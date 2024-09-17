@@ -29,7 +29,8 @@ enum KalmanType
 {
     UMKalman2D     = 0, // uniform motion kalman in the plane
     AMKalman2D,         // accelerated motion kalman in the plane
-    IMMKalman2D         // mixed kalman model filter in the plane
+    IMMKalman2D,        // mixed kalman model filter in the plane
+    UMKalman2DFull      // uniform motion kalman in the plane with full state
 };
 
 enum SmoothFailStrategy

@@ -460,10 +460,12 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     assert(refs.start_index.has_value());
 
+    //if (refs.utn == 21)
+    //    writeTargetData(refs, "/home/mcphatty/track_utn21.json");
+
     //configure and init estimator
     reconstruction::KalmanEstimator estimator;
     estimator.settings() = settings_.kalmanEstimatorSettings();
-
     estimator.init(settings_.kalman_type_final);
 
     kalman::KalmanUpdate update;
@@ -482,94 +484,17 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         used_mms.reserve(n_before + n_mm);
     }
 
-    // auto ThresRemove = reconstructor_.remove_before_time_;
-    // auto ThresJoin   = getJoinThreshold();
-
-    // loginf << "update_end: " << (refs.updates.empty() ? "-" : Utils::Time::toString(refs.updates.rbegin()->t)) << ", "
-    //        << "mm_begin: " << Utils::Time::toString(refs.measurements[ refs.start_index.value() ].t) << ", "
-    //        << "thres_rem: " << Utils::Time::toString(ThresRemove) << ", thres_join: " << Utils::Time::toString(ThresJoin) << ", "
-    //        << "idx: " << refs.start_index.value();
-
-#if 0
-    for (size_t i = refs.start_index.value(); i < refs.measurements.size(); ++i)
-    {
-        const auto& mm = refs.measurements[ i ];
-
-        reconstruction::Reference ref;
-        (reconstruction::Measurement&)ref = mm;
-
-        refs.references.push_back(ref);
-    }
-
-    return;
-#endif
-
     if (debug_target && shallAddAnnotationData())
     {
         addAnnotationData(refs,
                           "Input Measurements",
-                          AnnotationStyle(ColorMeasurements, PointSizeMeasurements, LineWidthBase),
-                          AnnotationStyle(ColorMeasurements, PointSizeOSG, LineWidthBase),
+                          rec_annotations::AnnotationStyle(ColorMeasurements, PointSizeMeasurements, LineWidthBase),
+                          rec_annotations::AnnotationStyle(ColorMeasurements, PointSizeOSG, LineWidthBase),
                           refs.measurements,
                           slice_t0, 
                           slice_t1,
                           refs.start_index.value());
     }
-
-    // auto checkState = [ & ] (const kalman::KalmanUpdate& update)
-    // {
-    //     assert(update.state.sub_states);
-    //     assert(update.state.x.size() > 0);
-    //     assert(update.state.P.cols() > 0 && update.state.P.rows() > 0);
-    //     assert(update.state.sub_states->at(0).F.cols() > 0 && update.state.sub_states->at(0).F.rows());
-    //     assert(update.state.sub_states->at(1).F.cols() > 0 && update.state.sub_states->at(1).F.rows());
-    // };
-
-    // if (refs.utn == 21)
-    // {
-    //     FrameProjector p;
-    //     if (!refs.t0.has_value())
-    //     {
-    //         refs.test_target.clear();
-
-    //         refs.t0   = refs.measurements[ 0 ].t;
-    //         refs.lat_ = refs.measurements[ 0 ].lat;
-    //         refs.lon_ = refs.measurements[ 0 ].lon;
-    //     }
-    //     p.update(refs.lat_, refs.lon_);
-
-    //     for (const auto& mm : refs.measurements)
-    //     {
-    //         if (mm.t < reconstructor_.currentSlice().slice_begin_ ||
-    //             mm.t >= reconstructor_.currentSlice().next_slice_begin_)
-    //             continue;
-
-    //         TestTarget::Measurement mm_tt;
-    //         p.project(mm_tt.x, mm_tt.y, mm.lat, mm.lon);
-
-    //         mm_tt.vx = mm.vx.has_value() ? mm.vx.value() : 0.0;
-    //         mm_tt.vy = mm.vy.has_value() ? mm.vy.value() : 0.0;
-
-    //         mm_tt.ax = mm.ax.has_value() ? mm.ax.value() : 0.0;
-    //         mm_tt.ay = mm.ay.has_value() ? mm.ay.value() : 0.0;
-
-    //         mm_tt.x_stddev = mm.x_stddev;
-    //         mm_tt.y_stddev = mm.y_stddev;
-    //         mm_tt.xy_cov = mm.xy_cov;
-
-    //         mm_tt.vx_stddev = mm.vx_stddev;
-    //         mm_tt.vy_stddev = mm.vy_stddev;
-
-    //         mm_tt.ax_stddev = mm.ax_stddev;
-    //         mm_tt.ay_stddev = mm.ay_stddev;
-
-    //         mm_tt.t = Utils::Time::partialSeconds(mm.t - refs.t0.value());
-
-    //         refs.test_target.addMeasurement(mm_tt);
-    //     }
-
-    //     refs.test_target.exportJSON("/home/mcphatty/track_utn21.json");
-    // }
 
     auto collectUpdate = [ & ] (const kalman::KalmanUpdate& update, const 
                                 reconstruction::Measurement& mm,
@@ -699,8 +624,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         addAnnotationData(refs,
                           estimator, 
                           "Kalman", 
-                          AnnotationStyle(ColorKalman, PointSizeKalman, LineWidthBase),
-                          AnnotationStyle(ColorKalman, PointSizeOSG, LineWidthBase),
+                          rec_annotations::AnnotationStyle(ColorKalman, PointSizeKalman, LineWidthBase),
+                          rec_annotations::AnnotationStyle(ColorKalman, PointSizeOSG, LineWidthBase),
                           refs.updates,
                           used_mms,
                           slice_t0, 
@@ -774,8 +699,8 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         addAnnotationData(refs,
                           estimator, 
                           "Kalman (RTS)", 
-                          AnnotationStyle(ColorKalmanSmoothed, PointSizeKalmanSmoothed, LineWidthBase),
-                          AnnotationStyle(ColorKalmanSmoothed, PointSizeOSG, LineWidthBase),
+                          rec_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeKalmanSmoothed, LineWidthBase),
+                          rec_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeOSG, LineWidthBase),
                           updates,
                           used_mms,
                           slice_t0,
@@ -789,10 +714,19 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //resample?
     if (settings_.resample_result)
     {
+        reconstruction::KalmanEstimator estimator_resample;
+
+        //init resample estimator
+        kalman::KalmanType type_resample = 
+            settings_.kalman_type_final == kalman::KalmanType::IMMKalman2D ? kalman::KalmanType::AMKalman2D : settings_.kalman_type_final;
+
+        estimator_resample.settings() = settings_.kalmanEstimatorSettings();
+        estimator_resample.init(type_resample);
+
         //interpolate measurements
         size_t num_failed_steps;
         std::vector<kalman::KalmanUpdate> updates_interp;
-        estimator.interpUpdates(updates_interp, updates, &num_failed_steps);
+        estimator_resample.interpUpdates(updates_interp, updates, &num_failed_steps);
 
         refs.num_interp_steps_failed += num_failed_steps;
 
@@ -806,6 +740,89 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     //generate references
     estimator.storeUpdates(refs.references, updates);
+}
+
+/**
+ */
+void SimpleReferenceCalculator::updateReferences()
+{
+    for (auto& ref : references_)
+    {
+        assert(reconstructor_.targets_.count(ref.first));
+
+        auto& target = reconstructor_.targets_.at(ref.first);
+        //target.references_ = std::move(ref.second.references);
+
+        target.references_.clear();
+
+        for (auto& ref_it : ref.second.references)
+            target.references_[ref_it.t] = ref_it;
+
+        ref.second.references.clear();
+
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates                 += ref.second.num_updates;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_valid           += ref.second.num_updates_valid;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed          += ref.second.num_updates_failed;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_numeric  += ref.second.num_updates_failed_numeric;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_badstate += ref.second.num_updates_failed_badstate;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_other    += ref.second.num_updates_failed_other;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_skipped         += ref.second.num_updates_skipped;
+        dbContent::ReconstructorTarget::globalStats().num_rec_smooth_steps_failed     += ref.second.num_smooth_steps_failed;
+        dbContent::ReconstructorTarget::globalStats().num_rec_smooth_target_failed    += ref.second.num_smoothing_failed;
+        dbContent::ReconstructorTarget::globalStats().num_rec_interp_failed           += ref.second.num_interp_steps_failed;
+    }
+}
+
+/**
+*/
+bool SimpleReferenceCalculator::writeTargetData(TargetReferences& refs,
+                                                const std::string& fn)
+{
+    if (refs.measurements.empty())
+        return true;
+
+    FrameProjector p;
+    if (!refs.export_data)
+    {
+        refs.export_data.reset(new TargetExportData);
+
+        refs.export_data->t0   = refs.measurements[ 0 ].t;
+        refs.export_data->lat_ = refs.measurements[ 0 ].lat;
+        refs.export_data->lon_ = refs.measurements[ 0 ].lon;
+    }
+    p.update(refs.export_data->lat_, refs.export_data->lon_);
+
+    for (const auto& mm : refs.measurements)
+    {
+        if (mm.t <  reconstructor_.currentSlice().slice_begin_ ||
+            mm.t >= reconstructor_.currentSlice().next_slice_begin_)
+            continue;
+
+        TestTarget::Measurement mm_tt;
+        p.project(mm_tt.x, mm_tt.y, mm.lat, mm.lon);
+
+        mm_tt.vx = mm.vx.has_value() ? mm.vx.value() : 0.0;
+        mm_tt.vy = mm.vy.has_value() ? mm.vy.value() : 0.0;
+
+        mm_tt.ax = mm.ax.has_value() ? mm.ax.value() : 0.0;
+        mm_tt.ay = mm.ay.has_value() ? mm.ay.value() : 0.0;
+
+        mm_tt.x_stddev = mm.x_stddev;
+        mm_tt.y_stddev = mm.y_stddev;
+        mm_tt.xy_cov = mm.xy_cov;
+
+        mm_tt.vx_stddev = mm.vx_stddev;
+        mm_tt.vy_stddev = mm.vy_stddev;
+
+        mm_tt.ax_stddev = mm.ax_stddev;
+        mm_tt.ay_stddev = mm.ay_stddev;
+
+        mm_tt.t = Utils::Time::partialSeconds(mm.t - refs.export_data->t0.value());
+
+        refs.export_data->test_target.addMeasurement(mm_tt);
+    }
+
+    return refs.export_data->test_target.exportJSON(fn);
 }
 
 /**
@@ -850,18 +867,20 @@ void SimpleReferenceCalculator::createAnnotations()
 
     tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
     {
-        addAnnotations(annotations[ tgt_cnt ], *refs[ tgt_cnt ]);
+        createAnnotations(annotations[ tgt_cnt ], *refs[ tgt_cnt ]);
     });
 }
 
-namespace annotations
+namespace rec_annotations
 {
-    SimpleReferenceCalculator::TRAnnotation createTRAnnotation(const reconstruction::Measurement& mm,
-                                                               const boost::optional<Eigen::Vector2d>& speed_pos,
-                                                               const boost::optional<Eigen::Vector2d>& accel_pos,
-                                                               const boost::optional<Eigen::Vector2d>& mm_pos)
+    /**
+    */
+    TRAnnotation createTRAnnotation(const reconstruction::Measurement& mm,
+                                    const boost::optional<Eigen::Vector2d>& speed_pos,
+                                    const boost::optional<Eigen::Vector2d>& accel_pos,
+                                    const boost::optional<Eigen::Vector2d>& mm_pos)
     {
-        SimpleReferenceCalculator::TRAnnotation a;
+        TRAnnotation a;
         a.ts        = mm.t;
         a.pos_wgs84 = Eigen::Vector2d(mm.lat, mm.lon);
         a.pos_mm    = mm_pos;
@@ -879,10 +898,12 @@ namespace annotations
         return a;
     }
 
-    SimpleReferenceCalculator::TRAnnotation createTRAnnotation(const reconstruction::Reference& ref,
-                                                               const boost::optional<Eigen::Vector2d>& speed_pos,
-                                                               const boost::optional<Eigen::Vector2d>& accel_pos,
-                                                               const boost::optional<Eigen::Vector2d>& mm_pos)
+    /**
+    */
+    TRAnnotation createTRAnnotation(const reconstruction::Reference& ref,
+                                    const boost::optional<Eigen::Vector2d>& speed_pos,
+                                    const boost::optional<Eigen::Vector2d>& accel_pos,
+                                    const boost::optional<Eigen::Vector2d>& mm_pos)
     {
         const reconstruction::Measurement* mm = &ref;
         auto anno = createTRAnnotation(*mm, speed_pos, accel_pos, mm_pos);
@@ -893,13 +914,15 @@ namespace annotations
         return anno;
     }
 
-    SimpleReferenceCalculator::TRAnnotation createTRAnnotation(const kalman::KalmanUpdate& update,
-                                                               const reconstruction::KalmanEstimator& estimator,
-                                                               reconstruction::KalmanProjectionHandler& phandler,
-                                                               const Eigen::Vector2d& proj_center,
-                                                               int submodel_idx,
-                                                               bool debug,
-                                                               const std::string& name)
+    /**
+    */
+    TRAnnotation createTRAnnotation(const kalman::KalmanUpdate& update,
+                                    const reconstruction::KalmanEstimator& estimator,
+                                    reconstruction::KalmanProjectionHandler& phandler,
+                                    const Eigen::Vector2d& proj_center,
+                                    int submodel_idx,
+                                    bool debug,
+                                    const std::string& name)
     {
         reconstruction::Measurement mm;
         boost::optional<Eigen::Vector2d> speed_pos;
@@ -913,11 +936,13 @@ namespace annotations
         return createTRAnnotation(mm, speed_pos, accel_pos, {});
     }
 
-    SimpleReferenceCalculator::RTSAnnotation createRTSAnnotation(const kalman::RTSDebugInfo& rts_debug_info,
-                                                                 const reconstruction::KalmanEstimator& estimator,
-                                                                 reconstruction::KalmanProjectionHandler& phandler)
+    /**
+    */
+    RTSAnnotation createRTSAnnotation(const kalman::RTSDebugInfo& rts_debug_info,
+                                      const reconstruction::KalmanEstimator& estimator,
+                                      reconstruction::KalmanProjectionHandler& phandler)
     {
-        SimpleReferenceCalculator::RTSAnnotation anno;
+        RTSAnnotation anno;
 
         assert(rts_debug_info.state0.imm_state);
 
@@ -976,8 +1001,8 @@ namespace annotations
 void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_references,
                                                   const reconstruction::KalmanEstimator& estimator, 
                                                   const std::string& name,
-                                                  const AnnotationStyle& style,
-                                                  const boost::optional<AnnotationStyle>& style_osg,
+                                                  const rec_annotations::AnnotationStyle& style,
+                                                  const boost::optional<rec_annotations::AnnotationStyle>& style_osg,
                                                   const std::vector<kalman::KalmanUpdate>& updates,
                                                   const std::vector<unsigned int>& used_mms,
                                                   const boost::optional<boost::posix_time::ptime>& t0,
@@ -992,25 +1017,25 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
     std::vector<boost::optional<Eigen::Vector2d>> speed_positions, accel_positions;
     estimator.storeUpdates(references, updates, &speed_positions, &accel_positions);
 
-    std::vector<TRAnnotation> annos(references.size());
+    std::vector<rec_annotations::TRAnnotation> annos(references.size());
 
     for (size_t i = 0; i < references.size(); ++i)
     {
         const auto& mm = target_references.measurements.at(used_mms.at(i));
 
-        annos[ i ] = annotations::createTRAnnotation(references[ i ], 
-                                                     speed_positions[ i ], 
-                                                     accel_positions[ i ], 
-                                                     Eigen::Vector2d(mm.lat, mm.lon));
+        annos[ i ] = rec_annotations::createTRAnnotation(references[ i ], 
+                                                         speed_positions[ i ], 
+                                                         accel_positions[ i ], 
+                                                         Eigen::Vector2d(mm.lat, mm.lon));
     }
 
-    std::vector<RTSAnnotation> rts_annotations;
+    std::vector<rec_annotations::RTSAnnotation> rts_annotations;
     if (rts_debug_infos)
     {
         reconstruction::KalmanProjectionHandler phandler;
         for (const auto& rts_info : *rts_debug_infos)
         {
-            auto rts_anno = annotations::createRTSAnnotation(rts_info, estimator, phandler);
+            auto rts_anno = rec_annotations::createRTSAnnotation(rts_info, estimator, phandler);
             rts_annotations.push_back(rts_anno);
         }
     }
@@ -1032,8 +1057,8 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
  */
 void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_references,
                                                   const std::string& name,
-                                                  const AnnotationStyle& style,
-                                                  const boost::optional<AnnotationStyle>& style_osg,
+                                                  const rec_annotations::AnnotationStyle& style,
+                                                  const boost::optional<rec_annotations::AnnotationStyle>& style_osg,
                                                   const std::vector<reconstruction::Measurement>& measurements,
                                                   const boost::optional<boost::posix_time::ptime>& t0,
                                                   const boost::optional<boost::posix_time::ptime>& t1,
@@ -1042,14 +1067,14 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
     std::vector<boost::optional<Eigen::Vector2d>> speed_positions, accel_positions;
     reconstruction::KalmanEstimator::extractVelAccPositionsWGS84(speed_positions, accel_positions, measurements);
 
-    std::vector<TRAnnotation> annos(measurements.size());
+    std::vector<rec_annotations::TRAnnotation> annos(measurements.size());
 
     for (size_t i = 0; i < measurements.size(); ++i)
     {
-        annos[ i ] = annotations::createTRAnnotation(measurements[ i ], 
-                                                     speed_positions[ i ], 
-                                                     accel_positions[ i ], 
-                                                     {});
+        annos[ i ] = rec_annotations::createTRAnnotation(measurements[ i ], 
+                                                         speed_positions[ i ], 
+                                                         accel_positions[ i ], 
+                                                         {});
     }
 
     addAnnotationData(target_references, 
@@ -1068,17 +1093,17 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
  */
 void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_references,
                                                   const std::string& name,
-                                                  const AnnotationStyle& style,
-                                                  const boost::optional<AnnotationStyle>& style_osg,
-                                                  const std::vector<TRAnnotation>& annotations,
+                                                  const rec_annotations::AnnotationStyle& style,
+                                                  const boost::optional<rec_annotations::AnnotationStyle>& style_osg,
+                                                  const std::vector<rec_annotations::TRAnnotation>& annotations,
                                                   const boost::optional<boost::posix_time::ptime>& t0,
                                                   const boost::optional<boost::posix_time::ptime>& t1,
                                                   size_t offs,
                                                   const std::vector<QPointF>* fail_pos,
                                                   const std::vector<QPointF>* skip_pos,
-                                                  std::vector<RTSAnnotation>* rts_annotations) const
+                                                  std::vector<rec_annotations::RTSAnnotation>* rts_annotations) const
 {
-    AnnotationData& data = target_references.annotation_data[ name ];
+    rec_annotations::AnnotationData& data = target_references.annotation_data[ name ];
 
     data.name      = name;
     data.style     = style;
@@ -1122,8 +1147,8 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
 
 /**
  */
-void SimpleReferenceCalculator::addAnnotations(ViewPointGenAnnotation* annotation,
-                                               const TargetReferences& target_references) const
+void SimpleReferenceCalculator::createAnnotations(ViewPointGenAnnotation* annotation,
+                                                  const TargetReferences& target_references) const
 {
     //loginf << "SimpleReferenceCalculator: addAnnotations: Adding annotation '" << name << "' to parent '" << root.name() << "'";
 
@@ -1492,37 +1517,6 @@ void SimpleReferenceCalculator::addAnnotations(ViewPointGenAnnotation* annotatio
                 ++cnt;
             }
         }
-    }
-}
-
-/**
- */
-void SimpleReferenceCalculator::updateReferences()
-{
-    for (auto& ref : references_)
-    {
-        assert(reconstructor_.targets_.count(ref.first));
-
-        auto& target = reconstructor_.targets_.at(ref.first);
-        //target.references_ = std::move(ref.second.references);
-
-        target.references_.clear();
-
-        for (auto& ref_it : ref.second.references)
-            target.references_[ref_it.t] = ref_it;
-
-        ref.second.references.clear();
-
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates                 += ref.second.num_updates;
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates_valid           += ref.second.num_updates_valid;
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed          += ref.second.num_updates_failed;
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_numeric  += ref.second.num_updates_failed_numeric;
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_badstate += ref.second.num_updates_failed_badstate;
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_other    += ref.second.num_updates_failed_other;
-        dbContent::ReconstructorTarget::globalStats().num_rec_updates_skipped         += ref.second.num_updates_skipped;
-        dbContent::ReconstructorTarget::globalStats().num_rec_smooth_steps_failed     += ref.second.num_smooth_steps_failed;
-        dbContent::ReconstructorTarget::globalStats().num_rec_smooth_target_failed    += ref.second.num_smoothing_failed;
-        dbContent::ReconstructorTarget::globalStats().num_rec_interp_failed           += ref.second.num_interp_steps_failed;
     }
 }
 

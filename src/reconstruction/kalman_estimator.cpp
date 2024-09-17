@@ -31,6 +31,7 @@
 #if USE_EXPERIMENTAL_SOURCE
 #include "kalman_interface_amkalman2d.h"
 #include "kalman_interface_imm2d.h"
+#include "kalman_interface_umkalman2dfull.h"
 #endif
 
 namespace reconstruction
@@ -136,6 +137,14 @@ std::unique_ptr<KalmanInterface> KalmanEstimator::createInterface(kalman::Kalman
     {
 #if USE_EXPERIMENTAL_SOURCE
         return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceIMM2D(settings.imm_mu_init, settings.imm_M_init));
+#else
+        throw std::runtime_error("KalmanEstimator: createInterface: reconstructor type not supported by build");
+#endif
+    }
+    else if (ktype == kalman::KalmanType::UMKalman2DFull)
+    {
+#if USE_EXPERIMENTAL_SOURCE
+        return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceUMKalman2DFull(settings.track_velocities));
 #else
         throw std::runtime_error("KalmanEstimator: createInterface: reconstructor type not supported by build");
 #endif
