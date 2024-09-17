@@ -259,12 +259,19 @@ void ReconstructorAssociatorBase::selfAccociateNewUTNs()
 
         do_it_again = false;
 
-        for (auto utn_it = utn_vec_.begin(); utn_it != utn_vec_.end(); utn_it++)
+        for (auto utn_it = utn_vec_.begin(); utn_it != utn_vec_.end(); )
         {
             unsigned int utn = *utn_it;
 
+            logdbg << "ReconstructorAssociatorBase: selfAccociateNewUTNs: checking utn " << utn;
+
+            assert (reconstructor().targets_.count(utn));
+
             if (!reconstructor().targets_.at(utn).created_in_current_slice_)
+            {
+                utn_it++;
                 continue;
+            }
 
             other_utn = findUTNForTarget(utn);
 
@@ -272,6 +279,8 @@ void ReconstructorAssociatorBase::selfAccociateNewUTNs()
             {
                 loginf << "ReconstructorAssociatorBase: selfAccociateNewUTNs: run " << run_cnt
                        << ": found merge utn " << utn << " with " << other_utn;
+
+                assert (reconstructor().targets_.count(other_utn));
 
                 dbContent::ReconstructorTarget& target = reconstructor().targets_.at(utn);
                 dbContent::ReconstructorTarget& other_target = reconstructor().targets_.at(other_utn);
@@ -326,6 +335,8 @@ void ReconstructorAssociatorBase::selfAccociateNewUTNs()
 
                 ++num_merges_;
             }
+            else
+                utn_it++;
         }
 
         ++run_cnt;

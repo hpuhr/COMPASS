@@ -1074,7 +1074,7 @@ bool KalmanEstimator::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                                                     settings_.smoothing_scale,
                                                     fail_strategy,
                                                     debug_infos);
-        assert(ok);
+        //assert(ok);
     };
 
     executeChainFunc(updates, func);

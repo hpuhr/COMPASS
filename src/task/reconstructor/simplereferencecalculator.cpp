@@ -647,7 +647,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         bool ok = estimator.smoothUpdates(updates, 
                                           kalman::SmoothFailStrategy::SetInvalid,
                                           debug_target ? &rts_debug_infos : nullptr);
-        assert(ok);
+        //assert(ok);
 
         if (!ok)
         {

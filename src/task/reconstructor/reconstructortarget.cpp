@@ -99,8 +99,8 @@ void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
 
         addUpdateToGlobalStats(stats);
 
-        if (!ok)
-            logwrn << "ReconstructorTarget: addTargetReports: chain reestimation failed";
+        // if (!ok) // collected in stats
+        //     logwrn << "ReconstructorTarget: addTargetReports: chain reestimation failed";
     }
 }
 
