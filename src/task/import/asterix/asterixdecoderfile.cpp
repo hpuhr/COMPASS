@@ -308,6 +308,11 @@ float ASTERIXDecoderFile::statusInfoProgress() const
     return 100.0 * (float)currentlyReadBytes() / (float)total_file_size_;
 }
 
+std::string ASTERIXDecoderFile::currentDataSourceName() const
+{
+    return "File '"+getCurrentFilename()+"'";
+}
+
 /**
 */
 float ASTERIXDecoderFile::getRecordsPerSecond() const

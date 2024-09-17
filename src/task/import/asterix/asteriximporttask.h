@@ -69,6 +69,7 @@ public:
     ASTERIXImportTaskSettings();
 
     // registered
+    bool reset_date_between_files_ {true};
     bool debug_jasterix_;
     std::string current_file_framing_;
 
@@ -197,6 +198,7 @@ protected:
 
     ASTERIXImportTaskSettings settings_;
     ASTERIXImportSource       source_;
+    std::string current_data_source_name_; // used to check for decode file changes
 
     bool file_decoding_tested_ {false};
 

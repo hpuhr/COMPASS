@@ -121,11 +121,23 @@ void ASTERIXImportTaskWidget::addMainTab()
     main_tab_layout->addStretch();
 
     // final stuff
+
+    {
+        reset_date_between_files_check_ = new QCheckBox("Reset Date Between Files");
+        reset_date_between_files_check_->setToolTip(
+            "Disable if multiple sequential files with date increments are imported");
+        reset_date_between_files_check_->setChecked(task_.settings().reset_date_between_files_);
+        connect(reset_date_between_files_check_, &QCheckBox::clicked,
+                this, &ASTERIXImportTaskWidget::resetDateChangedSlot);
+        main_tab_layout->addWidget(reset_date_between_files_check_);
+
+    }
+
     {
         debug_check_ = new QCheckBox("Debug in Console");
         debug_check_->setChecked(task_.settings().debug_jasterix_);
-        connect(debug_check_, &QCheckBox::clicked, this,
-                &ASTERIXImportTaskWidget::debugChangedSlot);
+        connect(debug_check_, &QCheckBox::clicked,
+                this, &ASTERIXImportTaskWidget::debugChangedSlot);
         main_tab_layout->addWidget(debug_check_);
 
     }
@@ -337,6 +349,14 @@ void ASTERIXImportTaskWidget::updateParserBox()
             object_parser_box_->addItem(QString::number(parser_it.first));
         }
     }
+}
+
+void ASTERIXImportTaskWidget::resetDateChangedSlot()
+{
+    QCheckBox* box = dynamic_cast<QCheckBox*>(sender());
+    assert(box);
+
+    task_.settings().reset_date_between_files_ = box->checkState() == Qt::Checked;
 }
 
 void ASTERIXImportTaskWidget::debugChangedSlot()

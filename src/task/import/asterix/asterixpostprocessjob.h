@@ -34,6 +34,8 @@ public:
 
     std::map<std::string, std::shared_ptr<Buffer>> buffers() { return std::move(buffers_); }
 
+    static void clearCurrentDate();
+
 private:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 

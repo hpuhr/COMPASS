@@ -40,6 +40,7 @@ public:
     virtual bool hasStatusInfo() const override { return true; };
     virtual std::string statusInfoString() const override;
     virtual float statusInfoProgress() const override;
+    virtual std::string currentDataSourceName() const override;
 
     void checkDecoding(ASTERIXImportFileInfo& file_info,
                        bool force_recompute) const;

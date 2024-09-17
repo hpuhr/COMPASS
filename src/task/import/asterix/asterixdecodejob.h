@@ -63,6 +63,7 @@ public:
     bool hasStatusInfo();
     std::string statusInfoString();
     float statusInfoProgress(); // percent
+    std::string currentDataSourceName(); // used to distinguish file switches
 
     void forceBlockingDataProcessing();
 

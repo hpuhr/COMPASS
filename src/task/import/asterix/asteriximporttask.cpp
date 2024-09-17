@@ -66,7 +66,8 @@ const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 /**
 */
 ASTERIXImportTaskSettings::ASTERIXImportTaskSettings()
-:   debug_jasterix_          (false)
+:   reset_date_between_files_ (true)
+,   debug_jasterix_          (false)
 ,   current_file_framing_    ("")
 ,   num_packets_overload_    (60)
 ,   override_tod_offset_     (0.0f)
@@ -100,6 +101,8 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id,
 {
     tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
 
+    registerParameter("reset_date_between_files", &settings_.reset_date_between_files_,
+                      ASTERIXImportTaskSettings().reset_date_between_files_);
     registerParameter("debug_jasterix", &settings_.debug_jasterix_, ASTERIXImportTaskSettings().debug_jasterix_);
 
     registerParameter("current_file_framing", &settings_.current_file_framing_, ASTERIXImportTaskSettings().current_file_framing_);
@@ -728,6 +731,8 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
 
     num_records_ = 0;
 
+    current_data_source_name_ = "";
+
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
     last_insert_time_ = boost::posix_time::microsec_clock::local_time();
@@ -892,6 +897,22 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     }
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data total cnt " << num_packets_total_;
+
+    std::string tmp = decode_job_->currentDataSourceName();
+
+    if (current_data_source_name_ != tmp)
+    {
+        loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: current data source name changed, '"
+               << current_data_source_name_ << "' to '" << tmp << "'";
+
+        if (settings_.reset_date_between_files_)
+        {
+            loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: resetting date";
+            ASTERIXPostprocessJob::clearCurrentDate();
+        }
+
+        current_data_source_name_ = tmp;
+    }
 
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
 
@@ -1148,7 +1169,7 @@ void ASTERIXImportTask::insertData()
 
     if (!insert_slot_connected_)
     {
-        loginf << "JSONImporterTask: insertData: connecting slot";
+        loginf << "ASTERIXImportTask: insertData: connecting slot";
 
         connect(&dbcont_manager, &DBContentManager::insertDoneSignal,
                 this, &ASTERIXImportTask::insertDoneSlot, Qt::QueuedConnection);
@@ -1161,7 +1182,7 @@ void ASTERIXImportTask::insertData()
 
     checkAllDone();
 
-    logdbg << "JSONImporterTask: insertData: done";
+    logdbg << "ASTERIXImportTask: insertData: done";
 }
 
 /**

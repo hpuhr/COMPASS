@@ -55,6 +55,7 @@ public:
     virtual bool hasStatusInfo() const { return false; };
     virtual std::string statusInfoString() const { return ""; }
     virtual float statusInfoProgress() const { return 0; } // percent
+    virtual std::string currentDataSourceName() const { return ""; }
 
     virtual boost::optional<std::string> requiredASTERIXFraming() const { return {}; }
 

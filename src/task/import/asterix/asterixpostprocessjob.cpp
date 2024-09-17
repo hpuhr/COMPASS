@@ -74,6 +74,13 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
 
 ASTERIXPostprocessJob::~ASTERIXPostprocessJob() { logdbg << "ASTERIXPostprocessJob: dtor"; }
 
+void ASTERIXPostprocessJob::clearCurrentDate()
+{
+    current_date_set_ = false;
+    current_date_ = {};
+    previous_date_ = {};
+}
+
 void ASTERIXPostprocessJob::run()
 {
     logdbg << "ASTERIXPostprocessJob: run: num buffers " << buffers_.size();
@@ -298,9 +305,9 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                         current_date_ += boost::posix_time::seconds((unsigned int) tod_24h);
                         previous_date_ = current_date_ - boost::posix_time::seconds((unsigned int) tod_24h);
 
-                        loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: detected time-jump from "
-                               << " current " << Time::toDateString(current_date_)
-                               << " previous " << Time::toDateString(previous_date_);
+                        loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: detected time-jump from"
+                               << " previous " << Time::toDateString(previous_date_)
+                               << " to current " << Time::toDateString(current_date_);
 
                         did_recent_time_jump_ = true;
                     }

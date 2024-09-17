@@ -369,6 +369,12 @@ float ASTERIXDecodeJob::statusInfoProgress() // percent
     return decoder_->statusInfoProgress();
 }
 
+std::string ASTERIXDecodeJob::currentDataSourceName()
+{
+    assert (decoder_);
+    return decoder_->currentDataSourceName();
+}
+
 /**
 */
 void ASTERIXDecodeJob::forceBlockingDataProcessing()
