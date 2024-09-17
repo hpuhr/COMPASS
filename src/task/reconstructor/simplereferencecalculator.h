@@ -40,17 +40,11 @@ namespace reconstruction
 
 class QColor;
 
-/**
-*/
-class SimpleReferenceCalculator
+namespace rec_annotations
 {
-public:
-    typedef ReferenceCalculatorSettings Settings;
-
-    typedef std::vector<reconstruction::Measurement>                       Measurements;
-    typedef std::multimap<boost::posix_time::ptime, unsigned long>         TargetReports;
-    typedef std::map<unsigned int, std::vector<reconstruction::Reference>> References;
-
+    /**
+     * Target report annotation data.
+    */
     struct TRAnnotation
     {
         boost::posix_time::ptime         ts;
@@ -66,6 +60,9 @@ public:
         bool                             proj_change = false;
     };
 
+    /**
+     * Annotation for a single RTS submodel step.
+    */
     struct RTSStepAnnotation
     {
         TRAnnotation state1;
@@ -75,12 +72,74 @@ public:
         QColor       color;
     };
 
+    /**
+     * Annotation for RTS smoother debugging.
+    */
     struct RTSAnnotation
     {
         std::vector<RTSStepAnnotation> rts_step_models;
         RTSStepAnnotation              rts_step;
         std::string                    extra_info;
     };
+
+    /**
+     * Annotation for an IMM step.
+    */
+    struct IMMAnnotation
+    {
+        std::vector<TRAnnotation> imm_step_models;
+        TRAnnotation              imm_step;
+        std::string               extra_info;
+    };
+
+    /**
+     * Reconstruction annotation style.
+    */
+    struct AnnotationStyle
+    {
+        AnnotationStyle() {}
+        AnnotationStyle(const QColor& base_color,
+                        float point_size,
+                        float line_width)
+        :   base_color_(base_color)
+        ,   point_size_(point_size)
+        ,   line_width_(line_width)
+        {}
+
+        QColor base_color_;
+        float  point_size_;
+        float  line_width_;
+    };
+
+    /**
+     * Annotation data for a single slice reconstruction run.
+    */
+    struct AnnotationData
+    {
+        std::string                  name;
+        AnnotationStyle              style;
+        AnnotationStyle              style_osg;
+        std::vector<TRAnnotation>    annotations;
+        std::vector<size_t>          slice_begins;
+        std::vector<Eigen::Vector2d> fail_positions;
+        std::vector<Eigen::Vector2d> skip_positions;
+        std::vector<double>          Q_vars;
+        std::vector<bool>            is_reset_pos;
+        std::vector<bool>            is_proj_change_pos;
+        std::vector<RTSAnnotation>   rts_annotations;
+    };
+}
+
+/**
+*/
+class SimpleReferenceCalculator
+{
+public:
+    typedef ReferenceCalculatorSettings Settings;
+
+    typedef std::vector<reconstruction::Measurement>                       Measurements;
+    typedef std::multimap<boost::posix_time::ptime, unsigned long>         TargetReports;
+    typedef std::map<unsigned int, std::vector<reconstruction::Reference>> References;
 
     SimpleReferenceCalculator(ReconstructorBase& reconstructor);
     virtual ~SimpleReferenceCalculator();
@@ -109,37 +168,20 @@ public:
     static const float LineWidthBase;
                                 
 private:
-    struct AnnotationStyle
+    /**
+     * Data for target export.
+    */
+    struct TargetExportData
     {
-        AnnotationStyle() {}
-        AnnotationStyle(const QColor& base_color,
-                        float point_size,
-                        float line_width)
-        :   base_color_(base_color)
-        ,   point_size_(point_size)
-        ,   line_width_(line_width)
-        {}
-
-        QColor base_color_;
-        float  point_size_;
-        float  line_width_;
+        TestTarget test_target;
+        boost::optional<boost::posix_time::ptime> t0;
+        double lat_;
+        double lon_;
     };
 
-    struct AnnotationData
-    {
-        std::string                  name;
-        AnnotationStyle              style;
-        AnnotationStyle              style_osg;
-        std::vector<TRAnnotation>    annotations;
-        std::vector<size_t>          slice_begins;
-        std::vector<Eigen::Vector2d> fail_positions;
-        std::vector<Eigen::Vector2d> skip_positions;
-        std::vector<double>          Q_vars;
-        std::vector<bool>            is_reset_pos;
-        std::vector<bool>            is_proj_change_pos;
-        std::vector<RTSAnnotation>   rts_annotations;
-    };
-
+    /**
+     * Target reference data.
+    */
     struct TargetReferences
     {
         void reset();
@@ -167,12 +209,9 @@ private:
         size_t num_smoothing_failed        = 0;
         size_t num_interp_steps_failed     = 0;
 
-        std::map<std::string, AnnotationData> annotation_data;
+        std::map<std::string, rec_annotations::AnnotationData> annotation_data;
 
-        TestTarget test_target;
-        boost::optional<boost::posix_time::ptime> t0;
-        double lat_;
-        double lon_;
+        std::unique_ptr<TargetExportData> export_data;
     };
 
     enum class InitRecResult 
@@ -209,24 +248,27 @@ private:
 
     boost::posix_time::ptime getJoinThreshold() const;
 
+    bool writeTargetData(TargetReferences& refs,
+                         const std::string& fn);
+
     bool shallAddAnnotationData() const;
 
     void addAnnotationData(TargetReferences& target_references,
                            const std::string& name,
-                           const AnnotationStyle& style,
-                           const boost::optional<AnnotationStyle>& style_osg,
-                           const std::vector<TRAnnotation>& annotations,
+                           const rec_annotations::AnnotationStyle& style,
+                           const boost::optional<rec_annotations::AnnotationStyle>& style_osg,
+                           const std::vector<rec_annotations::TRAnnotation>& annotations,
                            const boost::optional<boost::posix_time::ptime>& t0,
                            const boost::optional<boost::posix_time::ptime>& t1,
                            size_t offs,
                            const std::vector<QPointF>* fail_pos = nullptr,
                            const std::vector<QPointF>* skip_pos = nullptr,
-                           std::vector<RTSAnnotation>* rts_annotations = nullptr) const;
+                           std::vector<rec_annotations::RTSAnnotation>* rts_annotations = nullptr) const;
     void addAnnotationData(TargetReferences& target_references,
                            const reconstruction::KalmanEstimator& estimator, 
                            const std::string& name,
-                           const AnnotationStyle& style,
-                           const boost::optional<AnnotationStyle>& style_osg,
+                           const rec_annotations::AnnotationStyle& style,
+                           const boost::optional<rec_annotations::AnnotationStyle>& style_osg,
                            const std::vector<kalman::KalmanUpdate>& updates,
                            const std::vector<unsigned int>& used_mms,
                            const boost::optional<boost::posix_time::ptime>& t0,
@@ -237,14 +279,14 @@ private:
                            std::vector<kalman::RTSDebugInfo>* rts_debug_infos = nullptr) const;
     void addAnnotationData(TargetReferences& target_references,
                            const std::string& name,
-                           const AnnotationStyle& style,
-                           const boost::optional<AnnotationStyle>& style_osg,
+                           const rec_annotations::AnnotationStyle& style,
+                           const boost::optional<rec_annotations::AnnotationStyle>& style_osg,
                            const std::vector<reconstruction::Measurement>& measurements,
                            const boost::optional<boost::posix_time::ptime>& t0,
                            const boost::optional<boost::posix_time::ptime>& t1,
                            size_t offs) const;
-    void addAnnotations(ViewPointGenAnnotation* annotation, 
-                        const TargetReferences& target_references) const;
+    void createAnnotations(ViewPointGenAnnotation* annotation, 
+                           const TargetReferences& target_references) const;
 
     ReconstructorBase& reconstructor_;
 
