@@ -151,7 +151,7 @@ void VariableSelectionWidget::showMenuSlot()
                 action->setIcon(tmp);
             }
 
-            action->setToolTip(var_it.second->description().c_str());
+            action->setToolTip(var_it.second->info().c_str());
 
             QVariantMap vmap;
             vmap.insert(QString::fromStdString(var_it.first),
@@ -164,6 +164,8 @@ void VariableSelectionWidget::showMenuSlot()
         if (show_meta_variables_)
         {
             QMenu* meta_menu = menu.addMenu(QString::fromStdString(META_OBJECT_NAME));
+            meta_menu->setToolTipsVisible(true);
+
             for (auto& meta_it : dbo_man_.metaVariables())
             {
                 if (show_data_types_only_ && !showDataType(meta_it.second->dataType()))
@@ -174,7 +176,7 @@ void VariableSelectionWidget::showMenuSlot()
                 if (!meta_it.second->hasDBContent())
                     action->setFont(font_italic);
 
-                action->setToolTip(meta_it.second->description().c_str());
+                action->setToolTip(meta_it.second->info().c_str());
 
                 QVariantMap vmap;
                 vmap.insert(QString::fromStdString(meta_it.first),
@@ -188,6 +190,7 @@ void VariableSelectionWidget::showMenuSlot()
             for (auto& object_it : dbo_man_)
             {
                 QMenu* m2 = menu.addMenu(QString::fromStdString(object_it.first));
+                m2->setToolTipsVisible(true);
 
                 if (!object_it.second->hasData())
                 {
@@ -208,7 +211,7 @@ void VariableSelectionWidget::showMenuSlot()
                         action->setIcon(tmp);
                     }
 
-                    action->setToolTip(var_it.second->description().c_str());
+                    action->setToolTip(var_it.second->info().c_str());
 
                     QVariantMap vmap;
                     vmap.insert(QString::fromStdString(var_it.first),

@@ -180,10 +180,12 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
                     continue;
             }
 
-            if (!ds_man.hasDBDataSource(ds_id))
-                group_name = to_string(Number::sacFromDsId(ds_id))+"/"+to_string(Number::sicFromDsId(ds_id));
-            else
+            if (ds_man.hasDBDataSource(ds_id))
                 group_name = ds_man.dbDataSource(ds_id).name();
+            else if (ds_man.hasConfigDataSource(ds_id))
+                group_name = ds_man.configDataSource(ds_id).name();
+            else
+                group_name = to_string(Number::sacFromDsId(ds_id))+"/"+to_string(Number::sicFromDsId(ds_id));
 
             group_name +=  " " + String::lineStrFrom(line_id);
 
