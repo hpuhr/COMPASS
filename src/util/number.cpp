@@ -326,6 +326,11 @@ unsigned int recNumGetDBContId (unsigned long rec_num)
 
 std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values)
 {
+    if (!values.size())
+        std::tuple<double,double,double,double>(
+            std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(),
+            std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN());
+
     double mean=0, stddev=0, min=0, max=0;
 
     double sum = std::accumulate(values.begin(), values.end(), 0.0);
