@@ -106,6 +106,27 @@ struct UpdateStats
 {
     bool set = false;
 
+    void resetChainInternals()
+    {
+        num_fresh           = 0;
+        num_updated         = 0;
+        num_valid           = 0;
+        num_failed          = 0;
+        num_failed_numeric  = 0;
+        num_failed_badstate = 0;
+        num_failed_other    = 0;
+        num_skipped         = 0;
+
+        num_proj_changed = 0;
+    };
+
+    //preemptive insertion check
+    size_t num_checked            = 0;
+    size_t num_skipped_preemptive = 0;
+    size_t num_replaced           = 0;
+    size_t num_inserted           = 0;
+
+    //chain internals
     size_t num_fresh           = 0;
     size_t num_updated         = 0;
     size_t num_valid           = 0;

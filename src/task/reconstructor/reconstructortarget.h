@@ -67,7 +67,11 @@ public:
             num_rec_interp_failed           = 0;
         }
 
+        size_t num_chain_checked                 = 0;
+        size_t num_chain_skipped_preempt         = 0;
+        size_t num_chain_replaced                = 0;
         size_t num_chain_added                   = 0;
+        size_t num_chain_fresh                   = 0;
         size_t num_chain_updates                 = 0;
         size_t num_chain_updates_valid           = 0;
         size_t num_chain_updates_failed          = 0;
@@ -330,19 +334,34 @@ protected:
         SkipFunc
     };
 
+    enum class TargetReportAddResult
+    {
+        Skipped = 0,
+        Added,
+        Reestimated,
+        ReestimationFailed
+    };
+
     static const double on_ground_max_alt_ft_;
     static const double on_ground_max_speed_ms_;
 
     bool hasTracker() const;
     void reinitTracker();
     void reinitChain();
-    bool addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
-                      bool reestimate = true,
-                      reconstruction::UpdateStats* stats = nullptr);
+    TargetReportAddResult addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
+                                       bool reestimate = true,
+                                       reconstruction::UpdateStats* stats = nullptr);
 
-    bool addTargetReport (unsigned long rec_num,
-                         bool add_to_tracker,
-                         bool reestimate);
+    bool compareChainUpdates(const dbContent::targetReport::ReconstructorInfo& tr,
+                             const dbContent::targetReport::ReconstructorInfo& tr_other) const;
+    bool checkChainBeforeAdd(const dbContent::targetReport::ReconstructorInfo& tr,
+                             int idx) const;
+    bool checkChainBeforeAdd(const dbContent::targetReport::ReconstructorInfo& tr,
+                             std::pair<int, int>& idxs_remove) const;
+
+    TargetReportAddResult addTargetReport (unsigned long rec_num,
+                                           bool add_to_tracker,
+                                           bool reestimate);
 
     TargetReportSkipResult skipTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
                                             const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;

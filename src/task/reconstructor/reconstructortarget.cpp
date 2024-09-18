@@ -45,7 +45,11 @@ ReconstructorTarget::~ReconstructorTarget()
 
 void ReconstructorTarget::addUpdateToGlobalStats(const reconstruction::UpdateStats& s)
 {
-    global_stats_.num_chain_added                   += s.num_fresh;
+    global_stats_.num_chain_checked                 += s.num_checked;
+    global_stats_.num_chain_skipped_preempt         += s.num_skipped_preemptive;
+    global_stats_.num_chain_replaced                += s.num_replaced;
+    global_stats_.num_chain_added                   += s.num_inserted;
+    global_stats_.num_chain_fresh                   += s.num_fresh;
     global_stats_.num_chain_updates                 += s.num_updated;
     global_stats_.num_chain_updates_valid           += s.num_valid;
     global_stats_.num_chain_updates_failed          += s.num_failed;
@@ -67,24 +71,21 @@ void ReconstructorTarget::addPredictionToGlobalStats(const reconstruction::Predi
     global_stats_.num_chain_predictions_fixed           += s.num_fixed;
 
     global_stats_.num_chain_predictions_proj_changed += s.num_proj_changed;
-
-
 }
 
 void ReconstructorTarget::addTargetReport (unsigned long rec_num,
-                                          bool add_to_tracker)
+                                           bool add_to_tracker)
 {
     addTargetReport(rec_num, add_to_tracker, true);
 }
 
 void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
-                                           bool add_to_tracker)
+                                            bool add_to_tracker)
 {
     //add single tr without reestimating
     size_t num_added = 0;
-
     for (auto& rn_it : other.tr_timestamps_)
-        if (addTargetReport(rn_it.second, add_to_tracker, false))
+        if (addTargetReport(rn_it.second, add_to_tracker, false) != TargetReportAddResult::Skipped)
             ++num_added;
 
     //reestimate chain after adding
@@ -104,9 +105,9 @@ void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
     }
 }
 
-bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
-                                          bool add_to_tracker,
-                                          bool reestimate)
+ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport (unsigned long rec_num,
+                                                                                 bool add_to_tracker,
+                                                                                 bool reestimate)
 {
     assert (reconstructor_.target_reports_.count(rec_num));
 
@@ -203,7 +204,7 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
     //    if (!tmp_)
     //        tr.addAssociated(this);
 
-    bool added = false;
+    TargetReportAddResult result = TargetReportAddResult::Skipped;
 
     if (add_to_tracker && !tr.do_not_use_position_)
     {
@@ -212,13 +213,13 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
 
         reconstruction::UpdateStats stats;
 
-        addToTracker(tr, reestimate, &stats);
+        result = addToTracker(tr, reestimate, &stats);
 
-        added = true;
-
-        if (reestimate)
+        if (reestimate && result != TargetReportAddResult::Skipped)
         {
-            assert(stats.num_fresh == 1);
+            assert(stats.num_replaced <= 2);
+            assert(stats.num_fresh <= 2);
+            assert(stats.num_replaced >= 0 || stats.num_fresh == 1);
             assert(stats.num_updated >= 1);
             assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
         }
@@ -226,7 +227,7 @@ bool ReconstructorTarget::addTargetReport (unsigned long rec_num,
         addUpdateToGlobalStats(stats);
     }
 
-    return added;
+    return result;
 }
 
 unsigned int ReconstructorTarget::numAssociated() const
@@ -2033,17 +2034,87 @@ void ReconstructorTarget::reinitTracker()
         { 
             this->reconstructor_.createMeasurement(mm, rec_num);
         });
-
-    
 }
 
-bool ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
-                                       bool reestimate, 
-                                       reconstruction::UpdateStats* stats)
+bool ReconstructorTarget::compareChainUpdates(const dbContent::targetReport::ReconstructorInfo& tr,
+                                              const dbContent::targetReport::ReconstructorInfo& tr_other) const
+{
+    if (!tr.position_accuracy_.has_value())
+        return false;
+    if (!tr_other.position_accuracy_.has_value())
+        return true;
+
+    return tr.position_accuracy_.value().maxStdDev() < tr_other.position_accuracy_.value().maxStdDev();
+}
+
+bool ReconstructorTarget::checkChainBeforeAdd(const dbContent::targetReport::ReconstructorInfo& tr,
+                                              int idx) const
+{
+    unsigned int rec_num  = chain_->getUpdate(idx).mm_id;
+    const auto&  tr_chain = reconstructor_.target_reports_.at(rec_num);
+
+    return compareChainUpdates(tr, tr_chain);
+}
+
+bool ReconstructorTarget::checkChainBeforeAdd(const dbContent::targetReport::ReconstructorInfo& tr,
+                                              std::pair<int, int>& idxs_remove) const
+{
+    // too near to first chain measurement + chain measurement better => fail
+    if (idxs_remove.first >= 0 && !checkChainBeforeAdd(tr, idxs_remove.first))
+        return false;
+
+    // too near to second chain measurement + chain measurement better => fail
+    if (idxs_remove.second >= 0 && !checkChainBeforeAdd(tr, idxs_remove.second))
+        return false;
+
+    // ok => replace any too near chain measurements afterwards
+    return true;
+}
+
+ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
+                                                                             bool reestimate, 
+                                                                             reconstruction::UpdateStats* stats)
 {
     assert(chain_);
 
-    return chain_->insert(tr.record_num_, tr.timestamp_, reestimate, stats);
+    if (stats)
+        ++stats->num_checked;
+
+    auto idxs_remove = chain_->indicesNear(tr.timestamp_, reconstructor_.referenceCalculatorSettings().min_dt);
+
+    //preemptive check failed => just skip
+    if (!checkChainBeforeAdd(tr, idxs_remove))
+    {
+        if (stats)
+            ++stats->num_skipped_preemptive;
+        return TargetReportAddResult::Skipped;
+    }
+
+    //measurement to be inserted => remove any replaced chain updates?
+    if (idxs_remove.second >= 0)
+    {
+        chain_->remove(idxs_remove.second, false);
+        //loginf << "removing0";
+    }
+    if (idxs_remove.first >= 0)
+    {
+        chain_->remove(idxs_remove.first, false);
+        //loginf << "removing1";
+    }
+
+    if (stats)
+    {
+        stats->num_inserted += 1;
+        stats->num_replaced += (idxs_remove.first >= 0 ? 1 : 0) + (idxs_remove.second >= 0 ? 1 : 0);
+    }
+    
+    //insert measurement
+    bool reestim_ok = chain_->insert(tr.record_num_, tr.timestamp_, reestimate, stats);
+
+    if (!reestimate)
+        return TargetReportAddResult::Added;
+
+    return reestim_ok ? TargetReportAddResult::Reestimated : TargetReportAddResult::ReestimationFailed;
 }
 
 bool ReconstructorTarget::canPredict(boost::posix_time::ptime ts) const

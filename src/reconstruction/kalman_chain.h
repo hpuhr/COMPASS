@@ -144,6 +144,11 @@ public:
     bool insert(const std::vector<std::pair<unsigned long, boost::posix_time::ptime>>& mms,
                 bool reestim,
                 UpdateStats* stats = nullptr);
+    bool remove(size_t idx,
+                bool reestim,
+                UpdateStats* stats = nullptr);
+
+    std::pair<int, int> indicesNear(const boost::posix_time::ptime& ts, double dt) const;
 
     void removeUpdatesBefore(const boost::posix_time::ptime& ts);
     void removeUpdatesLaterThan(const boost::posix_time::ptime& ts);
@@ -207,9 +212,6 @@ private:
     void insertAt(int idx, 
                   unsigned long mm_id,
                   const boost::posix_time::ptime& ts);
-    void addReestimationIndex(int idx);
-    void addReestimationIndexRange(int idx0, int idx1);
-    void resetReestimationIndices();
     bool reinit(int idx) const;
     bool reestimate(int idx, 
                     KalmanEstimator::StepInfo* info = nullptr);
@@ -238,10 +240,12 @@ private:
     MeasurementAssignFunc assign_func_;
     mutable Measurement   mm_tmp_;
 
-    mutable Predictor              predictor_;
-    mutable Tracker                tracker_;
-    std::vector<int>               fresh_indices_;
-    std::vector<Update>            updates_;
+    mutable Predictor     predictor_;
+    mutable Tracker       tracker_;
+    std::vector<Update>   updates_;
+
+    bool                  needs_reestimate_ = false;
+    std::vector<int>      fresh_indices_;
 };
 
 } // reconstruction

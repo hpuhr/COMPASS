@@ -219,7 +219,9 @@ void KalmanChain::reset()
     tracker_.reset();
     predictor_.reset();
 
-    resetReestimationIndices();
+    fresh_indices_.clear();
+
+    needs_reestimate_ = false;
 }
 
 /**
@@ -431,6 +433,20 @@ KalmanChain::Interval KalmanChain::predictionRefInterval(const boost::posix_time
 }
 
 /**
+*/
+std::pair<int, int> KalmanChain::indicesNear(const boost::posix_time::ptime& ts, double dt) const
+{
+    auto iv = interval(ts);
+
+    if (iv.first >= 0 && KalmanInterface::timestep(updates_[iv.first].t, ts) >= dt)
+        iv.first = -1;
+    if (iv.second >= 0 && KalmanInterface::timestep(ts, updates_[iv.second].t) >= dt)
+        iv.second = -1;
+
+    return iv;
+}
+
+/**
  * Internally used.
 */
 bool KalmanChain::addToTracker(unsigned long mm_id,
@@ -463,12 +479,10 @@ void KalmanChain::addToEnd(unsigned long mm_id,
                            const boost::posix_time::ptime& ts)
 {
     assert (canReestimate());
-
     assert(updates_.empty() || ts >= updates_.rbegin()->t);
-        
-    addReestimationIndex(count());
     
     updates_.emplace_back(mm_id, ts);
+    needs_reestimate_ = true;
 }
 
 /**
@@ -522,22 +536,17 @@ bool KalmanChain::add(const std::vector<std::pair<unsigned long, boost::posix_ti
         if (!updates_.empty())
             assert(mms_sorted.begin()->second >= updates_.rbegin()->t);
 
-        int idx_min = count();
-
         size_t n  = updates_.size();
         size_t ni = mms_sorted.size();
 
         updates_.resize(n + ni);
+        needs_reestimate_ = true;
 
         for (size_t idx = 0, idx0 = n; idx < ni; ++idx, ++idx0)
         {
             updates_[ idx0 ].mm_id = mms_sorted[ idx ].first;
             updates_[ idx0 ].t     = mms_sorted[ idx ].second;
         }
-
-        int idx_max = lastIndex();
-
-        addReestimationIndexRange(idx_min, idx_max);
 
         if (reestim && !reestimate(stats))
             return false;
@@ -591,8 +600,7 @@ void KalmanChain::insertAt(int idx,
         //insert
         assert(idx <= count());
         updates_.insert(updates_.begin() + idx, Update(mm_id, ts));
-
-        addReestimationIndex(idx);
+        needs_reestimate_ = true;
     }
 
     assert(checkIntegrity());
@@ -647,6 +655,26 @@ bool KalmanChain::insert(const std::vector<std::pair<unsigned long, boost::posix
 
 /**
 */
+bool KalmanChain::remove(size_t idx,
+                         bool reestim,
+                         UpdateStats* stats)
+{
+    removeUpdate(idx);
+
+    if (idx < updates_.size())
+    {
+        updates_.at(idx).init = false;
+        needs_reestimate_ = true;
+    }
+
+    if (reestim)
+        return reestimate(stats);
+
+    return true;
+}
+
+/**
+*/
 void KalmanChain::removeUpdatesBefore(const boost::posix_time::ptime& ts)
 {
     assert(!needsReestimate());
@@ -663,6 +691,8 @@ void KalmanChain::removeUpdatesBefore(const boost::posix_time::ptime& ts)
     predictor_.ref_mm_id.reset();
 }
 
+/**
+*/
 void KalmanChain::removeUpdatesLaterThan(const boost::posix_time::ptime& ts)
 {
     assert(!needsReestimate());
@@ -1078,59 +1108,6 @@ void KalmanChain::removeUpdate(int idx)
 }
 
 /**
- * Keeps track of the range of inserted yet uninitialized indices. 
-*/
-void KalmanChain::addReestimationIndex(int idx)
-{
-    assert(idx >= 0);
-    assert(canReestimate());
-
-    if (settings_.debug && (!fresh_indices_.empty() && idx <= fresh_indices_.back()))
-    {
-        std::string str;
-        for (int idx : fresh_indices_)
-            str += std::to_string(idx) + " ";
-        loginf << str;
-        loginf << "adding: " << idx;
-    }
-
-    assert(fresh_indices_.empty() || idx > fresh_indices_.back());
-
-    fresh_indices_.push_back(idx);
-}
-
-/**
- * Keeps track of the range of inserted yet uninitialized indices. 
-*/
-void KalmanChain::addReestimationIndexRange(int idx0, int idx1)
-{
-    assert(idx0 >= 0 && idx1 >= idx0);
-    assert(canReestimate());
-
-    if (idx0 == idx1)
-    {
-        fresh_indices_.push_back(idx0);
-        return;
-    }
-
-    size_t n_old = fresh_indices_.size();
-    size_t n     = idx1 - idx0 + 1;
-    size_t n_new = n_old + n;
-
-    fresh_indices_.resize(n_new);
-
-    for (size_t i = n_old, idx = idx0; i < n_new; ++i, ++idx)
-        fresh_indices_[ i ] = idx;
-}
-
-/**
-*/
-void KalmanChain::resetReestimationIndices()
-{
-    fresh_indices_.clear();
-}
-
-/**
 */
 bool KalmanChain::canReestimate() const
 {
@@ -1142,7 +1119,7 @@ bool KalmanChain::canReestimate() const
 */
 bool KalmanChain::needsReestimate() const
 {
-    return !fresh_indices_.empty();
+    return needs_reestimate_;
 }
 
 /**
@@ -1216,7 +1193,7 @@ bool KalmanChain::reestimate(UpdateStats* stats)
 {
     if (stats)
     {
-        *stats = {};
+        stats->resetChainInternals();
         stats->set = true;
     }
 
@@ -1224,7 +1201,17 @@ bool KalmanChain::reestimate(UpdateStats* stats)
         return true;
 
     int n       = count();
-    int n_fresh = (int)fresh_indices_.size();
+    int n_fresh = 0;
+
+    fresh_indices_.clear();
+    for (int i = 0; i < n; ++i)
+    {
+        if (!updates_[ i ].init)
+        {
+            fresh_indices_.push_back(i);
+            ++n_fresh;
+        }
+    }
 
     if (n_fresh > 1)
         std::sort(fresh_indices_.begin(), fresh_indices_.end());
@@ -1357,8 +1344,6 @@ bool KalmanChain::reestimate(UpdateStats* stats)
         reestimations += ret;
     }
 
-    resetReestimationIndices();
-
     //remove any failed (=skipped) updates
     for (auto itr = tbr.rbegin(); itr != tbr.rend(); ++itr)
     {
@@ -1373,6 +1358,14 @@ bool KalmanChain::reestimate(UpdateStats* stats)
 
     //had to remove error-step updates?
     bool ok = tbr.empty();
+
+    needs_reestimate_ = false;
+
+    // n_fresh = 0;
+    // for (int i = 0; i < n; ++i)
+    //     if (!updates_[ i ].init)
+    //         ++n_fresh;
+    // loginf << "nfresh = " << n_fresh;
 
     return ok;
 }
