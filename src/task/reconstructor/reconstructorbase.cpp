@@ -316,13 +316,16 @@ void ReconstructorBase::processSlice()
             return QString::number((double)num / (double)num_total * 100.0, 'f', Decimals).toStdString() + "%";
         };
 
+        std::string num_chain_skipped_preempt_p         = perc(stats.num_chain_skipped_preempt        , stats.num_chain_checked       );
+        std::string num_chain_replaced_p                = perc(stats.num_chain_replaced               , stats.num_chain_checked       );
+        std::string num_chain_added_p                   = perc(stats.num_chain_added                  , stats.num_chain_checked       );
         std::string num_chain_updates_valid_p           = perc(stats.num_chain_updates_valid          , stats.num_chain_updates       );
         std::string num_chain_updates_failed_p          = perc(stats.num_chain_updates_failed         , stats.num_chain_updates       );
         std::string num_chain_updates_failed_numeric_p  = perc(stats.num_chain_updates_failed_numeric , stats.num_chain_updates_failed);
         std::string num_chain_updates_failed_badstate_p = perc(stats.num_chain_updates_failed_badstate, stats.num_chain_updates_failed);
         std::string num_chain_updates_failed_other_p    = perc(stats.num_chain_updates_failed_other   , stats.num_chain_updates_failed);
         std::string num_chain_updates_skipped_p         = perc(stats.num_chain_updates_skipped        , stats.num_chain_updates       );
-        std::string num_chain_updates_proj_changed_p    = perc(stats.num_chain_updates_proj_changed   , stats.num_chain_added         );
+        std::string num_chain_updates_proj_changed_p    = perc(stats.num_chain_updates_proj_changed   , stats.num_chain_updates       );
 
         std::string num_chain_predictions_failed_p          = perc(stats.num_chain_predictions_failed         , stats.num_chain_predictions       );
         std::string num_chain_predictions_failed_numeric_p  = perc(stats.num_chain_predictions_failed_numeric , stats.num_chain_predictions_failed);
@@ -345,7 +348,11 @@ void ReconstructorBase::processSlice()
                << "\n"
                << " * Chain updates:\n"
                << "\n"
-               << "   mm added:     " << stats.num_chain_added                                                                  <<  "\n"
+               << "   mm checked:   " << stats.num_chain_checked                                                                <<  "\n"
+               << "   skipped pre:  " << stats.num_chain_skipped_preempt         << " (" << num_chain_skipped_preempt_p         << ")\n"
+               << "   replaced:     " << stats.num_chain_replaced                << " (" << num_chain_replaced_p                << ")\n"
+               << "   added:        " << stats.num_chain_added                   << " (" << num_chain_added_p                   << ")\n"
+               << "   mm fresh:     " << stats.num_chain_fresh                                                                  <<  "\n"
                << "   valid:        " << stats.num_chain_updates_valid           << " (" << num_chain_updates_valid_p           << ")\n"
                << "   failed:       " << stats.num_chain_updates_failed          << " (" << num_chain_updates_failed_p          << ")\n"
                << "      numeric:   " << stats.num_chain_updates_failed_numeric  << " (" << num_chain_updates_failed_numeric_p  << ")\n"
