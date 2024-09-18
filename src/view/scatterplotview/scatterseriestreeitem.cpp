@@ -164,42 +164,50 @@ bool ScatterSeriesTreeItemDelegate::editorEvent(QEvent* event, QAbstractItemMode
 }
 
 
-ScatterSeriesTreeItem::ScatterSeriesTreeItem(const std::string& name, ScatterSeriesTreeItem* parent_item)
-    : name_(name)
+ScatterSeriesTreeItem::ScatterSeriesTreeItem(
+    const std::string& name, ScatterSeriesModel& model,
+    ScatterSeriesCollection::DataSeries* data_series,
+    ScatterSeriesTreeItem* parent_item)
+    : name_(name), model_(model), data_series_(data_series), parent_item_(parent_item)
 {
-    parent_item_ = parent_item;
-    if (parent_item_)
+    if (data_series_)
     {
-        parent_item_->appendChild(this);
+        QPixmap pixmap(100,100);
+        pixmap.fill(data_series_->color);
+        color_icon_ = QIcon(pixmap);
     }
+
 }
 
 ScatterSeriesTreeItem::~ScatterSeriesTreeItem()
 {
-    if (parent_item_)
-    {
-        parent_item_->removeChild(this);
-        parent_item_ = nullptr;
-    }
-
     child_items_.clear();
 }
 
 void ScatterSeriesTreeItem::appendChild(ScatterSeriesTreeItem* item)
 {
     logdbg << "ScatterSeriesTreeItem " << name_ << ": appendChild: " << item->name();
-    child_items_.push_back(item);
+
+    assert (!child_items_.count(item->name()));
+
+    child_items_[item->name()].reset(item);
 }
 
-void ScatterSeriesTreeItem::removeChild(ScatterSeriesTreeItem* item)
-{
-    logdbg << "ScatterSeriesTreeItem " << name_ << ": removeChild: " << item->name();
-    auto it = std::find(child_items_.begin(), child_items_.end(), item);
-    assert(it != child_items_.end());
+// void ScatterSeriesTreeItem::removeChild(ScatterSeriesTreeItem* item)
+// {
+//     logdbg << "ScatterSeriesTreeItem " << name_ << ": removeChild: " << item->name();
+//     auto it = std::find(child_items_.begin(), child_items_.end(), item);
+//     assert(it != child_items_.end());
 
-    if (it != child_items_.end())
-        child_items_.erase(it);
-}
+//     if (it != child_items_.end())
+//         child_items_.erase(it);
+// }
+
+// void ScatterSeriesTreeItem::updateHiddenImpl()
+// {
+//     for (auto& child_it : child_items_)
+//         child_it.second->updateHidden();
+// }
 
 // void ScatterSeriesTreeItem::moveChildUp(ScatterSeriesTreeItem* child)
 // {
@@ -257,41 +265,32 @@ void ScatterSeriesTreeItem::removeChild(ScatterSeriesTreeItem* item)
 //     parent_item_->moveChildToEnd(this);
 // }
 
-// unsigned int ScatterSeriesTreeItem::getIndexOf(ScatterSeriesTreeItem* child)
-// {
-//     auto it = std::find(child_items_.begin(), child_items_.end(), child);
-//     assert(it != child_items_.end());
-
-//     return it - child_items_.begin();
-// }
-
-void ScatterSeriesTreeItem::deleteChildren()
+unsigned int ScatterSeriesTreeItem::getIndexOf(ScatterSeriesTreeItem* child)
 {
-    logdbg << "ScatterSeriesTreeItem " << name_ << ": deleteChildren";
+    auto it = std::find_if(child_items_.begin(), child_items_.end(),
+                           [&](const auto& x)
+                           -> bool { return x.second.get() == child;});
 
-    auto child_items_copy = child_items_; // since unregisters on delete
+    assert(it != child_items_.end());
 
-    for (auto child : child_items_copy)
-    {
-        logdbg << "ScatterSeriesTreeItem " << name_ << ": deleteChildren: deleting children of " << child->name();
-        child->deleteChildren();
-        logdbg << "ScatterSeriesTreeItem " << name_ << ": deleteChildren: deleting child " << child->name();
-        delete child;
-    }
+    return distance(child_items_.begin(), it);
+}
 
+void ScatterSeriesTreeItem::clear()
+{
     child_items_.clear();
-
-    assert(!child_items_.size());
-
-    logdbg << "ScatterSeriesTreeItem " << name_ << ": deleteChildren: done";
 }
 
 ScatterSeriesTreeItem* ScatterSeriesTreeItem::child(int row)
 {
     assert(row >= 0);
     assert((unsigned int)row < child_items_.size());
-    logdbg << "ScatterSeriesTreeItem " << name_ << ": child: " << child_items_.at(row)->name();
-    return child_items_.at(row);
+
+    auto it = std::next(child_items_.begin(), row);
+    assert (it != child_items_.end());
+
+    logdbg << "ScatterSeriesTreeItem " << name_ << ": child: " << it->second->name();
+    return it->second.get();
 }
 
 int ScatterSeriesTreeItem::childCount() const
@@ -300,40 +299,69 @@ int ScatterSeriesTreeItem::childCount() const
     return child_items_.size();
 }
 
-int ScatterSeriesTreeItem::columnCount() const { return 2; }
+int ScatterSeriesTreeItem::columnCount() const
+{
+    return 2;
+}
 
 QVariant ScatterSeriesTreeItem::data(int column) const
 {
     if (column == 0)
         return name_.c_str();
     else if (column == 1)
-        return QVariant();
+    {
+        if (data_series_)
+            return (unsigned int) data_series_->scatter_series.points.size();
+        else
+            return QVariant();
+    }
     else
         assert(false);
 }
 
-QVariant ScatterSeriesTreeItem::icon() const { return QVariant(); }
+QVariant ScatterSeriesTreeItem::icon() const
+{
+    if (data_series_)
+        return color_icon_;
+    else
+        return QVariant();
+}
 
 ScatterSeriesTreeItem* ScatterSeriesTreeItem::parentItem() { return parent_item_; }
 
 int ScatterSeriesTreeItem::row() const
 {
-    // if (parent_item_)
-    //     return parent_item_->getIndexOf(const_cast<ScatterSeriesTreeItem*>(this));
+    if (parent_item_)
+        return parent_item_->getIndexOf(const_cast<ScatterSeriesTreeItem*>(this));
 
     return 0;
 }
 
-/**
- * Checks if the item is visible. This also accounts for any hidden parent item
- * in addition to the item's own visibility.
- */
-bool ScatterSeriesTreeItem::itemVisible() const
+void ScatterSeriesTreeItem::hide(bool value)
 {
-    //is parent visible?
-    if (parent_item_ && !parent_item_->itemVisible())
-        return false;
+    loginf << "ScatterSeriesTreeItem: hide: " << name_ << " hidden " << value;
 
-    //parent is visible => am i visible?
-    return !hidden();
+    hidden_ = value;
+
+    updateHidden();
+
+    emit model_.visibilityChangedSignal();
+}
+
+void ScatterSeriesTreeItem::updateHidden()
+{
+    if (data_series_)
+        data_series_->visible = !itemHidden();
+
+    for (auto& child_it : child_items_)
+        child_it.second->updateHidden();
+}
+
+
+/**
+ * Checks if the item is hidden, either itself or by parent
+ */
+bool ScatterSeriesTreeItem::itemHidden() const
+{
+    return hidden() || (parent_item_ && parent_item_->itemHidden());
 }

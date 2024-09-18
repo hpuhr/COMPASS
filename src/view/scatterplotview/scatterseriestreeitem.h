@@ -1,13 +1,19 @@
 #pragma once
 
+#include "scatterseries.h"
+
 #include <QList>
 #include <QVariant>
+#include <QIcon>
+
+#include <QItemDelegate>
+#include <QStyledItemDelegate>
+
+class ScatterSeriesModel;
 
 class QMenu;
 class QWidget;
 
-#include <QItemDelegate>
-#include <QStyledItemDelegate>
 
 class ScatterSeriesTreeItemDelegate : public QStyledItemDelegate  // public QItemDelegate
 {
@@ -27,7 +33,10 @@ class ScatterSeriesTreeItem : public QObject
     Q_OBJECT
 
 public:
-    explicit ScatterSeriesTreeItem(const std::string& name, ScatterSeriesTreeItem* parent_item = nullptr);
+    explicit ScatterSeriesTreeItem(const std::string& name,
+                                   ScatterSeriesModel& model,
+                                   ScatterSeriesCollection::DataSeries* data_series = nullptr,
+                                   ScatterSeriesTreeItem* parent_item = nullptr);
     virtual ~ScatterSeriesTreeItem();
 
     virtual ScatterSeriesTreeItem* child(int row);
@@ -40,16 +49,19 @@ public:
     bool hasParentItem() const { return parent_item_ != nullptr; }
     ScatterSeriesTreeItem* parentItem();
 
-    void deleteChildren();
+    void appendChild(ScatterSeriesTreeItem* child); // takes ownership
+    void clear();
 
     virtual bool hasMenu() const { return false; }
     virtual void execMenu(const QPoint& pos) {};
 
     virtual bool canHide() const { return true; }
     virtual bool hidden() const { return hidden_; }
-    virtual void hide(bool value) { hidden_ = value; update_hide_impl();}
+    virtual void hide(bool value);
 
-    bool itemVisible() const;
+    void updateHidden();
+
+    bool itemHidden() const;
 
     const std::string& name() const { return name_; }
 
@@ -63,19 +75,23 @@ public:
     // void moveToBegin();
     // void moveToEnd();
 
-    //unsigned int getIndexOf(OSGLayerTreeItem* child);
+    unsigned int getIndexOf(ScatterSeriesTreeItem* child);
 
 protected:
     bool hidden_{false};
 
-    std::vector<ScatterSeriesTreeItem*> child_items_;
     std::string name_;
+    ScatterSeriesModel& model_;
+
+    std::map<std::string, std::unique_ptr<ScatterSeriesTreeItem>> child_items_;
+
+
+    ScatterSeriesCollection::DataSeries* data_series_{nullptr};
     ScatterSeriesTreeItem* parent_item_{nullptr};
 
-    void appendChild(ScatterSeriesTreeItem* child);
-    void removeChild(ScatterSeriesTreeItem* child);
+    QIcon color_icon_;
 
-    virtual void update_hide_impl() = 0;
+    //void removeChild(ScatterSeriesTreeItem* child);
 
 };
 

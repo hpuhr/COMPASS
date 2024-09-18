@@ -58,22 +58,23 @@ public:
         std::string   name;
         QColor        color;
         double        marker_size;
+        bool          visible {true};
     };
 
     ScatterSeriesCollection();
     virtual ~ScatterSeriesCollection();
 
     void clear();
-    void addDataSeries(const DataSeries& data_series);
+    //void addDataSeries(const DataSeries& data_series);
     void addDataSeries(const ScatterSeries& scatter_series,
-                       const std::string& name = "",
+                       const std::string& name,
                        const QColor& color = Qt::blue,
                        double marker_size = 8.0);
 
     size_t numDataSeries() const;
 
-    const std::vector<DataSeries>& dataSeries() const;
-    std::vector<DataSeries>& dataSeries();
+    const std::map<std::string, DataSeries>& dataSeries() const;
+    std::map<std::string, DataSeries>& dataSeries();
 
     ScatterSeries::DataType commonDataTypeX() const;
     ScatterSeries::DataType commonDataTypeY() const; 
@@ -91,5 +92,5 @@ public:
     static const std::string TagMarkerSize;
 
 private:
-    std::vector<DataSeries> data_series_;
+    std::map<std::string, DataSeries> data_series_;
 };

@@ -11,6 +11,11 @@
 
 class ScatterSeriesModel : public QAbstractItemModel
 {
+    Q_OBJECT
+
+signals:
+    void visibilityChangedSignal();
+
 public:
     ScatterSeriesModel();
     virtual ~ScatterSeriesModel();
@@ -25,7 +30,7 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    ScatterSeriesCollection scatterSeries() const;
+    void updateFrom (ScatterSeriesCollection& collection);
 
     enum DataRole
     {
@@ -33,8 +38,6 @@ public:
     };
 
 private:
-    ScatterSeriesCollection scatter_series_;
-
     std::unique_ptr<ScatterSeriesTreeItem> root_item_;
 };
 

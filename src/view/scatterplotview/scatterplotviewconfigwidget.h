@@ -24,6 +24,7 @@ class ScatterPlotView;
 
 class QCheckBox;
 class QLineEdit;
+class QTreeView;
 
 /**
  * @brief Widget with configuration elements for a ScatterPlotView
@@ -35,6 +36,7 @@ class ScatterPlotViewConfigWidget : public VariableViewConfigWidget
 
 public slots:
     void useConnectionLinesSlot();
+    void updateToVisibilitySlot();
 
 public:
     ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, 
@@ -48,7 +50,8 @@ protected:
 
     ScatterPlotView* view_ = nullptr;
 
+    QTreeView* layer_view_{nullptr};
+
     QCheckBox* use_connection_lines_ {nullptr};
 
-    
 };

@@ -154,10 +154,10 @@ void ScatterSeriesCollection::clear()
 
 /**
 */
-void ScatterSeriesCollection::addDataSeries(const DataSeries& series)
-{
-    data_series_.push_back(series);
-}
+// void ScatterSeriesCollection::addDataSeries(const DataSeries& series)
+// {
+//     data_series_.push_back(series);
+// }
 
 /**
 */
@@ -172,7 +172,8 @@ void ScatterSeriesCollection::addDataSeries(const ScatterSeries& scatter_series,
     series.color          = color;
     series.marker_size    = marker_size;
 
-    data_series_.push_back(series);
+    assert (!data_series_.count(name));
+    data_series_[name] = series;
 }
 
 /**
@@ -184,14 +185,14 @@ size_t ScatterSeriesCollection::numDataSeries() const
 
 /**
 */
-const std::vector<ScatterSeriesCollection::DataSeries>& ScatterSeriesCollection::dataSeries() const
+const std::map<std::string, ScatterSeriesCollection::DataSeries>& ScatterSeriesCollection::dataSeries() const
 {
     return data_series_;
 }
 
 /**
 */
-std::vector<ScatterSeriesCollection::DataSeries>& ScatterSeriesCollection::dataSeries()
+std::map<std::string, ScatterSeriesCollection::DataSeries>& ScatterSeriesCollection::dataSeries()
 {
     return data_series_;
 }
@@ -203,10 +204,14 @@ ScatterSeries::DataType ScatterSeriesCollection::commonDataTypeX() const
     if (data_series_.empty())
         return ScatterSeries::DataTypeFloatingPoint;
 
-    ScatterSeries::DataType data_type = data_series_[ 0 ].scatter_series.data_type_x;
+    ScatterSeries::DataType data_type = data_series_.begin()->second.scatter_series.data_type_x;
 
-    for (size_t i = 1; i < data_series_.size(); ++i)
-        if (data_series_[ i ].scatter_series.data_type_x != data_type)
+    // for (size_t i = 1; i < data_series_.size(); ++i)
+    //     if (data_series_[ i ].scatter_series.data_type_x != data_type)
+    //         return ScatterSeries::DataTypeFloatingPoint;
+
+    for (auto& series_it : data_series_)
+        if (series_it.second.scatter_series.data_type_x != data_type)
             return ScatterSeries::DataTypeFloatingPoint;
 
     return data_type;
@@ -219,10 +224,10 @@ ScatterSeries::DataType ScatterSeriesCollection::commonDataTypeY() const
     if (data_series_.empty())
         return ScatterSeries::DataTypeFloatingPoint;
 
-    ScatterSeries::DataType data_type = data_series_[ 0 ].scatter_series.data_type_y;
+    ScatterSeries::DataType data_type = data_series_.begin()->second.scatter_series.data_type_y;
 
-    for (size_t i = 1; i < data_series_.size(); ++i)
-        if (data_series_[ i ].scatter_series.data_type_y != data_type)
+    for (auto& series_it : data_series_)
+        if (series_it.second.scatter_series.data_type_y != data_type)
             return ScatterSeries::DataTypeFloatingPoint;
 
     return data_type;
@@ -271,7 +276,8 @@ bool ScatterSeriesCollection::fromJSON(const nlohmann::json& data)
         if (js.contains(TagMarkerSize))
             dseries.marker_size = js[ TagMarkerSize ];
 
-        data_series_.push_back(dseries);
+        assert (!data_series_.count(dseries.name));
+        data_series_[dseries.name] = dseries;
     }
 
     return true;
@@ -288,13 +294,13 @@ nlohmann::json ScatterSeriesCollection::toJSON(bool binary) const
     {
         nlohmann::json js;
 
-        js[ binary ? TagDataRaw : TagData ] = dseries.scatter_series.toJSON(binary);
+        js[ binary ? TagDataRaw : TagData ] = dseries.second.scatter_series.toJSON(binary);
 
-        js[ TagDataTypeX  ] = dseries.scatter_series.data_type_x;
-        js[ TagDataTypeY  ] = dseries.scatter_series.data_type_y;
-        js[ TagName       ] = dseries.name;
-        js[ TagColor      ] = dseries.color.name().toStdString();
-        js[ TagMarkerSize ] = dseries.marker_size;
+        js[ TagDataTypeX  ] = dseries.second.scatter_series.data_type_x;
+        js[ TagDataTypeY  ] = dseries.second.scatter_series.data_type_y;
+        js[ TagName       ] = dseries.second.name;
+        js[ TagColor      ] = dseries.second.color.name().toStdString();
+        js[ TagMarkerSize ] = dseries.second.marker_size;
 
         jseries.push_back(js);
     }

@@ -24,6 +24,8 @@
 #include "variable.h"
 #include "metavariable.h"
 #include "ui_test_common.h"
+#include "scatterseriestreeitem.h"
+#include "scatterplotviewdatawidget.h"
 
 #include <QCheckBox>
 #include <QLabel>
@@ -32,6 +34,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QTabWidget>
+#include <QTreeView>
+#include <QHeaderView>
 
 using namespace Utils;
 using namespace dbContent;
@@ -46,6 +50,25 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
     assert(view_);
 
     auto layout = configLayout();
+
+    {
+        loginf << "GeographicViewConfigWidget: ctor: creating lay view";
+
+        layer_view_ = new QTreeView(this);
+        ScatterSeriesTreeItemDelegate* delegate = new ScatterSeriesTreeItemDelegate(this);
+        layer_view_->setItemDelegate(delegate);
+
+        layer_view_->setModel(&view_widget->getViewDataWidget()->dataModel());
+
+        layer_view_->header()->resizeSection(0 /*column index*/, 300 /*width*/);
+
+        connect(&view_widget->getViewDataWidget()->dataModel(), &ScatterSeriesModel::visibilityChangedSignal,
+                this, &ScatterPlotViewConfigWidget::updateToVisibilitySlot);
+
+        //getTabWidget()->addTab(layer_view_, "Layers");
+        layout->addWidget(layer_view_);
+    }
+
 
     use_connection_lines_ = new QCheckBox("Use Connection Lines");
     use_connection_lines_->setChecked(view_->useConnectionLines());
@@ -69,6 +92,13 @@ void ScatterPlotViewConfigWidget::useConnectionLinesSlot()
 
     assert (use_connection_lines_);
     view_->useConnectionLines(use_connection_lines_->checkState() == Qt::Checked);
+}
+
+void ScatterPlotViewConfigWidget::updateToVisibilitySlot()
+{
+    assert (layer_view_);
+    layer_view_->expandToDepth(3);
+    layer_view_->header()->resizeSection(0 /*column index*/, 300 /*width*/);
 }
 
 /**

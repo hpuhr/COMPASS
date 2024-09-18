@@ -19,6 +19,7 @@
 
 #include "variableviewstashdatawidget.h"
 #include "scatterseries.h"
+#include "scatterseriesmodel.h"
 #include "scatterplotviewchartview.h"
 
 class ScatterPlotView;
@@ -65,6 +66,8 @@ public:
 
     static const int ConnectLinesDataCountMax = 100000;
 
+    ScatterSeriesModel& dataModel();
+
 public slots:
     void rectangleSelectedSlot(QPointF p1, QPointF p2);
 
@@ -72,6 +75,8 @@ public slots:
     void clearSelectionSlot();
 
     void resetZoomSlot();
+
+    void updateChartSlot();
 
 protected:
     typedef std::unique_ptr<QtCharts::ScatterPlotViewChartView> ChartViewPtr;
@@ -92,7 +97,9 @@ protected:
 
 private:
     void updateDateTimeInfoFromVariables();
+
     bool updateChart();
+
     void updateDataSeries(QtCharts::QChart* chart);
     void resetSeries();
     void correctSeriesDateTime(ScatterSeriesCollection& collection);
@@ -113,4 +120,6 @@ private:
 
     bool x_axis_is_datetime_ = false;
     bool y_axis_is_datetime_ = false;
+
+    ScatterSeriesModel data_model_;
 };

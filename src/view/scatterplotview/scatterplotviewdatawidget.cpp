@@ -80,6 +80,9 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view
 
     updateDateTimeInfoFromVariables();
     updateChart();
+
+    connect (&data_model_, &ScatterSeriesModel::visibilityChangedSignal,
+            this, &ScatterPlotViewDataWidget::updateChartSlot);
 }
 
 /**
@@ -101,6 +104,8 @@ void ScatterPlotViewDataWidget::resetSeries()
 
     x_axis_is_datetime_ = false;
     y_axis_is_datetime_ = false;
+
+    data_model_.updateFrom(scatter_series_);
 }
 
 /**
@@ -167,7 +172,7 @@ void ScatterPlotViewDataWidget::correctSeriesDateTime(ScatterSeriesCollection& c
 
     for (auto& s : collection.dataSeries())
     {
-        for (auto& pos : s.scatter_series.points)
+        for (auto& pos : s.second.scatter_series.points)
         {
             if (x_axis_is_datetime_) pos[ 0 ] = Utils::Time::correctLongQtUTC((long)pos[ 0 ]);
             if (y_axis_is_datetime_) pos[ 1 ] = Utils::Time::correctLongQtUTC((long)pos[ 1 ]);
@@ -215,7 +220,7 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
 
         if (!dbc_series.points.empty())
         {
-            std::string name = dbc_stash.first + " (" + to_string(dbc_series.points.size()) + ")";
+            std::string name = dbc_stash.first;
 
             scatter_series_.addDataSeries(dbc_series, name, colorForGroupName(dbc_stash.first), MarkerSizePx);
         }
@@ -224,7 +229,7 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
     //add selected dataset as the last one (important for render order)
     if (!selected_series.points.empty())
     {
-        std::string name = "Selected (" + to_string(selected_series.points.size()) + ")";
+        std::string name = "Selected";
 
         scatter_series_.addDataSeries(selected_series, name, ColorSelected, MarkerSizeSelectedPx);
     }
@@ -236,6 +241,8 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
     updateDateTimeInfoFromVariables();
 
     correctSeriesDateTime(scatter_series_);
+
+    data_model_.updateFrom(scatter_series_);
 
     loginf << "ScatterPlotViewDataWidget: processStash: done, generated " << scatter_series_.numDataSeries() << " series";
 }
@@ -425,6 +432,11 @@ void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, d
     axis->setRange(vmin, vmax);
 }
 
+ScatterSeriesModel& ScatterPlotViewDataWidget::dataModel()
+{
+    return data_model_;
+}
+
 /**
 */
 void ScatterPlotViewDataWidget::resetZoomSlot()
@@ -446,6 +458,14 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
     }
 }
 
+void ScatterPlotViewDataWidget::updateChartSlot()
+{
+    bool updated = updateChart();
+
+    if (updated)
+        resetZoomSlot();
+}
+
 /**
 */
 bool ScatterPlotViewDataWidget::updateChart()
@@ -462,14 +482,15 @@ bool ScatterPlotViewDataWidget::updateChart()
     chart->setDropShadowEnabled(false);
     chart->setTitle(QString::fromStdString(title_));
 
-    chart->legend()->setAlignment(Qt::AlignRight);
-    chart->legend();
+    // chart->legend()->setAlignment(Qt::AlignRight);
 
     bool has_data = (scatter_series_.numDataSeries() > 0 && variablesOk());
 
     updateDataSeries(chart);
 
     chart->update();
+
+    chart->legend()->setMaximumSize(0,0);
 
     chart_view_.reset(new ScatterPlotViewChartView(this, chart));
     chart_view_->setObjectName("chart_view");
@@ -608,7 +629,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
     {
         //data available
 
-        chart->legend()->setVisible(true);
+        //chart->legend()->setVisible(true);
 
         bool use_connection_lines = view_->useConnectionLines();
 
@@ -619,46 +640,59 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         //qtcharts when rendering opengl will sort the series into a map using the pointer of the series as a key
         //we exploit this behavior to obtain a fixed render order for our data
 
-        size_t n_series = scatter_series_.numDataSeries();
+        //size_t n_series = scatter_series_.numDataSeries();
 
         //generate pointers
-        std::vector<SymbolLineSeries> series (n_series); 
-        for (size_t i = 0; i < n_series; ++i)
+        std::map<string,SymbolLineSeries> series;
+
+        const auto& data_series = scatter_series_.dataSeries();
+
+        for (auto& series_it : data_series)
         {
-            series[ i ].scatter_series = new QScatterSeries;
-            series[ i ].scatter_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-            series[ i ].scatter_series->setMarkerSize(MarkerSizePx);
-            series[ i ].scatter_series->setUseOpenGL(true);
+            if (!series_it.second.visible)
+                continue;
+
+            string name = series_it.first;
+
+            series[name].scatter_series = new QScatterSeries;
+            series[name].scatter_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+            series[name].scatter_series->setMarkerSize(MarkerSizePx);
+            series[name].scatter_series->setUseOpenGL(true);
 
             if (use_connection_lines)
             {
-                series[ i ].line_series = new QLineSeries;
-                QPen pen = series[ i ].line_series->pen();
+                series[name].line_series = new QLineSeries;
+                QPen pen = series[name].line_series->pen();
                 pen.setWidth(2);
                 //pen.setBrush(QBrush("red")); // or just pen.setColor("red");
-                series[ i ].line_series->setPen(pen);
+                series[name].line_series->setPen(pen);
 
-                series[ i ].line_series->setUseOpenGL(true);
+                series[name].line_series->setUseOpenGL(true);
             }
             else
-                series[ i ].line_series = nullptr;
+                series[name].line_series = nullptr;
         }
 
         //sort pointers to obtain fixed render order (as it happens inside qtcharts)
         //!the highest pointer is always on top, so the selection series is always assumed to be the last one!
-        sort(series.begin(), series.end(),
-             [&](const SymbolLineSeries& a, const SymbolLineSeries& b) {return a.scatter_series < b.scatter_series; });
+        // sort(series.begin(), series.end(),
+        //      [&](const SymbolLineSeries& a, const SymbolLineSeries& b) {return a.scatter_series < b.scatter_series; });
+        // not needed since map
 
-        const auto& data_series = scatter_series_.dataSeries();
 
         //now add data to series
-        for (size_t i = 0; i < n_series; ++i)
+        for (auto& series_it : data_series)
         {
-            const auto& ds = data_series[ i ];
+            if (!series_it.second.visible)
+                continue;
+
+            string name = series_it.first;
+            //const auto& ds = data_series[ i ];
+            const auto& ds = series_it.second;
 
             assert (!ds.scatter_series.points.empty());
 
-            QScatterSeries* chart_symbol_series = series[ i ].scatter_series;
+            QScatterSeries* chart_symbol_series = series[name].scatter_series;
             chart_symbol_series->setColor(ds.color);
             chart_symbol_series->setMarkerSize(ds.marker_size);
 
@@ -666,7 +700,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
             if (use_connection_lines)
             {
-                chart_line_series = series[ i ].line_series;
+                chart_line_series = series[name].line_series;
                 chart_line_series->setColor(ds.color);
             }
 
@@ -692,7 +726,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
                 assert (chart_line_series);
                 chart->addSeries(chart_line_series);
 
-                chart->legend()->markers(chart_line_series)[0]->setVisible(false); // remove line marker in legend
+                //chart->legend()->markers(chart_line_series)[0]->setVisible(false); // remove line marker in legend
 
                 logdbg << "ScatterPlotViewDataWidget: updateDataSeries: connection lines " << chart_line_series->count();
             }
@@ -707,7 +741,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no data, size " << getStash().groupedStashes().size();
 
         //no data -> generate default empty layout
-        chart->legend()->setVisible(false);
+        //chart->legend()->setVisible(false);
 
         //!add empty series first! (otherwise createAxes() will crash)
         QScatterSeries* series = new QScatterSeries;
