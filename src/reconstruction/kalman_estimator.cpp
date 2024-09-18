@@ -49,15 +49,18 @@ KalmanEstimator::Settings::Settings()
                                   
     imm_M_init.resize(3, 3);
 
-    const double M_big = 0.9999999999999999;
-    const double M_mid = 0.00000000000000005;
-    const double M_sm0 = 0.00000000000000009;
-    const double M_sm1 = 0.00000000000000001;
+    const double factor   = 0.5;
+    const double M_big    = 0.999999999999999999;
+    const double M_change = 0.000000000000000001;
 
-                   //   zero,        uniform,     accelerated
-    imm_M_init <<       M_big,       M_mid,       M_mid,     // zero
-                        M_mid,       M_big,       M_mid,     // uniform
-                        M_mid,       M_mid,       M_big;     // accelerated
+    const double M_change_mid    = M_change * 0.5;
+    const double M_change_big    = M_change * factor;
+    const double M_change_small  = M_change * (1.0 - factor);
+
+                   //   zero,             uniform,              accelerated
+    imm_M_init <<       M_big,            M_change_small,       M_change_big,     // zero
+                        M_change_small,   M_big,                M_change_big,     // uniform
+                        M_change_mid,     M_change_mid,         M_big;            // accelerated
 }
 
 /**

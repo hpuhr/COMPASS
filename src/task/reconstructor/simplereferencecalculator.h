@@ -83,13 +83,22 @@ namespace rec_annotations
     };
 
     /**
+     * Annotation for a single IMM submodel step.
+    */
+    struct IMMStepAnnotation
+    {
+        TRAnnotation state;
+        QColor       color;
+    };
+
+    /**
      * Annotation for an IMM step.
     */
     struct IMMAnnotation
     {
-        std::vector<TRAnnotation> imm_step_models;
-        TRAnnotation              imm_step;
-        std::string               extra_info;
+        std::vector<IMMStepAnnotation> imm_step_models;
+        IMMStepAnnotation              imm_step;
+        std::string                    extra_info;
     };
 
     /**
@@ -127,6 +136,7 @@ namespace rec_annotations
         std::vector<bool>            is_reset_pos;
         std::vector<bool>            is_proj_change_pos;
         std::vector<RTSAnnotation>   rts_annotations;
+        std::vector<IMMAnnotation>   imm_annotations;
     };
 }
 
@@ -263,6 +273,7 @@ private:
                            size_t offs,
                            const std::vector<QPointF>* fail_pos = nullptr,
                            const std::vector<QPointF>* skip_pos = nullptr,
+                           std::vector<rec_annotations::IMMAnnotation>* imm_annotations = nullptr,
                            std::vector<rec_annotations::RTSAnnotation>* rts_annotations = nullptr) const;
     void addAnnotationData(TargetReferences& target_references,
                            const reconstruction::KalmanEstimator& estimator, 
@@ -274,6 +285,7 @@ private:
                            const boost::optional<boost::posix_time::ptime>& t0,
                            const boost::optional<boost::posix_time::ptime>& t1,
                            size_t offs,
+                           bool debug_imm,
                            const std::vector<QPointF>* fail_pos = nullptr,
                            const std::vector<QPointF>* skip_pos = nullptr,
                            std::vector<kalman::RTSDebugInfo>* rts_debug_infos = nullptr) const;

@@ -631,6 +631,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                           slice_t0, 
                           slice_t1,
                           n_before,
+                          true,
                           &failed_updates,
                           &skipped_updates);
     }
@@ -706,6 +707,7 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                           slice_t0,
                           slice_t1,
                           n_before,
+                          false,
                           nullptr,
                           nullptr,
                           &rts_debug_infos);
@@ -994,6 +996,42 @@ namespace rec_annotations
 
         return anno;
     }
+
+    /**
+    */
+    IMMAnnotation createIMMAnnotation(const kalman::KalmanUpdate& imm_update,
+                                      const reconstruction::KalmanEstimator& estimator,
+                                      reconstruction::KalmanProjectionHandler& phandler)
+    {
+        assert(imm_update.state.imm_state);
+
+        size_t nm = imm_update.state.imm_state->filter_states.size();
+
+        IMMAnnotation anno;
+
+        anno.imm_step_models.resize(nm);
+        anno.imm_step.state = createTRAnnotation(imm_update, estimator, phandler, imm_update.projection_center, -1, false, "");
+        anno.imm_step.color = QColor(255, 255, 255);
+
+        for (size_t i = 0; i < nm; ++i)
+        {
+            auto& anno_model = anno.imm_step_models.at(i);
+
+            std::string name = "model" + std::to_string(i);
+            
+            anno_model.color = QColor(i % 3 == 0 ? 255 : 0, i % 3 == 1 ? 255 : 0, i % 3 == 2 ? 255 : 0);
+            anno_model.state = createTRAnnotation(imm_update, estimator, phandler, imm_update.projection_center, (int)i, false, "");
+        }
+
+        std::stringstream ss;
+        for (int i = 0; i < imm_update.state.imm_state->mu.size(); ++i)
+            ss << imm_update.state.imm_state->mu[ i ] << " ";
+
+        anno.extra_info = "";
+        anno.extra_info += ss.str();
+
+        return anno;
+    }
 }
 
 /**
@@ -1008,6 +1046,7 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                                                   const boost::optional<boost::posix_time::ptime>& t0,
                                                   const boost::optional<boost::posix_time::ptime>& t1,
                                                   size_t offs,
+                                                  bool debug_imm,
                                                   const std::vector<QPointF>* fail_pos,
                                                   const std::vector<QPointF>* skip_pos,
                                                   std::vector<kalman::RTSDebugInfo>* rts_debug_infos) const
@@ -1029,10 +1068,19 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                                                          Eigen::Vector2d(mm.lat, mm.lon));
     }
 
+    reconstruction::KalmanProjectionHandler phandler;
+
+    std::vector<rec_annotations::IMMAnnotation> imm_annotations;
+    if (debug_imm)
+    {
+        for (const auto& u : updates)
+            if (u.state.imm_state && u.isDebug())
+                imm_annotations.push_back(rec_annotations::createIMMAnnotation(u, estimator, phandler));
+    }
+    
     std::vector<rec_annotations::RTSAnnotation> rts_annotations;
     if (rts_debug_infos)
     {
-        reconstruction::KalmanProjectionHandler phandler;
         for (const auto& rts_info : *rts_debug_infos)
         {
             auto rts_anno = rec_annotations::createRTSAnnotation(rts_info, estimator, phandler);
@@ -1050,6 +1098,7 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                       offs,
                       fail_pos,
                       skip_pos,
+                      &imm_annotations,
                       &rts_annotations);
 }
 
@@ -1086,6 +1135,7 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                       t1, 
                       offs,
                       nullptr,
+                      nullptr,
                       nullptr);
 }
 
@@ -1101,6 +1151,7 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                                                   size_t offs,
                                                   const std::vector<QPointF>* fail_pos,
                                                   const std::vector<QPointF>* skip_pos,
+                                                  std::vector<rec_annotations::IMMAnnotation>* imm_annotations,
                                                   std::vector<rec_annotations::RTSAnnotation>* rts_annotations) const
 {
     rec_annotations::AnnotationData& data = target_references.annotation_data[ name ];
@@ -1135,6 +1186,10 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
     {
         for (const auto& sp : *skip_pos)
             data.skip_positions.emplace_back(sp.x(), sp.y());
+    }
+    if (imm_annotations)
+    {
+        data.imm_annotations.insert(data.imm_annotations.end(), imm_annotations->begin(), imm_annotations->end());
     }
     if (rts_annotations)
     {
@@ -1513,6 +1568,40 @@ void SimpleReferenceCalculator::createAnnotations(ViewPointGenAnnotation* annota
                 auto fl = new ViewPointGenFeatureLines(style_osg.line_width_, ViewPointGenFeatureLineString::LineStyle::Dotted, connections, {}, true);
                 fl->setColor(QColor(200, 200, 200));
                 anno_input->addFeature(fl);
+
+                ++cnt;
+            }
+        }
+
+        //add imm debug annotations
+        {
+            auto anno_rts = data_anno->getOrCreateAnnotation("IMM Infos", true);
+
+            loginf << "Adding " << data.imm_annotations.size() << " IMM info(s)";
+
+            size_t cnt = 0;
+            for (const auto& imm_anno : data.imm_annotations)
+            {
+                std::string name = "IMMInfo" + std::to_string(cnt) + (imm_anno.extra_info.empty() ? "" : ": " + imm_anno.extra_info);
+
+                auto anno_info = anno_rts->getOrCreateAnnotation(name);
+
+                std::vector<Eigen::Vector2d> positions;
+                std::vector<QColor> colors;
+
+                //position
+                positions.push_back(imm_anno.imm_step.state.pos_wgs84);
+                colors.push_back(imm_anno.imm_step.color);
+
+                //submodel positions
+                for (const auto& imm_anno_model : imm_anno.imm_step_models)
+                {
+                    positions.push_back(imm_anno_model.state.pos_wgs84);
+                    colors.push_back(imm_anno_model.color);
+                }
+
+                auto fp = new ViewPointGenFeaturePoints(ViewPointGenFeaturePoints::Symbol::Cross, style_osg.point_size_, positions, colors, true);
+                anno_info->addFeature(fp);
 
                 ++cnt;
             }
