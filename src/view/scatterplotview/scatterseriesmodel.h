@@ -1,10 +1,13 @@
 #pragma once
 
+#include "scatterseries.h"
+#include "scatterseriestreeitem.h"
+
+
 #include <QAbstractItemModel>
 #include <QModelIndex>
 #include <QVariant>
 
-#include "scatterseries.h"
 
 class ScatterSeriesModel : public QAbstractItemModel
 {
@@ -24,7 +27,14 @@ public:
 
     ScatterSeriesCollection scatterSeries() const;
 
+    enum DataRole
+    {
+        IconRole = Qt::UserRole + 100
+    };
+
 private:
     ScatterSeriesCollection scatter_series_;
+
+    std::unique_ptr<ScatterSeriesTreeItem> root_item_;
 };
 

@@ -13,6 +13,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/scatterplotviewwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/scatterseries.h"
         "${CMAKE_CURRENT_LIST_DIR}/scatterseriesmodel.h"
+        "${CMAKE_CURRENT_LIST_DIR}/scatterseriestreeitem.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/scatterplotview.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/scatterplotviewdatasource.cpp"
@@ -22,4 +23,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/scatterplotviewwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/scatterseries.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/scatterseriesmodel.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/scatterseriestreeitem.cpp"
 )
