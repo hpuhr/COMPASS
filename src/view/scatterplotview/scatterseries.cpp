@@ -124,6 +124,31 @@ nlohmann::json ScatterSeries::toJSON(bool binary) const
     return jpoints;
 }
 
+QRectF ScatterSeries::getDataBounds() const
+{
+    bool empty = true;
+
+    double x_min = std::numeric_limits<double>::max(); // everything is <= this
+    double x_max = std::numeric_limits<double>::min(); // everything is >= this
+    double y_min = std::numeric_limits<double>::max();
+    double y_max = std::numeric_limits<double>::min();
+
+    for (const auto& p : points)
+    {
+        x_min = std::min(x_min, p.x());
+        x_max = std::max(x_max, p.x());
+        y_min = std::min(y_min, p.y());
+        y_max = std::max(y_max, p.y());
+
+        empty = false;
+    }
+
+    if (empty)
+        return {};
+    else
+        return QRectF(QPointF(x_min, y_min), QPointF(x_max, y_max));
+}
+
 /*******************************************************************************************
  * ScatterSeriesCollection
  *******************************************************************************************/
@@ -308,4 +333,14 @@ nlohmann::json ScatterSeriesCollection::toJSON(bool binary) const
     obj[ TagDataSeries ] = jseries;
 
     return obj;
+}
+
+QRectF ScatterSeriesCollection::getDataBounds() const
+{
+    QRectF bounds;
+
+    for (const auto& dseries : data_series_)
+        bounds = bounds.united(dseries.second.scatter_series.getDataBounds());
+
+    return bounds;
 }

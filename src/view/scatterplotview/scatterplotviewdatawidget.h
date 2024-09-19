@@ -122,4 +122,6 @@ private:
     bool y_axis_is_datetime_ = false;
 
     ScatterSeriesModel data_model_;
+
+    QRectF annotation_bounds_;
 };

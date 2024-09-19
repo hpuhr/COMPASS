@@ -24,6 +24,7 @@
 #include <Eigen/Core>
 
 #include <QColor>
+#include <QRectF>
 
 /**
 */
@@ -39,6 +40,8 @@ struct ScatterSeries
 
     bool fromJSON(const nlohmann::json& data, bool binary);
     nlohmann::json toJSON(bool binary) const;
+
+    QRectF getDataBounds() const;
 
     std::vector<Eigen::Vector2d> points;
     DataType                     data_type_x = DataTypeFloatingPoint;
@@ -81,6 +84,8 @@ public:
 
     bool fromJSON(const nlohmann::json& data);
     nlohmann::json toJSON(bool binary = false) const;
+
+    QRectF getDataBounds() const;
 
     static const std::string TagDataSeries;
     static const std::string TagData;

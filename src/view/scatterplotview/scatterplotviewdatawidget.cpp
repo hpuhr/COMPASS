@@ -106,6 +106,8 @@ void ScatterPlotViewDataWidget::resetSeries()
     y_axis_is_datetime_ = false;
 
     data_model_.updateFrom(scatter_series_);
+
+    annotation_bounds_ = {};
 }
 
 /**
@@ -253,6 +255,8 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
 {
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations";
 
+    annotation_bounds_ = {};
+
     if (!view_->hasCurrentAnnotation())
         return;
 
@@ -277,6 +281,10 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
     y_axis_is_datetime_ = scatter_series_.commonDataTypeY() == ScatterSeries::DataTypeTimestamp;
 
     correctSeriesDateTime(scatter_series_);
+
+    data_model_.updateFrom(scatter_series_);
+
+    annotation_bounds_ = scatter_series_.getDataBounds();
 
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
 }
@@ -312,7 +320,12 @@ QPixmap ScatterPlotViewDataWidget::renderPixmap()
 */
 QRectF ScatterPlotViewDataWidget::getDataBounds() const
 {
-    return getPlanarBounds(0, 1);
+    if (!getStash().dataRanges().empty())
+        return getPlanarBounds(0, 1);
+    else // calculate from scatterseries
+    {
+        return annotation_bounds_;
+    }
 }
 
 /**
@@ -450,10 +463,14 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
             auto bounds = getDataBounds();
 
             loginf << "ScatterPlotViewDataWidget: resetZoomSlot: X min " << bounds.left()
-                   << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom();
+                   << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom()
+                   << " bounds empty " << bounds.isEmpty();
 
-            setAxisRange(chart_view_->chart()->axisX(), bounds.left(), bounds.right() );
-            setAxisRange(chart_view_->chart()->axisY(), bounds.top() , bounds.bottom());
+            if (!bounds.isEmpty())
+            {
+                setAxisRange(chart_view_->chart()->axisX(), bounds.left(), bounds.right() );
+                setAxisRange(chart_view_->chart()->axisY(), bounds.top() , bounds.bottom());
+            }
         }
     }
 }
