@@ -1679,6 +1679,8 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     //boost::posix_time::ptime ts_prev;
 
+    const auto& ref_calc_settings = reconstructor_.referenceCalculatorSettings();
+
     for (auto& ref_it : references_)
     {
         // loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_
@@ -1691,6 +1693,16 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
         if (!ts_prev_.is_not_a_date_time())
             assert (ref_it.second.t > ts_prev_);
+
+        // final filtering using max stddev
+        if (ref_calc_settings.filter_references_max_stddev_ &&
+            ref_it.second.x_stddev.has_value() && 
+            ref_it.second.y_stddev.has_value())
+        {
+            double stddev_max = std::max(ref_it.second.x_stddev.value(), ref_it.second.y_stddev.value());
+            if (stddev_max > ref_calc_settings.filter_references_max_stddev_m_)
+                continue;
+        }
 
         ds_id_vec.set(buffer_cnt, ds_id);
         sac_vec.set(buffer_cnt, sac);

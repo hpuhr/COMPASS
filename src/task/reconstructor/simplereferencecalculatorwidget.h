@@ -47,4 +47,6 @@ private:
     QDoubleSpinBox* resample_Q_std_air_edit_      = nullptr;
     QDoubleSpinBox* resample_Q_std_unknown_edit_  = nullptr;
     QDoubleSpinBox* resample_dt_box_              = nullptr;
+    QCheckBox*      filter_max_stddev_box_        = nullptr;
+    QDoubleSpinBox* filter_max_stddev_thres_box_  = nullptr;
 };
