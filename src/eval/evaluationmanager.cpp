@@ -853,9 +853,12 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
 {
     loginf << "EvaluationManager: addVariables: dbcontent_name " << dbcontent_name;
 
-    // TODO add required variables from standard requirements
-
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    if (!dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_))
+        return;
+
+    // TODO add required variables from standard requirements
 
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
     read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
