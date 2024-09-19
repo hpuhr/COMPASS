@@ -320,11 +320,23 @@ QPixmap ScatterPlotViewDataWidget::renderPixmap()
 */
 QRectF ScatterPlotViewDataWidget::getDataBounds() const
 {
-    if (!getStash().dataRanges().empty())
-        return getPlanarBounds(0, 1);
-    else // calculate from scatterseries
+    if (getStash().hasData()) // var data set
     {
-        return annotation_bounds_;
+        auto bounds = getPlanarBounds(0, 1);
+
+        loginf << "ScatterPlotViewDataWidget: getDataBounds: data range bounds X min " << bounds.left()
+               << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom()
+               << " bounds empty " << bounds.isEmpty();
+        return bounds;
+    }
+    else // calculate from annotations
+    {
+        auto bounds = annotation_bounds_;
+
+        loginf << "ScatterPlotViewDataWidget: getDataBounds: annotation bounds X min " << bounds.left()
+               << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom()
+               << " bounds empty " << bounds.isEmpty();
+        return bounds;
     }
 }
 
