@@ -107,6 +107,9 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
         registerParameter("ref_resample_systracks"       , &ref_calc_settings_.resample_systracks       , ReferenceCalculatorSettings().resample_systracks);
         registerParameter("ref_resample_systracks_dt"    , &ref_calc_settings_.resample_systracks_dt    , ReferenceCalculatorSettings().resample_systracks_dt);
         registerParameter("ref_resample_systracks_max_dt", &ref_calc_settings_.resample_systracks_max_dt, ReferenceCalculatorSettings().resample_systracks_max_dt);
+
+        registerParameter("filter_references_max_stddev"  , &ref_calc_settings_.filter_references_max_stddev_  , ReferenceCalculatorSettings().filter_references_max_stddev_);
+        registerParameter("filter_references_max_stddev_m", &ref_calc_settings_.filter_references_max_stddev_m_, ReferenceCalculatorSettings().filter_references_max_stddev_m_);
     }
 
     assert (acc_estimator_);

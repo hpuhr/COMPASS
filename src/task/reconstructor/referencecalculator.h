@@ -135,6 +135,10 @@ struct ReferenceCalculatorSettings
 
     bool dynamic_process_noise = true;
 
+    //final reference filter related
+    bool   filter_references_max_stddev_ {true};
+    double filter_references_max_stddev_m_ {150.0};
+
     //debug options
     bool compat_mode     = false;
     int  max_slice_index = -1;

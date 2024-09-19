@@ -223,6 +223,22 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
                     &resample_Q_std_unknown_edit_,
                     settings->resample_Q_std);
 
+    filter_max_stddev_box_ = new QCheckBox;
+    connect(filter_max_stddev_box_, &QCheckBox::toggled, 
+        [ = ] (bool ok) 
+        { 
+            settings->filter_references_max_stddev_ = ok; 
+            this->updateEnabledStates();
+        });
+    layout->addRow("Filter Result References", filter_max_stddev_box_);
+
+    filter_max_stddev_thres_box_ = new QDoubleSpinBox;
+    filter_max_stddev_thres_box_->setDecimals(2);
+    filter_max_stddev_thres_box_->setMinimum(0.0);
+    filter_max_stddev_thres_box_->setMaximum(100000.0);
+    connect(filter_max_stddev_thres_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->filter_references_max_stddev_m_ = v; });
+    layout->addRow("Max. Stddev [m]", filter_max_stddev_thres_box_);
+
     update();
 }
 
@@ -238,6 +254,7 @@ void SimpleReferenceCalculatorWidget::updateEnabledStates()
     bool smooth             = smooth_rts_box_->isChecked();
     bool resample_res       = resample_result_box_->isChecked();
     bool resample_systracks = resample_systracks_box_->isChecked();
+    bool filter_max_stddev  = filter_max_stddev_box_->isChecked();
 
     Q_std_static_edit_->setEnabled(!dynamic_Q);
     Q_std_ground_edit_->setEnabled(dynamic_Q);
@@ -254,6 +271,8 @@ void SimpleReferenceCalculatorWidget::updateEnabledStates()
 
     resample_systracks_dt_box_->setEnabled(resample_systracks);
     resample_systracks_maxdt_box_->setEnabled(resample_systracks);
+
+    filter_max_stddev_thres_box_->setEnabled(filter_max_stddev);
 }
 
 /**
@@ -291,6 +310,9 @@ void SimpleReferenceCalculatorWidget::update()
     if (resample_Q_std_ground_edit_) resample_Q_std_ground_edit_->setValue(settings.resample_Q_std.Q_std_ground);
     if (resample_Q_std_air_edit_) resample_Q_std_air_edit_->setValue(settings.resample_Q_std.Q_std_air);
     if (resample_Q_std_unknown_edit_) resample_Q_std_unknown_edit_->setValue(settings.resample_Q_std.Q_std_unknown); 
+
+    if (filter_max_stddev_box_) filter_max_stddev_box_->setChecked(settings.filter_references_max_stddev_);
+    if (filter_max_stddev_thres_box_) filter_max_stddev_thres_box_->setValue(settings.filter_references_max_stddev_m_);
 
     updateEnabledStates();
 }
