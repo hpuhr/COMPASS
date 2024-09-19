@@ -257,7 +257,7 @@ void ASTERIXOverrideWidget::filterTimeOfDayActiveCheckedSlot()
     loginf << "ASTERIXOverrideWidget: filterTimeOfDayActiveCheckedSlot";
     assert(filter_tod_active_check_);
 
-    task_.settings().override_tod_active_ = filter_tod_active_check_->checkState() == Qt::Checked;
+    task_.settings().filter_tod_active_ = filter_tod_active_check_->checkState() == Qt::Checked;
 }
 void ASTERIXOverrideWidget::minTimeChanged(QTime time)
 {
