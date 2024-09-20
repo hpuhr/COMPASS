@@ -743,6 +743,10 @@ void ReconstructorTask::loadingDoneSlot()
         if (cancelled_)
             return;
 
+        loginf << "ReconstructorTask: loadingDoneSlot: waiting on reconst processing "
+               << currentReconstructor()->processing()
+               << " data slice proc " << processing_data_slice_;
+
         QCoreApplication::processEvents();
         QThread::msleep(1000);
     }

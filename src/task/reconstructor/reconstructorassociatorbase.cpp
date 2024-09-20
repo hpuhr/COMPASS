@@ -115,7 +115,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
     unsigned long rec_num;
     int utn;
 
-    bool do_debug;
+    bool do_debug = false;
 
     checkACADLookup();
 
@@ -130,7 +130,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = reconstructor().task().debugRecNum(rec_num);
+        //do_debug = reconstructor().task().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -191,7 +191,8 @@ void ReconstructorAssociatorBase::associateTargetReports()
             unassoc_rec_nums_.push_back(rec_num);
         }
     }
-
+    if (do_debug)
+        loginf << "DBG associateTargetReports done";
 }
 
 void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> dbcont_ids)
@@ -424,10 +425,23 @@ void ReconstructorAssociatorBase::associate(
     assert (reconstructor().targets_.count(utn));
 
     // check if position usable
+    if (do_debug)
+        loginf << "DBG validate";
+
     reconstructor().acc_estimator_->validate(tr);
+
+    if (do_debug)
+        loginf << "DBG outlier detect";
+
     doOutlierDetection(tr, utn, do_debug); //124976,129072
 
+    if (do_debug)
+        loginf << "DBG addTargetReport";
+
     reconstructor().targets_.at(utn).addTargetReport(tr.record_num_);
+
+    if (do_debug)
+        loginf << "DBG add to lookups";
 
     if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
         tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
@@ -440,6 +454,9 @@ void ReconstructorAssociatorBase::associate(
         acid_2_utn_[*tr.acid_] = utn;
 
     assoc_counts_[tr.ds_id_][dbcont_id].first++;
+
+    if (do_debug)
+        loginf << "DBG postAssociate";
 
     postAssociate (tr, utn);
 }
@@ -454,6 +471,10 @@ void ReconstructorAssociatorBase::checkACADLookup()
     {
         if (!target_it.second.hasACAD())
             continue;
+
+        if (target_it.second.acads_.size() != 1)
+            logerr << "ReconstructorAssociatorBase: checkACADLookup: double acad in target "
+                   << target_it.second.asStr();
 
         assert (target_it.second.acads_.size() == 1);
 

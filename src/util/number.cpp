@@ -54,7 +54,7 @@ double roundToClosestPowerOf10(double value) {
     double log10_value = std::log10(std::fabs(value));
 
             // Round the log10_value to the lower integer
-    double rounded_log10 = std::floor(log10_value);
+    double rounded_log10 = std::round(log10_value);
 
             // Calculate the power of 10 corresponding to the rounded logarithm
     double power_of_10 = std::pow(10.0f, rounded_log10);

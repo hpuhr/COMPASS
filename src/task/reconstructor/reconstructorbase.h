@@ -30,7 +30,7 @@
 #include <string>
 #include <memory>
 
-#define DO_RECONSTRUCTOR_PEDANTIC_CHECKING 1
+#define DO_RECONSTRUCTOR_PEDANTIC_CHECKING 0
 
 namespace dbContent
 {

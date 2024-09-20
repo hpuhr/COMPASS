@@ -109,9 +109,17 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
                                                                                  bool add_to_tracker,
                                                                                  bool reestimate)
 {
+    bool do_debug = false;
+
     assert (reconstructor_.target_reports_.count(rec_num));
 
     const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
+
+    if (tr.acad_ && acads_.size() && !acads_.count(*tr.acad_))
+    {
+        logwrn << "Target: addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
+        return TargetReportAddResult::Skipped;
+    }
 
 #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
     assert (rec_num == tr.record_num_);
@@ -132,6 +140,9 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
 
     //        assert (tr.timestamp_ >= timestamp_max_);
     //    }
+
+    if (do_debug)
+        loginf << "DBG min/max";
 
     // update min/max
 
@@ -160,6 +171,9 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
         }
     }
 
+    if (do_debug)
+        loginf << "DBG adding meta info";
+
     if (!ds_ids_.count(tr.ds_id_))
         ds_ids_.insert(tr.ds_id_);
 
@@ -180,7 +194,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     {
         if (acads_.size() && !acads_.count(*tr.acad_))
         {
-            logwrn << "Target: addAssociated: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
+            logwrn << "Target: addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
         }
 
         if (!acads_.count(*tr.acad_))
@@ -204,14 +218,25 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     //    if (!tmp_)
     //        tr.addAssociated(this);
 
+    if (do_debug)
+        loginf << "DBG add to tracker";
+
     TargetReportAddResult result = TargetReportAddResult::Skipped;
 
     if (add_to_tracker && !tr.do_not_use_position_)
     {
         if (!hasTracker())
+        {
+            if (do_debug)
+                loginf << "DBG add to tracker: reinit";
+
             reinitTracker();
+        }
 
         reconstruction::UpdateStats stats;
+
+        if (do_debug)
+            loginf << "DBG add to tracker: addToTracker";
 
         result = addToTracker(tr, reestimate, &stats);
 
@@ -224,8 +249,14 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
             assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
         }
 
+        if (do_debug)
+            loginf << "DBG add to tracker: add to stats";
+
         addUpdateToGlobalStats(stats);
     }
+
+    if (do_debug)
+        loginf << "DBG addTargetReport done";
 
     return result;
 }
@@ -2062,7 +2093,8 @@ bool ReconstructorTarget::compareChainUpdates(const dbContent::targetReport::Rec
 bool ReconstructorTarget::checkChainBeforeAdd(const dbContent::targetReport::ReconstructorInfo& tr,
                                               int idx) const
 {
-    unsigned int rec_num  = chain_->getUpdate(idx).mm_id;
+    unsigned long rec_num  = chain_->getUpdate(idx).mm_id; // UGA not unsigned int
+    assert (reconstructor_.target_reports_.count(rec_num));
     const auto&  tr_chain = reconstructor_.target_reports_.at(rec_num);
 
     return compareChainUpdates(tr, tr_chain);
@@ -2087,20 +2119,35 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addToTracker(con
                                                                              bool reestimate, 
                                                                              reconstruction::UpdateStats* stats)
 {
+    bool do_debug = false;
+
     assert(chain_);
 
     if (stats)
         ++stats->num_checked;
 
+    if (do_debug)
+        loginf << "DBG indexes near";
+
     auto idxs_remove = chain_->indicesNear(tr.timestamp_, reconstructor_.referenceCalculatorSettings().min_dt);
+
+    if (do_debug)
+        loginf << "DBG checkChainBeforeAdd " << idxs_remove.first << ", " << idxs_remove.second;
 
     //preemptive check failed => just skip
     if (!checkChainBeforeAdd(tr, idxs_remove))
     {
         if (stats)
             ++stats->num_skipped_preemptive;
+
+        if (do_debug)
+            loginf << "DBG skipped";
+
         return TargetReportAddResult::Skipped;
     }
+
+    if (do_debug)
+        loginf << "DBG remove";
 
     //measurement to be inserted => remove any replaced chain updates?
     if (idxs_remove.second >= 0)
@@ -2120,11 +2167,17 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addToTracker(con
         stats->num_replaced += (idxs_remove.first >= 0 ? 1 : 0) + (idxs_remove.second >= 0 ? 1 : 0);
     }
     
+    if (do_debug)
+        loginf << "DBG insert";
+
     //insert measurement
     bool reestim_ok = chain_->insert(tr.record_num_, tr.timestamp_, reestimate, stats);
 
     if (!reestimate)
         return TargetReportAddResult::Added;
+
+    if (do_debug)
+        loginf << "DBG done";
 
     return reestim_ok ? TargetReportAddResult::Reestimated : TargetReportAddResult::ReestimationFailed;
 }

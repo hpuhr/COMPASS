@@ -98,13 +98,13 @@ class PositionAccuracy
           xy_cov_  (xy_cov  ) {}
 
     PositionAccuracy operator* (double scale) const
-    { return PositionAccuracy(x_stddev_ * scale, y_stddev_ * scale, xy_cov_ * scale); }
+    { return PositionAccuracy(x_stddev_ * scale, y_stddev_ * scale, xy_cov_ * scale * scale); }
 
     PositionAccuracy& operator* (double scale)
     {
         x_stddev_ *= scale;
         y_stddev_ *= scale;
-        xy_cov_ *= scale;
+        xy_cov_ *= scale*scale;
 
         return *this;
     }
