@@ -485,6 +485,12 @@ void SectionContentTable::clickedSlot(const QModelIndex& index)
         return;
     }
 
+    if (QApplication::mouseButtons() & Qt::RightButton)
+    {
+        loginf << "SectionContentTable: clickedSlot: RMB click ignored";
+        return;
+    }
+
     auto const source_index = proxy_model_->mapToSource(index);
     assert (source_index.isValid());
 

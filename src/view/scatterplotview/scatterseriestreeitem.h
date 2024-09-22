@@ -59,6 +59,8 @@ public:
     virtual bool hidden() const { return hidden_; }
     virtual void hide(bool value);
 
+    void hideAll(bool emit_signal=true);
+
     void updateHidden();
 
     bool itemHidden() const;

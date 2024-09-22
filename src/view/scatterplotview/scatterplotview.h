@@ -74,6 +74,9 @@ public:
 
     static const std::string ParamUseConnectionLines;
 
+    ScatterPlotViewDataWidget* getDataWidget();
+
+
 protected:
     friend class LatexVisitor;
 
@@ -88,7 +91,6 @@ protected:
     virtual void unshowViewPoint(const ViewableDataConfig* vp) override;
     virtual void showViewPoint(const ViewableDataConfig* vp) override;
 
-    ScatterPlotViewDataWidget* getDataWidget();
 
     /// For data display
     ScatterPlotViewWidget* widget_{nullptr};

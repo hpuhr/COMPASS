@@ -67,6 +67,12 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
 
         //getTabWidget()->addTab(layer_view_, "Layers");
         layout->addWidget(layer_view_);
+
+        QPushButton* push_button = new QPushButton("Deselect All");
+        push_button->setObjectName("deselect_all");
+        layout->addWidget(push_button);
+        QObject::connect(push_button, &QPushButton::pressed,
+                         this, &ScatterPlotViewConfigWidget::deselectAllSlot);
     }
 
 
@@ -100,6 +106,12 @@ void ScatterPlotViewConfigWidget::updateToVisibilitySlot()
     layer_view_->expandToDepth(3);
     layer_view_->header()->resizeSection(0 /*column index*/, 300 /*width*/);
 }
+
+void ScatterPlotViewConfigWidget::deselectAllSlot()
+{
+    view_->getDataWidget()->dataModel().deselectAll();
+}
+
 
 /**
 */

@@ -167,3 +167,10 @@ void ScatterSeriesModel::updateFrom (ScatterSeriesCollection& collection)
 
     endResetModel();
 }
+
+void ScatterSeriesModel::deselectAll()
+{
+    assert (root_item_);
+    root_item_->hideAll();
+    root_item_->hide(false);
+}

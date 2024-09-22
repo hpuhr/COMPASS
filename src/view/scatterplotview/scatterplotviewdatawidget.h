@@ -51,6 +51,7 @@ enum ScatterPlotViewDataTool
 class ScatterPlotViewDataWidget : public VariableViewStashDataWidget
 {
     Q_OBJECT
+
 public:
     /// @brief Constructor
     ScatterPlotViewDataWidget(ScatterPlotViewWidget* view_widget,

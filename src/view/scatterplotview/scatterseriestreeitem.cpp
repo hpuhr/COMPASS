@@ -348,6 +348,19 @@ void ScatterSeriesTreeItem::hide(bool value)
     emit model_.visibilityChangedSignal();
 }
 
+void ScatterSeriesTreeItem::hideAll(bool emit_signal)
+{
+    hidden_ = true;
+
+    for (auto& child_it : child_items_)
+        child_it.second->hideAll(false);
+
+    updateHidden();
+
+    if (emit_signal)
+        emit model_.visibilityChangedSignal();
+}
+
 void ScatterSeriesTreeItem::updateHidden()
 {
     if (data_series_)

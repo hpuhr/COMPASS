@@ -38,6 +38,8 @@ public slots:
     void useConnectionLinesSlot();
     void updateToVisibilitySlot();
 
+    void deselectAllSlot();
+
 public:
     ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, 
                                 QWidget* parent = nullptr);

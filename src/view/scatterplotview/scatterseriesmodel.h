@@ -37,6 +37,8 @@ public:
         IconRole = Qt::UserRole + 100
     };
 
+    void deselectAll();
+
 private:
     std::unique_ptr<ScatterSeriesTreeItem> root_item_;
 };
