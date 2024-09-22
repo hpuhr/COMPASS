@@ -93,6 +93,8 @@ void VariableViewStashDataWidget::preUpdateVariableDataEvent()
 */
 void VariableViewStashDataWidget::postUpdateVariableDataEvent() 
 {
+    loginf << "VariableViewStashDataWidget: postUpdateVariableDataEvent";
+
     //update the stash (bounds, counts, etc.)
     updateStash();
 

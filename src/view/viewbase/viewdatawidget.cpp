@@ -116,9 +116,9 @@ const std::map<std::string, QColor>& ViewDataWidget::dbContentColors() const
 void ViewDataWidget::setToolSwitcher(ViewToolSwitcher* tool_switcher)
 {
     if (!tool_switcher)
-        throw std::runtime_error("ViewDataWidget::setToolSwitcher: nullptr passed");
+        throw std::runtime_error("ViewDataWidget: setToolSwitcher: nullptr passed");
     if (tool_switcher_)
-        throw std::runtime_error("ViewDataWidget::setToolSwitcher: called twice");
+        throw std::runtime_error("ViewDataWidget: setToolSwitcher: called twice");
 
     tool_switcher_ = tool_switcher;
     tool_switcher_->setDataWidget(this);
@@ -167,7 +167,7 @@ void ViewDataWidget::endTool()
  */
 void ViewDataWidget::loadingStarted()
 {
-    logdbg << "ViewDataWidget::loadingStarted";
+    loginf << "ViewDataWidget: loadingStarted";
 
     //clear and update display
     clearData();
@@ -182,7 +182,7 @@ void ViewDataWidget::loadingStarted()
  */
 void ViewDataWidget::loadingDone()
 {
-    logdbg << "ViewDataWidget::loadingDone";
+    loginf << "ViewDataWidget: loadingDone";
 
     //invoke derived
     loadingDone_impl();
@@ -204,7 +204,7 @@ void ViewDataWidget::loadingDone_impl()
  */
 void ViewDataWidget::updateData(const BufferData& data, bool requires_reset)
 {
-    logdbg << "ViewDataWidget::updateData";
+    logdbg << "ViewDataWidget: updateData";
 
     //store new data
     data_ = data;
@@ -219,7 +219,7 @@ void ViewDataWidget::updateData(const BufferData& data, bool requires_reset)
  */
 void ViewDataWidget::clearData()
 {
-    logdbg << "ViewDataWidget::clearData";
+    logdbg << "ViewDataWidget: clearData";
 
     data_  = {};
     drawn_ = false;
@@ -236,7 +236,7 @@ void ViewDataWidget::clearData()
 */
 bool ViewDataWidget::redrawData(bool recompute, bool notify)
 {
-    logdbg << "ViewDataWidget::redrawData";
+    loginf << "ViewDataWidget: redrawData: recompute " << recompute << " notify " << notify;
 
     if (notify)
     {

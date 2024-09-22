@@ -122,7 +122,7 @@ bool ScatterPlotViewDataWidget::postLoadTrigger()
         view_->useConnectionLines(false);
         emit displayChanged();
 
-        return true;
+        //return true; // UGA why???
     }
 
     //no redraw triggered
