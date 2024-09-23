@@ -249,7 +249,7 @@ SimpleAssociator::checkPositionOffsetScore (double distance_m, double sum_stddev
 }
 
 boost::optional<bool> SimpleAssociator::isTargetAccuracyAcceptable(
-    double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts)
+    double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug)
 {
     return true;
 }

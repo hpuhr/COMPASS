@@ -1110,7 +1110,7 @@ void EvaluationTargetData::updatePositionMinMax() const
 
 void EvaluationTargetData::calculateTestDataMappings() const
 {
-    loginf << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_;
+    logdbg << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_;
 
     assert (!tst_data_mappings_.size());
 
@@ -1129,7 +1129,7 @@ void EvaluationTargetData::calculateTestDataMappings() const
             ++cnt;
     }
 
-    loginf << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_ << " done, num map "
+    logdbg << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_ << " done, num map "
            << tst_data_mappings_.size() << " ref pos " << cnt;
 }
 
