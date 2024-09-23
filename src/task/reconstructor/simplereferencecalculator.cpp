@@ -1444,10 +1444,7 @@ void SimpleReferenceCalculator::createAnnotations(ViewPointGenAnnotation* annota
                     series.points.emplace_back(Utils::Time::toLong(a.ts), a.Q_var.value());
             }
             series.points.emplace_back(series.points.back().x(), 0.0);
-
             series.data_type_x = ScatterSeries::DataType::DataTypeTimestamp;
-
-            feat_speed_scatter->scatterSeries().addDataSeries(series, data.name, style.base_color_, style.point_size_);
 
             //add own feature
             auto f = new ViewPointGenFeatureScatterSeries(series, data.name, style.base_color_, style.point_size_, 
