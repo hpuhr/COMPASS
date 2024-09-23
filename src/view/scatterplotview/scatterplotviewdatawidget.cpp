@@ -277,11 +277,11 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
     x_axis_is_datetime_ = scatter_series_.commonDataTypeX() == ScatterSeries::DataTypeTimestamp;
     y_axis_is_datetime_ = scatter_series_.commonDataTypeY() == ScatterSeries::DataTypeTimestamp;
 
+    annotation_bounds_ = scatter_series_.getDataBounds();
+
     correctSeriesDateTime(scatter_series_);
 
     data_model_.updateFrom(scatter_series_);
-
-    annotation_bounds_ = scatter_series_.getDataBounds();
 
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
 }
@@ -435,8 +435,7 @@ void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, d
     auto axis_dt = dynamic_cast<QDateTimeAxis*>(axis);
     if (axis_dt)
     {
-        // need correction sind bound calculated before correction
-
+        // need correction since bounds calculated before correction
         QDateTime vmin_cor = QDateTime::fromMSecsSinceEpoch(Time::correctLongQtUTC(vmin));
         QDateTime vmax_cor = QDateTime::fromMSecsSinceEpoch(Time::correctLongQtUTC(vmax));
 
