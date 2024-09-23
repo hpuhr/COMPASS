@@ -70,7 +70,7 @@ public:
     virtual std::set<std::string> acceptedAnnotationFeatureTypes() const override;
 
     bool useConnectionLines();
-    void useConnectionLines(bool value);
+    void useConnectionLines(bool value, bool redraw = true);
 
     static const std::string ParamUseConnectionLines;
 
