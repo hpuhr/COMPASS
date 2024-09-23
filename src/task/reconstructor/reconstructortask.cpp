@@ -916,7 +916,7 @@ void ReconstructorTask::runCancelledSlot()
            || processing_data_slice_ || currentReconstructor()->processing()
            || dbcontent_man.insertInProgress())
     {
-        loginf << "ReconstructorTask: runCancelledSlot: waiting, load "
+        logdbg << "ReconstructorTask: runCancelledSlot: waiting, load "
                << (loading_data_ || dbcontent_man.loadInProgress())
                << " proc " << (processing_data_slice_ || currentReconstructor()->processing())
                << " insert " << dbcontent_man.insertInProgress();

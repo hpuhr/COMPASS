@@ -25,6 +25,24 @@ class ReconstructorAssociatorBase
     const std::map<unsigned int, std::map<unsigned int,
                                           std::pair<unsigned int, unsigned int>>>& assocAounts() const;
 
+    struct AssociationOption
+    {
+        AssociationOption(){}
+
+        AssociationOption(bool usable, unsigned int other_utn, unsigned int num_updates,
+                          bool associate, float avg_distance)
+            : usable_(usable), other_utn_(other_utn), num_updates_(num_updates),
+            associate_based_on_secondary_attributes_(associate), avg_distance_(avg_distance)
+        {}
+
+        bool usable_ {false};
+        unsigned int other_utn_ {0};
+        unsigned int num_updates_{0};
+
+        bool associate_based_on_secondary_attributes_ {false};
+        float avg_distance_{0};
+    };
+
   protected:
 
     boost::posix_time::time_duration max_time_diff_;
@@ -62,7 +80,7 @@ class ReconstructorAssociatorBase
     int findUTNByModeACPos (const dbContent::targetReport::ReconstructorInfo& tr,
                            const std::vector<unsigned int>& utn_vec);
 
-    int findUTNForTarget (unsigned int utn);
+    std::vector<unsigned int> findUTNsForTarget (unsigned int utn);
 
     unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
@@ -105,7 +123,7 @@ class ReconstructorAssociatorBase
         (double distance_m, double sum_stddev_est, bool secondary_verified) = 0;
 
     virtual boost::optional<bool> isTargetAccuracyAcceptable(
-        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts) = 0;
+        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug) = 0;
     virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) = 0;
 
     virtual ReconstructorBase& reconstructor() = 0;

@@ -53,7 +53,7 @@ class SimpleAssociator : public ReconstructorAssociatorBase
         (double distance_m, double sum_stddev_est, bool secondary_verified) override;
 
     virtual boost::optional<bool> isTargetAccuracyAcceptable(
-        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts) override;
+        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug) override;
     virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) override;
 
     virtual ReconstructorBase& reconstructor() override;
