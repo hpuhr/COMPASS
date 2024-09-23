@@ -683,7 +683,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         //size_t n_series = scatter_series_.numDataSeries();
 
         //generate pointers
-        std::map<string,SymbolLineSeries> series;
+        std::vector<SymbolLineSeries> series;
 
         const auto& data_series = scatter_series_.dataSeries();
 
@@ -692,47 +692,50 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
             if (!series_it.second.visible)
                 continue;
 
-            string name = series_it.first;
+            series.push_back(SymbolLineSeries());
 
-            series[name].scatter_series = new QScatterSeries;
-            series[name].scatter_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
-            series[name].scatter_series->setMarkerSize(MarkerSizePx);
-            series[name].scatter_series->setUseOpenGL(true);
+            auto& s = series.back();
+
+            s.scatter_series = new QScatterSeries;
+            s.scatter_series->setMarkerShape(QScatterSeries::MarkerShapeCircle);
+            s.scatter_series->setMarkerSize(MarkerSizePx);
+            s.scatter_series->setUseOpenGL(true);
 
             if (use_connection_lines)
             {
-                series[name].line_series = new QLineSeries;
-                QPen pen = series[name].line_series->pen();
+                s.line_series = new QLineSeries;
+                QPen pen = s.line_series->pen();
                 pen.setWidth(2);
                 //pen.setBrush(QBrush("red")); // or just pen.setColor("red");
-                series[name].line_series->setPen(pen);
+                s.line_series->setPen(pen);
 
-                series[name].line_series->setUseOpenGL(true);
+                s.line_series->setUseOpenGL(true);
             }
             else
-                series[name].line_series = nullptr;
+                s.line_series = nullptr;
         }
 
         //sort pointers to obtain fixed render order (as it happens inside qtcharts)
         //!the highest pointer is always on top, so the selection series is always assumed to be the last one!
-        // sort(series.begin(), series.end(),
-        //      [&](const SymbolLineSeries& a, const SymbolLineSeries& b) {return a.scatter_series < b.scatter_series; });
-        // not needed since map
-
+        sort(series.begin(), series.end(),
+            [&](const SymbolLineSeries& a, const SymbolLineSeries& b) {return a.scatter_series < b.scatter_series; });
 
         //now add data to series
+        size_t cnt = 0;
         for (auto& series_it : data_series)
         {
             if (!series_it.second.visible)
                 continue;
 
+            auto& s = series[cnt++];
+            
             string name = series_it.first;
             //const auto& ds = data_series[ i ];
             const auto& ds = series_it.second;
 
             assert (!ds.scatter_series.points.empty());
 
-            QScatterSeries* chart_symbol_series = series[name].scatter_series;
+            QScatterSeries* chart_symbol_series = s.scatter_series;
             chart_symbol_series->setColor(ds.color);
             chart_symbol_series->setMarkerSize(ds.marker_size);
 
@@ -740,7 +743,7 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
             if (use_connection_lines)
             {
-                chart_line_series = series[name].line_series;
+                chart_line_series = s.line_series;
                 chart_line_series->setColor(ds.color);
             }
 
