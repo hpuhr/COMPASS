@@ -277,11 +277,11 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
     x_axis_is_datetime_ = scatter_series_.commonDataTypeX() == ScatterSeries::DataTypeTimestamp;
     y_axis_is_datetime_ = scatter_series_.commonDataTypeY() == ScatterSeries::DataTypeTimestamp;
 
+    annotation_bounds_ = scatter_series_.getDataBounds();
+
     correctSeriesDateTime(scatter_series_);
 
     data_model_.updateFrom(scatter_series_);
-
-    annotation_bounds_ = scatter_series_.getDataBounds();
 
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
 }
@@ -435,8 +435,7 @@ void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, d
     auto axis_dt = dynamic_cast<QDateTimeAxis*>(axis);
     if (axis_dt)
     {
-        // need correction sind bound calculated before correction
-
+        // need correction since bounds calculated before correction
         QDateTime vmin_cor = QDateTime::fromMSecsSinceEpoch(Time::correctLongQtUTC(vmin));
         QDateTime vmax_cor = QDateTime::fromMSecsSinceEpoch(Time::correctLongQtUTC(vmax));
 
@@ -477,8 +476,23 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 
             if (!bounds.isEmpty())
             {
-                setAxisRange(chart_view_->chart()->axisX(), bounds.left(), bounds.right() );
-                setAxisRange(chart_view_->chart()->axisY(), bounds.top() , bounds.bottom());
+                double x0 = bounds.left();
+                double x1 = bounds.right();
+                double y0 = bounds.top();
+                double y1 = bounds.bottom();
+                double w  = bounds.width();
+                double h  = bounds.height();
+
+                double bx = w < 1e-12 ? 0.1 : w * 0.03;
+                double by = h < 1e-12 ? 0.1 : h * 0.03;
+
+                x0 -= bx;
+                y0 -= by;
+                x1 += bx;
+                y1 += by;
+
+                setAxisRange(chart_view_->chart()->axisX(), x0, x1);
+                setAxisRange(chart_view_->chart()->axisY(), y0, y1);
             }
         }
     }
