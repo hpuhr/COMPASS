@@ -114,18 +114,15 @@ void ScatterPlotViewDataWidget::resetSeries()
 */
 bool ScatterPlotViewDataWidget::postLoadTrigger()
 {
-    // disable connection lines? (triggers redraw)
+    // disable connection lines?
     if (view_->useConnectionLines() && loadedDataCount() > ConnectLinesDataCountMax) 
     {
         loginf << "ScatterPlotViewDataWidget: loadingDone_impl: loaded data items >" << ConnectLinesDataCountMax << ", disabling connection lines";
 
-        view_->useConnectionLines(false);
-        emit displayChanged();
-
-        //return true; // UGA why???
+        //no redraw, happens later anyway
+        view_->useConnectionLines(false, false);
     }
 
-    //no redraw triggered
     return false;
 }
 

@@ -200,11 +200,12 @@ bool ScatterPlotView::useConnectionLines()
 
 /**
 */
-void ScatterPlotView::useConnectionLines(bool value)
+void ScatterPlotView::useConnectionLines(bool value, bool redraw)
 {
     settings_.use_connection_lines = value;
 
-    updateView(VU_Redraw);
+    if (redraw)
+        updateView(VU_Redraw);
 }
 
 /**
