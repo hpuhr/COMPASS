@@ -268,7 +268,7 @@ void ScatterSeriesTreeItem::appendChild(ScatterSeriesTreeItem* item)
 unsigned int ScatterSeriesTreeItem::getIndexOf(ScatterSeriesTreeItem* child)
 {
     auto it = std::find_if(child_items_.begin(), child_items_.end(),
-                           [&](const auto& x)
+                           [&](const std::pair<std::string, std::unique_ptr<ScatterSeriesTreeItem>>& x)
                            -> bool { return x.second.get() == child;});
 
     assert(it != child_items_.end());

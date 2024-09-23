@@ -332,6 +332,11 @@ bool ReconstructorTarget::hasModeC () const
     return mode_c_min_ && mode_c_max_;
 }
 
+bool ReconstructorTarget::isPrimary() const
+{
+    return !hasACAD() && !hasACID() && !hasModeA() && !hasModeC();
+}
+
 std::string ReconstructorTarget::asStr() const
 {
     stringstream ss;
@@ -441,7 +446,7 @@ bool ReconstructorTarget::isTimeInside (boost::posix_time::ptime timestamp, boos
 
 bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) const
 {
-    if (!isTimeInside(timestamp))
+    if (!isTimeInside(timestamp, d_max))
         return false;
 
     if (tr_timestamps_.count(timestamp))
@@ -1286,6 +1291,30 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
     assert (rec_nums.size() == unknown.size()+same.size()+different.size());
 
     return std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>>(unknown, same, different);
+}
+
+bool ReconstructorTarget::isPrimaryAt(boost::posix_time::ptime timestamp,
+                 boost::posix_time::time_duration max_time_diff, const InterpOptions& interp_options) const
+{
+    if (isPrimary()) // for full target
+        return true;
+
+    if (!hasDataForTime(timestamp, max_time_diff))
+        return false; // unknown
+
+    dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
+
+    if (interp_options.debug()) loginf << "ReconstructorTarget: isPrimaryAt: t = " << Utils::Time::toString(timestamp);
+
+    tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff, {}, interp_options);
+
+    if (lower_tr && lower_tr->isPrimaryOnlyDetection())
+        return true;
+
+    if (upper_tr && upper_tr->isPrimaryOnlyDetection())
+        return true;
+
+    return false;
 }
 
 boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptime timestamp,

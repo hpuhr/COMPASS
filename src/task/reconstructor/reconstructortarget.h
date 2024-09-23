@@ -214,6 +214,8 @@ public:
 
     bool hasModeC () const;
 
+    bool isPrimary() const;
+
     std::string asStr() const;
     std::string timeStr() const;
 
@@ -270,6 +272,9 @@ public:
                std::vector<unsigned long>> compareModeCCodes (
         const ReconstructorTarget& other, const std::vector<unsigned long>& rec_nums,
         boost::posix_time::time_duration max_time_diff, float max_alt_diff, bool debug) const;
+
+    bool isPrimaryAt(boost::posix_time::ptime timestamp,
+                     boost::posix_time::time_duration max_time_diff, const InterpOptions& interp_options) const;
 
     boost::optional<float> modeCCodeAt (boost::posix_time::ptime timestamp,
                                        boost::posix_time::time_duration max_time_diff,
