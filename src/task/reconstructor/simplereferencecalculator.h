@@ -169,11 +169,13 @@ public:
     static const QColor ColorMeasurements;
     static const QColor ColorKalman;
     static const QColor ColorKalmanSmoothed;
+    static const QColor ColorKalmanResampled;
 
     static const float PointSizeOSG;
     static const float PointSizeMeasurements;
     static const float PointSizeKalman;
     static const float PointSizeKalmanSmoothed;
+    static const float PointSizeKalmanResampled;
 
     static const float LineWidthBase;
                                 
@@ -281,11 +283,11 @@ private:
                            const rec_annotations::AnnotationStyle& style,
                            const boost::optional<rec_annotations::AnnotationStyle>& style_osg,
                            const std::vector<kalman::KalmanUpdate>& updates,
-                           const std::vector<unsigned int>& used_mms,
                            const boost::optional<boost::posix_time::ptime>& t0,
                            const boost::optional<boost::posix_time::ptime>& t1,
                            size_t offs,
                            bool debug_imm,
+                           const std::vector<unsigned int>* used_mms = nullptr,
                            const std::vector<QPointF>* fail_pos = nullptr,
                            const std::vector<QPointF>* skip_pos = nullptr,
                            std::vector<kalman::RTSDebugInfo>* rts_debug_infos = nullptr) const;

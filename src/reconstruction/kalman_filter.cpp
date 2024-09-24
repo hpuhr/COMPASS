@@ -452,6 +452,9 @@ KalmanFilter::Error KalmanFilter::predictState(Vector& x,
         dt = std::fabs(dt);
         
         Error err = predictState_impl(x, P, dt, Q_var_used, true, u, state);
+
+        //invert state...
+        invertState(x);
         
         //revert state
         x_ = x_backup;

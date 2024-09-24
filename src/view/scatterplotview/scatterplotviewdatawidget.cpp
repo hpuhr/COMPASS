@@ -682,10 +682,10 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
         //size_t n_series = scatter_series_.numDataSeries();
 
+        const auto& data_series = scatter_series_.dataSeries();
+
         //generate pointers
         std::vector<SymbolLineSeries> series;
-
-        const auto& data_series = scatter_series_.dataSeries();
 
         for (auto& series_it : data_series)
         {

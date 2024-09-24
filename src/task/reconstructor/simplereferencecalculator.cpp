@@ -44,14 +44,16 @@
 
 using namespace Utils;
 
-const QColor SimpleReferenceCalculator::ColorMeasurements   = QColor(102, 178, 255);
-const QColor SimpleReferenceCalculator::ColorKalman         = QColor(255, 102, 178);
-const QColor SimpleReferenceCalculator::ColorKalmanSmoothed = QColor(255, 178, 102);
+const QColor SimpleReferenceCalculator::ColorMeasurements    = QColor(102, 178, 255);
+const QColor SimpleReferenceCalculator::ColorKalman          = QColor(255, 102, 178);
+const QColor SimpleReferenceCalculator::ColorKalmanSmoothed  = QColor(255, 178, 102);
+const QColor SimpleReferenceCalculator::ColorKalmanResampled = QColor(200, 200, 200);
 
-const float SimpleReferenceCalculator::PointSizeOSG            = 10.0f;
-const float SimpleReferenceCalculator::PointSizeMeasurements   = 6.0f;
-const float SimpleReferenceCalculator::PointSizeKalman         = 4.0f;
-const float SimpleReferenceCalculator::PointSizeKalmanSmoothed = 2.0f;
+const float SimpleReferenceCalculator::PointSizeOSG             = 10.0f;
+const float SimpleReferenceCalculator::PointSizeMeasurements    = 6.0f;
+const float SimpleReferenceCalculator::PointSizeKalman          = 4.0f;
+const float SimpleReferenceCalculator::PointSizeKalmanSmoothed  = 2.0f;
+const float SimpleReferenceCalculator::PointSizeKalmanResampled = 2.0f;
 
 const float SimpleReferenceCalculator::LineWidthBase = 1.0f;
 
@@ -627,13 +629,14 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                           rec_annotations::AnnotationStyle(ColorKalman, PointSizeKalman, LineWidthBase),
                           rec_annotations::AnnotationStyle(ColorKalman, PointSizeOSG, LineWidthBase),
                           refs.updates,
-                          used_mms,
                           slice_t0, 
                           slice_t1,
                           n_before,
                           true,
+                          &used_mms,
                           &failed_updates,
-                          &skipped_updates);
+                          &skipped_updates,
+                          nullptr);
     }
 
     //start with joined kalman updates
@@ -703,11 +706,11 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                           rec_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeKalmanSmoothed, LineWidthBase),
                           rec_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeOSG, LineWidthBase),
                           updates,
-                          used_mms,
                           slice_t0,
                           slice_t1,
                           n_before,
                           false,
+                          &used_mms,
                           nullptr,
                           nullptr,
                           &rts_debug_infos);
@@ -738,6 +741,24 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         {
             loginf << "    #updates (resampled): " << updates.size();
         }
+    }
+
+    if (debug_target && shallAddAnnotationData())
+    {
+        addAnnotationData(refs,
+                          estimator, 
+                          "Kalman (Resampled)", 
+                          rec_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeKalmanResampled, LineWidthBase),
+                          rec_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeOSG, LineWidthBase),
+                          updates,
+                          slice_t0,
+                          slice_t1,
+                          0,
+                          false,
+                          nullptr,
+                          nullptr,
+                          nullptr,
+                          nullptr);
     }
 
     //generate references
@@ -1042,11 +1063,11 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                                                   const rec_annotations::AnnotationStyle& style,
                                                   const boost::optional<rec_annotations::AnnotationStyle>& style_osg,
                                                   const std::vector<kalman::KalmanUpdate>& updates,
-                                                  const std::vector<unsigned int>& used_mms,
                                                   const boost::optional<boost::posix_time::ptime>& t0,
                                                   const boost::optional<boost::posix_time::ptime>& t1,
                                                   size_t offs,
                                                   bool debug_imm,
+                                                  const std::vector<unsigned int>* used_mms,
                                                   const std::vector<QPointF>* fail_pos,
                                                   const std::vector<QPointF>* skip_pos,
                                                   std::vector<kalman::RTSDebugInfo>* rts_debug_infos) const
@@ -1060,12 +1081,17 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
 
     for (size_t i = 0; i < references.size(); ++i)
     {
-        const auto& mm = target_references.measurements.at(used_mms.at(i));
+        boost::optional<Eigen::Vector2d> mm_pos;
+        if (used_mms)
+        {
+            const auto& mm = target_references.measurements.at(used_mms->at(i));
+            mm_pos = Eigen::Vector2d(mm.lat, mm.lon);
+        }
 
         annos[ i ] = rec_annotations::createTRAnnotation(references[ i ], 
                                                          speed_positions[ i ], 
                                                          accel_positions[ i ], 
-                                                         Eigen::Vector2d(mm.lat, mm.lon));
+                                                         mm_pos);
     }
 
     reconstruction::KalmanProjectionHandler phandler;
