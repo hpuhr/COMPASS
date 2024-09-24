@@ -139,15 +139,15 @@
             },
             "Variable18": {
                 "parameters": {
-                    "data_type_str": "UINT",
+                    "data_type_str": "FLOAT",
                     "db_column_name": "time_stamping_bias",
                     "description": "From 070.TSB\n\nSystem Area Code",
                     "dimension": "Time",
                     "is_key": false,
                     "name": "Time Stamping Bias",
-                    "representation_str": "STANDARD",
+                    "representation_str": "SECONDS_TO_TIME",
                     "short_name": "TSB",
-                    "unit": "MilliSeconds"
+                    "unit": "Second"
                 }
             },
             "Variable19": {
@@ -160,7 +160,7 @@
                     "name": "SSR/Mode S Range Bias",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": "Nautical Mile"
+                    "unit": "Meter"
                 }
             },
             "Variable2": {
@@ -212,7 +212,7 @@
                     "name": "PSR Range Bias",
                     "representation_str": "STANDARD",
                     "short_name": "",
-                    "unit": "Nautical Mile"
+                    "unit": "Meter"
                 }
             },
             "Variable23": {

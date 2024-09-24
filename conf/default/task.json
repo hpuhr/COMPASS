@@ -39,6 +39,11 @@
             "path": "task_calc_radar_pos.json"
         },
         {
+            "class_id": "ReconstructorTask",
+            "instance_id": "ReconstructorTask0",
+            "path": "task_reconstructor.json"
+        },        
+        {
             "class_id": "ViewPointsImportTask",
             "instance_id": "ViewPointsImportTask0",
             "path": "task_import_view_points.json"

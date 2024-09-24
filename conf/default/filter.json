@@ -142,6 +142,43 @@
                     }
                 }
             },
+            "NonTargetReportOnly": {
+                "parameters": {
+                    "active": true,
+                    "changed": true,
+                    "name": "NonTargetReportOnly",
+                    "visible": false,
+                    "widget_visible": true
+                },
+                "sub_configs": {
+                    "DBFilterCondition": {
+                        "NonTargetReportOnlyCondition0": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": false,
+                                "op_and": true,
+                                "operator": "IS",
+                                "reset_value": "NULL",
+                                "value": "NULL",
+                                "variable_dbcontent_name": "Meta",
+                                "variable_name": "Latitude"
+                            }
+                        },
+                        "NonTargetReportOnlyCondition1": {
+                            "parameters": {
+                                "absolute_value": false,
+                                "display_instance_id": false,
+                                "op_and": true,
+                                "operator": "IS",
+                                "reset_value": "NULL",
+                                "value": "NULL",
+                                "variable_dbcontent_name": "Meta",
+                                "variable_name": "Longitude"
+                            }
+                        }
+                    }
+                }
+            },
             "Position": {
                 "parameters": {
                     "active": false,
