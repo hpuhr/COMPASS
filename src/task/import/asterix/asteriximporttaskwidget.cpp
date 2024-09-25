@@ -94,6 +94,7 @@ void ASTERIXImportTaskWidget::addMainTab()
             // line
             QComboBox* file_line_box = new QComboBox();
             file_line_box->addItems({"1", "2", "3", "4"});
+            file_line_box->setCurrentText(QString::number(task_.settings().file_line_id_+1)); // from 0..3
 
             connect(file_line_box, &QComboBox::currentTextChanged,
                     this, &ASTERIXImportTaskWidget::fileLineIDEditSlot);
@@ -313,8 +314,6 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
 
 void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 {
-    loginf << "ASTERIXImportTaskWidget: fileLineIDEditSlot: value '" << text.toStdString() << "'";
-
     bool ok;
 
     unsigned int line_id = text.toUInt(&ok);
@@ -323,7 +322,10 @@ void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 
     assert (line_id > 0 && line_id <= 4);
 
-    task_.settings().file_line_id_ = line_id-1;
+    loginf << "ASTERIXImportTaskWidget: fileLineIDEditSlot: value '" << text.toStdString()
+           << "' line id " << line_id;
+
+    task_.settings().file_line_id_ = line_id-1; // from 1...4
 }
 
 void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)
