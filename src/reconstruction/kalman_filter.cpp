@@ -454,7 +454,8 @@ KalmanFilter::Error KalmanFilter::predictState(Vector& x,
         Error err = predictState_impl(x, P, dt, Q_var_used, true, u, state);
 
         //invert state...
-        invertState(x);
+        if (err == Error::NoError)
+            invertState(x);
         
         //revert state
         x_ = x_backup;
