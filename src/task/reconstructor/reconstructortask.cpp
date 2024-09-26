@@ -64,6 +64,8 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 
     registerParameter("current_reconstructor_str", &current_reconstructor_str_, {});
 
+    registerParameter("skip_reference_data_writing", &skip_reference_data_writing_, false);
+
     if (!current_reconstructor_str_.size()
         || (current_reconstructor_str_ != ScoringUMReconstructorName
 #if USE_EXPERIMENTAL_SOURCE == true
@@ -849,7 +851,11 @@ void ReconstructorTask::processingDoneSlot()
 
     assert (!writing_slice_);
     writing_slice_ = std::move(processing_slice_);
-    writeDataSlice(); // starts the async jobs
+
+    if (skip_reference_data_writing_)
+        writing_slice_ = nullptr;
+    else
+        writeDataSlice(); // starts the async jobs
 }
 
 void ReconstructorTask::writeDoneSlot()
@@ -1158,6 +1164,16 @@ void ReconstructorTask::saveDebugViewPoints()
     COMPASS::instance().viewManager().addViewPoints(view_points);
 
     debug_viewpoints_.clear();
+}
+
+bool ReconstructorTask::skipReferenceDataWriting() const
+{
+    return skip_reference_data_writing_;
+}
+
+void ReconstructorTask::skipReferenceDataWriting(bool value)
+{
+    skip_reference_data_writing_ = value;
 }
 
 bool ReconstructorTask::debug() const

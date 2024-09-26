@@ -33,7 +33,7 @@ ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor,
                                          bool dynamic_insertions)
     :   reconstructor_(reconstructor)
     ,   utn_(utn)
-    ,   tmp_utn_(tmp_utn)
+//    ,   tmp_utn_(tmp_utn)
     ,   multithreaded_predictions_(multithreaded_predictions)
     ,   dynamic_insertions_(dynamic_insertions)
 {
@@ -117,8 +117,8 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
 
     if (tr.acad_ && acads_.size() && !acads_.count(*tr.acad_))
     {
-        logwrn << "Target: addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
-        return TargetReportAddResult::Skipped;
+        logerr << "Target: addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
+        assert (false);
     }
 
 #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
@@ -341,7 +341,7 @@ std::string ReconstructorTarget::asStr() const
 {
     stringstream ss;
 
-    ss << "utn " << utn_ << " tmp_utn " << tmp_utn_;  //<< " tmp " << tmp_
+    ss << "utn " << utn_; // << " tmp_utn " << tmp_utn_;  //<< " tmp " << tmp_
 
     if (acads_.size())
     {
