@@ -204,7 +204,7 @@ bool SimpleReferenceCalculator::computeReferences()
  */
 void SimpleReferenceCalculator::generateMeasurements()
 {
-    for (const auto& target : reconstructor_.targets_)
+    for (const auto& target : reconstructor_.targets_container_.targets_)
         generateTargetMeasurements(target.second);
 }
 
@@ -771,9 +771,9 @@ void SimpleReferenceCalculator::updateReferences()
 {
     for (auto& ref : references_)
     {
-        assert(reconstructor_.targets_.count(ref.first));
+        assert(reconstructor_.targets_container_.targets_.count(ref.first));
 
-        auto& target = reconstructor_.targets_.at(ref.first);
+        auto& target = reconstructor_.targets_container_.targets_.at(ref.first);
         //target.references_ = std::move(ref.second.references);
 
         target.references_.clear();

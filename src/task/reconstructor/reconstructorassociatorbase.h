@@ -47,16 +47,6 @@ class ReconstructorAssociatorBase
 
     boost::posix_time::time_duration max_time_diff_;
 
-    std::vector<unsigned int> utn_vec_;
-
-    std::map<unsigned int, unsigned int> acad_2_utn_; // acad dec -> utn
-    std::map<std::string, unsigned int> acid_2_utn_; // acid trim -> utn
-
-            // ds_id -> line id -> track num -> utn, last tod
-    std::map<unsigned int, std::map<unsigned int,
-                                    std::map<unsigned int,
-                                             std::pair<unsigned int, boost::posix_time::ptime>>>> tn2utn_;
-
     std::vector<unsigned long> unassoc_rec_nums_;
 
     unsigned int num_merges_ {0};
@@ -72,18 +62,17 @@ class ReconstructorAssociatorBase
     void retryAssociateTargetReports();
     void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn);
     virtual void postAssociate(dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn) {};
-    void checkACADLookup();
+    //void checkACADLookup();
     void countUnAssociated();
 
     int findUTNFor (dbContent::targetReport::ReconstructorInfo& tr);
 
             // tries to find existing utn for target report, based on mode a/c and position, -1 if failed
-    int findUTNByModeACPos (const dbContent::targetReport::ReconstructorInfo& tr,
-                           const std::vector<unsigned int>& utn_vec);
+    int findUTNByModeACPos (const dbContent::targetReport::ReconstructorInfo& tr);
 
     std::vector<unsigned int> findUTNsForTarget (unsigned int utn);
 
-    unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
+    //unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
     virtual bool canGetPositionOffsetTR(
         const dbContent::targetReport::ReconstructorInfo& tr,

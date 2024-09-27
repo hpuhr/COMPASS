@@ -123,6 +123,49 @@ class ReconstructorBase : public Configurable
         unsigned int run_count_ {0};
     };
 
+    struct TargetsContainer
+    {
+        TargetsContainer(ReconstructorBase& reconstructor)
+            :reconstructor_(reconstructor) {}
+
+        ReconstructorBase& reconstructor_;
+
+        std::vector<unsigned int> utn_vec_;
+
+        std::map<unsigned int, unsigned int> acad_2_utn_; // acad dec -> utn
+        std::map<std::string, unsigned int> acid_2_utn_; // acid trim -> utn
+
+        // ds_id -> line id -> track num -> utn, last tod
+        std::map<unsigned int, std::map<unsigned int,
+                                        std::map<unsigned int,
+                                                 std::pair<unsigned int, boost::posix_time::ptime>>>> tn2utn_;
+
+        std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> tgt
+
+        unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
+
+        void removeUTNAndReplaceWith(unsigned int other_utn, unsigned int utn);
+        void addToLookup(unsigned int utn, dbContent::targetReport::ReconstructorInfo& tr);
+        void checkACADLookup();
+
+        bool canAssocByACAD(dbContent::targetReport::ReconstructorInfo& tr, bool do_debug);
+        int assocByACAD(dbContent::targetReport::ReconstructorInfo& tr, bool do_debug); // -1 if failed, else utn
+        boost::optional<unsigned int> utnForACAD(unsigned int acad);
+
+        bool canAssocByACID(dbContent::targetReport::ReconstructorInfo& tr, bool do_debug);
+        int assocByACID(dbContent::targetReport::ReconstructorInfo& tr, bool do_debug); // -1 if failed, else utn
+
+        bool canAssocByTrackNumber(dbContent::targetReport::ReconstructorInfo& tr, bool do_debug);
+        int assocByTrackNumber(
+            dbContent::targetReport::ReconstructorInfo& tr,
+            const boost::posix_time::time_duration& track_max_time_diff, bool do_debug);
+        // -1 if failed, else utn
+
+        void eraseTrackNumberLookup(dbContent::targetReport::ReconstructorInfo& tr);
+
+        void clear();
+    };
+
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
 
     ReconstructorBase(const std::string& class_id, 
@@ -176,7 +219,7 @@ class ReconstructorBase : public Configurable
     std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>> tr_ds_;
     // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
 
-    std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> tgt
+    TargetsContainer targets_container_;
 
     std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
 

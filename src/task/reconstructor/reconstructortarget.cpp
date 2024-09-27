@@ -27,8 +27,8 @@ const double ReconstructorTarget::on_ground_max_speed_ms_ {30};
 ReconstructorTarget::GlobalStats ReconstructorTarget::global_stats_ = ReconstructorTarget::GlobalStats();
 
 ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor, 
-                                         unsigned int utn, 
-                                         bool tmp_utn,
+                                         unsigned int utn,
+//                                         bool tmp_utn,
                                          bool multithreaded_predictions,
                                          bool dynamic_insertions)
     :   reconstructor_(reconstructor)

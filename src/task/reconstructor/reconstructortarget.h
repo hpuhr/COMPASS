@@ -141,8 +141,8 @@ public:
     typedef std::function<bool(const dbContent::targetReport::ReconstructorInfo& tr_info)> InfoValidFunc;
 
     ReconstructorTarget(ReconstructorBase& reconstructor, 
-                        unsigned int utn, 
-                        bool tmp_utn,
+                        unsigned int utn,
+//                        bool tmp_utn,
                         bool multithreaded_predictions,
                         bool dynamic_insertions);
     virtual ~ReconstructorTarget();
