@@ -286,6 +286,12 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
 
     bounds_ = scatter_series_.getDataBounds();
 
+    if (scatter_series_.useConnectionLines().has_value())
+    {
+        view_->useConnectionLines(scatter_series_.useConnectionLines().value(), false);
+        view_->updateComponents();
+    }
+
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
 }
 

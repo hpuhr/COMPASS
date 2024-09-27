@@ -153,14 +153,15 @@ QRectF ScatterSeries::getDataBounds() const
  * ScatterSeriesCollection
  *******************************************************************************************/
 
-const std::string ScatterSeriesCollection::TagDataSeries = "dataseries";
-const std::string ScatterSeriesCollection::TagData       = "data";
-const std::string ScatterSeriesCollection::TagDataRaw    = "data_raw";
-const std::string ScatterSeriesCollection::TagDataTypeX  = "data_type_x";
-const std::string ScatterSeriesCollection::TagDataTypeY  = "data_type_y";
-const std::string ScatterSeriesCollection::TagName       = "name";
-const std::string ScatterSeriesCollection::TagColor      = "color";
-const std::string ScatterSeriesCollection::TagMarkerSize = "marker_size";
+const std::string ScatterSeriesCollection::TagDataSeries      = "dataseries";
+const std::string ScatterSeriesCollection::TagConnectionLines = "connection_lines";
+const std::string ScatterSeriesCollection::TagData            = "data";
+const std::string ScatterSeriesCollection::TagDataRaw         = "data_raw";
+const std::string ScatterSeriesCollection::TagDataTypeX       = "data_type_x";
+const std::string ScatterSeriesCollection::TagDataTypeY       = "data_type_y";
+const std::string ScatterSeriesCollection::TagName            = "name";
+const std::string ScatterSeriesCollection::TagColor           = "color";
+const std::string ScatterSeriesCollection::TagMarkerSize      = "marker_size";
 
 /**
 */
@@ -175,6 +176,15 @@ ScatterSeriesCollection::~ScatterSeriesCollection() = default;
 void ScatterSeriesCollection::clear()
 {
     data_series_.clear();
+}
+
+/**
+*/
+void ScatterSeriesCollection::reset()
+{
+    clear();
+
+    connection_lines_.reset();
 }
 
 /**
@@ -260,9 +270,23 @@ ScatterSeries::DataType ScatterSeriesCollection::commonDataTypeY() const
 
 /**
 */
+void ScatterSeriesCollection::setUseConnectionLines(bool ok)
+{
+    connection_lines_ = ok;
+}
+
+/**
+*/
+const boost::optional<bool>& ScatterSeriesCollection::useConnectionLines() const
+{
+    return connection_lines_;
+}
+
+/**
+*/
 bool ScatterSeriesCollection::fromJSON(const nlohmann::json& data)
 {
-    clear();
+    reset();
 
     if (!data.is_object() || !data.contains(TagDataSeries))
         return false;
@@ -305,6 +329,12 @@ bool ScatterSeriesCollection::fromJSON(const nlohmann::json& data)
         data_series_[dseries.name] = dseries;
     }
 
+    if (data.contains(TagConnectionLines))
+    {
+        bool cl = data[ TagConnectionLines ];
+        connection_lines_ = cl;
+    }
+
     return true;
 }
 
@@ -331,6 +361,9 @@ nlohmann::json ScatterSeriesCollection::toJSON(bool binary) const
     }
 
     obj[ TagDataSeries ] = jseries;
+
+    if (connection_lines_.has_value())
+        obj[ TagConnectionLines ] = connection_lines_.value();
 
     return obj;
 }

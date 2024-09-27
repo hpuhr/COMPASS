@@ -76,7 +76,6 @@ public:
 
     ScatterPlotViewDataWidget* getDataWidget();
 
-
 protected:
     friend class LatexVisitor;
 

@@ -100,6 +100,8 @@ void ScatterPlotViewConfigWidget::useConnectionLinesSlot()
     view_->useConnectionLines(use_connection_lines_->checkState() == Qt::Checked);
 }
 
+/**
+*/
 void ScatterPlotViewConfigWidget::updateToVisibilitySlot()
 {
     assert (layer_view_);
@@ -107,11 +109,12 @@ void ScatterPlotViewConfigWidget::updateToVisibilitySlot()
     layer_view_->header()->resizeSection(0 /*column index*/, 300 /*width*/);
 }
 
+/**
+*/
 void ScatterPlotViewConfigWidget::deselectAllSlot()
 {
     view_->getDataWidget()->dataModel().deselectAll();
 }
-
 
 /**
 */

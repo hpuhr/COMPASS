@@ -122,6 +122,7 @@ public:
     bool updateNeeded() const;
 
     void updateView();
+    void updateComponents();
     
     PresetError applyPreset(const ViewPresets::Preset& preset, 
                             std::vector<MissingKey>* missing_subconfig_keys = nullptr,
