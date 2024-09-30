@@ -747,6 +747,25 @@ void ReconstructorBase::clearOldTargetReports()
     // clear old data from targets
     for (auto& tgt_it : targets_container_.targets_)
         tgt_it.second.removeOutdatedTargetReports();
+
+    // clear old data from chains
+    // if (chain())
+    //     chain()->removeUpdatesBefore(reconstructor_.currentSlice().remove_before_time_);
+
+    for (auto chain_it = chains_.begin(); chain_it != chains_.end(); )
+    {
+        if (chain_it->second)
+        {
+            chain_it->second->removeUpdatesBefore(currentSlice().remove_before_time_);
+
+            if (!chain_it->second->hasData())
+                chain_it = chains_.erase(chain_it);
+            else
+                ++chain_it;
+        }
+        else
+            ++chain_it;
+    }
 }
 
 void ReconstructorBase::createTargetReports()

@@ -40,7 +40,7 @@ ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor,
 
 ReconstructorTarget::~ReconstructorTarget()
 {
-    chain().reset(nullptr);
+    //chain().reset(nullptr);
 }
 
 void ReconstructorTarget::addUpdateToGlobalStats(const reconstruction::UpdateStats& s)
@@ -2030,8 +2030,8 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
-    if (chain())
-        chain()->removeUpdatesBefore(reconstructor_.currentSlice().remove_before_time_);
+    // if (chain())
+    //     chain()->removeUpdatesBefore(reconstructor_.currentSlice().remove_before_time_);
 
     for (auto& ts_it : tmp_tr_timestamps)
     {
