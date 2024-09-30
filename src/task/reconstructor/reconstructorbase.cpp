@@ -35,6 +35,304 @@
 using namespace std;
 using namespace Utils;
 
+unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr)
+{
+    unsigned int utn;
+
+    if (targets_.size())
+        utn = targets_.rbegin()->first + 1; // new utn
+    else
+        utn = 0;
+
+    //assert (utn != 261);
+    if (tr.track_number_)
+        assert (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
+
+    assert (reconstructor_);
+
+    targets_.emplace(
+        std::piecewise_construct,
+        std::forward_as_tuple(utn),   // args for key
+        std::forward_as_tuple(*reconstructor_, utn, true, true));  // args for mapped value tmp_utn false
+
+    // add to lookup
+
+    targets_.at(utn).created_in_current_slice_ = true;
+
+    utn_vec_.push_back(utn);
+
+    return utn;
+}
+
+
+void ReconstructorBase::TargetsContainer::removeUTNAndReplaceWith(unsigned int other_utn, unsigned int utn)
+{
+    assert (targets_.count(other_utn));
+    assert (targets_.count(utn));
+
+    targets_.erase(other_utn);
+
+    // remove from utn list
+    auto other_it = std::find(utn_vec_.begin(), utn_vec_.end(), other_utn);
+    assert (other_it != utn_vec_.end());
+    utn_vec_.erase(other_it);
+
+    // remove from acad lookup
+    for (auto& acad_it : acad_2_utn_)
+    {
+        if (acad_it.second == other_utn)
+            acad_2_utn_[acad_it.first] = utn;
+    }
+
+    // remove from acid lookup
+    for (auto& acid_it : acid_2_utn_)
+    {
+        if (acid_it.second == other_utn)
+            acid_2_utn_[acid_it.first] = utn;
+    }
+
+    // remove in tn2utn_ lookup
+    // ds_id -> line id -> track num -> utn, last tod
+    for (auto& ds_it : tn2utn_)
+    {
+        for (auto& line_it : ds_it.second)
+        {
+            for (auto& tn_it : line_it.second)
+            {
+                if (tn_it.second.first == other_utn)
+                {
+                    // replace utn
+                    tn2utn_[ds_it.first][line_it.first][tn_it.first] =
+                        std::pair<unsigned int, boost::posix_time::ptime> (
+                            (unsigned int) utn, tn_it.second.second);
+                }
+            }
+        }
+
+    }
+}
+
+void ReconstructorBase::TargetsContainer::addToLookup(unsigned int utn, dbContent::targetReport::ReconstructorInfo& tr)
+{
+    assert (targets_.count(utn));
+
+    unsigned int dbcont_id  = Number::recNumGetDBContId(tr.record_num_);
+
+    if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
+        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
+            std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
+
+    if (tr.acad_)
+        acad_2_utn_[*tr.acad_] = utn;
+
+    if (tr.acid_)
+        acid_2_utn_[*tr.acid_] = utn;
+}
+
+void ReconstructorBase::TargetsContainer::checkACADLookup()
+{
+    unsigned int acad;
+
+    unsigned int count = 0;
+
+    for (auto& target_it : targets_)
+    {
+        if (!target_it.second.hasACAD())
+            continue;
+
+        if (target_it.second.acads_.size() != 1)
+            logerr << "ReconstructorBase: TargetsContainer: checkACADLookup: double acad in target "
+                   << target_it.second.asStr();
+
+        assert (target_it.second.acads_.size() == 1);
+
+        acad = *target_it.second.acads_.begin();
+
+        if (!acad_2_utn_.count(acad))
+        {
+            logerr << "ReconstructorBase: TargetsContainer: getTALookupMap: acad "
+                   << String::hexStringFromInt(acad, 6, '0')
+                   << " not in lookup";
+        }
+
+        ++count;
+    }
+
+    for (auto& acad_it : acad_2_utn_)
+    {
+        assert (targets_.count(acad_it.second));
+        assert (targets_.at(acad_it.second).hasACAD(acad_it.first));
+    }
+
+    assert (acad_2_utn_.size() == count);
+}
+
+bool ReconstructorBase::TargetsContainer::canAssocByACAD(
+    dbContent::targetReport::ReconstructorInfo& tr, bool do_debug)
+{
+    if (!tr.acad_)
+        return false;
+
+    if (do_debug)
+        loginf << "DBG can use stored utn in acad_2_utn_ " << acad_2_utn_.count(*tr.acad_);
+
+    return acad_2_utn_.count(*tr.acad_);
+}
+
+// -1 if failed, else utn
+int ReconstructorBase::TargetsContainer::assocByACAD(
+    dbContent::targetReport::ReconstructorInfo& tr, bool do_debug)
+{
+    assert (tr.acad_);
+    assert (acad_2_utn_.count(*tr.acad_));
+
+    if (do_debug)
+        loginf << "DBG use stored utn in acad_2_utn_: " << acad_2_utn_.at(*tr.acad_);
+
+    int utn = acad_2_utn_.at(*tr.acad_);
+
+    assert (targets_.count(utn));
+    assert (targets_.at(utn).hasACAD(*tr.acad_));
+
+    return utn;
+}
+
+boost::optional<unsigned int> ReconstructorBase::TargetsContainer::utnForACAD(unsigned int acad)
+{
+    auto it = std::find_if(targets_.begin(), targets_.end(),
+                           [acad](const std::pair<const unsigned int, dbContent::ReconstructorTarget> & t) -> bool {
+                               return t.second.hasACAD(acad);
+                           });
+
+    if (it != targets_.end())
+        return it->first;
+    else
+        return {};
+}
+
+bool ReconstructorBase::TargetsContainer::canAssocByACID(
+    dbContent::targetReport::ReconstructorInfo& tr, bool do_debug)
+{
+    if (!tr.acid_)
+        return false;
+
+    if (*tr.acid_ == "00000000" || *tr.acid_ == "????????" || *tr.acid_ == "        ")
+    {
+        if (do_debug)
+            loginf << "DBG can not use stored utn in acid_2_utn_, unspecifiec acid '" << *tr.acid_ << "'";
+
+        return false;
+    }
+
+    if (acid_2_utn_.count(*tr.acid_)) // already exists, but check if mode s address changed
+    {
+        assert (targets_.count(acid_2_utn_.at(*tr.acid_)));
+
+        // tr has acad, target has an acad but not the target reports
+        // happens if same acid is used by 2 different transponders
+        if (tr.acad_ && targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD()
+            && !targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD(!tr.acad_))
+        {
+            if (do_debug)
+                loginf << "DBG same acid used by different transponders '" << *tr.acid_ << "'";
+
+            return false;
+        }
+    }
+
+    if (do_debug)
+        loginf << "DBG can use stored utn in acid_2_utn_ " << acid_2_utn_.count(*tr.acid_);
+
+    return acid_2_utn_.count(*tr.acid_);
+}
+
+ // -1 if failed, else utn
+int ReconstructorBase::TargetsContainer::assocByACID(dbContent::targetReport::ReconstructorInfo& tr, bool do_debug)
+{
+    assert (tr.acid_);
+    assert (acid_2_utn_.count(*tr.acid_));
+
+    if (do_debug)
+        loginf << "DBG use stored utn in acid_2_utn_: " << acid_2_utn_.at(*tr.acid_);
+
+    int utn = acid_2_utn_.at(*tr.acid_);
+
+    assert (targets_.count(utn));
+    assert (targets_.at(utn).hasACID(*tr.acid_));
+
+    return utn;
+}
+
+bool ReconstructorBase::TargetsContainer::canAssocByTrackNumber(
+    dbContent::targetReport::ReconstructorInfo& tr, bool do_debug)
+{
+    if (!tr.track_number_) // only if track number is set
+        return false;
+
+    unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
+
+    if (dbcont_id != 62 && dbcont_id != 255) // only if trustworty track numbers in 62 and reftraj
+        return false;
+
+    if (do_debug)
+        loginf << "DBG can use stored utn in tn2utn_ "
+               << tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
+
+    return tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
+}
+
+int ReconstructorBase::TargetsContainer::assocByTrackNumber(
+    dbContent::targetReport::ReconstructorInfo& tr,
+    const boost::posix_time::time_duration& track_max_time_diff, bool do_debug)
+{
+    int utn {-1};
+
+    boost::posix_time::ptime timestamp_prev;
+
+    assert (tr.track_number_);
+
+    assert (tn2utn_.at(tr.ds_id_).at(tr.line_id_).count(*tr.track_number_));
+    std::tie(utn, timestamp_prev) = tn2utn_.at(tr.ds_id_).at(tr.line_id_).at(*tr.track_number_);
+    assert (targets_.count(utn));
+
+    // check for larger time offset
+    if (tr.timestamp_ - timestamp_prev > track_max_time_diff) // too old
+    {
+        if (do_debug)
+            loginf << "DBG stored utn in tn2utn_ too large time offset, remove & create new target";
+
+        // remove previous track number assoc
+        assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
+        tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
+
+        // create new and add
+        utn = createNewTarget(tr);
+        assert (targets_.count(utn));
+    }
+
+    return utn;
+}
+
+void ReconstructorBase::TargetsContainer::eraseTrackNumberLookup(dbContent::targetReport::ReconstructorInfo& tr)
+{
+    assert (tr.track_number_);
+    assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
+    tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
+}
+
+void ReconstructorBase::TargetsContainer::clear()
+{
+    utn_vec_.clear();
+
+    acad_2_utn_.clear(); // acad dec -> utn
+    acid_2_utn_.clear(); // acid trim -> utn
+
+    // ds_id -> line id -> track num -> utn, last tod
+    tn2utn_.clear();
+
+    targets_.clear(); // utn -> tgt
+}
+
 ReconstructorBase::ReconstructorBase(const std::string& class_id, 
                                      const std::string& instance_id,
                                      ReconstructorTask& task, 
@@ -42,6 +340,7 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                                      ReconstructorBaseSettings& base_settings,
                                      unsigned int default_line_id)
     :   Configurable (class_id, instance_id, &task)
+    ,   targets_container_(this)
     ,   acc_estimator_(std::move(acc_estimator))
     ,   task_(task)
     ,   base_settings_(base_settings)
@@ -233,7 +532,8 @@ void ReconstructorBase::reset()
     target_reports_.clear();
     tr_timestamps_.clear();
     tr_ds_.clear();
-    targets_.clear();
+
+    targets_container_.clear();
 
     assert (acc_estimator_);
     acc_estimator_->init(this);
@@ -447,8 +747,20 @@ void ReconstructorBase::clearOldTargetReports()
     loginf << "ReconstructorBase: clearOldTargetReports: size after " << target_reports_.size();
 
     // clear old data from targets
-    for (auto& tgt_it : targets_)
+    for (auto& tgt_it : targets_container_.targets_)
         tgt_it.second.removeOutdatedTargetReports();
+
+    // clear old data from chains
+    for (auto& chain_it : chains_)
+    {
+        if (chain_it.second)
+        {
+            chain_it.second->removeUpdatesBefore(currentSlice().remove_before_time_);
+
+            if (!chain_it.second->hasData())
+                chain_it.second = nullptr;
+        }
+    }
 }
 
 void ReconstructorBase::createTargetReports()
@@ -591,7 +903,7 @@ void ReconstructorBase::createTargetReports()
 void ReconstructorBase::removeTargetReportsLaterOrEqualThan(const boost::posix_time::ptime& ts)
 {
     // remove target reports from targets & clean
-    for (auto& tgt_it : targets_)
+    for (auto& tgt_it : targets_container_.targets_)
         tgt_it.second.removeTargetReportsLaterOrEqualThan(ts);
 }
 
@@ -602,7 +914,7 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase:
     std::map<unsigned int, std::map<unsigned long, unsigned int>> associations;
     unsigned int num_assoc {0};
 
-    for (auto& tgt_it : targets_)
+    for (auto& tgt_it : targets_container_.targets_)
     {
         for (auto rn_it : tgt_it.second.target_reports_)
         {
@@ -711,11 +1023,11 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
 
 std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenceBuffers()
 {
-    logdbg << "ReconstructorBase: createReferenceBuffers: num " << targets_.size();
+    logdbg << "ReconstructorBase: createReferenceBuffers: num " << targets_container_.targets_.size();
 
     std::shared_ptr<Buffer> buffer;
 
-    for (auto& tgt_it : targets_)
+    for (auto& tgt_it : targets_container_.targets_)
     {
         if (!buffer)
             buffer = tgt_it.second.getReferenceBuffer(); // also updates count
@@ -774,13 +1086,13 @@ void ReconstructorBase::cancel()
 
 void ReconstructorBase::saveTargets()
 {
-    loginf << "ReconstructorBase: saveTargets: num " << targets_.size();
+    loginf << "ReconstructorBase: saveTargets: num " << targets_container_.targets_.size();
 
     processing_ = true;
 
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
 
-    cont_man.createNewTargets(targets_);
+    cont_man.createNewTargets(targets_container_.targets_);
 
     cont_man.saveTargets();
 
@@ -914,13 +1226,11 @@ reconstruction::KalmanChainPredictors& ReconstructorBase::chainPredictors()
 
 boost::optional<unsigned int> ReconstructorBase::utnForACAD(unsigned int acad)
 {
-    auto it = std::find_if(targets_.begin(), targets_.end(),
-                           [acad](const std::pair<const unsigned int, dbContent::ReconstructorTarget> & t) -> bool {
-                               return t.second.hasACAD(acad);
-                           });
-
-    if (it != targets_.end())
-        return it->first;
-    else
-        return {};
+    return targets_container_.utnForACAD(acad);
 }
+
+std::unique_ptr<reconstruction::KalmanChain>& ReconstructorBase::chain(unsigned int utn)
+{
+    return chains_[utn];
+}
+

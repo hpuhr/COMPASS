@@ -151,7 +151,7 @@ public:
     std::pair<int, int> indicesNear(const boost::posix_time::ptime& ts, double dt) const;
 
     void removeUpdatesBefore(const boost::posix_time::ptime& ts);
-    void removeUpdatesLaterThan(const boost::posix_time::ptime& ts);
+    void removeUpdatesLaterOrEqualThan(const boost::posix_time::ptime& ts);
 
     kalman::KalmanUpdateMinimal lastKalmanUpdate() const;
     const kalman::KalmanUpdateMinimal& getKalmanUpdate(size_t idx) const;
