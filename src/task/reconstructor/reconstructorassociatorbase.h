@@ -48,6 +48,7 @@ class ReconstructorAssociatorBase
     boost::posix_time::time_duration max_time_diff_;
 
     std::vector<unsigned int> utn_vec_;
+
     std::map<unsigned int, unsigned int> acad_2_utn_; // acad dec -> utn
     std::map<std::string, unsigned int> acid_2_utn_; // acid trim -> utn
 

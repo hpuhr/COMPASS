@@ -126,7 +126,10 @@ class ReconstructorTask : public Task, public Configurable
     ViewPointGenAnnotation* getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const;
     void saveDebugViewPoints();
 
-  protected:
+    bool skipReferenceDataWriting() const;
+    void skipReferenceDataWriting(bool newSkip_reference_data_writing);
+
+protected:
     std::string current_reconstructor_str_;
 
     nlohmann::json use_dstypes_; // dstype -> bool
@@ -167,6 +170,8 @@ class ReconstructorTask : public Task, public Configurable
     std::future<void> process_future_;
     bool processing_data_slice_ {false};
     bool cancelled_ {false};
+
+    bool skip_reference_data_writing_ {false};
 
     mutable std::map<std::pair<std::string,std::string>, std::unique_ptr<ViewPointGenVP>> debug_viewpoints_;
 

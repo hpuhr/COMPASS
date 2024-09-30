@@ -130,7 +130,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        //do_debug = reconstructor().task().debugRecNum(rec_num);
+        do_debug = reconstructor().task().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -167,12 +167,12 @@ void ReconstructorAssociatorBase::associateTargetReports()
         if (!is_unreliable_primary_only) // if unreliable primary only, delay association until retry
         {
             if (do_debug)
-                loginf << "DBG finding UTN";
+                loginf << "DBG !is_unreliable_primary_only finding UTN";
 
             utn = findUTNFor(tr);
 
             if (do_debug)
-                loginf << "DBG got UTN " << utn;
+                loginf << "DBG !is_unreliable_primary_only got UTN " << utn;
         }
 
         if (utn != -1) // estimate accuracy and associate
@@ -426,6 +426,9 @@ void ReconstructorAssociatorBase::associate(
     // add associated target reports
     assert (reconstructor().targets_.count(utn));
 
+    if(do_debug)
+        loginf << "DBG tr " << tr.asStr() << " assoc to utn " << reconstructor().targets_.at(utn).asStr();
+
     // check if position usable
     // if (do_debug)
     //     loginf << "DBG validate";
@@ -546,6 +549,9 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
         if (!tr.acad_)
             return false;
 
+        if (do_debug)
+            loginf << "DBG can use stored utn in acad_2_utn_ " << (bool) acad_2_utn_.count(*tr.acad_);
+
         return (bool) acad_2_utn_.count(*tr.acad_);
     };
 
@@ -553,6 +559,9 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
     {
         assert (tr.acad_);
         assert (acad_2_utn_.count(*tr.acad_));
+
+        if (do_debug)
+            loginf << "DBG use stored utn in acad_2_utn_: " << acad_2_utn_.at(*tr.acad_);
 
         utn = acad_2_utn_.at(*tr.acad_);
         assert (reconstructor().targets_.count(utn));
@@ -565,18 +574,31 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
             return false;
 
         if (*tr.acid_ == "00000000" || *tr.acid_ == "????????" || *tr.acid_ == "        ")
+        {
+            if (do_debug)
+                loginf << "DBG can not use stored utn in acid_2_utn_, unspecifiec acid '" << *tr.acid_ << "'";
+
             return false;
+        }
 
         if (acid_2_utn_.count(*tr.acid_)) // already exists, but check if mode s address changed
         {
             assert (reconstructor().targets_.count(acid_2_utn_.at(*tr.acid_)));
 
             // tr has acad, target has an acad but not the target reports
-            // happens if same callsign is used by 2 different transponders
+            // happens if same acid is used by 2 different transponders
             if (tr.acad_ && reconstructor().targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD()
                 && !reconstructor().targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD(!tr.acad_))
+            {
+                if (do_debug)
+                    loginf << "DBG same acid used by different transponders '" << *tr.acid_ << "'";
+
                 return false;
+            }
         }
+
+        if (do_debug)
+            loginf << "DBG can use stored utn in acid_2_utn_ " << (bool) acid_2_utn_.count(*tr.acid_);
 
         return (bool) acid_2_utn_.count(*tr.acid_);
     };
@@ -585,6 +607,9 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
     {
         assert (tr.acid_);
         assert (acid_2_utn_.count(*tr.acid_));
+
+        if (do_debug)
+            loginf << "DBG use stored utn in acid_2_utn_: " << acid_2_utn_.at(*tr.acid_);
 
         utn = acid_2_utn_.at(*tr.acid_);
         assert (reconstructor().targets_.count(utn));
@@ -598,6 +623,10 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
 
         if (dbcont_id != 62 && dbcont_id != 255) // only if trustworty track numbers in 62 and reftraj
             return false;
+
+        if (do_debug)
+            loginf << "DBG can use stored utn in tn2utn_ "
+                   << (bool) tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
 
         return (bool) tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
     };
@@ -615,6 +644,9 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
         // check for larger time offset
         if (tr.timestamp_ - timestamp_prev > track_max_time_diff) // too old
         {
+            if (do_debug)
+                loginf << "DBG stored utn in tn2utn_ too large time offset, remove & create new target";
+
             // remove previous track number assoc
             assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
             tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
@@ -627,23 +659,26 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
         {
             assert (reconstructor().targets_.count(utn));
 
+            if (do_debug)
+                loginf << "DBG stored utn in tn2utn_ checking position offset";
+
             // check for position offsets
-            //            auto pos_offs = getPositionOffset(tr, reconstructor().targets_.at(utn), do_debug);
-
-            //            if (pos_offs.has_value())
-            //            {
-            //                std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
-
             boost::optional<bool> check_result = checkPositionOffsetAcceptable(
                 tr, utn, true, do_debug);
 
             if (check_result && !*check_result)
             {
+                if (do_debug)
+                    loginf << "DBG stored utn in tn2utn_ position offset not acceptable " << *check_result;
+
                 tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
                 reset_tr_assoc = true;
             }
-            //            }
         }
+
+        // do assoc
+        if (!reset_tr_assoc && do_debug)
+            loginf << "DBG use stored utn in tn2utn_: " << utn;
     };
 
     auto findUTNByModeACPosOrCreateNewTarget = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
@@ -655,10 +690,19 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
         {
             // create new and add
             utn = createNewTarget(tr);
+
+            if (do_debug)
+                loginf << "DBG use mode a/c/pos assoc to new utn " << utn;
+
             assert (reconstructor().targets_.count(utn));
         }
         else
+        {
             assert (reconstructor().targets_.count(utn));
+
+            if (do_debug)
+                loginf << "DBG use mode a/c/pos assoc to existing utn " << utn;
+        }
     };
 
 START_TR_ASSOC:
@@ -691,7 +735,7 @@ START_TR_ASSOC:
         assert (utn != -1);
 
         if(do_debug)
-            loginf << "DBG tr " << tr.record_num_ << " utn by acad";
+            loginf << "DBG tr " << tr.record_num_ << " utn by acad/acid/trach";
     }
     else // not associated by trustworty id
     {

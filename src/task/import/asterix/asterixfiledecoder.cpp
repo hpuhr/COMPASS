@@ -110,7 +110,8 @@ void ASTERIXFileDecoder::processFile(ASTERIXImportFileInfo& file_info)
     string       current_filename  = file_info.filename;
     unsigned int current_file_line = settings().file_line_id_; //files_info_.at(current_file_count_).line_id_;
 
-    loginf << "ASTERIXFileDecoder: processFile: file '" << current_filename << "' framing '" << settings().current_file_framing_ << "'";
+    loginf << "ASTERIXFileDecoder: processFile: file '" << current_filename
+           << "' framing '" << settings().current_file_framing_ << "' line " << current_file_line;
 
     //jasterix callback
     auto callback = [this, current_file_line] (std::unique_ptr<nlohmann::json> data, 

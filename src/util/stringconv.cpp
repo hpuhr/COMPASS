@@ -301,14 +301,14 @@ typedef std::numeric_limits<float> float_limit;
 std::string getValueString(const float& value)
 {
     std::ostringstream out;
-    out << std::setprecision(float_limit::max_digits10) << value;
+    out << std::fixed  << std::setprecision(float_limit::max_digits10) << value;
     return out.str();
 }
 
 std::string getValueString(const double& value)
 {
     std::ostringstream out;
-    out << std::setprecision(double_limit::max_digits10) << value;
+    out << std::fixed  << std::setprecision(double_limit::max_digits10) << value;
     return out.str();
 }
 

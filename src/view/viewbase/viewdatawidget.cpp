@@ -30,8 +30,8 @@
 
 #include <iostream>
 
-const double      ViewDataWidget::MarkerSizePx         = 8.0;
-const double      ViewDataWidget::MarkerSizeSelectedPx = 6.0;
+const double      ViewDataWidget::MarkerSizePx         = 6.0;
+const double      ViewDataWidget::MarkerSizeSelectedPx = 4.0;
 
 const std::string ViewDataWidget::Color_CAT001  = "#00FF00";
 const std::string ViewDataWidget::Color_CAT010  = "#AAAA66";
