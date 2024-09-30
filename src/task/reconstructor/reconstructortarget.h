@@ -142,7 +142,6 @@ public:
 
     ReconstructorTarget(ReconstructorBase& reconstructor, 
                         unsigned int utn,
-//                        bool tmp_utn,
                         bool multithreaded_predictions,
                         bool dynamic_insertions);
     virtual ~ReconstructorTarget();
@@ -150,7 +149,6 @@ public:
     ReconstructorBase& reconstructor_; // to get the real target reports
 
     unsigned int utn_;
-    //bool tmp_utn_ {false};
 
     bool created_in_current_slice_ {false};
 
@@ -352,7 +350,7 @@ protected:
 
     bool hasTracker() const;
     void reinitTracker();
-    void reinitChain();
+    //void reinitChain();
     TargetReportAddResult addToTracker(const dbContent::targetReport::ReconstructorInfo& tr, 
                                        bool reestimate = true,
                                        reconstruction::UpdateStats* stats = nullptr);
@@ -371,7 +369,9 @@ protected:
     TargetReportSkipResult skipTargetReport (const dbContent::targetReport::ReconstructorInfo& tr,
                                             const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
 
-    std::unique_ptr<reconstruction::KalmanChain> chain_;
+    std::unique_ptr<reconstruction::KalmanChain>& chain() const;
+
+    //std::unique_ptr<reconstruction::KalmanChain> chain_;
 
     bool multithreaded_predictions_ = true;
     bool dynamic_insertions_        = true;

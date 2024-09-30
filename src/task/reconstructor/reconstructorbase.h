@@ -23,6 +23,7 @@
 #include "targetreportdefs.h"
 #include "reconstructortarget.h"
 #include "referencecalculator.h"
+#include "kalman_chain.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -239,6 +240,8 @@ class ReconstructorBase : public Configurable
 
     boost::optional<unsigned int> utnForACAD(unsigned int acad);
 
+    std::unique_ptr<reconstruction::KalmanChain>& chain(unsigned int utn);
+
 protected:
 
     ReconstructorTask& task_;
@@ -285,5 +288,6 @@ protected:
 
     bool processing_ {false};
 
-    std::unique_ptr<reconstruction::KalmanChainPredictors> chain_predictors_;
+    std::map<unsigned int, std::unique_ptr<reconstruction::KalmanChain>> chains_; // utn -> chain
+    std::unique_ptr<reconstruction::KalmanChainPredictors> chain_predictors_; // relic, not used noew
 };

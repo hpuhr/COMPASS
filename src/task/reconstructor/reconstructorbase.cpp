@@ -1215,3 +1215,8 @@ boost::optional<unsigned int> ReconstructorBase::utnForACAD(unsigned int acad)
     return targets_container_.utnForACAD(acad);
 }
 
+std::unique_ptr<reconstruction::KalmanChain>& ReconstructorBase::chain(unsigned int utn)
+{
+    return chains_[utn];
+}
+

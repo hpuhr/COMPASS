@@ -28,19 +28,19 @@ ReconstructorTarget::GlobalStats ReconstructorTarget::global_stats_ = Reconstruc
 
 ReconstructorTarget::ReconstructorTarget(ReconstructorBase& reconstructor, 
                                          unsigned int utn,
-//                                         bool tmp_utn,
                                          bool multithreaded_predictions,
                                          bool dynamic_insertions)
     :   reconstructor_(reconstructor)
     ,   utn_(utn)
-//    ,   tmp_utn_(tmp_utn)
     ,   multithreaded_predictions_(multithreaded_predictions)
     ,   dynamic_insertions_(dynamic_insertions)
 {
+    chain();
 }
 
 ReconstructorTarget::~ReconstructorTarget()
 {
+    chain().reset(nullptr);
 }
 
 void ReconstructorTarget::addUpdateToGlobalStats(const reconstruction::UpdateStats& s)
@@ -89,10 +89,10 @@ void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
             ++num_added;
 
     //reestimate chain after adding
-    if (add_to_tracker && chain_)
+    if (add_to_tracker && chain())
     {
         reconstruction::UpdateStats stats;
-        bool ok = chain_->reestimate(&stats);
+        bool ok = chain()->reestimate(&stats);
 
         // assert(stats.num_fresh == num_added); //TODO UGAGUGA
         // assert(stats.num_updated >= num_added);
@@ -512,6 +512,11 @@ ReconstructorTarget::TargetReportSkipResult ReconstructorTarget::skipTargetRepor
         return TargetReportSkipResult::SkipFunc;
 
     return TargetReportSkipResult::Valid;
+}
+
+std::unique_ptr<reconstruction::KalmanChain>& ReconstructorTarget::chain() const
+{
+    return reconstructor_.chain(utn_);
 }
 
 namespace
@@ -2025,8 +2030,8 @@ void ReconstructorTarget::removeOutdatedTargetReports()
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
-    if (chain_)
-        chain_->removeUpdatesBefore(reconstructor_.currentSlice().remove_before_time_);
+    if (chain())
+        chain()->removeUpdatesBefore(reconstructor_.currentSlice().remove_before_time_);
 
     for (auto& ts_it : tmp_tr_timestamps)
     {
@@ -2051,8 +2056,8 @@ void ReconstructorTarget::removeTargetReportsLaterOrEqualThan(boost::posix_time:
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
-    if (chain_)
-        chain_->removeUpdatesLaterThan(ts);
+    if (chain())
+        chain()->removeUpdatesLaterThan(ts);
 
     for (auto& ts_it : tmp_tr_timestamps)
     {
@@ -2074,34 +2079,34 @@ void ReconstructorTarget::removeTargetReportsLaterOrEqualThan(boost::posix_time:
 
 bool ReconstructorTarget::hasTracker() const
 {
-    return (chain_ != nullptr);
+    return (chain() != nullptr);
 }
 
 size_t ReconstructorTarget::trackerCount() const
 {
-    return chain_->size();
+    return chain()->size();
 }
 
 boost::posix_time::ptime ReconstructorTarget::trackerTime(size_t idx) const
 {
-    return chain_->getUpdate(idx).t;
+    return chain()->getUpdate(idx).t;
 }
 
 void ReconstructorTarget::reinitTracker()
 {
-    chain_.reset(new reconstruction::KalmanChain);
+    chain().reset(new reconstruction::KalmanChain);
 
     //override some estimator settings for the chain
-    chain_->settings().mode            = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts :
+    chain()->settings().mode            = dynamic_insertions_ ? reconstruction::KalmanChain::Settings::Mode::DynamicInserts :
                                   reconstruction::KalmanChain::Settings::Mode::StaticAdd;
-    chain_->settings().prediction_mode = reconstruction::KalmanChain::Settings::PredictionMode::Interpolate;
-    chain_->settings().verbosity       = 0;
-    chain_->settings().debug           = false; //utn_ == 537;
+    chain()->settings().prediction_mode = reconstruction::KalmanChain::Settings::PredictionMode::Interpolate;
+    chain()->settings().verbosity       = 0;
+    chain()->settings().debug           = false; //utn_ == 537;
 
-    chain_->configureEstimator(reconstructor_.referenceCalculatorSettings().chainEstimatorSettings());
-    chain_->init(reconstructor_.referenceCalculatorSettings().kalman_type_assoc);
+    chain()->configureEstimator(reconstructor_.referenceCalculatorSettings().chainEstimatorSettings());
+    chain()->init(reconstructor_.referenceCalculatorSettings().kalman_type_assoc);
 
-    chain_->setMeasurementAssignFunc(
+    chain()->setMeasurementAssignFunc(
         [ this ] (reconstruction::Measurement& mm, unsigned long rec_num) 
         { 
             this->reconstructor_.createMeasurement(mm, rec_num);
@@ -2122,7 +2127,7 @@ bool ReconstructorTarget::compareChainUpdates(const dbContent::targetReport::Rec
 bool ReconstructorTarget::checkChainBeforeAdd(const dbContent::targetReport::ReconstructorInfo& tr,
                                               int idx) const
 {
-    unsigned long rec_num  = chain_->getUpdate(idx).mm_id; // UGA not unsigned int
+    unsigned long rec_num  = chain()->getUpdate(idx).mm_id; // UGA not unsigned int
     assert (reconstructor_.target_reports_.count(rec_num));
     const auto&  tr_chain = reconstructor_.target_reports_.at(rec_num);
 
@@ -2150,7 +2155,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addToTracker(con
 {
     bool do_debug = false;
 
-    assert(chain_);
+    assert(chain());
 
     if (stats)
         ++stats->num_checked;
@@ -2158,7 +2163,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addToTracker(con
     if (do_debug)
         loginf << "DBG indexes near";
 
-    auto idxs_remove = chain_->indicesNear(tr.timestamp_, reconstructor_.referenceCalculatorSettings().min_dt);
+    auto idxs_remove = chain()->indicesNear(tr.timestamp_, reconstructor_.referenceCalculatorSettings().min_dt);
 
     if (do_debug)
         loginf << "DBG checkChainBeforeAdd " << idxs_remove.first << ", " << idxs_remove.second;
@@ -2181,12 +2186,12 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addToTracker(con
     //measurement to be inserted => remove any replaced chain updates?
     if (idxs_remove.second >= 0)
     {
-        chain_->remove(idxs_remove.second, false);
+        chain()->remove(idxs_remove.second, false);
         //loginf << "removing0";
     }
     if (idxs_remove.first >= 0)
     {
-        chain_->remove(idxs_remove.first, false);
+        chain()->remove(idxs_remove.first, false);
         //loginf << "removing1";
     }
 
@@ -2200,7 +2205,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addToTracker(con
         loginf << "DBG insert";
 
     //insert measurement
-    bool reestim_ok = chain_->insert(tr.record_num_, tr.timestamp_, reestimate, stats);
+    bool reestim_ok = chain()->insert(tr.record_num_, tr.timestamp_, reestimate, stats);
 
     if (!reestimate)
         return TargetReportAddResult::Added;
@@ -2213,44 +2218,44 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addToTracker(con
 
 bool ReconstructorTarget::canPredict(boost::posix_time::ptime ts) const
 {
-    if (!chain_)
+    if (!chain())
         return false;
 
-    return chain_->canPredict(ts);
+    return chain()->canPredict(ts);
 }
 
 bool ReconstructorTarget::hasChainState(boost::posix_time::ptime ts) const
 {
-    if (!chain_)
+    if (!chain())
         return false;
 
-    return chain_->hasUpdateFor(ts);
+    return chain()->hasUpdateFor(ts);
 }
 
 bool ReconstructorTarget::predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const
 {
-    if (!chain_)
+    if (!chain())
         return false;
 
-    return chain_->predictPositionClose(ts, lat, lon);
+    return chain()->predictPositionClose(ts, lat, lon);
 }
 
 bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
                                   const boost::posix_time::ptime& ts,
                                   reconstruction::PredictionStats* stats) const
 {
-    assert(chain_);
+    assert(chain());
 
     bool ok = false;
 
     if (stats)
     {
-        ok = chain_->predict(mm, ts, stats);
+        ok = chain()->predict(mm, ts, stats);
     }
     else
     {
         reconstruction::PredictionStats pstats;
-        ok = chain_->predict(mm, ts, &pstats);
+        ok = chain()->predict(mm, ts, &pstats);
 
         //log immediately (!take care when using this method in a multithreaded context!)
         ReconstructorTarget::addPredictionToGlobalStats(pstats);
@@ -2266,9 +2271,9 @@ bool ReconstructorTarget::predictMT(reconstruction::Measurement& mm,
                                     unsigned int thread_id,
                                     reconstruction::PredictionStats* stats) const
 {
-    assert(chain_);
+    assert(chain());
 
-    bool ok = chain_->predictMT(mm, ts, reconstructor_.chainPredictors(), thread_id, stats);
+    bool ok = chain()->predictMT(mm, ts, reconstructor_.chainPredictors(), thread_id, stats);
     assert(ok);
 
     return ok;
@@ -2278,18 +2283,18 @@ bool ReconstructorTarget::getChainState(reconstruction::Measurement& mm,
                                         const boost::posix_time::ptime& ts,
                                         reconstruction::PredictionStats* stats) const
 {
-    assert(chain_);
+    assert(chain());
 
     bool ok = false;
 
     if (stats)
     {
-        ok = chain_->getChainState(mm, ts, stats);
+        ok = chain()->getChainState(mm, ts, stats);
     }
     else
     {
         reconstruction::PredictionStats pstats;
-        ok = chain_->getChainState(mm, ts, &pstats);
+        ok = chain()->getChainState(mm, ts, &pstats);
 
         //log immediately (!take care when using this method in a multithreaded context!)
         ReconstructorTarget::addPredictionToGlobalStats(pstats);
@@ -2302,9 +2307,9 @@ bool ReconstructorTarget::getChainState(reconstruction::Measurement& mm,
 
 const reconstruction::KalmanChain& ReconstructorTarget::getChain() const
 {
-    assert(chain_);
+    assert(chain());
 
-    return *chain_;
+    return *chain();
 }
 
 //bool ReconstructorTarget::hasADSBMOPSVersion()
