@@ -2056,8 +2056,8 @@ void ReconstructorTarget::removeTargetReportsLaterOrEqualThan(boost::posix_time:
     tr_timestamps_.clear();
     tr_ds_timestamps_.clear();
 
-    if (chain())
-        chain()->removeUpdatesLaterThan(ts);
+    // if (chain()) // moved to repeat run in probimmreconstructor
+    //     chain()->removeUpdatesLaterThan(ts);
 
     for (auto& ts_it : tmp_tr_timestamps)
     {
@@ -2106,10 +2106,12 @@ void ReconstructorTarget::reinitTracker()
     chain()->configureEstimator(reconstructor_.referenceCalculatorSettings().chainEstimatorSettings());
     chain()->init(reconstructor_.referenceCalculatorSettings().kalman_type_assoc);
 
+    ReconstructorBase* rec_ptr = &reconstructor_;
+
     chain()->setMeasurementAssignFunc(
-        [ this ] (reconstruction::Measurement& mm, unsigned long rec_num) 
-        { 
-            this->reconstructor_.createMeasurement(mm, rec_num);
+        [ rec_ptr ] (reconstruction::Measurement& mm, unsigned long rec_num)
+        {
+            rec_ptr->createMeasurement(mm, rec_num);
         });
 }
 

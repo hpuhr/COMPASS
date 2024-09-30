@@ -126,10 +126,10 @@ class ReconstructorBase : public Configurable
 
     struct TargetsContainer
     {
-        TargetsContainer(ReconstructorBase& reconstructor)
-            :reconstructor_(reconstructor) {}
+        TargetsContainer(ReconstructorBase* reconstructor)
+            :reconstructor_(reconstructor) { assert(reconstructor_); }
 
-        ReconstructorBase& reconstructor_;
+        ReconstructorBase* reconstructor_;
 
         std::vector<unsigned int> utn_vec_;
 
@@ -252,6 +252,10 @@ protected:
 
     ReconstructorBaseSettings& base_settings_;
 
+    bool cancelled_ {false};
+
+    std::map<unsigned int, std::unique_ptr<reconstruction::KalmanChain>> chains_; // utn -> chain
+
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual void processSlice_impl() = 0;
 
@@ -263,8 +267,6 @@ protected:
     std::map<std::string, std::shared_ptr<Buffer>> createAssociationBuffers(
         std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
-
-    bool cancelled_ {false};
 
   private:
     void initChainPredictors();
@@ -288,6 +290,5 @@ protected:
 
     bool processing_ {false};
 
-    std::map<unsigned int, std::unique_ptr<reconstruction::KalmanChain>> chains_; // utn -> chain
     std::unique_ptr<reconstruction::KalmanChainPredictors> chain_predictors_; // relic, not used noew
 };

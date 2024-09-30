@@ -48,10 +48,12 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
     if (tr.track_number_)
         assert (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
 
+    assert (reconstructor_);
+
     targets_.emplace(
         std::piecewise_construct,
         std::forward_as_tuple(utn),   // args for key
-        std::forward_as_tuple(reconstructor_, utn, true, true));  // args for mapped value tmp_utn false
+        std::forward_as_tuple(*reconstructor_, utn, true, true));  // args for mapped value tmp_utn false
 
     // add to lookup
 
@@ -338,7 +340,7 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                                      ReconstructorBaseSettings& base_settings,
                                      unsigned int default_line_id)
     :   Configurable (class_id, instance_id, &task)
-    ,   targets_container_(*this)
+    ,   targets_container_(this)
     ,   acc_estimator_(std::move(acc_estimator))
     ,   task_(task)
     ,   base_settings_(base_settings)
@@ -749,22 +751,15 @@ void ReconstructorBase::clearOldTargetReports()
         tgt_it.second.removeOutdatedTargetReports();
 
     // clear old data from chains
-    // if (chain())
-    //     chain()->removeUpdatesBefore(reconstructor_.currentSlice().remove_before_time_);
-
-    for (auto chain_it = chains_.begin(); chain_it != chains_.end(); )
+    for (auto& chain_it : chains_)
     {
-        if (chain_it->second)
+        if (chain_it.second)
         {
-            chain_it->second->removeUpdatesBefore(currentSlice().remove_before_time_);
+            chain_it.second->removeUpdatesBefore(currentSlice().remove_before_time_);
 
-            if (!chain_it->second->hasData())
-                chain_it = chains_.erase(chain_it);
-            else
-                ++chain_it;
+            if (!chain_it.second->hasData())
+                chain_it.second = nullptr;
         }
-        else
-            ++chain_it;
     }
 }
 
