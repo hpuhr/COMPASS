@@ -81,8 +81,7 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view
     updateDateTimeInfoFromVariables();
     updateChart();
 
-    connect (&data_model_, &ScatterSeriesModel::visibilityChangedSignal,
-            this, &ScatterPlotViewDataWidget::updateChartSlot);
+    connect (&data_model_, &ScatterSeriesModel::visibilityChangedSignal, this, &ScatterPlotViewDataWidget::updateChartSlot);
 }
 
 /**
@@ -105,9 +104,9 @@ void ScatterPlotViewDataWidget::resetSeries()
     x_axis_is_datetime_ = false;
     y_axis_is_datetime_ = false;
 
-    data_model_.updateFrom(scatter_series_);
+    bounds_ = {};
 
-    annotation_bounds_ = {};
+    data_model_.updateFrom(scatter_series_);
 }
 
 /**
@@ -190,6 +189,8 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
            << " selected: " << stash.selected_count_ << " "
            << " nan: " << stash.nan_value_count_;
 
+    bounds_ = {};
+
     //generate dataseries from stash
     ScatterSeries selected_series;
     selected_series.points.reserve(stash.selected_count_);
@@ -243,6 +244,8 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
 
     data_model_.updateFrom(scatter_series_);
 
+    bounds_ = scatter_series_.getDataBounds();
+
     loginf << "ScatterPlotViewDataWidget: processStash: done, generated " << scatter_series_.numDataSeries() << " series";
 }
 
@@ -252,7 +255,7 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
 {
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations";
 
-    annotation_bounds_ = {};
+    bounds_ = {};
 
     if (!view_->hasCurrentAnnotation())
         return;
@@ -277,11 +280,17 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
     x_axis_is_datetime_ = scatter_series_.commonDataTypeX() == ScatterSeries::DataTypeTimestamp;
     y_axis_is_datetime_ = scatter_series_.commonDataTypeY() == ScatterSeries::DataTypeTimestamp;
 
-    annotation_bounds_ = scatter_series_.getDataBounds();
-
     correctSeriesDateTime(scatter_series_);
 
     data_model_.updateFrom(scatter_series_);
+
+    bounds_ = scatter_series_.getDataBounds();
+
+    if (scatter_series_.useConnectionLines().has_value())
+    {
+        view_->useConnectionLines(scatter_series_.useConnectionLines().value(), false);
+        view_->updateComponents();
+    }
 
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
 }
@@ -315,44 +324,22 @@ QPixmap ScatterPlotViewDataWidget::renderPixmap()
 
 /**
 */
-QRectF ScatterPlotViewDataWidget::getDataBounds() const
+QRectF ScatterPlotViewDataWidget::getViewBounds() const
 {
-    if (getStash().hasData()) // var data set
-    {
-        auto bounds = getPlanarBounds(0, 1);
+    loginf << "ScatterPlotViewDataWidget: getViewBounds: data range bounds"
+               << " x min " << bounds_.left() << " max " << bounds_.right() 
+               << " y min " << bounds_.top() << " max " << bounds_.bottom()
+               << " bounds empty " << bounds_.isEmpty();
 
-        loginf << "ScatterPlotViewDataWidget: getDataBounds: data range bounds X min " << bounds.left()
-               << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom()
-               << " bounds empty " << bounds.isEmpty();
-        return bounds;
-    }
-    else // calculate from annotations
-    {
-        auto bounds = annotation_bounds_;
-
-        loginf << "ScatterPlotViewDataWidget: getDataBounds: annotation bounds X min " << bounds.left()
-               << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom()
-               << " bounds empty " << bounds.isEmpty();
-        return bounds;
-    }
+    return bounds_;
 }
 
 /**
+ * p1 and p2 are in the chart's coordinate system.
 */
 void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2) // TODO
 {
     loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot";
-
-    if (x_axis_is_datetime_)
-    {
-        p1.setX(Time::decorrectLongQtUTC(p1.x()));
-        p2.setX(Time::decorrectLongQtUTC(p2.x()));
-    }
-    if(y_axis_is_datetime_)
-    {
-        p1.setY(Time::decorrectLongQtUTC(p1.y()));
-        p2.setY(Time::decorrectLongQtUTC(p2.y()));
-    }
 
     if (chart_view_ && chart_view_->chart())
     {
@@ -372,7 +359,9 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2) /
         {
             loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot: select";
 
-            selectData(min(p1.x(), p2.x()), max(p1.x(), p2.x()), min(p1.y(), p2.y()), max(p1.y(), p2.y()), 0, 1);
+            //!datetime in the rect needs correction back to utc when selecting data!
+            bool correct_datetime_utc = true;
+            selectData(min(p1.x(), p2.x()), max(p1.x(), p2.x()), min(p1.y(), p2.y()), max(p1.y(), p2.y()), 0, 1, correct_datetime_utc);
         }
         else
         {
@@ -426,6 +415,7 @@ void ScatterPlotViewDataWidget::clearSelectionSlot()
 }
 
 /**
+ * vmin and vmax are expected to be in the chart's coordinate system.
 */
 void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, double vmax)
 {
@@ -435,16 +425,16 @@ void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, d
     auto axis_dt = dynamic_cast<QDateTimeAxis*>(axis);
     if (axis_dt)
     {
-        // need correction since bounds calculated before correction
-        QDateTime vmin_cor = QDateTime::fromMSecsSinceEpoch(Time::correctLongQtUTC(vmin));
-        QDateTime vmax_cor = QDateTime::fromMSecsSinceEpoch(Time::correctLongQtUTC(vmax));
+        // convert to datetime
+        QDateTime dt_min = QDateTime::fromMSecsSinceEpoch(vmin);
+        QDateTime dt_max = QDateTime::fromMSecsSinceEpoch(vmax);
 
         loginf << "ScatterPlotViewDataWidget: setAxisRange: ts min "
-               << vmin_cor.toString().toStdString()
-               << " max " << vmax_cor.toString().toStdString();
+               << dt_min.toString().toStdString()
+               << " max " << dt_max.toString().toStdString();
 
-        axis_dt->setMin(vmin_cor);
-        axis_dt->setMax(vmax_cor);
+        axis_dt->setMin(dt_min);
+        axis_dt->setMax(dt_max);
 
         return;
     }
@@ -453,6 +443,8 @@ void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, d
     axis->setRange(vmin, vmax);
 }
 
+/**
+*/
 ScatterSeriesModel& ScatterPlotViewDataWidget::dataModel()
 {
     return data_model_;
@@ -468,7 +460,7 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
     {
         if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
         {
-            auto bounds = getDataBounds();
+            auto bounds = getViewBounds();
 
             loginf << "ScatterPlotViewDataWidget: resetZoomSlot: X min " << bounds.left()
                    << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom()
@@ -498,6 +490,8 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
     }
 }
 
+/**
+*/
 void ScatterPlotViewDataWidget::updateChartSlot()
 {
     bool updated = updateChart();
@@ -819,7 +813,7 @@ void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     //!call base!
     VariableViewStashDataWidget::viewInfoJSON_impl(info);
 
-    auto bounds       = getDataBounds();
+    auto bounds       = getViewBounds();
     bool bounds_valid = bounds.isValid();
 
     info[ "data_bounds_valid" ] = bounds_valid;

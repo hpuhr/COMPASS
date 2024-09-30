@@ -26,6 +26,8 @@
 #include <QColor>
 #include <QRectF>
 
+#include <boost/optional.hpp>
+
 /**
 */
 struct ScatterSeries
@@ -68,6 +70,8 @@ public:
     virtual ~ScatterSeriesCollection();
 
     void clear();
+    void reset();
+
     //void addDataSeries(const DataSeries& data_series);
     void addDataSeries(const ScatterSeries& scatter_series,
                        const std::string& name,
@@ -82,12 +86,16 @@ public:
     ScatterSeries::DataType commonDataTypeX() const;
     ScatterSeries::DataType commonDataTypeY() const; 
 
+    void setUseConnectionLines(bool ok);
+    const boost::optional<bool>& useConnectionLines() const;
+
     bool fromJSON(const nlohmann::json& data);
     nlohmann::json toJSON(bool binary = false) const;
 
     QRectF getDataBounds() const;
 
     static const std::string TagDataSeries;
+    static const std::string TagConnectionLines;
     static const std::string TagData;
     static const std::string TagDataRaw;
     static const std::string TagDataTypeX;
@@ -98,4 +106,5 @@ public:
 
 private:
     std::map<std::string, DataSeries> data_series_;
+    boost::optional<bool> connection_lines_;
 };

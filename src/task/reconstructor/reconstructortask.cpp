@@ -888,9 +888,14 @@ void ReconstructorTask::writeDoneSlot()
 
         updateProgressSlot("Reference Calculation Done", true);
 
-        //call this before resetting the reconstructor, in case the reconstructor wants to create some additional annotations
         if (debug_)
+        {
+            //write some additional stuff before saving
+            if (currentReconstructor())
+                currentReconstructor()->createAdditionalAnnotations();
+            
             saveDebugViewPoints();
+        }
 
         currentReconstructor()->reset();
 
@@ -974,7 +979,6 @@ void ReconstructorTask::runCancelledSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    //call this before resetting the reconstructor, in case the reconstructor wants to create some additional annotations
     if (debug_)
         saveDebugViewPoints();
 
@@ -1144,10 +1148,6 @@ ViewPointGenAnnotation* ReconstructorTask::getDebugAnnotationForUTNSlice(unsigne
 void ReconstructorTask::saveDebugViewPoints()
 {
     loginf << "ReconstructorTask: saveDebugViewPoints";
-
-    //write some additional stuff before saving
-    if (currentReconstructor())
-        currentReconstructor()->createAdditionalAnnotations();
 
     COMPASS::instance().viewManager().clearViewPoints();
 

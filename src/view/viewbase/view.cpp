@@ -589,6 +589,15 @@ void View::updateView(int flags)
 }
 
 /**
+*/
+void View::updateComponents()
+{
+    assert(widget_);
+
+    widget_->updateComponents();
+}
+
+/**
  * Applies the given preset to the view.
  */
 View::PresetError View::applyPreset(const ViewPresets::Preset& preset,

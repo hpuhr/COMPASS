@@ -259,9 +259,10 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
 
 /**
 */
-void VariableViewStashDataWidget::updateVariableData(
-    size_t var_idx, std::string group_name, const Buffer& buffer,
-    const std::vector<unsigned int>& indexes)
+void VariableViewStashDataWidget::updateVariableData(size_t var_idx, 
+                                                     std::string group_name, 
+                                                     const Buffer& buffer,
+                                                     const std::vector<unsigned int>& indexes)
 {
     logdbg << "VariableViewStashDataWidget: updateVariableData: group_name "
            << group_name << " indexes size " << indexes.size();
@@ -305,8 +306,7 @@ void VariableViewStashDataWidget::updateVariableData(
 
     SwitchPropertyDataType(data_type, UpdateFunc, NotFoundFunc)
 
-        logdbg << "VariableViewStashDataWidget: updateVariableData: updated size " << buffer_counts;
-
+    logdbg << "VariableViewStashDataWidget: updateVariableData: updated size " << buffer_counts;
 }
 
 /**
@@ -338,28 +338,44 @@ void VariableViewStashDataWidget::updateStash()
 
 /**
  */
-QRectF VariableViewStashDataWidget::getPlanarBounds(int var_x, int var_y) const
+QRectF VariableViewStashDataWidget::getPlanarBounds(int var_x, int var_y, bool correct_datetime) const
 {
-    const auto& data_bounds = getStash().dataRanges();
-
-    if (!data_bounds[ var_x ].has_value() || !data_bounds[ var_y ].has_value())
+    auto bounds_x = getBounds(var_x, correct_datetime);
+    auto bounds_y = getBounds(var_y, correct_datetime);
+    if (!bounds_x.has_value() || !bounds_y.has_value())
         return QRectF();
 
-    double xmin = data_bounds[ var_x ].value().first;
-    double xmax = data_bounds[ var_x ].value().second;
-    double ymin = data_bounds[ var_y ].value().first;
-    double ymax = data_bounds[ var_y ].value().second;
+    double xmin = bounds_x.value().first;
+    double xmax = bounds_x.value().second;
+    double ymin = bounds_y.value().first;
+    double ymax = bounds_y.value().second;
 
     return QRectF(xmin, ymin, xmax - xmin, ymax - ymin);
 }
 
 /**
  */
-boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBounds(int var) const
+boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBounds(int var, bool correct_datetime) const
 {
-    const auto& data_bounds = getStash().dataRanges();
+    boost::optional<std::pair<double, double>> b = getStash().dataRanges().at(var);
+    if (!b.has_value())
+        return b;
 
-    return data_bounds.at(var);
+    if (correct_datetime && variableIsDateTime(var))
+    {
+        b->first  = Utils::Time::correctLongQtUTC((long)b->first );
+        b->second = Utils::Time::correctLongQtUTC((long)b->second);
+    }
+
+    return b;
+}
+
+/**
+*/
+QRectF VariableViewStashDataWidget::getViewBounds() const
+{
+    //meaningful default behaviour for most views
+    return getPlanarBounds(0, 1, false);
 }
 
 /**
@@ -369,7 +385,8 @@ void VariableViewStashDataWidget::selectData(double x_min,
                                              double y_min, 
                                              double y_max,
                                              int var_x,
-                                             int var_y)
+                                             int var_y,
+                                             bool correct_datetime)
 {
     bool ctrl_pressed = QApplication::keyboardModifiers() & Qt::ControlModifier;
 
@@ -381,6 +398,20 @@ void VariableViewStashDataWidget::selectData(double x_min,
            << "var_x " << var_x << " "
            << "var_y " << var_y << " "
            << "ctrl pressed " << ctrl_pressed;
+
+    if (correct_datetime)
+    {
+        if (variableIsDateTime(var_x))
+        {
+            x_min = Utils::Time::decorrectLongQtUTC((long)x_min);
+            x_max = Utils::Time::decorrectLongQtUTC((long)x_max);
+        }
+        if (variableIsDateTime(var_y))
+        {
+            y_min = Utils::Time::decorrectLongQtUTC((long)y_min);
+            y_max = Utils::Time::decorrectLongQtUTC((long)y_max);
+        }
+    }
     
     unsigned int sel_cnt = 0;
     string group_name;

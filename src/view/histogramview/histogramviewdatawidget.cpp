@@ -169,6 +169,12 @@ void HistogramViewDataWidget::updateFromAnnotations()
         return;
     }
 
+    if (histogram_raw_.useLogScale().has_value())
+    {
+        view_->useLogScale(histogram_raw_.useLogScale().value(), false);
+        view_->updateComponents();
+    }
+
     loginf << "HistogramViewDataWidget: updateFromAnnotations: done";
 }
 

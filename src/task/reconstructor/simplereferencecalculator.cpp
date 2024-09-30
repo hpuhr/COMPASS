@@ -1242,10 +1242,12 @@ void SimpleReferenceCalculator::createAnnotations(ViewPointGenAnnotation* annota
 
     auto feat_speed_histo = new ViewPointGenFeatureHistogram(RawHistogramCollection(), 
         PlotMetadata("Reconstruction", "Speed Common", "Speed", "", PlotGroup));
+    feat_speed_histo->histograms().setUseLogScale(false);
     common_anno->addFeature(feat_speed_histo);
 
     auto feat_speed_scatter = new ViewPointGenFeatureScatterSeries(ScatterSeriesCollection(), 
         PlotMetadata("Reconstruction", "Speed Common", "Timestamp", "Speed", PlotGroup));
+    feat_speed_scatter->scatterSeries().setUseConnectionLines(true);
     common_anno->addFeature(feat_speed_scatter);
 
     auto scaleColor = [ & ] (const QColor& color, double factor)

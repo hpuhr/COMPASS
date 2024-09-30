@@ -124,6 +124,7 @@ void HistogramViewConfigWidget::toggleLogScale()
 void HistogramViewConfigWidget::onDisplayChange_impl()
 {
     updateInfo();
+    updateLogScale();
 }
 
 /**
