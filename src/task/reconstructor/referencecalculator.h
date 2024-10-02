@@ -72,7 +72,7 @@ struct ReferenceCalculatorSettings
         //                                                       reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
 
         settings.step_fail_strategy = allow_invalid_updates ? reconstruction::KalmanEstimator::Settings::StepFailStrategy::Reinit :
-                                          reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
+                                                              reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
 
 
         settings.fix_predictions        = fix_predictions;

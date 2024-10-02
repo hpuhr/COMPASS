@@ -107,7 +107,7 @@ public:
                                    bool* fixed = nullptr,
                                    const boost::optional<double>& Q_var = boost::optional<double>()) const;
     //kalman state integrity
-    bool checkKalmanStateNumerical(kalman::KalmanState& state) const;
+    bool checkKalmanStateNumerical(const kalman::KalmanState& state) const;
     bool validateState(const kalman::KalmanState& state) const;
     
     //needed for feeding kalman

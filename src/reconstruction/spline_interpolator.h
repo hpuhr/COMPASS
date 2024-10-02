@@ -40,6 +40,7 @@ public:
 
         bool   check_fishy_segments  = true;
         bool   interpolate_cart      = false;
+        bool   interpolate_cov_nn    = false;
         
         double min_dt                      = 1e-06; //minimum time difference between measurements
         double max_dt                      = 30.0;  //maximum time difference between measurements
@@ -60,7 +61,8 @@ public:
                                                const Measurement& mm0, 
                                                const Measurement& mm1, 
                                                double interp_factor,
-                                               CoordSystem coord_sys);
+                                               CoordSystem coord_sys,
+                                               bool interp_cov_nn = false);
     static Eigen::VectorXd interpStateVector(const Eigen::VectorXd& x0, 
                                              const Eigen::VectorXd& x1, 
                                              double interp_factor);
@@ -70,7 +72,8 @@ public:
     static void interpCovarianceMat(Measurement& mm_interp,
                                     const Measurement& mm0,
                                     const Measurement& mm1,
-                                    double interp_factor);
+                                    double interp_factor,
+                                    bool interp_cov_nn = false);
     
     static size_t estimatedSamples(const Measurement& mm0, 
                                    const Measurement& mm1,

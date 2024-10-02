@@ -311,7 +311,7 @@ kalman::KalmanError KalmanInterface::interpStep(kalman::KalmanState& state_inter
 
 /**
 */
-bool KalmanInterface::checkKalmanStateNumerical(kalman::KalmanState& state) const
+bool KalmanInterface::checkKalmanStateNumerical(const kalman::KalmanState& state) const
 {
     assert(kalman_filter_);
     return kalman_filter_->checkState(state.x, state.P);

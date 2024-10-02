@@ -217,6 +217,7 @@ public:
     const StepInfo& stepInfo() const;
 
     bool checkKalmanStateNumerical(kalman::KalmanState& state) const;
+    bool checkPrediction(const Measurement& mm) const;
     bool validateState(const kalman::KalmanState& state) const;
 
     std::string asString(int flags = kalman::KalmanInfoFlags::InfoAll, const std::string& prefix = "") const;
@@ -295,7 +296,6 @@ private:
 
     reconstruction::Uncertainty defaultUncert(const Measurement& mm) const;
 
-    bool checkPrediction(const Measurement& mm) const;
     bool checkState(const kalman::KalmanUpdate& update) const;
 
     static void extractVelAccPosWGS84(boost::optional<Eigen::Vector2d>& speedvec_tippos_wgs84,

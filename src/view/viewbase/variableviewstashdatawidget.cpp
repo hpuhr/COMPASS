@@ -290,17 +290,17 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     logdbg << "VariableViewStashDataWidget: updateVariableData: updating, last size " << last_size;
 
 #define UpdateFunc(PDType, DType)                                                \
-    assert(view_var.settings().valid_data_types.count(PDType) != 0);         \
+        assert(view_var.settings().valid_data_types.count(PDType) != 0);         \
         assert(buffer.has<DType>(current_var_name));                             \
                                                                                  \
         const NullableVector<DType>& data = buffer.get<DType>(current_var_name); \
                                                                                  \
         appendData(data, values, indexes);                                       \
-    //buffer_counts = current_size;
+        //buffer_counts = current_size;
 
-#define NotFoundFunc                                                                                                             \
-        logerr << "VariableViewStashDataWidget: updateVariableData: impossible for property type " \
-        << Property::asString(data_type); \
+#define NotFoundFunc                                                                                          \
+        logerr << "VariableViewStashDataWidget: updateVariableData: impossible for property type "            \
+        << Property::asString(data_type);                                                                     \
         throw std::runtime_error("VariableViewStashDataWidget: updateVariableData: impossible property type " \
                                  + Property::asString(data_type));
 
