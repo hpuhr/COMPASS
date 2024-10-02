@@ -34,6 +34,7 @@ extern float randomNumber(float min, float max);
 /// @brief Returns rounded number to nearest integer
 extern float roundToNearest(float num);
 extern double round(float num, unsigned int precision);
+extern double round(double num, unsigned int precision);
 extern double roundToClosestPowerOf10(double value);
 
 

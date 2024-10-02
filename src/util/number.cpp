@@ -45,6 +45,11 @@ double round(float num, unsigned int precision)
     return std::round(num * std::pow(10, precision)) / std::pow(10, precision);
 }
 
+double round(double num, unsigned int precision)
+{
+    return std::round(num * std::pow(10, precision)) / std::pow(10, precision);
+}
+
 double roundToClosestPowerOf10(double value) {
     if (value == 0.0f) {
         return 0.0f; // Edge case: return 0 if input is 0
