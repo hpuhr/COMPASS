@@ -312,6 +312,7 @@ void SimpleReferenceCalculator::interpolateMeasurements(Measurements& measuremen
     reconstruction::SplineInterpolator interp;
     interp.config().check_fishy_segments = true;
     interp.config().interpolate_cart     = false;
+    interp.config().interpolate_cov_nn   = false;
     interp.config().sample_dt            = options.sample_dt;
     interp.config().max_dt               = options.max_dt;
 

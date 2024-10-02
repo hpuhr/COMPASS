@@ -38,7 +38,7 @@ struct Measurement
 
     std::string asString(const std::string& prefix = "") const;
 
-    unsigned long            source_id;            // source of the measurement
+    unsigned long            source_id = 0;        // source of the measurement
     boost::posix_time::ptime t;                    // timestamp
 
     bool                     mm_interp = false;    // measurement has been interpolated (e.g. by spline interpolator)

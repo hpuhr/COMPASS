@@ -704,7 +704,7 @@ void KalmanChain::removeUpdatesLaterThan(const boost::posix_time::ptime& ts)
     updates_.erase(it, updates_.end());
     updates_.shrink_to_fit();
 
-            //current mm ids might be outdated now => reset
+    //current mm ids might be outdated now => reset
     tracker_.tracked_mm_id.reset();
     predictor_.ref_mm_id.reset();
 }
@@ -1134,6 +1134,14 @@ bool KalmanChain::reestimate(int idx,
 
     auto&       update = updates_[ idx ];
     const auto& mm     = getMeasurement(update.mm_id);
+
+    bool chain_input_mm_check = tracker_.tracker_ptr->estimator().checkPrediction(mm);
+    if (!chain_input_mm_check)
+    {
+        logerr << "KalmanChain: reestimate: invalid measurement retrieved\n\n"
+               << mm.asString() << "\n";
+        assert(chain_input_mm_check);
+    }
 
     //check fetched mm's time against update
     assert(update.t == mm.t);
