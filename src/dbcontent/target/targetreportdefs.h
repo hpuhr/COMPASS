@@ -116,6 +116,9 @@ class PositionAccuracy
     double avgStdDev() const { return (x_stddev_+ y_stddev_) / 2.0; }
     double maxStdDev() const { return std::max(x_stddev_, y_stddev_); }
     std::string asStr() const;
+
+    bool isNormal() const
+    { return std::isfinite(x_stddev_) && std::isfinite(y_stddev_) && std::isfinite(xy_cov_); }
 };
 
 /**

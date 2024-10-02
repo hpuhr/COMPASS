@@ -191,7 +191,7 @@ protected:
                             const Joined* result) const;
 
     void common_clearResults();
-    void common_accumulateSingleResult(const PositionBase& single_result, 
+    void common_accumulateSingleResult(unsigned int utn, const PositionBase& single_result,
                                        bool last);
 
     boost::optional<double> common_computeResult() const;
