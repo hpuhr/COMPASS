@@ -106,6 +106,10 @@ void addWithWeightedAverage(double value1, double std_dev1, unsigned int value1_
                << " weightvalsum " << (value1 * weight1 + value2 * weight2)
                << " weightsum " << (weight1 + weight2);
 
+// [ERROR] Number: addWithWeightedAverage: new_weighted_avg -nan stddevsum 3.299e-306 weightvalsum inf weightsum inf
+// [ERROR] Number: addWithWeightedAverage: new_weighted_avg -nan stddevsum 1.07437e-305 weightvalsum inf weightsum inf
+
+
         return;
     }
 
