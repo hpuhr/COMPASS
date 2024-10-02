@@ -26,8 +26,6 @@
 #include <QSpinBox>
 #include <QFormLayout>
 
-
-
 using namespace Utils;
 using namespace dbContent;
 

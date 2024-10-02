@@ -525,6 +525,16 @@ void KalmanEstimator::kalmanInit(kalman::KalmanUpdate& update,
     update.projection_center = proj_handler_->projectionCenter();
     update.has_wgs84_pos     = true;
     update.valid             = true;
+
+    //check state => should be ok at this point, otherwise assert
+    bool kalman_update_check = checkState(update);
+    if (!kalman_update_check)
+    {
+        logerr << "KalmanEstimator: kalmanInit: init from mm yielded nan\n\n"
+               << update.state.print() << "\n"
+               << mm.asString() << "\n";
+        assert(kalman_update_check);
+    }
 }
 
 /**
@@ -542,6 +552,15 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdate& update)
 
     //reinit kalman from update
     kalman_interface_->kalmanInit(update.state, update.t);
+
+    //check state => should be ok at this point, otherwise assert
+    bool kalman_update_check = checkState(update);
+    if (!kalman_update_check)
+    {
+        logerr << "KalmanEstimator: kalmanInit: init from update yielded nan\n\n"
+               << update.state.print() << "\n";
+        assert(kalman_update_check);
+    }
 }
 
 /**
@@ -559,6 +578,18 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdateMinimal& update)
 
     //reinit kalman from update
     kalman_interface_->kalmanInit(update.x, update.P, update.t, update.Q_var);
+
+    //check state => should be ok at this point, otherwise assert
+    bool kalman_update_check = checkState(update);
+    if (!kalman_update_check)
+    {
+        logerr << "KalmanEstimator: kalmanInit: init from minimal update yielded nan\n\n"
+               << update.x << "\n"
+               << update.P << "\n"
+               << update.t << "\n"
+               << update.Q_var << "\n";
+        assert(kalman_update_check);
+    }
 }
 
 /**
@@ -778,6 +809,16 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
         }
     }
 
+    //check state => should be ok at this point, otherwise assert
+    bool kalman_update_check = checkState(update);
+    if (!kalman_update_check)
+    {
+        logerr << "KalmanEstimator: kalmanStepInternal: step yielded nan for dt = " << tstep << "\n\n"
+               << kalman_interface_->asString(kalman::KalmanInfoFlags::InfoAll) << "\n"
+               << update.state.print() << "\n";
+        assert(kalman_update_check);
+    }
+
     //update projection if needed
     checkProjection(update);
 
@@ -816,6 +857,9 @@ bool KalmanEstimator::checkPrediction(const Measurement& mm) const
 */
 bool KalmanEstimator::checkState(const kalman::KalmanUpdate& update) const
 {
+    if (!kalman_interface_->checkKalmanStateNumerical(update.state))
+        return false;
+
     double x, y;
     kalman_interface_->xPos(x, y, update.state.x);
 

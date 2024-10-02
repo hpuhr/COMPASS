@@ -103,44 +103,76 @@ Eigen::MatrixXd SplineInterpolator::interpCovarianceMat(const Eigen::MatrixXd& C
 void SplineInterpolator::interpCovarianceMat(Measurement& mm_interp,
                                              const Measurement& mm0,
                                              const Measurement& mm1,
-                                             double interp_factor)
+                                             double interp_factor,
+                                             bool interp_cov_nn)
 {
     if (mm0.hasStdDevPosition() && mm1.hasStdDevPosition())
     {
-        double x_stddev_sqr0 = mm0.x_stddev.value() * mm0.x_stddev.value();
-        double y_stddev_sqr0 = mm0.y_stddev.value() * mm0.y_stddev.value();
+        if (interp_cov_nn)
+        {
+            mm_interp.x_stddev = interp_factor <= 0.5 ? mm0.x_stddev.value() : mm1.x_stddev.value();
+            mm_interp.y_stddev = interp_factor <= 0.5 ? mm0.y_stddev.value() : mm1.y_stddev.value();
+        }
+        else
+        {
+            double x_stddev_sqr0 = mm0.x_stddev.value() * mm0.x_stddev.value();
+            double y_stddev_sqr0 = mm0.y_stddev.value() * mm0.y_stddev.value();
 
-        double x_stddev_sqr1 = mm1.x_stddev.value() * mm1.x_stddev.value();
-        double y_stddev_sqr1 = mm1.y_stddev.value() * mm1.y_stddev.value();
+            double x_stddev_sqr1 = mm1.x_stddev.value() * mm1.x_stddev.value();
+            double y_stddev_sqr1 = mm1.y_stddev.value() * mm1.y_stddev.value();
 
-        mm_interp.x_stddev = std::sqrt(interp(x_stddev_sqr0, x_stddev_sqr1, interp_factor));
-        mm_interp.y_stddev = std::sqrt(interp(y_stddev_sqr0, y_stddev_sqr1, interp_factor));
+            mm_interp.x_stddev = std::sqrt(interp(x_stddev_sqr0, x_stddev_sqr1, interp_factor));
+            mm_interp.y_stddev = std::sqrt(interp(y_stddev_sqr0, y_stddev_sqr1, interp_factor));
+        }
     }
     if (mm0.xy_cov.has_value() && mm1.xy_cov.has_value())
     {
-        mm_interp.xy_cov = interp(mm0.xy_cov.value(), mm1.xy_cov.value(), interp_factor);
+        if (interp_cov_nn)
+        {
+            mm_interp.xy_cov = interp_factor <= 0.5 ? mm0.xy_cov.value() : mm1.xy_cov.value();
+        }
+        else
+        {
+            mm_interp.xy_cov = interp(mm0.xy_cov.value(), mm1.xy_cov.value(), interp_factor);
+        }
     }
     if (mm0.hasStdDevVelocity() && mm1.hasStdDevVelocity())
     {
-        double vx_stddev_sqr0 = mm0.vx_stddev.value() * mm0.vx_stddev.value();
-        double vy_stddev_sqr0 = mm0.vy_stddev.value() * mm0.vy_stddev.value();
+        if (interp_cov_nn)
+        {
+            mm_interp.vx_stddev = interp_factor <= 0.5 ? mm0.vx_stddev.value() : mm1.vx_stddev.value();
+            mm_interp.vy_stddev = interp_factor <= 0.5 ? mm0.vy_stddev.value() : mm1.vy_stddev.value();
+        }
+        else
+        {
+            double vx_stddev_sqr0 = mm0.vx_stddev.value() * mm0.vx_stddev.value();
+            double vy_stddev_sqr0 = mm0.vy_stddev.value() * mm0.vy_stddev.value();
 
-        double vx_stddev_sqr1 = mm1.vx_stddev.value() * mm1.vx_stddev.value();
-        double vy_stddev_sqr1 = mm1.vy_stddev.value() * mm1.vy_stddev.value();
+            double vx_stddev_sqr1 = mm1.vx_stddev.value() * mm1.vx_stddev.value();
+            double vy_stddev_sqr1 = mm1.vy_stddev.value() * mm1.vy_stddev.value();
 
-        mm_interp.vx_stddev = std::sqrt(interp(vx_stddev_sqr0, vx_stddev_sqr1, interp_factor));
-        mm_interp.vy_stddev = std::sqrt(interp(vy_stddev_sqr0, vy_stddev_sqr1, interp_factor));
+            mm_interp.vx_stddev = std::sqrt(interp(vx_stddev_sqr0, vx_stddev_sqr1, interp_factor));
+            mm_interp.vy_stddev = std::sqrt(interp(vy_stddev_sqr0, vy_stddev_sqr1, interp_factor));
+        }
     }
     if (mm0.hasStdDevAccel() && mm1.hasStdDevAccel())
     {
-        double ax_stddev_sqr0 = mm0.ax_stddev.value() * mm0.ax_stddev.value();
-        double ay_stddev_sqr0 = mm0.ay_stddev.value() * mm0.ay_stddev.value();
+        if (interp_cov_nn)
+        {
+            mm_interp.ax_stddev = interp_factor <= 0.5 ? mm0.ax_stddev.value() : mm1.ax_stddev.value();
+            mm_interp.ay_stddev = interp_factor <= 0.5 ? mm0.ay_stddev.value() : mm1.ay_stddev .value();
+        }
+        else
+        {
+            double ax_stddev_sqr0 = mm0.ax_stddev.value() * mm0.ax_stddev.value();
+            double ay_stddev_sqr0 = mm0.ay_stddev.value() * mm0.ay_stddev.value();
 
-        double ax_stddev_sqr1 = mm1.ax_stddev.value() * mm1.ax_stddev.value();
-        double ay_stddev_sqr1 = mm1.ay_stddev.value() * mm1.ay_stddev.value();
+            double ax_stddev_sqr1 = mm1.ax_stddev.value() * mm1.ax_stddev.value();
+            double ay_stddev_sqr1 = mm1.ay_stddev.value() * mm1.ay_stddev.value();
 
-        mm_interp.ax_stddev = std::sqrt(interp(ax_stddev_sqr0, ax_stddev_sqr1, interp_factor));
-        mm_interp.ay_stddev = std::sqrt(interp(ay_stddev_sqr0, ay_stddev_sqr1, interp_factor));
+            mm_interp.ax_stddev = std::sqrt(interp(ax_stddev_sqr0, ax_stddev_sqr1, interp_factor));
+            mm_interp.ay_stddev = std::sqrt(interp(ay_stddev_sqr0, ay_stddev_sqr1, interp_factor));
+        }
     }
 }
 
@@ -151,7 +183,8 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
                                                         const Measurement& mm0, 
                                                         const Measurement& mm1, 
                                                         double interp_factor,
-                                                        CoordSystem coord_sys)
+                                                        CoordSystem coord_sys,
+                                                        bool interp_cov_nn)
 {
     if (interp_factor == 0.0)
         return MeasurementInterp(mm0, false, false);
@@ -179,7 +212,7 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
     }
 
     //interpolate cov mat values
-    interpCovarianceMat(mm_interp, mm0, mm1, interp_factor);
+    interpCovarianceMat(mm_interp, mm0, mm1, interp_factor, interp_cov_nn);
 
     //interpolate process noise if set
     if (mm0.Q_var.has_value() || mm1.Q_var.has_value())
@@ -239,7 +272,7 @@ MeasurementInterp SplineInterpolator::generateMeasurement(const Eigen::Vector2d&
                                                           double interp_factor,
                                                           bool corrected) const
 {
-    auto mm_interp = SplineInterpolator::interpMeasurement(pos, t, mm0, mm1, interp_factor, coordSystem());
+    auto mm_interp = SplineInterpolator::interpMeasurement(pos, t, mm0, mm1, interp_factor, coordSystem(), config_.interpolate_cov_nn);
     mm_interp.corrected = corrected;
 
     return mm_interp;
