@@ -97,7 +97,19 @@ void addWithWeightedAverage(double value1, double std_dev1, unsigned int value1_
     double weight2 = (double) value2_cnt / (std_dev2 * std_dev2);
 
             // Calculate the weighted average
-    weighted_avg = (value1 * weight1 + value2 * weight2) / (weight1 + weight2);
+    double new_weighted_avg = (value1 * weight1 + value2 * weight2) / (weight1 + weight2);
+
+    if (!std::isfinite(new_weighted_avg))
+    {
+        logerr << "Number: addWithWeightedAverage: new_weighted_avg " << new_weighted_avg
+               << " stddevsum " << (std_dev1 * std_dev1)
+               << " weightvalsum " << (value1 * weight1 + value2 * weight2)
+               << " weightsum " << (weight1 + weight2);
+
+        return;
+    }
+
+    weighted_avg = new_weighted_avg;
 
             // Calculate the combined standard deviation
     weighted_std_dev = sqrt(1.0 / (weight1 + weight2));

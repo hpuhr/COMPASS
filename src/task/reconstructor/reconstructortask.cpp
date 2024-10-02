@@ -853,7 +853,11 @@ void ReconstructorTask::processingDoneSlot()
     writing_slice_ = std::move(processing_slice_);
 
     if (skip_reference_data_writing_)
+    {
         writing_slice_ = nullptr;
+
+        loginf << "ReconstructorTask: processingDoneSlot: skipping reference writing";
+    }
     else
         writeDataSlice(); // starts the async jobs
 }
