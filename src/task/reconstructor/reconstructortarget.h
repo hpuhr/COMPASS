@@ -289,8 +289,8 @@ public:
                                       bool debug) const;
     // unknown, same, different timestamps from this
 
-    //fl_unknown, fl_on_ground, fl_index
-    std::tuple<bool, bool, unsigned int> getAltitudeState (
+    //fl_unknown, fl_on_ground, alt_baro_ft
+    std::tuple<bool, bool, float> getAltitudeState (
         const boost::posix_time::ptime& ts, boost::posix_time::time_duration max_time_diff,
         const InterpOptions& interp_options = InterpOptions()) const;
 

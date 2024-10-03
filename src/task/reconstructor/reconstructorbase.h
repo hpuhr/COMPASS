@@ -273,8 +273,8 @@ protected:
     void initChainPredictors();
 
     float qVarForAltitude(bool fl_unknown, 
-                          bool fl_ground, 
-                          unsigned int fl_index,
+                          bool fl_ground,
+                          float alt_baro_ft,
                           bool dynamic,
                           const ReferenceCalculatorSettings::ProcessNoise& Q_std) const;
 

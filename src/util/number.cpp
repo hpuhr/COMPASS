@@ -88,35 +88,62 @@ void calculateWeightedAverageAndStdDev(const std::vector<double>& values, const 
     std_dev = sqrt(1.0 / weight_sum);
 }
 
+const double min_std_dev = 10E-6;
+const unsigned int good_sample_size = 5;
+
 void addWithWeightedAverage(double value1, double std_dev1, unsigned int value1_cnt,
                                double value2, double std_dev2, unsigned int value2_cnt,
                                double& weighted_avg, double& weighted_std_dev, unsigned int& weighted_cnt)
 {
-    // Calculate weights based on standard deviations
-    double weight1 = (double) value1_cnt / (std_dev1 * std_dev1);
-    double weight2 = (double) value2_cnt / (std_dev2 * std_dev2);
-
-            // Calculate the weighted average
-    double new_weighted_avg = (value1 * weight1 + value2 * weight2) / (weight1 + weight2);
-
-    if (!std::isfinite(new_weighted_avg))
+    if (value1_cnt < good_sample_size && value2_cnt < good_sample_size) // both small
     {
-        logerr << "Number: addWithWeightedAverage: new_weighted_avg " << new_weighted_avg
-               << " stddevsum " << (std_dev1 * std_dev1)
-               << " weightvalsum " << (value1 * weight1 + value2 * weight2)
-               << " weightsum " << (weight1 + weight2);
+        weighted_avg = (value1 + value2) / 2.0;
+        weighted_std_dev = (std_dev1 + std_dev2) / 2.0;
+    }
+    else if ((value1_cnt >= good_sample_size && value2_cnt < good_sample_size)
+               || (value1_cnt < good_sample_size && value2_cnt >= good_sample_size)) // one good, one bad
+    {
+        double weight1 = (double) value1_cnt;
+        double weight2 = (double) value2_cnt;
 
-// [ERROR] Number: addWithWeightedAverage: new_weighted_avg -nan stddevsum 3.299e-306 weightvalsum inf weightsum inf
-// [ERROR] Number: addWithWeightedAverage: new_weighted_avg -nan stddevsum 1.07437e-305 weightvalsum inf weightsum inf
+        double new_weighted_avg = (value1 * weight1 + value2 * weight2) / (weight1 + weight2);
+        assert (std::isfinite(new_weighted_avg));
 
+        double new_weighted_stddev = (std_dev1 * weight1 + std_dev2 * weight2) / (weight1 + weight2);
+        assert (std::isfinite(new_weighted_stddev));
 
-        return;
+        weighted_avg = new_weighted_avg;
+        weighted_std_dev = new_weighted_stddev; // combined standard deviation
+    }
+    else
+    {
+        if (std_dev1 < min_std_dev)
+            std_dev1 = min_std_dev;
+
+        if (std_dev2 < min_std_dev)
+            std_dev2 = min_std_dev;
+
+        // Calculate weights based on standard deviations
+        double weight1 = (double) value1_cnt / (std_dev1 * std_dev1);
+        double weight2 = (double) value2_cnt / (std_dev2 * std_dev2);
+
+                // Calculate the weighted average
+        double new_weighted_avg = (value1 * weight1 + value2 * weight2) / (weight1 + weight2);
+
+        if (!std::isfinite(new_weighted_avg))
+        {
+            logerr << "Number: addWithWeightedAverage: new_weighted_avg " << new_weighted_avg
+                   << " stddevsum " << (std_dev1 * std_dev1)
+                   << " weightvalsum " << (value1 * weight1 + value2 * weight2)
+                   << " weightsum " << (weight1 + weight2);
+
+            return;
+        }
+
+        weighted_avg = new_weighted_avg;
+        weighted_std_dev = sqrt(1.0 / (weight1 + weight2)); // combined standard deviation
     }
 
-    weighted_avg = new_weighted_avg;
-
-            // Calculate the combined standard deviation
-    weighted_std_dev = sqrt(1.0 / (weight1 + weight2));
     weighted_cnt = value1_cnt + value2_cnt;
 }
 

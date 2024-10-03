@@ -1123,7 +1123,7 @@ ReconstructorBase::DataSlice& ReconstructorBase::currentSlice()
 
 float ReconstructorBase::qVarForAltitude(bool fl_unknown, 
                                          bool fl_ground, 
-                                         unsigned int fl_index,
+                                         float alt_baro_ft,
                                          bool dynamic,
                                          const ReferenceCalculatorSettings::ProcessNoise& Q_std) const
 {
@@ -1136,8 +1136,10 @@ float ReconstructorBase::qVarForAltitude(bool fl_unknown,
 
     assert (ref_calc_settings_.Q_altitude_min_ft < ref_calc_settings_.Q_altitude_max_ft);
 
-    double alt_ft       = std::max(ref_calc_settings_.Q_altitude_min_ft, std::min(ref_calc_settings_.Q_altitude_max_ft, fl_index * 100.0));
-    double t            = (alt_ft - ref_calc_settings_.Q_altitude_min_ft) / (ref_calc_settings_.Q_altitude_max_ft - ref_calc_settings_.Q_altitude_min_ft);
+    double alt_ft       = std::max(ref_calc_settings_.Q_altitude_min_ft,
+                             std::min(ref_calc_settings_.Q_altitude_max_ft, (double) alt_baro_ft));
+    double t            = (alt_ft - ref_calc_settings_.Q_altitude_min_ft)
+               / (ref_calc_settings_.Q_altitude_max_ft - ref_calc_settings_.Q_altitude_min_ft);
     double Q_std_interp = (1.0 - t) * Q_std.Q_std_ground + t * Q_std.Q_std_air;
 
     return Q_std_interp * Q_std_interp;
@@ -1177,12 +1179,13 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     if (target)
     {
         bool fl_unknown, fl_ground;
-        unsigned int fl_index;
-        std::tie(fl_unknown, fl_ground, fl_index) = target->getAltitudeState(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
+        float alt_baro_ft;
+        std::tie(fl_unknown, fl_ground, alt_baro_ft) =
+            target->getAltitudeState(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
 
         //compute measurement-specific process noise from altitude state
-        mm.Q_var        = qVarForAltitude(fl_unknown, fl_ground, fl_index, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.Q_std);
-        mm.Q_var_interp = qVarForAltitude(fl_unknown, fl_ground, fl_index, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.resample_Q_std);
+        mm.Q_var        = qVarForAltitude(fl_unknown, fl_ground, alt_baro_ft, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.Q_std);
+        mm.Q_var_interp = qVarForAltitude(fl_unknown, fl_ground, alt_baro_ft, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.resample_Q_std);
     }
 
     //velocity

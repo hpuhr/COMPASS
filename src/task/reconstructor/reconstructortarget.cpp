@@ -1521,8 +1521,8 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
         return ComparisonResult::DIFFERENT;
 }
 
-//fl_unknown, fl_on_ground, fl_index
-std::tuple<bool, bool, unsigned int> ReconstructorTarget::getAltitudeState (
+//fl_unknown, fl_on_ground, alt_baro_ft
+std::tuple<bool, bool, float> ReconstructorTarget::getAltitudeState (
     const boost::posix_time::ptime& ts, 
     boost::posix_time::time_duration max_time_diff,
     const ReconstructorTarget::InterpOptions& interp_options) const
@@ -1533,7 +1533,7 @@ std::tuple<bool, bool, unsigned int> ReconstructorTarget::getAltitudeState (
 
     bool fl_unknown {true};
     bool fl_on_ground {false};
-    unsigned int fl_index {0};
+    float alt_baro_ft {0};
 
     if ((gbs && *gbs)
         || (mode_c_code && *mode_c_code <= on_ground_max_alt_ft_)
@@ -1544,16 +1544,13 @@ std::tuple<bool, bool, unsigned int> ReconstructorTarget::getAltitudeState (
     }
     else if (mode_c_code) // not on ground
     {
-        if (*mode_c_code >= 0)
-            fl_index = *mode_c_code / 1000.0; // fl / 10
-        else
-            fl_index = 0;
+        alt_baro_ft = *mode_c_code;
 
         fl_unknown = false;
         fl_on_ground = false;
     }
 
-    return std::tuple<bool, bool, unsigned int>(fl_unknown, fl_on_ground, fl_index);
+    return std::tuple<bool, bool, float>(fl_unknown, fl_on_ground, alt_baro_ft);
 }
 
 void ReconstructorTarget::updateCounts()
