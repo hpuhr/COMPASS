@@ -287,8 +287,6 @@ RESTART_SELF_ASSOC:
 
                     reconstructor().targets_container_.replaceInLookup(other_utn, utn);
 
-                    reconstructor().targets_container_.checkACADLookup();
-
                     ++num_merges_;
                 }
             }
@@ -307,6 +305,8 @@ RESTART_SELF_ASSOC:
             utns_to_remove.clear();
 
             ++run_cnt;
+
+            reconstructor().targets_container_.checkACADLookup();
 
             goto RESTART_SELF_ASSOC; // here we go again
         }
