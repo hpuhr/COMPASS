@@ -145,7 +145,8 @@ class ReconstructorBase : public Configurable
 
         unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
-        void removeUTNAndReplaceWith(unsigned int other_utn, unsigned int utn);
+        void removeUTN(unsigned int other_utn);
+        void replaceInLookup(unsigned int other_utn, unsigned int utn);
         void addToLookup(unsigned int utn, dbContent::targetReport::ReconstructorInfo& tr);
         void checkACADLookup();
 

@@ -96,7 +96,7 @@ void SimpleAssociator::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
-    selfAccociateNewUTNs();
+    selfAssociateNewUTNs();
 
     if (reconstructor().isCancelled())
         return;

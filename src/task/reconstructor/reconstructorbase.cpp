@@ -65,10 +65,9 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
 }
 
 
-void ReconstructorBase::TargetsContainer::removeUTNAndReplaceWith(unsigned int other_utn, unsigned int utn)
+void ReconstructorBase::TargetsContainer::removeUTN(unsigned int other_utn)
 {
     assert (targets_.count(other_utn));
-    assert (targets_.count(utn));
 
     targets_.erase(other_utn);
 
@@ -76,6 +75,11 @@ void ReconstructorBase::TargetsContainer::removeUTNAndReplaceWith(unsigned int o
     auto other_it = std::find(utn_vec_.begin(), utn_vec_.end(), other_utn);
     assert (other_it != utn_vec_.end());
     utn_vec_.erase(other_it);
+}
+
+void ReconstructorBase::TargetsContainer::replaceInLookup(unsigned int other_utn, unsigned int utn)
+{
+    assert (targets_.count(utn));
 
     // remove from acad lookup
     for (auto& acad_it : acad_2_utn_)
@@ -108,7 +112,6 @@ void ReconstructorBase::TargetsContainer::removeUTNAndReplaceWith(unsigned int o
                 }
             }
         }
-
     }
 }
 

@@ -58,7 +58,7 @@ class ReconstructorAssociatorBase
     void associateTargetReports();
     void associateTargetReports(std::set<unsigned int> dbcont_ids);
 
-    void selfAccociateNewUTNs();
+    void selfAssociateNewUTNs();
     void retryAssociateTargetReports();
     void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn);
     virtual void postAssociate(dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn) {};
@@ -70,7 +70,7 @@ class ReconstructorAssociatorBase
             // tries to find existing utn for target report, based on mode a/c and position, -1 if failed
     int findUTNByModeACPos (const dbContent::targetReport::ReconstructorInfo& tr);
 
-    std::vector<unsigned int> findUTNsForTarget (unsigned int utn);
+    std::vector<unsigned int> findUTNsForTarget (unsigned int utn, const std::set<unsigned int>& utns_to_ignore);
 
     //unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
