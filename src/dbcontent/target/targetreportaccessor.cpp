@@ -177,6 +177,9 @@ void TargetReportAccessor::cacheVectors()
     meta_track_num_vec_   = metaVarVector<unsigned int>(DBContent::meta_var_track_num_);
     meta_track_begin_vec_ = metaVarVector<bool>(DBContent::meta_var_track_begin_);
     meta_track_end_vec_   = metaVarVector<bool>(DBContent::meta_var_track_end_);
+
+    cat021_ecat_vec_ = varVector<unsigned int>(DBContent::var_cat021_ecat_);
+    cat021_geo_alt_acc_vec_ = varVector<unsigned char>(DBContent::var_cat021_geo_alt_accuracy_);
 }
 
 /**
@@ -222,6 +225,16 @@ boost::optional<unsigned char> TargetReportAccessor::nucp(unsigned int index) co
 boost::optional<unsigned char> TargetReportAccessor::nacp(unsigned int index) const
 {
     return getOptional<unsigned char>(cat021_nac_p_vec_, index);
+}
+
+boost::optional<unsigned int> TargetReportAccessor::ecat(unsigned int index) const
+{
+    return getOptional<unsigned int>(cat021_ecat_vec_, index);
+}
+
+boost::optional<unsigned char> TargetReportAccessor::getGeoAltAcc(unsigned int index) const
+{
+    return getOptional<unsigned char>(cat021_geo_alt_acc_vec_, index);
 }
 
 /**
