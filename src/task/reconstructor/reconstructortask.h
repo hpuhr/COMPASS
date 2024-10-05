@@ -52,9 +52,36 @@ public:
         boost::posix_time::ptime debug_timestamp_max_;
 
         bool debug_accuracy_estimation_ {false};
+        bool debug_bias_correction_ {false};
+        bool debug_geo_altitude_correction_ {false};
+
+        nlohmann::json deep_debug_accuracy_estimation; // ds type -> bool
+        nlohmann::json deep_debug_accuracy_estimation_write_wp; // ds type -> bool
+
+        bool debug_reference_calculation_ {false};
+        bool debug_kalman_chains_ {false};
+        bool debug_write_reconstruction_viewpoints_ {false};
 
         bool debugUTN(unsigned int utn) { return debug_utns_.count(utn); }
         bool debugRecNum(unsigned long rec_num) { return debug_rec_nums_.count(rec_num); }
+
+        bool deepDebugAccuracyEstimation(const std::string& ds_type)
+        {
+            return deep_debug_accuracy_estimation[ds_type];
+        }
+        void deepDebugAccuracyEstimation(const std::string& ds_type, bool value)
+        {
+            deep_debug_accuracy_estimation[ds_type] = value;
+        }
+
+        bool deepDebugAccuracyEstimationWriteVP(const std::string& ds_type)
+        {
+            return deep_debug_accuracy_estimation_write_wp[ds_type];
+        }
+        void deepDebugAccuracyEstimationWriteVP(const std::string& ds_type, bool value)
+        {
+            deep_debug_accuracy_estimation_write_wp[ds_type] = value;
+        }
     };
 
   public slots:
