@@ -41,6 +41,22 @@ class ReconstructorTask : public Task, public Configurable
 {
     Q_OBJECT
 
+public:
+    struct DebugSettings
+    {
+        bool debug_ {false};
+        std::set<unsigned int> debug_utns_;
+        std::set<unsigned long> debug_rec_nums_;
+
+        boost::posix_time::ptime debug_timestamp_min_;
+        boost::posix_time::ptime debug_timestamp_max_;
+
+        bool debug_accuracy_estimation_ {false};
+
+        bool debugUTN(unsigned int utn) { return debug_utns_.count(utn); }
+        bool debugRecNum(unsigned long rec_num) { return debug_rec_nums_.count(rec_num); }
+    };
+
   public slots:
     void dialogRunSlot();
     void dialogCancelSlot();
@@ -88,26 +104,6 @@ class ReconstructorTask : public Task, public Configurable
 
     std::set<unsigned int> disabledDataSources() const;
 
-    bool debug() const;
-    void debug(bool value);
-
-    const std::set<unsigned int>& debugUTNs() const;
-    void debugUTNs(const std::set<unsigned int>& utns);
-    bool debugUTN(unsigned int utn);
-
-    const std::set<unsigned long>& debugRecNums() const;
-    void debugRecNums(const std::set<unsigned long>& rec_nums);
-    bool debugRecNum(unsigned long rec_num);
-
-    const boost::posix_time::ptime& debugTimestampMin() const;
-    void debugTimestampMin(const boost::posix_time::ptime& ts);
-
-    const boost::posix_time::ptime& debugTimestampMax() const;
-    void debugTimestampMax(const boost::posix_time::ptime& ts);
-
-    bool debugAccuracyEstimation() const;
-    void debugAccuracyEstimation(bool value);
-
     bool useDStype(const std::string& ds_type) const;
     void useDSType(const std::string& ds_type, bool value);
     bool useDataSource(unsigned int ds_id) const;
@@ -128,6 +124,8 @@ class ReconstructorTask : public Task, public Configurable
 
     bool skipReferenceDataWriting() const;
     void skipReferenceDataWriting(bool newSkip_reference_data_writing);
+
+    DebugSettings& debugSettings() { return debug_settings_; }
 
 protected:
     std::string current_reconstructor_str_;
@@ -155,14 +153,7 @@ protected:
     std::unique_ptr<ReconstructorBase::DataSlice> processing_slice_;
     std::unique_ptr<ReconstructorBase::DataSlice> writing_slice_;
 
-    bool debug_ {false};
-    std::set<unsigned int> debug_utns_;
-    std::set<unsigned long> debug_rec_nums_;
-
-    boost::posix_time::ptime debug_timestamp_min_;
-    boost::posix_time::ptime debug_timestamp_max_;
-
-    bool debug_accuracy_estimation_ {false};
+    DebugSettings debug_settings_;
 
     std::future<void> delcalcref_future_;
     std::future<void> deltgts_future_;

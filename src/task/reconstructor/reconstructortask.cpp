@@ -53,11 +53,6 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 {
     tooltip_ = "Associate target reports and calculate reference trajectories based on all DB Content.";
 
-    registerParameter("debug", &debug_, debug_);
-
-    // registerParameter("debug_accuracy_estimation", &debug_accuracy_estimation_,
-    //                   debug_accuracy_estimation_);
-
     registerParameter("use_dstypes", &use_dstypes_, nlohmann::json::object());
     registerParameter("use_data_sources", &use_data_sources_, nlohmann::json::object());
     registerParameter("use_data_sources_lines", &use_data_sources_lines_, nlohmann::json::object());
@@ -74,7 +69,9 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
             ))
         current_reconstructor_str_ = ScoringUMReconstructorName;
 
-    registerParameter("debug_accuracy_estimation", &debug_accuracy_estimation_, debug_accuracy_estimation_);
+    registerParameter("debug", &debug_settings_.debug_, debug_settings_.debug_);
+    registerParameter("debug_accuracy_estimation", &debug_settings_.debug_accuracy_estimation_,
+                      debug_settings_.debug_accuracy_estimation_);
 
     createSubConfigurables();
 }
@@ -347,80 +344,6 @@ std::set<unsigned int> ReconstructorTask::disabledDataSources() const
     }
 
     return disabled_ds;
-}
-
-const std::set<unsigned int>& ReconstructorTask::debugUTNs() const
-{
-    return debug_utns_;
-}
-
-void ReconstructorTask::debugUTNs(const std::set<unsigned int>& utns)
-{
-    loginf << "ReconstructorTask: debugRecNums: values '" << String::compress(utns, ',') << "'";
-
-    debug_utns_ = utns;
-}
-
-bool ReconstructorTask::debugUTN(unsigned int utn)
-{
-    if (!debug_)
-        return false;
-
-    return debug_utns_.count(utn);
-}
-
-const std::set<unsigned long>& ReconstructorTask::debugRecNums() const
-{
-    return debug_rec_nums_;
-}
-
-void ReconstructorTask::debugRecNums(const std::set<unsigned long>& rec_nums)
-{
-    loginf << "ReconstructorTask: debugRecNums: values '" << String::compress(rec_nums, ',') << "'";
-
-    debug_rec_nums_ = rec_nums;
-}
-
-bool ReconstructorTask::debugRecNum(unsigned long rec_num)
-{
-    if (!debug_)
-        return false;
-
-    return debug_rec_nums_.count(rec_num);
-}
-
-const boost::posix_time::ptime& ReconstructorTask::debugTimestampMin() const
-{
-    return debug_timestamp_min_;
-}
-
-void ReconstructorTask::debugTimestampMin(const boost::posix_time::ptime& ts)
-{
-    loginf << "ReconstructorTask: debugTimestampMin: value '" << Utils::Time::toString(ts) << "'";
-
-    debug_timestamp_min_ = ts;
-}
-
-const boost::posix_time::ptime& ReconstructorTask::debugTimestampMax() const
-{
-    return debug_timestamp_max_;
-}
-
-void ReconstructorTask::debugTimestampMax(const boost::posix_time::ptime& ts)
-{
-    loginf << "ReconstructorTask: debugTimestampMax: value '" << Utils::Time::toString(ts) << "'";
-
-    debug_timestamp_max_ = ts;
-}
-
-bool ReconstructorTask::debugAccuracyEstimation() const
-{
-    return debug_accuracy_estimation_;
-}
-
-void ReconstructorTask::debugAccuracyEstimation(bool value)
-{
-    debug_accuracy_estimation_ = value;
 }
 
 void ReconstructorTask::dialogRunSlot()
@@ -892,7 +815,7 @@ void ReconstructorTask::writeDoneSlot()
 
         updateProgressSlot("Reference Calculation Done", true);
 
-        if (debug_)
+        if (debug_settings_.debug_)
         {
             //write some additional stuff before saving
             if (currentReconstructor())
@@ -983,7 +906,7 @@ void ReconstructorTask::runCancelledSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    if (debug_)
+    if (debug_settings_.debug_)
         saveDebugViewPoints();
 
     currentReconstructor()->reset();
@@ -1178,16 +1101,6 @@ bool ReconstructorTask::skipReferenceDataWriting() const
 void ReconstructorTask::skipReferenceDataWriting(bool value)
 {
     skip_reference_data_writing_ = value;
-}
-
-bool ReconstructorTask::debug() const
-{
-    return debug_;
-}
-
-void ReconstructorTask::debug(bool value)
-{
-    debug_ = value;
 }
 
 void ReconstructorTask::checkSubConfigurables()

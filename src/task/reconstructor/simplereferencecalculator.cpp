@@ -432,13 +432,13 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 {
     refs.resetCounts();
 
-    bool general_debug = reconstructor_.task().debug();
-    bool debug_target  = general_debug && reconstructor_.task().debugUTNs().count(refs.utn);
+    bool general_debug = reconstructor_.task().debugSettings().debug_;
+    bool debug_target  = general_debug && reconstructor_.task().debugSettings().debugUTN(refs.utn);
 
-    const auto& debug_rec_nums = reconstructor_.task().debugRecNums();
+    const auto& debug_rec_nums = reconstructor_.task().debugSettings().debug_rec_nums_;
 
-    const auto& debug_ts_min  = reconstructor_.task().debugTimestampMin();
-    const auto& debug_ts_max  = reconstructor_.task().debugTimestampMax();
+    const auto& debug_ts_min  = reconstructor_.task().debugSettings().debug_timestamp_min_;
+    const auto& debug_ts_max  = reconstructor_.task().debugSettings().debug_timestamp_max_;
 
     const auto& slice_t0 = reconstructor_.currentSlice().slice_begin_;
     const auto& slice_t1 = reconstructor_.currentSlice().next_slice_begin_;
