@@ -72,6 +72,24 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
     registerParameter("debug", &debug_settings_.debug_, debug_settings_.debug_);
     registerParameter("debug_accuracy_estimation", &debug_settings_.debug_accuracy_estimation_,
                       debug_settings_.debug_accuracy_estimation_);
+    registerParameter("debug_bias_correction", &debug_settings_.debug_bias_correction_,
+                      debug_settings_.debug_bias_correction_);
+    registerParameter("debug_geo_altitude_correction", &debug_settings_.debug_geo_altitude_correction_,
+                      debug_settings_.debug_geo_altitude_correction_);
+
+    registerParameter("deep_debug_accuracy_estimation", &debug_settings_.deep_debug_accuracy_estimation_,
+                      debug_settings_.deep_debug_accuracy_estimation_);
+    registerParameter("deep_debug_accuracy_estimation_write_wp",
+                      &debug_settings_.deep_debug_accuracy_estimation_write_wp_,
+                      debug_settings_.deep_debug_accuracy_estimation_write_wp_);
+
+    registerParameter("debug_reference_calculation", &debug_settings_.debug_reference_calculation_,
+                      debug_settings_.debug_reference_calculation_);
+    registerParameter("debug_kalman_chains", &debug_settings_.debug_kalman_chains_,
+                      debug_settings_.debug_kalman_chains_);
+    registerParameter("debug_write_reconstruction_viewpoints",
+                      &debug_settings_.debug_write_reconstruction_viewpoints_,
+                      debug_settings_.debug_write_reconstruction_viewpoints_);
 
     createSubConfigurables();
 }
