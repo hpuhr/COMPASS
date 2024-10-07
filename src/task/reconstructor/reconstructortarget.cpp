@@ -223,7 +223,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
 
     TargetReportAddResult result = TargetReportAddResult::Skipped;
 
-    if (add_to_tracker && !tr.do_not_use_position_)
+    if (add_to_tracker && !tr.doNotUsePosition())
     {
         if (!hasTracker())
         {
@@ -837,7 +837,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     tie(lower, upper) = dataFor(
         timestamp, d_max,
-        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return !tr.do_not_use_position_; });
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return !tr.doNotUsePosition(); });
 
     if (lower && !upper) // exact time
     {
@@ -955,7 +955,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     tie(lower_rec_num, upper_rec_num) = dataFor(
         timestamp, d_max,
-        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return !tr.do_not_use_position_; });
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return !tr.doNotUsePosition(); });
 
     if (lower_rec_num && !upper_rec_num) // exact time
     {

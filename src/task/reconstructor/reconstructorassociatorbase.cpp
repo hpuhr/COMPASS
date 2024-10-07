@@ -400,12 +400,15 @@ void ReconstructorAssociatorBase::associate(
     // if (do_debug)
     //     loginf << "DBG validate";
 
-    reconstructor().acc_estimator_->validate(tr);
+    reconstructor().acc_estimator_->validate(tr); // do counting
 
     // if (do_debug)
     //     loginf << "DBG outlier detect";
 
-    doOutlierDetection(tr, utn, do_debug); //124976,129072
+    tr.is_pos_outlier_ = false;
+
+    if (!tr.doNotUsePosition())
+        doOutlierDetection(tr, utn, do_debug); //124976,129072
 
     // if (do_debug)
     //     loginf << "DBG addTargetReport";
@@ -804,7 +807,7 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
 
             const dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rn_it);
 
-            if (tr.do_not_use_position_ || !canGetPositionOffsetTargets(tr.timestamp_, target, other))
+            if (tr.doNotUsePosition() || !canGetPositionOffsetTargets(tr.timestamp_, target, other))
             {
                 ++pos_skipped_cnt;
                 continue;

@@ -250,7 +250,7 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
     {
         const auto& tr_info = reconstructor_.target_reports_.at(elem.second);
 
-        if (tr_info.do_not_use_position_)
+        if (tr_info.doNotUsePosition())
             continue;
 
         reconstruction::Measurement mm;

@@ -861,7 +861,7 @@ void ReconstructorBase::createTargetReports()
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
 
-                info.do_not_use_position_ =
+                info.unsused_ds_pos_ =
                     !info.position().has_value()
                         || (unused_ds_ids.count(info.ds_id_)
                         || (unused_lines.count(info.ds_id_) && unused_lines.at(info.ds_id_).count(info.line_id_)));
