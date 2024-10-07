@@ -394,7 +394,8 @@ void ReconstructorAssociatorBase::associate(
     assert (reconstructor().targets_container_.targets_.count(utn));
 
     if(do_debug)
-        loginf << "DBG tr " << tr.asStr() << " assoc to utn " << reconstructor().targets_container_.targets_.at(utn).asStr();
+        loginf << "DBG tr " << tr.asStr() << " assoc to utn "
+               << reconstructor().targets_container_.targets_.at(utn).asStr();
 
     // check if position usable
     // if (do_debug)
@@ -408,7 +409,7 @@ void ReconstructorAssociatorBase::associate(
     tr.is_pos_outlier_ = false;
 
     if (!tr.doNotUsePosition())
-        doOutlierDetection(tr, utn, do_debug); //124976,129072
+        reconstructor().acc_estimator_->doOutlierDetection(tr, utn, do_debug); //124976,129072
 
     // if (do_debug)
     //     loginf << "DBG addTargetReport";

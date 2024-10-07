@@ -43,6 +43,19 @@ class ReconstructorAssociatorBase
         float avg_distance_{0};
     };
 
+    virtual bool canGetPositionOffsetTR(
+        const dbContent::targetReport::ReconstructorInfo& tr,
+        const dbContent::ReconstructorTarget& target, bool use_max_distance=true) = 0;
+    virtual boost::optional<std::tuple<double, double, double>> getPositionOffsetTR(
+        const dbContent::targetReport::ReconstructorInfo& tr,
+        const dbContent::ReconstructorTarget& target,
+        bool do_debug,
+        const boost::optional<unsigned int>& thread_id,
+        reconstruction::PredictionStats* stats = nullptr) = 0;
+
+    virtual boost::optional<bool> isTargetAccuracyAcceptable(
+        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug) = 0;
+
   protected:
 
     boost::posix_time::time_duration max_time_diff_;
@@ -74,15 +87,7 @@ class ReconstructorAssociatorBase
 
     //unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
-    virtual bool canGetPositionOffsetTR(
-        const dbContent::targetReport::ReconstructorInfo& tr,
-        const dbContent::ReconstructorTarget& target, bool use_max_distance=true) = 0;
-    virtual boost::optional<std::tuple<double, double, double>> getPositionOffsetTR(
-        const dbContent::targetReport::ReconstructorInfo& tr,
-        const dbContent::ReconstructorTarget& target, 
-        bool do_debug,
-        const boost::optional<unsigned int>& thread_id,
-        reconstruction::PredictionStats* stats = nullptr) = 0;
+
 
     virtual bool canGetPositionOffsetTargets(
         const boost::posix_time::ptime& ts,
@@ -112,8 +117,6 @@ class ReconstructorAssociatorBase
     virtual std::tuple<DistanceClassification, double> checkPositionOffsetScore
         (double distance_m, double sum_stddev_est, bool secondary_verified) = 0;
 
-    virtual boost::optional<bool> isTargetAccuracyAcceptable(
-        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug) = 0;
     virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) = 0;
 
     virtual ReconstructorBase& reconstructor() = 0;
