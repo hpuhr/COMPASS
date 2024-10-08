@@ -103,6 +103,8 @@ public:
     bool filter_tod_active_{false};
     bool filter_position_active_{false};
     bool filter_modec_active_{false};
+
+    bool obfuscate_secondary_info_{false};
 };
 
 /**

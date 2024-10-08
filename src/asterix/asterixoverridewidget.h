@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXOVERRIDEWIDGET_H
-#define ASTERIXOVERRIDEWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -50,6 +49,8 @@ class ASTERIXOverrideWidget : public QWidget
     void modeCMinEditedSlot(const QString& value_str);
     void modeCMaxEditedSlot(const QString& value_str);
 
+    void obfuscateSecondaryInfoCheckedSlot();
+
   public:
     ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* parent = nullptr);
     virtual ~ASTERIXOverrideWidget();
@@ -73,6 +74,6 @@ class ASTERIXOverrideWidget : public QWidget
     QCheckBox* filter_modec_active_check_{nullptr};
     QLineEdit* filter_modec_min_edit_{nullptr};
     QLineEdit* filter_modec_max_edit_{nullptr};
-};
 
-#endif  // ASTERIXOVERRIDEWIDGET_H
+    QCheckBox* obfuscate_secondary_info_check_{nullptr};
+};

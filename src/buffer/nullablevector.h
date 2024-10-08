@@ -52,8 +52,9 @@ public:
 
     const T get(unsigned int index) const;
 
-    template<typename T_ = T, typename std::enable_if<!std::is_integral<T_>::value>::type* = nullptr>
-    T_& getRef(unsigned int index)
+    //template<typename T_ = T, typename std::enable_if<!std::is_integral<T_>::value>::type* = nullptr>
+    //T_& getRef(unsigned int index)
+    T& getRef(unsigned int index)
     {
         logdbg << "NullableVector " << property_.name() << ": getRef: index " << index;
         if (BUFFER_PEDANTIC_CHECKING)

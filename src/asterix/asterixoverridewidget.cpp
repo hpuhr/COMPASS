@@ -165,6 +165,18 @@ ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* p
     connect(filter_modec_max_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::modeCMaxEditedSlot);
     grid->addWidget(filter_modec_max_edit_, row, 2);
 
+    // obfuscate
+
+
+    ++row;
+
+    grid->addWidget(new QLabel("Obfuscate Secondary Information"), row, 0);
+
+    obfuscate_secondary_info_check_ = new QCheckBox();
+    connect(obfuscate_secondary_info_check_, &QCheckBox::clicked,
+            this, &ASTERIXOverrideWidget::obfuscateSecondaryInfoCheckedSlot);
+    grid->addWidget(obfuscate_secondary_info_check_, row, 1);
+
     main_layout->addLayout(grid);
 
     main_layout->addStretch();
@@ -213,6 +225,9 @@ void ASTERIXOverrideWidget::updateSlot()
     filter_modec_min_edit_->setText(QString::number(task_.settings().filter_modec_min_));
     assert(filter_modec_max_edit_);
     filter_modec_max_edit_->setText(QString::number(task_.settings().filter_modec_max_));
+
+    assert(obfuscate_secondary_info_check_);
+    obfuscate_secondary_info_check_->setChecked(task_.settings().obfuscate_secondary_info_);
 }
 
 void ASTERIXOverrideWidget::overrideActiveCheckedSlot()
@@ -326,4 +341,12 @@ void ASTERIXOverrideWidget::modeCMaxEditedSlot(const QString& value_str)
     double value = value_str.toDouble();
 
     task_.settings().filter_modec_max_ = value;
+}
+
+void ASTERIXOverrideWidget::obfuscateSecondaryInfoCheckedSlot()
+{
+    loginf << "ASTERIXOverrideWidget: obfuscateSecondaryInfoCheckedSlot";
+    assert(obfuscate_secondary_info_check_);
+
+    task_.settings().obfuscate_secondary_info_ = obfuscate_secondary_info_check_->checkState() == Qt::Checked;
 }
