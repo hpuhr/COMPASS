@@ -33,8 +33,6 @@ class ASTERIXOverrideWidget : public QWidget
   public slots:
     void updateSlot();
 
-    void ignoreTimeJumpsCheckedSlot();
-
     void overrideActiveCheckedSlot();
     void todOffsetEditedSlot(const QString& value);
 
@@ -58,8 +56,6 @@ class ASTERIXOverrideWidget : public QWidget
 
   protected:
     ASTERIXImportTask& task_;
-
-    QCheckBox* ignore_timejumps_check_{nullptr};
 
     QCheckBox* override_active_check_{nullptr};
     QLineEdit* tod_offset_edit_{nullptr};

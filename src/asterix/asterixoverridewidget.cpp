@@ -41,15 +41,7 @@ ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* p
 
     unsigned int row = 0;
 
-    grid->addWidget(new QLabel("Ignore 24h Time Jumps"), row, 0);
-
-    ignore_timejumps_check_ = new QCheckBox();
-    connect(ignore_timejumps_check_, &QCheckBox::clicked, this, &ASTERIXOverrideWidget::ignoreTimeJumpsCheckedSlot);
-    grid->addWidget(ignore_timejumps_check_, row, 1);
-
     // tod override
-
-    ++row;
 
     grid->addWidget(new QLabel("Override Time of Day"), row, 0);
 
@@ -186,10 +178,6 @@ ASTERIXOverrideWidget::~ASTERIXOverrideWidget() {}
 
 void ASTERIXOverrideWidget::updateSlot()
 {
-    // ignore tj
-    assert(ignore_timejumps_check_);
-    ignore_timejumps_check_->setChecked(task_.settings().ignore_time_jumps_);
-
     // tod override
     assert(override_active_check_);
     override_active_check_->setChecked(task_.settings().override_tod_active_);
@@ -225,14 +213,6 @@ void ASTERIXOverrideWidget::updateSlot()
     filter_modec_min_edit_->setText(QString::number(task_.settings().filter_modec_min_));
     assert(filter_modec_max_edit_);
     filter_modec_max_edit_->setText(QString::number(task_.settings().filter_modec_max_));
-}
-
-void ASTERIXOverrideWidget::ignoreTimeJumpsCheckedSlot()
-{
-    loginf << "ASTERIXOverrideWidget: ignoreTimeJumpsCheckedSlot";
-    assert(ignore_timejumps_check_);
-
-    task_.settings().ignore_time_jumps_ = ignore_timejumps_check_->checkState() == Qt::Checked;
 }
 
 void ASTERIXOverrideWidget::overrideActiveCheckedSlot()
