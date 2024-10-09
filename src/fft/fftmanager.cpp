@@ -408,6 +408,11 @@ std::pair<bool, float> FFTManager::isFromFFT(
         }
     }
 
+    // unknown fft
+
+    if (mode_a_code.has_value() && mode_a_code.value() == 4095) // 7777
+        return {true, 0}; // is fft, but unknown altitude, better to correct with 0 alt
+
     return {false, 0}; // no matches, not altitude info
 }
 
