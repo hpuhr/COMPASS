@@ -1029,7 +1029,20 @@ static const std::vector<std::string> ship_names = {
     "LOND",  // London
     "PARI",  // Paris
     "BERL",  // Berlin
-    "MINS"   // Minsk
+    "MINS",  // Minsk
+    "ROCI",   // Rocinante
+    "DONN",   // Donnager
+    "NAVA",   // Navoo
+    "TYNA",   // Tynan
+    "AGAT",   // Agatha King
+    "BEHE",   // Behemoth
+    "CONT",   // Contorta (Pinus Contorta)
+    "PELL",   // Pella
+    "SCOP",   // Scopuli
+    "BARB",   // Barbapiccola
+    "RAWE",   // Raweside
+    "HYGE",   // Hygiea
+    "ARBO"    // Arboghast
 };
 
 // Function to obfuscate value string
