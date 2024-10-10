@@ -124,20 +124,28 @@ void ReferenceCalculator::prepareForCurrentSlice()
     auto ThresRemove = reconstructor_.currentSlice().remove_before_time_;
     auto ThresJoin   = getJoinThreshold();
 
-            //remove previous updates which are no longer needed (either too old or above the join threshold)
-    for (auto& ref : references_)
+            //remove targets & previous updates which are no longer needed (either too old or above the join threshold)
+    //for (auto& ref : references_)
+    for (auto ref_it = references_.begin(); ref_it != references_.end(); )
     {
-        auto it = std::remove_if(ref.second.updates.begin(),
-                                 ref.second.updates.end(),
-                                 [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                                                                     update.t >= ThresJoin; });
-        ref.second.updates.erase(it, ref.second.updates.end());
+        if (!reconstructor_.targets_container_.targets_.count(ref_it->first)) // deleted target, remove
+            ref_it = references_.erase(ref_it);
+        else // target still exists, remove updates
+        {
+            auto it = std::remove_if(ref_it->second.updates.begin(),
+                                     ref_it->second.updates.end(),
+                                     [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                                                                         update.t >= ThresJoin; });
+            ref_it->second.updates.erase(it, ref_it->second.updates.end());
 
-        auto it_s = std::remove_if(ref.second.updates_smooth.begin(),
-                                   ref.second.updates_smooth.end(),
-                                   [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                                                                       update.t >= ThresJoin; });
-        ref.second.updates_smooth.erase(it_s, ref.second.updates_smooth.end());
+            auto it_s = std::remove_if(ref_it->second.updates_smooth.begin(),
+                                       ref_it->second.updates_smooth.end(),
+                                       [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                                                                           update.t >= ThresJoin; });
+            ref_it->second.updates_smooth.erase(it_s, ref_it->second.updates_smooth.end());
+
+            ++ref_it;
+        }
     }
 
     //reset data structs
@@ -204,7 +212,7 @@ bool ReferenceCalculator::computeReferences()
  */
 void ReferenceCalculator::generateMeasurements()
 {
-    for (const auto& target : reconstructor_.targets_)
+    for (const auto& target : reconstructor_.targets_container_.targets_)
         generateTargetMeasurements(target.second);
 }
 
@@ -242,7 +250,7 @@ void ReferenceCalculator::generateLineMeasurements(const dbContent::Reconstructo
     {
         const auto& tr_info = reconstructor_.target_reports_.at(elem.second);
 
-        if (tr_info.do_not_use_position_)
+        if (tr_info.doNotUsePosition())
             continue;
 
         reconstruction::Measurement mm;
@@ -430,13 +438,13 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 {
     refs.resetCounts();
 
-    bool general_debug = reconstructor_.task().debug();
-    bool debug_target  = general_debug && reconstructor_.task().debugUTNs().count(refs.utn);
+    bool general_debug = reconstructor_.task().debugSettings().debug_;
+    bool debug_target  = general_debug && reconstructor_.task().debugSettings().debugUTN(refs.utn);
 
-    const auto& debug_rec_nums = reconstructor_.task().debugRecNums();
+    const auto& debug_rec_nums = reconstructor_.task().debugSettings().debug_rec_nums_;
 
-    const auto& debug_ts_min  = reconstructor_.task().debugTimestampMin();
-    const auto& debug_ts_max  = reconstructor_.task().debugTimestampMax();
+    const auto& debug_ts_min  = reconstructor_.task().debugSettings().debug_timestamp_min_;
+    const auto& debug_ts_max  = reconstructor_.task().debugSettings().debug_timestamp_max_;
 
     const auto& slice_t0 = reconstructor_.currentSlice().slice_begin_;
     const auto& slice_t1 = reconstructor_.currentSlice().next_slice_begin_;
@@ -801,9 +809,9 @@ void ReferenceCalculator::updateReferences()
 {
     for (auto& ref : references_)
     {
-        assert(reconstructor_.targets_.count(ref.first));
+        assert(reconstructor_.targets_container_.targets_.count(ref.first));
 
-        auto& target = reconstructor_.targets_.at(ref.first);
+        auto& target = reconstructor_.targets_container_.targets_.at(ref.first);
         //target.references_ = std::move(ref.second.references);
 
         target.references_.clear();
@@ -883,7 +891,7 @@ bool ReferenceCalculator::writeTargetData(TargetReferences& refs,
 bool ReferenceCalculator::shallAddAnnotationData() const
 {
     //add only if in last iteration
-    return reconstructor_.isLastSliceProcessingRun(); 
+    return reconstructor_.isLastSliceProcessingRun();
 }
 
 /**
