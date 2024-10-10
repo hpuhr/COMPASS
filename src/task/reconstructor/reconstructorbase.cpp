@@ -1223,6 +1223,15 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     createMeasurement(mm, it->second, target);
 }
 
+const dbContent::targetReport::ReconstructorInfo* ReconstructorBase::getInfo(unsigned long rec_num) const
+{
+    auto it = target_reports_.find(rec_num);
+    if (it == target_reports_.end())
+        return nullptr;
+
+    return &it->second;
+}
+
 reconstruction::KalmanChainPredictors& ReconstructorBase::chainPredictors()
 {
     assert(chain_predictors_);

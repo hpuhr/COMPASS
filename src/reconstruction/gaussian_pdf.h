@@ -27,36 +27,34 @@
 class GaussianPDF
 {
 public:
-    GaussianPDF(const Eigen::MatrixXd& P_cov)
+    enum class NormalizeMode
     {
-        //store decomposition for later evaluations
-        chol_P_cov_ = Eigen::LLT<Eigen::MatrixXd>(P_cov);
-        LogSqrt2Pi_ = 0.5 * std::log(2 * M_PI);
-    }
+        Sum = 0,
+        Log
+    };
+
+    GaussianPDF(const Eigen::MatrixXd& P_cov,
+                double eps_lh = LikelihoodEpsilonDefault,
+                double eps_llh = LogLikelihoodEpsilonDefault);
     virtual ~GaussianPDF() = default;
 
-    /**
-    */
-    bool valid() const
-    {
-        return (chol_P_cov_.info() == Eigen::Success);
-    }
+    bool valid() const;
 
-    /**
-    */
-    boost::optional<double> eval(const Eigen::VectorXd& x) const
-    {
-        // Handle non positive definite covariance somehow:
-        if(!valid())
-            return {};
+    boost::optional<double> likelihood(const Eigen::VectorXd& x, bool check_eps) const;
+    boost::optional<double> logLikelihood(const Eigen::VectorXd& x, bool check_eps) const;
 
-        const Eigen::LLT<Eigen::MatrixXd>::Traits::MatrixL& L = chol_P_cov_.matrixL();
-        double quadform = (L.solve(x)).squaredNorm();
+    static void normalizeLikelihoods(Eigen::VectorXd& likelihoods, 
+                                     NormalizeMode mode, 
+                                     double eps = 1e-09,
+                                     bool debug = false);
 
-        return std::max(std::numeric_limits<double>::epsilon(), std::exp(-x.rows() * LogSqrt2Pi_ - 0.5 * quadform) / L.determinant());
-    }
+    static const double LikelihoodEpsilonDefault;
+    static const double LogLikelihoodEpsilonDefault;
+    static const double LogSqrt2Pi;
 
 private:
     Eigen::LLT<Eigen::MatrixXd> chol_P_cov_;
-    double                      LogSqrt2Pi_;
+
+    double eps_lh_;
+    double eps_llh_;
 };

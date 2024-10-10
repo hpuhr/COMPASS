@@ -201,6 +201,8 @@ class ReconstructorBase : public Configurable
     void createMeasurement(reconstruction::Measurement& mm, 
                            unsigned long rec_num,
                            const dbContent::ReconstructorTarget* target = nullptr);
+    
+    const dbContent::targetReport::ReconstructorInfo* getInfo(unsigned long rec_num) const;
 
     const dbContent::TargetReportAccessor& accessor(const dbContent::targetReport::ReconstructorInfo& tr) const;
 

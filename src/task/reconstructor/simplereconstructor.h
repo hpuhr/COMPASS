@@ -6,7 +6,7 @@
 #include "global.h"
 #include "reconstructortarget.h"
 #include "simpleassociator.h"
-#include "simplereferencecalculator.h"
+#include "referencecalculator.h"
 
 class SimpleReconstructorSettings : public ReconstructorBaseSettings
 {
@@ -56,7 +56,7 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
 
     SimpleReconstructorSettings settings_;
     SimpleAssociator associatior_;
-    SimpleReferenceCalculator ref_calculator_;
+    ReferenceCalculator ref_calculator_;
 
     virtual void processSlice_impl() override;
 };

@@ -1,5 +1,21 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
 
-#include "simplereferencecalculatorwidget.h"
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "referencecalculatorwidget.h"
 
 #include "reconstructorbase.h"
 
@@ -16,7 +32,7 @@
 
 /**
 */
-SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBase& reconstructor)
+ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstructor)
 :   reconstructor_(reconstructor)
 {
     auto* settings = &reconstructor_.referenceCalculatorSettings();
@@ -244,11 +260,11 @@ SimpleReferenceCalculatorWidget::SimpleReferenceCalculatorWidget(ReconstructorBa
 
 /**
 */
-SimpleReferenceCalculatorWidget::~SimpleReferenceCalculatorWidget() = default;
+ReferenceCalculatorWidget::~ReferenceCalculatorWidget() = default;
 
 /**
 */
-void SimpleReferenceCalculatorWidget::updateEnabledStates()
+void ReferenceCalculatorWidget::updateEnabledStates()
 {
     bool dynamic_Q          = dynamic_Q_box_->isChecked();
     bool smooth             = smooth_rts_box_->isChecked();
@@ -277,7 +293,7 @@ void SimpleReferenceCalculatorWidget::updateEnabledStates()
 
 /**
 */
-void SimpleReferenceCalculatorWidget::update()
+void ReferenceCalculatorWidget::update()
 {
     const auto& settings = reconstructor_.referenceCalculatorSettings();
 

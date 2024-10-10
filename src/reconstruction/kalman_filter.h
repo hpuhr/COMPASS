@@ -119,8 +119,8 @@ public:
     void setZFunc(const ZFunc& func) { z_func_ = func; }
     void setRFunc(const RFunc& func) { R_func_ = func; }
 
-    boost::optional<double> logLikelihood() const;
-    boost::optional<double> likelihood() const;
+    boost::optional<double> logLikelihood(bool check_eps) const;
+    boost::optional<double> likelihood(bool check_eps) const;
     boost::optional<double> mahalanobis() const;
 
     kalman::KalmanState state(bool xP_only = false) const;
@@ -158,7 +158,8 @@ public:
     static Matrix continuousWhiteNoise(size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
     static void continuousWhiteNoise(Matrix& Q_noise, size_t dim, double dt = 1.0, double spectral_density = 1.0, size_t block_size = 1);
 
-    static boost::optional<double> pdf(const Vector& x, const Matrix& P);
+    static boost::optional<double> likelihood(const Vector& x, const Matrix& P, bool check_eps);
+    static boost::optional<double> logLikelihood(const Vector& x, const Matrix& P, bool check_eps);
 
 protected:
 #if USE_EXPERIMENTAL_SOURCE
