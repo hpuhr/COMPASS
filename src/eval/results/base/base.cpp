@@ -25,6 +25,7 @@
 #include "eval/results/report/section_id.h"
 
 #include "eval/requirement/base/base.h"
+#include "number.h"
 
 #include "sectorlayer.h"
 //#include "logger.h"
@@ -41,6 +42,7 @@
 #include <cassert>
 
 using namespace std;
+using namespace Utils;
 
 namespace EvaluationRequirementResult
 {
@@ -317,9 +319,10 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
 
 /**
 */
-QString Base::formatValue(double v, int precision) const
+double Base::formatValue(double v, int precision) const
 {
-    return QString::fromStdString(Utils::String::doubleToStringPrecision(v, precision));
+    //return QString::fromStd(Utils::String::doubleToStringPrecision(v, precision));
+    return Number::round(v, precision);
 }
 
 /**

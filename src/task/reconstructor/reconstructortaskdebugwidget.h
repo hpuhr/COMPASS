@@ -15,8 +15,6 @@ class ReconstructorTaskDebugWidget : public QWidget
   signals:
 
   public slots:
-    void toggleDebugSlot();
-
     void utnsChangedSlot(const QString& value);
     void recNumsChangedSlot(const QString& value);
 
@@ -35,8 +33,18 @@ class ReconstructorTaskDebugWidget : public QWidget
 
     QLineEdit* utns_edit_{nullptr};
     QLineEdit* rec_nums_edit_{nullptr};
+
     QLineEdit* timestamp_min_edit_{nullptr};
     QLineEdit* timestamp_max_edit_{nullptr};
 
-    QCheckBox* debug_accuracy_est_box_{nullptr};
+    QCheckBox* debug_accuracy_est_check_{nullptr};
+    QCheckBox* debug_bias_correction_check_{nullptr};
+    QCheckBox* debug_geo_altitude_correction_check_{nullptr};
+
+    std::map<std::string, QCheckBox*> deep_debug_accuracy_estimation_checks_;
+    std::map<std::string, QCheckBox*> deep_debug_accuracy_estimation_write_vp_checks_;
+
+    QCheckBox* debug_reference_calculation_check_{nullptr};
+    QCheckBox* debug_kalman_chains_check_{nullptr};
+    QCheckBox* debug_write_reconstruction_viewpoints_check_{nullptr};
 };

@@ -16,6 +16,9 @@
  */
 
 #include "eval/results/base/probabilitybase.h"
+#include "number.h"
+
+using namespace Utils;
 
 namespace EvaluationRequirementResult
 {
@@ -95,7 +98,9 @@ double SingleProbabilityBase::invertProb(double prob) const
 */
 QVariant SingleProbabilityBase::formatProbability(double prob)
 {
-    return Utils::String::percentToString(std::round(prob * 10000.0) / 100.0, 2).c_str();
+    //return Utils::String::percentToString(std::round(prob * 10000.0) / 100.0, 2).c_str();
+
+    return Number::round(100.0 * prob, 2);
 }
 
 /**

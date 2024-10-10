@@ -41,7 +41,7 @@ void ReconstructorAssociatorBase::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
-    checkACADLookup();
+    reconstructor().targets_container_.checkACADLookup();
 
     if (reconstructor().isCancelled())
         return;
@@ -49,14 +49,14 @@ void ReconstructorAssociatorBase::associateNewData()
     start_time = boost::posix_time::microsec_clock::local_time();
 
     // self-associate created utns
-    selfAccociateNewUTNs();
+    selfAssociateNewUTNs();
 
     time_assoc_new_utns_ += boost::posix_time::microsec_clock::local_time() - start_time;
 
     if (reconstructor().isCancelled())
         return;
 
-    checkACADLookup();
+    reconstructor().targets_container_.checkACADLookup();
 
     if (reconstructor().isCancelled())
         return;
@@ -73,13 +73,10 @@ void ReconstructorAssociatorBase::associateNewData()
         return;
 
     // clear new flags
-    for (auto& tgt_it : reconstructor().targets_)
+    for (auto& tgt_it : reconstructor().targets_container_.targets_)
         tgt_it.second.created_in_current_slice_ = false;
 
     unassoc_rec_nums_.clear();
-
-    //    reconstructor().acc_estimator_->analyzeAssociatedDistances();
-    //    reconstructor().acc_estimator_->clearAssociatedDistances();
 
     loginf << "ReconstructorAssociatorBase: associateNewData: time_assoc_trs " << Time::toString(time_assoc_trs_)
            << " time_assoc_new_utns " << Time::toString(time_assoc_new_utns_)
@@ -93,10 +90,10 @@ void ReconstructorAssociatorBase::reset()
 {
     logdbg << "ReconstructorAssociatorBase: reset";
 
-    utn_vec_.clear();
-    acad_2_utn_.clear();
-    acid_2_utn_.clear();
-    tn2utn_.clear();
+    reconstructor().targets_container_.utn_vec_.clear();
+    reconstructor().targets_container_.acad_2_utn_.clear();
+    reconstructor().targets_container_.acid_2_utn_.clear();
+    reconstructor().targets_container_.tn2utn_.clear();
 
     unassoc_rec_nums_.clear();
     assoc_counts_.clear();
@@ -117,7 +114,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
     bool do_debug = false;
 
-    checkACADLookup();
+    reconstructor().targets_container_.checkACADLookup();
 
     bool is_unreliable_primary_only;
 
@@ -130,16 +127,12 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = reconstructor().task().debugRecNum(rec_num);
+        do_debug = reconstructor().task().debugSettings().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
 
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
-
-        // #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
-        //         loginf << "ReconstructorAssociatorBase: associateTargetReports: tr " << tr.asStr();
-        // #endif
 
         if (!tr.in_current_slice_)
         {
@@ -204,7 +197,7 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
     bool do_debug;
 
-    checkACADLookup();
+    reconstructor().targets_container_.checkACADLookup();
 
     for (auto& ts_it : reconstructor().tr_timestamps_)
     {
@@ -215,7 +208,7 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = reconstructor().task().debugRecNum(rec_num);
+        do_debug = reconstructor().task().debugSettings().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -243,109 +236,83 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
 }
 
-void ReconstructorAssociatorBase::selfAccociateNewUTNs()
+void ReconstructorAssociatorBase::selfAssociateNewUTNs()
 {
-    loginf << "ReconstructorAssociatorBase: selfAccociateNewUTNs";
+    loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs";
 
     unsigned int run_cnt {0};
-    bool do_it_again {true};
+
+    set<unsigned int> utns_to_remove;
 
 RESTART_SELF_ASSOC:
 
-    if (do_it_again && !reconstructor().isCancelled())
+    if (!reconstructor().isCancelled())
     {
-        logdbg << "ReconstructorAssociatorBase: selfAccociateNewUTNs: run " << run_cnt;
+        logdbg << "ReconstructorAssociatorBase: selfAssociateNewUTNs: run " << run_cnt;
 
-        checkACADLookup();
+        reconstructor().targets_container_.checkACADLookup();
 
-        do_it_again = false;
-
-        for (auto utn : utn_vec_)
+        for (auto utn : reconstructor().targets_container_.utn_vec_)
         {
-            logdbg << "ReconstructorAssociatorBase: selfAccociateNewUTNs: checking utn " << utn;
+            if (utns_to_remove.count(utn))
+                continue;
 
-            assert (reconstructor().targets_.count(utn));
+            logdbg << "ReconstructorAssociatorBase: selfAssociateNewUTNs: checking utn " << utn;
 
-            // if (!reconstructor().targets_.at(utn).created_in_current_slice_)
-            //     continue;
+            assert (reconstructor().targets_container_.targets_.count(utn));
 
-            std::vector<unsigned int> utns_to_merge = findUTNsForTarget(utn);
+            std::vector<unsigned int> utns_to_merge = findUTNsForTarget(utn, utns_to_remove);
 
             if (utns_to_merge.size())
             {
-                loginf << "ReconstructorAssociatorBase: selfAccociateNewUTNs: run " << run_cnt
+                loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: run " << run_cnt
                        << ": found utn " << utn << " merges with " << String::compress(utns_to_merge,',');
 
                 for (auto other_utn : utns_to_merge)
                 {
-
-                    loginf << "ReconstructorAssociatorBase: selfAccociateNewUTNs: run " << run_cnt
+                    logdbg << "ReconstructorAssociatorBase: selfAssociateNewUTNs: run " << run_cnt
                            << ": found merge utn " << utn << " with " << other_utn;
 
-                    assert (reconstructor().targets_.count(other_utn));
+                    assert (reconstructor().targets_container_.targets_.count(other_utn));
 
-                    dbContent::ReconstructorTarget& target = reconstructor().targets_.at(utn);
-                    dbContent::ReconstructorTarget& other_target = reconstructor().targets_.at(other_utn);
+                    dbContent::ReconstructorTarget& target = reconstructor().targets_container_.targets_.at(utn);
+                    dbContent::ReconstructorTarget& other_target = reconstructor().targets_container_.targets_.at(other_utn);
 
                     // move target reports
                     target.addTargetReports(other_target);
 
-                    // remove from targets
-                    assert (reconstructor().targets_.count(other_utn));
-                    reconstructor().targets_.erase(other_utn);
+                    // schedule remove from targets
 
-                    // remove from utn list
-                    auto other_it = std::find(utn_vec_.begin(), utn_vec_.end(), other_utn);
-                    assert (other_it != utn_vec_.end());
-                    utn_vec_.erase(other_it);
+                    utns_to_remove.insert(other_utn);
 
-                    // remove from acad lookup
-                    for (auto& acad_it : acad_2_utn_)
-                    {
-                        if (acad_it.second == other_utn)
-                            acad_2_utn_[acad_it.first] = utn;
-                    }
-
-                    // remove from acid lookup
-                    for (auto& acid_it : acid_2_utn_)
-                    {
-                        if (acid_it.second == other_utn)
-                            acid_2_utn_[acid_it.first] = utn;
-                    }
-
-                    // remove in tn2utn_ lookup
-                    // ds_id -> line id -> track num -> utn, last tod
-                    for (auto& ds_it : tn2utn_)
-                    {
-                        for (auto& line_it : ds_it.second)
-                        {
-                            for (auto& tn_it : line_it.second)
-                            {
-                                if (tn_it.second.first == other_utn)
-                                {
-                                    // replace utn
-                                    tn2utn_[ds_it.first][line_it.first][tn_it.first] =
-                                        std::pair<unsigned int, boost::posix_time::ptime> (
-                                            (unsigned int) utn, tn_it.second.second);
-                                }
-                            }
-                        }
-
-                    }
-
-                    checkACADLookup();
+                    reconstructor().targets_container_.replaceInLookup(other_utn, utn);
 
                     ++num_merges_;
                 }
-
-                ++run_cnt;
-                do_it_again = true;
-                goto RESTART_SELF_ASSOC;
             }
+        }
+
+        // remove scheduled from targets
+        if (utns_to_remove.size())
+        {
+            for (auto other_utn : utns_to_remove)
+            {
+                assert (reconstructor().targets_container_.targets_.count(other_utn));
+
+                reconstructor().targets_container_.removeUTN(other_utn);
+            }
+
+            utns_to_remove.clear();
+
+            ++run_cnt;
+
+            reconstructor().targets_container_.checkACADLookup();
+
+            goto RESTART_SELF_ASSOC; // here we go again
         }
     }
 
-    loginf << "ReconstructorAssociatorBase: selfAccociateNewUTNs: done at run " << run_cnt;
+    loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: done at run " << run_cnt;
 }
 
 void ReconstructorAssociatorBase::retryAssociateTargetReports()
@@ -374,7 +341,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = reconstructor().task().debugRecNum(rec_num);
+        do_debug = reconstructor().task().debugSettings().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -396,7 +363,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
         if (dbcont_id == 62 || dbcont_id == 255)
             assert (!tr.track_number_);
 
-        utn = findUTNByModeACPos (tr, utn_vec_);
+        utn = findUTNByModeACPos (tr);
 
         if (utn != -1) // estimate accuracy and associate
         {
@@ -414,49 +381,45 @@ void ReconstructorAssociatorBase::associate(
 {
     assert (utn >= 0);
 
-    bool do_debug = reconstructor().task().debugRecNum(tr.record_num_)
-                    || reconstructor().task().debugUTN(utn);
+    bool do_debug = reconstructor().task().debugSettings().debugRecNum(tr.record_num_)
+                    || reconstructor().task().debugSettings().debugUTN(utn);
 
     unsigned int dbcont_id  = Number::recNumGetDBContId(tr.record_num_);
     //AccuracyEstimatorBase::AssociatedDistance dist;
 
-    if (!reconstructor().targets_.count(utn))
+    if (!reconstructor().targets_container_.targets_.count(utn))
         logerr << "ReconstructorAssociatorBase: associate: utn " << utn << " missing";
 
     // add associated target reports
-    assert (reconstructor().targets_.count(utn));
+    assert (reconstructor().targets_container_.targets_.count(utn));
 
     if(do_debug)
-        loginf << "DBG tr " << tr.asStr() << " assoc to utn " << reconstructor().targets_.at(utn).asStr();
+        loginf << "DBG tr " << tr.asStr() << " assoc to utn "
+               << reconstructor().targets_container_.targets_.at(utn).asStr();
 
     // check if position usable
     // if (do_debug)
     //     loginf << "DBG validate";
 
-    reconstructor().acc_estimator_->validate(tr);
+    reconstructor().acc_estimator_->validate(tr); // do counting
 
     // if (do_debug)
     //     loginf << "DBG outlier detect";
 
-    doOutlierDetection(tr, utn, do_debug); //124976,129072
+    tr.is_pos_outlier_ = false;
+
+    if (!tr.doNotUsePosition())
+        reconstructor().acc_estimator_->doOutlierDetection(tr, utn, do_debug); //124976,129072
 
     // if (do_debug)
     //     loginf << "DBG addTargetReport";
 
-    reconstructor().targets_.at(utn).addTargetReport(tr.record_num_);
+    reconstructor().targets_container_.targets_.at(utn).addTargetReport(tr.record_num_);
 
     // if (do_debug)
     //     loginf << "DBG add to lookups";
 
-    if (tr.track_number_ && (dbcont_id == 62 || dbcont_id == 255))
-        tn2utn_[tr.ds_id_][tr.line_id_][*tr.track_number_] =
-            std::pair<unsigned int, boost::posix_time::ptime>(utn, tr.timestamp_);
-
-    if (tr.acad_)
-        acad_2_utn_[*tr.acad_] = utn;
-
-    if (tr.acid_)
-        acid_2_utn_[*tr.acid_] = utn;
+    reconstructor().targets_container_.addToLookup(utn, tr);
 
     assoc_counts_[tr.ds_id_][dbcont_id].first++;
 
@@ -466,43 +429,7 @@ void ReconstructorAssociatorBase::associate(
     postAssociate (tr, utn);
 }
 
-void ReconstructorAssociatorBase::checkACADLookup()
-{
-    unsigned int acad;
 
-    unsigned int count = 0;
-
-    for (auto& target_it : reconstructor().targets_)
-    {
-        if (!target_it.second.hasACAD())
-            continue;
-
-        if (target_it.second.acads_.size() != 1)
-            logerr << "ReconstructorAssociatorBase: checkACADLookup: double acad in target "
-                   << target_it.second.asStr();
-
-        assert (target_it.second.acads_.size() == 1);
-
-        acad = *target_it.second.acads_.begin();
-
-        if (!acad_2_utn_.count(acad))
-        {
-            logerr << "ReconstructorAssociatorBase: getTALookupMap: acad "
-                   << String::hexStringFromInt(acad, 6, '0')
-                   << " not in lookup";
-        }
-
-        ++count;
-    }
-
-    for (auto& acad_it : acad_2_utn_)
-    {
-        assert (reconstructor().targets_.count(acad_it.second));
-        assert (reconstructor().targets_.at(acad_it.second).hasACAD(acad_it.first));
-    }
-
-    assert (acad_2_utn_.size() == count);
-}
 
 void ReconstructorAssociatorBase::countUnAssociated()
 {
@@ -530,7 +457,7 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
 {
     int utn {-1};
 
-    bool do_debug = reconstructor().task().debugRecNum(tr.record_num_);
+    bool do_debug = reconstructor().task().debugSettings().debugRecNum(tr.record_num_);
 
     unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
 
@@ -538,177 +465,11 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
     const boost::posix_time::time_duration track_max_time_diff =
         Time::partialSeconds(reconstructor().settings().track_max_time_diff_);
 
-    assert (reconstructor().targets_.size() == utn_vec_.size());
-
-    //double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0};
-
-    bool reset_tr_assoc {false};
-
-    auto canAssocByACAD = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        if (!tr.acad_)
-            return false;
-
-        if (do_debug)
-            loginf << "DBG can use stored utn in acad_2_utn_ " << (bool) acad_2_utn_.count(*tr.acad_);
-
-        return (bool) acad_2_utn_.count(*tr.acad_);
-    };
-
-    auto assocByACAD = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        assert (tr.acad_);
-        assert (acad_2_utn_.count(*tr.acad_));
-
-        if (do_debug)
-            loginf << "DBG use stored utn in acad_2_utn_: " << acad_2_utn_.at(*tr.acad_);
-
-        utn = acad_2_utn_.at(*tr.acad_);
-        assert (reconstructor().targets_.count(utn));
-        assert (reconstructor().targets_.at(utn).hasACAD(*tr.acad_));
-    };
-
-    auto canAssocByACID = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        if (!tr.acid_)
-            return false;
-
-        if (*tr.acid_ == "00000000" || *tr.acid_ == "????????" || *tr.acid_ == "        ")
-        {
-            if (do_debug)
-                loginf << "DBG can not use stored utn in acid_2_utn_, unspecifiec acid '" << *tr.acid_ << "'";
-
-            return false;
-        }
-
-        if (acid_2_utn_.count(*tr.acid_)) // already exists, but check if mode s address changed
-        {
-            assert (reconstructor().targets_.count(acid_2_utn_.at(*tr.acid_)));
-
-            // tr has acad, target has an acad but not the target reports
-            // happens if same acid is used by 2 different transponders
-            if (tr.acad_ && reconstructor().targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD()
-                && !reconstructor().targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD(!tr.acad_))
-            {
-                if (do_debug)
-                    loginf << "DBG same acid used by different transponders '" << *tr.acid_ << "'";
-
-                return false;
-            }
-        }
-
-        if (do_debug)
-            loginf << "DBG can use stored utn in acid_2_utn_ " << (bool) acid_2_utn_.count(*tr.acid_);
-
-        return (bool) acid_2_utn_.count(*tr.acid_);
-    };
-
-    auto assocByACID = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        assert (tr.acid_);
-        assert (acid_2_utn_.count(*tr.acid_));
-
-        if (do_debug)
-            loginf << "DBG use stored utn in acid_2_utn_: " << acid_2_utn_.at(*tr.acid_);
-
-        utn = acid_2_utn_.at(*tr.acid_);
-        assert (reconstructor().targets_.count(utn));
-        assert (reconstructor().targets_.at(utn).hasACID(*tr.acid_));
-    };
-
-    auto canAssocByTrackNumber = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        if (!tr.track_number_) // only if track number is set
-            return false;
-
-        if (dbcont_id != 62 && dbcont_id != 255) // only if trustworty track numbers in 62 and reftraj
-            return false;
-
-        if (do_debug)
-            loginf << "DBG can use stored utn in tn2utn_ "
-                   << (bool) tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
-
-        return (bool) tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
-    };
-
-    auto assocByTrackNumber = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        boost::posix_time::ptime timestamp_prev;
-
-        assert (tr.track_number_);
-
-        assert (tn2utn_.at(tr.ds_id_).at(tr.line_id_).count(*tr.track_number_));
-        std::tie(utn, timestamp_prev) = tn2utn_.at(tr.ds_id_).at(tr.line_id_).at(*tr.track_number_);
-        assert (reconstructor().targets_.count(utn));
-
-        // check for larger time offset
-        if (tr.timestamp_ - timestamp_prev > track_max_time_diff) // too old
-        {
-            if (do_debug)
-                loginf << "DBG stored utn in tn2utn_ too large time offset, remove & create new target";
-
-            // remove previous track number assoc
-            assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
-            tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
-
-            // create new and add
-            utn = createNewTarget(tr);
-            assert (reconstructor().targets_.count(utn));
-        }
-        else if (canGetPositionOffsetTR(tr, reconstructor().targets_.at(utn)))
-        {
-            assert (reconstructor().targets_.count(utn));
-
-            if (do_debug)
-                loginf << "DBG stored utn in tn2utn_ checking position offset";
-
-            // check for position offsets
-            boost::optional<bool> check_result = checkPositionOffsetAcceptable(
-                tr, utn, true, do_debug);
-
-            if (check_result && !*check_result)
-            {
-                if (do_debug)
-                    loginf << "DBG stored utn in tn2utn_ position offset not acceptable " << *check_result;
-
-                tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
-                reset_tr_assoc = true;
-            }
-        }
-
-        // do assoc
-        if (!reset_tr_assoc && do_debug)
-            loginf << "DBG use stored utn in tn2utn_: " << utn;
-    };
-
-    auto findUTNByModeACPosOrCreateNewTarget = [ & ] (dbContent::targetReport::ReconstructorInfo& tr)
-    {
-        // check if position match to other target would exist
-        utn = findUTNByModeACPos (tr, utn_vec_);
-
-        if (utn == -1)
-        {
-            // create new and add
-            utn = createNewTarget(tr);
-
-            if (do_debug)
-                loginf << "DBG use mode a/c/pos assoc to new utn " << utn;
-
-            assert (reconstructor().targets_.count(utn));
-        }
-        else
-        {
-            assert (reconstructor().targets_.count(utn));
-
-            if (do_debug)
-                loginf << "DBG use mode a/c/pos assoc to existing utn " << utn;
-        }
-    };
+    assert (reconstructor().targets_container_.targets_.size() == reconstructor().targets_container_.utn_vec_.size());
 
 START_TR_ASSOC:
 
     utn = -1; // not yet found
-    reset_tr_assoc = false;
 
     // try by mode-s address or trustworthy track number
     // create new if not already existing
@@ -718,20 +479,63 @@ START_TR_ASSOC:
     {
         // find utn
 
-        if (canAssocByACAD(tr)) // already exists
-            assocByACAD(tr);
-        else if (canAssocByACID(tr)) // already exists
-            assocByACID(tr);
-        else if (canAssocByTrackNumber(tr))
+        if (reconstructor().targets_container_.canAssocByACAD(tr, do_debug)) // already exists
+            utn = reconstructor().targets_container_.assocByACAD(tr, do_debug);
+        else if (reconstructor().targets_container_.canAssocByACID(tr, do_debug)) // already exists
+            utn = reconstructor().targets_container_.assocByACID(tr, do_debug);
+        else if (reconstructor().targets_container_.canAssocByTrackNumber(tr, do_debug))
         {
-            assocByTrackNumber(tr);
+            utn = reconstructor().targets_container_.assocByTrackNumber(tr, track_max_time_diff, do_debug);
 
-            if (reset_tr_assoc)
-                goto START_TR_ASSOC;
+            if (utn != -1 && canGetPositionOffsetTR(tr, reconstructor().targets_container_.targets_.at(utn)))
+            {
+                assert ( reconstructor().targets_container_.targets_.count(utn));
+
+                if (do_debug)
+                    loginf << "DBG stored utn in tn2utn_ checking position offset";
+
+                // check for position offsets
+                boost::optional<bool> check_result = checkPositionOffsetAcceptable(
+                    tr, utn, true, do_debug);
+
+                if (check_result && !*check_result)
+                {
+                    if (do_debug)
+                        loginf << "DBG stored utn in tn2utn_ position offset not acceptable " << *check_result;
+
+                    reconstructor().targets_container_.eraseTrackNumberLookup(tr);
+
+                    goto START_TR_ASSOC;
+                }
+            }
+
+            // do assoc
+            if (do_debug)
+                loginf << "DBG use stored utn in tn2utn_: " << utn;
         }
-        else // not yet existing, create & add target
-            findUTNByModeACPosOrCreateNewTarget(tr);
+        else // not yet existing, create & add target findUTNByModeACPosOrCreateNewTarget(tr)
+        {
+            // check if position match to other target would exist
+            utn = findUTNByModeACPos (tr);
 
+            if (utn == -1)
+            {
+                // create new and add
+                utn = reconstructor().targets_container_.createNewTarget(tr);
+
+                if (do_debug)
+                    loginf << "DBG use mode a/c/pos assoc to new utn " << utn;
+
+                assert (reconstructor().targets_container_.targets_.count(utn));
+            }
+            else
+            {
+                assert (reconstructor().targets_container_.targets_.count(utn));
+
+                if (do_debug)
+                    loginf << "DBG use mode a/c/pos assoc to existing utn " << utn;
+            }
+        }
         assert (utn != -1);
 
         if(do_debug)
@@ -744,20 +548,20 @@ START_TR_ASSOC:
         if(do_debug)
             loginf << "DBG tr " << tr.record_num_ << " no utn by acad, doing mode a/c + pos";
 
-        utn = findUTNByModeACPos (tr, utn_vec_);
+        utn = findUTNByModeACPos (tr);
 
         if (utn != -1)
-            assert (reconstructor().targets_.count(utn));
+            assert (reconstructor().targets_container_.targets_.count(utn));
     }
 
     return utn;
 }
 
 int ReconstructorAssociatorBase::findUTNByModeACPos (
-    const dbContent::targetReport::ReconstructorInfo& tr, const std::vector<unsigned int>& utn_vec)
+    const dbContent::targetReport::ReconstructorInfo& tr)
 {
-    unsigned int num_targets = reconstructor().targets_.size();
-    assert (utn_vec.size() == num_targets);
+    unsigned int num_targets = reconstructor().targets_container_.targets_.size();
+    assert (reconstructor().targets_container_.utn_vec_.size() == num_targets);
 
     vector<tuple<bool, unsigned int, double>> results;
     vector<reconstruction::PredictionStats> prediction_stats;
@@ -768,7 +572,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
     const float max_altitude_diff = reconstructor().settings().max_altitude_diff_;
 
-    bool do_debug = reconstructor().task().debugRecNum(tr.record_num_);
+    bool do_debug = reconstructor().task().debugSettings().debugRecNum(tr.record_num_);
 
     if (do_debug)
         loginf << "ReconstructorAssociatorBase: findUTNByModeACPos: rn " << tr.record_num_;
@@ -779,10 +583,10 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     for (unsigned int target_cnt = 0; target_cnt < num_targets; ++target_cnt)
 #endif
                       {
-                          unsigned int other_utn = utn_vec.at(target_cnt);
+                          unsigned int other_utn = reconstructor().targets_container_.utn_vec_.at(target_cnt);
                           bool do_other_debug = false; //debug_utns.count(other_utn);
 
-                          ReconstructorTarget& other = reconstructor().targets_.at(other_utn);
+                          ReconstructorTarget& other = reconstructor().targets_container_.targets_.at(other_utn);
 
                           results[target_cnt] = tuple<bool, unsigned int, double>(false, other.utn_, 0);
 
@@ -873,11 +677,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
                           // check positions
 
-                          //                tie(ref_pos, ok) = other.interpolatedPosForTimeFast(
-                          //                    timestamp, max_time_diff_sensor);
-
-                          double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0}; //, sum_est_std_dev{0};
-                          //double mahalanobis_dist{0};
+                          double distance_m{0}, tgt_est_std_dev{0}, tr_est_std_dev{0};
 
                           if (!canGetPositionOffsetTR(tr, other))
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
@@ -952,53 +752,40 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     return -1;
 }
 
-std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (unsigned int utn)
+std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
+    unsigned int utn, const std::set<unsigned int>& utns_to_ignore)
 {
-    if (!reconstructor().targets_.size()) // check if targets exist
+    if (!reconstructor().targets_container_.targets_.size()) // check if targets exist
         return {};
 
-    assert (reconstructor().targets_.count(utn));
+    assert (!utns_to_ignore.count(utn));
 
-    const dbContent::ReconstructorTarget& target = reconstructor().targets_.at(utn);
+    assert (reconstructor().targets_container_.targets_.count(utn));
+
+    const dbContent::ReconstructorTarget& target = reconstructor().targets_container_.targets_.at(utn);
 
     //    if (print_debug_target)
     //        loginf << "ReconstructorAssociatorBase: findUTNForTarget: utn " << utn;
 
     // dont check by mode s, should never work
 
-    //    int tmp_utn = findUTNForTargetByTA(target, targets);
-
-    //    if (tmp_utn != -1) // either mode s, so
-    //        return tmp_utn;
-
-    //    if (!task_.associateNonModeS())
-    //        return -1;
-
     // try to find by m a/c/pos
 
     vector<AssociationOption> results;
-    //vector<tuple<bool, unsigned int, unsigned int, double>> results;
-    // usable, other utn, num updates, avg distance
 
     vector<reconstruction::PredictionStats> prediction_stats;
 
-    unsigned int num_utns = utn_vec_.size();
+    unsigned int num_utns = reconstructor().targets_container_.utn_vec_.size();
     results.resize(num_utns);
     prediction_stats.resize(num_utns);
 
     const auto& settings = reconstructor().settings();
-
-    //const boost::posix_time::time_duration max_time_diff_tracker = Utils::Time::partialSeconds(settings.max_time_diff_);
 
     //computes a match score for the given other target
     auto scoreUTN = [ & ] (const std::vector<size_t>& rec_nums,
                         const dbContent::ReconstructorTarget& other,
                         unsigned int result_idx,
                         bool secondary_verified,
-                        //                        double max_mahal_dist_accept,
-                        //                        double max_mahal_dist_dub,
-                        //                        double max_mahal_dist_quit,
-                        //double max_pos_dubious_rate,
                         bool do_debug)
     {
         vector<pair<unsigned long, double>> distance_scores;
@@ -1021,7 +808,7 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (unsign
 
             const dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rn_it);
 
-            if (tr.do_not_use_position_ || !canGetPositionOffsetTargets(tr.timestamp_, target, other))
+            if (tr.doNotUsePosition() || !canGetPositionOffsetTargets(tr.timestamp_, target, other))
             {
                 ++pos_skipped_cnt;
                 continue;
@@ -1134,19 +921,19 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (unsign
     for (unsigned int cnt=0; cnt < num_utns; ++cnt)
 #endif
                       {
-                          unsigned int other_utn = utn_vec_.at(cnt);
+                          unsigned int other_utn = reconstructor().targets_container_.utn_vec_.at(cnt);
 
                           //bool print_debug_target = debug_utns.count(utn) && debug_utns.count(other_utn);
 
                           // only check for previous targets
-                          const dbContent::ReconstructorTarget& other = reconstructor().targets_.at(other_utn);
+                          const dbContent::ReconstructorTarget& other = reconstructor().targets_container_.targets_.at(other_utn);
 
                           results[cnt] = AssociationOption(false, other.utn_, 0, false, 0);
 
-                          bool do_debug = reconstructor().task().debugUTN(utn)
-                                          && reconstructor().task().debugUTN(other_utn);
+                          bool do_debug = reconstructor().task().debugSettings().debugUTN(utn)
+                                          && reconstructor().task().debugSettings().debugUTN(other_utn);
 
-                          if (utn == other_utn)
+                          if (utn == other_utn || utns_to_ignore.count(other_utn))
 #ifdef FIND_UTN_FOR_TARGET_MT
                               return;
 #else
@@ -1178,7 +965,6 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (unsign
             continue;
 #endif
                           }
-                          Transformation trafo;
 
                           if (do_debug)
                           {
@@ -1275,26 +1061,13 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (unsign
     for (const auto& s : prediction_stats)
         ReconstructorTarget::addPredictionToGlobalStats(s);
 
-    // find best match
-    // bool usable;
-    // unsigned int other_utn;
-    // unsigned int num_updates;
-    // double distance_score_avg;
-    //double score;
-
-    //bool first = true;
-    // unsigned int best_other_utn {0};
-    // unsigned int best_num_updates;
-    // double best_distance_score_avg;
-    // double best_score;
-
     bool do_debug = false; //debug_utns.count(utn);
     std::vector<unsigned int> utns_to_merge;
 
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
     {
-        do_debug = reconstructor().task().debugUTN(utn)
-                   || reconstructor().task().debugUTN(res_it.other_utn_);
+        do_debug = reconstructor().task().debugSettings().debugUTN(utn)
+                   || reconstructor().task().debugSettings().debugUTN(res_it.other_utn_);
 
         if (!res_it.usable_)
         {
@@ -1304,8 +1077,6 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (unsign
             continue;
         }
 
-        //score = (double) num_updates * distance_score_avg;
-
         if (do_debug)
             loginf << "\ttarget " << target.utn_ << " other " << res_it.other_utn_
                    << " do_assoc " << res_it.associate_based_on_secondary_attributes_
@@ -1313,68 +1084,16 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (unsign
 
         if (res_it.associate_based_on_secondary_attributes_ || res_it.avg_distance_ <= 0)
         {
-            //if (do_debug)
+            if (do_debug)
                 loginf << "\ttarget " << target.utn_ << " other " << res_it.other_utn_
                    << " merging, based on sec.at. " << res_it.associate_based_on_secondary_attributes_
                    << " avg dist " << String::doubleToStringPrecision(res_it.avg_distance_, 2);
 
             utns_to_merge.push_back(res_it.other_utn_);
-
-            // best_other_utn = other_utn;
-            // best_num_updates = num_updates;
-            // best_distance_score_avg = distance_score_avg;
-            // best_score = score;
-
-            // first = false;
         }
     }
 
-    // if (first)
-    // {
-    //     if (reconstructor().task().debugUTN(utn))
-    //         loginf << "ReconstructorAssociatorBase: findUTNForTarget: target " << target.utn_ << " no match found";
-    //     return -1;
-    // }
-    // else
-    // {
-    //     //if (print_debug_target)
-    //     loginf << "ReconstructorAssociatorBase: findUTNForTarget: target " << target.utn_
-    //            << " match found best other " << best_other_utn
-    //            << " best score " << fixed << best_score
-    //            << " dist score avg " << best_distance_score_avg
-    //            << " num " << best_num_updates;
-
-    //     return best_other_utn;
-    // }
-
     return utns_to_merge;
-}
-
-unsigned int ReconstructorAssociatorBase::createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr)
-{
-    unsigned int utn;
-
-    if (reconstructor().targets_.size())
-        utn = reconstructor().targets_.rbegin()->first + 1; // new utn
-    else
-        utn = 0;
-
-    //assert (utn != 261);
-    if (tr.track_number_)
-        assert (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
-
-    reconstructor().targets_.emplace(
-        std::piecewise_construct,
-        std::forward_as_tuple(utn),   // args for key
-        std::forward_as_tuple(reconstructor(), utn, false, true, true));  // args for mapped value tmp_utn, false
-
-    // add to lookup
-
-    reconstructor().targets_.at(utn).created_in_current_slice_ = true;
-
-    utn_vec_.push_back(utn);
-
-    return utn;
 }
 
 const std::map<unsigned int, std::map<unsigned int,

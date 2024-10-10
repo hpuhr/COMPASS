@@ -43,19 +43,22 @@ class ReconstructorAssociatorBase
         float avg_distance_{0};
     };
 
+    virtual bool canGetPositionOffsetTR(
+        const dbContent::targetReport::ReconstructorInfo& tr,
+        const dbContent::ReconstructorTarget& target, bool use_max_distance=true) = 0;
+    virtual boost::optional<std::tuple<double, double, double>> getPositionOffsetTR(
+        const dbContent::targetReport::ReconstructorInfo& tr,
+        const dbContent::ReconstructorTarget& target,
+        bool do_debug,
+        const boost::optional<unsigned int>& thread_id,
+        reconstruction::PredictionStats* stats = nullptr) = 0;
+
+    virtual boost::optional<bool> isTargetAccuracyAcceptable(
+        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug) = 0;
+
   protected:
 
     boost::posix_time::time_duration max_time_diff_;
-
-    std::vector<unsigned int> utn_vec_;
-
-    std::map<unsigned int, unsigned int> acad_2_utn_; // acad dec -> utn
-    std::map<std::string, unsigned int> acid_2_utn_; // acid trim -> utn
-
-            // ds_id -> line id -> track num -> utn, last tod
-    std::map<unsigned int, std::map<unsigned int,
-                                    std::map<unsigned int,
-                                             std::pair<unsigned int, boost::posix_time::ptime>>>> tn2utn_;
 
     std::vector<unsigned long> unassoc_rec_nums_;
 
@@ -68,32 +71,23 @@ class ReconstructorAssociatorBase
     void associateTargetReports();
     void associateTargetReports(std::set<unsigned int> dbcont_ids);
 
-    void selfAccociateNewUTNs();
+    void selfAssociateNewUTNs();
     void retryAssociateTargetReports();
     void associate(dbContent::targetReport::ReconstructorInfo& tr, int utn);
     virtual void postAssociate(dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn) {};
-    void checkACADLookup();
+    //void checkACADLookup();
     void countUnAssociated();
 
     int findUTNFor (dbContent::targetReport::ReconstructorInfo& tr);
 
             // tries to find existing utn for target report, based on mode a/c and position, -1 if failed
-    int findUTNByModeACPos (const dbContent::targetReport::ReconstructorInfo& tr,
-                           const std::vector<unsigned int>& utn_vec);
+    int findUTNByModeACPos (const dbContent::targetReport::ReconstructorInfo& tr);
 
-    std::vector<unsigned int> findUTNsForTarget (unsigned int utn);
+    std::vector<unsigned int> findUTNsForTarget (unsigned int utn, const std::set<unsigned int>& utns_to_ignore);
 
-    unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
+    //unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
-    virtual bool canGetPositionOffsetTR(
-        const dbContent::targetReport::ReconstructorInfo& tr,
-        const dbContent::ReconstructorTarget& target, bool use_max_distance=true) = 0;
-    virtual boost::optional<std::tuple<double, double, double>> getPositionOffsetTR(
-        const dbContent::targetReport::ReconstructorInfo& tr,
-        const dbContent::ReconstructorTarget& target, 
-        bool do_debug,
-        const boost::optional<unsigned int>& thread_id,
-        reconstruction::PredictionStats* stats = nullptr) = 0;
+
 
     virtual bool canGetPositionOffsetTargets(
         const boost::posix_time::ptime& ts,
@@ -123,8 +117,6 @@ class ReconstructorAssociatorBase
     virtual std::tuple<DistanceClassification, double> checkPositionOffsetScore
         (double distance_m, double sum_stddev_est, bool secondary_verified) = 0;
 
-    virtual boost::optional<bool> isTargetAccuracyAcceptable(
-        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug) = 0;
     virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) = 0;
 
     virtual ReconstructorBase& reconstructor() = 0;

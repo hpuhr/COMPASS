@@ -171,6 +171,11 @@ bool ReconstructorInfo::isPrimaryOnlyDetection() const
     return !isModeSDetection() && !isModeACDetection();
 }
 
+bool ReconstructorInfo::doNotUsePosition() const
+{
+    return unsused_ds_pos_ || invalidated_pos_ || is_pos_outlier_;
+}
+
 std::string ModeACode::asStr() const
 {
     stringstream ss;

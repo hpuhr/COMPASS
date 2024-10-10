@@ -3,6 +3,8 @@
 #include "stringconv.h"
 #include "timeconv.h"
 #include "logger.h"
+#include "compass.h"
+#include "datasourcemanager.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -25,7 +27,7 @@ ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& ta
 
     debug_check_ = new QCheckBox ();
     connect(debug_check_, &QCheckBox::clicked,
-            this, &ReconstructorTaskDebugWidget::toggleDebugSlot);
+            this, [ = ] (bool ok) { task_.debugSettings().debug_ = ok; });
     combo_layout->addRow("Debug Reconstruction", debug_check_);
 
     utns_edit_ = new QLineEdit();
@@ -44,13 +46,64 @@ ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& ta
     connect(timestamp_max_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskDebugWidget::timestampsChanged);
     combo_layout->addRow("Timestamp Max.", timestamp_max_edit_);
 
-    // QCheckBox* debug_accuracy_est_box_{nullptr};
+    // acc est
 
-    debug_accuracy_est_box_ = new QCheckBox();
-    connect(debug_accuracy_est_box_, &QCheckBox::clicked,
-            this, [ = ] (bool ok) { task_.debugAccuracyEstimation(ok); });
+    debug_accuracy_est_check_ = new QCheckBox();
+    connect(debug_accuracy_est_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().debug_accuracy_estimation_ = ok; });
 
-    combo_layout->addRow("Debug Accuracy Estimation", debug_accuracy_est_box_);
+    combo_layout->addRow("Debug Accuracy Estimation", debug_accuracy_est_check_);
+
+    debug_bias_correction_check_ = new QCheckBox();
+    connect(debug_bias_correction_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().debug_bias_correction_ = ok; });
+
+    combo_layout->addRow("Debug Bias Correction", debug_bias_correction_check_);
+
+    debug_geo_altitude_correction_check_ = new QCheckBox();
+    connect(debug_geo_altitude_correction_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().debug_geo_altitude_correction_ = ok; });
+
+    combo_layout->addRow("Debug Geo.Altitude Correction", debug_geo_altitude_correction_check_);
+
+    // deep acc est
+
+    for (auto& ds_type : COMPASS::instance().dataSourceManager().data_source_types_)
+    {
+        QCheckBox* check = new QCheckBox(("Deep Debug "+ds_type+" Accuracy Estimation").c_str());
+        connect(check, &QCheckBox::clicked,
+                this, [ = ] (bool ok) { task_.debugSettings().deepDebugAccuracyEstimation(ds_type,ok); });
+
+        QCheckBox* write_vp_check = new QCheckBox("Write View Points");
+        connect(write_vp_check, &QCheckBox::clicked,
+                this, [ = ] (bool ok) { task_.debugSettings().deepDebugAccuracyEstimationWriteVP(ds_type,ok); });
+
+        deep_debug_accuracy_estimation_checks_[ds_type] = check;
+        deep_debug_accuracy_estimation_write_vp_checks_[ds_type] = write_vp_check;
+
+        combo_layout->addRow(check, write_vp_check);
+    }
+
+    // reference stuff
+
+    debug_reference_calculation_check_ = new QCheckBox();
+    connect(debug_reference_calculation_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().debug_reference_calculation_ = ok; });
+
+    combo_layout->addRow("Debug Reference Calculation", debug_reference_calculation_check_);
+
+    debug_kalman_chains_check_ = new QCheckBox();
+    connect(debug_kalman_chains_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().debug_kalman_chains_= ok; });
+
+    combo_layout->addRow("Debug Kalman Chains", debug_kalman_chains_check_);
+
+
+    debug_write_reconstruction_viewpoints_check_ = new QCheckBox();
+    connect(debug_write_reconstruction_viewpoints_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().debug_write_reconstruction_viewpoints_ = ok; });
+
+    combo_layout->addRow("Write Reconstruction View Points", debug_write_reconstruction_viewpoints_check_);
 
     setLayout(combo_layout);
 
@@ -61,40 +114,69 @@ ReconstructorTaskDebugWidget::~ReconstructorTaskDebugWidget()
 {
 }
 
-void ReconstructorTaskDebugWidget::toggleDebugSlot()
-{
-    assert (debug_check_);
-    task_.debug(debug_check_->checkState() == Qt::Checked);
-}
-
-
 void ReconstructorTaskDebugWidget::updateValues()
 {
     loginf << "ReconstructorTaskDebugWidget: updateValues";
 
     assert (debug_check_);
-    debug_check_->setChecked(task_.debug());
+    debug_check_->setChecked(task_.debugSettings().debug_);
 
     assert (utns_edit_);
-    utns_edit_->setText(String::compress(task_.debugUTNs(), ',').c_str());
+    utns_edit_->setText(String::compress(task_.debugSettings().debug_utns_, ',').c_str());
 
     assert (rec_nums_edit_);
-    rec_nums_edit_->setText(String::compress(task_.debugRecNums(), ',').c_str());
+    rec_nums_edit_->setText(String::compress(task_.debugSettings().debug_rec_nums_, ',').c_str());
 
     assert (timestamp_min_edit_);
-    if (!task_.debugTimestampMin().is_not_a_date_time())
-        timestamp_min_edit_->setText(QString::fromStdString(Utils::Time::toString(task_.debugTimestampMin())));
+    if (!task_.debugSettings().debug_timestamp_min_.is_not_a_date_time())
+        timestamp_min_edit_->setText(QString::fromStdString(
+            Utils::Time::toString(task_.debugSettings().debug_timestamp_min_)));
     else
         timestamp_min_edit_->setText("");
 
     assert (timestamp_max_edit_);
-    if (!task_.debugTimestampMax().is_not_a_date_time())
-        timestamp_max_edit_->setText(QString::fromStdString(Utils::Time::toString(task_.debugTimestampMax())));
+    if (!task_.debugSettings().debug_timestamp_max_.is_not_a_date_time())
+        timestamp_max_edit_->setText(QString::fromStdString(
+            Utils::Time::toString(task_.debugSettings().debug_timestamp_max_)));
     else
         timestamp_max_edit_->setText("");
 
-    assert (debug_accuracy_est_box_);
-    debug_accuracy_est_box_->setChecked(task_.debugAccuracyEstimation());
+    // acc est
+
+    assert (debug_accuracy_est_check_);
+    debug_accuracy_est_check_->setChecked(task_.debugSettings().debug_accuracy_estimation_);
+
+    assert (debug_bias_correction_check_);
+    debug_bias_correction_check_->setChecked(task_.debugSettings().debug_bias_correction_);
+
+    assert (debug_geo_altitude_correction_check_);
+    debug_geo_altitude_correction_check_->setChecked(task_.debugSettings().debug_geo_altitude_correction_);
+
+    // deep acc est
+
+    for (auto& ds_type : COMPASS::instance().dataSourceManager().data_source_types_)
+    {
+        assert (deep_debug_accuracy_estimation_checks_.count(ds_type));
+        assert (deep_debug_accuracy_estimation_write_vp_checks_.count(ds_type));
+
+        deep_debug_accuracy_estimation_checks_[ds_type]->setChecked(
+            task_.debugSettings().deepDebugAccuracyEstimation(ds_type));
+
+        deep_debug_accuracy_estimation_write_vp_checks_[ds_type]->setChecked(
+            task_.debugSettings().deepDebugAccuracyEstimationWriteVP(ds_type));
+    }
+
+    // reference stuff
+
+    assert (debug_reference_calculation_check_);
+    debug_reference_calculation_check_->setChecked(task_.debugSettings().debug_reference_calculation_);
+
+    assert (debug_kalman_chains_check_);
+    debug_kalman_chains_check_->setChecked(task_.debugSettings().debug_kalman_chains_);
+
+    assert (debug_write_reconstruction_viewpoints_check_);
+    debug_write_reconstruction_viewpoints_check_->setChecked(
+        task_.debugSettings().debug_write_reconstruction_viewpoints_);
 }
 
 void ReconstructorTaskDebugWidget::utnsChangedSlot(const QString& value)
@@ -119,7 +201,7 @@ void ReconstructorTaskDebugWidget::utnsChangedSlot(const QString& value)
         values_tmp.insert(utn_tmp);
     }
 
-    task_.debugUTNs(values_tmp);
+    task_.debugSettings().debug_utns_ = values_tmp;
 }
 
 void ReconstructorTaskDebugWidget::recNumsChangedSlot(const QString& value)
@@ -144,7 +226,7 @@ void ReconstructorTaskDebugWidget::recNumsChangedSlot(const QString& value)
         values_tmp.insert(utn_tmp);
     }
 
-    task_.debugRecNums(values_tmp);
+    task_.debugSettings().debug_rec_nums_ = values_tmp;
 }
 
 void ReconstructorTaskDebugWidget::timestampsChanged()
@@ -167,14 +249,16 @@ void ReconstructorTaskDebugWidget::timestampsChanged()
     };
 
     auto ts_min = checkTimestamp(timestamp_min_edit_);
-    task_.debugTimestampMin(ts_min.has_value() ? ts_min.value() : boost::posix_time::ptime());
+    task_.debugSettings().debug_timestamp_min_ = ts_min.has_value() ? ts_min.value() : boost::posix_time::ptime();
 
     if (ts_min.has_value())
-        loginf << "ReconstructorTaskDebugWidget: timestampsChanged: set ts min to " << Utils::Time::toString(ts_min.value());
+        loginf << "ReconstructorTaskDebugWidget: timestampsChanged: set ts min to "
+               << Utils::Time::toString(ts_min.value());
 
     auto ts_max = checkTimestamp(timestamp_max_edit_);
-    task_.debugTimestampMax(ts_max.has_value() ? ts_max.value() : boost::posix_time::ptime());
+    task_.debugSettings().debug_timestamp_max_ = ts_max.has_value() ? ts_max.value() : boost::posix_time::ptime();
 
     if (ts_max.has_value())
-        loginf << "ReconstructorTaskDebugWidget: timestampsChanged: set ts max to " << Utils::Time::toString(ts_max.value());
+        loginf << "ReconstructorTaskDebugWidget: timestampsChanged: set ts max to "
+               << Utils::Time::toString(ts_max.value());
 }

@@ -693,14 +693,14 @@ void KalmanChain::removeUpdatesBefore(const boost::posix_time::ptime& ts)
 
 /**
 */
-void KalmanChain::removeUpdatesLaterThan(const boost::posix_time::ptime& ts)
+void KalmanChain::removeUpdatesLaterOrEqualThan(const boost::posix_time::ptime& ts)
 {
     assert(!needsReestimate());
 
     if (size() == 0)
         return;
 
-    auto it = std::remove_if(updates_.begin(), updates_.end(), [ & ] (const Update& u) { return u.t > ts; });
+    auto it = std::remove_if(updates_.begin(), updates_.end(), [ & ] (const Update& u) { return u.t >= ts; });
     updates_.erase(it, updates_.end());
     updates_.shrink_to_fit();
 

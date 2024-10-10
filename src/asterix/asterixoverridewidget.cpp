@@ -41,15 +41,7 @@ ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* p
 
     unsigned int row = 0;
 
-    grid->addWidget(new QLabel("Ignore 24h Time Jumps"), row, 0);
-
-    ignore_timejumps_check_ = new QCheckBox();
-    connect(ignore_timejumps_check_, &QCheckBox::clicked, this, &ASTERIXOverrideWidget::ignoreTimeJumpsCheckedSlot);
-    grid->addWidget(ignore_timejumps_check_, row, 1);
-
     // tod override
-
-    ++row;
 
     grid->addWidget(new QLabel("Override Time of Day"), row, 0);
 
@@ -173,6 +165,18 @@ ASTERIXOverrideWidget::ASTERIXOverrideWidget(ASTERIXImportTask& task, QWidget* p
     connect(filter_modec_max_edit_, &QLineEdit::textEdited, this, &ASTERIXOverrideWidget::modeCMaxEditedSlot);
     grid->addWidget(filter_modec_max_edit_, row, 2);
 
+    // obfuscate
+
+
+    ++row;
+
+    grid->addWidget(new QLabel("Obfuscate Secondary Information"), row, 0);
+
+    obfuscate_secondary_info_check_ = new QCheckBox();
+    connect(obfuscate_secondary_info_check_, &QCheckBox::clicked,
+            this, &ASTERIXOverrideWidget::obfuscateSecondaryInfoCheckedSlot);
+    grid->addWidget(obfuscate_secondary_info_check_, row, 1);
+
     main_layout->addLayout(grid);
 
     main_layout->addStretch();
@@ -186,10 +190,6 @@ ASTERIXOverrideWidget::~ASTERIXOverrideWidget() {}
 
 void ASTERIXOverrideWidget::updateSlot()
 {
-    // ignore tj
-    assert(ignore_timejumps_check_);
-    ignore_timejumps_check_->setChecked(task_.settings().ignore_time_jumps_);
-
     // tod override
     assert(override_active_check_);
     override_active_check_->setChecked(task_.settings().override_tod_active_);
@@ -225,14 +225,9 @@ void ASTERIXOverrideWidget::updateSlot()
     filter_modec_min_edit_->setText(QString::number(task_.settings().filter_modec_min_));
     assert(filter_modec_max_edit_);
     filter_modec_max_edit_->setText(QString::number(task_.settings().filter_modec_max_));
-}
 
-void ASTERIXOverrideWidget::ignoreTimeJumpsCheckedSlot()
-{
-    loginf << "ASTERIXOverrideWidget: ignoreTimeJumpsCheckedSlot";
-    assert(ignore_timejumps_check_);
-
-    task_.settings().ignore_time_jumps_ = ignore_timejumps_check_->checkState() == Qt::Checked;
+    assert(obfuscate_secondary_info_check_);
+    obfuscate_secondary_info_check_->setChecked(task_.settings().obfuscate_secondary_info_);
 }
 
 void ASTERIXOverrideWidget::overrideActiveCheckedSlot()
@@ -346,4 +341,12 @@ void ASTERIXOverrideWidget::modeCMaxEditedSlot(const QString& value_str)
     double value = value_str.toDouble();
 
     task_.settings().filter_modec_max_ = value;
+}
+
+void ASTERIXOverrideWidget::obfuscateSecondaryInfoCheckedSlot()
+{
+    loginf << "ASTERIXOverrideWidget: obfuscateSecondaryInfoCheckedSlot";
+    assert(obfuscate_secondary_info_check_);
+
+    task_.settings().obfuscate_secondary_info_ = obfuscate_secondary_info_check_->checkState() == Qt::Checked;
 }

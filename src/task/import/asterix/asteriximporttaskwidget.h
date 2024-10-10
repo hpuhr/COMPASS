@@ -51,6 +51,7 @@ public slots:
     void dateChangedSlot(QDate date);
 
     void resetDateChangedSlot();
+    void ignoreTimeJumpsCheckedSlot();
     void debugChangedSlot();
 
     void decodingStateChangedSlot();
@@ -92,6 +93,7 @@ protected:
     ASTERIXOverrideWidget* override_widget_{nullptr};
 
     QCheckBox* reset_date_between_files_check_{nullptr};
+    QCheckBox* ignore_timejumps_check_{nullptr};
     QCheckBox* debug_check_{nullptr};
     QCheckBox* limit_ram_check_{nullptr};
 };

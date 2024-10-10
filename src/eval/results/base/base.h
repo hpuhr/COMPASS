@@ -223,7 +223,7 @@ protected:
 
     void setIgnored();
 
-    QString formatValue(double v, int precision = 2) const;
+    double formatValue(double v, int precision = 2) const;
     std::string conditionResultString() const;
 
     void updateResult(const boost::optional<double>& value);

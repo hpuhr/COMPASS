@@ -187,6 +187,8 @@ public:
     static const Property var_cat021_nucv_nacv_;
     static const Property var_cat021_sil_;
     static const Property var_cat021_geo_alt_;
+    static const Property var_cat021_geo_alt_accuracy_;
+    static const Property var_cat021_ecat_;
 
     static const Property var_cat021_latitude_hr_;
     static const Property var_cat021_longitude_hr_;
