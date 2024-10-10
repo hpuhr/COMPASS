@@ -133,6 +133,10 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
 
     if (mode == NormalizeMode::Sum || max_val >= eps)
     {
+        //assure minimum prob
+        for (auto& lh : likelihoods)
+            lh = std::max(lh, std::numeric_limits<double>::epsilon());
+
         //normalize directly via sum
         likelihoods /= likelihoods.sum();
         return;
