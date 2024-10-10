@@ -550,7 +550,7 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         return debug_mm;
     };
 
-    estimator.enableDebugging(refs.utn == 866);
+    //estimator.enableDebugging(refs.utn == 866);
 
     //init kalman (either from last slice's update or from new measurement)
     if (refs.init_update.has_value())
