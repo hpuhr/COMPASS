@@ -33,9 +33,7 @@ public:
         Log
     };
 
-    GaussianPDF(const Eigen::MatrixXd& P_cov,
-                double eps_lh = LikelihoodEpsilonDefault,
-                double eps_llh = LogLikelihoodEpsilonDefault);
+    GaussianPDF(const Eigen::MatrixXd& P_cov);
     virtual ~GaussianPDF() = default;
 
     bool valid() const;
@@ -45,16 +43,16 @@ public:
 
     static void normalizeLikelihoods(Eigen::VectorXd& likelihoods, 
                                      NormalizeMode mode, 
-                                     double eps = 1e-09,
                                      bool debug = false);
 
-    static const double LikelihoodEpsilonDefault;
-    static const double LogLikelihoodEpsilonDefault;
+    static const double LikelihoodEpsilon;
+    static const double LogLikelihoodEpsilon;
+    static const double NormalizeThreshold;
+    static const double NormalizeSumMin;
+    static const double ExpInputMin;
+    static const double LogInputMin;
     static const double LogSqrt2Pi;
 
 private:
     Eigen::LLT<Eigen::MatrixXd> chol_P_cov_;
-
-    double eps_lh_;
-    double eps_llh_;
 };

@@ -19,17 +19,17 @@
 
 #include "logger.h"
 
-const double GaussianPDF::LikelihoodEpsilonDefault    = std::numeric_limits<double>::epsilon();
-const double GaussianPDF::LogLikelihoodEpsilonDefault = -16.0;
-const double GaussianPDF::LogSqrt2Pi                  = 0.5 * std::log(2 * M_PI);
+const double GaussianPDF::LikelihoodEpsilon    = std::numeric_limits<double>::epsilon();
+const double GaussianPDF::LogLikelihoodEpsilon = -16.0;
+const double GaussianPDF::NormalizeThreshold   = 1e-09;
+const double GaussianPDF::NormalizeSumMin      = 1e-12;
+const double GaussianPDF::ExpInputMin          = -700.0;
+const double GaussianPDF::LogInputMin          = 1e-300;
+const double GaussianPDF::LogSqrt2Pi           = 0.5 * std::log(2 * M_PI);
 
 /**
 */
-GaussianPDF::GaussianPDF(const Eigen::MatrixXd& P_cov,
-                         double eps_lh,
-                         double eps_llh)
-:   eps_lh_ (eps_lh )
-,   eps_llh_(eps_llh)
+GaussianPDF::GaussianPDF(const Eigen::MatrixXd& P_cov)
 {
     //store decomposition for later evaluations
     chol_P_cov_ = Eigen::LLT<Eigen::MatrixXd>(P_cov);
@@ -54,7 +54,7 @@ boost::optional<double> GaussianPDF::likelihood(const Eigen::VectorXd& x, bool c
     const double quadform = (L.solve(x)).squaredNorm();
     const double lh       = std::exp(-x.rows() * LogSqrt2Pi - 0.5 * quadform) / L.determinant();
 
-    return (check_eps ? std::max(eps_lh_, lh) : lh);
+    return (check_eps ? std::max(LikelihoodEpsilon, lh) : lh);
 }
 
 /**
@@ -69,7 +69,7 @@ boost::optional<double> GaussianPDF::logLikelihood(const Eigen::VectorXd& x, boo
     const double quadform = (L.solve(x)).squaredNorm();
     const double llh      = -x.rows() * LogSqrt2Pi - 0.5 * quadform - std::log(L.determinant());
 
-    return (check_eps ? std::max(eps_llh_, llh) : llh);
+    return (check_eps ? std::max(LogLikelihoodEpsilon, llh) : llh);
 }
 
 namespace
@@ -104,7 +104,7 @@ namespace
         }
 
         //max lh takes it all
-        likelihoods.array() = std::numeric_limits<double>::epsilon();
+        likelihoods.array() = GaussianPDF::LikelihoodEpsilon;
         likelihoods[ max_idx ] = 1.0;
         likelihoods /= likelihoods.sum();
 
@@ -117,7 +117,6 @@ namespace
 */
 void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods, 
                                        NormalizeMode mode, 
-                                       double eps, 
                                        bool debug)
 {
     if (likelihoods.size() < 1)
@@ -125,20 +124,21 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
 
     //preemptive maximum value check
     const double max_val = likelihoods.maxCoeff();
-    if (max_val < 1e-300)
+    if (max_val < LogInputMin)
     {
         normalizeLikelihoodWinnerTakesAll(likelihoods, debug);
         return;
     }
 
-    if (mode == NormalizeMode::Sum || max_val >= eps)
+    if (mode == NormalizeMode::Sum || max_val >= NormalizeThreshold)
     {
         //assure minimum prob
         for (auto& lh : likelihoods)
-            lh = std::max(lh, std::numeric_limits<double>::epsilon());
+            lh = std::max(lh, LikelihoodEpsilon);
 
         //normalize directly via sum
         likelihoods /= likelihoods.sum();
+
         return;
     }
 
@@ -146,7 +146,7 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
 
     //convert to log likelihoods
     for (auto& lh : likelihoods)
-        lh = lh < 1e-300 ? std::numeric_limits<double>::signaling_NaN() : std::log(lh);
+        lh = lh < LogInputMin ? std::numeric_limits<double>::signaling_NaN() : std::log(lh);
 
     if (debug)
         loginf << "after log:\n" << likelihoods;
@@ -169,14 +169,14 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
 
     //convert back to likelihoods
     for (auto& lh : likelihoods)
-        lh = !std::isfinite(lh) || lh < -700.0 ? 0.0 : std::exp(lh);
+        lh = !std::isfinite(lh) || lh < ExpInputMin ? 0.0 : std::exp(lh);
 
     if (debug)
         loginf << "after exp:\n" << likelihoods;
 
     //check sum
     const double sum = likelihoods.sum();
-    if (sum < 1e-12)
+    if (sum < NormalizeSumMin)
     {
         normalizeLikelihoodWinnerTakesAll(likelihoods, debug);
         return;
@@ -184,7 +184,7 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
 
     //assure minimum prob
     for (auto& lh : likelihoods)
-        lh = std::max(lh, std::numeric_limits<double>::epsilon());
+        lh = std::max(lh, LikelihoodEpsilon);
 
     //normalize via sum
     likelihoods /= likelihoods.sum();
