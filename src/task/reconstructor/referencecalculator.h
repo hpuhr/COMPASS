@@ -155,6 +155,9 @@ private:
     void reconstructMeasurements();
     InitRecResult initReconstruction(TargetReferences& refs);
     void reconstructMeasurements(TargetReferences& refs);
+    void reconstructSmoothMeasurements(std::vector<kalman::KalmanUpdate>& updates,
+                                       TargetReferences& refs,
+                                       reconstruction::KalmanEstimator& estimator);
 
     void updateReferences();
 

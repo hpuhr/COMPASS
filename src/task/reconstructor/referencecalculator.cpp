@@ -434,11 +434,12 @@ ReferenceCalculator::InitRecResult ReferenceCalculator::initReconstruction(Targe
 
 /**
  */
-void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
+void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::KalmanUpdate>& updates,
+                                                        TargetReferences& refs,
+                                                        reconstruction::KalmanEstimator& estimator)
 {
-    refs.resetCounts();
-
-    bool general_debug = reconstructor_.task().debugSettings().debug_;
+    bool general_debug = reconstructor_.task().debugSettings().debug_ &&
+                         reconstructor_.task().debugSettings().debug_reference_calculation_;
     bool debug_target  = general_debug && reconstructor_.task().debugSettings().debugUTN(refs.utn);
 
     const auto& debug_rec_nums = reconstructor_.task().debugSettings().debug_rec_nums_;
@@ -448,24 +449,6 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     const auto& slice_t0 = reconstructor_.currentSlice().slice_begin_;
     const auto& slice_t1 = reconstructor_.currentSlice().next_slice_begin_;
-
-    if(settings_.activeVerbosity() > 0 || debug_target) 
-        loginf << "ReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
-
-    //try to init
-    auto res = initReconstruction(refs);
-    if (res != InitRecResult::Success)
-    {
-        //init failed
-        if (settings_.activeVerbosity() > 0)
-        {
-            if (res == InitRecResult::NoMeasurements)
-                loginf << "    skipping: no measurements";
-            else if (res == InitRecResult::NoStartIndex)
-                loginf << "    skipping: no start index found";
-        }
-        return;
-    }
 
     if (settings_.activeVerbosity() > 0) 
     {
@@ -479,11 +462,6 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     //if (refs.utn == 21)
     //    writeTargetData(refs, "/home/mcphatty/track_utn21.json");
-
-    //configure and init estimator
-    reconstruction::KalmanEstimator estimator;
-    estimator.settings() = settings_.kalmanEstimatorSettings();
-    estimator.init(settings_.kalman_type_final);
 
     kalman::KalmanUpdate update;
     size_t offs     = 0;
@@ -676,7 +654,7 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     }
 
     //start with joined kalman updates
-    std::vector<kalman::KalmanUpdate> updates = refs.updates;
+    updates = refs.updates;
     
     //run rts smoothing?
     std::vector<kalman::RTSDebugInfo> rts_debug_infos;
@@ -752,6 +730,59 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                                            nullptr,
                                            &rts_debug_infos);
     }
+}
+
+/**
+ */
+void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
+{
+    refs.resetCounts();
+
+    bool general_debug = reconstructor_.task().debugSettings().debug_ &&
+                         reconstructor_.task().debugSettings().debug_reference_calculation_;
+    bool debug_target  = general_debug && reconstructor_.task().debugSettings().debugUTN(refs.utn);
+
+    const auto& debug_rec_nums = reconstructor_.task().debugSettings().debug_rec_nums_;
+
+    const auto& debug_ts_min  = reconstructor_.task().debugSettings().debug_timestamp_min_;
+    const auto& debug_ts_max  = reconstructor_.task().debugSettings().debug_timestamp_max_;
+
+    const auto& slice_t0 = reconstructor_.currentSlice().slice_begin_;
+    const auto& slice_t1 = reconstructor_.currentSlice().next_slice_begin_;
+
+    if(settings_.activeVerbosity() > 0 || debug_target) 
+        loginf << "ReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
+
+    std::vector<kalman::KalmanUpdate> updates;
+
+    //configure and init estimator
+    reconstruction::KalmanEstimator estimator;
+    estimator.settings() = settings_.kalmanEstimatorSettings();
+    estimator.init(settings_.kalman_type_final);
+
+    //try to init
+    auto res = initReconstruction(refs);
+    if (res == InitRecResult::Success)
+    {
+        reconstructSmoothMeasurements(updates, refs, estimator);
+    }
+    else
+    {
+        //init failed
+        if (settings_.activeVerbosity() > 0 || debug_target)
+        {
+            if (res == InitRecResult::NoMeasurements)
+                loginf << "    skipping: no measurements";
+            else if (res == InitRecResult::NoStartIndex)
+                loginf << "    skipping: no start index found";
+        }
+        
+        if (refs.updates.empty())
+            return;
+
+        //process remaining updates of last slice
+        updates = settings_.smooth_rts ? refs.updates_smooth : refs.updates;
+    }
 
     //resample?
     if (settings_.resample_result)
@@ -783,20 +814,20 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     if (debug_target && shallAddAnnotationData())
     {
         refs.annotations.addAnnotationData(estimator, 
-                          "Kalman (Resampled)", 
-                          refcalc_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeKalmanResampled, LineWidthBase),
-                          refcalc_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeOSG, LineWidthBase),
-                          updates,
-                          slice_t0,
-                          slice_t1,
-                          0,
-                          false,
-                          nullptr,
-                          nullptr,
-                          nullptr,
-                          nullptr,
-                          nullptr, 
-                          nullptr);
+                                           "Kalman (Resampled)", 
+                                           refcalc_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeKalmanResampled, LineWidthBase),
+                                           refcalc_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeOSG, LineWidthBase),
+                                           updates,
+                                           slice_t0,
+                                           slice_t1,
+                                           0,
+                                           false,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr,
+                                           nullptr, 
+                                           nullptr);
     }
 
     //generate references

@@ -480,6 +480,11 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 
     next_slice_begin_ = current_slice_end; // for next iteration
 
+    bool is_last_slice = !hasNextTimeSlice();
+
+    if (is_last_slice)
+        write_before_time_ = current_slice_end + boost::posix_time::seconds(1);
+
     //assert (current_slice_begin_ <= timestamp_max_); can be bigger
 
     std::unique_ptr<DataSlice> slice (new DataSlice());
@@ -490,7 +495,7 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
     slice->timestamp_min_ = timestamp_min_;
     slice->timestamp_max_ = timestamp_max_;;
     slice->first_slice_ = first_slice_;
-    slice->is_last_slice_ = !hasNextTimeSlice();
+    slice->is_last_slice_ = is_last_slice;
 
     slice->remove_before_time_ = remove_before_time_;
     slice->write_before_time_ = write_before_time_;

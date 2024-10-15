@@ -1860,7 +1860,6 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         else
             has_prev_v_ = false;
 
-
         if (mom_long_acc_vec.isNull(buffer_cnt))
             mom_long_acc_vec.set(buffer_cnt, (unsigned char) MOM_LONG_ACC::Undetermined);
 
