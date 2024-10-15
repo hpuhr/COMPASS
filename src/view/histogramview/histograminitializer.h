@@ -252,15 +252,15 @@ public:
         //initialize histogram using config
         if (config.type == HistogramConfig::Type::Range)
         {
-            h.createFromRange(config.num_bins, data_min_.value(), data_max_.value());
+            return h.createFromRange(config.num_bins, data_min_.value(), data_max_.value());
         }
         else
         {
             std::vector<T> categories(distinct_values_.value().begin(), distinct_values_.value().end());
-            h.createFromCategories(categories, config.sorted_bins);
+            return h.createFromCategories(categories, config.sorted_bins);
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -280,7 +280,8 @@ public:
             return false;
 
         HistogramT<T> h;
-        if (!initHistogram(h, generateConfiguration(num_bins, distinct_values_min)))
+        auto config = generateConfiguration(num_bins, distinct_values_min);
+        if (!initHistogram(h, config))
             return false;
 
         h.add(data);
@@ -345,7 +346,8 @@ public:
             return true;
 
         HistogramT<T> h;
-        h.createFromCategories(category_values, categories_are_sorted);
+        if (!h.createFromCategories(category_values, categories_are_sorted))
+            return false;
 
         for (size_t i = 0; i < category_values.size(); ++i)
             h.add(category_values[ i ], category_counts[ i ]);
