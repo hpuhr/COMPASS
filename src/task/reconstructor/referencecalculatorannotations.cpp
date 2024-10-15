@@ -574,7 +574,7 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
                 //add to common feature
                 RawHistogram h;
                 HistogramInitializerT<double> init;
-                if (init.createRAW(h, values, true, 20))
+                if (init.createRAW(h, values, true, 20) && h.numBins() == 21)
                     feat_speed_histo->histograms().addDataSeries(h, data.name, style.base_color_);
 
                 //add own feature
