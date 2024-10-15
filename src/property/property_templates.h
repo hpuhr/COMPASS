@@ -18,6 +18,11 @@
 #pragma once
 
 #include "property.h"
+#include "nullablevector.h"
+
+#include "timeconv.h"
+
+#include <QString>
 
 #define SwitchPropertyDataTypeEntry(Name, Type, Func) \
     case Name:                                        \
@@ -108,6 +113,68 @@ bool invokeFunctor(PropertyDataType dtype, TFunc& func)
         func.error(dtype);
     }
     return false;
+}
+
+template <typename T>
+inline double toDouble(const T& value)
+{
+    return static_cast<double>(value);
+}
+template <>
+inline double toDouble(const boost::posix_time::ptime& value)
+{
+    return static_cast<double>(Utils::Time::toLong(value));
+}
+template <typename T>
+inline T fromDouble(double value)
+{
+    return static_cast<T>(value);
+}
+template <>
+inline boost::posix_time::ptime fromDouble(double value)
+{
+    return Utils::Time::fromLong(static_cast<unsigned long>(value));
+}
+template <typename T>
+inline std::string toString(const T& value, int decimals)
+{
+    return std::to_string(value);
+}
+template <>
+inline std::string toString(const std::string& value, int decimals)
+{
+    return value;
+}
+template <>
+inline std::string toString(const double& value, int decimals)
+{
+    return QString::number(value, 'f', decimals).toStdString();
+}
+template <>
+inline std::string toString(const float& value, int decimals)
+{
+    return QString::number(value, 'f', decimals).toStdString();
+}
+template <>
+inline std::string toString(const boost::posix_time::ptime& value, int decimals)
+{
+    return Utils::Time::toString(value);
+}
+template <typename T>
+inline T fromString(const std::string& value)
+{
+    double v = std::stod(value);
+    return static_cast<T>(v);
+}
+template <>
+inline std::string fromString(const std::string& value)
+{
+    return value;
+}
+template <>
+inline boost::posix_time::ptime fromString(const std::string& value)
+{
+    return Utils::Time::fromString(value);
 }
 
 } // property_templates

@@ -120,9 +120,10 @@ private:
         return vec->get(index);
     }
 
-    bool is_radar_   = false;
-    bool is_adsb_    = false;
-    bool is_tracker_ = false;
+    bool is_radar_    = false;
+    bool is_adsb_     = false;
+    bool is_tracker_  = false;
+    bool is_ref_traj_ = false;
 
     //general
     const NullableVector<boost::posix_time::ptime>* meta_timestamp_vec_ = nullptr;

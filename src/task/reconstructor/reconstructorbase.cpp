@@ -538,6 +538,8 @@ void ReconstructorBase::reset()
 
     targets_container_.clear();
 
+    chains_.clear();
+
     assert (acc_estimator_);
     acc_estimator_->init(this);
 
@@ -711,7 +713,7 @@ void ReconstructorBase::clearOldTargetReports()
 
     for (auto tr_it = target_reports_.begin(); tr_it != target_reports_.end() /* not hoisted */; /* no increment */)
     {
-        if (tr_it->second.timestamp_ <= currentSlice().remove_before_time_)
+        if (tr_it->second.timestamp_ < currentSlice().remove_before_time_)
         {
             //loginf << "ReconstructorBase: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
             tr_it = target_reports_.erase(tr_it);
@@ -759,6 +761,12 @@ void ReconstructorBase::clearOldTargetReports()
         if (chain_it.second)
         {
             chain_it.second->removeUpdatesBefore(currentSlice().remove_before_time_);
+
+            if (!chain_it.second->checkMeasurementAvailability())
+            {
+                logerr << "ProbIMMReconstructor: clearOldTargetReports: not all measurements available for chain with UTN " << chain_it.first;
+                assert( false);
+            }
 
             if (!chain_it.second->hasData())
                 chain_it.second = nullptr;
@@ -1221,6 +1229,15 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     assert(it != target_reports_.end());
 
     createMeasurement(mm, it->second, target);
+}
+
+const dbContent::targetReport::ReconstructorInfo* ReconstructorBase::getInfo(unsigned long rec_num) const
+{
+    auto it = target_reports_.find(rec_num);
+    if (it == target_reports_.end())
+        return nullptr;
+
+    return &it->second;
 }
 
 reconstruction::KalmanChainPredictors& ReconstructorBase::chainPredictors()

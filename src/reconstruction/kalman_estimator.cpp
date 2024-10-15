@@ -1343,7 +1343,7 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
 
                 kalman::KalmanState new_state;
                 new_state.x = SplineInterpolator::interpStateVector(new_state0.x, new_state1.x, interp_factor);
-                new_state.P = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, interp_factor);
+                new_state.P = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, interp_factor, SplineInterpolator::CovMatInterpMode::Linear);
 
                 // Reference ref;
                 // ref.t              = tcur;
@@ -1455,7 +1455,7 @@ kalman::KalmanError KalmanEstimator::predictBetween(kalman::KalmanUpdateMinimal&
 
     //interpolate predicted states
     update_interp.x                 = SplineInterpolator::interpStateVector(new_state0.x, new_state1.x, interp_factor);
-    update_interp.P                 = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, interp_factor);
+    update_interp.P                 = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, interp_factor, SplineInterpolator::CovMatInterpMode::Linear);
     update_interp.projection_center = update0.projection_center;
     update_interp.t                 = ts;
     update_interp.valid             = true;

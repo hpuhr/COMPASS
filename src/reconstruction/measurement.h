@@ -17,6 +17,14 @@ enum class CoordSystem
     Cart
 };
 
+enum CovMatFlags
+{
+    CovMatPos = 1 << 0,
+    CovMatVel = 1 << 1,
+    CovMatAcc = 1 << 2,
+    CovMatCov = 1 << 3
+};
+
 struct Measurement
 {
     Eigen::Vector2d position2D(CoordSystem cs) const;
@@ -37,6 +45,10 @@ struct Measurement
     bool hasStdDevAccel() const;
 
     std::string asString(const std::string& prefix = "") const;
+
+    Eigen::MatrixXd covMat(unsigned char flags = 255) const;
+    unsigned char covMatFlags() const;
+    bool setFromCovMat(const Eigen::MatrixXd& C, unsigned char flags = 255);
 
     unsigned long            source_id = 0;        // source of the measurement
     boost::posix_time::ptime t;                    // timestamp

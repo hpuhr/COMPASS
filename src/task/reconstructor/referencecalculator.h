@@ -1,4 +1,4 @@
- /*
+/*
  * This file is part of OpenATS COMPASS.
  *
  * COMPASS is free software: you can redistribute it and/or modify
@@ -17,133 +17,161 @@
 
 #pragma once
 
-#include "reconstruction_defs.h"
-#include "kalman_estimator.h"
+#include "referencecalculatorsettings.h"
+#include "referencecalculatorannotations.h"
+#include "test_target.h"
+
+#include <vector>
+
+#include <QColor>
+
+class ReconstructorBase;
+
+namespace dbContent 
+{
+    class ReconstructorTarget;
+}
+
+class ViewPointGenAnnotation;
+
+namespace reconstruction
+{
+    class KalmanEstimator;
+}
+
+/**
+ * Data for target export.
+*/
+struct ReferenceCalculatorTargetExportData
+{
+    TestTarget test_target;
+    boost::optional<boost::posix_time::ptime> t0;
+    double lat_;
+    double lon_;
+};
+
+/**
+ * Target reference data.
+*/
+struct ReferenceCalculatorTargetReferences
+{
+    void reset();
+    void resetCounts();
+
+    unsigned int utn;
+
+    std::vector<reconstruction::Measurement> measurements;
+    std::vector<kalman::KalmanUpdate>        updates;
+    std::vector<kalman::KalmanUpdate>        updates_smooth;
+    std::vector<double>                      updates_smooth_Qvars;
+    std::vector<reconstruction::Reference>   references;
+
+    boost::optional<kalman::KalmanUpdate>    init_update;
+    boost::optional<size_t>                  start_index;
+
+    size_t num_updates                 = 0;
+    size_t num_updates_valid           = 0;
+    size_t num_updates_failed          = 0;
+    size_t num_updates_failed_numeric  = 0;
+    size_t num_updates_failed_badstate = 0;
+    size_t num_updates_failed_other    = 0;
+    size_t num_updates_skipped         = 0;
+    size_t num_smooth_steps_failed     = 0;
+    size_t num_smoothing_failed        = 0;
+    size_t num_interp_steps_failed     = 0;
+
+    refcalc_annotations::ReferenceCalculatorAnnotations annotations;
+
+    std::unique_ptr<ReferenceCalculatorTargetExportData> export_data;
+};
 
 /**
 */
-struct ReferenceCalculatorSettings
+class ReferenceCalculator
 {
-    struct ProcessNoise
-    {
-        ProcessNoise() = default;
-        ProcessNoise(double stddev_static,
-                     double stddev_ground,
-                     double stddev_air,
-                     double stddev_unknown)
-        :   Q_std_static (stddev_static)
-        ,   Q_std_ground (stddev_ground)
-        ,   Q_std_air    (stddev_air)
-        ,   Q_std_unknown(stddev_unknown) {}
+public:
+    typedef ReferenceCalculatorSettings         Settings;
+    typedef ReferenceCalculatorTargetReferences TargetReferences;
 
-        double Q_std_static;
-        double Q_std_ground;
-        double Q_std_air;
-        double Q_std_unknown;
+    typedef std::vector<reconstruction::Measurement>                       Measurements;
+    typedef std::multimap<boost::posix_time::ptime, unsigned long>         TargetReports;
+    typedef std::map<unsigned int, std::vector<reconstruction::Reference>> References;
+
+    ReferenceCalculator(ReconstructorBase& reconstructor);
+    virtual ~ReferenceCalculator();
+
+    void prepareForNextSlice();
+    void prepareForCurrentSlice();
+    bool computeReferences();
+
+    void reset();
+
+    void createAnnotations();
+
+    Settings& settings() { return settings_; }
+    
+    static std::vector<std::vector<reconstruction::Measurement>> splitMeasurements(const Measurements& measurements,
+                                                                                   double max_dt);
+    static const QColor ColorMeasurements;
+    static const QColor ColorKalman;
+    static const QColor ColorKalmanSmoothed;
+    static const QColor ColorKalmanResampled;
+
+    static const float PointSizeOSG;
+    static const float PointSizeMeasurements;
+    static const float PointSizeKalman;
+    static const float PointSizeKalmanSmoothed;
+    static const float PointSizeKalmanResampled;
+
+    static const float LineWidthBase;
+                                
+private:
+    enum class InitRecResult 
+    {
+        NoMeasurements = 0,
+        NoStartIndex,
+        Success
     };
 
-    /**
-    */
-    reconstruction::KalmanEstimator::Settings kalmanEstimatorSettings() const
-    {
-        reconstruction::KalmanEstimator::Settings settings;
+    void resetDataStructs();
+    void updateInterpOptions();
 
-        settings.min_chain_size    = min_chain_size;
-        settings.min_dt            = min_dt;
-        settings.max_dt            = max_dt;
-        settings.max_distance_cart = max_distance;
+    void generateMeasurements();
+    void generateTargetMeasurements(const dbContent::ReconstructorTarget& target);
+    void generateLineMeasurements(const dbContent::ReconstructorTarget& target,
+                                  unsigned int dbcontent_id,
+                                  unsigned int sensor_id,
+                                  unsigned int line_id,
+                                  const TargetReports& target_reports);
+    
+    void addMeasurements(unsigned int utn,
+                         unsigned int dbcontent_id, 
+                         Measurements& measurements);
+    void preprocessMeasurements(unsigned int dbcontent_id, 
+                                Measurements& measurements);
+    void interpolateMeasurements(Measurements& measurements, 
+                                 const reconstruction::InterpOptions& options) const;
+    
+    void reconstructMeasurements();
+    InitRecResult initReconstruction(TargetReferences& refs);
+    void reconstructMeasurements(TargetReferences& refs);
 
-        settings.Q_var       = Q_std.Q_std_static * Q_std.Q_std_static;
-        settings.R_var_undef = R_std_undef * R_std_undef;
+    void updateReferences();
 
-        settings.min_pred_dt = min_dt;
-        
-        settings.resample_dt          = resample_dt;
-        settings.resample_Q_var       = resample_Q_std.Q_std_static * resample_Q_std.Q_std_static;
-        settings.resample_interp_mode = resample_blend_mode;
+    boost::posix_time::ptime getJoinThreshold() const;
 
-        settings.smoothing_scale = smooth_scale;
+    bool writeTargetData(TargetReferences& refs,
+                         const std::string& fn);
 
-        settings.max_proj_distance_cart = max_proj_distance_cart;
+    bool shallAddAnnotationData() const;
 
-        settings.verbosity = activeVerbosity() >= 2 ? activeVerbosity() - 1 : 0;
+    ReconstructorBase& reconstructor_;
 
-        // settings.step_fail_strategy = allow_invalid_updates ? reconstruction::KalmanEstimator::Settings::StepFailStrategy::ReturnInvalid :
-        //                                                       reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
+    Settings settings_;
 
-        settings.step_fail_strategy = allow_invalid_updates ? reconstruction::KalmanEstimator::Settings::StepFailStrategy::Reinit :
-                                                              reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
+    int  slice_idx_     = -1;
+    bool is_last_slice_ = false;
 
-
-        settings.fix_predictions        = fix_predictions;
-        settings.fix_predictions_interp = fix_predictions_interp;
-
-        return settings;
-    }
-
-    /**
-    */
-    reconstruction::KalmanEstimator::Settings chainEstimatorSettings() const
-    {
-        reconstruction::KalmanEstimator::Settings settings = kalmanEstimatorSettings();
-
-        //override settings for chain if needed
-
-        return settings;
-    }
-
-    int activeVerbosity() const
-    {
-        return (multithreading ? 0 : verbosity);
-    }
-
-    int verbosity = 0;
-
-    kalman::KalmanType kalman_type_assoc = kalman::KalmanType::UMKalman2D;
-    kalman::KalmanType kalman_type_final = kalman::KalmanType::IMMKalman2D;
-
-    //default noise
-    double       R_std_undef       = reconstruction::KalmanEstimator::HighStdDev;
-    ProcessNoise Q_std             = ProcessNoise(7.0, 5.0, 10.0, 7.0); // (static, ground, air, unknown)
-    double       Q_altitude_min_ft = 0.0;
-    double       Q_altitude_max_ft = 30000.0;
-
-    //reinit related
-    int    min_chain_size = 2;
-    double min_dt         = 0.001;
-    double max_dt         = 11.0;
-    double max_distance   = 50000.0;
-
-    bool   smooth_rts   = true;
-    double smooth_scale = 1.0;
-
-    //result resampling related
-    bool                            resample_result     = true;
-    ProcessNoise                    resample_Q_std      = ProcessNoise(3.0, 2.0, 5.0, 3.0); // (static, ground, air, unknown)
-    double                          resample_dt         = 2.0;
-    reconstruction::StateInterpMode resample_blend_mode = reconstruction::StateInterpMode::BlendVar;
-
-    //dynamic projection change
-    double max_proj_distance_cart  = 20000.0;
-
-    //systrack resampling related
-    bool   resample_systracks        = true; // resample system tracks using spline interpolation
-    double resample_systracks_dt     = 1.0;  // resample interval in seconds
-    double resample_systracks_max_dt = 30.0; // maximum timestep to interpolate in seconds
-
-    bool multithreading        = true;
-    bool allow_invalid_updates = true;
-
-    bool fix_predictions        = true;
-    bool fix_predictions_interp = false;
-
-    bool dynamic_process_noise = true;
-
-    //final reference filter related
-    bool   filter_references_max_stddev_ {true};
-    double filter_references_max_stddev_m_ {150.0};
-
-    //debug options
-    bool compat_mode     = false;
-    int  max_slice_index = -1;
+    std::map<unsigned int, TargetReferences>              references_;
+    std::map<unsigned int, reconstruction::InterpOptions> interp_options_;
 };
