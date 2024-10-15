@@ -2110,6 +2110,12 @@ void ReconstructorTarget::reinitTracker()
         {
             rec_ptr->createMeasurement(mm, rec_num);
         });
+
+    chain()->setMeasurementCheckFunc(
+        [ rec_ptr ] (unsigned long rec_num)
+        {
+            return rec_ptr->target_reports_.find(rec_num) != rec_ptr->target_reports_.end();
+        });
 }
 
 bool ReconstructorTarget::compareChainUpdates(const dbContent::targetReport::ReconstructorInfo& tr,

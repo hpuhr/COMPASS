@@ -457,11 +457,6 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
 
     const std::string PlotGroup = "Final Reconstruction";
 
-    auto feat_speed_histo = new ViewPointGenFeatureHistogram(RawHistogramCollection(), 
-        PlotMetadata("Reconstruction", "Speed Common", "Speed", "", PlotGroup));
-    feat_speed_histo->histograms().setUseLogScale(false);
-    common_anno->addFeature(feat_speed_histo);
-
     auto feat_speed_scatter = new ViewPointGenFeatureScatterSeries(ScatterSeriesCollection(), 
         PlotMetadata("Reconstruction", "Speed Common", "Timestamp", "Speed", PlotGroup));
     feat_speed_scatter->scatterSeries().setUseConnectionLines(true);
@@ -574,13 +569,12 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
                 //add to common feature
                 RawHistogram h;
                 HistogramInitializerT<double> init;
-                if (init.createRAW(h, values, true, 20) && h.numBins() == 21)
-                    feat_speed_histo->histograms().addDataSeries(h, data.name, style.base_color_);
-
-                //add own feature
-                auto f = new ViewPointGenFeatureHistogram(h, data.name, style.base_color_, 
-                    PlotMetadata("Reconstruction", "Speed " + data.name, "Speed", "", PlotGroup));
-                anno->addFeature(f);
+                if (init.createRAW(h, values, true, 20))
+                {
+                    auto f = new ViewPointGenFeatureHistogram(h, data.name, style.base_color_, 
+                        PlotMetadata("Reconstruction", "Speed " + data.name, "Speed", "", PlotGroup));
+                    anno->addFeature(f);
+                }
             }
 
             //add scatter data series

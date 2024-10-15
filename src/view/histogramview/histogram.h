@@ -545,8 +545,8 @@ private:
         if (step_size_int == 0)
         {
             //should only happen on integer types when number of bins is bigger than range
-            //in that case 
-            n = (size_t)(max_value_int - min_value_int);
+            //in that case => reduce bins
+            n             = (size_t)(max_value_int - min_value_int);
             step_size_int = 1;
             step_size_    = convertFromInternal<Tinternal>(step_size_int);
         }

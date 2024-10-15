@@ -112,6 +112,7 @@ public:
     typedef std::unique_ptr<KalmanEstimator>                 EstimatorPtr;
     typedef std::function<const Measurement&(unsigned long)> MeasurementGetFunc;
     typedef std::function<void(Measurement&, unsigned long)> MeasurementAssignFunc;
+    typedef std::function<bool(unsigned long)>               MeasurementCheckFunc;
 
     KalmanChain();
     virtual ~KalmanChain();
@@ -129,6 +130,7 @@ public:
     void configureEstimator(const KalmanEstimator::Settings& settings);
     void setMeasurementGetFunc(const MeasurementGetFunc& get_func);
     void setMeasurementAssignFunc(const MeasurementAssignFunc& assign_func);
+    void setMeasurementCheckFunc(const MeasurementCheckFunc& check_func);
 
     bool add(unsigned long mm_id,
              const boost::posix_time::ptime& ts,
@@ -180,6 +182,8 @@ public:
     
     size_t size() const;
     int count() const;
+
+    bool checkMeasurementAvailability() const;
 
     Settings& settings();
 
@@ -238,6 +242,7 @@ private:
 
     MeasurementGetFunc    get_func_;
     MeasurementAssignFunc assign_func_;
+    MeasurementCheckFunc  check_func_;
     mutable Measurement   mm_tmp_;
 
     mutable Predictor     predictor_;
