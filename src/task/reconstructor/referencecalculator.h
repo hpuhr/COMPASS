@@ -18,6 +18,7 @@
 #pragma once
 
 #include "referencecalculatorsettings.h"
+#include "referencecalculatordefs.h"
 #include "referencecalculatorannotations.h"
 #include "test_target.h"
 
@@ -55,19 +56,22 @@ struct ReferenceCalculatorTargetExportData
 */
 struct ReferenceCalculatorTargetReferences
 {
+    typedef ReferenceCalculatorInputInfo InputInfo;
+
     void reset();
     void resetCounts();
 
     unsigned int utn;
 
-    std::vector<reconstruction::Measurement> measurements;
-    std::vector<kalman::KalmanUpdate>        updates;
-    std::vector<kalman::KalmanUpdate>        updates_smooth;
-    std::vector<double>                      updates_smooth_Qvars;
-    std::vector<reconstruction::Reference>   references;
+    std::vector<reconstruction::Measurement>    measurements;
+    std::vector<kalman::KalmanUpdate>           updates;
+    std::vector<kalman::KalmanUpdate>           updates_smooth;
+    std::vector<double>                         updates_smooth_Qvars;
+    std::vector<reconstruction::Reference>      references;
+    std::map<kalman::UniqueUpdateID, InputInfo> input_infos;
 
-    boost::optional<kalman::KalmanUpdate>    init_update;
-    boost::optional<size_t>                  start_index;
+    boost::optional<kalman::KalmanUpdate> init_update;
+    boost::optional<size_t>               start_index;
 
     size_t num_updates                 = 0;
     size_t num_updates_valid           = 0;
@@ -155,6 +159,12 @@ private:
     void reconstructMeasurements();
     InitRecResult initReconstruction(TargetReferences& refs);
     void reconstructMeasurements(TargetReferences& refs);
+    void reconstructSmoothMeasurements(std::vector<kalman::KalmanUpdate>& updates,
+                                       TargetReferences& refs,
+                                       reconstruction::KalmanEstimator& estimator);
+    void obtainRemainingUpdates(std::vector<kalman::KalmanUpdate>& updates,
+                                TargetReferences& refs,
+                                reconstruction::KalmanEstimator& estimator);
 
     void updateReferences();
 

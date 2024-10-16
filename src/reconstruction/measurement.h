@@ -50,7 +50,10 @@ struct Measurement
     unsigned char covMatFlags() const;
     bool setFromCovMat(const Eigen::MatrixXd& C, unsigned char flags = 255);
 
-    unsigned long            source_id = 0;        // source of the measurement
+    std::pair<unsigned long, boost::posix_time::ptime> uniqueID() const;
+
+    boost::optional<unsigned long> source_id;      // source of the measurement
+
     boost::posix_time::ptime t;                    // timestamp
 
     bool                     mm_interp = false;    // measurement has been interpolated (e.g. by spline interpolator)

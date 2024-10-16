@@ -259,7 +259,7 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
         return MeasurementInterp(mm1, false, false);
 
     MeasurementInterp mm_interp;
-    mm_interp.source_id = mm0.source_id;
+    mm_interp.source_id = mm0.source_id; //!note: other components (e.g. reference calculation) rely on this assumption!
     mm_interp.t         = t;
     mm_interp.mm_interp = true;
 

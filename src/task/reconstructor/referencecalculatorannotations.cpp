@@ -59,24 +59,28 @@ void ReferenceCalculatorAnnotations::setReconstructor(const ReconstructorBase* r
 TRAnnotation ReferenceCalculatorAnnotations::createTRAnnotation(const reconstruction::Measurement& mm,
                                                                 const boost::optional<Eigen::Vector2d>& speed_pos,
                                                                 const boost::optional<Eigen::Vector2d>& accel_pos,
-                                                                const boost::optional<Eigen::Vector2d>& mm_pos,
+                                                                const boost::optional<Eigen::Vector2d>& input_pos,
                                                                 const boost::optional<std::string>& info_str) const
 {
     TRAnnotation a;
-    a.ts        = mm.t;
-    a.pos_wgs84 = Eigen::Vector2d(mm.lat, mm.lon);
-    a.pos_mm    = mm_pos;
-    a.speed_pos = speed_pos;
-    a.acc_pos   = accel_pos;
-    a.Q_var     = mm.Q_var;
-    a.info      = info_str;
+    a.ts            = mm.t;
+    a.pos_wgs84     = Eigen::Vector2d(mm.lat, mm.lon);
+    a.speed_pos     = speed_pos;
+    a.acc_pos       = accel_pos;
+    a.pos_mm        = input_pos;
+    a.pos_mm_uncorr = input_pos;
+    a.Q_var         = mm.Q_var;
+    a.info          = info_str;
 
-    if (reconstructor_ && mm_pos.has_value())
+    if (reconstructor_ && mm.source_id.has_value())
     {
-        auto tr_info = reconstructor_->getInfo(mm.source_id);
+        auto tr_info = reconstructor_->getInfo(mm.source_id.value());
 
         if (tr_info)
-            a.pos_mm_uncorr = tr_info->timestamp_ == mm.t ? Eigen::Vector2d(tr_info->position_->latitude_, tr_info->position_->longitude_) : mm_pos;
+        {
+            a.pos_mm        = mm.t == tr_info->timestamp_ ? Eigen::Vector2d(tr_info->position()->latitude_, tr_info->position()->longitude_) : input_pos;
+            a.pos_mm_uncorr = mm.t == tr_info->timestamp_ ? Eigen::Vector2d(tr_info->position_->latitude_, tr_info->position_->longitude_)   : input_pos;
+        }
     }
 
     if (mm.hasStdDevPosition())
@@ -94,10 +98,10 @@ TRAnnotation ReferenceCalculatorAnnotations::createTRAnnotation(const reconstruc
 TRAnnotation ReferenceCalculatorAnnotations::createTRAnnotation(const reconstruction::Reference& ref,
                                                                 const boost::optional<Eigen::Vector2d>& speed_pos,
                                                                 const boost::optional<Eigen::Vector2d>& accel_pos,
-                                                                const boost::optional<Eigen::Vector2d>& mm_pos) const
+                                                                const boost::optional<Eigen::Vector2d>& input_pos) const
 {
     const reconstruction::Measurement* mm = &ref;
-    auto anno = createTRAnnotation(*mm, speed_pos, accel_pos, mm_pos, {});
+    auto anno = createTRAnnotation(*mm, speed_pos, accel_pos, input_pos, {});
 
     anno.reset       = ref.reset_pos;
     anno.proj_change = ref.projchange_pos;
@@ -229,16 +233,11 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const reconstruction::Kal
                                                        const AnnotationStyle& style,
                                                        const boost::optional<AnnotationStyle>& style_osg,
                                                        const std::vector<kalman::KalmanUpdate>& updates,
-                                                       const boost::optional<boost::posix_time::ptime>& t0,
-                                                       const boost::optional<boost::posix_time::ptime>& t1,
-                                                       size_t offs,
                                                        bool debug_imm,
-                                                       const std::vector<reconstruction::Measurement>* mms,
-                                                       const std::vector<unsigned int>* used_mms,
+                                                       const std::map<Key, ReferenceCalculatorInputInfo>* input_infos,
                                                        const std::vector<QPointF>* fail_pos,
                                                        const std::vector<QPointF>* skip_pos,
-                                                       const std::vector<Eigen::Vector2d>* interp_input_positions,
-                                                       const std::vector<kalman::RTSDebugInfo>* rts_debug_infos)
+                                                       const std::map<Key, kalman::RTSDebugInfo>* rts_debug_infos)
 {
     //store updates to references for easier access
     std::vector<reconstruction::Reference> references;
@@ -247,54 +246,57 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const reconstruction::Kal
 
     std::vector<TRAnnotation> annos(references.size());
 
+    const auto* slice = reconstructor_ ? &reconstructor_->currentSlice() : nullptr;
+
     for (size_t i = 0; i < references.size(); ++i)
     {
-        boost::optional<Eigen::Vector2d> mm_pos;
-        if (mms && used_mms)
-        {
-            const auto& mm = mms->at(used_mms->at(i));
-            mm_pos = Eigen::Vector2d(mm.lat, mm.lon);
+        const auto& r = references[ i ];
 
-            //recover source id of reconstructed reference
-            references[ i ].source_id = mm.source_id;
+        if (slice && !slice->isWritten(r.t)) 
+            continue;
+
+        //try to obtain corresponding input measurement's position
+        boost::optional<Eigen::Vector2d> input_pos;
+        if (input_infos && r.source_id.has_value())
+        {
+            auto it = input_infos->find(r.uniqueID());
+            if (it != input_infos->end())
+                input_pos = Eigen::Vector2d(it->second.lat, it->second.lon);
         }
 
-        annos[ i ] = createTRAnnotation(references[ i ], 
+        annos[ i ] = createTRAnnotation(r, 
                                         speed_positions[ i ], 
-                                        accel_positions[ i ], 
-                                        mm_pos);
+                                        accel_positions[ i ],
+                                        input_pos);
     }
 
     reconstruction::KalmanProjectionHandler phandler;
 
-    std::vector<IMMAnnotation> imm_annotations;
+    std::map<Key, IMMAnnotation> imm_annotations;
     if (debug_imm)
     {
         for (const auto& u : updates)
-            if (u.state.imm_state && u.isDebug())
-                imm_annotations.push_back(createIMMAnnotation(u, estimator, phandler));
+        {
+            if (u.state.imm_state && u.isDebug() && u.source_id.has_value())
+            {
+                imm_annotations[ u.uniqueID() ] = createIMMAnnotation(u, estimator, phandler);
+            }
+        }
     }
     
-    std::vector<RTSAnnotation> rts_annotations;
+    std::map<Key, RTSAnnotation> rts_annotations;
     if (rts_debug_infos)
     {
         for (const auto& rts_info : *rts_debug_infos)
-        {
-            auto rts_anno = createRTSAnnotation(rts_info, estimator, phandler);
-            rts_annotations.push_back(rts_anno);
-        }
+            rts_annotations[ rts_info.first ] = createRTSAnnotation(rts_info.second, estimator, phandler);
     }
 
     addAnnotationData(name, 
                       style, 
                       style_osg, 
                       annos, 
-                      t0, 
-                      t1, 
-                      offs,
                       fail_pos,
                       skip_pos,
-                      interp_input_positions,
                       &imm_annotations,
                       &rts_annotations);
 }
@@ -304,22 +306,21 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const reconstruction::Kal
 void ReferenceCalculatorAnnotations::addAnnotationData(const std::string& name,
                                                        const AnnotationStyle& style,
                                                        const boost::optional<AnnotationStyle>& style_osg,
-                                                       const std::vector<reconstruction::Measurement>& measurements,
-                                                       const boost::optional<boost::posix_time::ptime>& t0,
-                                                       const boost::optional<boost::posix_time::ptime>& t1,
-                                                       size_t offs)
+                                                       const std::vector<reconstruction::Measurement>& measurements)
 {
     std::vector<boost::optional<Eigen::Vector2d>> speed_positions, accel_positions;
     reconstruction::KalmanEstimator::extractVelAccPositionsWGS84(speed_positions, accel_positions, measurements);
 
     std::vector<TRAnnotation> annos(measurements.size());
 
+    const auto* slice = reconstructor_ ? &reconstructor_->currentSlice() : nullptr;
+
     for (size_t i = 0; i < measurements.size(); ++i)
     {
         const auto& mm = measurements[ i ];
 
-        if (t0.has_value() && mm.t < t0.value()) continue;
-        if (t1.has_value() && mm.t > t1.value()) continue;
+        if (slice && !slice->inSlice(mm.t))
+            continue;
 
         std::string info;
         std::string tr_info;
@@ -327,18 +328,18 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const std::string& name,
         std::string sensor_info;
         std::string additional_info;
 
-        //target report info
-        tr_info = std::to_string(mm.source_id);
-
-        //dbcontent info
-        auto dbc_id = Utils::Number::recNumGetDBContId(mm.source_id);
-        if (COMPASS::instance().dbContentManager().existsDBContentWithId(dbc_id))
-            dbc_info = COMPASS::instance().dbContentManager().dbContentWithId(dbc_id);
-
-        //sensor info
-        if (reconstructor_)
+        if (mm.source_id.has_value())
         {
-            auto rec_info = reconstructor_->getInfo(mm.source_id);
+            //target report info
+            tr_info = std::to_string(mm.source_id.value());
+
+            //dbcontent info
+            auto dbc_id = Utils::Number::recNumGetDBContId(mm.source_id.value());
+            if (COMPASS::instance().dbContentManager().existsDBContentWithId(dbc_id))
+                dbc_info = COMPASS::instance().dbContentManager().dbContentWithId(dbc_id);
+        
+            //sensor info
+            auto rec_info = reconstructor_->getInfo(mm.source_id.value());
             if (rec_info)
             {
                 if (COMPASS::instance().dataSourceManager().hasDBDataSource(rec_info->ds_id_))
@@ -364,7 +365,7 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const std::string& name,
 
         annos[ i ] = createTRAnnotation(mm, 
                                         speed_positions[ i ], 
-                                        accel_positions[ i ], 
+                                        accel_positions[ i ],
                                         {},
                                         info);
     }
@@ -372,10 +373,8 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const std::string& name,
     addAnnotationData(name, 
                       style, 
                       style_osg, 
-                      annos, 
-                      t0, 
-                      t1, 
-                      offs,
+                      annos,
+                      nullptr,
                       nullptr,
                       nullptr,
                       nullptr);
@@ -387,14 +386,10 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const std::string& name,
                                                        const AnnotationStyle& style,
                                                        const boost::optional<AnnotationStyle>& style_osg,
                                                        const std::vector<TRAnnotation>& annotations,
-                                                       const boost::optional<boost::posix_time::ptime>& t0,
-                                                       const boost::optional<boost::posix_time::ptime>& t1,
-                                                       size_t offs,
                                                        const std::vector<QPointF>* fail_pos,
                                                        const std::vector<QPointF>* skip_pos,
-                                                       const std::vector<Eigen::Vector2d>* interp_input_positions,
-                                                       const std::vector<IMMAnnotation>* imm_annotations,
-                                                       const std::vector<RTSAnnotation>* rts_annotations)
+                                                       const std::map<Key, IMMAnnotation>* imm_annotations,
+                                                       const std::map<Key, RTSAnnotation>* rts_annotations)
 {
     AnnotationData& data = annotation_data_[ name ];
 
@@ -407,13 +402,10 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const std::string& name,
 
     bool added = false;
 
-    for (size_t i = offs; i < n; ++i)
+    for (size_t i = 0; i < n; ++i)
     {
         const auto& a = annotations.at(i);
         
-        if (t0.has_value() && a.ts < t0.value()) continue;
-        if (t1.has_value() && a.ts > t1.value()) continue;
-
         added = true;
 
         data.annotations.push_back(a);
@@ -429,17 +421,21 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const std::string& name,
         for (const auto& sp : *skip_pos)
             data.skip_positions.emplace_back(sp.x(), sp.y());
     }
-    if (interp_input_positions)
-    {
-        data.interp_input_positions.insert(data.interp_input_positions.end(), interp_input_positions->begin(), interp_input_positions->end());
-    }
+    // if (interp_positions)
+    // {
+    //     data.interp_input_positions.insert(data.interp_input_positions.end(), interp_positions->begin(), interp_positions->end());
+    // }
     if (imm_annotations)
     {
-        data.imm_annotations.insert(data.imm_annotations.end(), imm_annotations->begin(), imm_annotations->end());
+        //overwrite any updated keys
+        for (const auto& a : *imm_annotations)
+            data.imm_annotations[ a.first ] = a.second;
     }
     if (rts_annotations)
     {
-        data.rts_annotations.insert(data.rts_annotations.end(), rts_annotations->begin(), rts_annotations->end());
+        //overwrite any updated keys
+        for (const auto& a : *rts_annotations)
+            data.rts_annotations[ a.first ] = a.second;
     }
 
     if (added)
@@ -806,7 +802,7 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
             size_t cnt = 0;
             for (const auto& rts_anno : data.rts_annotations)
             {
-                std::string name = "RTSInfo" + std::to_string(cnt) + (rts_anno.extra_info.empty() ? "" : ": " + rts_anno.extra_info);
+                std::string name = "RTSInfo" + std::to_string(cnt) + (rts_anno.second.extra_info.empty() ? "" : ": " + rts_anno.second.extra_info);
 
                 auto anno_info = anno_rts->getOrCreateAnnotation(name);
 
@@ -816,14 +812,14 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
                 std::vector<QColor> colors;
 
                 //smoothed position
-                positions_smooth.push_back(rts_anno.rts_step.state0_smooth.pos_wgs84);
-                positions_nonsmooth.push_back(rts_anno.rts_step.state0.pos_wgs84);
+                positions_smooth.push_back(rts_anno.second.rts_step.state0_smooth.pos_wgs84);
+                positions_nonsmooth.push_back(rts_anno.second.rts_step.state0.pos_wgs84);
                 connections.push_back(positions_smooth.back());
                 connections.push_back(positions_nonsmooth.back());
-                colors.push_back(rts_anno.rts_step.color);
+                colors.push_back(rts_anno.second.rts_step.color);
 
                 //smoothed submodel positions
-                for (const auto& rts_anno_model : rts_anno.rts_step_models)
+                for (const auto& rts_anno_model : rts_anno.second.rts_step_models)
                 {
                     positions_smooth.push_back(rts_anno_model.state0_smooth.pos_wgs84);
                     positions_nonsmooth.push_back(rts_anno_model.state0.pos_wgs84);
@@ -859,7 +855,7 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
             size_t cnt = 0;
             for (const auto& imm_anno : data.imm_annotations)
             {
-                std::string name = "IMMInfo" + std::to_string(cnt) + (imm_anno.extra_info.empty() ? "" : ": " + imm_anno.extra_info);
+                std::string name = "IMMInfo" + std::to_string(cnt) + (imm_anno.second.extra_info.empty() ? "" : ": " + imm_anno.second.extra_info);
 
                 auto anno_info = anno_rts->getOrCreateAnnotation(name);
 
@@ -867,11 +863,11 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
                 std::vector<QColor> colors;
 
                 //position
-                positions.push_back(imm_anno.imm_step.state.pos_wgs84);
-                colors.push_back(imm_anno.imm_step.color);
+                positions.push_back(imm_anno.second.imm_step.state.pos_wgs84);
+                colors.push_back(imm_anno.second.imm_step.color);
 
                 //submodel positions
-                for (const auto& imm_anno_model : imm_anno.imm_step_models)
+                for (const auto& imm_anno_model : imm_anno.second.imm_step_models)
                 {
                     positions.push_back(imm_anno_model.state.pos_wgs84);
                     colors.push_back(imm_anno_model.color);

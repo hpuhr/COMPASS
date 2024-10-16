@@ -98,10 +98,18 @@ class ReconstructorBaseSettings
  */
 class ReconstructorBase : public Configurable
 {
-  public:
-
+public:
     struct DataSlice
     {
+        bool isWritten(const boost::posix_time::ptime& t) const
+        {
+            return (t >= remove_before_time_ && t < write_before_time_);
+        }
+        bool inSlice(const boost::posix_time::ptime& t) const
+        {
+            return (t >= slice_begin_ && t < next_slice_begin_);
+        }
+
         unsigned int slice_count_;
         boost::posix_time::ptime slice_begin_;
         boost::posix_time::ptime next_slice_begin_;
@@ -185,6 +193,7 @@ class ReconstructorBase : public Configurable
 
     void processSlice();
     ReconstructorBase::DataSlice& currentSlice();
+    const ReconstructorBase::DataSlice& currentSlice() const;
 
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 

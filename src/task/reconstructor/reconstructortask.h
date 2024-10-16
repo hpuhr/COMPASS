@@ -149,6 +149,7 @@ public:
     std::map<unsigned int, std::set<unsigned int>> unusedDSIDLines() const;
 
     ReconstructorBase::DataSlice& processingSlice();
+    const ReconstructorBase::DataSlice& processingSlice() const;
 
     ViewPointGenVP* getDebugViewpoint(const std::string& name, const std::string& type, bool* created = nullptr) const;
     ViewPointGenVP* getDebugViewpointNoData(const std::string& name, const std::string& type); // w/o sur data

@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include "kalman_defs.h"
+#include "referencecalculatordefs.h"
+
 #include <vector>
 #include <string>
 
@@ -28,8 +31,8 @@
 #include <QColor>
 #include <QPointF>
 
-class ViewPointGenAnnotation;
-class ReconstructorBase;
+class  ViewPointGenAnnotation;
+class  ReconstructorBase;
 
 namespace reconstruction
 {
@@ -133,6 +136,8 @@ struct AnnotationStyle
 */
 struct AnnotationData
 {
+    typedef kalman::UniqueUpdateID Key;
+
     std::string                  name;
     AnnotationStyle              style;
     AnnotationStyle              style_osg;
@@ -143,8 +148,8 @@ struct AnnotationData
     std::vector<double>          Q_vars;
     std::vector<bool>            is_reset_pos;
     std::vector<bool>            is_proj_change_pos;
-    std::vector<RTSAnnotation>   rts_annotations;
-    std::vector<IMMAnnotation>   imm_annotations;
+    std::map<Key, RTSAnnotation> rts_annotations;
+    std::map<Key, IMMAnnotation> imm_annotations;
     std::vector<Eigen::Vector2d> interp_input_positions;
 };
 
@@ -153,6 +158,8 @@ struct AnnotationData
 class ReferenceCalculatorAnnotations
 {
 public:
+    typedef kalman::UniqueUpdateID Key;
+    
     ReferenceCalculatorAnnotations();
     virtual ~ReferenceCalculatorAnnotations();
 
@@ -160,52 +167,33 @@ public:
 
     void setReconstructor(const ReconstructorBase* reconstructor);
 
-    void addAnnotationData(const std::string& name,
-                           const AnnotationStyle& style,
-                           const boost::optional<AnnotationStyle>& style_osg,
-                           const std::vector<TRAnnotation>& annotations,
-                           const boost::optional<boost::posix_time::ptime>& t0,
-                           const boost::optional<boost::posix_time::ptime>& t1,
-                           size_t offs,
-                           const std::vector<QPointF>* fail_pos = nullptr,
-                           const std::vector<QPointF>* skip_pos = nullptr,
-                           const std::vector<Eigen::Vector2d>* interp_input_positions = nullptr,
-                           const std::vector<IMMAnnotation>* imm_annotations = nullptr,
-                           const std::vector<RTSAnnotation>* rts_annotations = nullptr);
     void addAnnotationData(const reconstruction::KalmanEstimator& estimator, 
                            const std::string& name,
                            const AnnotationStyle& style,
                            const boost::optional<AnnotationStyle>& style_osg,
                            const std::vector<kalman::KalmanUpdate>& updates,
-                           const boost::optional<boost::posix_time::ptime>& t0,
-                           const boost::optional<boost::posix_time::ptime>& t1,
-                           size_t offs,
-                           bool debug_imm,
-                           const std::vector<reconstruction::Measurement>* mms = nullptr,
-                           const std::vector<unsigned int>* used_mms = nullptr,            
+                           bool debug_imm,     
+                           const std::map<Key, ReferenceCalculatorInputInfo>* input_infos,  
                            const std::vector<QPointF>* fail_pos = nullptr,
                            const std::vector<QPointF>* skip_pos = nullptr,
-                           const std::vector<Eigen::Vector2d>* interp_input_positions = nullptr,
-                           const std::vector<kalman::RTSDebugInfo>* rts_debug_infos = nullptr);
+                           const std::map<Key, kalman::RTSDebugInfo>* rts_debug_infos = nullptr);
     void addAnnotationData(const std::string& name,
                            const AnnotationStyle& style,
                            const boost::optional<AnnotationStyle>& style_osg,
-                           const std::vector<reconstruction::Measurement>& measurements,
-                           const boost::optional<boost::posix_time::ptime>& t0,
-                           const boost::optional<boost::posix_time::ptime>& t1,
-                           size_t offs);
+                           const std::vector<reconstruction::Measurement>& measurements);
+    
     void createAnnotations(ViewPointGenAnnotation* annotation) const;
 
 private:
     TRAnnotation createTRAnnotation(const reconstruction::Measurement& mm,
                                     const boost::optional<Eigen::Vector2d>& speed_pos,
                                     const boost::optional<Eigen::Vector2d>& accel_pos,
-                                    const boost::optional<Eigen::Vector2d>& mm_pos,
+                                    const boost::optional<Eigen::Vector2d>& input_pos,
                                     const boost::optional<std::string>& info_str) const;
     TRAnnotation createTRAnnotation(const reconstruction::Reference& ref,
                                     const boost::optional<Eigen::Vector2d>& speed_pos,
                                     const boost::optional<Eigen::Vector2d>& accel_pos,
-                                    const boost::optional<Eigen::Vector2d>& mm_pos) const;
+                                    const boost::optional<Eigen::Vector2d>& input_pos) const;
     TRAnnotation createTRAnnotation(const kalman::KalmanUpdate& update,
                                     const reconstruction::KalmanEstimator& estimator,
                                     reconstruction::KalmanProjectionHandler& phandler,
@@ -219,6 +207,15 @@ private:
     IMMAnnotation createIMMAnnotation(const kalman::KalmanUpdate& imm_update,
                                       const reconstruction::KalmanEstimator& estimator,
                                       reconstruction::KalmanProjectionHandler& phandler) const;
+
+    void addAnnotationData(const std::string& name,
+                           const AnnotationStyle& style,
+                           const boost::optional<AnnotationStyle>& style_osg,
+                           const std::vector<TRAnnotation>& annotations,
+                           const std::vector<QPointF>* fail_pos = nullptr,
+                           const std::vector<QPointF>* skip_pos = nullptr,
+                           const std::map<Key, IMMAnnotation>* imm_annotations = nullptr,
+                           const std::map<Key, RTSAnnotation>* rts_annotations = nullptr);
 
     const ReconstructorBase* reconstructor_ = nullptr;
 
