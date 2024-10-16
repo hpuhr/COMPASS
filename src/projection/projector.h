@@ -17,11 +17,11 @@
 
 #pragma once
 
-#include <memory>
-
 #include <GeographicLib/LocalCartesian.hpp>
 
 #include <QRectF>
+
+#include <memory>
 
 class OGRSpatialReference;
 class OGRCoordinateTransformation;
@@ -62,7 +62,7 @@ public:
     void update(double center_lat, double center_lon);
 
     const QPointF& centerWGS84() const;
-    const QPointF& centerCart() const;
+    //const QPointF& centerCart() const;
     double centerLat() const;
     double centerLon() const;
 
@@ -79,7 +79,7 @@ public:
                    double y) const override;
 private:
     QPointF center_wgs84_; //x = lat, y = lon
-    QPointF center_cart_;
+    //QPointF center_cart_;
     
     // mutable std::unique_ptr<OGRSpatialReference>         ref_src_;
     // mutable std::unique_ptr<OGRSpatialReference>         ref_dst_;

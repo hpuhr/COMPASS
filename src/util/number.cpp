@@ -88,7 +88,7 @@ void calculateWeightedAverageAndStdDev(const std::vector<double>& values, const 
     std_dev = sqrt(1.0 / weight_sum);
 }
 
-const double min_std_dev = 10E-6;
+const double min_std_dev = 1E-6;
 const unsigned int good_sample_size = 5;
 
 void addWithWeightedAverage(double value1, double std_dev1, unsigned int value1_cnt,

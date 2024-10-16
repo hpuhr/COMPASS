@@ -29,7 +29,7 @@
 
 class ProjectionManagerWidget;
 class Projection;
-class OGRProjection;
+class GeoProjection;
 
 class ProjectionManager : public Singleton, public Configurable
 {
@@ -60,7 +60,7 @@ public:
 
     std::map<std::string, std::unique_ptr<Projection>>& projections();
 
-    OGRProjection& ogrProjection();
+    GeoProjection& geoProjection();
 
     // in place calculation, returns transformation errors count
     unsigned int doRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
@@ -70,6 +70,7 @@ public:
 
     static const std::string RS2G_NAME;
     static const std::string OGR_NAME;
+    static const std::string GEO_NAME;
 
     double geoidHeightM (double latitude_deg, double longitude_deg);
 

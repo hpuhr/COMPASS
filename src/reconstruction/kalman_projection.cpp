@@ -109,9 +109,11 @@ void KalmanProjectionHandler::unproject(double& lat,
 */
 bool KalmanProjectionHandler::inRangeCart(double x_cart, double y_cart) const
 {
-    const auto& center = proj_->centerCart();
+    //const auto& center = proj_->centerCart();
 
-    const double d_sqr = (Eigen::Vector2d(center.x(), center.y()) - Eigen::Vector2d(x_cart, y_cart)).squaredNorm();
+    //const double d_sqr = (Eigen::Vector2d(center.x(), center.y()) - Eigen::Vector2d(x_cart, y_cart)).squaredNorm();
+
+    const double d_sqr = Eigen::Vector2d(x_cart, y_cart).squaredNorm();
     if (d_sqr > settings_.proj_max_dist_cart_sqr)
         return false; 
 
@@ -191,13 +193,13 @@ void KalmanProjectionHandler::changeProjection(kalman::KalmanUpdate& update,
     initProjection(lat, lon);
 
     //update cartesian coords of state to new map projection
-    const auto& center_cart = proj_->centerCart();
+    //const auto& center_cart = proj_->centerCart();
 
     //store new position to state vector
     //note: we assume only small changes in map projection, 
     //so directions, velocities, accelerations and connected uncertainties 
     //are held constant during a projection change.
-    interface.xPos(update.state.x, center_cart.x(), center_cart.y());
+    interface.xPos(update.state.x, 0, 0);
     
     //handle imm state if available
     if (update.state.imm_state)

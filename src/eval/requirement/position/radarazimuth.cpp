@@ -20,7 +20,7 @@
 #include "evaluationmanager.h"
 #include "logger.h"
 #include "util/number.h"
-#include "ogrprojection.h"
+#include "geoprojection.h"
 #include "projectionmanager.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
@@ -112,7 +112,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
 
     ProjectionManager& proj_man = ProjectionManager::instance();
 
-    OGRProjection& projection = proj_man.ogrProjection();
+    GeoProjection& projection = proj_man.geoProjection();
 
     if (!projection.radarCoordinateSystemsAdded())
         projection.addAllRadarCoordinateSystems();

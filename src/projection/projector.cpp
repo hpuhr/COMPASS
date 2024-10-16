@@ -29,7 +29,7 @@
 */
 FrameProjector::FrameProjector()
 :   center_wgs84_(0, 0)
-,   center_cart_ (0, 0)
+//,   center_cart_ (0, 0)
 {
 }
 
@@ -60,10 +60,10 @@ const QPointF& FrameProjector::centerWGS84() const
 
 /**
 */
-const QPointF& FrameProjector::centerCart() const
-{
-    return center_cart_;
-}
+// const QPointF& FrameProjector::centerCart() const
+// {
+//     return center_cart_;
+// }
 
 /**
 */
@@ -91,7 +91,7 @@ bool FrameProjector::valid() const
 void FrameProjector::reset()
 {
     center_wgs84_ = QPointF(0, 0);
-    center_cart_  = QPointF(0, 0);
+    //center_cart_  = QPointF(0, 0);
 
     //proj_.reset();
     // ref_dst_.reset();
@@ -137,8 +137,9 @@ void FrameProjector::update(double center_lat, double center_lon)
     //compute cartesian center of projection (!sometimes not mapped to (0,0)!)
     double cx_cart, cy_cart;
     project(cx_cart, cy_cart, center_lat, center_lon);
+    assert (sqrt(pow(cx_cart, 2)+pow(cy_cart,2)) < 1E-6);
 
-    center_cart_  = QPointF(cx_cart, cy_cart);
+    //center_cart_  = QPointF(cx_cart, cy_cart);
     center_wgs84_ = QPointF(center_lat, center_lon);
 }
 

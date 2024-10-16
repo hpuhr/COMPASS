@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OGRCOORDINATESYSTEM_H
-#define OGRCOORDINATESYSTEM_H
+#pragma once
 
 #include <ogr_spatialref.h>
 
@@ -68,4 +67,3 @@ class OGRCoordinateSystem
     double getRadiusAt(double latitude_rad);
 };
 
-#endif  // OGRCOORDINATESYSTEM_H

@@ -20,14 +20,14 @@
 #include "projection.h"
 
 class ProjectionManager;
-class OGRCoordinateSystem;
+class GeoCoordinateSystem;
 
-class OGRProjection : public Projection
+class GeoProjection : public Projection
 {
-  public:
-    OGRProjection(const std::string& class_id, const std::string& instance_id,
+public:
+    GeoProjection(const std::string& class_id, const std::string& instance_id,
                   ProjectionManager& proj_manager);
-    virtual ~OGRProjection();
+    virtual ~GeoProjection();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -43,8 +43,8 @@ class OGRProjection : public Projection
     bool wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
                                double& azimuth_deg, double& ground_range_m);
 
-  protected:
-    std::map<unsigned int, std::unique_ptr<OGRCoordinateSystem>> coordinate_systems_;
+protected:
+    std::map<unsigned int, std::unique_ptr<GeoCoordinateSystem>> coordinate_systems_;
 
     virtual void checkSubConfigurables() override;
 };

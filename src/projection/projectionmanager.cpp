@@ -21,6 +21,7 @@
 #include "ogrprojection.h"
 #include "projectionmanagerwidget.h"
 #include "rs2gprojection.h"
+#include "geoprojection.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "datasourcemanager.h"
@@ -41,6 +42,7 @@ using namespace Utils;
 
 const string ProjectionManager::RS2G_NAME = "RS2G";
 const string ProjectionManager::OGR_NAME = "OGR";
+const string ProjectionManager::GEO_NAME = "Geo";
 
 ProjectionManager::ProjectionManager()
     : Configurable("ProjectionManager", "ProjectionManager0", 0, "projection.json")
@@ -84,8 +86,8 @@ ProjectionManager::ProjectionManager()
     // egm96_band_width_ = egm96_band_->GetXSize();
     // egm96_band_height_ = egm96_band_->GetYSize();
 
-    for (float cnt=10; cnt < 50; cnt += 0.1)
-        geoidHeightM(cnt, cnt);
+    // for (float cnt=10; cnt < 50; cnt += 0.1)
+    //     geoidHeightM(cnt, cnt);
 
     loginf << "ProjectionManager: constructor: loading EGM96 map done";
 }
@@ -113,6 +115,14 @@ void ProjectionManager::generateSubConfigurable(const string& class_id,
 
         projections_[name].reset(new OGRProjection(class_id, instance_id, *this));
     }
+    else if (class_id == "GeoProjection")
+    {
+        string name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<string>("name");
+
+        assert(!projections_.count(name));
+
+        projections_[name].reset(new GeoProjection(class_id, instance_id, *this));
+    }
     else
         throw runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -132,6 +142,14 @@ void ProjectionManager::checkSubConfigurables()
         auto configuration = Configuration::create("OGRProjection");
 
         configuration->addParameter<string>("name", OGR_NAME);
+        generateSubConfigurableFromConfig(std::move(configuration));
+    }
+
+    if (!projections_.count(GEO_NAME))
+    {
+        auto configuration = Configuration::create("GeoProjection");
+
+        configuration->addParameter<string>("name", GEO_NAME);
         generateSubConfigurableFromConfig(std::move(configuration));
     }
 }
@@ -405,12 +423,12 @@ map<string, unique_ptr<Projection>>& ProjectionManager::projections()
     return projections_;
 }
 
-OGRProjection& ProjectionManager::ogrProjection()
+GeoProjection& ProjectionManager::geoProjection()
 {
-    assert (hasProjection(OGR_NAME));
-    assert (projections_.at(OGR_NAME));
-    assert (dynamic_cast<OGRProjection*> (projections_.at(OGR_NAME).get()));
-    return *dynamic_cast<OGRProjection*> (projections_.at(OGR_NAME).get());
+    assert (hasProjection(GEO_NAME));
+    assert (projections_.at(GEO_NAME));
+    assert (dynamic_cast<GeoProjection*> (projections_.at(GEO_NAME).get()));
+    return *dynamic_cast<GeoProjection*> (projections_.at(GEO_NAME).get());
 }
 
 
