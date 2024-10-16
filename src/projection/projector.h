@@ -19,6 +19,8 @@
 
 #include <memory>
 
+#include <GeographicLib/LocalCartesian.hpp>
+
 #include <QRectF>
 
 class OGRSpatialReference;
@@ -79,8 +81,10 @@ private:
     QPointF center_wgs84_; //x = lat, y = lon
     QPointF center_cart_;
     
-    mutable std::unique_ptr<OGRSpatialReference>         ref_src_;
-    mutable std::unique_ptr<OGRSpatialReference>         ref_dst_;
-    mutable std::unique_ptr<OGRCoordinateTransformation> trafo_fwd_;
-    mutable std::unique_ptr<OGRCoordinateTransformation> trafo_bwd_;
+    // mutable std::unique_ptr<OGRSpatialReference>         ref_src_;
+    // mutable std::unique_ptr<OGRSpatialReference>         ref_dst_;
+    // mutable std::unique_ptr<OGRCoordinateTransformation> trafo_fwd_;
+    // mutable std::unique_ptr<OGRCoordinateTransformation> trafo_bwd_;
+
+    mutable std::unique_ptr<GeographicLib::LocalCartesian> proj_;
 };

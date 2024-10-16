@@ -844,10 +844,15 @@ void ReconstructorTask::writeDoneSlot()
 
         currentReconstructor()->reset();
 
-        double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
+        double time_elapsed_s = Time::partialSeconds(
+            boost::posix_time::microsec_clock::local_time() - run_start_time_);
+
+        double time_elapsed_s_after_del = Time::partialSeconds(
+            boost::posix_time::microsec_clock::local_time() - run_start_time_after_del_);
 
         loginf << "ReconstructorTask: writeDoneSlot: done after "
-               << String::timeStringFromDouble(time_elapsed_s, false);
+               << String::timeStringFromDouble(time_elapsed_s, false)
+               << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
