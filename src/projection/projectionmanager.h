@@ -21,7 +21,9 @@
 #include "singleton.h"
 #include "buffer.h"
 
-#include "gdal_priv.h"
+//#include "gdal_priv.h"
+
+#include <GeographicLib/Geoid.hpp>
 
 #include <memory>
 
@@ -76,7 +78,8 @@ protected:
     std::string current_projection_name_;
 
     std::unique_ptr<ProjectionManagerWidget> widget_;
-    std::unique_ptr<GDALRasterBand> egm96_band_;
+    //std::unique_ptr<GDALRasterBand> egm96_band_;
+    std::unique_ptr<GeographicLib::Geoid> geoid_;
 
     double egm96_band_inv_geo_transform_[6];
 
