@@ -1034,6 +1034,12 @@ ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
     return *processing_slice_;
 }
 
+const ReconstructorBase::DataSlice& ReconstructorTask::processingSlice() const
+{
+    assert (processing_slice_);
+    return *processing_slice_;
+}
+
 ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type, bool* created) const
 {
     auto key_str = std::pair<std::string,std::string>(name,type);

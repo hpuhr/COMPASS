@@ -147,7 +147,7 @@ std::string Measurement::asString(const std::string& prefix) const
     std::string Q_var_str        = (Q_var.has_value() ? std::to_string(Q_var.value()) : "-");
     std::string Q_var_interp_str = (Q_var_interp.has_value() ? std::to_string(Q_var_interp.value()) : "-");
 
-    ss << prefix << "source_id:    " << source_id << std::endl;
+    ss << prefix << "source_id:    " << (source_id.has_value() ? std::to_string(source_id.value()) : "-") << std::endl;
     ss << prefix << "interp:       " << mm_interp << std::endl;
     ss << prefix << "pos wgs84:    " << lat << ", " << lon << std::endl;
     ss << prefix << "pos cart:     " << x << ", " << y << ", " << alt_str << " (" << x_stddev_str << ", " << y_stddev_str << ", " << xy_cov_str << ")" << std::endl;
@@ -290,6 +290,14 @@ bool Measurement::setFromCovMat(const Eigen::MatrixXd& C, unsigned char flags)
 
     //weird covmat size
     return false;
+}
+
+/**
+*/
+std::pair<unsigned long, boost::posix_time::ptime> Measurement::uniqueID() const
+{
+    assert(source_id.has_value());
+    return std::pair<unsigned long, boost::posix_time::ptime>(source_id.value(), t);
 }
 
 }  // namespace reconstruction

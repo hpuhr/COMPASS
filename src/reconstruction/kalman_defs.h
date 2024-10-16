@@ -328,6 +328,9 @@ struct KalmanUpdateMinimal
     bool valid         = false; // kalman update is valid
 };
 
+//unique update id which also accounts for interpolated source data
+typedef std::pair<unsigned long, boost::posix_time::ptime> UniqueUpdateID;
+
 /**
  * Low-level struct for a kalman update.
  * Contains everything needed for postprocessing and extraction of a final reference.
@@ -395,13 +398,20 @@ struct KalmanUpdate
         return state.debug;
     }
 
+    UniqueUpdateID uniqueID() const
+    {
+        assert(source_id.has_value());
+        return UniqueUpdateID(source_id.value(), t);
+    }
+
     KalmanState              state;             // kalman internal state, can be used for rts smooting, state interpolation, etc.
     Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
     double                   lat;               // latitude of state position (do not confuse with center of local projection!)
     double                   lon;               // longitude of state position (do not confuse with center of local projection!)
     boost::posix_time::ptime t;                 // time of update
 
-    boost::optional<float> Q_var_interp; // optional interpolation process noise variance
+    boost::optional<unsigned long> source_id;    // optional source id
+    boost::optional<float>         Q_var_interp; // optional interpolation process noise variance
 
     bool has_wgs84_pos = false; // lat/long are set
     bool valid         = false; // kalman update is valid
@@ -409,6 +419,8 @@ struct KalmanUpdate
     bool proj_changed  = false; // the projection center changed during this update
 };
 
+/**
+*/
 struct RTSStepInfo
 {
     BasicKalmanState state0;

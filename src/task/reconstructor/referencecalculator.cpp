@@ -124,14 +124,17 @@ void ReferenceCalculator::prepareForCurrentSlice()
     auto ThresRemove = reconstructor_.currentSlice().remove_before_time_;
     auto ThresJoin   = getJoinThreshold();
 
-            //remove targets & previous updates which are no longer needed (either too old or above the join threshold)
-    //for (auto& ref : references_)
+    //remove targets & previous updates which are no longer needed (either too old or above the join threshold)
     for (auto ref_it = references_.begin(); ref_it != references_.end(); )
     {
-        if (!reconstructor_.targets_container_.targets_.count(ref_it->first)) // deleted target, remove
-            ref_it = references_.erase(ref_it);
-        else // target still exists, remove updates
+        if (!reconstructor_.targets_container_.targets_.count(ref_it->first))
         {
+            // deleted target, remove
+            ref_it = references_.erase(ref_it);
+        }
+        else 
+        {
+            // target still exists, remove updates
             auto it = std::remove_if(ref_it->second.updates.begin(),
                                      ref_it->second.updates.end(),
                                      [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
@@ -143,6 +146,15 @@ void ReferenceCalculator::prepareForCurrentSlice()
                                        [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
                                                                                            update.t >= ThresJoin; });
             ref_it->second.updates_smooth.erase(it_s, ref_it->second.updates_smooth.end());
+
+            auto& input_infos = ref_it->second.input_infos;
+            for (auto first = input_infos.begin(), last = input_infos.end(); first != last;)
+            {
+                if (first->first.second < ThresRemove || first->first.second >= ThresJoin)
+                    first = input_infos.erase(first);
+                else
+                    ++first;
+            }
 
             ++ref_it;
         }
@@ -284,6 +296,10 @@ void ReferenceCalculator::addMeasurements(unsigned int utn,
 
     if (!measurements.empty()) // TODO UGA
         utn_ref.measurements.insert(utn_ref.measurements.end(), measurements.begin(), measurements.end());
+
+    //final check on available source ids
+    for (const auto& mm : utn_ref.measurements)
+        assert(mm.source_id.has_value());
 }
 
 /**
@@ -447,9 +463,6 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
     const auto& debug_ts_min  = reconstructor_.task().debugSettings().debug_timestamp_min_;
     const auto& debug_ts_max  = reconstructor_.task().debugSettings().debug_timestamp_max_;
 
-    const auto& slice_t0 = reconstructor_.currentSlice().slice_begin_;
-    const auto& slice_t1 = reconstructor_.currentSlice().next_slice_begin_;
-
     if (settings_.activeVerbosity() > 0) 
     {
         loginf << "    #measurements: " << refs.measurements.size();
@@ -470,32 +483,16 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
 
     refs.updates.reserve(n_before + n_mm);
 
-    std::vector<unsigned int>    used_mms;
-    std::vector<QPointF>         failed_updates;
-    std::vector<QPointF>         skipped_updates;
-    std::vector<Eigen::Vector2d> interp_input_positions;
-    if (debug_target)
-    {
-        used_mms.resize(n_before);
-        used_mms.reserve(n_before + n_mm);
-    }
+    std::vector<QPointF> failed_updates;
+    std::vector<QPointF> skipped_updates;
 
     if (debug_target && shallAddAnnotationData())
     {
         refs.annotations.addAnnotationData("Input Measurements",
                                            refcalc_annotations::AnnotationStyle(ColorMeasurements, PointSizeMeasurements, LineWidthBase),
                                            refcalc_annotations::AnnotationStyle(ColorMeasurements, PointSizeOSG, LineWidthBase),
-                                           refs.measurements,
-                                           slice_t0, 
-                                           slice_t1,
-                                           refs.start_index.value());
+                                           refs.measurements);
     }
-
-    auto collectInputMeasurement = [ & ] (const reconstruction::Measurement& mm)
-    {
-        if (debug_target && mm.mm_interp)
-            interp_input_positions.emplace_back(mm.lat, mm.lon);
-    };
 
     auto collectUpdate = [ & ] (const kalman::KalmanUpdate& update, 
                                 const reconstruction::Measurement& mm,
@@ -505,21 +502,27 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
         refs.updates.push_back(update);
         refs.updates.back().Q_var_interp = mm.Q_var_interp;
 
+        if (debug_target)
+        {
+            auto& input_info = refs.input_infos[ mm.uniqueID() ];
+
+            input_info.lat    = mm.lat;
+            input_info.lon    = mm.lon;
+            input_info.interp = mm.mm_interp;
+        }
+
         if (debug)
         {
-            loginf << "ReferenceCalculator: reconstructMeasurements: Debugging recnum " << mm.source_id 
+            loginf << "ReferenceCalculator: reconstructMeasurements: Debugging recnum " << mm.source_id.value() 
                    << " @t " << Utils::Time::toString(mm.t) 
                    << " interp " << mm.mm_interp;
             refs.updates.back().debugUpdate();
         }
-
-        if (debug_target)
-            used_mms.push_back(mm_idx);
     };
 
     auto debugMM = [ & ] (const reconstruction::Measurement& mm)
     {
-        bool debug_mm = debug_target && debug_rec_nums.count(mm.source_id);
+        bool debug_mm = debug_target && debug_rec_nums.count(mm.source_id.value());
 
         if (debug_target && !debug_ts_min.is_not_a_date_time() && mm.t >= debug_ts_min
                          && !debug_ts_max.is_not_a_date_time() && mm.t <= debug_ts_max)
@@ -558,7 +561,6 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
         estimator.kalmanInit(update, mm0);
         assert(update.valid);
 
-        collectInputMeasurement(mm0);
         collectUpdate(update, mm0, refs.start_index.value(), debug_mm);
 
         ++offs; //continue with second measurement
@@ -572,13 +574,11 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
 
         if (debug_mm)
         {
-            loginf << "[ Debugging UTN " << refs.utn << " ID " << mm.source_id << " TS " << Utils::Time::toString(mm.t) << " ]\n\n"
+            loginf << "[ Debugging UTN " << refs.utn << " ID " << mm.source_id.value() << " TS " << Utils::Time::toString(mm.t) << " ]\n\n"
                    << " * Before State:               \n\n" << estimator.asString()                             << "\n\n"
                    << " * Before State as Measurement:\n\n" << estimator.currentStateAsMeasurement().asString() << "\n\n"
                    << " * Measurement:                \n\n" << mm.asString()                                    << "\n\n";
         }
-
-        collectInputMeasurement(mm);
 
         auto res = estimator.kalmanStep(update, mm);
 
@@ -641,15 +641,10 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
                                            refcalc_annotations::AnnotationStyle(ColorKalman, PointSizeKalman, LineWidthBase),
                                            refcalc_annotations::AnnotationStyle(ColorKalman, PointSizeOSG, LineWidthBase),
                                            refs.updates,
-                                           slice_t0, 
-                                           slice_t1,
-                                           n_before,
                                            true,
-                                           &refs.measurements,
-                                           &used_mms,
+                                           &refs.input_infos,
                                            &failed_updates,
                                            &skipped_updates, 
-                                           &interp_input_positions,
                                            nullptr);
     }
 
@@ -657,15 +652,17 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
     updates = refs.updates;
     
     //run rts smoothing?
-    std::vector<kalman::RTSDebugInfo> rts_debug_infos;
+    std::map<kalman::UniqueUpdateID, kalman::RTSDebugInfo> rts_debug_info_map;
 
     if (settings_.smooth_rts)
     {
         //jointly smooth old + new kalman updates RTS
+        std::vector<kalman::RTSDebugInfo> rts_debug_infos;
         bool ok = estimator.smoothUpdates(updates, 
                                           kalman::SmoothFailStrategy::SetInvalid,
                                           debug_target ? &rts_debug_infos : nullptr);
         //assert(ok);
+        assert(updates.size() == refs.updates.size());
 
         if (!ok)
         {
@@ -673,36 +670,29 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
             ++refs.num_smoothing_failed;
         }
 
+        //collect debug infos
+        for (const auto& di : rts_debug_infos)
+        {
+            const auto& u = updates.at(di.update_idx);
+            if (!u.valid)
+                continue;
+
+            rts_debug_info_map[ u.uniqueID() ] = di;
+        }
+
         //combine old rts updates with new rts updates
         refs.updates_smooth.reserve(n_before + n_mm);
-
-        std::vector<unsigned int> used_mms_smooth;
-        if (debug_target)
-        {
-            used_mms_smooth.resize(n_before);
-            used_mms_smooth.reserve(n_before + n_mm);
-        }
 
         size_t n_updates = updates.size();
         for (size_t i = n_before; i < n_updates; ++i)
         {
             if (updates[ i ].valid)
-            {
                 refs.updates_smooth.push_back(updates[ i ]);
-
-                if (debug_target)
-                    used_mms_smooth.push_back(used_mms[ i ]);
-            }
             else
-            {
                 ++refs.num_smooth_steps_failed;
-            }
         }
 
         updates = refs.updates_smooth;
-
-        if (debug_target)
-            used_mms = used_mms_smooth;
 
         if (settings_.activeVerbosity() > 0)
         {
@@ -712,23 +702,62 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
 
     if (debug_target && shallAddAnnotationData())
     {
-        loginf << "Collected " << rts_debug_infos.size() << " debug target(s)";
+        loginf << "Collected " << rts_debug_info_map.size() << " debug target(s)";
 
         refs.annotations.addAnnotationData(estimator, 
                                            "Kalman (RTS)", 
                                            refcalc_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeKalmanSmoothed, LineWidthBase),
                                            refcalc_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeOSG, LineWidthBase),
                                            updates,
-                                           slice_t0,
-                                           slice_t1,
-                                           n_before,
                                            false,
-                                           &refs.measurements,
-                                           &used_mms,
+                                           &refs.input_infos,
                                            nullptr,
                                            nullptr,
-                                           nullptr,
-                                           &rts_debug_infos);
+                                           &rts_debug_info_map);
+    }
+}
+
+/**
+ */
+void ReferenceCalculator::obtainRemainingUpdates(std::vector<kalman::KalmanUpdate>& updates,
+                                                 TargetReferences& refs,
+                                                 reconstruction::KalmanEstimator& estimator)
+{
+    if (refs.updates.empty())
+        return;
+
+    bool general_debug = reconstructor_.task().debugSettings().debug_ &&
+                         reconstructor_.task().debugSettings().debug_reference_calculation_;
+    bool debug_target  = general_debug && reconstructor_.task().debugSettings().debugUTN(refs.utn);
+
+    //process remaining updates of last slice
+    updates = settings_.smooth_rts ? refs.updates_smooth : refs.updates;
+
+    //add missing annotations
+    //note: RTS or IMM debug infos for these updates mights already have been added in the last slice
+    if (debug_target && shallAddAnnotationData())
+    {
+        refs.annotations.addAnnotationData(estimator, 
+                                            "Kalman", 
+                                            refcalc_annotations::AnnotationStyle(ColorKalman, PointSizeKalman, LineWidthBase),
+                                            refcalc_annotations::AnnotationStyle(ColorKalman, PointSizeOSG, LineWidthBase),
+                                            refs.updates,
+                                            true,
+                                            &refs.input_infos,
+                                            nullptr,
+                                            nullptr, 
+                                            nullptr);
+
+        refs.annotations.addAnnotationData(estimator, 
+                                            "Kalman (RTS)", 
+                                            refcalc_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeKalmanSmoothed, LineWidthBase),
+                                            refcalc_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeOSG, LineWidthBase),
+                                            refs.updates_smooth,
+                                            false,
+                                            &refs.input_infos,
+                                            nullptr,
+                                            nullptr,
+                                            nullptr);
     }
 }
 
@@ -741,14 +770,6 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     bool general_debug = reconstructor_.task().debugSettings().debug_ &&
                          reconstructor_.task().debugSettings().debug_reference_calculation_;
     bool debug_target  = general_debug && reconstructor_.task().debugSettings().debugUTN(refs.utn);
-
-    const auto& debug_rec_nums = reconstructor_.task().debugSettings().debug_rec_nums_;
-
-    const auto& debug_ts_min  = reconstructor_.task().debugSettings().debug_timestamp_min_;
-    const auto& debug_ts_max  = reconstructor_.task().debugSettings().debug_timestamp_max_;
-
-    const auto& slice_t0 = reconstructor_.currentSlice().slice_begin_;
-    const auto& slice_t1 = reconstructor_.currentSlice().next_slice_begin_;
 
     if(settings_.activeVerbosity() > 0 || debug_target) 
         loginf << "ReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
@@ -772,17 +793,23 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         if (settings_.activeVerbosity() > 0 || debug_target)
         {
             if (res == InitRecResult::NoMeasurements)
-                loginf << "    skipping: no measurements";
+                loginf << "    no measurements to add...";
             else if (res == InitRecResult::NoStartIndex)
-                loginf << "    skipping: no start index found";
+                loginf << "    no start index found...";
         }
-        
+
         if (refs.updates.empty())
             return;
 
-        //process remaining updates of last slice
-        updates = settings_.smooth_rts ? refs.updates_smooth : refs.updates;
+        if (settings_.activeVerbosity() > 0 || debug_target)
+            loginf << "    adding remaining updates";
+        
+        obtainRemainingUpdates(updates, refs, estimator);
     }
+
+    //@TODO: remove check
+    for (const auto& u : updates)
+        assert(u.source_id.has_value());
 
     //resample?
     if (settings_.resample_result)
@@ -818,12 +845,7 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                                            refcalc_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeKalmanResampled, LineWidthBase),
                                            refcalc_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeOSG, LineWidthBase),
                                            updates,
-                                           slice_t0,
-                                           slice_t1,
-                                           0,
                                            false,
-                                           nullptr,
-                                           nullptr,
                                            nullptr,
                                            nullptr,
                                            nullptr, 

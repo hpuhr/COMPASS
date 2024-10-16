@@ -1134,6 +1134,11 @@ ReconstructorBase::DataSlice& ReconstructorBase::currentSlice()
     return task_.processingSlice();
 }
 
+const ReconstructorBase::DataSlice& ReconstructorBase::currentSlice() const
+{
+    return task_.processingSlice();
+}
+
 float ReconstructorBase::qVarForAltitude(bool fl_unknown, 
                                          bool fl_ground, 
                                          float alt_baro_ft,
