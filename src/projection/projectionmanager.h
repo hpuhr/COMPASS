@@ -21,31 +21,24 @@
 #include "singleton.h"
 #include "buffer.h"
 
+#include "gdal_priv.h"
+
+#include <memory>
+
 class ProjectionManagerWidget;
 class Projection;
 class OGRProjection;
 
-/**
- * @brief Singleton for coordinate projection handling
- *
- * Currently handles projection from world coordinates to Cartesian coordinates using the WGS-84
- * method.
- */
 class ProjectionManager : public Singleton, public Configurable
 {
 protected:
-    /// @brief Constructor
     ProjectionManager();
 
 public:
-    /// @brief Desctructor
     virtual ~ProjectionManager();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
-
-    /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
-    // bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
 
     ProjectionManagerWidget* widget();
     void deleteWidget();
@@ -76,11 +69,22 @@ public:
     static const std::string RS2G_NAME;
     static const std::string OGR_NAME;
 
+    double geoidHeightM (double latitude_deg, double longitude_deg);
+
 protected:
 
     std::string current_projection_name_;
 
     std::unique_ptr<ProjectionManagerWidget> widget_;
+    std::unique_ptr<GDALRasterBand> egm96_band_;
+
+    double egm96_band_inv_geo_transform_[6];
+
+    int egm96_band_width_{0};
+    int egm96_band_height_{0};
+
+    const double egm96_band_scale_ {0.003}; //from file, gdal too stupid
+    const double egm96_band_offset_ {-108.0};
 
     std::map<std::string, std::unique_ptr<Projection>> projections_;
 

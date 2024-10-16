@@ -28,6 +28,7 @@
 #include "asteriximporttask.h"
 #include "mainwindow.h"
 #include "rtcommand_manager.h"
+#include "projectionmanager.h"
 
 #include "json.hpp"
 #include "util/tbbhack.h"
@@ -273,6 +274,7 @@ bool Client::run ()
     try
     {
         COMPASS::instance();
+        ProjectionManager::instance();
     }
     catch(const std::exception& e)
     {
