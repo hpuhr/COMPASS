@@ -1860,7 +1860,6 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         else
             has_prev_v_ = false;
 
-
         if (mom_long_acc_vec.isNull(buffer_cnt))
             mom_long_acc_vec.set(buffer_cnt, (unsigned char) MOM_LONG_ACC::Undetermined);
 
@@ -2109,6 +2108,12 @@ void ReconstructorTarget::reinitTracker()
         [ rec_ptr ] (reconstruction::Measurement& mm, unsigned long rec_num)
         {
             rec_ptr->createMeasurement(mm, rec_num);
+        });
+
+    chain()->setMeasurementCheckFunc(
+        [ rec_ptr ] (unsigned long rec_num)
+        {
+            return rec_ptr->target_reports_.find(rec_num) != rec_ptr->target_reports_.end();
         });
 }
 

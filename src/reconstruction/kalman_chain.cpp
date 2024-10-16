@@ -325,6 +325,14 @@ void KalmanChain::setMeasurementAssignFunc(const MeasurementAssignFunc& assign_f
 
 /**
 */
+void KalmanChain::setMeasurementCheckFunc(const MeasurementCheckFunc& check_func)
+{
+    assert(check_func);
+    check_func_ = check_func;
+}
+
+/**
+*/
 const Measurement& KalmanChain::getMeasurement(unsigned long mm_id) const
 {
     assert(get_func_ || assign_func_);
@@ -1376,6 +1384,24 @@ bool KalmanChain::reestimate(UpdateStats* stats)
     // loginf << "nfresh = " << n_fresh;
 
     return ok;
+}
+
+/**
+*/
+bool KalmanChain::checkMeasurementAvailability() const
+{
+    assert(check_func_);
+
+    for (const auto& u : updates_)
+    {
+        if (!check_func_(u.mm_id))
+        {
+            logwrn << "KalmanChain: checkMeasurementAvailability: " << u.mm_id << " not available @t=" << Utils::Time::toString(u.t);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 } // reconstruction

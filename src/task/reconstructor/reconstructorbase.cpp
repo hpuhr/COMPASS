@@ -480,6 +480,11 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 
     next_slice_begin_ = current_slice_end; // for next iteration
 
+    bool is_last_slice = !hasNextTimeSlice();
+
+    if (is_last_slice)
+        write_before_time_ = current_slice_end + boost::posix_time::seconds(1);
+
     //assert (current_slice_begin_ <= timestamp_max_); can be bigger
 
     std::unique_ptr<DataSlice> slice (new DataSlice());
@@ -490,7 +495,7 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
     slice->timestamp_min_ = timestamp_min_;
     slice->timestamp_max_ = timestamp_max_;;
     slice->first_slice_ = first_slice_;
-    slice->is_last_slice_ = !hasNextTimeSlice();
+    slice->is_last_slice_ = is_last_slice;
 
     slice->remove_before_time_ = remove_before_time_;
     slice->write_before_time_ = write_before_time_;
@@ -537,6 +542,8 @@ void ReconstructorBase::reset()
     tr_ds_.clear();
 
     targets_container_.clear();
+
+    chains_.clear();
 
     assert (acc_estimator_);
     acc_estimator_->init(this);
@@ -711,7 +718,7 @@ void ReconstructorBase::clearOldTargetReports()
 
     for (auto tr_it = target_reports_.begin(); tr_it != target_reports_.end() /* not hoisted */; /* no increment */)
     {
-        if (tr_it->second.timestamp_ <= currentSlice().remove_before_time_)
+        if (tr_it->second.timestamp_ < currentSlice().remove_before_time_)
         {
             //loginf << "ReconstructorBase: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
             tr_it = target_reports_.erase(tr_it);
@@ -759,6 +766,12 @@ void ReconstructorBase::clearOldTargetReports()
         if (chain_it.second)
         {
             chain_it.second->removeUpdatesBefore(currentSlice().remove_before_time_);
+
+            if (!chain_it.second->checkMeasurementAvailability())
+            {
+                logerr << "ProbIMMReconstructor: clearOldTargetReports: not all measurements available for chain with UTN " << chain_it.first;
+                assert( false);
+            }
 
             if (!chain_it.second->hasData())
                 chain_it.second = nullptr;
