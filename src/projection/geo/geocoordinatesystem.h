@@ -1,10 +1,12 @@
 #pragma once
 
+#include "projectioncoordinatesystembase.h"
+
 #include <GeographicLib/LocalCartesian.hpp>
 
 #include <memory>
 
-class GeoCoordinateSystem
+class GeoCoordinateSystem : public ProjectionCoordinateSystemBase
 {
 public:
     GeoCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
@@ -28,11 +30,9 @@ public:
     bool wgs842PolarHorizontal(double latitude_deg, double longitude_deg, double& azimuth_deg, double& ground_range_m);
 
 protected:
-    unsigned int id_{0};
-    double latitude_deg_{0};
-    double longitude_deg_{0};
-    double altitude_m_{0};
 
     mutable std::unique_ptr<GeographicLib::LocalCartesian> proj_;
+
+    mutable std::unique_ptr<GeographicLib::LocalCartesian> proj_wo_alt_;
 };
 

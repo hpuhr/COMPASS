@@ -8,9 +8,11 @@ using namespace std;
 
 GeoCoordinateSystem::GeoCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                                          double altitude_m)
-    : id_(id), latitude_deg_(latitude_deg), longitude_deg_(longitude_deg), altitude_m_(altitude_m)
+    : ProjectionCoordinateSystemBase(id, latitude_deg, longitude_deg, altitude_m)
 {
     proj_.reset(new GeographicLib::LocalCartesian (latitude_deg, longitude_deg, altitude_m_));
+
+    proj_wo_alt_.reset(new GeographicLib::LocalCartesian (latitude_deg, longitude_deg, 0));
 }
 
 GeoCoordinateSystem::~GeoCoordinateSystem() {}
@@ -61,8 +63,12 @@ bool GeoCoordinateSystem::wgs842Cartesian(double latitude_deg, double longitude_
 
     double z;
 
+
     assert (proj_);
     proj_->Forward(latitude_deg, longitude_deg, 0.0, x_pos, y_pos, z);
+
+    assert (proj_wo_alt_);
+    proj_wo_alt_->Forward(latitude_deg, longitude_deg, 0.0, x_pos, y_pos, z);
 
     return true;
 }
@@ -74,9 +80,9 @@ bool GeoCoordinateSystem::cartesian2WGS84(double x_pos, double y_pos, double& la
 
     double h_back;
 
-    assert (proj_);
+    assert (proj_wo_alt_);
 
-    proj_->Reverse(x_pos, y_pos, 0.0, latitude, longitude, h_back);
+    proj_wo_alt_->Reverse(x_pos, y_pos, 0.0, latitude, longitude, h_back);
 
     return true;
 }
@@ -84,11 +90,11 @@ bool GeoCoordinateSystem::cartesian2WGS84(double x_pos, double y_pos, double& la
 bool GeoCoordinateSystem::wgs842PolarHorizontal(
     double latitude_deg, double longitude_deg, double& azimuth_deg, double& ground_range_m)
 {
-    assert (proj_);
+    assert (proj_wo_alt_);
 
     // Compute ENU coordinates of the target relative to the radar
     double north, east, up;
-    proj_->Forward(latitude_deg, longitude_deg, 0.0, north, east, up);
+    proj_wo_alt_->Forward(latitude_deg, longitude_deg, 0.0, north, east, up);
 
     // Calculate slant range
     ground_range_m = sqrt(north * north + east * east); // + up * up
@@ -105,6 +111,5 @@ bool GeoCoordinateSystem::wgs842PolarHorizontal(
     }
 
     return true;
-
 }
 

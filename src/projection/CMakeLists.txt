@@ -12,6 +12,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/projectionmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/projectionmanagerwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/projection.h"
+        "${CMAKE_CURRENT_LIST_DIR}/projectioncoordinatesystembase.h"
         "${CMAKE_CURRENT_LIST_DIR}/transformation.h"
         "${CMAKE_CURRENT_LIST_DIR}/projector.h"
         "${CMAKE_CURRENT_LIST_DIR}/rasterreference.h"

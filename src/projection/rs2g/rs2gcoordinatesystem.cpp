@@ -20,20 +20,18 @@
 #include "global.h"
 #include "logger.h"
 
-const double RS2GCoordinateSystem::EE_A = 6378137;
+// SSS D.2
+const double RS2GCoordinateSystem::EE_A = 6378137; //  WGS−84 geoid in m
 const double RS2GCoordinateSystem::EE_F = 1.0 / 298.257223563;
 const double RS2GCoordinateSystem::EE_E2 = EE_F * (2 - EE_F);
+
+
 const double RS2GCoordinateSystem::ALMOST_ZERO = 1e-10;
 const double RS2GCoordinateSystem::PRECISION_GEODESIC = 1e-8;
 
 RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
                                            double longitude_deg, double altitude_m)
-    : id_(id), latitude_deg_(latitude_deg), longitude_deg_(longitude_deg), altitude_m_(altitude_m)
-{
-    init();
-}
-
-void RS2GCoordinateSystem::init()
+    : ProjectionCoordinateSystemBase(id, latitude_deg, longitude_deg, altitude_m)
 {
     logdbg << "RS2GCoordinateSystem: init: id " << id_ << " lat " << latitude_deg_ << " long "
            << longitude_deg_ << " altitude " << altitude_m_;
@@ -48,7 +46,7 @@ void RS2GCoordinateSystem::init()
     Eigen::Matrix3d A_p0(3, 3), A_q0(3, 3);
     Eigen::Vector3d b_p0(3), b_q0(3);
 
-    rs2g_Rti_ = EE_A * (1 - EE_E2) / sqrt(pow(1 - EE_E2 * pow(sin(lat_rad), 2), 3));
+    R_T = EE_A * (1 - EE_E2) / sqrt(pow(1 - EE_E2 * pow(sin(lat_rad), 2), 3));
     //       printf(" - best earth radius:%g\n", (*it).second.rad->Rti());
 
     rs2gFillMat(A_p0, lat_rad, long_rad);
@@ -78,15 +76,15 @@ void RS2GCoordinateSystem::init()
     // from setradar
     rs2gFillVec(rs2g_bi_, lat_rad, long_rad, altitude_m_);
 
-    rs2g_hi_ = altitude_m_;
+    h_r = altitude_m_;
 }
 
 double RS2GCoordinateSystem::rs2gAzimuth(double x, double y)
 {
-    double azimuth = 0.0;
+    double azimuth_rad = 0.0;
 
     if (x == 0.0 && y == 0.0)
-        return azimuth;
+        return azimuth_rad;
 
     //    this is the implementation in ARTAS/COMSOFT
     //    IRS document Appendix A2 v6.5 2002/06/28
@@ -113,26 +111,28 @@ double RS2GCoordinateSystem::rs2gAzimuth(double x, double y)
     // and was taken from the TRANSLIB library function
     // 'azimuth' in file 'artas_trans.c'
     if (fabs(y) < ALMOST_ZERO)
-        azimuth = (x / fabs(x)) * M_PI / 2.0;
+        azimuth_rad = (x / fabs(x)) * M_PI / 2.0;
     else
-        azimuth = atan2(x, y);
+        azimuth_rad = atan2(x, y);
 
-    if (azimuth < 0.0)
-        azimuth += 2.0 * M_PI;
+    if (azimuth_rad < 0.0)
+        azimuth_rad += 2.0 * M_PI;
 
-    return azimuth;
+    return azimuth_rad;
 }
 
-double RS2GCoordinateSystem::rs2gElevation(double z, double rho)
+// from SSS D.3
+double RS2GCoordinateSystem::rs2gElevation(double H, double rho)
 {
-    double elevation = 0.0;
+    double El_rad = 0.0; // elevation angle
 
     if (rho >= ALMOST_ZERO)
     {
-        double x = (2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
-                   (2 * rho * (rs2g_Rti_ + rs2g_hi_));
+        double x = (2 * R_T * (H - h_r) + pow(H, 2) - pow(h_r, 2) - pow(rho, 2)) /
+                   (2 * rho * (R_T + h_r));
+
         if (fabs(x) <= 1.0)
-            elevation = asin(x);
+            El_rad = asin(x);
     }
 
     //    if (rho >= ALMOST_ZERO)
@@ -147,7 +147,7 @@ double RS2GCoordinateSystem::rs2gElevation(double z, double rho)
     //        rho << " elev " << elevation;
     //    }
 
-    return elevation;
+    return El_rad;
 }
 
 void RS2GCoordinateSystem::radarSlant2LocalCart(Eigen::Vector3d& local, bool has_altitude)
@@ -158,7 +158,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(Eigen::Vector3d& local, bool has
     double z = local[2];
 
     if (!has_altitude)
-        z = rs2g_hi_;  // the Z value has not been filled so use at least the radar height
+        z = h_r;  // the Z value has not been filled so use at least the radar height
 
     // double rho = sqrt(pow(local[0], 2) + pow(local[1], 2) + pow(z, 2));
     double rho = sqrt(pow(local[0], 2) + pow(local[1], 2));
@@ -243,18 +243,19 @@ void RS2GCoordinateSystem::rs2gGeodesic2Geocentric(Eigen::Vector3d& input)
     input[2] = z;
 }
 
-void RS2GCoordinateSystem::rs2gFillMat(Eigen::Matrix3d& A, double lat,
-                                       double lon)  //, Radar& radar);
+// as in R matrix
+void RS2GCoordinateSystem::rs2gFillMat(Eigen::Matrix3d& A, double lat_rad,
+                                       double lon_rad)  //, Radar& radar);
 {
-    A(0, 0) = -sin(lon);
-    A(0, 1) = cos(lon);
+    A(0, 0) = -sin(lon_rad);
+    A(0, 1) = cos(lon_rad);
     A(0, 2) = 0.0;
-    A(1, 0) = -sin(lat) * cos(lon);
-    A(1, 1) = -sin(lat) * sin(lon);
-    A(1, 2) = cos(lat);
-    A(2, 0) = cos(lat) * cos(lon);
-    A(2, 1) = cos(lat) * sin(lon);
-    A(2, 2) = sin(lat);
+    A(1, 0) = -sin(lat_rad) * cos(lon_rad);
+    A(1, 1) = -sin(lat_rad) * sin(lon_rad);
+    A(1, 2) = cos(lat_rad);
+    A(2, 0) = cos(lat_rad) * cos(lon_rad);
+    A(2, 1) = cos(lat_rad) * sin(lon_rad);
+    A(2, 2) = sin(lat_rad);
 }
 
 void RS2GCoordinateSystem::rs2gFillVec(Eigen::Vector3d& b, double lat, double lon, double height)
