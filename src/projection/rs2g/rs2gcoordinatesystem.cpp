@@ -79,11 +79,11 @@ RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
     h_r = altitude_m_;
 }
 
-double RS2GCoordinateSystem::rs2gAzimuth(double x, double y)
+double RS2GCoordinateSystem::rs2gAzimuth(double x_m, double y_m)
 {
     double azimuth_rad = 0.0;
 
-    if (x == 0.0 && y == 0.0)
+    if (x_m == 0.0 && y_m == 0.0)
         return azimuth_rad;
 
     //    this is the implementation in ARTAS/COMSOFT
@@ -110,10 +110,10 @@ double RS2GCoordinateSystem::rs2gAzimuth(double x, double y)
     // this is an equivalent implementation to the above
     // and was taken from the TRANSLIB library function
     // 'azimuth' in file 'artas_trans.c'
-    if (fabs(y) < ALMOST_ZERO)
-        azimuth_rad = (x / fabs(x)) * M_PI / 2.0;
+    if (fabs(y_m) < ALMOST_ZERO)
+        azimuth_rad = (x_m / fabs(x_m)) * M_PI / 2.0;
     else
-        azimuth_rad = atan2(x, y);
+        azimuth_rad = atan2(x_m, y_m);
 
     if (azimuth_rad < 0.0)
         azimuth_rad += 2.0 * M_PI;
@@ -150,20 +150,24 @@ double RS2GCoordinateSystem::rs2gElevation(double H, double rho)
     return El_rad;
 }
 
-void RS2GCoordinateSystem::radarSlant2LocalCart(Eigen::Vector3d& local, bool has_altitude)
+void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m,
+                                                bool has_altitude, double altitude_m,
+                                                Eigen::Vector3d& local)
 {
     logdbg << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1]
            << " z: " << local[2];
 
-    double z = local[2];
+    double elevation_m {0};
 
-    if (!has_altitude)
-        z = h_r;  // the Z value has not been filled so use at least the radar height
+    if (has_altitude)
+        elevation_m = altitude_m;
+    else
+        elevation_m = h_r;  // the Z value has not been filled so use at least the radar height
 
     // double rho = sqrt(pow(local[0], 2) + pow(local[1], 2) + pow(z, 2));
-    double rho = sqrt(pow(local[0], 2) + pow(local[1], 2));
-    double elevation = rs2gElevation(z, rho);
-    double azimuth = rs2gAzimuth(local[0], local[1]);
+    //double rho = sqrt(pow(local[0], 2) + pow(local[1], 2));
+    double elev_angle_rad = rs2gElevation(elevation_m, rho_m);
+    //double azimuth_rad = rs2gAzimuth(local[0], local[1]);
 
     //    if (rho < 50000)
     //    {
@@ -172,9 +176,9 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(Eigen::Vector3d& local, bool has
     //        elevation << " azimuth: " << azimuth;
     //    }
 
-    local[0] = rho * cos(elevation) * sin(azimuth);
-    local[1] = rho * cos(elevation) * cos(azimuth);
-    local[2] = rho * sin(elevation);
+    local[0] = rho_m * cos(elev_angle_rad) * sin(azimuth_rad);
+    local[1] = rho_m * cos(elev_angle_rad) * cos(azimuth_rad);
+    local[2] = rho_m * sin(elev_angle_rad);
 
     logdbg << "radarSlant2LocalCart: out x: " << local[0] << " y: " << local[1]
            << " z: " << local[2];
@@ -205,23 +209,25 @@ void RS2GCoordinateSystem::localCart2Geocentric(Eigen::Vector3d& input)
     logdbg << "localCart2Geocentric: out x: " << input[0] << " y:" << input[1] << " z:" << input[2];
 }
 
-bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double x, double y, double z,
-                                                      Eigen::Vector3d& geoc_pos, bool has_altitude)
+bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
+                                                      bool has_altitude, double altitude_m,
+                                                      Eigen::Vector3d& geoc_pos)
 {
-    Eigen::Vector3d pos(3);
+    Eigen::Vector3d local_pos(3);
 
     // the coordinates are in radar slant coordinates
-    pos[0] = x;
-    pos[1] = y;
-    pos[2] = z;
+    // pos[0] = x;
+    // pos[1] = y;
+    // pos[2] = z;
 
     // radar slant to local cartesian
-    radarSlant2LocalCart(pos, has_altitude);
+    radarSlant2LocalCart(azimuth_rad, slant_range_m,
+                         has_altitude, altitude_m, local_pos);
 
     // local cartesian to geocentric
-    localCart2Geocentric(pos);
+    localCart2Geocentric(local_pos);
 
-    geoc_pos = pos;
+    geoc_pos = local_pos;
 
     // geocentric to geodesic
     // Geocentric2Geodesic(pos);

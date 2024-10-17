@@ -27,8 +27,8 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
     RS2GCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                          double altitude_m);
 
-    bool calculateRadSlt2Geocentric(double x, double y, double z, Eigen::Vector3d& geoc_pos,
-                                    bool has_altitude);
+    bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
+                                    bool has_altitude, double altitude_m, Eigen::Vector3d& geoc_pos);
 
     static void geodesic2Geocentric(Eigen::Vector3d& input);
 
@@ -53,10 +53,12 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
     Eigen::Matrix3d rs2g_A_p0q0_;
     Eigen::Vector3d rs2g_b_p0q0_;
 
-    double rs2gAzimuth(double x, double y);
+    double rs2gAzimuth(double x_m, double y_m);
     // calculates elevation angle El using H (altitude of aircraft) and rho (slant range)
     double rs2gElevation(double H, double rho);
-    void radarSlant2LocalCart(Eigen::Vector3d& local, bool has_altitude);
+    void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
+                              bool has_altitude, double altitude_m,
+                              Eigen::Vector3d& local);
     void sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y);
     void localCart2Geocentric(Eigen::Vector3d& input);
 

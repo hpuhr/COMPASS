@@ -64,35 +64,36 @@ bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double sl
 
     assert(hasCoordinateSystem(id));
 
-    double x1, y1, z1;
-    bool ret;
+    //double x1, y1, z1;
+    bool ret {false};
 
-    Eigen::Vector3d pos;
+    Eigen::Vector3d geodetic_pos;
 
-    x1 = slant_range_m * sin(azimuth_rad);
-    y1 = slant_range_m * cos(azimuth_rad);
+    // x1 = slant_range_m * sin(azimuth_rad);
+    // y1 = slant_range_m * cos(azimuth_rad);
 
-    if (has_baro_altitude)
-        z1 = baro_altitude_ft * FT2M;
-    else
-        z1 = 0.0;
+    // if (has_baro_altitude)
+    //     z1 = baro_altitude_ft * FT2M;
+    // else
+    //     z1 = 0.0;
 
-    logdbg << "RS2GProjection: polarToWGS84: local x " << x1 << " y " << y1 << " z " << z1;
+    // logdbg << "RS2GProjection: polarToWGS84: local x " << x1 << " y " << y1 << " z " << z1;
 
     ret =
-        coordinate_systems_.at(id)->calculateRadSlt2Geocentric(x1, y1, z1, pos, has_baro_altitude);
+        coordinate_systems_.at(id)->calculateRadSlt2Geocentric(
+        azimuth_rad, slant_range_m, has_baro_altitude, baro_altitude_ft * FT2M, geodetic_pos);
 
     if (ret)
     {
-        logdbg << "RS2GProjection: polarToWGS84: geoc x " << pos[0] << " y " << pos[1] << " z "
-               << pos[2];
+        logdbg << "RS2GProjection: polarToWGS84: geoc x " << geodetic_pos[0] << " y " << geodetic_pos[1] << " z "
+               << geodetic_pos[2];
 
-        ret = RS2GCoordinateSystem::geocentric2Geodesic(pos);
+        ret = RS2GCoordinateSystem::geocentric2Geodesic(geodetic_pos);
 
-        latitude = pos[0];
-        longitude = pos[1];
+        latitude = geodetic_pos[0];
+        longitude = geodetic_pos[1];
 
-        logdbg << "RS2GProjection: polarToWGS84: geod x " << pos[0] << " y " << pos[1];
+        logdbg << "RS2GProjection: polarToWGS84: geod x " << geodetic_pos[0] << " y " << geodetic_pos[1];
         // what to do with altitude?
     }
 
