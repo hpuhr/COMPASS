@@ -237,6 +237,8 @@ void KalmanEstimator::storeUpdate(Measurement& mm,
     mm.t   = update.t;
     mm.lat = update.lat;
     mm.lon = update.lon;
+
+    mm.source_id = update.source_id;
 }
 
 /**
@@ -271,6 +273,8 @@ void KalmanEstimator::storeUpdate(Reference& ref,
     ref.lon = update.lon;
 
     ref.cov = update.state.P;
+
+    ref.source_id = update.source_id;
 }
 
 /**
@@ -336,8 +340,9 @@ void KalmanEstimator::storeUpdate(Measurement& mm,
 
     kalman_interface_->storeState(mm, update.state, submodel_idx);
 
-    mm.t              = update.t;
-    mm.Q_var          = update.state.Q_var;
+    mm.t         = update.t;
+    mm.Q_var     = update.state.Q_var;
+    mm.source_id = update.source_id;
 
     //unproject to lat/lon
     phandler.unproject(mm.lat, mm.lon, mm.x, mm.y, &update.projection_center);
@@ -494,7 +499,8 @@ void KalmanEstimator::initDataStructs(kalman::KalmanUpdate& update,
     update.resetFlags();
 
     //store info
-    update.t = mm.t;
+    update.t         = mm.t;
+    update.source_id = mm.source_id;
 
     //project measurement to cartesian
     //@TODO: slightly hacky: x and y are mutable to do this local projection on-the-fly
@@ -1257,6 +1263,8 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
         interp_updates.back().t                 = t;
         interp_updates.back().valid             = true;
         interp_updates.back().reinit            = false;
+
+        //@TODO: maybe set source id of first interval update? 
     };
 
     addUpdate(first_update.state, first_update.projection_center, first_update.t);
