@@ -13,6 +13,8 @@
 #include "dbcontent.h"
 #include "global.h"
 
+#include <osgEarth/GeoMath>
+
 #include <QMessageBox>
 
 #include <fstream>
@@ -395,8 +397,11 @@ std::pair<bool, float> FFTManager::isFromFFT(
 
         if (check_passed && fft_it->hasPosition())
         {
-            check_passed = sqrt(pow(prelim_latitute_deg - fft_it->latitude(), 2)
-                                + pow(prelim_longitude_deg - fft_it->longitude(), 2)) <= max_fft_plot_distance_deg_;
+            double distance_m = osgEarth::GeoMath::distance(
+                prelim_latitute_deg * DEG2RAD, prelim_longitude_deg * DEG2RAD,
+                    fft_it->latitude() * DEG2RAD, fft_it->longitude() * DEG2RAD);
+
+            check_passed = distance_m <= max_fft_plot_distance_m_;
         }
 
         if (check_passed)

@@ -169,7 +169,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     string latitude_var_name;
     string longitude_var_name;
 
-    string mode_s_address_var_name;
+    string acad_var_name;
     string mode_a_code_var_name;
 
     // do radar position projection
@@ -193,7 +193,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     bool is_from_fft;
     float fft_altitude_ft;
 
-    boost::optional<unsigned int> mode_s_address;
+    boost::optional<unsigned int> acad;
     boost::optional<unsigned int> mode_a_code;
     boost::optional<float> mode_c_code;
 
@@ -233,14 +233,14 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     NullableVector<float>& altitude_vec = buffer->get<float>(altitude_var_name);
 
     // optional data for fft check
-    NullableVector<unsigned int>* mode_s_address_vec {nullptr};
+    NullableVector<unsigned int>* acad_vec {nullptr};
 
     if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
     {
-        mode_s_address_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_).name();
-        assert (buffer->has<unsigned int>(mode_s_address_var_name));
+        acad_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_).name();
+        assert (buffer->has<unsigned int>(acad_var_name));
 
-        mode_s_address_vec = &buffer->get<unsigned int>(mode_s_address_var_name);
+        acad_vec = &buffer->get<unsigned int>(acad_var_name);
     }
 
     NullableVector<unsigned int>* mode_a_code_vec {nullptr};
@@ -328,10 +328,10 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
 
         // check if fft
 
-        if (mode_s_address_vec && !mode_s_address_vec->isNull(cnt))
-            mode_s_address = mode_s_address_vec->get(cnt);
+        if (acad_vec && !acad_vec->isNull(cnt))
+            acad = acad_vec->get(cnt);
         else
-            mode_s_address = boost::none;
+            acad = boost::none;
 
         if (mode_a_code_vec && !mode_a_code_vec->isNull(cnt))
             mode_a_code = mode_a_code_vec->get(cnt);
@@ -345,7 +345,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
 
 
         std::tie(is_from_fft, fft_altitude_ft) = fft_man.isFromFFT(
-                    lat, lon, mode_s_address, dbcontent_name == "CAT001",
+                    lat, lon, acad, dbcontent_name == "CAT001",
                     mode_a_code, mode_c_code);
 
         if (is_from_fft) // recalculate position
@@ -366,6 +366,12 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
                 transformation_errors++;
                 continue;
             }
+
+            // test if still close enough
+            std::tie(is_from_fft, fft_altitude_ft) = fft_man.isFromFFT(
+                lat, lon, acad, dbcontent_name == "CAT001",
+                mode_a_code, mode_c_code);
+            assert (is_from_fft);
 
             diff = 100 * sqrt(pow(lat-old_lat, 2) + pow(lon-old_lon, 2));
 

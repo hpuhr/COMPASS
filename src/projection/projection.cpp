@@ -16,6 +16,7 @@
  */
 
 #include "projection.h"
+#include "projectioncoordinatesystembase.h"
 #include "datasourcemanager.h"
 #include "logger.h"
 #include "projectionmanager.h"
@@ -37,6 +38,12 @@ Projection::~Projection() {}
 void Projection::generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id)
 {
+}
+
+double Projection::getGroundRange(unsigned int id, double slant_range_m,
+                                  bool has_altitude, double altitude_m)
+{
+    return coordinateSystem(id).getGroundRange(slant_range_m, has_altitude, altitude_m);
 }
 
 void Projection::addAllRadarCoordinateSystems()

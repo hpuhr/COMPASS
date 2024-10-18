@@ -20,6 +20,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/projectionmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/projectionmanagerwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/projection.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/projectioncoordinatesystembase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/transformation.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/projector.cpp"
 )

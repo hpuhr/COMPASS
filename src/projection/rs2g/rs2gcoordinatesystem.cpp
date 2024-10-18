@@ -20,14 +20,6 @@
 #include "global.h"
 #include "logger.h"
 
-// SSS D.2
-const double RS2GCoordinateSystem::EE_A = 6378137; //  WGS−84 geoid in m
-const double RS2GCoordinateSystem::EE_F = 1.0 / 298.257223563;
-const double RS2GCoordinateSystem::EE_E2 = EE_F * (2 - EE_F);
-
-
-const double RS2GCoordinateSystem::ALMOST_ZERO = 1e-10;
-const double RS2GCoordinateSystem::PRECISION_GEODESIC = 1e-8;
 
 RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
                                            double longitude_deg, double altitude_m)
@@ -45,9 +37,6 @@ RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
 
     Eigen::Matrix3d A_p0(3, 3), A_q0(3, 3);
     Eigen::Vector3d b_p0(3), b_q0(3);
-
-    R_T = EE_A * (1 - EE_E2) / sqrt(pow(1 - EE_E2 * pow(sin(lat_rad), 2), 3));
-    //       printf(" - best earth radius:%g\n", (*it).second.rad->Rti());
 
     rs2gFillMat(A_p0, lat_rad, long_rad);
     // mult(A_q0, trans(A_p0), *A_p0q0_); // A_p0q0 = A_q0 * Transpose(A_p0) in doxygen ...
@@ -76,7 +65,7 @@ RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
     // from setradar
     rs2gFillVec(rs2g_bi_, lat_rad, long_rad, altitude_m_);
 
-    h_r = altitude_m_;
+    h_r_ = altitude_m_;
 }
 
 double RS2GCoordinateSystem::rs2gAzimuth(double x_m, double y_m)
@@ -121,35 +110,6 @@ double RS2GCoordinateSystem::rs2gAzimuth(double x_m, double y_m)
     return azimuth_rad;
 }
 
-// from SSS D.3
-double RS2GCoordinateSystem::rs2gElevation(double H, double rho)
-{
-    double El_rad = 0.0; // elevation angle
-
-    if (rho >= ALMOST_ZERO)
-    {
-        double x = (2 * R_T * (H - h_r) + pow(H, 2) - pow(h_r, 2) - pow(rho, 2)) /
-                   (2 * rho * (R_T + h_r));
-
-        if (fabs(x) <= 1.0)
-            El_rad = asin(x);
-    }
-
-    //    if (rho >= ALMOST_ZERO)
-    //    {
-    //        //        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_,
-    //        2) - pow(rho, 2)) /
-    //        //                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
-    //        elevation = asin((z - rs2g_hi_)/rho);
-
-    //        //        if (rho < 50000)
-    //        //            loginf << "RS2GCoordinateSystem: rs2gElevation: z " << z << " rho " <<
-    //        rho << " elev " << elevation;
-    //    }
-
-    return El_rad;
-}
-
 void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m,
                                                 bool has_altitude, double altitude_m,
                                                 Eigen::Vector3d& local)
@@ -162,12 +122,9 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
     if (has_altitude)
         elevation_m = altitude_m;
     else
-        elevation_m = h_r;  // the Z value has not been filled so use at least the radar height
+        elevation_m = h_r_;  // the Z value has not been filled so use at least the radar height
 
-    // double rho = sqrt(pow(local[0], 2) + pow(local[1], 2) + pow(z, 2));
-    //double rho = sqrt(pow(local[0], 2) + pow(local[1], 2));
     double elev_angle_rad = rs2gElevation(elevation_m, rho_m);
-    //double azimuth_rad = rs2gAzimuth(local[0], local[1]);
 
     //    if (rho < 50000)
     //    {
@@ -216,13 +173,9 @@ bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double
     Eigen::Vector3d local_pos(3);
 
     // the coordinates are in radar slant coordinates
-    // pos[0] = x;
-    // pos[1] = y;
-    // pos[2] = z;
 
     // radar slant to local cartesian
-    radarSlant2LocalCart(azimuth_rad, slant_range_m,
-                         has_altitude, altitude_m, local_pos);
+    radarSlant2LocalCart(azimuth_rad, slant_range_m, has_altitude, altitude_m, local_pos);
 
     // local cartesian to geocentric
     localCart2Geocentric(local_pos);
@@ -273,27 +226,12 @@ void RS2GCoordinateSystem::rs2gFillVec(Eigen::Vector3d& b, double lat, double lo
     rs2gGeodesic2Geocentric(b);
 }
 
-void RS2GCoordinateSystem::geodesic2Geocentric(Eigen::Vector3d& input)
-{
-    double v = EE_A / sqrt(1 - EE_E2 * pow(sin(input[0]), 2));
-
-    double x = (v + input[2]) * cos(input[0]) * cos(input[1]);
-    double y = (v + input[2]) * cos(input[0]) * sin(input[1]);
-    double z = (v * (1 - EE_E2) + input[2]) * sin(input[0]);
-
-    input[0] = x;
-    input[1] = y;
-    input[2] = z;
-}
-
 bool RS2GCoordinateSystem::geocentric2Geodesic(Eigen::Vector3d& input)
 {
     double d_xy = sqrt(pow(input[0], 2) + pow(input[1], 2));
 
-    //double G = atan(input[1] / input[0]);
     double G = atan2(input[1], input[0]);
 
-    //double L = atan(input[2] / (d_xy * (1 - EE_A * EE_E2 / sqrt(pow(d_xy, 2) + pow(input[2], 2)))));
     double L = atan2(input[2], (d_xy * (1 - EE_A * EE_E2 / sqrt(pow(d_xy, 2) + pow(input[2], 2)))));
 
     double eta = EE_A / sqrt(1 - EE_E2 * pow(sin(L), 2));
@@ -308,7 +246,6 @@ bool RS2GCoordinateSystem::geocentric2Geodesic(Eigen::Vector3d& input)
     while (fabs(L - Li) > PRECISION_GEODESIC)
     {
         Li = L;
-        //L = atan(input[2] * (1 + H / eta) / (d_xy * (1 - EE_E2 + H / eta)));
         L = atan2(input[2] * (1 + H / eta), (d_xy * (1 - EE_E2 + H / eta)));
 
         eta = EE_A / sqrt(1 - EE_E2 * pow(sin(L), 2));
@@ -321,3 +258,4 @@ bool RS2GCoordinateSystem::geocentric2Geodesic(Eigen::Vector3d& input)
 
     return !std::isnan(input[0]) && !std::isnan(input[1]);
 }
+

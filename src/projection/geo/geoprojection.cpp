@@ -33,6 +33,13 @@ void GeoProjection::addCoordinateSystem(unsigned int id, double latitude_deg, do
         new GeoCoordinateSystem(id, latitude_deg, longitude_deg, altitude_m));
 }
 
+ProjectionCoordinateSystemBase& GeoProjection::coordinateSystem(unsigned int id)
+{
+    assert(hasCoordinateSystem(id));
+
+    return *coordinate_systems_.at(id).get();
+}
+
 void GeoProjection::clearCoordinateSystems()
 {
     coordinate_systems_.clear();

@@ -35,7 +35,9 @@ class OGRProjection : public Projection
     virtual bool hasCoordinateSystem(unsigned int id) override;
     virtual void addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                                      double altitude_m) override;
+    virtual ProjectionCoordinateSystemBase& coordinateSystem(unsigned int id) override;
     virtual void clearCoordinateSystems() override;
+
     virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                               bool has_baro_altitude, double baro_altitude_ft, double& latitude,
                               double& longitude) override;

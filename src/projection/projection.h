@@ -15,14 +15,14 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PROJECTION_H
-#define PROJECTION_H
+#pragma once
 
 #include "configurable.h"
 
 #include <boost/thread/mutex.hpp>
 
 class ProjectionManager;
+class ProjectionCoordinateSystemBase;
 
 class Projection : public Configurable
 {
@@ -37,10 +37,16 @@ public:
     virtual bool hasCoordinateSystem(unsigned int id) = 0;
     virtual void addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                                      double altitude_m) = 0;
+
+    virtual ProjectionCoordinateSystemBase& coordinateSystem(unsigned int id) = 0;
+
     virtual void clearCoordinateSystems() = 0;
     virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                               bool has_baro_altitude, double baro_altitude_ft, double& latitude,
                               double& longitude) = 0;
+
+    double getGroundRange(unsigned int id, double slant_range_m,
+                          bool has_altitude, double altitude_m);
 
     void addAllRadarCoordinateSystems(); // only adds if not already added
 
@@ -60,4 +66,4 @@ protected:
     virtual void checkSubConfigurables();
 };
 
-#endif  // PROJECTION_H
+

@@ -30,23 +30,14 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
     bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
                                     bool has_altitude, double altitude_m, Eigen::Vector3d& geoc_pos);
 
-    static void geodesic2Geocentric(Eigen::Vector3d& input);
-
     static bool geocentric2Geodesic(Eigen::Vector3d& input);
 
   protected:
-    static const double EE_A;
-    static const double EE_F;
-    static const double EE_E2;
-    static const double ALMOST_ZERO;
-    static const double PRECISION_GEODESIC;
-
     Eigen::Matrix3d rs2g_A_;
 
     Eigen::Matrix3d rs2g_T_Ai_;  // transposed matrix (depends on radar)
     Eigen::Vector3d rs2g_bi_;    // vector (depends on radar)
-    double h_r;                  // height of selected radar
-    double R_T;                  // earth radius of tangent sphere at the selected radar
+
     double rs2g_ho_;             // height of COP
     double rs2g_Rto_;            // earth radius of tangent sphere at the COP
 
@@ -55,7 +46,7 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
 
     double rs2gAzimuth(double x_m, double y_m);
     // calculates elevation angle El using H (altitude of aircraft) and rho (slant range)
-    double rs2gElevation(double H, double rho);
+
     void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
                               bool has_altitude, double altitude_m,
                               Eigen::Vector3d& local);

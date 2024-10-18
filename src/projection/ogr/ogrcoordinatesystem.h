@@ -25,8 +25,6 @@
 
 #include <memory>
 
-
-
 class OGRCoordinateSystem : public ProjectionCoordinateSystemBase
 {
   public:

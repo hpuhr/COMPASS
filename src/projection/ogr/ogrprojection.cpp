@@ -66,6 +66,13 @@ void OGRProjection::clearCoordinateSystems()
     radar_coordinate_systems_added_ = false;
 }
 
+ProjectionCoordinateSystemBase& OGRProjection::coordinateSystem(unsigned int id)
+{
+    assert(hasCoordinateSystem(id));
+
+    return *coordinate_systems_.at(id).get();
+}
+
 bool OGRProjection::polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                                  bool has_baro_altitude, double baro_altitude_ft,
                                  double& latitude_deg, double& longitude_deg)

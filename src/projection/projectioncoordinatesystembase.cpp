@@ -1,0 +1,65 @@
+#include "projectioncoordinatesystembase.h"
+
+// SSS D.2
+const double ProjectionCoordinateSystemBase::EE_A = 6378137; //  WGS−84 geoid in m
+const double ProjectionCoordinateSystemBase::EE_F = 1.0 / 298.257223563;
+const double ProjectionCoordinateSystemBase::EE_E2 = EE_F * (2 - EE_F);
+
+
+const double ProjectionCoordinateSystemBase::ALMOST_ZERO = 1e-10;
+const double ProjectionCoordinateSystemBase::PRECISION_GEODESIC = 1e-8;
+
+ProjectionCoordinateSystemBase::ProjectionCoordinateSystemBase(unsigned int id,
+                               double latitude_deg, double longitude_deg,
+                               double altitude_m)
+    : id_(id), latitude_deg_(latitude_deg), longitude_deg_(longitude_deg), altitude_m_(altitude_m)
+{
+    // best earth radius
+    R_T_ = EE_A * (1 - EE_E2) / sqrt(pow(1 - EE_E2 * pow(sin(latitude_deg_ * DEG2RAD), 2), 3));
+
+    h_r_ = altitude_m_;
+}
+
+// from SSS D.3
+double ProjectionCoordinateSystemBase::rs2gElevation(double H, double rho)
+{
+    double El_rad = 0.0; // elevation angle
+
+    if (rho >= ALMOST_ZERO)
+    {
+        double x = (2 * R_T_ * (H - h_r_) + pow(H, 2) - pow(h_r_, 2) - pow(rho, 2)) /
+                   (2 * rho * (R_T_ + h_r_));
+
+        if (fabs(x) <= 1.0)
+            El_rad = asin(x);
+    }
+
+    //    if (rho >= ALMOST_ZERO)
+    //    {
+    //        //        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_,
+    //        2) - pow(rho, 2)) /
+    //        //                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
+    //        elevation = asin((z - rs2g_hi_)/rho);
+
+    //        //        if (rho < 50000)
+    //        //            loginf << "RS2GCoordinateSystem: rs2gElevation: z " << z << " rho " <<
+    //        rho << " elev " << elevation;
+    //    }
+
+    return El_rad;
+}
+
+double ProjectionCoordinateSystemBase::getGroundRange(
+    double slant_range_m, bool has_altitude, double altitude_m)
+{
+    double elevation_m {0};
+
+    if (has_altitude)
+        elevation_m = altitude_m;
+    // else
+    //     elevation_m = h_r_;  // the Z value has not been filled so use at least the radar height
+
+    double elev_angle_rad = rs2gElevation(elevation_m, slant_range_m);
+
+    return slant_range_m * cos(elev_angle_rad);
+}
