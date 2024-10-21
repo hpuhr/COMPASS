@@ -57,37 +57,37 @@ ProjectionManager::ProjectionManager()
 
     loginf << "ProjectionManager: constructor: loading EGM96 map";
 
-    // Initialize GDAL
-    //GDALAllRegister();
-
-    // Path to your EGM96 PGM file
-    //const char* filename = "path/to/egm96.pgm";
-
     std::string file_path = HOME_DATA_DIRECTORY + "geoid";
     assert (Files::fileExists(file_path+"/egm96-5.pgm"));
 
-    geoid_.reset(new GeographicLib::Geoid ("egm96-5", file_path));
-    assert (geoid_);
+    // geoid_.reset(new GeographicLib::Geoid ("egm96-5", file_path));
+    // assert (geoid_);
+
+    // Initialize GDAL
+    GDALAllRegister();
+
+    // Path to your EGM96 PGM file
+    std::string filename = file_path+"/egm96-5.pgm";
 
     // Open the dataset
-    // GDALDataset* dataset = (GDALDataset*)GDALOpen(file_path.c_str(), GA_ReadOnly);
-    // assert (dataset);
+    GDALDataset* dataset = (GDALDataset*)GDALOpen(filename.c_str(), GA_ReadOnly);
+    assert (dataset);
 
     // Check if the dataset has georeferencing information
-    // double geo_transform[6];
-    // assert (dataset->GetGeoTransform(geo_transform) == CE_None);
+    double geo_transform[6];
+    assert (dataset->GetGeoTransform(geo_transform) == CE_None);
 
-    // // Convert geospatial coordinates to pixel coordinates
-    // assert (GDALInvGeoTransform(geo_transform, egm96_band_inv_geo_transform_));
+    // Convert geospatial coordinates to pixel coordinates
+    assert (GDALInvGeoTransform(geo_transform, egm96_band_inv_geo_transform_));
 
-    // egm96_band_.reset(dataset->GetRasterBand(1));
-    // assert(egm96_band_);
+    egm96_band_.reset(dataset->GetRasterBand(1));
+    assert(egm96_band_);
 
-    // egm96_band_width_ = egm96_band_->GetXSize();
-    // egm96_band_height_ = egm96_band_->GetYSize();
+    egm96_band_width_ = egm96_band_->GetXSize();
+    egm96_band_height_ = egm96_band_->GetYSize();
 
-    // for (float cnt=10; cnt < 50; cnt += 0.1)
-    //     geoidHeightM(cnt, cnt);
+    for (float cnt=10; cnt < 50; cnt += 0.1)
+        geoidHeightM(cnt, cnt);
 
     loginf << "ProjectionManager: constructor: loading EGM96 map done";
 }
@@ -554,49 +554,48 @@ void ProjectionManager::deleteWidget()
 
 double ProjectionManager::geoidHeightM (double latitude_deg, double longitude_deg)
 {
-    // assert (egm96_band_);
+    assert (egm96_band_);
 
-    // double pixel_x, pixel_y;
-    // GDALApplyGeoTransform(egm96_band_inv_geo_transform_, longitude_deg, latitude_deg, &pixel_x, &pixel_y);
+    double pixel_x, pixel_y;
+    GDALApplyGeoTransform(egm96_band_inv_geo_transform_, longitude_deg, latitude_deg, &pixel_x, &pixel_y);
 
+    // Read the pixel value using bilinear interpolation
+    int x = static_cast<int>(pixel_x);
+    int y = static_cast<int>(pixel_y);
+    double offset_x = pixel_x - x;
+    double offset_y = pixel_y - y;
 
-    // // Read the pixel value using bilinear interpolation
-    // int x = static_cast<int>(pixel_x);
-    // int y = static_cast<int>(pixel_y);
-    // double offset_x = pixel_x - x;
-    // double offset_y = pixel_y - y;
+    assert (!(x < 0 || x >= egm96_band_width_ - 1 || y < 0 || y >= egm96_band_height_ - 1));
 
-    // assert (!(x < 0 || x >= egm96_band_width_ - 1 || y < 0 || y >= egm96_band_height_ - 1));
+    // Read the four surrounding pixels
+    float values[4];
+    int px[4] = { x, x + 1, x, x + 1 };
+    int py[4] = { y, y, y + 1, y + 1 };
 
-    // // Read the four surrounding pixels
-    // float values[4];
-    // int px[4] = { x, x + 1, x, x + 1 };
-    // int py[4] = { y, y, y + 1, y + 1 };
+    for (int i = 0; i < 4; ++i)
+    {
+        assert (egm96_band_->RasterIO(GF_Read, px[i], py[i], 1, 1, &values[i], 1, 1, GDT_Float32, 0, 0) == CE_None);
+    }
 
-    // for (int i = 0; i < 4; ++i)
-    // {
-    //     assert (egm96_band_->RasterIO(GF_Read, px[i], py[i], 1, 1, &values[i], 1, 1, GDT_Float32, 0, 0) == CE_None);
-    // }
+    // Perform bilinear interpolation
+    double value_top = values[0] * (1 - offset_x) + values[1] * offset_x;
+    double value_bottom = values[2] * (1 - offset_x) + values[3] * offset_x;
+    double geoid_height = value_top * (1 - offset_y) + value_bottom * offset_y;
 
-    // // Perform bilinear interpolation
-    // double value_top = values[0] * (1 - offset_x) + values[1] * offset_x;
-    // double value_bottom = values[2] * (1 - offset_x) + values[3] * offset_x;
-    // double geoid_height = value_top * (1 - offset_y) + value_bottom * offset_y;
-
-    // // Convert the raw pixel value to the geoid height (difference to WGS84 ellipsoid)
-    // geoid_height = geoid_height * egm96_band_scale_ + egm96_band_offset_;
-
-    // logdbg << "ProjectionManager: geoidGeight: " << String::doubleToStringPrecision(latitude_deg,2)
-    //        << "," << String::doubleToStringPrecision(longitude_deg,2)
-    //        << " geoid_height " << geoid_height;
-
-    // return geoid_height;
-
-    double geoid_height = (*geoid_)(latitude_deg, longitude_deg);
+    // Convert the raw pixel value to the geoid height (difference to WGS84 ellipsoid)
+    geoid_height = geoid_height * egm96_band_scale_ + egm96_band_offset_;
 
     logdbg << "ProjectionManager: geoidGeight: " << String::doubleToStringPrecision(latitude_deg,2)
            << "," << String::doubleToStringPrecision(longitude_deg,2)
            << " geoid_height " << geoid_height;
 
     return geoid_height;
+
+    // double geoid_height = (*geoid_)(latitude_deg, longitude_deg);
+
+    // logdbg << "ProjectionManager: geoidGeight: " << String::doubleToStringPrecision(latitude_deg,2)
+    //        << "," << String::doubleToStringPrecision(longitude_deg,2)
+    //        << " geoid_height " << geoid_height;
+
+    // return geoid_height;
 }
