@@ -28,6 +28,7 @@
 #include "compass.h"
 #include "viewmanager.h"
 #include "viewpointgenerator.h"
+#include "geotiff.h"
 
 #include "variableselectionwidget.h"
 
@@ -43,6 +44,7 @@
 #include <QMessageBox>
 #include <QMenu>
 #include <QFormLayout>
+#include <QFileDialog>
 
 using namespace Utils;
 using namespace dbContent;
@@ -243,6 +245,20 @@ namespace
 
 /**
 */
+std::string GridViewConfigWidget::exportName() const
+{
+    auto var_sel = variableSelection(2);
+    auto var = var_sel->selectionAsString();
+
+    std::string name;
+    name += (!var.first.empty() && !var.second.empty()) ? (var.first + " - " + var.second) : "";
+    name += (!name.empty() ? " - " : "") + value_type_combo_->currentText().toStdString();
+
+    return name;
+}
+
+/**
+*/
 void GridViewConfigWidget::exportToGeographicView()
 {
 #if USE_EXPERIMENTAL_SOURCE == true
@@ -256,12 +272,7 @@ void GridViewConfigWidget::exportToGeographicView()
         return;
     }
 
-    auto var_sel = variableSelection(2);
-    auto var = var_sel->selectionAsString();
-
-    std::string name;
-    name += (!var.first.empty() && !var.second.empty()) ? (var.first + " - " + var.second) : "";
-    name += (!name.empty() ? " - " : "") + value_type_combo_->currentText().toStdString();
+    std::string name = exportName();
 
     auto export_config = getExportGeoViewConfig(this, name);
     if (!export_config.has_value())
@@ -288,5 +299,21 @@ void GridViewConfigWidget::exportToGeographicView()
 */
 void GridViewConfigWidget::exportToGeoTiff()
 {
-    //@TODO
+    const auto& data_widget = dynamic_cast<const GridView*>(view_)->getDataWidget();
+
+    auto geo_image = data_widget->currentGeoImage();
+    if (!geo_image.has_value())
+    {
+        QMessageBox::critical(this, "Error", "No grid available to send");
+        return;
+    }
+
+    std::string fn_default = COMPASS::instance().lastUsedPath() + "/" + exportName() + ".tif";
+
+    auto fn = QFileDialog::getSaveFileName(this, "Export to GeoTIFF", QString::fromStdString(fn_default), "*.tif");
+    if (fn.isEmpty())
+        return;
+
+    if (!GeoTIFFWriter::writeGeoTIFF(fn.toStdString(), geo_image->first, geo_image->second))
+        QMessageBox::critical(this, "Error", "Export to GeoTIFF failed.");
 }

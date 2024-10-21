@@ -52,6 +52,7 @@ protected:
 
     void updateConfig();
 
+    std::string exportName() const;
     void exportToGeographicView();
     void exportToGeoTiff();
 
