@@ -187,6 +187,7 @@ nlohmann::json RawHistogram::toJSON() const
  *******************************************************************************************/
 
 const std::string RawHistogramCollection::TagDataSeries = "dataseries";
+const std::string RawHistogramCollection::TagLogScale   = "log_scale";
 const std::string RawHistogramCollection::TagHistogram  = "histogram";
 const std::string RawHistogramCollection::TagName       = "name";
 const std::string RawHistogramCollection::TagColor      = "color";
@@ -211,6 +212,7 @@ bool RawHistogramCollection::hasData() const
 void RawHistogramCollection::clear()
 {
     data_series_.clear();
+    log_scale_.reset();
 }
 
 /**
@@ -286,6 +288,20 @@ std::vector<std::string> RawHistogramCollection::labels() const
 
 /**
 */
+void RawHistogramCollection::setUseLogScale(bool ok)
+{
+    log_scale_ = ok;
+}
+
+/**
+*/
+const boost::optional<bool>& RawHistogramCollection::useLogScale() const
+{
+    return log_scale_;
+}
+
+/**
+*/
 bool RawHistogramCollection::fromJSON(const nlohmann::json& data)
 {
     clear();
@@ -321,6 +337,12 @@ bool RawHistogramCollection::fromJSON(const nlohmann::json& data)
             if (!addDataSeries(l))
                 return false;
         }
+
+        if (data.contains(TagLogScale))
+        {
+            bool ls = data[ TagLogScale ];
+            log_scale_ = ls;
+        }
     }
     catch(...)
     {
@@ -350,6 +372,9 @@ nlohmann::json RawHistogramCollection::toJSON() const
     }
 
     j[ TagDataSeries ] = jlayers;
+
+    if (log_scale_.has_value())
+        j[ TagLogScale ] = log_scale_.value();
 
     return j;
 }

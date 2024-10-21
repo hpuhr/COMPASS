@@ -340,16 +340,16 @@ public:
      * Creation from data range.
      * E.g. useful for all numerical ranges.
      */
-    void createFromRange(size_t n, const T& min_value, const T& max_value)
+    bool createFromRange(size_t n, const T& min_value, const T& max_value)
     {
-        createFromRangeT<T>(n, min_value, max_value);
+        return createFromRangeT<T>(n, min_value, max_value);
     }
 
     /**
      * Creation from discrete categories. Values MUST match one of these category values to be added.
      * E.g. useful for strings or small range enums.
      */
-    void createFromCategories(const std::vector<T>& categories, bool categories_are_sorted = false)
+    bool createFromCategories(const std::vector<T>& categories, bool categories_are_sorted = false)
     {
         size_t n = categories.size();
         
@@ -360,7 +360,7 @@ public:
         config_.sorted_bins = categories_are_sorted;
 
         if (n < 1)
-            return;
+            return true;
 
         bins_.resize(n);
 
@@ -373,6 +373,8 @@ public:
             //add to search structure
             categories_[ categories[ i ] ] = (int)i;
         }
+
+        return true;
     }
 
     /**
@@ -511,12 +513,12 @@ private:
      * of step size, intervals, etc.
      */
     template<typename Tinternal = T>
-    void createFromRangeT(size_t n, const T& min_value, const T& max_value)
+    bool createFromRangeT(size_t n, const T& min_value, const T& max_value)
     {
         if (!histogram_helpers::checkFinite<T>(min_value) || 
             !histogram_helpers::checkFinite<T>(max_value) || 
-            min_value > max_value)
-            throw std::runtime_error("HistogramT::createFromRangeT: invalid range");
+            min_value >= max_value)
+            return false;
 
         clear();
 
@@ -525,18 +527,15 @@ private:
         config_.sorted_bins = true;
 
         if (n < 1)
-            return;
+            return true;
 
         const Tinternal min_value_int = convertToInternal<Tinternal>(min_value);
         const Tinternal max_value_int = convertToInternal<Tinternal>(max_value);
 
         if (!histogram_helpers::checkFinite<Tinternal>(min_value_int) || 
             !histogram_helpers::checkFinite<Tinternal>(max_value_int) || 
-            min_value_int > max_value_int)
-            throw std::runtime_error("HistogramT::createFromRangeT: invalid internal range");
-
-        if (max_value_int - min_value_int == 0)
-            return;
+            min_value_int >= max_value_int)
+            return false;
         
         //compute suitable step size
         //@TODO: integer types should check if the number of integer values in the range is below n!
@@ -546,8 +545,8 @@ private:
         if (step_size_int == 0)
         {
             //should only happen on integer types when number of bins is bigger than range
-            //in that case 
-            n = (size_t)(max_value_int - min_value_int);
+            //in that case => reduce bins
+            n             = (size_t)(max_value_int - min_value_int);
             step_size_int = 1;
             step_size_    = convertFromInternal<Tinternal>(step_size_int);
         }
@@ -577,6 +576,8 @@ private:
 
         //sort ranges
         std::sort(ranges_.begin(), ranges_.end());
+
+        return true;
     }
 
     /**
@@ -779,14 +780,16 @@ private:
  * Prevent creation of histogram from data range for some types.
  */
 template<>
-inline void HistogramT<std::string>::createFromRange(size_t n, const std::string& min_value, const std::string& max_value)
+inline bool HistogramT<std::string>::createFromRange(size_t n, const std::string& min_value, const std::string& max_value)
 {
     throw std::runtime_error("HistogramT<T>::createFromRange: not implemented for data type std::string");
+    return false;
 }
 template<>
-inline void HistogramT<bool>::createFromRange(size_t n, const bool& min_value, const bool& max_value)
+inline bool HistogramT<bool>::createFromRange(size_t n, const bool& min_value, const bool& max_value)
 {
     throw std::runtime_error("HistogramT<T>::createFromRange: not implemented for data type bool");
+    return false;
 }
 
 /**
@@ -835,12 +838,12 @@ inline boost::posix_time::ptime HistogramT<boost::posix_time::ptime>::convertFro
     return v_pt;
 }
 template<>
-inline void HistogramT<boost::posix_time::ptime>::createFromRange(size_t n, 
+inline bool HistogramT<boost::posix_time::ptime>::createFromRange(size_t n, 
                                                                   const boost::posix_time::ptime& min_value, 
                                                                   const boost::posix_time::ptime& max_value)
 {
     //compute using conversion to long
-    createFromRangeT<long>(n, min_value, max_value);
+    return createFromRangeT<long>(n, min_value, max_value);
 }
 
 /**

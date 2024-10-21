@@ -153,7 +153,7 @@ public:
     void print() const;
 
     std::pair<std::string, std::string> currentRangeAsLabels() const;
-
+    
     virtual bool hasData() const = 0;
     
 protected:

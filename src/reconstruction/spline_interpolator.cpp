@@ -23,6 +23,8 @@
 
 #include "spline.h"
 
+#include <Eigen/Eigenvalues>
+
 namespace reconstruction
 {
 
@@ -77,70 +79,167 @@ Eigen::VectorXd SplineInterpolator::interpStateVector(const Eigen::VectorXd& x0,
 
 /**
  * Interpolate covariance matrices.
- * 
- * -> linear interpolation of cov matrices should lead to symmetrical semi-positive-definite matrices in interval t=[0,1]
- * (see white, padmanabhan - including parameter dependence in the data and covariance for cosmological inference)
- *
- * thus we interpolate (1 - t) * COV0 + t * COV1 = (1 - t) * |stddev_x0^2 cov_xy0    | + t * |stddev_x1^2 cov_xy1    |
- *                                                           |cov_xy0     stddev_y0^2|       |cov_xy1     stddev_y1^2|
  */
 Eigen::MatrixXd SplineInterpolator::interpCovarianceMat(const Eigen::MatrixXd& C0, 
                                                         const Eigen::MatrixXd& C1, 
-                                                        double interp_factor)
+                                                        double interp_factor,
+                                                        CovMatInterpMode covmat_interp_mode,
+                                                        bool* ok)
 {
-    return (1.0 - interp_factor) * C0 + interp_factor * C1;
+    if (ok)
+        *ok = false;
+
+    Eigen::MatrixXd C;
+    bool is_ok = false;
+
+    if (covmat_interp_mode == CovMatInterpMode::WassersteinDistance)
+    {
+        //https://stats.stackexchange.com/questions/351043/interpolate-covariance-matrix
+        //https://link.springer.com/article/10.1007/s41884-021-00052-8
+
+        //C(t) = (1-t)^2 * C0 + t^2 * C1 + (1-t) * t * [ (C0*C1)^(1/2) + (C1*C0)^(1/2) ]
+
+        //should
+        // - yield SPD matrices
+        // - interpolate C0 and C1 smoothly
+
+        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver01(C0 * C1);
+        auto C0C1_sqrt = solver01.operatorSqrt();
+
+        if (solver01.info() == Eigen::ComputationInfo::Success)
+        {
+            Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> solver10(C1 * C0);
+            auto C1C0_sqrt = solver10.operatorSqrt();
+
+            if (solver10.info() == Eigen::ComputationInfo::Success)
+            {
+                const double t0 = (1.0 - interp_factor);
+                const double t1 = interp_factor;
+
+                C     = t0*t0 * C0 + t1*t1 * C1 + t0*t1 * (C0C1_sqrt + C1C0_sqrt);
+                is_ok = true;
+            }
+        }
+    }
+    else if (covmat_interp_mode == CovMatInterpMode::NearestNeighbor)
+    {
+        //simple nearest neighbor
+        C     = interp_factor <= 0.5 ? C0 : C1;
+        is_ok = true;
+    }
+    else if (covmat_interp_mode == CovMatInterpMode::Linear)
+    {
+        //linear interpolation of cov matrices should lead to symmetrical semi-positive-definite matrices in interval t=[0,1]
+        //(see white, padmanabhan - including parameter dependence in the data and covariance for cosmological inference)
+        // => not sure if this is true though
+
+        //(1 - t) * COV0 + t * COV1 = (1 - t) * |stddev_x0^2 cov_xy0    | + t * |stddev_x1^2 cov_xy1    |
+        //                                      |cov_xy0     stddev_y0^2|       |cov_xy1     stddev_y1^2|
+
+        C     = (1.0 - interp_factor) * C0 + interp_factor * C1;
+        is_ok = true;
+    }
+
+    if (ok)
+        *ok = is_ok;
+
+    return C;
 }
 
 /**
  * Interpolate covariance matrix values stored in the given measurements.
- * 
- * -> linear interpolation of cov matrices should lead to symmetrical semi-positive-definite matrices in interval t=[0,1]
- * (see white, padmanabhan - including parameter dependence in the data and covariance for cosmological inference)
- *
- * thus we interpolate (1 - t) * COV0 + t * COV1 = (1 - t) * |stddev_x0^2 cov_xy0    | + t * |stddev_x1^2 cov_xy1    |
- *                                                           |cov_xy0     stddev_y0^2|       |cov_xy1     stddev_y1^2|
  */
 void SplineInterpolator::interpCovarianceMat(Measurement& mm_interp,
                                              const Measurement& mm0,
                                              const Measurement& mm1,
-                                             double interp_factor)
+                                             double interp_factor,
+                                             CovMatInterpMode covmat_interp_mode)
 {
+    //this mode is handled separately, because it needs constructed covariance matrices for interpolation
+    if (covmat_interp_mode == CovMatInterpMode::WassersteinDistance)
+    {
+        //get covariance mat entries available in both matrices
+        unsigned char flags = mm0.covMatFlags() & mm1.covMatFlags();
+
+        //interpolate covmats
+        bool cov_mat_ok;
+        auto C = interpCovarianceMat(mm0.covMat(flags), mm0.covMat(flags), interp_factor, covmat_interp_mode, &cov_mat_ok);
+        assert(cov_mat_ok);
+
+        //set entries which were available in the original matrices
+        mm_interp.setFromCovMat(C, flags);
+
+        return;
+    }
+
+    //all other modes are handled on a per-accuracy-type basis
     if (mm0.hasStdDevPosition() && mm1.hasStdDevPosition())
     {
-        double x_stddev_sqr0 = mm0.x_stddev.value() * mm0.x_stddev.value();
-        double y_stddev_sqr0 = mm0.y_stddev.value() * mm0.y_stddev.value();
+        if (covmat_interp_mode == CovMatInterpMode::NearestNeighbor)
+        {
+            mm_interp.x_stddev = interp_factor <= 0.5 ? mm0.x_stddev.value() : mm1.x_stddev.value();
+            mm_interp.y_stddev = interp_factor <= 0.5 ? mm0.y_stddev.value() : mm1.y_stddev.value();
+        }
+        else if (covmat_interp_mode == CovMatInterpMode::Linear)
+        {
+            double x_stddev_sqr0 = mm0.x_stddev.value() * mm0.x_stddev.value();
+            double y_stddev_sqr0 = mm0.y_stddev.value() * mm0.y_stddev.value();
 
-        double x_stddev_sqr1 = mm1.x_stddev.value() * mm1.x_stddev.value();
-        double y_stddev_sqr1 = mm1.y_stddev.value() * mm1.y_stddev.value();
+            double x_stddev_sqr1 = mm1.x_stddev.value() * mm1.x_stddev.value();
+            double y_stddev_sqr1 = mm1.y_stddev.value() * mm1.y_stddev.value();
 
-        mm_interp.x_stddev = std::sqrt(interp(x_stddev_sqr0, x_stddev_sqr1, interp_factor));
-        mm_interp.y_stddev = std::sqrt(interp(y_stddev_sqr0, y_stddev_sqr1, interp_factor));
+            mm_interp.x_stddev = std::sqrt(interp(x_stddev_sqr0, x_stddev_sqr1, interp_factor));
+            mm_interp.y_stddev = std::sqrt(interp(y_stddev_sqr0, y_stddev_sqr1, interp_factor));
+        }
     }
     if (mm0.xy_cov.has_value() && mm1.xy_cov.has_value())
     {
-        mm_interp.xy_cov = interp(mm0.xy_cov.value(), mm1.xy_cov.value(), interp_factor);
+        if (covmat_interp_mode == CovMatInterpMode::NearestNeighbor)
+        {
+            mm_interp.xy_cov = interp_factor <= 0.5 ? mm0.xy_cov.value() : mm1.xy_cov.value();
+        }
+        else if (covmat_interp_mode == CovMatInterpMode::Linear)
+        {
+            mm_interp.xy_cov = interp(mm0.xy_cov.value(), mm1.xy_cov.value(), interp_factor);
+        }
     }
     if (mm0.hasStdDevVelocity() && mm1.hasStdDevVelocity())
     {
-        double vx_stddev_sqr0 = mm0.vx_stddev.value() * mm0.vx_stddev.value();
-        double vy_stddev_sqr0 = mm0.vy_stddev.value() * mm0.vy_stddev.value();
+        if (covmat_interp_mode == CovMatInterpMode::NearestNeighbor)
+        {
+            mm_interp.vx_stddev = interp_factor <= 0.5 ? mm0.vx_stddev.value() : mm1.vx_stddev.value();
+            mm_interp.vy_stddev = interp_factor <= 0.5 ? mm0.vy_stddev.value() : mm1.vy_stddev.value();
+        }
+        else if (covmat_interp_mode == CovMatInterpMode::Linear)
+        {
+            double vx_stddev_sqr0 = mm0.vx_stddev.value() * mm0.vx_stddev.value();
+            double vy_stddev_sqr0 = mm0.vy_stddev.value() * mm0.vy_stddev.value();
 
-        double vx_stddev_sqr1 = mm1.vx_stddev.value() * mm1.vx_stddev.value();
-        double vy_stddev_sqr1 = mm1.vy_stddev.value() * mm1.vy_stddev.value();
+            double vx_stddev_sqr1 = mm1.vx_stddev.value() * mm1.vx_stddev.value();
+            double vy_stddev_sqr1 = mm1.vy_stddev.value() * mm1.vy_stddev.value();
 
-        mm_interp.vx_stddev = std::sqrt(interp(vx_stddev_sqr0, vx_stddev_sqr1, interp_factor));
-        mm_interp.vy_stddev = std::sqrt(interp(vy_stddev_sqr0, vy_stddev_sqr1, interp_factor));
+            mm_interp.vx_stddev = std::sqrt(interp(vx_stddev_sqr0, vx_stddev_sqr1, interp_factor));
+            mm_interp.vy_stddev = std::sqrt(interp(vy_stddev_sqr0, vy_stddev_sqr1, interp_factor));
+        }
     }
     if (mm0.hasStdDevAccel() && mm1.hasStdDevAccel())
     {
-        double ax_stddev_sqr0 = mm0.ax_stddev.value() * mm0.ax_stddev.value();
-        double ay_stddev_sqr0 = mm0.ay_stddev.value() * mm0.ay_stddev.value();
+        if (covmat_interp_mode == CovMatInterpMode::NearestNeighbor)
+        {
+            mm_interp.ax_stddev = interp_factor <= 0.5 ? mm0.ax_stddev.value() : mm1.ax_stddev.value();
+            mm_interp.ay_stddev = interp_factor <= 0.5 ? mm0.ay_stddev.value() : mm1.ay_stddev .value();
+        }
+        else if (covmat_interp_mode == CovMatInterpMode::Linear)
+        {
+            double ax_stddev_sqr0 = mm0.ax_stddev.value() * mm0.ax_stddev.value();
+            double ay_stddev_sqr0 = mm0.ay_stddev.value() * mm0.ay_stddev.value();
 
-        double ax_stddev_sqr1 = mm1.ax_stddev.value() * mm1.ax_stddev.value();
-        double ay_stddev_sqr1 = mm1.ay_stddev.value() * mm1.ay_stddev.value();
+            double ax_stddev_sqr1 = mm1.ax_stddev.value() * mm1.ax_stddev.value();
+            double ay_stddev_sqr1 = mm1.ay_stddev.value() * mm1.ay_stddev.value();
 
-        mm_interp.ax_stddev = std::sqrt(interp(ax_stddev_sqr0, ax_stddev_sqr1, interp_factor));
-        mm_interp.ay_stddev = std::sqrt(interp(ay_stddev_sqr0, ay_stddev_sqr1, interp_factor));
+            mm_interp.ax_stddev = std::sqrt(interp(ax_stddev_sqr0, ax_stddev_sqr1, interp_factor));
+            mm_interp.ay_stddev = std::sqrt(interp(ay_stddev_sqr0, ay_stddev_sqr1, interp_factor));
+        }
     }
 }
 
@@ -151,7 +250,8 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
                                                         const Measurement& mm0, 
                                                         const Measurement& mm1, 
                                                         double interp_factor,
-                                                        CoordSystem coord_sys)
+                                                        CoordSystem coord_sys,
+                                                        CovMatInterpMode covmat_interp_mode)
 {
     if (interp_factor == 0.0)
         return MeasurementInterp(mm0, false, false);
@@ -159,7 +259,7 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
         return MeasurementInterp(mm1, false, false);
 
     MeasurementInterp mm_interp;
-    mm_interp.source_id = mm0.source_id;
+    mm_interp.source_id = mm0.source_id; //!note: other components (e.g. reference calculation) rely on this assumption!
     mm_interp.t         = t;
     mm_interp.mm_interp = true;
 
@@ -179,7 +279,7 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
     }
 
     //interpolate cov mat values
-    interpCovarianceMat(mm_interp, mm0, mm1, interp_factor);
+    interpCovarianceMat(mm_interp, mm0, mm1, interp_factor, covmat_interp_mode);
 
     //interpolate process noise if set
     if (mm0.Q_var.has_value() || mm1.Q_var.has_value())
@@ -239,7 +339,7 @@ MeasurementInterp SplineInterpolator::generateMeasurement(const Eigen::Vector2d&
                                                           double interp_factor,
                                                           bool corrected) const
 {
-    auto mm_interp = SplineInterpolator::interpMeasurement(pos, t, mm0, mm1, interp_factor, coordSystem());
+    auto mm_interp = SplineInterpolator::interpMeasurement(pos, t, mm0, mm1, interp_factor, coordSystem(), config_.covmat_interp_mode);
     mm_interp.corrected = corrected;
 
     return mm_interp;

@@ -237,6 +237,8 @@ void KalmanEstimator::storeUpdate(Measurement& mm,
     mm.t   = update.t;
     mm.lat = update.lat;
     mm.lon = update.lon;
+
+    mm.source_id = update.source_id;
 }
 
 /**
@@ -271,6 +273,8 @@ void KalmanEstimator::storeUpdate(Reference& ref,
     ref.lon = update.lon;
 
     ref.cov = update.state.P;
+
+    ref.source_id = update.source_id;
 }
 
 /**
@@ -336,8 +340,9 @@ void KalmanEstimator::storeUpdate(Measurement& mm,
 
     kalman_interface_->storeState(mm, update.state, submodel_idx);
 
-    mm.t              = update.t;
-    mm.Q_var          = update.state.Q_var;
+    mm.t         = update.t;
+    mm.Q_var     = update.state.Q_var;
+    mm.source_id = update.source_id;
 
     //unproject to lat/lon
     phandler.unproject(mm.lat, mm.lon, mm.x, mm.y, &update.projection_center);
@@ -494,7 +499,8 @@ void KalmanEstimator::initDataStructs(kalman::KalmanUpdate& update,
     update.resetFlags();
 
     //store info
-    update.t = mm.t;
+    update.t         = mm.t;
+    update.source_id = mm.source_id;
 
     //project measurement to cartesian
     //@TODO: slightly hacky: x and y are mutable to do this local projection on-the-fly
@@ -525,6 +531,16 @@ void KalmanEstimator::kalmanInit(kalman::KalmanUpdate& update,
     update.projection_center = proj_handler_->projectionCenter();
     update.has_wgs84_pos     = true;
     update.valid             = true;
+
+    //check state => should be ok at this point, otherwise assert
+    bool kalman_update_check = checkState(update);
+    if (!kalman_update_check)
+    {
+        logerr << "KalmanEstimator: kalmanInit: init from mm yielded nan\n\n"
+               << update.state.print() << "\n"
+               << mm.asString() << "\n";
+        assert(kalman_update_check);
+    }
 }
 
 /**
@@ -542,6 +558,15 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdate& update)
 
     //reinit kalman from update
     kalman_interface_->kalmanInit(update.state, update.t);
+
+    //check state => should be ok at this point, otherwise assert
+    bool kalman_update_check = checkState(update);
+    if (!kalman_update_check)
+    {
+        logerr << "KalmanEstimator: kalmanInit: init from update yielded nan\n\n"
+               << update.state.print() << "\n";
+        assert(kalman_update_check);
+    }
 }
 
 /**
@@ -559,6 +584,18 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdateMinimal& update)
 
     //reinit kalman from update
     kalman_interface_->kalmanInit(update.x, update.P, update.t, update.Q_var);
+
+    //check state => should be ok at this point, otherwise assert
+    bool kalman_update_check = checkState(update);
+    if (!kalman_update_check)
+    {
+        logerr << "KalmanEstimator: kalmanInit: init from minimal update yielded nan\n\n"
+               << update.x << "\n"
+               << update.P << "\n"
+               << update.t << "\n"
+               << update.Q_var << "\n";
+        assert(kalman_update_check);
+    }
 }
 
 /**
@@ -778,6 +815,16 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
         }
     }
 
+    //check state => should be ok at this point, otherwise assert
+    bool kalman_update_check = checkState(update);
+    if (!kalman_update_check)
+    {
+        logerr << "KalmanEstimator: kalmanStepInternal: step yielded nan for dt = " << tstep << "\n\n"
+               << kalman_interface_->asString(kalman::KalmanInfoFlags::InfoAll) << "\n"
+               << update.state.print() << "\n";
+        assert(kalman_update_check);
+    }
+
     //update projection if needed
     checkProjection(update);
 
@@ -816,6 +863,9 @@ bool KalmanEstimator::checkPrediction(const Measurement& mm) const
 */
 bool KalmanEstimator::checkState(const kalman::KalmanUpdate& update) const
 {
+    if (!kalman_interface_->checkKalmanStateNumerical(update.state))
+        return false;
+
     double x, y;
     kalman_interface_->xPos(x, y, update.state.x);
 
@@ -1213,6 +1263,8 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
         interp_updates.back().t                 = t;
         interp_updates.back().valid             = true;
         interp_updates.back().reinit            = false;
+
+        //@TODO: maybe set source id of first interval update? 
     };
 
     addUpdate(first_update.state, first_update.projection_center, first_update.t);
@@ -1299,7 +1351,7 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
 
                 kalman::KalmanState new_state;
                 new_state.x = SplineInterpolator::interpStateVector(new_state0.x, new_state1.x, interp_factor);
-                new_state.P = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, interp_factor);
+                new_state.P = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, interp_factor, SplineInterpolator::CovMatInterpMode::Linear);
 
                 // Reference ref;
                 // ref.t              = tcur;
@@ -1411,7 +1463,7 @@ kalman::KalmanError KalmanEstimator::predictBetween(kalman::KalmanUpdateMinimal&
 
     //interpolate predicted states
     update_interp.x                 = SplineInterpolator::interpStateVector(new_state0.x, new_state1.x, interp_factor);
-    update_interp.P                 = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, interp_factor);
+    update_interp.P                 = SplineInterpolator::interpCovarianceMat(new_state0.P, new_state1.P, interp_factor, SplineInterpolator::CovMatInterpMode::Linear);
     update_interp.projection_center = update0.projection_center;
     update_interp.t                 = ts;
     update_interp.valid             = true;

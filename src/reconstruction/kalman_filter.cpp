@@ -452,6 +452,10 @@ KalmanFilter::Error KalmanFilter::predictState(Vector& x,
         dt = std::fabs(dt);
         
         Error err = predictState_impl(x, P, dt, Q_var_used, true, u, state);
+
+        //invert state...
+        if (err == Error::NoError)
+            invertState(x);
         
         //revert state
         x_ = x_backup;
@@ -644,36 +648,40 @@ Matrix KalmanFilter::continuousWhiteNoise(size_t dim,
 
 /**
 */
-boost::optional<double> KalmanFilter::pdf(const Vector& x, const Matrix& P)
+boost::optional<double> KalmanFilter::likelihood(const Vector& x, const Matrix& P, bool check_eps)
 {
     GaussianPDF pdf(P);
-    return pdf.eval(x);
+    return pdf.likelihood(x, check_eps);
 }
 
 /**
 */
-boost::optional<double> KalmanFilter::logLikelihood() const
+boost::optional<double> KalmanFilter::logLikelihood(const Vector& x, const Matrix& P, bool check_eps)
+{
+    GaussianPDF pdf(P);
+    return pdf.logLikelihood(x, check_eps);
+}
+
+/**
+*/
+boost::optional<double> KalmanFilter::logLikelihood(bool check_eps) const
 {
     if (log_likelihood_.has_value())
         return log_likelihood_;
-    
-    auto lh = likelihood();
-    if (!lh.has_value())
-        return {};
 
-    log_likelihood_ = std::log(lh.value());
+    log_likelihood_ = KalmanFilter::logLikelihood(y_, S_, check_eps);
 
     return log_likelihood_;
 }
 
 /**
 */
-boost::optional<double> KalmanFilter::likelihood() const
+boost::optional<double> KalmanFilter::likelihood(bool check_eps) const
 {
     if (likelihood_.has_value())
         return likelihood_;
 
-    likelihood_ = KalmanFilter::pdf(y_, S_);
+    likelihood_ = KalmanFilter::likelihood(y_, S_, check_eps);
 
     return likelihood_;
 }

@@ -116,6 +116,9 @@ class PositionAccuracy
     double avgStdDev() const { return (x_stddev_+ y_stddev_) / 2.0; }
     double maxStdDev() const { return std::max(x_stddev_, y_stddev_); }
     std::string asStr() const;
+
+    bool isNormal() const
+    { return std::isfinite(x_stddev_) && std::isfinite(y_stddev_) && std::isfinite(xy_cov_); }
 };
 
 /**
@@ -226,7 +229,11 @@ struct ReconstructorInfo : public BaseInfo
     boost::optional<targetReport::Position> position_;
     boost::optional<targetReport::Position> position_corrected_;
     boost::optional<targetReport::PositionAccuracy> position_accuracy_;
-    bool do_not_use_position_ {false};
+
+    //bool do_not_use_position_ {false};
+    bool unsused_ds_pos_ {false}; // set if data source should not be used for pos
+    bool invalidated_pos_ {false}; // if invalidated by validate function
+    bool is_pos_outlier_ {false}; // if set by outlier detection
 
     boost::optional<targetReport::BarometricAltitude> barometric_altitude_;
 
@@ -244,6 +251,8 @@ struct ReconstructorInfo : public BaseInfo
     bool isModeSDetection() const;
     bool isModeACDetection() const;
     bool isPrimaryOnlyDetection() const;
+
+    bool doNotUsePosition() const;
 };
 
 // tmp list

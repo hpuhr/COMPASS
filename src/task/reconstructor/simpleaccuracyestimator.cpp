@@ -46,7 +46,7 @@ void SimpleAccuracyEstimator::validate (
     boost::optional<unsigned char> mops_version = reconstructor_->accessor(tr).mopsVersion(tr.buffer_index_);
 
     if (mops_version && *mops_version == 0)
-        tr.do_not_use_position_ = true;
+        tr.invalidated_pos_ = true;
 
 }
 

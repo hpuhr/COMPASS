@@ -117,9 +117,10 @@ void TargetReportAccessor::cacheVectors()
 {
     const auto& dbcontent_name = lookup_->dbContentName();
 
-    is_radar_   = (dbcontent_name == "CAT001" || dbcontent_name == "CAT048");
-    is_adsb_    = (dbcontent_name == "CAT021");
-    is_tracker_ = (dbcontent_name == "CAT062");
+    is_radar_    = (dbcontent_name == "CAT001" || dbcontent_name == "CAT048");
+    is_adsb_     = (dbcontent_name == "CAT021");
+    is_tracker_  = (dbcontent_name == "CAT062");
+    is_ref_traj_ = (dbcontent_name == "RefTraj");
 
     //general
     meta_timestamp_vec_ = metaVarVector<boost::posix_time::ptime>(DBContent::meta_var_timestamp_);
@@ -177,6 +178,9 @@ void TargetReportAccessor::cacheVectors()
     meta_track_num_vec_   = metaVarVector<unsigned int>(DBContent::meta_var_track_num_);
     meta_track_begin_vec_ = metaVarVector<bool>(DBContent::meta_var_track_begin_);
     meta_track_end_vec_   = metaVarVector<bool>(DBContent::meta_var_track_end_);
+
+    cat021_ecat_vec_ = varVector<unsigned int>(DBContent::var_cat021_ecat_);
+    cat021_geo_alt_acc_vec_ = varVector<unsigned char>(DBContent::var_cat021_geo_alt_accuracy_);
 }
 
 /**
@@ -222,6 +226,16 @@ boost::optional<unsigned char> TargetReportAccessor::nucp(unsigned int index) co
 boost::optional<unsigned char> TargetReportAccessor::nacp(unsigned int index) const
 {
     return getOptional<unsigned char>(cat021_nac_p_vec_, index);
+}
+
+boost::optional<unsigned int> TargetReportAccessor::ecat(unsigned int index) const
+{
+    return getOptional<unsigned int>(cat021_ecat_vec_, index);
+}
+
+boost::optional<unsigned char> TargetReportAccessor::getGeoAltAcc(unsigned int index) const
+{
+    return getOptional<unsigned char>(cat021_geo_alt_acc_vec_, index);
 }
 
 /**
@@ -319,10 +333,13 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
         {
             xy_cov = meta_pos_std_dev_xy_corr_coeff_vec_->get(index);
 
-            if (xy_cov < 0)
-                xy_cov = -std::pow(xy_cov, 2);
-            else
-                xy_cov =  std::pow(xy_cov, 2);
+            if (!is_ref_traj_)
+            {
+                if (xy_cov < 0)
+                    xy_cov = -std::pow(xy_cov, 2);
+                else
+                    xy_cov =  std::pow(xy_cov, 2);
+            }
         }
 
         return targetReport::PositionAccuracy(meta_pos_std_dev_x_m_vec_->get(index),

@@ -325,6 +325,14 @@ void KalmanChain::setMeasurementAssignFunc(const MeasurementAssignFunc& assign_f
 
 /**
 */
+void KalmanChain::setMeasurementCheckFunc(const MeasurementCheckFunc& check_func)
+{
+    assert(check_func);
+    check_func_ = check_func;
+}
+
+/**
+*/
 const Measurement& KalmanChain::getMeasurement(unsigned long mm_id) const
 {
     assert(get_func_ || assign_func_);
@@ -693,18 +701,18 @@ void KalmanChain::removeUpdatesBefore(const boost::posix_time::ptime& ts)
 
 /**
 */
-void KalmanChain::removeUpdatesLaterThan(const boost::posix_time::ptime& ts)
+void KalmanChain::removeUpdatesLaterOrEqualThan(const boost::posix_time::ptime& ts)
 {
     assert(!needsReestimate());
 
     if (size() == 0)
         return;
 
-    auto it = std::remove_if(updates_.begin(), updates_.end(), [ & ] (const Update& u) { return u.t > ts; });
+    auto it = std::remove_if(updates_.begin(), updates_.end(), [ & ] (const Update& u) { return u.t >= ts; });
     updates_.erase(it, updates_.end());
     updates_.shrink_to_fit();
 
-            //current mm ids might be outdated now => reset
+    //current mm ids might be outdated now => reset
     tracker_.tracked_mm_id.reset();
     predictor_.ref_mm_id.reset();
 }
@@ -1135,6 +1143,14 @@ bool KalmanChain::reestimate(int idx,
     auto&       update = updates_[ idx ];
     const auto& mm     = getMeasurement(update.mm_id);
 
+    bool chain_input_mm_check = tracker_.tracker_ptr->estimator().checkPrediction(mm);
+    if (!chain_input_mm_check)
+    {
+        logerr << "KalmanChain: reestimate: invalid measurement retrieved\n\n"
+               << mm.asString() << "\n";
+        assert(chain_input_mm_check);
+    }
+
     //check fetched mm's time against update
     assert(update.t == mm.t);
 
@@ -1368,6 +1384,24 @@ bool KalmanChain::reestimate(UpdateStats* stats)
     // loginf << "nfresh = " << n_fresh;
 
     return ok;
+}
+
+/**
+*/
+bool KalmanChain::checkMeasurementAvailability() const
+{
+    assert(check_func_);
+
+    for (const auto& u : updates_)
+    {
+        if (!check_func_(u.mm_id))
+        {
+            logwrn << "KalmanChain: checkMeasurementAvailability: " << u.mm_id << " not available @t=" << Utils::Time::toString(u.t);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 } // reconstruction

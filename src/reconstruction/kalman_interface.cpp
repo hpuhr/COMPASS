@@ -256,7 +256,10 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
     if (debug_infos)
     {
         for (auto& di : *debug_infos)
-            di.projection_center = updates[ di.update_idx + idx0 ].projection_center;
+        {
+            di.update_idx       += idx0;
+            di.projection_center = updates[ di.update_idx ].projection_center;
+        }
     }
 
     if (!ok)
@@ -311,7 +314,7 @@ kalman::KalmanError KalmanInterface::interpStep(kalman::KalmanState& state_inter
 
 /**
 */
-bool KalmanInterface::checkKalmanStateNumerical(kalman::KalmanState& state) const
+bool KalmanInterface::checkKalmanStateNumerical(const kalman::KalmanState& state) const
 {
     assert(kalman_filter_);
     return kalman_filter_->checkState(state.x, state.P);

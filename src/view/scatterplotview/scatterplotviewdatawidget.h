@@ -62,7 +62,6 @@ public:
 
     ScatterPlotViewDataTool selectedTool() const;
 
-    QRectF getDataBounds() const;
     QPixmap renderPixmap();
 
     static const int ConnectLinesDataCountMax = 100000;
@@ -94,6 +93,8 @@ protected:
     virtual void processStash(const VariableViewStash<double>& stash) override final;
     virtual void resetStashDependentData() override final;
 
+    virtual QRectF getViewBounds() const override final;
+
     void viewInfoJSON_impl(nlohmann::json& info) const override;
 
 private:
@@ -124,5 +125,5 @@ private:
 
     ScatterSeriesModel data_model_;
 
-    QRectF annotation_bounds_;
+    QRectF bounds_;
 };

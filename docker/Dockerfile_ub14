@@ -1,7 +1,7 @@
 FROM ubuntu:14.04
 
-RUN groupadd -r someusers --gid=1000 
-RUN useradd -r -p "$(openssl passwd -1 sk)" -g someusers -G sudo --uid=1000 --create-home --shell /bin/bash sk 
+RUN groupadd -r someusers --gid=1001 
+RUN useradd -r -p "$(openssl passwd -1 mcphatty)" -g someusers -G sudo --uid=1001 --create-home --shell /bin/bash mcphatty 
 
 # Update and allow for apt over HTTPS
 RUN apt-get update && apt-get install -y apt-utils
@@ -169,8 +169,8 @@ RUN updatedb
 
 RUN apt install sudo
 
-RUN echo 'sk ALL=(ALL)  ALL' >> /etc/sudoers
+RUN echo 'mcphatty ALL=(ALL)  ALL' >> /etc/sudoers
 RUN more /etc/sudoers
 
-USER sk
+USER mcphatty
 WORKDIR /app/workspace/compass/docker

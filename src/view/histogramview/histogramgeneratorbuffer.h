@@ -124,6 +124,8 @@ protected:
         for (const auto& db_content : scanned_contents)
         {
             auto& h = histograms_[ db_content ];
+
+            //@TODO: needs further reaction on init fail?
             histogram_init_.initHistogram(h, config);
         }
 

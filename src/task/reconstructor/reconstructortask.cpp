@@ -49,20 +49,17 @@ const std::string ReconstructorTask::ProbImmReconstructorName {"Probabilistic + 
 ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
     : Task(task_manager),
-      Configurable(class_id, instance_id, &task_manager, "task_reconstructor.json")
+    Configurable(class_id, instance_id, &task_manager, "task_reconstructor.json")
 {
     tooltip_ = "Associate target reports and calculate reference trajectories based on all DB Content.";
-
-    registerParameter("debug", &debug_, debug_);
-
-    // registerParameter("debug_accuracy_estimation", &debug_accuracy_estimation_,
-    //                   debug_accuracy_estimation_);
 
     registerParameter("use_dstypes", &use_dstypes_, nlohmann::json::object());
     registerParameter("use_data_sources", &use_data_sources_, nlohmann::json::object());
     registerParameter("use_data_sources_lines", &use_data_sources_lines_, nlohmann::json::object());
 
     registerParameter("current_reconstructor_str", &current_reconstructor_str_, {});
+
+    registerParameter("skip_reference_data_writing", &skip_reference_data_writing_, false);
 
     if (!current_reconstructor_str_.size()
         || (current_reconstructor_str_ != ScoringUMReconstructorName
@@ -72,7 +69,27 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
             ))
         current_reconstructor_str_ = ScoringUMReconstructorName;
 
-    registerParameter("debug_accuracy_estimation", &debug_accuracy_estimation_, debug_accuracy_estimation_);
+    registerParameter("debug", &debug_settings_.debug_, debug_settings_.debug_);
+    registerParameter("debug_accuracy_estimation", &debug_settings_.debug_accuracy_estimation_,
+                      debug_settings_.debug_accuracy_estimation_);
+    registerParameter("debug_bias_correction", &debug_settings_.debug_bias_correction_,
+                      debug_settings_.debug_bias_correction_);
+    registerParameter("debug_geo_altitude_correction", &debug_settings_.debug_geo_altitude_correction_,
+                      debug_settings_.debug_geo_altitude_correction_);
+
+    registerParameter("deep_debug_accuracy_estimation", &debug_settings_.deep_debug_accuracy_estimation_,
+                      debug_settings_.deep_debug_accuracy_estimation_);
+    registerParameter("deep_debug_accuracy_estimation_write_wp",
+                      &debug_settings_.deep_debug_accuracy_estimation_write_wp_,
+                      debug_settings_.deep_debug_accuracy_estimation_write_wp_);
+
+    registerParameter("debug_reference_calculation", &debug_settings_.debug_reference_calculation_,
+                      debug_settings_.debug_reference_calculation_);
+    registerParameter("debug_kalman_chains", &debug_settings_.debug_kalman_chains_,
+                      debug_settings_.debug_kalman_chains_);
+    registerParameter("debug_write_reconstruction_viewpoints",
+                      &debug_settings_.debug_write_reconstruction_viewpoints_,
+                      debug_settings_.debug_write_reconstruction_viewpoints_);
 
     createSubConfigurables();
 }
@@ -246,25 +263,25 @@ void ReconstructorTask::updateProgressSlot(const QString& msg, bool add_slice_pr
             }
 
             pmsg += "<br><br><table width=\"100%\">"
-                "<tr> <td><b>Data Source</b></td> <td><b>DBContent</b></td>"
-                " <td align='right'><b>Associated</b></td> <td></td> </tr>";
+                    "<tr> <td><b>Data Source</b></td> <td><b>DBContent</b></td>"
+                    " <td align='right'><b>Associated</b></td> <td></td> </tr>";
 
             for (auto& row_it : tmp_rows)
                 pmsg += row_it.second.c_str();
 
             pmsg += "</table>";
-                                 //<table>
-                                 //  <tr>
-                                 //    <th>Company</th>
-                                 //    <th>Contact</th>
-                                 //    <th>Country</th>
-                                 //  </tr>
-                                 //  <tr>
-                                 //    <td>Alfreds Futterkiste</td>
-                                 //    <td>Maria Anders</td>
-                                 //    <td>Germany</td>
-                                 //  </tr>
-                                 //</table>
+                //<table>
+                //  <tr>
+                //    <th>Company</th>
+                //    <th>Contact</th>
+                //    <th>Country</th>
+                //  </tr>
+                //  <tr>
+                //    <td>Alfreds Futterkiste</td>
+                //    <td>Maria Anders</td>
+                //    <td>Germany</td>
+                //  </tr>
+                //</table>
         }
 
     }
@@ -347,80 +364,6 @@ std::set<unsigned int> ReconstructorTask::disabledDataSources() const
     return disabled_ds;
 }
 
-const std::set<unsigned int>& ReconstructorTask::debugUTNs() const
-{
-    return debug_utns_;
-}
-
-void ReconstructorTask::debugUTNs(const std::set<unsigned int>& utns)
-{
-    loginf << "ReconstructorTask: debugRecNums: values '" << String::compress(utns, ',') << "'";
-
-    debug_utns_ = utns;
-}
-
-bool ReconstructorTask::debugUTN(unsigned int utn)
-{
-    if (!debug_)
-        return false;
-
-    return debug_utns_.count(utn);
-}
-
-const std::set<unsigned long>& ReconstructorTask::debugRecNums() const
-{
-    return debug_rec_nums_;
-}
-
-void ReconstructorTask::debugRecNums(const std::set<unsigned long>& rec_nums)
-{
-    loginf << "ReconstructorTask: debugRecNums: values '" << String::compress(rec_nums, ',') << "'";
-
-    debug_rec_nums_ = rec_nums;
-}
-
-bool ReconstructorTask::debugRecNum(unsigned long rec_num)
-{
-    if (!debug_)
-        return false;
-
-    return debug_rec_nums_.count(rec_num);
-}
-
-const boost::posix_time::ptime& ReconstructorTask::debugTimestampMin() const
-{
-    return debug_timestamp_min_;
-}
-
-void ReconstructorTask::debugTimestampMin(const boost::posix_time::ptime& ts)
-{
-    loginf << "ReconstructorTask: debugTimestampMin: value '" << Utils::Time::toString(ts) << "'";
-
-    debug_timestamp_min_ = ts;
-}
-
-const boost::posix_time::ptime& ReconstructorTask::debugTimestampMax() const
-{
-    return debug_timestamp_max_;
-}
-
-void ReconstructorTask::debugTimestampMax(const boost::posix_time::ptime& ts)
-{
-    loginf << "ReconstructorTask: debugTimestampMax: value '" << Utils::Time::toString(ts) << "'";
-
-    debug_timestamp_max_ = ts;
-}
-
-bool ReconstructorTask::debugAccuracyEstimation() const
-{
-    return debug_accuracy_estimation_;
-}
-
-void ReconstructorTask::debugAccuracyEstimation(bool value)
-{
-    debug_accuracy_estimation_ = value;
-}
-
 void ReconstructorTask::dialogRunSlot()
 {
     loginf << "ReconstructorTask: dialogRunSlot";
@@ -491,12 +434,20 @@ void ReconstructorTask::run()
 
     delcalcref_future_ = std::async(std::launch::async, [&] {
         {
-            deleteCalculatedReferences();
+            try
+            {
+                deleteCalculatedReferences();
 
-            if (cancelled_)
-                return;
+                if (cancelled_)
+                    return;
 
-            QMetaObject::invokeMethod(this, "deleteCalculatedReferencesDoneSlot", Qt::QueuedConnection);
+                QMetaObject::invokeMethod(this, "deleteCalculatedReferencesDoneSlot", Qt::QueuedConnection);
+            }
+            catch (std::exception &e)
+            {
+                loginf << "ReconstructorTask: run: delete calculated references threw exception '" << e.what() << "'";
+                assert (false);
+            }
         }});
 }
 
@@ -510,12 +461,21 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
 
     deltgts_future_ = std::async(std::launch::async, [&] {
         {
-            cont_man.clearTargetsInfo();
+            try
+            {
+                cont_man.clearTargetsInfo();
 
-            if (cancelled_)
-                return;
+                if (cancelled_)
+                    return;
 
-            QMetaObject::invokeMethod(this, "deleteTargetsDoneSlot", Qt::QueuedConnection);
+                QMetaObject::invokeMethod(this, "deleteTargetsDoneSlot", Qt::QueuedConnection);
+
+            }
+            catch (std::exception &e)
+            {
+                loginf << "ReconstructorTask: run: delete targets threw exception '" << e.what() << "'";
+                assert (false);
+            }
         }});
 }
 
@@ -529,22 +489,33 @@ void ReconstructorTask::deleteTargetsDoneSlot()
 
     delassocs_future_ = std::async(std::launch::async, [&] {
         {
-            for (auto& dbcont_it : cont_man)
+            try
             {
-                if (dbcont_it.second->existsInDB() && dbcont_it.second->hasVariable("UTN"))
+                for (auto& dbcont_it : cont_man)
                 {
-                    QMetaObject::invokeMethod(this, "updateProgressSlot", Qt::QueuedConnection,
-                                              Q_ARG(const QString&, "Deleting Previous Associations"),
-                                              Q_ARG(bool, false));
+                    if (dbcont_it.second->existsInDB() && dbcont_it.second->hasVariable("UTN"))
+                    {
+                        QMetaObject::invokeMethod(this, "updateProgressSlot", Qt::QueuedConnection,
+                                                  Q_ARG(const QString&, "Deleting Previous Associations"),
+                                                  Q_ARG(bool, false));
 
-                    COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
+                        COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
+                    }
                 }
+
+                if (cancelled_)
+                    return;
+
+                QMetaObject::invokeMethod(this, "deleteAssociationsDoneSlot", Qt::QueuedConnection);
+
+            }
+            catch (std::exception &e)
+            {
+                loginf << "ReconstructorTask: run: delete associations threw exception '" << e.what() << "'";
+                assert (false);
             }
 
-            if (cancelled_)
-                return;
 
-            QMetaObject::invokeMethod(this, "deleteAssociationsDoneSlot", Qt::QueuedConnection);
         }});
 }
 
@@ -650,23 +621,30 @@ void ReconstructorTask::processDataSlice()
            << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
 
     process_future_ = std::async(std::launch::async, [&] {
+        try
+        {
+            logdbg << "ReconstructorTask: processDataSlice: async process";
 
-        logdbg << "ReconstructorTask: processDataSlice: async process";
+            logdbg << "ReconstructorTask: processDataSlice: async processing first slice "
+                   << !processing_slice_->first_slice_
+                   << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
 
-        logdbg << "ReconstructorTask: processDataSlice: async processing first slice "
-               << !processing_slice_->first_slice_
-               << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
+            assert (!currentReconstructor()->processing());
+            currentReconstructor()->processSlice();
 
-        assert (!currentReconstructor()->processing());
-        currentReconstructor()->processSlice();
+            // wait for previous writing done
+            while (writing_slice_ && !cancelled_)
+                QThread::msleep(1);
 
-                // wait for previous writing done
-        while (writing_slice_ && !cancelled_)
-            QThread::msleep(1);
+            logdbg << "ReconstructorTask: processDataSlice: done";
 
-        logdbg << "ReconstructorTask: processDataSlice: done";
-
-        QMetaObject::invokeMethod(this, "processingDoneSlot", Qt::QueuedConnection);
+            QMetaObject::invokeMethod(this, "processingDoneSlot", Qt::QueuedConnection);
+        }
+        catch (std::exception &e)
+        {
+            loginf << "ReconstructorTask: run: processing slice threw exception '" << e.what() << "'";
+            assert (false);
+        }
     });
 }
 
@@ -737,7 +715,7 @@ void ReconstructorTask::loadingDoneSlot()
     if (cancelled_)
         return;
 
-            // check if not already processing
+    // check if not already processing
     while (currentReconstructor()->processing() || processing_data_slice_)
     {
         if (cancelled_)
@@ -804,7 +782,7 @@ void ReconstructorTask::processingDoneSlot()
         return;
     }
 
-            // processing done
+    // processing done
     assert(currentReconstructor()->currentSlice().processing_done_);
     assert (processing_data_slice_);
     assert (processing_slice_);
@@ -814,7 +792,15 @@ void ReconstructorTask::processingDoneSlot()
 
     assert (!writing_slice_);
     writing_slice_ = std::move(processing_slice_);
-    writeDataSlice(); // starts the async jobs
+
+    if (skip_reference_data_writing_)
+    {
+        writing_slice_ = nullptr;
+
+        loginf << "ReconstructorTask: processingDoneSlot: skipping reference writing";
+    }
+    else
+        writeDataSlice(); // starts the async jobs
 }
 
 void ReconstructorTask::writeDoneSlot()
@@ -847,9 +833,14 @@ void ReconstructorTask::writeDoneSlot()
 
         updateProgressSlot("Reference Calculation Done", true);
 
-        //call this before resetting the reconstructor, in case the reconstructor wants to create some additional annotations
-        if (debug_)
+        if (debug_settings_.debug_)
+        {
+            //write some additional stuff before saving
+            if (currentReconstructor())
+                currentReconstructor()->createAdditionalAnnotations();
+            
             saveDebugViewPoints();
+        }
 
         currentReconstructor()->reset();
 
@@ -877,7 +868,7 @@ void ReconstructorTask::runCancelledSlot()
 
     if (done_) // already done, cancel only to close
     {
-       //close progress dialog
+        //close progress dialog
         progress_dialog_.reset();
 
         emit doneSignal();
@@ -887,7 +878,7 @@ void ReconstructorTask::runCancelledSlot()
 
     progress_dialog_->setLabelText("Cancelling");
     progress_dialog_->setCancelButton(nullptr);
-                                                 //close progress dialog
+        //close progress dialog
     progress_dialog_.reset();
 
     currentReconstructor()->cancel();
@@ -933,8 +924,7 @@ void ReconstructorTask::runCancelledSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    //call this before resetting the reconstructor, in case the reconstructor wants to create some additional annotations
-    if (debug_)
+    if (debug_settings_.debug_)
         saveDebugViewPoints();
 
     currentReconstructor()->reset();
@@ -1044,6 +1034,12 @@ ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
     return *processing_slice_;
 }
 
+const ReconstructorBase::DataSlice& ReconstructorTask::processingSlice() const
+{
+    assert (processing_slice_);
+    return *processing_slice_;
+}
+
 ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type, bool* created) const
 {
     auto key_str = std::pair<std::string,std::string>(name,type);
@@ -1104,10 +1100,6 @@ void ReconstructorTask::saveDebugViewPoints()
 {
     loginf << "ReconstructorTask: saveDebugViewPoints";
 
-    //write some additional stuff before saving
-    if (currentReconstructor())
-        currentReconstructor()->createAdditionalAnnotations();
-
     COMPASS::instance().viewManager().clearViewPoints();
 
     std::vector <nlohmann::json> view_points;
@@ -1125,14 +1117,14 @@ void ReconstructorTask::saveDebugViewPoints()
     debug_viewpoints_.clear();
 }
 
-bool ReconstructorTask::debug() const
+bool ReconstructorTask::skipReferenceDataWriting() const
 {
-    return debug_;
+    return skip_reference_data_writing_;
 }
 
-void ReconstructorTask::debug(bool value)
+void ReconstructorTask::skipReferenceDataWriting(bool value)
 {
-    debug_ = value;
+    skip_reference_data_writing_ = value;
 }
 
 void ReconstructorTask::checkSubConfigurables()
@@ -1184,7 +1176,7 @@ void ReconstructorTask::deleteCalculatedReferences() // called in async
     unsigned int ds_id = Number::dsIdFrom(currentReconstructor()->settings().ds_sac,
                                           currentReconstructor()->settings().ds_sic);
 
-            // clear counts
+    // clear counts
     if (ds_man.hasDBDataSource(ds_id))
     {
         dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
@@ -1195,7 +1187,7 @@ void ReconstructorTask::deleteCalculatedReferences() // called in async
             ds.clearNumInserted("RefTraj", currentReconstructor()->settings().ds_line);
     }
 
-            // emit done in run
+    // emit done in run
 
     loginf << "ReconstructorTask: deleteCalculatedReferences: done";
 }

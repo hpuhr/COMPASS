@@ -20,22 +20,28 @@ using namespace nlohmann;
 using namespace Utils;
 
 
+std::map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_m3a_map_;
+std::map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_acad_map_;
+std::map<std::string, std::string> ASTERIXPostprocessJob::obfuscate_acid_map_;
+
 bool ASTERIXPostprocessJob::current_date_set_ = false;
 boost::posix_time::ptime ASTERIXPostprocessJob::current_date_;
 boost::posix_time::ptime ASTERIXPostprocessJob::previous_date_;
 bool ASTERIXPostprocessJob::did_recent_time_jump_ = false;
 bool ASTERIXPostprocessJob::had_late_time_ = false;
 
-ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
-                                             boost::posix_time::ptime date,
-                                             bool override_tod_active, float override_tod_offset,
-                                             bool ignore_time_jumps, bool do_timestamp_checks,
-                                             bool filter_tod_active, float filter_tod_min, float filter_tod_max,
-                                             bool filter_position_active,
-                                             float filter_latitude_min, float filter_latitude_max,
-                                             float filter_longitude_min, float filter_longitude_max,
-                                             bool filter_modec_active,
-                                             float filter_modec_min, float filter_modec_max)
+ASTERIXPostprocessJob::ASTERIXPostprocessJob(
+    map<string, shared_ptr<Buffer>> buffers,
+    boost::posix_time::ptime date,
+    bool override_tod_active, float override_tod_offset,
+    bool ignore_time_jumps, bool do_timestamp_checks,
+    bool filter_tod_active, float filter_tod_min, float filter_tod_max,
+    bool filter_position_active,
+    float filter_latitude_min, float filter_latitude_max,
+    float filter_longitude_min, float filter_longitude_max,
+    bool filter_modec_active,
+    float filter_modec_min, float filter_modec_max,
+    bool do_obfuscate_secondary_info)
     : Job("ASTERIXPostprocessJob"),
     buffers_(std::move(buffers)),
     override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
@@ -45,7 +51,8 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
     filter_latitude_min_(filter_latitude_min), filter_latitude_max_(filter_latitude_max),
     filter_longitude_min_(filter_longitude_min), filter_longitude_max_(filter_longitude_max),
     filter_modec_active_(filter_modec_active),
-    filter_modec_min_(filter_modec_min), filter_modec_max_(filter_modec_max)
+    filter_modec_min_(filter_modec_min), filter_modec_max_(filter_modec_max),
+    do_obfuscate_secondary_info_(do_obfuscate_secondary_info)
 {
     if (!current_date_set_) // init if first time
     {
@@ -54,6 +61,12 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
 
         current_date_set_ = true;
     }
+
+    obfuscate_m3a_map_[512] = 512; // 1000
+    obfuscate_m3a_map_[1024] = 1024; // 2000
+    obfuscate_m3a_map_[3584] = 3584; // 7000
+    obfuscate_m3a_map_[4095] = 4095; // 7777
+
 }
 
 ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
@@ -100,6 +113,9 @@ void ASTERIXPostprocessJob::run()
 
     if (filter_tod_active_ || filter_position_active_ || filter_modec_active_)
         doFilters();
+
+    if (do_obfuscate_secondary_info_)
+        doObfuscate();
 
     done_ = true;
 }
@@ -727,7 +743,7 @@ void ASTERIXPostprocessJob::doFilters()
                         continue;
                     }
                     else if (mc_vec2 && !mc_vec2->isNull(cnt)
-                        && (mc_vec2->get(cnt) < filter_modec_min_ || mc_vec2->get(cnt) > filter_modec_max_))
+                             && (mc_vec2->get(cnt) < filter_modec_min_ || mc_vec2->get(cnt) > filter_modec_max_))
                     {
                         to_be_removed.push_back(cnt);
                         continue;
@@ -749,3 +765,350 @@ void ASTERIXPostprocessJob::doFilters()
             ++it;
     }
 }
+
+void ASTERIXPostprocessJob::doObfuscate()
+{
+
+    assert (do_obfuscate_secondary_info_);
+
+    string dbcontent_name;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    // filter / change mode 3/a codes
+    {
+        string var_name;
+
+        for (auto& buf_it : buffers_)
+        {
+            dbcontent_name = buf_it.first;
+
+            shared_ptr<Buffer> buffer = buf_it.second;
+            unsigned int buffer_size = buffer->size();
+
+            if(!buffer_size)
+                continue;
+
+            if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
+                continue;
+
+            dbContent::Variable& var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
+
+            var_name = var.name();
+
+            assert (buffer->has<unsigned int>(var_name));
+
+            NullableVector<unsigned int>& var_vec = buffer->get<unsigned int>(var_name);
+
+            std::vector<size_t> to_be_removed;
+
+            for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+            {
+                if (var_vec.isNull(cnt))
+                    continue;
+
+                if ((var_vec.get(cnt) >= 832 && var_vec.get(cnt) <= 895) // 1500 - 1577
+                    || (var_vec.get(cnt) >= 2560 && var_vec.get(cnt) <= 3071)) // 5000 - 5777
+                {
+                    to_be_removed.push_back(cnt);
+                    continue;
+                }
+                else // obfuscate
+                    obfuscateM3A(var_vec.getRef(cnt));
+            }
+
+            buffer->removeIndexes(to_be_removed);
+        }
+    }
+
+    // change acads
+    {
+        string var_name;
+
+        for (auto& buf_it : buffers_)
+        {
+            dbcontent_name = buf_it.first;
+
+            shared_ptr<Buffer> buffer = buf_it.second;
+            unsigned int buffer_size = buffer->size();
+
+            if(!buffer_size)
+                continue;
+
+            if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_))
+                continue;
+
+            dbContent::Variable& var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_);
+
+            var_name = var.name();
+
+            assert (buffer->has<unsigned int>(var_name));
+
+            NullableVector<unsigned int>& var_vec = buffer->get<unsigned int>(var_name);
+
+            for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+            {
+                if (var_vec.isNull(cnt))
+                    continue;
+
+                // obfuscate
+                obfuscateACAD(var_vec.getRef(cnt));
+            }
+        }
+    }
+
+    // change acids
+    {
+        string var_name;
+
+        for (auto& buf_it : buffers_)
+        {
+            dbcontent_name = buf_it.first;
+
+            shared_ptr<Buffer> buffer = buf_it.second;
+            unsigned int buffer_size = buffer->size();
+
+            if(!buffer_size)
+                continue;
+
+            if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_))
+                continue;
+
+            dbContent::Variable& var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_);
+
+            var_name = var.name();
+
+            assert (buffer->has<string>(var_name));
+
+            NullableVector<string>& var_vec = buffer->get<string>(var_name);
+
+            for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+            {
+                if (var_vec.isNull(cnt))
+                    continue;
+
+                // obfuscate
+                obfuscateACID(var_vec.getRef(cnt));
+            }
+        }
+    }
+}
+
+void ASTERIXPostprocessJob::obfuscateM3A (unsigned int& value)
+{
+    if (!obfuscate_m3a_map_.count(value))
+    {
+        // generate new value
+
+        unsigned int obfuscated_val = obfuscate_m3a_map_.size();
+        while (std::find_if(obfuscate_m3a_map_.begin(), obfuscate_m3a_map_.end(),
+                            [obfuscated_val](const auto& mo) {return mo.second == obfuscated_val; })
+               != obfuscate_m3a_map_.end())
+        {
+            ++obfuscated_val;
+        }
+
+        assert (obfuscated_val <= 4095);
+        obfuscate_m3a_map_[value] = obfuscated_val;
+    }
+
+    value = obfuscate_m3a_map_.at(value);
+}
+
+void ASTERIXPostprocessJob::obfuscateACAD (unsigned int& value)
+{
+    if (!obfuscate_acad_map_.count(value))
+    {
+        // generate new value
+
+        unsigned int obfuscated_val = obfuscate_acad_map_.size()+1;
+
+        while (std::find_if(obfuscate_acad_map_.begin(), obfuscate_acad_map_.end(),
+                            [obfuscated_val](const auto& mo) {return mo.second == obfuscated_val; })
+               != obfuscate_acad_map_.end())
+        {
+            ++obfuscated_val;
+        }
+
+        obfuscate_acad_map_[value] = obfuscated_val;
+    }
+
+    value = obfuscate_acad_map_.at(value);
+}
+
+// List of Starfleet ship names (prefixes)
+static const std::vector<std::string> ship_names = {
+    "ENTE",  // Enterprise
+    "VOYA",  // Voyager
+    "DEFI",  // Defiant
+    "DISC",  // Discovery
+    "RELI",  // Reliant
+    "EXCE",  // Excelsior
+    "EQUI",  // Equinox
+    "INTR",  // Intrepid
+    "TITA",  // Titan
+    "ODYS",  // Odyssey
+    "CONS",  // Constellation
+    "STAR",  // Stargazer
+    "GRIS",  // Grissom
+    "SARA",  // Saratoga
+    "COCH",  // Cochrane
+    "KIRK",  // Kirk (NX-01 refit named after him)
+    "PICA",  // Picard
+    "JANE",  // Janeway
+    "SULU",  // Sulu
+    "SHEN",  // Shenzhou
+    "YORK",  // Yorktown
+    "BURA",  // Buran
+    "THUN",  // Thunderchild
+    "FRAN",  // Franklin
+    "VENG",  // Vengeance
+    "SHRA",  // Shran
+    "LEXI",  // Lexington
+    "POTE",  // Potemkin
+    "ENDE",  // Endeavour
+    "COLU",  // Columbia
+    "KELV",  // Kelvin
+    "ANTA",  // Antares
+    "DAED",  // Daedalus
+    "ARES",  // Ares
+    "NEBU",  // Nebula
+    "AKIR",  // Akira
+    "PROM",  // Prometheus
+    "LUNA",  // Luna
+    "NORW",  // Norway
+    "STEA",  // Steamrunner
+    "EXET",  // Exeter
+    "HOOD",  // Hood
+    "MIRA",  // Miranda
+    "SOVE",  // Sovereign
+    "AVEN",  // Avenger
+    "EAGL",  // Eagle
+    "FARR",  // Farragut
+    "BOZE",  // Bozeman
+    "CAIR",  // Cairo
+    "EXCA",  // Excalibur
+    "GALX",  // Galaxy
+    "HATH",  // Hathaway
+    "MAGL",  // Magellan
+    "YAMA",  // Yamaguchi
+    "ADVE",  // Adventure
+    "BLAC",  // Blackwell
+    "CHAL",  // Challenger
+    "CHAR",  // Charleston
+    "CHER",  // Cherokee
+    "CONC",  // Concord
+    "COPE",  // Copernicus
+    "DERB",  // Derbyshire
+    "DRAK",  // Drake
+    "EDIS",  // Edison
+    "EDMU",  // Edmund
+    "GAGA",  // Gagarin
+    "GRIF",  // Griffin
+    "HANS",  // Hansen
+    "MARY",  // Maryland
+    "OBER",  // Oberth
+    "OLIV",  // Oliver
+    "ORIO",  // Orion
+    "PEGA",  // Pegasus
+    "SAGA",  // Sagan
+    "ZHEN",  // Zheng He
+    "NIAG",  // Niagara
+    "NIMI",  // Nimitz
+    "GETT",  // Gettysburg
+    "CHAN",  // Chang
+    "KONG",  // Kongo
+    "TURK",  // Turkey
+    "KURA",  // Kurak
+    "SARE",  // Sarek
+    "TPAU",  // T'Pau
+    "SOVA",  // Soval
+    "SURA",  // Surak
+    "ARCH",  // Archer
+    "DALL",  // Dallas
+    "LOND",  // London
+    "PARI",  // Paris
+    "BERL",  // Berlin
+    "MINS",  // Minsk
+    "ROCI",   // Rocinante
+    "DONN",   // Donnager
+    "NAVA",   // Navoo
+    "TYNA",   // Tynan
+    "AGAT",   // Agatha King
+    "BEHE",   // Behemoth
+    "CONT",   // Contorta (Pinus Contorta)
+    "PELL",   // Pella
+    "SCOP",   // Scopuli
+    "BARB",   // Barbapiccola
+    "RAWE",   // Raweside
+    "HYGE",   // Hygiea
+    "ARBO"    // Arboghast
+};
+
+// Function to obfuscate value string
+//std::string obfuscate_input(const std::string& value)
+void ASTERIXPostprocessJob::obfuscateACID (std::string& value)
+{
+
+    // Static map to store input-output pairings
+    //static std::map<std::string, std::string> obfuscate_acid_map_;
+
+    // Check if the input has already been mapped
+    auto it = obfuscate_acid_map_.find(value);
+    if (it != obfuscate_acid_map_.end()) {
+        // Return the previously stored output
+        value = it->second;
+        return;
+    }
+
+    // Ensure input length is between 0 and 8 characters
+    std::string trimmed_input = value.substr(0, 8);
+
+    // Maximum output length
+    const size_t max_output_length = 8;
+
+    // Compute a consistent hash value from the input string
+    // Using a simple custom hash function for consistency across runs
+    size_t hash_value = 0;
+    for (char c : trimmed_input) {
+        hash_value = hash_value * 31 + static_cast<size_t>(c);
+    }
+
+    // Select a ship name based on the hash value
+    size_t ship_index = hash_value % ship_names.size();
+    std::string ship_prefix = ship_names[ship_index];
+
+    // Determine the maximum length for the count number
+    size_t max_count_length = max_output_length - ship_prefix.length();
+    if (max_count_length == 0) {
+        // If there's no space for count number, truncate the ship prefix
+        ship_prefix = ship_prefix.substr(0, max_output_length - 1);
+        max_count_length = 1;
+    }
+
+    // Compute a count number to ensure uniqueness
+    // Use a static counter for each ship prefix
+    static std::map<std::string, size_t> ship_counters;
+    size_t count_number = ship_counters[ship_prefix]++;
+    count_number = count_number % static_cast<size_t>(std::pow(10, max_count_length));
+
+    // Format the count number with leading zeros if necessary
+    std::string count_str = std::to_string(count_number);
+    if (count_str.length() < max_count_length) {
+        count_str = std::string(max_count_length - count_str.length(), '0') + count_str;
+    }
+
+    // Combine ship prefix and count number
+    std::string obfuscated_val = ship_prefix + count_str;
+
+    // Ensure the output does not exceed the maximum length
+    if (obfuscated_val.length() > max_output_length) {
+        obfuscated_val = obfuscated_val.substr(0, max_output_length);
+    }
+
+    // Store the new input-output mapping
+    obfuscate_acid_map_[value] = obfuscated_val;
+
+    value = obfuscated_val;
+}
+

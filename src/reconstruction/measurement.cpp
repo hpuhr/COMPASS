@@ -147,7 +147,7 @@ std::string Measurement::asString(const std::string& prefix) const
     std::string Q_var_str        = (Q_var.has_value() ? std::to_string(Q_var.value()) : "-");
     std::string Q_var_interp_str = (Q_var_interp.has_value() ? std::to_string(Q_var_interp.value()) : "-");
 
-    ss << prefix << "source_id:    " << source_id << std::endl;
+    ss << prefix << "source_id:    " << (source_id.has_value() ? std::to_string(source_id.value()) : "-") << std::endl;
     ss << prefix << "interp:       " << mm_interp << std::endl;
     ss << prefix << "pos wgs84:    " << lat << ", " << lon << std::endl;
     ss << prefix << "pos cart:     " << x << ", " << y << ", " << alt_str << " (" << x_stddev_str << ", " << y_stddev_str << ", " << xy_cov_str << ")" << std::endl;
@@ -157,6 +157,147 @@ std::string Measurement::asString(const std::string& prefix) const
     ss << prefix << "Q_var_interp: " << Q_var_interp_str;
 
     return ss.str();
+}
+
+/**
+*/
+Eigen::MatrixXd Measurement::covMat(unsigned char flags) const
+{
+    if (hasStdDevPosition() && (flags & CovMatFlags::CovMatPos))
+    {
+        if (hasStdDevVelocity() && (flags & CovMatFlags::CovMatVel))
+        {
+            if (hasStdDevAccel() && (flags & CovMatFlags::CovMatAcc))
+            {
+                //generate 6x6 from position, velocity and acceleration
+                Eigen::MatrixXd C = Eigen::MatrixXd::Zero(6, 6);
+                C(0, 0) =  x_stddev.value() *  x_stddev.value();
+                C(1, 1) = vx_stddev.value() * vx_stddev.value();
+                C(2, 2) = ax_stddev.value() * ax_stddev.value();
+                C(3, 3) =  y_stddev.value() *  y_stddev.value();
+                C(4, 4) = vy_stddev.value() * vy_stddev.value();
+                C(5, 5) = ay_stddev.value() * ay_stddev.value();
+
+                if (xy_cov.has_value())
+                {
+                    C(0, 3) = xy_cov.value();
+                    C(3, 0) = xy_cov.value();
+                }
+            }
+            else
+            {
+                //generate 4x4 from position and velocity
+                Eigen::MatrixXd C = Eigen::MatrixXd::Zero(4, 4);
+                C(0, 0) =  x_stddev.value() *  x_stddev.value();
+                C(1, 1) = vx_stddev.value() * vx_stddev.value();
+                C(2, 2) =  y_stddev.value() *  y_stddev.value();
+                C(3, 3) = vy_stddev.value() * vy_stddev.value();
+
+                if (xy_cov.has_value())
+                {
+                    C(0, 2) = xy_cov.value();
+                    C(2, 0) = xy_cov.value();
+                }
+            }
+        }
+        else
+        {
+            //generate 2x2 from position
+            Eigen::MatrixXd C = Eigen::MatrixXd::Zero(2, 2);
+            C(0, 0) =  x_stddev.value() *  x_stddev.value();
+            C(1, 1) =  y_stddev.value() *  y_stddev.value();
+
+            if (xy_cov.has_value())
+            {
+                C(0, 1) = xy_cov.value();
+                C(1, 0) = xy_cov.value();
+            }
+        }
+    }
+
+    return Eigen::MatrixXd();
+}
+
+/**
+*/
+unsigned char Measurement::covMatFlags() const
+{
+    unsigned char flags = 0;
+
+    if (hasStdDevPosition())
+        flags |= CovMatFlags::CovMatPos;
+    if (hasStdDevVelocity())
+        flags |= CovMatFlags::CovMatVel;
+    if (hasStdDevAccel())
+        flags |= CovMatFlags::CovMatAcc;
+    if (xy_cov.has_value())
+        flags |= CovMatFlags::CovMatCov;
+
+    return flags;
+}
+
+namespace covmat
+{
+    void setMMPosAcc(Measurement& mm, const Eigen::MatrixXd& C, int idx0, int idx1)
+    {
+        mm.x_stddev = std::sqrt(C(idx0, idx0));
+        mm.y_stddev = std::sqrt(C(idx1, idx1));
+    }
+    void setMMPosCov(Measurement& mm, const Eigen::MatrixXd& C, int idx0, int idx1)
+    {
+        mm.xy_cov = C(idx0, idx1);
+    }
+    void setMMVelAcc(Measurement& mm, const Eigen::MatrixXd& C, int idx0, int idx1)
+    {
+        mm.vx_stddev = std::sqrt(C(idx0, idx0));
+        mm.vy_stddev = std::sqrt(C(idx1, idx1));
+    }
+    void setMMAccAcc(Measurement& mm, const Eigen::MatrixXd& C, int idx0, int idx1)
+    {
+        mm.ax_stddev = std::sqrt(C(idx0, idx0));
+        mm.ay_stddev = std::sqrt(C(idx1, idx1));
+    }
+}
+
+/**
+*/
+bool Measurement::setFromCovMat(const Eigen::MatrixXd& C, unsigned char flags)
+{
+    if (C.cols() == 2 && C.rows() == 2)
+    {
+        if (flags & CovMatFlags::CovMatPos) covmat::setMMPosAcc(*this, C, 0, 1);
+        if (flags & CovMatFlags::CovMatCov) covmat::setMMPosCov(*this, C, 0, 1);
+
+        return true;
+    }
+    else if (C.cols() == 4 && C.rows() == 4)
+    {
+        if (flags & CovMatFlags::CovMatPos) covmat::setMMPosAcc(*this, C, 0, 2);
+        if (flags & CovMatFlags::CovMatCov) covmat::setMMPosCov(*this, C, 0, 2);
+        if (flags & CovMatFlags::CovMatVel) covmat::setMMVelAcc(*this, C, 1, 3);
+
+        return true;
+    }
+    else if (C.cols() == 6 && C.rows() == 6)
+    {
+        if (flags & CovMatFlags::CovMatPos) covmat::setMMPosAcc(*this, C, 0, 3);
+        if (flags & CovMatFlags::CovMatCov) covmat::setMMPosCov(*this, C, 0, 3);
+        if (flags & CovMatFlags::CovMatVel) covmat::setMMVelAcc(*this, C, 1, 4);
+        if (flags & CovMatFlags::CovMatAcc) covmat::setMMAccAcc(*this, C, 2, 5);
+
+        return true;
+    }
+
+    //weird covmat size
+    return false;
+}
+
+/**
+*/
+std::pair<unsigned long, boost::posix_time::ptime> Measurement::uniqueID() const
+{
+    assert(source_id.has_value());
+    return std::pair<unsigned long, boost::posix_time::ptime>(source_id.value(), t);
 }
 
 }  // namespace reconstruction

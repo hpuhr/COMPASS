@@ -35,6 +35,10 @@ class AccuracyEstimatorBase
 
     virtual void validate (dbContent::targetReport::ReconstructorInfo& tr) = 0; // can set do not use position flag
 
+    virtual void doOutlierDetection (
+        dbContent::targetReport::ReconstructorInfo& tr,
+        unsigned int utn, bool do_debug) {};
+
     virtual bool canCorrectPosition(const dbContent::targetReport::ReconstructorInfo& tr) { return false; }
     virtual void correctPosition(dbContent::targetReport::ReconstructorInfo& tr) {} // save in position_corrected_
 
@@ -51,7 +55,7 @@ class AccuracyEstimatorBase
 
   protected:
 
-    bool skip_unused_positions_ {true};
+    bool skip_unused_positions_ {false};
     bool use_min_std_dev_ {true};
     double min_std_dev_ {1.0};
 

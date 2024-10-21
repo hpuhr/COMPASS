@@ -23,7 +23,8 @@ public:
                           float filter_latitude_min, float filter_latitude_max,
                           float filter_longitude_min, float filter_longitude_max,
                           bool filter_modec_active,
-                          float filter_modec_min, float filter_modec_max);
+                          float filter_modec_min, float filter_modec_max,
+                          bool do_obfuscate_secondary_info);
 
     ASTERIXPostprocessJob(std::map<std::string, std::shared_ptr<Buffer>> buffers,
                           boost::posix_time::ptime date); // ctor with no checks/overrides/filters
@@ -59,6 +60,12 @@ private:
     float filter_modec_min_{0};
     float filter_modec_max_{0};
 
+    bool do_obfuscate_secondary_info_{false};
+
+    static std::map<unsigned int, unsigned int> obfuscate_m3a_map_;
+    static std::map<unsigned int, unsigned int> obfuscate_acad_map_;
+    static std::map<std::string, std::string> obfuscate_acid_map_;
+
     // static vars for timestamp / timejump handling
     static bool current_date_set_;
     static boost::posix_time::ptime current_date_;
@@ -74,6 +81,11 @@ private:
     void doADSBPositionPorcessing();
     void doGroundSpeedCalculations();
     void doFilters();
+    void doObfuscate();
+
+    void obfuscateM3A (unsigned int& value);
+    void obfuscateACAD (unsigned int& value);
+    void obfuscateACID (std::string& value);
 };
 
 #endif // ASTERIXPOSTPROCESSJOB_H

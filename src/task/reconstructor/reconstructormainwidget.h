@@ -33,4 +33,5 @@ protected:
     QSpinBox*  slice_overlap_box_ = nullptr;
 
     QCheckBox* delete_refs_box_   = nullptr;
+    QCheckBox* skip_reference_data_writing_box_   = nullptr;
 };

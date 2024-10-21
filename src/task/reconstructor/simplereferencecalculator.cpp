@@ -44,14 +44,16 @@
 
 using namespace Utils;
 
-const QColor SimpleReferenceCalculator::ColorMeasurements   = QColor(102, 178, 255);
-const QColor SimpleReferenceCalculator::ColorKalman         = QColor(255, 102, 178);
-const QColor SimpleReferenceCalculator::ColorKalmanSmoothed = QColor(255, 178, 102);
+const QColor SimpleReferenceCalculator::ColorMeasurements    = QColor(102, 178, 255);
+const QColor SimpleReferenceCalculator::ColorKalman          = QColor(255, 102, 178);
+const QColor SimpleReferenceCalculator::ColorKalmanSmoothed  = QColor(255, 178, 102);
+const QColor SimpleReferenceCalculator::ColorKalmanResampled = QColor(200, 200, 200);
 
-const float SimpleReferenceCalculator::PointSizeOSG            = 10.0f;
-const float SimpleReferenceCalculator::PointSizeMeasurements   = 6.0f;
-const float SimpleReferenceCalculator::PointSizeKalman         = 4.0f;
-const float SimpleReferenceCalculator::PointSizeKalmanSmoothed = 2.0f;
+const float SimpleReferenceCalculator::PointSizeOSG             = 10.0f;
+const float SimpleReferenceCalculator::PointSizeMeasurements    = 6.0f;
+const float SimpleReferenceCalculator::PointSizeKalman          = 4.0f;
+const float SimpleReferenceCalculator::PointSizeKalmanSmoothed  = 2.0f;
+const float SimpleReferenceCalculator::PointSizeKalmanResampled = 2.0f;
 
 const float SimpleReferenceCalculator::LineWidthBase = 1.0f;
 
@@ -122,20 +124,28 @@ void SimpleReferenceCalculator::prepareForCurrentSlice()
     auto ThresRemove = reconstructor_.currentSlice().remove_before_time_;
     auto ThresJoin   = getJoinThreshold();
 
-            //remove previous updates which are no longer needed (either too old or above the join threshold)
-    for (auto& ref : references_)
+            //remove targets & previous updates which are no longer needed (either too old or above the join threshold)
+    //for (auto& ref : references_)
+    for (auto ref_it = references_.begin(); ref_it != references_.end(); )
     {
-        auto it = std::remove_if(ref.second.updates.begin(),
-                                 ref.second.updates.end(),
-                                 [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                                                                     update.t >= ThresJoin; });
-        ref.second.updates.erase(it, ref.second.updates.end());
+        if (!reconstructor_.targets_container_.targets_.count(ref_it->first)) // deleted target, remove
+            ref_it = references_.erase(ref_it);
+        else // target still exists, remove updates
+        {
+            auto it = std::remove_if(ref_it->second.updates.begin(),
+                                     ref_it->second.updates.end(),
+                                     [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                                                                         update.t >= ThresJoin; });
+            ref_it->second.updates.erase(it, ref_it->second.updates.end());
 
-        auto it_s = std::remove_if(ref.second.updates_smooth.begin(),
-                                   ref.second.updates_smooth.end(),
-                                   [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
-                                                                                       update.t >= ThresJoin; });
-        ref.second.updates_smooth.erase(it_s, ref.second.updates_smooth.end());
+            auto it_s = std::remove_if(ref_it->second.updates_smooth.begin(),
+                                       ref_it->second.updates_smooth.end(),
+                                       [ & ] (const kalman::KalmanUpdate& update) { return update.t <  ThresRemove ||
+                                                                                           update.t >= ThresJoin; });
+            ref_it->second.updates_smooth.erase(it_s, ref_it->second.updates_smooth.end());
+
+            ++ref_it;
+        }
     }
 
     //reset data structs
@@ -202,7 +212,7 @@ bool SimpleReferenceCalculator::computeReferences()
  */
 void SimpleReferenceCalculator::generateMeasurements()
 {
-    for (const auto& target : reconstructor_.targets_)
+    for (const auto& target : reconstructor_.targets_container_.targets_)
         generateTargetMeasurements(target.second);
 }
 
@@ -240,7 +250,7 @@ void SimpleReferenceCalculator::generateLineMeasurements(const dbContent::Recons
     {
         const auto& tr_info = reconstructor_.target_reports_.at(elem.second);
 
-        if (tr_info.do_not_use_position_)
+        if (tr_info.doNotUsePosition())
             continue;
 
         reconstruction::Measurement mm;
@@ -310,6 +320,7 @@ void SimpleReferenceCalculator::interpolateMeasurements(Measurements& measuremen
     reconstruction::SplineInterpolator interp;
     interp.config().check_fishy_segments = true;
     interp.config().interpolate_cart     = false;
+    interp.config().interpolate_cov_nn   = false;
     interp.config().sample_dt            = options.sample_dt;
     interp.config().max_dt               = options.max_dt;
 
@@ -421,13 +432,13 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 {
     refs.resetCounts();
 
-    bool general_debug = reconstructor_.task().debug();
-    bool debug_target  = general_debug && reconstructor_.task().debugUTNs().count(refs.utn);
+    bool general_debug = reconstructor_.task().debugSettings().debug_;
+    bool debug_target  = general_debug && reconstructor_.task().debugSettings().debugUTN(refs.utn);
 
-    const auto& debug_rec_nums = reconstructor_.task().debugRecNums();
+    const auto& debug_rec_nums = reconstructor_.task().debugSettings().debug_rec_nums_;
 
-    const auto& debug_ts_min  = reconstructor_.task().debugTimestampMin();
-    const auto& debug_ts_max  = reconstructor_.task().debugTimestampMax();
+    const auto& debug_ts_min  = reconstructor_.task().debugSettings().debug_timestamp_min_;
+    const auto& debug_ts_max  = reconstructor_.task().debugSettings().debug_timestamp_max_;
 
     const auto& slice_t0 = reconstructor_.currentSlice().slice_begin_;
     const auto& slice_t1 = reconstructor_.currentSlice().next_slice_begin_;
@@ -627,13 +638,14 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                           rec_annotations::AnnotationStyle(ColorKalman, PointSizeKalman, LineWidthBase),
                           rec_annotations::AnnotationStyle(ColorKalman, PointSizeOSG, LineWidthBase),
                           refs.updates,
-                          used_mms,
                           slice_t0, 
                           slice_t1,
                           n_before,
                           true,
+                          &used_mms,
                           &failed_updates,
-                          &skipped_updates);
+                          &skipped_updates,
+                          nullptr);
     }
 
     //start with joined kalman updates
@@ -703,11 +715,11 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
                           rec_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeKalmanSmoothed, LineWidthBase),
                           rec_annotations::AnnotationStyle(ColorKalmanSmoothed, PointSizeOSG, LineWidthBase),
                           updates,
-                          used_mms,
                           slice_t0,
                           slice_t1,
                           n_before,
                           false,
+                          &used_mms,
                           nullptr,
                           nullptr,
                           &rts_debug_infos);
@@ -740,6 +752,24 @@ void SimpleReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
         }
     }
 
+    if (debug_target && shallAddAnnotationData())
+    {
+        addAnnotationData(refs,
+                          estimator, 
+                          "Kalman (Resampled)", 
+                          rec_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeKalmanResampled, LineWidthBase),
+                          rec_annotations::AnnotationStyle(ColorKalmanResampled, PointSizeOSG, LineWidthBase),
+                          updates,
+                          slice_t0,
+                          slice_t1,
+                          0,
+                          false,
+                          nullptr,
+                          nullptr,
+                          nullptr,
+                          nullptr);
+    }
+
     //generate references
     estimator.storeUpdates(refs.references, updates);
 }
@@ -750,9 +780,9 @@ void SimpleReferenceCalculator::updateReferences()
 {
     for (auto& ref : references_)
     {
-        assert(reconstructor_.targets_.count(ref.first));
+        assert(reconstructor_.targets_container_.targets_.count(ref.first));
 
-        auto& target = reconstructor_.targets_.at(ref.first);
+        auto& target = reconstructor_.targets_container_.targets_.at(ref.first);
         //target.references_ = std::move(ref.second.references);
 
         target.references_.clear();
@@ -1042,11 +1072,11 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
                                                   const rec_annotations::AnnotationStyle& style,
                                                   const boost::optional<rec_annotations::AnnotationStyle>& style_osg,
                                                   const std::vector<kalman::KalmanUpdate>& updates,
-                                                  const std::vector<unsigned int>& used_mms,
                                                   const boost::optional<boost::posix_time::ptime>& t0,
                                                   const boost::optional<boost::posix_time::ptime>& t1,
                                                   size_t offs,
                                                   bool debug_imm,
+                                                  const std::vector<unsigned int>* used_mms,
                                                   const std::vector<QPointF>* fail_pos,
                                                   const std::vector<QPointF>* skip_pos,
                                                   std::vector<kalman::RTSDebugInfo>* rts_debug_infos) const
@@ -1060,12 +1090,17 @@ void SimpleReferenceCalculator::addAnnotationData(TargetReferences& target_refer
 
     for (size_t i = 0; i < references.size(); ++i)
     {
-        const auto& mm = target_references.measurements.at(used_mms.at(i));
+        boost::optional<Eigen::Vector2d> mm_pos;
+        if (used_mms)
+        {
+            const auto& mm = target_references.measurements.at(used_mms->at(i));
+            mm_pos = Eigen::Vector2d(mm.lat, mm.lon);
+        }
 
         annos[ i ] = rec_annotations::createTRAnnotation(references[ i ], 
                                                          speed_positions[ i ], 
                                                          accel_positions[ i ], 
-                                                         Eigen::Vector2d(mm.lat, mm.lon));
+                                                         mm_pos);
     }
 
     reconstruction::KalmanProjectionHandler phandler;
@@ -1216,10 +1251,12 @@ void SimpleReferenceCalculator::createAnnotations(ViewPointGenAnnotation* annota
 
     auto feat_speed_histo = new ViewPointGenFeatureHistogram(RawHistogramCollection(), 
         PlotMetadata("Reconstruction", "Speed Common", "Speed", "", PlotGroup));
+    feat_speed_histo->histograms().setUseLogScale(false);
     common_anno->addFeature(feat_speed_histo);
 
     auto feat_speed_scatter = new ViewPointGenFeatureScatterSeries(ScatterSeriesCollection(), 
         PlotMetadata("Reconstruction", "Speed Common", "Timestamp", "Speed", PlotGroup));
+    feat_speed_scatter->scatterSeries().setUseConnectionLines(true);
     common_anno->addFeature(feat_speed_scatter);
 
     auto scaleColor = [ & ] (const QColor& color, double factor)

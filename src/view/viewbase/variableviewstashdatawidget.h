@@ -45,8 +45,8 @@ public:
 
     unsigned int nullValueCount() const;
 
-    QRectF getPlanarBounds(int var_x, int var_y) const;
-    boost::optional<std::pair<double, double>> getBounds(int var) const;
+    QRectF getPlanarBounds(int var_x, int var_y, bool correct_datetime = false) const;
+    boost::optional<std::pair<double, double>> getBounds(int var, bool correct_datetime = false) const;
 
 protected:
     virtual void resetVariableData() override final;
@@ -55,6 +55,8 @@ protected:
     virtual void postUpdateVariableDataEvent() override final;
     virtual void updateVariableData(const std::string& dbcontent_name,
                                     Buffer& buffer) override final;
+
+    virtual QRectF getViewBounds() const;
 
     /// derived behavior during postUpdateVariableDataEvent()
     virtual void processStash(const VariableViewStash<double>& stash) = 0;
@@ -68,7 +70,8 @@ protected:
                      double y_min, 
                      double y_max,
                      int var_x,
-                     int var_y);
+                     int var_y,
+                     bool correct_datetime = false);
 
     const VariableViewStash<double>& getStash() const { return stash_; }
 

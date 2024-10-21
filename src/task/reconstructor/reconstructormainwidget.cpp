@@ -1,5 +1,6 @@
 #include "reconstructormainwidget.h"
 #include "reconstructorbase.h"
+#include "reconstructortask.h"
 
 #include "logger.h"
 
@@ -100,6 +101,18 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
 
     layout->addRow("", delete_refs_box_);
 
+    // skip ref writing
+
+    skip_reference_data_writing_box_ = new QCheckBox("Skip Writing of Reference Trajectories");
+    skip_reference_data_writing_box_->setToolTip("All associations are made and written, also the created targets,"
+                                                 " but no calculated reference target reports are written"
+                                                 " into the database");
+
+    connect(skip_reference_data_writing_box_, &QCheckBox::toggled,
+            [ = ] (bool ok) { this->reconstructor_.task().skipReferenceDataWriting(ok); });
+
+    layout->addRow("", skip_reference_data_writing_box_);
+
     updateValues();
 }
 
@@ -137,4 +150,7 @@ void ReconstructorMainWidget::updateValues()
 
     assert(delete_refs_box_);
     delete_refs_box_->setChecked(settings.delete_all_calc_reftraj);
+
+    assert(skip_reference_data_writing_box_);
+    skip_reference_data_writing_box_->setChecked(reconstructor_.task().skipReferenceDataWriting());
 }

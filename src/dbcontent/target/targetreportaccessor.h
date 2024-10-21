@@ -57,6 +57,8 @@ public:
     boost::optional<unsigned char> mopsVersion(unsigned int index) const;
     boost::optional<unsigned char> nucp(unsigned int index) const;
     boost::optional<unsigned char> nacp(unsigned int index) const;
+    boost::optional<unsigned int> ecat(unsigned int index) const;
+    boost::optional<unsigned char> getGeoAltAcc(unsigned int index) const;
 
     boost::optional<unsigned int> acad(unsigned int index) const;
     boost::optional<std::string> acid(unsigned int index) const;
@@ -118,9 +120,10 @@ private:
         return vec->get(index);
     }
 
-    bool is_radar_   = false;
-    bool is_adsb_    = false;
-    bool is_tracker_ = false;
+    bool is_radar_    = false;
+    bool is_adsb_     = false;
+    bool is_tracker_  = false;
+    bool is_ref_traj_ = false;
 
     //general
     const NullableVector<boost::posix_time::ptime>* meta_timestamp_vec_ = nullptr;
@@ -173,6 +176,9 @@ private:
     const NullableVector<unsigned int>* meta_track_num_vec_   = nullptr;
     const NullableVector<bool>*         meta_track_begin_vec_ = nullptr;
     const NullableVector<bool>*         meta_track_end_vec_   = nullptr;
+
+    const NullableVector<unsigned int>* cat021_ecat_vec_ = nullptr;
+    const NullableVector<unsigned char>* cat021_geo_alt_acc_vec_ = nullptr;
 };
 
 } // namespace dbContent

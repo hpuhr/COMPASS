@@ -104,9 +104,11 @@ const Property DBContent::var_cat021_nucp_nic_ {"NUCp or NIC", PropertyDataType:
 const Property DBContent::var_cat021_nucv_nacv_ {"NUCr or NACv", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_sil_ {"SIL", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_geo_alt_ {"Geometric Height", PropertyDataType::FLOAT};
+const Property DBContent::var_cat021_geo_alt_accuracy_ {"Geometric Altitude Accuracy", PropertyDataType::UCHAR};
+const Property DBContent::var_cat021_ecat_ {"Emitter Category", PropertyDataType::UINT};
 
-const Property DBContent::var_cat021_latitude_hr_ {"Latitude HR", PropertyDataType::DOUBLE};;
-const Property DBContent::var_cat021_longitude_hr_ {"Longitude HR", PropertyDataType::DOUBLE};;
+const Property DBContent::var_cat021_latitude_hr_ {"Latitude HR", PropertyDataType::DOUBLE};
+const Property DBContent::var_cat021_longitude_hr_ {"Longitude HR", PropertyDataType::DOUBLE};
 
 const Property DBContent::var_cat021_sgv_gss_ {"SGV GSS", PropertyDataType::FLOAT};
 const Property DBContent::var_cat021_sgv_hgt_ {"SGV HGT", PropertyDataType::DOUBLE};

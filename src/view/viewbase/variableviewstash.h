@@ -246,7 +246,7 @@ public:
 
 private:
     std::map<std::string, GroupedDataStash<T>> grouped_stashes_;
-    std::vector<OptionalDataRange>            data_ranges_;
+    std::vector<OptionalDataRange>             data_ranges_;
 
     size_t num_variables_ = 0;
 };

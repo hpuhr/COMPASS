@@ -394,7 +394,7 @@ void JoinedPositionBase::common_clearResults()
 
 /**
 */
-void JoinedPositionBase::common_accumulateSingleResult(const PositionBase& single_result,
+void JoinedPositionBase::common_accumulateSingleResult(unsigned int utn, const PositionBase& single_result,
                                                        bool last)
 {
     num_pos_         += single_result.numPos();
@@ -403,6 +403,12 @@ void JoinedPositionBase::common_accumulateSingleResult(const PositionBase& singl
     num_pos_inside_  += single_result.numPosInside();
     num_passed_      += single_result.numPassed();
     num_failed_      += single_result.numFailed();
+
+    if (single_result.accumulator().max() > 10000)
+    {
+        loginf << "UGAUGAU utn " << utn << " dist max " <<  single_result.accumulator().max()
+               << " count " << single_result.accumulator().numValues();
+    }
 
     accumulator_.join(single_result.accumulator(), last);
 }
@@ -551,11 +557,12 @@ void JoinedPositionProbabilityBase::clearResults_impl()
 
 /**
 */
-void JoinedPositionProbabilityBase::accumulateSingleResult(const std::shared_ptr<Single>& single_result, bool first, bool last)
+void JoinedPositionProbabilityBase::accumulateSingleResult(
+    const std::shared_ptr<Single>& single_result, bool first, bool last)
 {
     std::shared_ptr<SinglePositionProbabilityBase> single = std::static_pointer_cast<SinglePositionProbabilityBase>(single_result);
 
-    common_accumulateSingleResult(*single, last);
+    common_accumulateSingleResult(single->utn(), *single, last);
 }
 
 /**
@@ -633,11 +640,12 @@ void JoinedPositionValueBase::clearResults_impl()
 
 /**
 */
-void JoinedPositionValueBase::accumulateSingleResult(const std::shared_ptr<Single>& single_result, bool first, bool last)
+void JoinedPositionValueBase::accumulateSingleResult(
+    const std::shared_ptr<Single>& single_result, bool first, bool last)
 {
     std::shared_ptr<SinglePositionValueBase> single = std::static_pointer_cast<SinglePositionValueBase>(single_result);
 
-    common_accumulateSingleResult(*single, last); 
+    common_accumulateSingleResult(single->utn(), *single, last);
 }
 
 /**

@@ -47,7 +47,7 @@ void SimpleAssociator::associateNewData()
     unsigned int multiple_associated {0};
     unsigned int single_associated {0};
 
-    for (auto& target_it : reconstructor_.targets_)
+    for (auto& target_it : reconstructor_.targets_container_.targets_)
     {
         if (target_it.second.ds_ids_.size() > 1)
             ++multiple_associated;
@@ -58,7 +58,7 @@ void SimpleAssociator::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
-    loginf << "SimpleAssociator: associateNewData: tracker targets " << reconstructor_.targets_.size()
+    loginf << "SimpleAssociator: associateNewData: tracker targets " << reconstructor_.targets_container_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 
             // create non-tracker utns
@@ -83,7 +83,7 @@ void SimpleAssociator::associateNewData()
     multiple_associated = 0;
     single_associated = 0;
 
-    for (auto& target_it : reconstructor_.targets_)
+    for (auto& target_it : reconstructor_.targets_container_.targets_)
     {
         if (target_it.second.ds_ids_.size() > 1)
             ++multiple_associated;
@@ -91,17 +91,17 @@ void SimpleAssociator::associateNewData()
             ++single_associated;
     }
 
-    checkACADLookup();
+    reconstructor_.targets_container_.checkACADLookup();
 
     if (reconstructor().isCancelled())
         return;
 
-    selfAccociateNewUTNs();
+    selfAssociateNewUTNs();
 
     if (reconstructor().isCancelled())
         return;
 
-    checkACADLookup();
+    reconstructor_.targets_container_.checkACADLookup();
 
     if (reconstructor().isCancelled())
         return;
@@ -113,12 +113,13 @@ void SimpleAssociator::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
-    for (auto& tgt_it : reconstructor().targets_)
+    for (auto& tgt_it : reconstructor().targets_container_.targets_)
         tgt_it.second.created_in_current_slice_ = false;
 
     unassoc_rec_nums_.clear();
 
-    loginf << "SimpleAssociator: associateNewData: after non-tracker targets " << reconstructor_.targets_.size()
+    loginf << "SimpleAssociator: associateNewData: after non-tracker targets "
+           << reconstructor_.targets_container_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 }
 
@@ -205,7 +206,7 @@ boost::optional<bool> SimpleAssociator::checkPositionOffsetAcceptable (
     dbContent::targetReport::ReconstructorInfo& tr,
     unsigned int utn, bool secondary_verified, bool do_debug)
 {
-    auto pos_offs = getPositionOffsetTR(tr, reconstructor().targets_.at(utn), do_debug, {});
+    auto pos_offs = getPositionOffsetTR(tr, reconstructor().targets_container_.targets_.at(utn), do_debug, {});
     if (!pos_offs.has_value())
         return false;
 

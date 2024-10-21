@@ -70,6 +70,7 @@ public:
 
     // registered
     bool reset_date_between_files_ {true};
+    bool ignore_time_jumps_{false};
     bool debug_jasterix_;
     std::string current_file_framing_;
 
@@ -97,12 +98,13 @@ public:
 
     bool override_tod_active_{false};
 
-    bool ignore_time_jumps_{false};
     bool network_ignore_future_ts_ {false};
 
     bool filter_tod_active_{false};
     bool filter_position_active_{false};
     bool filter_modec_active_{false};
+
+    bool obfuscate_secondary_info_{false};
 };
 
 /**

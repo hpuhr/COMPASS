@@ -23,6 +23,8 @@
 
 #include <QColor>
 
+#include <boost/optional.hpp>
+
 /**
  * A raw histogram bin.
  */
@@ -117,14 +119,19 @@ public:
 
     std::vector<std::string> labels() const;
 
+    void setUseLogScale(bool ok);
+    const boost::optional<bool>& useLogScale() const;
+
     bool fromJSON(const nlohmann::json& data);
     nlohmann::json toJSON() const;
 
     static const std::string TagDataSeries;
+    static const std::string TagLogScale;
     static const std::string TagHistogram;
     static const std::string TagName;
     static const std::string TagColor;
 
 private:
     std::vector<DataSeries> data_series_;
+    boost::optional<bool>   log_scale_;
 };

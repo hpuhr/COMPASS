@@ -41,6 +41,56 @@ class ReconstructorTask : public Task, public Configurable
 {
     Q_OBJECT
 
+public:
+    struct DebugSettings
+    {
+        bool debug_ {false};
+
+        std::set<unsigned int> debug_utns_;
+        std::set<unsigned long> debug_rec_nums_;
+
+        boost::posix_time::ptime debug_timestamp_min_;
+        boost::posix_time::ptime debug_timestamp_max_;
+
+        bool debug_accuracy_estimation_ {false};
+        bool debug_bias_correction_ {false};
+        bool debug_geo_altitude_correction_ {false};
+
+        nlohmann::json deep_debug_accuracy_estimation_; // ds type -> bool
+        nlohmann::json deep_debug_accuracy_estimation_write_wp_; // ds type -> bool
+
+        bool debug_reference_calculation_ {false};
+        bool debug_kalman_chains_ {false};
+        bool debug_write_reconstruction_viewpoints_ {false};
+
+        bool debugUTN(unsigned int utn) { return debug_utns_.count(utn); }
+        bool debugRecNum(unsigned long rec_num) { return debug_rec_nums_.count(rec_num); }
+
+        bool deepDebugAccuracyEstimation(const std::string& ds_type)
+        {
+            if (!deep_debug_accuracy_estimation_.contains(ds_type))
+                return false;
+
+            return deep_debug_accuracy_estimation_[ds_type];
+        }
+        void deepDebugAccuracyEstimation(const std::string& ds_type, bool value)
+        {
+            deep_debug_accuracy_estimation_[ds_type] = value;
+        }
+
+        bool deepDebugAccuracyEstimationWriteVP(const std::string& ds_type)
+        {
+            if (!deep_debug_accuracy_estimation_write_wp_.contains(ds_type))
+                return false;
+
+            return deep_debug_accuracy_estimation_write_wp_[ds_type];
+        }
+        void deepDebugAccuracyEstimationWriteVP(const std::string& ds_type, bool value)
+        {
+            deep_debug_accuracy_estimation_write_wp_[ds_type] = value;
+        }
+    };
+
   public slots:
     void dialogRunSlot();
     void dialogCancelSlot();
@@ -88,26 +138,6 @@ class ReconstructorTask : public Task, public Configurable
 
     std::set<unsigned int> disabledDataSources() const;
 
-    bool debug() const;
-    void debug(bool value);
-
-    const std::set<unsigned int>& debugUTNs() const;
-    void debugUTNs(const std::set<unsigned int>& utns);
-    bool debugUTN(unsigned int utn);
-
-    const std::set<unsigned long>& debugRecNums() const;
-    void debugRecNums(const std::set<unsigned long>& rec_nums);
-    bool debugRecNum(unsigned long rec_num);
-
-    const boost::posix_time::ptime& debugTimestampMin() const;
-    void debugTimestampMin(const boost::posix_time::ptime& ts);
-
-    const boost::posix_time::ptime& debugTimestampMax() const;
-    void debugTimestampMax(const boost::posix_time::ptime& ts);
-
-    bool debugAccuracyEstimation() const;
-    void debugAccuracyEstimation(bool value);
-
     bool useDStype(const std::string& ds_type) const;
     void useDSType(const std::string& ds_type, bool value);
     bool useDataSource(unsigned int ds_id) const;
@@ -119,6 +149,7 @@ class ReconstructorTask : public Task, public Configurable
     std::map<unsigned int, std::set<unsigned int>> unusedDSIDLines() const;
 
     ReconstructorBase::DataSlice& processingSlice();
+    const ReconstructorBase::DataSlice& processingSlice() const;
 
     ViewPointGenVP* getDebugViewpoint(const std::string& name, const std::string& type, bool* created = nullptr) const;
     ViewPointGenVP* getDebugViewpointNoData(const std::string& name, const std::string& type); // w/o sur data
@@ -126,7 +157,12 @@ class ReconstructorTask : public Task, public Configurable
     ViewPointGenAnnotation* getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const;
     void saveDebugViewPoints();
 
-  protected:
+    bool skipReferenceDataWriting() const;
+    void skipReferenceDataWriting(bool newSkip_reference_data_writing);
+
+    DebugSettings& debugSettings() { return debug_settings_; }
+
+protected:
     std::string current_reconstructor_str_;
 
     nlohmann::json use_dstypes_; // dstype -> bool
@@ -152,14 +188,7 @@ class ReconstructorTask : public Task, public Configurable
     std::unique_ptr<ReconstructorBase::DataSlice> processing_slice_;
     std::unique_ptr<ReconstructorBase::DataSlice> writing_slice_;
 
-    bool debug_ {false};
-    std::set<unsigned int> debug_utns_;
-    std::set<unsigned long> debug_rec_nums_;
-
-    boost::posix_time::ptime debug_timestamp_min_;
-    boost::posix_time::ptime debug_timestamp_max_;
-
-    bool debug_accuracy_estimation_ {false};
+    DebugSettings debug_settings_;
 
     std::future<void> delcalcref_future_;
     std::future<void> deltgts_future_;
@@ -167,6 +196,8 @@ class ReconstructorTask : public Task, public Configurable
     std::future<void> process_future_;
     bool processing_data_slice_ {false};
     bool cancelled_ {false};
+
+    bool skip_reference_data_writing_ {false};
 
     mutable std::map<std::pair<std::string,std::string>, std::unique_ptr<ViewPointGenVP>> debug_viewpoints_;
 
