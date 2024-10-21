@@ -95,13 +95,6 @@ EvaluationResultsGeneratorWidget::EvaluationResultsGeneratorWidget(
     connect(grid_num_cells_y_box_, QOverload<int>::of(&QSpinBox::valueChanged), [ = ] (int v) { this->eval_settings_.grid_num_cells_y = v; });
     layout->addRow("#Grid Cells Y", grid_num_cells_y_box_);
 
-    grid_pix_per_cell_box_ = new QSpinBox;
-    grid_pix_per_cell_box_->setMinimum(1);
-    grid_pix_per_cell_box_->setMaximum(10);
-    grid_pix_per_cell_box_->setValue(eval_settings_.grid_pixels_per_cell);
-    connect(grid_pix_per_cell_box_, QOverload<int>::of(&QSpinBox::valueChanged), [ = ] (int v) { this->eval_settings_.grid_pixels_per_cell = v; });
-    layout->addRow("#Pixels Per Grid Cell", grid_pix_per_cell_box_);
-
     setContentsMargins(0, 0, 0, 0);
 
     main_layout->addLayout(layout);
@@ -122,7 +115,6 @@ void EvaluationResultsGeneratorWidget::updateFromSettings()
 
     grid_num_cells_x_box_->setValue(eval_settings_.grid_num_cells_x);
     grid_num_cells_y_box_->setValue(eval_settings_.grid_num_cells_y);
-    grid_pix_per_cell_box_->setValue(eval_settings_.grid_pixels_per_cell);
 }
 
 void EvaluationResultsGeneratorWidget::toggleSplitResultsByMOPSSlot()

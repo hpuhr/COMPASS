@@ -66,6 +66,18 @@ struct RasterReference
                  dy };
     }
 
+    RasterReference subsampled(int samples) const
+    {
+        RasterReference r = *this;
+        if (samples <= 1)
+            return r;
+        
+        r.img_pixel_size_x /= samples;
+        r.img_pixel_size_y /= samples;
+
+        return r;
+    }
+
     bool fromJSON(const nlohmann::json& json_ref)
     {
         *this = {};

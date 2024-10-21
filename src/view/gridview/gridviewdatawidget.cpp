@@ -391,7 +391,6 @@ void GridViewDataWidget::updateRendering()
     const auto& settings = view_->settings();
 
     Grid2DRenderSettings render_settings;
-    render_settings.pixels_per_cell = settings.render_pixels_per_cell;
     render_settings.color_map.create(QColor(settings.render_color_min.c_str()), 
                                      QColor(settings.render_color_max.c_str()),
                                      settings.render_color_num_steps);
@@ -403,6 +402,7 @@ void GridViewDataWidget::updateRendering()
     grid_rendering_ = rendering.first;
     grid_roi_       = rendering.second.getROI(grid_rendering_.width(), grid_rendering_.height());
     grid_north_up_  = rendering.second.is_north_up;
+    ref_            = rendering.second;
 }
 
 /**
@@ -504,4 +504,11 @@ void GridViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     // };
 
     //@TODO
+}
+
+/**
+*/
+boost::optional<std::pair<QImage, RasterReference>> GridViewDataWidget::currentGeoImage() const
+{
+    return std::make_pair(grid_rendering_, ref_);
 }

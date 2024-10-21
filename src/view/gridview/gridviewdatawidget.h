@@ -73,6 +73,8 @@ public:
 
     const GridView* getView() const { return view_; }
 
+    boost::optional<std::pair<QImage, RasterReference>> currentGeoImage() const;
+
 public slots:
     void rectangleSelectedSlot(QPointF p1, QPointF p2);
 
@@ -117,6 +119,7 @@ private:
     QImage                  grid_rendering_;
     QRectF                  grid_roi_;
     bool                    grid_north_up_;
+    RasterReference         ref_;
 
     Grid2DLayers grid_layers_;
     std::string  x_axis_name_;

@@ -32,7 +32,6 @@
 GridView::Settings::Settings() 
 :   value_type            (grid2d::ValueType::ValueTypeCount)
 ,   grid_resolution       (50       )
-,   render_pixels_per_cell(10       )
 ,   render_color_min      ("#00FF00")
 ,   render_color_max      ("#FF0000")
 ,   render_color_num_steps(10       )
@@ -135,6 +134,14 @@ GridViewDataWidget* GridView::getDataWidget()
 
 /**
 */
+const GridViewDataWidget* GridView::getDataWidget() const
+{
+    assert (widget_);
+    return widget_->getViewDataWidget();
+}
+
+/**
+*/
 dbContent::VariableSet GridView::getBaseSet(const std::string& dbcontent_name)
 {
     return dbContent::VariableSet();
@@ -188,19 +195,6 @@ void GridView::setGridResolution(unsigned int n, bool notify_changes)
         return;
 
     setParameter(settings_.grid_resolution, n);
-
-    if (notify_changes)
-        notifyRefreshNeeded();
-}
-
-/**
-*/
-void GridView::setPixelsPerCell(unsigned int n, bool notify_changes)
-{
-    if (settings_.render_pixels_per_cell == n)
-        return;
-
-    setParameter(settings_.render_pixels_per_cell, n);
 
     if (notify_changes)
         notifyRefreshNeeded();

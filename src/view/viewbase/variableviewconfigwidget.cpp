@@ -177,6 +177,13 @@ void VariableViewConfigWidget::updateSelectedVariables(size_t idx)
 
 /**
 */
+const dbContent::VariableSelectionWidget* VariableViewConfigWidget::variableSelection(size_t idx) const
+{
+    return var_selection_widgets_.at(idx);
+}
+
+/**
+*/
 void VariableViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
 {
     //variable related

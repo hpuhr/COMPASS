@@ -26,6 +26,9 @@ class QCheckBox;
 class QLineEdit;
 class QComboBox;
 class QSpinBox;
+class QPushButton;
+class QToolButton;
+class QDialog;
 
 /**
  * @brief Widget with configuration elements for a ScatterPlotView
@@ -41,15 +44,21 @@ public:
 protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
+    void attachExportMenu();
+
     void valueTypeChanged();
     void gridResolutionChanged();
     void colorStepsChanged();
 
     void updateConfig();
 
+    void exportToGeographicView();
+    void exportToGeoTiff();
+
     GridView* view_ = nullptr;
 
-    QComboBox* value_type_combo_    = nullptr;
-    QSpinBox*  grid_resolution_box_ = nullptr;
-    QSpinBox*  color_steps_box_     = nullptr;
+    QComboBox*   value_type_combo_    = nullptr;
+    QSpinBox*    grid_resolution_box_ = nullptr;
+    QSpinBox*    color_steps_box_     = nullptr;
+    QPushButton* export_button_       = nullptr;
 };

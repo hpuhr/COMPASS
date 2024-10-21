@@ -58,6 +58,8 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
     MetaVariable& selectedMetaVariable() const;
     void selectedMetaVariable(MetaVariable& variable);
 
+    std::pair<std::string, std::string> selectionAsString() const;
+
     bool showMetaVariables() const;
     void showMetaVariables(bool show_meta_variables);
 

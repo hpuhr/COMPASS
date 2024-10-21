@@ -33,14 +33,13 @@ public:
     {
         Settings();
 
-        int               value_type;
+        int          value_type;
 
-        unsigned int      grid_resolution;
+        unsigned int grid_resolution;
 
-        unsigned int      render_pixels_per_cell;
-        std::string       render_color_min;
-        std::string       render_color_max;
-        unsigned int      render_color_num_steps;
+        std::string  render_color_min;
+        std::string  render_color_max;
+        unsigned int render_color_num_steps;
     };
 
     enum class Variable
@@ -70,6 +69,8 @@ public:
 
     virtual bool canShowAnnotations() const override final { return true; }
     virtual std::set<std::string> acceptedAnnotationFeatureTypes() const override;
+
+    const GridViewDataWidget* getDataWidget() const;
 
     const Settings& settings() const { return settings_; }
 

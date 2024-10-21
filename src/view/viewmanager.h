@@ -160,6 +160,20 @@ class ViewManager : public QObject, public Configurable
     bool automaticReloadEnabled() const;
     bool automaticRedrawEnabled() const;
 
+    template<class T>
+    std::vector<T*> viewsOfType()
+    {
+        std::vector<T*> views;
+        for (const auto& v : views_)
+        {
+            T* vt = dynamic_cast<T*>(v.second);
+            if (vt != nullptr)
+                views.push_back(vt);
+        }
+
+        return views;
+    }
+
 protected:
     virtual void checkSubConfigurables();
 

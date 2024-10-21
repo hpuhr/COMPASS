@@ -1417,9 +1417,8 @@ void SimpleReferenceCalculator::createAnnotations(ViewPointGenAnnotation* annota
                 grid.addToLayers(layers, "min accuracy", grid2d::ValueType::ValueTypeMax);
 
                 Grid2DRenderSettings rsettings;
-                rsettings.pixels_per_cell = 10;
-                rsettings.min_value       = 0.0;
-                rsettings.max_value       = 10.0;
+                rsettings.min_value = 0.0;
+                rsettings.max_value = 10.0;
 
                 rsettings.color_map.create(ColorMap::ColorScale::Green2Red, 10);
                 
