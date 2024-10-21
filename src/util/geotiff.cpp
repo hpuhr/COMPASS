@@ -4,6 +4,7 @@
 #include "rasterreference.h"
 
 #include "logger.h"
+#include "files.h"
 
 #include <cassert>
 
@@ -226,6 +227,47 @@ bool GeoTIFFWriter::writeGeoTIFF(const std::string& fn,
     {
         GDALClose(dataset);
     }
+
+    return true;
+}
+
+/**
+*/
+bool GeoTIFFWriter::warpGeoTIFF(const std::string& fn,
+                                const std::string& fn_out,
+                                const std::string& warp_to_srs)
+{
+    auto dataset = GDALOpen(fn.c_str(), GDALAccess::GA_ReadOnly);
+    if (!dataset)
+        return false;
+
+    loginf << "GeoTIFFWriter: warpGeoTIFF: fn = " << fn;
+    loginf << "GeoTIFFWriter: warpGeoTIFF: fn_out = " << fn_out;
+    loginf << "GeoTIFFWriter: warpGeoTIFF: warping to " << warp_to_srs << "...";
+
+    //GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
+
+    auto dataset_warped = GDALAutoCreateWarpedVRT(dataset, 
+                                                    GDALGetProjectionRef(dataset), 
+                                                    warp_to_srs.c_str(), 
+                                                    GDALResampleAlg::GRA_NearestNeighbour,
+                                                    0.001,
+                                                    0);
+    if (!dataset_warped)
+        return false;
+
+    //create a copy of the warped system using gtiff driver (not sure if this intermdiate step is needed)
+    auto gtiff_driver  = GDALGetDriverByName("GTiff");
+    auto dataset_layer = GDALCreateCopy(gtiff_driver, fn_out.c_str(), dataset_warped, 0, NULL, NULL, NULL);
+
+    //close all datasets and delete unwarped file from (virtual) mem
+    GDALClose(dataset_warped);
+    GDALClose(dataset);
+    GDALClose(dataset_layer);
+
+    //GDALDestroyWarpOptions(psWarpOptions);
+
+    loginf << "GeoTIFFWriter: warpGeoTIFF: warped";
 
     return true;
 }

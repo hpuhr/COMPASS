@@ -17,4 +17,7 @@ public:
                              const RasterReference& ref,
                              size_t subsampling = 1,
                              const std::string& warp_to_srs = "");
+    static bool warpGeoTIFF(const std::string& fn,
+                            const std::string& fn_out,
+                            const std::string& warp_to_srs);
 };
