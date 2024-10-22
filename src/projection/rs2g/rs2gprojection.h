@@ -39,8 +39,11 @@ class RS2GProjection : public Projection
     virtual void clearCoordinateSystems() override;
 
     virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
-                              bool has_baro_altitude, double baro_altitude_ft, double& latitude,
-                              double& longitude) override;
+                              bool has_baro_altitude, double baro_altitude_ft,
+                              double& latitude_deg, double& longitude_deg) override;
+
+    bool wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
+                               double& azimuth_deg, double& ground_range_m);
 
   protected:
     std::map<unsigned int, std::unique_ptr<RS2GCoordinateSystem>> coordinate_systems_;

@@ -64,8 +64,45 @@ void RS2GProjection::clearCoordinateSystems()
 }
 
 bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
-                                  bool has_baro_altitude, double baro_altitude_ft, double& latitude,
-                                  double& longitude)
+                                  bool has_baro_altitude, double baro_altitude_ft, double& latitude_deg,
+                                  double& longitude_deg)
+{
+    if (!hasCoordinateSystem(id))
+        logerr << "RS2GProjection: polarToWGS84: no coord system for " << id;
+
+    assert(hasCoordinateSystem(id));
+
+    bool ret {false};
+
+    //Eigen::Vector3d geodetic_pos;
+
+    double ecef_x, ecef_y, ecef_z;
+
+    // logdbg << "RS2GProjection: polarToWGS84: local x " << x1 << " y " << y1 << " z " << z1;
+
+    ret = coordinate_systems_.at(id)->calculateRadSlt2Geocentric(
+        azimuth_rad, slant_range_m, has_baro_altitude, baro_altitude_ft * FT2M, ecef_x, ecef_y, ecef_z);
+
+    if (ret)
+    {
+        logdbg << "RS2GProjection: polarToWGS84: geoc x " << ecef_x << " y " << ecef_y << " z "
+               << ecef_z;
+
+        double height_m;
+
+        ret = RS2GCoordinateSystem::geocentric2Geodesic(ecef_x, ecef_y, ecef_z,
+                                                        latitude_deg, longitude_deg, height_m);
+
+
+        logdbg << "RS2GProjection: polarToWGS84: geod lat " << latitude_deg << " lon " << longitude_deg;
+        // what to do with altitude?
+    }
+
+    return ret;
+}
+
+bool RS2GProjection::wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
+                           double& azimuth_deg, double& ground_range_m)
 {
     if (!hasCoordinateSystem(id))
         logerr << "RS2GProjection: polarToWGS84: no coord system for " << id;
@@ -76,25 +113,9 @@ bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double sl
 
     Eigen::Vector3d geodetic_pos;
 
-    // logdbg << "RS2GProjection: polarToWGS84: local x " << x1 << " y " << y1 << " z " << z1;
+    geodetic_pos[0] = latitude_deg;
+    geodetic_pos[1] = longitude_deg;
+    geodetic_pos[2] = 0;
 
-    ret = coordinate_systems_.at(id)->calculateRadSlt2Geocentric(
-        azimuth_rad, slant_range_m, has_baro_altitude, baro_altitude_ft * FT2M, geodetic_pos);
-
-    if (ret)
-    {
-        logdbg << "RS2GProjection: polarToWGS84: geoc x " << geodetic_pos[0] << " y " << geodetic_pos[1] << " z "
-               << geodetic_pos[2];
-
-        ret = RS2GCoordinateSystem::geocentric2Geodesic(geodetic_pos);
-
-        latitude = geodetic_pos[0];
-        longitude = geodetic_pos[1];
-
-        logdbg << "RS2GProjection: polarToWGS84: geod x " << geodetic_pos[0] << " y " << geodetic_pos[1];
-        // what to do with altitude?
-    }
-
-    return ret;
+    // geodesic 2 geocentric
 }
-

@@ -112,10 +112,10 @@ double RS2GCoordinateSystem::rs2gAzimuth(double x_m, double y_m)
 
 void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m,
                                                 bool has_altitude, double altitude_m,
-                                                Eigen::Vector3d& local)
+                                                double& local_x, double& local_y, double& local_z)
 {
-    logdbg << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1]
-           << " z: " << local[2];
+    // logdbg << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1]
+    //        << " z: " << local[2];
 
     double elevation_m {0};
 
@@ -133,54 +133,60 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
     //        elevation << " azimuth: " << azimuth;
     //    }
 
-    local[0] = rho_m * cos(elev_angle_rad) * sin(azimuth_rad);
-    local[1] = rho_m * cos(elev_angle_rad) * cos(azimuth_rad);
-    local[2] = rho_m * sin(elev_angle_rad);
+    local_x = rho_m * cos(elev_angle_rad) * sin(azimuth_rad);
+    local_y = rho_m * cos(elev_angle_rad) * cos(azimuth_rad);
+    local_z = rho_m * sin(elev_angle_rad);
 
-    logdbg << "radarSlant2LocalCart: out x: " << local[0] << " y: " << local[1]
-           << " z: " << local[2];
+    logdbg << "radarSlant2LocalCart: out x: " << local_x << " y: " << local_y
+           << " z: " << local_z;
 }
 
-void RS2GCoordinateSystem::sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y)
+// void RS2GCoordinateSystem::sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y)
+// {
+//     double H = sqrt(pow(b[0], 2) + pow(b[1], 2) + pow(b[2] + rs2g_ho_ + rs2g_Rto_, 2)) - rs2g_Rto_;
+//     double k = 2 * rs2g_Rto_ / (2 * rs2g_Rto_ + rs2g_ho_ + b[2] + H);
+
+//     *x = k * b[0];
+//     *y = k * b[1];
+// }
+
+void RS2GCoordinateSystem::localCart2Geocentric(double local_x, double local_y, double local_z,
+                                                double& ecef_x, double& ecef_y, double& ecef_z)
 {
-    double H = sqrt(pow(b[0], 2) + pow(b[1], 2) + pow(b[2] + rs2g_ho_ + rs2g_Rto_, 2)) - rs2g_Rto_;
-    double k = 2 * rs2g_Rto_ / (2 * rs2g_Rto_ + rs2g_ho_ + b[2] + H);
+    logdbg << "localCart2Geocentric: in x: " << local_x << " y:" << local_y << " z:" << local_z;
 
-    *x = k * b[0];
-    *y = k * b[1];
-}
-
-void RS2GCoordinateSystem::localCart2Geocentric(Eigen::Vector3d& input)
-{
-    logdbg << "localCart2Geocentric: in x: " << input[0] << " y:" << input[1] << " z:" << input[2];
-
-    Eigen::Vector3d Xinput(3);
+    Eigen::Vector3d local_pos(local_x, local_y, local_z);
 
     // local cartesian to geocentric
     // mult(T_Ai_, input, Xinput); // Xinput = Transposed(Ai_) * input
-    Xinput = rs2g_T_Ai_ * input;
+    Eigen::Vector3d Xinput = rs2g_T_Ai_ * local_pos;
 
     // add(bi_, Xinput, input); // Xinput = Xinput + bi_
-    input = Xinput + rs2g_bi_;
+    Xinput += rs2g_bi_;
 
-    logdbg << "localCart2Geocentric: out x: " << input[0] << " y:" << input[1] << " z:" << input[2];
+    ecef_x = Xinput[0];
+    ecef_y = Xinput[1];
+    ecef_z = Xinput[2];
+
+    logdbg << "localCart2Geocentric: out x: " << ecef_x << " y:" << ecef_y << " z:" << ecef_z;
 }
 
 bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
                                                       bool has_altitude, double altitude_m,
-                                                      Eigen::Vector3d& geoc_pos)
+                                                      double& ecef_x, double& ecef_y, double& ecef_z)
 {
     Eigen::Vector3d local_pos(3);
 
     // the coordinates are in radar slant coordinates
 
     // radar slant to local cartesian
-    radarSlant2LocalCart(azimuth_rad, slant_range_m, has_altitude, altitude_m, local_pos);
+    double local_x, local_y, local_z;
+
+    radarSlant2LocalCart(azimuth_rad, slant_range_m, has_altitude, altitude_m, local_x, local_y, local_z);
 
     // local cartesian to geocentric
-    localCart2Geocentric(local_pos);
 
-    geoc_pos = local_pos;
+    localCart2Geocentric(local_x, local_y, local_z, ecef_x, ecef_y, ecef_z);
 
     // geocentric to geodesic
     // Geocentric2Geodesic(pos);
@@ -189,22 +195,18 @@ bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double
     return true;
 }
 
-void RS2GCoordinateSystem::rs2gGeodesic2Geocentric(Eigen::Vector3d& input)
+void RS2GCoordinateSystem::rs2gGeodesic2Geocentric(double lat_rad, double lon_rad, double height_m,
+                                                   double& ecef_x, double& ecef_y, double& ecef_z)
 {
-    double v = EE_A / sqrt(1 - EE_E2 * pow(sin(input[0]), 2));
+    double v = EE_A / sqrt(1 - EE_E2 * pow(sin(lat_rad), 2));
 
-    double x = (v + input[2]) * cos(input[0]) * cos(input[1]);
-    double y = (v + input[2]) * cos(input[0]) * sin(input[1]);
-    double z = (v * (1 - EE_E2) + input[2]) * sin(input[0]);
-
-    input[0] = x;
-    input[1] = y;
-    input[2] = z;
+    ecef_x = (v + height_m) * cos(lat_rad) * cos(lon_rad);
+    ecef_y = (v + height_m) * cos(lat_rad) * sin(lon_rad);
+    ecef_z = (v * (1 - EE_E2) + height_m) * sin(lat_rad);
 }
 
 // as in R matrix
-void RS2GCoordinateSystem::rs2gFillMat(Eigen::Matrix3d& A, double lat_rad,
-                                       double lon_rad)  //, Radar& radar);
+void RS2GCoordinateSystem::rs2gFillMat(double lat_rad, double lon_rad, Eigen::Matrix3d& A)
 {
     A(0, 0) = -sin(lon_rad);
     A(0, 1) = cos(lon_rad);
@@ -217,22 +219,19 @@ void RS2GCoordinateSystem::rs2gFillMat(Eigen::Matrix3d& A, double lat_rad,
     A(2, 2) = sin(lat_rad);
 }
 
-void RS2GCoordinateSystem::rs2gFillVec(Eigen::Vector3d& b, double lat, double lon, double height)
+void RS2GCoordinateSystem::rs2gFillVec(double lat_rad, double lon_rad, double height_m, Eigen::Vector3d& b)
 {
-    b[0] = lat;
-    b[1] = lon;
-    b[2] = height;
-
-    rs2gGeodesic2Geocentric(b);
+    rs2gGeodesic2Geocentric(lat_rad, lon_rad, height_m, b[0], b[1], b[2]);
 }
 
-bool RS2GCoordinateSystem::geocentric2Geodesic(Eigen::Vector3d& input)
+bool RS2GCoordinateSystem::geocentric2Geodesic(double ecef_x, double ecef_y, double ecef_z,
+                                               double& lat_deg, double& lon_deg, double& height_m)
 {
-    double d_xy = sqrt(pow(input[0], 2) + pow(input[1], 2));
+    double d_xy = sqrt(pow(ecef_x, 2) + pow(ecef_y, 2));
 
-    double G = atan2(input[1], input[0]);
+    double G = atan2(ecef_y, ecef_x);
 
-    double L = atan2(input[2], (d_xy * (1 - EE_A * EE_E2 / sqrt(pow(d_xy, 2) + pow(input[2], 2)))));
+    double L = atan2(ecef_z, (d_xy * (1 - EE_A * EE_E2 / sqrt(pow(d_xy, 2) + pow(ecef_z, 2)))));
 
     double eta = EE_A / sqrt(1 - EE_E2 * pow(sin(L), 2));
     double H = d_xy / cos(L) - eta;
@@ -246,16 +245,49 @@ bool RS2GCoordinateSystem::geocentric2Geodesic(Eigen::Vector3d& input)
     while (fabs(L - Li) > PRECISION_GEODESIC)
     {
         Li = L;
-        L = atan2(input[2] * (1 + H / eta), (d_xy * (1 - EE_E2 + H / eta)));
+        L = atan2(ecef_z * (1 + H / eta), (d_xy * (1 - EE_E2 + H / eta)));
 
         eta = EE_A / sqrt(1 - EE_E2 * pow(sin(L), 2));
         H = d_xy / cos(L) - eta;
     }
 
-    input[0] = L * RAD2DEG;
-    input[1] = G * RAD2DEG;
-    input[2] = H;
+    lat_deg = L * RAD2DEG;
+    lon_deg = G * RAD2DEG;
+    height_m = H;
 
-    return !std::isnan(input[0]) && !std::isnan(input[1]);
+    return !std::isnan(lat_deg) && !std::isnan(lon_deg);
 }
+
+// bool RS2GCoordinateSystem::geodesic2Geocentric(Eigen::Vector3d& input)
+// {
+    // double d_xy = sqrt(pow(input[0], 2) + pow(input[1], 2));
+
+    // double G = atan2(input[1], input[0]);
+
+    // double L = atan2(input[2], (d_xy * (1 - EE_A * EE_E2 / sqrt(pow(d_xy, 2) + pow(input[2], 2)))));
+
+    // double eta = EE_A / sqrt(1 - EE_E2 * pow(sin(L), 2));
+    // double H = d_xy / cos(L) - eta;
+
+    // double Li;
+    // if (L >= 0.0)
+    //     Li = -0.1;
+    // else
+    //     Li = 0.1;
+
+    // while (fabs(L - Li) > PRECISION_GEODESIC)
+    // {
+    //     Li = L;
+    //     L = atan2(input[2] * (1 + H / eta), (d_xy * (1 - EE_E2 + H / eta)));
+
+    //     eta = EE_A / sqrt(1 - EE_E2 * pow(sin(L), 2));
+    //     H = d_xy / cos(L) - eta;
+    // }
+
+    // input[0] = L * RAD2DEG;
+    // input[1] = G * RAD2DEG;
+    // input[2] = H;
+
+    // return !std::isnan(input[0]) && !std::isnan(input[1]);
+//}
 

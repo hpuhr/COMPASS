@@ -28,9 +28,12 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
                          double altitude_m);
 
     bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
-                                    bool has_altitude, double altitude_m, Eigen::Vector3d& geoc_pos);
+                                    bool has_altitude, double altitude_m,
+                                    double& ecef_x, double& ecef_y, double& ecef_z);
 
-    static bool geocentric2Geodesic(Eigen::Vector3d& input);
+    static bool geocentric2Geodesic(double ecef_x, double ecef_y, double ecef_z,
+                                    double& lat_deg, double& lon_deg, double& height_m);
+    //static bool geodesic2Geocentric(Eigen::Vector3d& input);
 
   protected:
     Eigen::Matrix3d rs2g_A_;
@@ -49,15 +52,18 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
 
     void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
                               bool has_altitude, double altitude_m,
-                              Eigen::Vector3d& local);
-    void sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y);
-    void localCart2Geocentric(Eigen::Vector3d& input);
+                              double& local_x, double& local_y, double& local_z);
+    //void sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y);
 
-    static void rs2gGeodesic2Geocentric(Eigen::Vector3d& input);
+    void localCart2Geocentric(double local_x, double local_y, double local_z,
+        double& ecef_x, double& ecef_y, double& ecef_z);
 
-    static void rs2gFillMat(Eigen::Matrix3d& A, double lat, double lon);
+    static void rs2gGeodesic2Geocentric(double lat_rad, double lon_rad, double height_m,
+                                        double& ecef_x, double& ecef_y, double& ecef_z);
 
-    static void rs2gFillVec(Eigen::Vector3d& b, double lat, double lon, double height);
+    static void rs2gFillMat(double lat_rad, double lon_rad, Eigen::Matrix3d& A);
+
+    static void rs2gFillVec(double lat_rad, double lon_rad, double height_m, Eigen::Vector3d& b);
 };
 
 
