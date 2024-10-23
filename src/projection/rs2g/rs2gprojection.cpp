@@ -64,8 +64,8 @@ void RS2GProjection::clearCoordinateSystems()
 }
 
 bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
-                                  bool has_baro_altitude, double baro_altitude_ft, double& latitude_deg,
-                                  double& longitude_deg)
+                                  bool has_baro_altitude, double baro_altitude_ft,
+                                  double& latitude_deg, double& longitude_deg)
 {
     if (!hasCoordinateSystem(id))
         logerr << "RS2GProjection: polarToWGS84: no coord system for " << id;
@@ -90,8 +90,8 @@ bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double sl
 
         double height_m;
 
-        ret = RS2GCoordinateSystem::geocentric2Geodesic(ecef_x, ecef_y, ecef_z,
-                                                        latitude_deg, longitude_deg, height_m);
+        ret = coordinate_systems_.at(id)->geocentric2Geodesic(ecef_x, ecef_y, ecef_z,
+                                                              latitude_deg, longitude_deg, height_m);
 
 
         logdbg << "RS2GProjection: polarToWGS84: geod lat " << latitude_deg << " lon " << longitude_deg;
@@ -102,20 +102,30 @@ bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double sl
 }
 
 bool RS2GProjection::wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
-                           double& azimuth_deg, double& ground_range_m)
+                                           double& azimuth_deg, double& ground_range_m)
 {
     if (!hasCoordinateSystem(id))
         logerr << "RS2GProjection: polarToWGS84: no coord system for " << id;
 
     assert(hasCoordinateSystem(id));
 
-    bool ret {false};
-
-    Eigen::Vector3d geodetic_pos;
-
-    geodetic_pos[0] = latitude_deg;
-    geodetic_pos[1] = longitude_deg;
-    geodetic_pos[2] = 0;
-
     // geodesic 2 geocentric
+    double ecef_x, ecef_y, ecef_z;
+
+    coordinate_systems_.at(id)->geodesic2Geocentric(latitude_deg * DEG2RAD, longitude_deg * DEG2RAD, 0.0,
+                                                    ecef_x, ecef_y, ecef_z);
+
+    double local_x, local_y, local_z;
+
+    coordinate_systems_.at(id)->geocentric2LocalCart(ecef_x, ecef_y, ecef_z,
+                                                     local_x, local_y, local_z);
+
+    double azimuth_rad, slant_range_m, altitude_m;
+
+    coordinate_systems_.at(id)->localCart2RadarSlant(local_x, local_y, local_z,
+                                                     azimuth_rad, slant_range_m, ground_range_m, altitude_m);
+
+    azimuth_deg = azimuth_rad * RAD2DEG;
+
+    return true;
 }

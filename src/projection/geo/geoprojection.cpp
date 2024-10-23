@@ -54,16 +54,16 @@ bool GeoProjection::polarToWGS84(unsigned int id, double azimuth_rad, double sla
 
     double x_pos_m, y_pos_m;
     bool ret = coordinate_systems_.at(id)->polarSlantToCartesian(
-        azimuth_rad, slant_range_m, has_baro_altitude, baro_altitude_ft * FT2M, x_pos_m, y_pos_m);
+        azimuth_rad, slant_range_m, has_baro_altitude, baro_altitude_ft * FT2M,
+        x_pos_m, y_pos_m);
 
     if (!ret || std::isnan(x_pos_m) || std::isnan(y_pos_m))
         return false;
 
-    ret =
-        coordinate_systems_.at(id)->cartesian2WGS84(x_pos_m, y_pos_m, latitude_deg, longitude_deg);
+    ret = coordinate_systems_.at(id)->cartesian2WGS84(x_pos_m, y_pos_m,
+                                                      latitude_deg, longitude_deg);
 
-    // TODO altitude
-
+    // TODO altitude?
     return ret;
 }
 

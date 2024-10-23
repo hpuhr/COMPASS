@@ -429,15 +429,6 @@ map<string, unique_ptr<Projection>>& ProjectionManager::projections()
     return projections_;
 }
 
-GeoProjection& ProjectionManager::geoProjection()
-{
-    assert (hasProjection(GEO_NAME));
-    assert (projections_.at(GEO_NAME));
-    assert (dynamic_cast<GeoProjection*> (projections_.at(GEO_NAME).get()));
-    return *dynamic_cast<GeoProjection*> (projections_.at(GEO_NAME).get());
-}
-
-
 unsigned int ProjectionManager::doRadarPlotPositionCalculations (
         map<string, shared_ptr<Buffer>> buffers)
 {

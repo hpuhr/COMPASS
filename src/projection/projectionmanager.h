@@ -60,8 +60,6 @@ public:
 
     std::map<std::string, std::unique_ptr<Projection>>& projections();
 
-    GeoProjection& geoProjection();
-
     // in place calculation, returns transformation errors count
     unsigned int doRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
     // returns transformation errors count, update buffers

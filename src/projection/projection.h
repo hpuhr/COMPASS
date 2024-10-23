@@ -45,6 +45,9 @@ public:
                               bool has_baro_altitude, double baro_altitude_ft, double& latitude,
                               double& longitude) = 0;
 
+    virtual bool wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
+                                       double& azimuth_deg, double& ground_range_m) = 0;
+
     double getGroundRange(unsigned int id, double slant_range_m,
                           bool has_altitude, double altitude_m);
 

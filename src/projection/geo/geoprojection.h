@@ -42,8 +42,8 @@ public:
                               bool has_baro_altitude, double baro_altitude_ft, double& latitude,
                               double& longitude) override;
 
-    bool wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
-                               double& azimuth_deg, double& ground_range_m);
+    virtual bool wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
+                                       double& azimuth_deg, double& ground_range_m) override;
 
 protected:
     std::map<unsigned int, std::unique_ptr<GeoCoordinateSystem>> coordinate_systems_;

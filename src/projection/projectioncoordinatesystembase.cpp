@@ -56,8 +56,8 @@ double ProjectionCoordinateSystemBase::getGroundRange(
 
     if (has_altitude)
         elevation_m = altitude_m;
-    // else
-    //     elevation_m = h_r_;  // the Z value has not been filled so use at least the radar height
+    else
+        elevation_m = h_r_;  // the Z value has not been filled so use at least the radar height
 
     double elev_angle_rad = rs2gElevation(elevation_m, slant_range_m);
 

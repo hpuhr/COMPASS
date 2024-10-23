@@ -31,14 +31,31 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
                                     bool has_altitude, double altitude_m,
                                     double& ecef_x, double& ecef_y, double& ecef_z);
 
-    static bool geocentric2Geodesic(double ecef_x, double ecef_y, double ecef_z,
-                                    double& lat_deg, double& lon_deg, double& height_m);
-    //static bool geodesic2Geocentric(Eigen::Vector3d& input);
+    bool geocentric2Geodesic(double ecef_x, double ecef_y, double ecef_z,
+                             double& lat_deg, double& lon_deg, double& height_m);
+
+    void geodesic2Geocentric(double lat_rad, double lon_rad, double height_m,
+                                    double& ecef_x, double& ecef_y, double& ecef_z);
+
+    void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
+                              bool has_altitude, double altitude_m,
+                              double& local_x, double& local_y, double& local_z);
+
+    void localCart2RadarSlant(double local_x, double local_y, double local_z,
+                              double& azimuth_rad, double& slant_range_m, double& ground_range_m, double& altitude_m);
+
+    //void sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y);
+
+    void localCart2Geocentric(double local_x, double local_y, double local_z,
+                              double& ecef_x, double& ecef_y, double& ecef_z);
+
+    void geocentric2LocalCart(double ecef_x, double ecef_y, double ecef_z,
+                              double& local_x, double& local_y, double& local_z);
 
   protected:
-    Eigen::Matrix3d rs2g_A_;
+    Eigen::Matrix3d rs2g_A_;     // R matrix
 
-    Eigen::Matrix3d rs2g_T_Ai_;  // transposed matrix (depends on radar)
+    Eigen::Matrix3d rs2g_T_Ai_;  // transposed matrix R^T (depends on radar)
     Eigen::Vector3d rs2g_bi_;    // vector (depends on radar)
 
     double rs2g_ho_;             // height of COP
@@ -47,23 +64,15 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
     Eigen::Matrix3d rs2g_A_p0q0_;
     Eigen::Vector3d rs2g_b_p0q0_;
 
-    double rs2gAzimuth(double x_m, double y_m);
+    double azimuth(double x_m, double y_m);
     // calculates elevation angle El using H (altitude of aircraft) and rho (slant range)
 
-    void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
-                              bool has_altitude, double altitude_m,
-                              double& local_x, double& local_y, double& local_z);
-    //void sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y);
 
-    void localCart2Geocentric(double local_x, double local_y, double local_z,
-        double& ecef_x, double& ecef_y, double& ecef_z);
+    void rs2gFillMat(double lat_rad, double lon_rad, Eigen::Matrix3d& A);
 
-    static void rs2gGeodesic2Geocentric(double lat_rad, double lon_rad, double height_m,
-                                        double& ecef_x, double& ecef_y, double& ecef_z);
+    void rs2gFillVec(double lat_rad, double lon_rad, double height_m, Eigen::Vector3d& b);
 
-    static void rs2gFillMat(double lat_rad, double lon_rad, Eigen::Matrix3d& A);
-
-    static void rs2gFillVec(double lat_rad, double lon_rad, double height_m, Eigen::Vector3d& b);
+    Eigen::Vector3d getTVector(double lat_rad, double lon_rad, double height_m);
 };
 
 

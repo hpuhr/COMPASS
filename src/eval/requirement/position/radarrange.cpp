@@ -110,7 +110,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
     ProjectionManager& proj_man = ProjectionManager::instance();
 
-    GeoProjection& projection = proj_man.geoProjection();
+    Projection& projection = proj_man.currentProjection();
 
     if (!projection.radarCoordinateSystemsAdded())
         projection.addAllRadarCoordinateSystems();
