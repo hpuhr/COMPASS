@@ -19,6 +19,8 @@
 #include "util/async.h"
 #include "evaluationmanager.h"
 #include "viewpointgenerator.h"
+#include "projectionmanager.h"
+#include "projection.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
@@ -402,6 +404,10 @@ void ReconstructorTask::run()
     deltgts_future_ = {};
     delassocs_future_ = {};
     process_future_ = {};
+
+    Projection& projection = ProjectionManager::instance().currentProjection();
+    projection.clearCoordinateSystems();
+    projection.addAllRadarCoordinateSystems();
 
     loginf << "ReconstructorTask: run: started";
 

@@ -20,7 +20,7 @@
 #include "evaluationmanager.h"
 #include "logger.h"
 #include "util/number.h"
-#include "geoprojection.h"
+#include "projection.h"
 #include "projectionmanager.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
@@ -113,9 +113,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     Projection& projection = proj_man.currentProjection();
-
-    if (!projection.radarCoordinateSystemsAdded())
-        projection.addAllRadarCoordinateSystems();
+    assert (projection.radarCoordinateSystemsAdded());
 
     double ref_range_m, ref_azm_deg, tst_range_m, tst_azm_deg;
     double azm_deg_diff;
@@ -190,7 +188,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
         }
         ++num_pos_inside;
 
-        ok = projection.wgs842PolarHorizontal(tst_ds_id, ref_pos->latitude_, ref_pos->longitude_, ref_azm_deg, ref_range_m);
+        ok = projection.wgs842PolarHorizontal(tst_ds_id,
+                                              ref_pos->latitude_, ref_pos->longitude_, 0,
+                                              ref_azm_deg, ref_range_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
@@ -203,7 +203,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
             continue;
         }
 
-        ok = projection.wgs842PolarHorizontal(tst_ds_id, tst_pos.latitude_, tst_pos.longitude_, tst_azm_deg, tst_range_m);
+        ok = projection.wgs842PolarHorizontal(tst_ds_id,
+                                              tst_pos.latitude_, tst_pos.longitude_, 0,
+                                              tst_azm_deg, tst_range_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,

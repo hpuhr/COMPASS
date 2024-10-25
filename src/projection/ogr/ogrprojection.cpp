@@ -48,6 +48,16 @@ void OGRProjection::generateSubConfigurable(const std::string& class_id,
 
 void OGRProjection::checkSubConfigurables() {}
 
+std::vector<unsigned int> OGRProjection::ids()
+{
+    std::vector<unsigned int> ids;
+
+    for (auto& coord_sys : coordinate_systems_)
+        ids.push_back(coord_sys.first);
+
+    return ids;
+}
+
 bool OGRProjection::hasCoordinateSystem(unsigned int id) { return coordinate_systems_.count(id); }
 
 void OGRProjection::addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,

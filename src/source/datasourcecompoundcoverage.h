@@ -1,7 +1,6 @@
-#ifndef DATASOURCECOMPOUNDCOVERAGE_H
-#define DATASOURCECOMPOUNDCOVERAGE_H
+#pragma once
 
-#include "ogrcoordinatesystem.h"
+#include "rs2gcoordinatesystem.h"
 
 #include <vector>
 #include <tuple>
@@ -27,9 +26,8 @@ private:
     bool is_finalized_ {false};
 
     std::vector<std::tuple<unsigned int, double, double, double>> range_circles_;
-    std::vector<std::pair<std::unique_ptr<OGRCoordinateSystem>, double>> range_circles_cs_; // cs -> range
+    std::vector<std::pair<std::unique_ptr<RS2GCoordinateSystem>, double>> range_circles_cs_; // cs -> range
 };
 
 }
 
-#endif // DATASOURCECOMPOUNDCOVERAGE_H

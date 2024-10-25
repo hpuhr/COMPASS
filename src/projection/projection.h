@@ -38,15 +38,17 @@ public:
     virtual void addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                                      double altitude_m) = 0;
 
+    virtual std::vector<unsigned int> ids() = 0;
     virtual ProjectionCoordinateSystemBase& coordinateSystem(unsigned int id) = 0;
 
     virtual void clearCoordinateSystems() = 0;
     virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
-                              bool has_baro_altitude, double baro_altitude_ft, double& latitude,
-                              double& longitude) = 0;
+                              bool has_baro_altitude, double baro_altitude_ft, double& latitude_deg,
+                              double& longitude_deg, double& alt_wgs_m) = 0;
 
-    virtual bool wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
-                                       double& azimuth_deg, double& ground_range_m) = 0;
+    virtual bool wgs842PolarHorizontal(unsigned int id,
+                                       double latitude_deg, double longitude_deg, double alt_wgs_m,
+                                       double& azimuth_rad, double& slant_range_m) = 0;
 
     double getGroundRange(unsigned int id, double slant_range_m,
                           bool has_altitude, double altitude_m);

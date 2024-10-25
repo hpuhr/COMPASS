@@ -32,6 +32,8 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
+    virtual std::vector<unsigned int> ids() override;
+
     virtual bool hasCoordinateSystem(unsigned int id) override;
     virtual void addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                                      double altitude_m) override;
@@ -43,7 +45,7 @@ public:
                               double& longitude) override;
 
     virtual bool wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg,
-                                       double& azimuth_deg, double& ground_range_m) override;
+                                       double& azimuth_rad, double& ground_range_m) override;
 
 protected:
     std::map<unsigned int, std::unique_ptr<GeoCoordinateSystem>> coordinate_systems_;

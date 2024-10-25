@@ -44,13 +44,14 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
     void localCart2RadarSlant(double local_x, double local_y, double local_z,
                               double& azimuth_rad, double& slant_range_m, double& ground_range_m, double& altitude_m);
 
-    //void sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y);
-
     void localCart2Geocentric(double local_x, double local_y, double local_z,
                               double& ecef_x, double& ecef_y, double& ecef_z);
 
     void geocentric2LocalCart(double ecef_x, double ecef_y, double ecef_z,
                               double& local_x, double& local_y, double& local_z);
+
+    void geodesic2LocalCart(double lat_rad, double lon_rad, double height_m,
+                            double& local_x, double& local_y, double& local_z);
 
   protected:
     Eigen::Matrix3d rs2g_A_;     // R matrix

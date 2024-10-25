@@ -274,7 +274,7 @@ bool Client::run ()
     try
     {
         COMPASS::instance();
-        ProjectionManager::instance();
+        ProjectionManager::instance().test();
     }
     catch(const std::exception& e)
     {

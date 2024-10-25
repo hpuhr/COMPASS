@@ -1,7 +1,7 @@
 
 include("${CMAKE_CURRENT_LIST_DIR}/rs2g/CMakeLists.txt")
-include("${CMAKE_CURRENT_LIST_DIR}/ogr/CMakeLists.txt")
-include("${CMAKE_CURRENT_LIST_DIR}/geo/CMakeLists.txt")
+#include("${CMAKE_CURRENT_LIST_DIR}/ogr/CMakeLists.txt")
+#include("${CMAKE_CURRENT_LIST_DIR}/geo/CMakeLists.txt")
 
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"

@@ -67,10 +67,12 @@ public:
       doUpdateRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
 
     static const std::string RS2G_NAME;
-    static const std::string OGR_NAME;
-    static const std::string GEO_NAME;
+    //static const std::string OGR_NAME;
+    //static const std::string GEO_NAME;
 
     double geoidHeightM (double latitude_deg, double longitude_deg);
+
+    void test();
 
 protected:
 

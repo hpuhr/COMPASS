@@ -41,6 +41,8 @@
 #include "util/timeconv.h"
 #include "global.h"
 #include "viewpoint.h"
+#include "projectionmanager.h"
+#include "projection.h"
 
 #include "json.hpp"
 
@@ -788,6 +790,10 @@ void EvaluationManager::evaluate()
     assert (initialized_);
     assert (data_loaded_);
     assert (hasCurrentStandard());
+
+    Projection& projection = ProjectionManager::instance().currentProjection();
+    projection.clearCoordinateSystems();
+    projection.addAllRadarCoordinateSystems();
 
     // clean previous
     results_gen_.clear();

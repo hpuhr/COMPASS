@@ -142,11 +142,11 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
 }
 
 void RS2GCoordinateSystem::localCart2RadarSlant(double local_x, double local_y, double local_z,
-                          double& azimuth_deg, double& slant_range_m, double& ground_range_m, double& altitude_m)
+                          double& azimuth_rad, double& slant_range_m, double& ground_range_m, double& altitude_m)
 {
-    slant_range_m = sqrt(local_x*local_x + local_y*local_x + local_z*local_z);
+    slant_range_m = sqrt(local_x*local_x + local_y*local_y + local_z*local_z);
 
-    azimuth_deg = azimuth(local_x, local_y);
+    azimuth_rad = azimuth(local_x, local_y);
 
     ground_range_m = getGroundRange(slant_range_m, true, local_z);
 
@@ -195,6 +195,19 @@ void RS2GCoordinateSystem::geocentric2LocalCart(double ecef_x, double ecef_y, do
     local_z = local_pos[2];
 }
 
+void RS2GCoordinateSystem::geodesic2LocalCart(double lat_rad, double lon_rad, double height_m,
+                        double& local_x, double& local_y, double& local_z)
+{
+    double ecef_x, ecef_y, ecef_z;
+
+    geodesic2Geocentric(lat_rad, lon_rad, height_m,
+                        ecef_x, ecef_y, ecef_z);
+
+    geocentric2LocalCart(ecef_x, ecef_y, ecef_z,
+                         local_x, local_y, local_z);
+
+}
+
 bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
                                                       bool has_altitude, double altitude_m,
                                                       double& ecef_x, double& ecef_y, double& ecef_z)
@@ -207,6 +220,9 @@ bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double
     double local_x, local_y, local_z;
 
     radarSlant2LocalCart(azimuth_rad, slant_range_m, has_altitude, altitude_m, local_x, local_y, local_z);
+
+    logdbg << "RS2GCoordinateSystem: calculateRadSlt2Geocentric: local_x " << local_x
+           << " local_y " << local_y << " local_z " << local_z;
 
     // local cartesian to geocentric
 

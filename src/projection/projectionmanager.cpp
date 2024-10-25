@@ -18,17 +18,17 @@
 #include "projectionmanager.h"
 #include "global.h"
 #include "logger.h"
-#include "ogrprojection.h"
+//#include "ogrprojection.h"
 #include "projectionmanagerwidget.h"
 #include "rs2gprojection.h"
-#include "geoprojection.h"
+//#include "geoprojection.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "datasourcemanager.h"
 #include "fftmanager.h"
 #include "compass.h"
 #include "files.h"
-
+#include "number.h"
 
 //#include "cpl_conv.h" // for CPLMalloc()
 
@@ -41,17 +41,20 @@ using namespace std;
 using namespace Utils;
 
 const string ProjectionManager::RS2G_NAME = "RS2G";
-const string ProjectionManager::OGR_NAME = "OGR";
-const string ProjectionManager::GEO_NAME = "Geo";
+//const string ProjectionManager::OGR_NAME = "OGR";
+//const string ProjectionManager::GEO_NAME = "Geo";
 
 ProjectionManager::ProjectionManager()
     : Configurable("ProjectionManager", "ProjectionManager0", 0, "projection.json")
 {
     loginf << "ProjectionManager: constructor";
 
-    registerParameter("current_projection_name", &current_projection_name_, string("RS2G"));
+    registerParameter("current_projection_name", &current_projection_name_, RS2G_NAME);
 
     createSubConfigurables();
+
+    if (!hasCurrentProjection())
+        current_projection_name_ = RS2G_NAME;
 
     assert(hasCurrentProjection());
 
@@ -109,19 +112,19 @@ void ProjectionManager::generateSubConfigurable(const string& class_id,
     }
     else if (class_id == "OGRProjection")
     {
-        string name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<string>("name");
+        // string name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<string>("name");
 
-        assert(!projections_.count(name));
+        // assert(!projections_.count(name));
 
-        projections_[name].reset(new OGRProjection(class_id, instance_id, *this));
+        // projections_[name].reset(new OGRProjection(class_id, instance_id, *this));
     }
     else if (class_id == "GeoProjection")
     {
-        string name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<string>("name");
+        // string name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<string>("name");
 
-        assert(!projections_.count(name));
+        // assert(!projections_.count(name));
 
-        projections_[name].reset(new GeoProjection(class_id, instance_id, *this));
+        // projections_[name].reset(new GeoProjection(class_id, instance_id, *this));
     }
     else
         throw runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
@@ -137,26 +140,26 @@ void ProjectionManager::checkSubConfigurables()
         generateSubConfigurableFromConfig(std::move(configuration));
     }
 
-    if (!projections_.count(OGR_NAME))
-    {
-        auto configuration = Configuration::create("OGRProjection");
+    // if (!projections_.count(OGR_NAME))
+    // {
+    //     auto configuration = Configuration::create("OGRProjection");
 
-        configuration->addParameter<string>("name", OGR_NAME);
-        generateSubConfigurableFromConfig(std::move(configuration));
-    }
+    //     configuration->addParameter<string>("name", OGR_NAME);
+    //     generateSubConfigurableFromConfig(std::move(configuration));
+    // }
 
-    if (!projections_.count(GEO_NAME))
-    {
-        auto configuration = Configuration::create("GeoProjection");
+    // if (!projections_.count(GEO_NAME))
+    // {
+    //     auto configuration = Configuration::create("GeoProjection");
 
-        configuration->addParameter<string>("name", GEO_NAME);
-        generateSubConfigurableFromConfig(std::move(configuration));
-    }
+    //     configuration->addParameter<string>("name", GEO_NAME);
+    //     generateSubConfigurableFromConfig(std::move(configuration));
+    // }
 }
 
 unsigned int ProjectionManager::calculateRadarPlotPositions (
-        std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
-        NullableVector<double>& target_latitudes_vec, NullableVector<double>& target_longitudes_vec)
+    std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
+    NullableVector<double>& target_latitudes_vec, NullableVector<double>& target_longitudes_vec)
 {
     logdbg << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name;
 
@@ -185,7 +188,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     double range_m;
     double altitude_ft;
     bool has_altitude;
-    double lat, lon;
+    double lat, lon, wgs_alt;
 
     unsigned int transformation_errors {0};
     unsigned int num_ffts_found {0};
@@ -254,9 +257,9 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
 
     // set up projections
     assert(hasCurrentProjection());
+
     Projection& projection = currentProjection();
-    projection.addAllRadarCoordinateSystems();
-    assert (projection.radarCoordinateSystemsAdded()); // needs to have been prepared, otherwise multi-threading issue
+    assert (projection.radarCoordinateSystemsAdded()); // done in asteriximporttask or radarplotposcalctask
 
     for (auto ds_id_it : datasource_vec.distinctValues())
     {
@@ -318,7 +321,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
         }
 
         ret = projection.polarToWGS84(ds_id, azimuth_rad, range_m, has_altitude,
-                                      altitude_ft, lat, lon);
+                                      altitude_ft, lat, lon, wgs_alt);
 
         if (!ret)
         {
@@ -345,8 +348,8 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
 
 
         std::tie(is_from_fft, fft_altitude_ft) = fft_man.isFromFFT(
-                    lat, lon, acad, dbcontent_name == "CAT001",
-                    mode_a_code, mode_c_code);
+            lat, lon, acad, dbcontent_name == "CAT001",
+            mode_a_code, mode_c_code);
 
         if (is_from_fft) // recalculate position
         {
@@ -359,7 +362,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
                    << " fft_altitude_ft " << fft_altitude_ft;
 
             ret = projection.polarToWGS84(ds_id, azimuth_rad, range_m, true,
-                                          fft_altitude_ft, lat, lon);
+                                          fft_altitude_ft, lat, lon, wgs_alt);
 
             if (!ret)
             {
@@ -430,7 +433,7 @@ map<string, unique_ptr<Projection>>& ProjectionManager::projections()
 }
 
 unsigned int ProjectionManager::doRadarPlotPositionCalculations (
-        map<string, shared_ptr<Buffer>> buffers)
+    map<string, shared_ptr<Buffer>> buffers)
 {
     unsigned int transformation_errors {0};
 
@@ -504,7 +507,7 @@ ProjectionManager::doUpdateRadarPlotPositionCalculations (std::map<std::string, 
         update_buffer_list.addProperty(rec_num_var_name, PropertyDataType::ULONGINT);
 
         std::shared_ptr<Buffer> update_buffer =
-                std::make_shared<Buffer>(update_buffer_list, dbcontent_name);
+            std::make_shared<Buffer>(update_buffer_list, dbcontent_name);
 
         // copy record number
 
@@ -589,4 +592,65 @@ double ProjectionManager::geoidHeightM (double latitude_deg, double longitude_de
     //        << " geoid_height " << geoid_height;
 
     // return geoid_height;
+}
+
+void ProjectionManager::test()
+{
+    if (hasCurrentProjection())
+    {
+        Projection& proj = currentProjection();
+
+        proj.addAllRadarCoordinateSystems();
+
+        for (unsigned int id : proj.ids())
+        {
+            double azimuth_rad, slant_range_m;
+            bool has_baro_altitude;
+            double baro_altitude_ft;
+            double latitude, longitude, wgs_alt;
+
+            for (unsigned int cnt=0; cnt < 100; ++cnt)
+            {
+                azimuth_rad = Number::randomNumber(-M_PI/2, M_PI/2);
+                slant_range_m = Number::randomNumber(0, 100000);
+
+                if (Number::randomNumber(0, 1) > 0.5)
+                {
+                    has_baro_altitude = false;
+                    baro_altitude_ft = 0;
+                }
+                else
+                {
+                    has_baro_altitude = true;
+                    baro_altitude_ft = Number::randomNumber(0, 50000);
+                }
+
+                proj.polarToWGS84(id, azimuth_rad, slant_range_m, has_baro_altitude, baro_altitude_ft,
+                                  latitude, longitude, wgs_alt);
+
+                double calc_azimuth_rad, calc_slant_range_m;
+
+                proj.wgs842PolarHorizontal(id, latitude, longitude, wgs_alt,
+                                           calc_azimuth_rad, calc_slant_range_m);
+
+                double calc_azimuth_diff = Number::calculateMinAngleDifference(
+                    calc_azimuth_rad*RAD2DEG, azimuth_rad*RAD2DEG);
+                double calc_range_diff = fabs(calc_slant_range_m - slant_range_m);
+
+                if (calc_azimuth_diff >= 1E-4 || calc_range_diff >= 1E-2)
+                    logerr << "ProjectionManager: test: calc_azimuth_diff "
+                           << String::doubleToStringPrecision(calc_azimuth_diff, 6)
+                           << " calc_range_diff " << String::doubleToStringPrecision(calc_range_diff, 2);
+
+                assert (calc_azimuth_diff < 1E-4);
+                assert (calc_range_diff < 1E-2);
+            }
+        }
+
+        loginf << "ProjectionManager: test: done";
+    }
+    else
+        loginf << "ProjectionManager: test: no current projection set";
+
+
 }
