@@ -19,6 +19,12 @@
 
 #include <vector>
 
+enum class ColorMapDescriptionMode
+{
+    Ranges = 0,
+    Midpoints
+};
+
 namespace colorscale
 {
     enum class ColorScale
@@ -46,6 +52,7 @@ namespace colorscale
         Cubehelix, 
         HSV, 
         Green2Red,
+        Blue2Green2Red,
 
         Custom,
         NumColorScales
@@ -59,12 +66,11 @@ namespace colorscale
         ColorScale::Inferno_Cut,
         ColorScale::Plasma_Cut,
         ColorScale::Viridis_Cut,
-        ColorScale::Cividis,
         ColorScale::Red,
         ColorScale::Green,
         ColorScale::Blue,
-        ColorScale::Cubehelix,
-        ColorScale::Green2Red
+        ColorScale::Green2Red,
+        ColorScale::Blue2Green2Red
     }; 
 
 } // namespace colorscale

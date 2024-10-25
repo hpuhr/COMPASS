@@ -20,6 +20,8 @@
 #include "gridviewdatawidget.h"
 #include "gridview.h"
 
+#include "viewvariable.h"
+
 #include "logger.h"
 #include "ui_test_common.h"
 
@@ -29,12 +31,16 @@
 #include "viewmanager.h"
 #include "viewpointgenerator.h"
 #include "geotiff.h"
+#include "colormap_defs.h"
 
 #include "variableselectionwidget.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "geographicview.h"
 #endif
+
+#include "colorscaleselection.h"
+#include "propertyvalueedit.h"
 
 #include <QComboBox>
 #include <QLineEdit>
@@ -79,6 +85,12 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
 
     layout->addRow("Grid Resolution:", grid_resolution_box_);
 
+    color_selection_ = new ColorScaleSelection;
+
+    connect(color_selection_, &ColorScaleSelection::scaleChanged, this, &GridViewConfigWidget::colorScaleChanged);
+
+    layout->addRow("Color Scale:", color_selection_);
+
     color_steps_box_ = new QSpinBox;
     color_steps_box_->setMinimum(2);
     color_steps_box_->setMaximum(256);
@@ -86,6 +98,36 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     connect(color_steps_box_, QOverload<int>::of(&QSpinBox::valueChanged), this, &GridViewConfigWidget::colorStepsChanged);
 
     layout->addRow("Color Steps:", color_steps_box_);
+
+    color_value_min_box_ = new PropertyValueEdit();
+    reset_min_button_    = new QPushButton("Reset");
+    reset_min_button_->setVisible(false); //@TODO
+
+    QHBoxLayout* layout_color_min = new QHBoxLayout;
+    layout_color_min->setContentsMargins(0, 0, 0, 0);
+    layout_color_min->setSpacing(0);
+
+    layout_color_min->addWidget(color_value_min_box_);
+    layout_color_min->addWidget(reset_min_button_);
+
+    connect(color_value_min_box_, &PropertyValueEdit::valueEdited, this, &GridViewConfigWidget::minValueChanged);
+
+    layout->addRow("Color Min. Value:", layout_color_min);
+
+    color_value_max_box_ = new PropertyValueEdit();
+    reset_max_button_    = new QPushButton("Reset");
+    reset_max_button_->setVisible(false); //@TODO
+
+    QHBoxLayout* layout_color_max = new QHBoxLayout;
+    layout_color_max->setContentsMargins(0, 0, 0, 0);
+    layout_color_max->setSpacing(0);
+
+    layout_color_max->addWidget(color_value_max_box_);
+    layout_color_max->addWidget(reset_max_button_);
+
+    connect(color_value_max_box_, &PropertyValueEdit::valueEdited, this, &GridViewConfigWidget::maxValueChanged);
+
+    layout->addRow("Color Max. Value:", layout_color_max);
 
     export_button_ = new QPushButton("Export");
 
@@ -131,9 +173,19 @@ void GridViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
 /**
 */
+void GridViewConfigWidget::postVariableChangedEvent(int idx)
+{
+    if (idx == 2)
+        updateVariableDataType();
+}
+
+/**
+*/
 void GridViewConfigWidget::valueTypeChanged()
 {
     view_->setValueType((grid2d::ValueType)value_type_combo_->currentData().toInt(), true);
+
+    updateVariableDataType();
 }
 
 /**
@@ -145,9 +197,34 @@ void GridViewConfigWidget::gridResolutionChanged()
 
 /**
 */
+void GridViewConfigWidget::colorScaleChanged()
+{
+    view_->setColorScale(color_selection_->selectedScale(), true);
+}
+
+/**
+*/
 void GridViewConfigWidget::colorStepsChanged()
 {
     view_->setColorSteps((unsigned int)color_steps_box_->value(), true);
+}
+
+/**
+*/
+void GridViewConfigWidget::minValueChanged()
+{
+    auto v_str = color_value_min_box_->isValid() ? color_value_min_box_->valueAsString() : "";
+
+    view_->setMinValue(v_str, true);
+}
+
+/**
+*/
+void GridViewConfigWidget::maxValueChanged()
+{
+    auto v_str = color_value_max_box_->isValid() ? color_value_max_box_->valueAsString() : "";
+
+    view_->setMaxValue(v_str, true);
 }
 
 /**
@@ -164,9 +241,39 @@ void GridViewConfigWidget::updateConfig()
     grid_resolution_box_->setValue((int)settings.grid_resolution);
     grid_resolution_box_->blockSignals(false);
 
+    color_selection_->blockSignals(true);
+    color_selection_->setSelectedScale((colorscale::ColorScale)settings.render_color_scale);
+    color_selection_->blockSignals(false);
+
     color_steps_box_->blockSignals(true);
     color_steps_box_->setValue((int)settings.render_color_num_steps);
     color_steps_box_->blockSignals(false);
+
+    updateVariableDataType();
+
+    color_value_min_box_->blockSignals(true);
+    color_value_min_box_->setValue(settings.render_color_value_min);
+    color_value_min_box_->blockSignals(false);
+
+    color_value_max_box_->blockSignals(true);
+    color_value_max_box_->setValue(settings.render_color_value_max);
+    color_value_max_box_->blockSignals(false);
+}
+
+/**
+*/
+void GridViewConfigWidget::updateVariableDataType()
+{
+    //determine actual datatype depending on selected variable and grid value type
+    auto dtype = view_->currentDataType();
+
+    color_value_min_box_->blockSignals(true);
+    color_value_min_box_->setPropertyDataType(dtype);
+    color_value_min_box_->blockSignals(false);
+
+    color_value_max_box_->blockSignals(true);
+    color_value_max_box_->setPropertyDataType(dtype);
+    color_value_max_box_->blockSignals(false);
 }
 
 #if USE_EXPERIMENTAL_SOURCE == true

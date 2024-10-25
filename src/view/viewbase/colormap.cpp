@@ -470,7 +470,7 @@ ColorMap::ValueRange ColorMap::activeRange() const
     double vmin = value_range_.value().first;
     double vmax = value_range_.value().second;
 
-    if (smaple_values_symm_)
+    if (sample_values_symm_)
     {
         const double vmax_abs = std::max(std::fabs(vmin), std::fabs(vmax));
 
@@ -483,34 +483,53 @@ ColorMap::ValueRange ColorMap::activeRange() const
 
 /**
 */
-std::vector<std::pair<QColor, std::string>> ColorMap::getDescription(bool add_sel_color,
-                                                                     bool add_null_color) const
+std::vector<std::pair<QColor, std::string>> ColorMap::getDescription(ColorMapDescriptionMode mode,
+                                                                     bool add_sel_color,
+                                                                     bool add_null_color,
+                                                                     const ValueDecorator& decorator) const
 {
     if (!valid() || !canSampleValues())
         return std::vector<std::pair<QColor, std::string>>();
+
+    ValueDecorator active_decorator = decorator;
+    if (!active_decorator)
+        active_decorator = [ & ] (double value) { return std::to_string(value); };
 
     std::vector<std::pair<QColor, std::string>> descr;
 
     auto range = activeRange();
 
     const double vrange = range.second - range.first;
+
     if (vrange < 1e-12 || numColors() == 1)
     {
-        descr.emplace_back(colors_.front(), " = " + std::to_string(range.first));
+        if (mode == ColorMapDescriptionMode::Ranges)
+            descr.emplace_back(colors_.front(), " = " + active_decorator(range.first));
+        else
+            descr.emplace_back(colors_.front(), active_decorator(range.first));
     }
     else
     {
-        descr.emplace_back(colors_.front(), "< " + std::to_string(range.first));
+        if (mode == ColorMapDescriptionMode::Ranges)
+            descr.emplace_back(colors_.front(), "< " + active_decorator(range.first));
+        else
+            descr.emplace_back(colors_.front(), active_decorator(range.first));
 
         for (size_t i = 1; i < n_colors_ - 1; ++i)
         {
             const double v0 = range.first + value_factors_[ i     ] * vrange;
             const double v1 = range.first + value_factors_[ i + 1 ] * vrange;
 
-            descr.emplace_back(colors_[ i ], std::to_string(v0) + " - " + std::to_string(v1));
+            if (mode == ColorMapDescriptionMode::Ranges)
+                descr.emplace_back(colors_[ i ], active_decorator(v0) + " - " + active_decorator(v1));
+            else
+                descr.emplace_back(colors_[ i ], active_decorator((v0 + v1) / 2));
         }
 
-        descr.emplace_back(colors_.back(), ">= " + std::to_string(range.second));
+        if (mode == ColorMapDescriptionMode::Ranges)
+            descr.emplace_back(colors_.back(), ">= " + active_decorator(range.second));
+        else
+            descr.emplace_back(colors_.back(), active_decorator(range.second));
     }
 
     if (add_sel_color)

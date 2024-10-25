@@ -61,6 +61,9 @@ protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
     virtual void configChanged_impl() {};
 
+    virtual void preVariableChangedEvent(int idx) {}
+    virtual void postVariableChangedEvent(int idx) {}
+
     QVBoxLayout* configLayout() { return config_layout_; }
 
 private:

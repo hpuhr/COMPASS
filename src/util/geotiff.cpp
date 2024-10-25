@@ -16,6 +16,25 @@
 
 #include <boost/filesystem.hpp>
 
+/**
+*/
+bool GeoTIFFWriter::isValidGeoTIFF(const std::string& fn)
+{
+    if (!Utils::Files::fileExists(fn))
+        return false;
+
+    //try to open
+    auto dataset = GDALOpen(fn.c_str(), GDALAccess::GA_ReadOnly);
+    if (!dataset)
+        return false;
+
+    //try to get projection
+    if (!GDALGetProjectionRef(dataset))
+        return false;
+
+    return true;
+}
+
 namespace helpers
 {
 
@@ -57,8 +76,8 @@ std::string wktStringFromSRSName(const std::string& srs_name)
 bool GeoTIFFWriter::writeGeoTIFF(const std::string& fn,
                                  const QImage& img,
                                  const RasterReference& ref,
-                                 size_t subsampling,
-                                 const std::string& warp_to_srs)
+                                 const std::string& warp_to_srs,
+                                 size_t subsampling)
 {
     if (img.isNull())
         return false;
@@ -235,11 +254,14 @@ bool GeoTIFFWriter::writeGeoTIFF(const std::string& fn,
 */
 bool GeoTIFFWriter::warpGeoTIFF(const std::string& fn,
                                 const std::string& fn_out,
-                                const std::string& warp_to_srs)
+                                const std::string& warp_to_srs,
+                                size_t subsampling)
 {
     auto dataset = GDALOpen(fn.c_str(), GDALAccess::GA_ReadOnly);
     if (!dataset)
         return false;
+
+    //@TODO: subsampling
 
     loginf << "GeoTIFFWriter: warpGeoTIFF: fn = " << fn;
     loginf << "GeoTIFFWriter: warpGeoTIFF: fn_out = " << fn_out;
@@ -248,11 +270,11 @@ bool GeoTIFFWriter::warpGeoTIFF(const std::string& fn,
     //GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
 
     auto dataset_warped = GDALAutoCreateWarpedVRT(dataset, 
-                                                    GDALGetProjectionRef(dataset), 
-                                                    warp_to_srs.c_str(), 
-                                                    GDALResampleAlg::GRA_NearestNeighbour,
-                                                    0.001,
-                                                    0);
+                                                  GDALGetProjectionRef(dataset), 
+                                                  warp_to_srs.c_str(), 
+                                                  GDALResampleAlg::GRA_NearestNeighbour,
+                                                  0.001,
+                                                  0);
     if (!dataset_warped)
         return false;
 

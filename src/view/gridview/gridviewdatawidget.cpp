@@ -23,6 +23,8 @@
 
 #include "viewvariable.h"
 #include "viewpointgenerator.h"
+#include "colormapwidget.h"
+#include "property_templates.h"
 
 #include "buffer.h"
 
@@ -61,6 +63,14 @@ GridViewDataWidget::GridViewDataWidget(GridViewWidget* view_widget,
 
     setLayout(main_layout_);
 
+    legend_ = new ColorLegendWidget(this);
+    legend_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    legend_->showSelectionColor(true);
+    legend_->showNullColor(false);
+    legend_->setDescriptionMode(ColorMapDescriptionMode::Midpoints);
+
+    main_layout_->addWidget(legend_);
+
     x_axis_name_ = view_->variable(0).description();
     y_axis_name_ = view_->variable(1).description();
 
@@ -86,8 +96,9 @@ void GridViewDataWidget::resetGrid()
 void GridViewDataWidget::resetGridChart()
 {
     grid_chart_.reset();
+
     grid_rendering_ = QImage();
-    grid_roi_ = QRectF();
+    grid_roi_       = QRectF();
 }
 
 /**
@@ -95,6 +106,9 @@ void GridViewDataWidget::resetGridChart()
 void GridViewDataWidget::resetGridLayers()
 {
     grid_layers_.clear();
+
+    grid_value_min_ = 0.0;
+    grid_value_max_ = 1.0;
 
     x_axis_name_ = "";
     y_axis_name_ = "";
@@ -190,6 +204,12 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
 
     grid_->addToLayers(grid_layers_, layer_name, (grid2d::ValueType)settings.value_type);
 
+    auto range = grid_layers_.layer(0).range();
+
+    grid_value_min_ = range.has_value() ? range->first  : 0.0;
+    grid_value_max_ = range.has_value() ? range->second : 1.0;
+    assert(grid_value_min_ <= grid_value_max_);
+
     loginf << "GridViewDataWidget: processStash: done, generated " << grid_layers_.numLayers() << " layers";
 }
 
@@ -219,7 +239,20 @@ void GridViewDataWidget::updateFromAnnotations()
     
     grid_layers_.addLayer(std::move(layer));
 
+    auto range = grid_layers_.layer(0).range();
+
+    grid_value_min_ = range.has_value() ? range->first  : 0.0;
+    grid_value_max_ = range.has_value() ? range->second : 1.0;
+    assert(grid_value_min_ <= grid_value_max_);
+
     loginf << "GridViewDataWidget: updateFromAnnotations: done, generated " << grid_layers_.numLayers() << " layers";
+}
+
+/**
+*/
+bool GridViewDataWidget::hasValidGrid() const
+{
+    return grid_layers_.numLayers() > 0;
 }
 
 /**
@@ -370,11 +403,12 @@ bool GridViewDataWidget::updateGridChart()
     
     grid_chart_.reset(new QtCharts::GridViewChart(this, chart));
     grid_chart_->setObjectName("chart_view");
+    grid_chart_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect (grid_chart_.get(), &QtCharts::GridViewChart::rectangleSelectedSignal,
              this, &GridViewDataWidget::rectangleSelectedSlot, Qt::ConnectionType::QueuedConnection);
 
-    main_layout_->addWidget(grid_chart_.get());
+    main_layout_->insertWidget(0, grid_chart_.get());
 
     return has_data;
 }
@@ -385,17 +419,43 @@ void GridViewDataWidget::updateRendering()
 {
     loginf << "GridViewDataWidget: updateRendering: rendering";
 
-    if (grid_layers_.numLayers() == 0)
+    if (!hasValidGrid())
         return;
 
+    const auto& layer    = grid_layers_.layer(0);
     const auto& settings = view_->settings();
 
-    Grid2DRenderSettings render_settings;
-    render_settings.color_map.create(QColor(settings.render_color_min.c_str()), 
-                                     QColor(settings.render_color_max.c_str()),
-                                     settings.render_color_num_steps);
+    loginf << "GridViewDataWidget: updateRendering: min = " << grid_value_min_ << " max = " << grid_value_max_;
 
-    const auto& layer = grid_layers_.layer(0);
+    std::pair<double, double> range(grid_value_min_, grid_value_max_);
+
+    auto vmin = view_->getMinValue();
+    auto vmax = view_->getMaxValue();
+
+    if (vmin.has_value() && vmax.has_value() && vmin.value() <= vmax.value())
+        range = std::pair<double, double>(vmin.value(), vmax.value());
+    else if (vmin.has_value() && !vmax.has_value() && vmin.value() <= grid_value_max_)
+        range.first = vmin.value();
+    else if (vmax.has_value() && !vmin.has_value() && vmax.value() >= grid_value_min_)
+        range.second = vmax.value();
+
+    auto dtype = view_->currentDataType();
+
+    auto decoratorFunc = [ = ] (double v)
+    {
+        return property_templates::double2String(dtype, v, GridView::DecimalsDefault);
+    };
+
+    bool is_bool = (dtype == PropertyDataType::BOOL);
+
+    Grid2DRenderSettings render_settings;
+    render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
+                                      settings.render_color_num_steps,
+                                      is_bool ? ColorMap::Type::Binary : ColorMap::Type::Linear,
+                                      range);
+
+    legend_->setColorMap(render_settings.color_map);
+    legend_->setDecorator(decoratorFunc);    
 
     auto rendering = Grid2DLayerRenderer::render(layer, render_settings);
 
@@ -437,6 +497,8 @@ void GridViewDataWidget::updateChart(QtCharts::QChart* chart, bool has_data)
         chart->legend()->setVisible(false);
 
         QtCharts::QScatterSeries* series = new QtCharts::QScatterSeries;
+        series->setMarkerSize(0.1);
+        series->setColor(Qt::white);
 
         series->append(grid_roi_.topLeft());
         series->append(grid_roi_.topRight());

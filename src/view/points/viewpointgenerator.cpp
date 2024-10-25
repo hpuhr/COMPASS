@@ -502,29 +502,34 @@ void ViewPointGenFeatureText::toJSON_impl(nlohmann::json& j, bool write_binary_i
  * ViewPointGenFeatureGeoImage
  ********************************************************************************/
 
-const std::string ViewPointGenFeatureGeoImage::FeatureName                        = "geoimage";
-const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSource     = "source";
-const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameFn         = "fn";
-const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameData       = "data";
-const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameReference  = "reference";
+const std::string ViewPointGenFeatureGeoImage::FeatureName                       = "geoimage";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSource    = "source";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameFn        = "fn";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameData      = "data";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameReference = "reference";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSubsample = "subsample";
 
 /**
 */
 ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const std::string& fn,
-                                                         const RasterReference& ref)
+                                                         const RasterReference& ref,
+                                                         bool subsample)
 :   ViewPointGenFeature(FeatureName)
-,   fn_ (fn )
-,   ref_(ref)
+,   fn_       (fn       )
+,   ref_      (ref      )
+,   subsample_(subsample)
 {
 }
 
 /**
 */
 ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const QImage& data,
-                                                         const RasterReference& ref)
+                                                         const RasterReference& ref,
+                                                         bool subsample)
 :   ViewPointGenFeature(FeatureName)
-,   data_(data)
-,   ref_ (ref )
+,   data_     (data     )
+,   ref_      (ref      )
+,   subsample_(subsample)
 {
 }
 
@@ -547,6 +552,9 @@ void ViewPointGenFeatureGeoImage::toJSON_impl(nlohmann::json& j, bool write_bina
 
     //reference
     j[FeatureGeoImageFieldNameReference] = ref_.toJSON();
+
+    //subsampling
+    j[FeatureGeoImageFieldNameSubsample] = subsample_;
 }
 
 /**

@@ -24,6 +24,12 @@
 
 #include <QString>
 
+#include <boost/optional.hpp>
+
+/*****************************************************************************************
+ * Helpers for switching property data types.
+ *****************************************************************************************/
+
 #define SwitchPropertyDataTypeEntry(Name, Type, Func) \
     case Name:                                        \
     {                                                 \
@@ -115,6 +121,10 @@ bool invokeFunctor(PropertyDataType dtype, TFunc& func)
     return false;
 }
 
+/*****************************************************************************************
+ * Template value to double.
+ *****************************************************************************************/
+
 template <typename T>
 inline double toDouble(const T& value)
 {
@@ -125,6 +135,21 @@ inline double toDouble(const boost::posix_time::ptime& value)
 {
     return static_cast<double>(Utils::Time::toLong(value));
 }
+template <>
+inline double toDouble(const std::string& value)
+{
+    return 0.0;
+}
+template <>
+inline double toDouble(const nlohmann::json& value)
+{
+    return 0.0;
+}
+
+/*****************************************************************************************
+ * Template value from double.
+ *****************************************************************************************/
+
 template <typename T>
 inline T fromDouble(double value)
 {
@@ -135,6 +160,21 @@ inline boost::posix_time::ptime fromDouble(double value)
 {
     return Utils::Time::fromLong(static_cast<unsigned long>(value));
 }
+template <>
+inline std::string fromDouble(double value)
+{
+    return std::to_string(value);
+}
+template <>
+inline nlohmann::json fromDouble(double value)
+{
+    return nlohmann::json();
+}
+
+/*****************************************************************************************
+ * Template value to string.
+ *****************************************************************************************/
+
 template <typename T>
 inline std::string toString(const T& value, int decimals)
 {
@@ -160,21 +200,120 @@ inline std::string toString(const boost::posix_time::ptime& value, int decimals)
 {
     return Utils::Time::toString(value);
 }
-template <typename T>
-inline T fromString(const std::string& value)
+template <>
+inline std::string toString(const nlohmann::json& value, int decimals)
 {
-    double v = std::stod(value);
+    return value.dump();
+}
+
+/*****************************************************************************************
+ * Template value from string.
+ *****************************************************************************************/
+
+template <typename T>
+inline boost::optional<T> fromString(const std::string& value)
+{
+    double v;
+    try
+    {
+        size_t n;
+        v = std::stod(value, &n);
+
+        if (n != value.size())
+            return {};
+    }
+    catch(...)
+    {
+        return {};
+    }
     return static_cast<T>(v);
 }
 template <>
-inline std::string fromString(const std::string& value)
+inline boost::optional<std::string> fromString(const std::string& value)
 {
     return value;
 }
 template <>
-inline boost::posix_time::ptime fromString(const std::string& value)
+inline boost::optional<boost::posix_time::ptime> fromString(const std::string& value)
 {
-    return Utils::Time::fromString(value);
+    boost::posix_time::ptime t = Utils::Time::fromString(value);
+    if (t.is_not_a_date_time())
+        return {};
+
+    return t;
+}
+template <>
+inline boost::optional<nlohmann::json> fromString(const std::string& value)
+{
+    nlohmann::json j = nlohmann::json::parse(value);
+    if (j.is_null())
+        return {};
+
+    return j;
+}
+
+/*****************************************************************************************
+ * Double to string.
+ *****************************************************************************************/
+
+struct Double2StringFunctor
+{
+    template <typename T, PropertyDataType DType>
+    bool operator()()
+    {
+        T value = fromDouble<T>(v);
+        v_str = toString<T>(value, dec);
+        return true;
+    }
+
+    void error(PropertyDataType dtype) {}
+
+    double      v;
+    std::string v_str;
+    int         dec = 6;
+};
+
+inline std::string double2String(PropertyDataType dtype, double v, int decimals)
+{
+    Double2StringFunctor func;
+    func.v   = v;
+    func.dec = decimals;
+    invokeFunctor(dtype, func);
+
+    return func.v_str;
+}
+
+/*****************************************************************************************
+ * String to double.
+ *****************************************************************************************/
+
+struct String2DoubleFunctor
+{
+    template <typename T, PropertyDataType DType>
+    bool operator()()
+    {
+        auto value = fromString<T>(v_str);
+        if (!value.has_value())
+            return false;
+
+        v = toDouble<T>(value.value());
+        return true;
+    }
+
+    void error(PropertyDataType dtype) {}
+    
+    std::string v_str;
+    double      v;
+};
+
+inline boost::optional<double> string2Double(PropertyDataType dtype, const std::string& v_str)
+{
+    String2DoubleFunctor func;
+    func.v_str = v_str;
+    if (!invokeFunctor(dtype, func))
+        return {};
+
+    return func.v;
 }
 
 } // property_templates

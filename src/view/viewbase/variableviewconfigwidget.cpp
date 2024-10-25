@@ -142,7 +142,11 @@ void VariableViewConfigWidget::selectedVariableChangedSlot(int idx)
     auto selection = var_selection_widgets_.at(idx);
     assert(selection);
 
+    preVariableChangedEvent(idx);
+
     var_view_->variable(idx).setVariable(*selection, true);
+
+    postVariableChangedEvent(idx);
 }
 
 /**

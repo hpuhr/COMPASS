@@ -112,7 +112,7 @@ void Grid2D::reset()
     layers_[ IndexMean  ].setConstant(0);
     layers_[ IndexMean2 ].setConstant(0);
     layers_[ IndexMin   ].setConstant(std::numeric_limits<double>::max());
-    layers_[ IndexMax   ].setConstant(std::numeric_limits<double>::min());
+    layers_[ IndexMax   ].setConstant(std::numeric_limits<double>::lowest());
 
     flags_.setConstant(0);
  

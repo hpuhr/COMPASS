@@ -18,6 +18,9 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/groupbox.h"
         "${CMAKE_CURRENT_LIST_DIR}/selectdatasourceswidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/textinputdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/fileimportdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/colorscaleselection.h"
+        "${CMAKE_CURRENT_LIST_DIR}/propertyvalueedit.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/autoresumedialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rangeedit.cpp"
@@ -27,4 +30,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/groupbox.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/selectdatasourceswidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/textinputdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/fileimportdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/colorscaleselection.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/propertyvalueedit.cpp"
 )

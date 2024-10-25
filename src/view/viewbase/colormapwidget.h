@@ -39,14 +39,22 @@ public:
     ColorLegendWidget(QWidget* parent = nullptr);
     virtual ~ColorLegendWidget();
 
-    void setColorMap(ColorMap* colormap);
+    void setColorMap(const ColorMap& colormap);
+    void setDescriptionMode(ColorMapDescriptionMode mode);
+    void setDecorator(const ColorMap::ValueDecorator& d);
+    void showSelectionColor(bool ok);
+    void showNullColor(bool ok);
 
     void updateUI();
 
 private:
     void createUI();
 
-    ColorMap* colormap_ = nullptr;
+    ColorMap                 colormap_;
+    ColorMapDescriptionMode  descr_mode_ = ColorMapDescriptionMode::Midpoints;
+    ColorMap::ValueDecorator decorator_;
+    bool                     show_selection_col_ = false;
+    bool                     show_null_col_ = false;
 
     QHBoxLayout* layout_ = nullptr;
     QWidget*     widget_ = nullptr;

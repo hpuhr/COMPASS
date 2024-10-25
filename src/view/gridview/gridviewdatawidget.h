@@ -28,6 +28,7 @@
 class GridView;
 class GridViewWidget;
 class Grid2D;
+class ColorLegendWidget;
 
 namespace QtCharts
 {
@@ -62,6 +63,8 @@ public:
 
     GridViewDataTool selectedTool() const;
 
+    bool hasValidGrid() const;
+
     QRectF getXYBounds() const;
     boost::optional<std::pair<double, double>> getZBounds() const;
 
@@ -70,6 +73,9 @@ public:
     const QImage& gridRendering() const { return grid_rendering_; }
     const QRectF& gridBounds() const { return grid_roi_; }
     bool gridIsNorthUp() const { return grid_north_up_; }
+
+    double getGridValueMin() const { return grid_value_min_; }
+    double getGridValueMax() const { return grid_value_max_; }
 
     const GridView* getView() const { return view_; }
 
@@ -107,19 +113,22 @@ private:
     void updateRendering();
     void updateChart(QtCharts::QChart* chart, bool has_data);
 
-    GridView* view_ = nullptr;
-
+    GridView* view_   = nullptr;
+    
     GridViewDataTool selected_tool_ = GV_NAVIGATE_TOOL;
 
     QHBoxLayout* main_layout_ = nullptr;
 
     std::unique_ptr<QtCharts::GridViewChart> grid_chart_;
+    ColorLegendWidget* legend_ = nullptr;
 
     std::unique_ptr<Grid2D> grid_;
     QImage                  grid_rendering_;
     QRectF                  grid_roi_;
     bool                    grid_north_up_;
     RasterReference         ref_;
+    double                  grid_value_min_ = 0.0;
+    double                  grid_value_max_ = 1.0;
 
     Grid2DLayers grid_layers_;
     std::string  x_axis_name_;

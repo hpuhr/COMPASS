@@ -18,9 +18,14 @@
 #pragma once
 
 #include "variableviewconfigwidget.h"
+#include "grid2d_defs.h"
+#include "property.h"
 
 class GridViewWidget;
 class GridView;
+
+class ColorScaleSelection;
+class PropertyValueEdit;
 
 class QCheckBox;
 class QLineEdit;
@@ -41,16 +46,24 @@ public:
                          QWidget* parent = nullptr);
     virtual ~GridViewConfigWidget();
 
+    static const int DecimalsDefault;
+
 protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
+
+    virtual void postVariableChangedEvent(int idx) override;
 
     void attachExportMenu();
 
     void valueTypeChanged();
     void gridResolutionChanged();
+    void colorScaleChanged();
     void colorStepsChanged();
-
+    void minValueChanged();
+    void maxValueChanged();
+    
     void updateConfig();
+    void updateVariableDataType();
 
     std::string exportName() const;
     void exportToGeographicView();
@@ -58,8 +71,13 @@ protected:
 
     GridView* view_ = nullptr;
 
-    QComboBox*   value_type_combo_    = nullptr;
-    QSpinBox*    grid_resolution_box_ = nullptr;
-    QSpinBox*    color_steps_box_     = nullptr;
-    QPushButton* export_button_       = nullptr;
+    QComboBox*           value_type_combo_    = nullptr;
+    QSpinBox*            grid_resolution_box_ = nullptr;
+    ColorScaleSelection* color_selection_     = nullptr;
+    QSpinBox*            color_steps_box_     = nullptr;
+    PropertyValueEdit*   color_value_min_box_ = nullptr;
+    PropertyValueEdit*   color_value_max_box_ = nullptr;
+    QPushButton*         reset_min_button_    = nullptr;
+    QPushButton*         reset_max_button_    = nullptr;
+    QPushButton*         export_button_       = nullptr;
 };

@@ -37,6 +37,8 @@ public:
     typedef std::pair<double, double>   ValueRange;
     typedef boost::optional<ValueRange> OValueRange;
 
+    typedef std::function<std::string(double)> ValueDecorator;
+
     enum class Type
     {
         Linear = 0,
@@ -84,6 +86,8 @@ public:
     const QColor& getColor(size_t idx) const;
     const std::vector<QColor>& getColors() const { return colors_; }
 
+    const OValueRange& valueRange() const { return value_range_; }
+
     void create(const std::vector<QColor>& colors,
                 Type type = Type::Linear,
                 const OValueRange& value_range = OValueRange());
@@ -109,9 +113,10 @@ public:
     QColor sample(double t) const;
     QColor sampleValue(double v) const;
 
-    std::vector<std::pair<QColor, std::string>> getDescription(bool add_sel_color = true,
-                                                               bool add_null_color = true) const;
-
+    std::vector<std::pair<QColor, std::string>> getDescription(ColorMapDescriptionMode mode = ColorMapDescriptionMode::Midpoints,
+                                                               bool add_sel_color = true,
+                                                               bool add_null_color = true,
+                                                               const ValueDecorator& decorator = ValueDecorator()) const;
 private:
     void create(const std::vector<QColor>& colors,
                 Type type,
@@ -132,5 +137,5 @@ private:
 
     std::vector<QColor> special_colors_;
     OValueRange         value_range_;
-    bool                smaple_values_symm_ = false;
+    bool                sample_values_symm_ = false;
 };
