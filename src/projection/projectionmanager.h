@@ -37,6 +37,7 @@ protected:
     ProjectionManager();
 
 public:
+
     virtual ~ProjectionManager();
 
     virtual void generateSubConfigurable(const std::string& class_id,
