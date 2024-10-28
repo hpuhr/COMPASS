@@ -1410,9 +1410,9 @@ void SimpleReferenceCalculator::createAnnotations(ViewPointGenAnnotation* annota
             std::vector<Eigen::Vector3d> accuracies;
 
             double lat_min = std::numeric_limits<double>::max();
-            double lat_max = std::numeric_limits<double>::min();
+            double lat_max = std::numeric_limits<double>::lowest();
             double lon_min = std::numeric_limits<double>::max();
-            double lon_max = std::numeric_limits<double>::min();
+            double lon_max = std::numeric_limits<double>::lowest();
 
             for (size_t i = 0; i < na; ++i)
             {
@@ -1454,9 +1454,8 @@ void SimpleReferenceCalculator::createAnnotations(ViewPointGenAnnotation* annota
                 grid.addToLayers(layers, "min accuracy", grid2d::ValueType::ValueTypeMax);
 
                 Grid2DRenderSettings rsettings;
-                rsettings.pixels_per_cell = 10;
-                rsettings.min_value       = 0.0;
-                rsettings.max_value       = 10.0;
+                rsettings.min_value = 0.0;
+                rsettings.max_value = 10.0;
 
                 rsettings.color_map.create(ColorMap::ColorScale::Green2Red, 10);
                 

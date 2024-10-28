@@ -21,6 +21,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/async.h"
         "${CMAKE_CURRENT_LIST_DIR}/event_log.h"
         "${CMAKE_CURRENT_LIST_DIR}/stringmat.h"
+        "${CMAKE_CURRENT_LIST_DIR}/geotiff.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/config.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/files.cpp"
@@ -34,4 +35,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/async.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/event_log.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/stringmat.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/geotiff.cpp"
 )

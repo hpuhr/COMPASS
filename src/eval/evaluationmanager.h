@@ -142,7 +142,6 @@ struct EvaluationManagerSettings
     //grid generation
     unsigned int grid_num_cells_x     = 512;
     unsigned int grid_num_cells_y     = 512;
-    unsigned int grid_pixels_per_cell = 5;
 
     //histogram generation
     unsigned int histogram_num_bins = 20;

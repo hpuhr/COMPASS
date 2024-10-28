@@ -254,7 +254,6 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     //grid generation
     registerParameter("grid_num_cells_x", &settings_.grid_num_cells_x, Settings().grid_num_cells_x);
     registerParameter("grid_num_cells_y", &settings_.grid_num_cells_y, Settings().grid_num_cells_y);
-    registerParameter("grid_pixels_per_cell", &settings_.grid_pixels_per_cell, Settings().grid_pixels_per_cell);
 
     //histogram generation
     registerParameter("histogram_num_bins", &settings_.histogram_num_bins, Settings().histogram_num_bins);

@@ -103,10 +103,10 @@ QRectF GridResolution::addBorder(const QRectF& roi,
     double x_border = w * b * 0.5;
     double y_border = h * b * 0.5;
 
-    double roi_x_min = std::max(xmin.has_value() ? xmin.value() : std::numeric_limits<double>::min(), roi.left()   - x_border);
-    double roi_x_max = std::min(xmax.has_value() ? xmax.value() : std::numeric_limits<double>::max(), roi.right()  + x_border);
-    double roi_y_min = std::max(ymin.has_value() ? ymin.value() : std::numeric_limits<double>::min(), roi.top()    - y_border);
-    double roi_y_max = std::min(ymax.has_value() ? ymax.value() : std::numeric_limits<double>::max(), roi.bottom() + y_border);
+    double roi_x_min = std::max(xmin.has_value() ? xmin.value() : std::numeric_limits<double>::lowest(), roi.left()   - x_border);
+    double roi_x_max = std::min(xmax.has_value() ? xmax.value() : std::numeric_limits<double>::max()   , roi.right()  + x_border);
+    double roi_y_min = std::max(ymin.has_value() ? ymin.value() : std::numeric_limits<double>::lowest(), roi.top()    - y_border);
+    double roi_y_max = std::min(ymax.has_value() ? ymax.value() : std::numeric_limits<double>::max()   , roi.bottom() + y_border);
 
     return QRectF(roi_x_min, roi_y_min, roi_x_max - roi_x_min, roi_y_max - roi_y_min);
 }

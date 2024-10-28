@@ -52,7 +52,7 @@ bool Grid2DLayer::hasFlags() const
 boost::optional<std::pair<double, double>> Grid2DLayer::range() const
 {
     double vmin = std::numeric_limits<double>::max();
-    double vmax = std::numeric_limits<double>::min();
+    double vmax = std::numeric_limits<double>::lowest();
 
     const double* d = data.data();
 
@@ -386,14 +386,25 @@ std::pair<QImage,RasterReference> Grid2DLayerRenderer::render(const Grid2DLayer&
     auto range = layer.range();
 
     double vmin, vmax;
+    bool use_colormap_range = false;
 
     if (settings.min_value.has_value() && settings.max_value.has_value())
     {
+        //use min max values specified in settings first
         vmin = settings.min_value.value();
         vmax = settings.max_value.value();
     }
+    else if (settings.color_map.canSampleValues())
+    {
+        //otherwise use range in colormap if available
+        vmin = settings.color_map.valueRange()->first;
+        vmax = settings.color_map.valueRange()->second;
+
+        use_colormap_range = true;
+    }
     else if (range.has_value())
     {
+        //otherwise use data range if valid
         vmin = range.value().first;
         vmax = range.value().second;
     }
@@ -420,7 +431,11 @@ std::pair<QImage,RasterReference> Grid2DLayerRenderer::render(const Grid2DLayer&
         if (data(cy, cx) == Grid2D::InvalidValue)
             return QColor(0, 0, 0, 0);
 
-        double t = (data(cy, cx) - vmin) / vrange;
+        double v = data(cy, cx);
+        if (use_colormap_range)
+            return settings.color_map.sampleValue(v);
+
+        double t = (v - vmin) / vrange;
 
         return settings.color_map.sample(t);
     };

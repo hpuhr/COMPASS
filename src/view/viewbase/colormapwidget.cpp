@@ -49,9 +49,54 @@ ColorLegendWidget::~ColorLegendWidget() = default;
 
 /**
 */
-void ColorLegendWidget::setColorMap(ColorMap* colormap)
+void ColorLegendWidget::setColorMap(const ColorMap& colormap)
 {
     colormap_ = colormap;
+
+    updateUI();
+}
+
+/**
+*/
+void ColorLegendWidget::setDescriptionMode(ColorMapDescriptionMode mode)
+{
+    if (descr_mode_ == mode)
+        return;
+
+    descr_mode_ = mode;
+
+    updateUI();
+}
+
+/**
+*/
+void ColorLegendWidget::setDecorator(const ColorMap::ValueDecorator& d)
+{
+    decorator_ = d;
+
+    updateUI();
+}
+
+/**
+*/
+void ColorLegendWidget::showSelectionColor(bool ok)
+{
+    if (show_selection_col_ == ok)
+        return;
+
+    show_selection_col_ = ok;
+
+    updateUI();
+}
+
+/**
+*/
+void ColorLegendWidget::showNullColor(bool ok)
+{
+    if (show_null_col_ == ok)
+        return;
+    
+    show_null_col_ = ok;
 
     updateUI();
 }
@@ -74,16 +119,24 @@ void ColorLegendWidget::updateUI()
         widget_ = nullptr;
     }
 
-    if (!colormap_)
+    if (colormap_.numColors() < 1)
         return;
 
     widget_ = new QWidget;
 
-    QGridLayout* layout = new QGridLayout;
+    QVBoxLayout* layout = new QVBoxLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
     widget_->setLayout(layout);
 
-    auto descr = colormap_->getDescription();
+    QGridLayout* layout_grid = new QGridLayout;
+    layout_grid->setContentsMargins(0, 0, 0, 0);
+    layout->addLayout(layout_grid);
+    layout->addStretch(1);
 
+    auto descr = colormap_.getDescription(descr_mode_, 
+                                          show_selection_col_, 
+                                          show_null_col_, 
+                                          decorator_);
     int row = 0;
     for (const auto& d : descr)
     {
@@ -92,14 +145,14 @@ void ColorLegendWidget::updateUI()
 
         QLabel* l = new QLabel;
         l->setPixmap(QPixmap::fromImage(img));
-        l->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+        l->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
 
         QLabel* l2 = new QLabel;
         l2->setText(QString::fromStdString(d.second));
-        l2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        l2->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
-        layout->addWidget(l , row, 0);
-        layout->addWidget(l2, row, 1);
+        layout_grid->addWidget(l , row, 0);
+        layout_grid->addWidget(l2, row, 1);
 
         ++row;
     }

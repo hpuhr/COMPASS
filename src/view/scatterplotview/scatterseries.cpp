@@ -128,10 +128,10 @@ QRectF ScatterSeries::getDataBounds() const
 {
     bool empty = true;
 
-    double x_min = std::numeric_limits<double>::max(); // everything is <= this
-    double x_max = std::numeric_limits<double>::min(); // everything is >= this
+    double x_min = std::numeric_limits<double>::max();    // everything is <= this
+    double x_max = std::numeric_limits<double>::lowest(); // everything is >= this
     double y_min = std::numeric_limits<double>::max();
-    double y_max = std::numeric_limits<double>::min();
+    double y_max = std::numeric_limits<double>::lowest();
 
     for (const auto& p : points)
     {

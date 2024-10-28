@@ -55,12 +55,10 @@ public:
                               const std::string& feature_description,
                               bool generate_geoimage,
                               const boost::optional<unsigned int>& grid_num_cells_x = boost::optional<unsigned int>(),
-                              const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>(),
-                              const boost::optional<unsigned int>& grid_pixels_per_cell = boost::optional<unsigned int>())
+                              const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>())
     :   FeatureDefinition    (eval_manager, description_type, feature_description, "", "")
     ,   grid_num_cells_x_    (grid_num_cells_x)
     ,   grid_num_cells_y_    (grid_num_cells_y)
-    ,   grid_pixels_per_cell_(grid_pixels_per_cell)
     ,   generate_geoimage_   (generate_geoimage)
     {
         //default converter
@@ -92,9 +90,8 @@ public:
         //create suitably sized grid
         QRectF roi = gridBounds(result->sectorLayer(), {});
 
-        unsigned int grid_num_cells_x     = grid_num_cells_x_.has_value() ? grid_num_cells_x_.value() : FeatureDefinition::evalManager().settings().grid_num_cells_x;
-        unsigned int grid_num_cells_y     = grid_num_cells_y_.has_value() ? grid_num_cells_y_.value() : evalManager().settings().grid_num_cells_y;
-        unsigned int grid_pixels_per_cell = grid_pixels_per_cell_.has_value() ? grid_pixels_per_cell_.value() : evalManager().settings().grid_pixels_per_cell;
+        unsigned int grid_num_cells_x = grid_num_cells_x_.has_value() ? grid_num_cells_x_.value() : FeatureDefinition::evalManager().settings().grid_num_cells_x;
+        unsigned int grid_num_cells_y = grid_num_cells_y_.has_value() ? grid_num_cells_y_.value() : evalManager().settings().grid_num_cells_y;
 
         auto resolution = grid2d::GridResolution().setCellCount(grid_num_cells_x,
                                                                 grid_num_cells_y);
@@ -159,7 +156,6 @@ public:
 
             //get render settings and override some values
             Grid2DRenderSettings render_settings = ds.render_settings;
-            render_settings.pixels_per_cell = grid_pixels_per_cell;
 
             //store layer
             grid.addToLayers(layers, ds.series_name, ds.value_type);
@@ -283,7 +279,6 @@ private:
 
     boost::optional<unsigned int> grid_num_cells_x_;
     boost::optional<unsigned int> grid_num_cells_y_;
-    boost::optional<unsigned int> grid_pixels_per_cell_;
 
     bool generate_geoimage_ = true;
 };
@@ -299,9 +294,8 @@ public:
                           const std::string& feature_description,
                           bool generate_geoimage,
                           const boost::optional<unsigned int>& grid_num_cells_x = boost::optional<unsigned int>(),
-                          const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>(),
-                          const boost::optional<unsigned int>& grid_pixels_per_cell = boost::optional<unsigned int>())
-    :   FeatureDefinitionGridBase<T>(eval_manager, "grid", feature_description, generate_geoimage, grid_num_cells_x, grid_num_cells_y, grid_pixels_per_cell)
+                          const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>())
+    :   FeatureDefinitionGridBase<T>(eval_manager, "grid", feature_description, generate_geoimage, grid_num_cells_x, grid_num_cells_y)
     {
     }
     virtual ~FeatureDefinitionGrid() = default;
@@ -338,9 +332,8 @@ public:
     FeatureDefinitionBinaryGrid(const EvaluationManager& eval_manager,
                                 const std::string& feature_description,
                                 const boost::optional<unsigned int>& grid_num_cells_x = boost::optional<unsigned int>(),
-                                const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>(),
-                                const boost::optional<unsigned int>& grid_pixels_per_cell = boost::optional<unsigned int>())
-    :   FeatureDefinitionGridBase<bool>(eval_manager, "binary_grid", feature_description, true, grid_num_cells_x, grid_num_cells_y, grid_pixels_per_cell)
+                                const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>())
+    :   FeatureDefinitionGridBase<bool>(eval_manager, "binary_grid", feature_description, true, grid_num_cells_x, grid_num_cells_y)
     {
         //converts bool -> double
         converter_ = [ & ] (const bool& v) { return v ? 1.0 : 0.0; };

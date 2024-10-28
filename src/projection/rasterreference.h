@@ -44,6 +44,21 @@ struct RasterReference
         is_north_up      = srs_is_north_up;
     }
 
+    void set(const std::string& srs_str,
+             const std::vector<double>& geo_transform)
+    {
+        assert(geo_transform.size() == 6);
+
+        srs = srs_str;
+
+        is_north_up = geo_transform[ 5 ] < 0;
+
+        img_origin_x     = geo_transform[ 0 ];
+        img_pixel_size_x = geo_transform[ 1 ];
+        img_origin_y     = geo_transform[ 3 ];
+        img_pixel_size_y = is_north_up ? -geo_transform[ 5 ] : geo_transform[ 5 ];
+    }
+
     QRectF getROI(int w, int h) const
     {
         double roi_w = w * img_pixel_size_x;
@@ -64,6 +79,18 @@ struct RasterReference
                  img_origin_y + offsy * dy, 
                  0, 
                  dy };
+    }
+
+    RasterReference subsampled(int samples) const
+    {
+        RasterReference r = *this;
+        if (samples <= 1)
+            return r;
+        
+        r.img_pixel_size_x /= samples;
+        r.img_pixel_size_y /= samples;
+
+        return r;
     }
 
     bool fromJSON(const nlohmann::json& json_ref)

@@ -56,9 +56,13 @@ protected:
     void updateSelectedVariables();
     void updateSelectedVariables(size_t idx);
 
-    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
+    const dbContent::VariableSelectionWidget* variableSelection(size_t idx) const;
 
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
     virtual void configChanged_impl() {};
+
+    virtual void preVariableChangedEvent(int idx) {}
+    virtual void postVariableChangedEvent(int idx) {}
 
     QVBoxLayout* configLayout() { return config_layout_; }
 

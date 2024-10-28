@@ -621,9 +621,9 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
             std::vector<Eigen::Vector3d> accuracies;
 
             double lat_min = std::numeric_limits<double>::max();
-            double lat_max = std::numeric_limits<double>::min();
+            double lat_max = std::numeric_limits<double>::lowest();
             double lon_min = std::numeric_limits<double>::max();
-            double lon_max = std::numeric_limits<double>::min();
+            double lon_max = std::numeric_limits<double>::lowest();
 
             for (size_t i = 0; i < na; ++i)
             {

@@ -93,17 +93,17 @@ inline std::string valueTypeToString(ValueType vtype)
     switch (vtype)
     {
         case ValueTypeCount:
-            return "count";
+            return "Count";
         case ValueTypeMin:
-            return "min";
+            return "Min";
         case ValueTypeMax:
-            return "max";
+            return "Max";
         case ValueTypeMean:
-            return "mean";
+            return "Mean";
         case ValueTypeVar:
-            return "var";
+            return "Var";
         case ValueTypeStddev:
-            return "stddev";
+            return "Stddev";
         default:
             return "";
     }

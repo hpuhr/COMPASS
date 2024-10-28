@@ -18,6 +18,8 @@
 #include "gridview.h"
 #include "gridviewdatawidget.h"
 #include "gridviewwidget.h"
+#include "viewvariable.h"
+#include "property_templates.h"
 
 #include "viewpointgenerator.h"
 
@@ -29,15 +31,19 @@
 
 #include <QApplication>
 
+/**
+*/
 GridView::Settings::Settings() 
 :   value_type            (grid2d::ValueType::ValueTypeCount)
 ,   grid_resolution       (50       )
-,   render_pixels_per_cell(10       )
-,   render_color_min      ("#00FF00")
-,   render_color_max      ("#FF0000")
+,   render_color_value_min(""       )
+,   render_color_value_max(""       )
+,   render_color_scale    ((int)colorscale::ColorScale::Green2Red)
 ,   render_color_num_steps(10       )
 {
 }
+
+const int GridView::DecimalsDefault = 3;
 
 /**
 */
@@ -135,6 +141,14 @@ GridViewDataWidget* GridView::getDataWidget()
 
 /**
 */
+const GridViewDataWidget* GridView::getDataWidget() const
+{
+    assert (widget_);
+    return widget_->getViewDataWidget();
+}
+
+/**
+*/
 dbContent::VariableSet GridView::getBaseSet(const std::string& dbcontent_name)
 {
     return dbContent::VariableSet();
@@ -195,12 +209,12 @@ void GridView::setGridResolution(unsigned int n, bool notify_changes)
 
 /**
 */
-void GridView::setPixelsPerCell(unsigned int n, bool notify_changes)
+void GridView::setColorScale(colorscale::ColorScale scale, bool notify_changes)
 {
-    if (settings_.render_pixels_per_cell == n)
+    if (settings_.render_color_scale == (int)scale)
         return;
 
-    setParameter(settings_.render_pixels_per_cell, n);
+    setParameter(settings_.render_color_scale, (int)scale);
 
     if (notify_changes)
         notifyRefreshNeeded();
@@ -220,29 +234,67 @@ void GridView::setColorSteps(unsigned int n, bool notify_changes)
 }
 
 /**
-*/
-void GridView::setColorMin(const QColor& color, bool notify_changes)
+ */
+void GridView::setMinValue(const std::string& value_str, bool notify_changes)
 {
-    if (settings_.render_color_min == color.name().toStdString())
+    if (settings_.render_color_value_min == value_str)
         return;
 
-    setParameter(settings_.render_color_min, color.name().toStdString());
-
+    setParameter(settings_.render_color_value_min, value_str);
+    
     if (notify_changes)
         notifyRefreshNeeded();
 }
 
 /**
-*/
-void GridView::setColorMax(const QColor& color, bool notify_changes)
+ */
+void GridView::setMaxValue(const std::string& value_str, bool notify_changes)
 {
-    if (settings_.render_color_max == color.name().toStdString())
+    if (settings_.render_color_value_max == value_str)
         return;
 
-    setParameter(settings_.render_color_max, color.name().toStdString());
-
+    setParameter(settings_.render_color_value_max, value_str);
+    
     if (notify_changes)
         notifyRefreshNeeded();
+}
+
+/**
+ */
+boost::optional<double> GridView::getMinValue() const
+{
+    if (settings_.render_color_value_min.empty())
+        return {};
+
+    auto dtype = currentDataType();
+
+    return property_templates::string2Double(dtype, settings_.render_color_value_min);
+}
+
+/**
+ */
+boost::optional<double> GridView::getMaxValue() const
+{
+    if (settings_.render_color_value_max.empty())
+        return {};
+
+    auto dtype = currentDataType();
+
+    return property_templates::string2Double(dtype, settings_.render_color_value_max);
+}
+
+/**
+ */
+PropertyDataType GridView::currentDataType() const
+{
+    auto data_type = variable(2).dataType();
+
+    //counts are active => always override data type
+    if (settings_.value_type == (int)grid2d::ValueType::ValueTypeCount)
+        return PropertyDataType::UINT;
+
+    //in all other cases the data type of the distributed variable should be the right one
+    return data_type;
 }
 
 /**

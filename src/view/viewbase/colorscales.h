@@ -2433,7 +2433,16 @@ namespace colorscale
     static const double ScaleGreen2Red[][3] = 
     {
         { 0.0, 1.0, 0.0 },
-        { 1.0, 0.8, 0.0 },
+        { 1.0, 0.6, 0.0 },
+        { 1.0, 0.0, 0.0 }
+    };
+
+    static const double ScaleBlue2Green2Red[][3] = 
+    {
+        { 0.0, 0.0, 1.0 },
+        { 0.0, 0.6, 1.0 },
+        { 0.0, 1.0, 0.0 },
+        { 1.0, 0.6, 0.0 },
         { 1.0, 0.0, 0.0 }
     };
 
@@ -2678,6 +2687,11 @@ namespace colorscale
         return interpColor(t, ScaleGreen2Red);
     }
 
+    inline Eigen::Vector3d sampleBlue2Green2Red(double t)
+    {
+        return interpColor(t, ScaleBlue2Green2Red);
+    }
+
     /**
     */
     inline Eigen::Vector3d sample(double t, ColorScale scale)
@@ -2687,7 +2701,7 @@ namespace colorscale
             case ColorScale::Parula:
                 return sampleParula(t);
             case ColorScale::Parula_Cut:
-                return sampleParula(t, 0, 20);
+                return sampleParula(t, 0, 35);
             case ColorScale::Heat:
                 return sampleHeat(t);
             case ColorScale::Jet:
@@ -2701,19 +2715,19 @@ namespace colorscale
             case ColorScale::Magma:
                 return sampleMagma(t);
             case ColorScale::Magma_Cut:
-                return sampleMagma(t, 0, 20);
+                return sampleMagma(t, 0, 35);
             case ColorScale::Inferno:
                 return sampleInferno(t);
             case ColorScale::Inferno_Cut:
-                return sampleInferno(t, 0, 25);
+                return sampleInferno(t, 0, 35);
             case ColorScale::Plasma:
                 return samplePlasma(t);
             case ColorScale::Plasma_Cut:
-                return samplePlasma(t, 0, 20);
+                return samplePlasma(t, 0, 30);
             case ColorScale::Viridis:
                 return sampleViridis(t);
             case ColorScale::Viridis_Cut:
-                return sampleViridis(t, 0, 20);
+                return sampleViridis(t, 0, 30);
             case ColorScale::Cividis:
                 return sampleCividis(t);
             case ColorScale::Github:
@@ -2725,11 +2739,13 @@ namespace colorscale
             case ColorScale::Blue:
                 return sampleBlue(t);
             case ColorScale::Cubehelix:
-                return sampleCubehelix(t);
+                return sampleCubehelix(t, 0, 20);
             case ColorScale::HSV:
                 return sampleHSV(t);
             case ColorScale::Green2Red:
                 return sampleGreen2Red(t);
+            case ColorScale::Blue2Green2Red:
+                return sampleBlue2Green2Red(t);
             default:
                 break;
         }
@@ -2788,6 +2804,8 @@ namespace colorscale
                 return "HSV";
             case ColorScale::Green2Red:
                 return "Green2Red";
+            case ColorScale::Blue2Green2Red:
+                return "Blue2Green2Red";
             case ColorScale::Custom:
                 return "Custom";
             default:

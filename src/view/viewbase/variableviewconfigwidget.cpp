@@ -142,7 +142,11 @@ void VariableViewConfigWidget::selectedVariableChangedSlot(int idx)
     auto selection = var_selection_widgets_.at(idx);
     assert(selection);
 
+    preVariableChangedEvent(idx);
+
     var_view_->variable(idx).setVariable(*selection, true);
+
+    postVariableChangedEvent(idx);
 }
 
 /**
@@ -173,6 +177,13 @@ void VariableViewConfigWidget::updateSelectedVariables(size_t idx)
     assert(selection);
 
     var_view_->variable(idx).updateWidget(*selection);
+}
+
+/**
+*/
+const dbContent::VariableSelectionWidget* VariableViewConfigWidget::variableSelection(size_t idx) const
+{
+    return var_selection_widgets_.at(idx);
 }
 
 /**

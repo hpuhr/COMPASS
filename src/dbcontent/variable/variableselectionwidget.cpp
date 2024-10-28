@@ -342,6 +342,17 @@ MetaVariable& VariableSelectionWidget::selectedMetaVariable() const
     return dbo_man_.metaVariable(var_name);
 }
 
+std::pair<std::string, std::string> VariableSelectionWidget::selectionAsString() const
+{
+    assert(object_label_);
+    assert(variable_label_);
+
+    std::string obj_name = object_label_->text().toStdString();
+    std::string var_name = variable_label_->text().toStdString();
+
+    return std::make_pair(obj_name, var_name);
+}
+
 void VariableSelectionWidget::showDBContentOnly(const std::string& only_dbcontent_name)
 {
     show_dbcont_only_ = true;
