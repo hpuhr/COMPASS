@@ -609,7 +609,7 @@ void ProjectionManager::test()
             bool has_baro_altitude;
             double baro_altitude_ft;
             double latitude, longitude, wgs_alt;
-            double latitude2, longitude2, wgs_alt2;
+            //double latitude2, longitude2, wgs_alt2;
 
             for (unsigned int cnt=0; cnt < 100; ++cnt)
             {

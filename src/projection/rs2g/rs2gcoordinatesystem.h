@@ -21,6 +21,8 @@
 
 #include <Eigen/Dense>
 
+class RadarBiasInfo;
+
 class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
 {
   public:
@@ -31,6 +33,11 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
                                     bool has_altitude, double altitude_m,
                                     double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
 
+    bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
+                                    bool has_altitude, double altitude_m,
+                                    RadarBiasInfo& bias_info,
+                                    double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
+
     bool geocentric2Geodesic(double ecef_x, double ecef_y, double ecef_z,
                              double& lat_deg, double& lon_deg, double& height_m, bool debug=false);
 
@@ -39,6 +46,11 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
 
     void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
                               bool has_altitude, double altitude_m,
+                              double& local_x, double& local_y, double& local_z, bool debug=false);
+
+    void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
+                              bool has_altitude, double altitude_m,
+                              RadarBiasInfo& bias_info,
                               double& local_x, double& local_y, double& local_z, bool debug=false);
 
     void localCart2RadarSlant(double local_x, double local_y, double local_z,
