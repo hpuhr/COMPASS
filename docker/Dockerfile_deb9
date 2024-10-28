@@ -172,6 +172,8 @@ RUN cd jasper && dpkg -i *.deb
 
 RUN apt-get install libpcap-dev -y
 
+RUN apt-get install libgeographic-dev -y
+
 RUN ldconfig -v /usr/lib64/ /usr/local/
 RUN updatedb
 

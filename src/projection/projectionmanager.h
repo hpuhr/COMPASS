@@ -23,6 +23,11 @@
 
 #include "gdal_priv.h"
 
+// fix stupid gdal constant
+#ifdef PACKAGE_VERSION
+#undef PACKAGE_VERSION
+#endif
+
 //#include <GeographicLib/Geoid.hpp>
 
 #include <memory>

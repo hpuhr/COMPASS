@@ -608,7 +608,7 @@ template <class T>
 std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
 {
     bool set = false;
-    T min, max;
+    T min{}, max{};
 
     for (; index < data_.size(); ++index)
     {
