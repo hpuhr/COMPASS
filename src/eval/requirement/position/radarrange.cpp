@@ -115,7 +115,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
     unsigned int tst_ds_id;
 
-    double ref_range_m, ref_azm_deg, tst_range_m, tst_azm_deg;
+    double ref_slant_range_m, ref_ground_range_m, ref_alt_m, ref_azm_rad,
+        tst_slant_range_m, tst_ground_range_m, tst_alt_m, tst_azm_rad;
     double range_m_diff;
 
     std::vector<double> range_values_ref;
@@ -193,7 +194,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
         ok = projection.wgs842PolarHorizontal(tst_ds_id,
                                               ref_pos->latitude_, ref_pos->longitude_, 0,
-                                              ref_azm_deg, ref_range_m);
+                                              ref_azm_rad, ref_slant_range_m, ref_ground_range_m,
+                                              ref_alt_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
@@ -208,7 +210,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
         ok = projection.wgs842PolarHorizontal(tst_ds_id,
                                               tst_pos.latitude_, tst_pos.longitude_, 0,
-                                              tst_azm_deg, tst_range_m);
+                                              tst_azm_rad, tst_slant_range_m, tst_ground_range_m,
+                                              tst_alt_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
@@ -221,7 +224,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
             continue;
         }
 
-        range_m_diff = ref_range_m - tst_range_m;
+        range_m_diff = ref_ground_range_m - tst_ground_range_m;
 
         if (std::isnan(range_m_diff) || std::isinf(range_m_diff))
         {
@@ -249,8 +252,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
             comment = "Failed";
         }
 
-        range_values_ref.push_back(ref_range_m);
-        range_values_tst.push_back(tst_range_m);
+        range_values_ref.push_back(ref_ground_range_m);
+        range_values_tst.push_back(tst_ground_range_m);
 
         addDetail(timestamp, tst_pos,
                     ref_pos,

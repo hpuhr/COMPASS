@@ -1,4 +1,6 @@
 #include "projectioncoordinatesystembase.h"
+#include "stringconv.h"
+#include "logger.h"
 
 // SSS D.2
 const double ProjectionCoordinateSystemBase::EE_A = 6378137; //  WGS−84 geoid in m
@@ -8,6 +10,8 @@ const double ProjectionCoordinateSystemBase::EE_E2 = EE_F * (2 - EE_F);
 
 const double ProjectionCoordinateSystemBase::ALMOST_ZERO = 1e-10;
 const double ProjectionCoordinateSystemBase::PRECISION_GEODESIC = 1e-8;
+
+using namespace Utils;
 
 ProjectionCoordinateSystemBase::ProjectionCoordinateSystemBase(unsigned int id,
                                double latitude_deg, double longitude_deg,
@@ -49,9 +53,16 @@ double ProjectionCoordinateSystemBase::rs2gElevation(double H, double rho)
     return El_rad;
 }
 
-double ProjectionCoordinateSystemBase::getGroundRange(
-    double slant_range_m, bool has_altitude, double altitude_m)
+void ProjectionCoordinateSystemBase::getGroundRange(
+    double slant_range_m, bool has_altitude, double altitude_m,
+    double& ground_range_m, double& adjusted_altitude_m, bool debug)
 {
+    if (debug)
+        loginf << "ProjectionCoordinateSystemBase: getGroundRange: slant_range_m "
+               << String::doubleToStringPrecision(slant_range_m, 2)
+               << " has_altitude " << has_altitude
+               << " altitude_m " << String::doubleToStringPrecision(altitude_m, 2);
+
     double elevation_m {0};
 
     if (has_altitude)
@@ -61,5 +72,16 @@ double ProjectionCoordinateSystemBase::getGroundRange(
 
     double elev_angle_rad = rs2gElevation(elevation_m, slant_range_m);
 
-    return slant_range_m * cos(elev_angle_rad);
+    ground_range_m = slant_range_m * cos(elev_angle_rad);
+
+    adjusted_altitude_m = h_r_ + slant_range_m * sin(elev_angle_rad);
+
+    if (debug)
+        loginf << "ProjectionCoordinateSystemBase: getGroundRange: has_altitude " << has_altitude
+               << " elevation_m " << String::doubleToStringPrecision(elevation_m, 2)
+               << " elev_angle_rad " << String::doubleToStringPrecision(elev_angle_rad, 6)
+               << " ground_range_m " << String::doubleToStringPrecision(ground_range_m, 2)
+               << " adjusted_altitude_m " << String::doubleToStringPrecision(adjusted_altitude_m, 2);
+
+    return;
 }

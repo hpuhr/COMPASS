@@ -604,17 +604,21 @@ void ProjectionManager::test()
 
         for (unsigned int id : proj.ids())
         {
-            double azimuth_rad, slant_range_m;
+            double azimuth_rad, slant_range_m, ground_range_m, adjusted_altitude_m;
+
             bool has_baro_altitude;
             double baro_altitude_ft;
             double latitude, longitude, wgs_alt;
+            double latitude2, longitude2, wgs_alt2;
 
             for (unsigned int cnt=0; cnt < 100; ++cnt)
             {
+                loginf << "\n";
+
                 azimuth_rad = Number::randomNumber(-M_PI/2, M_PI/2);
                 slant_range_m = Number::randomNumber(0, 100000);
 
-                if (Number::randomNumber(0, 1) > 0.5)
+                if (Number::randomNumber(1, 100) > 50)
                 {
                     has_baro_altitude = false;
                     baro_altitude_ft = 0;
@@ -622,28 +626,50 @@ void ProjectionManager::test()
                 else
                 {
                     has_baro_altitude = true;
-                    baro_altitude_ft = Number::randomNumber(0, 50000);
+                    baro_altitude_ft = Number::randomNumber(0, 30000);
                 }
 
-                proj.polarToWGS84(id, azimuth_rad, slant_range_m, has_baro_altitude, baro_altitude_ft,
-                                  latitude, longitude, wgs_alt);
+                proj.getGroundRange(id, slant_range_m, has_baro_altitude, baro_altitude_ft * FT2M,
+                                    ground_range_m, adjusted_altitude_m, true);
 
-                double calc_azimuth_rad, calc_slant_range_m;
+                proj.polarToWGS84(id, azimuth_rad, slant_range_m, has_baro_altitude, baro_altitude_ft,
+                                  latitude, longitude, wgs_alt, true);
+
+                proj.polarToWGS84(id, azimuth_rad, ground_range_m, true, 0,
+                                  latitude2, longitude2, wgs_alt2, true);
+
+                double lat_diff = fabs(latitude - latitude2);
+                double lon_diff = fabs(longitude - longitude2);
+
+                if (lat_diff >= 1E-6 || lon_diff >= 1E-6)
+                    logerr << "ProjectionManager: test: lat_diff "
+                           << String::doubleToStringPrecision(lat_diff, 7)
+                           << " lon_diff " << String::doubleToStringPrecision(lon_diff, 7);
+                           //<< " wgs_alt_diff " << String::doubleToStringPrecision(wgs_alt_diff, 1);
+
+                assert (lat_diff < 1E-6);
+                assert (lon_diff < 1E-6);
+
+                double calc_azimuth_rad, calc_slant_range_m, calc_ground_range_m, calc_radar_alt_m;
 
                 proj.wgs842PolarHorizontal(id, latitude, longitude, wgs_alt,
-                                           calc_azimuth_rad, calc_slant_range_m);
+                                           calc_azimuth_rad, calc_slant_range_m,
+                                           calc_ground_range_m,calc_radar_alt_m, true);
 
                 double calc_azimuth_diff = Number::calculateMinAngleDifference(
                     calc_azimuth_rad*RAD2DEG, azimuth_rad*RAD2DEG);
-                double calc_range_diff = fabs(calc_slant_range_m - slant_range_m);
+                double calc_slant_range_diff = fabs(calc_slant_range_m - slant_range_m);
+                double calc_ground_range_diff = fabs(calc_ground_range_m - ground_range_m);
 
-                if (calc_azimuth_diff >= 1E-4 || calc_range_diff >= 1E-2)
+                if (calc_azimuth_diff >= 1E-4 || calc_slant_range_diff >= 1E-2 || calc_ground_range_diff >= 1E-2)
                     logerr << "ProjectionManager: test: calc_azimuth_diff "
                            << String::doubleToStringPrecision(calc_azimuth_diff, 6)
-                           << " calc_range_diff " << String::doubleToStringPrecision(calc_range_diff, 2);
+                           << " calc_slant_range_diff " << String::doubleToStringPrecision(calc_slant_range_diff, 2)
+                        << " calc_ground_range_diff " << String::doubleToStringPrecision(calc_ground_range_diff, 2);
 
                 assert (calc_azimuth_diff < 1E-4);
-                assert (calc_range_diff < 1E-2);
+                assert (calc_slant_range_diff < 1E-2);
+                assert (calc_ground_range_diff < 1E-2);
             }
         }
 
@@ -654,3 +680,4 @@ void ProjectionManager::test()
 
 
 }
+

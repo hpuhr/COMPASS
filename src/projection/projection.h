@@ -44,14 +44,16 @@ public:
     virtual void clearCoordinateSystems() = 0;
     virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                               bool has_baro_altitude, double baro_altitude_ft, double& latitude_deg,
-                              double& longitude_deg, double& alt_wgs_m) = 0;
+                              double& longitude_deg, double& alt_wgs_m, bool debug=false) = 0;
 
     virtual bool wgs842PolarHorizontal(unsigned int id,
                                        double latitude_deg, double longitude_deg, double alt_wgs_m,
-                                       double& azimuth_rad, double& slant_range_m) = 0;
+                                       double& azimuth_rad, double& slant_range_m, double& ground_range_m,
+                                       double& radar_altitude_m, bool debug=false) = 0;
 
-    double getGroundRange(unsigned int id, double slant_range_m,
-                          bool has_altitude, double altitude_m);
+    void getGroundRange(unsigned int id, double slant_range_m,
+                          bool has_altitude, double altitude_m,
+                          double& ground_range_m, double& adjusted_altitude_m, bool debug=false);
 
     void addAllRadarCoordinateSystems(); // only adds if not already added
 

@@ -29,29 +29,30 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
 
     bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
                                     bool has_altitude, double altitude_m,
-                                    double& ecef_x, double& ecef_y, double& ecef_z);
+                                    double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
 
     bool geocentric2Geodesic(double ecef_x, double ecef_y, double ecef_z,
-                             double& lat_deg, double& lon_deg, double& height_m);
+                             double& lat_deg, double& lon_deg, double& height_m, bool debug=false);
 
     void geodesic2Geocentric(double lat_rad, double lon_rad, double height_m,
-                                    double& ecef_x, double& ecef_y, double& ecef_z);
+                                    double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
 
     void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
                               bool has_altitude, double altitude_m,
-                              double& local_x, double& local_y, double& local_z);
+                              double& local_x, double& local_y, double& local_z, bool debug=false);
 
     void localCart2RadarSlant(double local_x, double local_y, double local_z,
-                              double& azimuth_rad, double& slant_range_m, double& ground_range_m, double& altitude_m);
+                              double& azimuth_rad, double& slant_range_m, double& ground_range_m,
+                              double& altitude_m, bool debug=false);
 
     void localCart2Geocentric(double local_x, double local_y, double local_z,
-                              double& ecef_x, double& ecef_y, double& ecef_z);
+                              double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
 
     void geocentric2LocalCart(double ecef_x, double ecef_y, double ecef_z,
-                              double& local_x, double& local_y, double& local_z);
+                              double& local_x, double& local_y, double& local_z, bool debug=false);
 
     void geodesic2LocalCart(double lat_rad, double lon_rad, double height_m,
-                            double& local_x, double& local_y, double& local_z);
+                            double& local_x, double& local_y, double& local_z, bool debug=false);
 
   protected:
     Eigen::Matrix3d rs2g_A_;     // R matrix

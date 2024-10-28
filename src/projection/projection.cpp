@@ -40,10 +40,14 @@ void Projection::generateSubConfigurable(const std::string& class_id,
 {
 }
 
-double Projection::getGroundRange(unsigned int id, double slant_range_m,
-                                  bool has_altitude, double altitude_m)
+void Projection::getGroundRange(
+    unsigned int id, double slant_range_m, bool has_altitude, double altitude_m,
+    double& ground_range_m, double& adjusted_altitude_m, bool debug)
 {
-    return coordinateSystem(id).getGroundRange(slant_range_m, has_altitude, altitude_m);
+    coordinateSystem(id).getGroundRange(slant_range_m, has_altitude, altitude_m,
+                                        ground_range_m, adjusted_altitude_m, debug);
+
+    return;
 }
 
 void Projection::addAllRadarCoordinateSystems()

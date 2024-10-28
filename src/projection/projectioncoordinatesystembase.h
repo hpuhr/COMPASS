@@ -12,8 +12,9 @@ public:
 
     double rs2gElevation(double H, double rho);
 
-    double getGroundRange(double slant_range_m,
-                          bool has_altitude, double altitude_m);
+    void getGroundRange(double slant_range_m,
+                          bool has_altitude, double altitude_m,
+                          double& ground_range_m, double& adjusted_altitude_m, bool debug=false);
 
 protected:
     // SSS D.2
