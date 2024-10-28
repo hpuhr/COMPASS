@@ -714,7 +714,6 @@ void ReconstructorTask::loadingDoneSlot()
            << " current_slice_idx " << current_slice_idx_;
 
     loading_slice_->data_ = dbcontent_man.data();
-    assert (loading_slice_->data_.size());
 
     dbcontent_man.clearData(); // clear previous
 
@@ -749,7 +748,9 @@ void ReconstructorTask::loadingDoneSlot()
            << !loading_slice_->first_slice_
            << " remove ts " << Time::toString(loading_slice_->remove_before_time_);
 
-    processDataSlice();
+    if (loading_slice_->data_.size())
+        processDataSlice();
+
     assert (!loading_slice_);
     assert (processing_data_slice_);
 
