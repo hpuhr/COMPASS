@@ -136,25 +136,25 @@ protected:
      */
     virtual bool refill_impl() override final
     {
-        loginf << "HistogramGeneratorBuffer: refill_impl";
+        logdbg << "HistogramGeneratorBuffer: refill_impl";
 
         //reinit intermediate data
 
-        loginf << "HistogramGeneratorBuffer: refill_impl: intermediate data";
+        logdbg << "HistogramGeneratorBuffer: refill_impl: intermediate data";
         initIntermediateData();
 
         //add all buffers
         for (auto& elem : *currentData())
         {
-            loginf << "HistogramGeneratorBuffer: refill_impl: addBuffer " << elem.first;
+            logdbg << "HistogramGeneratorBuffer: refill_impl: addBuffer " << elem.first;
 
             bool ok = addBuffer(elem.first, *elem.second);
 
             if (!ok)
-                logdbg << "HistogramGeneratorBuffer: could not add buffer of DBContent " << elem.first;
+                logdbg << "HistogramGeneratorBuffer: refill_impl: could not add buffer of dbcontent " << elem.first;
         }
 
-        loginf << "HistogramGeneratorBuffer: refill_impl: done";
+        logdbg << "HistogramGeneratorBuffer: refill_impl: done";
 
         return true;
     }
