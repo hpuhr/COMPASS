@@ -111,14 +111,20 @@ protected:
             if (ok)
                 scanned_contents.push_back(elem.first);
             else
-                logdbg << "HistogramGeneratorBuffer: could not scan buffer of DBContent " << elem.first;
+                logdbg << "HistogramGeneratorBuffer: generateHistograms_impl: could not scan buffer of DBContent " << elem.first;
         }
 
         //no data range available -> no good
         if (scanned_contents.empty() || !histogram_init_.valid())
             return false;
 
+        auto range = histogram_init_.getRange();
+
+        logdbg << "HistogramGeneratorBuffer: generateHistograms_impl: RANGE: min = " << range->first << ", max = " << range->second;
+
         auto config = histogram_init_.generateConfiguration();
+
+        logdbg << "HistogramGeneratorBuffer: generateHistograms_impl: CONFIG: num bins = " << config.num_bins << ", sorted = " << config.sorted_bins << ", type = " << (int)config.type;
 
         //init needed histograms
         for (const auto& db_content : scanned_contents)
@@ -319,32 +325,19 @@ private:
 
         auto it = histograms_.begin();
 
-        logdbg << "HistogramGeneratorBufferT: labelsForBin: numBins " << (int)it->second.numBins()
-               <<  " numRealBins " << (int)it->second.numRealBins();
-        // sometimes [INFO] HistogramGeneratorBufferT: labelsForBin: numBins 20 numRealBins 0
-
-
-        if (bin >= (int)it->second.numBins() || bin >= (int)it->second.numRealBins())
+        if (bin >= (int)it->second.numBins())
             return {};
-
-        logdbg << "HistogramGeneratorBufferT: labelsForBin: var";
 
         auto var = currentVariable(it->first);
         if (!var)
             return {};
 
-        logdbg << "HistogramGeneratorBufferT: labelsForBin: getBin bin " << bin << " numBins " << it->second.numRealBins();
-
-        const auto& b = it->second.getBin(bin); // UGA TODO
-
-        logdbg << "HistogramGeneratorBufferT: labelsForBin: labels";
+        const auto& b = it->second.getBin(bin);
 
         BinLabels labels;
         labels.label     = b.label(var);
         labels.label_min = b.labelMin(var);
         labels.label_max = b.labelMax(var);
-
-        logdbg << "HistogramGeneratorBufferT: labelsForBin: done";
 
         return labels;
     }

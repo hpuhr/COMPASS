@@ -277,17 +277,12 @@ public:
         return config_;
     }
 
-    size_t numRealBins() const
-    {
-        return bins_.size();
-    }
-
     /**
      * Returns the given bin.
      */
     const HistogramBinT<T>& getBin(size_t idx) const
     {
-        //assert (idx < bins_.size()); // UGA TODO
+        assert (idx < bins_.size());
         return bins_.at(idx);
     }
 
@@ -521,12 +516,12 @@ private:
     template<typename Tinternal = T>
     bool createFromRangeT(size_t n, const T& min_value, const T& max_value)
     {
+        clear();
+
         if (!histogram_helpers::checkFinite<T>(min_value) || 
             !histogram_helpers::checkFinite<T>(max_value) || 
             min_value >= max_value)
             return false;
-
-        clear();
 
         config_.type        = HistogramConfig::Type::Range;
         config_.num_bins    = 0;

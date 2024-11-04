@@ -297,9 +297,11 @@ bool HistogramGenerator::finalizeResults()
         num_bins_ = (int)r.bins.size();
     }
 
-    if(!subRangeActive() && results_.not_inserted_count != 0) // UGA TODO
-        logerr << "HistogramGenerator::finalizeResults: error subRangeActive " << subRangeActive()
-               << " not_inserted_count " << results_.not_inserted_count;
+    assert(subRangeActive() || results_.not_inserted_count == 0);
+
+    // if(!subRangeActive() && results_.not_inserted_count != 0)
+    //     logerr << "HistogramGenerator::finalizeResults: error subRangeActive " << subRangeActive()
+    //            << " not_inserted_count " << results_.not_inserted_count;
 
     return true;
 }

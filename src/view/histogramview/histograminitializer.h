@@ -47,6 +47,17 @@ public:
         return (data_min_.has_value() && data_max_.has_value());
     }
 
+    const boost::optional<T>& getRangeMin() const { return data_min_; }
+    const boost::optional<T>& getRangeMax() const { return data_max_; }
+
+    boost::optional<std::pair<T,T>> getRange() const
+    {
+        if (!valid())
+            return boost::optional<std::pair<T,T>>();
+        
+        return std::make_pair(data_min_.value(), data_max_.value());
+    }
+
     /**
      * Resets all scanned information.
      */
@@ -84,8 +95,7 @@ public:
             data_max_ = data_max;
 
         //collect distinct values if supported/desired for template type
-        if (!std::is_floating_point<T>::value &&
-            !std::is_same<boost::posix_time::ptime, T>::value)
+        if (collectDistinctValues())
         {
             auto distinct_values = distinctValues(data);
             if (!distinct_values.empty())
@@ -130,8 +140,7 @@ public:
             data_max_ = data_max;
 
         //collect distinct values if supported/desired for template type
-        if (!std::is_floating_point<T>::value &&
-            !std::is_same<boost::posix_time::ptime, T>::value)
+        if (collectDistinctValues())
         {
             auto distinct_values = distinctValues(data);
             if (!distinct_values.empty())
@@ -180,8 +189,7 @@ public:
             data_max_ = data_max;
 
         //collect distinct values if supported/desired for template type
-        if (!std::is_floating_point<T>::value &&
-            !std::is_same<boost::posix_time::ptime, T>::value)
+        if (collectDistinctValues())
         {
             auto distinct_values = distinctValues(get_value_func, n);
             if (!distinct_values.empty())
@@ -209,17 +217,46 @@ public:
         if (num_bins.has_value())
             config.num_bins = num_bins.value();
 
-        //no data range or no distinct values stored -> return default config
-        if (!valid() || 
-            !distinct_values_.has_value() || 
-             distinct_values_.value().empty())
+        logdbg << "HistogramInitializerT: generateConfiguration: valid = " << valid() 
+               << ", has distinct = " << distinct_values_.has_value() 
+               << ", num distinct = " << (distinct_values_.has_value() ? distinct_values_->size() : 0);
+
+        //no data range?
+        if (!valid())
             return config;
 
-        //default config also for floating point numbers and timestamps
-        if (std::is_floating_point<T>::value ||
-            std::is_same<boost::posix_time::ptime, T>::value)
+        bool has_distinct_values     = distinct_values_.has_value() && !distinct_values_.value().empty();
+        bool collect_distinct_values = collectDistinctValues();
+
+        //distinct values should exist in case we collect them
+        assert(!collect_distinct_values || has_distinct_values);
+
+        //for a single value we just return a single category in any case
+        if (data_min_.value() == data_max_.value())
+        {
+            //distinct values should be of size 1 in case we collect them
+            assert(!collect_distinct_values || distinct_values_->size() == 1);
+
+            //single distinct value
+            config.num_bins    = 1;
+            config.type        = HistogramConfig::Type::Category;
+            config.sorted_bins = false;
+
+            if (!collect_distinct_values)
+            {
+                //set distinct value if not yet set
+                distinct_values_ = std::set<T>();
+                distinct_values_->insert(data_min_.value());
+            }
+
+            return config;
+        }
+
+        //no distinct values -> return default range config
+        if (!collect_distinct_values)
             return config;
 
+        //distinct values from here on
         unsigned int num_distinct_values     = distinct_values_.value().size();
         unsigned int num_distinct_values_min = distinct_values_min.has_value() ? distinct_values_min.value() : config.num_bins;
 
@@ -256,6 +293,7 @@ public:
         }
         else
         {
+            assert(distinct_values_.has_value());
             std::vector<T> categories(distinct_values_.value().begin(), distinct_values_.value().end());
             return h.createFromCategories(categories, config.sorted_bins);
         }
@@ -359,6 +397,16 @@ public:
 
 protected:
     /**
+    */
+    bool collectDistinctValues() const
+    {
+        bool is_distinct_type = (!std::is_floating_point<T>::value &&
+                                 !std::is_same<boost::posix_time::ptime, T>::value);
+        
+        return is_distinct_type;
+    }
+
+    /**
      * Returns the buffers distinct (unique) values.
      */
     std::set<T> distinctValues(NullableVector<T>& data) const
@@ -400,9 +448,9 @@ protected:
         return distinct_values;
     }
 
-    boost::optional<T>           data_min_;
-    boost::optional<T>           data_max_;
-    boost::optional<std::set<T>> distinct_values_;
+    boost::optional<T>                   data_min_;
+    boost::optional<T>                   data_max_;
+    mutable boost::optional<std::set<T>> distinct_values_;
 };
 
 /**

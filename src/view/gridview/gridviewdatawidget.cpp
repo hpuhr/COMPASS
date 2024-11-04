@@ -167,12 +167,12 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
         return;
 
     auto bounds = getXYBounds();
-
-    if(!bounds.isValid())
+    if (bounds.isEmpty())
     {
-        logerr << "GridViewDataWidget: processStash: bounds invalid"; // UGA TODO
+        loginf << "GridViewDataWidget: processStash: bounds empty, skipping...";
         return;
     }
+    assert(bounds.isValid());
 
     auto z_bounds = getZBounds();
     assert(z_bounds.has_value());
@@ -240,7 +240,17 @@ void GridViewDataWidget::updateFromAnnotations()
 
     std::unique_ptr<Grid2DLayer> layer(new Grid2DLayer);
     if (!layer->fromJSON(feature[ ViewPointGenFeatureGrid::FeatureGridFieldNameGrid ]))
+    {
+        logerr << "GridViewDataWidget: updateFromAnnotations: could not read grid layer";
         return;
+    }
+
+    if (layer->data.cols() < 1 || 
+        layer->data.rows() < 1)
+    {
+        logerr << "GridViewDataWidget: updateFromAnnotations: grid layer empty";
+        return;
+    }
     
     grid_layers_.addLayer(std::move(layer));
 
