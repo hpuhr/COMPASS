@@ -15,61 +15,78 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RS2GCOORDINATESYSTEM_H
-#define RS2GCOORDINATESYSTEM_H
+#pragma once
+
+#include "projectioncoordinatesystembase.h"
 
 #include <Eigen/Dense>
 
-class RS2GCoordinateSystem
+class RadarBiasInfo;
+
+class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
 {
   public:
     RS2GCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                          double altitude_m);
 
-    bool calculateRadSlt2Geocentric(double x, double y, double z, Eigen::Vector3d& geoc_pos,
-                                    bool has_altitude);
+    bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
+                                    bool has_altitude, double altitude_m,
+                                    double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
 
-    static void geodesic2Geocentric(Eigen::Vector3d& input);
+    bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
+                                    bool has_altitude, double altitude_m,
+                                    RadarBiasInfo& bias_info,
+                                    double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
 
-    static bool geocentric2Geodesic(Eigen::Vector3d& input);
+    bool geocentric2Geodesic(double ecef_x, double ecef_y, double ecef_z,
+                             double& lat_deg, double& lon_deg, double& height_m, bool debug=false);
+
+    void geodesic2Geocentric(double lat_rad, double lon_rad, double height_m,
+                                    double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
+
+    void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
+                              bool has_altitude, double altitude_m,
+                              double& local_x, double& local_y, double& local_z, bool debug=false);
+
+    void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
+                              bool has_altitude, double altitude_m,
+                              RadarBiasInfo& bias_info,
+                              double& local_x, double& local_y, double& local_z, bool debug=false);
+
+    void localCart2RadarSlant(double local_x, double local_y, double local_z,
+                              double& azimuth_rad, double& slant_range_m, double& ground_range_m,
+                              double& altitude_m, bool debug=false);
+
+    void localCart2Geocentric(double local_x, double local_y, double local_z,
+                              double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
+
+    void geocentric2LocalCart(double ecef_x, double ecef_y, double ecef_z,
+                              double& local_x, double& local_y, double& local_z, bool debug=false);
+
+    void geodesic2LocalCart(double lat_rad, double lon_rad, double height_m,
+                            double& local_x, double& local_y, double& local_z, bool debug=false);
 
   protected:
-    static const double EE_A;
-    static const double EE_F;
-    static const double EE_E2;
-    static const double ALMOST_ZERO;
-    static const double PRECISION_GEODESIC;
+    Eigen::Matrix3d rs2g_A_;     // R matrix
 
-    unsigned int id_{0};
-    double latitude_deg_{0};
-    double longitude_deg_{0};
-    double altitude_m_{0};
-
-    Eigen::Matrix3d rs2g_A_;
-
-    Eigen::Matrix3d rs2g_T_Ai_;  // transposed matrix (depends on radar)
+    Eigen::Matrix3d rs2g_T_Ai_;  // transposed matrix R^T (depends on radar)
     Eigen::Vector3d rs2g_bi_;    // vector (depends on radar)
-    double rs2g_hi_;             // height of selected radar
-    double rs2g_Rti_;            // earth radius of tangent sphere at the selected radar
+
     double rs2g_ho_;             // height of COP
     double rs2g_Rto_;            // earth radius of tangent sphere at the COP
 
     Eigen::Matrix3d rs2g_A_p0q0_;
     Eigen::Vector3d rs2g_b_p0q0_;
 
-    void init();
+    double azimuth(double x_m, double y_m);
+    // calculates elevation angle El using H (altitude of aircraft) and rho (slant range)
 
-    double rs2gAzimuth(double x, double y);
-    double rs2gElevation(double z, double rho);
-    void radarSlant2LocalCart(Eigen::Vector3d& local, bool has_altitude);
-    void sysCart2SysStereo(Eigen::Vector3d& b, double* x, double* y);
-    void localCart2Geocentric(Eigen::Vector3d& input);
 
-    static void rs2gGeodesic2Geocentric(Eigen::Vector3d& input);
+    void rs2gFillMat(double lat_rad, double lon_rad, Eigen::Matrix3d& A);
 
-    static void rs2gFillMat(Eigen::Matrix3d& A, double lat, double lon);
+    void rs2gFillVec(double lat_rad, double lon_rad, double height_m, Eigen::Vector3d& b);
 
-    static void rs2gFillVec(Eigen::Vector3d& b, double lat, double lon, double height);
+    Eigen::Vector3d getTVector(double lat_rad, double lon_rad, double height_m);
 };
 
-#endif  // RS2GCOORDINATESYSTEM_H
+

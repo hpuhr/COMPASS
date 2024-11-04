@@ -902,7 +902,8 @@ void ASTERIXPostprocessJob::obfuscateM3A (unsigned int& value)
 
         unsigned int obfuscated_val = obfuscate_m3a_map_.size();
         while (std::find_if(obfuscate_m3a_map_.begin(), obfuscate_m3a_map_.end(),
-                            [obfuscated_val](const auto& mo) {return mo.second == obfuscated_val; })
+                            [obfuscated_val](const std::pair<const unsigned int, unsigned int>& mo)
+                            {return mo.second == obfuscated_val; })
                != obfuscate_m3a_map_.end())
         {
             ++obfuscated_val;
@@ -924,7 +925,8 @@ void ASTERIXPostprocessJob::obfuscateACAD (unsigned int& value)
         unsigned int obfuscated_val = obfuscate_acad_map_.size()+1;
 
         while (std::find_if(obfuscate_acad_map_.begin(), obfuscate_acad_map_.end(),
-                            [obfuscated_val](const auto& mo) {return mo.second == obfuscated_val; })
+                            [obfuscated_val](const std::pair<const unsigned int, unsigned int>& mo)
+                            {return mo.second == obfuscated_val; })
                != obfuscate_acad_map_.end())
         {
             ++obfuscated_val;

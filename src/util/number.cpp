@@ -88,7 +88,7 @@ void calculateWeightedAverageAndStdDev(const std::vector<double>& values, const 
     std_dev = sqrt(1.0 / weight_sum);
 }
 
-const double min_std_dev = 10E-6;
+const double min_std_dev = 1E-6;
 const unsigned int good_sample_size = 5;
 
 void addWithWeightedAverage(double value1, double std_dev1, unsigned int value1_cnt,
@@ -192,31 +192,15 @@ double calculateAngle(double degrees, double minutes, double seconds)
 
 double calculateMinAngleDifference(double a_deg, double b_deg)
 {
-    //double phi = std::fmod(std::fabs(a_deg - b_deg), 360.0);       // This is either the distance or 360 - distance
-    //double distance = phi > 180.0 ? 360.0 - phi : phi;
+    //double distance = fmod(fmod(a_deg - b_deg, 360) + 540, 360) - 180;
+    // return distance;
 
-//    if (a_deg < 0)
-//        a_deg += 360;
+    double diff = b_deg - a_deg;
+    // Normalize the difference to the range [-180, 180)
+    while (diff < -180.0) diff += 360.0;
+    while (diff >= 180.0) diff -= 360.0;
 
-//    if (b_deg < 0)
-//        b_deg += 360;
-
-//    assert (a_deg <= 360.0);
-//    assert (b_deg <= 360.0);
-
-//    double distance = a_deg - b_deg;
-
-//    while (distance > 180.0)
-//        distance -= 360.0;
-
-//    while (distance < -180.0)
-//        distance += 360.0;
-
-    // shortest_angle=((((end - start) % 360) + 540) % 360) - 180;
-
-    double distance = fmod(fmod(a_deg - b_deg, 360) + 540, 360) - 180;
-
-    return distance;
+    return diff;
 }
 
 double deg2rad(double angle)

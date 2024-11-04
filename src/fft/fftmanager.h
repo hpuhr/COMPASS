@@ -83,7 +83,7 @@ protected:
 
     std::unique_ptr<FFTsConfigurationDialog> config_dialog_;
 
-    const double max_fft_plot_distance_deg_ {0.1}; // lat/lon distance in degress
+    const double max_fft_plot_distance_m_ {10000}; // lat/lon distance in degress
 
     virtual void checkSubConfigurables();
 

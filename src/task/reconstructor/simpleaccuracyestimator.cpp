@@ -55,7 +55,7 @@ dbContent::targetReport::PositionAccuracy SimpleAccuracyEstimator::positionAccur
 {
     if (tr.position_accuracy_)
     {
-        if (tr.position_accuracy_->maxStdDev() < 10E-6)
+        if (tr.position_accuracy_->maxStdDev() < 1E-6)
             return AccuracyEstimatorBase::PosAccStdMin;
 
         return *tr.position_accuracy_;
@@ -69,7 +69,7 @@ dbContent::targetReport::VelocityAccuracy SimpleAccuracyEstimator::velocityAccur
 {
     if (tr.velocity_accuracy_)
     {
-        if (tr.velocity_accuracy_->maxStdDev() < 10E-6)
+        if (tr.velocity_accuracy_->maxStdDev() < 1E-6)
             return AccuracyEstimatorBase::VelAccStdMin;
 
         return *tr.velocity_accuracy_;

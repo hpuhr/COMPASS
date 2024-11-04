@@ -16,16 +16,12 @@
  */
 
 #include "evaluationtargetdata.h"
-//#include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
-//#include "dbcontent/variable/variable.h"
-//#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/target/target.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
-//#include "util/number.h"
 #include "util/timeconv.h"
 #include "sector/airspace.h"
 #include "sectorlayer.h"
@@ -331,6 +327,9 @@ bool EvaluationTargetData::hasMappedRefData(const DataID& tst_id,
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return false;
 
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_pos_)
+        return true;
+
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
         assert (mapping.timestamp_ref1_ <= timestamp);
@@ -358,6 +357,9 @@ std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& tst_i
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, {}};
+
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_pos_)
+        return {mapping.timestamp_ref1_, {}};
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -387,19 +389,43 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
     return tdm.pos_ref_;
 }
 
-boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(const DataID& tst_id,
-                                                                              time_duration d_max) const
+boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
+    const DataID& tst_id, time_duration d_max, bool debug) const
 {
     auto timestamp = tst_id.timestamp();
     auto index     = tst_chain_.indexFromDataID(tst_id);
 
+    if (debug)
+        loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " timestamp "
+               << Time::toString(timestamp) << " d_max " << Time::toString(d_max);
+
     const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
+    if (debug)
+        loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " has_ref1 "
+               << mapping.has_ref1_ << " has_ref2 " << mapping.has_ref2_;
+
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
+    {
+        if (debug)
+            loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " no ref data";
+
         return {};
+    }
+
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_pos_)
+    {
+        if (debug)
+            loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " exact match";
+
+        return mapping.pos_ref_;
+    }
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
+        if (debug)
+            loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " both ref data";
+
         assert (mapping.timestamp_ref1_ <= timestamp);
         assert (mapping.timestamp_ref2_ >= timestamp);
 
@@ -407,6 +433,10 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
         {
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
+
+            if (debug)
+                loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " lower too far "
+                    << Time::toString(mapping.timestamp_ref1_ - timestamp);
 
             return {};
         }
@@ -416,6 +446,10 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
 
+            if (debug)
+                loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " higher too far "
+                       << Time::toString(mapping.timestamp_ref2_ - timestamp);
+
             return {};
         }
 
@@ -423,6 +457,9 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
         {
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: no ref pos";
+
+            if (debug)
+                loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " no ref_pos in mapping";
 
             return {};
         }
@@ -435,6 +472,9 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
 
         return mapping.pos_ref_;
     }
+
+    if (debug)
+        loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " only 1";
 
     return {};
 }
@@ -449,6 +489,9 @@ boost::optional<dbContent::TargetVelocity> EvaluationTargetData::mappedRefSpeed(
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {};
+
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_spd_)
+        return mapping.spd_ref_;
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -505,6 +548,14 @@ boost::optional<bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {};
+
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_spd_)
+    {
+        auto gbs = ref_chain_.groundBit(mapping.dataid_ref1_);
+
+        if (gbs.has_value() && *gbs)
+            return gbs;
+    }
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -1285,7 +1336,7 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
     }
 
     // calc if insice test sensor coverage, true if not circles
-    bool inside_cov = inside_cov = eval_man_.tstSrcsCoverage().isInside(pos.latitude_, pos.longitude_);
+    bool inside_cov = eval_man_.tstSrcsCoverage().isInside(pos.latitude_, pos.longitude_);
 
     // check sector layers
     for (const auto& sl : inside_sector_layers_)

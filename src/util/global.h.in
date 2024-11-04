@@ -37,6 +37,7 @@ static const std::string SQLITE_IDENTIFIER="sqlite";
 static const double DEG2RAD = 2*M_PI/360.0;
 static const double RAD2DEG = 1.0/DEG2RAD;
 static const double FT2M = 0.3048;
+static const double M2FT = 1.0/0.3048;
 
 static const double FL2M    = 30.48; // flight levels to metres
 static const double NM2M    = 1852.0; // NM to meters

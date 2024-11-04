@@ -21,31 +21,32 @@
 #include "singleton.h"
 #include "buffer.h"
 
+#include "gdal_priv.h"
+
+// fix stupid gdal constant
+#ifdef PACKAGE_VERSION
+#undef PACKAGE_VERSION
+#endif
+
+//#include <GeographicLib/Geoid.hpp>
+
+#include <memory>
+
 class ProjectionManagerWidget;
 class Projection;
-class OGRProjection;
+class GeoProjection;
 
-/**
- * @brief Singleton for coordinate projection handling
- *
- * Currently handles projection from world coordinates to Cartesian coordinates using the WGS-84
- * method.
- */
 class ProjectionManager : public Singleton, public Configurable
 {
 protected:
-    /// @brief Constructor
     ProjectionManager();
 
 public:
-    /// @brief Desctructor
+
     virtual ~ProjectionManager();
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id);
-
-    /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
-    // bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
 
     ProjectionManagerWidget* widget();
     void deleteWidget();
@@ -65,8 +66,6 @@ public:
 
     std::map<std::string, std::unique_ptr<Projection>>& projections();
 
-    OGRProjection& ogrProjection();
-
     // in place calculation, returns transformation errors count
     unsigned int doRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
     // returns transformation errors count, update buffers
@@ -74,13 +73,28 @@ public:
       doUpdateRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
 
     static const std::string RS2G_NAME;
-    static const std::string OGR_NAME;
+    //static const std::string OGR_NAME;
+    //static const std::string GEO_NAME;
+
+    double geoidHeightM (double latitude_deg, double longitude_deg);
+
+    void test();
 
 protected:
 
     std::string current_projection_name_;
 
     std::unique_ptr<ProjectionManagerWidget> widget_;
+    std::unique_ptr<GDALRasterBand> egm96_band_;
+    //std::unique_ptr<GeographicLib::Geoid> geoid_;
+
+    double egm96_band_inv_geo_transform_[6];
+
+    int egm96_band_width_{0};
+    int egm96_band_height_{0};
+
+    const double egm96_band_scale_ {0.003}; //from file, gdal too stupid
+    const double egm96_band_offset_ {-108.0};
 
     std::map<std::string, std::unique_ptr<Projection>> projections_;
 

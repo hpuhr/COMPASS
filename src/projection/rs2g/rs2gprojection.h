@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RS2GPROJECTION_H
-#define RS2GPROJECTION_H
+#pragma once
 
 #include "projection.h"
 
@@ -25,7 +24,7 @@ class RS2GCoordinateSystem;
 
 class RS2GProjection : public Projection
 {
-  public:
+public:
     RS2GProjection(const std::string& class_id, const std::string& instance_id,
                    ProjectionManager& proj_manager);
     virtual ~RS2GProjection();
@@ -33,18 +32,31 @@ class RS2GProjection : public Projection
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
+    virtual std::vector<unsigned int> ids() override;
+
     virtual bool hasCoordinateSystem(unsigned int id) override;
     virtual void addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                                      double altitude_m) override;
+    virtual ProjectionCoordinateSystemBase& coordinateSystem(unsigned int id) override;
     virtual void clearCoordinateSystems() override;
-    virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
-                              bool has_baro_altitude, double baro_altitude_ft, double& latitude,
-                              double& longitude) override;
 
-  protected:
+    virtual bool polarToWGS84(
+        unsigned int id, double azimuth_rad, double slant_range_m,
+        bool has_baro_altitude, double baro_altitude_ft,
+        double& latitude_deg, double& longitude_deg, double& alt_wgs_m, bool debug=false) override;
+
+    virtual bool polarToWGS84(
+        unsigned int id, double azimuth_rad, double slant_range_m,
+        bool has_baro_altitude, double baro_altitude_ft, RadarBiasInfo& bias_info,
+        double& latitude_deg, double& longitude_deg, double& alt_wgs_m, bool debug=false) override;
+
+    virtual bool wgs842PolarHorizontal(unsigned int id, double latitude_deg, double longitude_deg, double alt_wgs_m,
+                                       double& azimuth_rad, double& slant_range_m, double& ground_range_m,
+                                       double& radar_altitude_m, bool debug=false) override;
+
+protected:
     std::map<unsigned int, std::unique_ptr<RS2GCoordinateSystem>> coordinate_systems_;
 
     virtual void checkSubConfigurables() override;
 };
 
-#endif  // RS2GPROJECTION_H

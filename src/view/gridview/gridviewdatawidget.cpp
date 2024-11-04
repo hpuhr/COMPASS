@@ -167,7 +167,12 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
         return;
 
     auto bounds = getXYBounds();
-    assert(bounds.isValid());
+
+    if(!bounds.isValid())
+    {
+        logerr << "GridViewDataWidget: processStash: bounds invalid"; // UGA TODO
+        return;
+    }
 
     auto z_bounds = getZBounds();
     assert(z_bounds.has_value());

@@ -323,7 +323,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
 
     assert (num_no_ref <= num_pos);
 
-    if (num_pos - num_no_ref - num_pos_ref_spd_low != num_pos_inside + num_pos_outside)
+    if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
         logwrn << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside;

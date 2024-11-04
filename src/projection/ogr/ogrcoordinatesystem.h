@@ -15,8 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OGRCOORDINATESYSTEM_H
-#define OGRCOORDINATESYSTEM_H
+#pragma once
+
+#include "projectioncoordinatesystembase.h"
 
 #include <ogr_spatialref.h>
 
@@ -24,9 +25,7 @@
 
 #include <memory>
 
-// class OGRProjection;
-
-class OGRCoordinateSystem
+class OGRCoordinateSystem : public ProjectionCoordinateSystemBase
 {
   public:
     OGRCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
@@ -50,10 +49,6 @@ class OGRCoordinateSystem
     bool wgs842PolarHorizontal(double latitude_deg, double longitude_deg, double& azimuth_deg, double& ground_range_m);
 
   protected:
-    unsigned int id_{0};
-    double latitude_deg_{0};
-    double longitude_deg_{0};
-    double altitude_m_{0};
 
     OGRSpatialReference wgs84_;
     double wgs84_ellispoid_semi_major_{0};
@@ -68,4 +63,3 @@ class OGRCoordinateSystem
     double getRadiusAt(double latitude_rad);
 };
 
-#endif  // OGRCOORDINATESYSTEM_H

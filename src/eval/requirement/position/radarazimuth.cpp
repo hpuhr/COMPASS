@@ -20,7 +20,7 @@
 #include "evaluationmanager.h"
 #include "logger.h"
 #include "util/number.h"
-#include "ogrprojection.h"
+#include "projection.h"
 #include "projectionmanager.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
@@ -112,12 +112,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
 
     ProjectionManager& proj_man = ProjectionManager::instance();
 
-    OGRProjection& projection = proj_man.ogrProjection();
+    Projection& projection = proj_man.currentProjection();
+    assert (projection.radarCoordinateSystemsAdded());
 
-    if (!projection.radarCoordinateSystemsAdded())
-        projection.addAllRadarCoordinateSystems();
-
-    double ref_range_m, ref_azm_deg, tst_range_m, tst_azm_deg;
+    double ref_slant_range_m, ref_ground_range_m, ref_alt_m, ref_azm_rad,
+        tst_slant_range_m, tst_ground_range_m, tst_alt_m, tst_azm_rad;
     double azm_deg_diff;
 
     for (const auto& tst_id : tst_data)
@@ -190,7 +189,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
         }
         ++num_pos_inside;
 
-        ok = projection.wgs842PolarHorizontal(tst_ds_id, ref_pos->latitude_, ref_pos->longitude_, ref_azm_deg, ref_range_m);
+        ok = projection.wgs842PolarHorizontal(tst_ds_id,
+                                              ref_pos->latitude_, ref_pos->longitude_, 0,
+                                              ref_azm_rad, ref_slant_range_m, ref_ground_range_m,
+                                              ref_alt_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
@@ -203,7 +205,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
             continue;
         }
 
-        ok = projection.wgs842PolarHorizontal(tst_ds_id, tst_pos.latitude_, tst_pos.longitude_, tst_azm_deg, tst_range_m);
+        ok = projection.wgs842PolarHorizontal(tst_ds_id,
+                                              tst_pos.latitude_, tst_pos.longitude_, 0,
+                                              tst_azm_rad, tst_slant_range_m, tst_ground_range_m,
+                                              tst_alt_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
@@ -216,7 +221,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
             continue;
         }
 
-        azm_deg_diff = Number::calculateMinAngleDifference(ref_azm_deg, tst_azm_deg);
+        azm_deg_diff = Number::calculateMinAngleDifference(ref_azm_rad, tst_azm_rad);
 
         if (std::isnan(azm_deg_diff) || std::isinf(azm_deg_diff))
         {

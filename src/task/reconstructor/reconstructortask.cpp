@@ -19,6 +19,8 @@
 #include "util/async.h"
 #include "evaluationmanager.h"
 #include "viewpointgenerator.h"
+#include "projectionmanager.h"
+#include "projection.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
@@ -403,6 +405,10 @@ void ReconstructorTask::run()
     delassocs_future_ = {};
     process_future_ = {};
 
+    Projection& projection = ProjectionManager::instance().currentProjection();
+    projection.clearCoordinateSystems();
+    projection.addAllRadarCoordinateSystems();
+
     loginf << "ReconstructorTask: run: started";
 
     run_start_time_ = boost::posix_time::microsec_clock::local_time();
@@ -708,7 +714,6 @@ void ReconstructorTask::loadingDoneSlot()
            << " current_slice_idx " << current_slice_idx_;
 
     loading_slice_->data_ = dbcontent_man.data();
-    assert (loading_slice_->data_.size());
 
     dbcontent_man.clearData(); // clear previous
 
@@ -743,7 +748,9 @@ void ReconstructorTask::loadingDoneSlot()
            << !loading_slice_->first_slice_
            << " remove ts " << Time::toString(loading_slice_->remove_before_time_);
 
-    processDataSlice();
+    if (loading_slice_->data_.size())
+        processDataSlice();
+
     assert (!loading_slice_);
     assert (processing_data_slice_);
 
@@ -844,10 +851,15 @@ void ReconstructorTask::writeDoneSlot()
 
         currentReconstructor()->reset();
 
-        double time_elapsed_s= Time::partialSeconds(boost::posix_time::microsec_clock::local_time() - run_start_time_);
+        double time_elapsed_s = Time::partialSeconds(
+            boost::posix_time::microsec_clock::local_time() - run_start_time_);
+
+        double time_elapsed_s_after_del = Time::partialSeconds(
+            boost::posix_time::microsec_clock::local_time() - run_start_time_after_del_);
 
         loginf << "ReconstructorTask: writeDoneSlot: done after "
-               << String::timeStringFromDouble(time_elapsed_s, false);
+               << String::timeStringFromDouble(time_elapsed_s, false)
+               << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
 
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 

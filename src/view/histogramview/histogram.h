@@ -277,11 +277,17 @@ public:
         return config_;
     }
 
+    size_t numRealBins() const
+    {
+        return bins_.size();
+    }
+
     /**
      * Returns the given bin.
      */
     const HistogramBinT<T>& getBin(size_t idx) const
     {
+        //assert (idx < bins_.size()); // UGA TODO
         return bins_.at(idx);
     }
 

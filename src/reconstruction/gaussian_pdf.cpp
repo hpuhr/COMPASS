@@ -133,8 +133,11 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
     if (mode == NormalizeMode::Sum || max_val >= NormalizeThreshold)
     {
         //assure minimum prob
-        for (auto& lh : likelihoods)
-            lh = std::max(lh, LikelihoodEpsilon);
+        // for (auto& lh : likelihoods)
+        //     lh = std::max(lh, LikelihoodEpsilon);
+
+        for (unsigned int i = 0; i < likelihoods.size(); ++i)
+            likelihoods[i] = std::max(likelihoods[i], LikelihoodEpsilon);
 
         //normalize directly via sum
         likelihoods /= likelihoods.sum();
@@ -145,31 +148,46 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
     // NormalizeMode::Log
 
     //convert to log likelihoods
-    for (auto& lh : likelihoods)
-        lh = lh < LogInputMin ? std::numeric_limits<double>::signaling_NaN() : std::log(lh);
+    // for (auto& lh : likelihoods)
+    //     lh = lh < LogInputMin ? std::numeric_limits<double>::signaling_NaN() : std::log(lh);
+
+    for (unsigned int i = 0; i < likelihoods.size(); ++i)
+        likelihoods[i] = likelihoods[i] < LogInputMin ?
+                             std::numeric_limits<double>::signaling_NaN() : std::log(likelihoods[i]);
 
     if (debug)
         loginf << "after log:\n" << likelihoods;
 
     //determine max log value and subtract
     double max_val_log = std::numeric_limits<double>::lowest();
-    for (auto& llh : likelihoods)
-        if (std::isfinite(llh) && llh > max_val_log)
-            max_val_log = llh;
+    // for (auto& llh : likelihoods)
+    //     if (std::isfinite(llh) && llh > max_val_log)
+    //         max_val_log = llh;
+
+    for (unsigned int i = 0; i < likelihoods.size(); ++i)
+        if (std::isfinite(likelihoods[i]) && likelihoods[i] > max_val_log)
+            max_val_log = likelihoods[i];
 
     if (debug)
         loginf << "logmax: " << max_val_log;
 
-    for (auto& llh : likelihoods)
-        if (std::isfinite(llh))
-            llh -= max_val_log;
+    // for (auto& llh : likelihoods)
+    //     if (std::isfinite(llh))
+    //         llh -= max_val_log;
+
+    for (unsigned int i = 0; i < likelihoods.size(); ++i)
+        if (std::isfinite(likelihoods[i]))
+            likelihoods[i] -= max_val_log;
 
     if (debug)
         loginf << "after log renorm:\n" << likelihoods;
 
     //convert back to likelihoods
-    for (auto& lh : likelihoods)
-        lh = !std::isfinite(lh) || lh < ExpInputMin ? 0.0 : std::exp(lh);
+    // for (auto& lh : likelihoods)
+    //     lh = !std::isfinite(lh) || lh < ExpInputMin ? 0.0 : std::exp(lh);
+
+    for (unsigned int i = 0; i < likelihoods.size(); ++i)
+        likelihoods[i] = !std::isfinite(likelihoods[i]) || likelihoods[i] < ExpInputMin ? 0.0 : std::exp(likelihoods[i]);
 
     if (debug)
         loginf << "after exp:\n" << likelihoods;
@@ -183,8 +201,11 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
     }
 
     //assure minimum prob
-    for (auto& lh : likelihoods)
-        lh = std::max(lh, LikelihoodEpsilon);
+    // for (auto& lh : likelihoods)
+    //     lh = std::max(lh, LikelihoodEpsilon);
+
+    for (unsigned int i = 0; i < likelihoods.size(); ++i)
+        likelihoods[i] = std::max(likelihoods[i], LikelihoodEpsilon);
 
     //normalize via sum
     likelihoods /= likelihoods.sum();
@@ -193,8 +214,11 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
         loginf << "renormed log:\n" << likelihoods;
 
     //final check
-    for (auto& lh : likelihoods)
-        assert(std::isfinite(lh));
+    // for (auto& lh : likelihoods)
+    //     assert(std::isfinite(lh));
+
+    for (unsigned int i = 0; i < likelihoods.size(); ++i)
+        assert(std::isfinite(likelihoods[i]));
 
     //likelihoods = likelihoods.array().log();
     //likelihoods.array() -= likelihoods.maxCoeff();

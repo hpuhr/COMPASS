@@ -114,6 +114,12 @@ message("OSG libs
     ${OSGQT_INCLUDE_DIR}
     )
 
+find_package(GeographicLib REQUIRED)
+
+message("  GeographicLib_INCLUDE_DIRS:  ${GeographicLib_INCLUDE_DIRS}")
+message("  GeographicLib_LIBRARIES: ${GeographicLib_LIBRARIES}")
+
+
 add_library(compass "")
 
 message("Install path: ${CMAKE_INSTALL_PREFIX}")
@@ -160,6 +166,7 @@ include_directories (
     ${JSONCPP_INCLUDE_DIR}
     ${jASTERIX_INCLUDE_DIR}
     ${PCAP_INCLUDE_DIR}
+    ${GeographicLib_INCLUDE_DIRS}
     )
 
 link_directories(
@@ -189,6 +196,7 @@ target_link_libraries ( compass
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OSGQT_LIBRARIES}
     ${OSGEARTH_LIBRARY}
+    ${GeographicLib_LIBRARIES}
     )
 
 # installation stuff

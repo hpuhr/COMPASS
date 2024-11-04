@@ -48,6 +48,16 @@ void OGRProjection::generateSubConfigurable(const std::string& class_id,
 
 void OGRProjection::checkSubConfigurables() {}
 
+std::vector<unsigned int> OGRProjection::ids()
+{
+    std::vector<unsigned int> ids;
+
+    for (auto& coord_sys : coordinate_systems_)
+        ids.push_back(coord_sys.first);
+
+    return ids;
+}
+
 bool OGRProjection::hasCoordinateSystem(unsigned int id) { return coordinate_systems_.count(id); }
 
 void OGRProjection::addCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
@@ -64,6 +74,13 @@ void OGRProjection::clearCoordinateSystems()
 {
     coordinate_systems_.clear();
     radar_coordinate_systems_added_ = false;
+}
+
+ProjectionCoordinateSystemBase& OGRProjection::coordinateSystem(unsigned int id)
+{
+    assert(hasCoordinateSystem(id));
+
+    return *coordinate_systems_.at(id).get();
 }
 
 bool OGRProjection::polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,

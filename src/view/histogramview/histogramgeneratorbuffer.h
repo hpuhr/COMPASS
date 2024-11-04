@@ -136,17 +136,25 @@ protected:
      */
     virtual bool refill_impl() override final
     {
+        logdbg << "HistogramGeneratorBuffer: refill_impl";
+
         //reinit intermediate data
+
+        logdbg << "HistogramGeneratorBuffer: refill_impl: intermediate data";
         initIntermediateData();
 
         //add all buffers
         for (auto& elem : *currentData())
         {
+            logdbg << "HistogramGeneratorBuffer: refill_impl: addBuffer " << elem.first;
+
             bool ok = addBuffer(elem.first, *elem.second);
 
             if (!ok)
-                logdbg << "HistogramGeneratorBuffer: could not add buffer of DBContent " << elem.first;
+                logdbg << "HistogramGeneratorBuffer: refill_impl: could not add buffer of dbcontent " << elem.first;
         }
+
+        logdbg << "HistogramGeneratorBuffer: refill_impl: done";
 
         return true;
     }
@@ -226,7 +234,7 @@ protected:
                 ++select_cnt;
         }
 
-        loginf << "HistogramGeneratorT::selectBuffer: content = " << db_content << ", selected " << select_cnt;
+        loginf << "HistogramGeneratorT: selectBuffer: content = " << db_content << ", selected " << select_cnt;
 
         return true;
     }
@@ -265,24 +273,38 @@ private:
      */
     void initIntermediateData()
     {
+        logdbg << "HistogramGeneratorBufferT: initIntermediateData";
+
         //reset existing histogram bins
         for (auto& elem : histograms_)
             elem.second.resetBins();
 
         intermediate_data_ = {};
 
+        logdbg << "HistogramGeneratorBufferT: initIntermediateData: doing histograms";
+
         for (auto& elem : histograms_)
         {
+            logdbg << "HistogramGeneratorBufferT: initIntermediateData: histograms " << elem.first;
+
             auto& d = intermediate_data_[ elem.first ];
             d.init(elem.second.numBins());
+
+            logdbg << "HistogramGeneratorBufferT: initIntermediateData: bins";
 
             d.bins_are_sorted     = elem.second.configuration().sorted_bins;
             d.bins_are_categories = elem.second.configuration().type == HistogramConfig::Type::Category;
 
+            logdbg << "HistogramGeneratorBufferT: initIntermediateData: labels";
+
             //generate labels
             for (size_t i = 0; i < elem.second.numBins(); ++i)
+            {
                 d.bin_data[ i ].labels = labelsForBin((int)i);
+            }
         }
+
+        logdbg << "HistogramGeneratorBufferT: initIntermediateData: done";
     }
 
     /**
@@ -290,23 +312,39 @@ private:
      */
     BinLabels labelsForBin(int bin) const
     {
+        logdbg << "HistogramGeneratorBufferT: labelsForBin: bin " << bin;
+
         if (bin < 0 || histograms_.empty())
             return {};
 
         auto it = histograms_.begin();
-        if (bin >= (int)it->second.numBins())
+
+        logdbg << "HistogramGeneratorBufferT: labelsForBin: numBins " << (int)it->second.numBins()
+               <<  " numRealBins " << (int)it->second.numRealBins();
+        // sometimes [INFO] HistogramGeneratorBufferT: labelsForBin: numBins 20 numRealBins 0
+
+
+        if (bin >= (int)it->second.numBins() || bin >= (int)it->second.numRealBins())
             return {};
+
+        logdbg << "HistogramGeneratorBufferT: labelsForBin: var";
 
         auto var = currentVariable(it->first);
         if (!var)
             return {};
 
-        const auto& b = it->second.getBin(bin);
+        logdbg << "HistogramGeneratorBufferT: labelsForBin: getBin bin " << bin << " numBins " << it->second.numRealBins();
+
+        const auto& b = it->second.getBin(bin); // UGA TODO
+
+        logdbg << "HistogramGeneratorBufferT: labelsForBin: labels";
 
         BinLabels labels;
         labels.label     = b.label(var);
         labels.label_min = b.labelMin(var);
         labels.label_max = b.labelMax(var);
+
+        logdbg << "HistogramGeneratorBufferT: labelsForBin: done";
 
         return labels;
     }

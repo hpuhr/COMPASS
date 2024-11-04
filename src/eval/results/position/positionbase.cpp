@@ -406,7 +406,8 @@ void JoinedPositionBase::common_accumulateSingleResult(unsigned int utn, const P
 
     if (single_result.accumulator().max() > 10000)
     {
-        loginf << "UGAUGAU utn " << utn << " dist max " <<  single_result.accumulator().max()
+        loginf << "JoinedPositionBase: common_accumulateSingleResult: utn " << utn
+               << " dist max " <<  single_result.accumulator().max()
                << " count " << single_result.accumulator().numValues();
     }
 
