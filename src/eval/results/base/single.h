@@ -114,6 +114,7 @@ public:
         Highlight
     };
     
+    //!be careful: reflects order in render hierarchy!
     enum class AnnotationArrayType
     {
         TypeOk = 0,

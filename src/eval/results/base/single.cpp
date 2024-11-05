@@ -692,14 +692,20 @@ nlohmann::json& Single::annotationLineCoords(nlohmann::json& annotations_json, A
 /**
  * Retrieves (and possibly creates) a json annotation for the given annotation type.
 */
-nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, AnnotationArrayType type, bool overview) const
+nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
+                                              AnnotationArrayType type, 
+                                              bool overview) const
 {
     assert (annotations_json.is_array());
 
     string anno_name = annotation_type_names_.at(type);
 
     logdbg << "Single: getOrCreateAnnotation: anno_name '" << anno_name << "' overview " << overview;
+
+    const std::string AnnotationArrayTypeField = "eval_annotation_array_type";
+    const std::string FieldName                = ViewPointGenAnnotation::AnnotationFieldName;
     
+    //creates a new annotation at the given array position
     auto insertAnnotation = [ & ] (const std::string& name,
                                    unsigned int position,
                                    const QColor& symbol_color,
@@ -742,109 +748,104 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json, 
         //convert to json
         annotation.toJSON(annotation_json);
 
+        //add annotation type for finding the annotation again later on
+        annotation_json[ AnnotationArrayTypeField ] = (int)type;
+
         for (unsigned int cnt=0; cnt < annotations_json.size(); ++cnt)
             logdbg << "Single: getOrCreateAnnotation: end: index " << cnt <<" '" << annotations_json.at(cnt).at("name") << "'";
     };
 
-    //ATTENTION: !ORDER IMPORTANT!
-
-    const std::string FieldName = ViewPointGenAnnotation::AnnotationFieldName;
-
-    if (type == AnnotationArrayType::TypeHighlight)
+    struct Style
     {
-        // should be first
+        QColor                            color;
+        ViewPointGenFeaturePoints::Symbol point_symbol;
+        int                               point_size;
+        int                               line_width;
+    };
 
-        if (!annotations_json.size() || annotations_json.at(0).at(FieldName) != anno_name)
-        { 
-            // empty or not selected, add at first position
-            insertAnnotation(anno_name, 
-                             0,
-                             AnnotationColorHighlight,
-                             overview ? ViewPointGenFeaturePoints::Symbol::Circle : ViewPointGenFeaturePoints::Symbol::Border,
-                             AnnotationColorHighlight,
-                             overview ? AnnotationPointSizeOverview : AnnotationPointSizeHighlight,
-                             AnnotationColorHighlight,
-                             AnnotationLineWidthHighlight);
-        }
-
-        assert (annotations_json.at(0).at(FieldName) == anno_name);
-        return annotations_json.at(0);
-    }
-    else if (type == AnnotationArrayType::TypeError)
+    //creates a style for the given annotation type
+    auto getStyle = [ & ] (AnnotationArrayType type)
     {
-        // should be first or second
-
-        bool         insert_needed = false;
-        unsigned int anno_pos      = 0;
-
-        if (!annotations_json.size()) // empty, add at first pos
+        Style s;
+        if (type == AnnotationArrayType::TypeHighlight)
         {
-            insert_needed = true;
-            anno_pos = 0;
+            s.color        = AnnotationColorHighlight;
+            s.point_symbol = ViewPointGenFeaturePoints::Symbol::Border;
+            s.point_size   = AnnotationPointSizeHighlight;
+            s.line_width   = AnnotationLineWidthHighlight;
         }
-        else if (annotations_json.at(0).at(FieldName) != anno_name)
+        else if (type == AnnotationArrayType::TypeError)
         {
-            if (annotations_json.size() > 1 && annotations_json.at(1).at(FieldName) == anno_name)
-            {
-                // found at second pos
-                anno_pos = 1;
-            }
-            else if (annotations_json.at(0).at(FieldName) == annotation_type_names_.at(AnnotationArrayType::TypeHighlight))
-            {
-                // insert after
-                insert_needed = true;
-                anno_pos = 1;
-            }
-            else
-            {
-                assert (annotations_json.at(0).at(FieldName) == annotation_type_names_.at(AnnotationArrayType::TypeOk));
-                // insert before
-                insert_needed = true;
-                anno_pos = 0;
-            }
+            s.color        = AnnotationColorError;
+            s.point_symbol = ViewPointGenFeaturePoints::Symbol::BorderThick;
+            s.point_size   = AnnotationPointSizeError;
+            s.line_width   = AnnotationLineWidthError;
         }
-        else
+        else if (type == AnnotationArrayType::TypeOk)
         {
-            anno_pos = 0; // only for you
+            s.color        = AnnotationColorOk;
+            s.point_symbol = ViewPointGenFeaturePoints::Symbol::Border;
+            s.point_size   = AnnotationPointSizeOk;
+            s.line_width   = AnnotationLineWidthOk;
         }
 
-        if (insert_needed)
+        if (overview)
         {
-            insertAnnotation(anno_name, 
-                             anno_pos,
-                             AnnotationColorError,
-                             overview ? ViewPointGenFeaturePoints::Symbol::Circle : ViewPointGenFeaturePoints::Symbol::BorderThick,
-                             AnnotationColorError,
-                             overview ? AnnotationPointSizeOverview : AnnotationPointSizeError,
-                             AnnotationColorError,
-                             AnnotationLineWidthError);
+            s.point_symbol = ViewPointGenFeaturePoints::Symbol::Circle;
+            s.point_size   = AnnotationPointSizeOverview;
         }
 
-        assert (annotations_json.at(anno_pos).at(FieldName) == anno_name);
-        return annotations_json.at(anno_pos);
-    }
-    else
+        return s;
+    };
+
+    //find insertion index
+    unsigned int insert_idx;
+
+    auto comp = [ & ] (const nlohmann::json& j, AnnotationArrayType type) 
+    { 
+        int anno_type = j[ AnnotationArrayTypeField ];
+        return anno_type < (int)type;
+    };
+
+    auto it = std::lower_bound(annotations_json.begin(), annotations_json.end(), type, comp);
+
+    if (it == annotations_json.end()) 
     {
-        assert (type == AnnotationArrayType::TypeOk);
-        // should be last
+        // no element >= type -> insert at end
+        insert_idx = annotations_json.size();
+    }
+    else // element >= type found
+    {
+        insert_idx = it - annotations_json.begin();
 
-        if (!annotations_json.size() || annotations_json.back().at(FieldName) != anno_name)
+        // type already present? -> return annotation
+        int anno_type = (*it)[ AnnotationArrayTypeField ];
+        if (anno_type == (int)type)
         {
-            //unsigned int anno_pos = annotations_json.size() ? annotations_json.size() - 1 : 0;
-
-            // insert at last
-            insertAnnotation(anno_name, annotations_json.size(),
-                             AnnotationColorOk,
-                             overview ? ViewPointGenFeaturePoints::Symbol::Circle : ViewPointGenFeaturePoints::Symbol::Border,
-                             AnnotationColorOk,
-                             overview ? AnnotationPointSizeOverview : AnnotationPointSizeOk,
-                             AnnotationColorOk,
-                             AnnotationLineWidthOk);
+            auto& j = annotations_json.at(insert_idx);
+            assert(j.at(FieldName) == anno_name);
+            return j;
         }
 
-        assert (annotations_json.back().at(FieldName) == anno_name);
-        return annotations_json.back();
+        // element > type found -> insert there
     }
+
+    //insert new annotation of given type
+    auto style = getStyle(type);
+
+    insertAnnotation(anno_name, 
+                     insert_idx,
+                     style.color,
+                     style.point_symbol,
+                     style.color,
+                     style.point_size,
+                     style.color,
+                     style.line_width);
+    
+    auto& j = annotations_json.at(insert_idx);
+    assert(j.at(FieldName) == anno_name);
+    
+    return j;
 }
 
 /**
