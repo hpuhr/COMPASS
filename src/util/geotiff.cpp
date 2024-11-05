@@ -211,13 +211,16 @@ bool GeoTIFFWriter::writeGeoTIFF(const std::string& fn,
         auto wkt_string = helpers::wktStringFromSRSName(ref.srs);
         GDALSetProjection(dataset, wkt_string.c_str());
 
+        // auto dataset_tmp = GDALCreateCopy(gtiff_driver, "/home/mcphatty/grid.png", dataset, 0, NULL, NULL, NULL);
+        // GDALClose(dataset_tmp);
+
         loginf << "GeoTIFFWriter: writeGeoTIFF: wkt = " << wkt_string;
     }
 
     //warp dataset to other srs
     if (!warp_to_srs.empty())
     {
-        loginf << "GeoTIFFWriter: writeGeoTIFF: warping to " << warp_to_srs << "...";
+        loginf << "GeoTIFFWriter: writeGeoTIFF: warping...\n\n" << GDALGetProjectionRef(dataset) << "\n =>\n" << warp_to_srs << "\n";
 
         //GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
 
@@ -231,6 +234,9 @@ bool GeoTIFFWriter::writeGeoTIFF(const std::string& fn,
         //create a copy of the warped system using gtiff driver (not sure if this intermdiate step is needed)
         auto gtiff_driver  = GDALGetDriverByName("GTiff");
         auto dataset_layer = GDALCreateCopy(gtiff_driver, fn_out.c_str(), dataset_warped, 0, NULL, NULL, NULL);
+
+        // auto dataset_tmp = GDALCreateCopy(gtiff_driver, "/home/mcphatty/grid_warped.png", dataset_warped, 0, NULL, NULL, NULL);
+        // GDALClose(dataset_tmp);
 
         //close all datasets and delete unwarped file from (virtual) mem
         GDALClose(dataset_warped);
@@ -265,7 +271,7 @@ bool GeoTIFFWriter::warpGeoTIFF(const std::string& fn,
 
     loginf << "GeoTIFFWriter: warpGeoTIFF: fn = " << fn;
     loginf << "GeoTIFFWriter: warpGeoTIFF: fn_out = " << fn_out;
-    loginf << "GeoTIFFWriter: warpGeoTIFF: warping to " << warp_to_srs << "...";
+    loginf << "GeoTIFFWriter: warpGeoTIFF: warping...\n\n" << GDALGetProjectionRef(dataset) << "\n =>\n" << warp_to_srs << "\n";
 
     //GDALWarpOptions *psWarpOptions = GDALCreateWarpOptions();
 

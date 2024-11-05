@@ -136,7 +136,7 @@ QRectF GridResolution::resolution(size_t& grid_cells_x,
             !validResolution(grid_cell_size_y))
             return QRectF();
 
-        return roi;
+        return roi_bordered;
     }
     else if (type == Type::CellSize)
     {
