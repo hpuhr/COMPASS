@@ -381,6 +381,82 @@ std::tuple<double,double,double,double> getStatistics (const std::vector<double>
     return std::tuple<double,double,double,double>(mean, stddev, min, max);
 }
 
+// Function to calculate the median of a vector
+double calculateMedian(std::vector<double> data) {
+    size_t size = data.size();
+    if (size == 0) {
+        throw std::domain_error("Cannot compute median of an empty vector.");
+    }
+    std::sort(data.begin(), data.end());
+    if (size % 2 == 0) {
+        // Even number of elements
+        return (data[size / 2 - 1] + data[size / 2]) / 2.0;
+    } else {
+        // Odd number of elements
+        return data[size / 2];
+    }
+}
+
+// Function to calculate the interquartile range (IQR)
+double calculateIQR(std::vector<double> data) {
+    size_t size = data.size();
+    if (size < 4) {
+        throw std::domain_error("At least four data points are required to compute IQR.");
+    }
+    std::sort(data.begin(), data.end());
+
+    size_t mid = size / 2;
+    std::vector<double> lower_half(data.begin(), data.begin() + mid);
+    std::vector<double> upper_half;
+
+    if (size % 2 == 0) {
+        upper_half = std::vector<double>(data.begin() + mid, data.end());
+    } else {
+        upper_half = std::vector<double>(data.begin() + mid + 1, data.end());
+    }
+
+    double q1 = calculateMedian(lower_half);
+    double q3 = calculateMedian(upper_half);
+
+    return q3 - q1;
+}
+
+// Function to calculate the median absolute deviation (MAD)
+double calculateMAD(std::vector<double> data) {
+    if (data.empty()) {
+        throw std::domain_error("Cannot compute MAD of an empty vector.");
+    }
+    double median = calculateMedian(data);
+
+    // Calculate absolute deviations from the median
+    std::vector<double> abs_deviations;
+    abs_deviations.reserve(data.size());
+    for (double value : data) {
+        abs_deviations.push_back(std::abs(value - median));
+    }
+
+    // Compute the median of absolute deviations
+    return calculateMedian(abs_deviations);
+}
+
+std::tuple<double,double,double> getMedianStatistics (const std::vector<double>& values)
+{
+    try {
+        double median = calculateMedian(values);
+        double iqr = calculateIQR(values);
+        double mad = calculateMAD(values);
+
+        // std::cout << "Median: " << median << std::endl;
+        // std::cout << "Interquartile Range (IQR): " << iqr << std::endl;
+        // std::cout << "Median Absolute Deviation (MAD): " << mad << std::endl;
+
+        return std::tuple<double,double,double>{median, iqr, mad};
+    } catch (const std::domain_error& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        assert (false);
+    }
+}
+
 }  // namespace Number
 
 //void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list) {}

@@ -101,6 +101,11 @@ std::tuple<double,double,double,double> getStatistics (const T& values)
 
 extern std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values);
 
+extern double calculateMedian(std::vector<double> data); // worked-on copy
+extern double calculateIQR(std::vector<double> data);
+extern double calculateMAD(std::vector<double> data);
+extern std::tuple<double,double,double> getMedianStatistics (const std::vector<double>& values);
+
 //template <typename T>
 //double getStatistics(const std::vector<>);
 

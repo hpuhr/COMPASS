@@ -55,7 +55,7 @@ class AccuracyEstimatorBase
 
   protected:
 
-    bool skip_unused_positions_ {true};
+    bool skip_unused_positions_ {false};
     bool use_min_std_dev_ {true};
     double min_std_dev_ {1.0};
 
