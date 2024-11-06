@@ -30,7 +30,7 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
                          double altitude_m);
 
     bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
-                                    bool has_altitude, double altitude_m,
+                                    bool has_altitude, double altitude_m, double& ground_range_m,
                                     double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
 
     bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
@@ -45,7 +45,7 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
                                     double& ecef_x, double& ecef_y, double& ecef_z, bool debug=false);
 
     void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,
-                              bool has_altitude, double altitude_m,
+                              bool has_altitude, double altitude_m, double& ground_range_m,
                               double& local_x, double& local_y, double& local_z, bool debug=false);
 
     void radarSlant2LocalCart(double azimuth_rad, double slant_range_m,

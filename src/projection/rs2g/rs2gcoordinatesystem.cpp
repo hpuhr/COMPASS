@@ -114,7 +114,7 @@ double RS2GCoordinateSystem::azimuth(double x_m, double y_m)
 }
 
 void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m,
-                                                bool has_altitude, double altitude_m,
+                                                bool has_altitude, double altitude_m, double& ground_range_m,
                                                 double& local_x, double& local_y, double& local_z, bool debug)
 {
     // logdbg << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1]
@@ -129,7 +129,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
 
     double elev_angle_rad = rs2gElevation(elevation_m, rho_m);
 
-    double ground_range_m = rho_m * cos(elev_angle_rad);
+    ground_range_m = rho_m * cos(elev_angle_rad);
 
     if (debug)
         loginf << "RS2GCoordinateSystem: radarSlant2LocalCart: has_altitude " << has_altitude
@@ -172,7 +172,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
     if (bias_info.bias_valid_)
     {
         ground_range_m = ground_range_m * bias_info.range_gain_ + bias_info.range_bias_m_;
-        //azimuth_rad += bias_info.azimuth_bias_deg_ * DEG2RAD;
+        azimuth_rad += bias_info.azimuth_bias_deg_ * DEG2RAD;
     }
 
     if (debug)
@@ -255,7 +255,7 @@ void RS2GCoordinateSystem::geodesic2LocalCart(double lat_rad, double lon_rad, do
 }
 
 bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
-                                                      bool has_altitude, double altitude_m,
+                                                      bool has_altitude, double altitude_m, double& ground_range_m,
                                                       double& ecef_x, double& ecef_y, double& ecef_z, bool debug)
 {
     Eigen::Vector3d local_pos(3);
@@ -266,7 +266,7 @@ bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double
     double local_x, local_y, local_z;
 
     radarSlant2LocalCart(azimuth_rad, slant_range_m, has_altitude, altitude_m,
-                         local_x, local_y, local_z, debug);
+                         ground_range_m, local_x, local_y, local_z, debug);
 
     if (debug)
         loginf << "RS2GCoordinateSystem: calculateRadSlt2Geocentric: local_x " << std::fixed << local_x

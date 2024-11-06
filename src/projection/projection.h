@@ -48,6 +48,11 @@ public:
                               double& latitude_deg, double& longitude_deg, double& alt_wgs_m, bool debug=false) = 0;
 
     virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
+                              bool has_baro_altitude, double baro_altitude_ft,
+                              double& ground_range_m,
+                              double& latitude_deg, double& longitude_deg, double& alt_wgs_m, bool debug=false) = 0;
+
+    virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                               bool has_baro_altitude, double baro_altitude_ft, RadarBiasInfo& bias_info,
                               double& latitude_deg, double& longitude_deg, double& alt_wgs_m, bool debug=false) = 0;
 
