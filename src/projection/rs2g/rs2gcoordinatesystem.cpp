@@ -172,7 +172,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
     if (bias_info.bias_valid_)
     {
         ground_range_m = ground_range_m * bias_info.range_gain_ + bias_info.range_bias_m_;
-        azimuth_rad += bias_info.azimuth_bias_deg_ * DEG2RAD;
+        //azimuth_rad += bias_info.azimuth_bias_deg_ * DEG2RAD;
     }
 
     if (debug)
