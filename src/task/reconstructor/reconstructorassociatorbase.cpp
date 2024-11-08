@@ -623,7 +623,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
                               if (tr.mode_a_code_)
                               {
-                                  ComparisonResult ma_res = other.compareModeACode(tr, max_time_diff_);
+                                  ComparisonResult ma_res = other.compareModeACode(tr, max_time_diff_, do_debug);
 
                                   if (ma_res == ComparisonResult::DIFFERENT)
                                   {
@@ -987,7 +987,7 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
                               vector<unsigned long> ma_different;
 
                               tie (ma_unknown, ma_same, ma_different) = target.compareModeACodes(
-                                  other, max_time_diff_);
+                                  other, max_time_diff_, do_debug);
 
                               if (do_debug)
                               {

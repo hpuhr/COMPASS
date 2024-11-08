@@ -1178,8 +1178,10 @@ float ReconstructorTarget::probTimeOverlaps (const ReconstructorTarget& other) c
     return overlap_duration / targets_min_duration;
 }
 
-std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> ReconstructorTarget::compareModeACodes (
-    const ReconstructorTarget& other, boost::posix_time::time_duration max_time_diff) const
+std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>>
+ReconstructorTarget::compareModeACodes (
+    const ReconstructorTarget& other,
+    boost::posix_time::time_duration max_time_diff, bool do_debug) const
 {
     vector<unsigned long> unknown;
     vector<unsigned long> same;
@@ -1187,11 +1189,21 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
 
     ComparisonResult cmp_res;
 
+    if (do_debug)
+        loginf << "ReconstructorTarget: compareModeACode: num target_reports " << target_reports_.size()
+               << " max t_diff " << Time::toString(max_time_diff);
+
     for (auto tr_it : target_reports_)
     {
         dbContent::targetReport::ReconstructorInfo& tr = dataFor(tr_it);
 
-        cmp_res = other.compareModeACode(tr, max_time_diff);
+        cmp_res = other.compareModeACode(tr, max_time_diff, do_debug);
+
+        if (do_debug)
+            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                   << " cmp_res " << (unsigned int) cmp_res
+                   << " num unknown " << unknown.size() << " same " << same.size()
+                   << " different " << different.size();
 
         if (cmp_res == ComparisonResult::UNKNOWN)
             unknown.push_back(tr.record_num_);
@@ -1207,13 +1219,30 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
 }
 
 ComparisonResult ReconstructorTarget::compareModeACode (
-    const dbContent::targetReport::ReconstructorInfo& tr, time_duration max_time_diff) const
+    const dbContent::targetReport::ReconstructorInfo& tr, time_duration max_time_diff, bool do_debug) const
 {
+
+    if (do_debug)
+        loginf << "ReconstructorTarget: compareModeACode: tr " << tr.asStr();
+
     if (tr.mode_a_code_.has_value() && !tr.mode_a_code_->hasReliableValue()) // check if reliable value
+    {
+        if (do_debug)
+            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                   << " res unkown, has val " << tr.mode_a_code_.has_value()
+                   << " reliable " << (tr.mode_a_code_.has_value() && tr.mode_a_code_->hasReliableValue());
+
         return ComparisonResult::UNKNOWN;
+    }
 
     if (!hasDataForTime(tr.timestamp_, max_time_diff))
+    {
+        if (do_debug)
+            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                   << " no data for time";
+
         return ComparisonResult::UNKNOWN;
+    }
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
@@ -1224,24 +1253,58 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     bool lower_no_m3a = lower_tr && !lower_tr->mode_a_code_.has_value();  // TODO check
     bool upper_no_m3a = upper_tr && !upper_tr->mode_a_code_.has_value();
 
+    if (do_debug)
+        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+               << " lower_no_m3a " << lower_no_m3a << " upper_no_m3a " << upper_no_m3a;
+
     // no mode a, and one missing in one of the others
     if (!tr.mode_a_code_.has_value() && (lower_no_m3a || upper_no_m3a)) // TODO check if data sources m3a capable
+    {
+        if (do_debug)
+            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                   << " no mode a, same";
+
         return ComparisonResult::SAME;
+    }
 
     bool lower_m3a_usable = lower_tr && lower_tr->mode_a_code_.has_value() && lower_tr->mode_a_code_->hasReliableValue();
     bool upper_m3a_usable = upper_tr && upper_tr->mode_a_code_.has_value() && upper_tr->mode_a_code_->hasReliableValue();
 
+    if (do_debug)
+        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+               << " lower_m3a_usable " << lower_m3a_usable << " upper_m3a_usable " << upper_m3a_usable;
+
     // no able to compare
     if (!lower_m3a_usable && !upper_m3a_usable)
+    {
+        if (do_debug)
+            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                   << " none usable, unknown";
+
         return ComparisonResult::UNKNOWN;
+    }
 
     if ((lower_m3a_usable && !upper_m3a_usable)
         || (!lower_m3a_usable && upper_m3a_usable)) // only 1 usable
     {
+        if (do_debug)
+            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                   << " only 1 usable";
+
         dbContent::targetReport::ReconstructorInfo& ref1 = lower_m3a_usable ? *lower_tr : *upper_tr;
 
         if (!tr.mode_a_code_.has_value())
+        {
+            if (do_debug)
+                loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                       << " no tr mode a, different";
+
             return ComparisonResult::DIFFERENT;
+        }
+
+        if (do_debug)
+            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                   << " tr mode a, same " << (tr.mode_a_code_->code_ == ref1.mode_a_code_->code_);
 
         // mode a exists
         if (tr.mode_a_code_->code_ == ref1.mode_a_code_->code_) // is same
@@ -1251,13 +1314,29 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     }
 
     // both set & reliable
+
+    if (do_debug)
+        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+               << " both set & reliable";
+
     dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
     dbContent::targetReport::ReconstructorInfo& ref2 = *upper_tr;
 
     if (!tr.mode_a_code_.has_value())
+    {
+        if (do_debug)
+            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                   << " no tr mode a, different";
+
         return ComparisonResult::DIFFERENT; // no mode a here, but in other
+    }
 
     // everything exists
+
+    if (do_debug)
+        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+               << " tr mode a, same " << ((tr.mode_a_code_->code_ == ref1.mode_a_code_->code_)
+                                          || (tr.mode_a_code_->code_ == ref2.mode_a_code_->code_));
 
     if ((tr.mode_a_code_->code_ == ref1.mode_a_code_->code_)
         || (tr.mode_a_code_->code_ == ref2.mode_a_code_->code_)) // one of them is same

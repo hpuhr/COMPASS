@@ -596,6 +596,8 @@ double ProjectionManager::geoidHeightM (double latitude_deg, double longitude_de
 
 void ProjectionManager::test()
 {
+    bool do_prints = false;
+
     if (hasCurrentProjection())
     {
         Projection& proj = currentProjection();
@@ -613,7 +615,10 @@ void ProjectionManager::test()
 
             for (unsigned int cnt=0; cnt < 100; ++cnt)
             {
-                loginf << "\n";
+                if (do_prints)
+                    loginf << "\n";
+
+REDO_LABEL:
 
                 azimuth_rad = Number::randomNumber(-M_PI/2, M_PI/2);
                 slant_range_m = Number::randomNumber(0, 100000);
@@ -632,12 +637,12 @@ void ProjectionManager::test()
                 //loginf << "ground1";
 
                 proj.getGroundRange(id, slant_range_m, has_baro_altitude, baro_altitude_ft * FT2M,
-                                    ground_range_m, adjusted_altitude_m, true);
+                                    ground_range_m, adjusted_altitude_m, do_prints);
 
                 //loginf << "polar w alt";
 
                 proj.polarToWGS84(id, azimuth_rad, slant_range_m, has_baro_altitude, baro_altitude_ft,
-                                  latitude, longitude, wgs_alt, true);
+                                  latitude, longitude, wgs_alt, do_prints);
 
 
                 // loginf << "polar gnd";
@@ -660,18 +665,25 @@ void ProjectionManager::test()
 
                 proj.wgs842PolarHorizontal(id, latitude, longitude, wgs_alt,
                                            calc_azimuth_rad, calc_slant_range_m,
-                                           calc_ground_range_m,calc_radar_alt_m, true);
+                                           calc_ground_range_m,calc_radar_alt_m, do_prints);
 
                 double calc_azimuth_diff = Number::calculateMinAngleDifference(
                     calc_azimuth_rad*RAD2DEG, azimuth_rad*RAD2DEG);
                 double calc_slant_range_diff = fabs(calc_slant_range_m - slant_range_m);
                 double calc_ground_range_diff = fabs(calc_ground_range_m - ground_range_m);
 
-                if (calc_azimuth_diff >= 1E-4 || calc_slant_range_diff >= 1E-2 || calc_ground_range_diff >= 1E-2)
+                if (!do_prints
+                    && (calc_azimuth_diff >= 1E-4 || calc_slant_range_diff >= 1E-2 || calc_ground_range_diff >= 1E-2))
+                {
                     logerr << "ProjectionManager: test: calc_azimuth_diff "
                            << String::doubleToStringPrecision(calc_azimuth_diff, 6)
                            << " calc_slant_range_diff " << String::doubleToStringPrecision(calc_slant_range_diff, 2)
                         << " calc_ground_range_diff " << String::doubleToStringPrecision(calc_ground_range_diff, 2);
+
+                    do_prints = true;
+
+                    goto REDO_LABEL;
+                }
 
                 assert (calc_azimuth_diff < 1E-4);
                 assert (calc_slant_range_diff < 1E-2);

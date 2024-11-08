@@ -260,10 +260,11 @@ public:
     std::tuple<std::vector<unsigned long>,
                std::vector<unsigned long>,
                std::vector<unsigned long>> compareModeACodes (
-        const ReconstructorTarget& other, boost::posix_time::time_duration max_time_diff) const;
+        const ReconstructorTarget& other, boost::posix_time::time_duration max_time_diff, bool do_debug) const;
     // unknown, same, different
     ComparisonResult compareModeACode (
-        const dbContent::targetReport::ReconstructorInfo& tr, boost::posix_time::time_duration max_time_diff) const;
+        const dbContent::targetReport::ReconstructorInfo& tr,
+        boost::posix_time::time_duration max_time_diff, bool do_debug) const;
 
     std::tuple<std::vector<unsigned long>,
                std::vector<unsigned long>,
