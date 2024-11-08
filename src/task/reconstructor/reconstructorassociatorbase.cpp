@@ -240,7 +240,7 @@ void ReconstructorAssociatorBase::selfAssociateNewUTNs()
 {
     loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs";
 
-    unsigned int run_cnt {0};
+    unsigned int loop_cnt {0};
 
     set<unsigned int> utns_to_remove;
 
@@ -248,7 +248,7 @@ RESTART_SELF_ASSOC:
 
     if (!reconstructor().isCancelled())
     {
-        logdbg << "ReconstructorAssociatorBase: selfAssociateNewUTNs: run " << run_cnt;
+        logdbg << "ReconstructorAssociatorBase: selfAssociateNewUTNs: loop " << loop_cnt;
 
         reconstructor().targets_container_.checkACADLookup();
 
@@ -265,12 +265,12 @@ RESTART_SELF_ASSOC:
 
             if (utns_to_merge.size())
             {
-                loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: run " << run_cnt
+                loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: loop " << loop_cnt
                        << ": found utn " << utn << " merges with " << String::compress(utns_to_merge,',');
 
                 for (auto other_utn : utns_to_merge)
                 {
-                    logdbg << "ReconstructorAssociatorBase: selfAssociateNewUTNs: run " << run_cnt
+                    logdbg << "ReconstructorAssociatorBase: selfAssociateNewUTNs: loop " << loop_cnt
                            << ": found merge utn " << utn << " with " << other_utn;
 
                     assert (reconstructor().targets_container_.targets_.count(other_utn));
@@ -304,7 +304,7 @@ RESTART_SELF_ASSOC:
 
             utns_to_remove.clear();
 
-            ++run_cnt;
+            ++loop_cnt;
 
             reconstructor().targets_container_.checkACADLookup();
 
@@ -312,7 +312,7 @@ RESTART_SELF_ASSOC:
         }
     }
 
-    loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: done at run " << run_cnt;
+    loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: done at loop cnt " << loop_cnt;
 }
 
 void ReconstructorAssociatorBase::retryAssociateTargetReports()
@@ -825,19 +825,15 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
 
             tie(distance_m, stddev_est_target, stddev_est_other) = pos_offs.value();
 
-            if (!*isTargetAccuracyAcceptable(stddev_est_target, utn, tr.timestamp_, do_debug)
-                || !*isTargetAccuracyAcceptable(stddev_est_other, other.utn_, tr.timestamp_, do_debug))
-            {
-                ++pos_skipped_cnt;
-                continue;
-            }
+            bool target_acc_acc = *isTargetAccuracyAcceptable(stddev_est_target, utn, tr.timestamp_, do_debug)
+                                  && *isTargetAccuracyAcceptable(stddev_est_other, other.utn_, tr.timestamp_, do_debug);
 
             double sum_stddev_est = stddev_est_target + stddev_est_other;
             ReconstructorAssociatorBase::DistanceClassification score_class;
             double distance_score;
 
             std::tie(score_class, distance_score) = checkPositionOffsetScore (
-                distance_m, sum_stddev_est, secondary_verified);
+                distance_m, sum_stddev_est, secondary_verified, target_acc_acc);
 
             if (score_class == DistanceClassification::Distance_Dubious)
                 ++pos_dubious_cnt;

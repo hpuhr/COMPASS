@@ -608,12 +608,17 @@ void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::Recon
 
         if (tgt_it.second.hasTimestamps())
         {
-            tgt.timeBegin(tgt_it.second.timestamp_min_);
-            tgt.timeEnd(tgt_it.second.timestamp_max_);
+            tgt.timeBegin(tgt_it.second.total_timestamp_min_);
+            tgt.timeEnd(tgt_it.second.total_timestamp_max_);
         }
 
         if (tgt_it.second.hasModeC())
             tgt.modeCMinMax(*tgt_it.second.mode_c_min_, *tgt_it.second.mode_c_max_);
+
+        if (tgt_it.second.latitude_min_ && tgt_it.second.latitude_max_
+            && tgt_it.second.longitude_min_ && tgt_it.second.longitude_max_)
+            tgt.setPositionBounds(*tgt_it.second.latitude_min_, *tgt_it.second.latitude_max_,
+                                  *tgt_it.second.longitude_min_, *tgt_it.second.longitude_max_);
 
                 // set counts
         for (auto& count_it : tgt_it.second.getDBContentCounts())

@@ -115,7 +115,7 @@ class ReconstructorAssociatorBase
         bool do_debug) = 0;
     // empty if not possible, else check passed + score (smaller is better) returned
     virtual std::tuple<DistanceClassification, double> checkPositionOffsetScore
-        (double distance_m, double sum_stddev_est, bool secondary_verified) = 0;
+        (double distance_m, double sum_stddev_est, bool secondary_verified, bool target_acccuracy_acceptable) = 0;
 
     virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) = 0;
 

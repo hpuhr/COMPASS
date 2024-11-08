@@ -50,7 +50,7 @@ class SimpleAssociator : public ReconstructorAssociatorBase
         bool do_debug) override;
     // empty if not possible, else check passed + score (smaller is better) returned
     virtual std::tuple<DistanceClassification, double> checkPositionOffsetScore
-        (double distance_m, double sum_stddev_est, bool secondary_verified) override;
+        (double distance_m, double sum_stddev_est, bool secondary_verified, bool target_acccuracy_acceptable) override;
 
     virtual boost::optional<bool> isTargetAccuracyAcceptable(
         double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug) override;

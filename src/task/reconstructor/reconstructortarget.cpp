@@ -144,7 +144,17 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     if (do_debug)
         loginf << "DBG min/max";
 
-    // update min/max
+    // update min/max ts
+    if (total_timestamp_min_.is_not_a_date_time() || total_timestamp_max_.is_not_a_date_time())
+    {
+        total_timestamp_min_ = tr.timestamp_;
+        total_timestamp_max_ = tr.timestamp_;
+    }
+    else
+    {
+        total_timestamp_min_ = min(total_timestamp_min_, tr.timestamp_);
+        total_timestamp_max_ = max(total_timestamp_max_, tr.timestamp_);
+    }
 
     if (!target_reports_.size())
     {
@@ -169,6 +179,24 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
             mode_c_min_ = tr.barometric_altitude_->altitude_;
             mode_c_max_ = tr.barometric_altitude_->altitude_;
         }
+    }
+
+    if (latitude_min_ && latitude_max_
+        && longitude_min_ && longitude_max_)
+    {
+        latitude_min_ = min(*latitude_min_, tr.position_->latitude_);
+        latitude_max_ = max(*latitude_max_, tr.position_->latitude_);
+
+        longitude_min_ = min(*longitude_min_, tr.position_->longitude_);
+        longitude_max_ = max(*longitude_max_, tr.position_->longitude_);
+    }
+    else
+    {
+        latitude_min_ = tr.position_->latitude_;
+        latitude_max_ = tr.position_->latitude_;
+
+        longitude_min_ = tr.position_->longitude_;
+        longitude_max_ = tr.position_->longitude_;
     }
 
     if (do_debug)
@@ -1855,6 +1883,26 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
         lat_vec.set(buffer_cnt, ref_it.second.lat);
         lon_vec.set(buffer_cnt, ref_it.second.lon);
+
+        // add to min/max pos
+
+        if (latitude_min_ && latitude_max_
+            && longitude_min_ && longitude_max_)
+        {
+            latitude_min_ = min(*latitude_min_, ref_it.second.lat);
+            latitude_max_ = max(*latitude_max_, ref_it.second.lat);
+
+            longitude_min_ = min(*longitude_min_, ref_it.second.lon);
+            longitude_max_ = max(*longitude_max_, ref_it.second.lon);
+        }
+        else
+        {
+            latitude_min_ = ref_it.second.lat;
+            latitude_max_ = ref_it.second.lat;
+
+            longitude_min_ = ref_it.second.lon;
+            longitude_max_ = ref_it.second.lon;
+        }
 
         utn_vec.set(buffer_cnt, utn_);
 

@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "compass.h"
 #include "taskmanager.h"
+#include "evaluationmanager.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -12,6 +13,8 @@
 #include <QSortFilterProxyModel>
 #include <QMenu>
 #include <QToolBar>
+#include <QApplication>
+#include <QThread>
 
 using namespace std;
 
@@ -57,8 +60,8 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     connect(table_view_, &QTableView::customContextMenuRequested,
             this, &TargetListWidget::customContextMenuSlot);
 
-    //    connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
-    //            this, &TargetListWidget::currentRowChanged);
+    // connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+    //         this, &TargetListWidget::currentRowChanged);
 
     connect(table_view_->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &TargetListWidget::selectionChanged);
@@ -125,38 +128,51 @@ void TargetListWidget::filterSlot()
 
 void TargetListWidget::customContextMenuSlot(const QPoint& p)
 {
-    // logdbg << "TargetListWidget: customContextMenuSlot";
+    logdbg << "TargetListWidget: customContextMenuSlot";
 
-    // assert (table_view_);
+    assert (table_view_);
 
-    // QModelIndex index = table_view_->indexAt(p);
-    // if (!index.isValid())
-    //     return;
+    QModelIndex index = table_view_->indexAt(p);
+    if (!index.isValid())
+        return;
 
-    // auto const source_index = proxy_model_->mapToSource(index);
-    // assert (source_index.isValid());
+    auto const source_index = proxy_model_->mapToSource(index);
+    assert (source_index.isValid());
 
-    // const dbContent::Target& target = model_.getTargetOf(source_index);
+    const dbContent::Target& target = model_.getTargetOf(source_index);
 
-    // QMenu menu;
+    QMenu menu;
 
-    // menu.exec(table_view_->viewport()->mapToGlobal(p));
+    QAction* action2 = new QAction("Show Surrounding Data", this);
+    connect (action2, &QAction::triggered, this, &TargetListWidget::showSurroundingDataSlot);
+    action2->setData(target.utn_);
+    menu.addAction(action2);
+
+    menu.exec(table_view_->viewport()->mapToGlobal(p));
 }
 
-void TargetListWidget::showFullUTNSlot ()
-{
-    QAction* action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
+// void TargetListWidget::showFullUTNSlot ()
+// {
+//     QAction* action = dynamic_cast<QAction*> (QObject::sender());
+//     assert (action);
 
-    unsigned int utn = action->data().toUInt();
+//     unsigned int utn = action->data().toUInt();
 
-    loginf << "TargetListWidget: showFullUTNSlot: utn " << utn;
+//     loginf << "TargetListWidget: showFullUTNSlot: utn " << utn;
 
-    //eval_man_.showFullUTN(utn);
-}
+//     //eval_man_.showFullUTN(utn);
+// }
 
 void TargetListWidget::showSurroundingDataSlot ()
 {
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    while (dbcont_man.loadInProgress())
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(10);
+    }
+
     QAction* action = dynamic_cast<QAction*> (QObject::sender());
     assert (action);
 
@@ -164,7 +180,7 @@ void TargetListWidget::showSurroundingDataSlot ()
 
     loginf << "TargetListWidget: showSurroundingDataSlot: utn " << utn;
 
-    //eval_man_.showSurroundingData(utn);
+    dbcont_man.showSurroundingData(utn);
 }
 
 void TargetListWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)

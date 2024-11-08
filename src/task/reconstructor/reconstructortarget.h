@@ -169,11 +169,16 @@ public:
     std::set<unsigned int> mode_as_;
     //std::set<unsigned int> mops_versions_;
 
-    boost::posix_time::ptime timestamp_min_;
-    boost::posix_time::ptime timestamp_max_;
+    boost::posix_time::ptime total_timestamp_min_, total_timestamp_max_; // over all data
+    boost::posix_time::ptime timestamp_min_, timestamp_max_; // in current slice
 
     boost::optional<float> mode_c_min_;
     boost::optional<float> mode_c_max_;
+
+    boost::optional<double> latitude_min_;
+    boost::optional<double> latitude_max_;
+    boost::optional<double> longitude_min_;
+    boost::optional<double> longitude_max_;
 
     std::set <unsigned int> ds_ids_;
     //std::set <std::pair<unsigned int, unsigned int>> track_nums_; // ds_id, tn

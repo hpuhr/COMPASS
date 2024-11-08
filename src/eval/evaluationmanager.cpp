@@ -2017,15 +2017,20 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
     //    "Barometric Altitude": {
     //    "Barometric Altitude Maximum": "43000",
     //    "Barometric Altitude Minimum": "500"
+    //    "Barometric Altitude NULL": false
     //    },
 
-    //    if (target_data.hasModeC())
-    //    {
-    //        float alt_min = target_data.modeCMin();
-    //        alt_min -= 300;
-    //        float alt_max = target_data.modeCMax();
-    //        alt_max += 300;
-    //    }
+    if (target_data.hasModeC())
+    {
+        float alt_min = target_data.modeCMin();
+        alt_min -= 300;
+        float alt_max = target_data.modeCMax();
+        alt_max += 300;
+
+        data[ViewPoint::VP_FILTERS_KEY]["Barometric Altitude"]["Barometric Altitude Maximum"] = alt_max;
+        data[ViewPoint::VP_FILTERS_KEY]["Barometric Altitude"]["Barometric Altitude Minimum"] = alt_min;
+        data[ViewPoint::VP_FILTERS_KEY]["Barometric Altitude"]["Barometric Altitude NULL"] = true;
+    }
 
     //    "Position": {
     //    "Latitude Maximum": "50.78493920733",
@@ -2036,10 +2041,15 @@ void EvaluationManager::showSurroundingData (unsigned int utn)
 
     if (target_data.hasPos())
     {
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(target_data.latitudeMax()+0.2);
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(target_data.latitudeMin()-0.2);
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(target_data.longitudeMax()+0.2);
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(target_data.longitudeMin()-0.2);
+        double lat_eps = (target_data.latitudeMax() - target_data.latitudeMin()) / 10.0;
+        lat_eps = min(lat_eps, 0.1); // 10% or 0.1 at max
+        double lon_eps = (target_data.longitudeMax() - target_data.longitudeMin()) / 10.0; // 10%
+        lon_eps = min(lon_eps, 0.1); // 10% or 0.1 at max
+
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(target_data.latitudeMax()+lat_eps);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(target_data.latitudeMin()-lat_eps);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(target_data.longitudeMax()+lon_eps);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(target_data.longitudeMin()-lon_eps);
     }
 
     setViewableDataConfig(data);

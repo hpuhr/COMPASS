@@ -67,6 +67,14 @@ public:
     void adsbMOPSVersions(std::set<unsigned int> values);
     std::string adsbMOPSVersionsStr() const;
 
+    bool hasPositionBounds() const;
+    void setPositionBounds (double latitude_min, double latitude_max,
+                           double longitude_min, double longitude_max);
+    double latitudeMin() const;
+    double latitudeMax() const;
+    double longitudeMin() const;
+    double longitudeMax() const;
+
 protected:
     nlohmann::json info_;
     mutable std::string time_duration_str_;

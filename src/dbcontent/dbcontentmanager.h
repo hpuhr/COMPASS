@@ -183,6 +183,7 @@ public:
     void autoFilterUTNS();
     void showUTN (unsigned int utn);
     void showUTNs (std::vector<unsigned int> utns);
+    void showSurroundingData (unsigned int utn);
 
 protected:
     COMPASS& compass_;

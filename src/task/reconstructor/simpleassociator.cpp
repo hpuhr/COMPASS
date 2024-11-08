@@ -227,7 +227,8 @@ boost::optional<std::pair<bool, double>> SimpleAssociator::calculatePositionOffs
 }
 
 std::tuple<ReconstructorAssociatorBase::DistanceClassification, double>
-SimpleAssociator::checkPositionOffsetScore (double distance_m, double sum_stddev_est, bool secondary_verified)
+SimpleAssociator::checkPositionOffsetScore (double distance_m, double sum_stddev_est,
+                                           bool secondary_verified, bool target_acccuracy_acceptable)
 {
         const auto& settings = reconstructor_.settings();
 
