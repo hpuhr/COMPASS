@@ -278,7 +278,7 @@ bool ReconstructorBase::TargetsContainer::canAssocByTrackNumber(
         return false;
 
     if (do_debug)
-        loginf << "DBG can use stored utn in tn2utn_ "
+        loginf << "DBG canAssocByTrackNumber can use stored utn in tn2utn_ "
                << tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
 
     return tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
@@ -896,7 +896,6 @@ void ReconstructorBase::createTargetReports()
 
                 tr_ds_[dbcont_id][info.ds_id_][info.line_id_].push_back(record_num);
             }
-
         }
     }
 

@@ -208,6 +208,7 @@ public:
     bool hasACAD (unsigned int ta)  const;
     bool hasAllOfACADs (std::set<unsigned int> tas) const;
     bool hasAnyOfACADs (std::set<unsigned int> tas) const;
+    std::string acadsStr() const;
 
     bool hasACID () const;
     bool hasACID (const std::string& acid)  const;

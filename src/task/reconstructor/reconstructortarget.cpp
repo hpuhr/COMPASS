@@ -335,6 +335,29 @@ bool ReconstructorTarget::hasAnyOfACADs (std::set<unsigned int> tas) const
     return false;
 }
 
+std::string ReconstructorTarget::acadsStr() const
+{
+    bool first = true;
+
+    stringstream ss;
+
+    ss << "'";
+
+    for (auto ta_it : acads_)
+    {
+        if (first)
+            ss << String::hexStringFromInt(ta_it, 6, '0');
+        else
+            ss << ", " << String::hexStringFromInt(ta_it, 6, '0');
+
+        first = false;
+    }
+
+    ss << "'";
+
+    return ss.str();
+}
+
 bool ReconstructorTarget::hasACID () const
 {
     return acids_.size();
@@ -373,20 +396,7 @@ std::string ReconstructorTarget::asStr() const
 
     if (acads_.size())
     {
-        ss << " acads '";
-
-        bool first {true};
-        for (auto ta_it : acads_)
-        {
-            if (first)
-                ss << String::hexStringFromInt(ta_it, 6, '0');
-            else
-                ss << ", " << String::hexStringFromInt(ta_it, 6, '0');
-
-            first = false;
-        }
-
-        ss << "'";
+        ss << " acads " << acadsStr();
     }
 
     if (acids_.size())

@@ -202,7 +202,7 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
     return std::tuple<double, double, double>(distance_m, -1, -1);
 }
 
-boost::optional<bool> SimpleAssociator::checkPositionOffsetAcceptable (
+boost::optional<bool> SimpleAssociator::checkTrackPositionOffsetAcceptable (
     dbContent::targetReport::ReconstructorInfo& tr,
     unsigned int utn, bool secondary_verified, bool do_debug)
 {

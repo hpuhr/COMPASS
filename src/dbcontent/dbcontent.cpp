@@ -156,8 +156,13 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
            << name_;
 
     checkStaticVariable(DBContent::meta_var_ds_id_);
-    checkStaticVariable(DBContent::meta_var_latitude_);
-    checkStaticVariable(DBContent::meta_var_longitude_);
+
+    if (name_ == "CAT001" || name_ == "CAT010" || name_ == "CAT020"|| name_ == "CAT021"
+        || name_ == "CAT048" || name_ == "CAT062")
+    {
+        checkStaticVariable(DBContent::meta_var_latitude_);
+        checkStaticVariable(DBContent::meta_var_longitude_);
+    }
 
     if (name_ == "CAT001" || name_ == "CAT048")
     {

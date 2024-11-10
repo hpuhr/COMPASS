@@ -101,7 +101,7 @@ class ReconstructorAssociatorBase
         const boost::optional<unsigned int>& thread_id,
         reconstruction::PredictionStats* stats = nullptr) = 0;
 
-    virtual boost::optional<bool> checkPositionOffsetAcceptable (
+    virtual boost::optional<bool> checkTrackPositionOffsetAcceptable (
         dbContent::targetReport::ReconstructorInfo& tr, unsigned int utn,
         bool secondary_verified, bool do_debug) = 0;
     // empty if not possible, else check passed or failed returned
