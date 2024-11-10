@@ -366,9 +366,14 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
 
     // association stuff
     registerParameter("max_time_diff", &base_settings_.max_time_diff_, base_settings_.max_time_diff_);
-    registerParameter("track_max_time_diff", &base_settings_.track_max_time_diff_, base_settings_.track_max_time_diff_);
-
     registerParameter("max_altitude_diff", &base_settings_.max_altitude_diff_, base_settings_.max_altitude_diff_);
+    registerParameter("track_max_time_diff", &base_settings_.track_max_time_diff_, base_settings_.track_max_time_diff_);
+    registerParameter("do_track_number_disassociate_using_distance",
+                      &base_settings_.do_track_number_disassociate_using_distance_,
+                      base_settings_.do_track_number_disassociate_using_distance_);
+    registerParameter("tn_disassoc_distance_factor", &base_settings_.tn_disassoc_distance_factor_,
+                      base_settings_.tn_disassoc_distance_factor_);
+
 
     registerParameter("target_prob_min_time_overlap", &base_settings_.target_prob_min_time_overlap_,
                       base_settings_.target_prob_min_time_overlap_);

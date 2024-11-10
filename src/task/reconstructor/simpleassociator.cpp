@@ -214,7 +214,8 @@ boost::optional<bool> SimpleAssociator::checkTrackPositionOffsetAcceptable (
 
     std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
 
-    return distance_m < reconstructor_.settings().max_distance_acceptable_;
+    return distance_m <
+           reconstructor_.settings().max_distance_acceptable_ * reconstructor_.settings().tn_disassoc_distance_factor_;
 }
 
 boost::optional<std::pair<bool, double>> SimpleAssociator::calculatePositionOffsetScore (

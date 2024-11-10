@@ -4,6 +4,15 @@
 #include "reconstructortarget.h"
 #include "reconstructorbase.h"
 
+// used settings from ReconstructorBaseSettings
+// max_time_diff_
+// track_max_time_diff_
+// max_altitude_diff_
+// target_max_positions_dubious_verified_rate_
+// target_max_positions_dubious_unknown_rate_
+// target_min_updates_
+// target_prob_min_time_overlap_
+
 class ReconstructorAssociatorBase
 {
   public:

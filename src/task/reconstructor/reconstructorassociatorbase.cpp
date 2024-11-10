@@ -488,7 +488,7 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
 
     assert (reconstructor().targets_container_.targets_.size() == reconstructor().targets_container_.utn_vec_.size());
 
-//START_TR_ASSOC:
+START_TR_ASSOC:
 
     utn = -1; // not yet found
 
@@ -511,31 +511,32 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
             if (do_debug)
                 loginf << "DBG assoc by track_num, utn " << utn;
 
-            // if (utn != -1 && canGetPositionOffsetTR(tr, reconstructor().targets_container_.targets_.at(utn)))
-            // {
-            //     assert (reconstructor().targets_container_.targets_.count(utn));
+            if (utn != -1 && reconstructor().settings().do_track_number_disassociate_using_distance_
+                && canGetPositionOffsetTR(tr, reconstructor().targets_container_.targets_.at(utn)))
+            {
+                assert (reconstructor().targets_container_.targets_.count(utn));
 
-            //     if (do_debug)
-            //         loginf << "DBG stored utn in tn2utn_ checking position offset";
+                if (do_debug)
+                    loginf << "DBG stored utn in tn2utn_ checking position offset";
 
-            //     // check for position offsets
-            //     boost::optional<bool> check_result = checkTrackPositionOffsetAcceptable(
-            //         tr, utn, true, do_debug);
+                // check for position offsets
+                boost::optional<bool> check_result = checkTrackPositionOffsetAcceptable(
+                    tr, utn, true, do_debug);
 
-            //     if (check_result && !*check_result)
-            //     {
-            //         if (do_debug)
-            //             loginf << "DBG stored utn in tn2utn_ position offset not acceptable " << *check_result;
+                if (check_result && !*check_result)
+                {
+                    if (do_debug)
+                        loginf << "DBG stored utn in tn2utn_ position offset not acceptable " << *check_result;
 
-            //         reconstructor().targets_container_.eraseTrackNumberLookup(tr);
+                    reconstructor().targets_container_.eraseTrackNumberLookup(tr);
 
-            //         goto START_TR_ASSOC;
-            //     }
-            // }
+                    goto START_TR_ASSOC;
+                }
+            }
 
-            // // do assoc
-            // if (do_debug)
-            //     loginf << "DBG use stored utn in tn2utn_: " << utn;
+            // do assoc
+            if (do_debug)
+                loginf << "DBG use stored utn in tn2utn_: " << utn;
         }
         else // not yet existing, create & add target findUTNByModeACPosOrCreateNewTarget(tr)
         {
