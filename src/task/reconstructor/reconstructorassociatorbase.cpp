@@ -816,13 +816,14 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
         vector<pair<unsigned long, double>> distance_scores;
         double distance_scores_sum {0};
 
+        unsigned int pos_not_ok_cnt {0};
         unsigned int pos_dubious_cnt {0};
         unsigned int pos_good_cnt {0};
         unsigned int pos_skipped_cnt {0};
 
         double distance_m, stddev_est_target, stddev_est_other;
-        float pos_dubious_rate;
-        bool pos_dubious_rate_acceptable;
+        float pos_not_ok_rate, pos_dubious_rate;
+        bool pos_not_ok_rate_acceptable, pos_dubious_rate_acceptable;
 
         if (do_debug)
             loginf << "\ttarget " << utn << " other utn " << other.utn_ << " rec_nums " << rec_nums.size();
@@ -866,16 +867,18 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
                 ++pos_good_cnt;
             else if (score_class == DistanceClassification::Distance_NotOK)
             {
-                distance_scores.clear();
-                pos_good_cnt = 0;
+                // distance_scores.clear();
+                // pos_good_cnt = 0;
 
-                if (do_debug)
-                {
-                    loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                           << " max mahalanobis distance failed,  score " << distance_score;
-                }
+                // if (do_debug)
+                // {
+                //     loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                //            << " max mahalanobis distance failed,  score " << distance_score;
+                // }
 
-                break;
+                // break;
+
+                ++pos_not_ok_cnt;
             }
 
             //loginf << "\tdist " << distance;
@@ -884,6 +887,11 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
             distance_scores_sum += distance_score;
         }
 
+        if (pos_not_ok_cnt)
+            pos_not_ok_rate = (float) pos_not_ok_cnt / (float) pos_good_cnt;
+        else
+            pos_not_ok_rate = 0;
+
         if (pos_good_cnt)
             pos_dubious_rate = (float) pos_dubious_cnt / (float) pos_good_cnt;
         else
@@ -891,8 +899,13 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
 
         if (do_debug)
             loginf << "\ttarget " << utn << " other utn " << other.utn_
-                   << " pos_dubious_rate " << pos_dubious_rate
-                   << " pos_dubious_cnt " << pos_dubious_cnt << " pos_good_cnt " << pos_good_cnt;
+                   << " pos_not_ok_rate " << pos_not_ok_rate << " pos_not_ok_cnt " << pos_not_ok_cnt
+                   << " pos_dubious_rate " << pos_dubious_rate << " pos_dubious_cnt " << pos_dubious_cnt
+                   << " pos_good_cnt " << pos_good_cnt;
+
+        pos_not_ok_rate_acceptable =
+            secondary_verified ? pos_dubious_rate < settings.target_max_positions_not_ok_verified_rate_
+                               : pos_dubious_rate < settings.target_max_positions_not_ok_unknown_rate_;
 
         pos_dubious_rate_acceptable =
             secondary_verified ? pos_dubious_rate < settings.target_max_positions_dubious_verified_rate_
@@ -900,10 +913,11 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
 
         if (do_debug)
             loginf << "\ttarget " << utn << " other utn " << other.utn_
+                   << " pos_not_ok_rate_acceptable " << pos_not_ok_rate_acceptable
                    << " pos_dubious_rate_acceptable " << pos_dubious_rate_acceptable;
 
         if (pos_good_cnt
-            && pos_dubious_rate_acceptable
+            && pos_not_ok_rate_acceptable && pos_dubious_rate_acceptable
             && distance_scores.size() >= settings.target_min_updates_)
         {
             double distance_score_avg = distance_scores_sum / (float) distance_scores.size();

@@ -383,6 +383,11 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
     registerParameter("target_max_positions_dubious_unknown_rate", &base_settings_.target_max_positions_dubious_unknown_rate_,
                       base_settings_.target_max_positions_dubious_unknown_rate_);
 
+    registerParameter("target_max_positions_not_ok_verified_rate", &base_settings_.target_max_positions_not_ok_verified_rate_,
+                      base_settings_.target_max_positions_not_ok_verified_rate_);
+    registerParameter("target_max_positions_not_ok_unknown_rate", &base_settings_.target_max_positions_not_ok_unknown_rate_,
+                      base_settings_.target_max_positions_not_ok_unknown_rate_);
+
     // reference computation
     {
         registerParameter("ref_rec_type", (int*)&ref_calc_settings_.kalman_type_assoc, (int)ReferenceCalculatorSettings().kalman_type_assoc);

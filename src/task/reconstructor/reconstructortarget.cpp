@@ -573,7 +573,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
                                                                         const InterpOptions& interp_options) const
 // lower/upper times, invalid ts if not existing
 {
-    bool debug = interp_options.debug();
+    bool debug = false; //interp_options.debug();
 
     std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_lower, it_upper;
     bool has_lower = false;
@@ -593,7 +593,8 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         has_lower = true;
         has_upper = true;
 
-        if (debug) loginf << "ReconstructorTarget: dataFor: found timestamp in target";
+        if(debug)
+            loginf << "ReconstructorTarget: dataFor: found timestamp in target";
     }
     else if (num_ts_existing > 1)
     {
@@ -652,7 +653,8 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         has_lower = true;
         has_upper = true;
 
-        if (debug) loginf << "ReconstructorTarget: dataFor: found multiple timestamps in target, chose:\n" << tr2String(dataFor(it_start->second));
+        if (debug)
+            loginf << "ReconstructorTarget: dataFor: found multiple timestamps in target, chose:\n" << tr2String(dataFor(it_start->second));
     }
     else
     {
@@ -698,7 +700,8 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
     if (ok_lower && ok_upper)
     {
         if (debug)
-            loginf << "ReconstructorTarget: dataFor: initial interval valid";
+            loginf << "ReconstructorTarget: dataFor: initial interval valid, has_lower " << has_lower
+                   << " has_upper " << has_upper;
 
         return {has_lower ? &dataFor(it_lower->second) : nullptr, has_upper ? &dataFor(it_upper->second) : nullptr};
     }
