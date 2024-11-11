@@ -548,6 +548,9 @@ START_TR_ASSOC:
                 // create new and add
                 utn = reconstructor().targets_container_.createNewTarget(tr);
 
+                if (reconstructor().task().debugSettings().debugUTN(utn))
+                    loginf << "created new utn " << utn << " with no mode AC match using tr " << tr.asStr();
+
                 if (do_debug)
                     loginf << "DBG use mode a/c/pos assoc to new utn " << utn;
 
@@ -1072,11 +1075,18 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
                                   {
                                       if (do_debug)
                                           loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                                                 << " mode c check failed";
+                                                 << " mode c check failed, checking on position only";
+
+                                      // check based on pos only
+                                      scoreUTN(target.target_reports_, other, cnt, false, do_debug);
                                   }
                               }
                               else if (!ma_different.size())
                               {
+                                  if (do_debug)
+                                      loginf << "\ttarget " << target.utn_ << " other " << other.utn_
+                                             << " mode a check failed, checking on position only";
+
                                   // check based on pos only
                                   scoreUTN(target.target_reports_, other, cnt, false, do_debug);
                               }

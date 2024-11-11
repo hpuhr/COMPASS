@@ -310,6 +310,10 @@ int ReconstructorBase::TargetsContainer::assocByTrackNumber(
 
         // create new and add
         utn = createNewTarget(tr);
+
+        if (reconstructor_->task().debugSettings().debugUTN(utn))
+            loginf << "created new utn " << utn << " from max tdiff track using tr " << tr.asStr();
+
         assert (targets_.count(utn));
     }
 

@@ -276,7 +276,7 @@ public:
                std::vector<unsigned long>,
                std::vector<unsigned long>> compareModeCCodes (
         const ReconstructorTarget& other, const std::vector<unsigned long>& rec_nums,
-        boost::posix_time::time_duration max_time_diff, float max_alt_diff, bool debug) const;
+        boost::posix_time::time_duration max_time_diff, float max_alt_diff, bool do_debug) const;
 
     bool isPrimaryAt(boost::posix_time::ptime timestamp,
                      boost::posix_time::time_duration max_time_diff, const InterpOptions& interp_options) const;
@@ -293,7 +293,7 @@ public:
 
     ComparisonResult compareModeCCode (const dbContent::targetReport::ReconstructorInfo& tr,
                                       boost::posix_time::time_duration max_time_diff, float max_alt_diff,
-                                      bool debug) const;
+                                      bool do_debug) const;
     // unknown, same, different timestamps from this
 
     //fl_unknown, fl_on_ground, alt_baro_ft
