@@ -51,11 +51,18 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
     else
         utn = 0;
 
-    //assert (utn != 261);
+    if (tr.acad_)
+        assert (!acad_2_utn_.count(*tr.acad_));
+
+    if (tr.acid_)
+        assert (!acid_2_utn_.count(*tr.acid_));
+
     if (tr.track_number_)
         assert (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
 
     assert (reconstructor_);
+
+    assert (!targets_.count(utn));
 
     targets_.emplace(
         std::piecewise_construct,
@@ -321,16 +328,10 @@ int ReconstructorBase::TargetsContainer::assocByTrackNumber(
         assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
         tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
 
-        // create new and add TODO HP
-        utn = createNewTarget(tr);
-
         if (reconstructor_->task().debugSettings().debugUTN(utn))
-        {
-            loginf << "disassciated utn " << utn << " from max tdiff track using tr " << tr.asStr();
-//            return -1;
-        }
+            loginf << "DBG disassociated utn " << utn << " from max tdiff track using tr " << tr.asStr();
 
-        assert (targets_.count(utn));
+        return -1; // disassoc case
     }
 
     return utn;

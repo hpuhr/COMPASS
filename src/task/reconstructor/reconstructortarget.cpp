@@ -1231,7 +1231,7 @@ ReconstructorTarget::compareModeACodes (
     ComparisonResult cmp_res;
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeACode: num target_reports " << target_reports_.size()
+        loginf << "ReconstructorTarget: compareModeACodes: num target_reports " << target_reports_.size()
                << " max t_diff " << Time::toString(max_time_diff);
 
     for (auto tr_it : target_reports_)
@@ -1241,7 +1241,7 @@ ReconstructorTarget::compareModeACodes (
         cmp_res = other.compareModeACode(tr, max_time_diff, do_debug);
 
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "ReconstructorTarget: compareModeACodes: tr ts " << Time::toString(tr.timestamp_)
                    << " cmp_res " << (unsigned int) cmp_res
                    << " num unknown " << unknown.size() << " same " << same.size()
                    << " different " << different.size();
@@ -1266,15 +1266,13 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     if (do_debug)
         loginf << "ReconstructorTarget: compareModeACode: tr " << tr.asStr();
 
-    if (tr.mode_a_code_.has_value() && !tr.mode_a_code_->hasReliableValue()) // check if reliable value
-    {
-        if (do_debug)
-            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
-                   << " res unkown, has val " << tr.mode_a_code_.has_value()
-                   << " reliable " << (tr.mode_a_code_.has_value() && tr.mode_a_code_->hasReliableValue());
+    // check if reliable value, can be different but not same
+    bool tr_mode_a_unreliable = tr.mode_a_code_.has_value() && !tr.mode_a_code_->hasReliableValue();
 
-        return ComparisonResult::UNKNOWN;
-    }
+    if (do_debug)
+        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+               << " res unkown, has val " << tr.mode_a_code_.has_value()
+               << " reliable " << tr_mode_a_unreliable;
 
     if (!hasDataForTime(tr.timestamp_, max_time_diff))
     {
@@ -1349,7 +1347,12 @@ ComparisonResult ReconstructorTarget::compareModeACode (
 
         // mode a exists
         if (tr.mode_a_code_->code_ == ref1.mode_a_code_->code_) // is same
-            return ComparisonResult::SAME;
+        {
+            if (tr_mode_a_unreliable)
+                return ComparisonResult::UNKNOWN;
+            else
+                return ComparisonResult::SAME;
+        }
         else
             return ComparisonResult::DIFFERENT;
     }
@@ -1382,7 +1385,10 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     if ((tr.mode_a_code_->code_ == ref1.mode_a_code_->code_)
         || (tr.mode_a_code_->code_ == ref2.mode_a_code_->code_)) // one of them is same
     {
-        return ComparisonResult::SAME;
+        if (tr_mode_a_unreliable)
+            return ComparisonResult::UNKNOWN;
+        else
+            return ComparisonResult::SAME;
     }
     else
         return ComparisonResult::DIFFERENT;
@@ -1586,13 +1592,15 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
     if (do_debug)
         loginf << "ReconstructorTarget: compareModeCCode: tr " << tr.asStr();
 
-    if (tr.barometric_altitude_.has_value() && !tr.barometric_altitude_->hasReliableValue()) // check if reliable value
-    {
-        if (do_debug)
-            loginf << "ReconstructorTarget: compareModeCCode: no unreliable value";
+    // if (tr.barometric_altitude_.has_value() && !tr.barometric_altitude_->hasReliableValue()) // check if reliable value
+    // {
+    //     if (do_debug)
+    //         loginf << "ReconstructorTarget: compareModeCCode: no unreliable value";
 
-        return ComparisonResult::UNKNOWN;
-    }
+    //     return ComparisonResult::UNKNOWN;
+    // }
+
+    bool tr_mode_c_unreliable = tr.barometric_altitude_.has_value() && !tr.barometric_altitude_->hasReliableValue();
 
     if (!hasDataForTime(tr.timestamp_, max_time_diff))
     {
@@ -1673,7 +1681,12 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
 
         // barometric_altitude exists
         if (fabs(tr.barometric_altitude_->altitude_ - ref1.barometric_altitude_->altitude_) < max_alt_diff) // is same
-            return ComparisonResult::SAME;
+        {
+            if (tr_mode_c_unreliable)
+                return ComparisonResult::UNKNOWN;
+            else
+                return ComparisonResult::SAME;
+        }
         else
             return ComparisonResult::DIFFERENT;
     }
@@ -1706,7 +1719,10 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
     if ((fabs(tr.barometric_altitude_->altitude_ - ref1.barometric_altitude_->altitude_) < max_alt_diff)
         || (fabs(tr.barometric_altitude_->altitude_ - ref2.barometric_altitude_->altitude_)) < max_alt_diff) // one of them is same
     {
-        return ComparisonResult::SAME;
+        if (tr_mode_c_unreliable)
+            return ComparisonResult::UNKNOWN;
+        else
+            return ComparisonResult::SAME;
     }
     else
         return ComparisonResult::DIFFERENT;

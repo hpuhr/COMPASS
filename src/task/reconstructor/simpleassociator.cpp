@@ -61,7 +61,7 @@ void SimpleAssociator::associateNewData()
     loginf << "SimpleAssociator: associateNewData: tracker targets " << reconstructor_.targets_container_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 
-            // create non-tracker utns
+    // create non-tracker utns
     std::set<unsigned int> sensor_dbcont_ids;
 
     for (auto dbcont_it : COMPASS::instance().dbContentManager())
@@ -155,13 +155,13 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
                                                     tr.position_->longitude_ * DEG2RAD,
                                                     ref_pos.latitude_ * DEG2RAD, ref_pos.longitude_ * DEG2RAD);
 
-            // distance, target acc, tr acc
+    // distance, target acc, tr acc
     return std::tuple<double, double, double>(distance_m, -1, -1);
 }
 
 bool SimpleAssociator::canGetPositionOffsetTargets(const boost::posix_time::ptime& ts,
-                                            const dbContent::ReconstructorTarget& target0,
-                                            const dbContent::ReconstructorTarget& target1)
+                                                   const dbContent::ReconstructorTarget& target0,
+                                                   const dbContent::ReconstructorTarget& target1)
 {
     dbContent::targetReport::Position ref_pos;
     bool ok;
@@ -198,7 +198,7 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
     double distance_m = osgEarth::GeoMath::distance(target0_pos.latitude_ * DEG2RAD, target0_pos.longitude_ * DEG2RAD,
                                                     target1_pos.latitude_ * DEG2RAD, target1_pos.longitude_ * DEG2RAD);
 
-            // distance, target acc, tr acc
+    // distance, target acc, tr acc
     return std::tuple<double, double, double>(distance_m, -1, -1);
 }
 
@@ -224,31 +224,28 @@ boost::optional<std::pair<bool, double>> SimpleAssociator::calculatePositionOffs
     bool do_debug)
 {
     return std::pair<bool, double> (distance_m < reconstructor_.settings().max_distance_acceptable_,
-                                    distance_m - reconstructor_.settings().max_distance_acceptable_);
+                                   distance_m - reconstructor_.settings().max_distance_acceptable_);
 }
 
 std::tuple<ReconstructorAssociatorBase::DistanceClassification, double>
 SimpleAssociator::checkPositionOffsetScore (double distance_m, double sum_stddev_est,
                                            bool secondary_verified, bool target_acccuracy_acceptable)
 {
-        const auto& settings = reconstructor_.settings();
+    const auto& settings = reconstructor_.settings();
+
+    DistanceClassification classif;
 
     if (distance_m > settings.max_distance_quit_)
-        return tuple<DistanceClassification, double>(
-            DistanceClassification::Distance_NotOK,
-            distance_m - settings.max_distance_acceptable_);
-    if (distance_m > settings.max_distance_dubious_)
-        return tuple<DistanceClassification, double>(
-            DistanceClassification::Distance_Dubious,
-            distance_m - settings.max_distance_acceptable_);
-    if (distance_m < settings.max_distance_acceptable_)
-        return tuple<DistanceClassification, double>
-            (DistanceClassification::Distance_Good,
-             distance_m - settings.max_distance_acceptable_);
+        classif = DistanceClassification::Distance_NotOK;
+    else if (distance_m > settings.max_distance_dubious_)
+        classif = DistanceClassification::Distance_Dubious;
+    else if (distance_m < settings.max_distance_acceptable_)
+        classif = DistanceClassification::Distance_Good;
+    else
+        classif = DistanceClassification::Distance_Acceptable;
 
     return tuple<DistanceClassification, double>(
-        DistanceClassification::Distance_Acceptable,
-        distance_m - settings.max_distance_acceptable_);
+        classif, settings.max_distance_acceptable_ - distance_m);
 }
 
 boost::optional<bool> SimpleAssociator::isTargetAccuracyAcceptable(
@@ -257,10 +254,10 @@ boost::optional<bool> SimpleAssociator::isTargetAccuracyAcceptable(
     return true;
 }
 
-bool SimpleAssociator::isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified)
-{
-    return distance_score_avg < reconstructor_.settings().max_distance_acceptable_;
-}
+// bool SimpleAssociator::isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified)
+// {
+//     return distance_score_avg < reconstructor_.settings().max_distance_acceptable_;
+// }
 
 ReconstructorBase& SimpleAssociator::reconstructor()
 {
