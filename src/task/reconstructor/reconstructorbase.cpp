@@ -39,6 +39,13 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
 {
     unsigned int utn;
 
+    // if (removed_utns_.size())
+    // {
+    //     utn = *removed_utns_.begin();
+    //     assert (!targets_.count(utn));
+    //     removed_utns_.erase(removed_utns_.begin());
+    // }
+    // else
     if (targets_.size())
         utn = targets_.rbegin()->first + 1; // new utn
     else
@@ -75,6 +82,9 @@ void ReconstructorBase::TargetsContainer::removeUTN(unsigned int other_utn)
     auto other_it = std::find(utn_vec_.begin(), utn_vec_.end(), other_utn);
     assert (other_it != utn_vec_.end());
     utn_vec_.erase(other_it);
+
+    // add to removed utns for re-use
+    //removed_utns_.push_back(other_utn);
 }
 
 void ReconstructorBase::TargetsContainer::replaceInLookup(unsigned int other_utn, unsigned int utn)
@@ -302,17 +312,23 @@ int ReconstructorBase::TargetsContainer::assocByTrackNumber(
     if (tr.timestamp_ - timestamp_prev > track_max_time_diff) // too old
     {
         if (do_debug)
-            loginf << "DBG stored utn in tn2utn_ too large time offset, remove & create new target";
+            loginf << "DBG stored utn " << utn << " in tn2utn_ too large time offset (tdiff "
+                   << Time::toString(tr.timestamp_ - timestamp_prev) << " > "
+                   << Time::toString(track_max_time_diff)
+                      << "), remove & create new target";
 
         // remove previous track number assoc
         assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
         tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
 
-        // create new and add
+        // create new and add TODO HP
         utn = createNewTarget(tr);
 
         if (reconstructor_->task().debugSettings().debugUTN(utn))
-            loginf << "created new utn " << utn << " from max tdiff track using tr " << tr.asStr();
+        {
+            loginf << "disassciated utn " << utn << " from max tdiff track using tr " << tr.asStr();
+//            return -1;
+        }
 
         assert (targets_.count(utn));
     }
@@ -338,6 +354,8 @@ void ReconstructorBase::TargetsContainer::clear()
     tn2utn_.clear();
 
     targets_.clear(); // utn -> tgt
+
+    //removed_utns_.clear();
 }
 
 ReconstructorBase::ReconstructorBase(const std::string& class_id, 

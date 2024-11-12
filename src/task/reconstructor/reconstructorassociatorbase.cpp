@@ -284,12 +284,14 @@ RESTART_SELF_ASSOC:
 
                 for (auto other_utn : utns_to_merge)
                 {
-                    logdbg << "ReconstructorAssociatorBase: selfAssociateNewUTNs: loop " << loop_cnt
-                           << ": found merge utn " << utn << " with " << other_utn;
-
                     assert (reconstructor().targets_container_.targets_.count(other_utn));
 
-                    dbContent::ReconstructorTarget& other_target = reconstructor().targets_container_.targets_.at(other_utn);
+                    dbContent::ReconstructorTarget& other_target =
+                        reconstructor().targets_container_.targets_.at(other_utn);
+
+                    loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: loop " << loop_cnt
+                           << ": merging utn " << utn << " '" << target.asStr()
+                           << "' with " << other_utn << " '" << other_target.asStr() << "'";
 
                     // move target reports
                     target.addTargetReports(other_target);
@@ -507,6 +509,16 @@ START_TR_ASSOC:
         else if (reconstructor().targets_container_.canAssocByTrackNumber(tr, do_debug))
         {
             utn = reconstructor().targets_container_.assocByTrackNumber(tr, track_max_time_diff, do_debug);
+
+//            if (utn == -1) TODO HP
+//            {
+//                if (do_debug)
+//                    loginf << "DBG restart assoc due to track_num disassoc";
+
+//                assert (!reconstructor().targets_container_.canAssocByTrackNumber(tr, do_debug));
+
+//                goto START_TR_ASSOC;
+//            }
 
             if (do_debug)
                 loginf << "DBG assoc by track_num, utn " << utn;
@@ -907,8 +919,8 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
                    << " pos_good_cnt " << pos_good_cnt;
 
         pos_not_ok_rate_acceptable =
-            secondary_verified ? pos_dubious_rate < settings.target_max_positions_not_ok_verified_rate_
-                               : pos_dubious_rate < settings.target_max_positions_not_ok_unknown_rate_;
+            secondary_verified ? pos_not_ok_rate < settings.target_max_positions_not_ok_verified_rate_
+                               : pos_not_ok_rate < settings.target_max_positions_not_ok_unknown_rate_;
 
         pos_dubious_rate_acceptable =
             secondary_verified ? pos_dubious_rate < settings.target_max_positions_dubious_verified_rate_
@@ -916,8 +928,12 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
 
         if (do_debug)
             loginf << "\ttarget " << utn << " other utn " << other.utn_
+                   << " pos_good_cnt " << pos_good_cnt
                    << " pos_not_ok_rate_acceptable " << pos_not_ok_rate_acceptable
-                   << " pos_dubious_rate_acceptable " << pos_dubious_rate_acceptable;
+                   << " pos_dubious_rate_acceptable " << pos_dubious_rate_acceptable
+                   << " (distance_scores " << distance_scores.size() << " < target_min_updates "
+                   << settings.target_min_updates_ << ") "
+                   << (distance_scores.size() >= settings.target_min_updates_);
 
         if (pos_good_cnt
             && pos_not_ok_rate_acceptable && pos_dubious_rate_acceptable
@@ -941,7 +957,7 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
             {
                 if (do_debug)
                     loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-                           << " distance_score_avg failed " << distance_score_avg;
+                           << " distance_scoring failed" << distance_score_avg;
             }
         }
         else
@@ -1113,6 +1129,14 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
     bool do_debug = false; //debug_utns.count(utn);
     std::vector<unsigned int> utns_to_merge;
 
+    // TODO rework to 1?
+
+    bool best_found = false;
+    unsigned int best_other_utn;
+    unsigned int best_num_updates;
+    unsigned int best_avg_distance;
+
+
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
     {
         do_debug = reconstructor().task().debugSettings().debugUTN(utn)
@@ -1138,9 +1162,31 @@ std::vector<unsigned int> ReconstructorAssociatorBase::findUTNsForTarget (
                    << " merging, based on sec.at. " << res_it.associate_based_on_secondary_attributes_
                    << " avg dist " << String::doubleToStringPrecision(res_it.avg_distance_, 2);
 
-            utns_to_merge.push_back(res_it.other_utn_);
+            //utns_to_merge.push_back(res_it.other_utn_);
+
+            if (best_found)
+            {
+                if (best_num_updates < res_it.num_updates_
+                    && best_avg_distance > res_it.avg_distance_)
+                {
+                    best_other_utn = res_it.other_utn_;
+                    best_num_updates = res_it.num_updates_;
+                    best_avg_distance = res_it.avg_distance_;
+                }
+            }
+            else
+            {
+                best_other_utn = res_it.other_utn_;
+                best_num_updates = res_it.num_updates_;
+                best_avg_distance = res_it.avg_distance_;
+            }
+
+            best_found = true;
         }
     }
+
+    if (best_found)
+        utns_to_merge.push_back(best_other_utn);
 
     return utns_to_merge;
 }

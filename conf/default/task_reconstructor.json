@@ -3,22 +3,21 @@
         "current_reconstructor_str": "Probabilistic + IMM",
         "debug": false,
         "debug_accuracy_estimation": false,
+        "debug_bias_correction": false,
+        "debug_geo_altitude_correction": false,
+        "debug_kalman_chains": false,
+        "debug_reference_calculation": false,
+        "debug_write_reconstruction_viewpoints": false,
+        "deep_debug_accuracy_estimation": {
+            "MLAT": false,
+            "Radar": false
+        },
+        "deep_debug_accuracy_estimation_write_wp": {
+            "MLAT": false,
+            "Radar": false
+        },
+        "skip_reference_data_writing": false,
         "use_data_sources": {
-            "12241": true,
-            "12639": true,
-            "12760": true,
-            "12761": true,
-            "12763": true,
-            "12770": true,
-            "12798": true,
-            "12851": true,
-            "12852": true,
-            "12853": false,
-            "25005": true,
-            "25006": true,
-            "37494": true,
-            "65025": false,
-            "65026": false
         },
         "use_data_sources_lines": {
             "12990": {
@@ -36,11 +35,13 @@
         "ProbIMMReconstructor": {
             "ProbIMMReconstructor0": {
                 "parameters": {
-                    "correct_radar_bias": false,
+                    "correct_radar_bias": true,
                     "debug_accuracy_estimation": true,
+                    "default_radar_xy_std_dev": 7.5,
                     "delete_all_calc_reftraj": true,
                     "do_multiple_runs": true,
                     "do_outlier_checks": true,
+                    "do_track_number_disassociate_using_distance": false,
                     "ds_line": 0,
                     "dynamic_process_noise": true,
                     "filter_references_max_stddev": true,
@@ -95,8 +96,11 @@
                     "slice_duration_in_minutes": 15,
                     "target_max_positions_dubious_unknown_rate": 0.3,
                     "target_max_positions_dubious_verified_rate": 0.5,
+                    "target_max_positions_not_ok_unknown_rate": 0.05,
+                    "target_max_positions_not_ok_verified_rate": 0.1,
                     "target_min_updates": 5,
                     "target_prob_min_time_overlap": 0.1,
+                    "tn_disassoc_distance_factor": 3.0,
                     "track_max_time_diff": 300.0,
                     "use_adsb_geo_altitude": true
                 }
@@ -109,6 +113,7 @@
                     "cont_max_distance_acceptable_tracker": 1852.0,
                     "cont_max_time_diff_tracker": 30.0,
                     "delete_all_calc_reftraj": true,
+                    "do_track_number_disassociate_using_distance": false,
                     "ds_line": 0,
                     "dynamic_process_noise": true,
                     "filter_references_max_stddev": true,
@@ -155,8 +160,11 @@
                     "slice_duration_in_minutes": 15,
                     "target_max_positions_dubious_unknown_rate": 0.3,
                     "target_max_positions_dubious_verified_rate": 0.5,
+                    "target_max_positions_not_ok_unknown_rate": 0.05,
+                    "target_max_positions_not_ok_verified_rate": 0.1,
                     "target_min_updates": 5,
                     "target_prob_min_time_overlap": 0.1,
+                    "tn_disassoc_distance_factor": 3.0,
                     "track_max_time_diff": 300.0,
                     "track_max_time_diff_": 15.0
                 }

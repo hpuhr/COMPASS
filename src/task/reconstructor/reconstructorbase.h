@@ -157,6 +157,7 @@ public:
                                                  std::pair<unsigned int, boost::posix_time::ptime>>>> tn2utn_;
 
         std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> tgt
+        //std::vector<unsigned int> removed_utns_;
 
         unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
