@@ -274,6 +274,7 @@ bool Client::run ()
     try
     {
         COMPASS::instance();
+        COMPASS::instance().init(); //here everything created in compass instance should be available
         ProjectionManager::instance().test();
     }
     catch(const std::exception& e)

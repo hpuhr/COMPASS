@@ -49,6 +49,8 @@
 #include "ui_test_common.h"
 #include "ui_test_cmd.h"
 #include "rtcommand_shell.h"
+#include "licensemanagerdialog.h"
+#include "licensemanager.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
@@ -107,11 +109,6 @@ MainWindow::MainWindow()
 
     QSettings settings("COMPASS", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
-
-    assert(COMPASS::instance().config().existsId("version"));
-    std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version");
-
-    QWidget::setWindowTitle(title.c_str());
 
     QWidget* main_widget = new QWidget();
 
@@ -210,6 +207,8 @@ MainWindow::MainWindow()
     createMenus ();
     updateMenus ();
 
+    updateWindowTitle();
+
             // do signal slots
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
             this, &MainWindow::appModeSwitchSlot);
@@ -218,6 +217,9 @@ MainWindow::MainWindow()
             this, &MainWindow::loadingDoneSlot);
     connect (&COMPASS::instance().dbContentManager(), &DBContentManager::associationStatusChangedSignal,
             this, &MainWindow::updateMenus);
+
+    connect(&COMPASS::instance().licenseManager(), &LicenseManager::changed,
+            this, &MainWindow::updateWindowTitle);
 
             //init ui related commands
     ui_test::initUITestCommands();
@@ -238,12 +240,12 @@ void MainWindow::createMenus ()
 
     menuBar()->setObjectName("mainmenu");
 
-            // file menu
+    // file menu
     QMenu* file_menu = menuBar()->addMenu("&File");
     file_menu->setObjectName("main_window_file_menu");
     file_menu->setToolTipsVisible(true);
 
-            // db operations
+    // db operations
     new_db_action_ = new QAction("&New");
     new_db_action_->setShortcuts(QKeySequence::New);
     new_db_action_->setToolTip("Create a new database");
@@ -278,7 +280,7 @@ void MainWindow::createMenus ()
 
     file_menu->addSeparator();
 
-            // config operations
+    // config operations
 
     if (!COMPASS::instance().disableMenuConfigSave())
     {
@@ -290,7 +292,7 @@ void MainWindow::createMenus ()
         file_menu->addSeparator();
     }
 
-            // quit operations
+    // quit operations
     quit_wo_cfg_sav_action_ = new QAction("Quit &Without Saving Config");
     quit_wo_cfg_sav_action_->setShortcut(tr("Ctrl+W"));
     quit_wo_cfg_sav_action_->setToolTip("Quit the application withour saving the configuration");
@@ -304,7 +306,7 @@ void MainWindow::createMenus ()
     connect(quit_act, &QAction::triggered, this, &MainWindow::quitSlot);
     file_menu->addAction(quit_act);
 
-            // import menu
+    // import menu
 
     import_menu_ = menuBar()->addMenu("&Import");
     import_menu_->setToolTipsVisible(true);
@@ -321,14 +323,14 @@ void MainWindow::createMenus ()
     connect(import_pcap_file_action, &QAction::triggered, this, &MainWindow::importAsterixFromPCAPSlot);
     import_menu_->addAction(import_pcap_file_action);
 
-            // if (!COMPASS::instance().isAppImage())
-            // {
-            //     QAction* import_ast_json_action = new QAction("ASTERIX From JSON Recording");
-            //     //import_ast_json_action->setShortcut(tr("Ctrl+P"));
-            //     import_ast_json_action->setToolTip("Import ASTERIX data from JSON recording file");
-            //     connect(import_ast_json_action, &QAction::triggered, this, &MainWindow::importAsterixFromJSONSlot);
-            //     import_menu_->addAction(import_ast_json_action);
-            // }
+    // if (!COMPASS::instance().isAppImage())
+    // {
+    //     QAction* import_ast_json_action = new QAction("ASTERIX From JSON Recording");
+    //     //import_ast_json_action->setShortcut(tr("Ctrl+P"));
+    //     import_ast_json_action->setToolTip("Import ASTERIX data from JSON recording file");
+    //     connect(import_ast_json_action, &QAction::triggered, this, &MainWindow::importAsterixFromJSONSlot);
+    //     import_menu_->addAction(import_ast_json_action);
+    // }
 
     QAction* import_ast_net_action = new QAction("ASTERIX From Network");
     import_ast_net_action->setToolTip("Import ASTERIX From Network");
@@ -347,7 +349,7 @@ void MainWindow::createMenus ()
     connect(import_gps_nmea_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
     import_menu_->addAction(import_gps_nmea_action);
 
-            // deactivated, just for porto?
+    // deactivated, just for porto?
     //    QAction* import_gps_csv_action = new QAction("&GPS Trail CSV");
     //    import_gps_csv_action->setToolTip("Import GPS Trail CSV File");
     //    connect(import_gps_csv_action, &QAction::triggered, this, &MainWindow::importGPSCSVSlot);
@@ -362,7 +364,7 @@ void MainWindow::createMenus ()
         import_menu_->addAction(import_vp_file_action);
     }
 
-            // configuration menu
+    // configuration menu
     config_menu_ = menuBar()->addMenu("&Configuration");
     config_menu_->setToolTipsVisible(true);
 
@@ -393,17 +395,25 @@ void MainWindow::createMenus ()
     sectors_action_->setDisabled(true);
     config_menu_->addAction(sectors_action_);
 
+#if USE_EXPERIMENTAL_SOURCE == true
+    config_menu_->addSeparator();
+
+    license_action_ = config_menu_->addAction("Licenses");
+    license_action_->setToolTip("Manage licenses");
+    connect(license_action_, &QAction::triggered, this, &MainWindow::manageLicensesSlot);
+    config_menu_->addAction(license_action_);
+#endif
+
     config_menu_->addSeparator();
 
     ViewManager& view_manager = COMPASS::instance().viewManager();
 
-    auto auto_refresh_views_action = new QAction("Refresh Views Automatically");
-    auto_refresh_views_action->setCheckable(true);
-    auto_refresh_views_action->setChecked(view_manager.automaticReloadEnabled());
-    connect(auto_refresh_views_action, &QAction::toggled, &view_manager, &ViewManager::enableAutomaticReload);
-    config_menu_->addAction(auto_refresh_views_action);
+    auto_refresh_views_action_ = config_menu_->addAction("Refresh Views Automatically");
+    auto_refresh_views_action_->setCheckable(true);
+    auto_refresh_views_action_->setChecked(view_manager.automaticReloadEnabled());
+    connect(auto_refresh_views_action_, &QAction::toggled, &view_manager, &ViewManager::enableAutomaticReload);
 
-            // process menu
+    // process menu
     process_menu_ = menuBar()->addMenu("&Process");
     process_menu_->setToolTipsVisible(true);
 
@@ -423,7 +433,7 @@ void MainWindow::createMenus ()
     connect(reconstruct_action, &QAction::triggered, this, &MainWindow::reconstructReferencesSlot);
     process_menu_->addAction(reconstruct_action);
 
-            // ui menu
+    // ui menu
     ui_menu_ = menuBar()->addMenu("&UI");
     ui_menu_->setToolTipsVisible(true);
 
@@ -434,7 +444,7 @@ void MainWindow::createMenus ()
     connect(reset_views_action, &QAction::triggered, this, &MainWindow::resetViewsMenuSlot);
     ui_menu_->addAction(reset_views_action);
 
-            //debug menu (internal)
+    //debug menu (internal)
     createDebugMenu();
 }
 
@@ -449,10 +459,12 @@ void MainWindow::updateMenus()
 
     assert (import_menu_);
 
-    bool in_live_running = COMPASS::instance().appMode() == AppMode::LiveRunning;
-    bool in_live_paused = COMPASS::instance().appMode() == AppMode::LivePaused;
+    assert (license_action_);
 
-    bool in_live = in_live_running || in_live_paused;
+    bool in_live_running        = COMPASS::instance().appMode() == AppMode::LiveRunning;
+    bool in_live_paused         = COMPASS::instance().appMode() == AppMode::LivePaused;
+    bool in_live                = in_live_running || in_live_paused;
+    bool asterix_import_running = COMPASS::instance().taskManager().asterixImporterTask().isRunning();
 
     open_recent_db_menu_->clear();
 
@@ -491,14 +503,15 @@ void MainWindow::updateMenus()
 
     sectors_action_->setDisabled(!db_open || in_live_running);
 
-    import_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                              || in_live);
-    process_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                               || in_live);
+    import_menu_->setDisabled(!db_open || asterix_import_running || in_live);
+    process_menu_->setDisabled(!db_open || asterix_import_running || in_live);
 
     assert (config_menu_);
-    config_menu_->setDisabled(!db_open || COMPASS::instance().taskManager().asterixImporterTask().isRunning()
-                              || in_live);
+    config_menu_->setDisabled(asterix_import_running || in_live);
+
+    for (auto a : config_menu_->actions())
+        a->setEnabled(a == license_action_ || 
+                      a == auto_refresh_views_action_ ? true : db_open);
 }
 
 void MainWindow::updateBottomWidget()
@@ -934,9 +947,7 @@ void MainWindow::reconstructReferencesSlot()
 {
     loginf << "MainWindow: reconstructReferencesSlot";
 
-    COMPASS::instance().taskManager().reconstructReferencesTask().dialog()->show();
-    COMPASS::instance().taskManager().reconstructReferencesTask().dialog()->showCurrentReconstructorWidget();
-    COMPASS::instance().taskManager().reconstructReferencesTask().dialog()->updateButtons();
+    COMPASS::instance().taskManager().reconstructReferencesTask().showDialog();
 }
 
 void MainWindow::configureDataSourcesSlot()
@@ -1278,4 +1289,21 @@ void MainWindow::showCommandShell()
 
     dlg.resize(800, 600);
     dlg.exec();
+}
+
+void MainWindow::manageLicensesSlot()
+{
+    LicenseManagerDialog dlg(this);
+    dlg.resize(800, 600);
+    dlg.exec();
+}
+
+void MainWindow::updateWindowTitle()
+{
+    auto version  = COMPASS::instance().versionString();
+    auto licensee = COMPASS::instance().licenseeString();
+
+    auto title = version + "   |   " + licensee;
+
+    QWidget::setWindowTitle(title.c_str());
 }

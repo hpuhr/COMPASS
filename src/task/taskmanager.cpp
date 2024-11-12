@@ -287,3 +287,10 @@ MainWindow* TaskManager::getMainWindow()
     }
     return nullptr;
 }
+
+void TaskManager::updateFeatures()
+{
+    for (auto& t : tasks_)
+        if (t.second)
+            t.second->updateFeatures();
+}

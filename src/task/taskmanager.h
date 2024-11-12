@@ -62,6 +62,8 @@ class TaskManager : public QObject, public Configurable
 
     void runTask(const std::string& task_name);
 
+    void updateFeatures();
+
     ASTERIXImportTask& asterixImporterTask() const;
     ViewPointsImportTask& viewPointsImportTask() const;
     JSONImportTask& jsonImporterTask() const;

@@ -11,25 +11,18 @@ class ReconstructorTask;
 class ReconstructorTaskDialog : public QDialog
 {
     Q_OBJECT
-
-  signals:
-    void runSignal();
-    void cancelSignal();
-
-  public slots:
-
+    
+public slots:
     void reconstructorMethodChangedSlot(const QString& value);
 
-    void runClickedSlot();
-    void cancelClickedSlot();
-
-  public:
+public:
     ReconstructorTaskDialog(ReconstructorTask& task);
+    virtual ~ReconstructorTaskDialog();
 
     void showCurrentReconstructorWidget();
     void updateButtons();
 
-  protected:
+protected:
     ReconstructorTask& task_;
 
     // order in stack has to be the same as in box

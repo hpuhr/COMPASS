@@ -117,7 +117,6 @@ class ViewManager : public QObject, public Configurable
         return it->second;
     }
 
-
     ViewPointsWidget* viewPointsWidget() const;
     ViewPointsReportGenerator& viewPointsGenerator();
 
@@ -159,6 +158,8 @@ class ViewManager : public QObject, public Configurable
     void enableAutomaticRedraw(bool enable);
     bool automaticReloadEnabled() const;
     bool automaticRedrawEnabled() const;
+
+    void updateFeatures();
 
     template<class T>
     std::vector<T*> viewsOfType()

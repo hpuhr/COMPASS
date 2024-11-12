@@ -88,6 +88,8 @@ public slots:
 
     void resetViewsMenuSlot();
 
+    void manageLicensesSlot();
+
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
     void autoResumeTimerSlot();
@@ -111,6 +113,8 @@ public:
 protected:
     void createMenus ();
     void createDebugMenu();
+
+    void updateWindowTitle();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);
@@ -141,6 +145,8 @@ protected:
 
     // configuration menu
     QMenu* config_menu_ {nullptr};
+    QAction* license_action_ {nullptr};
+    QAction* auto_refresh_views_action_ {nullptr};
 
     // process menu
     QMenu* process_menu_ {nullptr};

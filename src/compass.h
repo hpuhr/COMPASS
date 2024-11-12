@@ -40,6 +40,7 @@ class SimpleConfig;
 class EvaluationManager;
 class MainWindow;
 class FFTManager;
+class LicenseManager;
 
 namespace rtcommand
 {
@@ -78,13 +79,18 @@ public:
     EvaluationManager& evaluationManager();
     rtcommand::RTCommandRunner& rtCmdRunner();
     FFTManager& fftManager();
+    LicenseManager& licenseManager();
 
+    void init();
     void shutdown();
 
     MainWindow& mainWindow();
 
     std::string lastUsedPath();
     void lastUsedPath(const std::string& last_path);
+
+    std::string versionString() const;
+    std::string licenseeString() const;
 
 protected:
     bool db_opened_{false};
@@ -117,6 +123,7 @@ protected:
     std::unique_ptr<ViewManager> view_manager_;
     std::unique_ptr<EvaluationManager> eval_manager_;
     std::unique_ptr<FFTManager> fft_manager_;
+    std::unique_ptr<LicenseManager> license_manager_;
 
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
 

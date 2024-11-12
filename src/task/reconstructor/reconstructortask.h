@@ -16,7 +16,6 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
-class ReconstructorTaskDialog;
 class DBContent;
 class Buffer;
 class ReconstructorBase;
@@ -92,9 +91,6 @@ public:
     };
 
   public slots:
-    void dialogRunSlot();
-    void dialogCancelSlot();
-
     void deleteCalculatedReferencesDoneSlot();
     void deleteTargetsDoneSlot();
     void deleteAssociationsDoneSlot();
@@ -116,8 +112,6 @@ public:
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
-
-    ReconstructorTaskDialog* dialog();
 
     virtual bool canRun() override;
     virtual void run() override;
@@ -160,6 +154,10 @@ public:
     bool skipReferenceDataWriting() const;
     void skipReferenceDataWriting(bool newSkip_reference_data_writing);
 
+    void showDialog();
+
+    virtual void updateFeatures() override final;
+
     DebugSettings& debugSettings() { return debug_settings_; }
 
 protected:
@@ -168,8 +166,6 @@ protected:
     nlohmann::json use_dstypes_; // dstype -> bool
     nlohmann::json use_data_sources_; // ds_id -> bool
     nlohmann::json use_data_sources_lines_; // ds_id -> line_id -> bool
-
-    std::unique_ptr<ReconstructorTaskDialog> dialog_;
 
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
 
@@ -207,5 +203,4 @@ protected:
     void loadDataSlice();
     void processDataSlice();
     void writeDataSlice();
-
 };

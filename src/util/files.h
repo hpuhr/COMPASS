@@ -38,6 +38,8 @@ static const std::string HOME_CONF_DIRECTORY   = HOME_VERSION_SUBDIRECTORY + CON
 static const std::string HOME_DATA_DIRECTORY   = HOME_VERSION_SUBDIRECTORY + DATA_SUBDIRECTORY;
 static const std::string HOME_PRESET_DIRECTORY = HOME_VERSION_SUBDIRECTORY + PRESET_SUBDIRECTORY;
 
+static const std::string LICENSE_SUBDIRECTORY = HOME_SUBDIRECTORY + "license/";
+
 extern std::string CURRENT_CONF_DIRECTORY;
 
 namespace Utils

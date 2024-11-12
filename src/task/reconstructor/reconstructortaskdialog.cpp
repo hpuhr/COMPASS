@@ -3,6 +3,8 @@
 #include "simplereconstructor.h"
 #include "simplereconstructorwidget.h"
 #include "global.h"
+#include "compass.h"
+#include "licensemanager.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
@@ -17,6 +19,7 @@
 #include <QStackedWidget>
 #include <QFormLayout>
 #include <QComboBox>
+#include <QStandardItemModel>
 
 ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     : QDialog(), task_(task)
@@ -43,8 +46,11 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     reconstructor_box_ = new QComboBox();
     reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ScoringUMReconstructorName));
 
+    const auto& license_manager = COMPASS::instance().licenseManager();
+
 #if USE_EXPERIMENTAL_SOURCE == true
-    reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ProbImmReconstructorName));
+    if (license_manager.validLicenseID().has_value())
+        reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ProbImmReconstructorName));
 #endif
 
     int idx = reconstructor_box_->findText(QString::fromStdString(task_.currentReconstructorStr()));
@@ -62,7 +68,8 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     reconstructor_widget_stack_->addWidget(task_.simpleReconstructor()->widget());
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    reconstructor_widget_stack_->addWidget(task_.probIMMReconstructor()->widget());
+    if (license_manager.validLicenseID().has_value())
+        reconstructor_widget_stack_->addWidget(task_.probIMMReconstructor()->widget());
 #endif
 
     showCurrentReconstructorWidget();
@@ -72,13 +79,13 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     QHBoxLayout* button_layout = new QHBoxLayout();
 
     cancel_button_ = new QPushButton("Cancel");
-    connect(cancel_button_, &QPushButton::clicked, this, &ReconstructorTaskDialog::cancelClickedSlot);
+    connect(cancel_button_, &QPushButton::clicked, this, &QDialog::reject);
     button_layout->addWidget(cancel_button_);
 
     button_layout->addStretch();
 
     run_button_ = new QPushButton("Run");
-    connect(run_button_, &QPushButton::clicked, this, &ReconstructorTaskDialog::runClickedSlot);
+    connect(run_button_, &QPushButton::clicked, this, &QDialog::accept);
     button_layout->addWidget(run_button_);
 
     main_layout->addLayout(button_layout);
@@ -86,6 +93,10 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     setLayout(main_layout);
 
     updateButtons();
+}
+
+ReconstructorTaskDialog::~ReconstructorTaskDialog()
+{
 }
 
 void ReconstructorTaskDialog::showCurrentReconstructorWidget()
@@ -117,14 +128,3 @@ void ReconstructorTaskDialog::reconstructorMethodChangedSlot(const QString& valu
 
     showCurrentReconstructorWidget();
 }
-
-void ReconstructorTaskDialog::runClickedSlot()
-{
-    emit runSignal();
-}
-
-void ReconstructorTaskDialog::cancelClickedSlot()
-{
-    emit cancelSignal();
-}
-
