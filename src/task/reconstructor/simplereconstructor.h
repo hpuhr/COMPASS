@@ -59,5 +59,6 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
     ReferenceCalculator ref_calculator_;
 
     virtual void processSlice_impl() override;
+    virtual void init_impl() override;
 };
 

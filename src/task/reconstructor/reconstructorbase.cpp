@@ -434,19 +434,42 @@ ReconstructorBase::~ReconstructorBase()
     acc_estimator_ = nullptr;
 }
 
+void ReconstructorBase::init()
+{
+    assert(!init_);
+
+    //get data time range
+    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
+    std::tie(timestamp_min_, timestamp_max_) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+
+    //not needed at the moment
+    //initChainPredictors();
+
+    //invoke derived behaviour
+    init_impl();
+
+    current_slice_begin_ = timestamp_min_;
+    next_slice_begin_    = timestamp_min_; // first slice
+
+    loginf << "ReconstructorBase: init:" 
+           << " data time min " << Time::toString(timestamp_min_)
+           << " data time max " << Time::toString(timestamp_max_)
+           << " first_slice " << first_slice_;
+
+    init_ = true;
+}
+
+void ReconstructorBase::initIfNeeded()
+{
+    if (!init_)
+        init();
+
+    assert(init_);
+}
+
 bool ReconstructorBase::hasNextTimeSlice()
 {
-    if (current_slice_begin_.is_not_a_date_time())
-    {
-        assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
-        std::tie(timestamp_min_, timestamp_max_) = COMPASS::instance().dbContentManager().minMaxTimestamp();
-
-        current_slice_begin_ = timestamp_min_;
-        next_slice_begin_ = timestamp_min_; // first slice
-
-        loginf << "ReconstructorBase: hasNextTimeSlice: new min " << Time::toString(current_slice_begin_)
-               << " max " << Time::toString(timestamp_max_) << " first_slice " << first_slice_;
-    }
+    initIfNeeded();
 
     assert (!current_slice_begin_.is_not_a_date_time());
     assert (!timestamp_max_.is_not_a_date_time());
@@ -467,6 +490,9 @@ int ReconstructorBase::numSlices() const
 
 std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlice()
 {
+    initIfNeeded();
+
+    assert (isInit());
     assert (hasNextTimeSlice());
 
     current_slice_begin_ = next_slice_begin_;
@@ -559,6 +585,7 @@ void ReconstructorBase::reset()
     acc_estimator_->init(this);
 
     cancelled_ = false;
+    init_      = false;
 }
 
 /**
@@ -596,12 +623,6 @@ void ReconstructorBase::processSlice()
     logdbg << "ReconstructorBase: processSlice: first_slice " << currentSlice().first_slice_;
 
     processing_ = true;
-
-    if (currentSlice().first_slice_)
-    {
-        //not needed at the moment
-        //initChainPredictors();
-    }
 
     if (!currentSlice().first_slice_)
     {
@@ -1276,3 +1297,7 @@ std::unique_ptr<reconstruction::KalmanChain>& ReconstructorBase::chain(unsigned 
     return chains_[utn];
 }
 
+void ReconstructorBase::setMaxRuntime(const boost::posix_time::time_duration& max_rt)
+{
+    timestamp_max_ = timestamp_min_ + max_rt;
+}

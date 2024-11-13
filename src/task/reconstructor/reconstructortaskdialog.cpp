@@ -61,6 +61,20 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     combo_layout->addRow(tr("Reconstructor Method"), reconstructor_box_);
 
+    reconstructor_info_ = new QLabel;
+    reconstructor_info_->setWordWrap(true);
+    reconstructor_info_->setVisible(false);
+    reconstructor_info_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    auto reconstructor_info2 = new QLabel;
+    reconstructor_info2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    QHBoxLayout* info_layout = new QHBoxLayout;
+    info_layout->addWidget(reconstructor_info_);
+    info_layout->addWidget(reconstructor_info2);
+
+    combo_layout->addRow(tr(""), info_layout);
+
     main_layout->addLayout(combo_layout);
 
     reconstructor_widget_stack_ = new QStackedWidget();
@@ -93,10 +107,28 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     setLayout(main_layout);
 
     updateButtons();
+    updateReconstructorInfo();
 }
 
 ReconstructorTaskDialog::~ReconstructorTaskDialog()
 {
+}
+
+void ReconstructorTaskDialog::updateReconstructorInfo()
+{
+    reconstructor_info_->setText("");
+    reconstructor_info_->setVisible(false);
+
+    auto rec = task_.currentReconstructor();
+    if (!rec)
+        return;
+
+    auto info_str = rec->reconstructorInfoString();
+    if (!info_str.empty())
+    {
+        reconstructor_info_->setText(QString::fromStdString(info_str));
+        reconstructor_info_->setVisible(true);
+    }
 }
 
 void ReconstructorTaskDialog::showCurrentReconstructorWidget()
@@ -127,4 +159,5 @@ void ReconstructorTaskDialog::reconstructorMethodChangedSlot(const QString& valu
     task_.currentReconstructorStr(value.toStdString());
 
     showCurrentReconstructorWidget();
+    updateReconstructorInfo();
 }

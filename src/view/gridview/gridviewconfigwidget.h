@@ -64,6 +64,7 @@ protected:
     
     void updateConfig();
     void updateVariableDataType();
+    void updateExport();
 
     std::string exportName() const;
     void exportToGeographicView();

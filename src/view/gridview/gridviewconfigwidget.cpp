@@ -32,6 +32,8 @@
 #include "viewpointgenerator.h"
 #include "geotiff.h"
 #include "colormap_defs.h"
+#include "metavariable.h"
+#include "dbcontent.h"
 
 #include "variableselectionwidget.h"
 
@@ -135,6 +137,7 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
 
     attachExportMenu();
     updateConfig();
+    updateExport();
 }
 
 /**
@@ -175,8 +178,43 @@ void GridViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
 */
 void GridViewConfigWidget::postVariableChangedEvent(int idx)
 {
-    if (idx == 2)
+    if (idx == 0 || idx == 1)
+        updateExport();
+    else if (idx == 2)
         updateVariableDataType();
+}
+
+/**
+*/
+void GridViewConfigWidget::updateExport()
+{
+    auto var_sel_x = variableSelection(0);
+    auto var_sel_y = variableSelection(1);
+
+    assert(var_sel_x && var_sel_y);
+
+    auto& dbc_man = COMPASS::instance().dbContentManager();
+
+    const auto& metavar_lon = dbc_man.metaVariable(DBContent::meta_var_longitude_.name());
+    const auto& metavar_lat = dbc_man.metaVariable(DBContent::meta_var_latitude_.name());
+
+    bool has_lon       = var_sel_x->hasMetaVariable() && &var_sel_x->selectedMetaVariable() == &metavar_lon;
+    bool has_lat       = var_sel_y->hasMetaVariable() && &var_sel_y->selectedMetaVariable() == &metavar_lat;
+    bool enable_export = has_lon && has_lat;
+
+    const std::string tt_deactiv = "<html><head/><body>"
+                                   "<p>To reenable export, please select the following variables.</p>"
+                                   "<ul>"
+                                   "<li><b>X Variable</b>: Meta - Longitude</li>"
+                                   "<li><b>Y Variable</b>: Meta - Latitude</li>"
+                                   "</ul>"
+                                   "<p></p>"
+                                   "</body></html>";
+
+    std::string tooltip = enable_export ? "" : tt_deactiv;
+
+    export_button_->setEnabled(enable_export);
+    export_button_->setToolTip(QString::fromStdString(tooltip));
 }
 
 /**

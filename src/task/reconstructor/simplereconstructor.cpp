@@ -118,6 +118,12 @@ void SimpleReconstructor::reset()
     ReconstructorBase::reset();
 }
 
+void SimpleReconstructor::init_impl()
+{
+    //nothing to do
+}
+
+
 SimpleReconstructorSettings& SimpleReconstructor::settings()
 {
     return settings_;

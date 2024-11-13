@@ -229,6 +229,8 @@ public:
     void cancel();
     bool isCancelled() { return cancelled_; };
 
+    bool isInit() { return init_; }
+
     void saveTargets();
 
     // our data structures
@@ -255,6 +257,8 @@ public:
     virtual bool isLastSliceProcessingRun() { return true; }      // called to check if another repeat run is planned
     virtual unsigned int currentSliceRepeatRun() { return currentSlice().run_count_; }    // current repeat run
 
+    virtual std::string reconstructorInfoString() { return ""; }
+
     reconstruction::KalmanChainPredictors& chainPredictors();
 
     boost::optional<unsigned int> utnForACAD(unsigned int acad);
@@ -262,7 +266,6 @@ public:
     std::unique_ptr<reconstruction::KalmanChain>& chain(unsigned int utn);
 
 protected:
-
     ReconstructorTask& task_;
 
     std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
@@ -278,6 +281,8 @@ protected:
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual void processSlice_impl() = 0;
 
+    virtual void init_impl() = 0;
+
     void clearOldTargetReports();
     void createTargetReports();
     void removeTargetReportsLaterOrEqualThan(const boost::posix_time::ptime& ts); // for slice recalc
@@ -287,7 +292,11 @@ protected:
         std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
 
-  private:
+    void setMaxRuntime(const boost::posix_time::time_duration& max_rt);
+
+private:
+    void init();
+    void initIfNeeded();
     void initChainPredictors();
 
     float qVarForAltitude(bool fl_unknown, 
@@ -308,6 +317,7 @@ protected:
     boost::posix_time::ptime write_before_time_;
 
     bool processing_ {false};
+    bool init_       {false};
 
     std::unique_ptr<reconstruction::KalmanChainPredictors> chain_predictors_; // relic, not used noew
 };

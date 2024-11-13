@@ -5,6 +5,7 @@
 class QPushButton;
 class QStackedWidget;
 class QComboBox;
+class QLabel;
 
 class ReconstructorTask;
 
@@ -23,10 +24,13 @@ public:
     void updateButtons();
 
 protected:
+    void updateReconstructorInfo();
+
     ReconstructorTask& task_;
 
     // order in stack has to be the same as in box
     QComboBox*      reconstructor_box_  {nullptr};
+    QLabel*         reconstructor_info_  {nullptr};
     QStackedWidget* reconstructor_widget_stack_ {nullptr};
 
     QPushButton* cancel_button_{nullptr};
