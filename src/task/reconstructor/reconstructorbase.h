@@ -90,7 +90,7 @@ class ReconstructorBaseSettings
 
     // compare targets related
     double target_prob_min_time_overlap_ {0.1};
-    unsigned int target_min_updates_ {5};
+    unsigned int target_min_updates_ {2}; // TODO HP
     double target_max_positions_dubious_verified_rate_ {0.5};
     double target_max_positions_dubious_unknown_rate_ {0.3};
 
