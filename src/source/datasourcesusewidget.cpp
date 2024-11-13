@@ -343,7 +343,8 @@ void DataSourcesUseWidget::clear()
     ds_widgets_.clear(); // delete by data sources
 
             // delete all previous
-    while (QLayoutItem* child = type_layout_->takeAt(0))
+    QLayoutItem* child;
+    while (!type_layout_->isEmpty() && (child = type_layout_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();

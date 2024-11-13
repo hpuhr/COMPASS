@@ -100,7 +100,7 @@ void EvaluationDataSourceWidget::updateDataSourcesSlot()
     assert (data_source_layout_);
 
     QLayoutItem* child;
-    while ((child = data_source_layout_->takeAt(0)) != nullptr)
+    while (!data_source_layout_->isEmpty() && (child = data_source_layout_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();

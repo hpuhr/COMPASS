@@ -770,10 +770,8 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
             continue;
 #endif
 
-                          bool mode_a_checked = false;
                           bool mode_a_verified = false;
-
-                          bool mode_c_checked = false;
+                          bool mode_c_verified = false;
 
                           if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
                           {
@@ -791,7 +789,6 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #endif
                                   }
 
-                                  mode_a_checked = true;
                                   mode_a_verified = ma_res == ComparisonResult::SAME;
                               }
 
@@ -816,19 +813,22 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #endif
                                   }
 
-                                  mode_c_checked = true;
+                                  mode_c_verified = mc_res == ComparisonResult::SAME;
                               }
 
                               if (do_debug)
                                   loginf << "DBG tr " << tr.record_num_ << " other_utn "
-                                         << other_utn << ": possible mode c match";
+                                         << other_utn << ": possible match";
                           }
 
+                          bool secondary_verified = mode_a_verified || mode_c_verified;
+
                           if (do_debug)
-                              loginf << "DBG tr " << tr.record_num_ << " other_utn "
-                                     << other_utn << ": mode_a_checked " << mode_a_checked
+                              loginf << "DBG tr " << tr.record_num_ << " other_utn " << other_utn
                                      << " mode_a_verified " << mode_a_verified
-                                     << " mode_c_checked " << mode_c_checked;
+                                     << " mode_c_verified " << mode_c_verified
+                                     << " secondary_verified " << secondary_verified;
+
 
                           // check positions
 
@@ -858,7 +858,8 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
 
                           // TODO HP here be danger
-                          if (!isTargetAccuracyAcceptable(tgt_est_std_dev, other_utn, tr, do_debug))
+                          if (!secondary_verified
+                              && !isTargetAccuracyAcceptable(tgt_est_std_dev, other_utn, tr, do_debug))
                           {
                               if (do_debug)
                                   loginf << "DBG tr " << tr.record_num_ << " other_utn " << other_utn
@@ -872,7 +873,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                           }
 
                           boost::optional<std::pair<bool, double>> check_ret = calculatePositionOffsetScore(
-                              tr, other_utn, distance_m, tgt_est_std_dev, tr_est_std_dev, mode_a_verified, do_debug);
+                              tr, other_utn, distance_m, tgt_est_std_dev, tr_est_std_dev, secondary_verified, do_debug);
 
                           if (check_ret && check_ret->first)
                           {
