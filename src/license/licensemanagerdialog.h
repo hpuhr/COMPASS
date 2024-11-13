@@ -43,4 +43,7 @@ private:
     QTreeWidget*   license_list_          = nullptr;
     LicenseWidget* license_widget_        = nullptr;
     QPushButton*   remove_license_button_ = nullptr;
+
+    int idx_id_    = -1;
+    int state_idx_ = -1;
 };

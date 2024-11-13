@@ -33,6 +33,7 @@ namespace license
 */
 struct License
 {
+    //!don't change order!
     enum class Type
     {
         Free = 0, //typically not part of a valid license -> unlicensed = Free
@@ -67,6 +68,7 @@ struct License
     static std::string colorFromState(State state);
 
     bool isComplete() const;
+    bool componentEnabled(Component c) const;
 
     std::pair<bool, std::string> read(const nlohmann::json& license_json);
     std::pair<bool, std::string> read(const std::string& license_key);

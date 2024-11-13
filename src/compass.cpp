@@ -840,7 +840,7 @@ std::string COMPASS::versionString() const
     std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version");
 
     const auto& license_manager = COMPASS::instance().licenseManager();
-    auto vl = license_manager.validLicense();
+    auto vl = license_manager.activeLicense();
 
     if (vl)
     {
@@ -858,7 +858,7 @@ std::string COMPASS::versionString() const
 std::string COMPASS::licenseeString() const
 {
     const auto& license_manager = COMPASS::instance().licenseManager();
-    auto vl = license_manager.validLicense();
+    auto vl = license_manager.activeLicense();
 
     if (!vl)
         return "";

@@ -49,7 +49,7 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     const auto& license_manager = COMPASS::instance().licenseManager();
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    if (license_manager.validLicenseID().has_value())
+    if (license_manager.componentEnabled(license::License::Component::ComponentProbIMMReconstructor))
         reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ProbImmReconstructorName));
 #endif
 
@@ -82,7 +82,7 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     reconstructor_widget_stack_->addWidget(task_.simpleReconstructor()->widget());
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    if (license_manager.validLicenseID().has_value())
+    if (license_manager.componentEnabled(license::License::Component::ComponentProbIMMReconstructor))
         reconstructor_widget_stack_->addWidget(task_.probIMMReconstructor()->widget());
 #endif
 

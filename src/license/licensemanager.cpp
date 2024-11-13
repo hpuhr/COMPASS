@@ -24,6 +24,7 @@
 #include "json.hpp"
 
 #include <fstream>
+#include <map>
 
 const std::string LicenseManager::LicenseFileName = "licenses.json";
 
@@ -203,39 +204,67 @@ bool LicenseManager::writeLicenses() const
 
 /**
 */
-boost::optional<std::string> LicenseManager::validLicenseID() const
+boost::optional<std::string> LicenseManager::activeLicenseID() const
 {
-    std::string lid;
+    std::map<license::License::Type, std::vector<std::string>> valid_licenses;
+    for (const auto& l : licenses_)
+        if (l.second.state().first == license::License::State::Valid)
+            valid_licenses[ l.second.type ].push_back(l.first);
+
+    if (valid_licenses.empty() || valid_licenses.rbegin()->second.empty())
+        return {};
+
+    std::string lid_newest;
     boost::optional<boost::posix_time::ptime> license_date;
 
-    for (const auto& l : licenses_)
+    for (const auto& lid : valid_licenses.rbegin()->second)
     {
-        if (l.second.state().first == license::License::State::Valid)
+        const auto& l = getLicense(lid);
+
+        if (!license_date.has_value() || l.created > license_date.value())
         {
-            //return newest valid license
-            if (!license_date.has_value() || l.second.created > license_date.value())
-            {
-                lid          = l.first;
-                license_date = l.second.created;
-            }
+            lid_newest   = lid;
+            license_date = l.created;
         }
     }
 
     if (!license_date.has_value())
         return {};
 
-    return lid;
+    return lid_newest;
 }
 
 /**
 */
-const license::License* LicenseManager::validLicense() const
+const license::License* LicenseManager::activeLicense() const
 {
-    auto id = validLicenseID();
+    auto id = activeLicenseID();
     if (!id.has_value())
         return nullptr;
 
     return &getLicense(id.value());
+}
+
+/**
+*/
+boost::optional<license::License::Type> LicenseManager::activeLicenseType() const
+{
+    auto l = activeLicense();
+    if (!l)
+        return {};
+
+    return l->type;
+}
+
+/**
+*/
+bool LicenseManager::componentEnabled(license::License::Component c) const
+{
+    auto l = activeLicense();
+    if (!l)
+        return false;
+
+    return l->componentEnabled(c);
 }
 
 /**

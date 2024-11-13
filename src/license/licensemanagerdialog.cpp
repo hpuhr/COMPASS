@@ -60,20 +60,27 @@ LicenseManagerDialog::LicenseManagerDialog(QWidget* parent,
     layouth->addStretch(1);
 
     QStringList headers;
+    headers << "Active";
     headers << "Name";
+    headers << "Type";
     headers << "Activation";
     headers << "Expiration";
     headers << "Status";
+
+    idx_id_    = 1;
+    state_idx_ = 5;
 
     license_list_ = new QTreeWidget;
     license_list_->setColumnCount(headers.count());
     license_list_->setHeaderLabels(headers);
     license_list_->setSelectionMode(QTreeWidget::SelectionMode::SingleSelection);
 
-    license_list_->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Stretch);
-    license_list_->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::ResizeToContents);
+    license_list_->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
+    license_list_->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
     license_list_->header()->setSectionResizeMode(2, QHeaderView::ResizeMode::ResizeToContents);
     license_list_->header()->setSectionResizeMode(3, QHeaderView::ResizeMode::ResizeToContents);
+    license_list_->header()->setSectionResizeMode(4, QHeaderView::ResizeMode::ResizeToContents);
+    license_list_->header()->setSectionResizeMode(5, QHeaderView::ResizeMode::ResizeToContents);
 
     layout->addWidget(license_list_);
 
@@ -127,7 +134,7 @@ void LicenseManagerDialog::selectLicense(const std::string& id)
     for (int i = 0; i < license_list_->topLevelItemCount(); ++i)
     {
         auto item = license_list_->topLevelItem(i);
-        if (item->text(0).toStdString() == id)
+        if (item->text(idx_id_).toStdString() == id)
             item->setSelected(true);
     }
 }
@@ -141,27 +148,36 @@ void LicenseManagerDialog::updateList()
 
     const auto& license_manager = COMPASS::instance().licenseManager();
 
+    auto active_id = license_manager.activeLicenseID();
+
     for (const auto& l : license_manager.getLicenses())
     {
         auto item = new QTreeWidgetItem;
 
         auto lstate = l.second.state();
+
+        QString active_str = active_id.has_value() && active_id.value() == l.first ? QString::fromUtf8("\u2714") : "";
         
-        item->setText(0, QString::fromStdString(l.first));
-        item->setText(1, QString::fromStdString(Utils::Time::toDateString(l.second.date_activation)));
-        item->setText(2, QString::fromStdString(Utils::Time::toDateString(l.second.date_expiration)));
-        item->setText(3, QString::fromStdString(license::License::stringFromState(lstate.first)));
+        item->setText(0, active_str);
+        item->setText(1, QString::fromStdString(l.first));
+        item->setText(2, QString::fromStdString(license::License::typeToString(l.second.type)));
+        item->setText(3, QString::fromStdString(Utils::Time::toDateString(l.second.date_activation)));
+        item->setText(4, QString::fromStdString(Utils::Time::toDateString(l.second.date_expiration)));
+        item->setText(5, QString::fromStdString(license::License::stringFromState(lstate.first)));
 
         QBrush b (QColor(QString::fromStdString(license::License::colorFromState(lstate.first))));
-	    item->setForeground(3, b);
+	    item->setForeground(state_idx_, b);
 
         license_list_->addTopLevelItem(item);
     }
 
     license_list_->blockSignals(false);
-    license_list_->resizeColumnToContents(1);
+
+    license_list_->resizeColumnToContents(0);
     license_list_->resizeColumnToContents(2);
     license_list_->resizeColumnToContents(3);
+    license_list_->resizeColumnToContents(4);
+    license_list_->resizeColumnToContents(5);
 
     updateLicenseWidget();
 }
@@ -181,7 +197,7 @@ void LicenseManagerDialog::updateLicenseWidget()
 
     auto& license_manager = COMPASS::instance().licenseManager();
 
-    auto id = items.front()->text(0).toStdString();
+    auto id = items.front()->text(idx_id_).toStdString();
     const auto& l = license_manager.getLicense(id);
 
     license_widget_->showLicense(&l);
@@ -192,7 +208,7 @@ void LicenseManagerDialog::updateLicenseWidget()
 void LicenseManagerDialog::addLicense()
 {
     auto& license_manager = COMPASS::instance().licenseManager();
-    auto  license_cur     = license_manager.validLicense();
+    auto  license_cur     = license_manager.activeLicense();
 
     bool had_pro_license = license_cur && license_cur->type == license::License::Type::Pro;
 
@@ -232,7 +248,7 @@ void LicenseManagerDialog::addLicense()
     updateList();
     //selectLicense(l->id);
 
-    license_cur = license_manager.validLicense();
+    license_cur = license_manager.activeLicense();
     bool has_pro_license = license_cur && license_cur->type == license::License::Type::Pro;
 
     if (!had_pro_license && has_pro_license)
@@ -257,7 +273,7 @@ void LicenseManagerDialog::removeCurrentLicense()
 
     auto& license_manager = COMPASS::instance().licenseManager();
 
-    auto id = items.front()->text(0).toStdString();
+    auto id = items.front()->text(idx_id_).toStdString();
 
     auto b = QMessageBox::question(this, 
                                    "Remove License",

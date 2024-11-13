@@ -42,8 +42,10 @@ public:
     bool readLicenses();
     bool writeLicenses() const;
 
-    boost::optional<std::string> validLicenseID() const;
-    const license::License* validLicense() const;
+    boost::optional<std::string> activeLicenseID() const;
+    boost::optional<license::License::Type> activeLicenseType() const;
+    const license::License* activeLicense() const;
+    bool componentEnabled(license::License::Component c) const;
     
     bool hasLicense(const std::string& id) const;
     const license::License& getLicense(const std::string& id) const;

@@ -1294,7 +1294,7 @@ void MainWindow::showCommandShell()
 void MainWindow::manageLicensesSlot()
 {
     LicenseManagerDialog dlg(this);
-    dlg.resize(800, 600);
+    dlg.resize(1000, 600);
     dlg.exec();
 }
 

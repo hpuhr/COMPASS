@@ -415,6 +415,13 @@ std::pair<License::State, std::string> License::state() const
 
 /**
 */
+bool License::componentEnabled(Component c) const
+{
+    return (type != Type::Free && components.count(c) > 0);
+}
+
+/**
+*/
 std::string License::componentsAsString() const
 {
     std::string component_str;
