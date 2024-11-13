@@ -9,6 +9,8 @@
 #include "util/system.h"
 #include "kalman_chain.h"
 
+#include <QApplication>
+
 #define FIND_UTN_FOR_TARGET_MT
 #define FIND_UTN_FOR_TARGET_REPORT_MT
 
@@ -19,6 +21,13 @@ using namespace Utils;
 ReconstructorAssociatorBase::ReconstructorAssociatorBase()
 {
 }
+
+#define DO_VALGRIND_BENCH 0
+
+#if DO_VALGRIND_BENCH
+#include <valgrind/callgrind.h>
+#endif
+
 
 void ReconstructorAssociatorBase::associateNewData()
 {
@@ -36,7 +45,19 @@ void ReconstructorAssociatorBase::associateNewData()
 
     loginf << "ReconstructorAssociatorBase: associateNewData: associateTargetReports";
 
+#if DO_VALGRIND_BENCH
+    CALLGRIND_START_INSTRUMENTATION;
+
+    CALLGRIND_TOGGLE_COLLECT;
+#endif
+
     associateTargetReports();
+
+#if DO_VALGRIND_BENCH
+    CALLGRIND_TOGGLE_COLLECT;
+
+    CALLGRIND_STOP_INSTRUMENTATION;
+#endif
 
     time_assoc_trs_ += boost::posix_time::microsec_clock::local_time() - start_time;
 
@@ -133,16 +154,35 @@ void ReconstructorAssociatorBase::associateTargetReports()
     unsigned long rec_num;
     int utn;
 
-    bool do_debug = true;
+    bool do_debug = false;
 
     reconstructor().targets_container_.checkACADLookup();
 
     bool is_unreliable_primary_only;
 
+    boost::posix_time::ptime last_ts;
+
+    auto one_min = boost::posix_time::seconds(60);
+    unsigned int ts_cnt=0;
+
     for (auto& ts_it : reconstructor().tr_timestamps_)
     {
         if (reconstructor().isCancelled())
             return;
+
+        if (last_ts.is_not_a_date_time())
+        {
+            last_ts = ts_it.first;
+            loginf << "ReconstructorAssociatorBase: associateTargetReports: start time "
+                   << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
+        }
+
+        if (ts_it.first - last_ts > one_min)
+        {
+            last_ts = ts_it.first;
+            loginf << "ReconstructorAssociatorBase: associateTargetReports: processed time "
+                   << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
+        }
 
         rec_num = ts_it.second;
 
@@ -204,6 +244,8 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
             unassoc_rec_nums_.push_back(rec_num);
         }
+
+        ++ts_cnt;
     }
 
     loginf << "ReconstructorAssociatorBase: associateTargetReports: done";
