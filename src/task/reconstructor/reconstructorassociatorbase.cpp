@@ -236,6 +236,14 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
 
             associate(tr, utn);
+
+            if (do_debug || reconstructor().task().debugSettings().debugUTN(utn))
+            {
+                assert (reconstructor().targets_container_.targets_.count(utn));
+
+                loginf << "DBG target after assoc "
+                       << reconstructor().targets_container_.targets_.at(utn).asStr();
+            }
         }
         else // not associated
         {
@@ -284,7 +292,7 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
         if (!tr.in_current_slice_)
         {
             if(do_debug)
-                loginf << "DBG associating tr " << rec_num << " to UTN " << utn;
+                loginf << "DBG tr " << rec_num << " not in current slice";
 
             continue;
         }
@@ -585,6 +593,9 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
 
     bool do_debug = reconstructor().task().debugSettings().debugRecNum(tr.record_num_);
 
+    if (do_debug)
+        loginf << "DBG findUTNFor tr " << tr.asStr();
+
     unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
 
     vector<tuple<bool, unsigned int, double>> results;
@@ -761,19 +772,18 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
                           bool mode_a_checked = false;
                           bool mode_a_verified = false;
+
                           bool mode_c_checked = false;
 
                           if (tr.mode_a_code_ || tr.barometric_altitude_) // mode a/c based
                           {
                               // check mode a code
-
                               if (tr.mode_a_code_)
                               {
                                   ComparisonResult ma_res = other.compareModeACode(tr, max_time_diff_, do_debug);
 
                                   if (ma_res == ComparisonResult::DIFFERENT)
                                   {
-                                      //target_cnt++;
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                                       return;
 #else
@@ -799,7 +809,6 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
                                   if (mc_res == ComparisonResult::DIFFERENT)
                                   {
-                                      //target_cnt++;
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                                       return;
 #else
@@ -833,14 +842,34 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #endif
                           auto pos_offs = getPositionOffsetTR(tr, other, do_debug, {}, &prediction_stats[ target_cnt ]);
 
-                          if (!pos_offs.has_value()) 
+                          if (!pos_offs.has_value())
+                          {
+                              if (do_debug)
+                                  loginf << "DBG tr " << tr.record_num_ << " other_utn " << other_utn
+                                         << " no position offset";
+
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
                               return;
 #else
             continue;
 #endif
+                          }
 
                           std::tie(distance_m, tgt_est_std_dev, tr_est_std_dev) = pos_offs.value();
+
+                          // TODO HP here be danger
+                          if (!isTargetAccuracyAcceptable(tgt_est_std_dev, other_utn, tr, do_debug))
+                          {
+                              if (do_debug)
+                                  loginf << "DBG tr " << tr.record_num_ << " other_utn " << other_utn
+                                         << " tgt accuracy not acceptable";
+
+#ifdef FIND_UTN_FOR_TARGET_REPORT_MT
+                              return;
+#else
+                              continue;
+#endif
+                          }
 
                           boost::optional<std::pair<bool, double>> check_ret = calculatePositionOffsetScore(
                               tr, other_utn, distance_m, tgt_est_std_dev, tr_est_std_dev, mode_a_verified, do_debug);
@@ -972,8 +1001,8 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
 
             tie(distance_m, stddev_est_target, stddev_est_other) = pos_offs.value();
 
-            bool target_acc_acc = *isTargetAccuracyAcceptable(stddev_est_target, utn, tr.timestamp_, do_debug)
-                                  && *isTargetAccuracyAcceptable(stddev_est_other, other.utn_, tr.timestamp_, do_debug);
+            bool target_acc_acc = isTargetAccuracyAcceptable(stddev_est_target, utn, tr, do_debug)
+                                  && isTargetAccuracyAcceptable(stddev_est_other, other.utn_, tr, do_debug);
 
             double sum_stddev_est = stddev_est_target + stddev_est_other;
             ReconstructorAssociatorBase::DistanceClassification score_class;
@@ -1186,7 +1215,7 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
                                       // check positions
                                       scoreUTN(mc_same, other, cnt, true, do_debug);
                                   }
-                                  else
+                                  else if (!mc_different.size())
                                   {
                                       if (do_debug)
                                           loginf << "\ttarget " << target.utn_ << " other " << other.utn_

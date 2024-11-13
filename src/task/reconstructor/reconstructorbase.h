@@ -78,7 +78,7 @@ class ReconstructorBaseSettings
     bool ignore_calculated_references {true};
 
     // maximum time difference in target reports to do comparisons
-    float max_time_diff_ {5}; // sec
+    float max_time_diff_ {10}; // sec
     // maximum altitude difference to consider mode c the "same"
     float max_altitude_diff_ {300.0};
     // maximimum time difference between track updates, otherwise considered new track

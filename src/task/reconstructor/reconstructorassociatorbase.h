@@ -62,8 +62,8 @@ class ReconstructorAssociatorBase
         const boost::optional<unsigned int>& thread_id,
         reconstruction::PredictionStats* stats = nullptr) = 0;
 
-    virtual boost::optional<bool> isTargetAccuracyAcceptable(
-        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug) = 0;
+    virtual bool isTargetAccuracyAcceptable(
+        double tgt_est_std_dev, unsigned int utn, const dbContent::targetReport::ReconstructorInfo& tr, bool do_debug) = 0;
 
   protected:
 

@@ -248,8 +248,8 @@ SimpleAssociator::checkPositionOffsetScore (double distance_m, double sum_stddev
         classif, settings.max_distance_acceptable_ - distance_m);
 }
 
-boost::optional<bool> SimpleAssociator::isTargetAccuracyAcceptable(
-    double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug)
+bool SimpleAssociator::isTargetAccuracyAcceptable(
+    double tgt_est_std_dev, unsigned int utn, const dbContent::targetReport::ReconstructorInfo& tr, bool do_debug)
 {
     return true;
 }

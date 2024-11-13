@@ -1231,7 +1231,7 @@ ReconstructorTarget::compareModeACodes (
     ComparisonResult cmp_res;
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeACodes: num target_reports " << target_reports_.size()
+        loginf << "DBG other_utn " << utn_ << " cmpMAs num target_reports " << target_reports_.size()
                << " max t_diff " << Time::toString(max_time_diff);
 
     for (auto tr_it : target_reports_)
@@ -1241,7 +1241,7 @@ ReconstructorTarget::compareModeACodes (
         cmp_res = other.compareModeACode(tr, max_time_diff, do_debug);
 
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeACodes: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMAs "
                    << " cmp_res " << (unsigned int) cmp_res
                    << " num unknown " << unknown.size() << " same " << same.size()
                    << " different " << different.size();
@@ -1264,20 +1264,20 @@ ComparisonResult ReconstructorTarget::compareModeACode (
 {
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeACode: tr " << tr.asStr();
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA tr " << tr.asStr();
 
     // check if reliable value, can be different but not same
     bool tr_mode_a_unreliable = tr.mode_a_code_.has_value() && !tr.mode_a_code_->hasReliableValue();
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                << " res unkown, has val " << tr.mode_a_code_.has_value()
                << " reliable " << tr_mode_a_unreliable;
 
     if (!hasDataForTime(tr.timestamp_, max_time_diff))
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                    << " no data for time";
 
         return ComparisonResult::UNKNOWN;
@@ -1293,14 +1293,14 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     bool upper_no_m3a = upper_tr && !upper_tr->mode_a_code_.has_value();
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                << " lower_no_m3a " << lower_no_m3a << " upper_no_m3a " << upper_no_m3a;
 
     // no mode a, and one missing in one of the others
     if (!tr.mode_a_code_.has_value() && (lower_no_m3a || upper_no_m3a)) // TODO check if data sources m3a capable
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                    << " no mode a, same";
 
         return ComparisonResult::SAME;
@@ -1310,14 +1310,14 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     bool upper_m3a_usable = upper_tr && upper_tr->mode_a_code_.has_value() && upper_tr->mode_a_code_->hasReliableValue();
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                << " lower_m3a_usable " << lower_m3a_usable << " upper_m3a_usable " << upper_m3a_usable;
 
     // no able to compare
     if (!lower_m3a_usable && !upper_m3a_usable)
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                    << " none usable, unknown";
 
         return ComparisonResult::UNKNOWN;
@@ -1327,7 +1327,7 @@ ComparisonResult ReconstructorTarget::compareModeACode (
         || (!lower_m3a_usable && upper_m3a_usable)) // only 1 usable
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                    << " only 1 usable";
 
         dbContent::targetReport::ReconstructorInfo& ref1 = lower_m3a_usable ? *lower_tr : *upper_tr;
@@ -1335,14 +1335,14 @@ ComparisonResult ReconstructorTarget::compareModeACode (
         if (!tr.mode_a_code_.has_value())
         {
             if (do_debug)
-                loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+                loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                        << " no tr mode a, different";
 
             return ComparisonResult::DIFFERENT;
         }
 
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                    << " tr mode a, same " << (tr.mode_a_code_->code_ == ref1.mode_a_code_->code_);
 
         // mode a exists
@@ -1360,7 +1360,7 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     // both set & reliable
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                << " both set & reliable";
 
     dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
@@ -1369,7 +1369,7 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     if (!tr.mode_a_code_.has_value())
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                    << " no tr mode a, different";
 
         return ComparisonResult::DIFFERENT; // no mode a here, but in other
@@ -1378,7 +1378,7 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     // everything exists
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeACode: tr ts " << Time::toString(tr.timestamp_)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
                << " tr mode a, same " << ((tr.mode_a_code_->code_ == ref1.mode_a_code_->code_)
                                           || (tr.mode_a_code_->code_ == ref2.mode_a_code_->code_));
 
@@ -1412,7 +1412,7 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
         cmp_res = other.compareModeCCode(tr, max_time_diff, max_alt_diff, do_debug);
 
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeCCodes: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMCs "
                    << " cmp_res " << (unsigned int) cmp_res
                    << " num unknown " << unknown.size() << " same " << same.size()
                    << " different " << different.size();
@@ -1590,22 +1590,14 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
     time_duration max_time_diff, float max_alt_diff, bool do_debug) const
 {
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeCCode: tr " << tr.asStr();
-
-    // if (tr.barometric_altitude_.has_value() && !tr.barometric_altitude_->hasReliableValue()) // check if reliable value
-    // {
-    //     if (do_debug)
-    //         loginf << "ReconstructorTarget: compareModeCCode: no unreliable value";
-
-    //     return ComparisonResult::UNKNOWN;
-    // }
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC tr " << tr.asStr();
 
     bool tr_mode_c_unreliable = tr.barometric_altitude_.has_value() && !tr.barometric_altitude_->hasReliableValue();
 
     if (!hasDataForTime(tr.timestamp_, max_time_diff))
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                    << " no data for time";
 
         return ComparisonResult::UNKNOWN;
@@ -1622,14 +1614,14 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
     bool upper_no_mc = upper_tr && !upper_tr->barometric_altitude_.has_value();
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                << " lower_no_mc " << lower_no_mc << " upper_no_mc " << upper_no_mc;
 
     // no mode c, and one missing in one of the others
     if (!tr.barometric_altitude_.has_value() && (lower_no_mc || upper_no_mc)) // TODO check if data sources mc capable
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                    << " no mode c, same";
 
         return ComparisonResult::SAME;
@@ -1642,14 +1634,14 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
                            && upper_tr->barometric_altitude_->hasReliableValue();
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                << " lower_mc_usable " << lower_mc_usable << " upper_mc_usable " << upper_mc_usable;
 
     // no able to compare
     if (!lower_mc_usable && !upper_mc_usable)
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                    << " none usable, unknown";
 
         return ComparisonResult::UNKNOWN;
@@ -1659,7 +1651,7 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
         || (!lower_mc_usable && upper_mc_usable)) // only 1 usable
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                    << " only 1 usable";
 
         dbContent::targetReport::ReconstructorInfo& ref1 = lower_mc_usable ? *lower_tr : *upper_tr;
@@ -1668,14 +1660,14 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
         if (!tr.barometric_altitude_.has_value())
         {
             if (do_debug)
-                loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+                loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                        << " no tr mode c, different";
 
             return ComparisonResult::DIFFERENT;
         }
 
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                    << " tr mode c, same "
                    << (fabs(tr.barometric_altitude_->altitude_ - ref1.barometric_altitude_->altitude_) < max_alt_diff);
 
@@ -1694,7 +1686,7 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
     // both set & reliable
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                << " both set & reliable";
 
     dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
@@ -1703,7 +1695,7 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
     if (!tr.barometric_altitude_.has_value())
     {
         if (do_debug)
-            loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+            loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                    << " no tr mode c, different";
 
         return ComparisonResult::DIFFERENT; // no mode a here, but in other
@@ -1712,7 +1704,7 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
     // everything exists
 
     if (do_debug)
-        loginf << "ReconstructorTarget: compareModeCCode: tr ts " << Time::toString(tr.timestamp_)
+        loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
                << " tr mode c, same " << ((fabs(tr.barometric_altitude_->altitude_ - ref1.barometric_altitude_->altitude_) < max_alt_diff)
         || (fabs(tr.barometric_altitude_->altitude_ - ref2.barometric_altitude_->altitude_)) < max_alt_diff);
 
