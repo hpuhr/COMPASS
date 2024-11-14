@@ -46,6 +46,9 @@ public:
                          QWidget* parent = nullptr);
     virtual ~GridViewConfigWidget();
 
+    virtual void redrawDone() override;
+    virtual void loadingDone() override;
+
     static const int DecimalsDefault;
 
 protected:

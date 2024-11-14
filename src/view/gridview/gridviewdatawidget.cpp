@@ -267,7 +267,12 @@ void GridViewDataWidget::updateFromAnnotations()
 */
 bool GridViewDataWidget::hasValidGrid() const
 {
-    return grid_layers_.numLayers() > 0;
+    if (grid_layers_.numLayers() == 0)
+        return false;
+
+    const auto& d = grid_layers_.layers().front()->data;
+
+    return (d.cols() > 0 && d.rows() > 0);
 }
 
 /**

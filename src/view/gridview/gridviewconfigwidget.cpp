@@ -186,8 +186,39 @@ void GridViewConfigWidget::postVariableChangedEvent(int idx)
 
 /**
 */
+void GridViewConfigWidget::redrawDone()
+{
+    VariableViewConfigWidget::redrawDone();
+
+    updateExport();
+}
+
+/**
+*/
+void GridViewConfigWidget::loadingDone()
+{
+    VariableViewConfigWidget::loadingDone();
+
+    updateExport();
+}
+
+/**
+*/
 void GridViewConfigWidget::updateExport()
 {
+    assert(view_);
+
+    auto const_view = dynamic_cast<const GridView*>(view_);
+    assert(const_view);
+
+    if (!const_view->isInit() || !const_view->getDataWidget()->hasValidGrid())
+    {
+        export_button_->setEnabled(false);
+        export_button_->setToolTip("No grid data available");
+
+        return;
+    }
+
     auto var_sel_x = variableSelection(0);
     auto var_sel_y = variableSelection(1);
 
