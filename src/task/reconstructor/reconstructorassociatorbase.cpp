@@ -934,14 +934,9 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
     if (!reconstructor().targets_container_.targets_.size()) // check if targets exist
         return std::pair<float, std::pair<unsigned int, unsigned int>>{std::numeric_limits<float>::lowest(), {0,0}};
 
-    //assert (!utns_to_ignore.count(utn));
-
     assert (reconstructor().targets_container_.targets_.count(utn));
 
     const dbContent::ReconstructorTarget& target = reconstructor().targets_container_.targets_.at(utn);
-
-    //    if (print_debug_target)
-    //        loginf << "ReconstructorAssociatorBase: findUTNForTarget: utn " << utn;
 
     // dont check by mode s, should never work
 
@@ -1068,8 +1063,6 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
         {
             double distance_score_avg = distance_scores_sum / (float) distance_scores.size();
 
-            // if (isTargetAverageDistanceAcceptable(distance_score_avg, secondary_verified)) // mahala for probimm
-            // {
             if (do_debug)
                 loginf << "\ttarget " << target.utn_ << " other " << other.utn_
                        << " next utn " << num_utns << " distance_score_avg " << distance_score_avg
@@ -1077,13 +1070,6 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
 
             results[result_idx] = AssociationOption(
                 true, other.utn_, distance_scores.size(), true, distance_score_avg);
-            // }
-            // else
-            // {
-            //     if (do_debug)
-            //         loginf << "\ttarget " << target.utn_ << " other " << other.utn_
-            //                << " distance_scoring failed" << distance_score_avg;
-            // }
         }
         else
         {
