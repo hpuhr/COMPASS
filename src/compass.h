@@ -89,8 +89,9 @@ public:
     std::string lastUsedPath();
     void lastUsedPath(const std::string& last_path);
 
-    std::string versionString() const;
-    std::string licenseeString() const;
+    std::string versionString(bool open_ats = true, 
+                              bool license_type = true) const;
+    std::string licenseeString(bool licensed_to = true) const;
 
 protected:
     bool db_opened_{false};

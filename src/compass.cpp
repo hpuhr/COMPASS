@@ -834,28 +834,33 @@ void COMPASS::addDBFileToList(const std::string filename)
     }
 }
 
-std::string COMPASS::versionString() const
+std::string COMPASS::versionString(bool open_ats, 
+                                   bool license_type) const
 {
     assert(COMPASS::instance().config().existsId("version"));
-    std::string title = "OpenATS COMPASS v" + COMPASS::instance().config().getString("version");
+    std::string version = COMPASS::instance().config().getString("version");
 
-    const auto& license_manager = COMPASS::instance().licenseManager();
-    auto vl = license_manager.activeLicense();
+    std::string version_str;
+    if (open_ats) 
+        version_str += "OpenATS ";
 
-    if (vl)
+    version_str += "COMPASS v" + version;
+
+    if (license_type)
     {
-        title += " " + license::License::typeToString(vl->type);
-        //title += " - Licensed to: " + vl->licensee;
-    }
-    else
-    {
-        title += " " + license::License::typeToString(license::License::Type::Free);
+        const auto& license_manager = COMPASS::instance().licenseManager();
+        auto vl = license_manager.activeLicense();
+
+        if (vl)
+            version_str += " " + license::License::typeToString(vl->type);
+        else
+            version_str += " " + license::License::typeToString(license::License::Type::Free);
     }
 
-    return title;
+    return version_str;
 }
 
-std::string COMPASS::licenseeString() const
+std::string COMPASS::licenseeString(bool licensed_to) const
 {
     const auto& license_manager = COMPASS::instance().licenseManager();
     auto vl = license_manager.activeLicense();
@@ -863,5 +868,5 @@ std::string COMPASS::licenseeString() const
     if (!vl)
         return "";
 
-    return "Licensed to " + vl->licensee;
+    return (licensed_to ? "Licensed to " : "") + vl->licensee;
 }

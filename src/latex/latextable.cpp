@@ -67,14 +67,14 @@ std::string LatexTable::toString()
     if (wide_table_)
     {
         //ss << R"(\newgeometry{margin=1cm})" << "\n";
-        ss << R"(\begin{landscape})" << "\n";
-        ss << R"(\thispagestyle{empty})" << "\n";
+        ss << R"(\begin{landscape2})" << "\n";
+        //ss << R"(\thispagestyle{empty})" << "\n";
     }
 
-    if (wide_table_)
-        ss << R"(\begin{tabularx}{\linewidth}[H]{)" << heading_alignment_ << " }\n";
-    else
+    //if (wide_table_)
         ss << R"(\begin{tabularx}{\textwidth}[H]{)" << heading_alignment_ << " }\n";
+    //else
+    //    ss << R"(\begin{tabularx}{\linewidth}[H]{)" << heading_alignment_ << " }\n";
 
     ss << R"(\hline)" << "\n";
     ss << getLine(headings_, true);
@@ -103,7 +103,7 @@ std::string LatexTable::toString()
 
     if (wide_table_)
     {
-        ss << R"(\end{landscape})" << "\n";
+        ss << R"(\end{landscape2})" << "\n";
         //ss << R"(\restoregeometry)" << "\n";
     }
 
