@@ -479,63 +479,80 @@ bool ReconstructorTarget::isTimeInside (boost::posix_time::ptime timestamp, boos
     if (timestamp_min_.is_not_a_date_time() || timestamp_min_.is_not_a_date_time())
         return false;
 
-    return timestamp >= timestamp_min_ - d_max && timestamp <= timestamp_max_ + d_max;
+    return timestamp >= (timestamp_min_ - d_max) && timestamp <= (timestamp_max_ + d_max);
 }
 
 bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) const
 {
-    if (!isTimeInside(timestamp, d_max))
+    if (!tr_timestamps_.size() || !isTimeInside(timestamp, d_max))
         return false;
 
     if (tr_timestamps_.count(timestamp))
-        return true; // contains exact value
+        return true; // contains exact value(s)
 
     //    Return iterator to lower bound
     //    Returns an iterator pointing to the first element in the container whose key is not considered to go
     //    before k (i.e., either it is equivalent or goes after).
 
-    auto lb_it = tr_timestamps_.lower_bound(timestamp);
+    auto it_upper = tr_timestamps_.lower_bound(timestamp);
 
-    if (lb_it == tr_timestamps_.end())
-        return false;
-
-    assert (lb_it->first >= timestamp);
-
-    if (lb_it->first - timestamp > d_max)
-        return false; // too much time difference
-
-    // save value
-    ptime upper = lb_it->first;
-
-    // TODO lb_it--; ?
-    while (lb_it != tr_timestamps_.end() && timestamp < lb_it->first)
+    // all tr_timestamps_ smaller than timestamp
+    if (it_upper == tr_timestamps_.end())
     {
-        if (lb_it == tr_timestamps_.begin()) // exit condition on first value
-        {
-            if (timestamp < lb_it->first) // set as not found
-                lb_it = tr_timestamps_.end();
-
-            break;
-        }
-
-        lb_it--;
+        assert (tr_timestamps_.rbegin()->first <= timestamp);
+        return (timestamp - tr_timestamps_.rbegin()->first) < d_max;
     }
 
-    if (lb_it == tr_timestamps_.end())
-        return false;
+    // all tr_timestamps_ bigger than timestamp
+    if (it_upper == tr_timestamps_.begin())
+    {
+        assert (tr_timestamps_.begin()->first >= timestamp);
+        return (tr_timestamps_.begin()->first - timestamp) < d_max;
+    }
 
-    assert (timestamp >= lb_it->first);
+    // have lb_it which has >= timestamp
+    assert (it_upper->first >= timestamp);
 
-    if (timestamp - lb_it->first > d_max)
-        return false; // too much time difference
+    if (timestamp - it_upper->first < d_max)
+        return true; // got one in d_max
 
-    ptime lower = lb_it->first;
+    it_upper--;
 
-    logdbg << "Target " << utn_ << ": hasDataForTime: found " << Time::toString(lower)
-           << " <= " << Time::toString(timestamp)
-           << " <= " << Time::toString(upper);
+    assert (it_upper->first < timestamp);
+    return (timestamp - tr_timestamps_.begin()->first) < d_max;
 
-    return true;
+    // save value
+    // ptime upper = lb_it->first;
+
+    // // reverse in time to check previous timestamps
+    // while (lb_it != tr_timestamps_.end() && timestamp < lb_it->first)
+    // {
+    //     if (lb_it == tr_timestamps_.begin()) // exit condition on first value
+    //     {
+    //         if (timestamp < lb_it->first) // set as not found
+    //             lb_it = tr_timestamps_.end();
+
+    //         break;
+    //     }
+
+    //     lb_it--;
+    // }
+
+    // if (lb_it == tr_timestamps_.end())
+    //     return false;
+
+    // assert (timestamp >= lb_it->first);
+
+    // if (timestamp - lb_it->first > d_max)
+    //     return false; // too much time difference
+
+    // ptime lower = lb_it->first;
+
+    // logdbg << "Target " << utn_ << ": hasDataForTime: found " << Time::toString(lower)
+    //        << " <= " << Time::toString(timestamp)
+    //        << " <= " << Time::toString(upper);
+
+    // return true;
 }
 
 ReconstructorTarget::TargetReportSkipResult ReconstructorTarget::skipTargetReport(const dbContent::targetReport::ReconstructorInfo& tr,
@@ -661,19 +678,38 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         //get lower bound
         it_upper = tr_timestamps_.lower_bound(timestamp);
 
-        //lower bound not found => stop
+        // all tr_timestamps_ smaller than timestamp
         if (it_upper == tr_timestamps_.end())
-            return {nullptr, nullptr};
-
-        assert (it_upper->first >= timestamp);
-
-        //too much time difference?
-        if (it_upper->first - timestamp <= d_max)
-            has_upper = true;
-
-        //our upper element is the first element => no lower element
-        if (it_upper != tr_timestamps_.begin())
         {
+            assert (tr_timestamps_.rbegin()->first <= timestamp);
+            if ((timestamp - tr_timestamps_.rbegin()->first) < d_max)
+            {
+                it_lower  = std::prev(tr_timestamps_.end());
+                it_upper  = tr_timestamps_.end();
+                has_lower = true;
+                has_upper = false;
+            }
+        }
+        else if (it_upper == tr_timestamps_.begin())// all tr_timestamps_ bigger than timestamp
+        {
+            assert (tr_timestamps_.begin()->first >= timestamp);
+
+            if ((tr_timestamps_.begin()->first - timestamp) < d_max)
+            {
+                it_lower  = tr_timestamps_.end();
+                //it_upper  = tr_timestamps_.begin(); // is already on this value
+                has_lower = false;
+                has_upper = true;
+            }
+        }
+        else
+        {
+            assert (it_upper->first >= timestamp);
+
+            //too much time difference?
+            if (it_upper->first - timestamp <= d_max)
+                has_upper = true;
+
             //set lower iterator to last elem
             it_lower = it_upper;
             --it_lower;
@@ -684,7 +720,6 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             if (timestamp - it_lower->first <= d_max)
                 has_lower = true;
         }
-
         if (debug) 
         {
             loginf << "ReconstructorTarget: dataFor: initial interval:\n" 
@@ -1278,7 +1313,8 @@ ComparisonResult ReconstructorTarget::compareModeACode (
     {
         if (do_debug)
             loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMA"
-                   << " no data for time";
+                   << " no data for time ("
+                   << Time::toString(timestamp_min_) << "-" << Time::toString(timestamp_max_) << ")";
 
         return ComparisonResult::UNKNOWN;
     }
@@ -1598,7 +1634,8 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
     {
         if (do_debug)
             loginf << "DBG tr " << tr.record_num_ << " other_utn " << utn_ << " cmpMC"
-                   << " no data for time";
+                   << " no data for time ("
+                   << Time::toString(timestamp_min_) << "-" << Time::toString(timestamp_max_) << ")";
 
         return ComparisonResult::UNKNOWN;
     }
