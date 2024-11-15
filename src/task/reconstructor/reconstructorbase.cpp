@@ -628,17 +628,16 @@ void ReconstructorBase::processSlice()
 {
     assert (!currentSlice().remove_before_time_.is_not_a_date_time());
 
-    loginf << "ReconstructorBase: processSlice: " << Time::toString(currentSlice().timestamp_min_);
-
-    logdbg << "ReconstructorBase: processSlice: first_slice " << currentSlice().first_slice_;
+    loginf << "ReconstructorBase: processSlice: " << Time::toString(currentSlice().timestamp_min_)
+           << " first_slice " << currentSlice().first_slice_;
 
     processing_ = true;
 
-    if (currentSlice().first_slice_)
-    {
-        //not needed at the moment
-        //initChainPredictors();
-    }
+    // if (currentSlice().first_slice_)
+    // {
+    //     //not needed at the moment
+    //     //initChainPredictors();
+    // }
 
     if (!currentSlice().first_slice_)
     {
@@ -648,7 +647,7 @@ void ReconstructorBase::processSlice()
         accessor_->removeContentBeforeTimestamp(currentSlice().remove_before_time_);
     }
 
-    logdbg << "ReconstructorBase: processSlice: adding";
+    loginf << "ReconstructorBase: processSlice: adding, size " << currentSlice().data_.size();
 
     accessor_->add(currentSlice().data_);
 
@@ -657,8 +656,6 @@ void ReconstructorBase::processSlice()
     processSlice_impl();
 
     processing_ = false;
-
-    logdbg << "ReconstructorBase: processSlice: done";
 
     currentSlice().processing_done_ = true;
 
@@ -752,6 +749,8 @@ void ReconstructorBase::processSlice()
                << "   failed:" << stats.num_rec_interp_failed << "\n"
                << "\n";
     }
+
+    logdbg << "ReconstructorBase: processSlice: done";
 }
 
 void ReconstructorBase::clearOldTargetReports()

@@ -42,6 +42,8 @@ DBContentAccessor::DBContentAccessor()
 */
 bool DBContentAccessor::add(std::map<std::string, std::shared_ptr<Buffer>> buffers)
 {
+    loginf << "DBContentAccessor: add";
+
     bool something_changed = false;
 
     for (auto& buf_it : buffers)
@@ -74,11 +76,15 @@ bool DBContentAccessor::add(std::map<std::string, std::shared_ptr<Buffer>> buffe
     if (something_changed)
         updateDBContentLookup();
 
+    loginf << "DBContentAccessor: add: done";
+
     return something_changed;
 }
 
 void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime remove_before_time)
 {
+    loginf << "DBContentAccessor: removeContentBeforeTimestamp";
+
     unsigned int buffer_size;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
@@ -88,12 +94,18 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
            << Time::toString(remove_before_time);
 #endif
 
-    for (auto buf_it = buffers_.begin(); buf_it != buffers_.end(); ++buf_it)
+    for (auto buf_it = buffers_.begin(); buf_it != buffers_.end();)
     {
         buffer_size = buf_it->second->size();
 
+        loginf << "DBContentAccessor: removeContentBeforeTimestamp: dbcont " << buf_it->first
+               << " size " << buf_it->second->size();
+
         if (buffer_size == 0)
+        {
+            ++buf_it;
             continue;
+        }
 
         assert (dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it->first));
 
@@ -112,6 +124,8 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
         unsigned int index=0;
         bool cutoff_found = false;
 
+        loginf << "DBContentAccessor: removeContentBeforeTimestamp: looking for cutoff";
+
         for (; index < buffer_size; ++index)
         {
             if (!ts_vec.isNull(index) && ts_vec.get(index) > remove_before_time)
@@ -127,6 +141,8 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
             }
         }
 
+        loginf << "DBContentAccessor: removeContentBeforeTimestamp: cutoff_found " << cutoff_found;
+
         if (!cutoff_found) // no ts bigger than remove:ts found, remove all data
         {
 #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
@@ -136,9 +152,13 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
 #endif
 
             buf_it = buffers_.erase(buf_it);
+
+            loginf << "DBContentAccessor: removeContentBeforeTimestamp: removing full buffer done";
         }
         else if (cutoff_found && index != 0) // if index == 0, all ok, otherwise remove
         {
+            loginf << "DBContentAccessor: removeContentBeforeTimestamp: found cutoff at index " << index;
+
             assert (index >= 1);
             assert (index < buffer_size);
 
@@ -170,6 +190,8 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
                 }
             }
 #endif
+            ++buf_it;
+
         }
         else
         {
@@ -189,16 +211,23 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
                 assert (ts_vec.get(index) > remove_before_time);
             }
 #endif
+            ++buf_it;
         }
 
-
+        logdbg << "DBContentAccessor: removeContentBeforeTimestamp: processing buffer done";
     }
 
+    logdbg << "DBContentAccessor: removeContentBeforeTimestamp: removing empty buffers";
+
     removeEmptyBuffers();
+
+    logdbg << "DBContentAccessor: removeContentBeforeTimestamp: done";
 }
 
 void DBContentAccessor::removeEmptyBuffers()
 {
+    logdbg << "DBContentAccessor: removeEmptyBuffers";
+
     bool something_changed = false;
 
     // remove empty buffers
@@ -213,6 +242,8 @@ void DBContentAccessor::removeEmptyBuffers()
 
     if (something_changed)
         updateDBContentLookup();
+
+    logdbg << "DBContentAccessor: removeEmptyBuffers: done";
 }
 
 /**
@@ -242,6 +273,8 @@ std::shared_ptr<Buffer> DBContentAccessor::get(const std::string& dbcontent_name
 */
 void DBContentAccessor::updateDBContentLookup()
 {
+    loginf << "DBContentAccessor: updateDBContentLookup";
+
     dbcontent_lookup_.clear();
 
     for (auto& buf_it : buffers_)
