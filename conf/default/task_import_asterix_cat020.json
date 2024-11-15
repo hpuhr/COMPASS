@@ -86,6 +86,102 @@
                     "unit": ""
                 }
             },
+            "JSONDataMapping103": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "X StdDev",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "500.SDP.sigma-x",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping104": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "Y StdDev",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "500.SDP.sigma-y",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping105": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "X DoP",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "500.DOP.DOP-x",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping106": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "X/Y DoP Cov",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "500.DOP.DOP-xy",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping107": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "Y DoP",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "500.DOP.DOP-y",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
+            "JSONDataMapping108": {
+                "parameters": {
+                    "active": true,
+                    "append_value": false,
+                    "comment": "",
+                    "db_content_name": "CAT020",
+                    "db_content_variable_name": "X/Y StdDev Cov",
+                    "dimension": "",
+                    "format_data_type": "",
+                    "in_array": false,
+                    "json_key": "500.SDP.rho-xy",
+                    "json_value_format": "",
+                    "mandatory": false,
+                    "unit": ""
+                }
+            },
             "JSONDataMapping12": {
                 "parameters": {
                     "active": true,
