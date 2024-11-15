@@ -442,7 +442,14 @@ void ManageSectorsTaskWidget::updateFileListSlot()
 
     for (auto it : task_.fileList())
     {
+        if (!Files::fileExists(it.first))
+        {
+            logwrn << "ManageSectorsTaskWidget: updateFileListSlot: file '" << it.first << "' does not exist";
+            continue;
+        }
+
         QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
+
         if (it.first == task_.currentFilename())
             file_list_->setCurrentItem(item);
     }

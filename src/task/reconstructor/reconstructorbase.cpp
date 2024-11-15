@@ -35,30 +35,43 @@
 using namespace std;
 using namespace Utils;
 
+std::set<std::string> ReconstructorBase::TargetsContainer::unspecific_acids_ {"00000000","????????","        "};
+
 unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr)
 {
     unsigned int utn;
 
-    // if (removed_utns_.size())
-    // {
-    //     utn = *removed_utns_.begin();
-    //     assert (!targets_.count(utn));
-    //     removed_utns_.erase(removed_utns_.begin());
-    // }
-    // else
     if (targets_.size())
         utn = targets_.rbegin()->first + 1; // new utn
     else
         utn = 0;
 
     if (tr.acad_)
-        assert (!acad_2_utn_.count(*tr.acad_));
+    {
+        if (acad_2_utn_.count(*tr.acad_))
+            logerr << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " acad already present in "
+                   << targets_.at(acad_2_utn_.at(*tr.acad_)).asStr();
 
-    if (tr.acid_)
+        assert (!acad_2_utn_.count(*tr.acad_));
+    }
+
+    if (tr.acid_ && !unspecific_acids_.count(*tr.acid_))
+    {
+        if (acid_2_utn_.count(*tr.acid_))
+            logerr << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " acid already present in "
+                   << targets_.at(acid_2_utn_.at(*tr.acid_)).asStr();
+
         assert (!acid_2_utn_.count(*tr.acid_));
+    }
 
     if (tr.track_number_)
+    {
+        if (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_))
+            logerr << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " track num already present in "
+                   << targets_.at(tn2utn_[tr.ds_id_][tr.line_id_].at(*tr.track_number_).first).asStr();
+
         assert (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
+    }
 
     assert (reconstructor_);
 
@@ -145,7 +158,7 @@ void ReconstructorBase::TargetsContainer::addToLookup(unsigned int utn, dbConten
     if (tr.acad_)
         acad_2_utn_[*tr.acad_] = utn;
 
-    if (tr.acid_)
+    if (tr.acid_ && !unspecific_acids_.count(*tr.acid_))
         acid_2_utn_[*tr.acid_] = utn;
 }
 
@@ -236,7 +249,7 @@ bool ReconstructorBase::TargetsContainer::canAssocByACID(
     if (!tr.acid_)
         return false;
 
-    if (*tr.acid_ == "00000000" || *tr.acid_ == "????????" || *tr.acid_ == "        ")
+    if (unspecific_acids_.count(*tr.acid_))
     {
         if (do_debug)
             loginf << "DBG can not use stored utn in acid_2_utn_, unspecifiec acid '" << *tr.acid_ << "'";
@@ -271,6 +284,7 @@ int ReconstructorBase::TargetsContainer::assocByACID(dbContent::targetReport::Re
 {
     assert (tr.acid_);
     assert (acid_2_utn_.count(*tr.acid_));
+    assert (!unspecific_acids_.count(*tr.acid_));
 
     if (do_debug)
         loginf << "DBG use stored utn in acid_2_utn_: " << acid_2_utn_.at(*tr.acid_);

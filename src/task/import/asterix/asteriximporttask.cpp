@@ -1194,6 +1194,8 @@ void ASTERIXImportTask::insertDoneSlot()
 {
     logdbg << "ASTERIXImportTask: insertDoneSlot";
 
+    assert (insert_slot_connected_);
+
     if (source_.isFileType())
     {
         logdbg << "ASTERIXImportTask: insertDoneSlot: num_packets_in_processing " << num_packets_in_processing_;
@@ -1232,19 +1234,6 @@ void ASTERIXImportTask::insertDoneSlot()
     }
 
     checkAllDone();
-
-    logdbg << "ASTERIXImportTask: insertDoneSlot: check done";
-
-    if (all_done_)
-    {
-        logdbg << "ASTERIXImportTask: insertDoneSlot: finalizing";
-
-        disconnect(&COMPASS::instance().dbContentManager(), &DBContentManager::insertDoneSignal,
-                   this, &ASTERIXImportTask::insertDoneSlot);
-        insert_slot_connected_ = false;
-
-        emit doneSignal();
-    }
 
     logdbg << "ASTERIXImportTask: insertDoneSlot: done";
 }
@@ -1330,6 +1319,15 @@ void ASTERIXImportTask::checkAllDone()
         COMPASS::instance().interface().saveProperties();
 
         malloc_trim(0); // release unused memory
+
+        if (insert_slot_connected_) // moved here from insertDoneSlot
+        {
+            disconnect(&COMPASS::instance().dbContentManager(), &DBContentManager::insertDoneSignal,
+                       this, &ASTERIXImportTask::insertDoneSlot);
+            insert_slot_connected_ = false;
+        }
+
+        emit doneSignal();
     }
 
     logdbg << "ASTERIXImportTask: checkAllDone: done";

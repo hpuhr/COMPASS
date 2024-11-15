@@ -141,6 +141,8 @@ public:
 
     struct TargetsContainer
     {
+        static std::set<std::string> unspecific_acids_;
+
         TargetsContainer(ReconstructorBase* reconstructor)
             :reconstructor_(reconstructor) { assert(reconstructor_); }
 
