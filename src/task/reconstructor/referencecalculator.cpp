@@ -35,6 +35,7 @@
 #include "util/number.h"
 #include "stringconv.h"
 #include "logger.h"
+#include "global.h"
 
 #include "projector.h"
 
@@ -779,7 +780,14 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     //configure and init estimator
     reconstruction::KalmanEstimator estimator;
     estimator.settings() = settings_.kalmanEstimatorSettings();
-    estimator.init(settings_.kalman_type_final);
+
+    auto kalman_type = kalman::KalmanType::UMKalman2D;
+#if USE_EXPERIMENTAL_SOURCE == true
+    if (reconstructor_.supportsIMM())
+        kalman_type = settings_.kalman_type_final;
+#endif
+
+    estimator.init(kalman_type);
 
     //try to init
     auto res = initReconstruction(refs);

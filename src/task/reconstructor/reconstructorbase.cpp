@@ -390,9 +390,6 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
 
     // reference computation
     {
-        registerParameter("ref_rec_type", (int*)&ref_calc_settings_.kalman_type_assoc, (int)ReferenceCalculatorSettings().kalman_type_assoc);
-        registerParameter("ref_rec_type_final", (int*)&ref_calc_settings_.kalman_type_final, (int)ReferenceCalculatorSettings().kalman_type_final);
-
         registerParameter("ref_Q_std", &ref_calc_settings_.Q_std.Q_std_static, ReferenceCalculatorSettings().Q_std.Q_std_static);
         registerParameter("ref_Q_std_ground", &ref_calc_settings_.Q_std.Q_std_ground, ReferenceCalculatorSettings().Q_std.Q_std_ground);
         registerParameter("ref_Q_std_air", &ref_calc_settings_.Q_std.Q_std_air, ReferenceCalculatorSettings().Q_std.Q_std_air);

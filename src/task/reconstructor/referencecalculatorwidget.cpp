@@ -105,7 +105,12 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
 
     rec_type_combo_final_ = new QComboBox;
     rec_type_combo_final_->addItem("Uniform Motion", QVariant(kalman::UMKalman2D));
-    rec_type_combo_final_->addItem("IMM", QVariant(kalman::IMMKalman2D));
+    if (reconstructor_.supportsIMM())
+        rec_type_combo_final_->addItem("IMM", QVariant(kalman::IMMKalman2D));
+
+    if (rec_type_combo_final_->count() <= 1)
+        rec_type_combo_final_->setEnabled(false);
+
     connect(rec_type_combo_final_, QOverload<int>::of(&QComboBox::currentIndexChanged), 
         [ = ] (int idx) { settings->kalman_type_final = (kalman::KalmanType)rec_type_combo_final_->currentData().toInt(); });
     layout->addRow("Kalman Type Final", rec_type_combo_final_);
@@ -297,8 +302,11 @@ void ReferenceCalculatorWidget::update()
 {
     const auto& settings = reconstructor_.referenceCalculatorSettings();
 
-    if (rec_type_combo_) rec_type_combo_->setCurrentIndex(rec_type_combo_->findData(QVariant(settings.kalman_type_assoc)));
-    if (rec_type_combo_final_) rec_type_combo_final_->setCurrentIndex(rec_type_combo_final_->findData(QVariant(settings.kalman_type_final)));
+    auto kalman_assoc = reconstructor_.supportsIMM() ? settings.kalman_type_assoc : kalman::KalmanType::UMKalman2D;
+    auto kalman_final = reconstructor_.supportsIMM() ? settings.kalman_type_final : kalman::KalmanType::UMKalman2D;
+
+    if (rec_type_combo_) rec_type_combo_->setCurrentIndex(rec_type_combo_->findData(QVariant(kalman_assoc)));
+    if (rec_type_combo_final_) rec_type_combo_final_->setCurrentIndex(rec_type_combo_final_->findData(QVariant(kalman_final)));
 
     if (Q_std_static_edit_) Q_std_static_edit_->setValue(settings.Q_std.Q_std_static);
     if (Q_std_ground_edit_) Q_std_ground_edit_->setValue(settings.Q_std.Q_std_ground);

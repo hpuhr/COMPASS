@@ -7,6 +7,7 @@
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/target/targetreportaccessor.h"
 
+#include "kalman_defs.h"
 
 #include "timeconv.h"
 
@@ -24,6 +25,10 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id,
     registerParameter("max_distance_quit", &settings_.max_distance_quit_, 5*NM2M); // kb 5nm
     registerParameter("max_distance_dubious", &settings_.max_distance_dubious_, 2*NM2M);
     registerParameter("max_distance_acceptable", &settings_.max_distance_acceptable_, 1*NM2M);
+
+    // reconstruction settings (check base for other settings)
+    registerParameter("ref_rec_type", (int*)&referenceCalculatorSettings().kalman_type_assoc, (int)kalman::KalmanType::UMKalman2D);
+    registerParameter("ref_rec_type_final", (int*)&referenceCalculatorSettings().kalman_type_final, (int)kalman::KalmanType::UMKalman2D);
 }
 
 SimpleReconstructor::~SimpleReconstructor() {}

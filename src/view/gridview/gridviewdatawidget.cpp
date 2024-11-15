@@ -67,7 +67,6 @@ GridViewDataWidget::GridViewDataWidget(GridViewWidget* view_widget,
     legend_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     legend_->showSelectionColor(true);
     legend_->showNullColor(false);
-    legend_->setDescriptionMode(ColorMapDescriptionMode::Midpoints);
 
     main_layout_->addWidget(legend_);
 
@@ -99,6 +98,8 @@ void GridViewDataWidget::resetGridChart()
 
     grid_rendering_ = QImage();
     grid_roi_       = QRectF();
+
+    custom_range_invalid_ = false;
 }
 
 /**
@@ -439,6 +440,8 @@ void GridViewDataWidget::updateRendering()
 {
     loginf << "GridViewDataWidget: updateRendering: rendering";
 
+    custom_range_invalid_ = false;
+
     if (!hasValidGrid())
         return;
 
@@ -451,28 +454,58 @@ void GridViewDataWidget::updateRendering()
 
     auto vmin = view_->getMinValue();
     auto vmax = view_->getMaxValue();
+    
+    if (vmin.has_value() || vmax.has_value())
+    {
+        if (vmin.has_value() && vmax.has_value() && vmin.value() < vmax.value())
+            range = std::pair<double, double>(vmin.value(), vmax.value());
+        else if (vmin.has_value() && !vmax.has_value() && vmin.value() < grid_value_max_)
+            range.first = vmin.value();
+        else if (vmax.has_value() && !vmin.has_value() && vmax.value() > grid_value_min_)
+            range.second = vmax.value();
+        else
+            custom_range_invalid_ = true;
+    }
 
-    if (vmin.has_value() && vmax.has_value() && vmin.value() <= vmax.value())
-        range = std::pair<double, double>(vmin.value(), vmax.value());
-    else if (vmin.has_value() && !vmax.has_value() && vmin.value() <= grid_value_max_)
-        range.first = vmin.value();
-    else if (vmax.has_value() && !vmin.has_value() && vmax.value() >= grid_value_min_)
-        range.second = vmax.value();
-
-    auto dtype = view_->currentDataType();
+    auto dtype = view_->currentLegendDataType();
 
     auto decoratorFunc = [ = ] (double v)
     {
         return property_templates::double2String(dtype, v, GridView::DecimalsDefault);
     };
 
-    bool is_bool = (dtype == PropertyDataType::BOOL);
+    size_t num_steps = property_templates::suggestedNumColorSteps(dtype, 
+                                                                  range.first, 
+                                                                  range.second, 
+                                                                  settings.render_color_num_steps);
+    if (num_steps == 0)
+        return;
 
     Grid2DRenderSettings render_settings;
-    render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
-                                      settings.render_color_num_steps,
-                                      is_bool ? ColorMap::Type::Binary : ColorMap::Type::Linear,
-                                      range);
+
+    if (num_steps == 1)
+    {
+        //single value
+        render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
+                                          1,
+                                          ColorMap::Type::LinearSamples,
+                                          range);
+    }
+    else if (num_steps == 2)
+    {
+        //binary
+        render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
+                                          2,
+                                          ColorMap::Type::Binary,
+                                          range);
+    }
+    else
+    {
+        render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
+                                          num_steps,
+                                          ColorMap::Type::LinearSamples,
+                                          range);
+    }
 
     legend_->setColorMap(render_settings.color_map);
     legend_->setDecorator(decoratorFunc);    

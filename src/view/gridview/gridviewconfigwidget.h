@@ -33,6 +33,7 @@ class QComboBox;
 class QSpinBox;
 class QPushButton;
 class QToolButton;
+class QLabel;
 class QDialog;
 
 /**
@@ -68,6 +69,7 @@ protected:
     void updateConfig();
     void updateVariableDataType();
     void updateExport();
+    void checkRanges();
 
     std::string exportName() const;
     void exportToGeographicView();
@@ -84,4 +86,5 @@ protected:
     QPushButton*         reset_min_button_    = nullptr;
     QPushButton*         reset_max_button_    = nullptr;
     QPushButton*         export_button_       = nullptr;
+    QLabel*              range_info_label_    = nullptr;
 };

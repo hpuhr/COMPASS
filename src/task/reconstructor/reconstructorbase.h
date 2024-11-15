@@ -257,6 +257,7 @@ public:
     virtual bool isLastSliceProcessingRun() { return true; }      // called to check if another repeat run is planned
     virtual unsigned int currentSliceRepeatRun() { return currentSlice().run_count_; }    // current repeat run
 
+    virtual bool supportsIMM() const { return false; }
     virtual std::string reconstructorInfoString() { return ""; }
 
     reconstruction::KalmanChainPredictors& chainPredictors();
