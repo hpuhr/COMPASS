@@ -60,6 +60,7 @@ public slots:
     void metaDialogOKSlot();
 
 signals:
+    void dbContentStatusChanged();
     void dbObjectsChangedSignal();
     void associationStatusChangedSignal();
 

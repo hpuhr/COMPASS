@@ -238,8 +238,9 @@ inline boost::optional<std::string> fromString(const std::string& value)
 template <>
 inline boost::optional<boost::posix_time::ptime> fromString(const std::string& value)
 {
-    boost::posix_time::ptime t = Utils::Time::fromString(value);
-    if (t.is_not_a_date_time())
+    bool ok;
+    boost::posix_time::ptime t = Utils::Time::fromString(value, &ok);
+    if (!ok || t.is_not_a_date_time())
         return {};
 
     return t;

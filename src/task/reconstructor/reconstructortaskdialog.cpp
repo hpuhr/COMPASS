@@ -108,6 +108,9 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     updateButtons();
     updateReconstructorInfo();
+    checkValidity();
+
+    connect (&task_, &ReconstructorTask::configChanged, this, &ReconstructorTaskDialog::checkValidity);
 }
 
 ReconstructorTaskDialog::~ReconstructorTaskDialog()
@@ -160,4 +163,29 @@ void ReconstructorTaskDialog::reconstructorMethodChangedSlot(const QString& valu
 
     showCurrentReconstructorWidget();
     updateReconstructorInfo();
+}
+
+void ReconstructorTaskDialog::checkValidity()
+{
+    auto valid = configValid();
+
+    run_button_->setEnabled(valid.first);
+    run_button_->setToolTip(QString::fromStdString(valid.second));
+}
+
+std::pair<bool, std::string> ReconstructorTaskDialog::configValid() const
+{
+    auto rec = task_.currentReconstructor();
+    if (!rec)
+        return std::make_pair(false, "No reconstructor found");
+
+    const auto& settings = rec->settings();
+    if (settings.data_timestamp_min.is_not_a_date_time())
+        return std::make_pair(false, "Please enter a valid begin time");
+    if (settings.data_timestamp_max.is_not_a_date_time())
+        return std::make_pair(false, "Please enter a valid end time");
+    if (settings.data_timestamp_max <= settings.data_timestamp_min)
+        return std::make_pair(false, "Please enter a valid timeframe");
+
+    return std::make_pair(true, "");
 }

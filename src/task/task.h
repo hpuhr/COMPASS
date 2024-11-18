@@ -38,6 +38,7 @@ class Task : public QObject
 
     bool done() const { return done_; }
 
+    virtual void initTask() {} 
     virtual bool canRun() { return true; };
     virtual void run() = 0;  // to be overriden by tasks that can run
     virtual void stop() { stopped_= true; } // should also set done_, stopped_ only to be set after shutdown

@@ -31,6 +31,8 @@
 #include <string>
 #include <memory>
 
+#include <QObject>
+
 #define DO_RECONSTRUCTOR_PEDANTIC_CHECKING 0
 
 namespace dbContent
@@ -70,6 +72,10 @@ class ReconstructorBaseSettings
     unsigned int ds_sic  {REC_DS_SIC};
     unsigned int ds_line {0};
 
+    //timeframe
+    boost::posix_time::ptime data_timestamp_min;
+    boost::posix_time::ptime data_timestamp_max;
+
     // slicing
     unsigned int slice_duration_in_minutes    {15};
     unsigned int outdated_duration_in_minutes {2};
@@ -103,8 +109,9 @@ class ReconstructorBaseSettings
 
 /**
  */
-class ReconstructorBase : public Configurable
+class ReconstructorBase : public QObject, public Configurable
 {
+    Q_OBJECT
 public:
     struct DataSlice
     {
@@ -265,6 +272,12 @@ public:
     boost::optional<unsigned int> utnForACAD(unsigned int acad);
 
     std::unique_ptr<reconstruction::KalmanChain>& chain(unsigned int utn);
+
+    void informConfigChanged();
+    virtual void dbContentChanged();
+
+signals:
+    void configChanged(); 
 
 protected:
     ReconstructorTask& task_;

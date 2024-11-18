@@ -22,9 +22,12 @@ public:
 
     void showCurrentReconstructorWidget();
     void updateButtons();
+    void checkValidity();
 
 protected:
     void updateReconstructorInfo();
+
+    std::pair<bool, std::string> configValid() const;
 
     ReconstructorTask& task_;
 

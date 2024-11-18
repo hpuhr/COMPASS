@@ -516,7 +516,7 @@ bool COMPASS::dbOpened()
 void COMPASS::init()
 {
     assert(task_manager_);
-    task_manager_->updateFeatures();
+    task_manager_->init();
 }
 
 void COMPASS::shutdown()

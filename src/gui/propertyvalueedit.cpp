@@ -16,7 +16,6 @@
  */
 
 #include "propertyvalueedit.h"
-#include "property_templates.h"
 
 #include <QLineEdit>
 #include <QHBoxLayout>
@@ -62,19 +61,21 @@ void PropertyValueEdit::setPropertyDataType(PropertyDataType dtype)
 
 /**
 */
-void PropertyValueEdit::setValue(const std::string& string_value)
+bool PropertyValueEdit::setValue(const std::string& string_value)
 {
     edit_->setText(QString::fromStdString(string_value));
 
     checkValidity();
+
+    return isValid();
 }
 
 /**
 */
-void PropertyValueEdit::setValue(double value)
+bool PropertyValueEdit::setValue(double value)
 {
     auto v_str = property_templates::double2String(dtype_, value, decimals_);
-    setValue(v_str);
+    return setValue(v_str);
 }
 
 bool PropertyValueEdit::isValid() const

@@ -90,6 +90,10 @@ public:
         }
     };
 
+  signals:
+    void dbContentChanged();
+    void configChanged();
+
   public slots:
     void deleteCalculatedReferencesDoneSlot();
     void deleteTargetsDoneSlot();
@@ -157,6 +161,7 @@ public:
     void showDialog();
 
     virtual void updateFeatures() override final;
+    virtual void initTask() override final;
 
     DebugSettings& debugSettings() { return debug_settings_; }
 

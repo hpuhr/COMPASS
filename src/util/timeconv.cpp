@@ -34,8 +34,11 @@ string time_str_format = "%H:%M:%S.%f";
 //string time_str_format = "%H:%M:%s *";
 boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
 
-boost::posix_time::ptime fromString(const std::string& value)
+boost::posix_time::ptime fromString(const std::string& value, bool* ok)
 {
+    if (ok)
+        *ok = true;
+    
     boost::posix_time::ptime timestamp;
 
     istringstream iss(value);
@@ -44,11 +47,18 @@ boost::posix_time::ptime fromString(const std::string& value)
     iss.imbue(std::locale(std::locale::classic(), new boost::posix_time::time_input_facet("%Y-%m-%d %H:%M:%S%F")));
 
     iss >> timestamp;
+
+    if (ok && !iss)
+        *ok = false;
+
     return timestamp;
 }
 
-boost::posix_time::ptime fromString(const std::string& value, const std::string& facet)
+boost::posix_time::ptime fromString(const std::string& value, const std::string& facet, bool* ok)
 {
+    if (ok)
+        *ok = true;
+    
     boost::posix_time::ptime timestamp;
 
     istringstream iss(value);
@@ -57,6 +67,10 @@ boost::posix_time::ptime fromString(const std::string& value, const std::string&
     iss.imbue(std::locale(std::locale::classic(), new boost::posix_time::time_input_facet(facet)));
 
     iss >> timestamp;
+
+    if (ok && !iss)
+        *ok = false;
+
     return timestamp;
 }
 
@@ -108,12 +122,18 @@ long decorrectLongQtUTC(long t)
     return fixed_timestamp;
 }
 
-string toString(boost::posix_time::ptime value, unsigned int partial_digits)
+string toString(boost::posix_time::ptime value, unsigned int partial_digits, bool* ok)
 {
+    if (ok)
+        *ok = true;
+    
     ostringstream date_stream;
 
     date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(str_format.c_str())));
     date_stream << value;
+
+    if (ok && !date_stream)
+        *ok = false;
 
     string tmp = date_stream.str();
 

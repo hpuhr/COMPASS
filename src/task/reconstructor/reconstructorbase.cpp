@@ -436,8 +436,8 @@ void ReconstructorBase::init()
     assert(!init_);
 
     //get data time range
-    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
-    std::tie(timestamp_min_, timestamp_max_) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+    timestamp_min_ = base_settings_.data_timestamp_min;
+    timestamp_max_ = base_settings_.data_timestamp_max;
 
     //not needed at the moment
     //initChainPredictors();
@@ -1297,4 +1297,17 @@ std::unique_ptr<reconstruction::KalmanChain>& ReconstructorBase::chain(unsigned 
 void ReconstructorBase::setMaxRuntime(const boost::posix_time::time_duration& max_rt)
 {
     timestamp_max_ = timestamp_min_ + max_rt;
+}
+
+void ReconstructorBase::informConfigChanged()
+{
+    emit configChanged();
+}
+
+void ReconstructorBase::dbContentChanged()
+{
+    //get current data time range
+    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
+    boost::posix_time::ptime data_t0, data_t1;
+    std::tie(base_settings_.data_timestamp_min, base_settings_.data_timestamp_max) = COMPASS::instance().dbContentManager().minMaxTimestamp();
 }
