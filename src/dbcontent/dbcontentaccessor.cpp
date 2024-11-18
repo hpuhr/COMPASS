@@ -94,7 +94,7 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
            << Time::toString(remove_before_time);
 #endif
 
-    for (auto buf_it = buffers_.begin(); buf_it != buffers_.end();)
+    for (auto buf_it = buffers_.begin(); buf_it != buffers_.end();) // iterate below
     {
         buffer_size = buf_it->second->size();
 
