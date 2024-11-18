@@ -127,11 +127,11 @@ void DBFilterWidget::addChildWidget(QWidget* widget)
 void DBFilterWidget::updateChildWidget()
 {
     QLayoutItem* child;
-    while ((child = child_layout_->takeAt(0)) != 0)
+    while (!child_layout_->isEmpty() && (child = child_layout_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             child_layout_->removeWidget(child->widget());
-        ;
+
         child_layout_->removeItem(child);
         delete child;
     }

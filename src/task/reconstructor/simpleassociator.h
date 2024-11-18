@@ -48,13 +48,13 @@ class SimpleAssociator : public ReconstructorAssociatorBase
         const dbContent::targetReport::ReconstructorInfo& tr, unsigned int other_utn,
         double distance_m, double tgt_est_std_dev, double tr_est_std_dev, bool secondary_verified,
         bool do_debug) override;
-    // empty if not possible, else check passed + score (smaller is better) returned
+    // check passed + score (larger is better) returned
     virtual std::tuple<DistanceClassification, double> checkPositionOffsetScore
         (double distance_m, double sum_stddev_est, bool secondary_verified, bool target_acccuracy_acceptable) override;
 
-    virtual boost::optional<bool> isTargetAccuracyAcceptable(
-        double tgt_est_std_dev, unsigned int utn, const boost::posix_time::ptime& ts, bool do_debug) override;
-    virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) override;
+    virtual bool isTargetAccuracyAcceptable(
+        double tgt_est_std_dev, unsigned int utn, const dbContent::targetReport::ReconstructorInfo& tr, bool do_debug) override;
+    //virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) override;
 
     virtual ReconstructorBase& reconstructor() override;
 };

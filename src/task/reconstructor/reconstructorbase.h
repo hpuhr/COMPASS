@@ -84,7 +84,7 @@ class ReconstructorBaseSettings
     bool ignore_calculated_references {true};
 
     // maximum time difference in target reports to do comparisons
-    float max_time_diff_ {5}; // sec
+    float max_time_diff_ {10}; // sec
     // maximum altitude difference to consider mode c the "same"
     float max_altitude_diff_ {300.0};
     // maximimum time difference between track updates, otherwise considered new track
@@ -96,7 +96,7 @@ class ReconstructorBaseSettings
 
     // compare targets related
     double target_prob_min_time_overlap_ {0.1};
-    unsigned int target_min_updates_ {5};
+    unsigned int target_min_updates_ {2}; // TODO HP
     double target_max_positions_dubious_verified_rate_ {0.5};
     double target_max_positions_dubious_unknown_rate_ {0.3};
 
@@ -148,6 +148,8 @@ public:
 
     struct TargetsContainer
     {
+        static std::set<std::string> unspecific_acids_;
+
         TargetsContainer(ReconstructorBase* reconstructor)
             :reconstructor_(reconstructor) { assert(reconstructor_); }
 
@@ -164,6 +166,7 @@ public:
                                                  std::pair<unsigned int, boost::posix_time::ptime>>>> tn2utn_;
 
         std::map<unsigned int, dbContent::ReconstructorTarget> targets_; // utn -> tgt
+        //std::vector<unsigned int> removed_utns_;
 
         unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 

@@ -178,7 +178,7 @@ void ViewManagerWidget::update()
 //    cont_widgets_.clear();
 
 //    QLayoutItem* child;
-//    while ((child = cont_layout_->takeAt(0)) != 0)
+//    while ((child = cont_layout_->takeAt(0)) != nullptr)
 //    {
 //        cont_layout_->removeItem(child);
 //    }

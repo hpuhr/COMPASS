@@ -35,6 +35,8 @@
 using namespace std;
 using namespace Utils;
 
+std::set<std::string> ReconstructorBase::TargetsContainer::unspecific_acids_ {"00000000","????????","        "};
+
 unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr)
 {
     unsigned int utn;
@@ -44,11 +46,36 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
     else
         utn = 0;
 
-    //assert (utn != 261);
+    if (tr.acad_)
+    {
+        if (acad_2_utn_.count(*tr.acad_))
+            logerr << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " acad already present in "
+                   << targets_.at(acad_2_utn_.at(*tr.acad_)).asStr();
+
+        assert (!acad_2_utn_.count(*tr.acad_));
+    }
+
+    if (tr.acid_ && !unspecific_acids_.count(*tr.acid_))
+    {
+        if (acid_2_utn_.count(*tr.acid_))
+            logerr << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " acid already present in "
+                   << targets_.at(acid_2_utn_.at(*tr.acid_)).asStr();
+
+        assert (!acid_2_utn_.count(*tr.acid_));
+    }
+
     if (tr.track_number_)
+    {
+        if (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_))
+            logerr << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " track num already present in "
+                   << targets_.at(tn2utn_[tr.ds_id_][tr.line_id_].at(*tr.track_number_).first).asStr();
+
         assert (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
+    }
 
     assert (reconstructor_);
+
+    assert (!targets_.count(utn));
 
     targets_.emplace(
         std::piecewise_construct,
@@ -75,6 +102,9 @@ void ReconstructorBase::TargetsContainer::removeUTN(unsigned int other_utn)
     auto other_it = std::find(utn_vec_.begin(), utn_vec_.end(), other_utn);
     assert (other_it != utn_vec_.end());
     utn_vec_.erase(other_it);
+
+    // add to removed utns for re-use
+    //removed_utns_.push_back(other_utn);
 }
 
 void ReconstructorBase::TargetsContainer::replaceInLookup(unsigned int other_utn, unsigned int utn)
@@ -128,7 +158,7 @@ void ReconstructorBase::TargetsContainer::addToLookup(unsigned int utn, dbConten
     if (tr.acad_)
         acad_2_utn_[*tr.acad_] = utn;
 
-    if (tr.acid_)
+    if (tr.acid_ && !unspecific_acids_.count(*tr.acid_))
         acid_2_utn_[*tr.acid_] = utn;
 }
 
@@ -219,7 +249,7 @@ bool ReconstructorBase::TargetsContainer::canAssocByACID(
     if (!tr.acid_)
         return false;
 
-    if (*tr.acid_ == "00000000" || *tr.acid_ == "????????" || *tr.acid_ == "        ")
+    if (unspecific_acids_.count(*tr.acid_))
     {
         if (do_debug)
             loginf << "DBG can not use stored utn in acid_2_utn_, unspecifiec acid '" << *tr.acid_ << "'";
@@ -254,6 +284,7 @@ int ReconstructorBase::TargetsContainer::assocByACID(dbContent::targetReport::Re
 {
     assert (tr.acid_);
     assert (acid_2_utn_.count(*tr.acid_));
+    assert (!unspecific_acids_.count(*tr.acid_));
 
     if (do_debug)
         loginf << "DBG use stored utn in acid_2_utn_: " << acid_2_utn_.at(*tr.acid_);
@@ -302,15 +333,19 @@ int ReconstructorBase::TargetsContainer::assocByTrackNumber(
     if (tr.timestamp_ - timestamp_prev > track_max_time_diff) // too old
     {
         if (do_debug)
-            loginf << "DBG stored utn in tn2utn_ too large time offset, remove & create new target";
+            loginf << "DBG stored utn " << utn << " in tn2utn_ too large time offset (tdiff "
+                   << Time::toString(tr.timestamp_ - timestamp_prev) << " > "
+                   << Time::toString(track_max_time_diff)
+                      << "), remove & create new target";
 
         // remove previous track number assoc
         assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
         tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
 
-        // create new and add
-        utn = createNewTarget(tr);
-        assert (targets_.count(utn));
+        if (reconstructor_->task().debugSettings().debugUTN(utn))
+            loginf << "DBG disassociated utn " << utn << " from max tdiff track using tr " << tr.asStr();
+
+        return -1; // disassoc case
     }
 
     return utn;
@@ -334,6 +369,8 @@ void ReconstructorBase::TargetsContainer::clear()
     tn2utn_.clear();
 
     targets_.clear(); // utn -> tgt
+
+    //removed_utns_.clear();
 }
 
 ReconstructorBase::ReconstructorBase(const std::string& class_id, 
@@ -631,9 +668,8 @@ void ReconstructorBase::processSlice()
 {
     assert (!currentSlice().remove_before_time_.is_not_a_date_time());
 
-    loginf << "ReconstructorBase: processSlice: " << Time::toString(currentSlice().timestamp_min_);
-
-    logdbg << "ReconstructorBase: processSlice: first_slice " << currentSlice().first_slice_;
+    loginf << "ReconstructorBase: processSlice: " << Time::toString(currentSlice().timestamp_min_)
+           << " first_slice " << currentSlice().first_slice_;
 
     processing_ = true;
 
@@ -645,7 +681,7 @@ void ReconstructorBase::processSlice()
         accessor_->removeContentBeforeTimestamp(currentSlice().remove_before_time_);
     }
 
-    logdbg << "ReconstructorBase: processSlice: adding";
+    loginf << "ReconstructorBase: processSlice: adding, size " << currentSlice().data_.size();
 
     accessor_->add(currentSlice().data_);
 
@@ -654,8 +690,6 @@ void ReconstructorBase::processSlice()
     processSlice_impl();
 
     processing_ = false;
-
-    logdbg << "ReconstructorBase: processSlice: done";
 
     currentSlice().processing_done_ = true;
 
@@ -749,6 +783,8 @@ void ReconstructorBase::processSlice()
                << "   failed:" << stats.num_rec_interp_failed << "\n"
                << "\n";
     }
+
+    logdbg << "ReconstructorBase: processSlice: done";
 }
 
 void ReconstructorBase::clearOldTargetReports()

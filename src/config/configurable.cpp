@@ -311,7 +311,12 @@ void Configurable::createSubConfigurables()
         //not yet created from manual order?
         if (custom_order.empty() || std::find(custom_order.begin(), custom_order.end(), it->first) == custom_order.end())
         {
-            logdbg << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '" << it->first.first << "' instance_id '" << it->first.second << "'";
+            logdbg << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '"
+                   << it->first.first << "' instance_id '" << it->first.second << "'";
+
+            if (hasSubConfigurable(it->first.first, it->first.second))
+                logerr << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '"
+                       << it->first.first << "' instance_id '" << it->first.second << "' already exists";
 
             assert(!hasSubConfigurable(it->first.first, it->first.second));
             generateSubConfigurable(it->first.first, it->first.second);

@@ -220,7 +220,7 @@ void FilterEditWidget::updateConditionsGrid()
     assert(conditions_grid_);
 
     QLayoutItem* child;
-    while ((child = conditions_grid_->takeAt(0)) != 0)
+    while (!conditions_grid_->isEmpty() && (child = conditions_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();

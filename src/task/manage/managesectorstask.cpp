@@ -17,13 +17,11 @@
 
 #include "managesectorstask.h"
 #include "compass.h"
-//#include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "managesectorstaskdialog.h"
 #include "taskmanager.h"
 #include "savedfile.h"
 #include "files.h"
-//#include "sector.h"
 
 #include "gdal.h"
 #include "gdal_priv.h"
@@ -91,7 +89,14 @@ void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
     {
         SavedFile* file = new SavedFile(class_id, instance_id, this);
         assert(file_list_.count(file->name()) == 0);
-        file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
+
+        if (!Files::fileExists(file->name()))
+        {
+            loginf << "ManageSectorsTask: generateSubConfigurable: removing outdated file '" << file->name() << "'";
+            delete file; // TODO HP
+        }
+        else
+            file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
     }
     else
         throw std::runtime_error("ManageSectorsTask: generateSubConfigurable: unknown class_id " +

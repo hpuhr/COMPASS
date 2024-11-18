@@ -597,6 +597,16 @@ void ReconstructorTask::processDataSlice()
 
     assert (!processing_data_slice_);
 
+    if (!processing_slice_->data_.size())
+    {
+        loginf << "ReconstructorTask: processDataSlice: empty buffer at ("
+               << Time::toString(loading_slice_->slice_begin_)<< ", no process";
+
+        processing_slice_ = nullptr;
+
+        return;
+    }
+
     processing_data_slice_ = true;
 
     logdbg << "ReconstructorTask: processDataSlice: processing1 first slice "
@@ -675,9 +685,7 @@ void ReconstructorTask::loadingDoneSlot()
     loginf << "ReconstructorTask: loadingDoneSlot";
 
     assert (loading_data_);
-
-    if (loading_data_)
-        loading_data_ = false;
+    loading_data_ = false;
 
     assert (currentReconstructor());
     assert (loading_slice_);
@@ -732,10 +740,20 @@ void ReconstructorTask::loadingDoneSlot()
            << " remove ts " << Time::toString(loading_slice_->remove_before_time_);
 
     if (loading_slice_->data_.size())
+    {
         processDataSlice();
 
-    assert (!loading_slice_);
-    assert (processing_data_slice_);
+        assert (!loading_slice_);
+        assert (processing_data_slice_);
+    }
+    else // loading slice empty
+    {
+        loginf << "ReconstructorTask: loadingDoneSlot: empty buffer at ("
+               << Time::toString(loading_slice_->slice_begin_)<< ", no process";
+
+        loading_slice_ = nullptr;
+        assert (!processing_data_slice_);
+    }
 
     if (cancelled_)
         return;

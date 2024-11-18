@@ -118,6 +118,9 @@ void DBContentReadDBJob::run()
         }
     }
 
+    if (obsolete_)
+        cached_buffer_ = nullptr;
+
     assert (!cached_buffer_);
 
     logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": finalizing statement";

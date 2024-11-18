@@ -1291,7 +1291,7 @@ bool RTCommandCalculateReferences::run_impl()
     task.run();
 
     // if ok
-    return false;
+    return true;
 }
 
 // load data

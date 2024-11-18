@@ -163,12 +163,12 @@ void FilterManagerWidget::updateFiltersSlot()
     assert(ds_filter_layout0_);
 
     QLayoutItem* child;
-    while ((child = ds_filter_layout0_->takeAt(0)))
+    while (!ds_filter_layout0_->isEmpty() && (child = ds_filter_layout0_->takeAt(0)))
         ds_filter_layout0_->removeItem(child);
 
     assert(ds_filter_layout1_);
 
-    while ((child = ds_filter_layout1_->takeAt(0)))
+    while (!ds_filter_layout1_->isEmpty() && (child = ds_filter_layout1_->takeAt(0)))
         ds_filter_layout1_->removeItem(child);
 
     auto& filters = filter_manager_.filters();

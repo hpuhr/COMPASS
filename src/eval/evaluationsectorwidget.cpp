@@ -59,7 +59,7 @@ void EvaluationSectorWidget::update()
     assert (grid_layout_);
 
     QLayoutItem* child;
-    while ((child = grid_layout_->takeAt(0)) != 0)
+    while (!grid_layout_->isEmpty() && (child = grid_layout_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();
