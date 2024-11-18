@@ -5,6 +5,7 @@
 #include "global.h"
 #include "compass.h"
 #include "licensemanager.h"
+#include "dbcontentmanager.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
@@ -179,12 +180,19 @@ std::pair<bool, std::string> ReconstructorTaskDialog::configValid() const
     if (!rec)
         return std::make_pair(false, "No reconstructor found");
 
+    //get full data time range
+    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
+    boost::posix_time::ptime data_t0, data_t1;
+    std::tie(data_t0, data_t1) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+
     const auto& settings = rec->settings();
     if (settings.data_timestamp_min.is_not_a_date_time())
         return std::make_pair(false, "Please enter a valid begin time");
     if (settings.data_timestamp_max.is_not_a_date_time())
         return std::make_pair(false, "Please enter a valid end time");
-    if (settings.data_timestamp_max <= settings.data_timestamp_min)
+    if (settings.data_timestamp_max <= settings.data_timestamp_min ||
+        settings.data_timestamp_min >= data_t1 ||
+        settings.data_timestamp_max <= data_t0)
         return std::make_pair(false, "Please enter a valid timeframe");
 
     return std::make_pair(true, "");

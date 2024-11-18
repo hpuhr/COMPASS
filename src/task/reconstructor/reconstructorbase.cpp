@@ -435,9 +435,24 @@ void ReconstructorBase::init()
 {
     assert(!init_);
 
-    //get data time range
-    timestamp_min_ = base_settings_.data_timestamp_min;
-    timestamp_max_ = base_settings_.data_timestamp_max;
+    //get full data time range
+    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
+    boost::posix_time::ptime data_t0, data_t1;
+    std::tie(data_t0, data_t1) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+
+    assert(data_t0 < data_t1);
+
+    //get time range from settings
+    boost::posix_time::ptime settings_t0 = base_settings_.data_timestamp_min;
+    boost::posix_time::ptime settings_t1 = base_settings_.data_timestamp_max;
+
+    assert(settings_t0 < settings_t1);
+
+    //get reconstructor time range
+    timestamp_min_ = std::max(settings_t0, data_t0);
+    timestamp_max_ = std::min(settings_t1, data_t1);
+
+    assert(timestamp_min_ < timestamp_max_);
 
     //not needed at the moment
     //initChainPredictors();
@@ -450,8 +465,7 @@ void ReconstructorBase::init()
 
     loginf << "ReconstructorBase: init:" 
            << " data time min " << Time::toString(timestamp_min_)
-           << " data time max " << Time::toString(timestamp_max_)
-           << " first_slice " << first_slice_;
+           << " data time max " << Time::toString(timestamp_max_);
 
     init_ = true;
 }
@@ -472,6 +486,8 @@ bool ReconstructorBase::hasNextTimeSlice()
     assert (!timestamp_max_.is_not_a_date_time());
 
     first_slice_ = current_slice_begin_ == timestamp_min_;
+
+    loginf << "ReconstructorBase: hasNextTimeSlice: first_slice " << first_slice_;
 
     return next_slice_begin_ < timestamp_max_;
 }
