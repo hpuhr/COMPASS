@@ -477,6 +477,7 @@ void DBContentManager::databaseOpenedSlot()
     loadTargets();
 
     emit associationStatusChangedSignal();
+    emit dbContentStatusChanged();
 
     loginf << "DBContentManager: databaseOpenedSlot: done";
 }
@@ -506,7 +507,8 @@ void DBContentManager::databaseClosedSlot()
     longitude_min_.reset();
     longitude_max_.reset();
 
-    associationStatusChangedSignal();
+    emit associationStatusChangedSignal();
+    emit dbContentStatusChanged();
 }
 
 void DBContentManager::loadingDone(DBContent& object)

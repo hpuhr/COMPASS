@@ -18,6 +18,7 @@
 #pragma once
 
 #include "property.h"
+#include "property_templates.h"
 
 #include <QWidget>
 
@@ -38,14 +39,28 @@ public:
     virtual ~PropertyValueEdit() = default;
 
     void setPropertyDataType(PropertyDataType dtype);
-    void setValue(const std::string& string_value);
-    void setValue(double value);
+    bool setValue(const std::string& string_value);
+    bool setValue(double value);
+
+    template <typename T>
+    bool setValue(const T& v)
+    {
+        auto str = property_templates::toString<T>(v, decimals_);
+        return setValue(str);
+    };
 
     bool isValid() const;
 
     PropertyDataType dataType() const;
     std::string valueAsString() const;
     boost::optional<double> valueAsDouble() const;
+
+    template <typename T>
+    boost::optional<T> valueAs() const
+    {
+        std::string str = valueAsString();
+        return property_templates::fromString<T>(str);
+    }
 
 signals:
     void valueChanged();

@@ -45,6 +45,8 @@ class ViewContainerWidget : public QWidget, public Configurable
     const std::string& name() { return name_; }
     ViewContainer& viewContainer() const;
 
+    void updateFeatures();
+
   protected:
     ViewManager& view_manager_;
     std::string name_;
@@ -58,6 +60,8 @@ class ViewContainerWidget : public QWidget, public Configurable
 
     QTabWidget* tab_widget_{nullptr};
     ViewContainer* view_container_{nullptr};
+
+    void updateWindowTitle();
 
     void closeEvent(QCloseEvent* event);
     virtual void moveEvent(QMoveEvent* event);

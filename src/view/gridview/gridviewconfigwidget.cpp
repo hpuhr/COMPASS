@@ -32,6 +32,8 @@
 #include "viewpointgenerator.h"
 #include "geotiff.h"
 #include "colormap_defs.h"
+#include "metavariable.h"
+#include "dbcontent.h"
 
 #include "variableselectionwidget.h"
 
@@ -51,6 +53,7 @@
 #include <QMenu>
 #include <QFormLayout>
 #include <QFileDialog>
+#include <QLabel>
 
 using namespace Utils;
 using namespace dbContent;
@@ -80,6 +83,7 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     grid_resolution_box_ = new QSpinBox;
     grid_resolution_box_->setMinimum(1);
     grid_resolution_box_->setMaximum(1000);
+    grid_resolution_box_->setKeyboardTracking(false);
 
     connect(grid_resolution_box_, QOverload<int>::of(&QSpinBox::valueChanged), this, &GridViewConfigWidget::gridResolutionChanged);
 
@@ -93,7 +97,8 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
 
     color_steps_box_ = new QSpinBox;
     color_steps_box_->setMinimum(2);
-    color_steps_box_->setMaximum(256);
+    color_steps_box_->setMaximum(32);
+    color_steps_box_->setKeyboardTracking(false);
 
     connect(color_steps_box_, QOverload<int>::of(&QSpinBox::valueChanged), this, &GridViewConfigWidget::colorStepsChanged);
 
@@ -129,12 +134,18 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
 
     layout->addRow("Color Max. Value:", layout_color_max);
 
+    range_info_label_ = new QLabel;
+    range_info_label_->setStyleSheet("QLabel { color : red; }");
+    
+    layout->addRow("", range_info_label_);
+
     export_button_ = new QPushButton("Export");
 
     layout->addRow("", export_button_);
 
     attachExportMenu();
     updateConfig();
+    updateExport();
 }
 
 /**
@@ -175,8 +186,76 @@ void GridViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
 */
 void GridViewConfigWidget::postVariableChangedEvent(int idx)
 {
-    if (idx == 2)
+    if (idx == 0 || idx == 1)
+        updateExport();
+    else if (idx == 2)
         updateVariableDataType();
+}
+
+/**
+*/
+void GridViewConfigWidget::redrawDone()
+{
+    VariableViewConfigWidget::redrawDone();
+
+    updateExport();
+    checkRanges();
+}
+
+/**
+*/
+void GridViewConfigWidget::loadingDone()
+{
+    VariableViewConfigWidget::loadingDone();
+
+    updateExport();
+    checkRanges();
+}
+
+/**
+*/
+void GridViewConfigWidget::updateExport()
+{
+    assert(view_);
+
+    auto const_view = dynamic_cast<const GridView*>(view_);
+    assert(const_view);
+
+    if (!const_view->isInit() || !const_view->getDataWidget()->hasValidGrid())
+    {
+        export_button_->setEnabled(false);
+        export_button_->setToolTip("No grid data available");
+
+        return;
+    }
+
+    auto var_sel_x = variableSelection(0);
+    auto var_sel_y = variableSelection(1);
+
+    assert(var_sel_x && var_sel_y);
+
+    auto& dbc_man = COMPASS::instance().dbContentManager();
+
+    const auto& metavar_lon = dbc_man.metaVariable(DBContent::meta_var_longitude_.name());
+    const auto& metavar_lat = dbc_man.metaVariable(DBContent::meta_var_latitude_.name());
+
+    bool has_lon       = var_sel_x->hasMetaVariable() && &var_sel_x->selectedMetaVariable() == &metavar_lon;
+    bool has_lat       = var_sel_y->hasMetaVariable() && &var_sel_y->selectedMetaVariable() == &metavar_lat;
+    bool enable_export = has_lon && has_lat;
+
+    const std::string tt_deactiv = "<html><head/><body>"
+                                   "<p>To reenable export, please select the following variables.</p>"
+                                   "<ul>"
+                                   "<li><b>X Variable</b>: Meta - Longitude</li>"
+                                   "<li><b>Y Variable</b>: Meta - Latitude</li>"
+                                   "</ul>"
+                                   "<p></p>"
+                                   "</body></html>";
+
+    std::string tooltip = enable_export ? "" : tt_deactiv;
+
+    export_button_->setEnabled(enable_export);
+    export_button_->setToolTip(QString::fromStdString(tooltip));
 }
 
 /**
@@ -274,6 +353,26 @@ void GridViewConfigWidget::updateVariableDataType()
     color_value_max_box_->blockSignals(true);
     color_value_max_box_->setPropertyDataType(dtype);
     color_value_max_box_->blockSignals(false);
+}
+
+/**
+*/
+void GridViewConfigWidget::checkRanges()
+{
+    assert(view_);
+
+    auto const_view = dynamic_cast<const GridView*>(view_);
+    assert(const_view);
+
+    range_info_label_->setText("");
+
+    if (!const_view->isInit() || !const_view->getDataWidget()->hasValidGrid())
+        return;
+
+    if (const_view->isInit() && 
+        const_view->getDataWidget()->hasValidGrid() && 
+        const_view->getDataWidget()->customRangeInvalid())
+        range_info_label_->setText("Please enter a valid range");
 }
 
 #if USE_EXPERIMENTAL_SOURCE == true

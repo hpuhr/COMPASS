@@ -191,6 +191,17 @@ void TaskManager::checkSubConfigurables()
 
 std::map<std::string, Task*> TaskManager::tasks() const { return tasks_; }
 
+void TaskManager::init()
+{
+    //init all tasks
+    for (const auto& t : tasks_)
+        if (t.second)
+            t.second->initTask();
+
+    //update features
+    updateFeatures();
+}
+
 void TaskManager::shutdown()
 {
     loginf << "TaskManager: shutdown";
@@ -286,4 +297,11 @@ MainWindow* TaskManager::getMainWindow()
         }
     }
     return nullptr;
+}
+
+void TaskManager::updateFeatures()
+{
+    for (auto& t : tasks_)
+        if (t.second)
+            t.second->updateFeatures();
 }

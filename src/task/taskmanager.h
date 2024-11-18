@@ -56,11 +56,14 @@ class TaskManager : public QObject, public Configurable
 
     virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override;
 
+    void init();
     void shutdown();
 
     std::map<std::string, Task*> tasks() const;
 
     void runTask(const std::string& task_name);
+
+    void updateFeatures();
 
     ASTERIXImportTask& asterixImporterTask() const;
     ViewPointsImportTask& viewPointsImportTask() const;

@@ -34,6 +34,8 @@ namespace
             return {};
         if (n == 1)
             return { 0.0 };
+        if (n == 2)
+            return { 0.0, 1.0 };
 
         const size_t b = n - 1;
 
@@ -71,7 +73,9 @@ namespace
     size_t numColorsFromType(ColorMap::Type type, size_t n)
     {
         size_t num_colors = 0;
-        if (type == ColorMap::Type::Linear)
+        if (type == ColorMap::Type::LinearSamples)
+            num_colors = n;
+        else if (type == ColorMap::Type::LinearRanges)
             num_colors = n + 2;
         else if (type == ColorMap::Type::Discrete)
             num_colors = n;
@@ -118,7 +122,7 @@ ColorMap::ColorMap()
     special_colors_[ SpecialColorNull     ] = Qt::magenta;
 
     //init to valid map
-    create(ColorScale::Green2Red, 5, ColorMap::Type::Linear);
+    create(ColorScale::Green2Red, 5, ColorMap::Type::LinearSamples);
 }
 
 /**
@@ -299,9 +303,10 @@ void ColorMap::create(const std::vector<QColor>& colors,
                       size_t steps,
                       const OValueRange& value_range)
 {
-    assert(type != Type::Binary   || colors.size() == 2);
-    assert(type != Type::Discrete || colors.size() >= 1);
-    assert(type != Type::Linear   || colors.size() >= 3);
+    assert(type != Type::Binary        || colors.size() == 2);
+    assert(type != Type::Discrete      || colors.size() >= 1);
+    assert(type != Type::LinearRanges  || colors.size() >= 3);
+    assert(type != Type::LinearSamples || colors.size() >= 1);
 
     assert(!value_range.has_value() || value_range.value().first <= value_range.value().second);
 
@@ -312,7 +317,7 @@ void ColorMap::create(const std::vector<QColor>& colors,
     value_range_   = value_range;
 
     colors_        = colors;
-    value_factors_ = valueFactors(colors_.size());
+    value_factors_ = type == Type::LinearRanges ? valueFactors(colors_.size()) : interpFactors(colors_.size());
     n_colors_      = colors_.size();
 }
 
@@ -417,20 +422,42 @@ size_t ColorMap::indexFromFactor(double t) const
     }
 
     //linear colormap
-    assert(type_ == Type::Linear);
-    assert(n_colors_ >= 3);
+    assert(type_ == Type::LinearSamples || type_ == Type::LinearRanges);
+    assert(type_ != Type::LinearRanges  || n_colors_ >= 3);
+    assert(type_ != Type::LinearSamples || n_colors_ >= 1);
 
-    //handle maximum colors
-    if (t < 0.0)
-        return 0;
-    if (t >= 1.0)
-        return n_colors_ - 1;
+    size_t idx;
 
-    //t in [0, 1)
-    const size_t n_inner = n_colors_ - 2;
-    const size_t idx     = (size_t)std::floor(t * n_inner) + 1;
+    if (type_ == Type::LinearRanges)
+    {
+        //handle maximum colors
+        if (t < 0.0)
+            return 0;
+        if (t >= 1.0)
+            return n_colors_ - 1;
 
-    assert(idx <= n_colors_ - 2);
+        //t in [0, 1)
+        const size_t n_inner = n_colors_ - 2;
+        idx                  = (size_t)std::floor(t * n_inner) + 1;
+
+        assert(idx <= n_colors_ - 2);
+    }
+    else // Type::LinearSamples
+    {
+        const double step  = 1.0 / (n_colors_ - 1);
+        const double hstep = step * 0.5;
+
+        if (t < hstep)
+            return 0;
+        if (t >= 1.0 - hstep)
+            return n_colors_ - 1;
+
+        const size_t n_inner   = n_colors_ - 2;
+        const size_t idx_inner = (size_t)std::floor((t - hstep) * n_inner);
+        idx                    = 1 + idx_inner;
+
+        assert(idx <= n_colors_ - 2);
+    }
 
     return idx;
 }
@@ -483,8 +510,7 @@ ColorMap::ValueRange ColorMap::activeRange() const
 
 /**
 */
-std::vector<std::pair<QColor, std::string>> ColorMap::getDescription(ColorMapDescriptionMode mode,
-                                                                     bool add_sel_color,
+std::vector<std::pair<QColor, std::string>> ColorMap::getDescription(bool add_sel_color,
                                                                      bool add_null_color,
                                                                      const ValueDecorator& decorator) const
 {
@@ -503,33 +529,35 @@ std::vector<std::pair<QColor, std::string>> ColorMap::getDescription(ColorMapDes
 
     if (vrange < 1e-12 || numColors() == 1)
     {
-        if (mode == ColorMapDescriptionMode::Ranges)
+        if (type_ == Type::LinearRanges)
             descr.emplace_back(colors_.front(), " = " + active_decorator(range.first));
         else
             descr.emplace_back(colors_.front(), active_decorator(range.first));
     }
     else
     {
-        if (mode == ColorMapDescriptionMode::Ranges)
-            descr.emplace_back(colors_.front(), "< " + active_decorator(range.first));
-        else
-            descr.emplace_back(colors_.front(), active_decorator(range.first));
-
-        for (size_t i = 1; i < n_colors_ - 1; ++i)
+        if (type_ == Type::LinearRanges)
         {
-            const double v0 = range.first + value_factors_[ i     ] * vrange;
-            const double v1 = range.first + value_factors_[ i + 1 ] * vrange;
+            descr.emplace_back(colors_.front(), "< " + active_decorator(range.first));
 
-            if (mode == ColorMapDescriptionMode::Ranges)
+            for (size_t i = 1; i < n_colors_ - 1; ++i)
+            {
+                const double v0 = range.first + value_factors_[ i     ] * vrange;
+                const double v1 = range.first + value_factors_[ i + 1 ] * vrange;
+
                 descr.emplace_back(colors_[ i ], active_decorator(v0) + " - " + active_decorator(v1));
-            else
-                descr.emplace_back(colors_[ i ], active_decorator((v0 + v1) / 2));
-        }
+            }
 
-        if (mode == ColorMapDescriptionMode::Ranges)
             descr.emplace_back(colors_.back(), ">= " + active_decorator(range.second));
+        }
         else
-            descr.emplace_back(colors_.back(), active_decorator(range.second));
+        {
+            for (size_t i = 0; i < n_colors_; ++i)
+            {
+                const double v = range.first + value_factors_[ i ] * vrange;
+                descr.emplace_back(colors_[ i ], active_decorator(v));
+            }
+        }
     }
 
     if (add_sel_color)

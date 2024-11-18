@@ -58,18 +58,6 @@ void ColorLegendWidget::setColorMap(const ColorMap& colormap)
 
 /**
 */
-void ColorLegendWidget::setDescriptionMode(ColorMapDescriptionMode mode)
-{
-    if (descr_mode_ == mode)
-        return;
-
-    descr_mode_ = mode;
-
-    updateUI();
-}
-
-/**
-*/
 void ColorLegendWidget::setDecorator(const ColorMap::ValueDecorator& d)
 {
     decorator_ = d;
@@ -133,8 +121,7 @@ void ColorLegendWidget::updateUI()
     layout->addLayout(layout_grid);
     layout->addStretch(1);
 
-    auto descr = colormap_.getDescription(descr_mode_, 
-                                          show_selection_col_, 
+    auto descr = colormap_.getDescription(show_selection_col_, 
                                           show_null_col_, 
                                           decorator_);
     int row = 0;
@@ -321,7 +308,7 @@ void ColorMapWidget::updateColormap()
 
     colormap_->create((ColorMap::ColorScale)scale_combo_->currentData().toInt(),
                       (size_t)steps_box_->value(),
-                      ColorMap::Type::Linear,
+                      ColorMap::Type::LinearSamples,
                       vrange);
 
     loginf << "ColorMapWidget: updateColormap:"

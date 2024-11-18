@@ -189,6 +189,8 @@ void GridView::setValueType(grid2d::ValueType type, bool notify_changes)
         return;
 
     setParameter(settings_.value_type, (int)type);
+    setParameter(settings_.render_color_value_min, std::string(""));
+    setParameter(settings_.render_color_value_max, std::string(""));
 
     if (notify_changes)
         notifyRefreshNeeded();
@@ -291,7 +293,31 @@ PropertyDataType GridView::currentDataType() const
 
     //counts are active => always override data type
     if (settings_.value_type == (int)grid2d::ValueType::ValueTypeCount)
+    {
         return PropertyDataType::UINT;
+    }
+
+    //in all other cases the data type of the distributed variable should be the right one
+    return data_type;
+}
+
+/**
+*/
+PropertyDataType GridView::currentLegendDataType() const
+{
+    auto data_type = variable(2).dataType();
+
+    //counts are active => always override data type
+    if (settings_.value_type == (int)grid2d::ValueType::ValueTypeCount)
+    {
+        return PropertyDataType::UINT;
+    }
+    else if (settings_.value_type == (int)grid2d::ValueType::ValueTypeMean ||
+             settings_.value_type == (int)grid2d::ValueType::ValueTypeStddev ||
+             settings_.value_type == (int)grid2d::ValueType::ValueTypeVar)
+    {
+        return PropertyDataType::DOUBLE;
+    }
 
     //in all other cases the data type of the distributed variable should be the right one
     return data_type;

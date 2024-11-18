@@ -40,7 +40,6 @@ public:
     virtual ~ColorLegendWidget();
 
     void setColorMap(const ColorMap& colormap);
-    void setDescriptionMode(ColorMapDescriptionMode mode);
     void setDecorator(const ColorMap::ValueDecorator& d);
     void showSelectionColor(bool ok);
     void showNullColor(bool ok);
@@ -51,7 +50,6 @@ private:
     void createUI();
 
     ColorMap                 colormap_;
-    ColorMapDescriptionMode  descr_mode_ = ColorMapDescriptionMode::Midpoints;
     ColorMap::ValueDecorator decorator_;
     bool                     show_selection_col_ = false;
     bool                     show_null_col_ = false;

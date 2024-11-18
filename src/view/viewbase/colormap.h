@@ -41,7 +41,8 @@ public:
 
     enum class Type
     {
-        Linear = 0,
+        LinearSamples = 0,
+        LinearRanges,
         Discrete,
         Binary
     };
@@ -89,32 +90,31 @@ public:
     const OValueRange& valueRange() const { return value_range_; }
 
     void create(const std::vector<QColor>& colors,
-                Type type = Type::Linear,
+                Type type = Type::LinearSamples,
                 const OValueRange& value_range = OValueRange());
     void create(const QColor& color_min,
                 const QColor& color_max,
                 size_t n,
-                Type type = Type::Linear,
+                Type type = Type::LinearSamples,
                 const OValueRange& value_range = OValueRange());
     void create(const QColor& color_min,
                 const QColor& color_mid,
                 const QColor& color_max,
                 size_t n,
-                Type type = Type::Linear,
+                Type type = Type::LinearSamples,
                 const OValueRange& value_range = OValueRange());
     void create(ColorScale scale, 
                 size_t n,
-                Type type = Type::Linear,
+                Type type = Type::LinearSamples,
                 const OValueRange& value_range = OValueRange());
-
+    
     void setSpecialColor(SpecialColor type, const QColor& color);
     const QColor& specialColor(SpecialColor type) const;
     
     QColor sample(double t) const;
     QColor sampleValue(double v) const;
 
-    std::vector<std::pair<QColor, std::string>> getDescription(ColorMapDescriptionMode mode = ColorMapDescriptionMode::Midpoints,
-                                                               bool add_sel_color = true,
+    std::vector<std::pair<QColor, std::string>> getDescription(bool add_sel_color = true,
                                                                bool add_null_color = true,
                                                                const ValueDecorator& decorator = ValueDecorator()) const;
 private:
@@ -127,7 +127,7 @@ private:
     size_t indexFromFactor(double t) const;
     ValueRange activeRange() const;
 
-    Type       type_  = Type::Linear;
+    Type       type_  = Type::LinearSamples;
     ColorScale scale_ = ColorScale::Custom;
     size_t     steps_ = 0;
 

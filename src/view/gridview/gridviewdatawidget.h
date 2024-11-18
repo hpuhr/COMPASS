@@ -77,6 +77,8 @@ public:
     double getGridValueMin() const { return grid_value_min_; }
     double getGridValueMax() const { return grid_value_max_; }
 
+    bool customRangeInvalid() const { return custom_range_invalid_; }
+
     const GridView* getView() const { return view_; }
 
     boost::optional<std::pair<QImage, RasterReference>> currentGeoImage() const;
@@ -129,6 +131,7 @@ private:
     RasterReference         ref_;
     double                  grid_value_min_ = 0.0;
     double                  grid_value_max_ = 1.0;
+    bool                    custom_range_invalid_ = false;
 
     Grid2DLayers grid_layers_;
     std::string  x_axis_name_;

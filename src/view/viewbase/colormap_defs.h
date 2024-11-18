@@ -19,12 +19,6 @@
 
 #include <vector>
 
-enum class ColorMapDescriptionMode
-{
-    Ranges = 0,
-    Midpoints
-};
-
 namespace colorscale
 {
     enum class ColorScale

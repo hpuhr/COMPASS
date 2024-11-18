@@ -82,6 +82,7 @@ public:
     virtual ~View();
 
     bool init();
+    bool isInit() const { return init_; }
 
     virtual void databaseOpened();
     virtual void databaseClosed();
@@ -123,6 +124,7 @@ public:
 
     void updateView();
     void updateComponents();
+    virtual void updateFeatures() {}
     
     PresetError applyPreset(const ViewPresets::Preset& preset, 
                             std::vector<MissingKey>* missing_subconfig_keys = nullptr,
@@ -189,13 +191,15 @@ protected:
 private:
     friend class ViewVariable;
 
-    std::string name_;
     unsigned int getInstanceKey();
 
     void runAutomaticUpdates();
 
     void presetEdited(ViewPresets::EditAction ea);
 
+    std::string name_;
+
+    bool    init_ = false;
     AppMode app_mode_;
     time_t  creation_time_;
 

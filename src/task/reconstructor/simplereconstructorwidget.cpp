@@ -104,6 +104,4 @@ void SimpleReconstructorWidget::update()
 void SimpleReconstructorWidget::updateSlot()
 {
     update();
-
-
 }

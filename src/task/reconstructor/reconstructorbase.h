@@ -31,6 +31,8 @@
 #include <string>
 #include <memory>
 
+#include <QObject>
+
 #define DO_RECONSTRUCTOR_PEDANTIC_CHECKING 0
 
 namespace dbContent
@@ -70,6 +72,10 @@ class ReconstructorBaseSettings
     unsigned int ds_sic  {REC_DS_SIC};
     unsigned int ds_line {0};
 
+    //timeframe
+    boost::posix_time::ptime data_timestamp_min;
+    boost::posix_time::ptime data_timestamp_max;
+
     // slicing
     unsigned int slice_duration_in_minutes    {15};
     unsigned int outdated_duration_in_minutes {2};
@@ -103,8 +109,9 @@ class ReconstructorBaseSettings
 
 /**
  */
-class ReconstructorBase : public Configurable
+class ReconstructorBase : public QObject, public Configurable
 {
+    Q_OBJECT
 public:
     struct DataSlice
     {
@@ -232,6 +239,8 @@ public:
     void cancel();
     bool isCancelled() { return cancelled_; };
 
+    bool isInit() { return init_; }
+
     void saveTargets();
 
     // our data structures
@@ -258,14 +267,22 @@ public:
     virtual bool isLastSliceProcessingRun() { return true; }      // called to check if another repeat run is planned
     virtual unsigned int currentSliceRepeatRun() { return currentSlice().run_count_; }    // current repeat run
 
+    virtual bool supportsIMM() const { return false; }
+    virtual std::string reconstructorInfoString() { return ""; }
+
     reconstruction::KalmanChainPredictors& chainPredictors();
 
     boost::optional<unsigned int> utnForACAD(unsigned int acad);
 
     std::unique_ptr<reconstruction::KalmanChain>& chain(unsigned int utn);
 
-protected:
+    void informConfigChanged();
+    virtual void dbContentChanged();
 
+signals:
+    void configChanged(); 
+
+protected:
     ReconstructorTask& task_;
 
     std::map<unsigned int, dbContent::TargetReportAccessor> accessors_;
@@ -281,6 +298,8 @@ protected:
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual void processSlice_impl() = 0;
 
+    virtual void init_impl() = 0;
+
     void clearOldTargetReports();
     void createTargetReports();
     void removeTargetReportsLaterOrEqualThan(const boost::posix_time::ptime& ts); // for slice recalc
@@ -290,7 +309,11 @@ protected:
         std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
 
-  private:
+    void setMaxRuntime(const boost::posix_time::time_duration& max_rt);
+
+private:
+    void init();
+    void initIfNeeded();
     void initChainPredictors();
 
     float qVarForAltitude(bool fl_unknown, 
@@ -311,6 +334,7 @@ protected:
     boost::posix_time::ptime write_before_time_;
 
     bool processing_ {false};
+    bool init_       {false};
 
     std::unique_ptr<reconstruction::KalmanChainPredictors> chain_predictors_; // relic, not used noew
 };
