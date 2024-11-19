@@ -781,7 +781,6 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     reconstruction::KalmanEstimator estimator;
     estimator.settings() = settings_.kalmanEstimatorSettings();
 
-    assert(reconstructor_.supportsIMM() || settings_.kalman_type_final == kalman::KalmanType::UMKalman2D);
 #if USE_EXPERIMENTAL_SOURCE == false
     assert(settings_.kalman_type_final == kalman::KalmanType::UMKalman2D);
 #endif

@@ -92,7 +92,6 @@ public:
     };
 
   signals:
-    void dbContentChanged();
     void configChanged();
 
   public slots:

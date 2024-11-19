@@ -1265,7 +1265,7 @@ void MainWindow::createDebugMenu()
     }
 #endif
 
-            //add command shell
+        //add command shell
     {
         auto action = debug_menu->addAction("Command Shell");
         connect(action, &QAction::triggered, [ this ] () { this->showCommandShell(); });
@@ -1303,7 +1303,9 @@ void MainWindow::updateWindowTitle()
     auto version  = COMPASS::instance().versionString();
     auto licensee = COMPASS::instance().licenseeString();
 
-    auto title = version + "   |   " + licensee;
+    auto title = version;
+    if (!licensee.empty())
+        title += "   |   " + licensee;
 
     QWidget::setWindowTitle(title.c_str());
 }

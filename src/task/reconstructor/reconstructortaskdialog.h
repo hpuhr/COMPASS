@@ -26,6 +26,7 @@ public:
 
 protected:
     void updateReconstructorInfo();
+    void updateTimeframe();
 
     std::pair<bool, std::string> configValid() const;
 

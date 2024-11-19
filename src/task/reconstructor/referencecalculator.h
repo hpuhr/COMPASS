@@ -128,6 +128,9 @@ public:
     static const float PointSizeKalmanResampled;
 
     static const float LineWidthBase;
+
+protected:
+    virtual void reconstructMeasurements();
                                 
 private:
     enum class InitRecResult 
@@ -156,7 +159,6 @@ private:
     void interpolateMeasurements(Measurements& measurements, 
                                  const reconstruction::InterpOptions& options) const;
     
-    void reconstructMeasurements();
     InitRecResult initReconstruction(TargetReferences& refs);
     void reconstructMeasurements(TargetReferences& refs);
     void reconstructSmoothMeasurements(std::vector<kalman::KalmanUpdate>& updates,

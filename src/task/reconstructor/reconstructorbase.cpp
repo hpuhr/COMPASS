@@ -472,24 +472,8 @@ void ReconstructorBase::init()
 {
     assert(!init_);
 
-    //get full data time range
-    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
-    boost::posix_time::ptime data_t0, data_t1;
-    std::tie(data_t0, data_t1) = COMPASS::instance().dbContentManager().minMaxTimestamp();
-
-    assert(data_t0 < data_t1);
-
-    //get time range from settings
-    boost::posix_time::ptime settings_t0 = base_settings_.data_timestamp_min;
-    boost::posix_time::ptime settings_t1 = base_settings_.data_timestamp_max;
-
-    assert(settings_t0 < settings_t1);
-
-    //get reconstructor time range
-    timestamp_min_ = std::max(settings_t0, data_t0);
-    timestamp_max_ = std::min(settings_t1, data_t1);
-
-    assert(timestamp_min_ < timestamp_max_);
+    resetTimeframe();
+    applyTimeframeLimits();
 
     //not needed at the moment
     //initChainPredictors();
@@ -505,6 +489,74 @@ void ReconstructorBase::init()
            << " data time max " << Time::toString(timestamp_max_);
 
     init_ = true;
+}
+
+void ReconstructorBase::resetTimeframeSettings()
+{
+    auto timeframe = timeFrame();
+
+    settings().data_timestamp_min = timeframe.first;
+    settings().data_timestamp_max = timeframe.second;
+
+    emit configChanged();
+}
+
+std::pair<boost::posix_time::ptime, boost::posix_time::ptime> ReconstructorBase::timeFrame() const
+{
+    //get full data time range (should)
+    if (!COMPASS::instance().dbContentManager().hasMinMaxTimestamp())
+        return std::pair<boost::posix_time::ptime, boost::posix_time::ptime>();
+
+    boost::posix_time::ptime data_t0, data_t1;
+    std::tie(data_t0, data_t1) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+
+    if (data_t0 >= data_t1)
+        return std::pair<boost::posix_time::ptime, boost::posix_time::ptime>();
+
+    return std::pair<boost::posix_time::ptime, boost::posix_time::ptime>(data_t0, data_t1);
+}
+
+void ReconstructorBase::resetTimeframe()
+{
+    auto timeframe = timeFrame();
+
+    if (timeframe.first.is_not_a_date_time() || timeframe.second.is_not_a_date_time())
+        logerr << "ReconstructorBase: resetTimeframe: invalid data timeframe";
+    
+    assert(!timeframe.first.is_not_a_date_time() && !timeframe.second.is_not_a_date_time());
+
+    timestamp_min_ = timeframe.first;
+    timestamp_max_ = timeframe.second;
+}
+
+void ReconstructorBase::applyTimeframeLimits()
+{
+    //get time range from settings
+    boost::posix_time::ptime settings_t0 = base_settings_.data_timestamp_min;
+    boost::posix_time::ptime settings_t1 = base_settings_.data_timestamp_max;
+
+    //both set?
+    if (settings_t0.is_not_a_date_time() || settings_t1.is_not_a_date_time())
+        return;
+    
+    if (settings_t0 >= settings_t1)
+    {
+        logwrn << "ReconstructorBase: applyTimeframeLimits: chosen timeframe is invalid, returning...";
+        return;
+    }
+
+    //limit reconstructor time range
+    auto tmin = std::max(settings_t0, timestamp_min_);
+    auto tmax = std::min(settings_t1, timestamp_max_);
+
+    if (tmin >= tmax)
+    {
+        logwrn << "ReconstructorBase: applyTimeframeLimits: combined timeframe is invalid, returning...";
+        return;
+    }
+
+    timestamp_min_ = tmin;
+    timestamp_max_ = tmax;
 }
 
 void ReconstructorBase::initIfNeeded()
@@ -1346,26 +1398,7 @@ std::unique_ptr<reconstruction::KalmanChain>& ReconstructorBase::chain(unsigned 
     return chains_[utn];
 }
 
-void ReconstructorBase::setMaxRuntime(const boost::posix_time::time_duration& max_rt)
-{
-    timestamp_max_ = timestamp_min_ + max_rt;
-}
-
 void ReconstructorBase::informConfigChanged()
 {
     emit configChanged();
-}
-
-void ReconstructorBase::dbContentChanged()
-{
-    //get current data time range
-    if (COMPASS::instance().dbContentManager().hasMinMaxTimestamp())
-    {
-        std::tie(base_settings_.data_timestamp_min, base_settings_.data_timestamp_max) = COMPASS::instance().dbContentManager().minMaxTimestamp();
-    }
-    else
-    {
-        base_settings_.data_timestamp_min = boost::posix_time::not_a_date_time;
-        base_settings_.data_timestamp_max = boost::posix_time::not_a_date_time;
-    }
 }

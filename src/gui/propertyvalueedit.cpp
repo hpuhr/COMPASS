@@ -136,7 +136,6 @@ void PropertyValueEdit::checkValidity()
 
     if (edit_connected_)
         edit_connected_->setStyleSheet(show_error ? QString("QLineEdit {background-color: #FA8072;}") : QString());
-
 }
 
 /**

@@ -33,15 +33,17 @@ public:
     explicit ReferenceCalculatorWidget(ReconstructorBase& reconstructor);
     virtual ~ReferenceCalculatorWidget();
 
-    void update();
+    virtual void updateValues();
+
+protected:
+    QComboBox* rec_type_combo_       = nullptr;
+    QComboBox* rec_type_combo_final_ = nullptr;
+
+    ReconstructorBase& reconstructor_;
 
 private:
     void updateEnabledStates();
 
-    ReconstructorBase& reconstructor_;
-
-    QComboBox*      rec_type_combo_               = nullptr;
-    QComboBox*      rec_type_combo_final_         = nullptr;
     QDoubleSpinBox* Q_std_static_edit_            = nullptr;
     QDoubleSpinBox* Q_std_ground_edit_            = nullptr;
     QDoubleSpinBox* Q_std_air_edit_               = nullptr;

@@ -18,7 +18,8 @@ class PropertyValueEdit;
 class ReconstructorMainWidget : public QWidget
 {
 public:
-    explicit ReconstructorMainWidget(ReconstructorBase& reconstructor, QWidget *parent = nullptr);
+    explicit ReconstructorMainWidget(ReconstructorBase& reconstructor, 
+                                     QWidget *parent = nullptr);
     virtual ~ReconstructorMainWidget();
 
     void updateValues();

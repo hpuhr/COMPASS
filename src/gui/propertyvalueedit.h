@@ -47,6 +47,9 @@ public:
     bool setValue(const T& v)
     {
         auto str = property_templates::toString<T>(v, decimals_);
+        if (str.empty())
+            return false;
+        
         return setValue(str);
     };
 

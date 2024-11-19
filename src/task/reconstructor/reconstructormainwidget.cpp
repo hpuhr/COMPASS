@@ -20,6 +20,9 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
 :   QWidget       (parent       )
 ,   reconstructor_(reconstructor)
 {
+    //reset chosen timeframe
+    reconstructor_.resetTimeframeSettings();
+
     QFormLayout* layout = new QFormLayout;
     layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
 

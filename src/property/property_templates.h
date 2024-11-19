@@ -200,6 +200,9 @@ inline std::string toString(const float& value, int decimals)
 template <>
 inline std::string toString(const boost::posix_time::ptime& value, int decimals)
 {
+    if (value.is_not_a_date_time())
+        return "";
+    
     return Utils::Time::toString(value);
 }
 template <>
@@ -238,6 +241,9 @@ inline boost::optional<std::string> fromString(const std::string& value)
 template <>
 inline boost::optional<boost::posix_time::ptime> fromString(const std::string& value)
 {
+    if (value.empty())
+        return {};
+
     bool ok;
     boost::posix_time::ptime t = Utils::Time::fromString(value, &ok);
     if (!ok || t.is_not_a_date_time())

@@ -267,8 +267,8 @@ public:
     virtual bool isLastSliceProcessingRun() { return true; }      // called to check if another repeat run is planned
     virtual unsigned int currentSliceRepeatRun() { return currentSlice().run_count_; }    // current repeat run
 
-    virtual bool supportsIMM() const { return false; }
     virtual std::string reconstructorInfoString() { return ""; }
+    virtual std::pair<boost::posix_time::ptime, boost::posix_time::ptime> timeFrame() const;
 
     reconstruction::KalmanChainPredictors& chainPredictors();
 
@@ -277,7 +277,8 @@ public:
     std::unique_ptr<reconstruction::KalmanChain>& chain(unsigned int utn);
 
     void informConfigChanged();
-    virtual void dbContentChanged();
+
+    void resetTimeframeSettings();
 
 signals:
     void configChanged(); 
@@ -298,7 +299,7 @@ protected:
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual void processSlice_impl() = 0;
 
-    virtual void init_impl() = 0;
+    virtual void init_impl() {}
 
     void clearOldTargetReports();
     void createTargetReports();
@@ -309,12 +310,13 @@ protected:
         std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
 
-    void setMaxRuntime(const boost::posix_time::time_duration& max_rt);
-
 private:
     void init();
     void initIfNeeded();
     void initChainPredictors();
+
+    void resetTimeframe();
+    void applyTimeframeLimits();
 
     float qVarForAltitude(bool fl_unknown, 
                           bool fl_ground,

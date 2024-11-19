@@ -117,7 +117,6 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
         assert(simple_reconstructor_);
 
         connect(simple_reconstructor_.get(), &ReconstructorBase::configChanged, this, &ReconstructorTask::configChanged);
-        connect(this, &ReconstructorTask::dbContentChanged, simple_reconstructor_.get(), &ReconstructorBase::dbContentChanged);
     }
     else if (class_id == "ProbIMMReconstructor")
     {
@@ -132,7 +131,6 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
         assert(probimm_reconstructor_);
 
         connect(probimm_reconstructor_.get(), &ReconstructorBase::configChanged, this, &ReconstructorTask::configChanged);
-        connect(this, &ReconstructorTask::dbContentChanged, probimm_reconstructor_.get(), &ReconstructorBase::dbContentChanged);
 #endif
     }
     else
@@ -141,7 +139,6 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
 
 void ReconstructorTask::initTask()
 {
-    connect(&COMPASS::instance().dbContentManager(), &DBContentManager::dbContentStatusChanged, this, &ReconstructorTask::dbContentChanged);
 }
 
 void ReconstructorTask::updateFeatures()
