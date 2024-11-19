@@ -132,7 +132,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "X",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -145,7 +145,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "Y",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -340,7 +340,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Mode C Code",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "MC",
                     "unit": "Feet"
                 }

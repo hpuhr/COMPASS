@@ -18,6 +18,7 @@
 #include "coordconverter.h"
 
 #include <ogr_spatialref.h>
+#include <gdal_version.h>
 
 namespace projection
 {
@@ -39,8 +40,24 @@ std::vector<boost::optional<QPointF>> CoordConverter::convert(const std::vector<
 
     // Create source and target spatial references
     OGRSpatialReference sourceSRS, targetSRS;
+
+#if GDAL_VERSION_MAJOR >= 3
     sourceSRS.importFromWkt(srs_src.c_str());
     targetSRS.importFromWkt(srs_dst.c_str());
+#elif GDAL_VERSION_MAJOR <= 2
+
+    char* source_arry = new char[srs_src.length()+1];
+    strcpy(source_arry, srs_src.c_str()); // Copy the contents of the std::string into the char array
+
+    char* target_arry = new char[srs_dst.length()+1];
+    strcpy(target_arry, srs_dst.c_str()); // Copy the contents of the std::string into the char array
+
+    sourceSRS.importFromWkt(&source_arry);
+    targetSRS.importFromWkt(&target_arry);
+
+    delete[] source_arry;
+    delete[] target_arry;
+#endif
 
     // Create the coordinate transformation
     OGRCoordinateTransformation* coordTransform = OGRCreateCoordinateTransformation(&sourceSRS, &targetSRS);

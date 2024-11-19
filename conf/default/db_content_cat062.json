@@ -93,7 +93,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Current Cleared Flight Level FPL",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -249,7 +249,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Altitude StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GA StdDev",
                     "unit": "Feet"
                 }
@@ -340,7 +340,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Barometric Altitude Calculated StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -561,7 +561,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "X",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": ""
                 }
@@ -574,7 +574,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "Y",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": ""
                 }
@@ -860,7 +860,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "3D Height LM",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -1003,7 +1003,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "FS SA ADD",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -1653,7 +1653,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Altitude Calculated",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GA C",
                     "unit": "Feet"
                 }
@@ -1744,7 +1744,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Mode C Code LM",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "MC LM",
                     "unit": "Feet"
                 }
@@ -1783,7 +1783,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Altitude ADD",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GA ADD",
                     "unit": "Feet"
                 }
@@ -1861,7 +1861,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Flight Level Measured",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "FL M",
                     "unit": "Feet"
                 }
@@ -2030,7 +2030,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "X StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -2043,7 +2043,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "X/Y Covariance",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC4",
                     "short_name": "",
                     "unit": ""
                 }
@@ -2056,7 +2056,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "Y StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -2108,7 +2108,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Selected Altitude ADD",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "SA ADD",
                     "unit": "Feet"
                 }
@@ -2706,7 +2706,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Barometric Altitude Calculated",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "BA C",
                     "unit": "Feet"
                 }

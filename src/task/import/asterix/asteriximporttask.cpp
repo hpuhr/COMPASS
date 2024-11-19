@@ -1305,7 +1305,7 @@ void ASTERIXImportTask::checkAllDone()
 
         logdbg << "ASTERIXImportTask: checkAllDone: dbo content";
 
-        emit COMPASS::instance().interface().databaseContentChangedSignal();
+        //emit COMPASS::instance().interface().databaseContentChangedSignal();
 
         logdbg << "ASTERIXImportTask: checkAllDone: status logging";
 
@@ -1316,6 +1316,7 @@ void ASTERIXImportTask::checkAllDone()
 
         COMPASS::instance().dataSourceManager().saveDBDataSources();
         emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+        emit COMPASS::instance().dbContentManager().dbContentStatusChanged();
         COMPASS::instance().interface().saveProperties();
 
         malloc_trim(0); // release unused memory

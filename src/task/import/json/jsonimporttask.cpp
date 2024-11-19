@@ -859,11 +859,10 @@ void JSONImportTask::checkAllDone()
 
         QApplication::restoreOverrideCursor();
 
-        if (!test_)
-            emit COMPASS::instance().interface().databaseContentChangedSignal();
+        // if (!test_)
+        //     emit COMPASS::instance().interface().databaseContentChangedSignal();
 
         double records_per_second = records_inserted_ / (diff.total_milliseconds() / 1000.0);
-
 
         if (!test_)
         {

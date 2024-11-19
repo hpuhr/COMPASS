@@ -15,7 +15,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Altitude StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GA StdDev",
                     "unit": "Feet"
                 }
@@ -93,7 +93,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Barometric Altitude StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -119,7 +119,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "X",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": ""
                 }
@@ -132,7 +132,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "Y",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": ""
                 }
@@ -262,7 +262,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "Barometric Vertical Rate",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "BVR",
                     "unit": ""
                 }
@@ -327,7 +327,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Altitude",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GA",
                     "unit": "Feet"
                 }
@@ -392,7 +392,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Mode C Code",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "MC",
                     "unit": "Feet"
                 }
@@ -548,7 +548,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "X StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -561,7 +561,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "X/Y Covariance",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC4",
                     "short_name": "",
                     "unit": ""
                 }
@@ -574,7 +574,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "Y StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -743,7 +743,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Barometric Altitude",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "BA",
                     "unit": "Feet"
                 }
