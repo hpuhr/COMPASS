@@ -109,6 +109,7 @@ boost::optional<double> PropertyValueEdit::valueAsDouble() const
 */
 void PropertyValueEdit::checkValidity()
 {
+    //check own validity
     std::string txt = edit_->text().toStdString();
 
     auto v = property_templates::string2Double(dtype_, txt);
@@ -116,7 +117,26 @@ void PropertyValueEdit::checkValidity()
 
     bool show_error = (!txt.empty() && !valid_);
 
+    //check connected edit's validity?
+    if (!show_error && edit_connected_ && !edit_connected_->isValid())
+        show_error = true;
+
+    //check range?
+    if (!show_error && edit_connected_)
+    {
+        auto v_other = edit_connected_->valueAsDouble();
+        assert(v_other.has_value());
+
+        if (( edit_connected_is_min_ && v_other.value() >= v.value()) ||
+            (!edit_connected_is_min_ && v_other.value() <= v.value()))
+            show_error = true;
+    }
+
     edit_->setStyleSheet(show_error ? QString("QLineEdit {background-color: #FA8072;}") : QString());
+
+    if (edit_connected_)
+        edit_connected_->setStyleSheet(show_error ? QString("QLineEdit {background-color: #FA8072;}") : QString());
+
 }
 
 /**
@@ -135,4 +155,24 @@ void PropertyValueEdit::onValueEdited()
     checkValidity();
 
     emit valueEdited();
+}
+
+/**
+*/
+void PropertyValueEdit::connectRange(PropertyValueEdit* edit_min, PropertyValueEdit* edit_max)
+{
+    edit_min->connectEdit(edit_max, false);
+    edit_max->connectEdit(edit_min, true );
+}
+
+/**
+*/
+void PropertyValueEdit::connectEdit(PropertyValueEdit* edit, bool is_min)
+{
+    edit_connected_        = edit;
+    edit_connected_is_min_ = is_min;
+
+    checkValidity();
+
+    connect(edit, &PropertyValueEdit::valueChanged, this, &PropertyValueEdit::checkValidity);
 }

@@ -92,6 +92,8 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
             this->reconstructor_.informConfigChanged();
         });
 
+    //PropertyValueEdit::connectRange(ds_time_begin_box_, ds_time_end_box_);
+
     layout->addRow("Begin", ds_time_begin_box_);
     layout->addRow("End", ds_time_end_box_);
     

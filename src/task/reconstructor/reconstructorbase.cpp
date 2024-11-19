@@ -1359,7 +1359,13 @@ void ReconstructorBase::informConfigChanged()
 void ReconstructorBase::dbContentChanged()
 {
     //get current data time range
-    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
-    boost::posix_time::ptime data_t0, data_t1;
-    std::tie(base_settings_.data_timestamp_min, base_settings_.data_timestamp_max) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+    if (COMPASS::instance().dbContentManager().hasMinMaxTimestamp())
+    {
+        std::tie(base_settings_.data_timestamp_min, base_settings_.data_timestamp_max) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+    }
+    else
+    {
+        base_settings_.data_timestamp_min = boost::posix_time::not_a_date_time;
+        base_settings_.data_timestamp_max = boost::posix_time::not_a_date_time;
+    }
 }

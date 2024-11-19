@@ -39,6 +39,7 @@ public:
     virtual ~PropertyValueEdit() = default;
 
     void setPropertyDataType(PropertyDataType dtype);
+
     bool setValue(const std::string& string_value);
     bool setValue(double value);
 
@@ -62,6 +63,8 @@ public:
         return property_templates::fromString<T>(str);
     }
 
+    static void connectRange(PropertyValueEdit* edit_min, PropertyValueEdit* edit_max);
+
 signals:
     void valueChanged();
     void valueEdited();
@@ -71,9 +74,14 @@ private:
     void onValueChanged();
     void onValueEdited();
 
+    void connectEdit(PropertyValueEdit* edit, bool is_min);
+
     QLineEdit* edit_ = nullptr;
 
     int              decimals_;
     PropertyDataType dtype_;
     bool             valid_ = false;
+
+    PropertyValueEdit* edit_connected_        = nullptr;
+    bool               edit_connected_is_min_ = false;
 };
