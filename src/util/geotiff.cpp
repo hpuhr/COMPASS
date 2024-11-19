@@ -18,6 +18,65 @@
 
 /**
 */
+QRectF GeoTiffInfo::roi() const
+{
+    if (!valid || img_w < 1 || img_h < 1)
+        return QRectF();
+
+    RasterReference ref;
+    ref.set(geo_srs, geo_transform);
+
+    return ref.getROI(img_w, img_h);
+}
+
+/**
+*/
+GeoTiffInfo GeoTIFFWriter::getInfo(const std::string& fn, bool vmem)
+{
+    GeoTiffInfo info;
+
+    if (!vmem && !Utils::Files::fileExists(fn))
+        return info;
+
+    //try to open
+    auto dataset = GDALOpen(fn.c_str(), GDALAccess::GA_ReadOnly);
+    if (!dataset)
+        return info;
+
+    //try to get size
+    info.img_w = GDALGetRasterXSize(dataset);
+    info.img_h = GDALGetRasterYSize(dataset);
+    if (info.img_w < 1 || info.img_h < 1)
+    {
+        GDALClose(dataset);
+        return info;
+    }
+
+    //try to get geo transform
+    info.geo_transform.resize(6);
+    if (GDALGetGeoTransform(dataset, info.geo_transform.data()) != CPLErr::CE_None)
+    {
+        GDALClose(dataset);
+        return info;
+    }
+
+    //try to get projection
+    info.geo_srs = std::string(GDALGetProjectionRef(dataset));
+    if (info.geo_srs.empty())
+    {
+        GDALClose(dataset);
+        return info;
+    }
+
+    info.valid = true;
+
+    GDALClose(dataset);
+
+    return info;
+}
+
+/**
+*/
 bool GeoTIFFWriter::isValidGeoTIFF(const std::string& fn)
 {
     if (!Utils::Files::fileExists(fn))
@@ -30,15 +89,19 @@ bool GeoTIFFWriter::isValidGeoTIFF(const std::string& fn)
 
     //try to get projection
     if (!GDALGetProjectionRef(dataset))
+    {
+        GDALClose(dataset);
         return false;
+    }
+
+    GDALClose(dataset);
 
     return true;
 }
 
-namespace helpers
-{
-
-std::string wktStringFromSRSName(const std::string& srs_name)
+/**
+*/
+std::string GeoTIFFWriter::wktStringFromSRSName(const std::string& srs_name)
 {
     char* srs_wkt = NULL;
     OGRSpatialReferenceH srs = OSRNewSpatialReference( NULL );
@@ -67,8 +130,6 @@ std::string wktStringFromSRSName(const std::string& srs_name)
     OSRDestroySpatialReference(srs);
 
     return std::string(srs_wkt);
-}
-
 }
 
 /**
@@ -208,7 +269,7 @@ bool GeoTIFFWriter::writeGeoTIFF(const std::string& fn,
         loginf << "GeoTIFFWriter: writeGeoTIFF: geotransform = " << gt[ 0 ] << ", " << gt[ 1 ] << ", " << gt[ 2 ] << ", " << gt[ 3 ] << ", " << gt[ 4 ] << ", " << gt[ 5 ];
 
         //obtain and set wkt string of projection
-        auto wkt_string = helpers::wktStringFromSRSName(ref.srs);
+        auto wkt_string = wktStringFromSRSName(ref.srs);
         GDALSetProjection(dataset, wkt_string.c_str());
 
         // auto dataset_tmp = GDALCreateCopy(gtiff_driver, "/home/mcphatty/grid.png", dataset, 0, NULL, NULL, NULL);

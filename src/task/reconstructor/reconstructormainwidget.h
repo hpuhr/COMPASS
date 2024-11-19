@@ -11,6 +11,8 @@ class QSpinBox;
 class QLineEdit;
 class QCheckBox;
 
+class PropertyValueEdit;
+
 /**
 */
 class ReconstructorMainWidget : public QWidget
@@ -28,6 +30,9 @@ protected:
     QSpinBox*  ds_sac_box_        = nullptr;
     QSpinBox*  ds_sic_box_        = nullptr;
     QComboBox* ds_line_combo_     = nullptr;
+
+    PropertyValueEdit* ds_time_begin_box_ = nullptr;
+    PropertyValueEdit* ds_time_end_box_   = nullptr;
 
     QSpinBox*  slice_length_box_  = nullptr;
     QSpinBox*  slice_overlap_box_ = nullptr;

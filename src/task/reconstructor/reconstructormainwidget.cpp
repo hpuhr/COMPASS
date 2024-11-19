@@ -1,8 +1,10 @@
+
 #include "reconstructormainwidget.h"
 #include "reconstructorbase.h"
 #include "reconstructortask.h"
 
 #include "logger.h"
+#include "propertyvalueedit.h"
 
 #include <QLabel>
 #include <QFormLayout>
@@ -69,6 +71,29 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
         [ = ] (int idx) { this->reconstructor_.settings().ds_line = ds_line_combo_->itemData(idx).toInt(); });
 
     layout->addRow("Line ID", ds_line_combo_);
+
+    addSection("Data Timeframe");
+
+    ds_time_begin_box_ = new PropertyValueEdit(PropertyDataType::TIMESTAMP);
+    ds_time_end_box_   = new PropertyValueEdit(PropertyDataType::TIMESTAMP);
+
+    connect(ds_time_begin_box_, &PropertyValueEdit::valueChanged, 
+        [ = ] () 
+        { 
+            auto ts = ds_time_begin_box_->valueAs<boost::posix_time::ptime>();
+            this->reconstructor_.settings().data_timestamp_min = ts.has_value() ? ts.value() : boost::posix_time::not_a_date_time;
+            this->reconstructor_.informConfigChanged();
+        });
+    connect(ds_time_end_box_, &PropertyValueEdit::valueChanged,
+        [ = ] () 
+        { 
+            auto ts = ds_time_end_box_->valueAs<boost::posix_time::ptime>();
+            this->reconstructor_.settings().data_timestamp_max = ts.has_value() ? ts.value() : boost::posix_time::not_a_date_time;
+            this->reconstructor_.informConfigChanged();
+        });
+
+    layout->addRow("Begin", ds_time_begin_box_);
+    layout->addRow("End", ds_time_end_box_);
     
     addSection("Data Slicing");
 
@@ -141,6 +166,12 @@ void ReconstructorMainWidget::updateValues()
     int line_idx = ds_line_combo_->findData(QVariant(settings.ds_line));
     assert(line_idx >= 0);
     ds_line_combo_->setCurrentIndex(line_idx);
+
+    assert (ds_time_begin_box_);
+    ds_time_begin_box_->setValue<boost::posix_time::ptime>(settings.data_timestamp_min);
+
+    assert (ds_time_end_box_);
+    ds_time_end_box_->setValue<boost::posix_time::ptime>(settings.data_timestamp_max);
 
     assert (slice_length_box_);
     slice_length_box_->setValue(settings.slice_duration_in_minutes);

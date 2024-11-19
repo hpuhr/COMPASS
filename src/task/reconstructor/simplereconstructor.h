@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QObject>
-
 #include "reconstructorbase.h"
 #include "global.h"
 #include "reconstructortarget.h"
@@ -20,7 +18,7 @@ class SimpleReconstructorSettings : public ReconstructorBaseSettings
 
 class SimpleReconstructorWidget;
 
-class SimpleReconstructor : public QObject, public ReconstructorBase
+class SimpleReconstructor : public ReconstructorBase
 {
     Q_OBJECT
 
@@ -59,5 +57,6 @@ class SimpleReconstructor : public QObject, public ReconstructorBase
     ReferenceCalculator ref_calculator_;
 
     virtual void processSlice_impl() override;
+    virtual void init_impl() override;
 };
 

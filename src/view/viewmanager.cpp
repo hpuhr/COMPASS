@@ -115,6 +115,7 @@ void ViewManager::init(QTabWidget* tab_widget)
     initialized_ = true;
 
     createSubConfigurables();
+    updateFeatures();
 }
 
 void ViewManager::loadViewPoints()
@@ -1011,6 +1012,19 @@ bool ViewManager::automaticReloadEnabled() const
 bool ViewManager::automaticRedrawEnabled() const
 {
     return config_.automatic_redraw;
+}
+
+/**
+*/
+void ViewManager::updateFeatures()
+{
+    for (const auto& cw : container_widgets_)
+        if (cw.second)
+            cw.second->updateFeatures();
+    
+    for (const auto& v : views_)
+        if (v.second)
+            v.second->updateFeatures();
 }
 
 // void ViewManager::saveViewAsTemplate (View *view, std::string template_name)

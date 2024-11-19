@@ -20,6 +20,8 @@
 #include "files.h"
 #include "stringconv.h"
 #include "latexsection.h"
+#include "compass.h"
+#include "licensemanager.h"
 
 #include <QDateTime>
 
@@ -28,8 +30,6 @@
 #include <fstream>
 #include <sstream>
 
-
-
 using namespace std;
 using namespace Utils;
 
@@ -37,8 +37,10 @@ LatexDocument::LatexDocument(const std::string& path, const std::string& filenam
     : path_(path), filename_(filename)
 {
     loginf << "LatexDocument: constructor: path '" << path_ << "' filename '" << filename_ << "'";
-}
 
+    footer_left_  = COMPASS::instance().versionString(false, true);
+    footer_right_ = COMPASS::instance().licenseeString(true);
+}
 
 void LatexDocument::write()
 {
@@ -64,6 +66,8 @@ std::string LatexDocument::toString()
           \usepackage{geometry}
           \geometry{legalpaper, margin=1.5cm}
 
+          \usepackage{fancyhdr}
+
           \usepackage{graphicx}
           \usepackage{float}
           \usepackage[export]{adjustbox}
@@ -81,6 +85,67 @@ std::string LatexDocument::toString()
           \definecolor{darkgreen}{rgb}{0.0, 0.5, 0.13}
 
           \usepackage{silence}
+
+          \pagestyle{fancy}       % Set the page style to fancy
+          \fancyhf{}              % Clear default header and footer
+
+          % Define header and footer content
+          \fancyhead[L]{}
+          \fancyhead[C]{}
+          \fancyhead[R]{}
+          \fancyfoot[L]{)" << footer_left_ << R"(}
+          \fancyfoot[C]{\thepage}
+          \fancyfoot[R]{)" << footer_right_ << R"(}
+
+          % No header line
+          \renewcommand{\headrulewidth}{0pt}
+
+          % Macro for landscape pages
+          % Emulates a landscape page by swapping page width and heigth
+          % This makes landscape pages work with fancyhdr
+          \newcommand{\newvar}[2]{
+            \newlength#1
+            \setlength#1{#2}
+          }
+
+          \newvar{\initialPaperWidth}{\paperwidth}
+          \newvar{\initialPaperHeight}{\paperheight}
+          \newvar{\initialTextWidth}{\textwidth}
+          \newvar{\initialTextHeight}{\textheight}
+
+          \makeatletter
+
+          \newenvironment{landscape2}{%%%
+            \clearpage
+            \paperwidth=\initialPaperHeight
+            \paperheight=\initialPaperWidth
+            \pdfpagewidth=\initialPaperHeight
+            \pdfpageheight=\initialPaperWidth
+            \textwidth=\initialTextHeight
+            \textheight=\initialTextWidth
+            \fancyheadoffset{0pt}%%%
+            \fancyfootoffset{0pt}%%%
+            \fancyhfoffset{0pt}%%%
+            \pagestyle{fancy}%%%
+            \vsize=\textheight
+            \@colroom=\vsize
+            \@colht\vsize
+            \hsize=\textwidth
+            \clearpage
+          }{%%%
+            \clearpage
+            \textwidth=\initialTextWidth
+            \textheight=\initialTextHeight
+            \global\pdfpagewidth=\initialPaperWidth
+            \global\pdfpageheight=\initialPaperHeight
+            \global\@colht=\textheight
+            \global\vsize=\textheight
+            \global\@colroom=\textheight
+            \pagestyle{fancy}%%%
+            \clearpage
+          }
+
+          \makeatother
 
           \WarningFilter{latex}{Hyper reference}
           \WarningFilter{latex}{There were undefined references}
@@ -148,7 +213,7 @@ LatexSection& LatexDocument::getSection (const std::string& id)
 
     //std::string& top = parts.at(0);
 
-    LatexSection* tmp;
+    LatexSection* tmp = nullptr;
 
     for (unsigned int cnt=0; cnt < parts.size(); ++cnt)
     {
@@ -234,4 +299,3 @@ void LatexDocument::abstract(const std::string& abstract)
 {
     abstract_ = abstract;
 }
-

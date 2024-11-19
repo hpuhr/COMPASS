@@ -99,6 +99,8 @@ bool View::init()
 {
     logdbg << "View: init";
 
+    assert(!init_);
+
     // register in manager
     view_manager_.registerView(this);
 
@@ -116,6 +118,8 @@ bool View::init()
 
     //init view widget
     w->init();
+
+    init_ = true;
 
     return true;
 }

@@ -21,6 +21,7 @@
 #include "viewpointgenerator.h"
 #include "projectionmanager.h"
 #include "projection.h"
+#include "licensemanager.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
@@ -112,6 +113,9 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
 
         simple_reconstructor_.reset(new SimpleReconstructor(class_id, instance_id, *this, std::move(acc_estimator)));
         assert(simple_reconstructor_);
+
+        connect(simple_reconstructor_.get(), &ReconstructorBase::configChanged, this, &ReconstructorTask::configChanged);
+        connect(this, &ReconstructorTask::dbContentChanged, simple_reconstructor_.get(), &ReconstructorBase::dbContentChanged);
     }
     else if (class_id == "ProbIMMReconstructor")
     {
@@ -125,27 +129,25 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
         probimm_reconstructor_.reset(new ProbIMMReconstructor(class_id, instance_id, *this, std::move(acc_estimator)));
         assert(probimm_reconstructor_);
 
+        connect(probimm_reconstructor_.get(), &ReconstructorBase::configChanged, this, &ReconstructorTask::configChanged);
+        connect(this, &ReconstructorTask::dbContentChanged, probimm_reconstructor_.get(), &ReconstructorBase::dbContentChanged);
 #endif
     }
     else
         throw std::runtime_error("ReconstructorTask: generateSubConfigurable: unknown class_id " + class_id);
 }
 
-ReconstructorTaskDialog* ReconstructorTask::dialog()
+void ReconstructorTask::initTask()
 {
-    if (!dialog_)
-    {
-        dialog_.reset(new ReconstructorTaskDialog(*this));
+    connect(&COMPASS::instance().dbContentManager(), &DBContentManager::dbContentStatusChanged, this, &ReconstructorTask::dbContentChanged);
+}
 
-        connect(dialog_.get(), &ReconstructorTaskDialog::runSignal,
-                this, &ReconstructorTask::dialogRunSlot);
+void ReconstructorTask::updateFeatures()
+{
+    const auto& license_manager = COMPASS::instance().licenseManager();
 
-        connect(dialog_.get(), &ReconstructorTaskDialog::cancelSignal,
-                this, &ReconstructorTask::dialogCancelSlot);
-    }
-
-    assert(dialog_);
-    return dialog_.get();
+    if (!license_manager.componentEnabled(license::License::ComponentProbIMMReconstructor) && currentReconstructorStr() == ProbImmReconstructorName)
+        currentReconstructorStr(ScoringUMReconstructorName);
 }
 
 bool ReconstructorTask::canRun()
@@ -364,25 +366,6 @@ std::set<unsigned int> ReconstructorTask::disabledDataSources() const
     }
 
     return disabled_ds;
-}
-
-void ReconstructorTask::dialogRunSlot()
-{
-    loginf << "ReconstructorTask: dialogRunSlot";
-
-    assert (dialog_);
-    dialog_->hide();
-
-    assert (canRun());
-    run ();
-}
-
-void ReconstructorTask::dialogCancelSlot()
-{
-    loginf << "ReconstructorTask: dialogCancelSlot";
-
-    assert (dialog_);
-    dialog_->hide();
 }
 
 void ReconstructorTask::run()
@@ -1224,4 +1207,14 @@ void ReconstructorTask::deleteCalculatedReferences() // called in async
     // emit done in run
 
     loginf << "ReconstructorTask: deleteCalculatedReferences: done";
+}
+
+void ReconstructorTask::showDialog()
+{
+    ReconstructorTaskDialog dlg(*this);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    assert(canRun());
+    run();
 }

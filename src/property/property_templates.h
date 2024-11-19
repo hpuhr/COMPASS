@@ -22,6 +22,8 @@
 
 #include "timeconv.h"
 
+#include <type_traits>
+
 #include <QString>
 
 #include <boost/optional.hpp>
@@ -236,8 +238,9 @@ inline boost::optional<std::string> fromString(const std::string& value)
 template <>
 inline boost::optional<boost::posix_time::ptime> fromString(const std::string& value)
 {
-    boost::posix_time::ptime t = Utils::Time::fromString(value);
-    if (t.is_not_a_date_time())
+    bool ok;
+    boost::posix_time::ptime t = Utils::Time::fromString(value, &ok);
+    if (!ok || t.is_not_a_date_time())
         return {};
 
     return t;
@@ -314,6 +317,87 @@ inline boost::optional<double> string2Double(PropertyDataType dtype, const std::
         return {};
 
     return func.v;
+}
+
+/*****************************************************************************************
+ * Num color steps.
+ *****************************************************************************************/
+
+template <typename T>
+inline size_t suggestedNumColorSteps(const T& vmin, const T& vmax, size_t steps_default)
+{
+    assert (vmax >= vmin);
+
+    if (vmin == vmax)
+        return 1;
+
+    if (std::is_floating_point<T>::value)
+    {
+        return steps_default;
+    }
+    else if (std::is_integral<T>::value)
+    {
+        return std::min(steps_default, (size_t)(vmax - vmin + 1));
+    }
+
+    return steps_default;
+}
+template <>
+inline size_t suggestedNumColorSteps(const std::string& vmin, const std::string& vmax, size_t steps_default)
+{
+    return 0;
+}
+template <>
+inline size_t suggestedNumColorSteps(const boost::posix_time::ptime& vmin, const boost::posix_time::ptime& vmax, size_t steps_default)
+{
+    return 0;
+}
+template <>
+inline size_t suggestedNumColorSteps(const nlohmann::json& vmin, const nlohmann::json& vmax, size_t steps_default)
+{
+    return 0;
+}
+template <>
+inline size_t suggestedNumColorSteps(const bool& vmin, const bool& vmax, size_t steps_default)
+{
+    return (vmin == vmax ? 1 : 2);
+}
+
+struct SuggestedNumColorStepsFunctor
+{
+    template <typename T, PropertyDataType DType>
+    bool operator()()
+    {
+        T v0 = fromDouble<T>(vmin);
+        T v1 = fromDouble<T>(vmax);
+
+        steps = suggestedNumColorSteps<T>(v0, v1, steps_default);
+
+        return true;
+    }
+
+    void error(PropertyDataType dtype) {}
+    
+    size_t steps_default;
+    double vmin;
+    double vmax;
+    size_t steps;
+};
+
+inline size_t suggestedNumColorSteps(PropertyDataType dtype, 
+                                     double vmin, 
+                                     double vmax, 
+                                     size_t steps_default)
+{
+    SuggestedNumColorStepsFunctor func;
+    func.steps_default = steps_default;
+    func.vmin          = vmin;
+    func.vmax          = vmax;
+
+    if (!invokeFunctor(dtype, func))
+        return 0;
+
+    return func.steps;
 }
 
 } // property_templates

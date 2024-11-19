@@ -427,9 +427,6 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
 
     // reference computation
     {
-        registerParameter("ref_rec_type", (int*)&ref_calc_settings_.kalman_type_assoc, (int)ReferenceCalculatorSettings().kalman_type_assoc);
-        registerParameter("ref_rec_type_final", (int*)&ref_calc_settings_.kalman_type_final, (int)ReferenceCalculatorSettings().kalman_type_final);
-
         registerParameter("ref_Q_std", &ref_calc_settings_.Q_std.Q_std_static, ReferenceCalculatorSettings().Q_std.Q_std_static);
         registerParameter("ref_Q_std_ground", &ref_calc_settings_.Q_std.Q_std_ground, ReferenceCalculatorSettings().Q_std.Q_std_ground);
         registerParameter("ref_Q_std_air", &ref_calc_settings_.Q_std.Q_std_air, ReferenceCalculatorSettings().Q_std.Q_std_air);
@@ -471,24 +468,63 @@ ReconstructorBase::~ReconstructorBase()
     acc_estimator_ = nullptr;
 }
 
+void ReconstructorBase::init()
+{
+    assert(!init_);
+
+    //get full data time range
+    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
+    boost::posix_time::ptime data_t0, data_t1;
+    std::tie(data_t0, data_t1) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+
+    assert(data_t0 < data_t1);
+
+    //get time range from settings
+    boost::posix_time::ptime settings_t0 = base_settings_.data_timestamp_min;
+    boost::posix_time::ptime settings_t1 = base_settings_.data_timestamp_max;
+
+    assert(settings_t0 < settings_t1);
+
+    //get reconstructor time range
+    timestamp_min_ = std::max(settings_t0, data_t0);
+    timestamp_max_ = std::min(settings_t1, data_t1);
+
+    assert(timestamp_min_ < timestamp_max_);
+
+    //not needed at the moment
+    //initChainPredictors();
+
+    //invoke derived behaviour
+    init_impl();
+
+    current_slice_begin_ = timestamp_min_;
+    next_slice_begin_    = timestamp_min_; // first slice
+
+    loginf << "ReconstructorBase: init:" 
+           << " data time min " << Time::toString(timestamp_min_)
+           << " data time max " << Time::toString(timestamp_max_);
+
+    init_ = true;
+}
+
+void ReconstructorBase::initIfNeeded()
+{
+    if (!init_)
+        init();
+
+    assert(init_);
+}
+
 bool ReconstructorBase::hasNextTimeSlice()
 {
-    if (current_slice_begin_.is_not_a_date_time())
-    {
-        assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
-        std::tie(timestamp_min_, timestamp_max_) = COMPASS::instance().dbContentManager().minMaxTimestamp();
-
-        current_slice_begin_ = timestamp_min_;
-        next_slice_begin_ = timestamp_min_; // first slice
-
-        loginf << "ReconstructorBase: hasNextTimeSlice: new min " << Time::toString(current_slice_begin_)
-               << " max " << Time::toString(timestamp_max_) << " first_slice " << first_slice_;
-    }
+    initIfNeeded();
 
     assert (!current_slice_begin_.is_not_a_date_time());
     assert (!timestamp_max_.is_not_a_date_time());
 
     first_slice_ = current_slice_begin_ == timestamp_min_;
+
+    loginf << "ReconstructorBase: hasNextTimeSlice: first_slice " << first_slice_;
 
     return next_slice_begin_ < timestamp_max_;
 }
@@ -504,6 +540,9 @@ int ReconstructorBase::numSlices() const
 
 std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlice()
 {
+    initIfNeeded();
+
+    assert (isInit());
     assert (hasNextTimeSlice());
 
     current_slice_begin_ = next_slice_begin_;
@@ -596,6 +635,7 @@ void ReconstructorBase::reset()
     acc_estimator_->init(this);
 
     cancelled_ = false;
+    init_      = false;
 }
 
 /**
@@ -632,12 +672,6 @@ void ReconstructorBase::processSlice()
            << " first_slice " << currentSlice().first_slice_;
 
     processing_ = true;
-
-    // if (currentSlice().first_slice_)
-    // {
-    //     //not needed at the moment
-    //     //initChainPredictors();
-    // }
 
     if (!currentSlice().first_slice_)
     {
@@ -1312,3 +1346,20 @@ std::unique_ptr<reconstruction::KalmanChain>& ReconstructorBase::chain(unsigned 
     return chains_[utn];
 }
 
+void ReconstructorBase::setMaxRuntime(const boost::posix_time::time_duration& max_rt)
+{
+    timestamp_max_ = timestamp_min_ + max_rt;
+}
+
+void ReconstructorBase::informConfigChanged()
+{
+    emit configChanged();
+}
+
+void ReconstructorBase::dbContentChanged()
+{
+    //get current data time range
+    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
+    boost::posix_time::ptime data_t0, data_t1;
+    std::tie(base_settings_.data_timestamp_min, base_settings_.data_timestamp_max) = COMPASS::instance().dbContentManager().minMaxTimestamp();
+}
