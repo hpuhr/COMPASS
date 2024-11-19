@@ -73,6 +73,8 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
         current_reconstructor_str_ = ScoringUMReconstructorName;
 
     registerParameter("debug", &debug_settings_.debug_, debug_settings_.debug_);
+    registerParameter("debug_association", &debug_settings_.debug_association_,
+                      debug_settings_.debug_association_);
     registerParameter("debug_accuracy_estimation", &debug_settings_.debug_accuracy_estimation_,
                       debug_settings_.debug_accuracy_estimation_);
     registerParameter("debug_bias_correction", &debug_settings_.debug_bias_correction_,

@@ -46,6 +46,12 @@ ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& ta
     connect(timestamp_max_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskDebugWidget::timestampsChanged);
     combo_layout->addRow("Timestamp Max.", timestamp_max_edit_);
 
+    debug_association_check_= new QCheckBox();
+    connect(debug_association_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().debug_association_ = ok; });
+
+    combo_layout->addRow("Debug Association", debug_association_check_);
+
     // acc est
 
     debug_accuracy_est_check_ = new QCheckBox();
@@ -140,6 +146,9 @@ void ReconstructorTaskDebugWidget::updateValues()
             Utils::Time::toString(task_.debugSettings().debug_timestamp_max_)));
     else
         timestamp_max_edit_->setText("");
+
+    assert (debug_association_check_);
+    debug_association_check_->setChecked(task_.debugSettings().debug_association_);
 
     // acc est
 

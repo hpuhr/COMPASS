@@ -188,7 +188,8 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = reconstructor().task().debugSettings().debugRecNum(rec_num);
+        do_debug = reconstructor().task().debugSettings().debug_association_ &&
+                   reconstructor().task().debugSettings().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -279,7 +280,8 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = reconstructor().task().debugSettings().debugRecNum(rec_num);
+        do_debug = reconstructor().task().debugSettings().debug_association_
+                   && reconstructor().task().debugSettings().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -348,7 +350,8 @@ RESTART_SELF_ASSOC:
         if (!target.target_reports_.size()) // can not compare
             continue;
 
-        bool do_debug = reconstructor().task().debugSettings().debugUTN(utn);
+        bool do_debug = reconstructor().task().debugSettings().debug_association_
+                        && reconstructor().task().debugSettings().debugUTN(utn);
 
         if (do_debug)
             loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: checking utn " << utn;
@@ -465,7 +468,8 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = reconstructor().task().debugSettings().debugRecNum(rec_num);
+        do_debug = reconstructor().task().debugSettings().debug_association_
+                   && reconstructor().task().debugSettings().debugRecNum(rec_num);
 
         if (do_debug)
             loginf << "DBG tr " << rec_num;
@@ -515,8 +519,9 @@ void ReconstructorAssociatorBase::associate(
 {
     assert (utn >= 0);
 
-    bool do_debug = reconstructor().task().debugSettings().debugRecNum(tr.record_num_)
-                    || reconstructor().task().debugSettings().debugUTN(utn);
+    bool do_debug = reconstructor().task().debugSettings().debug_association_
+                    && (reconstructor().task().debugSettings().debugRecNum(tr.record_num_)
+                        || reconstructor().task().debugSettings().debugUTN(utn));
 
     unsigned int dbcont_id  = Number::recNumGetDBContId(tr.record_num_);
     //AccuracyEstimatorBase::AssociatedDistance dist;
@@ -591,7 +596,8 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
 {
     int utn {-1};
 
-    bool do_debug = reconstructor().task().debugSettings().debugRecNum(tr.record_num_);
+    bool do_debug = reconstructor().task().debugSettings().debug_association_
+                    && reconstructor().task().debugSettings().debugRecNum(tr.record_num_);
 
     if (do_debug)
         loginf << "DBG findUTNFor tr " << tr.asStr();
@@ -729,7 +735,8 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 
     const float max_altitude_diff = reconstructor().settings().max_altitude_diff_;
 
-    bool do_debug = reconstructor().task().debugSettings().debugRecNum(tr.record_num_);
+    bool do_debug = reconstructor().task().debugSettings().debug_association_
+                    && reconstructor().task().debugSettings().debugRecNum(tr.record_num_);
 
     if (do_debug)
         loginf << "ReconstructorAssociatorBase: findUTNByModeACPos: rn " << tr.record_num_;
@@ -1096,7 +1103,8 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
 
                           results[cnt] = AssociationOption(false, other.utn_, 0, false, 0);
 
-                          bool do_debug = reconstructor().task().debugSettings().debugUTN(utn)
+                          bool do_debug = reconstructor().task().debugSettings().debug_association_
+                                          && reconstructor().task().debugSettings().debugUTN(utn)
                                           && reconstructor().task().debugSettings().debugUTN(other_utn);
 
                           if (utn == other_utn)
@@ -1254,8 +1262,9 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
     float score;
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
     {
-        do_debug = reconstructor().task().debugSettings().debugUTN(utn)
-                   || reconstructor().task().debugSettings().debugUTN(res_it.other_utn_);
+        do_debug = reconstructor().task().debugSettings().debug_association_
+                   && (reconstructor().task().debugSettings().debugUTN(utn)
+                       || reconstructor().task().debugSettings().debugUTN(res_it.other_utn_));
 
         if (!res_it.usable_)
         {
