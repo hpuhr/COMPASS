@@ -639,7 +639,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Selected Altitude",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "SA",
                     "unit": "Feet"
                 }
@@ -678,7 +678,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "FS SA",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -1614,7 +1614,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Mode C Code",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "MC",
                     "unit": "Feet"
                 }
@@ -1627,7 +1627,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Height",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GH",
                     "unit": "Feet"
                 }

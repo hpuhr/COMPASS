@@ -934,6 +934,7 @@ void GPSTrailImportTask::insertDoneSlot()
 
     COMPASS::instance().dataSourceManager().saveDBDataSources();
     emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+    emit COMPASS::instance().dbContentManager().dbContentStatusChanged();
 
     done_ = true;
 

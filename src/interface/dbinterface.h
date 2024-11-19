@@ -73,7 +73,7 @@ class DBInterface : public QObject, public Configurable
 
 signals:
     //void databaseOpenedSignal();
-    void databaseContentChangedSignal();
+    //void databaseContentChangedSignal();
     //void databaseClosedSignal();
 
 public:
