@@ -52,6 +52,7 @@ public:
         boost::posix_time::ptime debug_timestamp_min_;
         boost::posix_time::ptime debug_timestamp_max_;
 
+        bool debug_association_ {false}; // TODO HP
         bool debug_accuracy_estimation_ {false};
         bool debug_bias_correction_ {false};
         bool debug_geo_altitude_correction_ {false};

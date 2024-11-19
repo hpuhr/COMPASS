@@ -137,9 +137,20 @@ void PositionAccuracy::scaleToMinStdDev(double min_stddev)
         double scale_factor = std::max(scale_factor_x, scale_factor_y);
 
         // Apply scaling
-        x_stddev_ *= scale_factor;
-        y_stddev_ *= scale_factor;
-        xy_cov_ *= scale_factor * scale_factor; // Covariance scales with the square of the factor
+        if (std::isfinite(scale_factor))
+        {
+            x_stddev_ *= scale_factor;
+            y_stddev_ *= scale_factor;
+            xy_cov_ *= scale_factor * scale_factor; // Covariance scales with the square of the factor
+        }
+        else
+        {
+            if (x_stddev_ < min_stddev)
+                x_stddev_ = min_stddev;
+
+            if (y_stddev_ < min_stddev)
+                y_stddev_ = min_stddev;
+        }
     }
 }
 

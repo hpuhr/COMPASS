@@ -851,6 +851,10 @@ void ReconstructorTask::writeDoneSlot()
 
         currentReconstructor()->saveTargets();
 
+        COMPASS::instance().dataSourceManager().saveDBDataSources();
+        emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+        COMPASS::instance().interface().saveProperties();
+
         done_ = true;
 
         assert (progress_dialog_);
