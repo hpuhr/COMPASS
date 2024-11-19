@@ -125,6 +125,24 @@ std::string BaseInfo::asStr() const
     return ss.str();
 }
 
+void PositionAccuracy::scaleToMinStdDev(double min_stddev)
+{
+    // Check if either standard deviation is below the minimum threshold
+    if (x_stddev_ < min_stddev || y_stddev_ < min_stddev) {
+        // Calculate the scaling factor to bring the smallest sigma up to min_stddev
+        double scale_factor_x = (x_stddev_ < min_stddev) ? min_stddev / x_stddev_ : 1.0;
+        double scale_factor_y = (y_stddev_ < min_stddev) ? min_stddev / y_stddev_ : 1.0;
+
+        // Use the larger scaling factor to maintain the relative covariance structure
+        double scale_factor = std::max(scale_factor_x, scale_factor_y);
+
+        // Apply scaling
+        x_stddev_ *= scale_factor;
+        y_stddev_ *= scale_factor;
+        xy_cov_ *= scale_factor * scale_factor; // Covariance scales with the square of the factor
+    }
+}
+
 
 boost::optional<targetReport::Position>& ReconstructorInfo::position()
 {

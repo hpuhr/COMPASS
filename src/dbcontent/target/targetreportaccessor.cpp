@@ -333,13 +333,13 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
         {
             xy_cov = meta_pos_std_dev_xy_corr_coeff_vec_->get(index);
 
-            if (!is_ref_traj_)
-            {
-                if (xy_cov < 0)
-                    xy_cov = -std::pow(xy_cov, 2);
-                else
-                    xy_cov =  std::pow(xy_cov, 2);
-            }
+            // if (!is_ref_traj_) // already adjusted during ASTERIX import
+            // {
+            //     if (xy_cov < 0)
+            //         xy_cov = -std::pow(xy_cov, 2);
+            //     else
+            //         xy_cov =  std::pow(xy_cov, 2);
+            // }
         }
 
         return targetReport::PositionAccuracy(meta_pos_std_dev_x_m_vec_->get(index),

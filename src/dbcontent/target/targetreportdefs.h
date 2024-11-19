@@ -114,7 +114,11 @@ class PositionAccuracy
     double xy_cov_   {0}; // m^2
 
     double avgStdDev() const { return (x_stddev_+ y_stddev_) / 2.0; }
+    double minStdDev() const { return std::min(x_stddev_, y_stddev_); }
     double maxStdDev() const { return std::max(x_stddev_, y_stddev_); }
+
+    void scaleToMinStdDev(double min_stddev);
+
     std::string asStr() const;
 
     bool isNormal() const

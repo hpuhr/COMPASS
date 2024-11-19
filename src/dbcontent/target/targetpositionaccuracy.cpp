@@ -168,12 +168,12 @@ boost::optional<TargetPositionAccuracy> getXYPositionAccuracy(
 
     if (!pos_std_dev_xy_corr_coeff.isNull(index)) // else 0
     {
-        xy_cov = pos_std_dev_xy_corr_coeff.get(index); // is covariance component
+        xy_cov = pos_std_dev_xy_corr_coeff.get(index); // already adjusted during ASTERIX import
 
-        if (xy_cov < 0)
-            xy_cov = - pow(xy_cov, 2);
-        else
-            xy_cov = pow(xy_cov, 2);
+        // if (xy_cov < 0)
+        //     xy_cov = - pow(xy_cov, 2);
+        // else
+        //     xy_cov = pow(xy_cov, 2);
     }
 
     ret = TargetPositionAccuracy {x_stddev, y_stddev, xy_cov};

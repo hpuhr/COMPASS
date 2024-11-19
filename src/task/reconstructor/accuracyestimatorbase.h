@@ -55,9 +55,6 @@ class AccuracyEstimatorBase
 
   protected:
 
-    bool use_min_std_dev_ {true};
-    double min_std_dev_ {1.0};
-
     static const double PosAccStdDevMin;
     static const dbContent::targetReport::PositionAccuracy PosAccStdMin;
 
