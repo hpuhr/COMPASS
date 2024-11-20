@@ -62,6 +62,7 @@ public:
 
 signals:
     void changed();
+    void licensesChanged();
 
 protected:
     virtual void checkSubConfigurables() override {}

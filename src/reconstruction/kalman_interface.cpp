@@ -233,17 +233,20 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
     std::vector<kalman::Matrix> P_smooth;
     std::vector<bool>           state_valid_tmp;
 
-    //loginf << "KalmanInterface: smoothUpdates: #updates: " << updates.size() << ", idx0: " << idx0 << ", idx1: " << idx1 << ", n: " << n;
+    if (debug_infos)
+        loginf << "KalmanInterface: smoothUpdates: #updates: " << updates.size() << ", idx0: " << idx0 << ", idx1: " << idx1 << ", n: " << n;
 
     //@TODO: duplicate states really needed!?
     std::vector<kalman::KalmanState> states(n);
     for (size_t i = idx0; i <= idx1; ++i)
-        states [ i - idx0 ] = updates[ i ].state;
+        states[ i - idx0 ] = updates[ i ].state;
 
     //get reprojection transfer func
     auto x_tr = proj_handler.reprojectionTransform(&updates, this, idx0);
 
     //smooth states
+    size_t n_debug_infos_before = debug_infos ? debug_infos->size() : 0;
+
     bool ok = kalman_filter_->smooth(x_smooth, 
                                      P_smooth, 
                                      states, 
@@ -252,13 +255,16 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
                                      fail_strategy == kalman::SmoothFailStrategy::Stop, 
                                      fail_strategy == kalman::SmoothFailStrategy::SetInvalid ? &state_valid_tmp : nullptr, 
                                      debug_infos);
-    
     if (debug_infos)
     {
-        for (auto& di : *debug_infos)
+        for (size_t i = n_debug_infos_before; i < debug_infos->size(); ++i)
         {
+            auto& di = debug_infos->at(i);
+
+            loginf << "debug info: update idx = " << di.update_idx;
+
             di.update_idx       += idx0;
-            di.projection_center = updates[ di.update_idx ].projection_center;
+            di.projection_center = updates.at(di.update_idx).projection_center;
         }
     }
 

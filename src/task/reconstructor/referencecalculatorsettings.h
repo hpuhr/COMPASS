@@ -78,6 +78,10 @@ struct ReferenceCalculatorSettings
         settings.fix_predictions        = fix_predictions;
         settings.fix_predictions_interp = fix_predictions_interp;
 
+        settings.imm_prob_remain              = imm_prob_remain;
+        settings.imm_prob_transition_likely   = imm_prob_transition_likely;
+        settings.imm_prob_transition_unlikely = imm_prob_transition_unlikely;
+
         return settings;
     }
 
@@ -107,6 +111,11 @@ struct ReferenceCalculatorSettings
     ProcessNoise Q_std             = ProcessNoise(7.0, 5.0, 10.0, 7.0); // (static, ground, air, unknown)
     double       Q_altitude_min_ft = 0.0;
     double       Q_altitude_max_ft = 30000.0;
+
+    //imm related
+    double imm_prob_remain              = reconstruction::KalmanEstimator::Settings().imm_prob_remain;
+    double imm_prob_transition_likely   = reconstruction::KalmanEstimator::Settings().imm_prob_transition_likely; 
+    double imm_prob_transition_unlikely = reconstruction::KalmanEstimator::Settings().imm_prob_transition_unlikely;
 
     //reinit related
     int    min_chain_size = 2;

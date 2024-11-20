@@ -37,6 +37,8 @@ LicenseManager::LicenseManager(const std::string& class_id,
 {
     //read licenses on creation
     readLicenses();
+
+    createSubConfigurables();
 }
 
 /**
