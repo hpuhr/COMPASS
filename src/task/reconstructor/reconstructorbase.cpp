@@ -472,6 +472,7 @@ void ReconstructorBase::init()
 {
     assert(!init_);
 
+    //call before init_impl()
     resetTimeframe();
     applyTimeframeLimits();
 

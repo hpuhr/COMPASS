@@ -62,6 +62,9 @@ public:
 
         Settings();
 
+        kalman::Vector immMuInit() const;
+        kalman::Matrix immMInit() const;
+
         double Q_var       = 900.0;   // default variance of kalman process (30*30)
         double R_var_undef = HighVar; // high variance for undefined values   (1000*1000)
 
@@ -101,13 +104,8 @@ public:
 
         reconstruction::Uncertainty default_uncert; //default uncertainties used if none are provided in the measurement
 
-        //should sum up to one
-        double imm_prob_remain              = 0.9999;   // probability to remain in the current state
-        double imm_prob_transition_likely   = 0.000099; // probability to change to a likely state (e.g. from zero to accelerated)
-        double imm_prob_transition_unlikely = 0.000001; // probability to change to an unlikely state (e.g. from zero to uniform)
-
-        kalman::Vector imm_mu_init;
-        kalman::Matrix imm_M_init;
+        double imm_prob_transition_likely   = 5e-13; // probability to change to a likely state (e.g. from zero to accelerated)
+        double imm_prob_transition_unlikely = 5e-13; // probability to change to an unlikely state (e.g. from zero to uniform)
     };
 
     enum class ReinitState

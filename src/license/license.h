@@ -43,8 +43,17 @@ struct License
 
     enum class State
     {
+        Empty = 0,
+        ReadError,
+        Read
+    };
+
+    enum class Validity
+    {
         Valid = 0,
         Empty,
+        ReadError,
+        Incomplete,
         Invalid,
         Expired
     };
@@ -64,16 +73,16 @@ struct License
     static std::vector<unsigned char> licenseBytes(const nlohmann::json& license_json);
     static std::vector<unsigned char> signatureBytes(const std::string& signature);
 
-    static std::string stringFromState(State state);
-    static std::string colorFromState(State state);
+    static std::string stringFromValidity(Validity validity);
+    static std::string colorFromValidity(Validity validity);
 
     bool isComplete() const;
     bool componentEnabled(Component c) const;
 
-    std::pair<bool, std::string> read(const nlohmann::json& license_json);
-    std::pair<bool, std::string> read(const std::string& license_key);
+    bool read(const nlohmann::json& license_json, const std::string* expected_id = nullptr);
+    bool read(const std::string& license_key, const std::string* expected_id = nullptr);
     std::pair<bool, std::string> verify() const;
-    std::pair<State, std::string> state() const;
+    std::pair<Validity, std::string> validity() const;
 
     void print() const;
     std::string componentsAsString() const;
@@ -97,6 +106,9 @@ struct License
 
     std::string                signature;
     nlohmann::json             json_blob;
+
+    State                      state = State::Empty;
+    std::string                error;
 };
 
 } // namespace license

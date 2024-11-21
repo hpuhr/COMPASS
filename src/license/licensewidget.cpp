@@ -66,12 +66,14 @@ LicenseWidget::LicenseWidget(bool with_extra_infos, QWidget* parent)
 */
 void LicenseWidget::showLicense(const license::License* license)
 {
-    if (label_type_      ) label_type_->setText(license ? QString::fromStdString(license::License::typeToString(license->type)) : "-");
-    if (label_id_        ) label_id_->setText(license ? QString::fromStdString(license->id) : "-");
-    if (label_licensee_  ) label_licensee_->setText(license ? QString::fromStdString(license->licensee) : "-");
-    if (label_components_) label_components_->setText(license ? QString::fromStdString(license->componentsAsString()) : "-");
-    if (label_activates_ ) label_activates_->setText(license ? QString::fromStdString(Utils::Time::toDateString(license->date_activation)) : "-");
-    if (label_expires_   ) label_expires_->setText(license ? QString::fromStdString(Utils::Time::toDateString(license->date_expiration)) : "-");
-    if (label_created_   ) label_created_->setText(license ? QString::fromStdString(Utils::Time::toString(license->created)) : "-");
-    if (label_info_      ) label_info_->setText(license ? QString::fromStdString(license->info) : "-");
+    bool read = license && license->state == license::License::State::Read;
+
+    if (label_type_      ) label_type_->setText(read ? QString::fromStdString(license::License::typeToString(license->type)) : "-");
+    if (label_id_        ) label_id_->setText(read ? QString::fromStdString(license->id) : "-");
+    if (label_licensee_  ) label_licensee_->setText(read ? QString::fromStdString(license->licensee) : "-");
+    if (label_components_) label_components_->setText(read ? QString::fromStdString(license->componentsAsString()) : "-");
+    if (label_activates_ ) label_activates_->setText(read ? QString::fromStdString(Utils::Time::toDateString(license->date_activation)) : "-");
+    if (label_expires_   ) label_expires_->setText(read ? QString::fromStdString(Utils::Time::toDateString(license->date_expiration)) : "-");
+    if (label_created_   ) label_created_->setText(read ? QString::fromStdString(Utils::Time::toString(license->created)) : "-");
+    if (label_info_      ) label_info_->setText(read ? QString::fromStdString(license->info) : "-");
 }

@@ -147,25 +147,25 @@ void LicenseManagerDialog::updateList()
     license_list_->clear();
 
     const auto& license_manager = COMPASS::instance().licenseManager();
-
-    auto active_id = license_manager.activeLicenseID();
+    auto active_license = license_manager.activeLicense();
 
     for (const auto& l : license_manager.getLicenses())
     {
         auto item = new QTreeWidgetItem;
 
-        auto lstate = l.second.state();
+        auto lvalid = l.second.validity();
+        bool read   = l.second.state == license::License::State::Read;
 
-        QString active_str = active_id.has_value() && active_id.value() == l.first ? QString::fromUtf8("\u2714") : "";
+        QString active_str = active_license && active_license->id == l.first ? QString::fromUtf8("\u2714") : "";
         
         item->setText(0, active_str);
         item->setText(1, QString::fromStdString(l.first));
-        item->setText(2, QString::fromStdString(license::License::typeToString(l.second.type)));
-        item->setText(3, QString::fromStdString(Utils::Time::toDateString(l.second.date_activation)));
-        item->setText(4, QString::fromStdString(Utils::Time::toDateString(l.second.date_expiration)));
-        item->setText(5, QString::fromStdString(license::License::stringFromState(lstate.first)));
+        item->setText(2, read ? QString::fromStdString(license::License::typeToString(l.second.type)) : "-");
+        item->setText(3, read ? QString::fromStdString(Utils::Time::toDateString(l.second.date_activation)) : "-");
+        item->setText(4, read ? QString::fromStdString(Utils::Time::toDateString(l.second.date_expiration)) : "-");
+        item->setText(5, QString::fromStdString(license::License::stringFromValidity(lvalid.first)));
 
-        QBrush b (QColor(QString::fromStdString(license::License::colorFromState(lstate.first))));
+        QBrush b (QColor(QString::fromStdString(license::License::colorFromValidity(lvalid.first))));
 	    item->setForeground(state_idx_, b);
 
         license_list_->addTopLevelItem(item);

@@ -21,10 +21,14 @@
 #include "license.h"
 
 #include <map>
+#include <vector>
+#include <string>
 
 #include <QObject>
 
 #include <boost/optional.hpp>
+
+#include "json.hpp"
 
 class COMPASS;
 
@@ -42,9 +46,8 @@ public:
     bool readLicenses();
     bool writeLicenses() const;
 
-    boost::optional<std::string> activeLicenseID() const;
-    boost::optional<license::License::Type> activeLicenseType() const;
     const license::License* activeLicense() const;
+    const license::License* activeLicenseForComponent(license::License::Component c) const;
     bool componentEnabled(license::License::Component c) const;
     
     bool hasLicense(const std::string& id) const;
@@ -68,6 +71,8 @@ protected:
     virtual void checkSubConfigurables() override {}
 
 private:
+    boost::optional<std::string> activeLicenseID() const;
+
     static std::string licenseFilePath();
 
     std::map<std::string, license::License> licenses_;

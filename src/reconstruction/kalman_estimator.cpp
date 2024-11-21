@@ -44,20 +44,56 @@ const double KalmanEstimator::HighVar    = KalmanEstimator::HighStdDev * KalmanE
 */
 KalmanEstimator::Settings::Settings()
 {
+}
+
+/**
+*/
+kalman::Vector KalmanEstimator::Settings::immMuInit() const
+{
+    kalman::Vector imm_mu_init;
+
     imm_mu_init.resize(3);
     imm_mu_init << 0.33, 0.34, 0.33;
-                                  
+
+    return imm_mu_init;
+}
+
+/**
+*/
+kalman::Matrix KalmanEstimator::Settings::immMInit() const
+{
+    kalman::Matrix imm_M_init;
+
     imm_M_init.resize(3, 3);
 
-    const double M_remain        = imm_prob_remain;
-    const double M_change_mid    = (1.0 - imm_prob_remain) * 0.5;
+#if 0
+    const double M_change        = imm_prob_transition_likely + imm_prob_transition_unlikely;
+    const double M_remain        = std::fma(-M_change, 1.0, 1.0); // 1.0 - M_change;
+    const double M_change_mid    = std::fma(-M_remain, 1.0, 1.0) * 0.5;
     const double M_change_big    = imm_prob_transition_likely;
     const double M_change_small  = imm_prob_transition_unlikely;
+#else
+    const double factor   = 0.5;
+    const double M_remain = 0.999999999999999999;
+    const double M_change = 0.000000000000000001;
+
+    const double M_change_mid    = M_change * 0.5;
+    const double M_change_big    = M_change * factor;
+    const double M_change_small  = M_change * (1.0 - factor);
+#endif
 
                    //   zero,             uniform,              accelerated
     imm_M_init <<       M_remain,         M_change_small,       M_change_big,     // zero
                         M_change_small,   M_remain,             M_change_big,     // uniform
                         M_change_mid,     M_change_mid,         M_remain;         // accelerated
+
+    // std::cout << std::setprecision(24) << "remain: " << M_remain << "\n"
+    //                                    << "mid:    " << M_change_mid << "\n"
+    //                                    << "big:    " << M_change_big << "\n"
+    //                                    << "small:  " << M_change_small << "\n";
+    // assert(false);
+
+    return imm_M_init;
 }
 
 /**
@@ -136,7 +172,7 @@ std::unique_ptr<KalmanInterface> KalmanEstimator::createInterface(kalman::Kalman
     else if (ktype == kalman::KalmanType::IMMKalman2D)
     {
 #if USE_EXPERIMENTAL_SOURCE
-        return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceIMM2D(settings.imm_mu_init, settings.imm_M_init));
+        return std::unique_ptr<KalmanInterface>(new reconstruction::KalmanInterfaceIMM2D(settings.immMuInit(), settings.immMInit()));
 #else
         throw std::runtime_error("KalmanEstimator: createInterface: reconstructor type not supported by build");
 #endif

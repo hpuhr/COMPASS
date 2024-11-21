@@ -203,6 +203,9 @@ public:
                       unsigned int default_line_id = 0);
     virtual ~ReconstructorBase();
 
+    const boost::posix_time::ptime& timestampMin() const { return timestamp_min_; }
+    const boost::posix_time::ptime& timestampMax() const { return timestamp_max_; }
+
     bool hasNextTimeSlice();
     std::unique_ptr<ReconstructorBase::DataSlice> getNextTimeSlice();
 
@@ -277,7 +280,6 @@ public:
     std::unique_ptr<reconstruction::KalmanChain>& chain(unsigned int utn);
 
     void informConfigChanged();
-
     void resetTimeframeSettings();
 
 signals:

@@ -78,7 +78,6 @@ struct ReferenceCalculatorSettings
         settings.fix_predictions        = fix_predictions;
         settings.fix_predictions_interp = fix_predictions_interp;
 
-        settings.imm_prob_remain              = imm_prob_remain;
         settings.imm_prob_transition_likely   = imm_prob_transition_likely;
         settings.imm_prob_transition_unlikely = imm_prob_transition_unlikely;
 
@@ -113,7 +112,6 @@ struct ReferenceCalculatorSettings
     double       Q_altitude_max_ft = 30000.0;
 
     //imm related
-    double imm_prob_remain              = reconstruction::KalmanEstimator::Settings().imm_prob_remain;
     double imm_prob_transition_likely   = reconstruction::KalmanEstimator::Settings().imm_prob_transition_likely; 
     double imm_prob_transition_unlikely = reconstruction::KalmanEstimator::Settings().imm_prob_transition_unlikely;
 

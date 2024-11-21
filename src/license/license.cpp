@@ -136,8 +136,6 @@ std::vector<unsigned char> License::licenseBytes(const nlohmann::json& license_j
     memcpy(bytes.data(), byte_arr.data(), byte_arr.size() * sizeof(unsigned char));
 
     return bytes;
-
-        
 }
 
 /**
@@ -156,15 +154,17 @@ std::vector<unsigned char> License::signatureBytes(const std::string& signature)
 
 /**
 */
-std::string License::stringFromState(State state)
+std::string License::stringFromValidity(Validity validity)
 {
-    if (state == State::Empty)
+    if (validity == Validity::Empty)
         return "Empty";
-    else if (state == State::Invalid)
+    else if (validity == Validity::ReadError)
+        return "Unreadable";
+    else if (validity == Validity::Invalid)
         return "Invalid";
-    else if (state == State::Expired)
+    else if (validity == Validity::Expired)
         return "Expired";
-    else if (state == State::Valid)
+    else if (validity == Validity::Valid)
         return "Valid";
 
     return "";
@@ -172,15 +172,17 @@ std::string License::stringFromState(State state)
 
 /**
 */
-std::string License::colorFromState(State state)
+std::string License::colorFromValidity(Validity validity)
 {
-    if (state == State::Empty)
+    if (validity == Validity::Empty)
         return ColorInvalid;
-    else if (state == State::Invalid)
+    else if (validity == Validity::ReadError)
         return ColorInvalid;
-    else if (state == State::Expired)
+    else if (validity == Validity::Invalid)
         return ColorInvalid;
-    else if (state == State::Valid)
+    else if (validity == Validity::Expired)
+        return ColorInvalid;
+    else if (validity == Validity::Valid)
         return ColorValid;
 
     return "";
@@ -191,39 +193,53 @@ std::string License::colorFromState(State state)
 bool License::isComplete() const
 {
     return (!id.empty() &&
+            version > 0 &&
             !signature.empty() &&
             json_blob.is_object());
 }
 
 /**
 */
-std::pair<bool, std::string> License::read(const nlohmann::json& license_json)
+bool License::read(const nlohmann::json& license_json, 
+                   const std::string* expected_id)
 {
     *this = {};
 
+    auto logReadError = [ & ] (const std::string& err)
+    {
+        state = State::ReadError;
+        error = err;
+        return false;
+    };
+
     try
     {
+        json_blob = license_json;
+
         if (!license_json.contains("license") ||
             !license_json.contains("signature") || 
             !license_json.contains("id"))
-            return std::make_pair(false, "license structure invalid");
+            return logReadError("license structure invalid");
 
         signature = license_json.at("signature");
         if (signature.empty())
-            return std::make_pair(false, "license signature missing");
+            return logReadError("license signature missing");
 
         id = license_json.at("id");
 
+        if (expected_id && id != *expected_id)
+            return logReadError("license obtains invalid id");
+
         const auto& j = license_json.at("license");
         if (!j.is_object())
-            return std::make_pair(false, "license structure invalid");
+            return logReadError("license structure invalid");
 
         if (!j.contains("version"))
-            return std::make_pair(false, "license version missing");
+            return logReadError("license version missing");
 
         version = j.at("version");
         if (version < 1)
-            return std::make_pair(false, "license version invalid");
+            return logReadError("license version invalid");
 
         if (version >= 1)
         {
@@ -234,12 +250,12 @@ std::pair<bool, std::string> License::read(const nlohmann::json& license_json)
                 !j.contains("date_expiration") ||
                 !j.contains("created") ||
                 !j.contains("info"))
-                return std::make_pair(false, "license structure invalid");
+                return logReadError("license structure invalid");
 
             //read type
             {
                 if (!typeFromString(j.at("type")).has_value())
-                    return std::make_pair(false, "license type invalid");
+                    return logReadError("license type invalid");
                 
                 type = typeFromString(j.at("type")).value();
             }
@@ -248,13 +264,13 @@ std::pair<bool, std::string> License::read(const nlohmann::json& license_json)
             {
                 const auto& components_json = j.at("components");
                 if (!components_json.is_array())
-                    return std::make_pair(false, "component list invalid");
+                    return logReadError("component list invalid");
 
                 for(const auto& c : components_json)
                 {
                     auto ctype = componentFromString(c);
                     if (!ctype.has_value())
-                        return std::make_pair(false, "component list invalid");
+                        return logReadError("component list invalid");
 
                     components.insert(ctype.value());
                 }
@@ -267,37 +283,45 @@ std::pair<bool, std::string> License::read(const nlohmann::json& license_json)
             created         = Utils::Time::fromString(j["created"]);
 
             info = j.at("info");
+
+            state = State::Read;
         }
         else
         {
-            return std::make_pair(false, "license version unknown");
+            return logReadError("license version unknown");
         }
-
-        json_blob = license_json;
     }
     catch(const std::exception& e)
     {
-        return std::make_pair(false, e.what());
+        return logReadError(e.what());
     }
     catch(...)
     {
-        return std::make_pair(false, "unknown error");
+        return logReadError("unknown error");
     }
     
-    return std::make_pair(true, "");
+    return true;
 }
 
 /**
 */
-std::pair<bool, std::string> License::read(const std::string& license_key)
+bool License::read(const std::string& license_key,
+                   const std::string* expected_id)
 {
     *this = {};
 
+    auto logReadError = [ & ] (const std::string& err)
+    {
+        state = State::ReadError;
+        error = err;
+        return false;
+    };
+
     auto j = License::unpackageLicenseKey(license_key);
     if (!j.has_value())
-        return std::make_pair(false, "key expansion failed");
+        return logReadError("key expansion failed");
 
-    return read(j.value());
+    return read(j.value(), expected_id);
 }
 
 namespace
@@ -396,21 +420,25 @@ std::pair<bool, std::string> License::verify() const
 
 /**
 */
-std::pair<License::State, std::string> License::state() const
+std::pair<License::Validity, std::string> License::validity() const
 {
-    if (!json_blob.is_object())
-        return std::make_pair(State::Empty, "license empty");
+    if (state == State::Empty)
+        return std::make_pair(Validity::Empty, "license empty");
+    else if (state == State::ReadError)
+        return std::make_pair(Validity::ReadError, "license could not be read");
+    else if (!isComplete())
+        return std::make_pair(Validity::Incomplete, "license incomplete");
     
     auto vres = verify();
     if (!vres.first)
-        return std::make_pair(State::Invalid, vres.second);
+        return std::make_pair(Validity::Invalid, vres.second);
 
     auto t = Utils::Time::currentUTCTime();
 
     if (t < date_activation - D0 || t > date_expiration + D1)
-        return std::make_pair(State::Expired, "license expired");
+        return std::make_pair(Validity::Expired, "license expired");
 
-    return std::make_pair(State::Valid, "");
+    return std::make_pair(Validity::Valid, "");
 }
 
 /**
@@ -445,6 +473,8 @@ void License::print() const
     loginf << "created:    " << Utils::Time::toString(created);
     loginf << "info:       " << info;
     loginf << "signature:  " << signature;
+    loginf << "state:      " << (int)state;
+    loginf << "error:      " << error;
 }
 
 }

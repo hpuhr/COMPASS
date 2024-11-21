@@ -110,35 +110,30 @@ bool LicenseManager::readLicenses()
     }
 
     const auto& jlicenses = j.at("licenses");
-    if (!jlicenses.is_array())
+    if (!jlicenses.is_object())
     {
         logerr << "LicenseManager: readLicenses: license file invalid";
         return false;
     }
 
     //read license array
-    for (const auto& jl : jlicenses)
+    for (const auto& jl : jlicenses.items())
     {
-        license::License l;
-        auto res = l.read(jl);
+        std::string id = jl.key();
 
-        //check if license could be read and is complete, otherwise skip
-        if (!res.first || !l.isComplete())
-        {
-            logerr << "LicenseManager: readLicenses: license could not be read, skipping...";
-            continue;
-        }
+        assert(licenses_.find(id) == licenses_.end());
 
-        //skip licenses with duplicate id (should not happen)
-        if (licenses_.find(l.id) != licenses_.end())
-        {
-            logerr << "LicenseManager: readLicenses: duplicate license id '" << l.id << "', skipping...";
-            continue;
-        }
+        auto& l = licenses_[ id ];
 
-        licenses_[ l.id ] = l;
+        l.read(jl.value(), &id);
+
+        if (l.state != license::License::State::Read)
+            logwrn << "LicenseManager: readLicenses: license '" << id << "' could not be read: " << l.error;
+        else if (!l.isComplete())
+            logwrn << "LicenseManager: readLicenses: license '" << id << "' is incomplete";
     }
 
+    emit licensesChanged();
     emit changed();
 
     return true;
@@ -169,7 +164,7 @@ bool LicenseManager::writeLicenses() const
     //store json licenses
     nlohmann::json j;
 
-    j["licenses"] = nlohmann::json::array();
+    j["licenses"] = nlohmann::json::object();
 
     auto& jlicenses = j["licenses"];
 
@@ -177,14 +172,10 @@ bool LicenseManager::writeLicenses() const
 
     for (const auto& l : licenses_)
     {
-        //skip incomplete licenses (should not happen)
         if (!l.second.isComplete())
-        {
-            ok = false;
-            logerr << "LicenseManager: writeLicenses: incomplete license of id '" << l.first << "', skipping...";
-            continue;
-        }
-        jlicenses.push_back(l.second.json_blob);
+            logwrn << "LicenseManager: writeLicenses: incomplete license of id '" << l.first << "' encountered";
+        
+        jlicenses[ l.first ] = l.second.json_blob.is_object() ? l.second.json_blob : nlohmann::json::object();
     }
 
     //write to license file
@@ -210,7 +201,7 @@ boost::optional<std::string> LicenseManager::activeLicenseID() const
 {
     std::map<license::License::Type, std::vector<std::string>> valid_licenses;
     for (const auto& l : licenses_)
-        if (l.second.state().first == license::License::State::Valid)
+        if (l.second.validity().first == license::License::Validity::Valid)
             valid_licenses[ l.second.type ].push_back(l.first);
 
     if (valid_licenses.empty() || valid_licenses.rbegin()->second.empty())
@@ -249,24 +240,43 @@ const license::License* LicenseManager::activeLicense() const
 
 /**
 */
-boost::optional<license::License::Type> LicenseManager::activeLicenseType() const
+const license::License* LicenseManager::activeLicenseForComponent(license::License::Component c) const
 {
-    auto l = activeLicense();
-    if (!l)
-        return {};
+    std::map<license::License::Type, std::vector<const license::License*>> valid_licenses;
+    for (const auto& l : licenses_)
+        if (l.second.validity().first == license::License::Validity::Valid && l.second.componentEnabled(c))
+            valid_licenses[ l.second.type ].push_back(&l.second);
 
-    return l->type;
+    if (valid_licenses.empty() || valid_licenses.rbegin()->second.empty())
+        return nullptr;
+
+    const license::License* l_newest;
+    boost::optional<boost::posix_time::ptime> license_date;
+
+    for (auto l: valid_licenses.rbegin()->second)
+    {
+        if (!license_date.has_value() || l->created > license_date.value())
+        {
+            l_newest     = l;
+            license_date = l->created;
+        }
+    }
+
+    if (!license_date.has_value())
+        return nullptr;
+
+    return l_newest;
 }
 
 /**
 */
 bool LicenseManager::componentEnabled(license::License::Component c) const
 {
-    auto l = activeLicense();
-    if (!l)
-        return false;
+    for (const auto& l : licenses_)
+        if (l.second.validity().first == license::License::Validity::Valid && l.second.componentEnabled(c))
+            return true;
 
-    return l->componentEnabled(c);
+    return false;
 }
 
 /**
@@ -304,6 +314,7 @@ bool LicenseManager::addLicense(const license::License& license, bool write_lice
     //update license file?
     bool ok = write_licenses ? writeLicenses() : true;
 
+    emit licensesChanged();
     emit changed();
 
     return ok;
@@ -318,6 +329,7 @@ bool LicenseManager::setLicense(const license::License& license, bool write_lice
     //update license file?
     bool ok = write_licenses ? writeLicenses() : true;
 
+    emit licensesChanged();
     emit changed();
 
     return ok;
@@ -334,6 +346,7 @@ bool LicenseManager::removeLicense(const std::string& id, bool write_licenses)
     //update license file?
     bool ok =  write_licenses ? writeLicenses() : true;
 
+    emit licensesChanged();
     emit changed();
 
     return ok;
