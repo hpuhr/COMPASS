@@ -34,35 +34,35 @@ The following framings are currently supported:
 
 Please \textbf{note} that the following ASTERIX categories, editions, reserved expansion fields and special purpose fields are currently supported: \\
 
-\begin{tabular}{ | l | r | r | r |}
+\begin{tabular}{ | l | r | r | r | r |}
 \hline
-  CAT & Editions & REFs & SPFs  \\ \hline
-  001 & 1.1 &  &  \\ \hline
-  002 & 1.0 &  &  \\ \hline
-  010 & 0.24 Sensis, 0.31  &  &  \\ \hline
-  019 & 1.2, 1.3 & & \\ \hline
-  020 & 1.5, 1.8 & 1.3 & \\ \hline
-  021 & 0.26, 2.1, 2.4 & 1.5 & \\ \hline
-  023 & 1.2 & & \\ \hline
-  030 & 7.0 & & \\ \hline
-  034 & 1.26 & & \\ \hline
-  048 & 1.15, 1.23 & 1.9 & \\ \hline
-  062 & 1.12, 1.16, 1.18 & 1.2 & ARTAS TRIs \\ \hline
-  063 & 1.0, 1.1 & & \\ \hline
-  065 & 1.2, 1.3 & & \\ \hline
-  247 & 1.2 & & \\ \hline
-  252 & 7.0 & & \\ \hline
+  CAT & Editions & REFs & SPFs & Used  \\ \hline
+  001 & 1.1 & & & X \\ \hline
+  002 & 1.0 & & & X  \\ \hline
+  004 & 1.4 & & & X  \\ \hline
+  010 & 0.24 Sensis, 0.31  &  & & X  \\ \hline
+  019 & 1.2, 1.3 & & & X \\ \hline
+  020 & 1.5, 1.8 & 1.3 & & X \\ \hline
+  021 & 0.26, 2.1, 2.4 & 1.5 & & X \\ \hline
+  023 & 1.2 & & & X \\ \hline
+  030 & 7.0 & & & \\ \hline
+  034 & 1.26 & & &  \\ \hline
+  048 & 1.15, 1.23 & 1.9 & & X \\ \hline
+  062 & 1.12, 1.16, 1.18 & 1.2 & ARTAS TRIs & X \\ \hline
+  063 & 1.0, 1.1 & & & X \\ \hline
+  065 & 1.2, 1.3 & & & X \\ \hline
+  247 & 1.2 & & & \\ \hline
+  252 & 7.0 & & & \\ \hline
 \end{tabular} \\
 \  \\
 
-Please \textbf{note} that sensor status messages can be decoded, but are not inserted into the database. 
-Decoding of ASTERIX CAT002 is recommended if CAT001 data is imported, since the timestamps are derived from it (if not available in CAT001).
+Please \textbf{note} that only the categories marked with 'X' are used, i.e. inserted into the database. Decoding of ASTERIX CAT002 is recommended if CAT001 data is imported, since the timestamps are derived from it (if not available in CAT001).
 
 \subsubsection{Main Tab}
 
 At the top, the recording files to be imported are shown, with the following items existing for each:
 \begin{itemize}
-\item Checkbox: Checkbox to indicate if the file should be imported
+\item Checkbox: Checkbox to indicate if the file(s) should be imported
 \item Name: Path and filename
 \item Decoding and Error: Indicating possible decoder issues
 \end{itemize}
@@ -72,8 +72,32 @@ Below, the following items exist:
 \begin{itemize}
 \item Line ID: Line into which all data should be written
 \item UTC Day: Date of the recording (for all data)
-\item Debug in Console: Additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation \\
+\item Reset Date Between Files: Use to import non-consecutive files with 24h timejumps
+\item Ignore 24h Time Jumps: Do not detect 24h time jumps in input data - import everything into same date
+\item Debug in Console: Additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation
 \end{itemize}
+\ \\
+
+ASTERIX information (broadly speaking) does not include useful date information, only 'Time of Day' (ToD), which represents seconds since midnight. Thus, the date information must be derived from the ToD, e.g., by detecting a date rollover when a high time close to 23:59 resets to 00:00. \\
+
+Since ASTERIX ToDs do not always appear sequentially, this algorithm is not completely straight-forward, but allows for stable detection of 24h time jumps (unless disabled using checkbox). \\
+
+This works well when importing data from a single data source, e.g.:
+\begin{itemize}
+\item PSR Day 1 00:01 - Day 1 23:59 \textbf{or}
+\item PSR Day 1 22:00 - Day 2 02:00 \textbf{or}
+\item File 1 PSR Day 1 00:01 - Day 1 06:00 \textbf{followed by} \\{} File 2 PSR Day 1 06:01 - Day 1 12:00
+\end{itemize}
+\ \\
+
+However, it does not work well when importing 'mixed days' from different data sources, e.g. 
+\begin{itemize}
+\item File 1 SMR Day 1 00:01 - Day 1 23:59 \textbf{followed by} \\{} File 2 MLAT Day 1 00:01 - Day 1 23:59
+\end{itemize}
+\ \\
+
+ In this case, a time-jump would be detected and MLAT would erroneously be imported as during as Day 2. For this reason, the 'Reset Date Between Files' option was added, force a reset to the specified UTC Day as start day for each file. \\
+
 
 \subsubsection{Decoder}
 
@@ -120,7 +144,7 @@ Using the 'Refresh' button, all of the jASTERIX definitions are re-loaded from h
   \center
     \hspace*{-0.5cm}
     \includegraphics[width=17cm]{figures/asterix_import_data_override.png}
-  \caption{Task: Import ASTERIX data Override / Filter}
+  \caption{Task: Import ASTERIX Data Override / Filter}
 \end{figure}
 
 These features should only be used in very specific circumstances.
@@ -128,7 +152,6 @@ These features should only be used in very specific circumstances.
 \begin{itemize}
 \item Time Correction
 \begin{itemize}
-\item Ignore 24h Time Jumps: Do not detect 24h time jumps in input data - import everything into same date
 \item Override Time of Day: Set offset, which will be added to the 'Time of Day'  item, to correct for unwanted time-shifts
 \item Time of Day Offset: Positive or negative offset to be added, in seconds. If the resulting value is out of bounds, it is adjusted to the [0, 86400] interval.
 \end{itemize}
@@ -138,10 +161,20 @@ These features should only be used in very specific circumstances.
 \item Filter Position: Use minimum / maximum rectangle in latitude and longitude
 \item Filter Mode C: Use minimum / maximum rectangle in Mode C. Target reports without Mode C will not be filtered.
 \end{itemize}
+\item Obfuscate Secondary Information: Obfuscates main secondary information
+\begin{itemize}
+\item Randomizes Mode 3/A code, except for conspicuity codes and '7777'
+\item Mode S address, identification: Random values
+\end{itemize}
 \end{itemize}
 \ \\
 
 Please \textbf{note} that the filtering is applied after the (optional) 'Time of Day' correction is performed. Also, if any filters are active, the import status dialog may not be updated for some time and show wrong time estimates.
+\\
+
+Please also \textbf{note} that the obfuscation function only currently overrides the main DBContent variables, i.e. the one used for labels. Other additional secondary values could still be set in the database, therefore this function exists mainly for presentation purposes, not to safeguard against all use cases. Also, to create a time-shift in the data, it is recommended to set a wrong 'UTC Day' as well as to add a random 'Time of Day' override offset.
+
+
 
 \subsubsection{Mappings Tab}
 

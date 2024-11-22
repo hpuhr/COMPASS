@@ -54,10 +54,6 @@ Data can be imported into the database using the Import menu. This menu is only 
  \begin{itemize}
  \item see \nameref{sec:ui_import_asterix}
  \end{itemize}
- \item Recent ASTERIX Recording: Import recent ASTERIX recording file
-  \begin{itemize}
- \item see \nameref{sec:ui_import_asterix}
- \end{itemize}
  \item PCAP Network Recording: Import ASTERIX from a PCAP network recording
   \begin{itemize}
  \item see \nameref{sec:ui_import_pcap}
@@ -107,10 +103,12 @@ Data sources and sectors can be configured using the Configuration menu. Further
  \end{itemize}
   \item Licenses: Manage licences
  \begin{itemize}
- \item see \nameref{sec:ui_configure_sectors}
+ \item see \nameref{sec:ui_configure_licenses}
  \end{itemize}
 \end{itemize}
 \  \\
+
+The 'Refresh Views Automatically' checkbox sets if views show trigger an automatic data re-load process if any configuration changes are made (e.g. adding a DBContent variable in TextView, ...).
 
 \subsection{Process Menu}
 \label{sec:ui_overview_process_menu}
@@ -128,25 +126,24 @@ Post-processing tasks can be performed using the Process menu. This menu is only
    \begin{itemize}
  \item see \nameref{sec:ui_proc_radar_plot_pos}
  \end{itemize}
- \item Calculate Unique Targets: Find unique targets and associate target reports
-   \begin{itemize}
- \item see \nameref{sec:ui_associate_tr}
- \end{itemize}
  \item Calculate ARTAS Target Report Usage: Associate used target reports to ARTAS tracks based on ARTAS TRI information
    \begin{itemize}
    \item see \nameref{sec:ui_associate_tr_artas}
    \end{itemize}
+  \item Reconstruct References: Find unique targets, associate target reports and calculate reference trajectories
+   \begin{itemize}
+ \item see \nameref{sec:ui_proc_reconst_references}
+ \end{itemize}
+
 \end{itemize}
 \  \\
-
-Please note that the 'Calculate Associations from ARTAS' has been removed, since the functionality was broken by other developements. It will be re-added in one of the next releases.
 
 \subsection{UI Menu}
 \label{sec:ui_overview_ui_menu}
 
 The UI can be reset to a "default" state (as existed at application startup) using the "Reset Views" function.
 
-\subfile{import/ui_import_data}
+\subfile{import/ui_import}
 \subfile{config/ui_configuration}
 \subfile{process/ui_process}
 \subfile{ui_ui}
