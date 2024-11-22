@@ -93,8 +93,8 @@ If surveillance data is given in EUROCONTROL's ASTERIX format, it can be decoded
 
 The resulting JSON data is then mapped to DBContent variables stored in the database. The mapping between JSON keys and DBContent variables is configurable, allowing for a broad usage spectrum.
 
-%\subsection*{JSON Data Import}
-%If surveillance data is given in the JSON format, it can be mapped to DBObject variables and imported to a selected schema. Currently, only SCDB is supported for importing, but this will be extended in the future. The mapping between JSON keys and DBObject variables is configurable, allowing for a broad usage spectrum.
+\subsection*{JSON Data Import}
+If surveillance data is given in the JSON format, it can be mapped to DBContent variables and imported to a selected schema. Currently, only jASTERIX JSON is supported for importing. The mapping between JSON keys and DBContent variables is configurable (as with the ASTERIX Data Import), allowing for a broad usage spectrum.
 
 \subsection*{Meta Variables}
 
@@ -168,9 +168,15 @@ The 'Live' modes can be quit, after which the application returns to the 'Offlin
 
 \subsection*{Calculation of Reference Trajectories}
 
-Based on the associated target reports, references can be calculated. Using a selection of data sources, with optional filters on position quality indicators, references are calculated using ADS-B and / or System Track target reports using a Kalman based algorithm with RTS smoothing. The resulting references are then written as 'RefTraj' data into the database. \\
+After importing ASTERIX data, reference trajectories can be calculated from the given Traffic of Opportunity. Based on loaded time-slices, target reports of the same target are associated to a UTN, which in turn is used to calculate the reference trajectories. \\
 
-The main use case of calculated references is as reference data in evaluations. Special care should be taken that the reference accuracy needed for the respective evaluation is given.
+The main use case of calculated references is as reference data in evaluations. Special care should be taken that the reference accuracy needed for the respective evaluation is given. \\
+
+\subsection*{Free / Pro License}
+
+OpenATS COMPASS is publicly available and free for anyone to use (including commercial usage), under the \href{https://www.gnu.org/licenses/gpl-3.0.en.html}{GPL-3.0}, and \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0} licenses. \\
+
+However, one component, namely an advanced reference trajection calculation feature (Probabilistic + IMM Reconstructor) is only available under a commercial professional license. In the free license, a basic reconstructor (Scoring + UMKalman) is available.
 
 \subsection*{Evaluation}
 

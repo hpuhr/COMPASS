@@ -5,9 +5,9 @@
 The binary will currently only be provided to (somewhat current) Linux 64-bit operating systems. For the following distributions, the AppImage was reported to be working correctly:
 
 \begin{itemize}  
-\item CentOS 7.3
-\item Ubuntu 14.04, 16.04, 17.04, 18.04, 19.04, 20.04
-\item Linux Mint 18.3
+\item Debian 9 and later
+\item Ubuntu 18.04 and later
+\item Linux Mint 18.3 and later
 \end{itemize}
 \ \\
 
@@ -24,7 +24,7 @@ Other operating systems (e.g. Windows or Mac) are currently not supported.
 
 \subsection{Recommended Hardware}
 
-The application will perform best on a workstation with at least the following minimum requirements:
+The required hardware strongly depends on the use cases, for simple visual inspection of smallish (small number of million target reports) the following minimum requirements exist:
 
 \begin{itemize}  
 \item CPU with at least 2 physical cores
@@ -48,7 +48,9 @@ An optimal setup could be similiar to:
 \item Refer e.g. to \url{http://gpuboss.com/} for benchmarks
 \end{itemize}
 \item 16GB of RAM or more
-\end{itemize}
+\end{itemize} \ \\
+
+For larger reference trajectory calculations, workstations with large number of CPU cores are of significant advantage. Depending on the amount of data over time, for large datasets (e.g. ACC traffic of opportunity with more than 1 million target reports per hour) 32 GB of RAM are required.
 
 
 \subsection{Graphics Cards \& Drivers}

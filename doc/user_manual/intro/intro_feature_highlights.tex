@@ -14,7 +14,7 @@
         \item File recordings, PCAP, JSON
     \end{itemize}    
     \item Import of (D)GPS trails from NMEA files
-    \item Import of polygons from GML, KML, ESRI Shapefiles
+    \item Import of polygons from GML, KML, ESRI Shapefiles, GeoJSON
     \item Supported data source types
     \begin{itemize}  
         \item Radar
@@ -23,6 +23,7 @@
         \item System Tracker
         \item Reference Trajectory
     \end{itemize}
+    \item Sensor / System Tracker status messages
     \item 24h+ import using EPOCH timestamps    
 \end{itemize}
 
@@ -31,7 +32,6 @@
     \item High performance processing, low memory footprint
     \item Filtering for detailed analysis
     \item Simple custom filter generation
-    \item General target report association (find unique targets)
     \item ARTAS track association (TRI) analysis
 \end{itemize}
 
@@ -47,6 +47,12 @@
     \begin{itemize}  
         \item Display of any numeric variable or evaluation result as histogram
         \item Linear or logarithmic axis
+    \end{itemize}
+        \item \hl{Data distribution inspection using Grid View}
+    \begin{itemize}  
+        \item Display of any numeric variable over 2D grid of two other numeric variables
+        \item 
+        \item Configurable color map and data ranges
     \end{itemize}
     \item Graphical data inspection using Geographic View
     \begin{itemize}  
@@ -64,23 +70,45 @@
     \end{itemize}
     \item Cross-view data selection and inspection
     \item Configurable view presets for various use-cases
-    \item Storable view points for efficient inspection
+    \item Persisted view points for efficient inspection
+\end{itemize}
+
+\subsection{Reference Trajectory Calculation}    
+\begin{itemize}  
+    \item Association of target reports from same target
+    \item Calculation of reference trajectories based on sensors and System Trackers
+    \item Allows for manual comparison or evaluations using Traffic of Opportunity
+    \item 2 different reconstructors
+    \begin{itemize}  
+        \item Basic: Scoring + UMKalman
+        \begin{itemize}  
+            \item Included in free version
+            \item Association based on secondary attributes and simple, configurable distance scoring
+            \item Position estimation using Linear Uniform Motion Kalman filter
+        \end{itemize}  
+        \item Advanced: Probabilistic + IMM
+        \begin{itemize}  
+            \item Requires commercial professional license
+            \item Association based on secondary attributes and self-adaptive probabilistic thresholds
+            \item Uses Radar bias estimation \& correction, ADS-B geometric altitude for slant range correction, accuracy -re-estimation and scaling, ADS-B verification, ...
+            \item Position estimation using Interacting Multiple Models (IMM) filter, with a Rauch-Tung-Striebel (RTS) smoother
+        \end{itemize}          
+    \end{itemize}  
 \end{itemize}
 
 \subsection{Evaluation}    
 \begin{itemize}  
-    \item Association of target reports from same target
-    \item Calculation of reference trajetories based on ADS-B, System Tracks
     \item Standard compliance evaluation
-    \begin{itemize}  
-        \item Definition of standards based on configurable requirements
-        \item Generalized comparison of test data vs. reference data
-        \item Calculation of requirements/performance indicators
-        \item Investigation/display of results at several levels of detail
-        \item Automatic removal of targets (short tracks, VFR, …) possible
-        \item Manual removal of specific targets possible
-        \item Export of results as report PDF
-    \end{itemize}
+        \begin{itemize}  
+            \item EUROCAE ED-116, ED-87C/D/E, ED-117/A, ED-142, ...
+        \end{itemize}  
+    \item Definition of standards based on configurable requirements
+    \item Generalized comparison of selectable test data vs. reference data
+    \item Calculation of requirements/performance indicators
+    \item Investigation/display of results at several levels of detail
+    \item Automatic removal of targets (short tracks, VFR, …) possible
+    \item Manual removal of specific targets possible
+    \item Export of results as report PDF
 \end{itemize}
 
 \subsection{Semi-automated Processing}    

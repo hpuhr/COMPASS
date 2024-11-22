@@ -98,7 +98,7 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
     {
         buffer_size = buf_it->second->size();
 
-        loginf << "DBContentAccessor: removeContentBeforeTimestamp: dbcont " << buf_it->first
+        logdbg << "DBContentAccessor: removeContentBeforeTimestamp: dbcont " << buf_it->first
                << " size " << buf_it->second->size();
 
         if (buffer_size == 0)
@@ -124,7 +124,7 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
         unsigned int index=0;
         bool cutoff_found = false;
 
-        loginf << "DBContentAccessor: removeContentBeforeTimestamp: looking for cutoff";
+        logdbg << "DBContentAccessor: removeContentBeforeTimestamp: looking for cutoff";
 
         for (; index < buffer_size; ++index)
         {
@@ -141,7 +141,7 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
             }
         }
 
-        loginf << "DBContentAccessor: removeContentBeforeTimestamp: cutoff_found " << cutoff_found;
+        logdbg << "DBContentAccessor: removeContentBeforeTimestamp: cutoff_found " << cutoff_found;
 
         if (!cutoff_found) // no ts bigger than remove:ts found, remove all data
         {
@@ -153,11 +153,11 @@ void DBContentAccessor::removeContentBeforeTimestamp(boost::posix_time::ptime re
 
             buf_it = buffers_.erase(buf_it);
 
-            loginf << "DBContentAccessor: removeContentBeforeTimestamp: removing full buffer done";
+            logdbg << "DBContentAccessor: removeContentBeforeTimestamp: removing full buffer done";
         }
         else if (cutoff_found && index != 0) // if index == 0, all ok, otherwise remove
         {
-            loginf << "DBContentAccessor: removeContentBeforeTimestamp: found cutoff at index " << index;
+            logdbg << "DBContentAccessor: removeContentBeforeTimestamp: found cutoff at index " << index;
 
             assert (index >= 1);
             assert (index < buffer_size);
