@@ -11,17 +11,11 @@ This dialog allows (re-)calculation of Radar plot latitude/longitude position in
 
 Please note that for this step the Radar data source positions have to set in the database (see \nameref{sec:ui_configure_data_sources}), otherwise no plot position can be calculated.  \\
 
-There are two projection methods (radar polar coordinates to WGS-84 coordinates) available. The \textit{RS2G} projection is the currently recommended option.
-
-\paragraph{OGR Projection}
-
-The EPSG code for the projection has to be chosen according to your needs, please refer to \url{http://spatialreference.org/ref/epsg/} for a list of possible codes.
-
-The WGS84 latitude/longitude coordinates are then calculated using the radar positions in the database, the range and the azimuth. Please \textbf{note} that currently there will be offsets in the projected coordinates compared to the e.g. the ARTAS projection. The reason for this is under investigation.
+There is currently only one projection method (radar polar coordinates to WGS-84 coordinates), called \textit{RS2G}, available. 
 
 \paragraph{RS2G Projection}
 
-For this projection, no additional attributes must be given. Please \textbf{note} that this projection is based on a common 'radar slant to geodesic transformation', it should be equivalent to the ARTAS projection. A verification is still needed, please contact the author if you would be willing to support this.
+For this projection, no additional attributes must be given. Please \textbf{note} that this projection is based on a common 'radar slant to geodesic transformation', it should be equivalent to the ARTAS projection. 
 
 \paragraph{FFTs}
 

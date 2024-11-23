@@ -21,7 +21,25 @@ There exist 2 tabs:
 
 At the top, a label exists indicating the file to be imported. \\
 
-Below, a text field is given, which after selection of an NMEA file displays the content information and/or error messages. \\
+Below, a text field is given, which after selection of an NMEA file displays the content information and/or error messages. The following information is (commonly) presented:
+
+\begin{itemize}
+\item Number of lines parsed
+\item Number of (position) fixes
+\item Number of skipped fixes, skipped if
+\begin{itemize}
+\item the time  and position is the same as the previous update or
+\item the quality is set to 0 (invalid position).
+\end{itemize}
+\item Number of remaining fixes (to be imported)
+\item Number of missing speed vector information
+\item Timestamps
+\begin{itemize}
+\item In NMEA (if certain messages are present) the date information is given
+\item The Begin/End timestamps are the first and the last one the file
+\item If this information is wrong, it is recommended to either edit the NMEA file, or (if no 24h rollover occurred) to use the 'Override Date' function
+\end{itemize}
+\end{itemize}
 
 \subsubsection{Config Tab}
 
@@ -49,8 +67,4 @@ In the configuration tab, several configuration parameters can be set:
 
 After selecting an NMEA file, the task can be performed using the 'Import' button.
 
-Please note that reference trajectory updates are skipped in the following two cases:
-\begin{itemize}
-\item The time is the same as the previous update
-\item The quality is set to 0 (invalid position).
-\end{itemize}
+
