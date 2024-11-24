@@ -384,6 +384,8 @@ void ManageSectorsTask::parseCurrentFile (bool import)
         }
     }
 
+    GDALClose(data_set);
+
     if (dialog_)
         dialog_->updateParseMessage();
 }

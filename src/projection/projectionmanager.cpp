@@ -73,30 +73,34 @@ ProjectionManager::ProjectionManager()
     std::string filename = file_path+"/egm96-5.pgm";
 
     // Open the dataset
-    GDALDataset* dataset = (GDALDataset*)GDALOpen(filename.c_str(), GA_ReadOnly);
-    assert (dataset);
+    dataset_ = (GDALDataset*)GDALOpen(filename.c_str(), GA_ReadOnly);
+    assert (dataset_);
 
     // Check if the dataset has georeferencing information
     double geo_transform[6];
-    assert (dataset->GetGeoTransform(geo_transform) == CE_None);
+    assert (dataset_->GetGeoTransform(geo_transform) == CE_None);
 
     // Convert geospatial coordinates to pixel coordinates
     assert (GDALInvGeoTransform(geo_transform, egm96_band_inv_geo_transform_));
 
-    egm96_band_.reset(dataset->GetRasterBand(1));
+    egm96_band_ = dataset_->GetRasterBand(1);
     assert(egm96_band_);
 
     egm96_band_width_ = egm96_band_->GetXSize();
     egm96_band_height_ = egm96_band_->GetYSize();
 
-    for (float cnt=10; cnt < 50; cnt += 0.1)
-        geoidHeightM(cnt, cnt);
+    // for (float cnt=10; cnt < 50; cnt += 0.1)
+    //     geoidHeightM(cnt, cnt);
 
     loginf << "ProjectionManager: constructor: loading EGM96 map done";
 }
 
 ProjectionManager::~ProjectionManager()
 {
+    if (dataset_)
+        GDALClose(dataset_);
+
+    egm96_band_ = nullptr;
 }
 
 void ProjectionManager::generateSubConfigurable(const string& class_id,

@@ -85,7 +85,7 @@ protected:
     std::string current_projection_name_;
 
     std::unique_ptr<ProjectionManagerWidget> widget_;
-    std::unique_ptr<GDALRasterBand> egm96_band_;
+    GDALRasterBand* egm96_band_{nullptr};
     //std::unique_ptr<GeographicLib::Geoid> geoid_;
 
     double egm96_band_inv_geo_transform_[6];
@@ -95,6 +95,8 @@ protected:
 
     const double egm96_band_scale_ {0.003}; //from file, gdal too stupid
     const double egm96_band_offset_ {-108.0};
+
+    GDALDataset* dataset_ {nullptr};
 
     std::map<std::string, std::unique_ptr<Projection>> projections_;
 

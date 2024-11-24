@@ -181,7 +181,9 @@ std::pair<bool, std::string> ReconstructorTaskDialog::configValid() const
         return std::make_pair(false, "No reconstructor found");
 
     //get full data time range
-    assert (COMPASS::instance().dbContentManager().hasMinMaxTimestamp());
+    if (!COMPASS::instance().dbContentManager().hasMinMaxTimestamp())
+        return std::make_pair(false, "No timestamps found");
+
     boost::posix_time::ptime data_t0, data_t1;
     std::tie(data_t0, data_t1) = COMPASS::instance().dbContentManager().minMaxTimestamp();
 
