@@ -9,7 +9,7 @@ class ReconstructorTask;
 class QCheckBox;
 class QLineEdit;
 
-class ReconstructorTaskDebugWidget : public QWidget
+class ReconstructorTaskAnalyseWidget : public QWidget
 {
     Q_OBJECT
   signals:
@@ -19,8 +19,8 @@ class ReconstructorTaskDebugWidget : public QWidget
     void recNumsChangedSlot(const QString& value);
 
   public:
-    explicit ReconstructorTaskDebugWidget(ReconstructorTask& task, QWidget *parent = nullptr);
-    virtual ~ReconstructorTaskDebugWidget();
+    explicit ReconstructorTaskAnalyseWidget(ReconstructorTask& task, QWidget *parent = nullptr);
+    virtual ~ReconstructorTaskAnalyseWidget();
 
     void updateValues();
 

@@ -7,7 +7,7 @@
 #include "referencecalculatorwidget.h"
 #include "datasourcesusewidget.h"
 #include "reconstructortask.h"
-#include "reconstructortaskdebugwidget.h"
+#include "reconstructortaskanalysewidget.h"
 #include "compass.h"
 
 #include <QCheckBox>
@@ -62,10 +62,9 @@ SimpleReconstructorWidget::SimpleReconstructorWidget(SimpleReconstructor& recons
     calc_widget_.reset(new ReferenceCalculatorWidget(reconstructor_));
     tab_widget->addTab(calc_widget_.get(), "Reference Calculation");
 
-    debug_widget_.reset(new ReconstructorTaskDebugWidget(reconstructor_.task()));
+    debug_widget_.reset(new ReconstructorTaskAnalyseWidget(reconstructor_.task()));
 
-    if (!COMPASS::instance().isAppImage())
-        tab_widget->addTab(debug_widget_.get(), "Debug");
+    tab_widget->addTab(debug_widget_.get(), "Analyse");
 
     update();
 

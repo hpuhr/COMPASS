@@ -27,12 +27,6 @@ SimpleReconstructorAssociationWidget::SimpleReconstructorAssociationWidget(
 
     QGridLayout* layout = new QGridLayout();
 
-    // common
-    QLabel* common_label = new QLabel("Common Parameters");
-    common_label->setFont(font_bold);
-    layout->addWidget(common_label, row, 0);
-    ++row;
-
     layout->addWidget(new QLabel("Maximum Comparison Time Difference [s]"), row, 0);
 
     max_time_diff_edit_ = new QLineEdit();

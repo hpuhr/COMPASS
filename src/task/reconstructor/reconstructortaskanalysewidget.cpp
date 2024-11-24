@@ -1,4 +1,4 @@
-#include "reconstructortaskdebugwidget.h"
+#include "reconstructortaskanalysewidget.h"
 #include "reconstructortask.h"
 #include "stringconv.h"
 #include "timeconv.h"
@@ -18,9 +18,11 @@ using namespace std;
 using namespace Utils;
 
 
-ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& task, QWidget *parent)
+ReconstructorTaskAnalyseWidget::ReconstructorTaskAnalyseWidget(ReconstructorTask& task, QWidget *parent)
     : QWidget{parent}, task_(task)
 {
+    bool add_debug_stuff = !COMPASS::isAppImage() || COMPASS::instance().expertMode();
+
     QFormLayout* combo_layout = new QFormLayout;
     //combo_layout->setMargin(0);
     combo_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
@@ -28,29 +30,38 @@ ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& ta
     debug_check_ = new QCheckBox ();
     connect(debug_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_ = ok; });
-    combo_layout->addRow("Debug Reconstruction", debug_check_);
+    combo_layout->addRow("Analyse Reconstruction", debug_check_);
 
     utns_edit_ = new QLineEdit();
-    connect(utns_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskDebugWidget::utnsChangedSlot);
-    combo_layout->addRow("UTNs", utns_edit_);
+    connect(utns_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalyseWidget::utnsChangedSlot);
+
+    if (add_debug_stuff)
+        combo_layout->addRow("Debug UTNs", utns_edit_);
 
     rec_nums_edit_ = new QLineEdit();
-    connect(rec_nums_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskDebugWidget::recNumsChangedSlot);
-    combo_layout->addRow("Record Numbers", rec_nums_edit_);
+    connect(rec_nums_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalyseWidget::recNumsChangedSlot);
+
+    if (add_debug_stuff)
+        combo_layout->addRow("Debug Record Numbers", rec_nums_edit_);
 
     timestamp_min_edit_ = new QLineEdit();
-    connect(timestamp_min_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskDebugWidget::timestampsChanged);
-    combo_layout->addRow("Timestamp Min.", timestamp_min_edit_);
+    connect(timestamp_min_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalyseWidget::timestampsChanged);
+
+    if (add_debug_stuff)
+        combo_layout->addRow("Debug Timestamp Min.", timestamp_min_edit_);
 
     timestamp_max_edit_ = new QLineEdit();
-    connect(timestamp_max_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskDebugWidget::timestampsChanged);
-    combo_layout->addRow("Timestamp Max.", timestamp_max_edit_);
+    connect(timestamp_max_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalyseWidget::timestampsChanged);
+
+    if (add_debug_stuff)
+        combo_layout->addRow("Debug Timestamp Max.", timestamp_max_edit_);
 
     debug_association_check_= new QCheckBox();
     connect(debug_association_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_association_ = ok; });
 
-    combo_layout->addRow("Debug Association", debug_association_check_);
+    if (add_debug_stuff)
+        combo_layout->addRow("Debug Association", debug_association_check_);
 
     // acc est
 
@@ -58,25 +69,25 @@ ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& ta
     connect(debug_accuracy_est_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_accuracy_estimation_ = ok; });
 
-    combo_layout->addRow("Debug Accuracy Estimation", debug_accuracy_est_check_);
+    combo_layout->addRow("Analyse Accuracy Estimation", debug_accuracy_est_check_);
 
     debug_bias_correction_check_ = new QCheckBox();
     connect(debug_bias_correction_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_bias_correction_ = ok; });
 
-    combo_layout->addRow("Debug Bias Correction", debug_bias_correction_check_);
+    combo_layout->addRow("Analyse Bias Correction", debug_bias_correction_check_);
 
     debug_geo_altitude_correction_check_ = new QCheckBox();
     connect(debug_geo_altitude_correction_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_geo_altitude_correction_ = ok; });
 
-    combo_layout->addRow("Debug Geo.Altitude Correction", debug_geo_altitude_correction_check_);
+    combo_layout->addRow("Analyse Geo.Altitude Correction", debug_geo_altitude_correction_check_);
 
     // deep acc est
 
     for (auto& ds_type : COMPASS::instance().dataSourceManager().data_source_types_)
     {
-        QCheckBox* check = new QCheckBox(("Deep Debug "+ds_type+" Accuracy Estimation").c_str());
+        QCheckBox* check = new QCheckBox(("Deep Analyse "+ds_type+" Accuracy Estimation").c_str());
         connect(check, &QCheckBox::clicked,
                 this, [ = ] (bool ok) { task_.debugSettings().deepDebugAccuracyEstimation(ds_type,ok); });
 
@@ -96,33 +107,52 @@ ReconstructorTaskDebugWidget::ReconstructorTaskDebugWidget(ReconstructorTask& ta
     connect(debug_reference_calculation_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_reference_calculation_ = ok; });
 
-    combo_layout->addRow("Debug Reference Calculation", debug_reference_calculation_check_);
+    if (add_debug_stuff)
+        combo_layout->addRow("Debug Reference Calculation", debug_reference_calculation_check_);
 
     debug_kalman_chains_check_ = new QCheckBox();
     connect(debug_kalman_chains_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_kalman_chains_= ok; });
 
-    combo_layout->addRow("Debug Kalman Chains", debug_kalman_chains_check_);
-
+    if (add_debug_stuff)
+        combo_layout->addRow("Debug Kalman Chains", debug_kalman_chains_check_);
 
     debug_write_reconstruction_viewpoints_check_ = new QCheckBox();
     connect(debug_write_reconstruction_viewpoints_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_write_reconstruction_viewpoints_ = ok; });
 
-    combo_layout->addRow("Write Reconstruction View Points", debug_write_reconstruction_viewpoints_check_);
+    if (add_debug_stuff)
+        combo_layout->addRow("Write Debug Reconstruction View Points", debug_write_reconstruction_viewpoints_check_);
 
     setLayout(combo_layout);
 
     updateValues();
 }
 
-ReconstructorTaskDebugWidget::~ReconstructorTaskDebugWidget()
+ReconstructorTaskAnalyseWidget::~ReconstructorTaskAnalyseWidget()
 {
 }
 
-void ReconstructorTaskDebugWidget::updateValues()
+void ReconstructorTaskAnalyseWidget::updateValues()
 {
     loginf << "ReconstructorTaskDebugWidget: updateValues";
+
+    bool add_debug_stuff = !COMPASS::isAppImage() || COMPASS::instance().expertMode();
+
+    if (!add_debug_stuff) // disable everything not shown in the settings, to be on the safe side
+    {
+        task_.debugSettings().debug_utns_.clear();
+        task_.debugSettings().debug_rec_nums_.clear();
+
+        // task_.debugSettings().debug_timestamp_min_ = {}; // should be ok not to reset
+        // task_.debugSettings().debug_timestamp_max_ = {};
+
+        task_.debugSettings().debug_association_ = false;
+
+        task_.debugSettings().debug_reference_calculation_ = false;
+        task_.debugSettings().debug_kalman_chains_ = false;
+        task_.debugSettings().debug_write_reconstruction_viewpoints_ = false;
+    }
 
     assert (debug_check_);
     debug_check_->setChecked(task_.debugSettings().debug_);
@@ -188,7 +218,7 @@ void ReconstructorTaskDebugWidget::updateValues()
         task_.debugSettings().debug_write_reconstruction_viewpoints_);
 }
 
-void ReconstructorTaskDebugWidget::utnsChangedSlot(const QString& value)
+void ReconstructorTaskAnalyseWidget::utnsChangedSlot(const QString& value)
 {
     loginf << "ReconstructorTaskDebugWidget: utnsChangedSlot: value '" << value.toStdString() << "'";
 
@@ -213,7 +243,7 @@ void ReconstructorTaskDebugWidget::utnsChangedSlot(const QString& value)
     task_.debugSettings().debug_utns_ = values_tmp;
 }
 
-void ReconstructorTaskDebugWidget::recNumsChangedSlot(const QString& value)
+void ReconstructorTaskAnalyseWidget::recNumsChangedSlot(const QString& value)
 {
     loginf << "ReconstructorTaskDebugWidget: recNumsChangedSlot: value '" << value.toStdString() << "'";
 
@@ -238,7 +268,7 @@ void ReconstructorTaskDebugWidget::recNumsChangedSlot(const QString& value)
     task_.debugSettings().debug_rec_nums_ = values_tmp;
 }
 
-void ReconstructorTaskDebugWidget::timestampsChanged()
+void ReconstructorTaskAnalyseWidget::timestampsChanged()
 {
     auto checkTimestamp = [ & ] (QLineEdit* line_edit)
     {
