@@ -48,7 +48,7 @@ struct ReferenceCalculatorSettings
     {
         reconstruction::KalmanEstimator::Settings settings;
 
-        settings.min_chain_size    = min_chain_size;
+        //settings.min_chain_size    = min_chain_size;
         settings.min_dt            = min_dt;
         settings.max_dt            = max_dt;
         settings.max_distance_cart = max_distance;
@@ -116,7 +116,7 @@ struct ReferenceCalculatorSettings
     double imm_prob_transition_unlikely = reconstruction::KalmanEstimator::Settings().imm_prob_transition_unlikely;
 
     //reinit related
-    int    min_chain_size = 2;
+    //int    min_chain_size = 2;
     double min_dt         = 0.001;
     double max_dt         = 11.0;
     double max_distance   = 50000.0;
@@ -147,7 +147,7 @@ struct ReferenceCalculatorSettings
     bool dynamic_process_noise = true;
 
     //final reference filter related
-    bool   filter_references_max_stddev_ {true};
+    bool   filter_references_max_stddev_ {false};
     double filter_references_max_stddev_m_ {150.0};
 
     //debug options

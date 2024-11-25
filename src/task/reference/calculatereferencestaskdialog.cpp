@@ -357,13 +357,13 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     addWidget(max_dt_box_, 2);
     newRow();
 
-    min_chain_size_box_ = new QSpinBox;
-    min_chain_size_box_->setMinimum(1);
-    min_chain_size_box_->setMaximum(INT_MAX);
+    // min_chain_size_box_ = new QSpinBox;
+    // min_chain_size_box_->setMinimum(1);
+    // min_chain_size_box_->setMaximum(INT_MAX);
 
-    addLabel("Minimum Chain Size", 0, true);
-    addWidget(min_chain_size_box_, 2);
-    newRow();
+    // addLabel("Minimum Chain Size", 0, true);
+    // addWidget(min_chain_size_box_, 2);
+    // newRow();
 
     //additional option section
     addHeader("Additional Options");
@@ -556,7 +556,7 @@ void CalculateReferencesTaskDialog::readOptions()
 
     min_dt_box_->setValue(s.min_dt);
     max_dt_box_->setValue(s.max_dt);
-    min_chain_size_box_->setValue(s.min_chain_size);
+    //min_chain_size_box_->setValue(s.min_chain_size);
 
     use_vel_mm_box_->setChecked(s.use_vel_mm);
     smooth_box_->setChecked(s.smooth_rts);
@@ -626,7 +626,7 @@ void CalculateReferencesTaskDialog::writeOptions()
 
     s.min_dt                = min_dt_box_->value();
     s.max_dt                = max_dt_box_->value();
-    s.min_chain_size        = min_chain_size_box_->value();
+    //s.min_chain_size        = min_chain_size_box_->value();
 
     s.use_vel_mm            = use_vel_mm_box_->isChecked();
     s.smooth_rts            = smooth_box_->isChecked();

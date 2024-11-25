@@ -434,7 +434,7 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
 
         registerParameter("dynamic_process_noise", &ref_calc_settings_.dynamic_process_noise, ReferenceCalculatorSettings().dynamic_process_noise);
 
-        registerParameter("ref_min_chain_size", &ref_calc_settings_.min_chain_size   , ReferenceCalculatorSettings().min_chain_size);
+        //registerParameter("ref_min_chain_size", &ref_calc_settings_.min_chain_size   , ReferenceCalculatorSettings().min_chain_size);
         registerParameter("ref_min_dt"        , &ref_calc_settings_.min_dt   , ReferenceCalculatorSettings().min_dt);
         registerParameter("ref_max_dt"        , &ref_calc_settings_.max_dt   , ReferenceCalculatorSettings().max_dt);
         registerParameter("ref_max_distance"  , &ref_calc_settings_.max_distance   , ReferenceCalculatorSettings().max_distance);

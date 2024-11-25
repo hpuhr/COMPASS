@@ -68,7 +68,7 @@ public:
         double Q_var       = 900.0;   // default variance of kalman process (30*30)
         double R_var_undef = HighVar; // high variance for undefined values   (1000*1000)
 
-        size_t min_chain_size     = 2;       // minimum number of consecutive kalman updates without reinit            (0 = do not check)
+        //size_t min_chain_size     = 2;       // minimum number of consecutive kalman updates without reinit            (0 = do not check)
         double max_distance_cart  = 50000.0; // maximum allowed distance of consecutive measurements in meters         (0 = do not check)
         double min_dt             = 0.001;   // minimum allowed time difference of consecutive measurements in seconds (0 = do not check)
         double max_dt             = 11.0;    // maximum allowed time difference of consecutive measurements in seconds (0 = do not check)

@@ -50,7 +50,7 @@ private:
     QDoubleSpinBox* Q_std_unknown_edit_           = nullptr;
     QCheckBox*      dynamic_Q_box_                = nullptr;
     QDoubleSpinBox* repr_distance_box_            = nullptr;
-    QSpinBox*       min_chain_size_box_           = nullptr;
+    //QSpinBox*       min_chain_size_box_           = nullptr;
     QDoubleSpinBox* min_dt_box_                   = nullptr;
     QDoubleSpinBox* max_dt_box_                   = nullptr;
     QDoubleSpinBox* max_distance_box_             = nullptr;

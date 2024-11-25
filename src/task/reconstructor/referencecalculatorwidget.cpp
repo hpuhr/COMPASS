@@ -153,11 +153,11 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
 
     addHeader("Chain Generation");
 
-    min_chain_size_box_ = new QSpinBox;
-    min_chain_size_box_->setMinimum(1);
-    min_chain_size_box_->setMaximum(std::numeric_limits<int>::max());
-    connect(min_chain_size_box_, QOverload<int>::of(&QSpinBox::valueChanged), [ = ] (int v) { settings->min_chain_size = v; });
-    layout->addRow("Minimum Chain Size", min_chain_size_box_);
+    // min_chain_size_box_ = new QSpinBox;
+    // min_chain_size_box_->setMinimum(1);
+    // min_chain_size_box_->setMaximum(std::numeric_limits<int>::max());
+    // connect(min_chain_size_box_, QOverload<int>::of(&QSpinBox::valueChanged), [ = ] (int v) { settings->min_chain_size = v; });
+    // layout->addRow("Minimum Chain Size", min_chain_size_box_);
 
     min_dt_box_ = new QDoubleSpinBox; // reinit vs kalman step
     min_dt_box_->setDecimals(8);
@@ -333,7 +333,7 @@ void ReferenceCalculatorWidget::updateValues()
 
     if (repr_distance_box_) repr_distance_box_->setValue(settings.max_proj_distance_cart);
 
-    if (min_chain_size_box_) min_chain_size_box_->setValue(settings.min_chain_size);
+    //if (min_chain_size_box_) min_chain_size_box_->setValue(settings.min_chain_size);
     if (min_dt_box_) min_dt_box_->setValue(settings.min_dt);
     if (max_dt_box_) max_dt_box_->setValue(settings.max_dt);
     if (max_distance_box_) max_distance_box_->setValue(settings.max_distance);
