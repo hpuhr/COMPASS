@@ -62,10 +62,6 @@ SimpleReconstructorWidget::SimpleReconstructorWidget(SimpleReconstructor& recons
     calc_widget_.reset(new ReferenceCalculatorWidget(reconstructor_));
     tab_widget->addTab(calc_widget_.get(), "Reference Calculation");
 
-    debug_widget_.reset(new ReconstructorTaskAnalyseWidget(reconstructor_.task()));
-
-    tab_widget->addTab(debug_widget_.get(), "Analyse");
-
     update();
 
     setContentsMargins(0, 0, 0, 0);
@@ -95,8 +91,8 @@ void SimpleReconstructorWidget::update()
     assert (calc_widget_);
     calc_widget_->update();
 
-    assert (debug_widget_);
-    debug_widget_->updateValues();
+    if (debug_widget_)
+        debug_widget_->updateValues();
 }
 
 

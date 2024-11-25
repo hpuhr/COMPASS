@@ -37,6 +37,8 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
 {
     auto* settings = &reconstructor_.referenceCalculatorSettings();
 
+    bool add_optionals = !COMPASS::isAppImage() || COMPASS::instance().expertMode();
+
     auto layout = new QFormLayout;
     setLayout(layout);
 
@@ -79,8 +81,11 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
         *Q_air_box     = createProcessNoiseBox(&Q_std.Q_std_air);
         *Q_unknown_box = createProcessNoiseBox(&Q_std.Q_std_unknown);
 
-        layout_h->addWidget(new QLabel("Static"));
-        layout_h->addWidget(*Q_static_box);
+        if (add_optionals)
+        {
+            layout_h->addWidget(new QLabel("Static"));
+            layout_h->addWidget(*Q_static_box);
+        }
 
         layout_h->addWidget(new QLabel("Ground"));
         layout_h->addWidget(*Q_ground_box);
@@ -94,15 +99,15 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
         layout->addRow(name, layout_h);
     };
 
-    bool is_appimage = COMPASS::instance().isAppImage();
-
     rec_type_combo_ = new QComboBox;
     rec_type_combo_->addItem("Uniform Motion", QVariant(kalman::UMKalman2D));
     rec_type_combo_->setEnabled(false);
 
     connect(rec_type_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), 
         [ = ] (int idx) { settings->kalman_type_assoc = (kalman::KalmanType)rec_type_combo_->currentData().toInt(); });
-    layout->addRow("Kalman Type Association", rec_type_combo_);
+
+    if (add_optionals)
+        layout->addRow("Kalman Type Association", rec_type_combo_);
 
     rec_type_combo_final_ = new QComboBox;
     rec_type_combo_final_->addItem("Uniform Motion", QVariant(kalman::UMKalman2D));
@@ -110,16 +115,21 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
 
     connect(rec_type_combo_final_, QOverload<int>::of(&QComboBox::currentIndexChanged), 
         [ = ] (int idx) { settings->kalman_type_final = (kalman::KalmanType)rec_type_combo_final_->currentData().toInt(); });
-    layout->addRow("Kalman Type Final", rec_type_combo_final_);
 
-    addHeader("Map Projection");
+    if (add_optionals)
+        layout->addRow("Kalman Type Final", rec_type_combo_final_);
+
+    if (add_optionals)
+        addHeader("Map Projection");
 
     repr_distance_box_ = new QDoubleSpinBox;
     repr_distance_box_->setDecimals(3);
     repr_distance_box_->setMinimum(1.0);
     repr_distance_box_->setMaximum(std::numeric_limits<double>::max());
     connect(repr_distance_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_proj_distance_cart = v; });
-    layout->addRow("Maximum projection distance [m]", repr_distance_box_);
+
+    if (add_optionals)
+        layout->addRow("Maximum projection distance [m]", repr_distance_box_);
 
     addHeader("Default Uncertainties");
 
@@ -130,7 +140,9 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
             settings->dynamic_process_noise = ok; 
             this->updateEnabledStates();
         });
-    layout->addRow("Dynamic Process Noise", dynamic_Q_box_);
+
+    if (add_optionals)
+        layout->addRow("Dynamic Process Noise", dynamic_Q_box_);
 
     addProcessNoise("Process Stddev [m]", 
                     &Q_std_static_edit_,
@@ -147,15 +159,14 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
     connect(min_chain_size_box_, QOverload<int>::of(&QSpinBox::valueChanged), [ = ] (int v) { settings->min_chain_size = v; });
     layout->addRow("Minimum Chain Size", min_chain_size_box_);
 
-    if (!is_appimage)
-    {
-        min_dt_box_ = new QDoubleSpinBox;
-        min_dt_box_->setDecimals(8);
-        min_dt_box_->setMinimum(0.0);
-        min_dt_box_->setMaximum(std::numeric_limits<double>::max());
-        connect(min_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->min_dt = v; });
+    min_dt_box_ = new QDoubleSpinBox; // reinit vs kalman step
+    min_dt_box_->setDecimals(8);
+    min_dt_box_->setMinimum(0.0);
+    min_dt_box_->setMaximum(std::numeric_limits<double>::max());
+    connect(min_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->min_dt = v; });
+
+    if (add_optionals)
         layout->addRow("Minimum Time Step [s]", min_dt_box_);
-    }
 
     max_dt_box_ = new QDoubleSpinBox;
     max_dt_box_->setDecimals(3);
@@ -164,26 +175,28 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
     connect(max_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_dt = v; });
     layout->addRow("Maximum Time Step [s]", max_dt_box_);
 
-    if (!is_appimage)
-    {
-        max_distance_box_ = new QDoubleSpinBox;
-        max_distance_box_->setDecimals(3);
-        max_distance_box_->setMinimum(0.0);
-        max_distance_box_->setMaximum(std::numeric_limits<double>::max());
-        connect(max_distance_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_distance = v; });
-        layout->addRow("Maximum Distance [m]", max_distance_box_);
-    }
+    max_distance_box_ = new QDoubleSpinBox;
+    max_distance_box_->setDecimals(3);
+    max_distance_box_->setMinimum(0.0);
+    max_distance_box_->setMaximum(std::numeric_limits<double>::max());
+    connect(max_distance_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->max_distance = v; });
 
-    addHeader("Input Data Preprocessing");
+    if (add_optionals)
+        layout->addRow("Maximum Distance [m]", max_distance_box_);
+
+    if (add_optionals)
+        addHeader("System Track Preprocessing");
 
     resample_systracks_box_ = new QCheckBox;
-    connect(resample_systracks_box_, &QCheckBox::toggled, 
-        [ = ] (bool ok) 
-        { 
-            settings->resample_systracks = ok; 
-            this->updateEnabledStates();
-        });
-    layout->addRow("Resample SystemTracks", resample_systracks_box_);
+    connect(resample_systracks_box_, &QCheckBox::toggled,
+            [ = ] (bool ok)
+            {
+                settings->resample_systracks = ok;
+                this->updateEnabledStates();
+            });
+
+    if (add_optionals)
+        layout->addRow("Resample SystemTracks", resample_systracks_box_);
 
     resample_systracks_dt_box_ = new QDoubleSpinBox;
     resample_systracks_dt_box_->setDecimals(3);
@@ -191,14 +204,18 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
     resample_systracks_dt_box_->setMaximum(std::numeric_limits<double>::max());
     connect(resample_systracks_dt_box_,
             QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_systracks_dt = v; });
-    layout->addRow("Resample Interval [s]", resample_systracks_dt_box_);
+
+    if (add_optionals)
+        layout->addRow("Resample Interval [s]", resample_systracks_dt_box_);
 
     resample_systracks_maxdt_box_ = new QDoubleSpinBox;
     resample_systracks_maxdt_box_->setDecimals(3);
     resample_systracks_maxdt_box_->setMinimum(0.0);
     resample_systracks_maxdt_box_->setMaximum(std::numeric_limits<double>::max());
     connect(resample_systracks_maxdt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_systracks_max_dt = v; });
-    layout->addRow("Maximum Time Step [s]", resample_systracks_maxdt_box_);
+
+    if (add_optionals)
+        layout->addRow("Maximum Time Step [s]", resample_systracks_maxdt_box_); // maximum time for spline intp
 
     addHeader("Result Generation");
 
@@ -209,14 +226,18 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
             settings->smooth_rts = ok; 
             this->updateEnabledStates();
         });
-    layout->addRow("Smooth Results", smooth_rts_box_);
+
+    if (add_optionals)
+        layout->addRow("Smooth Results", smooth_rts_box_);
 
     smooth_scale_box_ = new QDoubleSpinBox;
     smooth_scale_box_->setDecimals(1);
     smooth_scale_box_->setMinimum(0.1);
     smooth_scale_box_->setMaximum(1.0);
     connect(smooth_scale_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->smooth_scale = v; });
-    layout->addRow("Smooth Factor", smooth_scale_box_);
+
+    if (add_optionals)
+        layout->addRow("Smooth Factor", smooth_scale_box_);
 
     resample_result_box_ = new QCheckBox;
     connect(resample_result_box_, &QCheckBox::toggled, 
@@ -225,12 +246,14 @@ ReferenceCalculatorWidget::ReferenceCalculatorWidget(ReconstructorBase& reconstr
             settings->resample_result = ok; 
             this->updateEnabledStates();
         });
-    layout->addRow("Resample Results", resample_result_box_);
+
+    if (add_optionals)
+        layout->addRow("Resample Results", resample_result_box_);
 
     resample_dt_box_ = new QDoubleSpinBox;
-    resample_dt_box_->setDecimals(3);
-    resample_dt_box_->setMinimum(0.01);
-    resample_dt_box_->setMaximum(std::numeric_limits<double>::max());
+    resample_dt_box_->setDecimals(1);
+    resample_dt_box_->setMinimum(0.1);
+    resample_dt_box_->setMaximum(30);
     connect(resample_dt_box_, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [ = ] (double v) { settings->resample_dt = v; });
     layout->addRow("Resample Interval [s]", resample_dt_box_);
 
