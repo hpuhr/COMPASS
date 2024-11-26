@@ -28,7 +28,7 @@ class AccuracyEstimatorBase
     AccuracyEstimatorBase();
     virtual ~AccuracyEstimatorBase() {};
 
-    virtual void init (ReconstructorBase* reconstructor);
+    virtual void init (ReconstructorBase* reconstructor_ptr);
 
     virtual void prepareForNewSlice() {}
     virtual void postProccessNewSlice() {}
@@ -54,40 +54,17 @@ class AccuracyEstimatorBase
     virtual void clearAssociatedDistances();
 
   protected:
-    // stddev minimas, cfg flag if used
-    // static const double PosAccStdDevMin;
-    // static const dbContent::targetReport::PositionAccuracy PosAccStdMin;
-
-    // static const double VelAccStdDevMin;
-    // static const dbContent::targetReport::VelocityAccuracy VelAccStdMin;
-
-    // static const double AccAccStdDevMin;
-    // static const dbContent::targetReport::AccelerationAccuracy AccAccStdMin;
-
-    // static const double PosAccStdDevMax;
-    // static const dbContent::targetReport::PositionAccuracy PosAccStdMax;
-
-    // fallback stddev values, if value is given
-    // static const double PosAccStdDevFallback;
-    // static const dbContent::targetReport::PositionAccuracy PosAccStdFallback;
-
-    // static const double VelAccStdDevFallback;
-    // static const dbContent::targetReport::VelocityAccuracy VelAccStdFallback;
-
-    // static const double AccAccStdDevFallback;
-    // static const dbContent::targetReport::AccelerationAccuracy AccAccStdFallback;
-
-    // fallback stddev values, if no value is given
-
-    // static const double NoVelAccStdDevFallback;
-    // static const dbContent::targetReport::VelocityAccuracy NoVelAccStdFallback;
-
-    // static const double NoAccAccStdDevFallback;
-    // static const dbContent::targetReport::AccelerationAccuracy NoAccAccStdFallback;
-
     std::string name_;
 
     ReconstructorBase* reconstructor_ {nullptr};
+
+    dbContent::targetReport::PositionAccuracy unspecific_pos_acc_fallback_;
+    dbContent::targetReport::PositionAccuracy no_pos_acc_fallback_;
+
+    dbContent::targetReport::VelocityAccuracy unspecifc_vel_acc_fallback_;
+    dbContent::targetReport::VelocityAccuracy no_vel_acc_fallback_;
+
+    dbContent::targetReport::AccelerationAccuracy no_acc_acc_fallback_;
 
     std::vector<AssociatedDistance> assoc_distances_;
 

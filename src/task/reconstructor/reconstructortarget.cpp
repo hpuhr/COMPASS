@@ -14,6 +14,8 @@
 
 #include <boost/optional/optional_io.hpp>
 
+#include <GeographicLib/LocalCartesian.hpp>
+
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
@@ -1108,7 +1110,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 }
 
 std::pair<boost::optional<dbContent::targetReport::Position>,
-          boost::optional<dbContent::targetReport::PositionAccuracy>> ReconstructorTarget::interpolatedRefPosForTimeFast (
+          boost::optional<dbContent::targetReport::PositionAccuracy>> ReconstructorTarget::interpolatedRefPosForTime (
     ptime timestamp, time_duration d_max) const
 {
     const reconstruction::Reference* lower_ref, *upper_ref;
@@ -1118,47 +1120,81 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
     if (lower_ref && !upper_ref) // exact time
         return {lower_ref->position(),lower_ref->positionAccuracy()};
 
-    if (!lower_ref || !upper_ref)
-        return {};
+    if (!lower_ref && !upper_ref) // none set
+        return {{},{}};
 
-    dbContent::targetReport::Position pos1 = lower_ref->position();
-    dbContent::targetReport::Position pos2 = upper_ref->position();
-
-    float d_t = Time::partialSeconds(upper_ref->t - lower_ref->t);
-
-    logdbg << "Target: interpolatedRefPosForTimeFast: d_t " << d_t;
-
-    assert (d_t >= 0);
-
-    if (pos1.latitude_ == pos2.latitude_
-        && pos1.longitude_ == pos2.longitude_) // same pos
-        return {lower_ref->position(),lower_ref->positionAccuracy()};
-
-    if (lower_ref == upper_ref) // same time
+    if (!lower_ref || !upper_ref) // only 1 set
     {
-        logwrn << "Target: interpolatedRefPosForTimeFast: ref has same time twice";
-        return {};
+        auto ref_ptr = lower_ref ? lower_ref : upper_ref;
+
+        dbContent::targetReport::Position pos = ref_ptr->position();
+        dbContent::targetReport::PositionAccuracy acc = ref_ptr->positionAccuracy();
+
+        auto pos_ts = ref_ptr->t;
+
+        double dx {0}, dy {0};
+        float d_t2 = Time::partialSeconds(timestamp - pos_ts);
+
+        if (ref_ptr->hasVelocity())
+        {
+            dx = *ref_ptr->vx * d_t2;
+            dy = *ref_ptr->vy * d_t2;
+        }
+
+        //Transformation trafo;
+        //bool ok;
+        double int_lat, int_long, h_back;
+
+        GeographicLib::LocalCartesian proj_wo_alt (pos.latitude_, pos.longitude_, 0);
+        //tie (ok, int_lat, int_long) = trafo_.wgsAddCartOffset(pos.latitude_, pos.longitude_, dx, dy);
+
+        proj_wo_alt.Reverse(dx, dy, 0.0, int_lat, int_long, h_back);
+
+        return {dbContent::targetReport::Position{int_lat, int_long}, acc};
     }
+    else
+    {
+        dbContent::targetReport::Position pos1 = lower_ref->position();
+        dbContent::targetReport::Position pos2 = upper_ref->position();
 
-    double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
-    double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
-    logdbg << "Target: interpolatedRefPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
+        float d_t = Time::partialSeconds(upper_ref->t - lower_ref->t);
 
-    float d_t2 = Time::partialSeconds(timestamp - lower_ref->t);
-    logdbg << "Target: interpolatedRefPosForTimeFast: d_t2 " << d_t2;
+        logdbg << "Target: interpolatedRefPosForTimeFast: d_t " << d_t;
 
-    assert (d_t2 >= 0);
+        assert (d_t >= 0);
 
-    double int_lat = pos1.latitude_ + v_lat * d_t2;
-    double int_long = pos1.longitude_ + v_long * d_t2;
+        if (pos1.latitude_ == pos2.latitude_
+            && pos1.longitude_ == pos2.longitude_) // same pos
+            return {lower_ref->position(), lower_ref->positionAccuracy()};
 
-    logdbg << "Target: interpolatedRefPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
+        if (lower_ref == upper_ref) // same time
+        {
+            logwrn << "Target: interpolatedRefPosForTimeFast: ref has same time twice";
+            return {dbContent::targetReport::Position
+                    { (pos1.latitude_ + pos2.latitude_)/2.0, (pos1.longitude_ + pos2.longitude_)/2.0},
+                    lower_ref->positionAccuracy()};
+        }
 
-    boost::optional<dbContent::targetReport::PositionAccuracy> ret_pos_acc =
-        lower_ref->positionAccuracy().maxStdDev() > upper_ref->positionAccuracy().maxStdDev()
-            ? lower_ref->positionAccuracy() : upper_ref->positionAccuracy();
+        double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
+        double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
+        logdbg << "Target: interpolatedRefPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
 
-    return {dbContent::targetReport::Position{int_lat, int_long}, ret_pos_acc};
+        float d_t2 = Time::partialSeconds(timestamp - lower_ref->t);
+        logdbg << "Target: interpolatedRefPosForTimeFast: d_t2 " << d_t2;
+
+        assert (d_t2 >= 0);
+
+        double int_lat = pos1.latitude_ + v_lat * d_t2;
+        double int_long = pos1.longitude_ + v_long * d_t2;
+
+        logdbg << "Target: interpolatedRefPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
+
+        boost::optional<dbContent::targetReport::PositionAccuracy> ret_pos_acc =
+            lower_ref->positionAccuracy().maxStdDev() > upper_ref->positionAccuracy().maxStdDev()
+                ? lower_ref->positionAccuracy() : upper_ref->positionAccuracy();
+
+        return {dbContent::targetReport::Position{int_lat, int_long}, ret_pos_acc};
+    }
 }
 
 //bool ReconstructorTarget::hasDataForExactTime (ptime timestamp) const

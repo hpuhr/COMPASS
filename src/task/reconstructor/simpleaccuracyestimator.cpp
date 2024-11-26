@@ -6,21 +6,6 @@
 using namespace Utils;
 
 SimpleAccuracyEstimator::SimpleAccuracyEstimator()
-    : unspecific_pos_acc_fallback_(dbContent::targetReport::PositionAccuracy(
-          reconstructor_->settings().unspecific_pos_acc_fallback_,
-          reconstructor_->settings().unspecific_pos_acc_fallback_, 0)),
-    no_pos_acc_fallback_(dbContent::targetReport::PositionAccuracy(
-          reconstructor_->settings().no_value_acc_fallback_,
-          reconstructor_->settings().no_value_acc_fallback_, 0)),
-    unspecifc_vel_acc_fallback_ (dbContent::targetReport::VelocityAccuracy(
-          reconstructor_->settings().unspecifc_vel_acc_fallback_,
-          reconstructor_->settings().unspecifc_vel_acc_fallback_)),
-    no_vel_acc_fallback_ (dbContent::targetReport::VelocityAccuracy(
-          reconstructor_->settings().no_value_acc_fallback_,
-          reconstructor_->settings().no_value_acc_fallback_)),
-    no_acc_acc_fallback_ (dbContent::targetReport::AccelerationAccuracy(
-        reconstructor_->settings().no_value_acc_fallback_,
-        reconstructor_->settings().no_value_acc_fallback_))
 {
 }
 

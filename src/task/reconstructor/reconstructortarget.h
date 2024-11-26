@@ -255,7 +255,7 @@ public:
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
     std::pair<boost::optional<dbContent::targetReport::Position>,
-              boost::optional<dbContent::targetReport::PositionAccuracy>> interpolatedRefPosForTimeFast (
+              boost::optional<dbContent::targetReport::PositionAccuracy>> interpolatedRefPosForTime (
         boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
     //    bool hasDataForExactTime (boost::posix_time::ptime timestamp) const;
