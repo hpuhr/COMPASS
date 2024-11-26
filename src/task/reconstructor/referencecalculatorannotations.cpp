@@ -237,14 +237,16 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const reconstruction::Kal
                                                        const std::map<Key, ReferenceCalculatorInputInfo>* input_infos,
                                                        const std::vector<QPointF>* fail_pos,
                                                        const std::vector<QPointF>* skip_pos,
-                                                       const std::map<Key, kalman::RTSDebugInfo>* rts_debug_infos)
+                                                       const std::map<Key, kalman::RTSDebugInfo>* rts_debug_infos,
+                                                       bool debug)
 {
     //store updates to references for easier access
     std::vector<reconstruction::Reference> references;
     std::vector<boost::optional<Eigen::Vector2d>> speed_positions, accel_positions;
     estimator.storeUpdates(references, updates, &speed_positions, &accel_positions);
 
-    std::vector<TRAnnotation> annos(references.size());
+    std::vector<TRAnnotation> annos;
+    annos.reserve(references.size());
 
     const auto* slice = reconstructor_ ? &reconstructor_->currentSlice() : nullptr;
 
@@ -264,10 +266,12 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const reconstruction::Kal
                 input_pos = Eigen::Vector2d(it->second.lat, it->second.lon);
         }
 
-        annos[ i ] = createTRAnnotation(r, 
-                                        speed_positions[ i ], 
-                                        accel_positions[ i ],
-                                        input_pos);
+        auto a = createTRAnnotation(r, 
+                                    speed_positions[ i ], 
+                                    accel_positions[ i ],
+                                    input_pos);
+
+        annos.push_back(a);
     }
 
     reconstruction::KalmanProjectionHandler phandler;
@@ -311,7 +315,8 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const std::string& name,
     std::vector<boost::optional<Eigen::Vector2d>> speed_positions, accel_positions;
     reconstruction::KalmanEstimator::extractVelAccPositionsWGS84(speed_positions, accel_positions, measurements);
 
-    std::vector<TRAnnotation> annos(measurements.size());
+    std::vector<TRAnnotation> annos;
+    annos.reserve(measurements.size());
 
     const auto* slice = reconstructor_ ? &reconstructor_->currentSlice() : nullptr;
 
@@ -363,11 +368,13 @@ void ReferenceCalculatorAnnotations::addAnnotationData(const std::string& name,
 
         info = tr_info + "\n" + dbc_info + "\n" + sensor_info + "\n" + additional_info;
 
-        annos[ i ] = createTRAnnotation(mm, 
-                                        speed_positions[ i ], 
-                                        accel_positions[ i ],
-                                        {},
-                                        info);
+        auto a = createTRAnnotation(mm, 
+                                    speed_positions[ i ], 
+                                    accel_positions[ i ],
+                                    {},
+                                    info);
+
+        annos.push_back(a);
     }
 
     addAnnotationData(name, 
@@ -776,22 +783,22 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
         }
 
         //add textual info
-        {
-            auto anno = data_anno->getOrCreateAnnotation("Info Labels", true);
+        // {
+        //     auto anno = data_anno->getOrCreateAnnotation("Info Labels", true);
 
-            for (size_t i = 0; i < na; ++i)
-            {
-                const auto& a = data.annotations[ i ];
+        //     for (size_t i = 0; i < na; ++i)
+        //     {
+        //         const auto& a = data.annotations[ i ];
 
-                if (!a.info.has_value())
-                    continue;
+        //         if (!a.info.has_value())
+        //             continue;
 
-                auto feat = new ViewPointGenFeatureText(a.info.value(), a.pos_wgs84.x(), a.pos_wgs84.y());
-                feat->setColor(ColorBright);
+        //         auto feat = new ViewPointGenFeatureText(a.info.value(), a.pos_wgs84.x(), a.pos_wgs84.y());
+        //         feat->setColor(ColorBright);
 
-                anno->addFeature(feat);
-            }
-        }
+        //         anno->addFeature(feat);
+        //     }
+        // }
 
         //add rts debug annotations
         {

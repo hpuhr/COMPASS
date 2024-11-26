@@ -75,7 +75,12 @@ void ReferenceCalculator::TargetReferences::reset()
 void ReferenceCalculator::TargetReferences::resetCounts()
 {
     num_updates                 = 0;
+    num_updates_ccoeff_corr     = 0;
     num_updates_valid           = 0;
+    num_updates_raf             = 0;
+    num_updates_raf_numeric     = 0;
+    num_updates_raf_badstate    = 0;
+    num_updates_raf_other       = 0;
     num_updates_failed          = 0;
     num_updates_failed_numeric  = 0;
     num_updates_failed_badstate = 0;
@@ -573,6 +578,9 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
         const auto& mm       = refs.measurements[ i ];
         bool        debug_mm = debugMM(mm);
 
+        if (mm.pos_acc_corrected)
+            ++refs.num_updates_ccoeff_corr;
+
         if (debug_mm)
         {
             loginf << "[ Debugging UTN " << refs.utn << " ID " << mm.source_id.value() << " TS " << Utils::Time::toString(mm.t) << " ]\n\n"
@@ -581,26 +589,48 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
                    << " * Measurement:                \n\n" << mm.asString()                                    << "\n\n";
         }
 
+        //do kalman step
         auto res = estimator.kalmanStep(update, mm);
 
         if (debug_mm)
         {
+            const auto& step_info = estimator.stepInfo();
+
+            loginf << "Step Result:        " << (int)step_info.result;
+            loginf << "Kalman Error:       " << (int)step_info.kalman_error;
+            loginf << "Reinit After Fail:  " << step_info.reinit_after_fail;
+            loginf << "Projection Changed: " << step_info.proj_changed << "\n";
+
             loginf << " * After State:                \n\n" << estimator.asString()                             << "\n\n"
                    << " * After State as Measurement: \n\n" << estimator.currentStateAsMeasurement().asString() << "\n";
         }
 
-        //!only add update if valid!
-        if (update.valid) 
-            collectUpdate(update, mm, i, debug_mm);
-
-        ++refs.num_updates;
-
-        if (update.valid)
+        //check result
+        if (res == reconstruction::KalmanEstimator::StepResult::Success)
         {
+            assert(update.valid);
+
+            const auto& step_info = estimator.stepInfo();
+
+            if (step_info.reinit_after_fail)
+            {
+                //log reinits after fail separately
+                ++refs.num_updates_raf;
+
+                if (step_info.kalman_error == kalman::KalmanError::Numeric)
+                    ++refs.num_updates_raf_numeric;
+                else if (step_info.kalman_error == kalman::KalmanError::InvalidState)
+                    ++refs.num_updates_raf_badstate;
+                else
+                    ++refs.num_updates_raf_other;
+            }
+
             ++refs.num_updates_valid;
         }
         else if (res == reconstruction::KalmanEstimator::StepResult::FailStepTooSmall)
         {
+            assert(!update.valid);
+
             if (debug_target)
                 skipped_updates.push_back(estimator.currentPositionWGS84());
             
@@ -608,6 +638,8 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
         }
         else if (res == reconstruction::KalmanEstimator::StepResult::FailKalmanError)
         {
+            assert(!update.valid);
+
             if (debug_target)
                 failed_updates.push_back(estimator.currentPositionWGS84());
             
@@ -620,13 +652,21 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
             else if (step_info.kalman_error == kalman::KalmanError::InvalidState)
                 ++refs.num_updates_failed_badstate;
             else
-                ++refs.num_updates_failed_other;  
+                ++refs.num_updates_failed_other;
         }
         else
         {
+            assert(!update.valid);
+
             ++refs.num_updates_failed;
             ++refs.num_updates_failed_other;
         }
+
+        //!only add update if valid!
+        if (update.valid) 
+            collectUpdate(update, mm, i, debug_mm);
+
+        ++refs.num_updates;
     }
 
     if (settings_.activeVerbosity() > 0)
@@ -646,7 +686,8 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
                                            &refs.input_infos,
                                            &failed_updates,
                                            &skipped_updates, 
-                                           nullptr);
+                                           nullptr,
+                                           debug_target);
     }
 
     //start with joined kalman updates
@@ -714,7 +755,8 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
                                            &refs.input_infos,
                                            nullptr,
                                            nullptr,
-                                           &rts_debug_info_map);
+                                           &rts_debug_info_map,
+                                           debug_target);
     }
 }
 
@@ -881,14 +923,24 @@ void ReferenceCalculator::updateReferences()
         ref.second.references.clear();
 
         dbContent::ReconstructorTarget::globalStats().num_rec_updates                 += ref.second.num_updates;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_ccoeff_corr     += ref.second.num_updates_ccoeff_corr;
+
         dbContent::ReconstructorTarget::globalStats().num_rec_updates_valid           += ref.second.num_updates_valid;
+
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_raf             += ref.second.num_updates_raf;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_raf_numeric     += ref.second.num_updates_raf_numeric;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_raf_badstate    += ref.second.num_updates_raf_badstate;
+        dbContent::ReconstructorTarget::globalStats().num_rec_updates_raf_other       += ref.second.num_updates_raf_other;
+
         dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed          += ref.second.num_updates_failed;
         dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_numeric  += ref.second.num_updates_failed_numeric;
         dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_badstate += ref.second.num_updates_failed_badstate;
         dbContent::ReconstructorTarget::globalStats().num_rec_updates_failed_other    += ref.second.num_updates_failed_other;
         dbContent::ReconstructorTarget::globalStats().num_rec_updates_skipped         += ref.second.num_updates_skipped;
+
         dbContent::ReconstructorTarget::globalStats().num_rec_smooth_steps_failed     += ref.second.num_smooth_steps_failed;
         dbContent::ReconstructorTarget::globalStats().num_rec_smooth_target_failed    += ref.second.num_smoothing_failed;
+
         dbContent::ReconstructorTarget::globalStats().num_rec_interp_failed           += ref.second.num_interp_steps_failed;
     }
 }

@@ -25,6 +25,8 @@ enum CovMatFlags
     CovMatCov = 1 << 3
 };
 
+/**
+*/
 struct Measurement
 {
     Eigen::Vector2d position2D(CoordSystem cs) const;
@@ -52,39 +54,40 @@ struct Measurement
 
     std::pair<unsigned long, boost::posix_time::ptime> uniqueID() const;
 
-    boost::optional<unsigned long> source_id;      // source of the measurement
+    boost::optional<unsigned long> source_id;           // source of the measurement
 
-    boost::posix_time::ptime t;                    // timestamp
+    boost::posix_time::ptime t;                         // timestamp
 
-    bool                     mm_interp = false;    // measurement has been interpolated (e.g. by spline interpolator)
+    bool                     mm_interp         = false; // measurement has been interpolated (e.g. by spline interpolator)
+    bool                     pos_acc_corrected = false; // position accuracy has been corrected due to invalid correlation coefficient
 
-    double                   lat;                  // wgs84 latitude
-    double                   lon;                  // wgs84 longitude
+    double                   lat;                       // wgs84 latitude 
+    double                   lon;                       // wgs84 longitude
 
-    mutable double           x;                    // x position (hack: mutable because of on-demand projection in KalmanEstimator)
-    mutable double           y;                    // y position (hack: mutable because of on-demand projection in KalmanEstimator)
-    boost::optional<double>  z;                    // optional z position
+    mutable double           x;                         // x position (hack: mutable because of on-demand projection in KalmanEstimator)
+    mutable double           y;                         // y position (hack: mutable because of on-demand projection in KalmanEstimator)
+    boost::optional<double>  z;                         // optional z position
 
-    boost::optional<double>  vx;                   // speed vector x
-    boost::optional<double>  vy;                   // speed vector y
-    boost::optional<double>  vz;                   // speed vector z
+    boost::optional<double>  vx;                        // speed vector x
+    boost::optional<double>  vy;                        // speed vector y
+    boost::optional<double>  vz;                        // speed vector z
 
-    boost::optional<double>  ax;                   // accel vector x
-    boost::optional<double>  ay;                   // accel vector y
-    boost::optional<double>  az;                   // accel vector z
+    boost::optional<double>  ax;                        // accel vector x
+    boost::optional<double>  ay;                        // accel vector y
+    boost::optional<double>  az;                        // accel vector z
 
-    boost::optional<double>  x_stddev;             // position stddev x
-    boost::optional<double>  y_stddev;             // position stddev y
-    boost::optional<double>  xy_cov;               // position xy-covariance value
+    boost::optional<double>  x_stddev;                  // position stddev x
+    boost::optional<double>  y_stddev;                  // position stddev y
+    boost::optional<double>  xy_cov;                    // position xy-covariance value
 
-    boost::optional<double>  vx_stddev;            // velocity stddev x
-    boost::optional<double>  vy_stddev;            // velocity stddev y
+    boost::optional<double>  vx_stddev;                 // velocity stddev x
+    boost::optional<double>  vy_stddev;                 // velocity stddev y
 
-    boost::optional<double>  ax_stddev;            // accel stddev x
-    boost::optional<double>  ay_stddev;            // accel stddev y
+    boost::optional<double>  ax_stddev;                 // accel stddev x
+    boost::optional<double>  ay_stddev;                 // accel stddev y
 
-    boost::optional<float>   Q_var;                // optional mm-specific process noise variance
-    boost::optional<float>   Q_var_interp;         // optional mm-specific process noise variance for interpolation
+    boost::optional<float>   Q_var;                     // optional mm-specific process noise variance
+    boost::optional<float>   Q_var_interp;              // optional mm-specific process noise variance for interpolation
 };
 
 }  // namespace reconstruction

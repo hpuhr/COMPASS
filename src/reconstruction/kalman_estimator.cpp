@@ -100,9 +100,10 @@ kalman::Matrix KalmanEstimator::Settings::immMInit() const
 */
 void KalmanEstimator::StepInfo::reset()
 {
-    result       = StepResult::Success;
-    kalman_error = kalman::KalmanError::NoError;
-    proj_changed = false;
+    result            = StepResult::Success;
+    kalman_error      = kalman::KalmanError::NoError;
+    reinit_after_fail = false;
+    proj_changed      = false;
 }
 
 /**
@@ -774,6 +775,14 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStep(kalman::KalmanUpdate& up
 
     step_info_.result = result;
 
+    if (result == KalmanEstimator::StepResult::Success)
+    {
+        if (step_info_.reinit_after_fail)
+            assert(step_info_.kalman_error != kalman::KalmanError::NoError);
+        else
+            assert(step_info_.kalman_error == kalman::KalmanError::NoError);
+    }
+
     return result;
 }
 
@@ -833,6 +842,8 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
             {
                 //reinit to new measurement
                 kalmanInterfaceReinit(update, mm);
+
+                step_info_.reinit_after_fail = true;
             }
             else if (settings_.step_fail_strategy == Settings::StepFailStrategy::ReturnInvalid)
             {

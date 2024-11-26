@@ -128,9 +128,10 @@ public:
         void reset();
         bool isOk() const;
 
-        StepResult          result       = StepResult::Success; 
-        kalman::KalmanError kalman_error = kalman::KalmanError::NoError;
-        bool                proj_changed = false;
+        StepResult          result            = StepResult::Success; 
+        kalman::KalmanError kalman_error      = kalman::KalmanError::NoError;
+        bool                reinit_after_fail = false;
+        bool                proj_changed      = false;
     };
 
     typedef std::vector<kalman::KalmanUpdate> Updates;

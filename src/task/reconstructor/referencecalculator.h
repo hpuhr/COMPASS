@@ -74,7 +74,12 @@ struct ReferenceCalculatorTargetReferences
     boost::optional<size_t>               start_index;
 
     size_t num_updates                 = 0;
+    size_t num_updates_ccoeff_corr     = 0;
     size_t num_updates_valid           = 0;
+    size_t num_updates_raf             = 0; //reinit after fail
+    size_t num_updates_raf_numeric     = 0;
+    size_t num_updates_raf_badstate    = 0;
+    size_t num_updates_raf_other       = 0;
     size_t num_updates_failed          = 0;
     size_t num_updates_failed_numeric  = 0;
     size_t num_updates_failed_badstate = 0;

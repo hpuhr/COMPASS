@@ -176,7 +176,8 @@ public:
                            const std::map<Key, ReferenceCalculatorInputInfo>* input_infos,  
                            const std::vector<QPointF>* fail_pos = nullptr,
                            const std::vector<QPointF>* skip_pos = nullptr,
-                           const std::map<Key, kalman::RTSDebugInfo>* rts_debug_infos = nullptr);
+                           const std::map<Key, kalman::RTSDebugInfo>* rts_debug_infos = nullptr, 
+                           bool debug = false);
     void addAnnotationData(const std::string& name,
                            const AnnotationStyle& style,
                            const boost::optional<AnnotationStyle>& style_osg,

@@ -149,6 +149,7 @@ std::string Measurement::asString(const std::string& prefix) const
 
     ss << prefix << "source_id:    " << (source_id.has_value() ? std::to_string(source_id.value()) : "-") << std::endl;
     ss << prefix << "interp:       " << mm_interp << std::endl;
+    ss << prefix << "pos acc corr: " << pos_acc_corrected << std::endl;
     ss << prefix << "pos wgs84:    " << lat << ", " << lon << std::endl;
     ss << prefix << "pos cart:     " << x << ", " << y << ", " << alt_str << " (" << x_stddev_str << ", " << y_stddev_str << ", " << xy_cov_str << ")" << std::endl;
     ss << prefix << "velocity:     " << vx_str << ", " << vy_str << " (" << vx_stddev_str << ", " << vy_stddev_str << ")" << std::endl;

@@ -57,6 +57,10 @@ public:
 
             num_rec_updates                 = 0;
             num_rec_updates_valid           = 0;
+            num_rec_updates_raf             = 0;
+            num_rec_updates_raf_numeric     = 0;
+            num_rec_updates_raf_badstate    = 0;
+            num_rec_updates_raf_other       = 0;
             num_rec_updates_failed          = 0;
             num_rec_updates_failed_numeric  = 0;
             num_rec_updates_failed_badstate = 0;
@@ -90,7 +94,12 @@ public:
         size_t num_chain_predictions_proj_changed    = 0;
 
         size_t num_rec_updates                 = 0;
+        size_t num_rec_updates_ccoeff_corr     = 0;
         size_t num_rec_updates_valid           = 0;
+        size_t num_rec_updates_raf             = 0; //reinit after fail
+        size_t num_rec_updates_raf_numeric     = 0;
+        size_t num_rec_updates_raf_badstate    = 0;
+        size_t num_rec_updates_raf_other       = 0;
         size_t num_rec_updates_failed          = 0;
         size_t num_rec_updates_failed_numeric  = 0;
         size_t num_rec_updates_failed_badstate = 0;

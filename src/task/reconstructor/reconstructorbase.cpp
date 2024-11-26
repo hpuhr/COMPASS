@@ -778,11 +778,16 @@ void ReconstructorBase::processSlice()
         std::string num_chain_predictions_fixed_p           = perc(stats.num_chain_predictions_fixed          , stats.num_chain_predictions       );
         std::string num_chain_predictions_proj_changed_p    = perc(stats.num_chain_predictions_proj_changed   , stats.num_chain_predictions       );
 
+        std::string num_rec_updates_ccoeff_corr_p     = perc(stats.num_rec_updates_ccoeff_corr    , stats.num_rec_updates       );
         std::string num_rec_updates_valid_p           = perc(stats.num_rec_updates_valid          , stats.num_rec_updates       );
         std::string num_rec_updates_failed_p          = perc(stats.num_rec_updates_failed         , stats.num_rec_updates       );
         std::string num_rec_updates_failed_numeric_p  = perc(stats.num_rec_updates_failed_numeric , stats.num_rec_updates_failed);
         std::string num_rec_updates_failed_badstate_p = perc(stats.num_rec_updates_failed_badstate, stats.num_rec_updates_failed);
         std::string num_rec_updates_failed_other_p    = perc(stats.num_rec_updates_failed_other   , stats.num_rec_updates_failed);
+        std::string num_rec_updates_raf_p             = perc(stats.num_rec_updates_raf            , stats.num_rec_updates       );
+        std::string num_rec_updates_raf_numeric_p     = perc(stats.num_rec_updates_raf_numeric    , stats.num_rec_updates_raf   );
+        std::string num_rec_updates_raf_badstate_p    = perc(stats.num_rec_updates_raf_badstate   , stats.num_rec_updates_raf   );
+        std::string num_rec_updates_raf_other_p       = perc(stats.num_rec_updates_raf_other      , stats.num_rec_updates_raf   );
         std::string num_rec_updates_skipped_p         = perc(stats.num_rec_updates_skipped        , stats.num_rec_updates       );
         std::string num_rec_smooth_steps_failed_p     = perc(stats.num_rec_smooth_steps_failed    , stats.num_rec_updates       );
 
@@ -818,18 +823,23 @@ void ReconstructorBase::processSlice()
                << "\n"
                << " * Rec updates:\n"
                << "\n" 
-               << "   valid:   " << stats.num_rec_updates_valid                << " (" << num_rec_updates_valid_p           << ")\n"
-               << "   failed:  " << stats.num_rec_updates_failed               << " (" << num_rec_updates_failed_p          << ")\n"
-               << "      numeric:   " << stats.num_rec_updates_failed_numeric  << " (" << num_rec_updates_failed_numeric_p  << ")\n"
-               << "      bad state: " << stats.num_rec_updates_failed_badstate << " (" << num_rec_updates_failed_badstate_p << ")\n"
-               << "      other:     " << stats.num_rec_updates_failed_other    << " (" << num_rec_updates_failed_other_p    << ")\n"
-               << "   skipped: " << stats.num_rec_updates_skipped              << " (" << num_rec_updates_skipped_p         << ")\n"
-               << "   total:   " << stats.num_rec_updates                                                                   <<  "\n"
+               << "   ccoeff corr:       " << stats.num_rec_updates_ccoeff_corr     << " (" << num_rec_updates_ccoeff_corr_p     << ")\n"
+               << "   valid:             " << stats.num_rec_updates_valid           << " (" << num_rec_updates_valid_p           << ")\n"
+               << "   failed:            " << stats.num_rec_updates_failed          << " (" << num_rec_updates_failed_p          << ")\n"
+               << "      numeric:        " << stats.num_rec_updates_failed_numeric  << " (" << num_rec_updates_failed_numeric_p  << ")\n"
+               << "      bad state:      " << stats.num_rec_updates_failed_badstate << " (" << num_rec_updates_failed_badstate_p << ")\n"
+               << "      other:          " << stats.num_rec_updates_failed_other    << " (" << num_rec_updates_failed_other_p    << ")\n"
+               << "   reinit after fail: " << stats.num_rec_updates_raf             << " (" << num_rec_updates_raf_p             << ")\n"
+               << "      numeric:        " << stats.num_rec_updates_raf_numeric     << " (" << num_rec_updates_raf_numeric_p     << ")\n"
+               << "      bad state:      " << stats.num_rec_updates_raf_badstate    << " (" << num_rec_updates_raf_badstate_p    << ")\n"
+               << "      other:          " << stats.num_rec_updates_raf_other       << " (" << num_rec_updates_raf_other_p       << ")\n"
+               << "   skipped:           " << stats.num_rec_updates_skipped         << " (" << num_rec_updates_skipped_p         << ")\n"
+               << "   total:             " << stats.num_rec_updates                                                              <<  "\n"
                << "\n"
                << " * Rec smooth steps:\n" 
                << "\n"
-               << "   failed steps:   " << stats.num_rec_smooth_steps_failed << " (" << num_rec_smooth_steps_failed_p << ")\n"
-               << "   failed targets: " << stats.num_rec_smooth_target_failed << "\n"
+               << "   failed steps:   " << stats.num_rec_smooth_steps_failed  << " (" << num_rec_smooth_steps_failed_p << ")\n"
+               << "   failed targets: " << stats.num_rec_smooth_target_failed                                          <<  "\n"
                << "\n"
                << " * Rec interp steps:\n"
                << "\n" 
@@ -1361,6 +1371,23 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
 
     mm.ax_stddev = acc_acc.ax_stddev_;
     mm.ay_stddev = acc_acc.ay_stddev_;
+
+    //fix invalid correlation coefficient
+    const double ccoeff     = pos_acc.xy_cov_ / (pos_acc.x_stddev_ * pos_acc.y_stddev_);
+    const double eps        = 1e-09;
+    const double ccoeff_min = -1.0 + eps;
+    const double ccoeff_max =  1.0 - eps;
+
+    if (!std::isfinite(ccoeff) || ccoeff < ccoeff_min || ccoeff > ccoeff_max)
+    {
+        const double stddev_mean = pos_acc.avgStdDev();
+
+        mm.x_stddev = stddev_mean;
+        mm.y_stddev = stddev_mean;
+        mm.xy_cov   = 0.0;
+
+        mm.pos_acc_corrected = true;
+    }
 }
 
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
