@@ -5,37 +5,23 @@
 
 using namespace Utils;
 
-// const double SimpleAccuracyEstimator::PosAccStdDevDefault = 100.0;
-// const dbContent::targetReport::PositionAccuracy SimpleAccuracyEstimator::PosAccStdDefault
-//     { SimpleAccuracyEstimator::PosAccStdDevDefault, SimpleAccuracyEstimator::PosAccStdDevDefault, 0};
-
-// const double SimpleAccuracyEstimator::VelAccStdDevDefault = 30.0;
-// const double SimpleAccuracyEstimator::VelAccStdDevDefaultCAT021 = 10.0;
-// const double SimpleAccuracyEstimator::VelAccStdDevDefaultCAT062 = 20.0;
-
-// const dbContent::targetReport::VelocityAccuracy SimpleAccuracyEstimator::VelAccStdDefault
-//     { SimpleAccuracyEstimator::VelAccStdDevDefault, SimpleAccuracyEstimator::VelAccStdDevDefault};
-// const dbContent::targetReport::VelocityAccuracy SimpleAccuracyEstimator::VelAccStdDefaultCAT021
-//     { SimpleAccuracyEstimator::VelAccStdDevDefaultCAT021, SimpleAccuracyEstimator::VelAccStdDevDefaultCAT021};
-// const dbContent::targetReport::VelocityAccuracy SimpleAccuracyEstimator::VelAccStdDefaultCAT062
-// { SimpleAccuracyEstimator::VelAccStdDevDefaultCAT062, SimpleAccuracyEstimator::VelAccStdDevDefaultCAT062};
-
-
-// const double SimpleAccuracyEstimator::AccAccStdDevDefault = 30.0;
-// const double SimpleAccuracyEstimator::AccAccStdDevDefaultCAT021 = 10.0;
-// const double SimpleAccuracyEstimator::AccAccStdDevDefaultCAT062 = 20.0;
-
-// const dbContent::targetReport::AccelerationAccuracy SimpleAccuracyEstimator::AccAccStdDefault
-//     { SimpleAccuracyEstimator::AccAccStdDevDefault, SimpleAccuracyEstimator::AccAccStdDevDefault};
-// const dbContent::targetReport::AccelerationAccuracy SimpleAccuracyEstimator::AccAccStdDefaultCAT021
-//     { SimpleAccuracyEstimator::AccAccStdDevDefaultCAT021, SimpleAccuracyEstimator::AccAccStdDevDefaultCAT021};
-// const dbContent::targetReport::AccelerationAccuracy SimpleAccuracyEstimator::AccAccStdDefaultCAT062
-//     { SimpleAccuracyEstimator::AccAccStdDevDefaultCAT062, SimpleAccuracyEstimator::AccAccStdDevDefaultCAT062};
-
-
 SimpleAccuracyEstimator::SimpleAccuracyEstimator()
+    : unspecific_pos_acc_fallback_(dbContent::targetReport::PositionAccuracy(
+          reconstructor_->settings().unspecific_pos_acc_fallback_,
+          reconstructor_->settings().unspecific_pos_acc_fallback_, 0)),
+    no_pos_acc_fallback_(dbContent::targetReport::PositionAccuracy(
+          reconstructor_->settings().no_value_acc_fallback_,
+          reconstructor_->settings().no_value_acc_fallback_, 0)),
+    unspecifc_vel_acc_fallback_ (dbContent::targetReport::VelocityAccuracy(
+          reconstructor_->settings().unspecifc_vel_acc_fallback_,
+          reconstructor_->settings().unspecifc_vel_acc_fallback_)),
+    no_vel_acc_fallback_ (dbContent::targetReport::VelocityAccuracy(
+          reconstructor_->settings().no_value_acc_fallback_,
+          reconstructor_->settings().no_value_acc_fallback_)),
+    no_acc_acc_fallback_ (dbContent::targetReport::AccelerationAccuracy(
+        reconstructor_->settings().no_value_acc_fallback_,
+        reconstructor_->settings().no_value_acc_fallback_))
 {
-
 }
 
 void SimpleAccuracyEstimator::validate (
@@ -56,16 +42,15 @@ dbContent::targetReport::PositionAccuracy SimpleAccuracyEstimator::positionAccur
     if (tr.position_accuracy_)
     {
         if (tr.position_accuracy_->minStdDev() < reconstructor_->settings().numerical_min_std_dev_)
-            return dbContent::targetReport::PositionAccuracy(
-                reconstructor_->settings().numerical_min_std_dev_,
-                reconstructor_->settings().numerical_min_std_dev_, 0);
+            return tr.position_accuracy_->getScaledToMinStdDev(reconstructor_->settings().numerical_min_std_dev_);
 
         return *tr.position_accuracy_;
     }
 
-    return dbContent::targetReport::PositionAccuracy(
-        reconstructor_->settings().no_value_acc_fallback_,
-        reconstructor_->settings().no_value_acc_fallback_, 0);
+    if (tr.position_)
+        return unspecific_pos_acc_fallback_;
+    else
+        return no_pos_acc_fallback_;
 }
 
 dbContent::targetReport::VelocityAccuracy SimpleAccuracyEstimator::velocityAccuracy (
@@ -74,38 +59,19 @@ dbContent::targetReport::VelocityAccuracy SimpleAccuracyEstimator::velocityAccur
     if (tr.velocity_accuracy_)
     {
         if (tr.velocity_accuracy_->minStdDev() < reconstructor_->settings().numerical_min_std_dev_)
-            return dbContent::targetReport::VelocityAccuracy(
-                reconstructor_->settings().numerical_min_std_dev_,
-                reconstructor_->settings().numerical_min_std_dev_);
+            return tr.velocity_accuracy_->getScaledToMinStdDev(reconstructor_->settings().numerical_min_std_dev_);
 
         return *tr.velocity_accuracy_;
     }
 
-    //unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
-
     if (tr.velocity_)
-        return dbContent::targetReport::VelocityAccuracy(
-            reconstructor_->settings().unspecifc_vel_acc_fallback_,
-            reconstructor_->settings().unspecifc_vel_acc_fallback_);
+        return unspecifc_vel_acc_fallback_;
     else
-        return dbContent::targetReport::VelocityAccuracy(
-            reconstructor_->settings().no_value_acc_fallback_,
-            reconstructor_->settings().no_value_acc_fallback_);
+        return no_vel_acc_fallback_;
 }
 
 dbContent::targetReport::AccelerationAccuracy SimpleAccuracyEstimator::accelerationAccuracy (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
-    // unsigned int dbcont_id = Number::recNumGetDBContId(tr.record_num_);
-
-    // if (dbcont_id == 21)
-    //     return AccAccStdDefaultCAT021;
-    // else if (dbcont_id == 62)
-    //     return AccAccStdDefaultCAT062;
-    // else
-    //     return AccAccStdDefault;
-
-    return dbContent::targetReport::AccelerationAccuracy(
-        reconstructor_->settings().no_value_acc_fallback_,
-        reconstructor_->settings().no_value_acc_fallback_);
+    return no_acc_acc_fallback_;
 }

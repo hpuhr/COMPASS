@@ -23,12 +23,13 @@ Reference trajectories are calculated based on available sensors and System Trac
    \end{itemize}
 \end{itemize}  
 
-\section{Workflow}
-
 For optimal performance, the processing of the target reports and reconstruction is time-sliced. In (commonly) 15 minute intervals, all target reports are loaded, associated to UTNs, references are calculated and written to the database, after which the next time-slice is loaded. \\
 
 In the 'Probabilistic + IMM' reconstructor, each data slice is processed multiple times, to re-estimate correctable bias' as well as rescale target report accuracies. \\
 
+\subfile{reconstructor_config}
+
+\section{Workflow}
 For each processed slice, the following general steps are performed:
 
 \begin{itemize}
@@ -55,164 +56,7 @@ For each processed slice, the following general steps are performed:
 \end{itemize}
 \ \\
 
-\section{Dialog}
 
-\subsection{Common}
-
-\subsubsection{Main}
-
-\begin{figure}[H]
-    \center
-      \includegraphics[width=16cm]{figures/dialog_main.png}
-    \caption{Calculate References Main}
-\end{figure}
-
-In the main tab, the following parameters can be set:
-
-\begin{itemize}
-\item Data Source: Data source to be created for calculated references
-    \begin{itemize}
-    \item Name, SAC, SIC: Data source parameters
-    \item Line ID: Line ID to be used
-    \end{itemize}
-\item Data Timeframe: Time window of data to be processed
-    \begin{itemize}
-    \item Begin / End timestamps
-    \end{itemize}
-\item Data Slicing: Time slice sizes
-    \begin{itemize}
-    \item Slice Length: Duration of a time slice
-    \item Slice Overlap Length: Duration of an overlap region to "glue" slices together
-    \end{itemize}
-\item Delete All Calculated Reference Trajectories: If active, all previous calculated references are deleted
-\item Skip Writing of Reference Trajectories: If active, calculated references are not written into the database, only the associations
-\end{itemize}
-\ \\
-
-\subsubsection{Data Sources}
-
-\begin{figure}[H]
-    \center
-      \includegraphics[width=16cm]{figures/dialog_data_sources.png}
-    \caption{Calculate References Data Sources}
-\end{figure}
-
-In this tab, the data sources to contribute to the calculated references can be selected. \\
-
-Please \textbf{note} that de-selected data sources are still associated, but only their target report positions do not contribute to the references.
-
-\subsection{Scoring + UMKalman Parameters}
-
-\subsubsection{Association}
-
-\begin{figure}[H]
-    \center
-      \includegraphics[width=16cm]{figures/dialog_scorum_assoc.png}
-    \caption{Scoring + UMKalman Association Parameters}
-\end{figure}
-
-In this tab, the association parameters can be set, i.e. the thresholds used to associate target reports to targets, or targets to targets. \\
-
-\begin{table}[H]
-  \center
-  \begin{tabularx}{\textwidth}{ | l | l | X |}
-    \hline
-    \textbf{Parameter} & \textbf{Default} &  \textbf{Description} \\ \hline
-    Maximum Comparison Time Difference [s] & 15 & Maximum time delta for any code/position comparison \\ \hline
-    Maximum Quit Distance [m] & 18520 & Target/target association \\ \hline
-    Maximum Dubious Distance [m] & 5556 & Target/target association \\ \hline
-    Maximum Acceptable Distance [m] & 1852 & Target/target association \\ \hline
-    Maximum Altitude Difference [ft] & 300 & Maximum altitude difference \\ \hline
-    Do Track Number Disassoc. Using Distance & false & Whether to disassociated track numbers from targets based on position \\ \hline
-    Track Number Disassoc. Distance Factor [1] & 3 & Maximum number of standard deviations distance \\ \hline
-    Minimum Updates [1] & 2 & Target/target association \\ \hline
-    Minimum Time Overlap Probability [0-1] & 0.1 & Target/target association \\ \hline
-  \end{tabularx}
-\end{table}
-
-\subsubsection{Reference Calculation}
-
-\begin{figure}[H]
-    \center
-      \includegraphics[width=16cm]{figures/dialog_ref_calc.png}
-    \caption{Scoring + UMKalman Reconstruction Parameters}
-\end{figure}
-
-In this tab, the reference calculation parameters can be set, i.e. the Kalman and reconstruction parameters used for position estimation of the references. \\
-
-\begin{table}[H]
-  \center
-  \begin{tabularx}{\textwidth}{ | l | l | X |}
-    \hline
-    \textbf{Parameter} & \textbf{Default} &  \textbf{Description} \\ \hline
-    Process Stddev [m] Ground & 3 & Process noise for ground targets \\ \hline
-    Process Stddev [m] Air & 10 & Process noise for FL400 targets \\ \hline
-    Process Stddev [m] Unknown & 7 & Process noise for targets w/o altitude \\ \hline
-    Maximum Time Step [s] & 11 & Re-init reference if no update available within given time \\ \hline
-    Resample Interval[s] & 2 & Update interval for the resampled reference trajectories \\ \hline
-    Resample Process Stddev [m] Ground & 2 & Resampling process noise for ground targets \\ \hline
-    Resample Process Stddev [m] Air & 5 & Resampling process noise for FL400 targets \\ \hline
-    Resample Process Stddev [m] Unknown & 3 & Resampling process noise for targets w/o altitude \\ \hline    
-    Filter Result References& false & Whether to filter written reference trajectory updates based on maximum position standard deviation \\ \hline
-    Max. Stddev [m] & 150 & Maximum position standard deviation \\ \hline
-  \end{tabularx}
-\end{table}
-
-\subsection{Probabilistic + IMM Parameters}
-
-\subsubsection{Association}
-
-\begin{figure}[H]
-    \center
-      \includegraphics[width=16cm]{figures/dialog_probimm_assoc.png}
-    \caption{Probabilistic + IMM Association Parameters}
-\end{figure}
-
-Please \textbf{note} that a detailed discussion of the given parameters is out of scope for this user manual. For users with a professional license, a dedicated reconstructor user manual appendix is provided.
-
-\subsubsection{Reference Calculation}
-
-\begin{figure}[H]
-    \center
-      \includegraphics[width=16cm]{figures/dialog_ref_calc.png}
-    \caption{Probabilistic + IMM Reconstruction Parameters}
-\end{figure}
-
-Please \textbf{note} that a detailed discussion of the given parameters is out of scope for this user manual. For users with a professional license, a dedicated reconstructor user manual appendix is provided.
-
-\subsubsection{Analyse}
-
-\begin{figure}[H]
-    \center
-      \includegraphics[width=16cm]{figures/dialog_probimm_analyse.png}
-    \caption{Probabilistic + IMM Analysis Parameters}
-\end{figure}
-
-Please \textbf{note} that a detailed discussion of the given parameters is out of scope for this user manual. For users with a professional license, a dedicated reconstructor user manual appendix is provided.
-
-\section{Calculate Unique Targets}
-
-
-The other parameters are discussed in following sub-sections.
-
-\subsubsection{Reference/Tracker UTN Creation}
-
-Track/Track Association Parameters:
-\begin{table}[H]
-  \center
-  \begin{tabularx}{\textwidth}{ | X | l | X |}
-    \hline
-    \textbf{Parameter} & \textbf{Default} &  \textbf{Used In} \\ \hline
-    Maximum Comparison Time Difference [s] & 15.0 & All (maximum time delta for any code/position comparison) \\ \hline
-
-    Maximum Altitude Difference [ft] & 300 & Target/target association \\ \hline
-
-    Max Speed [kts] & 100000 & Dubious target detection \\ \hline
-    Maximum Continuation Time Difference [s] & 30 & Track continuation \\ \hline
-    Maximum Acceptable Continuation Distance [m] & 1852 & Track continuation \\ \hline
-  \end{tabularx}
-\end{table}
-\ \\
 
 The following steps are performed for each Reference/Tracker data source:
 \begin{itemize}
@@ -242,21 +86,6 @@ The following steps are performed for each Reference/Tracker data source:
 \end{itemize}
 \ \\
 
-After creating targets for all Reference/Tracker data sources:
-\begin{itemize}
-\item Find dubious targets
-\item Clean dubious targets (if configured)
-\item Mark/comment dubious targets (if configured)
-\end{itemize}
-\ \\
-
-The exact method discussion will be added at a later time, since the algorithms will be improved to include position accuracy information (error standard deviation etc.) in the near future. \\
-
-After these steps, for each target which can be created by the simple score-based association method will be used to additionally associate sensor target reports (non Reference/Tracker based target reports), as discussed in the next section.
-
-\subsubsection{Sensor UTN Creation}
-
-
 
 The following steps are performed for each sensor data source:
 \begin{itemize}
@@ -276,11 +105,6 @@ The following steps are performed for each sensor data source:
 \end{itemize}
 \ \\
 
-\subsubsection{Dubious Targets}
-
-The dubious target check is solely based on a simple maximum speed given all associated Reference/Tracker target reports. It should be used to detect/mark possibly wrong associations, to investigate such targets later and, if possible, resolve such issues using different parameter values. \\
-
-Please note that in a special case where target reports from difference Reference/Tracker source are very close in time this check can generate a large number of false positives and should be disabled. For this reason the default value was set to a disproportionately high value.
 
 \subsubsection{Discussion}
 
@@ -378,21 +202,21 @@ The following tables describe the existing options.
     \end{tabularx}
 \end{table}
 
-\textit{ADS-B Position Data Usage}:
-\begin{table}[H]
-    \center
-    \begin{tabularx}{\textwidth}{ | l | l | X |}
-        \hline
-        \textbf{Parameter} & \textbf{Default} & \textbf{Description} \\ \hline
-        Only Use MOPS V1 / V2 & enabled & Use only MOPS V1 and V2 ADS-B data \\ \hline
-        Only Use High NUCp / NIC & disabled & Use only ADS-B data larger than NUCp / NIC threshold \\ \hline
-        Minimum Position NUCp / NIC & 4 &  NUCp / NIC threshold \\ \hline
-        Only Use High NACp & enabled & Use only ADS-B data larger than NACp threshold \\ \hline
-        Minimum Position NACp & 4 & NACp threshold \\ \hline
-        Only Use High SIL & disabled & Use only ADS-B data larger than SIL threshold \\ \hline
-        Minimum Position SIL & 1 & SIL threshold \\ \hline
-    \end{tabularx}
-\end{table}
+% \textit{ADS-B Position Data Usage}:
+% \begin{table}[H]
+%     \center
+%     \begin{tabularx}{\textwidth}{ | l | l | X |}
+%         \hline
+%         \textbf{Parameter} & \textbf{Default} & \textbf{Description} \\ \hline
+%         Only Use MOPS V1 / V2 & enabled & Use only MOPS V1 and V2 ADS-B data \\ \hline
+%         Only Use High NUCp / NIC & disabled & Use only ADS-B data larger than NUCp / NIC threshold \\ \hline
+%         Minimum Position NUCp / NIC & 4 &  NUCp / NIC threshold \\ \hline
+%         Only Use High NACp & enabled & Use only ADS-B data larger than NACp threshold \\ \hline
+%         Minimum Position NACp & 4 & NACp threshold \\ \hline
+%         Only Use High SIL & disabled & Use only ADS-B data larger than SIL threshold \\ \hline
+%         Minimum Position SIL & 1 & SIL threshold \\ \hline
+%     \end{tabularx}
+% \end{table}
 
 \subsubsection*{Kalman Settings}
 
