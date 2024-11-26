@@ -1,4 +1,4 @@
-#include "reconstructortaskanalysewidget.h"
+#include "reconstructortaskanalysiswidget.h"
 #include "reconstructortask.h"
 #include "stringconv.h"
 #include "timeconv.h"
@@ -18,7 +18,7 @@ using namespace std;
 using namespace Utils;
 
 
-ReconstructorTaskAnalyseWidget::ReconstructorTaskAnalyseWidget(ReconstructorTask& task, QWidget *parent)
+ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(ReconstructorTask& task, QWidget *parent)
     : QWidget{parent}, task_(task)
 {
     bool add_debug_stuff = !COMPASS::isAppImage() || COMPASS::instance().expertMode();
@@ -33,25 +33,25 @@ ReconstructorTaskAnalyseWidget::ReconstructorTaskAnalyseWidget(ReconstructorTask
     combo_layout->addRow("Analyse Reconstruction", debug_check_);
 
     utns_edit_ = new QLineEdit();
-    connect(utns_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalyseWidget::utnsChangedSlot);
+    connect(utns_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalysisWidget::utnsChangedSlot);
 
     if (add_debug_stuff)
         combo_layout->addRow("Debug UTNs", utns_edit_);
 
     rec_nums_edit_ = new QLineEdit();
-    connect(rec_nums_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalyseWidget::recNumsChangedSlot);
+    connect(rec_nums_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalysisWidget::recNumsChangedSlot);
 
     if (add_debug_stuff)
         combo_layout->addRow("Debug Record Numbers", rec_nums_edit_);
 
     timestamp_min_edit_ = new QLineEdit();
-    connect(timestamp_min_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalyseWidget::timestampsChanged);
+    connect(timestamp_min_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalysisWidget::timestampsChanged);
 
     if (add_debug_stuff)
         combo_layout->addRow("Debug Timestamp Min.", timestamp_min_edit_);
 
     timestamp_max_edit_ = new QLineEdit();
-    connect(timestamp_max_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalyseWidget::timestampsChanged);
+    connect(timestamp_max_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalysisWidget::timestampsChanged);
 
     if (add_debug_stuff)
         combo_layout->addRow("Debug Timestamp Max.", timestamp_max_edit_);
@@ -129,11 +129,11 @@ ReconstructorTaskAnalyseWidget::ReconstructorTaskAnalyseWidget(ReconstructorTask
     updateValues();
 }
 
-ReconstructorTaskAnalyseWidget::~ReconstructorTaskAnalyseWidget()
+ReconstructorTaskAnalysisWidget::~ReconstructorTaskAnalysisWidget()
 {
 }
 
-void ReconstructorTaskAnalyseWidget::updateValues()
+void ReconstructorTaskAnalysisWidget::updateValues()
 {
     loginf << "ReconstructorTaskDebugWidget: updateValues";
 
@@ -218,7 +218,7 @@ void ReconstructorTaskAnalyseWidget::updateValues()
         task_.debugSettings().debug_write_reconstruction_viewpoints_);
 }
 
-void ReconstructorTaskAnalyseWidget::utnsChangedSlot(const QString& value)
+void ReconstructorTaskAnalysisWidget::utnsChangedSlot(const QString& value)
 {
     loginf << "ReconstructorTaskDebugWidget: utnsChangedSlot: value '" << value.toStdString() << "'";
 
@@ -243,7 +243,7 @@ void ReconstructorTaskAnalyseWidget::utnsChangedSlot(const QString& value)
     task_.debugSettings().debug_utns_ = values_tmp;
 }
 
-void ReconstructorTaskAnalyseWidget::recNumsChangedSlot(const QString& value)
+void ReconstructorTaskAnalysisWidget::recNumsChangedSlot(const QString& value)
 {
     loginf << "ReconstructorTaskDebugWidget: recNumsChangedSlot: value '" << value.toStdString() << "'";
 
@@ -268,7 +268,7 @@ void ReconstructorTaskAnalyseWidget::recNumsChangedSlot(const QString& value)
     task_.debugSettings().debug_rec_nums_ = values_tmp;
 }
 
-void ReconstructorTaskAnalyseWidget::timestampsChanged()
+void ReconstructorTaskAnalysisWidget::timestampsChanged()
 {
     auto checkTimestamp = [ & ] (QLineEdit* line_edit)
     {

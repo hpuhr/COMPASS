@@ -7,7 +7,7 @@
 #include "referencecalculatorwidget.h"
 #include "datasourcesusewidget.h"
 #include "reconstructortask.h"
-#include "reconstructortaskanalysewidget.h"
+#include "reconstructortaskanalysiswidget.h"
 #include "compass.h"
 
 #include <QCheckBox>

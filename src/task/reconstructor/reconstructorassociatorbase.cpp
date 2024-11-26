@@ -154,7 +154,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
     unsigned long rec_num;
     int utn;
 
-    bool do_debug = false;
+    bool do_debug_rec_num = false;
 
     reconstructor().targets_container_.checkACADLookup();
 
@@ -188,17 +188,17 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         assert (reconstructor().target_reports_.count(rec_num));
 
-        do_debug = reconstructor().task().debugSettings().debug_association_ &&
+        do_debug_rec_num = reconstructor().task().debugSettings().debug_association_ &&
                    reconstructor().task().debugSettings().debugRecNum(rec_num);
 
-        if (do_debug)
+        if (do_debug_rec_num)
             loginf << "DBG tr " << rec_num;
 
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
 
         if (!tr.in_current_slice_)
         {
-            if (do_debug)
+            if (do_debug_rec_num)
                 loginf << "DBG tr " << rec_num << " not in current slice";
 
             continue;
@@ -206,7 +206,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         if (reconstructor().acc_estimator_->canCorrectPosition(tr))
         {
-            if (do_debug)
+            if (do_debug_rec_num)
                 loginf << "DBG correcting position";
 
             reconstructor().acc_estimator_->correctPosition(tr);
@@ -216,29 +216,33 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
         is_unreliable_primary_only = tr.dbcont_id_ != 62 && tr.dbcont_id_  != 255 && tr.isPrimaryOnlyDetection();
 
-        if (do_debug)
+        if (do_debug_rec_num)
             loginf << "is_unreliable_primary_only " << is_unreliable_primary_only;
 
         if (!is_unreliable_primary_only) // if unreliable primary only, delay association until retry
         {
-            if (do_debug)
+            if (do_debug_rec_num)
                 loginf << "DBG !is_unreliable_primary_only finding UTN";
 
             utn = findUTNFor(tr);
 
-            if (do_debug || reconstructor().task().debugSettings().debugUTN(utn))
+            if (do_debug_rec_num
+                || (reconstructor().task().debugSettings().debug_association_ &&
+                    reconstructor().task().debugSettings().debugUTN(utn)))
                 loginf << "DBG !is_unreliable_primary_only got UTN " << utn;
         }
 
         if (utn != -1) // estimate accuracy and associate
         {
-            if (do_debug || reconstructor().task().debugSettings().debugUTN(utn))
-                loginf << "DBG associating tr " << rec_num << " to UTN " << utn;
+            bool do_debug_utn = reconstructor().task().debugSettings().debug_association_ &&
+                                reconstructor().task().debugSettings().debugUTN(utn);
 
+            if (do_debug_rec_num || do_debug_utn)
+                loginf << "DBG associating tr " << rec_num << " to UTN " << utn;
 
             associate(tr, utn);
 
-            if (do_debug || reconstructor().task().debugSettings().debugUTN(utn))
+            if (do_debug_rec_num || do_debug_utn)
             {
                 assert (reconstructor().targets_container_.targets_.count(utn));
 
@@ -248,7 +252,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
         }
         else // not associated
         {
-            if (do_debug)
+            if (do_debug_rec_num)
                 loginf << "DBG adding to unassoc_rec_nums_";
 
             unassoc_rec_nums_.push_back(rec_num);
@@ -303,7 +307,8 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
         if (utn != -1) // estimate accuracy and associate
         {
-            if (reconstructor().task().debugSettings().debugUTN(utn))
+            if (reconstructor().task().debugSettings().debug_association_
+                && reconstructor().task().debugSettings().debugUTN(utn))
                 loginf << "DBG associating (dbcont_ids) tr " << rec_num << " to UTN " << utn;
 
             associate(tr, utn);
@@ -496,7 +501,8 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
         if (utn != -1) // estimate accuracy and associate
         {
-            if (reconstructor().task().debugSettings().debugUTN(utn))
+            if (reconstructor().task().debugSettings().debug_association_
+                && reconstructor().task().debugSettings().debugUTN(utn))
                 loginf << "DBG retry-associating tr " << rec_num << " to UTN " << utn;
 
             associate(tr, utn);

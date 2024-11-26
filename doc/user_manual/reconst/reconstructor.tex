@@ -59,6 +59,8 @@ For each processed slice, the following general steps are performed:
 
 \subsection{Common}
 
+\subsubsection{Main}
+
 \begin{figure}[H]
     \center
       \includegraphics[width=16cm]{figures/dialog_main.png}
@@ -87,6 +89,8 @@ In the main tab, the following parameters can be set:
 \end{itemize}
 \ \\
 
+\subsubsection{Data Sources}
+
 \begin{figure}[H]
     \center
       \includegraphics[width=16cm]{figures/dialog_data_sources.png}
@@ -98,6 +102,8 @@ In this tab, the data sources to contribute to the calculated references can be 
 Please \textbf{note} that de-selected data sources are still associated, but only their target report positions do not contribute to the references.
 
 \subsection{Scoring + UMKalman Parameters}
+
+\subsubsection{Association}
 
 \begin{figure}[H]
     \center
@@ -121,6 +127,8 @@ Please \textbf{note} that de-selected data sources are still associated, but onl
     Minimum Time Overlap Probability [0-1] & 0.1 & Target/target association \\ \hline
   \end{tabularx}
 \end{table}
+
+\subsubsection{Reference Calculation}
 
 \begin{figure}[H]
     \center
@@ -148,17 +156,40 @@ Please \textbf{note} that de-selected data sources are still associated, but onl
 
 \subsection{Probabilistic + IMM Parameters}
 
+\subsubsection{Association}
+
 \begin{figure}[H]
     \center
       \includegraphics[width=16cm]{figures/dialog_probimm_assoc.png}
     \caption{Probabilistic + IMM Association Parameters}
 \end{figure}
 
+\subsubsection{Reference Calculation}
+
 \begin{figure}[H]
     \center
       \includegraphics[width=16cm]{figures/dialog_ref_calc.png}
     \caption{Probabilistic + IMM Reconstruction Parameters}
 \end{figure}
+
+\begin{table}[H]
+  \center
+  \begin{tabularx}{\textwidth}{ | l | l | X |}
+    \hline
+    \textbf{Parameter} & \textbf{Default} &  \textbf{Description} \\ \hline
+    Process Stddev [m] Ground & 3 & Process noise for ground targets \\ \hline
+    Process Stddev [m] Air & 10 & Process noise for FL400 targets \\ \hline
+    Process Stddev [m] Unknown & 7 & Process noise for targets w/o altitude \\ \hline
+    Maximum Time Step [s] & 11 & Re-init reference if no update available within given time \\ \hline
+    Resample Process Stddev [m] Ground & 2 & Resampling process noise for ground targets \\ \hline
+    Resample Process Stddev [m] Air & 5 & Resampling process noise for FL400 targets \\ \hline
+    Resample Process Stddev [m] Unknown & 3 & Resampling process noise for targets w/o altitude \\ \hline    
+    Filter Result References& false & Whether to filter written reference trajectory updates based on maximum position standard deviation \\ \hline
+    Max. Stddev [m] & 150 & Maximum position standard deviation \\ \hline
+  \end{tabularx}
+\end{table}
+
+\subsubsection{Analyse}
 
 \begin{figure}[H]
     \center
