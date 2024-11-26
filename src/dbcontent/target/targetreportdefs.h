@@ -153,6 +153,7 @@ struct VelocityAccuracy
     VelocityAccuracy() = default;
     VelocityAccuracy(double vx_stddev, double vy_stddev) : vx_stddev_(vx_stddev), vy_stddev_(vy_stddev) {}
 
+    double minStdDev() const { return std::min(vx_stddev_, vy_stddev_); }
     double maxStdDev() const { return std::max(vx_stddev_, vy_stddev_); }
 
     double vx_stddev_ {0}; // m/s
@@ -164,6 +165,7 @@ struct AccelerationAccuracy
     AccelerationAccuracy() = default;
     AccelerationAccuracy(double ax_stddev, double ay_stddev) : ax_stddev_(ax_stddev), ay_stddev_(ay_stddev) {}
 
+    double minStdDev() const { return std::min(ax_stddev_, ay_stddev_); }
     double maxStdDev() const { return std::max(ax_stddev_, ay_stddev_); }
 
     double ax_stddev_ {0}; // m/s^2

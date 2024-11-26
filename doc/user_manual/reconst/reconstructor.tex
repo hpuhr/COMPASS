@@ -111,6 +111,8 @@ Please \textbf{note} that de-selected data sources are still associated, but onl
     \caption{Scoring + UMKalman Association Parameters}
 \end{figure}
 
+In this tab, the association parameters can be set, i.e. the thresholds used to associate target reports to targets, or targets to targets. \\
+
 \begin{table}[H]
   \center
   \begin{tabularx}{\textwidth}{ | l | l | X |}
@@ -136,6 +138,8 @@ Please \textbf{note} that de-selected data sources are still associated, but onl
     \caption{Scoring + UMKalman Reconstruction Parameters}
 \end{figure}
 
+In this tab, the reference calculation parameters can be set, i.e. the Kalman and reconstruction parameters used for position estimation of the references. \\
+
 \begin{table}[H]
   \center
   \begin{tabularx}{\textwidth}{ | l | l | X |}
@@ -145,6 +149,7 @@ Please \textbf{note} that de-selected data sources are still associated, but onl
     Process Stddev [m] Air & 10 & Process noise for FL400 targets \\ \hline
     Process Stddev [m] Unknown & 7 & Process noise for targets w/o altitude \\ \hline
     Maximum Time Step [s] & 11 & Re-init reference if no update available within given time \\ \hline
+    Resample Interval[s] & 2 & Update interval for the resampled reference trajectories \\ \hline
     Resample Process Stddev [m] Ground & 2 & Resampling process noise for ground targets \\ \hline
     Resample Process Stddev [m] Air & 5 & Resampling process noise for FL400 targets \\ \hline
     Resample Process Stddev [m] Unknown & 3 & Resampling process noise for targets w/o altitude \\ \hline    
@@ -152,7 +157,6 @@ Please \textbf{note} that de-selected data sources are still associated, but onl
     Max. Stddev [m] & 150 & Maximum position standard deviation \\ \hline
   \end{tabularx}
 \end{table}
-
 
 \subsection{Probabilistic + IMM Parameters}
 
@@ -164,6 +168,8 @@ Please \textbf{note} that de-selected data sources are still associated, but onl
     \caption{Probabilistic + IMM Association Parameters}
 \end{figure}
 
+Please \textbf{note} that a detailed discussion of the given parameters is out of scope for this user manual. For users with a professional license, a dedicated reconstructor user manual appendix is provided.
+
 \subsubsection{Reference Calculation}
 
 \begin{figure}[H]
@@ -172,22 +178,7 @@ Please \textbf{note} that de-selected data sources are still associated, but onl
     \caption{Probabilistic + IMM Reconstruction Parameters}
 \end{figure}
 
-\begin{table}[H]
-  \center
-  \begin{tabularx}{\textwidth}{ | l | l | X |}
-    \hline
-    \textbf{Parameter} & \textbf{Default} &  \textbf{Description} \\ \hline
-    Process Stddev [m] Ground & 3 & Process noise for ground targets \\ \hline
-    Process Stddev [m] Air & 10 & Process noise for FL400 targets \\ \hline
-    Process Stddev [m] Unknown & 7 & Process noise for targets w/o altitude \\ \hline
-    Maximum Time Step [s] & 11 & Re-init reference if no update available within given time \\ \hline
-    Resample Process Stddev [m] Ground & 2 & Resampling process noise for ground targets \\ \hline
-    Resample Process Stddev [m] Air & 5 & Resampling process noise for FL400 targets \\ \hline
-    Resample Process Stddev [m] Unknown & 3 & Resampling process noise for targets w/o altitude \\ \hline    
-    Filter Result References& false & Whether to filter written reference trajectory updates based on maximum position standard deviation \\ \hline
-    Max. Stddev [m] & 150 & Maximum position standard deviation \\ \hline
-  \end{tabularx}
-\end{table}
+Please \textbf{note} that a detailed discussion of the given parameters is out of scope for this user manual. For users with a professional license, a dedicated reconstructor user manual appendix is provided.
 
 \subsubsection{Analyse}
 
@@ -197,6 +188,7 @@ Please \textbf{note} that de-selected data sources are still associated, but onl
     \caption{Probabilistic + IMM Analysis Parameters}
 \end{figure}
 
+Please \textbf{note} that a detailed discussion of the given parameters is out of scope for this user manual. For users with a professional license, a dedicated reconstructor user manual appendix is provided.
 
 \section{Calculate Unique Targets}
 

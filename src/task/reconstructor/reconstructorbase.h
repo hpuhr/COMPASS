@@ -105,6 +105,15 @@ class ReconstructorBaseSettings
 
     static const unsigned int REC_DS_SAC = 255;
     static const unsigned int REC_DS_SIC = 1;
+
+    // fallback accuracies
+    double numerical_min_std_dev_ {1E-3};
+
+    float unspecific_pos_acc_fallback_ {1000};
+    float unspecifc_vel_acc_fallback_ {50};
+    float unspecifc_acc_acc_fallback_ {10};
+
+    float no_value_acc_fallback_ {10000};
 };
 
 /**
