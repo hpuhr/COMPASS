@@ -482,7 +482,8 @@ void HistogramViewDataWidget::zoomToSubrange(unsigned int index1, unsigned int i
 
         //update raw data and chart
         compileRawDataFromGenerator();
-        updateChart();
+        
+        redrawData(false);
     } 
 }
 
