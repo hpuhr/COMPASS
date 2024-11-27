@@ -149,6 +149,8 @@ void ReconstructorTask::updateFeatures()
 
     if (!license_manager.componentEnabled(license::License::ComponentProbIMMReconstructor) && currentReconstructorStr() == ProbImmReconstructorName)
         currentReconstructorStr(ScoringUMReconstructorName);
+    else if (license_manager.componentEnabled(license::License::ComponentProbIMMReconstructor) && currentReconstructorStr() != ProbImmReconstructorName)
+        currentReconstructorStr(ProbImmReconstructorName);
 }
 
 bool ReconstructorTask::canRun()

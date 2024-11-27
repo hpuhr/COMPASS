@@ -68,12 +68,8 @@ struct ReferenceCalculatorSettings
 
         settings.verbosity = activeVerbosity() >= 2 ? activeVerbosity() - 1 : 0;
 
-        // settings.step_fail_strategy = allow_invalid_updates ? reconstruction::KalmanEstimator::Settings::StepFailStrategy::ReturnInvalid :
-        //                                                       reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
-
         settings.step_fail_strategy = allow_invalid_updates ? reconstruction::KalmanEstimator::Settings::StepFailStrategy::Reinit :
                                                               reconstruction::KalmanEstimator::Settings::StepFailStrategy::Assert;
-
 
         settings.fix_predictions        = fix_predictions;
         settings.fix_predictions_interp = fix_predictions_interp;
