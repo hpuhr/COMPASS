@@ -38,6 +38,7 @@ class ReconstructorTaskAnalysisWidget : public QWidget
     QLineEdit* timestamp_max_edit_{nullptr};
 
     QCheckBox* debug_association_check_{nullptr};
+    QCheckBox* debug_outliers_check_{nullptr};
     QCheckBox* debug_accuracy_est_check_{nullptr};
     QCheckBox* debug_bias_correction_check_{nullptr};
     QCheckBox* debug_geo_altitude_correction_check_{nullptr};
