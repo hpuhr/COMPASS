@@ -53,7 +53,7 @@ For each processed slice, the following general steps are performed:
 \end{itemize}
 \ \\
 
-There are several algorithmic features of interest, which are described in the following chapters, but deeper discussion is ouside the scope of this document.
+There are several algorithmic features of interest, which are described in the following chapters, but deeper discussion is outside the scope of this document.
 
 \subsection{Associate Target Reports to Targets}
 
@@ -66,33 +66,42 @@ The following steps are performed for each target report:
 \begin{itemize}
 \item Ignoring "00000000", "????????", "        " values
 \end{itemize}
-\item CAT062/Reference Trajectory Track number
+\item CAT062/Reference Trajectory Track number (data source + line specific)
 \end{itemize}
 \item Otherwise, associate by matching Mode A/C and position
 \item Otherwise, associate by position only
+\item If a matching target is found, the best match is used for association
+\item If no matching target is found
+\begin{itemize}
+\item If the target report has Mode S address/identification or a reliable Track Number, a new target is created
+\item Otherwise no association is made (stored for later retry-association)
 \end{itemize}
 \ \\
 
-If a match can be made, the target report is associated to the specific UTN, which in turn (can) update the respective lookup lists.
+If a match can be made, the match is verified - e.g. the matching based on Track Number can be changed if e.g. the time difference to the last target update is larger than the 'Maximum Track Time Difference' parameter, or of the distance threshold is larger than the 'Track Number Disassoc. Distance Factor', assuming the 'Do Track Number Disassoc. Using Distance' is set. \\
+
+If still valid, the target report is associated to the specific UTN, which in turn updates the respective lookup lists.
 
 \subsubsection{Position Matching}
-sdf
+
+For considering a position match, a position score is calculated for each target report, to all possible targets. In the case of 'Scoring + UMKalman', the distance offsets (target report to interpolated target position at time of target report) are compared to the 'Maximum Acceptable Offset', and only associated to the best match if within such a distance.
 
 \subsubsection{New Target Creation}
-sdf2
+
+When creating a new target using a target report, the secondary attributes are stored in the lookup lists of targets.
 
 \subsection{Self-associate New Targets}
 
+For all newly created targets, matching other targets are checked if a positive score would allow merging the target pair. This allows merging created targets even if single target reports (e.g. during the somewhat unstable beginning of tracking) did not allow for it.
+
 \begin{itemize}
-\item Per-source target to common target association (target/target association)
-\item Score-based approach
-\item Associates new per-source targets to existing targets based on
+\item Associate new per-source targets to existing targets based on
 \begin{itemize}
 \item Mode S address
 \item Time overlap
-\item Mode A code(s) similiarity (only if minimum time overlap is given)
-\item Mode C code(s) similiarity (only if Mode A similiarity is given)
-\item Position similiarity (only if Mode A/C similiarity is given)
+\item Mode A code(s) similarity (only if minimum time overlap is given)
+\item Mode C code(s) similarity (only if Mode A similarity is given)
+\item Position similarity
 \end{itemize}
 \end{itemize}
 \ \\
@@ -107,11 +116,7 @@ The following steps are performed for each sensor data source:
 \item Mode C code similiarity (if present)
 \item Position similiarity
 \end{itemize}
-\item If a matching target is found, the best match is used for association
-\item If no matching target is found
-\begin{itemize}
-\item If the target report has Mode S address, a new target is created
-\item Otherwise no association is made
+
 \end{itemize}
 \end{itemize}
 \ \\

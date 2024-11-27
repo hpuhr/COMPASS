@@ -48,12 +48,12 @@ SimpleReconstructorAssociationWidget::SimpleReconstructorAssociationWidget(
     //    QLineEdit* max_distance_quit_tracker_edit_{nullptr};
     ++row;
 
-    layout->addWidget(new QLabel("Maximum Quit Distance [m]"), row, 0);
+    layout->addWidget(new QLabel("Maximum Erroneous Distance [m]"), row, 0);
 
-    max_distance_quit_edit_ = new QLineEdit();
-    connect(max_distance_quit_edit_, &QLineEdit::textEdited,
-            this, &SimpleReconstructorAssociationWidget::maxDistanceQuitEditedSlot);
-    layout->addWidget(max_distance_quit_edit_, row, 1);
+    max_distance_notok_edit_ = new QLineEdit();
+    connect(max_distance_notok_edit_, &QLineEdit::textEdited,
+            this, &SimpleReconstructorAssociationWidget::maxDistanceNotOKEditedSlot);
+    layout->addWidget(max_distance_notok_edit_, row, 1);
 
     //    QLineEdit* max_distance_dubious_tracker_edit_{nullptr};
     ++row;
@@ -154,8 +154,8 @@ void SimpleReconstructorAssociationWidget::updateValues()
     max_time_diff_tracker_edit_->setValue(reconstructor_.settings().track_max_time_diff_);
 
     //    QLineEdit* max_distance_quit_tracker_edit_{nullptr};
-    assert (max_distance_quit_edit_);
-    max_distance_quit_edit_->setText(QString::number(reconstructor_.settings().max_distance_quit_));
+    assert (max_distance_notok_edit_);
+    max_distance_notok_edit_->setText(QString::number(reconstructor_.settings().max_distance_notok_));
 
     //    QLineEdit* max_distance_dubious_tracker_edit_{nullptr};
     assert (max_distance_dubious_edit_);
@@ -215,20 +215,20 @@ void SimpleReconstructorAssociationWidget::maxTimeDiffTrackerEditedSlot (int val
     reconstructor_.settings().track_max_time_diff_ = value;
 }
 
-void SimpleReconstructorAssociationWidget::maxDistanceQuitEditedSlot (const QString& text)
+void SimpleReconstructorAssociationWidget::maxDistanceNotOKEditedSlot (const QString& text)
 {
     string value_str = text.toStdString();
 
-    loginf << "SimpleReconstructorAssociationWidget: maxDistanceQuitEditedSlot: value '" << value_str << "'";
+    loginf << "SimpleReconstructorAssociationWidget: maxDistanceNotOKEditedSlot: value '" << value_str << "'";
 
     bool ok;
 
     double value = text.toDouble(&ok);
 
     if (ok)
-        reconstructor_.settings().max_distance_quit_ = value;
+        reconstructor_.settings().max_distance_notok_ = value;
     else
-        logwrn << "SimpleReconstructorAssociationWidget: maxDistanceQuitEditedSlot: unable to parse value '"
+        logwrn << "SimpleReconstructorAssociationWidget: maxDistanceNotOKEditedSlot: unable to parse value '"
                << value_str << "'";
 }
 
