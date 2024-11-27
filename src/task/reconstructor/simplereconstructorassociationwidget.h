@@ -16,8 +16,9 @@ class SimpleReconstructorAssociationWidget : public QWidget
 public slots:
 
     void maxTimeDiffEditedSlot (const QString& text);
+    void maxTimeDiffTrackerEditedSlot (int value);
 
-    void maxDistanceQuitEditedSlot (const QString& text);
+    void maxDistanceNotOKEditedSlot (const QString& text);
     void maxDistanceDubiousEditedSlot (const QString& text);
     void maxDistanceAcceptableEditedSlot (const QString& text);
     void maxAltitudeDiffEditedSlot (const QString& text);
@@ -44,8 +45,9 @@ private:
 
     // tracker
     QLineEdit* max_time_diff_edit_{nullptr};
+    QSpinBox* max_time_diff_tracker_edit_{nullptr};
 
-    QLineEdit* max_distance_quit_edit_{nullptr};
+    QLineEdit* max_distance_notok_edit_{nullptr};
     QLineEdit* max_distance_dubious_edit_{nullptr};
     QLineEdit* max_positions_dubious_edit_{nullptr};
     QLineEdit* max_distance_acceptable_edit_{nullptr};

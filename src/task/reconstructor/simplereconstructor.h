@@ -11,7 +11,7 @@ class SimpleReconstructorSettings : public ReconstructorBaseSettings
   public:
     SimpleReconstructorSettings() {};
 
-    double max_distance_quit_ {5*NM2M};
+    double max_distance_notok_ {5*NM2M};
     double max_distance_dubious_ {2*NM2M};
     double max_distance_acceptable_ {1*NM2M};
 };

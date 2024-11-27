@@ -235,7 +235,7 @@ SimpleAssociator::checkPositionOffsetScore (double distance_m, double sum_stddev
 
     DistanceClassification classif;
 
-    if (distance_m > settings.max_distance_quit_)
+    if (distance_m > settings.max_distance_notok_)
         classif = DistanceClassification::Distance_NotOK;
     else if (distance_m > settings.max_distance_dubious_)
         classif = DistanceClassification::Distance_Dubious;

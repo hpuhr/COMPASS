@@ -62,7 +62,8 @@ In this tab, the association parameters can be set, i.e. the thresholds used to 
     \hline
     \textbf{Parameter} & \textbf{Default} &  \textbf{Description} \\ \hline
     Maximum Comparison Time Difference [s] & 15 & Maximum time delta for any code/position comparison \\ \hline
-    Maximum Quit Distance [m] & 18520 & Target/target association \\ \hline
+    Maximum Track Time Difference [s] & 300 & Maximum time delta to a previously associated track \\ \hline
+    Maximum Erroneous Distance [m] & 18520 & Target/target association \\ \hline
     Maximum Dubious Distance [m] & 5556 & Target/target association \\ \hline
     Maximum Acceptable Distance [m] & 1852 & Target/target association \\ \hline
     Maximum Altitude Difference [ft] & 300 & Maximum altitude difference \\ \hline
@@ -74,6 +75,7 @@ In this tab, the association parameters can be set, i.e. the thresholds used to 
 \end{table}
 
 \subsubsection{Reference Calculation}
+\label{sec:reconst_scorum_ref_calc} 
 
 \begin{figure}[H]
     \center
@@ -121,7 +123,7 @@ Please \textbf{note} that a detailed discussion of the given parameters is out o
     \caption{Probabilistic + IMM Reconstruction Parameters}
 \end{figure}
 
-Please \textbf{note} that a detailed discussion of the given parameters is out of scope for this user manual. For users with a professional license, a dedicated reconstructor user manual appendix is provided.
+The given parameters are the same as discussed as with the 'Scoring + UMKalman' chapter, please refer to \nameref{sec:reconst_scorum_ref_calc} for details.
 
 \subsubsection{Analyse}
 
