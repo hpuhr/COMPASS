@@ -125,6 +125,15 @@ std::string BaseInfo::asStr() const
     return ss.str();
 }
 
+PositionAccuracy PositionAccuracy::getScaledToMinStdDev (double min_std_dev) const
+{
+    PositionAccuracy ret = *this;
+
+    ret.scaleToMinStdDev(min_std_dev);
+
+    return ret;
+}
+
 void PositionAccuracy::scaleToMinStdDev(double min_stddev)
 {
     // Check if either standard deviation is below the minimum threshold
@@ -153,6 +162,44 @@ void PositionAccuracy::scaleToMinStdDev(double min_stddev)
         }
     }
 }
+
+VelocityAccuracy VelocityAccuracy::getScaledToMinStdDev (double min_std_dev) const
+{
+    VelocityAccuracy ret = *this;
+
+    ret.scaleToMinStdDev(min_std_dev);
+
+    return ret;
+}
+
+void VelocityAccuracy::scaleToMinStdDev(double min_stddev)
+{
+    // Check if either standard deviation is below the minimum threshold
+    if (vx_stddev_ < min_stddev || vy_stddev_ < min_stddev) {
+        // Calculate the scaling factor to bring the smallest sigma up to min_stddev
+        double scale_factor_x = (vx_stddev_ < min_stddev) ? min_stddev / vx_stddev_ : 1.0;
+        double scale_factor_y = (vy_stddev_ < min_stddev) ? min_stddev / vy_stddev_ : 1.0;
+
+        // Use the larger scaling factor to maintain the relative covariance structure
+        double scale_factor = std::max(scale_factor_x, scale_factor_y);
+
+        // Apply scaling
+        if (std::isfinite(scale_factor))
+        {
+            vx_stddev_ *= scale_factor;
+            vy_stddev_ *= scale_factor;
+        }
+        else
+        {
+            if (vx_stddev_ < min_stddev)
+                vx_stddev_ = min_stddev;
+
+            if (vy_stddev_ < min_stddev)
+                vy_stddev_ = min_stddev;
+        }
+    }
+}
+
 
 
 boost::optional<targetReport::Position>& ReconstructorInfo::position()

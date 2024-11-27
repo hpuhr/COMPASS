@@ -554,7 +554,7 @@ void ReconstructorAssociatorBase::associate(
     tr.is_pos_outlier_ = false;
 
     if (!tr.doNotUsePosition())
-        reconstructor().acc_estimator_->doOutlierDetection(tr, utn, do_debug); //124976,129072
+        reconstructor().acc_estimator_->doOutlierDetection(tr, utn); //124976,129072
 
     // if (do_debug)
     //     loginf << "DBG addTargetReport";

@@ -117,6 +117,8 @@ class PositionAccuracy
     double minStdDev() const { return std::min(x_stddev_, y_stddev_); }
     double maxStdDev() const { return std::max(x_stddev_, y_stddev_); }
 
+
+    PositionAccuracy getScaledToMinStdDev (double min_std_dev) const;
     void scaleToMinStdDev(double min_stddev);
 
     std::string asStr() const;
@@ -155,6 +157,9 @@ struct VelocityAccuracy
 
     double minStdDev() const { return std::min(vx_stddev_, vy_stddev_); }
     double maxStdDev() const { return std::max(vx_stddev_, vy_stddev_); }
+
+    VelocityAccuracy getScaledToMinStdDev (double min_std_dev) const;
+    void scaleToMinStdDev(double min_stddev);
 
     double vx_stddev_ {0}; // m/s
     double vy_stddev_ {0}; // m/s

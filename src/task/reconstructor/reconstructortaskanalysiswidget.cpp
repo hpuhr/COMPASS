@@ -63,6 +63,13 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(ReconstructorTa
     if (add_debug_stuff)
         combo_layout->addRow("Debug Association", debug_association_check_);
 
+    debug_outliers_check_= new QCheckBox();
+    connect(debug_outliers_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().debug_outlier_detection_ = ok; });
+
+    if (add_debug_stuff)
+        combo_layout->addRow("Debug Outlier Detection", debug_outliers_check_);
+
     // acc est
 
     debug_accuracy_est_check_ = new QCheckBox();
@@ -179,6 +186,9 @@ void ReconstructorTaskAnalysisWidget::updateValues()
 
     assert (debug_association_check_);
     debug_association_check_->setChecked(task_.debugSettings().debug_association_);
+
+    assert (debug_outliers_check_);
+    debug_outliers_check_->setChecked(task_.debugSettings().debug_outlier_detection_);
 
     // acc est
 
