@@ -43,9 +43,6 @@ For each processed slice, the following general steps are performed:
     \item Mode S Address, Mode S Identification, Reliable Track Number
     \end{itemize}
    \item Otherwise, associate by matching Mode A/C and position
-    \begin{itemize}  
-    \item Ignoring conspicuity codes
-    \end{itemize}    
    \item Otherwise, associate by position only
    \end{itemize}
 \item Self-associate new targets (find matching UTNs created by the same target)
@@ -56,21 +53,36 @@ For each processed slice, the following general steps are performed:
 \end{itemize}
 \ \\
 
+There are several algorithmic features of interest, which are described in the following chapters, but deeper discussion is ouside the scope of this document.
 
+\subsection{Associate Target Reports to Targets}
 
-The following steps are performed for each Reference/Tracker data source:
+The following steps are performed for each target report:
 \begin{itemize}
-\item Per-source target creation
+\item Check if association can be made using lookup lists of targets based on
 \begin{itemize}
-\item Create new list of targets based on
-\begin{itemize}
-\item Track number
 \item Mode S address
-\item Mode A/C, time difference, position difference (track continuation)
+\item Mode S identification
+\begin{itemize}
+\item Ignoring "00000000", "????????", "        " values
 \end{itemize}
-\item Find dubious targets (dubious target detection)
-\item Clean dubious targets (if configured)
+\item CAT062/Reference Trajectory Track number
 \end{itemize}
+\item Otherwise, associate by matching Mode A/C and position
+\item Otherwise, associate by position only
+\end{itemize}
+\ \\
+
+If a match can be made, the target report is associated to the specific UTN, which in turn (can) update the respective lookup lists.
+
+\subsubsection{Position Matching}
+sdf
+
+\subsubsection{New Target Creation}
+sdf2
+
+\subsection{Self-associate New Targets}
+
 \begin{itemize}
 \item Per-source target to common target association (target/target association)
 \item Score-based approach
@@ -81,7 +93,6 @@ The following steps are performed for each Reference/Tracker data source:
 \item Mode A code(s) similiarity (only if minimum time overlap is given)
 \item Mode C code(s) similiarity (only if Mode A similiarity is given)
 \item Position similiarity (only if Mode A/C similiarity is given)
-\end{itemize}
 \end{itemize}
 \end{itemize}
 \ \\
