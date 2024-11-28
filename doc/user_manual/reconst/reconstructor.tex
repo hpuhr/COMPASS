@@ -97,38 +97,99 @@ For all newly created targets, matching other targets are checked if a positive 
 \begin{itemize}
 \item Associate new per-source targets to existing targets based on
 \begin{itemize}
-\item Mode S address
-\item Time overlap
-\item Mode A code(s) similarity (only if minimum time overlap is given)
-\item Mode C code(s) similarity (only if Mode A similarity is given)
+\item Minimum time overlap: 'Minimum Time Overlap Probability' parameter
+\item Mode A code(s) similarity
+\item Mode C code(s) similarity: 'Maximum Altitude Difference' parameter
 \item Position similarity
+\begin{itemize}
+\item Count number of updates being in different distances: \#Erroneous, \#Dubious, \#Acceptable
+\item Minimum number of updates checked: 'Minimum Updates' parameter
+\item Associate if probability of erroneous and dubious are not too high
+\end{itemize}
 \end{itemize}
 \end{itemize}
 \ \\
 
+\subsection{Discussion}
 
-The following steps are performed for each sensor data source:
+The user should be aware that, while this association feature is quite capable, it is still somewhat limited. It strongly depends on the correctness of Mode S addresses/identification, as well as the Tracker information (track number, secondary information and position information). If the mentioned information is erroneous, the made association will be sub-optimal or plainly wrong. \\
+
+Also, for association of non-Mode S target reports a trade-off has to be made in the 'Maximum Acceptable Distance' parameter, especially if they are primary-only. It should be set within the limits of Reference/Tracker error plus maximum sensor error (which can still include radar bias') and the used target separation minima. This is of course not well-suited for strongly different sensors accuracies and separations (e.g. when mixing ground and air surveillance data). \\
+
+\section{Probabilistic + IMM Features}
+
+Without going into detail, in this section a short overview is given over the capabilities of the advanced reconstructor. The main improvements are:
+
 \begin{itemize}
-\item Find possible target in existing target list based on
+\item Rescaling accuracies
 \begin{itemize}
-\item Mode S address
-\item Mode A code similiarity (if present)
-\item Mode C code similiarity (if present)
-\item Position similiarity
+\item Assess / verify accuracy of tracked data sources
+\item Assess / verify accuracy of ADS-B position quality indicators, per transponders
+\item Estimate radar plot position accuracy
+\item Using parameters based models as well as 2D accuracy maps
+\end{itemize}
+\item Correct Radar bias': Estimate and correct azimuth bias, range bias \& gain
+\item Use ADS-B geometric altitude for slant-range correction
+\begin{itemize}
+\item Method based on published paper: \href{https://doi.org/10.3390/engproc2022028008}{'Usage of Geometric Altitude for Radar Plot Position Improvements' by H. Puhr, MDPI 2022}
+\item Use geometric altitudes of ADS-B data for improved slant-range correction (over using barometric altitudes)
+\end{itemize}
+\item Do position outlier checks: Associate but do not use outlier positions
+\begin{itemize}
+\item Based on estimated target position estimate accuracy and (re-scaled) target report accuracy
+\end{itemize}
+\item Use Risky ADS-B: (disabled by default) Estimate ADS-B accuracy of transponders without usable position quality indicators
+\begin{itemize}
+\item Only usable if 'Rescaling Accuracies' is enabled
+\end{itemize}
+\item Generally: Do not use static position thresholds, but probabilistic ones
+\item System Tracker Spline interpolation: Generate 1-second updates to compensate for high-update-rate data sources
+\begin{itemize}
+\item Mahalanobis distances based on accuracy estimates
+\end{itemize}
+\item Improved reconstruction algorithms for reference reconstruction
+\begin{itemize}
+\item \textbf{I}nteracting \textbf{M}ultiple \textbf{M}odels (IMM) filter
+\item \textbf{R}auch-\textbf{T}ung-\textbf{S}triebel (RTS) smoother
+\end{itemize}
 \end{itemize}
 
-\end{itemize}
-\end{itemize}
-\ \\
+\subsection{Radar Plot Position Improvements}
 
+Using the features mentioned above, the 'Correct Radar Bias' and the 'Use ADS-B geometric altitude for slant-range correction' features can result in the following real-life position improvements: median org (original) error vs. median cor (corrected) error in [meters], for 10 different Radars:
 
-\subsubsection{Discussion}
-
-The user should be aware that, while this association feature is quite an improvement over the previous method, it is still somewhat limited. It strongly depends on the correctness of Mode S addresses, as well as the Reference/Tracker information (track number, secondary information and position information). If the mentioned information is erroneous, the made association will be sub-optimal or plainly wrong. \\
-
-For the Sensor UTN Creation, the correctness of the associations strongly depends again on the Mode S address as well as the quality of the assocations made in the Reference/Tracker UTN Creation. \\
-
-Also, for association of non Mode S sensor target reports a trade-off has to be made in the 'Maximum Acceptable Distance' parameter, especially if they are primary-only. It should be set within the limits of Reference/Tracker error plus maximum sensor error (which can still include radar bias') and the used target separation minima. This is of course not well-suited for strongly different sensors accuracies and seperations (e.g. when mixing ground and air surveillance data). \\
+\begin{lstlisting}
+Rad1 estimateXYStdDev: median error
+	 org avg 70.29 mad 34.20
+	 cor avg 65.18 mad 32.13 cnt 6476
+Rad2 estimateXYStdDev: median error
+	 org avg 59.40 mad 31.81
+	 cor avg 48.79 mad 29.69 cnt 22571
+Rad3 estimateXYStdDev: median error
+	 org avg 136.98 mad 57.03
+	 cor avg 65.69 mad 34.90 cnt 25725
+Rad4 estimateXYStdDev: median error
+	 org avg 73.16 mad 33.48
+	 cor avg 62.76 mad 34.57 cnt 26050
+Rad5 estimateXYStdDev: median error
+	 org avg 102.84 mad 54.71
+	 cor avg 95.01 mad 61.07 cnt 27595
+Rad6 estimateXYStdDev: median error
+	 org avg 65.04 mad 34.69
+	 cor avg 63.29 mad 38.70 cnt 30520
+Rad7 estimateXYStdDev: median error
+	 org avg 120.52 mad 57.49
+	 cor avg 60.03 mad 33.67 cnt 34208
+Rad8 estimateXYStdDev: median error
+	 org avg 132.39 mad 88.92
+	 cor avg 123.45 mad 79.81 cnt 33445
+Rad9 estimateXYStdDev: median error
+	 org avg 114.86 mad 56.14
+	 cor avg 75.72 mad 46.94 cnt 35744
+Rad10 estimateXYStdDev: median error
+	 org avg 71.64 mad 32.46
+	 cor avg 47.39 mad 24.76 cnt 39444
+\end{lstlisting}
 
 \subsubsection{Running}
 
