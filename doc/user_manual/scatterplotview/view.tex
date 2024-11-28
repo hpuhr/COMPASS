@@ -28,12 +28,14 @@ To load the data the mechanism described in Section \nameref{sec:ui_overview} or
 \end{figure}
 
 The values of the selected variables are used for positioning on the x-axis and y-axis. For each value pair a data point is generated. 
-In the current example the WGS-84 meta-variables 'Longitude' and 'Latitude' are used, showing a similar view as the Geographic View.
-The color of each data point is defined by the DBContent it belongs to.\\
+In the current example the WGS-84 meta-variables 'Longitude' and 'Latitude' are used, showing a similar view as the Geographic View. \\
+
+Data points are grouped and colored by the data source and line ID they belong to. 
+The data points belonging to a certain line ID of a data source thus form an individual scatter data item with an assigned unique color.
 
 %TODO_V7 i think here it would be immensely important to tell the user why he might not see any data at all when selecting variables from two different DBContents!
 
-On the bottom of the plot a legend is shown, giving the total counts of all data points.
+%On the right side of the plot a legend is shown, giving the total counts of all data points.
 
 \section{Usage}
 
@@ -71,9 +73,21 @@ The others provide general actions by which the view can be modified.
 
 \subsection{Config Tab}
 
-The selection controls on the top define which data variables are used to generate data points for the x/y-axis. Such a variable can be any numerical variable. A reload operation might be required for the selection to take effect. \\
+The selection controls on the top define which data variables are used to generate data points for the x/y-axis. 
+Such a variable can be any numerical variable. A reload operation might be required for the selection to take effect. \\
 
-Please note that visualization of evaluation result data is currently not implemented.
+If available, plottable scatter data of active View Points can be visualized by checking the 'Show Annotations' box. 
+If multiple scatter annotations are present in a View Point, these individual plots can be selected using the 'Plot' combo box.
+Plottable annotations might further be grouped into so-called plot groups, which are listed under 'Plot Group'.
+The plot group can be switched in case multiple plot groups are available.
+
+%\hl{TODO}
+%Please note that visualization of evaluation result data is currently not implemented.
+
+\subsection{Scatter Data Item List}
+
+Below the config tab, there is a list of all currently displayed scatter data items, shown with their respective color, name and data count.
+Individual data items can be shown or hidden by using the check boxes.
 
 \subsection{Scatterplot}
 
@@ -87,7 +101,7 @@ If the 'Select' tool is active, data can be selected. Using the left mouse-butto
   \caption{Scatterplot View data selection}
 \end{figure}
 
-The selected data is then presented in an extra 'Selected' entry in the legend, showing the count of all selected data points.
+The selected data is then presented in an extra 'Selected' item in the scatter data list.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -106,7 +120,7 @@ By pressing the 'Control' key while selecting, the newly selected data is added 
 
 \subsubsection{Zoom to Rectangle Tool}
 
-Using the 'Zoom to Rectangle' tool, the left mouse-button can be used to select a rectangular region, to which a zoom operation is performed.
+Using the 'Zoom to Rectangle' tool, the left mouse-button can be used to select a rectangular region, to which a zoom operation is performed. \\
 
 \subsubsection{General Zoom}
 
