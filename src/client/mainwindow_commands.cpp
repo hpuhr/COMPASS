@@ -54,7 +54,7 @@ REGISTER_RTCOMMAND(main_window::RTCommandImportGPSTrail)
 REGISTER_RTCOMMAND(main_window::RTCommandImportSectorsJSON)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateRadarPlotPositions)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateARTASAssociations)
-REGISTER_RTCOMMAND(main_window::RTCommandCalculateReferences)
+REGISTER_RTCOMMAND(RTCommandReconstructReferences::RTCommandReconstructReferences)
 REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
 REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
 REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
@@ -82,7 +82,7 @@ void init_commands()
     main_window::RTCommandImportGPSTrail::init();
     main_window::RTCommandImportSectorsJSON::init();
     main_window::RTCommandCalculateRadarPlotPositions::init();
-    main_window::RTCommandCalculateReferences::init();
+    main_window::RTCommandReconstructReferences::init();
     main_window::RTCommandLoadData::init();
     main_window::RTCommandExportViewPointsReport::init();
     main_window::RTCommandEvaluate::init();
@@ -1259,13 +1259,13 @@ bool RTCommandCalculateARTASAssociations::run_impl()
 }
 
 // calc ref
-RTCommandCalculateReferences::RTCommandCalculateReferences()
+RTCommandReconstructReferences::RTCommandReconstructReferences()
     : rtcommand::RTCommand()
 {
     condition.setSignal("compass.taskmanager.reconstructortask.doneSignal", -1); // think about max duration
 }
 
-bool RTCommandCalculateReferences::run_impl()
+bool RTCommandReconstructReferences::run_impl()
 {
     if (!COMPASS::instance().dbOpened())
     {
@@ -1283,7 +1283,7 @@ bool RTCommandCalculateReferences::run_impl()
 
     if(!task.canRun())
     {
-        setResultMessage("Calculate references task can not be run");
+        setResultMessage("Reconstruct references task can not be run");
         return false;
     }
 

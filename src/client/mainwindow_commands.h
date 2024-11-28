@@ -232,14 +232,14 @@ protected:
 };
 
 // calc ref
-struct RTCommandCalculateReferences : public rtcommand::RTCommand
+struct RTCommandReconstructReferences : public rtcommand::RTCommand
 {
-    RTCommandCalculateReferences();
+    RTCommandReconstructReferences();
 
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(calculate_references, "calculate references")
+    DECLARE_RTCOMMAND(reconstruct_references, "reconstruct references")
     DECLARE_RTCOMMAND_NOOPTIONS
 };
 

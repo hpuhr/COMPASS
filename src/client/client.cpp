@@ -168,8 +168,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
             ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
              "calculate radar plot positions")
             ("calculate_artas_tr_usage", po::bool_switch(&calculate_artas_tr_usage_), "associate target reports based on ARTAS usage")
-            ("calculate_references", po::bool_switch(&calculate_references_),
-             "calculate references from sensor and tracker data")
+            ("reconstruct_references", po::bool_switch(&reconstruct_references_),
+             "reconstruct references from sensor and tracker data")
             ("load_data", po::bool_switch(&load_data_), "load data after start")
             ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
              "export view points report after start with given filename, e.g. '/data/db2/report.tex")
@@ -425,8 +425,8 @@ bool Client::run ()
     if (calculate_artas_tr_usage_)
         rt_man.addCommand("calculate_artas_tr_usage");
 
-    if (calculate_references_)
-        rt_man.addCommand("calculate_references");
+    if (reconstruct_references_)
+        rt_man.addCommand("reconstruct_references");
 
     if (load_data_)
         rt_man.addCommand("load_data");
