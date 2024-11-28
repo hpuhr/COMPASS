@@ -61,7 +61,7 @@ GeoTiffInfo GeoTIFFWriter::getInfo(const std::string& fn, bool vmem)
     }
 
     //try to get projection
-    info.geo_srs = std::string(GDALGetProjectionRef(dataset));
+    info.geo_srs = QString::fromUtf8(GDALGetProjectionRef(dataset)).toStdString();
     if (info.geo_srs.empty())
     {
         GDALClose(dataset);

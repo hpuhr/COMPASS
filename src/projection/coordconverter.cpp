@@ -17,6 +17,8 @@
 
 #include "coordconverter.h"
 
+#include <iostream>
+
 #include <ogr_spatialref.h>
 #include <gdal_version.h>
 
@@ -45,18 +47,20 @@ std::vector<boost::optional<QPointF>> CoordConverter::convert(const std::vector<
     sourceSRS.importFromWkt(srs_src.c_str());
     targetSRS.importFromWkt(srs_dst.c_str());
 #elif GDAL_VERSION_MAJOR <= 2
+    char* source_array = new char[srs_src.length()+1];
+    strcpy(source_array, srs_src.c_str()); // Copy the contents of the std::string into the char array
 
-    char* source_arry = new char[srs_src.length()+1];
-    strcpy(source_arry, srs_src.c_str()); // Copy the contents of the std::string into the char array
+    char* target_array = new char[srs_dst.length()+1];
+    strcpy(target_array, srs_dst.c_str()); // Copy the contents of the std::string into the char array
 
-    char* target_arry = new char[srs_dst.length()+1];
-    strcpy(target_arry, srs_dst.c_str()); // Copy the contents of the std::string into the char array
+    char* source_array_in = source_array;
+    char* target_array_in = target_array;
 
-    sourceSRS.importFromWkt(&source_arry);
-    targetSRS.importFromWkt(&target_arry);
+    sourceSRS.importFromWkt(&source_array_in);
+    targetSRS.importFromWkt(&target_array_in);
 
-    delete[] source_arry;
-    delete[] target_arry;
+    delete[] source_array;
+    delete[] target_array;
 #endif
 
     // Create the coordinate transformation
