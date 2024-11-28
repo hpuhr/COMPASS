@@ -101,6 +101,33 @@ std::tuple<double,double,double,double> getStatistics (const T& values)
 
 extern std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values);
 
+template <typename T>
+std::pair<double,double> calculateMeanStdDev (T values, float remove_top=0.0)
+{
+    double mean=0, stddev=0;
+
+    unsigned int num_to_remove = static_cast<size_t>(std::floor(values.size() * remove_top));
+
+    // remove the last num_to_remove elements
+    if (num_to_remove)
+    {
+        std::sort(values.begin(), values.end());
+        values.erase(values.end() - num_to_remove, values.end());
+    }
+
+    double sum = std::accumulate(values.begin(), values.end(), 0.0);
+
+    mean = sum / values.size();
+
+    std::vector<double> diff(values.size());
+    std::transform(values.begin(), values.end(), diff.begin(),
+                   [mean](const double val) { return val - mean; });
+    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    stddev = std::sqrt(sq_sum / values.size());
+
+    return std::pair<double,double>(mean, stddev);
+}
+
 extern double calculateMedian(std::vector<double> data); // worked-on copy
 extern double calculateIQR(std::vector<double> data);
 extern double calculateMAD(std::vector<double> data);
