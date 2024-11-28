@@ -183,7 +183,13 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
     grid2d::GridResolution res = grid2d::GridResolution().setCellCount(settings.grid_resolution, settings.grid_resolution);
 
     grid_.reset(new Grid2D);
-    bool ok = grid_->create(bounds, res);
+
+    std::string err;
+    bool ok = grid_->create(bounds, res, "wgs84", true, &err);
+
+    if (!ok)
+        logerr << "GridViewDataWidget: renderGrid: creation of grid failed: " << err;
+
     assert(ok);
 
     loginf << "GridViewDataWidget: renderGrid: Created grid of " << grid_->numCellsX() << "x" << grid_->numCellsY();

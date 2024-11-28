@@ -52,12 +52,34 @@ bool Grid2D::valid() const
 bool Grid2D::create(const QRectF& roi,
                     const grid2d::GridResolution& resolution,
                     const std::string& srs,
-                    bool srs_is_north_up)
+                    bool srs_is_north_up,
+                    std::string* err)
 {
+    if (err) *err = "";
+
     clear();
 
-    if (roi.isEmpty() || !resolution.valid())
+    if (roi.isEmpty())
+    {
+        if (err) *err = "roi is empty";
         return false;
+    }
+    
+    if (!resolution.valid())
+    {
+        if (err) 
+        {
+            std::stringstream ss;
+            ss << "resolution invalid:" << " nx "     << resolution.num_cells_x 
+                                        << " ny "     << resolution.num_cells_y 
+                                        << " sx "     << resolution.cell_size_x 
+                                        << " sy "     << resolution.cell_size_y
+                                        << " border " << resolution.border
+                                        << " type "   << (int)resolution.type; 
+            *err = ss.str();
+        }
+        return false;
+    }
 
     //compute needed resolution values and adjusted roi
     QRectF roi_adj = resolution.resolution(n_cells_x_,
@@ -66,7 +88,15 @@ bool Grid2D::create(const QRectF& roi,
                                            cell_size_y_,
                                            roi);
     if (roi_adj.isEmpty())
+    {
+        if (err)
+        {
+            std::stringstream ss;
+            ss << "adjusted roi empty: x " << roi_adj.x() << " y " << roi_adj.y() << " w " << roi_adj.width() << " h " << roi_adj.height();
+            *err = ss.str();
+        }
         return false;
+    }
 
     cell_size_x_inv_ = 1.0 / cell_size_x_;
     cell_size_y_inv_ = 1.0 / cell_size_y_;

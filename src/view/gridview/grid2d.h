@@ -52,7 +52,8 @@ public:
     bool create(const QRectF& roi,
                 const grid2d::GridResolution& resolution,
                 const std::string& srs = "wgs84",
-                bool srs_is_north_up = true);
+                bool srs_is_north_up = true,
+                std::string* err = nullptr);
     void clear();
     void reset();
 
