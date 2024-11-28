@@ -67,9 +67,10 @@ Allowed options:
                                         given filename, e.g. 
                                         '/data/sectors.json'
   --calculate_radar_plot_positions      calculate radar plot positions
-  --associate_data                      associate target reports
   --calculate_artas_tr_usage            associate target reports based on ARTAS
                                         usage  
+  --reconstruct_references              reconstruct references from sensor and 
+                                        tracker data
   --load_data                           load data after start
   --export_view_points_report arg       export view points report after start 
                                         with given filename, e.g. 
@@ -224,13 +225,13 @@ Please \textbf{note} that both 'mode\_3a\_code' and 'target\_address' must be gi
 
 After a database was opened, adds the sectors defined in supplied filename using the task described in \nameref{sec:ui_configure_sectors_manage}.
 
-\subsection{--associate\_data}
-
-After a database with imported content exists, create target report associations using the task described in \nameref{sec:ui_associate_tr}.
-
 \subsection{--calculate\_artas\_tr\_usage}
 
 After a database with imported content exists, target report association can be calculated based on ARTAS tracks using the task described in \nameref{sec:ui_associate_tr_artas}.
+
+\subsection{--reconstruct\_references}
+
+After a database with imported content exists, reconstruct reference trajectories using the task described in \nameref{sec:reconst}.
 
 \subsection{--load\_data}
 
