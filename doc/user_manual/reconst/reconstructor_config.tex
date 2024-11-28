@@ -103,6 +103,12 @@ In this tab, the reference calculation parameters can be set, i.e. the Kalman an
   \end{tabularx}
 \end{table}
 
+Result resampling is be enabled in order to obtain reference trajectories with a homogeneous sample rate. 
+It is carried out by interpolating the Kalman states at fixed time-steps. The accuracy of the resulting samples
+follows the Kalman accuracies more closely when interpolating near the endpoints of a segment, and it will decrease
+in the middle of a segment. The amount of decrease of accuracy will depend on the time duration of the segment and the used 
+process standard deviation (parameter \textit{Resample Process Stddev}).
+
 \subsection{Probabilistic + IMM Parameters}
 
 \subsubsection{Association}
