@@ -604,6 +604,7 @@ The 'sizes' of the ellipses are provided as value triples (Standard deviation X,
 \textbf{Note} that coordinates always need to be provided as WGS84 latitude and longitude. \\
 
 \paragraph{GeoImage} The 'geoimage' feature displays image data with additional information about its geographic location.
+At the moment only GeoTIFF files are supported.
 
 \begin{lstlisting}[basicstyle=\small\ttfamily]
 {
@@ -611,26 +612,16 @@ The 'sizes' of the ellipses are provided as value triples (Standard deviation X,
         {
             "type": "geoimage",
 
-            "source":                      // Image data source
+            "source": // Image data source
             {
                 "fn": "/path/to/my/image/file.tif"
             },
-
-            "reference":                   // Description of the spatial reference system the image is embedded in
-            {
-                "srs": "epsg:3857",        // EPSG code of the spatial reference system (SRS), e.g. WGS84 Pseudo-Mercator
-                "img_origin_x": 16.37208,  // X-coordinate of the upper left image corner in the given SRS, usually its easting, e.g. WGS84 longitude
-                "img_origin_y": 48.20849,  // Y-coordinate of the upper left image corner in the given SRS, usually its northing, e.g. WGS84 latitude
-                "img_pixel_size_x": 1,     // Width of a pixel in units of the SRS, e.g. 1m
-                "img_pixel_size_y": 1,     // Height of a pixel in units of the SRS, e.g. 1m
-                "is_north_up": true        // Flag indicating if the SRS is north-up, usually 'true'
-            } 
         }
         ...
 }
 \end{lstlisting}
 
-TODO: Figure
+%TODO: Figure
 
 %\begin{figure}[H]
 %    \center
@@ -638,38 +629,38 @@ TODO: Figure
 %    \caption{View Point Annotations - Text} 
 %\end{figure}
 
-\paragraph{Histogram} The 'histogram' feature displays custom histogram data. 
-Such a histogram may contain multiple data layers of the same resolution, which can be
-displayed simultaneously e.g. in HistogramView.
+% \paragraph{Histogram} The 'histogram' feature displays custom histogram data. 
+% Such a histogram may contain multiple data layers of the same resolution, which can be
+% displayed simultaneously in HistogramView.
 
-\begin{lstlisting}[basicstyle=\small\ttfamily]
-{
-        ...
-        {
-            "type": "histogram",
+% \begin{lstlisting}[basicstyle=\small\ttfamily]
+% {
+%         ...
+%         {
+%             "type": "histogram",
 
-            "layers":                                     // Histogram layers, each layer must obtain the same number of bins
-            [
-                {
-                    "name": "Layer1",                     // Display name for the histogram layer
-                    "bins":                               // Histogram bins
-                    [
-                        // Bin count and a display label describing the bin, e.g. a numerical value or a certain category/state
-                        { "count": 100, "label": "1.1" }, 
-                        { "count": 100, "label": "1.2" },
-                        { "count": 100, "label": "1.3" },
-                        ...
-                    ],
-                    "color": "#AA00FF"                    // Display color for the layer
-                },
-                ...
-            ]
-        }
-        ...
-}
-\end{lstlisting}
+%             "layers":                                     // Histogram layers, each layer must obtain the same number of bins
+%             [
+%                 {
+%                     "name": "Layer1",                     // Display name for the histogram layer
+%                     "bins":                               // Histogram bins
+%                     [
+%                         // Bin count and a display label describing the bin, e.g. a numerical value or a certain category/state
+%                         { "count": 100, "label": "1.1" }, 
+%                         { "count": 100, "label": "1.2" },
+%                         { "count": 100, "label": "1.3" },
+%                         ...
+%                     ],
+%                     "color": "#AA00FF"                    // Display color for the layer
+%                 },
+%                 ...
+%             ]
+%         }
+%         ...
+% }
+% \end{lstlisting}
 
-TODO: Figure
+%TODO: Figure
 
 %\begin{figure}[H]
 %    \center
