@@ -18,14 +18,14 @@ Reference trajectories are calculated based on available sensors and System Trac
    \begin{itemize}  
    \item Requires commercial professional license
    \item Association based on secondary attributes and self-adaptive probabilistic thresholds
-   \item Uses Radar bias estimation \& correction, ADS-B geometric altitude for slant range correction, accuracy -re-estimation and scaling, ADS-B verification, ...
+   \item Uses Radar bias estimation \& correction, ADS-B geometric altitude for slant range correction, accuracy re-estimation and scaling, ADS-B verification, ...
    \item Position estimation using Interacting Multiple Models (IMM) filter, with a Rauch-Tung-Striebel (RTS) smoother
    \end{itemize}
 \end{itemize}  
 
 For optimal performance, the processing of the target reports and reconstruction is time-sliced. In (commonly) 15 minute intervals, all target reports are loaded, associated to UTNs, references are calculated and written to the database, after which the next time-slice is loaded. \\
 
-In the 'Probabilistic + IMM' reconstructor, each data slice is processed multiple times, to re-estimate correctable bias' as well as rescale target report accuracies. \\
+In the 'Probabilistic + IMM' reconstructor, each data slice is processed multiple times, to re-estimate correctable bias' as well as to rescale target report accuracies. \\
 
 \subfile{reconstructor_config}
 
@@ -78,7 +78,8 @@ The following steps are performed for each target report:
 \end{itemize}
 \ \\
 
-If a match can be made, the match is verified - e.g. the matching based on Track Number can be changed if e.g. the time difference to the last target update is larger than the 'Maximum Track Time Difference' parameter, or of the distance threshold is larger than the 'Track Number Disassoc. Distance Factor', assuming the 'Do Track Number Disassoc. Using Distance' is set. \\
+In case of a match, this match is verified. A match based on the Track Number can e.g. be revoked if the time difference to the last target update is larger than the 'Maximum Track Time Difference' parameter, 
+or if the distance threshold is larger than the 'Track Number Disassoc. Distance Factor' parameter, assuming the 'Do Track Number Disassoc. Using Distance' parameter is set. \\
 
 If still valid, the target report is associated to the specific UTN, which in turn updates the respective lookup lists.
 
@@ -92,7 +93,8 @@ When creating a new target using a target report, the secondary attributes are s
 
 \subsection{Self-associate New Targets}
 
-For all newly created targets, matching other targets are checked if a positive score would allow merging the target pair. This allows merging created targets even if single target reports (e.g. during the somewhat unstable beginning of tracking) did not allow for it.
+For all newly created targets, other possibly matching targets are checked if a computed match score would allow merging a target pair. 
+This enables merging of created targets even if single target reports (e.g. during the somewhat unstable beginning of tracking) did not allow for it.
 
 \begin{itemize}
 \item Associate new per-source targets to existing targets based on
@@ -104,7 +106,7 @@ For all newly created targets, matching other targets are checked if a positive 
 \begin{itemize}
 \item Count number of updates being in different distances: \#Erroneous, \#Dubious, \#Acceptable
 \item Minimum number of updates checked: 'Minimum Updates' parameter
-\item Associate if probability of erroneous and dubious are not too high
+\item Associate if probabilities of erroneous and dubious updates are not too high
 \end{itemize}
 \end{itemize}
 \end{itemize}
@@ -112,9 +114,13 @@ For all newly created targets, matching other targets are checked if a positive 
 
 \subsection{Discussion}
 
-The user should be aware that, while this association feature is quite capable, it is still somewhat limited. It strongly depends on the correctness of Mode S addresses/identification, as well as the Tracker information (track number, secondary information and position information). If the mentioned information is erroneous, the made association will be sub-optimal or plainly wrong. \\
+The user should be aware that, while this association feature is quite capable, it is still somewhat limited. 
+It strongly depends on the correctness of Mode S addresses/identification, as well as the Tracker information (track number, secondary information and position information). 
+If this information is erroneous, the created association will be sub-optimal or plainly wrong. \\
 
-Also, for association of non-Mode S target reports a trade-off has to be made in the 'Maximum Acceptable Distance' parameter, especially if they are primary-only. It should be set within the limits of Reference/Tracker error plus maximum sensor error (which can still include radar bias') and the used target separation minima. This is of course not well-suited for strongly different sensors accuracies and separations (e.g. when mixing ground and air surveillance data). \\
+Also, when associating non-Mode S target reports a trade-off has to be made for the 'Maximum Acceptable Distance' parameter, 
+especially if the target reports are primary-only. The parameter should be set within the limits of Reference/Tracker error plus maximum sensor error (which can still include radar bias'), and the used target separation minima. 
+This is of course not well-suited for strongly varied sensors accuracies and separations (e.g. when mixing ground and air surveillance data). \\
 
 \section{Probabilistic + IMM Features}
 
@@ -132,9 +138,9 @@ Without going into detail, in this section a short overview is given over the ca
 \item Use ADS-B geometric altitude for slant-range correction
 \begin{itemize}
 \item Method based on published paper: \href{https://doi.org/10.3390/engproc2022028008}{'Usage of Geometric Altitude for Radar Plot Position Improvements' by H. Puhr, MDPI 2022}
-\item Use geometric altitudes of ADS-B data for improved slant-range correction (over using barometric altitudes)
+\item Use geometric altitudes of ADS-B data for improved slant-range correction (instead of using barometric altitudes)
 \end{itemize}
-\item Do position outlier checks: Associate but do not use outlier positions
+\item Do position outlier checks: Associate outlier positions, but do not use them for reference computation
 \begin{itemize}
 \item Based on estimated target position estimate accuracy and (re-scaled) target report accuracy
 \end{itemize}
@@ -155,13 +161,13 @@ Without going into detail, in this section a short overview is given over the ca
 \end{itemize}
 
 
-Resampling of system tracks is be enabled in order to obtain similar sample rates for tracker and high-update ratte (e.g. ADS-B) data, which reduces a sensor-specific bias of the Kalman filter. Cubic B-splines are used to interpolate the tracker target
-reports in a relaxed way. In case a spline segment deviates too strongly from its interval, a linear interpolation is 
-used instead. \\
+Resampling of system tracks is enabled in order to obtain similar sample rates for tracker and high-update rate (e.g. ADS-B) data, which reduces a sensor-specific bias of the Kalman filter. 
+Cubic B-splines are used to interpolate the tracker target reports in a relaxed way. In case a spline segment deviates too strongly from its interval, a linear interpolation is used instead. \\
 
 \subsection{Radar Plot Position Improvements}
 
-Using the features mentioned above, the 'Correct Radar Bias' and the 'Use ADS-B geometric altitude for slant-range correction' features can result in the following real-life position improvements: median org (original) error vs. median cor (corrected) error in [meters], for 10 different Radars:
+Using the features mentioned above, the 'Correct Radar Bias' and the 'Use ADS-B geometric altitude for slant-range correction' features can for example result in the following real-life position improvements: 
+median org (original) error vs. median cor (corrected) error in [meters], for 10 different Radars:
 
 \begin{lstlisting}
 Rad1 estimateXYStdDev: median error
@@ -198,12 +204,13 @@ Rad10 estimateXYStdDev: median error
 
 \subsection{Rescaling Accuracies}
 
-Depending on the data source type (ADS-B, MLAT, Radar,Tracker) different accuracy scaling methods are used. The goal is to estimate the optimal target report accuracy, to in turn achieve the optimal reconstruction accuracy. Commonly, 2D accuracy maps of varying resolution are used. If per-target report accuracy given, scaling factors are used to factor out over/underestimation of the target report accuracy by the data source.
+Depending on the data source type (ADS-B, MLAT, Radar,Tracker) different accuracy scaling methods are used. The goal is to estimate the optimal target report accuracy, to in turn achieve the optimal reconstruction accuracy. 
+Commonly, 2D accuracy maps of varying resolution are used. If per-target-report accuracy is given, scaling factors are used to factor out over/underestimation of the target report accuracy by the data source.
 
 \begin{itemize}
 \item For Radars: Use average accuracy 2D map, model average accuracy by regression line as fallback
 \item For MLAT/Trackers: Use average accuracy 2D map, estimate scaling factors to rescale the given target report accuracy
-\item For ADS-B: Model per-quality indicator value accuracies for each transponder, estimate scaling factors to rescale the given target report accuracy
+\item For ADS-B: Model per-quality-indicator-value accuracies for each transponder, estimate scaling factors to rescale the given target report accuracy
 \end{itemize}
 \ \\
 
@@ -213,17 +220,19 @@ A common Radar accuracy map can look as follows, with this particular Radar show
 \begin{figure}[H]
     \hspace*{-2.5cm}
     \includegraphics[width=19cm]{figures/radar_acc.png}
-  \caption{Radar Accuracy: 0.3m (green) - 2768m (red)}
+  \caption{Radar Accuracy: 0.3m (green) - 2768m (red)} 
 \end{figure} 
 
-A common Tracked data source accuracy \textbf{scale factor} map can look as follows, with this source showing a distinct accuracy over-estimation (tracking accuracy vs. measured against reconstructed accuracy) in the southern region:
+A common Tracked data source accuracy \textbf{scale factor} map can look as follows, 
+with this source showing a distinct accuracy over-estimation (tracking accuracy vs. measured against reconstructed accuracy) in the southern region:
 \begin{figure}[H]
     \hspace*{-2.5cm}
     \includegraphics[width=19cm]{figures/tracked_scaling.png}
   \caption{Tracked Source Accuracy Scaling: 0.5 [1] (green) - 5 [1] (red)}
 \end{figure} 
 
-The (rescaled) average Tracked data source accuracy map can look as follows, showing a nice common accuracy region, with slightly increased errors in some regions (most probably airports) and in the outer limits.
+The (rescaled) average Tracked data source accuracy map can look as follows, 
+showing a nice common accuracy region, with slightly increased errors in some regions (most probably airports) and in the outer limits.
 \begin{figure}[H]
     \hspace*{-2.5cm}
     \includegraphics[width=19cm]{figures/tracked_avgerr.png}
@@ -258,7 +267,7 @@ After all data slices are processed and the calculated references associations a
     \caption{Reconstructing References Task - Done}
 \end{figure}
 
-After a successful reconstruction, in the main window 'Targets' tab, a list of all unique targets exists.
+After a successful reconstruction, all created unique targets are listed in the main window's 'Targets' tab.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
