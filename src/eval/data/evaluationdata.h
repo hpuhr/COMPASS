@@ -116,7 +116,7 @@ protected:
     DBContentManager& dbcont_man_;
 
     QStringList table_columns_ {"Use", "UTN", "Comment", "Interest",
-                               "Begin", "End", "#All", "#Ref", "#Tst", "Callsign", "TA",
+                               "Begin", "End", "#All", "#Ref", "#Tst", "ACIDs", "ACADs",
                                 "M3/A", "MC Min", "MC Max"};
 
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;

@@ -37,17 +37,6 @@ EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, Evaluation
     QVBoxLayout* main_layout = new QVBoxLayout();
 
     // toolbar
-//    toolbar_ = new QToolBar("Tools");
-
-//    QWidget* spacer = new QWidget();
-//    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-//    toolbar_->addWidget(spacer);
-
-//    toolbar_->addAction("Change Usage");
-
-//    connect(toolbar_, &QToolBar::actionTriggered, this, &EvaluationDataWidget::actionTriggeredSlot);
-
-//    main_layout->addWidget(toolbar_);
 
     // table
     proxy_model_ = new QSortFilterProxyModel();

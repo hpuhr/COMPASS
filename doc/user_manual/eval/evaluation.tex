@@ -16,13 +16,7 @@ The 'Evaluation' tab allows adapting/defining requirement-based standards and co
 
 While it is possible to manually remove single targets from the evaluation, the usage of correct reference data is paramount for the significance of the evaluation results. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} \textbf{Please note that the evaluation feature should not be used as a sole basis for decision making - especially not without manually verifying the evaluation results.} \\
-
-There will be improvements in the next releases, and further verification of the results by the author and other users.
-
-\subsection{Target Report Associations}
-
-Since the task only makes use of the Mode S address, non-Mode S data is not evaluated and may even show up as gaps/misses in detection.
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} \textbf{Please note that the evaluation feature should not be used as a sole basis for decision making - especially not without manually verifying the evaluation results.}
 
 \subsection{Sector Altitude Filtering}
 
@@ -45,7 +39,7 @@ To give a few examples what this could mean:
 \end{itemize}
 \ \\
 
-Also, since target secondary attributes (currently only Mode S address) are also used in the 'Target Report Association' task, errors in these attributes might also lead to imperfect data association. This would result in wrong evaluation results in almost all requirements.
+Also, since target secondary attributes are used in the 'Reconstruct References' task, errors in these attributes might also lead to imperfect data association, which could in turn result in wrong evaluation results in some requirements.
 
 \section{Overview}
 \label{sec:eval_overview} 
@@ -165,13 +159,14 @@ The following columns exist:
 \begin{itemize}  
 \item Use: Checkbox defining if the target should be used in the evaluation
 \item UTN: Unique Target Number
+\item Comment: User comment, can be set with double-click, persisted into database
 \item Begin: First timestamp of UTN
 \item End: Last timestamp of UTN
 \item \#All: Sum number of target reports
 \item \#Ref: Number of target reports in reference data
 \item \#Tst: Number of target reports in test data
-\item Callsign: Target identification(s)
-\item TA: Target address (hexadecimal)
+\item ACIDs: Mode S aircraft identification(s)
+\item ACADs: Mode S aircraft address (hexadecimal)
 \item M3/A: Mode 3/A code(s) (octal)
 \item MC Min: Mode C code minimum [ft]
 \item MC Max: Mode C code maximum [ft]
@@ -186,6 +181,14 @@ After loading the data, the table can look as follows:
   \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{figures/eval_targets_loaded.png}
   \caption{Evaluation Targets tab with loaded data}
+\end{figure}
+
+After evaluation (and sorting by interest), the table can look as follows:
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{figures/eval_targets_eval.png}
+  \caption{Evaluation Targets tab with evaluated data}
 \end{figure}
 
 \subsection{Filter Tab}

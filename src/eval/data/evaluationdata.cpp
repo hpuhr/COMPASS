@@ -446,11 +446,11 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
         {
             return target.numTstUpdates();
         }
-        else if (col_name == "Callsign")
+        else if (col_name == "ACIDs")
         {
             return target.acidsStr().c_str();
         }
-        else if (col_name == "TA")
+        else if (col_name == "ACADs")
         {
             return target.acadsStr().c_str();
         }

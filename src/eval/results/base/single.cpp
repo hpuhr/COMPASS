@@ -434,7 +434,7 @@ void Single::generateDetailsTable(EvaluationResultsReport::Section& utn_req_sect
 */
 std::vector<std::string> Single::targetTableHeadersCommon() const
 {
-    return { "UTN", "Begin", "End", "Callsign", "TA", "M3/A", "MC Min", "MC Max" };
+    return { "UTN", "Begin", "End", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max" };
 }
 
 /**
@@ -526,15 +526,15 @@ std::vector<QVariant> Single::targetTableValues() const
 */
 std::vector<Single::TargetInfo> Single::targetInfosCommon() const
 {
-    return { { "UTN"         , "Unique Target Number"           , utn_                             },
-             { "Begin"       , "Begin time of target"           , target_->timeBeginStr().c_str()  },
-             { "End"         , "End time of target"             , target_->timeEndStr().c_str()    },
-             { "Callsign"    , "Mode S target identification(s)", target_->acidsStr().c_str()      }, 
-             { "Target Addr.", "Mode S target address(es)"      , target_->acadsStr().c_str()      },
-             { "Mode 3/A"    , "Mode 3/A code(s)"               , target_->modeACodesStr().c_str() }, 
-             { "Mode C Min"  , "Minimum Mode C code [ft]"       , target_->modeCMinStr().c_str()   },
-             { "Mode C Max"  , "Maximum Mode C code [ft]"       , target_->modeCMaxStr().c_str()   },
-             { "Use"         , "To be used in results"          , use_                             } };
+    return { { "UTN"         , "Unique Target Number"            , utn_                             },
+             { "Begin"       , "Begin time of target"            , target_->timeBeginStr().c_str()  },
+             { "End"         , "End time of target"              , target_->timeEndStr().c_str()    },
+             { "ACIDs"       , "Mode S aicraft identification(s)", target_->acidsStr().c_str()      },
+             { "ACADs"       , "Mode S aircraft address(es)"     , target_->acadsStr().c_str()      },
+             { "Mode 3/A"    , "Mode 3/A code(s)"                , target_->modeACodesStr().c_str() },
+             { "Mode C Min"  , "Minimum Mode C code [ft]"        , target_->modeCMinStr().c_str()   },
+             { "Mode C Max"  , "Maximum Mode C code [ft]"        , target_->modeCMaxStr().c_str()   },
+             { "Use"         , "To be used in results"           , use_                             } };
 }
 
 /**
