@@ -534,7 +534,7 @@ std::vector<Single::TargetInfo> Single::targetInfosCommon() const
              { "Mode 3/A"    , "Mode 3/A code(s)"                , target_->modeACodesStr().c_str() },
              { "Mode C Min"  , "Minimum Mode C code [ft]"        , target_->modeCMinStr().c_str()   },
              { "Mode C Max"  , "Maximum Mode C code [ft]"        , target_->modeCMaxStr().c_str()   },
-             { "Use"         , "To be used in results"           , use_                             } };
+             { "Use"         , "To be used in results"           , use_                             }};
 }
 
 /**
