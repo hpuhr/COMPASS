@@ -207,22 +207,26 @@ Depending on the data source type (ADS-B, MLAT, Radar,Tracker) different accurac
 \end{itemize}
 \ \\
 
-2D Map Examples:
+\subsubsection{2D Map Examples}
+
+A common Radar accuracy map can look as follows, with this particular Radar showing a distinct accuracy decrease in a certain azimuth angle:
 \begin{figure}[H]
     \hspace*{-2.5cm}
     \includegraphics[width=19cm]{figures/radar_acc.png}
   \caption{Radar Accuracy: 0.3m (green) - 2768m (red)}
 \end{figure} 
 
+A common Tracked data source accuracy \textbf{scale factor} map can look as follows, with this source showing a distinct accuracy over-estimation (tracking accuracy vs. measured against reconstructed accuracy) in the southern region:
 \begin{figure}[H]
     \hspace*{-2.5cm}
     \includegraphics[width=19cm]{figures/tracked_scaling.png}
   \caption{Tracked Source Accuracy Scaling: 0.5 [1] (green) - 5 [1] (red)}
 \end{figure} 
 
+The (rescaled) average Tracked data source accuracy map can look as follows, showing a nice common accuracy region, with slightly increased errors in some regions (most probably airports) and in the outer limits.
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/tracked_scaling.png}
+    \includegraphics[width=19cm]{figures/tracked_avgerr.png}
   \caption{Tracked Source Average Error Scaling: 1 [m] (green) - 878 [m] (red)}
 \end{figure} 
 
