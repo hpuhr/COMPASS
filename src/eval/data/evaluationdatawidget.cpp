@@ -30,6 +30,9 @@
 #include <QToolBar>
 #include <QWidgetAction>
 #include <QLabel>
+#include <QPushButton>
+#include <QWidgetAction>
+#include <QCheckBox>
 
 EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, EvaluationManager& eval_man)
     : QWidget(), eval_data_(eval_data), eval_man_(eval_man)
@@ -37,6 +40,19 @@ EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, Evaluation
     QVBoxLayout* main_layout = new QVBoxLayout();
 
     // toolbar
+
+    // top buttons
+    QHBoxLayout* top_layout = new QHBoxLayout();
+
+    main_layout->addLayout(top_layout);
+    interest_button_ = new QPushButton("Configure Interest");
+    interest_button_->setEnabled(false);
+
+    interest_menu_ = new QMenu;
+    interest_button_->setMenu(interest_menu_);
+
+    top_layout->addStretch(1);
+    top_layout->addWidget(interest_button_);
 
     // table
     proxy_model_ = new QSortFilterProxyModel();
@@ -66,8 +82,9 @@ EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, Evaluation
     main_layout->addWidget(table_view_);
 
     setLayout(main_layout);
-}
 
+    updateInterestMenu();
+}
 
 void EvaluationDataWidget::resizeColumnsToContents()
 {
@@ -137,7 +154,7 @@ namespace
             QHBoxLayout* layout = new QHBoxLayout;
             setLayout(layout);
 
-            QColor      color = EvaluationTargetData::colorForInterestFactor (interest_factor);
+            QColor      color = EvaluationTargetData::colorForInterestFactorRequirement(interest_factor);
             std::string name  = EvaluationTargetData::stringForInterestFactor(req_id, interest_factor);
 
             QLabel* label = new QLabel(QString::fromStdString(name));
@@ -184,7 +201,7 @@ namespace
     static QAction* interestFactorAction(const std::string& req_id, 
                                          double interest_factor)
     {
-        QColor      color = EvaluationTargetData::colorForInterestFactor (interest_factor);
+        QColor      color = EvaluationTargetData::colorForInterestFactorRequirement (interest_factor);
         std::string name  = EvaluationTargetData::stringForInterestFactor(req_id, interest_factor);
 
         QAction* action = new QAction(QString::fromStdString(name));
@@ -230,25 +247,23 @@ void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)
     menu.addAction(action2);
 
     //add interest values
-    if (!target.interestFactors().empty())
+    auto ifactors = target.enabledInterestFactors();
+    if (!ifactors.empty())
     {
         auto req_menu = menu.addMenu("Jump to Requirement");
 
-        const auto& interest_factors = target.interestFactors();
-
-        for (const auto& ifactor : interest_factors)
+        for (const auto& ifactor : ifactors)
         {
             std::string req = ifactor.first;
 
             QAction* action = nullptr;
 #if 1
             action = interestFactorAction(ifactor.first, ifactor.second);
-
 #else
             QWidgetAction* waction = new QWidgetAction(this);
             waction->setDefaultWidget(new InterestFactorLabel(ifactor.first, ifactor.second));
 
-            action = waction;  
+            action = waction;
 #endif
             req_menu->addAction(action);
 
@@ -318,4 +333,66 @@ void EvaluationDataWidget::itemClicked(const QModelIndex& index)
     //restore_focus_ = true;
 
     eval_man_.showUTN(target.utn_);
+}
+
+void EvaluationDataWidget::updateInterestMenu()
+{
+    interest_menu_->clear();
+
+    EvaluationData* eval_data = &eval_data_;
+
+    auto w      = new QWidget;
+    auto layout = new QHBoxLayout;
+
+    w->setLayout(layout);
+
+    auto button_all  = new QPushButton("All");
+    auto button_none = new QPushButton("None");
+
+    layout->addWidget(button_all);
+    layout->addWidget(button_none);
+    layout->addStretch(1);
+
+    auto wa = new QWidgetAction(interest_menu_);
+    wa->setDefaultWidget(w);
+
+    interest_menu_->addAction(wa);
+
+    std::vector<QCheckBox*> boxes;
+
+    for (const auto& ife : eval_data_.interestSwitches())
+    {
+        auto wa = new QWidgetAction(interest_menu_);
+
+        auto cb = new QCheckBox(QString::fromStdString(ife.first));
+        cb->setChecked(ife.second);
+
+        wa->setDefaultWidget(cb);
+
+        interest_menu_->addAction(wa);
+
+        auto clickCB = [ eval_data, cb ] (bool ok) { eval_data->setInterestFactorEnabled(cb->text().toStdString(), ok, true); };
+
+        connect(cb, &QCheckBox::toggled, clickCB);
+
+        boxes.push_back(cb);
+    }
+
+    auto updateBoxesCB = [ = ] ()
+    {
+        for (auto b : boxes)
+        {
+            b->blockSignals(true);
+            b->setChecked(eval_data->interestFactorEnabled(b->text().toStdString()));
+            b->blockSignals(false);
+        }
+    };
+
+    auto allCB  = [ = ] () { eval_data->setInterestFactorEnabled(true , true); updateBoxesCB(); };
+    auto noneCB = [ = ] () { eval_data->setInterestFactorEnabled(false, true); updateBoxesCB(); };
+
+    connect(button_all , &QPushButton::pressed, allCB );
+    connect(button_none, &QPushButton::pressed, noneCB);
+
+    interest_button_->setEnabled(eval_data_.interestSwitches().size() > 0);
 }

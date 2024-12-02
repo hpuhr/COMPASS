@@ -64,6 +64,8 @@ public:
     static std::string sectionIDWithoutResults(const std::string& section_id);
     static std::string sectionID2Path(const std::string& section_id);
 
+    static std::string reqNameFromReqResultID(const std::string& req_result_id);
+
     //needed section id parts
     static std::string reportResultID();
     static std::string targetResultsID();
