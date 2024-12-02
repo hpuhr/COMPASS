@@ -25,8 +25,6 @@
 #include <cmath>
 #include <limits>
 
-#include "logger.h"
-
 namespace Utils
 {
 namespace Number
@@ -81,74 +79,15 @@ extern unsigned long recNumAddDBContId (unsigned long rec_num_wo_dbcont_id, unsi
 extern unsigned long recNumGetWithoutDBContId (unsigned long rec_num);
 extern unsigned int recNumGetDBContId (unsigned long rec_num);
 
-template <typename T>
-std::tuple<double,double,double,double> getStatistics (const T& values)
-{
-    double mean=0, stddev=0, min=0, max=0;
-
-    if (values.empty()) {
-        logerr << "Number: getStatistics: empty vector";
-
-        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(),
-                std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
-    }
-
-    double sum = std::accumulate(values.begin(), values.end(), 0.0);
-
-    mean = sum / values.size();
-
-    std::vector<double> diff(values.size());
-    std::transform(values.begin(), values.end(), diff.begin(),
-                   [mean](const double val) { return val - mean; });
-    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
-    stddev = std::sqrt(sq_sum / values.size());
-
-    min = *std::min_element(values.begin(), values.end());
-    max = *std::max_element(values.begin(), values.end());
-
-    return std::tuple<double,double,double,double>(mean, stddev, min, max);
-}
+// template <typename T>
+// std::tuple<double,double,double,double> getStatistics (const T& values);
 
 extern std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values);
 
-template <typename T>
-std::pair<double,double> calculateMeanStdDev (T values, float remove_top=0.0)
-{
-    double mean=0, stddev=0;
+// template <typename T>
+// std::pair<double,double> calculateMeanStdDev (T values, float remove_top=0.0);
 
-    if (values.empty()) {
-        logerr << "Number: calculateMeanStdDev: empty vector";
-
-        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
-    }
-
-    unsigned int num_to_remove = static_cast<size_t>(std::floor(values.size() * remove_top));
-
-    // remove the last num_to_remove elements
-    if (num_to_remove)
-    {
-        std::sort(values.begin(), values.end());
-        values.erase(values.end() - num_to_remove, values.end());
-    }
-
-    if (values.empty()) {
-        logerr << "Number: calculateMeanStdDev: empty vector after remove";
-
-        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
-    }
-
-    double sum = std::accumulate(values.begin(), values.end(), 0.0);
-
-    mean = sum / values.size();
-
-    std::vector<double> diff(values.size());
-    std::transform(values.begin(), values.end(), diff.begin(),
-                   [mean](const double val) { return val - mean; });
-    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
-    stddev = std::sqrt(sq_sum / values.size());
-
-    return std::pair<double,double>(mean, stddev);
-}
+std::pair<double,double> calculateMeanStdDev (std::vector<double> values, float remove_top=0.0);
 
 extern double calculateMedian(std::vector<double> data); // worked-on copy
 extern double calculateIQR(std::vector<double> data);

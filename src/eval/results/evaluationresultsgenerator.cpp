@@ -231,7 +231,6 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                         throw e;
                     }
                 });
-            }
 
                 unsigned int tmp_done_cnt;
 
