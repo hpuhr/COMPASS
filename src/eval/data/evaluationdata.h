@@ -101,17 +101,23 @@ public:
     void resetModelBegin();
     void resetModelEnd();
 
+    void setInterestFactorEnabled(const std::string& req_name, bool ok, bool update);
+    void setInterestFactorEnabled(bool ok, bool update);
+    bool interestFactorEnabled(const std::string& req_name) const;
+    
+    void updateInterestSwitches();
+
+    const std::map<std::string, bool>& interestSwitches() const { return interest_factor_enabled_; }
+
     // ref
     unsigned int ref_line_id_;
 
     // tst
     unsigned int tst_line_id_;
 
-    static QColor color_interest_high_, color_interest_mid_, color_interest_low_;
-
-
-
 protected:
+    void updateAllInterestFactors();
+
     EvaluationManager& eval_man_;
     DBContentManager& dbcont_man_;
 
@@ -120,7 +126,6 @@ protected:
                                 "M3/A", "MC Min", "MC Max"};
 
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
-
 
     TargetCache target_data_;
     bool finalized_ {false};
@@ -132,6 +137,8 @@ protected:
 
     unsigned int unassociated_tst_cnt_ {0};
     unsigned int associated_tst_cnt_ {0};
+
+    std::map<std::string, bool> interest_factor_enabled_; // requirement name -> bool
 };
 
 #endif // EVALUATIONDATA_H

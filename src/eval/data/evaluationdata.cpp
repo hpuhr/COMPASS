@@ -18,6 +18,9 @@
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
 #include "evaluationmanager.h"
+#include "evaluationstandard.h"
+#include "requirement/base/baseconfig.h"
+#include "requirement/group.h"
 #include "dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 //#include "dbcontent/variable/variable.h"
@@ -45,10 +48,6 @@ using namespace std;
 using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
-
-QColor EvaluationData::color_interest_high_{"#FF6666"};
-QColor EvaluationData::color_interest_mid_{"#FFA500"};
-QColor EvaluationData::color_interest_low_{"#66AA66"};
 
 EvaluationData::EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man)
     : eval_man_(eval_man), dbcont_man_(dbcont_man)
@@ -341,7 +340,12 @@ void EvaluationData::clear()
     unassociated_tst_cnt_ = 0;
     associated_tst_cnt_ = 0;
 
+    interest_factor_enabled_.clear();
+
     endResetModel();
+
+    if (widget_)
+        widget_->updateInterestMenu();
 }
 
 QVariant EvaluationData::data(const QModelIndex& index, int role) const
@@ -382,14 +386,11 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
             return QBrush(Qt::lightGray);
         else if (col_name == "Interest")
         {
-            double interest = target.interestFactorsSum();
+            const auto& ifactors = target.interestFactors();
 
-            if (interest < 0.05)
-                return color_interest_low_;
-            else if (interest < 0.1)
-                return color_interest_mid_;
-            else
-                return color_interest_high_;
+            double interest = target.enabledInterestFactorsSum();
+
+            return ifactors.empty() ? QVariant() : EvaluationTargetData::colorForInterestFactorSum(interest);
         }
         else
             return QVariant();
@@ -424,7 +425,9 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
         }
         else if (col_name == "Interest")
         {
-            return QString::number(target.interestFactorsSum(), 'f', 3);
+            const auto& ifactors = target.interestFactors();
+
+            return ifactors.empty() ? "" : QString::number(target.enabledInterestFactorsSum(), 'f', 3);
         }
         else if (col_name == "Begin")
         {
@@ -504,7 +507,7 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
         if (col_name == "Interest")
         {
-            return target.interestFactorsStr().c_str();
+            return target.enabledInterestFactorsStr().c_str();
         }
     }
     default:
@@ -628,12 +631,15 @@ void EvaluationData::clearInterestFactors()
     {
         target_data_.modify(target_data_.project<0>(tgt_it), [](EvaluationTargetData& t) { t.clearInterestFactors(); });
     }
+
+    updateInterestSwitches();
 }
 
 void EvaluationData::resetModelBegin()
 {
     beginResetModel();
 }
+
 void EvaluationData::resetModelEnd()
 {
     endResetModel();
@@ -675,4 +681,66 @@ boost::optional<nlohmann::json> EvaluationData::getTableData(bool rowwise,
                                                              const std::vector<int>& cols) const
 {
     return Utils::StringTable(this).toJSON(rowwise, cols);
+}
+
+void EvaluationData::setInterestFactorEnabled(const std::string& req_name, bool ok, bool update)
+{
+    interest_factor_enabled_[ req_name ] = ok;
+
+    if (update)
+        updateAllInterestFactors();
+}
+
+void EvaluationData::setInterestFactorEnabled(bool ok, bool update)
+{
+    for (auto& ife : interest_factor_enabled_)
+        ife.second = ok;
+
+    if (update)
+        updateAllInterestFactors();
+}
+
+bool EvaluationData::interestFactorEnabled(const std::string& req_name) const
+{
+    auto it = interest_factor_enabled_.find(req_name);
+    if (it == interest_factor_enabled_.end())
+        return false;
+
+    return it->second;
+}
+
+void EvaluationData::updateAllInterestFactors()
+{
+    for (auto tgt_it = begin(); tgt_it != end(); ++tgt_it)
+    {
+        target_data_.modify(target_data_.project<0>(tgt_it), [](EvaluationTargetData& t) { t.updateInterestFactors(); });
+    }
+
+    beginResetModel();
+    endResetModel();
+}
+
+void EvaluationData::updateInterestSwitches()
+{
+    loginf << "EvaluationData: updateAvailableInterests";
+
+    interest_factor_enabled_.clear();
+
+    if (!eval_man_.hasCurrentStandard())
+        return;
+
+    auto& standard = eval_man_.currentStandard();
+
+    for (auto itg = standard.begin(); itg != standard.end(); ++itg)
+    {
+        for (auto itr = (*itg)->begin(); itr != (*itg)->end(); ++itr)
+        {
+            interest_factor_enabled_[ (*itr)->name() ] = true;
+        }
+    }
+
+    updateAllInterestFactors();
+
+    if (widget_) 
+        widget_->updateInterestMenu();
 }

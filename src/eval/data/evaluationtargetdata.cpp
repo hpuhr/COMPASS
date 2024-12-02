@@ -25,6 +25,7 @@
 #include "util/timeconv.h"
 #include "sector/airspace.h"
 #include "sectorlayer.h"
+#include "section_id.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -42,6 +43,16 @@ using namespace boost::posix_time;
 using namespace dbContent::TargetReport;
 
 //const unsigned int debug_utn = 3275;
+
+QColor EvaluationTargetData::color_interest_high_{"#FF6666"};
+QColor EvaluationTargetData::color_interest_mid_{"#FFA500"};
+QColor EvaluationTargetData::color_interest_low_{"#66AA66"};
+
+double EvaluationTargetData::interest_thres_req_high_ = 0.05;
+double EvaluationTargetData::interest_thres_req_mid_  = 0.01;
+
+double EvaluationTargetData::interest_thres_sum_high_ = 0.1;
+double EvaluationTargetData::interest_thres_sum_mid_  = 0.05;
 
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, 
                                            EvaluationData& eval_data,
@@ -869,17 +880,18 @@ std::string EvaluationTargetData::acadsStr() const
 void EvaluationTargetData::clearInterestFactors() const
 {
     interest_factors_.clear();
-    interest_factors_sum_ = 0.0;
 
+    interest_factors_sum_total_   = 0.0;
+    interest_factors_sum_enabled_ = 0.0;
 }
+
 void EvaluationTargetData::addInterestFactor (const std::string& req_section_id, double factor) const
 {
     logdbg << "EvaluationTargetData: addInterestFactor: utn " << utn_
            << " req_section_id " << req_section_id << " factor " << factor;
 
-
     interest_factors_[req_section_id] += factor;
-    interest_factors_sum_ += factor;
+    interest_factors_sum_total_ += factor;
 }
 
 const std::map<std::string, double>& EvaluationTargetData::interestFactors() const
@@ -887,14 +899,19 @@ const std::map<std::string, double>& EvaluationTargetData::interestFactors() con
     return interest_factors_;
 }
 
-QColor EvaluationTargetData::colorForInterestFactor(double factor)
+std::map<std::string, double> EvaluationTargetData::enabledInterestFactors() const
 {
-    if (factor < 0.01)
-        return EvaluationData::color_interest_low_;
-    else if (factor < 0.05)
-        return EvaluationData::color_interest_mid_;
-    
-    return EvaluationData::color_interest_high_;
+    std::map<std::string, double> ifactors;
+
+    for (auto& fac_it : interest_factors_)
+    {
+        if (!interestFactorEnabled(fac_it.first))
+            continue;
+
+        ifactors[ fac_it.first ] = fac_it.second;
+    }
+
+    return ifactors;
 }
 
 std::string EvaluationTargetData::stringForInterestFactor(const std::string& req_id, double factor)
@@ -902,7 +919,7 @@ std::string EvaluationTargetData::stringForInterestFactor(const std::string& req
     return req_id + " (" + String::doubleToStringPrecision(factor, InterestFactorPrecision) + ")";
 }
 
-std::string EvaluationTargetData::interestFactorsStr() const
+std::string EvaluationTargetData::enabledInterestFactorsStr() const
 {
     std::string ret;
     if (interest_factors_.empty())
@@ -915,7 +932,7 @@ std::string EvaluationTargetData::interestFactorsStr() const
 
     auto generateRow = [ & ] (const std::string& interest, double factor, int prec, int spacing)
     {
-        auto factor_color = colorForInterestFactor(factor);
+        auto factor_color = EvaluationTargetData::colorForInterestFactorRequirement(factor);
         auto prec_str     = String::doubleToStringPrecision(factor, prec);
 
         std::string ret;
@@ -934,19 +951,75 @@ std::string EvaluationTargetData::interestFactorsStr() const
 
     ret = "<html><body><table>";
 
+    size_t added = 0;
     for (auto& fac_it : interest_factors_)
     {
+        if (!interestFactorEnabled(fac_it.first))
+            continue;
+
         ret += generateRow(fac_it.first, fac_it.second, InterestFactorPrecision, Spacing);
+
+        ++added;
     }
+
+    if (added < 1)
+        return "";
 
     ret += "</table></body></html>";
 
     return ret;
 }
 
-double EvaluationTargetData::interestFactorsSum() const
+double EvaluationTargetData::totalInterestFactorsSum() const
 {
-    return interest_factors_sum_;
+    return interest_factors_sum_total_;
+}
+
+double EvaluationTargetData::enabledInterestFactorsSum() const
+{
+    updateInterestFactors();
+
+    return interest_factors_sum_enabled_;
+}
+
+bool EvaluationTargetData::interestFactorEnabled(const std::string& req_id) const
+{
+    std::string req_name = EvaluationResultsReport::SectionID::reqNameFromReqResultID(req_id);
+
+    return eval_data_.interestFactorEnabled(req_name);
+}
+
+void EvaluationTargetData::updateInterestFactors() const
+{
+    interest_factors_sum_enabled_ = 0.0;
+
+    for (auto& fac_it : interest_factors_)
+    {
+        if (!interestFactorEnabled(fac_it.first))
+            continue;
+
+        interest_factors_sum_enabled_ += fac_it.second;
+    }
+}
+
+QColor EvaluationTargetData::colorForInterestFactorRequirement(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_req_mid_)
+        return EvaluationTargetData::color_interest_low_;
+    else if (factor < EvaluationTargetData::interest_thres_req_high_)
+        return EvaluationTargetData::color_interest_mid_;
+    
+    return EvaluationTargetData::color_interest_high_;
+}
+
+QColor EvaluationTargetData::colorForInterestFactorSum(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_sum_mid_)
+        return EvaluationTargetData::color_interest_low_;
+    else if (factor < EvaluationTargetData::interest_thres_sum_high_)
+        return EvaluationTargetData::color_interest_mid_;
+    
+    return EvaluationTargetData::color_interest_high_;
 }
 
 void EvaluationTargetData::updateACIDs() const

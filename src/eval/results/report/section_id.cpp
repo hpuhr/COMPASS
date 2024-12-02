@@ -100,6 +100,17 @@ std::string SectionID::sectionID2Path(const std::string& section_id)
 
 /**
 */
+std::string SectionID::reqNameFromReqResultID(const std::string& req_result_id)
+{
+    auto strings = Utils::String::split(req_result_id, Sep[ 0 ]);
+    if (strings.size() < 2)
+        return "";
+
+    return strings.back();
+}
+
+/**
+*/
 std::string SectionID::reportResultID()
 {
     return SectionReport + Sep + SectionResults;
