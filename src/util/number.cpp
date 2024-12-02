@@ -18,14 +18,16 @@
 #include "number.h"
 #include "logger.h"
 
-#include <cmath>
-#include <stdlib.h>
-#include <algorithm>
-#include <numeric>
+#include "tbbhack.h"
 
 #include <QString>
 
 #include <Eigen/Core>
+
+#include <cmath>
+#include <stdlib.h>
+#include <algorithm>
+#include <numeric>
 
 using namespace std;
 
@@ -383,6 +385,9 @@ std::tuple<double,double,double,double> getStatistics (const T& values)
 
     return std::tuple<double,double,double,double>(mean, stddev, min, max);
 }
+
+
+template std::tuple<double,double,double,double> getStatistics (const tbb::concurrent_vector<double>& values);
 
 std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values)
 {

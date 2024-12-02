@@ -79,8 +79,8 @@ extern unsigned long recNumAddDBContId (unsigned long rec_num_wo_dbcont_id, unsi
 extern unsigned long recNumGetWithoutDBContId (unsigned long rec_num);
 extern unsigned int recNumGetDBContId (unsigned long rec_num);
 
-// template <typename T>
-// std::tuple<double,double,double,double> getStatistics (const T& values);
+template <typename T>
+ std::tuple<double,double,double,double> getStatistics (const T& values);
 
 extern std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values);
 
