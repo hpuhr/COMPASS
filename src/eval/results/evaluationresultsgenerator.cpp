@@ -197,32 +197,41 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 std::future<void> pending_future = std::async(std::launch::async, [&] {
 
-                    unsigned int num_utns = utns.size();
-                    assert (done_flags.size() == num_utns);
-
-                    if (single_thread)
+                    try
                     {
-                        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+                        unsigned int num_utns = utns.size();
+                        assert (done_flags.size() == num_utns);
+
+                        if (single_thread)
                         {
-                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
-                            done_flags[utn_cnt] = true;
+                            for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+                            {
+                                results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                                done_flags[utn_cnt] = true;
+                            }
                         }
-                    }
-                    else
-                    {
-                        tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+                        else
                         {
-                            //assert(num_threads == oneapi::tbb::this_task_arena::max_concurrency());
-                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
-                            done_flags[utn_cnt] = true;
-                        });
+                            tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+                                              {
+                                                  //assert(num_threads == oneapi::tbb::this_task_arena::max_concurrency());
+                                                  results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                                                  done_flags[utn_cnt] = true;
+                                              });
+                        }
+
+                        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+                            assert (results[utn_cnt]);
+
+                        task_done = true;
                     }
-
-                    for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
-                        assert (results[utn_cnt]);
-
-                    task_done = true;
+                    catch (const std::exception& e)
+                    {
+                        logerr << "EvaluationResultsGenerator: evaluate: exception '" << e.what() << "'";
+                        throw e;
+                    }
                 });
+            }
 
                 unsigned int tmp_done_cnt;
 

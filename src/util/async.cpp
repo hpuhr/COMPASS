@@ -17,6 +17,7 @@
 
 #include "async.h"
 #include "stringconv.h"
+#include "logger.h"
 
 #include <future>
 
@@ -79,9 +80,17 @@ bool waitDialogAsync(const std::function<bool()>& task,
 
     auto outer_task = [ & ] ()
     {
-        bool ok = task();
-        all_done = true;
-        return ok;
+        try
+        {
+            bool ok = task();
+            all_done = true;
+            return ok;
+        }
+        catch (const std::exception& e)
+        {
+            logerr << "Async: waitDialogAsync: exception '" << e.what() << "'";
+            throw e;
+        }
     };
 
     std::future<bool> pending_future = std::async(std::launch::async, outer_task);

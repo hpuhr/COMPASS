@@ -358,10 +358,12 @@ unsigned int recNumGetDBContId (unsigned long rec_num)
 
 std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values)
 {
-    if (!values.size())
-        std::tuple<double,double,double,double>(
-            std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(),
-            std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN());
+    if (values.empty()) {
+        logerr << "Number: getStatistics: empty vector";
+
+        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(),
+                std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
+    }
 
     double mean=0, stddev=0, min=0, max=0;
 
@@ -383,9 +385,13 @@ std::tuple<double,double,double,double> getStatistics (const std::vector<double>
 
 // Function to calculate the median of a vector
 double calculateMedian(std::vector<double> data) {
+
     size_t size = data.size();
+
     if (size == 0) {
-        throw std::domain_error("Cannot compute median of an empty vector.");
+        logerr << "Number: calculateMedian: empty vector";
+
+        return std::numeric_limits<double>::signaling_NaN();
     }
     std::sort(data.begin(), data.end());
     if (size % 2 == 0) {
@@ -401,7 +407,8 @@ double calculateMedian(std::vector<double> data) {
 double calculateIQR(std::vector<double> data) {
     size_t size = data.size();
     if (size < 4) {
-        throw std::domain_error("At least four data points are required to compute IQR.");
+        logerr << "Number: calculateIQR: too few data opints to compute IQR";
+        return std::numeric_limits<double>::signaling_NaN();
     }
     std::sort(data.begin(), data.end());
 
@@ -424,7 +431,9 @@ double calculateIQR(std::vector<double> data) {
 // Function to calculate the median absolute deviation (MAD)
 double calculateMAD(std::vector<double> data) {
     if (data.empty()) {
-        throw std::domain_error("Cannot compute MAD of an empty vector.");
+        logerr << "Number: calculateMAD: empty vector";
+
+        return std::numeric_limits<double>::signaling_NaN();
     }
     double median = calculateMedian(data);
 
@@ -452,8 +461,10 @@ std::tuple<double,double,double> getMedianStatistics (const std::vector<double>&
 
         return std::tuple<double,double,double>{median, iqr, mad};
     } catch (const std::domain_error& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        assert (false);
+        logerr << "Number: getMedianStatistics: " << e.what();
+        return {std::numeric_limits<double>::signaling_NaN(),
+                std::numeric_limits<double>::signaling_NaN(),
+                std::numeric_limits<double>::signaling_NaN()};
     }
 }
 

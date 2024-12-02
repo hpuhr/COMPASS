@@ -16,6 +16,7 @@
  */
 
 #include "asynctask.h"
+#include "logger.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -114,10 +115,18 @@ bool AsyncTask::runAsyncDialog(bool auto_close,
     AsyncTaskDialog dlg(this, auto_close, parent);
 
     auto result = std::async(std::launch::async, 
-        [ this ] () 
-        { 
-            this->run(); 
-            return this->taskState().isDone();
+        [ this ] ()
+        {
+            try
+            {
+                this->run();
+                return this->taskState().isDone();
+            }
+            catch (const std::exception& e)
+            {
+                logerr << "AsyncTask: runAsyncDialog: exception '" << e.what() << "'";
+                throw e;
+            }
         });
 
     dlg.exec();
@@ -140,7 +149,7 @@ AsyncFuncTask::AsyncFuncTask(const Func& func,
 :   func_           (func           )
 ,   title_          (title          )
 ,   default_message_(default_message)
-,   can_abort_      (can_abort      ) 
+,   can_abort_      (can_abort      )
 {
 }
 

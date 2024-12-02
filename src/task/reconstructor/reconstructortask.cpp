@@ -435,7 +435,7 @@ void ReconstructorTask::run()
 
                 QMetaObject::invokeMethod(this, "deleteCalculatedReferencesDoneSlot", Qt::QueuedConnection);
             }
-            catch (std::exception &e)
+            catch (const std::exception& e)
             {
                 loginf << "ReconstructorTask: run: delete calculated references threw exception '" << e.what() << "'";
                 assert (false);
@@ -463,7 +463,7 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
                 QMetaObject::invokeMethod(this, "deleteTargetsDoneSlot", Qt::QueuedConnection);
 
             }
-            catch (std::exception &e)
+            catch (const std::exception& e)
             {
                 loginf << "ReconstructorTask: run: delete targets threw exception '" << e.what() << "'";
                 assert (false);
@@ -501,7 +501,7 @@ void ReconstructorTask::deleteTargetsDoneSlot()
                 QMetaObject::invokeMethod(this, "deleteAssociationsDoneSlot", Qt::QueuedConnection);
 
             }
-            catch (std::exception &e)
+            catch (const std::exception& e)
             {
                 loginf << "ReconstructorTask: run: delete associations threw exception '" << e.what() << "'";
                 assert (false);
@@ -642,7 +642,7 @@ void ReconstructorTask::processDataSlice()
 
             QMetaObject::invokeMethod(this, "processingDoneSlot", Qt::QueuedConnection);
         }
-        catch (std::exception &e)
+        catch (std::exception& e)
         {
             loginf << "ReconstructorTask: run: processing slice threw exception '" << e.what() << "'";
             assert (false);

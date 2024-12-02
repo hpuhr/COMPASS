@@ -23,6 +23,9 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
+#include <limits>
+
+#include "logger.h"
 
 namespace Utils
 {
@@ -83,6 +86,13 @@ std::tuple<double,double,double,double> getStatistics (const T& values)
 {
     double mean=0, stddev=0, min=0, max=0;
 
+    if (values.empty()) {
+        logerr << "Number: getStatistics: empty vector";
+
+        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(),
+                std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
+    }
+
     double sum = std::accumulate(values.begin(), values.end(), 0.0);
 
     mean = sum / values.size();
@@ -106,6 +116,12 @@ std::pair<double,double> calculateMeanStdDev (T values, float remove_top=0.0)
 {
     double mean=0, stddev=0;
 
+    if (values.empty()) {
+        logerr << "Number: calculateMeanStdDev: empty vector";
+
+        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
+    }
+
     unsigned int num_to_remove = static_cast<size_t>(std::floor(values.size() * remove_top));
 
     // remove the last num_to_remove elements
@@ -113,6 +129,12 @@ std::pair<double,double> calculateMeanStdDev (T values, float remove_top=0.0)
     {
         std::sort(values.begin(), values.end());
         values.erase(values.end() - num_to_remove, values.end());
+    }
+
+    if (values.empty()) {
+        logerr << "Number: calculateMeanStdDev: empty vector after remove";
+
+        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
     }
 
     double sum = std::accumulate(values.begin(), values.end(), 0.0);
