@@ -50,15 +50,14 @@ void RTCommandManager::run()
 
     boost::asio::io_context io_context;
 
-    TCPServer server (io_context, port_num_);
-
     boost::thread t;
 
     if (open_port_)
     {
         loginf<< "RTCommandManager: run: running io context for rt command port";
 
-        server.start();
+        server_.reset(new TCPServer (io_context, port_num_));
+        server_->start();
 
         t = boost::thread (boost::bind(&boost::asio::io_context::run, &io_context));
         t.detach();
@@ -71,11 +70,11 @@ void RTCommandManager::run()
         if (stop_requested_) //  && !hasAnyJobs()
             break;
 
-        if (open_port_ && server.hasSession() && server.hasStrData())
+        if (open_port_ && server_ && server_->hasSession() && server_->hasStrData())
         {
             logdbg << "RTCommandManager: run: getting commands";
 
-            std::vector<std::string> cmds = server.getStrData();
+            std::vector<std::string> cmds = server_->getStrData();
 
             loginf<< "RTCommandManager: run: got " << cmds.size() << " commands '"
                   << String::compress(cmds, ';') << "'";
@@ -89,7 +88,7 @@ void RTCommandManager::run()
                 if (issue_info.issued)
                     loginf<< "RTCommandManager: run: added command " << cmd_str << " to queue, size " << command_queue_.size();
 
-                server.sendStrData(cmd_response.toJSONString());
+                server_->sendStrData(cmd_response.toJSONString());
             }
         }
 
@@ -146,10 +145,11 @@ void RTCommandManager::run()
             }
             else if (source == Source::Server)
             {
-                if (open_port_ && server.hasSession())
+                if (open_port_ && server_->hasSession())
                 {
+                    assert (server_);
                     //@TODO: get state from command result and compile reply
-                    server.sendStrData(cmd_response.toJSONString());
+                    server_->sendStrData(cmd_response.toJSONString());
                 }
             }
         }
