@@ -2176,6 +2176,80 @@ Also, a table is given for all single targets, sorted by \#CF.
 \subsection{ROCD Correct}
 \label{sec:eval_req_rocd_correct} 
 
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_rocd_correct.png}
+  \caption{Evaluation ROCD Correct requirement}
+\end{figure}
+
+The 'ROCD Correct' requirement is used to calculate the probability of a target report having an rate of climb/descend error smaller than a defined threshold. The difference of the ROCD (test value vs. linear interpolated reference values) is calculated, and if its absolute value is smaller or equal than the defined threshold, the target report is counted for the calculated probability PCROCD (probability of correct ROCD). The PCROCD must be greater or equal than the defined 'Probability' for the requirement to pass. \\
+
+\begin{itemize}  
+\item Probability [1]: Probability of Correct ROCD
+\item Probability Check Type: $\geq$
+\item Maximum Difference: Maximum ROCD difference between the test and the reference, in feet / minute
+\end{itemize}
+\ \\
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer;Name of the sector layer;units\_OPS\_2024 \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & ROCD Correct \\ \hline
+    Num Results & Total number of results & 1969 \\ \hline
+    Num Usable Results & Number of usable results & 1354 \\ \hline
+    Num Unusable Results & Number of unusable results & 615 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 580674 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or Rate of Climb/Descent & 342 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position & 149 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference Rate of Climb/Descent & 193 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 580230 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 295 \\ \hline
+    \#Unknown [1] & Number of updates unknown Rate of Climb/Descent & 2686 \\ \hline
+    \#Correct [1] & Number of updates with correct Rate of Climb/Descent & 470822 \\ \hline
+    \#False [1] & Number of updates with incorrect Rate of Climb/Descent & 106529 \\ \hline
+    PCROCD [\%] & Probability of Correct ROCD & 81.55 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PCROCD.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 813 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or Rate of Climb/Descent & 0 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 0 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference Rate of Climb/Descent & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 813 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    \#Unknown [1] & Number of updates unknown Rate of Climb/Descent & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct Rate of Climb/Descent & 702 \\ \hline
+    \#False [1] & Number of updates with incorrect Rate of Climb/Descent & 111 \\ \hline
+    PCROCD [\%] & Probability of Correct ROCD & 86.35 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
 \subsection{Speed}
 \label{sec:eval_req_speed} 
 
@@ -2267,3 +2341,88 @@ Also, a table is given for all single targets, sorted by PCP.
 
 \subsection{Track Angle}
 \label{sec:eval_req_track_angle} 
+
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_track_angle.png}
+  \caption{Evaluation Track Angle requirement}
+\end{figure}
+
+The 'Track Angle' requirement is used to calculate the probability of a target report having an track angle (direction of movement) error smaller than a defined threshold. Since this check only makes sense for moving targets, a minimum speed is defined, updates with less speed are ignored. The difference of the track angle (test vs. linear inpolated reference values) is calculated, and if its absolute value is smaller or equal than the defined threshold, the target report is counted for the calculated probability PCP (probability of check passed). The PCP must be greater or equal than the defined 'Probability' for the requirement to pass. \\
+
+\begin{itemize}  
+\item Probability [1]: Probability of correct track angle
+\item Probability Check Type: $\geq$
+\item Track Angle Offset Value [deg]: Maximum absolute difference between the test and the reference, in degrees
+\item Use Minimum Speed: Defines if the minimum speed threshold shall be active
+\item Minimum Speed [m/s]: Minimum speed for target reports to be checked
+\item Threshold Value Check Type: $\leq$, differences must be less or equal the given threshold
+\item Failed Values are of Interest: Checked, the values of interest are the ones not passing the check
+\end{itemize}
+\ \\
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & units\_OPS\_2024 \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & TrackAngle \\ \hline
+    Num Results & Total number of results & 1969 \\ \hline
+    Num Usable Results & Number of usable results & 1491 \\ \hline
+    Num Unusable Results & Number of unusable results & 478 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 581710 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference trackangles & 282 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 581133 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 295 \\ \hline
+    \#NoTstData [1] & Number of updates without tst trackangle data & 0 \\ \hline
+    OMin [m/s] & Minimum of trackangle offset & -179.3 \\ \hline
+    OMax [m/s] & Maximum of trackangle offset & 179.98 \\ \hline
+    OAvg [m/s] & Average of trackangle offset & -0.01 \\ \hline
+    OSDev [m/s] & Standard Deviation of trackangle offset & 5.25 \\ \hline
+    OVar [$m^2$/$s^2$] & Variance of trackangle offset & 27.53 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 2670 \\ \hline
+    \#CP [1] & Number of updates with passed comparison & 577009 \\ \hline
+    PCP [\%] & Probability of passed comparison & 99.54 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PCP.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 813 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference trackangles & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 813 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    \#NoTstData [1] & Number of updates without tst trackangle data & 0 \\ \hline
+    OMin [m/s] & Minimum of trackangle offset & -7.82 \\ \hline
+    OMax [m/s] & Maximum of trackangle offset & 7.92 \\ \hline
+    OAvg [m/s] & Average of trackangle offset & 0.05 \\ \hline
+    OSDev [m/s] & Standard Deviation of trackangle offset & 0.66 \\ \hline
+    OVar [$m^2$/$s^2$] & Variance of trackangle offset & 0.44 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 0 \\ \hline
+    \#CP [1] & Number of updates with passed comparison & 813 \\ \hline
+    PCP [\%] & Probability of passed comparison & 100.00 \\ \hline
+    Condition &  & >= 90.00
+    Condition Fulfilled;;Passed
+\end{tabularx}
+\end{table}
+\end{center}
+
