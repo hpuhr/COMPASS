@@ -53,6 +53,13 @@ GridView::GridView(const std::string& class_id,
                    ViewManager& view_manager)
 :   VariableView(class_id, instance_id, w, view_manager)
 {
+    registerParameter("value_type", &settings_.value_type, Settings().value_type);
+    registerParameter("grid_resolution", &settings_.grid_resolution, Settings().grid_resolution);
+    registerParameter("render_color_scale", &settings_.render_color_scale, Settings().render_color_scale);
+    registerParameter("render_color_num_steps", &settings_.render_color_num_steps, Settings().render_color_num_steps);
+    registerParameter("render_color_value_min", &settings_.render_color_value_min, Settings().render_color_value_min);
+    registerParameter("render_color_value_max", &settings_.render_color_value_max, Settings().render_color_value_max);
+
     const std::vector<PropertyDataType> valid_types_xy = { PropertyDataType::BOOL,
                                                            PropertyDataType::CHAR,
                                                            PropertyDataType::UCHAR,

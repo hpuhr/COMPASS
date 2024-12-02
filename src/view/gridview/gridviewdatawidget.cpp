@@ -463,14 +463,28 @@ void GridViewDataWidget::updateRendering()
     
     if (vmin.has_value() || vmax.has_value())
     {
-        if (vmin.has_value() && vmax.has_value() && vmin.value() < vmax.value())
+        if (vmin.has_value() && vmax.has_value() && vmin.value() <= vmax.value())
+        {
             range = std::pair<double, double>(vmin.value(), vmax.value());
-        else if (vmin.has_value() && !vmax.has_value() && vmin.value() < grid_value_max_)
+        }
+        else if (vmin.has_value() && !vmax.has_value())
+        {
             range.first = vmin.value();
-        else if (vmax.has_value() && !vmin.has_value() && vmax.value() > grid_value_min_)
+
+            if (vmin.value() > grid_value_max_)
+                range.second = vmin.value();
+        }
+        else if (vmax.has_value() && !vmin.has_value())
+        {
             range.second = vmax.value();
+
+            if (vmax.value() < grid_value_min_)
+                range.first = vmax.value();
+        }
         else
+        {
             custom_range_invalid_ = true;
+        }
     }
 
     auto dtype = view_->currentLegendDataType();

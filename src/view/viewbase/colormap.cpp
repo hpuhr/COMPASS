@@ -444,6 +444,9 @@ size_t ColorMap::indexFromFactor(double t) const
     }
     else // Type::LinearSamples
     {
+        if (n_colors_ == 1)
+            return 0;
+
         const double step  = 1.0 / (n_colors_ - 1);
         const double hstep = step * 0.5;
 
