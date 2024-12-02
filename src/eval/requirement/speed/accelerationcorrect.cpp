@@ -22,8 +22,9 @@ namespace EvaluationRequirement
 
 /**
 */
-AccelerationCorrect::AccelerationCorrect(const std::string& name, const std::string& short_name, const std::string& group_name,
-                                         double prob, COMPARISON_TYPE prob_check_type, double threshold, EvaluationManager& eval_man)
+AccelerationCorrect::AccelerationCorrect(
+    const std::string& name, const std::string& short_name, const std::string& group_name,
+    double prob, COMPARISON_TYPE prob_check_type, double threshold, EvaluationManager& eval_man)
 :   GenericDouble(name, short_name, group_name, prob, prob_check_type, threshold, eval_man)
 {
     result_type_ = "AccelerationCorrect";

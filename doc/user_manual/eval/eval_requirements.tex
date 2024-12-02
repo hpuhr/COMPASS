@@ -4,9 +4,163 @@
 \subsection{Acceleration Correct}
 \label{sec:eval_req_accel_correct} 
 
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_acceleration.png}
+  \caption{Evaluation Acceleration Correct Requirement}
+\end{figure}
+
+The ’Acceleration Correct’ requirement is used to calculate the probability of a target report having a acceleration error smaller than a defined threshold. 
+
+\begin{itemize}  
+\item Probability [1]: Probability of correct acceleration
+\item Probability Check Type: $\geq$
+\item Maximum Difference: Maximum different in $m/s^2$
+\end{itemize}
+\ \\
+
+\subsubsection{Calculation}
+
+The offset of the acceleration (test vs. linear interpolated reference values) is used to calculate the offset. If the value of this offset fails the defined comparison threshold, the target report is counted for the calculated probability PCAcc (probability of correct acceleration). The PCAcc must be in turn pass the check for the requirement to pass. 
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & units\_OPS\_2024 \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Acceleration Correct \\ \hline
+    Num Results & Total number of results & 1969 \\ \hline
+    Num Usable Results & Number of usable results & 1492 \\ \hline
+    Num Unusable Results & Number of unusable results & 477 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 583549 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or Acceleration & 331 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position & 282 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference Acceleration & 49 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 582972 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 295 \\ \hline
+    \#Unknown [1] & Number of updates unknown Acceleration & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct Acceleration & 578555 \\ \hline
+    \#False [1] & Number of updates with incorrect Acceleration & 4368 \\ \hline
+    PCAcc [\%] & Probability of Correct ACC & 99.25 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+    \end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PCAcc.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 609 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or Acceleration & 0 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 0 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference Acceleration & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 609 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    \#Unknown [1] & Number of updates unknown Acceleration & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct Acceleration & 606 \\ \hline
+    \#False [1] & Number of updates with incorrect Acceleration & 3 \\ \hline
+    PCAcc [\%] & Probability of Correct ACC & 99.51 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
 \subsection{Track Coasting Correct}
 \label{sec:eval_req_trk_coast_correct} 
 
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_coasting.png}
+  \caption{Evaluation Track Coasting Correct Requirement}
+\end{figure}
+
+The 'Track Coasting Correct’ requirement is used to calculate the probability of a target report having a difference in the track coasting flag. 
+
+\begin{itemize}  
+\item Probability [1]: Probability of correct coasting flag
+\item Probability Check Type: $\geq$
+\end{itemize}
+\ \\
+
+\subsubsection{Calculation}
+
+The track coasting flag of the test data is compared to the two reference updates closest in time (before and after the test timestamp), if one of the reference flag values matches the target report is counted for the calculated probability PCAcc (probability of correct acceleration). The PCAcc must be in turn pass the check for the requirement to pass. 
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & units\_OPS\_2024 \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & Track Coasting Correct \\ \hline
+    Num Results & Total number of results & 1502 \\ \hline
+    Num Usable Results & Number of usable results & 1500 \\ \hline
+    Num Unusable Results & Number of unusable results & 2 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 583571 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or Track Coasting & 0 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position & 0 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference Track Coasting & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 583277 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 294 \\ \hline
+    \#Unknown [1] & Number of updates unknown Track Coasting & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct Track Coasting & 583248 \\ \hline
+    \#False [1] & Number of updates with incorrect Track Coasting & 29 \\ \hline
+    PCCoast [\%] & Probability of Correct Track Coasting & 100.00 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+    \end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PCCoast.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+  Use & To be used in results & true \\ \hline
+  \#Up [1] & Number of updates & 95 \\ \hline
+  \#NoRef [1] & Number of updates w/o reference position or Track Coasting & 0 \\ \hline
+  \#NoRefPos [1] & Number of updates w/o reference position  & 0 \\ \hline
+  \#NoRef [1] & Number of updates w/o reference Track Coasting & 0 \\ \hline
+  \#PosInside [1] & Number of updates inside sector & 95 \\ \hline
+  \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+  \#Unknown [1] & Number of updates unknown Track Coasting & 0 \\ \hline
+  \#Correct [1] & Number of updates with correct Track Coasting & 95 \\ \hline
+  \#False [1] & Number of updates with incorrect Track Coasting & 0 \\ \hline
+  PCCoast [\%] & Probability of Correct Track Coasting & 100.00 \\ \hline
+  Condition &  & >= 90.00 \\ \hline
+  Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
 
 
 \subsection{Detection}
@@ -41,7 +195,7 @@ As a summary, the reference is used to calculate the number of expected update i
 
 Gaps are, if a minimum or maximum gap length is used, only counted if the detected gap fulfills the thresholds. \\
 
-The ratio of \#MUI and \#EUI gives the probability of missed update interval, the counter-probability gives the Probability of Detection (PD). The PD must greator or equal than the defined 'Probability' for the requirement to pass.
+The ratio of \#MUI and \#EUI gives the probability of missed update interval, the counter-probability gives the Probability of Detection (PD). The PD must greater or equal than the defined 'Probability' for the requirement to pass.
 
 \subsubsection{Result Values}
 
@@ -726,11 +880,246 @@ Also, a table is given for all single targets, sorted by PF.
 \subsection{MoM Longitudinal Acceleration}
 \label{sec:eval_req_mom_long}
 
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_mom_long.png}
+  \caption{Evaluation MoM Longitudinal Acceleration Requirement}
+\end{figure}
+
+The 'MoM Longitudinal Acceleration’ requirement is used to calculate the probability of a target report having a difference in the track Mode-of-Movement Longitudinal Acceleration enumerated type. 
+
+\begin{itemize}  
+\item Probability [1]: Probability of correct MoM enumerated type value
+\item Probability Check Type: $\geq$
+\end{itemize}
+\ \\
+
+\subsubsection{Calculation}
+
+The MoM enumerated type of the test data is compared to the two reference updates closest in time (before and after the test timestamp), if one of the reference enum values matches the target report is counted for the calculated probability PCLAcc (probability of correct MoM longitudinal acceleration). The PCLAcc must be in turn pass the check for the requirement to pass. 
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & units\_OPS\_2024 \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & MoM Long ACC Correct \\ \hline
+    Num Results & Total number of results & 1969 \\ \hline
+    Num Usable Results & Number of usable results & 1493 \\ \hline
+    Num Unusable Results & Number of unusable results & 476 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 583550 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or MoM Longitudinal Acceleration & 282 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position & 282 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference MoM Longitudinal Acceleration & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 582973 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 295 \\ \hline
+    \#Unknown [1] & Number of updates unknown MoM Longitudinal Acceleration & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct MoM Longitudinal Acceleration & 479871 \\ \hline
+    \#False [1] & Number of updates with incorrect MoM Longitudinal Acceleration & 103102 \\ \hline
+    PCLAcc [\%] & Probability of Correct MoM Longitudinal Acceleration & 82.31 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+    \end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PCLAcc.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 740 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or MoM Longitudinal Acceleration & 0 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 0 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference MoM Longitudinal Acceleration & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 740 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    \#Unknown [1] & Number of updates unknown MoM Longitudinal Acceleration & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct MoM Longitudinal Acceleration & 569 \\ \hline
+    \#False [1] & Number of updates with incorrect MoM Longitudinal Acceleration & 171 \\ \hline
+    PCLAcc [\%] & Probability of Correct MoM Longitudinal Acceleration & 76.89 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+
 \subsection{MoM Transversal Acceleration}
 \label{sec:eval_req_mom_trans}
 
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_mom_trans.png}
+  \caption{Evaluation MoM Transversal Acceleration Requirement}
+\end{figure}
+
+The 'MoM Transversal Acceleration’ requirement is used to calculate the probability of a target report having a difference in the track Mode-of-Movement Transversal Acceleration enumerated type. 
+
+\begin{itemize}  
+\item Probability [1]: Probability of correct MoM enumerated type value
+\item Probability Check Type: $\geq$
+\end{itemize}
+\ \\
+
+\subsubsection{Calculation}
+
+The MoM enumerated type of the test data is compared to the two reference updates closest in time (before and after the test timestamp), if one of the reference enum values matches the target report is counted for the calculated probability PCLAcc (probability of correct MoM longitudinal acceleration). The PCLAcc must be in turn pass the check for the requirement to pass. 
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & units\_OPS\_2024 \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & MoM Trans Acc Correct \\ \hline
+    Num Results & Total number of results & 1969 \\ \hline
+    Num Usable Results & Number of usable results & 1493 \\ \hline
+    Num Unusable Results & Number of unusable results & 476 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 583550 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or MoM Transversal Acceleration & 282 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position & 282 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference MoM Transversal Acceleration & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 582973 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 295 \\ \hline
+    \#Unknown [1] & Number of updates unknown MoM Transversal Acceleration & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct MoM Transversal Acceleration & 573156 \\ \hline
+    \#False [1] & Number of updates with incorrect MoM Transversal Acceleration & 9817 \\ \hline
+    PCTAcc [\%] & Probability of Correct MoM Transversal Acceleration & 98.32 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+    \end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PCTAcc.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 740 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or MoM Transversal Acceleration & 0 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 0 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference MoM Transversal Acceleration & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 740 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    \#Unknown [1] & Number of updates unknown MoM Transversal Acceleration & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct MoM Transversal Acceleration & 740 \\ \hline
+    \#False [1] & Number of updates with incorrect MoM Transversal Acceleration & 0 \\ \hline
+    PCTAcc [\%] & Probability of Correct MoM Transversal Acceleration & 100.00 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+
 \subsection{MoM Vertical Rate}
 \label{sec:eval_req_mom_vert}
+
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_mom_vert.png}
+  \caption{Evaluation MoM Vertical Rate Requirement}
+\end{figure}
+
+The 'MoM Vertical Rate’ requirement is used to calculate the probability of a target report having a difference in the track Mode-of-Movement Vertical Rate enumerated type. 
+
+\begin{itemize}  
+\item Probability [1]: Probability of correct MoM enumerated type value
+\item Probability Check Type: $\geq$
+\end{itemize}
+\ \\
+
+
+\subsubsection{Calculation}
+
+The MoM enumerated type of the test data is compared to the two reference updates closest in time (before and after the test timestamp), if one of the reference enum values matches the target report is counted for the calculated probability PCVRt (probability of correct MoM longitudinal acceleration). The PCVRt must be in turn pass the check for the requirement to pass. 
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & units\_OPS\_2024 \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & MoM Vertical Rate Correct \\ \hline
+    Num Results & Total number of results & 1969 \\ \hline
+    Num Usable Results & Number of usable results & 1493 \\ \hline
+    Num Unusable Results & Number of unusable results & 476 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 583550 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or MoM Vertical Rate & 282 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position & 282 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference MoM Vertical Rate & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 582973 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 295 \\ \hline
+    \#Unknown [1] & Number of updates unknown MoM Vertical Rate & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct MoM Vertical Rate & 530018 \\ \hline
+    \#False [1] & Number of updates with incorrect MoM Vertical Rate & 52955 \\ \hline
+    PCVRt [\%] & Probability of Correct MoM Vertical Rate & 90.92 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PCVRt.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 740 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or MoM Vertical Rate & 0 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 0 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference MoM Vertical Rate & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 740 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    \#Unknown [1] & Number of updates unknown MoM Vertical Rate & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct MoM Vertical Rate & 669 \\ \hline
+    \#False [1] & Number of updates with incorrect MoM Vertical Rate & 71 \\ \hline
+    PCVRt [\%] & Probability of Correct MoM Vertical Rate & 90.41 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
 
 \subsection{Mode 3/A False}
 \label{sec:eval_req_m3a_false} 
@@ -1360,7 +1749,7 @@ This requirement can be used in 2 variations:
 
 The 'Position Distance' requirement is used to calculate the probability of a target report having a position error smaller or larger than a defined threshold. This two possibilities allow for calculation of a position correct or being false (e.g. outside an $5\sigma$ range of an expected error distribution). \\
 
-The offset of the position (test vs. linear interpolated reference position) is used to calculate the Euklidian error distance. If the  value of this position error is fails the defined comparison threshold, the target report is counted for the calculated probability PCP (probability of check passed). The PCP must be in turn pass the check for the requirement to pass. \\
+The offset of the position (test vs. linear interpolated reference position) is used to calculate the Euklidian error distance. If the  value of this position error fails the defined comparison threshold, the target report is counted for the calculated probability PCP (probability of check passed). The PCP must be in turn pass the check for the requirement to pass. \\
 
 The 'Failed Values are of Interest' checkbox define if the target reports passing or failing the check are of interest.
 
@@ -1787,6 +2176,80 @@ Also, a table is given for all single targets, sorted by \#CF.
 \subsection{ROCD Correct}
 \label{sec:eval_req_rocd_correct} 
 
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_rocd_correct.png}
+  \caption{Evaluation ROCD Correct requirement}
+\end{figure}
+
+The 'ROCD Correct' requirement is used to calculate the probability of a target report having an rate of climb/descend error smaller than a defined threshold. The difference of the ROCD (test value vs. linear interpolated reference values) is calculated, and if its absolute value is smaller or equal than the defined threshold, the target report is counted for the calculated probability PCROCD (probability of correct ROCD). The PCROCD must be greater or equal than the defined 'Probability' for the requirement to pass. \\
+
+\begin{itemize}  
+\item Probability [1]: Probability of Correct ROCD
+\item Probability Check Type: $\geq$
+\item Maximum Difference: Maximum ROCD difference between the test and the reference, in feet / minute
+\end{itemize}
+\ \\
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer;Name of the sector layer;units\_OPS\_2024 \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & ROCD Correct \\ \hline
+    Num Results & Total number of results & 1969 \\ \hline
+    Num Usable Results & Number of usable results & 1354 \\ \hline
+    Num Unusable Results & Number of unusable results & 615 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 580674 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or Rate of Climb/Descent & 342 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position & 149 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference Rate of Climb/Descent & 193 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 580230 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 295 \\ \hline
+    \#Unknown [1] & Number of updates unknown Rate of Climb/Descent & 2686 \\ \hline
+    \#Correct [1] & Number of updates with correct Rate of Climb/Descent & 470822 \\ \hline
+    \#False [1] & Number of updates with incorrect Rate of Climb/Descent & 106529 \\ \hline
+    PCROCD [\%] & Probability of Correct ROCD & 81.55 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PCROCD.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Up [1] & Number of updates & 813 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference position or Rate of Climb/Descent & 0 \\ \hline
+    \#NoRefPos [1] & Number of updates w/o reference position  & 0 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference Rate of Climb/Descent & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 813 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    \#Unknown [1] & Number of updates unknown Rate of Climb/Descent & 0 \\ \hline
+    \#Correct [1] & Number of updates with correct Rate of Climb/Descent & 702 \\ \hline
+    \#False [1] & Number of updates with incorrect Rate of Climb/Descent & 111 \\ \hline
+    PCROCD [\%] & Probability of Correct ROCD & 86.35 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Failed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
 \subsection{Speed}
 \label{sec:eval_req_speed} 
 
@@ -1878,3 +2341,88 @@ Also, a table is given for all single targets, sorted by PCP.
 
 \subsection{Track Angle}
 \label{sec:eval_req_track_angle} 
+
+\subsubsection{Configuration}
+
+\begin{figure}[H]
+    \includegraphics[width=14cm,frame]{figures/eval_req_track_angle.png}
+  \caption{Evaluation Track Angle requirement}
+\end{figure}
+
+The 'Track Angle' requirement is used to calculate the probability of a target report having an track angle (direction of movement) error smaller than a defined threshold. Since this check only makes sense for moving targets, a minimum speed is defined, updates with less speed are ignored. The difference of the track angle (test vs. linear inpolated reference values) is calculated, and if its absolute value is smaller or equal than the defined threshold, the target report is counted for the calculated probability PCP (probability of check passed). The PCP must be greater or equal than the defined 'Probability' for the requirement to pass. \\
+
+\begin{itemize}  
+\item Probability [1]: Probability of correct track angle
+\item Probability Check Type: $\geq$
+\item Track Angle Offset Value [deg]: Maximum absolute difference between the test and the reference, in degrees
+\item Use Minimum Speed: Defines if the minimum speed threshold shall be active
+\item Minimum Speed [m/s]: Minimum speed for target reports to be checked
+\item Threshold Value Check Type: $\leq$, differences must be less or equal the given threshold
+\item Failed Values are of Interest: Checked, the values of interest are the ones not passing the check
+\end{itemize}
+\ \\
+
+\subsubsection{Result Values}
+
+\paragraph{Sector}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Sector Layer & Name of the sector layer & units\_OPS\_2024 \\ \hline
+    Reqirement Group & Name of the requirement group & Mandatory \\ \hline
+    Reqirement & Name of the requirement & TrackAngle \\ \hline
+    Num Results & Total number of results & 1969 \\ \hline
+    Num Usable Results & Number of usable results & 1491 \\ \hline
+    Num Unusable Results & Number of unusable results & 478 \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 581710 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference trackangles & 282 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 581133 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 295 \\ \hline
+    \#NoTstData [1] & Number of updates without tst trackangle data & 0 \\ \hline
+    OMin [m/s] & Minimum of trackangle offset & -179.3 \\ \hline
+    OMax [m/s] & Maximum of trackangle offset & 179.98 \\ \hline
+    OAvg [m/s] & Average of trackangle offset & -0.01 \\ \hline
+    OSDev [m/s] & Standard Deviation of trackangle offset & 5.25 \\ \hline
+    OVar [$m^2$/$s^2$] & Variance of trackangle offset & 27.53 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 2670 \\ \hline
+    \#CP [1] & Number of updates with passed comparison & 577009 \\ \hline
+    PCP [\%] & Probability of passed comparison & 99.54 \\ \hline
+    Condition &  & >= 90.00 \\ \hline
+    Condition Fulfilled &  & Passed \\ \hline
+\end{tabularx}
+\end{table}
+\end{center}
+
+Also, a table is given for all single targets, sorted by PCP.
+
+\paragraph{Single Target}
+
+\begin{center}
+ \begin{table}[H]
+  \begin{tabularx}{\textwidth}{ | l | X |  l | }
+    \hline
+    \textbf{Name} & \textbf{Description} & \textbf{Example} \\ \hline
+    Use & To be used in results & true \\ \hline
+    \#Pos [1] & Number of updates & 813 \\ \hline
+    \#NoRef [1] & Number of updates w/o reference trackangles & 0 \\ \hline
+    \#PosInside [1] & Number of updates inside sector & 813 \\ \hline
+    \#PosOutside [1] & Number of updates outside sector & 0 \\ \hline
+    \#NoTstData [1] & Number of updates without tst trackangle data & 0 \\ \hline
+    OMin [m/s] & Minimum of trackangle offset & -7.82 \\ \hline
+    OMax [m/s] & Maximum of trackangle offset & 7.92 \\ \hline
+    OAvg [m/s] & Average of trackangle offset & 0.05 \\ \hline
+    OSDev [m/s] & Standard Deviation of trackangle offset & 0.66 \\ \hline
+    OVar [$m^2$/$s^2$] & Variance of trackangle offset & 0.44 \\ \hline
+    \#CF [1] & Number of updates with failed comparison & 0 \\ \hline
+    \#CP [1] & Number of updates with passed comparison & 813 \\ \hline
+    PCP [\%] & Probability of passed comparison & 100.00 \\ \hline
+    Condition &  & >= 90.00
+    Condition Fulfilled;;Passed
+\end{tabularx}
+\end{table}
+\end{center}
+
