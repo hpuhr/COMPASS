@@ -1,5 +1,5 @@
 {
-    "app_version": "0.7.6",
+    "app_version": "0.8.0",
     "category": "Default",
     "deployed": true,
     "description": "Gives an overview of the data, color by DBContent over the OpenStreetMap map.",

@@ -1,5 +1,5 @@
 {
-    "app_version": "0.7.6",
+    "app_version": "0.8.0",
     "category": "Default",
     "deployed": true,
     "description": "Displays baromatric altitude over groundspeed - giving a distribution of speeds at each altitude (and vice-versa).",
