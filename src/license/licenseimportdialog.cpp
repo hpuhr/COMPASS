@@ -120,7 +120,8 @@ void LicenseImportDialog::importLicenseKey(const QString& license_key)
     status_label_->setText("License " + QString::fromStdString(license::License::stringFromValidity(validity.first)).toLower());
     status_label_->setStyleSheet("QLabel { color: " + QString::fromStdString(license::License::colorFromValidity(validity.first)) + "; }");
 
-    import_button_->setEnabled(validity.first == license::License::Validity::Valid);
+    import_button_->setEnabled(validity.first == license::License::Validity::Valid ||
+                               validity.first == license::License::Validity::NotActivated);
 
     license_.reset(new license::License);
     *license_ = l;

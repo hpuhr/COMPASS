@@ -42,6 +42,7 @@ namespace license
 
 const std::string License::ColorValid   = QColor(34,139,34).name().toStdString();
 const std::string License::ColorInvalid = QColor(220,20,60).name().toStdString();
+const std::string License::ColorWarning = QColor(255,140,0).name().toStdString();
 
 const boost::posix_time::time_duration D0 = boost::posix_time::hours(24);
 const boost::posix_time::time_duration D1 = boost::posix_time::hours(48);
@@ -183,7 +184,7 @@ std::string License::colorFromValidity(Validity validity)
     else if (validity == Validity::Invalid)
         return ColorInvalid;
     else if (validity == Validity::NotActivated)
-        return ColorInvalid;
+        return ColorWarning;
     else if (validity == Validity::Expired)
         return ColorInvalid;
     else if (validity == Validity::Valid)

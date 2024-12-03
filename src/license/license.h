@@ -90,6 +90,7 @@ struct License
 
     static const std::string ColorValid;
     static const std::string ColorInvalid;
+    static const std::string ColorWarning;
 
     std::string                id;
 
