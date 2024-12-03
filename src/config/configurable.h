@@ -56,15 +56,16 @@
 class Configurable
 {
 public:
-    typedef Configuration::JSONExportType    JSONExportType;
-    typedef Configuration::Key               Key;
-    typedef Configuration::SubConfigKey      SubConfigKey;
-    typedef Configuration::MissingKeyMode    MissingKeyMode;
-    typedef Configuration::MissingKeyType    MissingKeyType;
-    typedef Configuration::MissingKey        MissingKey;
-    typedef Configuration::ReconfigureError  ReconfigureError;
-    typedef Configuration::ReconfigureResult ReconfigureResult;
-    typedef Configuration::InstanceDescr     InstanceDescr;
+    typedef Configuration::JSONExportType       JSONExportType;
+    typedef Configuration::JSONExportFilterType JSONExportFilterType;
+    typedef Configuration::Key                  Key;
+    typedef Configuration::SubConfigKey         SubConfigKey;
+    typedef Configuration::MissingKeyMode       MissingKeyMode;
+    typedef Configuration::MissingKeyType       MissingKeyType;
+    typedef Configuration::MissingKey           MissingKey;
+    typedef Configuration::ReconfigureError     ReconfigureError;
+    typedef Configuration::ReconfigureResult    ReconfigureResult;
+    typedef Configuration::InstanceDescr        InstanceDescr;
     
     /// @brief Constructor
     Configurable(const std::string& class_id, 
@@ -167,9 +168,11 @@ protected:
                                              const std::string& instance_id) const;
 
     void addJSONExportFilter(JSONExportType export_type, 
-                             const std::string& class_id);
+                             JSONExportFilterType filter_type,
+                             const std::string& id);
     void addJSONExportFilter(JSONExportType export_type, 
-                             const std::vector<std::string>& class_ids);
+                             JSONExportFilterType filter_type,
+                             const std::vector<std::string>& ids);
 
     void notifyModifications();
 

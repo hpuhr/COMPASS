@@ -540,20 +540,22 @@ std::string Configurable::getPath() const
  * Adds a new filtered class id to the export filter for the given export type.
  */
 void Configurable::addJSONExportFilter(JSONExportType export_type, 
-                                       const std::string& class_id)
+                                       JSONExportFilterType filter_type,
+                                       const std::string& id)
 {
     assert(configuration_);
-    configuration_->addJSONExportFilter(export_type, class_id);
+    configuration_->addJSONExportFilter(export_type, filter_type, id);
 }
 
 /**
  * Adds new filtered class ids to the export filter for the given export type.
  */
 void Configurable::addJSONExportFilter(JSONExportType export_type, 
-                                       const std::vector<std::string>& class_ids)
+                                       JSONExportFilterType filter_type,
+                                       const std::vector<std::string>& ids)
 {
     assert(configuration_);
-    configuration_->addJSONExportFilter(export_type, class_ids);
+    configuration_->addJSONExportFilter(export_type, filter_type, ids);
 }
 
 /**

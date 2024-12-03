@@ -55,6 +55,7 @@ View::View(const std::string& class_id,
     logdbg << "View: constructor";
 
     registerParameter("name", &name_, std::string());
+
     loginf << "View: constructor: name '" << name_ << "'";
     assert (name_.size());
 
@@ -71,6 +72,9 @@ View::View(const std::string& class_id,
     connect(&view_manager_, &ViewManager::reloadStateChanged, this, &View::viewManagerReloadStateChanged);
     connect(&view_manager_, &ViewManager::automaticUpdatesChanged, this, &View::viewManagerAutoUpdatesChanged);
     connect(&view_manager_, &ViewManager::presetEdited, this, &View::presetEdited);
+
+    //do not write view name to presets
+    addJSONExportFilter(Configurable::JSONExportType::Preset, Configurable::JSONExportFilterType::ParamID, "name");
 }
 
 /**
