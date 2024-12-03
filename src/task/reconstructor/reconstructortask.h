@@ -161,6 +161,8 @@ public:
 
     void showDialog();
 
+    void checkReconstructor();
+
     virtual void updateFeatures() override final;
     virtual void initTask() override final;
 

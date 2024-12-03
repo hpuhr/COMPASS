@@ -32,6 +32,8 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     setMinimumSize(QSize(1000, 800));
 
+    task_.checkReconstructor();
+
     QFont font_bold;
     font_bold.setBold(true);
 

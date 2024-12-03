@@ -143,7 +143,7 @@ void ReconstructorTask::initTask()
 {
 }
 
-void ReconstructorTask::updateFeatures()
+void ReconstructorTask::checkReconstructor()
 {
     const auto& license_manager = COMPASS::instance().licenseManager();
 
@@ -151,6 +151,11 @@ void ReconstructorTask::updateFeatures()
         currentReconstructorStr(ScoringUMReconstructorName);
     else if (license_manager.componentEnabled(license::License::ComponentProbIMMReconstructor) && currentReconstructorStr() != ProbImmReconstructorName)
         currentReconstructorStr(ProbImmReconstructorName);
+}
+
+void ReconstructorTask::updateFeatures()
+{
+    checkReconstructor();
 }
 
 bool ReconstructorTask::canRun()
