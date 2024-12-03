@@ -55,6 +55,7 @@ struct License
         ReadError,
         Incomplete,
         Invalid,
+        NotActivated,
         Expired
     };
 

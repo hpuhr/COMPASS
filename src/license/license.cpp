@@ -162,6 +162,8 @@ std::string License::stringFromValidity(Validity validity)
         return "Unreadable";
     else if (validity == Validity::Invalid)
         return "Invalid";
+    else if (validity == Validity::NotActivated)
+        return "Not Activated";
     else if (validity == Validity::Expired)
         return "Expired";
     else if (validity == Validity::Valid)
@@ -179,6 +181,8 @@ std::string License::colorFromValidity(Validity validity)
     else if (validity == Validity::ReadError)
         return ColorInvalid;
     else if (validity == Validity::Invalid)
+        return ColorInvalid;
+    else if (validity == Validity::NotActivated)
         return ColorInvalid;
     else if (validity == Validity::Expired)
         return ColorInvalid;
@@ -435,7 +439,9 @@ std::pair<License::Validity, std::string> License::validity() const
 
     auto t = Utils::Time::currentUTCTime();
 
-    if (t < date_activation - D0 || t > date_expiration + D1)
+    if (t < date_activation - D0)
+        return std::make_pair(Validity::NotActivated, "license not activated");
+    if (t > date_expiration + D1)
         return std::make_pair(Validity::Expired, "license expired");
 
     return std::make_pair(Validity::Valid, "");
