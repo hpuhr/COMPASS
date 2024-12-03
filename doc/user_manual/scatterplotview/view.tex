@@ -79,15 +79,17 @@ Such a variable can be any numerical variable. A reload operation might be requi
 If available, plottable scatter data of active View Points can be visualized by checking the 'Show Annotations' box. 
 If multiple scatter annotations are present in a View Point, these individual plots can be selected using the 'Plot' combo box.
 Plottable annotations might further be grouped into so-called plot groups, which are listed under 'Plot Group'.
-The plot group can be switched in case multiple plot groups are available.
+The plot group can be switched in case multiple plot groups are available. \\
+
+Below the variable selection, there is a list of all currently displayed scatter data items, shown with their respective color, name and data count.
+Individual data items can be shown or hidden by using the check boxes. All items can be hidden simultaneously by pressing the 'Deselect All' button. \\
+
+Scatter data items can be drawn with their data points connected by lines by checking the 'Use Connection Lines' box.
+\textbf{Note} that on a reload, if the total number of drawn data points exceeds 100000, connections lines will be deactivated automatically
+in order to prevent performance issues. After the reload the connection lines can be reactivated manually by the user if desired.
 
 %\hl{TODO}
 %Please note that visualization of evaluation result data is currently not implemented.
-
-\subsection{Scatter Data Item List}
-
-Below the config tab, there is a list of all currently displayed scatter data items, shown with their respective color, name and data count.
-Individual data items can be shown or hidden by using the check boxes.
 
 \subsection{Scatterplot}
 

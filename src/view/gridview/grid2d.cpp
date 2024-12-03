@@ -59,6 +59,12 @@ bool Grid2D::create(const QRectF& roi,
 
     clear();
 
+    if (!roi.isValid())
+    {
+        if (err) *err = "roi is invalid";
+        return false;
+    }
+
     if (roi.isEmpty())
     {
         if (err) *err = "roi is empty";
@@ -448,6 +454,12 @@ size_t Grid2D::addLineInternal(double x0,
                                std::set<std::pair<size_t, size_t>>& visited,
                                int subsampling)
 {
+    if (!std::isfinite(x0) ||
+        !std::isfinite(y0) ||
+        !std::isfinite(x1) ||
+        !std::isfinite(y1))
+        return 0;
+
     int cells_x = std::max(1, (int)std::ceil(std::fabs(x1 - x0) * cell_size_x_inv_));
     int cells_y = std::max(1, (int)std::ceil(std::fabs(y1 - y0) * cell_size_y_inv_));
     int samples = std::max(cells_x, cells_y) * 2 * subsampling;

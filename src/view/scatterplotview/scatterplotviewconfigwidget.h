@@ -49,6 +49,7 @@ protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     virtual void onDisplayChange_impl() override;
+    virtual void configChanged_impl() override;
 
     ScatterPlotView* view_ = nullptr;
 
