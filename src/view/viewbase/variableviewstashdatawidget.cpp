@@ -350,6 +350,11 @@ QRectF VariableViewStashDataWidget::getPlanarBounds(int var_x, int var_y, bool c
     double ymin = bounds_y.value().first;
     double ymax = bounds_y.value().second;
 
+    assert(std::isfinite(xmin));
+    assert(std::isfinite(xmax));
+    assert(std::isfinite(ymin));
+    assert(std::isfinite(ymax));
+
     return QRectF(xmin, ymin, xmax - xmin, ymax - ymin);
 }
 

@@ -308,6 +308,14 @@ void GridViewConfigWidget::maxValueChanged()
 
 /**
 */
+void GridViewConfigWidget::configChanged_impl()
+{
+    updateConfig();
+    updateExport();
+}
+
+/**
+*/
 void GridViewConfigWidget::updateConfig()
 {
     const auto& settings = view_->settings();

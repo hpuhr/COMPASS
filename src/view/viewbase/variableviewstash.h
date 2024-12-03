@@ -192,6 +192,9 @@ public:
                 const auto& values = dbc.second.variable_stashes[ i ].values;
                 for (const auto& v : values)
                 {
+                    if (!std::isfinite(v))
+                        continue;
+
                     if (!data_range.has_value())
                     {
                         data_range = DataRange(v, v);

@@ -90,7 +90,6 @@ protected:
     virtual void unshowViewPoint(const ViewableDataConfig* vp) override;
     virtual void showViewPoint(const ViewableDataConfig* vp) override;
 
-
     /// For data display
     ScatterPlotViewWidget* widget_{nullptr};
     /// For data loading
