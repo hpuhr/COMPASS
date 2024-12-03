@@ -1,0 +1,33 @@
+{
+    "app_version": "0.8.0",
+    "category": "Default",
+    "deployed": true,
+    "description": "Maximum CAT062 Type LM of Longitude-Latitude grid cells.",
+    "modified": false,
+    "name": "Track Detection Type",
+    "timestamp": "2024-12-03 09:29:57.102",
+    "view": "GridView",
+    "view_config": {
+        "parameters": {
+            "data_var_x_dbo": "Meta",
+            "data_var_x_name": "Longitude",
+            "data_var_y_dbo": "Meta",
+            "data_var_y_name": "Latitude",
+            "data_var_z_dbo": "CAT062",
+            "data_var_z_name": "Type LM",
+            "grid_resolution": 100,
+            "render_color_num_steps": 10,
+            "render_color_scale": 22,
+            "render_color_value_max": "",
+            "render_color_value_min": "",
+            "value_type": 2
+        },
+        "sub_configs": {
+            "GridViewWidget": {
+                "GridViewWidget0": {
+                    "parameters": null
+                }
+            }
+        }
+    }
+}

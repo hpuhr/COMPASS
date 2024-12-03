@@ -1,0 +1,33 @@
+{
+    "app_version": "0.8.0",
+    "category": "Default",
+    "deployed": true,
+    "description": "Data counts of Longitude-Latitude grid cells.",
+    "modified": false,
+    "name": "Traffic Patterns",
+    "timestamp": "2024-12-03 08:57:14.984",
+    "view": "GridView",
+    "view_config": {
+        "parameters": {
+            "data_var_x_dbo": "Meta",
+            "data_var_x_name": "Longitude",
+            "data_var_y_dbo": "Meta",
+            "data_var_y_name": "Latitude",
+            "data_var_z_dbo": "Meta",
+            "data_var_z_name": "Time of Day",
+            "grid_resolution": 200,
+            "render_color_num_steps": 20,
+            "render_color_scale": 22,
+            "render_color_value_max": "2000",
+            "render_color_value_min": "",
+            "value_type": 0
+        },
+        "sub_configs": {
+            "GridViewWidget": {
+                "GridViewWidget0": {
+                    "parameters": null
+                }
+            }
+        }
+    }
+}

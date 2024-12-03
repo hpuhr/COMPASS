@@ -1,0 +1,33 @@
+{
+    "app_version": "0.8.0",
+    "category": "Default",
+    "deployed": true,
+    "description": "Mean Track Ground Speed of Longitude-Latitude grid cells.",
+    "modified": false,
+    "name": "Mean Track Ground Speed",
+    "timestamp": "2024-12-03 09:22:56.817",
+    "view": "GridView",
+    "view_config": {
+        "parameters": {
+            "data_var_x_dbo": "Meta",
+            "data_var_x_name": "Longitude",
+            "data_var_y_dbo": "Meta",
+            "data_var_y_name": "Latitude",
+            "data_var_z_dbo": "Meta",
+            "data_var_z_name": "Track Groundspeed",
+            "grid_resolution": 200,
+            "render_color_num_steps": 20,
+            "render_color_scale": 22,
+            "render_color_value_max": "",
+            "render_color_value_min": "",
+            "value_type": 3
+        },
+        "sub_configs": {
+            "GridViewWidget": {
+                "GridViewWidget0": {
+                    "parameters": null
+                }
+            }
+        }
+    }
+}
