@@ -44,6 +44,8 @@ ScatterPlotView::ScatterPlotView(const std::string& class_id,
                                  ViewManager& view_manager)
 :   VariableView(class_id, instance_id, w, view_manager)
 {
+    registerParameter(ParamUseConnectionLines, &settings_.use_connection_lines, Settings().use_connection_lines);
+
     const std::vector<PropertyDataType> valid_types = { PropertyDataType::BOOL,
                                                         PropertyDataType::CHAR,
                                                         PropertyDataType::UCHAR,
@@ -202,7 +204,7 @@ bool ScatterPlotView::useConnectionLines()
 */
 void ScatterPlotView::useConnectionLines(bool value, bool redraw)
 {
-    settings_.use_connection_lines = value;
+    setParameter(settings_.use_connection_lines, value);
 
     if (redraw)
         updateView(VU_Redraw);

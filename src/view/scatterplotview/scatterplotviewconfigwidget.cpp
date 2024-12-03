@@ -134,6 +134,15 @@ void ScatterPlotViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
     info[ "use_connection_lines" ] = use_connection_lines_->isChecked();
 }
 
+/**
+*/
+void ScatterPlotViewConfigWidget::configChanged_impl()
+{
+    use_connection_lines_->blockSignals(true);
+    use_connection_lines_->setChecked(view_->useConnectionLines());
+    use_connection_lines_->blockSignals(false);
+}
+
 //void ScatterPlotViewConfigWidget::exportSlot()
 //{
 //    logdbg << "ScatterPlotViewConfigWidget: exportSlot";
