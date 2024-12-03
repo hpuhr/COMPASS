@@ -421,7 +421,8 @@ std::pair<double,double> calculateMeanStdDev (std::vector<double> values, float 
 {
     double mean=0, stddev=0;
 
-    if (values.empty()) {
+    if (values.empty())
+    {
         logerr << "Number: calculateMeanStdDev: empty vector";
 
         return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
@@ -429,28 +430,32 @@ std::pair<double,double> calculateMeanStdDev (std::vector<double> values, float 
 
     unsigned int num_to_remove = static_cast<size_t>(std::floor(values.size() * remove_top));
 
-    // remove the last num_to_remove elements
-    if (num_to_remove)
+    unsigned int num_to_check = values.size() - num_to_remove;
+
+    if (num_to_check == 0)
     {
-        std::sort(values.begin(), values.end());
-        values.erase(values.end() - num_to_remove, values.end());
-    }
-
-    if (values.empty()) {
-        logerr << "Number: calculateMeanStdDev: empty vector after remove";
-
+        logerr << "Number: calculateMeanStdDev: remove all values in vector";
         return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
     }
 
-    double sum = std::accumulate(values.begin(), values.end(), 0.0);
+    std::sort(values.begin(), values.end());
 
-    mean = sum / values.size();
+    auto last_val_to_check_it = values.begin() + num_to_check;
 
-    std::vector<double> diff(values.size());
-    std::transform(values.begin(), values.end(), diff.begin(),
+    //assert (values.begin() != last_val_to_check_it);
+
+    double sum = std::accumulate(values.begin(), last_val_to_check_it, 0.0);
+
+    mean = sum /num_to_check;
+
+    if (num_to_check == 1)
+        return {mean, 0};
+
+    std::vector<double> diff(num_to_check);
+    std::transform(values.begin(), last_val_to_check_it, diff.begin(),
                    [mean](const double val) { return val - mean; });
     double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
-    stddev = std::sqrt(sq_sum / values.size());
+    stddev = std::sqrt(sq_sum / num_to_check);
 
     return std::pair<double,double>(mean, stddev);
 }
