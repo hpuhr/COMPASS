@@ -35,6 +35,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QComboBox>
 
 using namespace dbContent;
 
@@ -62,6 +63,22 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
                 &CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot);
 
         grid->addWidget(ds_combo_, row_cnt, 1);
+
+        // line
+        row_cnt++;
+        grid->addWidget(new QLabel("Line ID"), row_cnt, 0);
+        ds_line_combo_ = new QComboBox;
+        ds_line_combo_->addItem("1", QVariant(0u));
+        ds_line_combo_->addItem("2", QVariant(1u));
+        ds_line_combo_->addItem("3", QVariant(2u));
+        ds_line_combo_->addItem("4", QVariant(3u));
+
+        ds_line_combo_->setCurrentIndex(ds_line_combo_->findData(QVariant(task.currentDataSourceLineID())));
+
+        connect(ds_line_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+                &CreateARTASAssociationsTaskWidget::currentDataSourceLineChangedSlot);
+
+        grid->addWidget(ds_line_combo_, row_cnt, 1);
 
         // time stuff
         row_cnt++;
@@ -173,6 +190,12 @@ void CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot()
     task_.currentDataSourceName(ds_combo_->getDSName());
 }
 
+void CreateARTASAssociationsTaskWidget::currentDataSourceLineChangedSlot()
+{
+    assert(ds_line_combo_);
+    task_.currentDataSourceLineID(ds_line_combo_->currentData().toUInt());
+}
+
 void CreateARTASAssociationsTaskWidget::update()
 {
     if (task_.currentDataSourceName().size() &&
@@ -181,7 +204,6 @@ void CreateARTASAssociationsTaskWidget::update()
 
     if (ds_combo_->getDSName() != task_.currentDataSourceName())
         task_.currentDataSourceName(ds_combo_->getDSName());
-
 }
 
 void CreateARTASAssociationsTaskWidget::endTrackTimeEditSlot(QString value)

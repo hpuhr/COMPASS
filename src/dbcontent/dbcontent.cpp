@@ -850,3 +850,44 @@ void DBContent::checkStaticVariable(const Property& property)
                << " insteaf of " << property.dataTypeString() << ")";
 }
 
+bool DBContent::isStatusContent(const std::string& dbc_name)
+{
+    return (dbc_name == "CAT002" || 
+            dbc_name == "CAT004" ||
+            dbc_name == "CAT019" ||
+            dbc_name == "CAT023" ||
+            dbc_name == "CAT034" ||
+            dbc_name == "CAT063" ||
+            dbc_name == "CAT065");
+}
+
+bool DBContent::isStatusContent(unsigned int dbc_id)
+{
+    return (dbc_id == 2  || 
+            dbc_id == 4  ||
+            dbc_id == 19 ||
+            dbc_id == 23 ||
+            dbc_id == 34 ||
+            dbc_id == 63 ||
+            dbc_id == 65);
+}
+
+bool DBContent::isReferenceContent(const std::string& dbc_name)
+{
+    return (dbc_name == "RefTraj");
+}
+
+bool DBContent::isReferenceContent(unsigned int dbc_id)
+{
+    return (dbc_id == 255);
+}
+
+bool DBContent::isStatusContent() const
+{
+    return DBContent::isStatusContent(id_);
+}
+
+bool DBContent::isReferenceContent() const
+{
+    return DBContent::isReferenceContent(id_);
+}
