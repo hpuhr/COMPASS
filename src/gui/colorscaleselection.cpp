@@ -18,6 +18,8 @@
 #include "colorscaleselection.h"
 #include "colormap.h"
 
+#include "ui_test_common.h"
+
 #include <QComboBox>
 #include <QHBoxLayout>
 
@@ -34,6 +36,8 @@ ColorScaleSelection::ColorScaleSelection(QWidget* parent)
 
     combo_ = ColorMap::generateScaleSelection();
     layout->addWidget(combo_);
+
+    UI_TEST_OBJ_NAME(combo_, "combo");
 
     connect(combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ColorScaleSelection::scaleChanged);
 }
