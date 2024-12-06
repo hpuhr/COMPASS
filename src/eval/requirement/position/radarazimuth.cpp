@@ -135,6 +135,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
                             num_comp_passed, num_comp_failed,
                             "No data source info");
 
+            ++num_no_ref;
             continue;
         }
 
