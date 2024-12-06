@@ -376,7 +376,8 @@ void ReferenceCalculator::reconstructMeasurements()
 
     unsigned int num_targets = refs.size();
 
-    loginf << "ReferenceCalculator: reconstructMeasurements: reconstructing " << num_targets << " target(s) " << (settings_.multithreading ? "multithreaded" : "") << "...";
+    loginf << "ReferenceCalculator: reconstructMeasurements: reconstructing " << num_targets
+           << " target(s) " << (settings_.multithreading ? "multithreaded" : "") << "...";
 
     //compute references in parallel
     if (settings_.multithreading)
@@ -393,6 +394,8 @@ void ReferenceCalculator::reconstructMeasurements()
             reconstructMeasurements(*refs[ i ]);
         }
     }
+
+    loginf << "ReferenceCalculator: reconstructMeasurements: done";
 }
 
 /**

@@ -880,9 +880,13 @@ void ReconstructorTask::writeDoneSlot()
             progress_dialog_->close();
     }
 
+    loginf << "ReconstructorTask: writeDoneSlot: trim";
+
     malloc_trim(0); // release unused memory
 
     writing_slice_ = nullptr;
+
+    loginf << "ReconstructorTask: writeDoneSlot: done";
 }
 
 void ReconstructorTask::runCancelledSlot()

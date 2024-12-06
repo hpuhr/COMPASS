@@ -446,7 +446,7 @@ std::pair<double,double> calculateMeanStdDev (std::vector<double> values, float 
 
     double sum = std::accumulate(values.begin(), last_val_to_check_it, 0.0);
 
-    mean = sum /num_to_check;
+    mean = sum / num_to_check;
 
     if (num_to_check == 1)
         return {mean, 0};

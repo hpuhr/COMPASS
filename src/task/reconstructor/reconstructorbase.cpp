@@ -58,8 +58,27 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
     if (tr.acid_ && !unspecific_acids_.count(*tr.acid_))
     {
         if (acid_2_utn_.count(*tr.acid_))
-            logerr << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " acid already present in "
-                   << targets_.at(acid_2_utn_.at(*tr.acid_)).asStr();
+        {
+            assert (targets_.count(acid_2_utn_.at(*tr.acid_)));
+
+            auto existing_target = targets_.at(acid_2_utn_.at(*tr.acid_));
+
+            logwrn << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " acid already present in "
+                   << existing_target.asStr();
+
+            if (tr.acad_ && existing_target.acads_.size()
+                && existing_target.hasACAD(*tr.acad_))
+            {
+                logerr << "TargetsContainer: createNewTarget: acad matches, this seems to be an association error";
+                assert (false);
+            }
+
+            logwrn << "TargetsContainer: createNewTarget: no acad match, assuming duplicate acid '"
+                << *tr.acid_ << "', removing from association criteria";
+
+            acid_2_utn_.erase(*tr.acid_);
+            unspecific_acids_.insert(*tr.acid_);
+        }
 
         assert (!acid_2_utn_.count(*tr.acid_));
     }
