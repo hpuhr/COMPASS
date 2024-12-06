@@ -584,7 +584,8 @@ void SectionContentTable::customContextMenuSlot(const QPoint& p)
     assert (table_view_);
 
     QModelIndex index = table_view_->indexAt(p);
-    assert (index.isValid());
+    if (!index.isValid())
+        return;
 
     auto const source_index = proxy_model_->mapToSource(index);
     assert (source_index.isValid());
