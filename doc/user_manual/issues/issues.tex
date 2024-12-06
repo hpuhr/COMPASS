@@ -92,14 +92,26 @@ If such a display issue exists, additional information is required. \\
 
 Please \textbf{verify} that the installed graphics card and driver in use match the supported version stated in \nameref{sec:graphics_installation}. \\
 
-Only if this is the case, please collect the output of \textit{glxinfo} and create an issue report as stated below.
+Only if this is the case, please collect the output of \textit{glxinfo} and create an issue report as stated below. \\
+
+If the application should immediately crash on startup giving an error similar to
+
+\begin{verbatim}
+GLib-GIO-ERROR **: 10:47:18.464: Settings schema 'org.gnome.settings-daemon.
+plugins.xsettings' does not contain a key named 'antialiasing'
+\end{verbatim}
+
+a possible fix can be to start the application using 
+
+\begin{verbatim}
+GDK_BACKEND=X11 ./NAME_OF_THE_APPIMAGE.AppImage
+\end{verbatim}
 
 \subsection{ADS-B Target Reports Not Shown}
 
 This previously existing issues of ADS-B sometimes having the CAT021 'Latitude HP' and 'Longitude HP' set instead of the 'Latitude' and 'Longitude' variables. This was resolved in v0.8.0 and later by setting empty CAT021 'Latitude' / 'Longitude' values using 'Latitude HP' / 'Longitude HP' during ASTERIX import. \\
 
 While this is a somewhat suboptimal solution (since it makes it hard for the user to establish what positions are exactly coming from which ASTERIX data items) it is a feasible workaround for the time being.
-
 
 \section{Reporting Issues}
 
