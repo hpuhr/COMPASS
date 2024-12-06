@@ -138,6 +138,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
                             num_comp_passed, num_comp_failed,
                             "No data source info");
 
+            ++num_no_ref;
             continue;
         }
 
@@ -273,7 +274,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
         loginf << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
+               << " num_pos " << num_pos<< " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_calc_errors " << num_pos_calc_errors
                << " num_distances " << num_distances;
