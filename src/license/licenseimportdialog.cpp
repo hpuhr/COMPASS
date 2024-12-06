@@ -21,6 +21,9 @@
 
 #include "compass.h"
 #include "timeconv.h"
+#include "files.h"
+
+#include <fstream>
 
 #include <QLineEdit>
 #include <QTextEdit>
@@ -29,6 +32,70 @@
 #include <QVBoxLayout>
 #include <QFormLayout>
 #include <QGroupBox>
+
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
+
+/**
+*/
+class KeyEdit : public QTextEdit
+{
+public:
+    KeyEdit(QWidget* parent = nullptr) : QTextEdit(parent) {}
+    virtual ~KeyEdit() = default;
+protected:
+    virtual void dragEnterEvent(QDragEnterEvent *event) override
+    {
+        if (event->mimeData()->hasUrls())
+        {
+            auto urls = event->mimeData()->urls();
+            if (!urls.empty())
+            {
+                QString fn = urls[ 0 ].toLocalFile();
+                if (fn.endsWith(".txt"))
+                    event->acceptProposedAction();
+            }
+        }
+    }
+    virtual void dropEvent(QDropEvent *event) override
+    {
+        std::string drop_fn;
+
+        if (event->mimeData()->hasUrls())
+        {
+            auto urls = event->mimeData()->urls();
+            if (!urls.empty())
+            {
+                QString fn = urls[ 0 ].toLocalFile();
+                if (fn.endsWith(".txt"))
+                    drop_fn = fn.toStdString();
+            }
+        }
+
+        if (drop_fn.empty() || !Utils::Files::fileExists(drop_fn))
+            return;
+
+        if (readFile(drop_fn))
+            event->acceptProposedAction();
+    }
+
+private:
+    bool readFile(const std::string& fn)
+    {
+        std::ifstream file(fn);
+        if (!file.is_open())
+            return false;
+
+        std::string str, file_contents;
+        while (std::getline(file, str))
+            file_contents += str;
+        
+        setText(QString::fromStdString(file_contents));
+
+        return !file_contents.empty();
+    }
+};
 
 /**
 */
@@ -42,10 +109,11 @@ LicenseImportDialog::LicenseImportDialog(QWidget* parent,
     setLayout(layout);
 
     auto key_layout = new QFormLayout;
-    auto key_edit   = new QTextEdit;
+    auto key_edit   = new KeyEdit;
 
     key_edit->setPlaceholderText("Enter license key");
     key_edit->setAcceptRichText(false);
+    key_edit->setAcceptDrops(true);
     
     key_layout->addRow("License Key: ", key_edit);
 
