@@ -119,8 +119,6 @@ std::string compress(const std::set<T>& values, char seperator)
     return ss.str();
 }
 
-
-
 extern bool hasEnding(std::string const& full_string, std::string const& ending);
 
 extern bool replace(std::string& str, const std::string& from, const std::string& to);

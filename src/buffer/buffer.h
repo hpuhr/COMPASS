@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BUFFER_H_
-#define BUFFER_H_
+#pragma once
 
 #include "propertylist.h"
 #include "logger.h"
@@ -110,7 +109,7 @@ public:
     void cutUpToIndex(size_t index); // everything up to index is removed
     void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
 
-    const std::string& dbContentName() { return dbcontent_name_; }
+    const std::string& dbContentName() const { return dbcontent_name_; }
 
     void dbContentName(const std::string& dbcontent_name) { dbcontent_name_ = dbcontent_name; }
 
@@ -268,4 +267,3 @@ void Buffer::seizeArrayListMap(Buffer& other_buffer)
     other_buffer.getArrayListMap<T>().clear();
 }
 
-#endif /* BUFFER_H_ */

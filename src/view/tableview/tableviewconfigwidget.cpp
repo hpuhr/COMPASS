@@ -74,6 +74,13 @@ TableViewConfigWidget::TableViewConfigWidget(TableViewWidget* view_widget, QWidg
         connect(presentation_check_, &QCheckBox::clicked, this, &TableViewConfigWidget::toggleUsePresentation);
         cfg_layout->addWidget(presentation_check_);
 
+        ignore_non_target_reports_check_ = new QCheckBox("Ignore Non-Target Reports");
+        UI_TEST_OBJ_NAME(ignore_non_target_reports_check_, presentation_check_->text())
+        ignore_non_target_reports_check_->setChecked(view_->ignoreNonTargetReports());
+        connect(ignore_non_target_reports_check_, &QCheckBox::clicked,
+                this, &TableViewConfigWidget::toggleIgnoreNonTargetReports);
+        cfg_layout->addWidget(ignore_non_target_reports_check_);
+
         cfg_layout->addStretch();
         
         cfg_widget->setLayout(cfg_layout);
@@ -103,6 +110,15 @@ void TableViewConfigWidget::toggleUsePresentation()
     logdbg << "TableViewConfigWidget: toggleUsePresentation: setting use presentation to "
            << checked;
     view_->usePresentation(checked);
+}
+
+void TableViewConfigWidget::toggleIgnoreNonTargetReports()
+{
+    assert(ignore_non_target_reports_check_);
+    bool checked = ignore_non_target_reports_check_->checkState() == Qt::Checked;
+    logdbg << "TableViewConfigWidget: toggleIgnoreNonTargetReports: setting to "
+           << checked;
+    view_->ignoreNonTargetReports(checked);
 }
 
 void TableViewConfigWidget::exportSlot()
@@ -139,6 +155,7 @@ void TableViewConfigWidget::configChanged()
     //other ui elements
     only_selected_check_->setChecked(view_->showOnlySelected());
     presentation_check_->setChecked(view_->usePresentation());
+    ignore_non_target_reports_check_->setChecked(view_->ignoreNonTargetReports());
 }
 
 void TableViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
@@ -150,4 +167,5 @@ void TableViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
     info[ "variables"          ] = variables;
     info[ "show_only_selected" ] = only_selected_check_->isChecked();
     info[ "use_presentation"   ] = presentation_check_->isChecked();
+    info[ "ignore_non_target_reports"   ] = ignore_non_target_reports_check_->isChecked();
 }

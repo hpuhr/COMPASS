@@ -56,7 +56,7 @@ VariableOrderedSet::VariableOrderedSet(const std::string& class_id,
             if (!dbcont_man.existsMetaVariable(def_it.second))
             {
                 logwrn << "VariableOrderedSet: ctor: outdated meta variable " << def_it.second;
-                removeVariableAt(getIndexFor(def_it.first, def_it.second));
+                removeVariableAt(getIndexFor(def_it.first, def_it.second), false);
             }
         }
         else if (!dbcont_man.existsDBContent(def_it.first) ||
@@ -64,7 +64,7 @@ VariableOrderedSet::VariableOrderedSet(const std::string& class_id,
         {
             logwrn << "VariableOrderedSet: ctor: outdated dbcont name "
                    << def_it.first << " variable " << def_it.second;
-            removeVariableAt(getIndexFor(def_it.first, def_it.second));
+            removeVariableAt(getIndexFor(def_it.first, def_it.second), false);
         }
     }
 
@@ -138,6 +138,11 @@ void VariableOrderedSet::set(const std::vector<std::pair<std::string,std::string
 
 void VariableOrderedSet::removeVariableAt(unsigned int index)
 {
+    removeVariableAt(index, true);
+}
+
+void VariableOrderedSet::removeVariableAt(unsigned int index, bool signal_changes)
+{
     loginf << "VariableOrderedSet: removeVariableAt: index " << index;
 
     assert(index < variable_definitions_.size());
@@ -145,7 +150,11 @@ void VariableOrderedSet::removeVariableAt(unsigned int index)
     variable_definitions_.erase(index);
     notifyModifications();
 
-    emit setChangedSignal();
+    if (signal_changes)
+    {
+        emit variableRemovedSignal();
+        emit setChangedSignal();
+    }
 }
 
 void VariableOrderedSet::removeVariable(const Variable& variable)
@@ -192,6 +201,7 @@ void VariableOrderedSet::moveVariableUp(unsigned int index)
     variable_definitions_ = tmp_vec;
     notifyModifications();
 
+    emit variableMovedSignal();
     emit setChangedSignal();
 }
 
@@ -213,6 +223,7 @@ void VariableOrderedSet::moveVariableDown(unsigned int index)
     variable_definitions_ = tmp_vec;
     notifyModifications();
 
+    emit variableMovedSignal();
     emit setChangedSignal();
 }
 

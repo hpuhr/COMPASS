@@ -34,7 +34,7 @@ namespace rtcommand
 /**
  */
 RTCommandRunner::RTCommandRunner()
-:   stash_(new RTCommandRunnerStash)
+    :   stash_(new RTCommandRunnerStash)
 {
 }
 
@@ -62,21 +62,30 @@ std::future<RTCommandRunner::Results> RTCommandRunner::runCommands(RTCommandChai
 
     auto runCommand = [ s ] (RTCommandChain&& cmds_to_run) mutable
     {
-        Results results;
-
-        while (auto cmd = cmds_to_run.pop())
+        try
         {
-            //from here on we use shared pointer to be able to run commands asynchronously on the main thread
-            std::shared_ptr<RTCommand> cmd_ptr(cmd.release());
+            Results results;
 
-            RTCommandRunner::runCommand(cmd_ptr, s);
-            results.push_back(cmd_ptr->result());
+            while (auto cmd = cmds_to_run.pop())
+            {
+                //from here on we use shared pointer to be able to run commands asynchronously on the main thread
+                std::shared_ptr<RTCommand> cmd_ptr(cmd.release());
+
+                RTCommandRunner::runCommand(cmd_ptr, s);
+                results.push_back(cmd_ptr->result());
+            }
+
+            return results;
         }
-
-        return results;
+        catch (const std::exception& e)
+        {
+            logerr << "RTCommandRunner: runCommand: exception '" << e.what() << "'";
+            throw e;
+        }
     };
 
     return std::async(std::launch::async, runCommand, std::move(cmds));
+
 }
 
 /**
@@ -182,10 +191,10 @@ bool RTCommandRunner::executeCommand(std::shared_ptr<RTCommand> cmd, RTCommandRu
     bool invoked = cmd->execute_async ? QMetaObject::invokeMethod(stash, "executeCommandAsync", 
                                                                   Qt::QueuedConnection,
                                                                   Q_ARG(RTCommandMetaTypeWrapper, wrapper)) :
-                                        QMetaObject::invokeMethod(stash, "executeCommand", 
-                                                                  Qt::BlockingQueuedConnection,
-                                                                  Q_RETURN_ARG(bool, ok),
-                                                                  Q_ARG(RTCommandMetaTypeWrapper, wrapper));
+                       QMetaObject::invokeMethod(stash, "executeCommand",
+                                                 Qt::BlockingQueuedConnection,
+                                                 Q_RETURN_ARG(bool, ok),
+                                                 Q_ARG(RTCommandMetaTypeWrapper, wrapper));
     bool succeeded = (ok && invoked);
 
     //if invoking the execution failed, we set the commands state to failed
@@ -259,7 +268,7 @@ void RTCommandRunner::logMsg(const std::string& msg, RTCommand* cmd)
 void RTCommandRunner::runCommand(std::shared_ptr<RTCommand> cmd, RTCommandRunnerStash* stash)
 {
     if (!stash)
-        throw std::runtime_error("RTCommandRunner::run: No stash");
+        throw std::runtime_error("RTCommandRunner: run: No stash");
 
     //reset result state
     cmd->resetResult();

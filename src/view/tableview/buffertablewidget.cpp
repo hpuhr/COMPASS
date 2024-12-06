@@ -15,16 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include <iostream>
-
 #include "buffertablewidget.h"
 
 #include "buffer.h"
 #include "buffertablemodel.h"
 #include "dbcontent/dbcontent.h"
-//#include "dbcontent/dbcontentmanager.h"
-//#include "dbcontent/variable/variable.h"
-//#include "dbcontent/variable/variableset.h"
 #include "tableviewdatasource.h"
 #include "logger.h"
 #include "compass.h"
@@ -53,7 +48,7 @@ BufferTableWidget::BufferTableWidget(DBContent& object, TableView& view,
     table_ = new QTableView(this);
     table_->setSelectionBehavior(QAbstractItemView::SelectItems);
     table_->setSelectionMode(QAbstractItemView::ContiguousSelection);
-    model_ = new BufferTableModel(this, object_, data_source_);
+    model_ = new BufferTableModel(this, object_, view_, data_source_);
     table_->setModel(model_);
 
     connect(model_, &BufferTableModel::exportDoneSignal,
@@ -126,35 +121,43 @@ void BufferTableWidget::exportSlot()
 
 void BufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(cancelled); }
 
-void BufferTableWidget::showOnlySelectedSlot(bool value)
+void BufferTableWidget::updateToSettingsChange()
 {
-    logdbg << "BufferTableWidget: showOnlySelectedSlot: " << value;
+    logdbg << "BufferTableWidget: updateToSettingsChange";
 
     assert(model_);
-    model_->showOnlySelected(value);
+    model_->rebuild();
     assert(table_);
     table_->resizeColumnsToContents();
 }
 
-void BufferTableWidget::usePresentationSlot(bool use_presentation)
-{
-    assert(model_);
-    model_->usePresentation(use_presentation);
-    assert(table_);
-    table_->resizeColumnsToContents();
-}
+// void BufferTableWidget::usePresentation(bool value)
+// {
+//     assert(model_);
+//     model_->rebuild();
+//     assert(table_);
+//     table_->resizeColumnsToContents();
+// }
 
-bool BufferTableWidget::showOnlySelected() const
-{
-    assert(model_);
-    return model_->showOnlySelected();
-}
+// void BufferTableWidget::ignoreNonTargetReports(bool value)
+// {
+//     assert(model_);
+//     model_->rebuild();
+//     assert(table_);
+//     table_->resizeColumnsToContents();
+// }
 
-bool BufferTableWidget::usePresentation() const
-{
-    assert(model_);
-    return model_->usePresentation();
-}
+// bool BufferTableWidget::showOnlySelected() const
+// {
+//     assert(model_);
+//     return model_->showOnlySelected();
+// }
+
+// bool BufferTableWidget::usePresentation() const
+// {
+//     assert(model_);
+//     return model_->usePresentation();
+// }
 
 void BufferTableWidget::resetModel()
 {
@@ -165,12 +168,18 @@ void BufferTableWidget::resetModel()
 void BufferTableWidget::updateToSelection()
 {
     assert(model_);
-    model_->updateToSelection();
+    model_->rebuild();
     assert(table_);
     table_->resizeColumnsToContents();
 }
 
 TableView& BufferTableWidget::view() const { return view_; }
+
+bool BufferTableWidget::hasData() const
+{
+    assert (model_);
+    return model_->hasData();
+}
 
 void BufferTableWidget::resizeColumns()
 {

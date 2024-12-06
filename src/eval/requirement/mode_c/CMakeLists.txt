@@ -14,6 +14,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/modeccorrectconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/correct.h"
         "${CMAKE_CURRENT_LIST_DIR}/correct_period.h"
+        "${CMAKE_CURRENT_LIST_DIR}/rocdcorrect.h"
+
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/falseconfig.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/modecfalseconfigwidget.cpp"
@@ -25,6 +27,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/modeccorrectconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/correct.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/correct_period.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/rocdcorrect.cpp"
     )
 
 

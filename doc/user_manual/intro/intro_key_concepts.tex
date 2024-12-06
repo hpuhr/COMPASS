@@ -93,8 +93,8 @@ If surveillance data is given in EUROCONTROL's ASTERIX format, it can be decoded
 
 The resulting JSON data is then mapped to DBContent variables stored in the database. The mapping between JSON keys and DBContent variables is configurable, allowing for a broad usage spectrum.
 
-%\subsection*{JSON Data Import}
-%If surveillance data is given in the JSON format, it can be mapped to DBObject variables and imported to a selected schema. Currently, only SCDB is supported for importing, but this will be extended in the future. The mapping between JSON keys and DBObject variables is configurable, allowing for a broad usage spectrum.
+\subsection*{JSON Data Import}
+If surveillance data is given in the JSON format, it can be mapped to DBContent variables and imported to a selected schema. Currently, only jASTERIX JSON is supported for importing. The mapping between JSON keys and DBContent variables is configurable (as with the ASTERIX Data Import), allowing for a broad usage spectrum.
 
 \subsection*{Meta Variables}
 
@@ -168,9 +168,15 @@ The 'Live' modes can be quit, after which the application returns to the 'Offlin
 
 \subsection*{Calculation of Reference Trajectories}
 
-Based on the associated target reports, references can be calculated. Using a selection of data sources, with optional filters on position quality indicators, references are calculated using ADS-B and / or System Track target reports using a Kalman based algorithm with RTS smoothing. The resulting references are then written as 'RefTraj' data into the database. \\
+After importing ASTERIX data, reference trajectories can be calculated from the given Traffic of Opportunity. Based on loaded time-slices, target reports of the same target are associated to a UTN, which in turn is used to calculate the reference trajectories. \\
 
-The main use case of calculated references is as reference data in evaluations. Special care should be taken that the reference accuracy needed for the respective evaluation is given.
+The main use case of calculated references is as reference data in evaluations. Special care should be taken that the reference accuracy needed for the respective evaluation is given. \\
+
+\subsection*{Free / Pro License}
+
+OpenATS COMPASS is publicly available and free for anyone to use (including commercial usage), under the \href{https://www.gnu.org/licenses/gpl-3.0.en.html}{GPL-3.0}, and \href{https://creativecommons.org/licenses/by/4.0/}{CC BY 4.0} licenses. \\
+
+However, one component, namely an advanced reference trajection calculation feature (Probabilistic + IMM Reconstructor) is only available under a commercial professional license. In the free license, a basic reconstructor (Scoring + UMKalman) is available.
 
 \subsection*{Evaluation}
 
@@ -180,3 +186,36 @@ Based on reference and test data source(s), evaluation of configurable standards
 
 Each view can be configured to the users needs, to suit various use-cases. For each type of view, a number of pre-defined (default) presets are delivered, which can be used to conveniently set a number of configuration options for specific display purposes. Existing presets can be changed and overridden, also new ones can be created.
 
+\subsection*{View Points}
+\label{sec:key_concepts_viewpoints}
+
+A View Point can be seen as a conglomerate of filter settings, view configurations and displayable view annotations, 
+which represents a unique view onto either internal data (COMPASS database) or externally provided data. \\
+
+Key features of View Points include: \\
+
+\begin{itemize}
+    \item \textbf{Data Sources}: Specification for enabling/disabling certain data sources
+    \item \textbf{Filters}: Filter statements for which data to load from the specified data sources
+    \item \textbf{View Configurations}: Specification for regions of interest, time frames of interest, etc.
+    \item \textbf{Annotations}: View annotations to display in COMPASS' various views (scatter data, histograms, grid data, geometric data, etc.) 
+\end{itemize}
+
+These key features reflect the data flow in COMPASS:  
+
+\textit{Database} $\rightarrow$ \textit{Data Sources} $\rightarrow$ \textit{Filters} $\rightarrow$ \textit{Views} \\
+
+Usage of each feature is optional, so a viewpoint may contain e.g. only a set of filter statements or only a set of annotations. \\
+
+View Points can be used in various ways in COMPASS: \\
+
+\begin{itemize}
+    \item View Points can be exported from or imported into COMPASS using the 'View Points' tab in the main window (see \ref{sec:view_points}).
+    This way a specific view onto data can be saved and restored at a later point.
+    \item View Points also provide a simple and practical interface to provide external data to COMPASS via view annotations.
+    \item They are also used heavily by COMPASS itself, e.g. to distribute evaluation results to its views.
+\end{itemize}
+\ \\
+
+A View Point is stored in the widely-used JSON format and uses predefined tags, which are explained in more detail in 
+the appendix (\ref{sec:appendix_view_points}).

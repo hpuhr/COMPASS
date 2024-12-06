@@ -63,6 +63,7 @@ public:
     bool hasStatusInfo();
     std::string statusInfoString();
     float statusInfoProgress(); // percent
+    std::string currentDataSourceName(); // used to distinguish file switches
 
     void forceBlockingDataProcessing();
 
@@ -86,6 +87,7 @@ private:
     friend class ASTERIXFileDecoder;
     friend class ASTERIXNetworkDecoder;
     friend class ASTERIXPCAPDecoder; 
+    friend class ASTERIXJSONDecoder;
 
     ASTERIXImportTask& task_;
     const ASTERIXImportTaskSettings& settings_;

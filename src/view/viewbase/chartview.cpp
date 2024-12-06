@@ -23,6 +23,7 @@
 #include <QAreaSeries>
 #include <QLineSeries>
 #include <QXYSeries>
+#include <QLegendMarker>
 
 const QColor ChartView::SelectionColor = Qt::red;
 
@@ -32,6 +33,22 @@ ChartView::ChartView(QtCharts::QChart* chart, SelectionStyle sel_style, QWidget*
 :   QChartView(chart, parent)
 ,   sel_style_(sel_style)
 {
+    //rescale axis font to obtain title font
+    QFont title_font = chart->axisX()->titleFont();
+    title_font.setPointSize(title_font.pointSize() * 1.2);
+    chart->setTitleFont(title_font);
+
+    //only show legend if at least one marker has a meaningful text
+    if (chart->legend())
+    {
+        bool has_nonempty_legend_marker = false;
+        for (const auto& m : chart->legend()->markers())
+            if (!m->label().isEmpty())
+                has_nonempty_legend_marker = true;
+
+        chart->legend()->setVisible(has_nonempty_legend_marker);
+    }
+
     createDisplayElements(chart);
 
     setRenderHint(QPainter::Antialiasing);
@@ -406,6 +423,14 @@ void ChartView::paintEvent(QPaintEvent *e)
     //call base
     QChartView::paintEvent(e);
 
+    {
+        QPainter painter(this->viewport());
+
+        //paint any other items
+        paintCustomItems(e, painter);
+    }
+
+    //paint selection items
     if (sel_style_ == SelectionStyle::SeriesArea)
         updateSelectionBox(selected_region_chart_);
     else if (sel_style_ == SelectionStyle::SeriesLines)

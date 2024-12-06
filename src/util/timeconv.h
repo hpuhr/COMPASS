@@ -16,8 +16,7 @@
  */
 
 
-#ifndef TIMECONV_H
-#define TIMECONV_H
+#pragma once
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -29,11 +28,14 @@ namespace Time
 {
 extern const std::string QT_DATETIME_FORMAT;
 
-extern boost::posix_time::ptime fromString(const std::string& value);
-extern boost::posix_time::ptime fromString(const std::string& value, const std::string& facet);
+extern boost::posix_time::ptime fromString(const std::string& value, bool* ok = nullptr);
+extern boost::posix_time::ptime fromString(const std::string& value, const std::string& facet, bool* ok = nullptr);
 extern boost::posix_time::ptime fromLong(unsigned long value);
 extern long toLong(boost::posix_time::ptime value);
-extern std::string toString(boost::posix_time::ptime value, unsigned int partial_digits=3);
+extern long toLongQtUTC(boost::posix_time::ptime value);
+extern long correctLongQtUTC(long t);
+extern long decorrectLongQtUTC(long t);
+extern std::string toString(boost::posix_time::ptime value, unsigned int partial_digits=3, bool* ok = nullptr);
 extern std::string toString(boost::posix_time::time_duration duration, unsigned int partial_digits=3);
 extern std::string toStringLong(unsigned long value);
 extern std::string toTimeString(boost::posix_time::ptime value);
@@ -49,4 +51,4 @@ extern double partialSeconds(boost::posix_time::time_duration seconds);
 
 }  // namespace Utils
 
-#endif // TIMECONV_H
+

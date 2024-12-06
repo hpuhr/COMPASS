@@ -13,6 +13,8 @@
 #include "dbcontent.h"
 #include "global.h"
 
+#include <osgEarth/GeoMath>
+
 #include <QMessageBox>
 
 #include <fstream>
@@ -152,24 +154,24 @@ bool FFTManager::canAddNewFFTFromConfig (const std::string& name)
     return hasConfigFFT(name);
 }
 
-void FFTManager::addNewFFT (const std::string& name)
+void FFTManager::addNewFFT (const std::string& name, bool emit_signal)
 {
-    loginf << "FFTManager: addNewFFT: name " << name;
+    logdbg << "FFTManager: addNewFFT: name " << name;
 
     assert (!hasDBFFT(name));
 
     if (hasConfigFFT(name))
     {
-        loginf << "FFTManager: addNewFFT: name " << name << " from config";
+        logdbg << "FFTManager: addNewFFT: name " << name << " from config";
 
         ConfigurationFFT& cfg_fft = configFFT(name);
 
         db_ffts_.emplace_back(std::move(cfg_fft.getAsNewDBFFT()));
-        sortDBFFTs();
+
     }
     else
     {
-        loginf << "FFTManager: addNewFFT: name " << name << " create new";
+        logdbg << "FFTManager: addNewFFT: name " << name << " create new";
 
         createConfigFFT(name);
 
@@ -177,14 +179,14 @@ void FFTManager::addNewFFT (const std::string& name)
         new_fft->name(name);
 
         db_ffts_.emplace_back(std::move(new_fft));
-
-        sortDBFFTs();
     }
 
+    sortDBFFTs();
     assert (hasDBFFT(name));
     updateFFTNamesAll();
 
-    emit fftsChangedSignal();
+    if (emit_signal)
+        emit fftsChangedSignal();
 
     loginf << "FFTManager: addNewFFT: name " << name << " done";
 }
@@ -395,8 +397,11 @@ std::pair<bool, float> FFTManager::isFromFFT(
 
         if (check_passed && fft_it->hasPosition())
         {
-            check_passed = sqrt(pow(prelim_latitute_deg - fft_it->latitude(), 2)
-                                + pow(prelim_longitude_deg - fft_it->longitude(), 2)) <= max_fft_plot_distance_deg_;
+            double distance_m = osgEarth::GeoMath::distance(
+                prelim_latitute_deg * DEG2RAD, prelim_longitude_deg * DEG2RAD,
+                    fft_it->latitude() * DEG2RAD, fft_it->longitude() * DEG2RAD);
+
+            check_passed = distance_m <= max_fft_plot_distance_m_;
         }
 
         if (check_passed)
@@ -407,6 +412,11 @@ std::pair<bool, float> FFTManager::isFromFFT(
                 return {true, 0}; // no altitude info
         }
     }
+
+    // unknown fft
+
+    if (mode_a_code.has_value() && mode_a_code.value() == 4095) // 7777
+        return {true, 0}; // is fft, but unknown altitude, better to correct with 0 alt
 
     return {false, 0}; // no matches, not altitude info
 }
@@ -428,11 +438,11 @@ void FFTManager::loadDBFFTs()
     // create from config into db ones
     for (const auto& cfg_fft_it : config_ffts_)
     {
-        if (canAddNewFFTFromConfig(cfg_fft_it->name()))
+        if (!hasDBFFT(cfg_fft_it->name()) && canAddNewFFTFromConfig(cfg_fft_it->name()))
         {
             loginf << "FFTManager: loadDBFFTs: creating db fft '" << cfg_fft_it->name() << "'";
 
-            addNewFFT(cfg_fft_it->name()); // creates from config if possible
+            addNewFFT(cfg_fft_it->name(), false); // creates from config if possible
             new_created = true;
         }
     }
@@ -456,6 +466,8 @@ void FFTManager::loadDBFFTs()
 
     updateFFTNamesAll();
     sortDBFFTs();
+
+    emit fftsChangedSignal();
 }
 
 void FFTManager::sortDBFFTs()

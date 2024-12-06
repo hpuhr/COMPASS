@@ -43,41 +43,46 @@ UTNFilter::UTNFilter(const std::string& class_id, const std::string& instance_id
 
 UTNFilter::~UTNFilter() {}
 
-bool UTNFilter::filters(const std::string& dbo_type)
+bool UTNFilter::filters(const std::string& dbcont_name)
 {
     if (!COMPASS::instance().dbContentManager().hasAssociations())
         return false;
 
-    return true;
+    return true; // condition string for non-associated dbcontent as well
 }
 
 std::string UTNFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "UTNFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "UTNFilter: getConditionString: dbcontent " << dbcontent_name << " active " << active_
+           << " null_wanted " << null_wanted_;
 
-    if (!COMPASS::instance().dbContentManager().hasAssociations())
+    if (!active_ || !COMPASS::instance().dbContentManager().hasAssociations())
         return "";
 
     stringstream ss;
 
-    if (active_ && (values_.size() || null_wanted_))
+    // check if filter non-associated content
+    if (!COMPASS::instance().dbContentManager().metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_))
     {
-//        DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-//        assert (dbcontent_man.existsDBContent(dbcontent_name));
+        if (!null_wanted_)
+        {
+            if (!first)
+                ss << " AND";
 
-//        assert (dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbcontent_name));
+            ss << " false";
 
-//        if (!first)
-//        {
-//            ss << " AND";
-//        }
+            first = false;
 
-//        // SELECT x FROM data_cat062, json_each(data_cat062.associations) WHERE json_each.value == 0;
+            return ss.str();
+        }
+        // else no condition
 
-//        ss << " json_each.value IN (" << utns_str_ << ")"; // rest done in SQLGenerator::getSelectCommand
+        logdbg << "UTNFilter: getConditionString: condition '" << ss.str() << "'";
+        return ss.str();
+    }
 
-//        first = false;
-
+    if (values_.size() || null_wanted_)
+    {
         dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
                     DBContent::meta_var_utn_.name()).getFor(dbcontent_name);
 
@@ -105,7 +110,7 @@ std::string UTNFilter::getConditionString(const std::string& dbcontent_name, boo
         first = false;
     }
 
-    logdbg << "UTNFilter: getConditionString: here '" << ss.str() << "'";
+    logdbg << "UTNFilter: getConditionString: condition '" << ss.str() << "'";
 
     return ss.str();
 }

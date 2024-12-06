@@ -28,16 +28,16 @@ public:
     double vy_stddev_ {0}; // m/s
 };
 
-class Cache;
+class DBContentAccessor;
 
 boost::optional<TargetVelocityAccuracy> getVelocityAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index);
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index);
 
 boost::optional<TargetVelocityAccuracy> getVelocityAccuracyADSB(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index);
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index);
 
 boost::optional<TargetVelocityAccuracy> getVelocityAccuracyTracker(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index);
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index);
 
 }
 

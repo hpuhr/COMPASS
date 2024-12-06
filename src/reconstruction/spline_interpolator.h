@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "reconstructor_defs.h"
+#include "reconstruction_defs.h"
 
 #include <vector>
 
@@ -36,16 +36,27 @@ class SplineInterpolator
 public:
     struct Config
     {
+        enum class CovMatInterpMode
+        {
+            Linear = 0,
+            NearestNeighbor,
+            WassersteinDistance
+        };
+
         double sample_dt = 1.0; //sample interval in seconds
 
-        bool   check_fishy_segments  = true;
-        bool   interpolate_cart      = false;
+        bool check_fishy_segments = true;
+        bool interpolate_cart     = false;
+
+        CovMatInterpMode covmat_interp_mode = CovMatInterpMode::Linear;
         
         double min_dt                      = 1e-06; //minimum time difference between measurements
         double max_dt                      = 30.0;  //maximum time difference between measurements
         double min_len                     = 1e-07; //minimum length between measurements
         double max_segment_distance_factor = 2.0;
     };
+
+    typedef Config::CovMatInterpMode CovMatInterpMode;
 
     SplineInterpolator() = default;
     virtual ~SplineInterpolator() = default;
@@ -60,21 +71,29 @@ public:
                                                const Measurement& mm0, 
                                                const Measurement& mm1, 
                                                double interp_factor,
-                                               CoordSystem coord_sys);
+                                               CoordSystem coord_sys,
+                                               CovMatInterpMode covmat_interp_mode);
     static Eigen::VectorXd interpStateVector(const Eigen::VectorXd& x0, 
                                              const Eigen::VectorXd& x1, 
                                              double interp_factor);
     static Eigen::MatrixXd interpCovarianceMat(const Eigen::MatrixXd& C0, 
                                                const Eigen::MatrixXd& C1, 
-                                               double interp_factor);
+                                               double interp_factor,
+                                               CovMatInterpMode covmat_interp_mode,
+                                               bool* ok = nullptr);
     static void interpCovarianceMat(Measurement& mm_interp,
                                     const Measurement& mm0,
                                     const Measurement& mm1,
-                                    double interp_factor);
+                                    double interp_factor,
+                                    CovMatInterpMode covmat_interp_mode);
     
     static size_t estimatedSamples(const Measurement& mm0, 
                                    const Measurement& mm1,
                                    double dt);
+    
+    static std::vector<std::vector<Measurement>> splitMeasurements(const std::vector<Measurement>& measurements,
+                                                                   double max_dt);
+
 protected:
     std::vector<MeasurementInterp> interpolatePart(const std::vector<Measurement>& measurements) const;
     bool isFishySegment(const Measurement& mm0, 

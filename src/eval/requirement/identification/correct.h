@@ -15,34 +15,35 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTIDENTIFICATIONCORRECT_H
-#define EVALUATIONREQUIREMENTIDENTIFICATIONCORRECT_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class IdentificationCorrect : public ProbabilityBase
 {
 public:
     IdentificationCorrect(
             const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+            double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
             bool require_correctness_of_all, bool use_mode_a, bool use_ms_ta, bool use_ms_ti);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "POK"; }
+    std::string probabilityName() const override final { return "Probability of correct identification"; }
+
     bool requireCorrectnessOfAll() const;
 
     bool useModeA() const;
-
     bool useMsTa() const;
-
     bool useMsTi() const;
-
 
 protected:
     // true: all must be correct (not false), false: at least one must be correct (not false)
@@ -57,4 +58,3 @@ protected:
 };
 
 }
-#endif // EVALUATIONREQUIREMENTDETECTIONCORRECT_H

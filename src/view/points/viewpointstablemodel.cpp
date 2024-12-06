@@ -83,6 +83,22 @@ void ViewPointsTableModel::loadViewPoints()
 
     endResetModel();
 }
+void ViewPointsTableModel::addViewPoints(const std::vector <nlohmann::json>& viewpoints)
+{
+    loginf << "ViewPointsTableModel: loadViewPoints";
+
+    beginResetModel();
+
+    for (auto vp_it = viewpoints.begin(); vp_it != viewpoints.end(); ++vp_it)
+        saveNewViewPoint(*vp_it, std::next(vp_it) == viewpoints.end());
+
+    updateTableColumns();
+    updateTypes();
+    updateStatuses();
+
+    endResetModel();
+}
+
 void ViewPointsTableModel::clearViewPoints()
 {
     loginf << "ViewPointsTableModel: clearViewPoints";
@@ -91,11 +107,15 @@ void ViewPointsTableModel::clearViewPoints()
 
     view_points_.clear();
 
+    max_id_ = 0;
+
     table_columns_ = default_table_columns_;
     types_.clear();
     statuses_.clear();
 
     endResetModel();
+
+    loginf << "ViewPointsTableModel: clearViewPoints: done";
 }
 
 int ViewPointsTableModel::rowCount(const QModelIndex& parent) const

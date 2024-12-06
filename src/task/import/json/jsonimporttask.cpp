@@ -57,7 +57,7 @@ const std::string DONE_PROPERTY_NAME = "json_data_imported";
 
 JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& instance_id,
                                TaskManager& task_manager)
-    : Task("JSONImportTask", "Import JSON Data", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_json.json")
 {
     tooltip_ = "Allows importing of JSON data in several variants into the opened database.";
@@ -171,10 +171,7 @@ void JSONImportTask::removeCurrentSchema()
     if (schemas_.size())
         current_schema_name_ = schemas_.begin()->first;
 
-    loginf << "JSONImporterTask: removeCurrentSchema: set current schema '" << currentSchemaName()
-           << "'";
-
-    emit statusChangedSignal(name_);
+    loginf << "JSONImporterTask: removeCurrentSchema: set current schema '" << currentSchemaName() << "'";
 }
 
 std::string JSONImportTask::currentSchemaName() const { return current_schema_name_; }
@@ -184,9 +181,6 @@ void JSONImportTask::currentSchemaName(const std::string& current_schema)
     loginf << "JSONImportTask: currentSchemaName: " << current_schema;
 
     current_schema_name_ = current_schema;
-
-    loginf << "JSONImportTask: currentSchemaName: emitting signal";
-    emit statusChangedSignal(name_);
 
     loginf << "JSONImportTask: currentSchemaName: done";
 }
@@ -865,11 +859,10 @@ void JSONImportTask::checkAllDone()
 
         QApplication::restoreOverrideCursor();
 
-        if (!test_)
-            emit COMPASS::instance().interface().databaseContentChangedSignal();
+        // if (!test_)
+        //     emit COMPASS::instance().interface().databaseContentChangedSignal();
 
         double records_per_second = records_inserted_ / (diff.total_milliseconds() / 1000.0);
-
 
         if (!test_)
         {
@@ -882,7 +875,7 @@ void JSONImportTask::checkAllDone()
 
 //            COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
-            emit doneSignal(name_);
+            emit doneSignal();
         }
 
         test_ = false;  // is set again in case of test import

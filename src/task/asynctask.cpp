@@ -16,6 +16,7 @@
  */
 
 #include "asynctask.h"
+#include "logger.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -33,7 +34,11 @@
 
 /**
 */
-AsyncTask::AsyncTask() = default;
+AsyncTask::AsyncTask()
+:   task_progress_wrapper_(&task_progress_)
+{
+    connect(&task_progress_wrapper_, &AsyncTaskProgressWrapper::progressChanged, this, &AsyncTask::stateChanged, Qt::ConnectionType::QueuedConnection);
+}
 
 /**
 */
@@ -64,13 +69,10 @@ void AsyncTask::run()
     setState(AsyncTaskState::State::Running);
 
     AsyncTaskResult result(false, "");
-
-    AsyncTaskProgressWrapper pwrapper(&task_progress_);
-    connect(&pwrapper, &AsyncTaskProgressWrapper::progressChanged, this, &AsyncTask::stateChanged);
     
     try
     {
-        result = run_impl(task_state_, pwrapper);
+        result = run_impl(task_state_, task_progress_wrapper_);
     }
     catch(const std::exception& e)
     {
@@ -107,19 +109,24 @@ void AsyncTask::abort()
 
 /**
 */
-bool AsyncTask::runAsyncDialog(AsyncTask* task,
-                               bool auto_close,
+bool AsyncTask::runAsyncDialog(bool auto_close,
                                QWidget* parent)
 {
-    assert(task);
-
-    AsyncTaskDialog dlg(task, auto_close, parent);
+    AsyncTaskDialog dlg(this, auto_close, parent);
 
     auto result = std::async(std::launch::async, 
-        [ task ] () 
-        { 
-            task->run(); 
-            return task->taskState().isDone();
+        [ this ] ()
+        {
+            try
+            {
+                this->run();
+                return this->taskState().isDone();
+            }
+            catch (const std::exception& e)
+            {
+                logerr << "AsyncTask: runAsyncDialog: exception '" << e.what() << "'";
+                throw e;
+            }
         });
 
     dlg.exec();
@@ -142,7 +149,7 @@ AsyncFuncTask::AsyncFuncTask(const Func& func,
 :   func_           (func           )
 ,   title_          (title          )
 ,   default_message_(default_message)
-,   can_abort_      (can_abort      ) 
+,   can_abort_      (can_abort      )
 {
 }
 

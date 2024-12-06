@@ -235,7 +235,7 @@ bool DBDataSource::loadingWanted() const
 
 void DBDataSource::loadingWanted(bool loading_wanted)
 {
-    loginf << "DBDataSource: loadingWanted: ds " << name_ << " wanted " << loading_wanted;
+    logdbg << "DBDataSource: loadingWanted: ds " << name_ << " wanted " << loading_wanted;
 
     loading_wanted_ = loading_wanted;
 }
@@ -304,14 +304,14 @@ std::set<unsigned int> DBDataSource::getLoadingWantedLines() const
     return lines;
 }
 
-DBDataSourceWidget* DBDataSource::widget()
-{
-    if (!widget_)
-        widget_.reset(new DBDataSourceWidget(*this));
+//DBDataSourceWidget* DBDataSource::widget()
+//{
+//    if (!widget_)
+//        widget_.reset(new DBDataSourceWidget(*this));
 
-    assert (widget_);
-    return widget_.get();
-}
+//    assert (widget_);
+//    return widget_.get();
+//}
 
 bool DBDataSource::hasMaxTimestamp(unsigned int line) const
 {

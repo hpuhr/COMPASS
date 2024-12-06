@@ -23,6 +23,7 @@
 #include "tableview.h"
 #include "histogramview.h"
 #include "scatterplotview.h"
+#include "gridview.h"
 #include "logger.h"
 //#include "mainloadwidget.h"
 //#include "stringconv.h"
@@ -253,6 +254,13 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
     }
+    else if (class_id == "GridView")
+    {
+        views_.emplace_back(new GridView(class_id, instance_id, this, view_manager_));
+
+        (*views_.rbegin())->init();
+        addView(views_.rbegin()->get());
+    }
     else if (class_id == "GeographicView")
     {
 #if USE_EXPERIMENTAL_SOURCE == true
@@ -344,6 +352,19 @@ void ViewContainer::showViewMenuSlot()
     connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteViewSlot()));
 
     menu.exec(QCursor::pos());
+}
+
+void ViewContainer::resetToStartupConfiguration()
+{
+    //remove views
+    while (!views_.empty())
+    {
+        views_.rbegin()->get()->setTmpDisableRemoveConfigOnDelete(true);
+        views_.pop_back();
+    }
+
+    //recreate views from config
+    createSubConfigurables();
 }
 
 // void ViewContainerWidget::saveViewTemplate ()

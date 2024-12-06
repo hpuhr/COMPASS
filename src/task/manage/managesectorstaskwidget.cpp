@@ -200,14 +200,24 @@ void ManageSectorsTaskWidget::updateSectorTableSlot()
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
+    sector_table_->setDisabled(true); // otherwise first element is edited after
+    sector_table_->clearContents();
+
+    if (!eval_man.sectorsLoaded())
+    {
+        sector_table_->blockSignals(false);
+        sector_table_->setDisabled(false);
+
+        return;
+    }
+
+    assert (eval_man.sectorsLoaded());
     vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man.sectorsLayers();
 
     unsigned int num_layers=0;
     for (auto& sec_lay_it : sector_layers)
         num_layers += sec_lay_it->sectors().size();
 
-    sector_table_->setDisabled(true); // otherwise first element is edited after
-    sector_table_->clearContents();
     sector_table_->setRowCount(num_layers);
 
     int row = 0;
@@ -432,7 +442,14 @@ void ManageSectorsTaskWidget::updateFileListSlot()
 
     for (auto it : task_.fileList())
     {
+        if (!Files::fileExists(it.first))
+        {
+            logwrn << "ManageSectorsTaskWidget: updateFileListSlot: file '" << it.first << "' does not exist";
+            continue;
+        }
+
         QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
+
         if (it.first == task_.currentFilename())
             file_list_->setCurrentItem(item);
     }

@@ -19,8 +19,23 @@
         },
         {
             "class_id": "DBContent",
+            "instance_id": "CAT002",
+            "path": "db_content_cat002.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT004",
+            "path": "db_content_cat004.json"
+        },
+        {
+            "class_id": "DBContent",
             "instance_id": "CAT010",
             "path": "db_content_cat010.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT019",
+            "path": "db_content_cat019.json"
         },
         {
             "class_id": "DBContent",
@@ -34,6 +49,16 @@
         },
         {
             "class_id": "DBContent",
+            "instance_id": "CAT023",
+            "path": "db_content_cat023.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT034",
+            "path": "db_content_cat034.json"
+        },
+        {
+            "class_id": "DBContent",
             "instance_id": "CAT048",
             "path": "db_content_cat048.json"
         },
@@ -41,6 +66,16 @@
             "class_id": "DBContent",
             "instance_id": "CAT062",
             "path": "db_content_cat062.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT063",
+            "path": "db_content_cat063.json"
+        },
+        {
+            "class_id": "DBContent",
+            "instance_id": "CAT065",
+            "path": "db_content_cat065.json"
         },
         {
             "class_id": "DBContent",
@@ -74,6 +109,69 @@
             }
         },
         "MetaVariable": {
+            "MetaMOMLongitudinalAcc0": {
+                "parameters": {
+                    "name": "MOM Longitudinal Acc"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062MOMLongitudinalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Longitudinal Acc"
+                            }
+                        },
+                        "VariableDefinitionRefTrajMOMLongitudinalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "MOM Longitudinal Acc"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaMOMTransversalAcc0": {
+                "parameters": {
+                    "name": "MOM Transversal Acc"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062MOMTransversalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Transversal Acc"
+                            }
+                        },
+                        "VariableDefinitionRefTrajMOMTransversalAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "MOM Transversal Acc"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaMOMVerticalRate0": {
+                "parameters": {
+                    "name": "MOM Vertical Rate"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT062MOMVerticalRateAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "MOM Vertical Rate"
+                            }
+                        },
+                        "VariableDefinitionRefTrajMOMVerticalRatelAcc0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "MOM Vertical Rate"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaVariableARTAS Hash0": {
                 "parameters": {
                     "name": "ARTAS Hash"
@@ -203,6 +301,72 @@
                     }
                 }
             },
+            "MetaVariableAx0": {
+                "parameters": {
+                    "name": "Ax"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT010Ax0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT010",
+                                "variable_name": "Ax"
+                            }
+                        },
+                        "VariableDefinitionCAT020Ax0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Ax"
+                            }
+                        },
+                        "VariableDefinitionCAT062Ax0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Ax"
+                            }
+                        },
+                        "VariableDefinitionRefTrajAx0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Ax"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVariableAy0": {
+                "parameters": {
+                    "name": "Ay"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT010Ay0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT010",
+                                "variable_name": "Ay"
+                            }
+                        },
+                        "VariableDefinitionCAT020Ay0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT020",
+                                "variable_name": "Ay"
+                            }
+                        },
+                        "VariableDefinitionCAT062Ay0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Ay"
+                            }
+                        },
+                        "VariableDefinitionRefTrajVy0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Ay"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaVariableAzimuth0": {
                 "parameters": {
                     "name": "Azimuth"
@@ -242,9 +406,27 @@
                                 "variable_name": "DS ID"
                             }
                         },
+                        "VariableDefinitionCAT002DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT002",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT004DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT004",
+                                "variable_name": "DS ID"
+                            }
+                        },
                         "VariableDefinitionCAT010DS ID0": {
                             "parameters": {
                                 "dbcontent_name": "CAT010",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT019DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT019",
                                 "variable_name": "DS ID"
                             }
                         },
@@ -260,6 +442,18 @@
                                 "variable_name": "DS ID"
                             }
                         },
+                        "VariableDefinitionCAT023DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT023",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT034DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "DS ID"
+                            }
+                        },
                         "VariableDefinitionCAT048DS ID0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -269,6 +463,18 @@
                         "VariableDefinitionCAT062DS ID0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT063DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "DS ID"
+                            }
+                        },
+                        "VariableDefinitionCAT065DS ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT065",
                                 "variable_name": "DS ID"
                             }
                         },
@@ -1046,9 +1252,27 @@
                                 "variable_name": "SAC"
                             }
                         },
+                        "VariableDefinitionCAT002SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT002",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "VariableDefinitionCAT004SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT004",
+                                "variable_name": "SAC"
+                            }
+                        },
                         "VariableDefinitionCAT010SAC0": {
                             "parameters": {
                                 "dbcontent_name": "CAT010",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "VariableDefinitionCAT019SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT019",
                                 "variable_name": "SAC"
                             }
                         },
@@ -1064,6 +1288,18 @@
                                 "variable_name": "SAC"
                             }
                         },
+                        "VariableDefinitionCAT023SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT023",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "VariableDefinitionCAT034SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "SAC"
+                            }
+                        },
                         "VariableDefinitionCAT048SAC0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -1073,6 +1309,18 @@
                         "VariableDefinitionCAT062SAC0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "VariableDefinitionCAT063SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "SAC"
+                            }
+                        },
+                        "VariableDefinitionCAT065SAC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT065",
                                 "variable_name": "SAC"
                             }
                         },
@@ -1097,9 +1345,27 @@
                                 "variable_name": "SIC"
                             }
                         },
+                        "VariableDefinitionCAT002SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT002",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT004SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT004",
+                                "variable_name": "SIC"
+                            }
+                        },
                         "VariableDefinitionCAT010SIC0": {
                             "parameters": {
                                 "dbcontent_name": "CAT010",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT019SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT019",
                                 "variable_name": "SIC"
                             }
                         },
@@ -1115,6 +1381,18 @@
                                 "variable_name": "SIC"
                             }
                         },
+                        "VariableDefinitionCAT023SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT023",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT034SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "SIC"
+                            }
+                        },
                         "VariableDefinitionCAT048SIC0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -1124,6 +1402,18 @@
                         "VariableDefinitionCAT062SIC0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT063SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "SIC"
+                            }
+                        },
+                        "VariableDefinitionCAT065SIC0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT065",
                                 "variable_name": "SIC"
                             }
                         },
@@ -1202,6 +1492,18 @@
                         "VariableDefinitionCAT062Service Identification0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "Service Identification"
+                            }
+                        },
+                        "VariableDefinitionCAT063Service Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "Service Identification"
+                            }
+                        },
+                        "VariableDefinitionCAT065Service Identification0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT065",
                                 "variable_name": "Service Identification"
                             }
                         }
@@ -1304,9 +1606,27 @@
                                 "variable_name": "Time of Day"
                             }
                         },
+                        "VariableDefinitionCAT002Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT002",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "VariableDefinitionCAT004Time of Message0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT004",
+                                "variable_name": "Time of Message"
+                            }
+                        },
                         "VariableDefinitionCAT010Time of Day0": {
                             "parameters": {
                                 "dbcontent_name": "CAT010",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "VariableDefinitionCAT019Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT019",
                                 "variable_name": "Time of Day"
                             }
                         },
@@ -1322,6 +1642,18 @@
                                 "variable_name": "Time of Day"
                             }
                         },
+                        "VariableDefinitionCAT023Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT023",
+                                "variable_name": "Time of Day"
+                            }
+                        },
+                        "VariableDefinitionCAT034Time of Day0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "Time of Day"
+                            }
+                        },
                         "VariableDefinitionCAT048Time of Day0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -1332,6 +1664,18 @@
                             "parameters": {
                                 "dbcontent_name": "CAT062",
                                 "variable_name": "Time of Day"
+                            }
+                        },
+                        "VariableDefinitionCAT063Time of Message0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "Time of Message"
+                            }
+                        },
+                        "VariableDefinitionCAT065Time of Message0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT065",
+                                "variable_name": "Time of Message"
                             }
                         },
                         "VariableDefinitionRefTrajTime of Day0": {
@@ -1355,9 +1699,27 @@
                                 "variable_name": "Timestamp"
                             }
                         },
+                        "VariableDefinitionCAT002Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT002",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT004Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT004",
+                                "variable_name": "Timestamp"
+                            }
+                        },
                         "VariableDefinitionCAT010Timestamp0": {
                             "parameters": {
                                 "dbcontent_name": "CAT010",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT019Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT019",
                                 "variable_name": "Timestamp"
                             }
                         },
@@ -1373,6 +1735,18 @@
                                 "variable_name": "Timestamp"
                             }
                         },
+                        "VariableDefinitionCAT023Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT023",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT034Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "Timestamp"
+                            }
+                        },
                         "VariableDefinitionCAT048Timestamp0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -1382,6 +1756,18 @@
                         "VariableDefinitionCAT062Timestamp0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT063Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "Timestamp"
+                            }
+                        },
+                        "VariableDefinitionCAT065Timestamp0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT065",
                                 "variable_name": "Timestamp"
                             }
                         },
@@ -2198,9 +2584,27 @@
                                 "variable_name": "Line ID"
                             }
                         },
+                        "VariableDefinitionCAT002Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT002",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "VariableDefinitionCAT004Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT004",
+                                "variable_name": "Line ID"
+                            }
+                        },
                         "VariableDefinitionCAT010Line ID0": {
                             "parameters": {
                                 "dbcontent_name": "CAT010",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "VariableDefinitionCAT019Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT019",
                                 "variable_name": "Line ID"
                             }
                         },
@@ -2216,6 +2620,18 @@
                                 "variable_name": "Line ID"
                             }
                         },
+                        "VariableDefinitionCAT023Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT023",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "VariableDefinitionCAT034Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "Line ID"
+                            }
+                        },
                         "VariableDefinitionCAT048Line ID0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -2225,6 +2641,18 @@
                         "VariableDefinitionCAT062Line ID0": {
                             "parameters": {
                                 "dbcontent_name": "CAT062",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "VariableDefinitionCAT063Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "Line ID"
+                            }
+                        },
+                        "VariableDefinitionCAT065Line ID0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT065",
                                 "variable_name": "Line ID"
                             }
                         },
@@ -2249,9 +2677,27 @@
                                 "variable_name": "Record Number"
                             }
                         },
+                        "VariableDefinitionCAT002Record Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT002",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT004Record Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT004",
+                                "variable_name": "Record Number"
+                            }
+                        },
                         "VariableDefinitionCAT010Record Number0": {
                             "parameters": {
                                 "dbcontent_name": "CAT010",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT019Record Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT019",
                                 "variable_name": "Record Number"
                             }
                         },
@@ -2267,6 +2713,18 @@
                                 "variable_name": "Record Number"
                             }
                         },
+                        "VariableDefinitionCAT023Record Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT023",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT034Record Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "Record Number"
+                            }
+                        },
                         "VariableDefinitionCAT048rec_num0": {
                             "parameters": {
                                 "dbcontent_name": "CAT048",
@@ -2279,10 +2737,49 @@
                                 "variable_name": "Record Number"
                             }
                         },
+                        "VariableDefinitionCAT063Record Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT063",
+                                "variable_name": "Record Number"
+                            }
+                        },
+                        "VariableDefinitionCAT065Record Number0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT065",
+                                "variable_name": "Record Number"
+                            }
+                        },
                         "VariableDefinitionRefTrajRecord Number0": {
                             "parameters": {
                                 "dbcontent_name": "RefTraj",
                                 "variable_name": "Record Number"
+                            }
+                        }
+                    }
+                }
+            },
+            "MetaVerticalRate0": {
+                "parameters": {
+                    "name": "Rate Of Climb/Descent"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT021VerticalRate0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT021",
+                                "variable_name": "Barometric Vertical Rate"
+                            }
+                        },
+                        "VariableDefinitionCAT062VerticalRate0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT062",
+                                "variable_name": "Rate Of Climb/Descent"
+                            }
+                        },
+                        "VariableDefinitionRefTrajVerticalRate0": {
+                            "parameters": {
+                                "dbcontent_name": "RefTraj",
+                                "variable_name": "Rate Of Climb/Descent"
                             }
                         }
                     }

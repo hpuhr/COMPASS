@@ -18,10 +18,16 @@
 #include "number.h"
 #include "logger.h"
 
-#include <cmath>
-#include <stdlib.h>
+#include "tbbhack.h"
+
+#include <QString>
 
 #include <Eigen/Core>
+
+#include <cmath>
+#include <stdlib.h>
+#include <algorithm>
+#include <numeric>
 
 using namespace std;
 
@@ -41,6 +47,146 @@ double round(float num, unsigned int precision)
     return std::round(num * std::pow(10, precision)) / std::pow(10, precision);
 }
 
+double round(double num, unsigned int precision)
+{
+    return std::round(num * std::pow(10, precision)) / std::pow(10, precision);
+}
+
+double roundToClosestPowerOf10(double value) {
+    if (value == 0.0f) {
+        return 0.0f; // Edge case: return 0 if input is 0
+    }
+
+            // Calculate the logarithm base 10 of the absolute value
+    double log10_value = std::log10(std::fabs(value));
+
+            // Round the log10_value to the lower integer
+    double rounded_log10 = std::round(log10_value);
+
+            // Calculate the power of 10 corresponding to the rounded logarithm
+    double power_of_10 = std::pow(10.0f, rounded_log10);
+
+            // Preserve the sign of the original value
+    if (value < 0) {
+        power_of_10 = -power_of_10;
+    }
+
+    return power_of_10;
+}
+
+// Function to calculate weighted average and standard deviation of a data series
+void calculateWeightedAverageAndStdDev(const std::vector<double>& values, const std::vector<double>& std_devs,
+                                            double& avg, double& std_dev) {
+    double weighted_sum = 0.0;
+    double weight_sum = 0.0;
+
+    for (size_t i = 0; i < values.size(); ++i) {
+        double weight = 1.0 / (std_devs[i] * std_devs[i]);
+        weighted_sum += values[i] * weight;
+        weight_sum += weight;
+    }
+
+    avg = weighted_sum / weight_sum;
+    std_dev = sqrt(1.0 / weight_sum);
+}
+
+const double min_std_dev = 1E-6;
+const unsigned int good_sample_size = 5;
+
+void addWithWeightedAverage(double value1, double std_dev1, unsigned int value1_cnt,
+                               double value2, double std_dev2, unsigned int value2_cnt,
+                               double& weighted_avg, double& weighted_std_dev, unsigned int& weighted_cnt)
+{
+    if (value1_cnt < good_sample_size && value2_cnt < good_sample_size) // both small
+    {
+        weighted_avg = (value1 + value2) / 2.0;
+        weighted_std_dev = (std_dev1 + std_dev2) / 2.0;
+    }
+    else if ((value1_cnt >= good_sample_size && value2_cnt < good_sample_size)
+               || (value1_cnt < good_sample_size && value2_cnt >= good_sample_size)) // one good, one bad
+    {
+        double weight1 = (double) value1_cnt;
+        double weight2 = (double) value2_cnt;
+
+        double new_weighted_avg = (value1 * weight1 + value2 * weight2) / (weight1 + weight2);
+        assert (std::isfinite(new_weighted_avg));
+
+        double new_weighted_stddev = (std_dev1 * weight1 + std_dev2 * weight2) / (weight1 + weight2);
+        assert (std::isfinite(new_weighted_stddev));
+
+        weighted_avg = new_weighted_avg;
+        weighted_std_dev = new_weighted_stddev; // combined standard deviation
+    }
+    else
+    {
+        if (std_dev1 < min_std_dev)
+            std_dev1 = min_std_dev;
+
+        if (std_dev2 < min_std_dev)
+            std_dev2 = min_std_dev;
+
+        // Calculate weights based on standard deviations
+        double weight1 = (double) value1_cnt / (std_dev1 * std_dev1);
+        double weight2 = (double) value2_cnt / (std_dev2 * std_dev2);
+
+                // Calculate the weighted average
+        double new_weighted_avg = (value1 * weight1 + value2 * weight2) / (weight1 + weight2);
+
+        if (!std::isfinite(new_weighted_avg))
+        {
+            logerr << "Number: addWithWeightedAverage: new_weighted_avg " << new_weighted_avg
+                   << " stddevsum " << (std_dev1 * std_dev1)
+                   << " weightvalsum " << (value1 * weight1 + value2 * weight2)
+                   << " weightsum " << (weight1 + weight2);
+
+            return;
+        }
+
+        weighted_avg = new_weighted_avg;
+        weighted_std_dev = sqrt(1.0 / (weight1 + weight2)); // combined standard deviation
+    }
+
+    weighted_cnt = value1_cnt + value2_cnt;
+}
+
+unsigned int numDecimals(double v, unsigned int dec_max)
+{
+    auto str = QString::number(v, 'f', dec_max);
+
+    //strange cases => return max dec for safety
+    if (str.isEmpty() || str.count('.') > 1)
+        return dec_max;
+
+    int n   = str.count();
+    int idx = str.lastIndexOf('.');
+
+    //full number
+    if (idx < 0)
+        return 0;
+
+    //strange case => return max dec for safety
+    if (idx == n - 1)
+        return dec_max;
+
+    int idx_end = -1;
+    for (int i = n - 1; i > idx; --i)
+    {
+        if (str[ i ] != '0')
+        {
+            idx_end = i;
+            break;
+        }
+    }
+
+    //only zeros after dec
+    if (idx_end == -1)
+        return 0;
+
+    assert(idx_end >= idx);
+
+    return idx_end - idx;
+}
+
 double calculateAngle(double degrees, double minutes, double seconds)
 {
     return degrees + minutes / 60.0 + seconds / 3600.0;
@@ -48,31 +194,15 @@ double calculateAngle(double degrees, double minutes, double seconds)
 
 double calculateMinAngleDifference(double a_deg, double b_deg)
 {
-    //double phi = std::fmod(std::fabs(a_deg - b_deg), 360.0);       // This is either the distance or 360 - distance
-    //double distance = phi > 180.0 ? 360.0 - phi : phi;
+    //double distance = fmod(fmod(a_deg - b_deg, 360) + 540, 360) - 180;
+    // return distance;
 
-//    if (a_deg < 0)
-//        a_deg += 360;
+    double diff = b_deg - a_deg;
+    // Normalize the difference to the range [-180, 180)
+    while (diff < -180.0) diff += 360.0;
+    while (diff >= 180.0) diff -= 360.0;
 
-//    if (b_deg < 0)
-//        b_deg += 360;
-
-//    assert (a_deg <= 360.0);
-//    assert (b_deg <= 360.0);
-
-//    double distance = a_deg - b_deg;
-
-//    while (distance > 180.0)
-//        distance -= 360.0;
-
-//    while (distance < -180.0)
-//        distance += 360.0;
-
-    // shortest_angle=((((end - start) % 360) + 540) % 360) - 180;
-
-    double distance = fmod(fmod(a_deg - b_deg, 360) + 540, 360) - 180;
-
-    return distance;
+    return diff;
 }
 
 double deg2rad(double angle)
@@ -226,6 +356,193 @@ unsigned long recNumGetWithoutDBContId (unsigned long rec_num)
 unsigned int recNumGetDBContId (unsigned long rec_num)
 {
     return rec_num & 0xFF; // first byte
+}
+
+template <typename T>
+std::tuple<double,double,double,double> getStatistics (const T& values)
+{
+    double mean=0, stddev=0, min=0, max=0;
+
+    if (values.empty()) {
+        logerr << "Number: getStatistics: empty vector";
+
+        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(),
+                std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
+    }
+
+    double sum = std::accumulate(values.begin(), values.end(), 0.0);
+
+    mean = sum / values.size();
+
+    std::vector<double> diff(values.size());
+    std::transform(values.begin(), values.end(), diff.begin(),
+                   [mean](const double val) { return val - mean; });
+    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    stddev = std::sqrt(sq_sum / values.size());
+
+    min = *std::min_element(values.begin(), values.end());
+    max = *std::max_element(values.begin(), values.end());
+
+    return std::tuple<double,double,double,double>(mean, stddev, min, max);
+}
+
+
+template std::tuple<double,double,double,double> getStatistics (const tbb::concurrent_vector<double>& values);
+
+std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values)
+{
+    if (values.empty()) {
+        logerr << "Number: getStatistics: empty vector";
+
+        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(),
+                std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
+    }
+
+    double mean=0, stddev=0, min=0, max=0;
+
+    double sum = std::accumulate(values.begin(), values.end(), 0.0);
+
+    mean = sum / values.size();
+
+    std::vector<double> diff(values.size());
+    std::transform(values.begin(), values.end(), diff.begin(),
+                   [mean](const double val) { return val - mean; });
+    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    stddev = std::sqrt(sq_sum / values.size());
+
+    min = *std::min_element(values.begin(), values.end());
+    max = *std::max_element(values.begin(), values.end());
+
+    return std::tuple<double,double,double,double>(mean, stddev, min, max);
+}
+
+//template <typename T>
+std::pair<double,double> calculateMeanStdDev (std::vector<double> values, float remove_top)
+{
+    double mean=0, stddev=0;
+
+    if (values.empty())
+    {
+        logerr << "Number: calculateMeanStdDev: empty vector";
+
+        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
+    }
+
+    unsigned int num_to_remove = static_cast<size_t>(std::floor(values.size() * remove_top));
+
+    unsigned int num_to_check = values.size() - num_to_remove;
+
+    if (num_to_check == 0)
+    {
+        logerr << "Number: calculateMeanStdDev: remove all values in vector";
+        return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
+    }
+
+    std::sort(values.begin(), values.end());
+
+    auto last_val_to_check_it = values.begin() + num_to_check;
+
+    //assert (values.begin() != last_val_to_check_it);
+
+    double sum = std::accumulate(values.begin(), last_val_to_check_it, 0.0);
+
+    mean = sum / num_to_check;
+
+    if (num_to_check == 1)
+        return {mean, 0};
+
+    std::vector<double> diff(num_to_check);
+    std::transform(values.begin(), last_val_to_check_it, diff.begin(),
+                   [mean](const double val) { return val - mean; });
+    double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    stddev = std::sqrt(sq_sum / num_to_check);
+
+    return std::pair<double,double>(mean, stddev);
+}
+
+// Function to calculate the median of a vector
+double calculateMedian(std::vector<double> data) {
+
+    size_t size = data.size();
+
+    if (size == 0) {
+        logerr << "Number: calculateMedian: empty vector";
+
+        return std::numeric_limits<double>::signaling_NaN();
+    }
+    std::sort(data.begin(), data.end());
+    if (size % 2 == 0) {
+        // Even number of elements
+        return (data[size / 2 - 1] + data[size / 2]) / 2.0;
+    } else {
+        // Odd number of elements
+        return data[size / 2];
+    }
+}
+
+// Function to calculate the interquartile range (IQR)
+double calculateIQR(std::vector<double> data) {
+    size_t size = data.size();
+    if (size < 4) {
+        logerr << "Number: calculateIQR: too few data opints to compute IQR";
+        return std::numeric_limits<double>::signaling_NaN();
+    }
+    std::sort(data.begin(), data.end());
+
+    size_t mid = size / 2;
+    std::vector<double> lower_half(data.begin(), data.begin() + mid);
+    std::vector<double> upper_half;
+
+    if (size % 2 == 0) {
+        upper_half = std::vector<double>(data.begin() + mid, data.end());
+    } else {
+        upper_half = std::vector<double>(data.begin() + mid + 1, data.end());
+    }
+
+    double q1 = calculateMedian(lower_half);
+    double q3 = calculateMedian(upper_half);
+
+    return q3 - q1;
+}
+
+// Function to calculate the median absolute deviation (MAD)
+double calculateMAD(std::vector<double> data) {
+    if (data.empty()) {
+        logerr << "Number: calculateMAD: empty vector";
+
+        return std::numeric_limits<double>::signaling_NaN();
+    }
+    double median = calculateMedian(data);
+
+    // Calculate absolute deviations from the median
+    std::vector<double> abs_deviations;
+    abs_deviations.reserve(data.size());
+    for (double value : data) {
+        abs_deviations.push_back(std::abs(value - median));
+    }
+
+    // Compute the median of absolute deviations
+    return calculateMedian(abs_deviations);
+}
+
+std::tuple<double,double,double> getMedianStatistics (const std::vector<double>& values)
+{
+    try {
+        double median = calculateMedian(values);
+        double iqr = calculateIQR(values);
+        double mad = calculateMAD(values);
+
+        // std::cout << "Median: " << median << std::endl;
+        // std::cout << "Interquartile Range (IQR): " << iqr << std::endl;
+        // std::cout << "Median Absolute Deviation (MAD): " << mad << std::endl;
+
+        return std::tuple<double,double,double>{median, iqr, mad};
+    } catch (const std::domain_error& e) {
+        logerr << "Number: getMedianStatistics: " << e.what();
+        return {std::numeric_limits<double>::signaling_NaN(),
+                std::numeric_limits<double>::signaling_NaN(),
+                std::numeric_limits<double>::signaling_NaN()};
+    }
 }
 
 }  // namespace Number

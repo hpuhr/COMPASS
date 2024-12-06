@@ -20,6 +20,8 @@ class DBContentManager;
 
 namespace dbContent {
 
+    class ReconstructorTarget;
+
 struct target_tag
 {
 };
@@ -66,7 +68,8 @@ public:
     bool hasTargetsInfo();
     void clearTargetsInfo();
     bool existsTarget(unsigned int utn) const;
-    void createNewTarget(unsigned int utn);
+    //void createNewTarget(unsigned int utn);
+    void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     dbContent::Target& target(unsigned int utn);
     const dbContent::Target& target(unsigned int utn) const;
 

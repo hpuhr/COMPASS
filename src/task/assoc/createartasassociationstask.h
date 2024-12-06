@@ -59,7 +59,43 @@ public slots:
 
     void closeStatusDialogSlot();
 
+signals:
+    void dataSourceChanged();
+
 public:
+    enum class Error
+    {
+        NoError = 0,
+        NoDataSource,
+        NoDataForLineID
+    };
+
+    struct Settings
+    {
+        std::string current_data_source_name_;
+        unsigned int current_data_source_line_id_{0};
+
+        float end_track_time_{300.0f};  // time-delta after which begin a new track
+
+        float association_time_past_{60.0f};  // time_delta for which associations are considered into past time
+        float association_time_future_{2.0f};  // time_delta for which associations are considered into future time
+
+        float misses_acceptable_time_{60.0f};  // time delta at beginning/end of recording where misses are acceptable
+
+        float associations_dubious_distant_time_{30.0f};
+        // time delta of tou where association is dubious bc too distant in time
+        float association_dubious_close_time_past_{20.0f};
+        // time delta of tou where association is dubious when multible hashes exist
+        float association_dubious_close_time_future_{1.0f};
+        // time delta of tou where association is dubious when multible hashes exist
+
+        bool ignore_track_end_associations_{true};
+        bool mark_track_end_associations_dubious_{false};
+
+        bool ignore_track_coasting_associations_{true};
+        bool mark_track_coasting_associations_dubious_{false};
+    };
+
     CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
                                 TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
@@ -68,6 +104,9 @@ public:
 
     std::string currentDataSourceName() const;
     void currentDataSourceName(const std::string& currentDataSourceName);
+
+    unsigned int currentDataSourceLineID() const;
+    void currentDataSourceLineID(unsigned int line_id);
 
     float endTrackTime() const;
     void endTrackTime(float end_track_time);
@@ -107,33 +146,15 @@ public:
 
     bool wasRun();
 
+    Error checkError() const;
+
     static const std::string DONE_PROPERTY_NAME;
 
 protected:
-    std::string current_data_source_name_;
+    Settings settings_;
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
-
-    float end_track_time_{0};  // time-delta after which begin a new track
-
-    float association_time_past_{0};  // time_delta for which associations are considered into past time
-    float association_time_future_{0};  // time_delta for which associations are considered into future time
-
-    float misses_acceptable_time_{0};  // time delta at beginning/end of recording where misses are acceptable
-
-    float associations_dubious_distant_time_{0};
-    // time delta of tou where association is dubious bc too distant in time
-    float association_dubious_close_time_past_{0};
-    // time delta of tou where association is dubious when multible hashes exist
-    float association_dubious_close_time_future_{0};
-    // time delta of tou where association is dubious when multible hashes exist
-
-    bool ignore_track_end_associations_{false};
-    bool mark_track_end_associations_dubious_{false};
-
-    bool ignore_track_coasting_associations_{false};
-    bool mark_track_coasting_associations_dubious_{false};
 
     bool save_associations_{true};
 

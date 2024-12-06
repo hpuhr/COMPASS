@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTDUBIOUSTRACKCONFIGWIDGET_H
-#define EVALUATIONREQUIREMENTDUBIOUSTRACKCONFIGWIDGET_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
@@ -104,5 +103,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTDUBIOUSTRACKCONFIGWIDGET_H

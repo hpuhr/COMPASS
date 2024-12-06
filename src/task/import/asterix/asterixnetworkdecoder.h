@@ -39,6 +39,10 @@ public:
                           const ASTERIXImportTaskSettings* settings = nullptr);
     virtual ~ASTERIXNetworkDecoder();
 
+    std::string name() const override final { return "ASTERIXNetworkDecoder"; }
+
+    virtual std::string currentDataSourceName() const override { return "Network"; }
+
     static const unsigned int MAX_UDP_READ_SIZE    = 1024*1024;
     static const unsigned int MAX_ALL_RECEIVE_SIZE = 100*1024*1024;
 

@@ -18,6 +18,65 @@
 #include "logger.h"
 
 /**
+*/
+void HistogramGenerator::Results::toRaw(RawHistogramCollection& collection,
+                                        const std::map<std::string, QColor>& color_map,
+                                        const QColor& selection_color) const
+{
+    collection.clear();
+
+    if (content_results.empty())
+        return;
+
+    bool add_null     = hasNullValues();
+    bool add_selected = hasSelectedValues();
+
+    const std::string NullString = "NULL";
+
+    //generate a bar set for each DBContent
+    for (const auto& elem : content_results)
+    {
+        const auto& r = elem.second;
+
+        std::string name = elem.first + " (" + std::to_string(r.valid_count) + ")";
+
+        QColor color;
+        if (color_map.count(elem.first) > 0)
+            color = color_map.at(elem.first);
+
+        RawHistogram h;
+
+        for (const auto& bin : r.bins)
+            h.addBin(RawHistogramBin(bin.count, bin.labels.label));
+
+        if (add_null)
+            h.addBin(RawHistogramBin(r.null_count, NullString));
+
+        collection.addDataSeries(h, name, color);
+    }
+
+    if (add_selected)
+    {
+        const auto& bins0 = content_results.begin()->second.bins;
+
+        std::string name = "Selected (" + std::to_string(selected_count + null_selected_count) + ")";
+
+        QColor color = selection_color;
+
+        RawHistogram h;
+
+        size_t idx = 0;
+        for (auto bin : selected_counts)
+            h.addBin(RawHistogramBin(bin, bins0[ idx++ ].labels.label));
+
+        if (add_null)
+            h.addBin(RawHistogramBin(null_selected_count, NullString));
+
+        collection.addDataSeries(h, name, color);
+    }
+}
+
+/**
  * Resets all data.
  */
 void HistogramGenerator::reset()
@@ -239,6 +298,10 @@ bool HistogramGenerator::finalizeResults()
     }
 
     assert(subRangeActive() || results_.not_inserted_count == 0);
+
+    // if(!subRangeActive() && results_.not_inserted_count != 0)
+    //     logerr << "HistogramGenerator::finalizeResults: error subRangeActive " << subRangeActive()
+    //            << " not_inserted_count " << results_.not_inserted_count;
 
     return true;
 }

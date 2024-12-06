@@ -117,12 +117,13 @@ class ViewManager : public QObject, public Configurable
         return it->second;
     }
 
-
     ViewPointsWidget* viewPointsWidget() const;
     ViewPointsReportGenerator& viewPointsGenerator();
 
     void loadViewPoints();
     std::pair<bool, std::string> loadViewPoints(nlohmann::json json_obj);
+    void clearViewPoints();
+    void addViewPoints(const std::vector <nlohmann::json>& viewpoints);
 
     void setCurrentViewPoint (const ViewableDataConfig* viewable);
     void unsetCurrentViewPoint ();
@@ -157,6 +158,22 @@ class ViewManager : public QObject, public Configurable
     void enableAutomaticRedraw(bool enable);
     bool automaticReloadEnabled() const;
     bool automaticRedrawEnabled() const;
+
+    void updateFeatures();
+
+    template<class T>
+    std::vector<T*> viewsOfType()
+    {
+        std::vector<T*> views;
+        for (const auto& v : views_)
+        {
+            T* vt = dynamic_cast<T*>(v.second);
+            if (vt != nullptr)
+                views.push_back(vt);
+        }
+
+        return views;
+    }
 
 protected:
     virtual void checkSubConfigurables();

@@ -71,6 +71,22 @@ public:
 
     virtual QImage renderData();
 
+    QColor colorForGroupName(const std::string& group_name); // creates new one of required
+    const std::map<std::string, QColor>& dbContentColors() const;
+
+    static const double      MarkerSizePx;
+    static const double      MarkerSizeSelectedPx;
+
+    static const std::string Color_CAT001;
+    static const std::string Color_CAT010;
+    static const std::string Color_CAT020;
+    static const std::string Color_CAT021;
+    static const std::string Color_CAT048;
+    static const std::string Color_RefTraj;
+    static const std::string Color_CAT062;
+
+    static const QColor      ColorSelected;
+
 signals:
     void displayChanged();
     void dataLoaded();
@@ -86,6 +102,7 @@ protected:
     virtual void loadingDone_impl();                       //implements behavior at finishing a reload
     virtual void updateData_impl(bool requires_reset) = 0; //implements behavior at receiving new data
     virtual void clearData_impl() = 0;                     //implements clearing all view data
+    virtual void clearIntermediateRedrawData_impl() = 0;   //implements clearing of any data collected during redraw
     virtual bool redrawData_impl(bool recompute) = 0;      //implements redrawing the display (and possibly needed computations), and returns if the redraw succeeded
     virtual void liveReload_impl() = 0;                    //implements data reload during live running mode
 
@@ -108,4 +125,6 @@ private:
 
     BufferData data_;
     bool       drawn_ = false;
+
+    std::map<std::string, QColor> dbc_colors_;
 };

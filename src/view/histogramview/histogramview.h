@@ -15,21 +15,24 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HISTOGRAMVIEW_H_
-#define HISTOGRAMVIEW_H_
+#pragma once
 
-#include "view.h"
+#include "variableview.h"
+#include "histogram_raw.h"
 
 class HistogramViewWidget;
 class HistogramViewDataSource;
 class HistogramViewDataWidget;
 
-namespace dbContent {
-class Variable;
-class MetaVariable;
+namespace dbContent 
+{
+    class Variable;
+    class MetaVariable;
 }
 
-class HistogramView : public View
+/**
+*/
+class HistogramView : public VariableView
 {
     Q_OBJECT
 public:
@@ -37,18 +40,21 @@ public:
     {
         Settings();
 
-        std::string data_var_dbo;
-        std::string data_var_name;
-        bool        use_log_scale;
+        bool use_log_scale;
+    };
+
+    enum class Variable
+    {
+        DataVar = 0,
     };
 
     /// @brief Constructor
-    HistogramView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
-                ViewManager& view_manager);
+    HistogramView(const std::string& class_id, 
+                  const std::string& instance_id, 
+                  ViewContainer* w,
+                  ViewManager& view_manager);
     /// @brief Destructor
     virtual ~HistogramView() override;
-
-    virtual void loadingDone() override;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
@@ -60,47 +66,15 @@ public:
         return data_source_;
     }
 
-    virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
-
     virtual void accept(LatexVisitor& v) override;
+
+    virtual bool canShowAnnotations() const override final { return true; }
+    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const override;
 
     bool useLogScale() const;
     void useLogScale(bool value, bool notify_changes);
 
-    bool hasDataVar ();
-    bool isDataVarMeta ();
-    dbContent::Variable& dataVar();
-    void dataVar (dbContent::Variable& var, bool notify_changes);
-
-    dbContent::MetaVariable& metaDataVar();
-    void metaDataVar (dbContent::MetaVariable& var, bool notify_changes);
-
-    std::string dataVarDBO() const;
-    std::string dataVarName() const;
-
-    bool showResults() const;
-    void showResults(bool value);
-
-    std::string evalResultGrpReq() const;
-    void evalResultGrpReq(const std::string& value);
-
-    std::string evalResultsID() const;
-    void evalResultsID(const std::string& value);
-
-    bool hasResultID() const;
-
-    bool hasViewPoint () { return current_view_point_ != nullptr; }
-    const ViewableDataConfig& viewPoint() { assert (hasViewPoint()); return *current_view_point_; }
-
-    static const std::string ParamDataVarDBO;
-    static const std::string ParamDataVarName;
     static const std::string ParamUseLogScale;
-
-public slots:
-    virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
-    virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
-
-    void resultsChangedSlot();
 
 signals:
     void showOnlySelectedSignal(bool value);
@@ -119,7 +93,7 @@ protected:
 
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
-    void onShowResultsChanged();
+    virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) override;
 
     HistogramViewDataWidget* getDataWidget();
 
@@ -128,14 +102,5 @@ protected:
     /// For data loading
     HistogramViewDataSource* data_source_{nullptr};
 
-    std::string eval_results_grpreq_;
-     std::string eval_results_id_;
-
-    bool show_results_{false}; // no results at first
-
-    const ViewableDataConfig* current_view_point_ {nullptr};
-
     Settings settings_;
 };
-
-#endif /* HISTOGRAMVIEW_H_ */

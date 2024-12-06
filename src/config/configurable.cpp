@@ -311,7 +311,12 @@ void Configurable::createSubConfigurables()
         //not yet created from manual order?
         if (custom_order.empty() || std::find(custom_order.begin(), custom_order.end(), it->first) == custom_order.end())
         {
-            logdbg << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '" << it->first.first << "' instance_id '" << it->first.second << "'";
+            logdbg << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '"
+                   << it->first.first << "' instance_id '" << it->first.second << "'";
+
+            if (hasSubConfigurable(it->first.first, it->first.second))
+                logerr << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '"
+                       << it->first.first << "' instance_id '" << it->first.second << "' already exists";
 
             assert(!hasSubConfigurable(it->first.first, it->first.second));
             generateSubConfigurable(it->first.first, it->first.second);
@@ -535,20 +540,22 @@ std::string Configurable::getPath() const
  * Adds a new filtered class id to the export filter for the given export type.
  */
 void Configurable::addJSONExportFilter(JSONExportType export_type, 
-                                       const std::string& class_id)
+                                       JSONExportFilterType filter_type,
+                                       const std::string& id)
 {
     assert(configuration_);
-    configuration_->addJSONExportFilter(export_type, class_id);
+    configuration_->addJSONExportFilter(export_type, filter_type, id);
 }
 
 /**
  * Adds new filtered class ids to the export filter for the given export type.
  */
 void Configurable::addJSONExportFilter(JSONExportType export_type, 
-                                       const std::vector<std::string>& class_ids)
+                                       JSONExportFilterType filter_type,
+                                       const std::vector<std::string>& ids)
 {
     assert(configuration_);
-    configuration_->addJSONExportFilter(export_type, class_ids);
+    configuration_->addJSONExportFilter(export_type, filter_type, ids);
 }
 
 /**

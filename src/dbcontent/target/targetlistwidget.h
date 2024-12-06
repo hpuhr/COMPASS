@@ -26,7 +26,7 @@ public slots:
     void filterSlot();
 
     void customContextMenuSlot(const QPoint& p);
-    void showFullUTNSlot ();
+    //void showFullUTNSlot ();
     void showSurroundingDataSlot ();
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);

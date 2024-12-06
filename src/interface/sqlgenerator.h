@@ -81,6 +81,8 @@ public:
     std::string getSelectPropertyStatement(const std::string& id);
     std::string getSelectAllPropertiesStatement();
 
+    std::string getSetNullStatement (const std::string& table_name, const std::string& col_name);
+
     //    std::string getInsertMinMaxStatement(const std::string& variable_name,
     //                                         const std::string& object_name, const std::string& min,
     //                                         const std::string& max);

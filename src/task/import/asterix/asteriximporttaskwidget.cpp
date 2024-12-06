@@ -94,6 +94,7 @@ void ASTERIXImportTaskWidget::addMainTab()
             // line
             QComboBox* file_line_box = new QComboBox();
             file_line_box->addItems({"1", "2", "3", "4"});
+            file_line_box->setCurrentText(QString::number(task_.settings().file_line_id_+1)); // from 0..3
 
             connect(file_line_box, &QComboBox::currentTextChanged,
                     this, &ASTERIXImportTaskWidget::fileLineIDEditSlot);
@@ -121,11 +122,29 @@ void ASTERIXImportTaskWidget::addMainTab()
     main_tab_layout->addStretch();
 
     // final stuff
+
+    {
+        reset_date_between_files_check_ = new QCheckBox("Reset Date Between Files");
+        reset_date_between_files_check_->setToolTip(
+            "Disable if multiple sequential files with date increments are imported");
+        reset_date_between_files_check_->setChecked(task_.settings().reset_date_between_files_);
+        connect(reset_date_between_files_check_, &QCheckBox::clicked,
+                this, &ASTERIXImportTaskWidget::resetDateChangedSlot);
+        main_tab_layout->addWidget(reset_date_between_files_check_);
+
+
+        ignore_timejumps_check_ = new QCheckBox("Ignore 24h Time Jumps");
+        ignore_timejumps_check_->setChecked(task_.settings().ignore_time_jumps_);
+        connect(ignore_timejumps_check_, &QCheckBox::clicked, this,
+                &ASTERIXImportTaskWidget::ignoreTimeJumpsCheckedSlot);
+        main_tab_layout->addWidget(ignore_timejumps_check_);
+    }
+
     {
         debug_check_ = new QCheckBox("Debug in Console");
         debug_check_->setChecked(task_.settings().debug_jasterix_);
-        connect(debug_check_, &QCheckBox::clicked, this,
-                &ASTERIXImportTaskWidget::debugChangedSlot);
+        connect(debug_check_, &QCheckBox::clicked,
+                this, &ASTERIXImportTaskWidget::debugChangedSlot);
         main_tab_layout->addWidget(debug_check_);
 
     }
@@ -301,8 +320,6 @@ void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
 
 void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 {
-    loginf << "ASTERIXImportTaskWidget: fileLineIDEditSlot: value '" << text.toStdString() << "'";
-
     bool ok;
 
     unsigned int line_id = text.toUInt(&ok);
@@ -311,7 +328,10 @@ void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 
     assert (line_id > 0 && line_id <= 4);
 
-    task_.settings().file_line_id_ = line_id-1;
+    loginf << "ASTERIXImportTaskWidget: fileLineIDEditSlot: value '" << text.toStdString()
+           << "' line id " << line_id;
+
+    task_.settings().file_line_id_ = line_id-1; // from 1...4
 }
 
 void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)
@@ -339,6 +359,22 @@ void ASTERIXImportTaskWidget::updateParserBox()
     }
 }
 
+void ASTERIXImportTaskWidget::resetDateChangedSlot()
+{
+    QCheckBox* box = dynamic_cast<QCheckBox*>(sender());
+    assert(box);
+
+    task_.settings().reset_date_between_files_ = box->checkState() == Qt::Checked;
+}
+
+void ASTERIXImportTaskWidget::ignoreTimeJumpsCheckedSlot()
+{
+    loginf << "ASTERIXImportTaskWidget: ignoreTimeJumpsCheckedSlot";
+    assert(ignore_timejumps_check_);
+
+    task_.settings().ignore_time_jumps_ = ignore_timejumps_check_->checkState() == Qt::Checked;
+}
+
 void ASTERIXImportTaskWidget::debugChangedSlot()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*>(sender());
@@ -350,7 +386,7 @@ void ASTERIXImportTaskWidget::debugChangedSlot()
 void ASTERIXImportTaskWidget::updateSourcesGrid()
 {
     QLayoutItem* child;
-    while ((child = sources_grid_->takeAt(0)) != nullptr)
+    while (!sources_grid_->isEmpty() && (child = sources_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();

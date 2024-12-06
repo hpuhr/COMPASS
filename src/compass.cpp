@@ -34,6 +34,8 @@
 #include "rtcommand.h"
 #include "util/timeconv.h"
 #include "fftmanager.h"
+#include "util/async.h"
+#include "licensemanager.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -96,7 +98,17 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     JobManager::instance().start();
     RTCommandManager::instance().start();
 
-    createSubConfigurables();
+    try
+    {
+        createSubConfigurables();
+    }
+    catch(const std::exception& e)
+    {
+        JobManager::instance().shutdown();
+        RTCommandManager::instance().shutdown();
+        
+        throw std::runtime_error(e.what());
+    }
 
     assert(db_interface_);
     assert(dbcontent_manager_);
@@ -105,7 +117,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     assert(task_manager_);
     assert(view_manager_);
     assert(eval_manager_);
-    assert (fft_manager_);
+    assert(fft_manager_);
+    assert(license_manager_);
 
     rt_cmd_runner_.reset(new rtcommand::RTCommandRunner);
 
@@ -160,6 +173,10 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     connect (this, &COMPASS::appModeSwitchSignal,
              filter_manager_.get(), &FilterManager::appModeSwitchSlot);
 
+    // features
+    connect (license_manager_.get(), &LicenseManager::changed, task_manager_.get(), &TaskManager::updateFeatures);
+    connect (license_manager_.get(), &LicenseManager::changed, view_manager_.get(), &ViewManager::updateFeatures);
+
     qRegisterMetaType<AppMode>("AppMode");
 
     rtcommand::RTCommandHelp::init();
@@ -184,8 +201,9 @@ COMPASS::~COMPASS()
     assert(!filter_manager_);
     assert(!task_manager_);
     assert(!view_manager_);
-    assert (!eval_manager_);
-    assert (!fft_manager_);
+    assert(!eval_manager_);
+    assert(!fft_manager_);
+    assert(!license_manager_);
 
     logdbg << "COMPASS: destructor: end";
 }
@@ -254,12 +272,23 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         fft_manager_.reset(new FFTManager(class_id, instance_id, this));
         assert(fft_manager_);
     }
+    else if (class_id == "LicenseManager")
+    {
+        assert(!license_manager_);
+        license_manager_.reset(new LicenseManager(class_id, instance_id, this));
+        assert(license_manager_);
+    }
     else
         throw std::runtime_error("COMPASS: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void COMPASS::checkSubConfigurables()
 {
+    if (!license_manager_)
+    {
+        generateSubConfigurableFromConfig("LicenseManager", "LicenseManager0");
+        assert(license_manager_);
+    }
     if (!db_interface_)
     {
         generateSubConfigurableFromConfig("DBInterface", "DBInterface0");
@@ -375,8 +404,6 @@ void COMPASS::exportDBFile(const std::string& filename)
 
     db_export_in_progress_ = true;
 
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
     QMessageBox* msg_box = new QMessageBox;
 
     msg_box->setWindowTitle("Exporting Database");
@@ -385,11 +412,7 @@ void COMPASS::exportDBFile(const std::string& filename)
     msg_box->setWindowModality(Qt::ApplicationModal);
     msg_box->show();
 
-    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < 50)
-    {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep(1);
-    }
+    Async::waitAndProcessEventsFor(50);
 
     db_interface_->exportDBFile(filename);
     lastUsedPath(Files::getDirectoryFromPath(filename));
@@ -473,6 +496,12 @@ FFTManager& COMPASS::fftManager()
     return *fft_manager_;
 }
 
+LicenseManager& COMPASS::licenseManager()
+{
+    assert(license_manager_);
+    return *license_manager_;
+}
+
 rtcommand::RTCommandRunner& COMPASS::rtCmdRunner()
 {
     assert(rt_cmd_runner_);
@@ -482,6 +511,12 @@ rtcommand::RTCommandRunner& COMPASS::rtCmdRunner()
 bool COMPASS::dbOpened()
 {
     return db_opened_;
+}
+
+void COMPASS::init()
+{
+    assert(task_manager_);
+    task_manager_->init();
 }
 
 void COMPASS::shutdown()
@@ -536,6 +571,9 @@ void COMPASS::shutdown()
         db_interface_->closeDBFile();
 
     db_interface_ = nullptr;
+
+    assert(license_manager_);
+    license_manager_ = nullptr;
 
     //main_window_ = nullptr;
 
@@ -794,4 +832,41 @@ void COMPASS::addDBFileToList(const std::string filename)
 
         db_file_list_ = tmp_list;
     }
+}
+
+std::string COMPASS::versionString(bool open_ats, 
+                                   bool license_type) const
+{
+    assert(COMPASS::instance().config().existsId("version"));
+    std::string version = COMPASS::instance().config().getString("version");
+
+    std::string version_str;
+    if (open_ats) 
+        version_str += "OpenATS ";
+
+    version_str += "COMPASS v" + version;
+
+    if (license_type)
+    {
+        const auto& license_manager = COMPASS::instance().licenseManager();
+        auto vl = license_manager.activeLicense();
+
+        if (vl)
+            version_str += " " + license::License::typeToString(vl->type);
+        else
+            version_str += " " + license::License::typeToString(license::License::Type::Free);
+    }
+
+    return version_str;
+}
+
+std::string COMPASS::licenseeString(bool licensed_to) const
+{
+    const auto& license_manager = COMPASS::instance().licenseManager();
+    auto vl = license_manager.activeLicense();
+
+    if (!vl)
+        return "";
+
+    return (licensed_to ? "Licensed to " : "") + vl->licensee;
 }

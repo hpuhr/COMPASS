@@ -67,14 +67,19 @@ std::string LatexTable::toString()
     if (wide_table_)
     {
         //ss << R"(\newgeometry{margin=1cm})" << "\n";
-        ss << R"(\begin{landscape})" << "\n";
-        ss << R"(\thispagestyle{empty})" << "\n";
+
+        //landscape2 is our own macro for landscape pages, which generates horizontal footers also on landscape pages
+        ss << R"(\begin{landscape2})" << "\n";
+
+        //note: this makes the footer disappear on the first landscape page, so its commented out for now
+        //ss << R"(\thispagestyle{empty})" << "\n";
     }
 
-    if (wide_table_)
-        ss << R"(\begin{tabularx}{\linewidth}[H]{)" << heading_alignment_ << " }\n";
-    else
+    //note: textwidth is now true for both portrait and landscape
+    //if (wide_table_)
         ss << R"(\begin{tabularx}{\textwidth}[H]{)" << heading_alignment_ << " }\n";
+    //else
+    //    ss << R"(\begin{tabularx}{\linewidth}[H]{)" << heading_alignment_ << " }\n";
 
     ss << R"(\hline)" << "\n";
     ss << getLine(headings_, true);
@@ -103,7 +108,7 @@ std::string LatexTable::toString()
 
     if (wide_table_)
     {
-        ss << R"(\end{landscape})" << "\n";
+        ss << R"(\end{landscape2})" << "\n";
         //ss << R"(\restoregeometry)" << "\n";
     }
 

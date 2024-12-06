@@ -95,7 +95,7 @@ void RTCommandSetViewPoint::collectOptions_impl(OptionsDescription &options,
     ADD_RTCOMMAND_OPTIONS(options)
             ("view_point", po::value<std::string>()->required(), "View point JSON definition");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "view_point", 1)
+    ADD_RTCOMMAND_POS_OPTION(positional, "view_point")
 }
 
 /**

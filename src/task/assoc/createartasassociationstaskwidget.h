@@ -31,13 +31,15 @@ class DBDataSourceComboBox;
 class QPushButton;
 class QLineEdit;
 class QCheckBox;
+class QComboBox;
 
 class CreateARTASAssociationsTaskWidget : public QWidget
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void currentDataSourceChangedSlot();
+    void currentDataSourceLineChangedSlot();
 
     void endTrackTimeEditSlot(QString value);
 
@@ -50,7 +52,7 @@ class CreateARTASAssociationsTaskWidget : public QWidget
 
     void anyTrackFlagChangedSlot();
 
-  public:
+public:
     CreateARTASAssociationsTaskWidget(CreateARTASAssociationsTask& task, QWidget* parent = 0,
                                       Qt::WindowFlags f = 0);
 
@@ -58,10 +60,11 @@ class CreateARTASAssociationsTaskWidget : public QWidget
 
     void update();
 
-  protected:
+protected:
     CreateARTASAssociationsTask& task_;
 
     dbContent::DBDataSourceComboBox* ds_combo_{nullptr};
+    QComboBox* ds_line_combo_{nullptr};
 
     QLineEdit* end_track_time_edit_{nullptr};
 

@@ -19,35 +19,13 @@
 
 #include "compass.h"
 #include "createartasassociationstask.h"
-//#include "createartasassociationstaskwidget.h"
-//#include "dbcontent/dbcontentmanager.h"
 #include "jsonimporttask.h"
-//#include "jsonimporttaskwidget.h"
-//#include "jsonparsingschema.h"
-//#include "managedbcontenttask.h"
-//#include "managedbcontenttaskwidget.h"
 #include "managesectorstask.h"
-//#include "managesectorstaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
-//#include "radarplotpositioncalculatortaskwidget.h"
-//#include "dbinterface.h"
-//#include "files.h"
 #include "viewpointsimporttask.h"
-//#include "viewpointsimporttaskwidget.h"
 #include "gpstrailimporttask.h"
-//#include "gpstrailimporttaskwidget.h"
 #include "gpsimportcsvtask.h"
-//#include "gpsimportcsvtaskwidget.h"
-#include "createassociationstask.h"
-//#include "createassociationstaskwidget.h"
-#include "calculatereferencestask.h"
-//#include "calculatereferencestaskdialog.h"
-//#include "viewmanager.h"
-//#include "viewpointsreportgenerator.h"
-//#include "viewpointsreportgeneratordialog.h"
-//#include "evaluationmanager.h"
-//#include "eval/results/report/pdfgenerator.h"
-//#include "eval/results/report/pdfgeneratordialog.h"
+#include "reconstructortask.h"
 #include "mainwindow.h"
 
 #include "asteriximporttask.h"
@@ -122,8 +100,7 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "RadarPlotPositionCalculatorTask")
     {
         assert(!radar_plot_position_calculator_task_);
-        radar_plot_position_calculator_task_.reset(
-                    new RadarPlotPositionCalculatorTask(class_id, instance_id, *this));
+        radar_plot_position_calculator_task_.reset(new RadarPlotPositionCalculatorTask(class_id, instance_id, *this));
         assert(radar_plot_position_calculator_task_);
         addTask(class_id, radar_plot_position_calculator_task_.get());
     }
@@ -135,21 +112,12 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(create_artas_associations_task_);
         addTask(class_id, create_artas_associations_task_.get());
     }
-    else if (class_id == "CreateAssociationsTask")
+    else if (class_id == "ReconstructorTask")
     {
-        assert(!create_associations_task_);
-        create_associations_task_.reset(
-                    new CreateAssociationsTask(class_id, instance_id, *this));
-        assert(create_associations_task_);
-        addTask(class_id, create_associations_task_.get());
-    }
-    else if (class_id == "CalculateReferencesTask")
-    {
-        assert(!calculate_references_task_);
-        calculate_references_task_.reset(
-                    new CalculateReferencesTask(class_id, instance_id, *this));
-        assert(calculate_references_task_);
-        addTask(class_id, calculate_references_task_.get());
+        assert(!reconstruct_references_task_);
+        reconstruct_references_task_.reset(new ReconstructorTask(class_id, instance_id, *this));
+        assert(reconstruct_references_task_);
+        addTask(class_id, reconstruct_references_task_.get());
     }
     else
         throw std::runtime_error("TaskManager: generateSubConfigurable: unknown class_id " +
@@ -161,8 +129,6 @@ void TaskManager::addTask(const std::string& class_id, Task* task)
     assert(task);
     assert(!tasks_.count(class_id));
     tasks_[class_id] = task;
-//    connect(task, &Task::statusChangedSignal, this, &TaskManager::taskStatusChangesSlot);
-//    connect(task, &Task::doneSignal, this, &TaskManager::taskDoneSlot);
 }
 
 void TaskManager::checkSubConfigurables()
@@ -191,7 +157,6 @@ void TaskManager::checkSubConfigurables()
         assert(gps_trail_import_task_);
     }
 
-
     if (!gps_import_csv_task_)
     {
         generateSubConfigurable("GPSImportCSVTask", "GPSImportCSVTask0");
@@ -217,21 +182,25 @@ void TaskManager::checkSubConfigurables()
         assert(create_artas_associations_task_);
     }
 
-    if (!create_associations_task_)
+    if (!reconstruct_references_task_)
     {
-        generateSubConfigurable("CreateAssociationsTask", "CreateAssociationsTask0");
-        assert(create_associations_task_);
+        generateSubConfigurable("ReconstructorTask", "ReconstructorTask0");
+        assert(reconstruct_references_task_);
     }
-
-    if (!calculate_references_task_)
-    {
-        generateSubConfigurable("CalculateReferencesTask", "CalculateReferencesTask0");
-        assert(calculate_references_task_);
-    }
-
 }
 
 std::map<std::string, Task*> TaskManager::tasks() const { return tasks_; }
+
+void TaskManager::init()
+{
+    //init all tasks
+    for (const auto& t : tasks_)
+        if (t.second)
+            t.second->initTask();
+
+    //update features
+    updateFeatures();
+}
 
 void TaskManager::shutdown()
 {
@@ -247,7 +216,7 @@ void TaskManager::shutdown()
     manage_sectors_task_ = nullptr;
     radar_plot_position_calculator_task_ = nullptr;
     create_artas_associations_task_ = nullptr;
-    create_associations_task_ = nullptr;
+    reconstruct_references_task_ = nullptr;
 }
 
 void TaskManager::runTask(const std::string& task_name)
@@ -308,16 +277,10 @@ CreateARTASAssociationsTask& TaskManager::createArtasAssociationsTask() const
     return *create_artas_associations_task_;
 }
 
-CreateAssociationsTask& TaskManager::createAssociationsTask() const
+ReconstructorTask& TaskManager::reconstructReferencesTask() const
 {
-    assert(create_associations_task_);
-    return *create_associations_task_;
-}
-
-CalculateReferencesTask& TaskManager::calculateReferencesTask() const
-{
-    assert(calculate_references_task_);
-    return *calculate_references_task_;
+    assert(reconstruct_references_task_);
+    return *reconstruct_references_task_;
 }
 
 MainWindow* TaskManager::getMainWindow()
@@ -336,4 +299,9 @@ MainWindow* TaskManager::getMainWindow()
     return nullptr;
 }
 
-
+void TaskManager::updateFeatures()
+{
+    for (auto& t : tasks_)
+        if (t.second)
+            t.second->updateFeatures();
+}

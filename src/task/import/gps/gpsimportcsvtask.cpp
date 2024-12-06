@@ -53,7 +53,7 @@ using namespace nmea;
 
 GPSImportCSVTask::GPSImportCSVTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
-    : Task("GPSImportCSVTask", "Import GPS Trail", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_import_gps_csv.json")
 {
     tooltip_ = "Allows importing of GPS trails as CSV into the opened database.";
@@ -121,8 +121,6 @@ void GPSImportCSVTask::importFilename(const std::string& filename)
     current_filename_ = filename;
 
     parseCurrentFile();
-
-    emit statusChangedSignal(name_);
 }
 
 bool GPSImportCSVTask::checkPrerequisites()
@@ -465,7 +463,7 @@ void GPSImportCSVTask::run()
 
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_sac_id_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_sic_id_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
@@ -473,8 +471,8 @@ void GPSImportCSVTask::run()
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ta_));
-    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ti_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acad_));
+    assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_acid_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_num_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_vx_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_vy_));
@@ -487,7 +485,7 @@ void GPSImportCSVTask::run()
 
     Variable& sac_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sac_id_);
     Variable& sic_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_sic_id_);
-    Variable& ds_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_datasource_id_);
+    Variable& ds_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_);
     Variable& line_id_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_);
     Variable& tod_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_);
     Variable& ts_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
@@ -495,8 +493,8 @@ void GPSImportCSVTask::run()
     Variable& long_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
     Variable& m3a_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_);
     Variable& mc_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_);
-    Variable& ta_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ta_);
-    Variable& ti_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ti_);
+    Variable& ta_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acad_);
+    Variable& ti_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_acid_);
     Variable& tn_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_num_);
     Variable& vx_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vx_);
     Variable& vy_var = dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_vy_);
@@ -652,6 +650,11 @@ void GPSImportCSVTask::insertDoneSlot()
 
     buffer_ = nullptr;
 
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+               this, &GPSImportCSVTask::insertDoneSlot);
+
     COMPASS::instance().dataSourceManager().saveDBDataSources();
     emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
 
@@ -669,7 +672,7 @@ void GPSImportCSVTask::insertDoneSlot()
     if (allow_user_interactions_)
         msg_box.exec();
 
-    emit doneSignal(name_);
+    emit doneSignal();
 }
 
 void GPSImportCSVTask::dialogImportSlot()

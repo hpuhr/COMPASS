@@ -275,7 +275,6 @@ public:
     void setLimits(const QString& v0, const QString& v1);
     void connectToFields(QLineEdit* min_field, 
                          QLineEdit* max_field);
-
 signals:
     void lowerRangeChanged(QString);
     void upperRangeChanged(QString);

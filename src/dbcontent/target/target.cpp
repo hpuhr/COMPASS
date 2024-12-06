@@ -18,6 +18,12 @@ const std::string KEY_MODE_C_MIN = "mode_c_min";
 const std::string KEY_MODE_C_MAX = "mode_c_max";
 const std::string KEY_COUNTS = "dbcontent_counts";
 const std::string KEY_ADSD_MOPS_VERSION = "adsb_mops_versions";
+const std::string KEY_LATITUDE_MIN = "latitude_min";
+const std::string KEY_LATITUDE_MAX = "latitude_max";
+const std::string KEY_LONGITUDE_MIN = "longitude_min";
+const std::string KEY_LONGITUDE_MAX = "longitude_max";
+
+
 
 Target::Target(unsigned int utn, nlohmann::json info)
     : utn_(utn), info_(info)
@@ -317,6 +323,44 @@ std::string Target::adsbMOPSVersionsStr() const
     }
 
     return out.str().c_str();
+}
+
+bool Target::hasPositionBounds() const
+{
+    return info_.count(KEY_LATITUDE_MIN) && info_.count(KEY_LATITUDE_MAX)
+           && info_.count(KEY_LONGITUDE_MIN) && info_.count(KEY_LONGITUDE_MAX);
+}
+
+void Target::setPositionBounds (double latitude_min, double latitude_max, double longitude_min, double longitude_max)
+{
+    assert (latitude_min <= latitude_max);
+    assert (latitude_min <= latitude_max);
+
+    info_[KEY_LATITUDE_MIN] = latitude_min;
+    info_[KEY_LATITUDE_MAX] = latitude_max;
+    info_[KEY_LONGITUDE_MIN] = longitude_min;
+    info_[KEY_LONGITUDE_MAX] = longitude_max;
+}
+
+double Target::latitudeMin() const
+{
+    assert (info_.count(KEY_LATITUDE_MIN));
+    return info_.at(KEY_LATITUDE_MIN);
+}
+double Target::latitudeMax() const
+{
+    assert (info_.count(KEY_LATITUDE_MAX));
+    return info_.at(KEY_LATITUDE_MAX);
+}
+double Target::longitudeMin() const
+{
+    assert (info_.count(KEY_LONGITUDE_MIN));
+    return info_.at(KEY_LONGITUDE_MIN);
+}
+double Target::longitudeMax() const
+{
+    assert (info_.count(KEY_LONGITUDE_MAX));
+    return info_.at(KEY_LONGITUDE_MAX);
 }
 
 }

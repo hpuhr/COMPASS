@@ -35,7 +35,7 @@ namespace rtcommand
 
 namespace 
 {
-    QStringList splitCommand(const QString& command)
+    QStringList splitCommand(const QString& command, bool keep_empty)
     {
         //return QProcess::splitCommand(cmd); // does only exist in Qt 5.15+
 
@@ -43,35 +43,47 @@ namespace
         QString tmp;
         int quoteCount = 0;
         bool inQuote = false;
+
         // handle quoting. tokens can be surrounded by double quotes
         // "hello world". three consecutive double quotes represent
         // the quote character itself.
-        for (int i = 0; i < command.size(); ++i) {
-            if (command.at(i) == QLatin1Char('"')) {
+        for (int i = 0; i < command.size(); ++i) 
+        {
+            if (command.at(i) == QLatin1Char('"')) 
+            {
                 ++quoteCount;
-                if (quoteCount == 3) {
+                if (quoteCount == 3) 
+                {
                     // third consecutive quote
                     quoteCount = 0;
                     tmp += command.at(i);
                 }
                 continue;
             }
-            if (quoteCount) {
+            if (quoteCount) 
+            {
                 if (quoteCount == 1)
                     inQuote = !inQuote;
+                
                 quoteCount = 0;
             }
-            if (!inQuote && command.at(i).isSpace()) {
-                if (!tmp.isEmpty()) {
+            if (!inQuote && command.at(i).isSpace()) 
+            {
+                if (keep_empty || !tmp.isEmpty())
+                {
                     args += tmp;
                     tmp.clear();
                 }
-            } else {
+            } 
+            else 
+            {
                 tmp += command.at(i);
             }
         }
-        if (!tmp.isEmpty())
+
+        if (keep_empty || !tmp.isEmpty())
             args += tmp;
+        
         return args;
     }
 
@@ -88,6 +100,8 @@ namespace
     }
 
 }
+
+const bool RTCommandString::KeepEmptyCommands = false;
 
 /**
 */
@@ -110,7 +124,7 @@ QString RTCommandString::extractName() const
     if (cmd_.isEmpty())
         return "";
     
-    auto s = splitCommand(cmd_);
+    auto s = splitCommand(cmd_, KeepEmptyCommands);
     if (s.isEmpty())
         return "";
 
@@ -184,7 +198,7 @@ bool RTCommandString::hasHelpOption() const
     if (cmd_.isEmpty() || !valid())
         return false;
 
-    QStringList parts = splitCommand(cmd_);
+    QStringList parts = splitCommand(cmd_, KeepEmptyCommands);
     int argc = parts.count();
 
     if (argc < 1)

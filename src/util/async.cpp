@@ -17,6 +17,7 @@
 
 #include "async.h"
 #include "stringconv.h"
+#include "logger.h"
 
 #include <future>
 
@@ -28,6 +29,7 @@
 #include <QLabel>
 #include <QApplication>
 #include <QTimer>
+#include <QThread>
 
 namespace Utils
 {
@@ -78,9 +80,17 @@ bool waitDialogAsync(const std::function<bool()>& task,
 
     auto outer_task = [ & ] ()
     {
-        bool ok = task();
-        all_done = true;
-        return ok;
+        try
+        {
+            bool ok = task();
+            all_done = true;
+            return ok;
+        }
+        catch (const std::exception& e)
+        {
+            logerr << "Async: waitDialogAsync: exception '" << e.what() << "'";
+            throw e;
+        }
     };
 
     std::future<bool> pending_future = std::async(std::launch::async, outer_task);
@@ -231,6 +241,17 @@ bool waitDialogAsyncArray(const std::function<bool(int)>& task,
     };
 
     return waitDialogAsync(mt_task, done_cb, steps, task_name, wait_msg);
+}
+
+void waitAndProcessEventsFor (unsigned int milliseconds)
+{
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    while ((boost::posix_time::microsec_clock::local_time()-start_time).total_milliseconds() < milliseconds)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents); //
+        QThread::msleep(1);
+    }
 }
 
 }

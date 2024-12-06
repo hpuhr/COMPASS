@@ -1,5 +1,5 @@
 #include "targetpositionaccuracy.h"
-#include "dbcontent/dbcontentcache.h"
+#include "dbcontent/dbcontentaccessor.h"
 #include "dbcontent/dbcontent.h"
 
 using namespace std;
@@ -63,18 +63,18 @@ const map<int, float> adsb_v12_accuracies {
 };
 
 boost::optional<TargetPositionAccuracy> getPositionAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index)
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index)
 {
     if (dbcontent_name == "CAT021")
-        return getADSBPositionAccuracy(cache, dbcontent_name, index);
+        return getADSBPositionAccuracy(accessor, dbcontent_name, index);
     else if (dbcontent_name == "CAT001" || dbcontent_name == "CAT048")
-        return getRadarPositionAccuracy(cache, dbcontent_name, index);
+        return getRadarPositionAccuracy(accessor, dbcontent_name, index);
     else // cat010, cat020, cat062, reftraj
-        return getXYPositionAccuracy(cache, dbcontent_name, index);
+        return getXYPositionAccuracy(accessor, dbcontent_name, index);
 }
 
 boost::optional<TargetPositionAccuracy> getRadarPositionAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index)
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index)
 {
     boost::optional<TargetPositionAccuracy> ret;
 
@@ -85,18 +85,18 @@ boost::optional<TargetPositionAccuracy> getRadarPositionAccuracy(
 }
 
 boost::optional<TargetPositionAccuracy> getADSBPositionAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index)
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index)
 {
     boost::optional<TargetPositionAccuracy> ret;
 
     NullableVector<unsigned char>& mops_version_vec =
-            cache->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_mops_version_);
+            accessor->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_mops_version_);
 
     NullableVector<unsigned char>& nac_p_vec =
-            cache->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nacp_);
+            accessor->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nacp_);
 
     NullableVector<unsigned char>& nucp_nic_vec =
-            cache->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nucp_nic_);
+            accessor->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nucp_nic_);
 
     if (mops_version_vec.isNull(index)
             || (nac_p_vec.isNull(index) && nucp_nic_vec.isNull(index)))
@@ -145,20 +145,20 @@ boost::optional<TargetPositionAccuracy> getADSBPositionAccuracy(
 
 // cat010, cat020, cat062, reftraj
 boost::optional<TargetPositionAccuracy> getXYPositionAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index)
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index)
 {
     boost::optional<TargetPositionAccuracy> ret;
 
     double x_stddev, y_stddev, xy_cov {0};
 
     NullableVector<double>& pos_std_dev_x_m =
-            cache->getMetaVar<double>(dbcontent_name, DBContent::meta_var_x_stddev_);
+            accessor->getMetaVar<double>(dbcontent_name, DBContent::meta_var_x_stddev_);
 
     NullableVector<double>& pos_std_dev_y_m =
-            cache->getMetaVar<double>(dbcontent_name, DBContent::meta_var_y_stddev_);
+            accessor->getMetaVar<double>(dbcontent_name, DBContent::meta_var_y_stddev_);
 
     NullableVector<double>& pos_std_dev_xy_corr_coeff =
-            cache->getMetaVar<double>(dbcontent_name, DBContent::meta_var_xy_cov_);
+            accessor->getMetaVar<double>(dbcontent_name, DBContent::meta_var_xy_cov_);
 
     if (pos_std_dev_x_m.isNull(index) || pos_std_dev_y_m.isNull(index))
         return ret;
@@ -168,12 +168,12 @@ boost::optional<TargetPositionAccuracy> getXYPositionAccuracy(
 
     if (!pos_std_dev_xy_corr_coeff.isNull(index)) // else 0
     {
-        xy_cov = pos_std_dev_xy_corr_coeff.get(index); // is covariance component
+        xy_cov = pos_std_dev_xy_corr_coeff.get(index); // already adjusted during ASTERIX import
 
-        if (xy_cov < 0)
-            xy_cov = - pow(xy_cov, 2);
-        else
-            xy_cov = pow(xy_cov, 2);
+        // if (xy_cov < 0)
+        //     xy_cov = - pow(xy_cov, 2);
+        // else
+        //     xy_cov = pow(xy_cov, 2);
     }
 
     ret = TargetPositionAccuracy {x_stddev, y_stddev, xy_cov};

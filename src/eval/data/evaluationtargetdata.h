@@ -32,6 +32,8 @@
 
 #include <Eigen/Core>
 
+#include <QColor>
+
 class Buffer;
 class EvaluationData;
 class EvaluationManager;
@@ -45,7 +47,7 @@ public:
 
     EvaluationTargetData(unsigned int utn, 
                          EvaluationData& eval_data,
-                         std::shared_ptr<dbContent::Cache> cache,
+                         std::shared_ptr<dbContent::DBContentAccessor> accessor,
                          EvaluationManager& eval_man, 
                          DBContentManager& dbcont_man);
     virtual ~EvaluationTargetData();
@@ -130,7 +132,8 @@ public:
     boost::optional<dbContent::TargetPosition> mappedRefPos(
             const dbContent::TargetReport::Chain::DataID& tst_id) const;
     boost::optional<dbContent::TargetPosition> mappedRefPos(
-            const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const;
+            const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max,
+        bool debug=false) const;
     // bool ok
     boost::optional<dbContent::TargetVelocity> mappedRefSpeed(
             const dbContent::TargetReport::Chain::DataID& tst_id, boost::posix_time::time_duration d_max) const;
@@ -162,6 +165,26 @@ public:
                             const dbContent::TargetReport::Chain::DataID& id) const;
 
     static const int InterpGroundBitMaxSeconds = 15;
+    static const int InterestFactorPrecision   = 3;
+
+    // targets of interest
+    void updateInterestFactors() const;
+    void clearInterestFactors() const;
+    void addInterestFactor (const std::string& req_id, double factor) const;
+    const std::map<std::string, double>& interestFactors() const;
+    std::map<std::string, double> enabledInterestFactors() const;
+    std::string enabledInterestFactorsStr() const;
+    double enabledInterestFactorsSum() const;
+    double totalInterestFactorsSum() const;
+
+    static std::string stringForInterestFactor(const std::string& req_id, double factor);
+
+    static QColor colorForInterestFactorRequirement(double factor);
+    static QColor colorForInterestFactorSum(double factor);
+
+    static QColor color_interest_high_, color_interest_mid_, color_interest_low_;
+    static double interest_thres_req_high_, interest_thres_req_mid_;
+    static double interest_thres_sum_high_, interest_thres_sum_mid_;
 
 protected:
     void updateACIDs() const;
@@ -185,9 +208,11 @@ protected:
     bool checkInside(const SectorLayer& layer,
                      const InsideCheckMatrix& mat,
                      const dbContent::TargetReport::Index& index) const;
+
+    bool interestFactorEnabled(const std::string& req_id) const;
     
     EvaluationData&    eval_data_;
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
     EvaluationManager& eval_man_;
     DBContentManager&  dbcont_man_;
 
@@ -223,6 +248,10 @@ protected:
     mutable InsideCheckMatrix                    inside_tst_;
     mutable InsideCheckMatrix                    inside_map_;
     mutable std::map<const SectorLayer*, size_t> inside_sector_layers_;
+
+    mutable std::map<std::string, double> interest_factors_;
+    mutable double interest_factors_sum_total_ {0};
+    mutable double interest_factors_sum_enabled_ {0};
 };
 
 #endif // EVALUATIONTARGETDATA_H

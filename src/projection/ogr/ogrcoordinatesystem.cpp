@@ -19,13 +19,12 @@
 
 #include "global.h"
 #include "logger.h"
-//#include "ogrprojection.h"
 
 using namespace std;
 
 OGRCoordinateSystem::OGRCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
                                          double altitude_m)
-    : id_(id), latitude_deg_(latitude_deg), longitude_deg_(longitude_deg), altitude_m_(altitude_m)
+    : ProjectionCoordinateSystemBase(id, latitude_deg, longitude_deg, altitude_m)
 {
     wgs84_.SetWellKnownGeogCS("WGS84");
     wgs84_ellispoid_semi_major_ = wgs84_.GetSemiMajor();

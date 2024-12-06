@@ -637,28 +637,34 @@ void Configuration::generateJSON(nlohmann::json& target,
 
     json& param_config = target[ParameterSection];
 
-    // original parameters, in case config was not used
+    auto export_filters_classid = jsonExportFilters(export_type, JSONExportFilterType::ClassID);
+    auto export_filters_paramid = jsonExportFilters(export_type, JSONExportFilterType::ParamID);
 
+    // original parameters, in case config was not used
     for (auto& par_it : org_config_parameters_.items())
     {
+        if (export_filters_paramid && !export_filters_paramid->empty() && export_filters_paramid->count(par_it.key()) > 0)
+            continue;
+
         param_config[par_it.key()] = par_it.value();
     }
 
     // overwrite new parameter values
     for (auto& par_it : parameters_)
     {
+        if (export_filters_paramid && !export_filters_paramid->empty() && export_filters_paramid->count(par_it.second->getParameterId()) > 0)
+            continue;
+
         logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": generateJSON: writing '" << par_it.second->getParameterId() << "'";
         // assert (!param_config.contains(par_it.second.getParameterId()));
 
         par_it.second->toJSON(param_config);
     }
 
-    auto export_filters = jsonExportFilters(export_type);
-
     for (auto& config_it : sub_configurations_)
     {
         //apply class id based filter and skip sub-configurable?
-        if (export_filters && !export_filters->empty() && export_filters->count(config_it.second->getClassId()) > 0)
+        if (export_filters_classid && !export_filters_classid->empty() && export_filters_classid->count(config_it.second->getClassId()) > 0)
             continue;
 
         config_it.second->writeJSON(target, export_type);
@@ -1159,29 +1165,48 @@ void Configuration::setParameterFromJSON(const std::string& parameter_id, const 
  * Adds a new filtered class id to the export filter for the given export type.
  */
 void Configuration::addJSONExportFilter(JSONExportType export_type, 
-                                        const std::string& class_id)
+                                        JSONExportFilterType filter_type,
+                                        const std::string& id)
 {
-    json_export_filters_[ export_type ].insert(class_id);
+    if (filter_type == JSONExportFilterType::ClassID)
+        json_export_filters_class_id_[ export_type ].insert(id);
+    else if (filter_type == JSONExportFilterType::ParamID)
+        json_export_filters_param_id_[ export_type ].insert(id);
 }
 
 /**
  * Adds new filtered class ids to the export filter for the given export type.
  */
 void Configuration::addJSONExportFilter(JSONExportType export_type, 
-                                        const std::vector<std::string>& class_ids)
+                                        JSONExportFilterType filter_type,
+                                        const std::vector<std::string>& ids)
 {
-    json_export_filters_[ export_type ].insert(class_ids.begin(), class_ids.end());
+    if (filter_type == JSONExportFilterType::ClassID)
+        json_export_filters_class_id_[ export_type ].insert(ids.begin(), ids.end());
+    else if (filter_type == JSONExportFilterType::ParamID)
+        json_export_filters_param_id_[ export_type ].insert(ids.begin(), ids.end());
 }
 
 /**
  * Returns the filtered class ids of the export filter for the given export type.
  */
-const std::set<std::string>* Configuration::jsonExportFilters(JSONExportType export_type) const
+const std::set<std::string>* Configuration::jsonExportFilters(JSONExportType export_type,
+                                                              JSONExportFilterType filter_type) const
 {
-    if (json_export_filters_.empty() || json_export_filters_.count(export_type) == 0)
+    const std::map<JSONExportType, std::set<std::string>>* f = nullptr;
+
+    if (filter_type == JSONExportFilterType::ClassID)
+        f = &json_export_filters_class_id_;
+    else if (filter_type == JSONExportFilterType::ParamID)
+        f = &json_export_filters_param_id_;
+
+    if (!f)
         return nullptr;
 
-    return &json_export_filters_.at(export_type);
+    if (f->empty() || f->count(export_type) == 0)
+        return nullptr;
+
+    return &f->at(export_type);
 }
 
 // void Configuration::setTemplate (bool template_flag, const std::string& template_name)

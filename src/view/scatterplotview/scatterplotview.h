@@ -15,26 +15,19 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCATTERPLOTVIEW_H_
-#define SCATTERPLOTVIEW_H_
+#pragma once
 
-#include "view.h"
+#include "variableview.h"
 
 class ScatterPlotViewWidget;
 class ScatterPlotViewDataSource;
 class ScatterPlotViewDataWidget;
 
-namespace dbContent {
-class Variable;
-class MetaVariable;
-}
-
-class ScatterPlotView : public View
+/**
+*/
+class ScatterPlotView : public VariableView
 {
     Q_OBJECT
-public slots:
-    virtual void unshowViewPointSlot (const ViewableDataConfig* vp) override;
-    virtual void showViewPointSlot (const ViewableDataConfig* vp) override;
 
 signals:
     void showOnlySelectedSignal(bool value);
@@ -44,19 +37,20 @@ signals:
 public:
     struct Settings
     {
-        Settings();
-
-        std::string data_var_x_dbo;
-        std::string data_var_x_name;
-        std::string data_var_y_dbo;
-        std::string data_var_y_name;
-
         bool use_connection_lines {false};
     };
 
+    enum class Variable
+    {
+        DataVarX = 0,
+        DataVarY
+    };
+
     /// @brief Constructor
-    ScatterPlotView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
-                ViewManager& view_manager);
+    ScatterPlotView(const std::string& class_id, 
+                    const std::string& instance_id, 
+                    ViewContainer* w,
+                    ViewManager& view_manager);
     /// @brief Destructor
     virtual ~ScatterPlotView() override;
 
@@ -70,40 +64,17 @@ public:
         return data_source_;
     }
 
-    virtual dbContent::VariableSet getSet(const std::string& dbcontent_name) override;
-
     virtual void accept(LatexVisitor& v) override;
 
-    bool hasDataVarX ();
-    bool isDataVarXMeta ();
-    dbContent::Variable& dataVarX();
-    void dataVarX (dbContent::Variable& var, bool notify_changes);
-
-    dbContent::MetaVariable& metaDataVarX();
-    void metaDataVarX (dbContent::MetaVariable& var, bool notify_changes);
-
-    std::string dataVarXDBO() const;
-    std::string dataVarXName() const;
-
-    bool hasDataVarY ();
-    bool isDataVarYMeta ();
-    dbContent::Variable& dataVarY();
-    void dataVarY (dbContent::Variable& var, bool notify_changes);
-
-    dbContent::MetaVariable& metaDataVarY();
-    void metaDataVarY (dbContent::MetaVariable& var, bool notify_changes);
-
-    std::string dataVarYDBO() const;
-    std::string dataVarYName() const;
+    virtual bool canShowAnnotations() const override final { return true; }
+    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const override;
 
     bool useConnectionLines();
-    void useConnectionLines(bool value);
+    void useConnectionLines(bool value, bool redraw = true);
 
-    static const std::string ParamDataVarXDBO;
-    static const std::string ParamDataVarXName;
-    static const std::string ParamDataVarYDBO;
-    static const std::string ParamDataVarYName;
     static const std::string ParamUseConnectionLines;
+
+    ScatterPlotViewDataWidget* getDataWidget();
 
 protected:
     friend class LatexVisitor;
@@ -112,12 +83,12 @@ protected:
     virtual void updateSelection() override;
 
     virtual bool init_impl() override;
-
-    virtual bool refreshScreenOnNeededReload() const override { return true; }
-
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
-    ScatterPlotViewDataWidget* getDataWidget();
+    virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) override;
+
+    virtual void unshowViewPoint(const ViewableDataConfig* vp) override;
+    virtual void showViewPoint(const ViewableDataConfig* vp) override;
 
     /// For data display
     ScatterPlotViewWidget* widget_{nullptr};
@@ -126,5 +97,3 @@ protected:
 
     Settings settings_;
 };
-
-#endif /* SCATTERPLOTVIEW_H_ */

@@ -37,7 +37,7 @@ PositionDistanceRMSConfig::PositionDistanceRMSConfig(
         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
     : BaseConfig(class_id, instance_id, group, standard, eval_man)
 {
-    registerParameter("threshold_value", &threshold_value_, 50.0f);
+    registerParameter("threshold_value", &threshold_value_, 50.0);
 }
 
 PositionDistanceRMSConfig::~PositionDistanceRMSConfig()
@@ -52,12 +52,12 @@ std::shared_ptr<Base> PositionDistanceRMSConfig::createRequirement()
     return req;
 }
 
-float PositionDistanceRMSConfig::thresholdValue() const
+double PositionDistanceRMSConfig::thresholdValue() const
 {
     return threshold_value_;
 }
 
-void PositionDistanceRMSConfig::thresholdValue(float value)
+void PositionDistanceRMSConfig::thresholdValue(double value)
 {
     threshold_value_ = value;
 }

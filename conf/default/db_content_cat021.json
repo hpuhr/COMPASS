@@ -639,7 +639,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Selected Altitude",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "SA",
                     "unit": "Feet"
                 }
@@ -678,7 +678,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "FS SA",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -1614,7 +1614,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Mode C Code",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "MC",
                     "unit": "Feet"
                 }
@@ -1627,7 +1627,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Height",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GH",
                     "unit": "Feet"
                 }
@@ -1647,7 +1647,7 @@
             },
             "VariableADSBbaro_vertical_rate_ftm0": {
                 "parameters": {
-                    "data_type_str": "DOUBLE",
+                    "data_type_str": "FLOAT",
                     "db_column_name": "barometric_vertical_rate",
                     "description": "From 155.Barometric Vertical Rate\n\nBarometric Vertical Rate in ft/min",
                     "dimension": "",
@@ -1805,7 +1805,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "ground_speed",
-                    "description": "From 160.Ground Speed\n\nGround Speed referenced to WGS-84\n0 ≤ Ground Speed < 2 NM/s",
+                    "description": "From 160.Ground Speed or REF SGV GSS\n\nGround Speed referenced to WGS-84\n0 ≤ Ground Speed < 2 NM/s",
                     "dimension": "Speed",
                     "is_key": false,
                     "name": "Ground Speed",
@@ -1987,7 +1987,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "latitude",
-                    "description": "From 130.Latitude\n\nPosition in WGS-84 Co-ordinates latitude",
+                    "description": "From 130.Latitude\n\nPosition in WGS-84 Co-ordinates latitude or from Latitude HR",
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Latitude",
@@ -2000,7 +2000,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "longitude",
-                    "description": "From 130.Longitude\n\nPosition in WGS-84 Co-ordinates longitude",
+                    "description": "From 130.Longitude\n\nPosition in WGS-84 Co-ordinates longitude or from Longitude HR",
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Longitude",
@@ -2260,7 +2260,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle",
-                    "description": "From 160.Track Angle\n\nTrack Angle clockwise reference to 'True North'",
+                    "description": "From 160.Track Angle or REF SGV HGT\n\nTrack Angle clockwise reference to 'True North'",
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Track Angle",

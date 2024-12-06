@@ -32,7 +32,7 @@ public:
 
     bool quitRequested() const;
 
-    void run ();
+    bool run ();
 
 private:
 
@@ -71,10 +71,9 @@ private:
     std::string import_sectors_filename_;
 
     bool calculate_radar_plot_positions_ {false};
-    bool associate_data_ {false};
     bool calculate_artas_tr_usage_ {false};
 
-    bool calculate_references_ {false};
+    bool reconstruct_references_ {false};
 
     bool load_data_ {false};
 

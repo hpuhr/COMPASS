@@ -51,6 +51,7 @@ class ScatterPlotViewDataSource : public QObject, public Configurable
         assert(set_);
         return set_;
     }
+
     void unshowViewPoint (const ViewableDataConfig* vp); // vp can be nullptr
     void showViewPoint (const ViewableDataConfig* vp);
 

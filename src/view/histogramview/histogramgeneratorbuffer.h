@@ -111,19 +111,27 @@ protected:
             if (ok)
                 scanned_contents.push_back(elem.first);
             else
-                loginf << "HistogramGeneratorBuffer: could not scan buffer of DBContent " << elem.first;
+                logdbg << "HistogramGeneratorBuffer: generateHistograms_impl: could not scan buffer of DBContent " << elem.first;
         }
 
         //no data range available -> no good
         if (scanned_contents.empty() || !histogram_init_.valid())
             return false;
 
-        auto config = histogram_init_.currentConfiguration();
+        auto range = histogram_init_.getRange();
+
+        logdbg << "HistogramGeneratorBuffer: generateHistograms_impl: RANGE: min = " << range->first << ", max = " << range->second;
+
+        auto config = histogram_init_.generateConfiguration();
+
+        logdbg << "HistogramGeneratorBuffer: generateHistograms_impl: CONFIG: num bins = " << config.num_bins << ", sorted = " << config.sorted_bins << ", type = " << (int)config.type;
 
         //init needed histograms
         for (const auto& db_content : scanned_contents)
         {
             auto& h = histograms_[ db_content ];
+
+            //@TODO: needs further reaction on init fail?
             histogram_init_.initHistogram(h, config);
         }
 
@@ -134,17 +142,25 @@ protected:
      */
     virtual bool refill_impl() override final
     {
+        logdbg << "HistogramGeneratorBuffer: refill_impl";
+
         //reinit intermediate data
+
+        logdbg << "HistogramGeneratorBuffer: refill_impl: intermediate data";
         initIntermediateData();
 
         //add all buffers
         for (auto& elem : *currentData())
         {
+            logdbg << "HistogramGeneratorBuffer: refill_impl: addBuffer " << elem.first;
+
             bool ok = addBuffer(elem.first, *elem.second);
 
             if (!ok)
-                loginf << "HistogramGeneratorBuffer: could not add buffer of DBContent " << elem.first;
+                logdbg << "HistogramGeneratorBuffer: refill_impl: could not add buffer of dbcontent " << elem.first;
         }
+
+        logdbg << "HistogramGeneratorBuffer: refill_impl: done";
 
         return true;
     }
@@ -224,7 +240,7 @@ protected:
                 ++select_cnt;
         }
 
-        loginf << "HistogramGeneratorT::selectBuffer: content = " << db_content << ", selected " << select_cnt;
+        loginf << "HistogramGeneratorT: selectBuffer: content = " << db_content << ", selected " << select_cnt;
 
         return true;
     }
@@ -263,24 +279,38 @@ private:
      */
     void initIntermediateData()
     {
+        logdbg << "HistogramGeneratorBufferT: initIntermediateData";
+
         //reset existing histogram bins
         for (auto& elem : histograms_)
             elem.second.resetBins();
 
         intermediate_data_ = {};
 
+        logdbg << "HistogramGeneratorBufferT: initIntermediateData: doing histograms";
+
         for (auto& elem : histograms_)
         {
+            logdbg << "HistogramGeneratorBufferT: initIntermediateData: histograms " << elem.first;
+
             auto& d = intermediate_data_[ elem.first ];
             d.init(elem.second.numBins());
+
+            logdbg << "HistogramGeneratorBufferT: initIntermediateData: bins";
 
             d.bins_are_sorted     = elem.second.configuration().sorted_bins;
             d.bins_are_categories = elem.second.configuration().type == HistogramConfig::Type::Category;
 
+            logdbg << "HistogramGeneratorBufferT: initIntermediateData: labels";
+
             //generate labels
             for (size_t i = 0; i < elem.second.numBins(); ++i)
+            {
                 d.bin_data[ i ].labels = labelsForBin((int)i);
+            }
         }
+
+        logdbg << "HistogramGeneratorBufferT: initIntermediateData: done";
     }
 
     /**
@@ -288,10 +318,13 @@ private:
      */
     BinLabels labelsForBin(int bin) const
     {
+        logdbg << "HistogramGeneratorBufferT: labelsForBin: bin " << bin;
+
         if (bin < 0 || histograms_.empty())
             return {};
 
         auto it = histograms_.begin();
+
         if (bin >= (int)it->second.numBins())
             return {};
 
@@ -332,7 +365,10 @@ private:
 
         NullableVector<T>& data = buffer.get<T>(current_var_name);
         
-        return histogram_init_.scan(data);
+        if (!histogram_init_.scan(data))
+            return false;
+
+        return true;
     }
 
     /**
@@ -417,6 +453,6 @@ private:
         return true;
     }
 
-    HistogramInitializer<T> histogram_init_;
-    Histograms              histograms_;     //histograms per db content type
+    HistogramInitializerT<T> histogram_init_;
+    Histograms               histograms_;     //histograms per db content type
 };

@@ -119,15 +119,15 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
     dbovar_label->setFont(font_bold);
     form_layout->addRow(dbovar_label);
 
-    dbo_var_sel_ = new dbContent::VariableSelectionWidget();
-    dbo_var_sel_->showMetaVariables(false);
-    dbo_var_sel_->showDBContentOnly(parser_.dbContentName());
-    dbo_var_sel_->showEmptyVariable(true);
-    dbo_var_sel_->setDisabled(true);
+    dbcont_var_sel_ = new dbContent::VariableSelectionWidget();
+    dbcont_var_sel_->showMetaVariables(false);
+    dbcont_var_sel_->showDBContentOnly(parser_.dbContentName());
+    dbcont_var_sel_->showEmptyVariable(true);
+    dbcont_var_sel_->setDisabled(true);
 
-    connect(dbo_var_sel_, &dbContent::VariableSelectionWidget::selectionChanged,
+    connect(dbcont_var_sel_, &dbContent::VariableSelectionWidget::selectionChanged,
             this, &ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot);
-    form_layout->addRow("Name", dbo_var_sel_);
+    form_layout->addRow("Name", dbcont_var_sel_);
 
     dbo_var_data_type_label_ = new QLabel();
     form_layout->addRow("Data Type", dbo_var_data_type_label_);
@@ -360,18 +360,16 @@ void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key, bool un
 
 void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& var_name, bool mapping_exists)
 {
-    assert (dbo_var_sel_);
+    assert (dbcont_var_sel_);
     assert (dbo_var_comment_edit_);
 
     if (var_name.size())
     {
-        dbo_var_sel_->updateMenuEntries();
-
-        dbo_var_sel_->setEnabled(expert_mode_);
+        dbcont_var_sel_->setEnabled(expert_mode_);
 
         assert (parser_.dbContent().hasVariable(var_name));
-        dbo_var_sel_->selectedVariable(parser_.dbContent().variable(var_name));
-        dbo_var_data_type_label_->setText(dbo_var_sel_->selectedVariable().dataTypeString().c_str());
+        dbcont_var_sel_->selectedVariable(parser_.dbContent().variable(var_name));
+        dbo_var_data_type_label_->setText(dbcont_var_sel_->selectedVariable().dataTypeString().c_str());
 
         dbo_var_comment_edit_->setEnabled(expert_mode_);
         dbo_var_comment_edit_->setText(parser_.dbContent().variable(var_name).description().c_str());
@@ -396,8 +394,8 @@ void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& va
     }
     else
     {
-        dbo_var_sel_->setDisabled(false);
-        dbo_var_sel_->selectEmptyVariable();
+        dbcont_var_sel_->setDisabled(false);
+        dbcont_var_sel_->selectEmptyVariable();
         dbo_var_data_type_label_->setText("");
 
         dbo_var_comment_edit_->setDisabled(true);
@@ -491,16 +489,16 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
             || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedJSONKey);
-    assert (dbo_var_sel_);
+    assert (dbcont_var_sel_);
 
     if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)
     {
         // setting variable in existing mapping
 
-        if (dbo_var_sel_->hasVariable())
+        if (dbcont_var_sel_->hasVariable())
         {
-            parser_.mapping(entry_index_).dboVariableName(dbo_var_sel_->selectedVariable().name());
-            dbo_var_data_type_label_->setText(dbo_var_sel_->selectedVariable().dataTypeString().c_str());
+            parser_.mapping(entry_index_).dboVariableName(dbcont_var_sel_->selectedVariable().name());
+            dbo_var_data_type_label_->setText(dbcont_var_sel_->selectedVariable().dataTypeString().c_str());
         }
         else
         {
@@ -512,9 +510,9 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
 
         parser_.selectMapping(entry_index_);
     }
-    else if (dbo_var_sel_->hasVariable())
+    else if (dbcont_var_sel_->hasVariable())
     {
-        dbo_var_data_type_label_->setText(dbo_var_sel_->selectedVariable().dataTypeString().c_str());
+        dbo_var_data_type_label_->setText(dbcont_var_sel_->selectedVariable().dataTypeString().c_str());
 
         // create new mapping
 
@@ -524,7 +522,7 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
 
         new_cfg->addParameter<std::string>("json_key", json_key);
         new_cfg->addParameter<std::string>("db_content_name", parser_.dbContentName());
-        new_cfg->addParameter<std::string>("db_content_variable_name", dbo_var_sel_->selectedVariable().name());
+        new_cfg->addParameter<std::string>("db_content_variable_name", dbcont_var_sel_->selectedVariable().name());
 
         parser_.generateSubConfigurableFromConfig(std::move(new_cfg));
 
@@ -542,11 +540,11 @@ void ASTERIXJSONParserDetailWidget::dboVariableCommentChangedSlot()
         return;
 
     assert (has_current_entry_);
-    assert (dbo_var_sel_);
-    assert (dbo_var_sel_->hasVariable());
+    assert (dbcont_var_sel_);
+    assert (dbcont_var_sel_->hasVariable());
     assert (dbo_var_comment_edit_);
 
-    dbo_var_sel_->selectedVariable().description(dbo_var_comment_edit_->document()->toPlainText().toStdString());
+    dbcont_var_sel_->selectedVariable().description(dbo_var_comment_edit_->document()->toPlainText().toStdString());
 }
 
 
@@ -557,7 +555,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
             || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedJSONKey);
-    assert (dbo_var_sel_);
+    assert (dbcont_var_sel_);
 
     string json_key;
 
@@ -686,12 +684,12 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
             || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable);
-    assert (dbo_var_sel_);
+    assert (dbcont_var_sel_);
 
-    assert (dbo_var_sel_->hasVariable());
+    assert (dbcont_var_sel_->hasVariable());
 
 
-    string dbovar_name = dbo_var_sel_->selectedVariable().name();
+    string dbovar_name = dbcont_var_sel_->selectedVariable().name();
 
     loginf << "ASTERIXJSONParserDetailWidget: deleteDBVariableSlot: deleting var '" << dbovar_name << "'";
 
@@ -741,13 +739,13 @@ void ASTERIXJSONParserDetailWidget::editDBVariableSlot()
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
             || entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable);
-    assert (dbo_var_sel_);
+    assert (dbcont_var_sel_);
 
-    assert (dbo_var_sel_->hasVariable());
+    assert (dbcont_var_sel_->hasVariable());
 
-    dbContent::VariableEditDialog dialog (dbo_var_sel_->selectedVariable(), this);
+    dbContent::VariableEditDialog dialog (dbcont_var_sel_->selectedVariable(), this);
 
-    string current_var_name = dbo_var_sel_->selectedVariable().name();
+    string current_var_name = dbcont_var_sel_->selectedVariable().name();
 
     dialog.exec();
 

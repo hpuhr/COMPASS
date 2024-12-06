@@ -36,8 +36,10 @@ public:
 
     virtual rtcommand::IsValid valid() const override;
 
-    std::string result;
-    std::string table;
+    std::string      result;
+    std::string      table;
+    bool             colwise = false;
+    std::vector<int> columns;
     
 protected:
     virtual bool run_impl() override;

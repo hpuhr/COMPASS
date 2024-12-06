@@ -102,6 +102,7 @@ void ViewManager::init(QTabWidget* tab_widget)
 #endif
 
     view_class_list_.insert({"ScatterPlotView", "Scatterplot View"});
+    view_class_list_.insert({"GridView", "Grid View"});
 
 #ifdef SCAN_PRESETS
     //scan view presets
@@ -114,6 +115,7 @@ void ViewManager::init(QTabWidget* tab_widget)
     initialized_ = true;
 
     createSubConfigurables();
+    updateFeatures();
 }
 
 void ViewManager::loadViewPoints()
@@ -269,6 +271,7 @@ dbContent::VariableSet ViewManager::getReadSet(const std::string& dbcontent_name
 
 ViewPointsWidget* ViewManager::viewPointsWidget() const
 {
+    assert (view_points_widget_);
     return view_points_widget_;
 }
 
@@ -330,6 +333,22 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
     return std::make_pair(true, "");  
 }
 
+void ViewManager::clearViewPoints()
+{
+    DBInterface& db_interface = COMPASS::instance().interface();
+
+            //delete existing viewpoints
+    if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
+        db_interface.deleteAllViewPoints();
+
+    viewPointsWidget()->clearViewPoints();
+
+}
+void ViewManager::addViewPoints(const std::vector <nlohmann::json>& viewpoints)
+{
+    viewPointsWidget()->addViewPoints(viewpoints);
+}
+
 void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 {
     if (current_viewable_)
@@ -362,17 +381,17 @@ void ViewManager::unsetCurrentViewPoint ()
 
 void ViewManager::doViewPointAfterLoad ()
 {
-    loginf << "ViewManager: doViewPointAfterLoad";
+    logdbg << "ViewManager: doViewPointAfterLoad";
 
     if (!current_viewable_)
     {
-        loginf << "ViewManager: doViewPointAfterLoad: no viewable";
+        logdbg << "ViewManager: doViewPointAfterLoad: no viewable";
         return; // nothing to do
     }
 
     if (view_point_data_selected_)
     {
-        loginf << "ViewManager: doViewPointAfterLoad: data already selected";
+        logdbg << "ViewManager: doViewPointAfterLoad: data already selected";
         return; // already done, this is a re-load
     }
 
@@ -610,34 +629,45 @@ void ViewManager::resetToStartupConfiguration()
 
     enableStoredReadSets();
 
-    logdbg << "ViewManager: resetToStartupConfiguration: deleting container widgets";
-    while (container_widgets_.size())
-    {
-        auto first_it = container_widgets_.begin();
-        logdbg << "ViewManager: resetToStartupConfiguration: deleting container widget " << first_it->first;
+    // logdbg << "ViewManager: resetToStartupConfiguration: deleting container widgets";
+    // while (container_widgets_.size())
+    // {
+    //     auto first_it = container_widgets_.begin();
+    //     logdbg << "ViewManager: resetToStartupConfiguration: deleting container widget " << first_it->first;
 
-        first_it->second->setTmpDisableRemoveConfigOnDelete(true);
-        delete first_it->second; // deletes the respective view container, which removes itself from this
+    //     first_it->second->setTmpDisableRemoveConfigOnDelete(true);
+    //     delete first_it->second; // deletes the respective view container, which removes itself from this
 
-        container_widgets_.erase(first_it);
-    }
+    //     container_widgets_.erase(first_it);
+    // }
 
-    logdbg << "ViewManager: resetToStartupConfiguration: deleting containers size " << containers_.size();
-    while (containers_.size())
-    {
-        auto first_it = containers_.begin();
-        logdbg << "ViewManager: resetToStartupConfiguration: deleting container " << first_it->first;
+    // logdbg << "ViewManager: resetToStartupConfiguration: deleting containers size " << containers_.size();
+    // while (containers_.size())
+    // {
+    //     auto first_it = containers_.begin();
+    //     logdbg << "ViewManager: resetToStartupConfiguration: deleting container " << first_it->first;
 
-        first_it->second->setTmpDisableRemoveConfigOnDelete(true);
-        delete first_it->second;
-        //containers_.erase(first_it);  // TODO CAUSES SEGFAULT, FIX THIS
-    }
+    //     first_it->second->setTmpDisableRemoveConfigOnDelete(true);
+    //     delete first_it->second;
+    //     //containers_.erase(first_it);  // TODO CAUSES SEGFAULT, FIX THIS
+    // }
 
-    logdbg << "ViewManager: resetToStartupConfiguration: view points generator";
-    view_points_report_gen_->setTmpDisableRemoveConfigOnDelete(true);
-    view_points_report_gen_ = nullptr;
+    logdbg << "ViewManager: resetToStartupConfiguration: resettings containers";
 
-    createSubConfigurables();
+    for (auto& cw : container_widgets_)
+        cw.second->setVisible(false);
+
+    for (auto& c : containers_)
+        c.second->resetToStartupConfiguration();
+
+    for (auto& cw : container_widgets_)
+        cw.second->setVisible(true);
+
+    //logdbg << "ViewManager: resetToStartupConfiguration: view points generator";
+    //view_points_report_gen_->setTmpDisableRemoveConfigOnDelete(true);
+    //view_points_report_gen_ = nullptr;
+
+    //createSubConfigurables();
 
     disableStoredReadSets();
 }
@@ -810,7 +840,7 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
     if (disable_data_distribution_)
         return;
 
-    loginf << "ViewManager: loadedDataSlot: reset " << requires_reset;
+    logdbg << "ViewManager: loadedDataSlot: reset " << requires_reset;
 
     processing_data_ = true;
 
@@ -828,7 +858,7 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
 
     processing_data_ = false;
 
-    loginf << "ViewManager: loadedDataSlot: done";
+    logdbg << "ViewManager: loadedDataSlot: done";
 }
 
 void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading
@@ -982,6 +1012,19 @@ bool ViewManager::automaticReloadEnabled() const
 bool ViewManager::automaticRedrawEnabled() const
 {
     return config_.automatic_redraw;
+}
+
+/**
+*/
+void ViewManager::updateFeatures()
+{
+    for (const auto& cw : container_widgets_)
+        if (cw.second)
+            cw.second->updateFeatures();
+    
+    for (const auto& v : views_)
+        if (v.second)
+            v.second->updateFeatures();
 }
 
 // void ViewManager::saveViewAsTemplate (View *view, std::string template_name)

@@ -1,5 +1,4 @@
 #include "datasourcecompoundcoverage.h"
-#include "ogrcoordinatesystem.h"
 #include "logger.h"
 
 using namespace std;
@@ -39,28 +38,23 @@ bool DataSourceCompoundCoverage::isInside (double pos_lat, double pos_long) cons
 
     // check inside any
 
-    bool ok;
-    double x_pos_m;
-    double y_pos_m;
+    double local_x, local_y, local_z;
     double pos_rng_m;
 
     for (auto& rng_circ : range_circles_cs_)
     {
-        ok = rng_circ.first->wgs842Cartesian(pos_lat, pos_long, x_pos_m, y_pos_m);
+        rng_circ.first->geodesic2LocalCart(pos_lat, pos_long, 0, local_x, local_y, local_z);
 
-        if (ok)
+        pos_rng_m = sqrt(pow(local_x, 2) + pow(local_y, 2));
+
+        if (pos_rng_m <= rng_circ.second)
         {
-            pos_rng_m = sqrt(pow(x_pos_m, 2) + pow(y_pos_m, 2));
-
-            if (pos_rng_m <= rng_circ.second)
-            {
-                logdbg << "DataSourceCompoundCoverage: isInside: inside circ, true";
-                return true;
-            }
-            else
-                logdbg << "DataSourceCompoundCoverage: isInside: outside circ, range "
-                       << pos_rng_m << " max " << rng_circ.second << ", false";
+            logdbg << "DataSourceCompoundCoverage: isInside: inside circ, true";
+            return true;
         }
+        else
+            logdbg << "DataSourceCompoundCoverage: isInside: outside circ, range "
+                   << pos_rng_m << " max " << rng_circ.second << ", false";
     }
 
     logdbg << "DataSourceCompoundCoverage: isInside: not inside any circ, false";
@@ -73,8 +67,8 @@ void DataSourceCompoundCoverage::finalize()
 
     for (auto& rng_circ : range_circles_)
     {
-        std::unique_ptr<OGRCoordinateSystem> ptr;
-        ptr.reset(new OGRCoordinateSystem(get<0>(rng_circ), get<1>(rng_circ), get<2>(rng_circ), 0));
+        std::unique_ptr<RS2GCoordinateSystem> ptr;
+        ptr.reset(new RS2GCoordinateSystem(get<0>(rng_circ), get<1>(rng_circ), get<2>(rng_circ), 0));
 
         range_circles_cs_.emplace_back(
                     std::make_pair(std::move(ptr), get<3>(rng_circ)));

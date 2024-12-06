@@ -161,8 +161,10 @@ public:
     void print() const;
 
     size_t numPacketsRead() const { return num_read_; }
+    size_t numPacketsDropped() const { return num_dropped_; }
     size_t numBytesRead() const { return bytes_read_; }
     size_t numPacketsReadTotal() const { return num_read_total_; }
+    size_t numPacketsDroppedTotal() const { return num_dropped_total_; }
     size_t numBytesReadTotal() const { return bytes_read_total_; }
 
     const DataPerSignature& dataPerSignature() const { return data_per_signature_; }
@@ -203,11 +205,13 @@ private:
     bool checkSignatureFilter(const Signature& signature,
                               const BasicFilter& filter) const;
 
-    size_t packet_idx_       = 0;
-    size_t num_read_         = 0;
-    size_t bytes_read_       = 0;
-    size_t num_read_total_   = 0;
-    size_t bytes_read_total_ = 0;
+    size_t packet_idx_        = 0;
+    size_t num_read_          = 0;
+    size_t num_dropped_       = 0;
+    size_t bytes_read_        = 0;
+    size_t num_read_total_    = 0;
+    size_t num_dropped_total_ = 0;
+    size_t bytes_read_total_  = 0;
 
     bool reached_eof_ = false;
 

@@ -20,9 +20,58 @@
 
 namespace dbContent {
 
-class Cache;
+class DBContentAccessor;
 
 namespace TargetReport {
+
+/**
+ */
+struct Index
+{
+    Index() = default;
+    Index(unsigned int idx_ext,
+          unsigned int idx_int) : idx_external(idx_ext), idx_internal(idx_int) {}
+
+    unsigned int idx_external; //external index (usually index into buffer)
+    unsigned int idx_internal; //internal index (index into internal data structures)
+};
+
+/**
+ */
+class DataID
+{
+  public:
+    typedef std::pair<const boost::posix_time::ptime, Index> IndexPair;
+
+    DataID() = default;
+    DataID(const boost::posix_time::ptime& timestamp) : timestamp_(timestamp), valid_(true) {}
+    DataID(const boost::posix_time::ptime& timestamp, const Index& index) : timestamp_(timestamp), index_(index), valid_(true) {}
+    DataID(const IndexPair& ipair) : timestamp_(ipair.first), index_(ipair.second), valid_(true) {}
+    virtual ~DataID() = default;
+
+    bool valid() const { return valid_; }
+    const boost::posix_time::ptime& timestamp() const { return timestamp_; }
+    bool hasIndex() const { return index_.has_value(); }
+
+    DataID& addIndex(const Index& index)
+    {
+        index_ = index;
+        return *this;
+    }
+
+    const Index& index() const
+    {
+        if (!hasIndex())
+            throw std::runtime_error("DataID: index: No index stored");
+        return index_.value();
+    }
+
+  private:
+    boost::posix_time::ptime timestamp_;
+    boost::optional<Index>   index_;
+    bool                     valid_ = false;
+};
+
 
 struct DataMappingTimes // mapping to respective tst data
 {
@@ -55,6 +104,12 @@ struct DataMapping // mapping to respective ref data
 
     bool has_ref_spd_ {false};
     dbContent::TargetVelocity spd_ref_;
+
+    bool has_ref_acc_ {false}; // acceleration m/s2
+    double ref_acc_{0};
+
+    bool has_ref_rocd_ {false}; // rate of limb/descent ft/min
+    double ref_rocd_{0};
 };
 
 class Chain
@@ -63,7 +118,7 @@ public:
     typedef TargetReport::DataID                                  DataID;
     typedef std::multimap<boost::posix_time::ptime, Index>      IndexMap;
 
-    Chain(std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name);
+    Chain(std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name);
     virtual ~Chain();
 
     void addIndex (boost::posix_time::ptime timestamp, unsigned int index);
@@ -109,10 +164,20 @@ public:
 
     DataID dataID(const boost::posix_time::ptime& timestamp) const;
 
+    std::vector<DataID> dataIDsBetween(const boost::posix_time::ptime& timestamp0,
+                                       const boost::posix_time::ptime& timestamp1,
+                                       bool include_t0,
+                                       bool include_t1) const;
+
     unsigned int dsID(const DataID& id) const;
 
     TargetPosition pos(const DataID& id) const;
     boost::optional<TargetPosition> posOpt(const DataID& id) const;
+
+    std::vector<TargetPosition> positionsBetween(const boost::posix_time::ptime& timestamp0,
+                                                 const boost::posix_time::ptime& timestamp1,
+                                                 bool include_t0,
+                                                 bool include_t1) const;
 
     boost::optional<TargetPositionAccuracy> posAccuracy(const DataID& id) const;
 
@@ -139,6 +204,14 @@ public:
 
     boost::optional<float> trackAngle(const DataID& id) const; // deg
 
+    boost::optional<double> acceleration(const DataID& id) const; // m/s2
+    boost::optional<float> rocd(const DataID& id) const; // ft/min
+    boost::optional<unsigned char> momLongAcc(const DataID& id) const;
+    boost::optional<unsigned char> momTransAcc(const DataID& id) const;
+    boost::optional<unsigned char> momVertRate(const DataID& id) const;
+
+    boost::optional<unsigned char> trackCoasting(const DataID& id) const;
+
     Index indexFromDataID(const DataID& id) const;
     boost::posix_time::ptime timestampFromDataID(const DataID& id) const;
 
@@ -151,7 +224,7 @@ public:
     bool ignorePosition(const DataID& id) const;
 
 protected:
-    std::shared_ptr<dbContent::Cache> cache_;
+    std::shared_ptr<dbContent::DBContentAccessor> accessor_;
     std::string dbcontent_name_;
 
     std::multimap<boost::posix_time::ptime, Index> timestamp_index_lookup_; // timestamp -> index

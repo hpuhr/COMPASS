@@ -88,10 +88,7 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
     }
     setLayout(layout);
 
-    connect(&menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
     connect(sel_button_, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
-
-    updateMenuEntries();
 }
 
 VariableSelectionWidget::~VariableSelectionWidget() {}
@@ -101,80 +98,6 @@ void VariableSelectionWidget::setReadOnly(bool read_only)
     assert (sel_button_);
 
     sel_button_->setDisabled(read_only);
-}
-
-void VariableSelectionWidget::updateMenuEntries()
-{
-    menu_.clear();
-
-    if (show_empty_variable_) // show empty
-    {
-        QAction* action = menu_.addAction("");
-        QVariantMap vmap;
-        vmap.insert(QString(""), QVariant(QString("")));
-        action->setData(QVariant(vmap));
-    }
-
-    if (show_dbo_only_)
-    {
-        assert(dbo_man_.existsDBContent(only_dbcontent_name_));
-
-        for (auto& var_it : dbo_man_.dbContent(only_dbcontent_name_).variables())
-        {
-            if (show_data_types_only_ && !showDataType(var_it.second->dataType()))
-                continue;
-
-            QAction* action = menu_.addAction(var_it.first.c_str());
-            action->setToolTip(var_it.second->description().c_str());
-
-            QVariantMap vmap;
-            vmap.insert(QString::fromStdString(var_it.first),
-                        QVariant(QString::fromStdString(only_dbcontent_name_)));
-            action->setData(QVariant(vmap));
-        }
-    }
-    else
-    {
-        if (show_meta_variables_)
-        {
-            QMenu* meta_menu = menu_.addMenu(QString::fromStdString(META_OBJECT_NAME));
-            for (auto& meta_it : dbo_man_.metaVariables())
-            {
-                if (show_data_types_only_ && !showDataType(meta_it.second->dataType()))
-                    continue;
-
-                QAction* action = meta_menu->addAction(QString::fromStdString(meta_it.first));
-                action->setToolTip(meta_it.second->description().c_str());
-
-                QVariantMap vmap;
-                vmap.insert(QString::fromStdString(meta_it.first),
-                            QVariant(QString::fromStdString(META_OBJECT_NAME)));
-                action->setData(QVariant(vmap));
-            }
-        }
-
-        if (show_meta_variables_only_)
-            return;
-
-        for (auto& object_it : dbo_man_)
-        {
-            QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
-
-            for (auto& var_it : object_it.second->variables())
-            {
-                if (show_data_types_only_ && !showDataType(var_it.second->dataType()))
-                    continue;
-
-                QAction* action = m2->addAction(QString::fromStdString(var_it.first));
-                action->setToolTip(var_it.second->description().c_str());
-
-                QVariantMap vmap;
-                vmap.insert(QString::fromStdString(var_it.first),
-                            QVariant(QString::fromStdString(object_it.first)));
-                action->setData(QVariant(vmap));
-            }
-        }
-    }
 }
 
 bool VariableSelectionWidget::showDataType(PropertyDataType type)
@@ -192,7 +115,118 @@ void VariableSelectionWidget::updateToolTip()
         setToolTip("");
 }
 
-void VariableSelectionWidget::showMenuSlot() { menu_.exec(QCursor::pos()); }
+void VariableSelectionWidget::showMenuSlot()
+{
+    QMenu menu;
+    menu.setToolTipsVisible(true);
+
+    if (show_empty_variable_) // show empty
+    {
+        QAction* action = menu.addAction("");
+        QVariantMap vmap;
+        vmap.insert(QString(""), QVariant(QString("")));
+        action->setData(QVariant(vmap));
+    }
+
+    QIcon tmp = QIcon(Files::getIconFilepath("db_empty.png").c_str());
+
+    QFont font_italic;
+    font_italic.setItalic(true);
+    font_italic.setWeight(QFont::Light);
+
+    if (show_dbcont_only_)
+    {
+        assert(dbo_man_.existsDBContent(only_dbcontent_name_));
+
+        for (auto& var_it : dbo_man_.dbContent(only_dbcontent_name_).variables())
+        {
+            if (show_data_types_only_ && !showDataType(var_it.second->dataType()))
+                continue;
+
+            QAction* action = menu.addAction(var_it.first.c_str());
+
+            if (!var_it.second->hasDBContent())
+            {
+                action->setFont(font_italic);
+                action->setIcon(tmp);
+            }
+
+            action->setToolTip(var_it.second->info().c_str());
+
+            QVariantMap vmap;
+            vmap.insert(QString::fromStdString(var_it.first),
+                        QVariant(QString::fromStdString(only_dbcontent_name_)));
+            action->setData(QVariant(vmap));
+        }
+    }
+    else
+    {
+        if (show_meta_variables_)
+        {
+            QMenu* meta_menu = menu.addMenu(QString::fromStdString(META_OBJECT_NAME));
+            meta_menu->setToolTipsVisible(true);
+
+            for (auto& meta_it : dbo_man_.metaVariables())
+            {
+                if (show_data_types_only_ && !showDataType(meta_it.second->dataType()))
+                    continue;
+
+                QAction* action = meta_menu->addAction(QString::fromStdString(meta_it.first));
+
+                if (!meta_it.second->hasDBContent())
+                    action->setFont(font_italic);
+
+                action->setToolTip(meta_it.second->info().c_str());
+
+                QVariantMap vmap;
+                vmap.insert(QString::fromStdString(meta_it.first),
+                            QVariant(QString::fromStdString(META_OBJECT_NAME)));
+                action->setData(QVariant(vmap));
+            }
+        }
+
+        if (!show_meta_variables_only_)
+        {
+            for (auto& object_it : dbo_man_)
+            {
+                QMenu* m2 = menu.addMenu(QString::fromStdString(object_it.first));
+                m2->setToolTipsVisible(true);
+
+                if (!object_it.second->hasData())
+                {
+                    m2->menuAction()->setFont(font_italic);
+                    m2->menuAction()->setIcon(tmp);
+                }
+
+                for (auto& var_it : object_it.second->variables())
+                {
+                    if (show_data_types_only_ && !showDataType(var_it.second->dataType()))
+                        continue;
+
+                    QAction* action = m2->addAction(QString::fromStdString(var_it.first));
+
+                    if (!var_it.second->hasDBContent())
+                    {
+                        action->setFont(font_italic);
+                        action->setIcon(tmp);
+                    }
+
+                    action->setToolTip(var_it.second->info().c_str());
+
+                    QVariantMap vmap;
+                    vmap.insert(QString::fromStdString(var_it.first),
+                                QVariant(QString::fromStdString(object_it.first)));
+                    action->setData(QVariant(vmap));
+                }
+            }
+        }
+    }
+
+    connect(&menu, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
+
+    menu.exec(QCursor::pos());
+
+}
 
 void VariableSelectionWidget::triggerSlot(QAction* action)
 {
@@ -308,26 +342,33 @@ MetaVariable& VariableSelectionWidget::selectedMetaVariable() const
     return dbo_man_.metaVariable(var_name);
 }
 
+std::pair<std::string, std::string> VariableSelectionWidget::selectionAsString() const
+{
+    assert(object_label_);
+    assert(variable_label_);
+
+    std::string obj_name = object_label_->text().toStdString();
+    std::string var_name = variable_label_->text().toStdString();
+
+    return std::make_pair(obj_name, var_name);
+}
+
 void VariableSelectionWidget::showDBContentOnly(const std::string& only_dbcontent_name)
 {
-    show_dbo_only_ = true;
+    show_dbcont_only_ = true;
     only_dbcontent_name_ = only_dbcontent_name;
 
     assert(object_label_);
     object_label_->hide();
-
-    updateMenuEntries();
 }
 
 void VariableSelectionWidget::disableShowDBContentOnly()
 {
-    show_dbo_only_ = false;
+    show_dbcont_only_ = false;
     only_dbcontent_name_ = "";
 
     assert(object_label_);
     object_label_->show();
-
-    updateMenuEntries();
 }
 
 std::string VariableSelectionWidget::onlyDBContentName() const { return only_dbcontent_name_; }
@@ -337,16 +378,12 @@ bool VariableSelectionWidget::showEmptyVariable() const { return show_empty_vari
 void VariableSelectionWidget::showEmptyVariable(bool show_empty_variable)
 {
     show_empty_variable_ = show_empty_variable;
-
-    updateMenuEntries();
 }
 
 void VariableSelectionWidget::showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types)
 {
     only_data_types_ = only_data_types;
     show_data_types_only_ = true;
-
-    updateMenuEntries();
 }
 
 void VariableSelectionWidget::disableShowDataTypesOnly()
@@ -362,8 +399,6 @@ void VariableSelectionWidget::showMetaVariablesOnly(bool show_meta_variables_onl
 
     if (show_meta_variables_only_)
         show_meta_variables_ = true;
-
-    updateMenuEntries();
 }
 
 bool VariableSelectionWidget::showMetaVariables() const { return show_meta_variables_; }
@@ -371,7 +406,6 @@ bool VariableSelectionWidget::showMetaVariables() const { return show_meta_varia
 void VariableSelectionWidget::showMetaVariables(bool show_meta_variables)
 {
     show_meta_variables_ = show_meta_variables;
-    updateMenuEntries();
 }
 
 boost::optional<QString> VariableSelectionWidget::uiGet(const QString& what) const

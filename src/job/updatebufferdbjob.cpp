@@ -43,7 +43,7 @@ UpdateBufferDBJob::~UpdateBufferDBJob() {}
 
 void UpdateBufferDBJob::run()
 {
-    loginf << "UpdateBufferDBJob: run: start";
+    logdbg << "UpdateBufferDBJob: run: start";
 
     started_ = true;
 
@@ -54,7 +54,7 @@ void UpdateBufferDBJob::run()
 
     unsigned int steps = buffer_->size() / 10000;
 
-    loginf << "UpdateBufferDBJob: run: writing object " << dbobject_.name() << " key "
+    logdbg << "UpdateBufferDBJob: run: writing object " << dbobject_.name() << " key "
            << key_var_.name() << " size " << buffer_->size() << " steps " << steps;
 
     unsigned int index_from = 0;
@@ -68,7 +68,7 @@ void UpdateBufferDBJob::run()
         if (index_to > buffer_->size() - 1)
             index_to = buffer_->size() - 1;
 
-        loginf << "UpdateBufferDBJob: run: step " << cnt << " steps " << steps << " from "
+        logdbg << "UpdateBufferDBJob: run: step " << cnt << " steps " << steps << " from "
                << index_from << " to " << index_to;
 
         db_interface_.updateBuffer(dbobject_.dbTableName(), key_var_.dbColumnName(),
@@ -83,7 +83,8 @@ void UpdateBufferDBJob::run()
     boost::posix_time::time_duration diff = loading_stop_time_ - loading_start_time_;
     load_time = diff.total_milliseconds() / 1000.0;
 
-    loginf << "UpdateBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2)
-           << " s).";
+    logdbg << "UpdateBufferDBJob: run: " << dbobject_.name()
+           << " write done (" << doubleToStringPrecision(load_time, 2) << " s).";
+
     done_ = true;
 }

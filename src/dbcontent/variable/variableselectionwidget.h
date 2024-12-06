@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_VARIABLESELECTIONWIDGET_H
-#define DBCONTENT_VARIABLESELECTIONWIDGET_H
+#pragma once
 
 #include "property.h"
 #include "test/ui_test_testable.h"
@@ -59,6 +58,8 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
     MetaVariable& selectedMetaVariable() const;
     void selectedMetaVariable(MetaVariable& variable);
 
+    std::pair<std::string, std::string> selectionAsString() const;
+
     bool showMetaVariables() const;
     void showMetaVariables(bool show_meta_variables);
 
@@ -80,7 +81,6 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
     void disableShowDataTypesOnly();
 
     void setReadOnly(bool read_only);
-    void updateMenuEntries();
 
     virtual boost::optional<QString> uiGet(const QString& what = QString()) const override;
     virtual QWidget* uiRerouteToNative() const override;
@@ -91,7 +91,6 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
     QLabel* object_label_{nullptr};
     QLabel* variable_label_{nullptr};
     QPushButton* sel_button_{nullptr};
-    QMenu menu_;
 
     bool variable_selected_{false};
     bool meta_variable_selected_{false};
@@ -101,7 +100,7 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
     bool show_meta_variables_{false};
     bool show_meta_variables_only_{false};
 
-    bool show_dbo_only_{false};
+    bool show_dbcont_only_{false};
     std::string only_dbcontent_name_;
 
     bool show_data_types_only_{false};
@@ -113,4 +112,3 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
 
 }
 
-#endif  // DBCONTENT_VARIABLESELECTIONWIDGET_H

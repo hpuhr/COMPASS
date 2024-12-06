@@ -17,15 +17,11 @@
 
 #include "dbcontent/variable/variable.h"
 #include "compass.h"
-//#include "configuration.h"
-//#include "configurationmanager.h"
-//#include "dbinterface.h"
+#include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "datasourcemanager.h"
 #include "dbcontent/variable/variablewidget.h"
 #include "stringconv.h"
-//#include "unit.h"
-//#include "unitmanager.h"
 #include "global.h"
 
 #include <algorithm>
@@ -804,6 +800,16 @@ std::string Variable::shortName() const
 void Variable::shortName(const std::string& short_name)
 {
     short_name_ = short_name;
+}
+
+bool Variable::hasDBContent() const
+{
+    return COMPASS::instance().interface().hasContentIn(dbTableName(), db_column_name_);
+}
+
+void Variable::setHasDBContent()
+{
+    COMPASS::instance().interface().setContentIn(dbTableName(), db_column_name_);
 }
 
 bool Variable::isKey() const

@@ -170,8 +170,8 @@ struct AsyncTaskState
         error = "";
     }
 
-    State             state = State::Fresh;
-    std::string       error;
+    State       state = State::Fresh;
+    std::string error;
 };
 
 /**
@@ -204,9 +204,8 @@ public:
     const AsyncTaskState& taskState() const { return task_state_; }
     const AsyncTaskProgress& taskProgress() const { return task_progress_; }
 
-    static bool runAsyncDialog(AsyncTask* task,
-                               bool auto_close = true,
-                               QWidget* parent = nullptr);
+    bool runAsyncDialog(bool auto_close = true,
+                        QWidget* parent = nullptr);
 signals:
     void stateChanged();
 
@@ -218,8 +217,9 @@ private:
     void setState(AsyncTaskState::State state);
     void setError(const std::string& error);
 
-    AsyncTaskState    task_state_;
-    AsyncTaskProgress task_progress_;
+    AsyncTaskState           task_state_;
+    AsyncTaskProgress        task_progress_;
+    AsyncTaskProgressWrapper task_progress_wrapper_;
 };
 
 /**
@@ -244,8 +244,7 @@ protected:
                                      AsyncTaskProgressWrapper& progress) override;
 
 private:
-    const Func& func_;
-
+    Func    func_;
     QString title_;
     QString default_message_;
     bool    can_abort_       = true;

@@ -15,59 +15,46 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCATTERPLOTVIEWCONFIGWIDGET_H_
-#define SCATTERPLOTVIEWCONFIGWIDGET_H_
+#pragma once
 
-#include "viewconfigwidget.h"
-//#include "dbcontent/variable/variable.h"
-//#include "appmode.h"
-
-namespace dbContent
-{
-class VariableOrderedSetWidget;
-class VariableSelectionWidget;
-}
+#include "variableviewconfigwidget.h"
 
 class ScatterPlotViewWidget;
 class ScatterPlotView;
 
 class QCheckBox;
 class QLineEdit;
+class QTreeView;
 
 /**
  * @brief Widget with configuration elements for a ScatterPlotView
  *
  */
-class ScatterPlotViewConfigWidget : public TabStyleViewConfigWidget
+class ScatterPlotViewConfigWidget : public VariableViewConfigWidget
 {
     Q_OBJECT
 
 public slots:
-    void selectedVariableXChangedSlot();
-    void selectedVariableYChangedSlot();
-
     void useConnectionLinesSlot();
+    void updateToVisibilitySlot();
+
+    void deselectAllSlot();
 
 public:
-    ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, QWidget* parent = nullptr);
+    ScatterPlotViewConfigWidget(ScatterPlotViewWidget* view_widget, 
+                                QWidget* parent = nullptr);
     virtual ~ScatterPlotViewConfigWidget();
 
-    virtual void configChanged() override;
-
 protected:
-    void updateSelectedVarX();
-    void updateSelectedVarY();
+    virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
-    void viewInfoJSON_impl(nlohmann::json& info) const override;
+    virtual void onDisplayChange_impl() override;
+    virtual void configChanged_impl() override;
 
     ScatterPlotView* view_ = nullptr;
 
-    dbContent::VariableSelectionWidget* select_var_x_ {nullptr};
-    dbContent::VariableSelectionWidget* select_var_y_ {nullptr};
+    QTreeView* layer_view_{nullptr};
 
     QCheckBox* use_connection_lines_ {nullptr};
 
-    virtual void onDisplayChange_impl() override;
 };
-
-#endif /* SCATTERPLOTVIEWCONFIGWIDGET_H_ */

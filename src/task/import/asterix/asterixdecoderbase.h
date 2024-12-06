@@ -23,6 +23,7 @@
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/optional.hpp>
 
 class ASTERIXImportTask;
 class ASTERIXDecodeJob;
@@ -38,6 +39,8 @@ public:
                        const ASTERIXImportTaskSettings* settings = nullptr);
     virtual ~ASTERIXDecoderBase();
 
+    virtual std::string name() const { return ""; }
+
     bool canRun() const;
     bool canDecode(bool force_recompute) const;
     
@@ -52,6 +55,9 @@ public:
     virtual bool hasStatusInfo() const { return false; };
     virtual std::string statusInfoString() const { return ""; }
     virtual float statusInfoProgress() const { return 0; } // percent
+    virtual std::string currentDataSourceName() const { return ""; }
+
+    virtual boost::optional<std::string> requiredASTERIXFraming() const { return {}; }
 
     nlohmann::json stateAsJSON() const;
 

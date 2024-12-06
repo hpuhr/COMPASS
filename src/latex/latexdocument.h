@@ -56,6 +56,9 @@ protected:
     std::string title_;
     std::string author_;
     std::string abstract_;
+
+    std::string footer_left_;
+    std::string footer_right_;
 };
 
 #endif // LATEXDOCUMENT_H

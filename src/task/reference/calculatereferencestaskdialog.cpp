@@ -186,7 +186,7 @@ void CalculateReferencesTaskDialog::createPositionFilterSettingsWidget(QWidget* 
 
     tracker_minimum_accuracy_box_ = new QDoubleSpinBox;
     tracker_minimum_accuracy_box_->setMinimum(0.0);
-    tracker_minimum_accuracy_box_->setMaximum(DBL_MAX);
+    tracker_minimum_accuracy_box_->setMaximum(std::numeric_limits<double>::max());
     addRow("Minimum Position Stddev", tracker_minimum_accuracy_box_);
 
     addHeader("ADS-B Position Data Usage");
@@ -277,7 +277,7 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
     {
         auto sb = new QDoubleSpinBox;
         sb->setMinimum(0.0);
-        sb->setMaximum(DBL_MAX);
+        sb->setMaximum(std::numeric_limits<double>::max());
         sb->setVisible(visible);
         sb->setSuffix(" " + unit);
 
@@ -340,7 +340,7 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     min_dt_box_ = new QDoubleSpinBox;
     min_dt_box_->setMinimum(0.0);
-    min_dt_box_->setMaximum(DBL_MAX);
+    min_dt_box_->setMaximum(std::numeric_limits<double>::max());
     min_dt_box_->setSuffix(" s");
 
     addLabel("Minimum Time Step", 0, true);
@@ -350,20 +350,20 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     max_dt_box_ = new QDoubleSpinBox;
     max_dt_box_->setMinimum(0.0);
-    max_dt_box_->setMaximum(DBL_MAX);
+    max_dt_box_->setMaximum(std::numeric_limits<double>::max());
     max_dt_box_->setSuffix(" s");
 
     addLabel("Maximum Time Step", 0, true);
     addWidget(max_dt_box_, 2);
     newRow();
 
-    min_chain_size_box_ = new QSpinBox;
-    min_chain_size_box_->setMinimum(1);
-    min_chain_size_box_->setMaximum(INT_MAX);
+    // min_chain_size_box_ = new QSpinBox;
+    // min_chain_size_box_->setMinimum(1);
+    // min_chain_size_box_->setMaximum(INT_MAX);
 
-    addLabel("Minimum Chain Size", 0, true);
-    addWidget(min_chain_size_box_, 2);
-    newRow();
+    // addLabel("Minimum Chain Size", 0, true);
+    // addWidget(min_chain_size_box_, 2);
+    // newRow();
 
     //additional option section
     addHeader("Additional Options");
@@ -376,7 +376,7 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     resample_systracks_dt_box_ = new QDoubleSpinBox;
     resample_systracks_dt_box_->setMinimum(1.0);
-    resample_systracks_dt_box_->setMaximum(DBL_MAX);
+    resample_systracks_dt_box_->setMaximum(std::numeric_limits<double>::max());
     resample_systracks_dt_box_->setSuffix(" s");
 
     addLabel("Resample Interval", 1, true);
@@ -385,7 +385,7 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     resample_systracks_max_dt_box_ = new QDoubleSpinBox;
     resample_systracks_max_dt_box_->setMinimum(1.0);
-    resample_systracks_max_dt_box_->setMaximum(DBL_MAX);
+    resample_systracks_max_dt_box_->setMaximum(std::numeric_limits<double>::max());
     resample_systracks_max_dt_box_->setSuffix(" s");
 
     addLabel("Maximum Time Step", 1, true);
@@ -396,12 +396,12 @@ void CalculateReferencesTaskDialog::createKalmanSettingsWidget(QWidget* w)
 
     resample_result_dt_box_ = new QDoubleSpinBox;
     resample_result_dt_box_->setMinimum(1.0);
-    resample_result_dt_box_->setMaximum(DBL_MAX);
+    resample_result_dt_box_->setMaximum(std::numeric_limits<double>::max());
     resample_result_dt_box_->setSuffix(" s");
 
     resample_result_Q_std_box_ = new QDoubleSpinBox;
     resample_result_Q_std_box_->setMinimum(0.0);
-    resample_result_Q_std_box_->setMaximum(DBL_MAX);
+    resample_result_Q_std_box_->setMaximum(std::numeric_limits<double>::max());
     resample_result_Q_std_box_->setSuffix(" m");
 
     addLabel("Resample Interval", 1, true);
@@ -556,7 +556,7 @@ void CalculateReferencesTaskDialog::readOptions()
 
     min_dt_box_->setValue(s.min_dt);
     max_dt_box_->setValue(s.max_dt);
-    min_chain_size_box_->setValue(s.min_chain_size);
+    //min_chain_size_box_->setValue(s.min_chain_size);
 
     use_vel_mm_box_->setChecked(s.use_vel_mm);
     smooth_box_->setChecked(s.smooth_rts);
@@ -626,7 +626,7 @@ void CalculateReferencesTaskDialog::writeOptions()
 
     s.min_dt                = min_dt_box_->value();
     s.max_dt                = max_dt_box_->value();
-    s.min_chain_size        = min_chain_size_box_->value();
+    //s.min_chain_size        = min_chain_size_box_->value();
 
     s.use_vel_mm            = use_vel_mm_box_->isChecked();
     s.smooth_rts            = smooth_box_->isChecked();

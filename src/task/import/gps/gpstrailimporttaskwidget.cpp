@@ -161,7 +161,7 @@ void GPSTrailImportTaskWidget::addConfigTab()
     // target address
 
     ++row;
-    set_target_address_check_ = new QCheckBox("Target Address (hexadecimal)");
+    set_target_address_check_ = new QCheckBox("Aircraft Address (hexadecimal)");
     connect(set_target_address_check_, &QCheckBox::clicked, this, &GPSTrailImportTaskWidget::targetAddressCheckedSlot);
     grid->addWidget(set_target_address_check_, row, 0);
 
@@ -174,7 +174,7 @@ void GPSTrailImportTaskWidget::addConfigTab()
     // callsign
 
     ++row;
-    set_callsign_check_ = new QCheckBox("Callsign");
+    set_callsign_check_ = new QCheckBox("Aircraft Identification");
     connect(set_callsign_check_, &QCheckBox::clicked, this, &GPSTrailImportTaskWidget::callsignCheckedSlot);
     grid->addWidget(set_callsign_check_, row, 0);
 
@@ -260,7 +260,10 @@ void GPSTrailImportTaskWidget::todOffsetEditedSlot(const QString& value)
     TextFieldDoubleValidator::displayValidityAsColor(tod_offset_edit_);
 
     if (tod_offset_edit_->hasAcceptableInput())
-        task_.todOffset(value.toFloat());
+        task_.todOffset(value.toDouble());
+    else
+        logwrn << "GPSTrailImportTaskWidget: todOffsetEditedSlot: non-acceptable value '"
+               << tod_offset_edit_->text().toStdString() << "'";
 }
 
 void GPSTrailImportTaskWidget::overrideDateCheckedSlot()
@@ -365,7 +368,7 @@ void GPSTrailImportTaskWidget::updateConfig ()
     use_tod_offset_check_->setChecked(task_.useTodOffset());
 
     assert (tod_offset_edit_);
-    tod_offset_edit_->setText(QString::number(task_.todOffset()));
+    tod_offset_edit_->setText(String::doubleToStringPrecision(task_.todOffset(), 3).c_str());
 
     assert (use_override_date_check_);
     use_override_date_check_->setChecked(task_.useOverrideDate());

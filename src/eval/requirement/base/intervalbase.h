@@ -79,14 +79,17 @@ class IntervalBase : public ProbabilityBase
 public:
     struct DetailInfo
     {
-        boost::posix_time::ptime                   evt_time;          // time the event occurs at
-        double                                     evt_dt;            // event duration
-        std::string                                evt_comment;       // event comment
-        dbContent::TargetPosition                  evt_position;      // event location
-        boost::optional<dbContent::TargetPosition> evt_position_ref;  // event reference position (e.g. start of interval)
-        bool                                       evt_has_misses;    // event has misses
-        bool                                       evt_has_ref;       // event has reference
-        bool                                       evt_has_dt;        // event has a valid tod diff
+        boost::posix_time::ptime                                evt_time;             // time the event occurs at
+        double                                                  evt_dt;               // event duration
+        std::string                                             evt_comment;          // event comment
+        dbContent::TargetPosition                               evt_position;         // event location
+        boost::optional<dbContent::TargetPosition>              evt_position_ref;     // event reference position (e.g. start of interval)
+        boost::optional<unsigned int>                           evt_ref_updates_idx0; // optional event reference updates start index
+        boost::optional<unsigned int>                           evt_ref_updates_idx1; // optional event reference updates end index
+
+        bool evt_has_misses;    // event has misses
+        bool evt_has_ref;       // event has reference
+        bool evt_has_dt;        // event has a valid tod diff
 
         bool generate_detail = false; // generate a detail for this event
     };
@@ -107,7 +110,7 @@ public:
     IntervalBase(const std::string& name, 
                  const std::string& short_name, 
                  const std::string& group_name,
-                 float prob, 
+                 double prob, 
                  COMPARISON_TYPE prob_check_type, 
                  EvaluationManager& eval_man,
                  float update_interval_s, 
@@ -129,14 +132,13 @@ public:
     const boost::optional<float>& maxGapLength() const { return max_gap_length_s_; }
     const boost::optional<float>& missTolerance() const { return miss_tolerance_s_; }
 
-    const boost::optional<bool>& mustHoldForAnyTarget() const { return must_hold_for_any_target_; }
-
     float missThreshold() const;
 
 protected:
     virtual uint32_t numMisses(double dt) const;
     virtual DetailInfo eventDetailInfo(const EvaluationTargetData& target_data,
-                                       const Event& event) const;
+                                       const Event& event,
+                                       std::vector<dbContent::TargetPosition>& ref_updates) const;
 
     virtual Validity isValid(const dbContent::TargetReport::DataID& data_id,
                          const EvaluationTargetData& target_data,
@@ -165,7 +167,6 @@ private:
     boost::optional<float> max_gap_length_s_;
     boost::optional<float> miss_tolerance_s_;
     boost::optional<float> min_ref_period_s_;
-    boost::optional<bool>  must_hold_for_any_target_;
 };
 
 } // namespace EvaluationRequirement

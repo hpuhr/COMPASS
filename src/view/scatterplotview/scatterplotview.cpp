@@ -27,27 +27,14 @@
 #include "scatterplotviewwidget.h"
 #include "logger.h"
 #include "latexvisitor.h"
+#include "viewpointgenerator.h"
 
 #include <QApplication>
 
 using namespace std;
 using namespace dbContent;
 
-const std::string ScatterPlotView::ParamDataVarXDBO        = "data_var_x_dbo";
-const std::string ScatterPlotView::ParamDataVarXName       = "data_var_x_name";
-const std::string ScatterPlotView::ParamDataVarYDBO        = "data_var_y_dbo";
-const std::string ScatterPlotView::ParamDataVarYName       = "data_var_y_name";
 const std::string ScatterPlotView::ParamUseConnectionLines = "use_connection_lines";
-
-/**
-*/
-ScatterPlotView::Settings::Settings()
-:   data_var_x_dbo (META_OBJECT_NAME)
-,   data_var_x_name(DBContent::meta_var_longitude_.name())
-,   data_var_y_dbo (META_OBJECT_NAME)
-,   data_var_y_name(DBContent::meta_var_latitude_.name())
-{
-}
 
 /**
 */
@@ -55,13 +42,23 @@ ScatterPlotView::ScatterPlotView(const std::string& class_id,
                                  const std::string& instance_id,
                                  ViewContainer* w, 
                                  ViewManager& view_manager)
-:   View(class_id, instance_id, w, view_manager)
+:   VariableView(class_id, instance_id, w, view_manager)
 {
-    registerParameter(ParamDataVarXDBO, &settings_.data_var_x_dbo, Settings().data_var_x_dbo);
-    registerParameter(ParamDataVarXName, &settings_.data_var_x_name, Settings().data_var_x_name);
+    registerParameter(ParamUseConnectionLines, &settings_.use_connection_lines, Settings().use_connection_lines);
 
-    registerParameter(ParamDataVarYDBO, &settings_.data_var_y_dbo, Settings().data_var_y_dbo);
-    registerParameter(ParamDataVarYName, &settings_.data_var_y_name, Settings().data_var_y_name);
+    const std::vector<PropertyDataType> valid_types = { PropertyDataType::BOOL,
+                                                        PropertyDataType::CHAR,
+                                                        PropertyDataType::UCHAR,
+                                                        PropertyDataType::INT,
+                                                        PropertyDataType::UINT,
+                                                        PropertyDataType::LONGINT,
+                                                        PropertyDataType::ULONGINT,
+                                                        PropertyDataType::FLOAT,
+                                                        PropertyDataType::DOUBLE,
+                                                        PropertyDataType::TIMESTAMP };
+
+    addVariable("data_var_x", "X", "x", META_OBJECT_NAME, DBContent::meta_var_longitude_.name(), true, false, valid_types);
+    addVariable("data_var_y", "Y", "y", META_OBJECT_NAME, DBContent::meta_var_latitude_.name() , true, false, valid_types);
 
     // create sub done in init
 }
@@ -169,56 +166,21 @@ ScatterPlotViewDataWidget* ScatterPlotView::getDataWidget()
 
 /**
 */
-VariableSet ScatterPlotView::getSet(const std::string& dbcontent_name)
+VariableSet ScatterPlotView::getBaseSet(const std::string& dbcontent_name)
 {
-    logdbg << "ScatterPlotView: getSet";
-
     assert(data_source_);
 
     VariableSet set = data_source_->getSet()->getFor(dbcontent_name);
 
-    if (hasDataVarX())
+    if (dbcontent_name == "CAT063") // add sensor sec/sic special case
     {
-        if (isDataVarXMeta())
-        {
-            MetaVariable& meta_var = metaDataVarX();
+        DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-            if (meta_var.existsIn(dbcontent_name) && !set.hasVariable(meta_var.getFor(dbcontent_name)))
-            {
-                logdbg << "ScatterPlotView: getSet: adding x var " << meta_var.getFor(dbcontent_name).name();
-                set.add(meta_var.getFor(dbcontent_name));
-            }
-        }
-        else
-        {
-            if (dataVarX().dbContentName() == dbcontent_name && !set.hasVariable(dataVarX()))
-            {
-                logdbg << "ScatterPlotView: getSet: adding x var " << dataVarX().name();
-                set.add(dataVarX());
-            }
-        }
-    }
+        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat063_sensor_sac_));
+        assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat063_sensor_sic_));
 
-    if (hasDataVarY())
-    {
-        if (isDataVarYMeta())
-        {
-            MetaVariable& meta_var = metaDataVarY();
-
-            if (meta_var.existsIn(dbcontent_name) && !set.hasVariable(meta_var.getFor(dbcontent_name)))
-            {
-                loginf << "ScatterPlotView: getSet: adding y var " << meta_var.getFor(dbcontent_name).name();
-                set.add(meta_var.getFor(dbcontent_name));
-            }
-        }
-        else
-        {
-            if (dataVarY().dbContentName() == dbcontent_name && !set.hasVariable(dataVarY()))
-            {
-                loginf << "ScatterPlotView: getSet: adding y var " << dataVarY().name();
-                set.add(dataVarY());
-            }
-        }
+        set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat063_sensor_sac_));
+        set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat063_sensor_sic_));
     }
 
     return set;
@@ -233,196 +195,6 @@ void ScatterPlotView::accept(LatexVisitor& v)
 
 /**
 */
-bool ScatterPlotView::hasDataVarX ()
-{
-    if (settings_.data_var_x_dbo.empty() || settings_.data_var_x_name.empty())
-        return false;
-
-    if (settings_.data_var_x_dbo == META_OBJECT_NAME)
-        return COMPASS::instance().dbContentManager().existsMetaVariable(settings_.data_var_x_name);
-    else
-        return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_x_dbo).hasVariable(settings_.data_var_x_name);
-}
-
-/**
-*/
-bool ScatterPlotView::isDataVarXMeta ()
-{
-    return (settings_.data_var_x_dbo == META_OBJECT_NAME);
-}
-
-/**
-*/
-Variable& ScatterPlotView::dataVarX()
-{
-    assert (hasDataVarX());
-    assert (!isDataVarXMeta());
-    assert (COMPASS::instance().dbContentManager().dbContent(settings_.data_var_x_dbo).hasVariable(settings_.data_var_x_name));
-
-    return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_x_dbo).variable(settings_.data_var_x_name);
-}
-
-/**
-*/
-void ScatterPlotView::dataVarX (Variable& var, bool notify_changes)
-{
-    if (settings_.data_var_x_dbo == var.dbContentName() && 
-        settings_.data_var_x_name == var.name())
-        return;
-
-    setParameter(settings_.data_var_x_dbo, var.dbContentName());
-    setParameter(settings_.data_var_x_name, var.name());
-
-    assert (hasDataVarX());
-    assert (!isDataVarXMeta());
-
-    if (notify_changes)
-    {
-        notifyRefreshNeeded();
-    }
-}
-
-/**
-*/
-MetaVariable& ScatterPlotView::metaDataVarX()
-{
-    assert (hasDataVarX());
-    assert (isDataVarXMeta());
-
-    return COMPASS::instance().dbContentManager().metaVariable(settings_.data_var_x_name);
-}
-
-/**
-*/
-void ScatterPlotView::metaDataVarX (MetaVariable& var, bool notify_changes)
-{
-    if (settings_.data_var_x_dbo == META_OBJECT_NAME && 
-        settings_.data_var_x_name == var.name())
-        return;
-
-    setParameter(settings_.data_var_x_dbo, META_OBJECT_NAME);
-    setParameter(settings_.data_var_x_name, var.name());
-
-    assert (hasDataVarX());
-    assert (isDataVarXMeta());
-
-    if (notify_changes)
-    {
-        notifyRefreshNeeded();
-    }
-}
-
-/**
-*/
-std::string ScatterPlotView::dataVarXDBO() const
-{
-    return settings_.data_var_x_dbo;
-}
-
-/**
-*/
-std::string ScatterPlotView::dataVarXName() const
-{
-    return settings_.data_var_x_name;
-}
-
-/**
-*/
-bool ScatterPlotView::hasDataVarY ()
-{
-    if (settings_.data_var_y_dbo.empty() || settings_.data_var_y_name.empty())
-        return false;
-
-    if (settings_.data_var_y_dbo == META_OBJECT_NAME)
-        return COMPASS::instance().dbContentManager().existsMetaVariable(settings_.data_var_y_name);
-    else
-        return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_y_dbo).hasVariable(settings_.data_var_y_name);
-}
-
-/**
-*/
-bool ScatterPlotView::isDataVarYMeta ()
-{
-    return (settings_.data_var_y_dbo == META_OBJECT_NAME);
-}
-
-/**
-*/
-Variable& ScatterPlotView::dataVarY()
-{
-    assert (hasDataVarY());
-    assert (!isDataVarYMeta());
-    assert (COMPASS::instance().dbContentManager().dbContent(settings_.data_var_y_dbo).hasVariable(settings_.data_var_y_name));
-
-    return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_y_dbo).variable(settings_.data_var_y_name);
-}
-
-/**
-*/
-void ScatterPlotView::dataVarY (Variable& var, bool notify_changes)
-{
-    if (settings_.data_var_y_dbo == var.dbContentName() && 
-        settings_.data_var_y_name == var.name())
-        return;
-
-    setParameter(settings_.data_var_y_dbo, var.dbContentName());
-    setParameter(settings_.data_var_y_name, var.name());
-
-    assert (hasDataVarY());
-    assert (!isDataVarYMeta());
-
-    if (notify_changes)
-    {
-        notifyRefreshNeeded();
-    }
-}
-
-/**
-*/
-MetaVariable& ScatterPlotView::metaDataVarY()
-{
-    assert (hasDataVarY());
-    assert (isDataVarYMeta());
-
-    return COMPASS::instance().dbContentManager().metaVariable(settings_.data_var_y_name);
-}
-
-/**
-*/
-void ScatterPlotView::metaDataVarY (MetaVariable& var, bool notify_changes)
-{
-    if (settings_.data_var_y_dbo == META_OBJECT_NAME && 
-        settings_.data_var_y_name == var.name())
-        return;
-
-    setParameter(settings_.data_var_y_dbo, META_OBJECT_NAME);
-    setParameter(settings_.data_var_y_name, var.name());
-
-    assert (hasDataVarY());
-    assert (isDataVarYMeta());
-
-    if (notify_changes)
-    {
-        notifyRefreshNeeded();
-    }
-}
-
-/**
-*/
-std::string ScatterPlotView::dataVarYDBO() const
-{
-    return settings_.data_var_y_dbo;
-}
-
-/**
-*/
-std::string ScatterPlotView::dataVarYName() const
-{
-    return settings_.data_var_y_name;
-}
-
-/**
-*/
 bool ScatterPlotView::useConnectionLines()
 {
     return settings_.use_connection_lines;
@@ -430,11 +202,12 @@ bool ScatterPlotView::useConnectionLines()
 
 /**
 */
-void ScatterPlotView::useConnectionLines(bool value)
+void ScatterPlotView::useConnectionLines(bool value, bool redraw)
 {
-    settings_.use_connection_lines = value;
+    setParameter(settings_.use_connection_lines, value);
 
-    updateView(VU_Redraw);
+    if (redraw)
+        updateView(VU_Redraw);
 }
 
 /**
@@ -454,7 +227,7 @@ void ScatterPlotView::updateSelection()
 
 /**
 */
-void ScatterPlotView::unshowViewPointSlot (const ViewableDataConfig* vp)
+void ScatterPlotView::unshowViewPoint(const ViewableDataConfig* vp)
 {
     loginf << "ScatterPlotView: unshowViewPoint";
 
@@ -465,25 +238,31 @@ void ScatterPlotView::unshowViewPointSlot (const ViewableDataConfig* vp)
 
 /**
 */
-void ScatterPlotView::showViewPointSlot (const ViewableDataConfig* vp)
+void ScatterPlotView::showViewPoint(const ViewableDataConfig* vp)
 {
     loginf << "ScatterPlotView: showViewPoint";
 
     assert (vp);
     assert (data_source_);
     data_source_->showViewPoint(vp);
-    assert (widget_);
 }
 
 /**
  */
 void ScatterPlotView::viewInfoJSON_impl(nlohmann::json& info) const
 {
-    info[ ParamDataVarXDBO  ] = settings_.data_var_x_dbo;
-    info[ ParamDataVarXName ] = settings_.data_var_x_name;
-
-    info[ ParamDataVarYDBO  ] = settings_.data_var_y_dbo;
-    info[ ParamDataVarYName ] = settings_.data_var_y_name;
+    //!call base!
+    VariableView::viewInfoJSON_impl(info);
 
     info[ ParamUseConnectionLines ] = settings_.use_connection_lines;
+}
+
+/**
+ */
+std::set<std::string> ScatterPlotView::acceptedAnnotationFeatureTypes() const
+{
+    std::set<std::string> types;
+    types.insert(ViewPointGenFeatureScatterSeries::FeatureName);
+
+    return types;
 }

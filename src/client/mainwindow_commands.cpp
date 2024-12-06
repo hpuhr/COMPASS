@@ -10,9 +10,8 @@
 #include "evaluationmanager.h"
 #include "dbcontentmanager.h"
 #include "radarplotpositioncalculatortask.h"
-#include "createassociationstask.h"
 #include "createartasassociationstask.h"
-#include "calculatereferencestask.h"
+#include "reconstructortask.h"
 #include "viewmanager.h"
 #include "viewpointsimporttask.h"
 //#include "viewpointsimporttaskdialog.h"
@@ -54,9 +53,8 @@ REGISTER_RTCOMMAND(main_window::RTCommandImportJSONFile)
 REGISTER_RTCOMMAND(main_window::RTCommandImportGPSTrail)
 REGISTER_RTCOMMAND(main_window::RTCommandImportSectorsJSON)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateRadarPlotPositions)
-REGISTER_RTCOMMAND(main_window::RTCommandCalculateAssociations)
 REGISTER_RTCOMMAND(main_window::RTCommandCalculateARTASAssociations)
-REGISTER_RTCOMMAND(main_window::RTCommandCalculateReferences)
+REGISTER_RTCOMMAND(main_window::RTCommandReconstructReferences)
 REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
 REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
 REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
@@ -84,8 +82,7 @@ void init_commands()
     main_window::RTCommandImportGPSTrail::init();
     main_window::RTCommandImportSectorsJSON::init();
     main_window::RTCommandCalculateRadarPlotPositions::init();
-    main_window::RTCommandCalculateAssociations::init();
-    main_window::RTCommandCalculateReferences::init();
+    main_window::RTCommandReconstructReferences::init();
     main_window::RTCommandLoadData::init();
     main_window::RTCommandExportViewPointsReport::init();
     main_window::RTCommandEvaluate::init();
@@ -155,7 +152,7 @@ void RTCommandOpenDB::collectOptions_impl(OptionsDescription& options,
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.db’")
         ("assure_open", "Only opens the file if it is not already opened");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandOpenDB::assignVariables_impl(const VariablesMap& variables)
@@ -245,7 +242,7 @@ void RTCommandOpenRecentDB::collectOptions_impl(OptionsDescription& options,
         ("filename,f", po::value<std::string>()->default_value(""), "filename listed in the recent file history, e.g. ’file1.db’")
         ("index,i", po::value<int>()->default_value(-1), "index in the recent file history");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandOpenRecentDB::assignVariables_impl(const VariablesMap& variables)
@@ -297,7 +294,7 @@ void RTCommandCreateDB::collectOptions_impl(OptionsDescription& options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.db’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandCreateDB::assignVariables_impl(const VariablesMap& variables)
@@ -352,7 +349,7 @@ void RTCommandImportDataSourcesFile::collectOptions_impl(OptionsDescription& opt
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportDataSourcesFile::assignVariables_impl(const VariablesMap& variables)
@@ -429,7 +426,7 @@ void RTCommandImportViewPointsFile::collectOptions_impl(OptionsDescription& opti
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportViewPointsFile::assignVariables_impl(const VariablesMap& variables)
@@ -442,7 +439,7 @@ void RTCommandImportViewPointsFile::assignVariables_impl(const VariablesMap& var
 RTCommandImportASTERIXFile::RTCommandImportASTERIXFile()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal", -1); // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportASTERIXFile::valid() const
@@ -601,7 +598,7 @@ void RTCommandImportASTERIXFile::collectOptions_impl(OptionsDescription& options
          "imports ASTERIX file with given Time of Day override, in HH:MM:SS.ZZZ’");
     ADD_RTCOMMAND_OPTIONS(options)("ignore_time_jumps,i", "ignore 24h time jumps");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variables)
@@ -619,7 +616,7 @@ void RTCommandImportASTERIXFile::assignVariables_impl(const VariablesMap& variab
 RTCommandImportASTERIXFiles::RTCommandImportASTERIXFiles()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.asteriximporttask.doneSignal", -1); // think about max duration
 }
 
 rtcommand::IsValid RTCommandImportASTERIXFiles::valid() const
@@ -790,7 +787,7 @@ void RTCommandImportASTERIXFiles::collectOptions_impl(OptionsDescription& option
          "imports ASTERIX file with given Time of Day override, in HH:MM:SS.ZZZ’");
     ADD_RTCOMMAND_OPTIONS(options)("ignore_time_jumps,i", "ignore 24h time jumps");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filenames", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filenames") // give position
 }
 
 void RTCommandImportASTERIXFiles::assignVariables_impl(const VariablesMap& variables)
@@ -967,7 +964,7 @@ bool RTCommandImportASTERIXNetworkStop::run_impl()
 RTCommandImportJSONFile::RTCommandImportJSONFile()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.jsonimporttask.doneSignal(std::string)", -1);  // think about max duration
+    condition.setSignal("compass.taskmanager.jsonimporttask.doneSignal", -1);  // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportJSONFile::valid() const
@@ -1027,7 +1024,7 @@ void RTCommandImportJSONFile::collectOptions_impl(OptionsDescription& options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportJSONFile::assignVariables_impl(const VariablesMap& variables)
@@ -1039,7 +1036,7 @@ void RTCommandImportJSONFile::assignVariables_impl(const VariablesMap& variables
 RTCommandImportGPSTrail::RTCommandImportGPSTrail()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.gpstrailimporttask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.gpstrailimporttask.doneSignal", -1); // think about max duration
 }
 
 rtcommand::IsValid  RTCommandImportGPSTrail::valid() const
@@ -1099,7 +1096,7 @@ void RTCommandImportGPSTrail::collectOptions_impl(OptionsDescription& options,
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportGPSTrail::assignVariables_impl(const VariablesMap& variables)
@@ -1159,6 +1156,7 @@ bool RTCommandImportSectorsJSON::run_impl()
 
     size_t num_sectors = 0;
 
+    assert (COMPASS::instance().evaluationManager().sectorsLoaded());
     const auto& sector_layers = COMPASS::instance().evaluationManager().sectorsLayers();
 
     for (const auto& sl : sector_layers)
@@ -1180,7 +1178,7 @@ void RTCommandImportSectorsJSON::collectOptions_impl(OptionsDescription& options
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandImportSectorsJSON::assignVariables_impl(const VariablesMap& variables)
@@ -1192,7 +1190,7 @@ void RTCommandImportSectorsJSON::assignVariables_impl(const VariablesMap& variab
 RTCommandCalculateRadarPlotPositions::RTCommandCalculateRadarPlotPositions()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.radarplotpositioncalculatortask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.radarplotpositioncalculatortask.doneSignal", -1); // think about max duration
 }
 
 bool RTCommandCalculateRadarPlotPositions::run_impl()
@@ -1224,48 +1222,11 @@ bool RTCommandCalculateRadarPlotPositions::run_impl()
     return true;
 }
 
-// associate data
-RTCommandCalculateAssociations::RTCommandCalculateAssociations()
-    : rtcommand::RTCommand()
-{
-    condition.setSignal("compass.taskmanager.createassociationstask.doneSignal(std::string)", -1); // think about max duration
-}
-
-bool RTCommandCalculateAssociations::run_impl()
-{
-    if (!COMPASS::instance().dbOpened())
-    {
-        setResultMessage("Database not opened");
-        return false;
-    }
-
-    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
-    {
-        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
-        return false;
-    }
-
-    CreateAssociationsTask& task = COMPASS::instance().taskManager().createAssociationsTask();
-
-    if(!task.canRun())
-    {
-        setResultMessage("Calculate associations task can not be run");
-        return false;
-    }
-
-    task.allowUserInteractions(false);
-    task.run();
-
-    // if ok
-    return true;
-}
-
-
 // associate ARTAS target reports
 RTCommandCalculateARTASAssociations::RTCommandCalculateARTASAssociations()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.createartasassociationstask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.createartasassociationstask.doneSignal", -1); // think about max duration
 }
 
 bool RTCommandCalculateARTASAssociations::run_impl()
@@ -1298,13 +1259,13 @@ bool RTCommandCalculateARTASAssociations::run_impl()
 }
 
 // calc ref
-RTCommandCalculateReferences::RTCommandCalculateReferences()
+RTCommandReconstructReferences::RTCommandReconstructReferences()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.taskmanager.calculatereferencestask.doneSignal(std::string)", -1); // think about max duration
+    condition.setSignal("compass.taskmanager.reconstructortask.doneSignal", -1); // think about max duration
 }
 
-bool RTCommandCalculateReferences::run_impl()
+bool RTCommandReconstructReferences::run_impl()
 {
     if (!COMPASS::instance().dbOpened())
     {
@@ -1318,11 +1279,11 @@ bool RTCommandCalculateReferences::run_impl()
         return false;
     }
 
-    CalculateReferencesTask& task = COMPASS::instance().taskManager().calculateReferencesTask();
+    ReconstructorTask& task = COMPASS::instance().taskManager().reconstructReferencesTask();
 
     if(!task.canRun())
     {
-        setResultMessage("Calculate references task can not be run");
+        setResultMessage("Reconstruct references task can not be run");
         return false;
     }
 
@@ -1417,7 +1378,7 @@ void RTCommandExportViewPointsReport::collectOptions_impl(OptionsDescription& op
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/db2/report.tex'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandExportViewPointsReport::assignVariables_impl(const VariablesMap& variables)
@@ -1550,7 +1511,7 @@ void RTCommandExportEvaluationReport::collectOptions_impl(OptionsDescription& op
     ADD_RTCOMMAND_OPTIONS(options)
         ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/db2/report.tex'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename", 1) // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
 
 void RTCommandExportEvaluationReport::assignVariables_impl(const VariablesMap& variables)
@@ -1646,8 +1607,8 @@ void RTCommandReconfigure::collectOptions_impl(OptionsDescription& options,
         ("path", po::value<std::string>()->required(), "configurable to reconfigure")
         ("config", po::value<std::string>()->required(), "json configuration to apply");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "path", 1)
-    ADD_RTCOMMAND_POS_OPTION(positional, "config", 2)
+    ADD_RTCOMMAND_POS_OPTION(positional, "path")
+    ADD_RTCOMMAND_POS_OPTION(positional, "config")
 }
 
 void RTCommandReconfigure::assignVariables_impl(const VariablesMap& variables)

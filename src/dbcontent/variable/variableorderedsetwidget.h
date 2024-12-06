@@ -24,7 +24,6 @@ class QListWidget;
 #include <QWidget>
 
 #include "dbcontent/variable/variableorderedset.h"
-//#include "dbcontent/variable/variableselectionwidget.h"
 
 #include "test/ui_test_testable.h"
 
@@ -62,12 +61,9 @@ public:
 
 protected:
     VariableOrderedSet& set_;
-    QMenu menu_;
 
     QListWidget* list_widget_{nullptr};
     int current_index_{-1};
-
-    void updateMenuEntries();
 };
 
 }

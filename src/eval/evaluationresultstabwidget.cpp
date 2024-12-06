@@ -25,6 +25,7 @@
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "eval/results/report/sectioncontentfigure.h"
 #include "files.h"
 #include "logger.h"
 
@@ -83,10 +84,12 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     scroll_area->setWidget(results_widget_);
     splitter_->addWidget(scroll_area);
 
-    splitter_->setStretchFactor(1, 1);
+    //qt hack: very big screen size x stretch 
+    splitter_->setSizes({ 10000, 30000 });
 
     QSettings settings("COMPASS", "EvalManagerResultsWidget");
-    splitter_->restoreState(settings.value("splitterSizes").toByteArray());
+    if (settings.value("splitterSizes").isValid())
+        splitter_->restoreState(settings.value("splitterSizes").toByteArray());
 
     main_layout->addWidget(splitter_);
 
@@ -111,9 +114,30 @@ void EvaluationResultsTabWidget::expand()
     tree_view_->expandToDepth(3);
 }
 
-void EvaluationResultsTabWidget::selectId (const std::string& id)
+namespace 
+{
+    void iterateTreeModel(const EvaluationResultsReport::TreeModel& model, const QModelIndex& index, const std::string& spacing)
+    {
+        std::cout << spacing << model.data(index, Qt::UserRole).toString().toStdString() << std::endl;
+
+        if (model.hasChildren(index))
+        {
+            int rc = model.rowCount(index);
+            int cc = model.columnCount(index);
+            for (int r = 0; r < rc; ++r)
+                for (int c = 0; c < cc; ++c)
+                    iterateTreeModel(model, model.index(r, c, index), spacing + "   ");
+        }
+    }
+}
+
+void EvaluationResultsTabWidget::selectId (const std::string& id, 
+                                           bool show_figure)
 {
     loginf << "EvaluationResultsTabWidget: selectId: id '" << id << "'";
+
+    //const auto& model = eval_man_.resultsGenerator().resultsModel();
+    //iterateTreeModel(model, model.index(0, 0), "");
 
     QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(id);
 
@@ -130,7 +154,11 @@ void EvaluationResultsTabWidget::selectId (const std::string& id)
 
     tree_view_->selectionModel()->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     tree_view_->scrollTo(index);
+
     itemClickedSlot(index);
+
+    if (show_figure)
+        showFigure(index);
 }
 
 void EvaluationResultsTabWidget::reshowLastId ()
@@ -167,6 +195,30 @@ void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
     }
 
     updateBackButton();
+}
+
+void EvaluationResultsTabWidget::showFigure(const QModelIndex& index)
+{
+    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
+    assert (item);
+
+    loginf << "EvaluationResultsTabWidget: showFigure: name " << item->name() << " id " << item->id();
+
+    if (dynamic_cast<EvaluationResultsReport::RootItem*>(item))
+    {
+        return;
+    }
+    else if (dynamic_cast<EvaluationResultsReport::Section*>(item))
+    {
+        EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
+        assert (section);
+
+        loginf << "EvaluationResultsTabWidget: showFigure: section " << section->name();
+        
+        auto figures = section->getFigures();
+        if (!figures.empty())
+            figures[ 0 ]->viewSlot();
+    }
 }
 
 void EvaluationResultsTabWidget::stepBackSlot()
@@ -220,10 +272,14 @@ void EvaluationResultsTabWidget::updateBackButton ()
     back_button_->setEnabled(id_history_.size() > 1);
 }
 
-boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const std::string& result_id, const std::string& table_id) const
+boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const std::string& result_id, 
+                                                                         const std::string& table_id,
+                                                                         bool rowwise,
+                                                                         const std::vector<int>& cols) const
 {
     QString result_id_corr = QString::fromStdString(result_id);
 
+    //this is just for convenience
     if (!result_id_corr.startsWith("Report:Results:"))
     {
         if (result_id_corr.startsWith("Results:"))
@@ -232,6 +288,7 @@ boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const s
             result_id_corr = "Report:Results:" + result_id_corr;
     }
 
+    //get result section
     QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(result_id_corr.toStdString());
 
     if (!index.isValid())
@@ -254,33 +311,12 @@ boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const s
         return {};
     }
 
+    //check if table is available
     if (!section->hasTable(table_id))
     {
         logerr << "EvaluationResultsTabWidget: getTableData: no table found";
         return {};
     }
 
-    const auto& table = section->getTable(table_id);
-
-    nlohmann::json json_data;
-
-    nlohmann::json header = nlohmann::json::array();
-    for (int col = 0; col < table.columnCount(); ++col)
-        header.push_back(table.headerData(col, Qt::Horizontal, Qt::DisplayRole).toString().toStdString());
-
-    nlohmann::json data = nlohmann::json::array();
-    for (int row = 0; row < table.rowCount(); ++row)
-    {
-        nlohmann::json table_row = nlohmann::json::array();
-
-        for (int col = 0; col < table.columnCount(); ++col)
-            table_row.push_back(table.data(table.index(row, col), Qt::DisplayRole).toString().toStdString());
-        
-        data.push_back(table_row);
-    }
-
-    json_data["header"] = header;
-    json_data["data"  ] = data;
-
-    return json_data;
+    return section->getTable(table_id).toJSON(rowwise, cols);
 }

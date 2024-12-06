@@ -146,7 +146,7 @@ void GPSImportCSVTaskWidget::addConfigTab()
     // target address
 
     ++row;
-    set_target_address_check_ = new QCheckBox("Target Address (hexadecimal)");
+    set_target_address_check_ = new QCheckBox("Aircraft Address (hexadecimal)");
     connect(set_target_address_check_, &QCheckBox::clicked, this, &GPSImportCSVTaskWidget::targetAddressCheckedSlot);
     grid->addWidget(set_target_address_check_, row, 0);
 
@@ -159,7 +159,7 @@ void GPSImportCSVTaskWidget::addConfigTab()
     // callsign
 
     ++row;
-    set_callsign_check_ = new QCheckBox("Callsign");
+    set_callsign_check_ = new QCheckBox("Aircraft Identification");
     connect(set_callsign_check_, &QCheckBox::clicked, this, &GPSImportCSVTaskWidget::callsignCheckedSlot);
     grid->addWidget(set_callsign_check_, row, 0);
 

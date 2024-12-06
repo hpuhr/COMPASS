@@ -28,6 +28,8 @@ namespace rtcommand
     class  RTCommandShell;
 }
 
+class TCPServer;
+
 /**
  * Class for listening for and processing string commands at runtime,
  * either coming externally from a TCP port or internally from the application itself.
@@ -79,6 +81,7 @@ protected:
     volatile bool stop_requested_;
     volatile bool stopped_;
 
+    std::unique_ptr<TCPServer> server_;
     unsigned int port_num_ {27960};
 
     std::queue<QueuedCommand> command_queue_;

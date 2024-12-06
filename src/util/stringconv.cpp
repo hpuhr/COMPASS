@@ -200,7 +200,7 @@ int getAppendedInt(std::string text)
     }
 
     if (count == 0)
-        throw std::runtime_error("Util: getAppendedInt: no int found");
+        loginf << "Util: getAppendedInt: no int found, returning 0";
 
     return ret;
 }
@@ -301,14 +301,14 @@ typedef std::numeric_limits<float> float_limit;
 std::string getValueString(const float& value)
 {
     std::ostringstream out;
-    out << std::setprecision(float_limit::max_digits10) << value;
+    out << std::fixed  << std::setprecision(float_limit::max_digits10) << value;
     return out.str();
 }
 
 std::string getValueString(const double& value)
 {
     std::ostringstream out;
-    out << std::setprecision(double_limit::max_digits10) << value;
+    out << std::fixed  << std::setprecision(double_limit::max_digits10) << value;
     return out.str();
 }
 

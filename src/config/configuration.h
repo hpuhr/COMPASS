@@ -51,6 +51,12 @@ public:
         Preset
     };
 
+    enum class JSONExportFilterType
+    {
+        ClassID = 0,
+        ParamID
+    };
+
     enum class ConfigSource
     {
         File = 0,
@@ -218,10 +224,13 @@ public:
                                   bool assert_on_error = false);
 
     void addJSONExportFilter(JSONExportType export_type, 
-                             const std::string& class_id);
+                             JSONExportFilterType filter_type,
+                             const std::string& id);
     void addJSONExportFilter(JSONExportType export_type, 
-                             const std::vector<std::string>& class_ids);
-    const std::set<std::string>* jsonExportFilters(JSONExportType export_type) const;
+                             JSONExportFilterType filter_type,
+                             const std::vector<std::string>& ids);
+    const std::set<std::string>* jsonExportFilters(JSONExportType export_type, 
+                                                   JSONExportFilterType filter_type) const;
 
     static const std::string ParameterName;
     static const std::string ParameterSection;
@@ -293,5 +302,6 @@ private:
 
     boost::signals2::signal<void(const ParameterList&)> changed_signal_;
 
-    std::map<JSONExportType, std::set<std::string>> json_export_filters_;
+    std::map<JSONExportType, std::set<std::string>> json_export_filters_class_id_;
+    std::map<JSONExportType, std::set<std::string>> json_export_filters_param_id_;
 };

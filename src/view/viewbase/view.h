@@ -82,6 +82,7 @@ public:
     virtual ~View();
 
     bool init();
+    bool isInit() const { return init_; }
 
     virtual void databaseOpened();
     virtual void databaseClosed();
@@ -112,6 +113,8 @@ public:
 
     virtual void accept(LatexVisitor& v) = 0;
 
+    virtual std::set<std::string> acceptedAnnotationFeatureTypes() const { return {}; }
+
     QImage renderData() const;
     QImage renderView() const;
 
@@ -120,6 +123,8 @@ public:
     bool updateNeeded() const;
 
     void updateView();
+    void updateComponents();
+    virtual void updateFeatures() {}
     
     PresetError applyPreset(const ViewPresets::Preset& preset, 
                             std::vector<MissingKey>* missing_subconfig_keys = nullptr,
@@ -184,13 +189,17 @@ protected:
     QWidget* central_widget_ {nullptr};
 
 private:
-    std::string name_;
+    friend class ViewVariable;
+
     unsigned int getInstanceKey();
 
     void runAutomaticUpdates();
 
     void presetEdited(ViewPresets::EditAction ea);
 
+    std::string name_;
+
+    bool    init_ = false;
     AppMode app_mode_;
     time_t  creation_time_;
 

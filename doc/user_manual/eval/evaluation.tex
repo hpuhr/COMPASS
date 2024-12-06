@@ -1,13 +1,13 @@
 \chapter{Evaluation}
 \label{sec:eval} 
 
-The 'Evaluation' tab allows adapting/defining requirement-based standards  and compliance assessment of said standards. \\
+The 'Evaluation' tab allows adapting/defining requirement-based standards and compliance assessment of said standards. \\
 
 \section{Pre-Requisites \& Limitations}
 \label{sec:eval_prereq} 
 
 \begin{itemize}  
-\item Target report associations must be set (using \nameref{sec:ui_associate_tr})
+\item Target report associations must be set (using \nameref{sec:reconst})
 \item At least 1 sector has to be defined (using \nameref{sec:ui_configure_sectors})
 \item Usable reference data must exist
 \item Usable test data must exist
@@ -16,13 +16,7 @@ The 'Evaluation' tab allows adapting/defining requirement-based standards  and c
 
 While it is possible to manually remove single targets from the evaluation, the usage of correct reference data is paramount for the significance of the evaluation results. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} \textbf{Please note that the evaluation feature should not be used as a sole basis for decision making - especially not without manually verifying the evaluation results.} \\
-
-There will be improvements in the next releases, and further verification of the results by the author and other users.
-
-\subsection{Target Report Associations}
-
-Since the task only makes use of the Mode S address, non-Mode S data is not evaluated and may even show up as gaps/misses in detection.
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} \textbf{Please note that the evaluation feature should not be used as a sole basis for decision making - especially not without manually verifying the evaluation results.}
 
 \subsection{Sector Altitude Filtering}
 
@@ -45,7 +39,7 @@ To give a few examples what this could mean:
 \end{itemize}
 \ \\
 
-Also, since target secondary attributes (currently only Mode S address) are also used in the 'Target Report Association' task, errors in these attributes might also lead to imperfect data association. This would result in wrong evaluation results in almost all requirements.
+Also, since target secondary attributes are used in the 'Reconstruct References' task, errors in these attributes might also lead to imperfect data association, which could in turn result in wrong evaluation results in some requirements.
 
 \section{Overview}
 \label{sec:eval_overview} 
@@ -165,13 +159,15 @@ The following columns exist:
 \begin{itemize}  
 \item Use: Checkbox defining if the target should be used in the evaluation
 \item UTN: Unique Target Number
+\item Comment: User comment, can be set with double-click, persisted into database
+\item Interest: Score showing how strong a negative impact a target had on all requirement results. Please refer to \nameref{sec:eval_targets_of_interest} for details.
 \item Begin: First timestamp of UTN
 \item End: Last timestamp of UTN
 \item \#All: Sum number of target reports
 \item \#Ref: Number of target reports in reference data
 \item \#Tst: Number of target reports in test data
-\item Callsign: Target identification(s)
-\item TA: Target address (hexadecimal)
+\item ACIDs: Mode S aircraft identification(s)
+\item ACADs: Mode S aircraft address (hexadecimal)
 \item M3/A: Mode 3/A code(s) (octal)
 \item MC Min: Mode C code minimum [ft]
 \item MC Max: Mode C code maximum [ft]
@@ -186,6 +182,14 @@ After loading the data, the table can look as follows:
   \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{figures/eval_targets_loaded.png}
   \caption{Evaluation Targets tab with loaded data}
+\end{figure}
+
+After evaluation (and sorting by interest), the table can look as follows:
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{figures/eval_targets_eval.png}
+  \caption{Evaluation Targets tab with evaluated data}
 \end{figure}
 
 \subsection{Filter Tab}
@@ -300,6 +304,8 @@ The following requirements exist:
   \begin{tabularx}{\textwidth}{ | l | X |  }
     \hline
     \textbf{Type} & \textbf{Description} \\ \hline
+    \nameref{sec:eval_req_accel_correct} & Calculates probability of correct acceleration \\ \hline
+    \nameref{sec:eval_req_trk_coast_correct} & Calculates probability of correct track coasting flag \\ \hline
     \nameref{sec:eval_req_detection} & Calculates probability of detection  \\ \hline
     \nameref{sec:eval_req_dubious_targets} & Calculates probability of dubious targets based on physical movement (based on test data only) \\ \hline
     \nameref{sec:eval_req_dubious_tracks} & Calculates probability of dubious tracks from Trackers (based on test data only) \\ \hline
@@ -308,6 +314,9 @@ The following requirements exist:
     \nameref{sec:eval_req_id_correct} & Calculates probability of correct secondary identification \\ \hline
     \nameref{sec:eval_req_id_correct_periods} & Calculates probability of correct secondary identification based on UIs \\ \hline
     \nameref{sec:eval_req_id_false} & Calculates probability of false secondary identification \\ \hline
+    \nameref{sec:eval_req_mom_long} & Calculates probability of correct MoM Longitudinal Acceleration \\ \hline
+    \nameref{sec:eval_req_mom_trans} & Calculates probability of correct MoM Transversal Acceleration \\ \hline
+    \nameref{sec:eval_req_mom_vert} & Calculates probability of correct MoM Vertical Rate \\ \hline
     \nameref{sec:eval_req_m3a_false} & Calculates probability of false Mode 3/A code \\ \hline
     \nameref{sec:eval_req_m3a_present} & Calculates probability of Mode 3/A code present \\ \hline
     \nameref{sec:eval_req_mc_correct} & Calculates probability of correct Mode C code \\ \hline
@@ -318,16 +327,16 @@ The following requirements exist:
     \nameref{sec:eval_req_pos_along} & Calculates the probability of the position along error being within a threshold \\ \hline
     \nameref{sec:eval_req_pos_distance} & Calculates the probability of the position error being within or outside a threshold \\ \hline
     \nameref{sec:eval_req_pos_distance_rms} & Calculates the probability of the position error being within or outside an RMS threshold \\ \hline
+    \nameref{sec:eval_req_pos_latency}  & Calculates the probability of the position latency being within a threshold \\ \hline
     \nameref{sec:eval_req_pos_radar_azm} & Calculates the probability of the position azimuth error being within or outside a threshold \\ \hline
     \nameref{sec:eval_req_pos_radar_rng} & Calculates the probability of the position range error being within or outside a threshold \\ \hline
-    \nameref{sec:eval_req_pos_latency}  & Calculates the probability of the position latency being within a threshold \\ \hline
+    \nameref{sec:eval_req_rocd_correct} & Calculates the probability of correct ROCD \\ \hline
     \nameref{sec:eval_req_speed} & Calculates the probability of the speed error being within or outside a threshold or percentage \\ \hline
+    \nameref{sec:eval_req_track_angle} & Calculates the probability of correct track angle \\ \hline
 \end{tabularx}
 \end{table}
 \end{center}
 \ \\
-
-%TODOV7 add dubious tracks & targets
 
 If a requirement is clicked, it's configuration widget is shown on the right hand side. \\
 
@@ -434,82 +443,7 @@ Please note that the post-processing step uses all available cores on the CPU.
 
 The results are then shown in the Results tab.
 
-\section{Results Inspection \& Analysis}
-\label{sec:eval_inspect}
-
-As described before, there are several levels of detail in which sub-results can be inspected.\\
-
-The uppermost is the 'Requirements$\rightarrow$Overview', giving the sector sums for all requirements. \\
-
-The next level of detail are the sector sum details, located in 'Sectors$\rightarrow$Sector Layer Name$\rightarrow$Requirement Group Name$\rightarrow$Requirement Name'. \\
-
-The lowest level are the per-target details, located in 'Targets$\rightarrow$UTN' and the respective per-target results located in 'Targets$\rightarrow$UTN$\rightarrow$Sector Layer Name$\rightarrow$Requirement Group Name$\rightarrow$Requirement Name'. \\
-
-By default, when single-clicking a row in a table the respective results are shown in the existing Views. When double-clicking, a step into the next level of detail is performed (if available). \\
-
-Navigation can be made more efficient by returning to the last sub-result by using the 'Back' button on the top-left.
-
-\subsection{Overview}
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_overview.png}
-  \caption{Evaluation results: Overview}
-\end{figure}
-
-Please note that the results are given as example only and are no indication of performance for any system currently in operation. \\
-
-When single-clicking a row, the respective result error are shown in the existing Views.
-
-\begin{figure}[H]
-  \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/eval_results_geoview.png}
-  \caption{Evaluation results: Sector errors in Geographic View}
-\end{figure}
-
-When double-clicking a row, a step into the respective sector sum details is performed.
-
-\subsection{Sector Details}
-
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_sec_det_example.png}
-  \caption{Evaluation results: Sector Detail Example}
-\end{figure}
-
-On the left side, the current position in the results sections is shown. On the right, the current results are shown. At the top, there is an overview table giving the details of the calculation results in the respective sector layer and requirement. \\
-
-At the bottom, further result details are listed per-target, sorted in this example by the Probability of Detection (PD). \\
-
-When single-clicking a row, the respective target data and result errors are shown in the existing Geographic Views.
-
-\begin{figure}[H]
-  \hspace*{-2.5cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_single_geoview.png}
-  \caption{Evaluation results: Target Errors in Geographic View}
-\end{figure}
-
-When double-clicking a row, a step into the respective target details is performed.
-
-\subsection{Per-Target Details}
-
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_target_example.png}
-  \caption{Evaluation results: Per-Target Detail Example}
-\end{figure}
-
-On the left side, the current position in the results sections is shown. On the right, the current results are shown. At the top, there is an overview table giving the details of the calculation results for the target in the respective sector layer and requirement. \\
-
-At the bottom, further result details are listed per-target-report, sorted in this example by time. \\
-
-When single-clicking a row, the respective target data and the respective single result error are shown in the existing Geographic Views.
-
-\begin{figure}[H]
-  \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/eval_results_pd_single_tr_geoview.png}
-  \caption{Evaluation results: Target Single PD Error in Geographic View}
-\end{figure}
-
+\subfile{eval_inspect}
 
 \section{Generate Report}
 \label{sec:eval_report}

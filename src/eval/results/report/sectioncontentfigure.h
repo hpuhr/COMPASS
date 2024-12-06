@@ -37,8 +37,10 @@ public slots:
 
 public:
     SectionContentFigure(const string& name, const string& caption,
-                         std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
-                         Section* parent_section, EvaluationManager& eval_man); // const string& path
+                         std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
+                         Section* parent_section, 
+                         EvaluationManager& eval_man,
+                         int render_delay_msec = 0); // const string& path
 
     virtual void addToLayout (QVBoxLayout* layout) override;
 
@@ -49,7 +51,8 @@ public:
 
 protected:
     string caption_;
-    std::function<std::unique_ptr<nlohmann::json::object_t>(void)> viewable_fnc_;
+    int    render_delay_msec_ = 0;
+    std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc_;
 };
 
 }

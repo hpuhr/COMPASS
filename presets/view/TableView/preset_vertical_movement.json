@@ -1,5 +1,5 @@
 {
-    "app_version": "0.7.5",
+    "app_version": "0.8.0",
     "category": "Default",
     "description": "Contains main variables to be displayed by default, as well as vertical movement information: Climbing/Descending indicator and Ground bit.",
     "deployed": true,
@@ -31,6 +31,10 @@
                                             "Meta",
                                             "Line ID"
                                         ],
+                                        [
+                                            "Meta",
+                                            "UTN"
+                                        ],                                        
                                         [
                                             "Meta",
                                             "Mode 3/A Code"

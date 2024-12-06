@@ -26,18 +26,14 @@ class EvaluationManager;
 class QToolBar;
 class QTableView;
 class QSortFilterProxyModel;
+class QMenu;
+class QPushButton;
 
 class EvaluationDataWidget : public QWidget
 {
     Q_OBJECT
 
 public slots:
-    //void actionTriggeredSlot(QAction* action);
-    //void useAllSlot();
-    //void useNoneSlot();
-    //void clearCommentsSlot();
-    //void filterSlot();
-
     void customContextMenuSlot(const QPoint& p);
     void showFullUTNSlot ();
     void showSurroundingDataSlot ();
@@ -48,12 +44,17 @@ public:
     EvaluationDataWidget(EvaluationData& eval_data, EvaluationManager& eval_man);
 
     void resizeColumnsToContents();
+    void updateInterestMenu();
 
 protected:
+    void jumpToRequirement(const std::string& req_id, unsigned int utn);
+
     EvaluationData& eval_data_;
     EvaluationManager& eval_man_;
 
     //QToolBar* toolbar_ {nullptr};
+    QMenu*       interest_menu_   = nullptr;
+    QPushButton* interest_button_ = nullptr;
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};

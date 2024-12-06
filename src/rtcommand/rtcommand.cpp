@@ -609,7 +609,7 @@ namespace rtcommand
         ADD_RTCOMMAND_OPTIONS(options)
         ("command", po::value<std::string>()->default_value(""), "command to retrieve help information for");
 
-        ADD_RTCOMMAND_POS_OPTION(positional, "command", 1)
+        ADD_RTCOMMAND_POS_OPTION(positional, "command")
     }
 
     /**

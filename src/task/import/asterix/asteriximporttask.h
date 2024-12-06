@@ -69,12 +69,14 @@ public:
     ASTERIXImportTaskSettings();
 
     // registered
+    bool reset_date_between_files_ {true};
+    bool ignore_time_jumps_{false};
     bool debug_jasterix_;
     std::string current_file_framing_;
 
     unsigned int num_packets_overload_ {60};
 
-    float override_tod_offset_{0};
+    double override_tod_offset_{0};
 
     float filter_tod_min_{0};
     float filter_tod_max_{0};
@@ -96,12 +98,13 @@ public:
 
     bool override_tod_active_{false};
 
-    bool ignore_time_jumps_{false};
     bool network_ignore_future_ts_ {false};
 
     bool filter_tod_active_{false};
     bool filter_position_active_{false};
     bool filter_modec_active_{false};
+
+    bool obfuscate_secondary_info_{false};
 };
 
 /**
@@ -152,6 +155,8 @@ public:
     const ASTERIXImportSource& source() const { return source_; }
     ASTERIXImportSource& source() { return source_; }
 
+    bool requiresFixedFraming() const;
+
     std::shared_ptr<jASTERIX::jASTERIX> jASTERIX(bool refresh = false) const;
     
     bool hasConfiguratonFor(unsigned int category);
@@ -195,6 +200,7 @@ protected:
 
     ASTERIXImportTaskSettings settings_;
     ASTERIXImportSource       source_;
+    std::string current_data_source_name_; // used to check for decode file changes
 
     bool file_decoding_tested_ {false};
 

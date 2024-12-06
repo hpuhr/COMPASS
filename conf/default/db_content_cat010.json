@@ -145,7 +145,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "X",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -158,7 +158,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "Y",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -236,7 +236,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Mode C Code",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "MC",
                     "unit": "Feet"
                 }
@@ -275,7 +275,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Measured Height",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -479,7 +479,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "ground_speed",
-                    "description": "From 200.Ground Speed\n\nMax. val. = 2 NM/s = 7200kt\n\nOr calculated from From 202.Vx, 202.Vy",
+                    "description": "From 200.Ground Speed\n\nMax. val. = 2 NM/s = 7200kt",
                     "dimension": "Speed",
                     "is_key": false,
                     "name": "Ground Speed",
@@ -492,7 +492,7 @@
                 "parameters": {
                     "data_type_str": "DOUBLE",
                     "db_column_name": "track_angle",
-                    "description": "From 200.Track Angle\n\nOr calculated from From 202.Vx, 202.Vy",
+                    "description": "From 200.Track Angle",
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Track Angle",
@@ -691,7 +691,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "X StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": ""
                 }
@@ -704,7 +704,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "X/Y Covariance",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC4",
                     "short_name": "",
                     "unit": ""
                 }
@@ -717,7 +717,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "Y StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": ""
                 }

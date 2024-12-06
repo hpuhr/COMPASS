@@ -16,19 +16,16 @@
  */
 
 #include "evaluationtargetdata.h"
-//#include "buffer.h"
 #include "logger.h"
 #include "stringconv.h"
-//#include "dbcontent/variable/variable.h"
-//#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/target/target.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
-//#include "util/number.h"
 #include "util/timeconv.h"
 #include "sector/airspace.h"
 #include "sectorlayer.h"
+#include "section_id.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -38,6 +35,8 @@
 
 #include <Eigen/Core>
 
+#include <QString>
+
 using namespace std;
 using namespace Utils;
 using namespace boost::posix_time;
@@ -45,18 +44,28 @@ using namespace dbContent::TargetReport;
 
 //const unsigned int debug_utn = 3275;
 
+QColor EvaluationTargetData::color_interest_high_{"#FF6666"};
+QColor EvaluationTargetData::color_interest_mid_{"#FFA500"};
+QColor EvaluationTargetData::color_interest_low_{"#66AA66"};
+
+double EvaluationTargetData::interest_thres_req_high_ = 0.05;
+double EvaluationTargetData::interest_thres_req_mid_  = 0.01;
+
+double EvaluationTargetData::interest_thres_sum_high_ = 0.1;
+double EvaluationTargetData::interest_thres_sum_mid_  = 0.05;
+
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, 
                                            EvaluationData& eval_data,
-                                           std::shared_ptr<dbContent::Cache> cache,
+                                           std::shared_ptr<dbContent::DBContentAccessor> accessor,
                                            EvaluationManager& eval_man,
                                            DBContentManager& dbcont_man)
     :   utn_       (utn)
     ,   eval_data_ (eval_data)
-    ,   cache_(cache)
+    ,   accessor_  (accessor)
     ,   eval_man_  (eval_man)
     ,   dbcont_man_(dbcont_man)
-    ,   ref_chain_(cache_, eval_man_.dbContentNameRef())
-    ,   tst_chain_(cache_, eval_man_.dbContentNameTst())
+    ,   ref_chain_ (accessor_, eval_man_.dbContentNameRef())
+    ,   tst_chain_ (accessor_, eval_man_.dbContentNameTst())
 {
 }
 
@@ -329,6 +338,9 @@ bool EvaluationTargetData::hasMappedRefData(const DataID& tst_id,
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return false;
 
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_pos_)
+        return true;
+
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
         assert (mapping.timestamp_ref1_ <= timestamp);
@@ -356,6 +368,9 @@ std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& tst_i
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {{}, {}};
+
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_pos_)
+        return {mapping.timestamp_ref1_, {}};
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -385,19 +400,43 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
     return tdm.pos_ref_;
 }
 
-boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(const DataID& tst_id,
-                                                                              time_duration d_max) const
+boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
+    const DataID& tst_id, time_duration d_max, bool debug) const
 {
     auto timestamp = tst_id.timestamp();
     auto index     = tst_chain_.indexFromDataID(tst_id);
 
+    if (debug)
+        loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " timestamp "
+               << Time::toString(timestamp) << " d_max " << Time::toString(d_max);
+
     const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
+    if (debug)
+        loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " has_ref1 "
+               << mapping.has_ref1_ << " has_ref2 " << mapping.has_ref2_;
+
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
+    {
+        if (debug)
+            loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " no ref data";
+
         return {};
+    }
+
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_pos_)
+    {
+        if (debug)
+            loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " exact match";
+
+        return mapping.pos_ref_;
+    }
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
+        if (debug)
+            loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " both ref data";
+
         assert (mapping.timestamp_ref1_ <= timestamp);
         assert (mapping.timestamp_ref2_ >= timestamp);
 
@@ -405,6 +444,10 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
         {
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
+
+            if (debug)
+                loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " lower too far "
+                    << Time::toString(mapping.timestamp_ref1_ - timestamp);
 
             return {};
         }
@@ -414,6 +457,10 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
 
+            if (debug)
+                loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " higher too far "
+                       << Time::toString(mapping.timestamp_ref2_ - timestamp);
+
             return {};
         }
 
@@ -421,6 +468,9 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
         {
             //            if (utn_ == debug_utn)
             //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: no ref pos";
+
+            if (debug)
+                loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " no ref_pos in mapping";
 
             return {};
         }
@@ -433,6 +483,9 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
 
         return mapping.pos_ref_;
     }
+
+    if (debug)
+        loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " only 1";
 
     return {};
 }
@@ -447,6 +500,9 @@ boost::optional<dbContent::TargetVelocity> EvaluationTargetData::mappedRefSpeed(
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {};
+
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_spd_)
+        return mapping.spd_ref_;
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -503,6 +559,14 @@ boost::optional<bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
         return {};
+
+    if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_spd_)
+    {
+        auto gbs = ref_chain_.groundBit(mapping.dataid_ref1_);
+
+        if (gbs.has_value() && *gbs)
+            return gbs;
+    }
 
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
@@ -813,6 +877,151 @@ std::string EvaluationTargetData::acadsStr() const
     return out.str().c_str();
 }
 
+void EvaluationTargetData::clearInterestFactors() const
+{
+    interest_factors_.clear();
+
+    interest_factors_sum_total_   = 0.0;
+    interest_factors_sum_enabled_ = 0.0;
+}
+
+void EvaluationTargetData::addInterestFactor (const std::string& req_section_id, double factor) const
+{
+    logdbg << "EvaluationTargetData: addInterestFactor: utn " << utn_
+           << " req_section_id " << req_section_id << " factor " << factor;
+
+    interest_factors_[req_section_id] += factor;
+    interest_factors_sum_total_ += factor;
+}
+
+const std::map<std::string, double>& EvaluationTargetData::interestFactors() const
+{
+    return interest_factors_;
+}
+
+std::map<std::string, double> EvaluationTargetData::enabledInterestFactors() const
+{
+    std::map<std::string, double> ifactors;
+
+    for (auto& fac_it : interest_factors_)
+    {
+        if (!interestFactorEnabled(fac_it.first))
+            continue;
+
+        ifactors[ fac_it.first ] = fac_it.second;
+    }
+
+    return ifactors;
+}
+
+std::string EvaluationTargetData::stringForInterestFactor(const std::string& req_id, double factor)
+{
+    return req_id + " (" + String::doubleToStringPrecision(factor, InterestFactorPrecision) + ")";
+}
+
+std::string EvaluationTargetData::enabledInterestFactorsStr() const
+{
+    std::string ret;
+    if (interest_factors_.empty())
+        return ret;
+
+    auto coloredText = [ & ] (const std::string& txt, const QColor& color)
+    {
+        return "<font color=\"" + color.name().toStdString() + "\">" + txt + "</font>";
+    };
+
+    auto generateRow = [ & ] (const std::string& interest, double factor, int prec, int spacing)
+    {
+        auto factor_color = EvaluationTargetData::colorForInterestFactorRequirement(factor);
+        auto prec_str     = String::doubleToStringPrecision(factor, prec);
+
+        std::string ret;
+        ret += "<tr>";
+        ret += "<td align=\"left\">"  + coloredText(interest, factor_color) + "</td>";
+        ret += "<td>" + QString().fill(' ', spacing).toStdString() + "</td>";
+        ret += "<td align=\"right\">" + coloredText(prec_str, factor_color) + "</td>";
+        ret += "</tr>";
+
+        return ret;
+    };
+
+    //<font color=\"#ff0000\">bar</font>
+
+    const int Spacing = 4;
+
+    ret = "<html><body><table>";
+
+    size_t added = 0;
+    for (auto& fac_it : interest_factors_)
+    {
+        if (!interestFactorEnabled(fac_it.first))
+            continue;
+
+        ret += generateRow(fac_it.first, fac_it.second, InterestFactorPrecision, Spacing);
+
+        ++added;
+    }
+
+    if (added < 1)
+        return "";
+
+    ret += "</table></body></html>";
+
+    return ret;
+}
+
+double EvaluationTargetData::totalInterestFactorsSum() const
+{
+    return interest_factors_sum_total_;
+}
+
+double EvaluationTargetData::enabledInterestFactorsSum() const
+{
+    updateInterestFactors();
+
+    return interest_factors_sum_enabled_;
+}
+
+bool EvaluationTargetData::interestFactorEnabled(const std::string& req_id) const
+{
+    std::string req_name = EvaluationResultsReport::SectionID::reqNameFromReqResultID(req_id);
+
+    return eval_data_.interestFactorEnabled(req_name);
+}
+
+void EvaluationTargetData::updateInterestFactors() const
+{
+    interest_factors_sum_enabled_ = 0.0;
+
+    for (auto& fac_it : interest_factors_)
+    {
+        if (!interestFactorEnabled(fac_it.first))
+            continue;
+
+        interest_factors_sum_enabled_ += fac_it.second;
+    }
+}
+
+QColor EvaluationTargetData::colorForInterestFactorRequirement(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_req_mid_)
+        return EvaluationTargetData::color_interest_low_;
+    else if (factor < EvaluationTargetData::interest_thres_req_high_)
+        return EvaluationTargetData::color_interest_mid_;
+    
+    return EvaluationTargetData::color_interest_high_;
+}
+
+QColor EvaluationTargetData::colorForInterestFactorSum(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_sum_mid_)
+        return EvaluationTargetData::color_interest_low_;
+    else if (factor < EvaluationTargetData::interest_thres_sum_high_)
+        return EvaluationTargetData::color_interest_mid_;
+    
+    return EvaluationTargetData::color_interest_high_;
+}
+
 void EvaluationTargetData::updateACIDs() const
 {
     acids_.clear();
@@ -1025,7 +1234,7 @@ void EvaluationTargetData::updatePositionMinMax() const
 
 void EvaluationTargetData::calculateTestDataMappings() const
 {
-    loginf << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_;
+    logdbg << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_;
 
     assert (!tst_data_mappings_.size());
 
@@ -1044,7 +1253,7 @@ void EvaluationTargetData::calculateTestDataMappings() const
             ++cnt;
     }
 
-    loginf << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_ << " done, num map "
+    logdbg << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_ << " done, num map "
            << tst_data_mappings_.size() << " ref pos " << cnt;
 }
 
@@ -1056,6 +1265,8 @@ void EvaluationTargetData::computeSectorInsideInfo() const
     inside_tst_           = {};
     inside_map_           = {};
     inside_sector_layers_ = {};
+
+    assert (eval_man_.sectorsLoaded());
 
     auto sector_layers = eval_man_.sectorsLayers();
 
@@ -1198,7 +1409,7 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
     }
 
     // calc if insice test sensor coverage, true if not circles
-    bool inside_cov = inside_cov = eval_man_.tstSrcsCoverage().isInside(pos.latitude_, pos.longitude_);
+    bool inside_cov = eval_man_.tstSrcsCoverage().isInside(pos.latitude_, pos.longitude_);
 
     // check sector layers
     for (const auto& sl : inside_sector_layers_)

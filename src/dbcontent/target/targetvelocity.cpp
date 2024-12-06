@@ -1,5 +1,5 @@
 #include "targetvelocity.h"
-#include "dbcontent/dbcontentcache.h"
+#include "dbcontent/dbcontentaccessor.h"
 #include "dbcontent/dbcontent.h"
 
 using namespace std;
@@ -28,12 +28,12 @@ const map<int, float> adsb_nucr_nacv_accuracies {
 };
 
 boost::optional<TargetVelocityAccuracy> getVelocityAccuracy(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index)
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index)
 {
     if (dbcontent_name == "CAT021")
-        return getVelocityAccuracyADSB(cache, dbcontent_name, index);
+        return getVelocityAccuracyADSB(accessor, dbcontent_name, index);
     else if (dbcontent_name == "CAT062")
-        return getVelocityAccuracyTracker(cache, dbcontent_name, index);
+        return getVelocityAccuracyTracker(accessor, dbcontent_name, index);
     else
         assert (false); // not implemented yet
 
@@ -41,10 +41,10 @@ boost::optional<TargetVelocityAccuracy> getVelocityAccuracy(
 
 
 boost::optional<TargetVelocityAccuracy> getVelocityAccuracyADSB(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index)
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index)
 {
     NullableVector<unsigned char>& nucv_nacv_vec =
-            cache->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nucv_nacv_);
+            accessor->getVar<unsigned char>(dbcontent_name, DBContent::var_cat021_nucv_nacv_);
 
     if (nucv_nacv_vec.isNull(index))
         return {}; // no info
@@ -62,14 +62,14 @@ boost::optional<TargetVelocityAccuracy> getVelocityAccuracyADSB(
 }
 
 boost::optional<TargetVelocityAccuracy> getVelocityAccuracyTracker(
-        std::shared_ptr<dbContent::Cache> cache, const std::string& dbcontent_name, unsigned int index)
+        std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index)
 {
 
     NullableVector<double>& vx_stddev_vec =
-            cache->getVar<double>(dbcontent_name, DBContent::var_cat062_vx_stddev_);
+            accessor->getVar<double>(dbcontent_name, DBContent::var_cat062_vx_stddev_);
 
     NullableVector<double>& vy_stddev_vec =
-            cache->getVar<double>(dbcontent_name, DBContent::var_cat062_vy_stddev_);
+            accessor->getVar<double>(dbcontent_name, DBContent::var_cat062_vy_stddev_);
 
     if (vx_stddev_vec.isNull(index) || vy_stddev_vec.isNull(index))
         return {}; // no info

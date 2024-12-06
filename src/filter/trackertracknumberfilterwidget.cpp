@@ -37,7 +37,7 @@ void TrackerTrackNumberFilterWidget::update()
     DBFilterWidget::update();
 
     QLayoutItem* child;
-    while ((child = main_layout_->takeAt(0)) != nullptr)
+    while (!main_layout_->isEmpty() && (child = main_layout_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();

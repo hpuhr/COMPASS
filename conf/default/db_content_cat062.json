@@ -93,7 +93,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Current Cleared Flight Level FPL",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -249,7 +249,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Altitude StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GA StdDev",
                     "unit": "Feet"
                 }
@@ -340,7 +340,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Barometric Altitude Calculated StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -561,7 +561,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "X",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": ""
                 }
@@ -574,7 +574,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "Y",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": ""
                 }
@@ -646,7 +646,7 @@
             },
             "Variable32": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "ax",
                     "description": "From 210.Ax\n\nCalculated Acceleration of the target expressed in Cartesian co-\nordinates\n\n(LSB) = 0.25 m/s^2",
                     "dimension": "",
@@ -659,7 +659,7 @@
             },
             "Variable33": {
                 "parameters": {
-                    "data_type_str": "FLOAT",
+                    "data_type_str": "DOUBLE",
                     "db_column_name": "ay",
                     "description": "From 210.Ay\n\nCalculated Acceleration of the target expressed in Cartesian co-\nordinates\n\n(LSB) = 0.25 m/s^2",
                     "dimension": "",
@@ -860,7 +860,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "3D Height LM",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -1003,7 +1003,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "FS SA ADD",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Feet"
                 }
@@ -1653,7 +1653,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Altitude Calculated",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GA C",
                     "unit": "Feet"
                 }
@@ -1723,32 +1723,6 @@
                     "unit": "Knots"
                 }
             },
-            "VariableTrackertri0": {
-                "parameters": {
-                    "data_type_str": "STRING",
-                    "db_column_name": "target_report_identifiers",
-                    "description": "From SPF.Target Report Identifiers.TRI\n\nARTAS MD5 Hash Codes",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "Target Report Identifiers",
-                    "representation_str": "STANDARD",
-                    "short_name": "TRI",
-                    "unit": ""
-                }
-            },
-            "VariableTrackertri_recnums0": {
-                "parameters": {
-                    "data_type_str": "JSON",
-                    "db_column_name": "target_report_identifier_recnums",
-                    "description": "From SPF.Target Report Identifiers.TRI\n\nARTAS associated record numbers",
-                    "dimension": "",
-                    "is_key": false,
-                    "name": "TRI Record Numbers",
-                    "representation_str": "STANDARD",
-                    "short_name": "TRI RecNums",
-                    "unit": ""
-                }
-            },
             "VariableTrackerline_id0": {
                 "parameters": {
                     "data_type_str": "UINT",
@@ -1770,7 +1744,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Mode C Code LM",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "MC LM",
                     "unit": "Feet"
                 }
@@ -1809,7 +1783,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Geometric Altitude ADD",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "GA ADD",
                     "unit": "Feet"
                 }
@@ -1887,7 +1861,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Flight Level Measured",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "FL M",
                     "unit": "Feet"
                 }
@@ -2056,7 +2030,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "X StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -2069,7 +2043,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "X/Y Covariance",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC4",
                     "short_name": "",
                     "unit": ""
                 }
@@ -2082,7 +2056,7 @@
                     "dimension": "Length",
                     "is_key": false,
                     "name": "Y StdDev",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "",
                     "unit": "Meter"
                 }
@@ -2134,7 +2108,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Selected Altitude ADD",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "SA ADD",
                     "unit": "Feet"
                 }
@@ -2732,7 +2706,7 @@
                     "dimension": "Height",
                     "is_key": false,
                     "name": "Barometric Altitude Calculated",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "BA C",
                     "unit": "Feet"
                 }
@@ -2747,6 +2721,32 @@
                     "name": "Mode 3/A Code",
                     "representation_str": "DEC_TO_OCTAL",
                     "short_name": "MA",
+                    "unit": ""
+                }
+            },
+            "VariableTrackertri0": {
+                "parameters": {
+                    "data_type_str": "STRING",
+                    "db_column_name": "target_report_identifiers",
+                    "description": "From SPF.Target Report Identifiers.TRI\n\nARTAS MD5 Hash Codes",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "Target Report Identifiers",
+                    "representation_str": "STANDARD",
+                    "short_name": "TRI",
+                    "unit": ""
+                }
+            },
+            "VariableTrackertri_recnums0": {
+                "parameters": {
+                    "data_type_str": "JSON",
+                    "db_column_name": "target_report_identifier_recnums",
+                    "description": "From SPF.Target Report Identifiers.TRI\n\nARTAS associated record numbers",
+                    "dimension": "",
+                    "is_key": false,
+                    "name": "TRI Record Numbers",
+                    "representation_str": "STANDARD",
+                    "short_name": "TRI RecNums",
                     "unit": ""
                 }
             },

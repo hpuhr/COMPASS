@@ -49,6 +49,8 @@ public:
     void showRequirementWidget(QWidget* widget); // can be nullptr
 
 protected:
+    void showContextMenu(const QPoint& pos);
+
     EvaluationStandard& standard_;
 
     EvaluationStandardTreeModel standard_model_;

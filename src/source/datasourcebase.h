@@ -12,6 +12,20 @@ namespace dbContent
 class DataSourceBase
 {
 public:
+    static const std::string PSRIRMinKey;
+    static const std::string PSRIRMaxKey;
+    static const std::string SSRIRMinKey;
+    static const std::string SSRIRMaxKey;
+    static const std::string ModeSIRMinKey;
+    static const std::string ModeSIRMaxKey;
+
+    static const std::string PSRAzmSDKey;
+    static const std::string PSRRngSDKey;
+    static const std::string SSRAzmSDKey;
+    static const std::string SSRRngSDKey;
+    static const std::string ModeSAzmSDKey;
+    static const std::string ModeSRngSDKey;
+
     DataSourceBase();
 
     std::string dsType() const;
@@ -43,7 +57,6 @@ public:
     float updateInterval () const;
 
     bool hasPosition() const;
-    bool hasFullPosition() const;
 
     void latitude (double value);
     double latitude () const;

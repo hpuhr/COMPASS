@@ -16,6 +16,7 @@
  */
 
 #include "projection.h"
+#include "projectioncoordinatesystembase.h"
 #include "datasourcemanager.h"
 #include "logger.h"
 #include "projectionmanager.h"
@@ -39,8 +40,20 @@ void Projection::generateSubConfigurable(const std::string& class_id,
 {
 }
 
+void Projection::getGroundRange(
+    unsigned int id, double slant_range_m, bool has_altitude, double altitude_m,
+    double& ground_range_m, double& adjusted_altitude_m, bool debug)
+{
+    coordinateSystem(id).getGroundRange(slant_range_m, has_altitude, altitude_m,
+                                        ground_range_m, adjusted_altitude_m, debug);
+
+    return;
+}
+
 void Projection::addAllRadarCoordinateSystems()
 {
+    logdbg << "Projection: addAllRadarCoordinateSystems: added " << radar_coordinate_systems_added_;
+
     if (!radar_coordinate_systems_added_)
     {
         boost::mutex::scoped_lock locker(radar_coordinate_systems_mutex_);
@@ -54,7 +67,7 @@ void Projection::addAllRadarCoordinateSystems()
         {
             if (!hasCoordinateSystem(ds_it->id()))
             {
-                if (!ds_it->hasFullPosition())
+                if (!ds_it->hasPosition())
                     continue;
 
                 addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());
@@ -65,7 +78,7 @@ void Projection::addAllRadarCoordinateSystems()
         {
             if (!hasCoordinateSystem(ds_it->id()))
             {
-                if (!ds_it->hasFullPosition())
+                if (!ds_it->hasPosition())
                     continue;
 
                 addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());

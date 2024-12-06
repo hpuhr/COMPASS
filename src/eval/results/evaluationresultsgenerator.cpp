@@ -19,25 +19,24 @@
 #include "evaluationmanager.h"
 #include "evaluationdata.h"
 #include "evaluationstandard.h"
+
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/single.h"
-//#include "eval/results/detection/joined.h"
-#include "eval/results/joined.h"
+
+#include "eval/results/base/single.h"
+#include "eval/results/base/joined.h"
 #include "eval/results/report/rootitem.h"
 #include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
 #include "eval/results/report/sectioncontenttable.h"
+#include "dbcontentmanager.h"
 
 #include "compass.h"
-//#include "dbinterface.h"
-//#include "sqliteconnection.h"
-
 #include "logger.h"
 #include "stringconv.h"
 #include "global.h"
 #include "sectorlayer.h"
+#include "async.h"
 
 #include <QProgressDialog>
 #include <QApplication>
@@ -73,14 +72,14 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details "
            << eval_settings_.report_skip_no_data_details_
            << " split_results_by_mops " << eval_settings_.report_split_results_by_mops_
-           << " report_split_results_by_aconly_ms " << eval_settings_.report_split_results_by_aconly_ms_
-           << " show_adsb_info " << eval_settings_.report_show_adsb_info_;
+           << " report_split_results_by_aconly_ms " << eval_settings_.report_split_results_by_aconly_ms_;
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
+    assert (eval_man_.sectorsLoaded());
     std::vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man_.sectorsLayers();
 
     unsigned int num_req_evals = 0;
@@ -90,13 +89,16 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
         for (auto& req_group_it : standard)
         {
+            if (!req_group_it->used())
+                continue;
+
             const string& requirement_group_name = req_group_it->name();
 
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
-            num_req_evals += req_group_it->size() * data.size(); // num reqs * num target
-            num_req_evals += req_group_it->size(); // num reqs for sector sum
+            num_req_evals += req_group_it->numUsedRequirements() * data.size(); // num reqs * num target
+            num_req_evals += req_group_it->numUsedRequirements(); // num reqs for sector sum
         }
     }
 
@@ -117,10 +119,18 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     vector<unsigned int> utns;
 
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
     for (auto& target_data_it : data)
     {
+        if (!dbcont_man.existsTarget(target_data_it.utn_))
+            logerr << "EvaluationResultsGenerator: evaluate: unknown utn " << target_data_it.utn_;
+
+        assert (dbcont_man.existsTarget(target_data_it.utn_));
+        assert (data.hasTargetData(target_data_it.utn_));
+
         //if (target_data_it.use())
-            utns.push_back(target_data_it.utn_);
+        utns.push_back(target_data_it.utn_);
     }
 
     unsigned int num_utns = utns.size();
@@ -143,6 +153,9 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
         for (auto& req_group_it : standard)
         {
+            if (!req_group_it->used())
+                continue;
+
             const string& requirement_group_name = req_group_it->name();
 
             if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
@@ -153,6 +166,9 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             for (auto& req_cfg_it : *req_group_it)
             {
+                if (!req_cfg_it->used())
+                    continue;
+
                 loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
                        << " group " << requirement_group_name
                        << " req '" << req_cfg_it->name() << "'";
@@ -181,61 +197,40 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 std::future<void> pending_future = std::async(std::launch::async, [&] {
 
-                    unsigned int num_utns = utns.size();
-                    assert (done_flags.size() == num_utns);
-
-                    if (single_thread)
+                    try
                     {
-                        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+                        unsigned int num_utns = utns.size();
+                        assert (done_flags.size() == num_utns);
+
+                        if (single_thread)
                         {
-                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
-                            done_flags[utn_cnt] = true;
+                            for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+                            {
+                                results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                                done_flags[utn_cnt] = true;
+                            }
                         }
-                    }
-                    else
-                    {
-                        tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+                        else
                         {
-                            //assert(num_threads == oneapi::tbb::this_task_arena::max_concurrency());
-                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
-                            done_flags[utn_cnt] = true;
-                        });
+                            tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
+                                              {
+                                                  //assert(num_threads == oneapi::tbb::this_task_arena::max_concurrency());
+                                                  results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                                                  done_flags[utn_cnt] = true;
+                                              });
+                        }
+
+                        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
+                            assert (results[utn_cnt]);
+
+                        task_done = true;
                     }
-
-                    for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
-                        assert (results[utn_cnt]);
-
-                    task_done = true;
+                    catch (const std::exception& e)
+                    {
+                        logerr << "EvaluationResultsGenerator: evaluate: exception '" << e.what() << "'";
+                        throw e;
+                    }
                 });
-
-//                tbb::task_group g;
-
-//                g.run([&] {
-//                    loginf << "EvaluateTask: execute: starting";
-
-//                    unsigned int num_utns = utns.size();
-//                    assert (done_flags.size() == num_utns);
-
-//                    if (single_thread)
-//                    {
-//                        for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
-//                        {
-//                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
-//                            done_flags[utn_cnt] = true;
-//                        }
-//                    }
-//                    else
-//                    {
-//                        tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
-//                        {
-//                            results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
-//                            done_flags[utn_cnt] = true;
-//                        });
-//                    }
-
-//                    for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
-//                        assert (results[utn_cnt]);
-//                });
 
                 unsigned int tmp_done_cnt;
 
@@ -243,6 +238,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                             ("Sector Layer "+sector_layer_name
                              +":\n Requirement: "+req_group_it->name()+":\n    "+req_cfg_it->name()+"\n\n\n").c_str());
                 postprocess_dialog.setValue(eval_cnt);
+
+                Async::waitAndProcessEventsFor(50);
 
                 logdbg << "EvaluationResultsGenerator: evaluate: waiting on group " << req_group_it->name()
                        << " req '" << req_cfg_it->name() << "'";
@@ -278,12 +275,14 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                                      +" (estimated)").c_str());
 
                         postprocess_dialog.setValue(eval_cnt+tmp_done_cnt);
+
+                        Async::waitAndProcessEventsFor(50);
                     }
 
                     if (!task_done)
                     {
                         QCoreApplication::processEvents();
-                        QThread::msleep(200);
+                        QThread::msleep(100);
                     }
                 }
 
@@ -297,7 +296,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     if (!result_sum)
                         result_sum = result_it->createEmptyJoined("Sum");
 
-                    result_sum->join(result_it);
+                    result_sum->addSingleResult(result_it);
 
                     if (eval_man_.settings().report_split_results_by_mops_)
                     {
@@ -312,7 +311,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                             extra_results_sums[subresult_str+" Sum"] =
                                     result_it->createEmptyJoined(subresult_str+" Sum");
 
-                        extra_results_sums.at(subresult_str+" Sum")->join(result_it);
+                        extra_results_sums.at(subresult_str+" Sum")->addSingleResult(result_it);
                     }
 
                     if (eval_man_.settings().report_split_results_by_aconly_ms_)
@@ -330,7 +329,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                             extra_results_sums[subresult_str+" Sum"] =
                                     result_it->createEmptyJoined(subresult_str+" Sum");
 
-                        extra_results_sums.at(subresult_str+" Sum")->join(result_it);
+                        extra_results_sums.at(subresult_str+" Sum")->addSingleResult(result_it);
                     }
                 }
 
@@ -339,6 +338,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                     loginf << "EvaluationResultsGenerator: evaluate: adding result '" << result_sum->reqGrpId()
                            << "' id '" << result_sum->resultId() << "'";
                     assert (!results_[result_sum->reqGrpId()].count(result_sum->resultId()));
+
+                    //update now => here we still have all details for the joined viewable
+                    result_sum->updateToChanges(true);
+
                     results_[result_sum->reqGrpId()][result_sum->resultId()] = result_sum;
                     results_vec_.push_back(result_sum); // has to be added after all singles
                 }
@@ -350,15 +353,28 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                            << "' id '" << mops_res_it.second->resultId() << "'";
 
                     assert (!results_[mops_res_it.second->reqGrpId()].count(mops_res_it.second->resultId()));
+
+                    //update now => here we still have all details for the joined viewable
+                    mops_res_it.second->updateToChanges(true);
+
                     results_[mops_res_it.second->reqGrpId()][mops_res_it.second->resultId()] = mops_res_it.second;
                     results_vec_.push_back(mops_res_it.second); // has to be added after all singles
                 }
+
+                //purge stored single result details
+                for (auto& result_it : results)
+                    result_it->purgeStoredDetails();
 
                 assert (eval_cnt <= num_req_evals);
                 eval_cnt = results_vec_.size();
             }
         }
     }
+
+    postprocess_dialog.close();
+
+    //viewables are up-to-date => do not reset them
+    updateToChanges(false);
 
     elapsed_time = boost::posix_time::microsec_clock::local_time();
 
@@ -371,12 +387,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     emit eval_man_.resultsChangedSignal();
 
-    postprocess_dialog.close();
-
     loginf << "EvaluationResultsGenerator: evaluate: generating results";
 
     // generating results GUI
-    generateResultsReportGUI();
+    //generateResultsReportGUI();
 
     loginf << "EvaluationResultsGenerator: evaluate: done " << String::timeStringFromDouble(elapsed_time_s, true);
 
@@ -414,11 +428,11 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
 
-    // add dataset stuff
-
     Section& gen_sec = root_item->getSection("Overview:General");
 
-    gen_sec.addText("This section contains information about the used application, database and dat sources.");
+    gen_sec.addText("This section contains information about the used application, database and data sources.");
+
+    // add dataset stuff
 
     gen_sec.addTable("gen_overview_table", 3, {"Name", "Comment", "Value"}, false);
 
@@ -430,6 +444,26 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     assert (eval_man_.hasCurrentStandard());
     gen_table.addRow({"Standard", "Standard name", eval_man_.currentStandardName().c_str()}, nullptr);
+
+    // add used sensors
+
+    auto data_source_ref = eval_man_.activeDataSourceInfoRef();
+    auto data_source_tst = eval_man_.activeDataSourceInfoTst();
+
+    std::string sensors_ref;
+    std::string sensors_tst;
+
+    for (const auto& elem : data_source_ref.data_sources)
+        sensors_ref += (sensors_ref.empty() ? "" : ", ") + elem.name;
+    
+    for (const auto& elem : data_source_tst.data_sources)
+        sensors_tst += (sensors_tst.empty() ? "" : ", ") + elem.name;
+
+    sensors_ref = data_source_ref.dbcontent + ": " + sensors_ref;
+    sensors_tst = data_source_tst.dbcontent + ": " + sensors_tst;
+    
+    gen_table.addRow({ "Reference Sensors", "Used reference sensors", sensors_ref.c_str() }, nullptr);
+    gen_table.addRow({ "Test Sensors", "Used test sensors", sensors_tst.c_str() }, nullptr);
 
     // generate results
 
@@ -459,7 +493,6 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
         }
     }
 
-
     // generate non-result details
     addNonResultsContent (root_item);
 
@@ -482,15 +515,16 @@ EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
     return results_model_;
 }
 
-void EvaluationResultsGenerator::updateToChanges ()
+void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
 {
-    loginf << "EvaluationResultsGenerator: updateToChanges";
+    loginf << "EvaluationResultsGenerator: updateToChanges: reset_viewable " << reset_viewable;
 
     // clear everything
     results_model_.beginReset();
     results_model_.clear();
     results_model_.endReset();
 
+    // first check all single results if should be used
     for (auto& result_it : results_vec_)
     {
         if (result_it->isSingle()) // single result
@@ -503,19 +537,28 @@ void EvaluationResultsGenerator::updateToChanges ()
             assert (result);
             result->updateUseFromTarget();
         }
-        else
-        {
-            assert (result_it->isJoined()); // joined result
+    }
 
+    // then do the joined ones
+    for (auto& result_it : results_vec_)
+    {
+        if (result_it->isJoined()) // single result
+        {
             shared_ptr<EvaluationRequirementResult::Joined> result =
-                    static_pointer_cast<EvaluationRequirementResult::Joined>(result_it);
+                static_pointer_cast<EvaluationRequirementResult::Joined>(result_it);
 
             assert (result);
-            result->updatesToUseChanges();
+            result->updateToChanges(reset_viewable);
         }
     }
 
     generateResultsReportGUI();
+}
+
+void EvaluationResultsGenerator::updateToChanges ()
+{
+    //always reset the viewable on standard result updates
+    updateToChanges(true);
 }
 
 EvaluationResultsGeneratorWidget& EvaluationResultsGenerator::widget()

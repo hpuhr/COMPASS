@@ -16,14 +16,14 @@
  */
 
 #include "eval/requirement/position/radarrange.h"
-#include "eval/results/position/radarrangesingle.h"
+#include "eval/results/position/radarrange.h"
 //#include "evaluationdata.h"
 #include "evaluationmanager.h"
 #include "logger.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
 
-#include "ogrprojection.h"
+#include "projection.h"
 #include "projectionmanager.h"
 
 #include <algorithm>
@@ -37,16 +37,9 @@ namespace EvaluationRequirement
 
 PositionRadarRange::PositionRadarRange(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        EvaluationManager& eval_man, float threshold_value)
-    : Base(name, short_name, group_name, eval_man),
-      threshold_value_(threshold_value)
+        EvaluationManager& eval_man, double threshold_value)
+    : Base(name, short_name, group_name, threshold_value, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man)
 {
-
-}
-
-float PositionRadarRange::thresholdValue() const
-{
-    return threshold_value_;
 }
 
 std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluate (
@@ -54,7 +47,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
         const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " threshold_value " << threshold_value_;
+           << " threshold_value " << threshold();
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
@@ -86,10 +79,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     unsigned int num_distances {0};
     string comment;
 
-    vector<double> values;
-    vector<double> ref_range_values;
-    vector<double> tst_range_values;
-
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -107,7 +96,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::Value, offset)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -121,15 +110,17 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
     ProjectionManager& proj_man = ProjectionManager::instance();
 
-    OGRProjection& projection = proj_man.ogrProjection();
-
-    if (!projection.radarCoordinateSystemsAdded())
-        projection.addAllRadarCoordinateSystems();
+    Projection& projection = proj_man.currentProjection();
+    assert (projection.radarCoordinateSystemsAdded());
 
     unsigned int tst_ds_id;
 
-    double ref_range_m, ref_azm_deg, tst_range_m, tst_azm_deg;
+    double ref_slant_range_m, ref_ground_range_m, ref_alt_m, ref_azm_rad,
+        tst_slant_range_m, tst_ground_range_m, tst_alt_m, tst_azm_rad;
     double range_m_diff;
+
+    std::vector<double> range_values_ref;
+    std::vector<double> range_values_tst;
 
     for (const auto& tst_id : tst_data)
     {
@@ -147,6 +138,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
                             num_comp_passed, num_comp_failed,
                             "No data source info");
 
+            ++num_no_ref;
             continue;
         }
 
@@ -201,12 +193,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
         }
         ++num_pos_inside;
 
-        ok = projection.wgs842PolarHorizontal(tst_ds_id, ref_pos->latitude_, ref_pos->longitude_, ref_azm_deg, ref_range_m);
+        ok = projection.wgs842PolarHorizontal(tst_ds_id,
+                                              ref_pos->latitude_, ref_pos->longitude_, 0,
+                                              ref_azm_rad, ref_slant_range_m, ref_ground_range_m,
+                                              ref_alt_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
                       ref_pos, // ref_pos
-                      is_inside, {}, comp_passed, // pos_inside, value, check_passed
+                      is_inside, {}, comp_passed, // pos_inside, value, rcheck_passed
                       num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                       num_comp_passed, num_comp_failed,
                       "Ref. position transformation error");
@@ -214,7 +209,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
             continue;
         }
 
-        ok = projection.wgs842PolarHorizontal(tst_ds_id, tst_pos.latitude_, tst_pos.longitude_, tst_azm_deg, tst_range_m);
+        ok = projection.wgs842PolarHorizontal(tst_ds_id,
+                                              tst_pos.latitude_, tst_pos.longitude_, 0,
+                                              tst_azm_rad, tst_slant_range_m, tst_ground_range_m,
+                                              tst_alt_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
@@ -227,7 +225,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
             continue;
         }
 
-        range_m_diff = ref_range_m - tst_range_m;
+        range_m_diff = ref_ground_range_m - tst_ground_range_m;
 
         if (std::isnan(range_m_diff) || std::isinf(range_m_diff))
         {
@@ -243,7 +241,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
         ++num_distances;
 
-        if (fabs(range_m_diff) <= threshold_value_) // for single value
+        if (fabs(range_m_diff) <= threshold()) // for single value
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -255,16 +253,15 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
             comment = "Failed";
         }
 
+        range_values_ref.push_back(ref_ground_range_m);
+        range_values_tst.push_back(tst_ground_range_m);
+
         addDetail(timestamp, tst_pos,
                     ref_pos,
                     is_inside, range_m_diff, comp_passed, // pos_inside, value, check_passed
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_comp_passed, num_comp_failed,
                     comment);
-
-        values.push_back(range_m_diff);
-        ref_range_values.push_back(ref_range_m);
-        tst_range_values.push_back(tst_range_m);
     }
 
     //        logdbg << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -277,7 +274,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
         loginf << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
-               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
+               << " num_pos " << num_pos<< " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_calc_errors " << num_pos_calc_errors
                << " num_distances " << num_distances;
@@ -285,26 +282,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
     assert (num_distances == num_comp_failed + num_comp_passed);
-    assert (num_distances == values.size());
-    assert (values.size() == ref_range_values.size());
-    assert (values.size() == tst_range_values.size());
-
-    //assert (details.size() == num_pos);
+    
+    //assert (tst_range_values.size() == ref_range_values.size());
 
     return make_shared<EvaluationRequirementResult::SinglePositionRadarRange>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
-                values, ref_range_values, tst_range_values);
-}
-
-std::string PositionRadarRange::getConditionStr () const
-{
-    return "<= "+ to_string(threshold_value_);
-}
-
-std::string PositionRadarRange::getConditionResultStr (float rms_value) const
-{
-    return rms_value <= threshold_value_ ?  "Passed" : "Failed";
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, range_values_ref, range_values_tst);
 }
 
 }

@@ -18,6 +18,9 @@
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
 #include "evaluationmanager.h"
+#include "evaluationstandard.h"
+#include "requirement/base/baseconfig.h"
+#include "requirement/group.h"
 #include "dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 //#include "dbcontent/variable/variable.h"
@@ -27,6 +30,7 @@
 //#include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "util/async.h"
+#include "util/stringmat.h"
 
 #include <QApplication>
 #include <QThread>
@@ -48,7 +52,7 @@ using namespace boost::posix_time;
 EvaluationData::EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man)
     : eval_man_(eval_man), dbcont_man_(dbcont_man)
 {
-    cache_ = make_shared<dbContent::Cache>(dbcont_man_);
+    accessor_ = make_shared<dbContent::DBContentAccessor>();
 
     connect(&dbcont_man, &DBContentManager::targetChangedSignal, this, &EvaluationData::targetChangedSlot);
     connect(&dbcont_man, &DBContentManager::allTargetsChangedSignal, this, &EvaluationData::allTargetsChangedSlot);
@@ -58,11 +62,11 @@ void EvaluationData::setBuffers(std::map<std::string, std::shared_ptr<Buffer>> b
 {
     loginf << "EvaluationData: setBuffers";
 
-    cache_->clear();
-    cache_->add(buffers);
+    accessor_->clear();
+    accessor_->add(buffers);
 }
 
-void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_id)
+void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsigned int line_id)
 {
     loginf << "EvaluationData: addReferenceData: dbcontent " << dbcontent_name;
 
@@ -80,22 +84,22 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
-    assert (cache_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
-    NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(
+    assert (accessor_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
+    NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(
                 dbcontent_name, DBContent::meta_var_timestamp_);
 
     unsigned int buffer_size = ts_vec.size();
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_datasource_id_));
-    NullableVector<unsigned int>& ds_ids = cache_->getMetaVar<unsigned int>(
-                dbcontent_name, DBContent::meta_var_datasource_id_);
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ds_id_));
+    NullableVector<unsigned int>& ds_ids = accessor_->getMetaVar<unsigned int>(
+                dbcontent_name, DBContent::meta_var_ds_id_);
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
-    NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
+    NullableVector<unsigned int>& line_ids = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_line_id_);
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
-    NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+    NullableVector<unsigned int>& utn_vec = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_utn_);
 
     ptime timestamp;
@@ -143,9 +147,14 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
         }
 
         utn = utn_vec.get(cnt);
+        if (!dbcont_man_.existsTarget(utn))
+        {
+            logerr << "EvaluationData: addReferenceData: ignoring unknown utn " << utn;
+            continue;
+        }
 
         if (!hasTargetData(utn))
-            target_data_.emplace_back(utn, *this, cache_, eval_man_, dbcont_man_);
+            target_data_.emplace_back(utn, *this, accessor_, eval_man_, dbcont_man_);
 
         assert (hasTargetData(utn));
 
@@ -162,7 +171,7 @@ void EvaluationData::addReferenceData (string dbcontent_name, unsigned int line_
            << " num_skipped " << num_skipped;
 }
 
-void EvaluationData::addTestData (string dbcontent_name, unsigned int line_id)
+void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned int line_id)
 {
     loginf << "EvaluationData: addTestData: dbcontent " << dbcontent_name;
 
@@ -179,34 +188,35 @@ void EvaluationData::addTestData (string dbcontent_name, unsigned int line_id)
     bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
     unsigned int num_skipped {0};
 
-    assert (cache_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
-    NullableVector<ptime>& ts_vec = cache_->getMetaVar<ptime>(
+    assert (accessor_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
+    NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(
                 dbcontent_name, DBContent::meta_var_timestamp_);
 
     unsigned int buffer_size = ts_vec.size();
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_datasource_id_));
-    NullableVector<unsigned int>& ds_ids = cache_->getMetaVar<unsigned int>(
-                dbcontent_name, DBContent::meta_var_datasource_id_);
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ds_id_));
+    NullableVector<unsigned int>& ds_ids = accessor_->getMetaVar<unsigned int>(
+                dbcontent_name, DBContent::meta_var_ds_id_);
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
-    NullableVector<unsigned int>& line_ids = cache_->getMetaVar<unsigned int>(
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_line_id_));
+    NullableVector<unsigned int>& line_ids = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_line_id_);
 
-    assert (cache_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
-    NullableVector<unsigned int>& utn_vec = cache_->getMetaVar<unsigned int>(
+    assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_utn_));
+    NullableVector<unsigned int>& utn_vec = accessor_->getMetaVar<unsigned int>(
                 dbcontent_name, DBContent::meta_var_utn_);
 
     boost::posix_time::ptime timestamp;
     //vector<unsigned int> utn_vec;
+
     unsigned int utn;
 
     loginf << "EvaluationData: addTestData: adding target data";
 
-    loginf << "EvaluationData: addReferenceData: use_active_srcs " << use_active_srcs;
+    loginf << "EvaluationData: addTestData: use_active_srcs " << use_active_srcs;
 
     for (auto ds_id : active_srcs)
-        loginf << "EvaluationData: addReferenceData: " << ds_id;
+        loginf << "EvaluationData: addTestData: " << ds_id;
 
     for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
     {
@@ -241,9 +251,14 @@ void EvaluationData::addTestData (string dbcontent_name, unsigned int line_id)
         }
 
         utn = utn_vec.get(cnt);
+        if (!dbcont_man_.existsTarget(utn))
+        {
+            logerr << "EvaluationData: addTestData: ignoring unknown utn " << utn;
+            continue;
+        }
 
         if (!hasTargetData(utn))
-            target_data_.emplace_back(utn, *this, cache_, eval_man_, dbcont_man_);
+            target_data_.emplace_back(utn, *this, accessor_, eval_man_, dbcont_man_);
 
         assert (hasTargetData(utn));
 
@@ -283,7 +298,7 @@ void EvaluationData::finalize ()
     {
         auto task = [&] (int cnt) { target_data_[cnt].finalize(); return true; };
 
-        Utils::Async::waitDialogAsyncArray(task, (int)num_targets, "Finalizing data");
+        Utils::Async::waitDialogAsyncArray(task, (int) num_targets, "Finalizing data");
     }
 
     finalized_ = true;
@@ -314,7 +329,7 @@ void EvaluationData::clear()
 {
     beginResetModel();
 
-    cache_->clear();
+    accessor_->clear();
 
     target_data_.clear();
     finalized_ = false;
@@ -325,7 +340,12 @@ void EvaluationData::clear()
     unassociated_tst_cnt_ = 0;
     associated_tst_cnt_ = 0;
 
+    interest_factor_enabled_.clear();
+
     endResetModel();
+
+    if (widget_)
+        widget_->updateInterestMenu();
 }
 
 QVariant EvaluationData::data(const QModelIndex& index, int role) const
@@ -359,8 +379,19 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
         const EvaluationTargetData& target = target_data_.at(index.row());
 
+        assert (index.column() < table_columns_.size());
+        std::string col_name = table_columns_.at(index.column()).toStdString();
+
         if (!dbcont_man_.utnUseEval(target.utn_))
             return QBrush(Qt::lightGray);
+        else if (col_name == "Interest")
+        {
+            const auto& ifactors = target.interestFactors();
+
+            double interest = target.enabledInterestFactorsSum();
+
+            return ifactors.empty() ? QVariant() : EvaluationTargetData::colorForInterestFactorSum(interest);
+        }
         else
             return QVariant();
 
@@ -392,6 +423,12 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
         {
             return dbcont_man_.utnComment(target.utn_).c_str();
         }
+        else if (col_name == "Interest")
+        {
+            const auto& ifactors = target.interestFactors();
+
+            return ifactors.empty() ? "" : QString::number(target.enabledInterestFactorsSum(), 'f', 3);
+        }
         else if (col_name == "Begin")
         {
             return target.timeBeginStr().c_str();
@@ -412,11 +449,11 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
         {
             return target.numTstUpdates();
         }
-        else if (col_name == "Callsign")
+        else if (col_name == "ACIDs")
         {
             return target.acidsStr().c_str();
         }
-        else if (col_name == "TA")
+        else if (col_name == "ACADs")
         {
             return target.acadsStr().c_str();
         }
@@ -452,6 +489,25 @@ QVariant EvaluationData::data(const QModelIndex& index, int role) const
 
             const EvaluationTargetData& target = target_data_.at(index.row());
             return ("comment_"+to_string(target.utn_)).c_str();
+        }
+    }
+    case Qt::ToolTipRole:
+    {
+        logdbg << "EvaluationData: data: tooltip role: row " << index.row() << " col " << index.column();
+
+        assert (index.row() >= 0);
+        assert (index.row() < target_data_.size());
+
+        const EvaluationTargetData& target = target_data_.at(index.row());
+
+        logdbg << "EvaluationData: data: got utn " << target.utn_;
+
+        assert (index.column() < table_columns_.size());
+        std::string col_name = table_columns_.at(index.column()).toStdString();
+
+        if (col_name == "Interest")
+        {
+            return target.enabledInterestFactorsStr().c_str();
         }
     }
     default:
@@ -569,6 +625,26 @@ EvaluationDataWidget* EvaluationData::widget()
     return widget_.get();
 }
 
+void EvaluationData::clearInterestFactors()
+{
+    for (auto tgt_it = begin(); tgt_it != end(); ++tgt_it)
+    {
+        target_data_.modify(target_data_.project<0>(tgt_it), [](EvaluationTargetData& t) { t.clearInterestFactors(); });
+    }
+
+    updateInterestSwitches();
+}
+
+void EvaluationData::resetModelBegin()
+{
+    beginResetModel();
+}
+
+void EvaluationData::resetModelEnd()
+{
+    endResetModel();
+}
+
 void EvaluationData::targetChangedSlot(unsigned int utn) // for one utn
 {
     loginf << "EvaluationData: targetChangedSlot: utn " << utn;
@@ -599,4 +675,72 @@ void EvaluationData::allTargetsChangedSlot() // for more than 1 utn
     endResetModel();
 
     eval_man_.updateResultsToChanges();
+}
+
+boost::optional<nlohmann::json> EvaluationData::getTableData(bool rowwise,
+                                                             const std::vector<int>& cols) const
+{
+    return Utils::StringTable(this).toJSON(rowwise, cols);
+}
+
+void EvaluationData::setInterestFactorEnabled(const std::string& req_name, bool ok, bool update)
+{
+    interest_factor_enabled_[ req_name ] = ok;
+
+    if (update)
+        updateAllInterestFactors();
+}
+
+void EvaluationData::setInterestFactorEnabled(bool ok, bool update)
+{
+    for (auto& ife : interest_factor_enabled_)
+        ife.second = ok;
+
+    if (update)
+        updateAllInterestFactors();
+}
+
+bool EvaluationData::interestFactorEnabled(const std::string& req_name) const
+{
+    auto it = interest_factor_enabled_.find(req_name);
+    if (it == interest_factor_enabled_.end())
+        return false;
+
+    return it->second;
+}
+
+void EvaluationData::updateAllInterestFactors()
+{
+    for (auto tgt_it = begin(); tgt_it != end(); ++tgt_it)
+    {
+        target_data_.modify(target_data_.project<0>(tgt_it), [](EvaluationTargetData& t) { t.updateInterestFactors(); });
+    }
+
+    beginResetModel();
+    endResetModel();
+}
+
+void EvaluationData::updateInterestSwitches()
+{
+    loginf << "EvaluationData: updateAvailableInterests";
+
+    interest_factor_enabled_.clear();
+
+    if (!eval_man_.hasCurrentStandard())
+        return;
+
+    auto& standard = eval_man_.currentStandard();
+
+    for (auto itg = standard.begin(); itg != standard.end(); ++itg)
+    {
+        for (auto itr = (*itg)->begin(); itr != (*itg)->end(); ++itr)
+        {
+            interest_factor_enabled_[ (*itr)->name() ] = true;
+        }
+    }
+
+    updateAllInterestFactors();
+
+    if (widget_) 
+        widget_->updateInterestMenu();
 }

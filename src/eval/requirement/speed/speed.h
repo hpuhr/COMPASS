@@ -15,23 +15,23 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENSPEED_H
-#define EVALUATIONREQUIREMENSPEED_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybase.h"
 
 namespace EvaluationRequirement
 {
 
+/**
+*/
 class Speed : public ProbabilityBase
 {
 public:
-    Speed(
-            const std::string& name, const std::string& short_name, const std::string& group_name,
-            float prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
-            float threshold_value, bool use_percent_if_higher, float threshold_percent,
-            COMPARISON_TYPE threshold_value_check_type,
-            bool failed_values_of_interest);
+    Speed(const std::string& name, const std::string& short_name, const std::string& group_name,
+          double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+          float threshold_value, bool use_percent_if_higher, float threshold_percent,
+          COMPARISON_TYPE threshold_value_check_type,
+          bool failed_values_of_interest);
 
     float thresholdValue() const;
     bool usePercentIfHigher() const;
@@ -43,6 +43,9 @@ public:
             const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
             const SectorLayer& sector_layer) override;
 
+    std::string probabilityNameShort() const override final { return "PCP"; }
+    std::string probabilityName() const override final { return "Probability of passed comparison"; }
+
 protected:
     float threshold_value_ {0}; // offset
 
@@ -51,11 +54,7 @@ protected:
 
     COMPARISON_TYPE threshold_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
 
-
-
     bool failed_values_of_interest_ {true};
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENSPEED_H

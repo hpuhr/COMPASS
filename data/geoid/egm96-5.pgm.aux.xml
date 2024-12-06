@@ -1,0 +1,28 @@
+<PAMDataset>
+  <SRS dataAxisToSRSAxisMapping="2,1">GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],AUTHORITY["EPSG","4326"]]</SRS>
+  <GeoTransform> -4.1666666666666657e-02,  8.3333333333333329e-02,  0.0000000000000000e+00,  9.0041666666666671e+01,  0.0000000000000000e+00, -8.3333333333333329e-02</GeoTransform>
+  <Metadata>
+    <MDI key="AREA_OR_POINT">Point</MDI>
+    <MDI key="DateTime">2009-08-29 18:45:03</MDI>
+    <MDI key="Description">WGS84 EGM96, 5-minute grid</MDI>
+    <MDI key="MaxBilinearError">0.140</MDI>
+    <MDI key="MaxCubicError">0.003</MDI>
+    <MDI key="Offset">-108</MDI>
+    <MDI key="RMSBilinearError">0.005</MDI>
+    <MDI key="RMSCubicError">0.001</MDI>
+    <MDI key="Scale">0.003</MDI>
+    <MDI key="Tie_Point_Location">pixel_corner</MDI>
+    <MDI key="URL">http://earth-info.nga.mil/GandG/wgs84/gravitymod/egm96/egm96.html</MDI>
+    <MDI key="Vertical_Datum">WGS84</MDI>
+  </Metadata>
+  <PAMRasterBand band="1">
+    <Metadata>
+      <MDI key="STATISTICS_APPROXIMATE">YES</MDI>
+      <MDI key="STATISTICS_MAXIMUM">63642</MDI>
+      <MDI key="STATISTICS_MEAN">35659.475413712</MDI>
+      <MDI key="STATISTICS_MINIMUM">483</MDI>
+      <MDI key="STATISTICS_STDDEV">9711.9911746406</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">100</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

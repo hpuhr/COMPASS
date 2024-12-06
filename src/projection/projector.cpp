@@ -29,7 +29,7 @@
 */
 FrameProjector::FrameProjector()
 :   center_wgs84_(0, 0)
-,   center_cart_ (0, 0)
+//,   center_cart_ (0, 0)
 {
 }
 
@@ -60,10 +60,10 @@ const QPointF& FrameProjector::centerWGS84() const
 
 /**
 */
-const QPointF& FrameProjector::centerCart() const
-{
-    return center_cart_;
-}
+// const QPointF& FrameProjector::centerCart() const
+// {
+//     return center_cart_;
+// }
 
 /**
 */
@@ -83,7 +83,7 @@ double FrameProjector::centerLon() const
 */
 bool FrameProjector::valid() const
 {
-    return (ref_src_ != nullptr);
+    return (proj_ != nullptr);
 }
 
 /**
@@ -91,12 +91,12 @@ bool FrameProjector::valid() const
 void FrameProjector::reset()
 {
     center_wgs84_ = QPointF(0, 0);
-    center_cart_  = QPointF(0, 0);
+    //center_cart_  = QPointF(0, 0);
 
-    ref_src_.reset();
-    ref_dst_.reset();
-    trafo_fwd_.reset();
-    trafo_bwd_.reset();
+    //proj_.reset();
+    // ref_dst_.reset();
+    // trafo_fwd_.reset();
+    // trafo_bwd_.reset();
 }
 
 /**
@@ -120,20 +120,26 @@ void FrameProjector::update(double center_lat, double center_lon)
 
     reset();
 
-    ref_src_.reset(new OGRSpatialReference);
-    ref_src_->SetWellKnownGeogCS("WGS84");
+    if(proj_)
+        proj_->Reset(center_lat, center_lon, 0.0);
+    else
+        proj_.reset(new GeographicLib::LocalCartesian (center_lat, center_lon, 0.0));
 
-    ref_dst_.reset(new OGRSpatialReference);
-    ref_dst_->SetStereographic(center_lat, center_lon, 1.0, 0.0, 0.0); //@TODO: give some options as to what map proj to use
+    // ref_src_.reset(new OGRSpatialReference);
+    // ref_src_->SetWellKnownGeogCS("WGS84");
 
-    trafo_fwd_.reset(OGRCreateCoordinateTransformation(ref_src_.get(), ref_dst_.get()));
-    trafo_bwd_.reset(OGRCreateCoordinateTransformation(ref_dst_.get(), ref_src_.get()));
+    // ref_dst_.reset(new OGRSpatialReference);
+    // ref_dst_->SetStereographic(center_lat, center_lon, 1.0, 0.0, 0.0); //@TODO: give some options as to what map proj to use
+
+    // trafo_fwd_.reset(OGRCreateCoordinateTransformation(ref_src_.get(), ref_dst_.get()));
+    // trafo_bwd_.reset(OGRCreateCoordinateTransformation(ref_dst_.get(), ref_src_.get()));
 
     //compute cartesian center of projection (!sometimes not mapped to (0,0)!)
     double cx_cart, cy_cart;
     project(cx_cart, cy_cart, center_lat, center_lon);
+    assert (sqrt(pow(cx_cart, 2)+pow(cy_cart,2)) < 1E-6);
 
-    center_cart_  = QPointF(cx_cart, cy_cart);
+    //center_cart_  = QPointF(cx_cart, cy_cart);
     center_wgs84_ = QPointF(center_lat, center_lon);
 }
 
@@ -144,12 +150,17 @@ bool FrameProjector::project(double& x,
                              double lat, 
                              double lon) const
 {
-    x = lon;
-    y = lat;
-    trafo_fwd_->Transform(1, &x, &y);
+    // x = lon;
+    // y = lat;
+    // trafo_fwd_->Transform(1, &x, &y);
 
-    x -= center_cart_.x();
-    y -= center_cart_.y();
+    // x -= center_cart_.x();
+    // y -= center_cart_.y();
+
+    double z;
+
+    assert (proj_);
+    proj_->Forward(lat, lon, 0.0, x, y, z);
 
     return true;
 }
@@ -161,12 +172,18 @@ bool FrameProjector::unproject(double& lat,
                                double x, 
                                double y) const
 {
-    x += center_cart_.x();
-    y += center_cart_.y();
+    // x += center_cart_.x();
+    // y += center_cart_.y();
 
-    lon = x;
-    lat = y;
-    trafo_bwd_->Transform(1, &lon, &lat);
+    // lon = x;
+    // lat = y;
+    // trafo_bwd_->Transform(1, &lon, &lat);
+
+    double h_back;
+
+    assert (proj_);
+
+    proj_->Reverse(x, y, 0.0, lat, lon, h_back);
 
     return true;
 }

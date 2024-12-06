@@ -58,6 +58,8 @@ void ASTERIXPostProcess::postProcess(unsigned int category, nlohmann::json& reco
         postProcessCAT001(sac, sic, record);
     else if (category == 2)  // save last tods
         postProcessCAT002(sac, sic, record);
+    else if (category == 10)
+        postProcessCAT010(sac, sic, record);
     else if (category == 20)
         postProcessCAT020(sac, sic, record);
     else if (category == 21)
@@ -180,15 +182,45 @@ void ASTERIXPostProcess::postProcessCAT002(int sac, int sic, nlohmann::json& rec
     }
 }
 
+void ASTERIXPostProcess::postProcessCAT010(int sac, int sic, nlohmann::json& record)
+{
+    // 500.SDP-xy (σ_xy) Covariance in two’s complement, no adjustment needed
+}
+
 void ASTERIXPostProcess::postProcessCAT020(int sac, int sic, nlohmann::json& record)
 {
-    // rdp chain 0,1 to 1,2
-//    if (record.contains("020") && record.at("020").contains("CHN"))
-//    {
-//        nlohmann::json& item_020 = record.at("020");
-//        unsigned int chain = item_020.at("CHN");
-//        item_020.at("CHN") = chain + 1;
-//    }
+    // "500.SDP.rho-xy"
+    if (record.contains("500") && record.at("500").contains("SDP"))
+    {
+        nlohmann::json& item_500_stp = record.at("500").at("SDP");
+        assert (item_500_stp.contains("rho-xy"));
+        assert (item_500_stp.contains("sigma-x"));
+        assert (item_500_stp.contains("sigma-y"));
+
+        // Covariance from Correlation Coefficient CovXY​=ρXY​⋅σX​⋅σY
+        double rho_xy = item_500_stp.at("rho-xy");
+        double sigma_x = item_500_stp.at("sigma-x");
+        double sigma_y = item_500_stp.at("sigma-y");
+
+        item_500_stp.at("rho-xy") = rho_xy * sigma_x * sigma_y;
+    }
+
+    // "REF.PA.SDC.COV-XY (Covariance Component)"
+    if (record.contains("REF") && record.at("REF").contains("PA")
+        && record.at("REF").at("PA").contains("SDC"))
+    {
+        nlohmann::json& item_ref_pa = record.at("REF").at("PA").at("SDC");
+        assert (item_ref_pa.contains("COV-XY (Covariance Component)"));
+
+        // XY covariance component = sign {Cov(X,Y)} * sqrt {abs [Cov (X,Y)]}
+
+        double cov_xy = item_ref_pa.at("COV-XY (Covariance Component)");
+
+        cov_xy = (cov_xy < 0) ? -std::pow(cov_xy, 2) : std::pow(cov_xy, 2);
+
+        item_ref_pa.at("COV-XY (Covariance Component)") = cov_xy;
+    }
+
 
     // altitude capability
 //    if (record.contains("230") && record.at("230").contains("ARC"))
@@ -576,6 +608,24 @@ void ASTERIXPostProcess::postProcessCAT048(int sac, int sic, nlohmann::json& rec
 
 void ASTERIXPostProcess::postProcessCAT062(int sac, int sic, nlohmann::json& record)
 {
+    //"500.COV.COV (XY Covariance Component)"
+
+
+    if (record.contains("500") && record.at("500").contains("COV")
+        && record.at("500").at("COV").contains("COV (XY Covariance Component)"))
+    {
+        nlohmann::json& item_500_cov = record.at("500").at("COV").at("COV (XY Covariance Component)");
+
+        // XY covariance component = sign {Cov(X,Y)} * sqrt {abs [Cov (X,Y)]}
+        // Cov(X,Y) = sign {Cov(X,Y)} * XY covariance component^2
+
+        double cov_xy = item_500_cov;
+
+        cov_xy = (cov_xy < 0) ? -std::pow(cov_xy, 2) : std::pow(cov_xy, 2);
+
+        item_500_cov = cov_xy;
+    }
+
 //    if (record.contains("185"))
 //    {
 //        // 185.Vx Vy

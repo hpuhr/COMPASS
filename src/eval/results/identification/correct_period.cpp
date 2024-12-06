@@ -16,7 +16,6 @@
  */
 
 #include "correct_period.h"
-#include "eval/requirement/identification/correct_period.h"
 
 namespace EvaluationRequirementResult
 {
@@ -40,33 +39,14 @@ SingleIdentificationCorrectPeriod::SingleIdentificationCorrectPeriod(const std::
                                                                      TimePeriodCollection ref_periods)
 :   SingleIntervalBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details, sum_uis, missed_uis, ref_periods)
 {
+    updateResult();
 }
 
 /**
 */
 std::shared_ptr<Joined> SingleIdentificationCorrectPeriod::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedIdentificationCorrectPeriod> ("JoinedIdentificationCorrectPeriod", result_id, requirement_, sector_layer_, eval_man_);
-}
-
-/**
-*/
-std::string SingleIdentificationCorrectPeriod::probabilityName() const
-{
-    std::shared_ptr<EvaluationRequirement::IdentificationCorrectPeriod> req = std::static_pointer_cast<EvaluationRequirement::IdentificationCorrectPeriod>(requirement_);
-    assert (req);
-
-    return EvaluationRequirement::IdentificationCorrectPeriod::probabilityName(req->identificationType());
-}
-
-/**
-*/
-std::string SingleIdentificationCorrectPeriod::probabilityDescription() const
-{
-    std::shared_ptr<EvaluationRequirement::IdentificationCorrectPeriod> req = std::static_pointer_cast<EvaluationRequirement::IdentificationCorrectPeriod>(requirement_);
-    assert (req);
-
-    return EvaluationRequirement::IdentificationCorrectPeriod::probabilityDescription(req->identificationType());
+    return std::make_shared<JoinedIdentificationCorrectPeriod> ("JoinedIdentificationCorrectPeriod", result_id, requirement_, sector_layer_, eval_man_);
 }
 
 /********************************************************************************
@@ -82,26 +62,6 @@ JoinedIdentificationCorrectPeriod::JoinedIdentificationCorrectPeriod(const std::
                                                                      EvaluationManager& eval_man)
 :   JoinedIntervalBase(result_type, result_id, requirement, sector_layer, eval_man)
 {
-}
-
-/**
-*/
-std::string JoinedIdentificationCorrectPeriod::probabilityName() const
-{
-    std::shared_ptr<EvaluationRequirement::IdentificationCorrectPeriod> req = std::static_pointer_cast<EvaluationRequirement::IdentificationCorrectPeriod>(requirement_);
-    assert (req);
-
-    return EvaluationRequirement::IdentificationCorrectPeriod::probabilityName(req->identificationType());
-}
-
-/**
-*/
-std::string JoinedIdentificationCorrectPeriod::probabilityDescription() const
-{
-    std::shared_ptr<EvaluationRequirement::IdentificationCorrectPeriod> req = std::static_pointer_cast<EvaluationRequirement::IdentificationCorrectPeriod>(requirement_);
-    assert (req);
-
-    return EvaluationRequirement::IdentificationCorrectPeriod::probabilityDescription(req->identificationType());
 }
 
 } // namespace EvaluationRequirementResult

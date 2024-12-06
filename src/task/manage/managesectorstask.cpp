@@ -17,13 +17,11 @@
 
 #include "managesectorstask.h"
 #include "compass.h"
-//#include "dbinterface.h"
 #include "evaluationmanager.h"
 #include "managesectorstaskdialog.h"
 #include "taskmanager.h"
 #include "savedfile.h"
 #include "files.h"
-//#include "sector.h"
 
 #include "gdal.h"
 #include "gdal_priv.h"
@@ -39,7 +37,7 @@ using namespace std;
 
 ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
-    : Task("ManageSectorsTask", "Manage Sectors", task_manager),
+    : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_sectors.json")
 {
     registerParameter("current_filename", &current_filename_, std::string());
@@ -91,7 +89,14 @@ void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
     {
         SavedFile* file = new SavedFile(class_id, instance_id, this);
         assert(file_list_.count(file->name()) == 0);
-        file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
+
+        if (!Files::fileExists(file->name()))
+        {
+            loginf << "ManageSectorsTask: generateSubConfigurable: removing outdated file '" << file->name() << "'";
+            delete file; // TODO HP
+        }
+        else
+            file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
     }
     else
         throw std::runtime_error("ManageSectorsTask: generateSubConfigurable: unknown class_id " +
@@ -117,8 +122,6 @@ void ManageSectorsTask::addFile(const std::string& filename)
     current_filename_ = filename;
     parseCurrentFile(false);
 
-    emit statusChangedSignal(name_);
-
     if (dialog_)
         dialog_->updateFileList();
 }
@@ -141,8 +144,6 @@ void ManageSectorsTask::removeCurrentFilename()
     parse_message_ = "";
     found_sectors_num_ = 0;
 
-    emit statusChangedSignal(name_);
-
     if (dialog_)
         dialog_->updateFileList();
 }
@@ -162,8 +163,6 @@ void ManageSectorsTask::removeAllFiles ()
     parse_message_ = "";
     found_sectors_num_ = 0;
 
-    emit statusChangedSignal(name_);
-
     if (dialog_)
         dialog_->updateFileList();
 }
@@ -171,8 +170,6 @@ void ManageSectorsTask::removeAllFiles ()
 void ManageSectorsTask::currentFilename(const std::string& filename)
 {
     loginf << "ManageSectorsTask: currentFilename: filename '" << filename << "'";
-
-    bool had_filename = canImportFile();
 
     current_filename_ = filename;
 
@@ -183,9 +180,6 @@ void ManageSectorsTask::currentFilename(const std::string& filename)
         parse_message_ = "";
         found_sectors_num_ = 0;
     }
-
-    if (!had_filename)  // not on re-select
-        emit statusChangedSignal(name_);
 }
 
 std::string ManageSectorsTask::parseMessage() const
@@ -338,7 +332,21 @@ void ManageSectorsTask::parseCurrentFile (bool import)
             for(geom_field_cnt = 0; geom_field_cnt < geom_field_num; geom_field_cnt ++ )
             {
                 geometry = feature->GetGeomFieldRef(geom_field_cnt);
-                if(geometry != NULL && wkbFlatten(geometry->getGeometryType()) == wkbPolygon)
+
+                if (!geometry)
+                    continue;
+                if (geometry->getGeometryType() != wkbPolygon
+                    && geometry->getGeometryType() != wkbPolygon25D
+                    && geometry->getGeometryType() != wkbMultiPolygon
+                    && geometry->getGeometryType() != wkbMultiPolygon25D)
+                {
+                    loginf << "ManageSectorsTask: parseCurrentFile skipping unsupported geometry name "
+                           << geometry->getGeometryName()
+                           << " type " << geometry->getGeometryType();
+                    continue;
+                }
+
+                if(wkbFlatten(geometry->getGeometryType()) == wkbPolygon)
                 {
                     OGRPolygon* polygon = dynamic_cast<OGRPolygon*>(geometry);
                     assert (polygon);
@@ -375,6 +383,8 @@ void ManageSectorsTask::parseCurrentFile (bool import)
             }
         }
     }
+
+    GDALClose(data_set);
 
     if (dialog_)
         dialog_->updateParseMessage();

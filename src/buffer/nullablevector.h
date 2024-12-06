@@ -15,19 +15,14 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ARRAYLIST_H_
-#define ARRAYLIST_H_
+#pragma once
 
 #include "buffer.h"
 #include "property.h"
 #include "stringconv.h"
 #include "json.hpp"
 
-//#include <tbb/tbb.h>
-
 #include <QDateTime>
-
-//#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <array>
 #include <bitset>
@@ -39,36 +34,27 @@
 #include <vector>
 #include <type_traits>
 
-//#include "boost/lexical_cast.hpp"
 
 const bool BUFFER_PEDANTIC_CHECKING = false;
 
-/**
- * @brief Template List of fixed-size arrays to be used in Buffer classes.
- *
- * Was written for easy management of arrays of different data types.
- */
 template <class T>
 class NullableVector
 {
     friend class Buffer;
 
 public:
-    /// @brief Destructor
     virtual ~NullableVector() {}
 
     void renameProperty(const std::string& name) { property_.rename(name); }
 
-    /// @brief Sets all elements to false
     void clear();
     void clearData(); // removes all data
 
-    /// @brief Returns const reference to a specific value
     const T get(unsigned int index) const;
 
-    // exists only for non-integral types
-    template<typename T_ = T, typename std::enable_if<!std::is_integral<T_>::value>::type* = nullptr>
-    T_& getRef(unsigned int index)
+    //template<typename T_ = T, typename std::enable_if<!std::is_integral<T_>::value>::type* = nullptr>
+    //T_& getRef(unsigned int index)
+    T& getRef(unsigned int index)
     {
         logdbg << "NullableVector " << property_.name() << ": getRef: index " << index;
         if (BUFFER_PEDANTIC_CHECKING)
@@ -87,20 +73,16 @@ public:
         return data_.at(index);
     }
 
-    /// @brief Returns string of a specific value
     const std::string getAsString(unsigned int index) const;
 
-    /// @brief Sets specific value
     void set(unsigned int index, T value);
     void setFromFormat(unsigned int index, const std::string& format, const std::string& value_str, bool debug=false);
     void setAll(T value);
 
-    /// @brief Appends specific value
     void append(unsigned int index, T value);
     void appendFromFormat(unsigned int index, const std::string& format,
                           const std::string& value_str);
 
-    /// @brief Sets specific element to Null value
     void setNull(unsigned int index);
     void setAllNull();
 
@@ -148,12 +130,11 @@ public:
 private:
     Property property_;
     Buffer& buffer_;
-    /// Data container
+
     std::vector<T> data_;
-    // Null flags container
+
     std::vector<bool> null_flags_;
 
-    /// @brief Sets specific element to not Null value
     void unsetNull(unsigned int index);
 
     void resizeDataTo(unsigned int size);
@@ -164,7 +145,6 @@ private:
     void cutUpToIndex(unsigned int index); // everything up to index is removed
     void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
 
-    /// @brief Constructor, only for friend Buffer
     NullableVector(Property& property, Buffer& buffer);
 };
 
@@ -304,7 +284,7 @@ void NullableVector<T>::setAll(T value)
 {
     unsigned int data_size = data_.size();
 
-    for (unsigned int cnt=0; cnt < data_size; ++cnt)
+    for (unsigned int index=0; index < data_size; ++index)
     {
         data_.at(index) = value;
         unsetNull(index);
@@ -628,7 +608,7 @@ template <class T>
 std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
 {
     bool set = false;
-    T min, max;
+    T min{}, max{};
 
     for (; index < data_.size(); ++index)
     {
@@ -964,18 +944,20 @@ void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to ind
                << " null_size " << null_flags_.size();
     }
 
+    // Erase the range including both 0 and index
+
     if (null_flags_.size())
     {
-        if (index < null_flags_.size())
-            null_flags_.erase(null_flags_.begin(), null_flags_.begin() + index + 1);
+        if (index < null_flags_.size() - 1)
+            null_flags_.erase(null_flags_.begin(), null_flags_.begin() + index + 1); // first and last, is correct
         else
             null_flags_.clear(); // would have been removed
     }
 
     if (data_.size())
     {
-        if (index < data_.size())
-            data_.erase(data_.begin(), data_.begin() + index + 1); // takes number of elements
+        if (index < data_.size() - 1)
+            data_.erase(data_.begin(), data_.begin() + index + 1);
         else
             data_.clear(); // would have been removed
     }
@@ -1300,4 +1282,4 @@ void NullableVector<std::string>::append(unsigned int index, std::string value);
 template <>
 nlohmann::json NullableVector<boost::posix_time::ptime>::asJSON(unsigned int max_size);
 
-#endif /* ARRAYLIST_H_ */
+

@@ -5,17 +5,11 @@ include_directories (
 
 target_sources(compass
     PUBLIC
-        "${CMAKE_CURRENT_LIST_DIR}/correctsingle.h"
-        "${CMAKE_CURRENT_LIST_DIR}/correctjoined.h"
-        "${CMAKE_CURRENT_LIST_DIR}/falsesingle.h"
-        "${CMAKE_CURRENT_LIST_DIR}/falsejoined.h"
+        "${CMAKE_CURRENT_LIST_DIR}/correct.h"
+        "${CMAKE_CURRENT_LIST_DIR}/false.h"
         "${CMAKE_CURRENT_LIST_DIR}/correct_period.h"
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/correctsingle.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/correctjoined.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/falsesingle.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/falsejoined.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/correct.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/false.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/correct_period.cpp"
     )
-
-

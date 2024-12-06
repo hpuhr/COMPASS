@@ -164,6 +164,7 @@ void ASTERIXConfigWidget::updateFraming()
 
     framing_combo_->loadFramings();
     framing_combo_->setFraming(task_.settings().current_file_framing_);
+    framing_combo_->setEnabled(!task_.requiresFixedFraming());
 
     if (task_.settings().current_file_framing_ == "")
         framing_edit_->setDisabled(true);
@@ -176,7 +177,7 @@ void ASTERIXConfigWidget::updateCategories()
     assert(categories_grid_);
 
     QLayoutItem* child;
-    while ((child = categories_grid_->takeAt(0)) != nullptr)
+    while (!categories_grid_->isEmpty() && (child = categories_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();

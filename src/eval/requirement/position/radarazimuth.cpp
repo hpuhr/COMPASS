@@ -16,15 +16,14 @@
  */
 
 #include "eval/requirement/position/radarazimuth.h"
-#include "eval/results/position/radarazimuthsingle.h"
+#include "eval/results/position/radarazimuth.h"
 #include "evaluationmanager.h"
 #include "logger.h"
 #include "util/number.h"
-#include "ogrprojection.h"
+#include "projection.h"
 #include "projectionmanager.h"
 #include "util/timeconv.h"
 #include "sectorlayer.h"
-
 
 #include <algorithm>
 
@@ -37,16 +36,9 @@ namespace EvaluationRequirement
 
 PositionRadarAzimuth::PositionRadarAzimuth(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        EvaluationManager& eval_man, float threshold_value)
-    : Base(name, short_name, group_name, eval_man),
-      threshold_value_(threshold_value)
+        EvaluationManager& eval_man, double threshold_value)
+    : Base(name, short_name, group_name, threshold_value, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man)
 {
-
-}
-
-float PositionRadarAzimuth::thresholdValue() const
-{
-    return threshold_value_;
 }
 
 std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evaluate (
@@ -54,7 +46,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
         const SectorLayer& sector_layer)
 {
     logdbg << "EvaluationRequirementPositionRadarAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
-           << " threshold_value " << threshold_value_;
+           << " threshold_value " << threshold();
 
     time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
 
@@ -87,8 +79,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
     unsigned int num_distances {0};
     string comment;
 
-    vector<double> values;
-
     bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -106,7 +96,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
                             const std::string& comment)
     {
         details.push_back(Detail(ts, tst_pos).setValue(Result::DetailKey::PosInside, pos_inside.isValid() ? pos_inside : "false")
-                                             .setValue(Result::DetailKey::Value, offset.isValid() ? offset : 0.0f)
+                                             .setValue(Result::DetailKey::Value, offset)
                                              .setValue(Result::DetailKey::CheckPassed, check_passed)
                                              .setValue(Result::DetailKey::NumPos, num_pos)
                                              .setValue(Result::DetailKey::NumNoRef, num_no_ref)
@@ -122,12 +112,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
 
     ProjectionManager& proj_man = ProjectionManager::instance();
 
-    OGRProjection& projection = proj_man.ogrProjection();
+    Projection& projection = proj_man.currentProjection();
+    assert (projection.radarCoordinateSystemsAdded());
 
-    if (!projection.radarCoordinateSystemsAdded())
-        projection.addAllRadarCoordinateSystems();
-
-    double ref_range_m, ref_azm_deg, tst_range_m, tst_azm_deg;
+    double ref_slant_range_m, ref_ground_range_m, ref_alt_m, ref_azm_rad,
+        tst_slant_range_m, tst_ground_range_m, tst_alt_m, tst_azm_rad;
     double azm_deg_diff;
 
     for (const auto& tst_id : tst_data)
@@ -146,6 +135,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
                             num_comp_passed, num_comp_failed,
                             "No data source info");
 
+            ++num_no_ref;
             continue;
         }
 
@@ -200,7 +190,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
         }
         ++num_pos_inside;
 
-        ok = projection.wgs842PolarHorizontal(tst_ds_id, ref_pos->latitude_, ref_pos->longitude_, ref_azm_deg, ref_range_m);
+        ok = projection.wgs842PolarHorizontal(tst_ds_id,
+                                              ref_pos->latitude_, ref_pos->longitude_, 0,
+                                              ref_azm_rad, ref_slant_range_m, ref_ground_range_m,
+                                              ref_alt_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
@@ -213,7 +206,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
             continue;
         }
 
-        ok = projection.wgs842PolarHorizontal(tst_ds_id, tst_pos.latitude_, tst_pos.longitude_, tst_azm_deg, tst_range_m);
+        ok = projection.wgs842PolarHorizontal(tst_ds_id,
+                                              tst_pos.latitude_, tst_pos.longitude_, 0,
+                                              tst_azm_rad, tst_slant_range_m, tst_ground_range_m,
+                                              tst_alt_m);
         if (!ok)
         {
             addDetail(timestamp, tst_pos,
@@ -226,7 +222,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
             continue;
         }
 
-        azm_deg_diff = Number::calculateMinAngleDifference(ref_azm_deg, tst_azm_deg);
+        azm_deg_diff = Number::calculateMinAngleDifference(ref_azm_rad, tst_azm_rad);
 
         if (std::isnan(azm_deg_diff) || std::isinf(azm_deg_diff))
         {
@@ -242,7 +238,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
 
         ++num_distances;
 
-        if (fabs(azm_deg_diff) <= threshold_value_) // for single value
+        if (fabs(azm_deg_diff) <= threshold()) // for single value
         {
             comp_passed = true;
             ++num_comp_passed;
@@ -260,8 +256,6 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
                     num_pos, num_no_ref, num_pos_inside, num_pos_outside,
                     num_comp_passed, num_comp_failed,
                     comment);
-
-        values.push_back(azm_deg_diff);
     }
 
     //        logdbg << "EvaluationRequirementPositionRadarAzimuth '" << name_ << "': evaluate: utn " << target_data.utn_
@@ -280,26 +274,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
                << " num_distances " << num_distances;
 
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
-
     assert (num_distances == num_comp_failed + num_comp_passed);
-    assert (num_distances == values.size());
-
-    //assert (details.size() == num_pos);
 
     return make_shared<EvaluationRequirementResult::SinglePositionRadarAzimuth>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed,
-                values);
-}
-
-std::string PositionRadarAzimuth::getConditionStr () const
-{
-    return "<= "+ to_string(threshold_value_);
-}
-
-std::string PositionRadarAzimuth::getConditionResultStr (float rms_value) const
-{
-    return rms_value <= threshold_value_ ?  "Passed" : "Failed";
+                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed);
 }
 
 }
