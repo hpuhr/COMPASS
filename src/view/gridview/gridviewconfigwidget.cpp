@@ -76,6 +76,8 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     for (int i = 0; i < grid2d::NumValueTypes; ++i)
         value_type_combo_->addItem(QString::fromStdString(grid2d::valueTypeToString((grid2d::ValueType)i)), QVariant(i));
 
+    UI_TEST_OBJ_NAME(value_type_combo_, "value_type");
+
     connect(value_type_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &GridViewConfigWidget::valueTypeChanged);
 
     layout->addRow("Value Type:", value_type_combo_);
@@ -85,11 +87,15 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     grid_resolution_box_->setMaximum(1000);
     grid_resolution_box_->setKeyboardTracking(false);
 
+    UI_TEST_OBJ_NAME(grid_resolution_box_, "grid_resolution");
+
     connect(grid_resolution_box_, QOverload<int>::of(&QSpinBox::valueChanged), this, &GridViewConfigWidget::gridResolutionChanged);
 
     layout->addRow("Grid Resolution:", grid_resolution_box_);
 
     color_selection_ = new ColorScaleSelection;
+
+    UI_TEST_OBJ_NAME(color_selection_, "color_scale");
 
     connect(color_selection_, &ColorScaleSelection::scaleChanged, this, &GridViewConfigWidget::colorScaleChanged);
 
@@ -100,6 +106,8 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     color_steps_box_->setMaximum(32);
     color_steps_box_->setKeyboardTracking(false);
 
+    UI_TEST_OBJ_NAME(color_steps_box_, "color_steps");
+
     connect(color_steps_box_, QOverload<int>::of(&QSpinBox::valueChanged), this, &GridViewConfigWidget::colorStepsChanged);
 
     layout->addRow("Color Steps:", color_steps_box_);
@@ -107,6 +115,8 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     color_value_min_box_ = new PropertyValueEdit();
     reset_min_button_    = new QPushButton("Reset");
     reset_min_button_->setVisible(false); //@TODO
+
+    UI_TEST_OBJ_NAME(color_value_min_box_, "color_min");
 
     QHBoxLayout* layout_color_min = new QHBoxLayout;
     layout_color_min->setContentsMargins(0, 0, 0, 0);
@@ -122,6 +132,8 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     color_value_max_box_ = new PropertyValueEdit();
     reset_max_button_    = new QPushButton("Reset");
     reset_max_button_->setVisible(false); //@TODO
+
+    UI_TEST_OBJ_NAME(color_value_max_box_, "color_max");
 
     QHBoxLayout* layout_color_max = new QHBoxLayout;
     layout_color_max->setContentsMargins(0, 0, 0, 0);
@@ -140,6 +152,8 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     layout->addRow("", range_info_label_);
 
     export_button_ = new QPushButton("Export");
+
+    UI_TEST_OBJ_NAME(export_button_, "export");
 
     layout->addRow("", export_button_);
 

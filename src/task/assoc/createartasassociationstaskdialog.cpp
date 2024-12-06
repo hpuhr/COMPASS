@@ -46,14 +46,25 @@ CreateARTASAssociationsTaskDialog::CreateARTASAssociationsTaskDialog(CreateARTAS
     setLayout(main_layout);
 
     update();
+    updateButtons();
+
+    connect(&task_, &CreateARTASAssociationsTask::dataSourceChanged, this, &CreateARTASAssociationsTaskDialog::updateButtons);
 }
 
 void CreateARTASAssociationsTaskDialog::updateButtons()
 {
     assert (run_button_);
 
-    run_button_->setDisabled(!task_.canRun());
+    auto err = task_.checkError();
 
+    QString tt = "";
+    if (err == CreateARTASAssociationsTask::Error::NoDataSource)
+        tt = "Chosen data source invalid or empty";
+    else if (err == CreateARTASAssociationsTask::Error::NoDataForLineID)
+        tt = "Chosen line empty";
+
+    run_button_->setEnabled(err == CreateARTASAssociationsTask::Error::NoError);
+    run_button_->setToolTip(tt);
 }
 
 void CreateARTASAssociationsTaskDialog::runClickedSlot()
@@ -65,4 +76,3 @@ void CreateARTASAssociationsTaskDialog::cancelClickedSlot()
 {
     emit cancelSignal();
 }
-

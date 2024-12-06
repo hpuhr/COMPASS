@@ -290,6 +290,14 @@ public:
 
     std::string dbTableName() const;
 
+    static bool isStatusContent(const std::string& dbc_name); 
+    static bool isStatusContent(unsigned int dbc_id);
+    static bool isReferenceContent(const std::string& dbc_name);
+    static bool isReferenceContent(unsigned int dbc_id);
+
+    bool isStatusContent() const;
+    bool isReferenceContent() const;
+
 protected:
     COMPASS& compass_;
     DBContentManager& dbcont_manager_;

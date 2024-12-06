@@ -23,6 +23,7 @@
 #include "dbcontent/dbcontentmanager.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "dbcontent.h"
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -275,6 +276,10 @@ void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
 
     for (auto& dbo_it : COMPASS::instance().dbContentManager())
     {
+        if (dbo_it.second->isStatusContent() ||
+            dbo_it.second->isReferenceContent())
+            continue;
+
         ++row;
 
         unsigned int total_cnt = 0;
