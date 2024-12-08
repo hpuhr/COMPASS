@@ -134,8 +134,8 @@ ReconstructorMainWidget::ReconstructorMainWidget(ReconstructorBase& reconstructo
     // skip ref writing
 
     skip_reference_data_writing_box_ = new QCheckBox("Skip Writing of Reference Trajectories");
-    skip_reference_data_writing_box_->setToolTip("All associations are made and written, also the created targets,"
-                                                 " but no calculated reference target reports are written"
+    skip_reference_data_writing_box_->setToolTip("Targets are created but no calculated reference"
+                                                 " target reports or associations are written"
                                                  " into the database");
 
     connect(skip_reference_data_writing_box_, &QCheckBox::toggled,

@@ -286,7 +286,9 @@ bool ReconstructorBase::TargetsContainer::canAssocByACID(
             && !targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD(!tr.acad_))
         {
             if (do_debug)
-                loginf << "DBG same acid used by different transponders '" << *tr.acid_ << "'";
+                loginf << "DBG same acid used by different transponders '" << *tr.acid_ << "', utn "
+                       << targets_.at(acid_2_utn_.at(*tr.acid_)).asStr()
+                       << " tr " << tr.asStr();
 
             return false;
         }
@@ -331,7 +333,42 @@ bool ReconstructorBase::TargetsContainer::canAssocByTrackNumber(
         loginf << "DBG canAssocByTrackNumber can use stored utn in tn2utn_ "
                << tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
 
-    return tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
+    if (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_))
+        return false;
+
+    int utn {-1};
+
+    boost::posix_time::ptime timestamp_prev;
+
+    std::tie(utn, timestamp_prev) = tn2utn_.at(tr.ds_id_).at(tr.line_id_).at(*tr.track_number_);
+
+    if (do_debug || reconstructor_->task().debugSettings().debugUTN(utn))
+        loginf << "DBG can assoc by tn " << *tr.track_number_ << " to utn " << utn;
+
+    // tr has acad, target has an acad but not the target reports
+    // happens if same acid is used by 2 different transponders
+    if (tr.acad_ && targets_.at(utn).hasACAD()
+        && !targets_.at(utn).hasACAD(!tr.acad_))
+    {
+        logwrn << "ReconstructorBase: TargetsContainer: canAssocByTrackNumber:"
+                  << " same track num reused by different ACAD transponders, tr " << *tr.track_number_ << ", utn "
+               << targets_.at(utn).asStr() << " tr " << tr.asStr() << ", unassociating";
+
+        eraseTrackNumberLookup(tr);
+
+        if (tr.acid_ && acid_2_utn_.count(*tr.acid_))
+        {
+            if (do_debug || reconstructor_->task().debugSettings().debugUTN(utn))
+                loginf << "DBG removing from acid lookup " << *tr.acid_ << " to utn " << acid_2_utn_.at(*tr.acid_);
+
+            acid_2_utn_.erase(*tr.acid_);
+            unspecific_acids_.insert(*tr.acid_);
+        }
+
+        return false;
+    }
+
+    return true;
 }
 
 int ReconstructorBase::TargetsContainer::assocByTrackNumber(
@@ -366,6 +403,9 @@ int ReconstructorBase::TargetsContainer::assocByTrackNumber(
 
         return -1; // disassoc case
     }
+
+     if (do_debug || reconstructor_->task().debugSettings().debugUTN(utn))
+        loginf << "DBG assoc by tn " << *tr.track_number_ << " to utn " << utn;
 
     return utn;
 }

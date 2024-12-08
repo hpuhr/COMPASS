@@ -19,7 +19,7 @@ class ReconstructorTaskAnalysisWidget : public QWidget
     void recNumsChangedSlot(const QString& value);
 
   public:
-    explicit ReconstructorTaskAnalysisWidget(ReconstructorTask& task, QWidget *parent = nullptr);
+    explicit ReconstructorTaskAnalysisWidget(ReconstructorTask& task, bool probimm_reconst, QWidget *parent = nullptr);
     virtual ~ReconstructorTaskAnalysisWidget();
 
     void updateValues();
@@ -28,6 +28,7 @@ class ReconstructorTaskAnalysisWidget : public QWidget
     void timestampsChanged();
 
     ReconstructorTask& task_;
+    bool probimm_reconst_ {false};
 
     QCheckBox* debug_check_{nullptr};
 

@@ -18,8 +18,9 @@ using namespace std;
 using namespace Utils;
 
 
-ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(ReconstructorTask& task, QWidget *parent)
-    : QWidget{parent}, task_(task)
+ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(
+    ReconstructorTask& task, bool probimm_reconst, QWidget *parent)
+    : QWidget{parent}, task_(task), probimm_reconst_(probimm_reconst)
 {
     bool add_debug_stuff = !COMPASS::isAppImage() || COMPASS::instance().expertMode();
 
@@ -67,7 +68,7 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(ReconstructorTa
     connect(debug_outliers_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_outlier_detection_ = ok; });
 
-    if (add_debug_stuff)
+    if (probimm_reconst_ && add_debug_stuff)
         combo_layout->addRow("Debug Outlier Detection", debug_outliers_check_);
 
     // acc est
@@ -76,19 +77,22 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(ReconstructorTa
     connect(debug_accuracy_est_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_accuracy_estimation_ = ok; });
 
-    combo_layout->addRow("Analyse Accuracy Estimation", debug_accuracy_est_check_);
+    if (probimm_reconst_)
+        combo_layout->addRow("Analyse Accuracy Estimation", debug_accuracy_est_check_);
 
     debug_bias_correction_check_ = new QCheckBox();
     connect(debug_bias_correction_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_bias_correction_ = ok; });
 
-    combo_layout->addRow("Analyse Bias Correction", debug_bias_correction_check_);
+    if (probimm_reconst_)
+        combo_layout->addRow("Analyse Bias Correction", debug_bias_correction_check_);
 
     debug_geo_altitude_correction_check_ = new QCheckBox();
     connect(debug_geo_altitude_correction_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_geo_altitude_correction_ = ok; });
 
-    combo_layout->addRow("Analyse Geo.Altitude Correction", debug_geo_altitude_correction_check_);
+    if (probimm_reconst_)
+        combo_layout->addRow("Analyse Geo.Altitude Correction", debug_geo_altitude_correction_check_);
 
     // deep acc est
 
@@ -105,7 +109,8 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(ReconstructorTa
         deep_debug_accuracy_estimation_checks_[ds_type] = check;
         deep_debug_accuracy_estimation_write_vp_checks_[ds_type] = write_vp_check;
 
-        combo_layout->addRow(check, write_vp_check);
+        if (probimm_reconst_)
+            combo_layout->addRow(check, write_vp_check);
     }
 
     // reference stuff

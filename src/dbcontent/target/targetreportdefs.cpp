@@ -226,8 +226,16 @@ std::string ReconstructorInfo::asStr() const
 
     ss << " acad " << (acad_ ? String::hexStringFromInt(*acad_, 6, '0') : "''")
        << " acid '" << (acid_ ? *acid_ : "")  << "'"
-       << " m3a " << (mode_a_code_ ? mode_a_code_->asStr() : "")
-       << " curslc " << in_current_slice_;
+       << " m3a " << (mode_a_code_ ? mode_a_code_->asStr() : "");
+
+    if (track_number_)
+        ss << " tn " << *track_number_;
+    if (track_begin_)
+        ss << " tbeg " << *track_begin_;
+    if (track_end_)
+        ss << " tend " << *track_end_;
+
+    ss << " curslc " << in_current_slice_;
 
     return ss.str();
 }
