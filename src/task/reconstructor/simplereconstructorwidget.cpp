@@ -64,7 +64,8 @@ SimpleReconstructorWidget::SimpleReconstructorWidget(SimpleReconstructor& recons
 
     debug_widget_.reset(new ReconstructorTaskAnalysisWidget(reconstructor_.task(), false));
 
-    tab_widget->addTab(debug_widget_.get(), "Analysis");
+    if (!COMPASS::isAppImage() || COMPASS::instance().expertMode())
+        tab_widget->addTab(debug_widget_.get(), "Analysis");
 
     update();
 
