@@ -105,11 +105,12 @@ ViewVariable& VariableView::addVariable(const std::string& id,
                                         const std::string& default_name,
                                         bool show_meta_vars,
                                         bool show_empty_vars,
+                                        bool allow_empty_var,
                                         const std::vector<PropertyDataType>& valid_data_types)
 {
     bool empty = default_dbo.empty() || default_name.empty();
 
-    assert(!empty || show_empty_vars);
+    assert(!empty || allow_empty_var);
 
     int idx = (int)variables_.size();
 
@@ -122,6 +123,7 @@ ViewVariable& VariableView::addVariable(const std::string& id,
 
     var.settings().show_meta_vars   = show_meta_vars;
     var.settings().show_empty_vars  = show_empty_vars;
+    var.settings().allow_empty_var  = allow_empty_var;
     var.settings().valid_data_types = std::set<PropertyDataType>(valid_data_types.begin(), valid_data_types.end());
 
     registerParameter(var.regParamDBO() , &var.settings().data_var_dbo , default_dbo );

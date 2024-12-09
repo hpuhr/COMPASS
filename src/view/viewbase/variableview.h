@@ -93,6 +93,7 @@ protected:
                               const std::string& default_name,
                               bool show_meta_vars,
                               bool show_empty_vars,
+                              bool allow_empty_var,
                               const std::vector<PropertyDataType>& valid_data_types);
     void addVariablesToSet(dbContent::VariableSet& set, 
                            const std::string& dbcontent_name);

@@ -64,7 +64,7 @@ HistogramView::HistogramView(const std::string&
                                                         PropertyDataType::FLOAT,
                                                         PropertyDataType::DOUBLE };
 
-    addVariable("data_var", "", "data_var", META_OBJECT_NAME, DBContent::meta_var_timestamp_.name(), true, true, valid_types);
+    addVariable("data_var", "", "data_var", META_OBJECT_NAME, DBContent::meta_var_timestamp_.name(), true, true, false, valid_types);
 
     // create sub done in init
 }

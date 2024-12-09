@@ -234,7 +234,7 @@ bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent
     assert(buffer);
 
     //allow empty variables if configured correctly
-    if (variable.settings().show_empty_vars && variable.isEmpty())
+    if (variable.settings().allow_empty_var && variable.isEmpty())
         return true;
 
     auto data_var = variable.getFor(dbcontent_name);

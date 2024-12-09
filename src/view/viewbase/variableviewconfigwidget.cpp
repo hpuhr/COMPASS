@@ -54,7 +54,6 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
         layout->addWidget(new QLabel(QString::fromStdString(label)));
 
         auto sel_widget = new dbContent::VariableSelectionWidget();
-        sel_widget->showEmptyVariable(var.settings().show_empty_vars);
         sel_widget->setObjectName(QString::fromStdString(object_name));
 
         var_view_->variable(idx).configureWidget(*sel_widget);

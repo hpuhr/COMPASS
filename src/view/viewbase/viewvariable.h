@@ -50,6 +50,7 @@ public:
         std::set<PropertyDataType> valid_data_types;
         bool show_meta_vars  = true;
         bool show_empty_vars = false;
+        bool allow_empty_var = false;
     };
 
     ViewVariable(const std::string& id_str, int idx, VariableView* view = nullptr);

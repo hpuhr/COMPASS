@@ -248,7 +248,7 @@ void ViewVariable::setMetaVariable(dbContent::MetaVariable& var, bool notify_cha
  */
 void ViewVariable::setEmpty(bool notify_changes)
 {
-    assert(settings_.show_empty_vars);
+    assert(settings_.allow_empty_var);
 
     if (settings_.data_var_dbo == "" && 
         settings_.data_var_name == "")
@@ -396,8 +396,9 @@ void ViewVariable::setVariable(const dbContent::VariableSelectionWidget& selecti
 void ViewVariable::configureWidget(dbContent::VariableSelectionWidget& selection)
 {
     selection.showMetaVariables(settings_.show_meta_vars);
-    selection.showEmptyVariable(settings_.show_empty_vars);
-
+    selection.showExistingInDBOnly(!settings_.show_empty_vars);
+    selection.showEmptyVariable(settings_.allow_empty_var);
+    
     if (!settings_.valid_data_types.empty())
         selection.showDataTypesOnly(std::vector<PropertyDataType>(settings_.valid_data_types.begin(),
                                                                   settings_.valid_data_types.end()));

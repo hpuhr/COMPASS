@@ -34,7 +34,7 @@
 /**
 */
 GridView::Settings::Settings() 
-:   value_type            (grid2d::ValueType::ValueTypeCountValid)
+:   value_type            (grid2d::ValueType::ValueTypeCountTotal)
 ,   grid_resolution       (50       )
 ,   render_color_value_min(""       )
 ,   render_color_value_max(""       )
@@ -80,9 +80,9 @@ GridView::GridView(const std::string& class_id,
                                                            PropertyDataType::FLOAT,
                                                            PropertyDataType::DOUBLE };
 
-    addVariable("data_var_x", "X"          , "x", META_OBJECT_NAME, DBContent::meta_var_longitude_.name(), true, false, valid_types_xy);
-    addVariable("data_var_y", "Y"          , "y", META_OBJECT_NAME, DBContent::meta_var_latitude_.name() , true, false, valid_types_xy);
-    addVariable("data_var_z", "Distributed", "z", ""              , ""                                   , true, true , valid_types_z );
+    addVariable("data_var_x", "X"          , "x", META_OBJECT_NAME, DBContent::meta_var_longitude_.name(), true, true, false, valid_types_xy);
+    addVariable("data_var_y", "Y"          , "y", META_OBJECT_NAME, DBContent::meta_var_latitude_.name() , true, true, false, valid_types_xy);
+    addVariable("data_var_z", "Distributed", "z", ""              , ""                                   , true, true, true , valid_types_z );
 
     updateSettingsFromVariable();
 

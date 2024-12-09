@@ -119,7 +119,7 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
         const ViewVariable& view_var = variableView()->variable(i);
 
         //legit empty variables are handled in a special way, so do not return
-        bool is_empty = view_var.settings().show_empty_vars && view_var.isEmpty();
+        bool is_empty = view_var.settings().allow_empty_var && view_var.isEmpty();
         if (is_empty)
         {
             loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.id() << " empty";
@@ -287,7 +287,7 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     const ViewVariable& view_var = variableView()->variable(var_idx);
     const dbContent::Variable* data_var = view_var.getFor(buffer.dbContentName());
 
-    bool is_empty = view_var.settings().show_empty_vars && view_var.isEmpty();
+    bool is_empty = view_var.settings().allow_empty_var && view_var.isEmpty();
 
     //handle special cases
     if (is_empty)
