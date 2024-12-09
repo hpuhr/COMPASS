@@ -25,6 +25,8 @@
 #include <QImage>
 #include <QRectF>
 
+#include <boost/optional.hpp>
+
 class GridView;
 class GridViewWidget;
 class Grid2D;
@@ -74,8 +76,8 @@ public:
     const QRectF& gridBounds() const { return grid_roi_; }
     bool gridIsNorthUp() const { return grid_north_up_; }
 
-    double getGridValueMin() const { return grid_value_min_; }
-    double getGridValueMax() const { return grid_value_max_; }
+    const boost::optional<double>& getGridValueMin() const { return grid_value_min_; }
+    const boost::optional<double>& getGridValueMax() const { return grid_value_max_; }
 
     bool customRangeInvalid() const { return custom_range_invalid_; }
 
@@ -129,8 +131,8 @@ private:
     QRectF                  grid_roi_;
     bool                    grid_north_up_;
     RasterReference         ref_;
-    double                  grid_value_min_ = 0.0;
-    double                  grid_value_max_ = 1.0;
+    boost::optional<double> grid_value_min_;
+    boost::optional<double> grid_value_max_;
     bool                    custom_range_invalid_ = false;
 
     Grid2DLayers grid_layers_;

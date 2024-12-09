@@ -94,10 +94,15 @@ protected:
     virtual void checkSubConfigurables() override;
     virtual void updateSelection() override;
 
+    virtual void postVariableChangedEvent(int idx) override;
+
     virtual bool init_impl() override;
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) override;
+
+    void updateSettingsFromVariable();
+    void updateSettings(const std::string& dbo, const std::string& name);
 
     GridViewDataWidget* getDataWidget();
 

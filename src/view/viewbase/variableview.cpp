@@ -107,7 +107,13 @@ ViewVariable& VariableView::addVariable(const std::string& id,
                                         bool show_empty_vars,
                                         const std::vector<PropertyDataType>& valid_data_types)
 {
-    variables_.emplace_back(new ViewVariable(id, this));
+    bool empty = default_dbo.empty() || default_name.empty();
+
+    assert(!empty || show_empty_vars);
+
+    int idx = (int)variables_.size();
+
+    variables_.emplace_back(new ViewVariable(id, idx, this));
 
     ViewVariable& var = *variables_.back();
 

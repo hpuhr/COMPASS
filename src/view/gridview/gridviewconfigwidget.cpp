@@ -203,7 +203,7 @@ void GridViewConfigWidget::postVariableChangedEvent(int idx)
     if (idx == 0 || idx == 1)
         updateExport();
     else if (idx == 2)
-        updateVariableDataType();
+        updateDistributedVariable();
 }
 
 /**
@@ -359,6 +359,26 @@ void GridViewConfigWidget::updateConfig()
     color_value_max_box_->blockSignals(true);
     color_value_max_box_->setValue(settings.render_color_value_max);
     color_value_max_box_->blockSignals(false);
+}
+
+/**
+*/
+void GridViewConfigWidget::updateDistributedVariable()
+{
+    updateVariableDataType();
+
+    bool var_empty = view_->variable(2).isEmpty();
+
+    if (var_empty)
+    {
+        loginf << "GridViewConfigWidget: updateDistributedVariable: setting distributed variable to empty";
+
+        value_type_combo_->blockSignals(true);
+        value_type_combo_->setCurrentIndex(value_type_combo_->findData(QVariant((int)grid2d::ValueType::ValueTypeCountTotal)));
+        value_type_combo_->blockSignals(false);
+    }
+
+    value_type_combo_->setEnabled(!var_empty);
 }
 
 /**

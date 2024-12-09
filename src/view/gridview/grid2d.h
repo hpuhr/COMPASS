@@ -71,7 +71,7 @@ public:
                    size_t n,
                    double v, 
                    int subsampling = 10);
-    bool setValue(double x, double y, double v);
+    //bool setValue(double x, double y, double v);
     bool setCount(double x, double y, size_t count);
 
     void select(size_t x, size_t y, bool ok);
@@ -108,21 +108,23 @@ private:
     enum class IndexError
     {
         NoError = 0,
-        Inf,
+        InfIndex,
+        InfValue,
         OOR
     };
 
     enum ValueIndex
     {
-        IndexValue    = 0,
-        IndexCount    = 0,
-        IndexMin      = 1,
-        IndexMax      = 2,
-        IndexMean     = 3,
-        IndexMean2    = 4,
-        IndexVar      = 4,
-        IndexStddev   = 4,
-        NumLayers     = 5
+        IndexValue      = 0,
+        IndexCountValid = 0,
+        IndexCountNan   = 1,
+        IndexMin        = 2,
+        IndexMax        = 3,
+        IndexMean       = 4,
+        IndexMean2      = 5,
+        IndexVar        = 5,
+        IndexStddev     = 5,
+        NumLayers       = 6
     };
 
     IndexError index(size_t& idx_x, size_t& idx_y, double x, double y, bool clamp = false) const;

@@ -118,6 +118,15 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
     {
         const ViewVariable& view_var = variableView()->variable(i);
 
+        //legit empty variables are handled in a special way, so do not return
+        bool is_empty = view_var.settings().show_empty_vars && view_var.isEmpty();
+        if (is_empty)
+        {
+            loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.id() << " empty";
+            continue;
+        }
+
+        //otherwise return on invalid variable
         if (!view_var.getFor(dbcontent_name))
         {
             loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.variableName()
@@ -278,8 +287,23 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     const ViewVariable& view_var = variableView()->variable(var_idx);
     const dbContent::Variable* data_var = view_var.getFor(buffer.dbContentName());
 
-    if (!data_var)
+    bool is_empty = view_var.settings().show_empty_vars && view_var.isEmpty();
+
+    //handle special cases
+    if (is_empty)
     {
+        loginf << "VariableViewStashDataWidget: updateVariableData: adding empty variable to stash";
+
+        //empty variable selected => add zero values 
+        //(a little bit hacky, but we do not want to count the values as Nan or NULL values)
+        std::vector<double> vempty(indexes.size(), 0.0);
+        values.insert(values.end(), vempty.begin(), vempty.end());
+
+        return;
+    }
+    else if (!data_var)
+    {
+        //if not empty and no data var, something is fishy
         logwrn << "VariableViewStashDataWidget: updateVariableData: could not retrieve data var";
         return;
     }

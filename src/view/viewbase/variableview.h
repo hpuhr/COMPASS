@@ -84,6 +84,8 @@ public slots:
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override final;
 
 protected:
+    friend class ViewVariable;
+
     ViewVariable& addVariable(const std::string& id,
                               const std::string& display_name,
                               const std::string& var_name,
@@ -96,6 +98,9 @@ protected:
                            const std::string& dbcontent_name);
 
     virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) = 0;
+
+    virtual void preVariableChangedEvent(int idx, const std::string& dbo, const std::string& name) {}
+    virtual void postVariableChangedEvent(int idx) {}
 
     virtual void unshowViewPoint(const ViewableDataConfig* vp) {}
     virtual void showViewPoint(const ViewableDataConfig* vp) {}

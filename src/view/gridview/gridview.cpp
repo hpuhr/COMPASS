@@ -34,7 +34,7 @@
 /**
 */
 GridView::Settings::Settings() 
-:   value_type            (grid2d::ValueType::ValueTypeCount)
+:   value_type            (grid2d::ValueType::ValueTypeCountValid)
 ,   grid_resolution       (50       )
 ,   render_color_value_min(""       )
 ,   render_color_value_max(""       )
@@ -82,7 +82,9 @@ GridView::GridView(const std::string& class_id,
 
     addVariable("data_var_x", "X"          , "x", META_OBJECT_NAME, DBContent::meta_var_longitude_.name(), true, false, valid_types_xy);
     addVariable("data_var_y", "Y"          , "y", META_OBJECT_NAME, DBContent::meta_var_latitude_.name() , true, false, valid_types_xy);
-    addVariable("data_var_z", "Distributed", "z", META_OBJECT_NAME, DBContent::meta_var_mc_.name()       , true, false, valid_types_z);
+    addVariable("data_var_z", "Distributed", "z", ""              , ""                                   , true, true , valid_types_z );
+
+    updateSettingsFromVariable();
 
     // create sub done in init
 }
@@ -270,6 +272,40 @@ void GridView::setMaxValue(const std::string& value_str, bool notify_changes)
 
 /**
  */
+void GridView::postVariableChangedEvent(int idx)
+{
+    if (idx == 2)
+        updateSettingsFromVariable();
+}
+
+/**
+ */
+void GridView::updateSettingsFromVariable()
+{
+    const auto& var = variable(2);
+
+    updateSettings(var.settings().data_var_dbo, var.settings().data_var_name);
+}
+
+/**
+ */
+void GridView::updateSettings(const std::string& dbo, const std::string& name)
+{
+    bool is_empty = dbo.empty() && name.empty();
+
+    if (is_empty)
+    {
+        loginf << "GridView: updateSettings: Settings distributed variable to empty";
+
+        //set special settings for empty variable
+        setValueType(grid2d::ValueType::ValueTypeCountTotal, false);
+        setMinValue("", false);
+        setMaxValue("", false);
+    }
+}
+
+/**
+ */
 boost::optional<double> GridView::getMinValue() const
 {
     if (settings_.render_color_value_min.empty())
@@ -299,13 +335,16 @@ PropertyDataType GridView::currentDataType() const
     auto data_type = variable(2).dataType();
 
     //counts are active => always override data type
-    if (settings_.value_type == (int)grid2d::ValueType::ValueTypeCount)
+    if (!data_type.has_value() ||
+        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountValid ||
+        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountNan ||
+        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountTotal)
     {
         return PropertyDataType::UINT;
     }
 
     //in all other cases the data type of the distributed variable should be the right one
-    return data_type;
+    return data_type.value();
 }
 
 /**
@@ -315,7 +354,10 @@ PropertyDataType GridView::currentLegendDataType() const
     auto data_type = variable(2).dataType();
 
     //counts are active => always override data type
-    if (settings_.value_type == (int)grid2d::ValueType::ValueTypeCount)
+    if (!data_type.has_value() ||
+        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountValid ||
+        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountNan ||
+        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountTotal)
     {
         return PropertyDataType::UINT;
     }
@@ -327,7 +369,7 @@ PropertyDataType GridView::currentLegendDataType() const
     }
 
     //in all other cases the data type of the distributed variable should be the right one
-    return data_type;
+    return data_type.value();
 }
 
 /**

@@ -223,7 +223,7 @@ namespace
 bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent_name) const
 {
     auto& variable = variable_view_->variable(var_idx);
-
+    
     if (!viewData().count(dbcontent_name))
     {
         loginf << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no buffer";
@@ -232,6 +232,10 @@ bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent
 
     Buffer* buffer = viewData().at(dbcontent_name).get();
     assert(buffer);
+
+    //allow empty variables if configured correctly
+    if (variable.settings().show_empty_vars && variable.isEmpty())
+        return true;
 
     auto data_var = variable.getFor(dbcontent_name);
     if (!data_var)
