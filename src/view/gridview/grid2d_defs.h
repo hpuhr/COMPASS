@@ -95,11 +95,11 @@ inline std::string valueTypeToString(ValueType vtype)
     switch (vtype)
     {
         case ValueTypeCountValid:
-            return "Valid Count";
+            return "Count Valid";
         case ValueTypeCountNan:
-            return "Nan Count";
+            return "Count Invalid";
         case ValueTypeCountTotal:
-            return "Total Count";
+            return "Count Total";
         case ValueTypeMin:
             return "Min";
         case ValueTypeMax:
