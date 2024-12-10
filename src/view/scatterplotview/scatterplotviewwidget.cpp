@@ -122,10 +122,3 @@ const ScatterPlotViewConfigWidget* ScatterPlotViewWidget::getViewConfigWidget() 
     assert(w);
     return w;
 }
-
-/**
-*/
-std::string ScatterPlotViewWidget::loadedMessage_impl() const
-{
-    return "Loaded with " + std::to_string(getViewDataWidget()->nullValueCount()) + " NULL values";
-}

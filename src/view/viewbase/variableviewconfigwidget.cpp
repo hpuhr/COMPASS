@@ -74,21 +74,30 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
 
             const auto& var0 = var_view_->variable(idx0);
 
+            auto var_w = new QWidget;
+            auto layout = new QHBoxLayout;
+            layout->setContentsMargins(0, 0, 0, 0);
+            var_w->setLayout(layout);
+
             auto var_switch = new QToolButton;
             var_switch->setIcon(QIcon(Utils::Files::getIconFilepath("switch_ud.png").c_str()));
             var_switch->setToolTip(QString::fromStdString("Switch " + var0.settings().display_name + " and " + var.settings().display_name));
-
             var_switch->setVisible(false);
+
+            var_w->setFixedSize(var_switch->sizeHint());
+            layout->addWidget(var_switch);
 
             auto switch_cb = [ = ] () { this->switchVariables(idx0, idx1); };
 
             connect(var_switch, &QToolButton::pressed, switch_cb);
 
             var_switches_.push_back(var_switch);
-            switch_layout->addWidget(var_switch);
+
+            switch_layout->addWidget(var_w);
         }
 
-        switch_layout->addStretch(1);
+        switch_layout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Minimum));
+        //switch_layout->addStretch(1);
     };
 
     bool show_annotation = var_view_->showsAnnotation() && 

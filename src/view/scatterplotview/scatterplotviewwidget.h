@@ -55,9 +55,6 @@ public:
 
     /// @brief Returns the basis view
     ScatterPlotView* getView();
-
-protected:
-    virtual std::string loadedMessage_impl() const override;
 };
 
 #endif /* SCATTERPLOTVIEWWIDGET_H_ */

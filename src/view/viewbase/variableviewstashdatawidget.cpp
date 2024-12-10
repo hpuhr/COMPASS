@@ -58,13 +58,6 @@ VariableViewStashDataWidget::~VariableViewStashDataWidget() = default;
 
 /**
 */
-unsigned int VariableViewStashDataWidget::nullValueCount() const
-{
-    return stash_.nan_value_count_;
-}
-
-/**
-*/
 void VariableViewStashDataWidget::resetVariableData()
 {
     //reset stash data

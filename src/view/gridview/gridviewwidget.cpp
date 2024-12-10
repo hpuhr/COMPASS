@@ -28,8 +28,6 @@
 #include <QSplitter>
 #include <QTabWidget>
 
-
-
 /**
  */
 GridViewWidget::GridViewWidget(const std::string& class_id, 
@@ -123,11 +121,4 @@ const GridViewConfigWidget* GridViewWidget::getViewConfigWidget() const
     auto w = dynamic_cast<const GridViewConfigWidget*>(ViewWidget::getViewConfigWidget());
     assert(w);
     return w;
-}
-
-/**
-*/
-std::string GridViewWidget::loadedMessage_impl() const
-{
-    return "Loaded with " + std::to_string(getViewDataWidget()->nullValueCount()) + " NULL values";
 }

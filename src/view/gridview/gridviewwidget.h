@@ -41,7 +41,4 @@ public:
     const GridViewConfigWidget* getViewConfigWidget() const;
 
     GridView* getView();
-
-protected:
-    virtual std::string loadedMessage_impl() const override;
 };
