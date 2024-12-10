@@ -58,6 +58,9 @@ public:
     boost::optional<PropertyDataType> variableDataType(int var_idx) const;
     bool variableIsDateTime(int var_idx) const;
 
+    const boost::optional<size_t>& nullCount() const { return count_null_; }
+    const boost::optional<size_t>& nanCount() const { return count_nan_; }
+
 protected:
     virtual void loadingStarted_impl() override final;
     virtual void loadingDone_impl() override final;
@@ -99,10 +102,16 @@ protected:
     const VariableView* variableView() const { return variable_view_; }
     VariableView* variableView() { return variable_view_; }
 
+    void addNullCount(size_t n);
+    void addNanCount(size_t n);
+
 private:
     void resetVariableStates();
     
     VariableView* variable_view_ = nullptr;
 
     mutable std::vector<VariableState> variable_states_;
+
+    boost::optional<size_t> count_null_ = 0;
+    boost::optional<size_t> count_nan_  = 0;
 };

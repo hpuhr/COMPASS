@@ -94,10 +94,12 @@ void GridViewDataWidget::resetGrid()
 */
 void GridViewDataWidget::resetGridChart()
 {
-    grid_chart_.reset();
+    colormap_.reset();
 
     legend_->setColorMap(ColorMap());
     legend_->setVisible(false);
+
+    grid_chart_.reset();
 
     grid_rendering_ = QImage();
     grid_roi_       = QRectF();
@@ -212,6 +214,11 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
             if (!dbc_values.second.isNan(0, i) && !dbc_values.second.isNan(1, i))
                 grid_->addValue(x_values[ i ], y_values[ i ], z_values[ i ]);
     }
+
+    loginf << "GridViewDataWidget: processStash:"
+           << " added " << grid_->numAdded() 
+           << " oor "   << grid_->numOutOfRange() 
+           << " inf "   << grid_->numInf();
 
     loginf << "GridViewDataWidget: processStash: getting layer";
 
@@ -460,6 +467,21 @@ bool GridViewDataWidget::updateGridChart()
 
     main_layout_->insertWidget(0, grid_chart_.get());
 
+    if (colormap_.has_value())
+    {
+        auto dtype = view_->currentLegendDataType();
+
+        //update legend widget
+        auto decoratorFunc = [ = ] (double v)
+        {
+            return property_templates::double2String(dtype, v, GridView::DecimalsDefault);
+        };
+
+        legend_->setColorMap(colormap_.value());
+        legend_->setDecorator(decoratorFunc);
+        legend_->setVisible(true);
+    }
+
     return has_data;
 }
 
@@ -470,6 +492,7 @@ void GridViewDataWidget::updateRendering()
     loginf << "GridViewDataWidget: updateRendering: rendering";
 
     custom_range_invalid_ = false;
+    colormap_.reset();
 
     //no valid grid no rendering
     if (!hasValidGrid())
@@ -559,15 +582,7 @@ void GridViewDataWidget::updateRendering()
                                             range);
         }
 
-        //update legend widget
-        auto decoratorFunc = [ = ] (double v)
-        {
-            return property_templates::double2String(dtype, v, GridView::DecimalsDefault);
-        };
-
-        legend_->setColorMap(render_settings.color_map);
-        legend_->setDecorator(decoratorFunc);
-        legend_->setVisible(true);
+        colormap_ = render_settings.color_map;
     }
 
     //render grid

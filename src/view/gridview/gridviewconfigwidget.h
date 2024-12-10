@@ -56,7 +56,7 @@ protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
     virtual void configChanged_impl() override;
 
-    virtual void postVariableChangedEvent(int idx) override;
+    virtual void variableChangedEvent(int idx) override;
 
     void attachExportMenu();
 

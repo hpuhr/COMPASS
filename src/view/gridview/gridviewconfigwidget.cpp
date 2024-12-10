@@ -160,6 +160,8 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     attachExportMenu();
     updateConfig();
     updateExport();
+
+    showSwitch(0, true);
 }
 
 /**
@@ -198,7 +200,7 @@ void GridViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
 /**
 */
-void GridViewConfigWidget::postVariableChangedEvent(int idx)
+void GridViewConfigWidget::variableChangedEvent(int idx)
 {
     if (idx == 0 || idx == 1)
         updateExport();

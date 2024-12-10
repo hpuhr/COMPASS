@@ -19,6 +19,7 @@
 
 #include "variableviewstashdatawidget.h"
 #include "grid2dlayer.h"
+#include "colormap.h"
 
 #include <memory>
 
@@ -126,14 +127,15 @@ private:
     std::unique_ptr<QtCharts::GridViewChart> grid_chart_;
     ColorLegendWidget* legend_ = nullptr;
 
-    std::unique_ptr<Grid2D> grid_;
-    QImage                  grid_rendering_;
-    QRectF                  grid_roi_;
-    bool                    grid_north_up_;
-    RasterReference         ref_;
-    boost::optional<double> grid_value_min_;
-    boost::optional<double> grid_value_max_;
-    bool                    custom_range_invalid_ = false;
+    std::unique_ptr<Grid2D>   grid_;
+    QImage                    grid_rendering_;
+    QRectF                    grid_roi_;
+    bool                      grid_north_up_;
+    RasterReference           ref_;
+    boost::optional<ColorMap> colormap_;
+    boost::optional<double>   grid_value_min_;
+    boost::optional<double>   grid_value_max_;
+    bool                      custom_range_invalid_ = false;
 
     Grid2DLayers grid_layers_;
     std::string  x_axis_name_;

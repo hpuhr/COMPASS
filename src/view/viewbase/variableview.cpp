@@ -199,6 +199,26 @@ bool VariableView::showsVariables() const
 
 /**
 */
+void VariableView::switchVariables(int var0, int var1, bool inform_config_widget)
+{
+    auto& variable0 = variable(var0);
+    auto& variable1 = variable(var1);
+
+    std::string var0_dbo  = variable0.settings().data_var_dbo;
+    std::string var0_name = variable0.settings().data_var_name;
+
+    std::string var1_dbo  = variable1.settings().data_var_dbo;
+    std::string var1_name = variable1.settings().data_var_name;
+
+    variable0.set(var1_dbo, var1_name, true);
+    variable1.set(var0_dbo, var0_name, true);
+
+    if (inform_config_widget) 
+        getConfigWidget()->configChanged();
+}
+
+/**
+*/
 void VariableView::showAnnotation(bool force, bool update_config)
 {
     if (!canShowAnnotations() || !hasAnnotations())

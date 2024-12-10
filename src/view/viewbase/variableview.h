@@ -65,6 +65,8 @@ public:
     void showVariables();
     bool showsVariables() const;
 
+    void switchVariables(int var0, int var1, bool inform_config_widget);
+
     void showAnnotation();
     bool showsAnnotation() const;
     void setCurrentAnnotation(int group_idx, int annotation_idx);

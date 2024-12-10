@@ -65,6 +65,8 @@ public:
 
     boost::optional<PropertyDataType> dataType() const;
 
+    void set(const std::string& dbo, const std::string& name, bool notify_changes);
+
     dbContent::Variable& variable();
     const dbContent::Variable& variable() const;
     dbContent::Variable* variablePtr();

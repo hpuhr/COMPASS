@@ -118,6 +118,41 @@ boost::optional<PropertyDataType> ViewVariable::dataType() const
 
 /**
  */
+void ViewVariable::set(const std::string& dbo, const std::string& name, bool notify_changes)
+{
+    bool empty = dbo.empty() && name.empty();
+    assert(!empty || settings_.allow_empty_var);
+
+    if (settings_.data_var_dbo == dbo && 
+        settings_.data_var_name == name)
+        return;
+
+    if (!view_)
+    {
+        settings_.data_var_dbo  = dbo;
+        settings_.data_var_name = name;
+        return;
+    }
+
+    loginf << "ViewVariable: set: setting var '" << id_ << "' "
+        << "of view '" << view_->getName() << " to "
+        << "dbo " << dbo << " name " << name;
+
+    view_->preVariableChangedEvent(idx_, dbo, name);
+
+    view_->setParameter(settings_.data_var_dbo, dbo);
+    view_->setParameter(settings_.data_var_name, name);
+
+    view_->postVariableChangedEvent(idx_);
+
+    assert (empty || hasVariable());
+
+    if (notify_changes)
+        view_->notifyRefreshNeeded();
+}
+
+/**
+ */
 dbContent::Variable& ViewVariable::variable()
 {
     assert (hasVariable());
@@ -163,7 +198,7 @@ void ViewVariable::setVariable(dbContent::Variable& var, bool notify_changes)
         return;
     }
 
-    loginf << "ViewVariable: dataVar: setting var '" << id_ << "' "
+    loginf << "ViewVariable: setVariable: setting var '" << id_ << "' "
         << "of view '" << view_->getName() << " to "
         << "dbo " << var.dbContentName() << " name " << var.name();
 
@@ -226,7 +261,7 @@ void ViewVariable::setMetaVariable(dbContent::MetaVariable& var, bool notify_cha
         return;
     }
     
-    loginf << "ViewVariable: metaDataVar: setting metavar '" << id_ << "' "
+    loginf << "ViewVariable: setMetaVariable: setting metavar '" << id_ << "' "
            << "of view '" << view_->getName() << " to "
            << "name " << var.name();
 
