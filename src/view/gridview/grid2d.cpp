@@ -234,7 +234,7 @@ void Grid2D::cropGrid(QRectF& roi,
     double gy1 = grid_roi.bottom();
 
     if (gx1 < crop_rect.x() ||
-        gy1 < crop_rect.x() ||
+        gy1 < crop_rect.y() ||
         gx0 > crop_rect.x() + crop_rect.width() ||
         gy0 > crop_rect.y() + crop_rect.height())
         return;
