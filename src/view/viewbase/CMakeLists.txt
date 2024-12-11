@@ -13,6 +13,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/viewconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewtoolswitcher.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewloadstatewidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/viewinfowidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewpresetwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewpresets.h"
         "${CMAKE_CURRENT_LIST_DIR}/viewvariable.h"
@@ -29,6 +30,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/colormap.h"
         "${CMAKE_CURRENT_LIST_DIR}/colormapwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/plotmetadata.h"
+        "${CMAKE_CURRENT_LIST_DIR}/viewinfo.h"
         
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/view.cpp"
@@ -39,6 +41,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/viewconfigwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewtoolswitcher.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewloadstatewidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/viewinfowidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewpresetwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewpresets.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/viewvariable.cpp"
@@ -52,4 +55,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/colormap.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/colormapwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/plotmetadata.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/viewinfo.cpp"
 )

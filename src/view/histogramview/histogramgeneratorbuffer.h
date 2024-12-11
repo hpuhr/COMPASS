@@ -439,6 +439,9 @@ private:
             if (bin_idx < 0)   // is non-insertable?
             {
                 ++interm_data.not_inserted_count;
+
+                if (bin_idx == -2) //not finite
+                    ++interm_data.nan_count;
             }
             else if (selected) // is selected?
             {

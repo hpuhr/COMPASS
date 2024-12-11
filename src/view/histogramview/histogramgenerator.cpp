@@ -261,6 +261,7 @@ bool HistogramGenerator::finalizeResults()
         r.null_count          = d.null_count;
         r.null_selected_count = d.null_selected_count;
         r.not_inserted_count  = d.not_inserted_count;
+        r.nan_count           = d.nan_count;
 
         r.bins_are_sorted     = d.bins_are_sorted;
         r.bins_are_categories = d.bins_are_categories;
@@ -288,6 +289,7 @@ bool HistogramGenerator::finalizeResults()
         results_.valid_count         += r.valid_count;
         results_.selected_count      += r.selected_count;
         results_.null_count          += r.null_count;
+        results_.nan_count           += r.nan_count;
         results_.null_selected_count += r.null_selected_count;
         results_.not_inserted_count  += r.not_inserted_count;
         
@@ -325,6 +327,7 @@ void HistogramGenerator::print() const
         std::cout << "  null:            " << r.null_count << std::endl;
         std::cout << "  null + selected: " << r.null_selected_count << std::endl;
         std::cout << "  not inserted:    " << r.not_inserted_count << std::endl;
+        std::cout << "  nan:             " << r.nan_count << std::endl;
         
         std::cout << std::endl;
     }

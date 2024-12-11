@@ -113,8 +113,8 @@ private:
             }
         }
 
-        if (is_null) addNullCount(is_null);
-        if (is_nan ) addNanCount(is_nan);
+        addNullCount(is_null);
+        addNanCount(is_nan);
     }
 
     template<typename T>
@@ -147,8 +147,8 @@ private:
             }
         }
 
-        if (is_null) addNullCount(is_null);
-        if (is_nan ) addNanCount(is_nan);
+        addNullCount(is_null);
+        addNanCount(is_nan);
     }
 
     VariableViewStash<double> stash_;

@@ -37,6 +37,7 @@ class ViewConfigWidget;
 class ViewToolSwitcher;
 class ViewLoadStateWidget;
 class ViewPresetWidget;
+class ViewInfoWidget;
 
 class QSplitter;
 class QLayout;
@@ -65,7 +66,8 @@ _____________________________________________________________________________
 |                                              ||                            |
 |                                              ||                            |
 |                                              ||                            |
-|                                              ||                            |
+|                                              ||____________________________|
+|                                              ||ViewInfoWidget              |
 |                                              ||                            |
 |                                              ||____________________________|
 |                                              ||ViewLoadStateWidget         |
@@ -113,6 +115,7 @@ public:
 
     void updateToolWidget();
     void updateLoadState();
+    void updateInfoWidget();
     void updateComponents();
 
     bool refreshView();
@@ -161,6 +164,8 @@ protected:
     const ViewLoadStateWidget* getViewLoadStateWidget() const { assert(state_widget_); return state_widget_; }
     ViewPresetWidget* getViewPresetWidget() { return preset_widget_; }
     const ViewPresetWidget* getViewPresetWidget() const { return preset_widget_; }
+    ViewInfoWidget* getViewInfoWidget() { return info_widget_; }
+    const ViewInfoWidget* getViewInfoWidget() const { return info_widget_; }
 
     /**
      * Reimplement to provide the ViewLoadStateWidget with view specific load information.
@@ -202,6 +207,7 @@ private:
     ViewToolWidget*      tool_widget_   = nullptr;
     ViewDataWidget*      data_widget_   = nullptr;
     ViewConfigWidget*    config_widget_ = nullptr;
+    ViewInfoWidget*      info_widget_   = nullptr;
     ViewLoadStateWidget* state_widget_  = nullptr;
     ViewPresetWidget*    preset_widget_ = nullptr;
     

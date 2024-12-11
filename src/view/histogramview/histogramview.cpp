@@ -169,6 +169,14 @@ HistogramViewDataWidget* HistogramView::getDataWidget()
 
 /**
  */
+const HistogramViewDataWidget* HistogramView::getDataWidget() const
+{
+    assert (widget_);
+    return widget_->getViewDataWidget();
+}
+
+/**
+ */
 VariableSet HistogramView::getBaseSet(const std::string& dbcontent_name)
 {
     assert(data_source_);
@@ -227,6 +235,35 @@ void HistogramView::updateSelection()
     //        widget_->getDataWidget()->updateToSelection();
     //    else
     //        widget_->getDataWidget()->resetModels();  // just updates the checkboxes
+}
+
+/**
+ */
+ViewInfos HistogramView::viewInfos_impl() const
+{
+    HistogramViewDataWidget::ViewInfo info = getDataWidget()->getViewInfo();
+
+    ViewInfos vinfos;
+
+    vinfos.addSection("Histogram Range");
+
+    if (!info.has_result)
+    {
+        vinfos.addInfo("info_range_min", "Minimum:"            , "-");
+        vinfos.addInfo("info_range_max", "Maximum:"            , "-");
+        vinfos.addInfo("info_oor_count", "Out of range values:", "-");
+    }
+    else 
+    {
+        vinfos.addInfo("info_range_min", "Minimum:", info.min.isEmpty() ? "Not available" : info.min.toStdString(), info.min.isEmpty());
+        vinfos.addInfo("info_range_max", "Maximum:", info.max.isEmpty() ? "Not available" : info.max.toStdString(), info.max.isEmpty());
+        vinfos.addInfo("info_oor_count", "Out of range values:", std::to_string(info.out_of_range), false);
+
+        if (info.zoom_active)
+            vinfos.addInfo("info_zoom_active", "", "Zoom active", true);
+    }
+
+    return vinfos;
 }
 
 /**

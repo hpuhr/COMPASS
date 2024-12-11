@@ -66,6 +66,10 @@ void VariableViewDataWidget::clearIntermediateRedrawData_impl()
 {
     resetIntermediateVariableData(); // reset any intermediate data generated during redraw
     resetVariableStates();           // reset var states
+
+    //every variable-based view should support these counts, so init them to zero
+    addNullCount(0);
+    addNanCount(0);
 }
 
 /**
@@ -353,24 +357,4 @@ void VariableViewDataWidget::updateFromVariables()
         if (can_update)
             updateVariableData(dbcontent_name, *buffer);
     }
-}
-
-/**
- */
-void VariableViewDataWidget::addNullCount(size_t n)
-{
-    if (!count_null_.has_value())
-        count_null_ = 0;
-
-    count_null_.value() += n;
-}
-
-/**
- */
-void VariableViewDataWidget::addNanCount(size_t n)
-{
-    if (!count_nan_.has_value())
-        count_nan_ = 0;
-
-    count_nan_.value() += n;
 }
