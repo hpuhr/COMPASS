@@ -167,6 +167,7 @@ class DataSourceManager : public QObject, public Configurable
     void sortDBDataSources();
 
     void updateDSIdsAll();
+    void createConfigDataSourcesFromDB();
 };
 
 #endif // DATASOURCEMANAGER_H

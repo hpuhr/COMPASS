@@ -1,6 +1,8 @@
 #include "source/dbdatasource.h"
 #include "source/dbdatasourcewidget.h"
+#include "source/configurationdatasource.h"
 #include "util/timeconv.h"
+#include "util/number.h"
 #include "logger.h"
 
 using namespace nlohmann;

@@ -711,6 +711,8 @@ void DataSourceManager::loadDBDataSources()
         db_data_sources_ = db_interface.getDataSources();
         sortDBDataSources();
     }
+
+    createConfigDataSourcesFromDB();
 }
 
 void DataSourceManager::sortDBDataSources()
@@ -742,6 +744,38 @@ void DataSourceManager::updateDSIdsAll()
     }
 
     std::copy(ds_ids_set.begin(), ds_ids_set.end(), std::back_inserter(ds_ids_all_)); // copy to vec
+}
+
+void DataSourceManager::createConfigDataSourcesFromDB()
+{
+    for (auto& ds_it : db_data_sources_)
+    {
+        unsigned int ds_id = ds_it->id();
+
+        if (!hasConfigDataSource(ds_id))
+        {
+            createConfigDataSource(ds_id);
+
+            dbContent::ConfigurationDataSource& cfg_ds = configDataSource(ds_id);
+
+            cfg_ds.dsType(ds_it->dsType());
+            cfg_ds.sac(ds_it->sac());
+            cfg_ds.sic(ds_it->sic());
+            cfg_ds.name(ds_it->name());
+
+            if (ds_it->hasShortName())
+                cfg_ds.shortName(ds_it->shortName());
+
+            if (!ds_it->info().is_null())
+                cfg_ds.info(ds_it->info().dump());
+
+            loginf << "ConfigurationDataSource: createConfigDataSourcesFromDB: added name " << cfg_ds.name()
+                   << " sac/sic " << cfg_ds.sac() << "/" << cfg_ds.sic();
+        }
+        else
+            loginf << "DataSourceManager: createConfigDataSourcesFromDB: ds " << ds_it->name()
+                   << " sac/sic " << ds_it->sac() << "/" << ds_it->sic() << " already exists";
+    }
 }
 
 void DataSourceManager::saveDBDataSources()
@@ -809,7 +843,7 @@ void DataSourceManager::addNewDataSource (unsigned int ds_id)
 
         dbContent::ConfigurationDataSource& cfg_ds = configDataSource(ds_id);
 
-        db_data_sources_.emplace_back(move(cfg_ds.getAsNewDBDS()));
+        db_data_sources_.emplace_back(cfg_ds.getAsNewDBDS());
         sortDBDataSources();
     }
     else
@@ -826,7 +860,7 @@ void DataSourceManager::addNewDataSource (unsigned int ds_id)
         new_ds->name("Unknown ("+to_string(Number::sacFromDsId(ds_id))+"/"
                                 +to_string(Number::sicFromDsId(ds_id))+")");
 
-        db_data_sources_.emplace_back(move(new_ds));
+        db_data_sources_.emplace_back(new_ds);
         sortDBDataSources();
 
 
