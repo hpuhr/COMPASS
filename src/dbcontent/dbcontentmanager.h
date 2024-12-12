@@ -124,6 +124,7 @@ public:
     bool hasAssociations() const;
     void setAssociationsIdentifier(const std::string& assoc_id);
     std::string associationsID() const;
+    void clearAssociationsIdentifier();
 
     bool hasMaxRecordNumberWODBContentID() const { return has_max_rec_num_wo_dbcontid_; }
     unsigned long maxRecordNumberWODBContentID() const;

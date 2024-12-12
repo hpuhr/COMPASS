@@ -396,6 +396,8 @@ void ReconstructorTask::run()
     delassocs_future_ = {};
     process_future_ = {};
 
+    COMPASS::instance().dbContentManager().clearAssociationsIdentifier();
+
     Projection& projection = ProjectionManager::instance().currentProjection();
     projection.clearCoordinateSystems();
     projection.addAllRadarCoordinateSystems();
@@ -874,7 +876,8 @@ void ReconstructorTask::writeDoneSlot()
                << String::timeStringFromDouble(time_elapsed_s, false)
                << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
 
-        COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+        if (!skip_reference_data_writing_)
+            COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
         if (!allow_user_interactions_)
             progress_dialog_->close();

@@ -692,6 +692,12 @@ string DBInterface::getProperty(const string& id)
     return properties_.at(id);
 }
 
+void DBInterface::removeProperty(const std::string& id)
+{
+    assert(hasProperty(id));
+    properties_.erase(id);
+}
+
 bool DBInterface::hasProperty(const string& id) { return properties_.count(id); }
 
 void DBInterface::loadProperties()
