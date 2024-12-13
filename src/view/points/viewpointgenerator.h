@@ -22,6 +22,7 @@
 #include "scatterseries.h"
 #include "grid2dlayer.h"
 #include "plotmetadata.h"
+#include "colorlegend.h"
 
 #include <memory>
 #include <vector>
@@ -357,9 +358,11 @@ class ViewPointGenFeatureGeoImage : public ViewPointGenFeature
 public:
     ViewPointGenFeatureGeoImage(const std::string& fn,
                                 const RasterReference& ref,
-                                bool subsample = false);
+                                const ColorLegend& legend = ColorLegend(),
+                                bool subsample = true);
     ViewPointGenFeatureGeoImage(const QImage& data,
                                 const RasterReference& ref,
+                                const ColorLegend& legend = ColorLegend(),
                                 bool subsample = true);
     virtual ~ViewPointGenFeatureGeoImage() = default;
 
@@ -373,6 +376,7 @@ public:
     static const std::string FeatureGeoImageFieldNameFn;
     static const std::string FeatureGeoImageFieldNameData;
     static const std::string FeatureGeoImageFieldNameReference;
+    static const std::string FeatureGeoImageFieldNameLegend;
     static const std::string FeatureGeoImageFieldNameSubsample;
 
 protected:
@@ -382,6 +386,7 @@ private:
     std::string     fn_;
     QImage          data_;
     RasterReference ref_;
+    ColorLegend     legend_;
     bool            subsample_ = false;
 };
 

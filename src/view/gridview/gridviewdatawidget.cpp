@@ -550,9 +550,9 @@ void GridViewDataWidget::updateRendering()
 
         //derive suggested number of color steps from ui value
         size_t num_steps = property_templates::suggestedNumColorSteps(dtype, 
-                                                                    range.first, 
-                                                                    range.second, 
-                                                                    settings.render_color_num_steps);
+                                                                      range.first, 
+                                                                      range.second, 
+                                                                      settings.render_color_num_steps);
 
         loginf << "GridViewDataWidget: updateRendering: suggested color steps = " << num_steps;
 
@@ -702,4 +702,12 @@ void GridViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 boost::optional<std::pair<QImage, RasterReference>> GridViewDataWidget::currentGeoImage() const
 {
     return std::make_pair(grid_rendering_, ref_);
+}
+
+/**
+*/
+const ColorLegend& GridViewDataWidget::currentLegend() const
+{
+    assert(legend_);
+    return legend_->currentLegend();
 }

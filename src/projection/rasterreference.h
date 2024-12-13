@@ -156,7 +156,7 @@ struct RasterReference
         ss << "img_pixel_size_x: " << img_pixel_size_x << std::endl;
         ss << "img_pixel_size_y: " << img_pixel_size_y << std::endl;
         ss << "is_north_up:      " << is_north_up      << std::endl;
-        ss << "srs_is_wkt:       " << srs_is_wkt       << std::endl;
+        ss << "srs_is_wkt:       " << srs_is_wkt;
 
         return ss.str();
     }

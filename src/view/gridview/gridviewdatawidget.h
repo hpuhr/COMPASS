@@ -85,6 +85,7 @@ public:
     const GridView* getView() const { return view_; }
 
     boost::optional<std::pair<QImage, RasterReference>> currentGeoImage() const;
+    const ColorLegend& currentLegend() const;
 
 public slots:
     void rectangleSelectedSlot(QPointF p1, QPointF p2);

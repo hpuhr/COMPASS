@@ -524,6 +524,8 @@ void GridViewConfigWidget::exportToGeographicView()
         return;
     }
 
+    const auto& legend = data_widget->currentLegend();
+
     std::string name = exportName();
 
     auto export_config = getExportGeoViewConfig(this, name);
@@ -535,7 +537,10 @@ void GridViewConfigWidget::exportToGeographicView()
 
     ViewPointGenAnnotation anno(export_config->item_name);
 
-    auto geo_image_feat = new ViewPointGenFeatureGeoImage(geo_image->first, geo_image->second);
+    auto geo_image_feat = new ViewPointGenFeatureGeoImage(geo_image->first, 
+                                                          geo_image->second, 
+                                                          legend, 
+                                                          true);
     anno.addFeature(geo_image_feat);
 
     nlohmann::json j;

@@ -507,16 +507,19 @@ const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSource   
 const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameFn        = "fn";
 const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameData      = "data";
 const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameReference = "reference";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameLegend    = "legend";
 const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSubsample = "subsample";
 
 /**
 */
 ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const std::string& fn,
                                                          const RasterReference& ref,
+                                                         const ColorLegend& legend,
                                                          bool subsample)
 :   ViewPointGenFeature(FeatureName)
 ,   fn_       (fn       )
 ,   ref_      (ref      )
+,   legend_   (legend   )
 ,   subsample_(subsample)
 {
 }
@@ -525,10 +528,12 @@ ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const std::string& fn,
 */
 ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const QImage& data,
                                                          const RasterReference& ref,
+                                                         const ColorLegend& legend,
                                                          bool subsample)
 :   ViewPointGenFeature(FeatureName)
 ,   data_     (data     )
 ,   ref_      (ref      )
+,   legend_   (legend   )
 ,   subsample_(subsample)
 {
 }
@@ -552,6 +557,10 @@ void ViewPointGenFeatureGeoImage::toJSON_impl(nlohmann::json& j, bool write_bina
 
     //reference
     j[FeatureGeoImageFieldNameReference] = ref_.toJSON();
+
+    //legend
+    if (!legend_.empty())
+        j[FeatureGeoImageFieldNameLegend] = legend_.toJSON();
 
     //subsampling
     j[FeatureGeoImageFieldNameSubsample] = subsample_;
