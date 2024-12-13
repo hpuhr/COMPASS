@@ -17,13 +17,17 @@
 
 #include "fileimportdialog.h"
 
+#include "files.h"
+
+#include "geotiff.h"
+
 #include <QPushButton>
 #include <QCheckBox>
 #include <QFormLayout>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTreeWidget>
-#include <QHeaderView>
+#include <QComboBox>
 
 /***************************************************************************
  * FileImportDialog
@@ -32,38 +36,27 @@
 /**
 */
 FileImportDialog::FileImportDialog(const std::vector<std::string>& files,
+                                   const std::string& import_type_name,
                                    QWidget* parent, 
                                    Qt::WindowFlags f)
 :   QDialog(parent, f)
+,   files_ (files)
 {
-    for (const auto& f : files)
-        import_flags_[ f ] = true;
+    QString importer_name = QString::fromStdString(import_type_name);
 
-    setWindowTitle("Import Files");
+    setWindowTitle("Import " + (importer_name.isEmpty() ? "Files": importer_name));
 
     auto layout = new QVBoxLayout;
     setLayout(layout);
 
-    auto tree_widget = new QTreeWidget(this);
-    tree_widget->setColumnCount(2);
+    tree_widget_ = new QTreeWidget(this);
 
-    QStringList headers;
-    headers << "Import";
-    headers << "Filename";
+    layout->addWidget(tree_widget_);
 
-    tree_widget->setHeaderLabels(headers);
+    custom_layout_ = new QVBoxLayout;
+    layout->addLayout(custom_layout_);
 
-    tree_widget->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Fixed);
-    tree_widget->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
-
-    tree_widget->resizeColumnToContents(0);
-
-    layout->addWidget(tree_widget);
-
-    customs_layout_ = new QVBoxLayout;
-    layout->addLayout(customs_layout_);
-
-    layout->addStretch(1);
+    //layout->addStretch(1);
 
     auto button_layout = new QHBoxLayout;
     layout->addLayout(button_layout);
@@ -75,67 +68,175 @@ FileImportDialog::FileImportDialog(const std::vector<std::string>& files,
     button_layout->addWidget(ok_button_);
     button_layout->addWidget(cancel_button);
 
-    for (const auto& f : files)
-    {
-        auto item = new QTreeWidgetItem;
-        item->setCheckState(0, Qt::Checked);
-        item->setText(1, QString::fromStdString(f));
-
-        tree_widget->addTopLevelItem(item);
-    }
-
-    auto itemChangedCB = [ = ] (QTreeWidgetItem* item, int column)
-    {
-        if (column == 0)
-        {
-            bool import = item->checkState(0) == Qt::Checked;
-            auto name   = item->text(1).toStdString();
-
-            import_flags_[ name ] = import;
-
-            this->checkImportOk();
-        }
-    };
-
-    connect(tree_widget, &QTreeWidget::itemChanged, itemChangedCB);
+    connect(tree_widget_, &QTreeWidget::itemChanged, this, &FileImportDialog::itemChanged);
     connect(ok_button_, &QPushButton::pressed, this, &QDialog::accept);
     connect(cancel_button, &QPushButton::pressed, this, &QDialog::reject);
 }
 
 /**
 */
-bool FileImportDialog::importFile(const std::string& fn) const
+void FileImportDialog::showEvent(QShowEvent *event)
 {
-    auto it = import_flags_.find(fn);
-    if (it == import_flags_.end())
-        return false;
+    init();
+}
+
+/**
+*/
+void FileImportDialog::init()
+{
+    if (init_)
+        return;
+
+    init_ = true;
+
+    QStringList headers_default;
+    headers_default << "Import";
+    headers_default << "Filename";
+    headers_default << "Information";
+
+    num_default_cols_ = headers_default.count();
+
+    QStringList headers = headers_default;
+
+    auto custom_columns = customColumns();
+
+    for (const auto& c : custom_columns)
+        headers << QString::fromStdString(c.name);
+
+    tree_widget_->setColumnCount(headers.count());
+    tree_widget_->setHeaderLabels(headers);
+
+    tree_widget_->header()->setSectionResizeMode(0, QHeaderView::ResizeMode::Fixed);
+    tree_widget_->header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
+
+    int idx = 0;
+    for (const auto& c : custom_columns)
+        tree_widget_->header()->setSectionResizeMode(headers_default.count() + idx++, c.resize_mode);
+
+    idx = 0;
+    for (const auto& f : files_)
+    {
+        if (f.empty() || item_map_.find(f) != item_map_.end())
+            continue;
+
+        auto item = new QTreeWidgetItem;
+        tree_widget_->addTopLevelItem(item);
+
+        initItem(item, idx, f);
+
+        item_map_[ f ] = idx++;
+    }
+
+    for (int i = 0; i < headers.count(); ++i)
+        tree_widget_->resizeColumnToContents(i);
+
+    checkImportOk();
+}
+
+/**
+ */
+void FileImportDialog::initItem(QTreeWidgetItem* item, int idx, const std::string& fn)
+{
+    auto file_ok = checkFile(fn);
+
+    item->setCheckState(0, file_ok.first ? Qt::Checked : Qt::Unchecked);
+    item->setText(1, QString::fromStdString(fn));
+    item->setText(2, QString::fromStdString(file_ok.second));
+
+    initItem_impl(item, idx, fn);
+
+    if (!file_ok.first)
+        item->setFlags(item->flags() & ~Qt::ItemFlag::ItemIsEnabled);
+}
+
+/**
+ */
+int FileImportDialog::fileItemIndex(const std::string& fn) const
+{
+    auto it = item_map_.find(fn);
+    if (it == item_map_.end())
+        return -1;
 
     return it->second;
+}
+
+/**
+ */
+QTreeWidgetItem* FileImportDialog::fileItem(const std::string& fn) const
+{
+    int idx = fileItemIndex(fn);
+    if (idx < 0 || idx >= tree_widget_->topLevelItemCount())
+        return nullptr;
+
+    return tree_widget_->topLevelItem(idx);
+}
+
+/**
+*/
+std::pair<bool, std::string> FileImportDialog::checkFile(const std::string& fn) const
+{
+    if (!Utils::Files::fileExists(fn))
+        return std::make_pair(false, "File does not exist");
+
+    auto ret = checkFile_impl(fn);
+    if (!ret.first)
+    {
+        if (ret.second.empty())
+            ret.second = "Unknown error";
+        return ret;
+    }
+
+    return std::make_pair(true, "");
+}
+
+/**
+*/
+std::pair<bool, std::string> FileImportDialog::checkFile_impl(const std::string& fn) const
+{
+    return std::make_pair(true, "");
+}
+
+/**
+*/
+bool FileImportDialog::importFile(const std::string& fn) const
+{
+    auto item = fileItem(fn);
+    if (!item)
+        return false;
+
+    return item->checkState(0) == Qt::Checked;
 }
 
 /**
 */
 bool FileImportDialog::importOk() const
 {
-    bool ok = false;
-    for (const auto& f : import_flags_)
-    {
-        if (f.second)
-        {
-            ok = true;
-            break;
-        }
-    }
+    for (const auto& f : files_)
+        if (importFile(f))
+            return true;
 
-    return ok;
+    return false;
 }
 
 /**
 */
 void FileImportDialog::checkImportOk()
 {
-    bool ok = this->importOk();
+    bool ok = importOk();
+
     ok_button_->setEnabled(ok);
+}
+
+/**
+*/
+void FileImportDialog::itemChanged(QTreeWidgetItem* item, int column)
+{
+    itemChanged_impl(item, column);
+
+    if (column == 0)
+    {
+        checkImportOk();
+    }
 }
 
 /***************************************************************************
@@ -147,17 +248,85 @@ void FileImportDialog::checkImportOk()
 GeoTIFFImportDialog::GeoTIFFImportDialog(const std::vector<std::string>& files,
                                          QWidget* parent, 
                                          Qt::WindowFlags f)
-:   FileImportDialog(files, parent, f)
+:   FileImportDialog(files, "GeoTIFF", parent, f)
 {
-    subsample_box_ = new QCheckBox("Enable subsampling");
-    subsample_box_->setChecked(true);
-
-    customs_layout_->addWidget(subsample_box_);
 }
 
 /**
 */
-bool GeoTIFFImportDialog::subsamplingEnabled() const
+std::pair<bool, std::string> GeoTIFFImportDialog::checkFile_impl(const std::string& fn) const
 {
-    return subsample_box_->isChecked();
+    auto info = GeoTIFF::getInfo(fn);
+
+    gtiff_infos_[ fn ] = info;
+
+    bool gtiff_ok = info.isValid();
+    
+    return std::make_pair(gtiff_ok, gtiff_ok ? "" : "Invalid GeoTIFF (Code " + std::to_string((int)info.error) + ")");
+}
+
+/**
+*/
+void GeoTIFFImportDialog::initItem_impl(QTreeWidgetItem* item, int idx, const std::string& fn)
+{
+    int upsampling_col = numDefaultColumns() + 0;
+
+    auto it = gtiff_infos_.find(fn);
+
+    int subsampling = 1;
+    
+    if (it == gtiff_infos_.end() || !it->second.isValid())
+        return;
+
+    const auto& info = it->second;
+    subsampling = (int)GeoTIFF::maximumSubsamples(info.img_w, info.img_h);
+    
+    auto subsampling_combo = new QComboBox;
+    subsampling_combo->setFixedWidth(100);
+
+    subsampling_combo->addItem("Auto", QVariant(-1));
+
+    for (int s = 1; s <= subsampling; ++s)
+        subsampling_combo->addItem(QString::number(s), QVariant(s));
+    
+    subsampling_combo->setCurrentIndex(0);
+
+    treeWidget()->setItemWidget(item, upsampling_col, subsampling_combo);
+}
+
+/**
+*/
+std::vector<GeoTIFFImportDialog::CustomColumn> GeoTIFFImportDialog::customColumns() const
+{
+    std::vector<GeoTIFFImportDialog::CustomColumn> columns;
+    columns.emplace_back("Subsamples", true, QHeaderView::ResizeMode::Fixed);
+
+    return columns;
+}
+
+/**
+*/
+void GeoTIFFImportDialog::itemChanged_impl(QTreeWidgetItem* item, int column) 
+{
+}
+
+/**
+*/
+int GeoTIFFImportDialog::fileSubsampling(const std::string& fn) const
+{
+    auto item = fileItem(fn);
+    if (!item)
+        return -1;
+
+    int upsampling_col = numDefaultColumns() + 0;
+
+    auto w = treeWidget()->itemWidget(item, upsampling_col);
+    if (!w)
+        return -1;
+
+    auto combo = dynamic_cast<QComboBox*>(w);
+    if (!combo)
+        return -1;
+
+    return combo->currentData().toInt();
 }

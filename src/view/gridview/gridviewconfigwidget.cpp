@@ -86,7 +86,7 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
 
     grid_resolution_box_ = new QSpinBox;
     grid_resolution_box_->setMinimum(1);
-    grid_resolution_box_->setMaximum(GeoTIFF::MaxPixelsToSubsample);
+    grid_resolution_box_->setMaximum(1000);
     grid_resolution_box_->setKeyboardTracking(false);
 
     UI_TEST_OBJ_NAME(grid_resolution_box_, "grid_resolution");

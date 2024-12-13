@@ -22,13 +22,29 @@
 */
 QRectF GeoTIFFInfo::roi() const
 {
-    if (!valid || img_w < 1 || img_h < 1)
+    if (!isValid())
         return QRectF();
 
     RasterReference ref;
     ref.set(geo_srs, geo_transform);
 
     return ref.getROI(img_w, img_h);
+}
+
+/**
+*/
+bool GeoTIFFInfo::isValid() const
+{
+    if (error != ErrCode::NoError)
+        return false;
+
+    if (img_w < 1 || img_h < 1 || bands < 1)
+        return false;
+
+    if (geo_srs.empty() || geo_transform.size() != 6)
+        return false;
+
+    return true;
 }
 
 /**

@@ -85,11 +85,13 @@ public:
     static void* upsampleGTiff(const std::string& fn_out,
                                void* gdal_dataset,
                                size_t subsampling);
-    
-    static const int MaxSubsampledPixels;
-    static const int MaxPixelsToSubsample;
-    static const int DefaultSubsamples;
 
+    static size_t maximumSubsamples(size_t w, size_t h);
+
+    static const size_t MaxSize;
+    static const size_t MaxPixels;
+    static const size_t DefaultSubsamples;
+    
 private:
     static size_t geotiff_id_;
 }; 

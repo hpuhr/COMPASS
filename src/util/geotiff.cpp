@@ -20,9 +20,9 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
 
-const int GeoTIFF::MaxSubsampledPixels  = 10000;
-const int GeoTIFF::MaxPixelsToSubsample = 1000;
-const int GeoTIFF::DefaultSubsamples    = 10;
+const size_t GeoTIFF::MaxSize           = 24000u;
+const size_t GeoTIFF::MaxPixels         = MaxSize * MaxSize;
+const size_t GeoTIFF::DefaultSubsamples = 10u;
 
 size_t GeoTIFF::geotiff_id_ = 0;
 
@@ -41,6 +41,18 @@ namespace
     }
 }
 
+/**
+ */
+size_t GeoTIFF::maximumSubsamples(size_t w, size_t h)
+{
+    if (w >= MaxSize || h >= MaxSize)
+        return 1;
+
+    size_t max_x = std::max((size_t)1, (size_t)std::floor(MaxSize / w));
+    size_t max_y = std::max((size_t)1, (size_t)std::floor(MaxSize / h));
+
+    return std::min(DefaultSubsamples, std::min(max_x, max_y));
+}
 
 /**
  * Creates a unique filename for a geoimage in gdals vsimem memory file system.
@@ -86,21 +98,35 @@ GeoTIFFInfo GeoTIFF::getInfo(void* gdal_dataset)
 
     GeoTIFFInfo info;
 
+    auto driver = GDALGetDatasetDriver(gdal_dataset);
+    if (!driver)
+    {
+        info.error = GeoTIFFInfo::ErrCode::InvalidFormat;
+        return info;
+    }
+
+    const char* driver_name = GDALGetDriverShortName(driver);
+    if (!driver_name || std::string(driver_name) != "GTiff")
+    {
+        info.error = GeoTIFFInfo::ErrCode::InvalidFormat;
+        return info;
+    }
+
     //try to get size
     info.img_w = GDALGetRasterXSize(gdal_dataset);
     info.img_h = GDALGetRasterYSize(gdal_dataset);
     info.bands = GDALGetRasterCount(gdal_dataset);
     if (info.img_w < 1 || info.img_h < 1 || info.bands < 1)
     {
-        GDALClose(gdal_dataset);
+        info.error = GeoTIFFInfo::ErrCode::Empty;
         return info;
     }
-
+    
     //try to get geo transform
     info.geo_transform.resize(6);
     if (GDALGetGeoTransform(gdal_dataset, info.geo_transform.data()) != CPLErr::CE_None)
     {
-        GDALClose(gdal_dataset);
+        info.error = GeoTIFFInfo::ErrCode::NoReference;
         return info;
     }
 
@@ -108,11 +134,11 @@ GeoTIFFInfo GeoTIFF::getInfo(void* gdal_dataset)
     info.geo_srs = GeoTIFF::wktString(gdal_dataset);
     if (info.geo_srs.empty())
     {
-        GDALClose(gdal_dataset);
+        info.error = GeoTIFFInfo::ErrCode::NoReference;
         return info;
     }
 
-    info.valid = true;
+    info.error = GeoTIFFInfo::ErrCode::NoError;
 
     return info;
 }
@@ -130,16 +156,11 @@ bool GeoTIFF::isValidGeoTIFF(const std::string& fn)
     if (!dataset)
         return false;
 
-    int w  = GDALGetRasterXSize(dataset);
-    int h  = GDALGetRasterYSize(dataset);
-    int nb = GDALGetRasterCount(dataset);
-
-    bool has_data = (w >= 1 && h >= 1 && nb >= 1);
-    bool has_proj = GDALGetProjectionRef(dataset) != nullptr;
+    bool valid = GeoTIFF::getInfo(dataset).isValid();
 
     GDALClose(dataset);
 
-    return (has_data && has_proj);
+    return valid;
 }
 
 /**
@@ -150,7 +171,7 @@ std::string GeoTIFF::wktString(void* gdal_dataset)
     if (!gdal_dataset)
         return "";
 
-    auto ref = GDALGetProjectionRef(gdal_dataset);
+    const char* ref = GDALGetProjectionRef(gdal_dataset);
     if (!ref)
         return "";
 
@@ -489,7 +510,7 @@ void* GeoTIFF::upsampleGTiff(const std::string& fn_out,
 
     //get info about original dataset
     GeoTIFFInfo info = GeoTIFF::getInfo(gdal_dataset);
-    if (!info.valid)
+    if (!info.isValid())
         return nullptr;
 
     int wout = info.img_w * (int)subsampling;
@@ -559,7 +580,7 @@ void* GeoTIFF::subsampleGTiff(const std::string& fn_out,
 
     //get dataset info
     auto info = GeoTIFF::getInfo(gdal_dataset);
-    if (!info.valid)
+    if (!info.isValid())
         return nullptr;
 
     //configure reference

@@ -26,9 +26,20 @@
 */
 struct GeoTIFFInfo
 {
+    enum class ErrCode
+    {
+        NoError = 0,
+        NoInfo,
+        InvalidFormat,
+        Empty,
+        NoReference
+    };
+
     QRectF roi() const;
 
-    bool                valid = false;
+    bool isValid() const;
+
+    ErrCode             error = ErrCode::NoInfo;
     int                 img_w = -1;
     int                 img_h = -1;
     int                 bands = -1;
