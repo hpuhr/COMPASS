@@ -72,7 +72,8 @@ struct GridResolution
 
 enum ValueType
 {
-    ValueTypeCount = 0,
+    ValueTypeCountValid = 0,
+    ValueTypeCountNan,
     ValueTypeMin,
     ValueTypeMax,
     ValueTypeMean,
@@ -92,8 +93,10 @@ inline std::string valueTypeToString(ValueType vtype)
 {
     switch (vtype)
     {
-        case ValueTypeCount:
+        case ValueTypeCountValid:
             return "Count";
+        case ValueTypeCountNan:
+            return "Count NULL";
         case ValueTypeMin:
             return "Min";
         case ValueTypeMax:

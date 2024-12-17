@@ -18,18 +18,13 @@
 #pragma once
 
 #include "colormap.h"
+#include "colorlegend.h"
 
 #include <QWidget>
 
 class ColorMap;
-class RangeEditDouble;
 
-class QVBoxLayout;
 class QHBoxLayout;
-class QComboBox;
-class QSpinBox;
-class QLineEdit;
-class QLabel;
 
 /**
 */
@@ -46,52 +41,17 @@ public:
 
     void updateUI();
 
+    const ColorLegend& currentLegend() const { return legend_; }
+
 private:
     void createUI();
 
     ColorMap                 colormap_;
+    ColorLegend              legend_;
     ColorMap::ValueDecorator decorator_;
     bool                     show_selection_col_ = false;
     bool                     show_null_col_ = false;
 
     QHBoxLayout* layout_ = nullptr;
     QWidget*     widget_ = nullptr;
-};
-
-/**
-*/
-class ColorMapWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    ColorMapWidget(QWidget* parent = nullptr);
-    virtual ~ColorMapWidget();
-
-    void setColorMap(ColorMap* colormap);
-    void setValueRange(double vmin, double vmax);
-
-    void updateUI();
-
-    static const int SliderSteps = 1000;
-    static const int Precision   = 6; 
-
-signals:
-    void colorMapChanged();
-
-private:
-    void createUI();
-    void updateColormap();
-
-    ColorMap*               colormap_ = nullptr;
-    boost::optional<double> vmin_;
-    boost::optional<double> vmax_;
-
-    QComboBox*       scale_combo_   = nullptr;
-    QSpinBox*        steps_box_     = nullptr;
-
-    QLabel*          range_label_   = nullptr;
-    QWidget*         range_widget_  = nullptr;
-    QLineEdit*       range_min_box_ = nullptr;
-    QLineEdit*       range_max_box_ = nullptr;
-    RangeEditDouble* range_edit_    = nullptr;
 };

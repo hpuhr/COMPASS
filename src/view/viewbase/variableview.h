@@ -65,6 +65,8 @@ public:
     void showVariables();
     bool showsVariables() const;
 
+    void switchVariables(int var0, int var1, bool inform_config_widget);
+
     void showAnnotation();
     bool showsAnnotation() const;
     void setCurrentAnnotation(int group_idx, int annotation_idx);
@@ -84,6 +86,8 @@ public slots:
     virtual void showViewPointSlot (const ViewableDataConfig* vp) override final;
 
 protected:
+    friend class ViewVariable;
+
     ViewVariable& addVariable(const std::string& id,
                               const std::string& display_name,
                               const std::string& var_name,
@@ -91,11 +95,15 @@ protected:
                               const std::string& default_name,
                               bool show_meta_vars,
                               bool show_empty_vars,
+                              bool allow_empty_var,
                               const std::vector<PropertyDataType>& valid_data_types);
     void addVariablesToSet(dbContent::VariableSet& set, 
                            const std::string& dbcontent_name);
 
     virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) = 0;
+
+    virtual void preVariableChangedEvent(int idx, const std::string& dbo, const std::string& name) {}
+    virtual void postVariableChangedEvent(int idx) {}
 
     virtual void unshowViewPoint(const ViewableDataConfig* vp) {}
     virtual void showViewPoint(const ViewableDataConfig* vp) {}

@@ -17,28 +17,32 @@
 
 #pragma once
 
-#include "variableviewwidget.h"
+#include "json.hpp"
 
-class GridView;
-class GridViewConfigWidget;
-class GridViewDataWidget;
+#include <vector>
+
+#include <QColor>
 
 /**
-*/
-class GridViewWidget : public VariableViewWidget
+ */
+class ColorLegend
 {
 public:
-    GridViewWidget(const std::string& class_id, 
-                   const std::string& instance_id,
-                   Configurable* config_parent, 
-                   GridView* view, 
-                   QWidget* parent = NULL);
-    virtual ~GridViewWidget();
+    typedef std::vector<std::pair<QColor, std::string>> Entries;
 
-    GridViewDataWidget* getViewDataWidget();
-    const GridViewDataWidget* getViewDataWidget() const;
-    GridViewConfigWidget* getViewConfigWidget();
-    const GridViewConfigWidget* getViewConfigWidget() const;
+    ColorLegend() = default;
+    virtual ~ColorLegend() = default;
 
-    GridView* getView();
+    bool empty() const;
+
+    void clear();
+    void addEntry(const QColor& color, const std::string& descr);
+
+    const Entries& entries() const { return entries_; }
+
+    nlohmann::json toJSON() const;
+    bool fromJSON(const nlohmann::json& j);
+
+private:
+    Entries entries_;
 };

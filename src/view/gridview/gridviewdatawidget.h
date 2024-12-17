@@ -19,11 +19,14 @@
 
 #include "variableviewstashdatawidget.h"
 #include "grid2dlayer.h"
+#include "colormap.h"
 
 #include <memory>
 
 #include <QImage>
 #include <QRectF>
+
+#include <boost/optional.hpp>
 
 class GridView;
 class GridViewWidget;
@@ -74,14 +77,15 @@ public:
     const QRectF& gridBounds() const { return grid_roi_; }
     bool gridIsNorthUp() const { return grid_north_up_; }
 
-    double getGridValueMin() const { return grid_value_min_; }
-    double getGridValueMax() const { return grid_value_max_; }
+    const boost::optional<double>& getGridValueMin() const { return grid_value_min_; }
+    const boost::optional<double>& getGridValueMax() const { return grid_value_max_; }
 
     bool customRangeInvalid() const { return custom_range_invalid_; }
 
     const GridView* getView() const { return view_; }
 
     boost::optional<std::pair<QImage, RasterReference>> currentGeoImage() const;
+    const ColorLegend& currentLegend() const;
 
 public slots:
     void rectangleSelectedSlot(QPointF p1, QPointF p2);
@@ -124,14 +128,15 @@ private:
     std::unique_ptr<QtCharts::GridViewChart> grid_chart_;
     ColorLegendWidget* legend_ = nullptr;
 
-    std::unique_ptr<Grid2D> grid_;
-    QImage                  grid_rendering_;
-    QRectF                  grid_roi_;
-    bool                    grid_north_up_;
-    RasterReference         ref_;
-    double                  grid_value_min_ = 0.0;
-    double                  grid_value_max_ = 1.0;
-    bool                    custom_range_invalid_ = false;
+    std::unique_ptr<Grid2D>   grid_;
+    QImage                    grid_rendering_;
+    QRectF                    grid_roi_;
+    bool                      grid_north_up_;
+    RasterReference           ref_;
+    boost::optional<ColorMap> colormap_;
+    boost::optional<double>   grid_value_min_;
+    boost::optional<double>   grid_value_max_;
+    bool                      custom_range_invalid_ = false;
 
     Grid2DLayers grid_layers_;
     std::string  x_axis_name_;

@@ -17,28 +17,20 @@
 
 #pragma once
 
-#include "variableviewwidget.h"
-
-class GridView;
-class GridViewConfigWidget;
-class GridViewDataWidget;
+#include "viewwidget.h"
 
 /**
 */
-class GridViewWidget : public VariableViewWidget
+class VariableViewWidget : public ViewWidget
 {
 public:
-    GridViewWidget(const std::string& class_id, 
-                   const std::string& instance_id,
-                   Configurable* config_parent, 
-                   GridView* view, 
-                   QWidget* parent = NULL);
-    virtual ~GridViewWidget();
+    VariableViewWidget(const std::string& class_id, 
+               const std::string& instance_id,
+               Configurable* config_parent, 
+               View* view, 
+               QWidget* parent = nullptr);
+    virtual ~VariableViewWidget();
 
-    GridViewDataWidget* getViewDataWidget();
-    const GridViewDataWidget* getViewDataWidget() const;
-    GridViewConfigWidget* getViewConfigWidget();
-    const GridViewConfigWidget* getViewConfigWidget() const;
-
-    GridView* getView();
+protected:
+    virtual bool showInfoWidget() override { return true; }
 };

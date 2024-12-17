@@ -28,12 +28,13 @@ const double Grid2D::InvalidValue = std::numeric_limits<double>::max();
 Grid2D::Grid2D()
 {
     vtype_indices_.resize(grid2d::NumValueTypes);
-    vtype_indices_[ grid2d::ValueTypeCount  ] = IndexCount;
-    vtype_indices_[ grid2d::ValueTypeMin    ] = IndexMin;
-    vtype_indices_[ grid2d::ValueTypeMax    ] = IndexMax;
-    vtype_indices_[ grid2d::ValueTypeMean   ] = IndexMean;
-    vtype_indices_[ grid2d::ValueTypeVar    ] = IndexVar;
-    vtype_indices_[ grid2d::ValueTypeStddev ] = IndexStddev;
+    vtype_indices_[ grid2d::ValueTypeCountValid ] = IndexCountValid;
+    vtype_indices_[ grid2d::ValueTypeCountNan   ] = IndexCountNan;
+    vtype_indices_[ grid2d::ValueTypeMin        ] = IndexMin;
+    vtype_indices_[ grid2d::ValueTypeMax        ] = IndexMax;
+    vtype_indices_[ grid2d::ValueTypeMean       ] = IndexMean;
+    vtype_indices_[ grid2d::ValueTypeVar        ] = IndexVar;
+    vtype_indices_[ grid2d::ValueTypeStddev     ] = IndexStddev;
 }
 
 /**
@@ -144,11 +145,12 @@ void Grid2D::clear()
 */
 void Grid2D::reset()
 {
-    layers_[ IndexCount ].setConstant(0);
-    layers_[ IndexMean  ].setConstant(0);
-    layers_[ IndexMean2 ].setConstant(0);
-    layers_[ IndexMin   ].setConstant(std::numeric_limits<double>::max());
-    layers_[ IndexMax   ].setConstant(std::numeric_limits<double>::lowest());
+    layers_[ IndexCountValid ].setConstant(0);
+    layers_[ IndexCountNan   ].setConstant(0);
+    layers_[ IndexMean       ].setConstant(0);
+    layers_[ IndexMean2      ].setConstant(0);
+    layers_[ IndexMin        ].setConstant(std::numeric_limits<double>::max());
+    layers_[ IndexMax        ].setConstant(std::numeric_limits<double>::lowest());
 
     flags_.setConstant(0);
  
@@ -328,7 +330,7 @@ void Grid2D::cropGrid(QRectF& roi,
 Grid2D::IndexError Grid2D::index(size_t& idx_x, size_t& idx_y, double x, double y, bool clamp) const
 {
     if (!std::isfinite(x) || !std::isfinite(y))
-        return IndexError::Inf;
+        return IndexError::InfIndex;
     
     //out of range?
     if (!clamp && (x < x0_ || x > x1_ || y < y0_ || y > y1_))
@@ -398,20 +400,23 @@ Grid2D::IndexError Grid2D::checkAdd(size_t& idx_x, size_t& idx_y, double x, doub
 {
     assert(valid());
 
-    if (!std::isfinite(v))
-    {
-        ++num_inf_;
-        return IndexError::Inf;
-    }
-
     auto err = index(idx_x, idx_y, x, y);
 
     if (err == IndexError::OOR)
         ++num_oor_;
-    else if (err == IndexError::Inf)
+    else if (err == IndexError::InfIndex)
         ++num_inf_;
 
-    return err;
+    if (err != IndexError::NoError)
+        return err;
+
+    if (!std::isfinite(v))
+    {
+        ++num_inf_;
+        return IndexError::InfValue;
+    }
+
+    return IndexError::NoError;
 }
 
 /**
@@ -419,14 +424,23 @@ Grid2D::IndexError Grid2D::checkAdd(size_t& idx_x, size_t& idx_y, double x, doub
 bool Grid2D::addValue(double x, double y, double v)
 {
     size_t idx_x, idx_y;
-    if (checkAdd(idx_x, idx_y, x, y, v) != IndexError::NoError)
+    auto err = checkAdd(idx_x, idx_y, x, y, v);
+
+    if (err == IndexError::InfValue)
+    {
+        //value is inf => log in cell
+        auto& count_inf = layers_[ IndexCountNan ](idx_y, idx_x);
+        count_inf += 1;
+    }
+    
+    if (err != IndexError::NoError)
         return false;
 
-    auto& vmin  = layers_[ IndexMin   ](idx_y, idx_x);
-    auto& vmax  = layers_[ IndexMax   ](idx_y, idx_x);
-    auto& count = layers_[ IndexCount ](idx_y, idx_x);
-    auto& mean  = layers_[ IndexMean  ](idx_y, idx_x);
-    auto& mean2 = layers_[ IndexMean2 ](idx_y, idx_x);
+    auto& vmin  = layers_[ IndexMin        ](idx_y, idx_x);
+    auto& vmax  = layers_[ IndexMax        ](idx_y, idx_x);
+    auto& count = layers_[ IndexCountValid ](idx_y, idx_x);
+    auto& mean  = layers_[ IndexMean       ](idx_y, idx_x);
+    auto& mean2 = layers_[ IndexMean2      ](idx_y, idx_x);
 
     if (v < vmin) vmin = v;
     if (v > vmax) vmax = v;
@@ -548,17 +562,17 @@ size_t Grid2D::addPoly(const std::function<void(double&, double&, size_t)>& pos_
 
 /**
 */
-bool Grid2D::setValue(double x, double y, double v)
-{
-    size_t idx_x, idx_y;
-    if (checkAdd(idx_x, idx_y, x, y, v) != IndexError::NoError)
-        return false;
+// bool Grid2D::setValue(double x, double y, double v)
+// {
+//     size_t idx_x, idx_y;
+//     if (checkAdd(idx_x, idx_y, x, y, v) != IndexError::NoError)
+//         return false;
 
-    layers_[ IndexValue ](idx_y, idx_x) = v;
-    layers_[ IndexCount ](idx_y, idx_x) = 1;
+//     layers_[ IndexValue      ](idx_y, idx_x) = v;
+//     layers_[ IndexCountValid ](idx_y, idx_x) = 1;
 
-    return true;
-}
+//     return true;
+// }
 
 /**
 */
@@ -568,7 +582,7 @@ bool Grid2D::setCount(double x, double y, size_t count)
     if (checkAdd(idx_x, idx_y, x, y, 0.0) != IndexError::NoError)
         return false;
 
-    layers_[ IndexCount ](idx_y, idx_x) = (double)count;
+    layers_[ IndexCountValid ](idx_y, idx_x) = (double)count;
 
     return true;
 }
@@ -582,26 +596,37 @@ Eigen::MatrixXd Grid2D::getValues(grid2d::ValueType vtype) const
     Eigen::MatrixXd l = layers_[ vindex ];
     double* d = l.data();
 
-    const auto&   count  = layers_[ IndexCount ];
-    const double* dcount = count.data();
+    const auto&   count_valid  = layers_[ IndexCountValid ];
+    const auto&   count_nan    = layers_[ IndexCountNan   ];
+    const double* dcount_valid = count_valid.data();
+    const double* dcount_nan   = count_nan.data();
 
     size_t n = (size_t)l.size();
 
-    for (size_t i = 0; i < n; ++i)
-        if(dcount[ i ] == 0)
-            d[ i ] = InvalidValue;
-    
-    if (vtype == grid2d::ValueType::ValueTypeVar)
+    if (vtype == grid2d::ValueType::ValueTypeCountNan)
     {
         for (size_t i = 0; i < n; ++i)
-            if (d[ i ] != InvalidValue)
-                d[ i ] /= dcount[ i ];
+            if (d[ i ] == 0)
+                d[ i ] = InvalidValue;
     }
-    else if (vtype == grid2d::ValueType::ValueTypeStddev)
+    else
     {
         for (size_t i = 0; i < n; ++i)
-            if (d[ i ] != InvalidValue)
-                d[ i ] = std::sqrt(d[ i ] / dcount[ i ]);
+            if(dcount_valid[ i ] == 0)
+                d[ i ] = InvalidValue;
+        
+        if (vtype == grid2d::ValueType::ValueTypeVar)
+        {
+            for (size_t i = 0; i < n; ++i)
+                if (d[ i ] != InvalidValue)
+                    d[ i ] /= dcount_valid[ i ];
+        }
+        else if (vtype == grid2d::ValueType::ValueTypeStddev)
+        {
+            for (size_t i = 0; i < n; ++i)
+                if (d[ i ] != InvalidValue)
+                    d[ i ] = std::sqrt(d[ i ] / dcount_valid[ i ]);
+        }
     }
 
     return l;

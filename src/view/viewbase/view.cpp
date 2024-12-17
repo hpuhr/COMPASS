@@ -736,6 +736,40 @@ bool View::presetChanged() const
 }
 
 /**
+ * Returns view information to be displayed by the view info widget.
+ */
+ViewInfos View::viewInfos() const
+{
+    if (!widget_ || !widget_->isInit())
+        return ViewInfos();
+
+    ViewInfos vinfos;
+    
+    //get custom infos
+    ViewInfos vinfos_custom = viewInfos_impl();
+
+    //create standard view infos
+    ViewInfos vinfos_standard;
+    vinfos_standard.addSection("Loaded Data");
+
+    const auto& null_cnt = widget_->getViewDataWidget()->nullCount();
+    const auto& nan_cnt  = widget_->getViewDataWidget()->nanCount();
+
+    if (null_cnt.has_value())
+        vinfos_standard.addInfo("info_null_values", "NULL values:", std::to_string(null_cnt.value()));
+    if (nan_cnt.has_value())
+        vinfos_standard.addInfo("info_nan_values", "Non-finite values:", std::to_string(nan_cnt.value()));
+
+    //add custom infos, then standard ones
+    if (vinfos_custom.numInfos() > 0)
+        vinfos.addInfos(vinfos_custom);
+    if (vinfos_standard.numInfos() > 0)
+        vinfos.addInfos(vinfos_standard);
+
+    return vinfos;
+}
+
+/**
  * Returns view-specific json information.
  */
 nlohmann::json View::viewInfoJSON() const

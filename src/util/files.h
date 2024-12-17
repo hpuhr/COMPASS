@@ -48,6 +48,7 @@ namespace Files
 {
 bool fileExists(const std::string& path);
 size_t fileSize(const std::string& path);
+std::string fileSizeString(size_t file_size_in_bytes);
 void verifyFileExists(const std::string& path);
 bool directoryExists(const std::string& path);
 bool copyRecursively(const std::string& source_folder, const std::string& dest_folder);

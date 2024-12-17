@@ -16,7 +16,7 @@
  */
 
 #include "viewvariable.h"
-#include "view.h"
+#include "variableview.h"
 
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
@@ -35,8 +35,10 @@ const std::string ViewVariable::ParamDataVarDBO  = "dbo";
 /**
  */
 ViewVariable::ViewVariable(const std::string& id_str, 
-                           View* view)
+                           int idx,
+                           VariableView* view)
 :   id_  (id_str)
+,   idx_ (idx   )
 ,   view_(view  )
 {
 }
@@ -96,14 +98,57 @@ bool ViewVariable::isMetaVariable () const
 
 /**
  */
-PropertyDataType ViewVariable::dataType() const
+bool ViewVariable::isEmpty() const
 {
-    assert (hasVariable());
+    return (settings_.data_var_dbo.empty() && settings_.data_var_name.empty());
+}
+
+/**
+ */
+boost::optional<PropertyDataType> ViewVariable::dataType() const
+{
+    if (!hasVariable())
+        return {};
 
     if (isMetaVariable())
         return metaVariable().dataType();
 
     return variable().dataType();
+}
+
+/**
+ */
+void ViewVariable::set(const std::string& dbo, const std::string& name, bool notify_changes)
+{
+    bool empty = dbo.empty() && name.empty();
+    assert(!empty || settings_.allow_empty_var);
+
+    if (settings_.data_var_dbo == dbo && 
+        settings_.data_var_name == name)
+        return;
+
+    if (!view_)
+    {
+        settings_.data_var_dbo  = dbo;
+        settings_.data_var_name = name;
+        return;
+    }
+
+    loginf << "ViewVariable: set: setting var '" << id_ << "' "
+        << "of view '" << view_->getName() << " to "
+        << "dbo " << dbo << " name " << name;
+
+    view_->preVariableChangedEvent(idx_, dbo, name);
+
+    view_->setParameter(settings_.data_var_dbo, dbo);
+    view_->setParameter(settings_.data_var_name, name);
+
+    view_->postVariableChangedEvent(idx_);
+
+    assert (empty || hasVariable());
+
+    if (notify_changes)
+        view_->notifyRefreshNeeded();
 }
 
 /**
@@ -153,20 +198,22 @@ void ViewVariable::setVariable(dbContent::Variable& var, bool notify_changes)
         return;
     }
 
-    loginf << "ViewVariable: dataVar: setting var '" << id_ << "' "
-           << "of view '" << view_->getName() << " to "
-           << "dbo " << var.dbContentName() << " name " << var.name();
+    loginf << "ViewVariable: setVariable: setting var '" << id_ << "' "
+        << "of view '" << view_->getName() << " to "
+        << "dbo " << var.dbContentName() << " name " << var.name();
+
+    view_->preVariableChangedEvent(idx_, var.dbContentName(), var.name());
 
     view_->setParameter(settings_.data_var_dbo, var.dbContentName());
     view_->setParameter(settings_.data_var_name, var.name());
+
+    view_->postVariableChangedEvent(idx_);
 
     assert (hasVariable());
     assert (!isMetaVariable());
 
     if (notify_changes)
-    {
         view_->notifyRefreshNeeded();
-    }
 }
 
 /**
@@ -206,21 +253,63 @@ void ViewVariable::setMetaVariable(dbContent::MetaVariable& var, bool notify_cha
     if (settings_.data_var_dbo == META_OBJECT_NAME && 
         settings_.data_var_name == var.name())
         return;
+
+    if (!view_)
+    {
+        settings_.data_var_dbo  = META_OBJECT_NAME;
+        settings_.data_var_name = var.name();
+        return;
+    }
     
-    loginf << "ViewVariable: metaDataVar: setting metavar '" << id_ << "' "
+    loginf << "ViewVariable: setMetaVariable: setting metavar '" << id_ << "' "
            << "of view '" << view_->getName() << " to "
            << "name " << var.name();
 
+    view_->preVariableChangedEvent(idx_, META_OBJECT_NAME, var.name());
+
     view_->setParameter(settings_.data_var_dbo, META_OBJECT_NAME);
     view_->setParameter(settings_.data_var_name, var.name());
+
+    view_->postVariableChangedEvent(idx_);
 
     assert (hasVariable());
     assert (isMetaVariable());
 
     if (notify_changes)
-    {
         view_->notifyRefreshNeeded();
+}
+
+/**
+ */
+void ViewVariable::setEmpty(bool notify_changes)
+{
+    assert(settings_.allow_empty_var);
+
+    if (settings_.data_var_dbo == "" && 
+        settings_.data_var_name == "")
+        return;
+
+    if (!view_)
+    {
+        settings_.data_var_dbo  = "";
+        settings_.data_var_name = "";
+        return;
     }
+
+    loginf << "ViewVariable: setEmpty: setting to empty";
+
+    view_->preVariableChangedEvent(idx_, "", "");
+
+    view_->setParameter(settings_.data_var_dbo , std::string());
+    view_->setParameter(settings_.data_var_name, std::string());
+
+    view_->postVariableChangedEvent(idx_);
+
+    assert(!hasVariable());
+    assert(isEmpty());
+
+    if (notify_changes)
+        view_->notifyRefreshNeeded();
 }
 
 /**
@@ -333,6 +422,8 @@ void ViewVariable::setVariable(const dbContent::VariableSelectionWidget& selecti
         setVariable(selection.selectedVariable(), notify_changes);
     else if (selection.hasMetaVariable())
         setMetaVariable(selection.selectedMetaVariable(), notify_changes);
+    else
+        setEmpty(notify_changes);
 }
 
 /**
@@ -340,8 +431,9 @@ void ViewVariable::setVariable(const dbContent::VariableSelectionWidget& selecti
 void ViewVariable::configureWidget(dbContent::VariableSelectionWidget& selection)
 {
     selection.showMetaVariables(settings_.show_meta_vars);
-    selection.showEmptyVariable(settings_.show_empty_vars);
-
+    selection.showExistingInDBOnly(!settings_.show_empty_vars);
+    selection.showEmptyVariable(settings_.allow_empty_var);
+    
     if (!settings_.valid_data_types.empty())
         selection.showDataTypesOnly(std::vector<PropertyDataType>(settings_.valid_data_types.begin(),
                                                                   settings_.valid_data_types.end()));

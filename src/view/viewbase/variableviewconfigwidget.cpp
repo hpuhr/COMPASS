@@ -33,6 +33,7 @@
 #include <QLabel>
 #include <QTabWidget>
 #include <QRadioButton>
+#include <QToolButton>
 
 /**
 */
@@ -44,7 +45,7 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
 {
     assert(var_view_);
 
-    auto addVariableUI = [ & ] (QVBoxLayout* layout, int idx)
+    auto addVariableUI = [ & ] (QVBoxLayout* layout, QVBoxLayout* switch_layout, int idx)
     {
         const auto& var = var_view_->variable(idx);
 
@@ -65,6 +66,38 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
             [ this, idx ] () { this->selectedVariableChangedSlot(idx); } );
 
         layout->addWidget(sel_widget);
+
+        if (idx > 0)
+        {
+            int idx0 = idx - 1;
+            int idx1 = idx;
+
+            const auto& var0 = var_view_->variable(idx0);
+
+            auto var_w = new QWidget;
+            auto layout = new QHBoxLayout;
+            layout->setContentsMargins(0, 0, 0, 0);
+            var_w->setLayout(layout);
+
+            auto var_switch = new QToolButton;
+            var_switch->setIcon(QIcon(Utils::Files::getIconFilepath("switch_ud.png").c_str()));
+            var_switch->setToolTip(QString::fromStdString("Switch " + var0.settings().display_name + " and " + var.settings().display_name));
+            var_switch->setVisible(false);
+
+            var_w->setFixedSize(var_switch->sizeHint());
+            layout->addWidget(var_switch);
+
+            auto switch_cb = [ = ] () { this->switchVariables(idx0, idx1); };
+
+            connect(var_switch, &QToolButton::pressed, switch_cb);
+
+            var_switches_.push_back(var_switch);
+
+            switch_layout->addWidget(var_w);
+        }
+
+        switch_layout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Minimum));
+        //switch_layout->addStretch(1);
     };
 
     bool show_annotation = var_view_->showsAnnotation() && 
@@ -85,11 +118,17 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
 
         variables_widget_ = new QWidget;
 
+        QHBoxLayout* var_layout_outer = new QHBoxLayout;
+        variables_widget_->setLayout(var_layout_outer);
+
         QVBoxLayout* var_layout = new QVBoxLayout;
-        variables_widget_->setLayout(var_layout);
+        var_layout_outer->addLayout(var_layout);
+
+        QVBoxLayout* switch_layout = new QVBoxLayout;
+        var_layout_outer->addLayout(switch_layout);
 
         for (size_t i = 0; i < var_view_->numVariables(); ++i)
-            addVariableUI(var_layout, i);
+            addVariableUI(var_layout, switch_layout, i);
 
         cfg_layout->addWidget(variables_widget_);
     }
@@ -142,11 +181,9 @@ void VariableViewConfigWidget::selectedVariableChangedSlot(int idx)
     auto selection = var_selection_widgets_.at(idx);
     assert(selection);
 
-    preVariableChangedEvent(idx);
-
     var_view_->variable(idx).setVariable(*selection, true);
 
-    postVariableChangedEvent(idx);
+    variableChangedEvent(idx);
 }
 
 /**
@@ -177,6 +214,8 @@ void VariableViewConfigWidget::updateSelectedVariables(size_t idx)
     assert(selection);
 
     var_view_->variable(idx).updateWidget(*selection);
+
+    variableChangedEvent(idx);
 }
 
 /**
@@ -257,4 +296,18 @@ void VariableViewConfigWidget::annotationChanged()
 {
     var_view_->setCurrentAnnotation(annotation_widget_->currentGroupIdx(),
                                     annotation_widget_->currentAnnotationIdx());
+}
+
+/**
+ */
+void VariableViewConfigWidget::showSwitch(int var0, bool ok)
+{
+    var_switches_.at(var0)->setVisible(ok);
+}
+
+/**
+ */
+void VariableViewConfigWidget::switchVariables(int idx0, int idx1)
+{
+    var_view_->switchVariables(idx0, idx1, true);
 }

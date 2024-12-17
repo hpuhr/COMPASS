@@ -34,7 +34,7 @@
 HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std::string& instance_id,
                                      Configurable* config_parent, HistogramView* view,
                                      QWidget* parent)
-    : ViewWidget(class_id, instance_id, config_parent, view, parent)
+:   VariableViewWidget(class_id, instance_id, config_parent, view, parent)
 {
     auto data_widget = new HistogramViewDataWidget(this);
     setDataWidget(data_widget);

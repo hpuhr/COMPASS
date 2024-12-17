@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "viewwidget.h"
+#include "variableviewwidget.h"
 
 class HistogramView;
 class HistogramViewDataWidget;
@@ -26,7 +26,7 @@ class HistogramViewConfigWidget;
 class QSplitter;
 class QTabWidget;
 
-class HistogramViewWidget : public ViewWidget
+class HistogramViewWidget : public VariableViewWidget
 {
   public:
     /// @brief Constructor

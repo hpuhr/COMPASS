@@ -15,30 +15,19 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 #include "variableviewwidget.h"
-
-class GridView;
-class GridViewConfigWidget;
-class GridViewDataWidget;
 
 /**
 */
-class GridViewWidget : public VariableViewWidget
+VariableViewWidget::VariableViewWidget(const std::string& class_id, 
+                                       const std::string& instance_id,
+                                       Configurable* config_parent, 
+                                       View* view, 
+                                       QWidget* parent)
+:   ViewWidget(class_id, instance_id, config_parent, view, parent)
 {
-public:
-    GridViewWidget(const std::string& class_id, 
-                   const std::string& instance_id,
-                   Configurable* config_parent, 
-                   GridView* view, 
-                   QWidget* parent = NULL);
-    virtual ~GridViewWidget();
+}
 
-    GridViewDataWidget* getViewDataWidget();
-    const GridViewDataWidget* getViewDataWidget() const;
-    GridViewConfigWidget* getViewConfigWidget();
-    const GridViewConfigWidget* getViewConfigWidget() const;
-
-    GridView* getView();
-};
+/**
+*/
+VariableViewWidget::~VariableViewWidget() = default;

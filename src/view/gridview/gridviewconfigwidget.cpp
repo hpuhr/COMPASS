@@ -20,6 +20,8 @@
 #include "gridviewdatawidget.h"
 #include "gridview.h"
 
+#include "geotiff.h"
+
 #include "viewvariable.h"
 
 #include "logger.h"
@@ -160,6 +162,8 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     attachExportMenu();
     updateConfig();
     updateExport();
+
+    showSwitch(0, true);
 }
 
 /**
@@ -198,12 +202,12 @@ void GridViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
 /**
 */
-void GridViewConfigWidget::postVariableChangedEvent(int idx)
+void GridViewConfigWidget::variableChangedEvent(int idx)
 {
     if (idx == 0 || idx == 1)
         updateExport();
     else if (idx == 2)
-        updateVariableDataType();
+        updateDistributedVariable();
 }
 
 /**
@@ -363,6 +367,26 @@ void GridViewConfigWidget::updateConfig()
 
 /**
 */
+void GridViewConfigWidget::updateDistributedVariable()
+{
+    updateVariableDataType();
+
+    bool var_empty = view_->variable(2).isEmpty();
+
+    if (var_empty)
+    {
+        loginf << "GridViewConfigWidget: updateDistributedVariable: setting distributed variable to empty";
+
+        value_type_combo_->blockSignals(true);
+        value_type_combo_->setCurrentIndex(value_type_combo_->findData(QVariant((int)grid2d::ValueType::ValueTypeCountValid)));
+        value_type_combo_->blockSignals(false);
+    }
+
+    value_type_combo_->setEnabled(!var_empty);
+}
+
+/**
+*/
 void GridViewConfigWidget::updateVariableDataType()
 {
     //determine actual datatype depending on selected variable and grid value type
@@ -500,6 +524,8 @@ void GridViewConfigWidget::exportToGeographicView()
         return;
     }
 
+    const auto& legend = data_widget->currentLegend();
+
     std::string name = exportName();
 
     auto export_config = getExportGeoViewConfig(this, name);
@@ -511,7 +537,10 @@ void GridViewConfigWidget::exportToGeographicView()
 
     ViewPointGenAnnotation anno(export_config->item_name);
 
-    auto geo_image_feat = new ViewPointGenFeatureGeoImage(geo_image->first, geo_image->second);
+    auto geo_image_feat = new ViewPointGenFeatureGeoImage(geo_image->first, 
+                                                          geo_image->second, 
+                                                          legend, 
+                                                          true);
     anno.addFeature(geo_image_feat);
 
     nlohmann::json j;
@@ -542,6 +571,6 @@ void GridViewConfigWidget::exportToGeoTiff()
     if (fn.isEmpty())
         return;
 
-    if (!GeoTIFFWriter::writeGeoTIFF(fn.toStdString(), geo_image->first, geo_image->second))
+    if (!GeoTIFF::writeGeoTIFF(fn.toStdString(), geo_image->first, geo_image->second))
         QMessageBox::critical(this, "Error", "Export to GeoTIFF failed.");
 }
