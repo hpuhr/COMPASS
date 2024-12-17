@@ -604,6 +604,16 @@ void COMPASS::lastUsedPath(const std::string& last_path)
     last_path_ = last_path;
 }
 
+bool COMPASS::darkMode() const
+{
+    return dark_mode_;
+}
+
+void COMPASS::darkMode(bool value)
+{
+    dark_mode_ = value;
+}
+
 
 bool COMPASS::disableConfirmResetViews() const
 {

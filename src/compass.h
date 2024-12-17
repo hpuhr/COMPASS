@@ -89,6 +89,8 @@ public:
     std::string lastUsedPath();
     void lastUsedPath(const std::string& last_path);
 
+    bool dark_mode_ {false};
+
     std::string versionString(bool open_ats = true, 
                               bool license_type = true) const;
     std::string licenseeString(bool licensed_to = true) const;
@@ -188,6 +190,9 @@ public:
     unsigned int autoLiveRunningResumeAskTime() const; // min
     unsigned int autoLiveRunningResumeAskWaitTime() const; // min
     bool disableConfirmResetViews() const;
+
+    bool darkMode() const;
+    void darkMode(bool value);
 };
 
 #endif /* COMPASS_H_ */

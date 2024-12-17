@@ -86,6 +86,8 @@ private:
 
     std::string max_fps_;
 
+    bool dark_mode_ {false};
+
     bool no_config_save_ {false};
 
     bool open_rt_cmd_port_ {false};

@@ -37,6 +37,7 @@
 #include <QMessageBox>
 #include <QSurfaceFormat>
 #include <QSplashScreen>
+#include <QStyleFactory>
 
 #include "util/tbbhack.h"
 
@@ -118,72 +119,73 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")
-            ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
-            ("override_cfg_path", po::value<std::string>(&override_cfg_path_),
-             "overrides 'default' config subfolder to other value, e.g. 'org'")
-            ("expert_mode", po::bool_switch(&expert_mode_) ,"set expert mode")
-            ("create_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
-             "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
-            ("open_db", po::value<std::string>(&open_sqlite3_db_filename_),
-             "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
-            ("import_data_sources_file", po::value<std::string>(&import_data_sources_filename_),
-             "imports data sources JSON file with given filename, e.g. '/data/ds1.json'")
-            ("import_view_points", po::value<std::string>(&import_view_points_filename_),
-             "imports view points JSON file with given filename, e.g. '/data/file1.json'")
-            ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
-             "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
-            ("import_asterix_files", po::value<std::string>(&import_asterix_filenames_),
-             "imports multiple ASTERIX files with given filenames, e.g. '/data/file1.ff;/data/file2.ff'")
-            ("import_asterix_file_line", po::value<std::string>(&import_asterix_file_line_),
-             "imports ASTERIX file with given line, e.g. 'L2'")
-            ("import_asterix_date", po::value<std::string>(&import_asterix_date_),
-             "imports ASTERIX file with given date, in YYYY-MM-DD format e.g. '2020-04-20'")
-            ("import_asterix_file_time_offset", po::value<std::string>(&import_asterix_file_time_offset_),
-             "used time offset during ASTERIX file import Time of Day override, in HH:MM:SS.ZZZ'")
-            ("import_asterix_ignore_time_jumps", po::bool_switch(&import_asterix_ignore_time_jumps_),
-             "imports ASTERIX file ignoring 24h time jumps")
-            ("import_asterix_network", po::bool_switch(&import_asterix_network_),
-             "imports ASTERIX from defined network UDP streams")
-            ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
-             "additive time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
-            ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
-             "maximum number of lines per data source during ASTERIX network import, 1..4")
-            ("import_asterix_network_ignore_future_ts", po::bool_switch(&import_asterix_network_ignore_future_ts_),
-             "ignore future timestamps during ASTERIX network import'")
-            ("asterix_framing", po::value<std::string>(&asterix_framing),
-             "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
-            ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
-             "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
-             " (including one pair of single quotes)")
-            ("import_json", po::value<std::string>(&import_json_filename_),
-             "imports JSON file with given filename, e.g. '/data/file1.json'")
-            //            ("json_schema", po::value<std::string>(&import_json_schema),
-            //             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
-            ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename_),
-             "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
-            ("import_gps_parameters", po::value<std::string>(&import_gps_parameters_),
-             "import GPS parameters as JSON string, e.g. ''{\"callsign\": \"ENTRPRSE\", \"ds_name\": \"GPS Trail\", \"ds_sac\": 0, \"ds_sic\": 0, \"mode_3a_code\": 961, \"set_callsign\": true, \"set_mode_3a_code\": true, \"set_target_address\": true, \"target_address\": 16702992, \"tod_offset\": 0.0}'' (including one pair of single quotes)")
-            ("import_sectors_json", po::value<std::string>(&import_sectors_filename_),
-             "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
-            ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
-             "calculate radar plot positions")
-            ("calculate_artas_tr_usage", po::bool_switch(&calculate_artas_tr_usage_), "associate target reports based on ARTAS usage")
-            ("reconstruct_references", po::bool_switch(&reconstruct_references_),
-             "reconstruct references from sensor and tracker data")
-            ("load_data", po::bool_switch(&load_data_), "load data after start")
-            ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
-             "export view points report after start with given filename, e.g. '/data/db2/report.tex")
-            ("evaluate", po::bool_switch(&evaluate_), "run evaluation")
-            ("evaluation_parameters", po::value<std::string>(&evaluation_parameters_),
-             "evaluation parameters as JSON string, e.g. ''{\"current_standard\": \"test\", \"dbcontent_name_ref\": \"CAT062\", \"dbcontent_name_tst\": \"CAT020\"}'' (including one pair of single quotes)")
-            ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
-            ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
-             "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
-            ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in GeographicView'")
-            ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
-            ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
-            ("enable_event_log", po::bool_switch(&enable_event_log_), "collect warnings and errors in the event log")
-            ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
+        ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
+        ("override_cfg_path", po::value<std::string>(&override_cfg_path_),
+         "overrides 'default' config subfolder to other value, e.g. 'org'")
+        ("expert_mode", po::bool_switch(&expert_mode_) ,"set expert mode")
+        ("create_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
+         "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
+        ("open_db", po::value<std::string>(&open_sqlite3_db_filename_),
+         "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
+        ("import_data_sources_file", po::value<std::string>(&import_data_sources_filename_),
+         "imports data sources JSON file with given filename, e.g. '/data/ds1.json'")
+        ("import_view_points", po::value<std::string>(&import_view_points_filename_),
+         "imports view points JSON file with given filename, e.g. '/data/file1.json'")
+        ("import_asterix_file", po::value<std::string>(&import_asterix_filename_),
+         "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
+        ("import_asterix_files", po::value<std::string>(&import_asterix_filenames_),
+         "imports multiple ASTERIX files with given filenames, e.g. '/data/file1.ff;/data/file2.ff'")
+        ("import_asterix_file_line", po::value<std::string>(&import_asterix_file_line_),
+         "imports ASTERIX file with given line, e.g. 'L2'")
+        ("import_asterix_date", po::value<std::string>(&import_asterix_date_),
+         "imports ASTERIX file with given date, in YYYY-MM-DD format e.g. '2020-04-20'")
+        ("import_asterix_file_time_offset", po::value<std::string>(&import_asterix_file_time_offset_),
+         "used time offset during ASTERIX file import Time of Day override, in HH:MM:SS.ZZZ'")
+        ("import_asterix_ignore_time_jumps", po::bool_switch(&import_asterix_ignore_time_jumps_),
+         "imports ASTERIX file ignoring 24h time jumps")
+        ("import_asterix_network", po::bool_switch(&import_asterix_network_),
+         "imports ASTERIX from defined network UDP streams")
+        ("import_asterix_network_time_offset", po::value<std::string>(&import_asterix_network_time_offset_),
+         "additive time offset during ASTERIX network import, in HH:MM:SS.ZZZ'")
+        ("import_asterix_network_max_lines", po::value<int>(&import_asterix_network_max_lines_),
+         "maximum number of lines per data source during ASTERIX network import, 1..4")
+        ("import_asterix_network_ignore_future_ts", po::bool_switch(&import_asterix_network_ignore_future_ts_),
+         "ignore future timestamps during ASTERIX network import'")
+        ("asterix_framing", po::value<std::string>(&asterix_framing),
+         "sets ASTERIX framing, e.g. 'none', 'ioss', 'ioss_seq', 'rff'")
+        ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
+         "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
+         " (including one pair of single quotes)")
+        ("import_json", po::value<std::string>(&import_json_filename_),
+         "imports JSON file with given filename, e.g. '/data/file1.json'")
+        //            ("json_schema", po::value<std::string>(&import_json_schema),
+        //             "JSON file import schema, e.g. 'jASTERIX', 'OpenSkyNetwork', 'ADSBExchange', 'SDDL'")
+        ("import_gps_trail", po::value<std::string>(&import_gps_trail_filename_),
+         "imports gps trail NMEA with given filename, e.g. '/data/file2.txt'")
+        ("import_gps_parameters", po::value<std::string>(&import_gps_parameters_),
+         "import GPS parameters as JSON string, e.g. ''{\"callsign\": \"ENTRPRSE\", \"ds_name\": \"GPS Trail\", \"ds_sac\": 0, \"ds_sic\": 0, \"mode_3a_code\": 961, \"set_callsign\": true, \"set_mode_3a_code\": true, \"set_target_address\": true, \"target_address\": 16702992, \"tod_offset\": 0.0}'' (including one pair of single quotes)")
+        ("import_sectors_json", po::value<std::string>(&import_sectors_filename_),
+         "imports exported sectors JSON with given filename, e.g. '/data/sectors.json'")
+        ("calculate_radar_plot_positions", po::bool_switch(&calculate_radar_plot_positions_),
+         "calculate radar plot positions")
+        ("calculate_artas_tr_usage", po::bool_switch(&calculate_artas_tr_usage_), "associate target reports based on ARTAS usage")
+        ("reconstruct_references", po::bool_switch(&reconstruct_references_),
+         "reconstruct references from sensor and tracker data")
+        ("load_data", po::bool_switch(&load_data_), "load data after start")
+        ("export_view_points_report", po::value<std::string>(&export_view_points_report_filename_),
+         "export view points report after start with given filename, e.g. '/data/db2/report.tex")
+        ("evaluate", po::bool_switch(&evaluate_), "run evaluation")
+        ("evaluation_parameters", po::value<std::string>(&evaluation_parameters_),
+         "evaluation parameters as JSON string, e.g. ''{\"current_standard\": \"test\", \"dbcontent_name_ref\": \"CAT062\", \"dbcontent_name_tst\": \"CAT020\"}'' (including one pair of single quotes)")
+        ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
+        ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
+         "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
+        ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in GeographicView'")
+        ("dark_mode", po::bool_switch(&dark_mode_), "dark mode (experimental)")
+        ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
+        ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
+        ("enable_event_log", po::bool_switch(&enable_event_log_), "collect warnings and errors in the event log")
+        ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
 
     try
     {
@@ -212,8 +214,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         return;
     }
 
-//    if (quit_requested_)
-//        return;
+    //    if (quit_requested_)
+    //        return;
 
     //    if (import_json_filename.size() && !import_json_schema.size())
     //    {
@@ -244,15 +246,56 @@ bool Client::run ()
     loginf << "COMPASSClient: started with " << num_threads << " threads";
 #endif
 
-//    unsigned int data_size = 10e6;
-//    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
-//        double x = 0;
+    //    unsigned int data_size = 10e6;
+    //    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
+    //        double x = 0;
 
-//        for (unsigned int cnt2=1; cnt2 < data_size * data_size; ++ cnt2)
-//            x += (data_size * cnt) % cnt2;
+    //        for (unsigned int cnt2=1; cnt2 < data_size * data_size; ++ cnt2)
+    //            x += (data_size * cnt) % cnt2;
 
-//        loginf << x;
-//    });
+    //        loginf << x;
+    //    });
+
+    // Set the "Fusion" style for better cross-platform results
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
+
+    if (dark_mode_)
+    {
+        // Define a simple dark mode stylesheet
+        QPalette dark_pal;
+        dark_pal.setColor(QPalette::Window, QColor(53, 53, 53));
+        dark_pal.setColor(QPalette::WindowText, Qt::white);
+        dark_pal.setColor(QPalette::Base, QColor(25, 25, 25));
+        dark_pal.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+        dark_pal.setColor(QPalette::ToolTipBase, Qt::white);
+        dark_pal.setColor(QPalette::ToolTipText, Qt::white);
+        dark_pal.setColor(QPalette::Text, Qt::white);
+        dark_pal.setColor(QPalette::Button, QColor(75, 75, 75));
+        dark_pal.setColor(QPalette::ButtonText, Qt::white);
+        dark_pal.setColor(QPalette::BrightText, Qt::red);
+        dark_pal.setColor(QPalette::Link, QColor(42, 130, 218));
+        dark_pal.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        dark_pal.setColor(QPalette::HighlightedText, Qt::black);
+
+        dark_pal.setColor(QPalette::Disabled, QPalette::Window, dark_pal.window().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::WindowText, dark_pal.windowText().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::Base, dark_pal.base().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::AlternateBase, dark_pal.alternateBase().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::Text, dark_pal.text().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::Button, dark_pal.button().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::ButtonText, dark_pal.buttonText().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::BrightText, dark_pal.brightText().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::Link, dark_pal.link().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::Highlight, dark_pal.highlight().color().darker());
+        dark_pal.setColor(QPalette::Disabled, QPalette::HighlightedText, dark_pal.highlightedText().color().darker());
+
+        // Apply the palette
+        QApplication::setPalette(dark_pal);
+
+        // (Optional) Apply a global stylesheet for further refinement
+        QApplication::setStyleSheet("QToolTip { color: #ffffff; background-color: #2a2a2a; border: 1px solid white; }");
+    }
+
 
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
@@ -273,8 +316,9 @@ bool Client::run ()
     //!this should be the first call to COMPASS instance!
     try
     {
-        COMPASS::instance();
+        COMPASS::instance().darkMode(dark_mode_); // also needed as first call
         COMPASS::instance().init(); //here everything created in compass instance should be available
+
         ProjectionManager::instance().test();
     }
     catch(const std::exception& e)
@@ -566,17 +610,17 @@ void Client::checkAndSetupConfig()
                 json gps_config = json::parse(import_gps_parameters_);
 
                 assert (ConfigurationManager::getInstance().hasRootConfiguration(
-                            "COMPASS", "COMPASS0"));
+                    "COMPASS", "COMPASS0"));
                 Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
-                            "COMPASS", "COMPASS0");
+                    "COMPASS", "COMPASS0");
 
                 assert (compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
                 Configuration& task_man_config = compass_config.assertSubConfiguration(
-                            "TaskManager", "TaskManager0");
+                    "TaskManager", "TaskManager0");
 
                 assert (task_man_config.hasSubConfiguration("GPSTrailImportTask", "GPSTrailImportTask0"));
                 Configuration& gps_task_config = task_man_config.assertSubConfiguration(
-                            "GPSTrailImportTask", "GPSTrailImportTask0");
+                    "GPSTrailImportTask", "GPSTrailImportTask0");
 
                 gps_task_config.overrideJSONParameters(gps_config);
             }
@@ -596,13 +640,13 @@ void Client::checkAndSetupConfig()
                 json eval_config = json::parse(evaluation_parameters_);
 
                 assert (ConfigurationManager::getInstance().hasRootConfiguration(
-                            "COMPASS", "COMPASS0"));
+                    "COMPASS", "COMPASS0"));
                 Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
-                            "COMPASS", "COMPASS0");
+                    "COMPASS", "COMPASS0");
 
                 assert (compass_config.hasSubConfiguration("EvaluationManager", "EvaluationManager0"));
                 Configuration& eval_man_config = compass_config.assertSubConfiguration(
-                            "EvaluationManager", "EvaluationManager0");
+                    "EvaluationManager", "EvaluationManager0");
 
                 eval_man_config.overrideJSONParameters(eval_config);
             }
@@ -675,7 +719,7 @@ void Client::checkNeededActions()
     cout << "COMPASSClient: checking if current compass config exists ... ";
 
     bool current_cfg_subdir_exists = Files::directoryExists(HOME_SUBDIRECTORY)
-            && Files::directoryExists(HOME_VERSION_SUBDIRECTORY);
+                                     && Files::directoryExists(HOME_VERSION_SUBDIRECTORY);
 
     if (current_cfg_subdir_exists)
     {
@@ -710,10 +754,10 @@ void Client::performNeededActions()
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(
-                    nullptr, "Delete Previous Configuration & Data",
-                    "Complete deletion of the previous configuration and data is required. This will delete"
-                    " the folder '~/.compass'. Do you want to continue?",
-                    QMessageBox::Yes | QMessageBox::No);
+            nullptr, "Delete Previous Configuration & Data",
+            "Complete deletion of the previous configuration and data is required. This will delete"
+            " the folder '~/.compass'. Do you want to continue?",
+            QMessageBox::Yes | QMessageBox::No);
 
         if (reply == QMessageBox::Yes)
         {
