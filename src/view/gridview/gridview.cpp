@@ -34,7 +34,7 @@
 /**
 */
 GridView::Settings::Settings() 
-:   value_type            (grid2d::ValueType::ValueTypeCountTotal)
+:   value_type            (grid2d::ValueType::ValueTypeCountValid)
 ,   grid_resolution       (50       )
 ,   render_color_value_min(""       )
 ,   render_color_value_max(""       )
@@ -298,7 +298,7 @@ void GridView::updateSettings(const std::string& dbo, const std::string& name)
         loginf << "GridView: updateSettings: Settings distributed variable to empty";
 
         //set special settings for empty variable
-        setValueType(grid2d::ValueType::ValueTypeCountTotal, false);
+        setValueType(grid2d::ValueType::ValueTypeCountValid, false);
         setMinValue("", false);
         setMaxValue("", false);
     }
@@ -338,7 +338,7 @@ PropertyDataType GridView::currentDataType() const
     if (!data_type.has_value() ||
         settings_.value_type == (int)grid2d::ValueType::ValueTypeCountValid ||
         settings_.value_type == (int)grid2d::ValueType::ValueTypeCountNan ||
-        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountTotal)
+        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountValid)
     {
         return PropertyDataType::UINT;
     }
@@ -357,7 +357,7 @@ PropertyDataType GridView::currentLegendDataType() const
     if (!data_type.has_value() ||
         settings_.value_type == (int)grid2d::ValueType::ValueTypeCountValid ||
         settings_.value_type == (int)grid2d::ValueType::ValueTypeCountNan ||
-        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountTotal)
+        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountValid)
     {
         return PropertyDataType::UINT;
     }

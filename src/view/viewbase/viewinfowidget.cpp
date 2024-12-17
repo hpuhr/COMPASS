@@ -65,7 +65,7 @@ void ViewInfoWidget::reinit()
     info_layout_ = new QGridLayout;
 
     widget_layout->addLayout(info_layout_);
-    widget_layout->addStretch(1);
+    //widget_layout->addStretch(1);
 
     info_layout_->setSpacing(6);
 

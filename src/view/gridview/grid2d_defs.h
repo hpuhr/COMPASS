@@ -74,7 +74,6 @@ enum ValueType
 {
     ValueTypeCountValid = 0,
     ValueTypeCountNan,
-    ValueTypeCountTotal,
     ValueTypeMin,
     ValueTypeMax,
     ValueTypeMean,
@@ -95,11 +94,9 @@ inline std::string valueTypeToString(ValueType vtype)
     switch (vtype)
     {
         case ValueTypeCountValid:
-            return "Count Valid";
+            return "Count";
         case ValueTypeCountNan:
-            return "Count Invalid";
-        case ValueTypeCountTotal:
-            return "Count Total";
+            return "Count NULL";
         case ValueTypeMin:
             return "Min";
         case ValueTypeMax:

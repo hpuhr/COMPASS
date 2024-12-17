@@ -30,6 +30,7 @@ class QPushButton;
 class QCheckBox;
 class QTreeWidget;
 class QTreeWidgetItem;
+class QComboBox;
 
 /**
  */
@@ -70,6 +71,8 @@ protected:
     virtual void initItem_impl(QTreeWidgetItem* item, int idx, const std::string& fn) {}
     virtual void itemChanged_impl(QTreeWidgetItem* item, int column) {}
     virtual void init_impl() {}
+
+    virtual QString infoColumnName() const;
 
     int fileItemIndex(const std::string& fn) const;
     QTreeWidgetItem* fileItem(const std::string& fn) const;
@@ -115,6 +118,13 @@ protected:
     virtual void initItem_impl(QTreeWidgetItem* item, int idx, const std::string& fn) override;
     virtual void itemChanged_impl(QTreeWidgetItem* item, int column) override;
 
+    virtual QString infoColumnName() const override;
+
 private:
+    void updateSizeInfo(int idx);
+
+    QComboBox* subsamplingCombo(int idx) const;
+    QComboBox* subsamplingCombo(QTreeWidgetItem* item) const;
+
     mutable std::map<std::string, GeoTIFFInfo> gtiff_infos_;
 };

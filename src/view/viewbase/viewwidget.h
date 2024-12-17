@@ -182,6 +182,11 @@ protected:
      */
     virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
+    /**
+     * Reimplement to show the info widget or not.
+     */
+    virtual bool showInfoWidget() { return false; }
+
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
     void setLowerWidget(QWidget* w);

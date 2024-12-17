@@ -35,7 +35,7 @@ ScatterPlotViewWidget::ScatterPlotViewWidget(const std::string& class_id,
                                              Configurable* config_parent, 
                                              ScatterPlotView* view,
                                              QWidget* parent)
-:   ViewWidget(class_id, instance_id, config_parent, view, parent)
+:   VariableViewWidget(class_id, instance_id, config_parent, view, parent)
 {
     auto data_widget = new ScatterPlotViewDataWidget(this);
     setDataWidget(data_widget);

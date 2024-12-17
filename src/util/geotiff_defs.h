@@ -39,10 +39,11 @@ struct GeoTIFFInfo
 
     bool isValid() const;
 
-    ErrCode             error = ErrCode::NoInfo;
-    int                 img_w = -1;
-    int                 img_h = -1;
-    int                 bands = -1;
+    ErrCode             error        = ErrCode::NoInfo;
+    int                 img_w        = -1;
+    int                 img_h        = -1;
+    int                 bands        = -1;
+    int                 raster_bytes = 0;
     std::vector<double> geo_transform;
     std::string         geo_srs; // most likely wkt!
 };

@@ -30,7 +30,6 @@ Grid2D::Grid2D()
     vtype_indices_.resize(grid2d::NumValueTypes);
     vtype_indices_[ grid2d::ValueTypeCountValid ] = IndexCountValid;
     vtype_indices_[ grid2d::ValueTypeCountNan   ] = IndexCountNan;
-    vtype_indices_[ grid2d::ValueTypeCountTotal ] = IndexCountValid;
     vtype_indices_[ grid2d::ValueTypeMin        ] = IndexMin;
     vtype_indices_[ grid2d::ValueTypeMax        ] = IndexMax;
     vtype_indices_[ grid2d::ValueTypeMean       ] = IndexMean;
@@ -604,16 +603,7 @@ Eigen::MatrixXd Grid2D::getValues(grid2d::ValueType vtype) const
 
     size_t n = (size_t)l.size();
 
-    if (vtype == grid2d::ValueType::ValueTypeCountTotal)
-    {
-        for (size_t i = 0; i < n; ++i)
-        {
-            d[ i ] += dcount_nan[ i ];
-            if (d[ i ] == 0)
-                d[ i ] = InvalidValue;
-        }
-    }
-    else if (vtype == grid2d::ValueType::ValueTypeCountNan)
+    if (vtype == grid2d::ValueType::ValueTypeCountNan)
     {
         for (size_t i = 0; i < n; ++i)
             if (d[ i ] == 0)

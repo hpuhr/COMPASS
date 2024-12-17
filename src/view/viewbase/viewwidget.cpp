@@ -206,6 +206,8 @@ void ViewWidget::createStandardLayout()
     //create info widget
     {
         info_widget_ = new ViewInfoWidget(view_, right_widget_);
+        info_widget_->setVisible(false);
+        info_widget_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
         right_layout->addWidget(info_widget_);
     }
@@ -227,6 +229,7 @@ void ViewWidget::createStandardLayout()
         main_splitter_->setCollapsible(i, false);
 }
 
+
 /**
  * View initialization. Called by View on view creation.
 */
@@ -241,12 +244,16 @@ void ViewWidget::init()
     assert(config_widget_);
     assert(tool_widget_);
     assert(state_widget_);
+    assert(info_widget_);
 
     //add screenshot button
     tool_widget_->addScreenshotButton();
 
     //add toggle button for config widget
     tool_widget_->addConfigWidgetToggle();
+
+    //set info widget visibility
+    info_widget_->setVisible(showInfoWidget());
 
     //call derived
     init_impl();

@@ -287,9 +287,11 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     {
         loginf << "VariableViewStashDataWidget: updateVariableData: adding empty variable to stash";
 
-        //empty variable selected => add zero values 
+        //empty variable selected => add zero values (valid values)
         //(a little bit hacky, but we do not want to count the values as Nan or NULL values)
-        std::vector<double> vempty(indexes.size(), 0.0);
+        const double DefaultEmptyVarValue = 0.0;
+        
+        std::vector<double> vempty(indexes.size(), DefaultEmptyVarValue);
         values.insert(values.end(), vempty.begin(), vempty.end());
 
         return;

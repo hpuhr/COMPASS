@@ -20,9 +20,9 @@
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/lexical_cast.hpp>
 
-const size_t GeoTIFF::MaxSize           = 24000u;
+const size_t GeoTIFF::MaxSize           = 10000u;
 const size_t GeoTIFF::MaxPixels         = MaxSize * MaxSize;
-const size_t GeoTIFF::DefaultSubsamples = 10u;
+const size_t GeoTIFF::DefaultSubsamples = 5u;
 
 size_t GeoTIFF::geotiff_id_ = 0;
 
@@ -121,6 +121,16 @@ GeoTIFFInfo GeoTIFF::getInfo(void* gdal_dataset)
         info.error = GeoTIFFInfo::ErrCode::Empty;
         return info;
     }
+
+    auto rBand = GDALGetRasterBand(gdal_dataset, 1);
+    if (!rBand)
+    {
+        info.error = GeoTIFFInfo::ErrCode::InvalidFormat;
+        return info;
+    }
+
+    auto data_type = GDALGetRasterDataType(rBand);
+    info.raster_bytes = GDALGetDataTypeSizeBytes(data_type);
     
     //try to get geo transform
     info.geo_transform.resize(6);
