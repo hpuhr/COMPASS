@@ -969,11 +969,14 @@ void DBContentManager::addInsertedDataToChache()
                           }
 
                           // add assoc property if required
-                          Variable& utn_var = metaGetVariable(buf_it->first, DBContent::meta_var_utn_);
-                          Property utn_prop (utn_var.dbColumnName(), utn_var.dataType());
+                          if (metaCanGetVariable(buf_it->first, DBContent::meta_var_utn_))
+                          {
+                              Variable& utn_var = metaGetVariable(buf_it->first, DBContent::meta_var_utn_);
+                              Property utn_prop (utn_var.dbColumnName(), utn_var.dataType());
 
-                          if (!buf_it->second->hasProperty(utn_prop))
-                              buf_it->second->addProperty(utn_prop);
+                              if (!buf_it->second->hasProperty(utn_prop))
+                                  buf_it->second->addProperty(utn_prop);
+                          }
 
                           // change db column names to dbo var names
                           buf_it->second->transformVariables(read_set, true);
