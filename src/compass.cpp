@@ -614,6 +614,15 @@ void COMPASS::darkMode(bool value)
     dark_mode_ = value;
 }
 
+const char* COMPASS::lineEditInvalidStyle()
+{
+    if (dark_mode_)
+        return "QLineEdit { background: rgb(255, 50, 50); selection-background-color:"
+                          " rgb(255, 100, 100); }";
+    else
+        return "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
+                          " rgb(255, 200, 200); }";
+}
 
 bool COMPASS::disableConfirmResetViews() const
 {

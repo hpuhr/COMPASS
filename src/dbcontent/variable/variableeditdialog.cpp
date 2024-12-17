@@ -97,12 +97,6 @@ VariableEditDialog::VariableEditDialog(Variable& variable, QWidget* parent, Qt::
     main_layout->addWidget(done_button_);
 
     setLayout(main_layout);
-
-    invalid_bg_str_ = "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
-                    " rgb(255, 200, 200); }";
-
-    valid_bg_str_ = "QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
-                    " rgb(200, 200, 200); }";
 }
 
 bool VariableEditDialog::variableEdited() const
@@ -127,7 +121,7 @@ void VariableEditDialog::nameChangedSlot(const QString& name)
 
     if (!new_name.size())
     {
-        name_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        name_edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
         return;
     }
 
@@ -135,14 +129,14 @@ void VariableEditDialog::nameChangedSlot(const QString& name)
     {
         logwrn << "VariableEditDialog: nameChangedSlot: name '" << new_name << "' already in use";
 
-        name_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        name_edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
         name_edit_->setToolTip(("Variable name '"+new_name+"' already in use").c_str());
         return;
     }
 
     // ok, rename
 
-    name_edit_->setStyleSheet(valid_bg_str_.c_str());
+    name_edit_->setStyleSheet("");
     name_edit_->setToolTip("");
 
     loginf << "VariableEditDialog: nameChangedSlot: renaming '" << variable_.name() << "' to '" << new_name << "'";
@@ -193,7 +187,7 @@ void VariableEditDialog::dbColumnChangedSlot(const QString& name)
 
     if (!new_name.size())
     {
-        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        db_column_edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
         return;
     }
 
@@ -201,12 +195,12 @@ void VariableEditDialog::dbColumnChangedSlot(const QString& name)
     {
         logwrn << "VariableEditDialog: dbColumnChangedSlot: name '" << new_name << "' already in use";
 
-        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        db_column_edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
         db_column_edit_->setToolTip(("Variable DB Column name '"+new_name+"' already in use").c_str());
         return;
     }
 
-    db_column_edit_->setStyleSheet(valid_bg_str_.c_str());
+    db_column_edit_->setStyleSheet("");
     db_column_edit_->setToolTip("");
 
     loginf << "VariableEditDialog: dbColumnChangedSlot: changing '" << variable_.dbColumnName()

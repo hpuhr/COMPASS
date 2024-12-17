@@ -112,7 +112,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     //    std::string import_json_filename;
     //    std::string import_json_schema;
 
-
     //    bool load_data {false};
 
     //    bool quit {false};

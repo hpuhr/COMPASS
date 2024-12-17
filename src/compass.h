@@ -193,6 +193,8 @@ public:
 
     bool darkMode() const;
     void darkMode(bool value);
+
+    const char* lineEditInvalidStyle();
 };
 
 #endif /* COMPASS_H_ */
