@@ -128,7 +128,48 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
+// import_pcap_file
+struct RTCommandImportASTERIXPCAPFile : public rtcommand::RTCommand
+{
+    std::string filename_;
+    std::string line_id_;
+    std::string date_str_;
+    std::string time_offset_str_;
+    bool ignore_time_jumps_ {false};
 
+    virtual rtcommand::IsValid valid() const override;
+
+    RTCommandImportASTERIXPCAPFile();
+
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(import_asterix_pcap_file,
+                      "imports ASTERIX PCAP file with given filename, e.g. '/data/file1.pcap'")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
+// import_pcap_files
+struct RTCommandImportASTERIXPCAPFiles : public rtcommand::RTCommand
+{
+    std::string filenames_;
+    std::vector<std::string> split_filenames_;
+    std::string line_id_;
+    std::string date_str_;
+    std::string time_offset_str_;
+    bool ignore_time_jumps_ {false};
+
+    virtual rtcommand::IsValid valid() const override;
+
+    RTCommandImportASTERIXPCAPFiles();
+
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(import_asterix_pcap_files,
+                      "imports multiple ASTERIX PCAP files with given filenames, e.g. '/data/file1.pcap;/data/file2.pcap'")
+    DECLARE_RTCOMMAND_OPTIONS
+};
 
 // import_asterix_network
 struct RTCommandImportASTERIXNetworkStart : public rtcommand::RTCommand

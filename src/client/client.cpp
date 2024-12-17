@@ -134,6 +134,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
          "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
         ("import_asterix_files", po::value<std::string>(&import_asterix_filenames_),
          "imports multiple ASTERIX files with given filenames, e.g. '/data/file1.ff;/data/file2.ff'")
+        ("import_asterix_pcap_file", po::value<std::string>(&import_asterix_pcap_filename_),
+         "imports ASTERIX PCAP file with given filename, e.g. '/data/file1.pcap'")
+        ("import_asterix_pcap_files", po::value<std::string>(&import_asterix_pcap_filenames_),
+         "imports multiple ASTERIX PCAP files with given filenames, e.g. '/data/file1.pcap;/data/file2.pcap'")
         ("import_asterix_file_line", po::value<std::string>(&import_asterix_file_line_),
          "imports ASTERIX file with given line, e.g. 'L2'")
         ("import_asterix_date", po::value<std::string>(&import_asterix_date_),
@@ -207,9 +211,18 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     checkAndSetupConfig();
 
-    if (import_asterix_filename_.size() && import_asterix_network_)
+    // check if more than 1 ASTERIX import operations are defined
+    unsigned int import_count = 0;
+
+    if (import_asterix_network_) import_count++;
+    if (!import_asterix_filename_.empty()) import_count++;
+    if (!import_asterix_filenames_.empty()) import_count++;
+    if (!import_asterix_pcap_filename_.empty()) import_count++;
+    if (!import_asterix_pcap_filenames_.empty()) import_count++;
+
+    if (import_count > 1)
     {
-        logerr << "COMPASSClient: unable to import both ASTERIX file and from network at the same time";
+        logerr << "COMPASSClient: unable run multiple ASTERIX import operations at the same time";
         return;
     }
 
@@ -432,7 +445,49 @@ bool Client::run ()
         rt_man.addCommand(cmd);
     }
 
-    else if (import_asterix_network_)
+    if (import_asterix_pcap_filename_.size())
+    {
+        string cmd = "import_asterix_pcap_file "+import_asterix_pcap_filename_;
+
+        if (import_asterix_file_line_.size())
+            cmd += " --line "+import_asterix_file_line_;
+        else
+            cmd += " --line L1";
+
+        if (import_asterix_date_.size())
+            cmd += " --date "+import_asterix_date_;
+
+        if (import_asterix_file_time_offset_.size())
+            cmd += " --time_offset "+import_asterix_file_time_offset_;
+
+        if (import_asterix_ignore_time_jumps_)
+            cmd += " --ignore_time_jumps";
+
+        rt_man.addCommand(cmd);
+    }
+
+    if (import_asterix_pcap_filenames_.size())
+    {
+        string cmd = "import_asterix_pcap_files '"+import_asterix_pcap_filenames_+"'";
+
+        if (import_asterix_file_line_.size())
+            cmd += " --line "+import_asterix_file_line_;
+        else
+            cmd += " --line L1";
+
+        if (import_asterix_date_.size())
+            cmd += " --date "+import_asterix_date_;
+
+        if (import_asterix_file_time_offset_.size())
+            cmd += " --time_offset "+import_asterix_file_time_offset_;
+
+        if (import_asterix_ignore_time_jumps_)
+            cmd += " --ignore_time_jumps";
+
+        rt_man.addCommand(cmd);
+    }
+
+    if (import_asterix_network_)
     {
         string cmd = "import_asterix_network";
 

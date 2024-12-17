@@ -9,7 +9,7 @@ http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
     <options>
         <lighting>false</lighting>
         <profile>spherical-mercator</profile>
-        <terrain tile_size="2" morph_imagery="false" range_mode="PIXEL_SIZE_ON_SCREEN" tile_pixel_size="512" color="#000000FF"/>
+        <terrain tile_size="2" morph_imagery="false" range_mode="PIXEL_SIZE_ON_SCREEN" tile_pixel_size="512" color="#FFFFFFFF"/>
         
         <cache_policy max_age="1209600"/>
         <cache type="filesystem">
