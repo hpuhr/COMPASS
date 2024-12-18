@@ -71,6 +71,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     }
     db_file_list_ = cleaned_file_list;
 
+    registerParameter("dark_mode", &dark_mode_, false);
+
     registerParameter("last_path", &last_path_, {});
 
     if (!Files::directoryExists(last_path_))
