@@ -105,6 +105,10 @@ Data sources and sectors can be configured using the Configuration menu. Further
  \begin{itemize}
  \item see \nameref{sec:ui_configure_licenses}
  \end{itemize}
+   \item Dark Mode: Enable/Disable dark mode (after restart)
+ \begin{itemize}
+ \item see \nameref{sec:ui_overview_dark_mode}
+ \end{itemize}
 \end{itemize}
 \  \\
 
@@ -152,7 +156,18 @@ The UI can be reset to a "default" state (as existed at application startup) usi
 \subfile{ui_targets}
 \subfile{ui_views}
 
+\subsection{Dark Mode}
+\label{sec:ui_overview_dark_mode}
 
+After Dark Mode is enabled or disabled (requiring an application restart), the GUI is switched to a dark theme.
 
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{figures/dark_mode.png}
+  \caption{Main Window Dark Mode}
+\end{figure}
 
+Please \textbf{note} that this mode is currently experimental, and not all Views support this dark background color, and some GUI elements may show unexpected coloring. This will be improved in the future. Please also \textbf{note} that the window decoration color can only be changed using your Linux window manager settings. \\
+
+There also exist special dark mode maps for Geographic View as described in \nameref{ref:geoview_map_osm_dark}.
 

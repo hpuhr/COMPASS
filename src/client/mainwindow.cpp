@@ -515,8 +515,9 @@ void MainWindow::updateMenus()
     config_menu_->setDisabled(asterix_import_running || in_live);
 
     for (auto a : config_menu_->actions())
-        a->setEnabled(a == license_action_ || 
-                      a == auto_refresh_views_action_ ? true : db_open);
+        a->setEnabled(a == license_action_
+                      || a == auto_refresh_views_action_
+                              || a == dark_mode_action_ ? true : db_open);
 }
 
 void MainWindow::updateBottomWidget()
