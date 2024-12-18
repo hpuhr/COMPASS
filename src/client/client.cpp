@@ -187,7 +187,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
          "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
         ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in GeographicView'")
-        ("dark_mode", po::bool_switch(&dark_mode_), "dark mode (experimental)")
         ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
         ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
         ("enable_event_log", po::bool_switch(&enable_event_log_), "collect warnings and errors in the event log")
@@ -274,44 +273,6 @@ bool Client::run ()
     // Set the "Fusion" style for better cross-platform results
     QApplication::setStyle(QStyleFactory::create("Fusion"));
 
-    if (dark_mode_)
-    {
-        // Define a simple dark mode stylesheet
-        QPalette dark_pal;
-        dark_pal.setColor(QPalette::Window, QColor(53, 53, 53));
-        dark_pal.setColor(QPalette::WindowText, Qt::white);
-        dark_pal.setColor(QPalette::Base, QColor(25, 25, 25));
-        dark_pal.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
-        dark_pal.setColor(QPalette::ToolTipBase, Qt::white);
-        dark_pal.setColor(QPalette::ToolTipText, Qt::white);
-        dark_pal.setColor(QPalette::Text, Qt::white);
-        dark_pal.setColor(QPalette::Button, QColor(75, 75, 75));
-        dark_pal.setColor(QPalette::ButtonText, Qt::white);
-        dark_pal.setColor(QPalette::BrightText, Qt::red);
-        dark_pal.setColor(QPalette::Link, QColor(42, 130, 218));
-        dark_pal.setColor(QPalette::Highlight, QColor(42, 130, 218));
-        dark_pal.setColor(QPalette::HighlightedText, Qt::black);
-
-        dark_pal.setColor(QPalette::Disabled, QPalette::Window, dark_pal.window().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::WindowText, dark_pal.windowText().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::Base, dark_pal.base().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::AlternateBase, dark_pal.alternateBase().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::Text, dark_pal.text().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::Button, dark_pal.button().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::ButtonText, dark_pal.buttonText().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::BrightText, dark_pal.brightText().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::Link, dark_pal.link().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::Highlight, dark_pal.highlight().color().darker());
-        dark_pal.setColor(QPalette::Disabled, QPalette::HighlightedText, dark_pal.highlightedText().color().darker());
-
-        // Apply the palette
-        QApplication::setPalette(dark_pal);
-
-        // (Optional) Apply a global stylesheet for further refinement
-        QApplication::setStyleSheet("QToolTip { color: #ffffff; background-color: #2a2a2a; border: 1px solid white; }");
-    }
-
-
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
     splash.show();
@@ -331,7 +292,42 @@ bool Client::run ()
     //!this should be the first call to COMPASS instance!
     try
     {
-        COMPASS::instance().darkMode(dark_mode_); // also needed as first call
+        if (COMPASS::instance().darkMode()) // also needed as first call
+        {
+            // Define a simple dark mode stylesheet
+            QPalette dark_pal;
+            dark_pal.setColor(QPalette::Window, QColor(53, 53, 53));
+            dark_pal.setColor(QPalette::WindowText, Qt::white);
+            dark_pal.setColor(QPalette::Base, QColor(25, 25, 25));
+            dark_pal.setColor(QPalette::AlternateBase, QColor(53, 53, 53));
+            dark_pal.setColor(QPalette::ToolTipBase, Qt::white);
+            dark_pal.setColor(QPalette::ToolTipText, Qt::white);
+            dark_pal.setColor(QPalette::Text, Qt::white);
+            dark_pal.setColor(QPalette::Button, QColor(75, 75, 75));
+            dark_pal.setColor(QPalette::ButtonText, Qt::white);
+            dark_pal.setColor(QPalette::BrightText, Qt::red);
+            dark_pal.setColor(QPalette::Link, QColor(42, 130, 218));
+            dark_pal.setColor(QPalette::Highlight, QColor(42, 130, 218));
+            dark_pal.setColor(QPalette::HighlightedText, Qt::black);
+
+            dark_pal.setColor(QPalette::Disabled, QPalette::Window, dark_pal.window().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::WindowText, dark_pal.windowText().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::Base, dark_pal.base().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::AlternateBase, dark_pal.alternateBase().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::Text, dark_pal.text().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::Button, dark_pal.button().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::ButtonText, dark_pal.buttonText().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::BrightText, dark_pal.brightText().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::Link, dark_pal.link().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::Highlight, dark_pal.highlight().color().darker());
+            dark_pal.setColor(QPalette::Disabled, QPalette::HighlightedText, dark_pal.highlightedText().color().darker());
+
+            // Apply the palette
+            QApplication::setPalette(dark_pal);
+
+            // (Optional) Apply a global stylesheet for further refinement
+            QApplication::setStyleSheet("QToolTip { color: #ffffff; background-color: #2a2a2a; border: 1px solid white; }");
+        }
         COMPASS::instance().init(); //here everything created in compass instance should be available
 
         ProjectionManager::instance().test();

@@ -89,8 +89,6 @@ public:
     std::string lastUsedPath();
     void lastUsedPath(const std::string& last_path);
 
-    bool dark_mode_ {false};
-
     std::string versionString(bool open_ats = true, 
                               bool license_type = true) const;
     std::string licenseeString(bool licensed_to = true) const;
@@ -98,6 +96,8 @@ public:
 protected:
     bool db_opened_{false};
     bool expert_mode_ {false};
+
+    bool dark_mode_ {false};
 
     AppMode app_mode_ {AppMode::Offline};
     AppState app_state_ = AppState::Starting;
