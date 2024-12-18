@@ -77,7 +77,16 @@ public:
         unsigned int nan_count           = 0; //number of nan values
     };
 
-    typedef std::map<std::string, IntermediateContentData> IntermediateData;
+    /**
+     */
+    struct IntermediateData
+    {
+        std::map<std::string, IntermediateContentData> content_data;
+
+        unsigned int buffer_null_count = 0;
+        unsigned int buffer_nan_count  = 0;
+    };
+
 
     /**
      * Result for a certain DBContent.
@@ -135,6 +144,9 @@ public:
         unsigned int              not_inserted_count  = 0; //total non-insertable data (e.g. out of histogram range)
         unsigned int              nan_count           = 0; //total nan data
         unsigned int              max_count           = 0; //total maximum bin count
+
+        unsigned int              buffer_null_count   = 0;
+        unsigned int              buffer_nan_count    = 0;
     };
 
     HistogramGenerator() = default;

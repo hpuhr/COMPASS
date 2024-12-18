@@ -160,6 +160,9 @@ protected:
                 logdbg << "HistogramGeneratorBuffer: refill_impl: could not add buffer of dbcontent " << elem.first;
         }
 
+        intermediate_data_.buffer_nan_count  = histogram_init_.numNanValues();
+        intermediate_data_.buffer_null_count = histogram_init_.numNullValues();
+
         logdbg << "HistogramGeneratorBuffer: refill_impl: done";
 
         return true;
@@ -293,7 +296,7 @@ private:
         {
             logdbg << "HistogramGeneratorBufferT: initIntermediateData: histograms " << elem.first;
 
-            auto& d = intermediate_data_[ elem.first ];
+            auto& d = intermediate_data_.content_data[ elem.first ];
             d.init(elem.second.numBins());
 
             logdbg << "HistogramGeneratorBufferT: initIntermediateData: bins";
@@ -364,6 +367,8 @@ private:
         }
 
         NullableVector<T>& data = buffer.get<T>(current_var_name);
+
+        //loginf << "HistogramGeneratorBuffer: scanBuffer: Scanning buffer of dbc " << db_content << " size = " << data.size();
         
         if (!histogram_init_.scan(data))
             return false;
@@ -377,7 +382,7 @@ private:
     bool addBuffer(const std::string& db_content, Buffer& buffer)
     {
         //adding buffer needs previously initialized result and histogram for dbcontent type
-        if (intermediate_data_.find(db_content) == intermediate_data_.end() ||
+        if (intermediate_data_.content_data.find(db_content) == intermediate_data_.content_data.end() ||
             histograms_.find(db_content) == histograms_.end())
             return false;
 
@@ -408,7 +413,7 @@ private:
         if (histogram.numBins() < 1)
             return false;
 
-        auto& interm_data = intermediate_data_[ db_content ];
+        auto& interm_data = intermediate_data_.content_data[ db_content ];
 
         //add variable content
         for (unsigned int cnt=0; cnt < data.size(); ++cnt)

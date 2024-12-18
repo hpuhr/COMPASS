@@ -32,7 +32,6 @@ class Buffer;
 /**
  * Base view data class for variable-based views which stash their buffer data on a per-variable basis.
  * This stash also does a lot of counting and can be processed later on to generate the final view data.
- *
  */
 class VariableViewStashDataWidget : public VariableViewDataWidget
 {
@@ -88,17 +87,15 @@ private:
                     unsigned int last_size,
                     unsigned int current_size)
     {
-        size_t is_null = 0;
-        size_t is_nan  = 0;
-
         bool ok;
+
+        size_t num_nan_values = 0;
 
         for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
         {
             if (data.isNull(cnt))
             {
                 target.push_back(std::numeric_limits<double>::signaling_NaN());
-                ++is_null;
             }
             else
             {
@@ -109,12 +106,11 @@ private:
                 target.push_back(v);
 
                 if (!std::isfinite(v))
-                    ++is_nan;
+                    ++num_nan_values;
             }
         }
 
-        addNullCount(is_null);
-        addNanCount(is_nan);
+        addNanCount(num_nan_values);
     }
 
     template<typename T>
@@ -122,17 +118,15 @@ private:
                     std::vector<double>& target,
                     std::vector<unsigned int> indexes)
     {
-        size_t is_null = 0;
-        size_t is_nan  = 0;
-
         bool ok;
+
+        size_t num_nan_values = 0;
 
         for (unsigned int index : indexes)
         {
             if (data.isNull(index))
             {
                 target.push_back(std::numeric_limits<double>::signaling_NaN());
-                ++is_null;
             }
             else
             {
@@ -143,12 +137,11 @@ private:
                 target.push_back(v);
 
                 if (!std::isfinite(v))
-                    ++is_nan;
+                    ++num_nan_values;
             }
         }
 
-        addNullCount(is_null);
-        addNanCount(is_nan);
+        addNanCount(num_nan_values);
     }
 
     VariableViewStash<double> stash_;

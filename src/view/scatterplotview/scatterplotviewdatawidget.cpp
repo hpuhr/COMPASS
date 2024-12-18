@@ -195,10 +195,12 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
     ScatterSeries selected_series;
     selected_series.points.reserve(stash.selected_count_);
 
+    size_t num_null_values = 0;
+
     for (const auto& dbc_stash : stash.groupedStashes())
     {
-        if (!dbc_stash.second.valid_count)
-            continue;
+        //if (!dbc_stash.second.valid_count)
+        //    continue;
 
         ScatterSeries dbc_series;
         dbc_series.points.reserve(dbc_stash.second.unsel_count);
@@ -211,11 +213,19 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
         for (size_t i = 0; i < n; ++i)
         {
             if (dbc_stash.second.nan_values[ i ])
+            {
+                //nan = null, each value of the triplet must not be null
+                ++num_null_values;
                 continue;
+            }
             else if (dbc_stash.second.selected_values[ i ])
+            {
                 selected_series.points.emplace_back(x_values[ i ], y_values[ i ]);
+            }
             else
+            {
                 dbc_series.points.emplace_back(x_values[ i ], y_values[ i ]);
+            }
         }
 
         if (!dbc_series.points.empty())
@@ -225,6 +235,9 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
             scatter_series_.addDataSeries(dbc_series, name, colorForGroupName(dbc_stash.first), MarkerSizePx);
         }
     }
+
+    //@TODO
+    addNullCount(num_null_values);
 
     //add selected dataset as the last one (important for render order)
     if (!selected_series.points.empty())

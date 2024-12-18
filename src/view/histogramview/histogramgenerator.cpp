@@ -103,7 +103,7 @@ bool HistogramGenerator::hasValidResult() const
 {
     return (num_bins_ > 0 && 
             !results_.content_results.empty() &&
-            results_.content_results.size() == intermediate_data_.size());
+            results_.content_results.size() == intermediate_data_.content_data.size());
 }
 
 /**
@@ -243,15 +243,15 @@ bool HistogramGenerator::finalizeResults()
     results_  = {};
     num_bins_ = 0;
 
-    if (!intermediate_data_.empty())
+    if (!intermediate_data_.content_data.empty())
     {
-        num_bins_ = (unsigned int)intermediate_data_.begin()->second.bin_data.size();
+        num_bins_ = (unsigned int)intermediate_data_.content_data.begin()->second.bin_data.size();
     }
 
     results_.valid_counts.assign(num_bins_, 0);
     results_.selected_counts.assign(num_bins_, 0);
 
-    for (auto& elem : intermediate_data_)
+    for (auto& elem : intermediate_data_.content_data)
     {
         const auto& d = elem.second;
         auto&       r = results_.content_results[ elem.first ];
@@ -298,6 +298,9 @@ bool HistogramGenerator::finalizeResults()
 
         num_bins_ = (int)r.bins.size();
     }
+
+    results_.buffer_nan_count  = intermediate_data_.buffer_nan_count;
+    results_.buffer_null_count = intermediate_data_.buffer_null_count;
 
     assert(subRangeActive() || results_.not_inserted_count == 0);
 
