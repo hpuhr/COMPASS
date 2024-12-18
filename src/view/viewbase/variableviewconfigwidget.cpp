@@ -34,6 +34,7 @@
 #include <QTabWidget>
 #include <QRadioButton>
 #include <QToolButton>
+#include <QPainter>
 
 /**
 */
@@ -79,8 +80,31 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
             layout->setContentsMargins(0, 0, 0, 0);
             var_w->setLayout(layout);
 
+            QImage icon_img_upper(Utils::Files::getIconFilepath("collapse.png").c_str());
+            QImage icon_img_lower = icon_img_upper.transformed(QTransform().rotate(180));
+            QIcon icon;
+            if (!icon_img_upper.isNull())
+            {
+                int w = icon_img_upper.width();
+                int h = icon_img_upper.height();
+                int h_half  = h / 2;
+                int h_arrow = h_half * 0.7;
+                int w_offs  = (w - h_arrow) / 2;
+                int h_offs  = (h_half - h_arrow) / 2;
+
+                auto icon_img_upper_scaled = icon_img_upper.scaled(h_arrow, h_arrow);
+                auto icon_img_lower_scaled = icon_img_lower.scaled(h_arrow, h_arrow);
+
+                QImage img(w, h_half * 2, icon_img_upper.format());
+                QPainter p(&img);
+                p.drawImage(QPoint(w_offs, h_offs), icon_img_upper_scaled);
+                p.drawImage(QPoint(w_offs, h_half + h_offs), icon_img_lower_scaled);
+
+                icon = QIcon(QPixmap::fromImage(img));
+            }
+
             auto var_switch = new QToolButton;
-            var_switch->setIcon(QIcon(Utils::Files::getIconFilepath("switch_ud.png").c_str()));
+            var_switch->setIcon(icon);
             var_switch->setToolTip(QString::fromStdString("Switch " + var0.settings().display_name + " and " + var.settings().display_name));
             var_switch->setVisible(false);
 

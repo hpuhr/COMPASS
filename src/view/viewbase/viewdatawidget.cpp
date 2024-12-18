@@ -267,6 +267,16 @@ bool ViewDataWidget::redrawData(bool recompute, bool notify)
     //invoke derived: redraw and remember if data has been redrawn correctly
     drawn_ = redrawData_impl(recompute);
 
+    if (recompute)
+    {
+        //check for nan values in the data
+        if (nanCount().has_value() && nanCount().value() > 0)
+        {
+            logerr << "ViewDataWidget: redrawData: " << nanCount().value() << " inf value(s) detected "
+                   << "in view " << getWidget()->getView()->instanceId();
+        }
+    }
+
     if (notify)
     {
         emit redrawDone();

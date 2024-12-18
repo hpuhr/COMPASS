@@ -163,7 +163,7 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     updateConfig();
     updateExport();
 
-    showSwitch(0, true);
+    //showSwitch(0, true);
 }
 
 /**

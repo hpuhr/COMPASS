@@ -85,7 +85,7 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
     
     layout->addWidget(use_connection_lines_);
 
-    showSwitch(0, true);
+    //showSwitch(0, true);
 }
 
 /**

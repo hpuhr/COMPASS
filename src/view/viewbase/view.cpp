@@ -753,12 +753,9 @@ ViewInfos View::viewInfos() const
     vinfos_standard.addSection("Loaded Data");
 
     const auto& null_cnt = widget_->getViewDataWidget()->nullCount();
-    const auto& nan_cnt  = widget_->getViewDataWidget()->nanCount();
 
     if (null_cnt.has_value())
         vinfos_standard.addInfo("info_null_values", "NULL values:", std::to_string(null_cnt.value()));
-    if (nan_cnt.has_value())
-        vinfos_standard.addInfo("info_nan_values", "Non-finite values:", std::to_string(nan_cnt.value()));
 
     //add custom infos, then standard ones
     if (vinfos_custom.numInfos() > 0)

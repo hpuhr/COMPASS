@@ -199,11 +199,16 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
 
     loginf << "GridViewDataWidget: processStash: Created grid of " << grid_->numCellsX() << "x" << grid_->numCellsY();
 
+    size_t num_null_values = 0;
+
     for (const auto& dbc_values : getStash().groupedStashes())
     {
         const auto& x_values = dbc_values.second.variable_stashes[ 0 ].values;
         const auto& y_values = dbc_values.second.variable_stashes[ 1 ].values;
         const auto& z_values = dbc_values.second.variable_stashes[ 2 ].values;
+
+        assert(x_values.size() == y_values.size() &&
+               y_values.size() == z_values.size());
 
         loginf << "GridViewDataWidget: processStash: dbcontent " << dbc_values.first
                << " #x " << x_values.size()
@@ -211,9 +216,16 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
                << " #z " << z_values.size();
 
         for (size_t i = 0; i < z_values.size(); ++i)
+        {
+            if (dbc_values.second.nan_values[ i ])
+                ++num_null_values;
+
             if (!dbc_values.second.isNan(0, i) && !dbc_values.second.isNan(1, i))
                 grid_->addValue(x_values[ i ], y_values[ i ], z_values[ i ]);
+        }
     }
+
+    addNullCount(num_null_values);
 
     loginf << "GridViewDataWidget: processStash:"
            << " added " << grid_->numAdded() 
