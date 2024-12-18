@@ -159,6 +159,9 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         ("asterix_decoder_cfg", po::value<std::string>(&asterix_decoder_cfg),
          "sets ASTERIX decoder config using JSON string, e.g. ''{\"10\":{\"edition\":\"0.31\"}}''"
          " (including one pair of single quotes)")
+        ("import_asterix_parameters", po::value<std::string>(&import_asterix_parameters_),
+         "ASTERIX import parameters as JSON string, e.g. ''{\"filter_modec_active\": true,\"filter_modec_max\": 50000.0,\"filter_modec_min\": -10000.0}'' (including one pair of single quotes)")
+
         ("import_json", po::value<std::string>(&import_json_filename_),
          "imports JSON file with given filename, e.g. '/data/file1.json'")
         //            ("json_schema", po::value<std::string>(&import_json_schema),
@@ -655,13 +658,13 @@ void Client::checkAndSetupConfig()
 
         ConfigurationManager::getInstance().init(config.getString("main_configuration_file"));
 
-        if (import_gps_parameters_.size())
+        if (import_asterix_parameters_.size())
         {
-            loginf << "COMPASSClient: overriding gps import parameters";
+            loginf << "COMPASSClient: overriding ASTERIX import parameters";
             using namespace nlohmann;
 
             try {
-                json gps_config = json::parse(import_gps_parameters_);
+                json json_config = json::parse(import_asterix_parameters_);
 
                 assert (ConfigurationManager::getInstance().hasRootConfiguration(
                     "COMPASS", "COMPASS0"));
@@ -669,14 +672,44 @@ void Client::checkAndSetupConfig()
                     "COMPASS", "COMPASS0");
 
                 assert (compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
-                Configuration& task_man_config = compass_config.assertSubConfiguration(
+                Configuration& task_man_config = compass_config.getOrCreateSubConfiguration(
+                    "TaskManager", "TaskManager0");
+
+                assert (task_man_config.hasSubConfiguration("ASTERIXImportTask", "ASTERIXImportTask0"));
+                Configuration& task_config = task_man_config.getOrCreateSubConfiguration(
+                    "ASTERIXImportTask", "ASTERIXImportTask0");
+
+                task_config.overrideJSONParameters(json_config);
+            }
+            catch (exception& e)
+            {
+                logerr << "COMPASSClient: JSON parse error in '" << import_asterix_parameters_ << "'";
+                throw e;
+            }
+        }
+
+        if (import_gps_parameters_.size())
+        {
+            loginf << "COMPASSClient: overriding gps import parameters";
+            using namespace nlohmann;
+
+            try {
+                json json_config = json::parse(import_gps_parameters_);
+
+                assert (ConfigurationManager::getInstance().hasRootConfiguration(
+                    "COMPASS", "COMPASS0"));
+                Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
+                    "COMPASS", "COMPASS0");
+
+                assert (compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
+                Configuration& task_man_config = compass_config.getOrCreateSubConfiguration(
                     "TaskManager", "TaskManager0");
 
                 assert (task_man_config.hasSubConfiguration("GPSTrailImportTask", "GPSTrailImportTask0"));
-                Configuration& gps_task_config = task_man_config.assertSubConfiguration(
+                Configuration& task_config = task_man_config.getOrCreateSubConfiguration(
                     "GPSTrailImportTask", "GPSTrailImportTask0");
 
-                gps_task_config.overrideJSONParameters(gps_config);
+                task_config.overrideJSONParameters(json_config);
             }
             catch (exception& e)
             {
@@ -691,7 +724,7 @@ void Client::checkAndSetupConfig()
             using namespace nlohmann;
 
             try {
-                json eval_config = json::parse(evaluation_parameters_);
+                json json_config = json::parse(evaluation_parameters_);
 
                 assert (ConfigurationManager::getInstance().hasRootConfiguration(
                     "COMPASS", "COMPASS0"));
@@ -699,10 +732,10 @@ void Client::checkAndSetupConfig()
                     "COMPASS", "COMPASS0");
 
                 assert (compass_config.hasSubConfiguration("EvaluationManager", "EvaluationManager0"));
-                Configuration& eval_man_config = compass_config.assertSubConfiguration(
+                Configuration& eval_man_config = compass_config.getOrCreateSubConfiguration(
                     "EvaluationManager", "EvaluationManager0");
 
-                eval_man_config.overrideJSONParameters(eval_config);
+                eval_man_config.overrideJSONParameters(json_config);
             }
             catch (exception& e)
             {

@@ -27,11 +27,11 @@
 #include "jobmanager.h"
 #include "logger.h"
 #include "asteriximporttaskdialog.h"
-#include "stringconv.h"
+#include "util/stringconv.h"
 #include "system.h"
 #include "taskmanager.h"
 #include "mainwindow.h"
-#include "stringconv.h"
+#include "util/timeconv.h"
 #include "projection.h"
 #include "projectionmanager.h"
 #include "asynctask.h"
@@ -71,24 +71,25 @@ ASTERIXImportTaskSettings::ASTERIXImportTaskSettings()
     ,   debug_jasterix_          (false)
     ,   current_file_framing_    ("")
     ,   num_packets_overload_    (60)
+    ,   override_tod_active_     (false)
     ,   override_tod_offset_     (0.0f)
+    ,   filter_tod_active_       (false)
     ,   filter_tod_min_          (0.0f)
     ,   filter_tod_max_          (24*3600.0 - 1)
+    ,   filter_position_active_  (false)
     ,   filter_latitude_min_     (-90.0)
     ,   filter_latitude_max_     ( 00.0)
     ,   filter_longitude_min_    (-180.0)
     ,   filter_longitude_max_    ( 180.0)
+    ,   filter_modec_active_     (false)
     ,   filter_modec_min_        (-10000.0f)
     ,   filter_modec_max_        ( 50000.0f)
     ,   file_line_id_            (0)
+    ,   date_str_                ()
+    ,   network_ignore_future_ts_(false)
+    ,   obfuscate_secondary_info_(false)
     ,   date_                    ()
     ,   max_network_lines_       (4)
-    ,   override_tod_active_     (false)
-    ,   network_ignore_future_ts_(false)
-    ,   filter_tod_active_       (false)
-    ,   filter_position_active_  (false)
-    ,   filter_modec_active_     (false)
-    ,   obfuscate_secondary_info_(false)
 {
 }
 
@@ -110,20 +111,52 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id,
 
     registerParameter("num_packets_overload", &settings_.num_packets_overload_, ASTERIXImportTaskSettings().num_packets_overload_);
 
-    settings_.date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
+    registerParameter("override_tod_active", &settings_.override_tod_active_,
+                      ASTERIXImportTaskSettings().override_tod_active_);
+    addJSONExportFilter(JSONExportType::General, JSONExportFilterType::ParamID, "override_tod_active");
+    registerParameter("override_tod_offset", &settings_.override_tod_offset_,
+                      ASTERIXImportTaskSettings().override_tod_offset_);
 
-    registerParameter("override_tod_offset", &settings_.override_tod_offset_, ASTERIXImportTaskSettings().override_tod_offset_);
-
+    registerParameter("filter_tod_active", &settings_.filter_tod_active_,
+                      ASTERIXImportTaskSettings().filter_tod_active_);
+    addJSONExportFilter(JSONExportType::General, JSONExportFilterType::ParamID, "filter_tod_active");
     registerParameter("filter_tod_min", &settings_.filter_tod_min_, ASTERIXImportTaskSettings().filter_tod_min_);
     registerParameter("filter_tod_max", &settings_.filter_tod_max_, ASTERIXImportTaskSettings().filter_tod_max_);
 
-    registerParameter("filter_latitude_min", &settings_.filter_latitude_min_, ASTERIXImportTaskSettings().filter_latitude_min_);
-    registerParameter("filter_latitude_max", &settings_.filter_latitude_max_, ASTERIXImportTaskSettings().filter_latitude_max_);
-    registerParameter("filter_longitude_min", &settings_.filter_longitude_min_, ASTERIXImportTaskSettings().filter_longitude_min_);
-    registerParameter("filter_longitude_max", &settings_.filter_longitude_max_, ASTERIXImportTaskSettings().filter_longitude_max_);
+    registerParameter("filter_position_active", &settings_.filter_position_active_,
+                      ASTERIXImportTaskSettings().filter_position_active_);
+    addJSONExportFilter(JSONExportType::General, JSONExportFilterType::ParamID, "filter_position_active");
+    registerParameter("filter_latitude_min", &settings_.filter_latitude_min_,
+                      ASTERIXImportTaskSettings().filter_latitude_min_);
+    registerParameter("filter_latitude_max", &settings_.filter_latitude_max_,
+                      ASTERIXImportTaskSettings().filter_latitude_max_);
+    registerParameter("filter_longitude_min", &settings_.filter_longitude_min_,
+                      ASTERIXImportTaskSettings().filter_longitude_min_);
+    registerParameter("filter_longitude_max", &settings_.filter_longitude_max_,
+                      ASTERIXImportTaskSettings().filter_longitude_max_);
 
+    registerParameter("filter_modec_active", &settings_.filter_modec_active_,
+                      ASTERIXImportTaskSettings().filter_modec_active_);
+    addJSONExportFilter(JSONExportType::General, JSONExportFilterType::ParamID, "filter_modec_active");
     registerParameter("filter_modec_min", &settings_.filter_modec_min_, ASTERIXImportTaskSettings().filter_modec_min_);
     registerParameter("filter_modec_max", &settings_.filter_modec_max_, ASTERIXImportTaskSettings().filter_modec_max_);
+
+    registerParameter("file_line_id", &settings_.file_line_id_, ASTERIXImportTaskSettings().file_line_id_);
+    addJSONExportFilter(JSONExportType::General, JSONExportFilterType::ParamID, "file_line_id");
+    registerParameter("date_str", &settings_.date_str_, ASTERIXImportTaskSettings().date_str_);
+    addJSONExportFilter(JSONExportType::General, JSONExportFilterType::ParamID, "date_str");
+
+    if (settings_.date_str_.size())
+        settings_.date_ = Time::fromDateString(settings_.date_str_);
+    if (settings_.date_.is_not_a_date_time())
+        settings_.date_ = boost::posix_time::ptime(boost::gregorian::day_clock::universal_day());
+
+    registerParameter("network_ignore_future_ts", &settings_.network_ignore_future_ts_,
+                      ASTERIXImportTaskSettings().network_ignore_future_ts_);
+    addJSONExportFilter(JSONExportType::General, JSONExportFilterType::ParamID, "network_ignore_future_ts");
+    registerParameter("obfuscate_secondary_info", &settings_.obfuscate_secondary_info_,
+                      ASTERIXImportTaskSettings().obfuscate_secondary_info_);
+    addJSONExportFilter(JSONExportType::General, JSONExportFilterType::ParamID, "obfuscate_secondary_info");
 
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY + "jasterix_definitions";
 

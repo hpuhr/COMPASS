@@ -66,6 +66,7 @@ private:
     bool import_asterix_network_ignore_future_ts_ {false};
     std::string asterix_framing;
     std::string asterix_decoder_cfg;
+    std::string import_asterix_parameters_;
 
     std::string import_json_filename_;
 

@@ -112,7 +112,7 @@ class DataSourceManager : public QObject, public Configurable
     void deleteAllConfigDataSources();
     void exportDataSources(const std::string& filename);
 
-    nlohmann::json getConfigDataSourcesAsJSON();
+    nlohmann::json getDataSourcesAsJSON();
     nlohmann::json getDBDataSourcesAsJSON();
     nlohmann::json getSortedConfigDataSourcesAsJSON();
     nlohmann::json getSortedDBDataSourcesAsJSON();

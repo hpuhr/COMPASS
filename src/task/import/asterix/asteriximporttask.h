@@ -66,45 +66,44 @@ struct ASTERIXFileInfo
 class ASTERIXImportTaskSettings
 {
 public:
-    ASTERIXImportTaskSettings();
+    ASTERIXImportTaskSettings(); // defines default param values
 
     // registered
-    bool reset_date_between_files_ {true};
-    bool ignore_time_jumps_{false};
+    bool reset_date_between_files_;
+    bool ignore_time_jumps_;
     bool debug_jasterix_;
     std::string current_file_framing_;
 
-    unsigned int num_packets_overload_ {60};
+    unsigned int num_packets_overload_;
 
-    double override_tod_offset_{0};
+    bool override_tod_active_; // not saved
+    double override_tod_offset_;
 
-    float filter_tod_min_{0};
-    float filter_tod_max_{0};
+    bool filter_tod_active_; // not saved
+    float filter_tod_min_;
+    float filter_tod_max_;
 
-    double filter_latitude_min_{0};
-    double filter_latitude_max_{0};
-    double filter_longitude_min_{0};
-    double filter_longitude_max_{0};
+    bool filter_position_active_; // not saved
+    double filter_latitude_min_;
+    double filter_latitude_max_;
+    double filter_longitude_min_;
+    double filter_longitude_max_;
 
-    float filter_modec_min_{0};
-    float filter_modec_max_{0};
+    bool filter_modec_active_; // not saved
+    float filter_modec_min_;
+    float filter_modec_max_;
 
-    // unregistered, for passing on
+    // not saved
+    unsigned int file_line_id_;
+    std::string date_str_;
 
-    unsigned int file_line_id_ {0};
+    bool network_ignore_future_ts_;
+
+    bool obfuscate_secondary_info_;
+
+    // not in config
     boost::posix_time::ptime date_;
-
-    unsigned int max_network_lines_ {4};
-
-    bool override_tod_active_{false};
-
-    bool network_ignore_future_ts_ {false};
-
-    bool filter_tod_active_{false};
-    bool filter_position_active_{false};
-    bool filter_modec_active_{false};
-
-    bool obfuscate_secondary_info_{false};
+    unsigned int max_network_lines_;
 };
 
 /**

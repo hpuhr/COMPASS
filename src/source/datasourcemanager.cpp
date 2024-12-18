@@ -262,7 +262,7 @@ void DataSourceManager::exportDataSources(const std::string& filename)
 {
     loginf << "DataSourceManager: exportDataSources: file '" << filename << "'";
 
-    json data = getConfigDataSourcesAsJSON();
+    json data = getDataSourcesAsJSON();
 
     std::ofstream file(filename);
     file << data.dump(4);
@@ -273,7 +273,7 @@ void DataSourceManager::exportDataSources(const std::string& filename)
     m_info.exec();
 }
 
-nlohmann::json DataSourceManager::getConfigDataSourcesAsJSON()
+nlohmann::json DataSourceManager::getDataSourcesAsJSON()
 {
     json data;
 
@@ -283,12 +283,26 @@ nlohmann::json DataSourceManager::getConfigDataSourcesAsJSON()
     data["data_sources"] = json::array();
     json& data_sources = data.at("data_sources");
 
-    unsigned int cnt = 0;
+    set<unsigned int> joined_data_source_ids;
+
+    for (auto& ds_it : db_data_sources_)
+    {
+        auto json_info = ds_it->getAsJSON();
+
+        if (json_info.contains("counts"))
+            json_info.erase("counts");
+
+        data_sources[joined_data_source_ids.size()] = json_info;
+        joined_data_source_ids.insert(ds_it->id());
+    }
 
     for (auto& ds_it : config_data_sources_)
     {
-        data_sources[cnt] = ds_it->getAsJSON();
-        ++cnt;
+        if (joined_data_source_ids.count(ds_it->id()))
+            continue;
+
+        data_sources[joined_data_source_ids.size()] = ds_it->getAsJSON();
+        joined_data_source_ids.insert(ds_it->id());
     }
 
     return data;
@@ -339,7 +353,7 @@ namespace
 
 nlohmann::json DataSourceManager::getSortedConfigDataSourcesAsJSON()
 {
-    auto ds_json = getConfigDataSourcesAsJSON();
+    auto ds_json = getDataSourcesAsJSON();
     sortJSONDataSource(ds_json);
     return ds_json;
 }

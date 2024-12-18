@@ -181,7 +181,7 @@ public:
     /// @brief Returns a specified sub-configuration
     Configuration& getSubConfiguration(const std::string& class_id, const std::string& instance_id) const;
     /// @brief Creates a specified sub-configuration if needed and returns it
-    Configuration& assertSubConfiguration(const std::string& class_id, const std::string& instance_id);
+    Configuration& getOrCreateSubConfiguration(const std::string& class_id, const std::string& instance_id);
     /// @brief Removes a sub-configuration
     void removeSubConfiguration(const std::string& class_id, const std::string& instance_id);
     void removeSubConfigurations(const std::string& class_id);
