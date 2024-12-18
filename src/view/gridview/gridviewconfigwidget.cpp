@@ -162,6 +162,7 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     attachExportMenu();
     updateConfig();
     updateExport();
+    updateDistributedVariable();
 
     //showSwitch(0, true);
 }
