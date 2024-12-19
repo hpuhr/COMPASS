@@ -106,6 +106,7 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id,
     registerParameter("reset_date_between_files", &settings_.reset_date_between_files_,
                       ASTERIXImportTaskSettings().reset_date_between_files_);
     registerParameter("debug_jasterix", &settings_.debug_jasterix_, ASTERIXImportTaskSettings().debug_jasterix_);
+    addJSONExportFilter(JSONExportType::General, JSONExportFilterType::ParamID, "debug_jasterix");
 
     registerParameter("current_file_framing", &settings_.current_file_framing_, ASTERIXImportTaskSettings().current_file_framing_);
 
