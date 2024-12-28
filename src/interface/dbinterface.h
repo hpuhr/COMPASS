@@ -133,6 +133,7 @@ public:
     void createPropertiesTable();
     void setProperty(const std::string& id, const std::string& value);
     std::string getProperty(const std::string& id);
+    void removeProperty(const std::string& id);
     bool hasProperty(const std::string& id);
 
     bool hasContentIn(const std::string& table_name, const std::string& column_name) const;

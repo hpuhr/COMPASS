@@ -235,7 +235,8 @@ void ASTERIXPCAPDecoder::processFile(ASTERIXImportFileInfo& file_info)
 
         addRecordsRead(num_records);
 
-        job()->fileJasterixCallback(std::move(data), current_file_line, num_frames, num_records, numErrors);
+        if (job() && !job()->obsolete())
+            job()->fileJasterixCallback(std::move(data), current_file_line, num_frames, num_records, numErrors);
     };
 
     size_t max_packets = std::numeric_limits<size_t>::max();

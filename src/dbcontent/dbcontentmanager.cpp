@@ -570,9 +570,11 @@ bool DBContentManager::hasAssociations() const
 
 void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
 {
-    COMPASS::instance().interface().setProperty("associations_generated", "1");
-    COMPASS::instance().interface().setProperty("associations_id", assoc_id);
-    COMPASS::instance().interface().saveProperties();
+    auto& dbinterface = COMPASS::instance().interface();
+
+    dbinterface.setProperty("associations_generated", "1");
+    dbinterface.setProperty("associations_id", assoc_id);
+    dbinterface.saveProperties();
 
     has_associations_ = true;
     associations_id_ = assoc_id;
@@ -583,6 +585,26 @@ void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
 }
 
 std::string DBContentManager::associationsID() const { return associations_id_; }
+
+void DBContentManager::clearAssociationsIdentifier()
+{
+    has_associations_ = false;
+    associations_id_ = "";
+
+    auto& dbinterface = COMPASS::instance().interface();
+
+    if (dbinterface.hasProperty("associations_generated"))
+        dbinterface.removeProperty("associations_generated");
+
+    if (dbinterface.hasProperty("associations_id"))
+        dbinterface.removeProperty("associations_id");
+
+    dbinterface.saveProperties();
+
+    COMPASS::instance().dataSourceManager().updateWidget();
+
+    emit associationStatusChangedSignal();
+}
 
 bool DBContentManager::loadInProgress() const
 {
@@ -947,11 +969,14 @@ void DBContentManager::addInsertedDataToChache()
                           }
 
                           // add assoc property if required
-                          Variable& utn_var = metaGetVariable(buf_it->first, DBContent::meta_var_utn_);
-                          Property utn_prop (utn_var.dbColumnName(), utn_var.dataType());
+                          if (metaCanGetVariable(buf_it->first, DBContent::meta_var_utn_))
+                          {
+                              Variable& utn_var = metaGetVariable(buf_it->first, DBContent::meta_var_utn_);
+                              Property utn_prop (utn_var.dbColumnName(), utn_var.dataType());
 
-                          if (!buf_it->second->hasProperty(utn_prop))
-                              buf_it->second->addProperty(utn_prop);
+                              if (!buf_it->second->hasProperty(utn_prop))
+                                  buf_it->second->addProperty(utn_prop);
+                          }
 
                           // change db column names to dbo var names
                           buf_it->second->transformVariables(read_set, true);

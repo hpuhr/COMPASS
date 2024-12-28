@@ -224,8 +224,22 @@ void ViewDataWidget::clearData()
     data_  = {};
     drawn_ = false;
 
+    count_null_.reset();
+    count_nan_.reset();
+
     //invoke derived
     clearData_impl();
+}
+
+/**
+ * Clears any intermediate data needed for a redraw.
+ */
+void ViewDataWidget::clearIntermediateRedrawData()
+{
+    count_null_.reset();
+    count_nan_.reset();
+
+    clearIntermediateRedrawData_impl();
 }
 
 /**
@@ -246,10 +260,22 @@ bool ViewDataWidget::redrawData(bool recompute, bool notify)
 
     //clear computed data before a recompute
     if (recompute)
-        clearIntermediateRedrawData_impl();
+    {
+        clearIntermediateRedrawData();
+    }
     
     //invoke derived: redraw and remember if data has been redrawn correctly
     drawn_ = redrawData_impl(recompute);
+
+    if (recompute)
+    {
+        //check for nan values in the data
+        if (nanCount().has_value() && nanCount().value() > 0)
+        {
+            logerr << "ViewDataWidget: redrawData: " << nanCount().value() << " inf value(s) detected "
+                   << "in view " << getWidget()->getView()->instanceId();
+        }
+    }
 
     if (notify)
     {
@@ -350,4 +376,24 @@ nlohmann::json ViewDataWidget::viewInfoJSON() const
     viewInfoJSON_impl(info);
 
     return info;
+}
+
+/**
+ */
+void ViewDataWidget::addNullCount(size_t n)
+{
+    if (!count_null_.has_value())
+        count_null_ = 0;
+
+    count_null_.value() += n;
+}
+
+/**
+ */
+void ViewDataWidget::addNanCount(size_t n)
+{
+    if (!count_nan_.has_value())
+        count_nan_ = 0;
+
+    count_nan_.value() += n;
 }

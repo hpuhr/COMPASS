@@ -159,7 +159,8 @@ void ASTERIXFileDecoder::processFile(ASTERIXImportFileInfo& file_info)
         addRecordsRead(num_records);
 
         //invoke job callback
-        job()->fileJasterixCallback(std::move(data), current_file_line, num_frames, num_records, numErrors);
+        if (job() && !job()->obsolete())
+            job()->fileJasterixCallback(std::move(data), current_file_line, num_frames, num_records, numErrors);
     };
 
     //start decoding

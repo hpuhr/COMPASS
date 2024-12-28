@@ -380,7 +380,11 @@ std::string ASTERIXDecodeJob::currentDataSourceName()
 void ASTERIXDecodeJob::forceBlockingDataProcessing()
 {
     logdbg << "ASTERIXDecodeJob: forceBlockingDataProcessing: emitting signal";
-    emit decodedASTERIXSignal();
+
+    if (obsolete_)
+        extracted_data_.clear();
+    else
+        emit decodedASTERIXSignal();
 
     while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out
         QThread::msleep(1);

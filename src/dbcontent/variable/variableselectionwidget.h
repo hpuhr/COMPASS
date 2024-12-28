@@ -75,7 +75,7 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
     void showEmptyVariable(bool show_empty_variable);
 
     bool showExistingInDBOnly() const;
-    void showExistingInDBOnly(bool show);
+    void showExistingInDBOnly(bool show_existing_only);
 
     void showDataTypesOnly(const std::vector<PropertyDataType>& only_data_types);
     void disableShowDataTypesOnly();
@@ -105,6 +105,8 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
 
     bool show_data_types_only_{false};
     std::vector<PropertyDataType> only_data_types_;
+
+    bool show_existing_in_db_only_{true};
 
     bool showDataType(PropertyDataType type);
     void updateToolTip();

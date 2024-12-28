@@ -229,6 +229,10 @@ void HistogramViewDataWidget::updateFromVariables()
 
     compileRawDataFromGenerator();
 
+    //add to standard counts
+    addNullCount(generator->getResults().buffer_null_count);
+    addNanCount (generator->getResults().buffer_nan_count );
+
     loginf << "HistogramViewDataWidget: updateVariableData: done";
 }
 

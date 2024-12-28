@@ -23,8 +23,6 @@
 #include <map>
 #include <vector>
 
-#include <boost/optional.hpp>
-
 class ViewWidget;
 class VariableView;
 class Buffer;
@@ -95,6 +93,8 @@ protected:
     virtual void postUpdateVariableDataEvent() = 0;
     /// updates the display (e.g. by updating a chart showing the data)
     virtual bool updateVariableDisplay() = 0;
+
+    
 
     const VariableView* variableView() const { return variable_view_; }
     VariableView* variableView() { return variable_view_; }

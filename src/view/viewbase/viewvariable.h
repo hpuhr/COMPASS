@@ -22,6 +22,8 @@
 
 #include "property.h"
 
+#include <boost/optional.hpp>
+
 namespace dbContent 
 {
     class Variable;
@@ -30,7 +32,7 @@ namespace dbContent
     class VariableSelectionWidget;
 }
 
-class View;
+class VariableView;
 
 /**
 */
@@ -48,9 +50,10 @@ public:
         std::set<PropertyDataType> valid_data_types;
         bool show_meta_vars  = true;
         bool show_empty_vars = false;
+        bool allow_empty_var = false;
     };
 
-    ViewVariable(const std::string& id_str, View* view = nullptr);
+    ViewVariable(const std::string& id_str, int idx, VariableView* view = nullptr);
     virtual ~ViewVariable();
 
     const std::string& id() const;
@@ -58,8 +61,11 @@ public:
 
     bool hasVariable() const;
     bool isMetaVariable() const;
+    bool isEmpty() const;
 
-    PropertyDataType dataType() const;
+    boost::optional<PropertyDataType> dataType() const;
+
+    void set(const std::string& dbo, const std::string& name, bool notify_changes);
 
     dbContent::Variable& variable();
     const dbContent::Variable& variable() const;
@@ -70,6 +76,8 @@ public:
     const dbContent::MetaVariable& metaVariable() const;
     dbContent::MetaVariable* metaVariablePtr();
     void setMetaVariable(dbContent::MetaVariable& var, bool notify_changes);
+
+    void setEmpty(bool notify_changes);
 
     dbContent::Variable* getFor(const std::string& dbcontent_name);
     const dbContent::Variable* getFor(const std::string& dbcontent_name) const;
@@ -96,6 +104,7 @@ public:
 private:
     Settings settings_;
 
-    std::string id_;
-    View*       view_ = nullptr;
+    std::string   id_;
+    int           idx_;
+    VariableView* view_ = nullptr;
 };

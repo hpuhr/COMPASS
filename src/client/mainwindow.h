@@ -96,6 +96,8 @@ public slots:
     void autoResumeResumeSlot();
     void autoResumeStaySlot();
 
+    void toggleDarkModeSlot();
+
 public:
     MainWindow();
     virtual ~MainWindow();
@@ -147,6 +149,7 @@ protected:
     QMenu* config_menu_ {nullptr};
     QAction* license_action_ {nullptr};
     QAction* auto_refresh_views_action_ {nullptr};
+    QAction* dark_mode_action_ {nullptr};
 
     // process menu
     QMenu* process_menu_ {nullptr};

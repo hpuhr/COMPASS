@@ -128,23 +128,37 @@ bool invokeFunctor(PropertyDataType dtype, TFunc& func)
  *****************************************************************************************/
 
 template <typename T>
-inline double toDouble(const T& value)
+inline double toDouble(const T& value, bool* ok = nullptr)
 {
+    if (ok)
+        *ok = true;
+
     return static_cast<double>(value);
 }
 template <>
-inline double toDouble(const boost::posix_time::ptime& value)
+inline double toDouble(const boost::posix_time::ptime& value, bool* ok)
 {
+    if (ok)
+        *ok = true;
+
     return static_cast<double>(Utils::Time::toLong(value));
 }
 template <>
-inline double toDouble(const std::string& value)
+inline double toDouble(const std::string& value, bool* ok)
 {
+    //@TODO: maybe just throw?
+    if (ok)
+        *ok = false;
+    
     return 0.0;
 }
 template <>
-inline double toDouble(const nlohmann::json& value)
+inline double toDouble(const nlohmann::json& value, bool* ok)
 {
+    //@TODO: maybe just throw?
+    if (ok)
+        *ok = false;
+    
     return 0.0;
 }
 

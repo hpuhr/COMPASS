@@ -51,6 +51,10 @@ private:
 
     std::string import_asterix_filename_;
     std::string import_asterix_filenames_;
+
+    std::string import_asterix_pcap_filename_;
+    std::string import_asterix_pcap_filenames_;
+
     std::string import_asterix_file_line_;
     std::string import_asterix_date_;
     std::string import_asterix_file_time_offset_;
@@ -62,6 +66,7 @@ private:
     bool import_asterix_network_ignore_future_ts_ {false};
     std::string asterix_framing;
     std::string asterix_decoder_cfg;
+    std::string import_asterix_parameters_;
 
     std::string import_json_filename_;
 

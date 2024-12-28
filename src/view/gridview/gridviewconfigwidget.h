@@ -56,7 +56,7 @@ protected:
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
     virtual void configChanged_impl() override;
 
-    virtual void postVariableChangedEvent(int idx) override;
+    virtual void variableChangedEvent(int idx) override;
 
     void attachExportMenu();
 
@@ -68,6 +68,7 @@ protected:
     void maxValueChanged();
     
     void updateConfig();
+    void updateDistributedVariable();
     void updateVariableDataType();
     void updateExport();
     void checkRanges();
@@ -79,6 +80,7 @@ protected:
     GridView* view_ = nullptr;
 
     QComboBox*           value_type_combo_    = nullptr;
+    QLabel*              value_type_label_    = nullptr;
     QSpinBox*            grid_resolution_box_ = nullptr;
     ColorScaleSelection* color_selection_     = nullptr;
     QSpinBox*            color_steps_box_     = nullptr;

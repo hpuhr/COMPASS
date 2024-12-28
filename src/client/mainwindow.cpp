@@ -406,6 +406,11 @@ void MainWindow::createMenus ()
 
     config_menu_->addSeparator();
 
+    dark_mode_action_ = config_menu_->addAction("Dark Mode");
+    dark_mode_action_->setCheckable(true);
+    dark_mode_action_->setChecked(COMPASS::instance().darkMode());
+    connect(dark_mode_action_, &QAction::toggled, this, &MainWindow::toggleDarkModeSlot);
+
     ViewManager& view_manager = COMPASS::instance().viewManager();
 
     auto_refresh_views_action_ = config_menu_->addAction("Refresh Views Automatically");
@@ -510,8 +515,9 @@ void MainWindow::updateMenus()
     config_menu_->setDisabled(asterix_import_running || in_live);
 
     for (auto a : config_menu_->actions())
-        a->setEnabled(a == license_action_ || 
-                      a == auto_refresh_views_action_ ? true : db_open);
+        a->setEnabled(a == license_action_
+                      || a == auto_refresh_views_action_
+                              || a == dark_mode_action_ ? true : db_open);
 }
 
 void MainWindow::updateBottomWidget()
@@ -1152,6 +1158,17 @@ void MainWindow::autoResumeStaySlot()
 
             // restart timer
     auto_resume_timer_->start(COMPASS::instance().autoLiveRunningResumeAskTime() * 60 * 1000); // min -> ms
+}
+
+void MainWindow::toggleDarkModeSlot()
+{
+    loginf << "MainWindow: toggleDarkModeSlot";
+
+    COMPASS::instance().darkMode(!COMPASS::instance().darkMode());
+
+    QMessageBox m_warning(QMessageBox::Information, "Dark Mode",
+                          "Please restart the applications for the Dark Mode change to take effect.", QMessageBox::Ok);
+    m_warning.exec();
 }
 
 void MainWindow::loadButtonSlot()

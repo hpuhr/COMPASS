@@ -48,6 +48,44 @@ size_t fileSize(const std::string& path)
     return boost::filesystem::file_size(path);
 }
 
+std::string fileSizeString(size_t file_size_in_bytes)
+{
+    double size = file_size_in_bytes;
+    std::string unit = "";
+    int dec = 0;
+
+    if (size >= 1e12)
+    {
+        size /= 1e12;
+        unit = "TB";
+        dec = 1;
+    }
+    else if (size >= 1e09)
+    {
+        size /= 1e09;
+        unit = "GB";
+        dec = 1;
+    }
+    else if (size >= 1e06)
+    {
+        size /= 1e06;
+        unit = "MB";
+    }
+    else if (size >= 1e03)
+    {
+        size /= 1e03;
+        unit = "KB";
+    }
+    else
+    {
+        size /= 1e03;
+        unit = "KB";
+        dec = 1;
+    }
+
+    return QString::number(size, 'f', dec).toStdString() + " " + unit;
+}
+
 void verifyFileExists(const std::string& path)
 {
     if (!fileExists(path))

@@ -97,6 +97,8 @@ protected:
     bool db_opened_{false};
     bool expert_mode_ {false};
 
+    bool dark_mode_ {false};
+
     AppMode app_mode_ {AppMode::Offline};
     AppState app_state_ = AppState::Starting;
 
@@ -188,6 +190,11 @@ public:
     unsigned int autoLiveRunningResumeAskTime() const; // min
     unsigned int autoLiveRunningResumeAskWaitTime() const; // min
     bool disableConfirmResetViews() const;
+
+    bool darkMode() const;
+    void darkMode(bool value);
+
+    const char* lineEditInvalidStyle();
 };
 
 #endif /* COMPASS_H_ */

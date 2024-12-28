@@ -18,26 +18,24 @@
 #include "dbfiltercondition.h"
 #include "compass.h"
 #include "dbfilter.h"
-//#include "dbfilterwidget.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
-//#include "unit.h"
-//#include "unitmanager.h"
 #include "global.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QWidget>
+#include <QApplication>
+#include <QStyle>
 
 #include <boost/algorithm/string/join.hpp>
 
 #include <cassert>
 #include <sstream>
-//#include <boost/algorithm/string.hpp>
 
 using namespace Utils;
 using namespace std;
@@ -199,13 +197,18 @@ void DBFilterCondition::valueChanged()
            << value_invalid_;
 
     if (value_invalid_)
-        edit_->setStyleSheet(
-                    "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
-                    " rgb(255, 200, 200); }");
+    {
+        edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
+    }
     else
-        edit_->setStyleSheet(
-                    "QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
-                    " rgb(200, 200, 200); }");
+    {
+        //edit_->setStyleSheet(QApplication::style()->objectName());
+        edit_->setStyleSheet("");
+
+        // edit_->setStyleSheet(
+        //             "QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
+        //             " rgb(200, 200, 200); }");
+    }
 }
 
 std::string DBFilterCondition::getVariableName() const
@@ -393,7 +396,7 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
     std::vector<std::string> value_strings;
     std::vector<std::string> transformed_value_strings;
 
-    if (operator_ == "IN")
+    if (operator_ == "IN" || operator_ == "NOT IN")
     {
         value_strings = String::split(untransformed_value, ',');
     }
@@ -445,7 +448,7 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
 
     if (transformed_value_strings.size()) // can be empty if only NULL
     {
-        if (operator_ != "IN")
+        if (operator_ != "IN" && operator_ != "NOT IN")
         {
             assert(transformed_value_strings.size() == 1);
             value_str = transformed_value_strings.at(0);

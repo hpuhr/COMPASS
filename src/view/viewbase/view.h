@@ -23,6 +23,7 @@
 #include "buffer.h"
 #include "appmode.h"
 #include "viewpresets.h"
+#include "viewinfo.h"
 
 #include <QObject>
 
@@ -133,6 +134,7 @@ public:
     const ViewPresets::Preset* activePreset() const;
     bool presetChanged() const;
 
+    ViewInfos viewInfos() const;
     nlohmann::json viewInfoJSON() const;
 
     //shortcut update flags
@@ -163,6 +165,7 @@ protected:
 
     virtual bool refreshScreenOnNeededReload() const { return false; }
 
+    virtual ViewInfos viewInfos_impl() const { return ViewInfos(); }
     virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
     void constructWidget();

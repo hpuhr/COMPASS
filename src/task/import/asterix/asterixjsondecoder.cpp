@@ -425,7 +425,8 @@ void ASTERIXJSONDecoder::processFile(ASTERIXImportFileInfo& file_info)
         }
 
         //push to job
-        job()->fileJasterixCallback(std::move(data), settings().file_line_id_, num_frames, num_records, num_errors);
+        if (job() && !job()->obsolete())
+            job()->fileJasterixCallback(std::move(data), settings().file_line_id_, num_frames, num_records, num_errors);
 
         size_t total_bytes = 0;
         for (const auto& obj : objects)

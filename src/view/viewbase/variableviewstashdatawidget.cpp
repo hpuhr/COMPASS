@@ -18,6 +18,7 @@
 #include "variableviewstashdatawidget.h"
 #include "viewvariable.h"
 #include "variableview.h"
+#include "viewwidget.h"
 
 #include "buffer.h"
 #include "dbcontent/dbcontent.h"
@@ -55,13 +56,6 @@ VariableViewStashDataWidget::VariableViewStashDataWidget(ViewWidget* view_widget
 /**
 */
 VariableViewStashDataWidget::~VariableViewStashDataWidget() = default;
-
-/**
-*/
-unsigned int VariableViewStashDataWidget::nullValueCount() const
-{
-    return stash_.nan_value_count_;
-}
 
 /**
 */
@@ -118,6 +112,15 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
     {
         const ViewVariable& view_var = variableView()->variable(i);
 
+        //legit empty variables are handled in a special way, so do not return
+        bool is_empty = view_var.settings().allow_empty_var && view_var.isEmpty();
+        if (is_empty)
+        {
+            loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.id() << " empty";
+            continue;
+        }
+
+        //otherwise return on invalid variable
         if (!view_var.getFor(dbcontent_name))
         {
             loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.variableName()
@@ -278,8 +281,25 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     const ViewVariable& view_var = variableView()->variable(var_idx);
     const dbContent::Variable* data_var = view_var.getFor(buffer.dbContentName());
 
-    if (!data_var)
+    bool is_empty = view_var.settings().allow_empty_var && view_var.isEmpty();
+
+    //handle special cases
+    if (is_empty)
     {
+        loginf << "VariableViewStashDataWidget: updateVariableData: adding empty variable to stash";
+
+        //empty variable selected => add zero values (valid values)
+        //(a little bit hacky, but we do not want to count the values as Nan or NULL values)
+        const double DefaultEmptyVarValue = 0.0;
+        
+        std::vector<double> vempty(indexes.size(), DefaultEmptyVarValue);
+        values.insert(values.end(), vempty.begin(), vempty.end());
+
+        return;
+    }
+    else if (!data_var)
+    {
+        //if not empty and no data var, something is fishy
         logwrn << "VariableViewStashDataWidget: updateVariableData: could not retrieve data var";
         return;
     }
@@ -289,13 +309,15 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
 
     logdbg << "VariableViewStashDataWidget: updateVariableData: updating, last size " << last_size;
 
+    
+
 #define UpdateFunc(PDType, DType)                                                \
         assert(view_var.settings().valid_data_types.count(PDType) != 0);         \
         assert(buffer.has<DType>(current_var_name));                             \
                                                                                  \
         const NullableVector<DType>& data = buffer.get<DType>(current_var_name); \
                                                                                  \
-        appendData(data, values, indexes);                                       \
+        appendData(data, values, indexes);                       \
         //buffer_counts = current_size;
 
 #define NotFoundFunc                                                                                          \

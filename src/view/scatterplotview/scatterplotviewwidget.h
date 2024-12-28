@@ -18,7 +18,7 @@
 #ifndef SCATTERPLOTVIEWWIDGET_H_
 #define SCATTERPLOTVIEWWIDGET_H_
 
-#include "viewwidget.h"
+#include "variableviewwidget.h"
 
 class ScatterPlotView;
 class ScatterPlotViewDataToolWidget;
@@ -30,7 +30,7 @@ class QTabWidget;
 
 /**
 */
-class ScatterPlotViewWidget : public ViewWidget
+class ScatterPlotViewWidget : public VariableViewWidget
 {
 public:
     enum Mode
@@ -55,9 +55,6 @@ public:
 
     /// @brief Returns the basis view
     ScatterPlotView* getView();
-
-protected:
-    virtual std::string loadedMessage_impl() const override;
 };
 
 #endif /* SCATTERPLOTVIEWWIDGET_H_ */

@@ -11,6 +11,7 @@
 namespace dbContent
 {
 
+class ConfigurationDataSource;
 class DBDataSourceWidget;
 
 class DBDataSource : public DataSourceBase

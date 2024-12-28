@@ -51,9 +51,6 @@ protected:
 
     QPushButton* done_button_ {nullptr};
 
-    std::string invalid_bg_str_;
-    std::string valid_bg_str_;
-
     bool variable_edited_ {false};
 };
 

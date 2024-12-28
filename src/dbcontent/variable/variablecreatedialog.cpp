@@ -3,9 +3,9 @@
 #include "dbcontent/variable/variabledatatypecombobox.h"
 #include "stringrepresentationcombobox.h"
 #include "unitselectionwidget.h"
-//#include "stringconv.h"
 #include "dbcontent/dbcontent.h"
 #include "logger.h"
+#include "compass.h"
 
 #include <QLineEdit>
 #include <QCheckBox>
@@ -108,12 +108,6 @@ VariableCreateDialog::VariableCreateDialog(DBContent& object, const std::string 
     main_layout->addLayout(button_layout);
 
     setLayout(main_layout);
-
-    invalid_bg_str_ = "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
-                    " rgb(255, 200, 200); }";
-
-    valid_bg_str_ = "QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
-                    " rgb(200, 200, 200); }";
 
     checkSettings();
 }
@@ -239,9 +233,9 @@ void VariableCreateDialog::checkSettings()
         name_ok_ = true;
 
     if (name_ok_)
-        name_edit_->setStyleSheet(valid_bg_str_.c_str());
+        name_edit_->setStyleSheet("");
     else
-        name_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        name_edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
 
     name_edit_->setToolTip(name_quicktip.c_str());
 
@@ -271,9 +265,9 @@ void VariableCreateDialog::checkSettings()
 
 
     if (db_column_name_ok_)
-        db_column_edit_->setStyleSheet(valid_bg_str_.c_str());
+        db_column_edit_->setStyleSheet("");
     else
-        db_column_edit_->setStyleSheet(invalid_bg_str_.c_str());
+        db_column_edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
 
     db_column_edit_->setToolTip(db_column_quicktip.c_str());
 

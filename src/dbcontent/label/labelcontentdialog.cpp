@@ -143,7 +143,7 @@ void LabelContentDialog::createVariableGrid()
         line_hor->setLineWidth(2);
         line_hor->setMidLineWidth(1);
         line_hor->setFrameShape(QFrame::HLine);
-        line_hor->setStyleSheet("background-color:rgb(0,0,0)");
+        line_hor->setStyleSheet("background-color:black");
 
         var_grid_->addWidget(line_hor, 1, 0, 1, 2);
     }
@@ -153,7 +153,7 @@ void LabelContentDialog::createVariableGrid()
         line_vert->setLineWidth(2);
         line_vert->setMidLineWidth(1);
         line_vert->setFrameShape(QFrame::VLine);
-        line_vert->setStyleSheet("background-color:rgb(0,0,0)");
+        line_vert->setStyleSheet("background-color:black");
 
         var_grid_->addWidget(line_vert, 0, 1, 2, 1);
     }
@@ -163,7 +163,7 @@ void LabelContentDialog::createVariableGrid()
         line_hor->setLineWidth(2);
         line_hor->setMidLineWidth(1);
         line_hor->setFrameShape(QFrame::HLine);
-        line_hor->setStyleSheet("background-color:rgb(0,0,0)");
+        line_hor->setStyleSheet("background-color:black");
 
         var_grid_->addWidget(line_hor, 3, 0, 1, 4);
     }
@@ -173,7 +173,7 @@ void LabelContentDialog::createVariableGrid()
         line_vert->setLineWidth(2);
         line_vert->setMidLineWidth(1);
         line_vert->setFrameShape(QFrame::VLine);
-        line_vert->setStyleSheet("background-color:rgb(0,0,0)");
+        line_vert->setStyleSheet("background-color:black");
 
         var_grid_->addWidget(line_vert, 0, 3, 4, 1);
     }

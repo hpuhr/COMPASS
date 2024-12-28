@@ -424,7 +424,7 @@ public:
     int findBin(const T& v) const
     {
         if (!histogram_helpers::checkFinite(v))
-            return -1;
+            return -2;
 
         //estimate bin range to search
         auto bin_range = estimateTargetBin(v);

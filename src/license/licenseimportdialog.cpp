@@ -141,9 +141,9 @@ LicenseImportDialog::LicenseImportDialog(QWidget* parent,
     import_button_     = new QPushButton("Add License");
     auto button_cancel = new QPushButton("Cancel");
 
+    button_layout->addWidget(button_cancel);
     button_layout->addStretch(1);
     button_layout->addWidget(import_button_);
-    button_layout->addWidget(button_cancel);
 
     layout->addLayout(button_layout);
 

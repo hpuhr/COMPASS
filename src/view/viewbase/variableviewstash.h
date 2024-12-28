@@ -71,7 +71,7 @@ struct GroupedDataStash
         {
             bool is_nan = false;
             for (size_t j = 0; j < nv; ++j)
-                is_nan |= std::isnan(variable_stashes[ j ].values[ i ]);
+                is_nan |= isNan(j, i);
 
             nan_values[ i ] = is_nan;
 
@@ -94,6 +94,31 @@ struct GroupedDataStash
         selected_values.resize(0);
         nan_values.resize(0);
         record_numbers.resize(0);
+    }
+
+    size_t size() const
+    {
+        return selected_values.size();
+    }
+
+    size_t numVariables() const
+    {
+        return variable_stashes.size();
+    }
+
+    bool isNan(size_t var_idx, size_t idx) const
+    {
+        return std::isnan(variable_stashes[ var_idx ].values[ idx ]);
+    }
+
+    bool isNan(size_t idx) const
+    {
+        size_t nv = numVariables();
+        bool is_nan = false;
+        for (size_t j = 0; j < nv; ++j)
+            is_nan |= isNan(j, idx);
+
+        return is_nan;
     }
 
     std::vector<VariableStash<T>> variable_stashes;

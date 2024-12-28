@@ -17,37 +17,87 @@
 
 #pragma once
 
+#include "geotiff_defs.h"
+
 #include <string>
 #include <map>
 
 #include <QDialog>
+#include <QHeaderView>
 
 class QVBoxLayout;
 class QPushButton;
 class QCheckBox;
+class QTreeWidget;
+class QTreeWidgetItem;
+class QComboBox;
 
 /**
  */
 class FileImportDialog : public QDialog
 {
 public:
+    struct CustomColumn
+    {
+        CustomColumn(const std::string& col_name,
+                     bool col_checkable,
+                     QHeaderView::ResizeMode col_resize_mode)
+        :   name       (col_name)
+        ,   checkable  (col_checkable)
+        ,   resize_mode(col_resize_mode) {} 
+
+        std::string             name;
+        bool                    checkable = false;
+        QHeaderView::ResizeMode resize_mode = QHeaderView::ResizeMode::ResizeToContents;
+    };
+
     FileImportDialog(const std::vector<std::string>& files,
+                     const std::string& import_type_name = "",
                      QWidget* parent = nullptr, 
                      Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~FileImportDialog() = default;
 
+    void init();
+
+    virtual bool importOk() const;
+
     bool importFile(const std::string& fn) const;
 
 protected:
-    virtual bool importOk() const;
-    void checkImportOk();
+    virtual void showEvent(QShowEvent *event) override;
 
-    QVBoxLayout* customs_layout_ = nullptr;
+    virtual std::vector<CustomColumn> customColumns() const { return {}; }
+    virtual std::pair<bool, std::string> checkFile_impl(const std::string& fn) const;
+    virtual void initItem_impl(QTreeWidgetItem* item, int idx, const std::string& fn) {}
+    virtual void itemChanged_impl(QTreeWidgetItem* item, int column) {}
+    virtual void init_impl() {}
+
+    virtual QString infoColumnName() const;
+
+    int fileItemIndex(const std::string& fn) const;
+    QTreeWidgetItem* fileItem(const std::string& fn) const;
+
+    QTreeWidget* treeWidget() { return tree_widget_; }
+    const QTreeWidget* treeWidget() const { return tree_widget_; }
+    QVBoxLayout* customLayout() { return custom_layout_; }
+    int numDefaultColumns() const { return num_default_cols_; }
 
 private:
-    std::map<std::string, bool> import_flags_;
+    void itemChanged(QTreeWidgetItem* item, int column);
+    std::pair<bool, std::string> checkFile(const std::string& fn) const;
+    void initItem(QTreeWidgetItem* item, int idx, const std::string& fn);
 
-    QPushButton* ok_button_ = nullptr;
+    void checkImportOk();
+
+    std::vector<std::string>    files_;
+    std::map<std::string, int>  item_map_;
+
+    bool init_             = false;
+    int  num_default_cols_ = 0;
+
+    QTreeWidget* tree_widget_   = nullptr;
+    QPushButton* ok_button_     = nullptr;
+    QVBoxLayout* custom_layout_ = nullptr;
 };
 
 /**
@@ -60,8 +110,21 @@ public:
                         Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~GeoTIFFImportDialog() = default;
 
-    bool subsamplingEnabled() const;
+    int fileSubsampling(const std::string& fn) const;
+
+protected:
+    virtual std::vector<CustomColumn> customColumns() const override;
+    virtual std::pair<bool, std::string> checkFile_impl(const std::string& fn) const override;
+    virtual void initItem_impl(QTreeWidgetItem* item, int idx, const std::string& fn) override;
+    virtual void itemChanged_impl(QTreeWidgetItem* item, int column) override;
+
+    virtual QString infoColumnName() const override;
 
 private:
-    QCheckBox* subsample_box_ = nullptr;
+    void updateSizeInfo(int idx);
+
+    QComboBox* subsamplingCombo(int idx) const;
+    QComboBox* subsamplingCombo(QTreeWidgetItem* item) const;
+
+    mutable std::map<std::string, GeoTIFFInfo> gtiff_infos_;
 };

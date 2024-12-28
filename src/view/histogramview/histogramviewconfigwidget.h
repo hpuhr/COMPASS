@@ -45,7 +45,6 @@ public:
     virtual ~HistogramViewConfigWidget();
 
 protected:
-    void updateInfo();
     void updateLogScale();
 
     void toggleLogScale();
@@ -57,13 +56,6 @@ protected:
 
     HistogramView* view_ = nullptr;
 
-    // histogram info
-    GroupBox*     info_widget_          = nullptr;
-    QLabel*       info_range_min_label_ = nullptr;
-    QLabel*       info_range_max_label_ = nullptr;
-    QLabel*       info_oor_label_       = nullptr;
-    QLabel*       info_zoom_label       = nullptr;
-
     // general
-    QCheckBox*    log_check_{nullptr};
+    QCheckBox* log_check_{nullptr};
 };

@@ -64,9 +64,6 @@ protected:
     QPushButton* cancel_button_ {nullptr};
     QPushButton* ok_button_ {nullptr};
 
-    std::string invalid_bg_str_;
-    std::string valid_bg_str_;
-
     std::string name_;
     bool name_ok_ {false};
     std::string short_name_;

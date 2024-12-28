@@ -71,6 +71,8 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     }
     db_file_list_ = cleaned_file_list;
 
+    registerParameter("dark_mode", &dark_mode_, false);
+
     registerParameter("last_path", &last_path_, {});
 
     if (!Files::directoryExists(last_path_))
@@ -604,6 +606,25 @@ void COMPASS::lastUsedPath(const std::string& last_path)
     last_path_ = last_path;
 }
 
+bool COMPASS::darkMode() const
+{
+    return dark_mode_;
+}
+
+void COMPASS::darkMode(bool value)
+{
+    dark_mode_ = value;
+}
+
+const char* COMPASS::lineEditInvalidStyle()
+{
+    if (dark_mode_)
+        return "QLineEdit { background: rgb(255, 50, 50); selection-background-color:"
+                          " rgb(255, 100, 100); }";
+    else
+        return "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
+                          " rgb(255, 200, 200); }";
+}
 
 bool COMPASS::disableConfirmResetViews() const
 {

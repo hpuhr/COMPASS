@@ -27,6 +27,7 @@
 
 class QComboBox;
 class QImage;
+class ColorLegend;
 
 /**
 */
@@ -114,9 +115,9 @@ public:
     QColor sample(double t) const;
     QColor sampleValue(double v) const;
 
-    std::vector<std::pair<QColor, std::string>> getDescription(bool add_sel_color = true,
-                                                               bool add_null_color = true,
-                                                               const ValueDecorator& decorator = ValueDecorator()) const;
+    ColorLegend colorLegend(bool add_sel_color = true,
+                            bool add_null_color = true,
+                            const ValueDecorator& decorator = ValueDecorator()) const;
 private:
     void create(const std::vector<QColor>& colors,
                 Type type,

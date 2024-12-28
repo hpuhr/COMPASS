@@ -186,7 +186,7 @@ Configuration& Configurable::registerSubConfigurable(Configurable& child, bool c
     if (config_must_exist)
         assert(configuration_->hasSubConfiguration(child.classId(), child.instanceId()));
 
-    return configuration_->assertSubConfiguration(child.classId(), child.instanceId());
+    return configuration_->getOrCreateSubConfiguration(child.classId(), child.instanceId());
 }
 
 /**
