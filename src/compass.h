@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef COMPASS_H_
-#define COMPASS_H_
+#pragma once
 
 #include "configurable.h"
 #include "singleton.h"
