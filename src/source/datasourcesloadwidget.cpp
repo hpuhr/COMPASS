@@ -350,11 +350,10 @@ void DataSourcesLoadWidget::toogleShowCountsSlot()
 //    dbo_manager_.limitMax(max);
 //}
 
-void DataSourcesLoadWidget::updateContent()
+void DataSourcesLoadWidget::updateContent(bool recreate_required)
 {
-    logdbg << "DataSourcesLoadWidget: updateContent: num data sources " << ds_man_.dbDataSources().size();
-
-    bool recreate_required = false;
+    logdbg << "DataSourcesLoadWidget: updateContent: recreate_required " << recreate_required
+           << " num data sources " << ds_man_.dbDataSources().size();
 
     for (auto& ds_type_it : ds_type_boxes_)
         ds_type_it.second->setChecked(ds_man_.dsTypeLoadingWanted(ds_type_it.first));
