@@ -73,12 +73,13 @@ private:
     static bool did_recent_time_jump_; // indicator if recently a time jump was performed
     static bool had_late_time_; // indicator if time late before 24h mark occured
 
+    void doADSBTimeProcessing();
     void doTodOverride();
     //void doNetworkTimeOverride();
     void doFutureTimestampsCheck();
     void doTimeStampCalculation();
     void doRadarPlotPositionCalculations();
-    void doADSBPositionPorcessing();
+    void doADSBPositionProcessing();
     void doGroundSpeedCalculations();
     void doFilters();
     void doObfuscate();
