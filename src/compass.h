@@ -195,5 +195,3 @@ public:
 
     const char* lineEditInvalidStyle();
 };
-
-#endif /* COMPASS_H_ */

@@ -50,11 +50,33 @@ class DBResult
     /// @brief Returns if contains data flag was set
     bool containsData() { return contains_data_; }
 
+    /// @brief Sets error state
+    void setError(const std::string& err)
+    {
+        has_error_ = true;
+        error_msg_ = err;
+    }
+
+    /// @brief Checks error state
+    bool hasError() const
+    {
+        return has_error_;
+    }
+
+    /// @brief Returns the current error message
+    const std::string& error() const
+    {
+        return error_msg_;
+    }
+
   private:
     /// @brief Contains result data flag
     bool contains_data_;
     /// @brief Result data buffer
     std::shared_ptr<Buffer> buffer_;
+    /// @brief Errors
+    bool has_error_ = false;
+    std::string error_msg_;
 };
 
 #endif /* DBRESULT_H_ */

@@ -39,6 +39,7 @@ class COMPASS;
 class Buffer;
 class BufferWriter;
 class SQLiteConnection;
+class DuckDBConnection;
 class QProgressDialog;
 class DBContent;
 class DBResult;
@@ -89,10 +90,12 @@ public:
     bool dbOpen();
 
     const std::map<std::string, DBTableInfo>& tableInfo() { return table_info_; }
+    const std::string dbFilename() const { return db_filename_; }
 
     bool ready();
 
     SQLiteConnection& connection();
+    DuckDBConnection& duckDBConnection() { return *duckdb_connection_; }
 
     // data sources
     bool existsDataSourcesTable();
@@ -181,6 +184,7 @@ public:
 
 protected:
     std::unique_ptr<SQLiteConnection> db_connection_;
+    std::unique_ptr<DuckDBConnection> duckdb_connection_;
 
     bool properties_loaded_ {false};
     const std::string dbcolumn_content_property_name_{"dbcolumn_content"};
@@ -196,6 +200,8 @@ protected:
 
     std::map<std::string, std::string> properties_;
     std::map<std::string, std::set<std::string>> dbcolumn_content_flags_; // dbtable -> dbcols with content
+
+    std::string db_filename_;
 
     virtual void checkSubConfigurables();
 

@@ -37,6 +37,7 @@
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/target/target.h"
 #include "viewpoint.h"
+#include "duckdbconnection.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -66,6 +67,8 @@ DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
     registerParameter("read_chunk_size", &read_chunk_size_, 50000u);
 
     createSubConfigurables();
+
+    duckdb_connection_.reset(new DuckDBConnection(this));
 }
 
 DBInterface::~DBInterface()
@@ -75,6 +78,7 @@ DBInterface::~DBInterface()
     boost::mutex::scoped_lock locker(connection_mutex_);
 
     db_connection_ = nullptr;
+    duckdb_connection_ = nullptr;
 
     logdbg << "DBInterface: desctructor: end";
 }
@@ -98,6 +102,8 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+    db_filename_ = "";
+
     if (overwrite && Files::fileExists(filename))
     {
         loginf << "DBInterface: openDBFile: deleting pre-existing file '" << filename << "'";
@@ -109,6 +115,10 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
     loginf << "DBInterface: openDBFile: opening file '" << filename << "'";
     assert (db_connection_);
     db_connection_->openFile(filename);
+
+    duckdb_connection_->connect(Utils::Files::replaceExtension(filename, ".duckdb"));
+
+    db_filename_ = filename;
 
     updateTableInfo();
 
@@ -189,6 +199,10 @@ void DBInterface::closeDBFile()
         assert (db_connection_);
         db_connection_->disconnect();
 
+        assert(duckdb_connection_);
+        duckdb_connection_->disconnect();
+
+        db_filename_       = "";
         properties_loaded_ = false;
 
         properties_.clear();
