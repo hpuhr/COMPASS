@@ -383,6 +383,13 @@ void COMPASS::createNewDBFile(const std::string& filename)
         Files::deleteFile(filename);
     }
 
+    //@TODO: remove
+    if (Files::fileExists(Files::replaceExtension(filename, ".duckdb")))
+    {
+        loginf << "COMPASS: createNewDBFile: deleting pre-existing file '" << Files::replaceExtension(filename, ".duckdb") << "'";
+        Files::deleteFile(Files::replaceExtension(filename, ".duckdb"));
+    }
+
     last_db_filename_ = filename;
 
     db_interface_->openDBFile(filename, true);

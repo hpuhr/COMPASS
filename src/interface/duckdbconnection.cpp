@@ -336,9 +336,16 @@ bool DuckDBConnection::createTable(const DBContent& dbcontent)
     if (created_tables_.find(dbcontent.dbTableName()) != created_tables_.end())
         return true;
 
-    //SQLGenerator gen(interface_);
-    //auto sql = gen.getCreateTableStatement(dbcontent);
+    std::string sql;
 
+    PropertyList properties;
+    for (auto& var_it : dbcontent.variables())
+        properties.addProperty(var_it.second->dbColumnName(), var_it.second->dataType());
+
+#if 0
+    SQLGenerator gen(interface_);
+    sql = gen.getCreateTableStatement(dbcontent);
+#else
     std::map<PropertyDataType, std::string> dbtype_map = 
         {{PropertyDataType::BOOL, "BOOLEAN"},
          {PropertyDataType::CHAR, "TINYINT"},
@@ -356,10 +363,6 @@ bool DuckDBConnection::createTable(const DBContent& dbcontent)
     std::stringstream ss;
     ss << "CREATE TABLE " << dbcontent.dbTableName() << "(";
 
-    std::string data_type;
-
-    PropertyList properties;
-
     unsigned int cnt = 0;
     for (auto& var_it : dbcontent.variables())
     {
@@ -372,13 +375,12 @@ bool DuckDBConnection::createTable(const DBContent& dbcontent)
             ss << ",";
 
         cnt++;
-
-        properties.addProperty(var_it.second->dbColumnName(), var_it.second->dataType());
     }
 
     ss << ");";
 
-    std::string sql = ss.str();
+    sql = ss.str();
+#endif
 
     auto result = execute(sql);
     assert(result);
@@ -411,7 +413,7 @@ bool DuckDBConnection::insertBuffer(const std::string& table_name,
 
     size_t appender_column_count = appender->columnCount();
 
-    loginf << "column count: " << appender_column_count;
+    //loginf << "column count: " << appender_column_count;
 
     const auto& buffer_properties = buffer->properties();
 
@@ -428,7 +430,7 @@ bool DuckDBConnection::insertBuffer(const std::string& table_name,
 
     auto n = buffer->size();
 
-    loginf << "buffer properties: " << buffer_properties.size() << ", used properties: " << properties->size();
+    //loginf << "buffer properties: " << buffer_properties.size() << ", used properties: " << properties->size();
 
     unsigned int np = properties->size();
     assert(np == appender_column_count);
