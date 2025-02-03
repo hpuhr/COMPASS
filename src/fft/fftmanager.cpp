@@ -265,7 +265,7 @@ void FFTManager::saveDBFFTs()
 {
     loginf << "FFTManager: saveDBFFTs";
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
     assert(db_interface.dbOpen());
     db_interface.saveFFTs(db_ffts_);
@@ -425,7 +425,7 @@ void FFTManager::loadDBFFTs()
 {
     assert (!db_ffts_.size());
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
     // load from db
     if (db_interface.existsFFTsTable())

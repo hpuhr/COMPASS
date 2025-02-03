@@ -61,7 +61,7 @@ public:
     PropertyDataType& dataTypeRef() { return data_type_; }
 
     const std::string& dataTypeString() const { return data_type_str_; }
-    const std::string& dbDataTypeString() const;
+    const std::string& dbDataTypeString(bool precise_type) const;
     std::string& dataTypeStringRef() { return data_type_str_; }
     void dataType(PropertyDataType type)
     {
@@ -74,10 +74,13 @@ public:
 
     static const std::string& asString(PropertyDataType type);
     static PropertyDataType asDataType(const std::string& type);
+    static const std::string& asDBString(PropertyDataType type, bool precise_type);
+    static PropertyDataType asDBDataType(const std::string& db_type);
 
     static const std::map<PropertyDataType, std::string>& dataTypes2Strings();
-    static const std::map<PropertyDataType, std::string>& dbDataTypes2Strings();
+    static const std::map<PropertyDataType, std::string>& dbDataTypes2Strings(bool precise_types);
     static const std::map<std::string, PropertyDataType>& strings2DataTypes();
+    static const std::map<std::string, PropertyDataType>& strings2DBDataTypes();
 
 protected:
     /// Data type

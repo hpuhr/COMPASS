@@ -15,20 +15,16 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "duckdbcommon.h"
+#include "duckdbexecresult.h"
 #include "buffer.h"
 #include "property_templates.h"
 #include "propertylist.h"
 
 #include <cassert>
 
-/**************************************************************************************************
- * DuckDBResult
- **************************************************************************************************/
-
 /**
  */
-PropertyDataType DuckDBResult::dataTypeFromDuckDB(duckdb_type type)
+PropertyDataType DuckDBExecResult::dataTypeFromDuckDB(duckdb_type type)
 {
     if (type == duckdb_type::DUCKDB_TYPE_BOOLEAN)
         return PropertyDataType::BOOL;
@@ -53,7 +49,7 @@ PropertyDataType DuckDBResult::dataTypeFromDuckDB(duckdb_type type)
     
     //@TODO: more types needed?
 
-    logerr << "DuckDBResult: dataTypeFromDuckDB: data type not implemented";
+    logerr << "DuckDBExecResult: dataTypeFromDuckDB: data type not implemented";
     assert(false);
 
     return PropertyDataType::BOOL;
@@ -61,31 +57,48 @@ PropertyDataType DuckDBResult::dataTypeFromDuckDB(duckdb_type type)
 
 /**
  */
-DuckDBResult::DuckDBResult()
+DuckDBExecResult::DuckDBExecResult() = default;
+
+/**
+ */
+DuckDBExecResult::~DuckDBExecResult()
 {
+    if (result_valid_)
+    {
+        //@TODO: any extra freeing needed?
+        duckdb_destroy_result(&result_);
+        result_valid_ = false;
+    }
 }
 
 /**
  */
-DuckDBResult::~DuckDBResult()
+void DuckDBExecResult::setResultValid()
 {
-    if (has_result_)
-    {
-        //@TODO: any extra freeing needed?
-        duckdb_destroy_result(&result_);
-        has_result_ = false;
-        error_ = false;
-        error_msg_ = "";
-    }
+    result_valid_ = true;
+}
+
+/**
+ */
+std::string DuckDBExecResult::errorString() const
+{
+    return std::string(duckdb_result_error(&result_));
+}
+
+/**
+ */
+duckdb_result* DuckDBExecResult::result()
+{
+    return &result_;
 }
 
 /**
  * Generate a buffer from the current result.
  * In this version the scheme is specified by the result.
  */
-std::shared_ptr<Buffer> DuckDBResult::toBuffer(const std::string& dbcontent_name)
+std::shared_ptr<Buffer> DuckDBExecResult::toBuffer(const std::string& dbcontent_name)
 {
-    if (!usable())
+    if (!result_valid_)
         return std::shared_ptr<Buffer>();
 
     idx_t col_count = duckdb_column_count(&result_);
@@ -95,7 +108,7 @@ std::shared_ptr<Buffer> DuckDBResult::toBuffer(const std::string& dbcontent_name
     for (idx_t c = 0; c < col_count; ++c)
     {
         std::string name(duckdb_column_name(&result_, c));
-        auto dtype = DuckDBResult::dataTypeFromDuckDB(duckdb_column_type(&result_, c));
+        auto dtype = DuckDBExecResult::dataTypeFromDuckDB(duckdb_column_type(&result_, c));
 
         properties.addProperty(name, dtype);
     }
@@ -107,10 +120,10 @@ std::shared_ptr<Buffer> DuckDBResult::toBuffer(const std::string& dbcontent_name
  * Generate a buffer from the current result.
  * In this version the scheme is specified by the given property list.
  */
-std::shared_ptr<Buffer> DuckDBResult::toBuffer(const PropertyList& properties,
-                                               const std::string& dbcontent_name)
+std::shared_ptr<Buffer> DuckDBExecResult::toBuffer(const PropertyList& properties,
+                                                   const std::string& dbcontent_name)
 {
-    if (!usable() || properties.size() < 1)
+    if (!result_valid_ || properties.size() < 1)
         return std::shared_ptr<Buffer>();
 
     //create buffer
@@ -126,9 +139,9 @@ std::shared_ptr<Buffer> DuckDBResult::toBuffer(const PropertyList& properties,
  * Fill a given buffer with the current result.
  * In this version the scheme is specified by the buffer.
  */
-bool DuckDBResult::toBuffer(Buffer& buffer)
+bool DuckDBExecResult::toBuffer(Buffer& buffer)
 {
-    if (!usable())
+    if (!result_valid_)
         return false;
 
     const auto& properties = buffer.properties();
@@ -137,13 +150,13 @@ bool DuckDBResult::toBuffer(Buffer& buffer)
     idx_t row_count = duckdb_row_count(&result_);
     assert(col_count == properties.size()); // result column count must match provided buffer
 
-    #define UpdateFunc(PDType, DType)                             \
+    #define UpdateFunc(PDType, DType, Suffix)                     \
         bool is_null = duckdb_value_is_null(&result_, c, r);      \
         if (!is_null)                                             \
             buffer.get<DType>(p.name()).set(r, read<DType>(c, r));
 
-    #define NotFoundFunc                                                                         \
-        logerr << "DuckDBResult: toBuffer: unknown property type " << Property::asString(dtype); \
+    #define NotFoundFunc                                                                             \
+        logerr << "DuckDBExecResult: toBuffer: unknown property type " << Property::asString(dtype); \
         assert(false);
 
     for (idx_t r = 0; r < row_count; ++r)

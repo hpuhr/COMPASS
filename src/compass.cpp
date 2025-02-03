@@ -450,8 +450,7 @@ void COMPASS::closeDB()
     emit databaseClosedSignal();
 }
 
-
-DBInterface& COMPASS::interface()
+DBInterface& COMPASS::dbInterface()
 {
     assert(db_interface_);
     return *db_interface_;

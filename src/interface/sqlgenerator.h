@@ -15,31 +15,36 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SQLGENERATOR_H_
-#define SQLGENERATOR_H_
+#pragma once
 
 #include "dbcontent/variable/variableset.h"
+#include "dbtableinfo.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <memory>
+#include <string>
 
 class Buffer;
 class DBCommand;
 class DBCommandList;
-class DBInterface;
 class DBContent;
 
 class SQLGenerator
 {
 public:
-    SQLGenerator(DBInterface& db_interface);
+    SQLGenerator(bool precise_types);
     virtual ~SQLGenerator();
 
-    std::string getCreateTableStatement(const DBContent& object);
-    std::string insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, std::string table_name);
-    std::string createDBUpdateStringBind(std::shared_ptr<Buffer> buffer,
-                                         const std::string& key_col_name, std::string table_name);
+    std::string getCreateTableStatement(const DBContent& object, bool indexing);
+    std::string getCreateTableStatement(const std::string& table_name,
+                                        const std::vector<DBTableColumnInfo>& column_infos, 
+                                        bool indexing,
+                                        const std::string& dbcontent_name = "");
+    std::string getInsertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, std::string table_name);
+    std::string getCreateDBUpdateStringBind(std::shared_ptr<Buffer> buffer,
+                                            const std::string& key_col_name, 
+                                            std::string table_name);
 
     std::shared_ptr<DBCommand> getSelectCommand(
             const DBContent& object, dbContent::VariableSet read_list, const std::string& filter,
@@ -103,19 +108,9 @@ public:
     std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBContent& object);
 
 protected:
-    DBInterface& db_interface_;
-
-    //std::string table_minmax_create_statement_;
-    std::string table_properties_create_statement_;
-    std::string table_data_sources_create_statement_;
-    std::string table_ffts_create_statement_;
-    std::string table_sectors_create_statement_;
-    std::string table_view_points_create_statement_;
-    std::string table_targets_create_statement_;
+    bool precise_types_ = false;
 
     //    std::string subTablesWhereClause(const DBTable& table,
     //                                     const std::vector<std::string>& used_tables);
     //    std::string subTableKeyClause(const DBTable& table, const std::string& sub_table_name);
 };
-
-#endif /* SQLGENERATOR_H_ */

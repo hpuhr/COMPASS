@@ -17,81 +17,61 @@
 
 #pragma once
 
-#include <duckdb.h>
-
 #include "duckdbconnectionsettings.h"
-#include "property.h"
-#include "propertylist.h"
+#include "dbconnection.h"
 
 #include <memory>
 #include <string>
-#include <map>
 #include <vector>
-#include <set>
 
 #include <boost/optional.hpp>
 
 class DuckDBScopedAppender;
 class DuckDBScopedPrepare;
-class DuckDBResult;
 
 class Buffer;
 class DBInterface;
-class DBCommand;
-class DBCommandList;
 class DBResult;
-class DBConnectionInfo;
-class DBTableInfo;
-class DBContent;
+class PropertyList;
 
 /**
  */
-class DuckDBConnection
+class DuckDBConnection : public DBConnection
 {
 public:
-    typedef std::pair<std::string, PropertyDataType> TableColumn;
-    typedef std::vector<TableColumn> TableDescription;
-
     DuckDBConnection(DBInterface* interface);
     virtual ~DuckDBConnection();
 
-    std::pair<bool, std::string> connect(const std::string& file_name);
-    void disconnect();
-
-    void exportFile(const std::string& file_name);
-    
     std::shared_ptr<DuckDBScopedAppender> createAppender(const std::string& table);
-    std::shared_ptr<DuckDBScopedPrepare> prepareStatement(const std::string& statement);
+    std::shared_ptr<DBScopedPrepare> prepareStatement(const std::string& statement, 
+                                                      bool begin_transaction) override final;
 
-    std::shared_ptr<DBResult> execute(const std::string& sql, bool fetch_result_buffer = false);
-    std::shared_ptr<DBResult> execute(const DBCommand& command);
-    std::shared_ptr<DBResult> execute(const DBCommandList& command_list);
+    //duckdb needs precise data types in its tables
+    bool needsPreciseDBTypes() const override final { return true; }
 
-    bool createTable(const DBContent& dbcontent);
-    std::map<std::string, DBTableInfo> getTableInfo();
-    bool insertBuffer(const std::string& table_name, const std::shared_ptr<Buffer>& buffer);
-    bool insertBuffer(const DBContent& dbcontent, const std::shared_ptr<Buffer>& buffer);
-
-    std::string status() const;
-
-    bool dbOpened() { return db_opened_; }
+    //no indexing, queries should be quite fast in duckdb 
+    //and indexing blows up the db file consiferably
+    bool useIndexing() const override final { return false; }
 
     DuckDBConnectionSettings& settings() { return settings_; }
 
 protected:
-    std::shared_ptr<DuckDBResult> executeCmd(const std::string& command);
+    std::pair<bool, std::string> connect_impl(const std::string& file_name) override final;
+    void disconnect_impl() override final;
 
-    std::vector<std::string> getTableList();
-    DBTableInfo getColumnList(const std::string& table);
+    bool exportFile_impl(const std::string& file_name) override final;
 
-    DBInterface& interface_;
+    bool executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer) override final;
+    bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) override final;
 
-    /// Database handle to execute queries
+    std::pair<bool, std::string> insertBuffer_impl(const std::string& table_name, 
+                                                   const std::shared_ptr<Buffer>& buffer) override final;
+
+    boost::optional<std::vector<std::string>> getTableList_impl() override final;
+    
+private:
     duckdb_database   db_;
     duckdb_connection connection_;
-    bool              db_opened_ = false;
-
-    std::map<std::string, PropertyList> created_tables_;
 
     DuckDBConnectionSettings settings_;
 };

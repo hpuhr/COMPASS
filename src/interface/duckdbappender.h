@@ -42,21 +42,24 @@ public:
     bool valid() const;
 
     template<typename T>
-    void append(const T& value)
+    bool append(const T& value)
     {
-        assert(ok_);
         throw std::runtime_error("DuckDBScopedAppender: append: not implemented for type");
+        return false;
     }
 
-    void appendNull()
+    bool appendNull()
     {
-        assert(ok_);
-        duckdb_append_null(appender_);
+        if (!ok_ || duckdb_append_null(appender_) != DuckDBSuccess)
+            return false;
         ++appended_;
+        return true;
     }
 
     size_t endRow();
-    void flush();
+    bool flush();
+
+    std::string lastError() const;
     size_t columnCount() const;
     size_t currentColumnCount() const { return appended_; }
     
@@ -66,13 +69,14 @@ private:
     size_t appended_ = 0;
 };
 
-#define StandardApppender(DType, DuckDBDTypeName)                                 \
-template<>                                                                        \
-inline void DuckDBScopedAppender::append(const DType& value)                      \
-{                                                                                 \
-    assert(ok_);                                                                  \
-    duckdb_append_ ## DuckDBDTypeName(appender_, value);                          \
-    ++appended_;                                                                  \
+#define StandardApppender(DType, DuckDBDTypeName)                                     \
+template<>                                                                            \
+inline bool DuckDBScopedAppender::append(const DType& value)                          \
+{                                                                                     \
+    if (!ok_ || duckdb_append_ ## DuckDBDTypeName(appender_, value) != DuckDBSuccess) \
+        return false;                                                                 \
+    ++appended_;                                                                      \
+    return true;                                                                      \
 }
 
 StandardApppender(bool, bool)
@@ -86,25 +90,24 @@ StandardApppender(float, float)
 StandardApppender(double, double)
 
 template<>
-inline void DuckDBScopedAppender::append(const std::string& value)
+inline bool DuckDBScopedAppender::append(const std::string& value)
 {
-    assert(ok_);
-    duckdb_append_varchar(appender_, value.c_str());
+    if (!ok_ || duckdb_append_varchar(appender_, value.c_str()) != DuckDBSuccess)
+        return false;
     ++appended_;
+    return true;
 }
 
 template<>
-inline void DuckDBScopedAppender::append(const nlohmann::json& value)
+inline bool DuckDBScopedAppender::append(const nlohmann::json& value)
 {
-    assert(ok_);
     auto str = value.dump();
-    append<std::string>(str);
+    return append<std::string>(str);
 }
 
 template<>
-inline void DuckDBScopedAppender::append(const boost::posix_time::ptime& value)
+inline bool DuckDBScopedAppender::append(const boost::posix_time::ptime& value)
 {
-    assert(ok_);
     long ts = Utils::Time::toLong(value);
-    append<long>(ts);
+    return append<long>(ts);
 }

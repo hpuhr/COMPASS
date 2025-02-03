@@ -387,7 +387,7 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
     logdbg << "Buffer: seizeBuffer: end size " << size();
 }
 
-size_t Buffer::size() { return data_size_; }
+size_t Buffer::size() const { return data_size_; }
 
 void Buffer::cutToSize(size_t size)
 {
@@ -637,7 +637,7 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
     }
 }
 
-const PropertyList& Buffer::properties() { return properties_; }
+const PropertyList& Buffer::properties() const { return properties_; }
 
 void Buffer::printProperties()
 {

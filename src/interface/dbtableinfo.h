@@ -15,43 +15,73 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBTABLEINFO_H_
-#define DBTABLEINFO_H_
+#pragma once
+
+#include "property.h"
+#include "propertylist.h"
 
 #include <map>
 #include <string>
 
+#include <boost/optional.hpp>
+
+/**
+ */
 class DBTableColumnInfo
 {
-  public:
-    DBTableColumnInfo(const std::string& name, const std::string& type, bool key, bool null_allowed,
-                      const std::string& comment)
-        : name_(name), type_(type), null_allowed_(null_allowed), key_(key), comment_(comment)
+public:
+    DBTableColumnInfo(const std::string& name, 
+                      PropertyDataType type,
+                      bool key,
+                      bool null_allowed = true,
+                      const std::string& comment = "")
+    :   name_        (name)
+    ,   type_        (type)
+    ,   null_allowed_(null_allowed)
+    ,   key_         (key)
+    ,   comment_     (comment)
     {
     }
+
+    DBTableColumnInfo(const std::string& name, 
+                      const std::string& type_db,
+                      bool key,
+                      bool null_allowed = true,
+                      const std::string& comment = "")
+    :   name_        (name)
+    ,   type_db_     (type_db)
+    ,   null_allowed_(null_allowed)
+    ,   key_         (key)
+    ,   comment_     (comment)
+    {
+    }
+
     virtual ~DBTableColumnInfo() {}
 
     std::string name() const { return name_; }
-
-    std::string type() const { return type_; }
-
+    const boost::optional<PropertyDataType>& type() const { return type_; }
+    std::string dbTypeString(bool precise_types) const 
+    {
+        return type_db_.has_value() ? type_db_.value() : Property::asDBString(type_.value(), precise_types);
+    }
     bool nullAllowed() const { return null_allowed_; }
-
     bool key() const { return key_; }
-
     std::string comment() const { return comment_; }
 
-  protected:
-    std::string name_;
-    std::string type_;
-    bool null_allowed_;
-    bool key_;
-    std::string comment_;
+protected:
+    std::string                       name_;
+    boost::optional<PropertyDataType> type_;
+    boost::optional<std::string>      type_db_;
+    bool                              null_allowed_;
+    bool                              key_;
+    std::string                       comment_;
 };
 
+/**
+ */
 class DBTableInfo
 {
-  public:
+public:
     DBTableInfo(const std::string name) : name_(name) {}
     virtual ~DBTableInfo() {}
 
@@ -68,10 +98,18 @@ class DBTableInfo
 
     const std::map<std::string, DBTableColumnInfo>& columns() const { return columns_; }
 
-  protected:
+    PropertyList tableProperties() const
+    {
+        PropertyList p;
+
+        for (const auto& c : columns_)
+            p.addProperty(c.first, c.second.type().value());
+        
+        return p;
+    }
+
+protected:
     std::string name_;
 
     std::map<std::string, DBTableColumnInfo> columns_;
 };
-
-#endif

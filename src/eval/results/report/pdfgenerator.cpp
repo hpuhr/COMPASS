@@ -65,7 +65,7 @@ PDFGeneratorDialog& PDFGenerator::dialog()
 {
     if (!report_path_.size())
     {
-        SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
+        SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().dbInterface().connection());
         assert (sql_con);
 
         string current_filename = COMPASS::instance().lastDbFilename();

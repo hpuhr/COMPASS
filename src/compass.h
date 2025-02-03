@@ -68,7 +68,7 @@ public:
     bool dbOpened();
     void closeDB();
 
-    DBInterface& interface();
+    DBInterface& dbInterface();
     DBContentManager& dbContentManager();
     DataSourceManager& dataSourceManager();
     FilterManager& filterManager();

@@ -125,7 +125,7 @@ void GPSImportCSVTask::importFilename(const std::string& filename)
 
 bool GPSImportCSVTask::checkPrerequisites()
 {
-    if (!COMPASS::instance().interface().ready())  // must be connected
+    if (!COMPASS::instance().dbInterface().ready())  // must be connected
         return false;
 
     if (!COMPASS::instance().dbContentManager().existsDBContent("RefTraj"))

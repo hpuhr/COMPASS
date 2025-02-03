@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "duckdbscopedappender.h"
+#include "duckdbappender.h"
 
 #include "logger.h"
 
@@ -67,10 +67,10 @@ size_t DuckDBScopedAppender::endRow()
 
 /**
  */
-void DuckDBScopedAppender::flush()
+bool DuckDBScopedAppender::flush()
 {
     assert(ok_);
-    assert(duckdb_appender_flush(appender_) == DuckDBSuccess);
+    return duckdb_appender_flush(appender_) == DuckDBSuccess;
 }
 
 /**
@@ -79,4 +79,12 @@ size_t DuckDBScopedAppender::columnCount() const
 {
     assert(ok_);
     return duckdb_appender_column_count(appender_);
+}
+
+/**
+ */
+std::string DuckDBScopedAppender::lastError() const
+{
+    assert(ok_);
+    return std::string(duckdb_appender_error(appender_));
 }

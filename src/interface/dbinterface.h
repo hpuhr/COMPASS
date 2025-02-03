@@ -15,13 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBINTERFACE_H_
-#define DBINTERFACE_H_
+#pragma once
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
-//#include "propertylist.h"
-#include "sqlgenerator.h"
 
 #include <QObject>
 
@@ -30,16 +27,10 @@
 #include <memory>
 #include <set>
 
-static const std::string TABLE_NAME_PROPERTIES = "properties";
-static const std::string TABLE_NAME_SECTORS = "sectors";
-static const std::string TABLE_NAME_VIEWPOINTS = "viewpoints";
-static const std::string TABLE_NAME_TARGETS = "targets";
-
 class COMPASS;
 class Buffer;
 class BufferWriter;
-class SQLiteConnection;
-class DuckDBConnection;
+class DBConnection;
 class QProgressDialog;
 class DBContent;
 class DBResult;
@@ -56,10 +47,15 @@ class DBFFT;
 
 namespace dbContent
 {
-class DBDataSource;
-class Variable;
-class Target;
+    class DBDataSource;
+    class Variable;
+    class Target;
 }
+
+static const std::string TABLE_NAME_PROPERTIES = "properties";
+static const std::string TABLE_NAME_SECTORS    = "sectors";
+static const std::string TABLE_NAME_VIEWPOINTS = "viewpoints";
+static const std::string TABLE_NAME_TARGETS    = "targets";
 
 extern const std::string PROP_TIMESTAMP_MIN_NAME;
 extern const std::string PROP_TIMESTAMP_MAX_NAME;
@@ -68,6 +64,8 @@ extern const std::string PROP_LATITUDE_MAX_NAME;
 extern const std::string PROP_LONGITUDE_MIN_NAME;
 extern const std::string PROP_LONGITUDE_MAX_NAME;
 
+/**
+ */
 class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT
@@ -89,13 +87,12 @@ public:
     void closeDBFile();
     bool dbOpen();
 
-    const std::map<std::string, DBTableInfo>& tableInfo() { return table_info_; }
+    const std::map<std::string, DBTableInfo>& tableInfo();
     const std::string dbFilename() const { return db_filename_; }
 
     bool ready();
 
-    SQLiteConnection& connection();
-    DuckDBConnection& duckDBConnection() { return *duckdb_connection_; }
+    const DBConnection& connection() const;
 
     // data sources
     bool existsDataSourcesTable();
@@ -183,33 +180,22 @@ public:
     // ta -> mops versions, nucp_nics, nac_ps
 
 protected:
-    std::unique_ptr<SQLiteConnection> db_connection_;
-    std::unique_ptr<DuckDBConnection> duckdb_connection_;
+    void loadProperties();
+
+    bool connectionNeedsPreciseDBTypes() const;
+    SQLGenerator sqlGenerator() const;
+
+    std::unique_ptr<DBConnection> db_connection_;
 
     bool properties_loaded_ {false};
     const std::string dbcolumn_content_property_name_{"dbcolumn_content"};
 
     boost::mutex connection_mutex_;
-    boost::mutex table_info_mutex_;
 
     unsigned int read_chunk_size_;
-
-    SQLGenerator sql_generator_;
-
-    std::map<std::string, DBTableInfo> table_info_;
 
     std::map<std::string, std::string> properties_;
     std::map<std::string, std::set<std::string>> dbcolumn_content_flags_; // dbtable -> dbcols with content
 
     std::string db_filename_;
-
-    virtual void checkSubConfigurables();
-
-    void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int buffer_index);
-
-    void loadProperties();
-
-    void updateTableInfo();
 };
-
-#endif /* DBINTERFACE_H_ */

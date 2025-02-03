@@ -1027,10 +1027,10 @@ void EvaluationManager::loadSectors()
 
     assert (!sectors_loaded_);
 
-    if (!COMPASS::instance().interface().ready())
+    if (!COMPASS::instance().dbInterface().ready())
         sectors_loaded_ = false;
 
-    sector_layers_ = COMPASS::instance().interface().loadSectors();
+    sector_layers_ = COMPASS::instance().dbInterface().loadSectors();
 
     sectors_loaded_ = true;
 
@@ -1210,7 +1210,7 @@ void EvaluationManager::saveSector(std::shared_ptr<Sector> sector)
 {
     assert (sectors_loaded_);
     assert (hasSector(sector->name(), sector->layerName()));
-    COMPASS::instance().interface().saveSector(sector);
+    COMPASS::instance().dbInterface().saveSector(sector);
 }
 
 void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
@@ -1236,7 +1236,7 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
         checkMinHeightFilterValid();
     }
 
-    COMPASS::instance().interface().deleteSector(sector);
+    COMPASS::instance().dbInterface().deleteSector(sector);
 
     if (widget_)
         widget_->updateSectors();
@@ -1251,7 +1251,7 @@ void EvaluationManager::deleteAllSectors()
     assert (sectors_loaded_);
     sector_layers_.clear();
 
-    COMPASS::instance().interface().deleteAllSectors();
+    COMPASS::instance().dbInterface().deleteAllSectors();
 
     checkMinHeightFilterValid();
 
@@ -1271,7 +1271,7 @@ void EvaluationManager::importSectors(const std::string& filename)
     assert (sectors_loaded_);
 
     sector_layers_.clear();
-    COMPASS::instance().interface().clearSectorsTable();
+    COMPASS::instance().dbInterface().clearSectorsTable();
 
     std::ifstream input_file(filename, std::ifstream::in);
 

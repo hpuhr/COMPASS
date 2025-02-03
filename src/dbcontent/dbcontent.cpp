@@ -463,7 +463,7 @@ void DBContent::loadFiltered(dbContent::VariableSet& read_set, std::string custo
     read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_line_id_));
 
     read_job_ = shared_ptr<DBContentReadDBJob>(
-                new DBContentReadDBJob(COMPASS::instance().interface(), *this, read_set, custom_filter_clause));
+                new DBContentReadDBJob(COMPASS::instance().dbInterface(), *this, read_set, custom_filter_clause));
 
     connect(read_job_.get(), &DBContentReadDBJob::intermediateSignal,
             this, &DBContent::readJobIntermediateSlot, Qt::QueuedConnection);
@@ -513,7 +513,7 @@ void DBContent::insertData(shared_ptr<Buffer> buffer)
 
     doDataSourcesBeforeInsert(buffer);
 
-    insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().interface(), *this, buffer, false);
+    insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().dbInterface(), *this, buffer, false);
 
     connect(insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBContent::insertDoneSlot,
             Qt::QueuedConnection);
@@ -631,7 +631,7 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
     buffer->transformVariables(list, false);
 
     update_job_ =
-            make_shared<UpdateBufferDBJob>(COMPASS::instance().interface(), *this, key_var, buffer);
+            make_shared<UpdateBufferDBJob>(COMPASS::instance().dbInterface(), *this, key_var, buffer);
 
     connect(update_job_.get(), &UpdateBufferDBJob::doneSignal, this, &DBContent::updateDoneSlot,
             Qt::QueuedConnection);
@@ -650,7 +650,7 @@ void DBContent::deleteDBContentData()
 
     assert (!delete_job_);
 
-    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setSpecificDBContent(name_);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
@@ -668,7 +668,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic)
 
     assert (!delete_job_);
 
-    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setSpecificDBContent(name_);
     delete_job_->setSpecificSacSic(sac, sic);
 
@@ -688,7 +688,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned
 
     assert (!delete_job_);
 
-    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setSpecificDBContent(name_);
     delete_job_->setSpecificSacSic(sac, sic);
     delete_job_->setSpecificLineId(line_id);
@@ -726,7 +726,7 @@ void DBContent::deleteJobDoneSlot()
     // remove from targets count
     //dbcont_manager_.removeDBContentFromTargets(name_);
 
-    count_ = COMPASS::instance().interface().count(db_table_name_);
+    count_ = COMPASS::instance().dbInterface().count(db_table_name_);
 }
 
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
@@ -798,7 +798,7 @@ void DBContent::databaseOpenedSlot()
     is_loadable_ = existsInDB();
 
     if (is_loadable_)
-        count_ = COMPASS::instance().interface().count(db_table_name_);
+        count_ = COMPASS::instance().dbInterface().count(db_table_name_);
 
     logdbg << "DBContent: " << name_ << " databaseOpenedSlot: table " << db_table_name_
            << " count " << count_;
@@ -837,7 +837,7 @@ size_t DBContent::loadedCount()
 
 bool DBContent::existsInDB() const
 {
-    return COMPASS::instance().interface().existsTable(db_table_name_);
+    return COMPASS::instance().dbInterface().existsTable(db_table_name_);
 }
 
 void DBContent::checkStaticVariable(const Property& property)

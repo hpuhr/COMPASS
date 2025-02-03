@@ -498,7 +498,7 @@ void ReconstructorTask::deleteTargetsDoneSlot()
                                                   Q_ARG(const QString&, "Deleting Previous Associations"),
                                                   Q_ARG(bool, false));
 
-                        COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
+                        COMPASS::instance().dbInterface().clearAssociations(*dbcont_it.second);
                     }
                 }
 
@@ -846,7 +846,7 @@ void ReconstructorTask::writeDoneSlot()
 
         COMPASS::instance().dataSourceManager().saveDBDataSources();
         emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
-        COMPASS::instance().interface().saveProperties();
+        COMPASS::instance().dbInterface().saveProperties();
 
         done_ = true;
 

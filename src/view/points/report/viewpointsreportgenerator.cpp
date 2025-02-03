@@ -62,7 +62,7 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
 
     registerParameter("abstract", &abstract_, std::string());
 
-    SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
+    SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().dbInterface().connection());
     assert (sql_con);
 
     string current_filename = COMPASS::instance().lastDbFilename();

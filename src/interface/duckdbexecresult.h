@@ -19,6 +19,8 @@
 
 #include <duckdb.h>
 
+#include "dbexecresult.h"
+
 #include "property.h"
 #include "timeconv.h"
 
@@ -36,28 +38,25 @@ class PropertyList;
 
 /**
  */
-class DuckDBResult
+class DuckDBExecResult : public DBExecResult
 {
 public:
-    DuckDBResult();
-    virtual ~DuckDBResult();
+    DuckDBExecResult();
+    virtual ~DuckDBExecResult();
 
-    bool hasResult() const { return has_result_; }
-    bool hasError() const { return error_; }
-    bool usable() const { return hasResult() && !hasError(); }
-    const std::string& errorMsg() const { return error_msg_; }
-
-    std::shared_ptr<Buffer> toBuffer(const std::string& dbcontent_name = "");
+    std::shared_ptr<Buffer> toBuffer(const std::string& dbcontent_name = "") override final;
     std::shared_ptr<Buffer> toBuffer(const PropertyList& properties,
-                                     const std::string& dbcontent_name = "");
-    bool toBuffer(Buffer& buffer);
+                                     const std::string& dbcontent_name = "") override final;
+    bool toBuffer(Buffer& buffer) override final;
+
+    std::string errorString() const override final;
+
+    void setResultValid();
+    duckdb_result* result();
 
     static PropertyDataType dataTypeFromDuckDB(duckdb_type type);
 
 private:
-    friend class DuckDBScopedPrepare;
-    friend class DuckDBConnection;
-
     template <typename T>
     T read(idx_t col, idx_t row)
     {
@@ -65,15 +64,13 @@ private:
         throw std::runtime_error("DuckDBResult: read: not implemented for type");
     }
 
-    duckdb_result result_;
-    bool          has_result_ = false;
-    bool          error_ = false;
-    std::string   error_msg_;
+    mutable duckdb_result result_;
+    bool                  result_valid_;
 };
 
 #define StandardRead(DType, DuckDBDTypeName)                         \
 template<>                                                           \
-inline DType DuckDBResult::read(idx_t col, idx_t row)                \
+inline DType DuckDBExecResult::read(idx_t col, idx_t row)            \
 {                                                                    \
     assert(has_result_ && !error_);                                  \
     return duckdb_value_ ## DuckDBDTypeName(&result_, col, row);     \
@@ -90,14 +87,14 @@ StandardRead(float, float)
 StandardRead(double, double)
 
 template<>
-inline std::string DuckDBResult::read(idx_t col, idx_t row)
+inline std::string DuckDBExecResult::read(idx_t col, idx_t row)
 {
     assert(has_result_ && !error_);
     return std::string(duckdb_value_varchar(&result_, col, row));
 }
 
 template<>
-inline nlohmann::json DuckDBResult::read(idx_t col, idx_t row)
+inline nlohmann::json DuckDBExecResult::read(idx_t col, idx_t row)
 {
     assert(has_result_ && !error_);
     auto str = read<std::string>(col, row);
@@ -105,7 +102,7 @@ inline nlohmann::json DuckDBResult::read(idx_t col, idx_t row)
 }
 
 template<>
-inline boost::posix_time::ptime DuckDBResult::read(idx_t col, idx_t row)
+inline boost::posix_time::ptime DuckDBExecResult::read(idx_t col, idx_t row)
 {
     assert(has_result_ && !error_);
     long ts = read<long>(col, row);

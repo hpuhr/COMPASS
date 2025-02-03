@@ -181,7 +181,7 @@ void DBContentManager::deleteDBContentData(boost::posix_time::ptime before_times
 
     assert (!delete_job_);
 
-    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().interface());
+    delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setBeforeTimestamp(before_timestamp);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContentManager::deleteJobDoneSlot,
@@ -439,7 +439,7 @@ void DBContentManager::databaseOpenedSlot()
     loadMaxRecordNumberWODBContentID();
     loadMaxRefTrajTrackNum();
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
     if (db_interface.hasProperty("associations_generated"))
     {
@@ -570,7 +570,7 @@ bool DBContentManager::hasAssociations() const
 
 void DBContentManager::setAssociationsIdentifier(const std::string& assoc_id)
 {
-    auto& dbinterface = COMPASS::instance().interface();
+    auto& dbinterface = COMPASS::instance().dbInterface();
 
     dbinterface.setProperty("associations_generated", "1");
     dbinterface.setProperty("associations_id", assoc_id);
@@ -591,7 +591,7 @@ void DBContentManager::clearAssociationsIdentifier()
     has_associations_ = false;
     associations_id_ = "";
 
-    auto& dbinterface = COMPASS::instance().interface();
+    auto& dbinterface = COMPASS::instance().dbInterface();
 
     if (dbinterface.hasProperty("associations_generated"))
         dbinterface.removeProperty("associations_generated");
@@ -748,9 +748,9 @@ void DBContentManager::finishInserting()
 
         if (hasMinMaxTimestamp())
         {
-            COMPASS::instance().interface().setProperty(PROP_TIMESTAMP_MIN_NAME,
+            COMPASS::instance().dbInterface().setProperty(PROP_TIMESTAMP_MIN_NAME,
                                                         to_string(Time::toLong(timestamp_min_.get())));
-            COMPASS::instance().interface().setProperty(PROP_TIMESTAMP_MAX_NAME,
+            COMPASS::instance().dbInterface().setProperty(PROP_TIMESTAMP_MAX_NAME,
                                                         to_string(Time::toLong(timestamp_max_.get())));
 
             logdbg << "DBContentManager: finishInserting: tod min " << timestamp_min_.get()
@@ -799,11 +799,11 @@ void DBContentManager::finishInserting()
 
                 if (has_min_max)
                 {
-                    COMPASS::instance().interface().setProperty(PROP_LATITUDE_MIN_NAME, to_string(latitude_min_.get()));
-                    COMPASS::instance().interface().setProperty(PROP_LATITUDE_MAX_NAME, to_string(latitude_max_.get()));
+                    COMPASS::instance().dbInterface().setProperty(PROP_LATITUDE_MIN_NAME, to_string(latitude_min_.get()));
+                    COMPASS::instance().dbInterface().setProperty(PROP_LATITUDE_MAX_NAME, to_string(latitude_max_.get()));
 
-                    COMPASS::instance().interface().setProperty(PROP_LONGITUDE_MIN_NAME, to_string(longitude_min_.get()));
-                    COMPASS::instance().interface().setProperty(PROP_LONGITUDE_MAX_NAME, to_string(longitude_max_.get()));
+                    COMPASS::instance().dbInterface().setProperty(PROP_LONGITUDE_MIN_NAME, to_string(longitude_min_.get()));
+                    COMPASS::instance().dbInterface().setProperty(PROP_LONGITUDE_MAX_NAME, to_string(longitude_max_.get()));
 
                     logdbg << "DBContentManager: finishInserting: lat min " << latitude_min_.get()
                            << " max " << latitude_max_.get()
@@ -1282,8 +1282,8 @@ void DBContentManager::setMinMaxTimestamp(boost::posix_time::ptime min, boost::p
     timestamp_min_ = min;
     timestamp_max_ = max;
 
-    COMPASS::instance().interface().setProperty("timestamp_min", to_string(Time::toLong(timestamp_min_.get())));
-    COMPASS::instance().interface().setProperty("timestamp_max", to_string(Time::toLong(timestamp_max_.get())));
+    COMPASS::instance().dbInterface().setProperty("timestamp_min", to_string(Time::toLong(timestamp_min_.get())));
+    COMPASS::instance().dbInterface().setProperty("timestamp_max", to_string(Time::toLong(timestamp_max_.get())));
 }
 
 std::pair<boost::posix_time::ptime , boost::posix_time::ptime> DBContentManager::minMaxTimestamp() const
@@ -1303,8 +1303,8 @@ void DBContentManager::setMinMaxLatitude(double min, double max)
     latitude_min_ = min;
     latitude_max_ = max;
 
-    COMPASS::instance().interface().setProperty("latitude_min", to_string(latitude_min_.get()));
-    COMPASS::instance().interface().setProperty("latitude_max", to_string(latitude_max_.get()));
+    COMPASS::instance().dbInterface().setProperty("latitude_min", to_string(latitude_min_.get()));
+    COMPASS::instance().dbInterface().setProperty("latitude_max", to_string(latitude_max_.get()));
 }
 
 std::pair<double, double> DBContentManager::minMaxLatitude() const
@@ -1318,8 +1318,8 @@ void DBContentManager::setMinMaxLongitude(double min, double max)
     longitude_min_ = min;
     longitude_max_ = max;
 
-    COMPASS::instance().interface().setProperty("longitude_min", to_string(longitude_min_.get()));
-    COMPASS::instance().interface().setProperty("longitude_max", to_string(longitude_max_.get()));
+    COMPASS::instance().dbInterface().setProperty("longitude_min", to_string(longitude_min_.get()));
+    COMPASS::instance().dbInterface().setProperty("longitude_max", to_string(longitude_max_.get()));
 }
 
 std::pair<double, double> DBContentManager::minMaxLongitude() const
@@ -1330,7 +1330,8 @@ std::pair<double, double> DBContentManager::minMaxLongitude() const
 
 bool DBContentManager::hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const
 {
-
+    //@TODO
+    return false;
 }
 
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const
@@ -1526,7 +1527,7 @@ bool DBContentManager::insertInProgress() const
 
 void DBContentManager::loadMaxRecordNumberWODBContentID()
 {
-    assert (COMPASS::instance().interface().dbOpen());
+    assert (COMPASS::instance().dbInterface().dbOpen());
 
     max_rec_num_wo_dbcontid_ = 0;
     unsigned long max_rec_num_with_dbcontid = 0;
@@ -1535,7 +1536,7 @@ void DBContentManager::loadMaxRecordNumberWODBContentID()
     {
         if (obj_it.second->existsInDB())
         {
-            max_rec_num_with_dbcontid = COMPASS::instance().interface().getMaxRecordNumber(*obj_it.second);
+            max_rec_num_with_dbcontid = COMPASS::instance().dbInterface().getMaxRecordNumber(*obj_it.second);
             max_rec_num_wo_dbcontid_ = max(Number::recNumGetWithoutDBContId(max_rec_num_with_dbcontid),
                                            max_rec_num_wo_dbcontid_);
         }
@@ -1548,9 +1549,9 @@ void DBContentManager::loadMaxRecordNumberWODBContentID()
 
 void DBContentManager::loadMaxRefTrajTrackNum()
 {
-    assert (COMPASS::instance().interface().dbOpen());
+    assert (COMPASS::instance().dbInterface().dbOpen());
 
-    max_reftraj_track_num_ = COMPASS::instance().interface().getMaxRefTrackTrackNum();
+    max_reftraj_track_num_ = COMPASS::instance().dbInterface().getMaxRefTrackTrackNum();
     has_max_reftraj_track_num_ = true;
 
     loginf << "DBContentManager: loadMaxRefTrajTrackNum: " << max_reftraj_track_num_;

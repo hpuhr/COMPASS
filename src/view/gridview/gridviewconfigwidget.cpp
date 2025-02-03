@@ -355,6 +355,7 @@ void GridViewConfigWidget::updateConfig()
     color_steps_box_->setValue((int)settings.render_color_num_steps);
     color_steps_box_->blockSignals(false);
 
+    //@TODO: updateDistributedVariable()?
     updateVariableDataType();
 
     color_value_min_box_->blockSignals(true);

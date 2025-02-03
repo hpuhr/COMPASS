@@ -718,7 +718,7 @@ void DataSourceManager::loadDBDataSources()
 {
     assert (!db_data_sources_.size());
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
     if (db_interface.existsDataSourcesTable())
     {
@@ -796,7 +796,7 @@ void DataSourceManager::saveDBDataSources()
 {
     loginf << "DataSourceManager: saveDBDataSources";
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
     assert(db_interface.dbOpen());
     db_interface.saveDataSources(db_data_sources_);

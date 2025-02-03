@@ -56,7 +56,7 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace std;
 
-const unsigned int unlimited_chunk_size = 4000;
+const unsigned int unlimited_chunk_size = 20000;
 //const unsigned int limited_chunk_size = 2000;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
@@ -1351,7 +1351,7 @@ void ASTERIXImportTask::checkAllDone()
         COMPASS::instance().dataSourceManager().saveDBDataSources();
         emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
         emit COMPASS::instance().dbContentManager().dbContentStatusChanged();
-        COMPASS::instance().interface().saveProperties();
+        COMPASS::instance().dbInterface().saveProperties();
 
         malloc_trim(0); // release unused memory
 

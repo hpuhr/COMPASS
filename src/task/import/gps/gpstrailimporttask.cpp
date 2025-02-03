@@ -159,11 +159,11 @@ void GPSTrailImportTask::importFilename(const std::string& filename)
 */
 bool GPSTrailImportTask::checkPrerequisites()
 {
-    if (!COMPASS::instance().interface().ready())  // must be connected
+    if (!COMPASS::instance().dbInterface().ready())  // must be connected
         return false;
 
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    if (COMPASS::instance().dbInterface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = COMPASS::instance().dbInterface().getProperty(DONE_PROPERTY_NAME) == "1";
 
     if (!COMPASS::instance().dbContentManager().existsDBContent("RefTraj"))
         return false;
@@ -940,7 +940,7 @@ void GPSTrailImportTask::insertDoneSlot()
 
     //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
 
-    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+    COMPASS::instance().dbInterface().setProperty(DONE_PROPERTY_NAME, "1");
 
     //    COMPASS::instance().interface().databaseContentChanged();
     //    object.updateToDatabaseContent();

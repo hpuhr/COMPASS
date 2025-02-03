@@ -19,15 +19,16 @@
 #include "compass.h"
 #include "buffer.h"
 #include "dbcommand.h"
-#include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "logger.h"
+#include "property.h"
 #include "propertylist.h"
 #include "source/dbdatasource.h"
 #include "fft/dbfft.h"
 #include "util/timeconv.h"
+#include "dbinterface.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -37,67 +38,38 @@ using namespace Utils;
 using namespace std;
 using namespace dbContent;
 
-SQLGenerator::SQLGenerator(DBInterface& db_interface) : db_interface_(db_interface)
+/**
+ */
+SQLGenerator::SQLGenerator(bool precise_types) 
+:   precise_types_(precise_types)
 {
-    using namespace dbContent;
-
-    stringstream ss;
-
-    //    ss << "CREATE TABLE " << TABLE_NAME_MINMAX
-    //       << " (variable_name VARCHAR(255), object_name VARCHAR(255), min VARCHAR(255), max "
-    //          "VARCHAR(255),"
-    //          "PRIMARY KEY (variable_name, object_name));";
-    //    table_minmax_create_statement_ = ss.str();
-    //    ss.str(string());
-
-    ss << "CREATE TABLE " << TABLE_NAME_PROPERTIES
-       << "(id VARCHAR(255), value TEXT, PRIMARY KEY (id));";
-    table_properties_create_statement_ = ss.str();
-    ss.str(string());
-
-    // data sources
-    ss << "CREATE TABLE " << DBDataSource::table_name_ << "("
-        << DBDataSource::id_column_.name() << " "  << DBDataSource::id_column_.dbDataTypeString() << ", "
-        << DBDataSource::ds_type_column_.name() << " "  << DBDataSource::ds_type_column_.dbDataTypeString() << ", "
-        << DBDataSource::sac_column_.name() << " "  << DBDataSource::sac_column_.dbDataTypeString() << ", "
-        << DBDataSource::sic_column_.name() << " "  << DBDataSource::sic_column_.dbDataTypeString() << ", "
-        << DBDataSource::name_column_.name() << " "  << DBDataSource::name_column_.dbDataTypeString() << ", "
-        << DBDataSource::short_name_.name() << " "  << DBDataSource::short_name_.dbDataTypeString() << ", "
-        << DBDataSource::info_column_.name() << " "  << DBDataSource::info_column_.dbDataTypeString() << ", "
-        << DBDataSource::counts_column_.name() << " "  << DBDataSource::counts_column_.dbDataTypeString() << ", "
-        << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
-        << ");";
-    table_data_sources_create_statement_ = ss.str();
-    ss.str(string());
-
-    // ffts
-    ss << "CREATE TABLE " << DBFFT::table_name_ << "("
-        << DBFFT::name_column_.name() << " "  << DBFFT::name_column_.dbDataTypeString() << ", "
-        << DBFFT::info_column_.name() << " "  << DBFFT::info_column_.dbDataTypeString() << ", "
-        << "PRIMARY KEY (" << DBFFT::name_column_.name() << ")"
-        << ");";
-    table_ffts_create_statement_ = ss.str();
-    ss.str(string());
-
-    ss << "CREATE TABLE " << TABLE_NAME_SECTORS
-       << "(id INT, name VARCHAR(255), layer_name VARCHAR(255), json TEXT, PRIMARY KEY (id));";
-    table_sectors_create_statement_ = ss.str();
-    ss.str(string());
-
-    ss << "CREATE TABLE " << TABLE_NAME_VIEWPOINTS
-       << "(id INT, json TEXT, PRIMARY KEY (id));";
-    table_view_points_create_statement_ = ss.str();
-    ss.str(string());
-
-    ss << "CREATE TABLE " << TABLE_NAME_TARGETS
-       << "(utn INT, json TEXT, PRIMARY KEY (utn));";
-    table_targets_create_statement_ = ss.str();
-    ss.str(string());
 }
 
-SQLGenerator::~SQLGenerator() {}
+/**
+ */
+SQLGenerator::~SQLGenerator() = default;
 
-string SQLGenerator::getCreateTableStatement(const DBContent& object)
+/**
+ */
+string SQLGenerator::getCreateTableStatement(const DBContent& object, 
+                                             bool indexing)
+{
+    std::vector<DBTableColumnInfo> column_infos;
+    for (auto& var_it : object.variables())
+    {
+        const auto& v = var_it.second;
+        column_infos.push_back(DBTableColumnInfo(v->dbColumnName(), v->dataType(), v->isKey()));
+    }
+
+    return getCreateTableStatement(object.dbTableName(), column_infos, indexing, object.name());
+}
+
+/**
+ */
+std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
+                                                  const std::vector<DBTableColumnInfo>& column_infos, 
+                                                  bool indexing,
+                                                  const std::string& dbcontent_name)
 {
     stringstream ss;
 
@@ -120,23 +92,25 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
     //        data_type = "INT";
     // mysql same
 
-    ss << "CREATE TABLE " << object.dbTableName() << "(";
+    ss << "CREATE TABLE " << table_name << "(";
 
     string data_type;
 
+    std::string pkey_type_str = Property::asDBString(precise_types_ ? PropertyDataType::ULONGINT : PropertyDataType::INT, true);
+
     unsigned int cnt = 0;
-    for (auto& var_it : object.variables())
+    for (const auto& cinfo : column_infos)
     {
-        ss << var_it.second->dbColumnName();
+        ss << cinfo.name();
 
-        data_type = var_it.second->dbDataTypeString();
+        data_type = cinfo.dbTypeString(precise_types_);
 
-        if (var_it.second->isKey())
-            ss << " INTEGER PRIMARY KEY NOT NULL"; // AUTOINCREMENT
+        if (cinfo.key())
+            ss << " " << pkey_type_str << " PRIMARY KEY NOT NULL"; // AUTOINCREMENT
         else
             ss << " " << data_type;
 
-        if (cnt != object.numVariables() - 1)
+        if (cnt != column_infos.size() - 1)
             ss << ",";
 
         cnt++;
@@ -144,34 +118,39 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
 
     ss << ");";
 
-    // CREATE [UNIQUE] INDEX index_name ON table_name(column_list);
-
-    auto& dbcont_man = COMPASS::instance().dbContentManager();
-
-    ss << "\nCREATE INDEX TIMESTAMP_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
-    ss << dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_timestamp_).dbColumnName()
-       << ");";
-
-    ss << "\nCREATE INDEX DS_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
-    ss << dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_ds_id_).dbColumnName()
-       << ");";
-
-    ss << "\nCREATE INDEX LINE_ID_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
-    ss << dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_line_id_).dbColumnName()
-       << ");";
-
-    if (dbcont_man.metaCanGetVariable(object.name(), DBContent::meta_var_utn_)) // status dbcont no utn
+    //enable indexing on some metavars?
+    if (indexing && !dbcontent_name.empty())
     {
-        ss << "\nCREATE INDEX UTN_INDEX_" << object.name() << " ON " << object.dbTableName() << "(";
-        ss << COMPASS::instance().dbContentManager().metaGetVariable(
-                  object.name(), DBContent::meta_var_utn_).dbColumnName()
-           << ");";
+        // CREATE [UNIQUE] INDEX index_name ON table_name(column_list);
+
+        auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+        ss << "\nCREATE INDEX TIMESTAMP_INDEX_" << dbcontent_name << " ON " << table_name << "(";
+        ss << dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_).dbColumnName()
+        << ");";
+
+        ss << "\nCREATE INDEX DS_ID_INDEX_" << dbcontent_name << " ON " << table_name << "(";
+        ss << dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_).dbColumnName()
+        << ");";
+
+        ss << "\nCREATE INDEX LINE_ID_INDEX_" << dbcontent_name << " ON " << table_name << "(";
+        ss << dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_).dbColumnName()
+        << ");";
+
+        if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_)) // status dbcont no utn
+        {
+            ss << "\nCREATE INDEX UTN_INDEX_" << dbcontent_name << " ON " << table_name << "(";
+            ss << dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).dbColumnName()
+            << ");";
+        }
     }
 
     loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
     return ss.str();
 }
 
+/**
+ */
 shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 {
     using namespace dbContent;
@@ -216,6 +195,8 @@ shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
     return command;
 }
 
+/**
+ */
 shared_ptr<DBCommand> SQLGenerator::getFFTSelectCommand()
 {
     using namespace dbContent;
@@ -254,7 +235,8 @@ shared_ptr<DBCommand> SQLGenerator::getFFTSelectCommand()
     return command;
 }
 
-
+/**
+ */
 std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
         const DBContent& dbcontent, boost::posix_time::ptime before_timestamp)
 {
@@ -275,6 +257,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
     return command;
 }
 
+/**
+ */
 std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcontent)
 {
     //DELETE FROM table WHERE search_condition;
@@ -290,6 +274,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcon
     return command;
 }
 
+/**
+ */
 std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
         const DBContent& dbcontent, unsigned int sac, unsigned int sic)
 {
@@ -309,6 +295,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
     return command;
 }
 
+/**
+ */
 std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
         const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id)
 {
@@ -352,6 +340,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
 //    //    return getSelectCommand(object.currentMetaTable(), columns, true);
 //}
 
+/**
+ */
 std::shared_ptr<DBCommand> SQLGenerator::getMaxUIntValueCommand(const std::string& table_name,
                                                                 const std::string& col_name)
 {
@@ -374,9 +364,10 @@ std::shared_ptr<DBCommand> SQLGenerator::getMaxUIntValueCommand(const std::strin
     return command;
 }
 
-
+/**
+ */
 std::shared_ptr<DBCommand> SQLGenerator::getMaxULongIntValueCommand(const std::string& table_name,
-                                                                const std::string& col_name)
+                                                                    const std::string& col_name)
 {
     PropertyList list;
     list.addProperty(col_name, PropertyDataType::ULONGINT);
@@ -397,6 +388,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getMaxULongIntValueCommand(const std::s
     return command;
 }
 
+/**
+ */
 shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBContent& adsb_obj)
 {
 
@@ -457,11 +450,15 @@ shared_ptr<DBCommand> SQLGenerator::getADSBInfoCommand(DBContent& adsb_obj)
 //    return command;
 //}
 
+/**
+ */
 string SQLGenerator::getCountStatement(const string& table)
 {
     return "SELECT COUNT(*) FROM " + table + ";";
 }
 
+/**
+ */
 shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DBContent& object)
 {
     logdbg << "SQLGenerator: getTableSelectMinMaxNormalStatement: start for table " << object.dbTableName();
@@ -503,11 +500,15 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
     return command;
 }
 
+/**
+ */
 std::string SQLGenerator::getInsertTargetStatement(unsigned int utn, const std::string& info)
 {
     return "REPLACE INTO " + TABLE_NAME_TARGETS + " VALUES (" + to_string(utn)+ ", '" + info + "');";
 }
 
+/**
+ */
 string SQLGenerator::getInsertPropertyStatement(const string& id,
                                                 const string& value)
 {
@@ -519,6 +520,9 @@ string SQLGenerator::getInsertPropertyStatement(const string& id,
        << "');";
     return ss.str();
 }
+
+/**
+ */
 string SQLGenerator::getSelectPropertyStatement(const string& id)
 {
     stringstream ss;
@@ -526,6 +530,8 @@ string SQLGenerator::getSelectPropertyStatement(const string& id)
     return ss.str();
 }
 
+/**
+ */
 string SQLGenerator::getSelectAllPropertiesStatement()
 {
     stringstream ss;
@@ -533,11 +539,15 @@ string SQLGenerator::getSelectAllPropertiesStatement()
     return ss.str();
 }
 
+/**
+ */
 std::string SQLGenerator::getSetNullStatement (const std::string& table_name, const std::string& col_name)
 {
     return "UPDATE "+ table_name +" SET " + col_name + " = NULL";
 }
 
+/**
+ */
 string SQLGenerator::getInsertViewPointStatement(const unsigned int id, const string& json)
 {
     stringstream ss;
@@ -548,6 +558,8 @@ string SQLGenerator::getInsertViewPointStatement(const unsigned int id, const st
     return ss.str();
 }
 
+/**
+ */
 string SQLGenerator::getSelectAllViewPointsStatement()
 {
     stringstream ss;
@@ -555,6 +567,8 @@ string SQLGenerator::getSelectAllViewPointsStatement()
     return ss.str();
 }
 
+/**
+ */
 string SQLGenerator::getReplaceSectorStatement(const unsigned int id, const string& name,
                                                const string& layer_name, const string& json)
 {
@@ -566,6 +580,8 @@ string SQLGenerator::getReplaceSectorStatement(const unsigned int id, const stri
     return ss.str();
 }
 
+/**
+ */
 string SQLGenerator::getSelectAllSectorsStatement()
 {
     stringstream ss;
@@ -573,6 +589,8 @@ string SQLGenerator::getSelectAllSectorsStatement()
     return ss.str();
 }
 
+/**
+ */
 string SQLGenerator::getSelectAllTargetsStatement()
 {
     stringstream ss;
@@ -605,7 +623,10 @@ string SQLGenerator::getSelectAllTargetsStatement()
 //    return ss.str();
 //}
 
-string SQLGenerator::getSelectNullCount (const string& table_name, const vector<string> columns)
+/**
+ */
+string SQLGenerator::getSelectNullCount (const string& table_name, 
+                                         const vector<string> columns)
 {
     stringstream ss;
     ss << "SELECT count(*) FROM " << table_name << " WHERE";
@@ -627,38 +648,94 @@ string SQLGenerator::getSelectNullCount (const string& table_name, const vector<
 
 //string SQLGenerator::getTableMinMaxCreateStatement() { return table_minmax_create_statement_; }
 
+/**
+ */
 string SQLGenerator::getTablePropertiesCreateStatement()
 {
-    return table_properties_create_statement_;
+    stringstream ss;
+
+    ss << "CREATE TABLE " << TABLE_NAME_PROPERTIES
+       << "(id VARCHAR(255), value TEXT, PRIMARY KEY (id));";
+    
+    return ss.str();
 }
 
+/**
+ */
 std::string SQLGenerator::getTableDataSourcesCreateStatement()
 {
-    return table_data_sources_create_statement_;
+    stringstream ss;
+
+    ss << "CREATE TABLE " << DBDataSource::table_name_ << "("
+        << DBDataSource::id_column_.name() << " "  << DBDataSource::id_column_.dbDataTypeString(precise_types_) << ", "
+        << DBDataSource::ds_type_column_.name() << " "  << DBDataSource::ds_type_column_.dbDataTypeString(precise_types_) << ", "
+        << DBDataSource::sac_column_.name() << " "  << DBDataSource::sac_column_.dbDataTypeString(precise_types_) << ", "
+        << DBDataSource::sic_column_.name() << " "  << DBDataSource::sic_column_.dbDataTypeString(precise_types_) << ", "
+        << DBDataSource::name_column_.name() << " "  << DBDataSource::name_column_.dbDataTypeString(precise_types_) << ", "
+        << DBDataSource::short_name_.name() << " "  << DBDataSource::short_name_.dbDataTypeString(precise_types_) << ", "
+        << DBDataSource::info_column_.name() << " "  << DBDataSource::info_column_.dbDataTypeString(precise_types_) << ", "
+        << DBDataSource::counts_column_.name() << " "  << DBDataSource::counts_column_.dbDataTypeString(precise_types_) << ", " 
+        << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
+        << ");";
+    
+    return ss.str();
 }
 
+/**
+ */
 std::string SQLGenerator::getTableFFTsCreateStatement()
 {
-    return table_ffts_create_statement_;
+    stringstream ss;
+
+    ss << "CREATE TABLE " << DBFFT::table_name_ << "("
+        << DBFFT::name_column_.name() << " "  << DBFFT::name_column_.dbDataTypeString(precise_types_) << ", "
+        << DBFFT::info_column_.name() << " "  << DBFFT::info_column_.dbDataTypeString(precise_types_) << ", "
+        << "PRIMARY KEY (" << DBFFT::name_column_.name() << ")"
+        << ");";
+    
+    return ss.str();
 }
 
+/**
+ */
 string SQLGenerator::getTableSectorsCreateStatement()
 {
-    return table_sectors_create_statement_;
+    stringstream ss;
+
+    ss << "CREATE TABLE " << TABLE_NAME_SECTORS
+       << "(id INT, name VARCHAR(255), layer_name VARCHAR(255), json TEXT, PRIMARY KEY (id));";
+
+    return ss.str();
 }
 
+/**
+ */
 string SQLGenerator::getTableViewPointsCreateStatement()
 {
-    return table_view_points_create_statement_;
+    stringstream ss;
+
+    ss << "CREATE TABLE " << TABLE_NAME_VIEWPOINTS
+       << "(id INT, json TEXT, PRIMARY KEY (id));";
+    
+    return ss.str();
 }
 
+/**
+ */
 std::string SQLGenerator::getTableTargetsCreateStatement()
 {
-    return table_targets_create_statement_;
+    stringstream ss;
+
+    ss << "CREATE TABLE " << TABLE_NAME_TARGETS
+       << "(utn INT, json TEXT, PRIMARY KEY (utn));";
+
+    return ss.str();
 }
 
-string SQLGenerator::insertDBUpdateStringBind(shared_ptr<Buffer> buffer,
-                                              string tablename)
+/**
+ */
+string SQLGenerator::getInsertDBUpdateStringBind(shared_ptr<Buffer> buffer,
+                                                 string tablename)
 {
     assert(buffer);
     assert(tablename.size() > 0);
@@ -696,9 +773,11 @@ string SQLGenerator::insertDBUpdateStringBind(shared_ptr<Buffer> buffer,
     return ss.str();
 }
 
-string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
-                                              const string& key_col_name,
-                                              string table_name)
+/**
+ */
+string SQLGenerator::getCreateDBUpdateStringBind(shared_ptr<Buffer> buffer,
+                                                 const string& key_col_name,
+                                                 string table_name)
 {
     assert(buffer);
     assert(table_name.size() > 0);
@@ -758,7 +837,8 @@ string SQLGenerator::createDBUpdateStringBind(shared_ptr<Buffer> buffer,
     return ss.str();
 }
 
-
+/**
+ */
 shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
         const DBContent& object, VariableSet read_list, const string& filter,
         bool use_order, Variable* order_variable)
@@ -956,10 +1036,10 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
 //    return ss.str();
 //}
 
+/**
+ */
 string SQLGenerator::getDeleteStatement (const string& table, const string& filter)
 {
     // DELETE FROM table_name [WHERE Clause]
     return "DELETE FROM "+table+" WHERE "+filter+";";
 }
-
-

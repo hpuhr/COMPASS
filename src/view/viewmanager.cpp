@@ -291,7 +291,7 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
         if (!json_ok)
             return std::make_pair(false, err);
 
-        DBInterface& db_interface = COMPASS::instance().interface();
+        DBInterface& db_interface = COMPASS::instance().dbInterface();
 
         //delete existing viewpoints
         if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
@@ -335,7 +335,7 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
 
 void ViewManager::clearViewPoints()
 {
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
             //delete existing viewpoints
     if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
