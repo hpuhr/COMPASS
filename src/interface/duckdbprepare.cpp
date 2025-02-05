@@ -55,9 +55,17 @@ bool DuckDBPrepare::beginTransaction_impl()
 
 /**
  */
-bool DuckDBPrepare::endTransaction_impl()
+bool DuckDBPrepare::commitTransaction_impl()
 {
-    auto res = duckdb_query(connection_, "END TRANSACTION", nullptr);
+    auto res = duckdb_query(connection_, "COMMIT", nullptr);
+    return res == DuckDBSuccess;
+}
+
+/**
+ */
+bool DuckDBPrepare::rollbackTransaction_impl()
+{
+    auto res = duckdb_query(connection_, "ROLLBACK", nullptr);
     return res == DuckDBSuccess;
 }
 
@@ -66,7 +74,7 @@ bool DuckDBPrepare::endTransaction_impl()
 bool DuckDBPrepare::executeBinds_impl()
 {
     auto result = duckdb_execute_prepared(statement_, NULL);
-    return result != DuckDBSuccess;
+    return result == DuckDBSuccess;
 }
 
 /**
@@ -100,4 +108,95 @@ bool DuckDBPrepare::execute_impl(const ExecOptions* options, DBResult* result)
     }
 
     return true;
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_null_impl(size_t idx) 
+{ 
+    return duckdb_bind_null(statement_, idx) == DuckDBSuccess; 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_bool_impl(size_t idx, bool v) 
+{ 
+    return bind<bool>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_char_impl(size_t idx, char v) 
+{ 
+    return bind<char>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_uchar_impl(size_t idx, unsigned char v) 
+{ 
+    return bind<unsigned char>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_int_impl(size_t idx, int v) 
+{ 
+    return bind<int>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_uint_impl(size_t idx, unsigned int v) 
+{ 
+    return bind<unsigned int>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_long_impl(size_t idx, long v) 
+{ 
+    return bind<long>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_ulong_impl(size_t idx, unsigned long v) 
+{ 
+    return bind<unsigned long>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_float_impl(size_t idx, float v) 
+{ 
+    return bind<float>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_double_impl(size_t idx, double v) 
+{ 
+    return bind<double>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_string_impl(size_t idx, const std::string& v) 
+{ 
+    return bind<std::string>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_json_impl(size_t idx, const nlohmann::json& v) 
+{ 
+    return bind<nlohmann::json>(idx, v); 
+}
+
+/**
+ */
+bool DuckDBPrepare::bind_timestamp_impl(size_t idx, const boost::posix_time::ptime& v) 
+{ 
+    return bind<boost::posix_time::ptime>(idx, v); 
 }

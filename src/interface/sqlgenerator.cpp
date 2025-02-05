@@ -40,14 +40,23 @@ using namespace dbContent;
 
 /**
  */
-SQLGenerator::SQLGenerator(bool precise_types) 
+SQLGenerator::SQLGenerator(bool precise_types,
+                           db::SQLPlaceholder placeholder) 
 :   precise_types_(precise_types)
+,   placeholder_  (placeholder  )
 {
 }
 
 /**
  */
 SQLGenerator::~SQLGenerator() = default;
+
+/**
+ */
+std::string SQLGenerator::placeholder(int index) const
+{
+    return (placeholder_ == db::SQLPlaceholder::AtVar ? "@VAR" + std::to_string(index) : "?");
+}
 
 /**
  */
@@ -103,7 +112,10 @@ std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
     {
         ss << cinfo.name();
 
-        data_type = cinfo.dbTypeString(precise_types_);
+        //should always be true (as the column info was most likely feed with a property data type)
+        assert(cinfo.hasDBType());
+
+        data_type = cinfo.dbType();
 
         if (cinfo.key())
             ss << " " << pkey_type_str << " PRIMARY KEY NOT NULL"; // AUTOINCREMENT
@@ -757,7 +769,7 @@ string SQLGenerator::getInsertDBUpdateStringBind(shared_ptr<Buffer> buffer,
     {
         ss << properties.at(cnt).name();
 
-        values_ss << "@VAR" + to_string(cnt + 1);
+        values_ss << placeholder(cnt + 1);
 
         if (cnt != size - 1)
         {
@@ -818,7 +830,7 @@ string SQLGenerator::getCreateDBUpdateStringBind(shared_ptr<Buffer> buffer,
         }
         ss << properties.at(cnt).name() << "=";
 
-        ss << "@VAR" + to_string(cnt + 1);
+        ss << placeholder(cnt + 1);
 
         if (cnt != size - 2)
         {
@@ -828,7 +840,7 @@ string SQLGenerator::getCreateDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
     ss << " WHERE " << key_col_name << "=";
 
-    ss << "@VAR" << to_string(size);
+    ss << placeholder(size);
 
     ss << ";";
 

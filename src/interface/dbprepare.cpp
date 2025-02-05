@@ -22,6 +22,8 @@
 
 #include "logger.h"
 
+//#define DEBUG_BINDS
+
 /***************************************************************************************
  * DBPrepare
  ***************************************************************************************/
@@ -53,7 +55,9 @@ DBPrepare::~DBPrepare()
  */
 bool DBPrepare::init(const std::string& sql_statement)
 {
+    assert(!prepared_stmnt_ok_);
     prepared_stmnt_ok_ = init_impl(sql_statement);
+    return prepared_stmnt_ok_;
 }
 
 /**
@@ -101,9 +105,15 @@ bool DBPrepare::execute(const ExecOptions* options,
 
     if (active_binds_)
     {
+        #ifdef DEBUG_BINDS
+            loginf << "   executing binds...";
+        #endif
+
         //binds are active => execute bind statement as efficiently as possible
         ok = executeBinds_impl();
         cleanupBinds_impl();
+
+        active_binds_ = false;
     }
     else
     {
@@ -149,11 +159,11 @@ bool DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
     const auto& properties = b->properties().properties();
     size_t np = properties.size();
 
-    #define UpdateFunc(PDType, DType, Suffix)                                             \
-        bool is_null = b->isNull(p, r);                                                   \
-        bool ok = is_null ? bind_null(c) : bind_##Suffix(c, b->get<DType>(pname).get(r)); \
-        if (!ok)                                                                          \
-            logerr << "DBPrepare: executeBuffer: updating '" << pname << "' failed";      \
+    #define UpdateFunc(PDType, DType, Suffix)                                                           \
+        bool is_null = b->isNull(p, r);                                                                 \
+        bool ok = is_null ? bind_null(bind_idx) : bind_##Suffix(bind_idx, b->get<DType>(pname).get(r)); \
+        if (!ok)                                                                                        \
+            logerr << "DBPrepare: executeBuffer: updating '" << pname << "' failed";                    \
         assert(ok);
 
     #define NotFoundFunc                                                                           \
@@ -162,17 +172,28 @@ bool DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
 
     for (size_t r = idx0; r <= idx1; ++r)
     {
+        #ifdef DEBUG_BINDS
+            loginf << "binding buffer row " << r;
+        #endif
+
         for (size_t c = 0; c < np; ++c)
         {
             const auto& p     = properties[ c ];
             auto        dtype = p.dataType();
             const auto& pname = p.name();
 
+            //bind index = 1-based
+            size_t bind_idx = c + 1;
+
             SwitchPropertyDataType(dtype, UpdateFunc, NotFoundFunc);
         }
 
         //use minimal execution version
         bool ok = execute(nullptr, nullptr);
+
+        #ifdef DEBUG_BINDS
+            loginf << "   executed " << np << " bind(s): " << ok;
+        #endif
         
         if (!ok)
             logerr << "DBPrepare: executeBuffer: updating buffer row " << r << " failed";
@@ -205,23 +226,24 @@ bool DBPrepare::beginTransaction()
 
 /**
  */
-bool DBPrepare::endTransaction()
+bool DBPrepare::commitTransaction()
 {
     if (!prepared_stmnt_ok_)
-        logerr << "DBPrepare: endTransaction: prepared statement invalid";
+        logerr << "DBPrepare: commitTransaction: prepared statement invalid";
     assert(prepared_stmnt_ok_);
 
     if (!active_transaction_)
-        logerr << "DBPrepare: endTransaction: no transaction active";
+        logerr << "DBPrepare: commitTransaction: no transaction active";
     assert(active_transaction_);
 
-    bool ok = endTransaction_impl();
+    bool ok = commitTransaction_impl();
     if (!ok)
-        return false;
+        rollbackTransaction_impl();
 
+    //@TODO: guess there is nothing else we can do in case a transaction cannot be commited?
     active_transaction_ = false;
 
-    return true;
+    return ok;
 }
 
 /**
@@ -230,7 +252,11 @@ bool DBPrepare::bind_null(size_t idx)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_null_impl(idx); 
+    bool ok = bind_null_impl(idx); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_null @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -239,7 +265,11 @@ bool DBPrepare::bind_bool(size_t idx, bool v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_bool_impl(idx, v); 
+    bool ok = bind_bool_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_bool @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -248,7 +278,11 @@ bool DBPrepare::bind_char(size_t idx, char v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_char_impl(idx, v); 
+    bool ok = bind_char_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_char @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -257,7 +291,11 @@ bool DBPrepare::bind_uchar(size_t idx, unsigned char v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_uchar_impl(idx, v); 
+    bool ok = bind_uchar_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_uchar @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -266,7 +304,11 @@ bool DBPrepare::bind_int(size_t idx, int v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_int_impl(idx, v); 
+    bool ok = bind_int_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_int @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -275,7 +317,11 @@ bool DBPrepare::bind_uint(size_t idx, unsigned int v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_uint_impl(idx, v); 
+    bool ok = bind_uint_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_uint @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -284,7 +330,11 @@ bool DBPrepare::bind_long(size_t idx, long v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_long_impl(idx, v); 
+    bool ok = bind_long_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_long @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -293,7 +343,11 @@ bool DBPrepare::bind_ulong(size_t idx, unsigned long v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_ulong_impl(idx, v); 
+    bool ok = bind_ulong_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_ulong @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -302,7 +356,11 @@ bool DBPrepare::bind_float(size_t idx, float v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_float_impl(idx, v); 
+    bool ok = bind_float_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_float @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -311,7 +369,11 @@ bool DBPrepare::bind_double(size_t idx, double v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_double_impl(idx, v); 
+    bool ok = bind_double_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_double @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -320,7 +382,11 @@ bool DBPrepare::bind_string(size_t idx, const std::string& v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_string_impl(idx, v); 
+    bool ok = bind_string_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_string @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -329,7 +395,11 @@ bool DBPrepare::bind_json(size_t idx, const nlohmann::json& v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_json_impl(idx, v); 
+    bool ok = bind_json_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_json @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /**
@@ -338,7 +408,11 @@ bool DBPrepare::bind_timestamp(size_t idx, const boost::posix_time::ptime& v)
 { 
     assert(prepared_stmnt_ok_);
     active_binds_ = true; 
-    return bind_timestamp_impl(idx, v); 
+    bool ok = bind_timestamp_impl(idx, v); 
+#ifdef DEBUG_BINDS
+    loginf << "   bind_timestamp @" << idx << ": " << ok;
+#endif
+    return ok;
 }
 
 /***************************************************************************************
@@ -353,9 +427,9 @@ DBScopedPrepare::DBScopedPrepare(const std::shared_ptr<DBPrepare>& db_prepare,
 :   db_prepare_(db_prepare) 
 {
     assert(db_prepare_);
-    db_prepare_->init(sql_statement);
+    bool ok = db_prepare_->init(sql_statement);
 
-    if (begin_transaction)
+    if (ok && begin_transaction)
         db_prepare_->beginTransaction();
 };
 
@@ -364,7 +438,7 @@ DBScopedPrepare::DBScopedPrepare(const std::shared_ptr<DBPrepare>& db_prepare,
 DBScopedPrepare::~DBScopedPrepare()
 {
     if (db_prepare_->hasActiveTransaction())
-        db_prepare_->endTransaction();
+        db_prepare_->commitTransaction();
 
     db_prepare_->cleanup();
 }

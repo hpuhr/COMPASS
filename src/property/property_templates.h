@@ -61,26 +61,26 @@
             }                                                                                                        \
         }
         
-#define SwitchPropertyDataTypeNumeric(Var, PTypeFunc, StringFunc, JSONFunc, DefaultFunc)                   \
-        switch(Var)                                                                                        \
-        {                                                                                                  \
-            SwitchPropertyDataTypeEntry(PropertyDataType::BOOL     , bool                    , PTypeFunc ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::CHAR     , char                    , PTypeFunc ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::UCHAR    , unsigned char           , PTypeFunc ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::INT      , int                     , PTypeFunc ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::UINT     , unsigned int            , PTypeFunc ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::LONGINT  , long int                , PTypeFunc ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::ULONGINT , unsigned long int       , PTypeFunc ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::FLOAT    , float                   , PTypeFunc ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::DOUBLE   , double                  , PTypeFunc ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::STRING   , std::string             , StringFunc) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::JSON     , nlohmann::json          , JSONFunc  ) \
-            SwitchPropertyDataTypeEntry(PropertyDataType::TIMESTAMP, boost::posix_time::ptime, PTypeFunc ) \
-            default:                                                                                       \
-            {                                                                                              \
-                DefaultFunc                                                                                \
-                break;                                                                                     \
-            }                                                                                              \
+#define SwitchPropertyDataTypeNumeric(Var, PTypeFunc, StringFunc, JSONFunc, DefaultFunc)                              \
+        switch(Var)                                                                                                   \
+        {                                                                                                             \
+            SwitchPropertyDataTypeEntry(PropertyDataType::BOOL     , bool                    , bool     , PTypeFunc ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::CHAR     , char                    , char     , PTypeFunc ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::UCHAR    , unsigned char           , uchar    , PTypeFunc ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::INT      , int                     , int      , PTypeFunc ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::UINT     , unsigned int            , uint     , PTypeFunc ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::LONGINT  , long int                , long     , PTypeFunc ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::ULONGINT , unsigned long int       , ulong    , PTypeFunc ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::FLOAT    , float                   , float    , PTypeFunc ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::DOUBLE   , double                  , double   , PTypeFunc ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::STRING   , std::string             , string   , StringFunc) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::JSON     , nlohmann::json          , json     , JSONFunc  ) \
+            SwitchPropertyDataTypeEntry(PropertyDataType::TIMESTAMP, boost::posix_time::ptime, timestamp, PTypeFunc ) \
+            default:                                                                                                  \
+            {                                                                                                         \
+                DefaultFunc                                                                                           \
+                break;                                                                                                \
+            }                                                                                                         \
         }
 
 namespace property_templates

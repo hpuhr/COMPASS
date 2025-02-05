@@ -16,6 +16,7 @@
  */
 
 #include "sqliteconnection.h"
+#include "sqliteprepare.h"
 
 #include "buffer.h"
 #include "dbcommand.h"
@@ -47,7 +48,17 @@ SQLiteConnection::SQLiteConnection(DBInterface* interface)
 SQLiteConnection::~SQLiteConnection()
 {
     loginf << "SQLiteConnection: destructor";
-    assert(!db_handle_);
+    
+    if (dbOpened())
+        disconnect();
+}
+
+/**
+ */
+std::shared_ptr<DBScopedPrepare> SQLiteConnection::prepareStatement(const std::string& statement, 
+                                                                    bool begin_transaction)
+{
+    return std::shared_ptr<DBScopedPrepare>(new SQLiteScopedPrepare(db_handle_, statement, begin_transaction));
 }
 
 /**
@@ -113,19 +124,8 @@ bool SQLiteConnection::executeSQL_impl(const std::string& sql,
                                        DBResult* result, 
                                        bool fetch_result_buffer)
 {
-    logdbg << "DBInterface: executeSQL: sql statement execute: '" << sql << "'";
-
-    char* exec_err_msg = NULL;
-    int result = sqlite3_exec(db_handle_, sql.c_str(), NULL, NULL, &exec_err_msg);
-    if (result != SQLITE_OK)
-    {
-        logerr << "DBInterface: executeSQL: sqlite3_exec cmd '" << sql << "' failed: " << exec_err_msg;
-        sqlite3_free(exec_err_msg);
-        std::string error;
-        error += "DBInterface: executeSQL: sqlite3_exec failed: ";
-        error += exec_err_msg;
-        throw std::runtime_error(error);
-    }
+    //@TODO
+    return false;
 }
 
 /**
@@ -134,59 +134,8 @@ bool SQLiteConnection::executeCmd_impl(const std::string& command,
                                        const PropertyList* properties, 
                                        DBResult* result)
 {
-    
-}
-
-void SQLiteConnection::execute(const std::string& command)
-{
-    logdbg << "SQLiteConnection: execute";
-
-    int result;
-
-    prepareStatement(command.c_str());
-    result = sqlite3_step(statement_);
-
-    if (result != SQLITE_DONE)
-    {
-        logerr << "SQLiteConnection: execute: problem while stepping the result: " << result << " "
-               << sqlite3_errmsg(db_handle_);
-        throw std::runtime_error("SQLiteConnection: execute: problem while stepping the result");
-    }
-
-    finalizeStatement();
-}
-
-void SQLiteConnection::execute(const std::string& command, std::shared_ptr<Buffer> buffer)
-{
-    logdbg << "SQLiteConnection: execute";
-
-    assert(buffer);
-    unsigned int num_properties = 0;
-
-    const PropertyList& list = buffer->properties();
-    num_properties = list.size();
-
-    unsigned int cnt = buffer->size();
-
-    int result;
-
-    prepareStatement(command.c_str());
-
-    // Now step throught the result lines
-    for (result = sqlite3_step(statement_); result == SQLITE_ROW; result = sqlite3_step(statement_))
-    {
-        readRowIntoBuffer(list, num_properties, buffer, cnt);
-        cnt++;
-    }
-
-    if (result != SQLITE_DONE)
-    {
-        logerr << "SQLiteConnection: execute: problem while stepping the result: " << result << " "
-               << sqlite3_errmsg(db_handle_);
-        throw std::runtime_error("SQLiteConnection: execute: problem while stepping the result");
-    }
-
-    finalizeStatement();
+    //@TODO
+    return false;
 }
 
 /**

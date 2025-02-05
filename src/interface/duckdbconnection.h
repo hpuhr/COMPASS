@@ -53,6 +53,8 @@ public:
     //and indexing blows up the db file consiferably
     bool useIndexing() const override final { return false; }
 
+    db::SQLPlaceholder sqlPlaceholder() const override final { return db::SQLPlaceholder::QuestionMark; }
+
     DuckDBConnectionSettings& settings() { return settings_; }
 
 protected:
@@ -65,13 +67,14 @@ protected:
     bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) override final;
 
     std::pair<bool, std::string> insertBuffer_impl(const std::string& table_name, 
-                                                   const std::shared_ptr<Buffer>& buffer) override final;
+                                                   const std::shared_ptr<Buffer>& buffer,
+                                                   PropertyList* table_properties) override final;
 
     boost::optional<std::vector<std::string>> getTableList_impl() override final;
     
 private:
-    duckdb_database   db_;
-    duckdb_connection connection_;
+    duckdb_database   db_         = nullptr;
+    duckdb_connection connection_ = nullptr;
 
     DuckDBConnectionSettings settings_;
 };

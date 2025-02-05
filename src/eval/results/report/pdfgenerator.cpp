@@ -24,7 +24,7 @@
 #include "logger.h"
 #include "files.h"
 #include "stringconv.h"
-#include "sqliteconnection.h"
+#include "dbconnection.h"
 #include "latexdocument.h"
 #include "latexvisitor.h"
 #include "latextable.h"
@@ -65,8 +65,8 @@ PDFGeneratorDialog& PDFGenerator::dialog()
 {
     if (!report_path_.size())
     {
-        SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().dbInterface().connection());
-        assert (sql_con);
+        const DBConnection* db_con = dynamic_cast<const DBConnection*>(&COMPASS::instance().dbInterface().connection());
+        assert (db_con);
 
         string current_filename = COMPASS::instance().lastDbFilename();
 

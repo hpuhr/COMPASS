@@ -34,8 +34,8 @@ DuckDBScopedAppender::DuckDBScopedAppender(duckdb_connection connection,
 DuckDBScopedAppender::~DuckDBScopedAppender()
 {
     //will also flush appender
-    if (ok_)
-        duckdb_appender_close(appender_);
+    //if (ok_)
+    //    duckdb_appender_close(appender_);
     duckdb_appender_destroy(&appender_);
 }
 

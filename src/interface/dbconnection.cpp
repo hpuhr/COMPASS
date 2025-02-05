@@ -51,7 +51,9 @@ DBConnection::DBConnection(DBInterface* interface)
  */
 DBConnection::~DBConnection()
 {
-    disconnect();
+    loginf << "DBConnection: destructor";
+
+    assert(!dbOpened());
 }
 
 /**
@@ -91,10 +93,12 @@ std::pair<bool, std::string> DBConnection::connect(const std::string& file_name)
  */
 void DBConnection::disconnect()
 {
+    loginf << "DBConnection: disconnecting, db open? " << db_opened_;
+
     if (!db_opened_)
         return;
 
-    logdbg << "DBConnection: disconnecting...";
+    loginf << "DBConnection: disconnecting...";
 
     disconnect_impl();
 
@@ -239,9 +243,10 @@ bool DBConnection::createTable(const std::string& table_name,
 
     //get sql statement
     bool needs_precise_types = needsPreciseDBTypes();
+    auto sql_placeholder     = sqlPlaceholder();
     bool use_indexing        = useIndexing();
 
-    std::string sql = SQLGenerator(needs_precise_types).getCreateTableStatement(table_name, column_infos, use_indexing, dbcontent_name);
+    std::string sql = SQLGenerator(needs_precise_types, sql_placeholder).getCreateTableStatement(table_name, column_infos, use_indexing, dbcontent_name);
 
     auto result = execute(sql, false);
     assert(result);
@@ -262,9 +267,10 @@ bool DBConnection::createTable(const std::string& table_name,
  * Inserts the given buffer into the given table.
  */
 bool DBConnection::insertBuffer(const std::string& table_name, 
-                                const std::shared_ptr<Buffer>& buffer)
+                                const std::shared_ptr<Buffer>& buffer,
+                                PropertyList* table_properties)
 {
-    auto res = insertBuffer_impl(table_name, buffer);
+    auto res = insertBuffer_impl(table_name, buffer, table_properties);
 
     if (!res.first)
         logerr << "DBConnection: : insertBuffer: inserting into table '" << table_name << "' failed: " << res.second;
@@ -278,8 +284,8 @@ bool DBConnection::insertBuffer(const std::string& table_name,
 bool DBConnection::updateBuffer(const std::string& table_name, 
                                 const std::shared_ptr<Buffer>& buffer,
                                 const std::string& key_column,
-                                const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
-                                const boost::optional<size_t>& idx_to = boost::optional<size_t>())
+                                const boost::optional<size_t>& idx_from, 
+                                const boost::optional<size_t>& idx_to)
 {
     auto res = updateBuffer_impl(table_name, buffer, key_column, idx_from, idx_to);
 
@@ -293,9 +299,11 @@ bool DBConnection::updateBuffer(const std::string& table_name,
 /**
  */
 std::pair<bool, std::string> DBConnection::insertBuffer_impl(const std::string& table_name, 
-                                                             const std::shared_ptr<Buffer>& buffer)
+                                                             const std::shared_ptr<Buffer>& buffer,
+                                                             PropertyList* table_properties)
 {
-    auto sql = SQLGenerator(needsPreciseDBTypes()).getInsertDBUpdateStringBind(buffer, table_name);
+    auto sql = SQLGenerator(needsPreciseDBTypes(),
+                            sqlPlaceholder()).getInsertDBUpdateStringBind(buffer, table_name);
 
     auto stmnt = prepareStatement(sql, true);
     assert(stmnt);
@@ -319,7 +327,10 @@ std::pair<bool, std::string> DBConnection::updateBuffer_impl(const std::string& 
                                                              const boost::optional<size_t>& idx_from, 
                                                              const boost::optional<size_t>& idx_to)
 {
-    auto sql = SQLGenerator(needsPreciseDBTypes()).getCreateDBUpdateStringBind(buffer, key_column, table_name);
+    auto sql = SQLGenerator(needsPreciseDBTypes(),
+                            sqlPlaceholder()).getCreateDBUpdateStringBind(buffer, key_column, table_name);
+
+    //loginf << "executing statement:\n" << sql;
 
     auto stmnt = prepareStatement(sql, true);
     assert(stmnt);
@@ -397,17 +408,11 @@ boost::optional<DBTableInfo> DBConnection::getColumnList_impl(const std::string&
 
     std::shared_ptr<Buffer> buffer = result->buffer();
 
-    const auto& str2types_db   = Property::strings2DBDataTypes();
-    const auto& types2str_prop = Property::dataTypes2Strings();
-
     for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
     {
         assert(buffer->has<std::string>("type"));
 
         std::string data_type = buffer->get<std::string>("type").get(cnt);
-
-        if (str2types_db.count(data_type))
-            data_type = types2str_prop.at(str2types_db.at(data_type));
 
         assert(buffer->has<std::string>("name"));
         assert(buffer->has<bool>("pk"));
@@ -446,4 +451,33 @@ bool DBConnection::updateTableInfo()
     }
 
     return true;
+}
+
+/**
+ */
+void DBConnection::printTableInfo()
+{
+    for (const auto& table : tableInfo())
+    {
+        auto table_name = table.first;
+
+        loginf << "[" << table_name << "]";
+        loginf << "columns: " << table.second.columns().size();
+
+        const auto& tinfo = table.second;
+        for (const auto& ci : tinfo.columns())
+        {
+            std::stringstream ss;
+            ss << "name: " << ci.name() << " ";
+            ss << "dtype_prop: " << (ci.hasPropertyType() ? Property::asString(ci.propertyType()) : "-") << " ";
+            ss << "dtype_db: " << (ci.hasDBType() ? ci.dbType() : "-") << " ";
+            ss << "key: " << ci.key() << " ";
+            ss << "null_allowed: " << ci.nullAllowed() << " ";
+            ss << "comment: " << ci.comment();
+
+            loginf << ss.str();
+        }
+
+        loginf << "";
+    }
 }

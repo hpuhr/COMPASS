@@ -19,6 +19,7 @@
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
+#include "dbdefs.h"
 
 #include <QObject>
 
@@ -183,6 +184,7 @@ protected:
     void loadProperties();
 
     bool connectionNeedsPreciseDBTypes() const;
+    db::SQLPlaceholder connectionSQLPlaceholder() const;
     SQLGenerator sqlGenerator() const;
 
     std::unique_ptr<DBConnection> db_connection_;

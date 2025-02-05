@@ -19,6 +19,7 @@
 
 #include "dbcontent/variable/variableset.h"
 #include "dbtableinfo.h"
+#include "dbdefs.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -33,7 +34,8 @@ class DBContent;
 class SQLGenerator
 {
 public:
-    SQLGenerator(bool precise_types);
+    SQLGenerator(bool precise_types, 
+                 db::SQLPlaceholder placeholder);
     virtual ~SQLGenerator();
 
     std::string getCreateTableStatement(const DBContent& object, bool indexing);
@@ -41,7 +43,8 @@ public:
                                         const std::vector<DBTableColumnInfo>& column_infos, 
                                         bool indexing,
                                         const std::string& dbcontent_name = "");
-    std::string getInsertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, std::string table_name);
+    std::string getInsertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, 
+                                            std::string table_name);
     std::string getCreateDBUpdateStringBind(std::shared_ptr<Buffer> buffer,
                                             const std::string& key_col_name, 
                                             std::string table_name);
@@ -108,7 +111,10 @@ public:
     std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBContent& object);
 
 protected:
-    bool precise_types_ = false;
+    std::string placeholder(int index = 1) const;
+
+    bool               precise_types_ = false;
+    db::SQLPlaceholder placeholder_   = db::SQLPlaceholder::AtVar;
 
     //    std::string subTablesWhereClause(const DBTable& table,
     //                                     const std::vector<std::string>& used_tables);

@@ -49,6 +49,8 @@ public:
     //needed for query speed
     bool useIndexing() const override final { return true; }
 
+    db::SQLPlaceholder sqlPlaceholder() const override final { return db::SQLPlaceholder::AtVar; }
+
 protected:
     std::pair<bool, std::string> connect_impl(const std::string& file_name) override final;
     void disconnect_impl() override final;

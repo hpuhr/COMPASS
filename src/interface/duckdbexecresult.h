@@ -60,7 +60,7 @@ private:
     template <typename T>
     T read(idx_t col, idx_t row)
     {
-        assert(has_result_ && !error_);
+        assert(result_valid_);
         throw std::runtime_error("DuckDBResult: read: not implemented for type");
     }
 
@@ -72,7 +72,7 @@ private:
 template<>                                                           \
 inline DType DuckDBExecResult::read(idx_t col, idx_t row)            \
 {                                                                    \
-    assert(has_result_ && !error_);                                  \
+    assert(result_valid_);                                           \
     return duckdb_value_ ## DuckDBDTypeName(&result_, col, row);     \
 }
 
@@ -89,14 +89,14 @@ StandardRead(double, double)
 template<>
 inline std::string DuckDBExecResult::read(idx_t col, idx_t row)
 {
-    assert(has_result_ && !error_);
+    assert(result_valid_);
     return std::string(duckdb_value_varchar(&result_, col, row));
 }
 
 template<>
 inline nlohmann::json DuckDBExecResult::read(idx_t col, idx_t row)
 {
-    assert(has_result_ && !error_);
+    assert(result_valid_);
     auto str = read<std::string>(col, row);
     return nlohmann::json::parse(str);
 }
@@ -104,7 +104,7 @@ inline nlohmann::json DuckDBExecResult::read(idx_t col, idx_t row)
 template<>
 inline boost::posix_time::ptime DuckDBExecResult::read(idx_t col, idx_t row)
 {
-    assert(has_result_ && !error_);
+    assert(result_valid_);
     long ts = read<long>(col, row);
     return Utils::Time::fromLong(ts);
 }

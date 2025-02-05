@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "dbdefs.h"
+
 #include <memory>
 #include <string>
 #include <map>
@@ -32,6 +34,7 @@ class DBResult;
 class DBTableInfo;
 class DBTableColumnInfo;
 class PropertyList;
+class DBScopedPrepare;
 
 /**
  */
@@ -44,6 +47,9 @@ public:
     std::pair<bool, std::string> connect(const std::string& file_name);
     void disconnect();
 
+    std::string status() const;
+    bool dbOpened() { return db_opened_; }
+
     bool exportFile(const std::string& file_name);
 
     bool execute(const std::string& sql);
@@ -55,21 +61,20 @@ public:
                      const std::vector<DBTableColumnInfo>& column_infos,
                      const std::string& dbcontent_name = "");
     bool updateTableInfo();
+    void printTableInfo();
     const std::map<std::string, DBTableInfo>& tableInfo() const { return created_tables_; }
     bool insertBuffer(const std::string& table_name, 
-                      const std::shared_ptr<Buffer>& buffer);
+                      const std::shared_ptr<Buffer>& buffer,
+                      PropertyList* table_properties = nullptr);
     bool updateBuffer(const std::string& table_name, 
                       const std::shared_ptr<Buffer>& buffer,
                       const std::string& key_column,
                       const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
                       const boost::optional<size_t>& idx_to = boost::optional<size_t>());
     
-    std::string status() const;
-
-    bool dbOpened() { return db_opened_; }
-
     virtual bool needsPreciseDBTypes() const = 0;
     virtual bool useIndexing() const = 0;
+    virtual db::SQLPlaceholder sqlPlaceholder() const = 0;
 
     virtual std::shared_ptr<DBScopedPrepare> prepareStatement(const std::string& statement, 
                                                               bool begin_transaction) = 0;
@@ -84,7 +89,8 @@ protected:
     virtual bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) = 0;
 
     virtual std::pair<bool, std::string> insertBuffer_impl(const std::string& table_name, 
-                                                           const std::shared_ptr<Buffer>& buffer);
+                                                           const std::shared_ptr<Buffer>& buffer,
+                                                           PropertyList* table_properties);
     virtual std::pair<bool, std::string> updateBuffer_impl(const std::string& table_name, 
                                                            const std::shared_ptr<Buffer>& buffer,
                                                            const std::string& key_column,

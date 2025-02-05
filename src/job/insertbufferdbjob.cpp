@@ -472,7 +472,7 @@ void InsertBufferDBJob::run()
     }
 #endif
 
-#if 1
+#if 0
     {
         auto& conn = db_interface_.duckDBConnection();
 

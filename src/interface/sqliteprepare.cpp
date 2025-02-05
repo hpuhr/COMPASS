@@ -22,7 +22,7 @@
 
 /**
  */
-SQLitePrepare(sqlite3* connection) 
+SQLitePrepare::SQLitePrepare(sqlite3* connection) 
 :   connection_(connection) 
 {
     assert(connection_);
@@ -83,11 +83,18 @@ bool SQLitePrepare::beginTransaction_impl()
 
 /**
  */
-bool SQLitePrepare::endTransaction_impl()
+bool SQLitePrepare::commitTransaction_impl()
 {
     char* sErrMsg = 0;
     auto res = sqlite3_exec(connection_, "END TRANSACTION", NULL, NULL, &sErrMsg);
     return res == SQLITE_OK;
+}
+
+/**
+ */
+bool SQLitePrepare::rollbackTransaction_impl()
+{
+    return false;
 }
 
 /**
@@ -104,4 +111,95 @@ bool SQLitePrepare::execute_impl(const ExecOptions* options, DBResult* result)
 {
     //@TODO
     return false;
+}
+
+/**
+ */
+bool SQLitePrepare::bind_null_impl(size_t idx) 
+{ 
+    return sqlite3_bind_null(statement_, idx) == SQLITE_OK; 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_bool_impl(size_t idx, bool v) 
+{ 
+    return bind<int>(idx, static_cast<int>(v)); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_char_impl(size_t idx, char v) 
+{ 
+    return bind<int>(idx, static_cast<int>(v)); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_uchar_impl(size_t idx, unsigned char v) 
+{ 
+    return bind<int>(idx, static_cast<int>(v)); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_int_impl(size_t idx, int v) 
+{ 
+    return bind<int>(idx, v); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_uint_impl(size_t idx, unsigned int v) 
+{ 
+    return bind<int>(idx, static_cast<int>(v)); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_long_impl(size_t idx, long v) 
+{ 
+    return bind<long>(idx, v); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_ulong_impl(size_t idx, unsigned long v) 
+{ 
+    return bind<long>(idx, static_cast<long>(v)); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_float_impl(size_t idx, float v) 
+{ 
+    return bind<double>(idx, static_cast<double>(v)); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_double_impl(size_t idx, double v) 
+{ 
+    return bind<double>(idx, v); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_string_impl(size_t idx, const std::string& v) 
+{ 
+    return bind<std::string>(idx, v); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_json_impl(size_t idx, const nlohmann::json& v) 
+{ 
+    return bind<nlohmann::json>(idx, v); 
+}
+
+/**
+ */
+bool SQLitePrepare::bind_timestamp_impl(size_t idx, const boost::posix_time::ptime& v) 
+{ 
+    return bind<boost::posix_time::ptime>(idx, v); 
 }

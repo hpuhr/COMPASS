@@ -5,6 +5,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/dbdefs.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbtableinfo.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbinterface.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbresult.h"

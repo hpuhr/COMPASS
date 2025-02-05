@@ -46,24 +46,25 @@ protected:
     void cleanupBinds_impl() override final;
 
     bool beginTransaction_impl() override final;
-    bool endTransaction_impl() override final;
+    bool commitTransaction_impl() override final;
+    bool rollbackTransaction_impl() override final;
 
-    bool bind_null_impl(size_t idx) override final { return sqlite3_bind_null(statement_, idx) == SQLITE_OK; }
-    bool bind_bool_impl(size_t idx, bool v) override final { return bind<int>(idx, static_cast<int>(v)); }
-    bool bind_char_impl(size_t idx, char v) override final { return bind<int>(idx, static_cast<int>(v)); }
-    bool bind_uchar_impl(size_t idx, unsigned char v) override final { return bind<int>(idx, static_cast<int>(v)); }
-    bool bind_int_impl(size_t idx, int v) override final { return bind<int>(idx, v); }
-    bool bind_uint_impl(size_t idx, unsigned int v) override final { return bind<int>(idx, static_cast<int>(v)); }
-    bool bind_long_impl(size_t idx, long v) override final { return bind<long>(idx, v); }
-    bool bind_ulong_impl(size_t idx, unsigned long v) override final { return bind<long>(idx, static_cast<long>(v)); }
-    bool bind_float_impl(size_t idx, float v) override final { return bind<double>(idx, static_cast<double>(v)); }
-    bool bind_double_impl(size_t idx, double v) override final { return bind<double>(idx, v); }
-    bool bind_string_impl(size_t idx, const std::string& v) override final { return bind<std::string>(idx, v); }
-    bool bind_json_impl(size_t idx, const nlohmann::json& v) override final { return bind<nlohmann::json>(idx, v); }
-    bool bind_timestamp_impl(size_t idx, const boost::posix_time::ptime& v) override final { return bind<boost::posix_time::ptime>(idx, v); }
+    bool bind_null_impl(size_t idx) override final;
+    bool bind_bool_impl(size_t idx, bool v) override final;
+    bool bind_char_impl(size_t idx, char v) override final;
+    bool bind_uchar_impl(size_t idx, unsigned char v) override final;
+    bool bind_int_impl(size_t idx, int v) override final;
+    bool bind_uint_impl(size_t idx, unsigned int v) override final;
+    bool bind_long_impl(size_t idx, long v) override final;
+    bool bind_ulong_impl(size_t idx, unsigned long v) override final;
+    bool bind_float_impl(size_t idx, float v) override final;
+    bool bind_double_impl(size_t idx, double v) override final;
+    bool bind_string_impl(size_t idx, const std::string& v) override final;
+    bool bind_json_impl(size_t idx, const nlohmann::json& v) override final;
+    bool bind_timestamp_impl(size_t idx, const boost::posix_time::ptime& v) override final;
 
-    virtual bool executeBinds_impl() = 0;
-    virtual bool execute_impl(const ExecOptions* options, DBResult* result) = 0;
+    bool executeBinds_impl() override final;
+    bool execute_impl(const ExecOptions* options, DBResult* result) override final;
 
     template<typename T>
     bool bind(size_t idx, const T& value)
@@ -107,3 +108,16 @@ inline bool SQLitePrepare::bind(size_t idx, const boost::posix_time::ptime& valu
     long ts = Utils::Time::toLong(value);
     return bind<long>(idx, ts);
 }
+
+/**
+ */
+class SQLiteScopedPrepare : public DBScopedPrepare
+{
+public:
+    SQLiteScopedPrepare(sqlite3* connection,
+                        const std::string& sql_statement,
+                        bool begin_transaction = false) 
+    :   DBScopedPrepare(std::shared_ptr<DBPrepare>(new SQLitePrepare(connection)), sql_statement, begin_transaction) {}
+
+    virtual ~SQLiteScopedPrepare() = default;
+};

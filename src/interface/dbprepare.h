@@ -38,7 +38,7 @@ class DBPrepare
 public:
     struct ExecOptions
     {
-        bool dataExpected() const { buffer_properties.has_value(); }
+        bool dataExpected() const { return buffer_properties.has_value(); }
         bool dataBatchExpected() const { return dataExpected() && result_offset.has_value() && result_max_entries.has_value(); }
     
         ExecOptions& offset(size_t o) { result_offset = o; return *this; }
@@ -59,24 +59,24 @@ public:
     bool valid() const { return prepared_stmnt_ok_; }
 
     bool beginTransaction();
-    bool endTransaction();
+    bool commitTransaction();
 
     bool hasActiveTransaction() const { return active_transaction_; }
     bool hasActiveBinds() const { return active_binds_; }
 
-    bool bind_null(size_t idx) { active_binds_ = true; return bind_null_impl(idx); }
-    bool bind_bool(size_t idx, bool v) { return bind_bool_impl(idx, v); }
-    bool bind_char(size_t idx, char v) { return bind_char_impl(idx, v); }
-    bool bind_uchar(size_t idx, unsigned char v) { return bind_uchar_impl(idx, v); }
-    bool bind_int(size_t idx, int v) { return bind_int_impl(idx, v); }
-    bool bind_uint(size_t idx, unsigned int v) { return bind_uint_impl(idx, v); }
-    bool bind_long(size_t idx, long v) { return bind_long_impl(idx, v); }
-    bool bind_ulong(size_t idx, unsigned long v) { return bind_ulong_impl(idx, v); }
-    bool bind_float(size_t idx, float v) { return bind_float_impl(idx, v); }
-    bool bind_double(size_t idx, double v) { return bind_double_impl(idx, v); }
-    bool bind_string(size_t idx, const std::string& v) { return bind_string_impl(idx, v); }
-    bool bind_json(size_t idx, const nlohmann::json& v) { return bind_json_impl(idx, v); }
-    bool bind_timestamp(size_t idx, const boost::posix_time::ptime& v) { return bind_timestamp_impl(idx, v); }
+    bool bind_null(size_t idx);
+    bool bind_bool(size_t idx, bool v);
+    bool bind_char(size_t idx, char v);
+    bool bind_uchar(size_t idx, unsigned char v);
+    bool bind_int(size_t idx, int v);
+    bool bind_uint(size_t idx, unsigned int v);
+    bool bind_long(size_t idx, long v);
+    bool bind_ulong(size_t idx, unsigned long v);
+    bool bind_float(size_t idx, float v);
+    bool bind_double(size_t idx, double v);
+    bool bind_string(size_t idx, const std::string& v);
+    bool bind_json(size_t idx, const nlohmann::json& v);
+    bool bind_timestamp(size_t idx, const boost::posix_time::ptime& v);
 
     std::shared_ptr<DBResult> execute(const ExecOptions& options = ExecOptions());
     bool execute(const ExecOptions* options = nullptr, 
@@ -91,7 +91,8 @@ protected:
     virtual void cleanupBinds_impl() {}
 
     virtual bool beginTransaction_impl() = 0;
-    virtual bool endTransaction_impl() = 0;
+    virtual bool commitTransaction_impl() = 0;
+    virtual bool rollbackTransaction_impl() = 0;
 
     virtual bool bind_null_impl(size_t idx) = 0;
     virtual bool bind_bool_impl(size_t idx, bool v) = 0;

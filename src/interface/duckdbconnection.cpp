@@ -83,6 +83,9 @@ DuckDBConnection::DuckDBConnection(DBInterface* interface)
 DuckDBConnection::~DuckDBConnection()
 {
     loginf << "DuckDBConnection: destructor";
+
+    if (dbOpened())
+        disconnect();
 }
 
 /**
@@ -122,8 +125,13 @@ std::pair<bool, std::string> DuckDBConnection::connect_impl(const std::string& f
  */
 void DuckDBConnection::disconnect_impl()
 {
+    loginf << "DuckDBConnection: disconnecting...";
+
     duckdb_disconnect(&connection_);
     duckdb_close(&db_);
+
+    connection_ = nullptr;
+    db_         = nullptr;
 }
 
 /**
@@ -207,10 +215,15 @@ bool DuckDBConnection::executeCmd_impl(const std::string& command,
 /**
  */
 std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::string& table_name, 
-                                                                 const std::shared_ptr<Buffer>& buffer)
+                                                                 const std::shared_ptr<Buffer>& buffer,
+                                                                 PropertyList* table_properties)
 {
+    //loginf << "DuckDBConnection: insertBuffer_impl: inserting into table '" << table_name << "'";
+
     if (!buffer || buffer->properties().size() == 0 || buffer->size() == 0)
         return std::make_pair(false, "input buffer invalid");
+
+    //loginf << "creating appender...";
 
     auto appender = createAppender(table_name);
     if (!appender->valid())
@@ -218,17 +231,39 @@ std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::stri
 
     size_t appender_column_count = appender->columnCount();
 
+    //loginf << "configuring table props...";
+
     const auto& buffer_properties = buffer->properties();
     const auto& created_tables    = tableInfo();
 
-    auto it = created_tables.find(table_name);
-    bool use_buffer_props = it == created_tables.end();
-
     PropertyList table_props;
-    if (!use_buffer_props)
-        table_props = it->second.tableProperties();
+    const PropertyList* properties = nullptr;
 
-    const PropertyList* properties = use_buffer_props ? &buffer_properties : &table_props;
+    if (table_properties)
+    {
+        //use externally passed properties
+        properties = table_properties;
+    }
+    else if (created_tables.count(table_name))
+    {
+        //use stored table properties
+        //@TODO: might fail!
+        auto it = created_tables.find(table_name);
+        auto tp = it->second.tableProperties();
+
+        assert(tp.has_value());
+        table_props = tp.value();
+
+        properties = &table_props;
+    }
+    else
+    {
+        //use buffers properties
+        properties = &buffer_properties;
+    }
+    assert(properties);
+
+    //loginf << "update func...";
 
     #define UpdateFunc(PDType, DType, Suffix)                                                                               \
         bool is_null = !has_property[ c ] || buffer->isNull(p, r);                                                          \
@@ -244,6 +279,8 @@ std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::stri
     auto n = buffer->size();
 
     //loginf << "buffer properties: " << buffer_properties.size() << ", used properties: " << properties->size();
+
+    //loginf << "inserting " << n << "row(s)...";
 
     unsigned int np = properties->size();
     assert(np == appender_column_count);
@@ -270,6 +307,7 @@ std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::stri
         //if (r % 2000 == 0)
         //    appender->flush();
     }
+
     appender->flush();
 
     //cleanup appender

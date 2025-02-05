@@ -93,14 +93,24 @@ DBInterface::~DBInterface()
  */
 bool DBInterface::connectionNeedsPreciseDBTypes() const
 {
-    return db_connection_ ? db_connection_->needsPreciseDBTypes() : true;
+    assert(db_connection_);
+    return db_connection_->needsPreciseDBTypes();
+}
+
+/**
+ */
+db::SQLPlaceholder DBInterface::connectionSQLPlaceholder() const
+{
+    assert(db_connection_);
+    return db_connection_->sqlPlaceholder();
 }
 
 /**
  */
 SQLGenerator DBInterface::sqlGenerator() const
 {
-    return SQLGenerator(connectionNeedsPreciseDBTypes());
+    return SQLGenerator(connectionNeedsPreciseDBTypes(),
+                        connectionSQLPlaceholder());
 }
 
 /**
@@ -237,7 +247,9 @@ void DBInterface::closeDBFile()
  */
 bool DBInterface::dbOpen()
 {
-    assert (db_connection_);
+    if (!db_connection_)
+        return false;
+    
     return db_connection_->dbOpened();
 }
 
@@ -1342,7 +1354,6 @@ void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buf
         unsigned int buffer_size = buffer->size();
         unsigned int dbcont_id = dbcontent.id();
 
-
         for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
         {
             ++max_rec_num;
@@ -1376,8 +1387,11 @@ void DBInterface::insertBuffer(const string& table_name,
 
 /**
  */
-void DBInterface::updateBuffer(const std::string& table_name, const std::string& key_col,
-                               shared_ptr<Buffer> buffer, int from_index, int to_index)
+void DBInterface::updateBuffer(const std::string& table_name, 
+                               const std::string& key_col,
+                               shared_ptr<Buffer> buffer, 
+                               int from_index, 
+                               int to_index)
 {
     logdbg << "DBInterface: updateBuffer: table " << table_name << " buffer size "
            << buffer->size() << " key " << key_col;
@@ -1401,61 +1415,63 @@ void DBInterface::prepareRead(const DBContent& dbobject,
                               bool use_order, 
                               Variable* order_variable)
 {
-    assert(db_connection_);
+    // assert(db_connection_);
 
-    assert(dbobject.existsInDB());
+    // assert(dbobject.existsInDB());
 
-    connection_mutex_.lock();
+    // connection_mutex_.lock();
 
-    shared_ptr<DBCommand> read = sqlGenerator().getSelectCommand(
-                dbobject, read_list, custom_filter_clause, use_order, order_variable);
+    // shared_ptr<DBCommand> read = sqlGenerator().getSelectCommand(
+    //             dbobject, read_list, custom_filter_clause, use_order, order_variable);
 
-    logdbg << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
-    db_connection_->prepareCommand(read);
+    // logdbg << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
+    // db_connection_->prepareCommand(read);
 }
 
 /**
  */
 std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBContent& dbobject)
 {
-    // locked by prepareRead
-    assert(db_connection_);
+    // // locked by prepareRead
+    // assert(db_connection_);
 
-    shared_ptr<DBResult> result;
-    bool last_one = false;
+    // shared_ptr<DBResult> result;
+    // bool last_one = false;
 
-    std::tie(result, last_one) = db_connection_->stepPreparedCommand(read_chunk_size_);
+    // std::tie(result, last_one) = db_connection_->stepPreparedCommand(read_chunk_size_);
 
-    if (!result)
-    {
-        logerr << "DBInterface: readDataChunk: connection returned error";
-        throw runtime_error("DBInterface: readDataChunk: connection returned error");
-    }
+    // if (!result)
+    // {
+    //     logerr << "DBInterface: readDataChunk: connection returned error";
+    //     throw runtime_error("DBInterface: readDataChunk: connection returned error");
+    // }
 
-    if (!result->containsData())
-    {
-        logerr << "DBInterface: readDataChunk: buffer does not contain data";
-        throw runtime_error("DBInterface: readDataChunk: buffer does not contain data");
-    }
+    // if (!result->containsData())
+    // {
+    //     logerr << "DBInterface: readDataChunk: buffer does not contain data";
+    //     throw runtime_error("DBInterface: readDataChunk: buffer does not contain data");
+    // }
 
-    shared_ptr<Buffer> buffer = result->buffer();
+    // shared_ptr<Buffer> buffer = result->buffer();
 
-    buffer->dbContentName(dbobject.name());
+    // buffer->dbContentName(dbobject.name());
 
-    assert(buffer);
+    // assert(buffer);
 
-    return {buffer, last_one};
+    // return {buffer, last_one};
+
+    return std::pair<std::shared_ptr<Buffer>, bool>(nullptr, false);
 }
 
 /**
  */
 void DBInterface::finalizeReadStatement(const DBContent& dbobject)
 {
-    connection_mutex_.unlock();
-    assert(db_connection_);
+    // connection_mutex_.unlock();
+    // assert(db_connection_);
 
-    logdbg << "DBInterface: finishReadSystemTracks: start ";
-    db_connection_->finalizeCommand();
+    // logdbg << "DBInterface: finishReadSystemTracks: start ";
+    // db_connection_->finalizeCommand();
 }
 
 /**

@@ -45,29 +45,30 @@ protected:
     void cleanup_impl() override final;
 
     bool beginTransaction_impl() override final;
-    bool endTransaction_impl() override final;
+    bool commitTransaction_impl() override final;
+    bool rollbackTransaction_impl() override final;
 
-    bool bind_null_impl(size_t idx) override final { return duckdb_bind_null(statement_, idx) == DuckDBSuccess; }
-    bool bind_bool_impl(size_t idx, bool v) override final { return bind<bool>(idx, v); }
-    bool bind_char_impl(size_t idx, char v) override final { return bind<char>(idx, v); }
-    bool bind_uchar_impl(size_t idx, unsigned char v) override final { return bind<unsigned char>(idx, v); }
-    bool bind_int_impl(size_t idx, int v) override final { return bind<int>(idx, v); }
-    bool bind_uint_impl(size_t idx, unsigned int v) override final { return bind<unsigned int>(idx, v); }
-    bool bind_long_impl(size_t idx, long v) override final { return bind<long>(idx, v); }
-    bool bind_ulong_impl(size_t idx, unsigned long v) override final { return bind<unsigned long>(idx, v); }
-    bool bind_float_impl(size_t idx, float v) override final { return bind<float>(idx, v); }
-    bool bind_double_impl(size_t idx, double v) override final { return bind<double>(idx, v); }
-    bool bind_string_impl(size_t idx, const std::string& v) override final { return bind<std::string>(idx, v); }
-    bool bind_json_impl(size_t idx, const nlohmann::json& v) override final { return bind<nlohmann::json>(idx, v); }
-    bool bind_timestamp_impl(size_t idx, const boost::posix_time::ptime& v) override final { return bind<boost::posix_time::ptime>(idx, v); }
+    bool bind_null_impl(size_t idx) override final;
+    bool bind_bool_impl(size_t idx, bool v) override final;
+    bool bind_char_impl(size_t idx, char v) override final;
+    bool bind_uchar_impl(size_t idx, unsigned char v) override final;
+    bool bind_int_impl(size_t idx, int v) override final;
+    bool bind_uint_impl(size_t idx, unsigned int v) override final;
+    bool bind_long_impl(size_t idx, long v) override final;
+    bool bind_ulong_impl(size_t idx, unsigned long v) override final;
+    bool bind_float_impl(size_t idx, float v) override final;
+    bool bind_double_impl(size_t idx, double v) override final;
+    bool bind_string_impl(size_t idx, const std::string& v) override final;
+    bool bind_json_impl(size_t idx, const nlohmann::json& v) override final;
+    bool bind_timestamp_impl(size_t idx, const boost::posix_time::ptime& v) override final;
 
     bool executeBinds_impl() override final;
     bool execute_impl(const ExecOptions* options, DBResult* result) override final;
 
-    template<typename T>                                                                 \
-    bool bind(size_t idx, const T& value)                                                \
-    {                                                                                    \
-        throw std::runtime_error("DuckDBScopedPrepare: bind: not implemented for type"); \
+    template<typename T>
+    bool bind(size_t idx, const T& value)
+    {
+        throw std::runtime_error("DuckDBScopedPrepare: bind: not implemented for type");
         return false;
     }
 

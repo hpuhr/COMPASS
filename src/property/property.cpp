@@ -22,6 +22,9 @@
 
 #include <limits>
 
+/**
+ * PropertyDataType => string repr
+ */
 const std::map<PropertyDataType, std::string>& Property::dataTypes2Strings()
 {
     static const auto* map = new std::map<PropertyDataType, std::string>
@@ -40,6 +43,9 @@ const std::map<PropertyDataType, std::string>& Property::dataTypes2Strings()
     return *map;
 }
 
+/**
+ * PropertyDataType => sql data type string repr
+ */
 const std::map<PropertyDataType, std::string>& Property::dbDataTypes2Strings(bool precise_types)
 {
     static const auto* map = new std::map<PropertyDataType, std::string>
@@ -73,6 +79,9 @@ const std::map<PropertyDataType, std::string>& Property::dbDataTypes2Strings(boo
     return precise_types ? *map_precise : *map;
 }
 
+/**
+ * string repr => PropertyDataType
+ */
 const std::map<std::string, PropertyDataType>& Property::strings2DataTypes()
 {
     static const auto* map = new std::map<std::string, PropertyDataType>
@@ -91,21 +100,36 @@ const std::map<std::string, PropertyDataType>& Property::strings2DataTypes()
     return *map;
 }
 
+/**
+ * sql data type string repr => PropertyDataType
+ */
 const std::map<std::string, PropertyDataType>& Property::strings2DBDataTypes()
 {
     static const auto* map = new std::map<std::string, PropertyDataType>
-        {{"BOOLEAN", PropertyDataType::BOOL},
-         {"TINYINT", PropertyDataType::CHAR},
+        {{"BOOLEAN" , PropertyDataType::BOOL},
+         {"LOGICAL" , PropertyDataType::BOOL},
+         {"TINYINT" , PropertyDataType::CHAR},
+         {"INT1"    , PropertyDataType::CHAR},
          {"UTINYINT", PropertyDataType::UCHAR},
-         {"INTEGER", PropertyDataType::INT},
+         {"INTEGER" , PropertyDataType::INT},
+         {"INT4"    , PropertyDataType::INT},
+         {"INT"     , PropertyDataType::INT},
+         {"SIGNED"  , PropertyDataType::INT},
          {"UINTEGER", PropertyDataType::UINT},
-         {"BIGINT", PropertyDataType::LONGINT},
-         {"UBIGINT", PropertyDataType::ULONGINT},
-         {"FLOAT", PropertyDataType::FLOAT},
-         {"DOUBLE", PropertyDataType::DOUBLE},
-         {"VARCHAR", PropertyDataType::STRING},
-         {"VARCHAR", PropertyDataType::JSON},
-         {"BIGINT", PropertyDataType::TIMESTAMP}};
+         {"BIGINT"  , PropertyDataType::LONGINT},
+         {"INT8"    , PropertyDataType::LONGINT},
+         {"LONG"    , PropertyDataType::LONGINT},
+         {"UBIGINT" , PropertyDataType::ULONGINT},
+         {"FLOAT"   , PropertyDataType::FLOAT},
+         {"FLOAT4"  , PropertyDataType::FLOAT},
+         {"REAL"    , PropertyDataType::FLOAT},
+         {"DOUBLE"  , PropertyDataType::DOUBLE},
+         {"FLOAT8"  , PropertyDataType::DOUBLE},
+         {"VARCHAR" , PropertyDataType::STRING},
+         {"CHAR"    , PropertyDataType::STRING},
+         {"BPCHAR"  , PropertyDataType::STRING},
+         {"TEXT"    , PropertyDataType::STRING},
+         {"STRING"  , PropertyDataType::STRING}};
 
     return *map;
 }
