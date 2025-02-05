@@ -237,10 +237,12 @@ bool DBPrepare::commitTransaction()
     assert(active_transaction_);
 
     bool ok = commitTransaction_impl();
+
+    //try to rollback in case commit failed
     if (!ok)
         rollbackTransaction_impl();
 
-    //@TODO: guess there is nothing else we can do in case a transaction cannot be commited?
+    //@TODO: guess there is nothing else we can do in case a transaction could be commited?
     active_transaction_ = false;
 
     return ok;

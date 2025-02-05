@@ -24,6 +24,7 @@
 DuckDBPrepare::DuckDBPrepare(duckdb_connection connection) 
 :   connection_(connection) 
 {
+    assert(connection_);
 }
 
 /**
@@ -85,29 +86,36 @@ bool DuckDBPrepare::execute_impl(const ExecOptions* options, DBResult* result)
 
     bool fetch_buffer = result && result->buffer() != nullptr;
 
-    DuckDBExecResult exec_result;
+    auto exec_result = executeDuckDB();
+    assert(exec_result);
 
-    auto state = duckdb_execute_prepared(statement_, exec_result.result());
-    exec_result.setResultValid();
-
-    if (state == DuckDBError)
+    if (exec_result->hasError())
     {
-        if (result) result->setError(exec_result.errorString());
-        return false;
-    }
-    else if (state != DuckDBSuccess)
-    {
-        if (result) result->setError("unknown error");
+        if (result) result->setError(exec_result->errorString());
         return false;
     }
 
-    if (fetch_buffer && !exec_result.toBuffer(*result->buffer()))
+    if (fetch_buffer && !exec_result->toBuffer(*result->buffer()))
     {
-        if (result) result->setError("reading query result failed");
+        result->setError("reading query result failed");
         return false;
     }
 
     return true;
+}
+
+/**
+ */
+std::shared_ptr<DuckDBExecResult> DuckDBPrepare::executeDuckDB()
+{
+    std::shared_ptr<DuckDBExecResult> result(new DuckDBExecResult);
+
+    auto state = duckdb_execute_prepared(statement_, result->result());
+
+    result->result_valid_ = true;
+    result->result_error_ = state != DuckDBSuccess;
+
+    return result;
 }
 
 /**
@@ -199,4 +207,14 @@ bool DuckDBPrepare::bind_json_impl(size_t idx, const nlohmann::json& v)
 bool DuckDBPrepare::bind_timestamp_impl(size_t idx, const boost::posix_time::ptime& v) 
 { 
     return bind<boost::posix_time::ptime>(idx, v); 
+}
+
+/**
+ */
+std::shared_ptr<DuckDBExecResult> DuckDBScopedPrepare::executeDuckDB()
+{
+    auto prepare = dynamic_cast<DuckDBPrepare*>(db_prepare_.get());
+    assert(prepare);
+
+    return prepare->executeDuckDB();
 }

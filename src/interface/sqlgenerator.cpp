@@ -851,12 +851,13 @@ string SQLGenerator::getCreateDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
 /**
  */
-shared_ptr<DBCommand> SQLGenerator::getSelectCommand(
-        const DBContent& object, VariableSet read_list, const string& filter,
-        bool use_order, Variable* order_variable)
+shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBContent& object, 
+                                                     VariableSet read_list, 
+                                                     const string& filter,
+                                                     bool use_order, 
+                                                     Variable* order_variable)
 {
-    logdbg << "SQLGenerator: getSelectCommand: dbo " << object.name()
-           << " read list size " << read_list.getSize();
+    logdbg << "SQLGenerator: getSelectCommand: dbo " << object.name() << " read list size " << read_list.getSize();
     assert(read_list.getSize() != 0);
 
     shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());

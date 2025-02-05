@@ -73,16 +73,78 @@ DuckDBExecResult::~DuckDBExecResult()
 
 /**
  */
-void DuckDBExecResult::setResultValid()
+bool DuckDBExecResult::hasError() const
 {
-    result_valid_ = true;
+    assert(result_valid_);
+    return result_error_;
 }
 
 /**
  */
 std::string DuckDBExecResult::errorString() const
 {
-    return std::string(duckdb_result_error(&result_));
+    if (!hasError())
+        return "";
+
+    std::string errstr = (duckdb_result_error(&result_));
+    if (errstr.empty())
+        errstr = "unknown error";
+
+    return errstr;
+}
+
+/**
+ */
+boost::optional<PropertyList> DuckDBExecResult::propertyList() const
+{
+    assert(result_valid_);
+
+    if (hasError())
+        return boost::optional<PropertyList>();
+
+    auto num_cols = numColumns();
+    if (!num_cols.has_value())
+        return boost::optional<PropertyList>();
+
+    size_t nc = num_cols.value();
+
+    //collect props
+    PropertyList properties;
+    for (idx_t c = 0; c < nc; ++c)
+    {
+        std::string name(duckdb_column_name(&result_, c));
+        auto dtype = DuckDBExecResult::dataTypeFromDuckDB(duckdb_column_type(&result_, c));
+
+        properties.addProperty(name, dtype);
+    }
+
+    return properties;
+}
+
+/**
+ */
+boost::optional<size_t> DuckDBExecResult::numColumns() const
+{
+    assert(result_valid_);
+
+    if (hasError())
+        return boost::optional<size_t>();
+
+    size_t n = duckdb_column_count(&result_);
+    return n;
+}
+
+/**
+ */
+boost::optional<size_t> DuckDBExecResult::numRows() const
+{
+    assert(result_valid_);
+
+    if (hasError())
+        return boost::optional<size_t>();
+
+    size_t n = duckdb_row_count(&result_);
+    return n;
 }
 
 /**
@@ -93,73 +155,45 @@ duckdb_result* DuckDBExecResult::result()
 }
 
 /**
- * Generate a buffer from the current result.
- * In this version the scheme is specified by the result.
- */
-std::shared_ptr<Buffer> DuckDBExecResult::toBuffer(const std::string& dbcontent_name)
-{
-    if (!result_valid_)
-        return std::shared_ptr<Buffer>();
-
-    idx_t col_count = duckdb_column_count(&result_);
-
-    //collect props
-    PropertyList properties;
-    for (idx_t c = 0; c < col_count; ++c)
-    {
-        std::string name(duckdb_column_name(&result_, c));
-        auto dtype = DuckDBExecResult::dataTypeFromDuckDB(duckdb_column_type(&result_, c));
-
-        properties.addProperty(name, dtype);
-    }
-
-    return toBuffer(properties, dbcontent_name);
-}
-
-/**
- * Generate a buffer from the current result.
- * In this version the scheme is specified by the given property list.
- */
-std::shared_ptr<Buffer> DuckDBExecResult::toBuffer(const PropertyList& properties,
-                                                   const std::string& dbcontent_name)
-{
-    if (!result_valid_ || properties.size() < 1)
-        return std::shared_ptr<Buffer>();
-
-    //create buffer
-    std::shared_ptr<Buffer> buffer(new Buffer(properties, dbcontent_name));
-
-    if (!toBuffer(*buffer))
-        return std::shared_ptr<Buffer>();
-
-    return buffer;
-}
-
-/**
  * Fill a given buffer with the current result.
  * In this version the scheme is specified by the buffer.
  */
-bool DuckDBExecResult::toBuffer(Buffer& buffer)
+bool DuckDBExecResult::toBuffer(Buffer& buffer,
+                                const boost::optional<size_t>& offset,
+                                const boost::optional<size_t>& max_entries)
 {
-    if (!result_valid_)
-        return false;
+    assert(result_valid_);
 
     const auto& properties = buffer.properties();
+
+    auto nc = numColumns();
+    auto nr = numRows();
+    assert(nc.has_value());
+    assert(nr.has_value());
 
     idx_t col_count = duckdb_column_count(&result_);
     idx_t row_count = duckdb_row_count(&result_);
     assert(col_count == properties.size()); // result column count must match provided buffer
 
-    #define UpdateFunc(PDType, DType, Suffix)                     \
-        bool is_null = duckdb_value_is_null(&result_, c, r);      \
-        if (!is_null)                                             \
-            buffer.get<DType>(p.name()).set(r, read<DType>(c, r));
+    #define UpdateFunc(PDType, DType, Suffix)                           \
+        bool is_null = duckdb_value_is_null(&result_, c, r);            \
+        if (!is_null)                                                   \
+            buffer.get<DType>(p.name()).set(buf_idx, read<DType>(c, r));
 
     #define NotFoundFunc                                                                             \
         logerr << "DuckDBExecResult: toBuffer: unknown property type " << Property::asString(dtype); \
         assert(false);
 
-    for (idx_t r = 0; r < row_count; ++r)
+    size_t r0 = offset.has_value() ? offset.value() : 0;
+    size_t r1 = max_entries.has_value() ? r0 + max_entries.value() : nr.value();
+
+    //nothing to read?
+    if (r0 >= r1 || r0 >= nr.value())
+        return true;
+
+    //read rows into buffer
+
+    for (idx_t r = r0, buf_idx = 0; r < r1; ++r, ++buf_idx)
     {
         for (idx_t c = 0; c < col_count; ++c)
         {

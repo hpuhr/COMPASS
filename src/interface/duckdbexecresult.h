@@ -44,19 +44,23 @@ public:
     DuckDBExecResult();
     virtual ~DuckDBExecResult();
 
-    std::shared_ptr<Buffer> toBuffer(const std::string& dbcontent_name = "") override final;
-    std::shared_ptr<Buffer> toBuffer(const PropertyList& properties,
-                                     const std::string& dbcontent_name = "") override final;
-    bool toBuffer(Buffer& buffer) override final;
-
+    bool hasError() const override final;
     std::string errorString() const override final;
+    boost::optional<PropertyList> propertyList() const override final;
+    boost::optional<size_t> numColumns() const override final;
+    boost::optional<size_t> numRows() const override final;
 
-    void setResultValid();
+    bool toBuffer(Buffer& buffer,
+                  const boost::optional<size_t>& offset = boost::optional<size_t>(),
+                  const boost::optional<size_t>& max_entries = boost::optional<size_t>()) override final;
+    
     duckdb_result* result();
 
     static PropertyDataType dataTypeFromDuckDB(duckdb_type type);
 
 private:
+    friend class DuckDBPrepare;
+
     template <typename T>
     T read(idx_t col, idx_t row)
     {
@@ -65,7 +69,8 @@ private:
     }
 
     mutable duckdb_result result_;
-    bool                  result_valid_;
+    bool                  result_valid_ = false;
+    bool                  result_error_ = false;
 };
 
 #define StandardRead(DType, DuckDBDTypeName)                         \

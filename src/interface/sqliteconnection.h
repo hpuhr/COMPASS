@@ -29,6 +29,7 @@ class DBInterface;
 class PropertyList;
 class DBResult;
 class DBScopedPrepare;
+class DBScopedReader;
 
 /**
  * @brief Interface for a SQLite3 database connection
@@ -42,6 +43,9 @@ public:
 
     std::shared_ptr<DBScopedPrepare> prepareStatement(const std::string& statement, 
                                                       bool begin_transaction) override final;
+    std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
+                                                 size_t offset, 
+                                                 size_t chunk_size) override final;
 
     //no precise types needed, e.g. suitable integer types will be chosen in the background
     bool needsPreciseDBTypes() const override final { return false; }

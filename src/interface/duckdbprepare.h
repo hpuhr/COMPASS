@@ -30,7 +30,7 @@
 
 #include <json.hpp>
 
-class DBExecResult;
+class DuckDBExecResult;
 
 /**
  */
@@ -39,6 +39,8 @@ class DuckDBPrepare : public DBPrepare
 public:
     DuckDBPrepare(duckdb_connection connection);
     virtual ~DuckDBPrepare();
+
+    std::shared_ptr<DuckDBExecResult> executeDuckDB();
 
 protected:
     bool init_impl(const std::string& sql_statement) override final;
@@ -125,4 +127,6 @@ public:
     :   DBScopedPrepare(std::shared_ptr<DBPrepare>(new DuckDBPrepare(connection)), sql_statement, begin_transaction) {}
 
     virtual ~DuckDBScopedPrepare() = default;
+
+    std::shared_ptr<DuckDBExecResult> executeDuckDB();
 };

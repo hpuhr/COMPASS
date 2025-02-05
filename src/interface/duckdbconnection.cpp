@@ -19,6 +19,7 @@
 #include "duckdbappender.h"
 #include "duckdbprepare.h"
 #include "duckdbexecresult.h"
+#include "duckdbreader.h"
 
 #include "sqlgenerator.h"
 
@@ -166,6 +167,15 @@ std::shared_ptr<DBScopedPrepare> DuckDBConnection::prepareStatement(const std::s
                                                                     bool begin_transaction)
 {
     return std::shared_ptr<DBScopedPrepare>(new DuckDBScopedPrepare(connection_, statement, begin_transaction));
+}
+
+/**
+ */
+std::shared_ptr<DBScopedReader> DuckDBConnection::createReader(const std::shared_ptr<DBCommand>& select_cmd, 
+                                                               size_t offset, 
+                                                               size_t chunk_size)
+{
+    return std::shared_ptr<DBScopedReader>(new DuckDBScopedReader(connection_, select_cmd, offset, chunk_size));
 }
 
 /**

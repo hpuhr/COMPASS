@@ -27,7 +27,8 @@
 #include <boost/optional.hpp>
 
 class DuckDBScopedAppender;
-class DuckDBScopedPrepare;
+class DBScopedPrepare;
+class DBScopedReader;
 
 class Buffer;
 class DBInterface;
@@ -45,6 +46,9 @@ public:
     std::shared_ptr<DuckDBScopedAppender> createAppender(const std::string& table);
     std::shared_ptr<DBScopedPrepare> prepareStatement(const std::string& statement, 
                                                       bool begin_transaction) override final;
+    std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
+                                                 size_t offset, 
+                                                 size_t chunk_size) override final;
 
     //duckdb needs precise data types in its tables
     bool needsPreciseDBTypes() const override final { return true; }

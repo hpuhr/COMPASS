@@ -18,6 +18,7 @@
 #include "dbconnection.h"
 #include "duckdbexecresult.h"
 #include "dbprepare.h"
+#include "dbreader.h"
 
 #include "sqlgenerator.h"
 
@@ -100,6 +101,9 @@ void DBConnection::disconnect()
 
     loginf << "DBConnection: disconnecting...";
 
+    //close active reader
+    active_reader_.reset();
+
     disconnect_impl();
 
     db_opened_   = false;
@@ -112,11 +116,7 @@ void DBConnection::disconnect()
  */
 bool DBConnection::exportFile(const std::string& file_name)
 {
-    if (!dbOpened())
-    {
-        logerr << "DBConnection: exportFile: not connected to database";
-        return false;
-    }
+    assert(dbOpened());
     
     if (!exportFile_impl(file_name))
     {
@@ -134,6 +134,8 @@ bool DBConnection::execute(const std::string& sql)
 {
     logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
 
+    assert(dbOpened());
+
     return executeSQL_impl(sql, nullptr, false);
 }
 
@@ -142,9 +144,11 @@ bool DBConnection::execute(const std::string& sql)
  */
 std::shared_ptr<DBResult> DBConnection::execute(const std::string& sql, bool fetch_result_buffer)
 {
-    std::shared_ptr<DBResult> result(new DBResult());
-
     logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
+
+    assert(dbOpened());
+
+    std::shared_ptr<DBResult> result(new DBResult());
 
     bool ok = executeSQL_impl(sql, result.get(), fetch_result_buffer);
     if (!ok)
@@ -167,6 +171,8 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
 {
     logdbg << "DBConnection: execute: executing single command";
 
+    assert(dbOpened());
+
     bool fetch_buffer = command.expectsResult();
 
     std::shared_ptr<DBResult> result(new DBResult());
@@ -187,6 +193,8 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
 std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_list)
 {
     logdbg << "DBConnection: execute: executing " << command_list.getNumCommands() << " command(s)";
+
+    assert(dbOpened());
 
     std::shared_ptr<DBResult> dbresult(new DBResult());
 
@@ -238,6 +246,8 @@ bool DBConnection::createTable(const std::string& table_name,
                                const std::vector<DBTableColumnInfo>& column_infos,
                                const std::string& dbcontent_name)
 {
+    assert(dbOpened());
+
     if (created_tables_.find(table_name) != created_tables_.end())
         return true;
 
@@ -270,6 +280,8 @@ bool DBConnection::insertBuffer(const std::string& table_name,
                                 const std::shared_ptr<Buffer>& buffer,
                                 PropertyList* table_properties)
 {
+    assert(dbOpened());
+
     auto res = insertBuffer_impl(table_name, buffer, table_properties);
 
     if (!res.first)
@@ -287,6 +299,8 @@ bool DBConnection::updateBuffer(const std::string& table_name,
                                 const boost::optional<size_t>& idx_from, 
                                 const boost::optional<size_t>& idx_to)
 {
+    assert(dbOpened());
+
     auto res = updateBuffer_impl(table_name, buffer, key_column, idx_from, idx_to);
 
     if (!res.first)
@@ -297,6 +311,7 @@ bool DBConnection::updateBuffer(const std::string& table_name,
 }
 
 /**
+ * Default implementation: use prepared INSERT statement.
  */
 std::pair<bool, std::string> DBConnection::insertBuffer_impl(const std::string& table_name, 
                                                              const std::shared_ptr<Buffer>& buffer,
@@ -305,13 +320,15 @@ std::pair<bool, std::string> DBConnection::insertBuffer_impl(const std::string& 
     auto sql = SQLGenerator(needsPreciseDBTypes(),
                             sqlPlaceholder()).getInsertDBUpdateStringBind(buffer, table_name);
 
+    //loginf << "executing statement:\n" << sql;
+
     auto stmnt = prepareStatement(sql, true);
     assert(stmnt);
     if (!stmnt->valid())
-        return std::make_pair(false, "could not prepare update statement");
+        return std::make_pair(false, "could not prepare insert statement");
 
     if (!stmnt->executeBuffer(buffer))
-        return std::make_pair(false, "could not execute statement on buffer");
+        return std::make_pair(false, "could not execute insert statement on buffer");
 
     //cleanup prepared statement
     stmnt.reset();
@@ -320,6 +337,7 @@ std::pair<bool, std::string> DBConnection::insertBuffer_impl(const std::string& 
 }
 
 /**
+ * Default implementation: use prepared UPDATE statement.
  */
 std::pair<bool, std::string> DBConnection::updateBuffer_impl(const std::string& table_name, 
                                                              const std::shared_ptr<Buffer>& buffer,
@@ -338,7 +356,7 @@ std::pair<bool, std::string> DBConnection::updateBuffer_impl(const std::string& 
         return std::make_pair(false, "could not prepare update statement");
 
     if (!stmnt->executeBuffer(buffer, idx_from, idx_to))
-        return std::make_pair(false, "could not execute statement on buffer");
+        return std::make_pair(false, "could not execute update statement on buffer");
 
     //cleanup prepared statement
     stmnt.reset();
@@ -351,6 +369,8 @@ std::pair<bool, std::string> DBConnection::updateBuffer_impl(const std::string& 
  */
 boost::optional<std::vector<std::string>> DBConnection::getTableList()
 {
+    assert(dbOpened());
+
     auto tlist = getTableList_impl();
 
     if (!tlist.has_value())
@@ -367,6 +387,8 @@ boost::optional<std::vector<std::string>> DBConnection::getTableList()
  */
 boost::optional<DBTableInfo> DBConnection::getColumnList(const std::string& table)
 {
+    assert(dbOpened());
+
     auto clist = getColumnList_impl(table);
 
     if (!clist.has_value())
@@ -433,6 +455,8 @@ boost::optional<DBTableInfo> DBConnection::getColumnList_impl(const std::string&
  */
 bool DBConnection::updateTableInfo()
 {
+    assert(dbOpened());
+
     created_tables_.clear();
 
     auto tlist = getTableList();
@@ -457,6 +481,8 @@ bool DBConnection::updateTableInfo()
  */
 void DBConnection::printTableInfo()
 {
+    assert(dbOpened());
+
     for (const auto& table : tableInfo())
     {
         auto table_name = table.first;
@@ -480,4 +506,56 @@ void DBConnection::printTableInfo()
 
         loginf << "";
     }
+}
+
+/**
+ */
+bool DBConnection::startRead(const std::shared_ptr<DBCommand>& select_cmd, 
+                             size_t offset, 
+                             size_t chunk_size)
+{
+    assert(dbOpened());
+    assert(select_cmd && QString::fromStdString(select_cmd->get()).startsWith("INSERT ") && select_cmd->expectsResult());
+
+    active_reader_ = createReader(select_cmd, offset, chunk_size);
+    return active_reader_->isReady();
+}
+
+/**
+ */
+std::shared_ptr<DBResult> DBConnection::readChunk()
+{
+    assert(dbOpened());
+
+    std::shared_ptr<DBResult> result;
+
+    if (!active_reader_)
+    {
+        result.reset(new DBResult);
+        result->setError("no reader active");
+        return result;
+    }
+    if (!active_reader_->isReady())
+    {
+        result.reset(new DBResult);
+        result->setError("active reader not ready");
+        return result;
+    }
+
+    result = active_reader_->readChunk();
+    assert(result);
+
+    //error during read?
+    if (result->hasError())
+        return result;
+
+    assert(result->buffer() && result->containsData());
+
+    if (!result->hasMore())
+    {
+        //reader has finished => reset
+        active_reader_.reset();
+    }
+
+    return result;
 }

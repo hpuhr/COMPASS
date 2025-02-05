@@ -17,6 +17,7 @@
 
 #include "sqliteconnection.h"
 #include "sqliteprepare.h"
+#include "sqlitereader.h"
 
 #include "buffer.h"
 #include "dbcommand.h"
@@ -59,6 +60,15 @@ std::shared_ptr<DBScopedPrepare> SQLiteConnection::prepareStatement(const std::s
                                                                     bool begin_transaction)
 {
     return std::shared_ptr<DBScopedPrepare>(new SQLiteScopedPrepare(db_handle_, statement, begin_transaction));
+}
+
+/**
+ */
+std::shared_ptr<DBScopedReader> SQLiteConnection::createReader(const std::shared_ptr<DBCommand>& select_cmd, 
+                                                               size_t offset, 
+                                                               size_t chunk_size)
+{
+    return std::shared_ptr<DBScopedReader>(new SQLiteScopedReader(db_handle_, select_cmd, offset, chunk_size));
 }
 
 /**

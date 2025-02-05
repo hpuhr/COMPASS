@@ -35,6 +35,7 @@ class DBTableInfo;
 class DBTableColumnInfo;
 class PropertyList;
 class DBScopedPrepare;
+class DBScopedReader;
 
 /**
  */
@@ -71,6 +72,10 @@ public:
                       const std::string& key_column,
                       const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
                       const boost::optional<size_t>& idx_to = boost::optional<size_t>());
+    bool startRead(const std::shared_ptr<DBCommand>& select_cmd, 
+                   size_t offset, 
+                   size_t chunk_size);
+    std::shared_ptr<DBResult> readChunk();
     
     virtual bool needsPreciseDBTypes() const = 0;
     virtual bool useIndexing() const = 0;
@@ -78,7 +83,9 @@ public:
 
     virtual std::shared_ptr<DBScopedPrepare> prepareStatement(const std::string& statement, 
                                                               bool begin_transaction) = 0;
-
+    virtual std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
+                                                         size_t offset, 
+                                                         size_t chunk_size) = 0;
 protected:
     virtual std::pair<bool, std::string> connect_impl(const std::string& file_name) = 0;
     virtual void disconnect_impl() = 0;
@@ -111,4 +118,6 @@ private:
     std::map<std::string, DBTableInfo> created_tables_;
     bool                               db_opened_ = false;
     std::string                        db_filename_;
+
+    std::shared_ptr<DBScopedReader>    active_reader_;
 };

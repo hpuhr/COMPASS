@@ -29,7 +29,7 @@
 #include <json.hpp>
 
 /**
- * Handles scoped appending of data to a specific table.
+ * Handles scoped appending of data to a specific duckdb table.
  * Will flush and destroy the appender on destruction.
  */
 class DuckDBScopedAppender

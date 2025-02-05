@@ -150,6 +150,6 @@ public:
     bool executeBuffer(const std::shared_ptr<Buffer>& buffer,
                        const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
                        const boost::optional<size_t>& idx_to = boost::optional<size_t>());
-private:
+protected:
     std::shared_ptr<DBPrepare> db_prepare_;
 };
