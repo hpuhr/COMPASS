@@ -257,7 +257,7 @@ void Buffer::sortByProperty(const Property& property)
 {
     logdbg << "Buffer: sortByProperty: name " << property.name();
 
-    std::vector<std::size_t> perm;
+    std::vector<unsigned int> perm;
 
     switch (property.dataType())
     {
@@ -421,37 +421,37 @@ void Buffer::cutToSize(size_t size)
 
 void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
 {
-    if (BUFFER_PEDANTIC_CHECKING)
-    {
-        assert (index < data_size_);
+    // if (BUFFER_PEDANTIC_CHECKING)
+    // {
+    //     assert (index < data_size_);
 
-        for (auto& it : getArrayListMap<bool>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<char>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned char>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<long int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned long int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<float>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<double>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<string>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<json>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<bool>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<char>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned char>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<long int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned long int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<float>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<double>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<string>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<json>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+    //         assert (it.second->size() <= data_size_);
 
-        loginf << "Buffer: cutUpToIndex: index " << index << " data_size_ " << data_size_;
-    }
+    //     loginf << "Buffer: cutUpToIndex: index " << index << " data_size_ " << data_size_;
+    // }
 
     for (auto& it : getArrayListMap<bool>())
         it.second->cutUpToIndex(index);
@@ -480,71 +480,71 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
 
     data_size_ -= index+1;
 
-    if (BUFFER_PEDANTIC_CHECKING)
-    {
-        loginf << "Buffer: cutUpToIndex: after cut index " << index << " data_size_ " << data_size_;
+    // if (BUFFER_PEDANTIC_CHECKING)
+    // {
+    //     loginf << "Buffer: cutUpToIndex: after cut index " << index << " data_size_ " << data_size_;
 
-        for (auto& it : getArrayListMap<bool>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<char>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned char>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<long int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned long int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<float>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<double>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<string>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<json>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<bool>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<char>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned char>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<long int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned long int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<float>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<double>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<string>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<json>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+    //         assert (it.second->size() <= data_size_);
 
-    }
+    // }
 }
 
-void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
+void Buffer::removeIndexes(const std::vector<unsigned int>& indexes_to_remove)
 {
-    if (BUFFER_PEDANTIC_CHECKING)
-    {
-        assert (indexes_to_remove.size() <= data_size_);
+    // if (BUFFER_PEDANTIC_CHECKING)
+    // {
+    //     assert (indexes_to_remove.size() <= data_size_);
 
-        for (auto& it : getArrayListMap<bool>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<char>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned char>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<long int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned long int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<float>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<double>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<string>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<json>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<bool>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<char>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned char>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<long int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned long int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<float>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<double>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<string>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<json>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+    //         assert (it.second->size() <= data_size_);
 
-        loginf << "Buffer: removeIndexes: indexes " << indexes_to_remove.size() << " data_size_ " << data_size_;
-    }
+    //     loginf << "Buffer: removeIndexes: indexes " << indexes_to_remove.size() << " data_size_ " << data_size_;
+    // }
 
     if (indexes_to_remove.size() == data_size_)
     {
@@ -605,36 +605,36 @@ void Buffer::removeIndexes(const std::vector<size_t>& indexes_to_remove)
 
     data_size_ -= indexes_to_remove.size();
 
-    if (BUFFER_PEDANTIC_CHECKING)
-    {
-        loginf << "Buffer: removeIndexes: after cut indexes " << indexes_to_remove.size() << " data_size_ " << data_size_;
+    // if (BUFFER_PEDANTIC_CHECKING)
+    // {
+    //     loginf << "Buffer: removeIndexes: after cut indexes " << indexes_to_remove.size() << " data_size_ " << data_size_;
 
-        for (auto& it : getArrayListMap<bool>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<char>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned char>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<long int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<unsigned long int>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<float>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<double>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<string>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<json>())
-            assert (it.second->size() <= data_size_);
-        for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<bool>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<char>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned char>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<long int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<unsigned long int>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<float>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<double>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<string>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<json>())
+    //         assert (it.second->size() <= data_size_);
+    //     for (auto& it : getArrayListMap<boost::posix_time::ptime>())
+    //         assert (it.second->size() <= data_size_);
 
-    }
+    // }
 }
 
 const PropertyList& Buffer::properties() { return properties_; }
@@ -647,8 +647,8 @@ void Buffer::printProperties()
 
 bool Buffer::isNull(const Property& property, unsigned int index)
 {
-    if (BUFFER_PEDANTIC_CHECKING)
-        assert(index < data_size_);
+    // if (BUFFER_PEDANTIC_CHECKING)
+    //     assert(index < data_size_);
 
     switch (property.dataType())
     {

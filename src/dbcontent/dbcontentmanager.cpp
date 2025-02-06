@@ -1043,7 +1043,7 @@ void DBContentManager::filterDataSources()
 
                           unsigned int buffer_size = buf_it->second->size();
 
-                          vector<size_t> indexes_to_remove;
+                          vector<unsigned int> indexes_to_remove;
                           //assert (ds_id_vec.isNeverNull()); TODO why asserts?
 
                           for (unsigned int index=0; index < buffer_size; ++index)
@@ -1328,10 +1328,10 @@ std::pair<double, double> DBContentManager::minMaxLongitude() const
     return {longitude_min_.get(), longitude_max_.get()};
 }
 
-bool DBContentManager::hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const
-{
+// bool DBContentManager::hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const
+// {
 
-}
+// }
 
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const
 {

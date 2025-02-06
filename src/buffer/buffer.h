@@ -39,6 +39,9 @@ class VariableSet;
 template <class T>
 class NullableVector;
 
+// template <class T>
+// class OldNullableVector;
+
 typedef std::tuple<std::map<std::string, std::shared_ptr<NullableVector<bool>>>,
 std::map<std::string, std::shared_ptr<NullableVector<char>>>,
 std::map<std::string, std::shared_ptr<NullableVector<unsigned char>>>,
@@ -72,6 +75,7 @@ class Buffer
 {
     template <class T>
     friend class NullableVector;
+    //friend class OldNullableVector;
 
 public:
     Buffer(PropertyList properties, const std::string& dbcontent_name = "");
@@ -107,7 +111,7 @@ public:
     void cutToSize(size_t size);
 
     void cutUpToIndex(size_t index); // everything up to index is removed
-    void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
+    void removeIndexes(const std::vector<unsigned int>& indexes_to_remove); // must be sorted
 
     const std::string& dbContentName() const { return dbcontent_name_; }
 
@@ -144,6 +148,7 @@ private:
 };
 
 #include "nullablevector.h"
+//#include "oldnullablevector.h"
 
 template <typename T>
 inline bool Buffer::has(const std::string& id) const

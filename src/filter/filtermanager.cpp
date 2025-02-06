@@ -566,7 +566,7 @@ void FilterManager::filterBuffers(std::map<std::string, std::shared_ptr<Buffer>>
 {
     loginf << "FilterManager: filterBuffers";
 
-    vector<size_t> indexes_to_remove;
+    vector<unsigned int> indexes_to_remove;
 
     for (auto& buf_it : data)
     {
