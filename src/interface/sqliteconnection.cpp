@@ -221,12 +221,12 @@ std::shared_ptr<DBResult> SQLiteConnection::execute(const DBCommand& command)
     {
         std::shared_ptr<Buffer> buffer(new Buffer(command.resultList()));
         dbresult->buffer(buffer);
-        logdbg << "MySQLppConnection: execute: executing";
+        logdbg << "SQLiteConnection: execute: executing";
         execute(sql, buffer);
     }
     else
     {
-        logdbg << "MySQLppConnection: execute: executing";
+        logdbg << "SQLiteConnection: execute: executing";
         execute(sql);
     }
 
@@ -307,6 +307,8 @@ void SQLiteConnection::execute(const std::string& command, std::shared_ptr<Buffe
                << sqlite3_errmsg(db_handle_);
         throw std::runtime_error("SQLiteConnection: execute: problem while stepping the result");
     }
+
+    loginf << "SQLiteConnection: execute: buffer size " << buffer->size();
 
     finalizeStatement();
 }
@@ -498,9 +500,9 @@ void SQLiteConnection::readRowIntoBuffer(const PropertyList& list, unsigned int 
                            << " property '" << prop.name() << " is null";
                 break;
             default:
-                logerr << "MySQLppConnection: readRowIntoBuffer: unknown property type";
+                logerr << "SQLiteConnection: readRowIntoBuffer: unknown property type";
                 throw std::runtime_error(
-                            "MySQLppConnection: readRowIntoBuffer: unknown property type");
+                            "SQLiteConnection: readRowIntoBuffer: unknown property type");
                 break;
         }
     }
@@ -641,6 +643,9 @@ std::vector<std::string> SQLiteConnection::getTableList()  // buffer of table na
     std::shared_ptr<Buffer> buffer = result->buffer();
 
     unsigned int size = buffer->size();
+
+    loginf << "SQLiteConnection: getTableList: buffer size " << size;
+
     std::string table_name;
 
     for (unsigned int cnt = 0; cnt < size; cnt++)
@@ -682,10 +687,10 @@ DBTableInfo SQLiteConnection::getColumnList(
     assert(result->containsData());
     std::shared_ptr<Buffer> buffer = result->buffer();
 
+    loginf << "SQLiteConnection: getColumnList: table " << table << " col size " << buffer->size();
+
     for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
     {
-        // loginf << "UGA " << table << ": "  << buffer->getString("name").get(cnt);
-
         assert(buffer->has<std::string>("type"));
 
         std::string data_type = buffer->get<std::string>("type").get(cnt);
@@ -702,6 +707,8 @@ DBTableInfo SQLiteConnection::getColumnList(
         assert(buffer->has<std::string>("name"));
         assert(buffer->has<int>("pk"));
         assert(buffer->has<int>("notnull"));
+
+        loginf << "UGA " << table << ": "  << buffer->get<std::string>("name").get(cnt);
 
         table_info.addColumn(buffer->get<std::string>("name").get(cnt), data_type,
                              buffer->get<int>("pk").get(cnt) > 0,
