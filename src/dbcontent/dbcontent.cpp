@@ -98,6 +98,11 @@ const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
 
+const Property DBContent::var_cat021_toa_position_ {"ToA Position", PropertyDataType::FLOAT};
+const Property DBContent::var_cat021_tomr_position_ {"ToMR Position", PropertyDataType::FLOAT};
+const Property DBContent::var_cat021_tort_ {"ToRT", PropertyDataType::FLOAT};
+const Property DBContent::var_cat021_tod_dep_ {"Time of Day Deprecated", PropertyDataType::FLOAT};
+
 const Property DBContent::var_cat021_mops_version_ {"MOPS Version", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nacp_ {"NACp", PropertyDataType::UCHAR};
 const Property DBContent::var_cat021_nucp_nic_ {"NUCp or NIC", PropertyDataType::UCHAR};

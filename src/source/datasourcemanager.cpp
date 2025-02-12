@@ -651,6 +651,9 @@ void DataSourceManager::configurationDialogDoneSlot()
 
     saveDBDataSources();
 
+    if (load_widget_)
+        load_widget_->updateContent(true);
+
     emit dataSourcesChangedSignal();
 }
 

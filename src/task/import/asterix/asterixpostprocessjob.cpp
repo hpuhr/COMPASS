@@ -100,6 +100,8 @@ void ASTERIXPostprocessJob::run()
 
     started_ = true;
 
+    doADSBTimeProcessing();
+
     if (override_tod_active_)
         doTodOverride();
 
@@ -108,7 +110,7 @@ void ASTERIXPostprocessJob::run()
 
     doTimeStampCalculation();
     doRadarPlotPositionCalculations();
-    doADSBPositionPorcessing();
+    doADSBPositionProcessing();
     doGroundSpeedCalculations();
 
     if (filter_tod_active_ || filter_position_active_ || filter_modec_active_)
@@ -118,6 +120,94 @@ void ASTERIXPostprocessJob::run()
         doObfuscate();
 
     done_ = true;
+}
+
+void ASTERIXPostprocessJob::doADSBTimeProcessing()
+{
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    string dbcontent_name = "CAT021";
+
+    if (!buffers_.count(dbcontent_name))
+        return;
+
+    shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
+    unsigned int buffer_size = buffer->size();
+
+    if (!buffer_size)
+        return;
+
+
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
+
+    assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
+
+    dbContent::Variable& tod_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_);
+
+    assert (tod_var.dataType() == PropertyDataType::FLOAT);
+
+    string tod_var_name = tod_var.name();
+
+    if (!buffer->has<float>(tod_var_name))
+        buffer->addProperty(tod_var_name, PropertyDataType::FLOAT); // add if needed
+
+    NullableVector<float>& tod_vec = buffer->get<float>(tod_var_name);
+
+    // check if other sources for tod exist
+
+    // "ToA Position" 071.Time of Applicability for Position
+    // "ToMR Position" 0.73 Time of Message Reception for Position
+    // "ToRT" 077.Time of Report Transmission
+    // "Time of Day Deprecated" 030.Time of Day
+
+    NullableVector<float>* toa_position_vec {nullptr};
+    NullableVector<float>* tomr_position_vec {nullptr};
+    NullableVector<float>* tort_vec {nullptr};
+    NullableVector<float>* tod_dep_vec {nullptr};
+
+    if (buffer->has<float>(DBContent::var_cat021_toa_position_.name()))
+        toa_position_vec = &buffer->get<float>(DBContent::var_cat021_toa_position_.name());
+
+    if (buffer->has<float>(DBContent::var_cat021_tomr_position_.name()))
+        tomr_position_vec = &buffer->get<float>(DBContent::var_cat021_tomr_position_.name());
+
+    if (buffer->has<float>(DBContent::var_cat021_tort_.name()))
+        tort_vec = &buffer->get<float>(DBContent::var_cat021_tort_.name());
+
+    if (buffer->has<float>(DBContent::var_cat021_tod_dep_.name()))
+        tod_dep_vec = &buffer->get<float>(DBContent::var_cat021_tod_dep_.name());
+
+
+
+    for (unsigned int index=0; index < buffer_size; index++)
+    {
+        if (!tod_vec.isNull(index)) // no need to copy, should not happen
+            continue;
+
+        if (toa_position_vec && !toa_position_vec->isNull(index))
+        {
+            tod_vec.set(index, toa_position_vec->get(index));
+            continue;
+        }
+
+        if (tomr_position_vec && !tomr_position_vec->isNull(index))
+        {
+            tod_vec.set(index, tomr_position_vec->get(index));
+            continue;
+        }
+
+        if (tort_vec && !tort_vec->isNull(index))
+        {
+            tod_vec.set(index, tort_vec->get(index));
+            continue;
+        }
+
+        if (tod_dep_vec && !tod_dep_vec->isNull(index))
+        {
+            tod_vec.set(index, tod_dep_vec->get(index));
+            continue;
+        }
+    }
 }
 
 void ASTERIXPostprocessJob::doTodOverride()
@@ -363,7 +453,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
     ProjectionManager::instance().doRadarPlotPositionCalculations(buffers_);
 }
 
-void ASTERIXPostprocessJob::doADSBPositionPorcessing()
+void ASTERIXPostprocessJob::doADSBPositionProcessing()
 {
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -380,7 +470,6 @@ void ASTERIXPostprocessJob::doADSBPositionPorcessing()
 
     assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
     assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
-
 
     assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_latitude_hr_));
     assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_longitude_hr_));
