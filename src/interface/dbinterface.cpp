@@ -726,8 +726,8 @@ void DBInterface::loadProperties()
     assert(buffer->has<string>("id"));
     assert(buffer->has<string>("value"));
 
-    NullableVector<string> id_vec = buffer->get<string>("id");
-    NullableVector<string> value_vec = buffer->get<string>("value");
+    NullableVector<string>& id_vec = buffer->get<string>("id");
+    NullableVector<string>& value_vec = buffer->get<string>("value");
 
     for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
@@ -831,10 +831,10 @@ std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
     assert(buffer->has<string>("layer_name"));
     assert(buffer->has<string>("json"));
 
-    NullableVector<int> id_vec = buffer->get<int>("id");
-    NullableVector<string> name_vec = buffer->get<string>("name");
-    NullableVector<string> layer_name_vec = buffer->get<string>("layer_name");
-    NullableVector<string> json_vec = buffer->get<string>("json");
+    NullableVector<int>& id_vec = buffer->get<int>("id");
+    NullableVector<string>& name_vec = buffer->get<string>("name");
+    NullableVector<string>& layer_name_vec = buffer->get<string>("layer_name");
+    NullableVector<string>& json_vec = buffer->get<string>("json");
 
     int id;
     string name;
@@ -907,7 +907,7 @@ bool DBInterface::areColumnsNull (const std::string& table_name, const std::vect
     assert(buffer);
     assert(buffer->has<int>("count"));
 
-    NullableVector<int> count_vec = buffer->get<int>("count");
+    NullableVector<int>& count_vec = buffer->get<int>("count");
     assert (count_vec.size() == 1);
 
     loginf << "DBInterface: areColumnsNull: null count " << count_vec.get(0);
@@ -979,8 +979,8 @@ map<unsigned int, string> DBInterface::viewPoints()
     assert(buffer->has<unsigned int>("id"));
     assert(buffer->has<string>("json"));
 
-    NullableVector<unsigned int> id_vec = buffer->get<unsigned int>("id");
-    NullableVector<string> json_vec = buffer->get<string>("json");
+    NullableVector<unsigned int>& id_vec = buffer->get<unsigned int>("id");
+    NullableVector<string>& json_vec = buffer->get<string>("json");
 
     map<unsigned int, string> view_points;
 
@@ -1129,8 +1129,8 @@ std::vector<std::unique_ptr<dbContent::Target>> DBInterface::loadTargets()
     assert(buffer->has<unsigned int>("utn"));
     assert(buffer->has<string>("json"));
 
-    NullableVector<unsigned int> utn_vec = buffer->get<unsigned int>("utn");
-    NullableVector<string> json_vec = buffer->get<string>("json");
+    NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int>("utn");
+    NullableVector<string>& json_vec = buffer->get<string>("json");
 
     unsigned int utn;
     string json_str;

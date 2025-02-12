@@ -1608,7 +1608,7 @@ void DBContentManager::saveSelectedRecNums()
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-        NullableVector<unsigned long> rec_num_vec = buf_it.second->get<unsigned long>(
+        NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
         for (unsigned int cnt=0; cnt < selected_vec.size(); ++cnt)
@@ -1636,7 +1636,7 @@ void DBContentManager::restoreSelectedRecNums()
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-        NullableVector<unsigned long> rec_num_vec = buf_it.second->get<unsigned long>(
+        NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
         // select existing, store still unselected

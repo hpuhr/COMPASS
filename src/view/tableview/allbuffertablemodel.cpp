@@ -491,7 +491,7 @@ void AllBufferTableModel::updateTimeIndexes()
             NullableVector<boost::posix_time::ptime>& ts_vec = buf_it.second->get<boost::posix_time::ptime>(ts_var.name());
 
             assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
-            NullableVector<bool> selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
+            NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
             boost::posix_time::ptime ts;
 

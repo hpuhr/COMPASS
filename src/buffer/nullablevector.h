@@ -10,17 +10,38 @@
 #include <vector>
 #include <memory>
 #include <stdexcept>
+#include <bitset>
+#include <type_traits>
+#include <cstddef>
 
 //#include <bitset>
+
+#define PAGE_SIZE_EXPR 1024*1024
 
 template <typename T>
 class NullableVector
 {
     friend class Buffer;
 
-    unsigned int page_size = 1024*1024;
+    const unsigned int page_size = PAGE_SIZE_EXPR;
+
+    //typedef std::array<T, PAGE_SIZE_EXPR> DATA_CONTAINER;
+
+    // If T is bool, use std::bitset<N>; otherwise, use std::array<T, N>.
+    // using DATA_CONTAINER = std::conditional_t<
+    //     std::is_same<T, bool>::value,
+    //     std::vector<bool>,
+    //     std::array<T, PAGE_SIZE_EXPR>>;
+
+    //typedef std::vector<T> DATA_CONTAINER;
+    typedef std::array<T, PAGE_SIZE_EXPR> DATA_CONTAINER;;
+
+    typedef std::array<uint8_t, PAGE_SIZE_EXPR/8 + 1> NULL_CONTAINER;
 
 public:
+    NullableVector(const NullableVector&) = delete; // Disable copy constructor
+    NullableVector& operator=(const NullableVector&) = delete; // Disable copy assignment operator
+
     virtual ~NullableVector() {}
 
     void renameProperty(const std::string& name) { property_.rename(name); }
@@ -124,7 +145,7 @@ public:
             return true; // if page doesn't exist, treat as NULL
         }
 
-        return (null_flag_pages_[page_index][offset / 8] & (1 << (offset % 8))) != 0;
+        return ((*null_flag_pages_.at(page_index))[offset / 8] & (1 << (offset % 8))) != 0;
     }
 
     bool isAlwaysNull() const
@@ -268,8 +289,8 @@ private:
     Property property_;
     Buffer& buffer_;
 
-    std::vector<std::unique_ptr<T[]>> value_pages_;       // Stores values
-    std::vector<std::unique_ptr<uint8_t[]>> null_flag_pages_; // Stores NULL flags (bit-packed)
+    std::vector<std::unique_ptr<DATA_CONTAINER>> value_pages_;       // Stores values
+    std::vector<std::unique_ptr<NULL_CONTAINER>> null_flag_pages_; // Stores NULL flags (bit-packed)
 
     NullableVector(Property& property, Buffer& buffer);
 
@@ -284,9 +305,14 @@ private:
         }
         if (!value_pages_[page_index])
         {
-            value_pages_[page_index] = std::make_unique<T[]>(page_size);
-            null_flag_pages_[page_index] = std::make_unique<uint8_t[]>(page_size / 8 + 1); // Bit-packed storage
-            std::fill_n(null_flag_pages_[page_index].get(), page_size / 8 + 1, 0); // Initialize NULL flags to 0
+            // value_pages_[page_index] = std::make_unique<T[]>(page_size);
+            // null_flag_pages_[page_index] = std::make_unique<uint8_t[]>(page_size / 8 + 1); // Bit-packed storage
+
+            value_pages_[page_index] = std::make_unique<DATA_CONTAINER>();
+            null_flag_pages_[page_index] = std::make_unique<NULL_CONTAINER>(); // Bit-packed storage
+
+            //std::fill_n(*null_flag_pages_[page_index], page_size / 8 + 1, 0); // Initialize NULL flags to 0
+            std::fill(null_flag_pages_[page_index]->begin(), null_flag_pages_[page_index]->end(), 0);
         }
     }
 
@@ -296,7 +322,7 @@ private:
         unsigned int page_index = index / page_size;
         unsigned int offset = index % page_size;
 
-        null_flag_pages_[page_index][offset / 8] &= ~(1 << (offset % 8));
+        (*null_flag_pages_.at(page_index))[offset / 8] &= ~(1 << (offset % 8));
     }
 
     // Resizes (or reinitializes) the data pages so that the total number
@@ -308,14 +334,15 @@ private:
         unsigned int required_pages = (size == 0 ? 0 : ((size - 1) / page_size) + 1);
 
         // Allocate a new vector for the pages.
-        std::vector<std::unique_ptr<T[]>> new_value_pages;
+        std::vector<std::unique_ptr<DATA_CONTAINER>> new_value_pages;
         new_value_pages.reserve(required_pages);
 
         // For each page, allocate and fill with default-constructed T.
         for (unsigned int i = 0; i < required_pages; ++i)
         {
-            auto page = std::make_unique<T[]>(page_size);
-            std::fill_n(page.get(), page_size, T{});
+            auto page = std::make_unique<DATA_CONTAINER>();
+            //std::fill_n(page.get(), page_size, T{});
+            std::fill(page->begin(), page->end(), T{});
             new_value_pages.push_back(std::move(page));
         }
 
@@ -330,14 +357,15 @@ private:
     {
         unsigned int required_pages = (size == 0 ? 0 : ((size - 1) / page_size) + 1);
 
-        std::vector<std::unique_ptr<uint8_t[]>> new_null_flag_pages;
+        std::vector<std::unique_ptr<NULL_CONTAINER>> new_null_flag_pages;
         new_null_flag_pages.reserve(required_pages);
 
         // Allocate each page; note that each page needs room for (page_size/8 + 1) bytes.
         for (unsigned int i = 0; i < required_pages; ++i)
         {
-            auto page = std::make_unique<uint8_t[]>(page_size / 8 + 1);
-            std::fill_n(page.get(), page_size / 8 + 1, 0xFF);
+            auto page = std::make_unique<NULL_CONTAINER>();
+            //std::fill_n(page.get(), page_size / 8 + 1, 0xFF);
+            std::fill(page->begin(), page->end(), 0xFF);
             new_null_flag_pages.push_back(std::move(page));
         }
 
@@ -379,14 +407,14 @@ private:
             // If the source element is NULL, mark our corresponding element as NULL.
             if (other.isNull(i))
             {
-                null_flag_pages_[target_page][target_offset / 8] |= (1 << (target_offset % 8));
+                (*null_flag_pages_.at(target_index))[target_offset / 8] |= (1 << (target_offset % 8));
             }
             else
             {
                 // Copy the data value from 'other'.
-                value_pages_[target_page][target_offset] = other.value_pages_[src_page][src_offset];
+                (*value_pages_[target_page])[target_offset] = (*other.value_pages_[src_page])[src_offset];
                 // Mark the new element as non-null.
-                null_flag_pages_[target_page][target_offset / 8] &= ~(1 << (target_offset % 8));
+                (*null_flag_pages_.at(target_index))[target_offset / 8] &= ~(1 << (target_offset % 8));
             }
         }
     }
@@ -429,11 +457,11 @@ private:
         unsigned int last_page = required_pages - 1;
         for (unsigned int i = remainder; i < page_size; ++i) {
             // Optionally reset the value to the default.
-            value_pages_[last_page][i] = T{};
+            (*value_pages_[last_page])[i] = T{};
             // Mark the element as NULL in the bit-packed null flags.
             unsigned int byte_index = i / 8;
             unsigned int bit_index  = i % 8;
-            null_flag_pages_[last_page][byte_index] |= (1 << bit_index);
+            (*null_flag_pages_.at(last_page))[byte_index] |= (1 << bit_index);
         }
     }
 
@@ -461,21 +489,23 @@ private:
         unsigned int new_pages = (new_size == 0 ? 0 : ((new_size - 1) / page_size) + 1);
 
         // Allocate new vectors for the pages.
-        std::vector<std::unique_ptr<T[]>> new_value_pages;
+        std::vector<std::unique_ptr<DATA_CONTAINER>> new_value_pages;
         new_value_pages.reserve(new_pages);
-        std::vector<std::unique_ptr<uint8_t[]>> new_null_flag_pages;
+        std::vector<std::unique_ptr<NULL_CONTAINER>> new_null_flag_pages;
         new_null_flag_pages.reserve(new_pages);
 
         // Allocate each new page and (optionally) initialize with default values.
         for (unsigned int i = 0; i < new_pages; ++i)
         {
-            auto new_data_page = std::make_unique<T[]>(page_size);
-            std::fill_n(new_data_page.get(), page_size, T{});
+            auto new_data_page = std::make_unique<DATA_CONTAINER>();
+            std::fill(new_data_page->begin(), new_data_page->end(), T{});
+            //std::fill_n(new_data_page.get(), page_size, T{});
             new_value_pages.push_back(std::move(new_data_page));
 
-            auto new_null_page = std::make_unique<uint8_t[]>(page_size / 8 + 1);
+            auto new_null_page = std::make_unique<NULL_CONTAINER>();
             // Initialize all bits to 0 (i.e. "not null") before copying in the proper bits.
-            std::fill_n(new_null_page.get(), page_size / 8 + 1, 0);
+            //std::fill_n(new_null_page.get(), page_size / 8 + 1, 0);
+            std::fill(new_null_page->begin(), new_null_page->end(), 0);
             new_null_flag_pages.push_back(std::move(new_null_page));
         }
 
@@ -490,21 +520,21 @@ private:
             unsigned int new_offset = new_index % page_size;
 
             // Copy the value.
-            new_value_pages[new_page][new_offset] = value_pages_[old_page][old_offset];
+            (*new_value_pages[new_page])[new_offset] = (*value_pages_[old_page])[old_offset];
 
             // Copy the corresponding null flag.
             unsigned int old_byte = old_offset / 8;
             unsigned int old_bit  = old_offset % 8;
-            bool was_null = (null_flag_pages_[old_page][old_byte] & (1 << old_bit)) != 0;
+            bool was_null = ((*null_flag_pages_[old_page])[old_byte] & (1 << old_bit)) != 0;
             unsigned int new_byte = new_offset / 8;
             unsigned int new_bit  = new_offset % 8;
             if (was_null)
             {
-                new_null_flag_pages[new_page][new_byte] |= (1 << new_bit);
+                (*new_null_flag_pages[new_page])[new_byte] |= (1 << new_bit);
             }
             else
             {
-                new_null_flag_pages[new_page][new_byte] &= ~(1 << new_bit);
+                (*new_null_flag_pages[new_page])[new_byte] &= ~(1 << new_bit);
             }
         }
 
@@ -535,21 +565,23 @@ private:
         unsigned int new_pages = (new_size == 0 ? 0 : ((new_size - 1) / page_size) + 1);
 
         // Allocate new vectors for the data and null pages.
-        std::vector<std::unique_ptr<T[]>> new_value_pages;
+        std::vector<std::unique_ptr<DATA_CONTAINER>> new_value_pages;
         new_value_pages.reserve(new_pages);
-        std::vector<std::unique_ptr<uint8_t[]>> new_null_flag_pages;
+        std::vector<std::unique_ptr<NULL_CONTAINER>> new_null_flag_pages;
         new_null_flag_pages.reserve(new_pages);
 
         // Allocate each new page.
         for (unsigned int i = 0; i < new_pages; ++i) {
-            auto data_page = std::make_unique<T[]>(page_size);
+            auto data_page = std::make_unique<DATA_CONTAINER>();
             // Initialize with default-constructed T.
-            std::fill_n(data_page.get(), page_size, T{});
+            //std::fill_n(data_page.get(), page_size, T{});
+            std::fill(data_page->begin(), data_page->end(), T{});
             new_value_pages.push_back(std::move(data_page));
 
-            auto null_page = std::make_unique<uint8_t[]>(page_size / 8 + 1);
+            auto null_page = std::make_unique<NULL_CONTAINER>();
             // Initialize the null flag page to 0 (i.e. "not null").
-            std::fill_n(null_page.get(), page_size / 8 + 1, 0);
+            //std::fill_n(null_page.get(), page_size / 8 + 1, 0);
+            std::fill(null_page->begin(), null_page->end(), 0);
             new_null_flag_pages.push_back(std::move(null_page));
         }
 
@@ -575,18 +607,18 @@ private:
             unsigned int new_offset = new_index % page_size;
 
             // Copy the data element.
-            new_value_pages[new_page][new_offset] = value_pages_[old_page][old_offset];
+            (*new_value_pages[new_page])[new_offset] = (*value_pages_[old_page])[old_offset];
 
             // Copy the corresponding null flag.
             unsigned int old_byte = old_offset / 8;
             unsigned int old_bit  = old_offset % 8;
-            bool was_null = (null_flag_pages_[old_page][old_byte] & (1 << old_bit)) != 0;
+            bool was_null = ((*null_flag_pages_[old_page])[old_byte] & (1 << old_bit)) != 0;
             unsigned int new_byte = new_offset / 8;
             unsigned int new_bit  = new_offset % 8;
             if (was_null)
-                new_null_flag_pages[new_page][new_byte] |= (1 << new_bit);
+                (*new_null_flag_pages[new_page])[new_byte] |= (1 << new_bit);
             else
-                new_null_flag_pages[new_page][new_byte] &= ~(1 << new_bit);
+                (*new_null_flag_pages[new_page])[new_byte] &= ~(1 << new_bit);
 
             ++new_index;
         }
@@ -614,11 +646,13 @@ void NullableVector<T>::clear()
         if (value_pages_[page_index])
         {
             // Reset all values to default-constructed T.
-            std::fill_n(value_pages_[page_index].get(), page_size, T{});
+            //std::fill_n(value_pages_[page_index].get(), page_size, T{});
+            std::fill(value_pages_[page_index]->begin(), value_pages_[page_index]->end(), T{});
 
             // Mark every element as null by setting all bits to 1.
             // The storage size is (page_size/8 + 1) bytes.
-            std::fill_n(null_flag_pages_[page_index].get(), page_size / 8 + 1, 0xFF);
+            //std::fill_n(null_flag_pages_[page_index].get(), page_size / 8 + 1, 0xFF);
+            std::fill(null_flag_pages_[page_index]->begin(), null_flag_pages_[page_index]->end(), 0);
         }
     }
 }
@@ -640,7 +674,7 @@ T NullableVector<T>::get(unsigned int index) const
     }
     unsigned int page_index = index / page_size;
     unsigned int offset = index % page_size;
-    return value_pages_[page_index][offset];
+    return (*value_pages_[page_index])[offset];
 }
 
 template <class T>
@@ -653,7 +687,7 @@ T& NullableVector<T>::getRef(unsigned int index)
     }
     unsigned int page_index = index / page_size;
     unsigned int offset = index % page_size;
-    return value_pages_[page_index][offset];
+    return (*value_pages_[page_index])[offset];
 }
 
 template <class T>
@@ -669,10 +703,10 @@ void NullableVector<T>::set(unsigned int index, const T& value)
     ensurePageExists(index);
     unsigned int page_index = index / page_size;
     unsigned int offset = index % page_size;
-    value_pages_[page_index][offset] = value;
+    (*value_pages_[page_index])[offset] = value;
 
     // clear NULL bit (indicating valid value)
-    null_flag_pages_[page_index][offset / 8] &= ~(1 << (offset % 8));
+    (*null_flag_pages_[page_index])[offset / 8] &= ~(1 << (offset % 8));
 }
 
 template <class T>
@@ -792,7 +826,7 @@ void NullableVector<T>::setNull(unsigned int index)
     unsigned int offset = index % page_size;
 
     // set NULL bit
-    null_flag_pages_[page_index][offset / 8] |= (1 << (offset % 8));
+    (*null_flag_pages_[page_index])[offset / 8] |= (1 << (offset % 8));
 }
 
 template <class T>

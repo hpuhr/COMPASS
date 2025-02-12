@@ -741,7 +741,7 @@ void ASTERIXPostprocessJob::doFilters()
 
             NullableVector<float>& tod_vec = buffer->get<float>(tod_var_name);
 
-            std::vector<size_t> to_be_removed;
+            std::vector<unsigned int> to_be_removed;
 
             for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
             {
@@ -811,7 +811,7 @@ void ASTERIXPostprocessJob::doFilters()
                     mc_vec2 = &buffer->get<float>(mc_var2.name());
             }
 
-            std::vector<size_t> to_be_removed;
+            std::vector<unsigned int> to_be_removed;
 
             for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
             {
@@ -889,7 +889,7 @@ void ASTERIXPostprocessJob::doObfuscate()
 
             NullableVector<unsigned int>& var_vec = buffer->get<unsigned int>(var_name);
 
-            std::vector<size_t> to_be_removed;
+            std::vector<unsigned int> to_be_removed;
 
             for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
             {

@@ -15,7 +15,7 @@ template <>
     for (unsigned int index=0; index < data_size; ++index)
     {
         if (!isNull(index))
-            getRef(index) *= tmp_factor;
+            set(index, get(index) & tmp_factor);
     }
 
     return *this;
@@ -62,7 +62,7 @@ void NullableVector<bool>::append(unsigned int index, bool value)
     if (index >= size() || isNull(index))
         set(index, value);
     else
-        getRef(index) |= value;
+        set(index, get(index) | value);
 }
 
 template <>
@@ -101,3 +101,16 @@ nlohmann::json NullableVector<boost::posix_time::ptime>::asJSON(unsigned int max
 
     return list;
 }
+
+// template class NullableVector<bool>;
+// template class NullableVector<char>;
+// template class NullableVector<unsigned char>;
+// template class NullableVector<int>;
+// template class NullableVector<unsigned int>;
+// template class NullableVector<long>;
+// template class NullableVector<unsigned long>;
+// template class NullableVector<float>;
+// template class NullableVector<double>;
+// template class NullableVector<std::string>;
+// template class NullableVector<nlohmann::json>;
+// template class NullableVector<boost::posix_time::ptime>;
