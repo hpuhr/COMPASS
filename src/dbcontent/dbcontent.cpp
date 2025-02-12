@@ -772,8 +772,6 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
         loginf << "DBContent: " << name_ << " finalizeReadJobDoneSlot: loading done";
         dbcont_manager_.loadingDone(*this);
     }
-
-
 }
 
 void DBContent::readJobObsoleteSlot()

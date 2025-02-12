@@ -337,8 +337,6 @@ void DBContentManager::load(const std::string& custom_filter_clause)
     bool load_job_created = false;
 
     DataSourceManager& ds_man =  COMPASS::instance().dataSourceManager();
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
-    ViewManager& view_man = COMPASS::instance().viewManager();
     DBInterface& db_interface = COMPASS::instance().dbInterface();
 
     db_interface.reloadStarted();
@@ -416,7 +414,6 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
     if (something_changed)
     {
         updateNumLoadedCounts();
-
         restoreSelectedRecNums();
 
         logdbg << "DBContentManager: addLoadedData: emitting signal";
@@ -1641,11 +1638,20 @@ void DBContentManager::saveSelectedRecNums()
 
 void DBContentManager::restoreSelectedRecNums()
 {
-    logdbg << "DBContentManager: restoreSelectedRecNums";
+    logdbg << "DBContentManager: restoreSelectedRecNums: " << tmp_selected_rec_nums_.size();
+
+    if (tmp_selected_rec_nums_.empty())
+        return;
+
+    //@TODO: find faster way to do this
 
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {
         if (!tmp_selected_rec_nums_.count(buf_it.first))
+            continue;
+
+        const auto& sel_recnums = tmp_selected_rec_nums_.at(buf_it.first);
+        if (sel_recnums.empty())
             continue;
 
         assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
@@ -1663,7 +1669,7 @@ void DBContentManager::restoreSelectedRecNums()
         std::map<unsigned long, unsigned int> unique_rec_nums =
             rec_num_vec.uniqueValuesWithIndexes();
 
-        for (unsigned long rec_num : tmp_selected_rec_nums_.at(buf_it.first))
+        for (unsigned long rec_num : sel_recnums)
         {
             if (unique_rec_nums.count(rec_num)) // previously selected found
                 selected_vec.set(unique_rec_nums.at(rec_num), true);
