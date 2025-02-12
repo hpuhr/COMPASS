@@ -284,6 +284,23 @@ DBContentManagerWidget* DBContentManager::widget()
     return widget_.get();
 }
 
+VariableSet DBContentManager::getReadSet(const std::string& dbcontent_name)
+{
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+    ViewManager& view_man       = COMPASS::instance().viewManager();
+
+    VariableSet read_set = view_man.getReadSet(dbcontent_name);
+
+    // add required vars for processing
+    addStandardVariables(dbcontent_name, read_set);
+
+    //label_generator_->addVariables(dbcontent_name, read_set);
+
+    if (eval_man.needsAdditionalVariables())
+        eval_man.addVariables(dbcontent_name, read_set);
+
+    return read_set;
+}
 
 void DBContentManager::load(const std::string& custom_filter_clause)
 {
@@ -322,6 +339,9 @@ void DBContentManager::load(const std::string& custom_filter_clause)
     DataSourceManager& ds_man =  COMPASS::instance().dataSourceManager();
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
+
+    db_interface.reloadStarted();
 
     for (auto& object : dbcontent_)
     {
@@ -333,15 +353,8 @@ void DBContentManager::load(const std::string& custom_filter_clause)
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
             logdbg << "DBContentManager: loadSlot: loading object " << object.first;
-            VariableSet read_set = view_man.getReadSet(object.first);
-
-            // add required vars for processing
-            addStandardVariables(object.first, read_set);
-
-            //label_generator_->addVariables(object.first, read_set);
-
-            if (eval_man.needsAdditionalVariables())
-                eval_man.addVariables(object.first, read_set);
+            
+            auto read_set = getReadSet(object.first);
 
             if (read_set.getSize() == 0)
             {
@@ -554,6 +567,9 @@ void DBContentManager::finishLoading()
     tmp_selected_rec_nums_.clear();
 
     COMPASS::instance().viewManager().doViewPointAfterLoad();
+
+    auto& db_interface = COMPASS::instance().dbInterface();
+    db_interface.reloadFinished();
 
     emit loadingDoneSignal();
 

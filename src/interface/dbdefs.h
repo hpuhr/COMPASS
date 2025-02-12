@@ -26,4 +26,14 @@ enum class SQLPlaceholder
     QuestionMark //e.g. duckdb
 };
 
+/**
+ */
+struct SQLConfig
+{
+    bool           precise_types           = false;
+    SQLPlaceholder placeholder             = SQLPlaceholder::AtVar;
+    bool           use_conflict_resolution = false;
+    bool           indexing                = true;
 };
+
+}

@@ -187,6 +187,8 @@ public:
     void showUTNs (std::vector<unsigned int> utns);
     void showSurroundingData (unsigned int utn);
 
+    dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
+
 protected:
     COMPASS& compass_;
 

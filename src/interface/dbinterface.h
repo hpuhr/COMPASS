@@ -40,6 +40,8 @@ class Job;
 class BufferWriter;
 class Sector;
 class SectorLayer;
+class Result;
+class DBCommand;
 
 class SQLGenerator;
 class QWidget;
@@ -176,6 +178,9 @@ public:
     unsigned long getMaxRecordNumber(DBContent& object);
     unsigned int getMaxRefTrackTrackNum();
 
+    void reloadStarted();
+    void reloadFinished();
+
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
     // ta -> mops versions, nucp_nics, nac_ps
@@ -183,9 +188,11 @@ public:
 protected:
     void loadProperties();
 
-    bool connectionNeedsPreciseDBTypes() const;
-    db::SQLPlaceholder connectionSQLPlaceholder() const;
     SQLGenerator sqlGenerator() const;
+    
+    Result execute(const std::string& sql);
+    std::shared_ptr<DBResult> execute(const DBCommand& cmd);
+    void updateTableInfo();
 
     std::unique_ptr<DBConnection> db_connection_;
 
@@ -200,4 +207,8 @@ protected:
     std::map<std::string, std::set<std::string>> dbcolumn_content_flags_; // dbtable -> dbcols with content
 
     std::string db_filename_;
+
+    double read_time_s_ = 0.0;
+    size_t chunks_read_ = 0;
+    size_t rows_read_   = 0;
 };

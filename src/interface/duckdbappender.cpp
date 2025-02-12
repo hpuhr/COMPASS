@@ -27,6 +27,9 @@ DuckDBScopedAppender::DuckDBScopedAppender(duckdb_connection connection,
     auto result = duckdb_appender_create(connection, NULL, table_name.c_str(), &appender_);
     ok_ = result == DuckDBSuccess;
     //loginf << "appender ok? " << ok_;
+
+    if (!ok_)
+        setError("could not create appender for table '" + table_name + "'");
 }
 
 /**
@@ -56,7 +59,6 @@ size_t DuckDBScopedAppender::endRow()
 
     if (state != DuckDBSuccess)
         logerr << "DuckDBScopedAppender: endRow: failed: " << duckdb_appender_error(appender_);
-
     assert(state == DuckDBSuccess);
 
     size_t last_appended = appended_;
@@ -83,7 +85,7 @@ size_t DuckDBScopedAppender::columnCount() const
 
 /**
  */
-std::string DuckDBScopedAppender::lastError() const
+std::string DuckDBScopedAppender::lastAppenderError() const
 {
     assert(ok_);
     return std::string(duckdb_appender_error(appender_));

@@ -60,7 +60,7 @@ class DBResult
     bool hasMore() const { return has_more_; }
 
     /// @brief Returns if contains data flag was set
-    bool containsData() { return contains_data_; }
+    bool containsData() const { return contains_data_; }
 
     /// @brief Sets error state
     void setError(const std::string& err)
@@ -80,6 +80,8 @@ class DBResult
     {
         return error_msg_;
     }
+
+    std::string printResult() const;
 
   private:
     /// @brief Flag signalling if more data is to be expected

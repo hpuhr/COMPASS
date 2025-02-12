@@ -24,6 +24,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/geotiff_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/geotiff.h"
         "${CMAKE_CURRENT_LIST_DIR}/parquettools.h"
+        "${CMAKE_CURRENT_LIST_DIR}/result.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/config.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/files.cpp"

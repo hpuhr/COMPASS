@@ -71,7 +71,7 @@ std::string DBConnection::status() const
 /**
  * Connects to the given database file. Will disconnect from the current db if connected.
  */
-std::pair<bool, std::string> DBConnection::connect(const std::string& file_name)
+Result DBConnection::connect(const std::string& file_name)
 {
     loginf << "DBConnection: connect: '" << file_name << "'";
 
@@ -80,13 +80,15 @@ std::pair<bool, std::string> DBConnection::connect(const std::string& file_name)
         disconnect();
 
     auto connect_result = connect_impl(file_name);
-    if (!connect_result.first)
+    if (!connect_result.ok())
         return connect_result;
 
     db_opened_   = true;
     db_filename_ = file_name;
 
-    return std::make_pair(true, "");
+    loginf << "DBConnection: connect: connected!";
+
+    return Result::succeeded();
 }
 
 /**
@@ -101,8 +103,8 @@ void DBConnection::disconnect()
 
     loginf << "DBConnection: disconnecting...";
 
-    //close active reader
-    active_reader_.reset();
+    //close any active reader
+    stopRead();
 
     disconnect_impl();
 
@@ -114,23 +116,22 @@ void DBConnection::disconnect()
 /**
  * Exports the database to the given file.
  */
-bool DBConnection::exportFile(const std::string& file_name)
+Result DBConnection::exportFile(const std::string& file_name)
 {
     assert(dbOpened());
-    
-    if (!exportFile_impl(file_name))
-    {
-        logerr << "DBConnection: exportFile: export failed";
-        return false;
-    }
 
-    return true;
+    auto r = exportFile_impl(file_name);
+    
+    //if (!r.ok())
+    //    logerr << "DBConnection: exportFile: export failed";
+
+    return r;
 }
 
 /**
  * Executes the given sql query without returning any data or specific error messages.
  */
-bool DBConnection::execute(const std::string& sql)
+Result DBConnection::execute(const std::string& sql)
 {
     logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
 
@@ -150,14 +151,11 @@ std::shared_ptr<DBResult> DBConnection::execute(const std::string& sql, bool fet
 
     std::shared_ptr<DBResult> result(new DBResult());
 
-    bool ok = executeSQL_impl(sql, result.get(), fetch_result_buffer);
-    if (!ok)
+    auto res = executeSQL_impl(sql, result.get(), fetch_result_buffer);
+
+    if (res.ok() && fetch_result_buffer && !result->buffer())
     {
-        logerr << "DBConnection: execute: Query '" << sql << "' failed: " << result->error();
-    }
-    else if (fetch_result_buffer && !result->buffer())
-    {
-        logerr << "DBConnection: execute: Query '" << sql << "': buffer creation failed";
+        //logerr << "DBConnection: execute: Query '" << sql << "': buffer creation failed";
         result->setError("buffer creation failed");
     }
 
@@ -180,7 +178,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
 
     if (ok && fetch_buffer && !result->buffer())
     {
-        logerr << "DBConnection: execute: DBCommand '" << command.get() << "': buffer creation failed";
+        //logerr << "DBConnection: execute: DBCommand '" << command.get() << "': buffer creation failed";
         result->setError("buffer creation failed");
     }
     
@@ -213,7 +211,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
         auto ok = executeCmd_impl(cmd, fetch_buffers ? &command_list.getResultList() : nullptr, result.get());
         if (!ok)
         {
-            logerr << "DBConnection: execute: DBCommand '" << cmd << "' failed: " << result->error();
+            //logerr << "DBConnection: execute: DBCommand '" << cmd << "' failed: " << result->error();
             dbresult->setError(result->error());
             break;
         }
@@ -221,7 +219,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
         {
             if (!result->buffer())
             {
-                logerr << "DBConnection: execute: DBCommand '" << cmd << "': buffer creation failed";
+                //logerr << "DBConnection: execute: DBCommand '" << cmd << "': buffer creation failed";
                 dbresult->setError("buffer creation failed");
                 break;
             }
@@ -242,168 +240,164 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
 /**
  * Creates a table of the given name and column properties.
  */
-bool DBConnection::createTable(const std::string& table_name, 
-                               const std::vector<DBTableColumnInfo>& column_infos,
-                               const std::string& dbcontent_name)
+Result DBConnection::createTable(const std::string& table_name, 
+                                 const std::vector<DBTableColumnInfo>& column_infos,
+                                 const std::string& dbcontent_name)
 {
     assert(dbOpened());
 
-    if (created_tables_.find(table_name) != created_tables_.end())
-        return true;
+    auto it = created_tables_.find(table_name);
+    if (it != created_tables_.end())
+    {
+        //@TODO: check properties of existing table against requested one
+        return Result::succeeded();
+    }
 
     //get sql statement
-    bool needs_precise_types = needsPreciseDBTypes();
-    auto sql_placeholder     = sqlPlaceholder();
-    bool use_indexing        = useIndexing();
-
-    std::string sql = SQLGenerator(needs_precise_types, sql_placeholder).getCreateTableStatement(table_name, column_infos, use_indexing, dbcontent_name);
+    std::string sql = SQLGenerator(sqlConfiguration()).getCreateTableStatement(table_name, column_infos, dbcontent_name);
 
     auto result = execute(sql, false);
     assert(result);
 
     if (result->hasError())
     {
-        logerr << "DBConnection: createTable: creating table '" << table_name << "' failed: " << result->error();
-        return false;
+        //logerr << "DBConnection: createTable: creating table '" << table_name << "' failed: " << result->error();
+        return Result::failed(result->error());
     }
 
     //update table info after inserting a new table
     updateTableInfo();
 
-    return true;
+    return Result::succeeded();
 }
 
 /**
  * Inserts the given buffer into the given table.
  */
-bool DBConnection::insertBuffer(const std::string& table_name, 
-                                const std::shared_ptr<Buffer>& buffer,
-                                PropertyList* table_properties)
+Result DBConnection::insertBuffer(const std::string& table_name, 
+                                  const std::shared_ptr<Buffer>& buffer,
+                                  PropertyList* table_properties)
 {
     assert(dbOpened());
 
     auto res = insertBuffer_impl(table_name, buffer, table_properties);
 
-    if (!res.first)
-        logerr << "DBConnection: : insertBuffer: inserting into table '" << table_name << "' failed: " << res.second;
+    //if (!res.first)
+    //    logerr << "DBConnection: : insertBuffer: inserting into table '" << table_name << "' failed: " << res.second;
 
-    return res.first;
+    return res;
 }
 
 /**
  * Updates the given table using values of the given buffer.
  */
-bool DBConnection::updateBuffer(const std::string& table_name, 
-                                const std::shared_ptr<Buffer>& buffer,
-                                const std::string& key_column,
-                                const boost::optional<size_t>& idx_from, 
-                                const boost::optional<size_t>& idx_to)
+Result DBConnection::updateBuffer(const std::string& table_name, 
+                                  const std::shared_ptr<Buffer>& buffer,
+                                  const std::string& key_column,
+                                  const boost::optional<size_t>& idx_from, 
+                                  const boost::optional<size_t>& idx_to)
 {
     assert(dbOpened());
 
     auto res = updateBuffer_impl(table_name, buffer, key_column, idx_from, idx_to);
 
-    if (!res.first)
-        logerr << "DBConnection: : updateBuffer: updating table '" << table_name 
-               << "' at key column '" << key_column << "' failed: " << res.second;
+    //if (!res.first)
+    //    logerr << "DBConnection: : updateBuffer: updating table '" << table_name 
+    //           << "' at key column '" << key_column << "' failed: " << res.second;
 
-    return res.first;
+    return res;
 }
 
 /**
  * Default implementation: use prepared INSERT statement.
  */
-std::pair<bool, std::string> DBConnection::insertBuffer_impl(const std::string& table_name, 
-                                                             const std::shared_ptr<Buffer>& buffer,
-                                                             PropertyList* table_properties)
+Result DBConnection::insertBuffer_impl(const std::string& table_name, 
+                                       const std::shared_ptr<Buffer>& buffer,
+                                       PropertyList* table_properties)
 {
-    auto sql = SQLGenerator(needsPreciseDBTypes(),
-                            sqlPlaceholder()).getInsertDBUpdateStringBind(buffer, table_name);
+    auto sql = SQLGenerator(sqlConfiguration()).getInsertDBUpdateStringBind(buffer, table_name);
 
     //loginf << "executing statement:\n" << sql;
 
     auto stmnt = prepareStatement(sql, true);
     assert(stmnt);
-    if (!stmnt->valid())
-        return std::make_pair(false, "could not prepare insert statement");
 
-    if (!stmnt->executeBuffer(buffer))
-        return std::make_pair(false, "could not execute insert statement on buffer");
+    if (!stmnt->valid())
+        return Result::failed("could not prepare insert statement: " + stmnt->lastError());
+
+    auto res = stmnt->executeBuffer(buffer);
+    if (!res.ok())
+        return Result::failed("could not execute insert statement on buffer: " + res.error());
 
     //cleanup prepared statement
     stmnt.reset();
 
-    return std::make_pair(true, "");
+    return Result::succeeded();
 }
 
 /**
  * Default implementation: use prepared UPDATE statement.
  */
-std::pair<bool, std::string> DBConnection::updateBuffer_impl(const std::string& table_name, 
+Result DBConnection::updateBuffer_impl(const std::string& table_name, 
                                                              const std::shared_ptr<Buffer>& buffer,
                                                              const std::string& key_column,
                                                              const boost::optional<size_t>& idx_from, 
                                                              const boost::optional<size_t>& idx_to)
 {
-    auto sql = SQLGenerator(needsPreciseDBTypes(),
-                            sqlPlaceholder()).getCreateDBUpdateStringBind(buffer, key_column, table_name);
+    auto sql = SQLGenerator(sqlConfiguration()).getCreateDBUpdateStringBind(buffer, key_column, table_name);
 
     //loginf << "executing statement:\n" << sql;
 
     auto stmnt = prepareStatement(sql, true);
     assert(stmnt);
-    if (!stmnt->valid())
-        return std::make_pair(false, "could not prepare update statement");
 
-    if (!stmnt->executeBuffer(buffer, idx_from, idx_to))
-        return std::make_pair(false, "could not execute update statement on buffer");
+    if (!stmnt->valid())
+        return Result::failed("could not prepare update statement" + stmnt->lastError());
+
+    auto res = stmnt->executeBuffer(buffer, idx_from, idx_to);
+    if (!res.ok())
+        return Result::failed("could not execute update statement on buffer: " + res.error());
 
     //cleanup prepared statement
     stmnt.reset();
 
-    return std::make_pair(true, "");
+    return Result::succeeded();
 }
 
 /**
  * Gets a list of tables in the database.
  */
-boost::optional<std::vector<std::string>> DBConnection::getTableList()
+ResultT<std::vector<std::string>> DBConnection::getTableList()
 {
     assert(dbOpened());
 
-    auto tlist = getTableList_impl();
+    auto res = getTableList_impl();
 
-    if (!tlist.has_value())
-    {
-        logerr << "DBConnection: : getTableList: retrieving table list failed"; 
-        return boost::optional<std::vector<std::string>>();
-    }
+    //if (!res.first)
+    //    logerr << "DBConnection: : getTableList: retrieving table list failed"; 
 
-    return tlist;
+    return res;
 }
 
 /**
  * Gets info about a specific table's columns.
  */
-boost::optional<DBTableInfo> DBConnection::getColumnList(const std::string& table)
+ResultT<DBTableInfo> DBConnection::getColumnList(const std::string& table)
 {
     assert(dbOpened());
 
-    auto clist = getColumnList_impl(table);
+    auto res = getColumnList_impl(table);
 
-    if (!clist.has_value())
-    {
-        logerr << "DBConnection: : getColumnList: retrieving column list failed"; 
-        return boost::optional<DBTableInfo>();
-    }
+    //if (!res.first)
+    //    logerr << "DBConnection: : getColumnList: retrieving column list failed"; 
 
-    return clist;
+    return res;
 }
 
 /**
  * Basic implementation which should work for sql like interfaces.
  */
-boost::optional<DBTableInfo> DBConnection::getColumnList_impl(const std::string& table)
+ResultT<DBTableInfo> DBConnection::getColumnList_impl(const std::string& table)
 {
     DBTableInfo table_info(table);
 
@@ -425,8 +419,11 @@ boost::optional<DBTableInfo> DBConnection::getColumnList_impl(const std::string&
     std::shared_ptr<DBResult> result = execute(command);
     assert(result);
 
+    if (result->hasError())
+        return ResultT<DBTableInfo>::failed(result->error());
+
     if (!result->containsData())
-        return boost::optional<DBTableInfo>();
+        return ResultT<DBTableInfo>::failed("table information could not be retrieved");
 
     std::shared_ptr<Buffer> buffer = result->buffer();
 
@@ -447,34 +444,36 @@ boost::optional<DBTableInfo> DBConnection::getColumnList_impl(const std::string&
                              "");
     }
 
-    return table_info;
+    return ResultT<DBTableInfo>::succeeded(table_info);
 }
 
 /**
  * Updates info about tables in the currently opened database.
  */
-bool DBConnection::updateTableInfo()
+Result DBConnection::updateTableInfo()
 {
     assert(dbOpened());
 
     created_tables_.clear();
 
-    auto tlist = getTableList();
+    auto list_res = getTableList();
+    if (!list_res.ok())
+        return list_res;
+    
+    assert(list_res.hasResult());
 
-    //assert for now, should never happen
-    assert(tlist.has_value());
-
-    for (const auto& tname : tlist.value())
+    for (const auto& tname : list_res.result())
     {
-        auto tinfo = getColumnList(tname);
+        auto table_res = getColumnList(tname);
+        if (!table_res.ok())
+            return table_res;
 
-        //assert for now, should never happen
-        assert(tinfo.has_value());
+        assert(table_res.hasResult());
 
-        created_tables_[ tname ] = tinfo.value();
+        created_tables_[ tname ] = table_res.result();
     }
 
-    return true;
+    return Result::succeeded();
 }
 
 /**
@@ -510,15 +509,15 @@ void DBConnection::printTableInfo()
 
 /**
  */
-bool DBConnection::startRead(const std::shared_ptr<DBCommand>& select_cmd, 
-                             size_t offset, 
-                             size_t chunk_size)
+Result DBConnection::startRead(const std::shared_ptr<DBCommand>& select_cmd, 
+                               size_t offset, 
+                               size_t chunk_size)
 {
     assert(dbOpened());
-    assert(select_cmd && QString::fromStdString(select_cmd->get()).startsWith("INSERT ") && select_cmd->expectsResult());
+    assert(select_cmd && QString::fromStdString(select_cmd->get()).startsWith("SELECT ") && select_cmd->expectsResult());
 
     active_reader_ = createReader(select_cmd, offset, chunk_size);
-    return active_reader_->isReady();
+    return Result(active_reader_->isReady(), active_reader_->lastError());
 }
 
 /**
@@ -551,11 +550,25 @@ std::shared_ptr<DBResult> DBConnection::readChunk()
 
     assert(result->buffer() && result->containsData());
 
-    if (!result->hasMore())
-    {
-        //reader has finished => reset
-        active_reader_.reset();
-    }
+    // if (!result->hasMore())
+    // {
+    //     //reader has finished => reset
+    //     stopRead();
+    // }
 
     return result;
+}
+
+/**
+ */
+void DBConnection::stopRead()
+{
+    active_reader_.reset();
+}
+
+/**
+ */
+SQLGenerator DBConnection::sqlGenerator() const
+{
+    return SQLGenerator(sqlConfiguration());
 }

@@ -44,13 +44,13 @@ bool SQLitePrepare::init_impl(const std::string& sql_statement)
     result = sqlite3_prepare_v2(connection_, sql_statement.c_str(), sql_statement.size(), &statement_, &remaining_sql);
     if (result != SQLITE_OK)
     {
-        logerr << "SQLiteConnection: execute: error " << result << " " << sqlite3_errmsg(connection_);
+        setError(sqlite3_errmsg(connection_));
         return false;
     }
 
     if (remaining_sql && *remaining_sql != '\0')
     {
-        logerr << "SQLiteConnection: execute: there was unparsed sql text: " << remaining_sql;
+        setError("there was unparsed sql text: " + std::string(remaining_sql));
         return false;
     }
     

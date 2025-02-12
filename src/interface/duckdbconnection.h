@@ -50,31 +50,44 @@ public:
                                                  size_t offset, 
                                                  size_t chunk_size) override final;
 
-    //duckdb needs precise data types in its tables
-    bool needsPreciseDBTypes() const override final { return true; }
+    /**
+     */
+    db::SQLConfig sqlConfiguration() const override final
+    {
+        db::SQLConfig config;
 
-    //no indexing, queries should be quite fast in duckdb 
-    //and indexing blows up the db file consiferably
-    bool useIndexing() const override final { return false; }
+        //duckdb needs precise data types in its tables
+        config.precise_types = true;
 
-    db::SQLPlaceholder sqlPlaceholder() const override final { return db::SQLPlaceholder::QuestionMark; }
+        //no indexing, queries should be quite fast in duckdb 
+        //and indexing blows up the db file consiferably
+        config.indexing = false;
+
+        //duckdb can only comprehend ? as a placeholder
+        config.placeholder = db::SQLPlaceholder::QuestionMark;
+
+        //duckdb does not allow 'replace into' directly, this is handled via 'insert ... on conflict'
+        config.use_conflict_resolution = true;
+
+        return config;
+    }
 
     DuckDBConnectionSettings& settings() { return settings_; }
 
 protected:
-    std::pair<bool, std::string> connect_impl(const std::string& file_name) override final;
+    Result connect_impl(const std::string& file_name) override final;
     void disconnect_impl() override final;
 
-    bool exportFile_impl(const std::string& file_name) override final;
+    Result exportFile_impl(const std::string& file_name) override final;
 
-    bool executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer) override final;
+    Result executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer) override final;
     bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) override final;
 
-    std::pair<bool, std::string> insertBuffer_impl(const std::string& table_name, 
-                                                   const std::shared_ptr<Buffer>& buffer,
-                                                   PropertyList* table_properties) override final;
+    Result insertBuffer_impl(const std::string& table_name, 
+                             const std::shared_ptr<Buffer>& buffer,
+                             PropertyList* table_properties) override final;
 
-    boost::optional<std::vector<std::string>> getTableList_impl() override final;
+    ResultT<std::vector<std::string>> getTableList_impl() override final;
     
 private:
     duckdb_database   db_         = nullptr;

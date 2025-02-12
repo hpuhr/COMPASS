@@ -57,6 +57,7 @@ bool DBPrepare::init(const std::string& sql_statement)
 {
     assert(!prepared_stmnt_ok_);
     prepared_stmnt_ok_ = init_impl(sql_statement);
+
     return prepared_stmnt_ok_;
 }
 
@@ -136,9 +137,9 @@ bool DBPrepare::execute(const ExecOptions* options,
 
 /**
  */
-bool DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
-                              const boost::optional<size_t>& idx_from, 
-                              const boost::optional<size_t>& idx_to)
+Result DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
+                                const boost::optional<size_t>& idx_from, 
+                                const boost::optional<size_t>& idx_to)
 {
     if (!prepared_stmnt_ok_)
         logerr << "DBPrepare: executeBuffer: prepared statement invalid";
@@ -185,7 +186,7 @@ bool DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
             //bind index = 1-based
             size_t bind_idx = c + 1;
 
-            SwitchPropertyDataType(dtype, UpdateFunc, NotFoundFunc);
+            SwitchPropertyDataType(dtype, UpdateFunc, NotFoundFunc)
         }
 
         //use minimal execution version
@@ -200,7 +201,7 @@ bool DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
         assert(ok);
     }
 
-    return true;
+    return Result::succeeded();
 }
 
 /**
@@ -462,9 +463,23 @@ bool DBScopedPrepare::execute(const DBPrepare::ExecOptions* options,
 
 /**
  */
-bool DBScopedPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
-                                    const boost::optional<size_t>& idx_from, 
-                                    const boost::optional<size_t>& idx_to)
+Result DBScopedPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
+                                      const boost::optional<size_t>& idx_from, 
+                                      const boost::optional<size_t>& idx_to)
 {
     return db_prepare_->executeBuffer(buffer, idx_from, idx_to);
+}
+
+/**
+ */
+bool DBScopedPrepare::hasError() const 
+{ 
+    return db_prepare_->hasError();
+}
+
+/**
+ */
+std::string DBScopedPrepare::lastError() const 
+{ 
+    return db_prepare_->lastError();
 }

@@ -34,14 +34,14 @@ class DBContent;
 class SQLGenerator
 {
 public:
-    SQLGenerator(bool precise_types, 
-                 db::SQLPlaceholder placeholder);
+    
+
+    SQLGenerator(const db::SQLConfig& config);
     virtual ~SQLGenerator();
 
-    std::string getCreateTableStatement(const DBContent& object, bool indexing);
+    std::string getCreateTableStatement(const DBContent& object);
     std::string getCreateTableStatement(const std::string& table_name,
                                         const std::vector<DBTableColumnInfo>& column_infos, 
-                                        bool indexing,
                                         const std::string& dbcontent_name = "");
     std::string getInsertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, 
                                             std::string table_name);
@@ -49,9 +49,16 @@ public:
                                             const std::string& key_col_name, 
                                             std::string table_name);
 
-    std::shared_ptr<DBCommand> getSelectCommand(
-            const DBContent& object, dbContent::VariableSet read_list, const std::string& filter,
-            bool use_order = false, dbContent::Variable* order_variable = nullptr);
+    std::shared_ptr<DBCommand> getSelectCommand(const DBContent& object, 
+                                                dbContent::VariableSet read_list, 
+                                                const std::string& filter,
+                                                bool use_order = false, 
+                                                dbContent::Variable* order_variable = nullptr);
+    std::shared_ptr<DBCommand> getSelectCommand(const std::string& table_name, 
+                                                const PropertyList& properties, 
+                                                const std::string& filter,
+                                                bool use_order = false, 
+                                                const std::string& order_variable = "");
 
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
     std::shared_ptr<DBCommand> getFFTSelectCommand();
@@ -110,11 +117,13 @@ public:
 
     std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBContent& object);
 
-protected:
+private:
     std::string placeholder(int index = 1) const;
 
-    bool               precise_types_ = false;
-    db::SQLPlaceholder placeholder_   = db::SQLPlaceholder::AtVar;
+    std::string replaceStatement(const std::string& table, 
+                                 const std::vector<std::string>& values) const;
+
+    db::SQLConfig config_;
 
     //    std::string subTablesWhereClause(const DBTable& table,
     //                                     const std::vector<std::string>& used_tables);

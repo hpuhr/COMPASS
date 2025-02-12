@@ -17,6 +17,10 @@
 
 #pragma once
 
+//#define WITH_PARQUET_TOOLS
+
+#ifdef WITH_PARQUET_TOOLS
+
 #include "property.h"
 
 #include <memory>
@@ -111,3 +115,5 @@ private:
 };
 
 } // namespace parquettools
+
+#endif

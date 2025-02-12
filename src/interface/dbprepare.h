@@ -27,6 +27,8 @@
 
 #include <json.hpp>
 
+#include "result.h"
+
 class Buffer;
 class DBResult;
 
@@ -81,11 +83,16 @@ public:
     std::shared_ptr<DBResult> execute(const ExecOptions& options = ExecOptions());
     bool execute(const ExecOptions* options = nullptr, 
                  DBResult* result = nullptr);
-    bool executeBuffer(const std::shared_ptr<Buffer>& buffer,
-                       const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
-                       const boost::optional<size_t>& idx_to = boost::optional<size_t>());
+    Result executeBuffer(const std::shared_ptr<Buffer>& buffer,
+                         const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
+                         const boost::optional<size_t>& idx_to = boost::optional<size_t>());
+
+    bool hasError() const { return error_.has_value(); }
+    std::string lastError() const { return hasError() ? error_.value() : ""; }
 
 protected:
+    void setError(const std::string& err) { error_ = err; }
+
     virtual bool init_impl(const std::string& sql_statement) = 0;
     virtual void cleanup_impl() = 0;
     virtual void cleanupBinds_impl() {}
@@ -115,6 +122,8 @@ private:
     bool prepared_stmnt_ok_  = false;
     bool active_transaction_ = false;
     bool active_binds_       = false;
+
+    boost::optional<std::string> error_;
 };
 
 /**
@@ -147,9 +156,13 @@ public:
     std::shared_ptr<DBResult> execute(const DBPrepare::ExecOptions& options = DBPrepare::ExecOptions());
     bool execute(const DBPrepare::ExecOptions* options = nullptr, 
                  DBResult* result = nullptr);
-    bool executeBuffer(const std::shared_ptr<Buffer>& buffer,
-                       const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
-                       const boost::optional<size_t>& idx_to = boost::optional<size_t>());
+    Result executeBuffer(const std::shared_ptr<Buffer>& buffer,
+                         const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
+                         const boost::optional<size_t>& idx_to = boost::optional<size_t>());
+
+    bool hasError() const;
+    std::string lastError() const;
+
 protected:
     std::shared_ptr<DBPrepare> db_prepare_;
 };

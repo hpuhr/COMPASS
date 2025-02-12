@@ -44,6 +44,6 @@ struct DuckDBConnectionSettings
 
     AccessMode   access_mode        = AccessMode::ReadWrite;
     SortOrder    sort_order_default = SortOrder::Ascending;
-    unsigned int max_ram_gb         = 1;
+    unsigned int max_ram_gb         = 2;
     unsigned int num_threads        = 8;
 };

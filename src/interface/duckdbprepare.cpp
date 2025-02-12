@@ -19,6 +19,8 @@
 #include "duckdbexecresult.h"
 #include "dbresult.h"
 
+#include "logger.h"
+
 /**
  */
 DuckDBPrepare::DuckDBPrepare(duckdb_connection connection) 
@@ -36,7 +38,13 @@ DuckDBPrepare::~DuckDBPrepare() = default;
 bool DuckDBPrepare::init_impl(const std::string& sql_statement)
 {
     auto result = duckdb_prepare(connection_, sql_statement.c_str(), &statement_);
-    return result == DuckDBSuccess;
+    if (result != DuckDBSuccess)
+    {
+        auto err = duckdb_prepare_error(statement_);
+        setError("could not prepare statement: " + std::string(err));
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -97,7 +105,7 @@ bool DuckDBPrepare::execute_impl(const ExecOptions* options, DBResult* result)
 
     if (fetch_buffer && !exec_result->toBuffer(*result->buffer()))
     {
-        result->setError("reading query result failed");
+        if (result) result->setError("reading query result failed");
         return false;
     }
 

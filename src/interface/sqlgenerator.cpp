@@ -40,10 +40,8 @@ using namespace dbContent;
 
 /**
  */
-SQLGenerator::SQLGenerator(bool precise_types,
-                           db::SQLPlaceholder placeholder) 
-:   precise_types_(precise_types)
-,   placeholder_  (placeholder  )
+SQLGenerator::SQLGenerator(const db::SQLConfig& config) 
+:   config_(config)
 {
 }
 
@@ -55,13 +53,12 @@ SQLGenerator::~SQLGenerator() = default;
  */
 std::string SQLGenerator::placeholder(int index) const
 {
-    return (placeholder_ == db::SQLPlaceholder::AtVar ? "@VAR" + std::to_string(index) : "?");
+    return (config_.placeholder == db::SQLPlaceholder::AtVar ? "@VAR" + std::to_string(index) : "?");
 }
 
 /**
  */
-string SQLGenerator::getCreateTableStatement(const DBContent& object, 
-                                             bool indexing)
+string SQLGenerator::getCreateTableStatement(const DBContent& object)
 {
     std::vector<DBTableColumnInfo> column_infos;
     for (auto& var_it : object.variables())
@@ -70,14 +67,13 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object,
         column_infos.push_back(DBTableColumnInfo(v->dbColumnName(), v->dataType(), v->isKey()));
     }
 
-    return getCreateTableStatement(object.dbTableName(), column_infos, indexing, object.name());
+    return getCreateTableStatement(object.dbTableName(), column_infos, object.name());
 }
 
 /**
  */
 std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
-                                                  const std::vector<DBTableColumnInfo>& column_infos, 
-                                                  bool indexing,
+                                                  const std::vector<DBTableColumnInfo>& column_infos,
                                                   const std::string& dbcontent_name)
 {
     stringstream ss;
@@ -105,7 +101,7 @@ std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
 
     string data_type;
 
-    std::string pkey_type_str = Property::asDBString(precise_types_ ? PropertyDataType::ULONGINT : PropertyDataType::INT, true);
+    std::string pkey_type_str = Property::asDBString(config_.precise_types ? PropertyDataType::ULONGINT : PropertyDataType::INT, true);
 
     unsigned int cnt = 0;
     for (const auto& cinfo : column_infos)
@@ -131,7 +127,7 @@ std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
     ss << ");";
 
     //enable indexing on some metavars?
-    if (indexing && !dbcontent_name.empty())
+    if (config_.indexing && !dbcontent_name.empty())
     {
         // CREATE [UNIQUE] INDEX index_name ON table_name(column_list);
 
@@ -514,9 +510,37 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
 
 /**
  */
+std::string SQLGenerator::replaceStatement(const std::string& table, 
+                                           const std::vector<std::string>& values) const
+{
+    assert(values.size() >= 2);
+
+    size_t n = values.size();
+
+    std::string s;
+    if (config_.use_conflict_resolution)
+    {
+        s += "INSERT OR REPLACE INTO " + table + " VALUES (";
+        for (size_t i = 0; i < n; ++i)
+            s += "'" + values[ i ] + "'" + (i < n - 1 ? ", " : "");
+        s += ");";
+    }
+    else
+    {
+        s += "REPLACE INTO " + table + " VALUES (";
+        for (size_t i = 0; i < n; ++i)
+            s += "'" + values[ i ] + "'" + (i < n - 1 ? ", " : "");
+        s += ");";
+    }
+
+    return s;
+}
+
+/**
+ */
 std::string SQLGenerator::getInsertTargetStatement(unsigned int utn, const std::string& info)
 {
-    return "REPLACE INTO " + TABLE_NAME_TARGETS + " VALUES (" + to_string(utn)+ ", '" + info + "');";
+    return replaceStatement(TABLE_NAME_TARGETS, { to_string(utn), info });
 }
 
 /**
@@ -524,13 +548,10 @@ std::string SQLGenerator::getInsertTargetStatement(unsigned int utn, const std::
 string SQLGenerator::getInsertPropertyStatement(const string& id,
                                                 const string& value)
 {
-    stringstream ss;
     assert(id.size() < 255);
 
     // REPLACE into table (id, name, age) values(1, "A", 19)
-    ss << "REPLACE INTO " << TABLE_NAME_PROPERTIES << " VALUES ('" << id << "', '" << value
-       << "');";
-    return ss.str();
+    return replaceStatement(TABLE_NAME_PROPERTIES, { id, value });
 }
 
 /**
@@ -562,12 +583,8 @@ std::string SQLGenerator::getSetNullStatement (const std::string& table_name, co
  */
 string SQLGenerator::getInsertViewPointStatement(const unsigned int id, const string& json)
 {
-    stringstream ss;
-
     // REPLACE into table (id, name, age) values(1, "A", 19)
-    ss << "REPLACE INTO " << TABLE_NAME_VIEWPOINTS << " VALUES ('" << id << "', '" << json
-       << "');";
-    return ss.str();
+    return replaceStatement(TABLE_NAME_VIEWPOINTS, { std::to_string(id), json });
 }
 
 /**
@@ -581,15 +598,13 @@ string SQLGenerator::getSelectAllViewPointsStatement()
 
 /**
  */
-string SQLGenerator::getReplaceSectorStatement(const unsigned int id, const string& name,
-                                               const string& layer_name, const string& json)
+string SQLGenerator::getReplaceSectorStatement(const unsigned int id, 
+                                               const string& name,
+                                               const string& layer_name, 
+                                               const string& json)
 {
-    stringstream ss;
-
     // REPLACE into table (id, name, age) values(1, "A", 19)
-    ss << "REPLACE INTO " << TABLE_NAME_SECTORS << " VALUES ('" << id << "', '" << name << "', '"
-       << layer_name << "', '" << json << "');";
-    return ss.str();
+    return replaceStatement(TABLE_NAME_SECTORS, { std::to_string(id), name, layer_name, json });
 }
 
 /**
@@ -610,6 +625,7 @@ string SQLGenerator::getSelectAllTargetsStatement()
     return ss.str();
 }
 
+//@TODO: !rewrite using replaceStatement() if again using these!
 //string SQLGenerator::getInsertMinMaxStatement(const string& variable_name,
 //                                              const string& object_name,
 //                                              const string& min, const string& max)
@@ -679,14 +695,14 @@ std::string SQLGenerator::getTableDataSourcesCreateStatement()
     stringstream ss;
 
     ss << "CREATE TABLE " << DBDataSource::table_name_ << "("
-        << DBDataSource::id_column_.name() << " "  << DBDataSource::id_column_.dbDataTypeString(precise_types_) << ", "
-        << DBDataSource::ds_type_column_.name() << " "  << DBDataSource::ds_type_column_.dbDataTypeString(precise_types_) << ", "
-        << DBDataSource::sac_column_.name() << " "  << DBDataSource::sac_column_.dbDataTypeString(precise_types_) << ", "
-        << DBDataSource::sic_column_.name() << " "  << DBDataSource::sic_column_.dbDataTypeString(precise_types_) << ", "
-        << DBDataSource::name_column_.name() << " "  << DBDataSource::name_column_.dbDataTypeString(precise_types_) << ", "
-        << DBDataSource::short_name_.name() << " "  << DBDataSource::short_name_.dbDataTypeString(precise_types_) << ", "
-        << DBDataSource::info_column_.name() << " "  << DBDataSource::info_column_.dbDataTypeString(precise_types_) << ", "
-        << DBDataSource::counts_column_.name() << " "  << DBDataSource::counts_column_.dbDataTypeString(precise_types_) << ", " 
+        << DBDataSource::id_column_.name() << " "  << DBDataSource::id_column_.dbDataTypeString(config_.precise_types) << ", "
+        << DBDataSource::ds_type_column_.name() << " "  << DBDataSource::ds_type_column_.dbDataTypeString(config_.precise_types) << ", "
+        << DBDataSource::sac_column_.name() << " "  << DBDataSource::sac_column_.dbDataTypeString(config_.precise_types) << ", "
+        << DBDataSource::sic_column_.name() << " "  << DBDataSource::sic_column_.dbDataTypeString(config_.precise_types) << ", "
+        << DBDataSource::name_column_.name() << " "  << DBDataSource::name_column_.dbDataTypeString(config_.precise_types) << ", "
+        << DBDataSource::short_name_.name() << " "  << DBDataSource::short_name_.dbDataTypeString(config_.precise_types) << ", "
+        << DBDataSource::info_column_.name() << " "  << DBDataSource::info_column_.dbDataTypeString(config_.precise_types) << ", "
+        << DBDataSource::counts_column_.name() << " "  << DBDataSource::counts_column_.dbDataTypeString(config_.precise_types) << ", " 
         << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
         << ");";
     
@@ -700,8 +716,8 @@ std::string SQLGenerator::getTableFFTsCreateStatement()
     stringstream ss;
 
     ss << "CREATE TABLE " << DBFFT::table_name_ << "("
-        << DBFFT::name_column_.name() << " "  << DBFFT::name_column_.dbDataTypeString(precise_types_) << ", "
-        << DBFFT::info_column_.name() << " "  << DBFFT::info_column_.dbDataTypeString(precise_types_) << ", "
+        << DBFFT::name_column_.name() << " "  << DBFFT::name_column_.dbDataTypeString(config_.precise_types) << ", "
+        << DBFFT::info_column_.name() << " "  << DBFFT::info_column_.dbDataTypeString(config_.precise_types) << ", "
         << "PRIMARY KEY (" << DBFFT::name_column_.name() << ")"
         << ");";
     
@@ -860,57 +876,72 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBContent& object,
     logdbg << "SQLGenerator: getSelectCommand: dbo " << object.name() << " read list size " << read_list.getSize();
     assert(read_list.getSize() != 0);
 
+    //collect needed properties
+    PropertyList property_list;
+    for (auto var_it : read_list.getSet())
+    {
+        Variable* variable = var_it;
+        property_list.addProperty(variable->dbColumnName(), variable->dataType());
+    }
+
+    return getSelectCommand(object.dbTableName(), 
+                            property_list, 
+                            filter, 
+                            use_order, 
+                            order_variable ? order_variable->dbColumnName() : "");
+}
+
+/**
+ */
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& table_name, 
+                                                          const PropertyList& properties, 
+                                                          const std::string& filter,
+                                                          bool use_order, 
+                                                          const std::string& order_variable)
+{
+    logdbg << "SQLGenerator: getSelectCommand: table " << table_name << " num properties " << properties.size();
+
+    assert(properties.size() != 0);
+
     shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
 
     stringstream ss;
 
     ss << "SELECT ";
 
-    logdbg << "SQLGenerator: getSelectCommand: collecting required variables";
-
-    PropertyList property_list;
-
-    string column_name;
-    string table_db_name = object.dbTableName();
-
     bool first = true;
-    for (auto var_it : read_list.getSet())
+    for (const auto& p : properties.properties())
         // look what tables are needed for loaded variables and add variables to sql query
     {
-        Variable* variable = var_it;
-
         if (!first)
             ss << ", ";
 
-        column_name = variable->dbColumnName();
-
-        ss << table_db_name << "." << column_name;
-
-        property_list.addProperty(column_name, variable->dataType());
+        ss << table_name << "." << p.name();
 
         first = false;
     }
 
-    ss << " FROM " << table_db_name;  // << table->getAllTableNames();
+    ss << " FROM " << table_name;  // << table->getAllTableNames();
 
     // check contributing_receivers json_each
     if (filter.find("json_each.value") != std::string::npos)
-        ss << ", json_each("+object.dbTableName()+".contributing_receivers)";
+        ss << (", json_each(" + table_name + ".contributing_receivers)");
 
     // add extra from parts
 //    for (auto& from_part : extra_from_parts)
 //        ss << ", " << from_part;
 
     logdbg << "SQLGenerator: getSelectCommand: filtering statement";
+
     // add filter statement
     if (filter.size() > 0)
         ss << " WHERE "  << filter;
 
     if (use_order)
     {
-        assert(order_variable);
+        assert(!order_variable.empty());
 
-        ss << " ORDER BY " << order_variable->dbColumnName();
+        ss << " ORDER BY " << order_variable;
 
         ss << " ASC";
     }
@@ -918,7 +949,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBContent& object,
     ss << ";";
 
     command->set(ss.str());
-    command->list(property_list);
+    command->list(properties);
 
     logdbg << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
 

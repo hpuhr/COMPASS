@@ -29,6 +29,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/dbprepare.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbreader.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbexecresult.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbresult.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/sqlgenerator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/sqliteconnection.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/sqliteprepare.cpp"

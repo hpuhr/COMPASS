@@ -59,9 +59,15 @@ bool DBReader::init(const std::shared_ptr<DBCommand>& select_cmd,
     chunk_size_ = chunk_size;
 
     if (!select_cmd_->expectsResult())
+    {
+        setError("select command does not provided expected properties");
         return false;
-    if (!QString::fromStdString(select_cmd_->get()).startsWith("INSERT "))
+    }
+    if (!QString::fromStdString(select_cmd_->get()).startsWith("SELECT "))
+    {
+        setError("not a valid select command");
         return false;
+    }
 
     ready_ = init_impl();
     return ready_;
@@ -84,6 +90,20 @@ std::shared_ptr<DBResult> DBReader::readChunk()
 {
     assert(isReady());
     return readChunk_impl();
+}
+
+/**
+ */
+bool DBReader::hasError()  const
+{ 
+    return error_.has_value(); 
+}
+
+/**
+ */
+std::string DBReader::lastError() const 
+{ 
+    return hasError() ? error_.value() : ""; 
 }
 
 /***************************************************************************************
@@ -121,4 +141,18 @@ bool DBScopedReader::isReady() const
 std::shared_ptr<DBResult> DBScopedReader::readChunk() 
 {
     return db_reader_->readChunk(); 
+}
+
+/**
+ */
+bool DBScopedReader::hasError()  const
+{ 
+    return db_reader_->hasError(); 
+}
+
+/**
+ */
+std::string DBScopedReader::lastError() const 
+{ 
+    return db_reader_->lastError(); 
 }

@@ -20,7 +20,7 @@
 #include "dbresult.h"
 #include "buffer.h"
 #include "property_templates.h"
-#include "dbcommand.h";
+#include "dbcommand.h"
 #include "duckdbexecresult.h"
 
 #include "logger.h"
@@ -52,12 +52,16 @@ bool DuckDBReader::init_impl()
 
     //succeeded?
     if (!prepare.valid())
+    {
+        setError("could not prepare select statement");
         return false;
+    }
 
     //execute and obtain duckdb result
     result_ = prepare.executeDuckDB();
     if (!result_ || result_->hasError())
     {
+        setError("could not execute select statement");
         result_.reset();
         return false;
     }
@@ -72,6 +76,7 @@ bool DuckDBReader::init_impl()
 
     if (result_cols_ != select_cmd->resultList().size())
     {
+        setError("unexpected result size");
         result_.reset();
         return false;
     }
@@ -99,7 +104,10 @@ std::shared_ptr<DBResult> DuckDBReader::readChunk_impl()
 
     //no more results to fetch?
     if (cur_idx_ >= result_rows_)
+    {
+        result->hasMore(false);
         return result;
+    }
     
     //fetch buffer data
     if (!result_->toBuffer(*b, cur_idx_, chunkSize()))
@@ -111,8 +119,14 @@ std::shared_ptr<DBResult> DuckDBReader::readChunk_impl()
     cur_idx_ += chunkSize();
 
     //check if there is MORE
-    if (cur_idx_ < result_rows_)
-        result->hasMore(true);
+    bool has_more = cur_idx_ < result_rows_;
+
+    size_t num_read = b->size();
+    size_t num_left = has_more ? result_rows_ - cur_idx_ : 0;
+
+    result->hasMore(has_more);
+
+    loginf << "DuckDBReader: readChunk_impl: read " << num_read << " left " << num_left << " hasmore " << has_more;
 
     return result;
 }

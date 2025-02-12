@@ -171,34 +171,37 @@ bool DuckDBExecResult::toBuffer(Buffer& buffer,
     assert(nc.has_value());
     assert(nr.has_value());
 
-    idx_t col_count = duckdb_column_count(&result_);
-    idx_t row_count = duckdb_row_count(&result_);
+    idx_t col_count = nc.value();
+    idx_t row_count = nr.value();
     assert(col_count == properties.size()); // result column count must match provided buffer
 
-    #define UpdateFunc(PDType, DType, Suffix)                           \
-        bool is_null = duckdb_value_is_null(&result_, c, r);            \
-        if (!is_null)                                                   \
-            buffer.get<DType>(p.name()).set(buf_idx, read<DType>(c, r));
+    #define UpdateFunc(PDType, DType, Suffix)                              \
+        bool is_null = duckdb_value_is_null(&result_, c, r);               \
+        if (!is_null)                                                      \
+        {                                                                  \
+            DType v = read<DType>(c, r);                                   \
+            buffer.get<DType>(pname).set(buf_idx, v);                      \
+        }
 
     #define NotFoundFunc                                                                             \
         logerr << "DuckDBExecResult: toBuffer: unknown property type " << Property::asString(dtype); \
         assert(false);
 
     size_t r0 = offset.has_value() ? offset.value() : 0;
-    size_t r1 = max_entries.has_value() ? r0 + max_entries.value() : nr.value();
+    size_t r1 = std::min(row_count, max_entries.has_value() ? r0 + max_entries.value() : row_count);
 
     //nothing to read?
-    if (r0 >= r1 || r0 >= nr.value())
+    if (r0 >= r1 || r0 >= row_count)
         return true;
 
     //read rows into buffer
-
     for (idx_t r = r0, buf_idx = 0; r < r1; ++r, ++buf_idx)
     {
         for (idx_t c = 0; c < col_count; ++c)
         {
             const auto& p = properties.at(c);
             auto dtype = p.dataType();
+            const auto& pname = p.name();
 
             SwitchPropertyDataType(dtype, UpdateFunc, NotFoundFunc)
         }

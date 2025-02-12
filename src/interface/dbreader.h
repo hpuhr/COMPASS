@@ -47,7 +47,12 @@ public:
 
     std::shared_ptr<DBResult> readChunk();
 
+    bool hasError() const;
+    std::string lastError() const;
+
 protected:
+    void setError(const std::string& error) { error_ = error; }
+
     DBCommand* selectCommand() const { return select_cmd_.get(); }
     size_t offset() const { return offset_; }
     size_t chunkSize() const { return chunk_size_; }
@@ -57,10 +62,11 @@ protected:
     virtual std::shared_ptr<DBResult> readChunk_impl() = 0;
 
 private:
-    bool                       ready_      = false;
-    std::shared_ptr<DBCommand> select_cmd_;
-    size_t                     offset_     = 0;
-    size_t                     chunk_size_ = 0;
+    bool                         ready_      = false;
+    std::shared_ptr<DBCommand>   select_cmd_;
+    size_t                       offset_     = 0;
+    size_t                       chunk_size_ = 0;
+    boost::optional<std::string> error_;
 };
 
 /**
@@ -77,6 +83,9 @@ public:
 
     bool isReady() const;
     std::shared_ptr<DBResult> readChunk();
+
+    bool hasError() const;
+    std::string lastError() const;
 
 private:
     std::shared_ptr<DBReader> db_reader_;

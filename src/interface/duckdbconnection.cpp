@@ -91,7 +91,7 @@ DuckDBConnection::~DuckDBConnection()
 
 /**
  */
-std::pair<bool, std::string> DuckDBConnection::connect_impl(const std::string& file_name)
+Result DuckDBConnection::connect_impl(const std::string& file_name)
 {
     //close any opened connection
     if (dbOpened())
@@ -100,7 +100,7 @@ std::pair<bool, std::string> DuckDBConnection::connect_impl(const std::string& f
     // create the configuration object
     DuckDBScopedConfig config;
     if (!config.valid()) 
-        return std::make_pair(false, "could not create db configuration");
+        return Result::failed("could not create db configuration");
 
     //configure
     config.configure(settings_);
@@ -111,15 +111,15 @@ std::pair<bool, std::string> DuckDBConnection::connect_impl(const std::string& f
     if (state != DuckDBSuccess)
     {
         std::string err_str = error ? std::string(error) : std::string("unknown error");
-        return std::make_pair(false, err_str);
+        return Result::failed(err_str);
     }
 
     //connect to db
     state = duckdb_connect(db_, &connection_);
     if (state != DuckDBSuccess)
-        return std::make_pair(false, "could not connect to database");
+        return Result::failed("could not connect to database");
 
-    return std::make_pair(true, "");
+    return Result::succeeded();
 }
 
 /**
@@ -137,7 +137,7 @@ void DuckDBConnection::disconnect_impl()
 
 /**
  */
-bool DuckDBConnection::exportFile_impl(const std::string& file_name)
+Result DuckDBConnection::exportFile_impl(const std::string& file_name)
 {
     //@TODO
 
@@ -151,7 +151,7 @@ bool DuckDBConnection::exportFile_impl(const std::string& file_name)
     // char* sErrMsg = 0;
     // sqlite3_exec(db_handle_, tmp_sql.c_str(), NULL, NULL, &sErrMsg);
 
-    return false;
+    return Result::failed("not yet implemented");
 }
 
 /**
@@ -180,17 +180,20 @@ std::shared_ptr<DBScopedReader> DuckDBConnection::createReader(const std::shared
 
 /**
  */
-bool DuckDBConnection::executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer)
+Result DuckDBConnection::executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer)
 {
     DuckDBExecResult dbresult;
 
-    auto state = duckdb_query(connection_, sql.c_str(), result ? dbresult.result() : nullptr);
-    if (state == DuckDBError) 
-    {
-        if (result)
-            result->setError(dbresult.errorString());
+    auto state = duckdb_query(connection_, sql.c_str(), dbresult.result());
+    dbresult.result_valid_ = true;
+    dbresult.result_error_ = state == DuckDBError;
 
-        return false;
+    if (dbresult.hasError()) 
+    {
+        auto err = dbresult.errorString();
+        if (result)
+            result->setError(err);
+        return Result::failed(err);
     }
 
     if (fetch_result_buffer && result)
@@ -198,7 +201,7 @@ bool DuckDBConnection::executeSQL_impl(const std::string& sql, DBResult* result,
         //@TODO: fetch buffer
     }
 
-    return true;
+    return Result::succeeded();
 }
 
 /**
@@ -209,12 +212,23 @@ bool DuckDBConnection::executeCmd_impl(const std::string& command,
 {
     DuckDBScopedPrepare prepare(connection_, command);
 
+    if (!prepare.valid())
+    {
+        loginf << "preparing command '" << command << "' failed";
+        if (result)
+            result->setError("could not prepare command '" + command + "': " + prepare.lastError());
+        return false;
+    }
+
     DBPrepare::ExecOptions options;
     if (result && properties)
         options.bufferProperties(*properties);
 
     auto dbresult = prepare.execute(options);
     assert(dbresult);
+
+    if (dbresult->hasError())
+        loginf << "executing command '" << command << "' failed";
 
     if (result)
         *result = *dbresult;
@@ -224,20 +238,20 @@ bool DuckDBConnection::executeCmd_impl(const std::string& command,
 
 /**
  */
-std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::string& table_name, 
-                                                                 const std::shared_ptr<Buffer>& buffer,
-                                                                 PropertyList* table_properties)
+Result DuckDBConnection::insertBuffer_impl(const std::string& table_name, 
+                                           const std::shared_ptr<Buffer>& buffer,
+                                           PropertyList* table_properties)
 {
     //loginf << "DuckDBConnection: insertBuffer_impl: inserting into table '" << table_name << "'";
 
     if (!buffer || buffer->properties().size() == 0 || buffer->size() == 0)
-        return std::make_pair(false, "input buffer invalid");
+        return Result::failed("input buffer invalid");
 
     //loginf << "creating appender...";
 
     auto appender = createAppender(table_name);
     if (!appender->valid())
-        return std::make_pair(false, "creating duckdb appender failed");
+        return Result::failed("creating duckdb appender failed: " + appender->lastError());
 
     size_t appender_column_count = appender->columnCount();
 
@@ -251,11 +265,15 @@ std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::stri
 
     if (table_properties)
     {
+        //loginf << "using externally passed properties";
+
         //use externally passed properties
         properties = table_properties;
     }
     else if (created_tables.count(table_name))
     {
+        //loginf << "using stored table properties";
+
         //use stored table properties
         //@TODO: might fail!
         auto it = created_tables.find(table_name);
@@ -268,7 +286,10 @@ std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::stri
     }
     else
     {
+        //loginf << "using buffer properties";
+
         //use buffers properties
+        //note: !in this case the buffer properties need to reflect the table properties 1:1!
         properties = &buffer_properties;
     }
     assert(properties);
@@ -276,8 +297,7 @@ std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::stri
     //loginf << "update func...";
 
     #define UpdateFunc(PDType, DType, Suffix)                                                                               \
-        bool is_null = !has_property[ c ] || buffer->isNull(p, r);                                                          \
-        bool ok = is_null ? appender->appendNull() : appender->append<DType>(buffer->get<DType>(pname).get(r));             \
+        bool ok = appender->append<DType>(buffer->get<DType>(pname).get(r));                                                \
         if (!ok)                                                                                                            \
             logerr << "DuckDBConnection: insertBuffer_impl: appending '" << pname << "' failed: " << appender->lastError(); \
         assert(ok);
@@ -306,8 +326,16 @@ std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::stri
         for (unsigned int c = 0; c < np; ++c)
         {
             const auto& p     = properties->at(c);
-            auto        dtype = p.dataType();
             const auto& pname = p.name();
+            const auto* pb    = has_property[ c ] ? &buffer->properties().get(p.name()) : nullptr;
+
+            if (!pb || buffer->isNull(*pb, r))
+            {
+                appender->appendNull();
+                continue;
+            }
+
+            auto dtype = pb->dataType();
             
             SwitchPropertyDataType(dtype, UpdateFunc, NotFoundFunc);
         }
@@ -323,12 +351,12 @@ std::pair<bool, std::string> DuckDBConnection::insertBuffer_impl(const std::stri
     //cleanup appender
     appender.reset();
 
-    return std::make_pair(true, "");
+    return Result::succeeded();
 }
 
 /**
  */
-boost::optional<std::vector<std::string>> DuckDBConnection::getTableList_impl()
+ResultT<std::vector<std::string>> DuckDBConnection::getTableList_impl()
 {
     std::vector<std::string> tables;
 
@@ -342,8 +370,10 @@ boost::optional<std::vector<std::string>> DuckDBConnection::getTableList_impl()
     std::shared_ptr<DBResult> result = execute(command);
     assert(result);
 
-    if (!result->containsData())
-        return boost::optional<std::vector<std::string>>();
+    if (result->hasError())
+        return ResultT<std::vector<std::string>>::failed(result->error());
+    if (!result->buffer() || !result->containsData())
+        return ResultT<std::vector<std::string>>::failed("table list could not be retrieved");
 
     std::shared_ptr<Buffer> buffer = result->buffer();
 
@@ -359,5 +389,5 @@ boost::optional<std::vector<std::string>> DuckDBConnection::getTableList_impl()
         tables.push_back(table_name);
     }
 
-    return tables;
+    return ResultT<std::vector<std::string>>::succeeded(tables);
 }

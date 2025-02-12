@@ -59,14 +59,21 @@ public:
     size_t endRow();
     bool flush();
 
-    std::string lastError() const;
+    std::string lastAppenderError() const;
     size_t columnCount() const;
     size_t currentColumnCount() const { return appended_; }
+
+    bool hasError() const { return error_.has_value(); }
+    std::string lastError() const { return hasError() ? error_.value() : ""; }
     
 private:
+    void setError(const std::string& err) { error_ = err; }
+
     duckdb_appender appender_;
     bool ok_ = false;
     size_t appended_ = 0;
+
+    boost::optional<std::string> error_; 
 };
 
 #define StandardApppender(DType, DuckDBDTypeName)                                     \

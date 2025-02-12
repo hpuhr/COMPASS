@@ -60,6 +60,7 @@ public:
 
 private:
     friend class DuckDBPrepare;
+    friend class DuckDBConnection;
 
     template <typename T>
     T read(idx_t col, idx_t row)

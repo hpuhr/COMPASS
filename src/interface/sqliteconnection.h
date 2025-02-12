@@ -46,25 +46,34 @@ public:
     std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
                                                  size_t offset, 
                                                  size_t chunk_size) override final;
+    /**
+     */
+    db::SQLConfig sqlConfiguration() const override final
+    {
+        db::SQLConfig config;
 
-    //no precise types needed, e.g. suitable integer types will be chosen in the background
-    bool needsPreciseDBTypes() const override final { return false; }
+        //no precise types needed, e.g. suitable integer types will be chosen in the background
+        config.precise_types = false;
 
-    //needed for query speed
-    bool useIndexing() const override final { return true; }
+        //needed for query speed
+        config.indexing = true;
 
-    db::SQLPlaceholder sqlPlaceholder() const override final { return db::SQLPlaceholder::AtVar; }
+        config.placeholder = db::SQLPlaceholder::AtVar;
+        config.use_conflict_resolution = false;
+
+        return config;
+    }
 
 protected:
-    std::pair<bool, std::string> connect_impl(const std::string& file_name) override final;
+    Result connect_impl(const std::string& file_name) override final;
     void disconnect_impl() override final;
 
-    bool exportFile_impl(const std::string& file_name) override final;
+    Result exportFile_impl(const std::string& file_name) override final;
 
-    bool executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer) override final;
+    Result executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer) override final;
     bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) override final;
 
-    boost::optional<std::vector<std::string>> getTableList_impl() override final;
+    ResultT<std::vector<std::string>> getTableList_impl() override final;
 
 private:
     /// Database handle to execute queries

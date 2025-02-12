@@ -36,6 +36,7 @@
 #include "fftmanager.h"
 #include "util/async.h"
 #include "licensemanager.h"
+#include "result.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -344,27 +345,30 @@ void COMPASS::openDBFile(const std::string& filename)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+    Result res = Result::succeeded();
+
     try
     {
         db_interface_->openDBFile(filename, false);
         assert (db_interface_->dbOpen());
 
         addDBFileToList(filename);
-        lastUsedPath(Files::getDirectoryFromPath(filename));
 
         db_opened_ = true;
 
         emit databaseOpenedSignal();
-
-    }  catch (std::exception& e)
+    }  
+    catch (std::exception& e)
     {
-        QMessageBox m_warning(QMessageBox::Warning, "Opening Database Failed",
-                              e.what(), QMessageBox::Ok);
-        m_warning.exec();
+        res = Result::failed(e.what());
 
         db_opened_ = false;
     }
 
+    lastUsedPath(Files::getDirectoryFromPath(filename));
+
+    if (!res.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
 
     QApplication::restoreOverrideCursor();
 }
@@ -392,15 +396,30 @@ void COMPASS::createNewDBFile(const std::string& filename)
 
     last_db_filename_ = filename;
 
-    db_interface_->openDBFile(filename, true);
-    assert (db_interface_->dbOpen());
+    Result res = Result::succeeded();
 
-    addDBFileToList(filename);
+    try
+    {
+        db_interface_->openDBFile(filename, true);
+        assert (db_interface_->dbOpen());
+
+        addDBFileToList(filename);
+
+        db_opened_ = true;
+
+        emit databaseOpenedSignal();
+    }
+    catch(const std::exception& e)
+    {
+        res = Result::failed(e.what());
+
+        db_opened_ = false;
+    }
+
     lastUsedPath(Files::getDirectoryFromPath(filename));
 
-    db_opened_ = true;
-
-    emit databaseOpenedSignal();
+    if (!res.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
 }
 
 void COMPASS::exportDBFile(const std::string& filename)
@@ -423,14 +442,26 @@ void COMPASS::exportDBFile(const std::string& filename)
 
     Async::waitAndProcessEventsFor(50);
 
-    db_interface_->exportDBFile(filename);
+    Result res = Result::succeeded();
+
+    try
+    {
+        db_interface_->exportDBFile(filename);
+    }
+    catch(const std::exception& e)
+    {
+        res = Result::failed(e.what());
+    }
+
     lastUsedPath(Files::getDirectoryFromPath(filename));
-
-
+    
     msg_box->close();
     delete msg_box;
 
     db_export_in_progress_ = false;
+
+    if (!res.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
 }
 
 void COMPASS::closeDB()

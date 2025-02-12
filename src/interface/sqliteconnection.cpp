@@ -73,7 +73,7 @@ std::shared_ptr<DBScopedReader> SQLiteConnection::createReader(const std::shared
 
 /**
  */
-std::pair<bool, std::string> SQLiteConnection::connect_impl(const std::string& file_name)
+Result SQLiteConnection::connect_impl(const std::string& file_name)
 {
     loginf << "SQLiteConnection: connect_impl: '" << file_name << "'";
 
@@ -88,7 +88,7 @@ std::pair<bool, std::string> SQLiteConnection::connect_impl(const std::string& f
         // purpose of calling sqlite3_errmsg on it ...)
         std::string err(sqlite3_errmsg(db_handle_));
         sqlite3_close(db_handle_);
-        return std::make_pair(false, err);
+        return Result::failed(err);
     }
 
     char* sErrMsg = 0;
@@ -100,7 +100,7 @@ std::pair<bool, std::string> SQLiteConnection::connect_impl(const std::string& f
 
     //sqlite3_exec(db_handle_, "PRAGMA locking_mode = EXCLUSIVE", NULL, NULL, &sErrMsg);
 
-    return std::make_pair(true, "");
+    return Result::succeeded();
 }
 
 /**
@@ -116,26 +116,26 @@ void SQLiteConnection::disconnect_impl()
 
 /**
  */
-bool SQLiteConnection::exportFile_impl(const std::string& file_name)
+Result SQLiteConnection::exportFile_impl(const std::string& file_name)
 {
     assert (dbOpened());
 
     string tmp_sql = "VACUUM INTO '"+file_name+"';";
 
     char* sErrMsg = 0;
-    sqlite3_exec(db_handle_, tmp_sql.c_str(), NULL, NULL, &sErrMsg);
+    bool ok = sqlite3_exec(db_handle_, tmp_sql.c_str(), NULL, NULL, &sErrMsg) == SQLITE_OK;
 
-    return true;
+    return Result(ok, sErrMsg);
 }
 
 /**
  */
-bool SQLiteConnection::executeSQL_impl(const std::string& sql, 
-                                       DBResult* result, 
-                                       bool fetch_result_buffer)
+Result SQLiteConnection::executeSQL_impl(const std::string& sql, 
+                                         DBResult* result, 
+                                         bool fetch_result_buffer)
 {
     //@TODO
-    return false;
+    return Result::failed("not yet implemented");
 }
 
 /**
@@ -150,7 +150,7 @@ bool SQLiteConnection::executeCmd_impl(const std::string& command,
 
 /**
  */
-boost::optional<std::vector<std::string>> SQLiteConnection::getTableList_impl()
+ResultT<std::vector<std::string>> SQLiteConnection::getTableList_impl()
 {
     std::vector<std::string> tables;
 
@@ -163,6 +163,11 @@ boost::optional<std::vector<std::string>> SQLiteConnection::getTableList_impl()
     command.list(list);
 
     std::shared_ptr<DBResult> result = execute(command);
+    if (result->hasError())
+        return ResultT<std::vector<std::string>>::failed(result->error());
+    if (!result->buffer() || !result->containsData())
+        return ResultT<std::vector<std::string>>::failed("table list could not be retrieved");
+
     assert(result->containsData());
     std::shared_ptr<Buffer> buffer = result->buffer();
 
@@ -179,5 +184,5 @@ boost::optional<std::vector<std::string>> SQLiteConnection::getTableList_impl()
         tables.push_back(buffer->get<std::string>("name").get(cnt));
     }
 
-    return tables;
+    return ResultT<std::vector<std::string>>::succeeded(tables);
 }

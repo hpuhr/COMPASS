@@ -15,6 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "parquettools.h"
+
+#ifdef WITH_PARQUET_TOOLS
+
 #include <arrow/api.h>
 #include <arrow/io/api.h>
 #include <arrow/filesystem/api.h>
@@ -23,7 +27,6 @@
 #include <parquet/arrow/writer.h>
 #include <parquet/arrow/schema.h>
 
-#include "parquettools.h"
 #include "buffer.h"
 #include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
@@ -622,3 +625,5 @@ void ParquetWriter::destroyTableWriter(const std::string& fn)
 }
 
 } // namespace parquettools
+
+#endif

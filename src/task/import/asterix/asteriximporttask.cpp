@@ -56,7 +56,7 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace std;
 
-const unsigned int unlimited_chunk_size = 20000;
+const unsigned int unlimited_chunk_size = 4000;
 //const unsigned int limited_chunk_size = 2000;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";

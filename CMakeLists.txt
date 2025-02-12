@@ -119,8 +119,8 @@ find_package(GeographicLib REQUIRED)
 message("  GeographicLib_INCLUDE_DIRS:  ${GeographicLib_INCLUDE_DIRS}")
 message("  GeographicLib_LIBRARIES: ${GeographicLib_LIBRARIES}")
 
-find_package(Arrow REQUIRED)
-find_package(Parquet REQUIRED)
+#find_package(Arrow REQUIRED)
+#find_package(Parquet REQUIRED)
 find_package(DuckDB REQUIRED)
 
 add_library(compass "")
@@ -170,8 +170,8 @@ include_directories (
     ${jASTERIX_INCLUDE_DIR}
     ${PCAP_INCLUDE_DIR}
     ${GeographicLib_INCLUDE_DIRS}
-    ${Arrow_INCLUDE_DIRS}
-    ${Parquet_INCLUDE_DIRS}
+    #${Arrow_INCLUDE_DIRS}
+    #${Parquet_INCLUDE_DIRS}
     ${DUCKDB_INCLUDE_DIR}
     )
 
@@ -203,8 +203,8 @@ target_link_libraries ( compass
     ${OSGQT_LIBRARIES}
     ${OSGEARTH_LIBRARY}
     ${GeographicLib_LIBRARIES}
-    Arrow::arrow_static 
-    Parquet::parquet_static
+    #Arrow::arrow_static 
+    #Parquet::parquet_static
     ${DUCKDB_LIBRARIES}
     )
 
