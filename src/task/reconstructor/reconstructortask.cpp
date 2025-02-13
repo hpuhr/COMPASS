@@ -808,14 +808,17 @@ void ReconstructorTask::processingDoneSlot()
 
     processing_data_slice_ = false;
 
+    bool is_last = processing_slice_->is_last_slice_;
+
     assert (!writing_slice_);
     writing_slice_ = std::move(processing_slice_);
 
     if (skip_reference_data_writing_)
     {
-        writing_slice_ = nullptr;
-
         loginf << "ReconstructorTask: processingDoneSlot: skipping reference writing";
+
+        //immediately finalize slice
+        finalizeSlice(writing_slice_);
     }
     else
         writeDataSlice(); // starts the async jobs
@@ -831,11 +834,21 @@ void ReconstructorTask::writeDoneSlot()
     if (cancelled_)
     {
         writing_slice_ = nullptr;
-
         return;
     }
 
-    if (writing_slice_->is_last_slice_)
+    finalizeSlice(writing_slice_);
+
+    loginf << "ReconstructorTask: writeDoneSlot: done";
+}
+
+void ReconstructorTask::finalizeSlice(std::unique_ptr<ReconstructorBase::DataSlice>& slice)
+{
+    assert(slice);
+
+    loginf << "ReconstructorTask: finalizeSlice: is last = " << slice->is_last_slice_;
+
+    if (slice->is_last_slice_)
     {
         DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -872,7 +885,7 @@ void ReconstructorTask::writeDoneSlot()
         double time_elapsed_s_after_del = Time::partialSeconds(
             boost::posix_time::microsec_clock::local_time() - run_start_time_after_del_);
 
-        loginf << "ReconstructorTask: writeDoneSlot: done after "
+        loginf << "ReconstructorTask: finalizeSlice: done after "
                << String::timeStringFromDouble(time_elapsed_s, false)
                << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
 
@@ -883,13 +896,11 @@ void ReconstructorTask::writeDoneSlot()
             progress_dialog_->close();
     }
 
-    loginf << "ReconstructorTask: writeDoneSlot: trim";
+    loginf << "ReconstructorTask: finalizeSlice: trim";
 
     malloc_trim(0); // release unused memory
 
-    writing_slice_ = nullptr;
-
-    loginf << "ReconstructorTask: writeDoneSlot: done";
+    slice.reset();
 }
 
 void ReconstructorTask::runCancelledSlot()
