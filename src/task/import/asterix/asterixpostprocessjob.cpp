@@ -442,8 +442,15 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                        << " ts " << Time::toString(timestamp);
 
                 timestamp_vec.set(index, timestamp);
+                assert (!timestamp_vec.isNull(index));
+                assert (timestamp_vec.get(index) == timestamp);
             }
         }
+
+        bool has_vec_min_max;
+        boost::posix_time::ptime ts_vec_min, ts_vec_max;
+
+        tie(has_vec_min_max, ts_vec_min, ts_vec_max) = timestamp_vec.minMaxValues();
     }
 }
 

@@ -38,6 +38,7 @@
 #include "dbcontentdeletedbjob.h"
 #include "dbcontent_commands.h"
 #include "viewpoint.h"
+#include "timeconv.h"
 
 #include "util/tbbhack.h"
 

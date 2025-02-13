@@ -18,7 +18,6 @@
 #pragma once
 
 #include "buffer.h"
-#include "oldnullablevector.h"
 #include "property.h"
 #include "stringconv.h"
 #include "json.hpp"
@@ -39,12 +38,12 @@
 const bool BUFFER_PEDANTIC_CHECKING = false;
 
 template <class T>
-class OldNullableVector
+class NullableVector
 {
     friend class Buffer;
 
 public:
-    virtual ~OldNullableVector() {}
+    virtual ~NullableVector() {}
 
     void renameProperty(const std::string& name) { property_.rename(name); }
 
@@ -57,17 +56,17 @@ public:
     //T_& getRef(unsigned int index)
     T& getRef(unsigned int index)
     {
-        logdbg << "OldNullableVector " << property_.name() << ": getRef: index " << index;
+        logdbg << "NullableVector " << property_.name() << ": getRef: index " << index;
         if (BUFFER_PEDANTIC_CHECKING)
         {
-            assert(data_.size() <= buffer_.data_size_);
-            assert(null_flags_.size() <= buffer_.data_size_);
+            assert(data_.size() <= buffer_.size_);
+            assert(null_flags_.size() <= buffer_.size_);
             assert(index < data_.size());
         }
 
         if (isNull(index))
         {
-            logerr << "OldNullableVector " << property_.name() << ": getRef: index " << index << " is null";
+            logerr << "NullableVector " << property_.name() << ": getRef: index " << index << " is null";
             assert (false);
         }
 
@@ -87,7 +86,7 @@ public:
     void setNull(unsigned int index);
     void setAllNull();
 
-    OldNullableVector<T>& operator*=(double factor);
+    NullableVector<T>& operator*=(double factor);
 
     std::set<T> distinctValues(unsigned int index = 0);
     std::map<T, unsigned int> distinctValuesWithCounts(unsigned int index = 0);
@@ -123,8 +122,8 @@ public:
         return property_.name() + "(" + property_.dataTypeString() + ")";
     }
 
-    std::vector<std::size_t> sortPermutation();
-    void sortByPermutation(const std::vector<std::size_t>& perm);
+    std::vector<unsigned int> sortPermutation();
+    void sortByPermutation(const std::vector<unsigned int>& perm);
 
     nlohmann::json asJSON(unsigned int max_size=0);
 
@@ -140,50 +139,50 @@ private:
 
     void resizeDataTo(unsigned int size);
     void resizeNullTo(unsigned int size);
-    void addData(OldNullableVector<T>& other);
-    void copyData(OldNullableVector<T>& other);
+    void addData(NullableVector<T>& other);
+    void copyData(NullableVector<T>& other);
     void cutToSize(unsigned int size);
     void cutUpToIndex(unsigned int index); // everything up to index is removed
-    void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
+    void removeIndexes(const std::vector<unsigned int>& indexes_to_remove); // must be sorted
 
-    OldNullableVector(Property& property, Buffer& buffer);
+    NullableVector(Property& property, Buffer& buffer);
 };
 
 template <class T>
-OldNullableVector<T>::OldNullableVector(Property& property, Buffer& buffer)
+NullableVector<T>::NullableVector(Property& property, Buffer& buffer)
     : property_(property), buffer_(buffer)
 {
 }
 
 template <class T>
-void OldNullableVector<T>::clear()
+void NullableVector<T>::clear()
 {
-    logdbg << "OldNullableVector " << property_.name() << ": clear";
+    logdbg << "NullableVector " << property_.name() << ": clear";
     std::fill(data_.begin(), data_.end(), T());
     std::fill(null_flags_.begin(), null_flags_.end(), true);
 }
 
 template <class T>
-void OldNullableVector<T>::clearData() // removes all data
+void NullableVector<T>::clearData() // removes all data
 {
     data_.clear();
     null_flags_.clear();
 }
 
 template <class T>
-const T OldNullableVector<T>::get(unsigned int index) const
+const T NullableVector<T>::get(unsigned int index) const
 {
-    logdbg << "OldNullableVector " << property_.name() << ": get: index " << index;
+    logdbg << "NullableVector " << property_.name() << ": get: index " << index;
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
         assert(index < data_.size());
     }
 
     if (isNull(index))
     {
-        logerr << "OldNullableVector " << property_.name() << ": get: index " << index << " is null";
+        logerr << "NullableVector " << property_.name() << ": get: index " << index << " is null";
         assert (false);
     }
 
@@ -191,22 +190,22 @@ const T OldNullableVector<T>::get(unsigned int index) const
 }
 
 template <class T>
-const std::string OldNullableVector<T>::getAsString(unsigned int index) const
+const std::string NullableVector<T>::getAsString(unsigned int index) const
 {
-    logdbg << "OldNullableVector " << property_.name() << ": getAsString";
+    logdbg << "NullableVector " << property_.name() << ": getAsString";
     return Utils::String::getValueString(get(index));
 }
 
 template <class T>
-void OldNullableVector<T>::set(unsigned int index, T value)
+void NullableVector<T>::set(unsigned int index, T value)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": set: index " << index << " value '"
+    logdbg << "NullableVector " << property_.name() << ": set: index " << index << " value '"
            << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     if (index >= data_.size())  // allocate new stuff, fill all new with not null
@@ -223,14 +222,14 @@ void OldNullableVector<T>::set(unsigned int index, T value)
     data_.at(index) = value;
     unsetNull(index);
 
-    // logdbg << "OldNullableVector: set: size " << size_ << " max_size " << max_size_;
+    // logdbg << "NullableVector: set: size " << size_ << " max_size " << max_size_;
 }
 
 template <class T>
-void OldNullableVector<T>::setFromFormat(unsigned int index, const std::string& format,
+void NullableVector<T>::setFromFormat(unsigned int index, const std::string& format,
                                       const std::string& value_str, bool debug)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": setFromFormat";
+    logdbg << "NullableVector " << property_.name() << ": setFromFormat";
     T value;
 
     if (format == "octal")
@@ -269,19 +268,19 @@ void OldNullableVector<T>::setFromFormat(unsigned int index, const std::string& 
     }
     else
     {
-        logerr << "OldNullableVector: setFromFormat: unknown format '" << format << "'";
+        logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
         assert(false);
     }
 
     if (debug)
-        loginf << "OldNullableVector: setFromFormat: index " << index << " value_str '" << value_str
+        loginf << "NullableVector: setFromFormat: index " << index << " value_str '" << value_str
                << "' value '" << value << "'";
 
     set(index, value);
 }
 
 template <class T>
-void OldNullableVector<T>::setAll(T value)
+void NullableVector<T>::setAll(T value)
 {
     unsigned int data_size = data_.size();
 
@@ -293,15 +292,15 @@ void OldNullableVector<T>::setAll(T value)
 }
 
 template <class T>
-void OldNullableVector<T>::append(unsigned int index, T value)
+void NullableVector<T>::append(unsigned int index, T value)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": append: index " << index << " value '"
+    logdbg << "NullableVector " << property_.name() << ": append: index " << index << " value '"
            << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     if (index >= data_.size())  // allocate new stuff, fill all new with not null
@@ -318,14 +317,14 @@ void OldNullableVector<T>::append(unsigned int index, T value)
     data_.at(index) += value;
     unsetNull(index);
 
-    // logdbg << "OldNullableVector: set: size " << size_ << " max_size " << max_size_;
+    // logdbg << "NullableVector: set: size " << size_ << " max_size " << max_size_;
 }
 
 template <class T>
-void OldNullableVector<T>::appendFromFormat(unsigned int index, const std::string& format,
+void NullableVector<T>::appendFromFormat(unsigned int index, const std::string& format,
                                          const std::string& value_str)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": appendFromFormat";
+    logdbg << "NullableVector " << property_.name() << ": appendFromFormat";
     T value;
 
     if (format == "octal")
@@ -350,7 +349,7 @@ void OldNullableVector<T>::appendFromFormat(unsigned int index, const std::strin
     }
     else
     {
-        logerr << "OldNullableVector: appendFromFormat: unknown format '" << format << "'";
+        logerr << "NullableVector: appendFromFormat: unknown format '" << format << "'";
         assert(false);
     }
 
@@ -358,14 +357,14 @@ void OldNullableVector<T>::appendFromFormat(unsigned int index, const std::strin
 }
 
 template <class T>
-void OldNullableVector<T>::setNull(unsigned int index)
+void NullableVector<T>::setNull(unsigned int index)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": setNull: index " << index;
+    logdbg << "NullableVector " << property_.name() << ": setNull: index " << index;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     if (index >= null_flags_.size())  // null flags to small
@@ -378,7 +377,7 @@ void OldNullableVector<T>::setNull(unsigned int index)
 }
 
 template <class T>
-void OldNullableVector<T>::setAllNull()
+void NullableVector<T>::setAllNull()
 {
     unsigned int data_size = data_.size();
 
@@ -389,15 +388,15 @@ void OldNullableVector<T>::setAllNull()
 
 /// @brief Checks if specific element is Null
 template <class T>
-bool OldNullableVector<T>::isNull(unsigned int index) const
+bool NullableVector<T>::isNull(unsigned int index) const
 {
-    logdbg << "OldNullableVector " << property_.name() << ": isNull: index " << index;
+    logdbg << "NullableVector " << property_.name() << ": isNull: index " << index;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
-        assert(index < buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
+        assert(index < buffer_.size_);
     }
 
     if (index < null_flags_.size())  // if stored, return value
@@ -413,31 +412,31 @@ bool OldNullableVector<T>::isNull(unsigned int index) const
 }
 
 template <class T>
-void OldNullableVector<T>::resizeDataTo(unsigned int size)
+void NullableVector<T>::resizeDataTo(unsigned int size)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": resizeDataTo: size " << size;
+    logdbg << "NullableVector " << property_.name() << ": resizeDataTo: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
         assert(data_.size() < size);  // only to be called if needed
     }
 
     data_.resize(size, T());
 
-    if (buffer_.data_size_ < data_.size())  // set new data size
-        buffer_.data_size_ = data_.size();
+    if (buffer_.size_ < data_.size())  // set new data size
+        buffer_.size_ = data_.size();
 }
 
 template <class T>
-void OldNullableVector<T>::resizeNullTo(unsigned int size)
+void NullableVector<T>::resizeNullTo(unsigned int size)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": resizeNullTo: size " << size;
+    logdbg << "NullableVector " << property_.name() << ": resizeNullTo: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
         assert (size >= null_flags_.size());
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     if (data_.size() > null_flags_.size())  // data was set w/o null, adjust & fill with set values
@@ -446,100 +445,100 @@ void OldNullableVector<T>::resizeNullTo(unsigned int size)
     if (null_flags_.size() < size)  // adjust to new size, fill with null values
         null_flags_.resize(size, true);
 
-    if (buffer_.data_size_ < null_flags_.size())  // set new data size
-        buffer_.data_size_ = null_flags_.size();
+    if (buffer_.size_ < null_flags_.size())  // set new data size
+        buffer_.size_ = null_flags_.size();
 
     if (BUFFER_PEDANTIC_CHECKING)
         assert(null_flags_.size() >= size); // could be larger since increase to data.size()
 }
 
 template <class T>
-void OldNullableVector<T>::addData(OldNullableVector<T>& other)
+void NullableVector<T>::addData(NullableVector<T>& other)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": addData";
+    logdbg << "NullableVector " << property_.name() << ": addData";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     if (!other.data_.size() &&
             other.null_flags_.size())  // if other has null flags set, need to fill my nulls
     {
-        logdbg << "OldNullableVector " << property_.name()
+        logdbg << "NullableVector " << property_.name()
                << ": addData: 1: other no data resizing null";
-        resizeNullTo(buffer_.data_size_);
-        logdbg << "OldNullableVector " << property_.name() << ": addData: 1: inserting null";
+        resizeNullTo(buffer_.size_);
+        logdbg << "NullableVector " << property_.name() << ": addData: 1: inserting null";
         null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
         return;
     }
 
     if (other.data_.size() && !other.null_flags_.size())  // if other has everything set
     {
-        logdbg << "OldNullableVector " << property_.name()
+        logdbg << "NullableVector " << property_.name()
                << ": addData: 2: other has everything set";
 
-        if (data_.size() < buffer_.data_size_)  // need to size data up
+        if (data_.size() < buffer_.size_)  // need to size data up
         {
-            logdbg << "OldNullableVector " << property_.name()
+            logdbg << "NullableVector " << property_.name()
                    << ": addData: 2: data not full, setting null";
-            resizeNullTo(buffer_.data_size_);
+            resizeNullTo(buffer_.size_);
 
-            logdbg << "OldNullableVector " << property_.name() << ": addData: 2: resizing data";
-            resizeDataTo(buffer_.data_size_);
+            logdbg << "NullableVector " << property_.name() << ": addData: 2: resizing data";
+            resizeDataTo(buffer_.size_);
         }
 
-        logdbg << "OldNullableVector " << property_.name() << ": addData: 2: inserting data";
+        logdbg << "NullableVector " << property_.name() << ": addData: 2: inserting data";
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
         return;
     }
 
-    logdbg << "OldNullableVector " << property_.name()
+    logdbg << "NullableVector " << property_.name()
            << ": addData: 3: mixture, both have data & nulls";
 
-    logdbg << "OldNullableVector " << property_.name() << ": addData: 3: resizing null to "
-           << buffer_.data_size_;
-    resizeNullTo(buffer_.data_size_);
-    logdbg << "OldNullableVector " << property_.name() << ": addData: 3: inserting nulls";
+    logdbg << "NullableVector " << property_.name() << ": addData: 3: resizing null to "
+           << buffer_.size_;
+    resizeNullTo(buffer_.size_);
+    logdbg << "NullableVector " << property_.name() << ": addData: 3: inserting nulls";
     null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
 
-    if (data_.size() < buffer_.data_size_)  // need to size data up
+    if (data_.size() < buffer_.size_)  // need to size data up
     {
-        logdbg << "OldNullableVector " << property_.name() << ": addData: 3: resizing data";
-        resizeDataTo(buffer_.data_size_);
+        logdbg << "NullableVector " << property_.name() << ": addData: 3: resizing data";
+        resizeDataTo(buffer_.size_);
     }
 
-    logdbg << "OldNullableVector " << property_.name() << ": addData: 3: inserting data";
+    logdbg << "NullableVector " << property_.name() << ": addData: 3: inserting data";
     data_.insert(data_.end(), other.data_.begin(), other.data_.end());
 
     // size is adjusted in Buffer::seizeBuffer
-    logdbg << "OldNullableVector " << property_.name() << ": addData: end";
+    logdbg << "NullableVector " << property_.name() << ": addData: end";
 }
 
 template <class T>
-void OldNullableVector<T>::copyData(OldNullableVector<T>& other)
+void NullableVector<T>::copyData(NullableVector<T>& other)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": copyData";
+    logdbg << "NullableVector " << property_.name() << ": copyData";
 
     data_ = other.data_;
     null_flags_ = other.null_flags_;
 
     // is only done for new buffers in Buffer::getPartialCopy, so no size-too-big isse
 
-    if (buffer_.data_size_ < data_.size())
-        buffer_.data_size_ = data_.size();
+    if (buffer_.size_ < data_.size())
+        buffer_.size_ = data_.size();
 
-    if (buffer_.data_size_ < null_flags_.size())
-        buffer_.data_size_ = null_flags_.size();
+    if (buffer_.size_ < null_flags_.size())
+        buffer_.size_ = null_flags_.size();
 
-    logdbg << "OldNullableVector " << property_.name() << ": copyData: end";
+    logdbg << "NullableVector " << property_.name() << ": copyData: end";
 }
 
 template <class T>
-OldNullableVector<T>& OldNullableVector<T>::operator*=(double factor)
+NullableVector<T>& NullableVector<T>::operator*=(double factor)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": operator*=";
+    logdbg << "NullableVector " << property_.name() << ": operator*=";
 
     unsigned int data_size = data_.size();
 
@@ -563,9 +562,9 @@ OldNullableVector<T>& OldNullableVector<T>::operator*=(double factor)
 }
 
 template <class T>
-std::set<T> OldNullableVector<T>::distinctValues(unsigned int index)
+std::set<T> NullableVector<T>::distinctValues(unsigned int index)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": distinctValues";
+    logdbg << "NullableVector " << property_.name() << ": distinctValues";
 
     std::set<T> values;
 
@@ -585,9 +584,9 @@ std::set<T> OldNullableVector<T>::distinctValues(unsigned int index)
 }
 
 template <class T>
-std::map<T, unsigned int> OldNullableVector<T>::distinctValuesWithCounts(unsigned int index)
+std::map<T, unsigned int> NullableVector<T>::distinctValuesWithCounts(unsigned int index)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": distinctValuesWithCounts";
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithCounts";
 
     std::map<T, unsigned int> values;
 
@@ -606,7 +605,7 @@ std::map<T, unsigned int> OldNullableVector<T>::distinctValuesWithCounts(unsigne
 }
 
 template <class T>
-std::tuple<bool,T,T> OldNullableVector<T>::minMaxValues(unsigned int index)
+std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
 {
     bool set = false;
     T min{}, max{};
@@ -636,7 +635,7 @@ std::tuple<bool,T,T> OldNullableVector<T>::minMaxValues(unsigned int index)
  * Special case for booleans.
  */
 template <>
-inline std::tuple<bool,bool,bool> OldNullableVector<bool>::minMaxValues(unsigned int index)
+inline std::tuple<bool,bool,bool> NullableVector<bool>::minMaxValues(unsigned int index)
 {
     bool set = false;
     char min, max;
@@ -663,7 +662,7 @@ inline std::tuple<bool,bool,bool> OldNullableVector<bool>::minMaxValues(unsigned
 }
 
 template <class T>
-std::tuple<bool,T,T> OldNullableVector<T>::minMaxValuesSorted(unsigned int index)
+std::tuple<bool,T,T> NullableVector<T>::minMaxValuesSorted(unsigned int index)
 {
     bool min_set = false;
     bool max_set = false;
@@ -704,10 +703,10 @@ std::tuple<bool,T,T> OldNullableVector<T>::minMaxValuesSorted(unsigned int index
 }
 
 template <class T>
-std::map<T, std::vector<unsigned int>> OldNullableVector<T>::distinctValuesWithIndexes(
+std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
         unsigned int from_index, unsigned int to_index)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": distinctValuesWithIndexes";
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
     std::map<T, std::vector<unsigned int>> values;
 
@@ -716,10 +715,10 @@ std::map<T, std::vector<unsigned int>> OldNullableVector<T>::distinctValuesWithI
     if (BUFFER_PEDANTIC_CHECKING)
     {
         assert(from_index <= to_index);
-        assert(from_index < buffer_.data_size_);
-        assert(to_index < buffer_.data_size_);
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(from_index < buffer_.size_);
+        assert(to_index < buffer_.size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     if (from_index + 1 > data_.size())  // no data
@@ -736,23 +735,23 @@ std::map<T, std::vector<unsigned int>> OldNullableVector<T>::distinctValuesWithI
         }
     }
 
-    logdbg << "OldNullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
            << values.size();
     return values;
 }
 
 template <class T>
-std::map<T, std::vector<unsigned int>> OldNullableVector<T>::distinctValuesWithIndexes(
+std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
         const std::vector<unsigned int>& indexes)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": distinctValuesWithIndexes";
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
     std::map<T, std::vector<unsigned int>> values;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     for (auto index : indexes)
@@ -766,22 +765,22 @@ std::map<T, std::vector<unsigned int>> OldNullableVector<T>::distinctValuesWithI
         }
     }
 
-    logdbg << "OldNullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
+    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
            << values.size();
     return values;
 }
 
 template <class T>
-std::map<T, unsigned int> OldNullableVector<T>::uniqueValuesWithIndexes()
+std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes()
 {
-    logdbg << "OldNullableVector " << property_.name() << ": uniqueValuesWithIndexes";
+    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
 
     std::map<T, unsigned int> values;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     for (unsigned int index = 0; index < data_.size(); ++index)
@@ -796,16 +795,16 @@ std::map<T, unsigned int> OldNullableVector<T>::uniqueValuesWithIndexes()
         }
     }
 
-    logdbg << "OldNullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
+    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
            << values.size();
     return values;
 }
 
 template <class T>
-std::vector<unsigned int> OldNullableVector<T>::nullValueIndexes(unsigned int from_index,
+std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_index,
                                                               unsigned int to_index)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": nullValueIndexes";
+    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
 
     std::vector<unsigned int> indexes;
 
@@ -814,10 +813,10 @@ std::vector<unsigned int> OldNullableVector<T>::nullValueIndexes(unsigned int fr
     if (BUFFER_PEDANTIC_CHECKING)
     {
         assert(from_index <= to_index);
-        assert(from_index < buffer_.data_size_);
-        assert(to_index < buffer_.data_size_);
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(from_index < buffer_.size_);
+        assert(to_index < buffer_.size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     //    if (from_index+1 >= data_.size()) // no data
@@ -834,16 +833,16 @@ std::vector<unsigned int> OldNullableVector<T>::nullValueIndexes(unsigned int fr
         }
     }
 
-    logdbg << "OldNullableVector " << property_.name() << ": nullValueIndexes: done with "
+    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
            << indexes.size();
     return indexes;
 }
 
 template <class T>
-std::vector<unsigned int> OldNullableVector<T>::nullValueIndexes(
+std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
         const std::vector<unsigned int>& indexes)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": nullValueIndexes";
+    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
 
     std::vector<unsigned int> ret_indexes;
 
@@ -855,15 +854,15 @@ std::vector<unsigned int> OldNullableVector<T>::nullValueIndexes(
         }
     }
 
-    logdbg << "OldNullableVector " << property_.name() << ": nullValueIndexes: done with "
+    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
            << ret_indexes.size();
     return ret_indexes;
 }
 
 template <class T>
-void OldNullableVector<T>::convertToStandardFormat(const std::string& from_format)
+void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": convertToStandardFormat";
+    logdbg << "NullableVector " << property_.name() << ": convertToStandardFormat";
 
     static_assert(std::is_integral<T>::value, "only defined for integer types");
 
@@ -872,7 +871,7 @@ void OldNullableVector<T>::convertToStandardFormat(const std::string& from_forma
 
     if (from_format != "octal")
     {
-        logerr << "OldNullableVector: convertToStandardFormat: unknown format '" << from_format
+        logerr << "NullableVector: convertToStandardFormat: unknown format '" << from_format
                << "'";
         assert(false);
     }
@@ -906,27 +905,27 @@ void OldNullableVector<T>::convertToStandardFormat(const std::string& from_forma
     //        }
     //        else
     //        {
-    //            logerr << "OldNullableVector: convertToStandardFormat: unknown format '" <<
+    //            logerr << "NullableVector: convertToStandardFormat: unknown format '" <<
     //            from_format << "'"; assert (false);
     //        }
     //    }
 }
 
 template <class T>
-unsigned int OldNullableVector<T>::size()
+unsigned int NullableVector<T>::size()
 {
     return data_.size();
 }
 
 template <class T>
-void OldNullableVector<T>::cutToSize(unsigned int size)
+void NullableVector<T>::cutToSize(unsigned int size)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": cutToSize: size " << size;
+    logdbg << "NullableVector " << property_.name() << ": cutToSize: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     while (null_flags_.size() > size)
@@ -939,11 +938,11 @@ void OldNullableVector<T>::cutToSize(unsigned int size)
 }
 
 template <class T>
-void OldNullableVector<T>::cutUpToIndex(unsigned int index) // everything up to index is removed
+void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to index is removed
 {
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        loginf << "OldNullableVector: cutUpToIndex: index " << index << " data_size " << data_.size()
+        loginf << "NullableVector: cutUpToIndex: index " << index << " data_size " << data_.size()
                << " null_size " << null_flags_.size();
     }
 
@@ -967,7 +966,7 @@ void OldNullableVector<T>::cutUpToIndex(unsigned int index) // everything up to 
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        loginf << "OldNullableVector: cutUpToIndex: after erase index " << index << " data_size " << data_.size()
+        loginf << "NullableVector: cutUpToIndex: after erase index " << index << " data_size " << data_.size()
                << " null_size " << null_flags_.size();
     }
 
@@ -975,7 +974,7 @@ void OldNullableVector<T>::cutUpToIndex(unsigned int index) // everything up to 
 }
 
 template <class T>
-void OldNullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_remove)
+void NullableVector<T>::removeIndexes(const std::vector<unsigned int>& indexes_to_remove)
 {
     // iterator to size cnt
 
@@ -993,14 +992,14 @@ void OldNullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_r
 //    }
 
     {
-        size_t data_rm_cnt = 0;
-        size_t data_idx_old = 0; //old index in data to copy from
-        size_t data_idx_new = 0; //new index in data to copy to
+        unsigned int data_rm_cnt = 0;
+        unsigned int data_idx_old = 0; //old index in data to copy from
+        unsigned int data_idx_new = 0; //new index in data to copy to
 
         //for all indices to be removed... in data
-        for (size_t i = 0; i < indexes_to_remove.size(); ++i)
+        for (unsigned int i = 0; i < indexes_to_remove.size(); ++i)
         {
-            const size_t idx_tbr = indexes_to_remove[ i ];
+            const unsigned int idx_tbr = indexes_to_remove[ i ];
 
 
             //..copy from current index in data up to item to be removed into new position
@@ -1036,15 +1035,15 @@ void OldNullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_r
     }
 
     {
-        size_t null_rm_cnt = 0;
+        unsigned int null_rm_cnt = 0;
 
-        size_t null_idx_old = 0; //old index in data to copy from
-        size_t null_idx_new = 0; //new index in data to copy to
+        unsigned int null_idx_old = 0; //old index in data to copy from
+        unsigned int null_idx_new = 0; //new index in data to copy to
 
         //for all indices to be removed... in null
-        for (size_t i = 0; i < indexes_to_remove.size(); ++i)
+        for (unsigned int i = 0; i < indexes_to_remove.size(); ++i)
         {
-            const size_t idx_tbr = indexes_to_remove[ i ];
+            const unsigned int idx_tbr = indexes_to_remove[ i ];
 
             //..copy from current index in null up to item to be removed into new position
 
@@ -1079,15 +1078,15 @@ void OldNullableVector<T>::removeIndexes(const std::vector<size_t>& indexes_to_r
 }
 
 template <class T>
-bool OldNullableVector<T>::isAlwaysNull() const
+bool NullableVector<T>::isAlwaysNull() const
 {
-    logdbg << "OldNullableVector " << property_.name() << ": isAlwaysNull";
+    logdbg << "NullableVector " << property_.name() << ": isAlwaysNull";
 
     if (data_.size() == 0)
         return true;
 
 
-    for (unsigned int cnt = 0; cnt < buffer_.data_size_; cnt++)
+    for (unsigned int cnt = 0; cnt < buffer_.size_; cnt++)
     {
         if (!isNull(cnt))
             return false;
@@ -1097,11 +1096,11 @@ bool OldNullableVector<T>::isAlwaysNull() const
 }
 
 template <class T>
-bool OldNullableVector<T>::isNeverNull() const
+bool NullableVector<T>::isNeverNull() const
 {
-    logdbg << "OldNullableVector " << property_.name() << ": isNeverNull";
+    logdbg << "NullableVector " << property_.name() << ": isNeverNull";
 
-    for (unsigned int cnt = 0; cnt < buffer_.data_size_; cnt++)
+    for (unsigned int cnt = 0; cnt < buffer_.size_; cnt++)
     {
         if (isNull(cnt))
             return false;
@@ -1111,7 +1110,7 @@ bool OldNullableVector<T>::isNeverNull() const
 }
 
 template <class T>
-void OldNullableVector<T>::swapData (unsigned int index1, unsigned int index2)
+void NullableVector<T>::swapData (unsigned int index1, unsigned int index2)
 {
     bool index1_null = isNull(index1);
     bool index2_null = isNull(index2);
@@ -1146,7 +1145,7 @@ void OldNullableVector<T>::swapData (unsigned int index1, unsigned int index2)
 //from https://stackoverflow.com/questions/17074324/how-can-i-sort-two-vectors-in-the-same-way-with-criteria-that-uses-only-one-of
 
 template <class T>
-std::vector<std::size_t> OldNullableVector<T>::sortPermutation()
+std::vector<unsigned int> NullableVector<T>::sortPermutation()
 {
     //assert (isNeverNull());
 
@@ -1156,11 +1155,11 @@ std::vector<std::size_t> OldNullableVector<T>::sortPermutation()
         resizeDataTo(buffer_.size());
 
     assert (data_.size() == buffer_.size());
-    std::vector<std::size_t> p (data_.size());
+    std::vector<unsigned int> p (data_.size());
 
     std::iota(p.begin(), p.end(), 0);
     std::sort(p.begin(), p.end(),
-              [&](std::size_t i, std::size_t j){
+              [&](unsigned int i, unsigned int j){
 
         bool is_i_null = isNull(i);
         bool is_j_null = isNull(j);
@@ -1178,25 +1177,25 @@ std::vector<std::size_t> OldNullableVector<T>::sortPermutation()
 }
 
 template <class T>
-void OldNullableVector<T>::sortByPermutation(const std::vector<std::size_t>& perm)
+void NullableVector<T>::sortByPermutation(const std::vector<unsigned int>& perm)
 {
     //    std::vector<bool> done(data_.size());
 
     std::vector<bool> done(perm.size());
 
-    //    for (std::size_t i = 0; i < data_.size(); ++i)
+    //    for (unsigned int i = 0; i < data_.size(); ++i)
 
-    for (std::size_t i = 0; i < perm.size(); ++i)
+    for (unsigned int i = 0; i < perm.size(); ++i)
     {
         if (done.at(i))
             continue;
 
         assert (i < done.size());
         done.at(i) = true;
-        std::size_t prev_j = i;
+        unsigned int prev_j = i;
 
         assert (i < perm.size());
-        std::size_t j = perm.at(i);
+        unsigned int j = perm.at(i);
         while (i != j)
         {
             //std::swap(data_[prev_j], data_[j]);
@@ -1211,15 +1210,15 @@ void OldNullableVector<T>::sortByPermutation(const std::vector<std::size_t>& per
     }
 
 
-    //    for (std::size_t i = 0; i < data_.size(); ++i)
+    //    for (unsigned int i = 0; i < data_.size(); ++i)
     //    {
     //        if (done[i])
     //        {
     //            continue;
     //        }
     //        done[i] = true;
-    //        std::size_t prev_j = i;
-    //        std::size_t j = perm[i];
+    //        unsigned int prev_j = i;
+    //        unsigned int j = perm[i];
     //        while (i != j)
     //        {
     //            //std::swap(data_[prev_j], data_[j]);
@@ -1233,7 +1232,7 @@ void OldNullableVector<T>::sortByPermutation(const std::vector<std::size_t>& per
 }
 
 template <class T>
-nlohmann::json  OldNullableVector<T>::asJSON(unsigned int max_size)
+nlohmann::json  NullableVector<T>::asJSON(unsigned int max_size)
 {
     nlohmann::json list = nlohmann::json::array();
 
@@ -1257,15 +1256,15 @@ nlohmann::json  OldNullableVector<T>::asJSON(unsigned int max_size)
 
 /// @brief Sets specific element to not Null value
 template <class T>
-void OldNullableVector<T>::unsetNull(unsigned int index)
+void NullableVector<T>::unsetNull(unsigned int index)
 {
-    logdbg << "OldNullableVector " << property_.name() << ": unsetNull";
+    logdbg << "NullableVector " << property_.name() << ": unsetNull";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
-        assert(index < buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
+        assert(index < buffer_.size_);
         assert(index < data_.size());
     }
 
@@ -1274,15 +1273,15 @@ void OldNullableVector<T>::unsetNull(unsigned int index)
 }
 
 template <>
-OldNullableVector<bool>& OldNullableVector<bool>::operator*=(double factor);
+NullableVector<bool>& NullableVector<bool>::operator*=(double factor);
 
 template <>
-void OldNullableVector<bool>::append(unsigned int index, bool value);
+void NullableVector<bool>::append(unsigned int index, bool value);
 
 template <>
-void OldNullableVector<std::string>::append(unsigned int index, std::string value);
+void NullableVector<std::string>::append(unsigned int index, std::string value);
 
 template <>
-nlohmann::json OldNullableVector<boost::posix_time::ptime>::asJSON(unsigned int max_size);
+nlohmann::json NullableVector<boost::posix_time::ptime>::asJSON(unsigned int max_size);
 
 
