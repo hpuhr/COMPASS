@@ -708,8 +708,6 @@ DBTableInfo SQLiteConnection::getColumnList(
         assert(buffer->has<int>("pk"));
         assert(buffer->has<int>("notnull"));
 
-        loginf << "UGA " << table << ": "  << buffer->get<std::string>("name").get(cnt);
-
         table_info.addColumn(buffer->get<std::string>("name").get(cnt), data_type,
                              buffer->get<int>("pk").get(cnt) > 0,
                              !buffer->get<int>("notnull").get(cnt), "");
