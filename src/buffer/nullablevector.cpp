@@ -10,7 +10,7 @@ template <>
 {
     bool tmp_factor = static_cast<bool>(factor);
 
-    unsigned int data_size = size();
+    unsigned int data_size = contentSize();
 
     for (unsigned int index=0; index < data_size; ++index)
     {
@@ -59,7 +59,7 @@ void NullableVector<bool>::append(unsigned int index, bool value)
     logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '"
            << value << "'";
 
-    if (index >= size() || isNull(index))
+    if (index >= contentSize() || isNull(index))
         set(index, value);
     else
         set(index, get(index) | value);
@@ -71,7 +71,7 @@ void NullableVector<std::string>::append(unsigned int index, std::string value)
     logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '"
            << value << "'";
 
-    if (index >= size() || isNull(index))
+    if (index >= contentSize() || isNull(index))
         set(index, value);
     else
     {

@@ -196,7 +196,7 @@ protected:
 
         NullableVector<T>& data = buffer.get<T>(current_var_name);
 
-        unsigned int data_size = data.size();
+        unsigned int data_size = data.contentSize();
 
         //selected vector?
         assert (buffer.has<bool>(DBContent::selected_var.name()));
@@ -405,7 +405,7 @@ private:
             return false;
 
         NullableVector<T>& data = buffer.get<T>(current_var_name);
-        unsigned int data_size = data.size();
+        unsigned int data_size = data.contentSize();
 
         assert (buffer.has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buffer.get<bool>(DBContent::selected_var.name());

@@ -180,7 +180,7 @@ public:
     //     }
     // }
 
-    unsigned int size() const // only content size, buffer holds full size
+    unsigned int contentSize() const // only content size, buffer holds full size
     {
         // Iterate backward over the pages.
         for (unsigned int page = value_pages_.size(); page > 0; )
@@ -244,7 +244,7 @@ public:
 
     bool isAlwaysNull() const
     {
-        unsigned int n = size();
+        unsigned int n = contentSize();
         if (n == 0)
         {
             // No data: you might consider this vacuously true,
@@ -262,7 +262,7 @@ public:
 
     bool isNeverNull() const
     {
-        unsigned int n = size();
+        unsigned int n = contentSize();
         if (n == 0) {
             // No data: again, you might say it is vacuously never null,
             // but here we choose to return false.
@@ -283,7 +283,7 @@ public:
         bool index1_null = isNull(index1);
         bool index2_null = isNull(index2);
 
-        unsigned int data_size = size();
+        unsigned int data_size = contentSize();
 
         if (index1_null && index2_null)
             return;
@@ -324,11 +324,11 @@ public:
 
     std::vector<unsigned int> sortPermutation()
     {
-        if (size() < buffer_.size())
+        if (contentSize() < buffer_.size())
             resizeDataTo(buffer_.size());
 
-        assert (size() == buffer_.size());
-        std::vector<unsigned int> p (size());
+        assert (contentSize() == buffer_.size());
+        std::vector<unsigned int> p (contentSize());
 
         std::iota(p.begin(), p.end(), 0);
         std::sort(p.begin(), p.end(),
@@ -500,7 +500,7 @@ private:
     {
         // Calculate the number of elements currently held and the number in 'other'
         unsigned int current_size = buffer_.size();
-        unsigned int other_size = other.size();
+        unsigned int other_size = other.contentSize();
         unsigned int new_total_size = current_size + other_size;
 
         if (BUFFER_PEDANTIC_CHECKING)
@@ -632,7 +632,7 @@ private:
     // ------------------------------------------------------------------
     void cutUpToIndex(unsigned int index)
     {
-        unsigned int old_size = size();
+        unsigned int old_size = contentSize();
         // If index is beyond or equal to the current size, remove everything.
         if (index >= old_size)
         {
@@ -708,7 +708,7 @@ private:
         if (indexes_to_remove.empty())
             return;
 
-        unsigned int old_size = size();
+        unsigned int old_size = contentSize();
         unsigned int num_to_remove = indexes_to_remove.size();
 
         // If all (or more than) elements are to be removed, clear the container.
@@ -831,8 +831,8 @@ T NullableVector<T>::get(unsigned int index) const
 {
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(size() <= buffer_.size_);
-        assert(index < size());
+        assert(contentSize() <= buffer_.size_);
+        assert(index < contentSize());
     }
 
     if (isNull(index))
@@ -852,8 +852,8 @@ T& NullableVector<T>::getRef(unsigned int index)
 {
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(size() <= buffer_.size_);
-        assert(index < size());
+        assert(contentSize() <= buffer_.size_);
+        assert(index < contentSize());
     }
 
     if (isNull(index))
@@ -902,7 +902,7 @@ void NullableVector<T>::set(unsigned int index, const T& value, bool adjust_buff
     {
         //loginf << "NullableVector " << property_.name() << ": set: end size " << size();
         assert (!isNull(index));
-        assert (index <= size());
+        assert (index <= contentSize());
     }
 }
 
@@ -963,7 +963,7 @@ void NullableVector<T>::setFromFormat(
 template <class T>
 void NullableVector<T>::setAll(T value)
 {
-    unsigned int data_size = size();
+    unsigned int data_size = contentSize();
 
     for (unsigned int index=0; index < data_size; ++index)
         set(index, value);
@@ -972,7 +972,7 @@ void NullableVector<T>::setAll(T value)
 template <class T>
 void NullableVector<T>::append(unsigned int index, T value)
 {
-    if (index >= size() || isNull(index))
+    if (index >= contentSize() || isNull(index))
         set(index, value);
     else
     {
@@ -1040,7 +1040,7 @@ NullableVector<T>& NullableVector<T>::operator*=(double factor)
 {
     logdbg << "NullableVector " << property_.name() << ": operator*=";
 
-    unsigned int data_size = size();
+    unsigned int data_size = contentSize();
 
     for (unsigned int index=0; index < data_size; ++index)
     {
@@ -1060,7 +1060,7 @@ std::set<T> NullableVector<T>::distinctValues(unsigned int index)
 
     T value;
 
-    unsigned int data_size = size();
+    unsigned int data_size = contentSize();
 
     for (; index < data_size; ++index)
     {
@@ -1085,7 +1085,7 @@ std::map<T, unsigned int> NullableVector<T>::distinctValuesWithCounts(unsigned i
 
     T value;
 
-    unsigned int data_size = size();
+    unsigned int data_size = contentSize();
 
     for (; index < data_size; ++index)
     {
@@ -1105,7 +1105,7 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index) // set,
     bool set = false;
     T min{}, max{};
 
-    unsigned int data_size = size();
+    unsigned int data_size = contentSize();
 
     for (; index < data_size; ++index)
     {
@@ -1135,10 +1135,10 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValuesSorted(unsigned int index) /
     bool max_set = false;
     T min, max;
 
-    if (!size())
+    if (!contentSize())
         return std::tuple<bool,T,T> {min_set && max_set, min, max};
 
-    unsigned int data_size = size();
+    unsigned int data_size = contentSize();
 
     for (unsigned int tmp_index=index; tmp_index < data_size; ++tmp_index)
     {
@@ -1181,7 +1181,7 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
 
     assert(from_index <= to_index);
 
-    unsigned int data_size = size();
+    unsigned int data_size = contentSize();
 
     if (from_index + 1 > data_size)  // no data
         return values;
@@ -1226,7 +1226,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes()
     logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
 
     std::map<T, unsigned int> values;
-    unsigned int data_size = size();
+    unsigned int data_size = contentSize();
 
     T value;
 

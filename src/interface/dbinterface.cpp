@@ -908,7 +908,7 @@ bool DBInterface::areColumnsNull (const std::string& table_name, const std::vect
     assert(buffer->has<int>("count"));
 
     NullableVector<int>& count_vec = buffer->get<int>("count");
-    assert (count_vec.size() == 1);
+    assert (count_vec.contentSize() == 1);
 
     loginf << "DBInterface: areColumnsNull: null count " << count_vec.get(0);
 

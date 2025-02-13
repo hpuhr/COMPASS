@@ -479,29 +479,29 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
         assert (index < size_);
 
         for (auto& it : getArrayListMap<bool>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<char>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned char>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<long int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned long int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<float>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<double>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<string>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<json>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
 
         loginf << "Buffer: cutUpToIndex: index " << index << " data_size_ " << size_;
     }
@@ -538,29 +538,29 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
         loginf << "Buffer: cutUpToIndex: after cut index " << index << " data_size_ " << size_;
 
         for (auto& it : getArrayListMap<bool>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<char>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned char>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<long int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned long int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<float>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<double>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<string>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<json>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
 
     }
 }
@@ -572,29 +572,29 @@ void Buffer::removeIndexes(const std::vector<unsigned int>& indexes_to_remove)
         assert (indexes_to_remove.size() <= size_);
 
         for (auto& it : getArrayListMap<bool>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<char>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned char>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<long int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned long int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<float>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<double>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<string>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<json>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
 
         loginf << "Buffer: removeIndexes: indexes " << indexes_to_remove.size() << " data_size_ " << size_;
     }
@@ -663,29 +663,29 @@ void Buffer::removeIndexes(const std::vector<unsigned int>& indexes_to_remove)
         loginf << "Buffer: removeIndexes: after cut indexes " << indexes_to_remove.size() << " data_size_ " << size_;
 
         for (auto& it : getArrayListMap<bool>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<char>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned char>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<long int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<unsigned long int>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<float>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<double>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<string>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<json>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
         for (auto& it : getArrayListMap<boost::posix_time::ptime>())
-            assert (it.second->size() <= size_);
+            assert (it.second->contentSize() <= size_);
 
     }
 }

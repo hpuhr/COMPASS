@@ -308,7 +308,7 @@ void SQLiteConnection::execute(const std::string& command, std::shared_ptr<Buffe
         throw std::runtime_error("SQLiteConnection: execute: problem while stepping the result");
     }
 
-    loginf << "SQLiteConnection: execute: buffer size " << buffer->size();
+    logdbg << "SQLiteConnection: execute: buffer size " << buffer->size();
 
     finalizeStatement();
 }
@@ -613,13 +613,13 @@ void SQLiteConnection::finalizeCommand()
 
 std::map<std::string, DBTableInfo> SQLiteConnection::getTableInfo()
 {
-    loginf << "SQLiteConnection: getTableInfo";
+    logdbg << "SQLiteConnection: getTableInfo";
 
     std::map<std::string, DBTableInfo> info;
 
     for (auto it : getTableList())
     {
-        loginf << "SQLiteConnection: getTableInfo: table " << it;
+        logdbg << "SQLiteConnection: getTableInfo: table " << it;
         info.insert(std::pair<std::string, DBTableInfo>(it, getColumnList(it)));
     }
 
@@ -687,7 +687,7 @@ DBTableInfo SQLiteConnection::getColumnList(
     assert(result->containsData());
     std::shared_ptr<Buffer> buffer = result->buffer();
 
-    loginf << "SQLiteConnection: getColumnList: table " << table << " col size " << buffer->size();
+    logdbg << "SQLiteConnection: getColumnList: table " << table << " col size " << buffer->size();
 
     for (unsigned int cnt = 0; cnt < buffer->size(); cnt++)
     {

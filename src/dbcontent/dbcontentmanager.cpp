@@ -1612,7 +1612,7 @@ void DBContentManager::saveSelectedRecNums()
         NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
-        size_t data_size = selected_vec.size();
+        size_t data_size = selected_vec.contentSize();
 
         for (unsigned int cnt=0; cnt < data_size; ++cnt)
         {

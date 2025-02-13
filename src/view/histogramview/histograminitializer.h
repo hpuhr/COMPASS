@@ -85,7 +85,7 @@ public:
      */
     bool scan(NullableVector<T>& data)
     {
-        size_t data_size = data.size();
+        size_t data_size = data.contentSize();
 
         for (size_t i = 0; i < data_size; ++i)
         {
