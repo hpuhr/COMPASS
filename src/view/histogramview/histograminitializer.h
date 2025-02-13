@@ -85,7 +85,9 @@ public:
      */
     bool scan(NullableVector<T>& data)
     {
-        for (size_t i = 0; i < data.size(); ++i)
+        size_t data_size = data.size();
+
+        for (size_t i = 0; i < data_size; ++i)
         {
             if (data.isNull(i))
                 ++num_null_values_;

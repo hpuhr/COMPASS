@@ -1611,7 +1611,9 @@ void DBContentManager::saveSelectedRecNums()
         NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
-        for (unsigned int cnt=0; cnt < selected_vec.size(); ++cnt)
+        size_t data_size = selected_vec.size();
+
+        for (unsigned int cnt=0; cnt < data_size; ++cnt)
         {
             if (!selected_vec.isNull(cnt) && selected_vec.get(cnt))
                 tmp_selected_rec_nums_[buf_it.first].push_back(rec_num_vec.get(cnt));
