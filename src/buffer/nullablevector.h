@@ -18,7 +18,7 @@
 
 #define PAGE_SIZE_EXPR 32*1024
 
-const bool BUFFER_PEDANTIC_CHECKING = true;
+const bool BUFFER_PEDANTIC_CHECKING = false;
 
 template <typename T>
 class NullableVector
@@ -88,9 +88,7 @@ class NullableVector
     {
         if (BUFFER_PEDANTIC_CHECKING)
         {
-            assert (page_index < null_flag_pages_.size());
-            assert (null_flag_pages_.at(page_index));
-            assert (offset / 8 < null_flag_pages_.at(page_index)->size());
+            assert (offset / 8 < PAGE_SIZE_EXPR);
         }
 
         return getNullPage(page_index)->at(offset/8);
@@ -100,9 +98,7 @@ class NullableVector
     {
         if (BUFFER_PEDANTIC_CHECKING)
         {
-            assert (page_index < null_flag_pages_.size());
-            assert (null_flag_pages_.at(page_index));
-            assert (offset / 8 < null_flag_pages_.at(page_index)->size());
+            assert (offset / 8 < PAGE_SIZE_EXPR);
         }
 
         return getNullPage(page_index)->at(offset/8);
@@ -128,7 +124,7 @@ public:
 
     const std::string getAsString(unsigned int index) const;
 
-    void set(unsigned int index, const T& value);
+    void set(unsigned int index, const T& value, bool adjust_buffer_size=true);
 
     void setFromFormat(unsigned int index, const std::string& format, const std::string& value_str, bool debug=false);
 
@@ -139,7 +135,7 @@ public:
     void appendFromFormat(unsigned int index, const std::string& format,
                           const std::string& value_str);
 
-    void setNull(unsigned int index);
+    void setNull(unsigned int index); // does not adjust buffer size
     void setAllNull();
 
     NullableVector<T>& operator*=(double factor);
@@ -183,7 +179,7 @@ public:
     //     }
     // }
 
-    unsigned int size() const
+    unsigned int size() const // only content size, buffer holds full size
     {
         // Iterate backward over the pages.
         for (unsigned int page = value_pages_.size(); page > 0; )
@@ -206,7 +202,9 @@ public:
                 {
                     // Found the last non-null element; return its index plus one.
                     if (BUFFER_PEDANTIC_CHECKING)
-                        loginf << "NullableVector " << property_.name() << ": size: non-null " << global_index + 1;
+                    {
+                        // loginf << "NullableVector " << property_.name() << ": size: non-null " << global_index + 1;
+                    }
                     return global_index + 1;
                 }
             }
@@ -214,7 +212,9 @@ public:
         // If no element is found (or no page is allocated), return 0.
 
         if (BUFFER_PEDANTIC_CHECKING)
-            loginf << "NullableVector " << property_.name() << ": size: 0 since nothing";
+        {
+            //loginf << "NullableVector " << property_.name() << ": size: 0 since nothing";
+        }
 
         return 0;
     }
@@ -392,9 +392,9 @@ private:
 
         if (BUFFER_PEDANTIC_CHECKING)
         {
-            loginf << "NullableVector " << property_.name() << ": ensurePageExists: start index " << index
-                   << " page_index " << page_index << " value_pages " << value_pages_.size()
-                   << " size " << size();
+            // loginf << "NullableVector " << property_.name() << ": ensurePageExists: start index " << index
+            //        << " page_index " << page_index << " value_pages " << value_pages_.size()
+            //        << " size " << size();
         }
 
         if (page_index >= value_pages_.size())
@@ -419,8 +419,8 @@ private:
 
         if (BUFFER_PEDANTIC_CHECKING)
         {
-            loginf << "NullableVector " << property_.name() << ": ensurePageExists: end value_pages "
-                   << value_pages_.size() << " size " << size();
+            // loginf << "NullableVector " << property_.name() << ": ensurePageExists: end value_pages "
+            //        << value_pages_.size() << " size " << size();
         }
     }
 
@@ -457,8 +457,9 @@ private:
         // Replace the old pages with the new ones.
         value_pages_ = std::move(new_value_pages);
 
-        if (buffer_.data_size_ < size())  // set new data size
-            buffer_.data_size_ = size();
+        // new data size set by caller
+        // if (buffer_.size_ < size())  // set new data size
+        //     buffer_.size_ = size();
     }
 
     // Resizes (or reinitializes) the null flag pages so that the total number
@@ -494,22 +495,29 @@ private:
     void addData(NullableVector<T>& other)
     {
         // Calculate the number of elements currently held and the number in 'other'
-        unsigned int current_size = this->size();
+        unsigned int current_size = buffer_.size();
         unsigned int other_size = other.size();
         unsigned int new_total_size = current_size + other_size;
 
+        if (BUFFER_PEDANTIC_CHECKING)
+        {
+            loginf << "NullableVector " << property_.name() << ": addData: start current_size " << current_size
+                   << "  buffer_.data_size_ " <<  buffer_.size_
+                   << " other_size " << other_size << " new_total_size " << new_total_size;
+        }
+
         // Extend the current container to accommodate new elements.
         // (These functions add new pages without touching existing ones.)
-        resizeDataTo(new_total_size);
-        resizeNullTo(new_total_size);
+        // resizeDataTo(new_total_size);
+        // resizeNullTo(new_total_size);
 
         // Copy each element from 'other' into our container.
         for (unsigned int i = 0; i < other_size; ++i)
         {
             // Compute target index where the element should be placed.
             unsigned int target_index = current_size + i;
-            unsigned int target_page  = target_index / page_size;
-            unsigned int target_offset = target_index % page_size;
+            // unsigned int target_page  = target_index / page_size;
+            // unsigned int target_offset = target_index % page_size;
 
             // Compute source page and offset in 'other'.
             unsigned int src_page   = i / page_size;
@@ -518,21 +526,38 @@ private:
             // If the source element is NULL, mark our corresponding element as NULL.
             if (other.isNull(i))
             {
-                (*null_flag_pages_.at(target_index))[target_offset / 8] |= (1 << (target_offset % 8));
+                if (!isNull(target_index))
+                    setNull(target_index);
+
+                //(*null_flag_pages_.at(target_index))[target_offset / 8] |= (1 << (target_offset % 8));
+                //getNullByteRef(target_index, target_offset) |= (1 << (target_offset % 8));
             }
             else
             {
                 // Copy the data value from 'other'.
-                (*value_pages_[target_page])[target_offset] = (*other.value_pages_[src_page])[src_offset];
+                //(*value_pages_[target_page])[target_offset] = (*other.value_pages_[src_page])[src_offset];
+
+                if (BUFFER_PEDANTIC_CHECKING)
+                {
+                    // assert (target_page < value_pages_.size());
+                    // assert (value_pages_.at(target_page));
+                    // assert (target_offset < getValuePage(target_page)->size());
+
+                    assert (src_page < other.value_pages_.size());
+                    assert (other.value_pages_.at(src_page));
+                    assert (src_offset < other.getValuePage(src_page)->size());
+                }
+
+                //getValuePage(target_page)->at(target_offset) =  other.getValuePage(src_page)->at(src_offset);
                 // Mark the new element as non-null.
-                (*null_flag_pages_.at(target_index))[target_offset / 8] &= ~(1 << (target_offset % 8));
+                //(*null_flag_pages_.at(target_index))[target_offset / 8] &= ~(1 << (target_offset % 8));
+
+                //getNullByteRef(target_index, target_offset) &= ~(1 << (target_offset % 8));
+                set(target_index, other.getValuePage(src_page)->at(src_offset), false); // size ajdusted after
             }
         }
 
-        unsigned int new_size = size();
-
-        if (new_size > buffer_.data_size_)
-            buffer_.data_size_ = new_size;
+        // new size set in buffer
     }
     //void copyData(NullableVector<T>& other);
     // ------------------------------------------------------------------
@@ -545,19 +570,23 @@ private:
     //     new_size elements.
     //  2. In the last (partially used) page, mark any entries after new_size as NULL.
     // ------------------------------------------------------------------
-    void cutToSize(unsigned int new_size) {
+    void cutToSize(unsigned int new_size)
+    {
         // Compute the number of pages required to hold new_size elements.
         unsigned int required_pages = (new_size == 0 ? 0 : ((new_size - 1) / page_size) + 1);
 
         // If new_size is 0, clear all pages.
-        if (new_size == 0) {
+        if (new_size == 0)
+        {
             value_pages_.clear();
             null_flag_pages_.clear();
+
             return;
         }
 
         // If we have more pages allocated than needed, shrink the vectors.
-        if (value_pages_.size() > required_pages) {
+        if (value_pages_.size() > required_pages)
+        {
             value_pages_.resize(required_pages);
             null_flag_pages_.resize(required_pages);
         }
@@ -565,19 +594,25 @@ private:
         // In the last page, if new_size does not end exactly on a page boundary,
         // mark all entries after new_size as "removed" (by setting them to NULL).
         unsigned int remainder = new_size % page_size;
+
         // If new_size is a multiple of page_size, then remainder == 0 means the
         // last page is entirely valid.
         if (remainder == 0)
             remainder = page_size;
 
         unsigned int last_page = required_pages - 1;
-        for (unsigned int i = remainder; i < page_size; ++i) {
+
+        for (unsigned int i = remainder; i < page_size; ++i)
+        {
             // Optionally reset the value to the default.
             (*value_pages_[last_page])[i] = T{};
             // Mark the element as NULL in the bit-packed null flags.
-            unsigned int byte_index = i / 8;
-            unsigned int bit_index  = i % 8;
-            (*null_flag_pages_.at(last_page))[byte_index] |= (1 << bit_index);
+            //unsigned int byte_index = i / 8;
+            //unsigned int bit_index  = i % 8;
+
+            //(*null_flag_pages_.at(last_page))[byte_index] |= (1 << bit_index);
+
+            getNullByteRef(last_page, i) |= (1 << i % 8);
         }
     }
 
@@ -768,7 +803,7 @@ void NullableVector<T>::clear()
             // Mark every element as null by setting all bits to 1.
             // The storage size is (page_size/8 + 1) bytes.
             //std::fill_n(getNullPage(page_index).get(), page_size / 8 + 1, 0xFF);
-            std::fill(getNullPage(page_index)->begin(), getNullPage(page_index)->end(), 0);
+            std::fill(getNullPage(page_index)->begin(), getNullPage(page_index)->end(), 0xFF);
         }
     }
 }
@@ -785,7 +820,7 @@ T NullableVector<T>::get(unsigned int index) const
 {
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(size() <= buffer_.data_size_);
+        assert(size() <= buffer_.size_);
         assert(index < size());
     }
 
@@ -805,7 +840,7 @@ T& NullableVector<T>::getRef(unsigned int index)
 {
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(size() <= buffer_.data_size_);
+        assert(size() <= buffer_.size_);
         assert(index < size());
     }
 
@@ -829,13 +864,13 @@ const std::string NullableVector<T>::getAsString(unsigned int index) const
 }
 
 template <class T>
-void NullableVector<T>::set(unsigned int index, const T& value)
+void NullableVector<T>::set(unsigned int index, const T& value, bool adjust_buffer_size)
 {
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(size() <= buffer_.data_size_);
+        //assert(size() <= buffer_.size_);
 
-        loginf << "NullableVector " << property_.name() << ": set: start index " << index << " size " << size();
+        //loginf << "NullableVector " << property_.name() << ": set: start index " << index << " size " << size();
     }
 
     ensurePageExists(index);
@@ -847,19 +882,20 @@ void NullableVector<T>::set(unsigned int index, const T& value)
     // clear NULL bit (indicating valid value)
     (*getNullPage(page_index))[offset / 8] &= ~(1 << (offset % 8));
 
-    if (buffer_.data_size_ < index + 1)  // set new data size
-        buffer_.data_size_ = index + 1;
+    if (adjust_buffer_size && buffer_.size_ < index + 1)  // set new data size
+        buffer_.size_ = index + 1;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        loginf << "NullableVector " << property_.name() << ": set: end size " << size();
+        //loginf << "NullableVector " << property_.name() << ": set: end size " << size();
         assert (!isNull(index));
         assert (index <= size());
     }
 }
 
 template <class T>
-void NullableVector<T>::setFromFormat(unsigned int index, const std::string& format, const std::string& value_str, bool debug)
+void NullableVector<T>::setFromFormat(
+    unsigned int index, const std::string& format, const std::string& value_str, bool debug)
 {
     logdbg << "NullableVector " << property_.name() << ": setFromFormat";
     T value;

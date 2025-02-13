@@ -131,7 +131,7 @@ protected:
     std::string dbcontent_name_;
 
     ArrayListMapTupel array_list_tuple_;
-    size_t data_size_ {0};
+    size_t size_ {0};
 
 private:
     template <typename T>
@@ -270,5 +270,7 @@ void Buffer::seizeArrayListMap(Buffer& other_buffer)
     }
 
     other_buffer.getArrayListMap<T>().clear();
+
+    // size_adjusted in seizeBuffer
 }
 
