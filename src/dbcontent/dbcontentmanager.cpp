@@ -51,8 +51,6 @@ using namespace std;
 using namespace Utils;
 using namespace dbContent;
 
-
-
 DBContentManager::DBContentManager(const std::string& class_id, const std::string& instance_id,
                                    COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass)
@@ -339,8 +337,6 @@ void DBContentManager::load(const std::string& custom_filter_clause)
     DataSourceManager& ds_man =  COMPASS::instance().dataSourceManager();
     DBInterface& db_interface = COMPASS::instance().dbInterface();
 
-    db_interface.reloadStarted();
-
     for (auto& object : dbcontent_)
     {
         logdbg << "DBContentManager: loadSlot: object " << object.first
@@ -564,9 +560,6 @@ void DBContentManager::finishLoading()
     tmp_selected_rec_nums_.clear();
 
     COMPASS::instance().viewManager().doViewPointAfterLoad();
-
-    auto& db_interface = COMPASS::instance().dbInterface();
-    db_interface.reloadFinished();
 
     emit loadingDoneSignal();
 

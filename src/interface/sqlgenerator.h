@@ -31,23 +31,27 @@ class DBCommand;
 class DBCommandList;
 class DBContent;
 
+/**
+ */
 class SQLGenerator
 {
 public:
-    
-
     SQLGenerator(const db::SQLConfig& config);
     virtual ~SQLGenerator();
 
     std::string getCreateTableStatement(const DBContent& object);
     std::string getCreateTableStatement(const std::string& table_name,
                                         const std::vector<DBTableColumnInfo>& column_infos, 
-                                        const std::string& dbcontent_name = "");
+                                        const std::vector<db::Index>& indices = std::vector<db::Index>());
     std::string getInsertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, 
                                             std::string table_name);
     std::string getCreateDBUpdateStringBind(std::shared_ptr<Buffer> buffer,
                                             const std::string& key_col_name, 
                                             std::string table_name);
+    std::string getUpdateTableFromTableStatement(const std::string& table_name_src,
+                                                 const std::string& table_name_dst,
+                                                 const std::vector<std::string>& col_names,
+                                                 const std::string& key_col);
 
     std::shared_ptr<DBCommand> getSelectCommand(const DBContent& object, 
                                                 dbContent::VariableSet read_list, 

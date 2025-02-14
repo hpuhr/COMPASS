@@ -39,6 +39,8 @@
 
 #include <cstring> 
 
+#include <QElapsedTimer>
+
 /**
  */
 DBConnection::DBConnection(DBInterface* interface)
@@ -242,7 +244,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
  */
 Result DBConnection::createTable(const std::string& table_name, 
                                  const std::vector<DBTableColumnInfo>& column_infos,
-                                 const std::string& dbcontent_name)
+                                 const std::vector<db::Index>& indices)
 {
     assert(dbOpened());
 
@@ -254,7 +256,7 @@ Result DBConnection::createTable(const std::string& table_name,
     }
 
     //get sql statement
-    std::string sql = SQLGenerator(sqlConfiguration()).getCreateTableStatement(table_name, column_infos, dbcontent_name);
+    std::string sql = SQLGenerator(sqlConfiguration()).getCreateTableStatement(table_name, column_infos, indices);
 
     auto result = execute(sql, false);
     assert(result);
@@ -272,15 +274,50 @@ Result DBConnection::createTable(const std::string& table_name,
 }
 
 /**
+ */
+Result DBConnection::deleteTable(const std::string& table_name)
+{
+    auto res = execute("DROP TABLE " + table_name + ";");
+    if (!res.ok())
+        return res;
+
+    updateTableInfo();
+
+    return Result::succeeded();
+}
+
+/**
+ */
+Result DBConnection::deleteTableContents(const std::string& table_name)
+{
+    return execute("DELETE FROM " + table_name + ";");
+}
+
+/**
  * Inserts the given buffer into the given table.
  */
 Result DBConnection::insertBuffer(const std::string& table_name, 
                                   const std::shared_ptr<Buffer>& buffer,
+                                  const boost::optional<size_t>& idx_from, 
+                                  const boost::optional<size_t>& idx_to,
                                   PropertyList* table_properties)
 {
     assert(dbOpened());
 
-    auto res = insertBuffer_impl(table_name, buffer, table_properties);
+    QElapsedTimer t;
+    if (perf_metrics_.has_value())
+    {
+        t.start();
+    }
+
+    auto res = insertBuffer_impl(table_name, buffer, idx_from, idx_to, table_properties);
+
+    if (perf_metrics_.has_value())
+    {
+        perf_metrics_->insert_time       += t.elapsed();
+        perf_metrics_->insert_num_chunks += 1;
+        perf_metrics_->insert_num_rows   += buffer->size();
+    }
 
     //if (!res.first)
     //    logerr << "DBConnection: : insertBuffer: inserting into table '" << table_name << "' failed: " << res.second;
@@ -299,7 +336,24 @@ Result DBConnection::updateBuffer(const std::string& table_name,
 {
     assert(dbOpened());
 
+    QElapsedTimer t;
+    if (perf_metrics_.has_value())
+    {
+        t.start();
+    }
+
+    size_t idx0 = idx_from.has_value() ? idx_from.value()   : 0;
+    size_t idx1 = idx_to.has_value()   ? idx_to.value() + 1 : buffer->size();
+    assert(idx1 >= idx0);
+
     auto res = updateBuffer_impl(table_name, buffer, key_column, idx_from, idx_to);
+
+    if (perf_metrics_.has_value())
+    {
+        perf_metrics_->update_time       += t.elapsed();
+        perf_metrics_->update_num_chunks += 1;
+        perf_metrics_->update_num_rows   += idx1 - idx0;
+    }
 
     //if (!res.first)
     //    logerr << "DBConnection: : updateBuffer: updating table '" << table_name 
@@ -313,6 +367,8 @@ Result DBConnection::updateBuffer(const std::string& table_name,
  */
 Result DBConnection::insertBuffer_impl(const std::string& table_name, 
                                        const std::shared_ptr<Buffer>& buffer,
+                                       const boost::optional<size_t>& idx_from, 
+                                       const boost::optional<size_t>& idx_to,
                                        PropertyList* table_properties)
 {
     auto sql = SQLGenerator(sqlConfiguration()).getInsertDBUpdateStringBind(buffer, table_name);
@@ -325,7 +381,7 @@ Result DBConnection::insertBuffer_impl(const std::string& table_name,
     if (!stmnt->valid())
         return Result::failed("could not prepare insert statement: " + stmnt->lastError());
 
-    auto res = stmnt->executeBuffer(buffer);
+    auto res = stmnt->executeBuffer(buffer, idx_from, idx_to);
     if (!res.ok())
         return Result::failed("could not execute insert statement on buffer: " + res.error());
 
@@ -541,8 +597,21 @@ std::shared_ptr<DBResult> DBConnection::readChunk()
         return result;
     }
 
+    QElapsedTimer t;
+    if (perf_metrics_.has_value())
+    {
+        t.start();
+    }
+
     result = active_reader_->readChunk();
     assert(result);
+
+    if (perf_metrics_.has_value())
+    {
+        perf_metrics_->read_time       += t.elapsed();
+        perf_metrics_->read_num_chunks += (result && result->containsData() ? 1 : 0);
+        perf_metrics_->read_num_rows   += (result && result->containsData() ? result->buffer()->size() : 0);
+    }
 
     //error during read?
     if (result->hasError())
@@ -571,4 +640,25 @@ void DBConnection::stopRead()
 SQLGenerator DBConnection::sqlGenerator() const
 {
     return SQLGenerator(sqlConfiguration());
+}
+
+/**
+ */
+void DBConnection::startPerformanceMetrics() const
+{
+    perf_metrics_ = db::PerformanceMetrics();
+    perf_metrics_->valid = true;
+}
+
+/**
+ */
+db::PerformanceMetrics DBConnection::stopPerformanceMetrics() const
+{
+    if(!perf_metrics_.has_value())
+        return db::PerformanceMetrics();
+
+    db::PerformanceMetrics pm = perf_metrics_.value();
+    perf_metrics_.reset();
+
+    return pm;
 }

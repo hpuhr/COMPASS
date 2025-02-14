@@ -178,8 +178,8 @@ public:
     unsigned long getMaxRecordNumber(DBContent& object);
     unsigned int getMaxRefTrackTrackNum();
 
-    void reloadStarted();
-    void reloadFinished();
+    void startPerformanceMetrics() const;
+    db::PerformanceMetrics stopPerformanceMetrics() const;
 
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
@@ -207,8 +207,4 @@ protected:
     std::map<std::string, std::set<std::string>> dbcolumn_content_flags_; // dbtable -> dbcols with content
 
     std::string db_filename_;
-
-    double read_time_s_ = 0.0;
-    size_t chunks_read_ = 0;
-    size_t rows_read_   = 0;
 };

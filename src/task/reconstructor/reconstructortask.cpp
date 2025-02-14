@@ -34,6 +34,7 @@
 #include <QThread>
 #include <QPushButton>
 #include <QLabel>
+#include <QElapsedTimer>
 
 #include <malloc.h>
 
@@ -397,6 +398,7 @@ void ReconstructorTask::run()
     process_future_ = {};
 
     COMPASS::instance().dbContentManager().clearAssociationsIdentifier();
+    COMPASS::instance().dbInterface().startPerformanceMetrics();
 
     Projection& projection = ProjectionManager::instance().currentProjection();
     projection.clearCoordinateSystems();
@@ -681,6 +683,7 @@ void ReconstructorTask::writeDataSlice()
                 this, &ReconstructorTask::writeDoneSlot);
 
     loginf << "ReconstructorTask: writeDataSlice: references dbcontent";
+
     dbcontent_man.insertData(writing_slice_->reftraj_data_);
 }
 
@@ -808,8 +811,6 @@ void ReconstructorTask::processingDoneSlot()
 
     processing_data_slice_ = false;
 
-    bool is_last = processing_slice_->is_last_slice_;
-
     assert (!writing_slice_);
     writing_slice_ = std::move(processing_slice_);
 
@@ -821,7 +822,9 @@ void ReconstructorTask::processingDoneSlot()
         finalizeSlice(writing_slice_);
     }
     else
+    {
         writeDataSlice(); // starts the async jobs
+    }
 }
 
 void ReconstructorTask::writeDoneSlot()
@@ -837,6 +840,7 @@ void ReconstructorTask::writeDoneSlot()
         return;
     }
 
+    //writing finished, finalize slice
     finalizeSlice(writing_slice_);
 
     loginf << "ReconstructorTask: writeDoneSlot: done";
@@ -850,57 +854,69 @@ void ReconstructorTask::finalizeSlice(std::unique_ptr<ReconstructorBase::DataSli
 
     if (slice->is_last_slice_)
     {
-        DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-        disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
-                   this, &ReconstructorTask::writeDoneSlot);
-
-        currentReconstructor()->saveTargets();
-
-        COMPASS::instance().dataSourceManager().saveDBDataSources();
-        emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
-        COMPASS::instance().dbInterface().saveProperties();
-
-        done_ = true;
-
-        assert (progress_dialog_);
-        progress_dialog_->setCancelButtonText("OK");
-
-        updateProgressSlot("Reference Calculation Done", true);
-
-        if (debug_settings_.debug_)
-        {
-            //write some additional stuff before saving
-            if (currentReconstructor())
-                currentReconstructor()->createAdditionalAnnotations();
-            
-            saveDebugViewPoints();
-        }
-
-        currentReconstructor()->reset();
-
-        double time_elapsed_s = Time::partialSeconds(
-            boost::posix_time::microsec_clock::local_time() - run_start_time_);
-
-        double time_elapsed_s_after_del = Time::partialSeconds(
-            boost::posix_time::microsec_clock::local_time() - run_start_time_after_del_);
-
-        loginf << "ReconstructorTask: finalizeSlice: done after "
-               << String::timeStringFromDouble(time_elapsed_s, false)
-               << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
-
-        if (!skip_reference_data_writing_)
-            COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
-
-        if (!allow_user_interactions_)
-            progress_dialog_->close();
+        //last slice finalized => end reconstruction
+        endReconstruction();
     }
 
     loginf << "ReconstructorTask: finalizeSlice: trim";
 
-    malloc_trim(0); // release unused memory
+    // release unused memory
+    malloc_trim(0); 
 
+    // free slice
     slice.reset();
+}
+
+void ReconstructorTask::endReconstruction()
+{
+    loginf << "ReconstructorTask: endReconstruction: ending reconstruction...";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+                this, &ReconstructorTask::writeDoneSlot);
+
+    currentReconstructor()->saveTargets();
+
+    COMPASS::instance().dataSourceManager().saveDBDataSources();
+    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+    COMPASS::instance().dbInterface().saveProperties();
+
+    done_ = true;
+
+    assert (progress_dialog_);
+    progress_dialog_->setCancelButtonText("OK");
+
+    updateProgressSlot("Reference Calculation Done", true);
+
+    if (debug_settings_.debug_)
+    {
+        //write some additional stuff before saving
+        if (currentReconstructor())
+            currentReconstructor()->createAdditionalAnnotations();
+        
+        saveDebugViewPoints();
+    }
+
+    currentReconstructor()->reset();
+
+    double time_elapsed_s = Time::partialSeconds(
+        boost::posix_time::microsec_clock::local_time() - run_start_time_);
+
+    double time_elapsed_s_after_del = Time::partialSeconds(
+        boost::posix_time::microsec_clock::local_time() - run_start_time_after_del_);
+
+    loginf << "ReconstructorTask: finalizeSlice: done after "
+            << String::timeStringFromDouble(time_elapsed_s, false)
+            << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
+
+    loginf << COMPASS::instance().dbInterface().stopPerformanceMetrics().asString();
+
+    if (!skip_reference_data_writing_)
+        COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+
+    if (!allow_user_interactions_)
+        progress_dialog_->close();
 }
 
 void ReconstructorTask::runCancelledSlot()

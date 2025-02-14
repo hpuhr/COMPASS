@@ -91,22 +91,6 @@ DBInterface::~DBInterface()
 }
 
 /**
- */
-void DBInterface::reloadStarted()
-{
-    read_time_s_ = 0.0;
-    chunks_read_ = 0;
-    rows_read_   = 0;
-}
-
-/**
- */
-void DBInterface::reloadFinished()
-{
-    loginf << "DBInterface: reloadFinished: chunks read: " << chunks_read_ << ", rows read: " << rows_read_ << ", read time = " << read_time_s_ << "s";
-}
-
-/**
  * Returns a connection-specific SQL generator.
  */
 SQLGenerator DBInterface::sqlGenerator() const
@@ -1511,14 +1495,7 @@ std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBCont
     shared_ptr<DBResult> result;
     bool last_one = false;
 
-    QElapsedTimer t;
-    t.start();
-
     result = db_connection_->readChunk();
-
-    read_time_s_ += t.elapsed() / 1000.0;
-    chunks_read_ += (result && result->containsData() ? 1 : 0);
-    rows_read_   += (result && result->containsData() ? result->buffer()->size() : 0);
 
     if (!result)
     {
@@ -1636,4 +1613,20 @@ void DBInterface::clearTableContent(const string& table_name)
     boost::mutex::scoped_lock locker(connection_mutex_);
     // DELETE FROM tablename;
     execute("DELETE FROM " + table_name + ";");
+}
+
+/**
+ */
+void DBInterface::startPerformanceMetrics() const
+{
+    assert(db_connection_);
+    db_connection_->startPerformanceMetrics();
+}
+
+/**
+ */
+db::PerformanceMetrics DBInterface::stopPerformanceMetrics() const
+{
+    assert(db_connection_);
+    return db_connection_->stopPerformanceMetrics();
 }

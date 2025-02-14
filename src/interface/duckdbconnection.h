@@ -49,7 +49,6 @@ public:
     std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
                                                  size_t offset, 
                                                  size_t chunk_size) override final;
-
     /**
      */
     db::SQLConfig sqlConfiguration() const override final
@@ -85,7 +84,14 @@ protected:
 
     Result insertBuffer_impl(const std::string& table_name, 
                              const std::shared_ptr<Buffer>& buffer,
+                             const boost::optional<size_t>& idx_from, 
+                             const boost::optional<size_t>& idx_to,
                              PropertyList* table_properties) override final;
+    Result updateBuffer_impl(const std::string& table_name, 
+                             const std::shared_ptr<Buffer>& buffer,
+                             const std::string& key_column,
+                             const boost::optional<size_t>& idx_from, 
+                             const boost::optional<size_t>& idx_to) override final;
 
     ResultT<std::vector<std::string>> getTableList_impl() override final;
     

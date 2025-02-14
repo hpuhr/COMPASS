@@ -21,6 +21,7 @@
 #include "duckdbexecresult.h"
 #include "duckdbreader.h"
 
+#include "dbtemporarytable.h"
 #include "sqlgenerator.h"
 
 #include "buffer.h"
@@ -240,6 +241,8 @@ bool DuckDBConnection::executeCmd_impl(const std::string& command,
  */
 Result DuckDBConnection::insertBuffer_impl(const std::string& table_name, 
                                            const std::shared_ptr<Buffer>& buffer,
+                                           const boost::optional<size_t>& idx_from, 
+                                           const boost::optional<size_t>& idx_to,
                                            PropertyList* table_properties)
 {
     //loginf << "DuckDBConnection: insertBuffer_impl: inserting into table '" << table_name << "'";
@@ -319,7 +322,11 @@ Result DuckDBConnection::insertBuffer_impl(const std::string& table_name,
     for (unsigned int c = 0; c < properties->size(); ++c)
         has_property[ c ] = buffer->hasAnyPropertyNamed(properties->at(c).name()) ? 1 : 0;
 
-    for (unsigned int r = 0; r < n; ++r)
+    unsigned int r0 = idx_from.has_value() ? idx_from.value()   : 0;
+    unsigned int r1 = idx_to.has_value()   ? idx_to.value() + 1 : n;
+    assert(r0 <= r1);
+
+    for (unsigned int r = r0; r < r1; ++r)
     {
         //loginf << "appending row " << std::to_string(r + 1) << "/" << std::to_string(n);
 
@@ -350,6 +357,57 @@ Result DuckDBConnection::insertBuffer_impl(const std::string& table_name,
 
     //cleanup appender
     appender.reset();
+
+    return Result::succeeded();
+}
+
+/**
+ * In DuckDB we update via a temporary table which seems to be much faster.
+ */
+Result DuckDBConnection::updateBuffer_impl(const std::string& table_name, 
+                                           const std::shared_ptr<Buffer>& buffer,
+                                           const std::string& key_column,
+                                           const boost::optional<size_t>& idx_from, 
+                                           const boost::optional<size_t>& idx_to)
+{
+    if (!buffer || buffer->properties().size() == 0 || buffer->size() == 0)
+        return Result::failed("input buffer invalid");
+
+    //create temporary table for buffer data
+    std::vector<DBTableColumnInfo> table_columns;
+    for (const auto& p : buffer->properties().properties())
+        table_columns.push_back(DBTableColumnInfo(p.name(), p.dataType(), false));
+
+    DBScopedTemporaryTable temp_table(this, table_columns);
+    if (!temp_table.valid())
+        return Result::failed("could not create temporary table for transaction: " + temp_table.result().error());
+
+    //insert buffer data into temp table
+    auto res_insert = insertBuffer(temp_table.name(), buffer, idx_from, idx_to);
+    if (!res_insert.ok())
+        return res_insert;
+
+    //assign temp table data to target table
+    std::vector<std::string> update_columns;
+    bool key_col_found = false;
+    for (const auto& p : buffer->properties().properties())
+    {
+        if (p.name() == key_column)
+            key_col_found = true;
+        else
+            update_columns.push_back(p.name());
+    }
+
+    if (!key_col_found)
+        return Result::failed("key column '" + key_column + "' not found in buffer");
+    
+    auto sql = sqlGenerator().getUpdateTableFromTableStatement(temp_table.name(),
+                                                               table_name,
+                                                               update_columns,
+                                                               key_column);
+    auto res_sql = execute(sql);
+    if (!res_sql.ok())
+        return res_sql;
 
     return Result::succeeded();
 }

@@ -52,6 +52,7 @@ public:
 
     std::string status() const;
     bool dbOpened() { return db_opened_; }
+    const std::string& dbFilename() const { return db_filename_; }
 
     Result exportFile(const std::string& file_name);
 
@@ -61,13 +62,17 @@ public:
     std::shared_ptr<DBResult> execute(const DBCommandList& command_list);
 
     Result createTable(const std::string& table_name, 
-                                             const std::vector<DBTableColumnInfo>& column_infos,
-                                             const std::string& dbcontent_name = "");
+                       const std::vector<DBTableColumnInfo>& column_infos,
+                       const std::vector<db::Index>& indices = std::vector<db::Index>());
+    Result deleteTable(const std::string& table_name);
+    Result deleteTableContents(const std::string& table_name);
     Result updateTableInfo();
     void printTableInfo();
     const std::map<std::string, DBTableInfo>& tableInfo() const { return created_tables_; }
     Result insertBuffer(const std::string& table_name, 
                         const std::shared_ptr<Buffer>& buffer,
+                        const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
+                        const boost::optional<size_t>& idx_to = boost::optional<size_t>(),
                         PropertyList* table_properties = nullptr);
     Result updateBuffer(const std::string& table_name, 
                         const std::shared_ptr<Buffer>& buffer,
@@ -81,6 +86,9 @@ public:
     void stopRead();
 
     SQLGenerator sqlGenerator() const;
+
+    void startPerformanceMetrics() const;
+    db::PerformanceMetrics stopPerformanceMetrics() const;
 
     virtual std::shared_ptr<DBScopedPrepare> prepareStatement(const std::string& statement, 
                                                               bool begin_transaction) = 0;
@@ -102,6 +110,8 @@ protected:
 
     virtual Result insertBuffer_impl(const std::string& table_name, 
                                      const std::shared_ptr<Buffer>& buffer,
+                                     const boost::optional<size_t>& idx_from, 
+                                     const boost::optional<size_t>& idx_to,
                                      PropertyList* table_properties);
     virtual Result updateBuffer_impl(const std::string& table_name, 
                                      const std::shared_ptr<Buffer>& buffer,
@@ -125,4 +135,6 @@ private:
     std::string                        db_filename_;
 
     std::shared_ptr<DBScopedReader>    active_reader_;
+
+    mutable boost::optional<db::PerformanceMetrics> perf_metrics_;
 };

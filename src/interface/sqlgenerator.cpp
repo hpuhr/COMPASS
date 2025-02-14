@@ -60,6 +60,7 @@ std::string SQLGenerator::placeholder(int index) const
  */
 string SQLGenerator::getCreateTableStatement(const DBContent& object)
 {
+    //collect needed columns
     std::vector<DBTableColumnInfo> column_infos;
     for (auto& var_it : object.variables())
     {
@@ -67,14 +68,33 @@ string SQLGenerator::getCreateTableStatement(const DBContent& object)
         column_infos.push_back(DBTableColumnInfo(v->dbColumnName(), v->dataType(), v->isKey()));
     }
 
-    return getCreateTableStatement(object.dbTableName(), column_infos, object.name());
+    //enable indexing on some metavars?
+    std::vector<db::Index> indices;
+    if (config_.indexing)
+    {
+        auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+        indices.emplace_back("TIMESTAMP_INDEX_" + object.name(), 
+                             dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_timestamp_).dbColumnName());
+        indices.emplace_back("DS_ID_INDEX_" + object.name(), 
+                             dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_ds_id_).dbColumnName());
+        indices.emplace_back("LINE_ID_INDEX_" + object.name(), 
+                             dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_line_id_).dbColumnName());
+        if (dbcont_man.metaCanGetVariable(object.name(), DBContent::meta_var_utn_))
+        {
+            indices.emplace_back("UTN_INDEX_" + object.name(), 
+                                 dbcont_man.metaGetVariable(object.name(), DBContent::meta_var_utn_).dbColumnName());
+        }
+    }
+
+    return getCreateTableStatement(object.dbTableName(), column_infos, indices);
 }
 
 /**
  */
 std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
                                                   const std::vector<DBTableColumnInfo>& column_infos,
-                                                  const std::string& dbcontent_name)
+                                                  const std::vector<db::Index>& indices)
 {
     stringstream ss;
 
@@ -126,31 +146,11 @@ std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
 
     ss << ");";
 
-    //enable indexing on some metavars?
-    if (config_.indexing && !dbcontent_name.empty())
+    if (config_.indexing)
     {
         // CREATE [UNIQUE] INDEX index_name ON table_name(column_list);
-
-        auto& dbcont_man = COMPASS::instance().dbContentManager();
-
-        ss << "\nCREATE INDEX TIMESTAMP_INDEX_" << dbcontent_name << " ON " << table_name << "(";
-        ss << dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_).dbColumnName()
-        << ");";
-
-        ss << "\nCREATE INDEX DS_ID_INDEX_" << dbcontent_name << " ON " << table_name << "(";
-        ss << dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_).dbColumnName()
-        << ");";
-
-        ss << "\nCREATE INDEX LINE_ID_INDEX_" << dbcontent_name << " ON " << table_name << "(";
-        ss << dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_).dbColumnName()
-        << ");";
-
-        if (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_)) // status dbcont no utn
-        {
-            ss << "\nCREATE INDEX UTN_INDEX_" << dbcontent_name << " ON " << table_name << "(";
-            ss << dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).dbColumnName()
-            << ");";
-        }
+        for (const auto& index : indices)
+            ss << "\nCREATE INDEX " << index.indexName() << " ON " << table_name << "(" << index.columnName() << ");";
     }
 
     loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
@@ -863,6 +863,37 @@ string SQLGenerator::getCreateDBUpdateStringBind(shared_ptr<Buffer> buffer,
     logdbg << "SQLGenerator: createDBUpdateStringBind: var update string '" << ss.str() << "'";
 
     return ss.str();
+}
+
+/**
+ */
+std::string SQLGenerator::getUpdateTableFromTableStatement(const std::string& table_name_src,
+                                                           const std::string& table_name_dst,
+                                                           const std::vector<std::string>& col_names,
+                                                           const std::string& key_col)
+{
+    //@TODO: maybe allow more variants of this command in the future and assert a little less
+    assert(!table_name_src.empty());
+    assert(!table_name_dst.empty());
+    assert(table_name_src != table_name_dst);
+    assert(!col_names.empty());
+    assert(!key_col.empty());
+
+    stringstream ss;
+    ss << "UPDATE " + table_name_dst + " SET ";
+
+    size_t n = col_names.size();
+    for (size_t i = 0; i < n; ++i)
+        ss << col_names[ i ] << "=" << table_name_src << "." << col_names[ i ] << (i < n - 1 ? ", " : "");
+
+    ss << " FROM " << table_name_src;
+    ss << " WHERE " << table_name_dst << "." << key_col << "=" << table_name_src << "." << key_col;
+    ss << ";";
+
+    logdbg << "SQLGenerator: getUpdateTableFromTableStatement: sql '" << ss.str() << "'";
+
+    return ss.str();
+    
 }
 
 /**
