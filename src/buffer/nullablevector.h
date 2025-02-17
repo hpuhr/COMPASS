@@ -103,7 +103,7 @@ public:
 
     void convertToStandardFormat(const std::string& from_format);
 
-    unsigned int size();
+    unsigned int contentSize();
 
     /// @brief Checks if specific element is Null
     bool isNull(unsigned int index) const;
@@ -912,7 +912,7 @@ void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
 }
 
 template <class T>
-unsigned int NullableVector<T>::size()
+unsigned int NullableVector<T>::contentSize()
 {
     return data_.size();
 }
