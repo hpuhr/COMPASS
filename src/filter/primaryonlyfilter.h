@@ -22,7 +22,7 @@ public:
     virtual void loadViewPointConditions (const nlohmann::json& filters) override;
 
     virtual bool activeInLiveMode() override;
-    virtual std::vector<size_t> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer) override;
+    virtual std::vector<unsigned int> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer) override;
 
 protected:
     virtual void checkSubConfigurables() override;

@@ -442,8 +442,15 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                        << " ts " << Time::toString(timestamp);
 
                 timestamp_vec.set(index, timestamp);
+                assert (!timestamp_vec.isNull(index));
+                assert (timestamp_vec.get(index) == timestamp);
             }
         }
+
+        bool has_vec_min_max;
+        boost::posix_time::ptime ts_vec_min, ts_vec_max;
+
+        tie(has_vec_min_max, ts_vec_min, ts_vec_max) = timestamp_vec.minMaxValues();
     }
 }
 
@@ -741,7 +748,7 @@ void ASTERIXPostprocessJob::doFilters()
 
             NullableVector<float>& tod_vec = buffer->get<float>(tod_var_name);
 
-            std::vector<size_t> to_be_removed;
+            std::vector<unsigned int> to_be_removed;
 
             for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
             {
@@ -811,7 +818,7 @@ void ASTERIXPostprocessJob::doFilters()
                     mc_vec2 = &buffer->get<float>(mc_var2.name());
             }
 
-            std::vector<size_t> to_be_removed;
+            std::vector<unsigned int> to_be_removed;
 
             for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
             {
@@ -889,7 +896,7 @@ void ASTERIXPostprocessJob::doObfuscate()
 
             NullableVector<unsigned int>& var_vec = buffer->get<unsigned int>(var_name);
 
-            std::vector<size_t> to_be_removed;
+            std::vector<unsigned int> to_be_removed;
 
             for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
             {

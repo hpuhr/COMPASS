@@ -88,7 +88,7 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
     NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(
                 dbcontent_name, DBContent::meta_var_timestamp_);
 
-    unsigned int buffer_size = ts_vec.size();
+    unsigned int buffer_size = ts_vec.contentSize();
 
     assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ds_id_));
     NullableVector<unsigned int>& ds_ids = accessor_->getMetaVar<unsigned int>(
@@ -192,7 +192,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
     NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(
                 dbcontent_name, DBContent::meta_var_timestamp_);
 
-    unsigned int buffer_size = ts_vec.size();
+    unsigned int buffer_size = ts_vec.contentSize();
 
     assert (accessor_->hasMetaVar<unsigned int>(dbcontent_name, DBContent::meta_var_ds_id_));
     NullableVector<unsigned int>& ds_ids = accessor_->getMetaVar<unsigned int>(

@@ -86,7 +86,7 @@ class DBFilter : public Configurable
     void updateToAppMode (AppMode app_mode);
 
     virtual bool activeInLiveMode();
-    virtual std::vector<size_t> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer);
+    virtual std::vector<unsigned int> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer);
 
     bool widgetVisible() const;
     void widgetVisible(bool widget_expanded);

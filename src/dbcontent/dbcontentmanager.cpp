@@ -38,6 +38,7 @@
 #include "dbcontentdeletedbjob.h"
 #include "dbcontent_commands.h"
 #include "viewpoint.h"
+#include "timeconv.h"
 
 #include "util/tbbhack.h"
 
@@ -1043,7 +1044,7 @@ void DBContentManager::filterDataSources()
 
                           unsigned int buffer_size = buf_it->second->size();
 
-                          vector<size_t> indexes_to_remove;
+                          vector<unsigned int> indexes_to_remove;
                           //assert (ds_id_vec.isNeverNull()); TODO why asserts?
 
                           for (unsigned int index=0; index < buffer_size; ++index)
@@ -1328,10 +1329,10 @@ std::pair<double, double> DBContentManager::minMaxLongitude() const
     return {longitude_min_.get(), longitude_max_.get()};
 }
 
-bool DBContentManager::hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const
-{
+// bool DBContentManager::hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const
+// {
 
-}
+// }
 
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const
 {
@@ -1608,10 +1609,12 @@ void DBContentManager::saveSelectedRecNums()
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-        NullableVector<unsigned long> rec_num_vec = buf_it.second->get<unsigned long>(
+        NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
-        for (unsigned int cnt=0; cnt < selected_vec.size(); ++cnt)
+        size_t data_size = selected_vec.contentSize();
+
+        for (unsigned int cnt=0; cnt < data_size; ++cnt)
         {
             if (!selected_vec.isNull(cnt) && selected_vec.get(cnt))
                 tmp_selected_rec_nums_[buf_it.first].push_back(rec_num_vec.get(cnt));
@@ -1636,7 +1639,7 @@ void DBContentManager::restoreSelectedRecNums()
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-        NullableVector<unsigned long> rec_num_vec = buf_it.second->get<unsigned long>(
+        NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
         // select existing, store still unselected
