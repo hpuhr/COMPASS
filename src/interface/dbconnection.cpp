@@ -60,6 +60,17 @@ DBConnection::~DBConnection()
 }
 
 /**
+ */
+db::SQLConfig DBConnection::sqlConfiguration(bool verbose) const
+{
+    auto config = sqlConfiguration_impl();
+
+    config.verbose = verbose;
+
+    return config;
+}
+
+/**
  * Returns the current connection status.
  */
 std::string DBConnection::status() const
@@ -244,19 +255,39 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
  */
 Result DBConnection::createTable(const std::string& table_name, 
                                  const std::vector<DBTableColumnInfo>& column_infos,
-                                 const std::vector<db::Index>& indices)
+                                 const std::vector<db::Index>& indices,
+                                 bool table_must_not_exist)
 {
     assert(dbOpened());
 
     auto it = created_tables_.find(table_name);
     if (it != created_tables_.end())
     {
-        //@TODO: check properties of existing table against requested one
-        return Result::succeeded();
+        //@TODO: check properties of existing table against requested one?
+        return table_must_not_exist ? Result::failed("table '" + table_name + "' already exists") : Result::succeeded();
     }
 
+    auto res = createTableInternal(table_name, column_infos, indices, true);
+    if (!res.ok())
+        return res;
+
+    //update table info after inserting a new table
+    updateTableInfo();
+
+    return Result::succeeded();
+}
+
+/**
+ */
+Result DBConnection::createTableInternal(const std::string& table_name, 
+                                         const std::vector<DBTableColumnInfo>& column_infos,
+                                         const std::vector<db::Index>& indices,
+                                         bool verbose)
+{
+    assert(dbOpened());
+
     //get sql statement
-    std::string sql = SQLGenerator(sqlConfiguration()).getCreateTableStatement(table_name, column_infos, indices);
+    std::string sql = SQLGenerator(sqlConfiguration(verbose)).getCreateTableStatement(table_name, column_infos, indices);
 
     auto result = execute(sql, false);
     assert(result);
@@ -266,9 +297,6 @@ Result DBConnection::createTable(const std::string& table_name,
         //logerr << "DBConnection: createTable: creating table '" << table_name << "' failed: " << result->error();
         return Result::failed(result->error());
     }
-
-    //update table info after inserting a new table
-    updateTableInfo();
 
     return Result::succeeded();
 }
@@ -395,14 +423,12 @@ Result DBConnection::insertBuffer_impl(const std::string& table_name,
  * Default implementation: use prepared UPDATE statement.
  */
 Result DBConnection::updateBuffer_impl(const std::string& table_name, 
-                                                             const std::shared_ptr<Buffer>& buffer,
-                                                             const std::string& key_column,
-                                                             const boost::optional<size_t>& idx_from, 
-                                                             const boost::optional<size_t>& idx_to)
+                                       const std::shared_ptr<Buffer>& buffer,
+                                       const std::string& key_column,
+                                       const boost::optional<size_t>& idx_from, 
+                                       const boost::optional<size_t>& idx_to)
 {
     auto sql = SQLGenerator(sqlConfiguration()).getCreateDBUpdateStringBind(buffer, key_column, table_name);
-
-    //loginf << "executing statement:\n" << sql;
 
     auto stmnt = prepareStatement(sql, true);
     assert(stmnt);

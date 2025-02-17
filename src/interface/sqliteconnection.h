@@ -46,9 +46,20 @@ public:
     std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
                                                  size_t offset, 
                                                  size_t chunk_size) override final;
+protected:
+    Result connect_impl(const std::string& file_name) override final;
+    void disconnect_impl() override final;
+
+    Result exportFile_impl(const std::string& file_name) override final;
+
+    Result executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer) override final;
+    bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) override final;
+
+    ResultT<std::vector<std::string>> getTableList_impl() override final;
+
     /**
      */
-    db::SQLConfig sqlConfiguration() const override final
+    db::SQLConfig sqlConfiguration_impl() const override final
     {
         db::SQLConfig config;
 
@@ -63,17 +74,6 @@ public:
 
         return config;
     }
-
-protected:
-    Result connect_impl(const std::string& file_name) override final;
-    void disconnect_impl() override final;
-
-    Result exportFile_impl(const std::string& file_name) override final;
-
-    Result executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer) override final;
-    bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) override final;
-
-    ResultT<std::vector<std::string>> getTableList_impl() override final;
 
 private:
     /// Database handle to execute queries

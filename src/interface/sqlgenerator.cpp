@@ -153,7 +153,9 @@ std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
             ss << "\nCREATE INDEX " << index.indexName() << " ON " << table_name << "(" << index.columnName() << ");";
     }
 
-    loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
+    if (config_.verbose)
+        loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
+
     return ss.str();
 }
 

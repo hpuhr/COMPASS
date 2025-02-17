@@ -59,7 +59,7 @@ ResultT<std::string> DBTemporaryTable::create(const std::vector<DBTableColumnInf
 
     auto table_name = DBTemporaryTable::createTempTableName();
 
-    auto res = connection_->createTable(table_name, column_infos, indices);
+    auto res = connection_->createTableInternal(table_name, column_infos, indices, false);
     if (!res.ok())
         return res;
 

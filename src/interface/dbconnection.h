@@ -63,7 +63,8 @@ public:
 
     Result createTable(const std::string& table_name, 
                        const std::vector<DBTableColumnInfo>& column_infos,
-                       const std::vector<db::Index>& indices = std::vector<db::Index>());
+                       const std::vector<db::Index>& indices = std::vector<db::Index>(),
+                       bool table_must_not_exist = true);
     Result deleteTable(const std::string& table_name);
     Result deleteTableContents(const std::string& table_name);
     Result updateTableInfo();
@@ -96,10 +97,11 @@ public:
                                                          size_t offset, 
                                                          size_t chunk_size) = 0;
     
-    //db backend specific sql settings
-    virtual db::SQLConfig sqlConfiguration() const = 0;
+    db::SQLConfig sqlConfiguration(bool verbose = false) const;
     
 protected:
+    friend class DBTemporaryTable;
+
     virtual Result connect_impl(const std::string& file_name) = 0;
     virtual void disconnect_impl() = 0;
 
@@ -121,6 +123,14 @@ protected:
 
     virtual ResultT<DBTableInfo> getColumnList_impl(const std::string& table);
     virtual ResultT<std::vector<std::string>> getTableList_impl() = 0;
+
+    //db backend specific sql settings
+    virtual db::SQLConfig sqlConfiguration_impl() const = 0;
+
+    Result createTableInternal(const std::string& table_name, 
+                               const std::vector<DBTableColumnInfo>& column_infos,
+                               const std::vector<db::Index>& indices,
+                               bool verbose = false);
 
     DBInterface& interface() { return interface_; }
     const DBInterface& interface() const { return interface_; }

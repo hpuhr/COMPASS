@@ -49,27 +49,6 @@ public:
     std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
                                                  size_t offset, 
                                                  size_t chunk_size) override final;
-    /**
-     */
-    db::SQLConfig sqlConfiguration() const override final
-    {
-        db::SQLConfig config;
-
-        //duckdb needs precise data types in its tables
-        config.precise_types = true;
-
-        //no indexing, queries should be quite fast in duckdb 
-        //and indexing blows up the db file consiferably
-        config.indexing = false;
-
-        //duckdb can only comprehend ? as a placeholder
-        config.placeholder = db::SQLPlaceholder::QuestionMark;
-
-        //duckdb does not allow 'replace into' directly, this is handled via 'insert ... on conflict'
-        config.use_conflict_resolution = true;
-
-        return config;
-    }
 
     DuckDBConnectionSettings& settings() { return settings_; }
 
@@ -94,6 +73,28 @@ protected:
                              const boost::optional<size_t>& idx_to) override final;
 
     ResultT<std::vector<std::string>> getTableList_impl() override final;
+
+    /**
+     */
+    db::SQLConfig sqlConfiguration_impl() const override final
+    {
+        db::SQLConfig config;
+
+        //duckdb needs precise data types in its tables
+        config.precise_types = true;
+
+        //no indexing, queries should be quite fast in duckdb 
+        //and indexing blows up the db file consiferably
+        config.indexing = false;
+
+        //duckdb can only comprehend ? as a placeholder
+        config.placeholder = db::SQLPlaceholder::QuestionMark;
+
+        //duckdb does not allow 'replace into' directly, this is handled via 'insert ... on conflict'
+        config.use_conflict_resolution = true;
+
+        return config;
+    }
     
 private:
     duckdb_database   db_         = nullptr;
