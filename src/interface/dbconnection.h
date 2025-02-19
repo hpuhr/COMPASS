@@ -49,6 +49,7 @@ public:
 
     Result connect(const std::string& file_name);
     void disconnect();
+    Result reconnect(bool cleanup_db = false, Result* cleanup_result = nullptr);
 
     std::string status() const;
     bool dbOpened() { return db_opened_; }
@@ -67,6 +68,7 @@ public:
                        bool table_must_not_exist = true);
     Result deleteTable(const std::string& table_name);
     Result deleteTableContents(const std::string& table_name);
+    
     Result updateTableInfo();
     void printTableInfo();
     const std::map<std::string, DBTableInfo>& tableInfo() const { return created_tables_; }
@@ -124,6 +126,8 @@ protected:
     virtual ResultT<DBTableInfo> getColumnList_impl(const std::string& table);
     virtual ResultT<std::vector<std::string>> getTableList_impl() = 0;
 
+    virtual Result cleanupDB_impl(const std::string& db_fn);
+
     //db backend specific sql settings
     virtual db::SQLConfig sqlConfiguration_impl() const = 0;
 
@@ -138,6 +142,8 @@ protected:
 private:
     ResultT<DBTableInfo> getColumnList(const std::string& table);
     ResultT<std::vector<std::string>> getTableList();
+
+    Result cleanupDB(const std::string& db_fn);
 
     DBInterface&                       interface_;
     std::map<std::string, DBTableInfo> created_tables_;

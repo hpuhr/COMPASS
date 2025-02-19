@@ -175,7 +175,7 @@ bool DuckDBExecResult::toBuffer(Buffer& buffer,
     idx_t row_count = nr.value();
     assert(col_count == properties.size()); // result column count must match provided buffer
 
-    #define UpdateFunc(PDType, DType, Suffix)                              \
+    #define UpdateFuncToBuffer(PDType, DType, Suffix)                      \
         bool is_null = duckdb_value_is_null(&result_, c, r);               \
         if (!is_null)                                                      \
         {                                                                  \
@@ -183,7 +183,7 @@ bool DuckDBExecResult::toBuffer(Buffer& buffer,
             buffer.get<DType>(pname).set(buf_idx, v);                      \
         }
 
-    #define NotFoundFunc                                                                             \
+    #define NotFoundFuncToBuffer                                                                     \
         logerr << "DuckDBExecResult: toBuffer: unknown property type " << Property::asString(dtype); \
         assert(false);
 
@@ -203,9 +203,122 @@ bool DuckDBExecResult::toBuffer(Buffer& buffer,
             auto dtype = p.dataType();
             const auto& pname = p.name();
 
-            SwitchPropertyDataType(dtype, UpdateFunc, NotFoundFunc)
+            SwitchPropertyDataType(dtype, UpdateFuncToBuffer, NotFoundFuncToBuffer)
         }
     }
 
     return true;
+}
+
+/**
+ */
+void DuckDBExecResult::nextChunk(std::vector<void*>& data_vectors,
+                                 std::vector<uint64_t*>& valid_vectors, 
+                                 size_t num_cols)
+{
+    chunk_          = duckdb_fetch_chunk(result_);
+    chunk_idx_      = 0;
+    chunk_num_rows_ = duckdb_data_chunk_get_size(chunk_.value());
+
+    data_vectors.assign(num_cols, nullptr);
+    data_vectors.assign(num_cols, nullptr);
+
+    if (!hasChunk())
+        return;
+
+    for (size_t i = 0; i < num_cols; ++i)
+    {
+        duckdb_vector vec      = duckdb_data_chunk_get_vector(chunk_.value(), i);
+        auto          data     = duckdb_vector_get_data(vec);
+        auto          validity = duckdb_vector_get_validity(vec);
+
+        data_vectors [ i ] = data;
+        valid_vectors[ i ] = validity;
+    }
+}
+
+/**
+ */
+bool DuckDBExecResult::hasChunk() const
+{
+    return (chunk_.has_value() && chunk_.value() != nullptr);
+}
+
+/**
+ */
+ResultT<bool> DuckDBExecResult::readNextChunk(Buffer& buffer,
+                                              size_t max_entries)
+{
+    assert(result_valid_);
+
+    const auto& properties = buffer.properties();
+    size_t np = properties.size();
+
+    loginf << "DuckDBExecResult: readNextChunk: reading...";
+
+    std::vector<void*>     data_vectors;
+    std::vector<uint64_t*> valid_vectors;
+
+    //init chunk?
+    if (!chunk_.has_value())
+        nextChunk(data_vectors, valid_vectors, np);
+
+    assert(chunk_.has_value());
+
+    //already at end? => no more data
+    if (!hasChunk())
+        return ResultT<bool>::succeeded(false);
+
+    //get needed chunk vectors
+    for (size_t i = 0; i < np; ++i)
+    {
+        duckdb_vector vec      = duckdb_data_chunk_get_vector(chunk_.value(), i);
+        auto          data     = duckdb_vector_get_data(vec);
+        auto          validity = duckdb_vector_get_validity(vec);
+
+        data_vectors [ i ] = data;
+        valid_vectors[ i ] = validity;
+    }
+
+    #define UpdateFuncNextChunk(PDType, DType, Suffix)                                                \
+        bool is_null = !duckdb_validity_row_is_valid(valid_vectors[ c ], r);                          \
+        if (!is_null) buffer.get<DType>(pname).set(buf_idx, readVector<DType>(data_vectors[ c ], r));
+
+    #define NotFoundFuncNextChunk                                                                         \
+        logerr << "DuckDBExecResult: readNextChunk: unknown property type " << Property::asString(dtype); \
+        assert(false);
+
+    //read data until we reach end of result or max entries
+    size_t buf_idx = 0;
+    while (buf_idx < max_entries && chunk_.value() != nullptr)
+    {
+        //read until chunk's end
+        for (size_t r = chunk_idx_; r < chunk_num_rows_; ++r, ++buf_idx, ++chunk_idx_)
+        {
+            //reached max entries? => break
+            if (buf_idx == max_entries)
+                break;
+
+            //fetch row data
+            for (idx_t c = 0; c < np; ++c)
+            {
+                const auto& p = properties.at(c);
+                auto dtype = p.dataType();
+                const auto& pname = p.name();
+
+                SwitchPropertyDataType(dtype, UpdateFuncNextChunk, NotFoundFuncNextChunk)
+            }
+        }
+
+        //fetch next chunk?
+        if (chunk_idx_ >= chunk_num_rows_)
+            nextChunk(data_vectors, valid_vectors, np);
+    }
+
+    assert(chunk_idx_ <= chunk_num_rows_);
+    assert(buf_idx <= max_entries);
+
+    bool has_more = hasChunk();
+
+    return ResultT<bool>::succeeded(has_more);
 }

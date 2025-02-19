@@ -119,11 +119,39 @@ void DBConnection::disconnect()
     //close any active reader
     stopRead();
 
+    //stop active performance metrics
+    stopPerformanceMetrics();
+
     disconnect_impl();
 
     db_opened_   = false;
     db_filename_ = "";
     created_tables_.clear();
+}
+
+/**
+ */
+Result DBConnection::reconnect(bool cleanup_db, Result* cleanup_result)
+{
+    assert(dbOpened());
+
+    auto fn = db_filename_;
+
+    //disconnect
+    disconnect();
+    assert(!dbOpened());
+
+    if (cleanup_db)
+    {
+        //cleanup closed db file
+        auto res = cleanupDB(fn);
+        
+        if (cleanup_result)
+            *cleanup_result = res;
+    }
+
+    //re-connect to db
+    return connect(fn);
 }
 
 /**
@@ -319,6 +347,23 @@ Result DBConnection::deleteTable(const std::string& table_name)
 Result DBConnection::deleteTableContents(const std::string& table_name)
 {
     return execute("DELETE FROM " + table_name + ";");
+}
+
+/**
+ */
+Result DBConnection::cleanupDB(const std::string& db_fn)
+{
+    assert(!dbOpened());
+
+    return cleanupDB_impl(db_fn);
+}
+
+/**
+ */
+Result DBConnection::cleanupDB_impl(const std::string& db_fn)
+{
+    //derive if some special action is needed
+    return Result::succeeded();
 }
 
 /**

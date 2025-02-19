@@ -53,6 +53,8 @@ public:
     bool toBuffer(Buffer& buffer,
                   const boost::optional<size_t>& offset = boost::optional<size_t>(),
                   const boost::optional<size_t>& max_entries = boost::optional<size_t>()) override final;
+    ResultT<bool> readNextChunk(Buffer& buffer,
+                                size_t max_entries) override final;
     
     duckdb_result* result();
 
@@ -62,6 +64,11 @@ private:
     friend class DuckDBPrepare;
     friend class DuckDBConnection;
 
+    void nextChunk(std::vector<void*>& data_vectors,
+                   std::vector<uint64_t*>& valid_vectors,
+                   size_t num_cols);
+    bool hasChunk() const; 
+
     template <typename T>
     T read(idx_t col, idx_t row)
     {
@@ -69,9 +76,19 @@ private:
         throw std::runtime_error("DuckDBResult: read: not implemented for type");
     }
 
-    mutable duckdb_result result_;
-    bool                  result_valid_ = false;
-    bool                  result_error_ = false;
+    template <typename T>
+    T readVector(void* v, idx_t row)
+    {
+        assert(result_valid_);
+        throw std::runtime_error("DuckDBResult: readVector: not implemented for type");
+    }
+
+    mutable duckdb_result                      result_;
+    mutable boost::optional<duckdb_data_chunk> chunk_;
+    size_t                                     chunk_num_rows_ = 0;
+    size_t                                     chunk_idx_      = 0;
+    bool                                       result_valid_   = false;
+    bool                                       result_error_   = false;
 };
 
 #define StandardRead(DType, DuckDBDTypeName)                         \
@@ -112,5 +129,50 @@ inline boost::posix_time::ptime DuckDBExecResult::read(idx_t col, idx_t row)
 {
     assert(result_valid_);
     long ts = read<long>(col, row);
+    return Utils::Time::fromLong(ts);
+}
+
+#define StandardReadVector(DType)                                    \
+template<>                                                           \
+inline DType DuckDBExecResult::readVector(void* v, idx_t row)        \
+{                                                                    \
+    assert(result_valid_);                                           \
+    return ((DType*)v)[ row ];                                       \
+}
+
+StandardReadVector(bool)
+StandardReadVector(char)
+StandardReadVector(unsigned char)
+StandardReadVector(int)
+StandardReadVector(unsigned int)
+StandardReadVector(long)
+StandardReadVector(unsigned long)
+StandardReadVector(float)
+StandardReadVector(double)
+
+template<>
+inline std::string DuckDBExecResult::readVector(void* v, idx_t row)
+{
+    assert(result_valid_);
+    duckdb_string_t str = ((duckdb_string_t*)v)[ row ];
+    if (duckdb_string_is_inlined(str)) 
+        return std::string((char*)str.value.inlined.inlined, str.value.inlined.length);
+    else 
+        return std::string((char*)str.value.pointer.ptr, str.value.pointer.length);
+}
+
+template<>
+inline nlohmann::json DuckDBExecResult::readVector(void* v, idx_t row)
+{
+    assert(result_valid_);
+    auto str = readVector<std::string>(v, row);
+    return nlohmann::json::parse(str);
+}
+
+template<>
+inline boost::posix_time::ptime DuckDBExecResult::readVector(void* v, idx_t row)
+{
+    assert(result_valid_);
+    long ts = readVector<long>(v, row);
     return Utils::Time::fromLong(ts);
 }

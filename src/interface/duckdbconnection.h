@@ -74,6 +74,8 @@ protected:
 
     ResultT<std::vector<std::string>> getTableList_impl() override final;
 
+    Result cleanupDB_impl(const std::string& db_fn) override final;
+
     /**
      */
     db::SQLConfig sqlConfiguration_impl() const override final

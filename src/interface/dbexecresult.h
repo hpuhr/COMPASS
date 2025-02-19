@@ -18,6 +18,7 @@
 #pragma once
 
 #include "propertylist.h"
+#include "result.h"
 
 #include <string>
 #include <memory>
@@ -51,4 +52,7 @@ public:
                                              const std::string& dbcontent_name = "",
                                              const boost::optional<size_t>& offset = boost::optional<size_t>(),
                                              const boost::optional<size_t>& max_entries = boost::optional<size_t>());
+
+    virtual ResultT<bool> readNextChunk(Buffer& buffer,
+                                        size_t max_entries) = 0;
 };

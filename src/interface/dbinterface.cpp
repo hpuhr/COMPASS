@@ -100,6 +100,25 @@ SQLGenerator DBInterface::sqlGenerator() const
 }
 
 /**
+ * 
+ */
+void DBInterface::reset()
+{
+    properties_loaded_ = false;
+    properties_.clear();
+
+    dbcolumn_content_flags_.clear();
+
+    if (db_connection_)
+    {
+        db_connection_->disconnect();
+        db_connection_.reset();
+    }
+
+    db_filename_ = "";
+}
+
+/**
  */
 void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 {
@@ -191,16 +210,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
     }
     catch(const std::exception& ex)
     {
-        properties_loaded_ = false;
-        properties_.clear();
-
-        if (db_connection_)
-        {
-            db_connection_->disconnect();
-            db_connection_.reset();
-        }
-
-        db_filename_ = "";
+        reset();
 
         logerr << "DBInterface: openDBFile: Error: " << ex.what();
         throw std::runtime_error(ex.what());
@@ -247,6 +257,45 @@ void DBInterface::closeDBFile()
     }
 
     // signal emitted in COMPASS
+}
+
+/**
+ */
+bool DBInterface::cleanupDB()
+{
+    loginf << "DBInterface: cleanupDB";
+
+    if (!dbOpen())
+        return false;
+
+    assert(db_connection_);
+    assert(db_connection_->dbOpened());
+
+    bool cleanup_ok = true;
+
+    try
+    {
+        Result res_cleanup;
+        auto res_reconnect = db_connection_->reconnect(true);
+        if (!res_reconnect.ok())
+            throw std::runtime_error("Reconnecting to database failed: " + res_reconnect.error());
+
+        if (!res_cleanup.ok())
+        {
+            logerr << "DBInterface: cleanupDB: Cleanup failed: " << res_cleanup.error();
+            cleanup_ok = false;
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        //reset interface = worstcase
+        reset();
+
+        logerr << "DBInterface: cleanupDB: Error: " << ex.what();
+        throw std::runtime_error(ex.what());
+    }
+
+    return cleanup_ok;
 }
 
 /**
@@ -1545,6 +1594,7 @@ void DBInterface::deleteBefore(const DBContent& dbcontent,
 
     std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent, before_timestamp);
     execute(*command.get());
+    execute("CHECKPOINT;");
 
     connection_mutex_.unlock();
 }
@@ -1557,6 +1607,7 @@ void DBInterface::deleteAll(const DBContent& dbcontent)
 
     std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent);
     execute(*command.get());
+    execute("CHECKPOINT;");
 
     connection_mutex_.unlock();
 }
@@ -1575,6 +1626,7 @@ void DBInterface::deleteContent(const DBContent& dbcontent,
     std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent, sac, sic);
 
     execute(*command.get());
+    execute("CHECKPOINT;");
 
     connection_mutex_.unlock();
 }
@@ -1591,8 +1643,19 @@ void DBInterface::deleteContent(const DBContent& dbcontent, unsigned int sac, un
     std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent, sac, sic, line_id);
 
     execute(*command.get());
+    execute("CHECKPOINT;");
 
     connection_mutex_.unlock();
+}
+
+/**
+ */
+void DBInterface::clearTableContent(const string& table_name)
+{
+    boost::mutex::scoped_lock locker(connection_mutex_);
+    // DELETE FROM tablename;
+    execute("DELETE FROM " + table_name + ";");
+    execute("CHECKPOINT;");
 }
 
 /**
@@ -1604,15 +1667,6 @@ void DBInterface::createPropertiesTable()
     execute(sqlGenerator().getTablePropertiesCreateStatement());
     updateTableInfo();
     connection_mutex_.unlock();
-}
-
-/**
- */
-void DBInterface::clearTableContent(const string& table_name)
-{
-    boost::mutex::scoped_lock locker(connection_mutex_);
-    // DELETE FROM tablename;
-    execute("DELETE FROM " + table_name + ";");
 }
 
 /**

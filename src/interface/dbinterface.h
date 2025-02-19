@@ -90,6 +90,8 @@ public:
     void closeDBFile();
     bool dbOpen();
 
+    bool cleanupDB();
+
     const std::map<std::string, DBTableInfo>& tableInfo();
     const std::string dbFilename() const { return db_filename_; }
 
@@ -187,6 +189,7 @@ public:
 
 protected:
     void loadProperties();
+    void reset();
 
     SQLGenerator sqlGenerator() const;
     
