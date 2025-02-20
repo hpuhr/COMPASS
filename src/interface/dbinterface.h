@@ -182,6 +182,7 @@ public:
 
     void startPerformanceMetrics() const;
     db::PerformanceMetrics stopPerformanceMetrics() const;
+    bool hasActivePerformanceMetrics() const;
 
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();

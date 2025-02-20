@@ -58,6 +58,8 @@ public:
     
     duckdb_result* result();
 
+    bool hasChunk() const; 
+
     static PropertyDataType dataTypeFromDuckDB(duckdb_type type);
 
 private:
@@ -67,7 +69,9 @@ private:
     void nextChunk(std::vector<void*>& data_vectors,
                    std::vector<uint64_t*>& valid_vectors,
                    size_t num_cols);
-    bool hasChunk() const; 
+    void fetchVectors(std::vector<void*>& data_vectors,
+                      std::vector<uint64_t*>& valid_vectors,
+                      size_t num_cols);
 
     template <typename T>
     T read(idx_t col, idx_t row)

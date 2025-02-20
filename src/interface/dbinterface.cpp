@@ -277,17 +277,22 @@ bool DBInterface::cleanupDB()
     {
         Result res_cleanup;
         auto res_reconnect = db_connection_->reconnect(true);
+
+        //reconnection shall never fail
         if (!res_reconnect.ok())
             throw std::runtime_error("Reconnecting to database failed: " + res_reconnect.error());
 
         if (!res_cleanup.ok())
         {
+            //cleanup didn't work => log and return false
             logerr << "DBInterface: cleanupDB: Cleanup failed: " << res_cleanup.error();
             cleanup_ok = false;
         }
     }
     catch(const std::exception& ex)
     {
+        //@TODO: what to do?
+
         //reset interface = worstcase
         reset();
 
@@ -1683,4 +1688,12 @@ db::PerformanceMetrics DBInterface::stopPerformanceMetrics() const
 {
     assert(db_connection_);
     return db_connection_->stopPerformanceMetrics();
+}
+
+/**
+ */
+bool DBInterface::hasActivePerformanceMetrics() const
+{
+    assert(db_connection_);
+    return db_connection_->hasActivePerformanceMetrics();
 }

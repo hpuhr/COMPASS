@@ -300,7 +300,8 @@ VariableSet DBContentManager::getReadSet(const std::string& dbcontent_name)
     return read_set;
 }
 
-void DBContentManager::load(const std::string& custom_filter_clause)
+void DBContentManager::load(const std::string& custom_filter_clause, 
+                            bool measure_db_performance)
 {
     logdbg << "DBContentManager: loadSlot: custom_filter_clause '" << custom_filter_clause << "'";
 
@@ -336,6 +337,9 @@ void DBContentManager::load(const std::string& custom_filter_clause)
 
     DataSourceManager& ds_man =  COMPASS::instance().dataSourceManager();
     DBInterface& db_interface = COMPASS::instance().dbInterface();
+
+    if (measure_db_performance)
+        db_interface.startPerformanceMetrics();
 
     for (auto& object : dbcontent_)
     {
@@ -560,6 +564,10 @@ void DBContentManager::finishLoading()
     tmp_selected_rec_nums_.clear();
 
     COMPASS::instance().viewManager().doViewPointAfterLoad();
+
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
+    if (db_interface.hasActivePerformanceMetrics())
+        loginf << db_interface.stopPerformanceMetrics().asString();
 
     emit loadingDoneSignal();
 

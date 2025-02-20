@@ -92,6 +92,7 @@ public:
 
     void startPerformanceMetrics() const;
     db::PerformanceMetrics stopPerformanceMetrics() const;
+    bool hasActivePerformanceMetrics() const;
 
     virtual std::shared_ptr<DBScopedPrepare> prepareStatement(const std::string& statement, 
                                                               bool begin_transaction) = 0;

@@ -659,7 +659,6 @@ void ReconstructorTask::processDataSlice()
     });
 }
 
-
 void ReconstructorTask::writeDataSlice()
 {
     loginf << "ReconstructorTask: writeDataSlice";
@@ -686,7 +685,6 @@ void ReconstructorTask::writeDataSlice()
 
     dbcontent_man.insertData(writing_slice_->reftraj_data_);
 }
-
 
 void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {

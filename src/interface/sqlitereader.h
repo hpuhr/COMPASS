@@ -32,6 +32,8 @@ public:
     SQLiteReader(sqlite3* connection);
     virtual ~SQLiteReader();
 
+    size_t numLeft() const override final;
+
 protected:
     bool init_impl() override final;
     void finish_impl() override final;

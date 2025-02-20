@@ -156,3 +156,10 @@ std::string DBScopedReader::lastError() const
 { 
     return db_reader_->lastError(); 
 }
+
+/**
+ */
+size_t DBScopedReader::numLeft() const
+{
+    return db_reader_->numLeft(); 
+}

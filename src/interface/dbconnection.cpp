@@ -690,6 +690,8 @@ std::shared_ptr<DBResult> DBConnection::readChunk()
 
     assert(result->buffer() && result->containsData());
 
+    loginf << "DBConnection: readChunk: read " << result->buffer()->size() << " left " << active_reader_->numLeft() << " hasmore " << result->hasMore();
+
     // if (!result->hasMore())
     // {
     //     //reader has finished => reset
@@ -732,4 +734,11 @@ db::PerformanceMetrics DBConnection::stopPerformanceMetrics() const
     perf_metrics_.reset();
 
     return pm;
+}
+
+/**
+ */
+bool DBConnection::hasActivePerformanceMetrics() const
+{
+    return perf_metrics_.has_value();
 }

@@ -56,3 +56,11 @@ std::shared_ptr<DBResult> SQLiteReader::readChunk_impl()
     //@TODO
     return std::shared_ptr<DBResult>();
 }
+
+/**
+ */
+size_t SQLiteReader::numLeft() const
+{
+    //@TODO
+    return 0;
+}

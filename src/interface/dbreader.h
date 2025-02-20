@@ -50,6 +50,8 @@ public:
     bool hasError() const;
     std::string lastError() const;
 
+    virtual size_t numLeft() const = 0;
+
 protected:
     void setError(const std::string& error) { error_ = error; }
 
@@ -86,6 +88,8 @@ public:
 
     bool hasError() const;
     std::string lastError() const;
+
+    size_t numLeft() const;
 
 private:
     std::shared_ptr<DBReader> db_reader_;

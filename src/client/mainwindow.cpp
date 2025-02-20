@@ -1197,7 +1197,7 @@ void MainWindow::loadButtonSlot()
     loading_ = true;
     load_button_->setText("Stop");
 
-    COMPASS::instance().dbContentManager().load();
+    COMPASS::instance().dbContentManager().load("", true);
 }
 
 void MainWindow::loadingDoneSlot()

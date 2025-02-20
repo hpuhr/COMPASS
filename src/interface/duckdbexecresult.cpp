@@ -220,8 +220,17 @@ void DuckDBExecResult::nextChunk(std::vector<void*>& data_vectors,
     chunk_idx_      = 0;
     chunk_num_rows_ = duckdb_data_chunk_get_size(chunk_.value());
 
+    fetchVectors(data_vectors, valid_vectors, num_cols);
+}
+
+/**
+ */
+void DuckDBExecResult::fetchVectors(std::vector<void*>& data_vectors,
+                                    std::vector<uint64_t*>& valid_vectors,
+                                    size_t num_cols)
+{
     data_vectors.assign(num_cols, nullptr);
-    data_vectors.assign(num_cols, nullptr);
+    valid_vectors.assign(num_cols, nullptr);
 
     if (!hasChunk())
         return;
@@ -254,7 +263,11 @@ ResultT<bool> DuckDBExecResult::readNextChunk(Buffer& buffer,
     const auto& properties = buffer.properties();
     size_t np = properties.size();
 
-    loginf << "DuckDBExecResult: readNextChunk: reading...";
+    // loginf << "DuckDBExecResult: readNextChunk: reading...";
+    // loginf << "   chunk idx:   " << chunk_idx_;
+    // loginf << "   chunk rows:  " << chunk_num_rows_;
+    // loginf << "   max entries: " << max_entries;
+    // loginf << "   num props:   " << np;
 
     std::vector<void*>     data_vectors;
     std::vector<uint64_t*> valid_vectors;
@@ -262,6 +275,8 @@ ResultT<bool> DuckDBExecResult::readNextChunk(Buffer& buffer,
     //init chunk?
     if (!chunk_.has_value())
         nextChunk(data_vectors, valid_vectors, np);
+    else
+        fetchVectors(data_vectors, valid_vectors, np);
 
     assert(chunk_.has_value());
 
@@ -269,24 +284,39 @@ ResultT<bool> DuckDBExecResult::readNextChunk(Buffer& buffer,
     if (!hasChunk())
         return ResultT<bool>::succeeded(false);
 
-    //get needed chunk vectors
-    for (size_t i = 0; i < np; ++i)
-    {
-        duckdb_vector vec      = duckdb_data_chunk_get_vector(chunk_.value(), i);
-        auto          data     = duckdb_vector_get_data(vec);
-        auto          validity = duckdb_vector_get_validity(vec);
-
-        data_vectors [ i ] = data;
-        valid_vectors[ i ] = validity;
-    }
-
     #define UpdateFuncNextChunk(PDType, DType, Suffix)                                                \
-        bool is_null = !duckdb_validity_row_is_valid(valid_vectors[ c ], r);                          \
-        if (!is_null) buffer.get<DType>(pname).set(buf_idx, readVector<DType>(data_vectors[ c ], r));
+        auto& vec = buffer.get<DType>(pname);                                                         \
+        NullableVector<DType>* vec_ptr = &vec;                                                        \
+        auto data_vec  = data_vectors[ c ];                                                           \
+        auto valid_vec = valid_vectors[ c ];                                                          \
+                                                                                                      \
+        auto cb = [ vec_ptr, data_vec, valid_vec, this ] (size_t row, size_t buf_idx)                 \
+        {                                                                                             \
+            bool is_null = !duckdb_validity_row_is_valid(valid_vec, row);                             \
+            if (!is_null) vec_ptr->set(buf_idx, this->readVector<DType>(data_vec, row));              \
+        };                                                                                            \
+                                                                                                      \
+        readers[ c ] = cb;
 
     #define NotFoundFuncNextChunk                                                                         \
         logerr << "DuckDBExecResult: readNextChunk: unknown property type " << Property::asString(dtype); \
         assert(false);
+
+    std::vector<std::function<void(size_t, size_t)>> readers(np);
+
+    auto updateReaders = [ & ] ()
+    {
+        for (idx_t c = 0; c < np; ++c)
+        {
+            const auto& p = properties.at(c);
+            auto dtype = p.dataType();
+            const auto& pname = p.name();
+
+            SwitchPropertyDataType(dtype, UpdateFuncNextChunk, NotFoundFuncNextChunk)
+        }
+    };
+
+    updateReaders();
 
     //read data until we reach end of result or max entries
     size_t buf_idx = 0;
@@ -301,18 +331,15 @@ ResultT<bool> DuckDBExecResult::readNextChunk(Buffer& buffer,
 
             //fetch row data
             for (idx_t c = 0; c < np; ++c)
-            {
-                const auto& p = properties.at(c);
-                auto dtype = p.dataType();
-                const auto& pname = p.name();
-
-                SwitchPropertyDataType(dtype, UpdateFuncNextChunk, NotFoundFuncNextChunk)
-            }
+                readers[ c ] (r, buf_idx);
         }
 
         //fetch next chunk?
         if (chunk_idx_ >= chunk_num_rows_)
+        {
             nextChunk(data_vectors, valid_vectors, np);
+            updateReaders(); //new chunk - new data vectors - new readers
+        }
     }
 
     assert(chunk_idx_ <= chunk_num_rows_);

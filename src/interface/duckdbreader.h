@@ -33,6 +33,8 @@ public:
     DuckDBReader(duckdb_connection connection);
     virtual ~DuckDBReader();
 
+    size_t numLeft() const override final;
+
 protected:
     bool init_impl() override final;
     void finish_impl() override final;

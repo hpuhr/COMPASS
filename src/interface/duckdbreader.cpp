@@ -111,7 +111,7 @@ std::shared_ptr<DBResult> DuckDBReader::readChunk_impl()
 
     bool has_more = false;
 
-#if 1
+#if 0
     //read lines from result (deprecated)
     if (!result_->toBuffer(*b, cur_idx_, chunkSize()))
     {
@@ -139,10 +139,12 @@ std::shared_ptr<DBResult> DuckDBReader::readChunk_impl()
 
     result->hasMore(has_more);
 
-    size_t num_read = b->size();
-    size_t num_left = has_more ? result_rows_ - cur_idx_ : 0;
-
-    loginf << "DuckDBReader: readChunk_impl: read " << num_read << " left " << num_left << " hasmore " << has_more;
-
     return result;
+}
+
+/**
+ */
+size_t DuckDBReader::numLeft() const
+{
+    return (cur_idx_ >= result_rows_ ? 0 : result_rows_ - cur_idx_);
 }
