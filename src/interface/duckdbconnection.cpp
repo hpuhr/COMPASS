@@ -304,10 +304,20 @@ Result DuckDBConnection::insertBuffer_impl(const std::string& table_name,
     //loginf << "update func...";
 
     #define UpdateFunc(PDType, DType, Suffix)                                                                               \
-        bool ok = appender->append<DType>(buffer->get<DType>(pname).get(r));                                                \
-        if (!ok)                                                                                                            \
-            logerr << "DuckDBConnection: insertBuffer_impl: appending '" << pname << "' failed: " << appender->lastError(); \
-        assert(ok);
+        NullableVector<DType>* vec_ptr = &buffer->get<DType>(pname);                                                        \
+                                                                                                                            \
+        auto cb = [ appender_ptr, vec_ptr, pname ] (size_t row)                                                             \
+        {                                                                                                                   \
+            bool ok;                                                                                                        \
+            if (vec_ptr->isNull(row))                                                                                       \
+                ok = appender_ptr->appendNull();                                                                            \
+            else                                                                                                            \
+                ok = appender_ptr->append<DType>(vec_ptr->get(row));                                                        \
+                                                                                                                            \
+            return ok;                                                                                                      \
+        };                                                                                                                  \
+                                                                                                                            \
+        importers[ c ] = cb;
 
     #define NotFoundFunc                                                                                      \
         logerr << "DuckDBConnection: insertBuffer_impl: unknown property type " << Property::asString(dtype); \
@@ -330,25 +340,39 @@ Result DuckDBConnection::insertBuffer_impl(const std::string& table_name,
     unsigned int r1 = idx_to.has_value()   ? idx_to.value() + 1 : n;
     assert(r0 <= r1);
 
+    auto appender_ptr = appender.get();
+
+    std::vector<std::function<bool(size_t)>> importers(np);
+
+    for (unsigned int c = 0; c < np; ++c)
+    {
+        if (!has_property[ c ])
+        {
+            //property not available => add null appender
+            importers[ c ] = [ appender_ptr ] (size_t row) { return appender_ptr->appendNull(); };
+            continue;
+        }
+
+        const auto& p     = properties->at(c);
+        const auto& pname = p.name();
+        const auto& pb    = buffer->properties().get(p.name());      
+
+        auto dtype = pb.dataType();
+
+        SwitchPropertyDataType(dtype, UpdateFunc, NotFoundFunc);
+    }
+
     for (unsigned int r = r0; r < r1; ++r)
     {
         //loginf << "appending row " << std::to_string(r + 1) << "/" << std::to_string(n);
 
         for (unsigned int c = 0; c < np; ++c)
         {
-            const auto& p     = properties->at(c);
-            const auto& pname = p.name();
-            const auto* pb    = has_property[ c ] ? &buffer->properties().get(p.name()) : nullptr;
+            bool ok = importers[ c ](r);
 
-            if (!pb || buffer->isNull(*pb, r))
-            {
-                appender->appendNull();
-                continue;
-            }
-
-            auto dtype = pb->dataType();
-            
-            SwitchPropertyDataType(dtype, UpdateFunc, NotFoundFunc);
+            if (!ok)
+                logerr << "DuckDBConnection: insertBuffer_impl: appending column " << c << " failed: " << appender->lastError();
+            assert(ok);
         }
         assert(appender->currentColumnCount() == np);
         appender->endRow();
