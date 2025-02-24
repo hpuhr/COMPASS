@@ -65,8 +65,10 @@ PDFGeneratorDialog& PDFGenerator::dialog()
 {
     if (!report_path_.size())
     {
-        const DBConnection* db_con = dynamic_cast<const DBConnection*>(&COMPASS::instance().dbInterface().connection());
-        assert (db_con);
+        //const DBConnection* db_con = dynamic_cast<const DBConnection*>(&COMPASS::instance().dbInterface().connection());
+        //assert (db_con);
+        //@TODO: PWa: did not understand why we need to check the connection at this point?
+        assert(COMPASS::instance().dbInterface().ready());
 
         string current_filename = COMPASS::instance().lastDbFilename();
 

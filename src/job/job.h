@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JOB_H_
-#define JOB_H_
+#pragma once
 
 #include "logger.h"
 
@@ -77,5 +76,3 @@ class Job : public QObject, public QRunnable
 
     //virtual void setDone() { done_ = true; }
 };
-
-#endif /* JOB_H_ */

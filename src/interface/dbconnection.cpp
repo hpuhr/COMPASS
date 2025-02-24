@@ -25,7 +25,7 @@
 #include "buffer.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"
-#include "dbinterface.h"
+#include "dbinstance.h"
 #include "dbresult.h"
 #include "dbtableinfo.h"
 #include "logger.h"
@@ -43,11 +43,13 @@
 
 /**
  */
-DBConnection::DBConnection(DBInterface* interface)
-:   interface_(*interface)
-,   db_opened_(false     )
+DBConnection::DBConnection(DBInstance* instance)
+:   instance_ (instance  )
+,   connected_(false     )
 {
     loginf << "DBConnection: constructor";
+
+    assert(instance_);
 }
 
 /**
@@ -56,18 +58,14 @@ DBConnection::~DBConnection()
 {
     loginf << "DBConnection: destructor";
 
-    assert(!dbOpened());
+    assert(!connected());
 }
 
 /**
  */
 db::SQLConfig DBConnection::sqlConfiguration(bool verbose) const
 {
-    auto config = sqlConfiguration_impl();
-
-    config.verbose = verbose;
-
-    return config;
+    return instance()->sqlConfiguration(verbose);
 }
 
 /**
@@ -75,7 +73,7 @@ db::SQLConfig DBConnection::sqlConfiguration(bool verbose) const
  */
 std::string DBConnection::status() const
 {
-    if (db_opened_)
+    if (connected_)
         return "Ready";
     else
         return "Not connected";
@@ -84,20 +82,21 @@ std::string DBConnection::status() const
 /**
  * Connects to the given database file. Will disconnect from the current db if connected.
  */
-Result DBConnection::connect(const std::string& file_name)
+Result DBConnection::connect()
 {
-    loginf << "DBConnection: connect: '" << file_name << "'";
+    assert(instance_->dbOpen());
+
+    loginf << "DBConnection: connect: connecting to instance '" << instance_->dbFilename() << "'...";
 
     //close any opened connection
-    if (dbOpened())
+    if (connected())
         disconnect();
 
-    auto connect_result = connect_impl(file_name);
+    auto connect_result = connect_impl();
     if (!connect_result.ok())
         return connect_result;
 
-    db_opened_   = true;
-    db_filename_ = file_name;
+    connected_ = true;
 
     loginf << "DBConnection: connect: connected!";
 
@@ -109,9 +108,9 @@ Result DBConnection::connect(const std::string& file_name)
  */
 void DBConnection::disconnect()
 {
-    loginf << "DBConnection: disconnecting, db open? " << db_opened_;
+    loginf << "DBConnection: disconnecting, connected? " << connected_;
 
-    if (!db_opened_)
+    if (!connected_)
         return;
 
     loginf << "DBConnection: disconnecting...";
@@ -124,42 +123,17 @@ void DBConnection::disconnect()
 
     disconnect_impl();
 
-    db_opened_   = false;
-    db_filename_ = "";
+    connected_ = false;
+
     created_tables_.clear();
-}
-
-/**
- */
-Result DBConnection::reconnect(bool cleanup_db, Result* cleanup_result)
-{
-    assert(dbOpened());
-
-    auto fn = db_filename_;
-
-    //disconnect
-    disconnect();
-    assert(!dbOpened());
-
-    if (cleanup_db)
-    {
-        //cleanup closed db file
-        auto res = cleanupDB(fn);
-        
-        if (cleanup_result)
-            *cleanup_result = res;
-    }
-
-    //re-connect to db
-    return connect(fn);
 }
 
 /**
  * Exports the database to the given file.
  */
-Result DBConnection::exportFile(const std::string& file_name)
+Result DBConnection::exportDB(const std::string& file_name)
 {
-    assert(dbOpened());
+    assert(connected());
 
     auto r = exportFile_impl(file_name);
     
@@ -176,7 +150,7 @@ Result DBConnection::execute(const std::string& sql)
 {
     logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
 
-    assert(dbOpened());
+    assert(connected());
 
     return executeSQL_impl(sql, nullptr, false);
 }
@@ -188,7 +162,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const std::string& sql, bool fet
 {
     logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
 
-    assert(dbOpened());
+    assert(connected());
 
     std::shared_ptr<DBResult> result(new DBResult());
 
@@ -210,7 +184,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
 {
     logdbg << "DBConnection: execute: executing single command";
 
-    assert(dbOpened());
+    assert(connected());
 
     bool fetch_buffer = command.expectsResult();
 
@@ -233,7 +207,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
 {
     logdbg << "DBConnection: execute: executing " << command_list.getNumCommands() << " command(s)";
 
-    assert(dbOpened());
+    assert(connected());
 
     std::shared_ptr<DBResult> dbresult(new DBResult());
 
@@ -286,7 +260,7 @@ Result DBConnection::createTable(const std::string& table_name,
                                  const std::vector<db::Index>& indices,
                                  bool table_must_not_exist)
 {
-    assert(dbOpened());
+    assert(connected());
 
     auto it = created_tables_.find(table_name);
     if (it != created_tables_.end())
@@ -312,7 +286,7 @@ Result DBConnection::createTableInternal(const std::string& table_name,
                                          const std::vector<db::Index>& indices,
                                          bool verbose)
 {
-    assert(dbOpened());
+    assert(connected());
 
     //get sql statement
     std::string sql = SQLGenerator(sqlConfiguration(verbose)).getCreateTableStatement(table_name, column_infos, indices);
@@ -350,23 +324,6 @@ Result DBConnection::deleteTableContents(const std::string& table_name)
 }
 
 /**
- */
-Result DBConnection::cleanupDB(const std::string& db_fn)
-{
-    assert(!dbOpened());
-
-    return cleanupDB_impl(db_fn);
-}
-
-/**
- */
-Result DBConnection::cleanupDB_impl(const std::string& db_fn)
-{
-    //derive if some special action is needed
-    return Result::succeeded();
-}
-
-/**
  * Inserts the given buffer into the given table.
  */
 Result DBConnection::insertBuffer(const std::string& table_name, 
@@ -375,7 +332,7 @@ Result DBConnection::insertBuffer(const std::string& table_name,
                                   const boost::optional<size_t>& idx_to,
                                   PropertyList* table_properties)
 {
-    assert(dbOpened());
+    assert(connected());
 
     QElapsedTimer t;
     if (perf_metrics_.has_value())
@@ -407,7 +364,7 @@ Result DBConnection::updateBuffer(const std::string& table_name,
                                   const boost::optional<size_t>& idx_from, 
                                   const boost::optional<size_t>& idx_to)
 {
-    assert(dbOpened());
+    assert(connected());
 
     QElapsedTimer t;
     if (perf_metrics_.has_value())
@@ -496,7 +453,7 @@ Result DBConnection::updateBuffer_impl(const std::string& table_name,
  */
 ResultT<std::vector<std::string>> DBConnection::getTableList()
 {
-    assert(dbOpened());
+    assert(connected());
 
     auto res = getTableList_impl();
 
@@ -511,7 +468,7 @@ ResultT<std::vector<std::string>> DBConnection::getTableList()
  */
 ResultT<DBTableInfo> DBConnection::getColumnList(const std::string& table)
 {
-    assert(dbOpened());
+    assert(connected());
 
     auto res = getColumnList_impl(table);
 
@@ -579,7 +536,7 @@ ResultT<DBTableInfo> DBConnection::getColumnList_impl(const std::string& table)
  */
 Result DBConnection::updateTableInfo()
 {
-    assert(dbOpened());
+    assert(connected());
 
     created_tables_.clear();
 
@@ -607,7 +564,7 @@ Result DBConnection::updateTableInfo()
  */
 void DBConnection::printTableInfo()
 {
-    assert(dbOpened());
+    assert(connected());
 
     for (const auto& table : tableInfo())
     {
@@ -640,7 +597,7 @@ Result DBConnection::startRead(const std::shared_ptr<DBCommand>& select_cmd,
                                size_t offset, 
                                size_t chunk_size)
 {
-    assert(dbOpened());
+    assert(connected());
     assert(select_cmd && QString::fromStdString(select_cmd->get()).startsWith("SELECT ") && select_cmd->expectsResult());
 
     active_reader_ = createReader(select_cmd, offset, chunk_size);
@@ -651,7 +608,7 @@ Result DBConnection::startRead(const std::shared_ptr<DBCommand>& select_cmd,
  */
 std::shared_ptr<DBResult> DBConnection::readChunk()
 {
-    assert(dbOpened());
+    assert(connected());
 
     std::shared_ptr<DBResult> result;
 

@@ -31,6 +31,7 @@
 class COMPASS;
 class Buffer;
 class BufferWriter;
+class DBInstance;
 class DBConnection;
 class QProgressDialog;
 class DBContent;
@@ -88,16 +89,15 @@ public:
     void openDBFile(const std::string& filename, bool overwrite);
     void exportDBFile(const std::string& filename);
     void closeDBFile();
-    bool dbOpen();
 
     bool cleanupDB();
 
     const std::map<std::string, DBTableInfo>& tableInfo();
     const std::string dbFilename() const { return db_filename_; }
 
-    bool ready();
+    bool ready() const;
 
-    const DBConnection& connection() const;
+    const DBInstance& dbInstance() const;
 
     // data sources
     bool existsDataSourcesTable();
@@ -114,9 +114,10 @@ public:
     // clears previous and saves new ones
 
     // insert data and create associated data sources
-    void insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buffer);
+    void insertDBContent(DBContent& dbcontent, std::shared_ptr<Buffer> buffer);
+    void insertDBContent(const std::map<std::string, std::shared_ptr<Buffer>>& buffers);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
-
+    
     void updateBuffer(const std::string& table_name, const std::string& key_col, std::shared_ptr<Buffer> buffer,
                       int from_index = -1, int to_index = -1);  // no indexes means full buffer
 
@@ -196,14 +197,15 @@ protected:
     
     Result execute(const std::string& sql);
     std::shared_ptr<DBResult> execute(const DBCommand& cmd);
+    
     void updateTableInfo();
 
-    std::unique_ptr<DBConnection> db_connection_;
+    std::unique_ptr<DBInstance> db_instance_;
 
     bool properties_loaded_ {false};
     const std::string dbcolumn_content_property_name_{"dbcolumn_content"};
 
-    boost::mutex connection_mutex_;
+    mutable boost::mutex instance_mutex_;
 
     unsigned int read_chunk_size_;
 

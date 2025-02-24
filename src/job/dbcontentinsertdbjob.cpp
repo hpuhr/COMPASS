@@ -15,36 +15,45 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "insertbufferdbjob.h"
+#include "dbcontentinsertdbjob.h"
+
 #include "buffer.h"
 #include "dbinterface.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
-//#include "dbcontent/variable/variable.h"
+
 #include "stringconv.h"
 #include "files.h"
 #include "timeconv.h"
-#include "parquettools.h"
-#include "duckdbconnection.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "boost/filesystem.hpp"
 
 using namespace Utils::String;
 
-InsertBufferDBJob::InsertBufferDBJob(DBInterface& db_interface, DBContent& dbobject,
-                                     std::shared_ptr<Buffer> buffer, bool emit_change)
-    : Job("InsertBufferDBJob"),
-      db_interface_(db_interface),
-      dbobject_(dbobject),
-      buffer_(buffer),
-      emit_change_(emit_change)
+/**
+ */
+DBContentInsertDBJob::DBContentInsertDBJob(DBInterface& db_interface, 
+                                           DBContentManager& db_content_man,
+                                           std::map<std::string, std::shared_ptr<Buffer>>& buffers,
+                                           bool emit_change)
+:   Job            ("DBContentInsertDBJob")
+,   db_interface_  (db_interface)
+,   db_content_man_(db_content_man)
+,   buffers_       (buffers)
+,   emit_change_   (emit_change)
 {
-    assert(buffer_);
+    for (const auto& b : buffers)
+        assert(b.second && b.second->size() > 0);
 }
 
-InsertBufferDBJob::~InsertBufferDBJob() {}
+/**
+ */
+DBContentInsertDBJob::~DBContentInsertDBJob() = default;
 
-void InsertBufferDBJob::run()
+/**
+ */
+void DBContentInsertDBJob::run()
 {
     logdbg << "InsertBufferDBJob: run: start";
 
@@ -55,21 +64,22 @@ void InsertBufferDBJob::run()
 
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
-    logdbg << "InsertBufferDBJob: run: writing object " << dbobject_.name() << " size "
-           << buffer_->size();
-    assert(buffer_->size());
+    logdbg << "DBContentInsertDBJob: run: writing " << buffers_.size() << " object(s)";
 
-    db_interface_.insertBuffer(dbobject_, buffer_);
+    db_interface_.insertDBContent(buffers_);
+
     loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
-    double load_time;
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
-    load_time = diff.total_milliseconds() / 1000.0;
 
-    loginf << "InsertBufferDBJob: run: buffer write done (" << doubleToStringPrecision(diff.total_milliseconds(), 2)
-           << " ms).";
+    loginf << "DBContentInsertDBJob: run: writing buffers done (" << doubleToStringPrecision(diff.total_milliseconds(), 2) << " ms).";
 
     done_ = true;
 }
 
-bool InsertBufferDBJob::emitChange() const { return emit_change_; }
+/**
+ */
+bool DBContentInsertDBJob::emitChange() const
+{ 
+    return emit_change_; 
+}

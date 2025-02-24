@@ -16,6 +16,7 @@
  */
 
 #include "duckdbconnection.h"
+#include "duckdbinstance.h"
 #include "duckdbappender.h"
 #include "duckdbprepare.h"
 #include "duckdbexecresult.h"
@@ -45,82 +46,45 @@
 
 #include <QFile>
 
-namespace
-{
-    class DuckDBScopedConfig
-    {
-    public:
-        DuckDBScopedConfig()
-        {
-            auto state = duckdb_create_config(&config_);
-            ok_ = state == DuckDBSuccess;
-        }
-
-        virtual ~DuckDBScopedConfig()
-        {
-            if (ok_)
-                duckdb_destroy_config(&config_);
-        }
-
-        void configure(const DuckDBConnectionSettings& settings)
-        {
-            settings.configure(&config_);
-        }
-
-        bool valid() const { return ok_; }
-        duckdb_config* configuration() { return &config_; }
-
-    private:
-        duckdb_config config_;
-        bool ok_ = false;
-    };
-}
-
 /**
  */
-DuckDBConnection::DuckDBConnection(DBInterface* interface)
-:   DBConnection(interface)
+DuckDBConnection::DuckDBConnection(DuckDBInstance* instance)
+:   DBConnection(instance)
 {
-    loginf << "DuckDBConnection: constructor";
+    //loginf << "DuckDBConnection: constructor";
 }
 
 /**
  */
 DuckDBConnection::~DuckDBConnection()
 {
-    loginf << "DuckDBConnection: destructor";
+    //loginf << "DuckDBConnection: destructor";
 
-    if (dbOpened())
+    if (connected())
         disconnect();
 }
 
 /**
  */
-Result DuckDBConnection::connect_impl(const std::string& file_name)
+DuckDBInstance* DuckDBConnection::duckDBInstance()
 {
-    //close any opened connection
-    if (dbOpened())
-        disconnect();
+    return dynamic_cast<DuckDBInstance*>(instance());
+}
 
-    // create the configuration object
-    DuckDBScopedConfig config;
-    if (!config.valid()) 
-        return Result::failed("could not create db configuration");
+/**
+ */
+Result DuckDBConnection::connect_impl()
+{
+    //loginf << "DuckDBConnection: connecting...";
 
-    //configure
-    config.configure(settings_);
+    auto duck_db = duckDBInstance();
 
-    //open db
-    char* error = nullptr;
-    auto state = duckdb_open_ext(file_name.c_str(), &db_, *config.configuration(), &error);
-    if (state != DuckDBSuccess)
-    {
-        std::string err_str = error ? std::string(error) : std::string("unknown error");
-        return Result::failed(err_str);
-    }
+    assert(duck_db->dbOpen());
+    assert(duck_db->db_);
+    
 
     //connect to db
-    state = duckdb_connect(db_, &connection_);
+    auto state = duckdb_connect(duck_db->db_, &connection_);
     if (state != DuckDBSuccess)
         return Result::failed("could not connect to database");
 
@@ -131,13 +95,11 @@ Result DuckDBConnection::connect_impl(const std::string& file_name)
  */
 void DuckDBConnection::disconnect_impl()
 {
-    loginf << "DuckDBConnection: disconnecting...";
+    //loginf << "DuckDBConnection: disconnecting...";
 
     duckdb_disconnect(&connection_);
-    duckdb_close(&db_);
 
     connection_ = nullptr;
-    db_         = nullptr;
 }
 
 /**
@@ -219,7 +181,7 @@ bool DuckDBConnection::executeCmd_impl(const std::string& command,
 
     if (!prepare.valid())
     {
-        loginf << "preparing command '" << command << "' failed";
+        logerr << "preparing command '" << command << "' failed";
         if (result)
             result->setError("could not prepare command '" + command + "': " + prepare.lastError());
         return false;
@@ -233,7 +195,7 @@ bool DuckDBConnection::executeCmd_impl(const std::string& command,
     assert(dbresult);
 
     if (dbresult->hasError())
-        loginf << "executing command '" << command << "' failed";
+        logerr << "executing command '" << command << "' failed";
 
     if (result)
         *result = *dbresult;
@@ -476,62 +438,4 @@ ResultT<std::vector<std::string>> DuckDBConnection::getTableList_impl()
     }
 
     return ResultT<std::vector<std::string>>::succeeded(tables);
-}
-
-/**
- */
-Result DuckDBConnection::cleanupDB_impl(const std::string& db_fn)
-{
-    //this method should only be called if there is no active connection
-    assert(!dbOpened());
-
-    std::string dir      = boost::filesystem::path(db_fn).parent_path().string();
-    std::string basename = boost::filesystem::path(db_fn).stem().string();
-    std::string ext      = boost::filesystem::path(db_fn).extension().string();
-
-    std::string fn_temp  = dir + "/" + basename + "_temp" + ext;
-
-    //try to prepare current database for compression
-    if (!QFile::rename(QString::fromStdString(db_fn), QString::fromStdString(fn_temp)))
-        return Result::failed("could not create temorary database");
-
-    //connect to in-mem db
-    duckdb_database   db;
-    duckdb_connection con;
-
-    if (duckdb_open(NULL, &db) == DuckDBError) 
-    {
-        //revert back to old file (if possible)
-        QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
-        return Result::failed("could not open memory db");
-    }
-    if (duckdb_connect(db, &con) == DuckDBError) 
-    {
-        //revert back to old file (if possible)
-        QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
-        return Result::failed("could not open connection to memory db");
-    }
-
-    //perform compression into new file
-    std::string sql = "ATTACH '" + fn_temp + "' AS db1;" +
-                      "ATTACH '" + db_fn   + "' AS db2;" +
-                      "COPY FROM DATABASE db1 TO db2;";
-
-    auto state = duckdb_query(con, sql.c_str(), nullptr);
-    if (state != DuckDBSuccess)
-    {
-        //remove any failed result + revert back to old file (if possible)
-        QFile::remove(QString::fromStdString(db_fn));
-        QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
-        return Result::failed("compressing database failed");
-    }
-
-    //compression successful => try to remove old file
-    if (!QFile::remove(QString::fromStdString(fn_temp)))
-        logwrn << "DuckDBConnection: cleanupDB_impl: Could not remove intermediate database file";
-    
-    duckdb_disconnect(&con);
-    duckdb_close(&db);
-
-    return Result::succeeded();
 }

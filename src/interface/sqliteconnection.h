@@ -25,7 +25,7 @@
 #include <string>
 
 class Buffer;
-class DBInterface;
+class SQLiteInstance;
 class PropertyList;
 class DBResult;
 class DBScopedPrepare;
@@ -38,7 +38,7 @@ class DBScopedReader;
 class SQLiteConnection : public DBConnection
 {
 public:
-    SQLiteConnection(DBInterface* interface);
+    SQLiteConnection(SQLiteInstance* instance, sqlite3* db_handle);
     virtual ~SQLiteConnection();
 
     std::shared_ptr<DBScopedPrepare> prepareStatement(const std::string& statement, 
@@ -47,7 +47,7 @@ public:
                                                  size_t offset, 
                                                  size_t chunk_size) override final;
 protected:
-    Result connect_impl(const std::string& file_name) override final;
+    Result connect_impl() override final;
     void disconnect_impl() override final;
 
     Result exportFile_impl(const std::string& file_name) override final;
@@ -56,24 +56,6 @@ protected:
     bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) override final;
 
     ResultT<std::vector<std::string>> getTableList_impl() override final;
-
-    /**
-     */
-    db::SQLConfig sqlConfiguration_impl() const override final
-    {
-        db::SQLConfig config;
-
-        //no precise types needed, e.g. suitable integer types will be chosen in the background
-        config.precise_types = false;
-
-        //needed for query speed
-        config.indexing = true;
-
-        config.placeholder = db::SQLPlaceholder::AtVar;
-        config.use_conflict_resolution = false;
-
-        return config;
-    }
 
 private:
     /// Database handle to execute queries

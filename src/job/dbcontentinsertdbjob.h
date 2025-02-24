@@ -15,53 +15,57 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INSERTBUFFERDBJOB_H_
-#define INSERTBUFFERDBJOB_H_
+#pragma once
+
+#include "job/job.h"
 
 #include <list>
-
-#include "job.h"
-
 #include <cassert>
+#include <map>
+#include <memory>
+#include <string>
 
 class Buffer;
-class DBContent;
 class DBInterface;
+class DBContentManager;
 class DBTable;
 
 /**
- * @brief Buffer write job
+ * @brief DBContent insert job
  *
- * Writes buffer's data contents to a database table.
+ * Writes dbcontent buffer data contents to a database table.
  */
-class InsertBufferDBJob : public Job
+class DBContentInsertDBJob : public Job
 {
     Q_OBJECT
 
-  signals:
+signals:
     void insertProgressSignal(float percent);
 
-  public:
-    InsertBufferDBJob(DBInterface& db_interface, DBContent& dbobject, std::shared_ptr<Buffer> buffer,
-                      bool emit_change = true);
+public:
+    DBContentInsertDBJob(DBInterface& db_interface, 
+                         DBContentManager& db_content_man,
+                         std::map<std::string, std::shared_ptr<Buffer>>& buffers,
+                         bool emit_change = true);
 
-    virtual ~InsertBufferDBJob();
+    virtual ~DBContentInsertDBJob();
 
     virtual void run();
 
-    std::shared_ptr<Buffer> buffer()
+    /**
+     */
+    const std::map<std::string, std::shared_ptr<Buffer>>& buffers()
     {
-        assert(buffer_);
-        return buffer_;
+        return buffers_;
     }
 
     bool emitChange() const;
 
-  protected:
-    DBInterface& db_interface_;
-    DBContent& dbobject_;
-    std::shared_ptr<Buffer> buffer_;
+protected:
+    DBInterface&      db_interface_;
+    DBContentManager& db_content_man_;
+
+    std::map<std::string, std::shared_ptr<Buffer>> buffers_;
+
     bool emit_change_{true};
 };
-
-#endif /* INSERTBUFFERDBJOB_H_ */

@@ -15,30 +15,30 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "duckdbconnectionsettings.h"
+#include "duckdbsettings.h"
 
 #include <duckdb.h>
 
 /**
  */
-std::string DuckDBConnectionSettings::accessModeAsString(AccessMode mode)
+std::string DuckDBSettings::accessModeAsString(AccessMode mode)
 {
     return mode == AccessMode::ReadOnly ? "READ_ONLY" : "READ_WRITE"; 
 }
 
 /**
  */
-std::string DuckDBConnectionSettings::sortOrderAsString(SortOrder order)
+std::string DuckDBSettings::sortOrderAsString(SortOrder order)
 {
     return order == SortOrder::Ascending ? "ASC" : "DESC"; 
 }
 
 /**
  */
-void DuckDBConnectionSettings::configure(duckdb_config* config) const
+void DuckDBSettings::configure(duckdb_config* config) const
 {
-    duckdb_set_config(*config, "access_mode", DuckDBConnectionSettings::accessModeAsString(access_mode).c_str()); // or READ_ONLY
+    duckdb_set_config(*config, "access_mode", DuckDBSettings::accessModeAsString(access_mode).c_str()); // or READ_ONLY
     duckdb_set_config(*config, "threads", std::to_string(num_threads).c_str());
     duckdb_set_config(*config, "max_memory", (std::to_string(max_ram_gb) + "GB").c_str());
-    duckdb_set_config(*config, "default_order", DuckDBConnectionSettings::sortOrderAsString(sort_order_default).c_str());
+    duckdb_set_config(*config, "default_order", DuckDBSettings::sortOrderAsString(sort_order_default).c_str());
 }

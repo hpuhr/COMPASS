@@ -350,7 +350,7 @@ void COMPASS::openDBFile(const std::string& filename)
     try
     {
         db_interface_->openDBFile(filename, false);
-        assert (db_interface_->dbOpen());
+        assert (db_interface_->ready());
 
         addDBFileToList(filename);
 
@@ -401,7 +401,7 @@ void COMPASS::createNewDBFile(const std::string& filename)
     try
     {
         db_interface_->openDBFile(filename, true);
-        assert (db_interface_->dbOpen());
+        assert (db_interface_->ready());
 
         addDBFileToList(filename);
 
@@ -474,7 +474,7 @@ void COMPASS::closeDB()
     dbcontent_manager_->saveTargets();
 
     db_interface_->closeDBFile();
-    assert (!db_interface_->dbOpen());
+    assert (!db_interface_->ready());
 
     db_opened_ = false;
 
@@ -577,17 +577,17 @@ void COMPASS::shutdown()
     assert(db_interface_);
 
     assert(ds_manager_);
-    if (db_interface_->dbOpen())
+    if (db_interface_->ready())
         ds_manager_->saveDBDataSources();
     ds_manager_ = nullptr;
 
     assert(fft_manager_);
-    if (db_interface_->dbOpen())
+    if (db_interface_->ready())
         fft_manager_->saveDBFFTs();
     fft_manager_ = nullptr;
 
     assert(dbcontent_manager_);
-    if (db_interface_->dbOpen())
+    if (db_interface_->ready())
         dbcontent_manager_->saveTargets();
     dbcontent_manager_ = nullptr;
 
@@ -606,7 +606,7 @@ void COMPASS::shutdown()
     assert(filter_manager_);
     filter_manager_ = nullptr;
 
-    if (db_interface_->dbOpen())
+    if (db_interface_->ready())
         db_interface_->closeDBFile();
 
     db_interface_ = nullptr;

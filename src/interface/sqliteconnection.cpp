@@ -18,6 +18,7 @@
 #include "sqliteconnection.h"
 #include "sqliteprepare.h"
 #include "sqlitereader.h"
+#include "sqliteinstance.h"
 
 #include "buffer.h"
 #include "dbcommand.h"
@@ -38,19 +39,19 @@ using namespace Utils;
 
 /**
  */
-SQLiteConnection::SQLiteConnection(DBInterface* interface)
-:   DBConnection(interface)
+SQLiteConnection::SQLiteConnection(SQLiteInstance* instance,
+                                   sqlite3* db_handle)
+:   DBConnection(instance )
+,   db_handle_  (db_handle)
 {
-    loginf << "SQLiteConnection: constructor: SQLITE_VERSION " << SQLITE_VERSION;
+    assert(db_handle);
 }
 
 /**
  */
 SQLiteConnection::~SQLiteConnection()
 {
-    loginf << "SQLiteConnection: destructor";
-    
-    if (dbOpened())
+    if (connected())
         disconnect();
 }
 
@@ -73,33 +74,13 @@ std::shared_ptr<DBScopedReader> SQLiteConnection::createReader(const std::shared
 
 /**
  */
-Result SQLiteConnection::connect_impl(const std::string& file_name)
+Result SQLiteConnection::connect_impl()
 {
-    loginf << "SQLiteConnection: connect_impl: '" << file_name << "'";
-
-    int result = sqlite3_open_v2(file_name.c_str(), &db_handle_,
-                                 SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
-
-//    int result = sqlite3_open(":memory:", &db_handle_);
-
-    if (result != SQLITE_OK)
-    {
-        // Even in case of an error we get a valid db_handle (for the
-        // purpose of calling sqlite3_errmsg on it ...)
-        std::string err(sqlite3_errmsg(db_handle_));
-        sqlite3_close(db_handle_);
-        return Result::failed(err);
-    }
-
-    char* sErrMsg = 0;
-    sqlite3_exec(db_handle_, "PRAGMA SYNCHRONOUS = OFF", NULL, NULL, &sErrMsg);
-    sqlite3_exec(db_handle_, "PRAGMA TEMP_STORE = 2", NULL, NULL, &sErrMsg);
-    sqlite3_exec(db_handle_, "PRAGMA JOURNAL_MODE = OFF", NULL, NULL, &sErrMsg);
-    sqlite3_exec(db_handle_, "PRAGMA LOCKING_MODE = EXCLUSIVE", NULL, NULL, &sErrMsg);
-    sqlite3_exec(db_handle_, "PRAGMA CACHE_SIZE = 500", NULL, NULL, &sErrMsg);
-
-    //sqlite3_exec(db_handle_, "PRAGMA locking_mode = EXCLUSIVE", NULL, NULL, &sErrMsg);
-
+    //nothing to do, instance handles connect => just pass open status
+    bool is_open = instance()->dbOpen();
+    if (!is_open)
+        return Result::failed("could not connect to closed database");
+    
     return Result::succeeded();
 }
 
@@ -107,18 +88,14 @@ Result SQLiteConnection::connect_impl(const std::string& file_name)
  */
 void SQLiteConnection::disconnect_impl()
 {
-    if (db_handle_)
-    {
-        sqlite3_close(db_handle_);
-        db_handle_ = nullptr;
-    }
+    //nothing to do, instance handles disconnect
 }
 
 /**
  */
 Result SQLiteConnection::exportFile_impl(const std::string& file_name)
 {
-    assert (dbOpened());
+    assert (connected());
 
     string tmp_sql = "VACUUM INTO '"+file_name+"';";
 

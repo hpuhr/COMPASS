@@ -17,7 +17,8 @@
 
 #pragma once
 
-#include "duckdbconnectionsettings.h"
+#include <duckdb.h>
+
 #include "dbconnection.h"
 
 #include <memory>
@@ -26,12 +27,13 @@
 
 #include <boost/optional.hpp>
 
+class DuckDBInstance;
 class DuckDBScopedAppender;
+
 class DBScopedPrepare;
 class DBScopedReader;
 
 class Buffer;
-class DBInterface;
 class DBResult;
 class PropertyList;
 
@@ -40,7 +42,7 @@ class PropertyList;
 class DuckDBConnection : public DBConnection
 {
 public:
-    DuckDBConnection(DBInterface* interface);
+    DuckDBConnection(DuckDBInstance* instance);
     virtual ~DuckDBConnection();
 
     std::shared_ptr<DuckDBScopedAppender> createAppender(const std::string& table);
@@ -49,11 +51,8 @@ public:
     std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
                                                  size_t offset, 
                                                  size_t chunk_size) override final;
-
-    DuckDBConnectionSettings& settings() { return settings_; }
-
 protected:
-    Result connect_impl(const std::string& file_name) override final;
+    Result connect_impl() override final;
     void disconnect_impl() override final;
 
     Result exportFile_impl(const std::string& file_name) override final;
@@ -73,34 +72,9 @@ protected:
                              const boost::optional<size_t>& idx_to) override final;
 
     ResultT<std::vector<std::string>> getTableList_impl() override final;
-
-    Result cleanupDB_impl(const std::string& db_fn) override final;
-
-    /**
-     */
-    db::SQLConfig sqlConfiguration_impl() const override final
-    {
-        db::SQLConfig config;
-
-        //duckdb needs precise data types in its tables
-        config.precise_types = true;
-
-        //no indexing, queries should be quite fast in duckdb 
-        //and indexing blows up the db file consiferably
-        config.indexing = false;
-
-        //duckdb can only comprehend ? as a placeholder
-        config.placeholder = db::SQLPlaceholder::QuestionMark;
-
-        //duckdb does not allow 'replace into' directly, this is handled via 'insert ... on conflict'
-        config.use_conflict_resolution = true;
-
-        return config;
-    }
     
 private:
-    duckdb_database   db_         = nullptr;
-    duckdb_connection connection_ = nullptr;
+    DuckDBInstance* duckDBInstance();
 
-    DuckDBConnectionSettings settings_;
+    duckdb_connection connection_ = nullptr;
 };

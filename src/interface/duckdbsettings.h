@@ -23,7 +23,7 @@
 
 /**
  */
-struct DuckDBConnectionSettings
+struct DuckDBSettings
 {
     enum class AccessMode
     {

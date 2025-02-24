@@ -267,7 +267,7 @@ void FFTManager::saveDBFFTs()
 
     DBInterface& db_interface = COMPASS::instance().dbInterface();
 
-    assert(db_interface.dbOpen());
+    assert(db_interface.ready());
     db_interface.saveFFTs(db_ffts_);
 }
 

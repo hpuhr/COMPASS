@@ -25,7 +25,6 @@
 #include "dbcontentreaddbjob.h"
 #include "dbcontent/variable/variable.h"
 #include "filtermanager.h"
-#include "insertbufferdbjob.h"
 #include "jobmanager.h"
 #include "propertylist.h"
 #include "updatebufferdbjob.h"
@@ -141,12 +140,15 @@ const Property DBContent::var_cat063_sensor_sic_ {"Sensor SIC", PropertyDataType
 
 const Property DBContent::selected_var {"selected", PropertyDataType::BOOL};
 
-DBContent::DBContent(COMPASS& compass, const string& class_id, const string& instance_id,
+/**
+ */
+DBContent::DBContent(COMPASS& compass, 
+                     const string& class_id, 
+                     const string& instance_id,
                      DBContentManager* manager)
-    : Configurable(class_id, instance_id, manager,
-                   "db_content_" + boost::algorithm::to_lower_copy(instance_id) + ".json"),
-      compass_(compass),
-      dbcont_manager_(*manager)
+:   Configurable   (class_id, instance_id, manager, "db_content_" + boost::algorithm::to_lower_copy(instance_id) + ".json")
+,   compass_       (compass)
+,   dbcont_manager_(*manager)
 {
     registerParameter("name", &name_, std::string("Undefined"));
     registerParameter("id", &id_, 0u);
@@ -177,12 +179,17 @@ DBContent::DBContent(COMPASS& compass, const string& class_id, const string& ins
     }
 }
 
+/**
+ */
 DBContent::~DBContent()
 {
     logdbg << "DBContent: dtor: " << name_;
 }
 
-void DBContent::generateSubConfigurable(const string& class_id, const string& instance_id)
+/**
+ */
+void DBContent::generateSubConfigurable(const string& class_id, 
+                                        const string& instance_id)
 {
     logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id;
     if (class_id == "Variable")
@@ -198,25 +205,32 @@ void DBContent::generateSubConfigurable(const string& class_id, const string& in
         logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
                << " with name " << var->name();
 
-        variables_.emplace(
-                    std::piecewise_construct,
-                    std::forward_as_tuple(var->name()),   // args for key
-                    std::forward_as_tuple(var));  // args for mapped value
+        variables_.emplace(std::piecewise_construct,
+                           std::forward_as_tuple(var->name()),   // args for key
+                           std::forward_as_tuple(var));  // args for mapped value
     }
     else
+    {
         throw runtime_error("DBContent: generateSubConfigurable: unknown class_id " + class_id);
+    }
 }
 
+/**
+ */
 void DBContent::checkSubConfigurables()
 {
     // nothing to see here
 }
 
+/**
+ */
 bool DBContent::hasVariable(const string& name) const
 {
     return variables_.count(name);
 }
 
+/**
+ */
 Variable& DBContent::variable(const string& name) const
 {
     assert(hasVariable(name));
@@ -225,6 +239,8 @@ Variable& DBContent::variable(const string& name) const
     return *(variables_.at(name).get());
 }
 
+/**
+ */
 void DBContent::renameVariable(const string& old_name, const string& new_name)
 {
     loginf << "DBContent: renameVariable: name " << old_name << " new_name " << new_name;
@@ -241,9 +257,10 @@ void DBContent::renameVariable(const string& old_name, const string& new_name)
 
     assert(!hasVariable(old_name));
     assert(hasVariable(new_name));
-
 }
 
+/**
+ */
 void DBContent::deleteVariable(const string& name)
 {
     assert(hasVariable(name));
@@ -252,9 +269,10 @@ void DBContent::deleteVariable(const string& name)
     assert(!hasVariable(name));
 }
 
+/**
+ */
 bool DBContent::hasVariableDBColumnName(const std::string& col_name) const
 {
-
     for (const auto& var : variables_)
     {
         if (var.second->dbColumnName() == col_name)
@@ -262,14 +280,17 @@ bool DBContent::hasVariableDBColumnName(const std::string& col_name) const
     }
 
     return false;
-
 }
 
+/**
+ */
 unsigned int DBContent::id()
 {
     return id_;
 }
 
+/**
+ */
 bool DBContent::hasKeyVariable()
 {
     for (const auto& var_it : variables_)
@@ -279,27 +300,35 @@ bool DBContent::hasKeyVariable()
     return false;
 }
 
+/**
+ */
 Variable& DBContent::getKeyVariable()
 {
     assert(hasKeyVariable());
 
     for (const auto& var_it : variables_)  // search in any
+    {
         if (var_it.second->isKey())
         {
             loginf << "DBContent " << name() << ": getKeyVariable: returning first found var "
                    << var_it.first;
             return *var_it.second.get();
         }
+    }
 
     throw runtime_error("DBContent: getKeyVariable: no key variable found");
 }
 
+/**
+ */
 string DBContent::status()
 {
     if (read_job_)
     {
         if (loadedCount())
+        {
             return "Loading";
+        }
         else
         {
             if (read_job_->started())
@@ -311,9 +340,13 @@ string DBContent::status()
     //    else if (finalize_jobs_.size() > 0)
     //        return "Post-processing";
     else
+    {
         return "Idle";
+    }
 }
 
+/**
+ */
 DBContentWidget* DBContent::widget()
 {
     if (!widget_)
@@ -325,9 +358,18 @@ DBContentWidget* DBContent::widget()
     return widget_.get();  // needed for qt integration, not pretty
 }
 
-void DBContent::closeWidget() { widget_ = nullptr; }
+/**
+ */
+void DBContent::closeWidget() 
+{ 
+    widget_ = nullptr; 
+}
 
-void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters, bool use_filters,
+/**
+ */
+void DBContent::load(dbContent::VariableSet& read_set, 
+                     bool use_datasrc_filters, 
+                     bool use_filters,
                      const std::string& custom_filter_clause)
 {
     assert(is_loadable_);
@@ -448,7 +490,10 @@ void DBContent::load(dbContent::VariableSet& read_set, bool use_datasrc_filters,
     loadFiltered(read_set, filter_clause);
 }
 
-void DBContent::loadFiltered(dbContent::VariableSet& read_set, std::string custom_filter_clause)
+/**
+ */
+void DBContent::loadFiltered(dbContent::VariableSet& read_set, 
+                             std::string custom_filter_clause)
 {
     logdbg << "DBContent: loadFiltered: name " << name_ << " loadable " << is_loadable_;
 
@@ -480,6 +525,8 @@ void DBContent::loadFiltered(dbContent::VariableSet& read_set, std::string custo
     JobManager::instance().addDBJob(read_job_);
 }
 
+/**
+ */
 void DBContent::quitLoading()
 {
     if (read_job_)
@@ -488,9 +535,11 @@ void DBContent::quitLoading()
     }
 }
 
-void DBContent::insertData(shared_ptr<Buffer> buffer)
+/**
+ */
+bool DBContent::prepareInsert(shared_ptr<Buffer>& buffer)
 {
-    logdbg << "DBContent " << name_ << ": insertData: buffer " << buffer->size();
+    logdbg << "DBContent " << name_ << ": prepareInsert: buffer " << buffer->size();
 
     assert (!insert_active_);
     insert_active_ = true;
@@ -511,26 +560,19 @@ void DBContent::insertData(shared_ptr<Buffer> buffer)
     if (!variable(DBContent::meta_var_rec_num_.name()).hasDBContent())
         variable(DBContent::meta_var_rec_num_.name()).setHasDBContent();
 
-    assert(!insert_job_);
-
     // transform variable names from dbovars to dbcolumns
     buffer->transformVariables(list, false);
 
-    doDataSourcesBeforeInsert(buffer);
+    logdbg << "DBContent: prepareInsert: end";
 
-    insert_job_ = make_shared<InsertBufferDBJob>(COMPASS::instance().dbInterface(), *this, buffer, false);
-
-    connect(insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBContent::insertDoneSlot,
-            Qt::QueuedConnection);
-
-    JobManager::instance().addDBJob(insert_job_);
-
-    logdbg << "DBContent: insertData: end";
+    return true;
 }
 
-void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
+/**
+ */
+void DBContent::updateDataSourcesBeforeInsert (shared_ptr<Buffer>& buffer)
 {
-    logdbg << "DBContent " << name_ << ": doDataSourcesBeforeInsert";
+    logdbg << "DBContent " << name_ << ": updateDataSourcesBeforeInsert";
 
     assert (hasVariable(DBContent::meta_var_ds_id_.name()));
 
@@ -595,27 +637,27 @@ void DBContent::doDataSourcesBeforeInsert (shared_ptr<Buffer> buffer)
     }
 }
 
-
-void DBContent::insertDoneSlot()
+/**
+ */
+void DBContent::finalizeInsert(std::shared_ptr<Buffer>& buffer)
 {
-    logdbg << "DBContent " << name_ << ": insertDoneSlot";
+    logdbg << "DBContent " << name_ << ": finalizeInsert";
 
-    assert(insert_job_);
+    assert(buffer);
+    assert(insert_active_);
 
     is_loadable_ = true;
-    count_ += insert_job_->buffer()->size();
-
-    insert_job_ = nullptr;
-    insert_active_ = false;
-
-    dbcont_manager_.insertDone(*this);
+    count_ += buffer->size();
 
     assert (existsInDB()); // check
 }
 
+/**
+ */
 void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
 {
     assert(!update_job_);
+    assert(!insert_active_);
 
     assert(existsInDB());
 
@@ -629,8 +671,6 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
         if (!variable(prop_it.name()).hasDBContent())
             variable(prop_it.name()).setHasDBContent();
     }
-
-    assert(!insert_job_);
 
     // transform variable names from dbovars to dbcolumns
     buffer->transformVariables(list, false);
@@ -646,6 +686,8 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
     JobManager::instance().addDBJob(update_job_);
 }
 
+/**
+ */
 void DBContent::deleteDBContentData()
 {
     loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "'";
@@ -664,6 +706,8 @@ void DBContent::deleteDBContentData()
     JobManager::instance().addDBJob(delete_job_);
 }
 
+/**
+ */
 void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic)
 {
     loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic;
@@ -683,6 +727,8 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic)
     JobManager::instance().addDBJob(delete_job_);
 }
 
+/**
+ */
 void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id)
 {
     loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic
@@ -704,8 +750,15 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned
     JobManager::instance().addDBJob(delete_job_);
 }
 
-void DBContent::updateProgressSlot(float percent) { emit updateProgressSignal(percent); }
+/**
+ */
+void DBContent::updateProgressSlot(float percent) 
+{ 
+    emit updateProgressSignal(percent); 
+}
 
+/**
+ */
 void DBContent::updateDoneSlot()
 {
     update_job_ = nullptr;
@@ -713,6 +766,8 @@ void DBContent::updateDoneSlot()
     emit updateDoneSignal(*this);
 }
 
+/**
+ */
 void DBContent::deleteJobDoneSlot()
 {
     loginf << "DBContent: deleteJobDoneSlot";
@@ -734,6 +789,8 @@ void DBContent::deleteJobDoneSlot()
     count_ = COMPASS::instance().dbInterface().count(db_table_name_);
 }
 
+/**
+ */
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
     assert(buffer);
@@ -774,6 +831,8 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
     }
 }
 
+/**
+ */
 void DBContent::readJobObsoleteSlot()
 {
     logdbg << "DBContent: " << name_ << " readJobObsoleteSlot";
@@ -783,6 +842,8 @@ void DBContent::readJobObsoleteSlot()
     dbcont_manager_.loadingDone(*this);
 }
 
+/**
+ */
 void DBContent::readJobDoneSlot()
 {
     logdbg << "DBContent: " << name_ << " readJobDoneSlot";
@@ -792,6 +853,8 @@ void DBContent::readJobDoneSlot()
     dbcont_manager_.loadingDone(*this);
 }
 
+/**
+ */
 void DBContent::databaseOpenedSlot()
 {
     loginf << "DBContent " << name_ << ": databaseOpenedSlot";
@@ -807,6 +870,8 @@ void DBContent::databaseOpenedSlot()
            << " count " << count_;
 }
 
+/**
+ */
 void DBContent::databaseClosedSlot()
 {
     loginf << "DBContent: databaseClosedSlot";
@@ -815,21 +880,31 @@ void DBContent::databaseClosedSlot()
     count_ = 0;
 }
 
+/**
+ */
 string DBContent::dbTableName() const
 {
     return db_table_name_;
 }
 
+/**
+ */
 bool DBContent::isLoading() { return read_job_ != nullptr; }
 
-bool DBContent::isInserting() { return insert_active_; }
-
+/**
+ */
 bool DBContent::isDeleting() { return delete_job_ != nullptr; }
 
+/**
+ */
 bool DBContent::hasData() { return count_ > 0; }
 
+/**
+ */
 size_t DBContent::count() { return count_; }
 
+/**
+ */
 size_t DBContent::loadedCount()
 {
     if (dbcont_manager_.data().count(name_))
@@ -838,21 +913,31 @@ size_t DBContent::loadedCount()
         return 0;
 }
 
+/**
+ */
 bool DBContent::existsInDB() const
 {
     return COMPASS::instance().dbInterface().existsTable(db_table_name_);
 }
 
+/**
+ */
 void DBContent::checkStaticVariable(const Property& property)
 {
     if (!hasVariable(property.name()))
+    {
         logwrn << "DBContent: checkStaticVariable: " << name_ << " has no variable " << property.name();
+    }
     else if (variable(property.name()).dataType() != property.dataType())
+    {
         logwrn << "DBContent: checkStaticVariable: " << name_ << " variable " << property.name()
                << " has wrong data type (" << variable(property.name()).dataTypeString()
                << " insteaf of " << property.dataTypeString() << ")";
+    }
 }
 
+/**
+ */
 bool DBContent::isStatusContent(const std::string& dbc_name)
 {
     return (dbc_name == "CAT002" || 
@@ -864,6 +949,8 @@ bool DBContent::isStatusContent(const std::string& dbc_name)
             dbc_name == "CAT065");
 }
 
+/**
+ */
 bool DBContent::isStatusContent(unsigned int dbc_id)
 {
     return (dbc_id == 2  || 
@@ -875,21 +962,29 @@ bool DBContent::isStatusContent(unsigned int dbc_id)
             dbc_id == 65);
 }
 
+/**
+ */
 bool DBContent::isReferenceContent(const std::string& dbc_name)
 {
     return (dbc_name == "RefTraj");
 }
 
+/**
+ */
 bool DBContent::isReferenceContent(unsigned int dbc_id)
 {
     return (dbc_id == 255);
 }
 
+/**
+ */
 bool DBContent::isStatusContent() const
 {
     return DBContent::isStatusContent(id_);
 }
 
+/**
+ */
 bool DBContent::isReferenceContent() const
 {
     return DBContent::isReferenceContent(id_);

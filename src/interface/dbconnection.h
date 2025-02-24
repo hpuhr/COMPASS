@@ -28,7 +28,7 @@
 #include <boost/optional.hpp>
 
 class Buffer;
-class DBInterface;
+class DBInstance;
 class DBCommand;
 class DBCommandList;
 class DBResult;
@@ -44,18 +44,18 @@ class SQLGenerator;
 class DBConnection
 {
 public:
-    DBConnection(DBInterface* interface); 
+    DBConnection(DBInstance* instance);
     virtual ~DBConnection();
 
-    Result connect(const std::string& file_name);
-    void disconnect();
-    Result reconnect(bool cleanup_db = false, Result* cleanup_result = nullptr);
+    db::SQLConfig sqlConfiguration(bool verbose = false) const;
 
     std::string status() const;
-    bool dbOpened() { return db_opened_; }
-    const std::string& dbFilename() const { return db_filename_; }
+    bool connected() const { return connected_; }
 
-    Result exportFile(const std::string& file_name);
+    Result connect();
+    void disconnect();
+
+    Result exportDB(const std::string& file_name);
 
     Result execute(const std::string& sql);
     std::shared_ptr<DBResult> execute(const std::string& sql, bool fetch_buffer);
@@ -99,13 +99,13 @@ public:
     virtual std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
                                                          size_t offset, 
                                                          size_t chunk_size) = 0;
-    
-    db::SQLConfig sqlConfiguration(bool verbose = false) const;
+
+    const DBInstance* instance() const { return instance_; }
     
 protected:
     friend class DBTemporaryTable;
 
-    virtual Result connect_impl(const std::string& file_name) = 0;
+    virtual Result connect_impl() = 0;
     virtual void disconnect_impl() = 0;
 
     virtual Result exportFile_impl(const std::string& file_name) = 0;
@@ -127,29 +127,20 @@ protected:
     virtual ResultT<DBTableInfo> getColumnList_impl(const std::string& table);
     virtual ResultT<std::vector<std::string>> getTableList_impl() = 0;
 
-    virtual Result cleanupDB_impl(const std::string& db_fn);
-
-    //db backend specific sql settings
-    virtual db::SQLConfig sqlConfiguration_impl() const = 0;
-
     Result createTableInternal(const std::string& table_name, 
                                const std::vector<DBTableColumnInfo>& column_infos,
                                const std::vector<db::Index>& indices,
                                bool verbose = false);
 
-    DBInterface& interface() { return interface_; }
-    const DBInterface& interface() const { return interface_; }
-
+    DBInstance* instance() { return instance_; }
+    
 private:
     ResultT<DBTableInfo> getColumnList(const std::string& table);
     ResultT<std::vector<std::string>> getTableList();
 
-    Result cleanupDB(const std::string& db_fn);
-
-    DBInterface&                       interface_;
+    DBInstance*                        instance_;
     std::map<std::string, DBTableInfo> created_tables_;
-    bool                               db_opened_ = false;
-    std::string                        db_filename_;
+    bool                               connected_ = false;
 
     std::shared_ptr<DBScopedReader>    active_reader_;
 
