@@ -44,7 +44,7 @@ class SQLGenerator;
 class DBConnection
 {
 public:
-    DBConnection(DBInstance* instance);
+    DBConnection(DBInstance* instance, bool verbose);
     virtual ~DBConnection();
 
     db::SQLConfig sqlConfiguration(bool verbose = false) const;
@@ -145,4 +145,6 @@ private:
     std::shared_ptr<DBScopedReader>    active_reader_;
 
     mutable boost::optional<db::PerformanceMetrics> perf_metrics_;
+
+    bool verbose_ = false;
 };

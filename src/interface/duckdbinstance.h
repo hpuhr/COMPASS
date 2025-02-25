@@ -38,7 +38,7 @@ public:
 protected:
     Result open_impl(const std::string& file_name) override final;
     void close_impl() override final;
-    ResultT<DBConnection*> createConnection_impl() override final;
+    ResultT<DBConnection*> createConnection_impl(bool verbose) override final;
     Result cleanupDB_impl(const std::string& db_fn) override final;
 
     /**
@@ -59,6 +59,9 @@ protected:
 
         //duckdb does not allow 'replace into' directly, this is handled via 'insert ... on conflict'
         config.use_conflict_resolution = true;
+
+        //duckdb supports mutlithreaded access
+        config.supports_mt = true;
 
         return config;
     }

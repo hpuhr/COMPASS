@@ -646,6 +646,8 @@ void DBContent::finalizeInsert(std::shared_ptr<Buffer>& buffer)
     assert(buffer);
     assert(insert_active_);
 
+    insert_active_ = false;
+
     is_loadable_ = true;
     count_ += buffer->size();
 

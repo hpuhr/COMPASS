@@ -64,25 +64,30 @@ public:
 
         virtual ~ConnectionWrapper()
         {
-            if (connection_)
+            if (connection_ && !detached_)
                 destroyer_(connection_);
         }
 
         bool hasError() const { return error_.has_value(); }
-        bool hasConnection() const { return connection_ != nullptr; }
+        const std::string& error() { return error_.value(); }
 
-        DBConnection& connection() 
+        DBConnection& connection()
         { 
-            assert(hasConnection()); 
             assert(!hasError());
 
             return *connection_; 
+        }
+
+        void detach()
+        {
+            detached_ = true;
         }
 
     private:
         DBInstance*   instance_   = nullptr;
         DBConnection* connection_ = nullptr;
         Destroyer     destroyer_;
+        bool          detached_   = false;
 
         boost::optional<std::string> error_;
     };
@@ -107,6 +112,7 @@ public:
 
     DBConnection& defaultConnection();
     ConnectionWrapperPtr newCustomConnection();
+    void destroyCustomConnections();
 
     size_t numCustomConnections() const;
 
@@ -123,7 +129,7 @@ protected:
     virtual void close_impl() = 0;
 
     /// implements connection creation
-    virtual ResultT<DBConnection*> createConnection_impl() = 0;
+    virtual ResultT<DBConnection*> createConnection_impl(bool verbose) = 0;
 
     /// implements db file cleanup (if supported)
     virtual Result cleanupDB_impl(const std::string& db_fn);
@@ -134,7 +140,7 @@ protected:
 private:
     Result cleanupDB(const std::string& db_fn);
 
-    ResultT<DBConnection*> createConnection();
+    ResultT<DBConnection*> createConnection(bool verbose);
     void destroyCustomConnection(DBConnection* conn);
 
     DBInterface& interface_;

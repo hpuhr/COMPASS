@@ -47,6 +47,8 @@
 #include "timeconv.h"
 #include "number.h"
 
+#include "tbbhack.h"
+
 #include <QApplication>
 #include <QMessageBox>
 #include <QMutexLocker>
@@ -864,7 +866,7 @@ size_t DBInterface::count(const string& table)
         shared_ptr<DBResult> result = execute(command);
         assert(result->containsData());
 
-        int tmp = result->buffer()->get<int>("count").get(0);
+        tmp = result->buffer()->get<int>("count").get(0);
     }
 
     logdbg << "DBInterface: count: " << table << ": " << tmp << " end";
@@ -1489,6 +1491,39 @@ void DBInterface::clearAssociations(const DBContent& dbcontent)
 
 /**
  */
+void DBInterface::initDBContentBuffer(DBContent& dbcontent, 
+                                      std::shared_ptr<Buffer> buffer)
+{
+    // create record numbers & and store new max rec num
+    assert (dbcontent.hasVariable(DBContent::meta_var_rec_num_.name()));
+
+    Variable& rec_num_var = dbcontent.variable(DBContent::meta_var_rec_num_.name());
+    assert (rec_num_var.dataType() == PropertyDataType::ULONGINT);
+
+    string rec_num_col_str = rec_num_var.dbColumnName();
+    assert (!buffer->has<unsigned long>(rec_num_col_str));
+
+    buffer->addProperty(rec_num_col_str, PropertyDataType::ULONGINT);
+
+    assert (COMPASS::instance().dbContentManager().hasMaxRecordNumberWODBContentID());
+    unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID();
+
+    NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(rec_num_col_str);
+
+    unsigned int buffer_size = buffer->size();
+    unsigned int dbcont_id = dbcontent.id();
+
+    for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+    {
+        ++max_rec_num;
+        rec_num_vec.set(cnt, Number::recNumAddDBContId(max_rec_num, dbcont_id));
+    }
+
+    COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID(max_rec_num);
+}
+
+/**
+ */
 void DBInterface::insertDBContent(DBContent& dbcontent, std::shared_ptr<Buffer> buffer)
 {
     logdbg << "DBInterface: insertDBContent: dbo " << dbcontent.name() << " buffer size " << buffer->size();
@@ -1500,43 +1535,8 @@ void DBInterface::insertDBContent(DBContent& dbcontent, std::shared_ptr<Buffer> 
     if (!existsTable(dbcontent.dbTableName()))
         createTable(dbcontent);
 
-    // create record numbers & and store new max rec num
-    {
-        assert (dbcontent.hasVariable(DBContent::meta_var_rec_num_.name()));
-
-        Variable& rec_num_var = dbcontent.variable(DBContent::meta_var_rec_num_.name());
-        assert (rec_num_var.dataType() == PropertyDataType::ULONGINT);
-
-        string rec_num_col_str = rec_num_var.dbColumnName();
-        assert (!buffer->has<unsigned long>(rec_num_col_str));
-
-        buffer->addProperty(rec_num_col_str, PropertyDataType::ULONGINT);
-
-        assert (COMPASS::instance().dbContentManager().hasMaxRecordNumberWODBContentID());
-        unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID();
-
-        NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(rec_num_col_str);
-
-        unsigned int buffer_size = buffer->size();
-        unsigned int dbcont_id = dbcontent.id();
-
-        for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
-        {
-            ++max_rec_num;
-            rec_num_vec.set(cnt, Number::recNumAddDBContId(max_rec_num, dbcont_id));
-        }
-
-        COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID(max_rec_num);
-    }
-
+    initDBContentBuffer(dbcontent, buffer);
     insertBuffer(dbcontent.dbTableName(), buffer);
-}
-
-/**
- */
-void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Buffer>>& buffers)
-{
-    //@TODO
 }
 
 /**
@@ -1566,6 +1566,98 @@ void DBInterface::insertBuffer(const string& table_name,
     {
         logerr << "DBInterface: insertBuffer: inserting into table '" << table_name << "' failed: " << res.error();
         throw runtime_error("DBInterface: insertBuffer: inserting into table '" + table_name + "' failed: " + res.error());
+    }
+}
+
+/**
+ * Inserts multiple dbcontent buffers at once, possibly utilizing parallelization.
+ */
+void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Buffer>>& buffers)
+{
+    assert(ready());
+
+    bool db_supports_mt = db_instance_->sqlConfiguration().supports_mt;
+    bool exec_mt        = db_supports_mt && buffers.size() > 1;
+
+    loginf << "DBInterface: insertDBContent: inserting " << buffers.size() << " object(s) " 
+           << (exec_mt ? "multi-threaded" : "single-threaded");
+
+    auto& dbc_manager = COMPASS::instance().dbContentManager();
+
+    std::vector<std::pair<std::string, std::shared_ptr<Buffer>>> insert_data;
+
+    //init single-threaded
+    for (auto& it : buffers)
+    {
+        assert(it.second);
+
+        auto& dbcontent = dbc_manager.dbContent(it.first);
+
+        //create table if needed
+        if (!existsTable(dbcontent.dbTableName()))
+            createTable(dbcontent);
+
+        //init buffer
+        initDBContentBuffer(dbcontent, it.second);
+
+        insert_data.emplace_back(dbcontent.dbTableName(), it.second);
+    }
+
+    unsigned int n = insert_data.size();
+
+    //create needed connections (if supported)
+    std::vector<std::unique_ptr<DBInstance::ConnectionWrapper>> connections(n);
+    if (exec_mt)
+    {
+        for (unsigned int i = 0; i < n; ++i)
+        {
+            connections[ i ] = db_instance_->newCustomConnection();
+            if (connections[ i ]->hasError())
+            {
+                logerr << "DBInterface: insertDBContent: creating connection failed: " << connections[ i ]->error();
+                throw runtime_error("DBInterface: insertDBContent: creating connection failed: " + connections[ i ]->error());
+            }
+        }
+    }
+
+    //insert buffers
+    std::vector<Result> results(n, 0);
+    if (exec_mt)
+    {
+        //insert multithreaded (if supported)
+        tbb::parallel_for(uint(0), n, [ & ](unsigned int i) 
+        {
+            auto& d = insert_data.at(i);
+            results.at(i) = connections.at(i)->connection().insertBuffer(d.first, d.second);
+        });
+    }
+    else
+    {
+        //single threaded insert
+        for (unsigned int i = 0; i < n; ++i)
+        {
+            auto& d = insert_data.at(i);
+            results.at(i) = db_instance_->defaultConnection().insertBuffer(d.first, d.second);
+        }
+    }
+
+    //cleanup connections
+    for (auto& c : connections)
+        c->detach();
+
+    db_instance_->destroyCustomConnections();
+    connections.clear();
+
+    //check results
+    for (unsigned int i = 0; i < n; ++i)
+    {
+        const auto& table_name = insert_data.at(i).first;
+        const auto& result     = results.at(i);
+        if (!result.ok())
+        {
+            logerr << "DBInterface: insertBuffer: inserting into table '" << table_name << "' failed: " << result.error();
+            throw runtime_error("DBInterface: insertBuffer: inserting into table '" + table_name + "' failed: " + result.error());
+        }
     }
 }
 

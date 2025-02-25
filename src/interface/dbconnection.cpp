@@ -43,11 +43,13 @@
 
 /**
  */
-DBConnection::DBConnection(DBInstance* instance)
+DBConnection::DBConnection(DBInstance* instance, bool verbose)
 :   instance_ (instance  )
 ,   connected_(false     )
+,   verbose_  (verbose   )
 {
-    loginf << "DBConnection: constructor";
+    if (verbose_)
+        loginf << "DBConnection: constructor";
 
     assert(instance_);
 }
@@ -56,7 +58,8 @@ DBConnection::DBConnection(DBInstance* instance)
  */
 DBConnection::~DBConnection()
 {
-    loginf << "DBConnection: destructor";
+    if (verbose_)
+        loginf << "DBConnection: destructor";
 
     assert(!connected());
 }
@@ -86,7 +89,8 @@ Result DBConnection::connect()
 {
     assert(instance_->dbOpen());
 
-    loginf << "DBConnection: connect: connecting to instance '" << instance_->dbFilename() << "'...";
+    if (verbose_)
+        loginf << "DBConnection: connect: connecting to instance '" << instance_->dbFilename() << "'...";
 
     //close any opened connection
     if (connected())
@@ -98,7 +102,8 @@ Result DBConnection::connect()
 
     connected_ = true;
 
-    loginf << "DBConnection: connect: connected!";
+    if (verbose_)
+        loginf << "DBConnection: connect: connected!";
 
     return Result::succeeded();
 }
@@ -108,12 +113,14 @@ Result DBConnection::connect()
  */
 void DBConnection::disconnect()
 {
-    loginf << "DBConnection: disconnecting, connected? " << connected_;
+    if (verbose_)
+        loginf << "DBConnection: disconnecting, connected? " << connected_;
 
     if (!connected_)
         return;
 
-    loginf << "DBConnection: disconnecting...";
+    if (verbose_)
+        loginf << "DBConnection: disconnecting...";
 
     //close any active reader
     stopRead();
@@ -148,7 +155,8 @@ Result DBConnection::exportDB(const std::string& file_name)
  */
 Result DBConnection::execute(const std::string& sql)
 {
-    logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
+    if (verbose_)
+        logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
 
     assert(connected());
 
@@ -160,7 +168,8 @@ Result DBConnection::execute(const std::string& sql)
  */
 std::shared_ptr<DBResult> DBConnection::execute(const std::string& sql, bool fetch_result_buffer)
 {
-    logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
+    if (verbose_)
+        logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
 
     assert(connected());
 
@@ -182,7 +191,8 @@ std::shared_ptr<DBResult> DBConnection::execute(const std::string& sql, bool fet
  */
 std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
 {
-    logdbg << "DBConnection: execute: executing single command";
+    if (verbose_)
+        logdbg << "DBConnection: execute: executing single command";
 
     assert(connected());
 
@@ -205,7 +215,8 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
  */
 std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_list)
 {
-    logdbg << "DBConnection: execute: executing " << command_list.getNumCommands() << " command(s)";
+    if (verbose_)
+        logdbg << "DBConnection: execute: executing " << command_list.getNumCommands() << " command(s)";
 
     assert(connected());
 
@@ -247,7 +258,8 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
     if (fetch_buffers && !dbresult->hasError())
         dbresult->buffer(buffer);
 
-    logdbg << "DBConnection: execute: end";
+    if (verbose_)
+        logdbg << "DBConnection: execute: end";
 
     return dbresult;
 }
@@ -333,6 +345,10 @@ Result DBConnection::insertBuffer(const std::string& table_name,
                                   PropertyList* table_properties)
 {
     assert(connected());
+    assert(buffer);
+
+    if (buffer->size() == 0)
+        return Result::succeeded();
 
     QElapsedTimer t;
     if (perf_metrics_.has_value())
@@ -365,6 +381,10 @@ Result DBConnection::updateBuffer(const std::string& table_name,
                                   const boost::optional<size_t>& idx_to)
 {
     assert(connected());
+    assert(buffer);
+
+    if (buffer->size() == 0)
+        return Result::succeeded();
 
     QElapsedTimer t;
     if (perf_metrics_.has_value())
@@ -647,7 +667,8 @@ std::shared_ptr<DBResult> DBConnection::readChunk()
 
     assert(result->buffer() && result->containsData());
 
-    loginf << "DBConnection: readChunk: read " << result->buffer()->size() << " left " << active_reader_->numLeft() << " hasmore " << result->hasMore();
+    if (verbose_)
+        loginf << "DBConnection: readChunk: read " << result->buffer()->size() << " left " << active_reader_->numLeft() << " hasmore " << result->hasMore();
 
     // if (!result->hasMore())
     // {

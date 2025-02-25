@@ -48,8 +48,8 @@
 
 /**
  */
-DuckDBConnection::DuckDBConnection(DuckDBInstance* instance)
-:   DBConnection(instance)
+DuckDBConnection::DuckDBConnection(DuckDBInstance* instance, bool verbose)
+:   DBConnection(instance, verbose)
 {
     //loginf << "DuckDBConnection: constructor";
 }

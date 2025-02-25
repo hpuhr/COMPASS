@@ -40,8 +40,9 @@ using namespace Utils;
 /**
  */
 SQLiteConnection::SQLiteConnection(SQLiteInstance* instance,
-                                   sqlite3* db_handle)
-:   DBConnection(instance )
+                                   sqlite3* db_handle, 
+                                   bool verbose)
+:   DBConnection(instance, verbose)
 ,   db_handle_  (db_handle)
 {
     assert(db_handle);

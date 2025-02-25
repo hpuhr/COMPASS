@@ -111,7 +111,7 @@ Result DBInstance::open(const std::string& file_name)
     db_filename_ = file_name;
 
     //open default connection
-    auto conn_result = createConnection();
+    auto conn_result = createConnection(true);
     if (!conn_result.ok())
         return conn_result;
 
@@ -204,10 +204,11 @@ DBConnection& DBInstance::defaultConnection()
 DBInstance::ConnectionWrapperPtr DBInstance::newCustomConnection()
 {
     assert(dbReady());
+    assert(sqlConfiguration().supports_mt);
 
     connection_mutex_.lock();
 
-    auto r = createConnection();
+    auto r = createConnection(false);
 
     if (r.ok())
         custom_connections_.emplace_back(r.result());
@@ -216,6 +217,14 @@ DBInstance::ConnectionWrapperPtr DBInstance::newCustomConnection()
 
     if (!r.ok())
         return ConnectionWrapperPtr(new ConnectionWrapper(r.error()));
+
+    //try to update table info
+    Result res_ti = r.result()->updateTableInfo();
+    if (!res_ti.ok())
+    {
+        delete r.result();
+        return ConnectionWrapperPtr(new ConnectionWrapper(res_ti.error()));
+    }
 
     auto destroy_cb = [ this ] (DBConnection* conn)
     {
@@ -252,11 +261,25 @@ void DBInstance::destroyCustomConnection(DBConnection* conn)
 
 /**
  */
-ResultT<DBConnection*> DBInstance::createConnection()
+void DBInstance::destroyCustomConnections()
+{
+    connection_mutex_.lock();
+
+    for (auto& cc : custom_connections_)
+        cc->disconnect();
+    
+    custom_connections_.clear();
+
+    connection_mutex_.unlock();
+}
+
+/**
+ */
+ResultT<DBConnection*> DBInstance::createConnection(bool verbose)
 {
     assert(dbOpen());
 
-    auto r = createConnection_impl();
+    auto r = createConnection_impl(verbose);
     assert(!r.ok() || r.result() != nullptr);
 
     return r;

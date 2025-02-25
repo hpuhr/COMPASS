@@ -193,11 +193,14 @@ protected:
     void loadProperties();
     void reset();
 
+    void initDBContentBuffer(DBContent& dbcontent, 
+                             std::shared_ptr<Buffer> buffer);
+
     SQLGenerator sqlGenerator() const;
     
     Result execute(const std::string& sql);
     std::shared_ptr<DBResult> execute(const DBCommand& cmd);
-    
+
     void updateTableInfo();
 
     std::unique_ptr<DBInstance> db_instance_;

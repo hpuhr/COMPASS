@@ -36,6 +36,7 @@ struct SQLConfig
     SQLPlaceholder placeholder             = SQLPlaceholder::AtVar;
     bool           use_conflict_resolution = false;
     bool           indexing                = true;
+    bool           supports_mt             = false;
 
     bool           verbose                 = true;
 };
