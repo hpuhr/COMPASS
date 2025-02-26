@@ -1327,7 +1327,7 @@ void EvaluationManager::importSectors(const std::string& filename)
             eval_sector->save();
 
             loginf << "EvaluationManager: importSectors: loaded sector '" << name << "' in layer '"
-                   << layer_name << "' num points " << sector(name, layer_name)->size();
+                   << layer_name << "' num points " << sector(name, layer_name)->size() << " id " << id;
         }
     }
     catch (json::exception& e)

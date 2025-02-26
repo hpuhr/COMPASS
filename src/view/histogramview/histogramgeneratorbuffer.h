@@ -196,13 +196,15 @@ protected:
 
         NullableVector<T>& data = buffer.get<T>(current_var_name);
 
+        unsigned int data_size = data.contentSize();
+
         //selected vector?
         assert (buffer.has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buffer.get<bool>(DBContent::selected_var.name());
 
         unsigned int select_cnt = 0;
 
-        for (unsigned int cnt=0; cnt < data.size(); ++cnt)
+        for (unsigned int cnt=0; cnt < data_size; ++cnt)
         {
             //check null case
             if (data.isNull(cnt))
@@ -403,6 +405,7 @@ private:
             return false;
 
         NullableVector<T>& data = buffer.get<T>(current_var_name);
+        unsigned int data_size = data.contentSize();
 
         assert (buffer.has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buffer.get<bool>(DBContent::selected_var.name());
@@ -416,7 +419,7 @@ private:
         auto& interm_data = intermediate_data_.content_data[ db_content ];
 
         //add variable content
-        for (unsigned int cnt=0; cnt < data.size(); ++cnt)
+        for (unsigned int cnt=0; cnt < data_size; ++cnt)
         {
             bool selected = !selected_vec.isNull(cnt) && selected_vec.get(cnt);
             bool is_null  = data.isNull(cnt);

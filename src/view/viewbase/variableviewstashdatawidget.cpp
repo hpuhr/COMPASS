@@ -516,7 +516,7 @@ void VariableViewStashDataWidget::selectData(double x_min,
             DBContent::meta_var_rec_num_.name());
 
         std::map<unsigned long, std::vector<unsigned int>> rec_num_indexes =
-            rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
+            rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.contentSize());
         // rec_num -> index
 
         for (const auto rec_num : sel_cont_id_it.second) // iterator over all selected rec_nums

@@ -145,7 +145,7 @@ public:
     void setMinMaxLongitude(double min, double max);
     std::pair<double, double> minMaxLongitude() const;
 
-    bool hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const;
+    //bool hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const;
 
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
 

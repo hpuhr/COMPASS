@@ -150,6 +150,9 @@ ResultT<std::vector<std::string>> SQLiteConnection::getTableList_impl()
     std::shared_ptr<Buffer> buffer = result->buffer();
 
     unsigned int size = buffer->size();
+
+    loginf << "SQLiteConnection: getTableList: buffer size " << size;
+
     std::string table_name;
 
     for (unsigned int cnt = 0; cnt < size; cnt++)
@@ -161,6 +164,5 @@ ResultT<std::vector<std::string>> SQLiteConnection::getTableList_impl()
 
         tables.push_back(buffer->get<std::string>("name").get(cnt));
     }
-
     return ResultT<std::vector<std::string>>::succeeded(tables);
 }

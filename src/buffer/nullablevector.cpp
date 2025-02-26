@@ -82,8 +82,8 @@ void NullableVector<bool>::append(unsigned int index, bool value)
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     if (index >= data_.size())  // allocate new stuff, fill all new with not null
@@ -112,8 +112,8 @@ void NullableVector<std::string>::append(unsigned int index, std::string value)
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        assert(data_.size() <= buffer_.data_size_);
-        assert(null_flags_.size() <= buffer_.data_size_);
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
     }
 
     if (index >= data_.size())  // allocate new stuff, fill all new with not null

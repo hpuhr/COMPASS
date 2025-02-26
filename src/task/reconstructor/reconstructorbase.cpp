@@ -1262,7 +1262,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
 
         logdbg << "ReconstructorBase: createReferenceBuffers: buffer size " << buffer->size()
                << " ts min " << Time::toString(ts_vec.get(0))
-               << " max " << Time::toString(ts_vec.get(ts_vec.size()-1));
+               << " max " << Time::toString(ts_vec.get(ts_vec.contentSize()-1));
 
         DataSourceManager& src_man = COMPASS::instance().dataSourceManager();
 

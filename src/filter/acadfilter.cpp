@@ -143,9 +143,9 @@ bool ACADFilter::activeInLiveMode()
     return true;
 }
 
-std::vector<size_t> ACADFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
+std::vector<unsigned int> ACADFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
 {
-    std::vector<size_t> to_be_removed;
+    std::vector<unsigned int> to_be_removed;
 
     if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbcontent_name))
         return to_be_removed;
