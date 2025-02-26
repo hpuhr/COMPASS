@@ -15,35 +15,54 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SQLGENERATOR_H_
-#define SQLGENERATOR_H_
+#pragma once
 
 #include "dbcontent/variable/variableset.h"
+#include "dbtableinfo.h"
+#include "dbdefs.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <memory>
+#include <string>
 
 class Buffer;
 class DBCommand;
 class DBCommandList;
-class DBInterface;
 class DBContent;
 
+/**
+ */
 class SQLGenerator
 {
 public:
-    SQLGenerator(DBInterface& db_interface);
+    SQLGenerator(const db::SQLConfig& config);
     virtual ~SQLGenerator();
 
     std::string getCreateTableStatement(const DBContent& object);
-    std::string insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, std::string table_name);
-    std::string createDBUpdateStringBind(std::shared_ptr<Buffer> buffer,
-                                         const std::string& key_col_name, std::string table_name);
+    std::string getCreateTableStatement(const std::string& table_name,
+                                        const std::vector<DBTableColumnInfo>& column_infos, 
+                                        const std::vector<db::Index>& indices = std::vector<db::Index>());
+    std::string getInsertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, 
+                                            std::string table_name);
+    std::string getCreateDBUpdateStringBind(std::shared_ptr<Buffer> buffer,
+                                            const std::string& key_col_name, 
+                                            std::string table_name);
+    std::string getUpdateTableFromTableStatement(const std::string& table_name_src,
+                                                 const std::string& table_name_dst,
+                                                 const std::vector<std::string>& col_names,
+                                                 const std::string& key_col);
 
-    std::shared_ptr<DBCommand> getSelectCommand(
-            const DBContent& object, dbContent::VariableSet read_list, const std::string& filter,
-            bool use_order = false, dbContent::Variable* order_variable = nullptr);
+    std::shared_ptr<DBCommand> getSelectCommand(const DBContent& object, 
+                                                dbContent::VariableSet read_list, 
+                                                const std::string& filter,
+                                                bool use_order = false, 
+                                                dbContent::Variable* order_variable = nullptr);
+    std::shared_ptr<DBCommand> getSelectCommand(const std::string& table_name, 
+                                                const PropertyList& properties, 
+                                                const std::string& filter,
+                                                bool use_order = false, 
+                                                const std::string& order_variable = "");
 
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand();
     std::shared_ptr<DBCommand> getFFTSelectCommand();
@@ -102,20 +121,15 @@ public:
 
     std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBContent& object);
 
-protected:
-    DBInterface& db_interface_;
+private:
+    std::string placeholder(int index = 1) const;
 
-    //std::string table_minmax_create_statement_;
-    std::string table_properties_create_statement_;
-    std::string table_data_sources_create_statement_;
-    std::string table_ffts_create_statement_;
-    std::string table_sectors_create_statement_;
-    std::string table_view_points_create_statement_;
-    std::string table_targets_create_statement_;
+    std::string replaceStatement(const std::string& table, 
+                                 const std::vector<std::string>& values) const;
+
+    db::SQLConfig config_;
 
     //    std::string subTablesWhereClause(const DBTable& table,
     //                                     const std::vector<std::string>& used_tables);
     //    std::string subTableKeyClause(const DBTable& table, const std::string& sub_table_name);
 };
-
-#endif /* SQLGENERATOR_H_ */

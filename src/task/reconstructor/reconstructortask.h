@@ -211,4 +211,7 @@ protected:
     void loadDataSlice();
     void processDataSlice();
     void writeDataSlice();
+    void endReconstruction();
+
+    void finalizeSlice(std::unique_ptr<ReconstructorBase::DataSlice>& slice);
 };

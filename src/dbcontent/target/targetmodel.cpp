@@ -568,7 +568,7 @@ void TargetModel::clearTargetsInfo()
 {
     clear();
 
-    COMPASS::instance().interface().clearTargetsTable();
+    COMPASS::instance().dbInterface().clearTargetsTable();
 }
 
 bool TargetModel::existsTarget(unsigned int utn) const
@@ -756,7 +756,7 @@ void TargetModel::loadFromDB()
 
     beginResetModel();
 
-    for (auto& target : COMPASS::instance().interface().loadTargets())
+    for (auto& target : COMPASS::instance().dbInterface().loadTargets())
     {
         target_data_.push_back({target->utn_, target->info()});
     }
@@ -778,7 +778,7 @@ void TargetModel::saveToDB()
     for (auto& target : target_data_)
         targets.emplace_back(new dbContent::Target(target.utn_, target.info()));
 
-    COMPASS::instance().interface().saveTargets(targets);
+    COMPASS::instance().dbInterface().saveTargets(targets);
 }
 
 void TargetModel::saveToDB(unsigned int utn)
@@ -791,7 +791,7 @@ void TargetModel::saveToDB(unsigned int utn)
 
     std::unique_ptr<dbContent::Target> tgt_copy {new dbContent::Target(tr_tag_it->utn_, tr_tag_it->info())};
 
-    COMPASS::instance().interface().saveTarget(tgt_copy);
+    COMPASS::instance().dbInterface().saveTarget(tgt_copy);
 }
 
 bool TargetModel::removeShortTargets() const

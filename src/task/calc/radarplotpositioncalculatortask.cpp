@@ -283,7 +283,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
                 String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
         done_ = true;
-        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+        COMPASS::instance().dbInterface().setProperty(DONE_PROPERTY_NAME, "1");
 
         QApplication::restoreOverrideCursor();
 

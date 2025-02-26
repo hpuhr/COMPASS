@@ -20,7 +20,7 @@ message("  Platform: Linux (inside docker)")
 add_definitions ( -UNDEBUG -Wall -std=c++11 -fext-numeric-literals) # -DQT_NO_KEYWORDS
 ELSE()
 message("  Platform: Linux (local)")
-add_definitions ( -UNDEBUG -Wall -std=c++14 -fext-numeric-literals) # -DQT_NO_KEYWORDS
+add_definitions ( -UNDEBUG -Wall -std=c++17 -fext-numeric-literals) # -DQT_NO_KEYWORDS
 ENDIF()
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
@@ -119,6 +119,9 @@ find_package(GeographicLib REQUIRED)
 message("  GeographicLib_INCLUDE_DIRS:  ${GeographicLib_INCLUDE_DIRS}")
 message("  GeographicLib_LIBRARIES: ${GeographicLib_LIBRARIES}")
 
+#find_package(Arrow REQUIRED)
+#find_package(Parquet REQUIRED)
+find_package(DuckDB REQUIRED)
 
 add_library(compass "")
 
@@ -167,6 +170,9 @@ include_directories (
     ${jASTERIX_INCLUDE_DIR}
     ${PCAP_INCLUDE_DIR}
     ${GeographicLib_INCLUDE_DIRS}
+    #${Arrow_INCLUDE_DIRS}
+    #${Parquet_INCLUDE_DIRS}
+    ${DUCKDB_INCLUDE_DIR}
     )
 
 link_directories(
@@ -197,6 +203,9 @@ target_link_libraries ( compass
     ${OSGQT_LIBRARIES}
     ${OSGEARTH_LIBRARY}
     ${GeographicLib_LIBRARIES}
+    #Arrow::arrow_static 
+    #Parquet::parquet_static
+    ${DUCKDB_LIBRARIES}
     )
 
 # installation stuff

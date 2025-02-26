@@ -203,7 +203,7 @@ void HistogramViewDataWidget::updateFromVariables()
 
     auto data_type = meta_var ? meta_var->dataType() : data_var->dataType();
 
-    #define UpdateFunc(PDType, DType) \
+    #define UpdateFunc(PDType, DType, Suffix) \
         histogram_generator_.reset(new HistogramGeneratorBufferT<DType>(&viewData(), data_var, meta_var));
 
     #define NotFoundFunc                                                                                                                      \
@@ -211,7 +211,7 @@ void HistogramViewDataWidget::updateFromVariables()
         logerr << msg;                                                                                                                        \
         throw std::runtime_error(msg);
 
-    #define UnsupportedFunc(PDType, DType) assert(true);
+    #define UnsupportedFunc(PDType, DType, Suffix) assert(true);
 
     SwitchPropertyDataTypeNumeric(data_type, UpdateFunc, UnsupportedFunc, UnsupportedFunc, NotFoundFunc)
 

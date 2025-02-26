@@ -34,6 +34,7 @@ class DBContent;
 class DBContentManagerWidget;
 class DBSchemaManager;
 class DBContentDeleteDBJob;
+class DBContentInsertDBJob;
 
 namespace dbContent 
 {
@@ -104,7 +105,7 @@ public:
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
 
-    void load(const std::string& custom_filter_clause="");
+    void load(const std::string& custom_filter_clause="", bool measure_db_performance = false);
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
     std::map<std::string, std::shared_ptr<Buffer>> loadedData();
     void loadingDone(DBContent& object); // to be called by dbo when it's loading is finished
@@ -112,7 +113,6 @@ public:
     void clearData();
 
     void insertData(std::map<std::string, std::shared_ptr<Buffer>> data);
-    void insertDone(DBContent& object); // to be called by dbo when it's insert is finished
     bool insertInProgress() const;
 
     void deleteDBContentData(boost::posix_time::ptime before_timestamp);
@@ -187,7 +187,29 @@ public:
     void showUTNs (std::vector<unsigned int> utns);
     void showSurroundingData (unsigned int utn);
 
+    dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
+
 protected:
+    virtual void checkSubConfigurables() override;
+    void finishLoading();
+    void finishInserting();
+
+    void addInsertedDataToChache();
+    void filterDataSources();
+    void cutCachedData();
+
+    void updateNumLoadedCounts(); // from data_
+
+    void loadMaxRecordNumberWODBContentID();
+    void loadMaxRefTrajTrackNum();
+
+    void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
+
+    void setViewableDataConfig (const nlohmann::json::object_t& data);
+
+    void saveSelectedRecNums();
+    void restoreSelectedRecNums();
+
     COMPASS& compass_;
 
     std::unique_ptr<dbContent::TargetModel> target_model_;
@@ -230,27 +252,7 @@ protected:
     std::unique_ptr<dbContent::MetaVariableConfigurationDialog> meta_cfg_dialog_;
 
     std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
+    std::shared_ptr<DBContentInsertDBJob> insert_job_{nullptr};
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
-
-    virtual void checkSubConfigurables() override;
-    void finishLoading();
-    void finishInserting();
-
-    void addInsertedDataToChache();
-    void filterDataSources();
-    void cutCachedData();
-
-    void updateNumLoadedCounts(); // from data_
-
-    void loadMaxRecordNumberWODBContentID();
-    void loadMaxRefTrajTrackNum();
-
-    void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
-
-    void setViewableDataConfig (const nlohmann::json::object_t& data);
-
-    void saveSelectedRecNums();
-    void restoreSelectedRecNums();
 };
-

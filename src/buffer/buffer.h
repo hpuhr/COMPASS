@@ -90,7 +90,7 @@ public:
     void addProperty(const Property& property);
     void deleteProperty(const Property& property);
 
-    const PropertyList& properties();
+    const PropertyList& properties() const;
     void printProperties();
 
     void sortByProperty(const Property& property);
@@ -107,7 +107,7 @@ public:
     void rename(const std::string& id, const std::string& id_new);
 
     // Returns current size
-    size_t size();
+    size_t size() const;
     void cutToSize(size_t size);
 
     void cutUpToIndex(size_t index); // everything up to index is removed

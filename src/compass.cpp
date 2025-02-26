@@ -36,6 +36,7 @@
 #include "fftmanager.h"
 #include "util/async.h"
 #include "licensemanager.h"
+#include "result.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -344,27 +345,30 @@ void COMPASS::openDBFile(const std::string& filename)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+    Result res = Result::succeeded();
+
     try
     {
         db_interface_->openDBFile(filename, false);
-        assert (db_interface_->dbOpen());
+        assert (db_interface_->ready());
 
         addDBFileToList(filename);
-        lastUsedPath(Files::getDirectoryFromPath(filename));
 
         db_opened_ = true;
 
         emit databaseOpenedSignal();
-
-    }  catch (std::exception& e)
+    }  
+    catch (std::exception& e)
     {
-        QMessageBox m_warning(QMessageBox::Warning, "Opening Database Failed",
-                              e.what(), QMessageBox::Ok);
-        m_warning.exec();
+        res = Result::failed(e.what());
 
         db_opened_ = false;
     }
 
+    lastUsedPath(Files::getDirectoryFromPath(filename));
+
+    if (!res.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
 
     QApplication::restoreOverrideCursor();
 }
@@ -383,17 +387,39 @@ void COMPASS::createNewDBFile(const std::string& filename)
         Files::deleteFile(filename);
     }
 
+    //@TODO: remove
+    if (Files::fileExists(Files::replaceExtension(filename, ".duckdb")))
+    {
+        loginf << "COMPASS: createNewDBFile: deleting pre-existing file '" << Files::replaceExtension(filename, ".duckdb") << "'";
+        Files::deleteFile(Files::replaceExtension(filename, ".duckdb"));
+    }
+
     last_db_filename_ = filename;
 
-    db_interface_->openDBFile(filename, true);
-    assert (db_interface_->dbOpen());
+    Result res = Result::succeeded();
 
-    addDBFileToList(filename);
+    try
+    {
+        db_interface_->openDBFile(filename, true);
+        assert (db_interface_->ready());
+
+        addDBFileToList(filename);
+
+        db_opened_ = true;
+
+        emit databaseOpenedSignal();
+    }
+    catch(const std::exception& e)
+    {
+        res = Result::failed(e.what());
+
+        db_opened_ = false;
+    }
+
     lastUsedPath(Files::getDirectoryFromPath(filename));
 
-    db_opened_ = true;
-
-    emit databaseOpenedSignal();
+    if (!res.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
 }
 
 void COMPASS::exportDBFile(const std::string& filename)
@@ -416,14 +442,26 @@ void COMPASS::exportDBFile(const std::string& filename)
 
     Async::waitAndProcessEventsFor(50);
 
-    db_interface_->exportDBFile(filename);
+    Result res = Result::succeeded();
+
+    try
+    {
+        db_interface_->exportDBFile(filename);
+    }
+    catch(const std::exception& e)
+    {
+        res = Result::failed(e.what());
+    }
+
     lastUsedPath(Files::getDirectoryFromPath(filename));
-
-
+    
     msg_box->close();
     delete msg_box;
 
     db_export_in_progress_ = false;
+
+    if (!res.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
 }
 
 void COMPASS::closeDB()
@@ -436,15 +474,14 @@ void COMPASS::closeDB()
     dbcontent_manager_->saveTargets();
 
     db_interface_->closeDBFile();
-    assert (!db_interface_->dbOpen());
+    assert (!db_interface_->ready());
 
     db_opened_ = false;
 
     emit databaseClosedSignal();
 }
 
-
-DBInterface& COMPASS::interface()
+DBInterface& COMPASS::dbInterface()
 {
     assert(db_interface_);
     return *db_interface_;
@@ -540,17 +577,17 @@ void COMPASS::shutdown()
     assert(db_interface_);
 
     assert(ds_manager_);
-    if (db_interface_->dbOpen())
+    if (db_interface_->ready())
         ds_manager_->saveDBDataSources();
     ds_manager_ = nullptr;
 
     assert(fft_manager_);
-    if (db_interface_->dbOpen())
+    if (db_interface_->ready())
         fft_manager_->saveDBFFTs();
     fft_manager_ = nullptr;
 
     assert(dbcontent_manager_);
-    if (db_interface_->dbOpen())
+    if (db_interface_->ready())
         dbcontent_manager_->saveTargets();
     dbcontent_manager_ = nullptr;
 
@@ -569,7 +606,7 @@ void COMPASS::shutdown()
     assert(filter_manager_);
     filter_manager_ = nullptr;
 
-    if (db_interface_->dbOpen())
+    if (db_interface_->ready())
         db_interface_->closeDBFile();
 
     db_interface_ = nullptr;

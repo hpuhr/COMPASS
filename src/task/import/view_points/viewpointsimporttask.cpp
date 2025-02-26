@@ -177,7 +177,7 @@ void ViewPointsImportTask::run()
     done_ = false;
     stopped_ = false;
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
     // check and clear existing ones
     if(db_interface.existsViewPointsTable() && db_interface.viewPoints().size() && allow_user_interactions_)

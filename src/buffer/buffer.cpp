@@ -690,7 +690,7 @@ void Buffer::removeIndexes(const std::vector<unsigned int>& indexes_to_remove)
     }
 }
 
-const PropertyList& Buffer::properties() { return properties_; }
+const PropertyList& Buffer::properties() const { return properties_; }
 
 void Buffer::printProperties()
 {

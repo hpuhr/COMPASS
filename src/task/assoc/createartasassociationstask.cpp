@@ -278,8 +278,8 @@ void CreateARTASAssociationsTask::run()
 
 bool CreateARTASAssociationsTask::wasRun()
 {
-    return COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME)
-             && COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    return COMPASS::instance().dbInterface().hasProperty(DONE_PROPERTY_NAME)
+             && COMPASS::instance().dbInterface().getProperty(DONE_PROPERTY_NAME) == "1";
 }
 
 void CreateARTASAssociationsTask::loadedDataDataSlot(
@@ -311,7 +311,7 @@ void CreateARTASAssociationsTask::loadingDoneSlot()
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
     create_job_ = std::make_shared<CreateARTASAssociationsJob>(
-                *this, COMPASS::instance().interface(), data_);
+                *this, COMPASS::instance().dbInterface(), data_);
 
     connect(create_job_.get(), &CreateARTASAssociationsJob::doneSignal, this,
             &CreateARTASAssociationsTask::createDoneSlot, Qt::QueuedConnection);
@@ -379,9 +379,9 @@ void CreateARTASAssociationsTask::createDoneSlot()
 
     if (save_associations_)
     {
-        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+        COMPASS::instance().dbInterface().setProperty(DONE_PROPERTY_NAME, "1");
 
-        COMPASS::instance().interface().saveProperties();
+        COMPASS::instance().dbInterface().saveProperties();
 
         done_ = true;
     }

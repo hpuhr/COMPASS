@@ -1351,7 +1351,7 @@ void ASTERIXImportTask::checkAllDone()
         COMPASS::instance().dataSourceManager().saveDBDataSources();
         emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
         emit COMPASS::instance().dbContentManager().dbContentStatusChanged();
-        COMPASS::instance().interface().saveProperties();
+        COMPASS::instance().dbInterface().saveProperties();
 
         malloc_trim(0); // release unused memory
 

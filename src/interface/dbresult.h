@@ -15,10 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBRESULT_H_
-#define DBRESULT_H_
+#pragma once
 
 #include <memory>
+#include <string>
 
 class Buffer;
 
@@ -32,9 +32,11 @@ class DBResult
 {
   public:
     /// @brief Constructor with parameters
-    DBResult(std::shared_ptr<Buffer> buffer) : contains_data_(true), buffer_(buffer) {}
+    DBResult(std::shared_ptr<Buffer> buffer) : has_more_(false), contains_data_(true), buffer_(buffer) {}
+    /// @brief Constructor with parameters
+    DBResult(std::shared_ptr<Buffer> buffer, bool has_more) : has_more_(has_more), contains_data_(true), buffer_(buffer) {}
     /// @brief Default constructor
-    DBResult() : contains_data_(false) {}
+    DBResult() : has_more_(false), contains_data_(false) {}
     /// @brief Destructor
     virtual ~DBResult() {}
 
@@ -44,17 +46,51 @@ class DBResult
         buffer_ = buffer;
         contains_data_ = true;
     }
+
     /// @brief Returns the result buffer
     std::shared_ptr<Buffer> buffer() const { return buffer_; }
 
+    /// @brief Sets the has more flag
+    void hasMore(bool has_more)
+    {
+        has_more_ = has_more;
+    }
+
+    /// @brief Returns the has more flag
+    bool hasMore() const { return has_more_; }
+
     /// @brief Returns if contains data flag was set
-    bool containsData() { return contains_data_; }
+    bool containsData() const { return contains_data_; }
+
+    /// @brief Sets error state
+    void setError(const std::string& err)
+    {
+        has_error_ = true;
+        error_msg_ = err;
+    }
+
+    /// @brief Checks error state
+    bool hasError() const
+    {
+        return has_error_;
+    }
+
+    /// @brief Returns the current error message
+    const std::string& error() const
+    {
+        return error_msg_;
+    }
+
+    std::string printResult() const;
 
   private:
+    /// @brief Flag signalling if more data is to be expected
+    bool has_more_ = false;
     /// @brief Contains result data flag
     bool contains_data_;
     /// @brief Result data buffer
     std::shared_ptr<Buffer> buffer_;
+    /// @brief Errors
+    bool has_error_ = false;
+    std::string error_msg_;
 };
-
-#endif /* DBRESULT_H_ */

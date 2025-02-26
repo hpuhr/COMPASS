@@ -721,7 +721,7 @@ void DataSourceManager::loadDBDataSources()
 {
     assert (!db_data_sources_.size());
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
     if (db_interface.existsDataSourcesTable())
     {
@@ -799,9 +799,9 @@ void DataSourceManager::saveDBDataSources()
 {
     loginf << "DataSourceManager: saveDBDataSources";
 
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
-    assert(db_interface.dbOpen());
+    assert(db_interface.ready());
     db_interface.saveDataSources(db_data_sources_);
 }
 
@@ -847,7 +847,6 @@ bool DataSourceManager::hasDataSourcesOfDBContent(const std::string dbcontent_na
     { return s->numInsertedMap().count(dbcontent_name) > 0; } ) != db_data_sources_.end();
 }
 
-
 void DataSourceManager::addNewDataSource (unsigned int ds_id)
 {
     loginf << "DataSourceManager: addNewDataSource: ds_id " << ds_id;
@@ -879,8 +878,6 @@ void DataSourceManager::addNewDataSource (unsigned int ds_id)
 
         db_data_sources_.emplace_back(new_ds);
         sortDBDataSources();
-
-
     }
 
     assert (hasDBDataSource(ds_id));
