@@ -1593,10 +1593,27 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
 
     auto& dbc_manager = COMPASS::instance().dbContentManager();
 
-    std::vector<std::pair<std::string, std::shared_ptr<Buffer>>> insert_data;
+    struct Job
+    {
+        Job() = default;
+        Job(const std::string& tname,
+            const std::shared_ptr<Buffer>& b,
+            const boost::optional<size_t>& from,
+            const boost::optional<size_t>& to)
+        :   table   (tname)
+        ,   buffer  (b    )
+        ,   idx_from(from )
+        ,   idx_to  (to   ) {}
 
-    QElapsedTimer t;
-    t.restart();
+        std::string             table;
+        std::shared_ptr<Buffer> buffer;
+        boost::optional<size_t> idx_from;
+        boost::optional<size_t> idx_to;
+    };
+
+    std::vector<Job> insert_jobs;
+
+    int chunk_size = -1;
 
     //init single-threaded
     for (auto& it : buffers)
@@ -1612,10 +1629,28 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
         //init buffer
         initDBContentBuffer(dbcontent, it.second);
 
-        insert_data.emplace_back(dbcontent.dbTableName(), it.second);
+        if (chunk_size < 1)
+        {
+            insert_jobs.push_back(Job(dbcontent.dbTableName(), it.second, {}, {}));
+        }
+        else
+        {
+            auto n = it.second->size();
+            for (size_t idx = 0; idx < n; idx += (size_t)chunk_size)
+            {
+                size_t idx_start = idx;
+                size_t idx_end   = std::min(idx_start + chunk_size, n);
+
+                assert(idx_start < idx_end);
+
+                insert_jobs.push_back(Job(dbcontent.dbTableName(), it.second, idx_start, idx_end - 1));
+            }
+        }
     }
 
-    unsigned int n = insert_data.size();
+    unsigned int n = insert_jobs.size();
+
+    loginf << "DBInterface: insertDBContent: created " << n << " job(s)";
 
     //create connections for multithreading (if supported)
     std::vector<DBConnectionWrapper> mt_connections;
@@ -1630,8 +1665,8 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
 
             if (mt_connections[ i ].hasError())
             {
-                logerr << "DBInterface: openDBFile: creating mt connection failed: " << mt_connections[ i ].error();
-                throw runtime_error("DBInterface: openDBFile: creating mt connection failed: " + mt_connections[ i ].error());
+                logerr << "DBInterface: insertDBContent: creating mt connection failed: " << mt_connections[ i ].error();
+                throw runtime_error("DBInterface: insertDBContent: creating mt connection failed: " + mt_connections[ i ].error());
             }
         }
     }
@@ -1643,8 +1678,8 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
         //insert multithreaded (if supported)
         tbb::parallel_for(uint(0), n, [ & ](unsigned int i) 
         {
-            auto& d = insert_data.at(i);
-            results.at(i) = mt_connections.at(i).connection().insertBuffer(d.first, d.second);
+            auto& job = insert_jobs.at(i);
+            results.at(i) = mt_connections.at(i).connection().insertBuffer(job.table, job.buffer, job.idx_from, job.idx_to);
         });
     }
     else
@@ -1652,15 +1687,15 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
         //single threaded insert
         for (unsigned int i = 0; i < n; ++i)
         {
-            auto& d = insert_data.at(i);
-            results.at(i) = db_instance_->defaultConnection().insertBuffer(d.first, d.second);
+            auto& job = insert_jobs.at(i);
+            results.at(i) = db_instance_->defaultConnection().insertBuffer(job.table, job.buffer, job.idx_from, job.idx_to);
         }
     }
 
     //check results
     for (unsigned int i = 0; i < n; ++i)
     {
-        const auto& table_name = insert_data.at(i).first;
+        const auto& table_name = insert_jobs.at(i).table;
         const auto& result     = results.at(i);
         if (!result.ok())
         {

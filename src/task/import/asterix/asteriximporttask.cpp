@@ -1421,7 +1421,7 @@ void ASTERIXImportTask::checkAllDone()
 */
 bool ASTERIXImportTask::maxLoadReached()
 {
-    return num_packets_in_processing_ > 2;
+    return num_packets_in_processing_ > 3;
 }
 
 /**
