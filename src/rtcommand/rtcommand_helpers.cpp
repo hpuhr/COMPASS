@@ -235,7 +235,7 @@ boost::optional<std::vector<int>> parameterToIntVector(const QString& string_par
     if (string_param.isEmpty())
         return vec;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0)
     const auto skip_empty_parts = Qt::SkipEmptyParts;
 #else
     const auto skip_empty_parts = QString::SkipEmptyParts;

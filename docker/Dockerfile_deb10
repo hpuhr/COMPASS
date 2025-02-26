@@ -1,0 +1,173 @@
+FROM debian:10
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+RUN apt-get install -y openssl
+
+RUN groupadd -r someusers --gid=1000 
+RUN useradd -r -p "$(openssl passwd -1 sk)" -g someusers -G sudo --uid=1000 --create-home --shell /bin/bash sk 
+
+# Update and allow for apt over HTTPS
+RUN apt-get install -y apt-utils
+RUN apt-get install software-properties-common build-essential -y
+RUN apt-get install gcc g++ -y
+
+RUN apt-get install wget -y
+
+#install cmake
+
+RUN apt-get install -y libssl-dev
+
+ENV CMAKE_VERSION=3.28
+ENV CMAKE_BUILD=1
+
+RUN wget https://cmake.org/files/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}.${CMAKE_BUILD}.tar.gz
+RUN tar xzvf cmake-${CMAKE_VERSION}.${CMAKE_BUILD}.tar.gz
+RUN cd cmake-${CMAKE_VERSION}.${CMAKE_BUILD}/ && ./bootstrap
+RUN cd cmake-${CMAKE_VERSION}.${CMAKE_BUILD}/ && make -j$(nproc)
+RUN cd cmake-${CMAKE_VERSION}.${CMAKE_BUILD}/ && make install
+RUN cmake --version
+
+#install boost
+
+RUN wget -O boost_1_83_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.83.0/boost_1_83_0.tar.gz/download --no-check-certificate
+RUN tar xzvf boost_1_83_0.tar.gz
+RUN cd boost_1_83_0/ && ./bootstrap.sh --prefix=/usr/local/
+RUN cd boost_1_83_0/ && ./b2 headers cxxflags="-std=c++17"
+RUN cd boost_1_83_0/ && ./b2 install cxxflags="-std=c++17"
+
+# install atsdb deps
+RUN apt-get install liblog4cpp5-dev libssl-dev libarchive-dev libeigen3-dev libgdal-dev libkml-dev -y
+# tools
+RUN apt-get install locate zip unzip qtchooser chrpath -y
+
+RUN apt-get install libtbb-dev -y
+
+RUN wget https://sqlite.org/2022/sqlite-autoconf-3380000.tar.gz --no-check-certificate
+RUN tar xvzf sqlite-autoconf-3380000.tar.gz
+RUN cd sqlite-autoconf-3380000 && env CPPFLAGS='-O2 -DNDEBUG -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_STAT4 -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT -DSQLITE_ENABLE_COLUMN_METADATA -DHAVE_ISNAN -DOMIT_LOOKASIDE -DUSE_URI -DSQLITE_DEFAULT_MEMSTATUS=0 -DSQLITE_DEFAULT_WAL_SYNCHRONOUS -DSQLITE_LIKE_DOESNT_MATCH_BLOBS -DSQLITE_MAX_EXPR_DEPTH=0 -DSQLITE_OMIT_DEPRECATED -DSQLITE_OMIT_PROGRESS_CALLBACK -DSQLITE_OMIT_SHARED_CACHE -DSQLITE_USE_ALLOCA -DENABLE_BYTECODE_VTAB -DENABLE_FTS3_PARENTHESIS -DENABLE_FTS3_TOKENIZER -DENABLE_PREUPDATE_HOOK -DENABLE_SESSION -DENABLE_PREUPDATE_HOOK -DENABLE_UNKNOWN_SQL_FUNCTION -DENABLE_UNLOCK_NOTIFY -DSOUNDEX -DDEFAULT_AUTOVACUUM=0 -DSQLITE_DEFAULT_WORKER_THREADS=8' ./configure --prefix=/usr/ --libdir=/usr/lib/x86_64-linux-gnu/
+RUN cd sqlite-autoconf-3380000 && make -j$(nproc)
+RUN cd sqlite-autoconf-3380000 && make install
+RUN sqlite3 --version
+RUN sqlite3 -cmd "PRAGMA compile_options;"
+RUN sqlite3 -cmd "CREATE TABLE countries (id varchar(3), data json);insert into countries (id, data) values(1, json('{\"cell\":\"+491765\", \"home\":\"+498973\"}'));select * from countries;"
+
+RUN more /etc/apt/sources.list
+RUN cp /etc/apt/sources.list /etc/apt/sources.list~
+RUN echo 'deb-src http://archive.debian.org/debian buster main' >> /etc/apt/sources.list
+RUN more /etc/apt/sources.list
+RUN apt-get update
+
+RUN apt-get install libgeos-dev -y
+
+# gui/x11 
+RUN apt-get install gedit libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-x11-dev -y #libegl1-mesa-drivers
+
+# qt
+
+RUN apt-get install qt5-* libqt5* -y
+
+ENV QT_SELECT=5
+ENV QT_QPA_PLATFORMTHEME=gtk3
+ENV UBUNTU_MENUPROXY=
+#ENV QT_STYLE_OVERRIDE=adwaita
+ENV QTDIR=/qt/${QT_VERSION_A}
+ENV PATH="${QTDIR}/gcc_64/bin:${PATH}"
+ENV QTTOOLDIR="${QTDIR}/gcc_64/bin"
+ENV QTLIBDIR="${QTDIR}/gcc_64/"
+
+RUN apt-get install libgif-dev -y
+RUN apt-get install libjpeg-dev -y
+
+RUN apt-get install git -y
+
+#opengl core
+#RUN mkdir glcore
+#RUN cd glcore && git clone https://github.com/KhronosGroup/OpenGL-Registry.git
+#RUN ls glcore
+#ENV CMAKE_PREFIX_PATH="/glcore"
+#ENV CMAKE_OPTS="-DOPENGL_INCLUDE_DIR=/glcore -DOPENGL_PROFILE=GLCORE -Dosg_OPENGL_PROFILE=GLCORE -DGLCORE_GLCOREARB_HEADER=\"/glcore\" \
+#OSG_GL3_AVAILABLE=TRUE \
+#OSG_GL1_AVAILABLE=FALSE \
+#OSG_GL2_AVAILABLE=FALSE \
+#OSG_GLES1_AVAILABLE=FALSE \
+#OSG_GLES2_AVAILABLE=FALSE \
+#OSG_GL_DISPLAYLISTS_AVAILABLE=FALSE \
+#OSG_GL_FIXED_FUNCTION_AVAILABLE=FALSE \
+#OSG_GL_MATRICES_AVAILABLE=FALSE \
+#OSG_GL_VERTEX_ARRAY_FUNCS_AVAILABLE=FALSE \
+#OSG_GL_VERTEX_FUNCS_AVAILABLE=FALSE \
+#"
+
+RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.zip
+RUN unzip OpenSceneGraph-3.6.5.zip
+RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.5/build
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 ..
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make -j$(nproc)
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make install
+RUN osgversion
+
+RUN wget https://github.com/openscenegraph/osgQt/archive/Qt4.zip
+RUN unzip Qt4.zip
+RUN mkdir osgQt-Qt4/build
+RUN cd osgQt-Qt4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd osgQt-Qt4/build && make -j$(nproc)
+RUN cd osgQt-Qt4/build && make install
+
+RUN apt-get install libgeos++-dev -y
+
+RUN apt-get install autoconf automake libtool curl -y
+
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/protobuf-cpp-3.19.1.zip
+RUN unzip protobuf-cpp-3.19.1.zip
+RUN cd protobuf-3.19.1 && ./autogen.sh
+RUN cd protobuf-3.19.1 && ./configure
+RUN cd protobuf-3.19.1 && make -j$(nproc)
+#RUN cd protobuf-3.19.1 && make check
+RUN cd protobuf-3.19.1 && make install
+RUN cd protobuf-3.19.1 && ldconfig # refresh shared library cache.
+
+RUN apt-get install libglew-dev libzip-dev -y
+
+RUN git clone --recurse-submodules --depth 1 --branch osgearth-3.7 https://github.com/gwaldron/osgearth.git osgearth-osgearth-3.7/
+RUN mkdir osgearth-osgearth-3.7/build
+RUN cd osgearth-osgearth-3.7/build && cmake -DCMAKE_CXX_FLAGS=-std=c++17 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. #-DOPENGL_PROFILE=GLCORE
+RUN cd osgearth-osgearth-3.7/build && make -j$(nproc)
+RUN cd osgearth-osgearth-3.7/build && make install
+
+#test GLCORE?
+#RUN ldconfig -v /usr/lib64/ /usr/local/
+#RUN updatedb
+#RUN osgearth_version --caps
+#RUN exit 1
+
+RUN wget https://github.com/hpuhr/NemaTode/archive/refs/heads/master.zip
+RUN unzip master.zip
+RUN mkdir NemaTode-master/build
+RUN cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd NemaTode-master/build && make -j$(nproc)
+RUN cd NemaTode-master/build && make install
+
+RUN apt-get install libpcap-dev -y
+
+RUN apt-get install libgeographic-dev -y
+
+RUN wget https://github.com/duckdb/duckdb/releases/download/v1.2.0/libduckdb-linux-amd64.zip
+RUN mkdir libduckdb-linux-amd64
+RUN unzip libduckdb-linux-amd64.zip -d libduckdb-linux-amd64
+RUN cd libduckdb-linux-amd64 && cp *.h /usr/include
+RUN cd libduckdb-linux-amd64 && cp lib* /usr/lib
+
+RUN ldconfig -v /usr/lib64/ /usr/local/
+RUN updatedb
+
+RUN locate libboost
+
+RUN apt install sudo
+
+RUN echo 'sk ALL=(ALL)  ALL' >> /etc/sudoers
+RUN more /etc/sudoers
+
+USER sk
+WORKDIR /app/workspace/compass/docker

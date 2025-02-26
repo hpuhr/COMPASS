@@ -759,10 +759,10 @@ void ReconstructorBase::initChainPredictors()
 
 //int num_threads = std::max(1, tbb::task_scheduler_init::default_num_threads());
 
-#if TBB_VERSION_MAJOR <= 4
+#if TBB_VERSION_MAJOR <= 2018
     int num_threads = tbb::task_scheduler_init::default_num_threads(); // TODO PHIL
 #else
-    int num_threads = oneapi::tbb::info::default_concurrency();
+    int num_threads = tbb::info::default_concurrency();
 #endif
 
     assert (num_threads > 0);

@@ -52,4 +52,4 @@ fi
 
 cd /app/workspace/compass/docker
 
-mv ../COMPASS-x86_64.AppImage ../COMPASS-x86_64_$1.AppImage
+#mv ../COMPASS-x86_64.AppImage ../COMPASS-x86_64_$1.AppImage

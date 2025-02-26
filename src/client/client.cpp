@@ -243,7 +243,7 @@ bool Client::run ()
 {
     // #define TBB_VERSION_MAJOR 4
 
-#if TBB_VERSION_MAJOR <= 4
+#if TBB_VERSION_MAJOR <= 2018
 
     // in appimage
 
@@ -255,7 +255,7 @@ bool Client::run ()
 #else
     int num_threads = oneapi::tbb::info::default_concurrency();
 
-    oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism, num_threads);
+    tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
 
     loginf << "COMPASSClient: started with " << num_threads << " threads";
 #endif

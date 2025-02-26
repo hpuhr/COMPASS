@@ -113,7 +113,7 @@ double secondsSinceMidnightUTC ()
 
 int tbbCurrentThreadID()
 {
-#if TBB_VERSION_MAJOR <= 4
+#if TBB_VERSION_MAJOR <= 2018
     int thread_id = pthread_self(); // TODO PHIL
 #else
     int thread_id = tbb::this_task_arena::current_thread_index();
