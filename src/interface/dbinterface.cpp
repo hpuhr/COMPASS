@@ -1131,7 +1131,7 @@ bool DBInterface::areColumnsNull(const std::string& table_name,
         assert(buffer->has<int>("count"));
 
         NullableVector<int>& count_vec = buffer->get<int>("count");
-        assert (count_vec.size() == 1);
+        assert (count_vec.contentSize() == 1);
 
         cols_null = count_vec.get(0) != 0;
 

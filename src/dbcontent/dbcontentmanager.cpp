@@ -1454,14 +1454,6 @@ std::pair<double, double> DBContentManager::minMaxLongitude() const
 
 /**
  */
-bool DBContentManager::hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const
-{
-    //@TODO
-    return false;
-}
-
-/**
- */
 const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() const
 {
     return data_;

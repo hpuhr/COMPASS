@@ -440,7 +440,7 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
     logdbg << "Buffer: seizeBuffer: end size " << size();
 }
 
-size_t Buffer::size() { return size_; }
+size_t Buffer::size() const { return size_; }
 
 void Buffer::cutToSize(size_t size)
 {
