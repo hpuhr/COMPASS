@@ -104,6 +104,10 @@ public:
     // not in config
     boost::posix_time::ptime date_;
     unsigned int max_network_lines_;
+
+    //import chunk sizes
+    unsigned int chunk_size_jasterix;
+    unsigned int chunk_size_insert;
 };
 
 /**
@@ -220,7 +224,8 @@ protected:
 
     std::vector<std::shared_ptr<ASTERIXJSONMappingJob>>         json_map_jobs_;
     std::vector<std::shared_ptr<ASTERIXPostprocessJob>>         postprocess_jobs_;
-    std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_job_buffers_;
+    std::map<std::string, std::shared_ptr<Buffer>>              accumulated_buffers_;
+    std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_insert_buffers_;
 
     boost::posix_time::ptime last_insert_time_;
 

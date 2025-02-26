@@ -1577,8 +1577,19 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
     bool db_supports_mt = db_instance_->sqlConfiguration().supports_mt;
     bool exec_mt        = db_supports_mt && buffers.size() > 1;
 
-    loginf << "DBInterface: insertDBContent: inserting " << buffers.size() << " object(s) " 
-           << (exec_mt ? "multi-threaded" : "single-threaded");
+    size_t max_size = 0;
+    size_t min_size = std::numeric_limits<size_t>::max();
+    for (const auto& it : buffers)
+    {
+        if (it.second->size() < min_size)
+            min_size = it.second->size();
+        if (it.second->size() > max_size)
+            max_size = it.second->size();
+    }
+
+    logdbg << "DBInterface: insertDBContent: inserting " << buffers.size() << " object(s) " 
+           << (exec_mt ? "multi-threaded" : "single-threaded") 
+           << " min_size " << (buffers.size() ? min_size : 0) << " max_size " << (buffers.size() ? max_size : 0);
 
     auto& dbc_manager = COMPASS::instance().dbContentManager();
 
@@ -1604,8 +1615,6 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
         insert_data.emplace_back(dbcontent.dbTableName(), it.second);
     }
 
-    auto t0 = t.restart();
-
     unsigned int n = insert_data.size();
 
     //create connections for multithreading (if supported)
@@ -1627,8 +1636,6 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
         }
     }
 
-    auto t1 = t.restart();
-
     //insert buffers
     std::vector<Result> results(n, 0);
     if (exec_mt)
@@ -1649,14 +1656,6 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
             results.at(i) = db_instance_->defaultConnection().insertBuffer(d.first, d.second);
         }
     }
-
-    auto t2    = t.restart();
-    auto total = t0 + t1 + t2;
-
-    loginf << "Inserting: t_prepare = " << (double)t0 / (double)total * 100.0 << "%"
-           << ", t_conn = " << (double)t1 / (double)total * 100.0 << "%"
-           << ", t_insert = " << (double)t2 / (double)total * 100.0 << "%"
-           << ", total = " << total << "ms";
 
     //check results
     for (unsigned int i = 0; i < n; ++i)
