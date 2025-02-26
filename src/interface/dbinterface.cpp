@@ -162,8 +162,6 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 
         db_filename_ = filename;
 
-        db_instance_->defaultConnection().updateTableInfo();
-
         if (created_new_db)
         {
             //create some default tables
@@ -369,7 +367,7 @@ void DBInterface::updateTableInfo()
 {
     assert(ready());
 
-    auto res = db_instance_->defaultConnection().updateTableInfo();
+    auto res = db_instance_->updateTableInfo();
 
     if (!res.ok())
     {
@@ -385,7 +383,7 @@ const std::map<std::string, DBTableInfo>& DBInterface::tableInfo()
     assert(ready());
 
     //@TODO: needs protection?
-    return db_instance_->defaultConnection().tableInfo();
+    return db_instance_->tableInfo();
 }
 
 /**
@@ -1586,6 +1584,9 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
 
     std::vector<std::pair<std::string, std::shared_ptr<Buffer>>> insert_data;
 
+    QElapsedTimer t;
+    t.restart();
+
     //init single-threaded
     for (auto& it : buffers)
     {
@@ -1603,22 +1604,30 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
         insert_data.emplace_back(dbcontent.dbTableName(), it.second);
     }
 
+    auto t0 = t.restart();
+
     unsigned int n = insert_data.size();
 
-    //create needed connections (if supported)
-    std::vector<std::unique_ptr<DBInstance::ConnectionWrapper>> connections(n);
-    if (exec_mt)
+    //create connections for multithreading (if supported)
+    std::vector<DBConnectionWrapper> mt_connections;
+    if (db_supports_mt)
     {
+        mt_connections.resize(n);
+
         for (unsigned int i = 0; i < n; ++i)
         {
-            connections[ i ] = db_instance_->newCustomConnection();
-            if (connections[ i ]->hasError())
+            mt_connections[ i ] = db_instance_->concurrentConnection(i);
+            assert(!mt_connections[ i ].isEmpty());
+
+            if (mt_connections[ i ].hasError())
             {
-                logerr << "DBInterface: insertDBContent: creating connection failed: " << connections[ i ]->error();
-                throw runtime_error("DBInterface: insertDBContent: creating connection failed: " + connections[ i ]->error());
+                logerr << "DBInterface: openDBFile: creating mt connection failed: " << mt_connections[ i ].error();
+                throw runtime_error("DBInterface: openDBFile: creating mt connection failed: " + mt_connections[ i ].error());
             }
         }
     }
+
+    auto t1 = t.restart();
 
     //insert buffers
     std::vector<Result> results(n, 0);
@@ -1628,7 +1637,7 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
         tbb::parallel_for(uint(0), n, [ & ](unsigned int i) 
         {
             auto& d = insert_data.at(i);
-            results.at(i) = connections.at(i)->connection().insertBuffer(d.first, d.second);
+            results.at(i) = mt_connections.at(i).connection().insertBuffer(d.first, d.second);
         });
     }
     else
@@ -1641,12 +1650,13 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
         }
     }
 
-    //cleanup connections
-    for (auto& c : connections)
-        c->detach();
+    auto t2    = t.restart();
+    auto total = t0 + t1 + t2;
 
-    db_instance_->destroyCustomConnections();
-    connections.clear();
+    loginf << "Inserting: t_prepare = " << (double)t0 / (double)total * 100.0 << "%"
+           << ", t_conn = " << (double)t1 / (double)total * 100.0 << "%"
+           << ", t_insert = " << (double)t2 / (double)total * 100.0 << "%"
+           << ", total = " << total << "ms";
 
     //check results
     for (unsigned int i = 0; i < n; ++i)

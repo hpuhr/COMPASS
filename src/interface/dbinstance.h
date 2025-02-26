@@ -18,18 +18,21 @@
 #pragma once
 
 #include "dbdefs.h"
+#include "dbtableinfo.h"
 
 #include "result.h"
 
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 #include <boost/thread/mutex.hpp>
 #include <boost/optional.hpp>
 
 class DBInterface;
 class DBConnection;
+class DBConnectionWrapper;
 
 /**
  * A DBInstance is governing a db file/project. 
@@ -40,60 +43,8 @@ class DBConnection;
 class DBInstance
 {
 public:
-    /**
-     */
-    class ConnectionWrapper
-    {
-    public:
-        typedef std::function<void(DBConnection*)> Destroyer;
-
-        ConnectionWrapper(DBInstance* instance,
-                          DBConnection* connection,
-                          const Destroyer& destroyer)
-        :   instance_  (instance  )
-        ,   connection_(connection)
-        ,   destroyer_ (destroyer )
-        {
-            assert(instance_  );
-            assert(connection_);
-            assert(destroyer_ );
-        }
-
-        ConnectionWrapper(const std::string& error)
-        :   error_(error) {}
-
-        virtual ~ConnectionWrapper()
-        {
-            if (connection_ && !detached_)
-                destroyer_(connection_);
-        }
-
-        bool hasError() const { return error_.has_value(); }
-        const std::string& error() { return error_.value(); }
-
-        DBConnection& connection()
-        { 
-            assert(!hasError());
-
-            return *connection_; 
-        }
-
-        void detach()
-        {
-            detached_ = true;
-        }
-
-    private:
-        DBInstance*   instance_   = nullptr;
-        DBConnection* connection_ = nullptr;
-        Destroyer     destroyer_;
-        bool          detached_   = false;
-
-        boost::optional<std::string> error_;
-    };
-
-    typedef std::unique_ptr<ConnectionWrapper> ConnectionWrapperPtr;
-    typedef std::unique_ptr<DBConnection>      ConnectionPtr;
+    typedef std::unique_ptr<DBConnectionWrapper> ConnectionWrapperPtr;
+    typedef std::unique_ptr<DBConnection>        ConnectionPtr;
 
     DBInstance(DBInterface* interface); 
     virtual ~DBInstance();
@@ -111,12 +62,19 @@ public:
     const std::string& dbFilename() const { return db_filename_; }
 
     DBConnection& defaultConnection();
+    DBConnectionWrapper concurrentConnection(size_t tIdx);
     ConnectionWrapperPtr newCustomConnection();
     void destroyCustomConnections();
+    void destroyConcurrentConnections();
 
     size_t numCustomConnections() const;
+    size_t numConcurrentConnections() const;
 
     db::SQLConfig sqlConfiguration(bool verbose = false) const;
+
+    Result updateTableInfo();
+    void printTableInfo() const;
+    const std::map<std::string, DBTableInfo>& tableInfo() const { return table_info_; }
     
 protected:
     DBInterface& interface() { return interface_; }
@@ -141,6 +99,12 @@ private:
     Result cleanupDB(const std::string& db_fn);
 
     ResultT<DBConnection*> createConnection(bool verbose);
+    DBConnectionWrapper createConnectionWrapper(DBConnection* conn, 
+                                                bool verbose, 
+                                                const std::function<void(DBConnection*)>& destroyer);
+    ConnectionWrapperPtr createConnectionWrapperPtr(DBConnection* conn, 
+                                                    bool verbose, 
+                                                    const std::function<void(DBConnection*)>& destroyer);
     void destroyCustomConnection(DBConnection* conn);
 
     DBInterface& interface_;
@@ -148,8 +112,10 @@ private:
     bool         db_open_      = false; 
     bool         db_connected_ = false;
 
-    std::vector<std::unique_ptr<DBConnection>> custom_connections_;
-    std::unique_ptr<DBConnection>              default_connection_;
-    boost::mutex                               connection_mutex_;
-    std::function<void(DBConnection*)>         destroyer_;
+    std::vector<std::unique_ptr<DBConnection>>   custom_connections_;
+    std::map<int, std::unique_ptr<DBConnection>> concurrent_connections_;
+    std::unique_ptr<DBConnection>                default_connection_;
+    boost::mutex                                 connection_mutex_;
+
+    std::map<std::string, DBTableInfo>           table_info_;
 };

@@ -44,6 +44,8 @@ class SQLGenerator;
 class DBConnection
 {
 public:
+    typedef std::map<std::string, DBTableInfo> TableInfo;
+
     DBConnection(DBInstance* instance, bool verbose);
     virtual ~DBConnection();
 
@@ -68,10 +70,9 @@ public:
                        bool table_must_not_exist = true);
     Result deleteTable(const std::string& table_name);
     Result deleteTableContents(const std::string& table_name);
+
+    ResultT<TableInfo> createTableInfo();
     
-    Result updateTableInfo();
-    void printTableInfo();
-    const std::map<std::string, DBTableInfo>& tableInfo() const { return created_tables_; }
     Result insertBuffer(const std::string& table_name, 
                         const std::shared_ptr<Buffer>& buffer,
                         const boost::optional<size_t>& idx_from = boost::optional<size_t>(), 
@@ -138,13 +139,69 @@ private:
     ResultT<DBTableInfo> getColumnList(const std::string& table);
     ResultT<std::vector<std::string>> getTableList();
 
-    DBInstance*                        instance_;
-    std::map<std::string, DBTableInfo> created_tables_;
-    bool                               connected_ = false;
+    DBInstance* instance_;
+    bool        connected_ = false;
 
-    std::shared_ptr<DBScopedReader>    active_reader_;
+    std::shared_ptr<DBScopedReader> active_reader_;
 
     mutable boost::optional<db::PerformanceMetrics> perf_metrics_;
 
     bool verbose_ = false;
+};
+
+/**
+ */
+class DBConnectionWrapper
+{
+public:
+    typedef std::function<void(DBConnection*)> Destroyer;
+
+    DBConnectionWrapper() {}
+
+    DBConnectionWrapper(DBInstance* instance,
+                        DBConnection* connection,
+                        const Destroyer& destroyer)
+    :   instance_  (instance  )
+    ,   connection_(connection)
+    ,   destroyer_ (destroyer )
+    {
+        assert(instance_  );
+        assert(connection_);
+    }
+
+    DBConnectionWrapper(const std::string& error)
+    :   error_(error) {}
+
+    virtual ~DBConnectionWrapper()
+    {
+        if (connection_ && destroyer_)
+            destroyer_(connection_);
+    }
+
+    bool isEmpty() const { return instance_ == nullptr; }
+    bool hasError() const { return error_.has_value(); }
+    const std::string& error() { return error_.value(); }
+
+    DBConnection& connection()
+    { 
+        assert(!hasError());
+        assert(!isEmpty() );
+        assert(connection_);
+
+        return *connection_; 
+    }
+
+    void detach()
+    {
+        destroyer_ = Destroyer();
+    }
+
+private:
+    friend class DBInstance;
+
+    DBInstance*   instance_   = nullptr;
+    DBConnection* connection_ = nullptr;
+    Destroyer     destroyer_;
+
+    boost::optional<std::string> error_;
 };

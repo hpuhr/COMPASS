@@ -131,8 +131,6 @@ void DBConnection::disconnect()
     disconnect_impl();
 
     connected_ = false;
-
-    created_tables_.clear();
 }
 
 /**
@@ -273,9 +271,12 @@ Result DBConnection::createTable(const std::string& table_name,
                                  bool table_must_not_exist)
 {
     assert(connected());
+    assert(instance_);
 
-    auto it = created_tables_.find(table_name);
-    if (it != created_tables_.end())
+    const auto& table_info = instance_->tableInfo();
+
+    auto it = table_info.find(table_name);
+    if (it != table_info.end())
     {
         //@TODO: check properties of existing table against requested one?
         return table_must_not_exist ? Result::failed("table '" + table_name + "' already exists") : Result::succeeded();
@@ -284,9 +285,6 @@ Result DBConnection::createTable(const std::string& table_name,
     auto res = createTableInternal(table_name, column_infos, indices, true);
     if (!res.ok())
         return res;
-
-    //update table info after inserting a new table
-    updateTableInfo();
 
     return Result::succeeded();
 }
@@ -322,8 +320,6 @@ Result DBConnection::deleteTable(const std::string& table_name)
     auto res = execute("DROP TABLE " + table_name + ";");
     if (!res.ok())
         return res;
-
-    updateTableInfo();
 
     return Result::succeeded();
 }
@@ -552,66 +548,6 @@ ResultT<DBTableInfo> DBConnection::getColumnList_impl(const std::string& table)
 }
 
 /**
- * Updates info about tables in the currently opened database.
- */
-Result DBConnection::updateTableInfo()
-{
-    assert(connected());
-
-    created_tables_.clear();
-
-    auto list_res = getTableList();
-    if (!list_res.ok())
-        return list_res;
-    
-    assert(list_res.hasResult());
-
-    for (const auto& tname : list_res.result())
-    {
-        auto table_res = getColumnList(tname);
-        if (!table_res.ok())
-            return table_res;
-
-        assert(table_res.hasResult());
-
-        created_tables_[ tname ] = table_res.result();
-    }
-
-    return Result::succeeded();
-}
-
-/**
- */
-void DBConnection::printTableInfo()
-{
-    assert(connected());
-
-    for (const auto& table : tableInfo())
-    {
-        auto table_name = table.first;
-
-        loginf << "[" << table_name << "]";
-        loginf << "columns: " << table.second.columns().size();
-
-        const auto& tinfo = table.second;
-        for (const auto& ci : tinfo.columns())
-        {
-            std::stringstream ss;
-            ss << "name: " << ci.name() << " ";
-            ss << "dtype_prop: " << (ci.hasPropertyType() ? Property::asString(ci.propertyType()) : "-") << " ";
-            ss << "dtype_db: " << (ci.hasDBType() ? ci.dbType() : "-") << " ";
-            ss << "key: " << ci.key() << " ";
-            ss << "null_allowed: " << ci.nullAllowed() << " ";
-            ss << "comment: " << ci.comment();
-
-            loginf << ss.str();
-        }
-
-        loginf << "";
-    }
-}
-
-/**
  */
 Result DBConnection::startRead(const std::shared_ptr<DBCommand>& select_cmd, 
                                size_t offset, 
@@ -719,4 +655,32 @@ db::PerformanceMetrics DBConnection::stopPerformanceMetrics() const
 bool DBConnection::hasActivePerformanceMetrics() const
 {
     return perf_metrics_.has_value();
+}
+
+/**
+ */
+ResultT<DBConnection::TableInfo> DBConnection::createTableInfo()
+{
+    assert(connected());
+
+    TableInfo table_info;
+
+    auto list_res = getTableList();
+    if (!list_res.ok())
+        return list_res;
+    
+    assert(list_res.hasResult());
+
+    for (const auto& tname : list_res.result())
+    {
+        auto table_res = getColumnList(tname);
+        if (!table_res.ok())
+            return table_res;
+
+        assert(table_res.hasResult());
+
+        table_info[ tname ] = table_res.result();
+    }
+
+    return ResultT<TableInfo>::succeeded(table_info);
 }

@@ -227,7 +227,7 @@ Result DuckDBConnection::insertBuffer_impl(const std::string& table_name,
     //loginf << "configuring table props...";
 
     const auto& buffer_properties = buffer->properties();
-    const auto& created_tables    = tableInfo();
+    const auto& created_tables    = instance()->tableInfo();
 
     PropertyList table_props;
     const PropertyList* properties = nullptr;

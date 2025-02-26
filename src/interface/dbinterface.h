@@ -28,26 +28,23 @@
 #include <memory>
 #include <set>
 
-class COMPASS;
-class Buffer;
-class BufferWriter;
 class DBInstance;
 class DBConnection;
-class QProgressDialog;
-class DBContent;
 class DBResult;
 class DBTableInfo;
-class Job;
+class DBCommand;
+class SQLGenerator;
+
+class COMPASS;
+
+class Buffer;
 class BufferWriter;
+class Job;
 class Sector;
 class SectorLayer;
 class Result;
-class DBCommand;
-
-class SQLGenerator;
-class QWidget;
-
 class DBFFT;
+class DBContent;
 
 namespace dbContent
 {
@@ -55,6 +52,9 @@ namespace dbContent
     class Variable;
     class Target;
 }
+
+class QWidget;
+class QProgressDialog;
 
 static const std::string TABLE_NAME_PROPERTIES = "properties";
 static const std::string TABLE_NAME_SECTORS    = "sectors";
@@ -192,6 +192,8 @@ public:
 protected:
     void loadProperties();
     void reset();
+
+    void recreateConcurrentConnections();
 
     void initDBContentBuffer(DBContent& dbcontent, 
                              std::shared_ptr<Buffer> buffer);

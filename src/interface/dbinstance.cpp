@@ -19,6 +19,8 @@
 #include "dbinterface.h"
 #include "dbconnection.h"
 
+#include "property.h"
+
 #include "logger.h"
 #include "compass.h"
 
@@ -92,6 +94,13 @@ size_t DBInstance::numCustomConnections() const
 }
 
 /**
+ */
+size_t DBInstance::numConcurrentConnections() const
+{
+    return concurrent_connections_.size();
+}
+
+/**
  * Opens the given database file and creates a default connection. 
  * Will close the currently opened database and destroy all open connections.
  */
@@ -120,6 +129,11 @@ Result DBInstance::open(const std::string& file_name)
 
     db_connected_ = true;
 
+    //update table info
+    auto ti_result = updateTableInfo();
+    if (!ti_result.ok())
+        return ti_result;
+
     loginf << "DBInstance: open: opened!";
 
     return Result::succeeded();
@@ -138,14 +152,21 @@ void DBInstance::close()
     loginf << "DBInstance: closing...";
 
     //destroy connections
-    default_connection_.reset();
-    custom_connections_.clear();
+    if (default_connection_)
+    {
+        default_connection_->disconnect();
+        default_connection_.reset();
+    }
+    destroyCustomConnections();
+    destroyConcurrentConnections();
 
     close_impl();
 
     db_open_      = false;
     db_connected_ = false;
     db_filename_  = "";
+
+    table_info_.clear();
 }
 
 /**
@@ -201,38 +222,100 @@ DBConnection& DBInstance::defaultConnection()
 
 /**
  */
+DBConnectionWrapper DBInstance::createConnectionWrapper(DBConnection* conn, 
+                                                        bool verbose, 
+                                                        const std::function<void(DBConnection*)>& destroyer)
+{
+    if (conn == nullptr)
+    {
+        //create new connection
+        auto r = createConnection(verbose);
+
+        if (!r.ok())
+            return DBConnectionWrapper(r.error());
+
+        conn = r.result();
+    }
+
+    assert(conn);
+
+    return DBConnectionWrapper(this, conn, destroyer);
+}
+
+/**
+ */
+DBInstance::ConnectionWrapperPtr DBInstance::createConnectionWrapperPtr(DBConnection* conn, 
+                                                                        bool verbose, 
+                                                                        const std::function<void(DBConnection*)>& destroyer)
+{
+    auto wrapper = createConnectionWrapper(conn, verbose, destroyer);
+    return ConnectionWrapperPtr(new DBConnectionWrapper(wrapper));
+}
+
+/**
+ */
+DBConnectionWrapper DBInstance::concurrentConnection(size_t tIdx)
+{
+    assert(dbReady());
+    assert(sqlConfiguration().supports_mt);
+
+    DBConnectionWrapper wrapper; 
+
+    connection_mutex_.lock();
+
+    auto it = concurrent_connections_.find(tIdx);
+
+    if (it == concurrent_connections_.end())
+    {
+        //create wrapper with new connection
+        wrapper = createConnectionWrapper(nullptr, false, {});
+
+        //no errors => insert
+        if (!wrapper.hasError())
+            concurrent_connections_[ tIdx ].reset(wrapper.connection_);
+    }
+    else
+    {
+        //wrap existing connection
+        wrapper = createConnectionWrapper(it->second.get(), false, {});
+    }
+
+    connection_mutex_.unlock();
+
+    assert(!wrapper.isEmpty());
+
+    return wrapper;
+}
+
+/**
+ */
 DBInstance::ConnectionWrapperPtr DBInstance::newCustomConnection()
 {
     assert(dbReady());
     assert(sqlConfiguration().supports_mt);
 
-    connection_mutex_.lock();
-
-    auto r = createConnection(false);
-
-    if (r.ok())
-        custom_connections_.emplace_back(r.result());
-
-    connection_mutex_.unlock();
-
-    if (!r.ok())
-        return ConnectionWrapperPtr(new ConnectionWrapper(r.error()));
-
-    //try to update table info
-    Result res_ti = r.result()->updateTableInfo();
-    if (!res_ti.ok())
-    {
-        delete r.result();
-        return ConnectionWrapperPtr(new ConnectionWrapper(res_ti.error()));
-    }
-
-    auto destroy_cb = [ this ] (DBConnection* conn)
+    auto d = [ this ] (DBConnection* conn)
     {
         assert(conn);
         this->destroyCustomConnection(conn);
     };
 
-    return ConnectionWrapperPtr(new ConnectionWrapper(this, r.result(), destroy_cb));
+    //create wrapper with new connection
+    auto wrapper_ptr = createConnectionWrapperPtr(nullptr, false, d);
+    assert(wrapper_ptr);
+
+    //errors?
+    if (wrapper_ptr->hasError())
+        return wrapper_ptr;
+
+    connection_mutex_.lock();
+
+    //insert
+    custom_connections_.emplace_back(wrapper_ptr->connection_);
+
+    connection_mutex_.unlock();
+
+    return wrapper_ptr;
 }
 
 /**
@@ -275,6 +358,20 @@ void DBInstance::destroyCustomConnections()
 
 /**
  */
+void DBInstance::destroyConcurrentConnections()
+{
+    connection_mutex_.lock();
+
+    for (auto& cc : concurrent_connections_)
+        cc.second->disconnect();
+    
+    concurrent_connections_.clear();
+
+    connection_mutex_.unlock();
+}
+
+/**
+ */
 ResultT<DBConnection*> DBInstance::createConnection(bool verbose)
 {
     assert(dbOpen());
@@ -283,4 +380,52 @@ ResultT<DBConnection*> DBInstance::createConnection(bool verbose)
     assert(!r.ok() || r.result() != nullptr);
 
     return r;
+}
+
+/**
+ * Updates info about tables in the currently opened database.
+ */
+Result DBInstance::updateTableInfo()
+{
+    assert(dbReady());
+    assert(default_connection_);
+
+    auto res = default_connection_->createTableInfo();
+    if (!res.ok())
+        return res;
+
+    table_info_ = res.result();
+
+    return Result::succeeded();
+}
+
+/**
+ */
+void DBInstance::printTableInfo() const
+{
+    assert(dbReady());
+
+    for (const auto& table : tableInfo())
+    {
+        auto table_name = table.first;
+
+        loginf << "[" << table_name << "]";
+        loginf << "columns: " << table.second.columns().size();
+
+        const auto& tinfo = table.second;
+        for (const auto& ci : tinfo.columns())
+        {
+            std::stringstream ss;
+            ss << "name: " << ci.name() << " ";
+            ss << "dtype_prop: " << (ci.hasPropertyType() ? Property::asString(ci.propertyType()) : "-") << " ";
+            ss << "dtype_db: " << (ci.hasDBType() ? ci.dbType() : "-") << " ";
+            ss << "key: " << ci.key() << " ";
+            ss << "null_allowed: " << ci.nullAllowed() << " ";
+            ss << "comment: " << ci.comment();
+
+            loginf << ss.str();
+        }
+
+        loginf << "";
+    }
 }
