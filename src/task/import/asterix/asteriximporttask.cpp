@@ -87,7 +87,7 @@ ASTERIXImportTaskSettings::ASTERIXImportTaskSettings()
     ,   obfuscate_secondary_info_ (false)
     ,   date_                     ()
     ,   max_network_lines_        (4)
-    ,   chunk_size_jasterix       (4000)
+    ,   chunk_size_jasterix       (2000)
     ,   chunk_size_insert         (50000)
 {
 }
