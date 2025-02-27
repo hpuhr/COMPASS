@@ -170,7 +170,7 @@ RUN locate libboost
 
 RUN apt install sudo
 
-RUN echo '${USER_NAME}  ALL=(ALL)  ALL' >> /etc/sudoers
+RUN echo "${USER_NAME}"'  ALL=(ALL)  ALL' >> /etc/sudoers
 RUN more /etc/sudoers
 
 USER ${USER_NAME} 
