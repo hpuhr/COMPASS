@@ -1575,7 +1575,7 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
     assert(ready());
 
     bool db_supports_mt = db_instance_->sqlConfiguration().supports_mt;
-    bool exec_mt        = db_supports_mt && buffers.size() > 1;
+    bool exec_mt        = insert_mt_ && db_supports_mt && buffers.size() > 1;
 
     size_t max_size = 0;
     size_t min_size = std::numeric_limits<size_t>::max();
@@ -1596,15 +1596,18 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
     struct Job
     {
         Job() = default;
-        Job(const std::string& tname,
+        Job(size_t idx,
+            const std::string& tname,
             const std::shared_ptr<Buffer>& b,
             const boost::optional<size_t>& from,
             const boost::optional<size_t>& to)
-        :   table   (tname)
+        :   index   (idx  )
+        ,   table   (tname)
         ,   buffer  (b    )
         ,   idx_from(from )
         ,   idx_to  (to   ) {}
 
+        size_t                  index;
         std::string             table;
         std::shared_ptr<Buffer> buffer;
         boost::optional<size_t> idx_from;
@@ -1616,6 +1619,7 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
     int chunk_size = -1;
 
     //init single-threaded
+    size_t idx = 0;
     for (auto& it : buffers)
     {
         assert(it.second);
@@ -1629,9 +1633,9 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
         //init buffer
         initDBContentBuffer(dbcontent, it.second);
 
-        if (chunk_size < 1)
+        if (chunk_size < 1 || !exec_mt)
         {
-            insert_jobs.push_back(Job(dbcontent.dbTableName(), it.second, {}, {}));
+            insert_jobs.push_back(Job(idx++, dbcontent.dbTableName(), it.second, {}, {}));
         }
         else
         {
@@ -1643,14 +1647,14 @@ void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Bu
 
                 assert(idx_start < idx_end);
 
-                insert_jobs.push_back(Job(dbcontent.dbTableName(), it.second, idx_start, idx_end - 1));
+                insert_jobs.push_back(Job(idx++, dbcontent.dbTableName(), it.second, idx_start, idx_end - 1));
             }
         }
     }
 
     unsigned int n = insert_jobs.size();
 
-    loginf << "DBInterface: insertDBContent: created " << n << " job(s)";
+    logdbg << "DBInterface: insertDBContent: created " << n << " job(s)";
 
     //create connections for multithreading (if supported)
     std::vector<DBConnectionWrapper> mt_connections;

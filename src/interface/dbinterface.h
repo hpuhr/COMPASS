@@ -218,4 +218,6 @@ protected:
     std::map<std::string, std::set<std::string>> dbcolumn_content_flags_; // dbtable -> dbcols with content
 
     std::string db_filename_;
+
+    bool insert_mt_ = false;
 };
