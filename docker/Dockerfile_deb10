@@ -1,12 +1,16 @@
 FROM debian:10
 
+ENV USER_NAME=sk
+ENV USER_ID=1000
+ENV USER_GROUP_ID=1000
+
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update
 RUN apt-get install -y openssl
 
-RUN groupadd -r someusers --gid=1000 
-RUN useradd -r -p "$(openssl passwd -1 sk)" -g someusers -G sudo --uid=1000 --create-home --shell /bin/bash sk 
+RUN groupadd -r someusers --gid=${USER_GROUP_ID} 
+RUN useradd -r -p "$(openssl passwd -1 ${USER_NAME})" -g someusers -G sudo --uid=${USER_ID} --create-home --shell /bin/bash ${USER_NAME} 
 
 # Update and allow for apt over HTTPS
 RUN apt-get install -y apt-utils
@@ -72,10 +76,10 @@ ENV QT_SELECT=5
 ENV QT_QPA_PLATFORMTHEME=gtk3
 ENV UBUNTU_MENUPROXY=
 #ENV QT_STYLE_OVERRIDE=adwaita
-ENV QTDIR=/qt/${QT_VERSION_A}
-ENV PATH="${QTDIR}/gcc_64/bin:${PATH}"
-ENV QTTOOLDIR="${QTDIR}/gcc_64/bin"
-ENV QTLIBDIR="${QTDIR}/gcc_64/"
+#ENV QTDIR=/qt/${QT_VERSION_A}
+#ENV PATH="${QTDIR}/gcc_64/bin:${PATH}"
+#ENV QTTOOLDIR="${QTDIR}/gcc_64/bin"
+#ENV QTLIBDIR="${QTDIR}/gcc_64/"
 
 RUN apt-get install libgif-dev -y
 RUN apt-get install libjpeg-dev -y
@@ -132,7 +136,7 @@ RUN apt-get install libglew-dev libzip-dev -y
 
 RUN git clone --recurse-submodules --depth 1 --branch osgearth-3.7 https://github.com/gwaldron/osgearth.git osgearth-osgearth-3.7/
 RUN mkdir osgearth-osgearth-3.7/build
-RUN cd osgearth-osgearth-3.7/build && cmake -DCMAKE_CXX_FLAGS=-std=c++17 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. #-DOPENGL_PROFILE=GLCORE
+RUN cd osgearth-osgearth-3.7/build && cmake -DCMAKE_CXX_STANDARD=17 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. #-DOPENGL_PROFILE=GLCORE
 RUN cd osgearth-osgearth-3.7/build && make -j$(nproc)
 RUN cd osgearth-osgearth-3.7/build && make install
 
@@ -166,8 +170,8 @@ RUN locate libboost
 
 RUN apt install sudo
 
-RUN echo 'sk ALL=(ALL)  ALL' >> /etc/sudoers
+RUN echo '${USER_NAME}  ALL=(ALL)  ALL' >> /etc/sudoers
 RUN more /etc/sudoers
 
-USER sk
+USER ${USER_NAME} 
 WORKDIR /app/workspace/compass/docker
