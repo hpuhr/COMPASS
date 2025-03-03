@@ -38,6 +38,7 @@
 #include <QSurfaceFormat>
 #include <QSplashScreen>
 #include <QStyleFactory>
+#include <QThreadPool>
 
 #include "util/tbbhack.h"
 
@@ -243,22 +244,32 @@ bool Client::run ()
 {
     // #define TBB_VERSION_MAJOR 4
 
+    int num_threads = 0;
+
 #if TBB_VERSION_MAJOR <= 2018
 
     // in appimage
 
-    int num_threads = tbb::task_scheduler_init::default_num_threads();;
+    num_threads = tbb::task_scheduler_init::default_num_threads();;
 
     loginf << "COMPASSClient: started with " << num_threads << " threads (tbb old)";
     tbb::task_scheduler_init init {num_threads};
 
 #else
-    int num_threads = oneapi::tbb::info::default_concurrency();
+    num_threads = oneapi::tbb::info::default_concurrency();
 
     tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
 
     loginf << "COMPASSClient: started with " << num_threads << " threads";
 #endif
+
+    loginf << "COMPASSClient: qt ideal thread count " << QThread::idealThreadCount()
+           << " max thread count " << QThreadPool::globalInstance()->maxThreadCount()
+           << " setting num_threads " << num_threads;
+
+    QThreadPool::globalInstance()->setMaxThreadCount(num_threads);
+
+    //axThreadCount() is QThread::idealThreadCount().
 
     //    unsigned int data_size = 10e6;
     //    tbb::parallel_for(uint(0), data_size, [&](unsigned int cnt) {
