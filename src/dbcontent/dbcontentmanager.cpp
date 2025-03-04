@@ -741,7 +741,8 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
 
     insert_job_ = make_shared<DBContentInsertDBJob>(COMPASS::instance().dbInterface(), *this, data, false);
 
-    connect(insert_job_.get(), &DBContentInsertDBJob::doneSignal, this, &DBContentManager::finishInserting, Qt::QueuedConnection);
+    connect(insert_job_.get(), &DBContentInsertDBJob::doneSignal,
+            this, &DBContentManager::finishInserting, Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(insert_job_);
 }

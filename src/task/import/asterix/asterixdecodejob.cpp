@@ -207,6 +207,9 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
         }
     }
 
+    while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out
+        QThread::msleep(1);
+
     {
         boost::mutex::scoped_lock locker(extracted_data_mutex_);
 
@@ -224,9 +227,6 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
     emit decodedASTERIXSignal();
 
     logdbg << "ASTERIXDecodeJob: fileJasterixCallback: wait " << signal_count_;
-
-    while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out
-        QThread::msleep(1);
 
     //QThread::msleep(10);
 
