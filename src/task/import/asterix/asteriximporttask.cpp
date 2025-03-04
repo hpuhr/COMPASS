@@ -1382,9 +1382,9 @@ void ASTERIXImportTask::insertData()
 
     //insert_start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    //dbcont_manager.insertData(job_buffers);
+    dbcont_manager.insertData(job_buffers);
 
-    insertDoneSlot();
+    //insertDoneSlot();
 
     checkAllDone();
 
