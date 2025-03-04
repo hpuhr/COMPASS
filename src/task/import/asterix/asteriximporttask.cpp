@@ -760,6 +760,8 @@ void ASTERIXImportTask::stop()
 */
 void ASTERIXImportTask::run() // , bool create_mapping_stubs
 {
+    loginf << "ASTERIXImportTask: run";
+
     assert (!running_);
 
     if (source_.isNetworkType())
@@ -847,6 +849,8 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
             &ASTERIXImportTask::addDecodedASTERIXSlot, Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(decode_job_);
+
+    loginf << "ASTERIXImportTask: run: done";
 
     return;
 }

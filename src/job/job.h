@@ -33,7 +33,7 @@
  *
  * Important: The Job and the contained data must be deleted in the callback functions.
  */
-class Job : public QObject, public QRunnable
+class Job : public QObject
 {
     Q_OBJECT
   signals:
@@ -42,7 +42,7 @@ class Job : public QObject, public QRunnable
 
   public:
     /// @brief Constructor
-    Job(const std::string& name) : name_(name) { setAutoDelete(false); }
+    Job(const std::string& name) : name_(name) { /*setAutoDelete(false);*/ }
     /// @brief Destructor
     virtual ~Job() {}
 

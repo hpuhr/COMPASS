@@ -30,15 +30,16 @@ using namespace Utils;
  */
 void JobManager::AsyncJob::exec()
 {
-    f    = std::async(std::launch::async, [ this ] { this->job->run(); return true; });
-    runs = true;
+    future_    = std::async(std::launch::async, [ this ] { this->job_->run(); return true; });
+    is_running_ = true;
 }
 
 /**
  */
 bool JobManager::AsyncJob::done() const
 {
-    return f.valid();
+    assert (job_);
+    return job_->done(); //future_.valid()
 }
 
 /**
@@ -61,7 +62,7 @@ void JobManager::addBlockingJob(std::shared_ptr<Job> job)
     logdbg << "JobManager: addJob: " << job->name() << " num " << blocking_jobs_.unsafe_size();
 
     std::shared_ptr<AsyncJob> j(new AsyncJob);
-    j->job = job;
+    j->job_ = job;
 
     blocking_jobs_.push(j);  // only add, do not start
 }
@@ -73,7 +74,7 @@ void JobManager::addNonBlockingJob(std::shared_ptr<Job> job)
     logdbg << "JobManager: addNonBlockingJob: " << job->name() << " num " << non_blocking_jobs_.unsafe_size();
 
     std::shared_ptr<AsyncJob> j(new AsyncJob);
-    j->job = job;
+    j->job_ = job;
 
     non_blocking_jobs_.push(j);  // add and start
     j->exec();
@@ -84,7 +85,7 @@ void JobManager::addNonBlockingJob(std::shared_ptr<Job> job)
 void JobManager::addDBJob(std::shared_ptr<Job> job)
 {
     std::shared_ptr<AsyncJob> j(new AsyncJob);
-    j->job = job;
+    j->job_ = job;
 
     queued_db_jobs_.push(j);
 
@@ -181,12 +182,12 @@ void JobManager::handleBlockingJobs()
 //                    active_blocking_job_->emitObsolete();
 //            }
 
-            logdbg << "JobManager: run: flushing blocking done job";
+            loginf << "JobManager: run: flushing blocking done job";
 
             if (!stop_requested_)
             {
-                active_blocking_job_->job->emitDone();
-                logdbg << "JobManager: run: done blocking job emitted " + active_blocking_job_->job->name();
+                active_blocking_job_->job_->emitDone();
+                loginf << "JobManager: run: blocking job " << active_blocking_job_->job_->name() << " emitted done ";
             }
 
             active_blocking_job_ = nullptr;
@@ -197,7 +198,9 @@ void JobManager::handleBlockingJobs()
     {
         if (blocking_jobs_.try_pop(active_blocking_job_))
         {
-            assert(!active_blocking_job_->runs && !active_blocking_job_->job->started());
+            loginf << "JobManager: run: running blocking job";
+
+            assert(!active_blocking_job_->is_running_ && !active_blocking_job_->job_->started());
             active_blocking_job_->exec();
 
             //changed_ = true;
@@ -228,8 +231,8 @@ void JobManager::handleNonBlockingJobs()
 
                 if (!stop_requested_)
                 {
-                    active_non_blocking_job_->job->emitDone();
-                    logdbg << "JobManager: run: done non-blocking job emitted " + active_non_blocking_job_->job->name();
+                    active_non_blocking_job_->job_->emitDone();
+                    logdbg << "JobManager: run: done non-blocking job emitted " + active_non_blocking_job_->job_->name();
                 }
 
                 active_non_blocking_job_ = nullptr;
@@ -275,8 +278,8 @@ void JobManager::handleDBJobs()
 
             if (!stop_requested_)
             {
-                active_db_job_->job->emitDone();
-                logdbg << "JobManager: run: done non-blocking job emitted " + active_db_job_->job->name();
+                active_db_job_->job_->emitDone();
+                logdbg << "JobManager: run: done non-blocking job emitted " + active_db_job_->job_->name();
             }
 
             active_db_job_ = nullptr;
@@ -304,25 +307,25 @@ void JobManager::shutdown()
     stop_requested_ = true;
 
     if (active_db_job_)
-        active_db_job_->job->setObsolete();
+        active_db_job_->job_->setObsolete();
 
     for (auto job_it = queued_db_jobs_.unsafe_begin(); job_it != queued_db_jobs_.unsafe_end();
          ++job_it)
-        (*job_it)->job->setObsolete();
+        (*job_it)->job_->setObsolete();
 
     if (active_blocking_job_)
-        active_blocking_job_->job->setObsolete();
+        active_blocking_job_->job_->setObsolete();
 
     for (auto job_it = blocking_jobs_.unsafe_begin(); job_it != blocking_jobs_.unsafe_end();
          ++job_it)
-        (*job_it)->job->setObsolete();
+        (*job_it)->job_->setObsolete();
 
     if (active_non_blocking_job_)
-        active_non_blocking_job_->job->setObsolete();
+        active_non_blocking_job_->job_->setObsolete();
 
     for (auto job_it = non_blocking_jobs_.unsafe_begin(); job_it != non_blocking_jobs_.unsafe_end();
          ++job_it)
-        (*job_it)->job->setObsolete();
+        (*job_it)->job_->setObsolete();
 
     loginf << "JobManager: shutdown: waiting on jobs to quit";
 

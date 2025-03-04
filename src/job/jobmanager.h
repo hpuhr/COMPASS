@@ -47,9 +47,9 @@ public:
         void exec();
         bool done() const;
 
-        std::shared_ptr<Job> job;
-        std::future<bool>    f;
-        bool                 runs = false;
+        std::shared_ptr<Job> job_;
+        std::future<bool>    future_;
+        bool                 is_running_ = false;
     };
 
     typedef std::shared_ptr<AsyncJob> AsyncJobPtr;
