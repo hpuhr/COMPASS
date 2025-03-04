@@ -8,6 +8,8 @@
 
 #include <exception>
 
+#include <QThread>
+
 using namespace std;
 using namespace Utils;
 using namespace nlohmann;
@@ -30,7 +32,7 @@ ASTERIXJSONMappingJob::~ASTERIXJSONMappingJob()
 
 void ASTERIXJSONMappingJob::run()
 {
-    logdbg << "ASTERIXJSONMappingJob: run";
+    loginf << "ASTERIXJSONMappingJob: " << this << " run on thread " << QThread::currentThreadId();
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 

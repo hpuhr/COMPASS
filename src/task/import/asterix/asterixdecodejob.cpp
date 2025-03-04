@@ -228,7 +228,7 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
     while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out
         QThread::msleep(1);
 
-    QThread::msleep(10);
+    //QThread::msleep(10);
 
     logdbg << "ASTERIXDecodeJob: fileJasterixCallback: waiting done " << signal_count_;
 }

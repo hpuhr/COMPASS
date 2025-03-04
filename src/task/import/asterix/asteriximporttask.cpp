@@ -997,6 +997,8 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     connect(json_map_job.get(), &ASTERIXJSONMappingJob::doneSignal, this,
             &ASTERIXImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
 
+    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: queueing in new mapping job, main thread is " << QThread::currentThreadId();
+
     JobManager::instance().addNonBlockingJob(json_map_job);
 
     //std::vector<std::unique_ptr<nlohmann::json>> data = std::move(extracted_data);
@@ -1383,8 +1385,6 @@ void ASTERIXImportTask::insertData()
     //insert_start_time_ = boost::posix_time::microsec_clock::local_time();
 
     dbcont_manager.insertData(job_buffers);
-
-    insertDoneSlot();
 
     checkAllDone();
 
