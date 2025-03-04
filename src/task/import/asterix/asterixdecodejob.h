@@ -23,6 +23,7 @@
 #include "json.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread/mutex.hpp>
 
 class ASTERIXImportTask;
 class ASTERIXImportTaskSettings;
@@ -102,6 +103,7 @@ private:
     size_t num_errors_ {0};
 
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data_;
+    boost::mutex extracted_data_mutex_;
 
     std::map<unsigned int, size_t> category_counts_;
 

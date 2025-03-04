@@ -66,13 +66,19 @@ void DBContentInsertDBJob::run()
 
     logdbg << "DBContentInsertDBJob: run: writing " << buffers_.size() << " object(s)";
 
+    unsigned int buffer_cnt {0};
+
+    for (auto& buf_it : buffers_)
+        buffer_cnt += buf_it.second->size();
+
     db_interface_.insertDBContent(buffers_);
 
     loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
 
-    loginf << "DBContentInsertDBJob: run: writing buffers done (" << doubleToStringPrecision(diff.total_milliseconds(), 2) << " ms).";
+    loginf << "DBContentInsertDBJob: run: writing buffers done, size " << buffer_cnt
+           << " (" << doubleToStringPrecision(diff.total_milliseconds(), 2) << " ms).";
 
     done_ = true;
 }

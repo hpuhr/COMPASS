@@ -112,17 +112,13 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     if (num_records == 0)
     {
-        loginf << "ASTERIXDecodeJob: fileJasterixCallback: omitting zero data";
+        loginf << "ASTERIXDecodeJob: fileJasterixCallback: omitting zero data in '"
+               << data->dump(2) << "'";
         return;
     }
 
-    assert(!extracted_data_.size());
-
-    extracted_data_.emplace_back(std::move(data));
-
-    assert(extracted_data_.size());
-    assert(extracted_data_.back());
-    assert(extracted_data_.back()->is_object());
+    assert(data);
+    assert(data->is_object());
 
     num_frames_  = num_frames;
     num_records_ = num_records;
@@ -146,12 +142,12 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     if (settings_.current_file_framing_ == "")
     {
-        assert(extracted_data_.back()->contains("data_blocks"));
-        assert(extracted_data_.back()->at("data_blocks").is_array());
+        assert(data->contains("data_blocks"));
+        assert(data->at("data_blocks").is_array());
 
         std::vector<std::string> keys{"content", "records"};
 
-        for (json& data_block : extracted_data_.back()->at("data_blocks"))
+        for (json& data_block : data->at("data_blocks"))
         {
             if (!data_block.contains("category"))
             {
@@ -174,12 +170,12 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
     }
     else
     {
-        assert(extracted_data_.back()->contains("frames"));
-        assert(extracted_data_.back()->at("frames").is_array());
+        assert(data->contains("frames"));
+        assert(data->at("frames").is_array());
 
         std::vector<std::string> keys{"content", "records"};
 
-        for (json& frame : extracted_data_.back()->at("frames"))
+        for (json& frame : data->at("frames"))
         {
             if (!frame.contains("content"))  // frame with errors
                 continue;
@@ -211,6 +207,16 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
         }
     }
 
+    {
+        boost::mutex::scoped_lock locker(extracted_data_mutex_);
+
+        //assert(!extracted_data_.size());
+
+        extracted_data_.emplace_back(std::move(data));
+
+        //assert(extracted_data_.size());
+    }
+
     ++signal_count_;
 
     logdbg << "ASTERIXDecodeJob: fileJasterixCallback: emitting signal " << signal_count_;
@@ -221,6 +227,8 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     while (!obsolete_ && extracted_data_.size())  // block decoder until extracted records have been moved out
         QThread::msleep(1);
+
+    QThread::msleep(10);
 
     logdbg << "ASTERIXDecodeJob: fileJasterixCallback: waiting done " << signal_count_;
 }
@@ -342,6 +350,8 @@ std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const
 std::vector<std::unique_ptr<nlohmann::json>> ASTERIXDecodeJob::extractedData()
 {
     logdbg << "ASTERIXDecodeJob: extractedData: signal cnt " << signal_count_;
+
+    boost::mutex::scoped_lock locker(extracted_data_mutex_);
 
     return std::move(extracted_data_);
 }

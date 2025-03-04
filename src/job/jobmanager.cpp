@@ -102,10 +102,10 @@ void JobManager::run()
 //        if (!stop_requested_ && changed_ && !hasDBJobs())
 //            emit databaseIdle();
 
-        if (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        else
-            msleep(1);
+        // if (QCoreApplication::hasPendingEvents())
+        //     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        // else
+        msleep(1);
 
 //        if ((boost::posix_time::microsec_clock::local_time() - log_time_).total_seconds() > 1)
 //        {

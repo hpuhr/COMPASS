@@ -100,6 +100,8 @@ void ASTERIXPostprocessJob::run()
 
     started_ = true;
 
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
     doADSBTimeProcessing();
 
     if (override_tod_active_)
@@ -118,6 +120,23 @@ void ASTERIXPostprocessJob::run()
 
     if (do_obfuscate_secondary_info_)
         doObfuscate();
+
+    auto t_diff = boost::posix_time::microsec_clock::local_time() - start_time;
+
+    unsigned int num_processed = 0;
+
+    for (auto& buf_it : buffers_)
+    {
+        if (buf_it.second && buf_it.second->size())
+            num_processed += buf_it.second->size();
+    }
+
+    float num_secs =  t_diff.total_milliseconds() ? t_diff.total_milliseconds() / 1000.0 : 10E-6;
+
+    loginf << "ASTERIXPostprocessJob: run: done: took "
+           << String::timeStringFromDouble(num_secs, true)
+           << " full " << String::timeStringFromDouble(num_secs, true)
+           << " " << ((float) num_processed) / num_secs << " rec/s";
 
     done_ = true;
 }

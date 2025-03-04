@@ -177,6 +177,9 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id,
     connect(&source_, &ASTERIXImportSource::changed, this, &ASTERIXImportTask::sourceChanged);
     connect(&source_, &ASTERIXImportSource::fileUsageChanged, this, &ASTERIXImportTask::sourceUsageChanged);
 
+    registerParameter("max_packets_in_processing", &settings_.max_packets_in_processing_,
+                      settings_.max_packets_in_processing_);
+
     logdbg << "ASTERIXImportTask: constructor: thread " << QThread::currentThreadId()
            << " main " << QApplication::instance()->thread()->currentThreadId();
 }
@@ -714,6 +717,8 @@ void ASTERIXImportTask::stop()
     for (auto& job_it : json_map_jobs_)
         job_it->setObsolete();
 
+    //json_map_futures_.clear();
+
     for (auto& job_it : postprocess_jobs_)
         job_it->setObsolete();
 
@@ -887,7 +892,7 @@ void ASTERIXImportTask::decodeASTERIXObsoleteSlot()
 */
 void ASTERIXImportTask::addDecodedASTERIXSlot()
 {
-    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot";
+    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot";
 
     if (stopped_)
     {
@@ -911,7 +916,8 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         if (maxLoadReached())
         // break if too many packets in process, this slot is called again from insertDoneSlot or postProcessDone
         {
-            logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached";
+            loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached, map futures "
+                   << json_map_jobs_.size() << " queued insert buffers " << queued_insert_buffers_.size();
             return;
         }
     }
@@ -992,6 +998,124 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
             &ASTERIXImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
 
     JobManager::instance().addNonBlockingJob(json_map_job);
+
+    //std::vector<std::unique_ptr<nlohmann::json>> data = std::move(extracted_data);
+    //auto data_record_keys = keys;
+
+    // json_map_futures_.push_back(std::async(std::launch::async,
+    //                              [this, &parsers = schema_->parsers()]
+    //                              (std::vector<std::unique_ptr<nlohmann::json>> data,
+    //                               const std::vector<std::string>& data_record_keys)
+    //                              -> std::map<std::string, std::shared_ptr<Buffer>> {
+    //     {
+    //         try
+    //         {
+    //             boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    //             std::map<std::string, std::shared_ptr<Buffer>> buffers;
+
+    //             string dbcontent_name;
+
+    //             for (const auto& parser_it : parsers)
+    //             {
+    //                 dbcontent_name = parser_it.second->dbContentName();
+
+    //                 if (!buffers.count(dbcontent_name))
+    //                     buffers[dbcontent_name] = parser_it.second->getNewBuffer();
+    //                 else
+    //                     parser_it.second->appendVariablesToBuffer(*buffers.at(dbcontent_name));
+    //             }
+
+    //             auto process_lambda = [&parsers, &buffers]
+    //                 (nlohmann::json& record) {
+    //                 //loginf << "UGA '" << record.dump(4) << "'";
+
+    //                 unsigned int category{0};
+
+    //                 if (!record.contains("category"))
+    //                 {
+    //                     logerr << "ASTERIXJSONMappingJob: run: record without category '" << record.dump(4) << "', skipping";
+    //                     return;
+    //                 }
+
+    //                 assert (record.contains("category"));
+
+    //                 category = record.at("category");
+
+    //                 bool parsed{false};
+
+    //                 if (!parsers.count(category))
+    //                     return;
+
+    //                 const unique_ptr<ASTERIXJSONParser>& parser = parsers.at(category);
+
+    //                 string dbcontent_name = parser->dbContentName();
+
+    //                 logdbg << "ASTERIXJSONMappingJob: run: mapping json: cat " << category;
+
+    //                 std::shared_ptr<Buffer>& buffer = buffers.at(dbcontent_name);
+    //                 assert(buffer);
+
+    //                 try
+    //                 {
+    //                     logdbg << "ASTERIXJSONMappingJob: run: obj " << dbcontent_name << " parsing JSON";
+
+    //                     parsed = parser->parseJSON(record, *buffer);
+
+    //                     logdbg << "ASTERIXJSONMappingJob: run: obj " << dbcontent_name << " done";
+    //                 }
+    //                 catch (exception& e)
+    //                 {
+    //                     logerr << "ASTERIXJSONMappingJob: run: caught exception '" << e.what() << "' in \n'"
+    //                            << record.dump(4) << "' parser dbo " << dbcontent_name;
+
+    //                     return;
+    //                 }
+
+    //             };
+
+    //             for (auto& data_slice : data)
+    //             {
+    //                 if (data_slice)
+    //                 {
+    //                     logdbg << "ASTERIXJSONMappingJob: run: applying JSON function";
+    //                     JSON::applyFunctionToValues(*data_slice.get(), data_record_keys, data_record_keys.begin(),
+    //                                                 process_lambda, false);
+    //                 }
+    //             }
+
+    //             std::map<std::string, std::shared_ptr<Buffer>> not_empty_buffers;
+
+    //             logdbg << "ASTERIXJSONMappingJob: run: counting buffer sizes";
+    //             for (auto& buf_it : buffers)
+    //             {
+    //                 if (buf_it.second && buf_it.second->size())
+    //                     not_empty_buffers[buf_it.first] = buf_it.second;
+    //             }
+    //             buffers = not_empty_buffers;  // cleaner
+
+    //             //data.clear();
+
+    //             auto t_diff = boost::posix_time::microsec_clock::local_time() - start_time;
+    //             float num_secs =  t_diff.total_milliseconds() ? t_diff.total_milliseconds() / 1000.0 : 10E-6;
+
+    //             loginf << "ASTERIXJSONMappingJob: run: done: took "
+    //                    << String::timeStringFromDouble(num_secs, true)
+    //                    << " full " << String::timeStringFromDouble(num_secs, true);
+
+    //             logdbg << "ASTERIXJSONMappingJob: run";
+
+    //             QMetaObject::invokeMethod(this, "mapJSONDoneSlot", Qt::QueuedConnection);
+
+    //             return buffers;
+    //         }
+    //         catch (const std::exception& e)
+    //         {
+    //             loginf << "ASTERIXImportTask: mapping async threw exception '" << e.what() << "'";
+    //             assert (false);
+    //         }
+    //     }}, std::move(extracted_data), std::move(keys)));
+
 }
 
 /**
@@ -1179,7 +1303,7 @@ void ASTERIXImportTask::postprocessDoneSlot()
 
             //...and restart decoding
             if (decode_job_ && decode_job_->hasData())
-                addDecodedASTERIXSlot();
+                QMetaObject::invokeMethod(this, "addDecodedASTERIXSlot", Qt::QueuedConnection);
         }
 
         if (!insert_active_ && 
@@ -1258,7 +1382,9 @@ void ASTERIXImportTask::insertData()
 
     //insert_start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    dbcont_manager.insertData(job_buffers);
+    //dbcont_manager.insertData(job_buffers);
+
+    insertDoneSlot();
 
     checkAllDone();
 
@@ -1307,7 +1433,7 @@ void ASTERIXImportTask::insertDoneSlot()
     if (decode_job_ && decode_job_->hasData())
     {
         logdbg << "ASTERIXImportTask: insertDoneSlot: starting decoding of next chunk";
-        addDecodedASTERIXSlot(); // load next chunk
+        QMetaObject::invokeMethod(this, "addDecodedASTERIXSlot", Qt::QueuedConnection); // load next chunk
     }
 
     checkAllDone();
@@ -1421,7 +1547,8 @@ void ASTERIXImportTask::checkAllDone()
 */
 bool ASTERIXImportTask::maxLoadReached()
 {
-    return num_packets_in_processing_ > 3;
+    return json_map_jobs_.size() > settings_.max_packets_in_processing_
+        || queued_insert_buffers_.size() > settings_.max_packets_in_processing_;
 }
 
 /**

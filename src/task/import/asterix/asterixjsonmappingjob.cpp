@@ -32,6 +32,8 @@ void ASTERIXJSONMappingJob::run()
 {
     logdbg << "ASTERIXJSONMappingJob: run";
 
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
     started_ = true;
 
     string dbcontent_name;
@@ -137,6 +139,14 @@ void ASTERIXJSONMappingJob::run()
     data_.clear();
 
     done_ = true;
+
+    auto t_diff = boost::posix_time::microsec_clock::local_time() - start_time;
+    float num_secs =  t_diff.total_milliseconds() ? t_diff.total_milliseconds() / 1000.0 : 10E-6;
+
+    loginf << "ASTERIXJSONMappingJob: run: done: took "
+           << String::timeStringFromDouble(num_secs, true)
+           << " full " << String::timeStringFromDouble(num_secs, true)
+           << " " << ((float) num_created_+num_not_mapped_) / num_secs << " rec/s";
 
     logdbg << "ASTERIXJSONMappingJob: run: done: mapped " << num_created_ << " skipped "
            << num_not_mapped_;

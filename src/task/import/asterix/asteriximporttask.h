@@ -108,6 +108,9 @@ public:
     //import chunk sizes
     unsigned int chunk_size_jasterix;
     unsigned int chunk_size_insert;
+
+    unsigned int max_packets_in_processing_{3};
+
 };
 
 /**
@@ -223,6 +226,7 @@ protected:
     std::unique_ptr<ASTERIXDecoderBase>       decoder_;
 
     std::vector<std::shared_ptr<ASTERIXJSONMappingJob>>         json_map_jobs_;
+    //std::vector<std::future<std::map<std::string, std::shared_ptr<Buffer>>>> json_map_futures_;
     std::vector<std::shared_ptr<ASTERIXPostprocessJob>>         postprocess_jobs_;
     std::map<std::string, std::shared_ptr<Buffer>>              accumulated_buffers_;
     std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_insert_buffers_;
