@@ -24,6 +24,8 @@
 #include "logger.h"
 #include "compass.h"
 
+#define PROTECT_CONNECTION
+
 /**
  */
 DBInstance::DBInstance(DBInterface* interface)
@@ -261,26 +263,28 @@ DBConnectionWrapper DBInstance::concurrentConnection(size_t tIdx)
 
     DBConnectionWrapper wrapper; 
 
-    connection_mutex_.lock();
-
-    auto it = concurrent_connections_.find(tIdx);
-
-    if (it == concurrent_connections_.end())
     {
-        //create wrapper with new connection
-        wrapper = createConnectionWrapper(nullptr, false, {});
+        #ifdef PROTECT_CONNECTION
+        boost::mutex::scoped_lock locker(connection_mutex_);
+        #endif
 
-        //no errors => insert
-        if (!wrapper.hasError())
-            concurrent_connections_[ tIdx ].reset(wrapper.connection_);
-    }
-    else
-    {
-        //wrap existing connection
-        wrapper = createConnectionWrapper(it->second.get(), false, {});
-    }
+        auto it = concurrent_connections_.find(tIdx);
 
-    connection_mutex_.unlock();
+        if (it == concurrent_connections_.end())
+        {
+            //create wrapper with new connection
+            wrapper = createConnectionWrapper(nullptr, false, {});
+
+            //no errors => insert
+            if (!wrapper.hasError())
+                concurrent_connections_[ tIdx ].reset(wrapper.connection_);
+        }
+        else
+        {
+            //wrap existing connection
+            wrapper = createConnectionWrapper(it->second.get(), false, {});
+        }
+    }
 
     assert(!wrapper.isEmpty());
 
@@ -308,12 +312,14 @@ DBInstance::ConnectionWrapperPtr DBInstance::newCustomConnection()
     if (wrapper_ptr->hasError())
         return wrapper_ptr;
 
-    connection_mutex_.lock();
+    {
+        #ifdef PROTECT_CONNECTION
+        boost::mutex::scoped_lock locker(connection_mutex_);
+        #endif
 
-    //insert
-    custom_connections_.emplace_back(wrapper_ptr->connection_);
-
-    connection_mutex_.unlock();
+        //insert
+        custom_connections_.emplace_back(wrapper_ptr->connection_);
+    }
 
     return wrapper_ptr;
 }
@@ -324,50 +330,52 @@ void DBInstance::destroyCustomConnection(DBConnection* conn)
 {
     assert(conn);
 
-    connection_mutex_.lock();
-
-    auto it = std::find_if(custom_connections_.begin(), custom_connections_.end(), 
-        [ & ] (const ConnectionPtr& c) { return c.get() == conn; });
-    
-    bool found = (it != custom_connections_.end());
-    if (found)
     {
-        it->get()->disconnect();
-        custom_connections_.erase(it);
+        #ifdef PROTECT_CONNECTION
+        boost::mutex::scoped_lock locker(connection_mutex_);
+        #endif
+
+        auto it = std::find_if(custom_connections_.begin(), custom_connections_.end(), 
+            [ & ] (const ConnectionPtr& c) { return c.get() == conn; });
+        
+        bool found = (it != custom_connections_.end());
+        if (found)
+        {
+            it->get()->disconnect();
+            custom_connections_.erase(it);
+        }
+
+        //connection already destroyed? => doom
+        assert(found);
     }
-
-    connection_mutex_.unlock();
-
-    //connection already destroyed? => doom
-    assert(found);
 }
 
 /**
  */
 void DBInstance::destroyCustomConnections()
 {
-    connection_mutex_.lock();
+    #ifdef PROTECT_CONNECTION
+    boost::mutex::scoped_lock locker(connection_mutex_);
+    #endif
 
     for (auto& cc : custom_connections_)
         cc->disconnect();
     
     custom_connections_.clear();
-
-    connection_mutex_.unlock();
 }
 
 /**
  */
 void DBInstance::destroyConcurrentConnections()
 {
-    connection_mutex_.lock();
+    #ifdef PROTECT_CONNECTION
+    boost::mutex::scoped_lock locker(connection_mutex_);
+    #endif
 
     for (auto& cc : concurrent_connections_)
         cc.second->disconnect();
     
     concurrent_connections_.clear();
-
-    connection_mutex_.unlock();
 }
 
 /**

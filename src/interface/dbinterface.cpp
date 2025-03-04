@@ -71,6 +71,8 @@ const string PROP_LATITUDE_MAX_NAME  {"latitude_max"};
 const string PROP_LONGITUDE_MIN_NAME {"longitude_min"};
 const string PROP_LONGITUDE_MAX_NAME {"longitude_max"};
 
+#define PROTECT_INSTANCE
+
 /**
  */
 DBInterface::DBInterface(string class_id, 
@@ -228,8 +230,11 @@ void DBInterface::closeDBFile()
     if (properties_loaded_)  // false if database not opened
         saveProperties();
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         assert (db_instance_);
         db_instance_->close();
 
@@ -252,8 +257,11 @@ void DBInterface::exportDBFile(const std::string& filename)
 
     Result export_result;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         export_result = db_instance_->defaultConnection().exportDB(filename);
     }
 
@@ -406,8 +414,11 @@ void DBInterface::createTable(const DBContent& object)
         return;
     }
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         string statement = sqlGenerator().getCreateTableStatement(object);
 
         execute(statement);
@@ -444,8 +455,11 @@ unsigned long DBInterface::getMaxRecordNumber(DBContent& object)
 
     unsigned long max_rn = 0;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         shared_ptr<DBCommand> command = sqlGenerator().getMaxULongIntValueCommand(object.dbTableName(),
                                                                                 rec_num_var.dbColumnName());
         shared_ptr<DBResult> result = execute(*command);
@@ -489,8 +503,11 @@ unsigned int DBInterface::getMaxRefTrackTrackNum()
 
     unsigned int max_tn = 0;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         shared_ptr<DBCommand> command = sqlGenerator().getMaxUIntValueCommand(reftraj_content.dbTableName(),
                                                                             track_num_var.dbColumnName());
         shared_ptr<DBResult> result = execute(*command);
@@ -579,8 +596,11 @@ void DBInterface::createDataSourcesTable()
     assert(ready());
     assert(!existsDataSourcesTable());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         execute(sqlGenerator().getTableDataSourcesCreateStatement());
         updateTableInfo();
     }
@@ -598,8 +618,11 @@ std::vector<std::unique_ptr<dbContent::DBDataSource>> DBInterface::getDataSource
 
     std::vector<std::unique_ptr<DBDataSource>> sources;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         shared_ptr<DBCommand> command = sqlGenerator().getDataSourcesSelectCommand();
 
         loginf << "DBInterface: getDataSources: sql '" << command->get() << "'";
@@ -743,8 +766,11 @@ void DBInterface::createFFTsTable()
     assert(ready());
     assert(!existsFFTsTable());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         execute(sqlGenerator().getTableFFTsCreateStatement());
         updateTableInfo();
     }
@@ -762,8 +788,11 @@ std::vector<std::unique_ptr<DBFFT>> DBInterface::getFFTs()
 
     std::vector<std::unique_ptr<DBFFT>> sources;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         shared_ptr<DBCommand> command = sqlGenerator().getFFTSelectCommand();
 
         loginf << "DBInterface: getFFTs: sql '" << command->get() << "'";
@@ -848,8 +877,11 @@ size_t DBInterface::count(const string& table)
 
     int tmp;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         string sql = sqlGenerator().getCountStatement(table);
 
         logdbg << "DBInterface: count: sql '" << sql << "'";
@@ -911,8 +943,11 @@ void DBInterface::loadProperties()
     assert(ready());
     assert (!properties_loaded_);
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         DBCommand command;
         command.set(sqlGenerator().getSelectAllPropertiesStatement());
 
@@ -1004,8 +1039,11 @@ void DBInterface::saveProperties()
 
     string str;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         for (auto& prop_it : properties_)
         {
             auto sql = sqlGenerator().getInsertPropertyStatement(prop_it.first, prop_it.second);
@@ -1026,8 +1064,11 @@ std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         DBCommand command;
         command.set(sqlGenerator().getSelectAllSectorsStatement());
 
@@ -1109,8 +1150,11 @@ bool DBInterface::areColumnsNull(const std::string& table_name,
 
     bool cols_null = false;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         string str = sqlGenerator().getSelectNullCount(table_name, columns);
 
         loginf << "DBInterface: areColumnsNull: sql '" << str << "'";
@@ -1157,8 +1201,11 @@ void DBInterface::createViewPointsTable()
 
     setProperty("view_points_version", ViewPoint::VP_COLLECTION_CONTENT_VERSION);
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         execute(sqlGenerator().getTableViewPointsCreateStatement());
         updateTableInfo();
     }
@@ -1177,8 +1224,11 @@ void DBInterface::setViewPoint(const unsigned int id, const string& value)
     if (!existsViewPointsTable())
         createViewPointsTable();
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         string str = sqlGenerator().getInsertViewPointStatement(id, value);
         logdbg << "DBInterface: setViewPoint: cmd '" << str << "'";
 
@@ -1197,8 +1247,11 @@ map<unsigned int, string> DBInterface::viewPoints()
 
     map<unsigned int, string> view_points;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         DBCommand command;
         command.set(sqlGenerator().getSelectAllViewPointsStatement());
 
@@ -1239,8 +1292,11 @@ void DBInterface::deleteViewPoint(const unsigned int id)
 {
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         auto sql = sqlGenerator().getDeleteStatement(TABLE_NAME_VIEWPOINTS, "id="+to_string(id));
         execute(sql);
     }
@@ -1269,8 +1325,11 @@ void DBInterface::createSectorsTable()
     assert(ready());
     assert(!existsSectorsTable());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         auto sql = sqlGenerator().getTableSectorsCreateStatement();
 
         loginf << "DBInterface: createSectorsTable: sql '" << sql << "'";
@@ -1305,8 +1364,11 @@ void DBInterface::saveSector(shared_ptr<Sector> sector)
     if (!existsSectorsTable())
         createSectorsTable();
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         // insert and replace
         string str = sqlGenerator().getReplaceSectorStatement(sector->id(), sector->name(), sector->layerName(), sector->jsonDataStr());
         logdbg << "DBInterface: saveSector: cmd '" << str << "'";
@@ -1323,8 +1385,11 @@ void DBInterface::deleteSector(shared_ptr<Sector> sector)
 
     unsigned int sector_id = sector->id();
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         string cmd = sqlGenerator().getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
         execute(cmd);
     }
@@ -1353,8 +1418,11 @@ void DBInterface::createTargetsTable()
     assert(ready());
     assert(!existsTargetsTable());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         auto sql = sqlGenerator().getTableTargetsCreateStatement();
 
         loginf << "DBInterface: createTargetsTable: sql '" << sql << "'";
@@ -1381,8 +1449,11 @@ std::vector<std::unique_ptr<dbContent::Target>> DBInterface::loadTargets()
 
     std::vector<std::unique_ptr<dbContent::Target>> targets;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         DBCommand command;
         command.set(sqlGenerator().getSelectAllTargetsStatement());
 
@@ -1443,8 +1514,11 @@ void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Targe
 
     string str;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         for (auto& tgt_it : targets)
         {
             string str = sqlGenerator().getInsertTargetStatement(tgt_it->utn_, tgt_it->info().dump());
@@ -1463,8 +1537,11 @@ void DBInterface::saveTarget(const std::unique_ptr<dbContent::Target>& target)
 
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         string str = sqlGenerator().getInsertTargetStatement(target->utn_, target->info().dump());
 
         // uses replace with utn as unique key
@@ -1478,8 +1555,11 @@ void DBInterface::clearAssociations(const DBContent& dbcontent)
 {
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         string str = sqlGenerator().getSetNullStatement(dbcontent.dbTableName(),
                                                     dbcontent.variable("UTN").dbColumnName());      
         // uses replace with utn as unique key
@@ -1555,8 +1635,11 @@ void DBInterface::insertBuffer(const string& table_name,
 
     Result res;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         res = db_instance_->defaultConnection().insertBuffer(table_name, buffer);
     }
 
@@ -1730,8 +1813,11 @@ void DBInterface::updateBuffer(const std::string& table_name,
 
     Result res;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         res = db_instance_->defaultConnection().updateBuffer(table_name, buffer, key_col, from_index, to_index);
     }
 
@@ -1762,8 +1848,11 @@ void DBInterface::prepareRead(const DBContent& dbobject,
 
     Result res;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         res = db_instance_->defaultConnection().startRead(read, 0, read_chunk_size_);
     }
     
@@ -1784,8 +1873,11 @@ std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBCont
     shared_ptr<DBResult> result;
     bool last_one = false;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         result = db_instance_->defaultConnection().readChunk();
     }
 
@@ -1822,8 +1914,11 @@ void DBInterface::finalizeReadStatement(const DBContent& dbobject)
 {
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         db_instance_->defaultConnection().stopRead();
     }
 }
@@ -1835,8 +1930,11 @@ void DBInterface::deleteBefore(const DBContent& dbcontent,
 {
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent, before_timestamp);
         execute(*command.get());
     }
@@ -1848,8 +1946,11 @@ void DBInterface::deleteAll(const DBContent& dbcontent)
 {
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent);
         execute(*command.get());
     }
@@ -1865,8 +1966,11 @@ void DBInterface::deleteContent(const DBContent& dbcontent,
 
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent, sac, sic);
 
         execute(*command.get());
@@ -1881,8 +1985,11 @@ void DBInterface::deleteContent(const DBContent& dbcontent, unsigned int sac, un
 
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent, sac, sic, line_id);
 
         execute(*command.get());
@@ -1895,8 +2002,11 @@ void DBInterface::clearTableContent(const string& table_name)
 {
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         // DELETE FROM tablename;
         execute("DELETE FROM " + table_name + ";");
     }
@@ -1909,8 +2019,11 @@ void DBInterface::createPropertiesTable()
     assert(ready());
     assert(!existsPropertiesTable());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         execute(sqlGenerator().getTablePropertiesCreateStatement());
         updateTableInfo();
     }
@@ -1922,8 +2035,11 @@ void DBInterface::startPerformanceMetrics() const
 {
     assert(ready());
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         db_instance_->defaultConnection().startPerformanceMetrics();
     }
 }
@@ -1936,8 +2052,11 @@ db::PerformanceMetrics DBInterface::stopPerformanceMetrics() const
 
     db::PerformanceMetrics pm;
 
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         pm = db_instance_->defaultConnection().stopPerformanceMetrics();
     }
 
@@ -1951,9 +2070,11 @@ bool DBInterface::hasActivePerformanceMetrics() const
     assert(ready());
 
     bool ok;
-
-    boost::mutex::scoped_lock locker(instance_mutex_);
     {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
         ok = db_instance_->defaultConnection().hasActivePerformanceMetrics();
     }
 
