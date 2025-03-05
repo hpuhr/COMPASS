@@ -19,6 +19,7 @@
 
 #include "configurable.h"
 #include "singleton.h"
+#include "job.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -33,7 +34,8 @@
 #include <memory>
 
 class WorkerThread;
-class Job;
+
+#ifdef USE_ASYNC_JOBS
 
 /**
  */
@@ -113,3 +115,75 @@ private:
     void handleNonBlockingJobs();
     void handleDBJobs();
 };
+
+#else 
+
+/**
+ */
+class JobManager : public QThread, public Singleton, public Configurable
+{
+//    Q_OBJECT
+//  signals:
+//    void databaseBusy();
+//    void databaseIdle();
+
+public:
+    virtual ~JobManager();
+
+    // blocks started of later ones
+    void addBlockingJob(std::shared_ptr<Job> job);
+    // does not block start of later ones
+    void addNonBlockingJob(std::shared_ptr<Job> job);
+    // only one db job can be active
+    void addDBJob(std::shared_ptr<Job> job);
+    void cancelJob(std::shared_ptr<Job> job);
+
+    bool hasAnyJobs();
+    bool hasBlockingJobs();
+    bool hasNonBlockingJobs();
+    bool hasDBJobs();
+
+    unsigned int numBlockingJobs();
+    unsigned int numNonBlockingJobs();
+    unsigned int numJobs();
+    unsigned int numDBJobs();
+    int numThreads();
+
+    void shutdown();
+
+    static JobManager& instance()
+    {
+        static JobManager instance;
+        return instance;
+    }
+
+protected:
+    volatile bool stop_requested_;
+    volatile bool stopped_;
+
+    //bool changed_{false};
+    //bool really_update_widget_{false};
+
+    std::shared_ptr<Job> active_blocking_job_;
+    tbb::concurrent_queue<std::shared_ptr<Job>> blocking_jobs_;
+
+    std::shared_ptr<Job> active_non_blocking_job_;
+    tbb::concurrent_queue<std::shared_ptr<Job>> non_blocking_jobs_;
+
+    std::shared_ptr<Job> active_db_job_;
+    tbb::concurrent_queue<std::shared_ptr<Job>> queued_db_jobs_;
+
+    boost::posix_time::ptime last_update_time_;
+
+    JobManager();
+
+private:
+    void run();
+
+    // set change flags as appropriate
+    void handleBlockingJobs();
+    void handleNonBlockingJobs();
+    void handleDBJobs();
+};
+
+#endif

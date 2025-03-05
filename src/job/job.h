@@ -19,10 +19,16 @@
 
 #include "logger.h"
 
-#include <QObject>
-#include <QRunnable>
-
 #include <memory>
+
+//use std::async instead of QThreadPool
+//#define USE_ASYNC_JOBS
+
+#include <QObject>
+
+#ifndef USE_ASYNC_JOBS
+#include <QRunnable>
+#endif
 
 /**
  * @brief Encapsulates a work-package
@@ -33,29 +39,42 @@
  *
  * Important: The Job and the contained data must be deleted in the callback functions.
  */
+#ifdef USE_ASYNC_JOBS
 class Job : public QObject
+#else
+class Job : public QObject, public QRunnable
+#endif
 {
     Q_OBJECT
-  signals:
+signals:
     void doneSignal();
     void obsoleteSignal();
 
-  public:
+public:
+#ifdef USE_ASYNC_JOBS
     /// @brief Constructor
-    Job(const std::string& name) : name_(name) { /*setAutoDelete(false);*/ }
+    Job(const std::string& name) : name_(name) {}
+#else
+    /// @brief Constructor
+    Job(const std::string& name) : name_(name) { setAutoDelete(false); }
+#endif
     /// @brief Destructor
     virtual ~Job() {}
-
+  
+#ifdef USE_ASYNC_JOBS
     // @brief Main operation function
     virtual void run() = 0;
+#else
+    //run() defined in QRunnable
+#endif
 
     bool started() { return started_; }
     // @brief Returns done flag
     bool done() { return done_; }
     void emitDone() { emit doneSignal(); }
     // @brief Sets obsolete flag
-    virtual void setObsolete() {
-
+    virtual void setObsolete() 
+    {
         logdbg << "Job: " << name_ << ": setObsolete";
         obsolete_ = true;
     }
@@ -65,7 +84,7 @@ class Job : public QObject
 
     const std::string& name() { return name_; }
 
-  protected:
+protected:
     std::string name_;
     ///
     bool started_{false};
