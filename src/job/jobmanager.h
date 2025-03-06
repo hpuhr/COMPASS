@@ -23,6 +23,7 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread/mutex.hpp>
 #endif
 
 #include <QMutex>
@@ -40,7 +41,7 @@ class WorkerThread;
 class JobManagerBase : public QThread
 {
 public:
-    JobManagerBase();
+    JobManagerBase(bool set_thread_affinity);
     virtual ~JobManagerBase();
 
     // blocks started of later ones
@@ -73,9 +74,9 @@ protected:
     virtual void addNonBlockingJob_impl(std::shared_ptr<Job> job) = 0;
     virtual void addDBJob_impl(std::shared_ptr<Job> job) = 0;
 
-    virtual void handleBlockingJobs() = 0;
-    virtual void handleNonBlockingJobs() = 0;
-    virtual void handleDBJobs() = 0;
+    virtual void handleBlockingJobs(bool debug) = 0;
+    virtual void handleNonBlockingJobs(bool debug) = 0;
+    virtual void handleDBJobs(bool debug) = 0;
 
     virtual void setJobsObsolete() = 0;
 
@@ -131,9 +132,9 @@ protected:
     void addNonBlockingJob_impl(std::shared_ptr<Job> job) override;
     void addDBJob_impl(std::shared_ptr<Job> job) override;
 
-    void handleBlockingJobs() override;
-    void handleNonBlockingJobs() override;
-    void handleDBJobs() override;
+    void handleBlockingJobs(bool debug) override;
+    void handleNonBlockingJobs(bool debug) override;
+    void handleDBJobs(bool debug) override;
 
     void setJobsObsolete() override;
 
@@ -153,6 +154,20 @@ private:
 class JobManagerThreadPool : public JobManagerBase
 {
 public:
+    /**
+     */
+    struct AsyncJob
+    {
+        void exec();
+        bool tryExec();
+        bool done() const;
+
+        std::shared_ptr<Job> job_;
+        bool                 is_running_ = false;
+    };
+
+    typedef std::shared_ptr<AsyncJob> AsyncJobPtr;
+
     JobManagerThreadPool();
     virtual ~JobManagerThreadPool();
 
@@ -171,21 +186,22 @@ protected:
     void addNonBlockingJob_impl(std::shared_ptr<Job> job) override;
     void addDBJob_impl(std::shared_ptr<Job> job) override;
 
-    void handleBlockingJobs() override;
-    void handleNonBlockingJobs() override;
-    void handleDBJobs() override;
+    void handleBlockingJobs(bool debug) override;
+    void handleNonBlockingJobs(bool debug) override;
+    void handleDBJobs(bool debug) override;
 
     void setJobsObsolete() override;
 
 private:
-    std::shared_ptr<Job> active_blocking_job_;
-    tbb::concurrent_queue<std::shared_ptr<Job>> blocking_jobs_;
+    AsyncJobPtr active_blocking_job_;
+    tbb::concurrent_queue<AsyncJobPtr> blocking_jobs_;
 
-    std::shared_ptr<Job> active_non_blocking_job_;
-    tbb::concurrent_queue<std::shared_ptr<Job>> non_blocking_jobs_;
+    boost::mutex non_blocking_queue_mutex_;
+    AsyncJobPtr active_non_blocking_job_;
+    tbb::concurrent_queue<AsyncJobPtr> non_blocking_jobs_;
 
-    std::shared_ptr<Job> active_db_job_;
-    tbb::concurrent_queue<std::shared_ptr<Job>> queued_db_jobs_;
+    AsyncJobPtr active_db_job_;
+    tbb::concurrent_queue<AsyncJobPtr> queued_db_jobs_;
 };
 
 /**
