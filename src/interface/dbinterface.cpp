@@ -79,6 +79,7 @@ DBInterface::DBInterface(string class_id,
                          string instance_id, 
                          COMPASS* compass)
 :   Configurable(class_id, instance_id, compass)
+,   insert_mt_(true)
 {
     registerParameter("read_chunk_size", &read_chunk_size_, 50000u);
 

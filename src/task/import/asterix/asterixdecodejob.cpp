@@ -70,6 +70,7 @@ void ASTERIXDecodeJob::run_impl()
     assert (decoder_);
     decoder_->start(this);
 
+    //@TODO: !check why assertion fails every now and then!
     if (!obsolete_)
         assert(extracted_data_.size() == 0);
 

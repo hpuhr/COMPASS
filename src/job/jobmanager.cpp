@@ -536,8 +536,7 @@ void JobManagerThreadPool::addNonBlockingJob_impl(std::shared_ptr<Job> job)
 
     non_blocking_queue_mutex_.lock();
 
-    non_blocking_jobs_.push(j);  // add and start
-    //j->exec();
+    non_blocking_jobs_.push(j);  // only add, do not start (start handled later)
 
     non_blocking_queue_mutex_.unlock();
 }
