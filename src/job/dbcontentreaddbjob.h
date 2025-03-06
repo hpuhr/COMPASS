@@ -38,13 +38,13 @@ public:
                        std::string custom_filter_clause);
     virtual ~DBContentReadDBJob();
 
-    virtual void run();
-
     dbContent::VariableSet& readList() { return read_list_; }
 
     unsigned int rowCount() const;
 
 protected:
+    virtual void run_impl();
+
     DBInterface& db_interface_;
     DBContent& dbcontent_;
     dbContent::VariableSet read_list_;

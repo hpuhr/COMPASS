@@ -35,11 +35,68 @@
 
 class WorkerThread;
 
-#ifdef USE_ASYNC_JOBS
+/**
+ */
+class JobManagerBase : public QThread
+{
+public:
+    JobManagerBase();
+    virtual ~JobManagerBase();
+
+    // blocks started of later ones
+    void addBlockingJob(std::shared_ptr<Job> job);
+    // does not block start of later ones
+    void addNonBlockingJob(std::shared_ptr<Job> job);
+    // only one db job can be active
+    void addDBJob(std::shared_ptr<Job> job);
+
+    void cancelJob(std::shared_ptr<Job> job);
+
+    bool hasAnyJobs() const;
+
+    virtual bool hasBlockingJobs() const = 0;
+    virtual bool hasNonBlockingJobs() const = 0;
+    virtual bool hasDBJobs() const = 0;
+
+    unsigned int numJobs() const;
+
+    virtual unsigned int numBlockingJobs() const = 0;
+    virtual unsigned int numNonBlockingJobs() const = 0;
+    virtual unsigned int numDBJobs() const = 0;
+
+    virtual int numThreads() const = 0;
+
+    void shutdown();
+
+protected:
+    virtual void addBlockingJob_impl(std::shared_ptr<Job> job) = 0;
+    virtual void addNonBlockingJob_impl(std::shared_ptr<Job> job) = 0;
+    virtual void addDBJob_impl(std::shared_ptr<Job> job) = 0;
+
+    virtual void handleBlockingJobs() = 0;
+    virtual void handleNonBlockingJobs() = 0;
+    virtual void handleDBJobs() = 0;
+
+    virtual void setJobsObsolete() = 0;
+
+    void run();
+
+    volatile bool stop_requested_;
+    volatile bool stopped_;
+
+    boost::posix_time::ptime last_update_time_;
+
+private:
+    size_t non_blocking_ids_ = 0;
+    size_t blocking_ids_     = 0;
+    size_t db_ids_           = 0;
+
+    bool set_thread_affinity_ = false;
+};
 
 /**
  */
-class JobManager : public QThread, public Singleton, public Configurable
+class JobManagerAsync : public JobManagerBase
 {
 public:
     /**
@@ -56,44 +113,31 @@ public:
 
     typedef std::shared_ptr<AsyncJob> AsyncJobPtr;
 
-    virtual ~JobManager();
+    JobManagerAsync();
+    virtual ~JobManagerAsync();
 
-    // blocks started of later ones
-    void addBlockingJob(std::shared_ptr<Job> job);
-    // does not block start of later ones
-    void addNonBlockingJob(std::shared_ptr<Job> job);
-    // only one db job can be active
-    void addDBJob(std::shared_ptr<Job> job);
+    bool hasBlockingJobs() const override;
+    bool hasNonBlockingJobs() const override;
+    bool hasDBJobs() const override;
 
-    void cancelJob(std::shared_ptr<Job> job);
+    unsigned int numBlockingJobs() const override;
+    unsigned int numNonBlockingJobs() const override;
+    unsigned int numDBJobs() const override;
 
-    bool hasAnyJobs();
-    bool hasBlockingJobs();
-    bool hasNonBlockingJobs();
-    bool hasDBJobs();
-
-    unsigned int numBlockingJobs();
-    unsigned int numNonBlockingJobs();
-    unsigned int numJobs();
-    unsigned int numDBJobs();
-
-    int numThreads();
-
-    void shutdown();
-
-    static JobManager& instance()
-    {
-        static JobManager instance;
-        return instance;
-    }
+    int numThreads() const override;
 
 protected:
-    volatile bool stop_requested_;
-    volatile bool stopped_;
+    void addBlockingJob_impl(std::shared_ptr<Job> job) override;
+    void addNonBlockingJob_impl(std::shared_ptr<Job> job) override;
+    void addDBJob_impl(std::shared_ptr<Job> job) override;
 
-    //bool changed_{false};
-    //bool really_update_widget_{false};
+    void handleBlockingJobs() override;
+    void handleNonBlockingJobs() override;
+    void handleDBJobs() override;
 
+    void setJobsObsolete() override;
+
+private:
     AsyncJobPtr active_blocking_job_;
     tbb::concurrent_queue<AsyncJobPtr> blocking_jobs_;
 
@@ -102,25 +146,54 @@ protected:
 
     AsyncJobPtr active_db_job_;
     tbb::concurrent_queue<AsyncJobPtr> queued_db_jobs_;
-
-    boost::posix_time::ptime last_update_time_;
-
-    JobManager();
-
-private:
-    void run();
-
-    // set change flags as appropriate
-    void handleBlockingJobs();
-    void handleNonBlockingJobs();
-    void handleDBJobs();
 };
-
-#else 
 
 /**
  */
-class JobManager : public QThread, public Singleton, public Configurable
+class JobManagerThreadPool : public JobManagerBase
+{
+public:
+    JobManagerThreadPool();
+    virtual ~JobManagerThreadPool();
+
+    bool hasBlockingJobs() const override;
+    bool hasNonBlockingJobs() const override;
+    bool hasDBJobs() const override;
+
+    unsigned int numBlockingJobs() const override;
+    unsigned int numNonBlockingJobs() const override;
+    unsigned int numDBJobs() const override;
+
+    int numThreads() const override;
+
+protected:
+    void addBlockingJob_impl(std::shared_ptr<Job> job) override;
+    void addNonBlockingJob_impl(std::shared_ptr<Job> job) override;
+    void addDBJob_impl(std::shared_ptr<Job> job) override;
+
+    void handleBlockingJobs() override;
+    void handleNonBlockingJobs() override;
+    void handleDBJobs() override;
+
+    void setJobsObsolete() override;
+
+private:
+    std::shared_ptr<Job> active_blocking_job_;
+    tbb::concurrent_queue<std::shared_ptr<Job>> blocking_jobs_;
+
+    std::shared_ptr<Job> active_non_blocking_job_;
+    tbb::concurrent_queue<std::shared_ptr<Job>> non_blocking_jobs_;
+
+    std::shared_ptr<Job> active_db_job_;
+    tbb::concurrent_queue<std::shared_ptr<Job>> queued_db_jobs_;
+};
+
+/**
+ */
+#ifdef USE_ASYNC_JOBS
+class JobManager : public JobManagerAsync, public Singleton, public Configurable
+#else 
+class JobManager : public JobManagerThreadPool, public Singleton, public Configurable
 {
 //    Q_OBJECT
 //  signals:
@@ -130,27 +203,6 @@ class JobManager : public QThread, public Singleton, public Configurable
 public:
     virtual ~JobManager();
 
-    // blocks started of later ones
-    void addBlockingJob(std::shared_ptr<Job> job);
-    // does not block start of later ones
-    void addNonBlockingJob(std::shared_ptr<Job> job);
-    // only one db job can be active
-    void addDBJob(std::shared_ptr<Job> job);
-    void cancelJob(std::shared_ptr<Job> job);
-
-    bool hasAnyJobs();
-    bool hasBlockingJobs();
-    bool hasNonBlockingJobs();
-    bool hasDBJobs();
-
-    unsigned int numBlockingJobs();
-    unsigned int numNonBlockingJobs();
-    unsigned int numJobs();
-    unsigned int numDBJobs();
-    int numThreads();
-
-    void shutdown();
-
     static JobManager& instance()
     {
         static JobManager instance;
@@ -158,32 +210,7 @@ public:
     }
 
 protected:
-    volatile bool stop_requested_;
-    volatile bool stopped_;
-
-    //bool changed_{false};
-    //bool really_update_widget_{false};
-
-    std::shared_ptr<Job> active_blocking_job_;
-    tbb::concurrent_queue<std::shared_ptr<Job>> blocking_jobs_;
-
-    std::shared_ptr<Job> active_non_blocking_job_;
-    tbb::concurrent_queue<std::shared_ptr<Job>> non_blocking_jobs_;
-
-    std::shared_ptr<Job> active_db_job_;
-    tbb::concurrent_queue<std::shared_ptr<Job>> queued_db_jobs_;
-
-    boost::posix_time::ptime last_update_time_;
-
     JobManager();
-
-private:
-    void run();
-
-    // set change flags as appropriate
-    void handleBlockingJobs();
-    void handleNonBlockingJobs();
-    void handleDBJobs();
 };
 
 #endif

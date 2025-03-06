@@ -45,7 +45,6 @@ public:
                      ASTERIXPostProcess& post_process);
     virtual ~ASTERIXDecodeJob();
 
-    virtual void run() override;
     virtual void setObsolete() override;
 
     size_t numFrames() const;
@@ -67,6 +66,9 @@ public:
     std::string currentDataSourceName(); // used to distinguish file switches
 
     void forceBlockingDataProcessing();
+
+protected:
+    void run_impl() override;
 
 private:
     void fileJasterixCallback(std::unique_ptr<nlohmann::json> data, 

@@ -30,9 +30,9 @@ ASTERIXJSONMappingJob::~ASTERIXJSONMappingJob()
     logdbg << "ASTERIXJSONMappingJob: dtor";
 }
 
-void ASTERIXJSONMappingJob::run()
+void ASTERIXJSONMappingJob::run_impl()
 {
-    loginf << "ASTERIXJSONMappingJob: " << this << " run on thread " << QThread::currentThreadId();
+    logdbg << "ASTERIXJSONMappingJob: " << this << " run on thread " << QThread::currentThreadId() << " on cpu " << sched_getcpu();
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -50,7 +50,8 @@ void ASTERIXJSONMappingJob::run()
             parser_it.second->appendVariablesToBuffer(*buffers_.at(dbcontent_name));
     }
 
-    auto process_lambda = [this](nlohmann::json& record) {
+    auto process_lambda = [this](nlohmann::json& record) 
+    {
         //loginf << "UGA '" << record.dump(4) << "'";
 
         if (this->obsolete_)
@@ -145,7 +146,7 @@ void ASTERIXJSONMappingJob::run()
     auto t_diff = boost::posix_time::microsec_clock::local_time() - start_time;
     float num_secs =  t_diff.total_milliseconds() ? t_diff.total_milliseconds() / 1000.0 : 10E-6;
 
-    loginf << "ASTERIXJSONMappingJob: run: done: took "
+    logdbg << "ASTERIXJSONMappingJob: run: done: took "
            << String::timeStringFromDouble(num_secs, true)
            << " full " << String::timeStringFromDouble(num_secs, true)
            << " " << ((float) num_created_+num_not_mapped_) / num_secs << " rec/s";

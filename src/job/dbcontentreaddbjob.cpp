@@ -49,7 +49,7 @@ DBContentReadDBJob::DBContentReadDBJob(DBInterface& db_interface, DBContent& dbc
 
 DBContentReadDBJob::~DBContentReadDBJob() {}
 
-void DBContentReadDBJob::run()
+void DBContentReadDBJob::run_impl()
 {
     logdbg << "DBContentReadDBJob: run: " << dbcontent_.name() << ": start";
     started_ = true;

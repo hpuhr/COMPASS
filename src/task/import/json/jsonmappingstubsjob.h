@@ -36,7 +36,8 @@ class JSONMappingStubsJob : public Job
     // json obj moved, mappings referenced
     virtual ~JSONMappingStubsJob();
 
-    virtual void run();
+  protected:
+    void run_impl() override;
 
   private:
     std::unique_ptr<nlohmann::json> data_;

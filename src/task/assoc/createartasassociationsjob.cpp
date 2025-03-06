@@ -60,7 +60,7 @@ CreateARTASAssociationsJob::CreateARTASAssociationsJob(
 
 CreateARTASAssociationsJob::~CreateARTASAssociationsJob() {}
 
-void CreateARTASAssociationsJob::run()
+void CreateARTASAssociationsJob::run_impl()
 {
     logdbg << "CreateARTASAssociationsJob: run: start";
 

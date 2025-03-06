@@ -25,10 +25,13 @@
 //#define USE_ASYNC_JOBS
 
 #include <QObject>
+#include <QThread>
 
 #ifndef USE_ASYNC_JOBS
 #include <QRunnable>
 #endif
+
+#include <boost/optional.hpp>
 
 /**
  * @brief Encapsulates a work-package
@@ -61,12 +64,37 @@ public:
     /// @brief Destructor
     virtual ~Job() {}
   
-#ifdef USE_ASYNC_JOBS
     // @brief Main operation function
-    virtual void run() = 0;
+#ifdef USE_ASYNC_JOBS
+    void run()
 #else
-    //run() defined in QRunnable
+    void run() override final
 #endif
+    {
+        //set thread affinity?
+        if (set_thread_affinity_ && job_id_.has_value())
+        {
+            //evenly distribute over cpus
+            int cpu = (int)(job_id_.value() % (size_t)QThread::idealThreadCount());
+
+            cpu_set_t cpuset;
+            CPU_ZERO(&cpuset);
+            CPU_SET(cpu, &cpuset);
+
+            pthread_t nativeThread = pthread_self();
+            if (pthread_setaffinity_np(nativeThread, sizeof(cpu_set_t), &cpuset) != 0)
+                logerr << "Job: run: failed to set thread affinity of job " << job_id_.value() << " to cpu" << cpu;
+        }
+
+        //invoke derived
+        run_impl();
+    }
+
+    void setJobID(size_t id, bool set_thread_affinity = false)
+    {
+        job_id_ = id;
+        set_thread_affinity_ = set_thread_affinity;
+    }
 
     bool started() { return started_; }
     // @brief Returns done flag
@@ -85,6 +113,8 @@ public:
     const std::string& name() { return name_; }
 
 protected:
+    virtual void run_impl() = 0;
+
     std::string name_;
     ///
     bool started_{false};
@@ -94,4 +124,7 @@ protected:
     volatile bool obsolete_{false};
 
     //virtual void setDone() { done_ = true; }
+
+    boost::optional<size_t> job_id_;
+    bool set_thread_affinity_ = false;
 };

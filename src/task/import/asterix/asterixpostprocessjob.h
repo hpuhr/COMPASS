@@ -31,11 +31,12 @@ public:
 
     virtual ~ASTERIXPostprocessJob();
 
-    virtual void run() override;
-
     std::map<std::string, std::shared_ptr<Buffer>> buffers() { return std::move(buffers_); }
 
     static void clearCurrentDate();
+
+protected:
+    void run_impl() override;
 
 private:
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;

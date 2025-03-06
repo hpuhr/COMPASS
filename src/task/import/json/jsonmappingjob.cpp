@@ -61,7 +61,7 @@ JSONMappingJob::~JSONMappingJob()
     assert (done_);
 }
 
-void JSONMappingJob::run()
+void JSONMappingJob::run_impl()
 {
     logdbg << "JSONMappingJob: run";
 

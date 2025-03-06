@@ -45,8 +45,6 @@ class UpdateBufferDBJob : public Job
 
     virtual ~UpdateBufferDBJob();
 
-    virtual void run();
-
     std::shared_ptr<Buffer> buffer()
     {
         assert(buffer_);
@@ -54,6 +52,8 @@ class UpdateBufferDBJob : public Job
     }
 
   protected:
+    virtual void run_impl();
+
     DBInterface& db_interface_;
     DBContent& dbobject_;
     dbContent::Variable& key_var_;

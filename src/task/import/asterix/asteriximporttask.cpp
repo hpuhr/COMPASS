@@ -896,7 +896,9 @@ void ASTERIXImportTask::decodeASTERIXObsoleteSlot()
 */
 void ASTERIXImportTask::addDecodedASTERIXSlot()
 {
-    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot";
+    logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot";
+    //int cpu = sched_getcpu();
+    //loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: running on cpu " << cpu;
 
     if (stopped_)
     {
@@ -1001,7 +1003,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     connect(json_map_job.get(), &ASTERIXJSONMappingJob::doneSignal, this,
             &ASTERIXImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
 
-    loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: queueing in new mapping job, main thread is " << QThread::currentThreadId();
+    //loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: queueing in new mapping job, main thread is " << QThread::currentThreadId();
 
     JobManager::instance().addNonBlockingJob(json_map_job);
 
@@ -1121,7 +1123,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     //             assert (false);
     //         }
     //     }}, std::move(extracted_data), std::move(keys)));
-
 }
 
 /**

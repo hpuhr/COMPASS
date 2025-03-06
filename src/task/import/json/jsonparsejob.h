@@ -32,12 +32,13 @@ class JSONParseJob : public Job
                  ASTERIXPostProcess& post_process);  // is moved from objects
     virtual ~JSONParseJob();
 
-    virtual void run();
-
     std::unique_ptr<nlohmann::json> jsonObjects();  // for move operation
 
     size_t objectsParsed() const;
     size_t parseErrors() const;
+
+  protected:
+    void run_impl() override;
 
   private:
     std::vector<std::string> objects_;

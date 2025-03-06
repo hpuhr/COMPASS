@@ -36,7 +36,7 @@ JSONMappingStubsJob::JSONMappingStubsJob(std::unique_ptr<nlohmann::json> data,
 
 JSONMappingStubsJob::~JSONMappingStubsJob() {}
 
-void JSONMappingStubsJob::run()
+void JSONMappingStubsJob::run_impl()
 {
     logdbg << "JSONMappingStubsJob: run";
 

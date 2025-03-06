@@ -53,7 +53,7 @@ DBContentInsertDBJob::~DBContentInsertDBJob() = default;
 
 /**
  */
-void DBContentInsertDBJob::run()
+void DBContentInsertDBJob::run_impl()
 {
     logdbg << "InsertBufferDBJob: run: start";
 

@@ -33,9 +33,9 @@ class BufferCSVExportJob : public Job
                        bool use_presentation);
     virtual ~BufferCSVExportJob();
 
-    virtual void run();
-
   protected:
+    virtual void run_impl();
+
     std::shared_ptr<Buffer> buffer_;
     dbContent::VariableSet read_set_;
 

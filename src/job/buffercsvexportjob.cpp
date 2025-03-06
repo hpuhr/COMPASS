@@ -40,7 +40,7 @@ BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer,
 
 BufferCSVExportJob::~BufferCSVExportJob() {}
 
-void BufferCSVExportJob::run()
+void BufferCSVExportJob::run_impl()
 {
     logdbg << "BufferCSVExportJob: execute: start";
     started_ = true;

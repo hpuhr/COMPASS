@@ -50,8 +50,6 @@ public:
 
     virtual ~DBContentInsertDBJob();
 
-    virtual void run();
-
     /**
      */
     const std::map<std::string, std::shared_ptr<Buffer>>& buffers()
@@ -62,6 +60,8 @@ public:
     bool emitChange() const;
 
 protected:
+    virtual void run_impl();
+
     DBInterface&      db_interface_;
     DBContentManager& db_content_man_;
 

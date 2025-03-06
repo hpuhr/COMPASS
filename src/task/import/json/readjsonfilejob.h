@@ -35,8 +35,6 @@ class ReadJSONFileJob : public Job
     ReadJSONFileJob(const std::string& file_name, unsigned int num_objects);
     virtual ~ReadJSONFileJob();
 
-    virtual void run();
-
     void pause();
     void unpause();
 
@@ -48,6 +46,8 @@ class ReadJSONFileJob : public Job
     float getStatusPercent();
 
   protected:
+    void run_impl() override;
+
     std::string file_name_;
     bool archive_{false};
     unsigned int num_objects_{0};

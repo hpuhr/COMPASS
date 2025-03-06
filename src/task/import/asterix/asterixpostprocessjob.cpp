@@ -13,6 +13,8 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+#include <QThread>
+
 const float tod_24h = 24 * 60 * 60;
 
 using namespace std;
@@ -94,8 +96,9 @@ void ASTERIXPostprocessJob::clearCurrentDate()
     previous_date_ = {};
 }
 
-void ASTERIXPostprocessJob::run()
+void ASTERIXPostprocessJob::run_impl()
 {
+    logdbg << "ASTERIXPostprocessJob: " << this << " run on thread " << QThread::currentThreadId() << " on cpu " << sched_getcpu();
     logdbg << "ASTERIXPostprocessJob: run: num buffers " << buffers_.size();
 
     started_ = true;
@@ -133,7 +136,7 @@ void ASTERIXPostprocessJob::run()
 
     float num_secs =  t_diff.total_milliseconds() ? t_diff.total_milliseconds() / 1000.0 : 10E-6;
 
-    loginf << "ASTERIXPostprocessJob: run: done: took "
+    logdbg << "ASTERIXPostprocessJob: run: done: took "
            << String::timeStringFromDouble(num_secs, true)
            << " full " << String::timeStringFromDouble(num_secs, true)
            << " " << ((float) num_processed) / num_secs << " rec/s";
@@ -568,7 +571,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
 
         shared_ptr<Buffer> buffer = buf_it.second;
         unsigned int buffer_size = buffer->size();
-        assert(buffer_size);
+        //assert(buffer_size);
 
         assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
         assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));

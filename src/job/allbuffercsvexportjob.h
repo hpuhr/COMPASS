@@ -40,9 +40,9 @@ class AllBufferCSVExportJob : public Job
                           bool use_presentation);
     virtual ~AllBufferCSVExportJob();
 
-    virtual void run();
-
   protected:
+    virtual void run_impl();
+
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
     dbContent::VariableOrderedSet* read_set_;
     std::map<unsigned int, std::string> number_to_dbo_;

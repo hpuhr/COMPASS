@@ -32,7 +32,7 @@ JSONParseJob::JSONParseJob(std::vector<std::string> objects, const std::string& 
 
 JSONParseJob::~JSONParseJob() {}
 
-void JSONParseJob::run()
+void JSONParseJob::run_impl()
 {
     loginf << "JSONParseJob: run: start with " << objects_.size() << " objects schema '" << current_schema_ << "'";
 

@@ -52,7 +52,7 @@ void DBContentDeleteDBJob::setSpecificLineId(unsigned int line_id)
     specific_line_id_ = line_id;
 }
 
-void DBContentDeleteDBJob::run()
+void DBContentDeleteDBJob::run_impl()
 {
     logdbg << "DBContentDeleteDBJob: run: start";
     started_ = true;

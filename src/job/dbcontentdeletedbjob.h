@@ -20,12 +20,12 @@ public:
     void setSpecificSacSic(unsigned int sac, unsigned int sic);
     void setSpecificLineId(unsigned int line_id);
 
-    virtual void run();
-
     bool useSpecificDBContent() const;
     bool useBeforeTimestamp() const;
 
 protected:
+    virtual void run_impl();
+
     DBInterface& db_interface_;
 
     bool use_before_timestamp_ {false};

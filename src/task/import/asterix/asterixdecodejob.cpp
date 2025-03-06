@@ -59,7 +59,7 @@ ASTERIXDecodeJob::~ASTERIXDecodeJob()
 
 /**
 */
-void ASTERIXDecodeJob::run()
+void ASTERIXDecodeJob::run_impl()
 {
     loginf << "ASTERIXDecodeJob: run";
 
@@ -98,6 +98,8 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
                                             size_t num_records, 
                                             size_t num_errors)
 {
+    logdbg << "ASTERIXDecodeJob: fileJasterixCallback: running on cpu " << sched_getcpu();
+
     if (obsolete_)
         return;
 

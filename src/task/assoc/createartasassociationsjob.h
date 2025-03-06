@@ -52,8 +52,6 @@ public:
 
     virtual ~CreateARTASAssociationsJob();
 
-    virtual void run();
-
     void setSaveQuestionAnswer(bool value);
 
     size_t missingHashesAtBeginning() const;
@@ -129,6 +127,8 @@ protected:
     bool isAssociationInDubiousDistantTime(boost::posix_time::ptime ts_track, boost::posix_time::ptime ts_target);
     bool isAssociationHashCollisionInDubiousTime(boost::posix_time::ptime ts_track, boost::posix_time::ptime ts_target);
     bool isTimeAtBeginningOrEnd(boost::posix_time::ptime ts_track);
+
+    void run_impl() override;
 };
 
 #endif  // CREATEARTASASSOCIATIONSJOB_H

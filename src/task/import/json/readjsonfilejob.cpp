@@ -44,7 +44,7 @@ ReadJSONFileJob::~ReadJSONFileJob()
         file_stream_.close();
 }
 
-void ReadJSONFileJob::run()
+void ReadJSONFileJob::run_impl()
 {
     logdbg << "ReadJSONFileJob: run: start";
     started_ = true;
