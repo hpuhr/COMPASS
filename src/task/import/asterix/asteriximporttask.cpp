@@ -705,6 +705,45 @@ bool ASTERIXImportTask::canRun()
 
 /**
 */
+void ASTERIXImportTask::reset()
+{
+    decode_job_ = nullptr;
+
+    json_map_jobs_.clear();
+    postprocess_jobs_.clear();
+    accumulated_buffers_.clear();
+    queued_insert_buffers_.clear();
+
+    running_ = true;
+    stopped_ = false;
+    done_    = false; // since can be run multiple times
+
+    assert (!insert_active_);
+    insert_active_ = false;
+
+    assert (!insert_slot_connected_);
+    insert_slot_connected_ = false;
+
+    all_done_ = false;
+
+    num_packets_in_processing_ = 0;
+    num_packets_total_         = 0;
+    num_records_               = 0;
+
+    current_data_source_name_ = "";
+
+    start_time_              = boost::posix_time::microsec_clock::local_time();
+    last_insert_time_        = boost::posix_time::microsec_clock::local_time();
+    last_file_progress_time_ = {};
+
+    error_         = false;
+    error_message_ = "";
+
+    added_data_sources_.clear();
+}
+
+/**
+*/
 void ASTERIXImportTask::stop()
 {
     loginf << "ASTERIXImportTask: stop";
@@ -763,30 +802,26 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
     loginf << "ASTERIXImportTask: run";
 
     assert (!running_);
+    assert (decoder_);
+    assert (schema_);
+
+    assert (decode_job_ == nullptr);
+
+    assert (json_map_jobs_.empty());
+    assert (postprocess_jobs_.empty());
+    assert (accumulated_buffers_.empty());
+    assert (queued_insert_buffers_.empty());
+
+    assert (canRun());
 
     if (source_.isNetworkType())
         COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
 
-    running_ = true;
-    stopped_ = false;
-    done_ = false; // since can be run multiple times
-
-    num_packets_in_processing_ = 0;
-    num_packets_total_ = 0;
-
-    num_records_ = 0;
-
-    current_data_source_name_ = "";
-
-    start_time_ = boost::posix_time::microsec_clock::local_time();
-
-    last_insert_time_ = boost::posix_time::microsec_clock::local_time();
+    reset();
 
     float free_ram = System::getFreeRAMinGB();
 
     loginf << "ASTERIXImportTask: run: filenames " << source_.filesAsString() << " free RAM " << free_ram << " GB";
-
-    assert(canRun());
 
     if (source_.isFileType())
     {
@@ -803,15 +838,6 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
     }
-
-    assert (!insert_active_);
-    insert_active_ = false;
-
-    all_done_ = false;
-
-    added_data_sources_.clear();
-
-    assert(schema_);
 
     for (auto& map_it : *schema_)
         if (!map_it.second->initialized())
@@ -832,9 +858,6 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
     projection.addAllRadarCoordinateSystems();
 
     loginf << "ASTERIXImportTask: run: starting decode job";
-
-    assert(decode_job_ == nullptr);
-    assert(decoder_);
 
     if (source_.isNetworkType())
         COMPASS::instance().dataSourceManager().createNetworkDBDataSources();

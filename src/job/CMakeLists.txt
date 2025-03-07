@@ -6,6 +6,7 @@ include_directories (
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/job.h"
+        "${CMAKE_CURRENT_LIST_DIR}/jobdefs.h"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbcontentreaddbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/allbuffercsvexportjob.h"

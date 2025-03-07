@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "jobdefs.h"
+
 #include "logger.h"
 
 #include <memory>
@@ -25,7 +27,6 @@
 //#define USE_ASYNC_JOBS
 
 #include <QObject>
-#include <QThread>
 
 #ifndef USE_ASYNC_JOBS
 #include <QRunnable>
@@ -54,6 +55,19 @@ signals:
     void obsoleteSignal();
 
 public:
+    enum class ThreadAffinityCondition
+    {
+        Always = 0,
+        CPU0
+    };
+
+    enum class ThreadAffinityMode
+    {
+        Auto = 0,
+        Modulo,
+        Random
+    };
+
 #ifdef USE_ASYNC_JOBS
     /// @brief Constructor
     Job(const std::string& name) : name_(name) {}
@@ -71,29 +85,21 @@ public:
     void run() override final
 #endif
     {
-        //set thread affinity?
-        if (set_thread_affinity_ && job_id_.has_value())
-        {
-            //evenly distribute over cpus
-            int cpu = (int)(job_id_.value() % (size_t)QThread::idealThreadCount());
-
-            cpu_set_t cpuset;
-            CPU_ZERO(&cpuset);
-            CPU_SET(cpu, &cpuset);
-
-            pthread_t nativeThread = pthread_self();
-            if (pthread_setaffinity_np(nativeThread, sizeof(cpu_set_t), &cpuset) != 0)
-                logerr << "Job: run: failed to set thread affinity of job " << job_id_.value() << " to cpu" << cpu;
-        }
+        //set thread affinity
+        job::setThreadAffinity(thread_affinity_, job_id_);
 
         //invoke derived
         run_impl();
     }
 
-    void setJobID(size_t id, bool set_thread_affinity = false)
+    void setJobID(size_t id)
     {
         job_id_ = id;
-        set_thread_affinity_ = set_thread_affinity;
+    }
+
+    void setThreadAffinity(const job::ThreadAffinity& thread_affinity)
+    {
+        thread_affinity_ = thread_affinity;
     }
 
     bool started() { return started_; }
@@ -115,6 +121,61 @@ public:
 protected:
     virtual void run_impl() = 0;
 
+    void setThreadAffinity(ThreadAffinityMode mode, 
+                           ThreadAffinityCondition condition)
+    {
+        //auto always returns and leaves config to whatever scheduler
+        if (mode == ThreadAffinityMode::Auto)
+            return;
+
+        //only set if currently on cpu0? => return if on different cpu
+        bool skip_cpu0 = false;
+        if (condition == ThreadAffinityCondition::CPU0)
+        {
+            int cpu_cur = sched_getcpu();
+            if (cpu_cur != 0)
+                return;
+            else
+                skip_cpu0 = true;
+        }
+
+        int cpu = -1;
+        if (mode == ThreadAffinityMode::Random)
+        {
+            static thread_local std::mt19937 generator(std::random_device{}());
+            std::uniform_int_distribution<int> distribution(skip_cpu0 ? 1 : 0, QThread::idealThreadCount());
+            cpu = distribution(generator);
+        }
+        else if (mode == ThreadAffinityMode::Modulo)
+        {
+            //use job id to evenly distribute over cpus via modulo
+            if (job_id_.has_value())
+            {
+                int offs = skip_cpu0 ? 1 : 0;
+                int n    = skip_cpu0 ? QThread::idealThreadCount() - 1 : QThread::idealThreadCount();
+                cpu = offs + (int)(job_id_.value() % (size_t)n);
+            }
+        }
+
+        if (cpu < 0)
+        {
+            logerr << "Job: setThreadAffinity: failed to set thread affinity of job " 
+                   << job_id_.value() << ": cpu could not be determined";
+            return;
+        }
+
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_SET(cpu, &cpuset);
+
+        pthread_t nativeThread = pthread_self();
+        if (pthread_setaffinity_np(nativeThread, sizeof(cpu_set_t), &cpuset) != 0)
+        {
+            logerr << "Job: setThreadAffinity: failed to set thread affinity of job " 
+                   << job_id_.value() << " to cpu" << cpu;
+        }
+    }
+
     std::string name_;
     ///
     bool started_{false};
@@ -126,5 +187,5 @@ protected:
     //virtual void setDone() { done_ = true; }
 
     boost::optional<size_t> job_id_;
-    bool set_thread_affinity_ = false;
+    job::ThreadAffinity     thread_affinity_;
 };
