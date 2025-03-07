@@ -31,10 +31,9 @@ using namespace Utils;
 
 /**
  */
-JobManagerBase::JobManagerBase(bool set_thread_affinity)
-:   stop_requested_     (false)
-,   stopped_            (false)
-,   set_thread_affinity_(set_thread_affinity)
+JobManagerBase::JobManagerBase()
+:   stop_requested_(false)
+,   stopped_       (false)
 {
 }
 
@@ -44,33 +43,69 @@ JobManagerBase::~JobManagerBase() = default;
 
 /**
  */
-void JobManagerBase::addBlockingJob(std::shared_ptr<Job> job)
+void JobManagerBase::setDefaultThreadAffinity(const job::ThreadAffinity& thread_affinity)
+{
+    setDefaultThreadAffinityBlocking(thread_affinity);
+    setDefaultThreadAffinityNonBlocking(thread_affinity);
+    setDefaultThreadAffinityDB(thread_affinity);
+}
+
+/**
+ */
+void JobManagerBase::setDefaultThreadAffinityBlocking(const job::ThreadAffinity& thread_affinity)
+{
+    thread_affinity_default_blocking_ = thread_affinity;
+}
+
+/**
+ */
+void JobManagerBase::setDefaultThreadAffinityNonBlocking(const job::ThreadAffinity& thread_affinity)
+{
+    thread_affinity_default_nonblocking_ = thread_affinity;
+}
+
+/**
+ */
+void JobManagerBase::setDefaultThreadAffinityDB(const job::ThreadAffinity& thread_affinity)
+{
+    thread_affinity_default_db_ = thread_affinity;
+}
+
+/**
+ */
+void JobManagerBase::addBlockingJob(std::shared_ptr<Job> job,
+                                    const boost::optional<job::ThreadAffinity>& thread_affinity)
 {
     logdbg << "JobManagerBase: addBlockingJob: " << job->name() << " num " << numBlockingJobs();
 
-    job->setJobID(blocking_ids_++, set_thread_affinity_);
+    job->setJobID(blocking_ids_++);
+    job->setThreadAffinity(thread_affinity.has_value() ? thread_affinity.value() : thread_affinity_default_blocking_);
 
     addBlockingJob_impl(job);
 }
 
 /**
  */
-void JobManagerBase::addNonBlockingJob(std::shared_ptr<Job> job)
+void JobManagerBase::addNonBlockingJob(std::shared_ptr<Job> job,
+                                       const boost::optional<job::ThreadAffinity>& thread_affinity)
 {
     logdbg << "JobManagerBase: addNonBlockingJob: " << job->name() << " num " << numNonBlockingJobs();
 
-    job->setJobID(non_blocking_ids_++, set_thread_affinity_);
+    job->setJobID(non_blocking_ids_++);
+    job->setThreadAffinity(thread_affinity.has_value() ? thread_affinity.value() : thread_affinity_default_nonblocking_);
 
     addNonBlockingJob_impl(job);
 }
 
 /**
  */
-void JobManagerBase::addDBJob(std::shared_ptr<Job> job)
+void JobManagerBase::addDBJob(std::shared_ptr<Job> job,
+                              const boost::optional<job::ThreadAffinity>& thread_affinity)
 {
     logdbg << "JobManagerBase: addDBJob: " << job->name() << " num " << numDBJobs();
 
-    job->setJobID(db_ids_++, set_thread_affinity_);
+    job->setJobID(db_ids_++);
+    job->setThreadAffinity(thread_affinity.has_value() ? thread_affinity.value() : thread_affinity_default_db_);
 
     addDBJob_impl(job);
 
@@ -130,6 +165,14 @@ void JobManagerBase::run()
 
         if (last_update_time_.is_not_a_date_time() || debug)
             last_update_time_ = boost::posix_time::microsec_clock::local_time();
+
+        if (debug && numJobs() > 0)
+        {
+            loginf << "JobManagerBase: run:" 
+                   << " blocking jobs " << numBlockingJobs() 
+                   << " non-blocking jobs " << numNonBlockingJobs() 
+                   << " db jobs " << numDBJobs();  
+        }
 
 //        if (!stop_requested_ && changed_ && !hasDBJobs())
 //            emit databaseIdle();
@@ -219,8 +262,10 @@ bool JobManagerAsync::AsyncJob::done() const
 /**
  */
 JobManagerAsync::JobManagerAsync() 
-:   JobManagerBase(true)
+:   JobManagerBase()
 {
+    setDefaultThreadAffinity(job::ThreadAffinity().mode(job::ThreadAffinityMode::AllCPUs)
+                                                  .condition(job::ThreadAffinityCondition::Always));
 }
 
 /**
@@ -509,8 +554,15 @@ bool JobManagerThreadPool::AsyncJob::done() const
 /**
  */
 JobManagerThreadPool::JobManagerThreadPool()
-:   JobManagerBase(false)
+:   JobManagerBase()
+,   exec_jobs_immediately_(false)
 {
+    setDefaultThreadAffinityBlocking(job::ThreadAffinity().mode(job::ThreadAffinityMode::AllCPUs)
+                                                          .condition(job::ThreadAffinityCondition::Always));
+    setDefaultThreadAffinityNonBlocking(job::ThreadAffinity().mode(job::ThreadAffinityMode::AllCPUs)
+                                                             .condition(job::ThreadAffinityCondition::Always));
+    setDefaultThreadAffinityDB(job::ThreadAffinity().mode(job::ThreadAffinityMode::AllCPUs)
+                                                    .condition(job::ThreadAffinityCondition::Always));
 }
 
 /**
@@ -536,7 +588,10 @@ void JobManagerThreadPool::addNonBlockingJob_impl(std::shared_ptr<Job> job)
 
     non_blocking_queue_mutex_.lock();
 
-    non_blocking_jobs_.push(j);  // only add, do not start (start handled later)
+    non_blocking_jobs_.push(j); 
+
+    if (exec_jobs_immediately_)
+        j->exec();
 
     non_blocking_queue_mutex_.unlock();
 }
@@ -651,7 +706,9 @@ void JobManagerThreadPool::handleNonBlockingJobs(bool debug)
     size_t num_started = 0;
     size_t num_waiting = 0;
     size_t num_running = 0;
-    size_t num_total;
+    size_t num_total   = 0;
+
+    if (!exec_jobs_immediately_)
     {
         auto checkJob = [ & ] (AsyncJobPtr& job)
         {

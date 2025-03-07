@@ -77,7 +77,7 @@ void DBContentInsertDBJob::run_impl()
 
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
 
-    loginf << "DBContentInsertDBJob: run: writing buffers done, size " << buffer_cnt
+    logdbg << "DBContentInsertDBJob: run: writing buffers done, size " << buffer_cnt
            << " (" << doubleToStringPrecision(diff.total_milliseconds(), 2) << " ms).";
 
     done_ = true;

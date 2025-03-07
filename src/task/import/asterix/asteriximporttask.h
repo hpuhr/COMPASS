@@ -189,6 +189,8 @@ public:
 protected:
     virtual void checkSubConfigurables() override;
 
+    void reset();
+
     void insertData(); // inserts queued job buffers
     void checkAllDone();
 
@@ -201,11 +203,21 @@ protected:
 
     void sourceChanged();
 
+    ASTERIXImportTaskSettings settings_;
+    ASTERIXImportSource       source_;
+
+    std::unique_ptr<QProgressDialog> file_progress_dialog_;
+
     mutable std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
 
-    ASTERIXImportTaskSettings settings_;
-    ASTERIXImportSource       source_;
+    //sub-configurables
+    std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
+    std::shared_ptr<ASTERIXJSONParsingSchema>     schema_;
+
+    std::unique_ptr<ASTERIXDecoderBase> decoder_;
+    std::shared_ptr<ASTERIXDecodeJob>   decode_job_;
+    
     std::string current_data_source_name_; // used to check for decode file changes
 
     bool file_decoding_tested_ {false};
@@ -216,22 +228,14 @@ protected:
     unsigned int num_packets_total_{0};
     unsigned int num_records_ {0};
 
-    boost::posix_time::ptime start_time_;
-    std::unique_ptr<QProgressDialog> file_progress_dialog_;
-
-    std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
-
-    std::shared_ptr<ASTERIXJSONParsingSchema> schema_;
-    std::shared_ptr<ASTERIXDecodeJob>         decode_job_;
-    std::unique_ptr<ASTERIXDecoderBase>       decoder_;
-
     std::vector<std::shared_ptr<ASTERIXJSONMappingJob>>         json_map_jobs_;
-    //std::vector<std::future<std::map<std::string, std::shared_ptr<Buffer>>>> json_map_futures_;
     std::vector<std::shared_ptr<ASTERIXPostprocessJob>>         postprocess_jobs_;
     std::map<std::string, std::shared_ptr<Buffer>>              accumulated_buffers_;
     std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_insert_buffers_;
 
+    boost::posix_time::ptime start_time_;
     boost::posix_time::ptime last_insert_time_;
+    boost::posix_time::ptime last_file_progress_time_;
 
     bool error_{false};
     std::string error_message_;
@@ -239,8 +243,6 @@ protected:
     bool insert_active_{false};
     //boost::posix_time::ptime insert_start_time_;
     //double total_insert_time_ms_ {0};
-
-    boost::posix_time::ptime last_file_progress_time_;
 
     std::set<int> added_data_sources_;
 

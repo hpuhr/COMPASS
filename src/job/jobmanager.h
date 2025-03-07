@@ -41,15 +41,18 @@ class WorkerThread;
 class JobManagerBase : public QThread
 {
 public:
-    JobManagerBase(bool set_thread_affinity);
+    JobManagerBase();
     virtual ~JobManagerBase();
 
     // blocks started of later ones
-    void addBlockingJob(std::shared_ptr<Job> job);
+    void addBlockingJob(std::shared_ptr<Job> job, 
+                        const boost::optional<job::ThreadAffinity>& thread_affinity = boost::optional<job::ThreadAffinity>());
     // does not block start of later ones
-    void addNonBlockingJob(std::shared_ptr<Job> job);
+    void addNonBlockingJob(std::shared_ptr<Job> job,
+                           const boost::optional<job::ThreadAffinity>& thread_affinity = boost::optional<job::ThreadAffinity>());
     // only one db job can be active
-    void addDBJob(std::shared_ptr<Job> job);
+    void addDBJob(std::shared_ptr<Job> job,
+                  const boost::optional<job::ThreadAffinity>& thread_affinity = boost::optional<job::ThreadAffinity>());
 
     void cancelJob(std::shared_ptr<Job> job);
 
@@ -82,6 +85,11 @@ protected:
 
     void run();
 
+    void setDefaultThreadAffinity(const job::ThreadAffinity& thread_affinity);
+    void setDefaultThreadAffinityBlocking(const job::ThreadAffinity& thread_affinity);
+    void setDefaultThreadAffinityNonBlocking(const job::ThreadAffinity& thread_affinity);
+    void setDefaultThreadAffinityDB(const job::ThreadAffinity& thread_affinity);
+
     volatile bool stop_requested_;
     volatile bool stopped_;
 
@@ -92,7 +100,9 @@ private:
     size_t blocking_ids_     = 0;
     size_t db_ids_           = 0;
 
-    bool set_thread_affinity_ = false;
+    job::ThreadAffinity thread_affinity_default_blocking_;
+    job::ThreadAffinity thread_affinity_default_nonblocking_;
+    job::ThreadAffinity thread_affinity_default_db_;
 };
 
 /**
@@ -202,6 +212,8 @@ private:
 
     AsyncJobPtr active_db_job_;
     tbb::concurrent_queue<AsyncJobPtr> queued_db_jobs_;
+
+    bool exec_jobs_immediately_ = true;
 };
 
 /**
