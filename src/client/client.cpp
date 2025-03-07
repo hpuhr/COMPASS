@@ -72,19 +72,33 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 
-#ifdef OSG_GL3_AVAILABLE
-    format.setVersion(3, 2);
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setRenderableType(QSurfaceFormat::OpenGL);
+ #ifdef OSG_GL3_AVAILABLE
+    cout << "COMPASSClient: OSG_GL3_AVAILABLE true, version "
+         << format.version().first << "." << format.version().second << endl;
+
+//     format.setVersion(3, 3);
+//     format.setProfile(QSurfaceFormat::CoreProfile);
+//     format.setRenderableType(QSurfaceFormat::OpenGL);
+
+//     osg::DisplaySettings::instance()->setGLContextVersion("3.3");
+//     osg::DisplaySettings::instance()->setShaderHint(osg::DisplaySettings::SHADER_GL3);
+
+ #else
+    cout << "COMPASSClient: OSG_GL3_AVAILABLE false, version "
+         << format.version().first << "." << format.version().second << endl;
+
+    // format.setVersion(2, 0);
+    // format.setProfile(QSurfaceFormat::CompatibilityProfile);
+    // format.setRenderableType(QSurfaceFormat::OpenGL);
     //format.setOption(QSurfaceFormat::DebugContext); // scatterplot stops working if active
-#else
-    format.setVersion(2, 0);
-    format.setProfile(QSurfaceFormat::CompatibilityProfile);
-    format.setRenderableType(QSurfaceFormat::OpenGL);
-    //format.setOption(QSurfaceFormat::DebugContext); // scatterplot stops working if active
+
+    // osg::DisplaySettings::instance()->setGLContextVersion("2.0");
+    // osg::DisplaySettings::instance()->setShaderHint(osg::DisplaySettings::SHADER_GL2);
 #endif
     //format.setDepthBufferSize(32); // scatterplot stops working if active
     //format.setAlphaBufferSize(8);
+
+
 
     format.setSamples(8);
     format.setStencilBufferSize(8);

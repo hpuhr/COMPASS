@@ -10,8 +10,8 @@ export QT_SELECT=5
 rm -rf /app/workspace/compass/$1_build # needed since binary becomes too big
 mkdir -p /app/workspace/compass/$1_build
 cd /app/workspace/compass/$1_build
-cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo .. #
-make -j 16
+cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_PREFIX_PATH=$GL_PATH $CMAKE_OPTS -DCMAKE_BUILD_TYPE=RelWithDebInfo .. #
+make -j $(nproc)
 sudo make install
 
 cd /app/workspace/compass/docker

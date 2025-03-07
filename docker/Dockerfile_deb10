@@ -66,7 +66,7 @@ RUN apt-get update
 RUN apt-get install libgeos-dev -y
 
 # gui/x11 
-RUN apt-get install gedit libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-x11-dev -y #libegl1-mesa-drivers
+RUN apt-get install gedit khronos-api libxkbcommon-x11-dev -y #libgl1-mesa-dev libegl1-mesa-dev libegl1-mesa-drivers
 
 # qt
 
@@ -90,24 +90,38 @@ RUN apt-get install git -y
 #RUN mkdir glcore
 #RUN cd glcore && git clone https://github.com/KhronosGroup/OpenGL-Registry.git
 #RUN ls glcore
-#ENV CMAKE_PREFIX_PATH="/glcore"
-#ENV CMAKE_OPTS="-DOPENGL_INCLUDE_DIR=/glcore -DOPENGL_PROFILE=GLCORE -Dosg_OPENGL_PROFILE=GLCORE -DGLCORE_GLCOREARB_HEADER=\"/glcore\" \
-#OSG_GL3_AVAILABLE=TRUE \
-#OSG_GL1_AVAILABLE=FALSE \
-#OSG_GL2_AVAILABLE=FALSE \
-#OSG_GLES1_AVAILABLE=FALSE \
-#OSG_GLES2_AVAILABLE=FALSE \
-#OSG_GL_DISPLAYLISTS_AVAILABLE=FALSE \
-#OSG_GL_FIXED_FUNCTION_AVAILABLE=FALSE \
-#OSG_GL_MATRICES_AVAILABLE=FALSE \
-#OSG_GL_VERTEX_ARRAY_FUNCS_AVAILABLE=FALSE \
-#OSG_GL_VERTEX_FUNCS_AVAILABLE=FALSE \
-#"
+#ENV GL_PATH="/glcore/OpenGL-Registry/api/"
+#ENV CMAKE_OPTS="-DOPENGL_INCLUDE_DIR=$GL_PATH -DOPENGL_PROFILE=GLCORE -Dosg_OPENGL_PROFILE=GLCORE -DGLCORE_GLCOREARB_HEADER=$GL_PATH \
+
+ENV CMAKE_OPTS="-DOPENGL_PROFILE=GLCORE \
+-DOSG_GLU_AVAILABLE=OFF \
+-DOSG_GL3_AVAILABLE=ON \
+-DOSG_GL1_AVAILABLE=OFF \
+-DOSG_GL2_AVAILABLE=OFF \
+-DOSG_GLES1_AVAILABLE=OFF \
+-DOSG_GLES2_AVAILABLE=OFF \
+-DOSG_GL_DISPLAYLISTS_AVAILABLE=OFF \
+-DOSG_GL_FIXED_FUNCTION_AVAILABLE=OFF \
+-DOSG_GL_MATRICES_AVAILABLE=OFF \
+-DOSG_GL_VERTEX_ARRAY_FUNCS_AVAILABLE=OFF \
+-DOSG_GL_VERTEX_FUNCS_AVAILABLE=OFF \
+"
 
 RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.zip
 RUN unzip OpenSceneGraph-3.6.5.zip
 RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.5/build
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 ..
+#RUN sed -i '461s/.*/SET(OPENGL_PROFILE \"GLCORE\")/' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
+#RUN sed -i '461a message("  OPENGL_PROFILE: ${OPENGL_PROFILE}")' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
+#RUN sed -i '502a message("  OSG_GL3_AVAILABLE: ${OSG_GL3_AVAILABLE}")' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
+
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr CMAKE_OPTS -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 ..
+#RUN exit 1
+#RUN sed -i '59a #ifdef OSG_GL3_AVAILABLE' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
+#RUN sed -i '60a static_assert(true, "OSG_GL3_AVAILABLE is defined!");' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
+#RUN sed -i '61a #else' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
+#RUN sed -i '62a static_assert(false, "OSG_GL3_AVAILABLE is NOT defined!");' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
+#RUN sed -i '63a #endif' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
+#RUN cat -n /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make -j$(nproc)
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make install
 RUN osgversion
@@ -115,7 +129,7 @@ RUN osgversion
 RUN wget https://github.com/openscenegraph/osgQt/archive/Qt4.zip
 RUN unzip Qt4.zip
 RUN mkdir osgQt-Qt4/build
-RUN cd osgQt-Qt4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd osgQt-Qt4/build && cmake CMAKE_OPTS -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
 RUN cd osgQt-Qt4/build && make -j$(nproc)
 RUN cd osgQt-Qt4/build && make install
 
@@ -134,11 +148,11 @@ RUN cd protobuf-3.19.1 && ldconfig # refresh shared library cache.
 
 RUN apt-get install libglew-dev libzip-dev -y
 
-RUN git clone --recurse-submodules --depth 1 --branch osgearth-3.7 https://github.com/gwaldron/osgearth.git osgearth-osgearth-3.7/
-RUN mkdir osgearth-osgearth-3.7/build
-RUN cd osgearth-osgearth-3.7/build && cmake -DCMAKE_CXX_STANDARD=17 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. #-DOPENGL_PROFILE=GLCORE
-RUN cd osgearth-osgearth-3.7/build && make -j$(nproc)
-RUN cd osgearth-osgearth-3.7/build && make install
+RUN git clone --recurse-submodules --depth 1 --branch osgearth-3.2 https://github.com/gwaldron/osgearth.git osgearth-osgearth-3.2/
+RUN mkdir osgearth-osgearth-3.2/build
+RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_STANDARD=17 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF CMAKE_OPTS -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. 
+RUN cd osgearth-osgearth-3.2/build && make -j$(nproc)
+RUN cd osgearth-osgearth-3.2/build && make install
 
 #test GLCORE?
 #RUN ldconfig -v /usr/lib64/ /usr/local/
@@ -165,8 +179,6 @@ RUN cd libduckdb-linux-amd64 && cp lib* /usr/lib
 
 RUN ldconfig -v /usr/lib64/ /usr/local/
 RUN updatedb
-
-RUN locate libboost
 
 RUN apt install sudo
 
