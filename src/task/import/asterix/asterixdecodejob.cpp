@@ -70,9 +70,16 @@ void ASTERIXDecodeJob::run_impl()
     assert (decoder_);
     decoder_->start(this);
 
-    //@TODO: !check why assertion fails every now and then!
     if (!obsolete_)
+    {
+        loginf << "ASTERIXDecodeJob: waiting for last data to be fetched...";
+
+        //wait until data is fetched
+        while (!extracted_data_.empty())
+            QThread::msleep(1);
+
         assert(extracted_data_.size() == 0);
+    }
 
     done_ = true;
 
