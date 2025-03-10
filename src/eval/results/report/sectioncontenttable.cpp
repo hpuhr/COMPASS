@@ -529,7 +529,7 @@ void SectionContentTable::performClickAction()
             auto func = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
             {
                 viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
-                return AsyncTaskResult(true, "");
+                return Result::succeeded();
             };
             
             AsyncFuncTask task(func, "Updating Contents", "Updating contents...", false);

@@ -46,6 +46,7 @@
 #include "files.h"
 #include "timeconv.h"
 #include "number.h"
+#include "asynctask.h"
 
 #include "tbbhack.h"
 
@@ -275,9 +276,35 @@ void DBInterface::exportDBFile(const std::string& filename)
 
 /**
  */
-bool DBInterface::cleanupDB()
+bool DBInterface::cleanupDB(bool show_dialog)
 {
-    loginf << "DBInterface: cleanupDB: cleaning db...";
+    bool ok;
+
+    loginf << "DBInterface: cleanupDB";
+
+    if (show_dialog)
+    {
+        auto cb = [ this ] (const AsyncTaskState&, AsyncTaskProgressWrapper&) 
+        { 
+            return this->cleanupDBInternal();
+        };
+
+        AsyncFuncTask task(cb, "Optimizing Database", "Optimizing database", false);
+        ok = task.runAsyncDialog();
+    }
+    else
+    {
+        ok = cleanupDBInternal().ok();
+    }
+
+    return ok;
+}
+
+/**
+ */
+Result DBInterface::cleanupDBInternal()
+{
+    loginf << "DBInterface: cleanupDBInternal: cleaning db...";
 
     assert(ready());
     assert(!cleanup_in_progress_);
@@ -297,7 +324,7 @@ bool DBInterface::cleanupDB()
         if (!res_cleanup.ok())
         {
             //cleanup didn't work => log and return false
-            logerr << "DBInterface: cleanupDB: Cleanup failed: " << res_cleanup.error();
+            logerr << "DBInterface: cleanupDBInternal: Cleanup failed: " << res_cleanup.error();
         }
 
         res_critical = Result::succeeded();
@@ -315,11 +342,11 @@ bool DBInterface::cleanupDB()
 
         reset();
 
-        logerr << "DBInterface: cleanupDB: Error: " << res_critical.error();
+        logerr << "DBInterface: cleanupDBInternal: Error: " << res_critical.error();
         throw std::runtime_error(res_critical.error());
     }
 
-    return res_cleanup.ok();
+    return res_cleanup;
 }
 
 /**

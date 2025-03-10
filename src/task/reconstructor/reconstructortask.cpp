@@ -913,8 +913,14 @@ void ReconstructorTask::endReconstruction()
     if (!skip_reference_data_writing_)
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
+    //cleanup db after reconstruction
+    COMPASS::instance().dbInterface().cleanupDB(true);
+
     if (!allow_user_interactions_)
+    {
+        //auto-close dialog and immediately cleanup db
         progress_dialog_->close();
+    }
 }
 
 void ReconstructorTask::runCancelledSlot()
@@ -1211,19 +1217,16 @@ void ReconstructorTask::deleteCalculatedReferences() // called in async
     loginf << "ReconstructorTask: deleteCalculatedReferences: deleting";
 
     //cleanup db on delete (for re-compression)
-    bool cleanup_db = true;
 
     if (currentReconstructor()->settings().delete_all_calc_reftraj)
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
             currentReconstructor()->settings().ds_sac, 
-            currentReconstructor()->settings().ds_sic,
-            cleanup_db);
+            currentReconstructor()->settings().ds_sic);
     else
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
             currentReconstructor()->settings().ds_sac, 
             currentReconstructor()->settings().ds_sic,
-            currentReconstructor()->settings().ds_line,
-            cleanup_db);
+            currentReconstructor()->settings().ds_line);
 
     loginf << "ReconstructorTask: deleteCalculatedReferences: waiting on delete";
 

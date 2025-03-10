@@ -90,7 +90,8 @@ public:
     void exportDBFile(const std::string& filename);
     void closeDBFile();
 
-    bool cleanupDB();
+    bool cleanupDB(bool show_dialog = false);
+    bool cleanupInProgress() const { return cleanup_in_progress_; }
 
     const std::map<std::string, DBTableInfo>& tableInfo();
     const std::string dbFilename() const { return db_filename_; }
@@ -185,8 +186,6 @@ public:
     db::PerformanceMetrics stopPerformanceMetrics() const;
     bool hasActivePerformanceMetrics() const;
 
-    bool cleanupInProgress() const { return cleanup_in_progress_; }
-
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
     // ta -> mops versions, nucp_nics, nac_ps
@@ -206,6 +205,7 @@ protected:
     std::shared_ptr<DBResult> execute(const DBCommand& cmd);
 
     void updateTableInfo();
+    Result cleanupDBInternal();
 
     std::unique_ptr<DBInstance> db_instance_;
 

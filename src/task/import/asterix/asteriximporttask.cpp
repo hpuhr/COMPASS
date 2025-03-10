@@ -671,7 +671,7 @@ void ASTERIXImportTask::testFileDecoding()
         assert(this->decoder_);
         this->decoder_->canDecode(true);
 
-        return AsyncTaskResult(true, "");
+        return Result::succeeded();
     };
 
     AsyncFuncTask task(check_decoding, "Testing decoding", "Please wait...", false);
@@ -1521,22 +1521,15 @@ void ASTERIXImportTask::checkAllDone()
     {
         logdbg << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
 
-        if (source_.isFileType() && file_progress_dialog_)
-        {
-            file_progress_dialog_ = nullptr;
-        }
-
         all_done_ = true;
-        done_ = true; // why was this not set?
-        running_ = false;
+        done_     = true; // why was this not set?
+        running_  = false;
 
         boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time_;
         loginf << "ASTERIXImportTask: checkAllDone: import done after "
                << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
         COMPASS::instance().mainWindow().updateMenus(); // re-enable import menu
-
-        QApplication::restoreOverrideCursor();
 
         logdbg << "ASTERIXImportTask: checkAllDone: refresh";
 
@@ -1566,6 +1559,18 @@ void ASTERIXImportTask::checkAllDone()
                        this, &ASTERIXImportTask::insertDoneSlot);
             insert_slot_connected_ = false;
         }
+
+        //close dialog
+        if (source_.isFileType() && file_progress_dialog_)
+        {
+            file_progress_dialog_ = nullptr;
+        }
+
+        QApplication::restoreOverrideCursor();
+
+        //cleanup db after import
+        if (source_.isFileType())
+            COMPASS::instance().dbInterface().cleanupDB(true);
 
         emit doneSignal();
     }

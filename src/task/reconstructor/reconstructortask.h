@@ -92,10 +92,10 @@ public:
         }
     };
 
-  signals:
+signals:
     void configChanged();
 
-  public slots:
+public slots:
     void deleteCalculatedReferencesDoneSlot();
     void deleteTargetsDoneSlot();
     void deleteAssociationsDoneSlot();
@@ -110,7 +110,7 @@ public:
 
     void updateProgressSlot(const QString& msg, bool add_slice_progress);
 
-  public:
+public:
     ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                       TaskManager& task_manager);
     virtual ~ReconstructorTask();
@@ -169,6 +169,16 @@ public:
     DebugSettings& debugSettings() { return debug_settings_; }
 
 protected:
+    virtual void checkSubConfigurables() override;
+    void deleteCalculatedReferences();
+
+    void loadDataSlice();
+    void processDataSlice();
+    void writeDataSlice();
+    void endReconstruction();
+
+    void finalizeSlice(std::unique_ptr<ReconstructorBase::DataSlice>& slice);
+
     std::string current_reconstructor_str_;
 
     nlohmann::json use_dstypes_; // dstype -> bool
@@ -204,14 +214,4 @@ protected:
     bool skip_reference_data_writing_ {false};
 
     mutable std::map<std::pair<std::string,std::string>, std::unique_ptr<ViewPointGenVP>> debug_viewpoints_;
-
-    virtual void checkSubConfigurables() override;
-    void deleteCalculatedReferences();
-
-    void loadDataSlice();
-    void processDataSlice();
-    void writeDataSlice();
-    void endReconstruction();
-
-    void finalizeSlice(std::unique_ptr<ReconstructorBase::DataSlice>& slice);
 };
