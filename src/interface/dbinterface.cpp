@@ -299,6 +299,8 @@ bool DBInterface::cleanupDB()
             //cleanup didn't work => log and return false
             logerr << "DBInterface: cleanupDB: Cleanup failed: " << res_cleanup.error();
         }
+
+        res_critical = Result::succeeded();
     }
     catch(const std::exception& ex)
     {
