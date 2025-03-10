@@ -185,6 +185,8 @@ public:
     db::PerformanceMetrics stopPerformanceMetrics() const;
     bool hasActivePerformanceMetrics() const;
 
+    bool cleanupInProgress() const { return cleanup_in_progress_; }
+
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
     // ta -> mops versions, nucp_nics, nac_ps
@@ -220,4 +222,6 @@ protected:
     std::string db_filename_;
 
     bool insert_mt_ = false;
+
+    bool cleanup_in_progress_ = false;
 };

@@ -817,6 +817,7 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
     if (source_.isNetworkType())
         COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
 
+    //reset state before new run
     reset();
 
     float free_ram = System::getFreeRAMinGB();
@@ -1321,6 +1322,7 @@ void ASTERIXImportTask::postprocessDoneSlot()
         {
             logdbg << "ASTERIXImportTask: postprocessDoneSlot: adding accumulated buffers to queue";
 
+            //queued buffers full => add to queue
             queued_insert_buffers_.emplace_back(std::move(accumulated_buffers_));
             accumulated_buffers_.clear();
         }
@@ -1328,7 +1330,7 @@ void ASTERIXImportTask::postprocessDoneSlot()
         {
             logdbg << "ASTERIXImportTask: postprocessDoneSlot: accumulated buffers not yet full";
 
-            //processing ist postponed, so to keep the whole thing running decrease packet count...
+            //processing is postponed, so to keep the whole thing running decrease packet count...
             --num_packets_in_processing_;
 
             //...and restart decoding

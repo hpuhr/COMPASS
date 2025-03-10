@@ -214,7 +214,9 @@ private:
     AsyncJobPtr active_db_job_;
     tbb::concurrent_queue<AsyncJobPtr> queued_db_jobs_;
 
-    bool exec_jobs_immediately_ = true;
+    // if true non-blocking jobs will be executed immediately on add,
+    // otherwise execution will be postponed until a thread is free (recommended)
+    bool exec_nb_jobs_immediately_ = false; 
 };
 
 /**

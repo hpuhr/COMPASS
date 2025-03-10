@@ -690,7 +690,7 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
 
 /**
  */
-void DBContent::deleteDBContentData()
+void DBContent::deleteDBContentData(bool cleanup_db)
 {
     loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "'";
 
@@ -701,6 +701,7 @@ void DBContent::deleteDBContentData()
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setSpecificDBContent(name_);
+    delete_job_->cleanupDB(cleanup_db);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
             Qt::QueuedConnection);
@@ -710,7 +711,7 @@ void DBContent::deleteDBContentData()
 
 /**
  */
-void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic)
+void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, bool cleanup_db)
 {
     loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic;
 
@@ -722,6 +723,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic)
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setSpecificDBContent(name_);
     delete_job_->setSpecificSacSic(sac, sic);
+    delete_job_->cleanupDB(cleanup_db);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
             Qt::QueuedConnection);
@@ -731,7 +733,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic)
 
 /**
  */
-void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id)
+void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id, bool cleanup_db)
 {
     loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic
            << " line_id " << line_id;
@@ -745,6 +747,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned
     delete_job_->setSpecificDBContent(name_);
     delete_job_->setSpecificSacSic(sac, sic);
     delete_job_->setSpecificLineId(line_id);
+    delete_job_->cleanupDB(cleanup_db);
 
     connect(delete_job_.get(), &DBContentDeleteDBJob::doneSignal, this, &DBContent::deleteJobDoneSlot,
             Qt::QueuedConnection);

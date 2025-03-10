@@ -1210,13 +1210,20 @@ void ReconstructorTask::deleteCalculatedReferences() // called in async
 
     loginf << "ReconstructorTask: deleteCalculatedReferences: deleting";
 
+    //cleanup db on delete (for re-compression)
+    bool cleanup_db = true;
+
     if (currentReconstructor()->settings().delete_all_calc_reftraj)
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-            currentReconstructor()->settings().ds_sac, currentReconstructor()->settings().ds_sic);
+            currentReconstructor()->settings().ds_sac, 
+            currentReconstructor()->settings().ds_sic,
+            cleanup_db);
     else
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-            currentReconstructor()->settings().ds_sac, currentReconstructor()->settings().ds_sic,
-            currentReconstructor()->settings().ds_line);
+            currentReconstructor()->settings().ds_sac, 
+            currentReconstructor()->settings().ds_sic,
+            currentReconstructor()->settings().ds_line,
+            cleanup_db);
 
     loginf << "ReconstructorTask: deleteCalculatedReferences: waiting on delete";
 

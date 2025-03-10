@@ -555,7 +555,7 @@ bool JobManagerThreadPool::AsyncJob::done() const
  */
 JobManagerThreadPool::JobManagerThreadPool()
 :   JobManagerBase()
-,   exec_jobs_immediately_(false)
+,   exec_nb_jobs_immediately_(false)
 {
     setDefaultThreadAffinityBlocking(job::ThreadAffinity().mode(job::ThreadAffinityMode::AllCPUs)
                                                           .condition(job::ThreadAffinityCondition::Always));
@@ -586,14 +586,19 @@ void JobManagerThreadPool::addNonBlockingJob_impl(std::shared_ptr<Job> job)
     std::shared_ptr<AsyncJob> j(new AsyncJob);
     j->job_ = job;
 
-    non_blocking_queue_mutex_.lock();
+    //queue iterated regularly? => needs further protection
+    if (!exec_nb_jobs_immediately_)
+        non_blocking_queue_mutex_.lock();
 
     non_blocking_jobs_.push(j); 
 
-    if (exec_jobs_immediately_)
-        j->exec();
+    //queue iterated regularly? => needs further protection
+    if (!exec_nb_jobs_immediately_)
+        non_blocking_queue_mutex_.unlock();
 
-    non_blocking_queue_mutex_.unlock();
+    //immediately start job?
+    if (exec_nb_jobs_immediately_)
+        j->exec();
 }
 
 /**
@@ -708,8 +713,9 @@ void JobManagerThreadPool::handleNonBlockingJobs(bool debug)
     size_t num_running = 0;
     size_t num_total   = 0;
 
-    if (!exec_jobs_immediately_)
+    if (!exec_nb_jobs_immediately_)
     {
+        //try to start postponed jobs 
         auto checkJob = [ & ] (AsyncJobPtr& job)
         {
             if (!job)
@@ -717,21 +723,22 @@ void JobManagerThreadPool::handleNonBlockingJobs(bool debug)
 
             if (!job->is_running_)
             {
+                //try to start on a free thread
                 if (job->tryExec())
-                    ++num_started;
+                    ++num_started; //thread available, could be started
                 else
-                    ++num_waiting;
+                    ++num_waiting; //no free thread, still waiting
             }
             else
             {
-                ++num_running;
+                ++num_running; //already running
             }
         };
 
         //check active job
         checkJob(active_non_blocking_job_);
 
-        //check queued jobs
+        //check queued jobs (uses mutex for safe queue iteration)
         non_blocking_queue_mutex_.lock();
         if (!non_blocking_jobs_.empty())
         {

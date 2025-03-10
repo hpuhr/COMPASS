@@ -277,16 +277,18 @@ void DBInterface::exportDBFile(const std::string& filename)
  */
 bool DBInterface::cleanupDB()
 {
-    loginf << "DBInterface: cleanupDB";
+    loginf << "DBInterface: cleanupDB: cleaning db...";
 
     assert(ready());
+    assert(!cleanup_in_progress_);
 
-    bool cleanup_ok = true;
+    cleanup_in_progress_ = true;
+
+    Result res_cleanup, res_critical;
 
     try
     {
-        Result res_cleanup;
-        auto res_reconnect = db_instance_->reconnect(true);
+        auto res_reconnect = db_instance_->reconnect(true, &res_cleanup);
 
         //reconnection shall never fail
         if (!res_reconnect.ok())
@@ -296,21 +298,26 @@ bool DBInterface::cleanupDB()
         {
             //cleanup didn't work => log and return false
             logerr << "DBInterface: cleanupDB: Cleanup failed: " << res_cleanup.error();
-            cleanup_ok = false;
         }
     }
     catch(const std::exception& ex)
     {
-        //@TODO: what to do?
-
-        //reset interface = worstcase
-        reset();
-
-        logerr << "DBInterface: cleanupDB: Error: " << ex.what();
-        throw std::runtime_error(ex.what());
+        res_critical = Result::failed(ex.what());
     }
 
-    return cleanup_ok;
+    cleanup_in_progress_ = false;
+
+    if (!res_critical.ok())
+    {
+        //@TODO: correct way to resolve this worst case?
+
+        reset();
+
+        logerr << "DBInterface: cleanupDB: Error: " << res_critical.error();
+        throw std::runtime_error(res_critical.error());
+    }
+
+    return res_cleanup.ok();
 }
 
 /**

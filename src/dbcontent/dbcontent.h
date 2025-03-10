@@ -275,12 +275,14 @@ public:
                     std::shared_ptr<Buffer> buffer);
 
     // counts and targets have to be adjusted outside
-    void deleteDBContentData();
+    void deleteDBContentData(bool cleanup_db = false);
     void deleteDBContentData(unsigned int sac, 
-                             unsigned int sic);
+                             unsigned int sic,
+                             bool cleanup_db = false);
     void deleteDBContentData(unsigned int sac, 
                              unsigned int sic, 
-                             unsigned int line_id);
+                             unsigned int line_id,
+                             bool cleanup_db = false);
 
     //std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
 

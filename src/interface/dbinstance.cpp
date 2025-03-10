@@ -179,11 +179,15 @@ Result DBInstance::reconnect(bool cleanup_db, Result* cleanup_result)
 
     auto fn = db_filename_;
 
+    loginf << "DBInstance: reconnect: closing db for reconnect...";
+
     //close db
     close();
 
     if (cleanup_db)
     {
+        loginf << "DBInstance: reconnect: cleaning db...";
+
         //cleanup closed db file (cleanup might need closing of db handles)
         auto res = cleanupDB(fn);
         
@@ -191,8 +195,12 @@ Result DBInstance::reconnect(bool cleanup_db, Result* cleanup_result)
             *cleanup_result = res;
     }
 
+    loginf << "DBInstance: reconnect: reopening db...";
+
     //re-open db
-    return open(fn);
+    auto open_res = open(fn);
+
+    return open_res;
 }
 
 /**

@@ -52,6 +52,11 @@ void DBContentDeleteDBJob::setSpecificLineId(unsigned int line_id)
     specific_line_id_ = line_id;
 }
 
+void DBContentDeleteDBJob::cleanupDB(bool cleanup_db)
+{
+    cleanup_db_ = cleanup_db;
+}
+
 void DBContentDeleteDBJob::run_impl()
 {
     logdbg << "DBContentDeleteDBJob: run: start";
@@ -117,6 +122,9 @@ void DBContentDeleteDBJob::run_impl()
     else
         assert (false);
 
+    //cleanup db after delete?
+    if (cleanup_db_)
+        db_interface_.cleanupDB();
 
     boost::posix_time::time_duration diff = boost::posix_time::microsec_clock::local_time() - start_time;
 
