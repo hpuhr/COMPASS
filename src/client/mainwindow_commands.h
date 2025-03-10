@@ -21,7 +21,6 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
-
 // import_sectors_json
 struct RTCommandImportSectorsJSON : public rtcommand::RTCommand
 {

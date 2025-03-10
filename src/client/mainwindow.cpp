@@ -68,6 +68,7 @@
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "geometrytreeitem.h"
 #include "test_lab.h"
+#include "extra_commands.h"
 #endif
 
 #include <QApplication>
@@ -221,8 +222,14 @@ MainWindow::MainWindow()
     connect(&COMPASS::instance().licenseManager(), &LicenseManager::changed,
             this, &MainWindow::updateWindowTitle);
 
-            //init ui related commands
+    //init ui related commands
     ui_test::initUITestCommands();
+
+    //init extra commands
+#if USE_EXPERIMENTAL_SOURCE == true
+    if (!COMPASS::instance().isAppImage())
+        extra::init_extra_commands();
+#endif
 
     main_window::init_commands();
 }
