@@ -174,6 +174,12 @@ RUN apt-get install libpcap-dev -y
 
 RUN apt-get install libgeographic-dev -y
 
+RUN wget https://github.com/duckdb/duckdb/releases/download/v1.2.0/libduckdb-linux-amd64.zip
+RUN mkdir libduckdb-linux-amd64
+RUN unzip libduckdb-linux-amd64.zip -d libduckdb-linux-amd64
+RUN cd libduckdb-linux-amd64 && cp *.h /usr/include
+RUN cd libduckdb-linux-amd64 && cp lib* /usr/lib
+
 RUN ldconfig -v /usr/lib64/ /usr/local/
 RUN updatedb
 

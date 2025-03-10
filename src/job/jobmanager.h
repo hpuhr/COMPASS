@@ -33,6 +33,7 @@
 
 #include <list>
 #include <memory>
+#include <future>
 
 class WorkerThread;
 
