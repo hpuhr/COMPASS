@@ -25,7 +25,6 @@
 #include "sqlgenerator.h"
 
 #include "duckdbinstance.h"
-#include "sqliteinstance.h"
 
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
@@ -146,10 +145,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
         //create connection
         auto ext = boost::filesystem::path(filename).extension().string();
 
-        if (ext == ".duckdb")
-            db_instance_.reset(new DuckDBInstance(this));
-        else
-            db_instance_.reset(new SQLiteInstance(this));
+        db_instance_.reset(new DuckDBInstance(this));
         
         loginf << "DBInterface: openDBFile: opening file '" << filename << "'";
 
