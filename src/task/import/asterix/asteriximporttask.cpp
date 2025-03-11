@@ -1295,47 +1295,57 @@ void ASTERIXImportTask::postprocessDoneSlot()
     // queue data
     if (!stopped_)
     {
-        logdbg << "ASTERIXImportTask: postprocessDoneSlot: accumulating...";
-
-        // move buffers to accumulated buffers
-        auto insert_buffers = std::move(job_buffers);
-
-        for (auto& b : insert_buffers)
+        if (source_.isNetworkType())
         {
-            auto it = accumulated_buffers_.find(b.first);
-            if (it == accumulated_buffers_.end())
-                accumulated_buffers_[ b.first ] = std::move(b.second);
-            else
-                it->second->seizeBuffer(*b.second);
-        }
-        insert_buffers.clear();
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: live - adding for insert...";
 
-        // check if ready to queue in
-        size_t size_max = 0;
-        for (const auto& b : accumulated_buffers_)
-            if (b.second->size() > size_max)
-                size_max = b.second->size();
-
-        logdbg << "ASTERIXImportTask: postprocessDoneSlot: accumulated buffers, maximum size " << size_max << " / " << settings_.chunk_size_insert;
-
-        if (!decode_job_ || size_max >= settings_.chunk_size_insert)
-        {
-            logdbg << "ASTERIXImportTask: postprocessDoneSlot: adding accumulated buffers to queue";
-
-            //queued buffers full => add to queue
-            queued_insert_buffers_.emplace_back(std::move(accumulated_buffers_));
-            accumulated_buffers_.clear();
+            // live - just add buffers for insert
+            queued_insert_buffers_.push_back(std::move(job_buffers));
         }
         else
         {
-            logdbg << "ASTERIXImportTask: postprocessDoneSlot: accumulated buffers not yet full";
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: accumulating...";
 
-            //processing is postponed, so to keep the whole thing running decrease packet count...
-            --num_packets_in_processing_;
+            // offline - move buffers to accumulated buffers
+            auto insert_buffers = std::move(job_buffers);
 
-            //...and restart decoding
-            if (decode_job_ && decode_job_->hasData())
-                QMetaObject::invokeMethod(this, "addDecodedASTERIXSlot", Qt::QueuedConnection);
+            for (auto& b : insert_buffers)
+            {
+                auto it = accumulated_buffers_.find(b.first);
+                if (it == accumulated_buffers_.end())
+                    accumulated_buffers_[ b.first ] = std::move(b.second);
+                else
+                    it->second->seizeBuffer(*b.second);
+            }
+            insert_buffers.clear();
+
+            // check if ready to queue in
+            size_t size_max = 0;
+            for (const auto& b : accumulated_buffers_)
+                if (b.second->size() > size_max)
+                    size_max = b.second->size();
+
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: accumulated buffers, maximum size " << size_max << " / " << settings_.chunk_size_insert;
+
+            if (!decode_job_ || size_max >= settings_.chunk_size_insert)
+            {
+                logdbg << "ASTERIXImportTask: postprocessDoneSlot: adding accumulated buffers to queue";
+
+                //queued buffers full => add to queue
+                queued_insert_buffers_.push_back(std::move(accumulated_buffers_));
+                accumulated_buffers_.clear();
+            }
+            else
+            {
+                logdbg << "ASTERIXImportTask: postprocessDoneSlot: accumulated buffers not yet full";
+
+                //processing is postponed, so to keep the whole thing running decrease packet count...
+                --num_packets_in_processing_;
+
+                //...and restart decoding
+                if (decode_job_ && decode_job_->hasData())
+                    QMetaObject::invokeMethod(this, "addDecodedASTERIXSlot", Qt::QueuedConnection);
+            }
         }
 
         if (!insert_active_ && 
