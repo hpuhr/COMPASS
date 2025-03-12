@@ -136,6 +136,11 @@ Result DBInstance::open(const std::string& file_name)
     if (!ti_result.ok())
         return ti_result;
 
+    //configure db using pragma statements (if provided by derived)
+    auto config_pragma_result = configureDBUsingPragmas();
+    if (!config_pragma_result.ok())
+        return config_pragma_result;
+
     loginf << "DBInstance: open: opened!";
 
     return Result::succeeded();
@@ -444,4 +449,39 @@ void DBInstance::printTableInfo() const
 
         loginf << "";
     }
+}
+
+/**
+ */
+Result DBInstance::configureDBUsingPragmas()
+{
+    assert(dbReady());
+    assert(default_connection_);
+
+    auto pragmas = sqlPragmas();
+
+    for (const auto& p : pragmas)
+    {
+        auto r = default_connection_->executePragma(p);
+        if (!r.ok())
+            return r;
+    }
+
+    return Result::succeeded();
+}
+
+/**
+ */
+std::string DBInstance::dbInfo()
+{
+    if (!dbReady())
+        return "db not ready";
+
+    assert(default_connection_);
+
+    auto info = default_connection_->dbInfo();
+    if (info.empty())
+        return "no info available";
+
+    return info;
 }

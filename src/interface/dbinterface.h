@@ -186,6 +186,8 @@ public:
     db::PerformanceMetrics stopPerformanceMetrics() const;
     bool hasActivePerformanceMetrics() const;
 
+    std::string dbInfo();
+
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
     // ta -> mops versions, nucp_nics, nac_ps

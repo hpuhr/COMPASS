@@ -64,6 +64,8 @@ public:
     std::shared_ptr<DBResult> execute(const DBCommand& command);
     std::shared_ptr<DBResult> execute(const DBCommandList& command_list);
 
+    virtual Result executePragma(const db::SQLPragma& pragma); 
+
     Result createTable(const std::string& table_name, 
                        const std::vector<DBTableColumnInfo>& column_infos,
                        const std::vector<db::Index>& indices = std::vector<db::Index>(),
@@ -100,6 +102,7 @@ public:
     virtual std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
                                                          size_t offset, 
                                                          size_t chunk_size) = 0;
+    virtual std::string dbInfo() { return ""; }
 
     const DBInstance* instance() const { return instance_; }
     
@@ -133,11 +136,12 @@ protected:
                                const std::vector<db::Index>& indices,
                                bool verbose = false);
 
+    ResultT<std::vector<std::string>> getTableList();
+
     DBInstance* instance() { return instance_; }
     
 private:
     ResultT<DBTableInfo> getColumnList(const std::string& table);
-    ResultT<std::vector<std::string>> getTableList();
 
     DBInstance* instance_;
     bool        connected_ = false;

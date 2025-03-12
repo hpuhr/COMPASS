@@ -263,6 +263,14 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
 }
 
 /**
+ */
+Result DBConnection::executePragma(const db::SQLPragma& pragma)
+{
+    auto sql = sqlGenerator().configurePragma(pragma);
+    return execute(sql);
+}
+
+/**
  * Creates a table of the given name and column properties.
  */
 Result DBConnection::createTable(const std::string& table_name, 

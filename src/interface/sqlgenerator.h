@@ -121,6 +121,8 @@ public:
 
     std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBContent& object);
 
+    std::string configurePragma(const db::SQLPragma& pragma);
+
 private:
     std::string placeholder(int index = 1) const;
 

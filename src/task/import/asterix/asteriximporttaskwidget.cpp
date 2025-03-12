@@ -132,7 +132,6 @@ void ASTERIXImportTaskWidget::addMainTab()
                 this, &ASTERIXImportTaskWidget::resetDateChangedSlot);
         main_tab_layout->addWidget(reset_date_between_files_check_);
 
-
         ignore_timejumps_check_ = new QCheckBox("Ignore 24h Time Jumps");
         ignore_timejumps_check_->setChecked(task_.settings().ignore_time_jumps_);
         connect(ignore_timejumps_check_, &QCheckBox::clicked, this,
@@ -146,7 +145,6 @@ void ASTERIXImportTaskWidget::addMainTab()
         connect(debug_check_, &QCheckBox::clicked,
                 this, &ASTERIXImportTaskWidget::debugChangedSlot);
         main_tab_layout->addWidget(debug_check_);
-
     }
 
     QWidget* main_tab_widget = new QWidget();

@@ -41,6 +41,8 @@ protected:
     ResultT<DBConnection*> createConnection_impl(bool verbose) override final;
     Result cleanupDB_impl(const std::string& db_fn) override final;
 
+    std::vector<db::SQLPragma> sqlPragmas() const override final;
+
     /**
      */
     db::SQLConfig sqlConfiguration_impl() const override final

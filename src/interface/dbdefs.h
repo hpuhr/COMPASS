@@ -80,4 +80,15 @@ struct Index : public std::pair<std::string, std::string>
     const std::string& columnName() const { return this->second; }
 };
 
+/**
+ */
+struct SQLPragma : public std::pair<std::string, std::string>
+{
+    SQLPragma() {}
+    SQLPragma(const std::string& name, 
+              const std::string& value) : std::pair<std::string, std::string>(name, value) {}
+    const std::string& name() const { return this->first; }
+    const std::string& value() const { return this->second; }
+};
+
 }

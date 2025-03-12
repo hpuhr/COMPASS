@@ -75,6 +75,8 @@ public:
     Result updateTableInfo();
     void printTableInfo() const;
     const std::map<std::string, DBTableInfo>& tableInfo() const { return table_info_; }
+
+    std::string dbInfo();
     
 protected:
     DBInterface& interface() { return interface_; }
@@ -95,8 +97,12 @@ protected:
     /// db backend specific sql settings
     virtual db::SQLConfig sqlConfiguration_impl() const = 0;
 
+    /// sql pragmas used for initial db configuration
+    virtual std::vector<db::SQLPragma> sqlPragmas() const { return {}; }
+
 private:
     Result cleanupDB(const std::string& db_fn);
+    Result configureDBUsingPragmas();
 
     ResultT<DBConnection*> createConnection(bool verbose);
     DBConnectionWrapper createConnectionWrapper(DBConnection* conn, 

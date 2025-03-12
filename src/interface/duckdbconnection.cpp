@@ -165,7 +165,10 @@ Result DuckDBConnection::executeSQL_impl(const std::string& sql, DBResult* resul
 
     if (fetch_result_buffer && result)
     {
-        //@TODO: fetch buffer
+        DBExecResult& result_base = dbresult;
+
+        auto b = result_base.toBuffer();
+        result->buffer(b);
     }
 
     return Result::succeeded();
@@ -438,4 +441,11 @@ ResultT<std::vector<std::string>> DuckDBConnection::getTableList_impl()
     }
 
     return ResultT<std::vector<std::string>>::succeeded(tables);
+}
+
+/**
+ */
+std::string DuckDBConnection::dbInfo()
+{
+    return "";
 }

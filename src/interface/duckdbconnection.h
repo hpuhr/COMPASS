@@ -51,6 +51,8 @@ public:
     std::shared_ptr<DBScopedReader> createReader(const std::shared_ptr<DBCommand>& select_cmd, 
                                                  size_t offset, 
                                                  size_t chunk_size) override final;
+    std::string dbInfo() override final;
+
 protected:
     Result connect_impl() override final;
     void disconnect_impl() override final;

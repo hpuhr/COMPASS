@@ -2113,3 +2113,13 @@ bool DBInterface::hasActivePerformanceMetrics() const
 
     return ok;
 }
+
+/**
+ */
+std::string DBInterface::dbInfo()
+{
+    if (!ready())
+        return "db not ready";
+
+    return db_instance_->dbInfo();
+}

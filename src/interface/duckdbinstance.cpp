@@ -175,3 +175,15 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
 
     return Result::succeeded();
 }
+
+/**
+ */
+std::vector<db::SQLPragma> DuckDBInstance::sqlPragmas() const
+{
+    std::vector<db::SQLPragma> pragmas;
+
+    //add config pragmas
+    //pragmas.emplace_back("force_compression", "'chimp'");
+
+    return pragmas;
+}

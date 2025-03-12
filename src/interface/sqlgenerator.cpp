@@ -1120,3 +1120,10 @@ string SQLGenerator::getDeleteStatement (const string& table, const string& filt
     // DELETE FROM table_name [WHERE Clause]
     return "DELETE FROM "+table+" WHERE "+filter+";";
 }
+
+/**
+ */
+std::string SQLGenerator::configurePragma(const db::SQLPragma& pragma)
+{
+    return "PRAGMA " + pragma.name() + " = " + pragma.value() + ";";
+}
