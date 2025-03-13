@@ -18,4 +18,4 @@ Categories=Science;NumericalAnalysis;DataVisualization;
 #Exec=fooview --create-new
 #Name=Create a new Foo!
 #Icon=fooview-new
-X-AppImage-Version=65e1689b
+X-AppImage-Version=37ddc1bf

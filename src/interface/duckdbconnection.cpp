@@ -168,6 +168,8 @@ Result DuckDBConnection::executeSQL_impl(const std::string& sql, DBResult* resul
         DBExecResult& result_base = dbresult;
 
         auto b = result_base.toBuffer();
+        loginf << "buffer has size " << (b ? b->size() : 0);
+
         result->buffer(b);
     }
 
@@ -447,5 +449,55 @@ ResultT<std::vector<std::string>> DuckDBConnection::getTableList_impl()
  */
 std::string DuckDBConnection::dbInfo()
 {
-    return "";
+    const std::string& fn = instance()->dbFilename();
+
+    std::stringstream ss;
+
+    ss << "**********************************************************************************" << std::endl;
+    ss << "* DBInfo | DB: " << fn << std::endl;
+    ss << "**********************************************************************************" << std::endl;
+    ss << std::endl;
+
+    auto tables = getTableList();
+    if (!tables.ok())
+        return "";
+
+    for (const auto& t : tables.result())
+    {
+        ss << "[Table '" << t << "']" << std::endl;
+        ss << std::endl;
+        ss << tableInfo(t) << std::endl;
+        ss << std::endl;
+    }
+
+    return ss.str();
+}
+
+/**
+ */
+std::string DuckDBConnection::tableInfo(const std::string& table_name)
+{
+    std::stringstream ss;
+
+    {
+        // std::string sql = std::string("") 
+        //                 + "SELECT * EXCLUDE (column_path, segment_id, start, stats, persistent, block_id, block_offset, has_updates) "
+        //                 + "FROM pragma_storage_info('" + table_name + "') "
+        //                 + "USING SAMPLE 10 ROWS "
+        //                 + "ORDER BY row_group_id;";
+        // auto result = execute(sql, true);
+
+        // if (result->hasError())
+        //     loginf << "DuckDBConnection: tableInfo: retrieving compression info failed: " << result->error();
+
+        // bool has_result = !result->hasError() && result->buffer();
+
+        // ss << "Compression: " << (has_result ? "\n" + result->buffer()->asJSON().dump(-4) : "-") << std::endl << std::endl;
+    }
+
+    std::string ret = ss.str();
+    if (ret.empty())
+        ret = "no info available";
+
+    return ret;
 }

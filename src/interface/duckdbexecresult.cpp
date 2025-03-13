@@ -47,9 +47,9 @@ PropertyDataType DuckDBExecResult::dataTypeFromDuckDB(duckdb_type type)
     else if (type == duckdb_type::DUCKDB_TYPE_VARCHAR)
         return PropertyDataType::STRING;
     
-    //@TODO: more types needed?
+    //@TODO: more types needed (how to handle types like 'list'?)
 
-    logerr << "DuckDBExecResult: dataTypeFromDuckDB: data type not implemented";
+    logerr << "DuckDBExecResult: dataTypeFromDuckDB: data type not implemented: " << type;
     assert(false);
 
     return PropertyDataType::BOOL;

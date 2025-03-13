@@ -78,5 +78,7 @@ protected:
 private:
     DuckDBInstance* duckDBInstance();
 
+    std::string tableInfo(const std::string& table_name);
+
     duckdb_connection connection_ = nullptr;
 };
