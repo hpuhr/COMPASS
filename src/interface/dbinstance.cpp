@@ -141,7 +141,7 @@ Result DBInstance::open(const std::string& file_name)
     if (!config_pragma_result.ok())
         return config_pragma_result;
 
-    loginf << "DBInstance: open: opened!";
+    loginf << "DBInstance: open: done";
 
     return Result::succeeded();
 }
@@ -151,7 +151,7 @@ Result DBInstance::open(const std::string& file_name)
  */
 void DBInstance::close()
 {
-    loginf << "DBInstance: close, db open? " << db_open_;
+    loginf << "DBInstance: close, db open " << db_open_;
 
     if (!dbOpen())
         return;

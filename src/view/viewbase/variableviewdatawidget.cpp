@@ -230,7 +230,7 @@ bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent
     
     if (!viewData().count(dbcontent_name))
     {
-        loginf << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no buffer";
+        logdbg << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no buffer";
         return false;
     }
 
@@ -244,7 +244,7 @@ bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent
     auto data_var = variable.getFor(dbcontent_name);
     if (!data_var)
     {
-        loginf << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no metavar";
+        logdbg << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no metavar";
         return false;
     }
 
@@ -262,8 +262,9 @@ bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent
 
     if (!ok)
     {
-        loginf << "VariableViewDataWidget: canUpdate: variable " << variable.id() 
-               << " dbcontent " << dbcontent_name << ": data var '" << current_var_name << "' not in buffer or not supported by view";
+        logdbg << "VariableViewDataWidget: canUpdate: variable " << variable.id()
+               << " dbcontent " << dbcontent_name << ": data var '" << current_var_name
+               << "' not in buffer or not supported by view";
     }
 
     return ok;
@@ -352,7 +353,7 @@ void VariableViewDataWidget::updateFromVariables()
 
         bool can_update = canUpdate(dbcontent_name);
 
-        loginf << "VariableViewDataWidget: updateData: dbo " << dbcontent_name << " canUpdate " << can_update;
+        logdbg << "VariableViewDataWidget: updateData: dbo " << dbcontent_name << " canUpdate " << can_update;
 
         if (can_update)
             updateVariableData(dbcontent_name, *buffer);

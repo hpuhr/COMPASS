@@ -103,7 +103,7 @@ Result DBConnection::connect()
     connected_ = true;
 
     if (verbose_)
-        loginf << "DBConnection: connect: connected!";
+        loginf << "DBConnection: connect: done";
 
     return Result::succeeded();
 }
@@ -114,7 +114,7 @@ Result DBConnection::connect()
 void DBConnection::disconnect()
 {
     if (verbose_)
-        loginf << "DBConnection: disconnecting, connected? " << connected_;
+        loginf << "DBConnection: disconnecting, connected " << connected_;
 
     if (!connected_)
         return;
@@ -612,7 +612,8 @@ std::shared_ptr<DBResult> DBConnection::readChunk()
     assert(result->buffer() && result->containsData());
 
     if (verbose_)
-        loginf << "DBConnection: readChunk: read " << result->buffer()->size() << " left " << active_reader_->numLeft() << " hasmore " << result->hasMore();
+        logdbg << "DBConnection: readChunk: read " << result->buffer()->size()
+               << " left " << active_reader_->numLeft() << " hasmore " << result->hasMore();
 
     // if (!result->hasMore())
     // {

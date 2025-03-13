@@ -946,7 +946,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         if (maxLoadReached())
         // break if too many packets in process, this slot is called again from insertDoneSlot or postProcessDone
         {
-            loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached, map futures "
+            logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: returning since max load reached, map futures "
                    << json_map_jobs_.size() << " queued insert buffers " << queued_insert_buffers_.size();
             return;
         }
@@ -992,7 +992,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     if (!extracted_data.size())
     {
-        loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
+        logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data empty";
         return;
     }
 

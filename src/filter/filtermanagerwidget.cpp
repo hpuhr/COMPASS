@@ -178,7 +178,7 @@ void FilterManagerWidget::updateFiltersSlot()
 
     for (auto& it : filters)
     {
-        loginf << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
+        logdbg << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
 
         if (cnt < num_filters_break)
             ds_filter_layout0_->addWidget(it->widget());

@@ -48,15 +48,6 @@ RUN apt-get install locate zip unzip qtchooser chrpath -y
 
 RUN apt-get install libtbb-dev -y
 
-RUN wget https://sqlite.org/2022/sqlite-autoconf-3380000.tar.gz --no-check-certificate
-RUN tar xvzf sqlite-autoconf-3380000.tar.gz
-RUN cd sqlite-autoconf-3380000 && env CPPFLAGS='-O2 -DNDEBUG -DSQLITE_ENABLE_FTS5 -DSQLITE_ENABLE_STAT4 -DSQLITE_ENABLE_UPDATE_DELETE_LIMIT -DSQLITE_ENABLE_COLUMN_METADATA -DHAVE_ISNAN -DOMIT_LOOKASIDE -DUSE_URI -DSQLITE_DEFAULT_MEMSTATUS=0 -DSQLITE_DEFAULT_WAL_SYNCHRONOUS -DSQLITE_LIKE_DOESNT_MATCH_BLOBS -DSQLITE_MAX_EXPR_DEPTH=0 -DSQLITE_OMIT_DEPRECATED -DSQLITE_OMIT_PROGRESS_CALLBACK -DSQLITE_OMIT_SHARED_CACHE -DSQLITE_USE_ALLOCA -DENABLE_BYTECODE_VTAB -DENABLE_FTS3_PARENTHESIS -DENABLE_FTS3_TOKENIZER -DENABLE_PREUPDATE_HOOK -DENABLE_SESSION -DENABLE_PREUPDATE_HOOK -DENABLE_UNKNOWN_SQL_FUNCTION -DENABLE_UNLOCK_NOTIFY -DSOUNDEX -DDEFAULT_AUTOVACUUM=0 -DSQLITE_DEFAULT_WORKER_THREADS=8' ./configure --prefix=/usr/ --libdir=/usr/lib/x86_64-linux-gnu/
-RUN cd sqlite-autoconf-3380000 && make -j$(nproc)
-RUN cd sqlite-autoconf-3380000 && make install
-RUN sqlite3 --version
-RUN sqlite3 -cmd "PRAGMA compile_options;"
-RUN sqlite3 -cmd "CREATE TABLE countries (id varchar(3), data json);insert into countries (id, data) values(1, json('{\"cell\":\"+491765\", \"home\":\"+498973\"}'));select * from countries;"
-
 RUN more /etc/apt/sources.list
 RUN cp /etc/apt/sources.list /etc/apt/sources.list~
 RUN echo 'deb-src http://archive.debian.org/debian buster main' >> /etc/apt/sources.list
@@ -90,8 +81,8 @@ RUN apt-get install git -y
 #RUN mkdir glcore
 #RUN cd glcore && git clone https://github.com/KhronosGroup/OpenGL-Registry.git
 #RUN ls glcore
-ENV GL_PATH="/glcore/OpenGL-Registry/api/"
-ENV CMAKE_OPTS="-DOPENGL_INCLUDE_DIR=$GL_PATH -DOPENGL_PROFILE=GL2 -Dosg_OPENGL_PROFILE=GL2 -DGLCORE_GLCOREARB_HEADER=$GL_PATH"
+#ENV GL_PATH="/glcore/OpenGL-Registry/api/"
+#ENV CMAKE_OPTS="-DOPENGL_INCLUDE_DIR=$GL_PATH -DOPENGL_PROFILE=GL2 -Dosg_OPENGL_PROFILE=GL2 -DGLCORE_GLCOREARB_HEADER=$GL_PATH"
 
 #ENV CMAKE_OPTS="-DOPENGL_INCLUDE_DIR=$GL_PATH -DOPENGL_PROFILE=GL3 -Dosg_OPENGL_PROFILE=GLCORE -DGLCORE_GLCOREARB_HEADER=$GL_PATH \
 #-DOSG_GLU_AVAILABLE=OFF \
@@ -114,14 +105,7 @@ RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.5/build
 #RUN sed -i '461a message("  OPENGL_PROFILE: ${OPENGL_PROFILE}")' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
 #RUN sed -i '502a message("  OSG_GL3_AVAILABLE: ${OSG_GL3_AVAILABLE}")' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
 
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake CMAKE_OPTS -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=17 ..
-#RUN exit 1
-#RUN sed -i '59a #ifdef OSG_GL3_AVAILABLE' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
-#RUN sed -i '60a static_assert(true, "OSG_GL3_AVAILABLE is defined!");' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
-#RUN sed -i '61a #else' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
-#RUN sed -i '62a static_assert(false, "OSG_GL3_AVAILABLE is NOT defined!");' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
-#RUN sed -i '63a #endif' /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
-#RUN cat -n /OpenSceneGraph-OpenSceneGraph-3.6.5/src/osg/PointSprite.cpp
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DOPENGL_PROFILE=GL2 -DCMAKE_CXX_STANDARD=11 ..
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make -j$(nproc)
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make install
 RUN osgversion
@@ -148,9 +132,10 @@ RUN cd protobuf-3.19.1 && ldconfig # refresh shared library cache.
 
 RUN apt-get install libglew-dev libzip-dev -y
 
-RUN git clone --recurse-submodules --depth 1 --branch osgearth-3.2 https://github.com/gwaldron/osgearth.git osgearth-osgearth-3.2/
+RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-3.2.zip
+RUN unzip osgearth-3.2.zip
 RUN mkdir osgearth-osgearth-3.2/build
-RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_STANDARD=17 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release .. 
+RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_STANDARD=11 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
 RUN cd osgearth-osgearth-3.2/build && make -j$(nproc)
 RUN cd osgearth-osgearth-3.2/build && make install
 

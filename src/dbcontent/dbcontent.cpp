@@ -862,7 +862,7 @@ void DBContent::readJobDoneSlot()
  */
 void DBContent::databaseOpenedSlot()
 {
-    loginf << "DBContent " << name_ << ": databaseOpenedSlot";
+    logdbg << "DBContent " << name_ << ": databaseOpenedSlot";
 
     //string associations_table_name = associationsTableName();
 

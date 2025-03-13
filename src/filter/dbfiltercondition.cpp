@@ -62,7 +62,7 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
 //    if (usable_)
 //        value_invalid_ = checkValueInvalid(value_);
 
-    loginf << "DBFilterCondition: DBFilterCondition: " << instance_id << " value " << value_
+    logdbg << "DBFilterCondition: ctor: " << instance_id << " value " << value_
            << " usable " << usable_ << " invalid " << value_invalid_;
 
     widget_ = new QWidget();

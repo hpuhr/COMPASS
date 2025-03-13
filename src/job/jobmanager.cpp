@@ -754,7 +754,7 @@ void JobManagerThreadPool::handleNonBlockingJobs(bool debug)
 
     if (debug && num_total > 0)
     {
-        loginf << "JobManagerThreadPool: handleNonBlockingJobs:"
+        logdbg << "JobManagerThreadPool: handleNonBlockingJobs:"
                << " started: " << num_started
                << " waiting: " << num_waiting
                << " running: " << num_running;

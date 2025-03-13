@@ -253,7 +253,7 @@ DBContent& ASTERIXJSONParser::dbContent() const
 
 void ASTERIXJSONParser::initialize()
 {
-    loginf << "ASTERIXJSONParser: initialize: name " << name_;
+    logdbg << "ASTERIXJSONParser: initialize: name " << name_;
 
     if (!initialized_)
     {
