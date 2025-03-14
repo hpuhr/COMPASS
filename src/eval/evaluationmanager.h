@@ -35,15 +35,14 @@ class EvaluationStandard;
 class DBContent;
 class SectorLayer;
 class AirSpace;
+class ToolBox;
 
-namespace dbContent {
-
-class VariableSet;
-
+namespace dbContent 
+{
+    class VariableSet;
 }
 
 class QWidget;
-class QTabWidget;
 
 struct EvaluationManagerSettings
 {
@@ -199,7 +198,7 @@ public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~EvaluationManager();
 
-    void init(QTabWidget* tab_widget);
+    void init(ToolBox* tool_box);
 
     bool canLoadData ();
     void loadData ();

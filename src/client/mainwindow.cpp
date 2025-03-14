@@ -51,6 +51,8 @@
 #include "rtcommand_shell.h"
 #include "licensemanagerdialog.h"
 #include "licensemanager.h"
+#include "toolbox.h"
+#include "toolboxwidget.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
@@ -115,33 +117,27 @@ MainWindow::MainWindow()
 
     QVBoxLayout* main_layout = new QVBoxLayout();
     main_layout->setContentsMargins(0, 0, 0, 0);
-
     main_widget->setLayout(main_layout);
 
-            // initialize tabs
+    QHBoxLayout* content_layout = new QHBoxLayout;
+    content_layout->setContentsMargins(0, 0, 0, 0);
+    content_layout->setSpacing(0);
+
+    main_layout->addLayout(content_layout);
+
+    tool_box_ = new ToolBox;
+    content_layout->addWidget(tool_box_);
+
+    // initialize tabs
 
     tab_widget_ = new QTabWidget();
     tab_widget_->setObjectName("container0");
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    tab_widget_->addTab(COMPASS::instance().dataSourceManager().loadWidget(), "Data Sources");
-    tab_widget_->addTab(COMPASS::instance().filterManager().widget(), "Filters");
-    tab_widget_->addTab(COMPASS::instance().dbContentManager().targetListWidget(), "Targets");
-
-    QTabBar *tabBar = tab_widget_->tabBar();
-
-    tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
-    //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0");
-
-    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
-    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
-
     tab_widget_->setCurrentIndex(0);
 
     QApplication::restoreOverrideCursor();
-
-            //tab_widget_->setCurrentIndex(0);
 
     const QString tool_tip = "Add view";
 
@@ -156,9 +152,30 @@ MainWindow::MainWindow()
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
-    main_layout->addWidget(tab_widget_);
+    content_layout->addWidget(tab_widget_);
 
-            // bottom widget
+    // add tools
+    tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().dataSourceManager().loadWidget(),
+                                                "Data Sources",
+                                                "Data Sources",
+                                                QIcon(Files::getIconFilepath("db.png").c_str())));
+    tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().filterManager().widget(),
+                                                "Filters",
+                                                "Filters",
+                                                QIcon(Files::getIconFilepath("filter.png").c_str())));
+    tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().dbContentManager().targetListWidget(),
+                                                "Targets",
+                                                "Targets",
+                                                QIcon(Files::getIconFilepath("globe.png").c_str())));
+    //@TODO: !handle filter check box!
+    //QTabBar *tabBar = tab_widget_->tabBar();
+    //tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
+    //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0");
+
+    COMPASS::instance().evaluationManager().init(tool_box_); // adds eval widget
+    COMPASS::instance().viewManager().init(tool_box_, tab_widget_); // adds view points widget and view container
+
+    // bottom widget
     QWidget* bottom_widget = new QWidget();
     bottom_widget->setMaximumHeight(40);
 
@@ -170,7 +187,7 @@ MainWindow::MainWindow()
 
     bottom_layout->addStretch();
 
-            // add status & button
+    // add status & button
     status_label_ = new QLabel();
     bottom_layout->addWidget(status_label_);
 

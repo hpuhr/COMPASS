@@ -43,10 +43,12 @@
 #include "viewpoint.h"
 #include "projectionmanager.h"
 #include "projection.h"
+#include "toolbox.h"
+#include "toolboxwidget.h"
+#include "files.h"
 
 #include "json.hpp"
 
-#include <QTabWidget>
 #include <QApplication>
 #include <QCoreApplication>
 #include <QThread>
@@ -265,17 +267,23 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     init_evaluation_commands();
 }
 
-void EvaluationManager::init(QTabWidget* tab_widget)
+void EvaluationManager::init(ToolBox* tool_box)
 {
     loginf << "EvaluationManager: init";
 
     assert (!initialized_);
-    assert (tab_widget);
+    assert (tool_box);
 
     initialized_ = true;
 
     if (!COMPASS::instance().hideEvaluation())
-        tab_widget->addTab(widget(), "Evaluation");
+    {
+        WrappedToolBoxWidget* w = new WrappedToolBoxWidget(widget(),
+                                                           "Evaluation",
+                                                           "Evaluation",
+                                                           QIcon(Utils::Files::getIconFilepath("scale.png").c_str()));
+        tool_box->addTool(w);
+    }
 
     widget()->setDisabled(true);
 

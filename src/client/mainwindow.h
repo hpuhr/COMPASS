@@ -36,6 +36,7 @@ class DBSelectionWidget;
 class DBSchemaManagerWidget;
 class DBContentManagerWidget;
 class MainLoadWidget;
+class ToolBox;
 
 class MainWindow : public QMainWindow
 {
@@ -169,6 +170,8 @@ protected:
 
     std::unique_ptr<AutoResumeDialog> auto_resume_dialog_;
     QTimer* auto_resume_timer_ {nullptr};
+
+    ToolBox* tool_box_ = nullptr;
 
 private:
     void showCommandShell();
