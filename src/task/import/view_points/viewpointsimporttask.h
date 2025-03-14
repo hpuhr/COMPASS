@@ -28,7 +28,6 @@
 
 class ViewPointsImportTaskDialog;
 class TaskManager;
-class SavedFile;
 
 class ViewPointsImportTask : public Task, public Configurable
 {

@@ -30,7 +30,6 @@
 
 class TaskManager;
 class GPSImportCSVTaskDialog;
-class SavedFile;
 class DBContent;
 class Buffer;
 

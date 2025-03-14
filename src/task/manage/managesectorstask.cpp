@@ -20,7 +20,6 @@
 #include "evaluationmanager.h"
 #include "managesectorstaskdialog.h"
 #include "taskmanager.h"
-#include "savedfile.h"
 #include "files.h"
 
 #include "gdal.h"
@@ -40,9 +39,20 @@ ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::str
     : Task(task_manager),
       Configurable(class_id, instance_id, &task_manager, "task_manage_sectors.json")
 {
+    registerParameter("db_file_list", &file_list_, json::array());
     registerParameter("current_filename", &current_filename_, std::string());
 
     createSubConfigurables();
+
+    vector<string> cleaned_file_list;
+    // clean missing files
+
+    for (auto& filename : file_list_.get<std::vector<string>>())
+    {
+        if (Files::fileExists(filename))
+            cleaned_file_list.push_back(filename);
+    }
+    file_list_ = cleaned_file_list;
 
     tooltip_ =
             "Allows management of sectors stored in the database. "
@@ -54,9 +64,6 @@ ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::str
 
 ManageSectorsTask::~ManageSectorsTask()
 {
-    for (auto it : file_list_)
-        delete it.second;
-
     file_list_.clear();
 }
 
@@ -85,22 +92,12 @@ void ManageSectorsTask::dialogDoneSlot()
 void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
                                                 const std::string& instance_id)
 {
-    if (class_id == "SectorsFile")
-    {
-        SavedFile* file = new SavedFile(class_id, instance_id, this);
-        assert(file_list_.count(file->name()) == 0);
+    throw std::runtime_error("ManageSectorsTask: generateSubConfigurable: unknown class_id " + class_id);
+}
 
-        if (!Files::fileExists(file->name()))
-        {
-            loginf << "ManageSectorsTask: generateSubConfigurable: removing outdated file '" << file->name() << "'";
-            delete file; // TODO HP
-        }
-        else
-            file_list_.insert(std::pair<std::string, SavedFile*>(file->name(), file));
-    }
-    else
-        throw std::runtime_error("ManageSectorsTask: generateSubConfigurable: unknown class_id " +
-                                 class_id);
+std::vector<std::string> ManageSectorsTask::fileList() const
+{
+    return file_list_.get<std::vector<string>>();
 }
 
 void ManageSectorsTask::addFile(const std::string& filename)
@@ -111,13 +108,17 @@ void ManageSectorsTask::addFile(const std::string& filename)
         throw std::invalid_argument("ManageSectorsTask: addFile: name '" + filename +
                                     "' already in use");
 
-    std::string instancename = filename;
-    instancename.erase(std::remove(instancename.begin(), instancename.end(), '/'),
-                       instancename.end());
+    vector<string> tmp_list = file_list_.get<std::vector<string>>();
+    if (find(tmp_list.begin(), tmp_list.end(), filename) == tmp_list.end())
+    {
+        loginf << "ManageSectorsTask: addFile: adding filename '" << filename << "'";
 
-    auto config = Configuration::create("SectorsFile", "SectorsFile" + instancename);
-    config->addParameter<std::string>("name", filename);
-    generateSubConfigurableFromConfig(std::move(config));
+        tmp_list.push_back(filename);
+
+        sort(tmp_list.begin(), tmp_list.end());
+
+        file_list_ = tmp_list;
+    }
 
     current_filename_ = filename;
     parseCurrentFile(false);
@@ -137,7 +138,6 @@ void ManageSectorsTask::removeCurrentFilename()
         throw std::invalid_argument("ManageSectorsTask: removeCurrentFilename: name '" +
                                     current_filename_ + "' not in use");
 
-    delete file_list_.at(current_filename_);
     file_list_.erase(current_filename_);
     current_filename_ = "";
 
@@ -152,12 +152,7 @@ void ManageSectorsTask::removeAllFiles ()
 {
     loginf << "ManageSectorsTask: removeAllFiles";
 
-    while (file_list_.size())
-    {
-        delete file_list_.begin()->second;
-        file_list_.erase(file_list_.begin());
-    }
-
+    file_list_.clear();
     current_filename_ = "";
 
     parse_message_ = "";

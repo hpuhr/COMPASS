@@ -31,7 +31,6 @@
 
 class TaskManager;
 class GPSTrailImportTaskDialog;
-class SavedFile;
 class DBContent;
 class Buffer;
 

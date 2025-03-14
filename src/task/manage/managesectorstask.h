@@ -28,7 +28,6 @@
 
 class TaskManager;
 class ManageSectorsTaskDialog;
-class SavedFile;
 class Sector;
 class OGRPolygon;
 class OGRLinearRing;
@@ -55,8 +54,8 @@ public:
 
     virtual void run() {} // TODO doesnt fit
 
-    const std::map<std::string, SavedFile*>& fileList() { return file_list_; }
     bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
+    std::vector<std::string> fileList() const;
     void addFile(const std::string& filename);
     void removeCurrentFilename();
     void removeAllFiles ();
@@ -67,7 +66,7 @@ public:
     //std::vector<std::shared_ptr<Sector>>& parsedData() const;
 
 protected:
-    std::map<std::string, SavedFile*> file_list_;
+    nlohmann::json file_list_;
     std::string current_filename_;
 
     std::unique_ptr<ManageSectorsTaskDialog> dialog_;
