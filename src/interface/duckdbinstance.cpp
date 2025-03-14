@@ -78,7 +78,7 @@ Result DuckDBInstance::open_impl(const std::string& file_name)
     // create the configuration object
     DuckDBScopedConfig config;
     if (!config.valid()) 
-        return Result::failed("could not create db configuration");
+        return Result::failed("Could not create db configuration");
 
     //configure
     config.configure(settings_);
@@ -88,7 +88,7 @@ Result DuckDBInstance::open_impl(const std::string& file_name)
     auto state = duckdb_open_ext(file_name.c_str(), &db_, *config.configuration(), &error);
     if (state != DuckDBSuccess)
     {
-        std::string err_str = error ? std::string(error) : std::string("unknown error");
+        std::string err_str = error ? std::string(error) : std::string("Unknown error");
         return Result::failed(err_str);
     }
 
@@ -134,7 +134,7 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
 
     //try to prepare current database for compression
     if (!QFile::rename(QString::fromStdString(db_fn), QString::fromStdString(fn_temp)))
-        return Result::failed("could not create temorary database");
+        return Result::failed("Could not create temorary database");
 
     //connect to in-mem db
     duckdb_database   db;
@@ -144,13 +144,13 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
     {
         //revert back to old file (if possible)
         QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
-        return Result::failed("could not open memory db");
+        return Result::failed("Could not open memory db");
     }
     if (duckdb_connect(db, &con) == DuckDBError) 
     {
         //revert back to old file (if possible)
         QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
-        return Result::failed("could not open connection to memory db");
+        return Result::failed("Could not open connection to memory db");
     }
 
     //perform compression into new file
@@ -164,7 +164,7 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
         //remove any failed result + revert back to old file (if possible)
         QFile::remove(QString::fromStdString(db_fn));
         QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
-        return Result::failed("compressing database failed");
+        return Result::failed("Compressing database failed");
     }
 
     //compression successful => try to remove old file

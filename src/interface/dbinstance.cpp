@@ -140,7 +140,7 @@ Result DBInstance::openInternal(const std::string& file_name)
 
     //in-mem => check if supported
     if (in_mem && !sqlConfiguration().supports_in_mem)
-        return Result::failed("database backend does not support in-memory mode");
+        return Result::failed("Database backend does not support in-memory mode");
 
     auto open_result = open_impl(file_name);
     if (!open_result.ok())

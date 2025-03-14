@@ -80,7 +80,7 @@ Result SQLiteConnection::connect_impl()
     //nothing to do, instance handles connect => just pass open status
     bool is_open = instance()->dbOpen();
     if (!is_open)
-        return Result::failed("could not connect to closed database");
+        return Result::failed("Could not connect to closed database");
     
     return Result::succeeded();
 }
@@ -99,7 +99,7 @@ Result SQLiteConnection::executeSQL_impl(const std::string& sql,
                                          bool fetch_result_buffer)
 {
     //@TODO
-    return Result::failed("not yet implemented");
+    return Result::failed("Not yet implemented");
 }
 
 /**
@@ -130,7 +130,7 @@ ResultT<std::vector<std::string>> SQLiteConnection::getTableList_impl()
     if (result->hasError())
         return ResultT<std::vector<std::string>>::failed(result->error());
     if (!result->buffer() || !result->containsData())
-        return ResultT<std::vector<std::string>>::failed("table list could not be retrieved");
+        return ResultT<std::vector<std::string>>::failed("Table list could not be retrieved");
 
     assert(result->containsData());
     std::shared_ptr<Buffer> buffer = result->buffer();

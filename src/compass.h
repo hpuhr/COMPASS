@@ -21,6 +21,7 @@
 #include "singleton.h"
 #include "json.hpp"
 #include "appmode.h"
+#include "result.h"
 
 #include <QObject>
 
@@ -97,7 +98,66 @@ public:
                               bool license_type = true) const;
     std::string licenseeString(bool licensed_to = true) const;
 
+    static COMPASS& instance()
+    {
+        static COMPASS instance;
+        return instance;
+    }
+
+    std::string lastDbFilename() const;
+    std::vector<std::string> dbFileList() const;
+    void clearDBFileList();
+    void addDBFileToList(const std::string filename);
+
+    AppMode appMode() const;
+    void appMode(const AppMode& app_mode);
+    std::string appModeStr() const;
+
+    AppState appState() const { return app_state_; }
+
+    static bool isAppImage() { return is_app_image_; }
+
+    static const std::map<AppMode, std::string>& appModes2Strings();
+
+    bool expertMode() const;
+    void expertMode(bool expert_mode);
+
+    bool isShutDown() const;
+    bool isRunning() const;
+
+    bool hideEvaluation() const;
+    bool hideViewpoints() const;
+
+    unsigned int maxFPS() const;
+    void maxFPS(unsigned int max_fps);
+
+    bool disableLiveToOfflineSwitch() const;
+    bool disableMenuConfigSave() const;
+    bool disableGeographicViewRotate() const;
+    bool disableAddRemoveViews() const;
+    bool dbExportInProgress() const;
+
+    unsigned int autoLiveRunningResumeAskTime() const; // min
+    unsigned int autoLiveRunningResumeAskWaitTime() const; // min
+    bool disableConfirmResetViews() const;
+
+    bool darkMode() const;
+    void darkMode(bool value);
+
+    const char* lineEditInvalidStyle();
+
 protected:
+    COMPASS();
+
+    Result openDBFileInternal(const std::string& filename);
+    Result createNewDBFileInternal(const std::string& filename);
+    Result createInMemDBFileInternal(const std::string& future_filename);
+    Result createNewDBFileFromMemoryInternal();
+    Result exportDBFileInternal(const std::string& filename);
+    Result closeDBInternal();
+
+    virtual void checkSubConfigurables() override;
+
     bool db_opened_{false};
     bool db_inmem_{false};
     bool expert_mode_ {false};
@@ -143,62 +203,10 @@ protected:
 
     bool db_export_in_progress_ {false};
 
-    virtual void checkSubConfigurables() override;
-
     MainWindow* main_window_;
-
-    COMPASS();
 
 private:
     friend class Client;
 
     void setAppState(AppState state);
-
-public:
-    static COMPASS& instance()
-    {
-        static COMPASS instance;
-        return instance;
-    }
-    std::string lastDbFilename() const;
-    std::vector<std::string> dbFileList() const;
-    void clearDBFileList();
-    void addDBFileToList(const std::string filename);
-
-    AppMode appMode() const;
-    void appMode(const AppMode& app_mode);
-    std::string appModeStr() const;
-
-    AppState appState() const { return app_state_; }
-
-    static bool isAppImage() { return is_app_image_; }
-
-    static const std::map<AppMode, std::string>& appModes2Strings();
-
-    bool expertMode() const;
-    void expertMode(bool expert_mode);
-
-    bool isShutDown() const;
-    bool isRunning() const;
-
-    bool hideEvaluation() const;
-    bool hideViewpoints() const;
-
-    unsigned int maxFPS() const;
-    void maxFPS(unsigned int max_fps);
-
-    bool disableLiveToOfflineSwitch() const;
-    bool disableMenuConfigSave() const;
-    bool disableGeographicViewRotate() const;
-    bool disableAddRemoveViews() const;
-    bool dbExportInProgress() const;
-
-    unsigned int autoLiveRunningResumeAskTime() const; // min
-    unsigned int autoLiveRunningResumeAskWaitTime() const; // min
-    bool disableConfirmResetViews() const;
-
-    bool darkMode() const;
-    void darkMode(bool value);
-
-    const char* lineEditInvalidStyle();
 };

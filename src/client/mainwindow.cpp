@@ -1259,6 +1259,7 @@ void MainWindow::liveStopSlot()
 
     COMPASS::instance().appMode(AppMode::Offline);
 
+    //transfer memory db to file
     if (COMPASS::instance().canCreateDBFileFromMemory())
         createDBFromMemory();
 }

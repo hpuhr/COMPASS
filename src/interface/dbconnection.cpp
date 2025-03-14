@@ -418,11 +418,11 @@ Result DBConnection::insertBuffer_impl(const std::string& table_name,
     assert(stmnt);
 
     if (!stmnt->valid())
-        return Result::failed("could not prepare insert statement: " + stmnt->lastError());
+        return Result::failed("Could not prepare insert statement: " + stmnt->lastError());
 
     auto res = stmnt->executeBuffer(buffer, idx_from, idx_to);
     if (!res.ok())
-        return Result::failed("could not execute insert statement on buffer: " + res.error());
+        return Result::failed("Could not execute insert statement on buffer: " + res.error());
 
     //cleanup prepared statement
     stmnt.reset();
@@ -445,11 +445,11 @@ Result DBConnection::updateBuffer_impl(const std::string& table_name,
     assert(stmnt);
 
     if (!stmnt->valid())
-        return Result::failed("could not prepare update statement" + stmnt->lastError());
+        return Result::failed("Could not prepare update statement" + stmnt->lastError());
 
     auto res = stmnt->executeBuffer(buffer, idx_from, idx_to);
     if (!res.ok())
-        return Result::failed("could not execute update statement on buffer: " + res.error());
+        return Result::failed("Could not execute update statement on buffer: " + res.error());
 
     //cleanup prepared statement
     stmnt.reset();
@@ -516,7 +516,7 @@ ResultT<DBTableInfo> DBConnection::getColumnList_impl(const std::string& table)
         return ResultT<DBTableInfo>::failed(result->error());
 
     if (!result->containsData())
-        return ResultT<DBTableInfo>::failed("table information could not be retrieved");
+        return ResultT<DBTableInfo>::failed("Table information could not be retrieved");
 
     std::shared_ptr<Buffer> buffer = result->buffer();
 

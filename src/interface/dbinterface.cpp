@@ -161,6 +161,7 @@ bool DBInterface::ready() const
 }
 
 /**
+ * Opens a database file.
  */
 void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 {
@@ -169,6 +170,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 }
 
 /**
+ * Opens an in-memory database.
  */
 void DBInterface::openDBInMemory()
 {
@@ -267,6 +269,7 @@ void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite
 }
 
 /**
+ * Transfers an opened memory database to the given file and switches to this version.
  */
 void DBInterface::openDBFileFromMemory(const std::string& filename)
 {
@@ -278,6 +281,7 @@ void DBInterface::openDBFileFromMemory(const std::string& filename)
         if (Files::fileExists(filename))
             Files::deleteFile(filename);
 
+        //export memory database to given file
         auto export_result = db_instance_->exportToFile(filename);
 
         if (!export_result.ok())
@@ -302,6 +306,7 @@ void DBInterface::openDBFileFromMemory(const std::string& filename)
 }
 
 /**
+ * Closes the currently open database.
  */
 void DBInterface::closeDB()
 {
@@ -328,6 +333,7 @@ void DBInterface::closeDB()
 }
 
 /**
+ * Exports the currently opened database to the given file.
  */
 void DBInterface::exportDBFile(const std::string& filename)
 {
@@ -335,6 +341,7 @@ void DBInterface::exportDBFile(const std::string& filename)
 
     Result export_result;
 
+    //delete any existing file
     if (Utils::Files::fileExists(filename))
         Utils::Files::deleteFile(filename);
 
@@ -360,6 +367,8 @@ void DBInterface::exportDBFile(const std::string& filename)
 }
 
 /**
+ * Cleans the current db.
+ * Note that the current database will be closed and reopened for this purpose.
  */
 bool DBInterface::cleanupDB(bool show_dialog)
 {
