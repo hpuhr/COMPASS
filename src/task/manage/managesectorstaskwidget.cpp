@@ -426,10 +426,12 @@ void ManageSectorsTaskWidget::deleteAllFilesSlot()
 
 void ManageSectorsTaskWidget::selectedFileSlot()
 {
-    loginf << "ManageSectorsTaskWidget: selectedFileSlot";
     assert(file_list_->currentItem());
 
     QString filename = file_list_->currentItem()->text();
+
+    loginf << "ManageSectorsTaskWidget: selectedFileSlot: filename '" << filename.toStdString();
+
     assert(task_.hasFile(filename.toStdString()));
     task_.currentFilename(filename.toStdString());
 }
@@ -442,15 +444,15 @@ void ManageSectorsTaskWidget::updateFileListSlot()
 
     for (auto it : task_.fileList())
     {
-        if (!Files::fileExists(it.first))
+        if (!Files::fileExists(it))
         {
-            logwrn << "ManageSectorsTaskWidget: updateFileListSlot: file '" << it.first << "' does not exist";
+            logwrn << "ManageSectorsTaskWidget: updateFileListSlot: file '" << it << "' does not exist";
             continue;
         }
 
-        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
+        QListWidgetItem* item = new QListWidgetItem(tr(it.c_str()), file_list_);
 
-        if (it.first == task_.currentFilename())
+        if (it == task_.currentFilename())
             file_list_->setCurrentItem(item);
     }
 }
