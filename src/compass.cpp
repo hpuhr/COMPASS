@@ -37,6 +37,7 @@
 #include "util/async.h"
 #include "licensemanager.h"
 #include "result.h"
+#include "dbinstance.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -334,7 +335,7 @@ void COMPASS::checkSubConfigurables()
     }
 }
 
-void COMPASS::openDBFile(const std::string& filename)
+bool COMPASS::openDBFile(const std::string& filename)
 {
     loginf << "COMPASS: openDBFile: opening file '" << filename << "'";
 
@@ -342,6 +343,7 @@ void COMPASS::openDBFile(const std::string& filename)
     assert (db_interface_);
 
     last_db_filename_ = filename;
+    db_inmem_ = false;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -368,12 +370,16 @@ void COMPASS::openDBFile(const std::string& filename)
     lastUsedPath(Files::getDirectoryFromPath(filename));
 
     if (!res.ok())
+    {
         QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
+    }
 
     QApplication::restoreOverrideCursor();
+
+    return res.ok();
 }
 
-void COMPASS::createNewDBFile(const std::string& filename)
+bool COMPASS::createNewDBFile(const std::string& filename)
 {
     loginf << "COMPASS: createNewDBFile: creating new file '" << filename << "'";
 
@@ -387,14 +393,8 @@ void COMPASS::createNewDBFile(const std::string& filename)
         Files::deleteFile(filename);
     }
 
-    //@TODO: remove
-    if (Files::fileExists(Files::replaceExtension(filename, ".duckdb")))
-    {
-        loginf << "COMPASS: createNewDBFile: deleting pre-existing file '" << Files::replaceExtension(filename, ".duckdb") << "'";
-        Files::deleteFile(Files::replaceExtension(filename, ".duckdb"));
-    }
-
     last_db_filename_ = filename;
+    db_inmem_ = false;
 
     Result res = Result::succeeded();
 
@@ -419,10 +419,69 @@ void COMPASS::createNewDBFile(const std::string& filename)
     lastUsedPath(Files::getDirectoryFromPath(filename));
 
     if (!res.ok())
+    {
         QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
+        return false;
+    }
+
+    return true;
 }
 
-void COMPASS::exportDBFile(const std::string& filename)
+bool COMPASS::createInMemDBFile(const std::string& future_filename)
+{
+    assert (!db_opened_);
+    assert (db_interface_);
+
+    inmem_future_filename_ = future_filename;
+    last_db_filename_ = DBInstance::InMemFilename;
+    db_inmem_ = true;
+
+    Result res = Result::succeeded();
+
+    try
+    {
+        db_interface_->openDBInMemory();
+        assert (db_interface_->ready());
+
+        db_opened_ = true;
+
+        emit databaseOpenedSignal();
+    }
+    catch(const std::exception& e)
+    {
+        res = Result::failed(e.what());
+
+        db_opened_ = false;
+    }
+
+    if (!res.ok())
+    {
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
+        return false;
+    }
+
+    return true;
+}
+
+bool COMPASS::createNewDBFileFromMemory()
+{
+    assert (canCreateDBFileFromMemory());
+
+    Result res = Result::succeeded();
+
+    if (!exportDBFile(inmem_future_filename_))
+        return false;
+
+    if (dbOpened() && !closeDB())
+        return false;
+
+    if (!openDBFile(inmem_future_filename_))
+        return false;
+
+    return true;
+}
+
+bool COMPASS::exportDBFile(const std::string& filename)
 {
     loginf << "COMPASS: exportDBFile: exporting as file '" << filename << "'";
 
@@ -461,10 +520,15 @@ void COMPASS::exportDBFile(const std::string& filename)
     db_export_in_progress_ = false;
 
     if (!res.ok())
+    {
         QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
+        return false;
+    }
+
+    return true;
 }
 
-void COMPASS::closeDB()
+bool COMPASS::closeDB()
 {
     loginf << "COMPASS: closeDB: closing db file '" << last_db_filename_ << "'";
 
@@ -473,12 +537,15 @@ void COMPASS::closeDB()
     ds_manager_->saveDBDataSources();
     dbcontent_manager_->saveTargets();
 
-    db_interface_->closeDBFile();
+    db_interface_->closeDB();
     assert (!db_interface_->ready());
 
     db_opened_ = false;
+    db_inmem_ = false;
 
     emit databaseClosedSignal();
+
+    return true;
 }
 
 DBInterface& COMPASS::dbInterface()
@@ -552,6 +619,16 @@ bool COMPASS::dbOpened()
     return db_opened_;
 }
 
+bool COMPASS::dbInMem() const
+{
+    return db_inmem_;
+}
+
+bool COMPASS::canCreateDBFileFromMemory() const
+{
+    return db_opened_ && db_inmem_ && db_interface_ && db_interface_->canCreateDBFileFromMemory() && !inmem_future_filename_.empty();
+}
+
 void COMPASS::init()
 {
     assert(task_manager_);
@@ -607,7 +684,7 @@ void COMPASS::shutdown()
     filter_manager_ = nullptr;
 
     if (db_interface_->ready())
-        db_interface_->closeDBFile();
+        db_interface_->closeDB();
 
     db_interface_ = nullptr;
 

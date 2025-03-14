@@ -37,6 +37,7 @@ struct SQLConfig
     bool           use_conflict_resolution = false;
     bool           indexing                = true;
     bool           supports_mt             = false;
+    bool           supports_in_mem         = false;
 
     bool           verbose                 = true;
 };

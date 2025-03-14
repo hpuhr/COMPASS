@@ -104,25 +104,6 @@ void DuckDBConnection::disconnect_impl()
 
 /**
  */
-Result DuckDBConnection::exportFile_impl(const std::string& file_name)
-{
-    //@TODO
-
-    // loginf << "DuckDBConnection: exportFile: file '" << file_name << "'";
-    // assert (db_opened_);
-
-    // string tmp_sql = "VACUUM INTO '"+file_name+"';";
-
-    // loginf << "DuckDBConnection: exportFile: sql '" << tmp_sql << "'";
-
-    // char* sErrMsg = 0;
-    // sqlite3_exec(db_handle_, tmp_sql.c_str(), NULL, NULL, &sErrMsg);
-
-    return Result::failed("not yet implemented");
-}
-
-/**
- */
 std::shared_ptr<DuckDBScopedAppender> DuckDBConnection::createAppender(const std::string& table)
 {
     return std::shared_ptr<DuckDBScopedAppender>(new DuckDBScopedAppender(connection_, table));

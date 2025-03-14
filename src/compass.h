@@ -62,11 +62,16 @@ public:
                                          const std::string& instance_id) override;
     std::string getPath() const override final;
 
-    void openDBFile(const std::string& filename);
-    void createNewDBFile(const std::string& filename);
-    void exportDBFile(const std::string& filename);
+    bool openDBFile(const std::string& filename);
+    bool createNewDBFile(const std::string& filename);
+    bool createInMemDBFile(const std::string& future_filename = "");
+    bool createNewDBFileFromMemory();
+    bool exportDBFile(const std::string& filename);
+    bool closeDB();
+
     bool dbOpened();
-    void closeDB();
+    bool dbInMem() const;
+    bool canCreateDBFileFromMemory() const;
 
     DBInterface& dbInterface();
     DBContentManager& dbContentManager();
@@ -94,6 +99,7 @@ public:
 
 protected:
     bool db_opened_{false};
+    bool db_inmem_{false};
     bool expert_mode_ {false};
 
     bool dark_mode_ {false};
@@ -130,6 +136,7 @@ protected:
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
 
     std::string last_db_filename_;
+    std::string inmem_future_filename_;
     nlohmann::json db_file_list_;
 
     std::string last_path_;

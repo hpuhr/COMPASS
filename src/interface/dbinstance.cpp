@@ -26,6 +26,8 @@
 
 #define PROTECT_CONNECTION
 
+const std::string DBInstance::InMemFilename = "In-Memory";
+
 /**
  */
 DBInstance::DBInstance(DBInterface* interface)
@@ -103,23 +105,50 @@ size_t DBInstance::numConcurrentConnections() const
 }
 
 /**
- * Opens the given database file and creates a default connection. 
- * Will close the currently opened database and destroy all open connections.
  */
 Result DBInstance::open(const std::string& file_name)
 {
-    loginf << "DBInstance: open: '" << file_name << "'";
+    assert(!file_name.empty());
+    return openInternal(file_name);
+}
+
+/**
+ */
+Result DBInstance::openInMemory()
+{
+    return openInternal("");
+}
+
+/**
+ * Opens the given database file and creates a default connection. 
+ * Will close the currently opened database and destroy all open connections.
+ * If an empty filename is passed, an in-memory db is created.
+ */
+Result DBInstance::openInternal(const std::string& file_name)
+{
+    std::string fn     = file_name;
+    bool        in_mem = file_name.empty(); //empty filename means in-mem
+
+    if (in_mem)
+        fn = InMemFilename;
+
+    loginf << "DBInstance: open: '" << fn << "'";
 
     //close first
     if (dbOpen())
         close();
+
+    //in-mem => check if supported
+    if (in_mem && !sqlConfiguration().supports_in_mem)
+        return Result::failed("database backend does not support in-memory mode");
 
     auto open_result = open_impl(file_name);
     if (!open_result.ok())
         return open_result;
 
     db_open_     = true;
-    db_filename_ = file_name;
+    db_filename_ = fn;
+    db_in_mem_   = in_mem;
 
     //open default connection
     auto conn_result = createConnection(true);
@@ -171,6 +200,7 @@ void DBInstance::close()
 
     db_open_      = false;
     db_connected_ = false;
+    db_in_mem_    = false;
     db_filename_  = "";
 
     table_info_.clear();
@@ -181,6 +211,13 @@ void DBInstance::close()
 Result DBInstance::reconnect(bool cleanup_db, Result* cleanup_result)
 {
     assert(dbReady());
+
+    //no reconnection to in-mem db
+    if (db_in_mem_)
+    {
+        logwrn << "DBInstance: reconnect: trying to reconnect to in-memory db, skipping";
+        return Result::succeeded();
+    }
 
     auto fn = db_filename_;
 
@@ -210,9 +247,19 @@ Result DBInstance::reconnect(bool cleanup_db, Result* cleanup_result)
 
 /**
  */
+Result DBInstance::exportToFile(const std::string& file_name)
+{
+    assert(dbReady());
+
+    return exportToFile_impl(file_name);
+}
+
+/**
+ */
 Result DBInstance::cleanupDB(const std::string& db_fn)
 {
     assert(!dbOpen());
+    assert(!db_fn.empty());
 
     return cleanupDB_impl(db_fn);
 }

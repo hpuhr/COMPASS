@@ -54,10 +54,13 @@ public:
     bool dbOpen() const;
     bool dbConnected() const;
     bool dbReady() const;
+    bool dbInMem() const { return db_in_mem_; }
 
     Result open(const std::string& file_name);
+    Result openInMemory();
     void close();
     Result reconnect(bool cleanup_db = false, Result* cleanup_result = nullptr);
+    Result exportToFile(const std::string& file_name);
 
     const std::string& dbFilename() const { return db_filename_; }
 
@@ -77,6 +80,8 @@ public:
     const std::map<std::string, DBTableInfo>& tableInfo() const { return table_info_; }
 
     std::string dbInfo();
+
+    static const std::string InMemFilename;
     
 protected:
     DBInterface& interface() { return interface_; }
@@ -94,6 +99,9 @@ protected:
     /// implements db file cleanup (if supported)
     virtual Result cleanupDB_impl(const std::string& db_fn);
 
+    /// implements db export to a specified file
+    virtual Result exportToFile_impl(const std::string& filename) = 0;
+
     /// db backend specific sql settings
     virtual db::SQLConfig sqlConfiguration_impl() const = 0;
 
@@ -101,6 +109,7 @@ protected:
     virtual std::vector<db::SQLPragma> sqlPragmas() const { return {}; }
 
 private:
+    Result openInternal(const std::string& file_name);
     Result cleanupDB(const std::string& db_fn);
     Result configureDBUsingPragmas();
 
@@ -115,8 +124,9 @@ private:
 
     DBInterface& interface_;
     std::string  db_filename_;
-    bool         db_open_      = false; 
+    bool         db_open_      = false;
     bool         db_connected_ = false;
+    bool         db_in_mem_    = false;
 
     std::vector<std::unique_ptr<DBConnection>>   custom_connections_;
     std::map<int, std::unique_ptr<DBConnection>> concurrent_connections_;

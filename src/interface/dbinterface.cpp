@@ -121,46 +121,93 @@ void DBInterface::reset()
         db_instance_->close();
         db_instance_.reset();
     }
+}
 
-    db_filename_ = "";
+/**
+ */
+std::string DBInterface::dbFilename() const
+{
+    if (!db_instance_)
+        return "";
+
+    return db_instance_->dbFilename();
+}
+
+/**
+ */
+bool DBInterface::dbInMemory() const
+{
+    if (!db_instance_)
+        return false;
+
+    return db_instance_->dbInMem();
+}
+
+/**
+ */
+bool DBInterface::canCreateDBFileFromMemory() const
+{
+    return (ready() && dbInMemory());
+}
+
+/**
+ */
+bool DBInterface::ready() const
+{
+    if (!db_instance_)
+        return false;
+    
+    return db_instance_->dbReady(); //ready means open and connected
 }
 
 /**
  */
 void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 {
+    assert(!filename.empty());
+    openDBFileInternal(filename, overwrite);
+}
+
+/**
+ */
+void DBInterface::openDBInMemory()
+{
+    openDBFileInternal("", false);
+}
+
+/**
+ */
+void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite)
+{
     try
     {
-        db_filename_ = "";
+        bool in_mem = filename.empty();
+        std::string filename_internal = in_mem ? DBInstance::InMemFilename : filename;
 
         //delete old file?
-        if (overwrite && Files::fileExists(filename))
+        if (!in_mem && overwrite && Files::fileExists(filename))
         {
             loginf << "DBInterface: openDBFile: deleting pre-existing file '" << filename << "'";
             Files::deleteFile(filename);
         }
 
-        bool created_new_db = !Files::fileExists(filename);
+        bool created_new_db = in_mem || !Files::fileExists(filename);
 
         //create connection
-        auto ext = boost::filesystem::path(filename).extension().string();
-
         db_instance_.reset(new DuckDBInstance(this));
         
-        loginf << "DBInterface: openDBFile: opening file '" << filename << "'";
+        loginf << "DBInterface: openDBFile: opening file '" << filename_internal << "'";
 
         //connect to db
         assert (db_instance_);
 
-        auto open_result = db_instance_->open(filename);
+        auto open_result = in_mem ? db_instance_->openInMemory() : db_instance_->open(filename);
 
         if (!open_result.ok())
         {
             logerr << "DBInterface: openDBFile: Database could not be opened: " << open_result.second;
             throw std::runtime_error ("Database could not be opened: " + open_result.second);
         }
-
-        db_filename_ = filename;
 
         if (created_new_db)
         {
@@ -221,9 +268,44 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 
 /**
  */
-void DBInterface::closeDBFile()
+void DBInterface::openDBFileFromMemory(const std::string& filename)
 {
-    loginf << "DBInterface: closeDBFile";
+    assert(canCreateDBFileFromMemory());
+    assert(!filename.empty());
+
+    try
+    {
+        if (Files::fileExists(filename))
+            Files::deleteFile(filename);
+
+        auto export_result = db_instance_->exportToFile(filename);
+
+        if (!export_result.ok())
+        {
+            logerr << "DBInterface: openDBFileFromMemory: Database could not be exported: " << export_result.second;
+            throw std::runtime_error ("Database could not be exported: " + export_result.second);
+        }
+
+        //close current (in-mem) db
+        closeDB();
+
+        //open new physical db
+        openDBFile(filename, false);
+    }
+    catch(const std::exception& ex)
+    {
+        reset();
+
+        logerr << "DBInterface: openDBFileFromMemory: Error: " << ex.what();
+        throw std::runtime_error(ex.what());
+    }
+}
+
+/**
+ */
+void DBInterface::closeDB()
+{
+    loginf << "DBInterface: closeDB";
 
     if (properties_loaded_)  // false if database not opened
         saveProperties();
@@ -236,9 +318,7 @@ void DBInterface::closeDBFile()
         assert (db_instance_);
         db_instance_->close();
 
-        db_filename_       = "";
         properties_loaded_ = false;
-
         properties_.clear();
 
         dbcolumn_content_flags_.clear();
@@ -255,12 +335,21 @@ void DBInterface::exportDBFile(const std::string& filename)
 
     Result export_result;
 
+    if (Utils::Files::fileExists(filename))
+        Utils::Files::deleteFile(filename);
+
+    try
     {
         #ifdef PROTECT_INSTANCE
         boost::mutex::scoped_lock locker(instance_mutex_);
         #endif
 
-        export_result = db_instance_->defaultConnection().exportDB(filename);
+        export_result = db_instance_->exportToFile(filename);
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: exportDBFile: Database could not be exported: " << ex.what();
+        throw std::runtime_error ("Database could not be exported: " + std::string(ex.what()));
     }
 
     if (!export_result.ok())
@@ -274,9 +363,15 @@ void DBInterface::exportDBFile(const std::string& filename)
  */
 bool DBInterface::cleanupDB(bool show_dialog)
 {
-    bool ok;
-
     loginf << "DBInterface: cleanupDB";
+
+    assert (ready());
+
+    //in-mem => nothing to do
+    if (dbInMemory())
+        return true;
+
+    bool ok;
 
     if (show_dialog)
     {
@@ -304,6 +399,7 @@ Result DBInterface::cleanupDBInternal()
 
     assert(ready());
     assert(!cleanup_in_progress_);
+    assert(!dbInMemory());
 
     cleanup_in_progress_ = true;
 
@@ -343,16 +439,6 @@ Result DBInterface::cleanupDBInternal()
     }
 
     return res_cleanup;
-}
-
-/**
- */
-bool DBInterface::ready() const
-{
-    if (!db_instance_)
-        return false;
-    
-    return db_instance_->dbReady(); //ready means open and connected
 }
 
 /**

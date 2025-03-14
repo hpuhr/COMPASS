@@ -94,20 +94,6 @@ void SQLiteConnection::disconnect_impl()
 
 /**
  */
-Result SQLiteConnection::exportFile_impl(const std::string& file_name)
-{
-    assert (connected());
-
-    string tmp_sql = "VACUUM INTO '"+file_name+"';";
-
-    char* sErrMsg = 0;
-    bool ok = sqlite3_exec(db_handle_, tmp_sql.c_str(), NULL, NULL, &sErrMsg) == SQLITE_OK;
-
-    return Result(ok, sErrMsg);
-}
-
-/**
- */
 Result SQLiteConnection::executeSQL_impl(const std::string& sql, 
                                          DBResult* result, 
                                          bool fetch_result_buffer)

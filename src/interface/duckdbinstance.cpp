@@ -19,6 +19,7 @@
 #include "duckdbconnection.h"
 
 #include "logger.h"
+#include "files.h"
 
 #include <boost/filesystem.hpp>
 
@@ -172,6 +173,31 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
     
     duckdb_disconnect(&con);
     duckdb_close(&db);
+
+    return Result::succeeded();
+}
+
+/**
+ */
+Result DuckDBInstance::exportToFile_impl(const std::string& file_name)
+{
+    //sync to db file (also merges wal-file)
+    auto res = defaultConnection().execute("FORCE CHECKPOINT;");
+    if (!res.ok())
+        return res;
+
+    std::string current_db = dbInMem() ? "" : dbFilename();
+
+    std::string sql = dbInMem() ? "ATTACH '" + file_name + "' AS db2;" +
+                                  "COPY FROM DATABASE memory TO db2;" + 
+                                  "DETACH db2;" :
+                                  "ATTACH '" + file_name   + "' AS db2;" +
+                                  "COPY FROM DATABASE '" + current_db + "' TO db2;" +
+                                  "DETACH db2;";
+
+    res = defaultConnection().execute(sql);
+    if (!res.ok())
+        return res;
 
     return Result::succeeded();
 }

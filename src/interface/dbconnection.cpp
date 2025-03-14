@@ -134,21 +134,6 @@ void DBConnection::disconnect()
 }
 
 /**
- * Exports the database to the given file.
- */
-Result DBConnection::exportDB(const std::string& file_name)
-{
-    assert(connected());
-
-    auto r = exportFile_impl(file_name);
-    
-    //if (!r.ok())
-    //    logerr << "DBConnection: exportFile: export failed";
-
-    return r;
-}
-
-/**
  * Executes the given sql query without returning any data or specific error messages.
  */
 Result DBConnection::execute(const std::string& sql)
