@@ -54,6 +54,9 @@ ManageSectorsTask::ManageSectorsTask(const std::string& class_id, const std::str
     }
     file_list_ = cleaned_file_list;
 
+    if (!hasFile(current_filename_))
+        current_filename_ = "";
+
     tooltip_ =
             "Allows management of sectors stored in the database. "
             "This task can not be run, but is performed using the GUI elements.";
@@ -95,6 +98,16 @@ void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
     throw std::runtime_error("ManageSectorsTask: generateSubConfigurable: unknown class_id " + class_id);
 }
 
+bool ManageSectorsTask::hasFile(const std::string& filename) const
+{
+    logdbg << "ManageSectorsTask: hasFile: filename '" << filename
+           << "' file_list_ '" << file_list_.dump(2) << "'";
+
+    vector<string> tmp_list = file_list_.get<std::vector<string>>();
+
+    return find(tmp_list.begin(), tmp_list.end(), filename) != tmp_list.end();
+}
+
 std::vector<std::string> ManageSectorsTask::fileList() const
 {
     return file_list_.get<std::vector<string>>();
@@ -119,6 +132,8 @@ void ManageSectorsTask::addFile(const std::string& filename)
 
         file_list_ = tmp_list;
     }
+
+    loginf << "ManageSectorsTask: addFile: filenames '" << file_list_.dump(2) << "'";
 
     current_filename_ = filename;
     parseCurrentFile(false);

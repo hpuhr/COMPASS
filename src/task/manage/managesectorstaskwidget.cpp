@@ -426,10 +426,12 @@ void ManageSectorsTaskWidget::deleteAllFilesSlot()
 
 void ManageSectorsTaskWidget::selectedFileSlot()
 {
-    loginf << "ManageSectorsTaskWidget: selectedFileSlot";
     assert(file_list_->currentItem());
 
     QString filename = file_list_->currentItem()->text();
+
+    loginf << "ManageSectorsTaskWidget: selectedFileSlot: filename '" << filename.toStdString();
+
     assert(task_.hasFile(filename.toStdString()));
     task_.currentFilename(filename.toStdString());
 }

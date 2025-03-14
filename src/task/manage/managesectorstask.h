@@ -54,7 +54,7 @@ public:
 
     virtual void run() {} // TODO doesnt fit
 
-    bool hasFile(const std::string& filename) { return file_list_.count(filename) > 0; }
+    bool hasFile(const std::string& filename) const;
     std::vector<std::string> fileList() const;
     void addFile(const std::string& filename);
     void removeCurrentFilename();
