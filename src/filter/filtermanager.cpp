@@ -300,6 +300,7 @@ std::string FilterManager::getSQLCondition(const std::string& dbcontent_name)
     std::stringstream ss;
 
     bool first = true;
+    std::string condition_str;
 
     for (auto& filter : filters_)
     {
@@ -309,11 +310,16 @@ std::string FilterManager::getSQLCondition(const std::string& dbcontent_name)
 
         if (filter->getActive() && filter->filters(dbcontent_name))
         {
-            ss << filter->getConditionString(dbcontent_name, first);
+            condition_str = filter->getConditionString(dbcontent_name, first);
+
+            logdbg << "FilterManager: getSQLCondition: filter " << filter->instanceId()
+                   << " condition '" << condition_str << "'";
+
+            ss << condition_str;
         }
     }
 
-    logdbg << "FilterManager: getSQLCondition: name " << dbcontent_name << " '" << ss.str() << "'";
+    loginf << "FilterManager: getSQLCondition: name " << dbcontent_name << " '" << ss.str() << "'";
     return ss.str();
 }
 

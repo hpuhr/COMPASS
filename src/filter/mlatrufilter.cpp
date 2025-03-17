@@ -37,39 +37,54 @@ std::string MLATRUFilter::getConditionString(const std::string& dbcontent_name, 
 
     stringstream ss;
 
-    if (active_ && values_.size())
+    if (active_ && (values_.size() || null_wanted_))
     {
         assert (dbcontent_name == "CAT020");
 
         DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-        assert (dbcontent_man.existsDBContent(dbcontent_name));
 
-        assert (dbcontent_man.metaVariable(DBContent::meta_var_utn_.name()).existsIn(dbcontent_name));
+        assert (dbcontent_man.canGetVariable(dbcontent_name, DBContent::var_cat020_crontrib_recv_));
+        std::string dbcol_name =
+            dbcontent_man.getVariable(dbcontent_name, DBContent::var_cat020_crontrib_recv_).dbColumnName();
 
         if (!first)
             ss << " AND";
 
-        // SELECT x FROM data_cat062, json_each(data_cat062.associations) WHERE json_each.value == 0;
+        // SELECT * FROM data WHERE json_contains(json_list, '3') OR json_contains(json_list, '7');
+        // SELECT * FROM data WHERE json_contains_any(json_list, '[3, 7]');
 
-        // any
+        ss << " (";
 
-        ss << " json_each.value IN (" << rus_str_ << ")"; // rest done in SQLGenerator::getSelectCommand
+        bool first_value=true;
 
-        // each
+        if (values_.size() == 1)
+        {
+            ss << "json_contains(" << dbcol_name << ", '" << rus_str_ << "')";
 
-        // SELECT f.* FROM data_cat020 f, json_each(contributing_receivers) t WHERE t.value IN (2, 6) GROUP BY f.record_number HAVING COUNT(*) = 2;
+            first_value = false;
+        }
+        else if (values_.size() > 1)
+        {
+            for (auto& value : values_)
+            {
+                if (!first_value)
+                    ss << " OR ";
 
-//        ss << " (";
+                ss << "json_contains(" << dbcol_name << ", '" << value << "')";
 
-//        for (auto& ru_val : values_)
-//        {
-//            if (ru_val != *values_.begin())
-//                ss << " OR";
+                first_value = false;
+            }
+        }
 
-//            ss << " json_each.value == " << to_string(ru_val);
-//        }
+        if (null_wanted_)
+        {
+            if (!first_value)
+                ss << " OR ";
 
-//        ss << ")";
+            ss << dbcol_name << " IS NULL";
+        }
+
+        ss << ")";
 
         first = false;
     }
@@ -159,8 +174,16 @@ bool MLATRUFilter::updateRUsFromStr(const std::string& values_str)
 
     bool ok = true;
 
+    null_wanted_ = false;
+
     for (auto& tmp_str : split_str)
     {
+        if (String::trim(tmp_str) == "NULL" || String::trim(tmp_str) == "null")
+        {
+            null_wanted_ = true;
+            continue;
+        }
+
         unsigned int utn_tmp = QString(tmp_str.c_str()).toInt(&ok);
 
         if (!ok)
