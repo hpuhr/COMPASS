@@ -113,6 +113,30 @@ MainWindow::MainWindow()
     QSettings settings("COMPASS", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 
+    //create ui
+    createUI();
+
+    //init ui related commands
+    ui_test::initUITestCommands();
+
+    //init extra commands
+#if USE_EXPERIMENTAL_SOURCE == true
+    if (!COMPASS::instance().isAppImage())
+        extra::init_extra_commands();
+#endif
+
+    main_window::init_commands();
+}
+
+MainWindow::~MainWindow()
+{
+    logdbg << "MainWindow: destructor";
+
+            // remember: this not called! insert deletes into closeEvent function
+}
+
+void MainWindow::createUI()
+{
     QWidget* main_widget = new QWidget();
 
     QVBoxLayout* main_layout = new QVBoxLayout();
@@ -125,11 +149,7 @@ MainWindow::MainWindow()
 
     main_layout->addLayout(content_layout);
 
-    tool_box_ = new ToolBox;
-    content_layout->addWidget(tool_box_);
-
     // initialize tabs
-
     tab_widget_ = new QTabWidget();
     tab_widget_->setObjectName("container0");
 
@@ -152,9 +172,9 @@ MainWindow::MainWindow()
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
-    content_layout->addWidget(tab_widget_);
-
-    // add tools
+    // initialize toolbox
+    tool_box_ = new ToolBox;
+    
     tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().dataSourceManager().loadWidget(),
                                                 "Data Sources",
                                                 "Data Sources",
@@ -174,6 +194,10 @@ MainWindow::MainWindow()
 
     COMPASS::instance().evaluationManager().init(tool_box_); // adds eval widget
     COMPASS::instance().viewManager().init(tool_box_, tab_widget_); // adds view points widget and view container
+
+    // add toolbox and view tab widget
+    content_layout->addWidget(tool_box_);
+    content_layout->addWidget(tab_widget_);
 
     // bottom widget
     QWidget* bottom_widget = new QWidget();
@@ -206,7 +230,7 @@ MainWindow::MainWindow()
 
     bottom_layout->addStretch();
 
-            // load button
+    // load button
     load_button_ = new QPushButton("Load");
     connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
     bottom_layout->addWidget(load_button_);
@@ -221,13 +245,14 @@ MainWindow::MainWindow()
 
     setCentralWidget(main_widget);
 
-            // do menus
-    createMenus ();
-    updateMenus ();
+    // create menus
+    createMenus();
+    updateMenus();
 
+    updateSizings(-1);
     updateWindowTitle();
 
-            // do signal slots
+    // connect signal slots
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
             this, &MainWindow::appModeSwitchSlot);
 
@@ -239,23 +264,7 @@ MainWindow::MainWindow()
     connect(&COMPASS::instance().licenseManager(), &LicenseManager::changed,
             this, &MainWindow::updateWindowTitle);
 
-    //init ui related commands
-    ui_test::initUITestCommands();
-
-    //init extra commands
-#if USE_EXPERIMENTAL_SOURCE == true
-    if (!COMPASS::instance().isAppImage())
-        extra::init_extra_commands();
-#endif
-
-    main_window::init_commands();
-}
-
-MainWindow::~MainWindow()
-{
-    logdbg << "MainWindow: destructor";
-
-            // remember: this not called! insert deletes into closeEvent function
+    connect(tool_box_, &ToolBox::toolToggled, this, &MainWindow::updateSizings);
 }
 
 void MainWindow::createMenus ()
@@ -1349,4 +1358,16 @@ void MainWindow::updateWindowTitle()
         title += "   |   " + licensee;
 
     QWidget::setWindowTitle(title.c_str());
+}
+
+void MainWindow::updateSizings(int currentToolIdx)
+{
+    QSizePolicy policy_toolbox(currentToolIdx >= 0 ? QSizePolicy::Expanding : QSizePolicy::Preferred, QSizePolicy::Expanding);
+    policy_toolbox.setHorizontalStretch(currentToolIdx >= 0 ? ToolBox::StretchToolBox : 0);
+
+    QSizePolicy policy_tabwidget(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    policy_tabwidget.setHorizontalStretch(currentToolIdx >= 0 ? ToolBox::StretchView : 0);
+
+    tool_box_->setSizePolicy(policy_toolbox);
+    tab_widget_->setSizePolicy(policy_tabwidget);
 }

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATASOURCESLOADWIDGET_H_
-#define DATASOURCESLOADWIDGET_H_
+#pragma once
 
 #include <QWidget>
 #include <QMenu>
@@ -30,12 +29,16 @@ class QPushButton;
 class QCheckBox;
 class QLineEdit;
 class QLabel;
+class QTreeWidget;
+class QTreeWidgetItem;
 
 namespace dbContent
 {
     class DBDataSourceWidget;
 }
 
+/**
+ */
 class DataSourcesLoadWidget : public QWidget
 {
     Q_OBJECT
@@ -87,4 +90,75 @@ private:
     void arrangeSourceWidgetWidths();
 };
 
-#endif /* DATASOURCESLOADWIDGET_H_ */
+/**
+ */
+class DataSourcesLoadTreeWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    DataSourcesLoadTreeWidget(DataSourceManager& ds_man);
+    virtual ~DataSourcesLoadTreeWidget();
+
+    void updateContent(bool recreate_required = false);
+    void loadingDone();
+
+public slots:
+    void loadDSTypeChangedSlot();
+    //void loadDSChangedSlot();
+
+    void editClickedSlot();
+
+    void selectAllDSTypesSlot();
+    void deselectAllDSTypesSlot();
+
+    void selectAllDataSourcesSlot();
+    void deselectAllDataSourcesSlot();
+    void selectDSTypeSpecificDataSourcesSlot();
+    void deselectDSTypeSpecificDataSourcesSlot();
+
+    void deselectAllLinesSlot();
+    void selectSpecificLineSlot();
+
+    void toogleShowCountsSlot();
+
+private:
+    enum class ItemType
+    {
+        DataSourceType = 0,
+        DataSource,
+        DBContent
+    };
+
+    struct ItemInfo
+    {
+        int         id = -1;
+        ItemType    type;
+        std::string name;
+    };
+
+    void createUI();
+    void createMenu();
+
+    void clear();
+    void createContent();
+    void createDataSourceType(const std::string& ds_type_name);
+    void createDataSource(QTreeWidgetItem* parent_item, const dbContent::DBDataSource& data_source);
+    void createDBContent(QTreeWidgetItem* parent_item);
+
+    DataSourceManager& ds_man_;
+
+    QMenu edit_menu_;
+
+    QLabel* ts_min_label_{nullptr};
+    QLabel* ts_max_label_{nullptr};
+    QLabel* associations_label_{nullptr};
+
+    QTreeWidget* tree_widget_ = nullptr;
+
+    std::map<std::string, QTreeWidgetItem*> ds_type_items_;
+    std::map<std::string, QTreeWidgetItem*> ds_items_;
+
+    std::map<int, ItemInfo> item_infos_;
+
+    int item_ids_ = 0;
+};

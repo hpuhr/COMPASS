@@ -49,6 +49,7 @@ class QLabel;
  */
 class ToolBox : public QWidget
 {
+    Q_OBJECT
 public:
     ToolBox(QWidget* parent = nullptr);
     virtual ~ToolBox();
@@ -58,9 +59,16 @@ public:
     static const int ToolIconSize;
     static const int ToolNameFontSize;
 
+    static const int StretchToolBox;
+    static const int StretchView;
+
+signals:
+    void toolToggled(int toolIdx);
+
 private:
     struct Tool
     {
+        int            idx    = -1;
         ToolBoxWidget* widget = nullptr;
         QToolButton*   button = nullptr;
         bool           hidden = false;

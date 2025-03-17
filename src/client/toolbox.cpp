@@ -28,6 +28,9 @@
 const int ToolBox::ToolIconSize     = 50;
 const int ToolBox::ToolNameFontSize = 12;
 
+const int ToolBox::StretchToolBox   = 1;
+const int ToolBox::StretchView      = 2;
+
 /**
  */
 ToolBox::ToolBox(QWidget* parent)
@@ -106,6 +109,7 @@ void ToolBox::addTool(ToolBoxWidget* tool)
     button->setToolTip(QString::fromStdString(info));
     button->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
     button->setIconSize(QSize(ToolIconSize, ToolIconSize));
+    button->setCheckable(true);
 
     tool->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -114,6 +118,7 @@ void ToolBox::addTool(ToolBoxWidget* tool)
     connect(button, &QToolButton::pressed, [ this, toolIdx ] () { this->toolActivated(toolIdx); });
 
     Tool t;
+    t.idx    = toolIdx;
     t.widget = tool;
     t.button = button;
 
@@ -130,14 +135,29 @@ void ToolBox::toolActivated(int idx)
     {
         right_widget_->setVisible(false);
         active_tool_idx_ = -1;
-        return;
+    }
+    else
+    {
+        assert(idx >= 0);
+
+        const auto& tool = tools_.at(idx);
+
+        tool_name_label_->setText(QString::fromStdString(tool.widget->toolName()));
+
+        active_tool_idx_ = idx;
+        widget_stack_->setCurrentIndex(idx);
+        right_widget_->setVisible(true);
+
+        for (auto& t : tools_)
+        {
+            if (t.idx == active_tool_idx_)
+                continue;
+
+            t.button->blockSignals(true);
+            t.button->setChecked(false);
+            t.button->blockSignals(false);
+        }
     }
 
-    const auto& tool = tools_.at(idx);
-
-    tool_name_label_->setText(QString::fromStdString(tool.widget->toolName()));
-
-    active_tool_idx_ = idx;
-    widget_stack_->setCurrentIndex(idx);
-    right_widget_->setVisible(true);
+    emit toolToggled(active_tool_idx_);
 }

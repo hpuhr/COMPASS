@@ -114,10 +114,12 @@ public:
     void updateBottomWidget();
 
 protected:
-    void createMenus ();
+    void createUI();
+    void createMenus();
     void createDebugMenu();
 
     void updateWindowTitle();
+    void updateSizings(int currentToolIdx);
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);

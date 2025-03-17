@@ -34,9 +34,15 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QScrollArea>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 using namespace std;
 using namespace Utils;
+
+/**************************************************************************************************
+ * DataSourcesLoadWidget
+ **************************************************************************************************/
 
 DataSourcesLoadWidget::DataSourcesLoadWidget(DataSourceManager& ds_man)
     : ds_man_(ds_man)
@@ -620,3 +626,681 @@ void DataSourcesLoadWidget::clearAndCreateContent()
 //    }
 //}
 
+/**************************************************************************************************
+ * DataSourcesLoadTreeWidget
+ **************************************************************************************************/
+
+/**
+ */
+DataSourcesLoadTreeWidget::DataSourcesLoadTreeWidget(DataSourceManager& ds_man)
+:   ds_man_(ds_man)
+{
+    createUI();
+}
+
+/**
+ */
+DataSourcesLoadTreeWidget::~DataSourcesLoadTreeWidget() = default;
+
+/**
+ */
+void DataSourcesLoadTreeWidget::createUI()
+{
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    QVBoxLayout* main_layout = new QVBoxLayout();
+    setLayout(main_layout);
+
+    // buttons
+    QHBoxLayout* button_layout = new QHBoxLayout();
+    button_layout->addStretch();
+
+    QPushButton* edit_button = new QPushButton();
+    edit_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    edit_button->setFixedSize(UI_ICON_SIZE);
+    edit_button->setFlat(UI_ICON_BUTTON_FLAT);
+    edit_button->setToolTip(tr("Data Source Options"));
+
+    connect(edit_button, &QPushButton::clicked, this, &DataSourcesLoadTreeWidget::editClickedSlot);
+    button_layout->addWidget(edit_button);
+
+    main_layout->addLayout(button_layout);
+
+    // tree widget
+    tree_widget_ = new QTreeWidget;
+    tree_widget_->setColumnCount(5);
+
+    QStringList header_labels;
+    header_labels << "Use";
+    header_labels << "Name";
+    header_labels << "Lines";
+    header_labels << "Loaded";
+    header_labels << "Count";
+
+    tree_widget_->setHeaderLabels(header_labels);
+
+    main_layout->addWidget(tree_widget_);
+
+    QHBoxLayout* assoc_layout = new QHBoxLayout();
+
+    // time
+    QLabel* ts_label = new QLabel("Timestamps");
+    ts_label->setFont(font_bold);
+    assoc_layout->addWidget(ts_label);
+
+    assoc_layout->addWidget(new QLabel("Min"));
+
+    ts_min_label_ = new QLabel("None");
+    assoc_layout->addWidget(ts_min_label_);
+
+    assoc_layout->addWidget(new QLabel("Max"));
+
+    ts_max_label_ = new QLabel("None");
+    assoc_layout->addWidget(ts_max_label_);
+
+    assoc_layout->addStretch();
+
+    // assoc
+    QLabel* assoc_label = new QLabel("Associations");
+    assoc_label->setFont(font_bold);
+    assoc_layout->addWidget(assoc_label);
+
+    associations_label_ = new QLabel("None");
+    assoc_layout->addWidget(associations_label_);
+
+    assoc_layout->addStretch();
+    main_layout->addLayout(assoc_layout);
+
+    // update
+    updateContent();
+
+    // create menu
+    createMenu();
+}
+
+/**
+ */
+void DataSourcesLoadTreeWidget::createMenu()
+{
+    QAction* sel_dstyp_action = edit_menu_.addAction("Select All DSTypes");
+    connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadTreeWidget::selectAllDSTypesSlot);
+
+    QAction* desel_dstyp_action = edit_menu_.addAction("Deselect All DSTypes");
+    connect(desel_dstyp_action, &QAction::triggered, this, &DataSourcesLoadTreeWidget::deselectAllDSTypesSlot);
+
+    edit_menu_.addSeparator();
+
+    QMenu* select_ds = edit_menu_.addMenu("Select Data Sources");
+
+    QAction* sel_ds_action = select_ds->addAction("All");
+    connect(sel_ds_action, &QAction::triggered, this, &DataSourcesLoadTreeWidget::selectAllDataSourcesSlot);
+
+    for (const auto& ds_type_it : ds_man_.data_source_types_)
+    {
+        QAction* action = select_ds->addAction(("From "+ds_type_it).c_str());
+        action->setProperty("ds_type", ds_type_it.c_str());
+        connect(action, &QAction::triggered, this, &DataSourcesLoadTreeWidget::selectDSTypeSpecificDataSourcesSlot);
+    }
+
+    QMenu* deselect_ds = edit_menu_.addMenu("Deselect Data Sources");
+
+    QAction* desel_ds_action = deselect_ds->addAction("All");
+    connect(desel_ds_action, &QAction::triggered, this, &DataSourcesLoadTreeWidget::deselectAllDataSourcesSlot);
+
+    for (const auto& ds_type_it : ds_man_.data_source_types_)
+    {
+        QAction* action = deselect_ds->addAction(("From "+ds_type_it).c_str());
+        action->setProperty("ds_type", ds_type_it.c_str());
+        connect(action, &QAction::triggered, this, &DataSourcesLoadTreeWidget::deselectDSTypeSpecificDataSourcesSlot);
+    }
+
+    edit_menu_.addSeparator();
+
+    QMenu* set_lines = edit_menu_.addMenu("Set Line");
+
+    QAction* desel_line_action = set_lines->addAction("Deselect All");
+    connect(desel_line_action, &QAction::triggered, this, &DataSourcesLoadTreeWidget::deselectAllLinesSlot);
+
+    for (unsigned int cnt=0; cnt < 4; ++cnt)
+    {
+        QAction* desel_line_action = set_lines->addAction(("Select "+String::lineStrFrom(cnt)).c_str());
+        desel_line_action->setProperty("line_id", cnt);
+        connect(desel_line_action, &QAction::triggered, this, &DataSourcesLoadTreeWidget::selectSpecificLineSlot);
+    }
+
+    edit_menu_.addSeparator();
+
+    QAction* show_cnt_action = edit_menu_.addAction("Toggle Show Counts");
+    connect(show_cnt_action, &QAction::triggered, this, &DataSourcesLoadTreeWidget::toogleShowCountsSlot);
+}
+
+/**
+ */
+void DataSourcesLoadTreeWidget::clear()
+{
+    ds_type_items_.clear();
+    ds_items_.clear();
+
+    item_infos_.clear();
+
+    tree_widget_->clear();
+}
+
+/**
+ */
+void DataSourcesLoadTreeWidget::createContent()
+{
+    logdbg << "DataSourcesLoadTreeWidget: createContent";
+    
+    clear();
+
+    unsigned int dstype_cnt = 0;
+    int item_id = 0;
+    for (auto& ds_type_name : DataSourceManager::data_source_types_)
+    {
+        logdbg << "DataSourcesLoadTreeWidget: createContent: typ " << ds_type_name << " cnt " << dstype_cnt++;
+
+        createDataSourceType(ds_type_name);
+    }
+}
+
+/**
+ */
+void DataSourcesLoadTreeWidget::createDataSourceType(const std::string& ds_type_name)
+{
+    //create item for ds type
+    QTreeWidgetItem* dstype_item = new QTreeWidgetItem;
+
+    auto font_bold = dstype_item->font(0);
+    font_bold.setBold(true);
+
+    ItemInfo info;
+    info.id   = item_ids_++;
+    info.name = ds_type_name;
+    info.type = ItemType::DataSourceType;
+
+    bool use_item = ds_man_.dsTypeLoadingWanted(ds_type_name);
+
+    dstype_item->setCheckState(0, use_item ? Qt::Checked : Qt::Unchecked);
+    dstype_item->setText(1, QString::fromStdString(ds_type_name));
+    dstype_item->setFont(1, font_bold);
+    dstype_item->setData(0, Qt::UserRole, QVariant(info.id));
+
+    assert (ds_type_items_.count(ds_type_name) == 0);
+    
+    ds_type_items_[ ds_type_name ] = dstype_item;
+    item_infos_   [ info.id      ] = info;
+
+    tree_widget_->addTopLevelItem(dstype_item);
+
+    //add data sources
+    bool ds_found = false;
+    for (const auto& ds_it : ds_man_.dbDataSources())
+    {
+        if (ds_it->dsType() != ds_type_name)
+            continue;
+
+        ds_found = true;
+
+        createDataSource(dstype_item, *ds_it);
+    }
+
+    if (!ds_found)
+    {
+        //@TODO: deactivate item
+    }
+}
+
+void DataSourcesLoadTreeWidget::createDataSource(QTreeWidgetItem* parent_item, const dbContent::DBDataSource& data_source)
+{
+    unsigned int ds_id   = Number::dsIdFrom(data_source.sac(), data_source.sic());
+    std::string  ds_name = data_source.name();
+
+    logdbg << "DataSourcesLoadTreeWidget: createDataSource: create '" << data_source.dsType() << "' '" << ds_name << "'";
+
+    //create item for data source
+    QTreeWidgetItem* ds_item = new QTreeWidgetItem;
+
+    ItemInfo info;
+    info.id   = item_ids_++;
+    info.name = ds_name;
+    info.type = ItemType::DataSource;
+
+    bool use_item = true; //ds_man_.da(ds_type_name);
+
+    ds_item->setCheckState(0, use_item ? Qt::Checked : Qt::Unchecked);
+    ds_item->setText(1, QString::fromStdString(ds_name));
+    ds_item->setData(0, Qt::UserRole, QVariant(info.id));
+
+    assert (ds_items_.count(ds_name) == 0);
+
+    ds_items_  [ ds_name ] = ds_item;
+    item_infos_[ info.id ] = info;
+
+    parent_item->addChild(ds_item);
+}
+
+void DataSourcesLoadTreeWidget::createDBContent(QTreeWidgetItem* parent_item)
+{
+
+}
+
+/**
+ */
+void DataSourcesLoadTreeWidget::updateContent(bool recreate_required)
+{
+    logdbg << "DataSourcesLoadWidget: updateContent: recreate_required " << recreate_required
+           << " num data sources " << ds_man_.dbDataSources().size();
+
+    clear();
+    
+    
+
+
+
+
+
+
+
+//         connect(dstyp_box, &QCheckBox::clicked,
+//                 this, &DataSourcesLoadWidget::loadDSTypeChangedSlot);
+
+//         dstyp_box->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+
+//         type_layout_->addWidget(dstyp_box, row, col);
+
+//         assert (!ds_type_boxes_.count(ds_type_name));
+//         ds_type_boxes_[ds_type_name] = dstyp_box;
+
+//         ++row;
+
+//         ds_found = false;
+
+//         logdbg << "DataSourcesLoadWidget: clearAndCreateContent: data sources for type " << ds_type_name;
+
+//         for (const auto& ds_it : ds_man_.dbDataSources())
+//         {
+//             if (ds_it->dsType() != ds_type_name)
+//                 continue;
+
+//             ds_found = true;
+
+//             ds_id = Number::dsIdFrom(ds_it->sac(), ds_it->sic());
+//             ds_name = ds_it->name();
+//             logdbg << "DataSourcesLoadWidget: clearAndCreateContent: create '" << ds_it->dsType()
+//                 << "' '" << ds_name << "'";
+
+//             std::function<bool()> get_use_ds_func =
+//                 [&ds_it] () { return ds_it->loadingWanted(); };
+//             std::function<void(bool)> set_use_ds_func  =
+//                 [&ds_it] (bool value) { return ds_it->loadingWanted(value); };
+//             std::function<bool(unsigned int)> get_use_ds_line_func =
+//                 [&ds_it] (unsigned int line_id) { return ds_it->lineLoadingWanted(line_id); };
+//             std::function<void(unsigned int, bool)> set_use_ds_line_func  =
+//                 [&ds_it] (unsigned int line_id, bool value) { return ds_it->lineLoadingWanted(line_id, value); };
+
+//             std::function<bool()> show_counts_func =
+//                 [this] () { return ds_man_.config().load_widget_show_counts_; };
+
+
+//             DBDataSourceWidget* ds_widget = new DBDataSourceWidget(
+//                 *ds_it, get_use_ds_func, set_use_ds_func,
+//                 get_use_ds_line_func, set_use_ds_line_func,
+//                 show_counts_func);
+
+//             type_layout_->addWidget(ds_widget, row, col);
+
+//             assert (!ds_widgets_.count(ds_name));
+//             ds_widgets_[ds_name] = ds_widget;
+
+//             ++row;
+//         }
+
+//         if (!ds_found)
+//         {
+//             dstyp_box->setChecked(false);
+//             dstyp_box->setDisabled(true);
+//         }
+
+//         dstyp_cnt++;
+//     }
+
+    
+ 
+//   for (auto& ds_type_it : ds_type_boxes_)
+//       ds_type_it.second->setChecked(ds_man_.dsTypeLoadingWanted(ds_type_it.first));
+ 
+//   if (ds_widgets_.size() != ds_man_.dbDataSources().size()) // check if same size
+//       recreate_required = true;
+//   else // check each one
+//   {
+//       for (const auto& ds_it : ds_man_.dbDataSources())
+//       {
+//           if (!ds_widgets_.count(ds_it->name()))
+//           {
+//               logdbg << "DataSourcesLoadWidget: updateContent: ds_box " << ds_it->name() << " missing ";
+ 
+//               recreate_required = true;
+//               break;
+//           }
+//       }
+//   }
+ 
+//   logdbg << "DataSourcesLoadWidget: updateContent: recreate_required " << recreate_required;
+ 
+//   if (recreate_required)
+//   {
+//       clearAndCreateContent();
+//   }
+//   else
+//   {
+//       for (auto& ds_widget_it : ds_widgets_)
+//           ds_widget_it.second->updateContent();
+//   }
+ 
+//           // TODO move this
+//   DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+ 
+//   assert (ts_min_label_);
+//   assert (ts_max_label_);
+ 
+//   if (dbcont_man.hasMinMaxTimestamp())
+//   {
+//       ts_min_label_->setText(Time::toString(get<0>(dbcont_man.minMaxTimestamp()), 0).c_str());
+//       ts_max_label_->setText(Time::toString(get<1>(dbcont_man.minMaxTimestamp()), 0).c_str());
+//   }
+//   else
+//   {
+//       ts_min_label_->setText("None");
+//       ts_max_label_->setText("None");
+//   }
+ 
+//   assert(associations_label_);
+//   if (dbcont_man.hasAssociations())
+//   {
+//       std::string tmp = "From " + dbcont_man.associationsID();
+//       associations_label_->setText(tmp.c_str());
+//   }
+//   else
+//       associations_label_->setText("None");
+ 
+//   arrangeSourceWidgetWidths();
+ }
+
+
+
+
+/**
+ */
+void DataSourcesLoadWidget::loadDSTypeChangedSlot()
+{
+    QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
+    assert (box);
+
+    string ds_type_name = box->property("DSType").toString().toStdString();
+
+    bool load = box->checkState() == Qt::Checked;
+
+    loginf << "DataSourcesLoadWidget: loadDSTypeChangedSlot: ds_type " << ds_type_name << " load " << load;
+
+    COMPASS::instance().dataSourceManager().dsTypeLoadingWanted(ds_type_name, load);
+}
+
+/**
+ */
+void DataSourcesLoadWidget::editClickedSlot()
+{
+ loginf << "DataSourcesLoadWidget: editClickedSlot";
+
+ edit_menu_.exec(QCursor::pos());
+}
+
+/**
+ */
+void DataSourcesLoadWidget::selectAllDSTypesSlot()
+{
+ loginf << "DataSourcesLoadWidget: selectAllDSTypesSlot";
+
+ ds_man_.selectAllDSTypes();
+
+}
+
+/**
+ */
+void DataSourcesLoadWidget::deselectAllDSTypesSlot()
+{
+ loginf << "DataSourcesLoadWidget: deselectAllDSTypesSlot";
+
+ ds_man_.deselectAllDSTypes();
+}
+
+/**
+ */
+void DataSourcesLoadWidget::selectAllDataSourcesSlot()
+{
+ loginf << "DataSourcesLoadWidget: selectAllDataSourcesSlot";
+
+ ds_man_.selectAllDataSources();
+}
+
+/**
+ */
+void DataSourcesLoadWidget::deselectAllDataSourcesSlot()
+{
+ loginf << "DataSourcesLoadWidget: deselectAllDataSourcesSlot";
+
+ ds_man_.deselectAllDataSources();
+}
+
+/**
+ */
+void DataSourcesLoadWidget::selectDSTypeSpecificDataSourcesSlot()
+{
+ QAction* action = dynamic_cast<QAction*>(sender());
+ assert (action);
+
+ string ds_type = action->property("ds_type").toString().toStdString();
+
+ loginf << "DataSourcesLoadWidget: selectDSTypeSpecificDataSourcesSlot: ds_type '" << ds_type << "'";
+
+ ds_man_.selectDSTypeSpecificDataSources(ds_type);
+}
+
+/**
+ */
+void DataSourcesLoadWidget::deselectDSTypeSpecificDataSourcesSlot()
+{
+ QAction* action = dynamic_cast<QAction*>(sender());
+ assert (action);
+
+ string ds_type = action->property("ds_type").toString().toStdString();
+
+ loginf << "DataSourcesLoadWidget: deselectDSTypeSpecificDataSourcesSlot: ds_type '" << ds_type << "'";
+
+ ds_man_.deselectDSTypeSpecificDataSources(ds_type);
+}
+
+/**
+ */
+void DataSourcesLoadWidget::deselectAllLinesSlot()
+{
+ loginf << "DataSourcesLoadWidget: deselectAllLinesSlot";
+
+ ds_man_.deselectAllLines();
+}
+
+/**
+ */
+void DataSourcesLoadWidget::selectSpecificLineSlot()
+{
+ QAction* action = dynamic_cast<QAction*>(sender());
+ assert (action);
+
+ unsigned int line_id = action->property("line_id").toUInt();
+
+ loginf << "DataSourcesLoadWidget: selectSpecificLineSlot: line_id " << line_id;
+
+ ds_man_.selectSpecificLineSlot(line_id);
+}
+
+/**
+ */
+void DataSourcesLoadWidget::toogleShowCountsSlot()
+{
+ loginf << "DataSourcesLoadWidget: toogleShowCountsSlot";
+
+ ds_man_.config().load_widget_show_counts_ = !ds_man_.config().load_widget_show_counts_;
+
+ updateContent();
+}
+
+
+void DataSourcesLoadWidget::clear()
+{
+ // delete dstype boxes
+ for (auto& ds_type_box_it : ds_type_boxes_)
+     delete ds_type_box_it.second;
+ ds_type_boxes_.clear();
+
+ ds_widgets_.clear(); // delete by data sources
+
+         // delete all previous
+ QLayoutItem* child;
+ while (!type_layout_->isEmpty() && (child = type_layout_->takeAt(0)) != nullptr)
+ {
+     if (child->widget())
+         delete child->widget();
+     delete child;
+ }
+}
+
+void DataSourcesLoadWidget::arrangeSourceWidgetWidths()
+{
+ logdbg << "DataSourcesLoadWidget: arrangeSourceWidgetWidths";
+
+ unsigned int min_width = 0;
+
+ for (auto& widget_it : ds_widgets_)
+     min_width = max(min_width, widget_it.second->getLabelMinWidth());
+
+ if (min_width)
+ {
+     logdbg << "DataSourcesLoadWidget: arrangeSourceWidgetWidths: setting width " << min_width;
+
+     for (auto& widget_it : ds_widgets_)
+         widget_it.second->updateLabelMinWidth(min_width);
+ }
+}
+
+void DataSourcesLoadWidget::clearAndCreateContent()
+{
+ logdbg << "DataSourcesLoadWidget: clearAndCreateContent";
+
+ clear();
+
+ QFont font_bold;
+ font_bold.setBold(true);
+ font_bold.setPointSize(ds_man_.config().ds_font_size_);
+
+ unsigned int row = 0;
+ unsigned int col = 0;
+ //unsigned int dstype_col = 0;
+ unsigned int dstyp_cnt = 0;
+
+ unsigned int ds_id;
+ string ds_name;
+ string ds_content_name;
+
+ using namespace dbContent;
+
+         //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+ bool ds_found;
+
+ logdbg << "DataSourcesLoadWidget: clearAndCreateContent: iterating data source types";
+
+ for (auto& ds_type_name : DataSourceManager::data_source_types_)
+ {
+     logdbg << "DataSourcesLoadWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
+
+     if (ds_type_name == "MLAT" || ds_type_name == "Tracker")  // break into next column
+     {
+         row = 0;
+         col++;
+     }
+
+     QCheckBox* dstyp_box = new QCheckBox(ds_type_name.c_str());
+     dstyp_box->setFont(font_bold);
+     dstyp_box->setChecked(ds_man_.dsTypeLoadingWanted(ds_type_name));
+     dstyp_box->setProperty("DSType", ds_type_name.c_str());
+
+     connect(dstyp_box, &QCheckBox::clicked,
+             this, &DataSourcesLoadWidget::loadDSTypeChangedSlot);
+
+     dstyp_box->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+
+     type_layout_->addWidget(dstyp_box, row, col);
+
+     assert (!ds_type_boxes_.count(ds_type_name));
+     ds_type_boxes_[ds_type_name] = dstyp_box;
+
+     ++row;
+
+     ds_found = false;
+
+     logdbg << "DataSourcesLoadWidget: clearAndCreateContent: data sources for type " << ds_type_name;
+
+     for (const auto& ds_it : ds_man_.dbDataSources())
+     {
+         if (ds_it->dsType() != ds_type_name)
+             continue;
+
+         ds_found = true;
+
+         ds_id = Number::dsIdFrom(ds_it->sac(), ds_it->sic());
+         ds_name = ds_it->name();
+         logdbg << "DataSourcesLoadWidget: clearAndCreateContent: create '" << ds_it->dsType()
+                << "' '" << ds_name << "'";
+
+         std::function<bool()> get_use_ds_func =
+             [&ds_it] () { return ds_it->loadingWanted(); };
+         std::function<void(bool)> set_use_ds_func  =
+             [&ds_it] (bool value) { return ds_it->loadingWanted(value); };
+         std::function<bool(unsigned int)> get_use_ds_line_func =
+             [&ds_it] (unsigned int line_id) { return ds_it->lineLoadingWanted(line_id); };
+         std::function<void(unsigned int, bool)> set_use_ds_line_func  =
+             [&ds_it] (unsigned int line_id, bool value) { return ds_it->lineLoadingWanted(line_id, value); };
+
+         std::function<bool()> show_counts_func =
+             [this] () { return ds_man_.config().load_widget_show_counts_; };
+
+
+         DBDataSourceWidget* ds_widget = new DBDataSourceWidget(
+             *ds_it, get_use_ds_func, set_use_ds_func,
+             get_use_ds_line_func, set_use_ds_line_func,
+             show_counts_func);
+
+         type_layout_->addWidget(ds_widget, row, col);
+
+         assert (!ds_widgets_.count(ds_name));
+         ds_widgets_[ds_name] = ds_widget;
+
+         ++row;
+     }
+
+     if (!ds_found)
+     {
+         dstyp_box->setChecked(false);
+         dstyp_box->setDisabled(true);
+     }
+
+     dstyp_cnt++;
+ }
+
+ logdbg << "DataSourcesLoadWidget: clearAndCreateContent: setting columns";
+
+ for(int c=0; c < type_layout_->columnCount(); c++)
+     type_layout_->setColumnStretch(c,1);
+
+ logdbg << "DataSourcesLoadWidget: clearAndCreateContent: done";
+}
