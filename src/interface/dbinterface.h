@@ -87,14 +87,18 @@ public:
                                          const std::string& instance_id);
 
     void openDBFile(const std::string& filename, bool overwrite);
+    void openDBInMemory();
+    void openDBFileFromMemory(const std::string& filename);
     void exportDBFile(const std::string& filename);
-    void closeDBFile();
+    void closeDB();
 
     bool cleanupDB(bool show_dialog = false);
     bool cleanupInProgress() const { return cleanup_in_progress_; }
 
     const std::map<std::string, DBTableInfo>& tableInfo();
-    const std::string dbFilename() const { return db_filename_; }
+    std::string dbFilename() const;
+    bool dbInMemory() const;
+    bool canCreateDBFileFromMemory() const;
 
     bool ready() const;
 
@@ -193,6 +197,8 @@ public:
     // ta -> mops versions, nucp_nics, nac_ps
 
 protected:
+    void openDBFileInternal(const std::string& filename, bool overwrite);
+
     void loadProperties();
     void reset();
 
@@ -220,8 +226,6 @@ protected:
 
     std::map<std::string, std::string> properties_;
     std::map<std::string, std::set<std::string>> dbcolumn_content_flags_; // dbtable -> dbcols with content
-
-    std::string db_filename_;
 
     bool insert_mt_ = false;
 

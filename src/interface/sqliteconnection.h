@@ -50,8 +50,6 @@ protected:
     Result connect_impl() override final;
     void disconnect_impl() override final;
 
-    Result exportFile_impl(const std::string& file_name) override final;
-
     Result executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer) override final;
     bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) override final;
 

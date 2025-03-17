@@ -57,8 +57,6 @@ public:
     Result connect();
     void disconnect();
 
-    Result exportDB(const std::string& file_name);
-
     Result execute(const std::string& sql);
     std::shared_ptr<DBResult> execute(const std::string& sql, bool fetch_buffer);
     std::shared_ptr<DBResult> execute(const DBCommand& command);
@@ -111,8 +109,6 @@ protected:
 
     virtual Result connect_impl() = 0;
     virtual void disconnect_impl() = 0;
-
-    virtual Result exportFile_impl(const std::string& file_name) = 0;
 
     virtual Result executeSQL_impl(const std::string& sql, DBResult* result, bool fetch_result_buffer) = 0; 
     virtual bool executeCmd_impl(const std::string& command, const PropertyList* properties, DBResult* result) = 0;

@@ -40,6 +40,7 @@ protected:
     void close_impl() override final;
     ResultT<DBConnection*> createConnection_impl(bool verbose) override final;
     Result cleanupDB_impl(const std::string& db_fn) override final;
+    Result exportToFile_impl(const std::string& file_name) override final;
 
     std::vector<db::SQLPragma> sqlPragmas() const override final;
 
@@ -62,8 +63,11 @@ protected:
         //duckdb does not allow 'replace into' directly, this is handled via 'insert ... on conflict'
         config.use_conflict_resolution = true;
 
-        //duckdb supports mutlithreaded access
+        //duckdb supports multithreaded access
         config.supports_mt = true;
+
+        //duckdb supports in-memory db
+        config.supports_in_mem = true;
 
         return config;
     }

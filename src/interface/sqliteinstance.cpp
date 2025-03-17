@@ -87,9 +87,17 @@ ResultT<DBConnection*> SQLiteInstance::createConnection_impl(bool verbose)
 
     if (!res.ok())
     {
-        delete c;
+        delete c; 
         return ResultT<DBConnection*>::failed(res.error());
     }
 
     return ResultT<DBConnection*>::succeeded(c);
+}
+/**
+ */
+Result SQLiteInstance::exportToFile_impl(const std::string& file_name)
+{
+    std::string tmp_sql = "VACUUM INTO '" + file_name + "';";
+
+    return defaultConnection().execute(tmp_sql);
 }

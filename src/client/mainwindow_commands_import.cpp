@@ -821,17 +821,23 @@ rtcommand::IsValid  RTCommandImportASTERIXNetworkStart::valid() const
 
 bool RTCommandImportASTERIXNetworkStart::run_impl()
 {
-    if (!COMPASS::instance().dbOpened())
-    {
-        setResultMessage("Database not opened");
-        return false;
-    }
-
     if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
     {
         setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
         return false;
     }
+
+    bool db_opened = COMPASS::instance().dbOpened();
+    bool db_inmem  = COMPASS::instance().dbInMem();
+
+    std::string current_db_filename = (db_opened && !db_inmem) ? COMPASS::instance().lastDbFilename() : "";
+
+    //close current db
+    if (db_opened)
+        COMPASS::instance().mainWindow().closeDBSlot();
+
+    //create in-memory db for live mode
+    COMPASS::instance().mainWindow().createInMemoryDB(current_db_filename);
 
     ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
 
@@ -867,7 +873,6 @@ bool RTCommandImportASTERIXNetworkStart::run_impl()
     }
 
     import_task.allowUserInteractions(false);
-
     import_task.run();
 
     // handle errors
