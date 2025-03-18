@@ -1,5 +1,5 @@
-#ifndef DATASOURCEMANAGER_H
-#define DATASOURCEMANAGER_H
+
+#pragma once
 
 #include "configurable.h"
 #include "source/configurationdatasource.h"
@@ -13,8 +13,7 @@
 #include <memory>
 
 class COMPASS;
-class DataSourcesLoadWidget;
-class DataSourcesLoadTreeWidget;
+class DataSourcesWidget;
 class DataSourcesConfigurationDialog;
 
 class DataSourceManager : public QObject, public Configurable
@@ -101,7 +100,7 @@ class DataSourceManager : public QObject, public Configurable
 
     void resetToStartupConfiguration();
 
-    DataSourcesLoadTreeWidget* loadWidget();
+    DataSourcesWidget* loadWidget();
     void updateWidget();
 
     DataSourcesConfigurationDialog* configurationDialog();
@@ -155,7 +154,7 @@ class DataSourceManager : public QObject, public Configurable
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
     std::vector<unsigned int> ds_ids_all_; // both from config and db, vector to have order
 
-    std::unique_ptr<DataSourcesLoadTreeWidget> load_widget_;
+    std::unique_ptr<DataSourcesWidget> load_widget_;
 
     std::unique_ptr<DataSourcesConfigurationDialog> config_dialog_;
 
@@ -169,5 +168,3 @@ class DataSourceManager : public QObject, public Configurable
     void updateDSIdsAll();
     void createConfigDataSourcesFromDB();
 };
-
-#endif // DATASOURCEMANAGER_H

@@ -24,7 +24,7 @@
 #include "datasourcesconfigurationdialog.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/target/targetlistwidget.h"
-#include "datasourcesloadwidget.h"
+#include "datasourceswidget.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
 #include "files.h"
 #include "filtermanager.h"
