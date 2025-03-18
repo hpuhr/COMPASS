@@ -19,92 +19,44 @@
 
 #include <QWidget>
 #include <QMenu>
+#include <QPushButton>
 
 #include <map>
 
 class DataSourceManager;
 
-class QGridLayout;
-class QPushButton;
-class QCheckBox;
-class QLineEdit;
 class QLabel;
 class QTreeWidget;
 class QTreeWidgetItem;
 
 namespace dbContent
 {
-    class DBDataSourceWidget;
+    class DBDataSource;
 }
 
 /**
  */
-class DataSourcesLoadWidget : public QWidget
+class DataSourcesWidget : public QWidget
 {
     Q_OBJECT
-
-public slots:
-    void loadDSTypeChangedSlot();
-    //void loadDSChangedSlot();
-
-    void editClickedSlot();
-
-    void selectAllDSTypesSlot();
-    void deselectAllDSTypesSlot();
-
-    void selectAllDataSourcesSlot();
-    void deselectAllDataSourcesSlot();
-    void selectDSTypeSpecificDataSourcesSlot();
-    void deselectDSTypeSpecificDataSourcesSlot();
-
-    void deselectAllLinesSlot();
-    void selectSpecificLineSlot();
-
-    void toogleShowCountsSlot();
-
 public:
-    DataSourcesLoadWidget(DataSourceManager& ds_man);
-    virtual ~DataSourcesLoadWidget();
+    DataSourcesWidget(DataSourceManager& ds_man, bool show_counts);
+    virtual ~DataSourcesWidget();
 
     void updateContent(bool recreate_required = false);
     void loadingDone();
 
-private:
-    DataSourceManager& ds_man_;
+    virtual void setUseDSType(const std::string& ds_type_name, bool use);
+    virtual bool getUseDSType(const std::string& ds_type_name) const;
+    virtual void setUseDS(unsigned int ds_id, bool use);
+    virtual bool getUseDS(unsigned int ds_id) const;
+    virtual void setUseDSLine(unsigned int ds_id, unsigned int ds_line, bool use);
+    virtual bool getUseDSLine(unsigned int ds_id, unsigned int ds_line) const;
 
-    QMenu edit_menu_;
-
-    QGridLayout* type_layout_{nullptr};
-
-    QLabel* ts_min_label_{nullptr};
-    QLabel* ts_max_label_{nullptr};
-    QLabel* associations_label_{nullptr};
-
-    std::map<std::string, QCheckBox*> ds_type_boxes_;
-
-    std::map<std::string, dbContent::DBDataSourceWidget*> ds_widgets_;
-
-    void clearAndCreateContent();
-
-    void clear();
-    void arrangeSourceWidgetWidths();
-};
-
-/**
- */
-class DataSourcesLoadTreeWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    DataSourcesLoadTreeWidget(DataSourceManager& ds_man);
-    virtual ~DataSourcesLoadTreeWidget();
-
-    void updateContent(bool recreate_required = false);
-    void loadingDone();
+    DataSourceManager& dsManager() { return ds_man_; }
 
 public slots:
     void loadDSTypeChangedSlot();
-    //void loadDSChangedSlot();
 
     void editClickedSlot();
 
@@ -145,6 +97,8 @@ private:
     void createDataSource(QTreeWidgetItem* parent_item, const dbContent::DBDataSource& data_source);
     void createDBContent(QTreeWidgetItem* parent_item);
 
+    QWidget* createLinesWidget(unsigned int ds_id);
+
     DataSourceManager& ds_man_;
 
     QMenu edit_menu_;
@@ -161,4 +115,28 @@ private:
     std::map<int, ItemInfo> item_infos_;
 
     int item_ids_ = 0;
+
+    bool show_counts_ = true;
+};
+
+/**
+ */
+class DataSourceLineButton : public QPushButton
+{
+public:
+    DataSourceLineButton(DataSourcesWidget* widget,
+                         unsigned int ds_id, 
+                         unsigned int line_id,
+                         unsigned int button_size_px);
+
+    void updateContent();
+
+    unsigned int dsID() const { return ds_id_; }
+    unsigned int lineID() const { return line_id_; }
+
+private:
+    DataSourcesWidget* widget_ = nullptr;
+    unsigned int       ds_id_;
+    unsigned int       line_id_;
+    std::string        line_str_;
 };

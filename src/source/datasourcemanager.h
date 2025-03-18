@@ -14,6 +14,7 @@
 
 class COMPASS;
 class DataSourcesLoadWidget;
+class DataSourcesLoadTreeWidget;
 class DataSourcesConfigurationDialog;
 
 class DataSourceManager : public QObject, public Configurable
@@ -75,7 +76,7 @@ class DataSourceManager : public QObject, public Configurable
     const std::vector<std::unique_ptr<dbContent::DBDataSource>>& dbDataSources() const;
 
     void createNetworkDBDataSources();
-    std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> getNetworkLines();
+    std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> getNetworkLines() const;
     //ds_id -> line str ->(ip, port)
 
     void saveDBDataSources();
@@ -100,7 +101,7 @@ class DataSourceManager : public QObject, public Configurable
 
     void resetToStartupConfiguration();
 
-    DataSourcesLoadWidget* loadWidget();
+    DataSourcesLoadTreeWidget* loadWidget();
     void updateWidget();
 
     DataSourcesConfigurationDialog* configurationDialog();
@@ -143,7 +144,6 @@ class DataSourceManager : public QObject, public Configurable
     void deselectAllLines();
     void selectSpecificLineSlot(unsigned int line_id);
 
-
     DataSourceManager::Config& config();
 
   protected:
@@ -155,7 +155,7 @@ class DataSourceManager : public QObject, public Configurable
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
     std::vector<unsigned int> ds_ids_all_; // both from config and db, vector to have order
 
-    std::unique_ptr<DataSourcesLoadWidget> load_widget_;
+    std::unique_ptr<DataSourcesLoadTreeWidget> load_widget_;
 
     std::unique_ptr<DataSourcesConfigurationDialog> config_dialog_;
 

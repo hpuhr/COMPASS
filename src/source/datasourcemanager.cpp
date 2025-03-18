@@ -1,3 +1,4 @@
+
 #include "datasourcemanager.h"
 #include "datasourcesloadwidget.h"
 #include "datasourcesconfigurationdialog.h"
@@ -35,7 +36,6 @@ DataSourceManager::Config::Config()
       //,   use_radar_min_stddev_                 (false)
 {
 }
-
 
 DataSourceManager::DataSourceManager(const std::string& class_id, const std::string& instance_id,
                                      COMPASS* compass)
@@ -99,11 +99,11 @@ const std::vector<unsigned int>& DataSourceManager::getAllDsIDs()
     return ds_ids_all_;
 }
 
-DataSourcesLoadWidget* DataSourceManager::loadWidget()
+DataSourcesLoadTreeWidget* DataSourceManager::loadWidget()
 {
     if (!load_widget_)
     {
-        load_widget_.reset(new DataSourcesLoadWidget(*this));
+        load_widget_.reset(new DataSourcesLoadTreeWidget(*this, true));
     }
 
     assert(load_widget_);
@@ -1009,7 +1009,7 @@ void DataSourceManager::createNetworkDBDataSources()
     emit dataSourcesChangedSignal();
 }
 
-std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> DataSourceManager::getNetworkLines()
+std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> DataSourceManager::getNetworkLines() const
 {
     // ds_id -> line str ->(ip, port)
     std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> lines;
@@ -1026,5 +1026,3 @@ std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>
 
     return lines;
 }
-
-
