@@ -395,6 +395,8 @@ void DataSourcesWidget::createUI()
     tree_widget_->setHeaderLabels(header_labels);
     tree_widget_->header()->setSectionResizeMode(QHeaderView::ResizeMode::ResizeToContents);
 
+    connect(tree_widget_, &QTreeWidget::itemChanged, this, &DataSourcesWidget::itemChanged);
+
     main_layout->addWidget(tree_widget_);
 
     QHBoxLayout* assoc_layout = new QHBoxLayout();
@@ -513,9 +515,11 @@ void DataSourcesWidget::createContent()
         createDataSourceType(ds_type_name);
     }
 
-    shows_counts_ = showCounts();
+    shows_counts_ = getShowCounts();
 
     tree_widget_->expandAll();
+
+    updateAdditionalInfo();
 }
 
 /**
@@ -548,7 +552,7 @@ void DataSourcesWidget::createDataSource(DataSourcesWidgetItem* parent_item,
     parent_item->addChild(ds_item);
     ds_item->init();
 
-    bool show_counts = showCounts();
+    bool show_counts = getShowCounts();
 
     //add count items?
     if (show_counts)
@@ -624,6 +628,61 @@ void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
     }
 }
 
+namespace
+{
+    void updateContentRecursive(QTreeWidgetItem* item)
+    {
+        auto w_item = dynamic_cast<DataSourcesWidgetItem*>(item);
+        if (w_item)
+            w_item->updateContent();
+
+        for (int i = 0; i < item->childCount(); ++i)
+            updateContentRecursive(item->child(i));
+    }
+}
+
+/**
+ */
+void DataSourcesWidget::updateAllContent()
+{
+    for (int i = 0; i < tree_widget_->topLevelItemCount(); ++i)
+        updateContentRecursive(tree_widget_->topLevelItem(i));
+
+    updateAdditionalInfo();
+}
+
+/**
+ */
+void DataSourcesWidget::updateAdditionalInfo()
+{
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    assert (ts_min_label_);
+    assert (ts_max_label_);
+
+    if (dbcont_man.hasMinMaxTimestamp())
+    {
+        ts_min_label_->setText(Utils::Time::toString(std::get<0>(dbcont_man.minMaxTimestamp()), 0).c_str());
+        ts_max_label_->setText(Utils::Time::toString(std::get<1>(dbcont_man.minMaxTimestamp()), 0).c_str());
+    }
+    else
+    {
+        ts_min_label_->setText("None");
+        ts_max_label_->setText("None");
+    }
+
+    assert(associations_label_);
+    if (dbcont_man.hasAssociations())
+    {
+        std::string tmp = "From " + dbcont_man.associationsID();
+        associations_label_->setText(tmp.c_str());
+    }
+    else
+    {
+        associations_label_->setText("None");
+    }
+}
+
 /**
  */
 void DataSourcesWidget::editClicked()
@@ -639,7 +698,10 @@ void DataSourcesWidget::selectAllDSTypes()
 {
     loginf << "DataSourcesWidget: selectAllDSTypes";
 
-    ds_man_.selectAllDSTypes();
+    for (auto& ds_type_name : DataSourceManager::data_source_types_)
+        setUseDSType(ds_type_name, true);
+
+    updateAllContent();
 }
 
 /**
@@ -648,7 +710,10 @@ void DataSourcesWidget::deselectAllDSTypes()
 {
     loginf << "DataSourcesWidget: deselectAllDSTypes";
 
-    ds_man_.deselectAllDSTypes();
+    for (auto& ds_type_name : DataSourceManager::data_source_types_)
+        setUseDSType(ds_type_name, false);
+
+    updateAllContent();
 }
 
 /**
@@ -657,7 +722,10 @@ void DataSourcesWidget::selectAllDataSources()
 {
     loginf << "DataSourcesWidget: selectAllDataSources";
 
-    ds_man_.selectAllDataSources();
+    for (const auto& ds_it : ds_man_.dbDataSources())
+        setUseDS(ds_it->id(), true);
+
+    updateAllContent();
 }
 
 /**
@@ -666,7 +734,10 @@ void DataSourcesWidget::deselectAllDataSources()
 {
     loginf << "DataSourcesWidget: deselectAllDataSources";
 
-    ds_man_.deselectAllDataSources();
+    for (const auto& ds_it : ds_man_.dbDataSources())
+        setUseDS(ds_it->id(), false);
+
+    updateAllContent();
 }
 
 /**
@@ -680,7 +751,11 @@ void DataSourcesWidget::selectDSTypeSpecificDataSources()
 
     loginf << "DataSourcesWidget: selectDSTypeSpecificDataSources: ds_type '" << ds_type << "'";
 
-    ds_man_.selectDSTypeSpecificDataSources(ds_type);
+    for (const auto& ds_it : ds_man_.dbDataSources())
+        if (ds_it->dsType() == ds_type)
+            setUseDS(ds_it->id(), true);
+
+    updateAllContent();
 }
 
 /**
@@ -694,7 +769,11 @@ void DataSourcesWidget::deselectDSTypeSpecificDataSources()
 
     loginf << "DataSourcesWidget: deselectDSTypeSpecificDataSources: ds_type '" << ds_type << "'";
 
-    ds_man_.deselectDSTypeSpecificDataSources(ds_type);
+    for (const auto& ds_it : ds_man_.dbDataSources())
+        if (ds_it->dsType() == ds_type)
+            setUseDS(ds_it->id(), false);
+
+    updateAllContent();
 }
 
 /**
@@ -703,7 +782,11 @@ void DataSourcesWidget::deselectAllLines()
 {
     loginf << "DataSourcesWidget: deselectAllLines";
 
-    ds_man_.deselectAllLines();
+    for (const auto& ds_it : ds_man_.dbDataSources())
+        for (int line = 0; line < 4; ++line)
+            setUseDSLine(ds_it->id(), line, false);
+
+    updateAllContent();
 }
 
 /**
@@ -717,7 +800,10 @@ void DataSourcesWidget::selectSpecificLines()
 
     loginf << "DataSourcesWidget: selectSpecificLine: line_id " << line_id;
 
-    ds_man_.selectSpecificLineSlot(line_id);
+    for (const auto& ds_it : ds_man_.dbDataSources())
+        setUseDSLine(ds_it->id(), line_id, true);
+
+    updateAllContent();
 }
 
 /**
@@ -726,7 +812,7 @@ void DataSourcesWidget::toogleShowCounts()
 {
     loginf << "DataSourcesWidget: toogleShowCounts";
 
-    ds_man_.config().load_widget_show_counts_ = !ds_man_.config().load_widget_show_counts_;
+    setShowCounts(!getShowCounts());
 
     updateContent();
 }
@@ -775,7 +861,14 @@ bool DataSourcesWidget::getUseDSLine(unsigned int ds_id, unsigned int ds_line) c
 
 /**
  */
-bool DataSourcesWidget::showCounts() const
+void DataSourcesWidget::setShowCounts(bool show) const
+{
+    ds_man_.config().load_widget_show_counts_ = show;
+}
+
+/**
+ */
+bool DataSourcesWidget::getShowCounts() const
 {
     return ds_man_.config().load_widget_show_counts_;
 }

@@ -186,7 +186,8 @@ public:
     virtual bool getUseDS(unsigned int ds_id) const;
     virtual void setUseDSLine(unsigned int ds_id, unsigned int ds_line, bool use);
     virtual bool getUseDSLine(unsigned int ds_id, unsigned int ds_line) const;
-    virtual bool showCounts() const;
+    virtual void setShowCounts(bool show) const;
+    virtual bool getShowCounts() const;
 
     DataSourceManager& dsManager() { return ds_man_; }
 
@@ -209,6 +210,9 @@ private:
 
     void itemChanged(QTreeWidgetItem *item, int column);
 
+    void updateAllContent();
+    void updateAdditionalInfo();
+
     void editClicked();
 
     void selectAllDSTypes();
@@ -217,7 +221,6 @@ private:
     void deselectAllDataSources();
     void selectDSTypeSpecificDataSources();
     void deselectDSTypeSpecificDataSources();
-    void selectAllLines();
     void deselectAllLines();
     void selectSpecificLines();
     void toogleShowCounts();
