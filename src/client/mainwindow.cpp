@@ -178,14 +178,17 @@ void MainWindow::createUI()
     tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().dataSourceManager().loadWidget(),
                                                 "Data Sources",
                                                 "Data Sources",
+                                                { "Data", "Sources" },
                                                 QIcon(Files::getIconFilepath("db.png").c_str())));
     tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().filterManager().widget(),
                                                 "Filters",
                                                 "Filters",
+                                                { "Filters" },
                                                 QIcon(Files::getIconFilepath("filter.png").c_str())));
     tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().dbContentManager().targetListWidget(),
                                                 "Targets",
                                                 "Targets",
+                                                { "Targets" },
                                                 QIcon(Files::getIconFilepath("globe.png").c_str())));
     //@TODO: !handle filter check box!
     //QTabBar *tabBar = tab_widget_->tabBar();
@@ -194,6 +197,9 @@ void MainWindow::createUI()
 
     COMPASS::instance().evaluationManager().init(tool_box_); // adds eval widget
     COMPASS::instance().viewManager().init(tool_box_, tab_widget_); // adds view points widget and view container
+
+    tool_box_->adjustSizings();
+    tool_box_->selectTool("Data Sources");
 
     // add toolbox and view tab widget
     content_layout->addWidget(tool_box_);

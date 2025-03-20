@@ -55,9 +55,16 @@ public:
     virtual ~ToolBox();
 
     void addTool(ToolBoxWidget* tool);
+    size_t numTools() const;
+
+    void adjustSizings();
+
+    void selectTool(size_t idx);
+    bool selectTool(const std::string& name);
 
     static const int ToolIconSize;
     static const int ToolNameFontSize;
+    static const int ToolLabelFontSize;
 
     static const int StretchToolBox;
     static const int StretchView;

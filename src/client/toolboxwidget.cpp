@@ -35,12 +35,14 @@ ToolBoxWidget::~ToolBoxWidget() = default;
 WrappedToolBoxWidget::WrappedToolBoxWidget(QWidget* w, 
                                            const std::string& name,
                                            const std::string& info,
+                                           const std::vector<std::string>& labels,
                                            const QIcon& icon,
                                            QWidget* parent)
 :   ToolBoxWidget(parent)
-,   name_(name)
-,   info_(info)
-,   icon_(icon)
+,   name_  (name  )
+,   info_  (info  )
+,   labels_(labels)
+,   icon_  (icon  )
 {
     auto layout = new QHBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
@@ -73,4 +75,11 @@ std::string WrappedToolBoxWidget::toolName() const
 std::string WrappedToolBoxWidget::toolInfo() const 
 {
     return info_;
+}
+
+/**
+*/
+const std::vector<std::string>& WrappedToolBoxWidget::toolLabels() const
+{
+    return labels_;
 }

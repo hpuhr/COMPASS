@@ -42,10 +42,10 @@ class DataSourceLineButton : public QPushButton
 {
 public:
     DataSourceLineButton(DataSourcesWidget* widget,
-                         unsigned int ds_id, 
                          unsigned int line_id,
                          unsigned int button_size_px);
 
+    bool init(unsigned int ds_id);
     void updateContent();
 
     unsigned int dsID() const { return ds_id_; }
@@ -56,6 +56,7 @@ private:
     unsigned int       ds_id_;
     unsigned int       line_id_;
     std::string        line_str_;
+    bool               is_init_ = false;
 
     const dbContent::DBDataSource* ds_ = nullptr;
 };
@@ -77,23 +78,18 @@ public:
                           Type type);
     virtual ~DataSourcesWidgetItem() = default;
 
+    bool isInit() const { return is_init_; }
     Type type() const { return type_; }
 
-    virtual void init() 
-    { 
-        init_impl(); 
-        updateContent(); 
-    }
     virtual void updateContent() = 0;
 
 protected:
-    virtual void init_impl() {}
-
     void setItemWidget(int column, QWidget* w);
 
     DataSourcesWidget*     widget_ = nullptr;
     DataSourcesWidgetItem* parent_ = nullptr;
 
+    bool is_init_ = false;
     Type type_;
 };
 
@@ -103,16 +99,17 @@ class DataSourceTypeItem : public DataSourcesWidgetItem
 {
 public:
     DataSourceTypeItem(DataSourcesWidget* widget,
-                       DataSourcesWidgetItem* parent,
-                       const std::string& ds_type);
+                       DataSourcesWidgetItem* parent);
     virtual ~DataSourceTypeItem() = default;
+
+    bool init(const std::string& ds_type);
+    void updateContent() override final;
 
     const std::string& dsType() const { return ds_type_; }
 
-    void updateContent() override final;
-
 private:
     std::string ds_type_;
+    
 };
 
 /**
@@ -121,24 +118,22 @@ class DataSourceItem : public DataSourcesWidgetItem
 {
 public:
     DataSourceItem(DataSourcesWidget* widget,
-                   DataSourcesWidgetItem* parent,
-                   unsigned int ds_id);
+                   DataSourcesWidgetItem* parent);
 
     virtual ~DataSourceItem() = default;
 
-    unsigned int dsID() const { return ds_id_; }
-    const dbContent::DBDataSource* dataSource() const { return ds_; }
-
+    bool init(unsigned int ds_id);
     void updateContent() override final;
 
-protected:
-    void init_impl() override final;
+    unsigned int dsID() const { return ds_id_; }
+    const dbContent::DBDataSource* dataSource() const { return ds_; }
 
 private:
     QWidget* createLinesWidget();
 
     unsigned int                   ds_id_;
-    const dbContent::DBDataSource* ds_ = nullptr;
+    const dbContent::DBDataSource* ds_         = nullptr;
+    bool                           has_widget_ = false;
 
     std::vector<DataSourceLineButton*> line_buttons_;
 };
@@ -149,16 +144,16 @@ class DataSourceCountItem : public DataSourcesWidgetItem
 {
 public:
     DataSourceCountItem(DataSourcesWidget* widget,
-                        DataSourcesWidgetItem* parent,
-                        unsigned int ds_id,
-                        const std::string& dbc_name);
+                        DataSourcesWidgetItem* parent);
 
     virtual ~DataSourceCountItem() = default;
 
+    bool init(unsigned int ds_id,
+              const std::string& dbc_name);
+    void updateContent() override final;
+
     unsigned int dsID() const { return ds_id_; }
     const std::string& dbContentName() const { return dbc_name_; }
-
-    void updateContent() override final;
 
 private:
     QWidget* createLinesWidget();
@@ -195,20 +190,25 @@ public:
 
 private:
     friend class DataSourcesWidgetItem;
+    friend class DataSourceLineButton;
 
     void createUI();
     void createMenu();
 
     void clear();
-    void createContent();
-    void createDataSourceType(const std::string& ds_type_name);
-    void createDataSource(DataSourcesWidgetItem* parent_item, 
-                          const dbContent::DBDataSource& data_source);
-    void createDBContent(DataSourcesWidgetItem* parent_item,
-                         const dbContent::DBDataSource& data_source,
-                         const std::string& dbc_name);
+    int generateContent(bool force_rebuild);
+    int generateDataSourceType(DataSourceTypeItem* item,
+                               const std::string& ds_type_name);
+    int generateDataSource(DataSourceItem* item,
+                           DataSourcesWidgetItem* parent_item, 
+                           const dbContent::DBDataSource& data_source);
+    int generateDataSourceCount(DataSourceCountItem* item,
+                                DataSourcesWidgetItem* parent_item,
+                                const dbContent::DBDataSource& data_source,
+                                const std::string& dbc_name);
 
     void itemChanged(QTreeWidgetItem *item, int column);
+    void lineChanged(unsigned int ds_id, unsigned int ds_line, bool use);
 
     void updateAllContent();
     void updateAdditionalInfo();
@@ -234,6 +234,4 @@ private:
     QLabel* associations_label_{nullptr};
 
     QTreeWidget* tree_widget_ = nullptr;
-
-    bool shows_counts_ = false;
 };

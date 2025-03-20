@@ -33,6 +33,7 @@ public:
     virtual QIcon toolIcon() const = 0;
     virtual std::string toolName() const = 0;
     virtual std::string toolInfo() const = 0;
+    virtual const std::vector<std::string>& toolLabels() const = 0;
 };
 
 /**
@@ -43,6 +44,7 @@ public:
     WrappedToolBoxWidget(QWidget* w, 
                          const std::string& name,
                          const std::string& info,
+                         const std::vector<std::string>& labels,
                          const QIcon& icon,
                          QWidget* parent = nullptr);
     virtual ~WrappedToolBoxWidget();
@@ -50,9 +52,11 @@ public:
     QIcon toolIcon() const override final;
     std::string toolName() const override final;
     std::string toolInfo() const override final;
+    const std::vector<std::string>& toolLabels() const override final;
 
 private:
-    std::string name_;
-    std::string info_;
-    QIcon       icon_;
+    std::string              name_;
+    std::string              info_;
+    std::vector<std::string> labels_;
+    QIcon                    icon_;
 };

@@ -68,17 +68,42 @@ void DataSourcesWidgetItem::setItemWidget(int column, QWidget* w)
 /**
  */
 DataSourceTypeItem::DataSourceTypeItem(DataSourcesWidget* widget,
-                                       DataSourcesWidgetItem* parent,
-                                       const std::string& ds_type)
+                                       DataSourcesWidgetItem* parent)
 :   DataSourcesWidgetItem(widget, parent, Type::DataSourceType)
-,   ds_type_(ds_type) 
 {
-    auto font_bold = font(0);
-    font_bold.setBold(true);
+}
 
-    setCheckState(0, widget_->getUseDSType(ds_type_) ? Qt::Checked : Qt::Unchecked);
-    setText(0, QString::fromStdString(ds_type_));
-    setFont(0, font_bold);
+/**
+ */
+bool DataSourceTypeItem::init(const std::string& ds_type)
+{
+    bool changes = false;
+    if (!is_init_ || ds_type != ds_type_)
+    {
+        ds_type_ = ds_type;
+
+        auto font_bold = font(0);
+        font_bold.setBold(true);
+
+        setCheckState(0, Qt::Checked);
+        setText(0, QString::fromStdString(ds_type_));
+        setFont(0, font_bold);
+
+        is_init_ = true;
+        changes  = true;
+    }
+
+    updateContent();
+
+    return changes;
+}
+
+/**
+ */
+void DataSourceTypeItem::updateContent()
+{
+    assert(is_init_);
+    assert(!ds_type_.empty());
 
     bool has_sources = false;
 
@@ -87,19 +112,16 @@ DataSourceTypeItem::DataSourceTypeItem(DataSourcesWidget* widget,
         if (ds_it->dsType() == ds_type_)
             has_sources = true;
 
-    //deactivate items without content
-    if (!has_sources)
+    if (has_sources)
+    {
+        setCheckState(0, widget_->getUseDSType(ds_type_) ? Qt::Checked : Qt::Unchecked);
+        setFlags(flags() | Qt::ItemFlag::ItemIsEnabled);
+    }
+    else
     {
         setCheckState(0, Qt::Unchecked);
         setFlags(flags() & ~Qt::ItemFlag::ItemIsEnabled);
     }
-}
-
-/**
- */
-void DataSourceTypeItem::updateContent()
-{
-    setCheckState(0, widget_->getUseDSType(ds_type_) ? Qt::Checked : Qt::Unchecked);
 }
 
 /**************************************************************************************************
@@ -109,36 +131,58 @@ void DataSourceTypeItem::updateContent()
 /**
  */
 DataSourceItem::DataSourceItem(DataSourcesWidget* widget,
-                               DataSourcesWidgetItem* parent,
-                               unsigned int ds_id)
+                               DataSourcesWidgetItem* parent)
 :   DataSourcesWidgetItem(widget, parent, Type::DataSource)
-,   ds_id_(ds_id) 
 {
-    auto& ds_man = widget_->dsManager();
-    assert(ds_man.hasDBDataSource(ds_id));
-
-    const auto& data_source = ds_man.dbDataSource(ds_id);
-    ds_ = &data_source;
-
-    std::string ds_name = data_source.name();
-
-    setCheckState(0, widget_->getUseDS(ds_id_) ? Qt::Checked : Qt::Unchecked);
-    setText(0, QString::fromStdString(ds_name));
 }
 
 /**
  */
-void DataSourceItem::init_impl()
+bool DataSourceItem::init(unsigned int ds_id)
 {
-    auto w = createLinesWidget();
+    bool changes = false;
+    if (!is_init_ || ds_id != ds_id_)
+    {
+        ds_id_ = ds_id;
 
-    setItemWidget(1, w);
+        auto& ds_man = widget_->dsManager();
+        assert(ds_man.hasDBDataSource(ds_id));
+
+        const auto& data_source = ds_man.dbDataSource(ds_id);
+        ds_ = &data_source;
+
+        std::string ds_name = data_source.name();
+
+        setCheckState(0, Qt::Checked);
+        setText(0, QString::fromStdString(ds_name));
+
+        if (!has_widget_)
+        {
+            auto w = createLinesWidget();
+            setItemWidget(1, w);
+
+            has_widget_ = true;
+
+            for (auto lb : line_buttons_)
+                lb->init(ds_id_);
+        }
+
+        is_init_ = true;
+        changes  = true;
+    }
+
+    updateContent();
+
+    return changes;
 }
 
 /**
  */
 void DataSourceItem::updateContent()
 {
+    assert(is_init_);
+    assert(has_widget_);
+
     setCheckState(0, widget_->getUseDS(ds_id_) ? Qt::Checked : Qt::Unchecked);
 
     for (auto lb : line_buttons_)
@@ -159,7 +203,7 @@ QWidget* DataSourceItem::createLinesWidget()
 
     for (unsigned int cnt=0; cnt < 4; ++cnt)
     {
-        auto w = new DataSourceLineButton(widget_, ds_id_, cnt, DataSourcesWidget::LineButtonSize);
+        auto w = new DataSourceLineButton(widget_, cnt, DataSourcesWidget::LineButtonSize);
         button_layout->addWidget(w);
 
         line_buttons_.push_back(w);
@@ -177,28 +221,46 @@ QWidget* DataSourceItem::createLinesWidget()
 /**
  */
 DataSourceCountItem::DataSourceCountItem(DataSourcesWidget* widget,
-                                         DataSourcesWidgetItem* parent,
-                                         unsigned int ds_id,
-                                         const std::string& dbc_name)
+                                         DataSourcesWidgetItem* parent)
 :   DataSourcesWidgetItem(widget, parent, Type::DataSourceCount)
-,   ds_id_   (ds_id   )
-,   dbc_name_(dbc_name)
 {
-    auto& ds_man = widget_->dsManager();
-    assert(ds_man.hasDBDataSource(ds_id));
+}
 
-    const auto& data_source = ds_man.dbDataSource(ds_id);
-    ds_ = &data_source;
+/**
+*/
+bool DataSourceCountItem::init(unsigned int ds_id,
+                               const std::string& dbc_name)
+{
+    bool changes = false;
+    if (!is_init_ || ds_id != ds_id_ || dbc_name != dbc_name_)
+    {
+        ds_id_    = ds_id;
+        dbc_name_ = dbc_name;
 
-    setText(0, QString::fromStdString(dbc_name));
-    setText(2, QString::number(0));
-    setText(3, QString::number(0));
+        auto& ds_man = widget_->dsManager();
+        assert(ds_man.hasDBDataSource(ds_id));
+
+        const auto& data_source = ds_man.dbDataSource(ds_id);
+        ds_ = &data_source;
+
+        setText(0, QString::fromStdString(dbc_name));
+
+        is_init_ = true;
+        changes  = true;
+    }
+
+    updateContent();
+
+    return changes;
 }
 
 /**
 */
 void DataSourceCountItem::updateContent()
 {
+    assert(is_init_);
+    assert(!dbc_name_.empty());
+
     auto num_inserted = ds_->numInsertedSummedLinesMap();
     auto it = num_inserted.find(dbc_name_);
     assert(it != num_inserted.end());
@@ -214,20 +276,12 @@ void DataSourceCountItem::updateContent()
 /**
  */
 DataSourceLineButton::DataSourceLineButton(DataSourcesWidget* widget, 
-                                           unsigned int ds_id, 
                                            unsigned int line_id,
                                            unsigned int button_size_px)
 :   widget_ (widget )
-,   ds_id_  (ds_id  )
 ,   line_id_(line_id)
 {
     assert(widget_);
-
-    auto& ds_man = widget_->dsManager();
-    assert(ds_man.hasDBDataSource(ds_id_));
-
-    auto& ds_src = ds_man.dbDataSource(ds_id_);
-    ds_ = &ds_src;
 
     line_str_ = "L" + std::to_string(line_id_ + 1);
 
@@ -239,27 +293,55 @@ DataSourceLineButton::DataSourceLineButton(DataSourcesWidget* widget,
     bool dark_mode = COMPASS::instance().darkMode();
 
     if (dark_mode)
+    {
         setStyleSheet(" QPushButton:pressed { border: 3px outset white; } " \
                       " QPushButton:checked { border: 3px outset white; }");
+        }
     else
+    {
         setStyleSheet(" QPushButton:pressed { border: 3px outset; } " \
                       " QPushButton:checked { border: 3px outset; }");
+    }
 
     setProperty("Line ID", line_id_);
 
-    connect(this, &QPushButton::toggled, [ = ] (bool ok) { widget_->setUseDSLine(ds_id_, line_id_, ok); });
+    connect(this, &QPushButton::toggled, [ = ] (bool ok) { widget_->lineChanged(ds_id_, line_id_, ok); });
 
     QSizePolicy sp_retain = widget->sizePolicy();
     sp_retain.setRetainSizeWhenHidden(true);
     setSizePolicy(sp_retain);
+}
+
+/**
+ */
+bool DataSourceLineButton::init(unsigned int ds_id)
+{
+    bool changes = false;
+    if (!is_init_ || ds_id != ds_id_)
+    {
+        ds_id_ = ds_id;
+
+        auto& ds_man = widget_->dsManager();
+        assert(ds_man.hasDBDataSource(ds_id_));
+
+        auto& ds_src = ds_man.dbDataSource(ds_id_);
+        ds_ = &ds_src;
+
+        is_init_ = true;
+        changes  = true;
+    }
 
     updateContent();
+
+    return changes;
 }
 
 /**
  */
 void DataSourceLineButton::updateContent()
 {
+    assert(is_init_);
+
     AppMode app_mode = COMPASS::instance().appMode();
 
     bool live_mode = app_mode == AppMode::LivePaused || app_mode == AppMode::LiveRunning;
@@ -339,7 +421,7 @@ void DataSourceLineButton::updateContent()
 }
 
 /**************************************************************************************************
- * DataSourcesLoadTreeWidget
+ * DataSourcesWidget
  **************************************************************************************************/
 
  const int DataSourcesWidget::LineButtonSize = 25;
@@ -347,8 +429,7 @@ void DataSourceLineButton::updateContent()
 /**
  */
 DataSourcesWidget::DataSourcesWidget(DataSourceManager& ds_man)
-:   ds_man_      (ds_man)
-,   shows_counts_(false )
+:   ds_man_(ds_man)
 {
     createUI();
 }
@@ -430,7 +511,7 @@ void DataSourcesWidget::createUI()
     main_layout->addLayout(assoc_layout);
 
     // update
-    updateContent();
+    updateContent(true);
 
     // create menu
     createMenu();
@@ -501,77 +582,199 @@ void DataSourcesWidget::clear()
 
 /**
  */
-void DataSourcesWidget::createContent()
+int DataSourcesWidget::generateContent(bool force_rebuild)
 {
     logdbg << "DataSourcesWidget: createContent";
-    
-    clear();
 
-    unsigned int dstype_cnt = 0;
-    for (auto& ds_type_name : DataSourceManager::data_source_types_)
+    tree_widget_->blockSignals(true);
+
+    //clear everything to force a complete rebuild
+    if (force_rebuild)
+        clear();
+
+    const auto& data_source_types = DataSourceManager::data_source_types_;
+
+    //create needed items
+    int n    = (int)data_source_types.size();
+    int ncur = tree_widget_->topLevelItemCount();
+
+    if (n > ncur)
     {
-        logdbg << "DataSourcesWidget: createContent: typ " << ds_type_name << " cnt " << dstype_cnt++;
-
-        createDataSourceType(ds_type_name);
+        //add more items if needed
+        for (int i = ncur; i < n; ++i)
+        {
+            auto dstype_item = new DataSourceTypeItem(this, nullptr);
+            tree_widget_->addTopLevelItem(dstype_item);
+        }
+    }
+    else if (n < ncur)
+    {
+        //remove unneeded items
+        while (tree_widget_->topLevelItemCount() > n)
+        {
+            auto item = tree_widget_->takeTopLevelItem(0);
+            delete item;
+        }
     }
 
-    shows_counts_ = getShowCounts();
+    //configure data source type items
+    unsigned int cnt = 0;
+    int changes = 0;
+    for (const auto& ds_type_name : data_source_types)
+    {
+        logdbg << "DataSourcesWidget: createContent: type " << ds_type_name << " cnt " << cnt;
 
+        auto item = dynamic_cast<DataSourceTypeItem*>(tree_widget_->topLevelItem(cnt));
+        assert(item);
+
+        changes += generateDataSourceType(item, ds_type_name);
+
+        ++cnt;
+    }
+
+    tree_widget_->blockSignals(false);
     tree_widget_->expandAll();
 
     updateAdditionalInfo();
+
+    return changes;
 }
 
 /**
  */
-void DataSourcesWidget::createDataSourceType(const std::string& ds_type_name)
+int DataSourcesWidget::generateDataSourceType(DataSourceTypeItem* item,
+                                              const std::string& ds_type_name)
 {
-    auto dstype_item = new DataSourceTypeItem(this, nullptr, ds_type_name);
+    //init item
+    int changes = item->init(ds_type_name) ? 1 : 0;
 
-    tree_widget_->addTopLevelItem(dstype_item);
-    dstype_item->init();
+    const auto& db_data_sources = ds_man_.dbDataSources();
 
-    //add data sources
-    for (const auto& ds_it : ds_man_.dbDataSources())
+    //create needed items
+    int ncur = item->childCount();
+    int n    = 0;
+    for (const auto& ds_it : db_data_sources)
         if (ds_it->dsType() == ds_type_name)
-            createDataSource(dstype_item, *ds_it);
+            ++n;
+
+    if (n > ncur)
+    {
+        //add more items if needed
+        for (int i = ncur; i < n; ++i)
+        {
+            auto ds_item = new DataSourceItem(this, item);
+            item->addChild(ds_item);
+        }
+    }
+    else if (n < ncur)
+    {
+        //remove unneeded items
+        while (item->childCount() > n)
+        {
+            auto child = item->child(0);
+            item->removeChild(child);
+            delete child;
+        }
+    }
+
+    //configure data source items
+    int cnt = 0;
+    for (const auto& ds_it : db_data_sources)
+    {
+        if (ds_it->dsType() == ds_type_name)
+        {
+            auto ds_item = dynamic_cast<DataSourceItem*>(item->child(cnt));
+            assert(ds_item);
+
+            changes += generateDataSource(ds_item, item, *ds_it);
+
+            ++cnt;
+        }
+    }
+
+    return changes;
 }
 
 /**
  */
-void DataSourcesWidget::createDataSource(DataSourcesWidgetItem* parent_item, 
-                                         const dbContent::DBDataSource& data_source)
+int DataSourcesWidget::generateDataSource(DataSourceItem* item,
+                                          DataSourcesWidgetItem* parent_item, 
+                                          const dbContent::DBDataSource& data_source)
 {
     unsigned int ds_id   = Utils::Number::dsIdFrom(data_source.sac(), data_source.sic());
     std::string  ds_name = data_source.name();
 
     logdbg << "DataSourcesWidget: createDataSource: create '" << data_source.dsType() << "' '" << ds_name << "'";
 
-    auto ds_item = new DataSourceItem(this, parent_item, ds_id);
+    //init item
+    int changes = item->init(ds_id) ? 1 : 0;
 
-    parent_item->addChild(ds_item);
-    ds_item->init();
-
+    //handle count items
     bool show_counts = getShowCounts();
-
-    //add count items?
-    if (show_counts)
+    if (!show_counts)
     {
-        for (auto& cnt_it : data_source.numInsertedSummedLinesMap())
-            createDBContent(ds_item, data_source, cnt_it.first);
+        //no counts shown => remove any existing children
+        while (item->childCount() > 0)
+        {
+            auto child = item->child(0);
+            item->removeChild(child);
+            delete child;
+        }
     }
+    else
+    {
+        // counts shown => create needed items
+        auto count_map = data_source.numInsertedSummedLinesMap();
+        int n    = (int)count_map.size();
+        int ncur = item->childCount();
+
+        if (n > ncur)
+        {
+            //add more items if needed
+            for (int i = ncur; i < n; ++i)
+            {
+                auto ds_cnt_item = new DataSourceCountItem(this, item);
+                item->addChild(ds_cnt_item);
+            }
+        }
+        else if (n < ncur)
+        {
+            //remove unneeded items
+            while (item->childCount() > n)
+            {
+                auto child = item->child(0);
+                item->removeChild(child);
+                delete child;
+            }
+        }
+
+        //configure count items
+        int cnt = 0;
+        for (auto& cnt_it : count_map)
+        {
+            auto ds_cnt_item = dynamic_cast<DataSourceCountItem*>(item->child(cnt));
+            assert(ds_cnt_item);
+
+            changes += generateDataSourceCount(ds_cnt_item, item, data_source, cnt_it.first);
+
+            ++cnt;
+        }
+    }
+
+    return changes;
 }
 
 /**
  */
-void DataSourcesWidget::createDBContent(DataSourcesWidgetItem* parent_item,
-                                        const dbContent::DBDataSource& data_source,
-                                        const std::string& dbc_name)
+int DataSourcesWidget::generateDataSourceCount(DataSourceCountItem* item,
+                                               DataSourcesWidgetItem* parent_item,
+                                               const dbContent::DBDataSource& data_source,
+                                               const std::string& dbc_name)
 {
-    auto ds_cnt_item = new DataSourceCountItem(this, parent_item, data_source.id(), dbc_name);
-    
-    parent_item->addChild(ds_cnt_item);
-    ds_cnt_item->init();
+    //init item
+    int changes = item->init(data_source.id(), dbc_name) ? 1 : 0;
+
+    return changes;
 }
 
 /**
@@ -581,7 +784,9 @@ void DataSourcesWidget::updateContent(bool recreate_required)
     logdbg << "DataSourcesWidget: updateContent: recreate_required " << recreate_required
            << " num data sources " << ds_man_.dbDataSources().size();
 
-    createContent();
+    int changes = generateContent(recreate_required);
+
+    loginf << "DataSourcesWidget: updateContent: Update generated " << changes << " change(s)";
 }
 
 /**
@@ -589,7 +794,7 @@ void DataSourcesWidget::updateContent(bool recreate_required)
 void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
 {
     auto w_item = dynamic_cast<DataSourcesWidgetItem*>(item);
-    if (!w_item)
+    if (!w_item || !w_item->isInit())
         return;
 
     //react on item changes
@@ -628,6 +833,15 @@ void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
     }
 }
 
+/**
+ */
+void DataSourcesWidget::lineChanged(unsigned int ds_id, unsigned int ds_line, bool use)
+{
+    loginf << "DataSourcesWidget: lineChanged: ds_id " << ds_id << " line " << ds_line << " use " << use;
+
+    setUseDSLine(ds_id, ds_line, use);
+}
+
 namespace
 {
     void updateContentRecursive(QTreeWidgetItem* item)
@@ -642,6 +856,7 @@ namespace
 }
 
 /**
+ * Only updates all contents.
  */
 void DataSourcesWidget::updateAllContent()
 {
@@ -701,7 +916,7 @@ void DataSourcesWidget::selectAllDSTypes()
     for (auto& ds_type_name : DataSourceManager::data_source_types_)
         setUseDSType(ds_type_name, true);
 
-    updateAllContent();
+    updateContent();
 }
 
 /**
@@ -713,7 +928,7 @@ void DataSourcesWidget::deselectAllDSTypes()
     for (auto& ds_type_name : DataSourceManager::data_source_types_)
         setUseDSType(ds_type_name, false);
 
-    updateAllContent();
+    updateContent();
 }
 
 /**
@@ -725,7 +940,7 @@ void DataSourcesWidget::selectAllDataSources()
     for (const auto& ds_it : ds_man_.dbDataSources())
         setUseDS(ds_it->id(), true);
 
-    updateAllContent();
+    updateContent();
 }
 
 /**
@@ -737,7 +952,7 @@ void DataSourcesWidget::deselectAllDataSources()
     for (const auto& ds_it : ds_man_.dbDataSources())
         setUseDS(ds_it->id(), false);
 
-    updateAllContent();
+    updateContent();
 }
 
 /**
@@ -755,7 +970,7 @@ void DataSourcesWidget::selectDSTypeSpecificDataSources()
         if (ds_it->dsType() == ds_type)
             setUseDS(ds_it->id(), true);
 
-    updateAllContent();
+    updateContent();
 }
 
 /**
@@ -773,7 +988,7 @@ void DataSourcesWidget::deselectDSTypeSpecificDataSources()
         if (ds_it->dsType() == ds_type)
             setUseDS(ds_it->id(), false);
 
-    updateAllContent();
+    updateContent();
 }
 
 /**
@@ -786,7 +1001,7 @@ void DataSourcesWidget::deselectAllLines()
         for (int line = 0; line < 4; ++line)
             setUseDSLine(ds_it->id(), line, false);
 
-    updateAllContent();
+    updateContent();
 }
 
 /**
@@ -803,7 +1018,7 @@ void DataSourcesWidget::selectSpecificLines()
     for (const auto& ds_it : ds_man_.dbDataSources())
         setUseDSLine(ds_it->id(), line_id, true);
 
-    updateAllContent();
+    updateContent();
 }
 
 /**

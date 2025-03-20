@@ -71,6 +71,7 @@ ViewManager::ViewManager(const std::string& class_id, const std::string& instanc
 void ViewManager::init(ToolBox* tool_box, QTabWidget* main_tab_widget)
 {
     logdbg << "ViewManager: init";
+
     assert(tool_box);
     assert(main_tab_widget);
     assert(!main_tab_widget_);
@@ -95,6 +96,7 @@ void ViewManager::init(ToolBox* tool_box, QTabWidget* main_tab_widget)
         WrappedToolBoxWidget* w = new WrappedToolBoxWidget(view_points_widget_, 
                                                            "View Points",
                                                            "View Points", 
+                                                           { "View", "Points" },
                                                            QIcon(Utils::Files::getIconFilepath("eye.png").c_str()));
         tool_box->addTool(w);
     }

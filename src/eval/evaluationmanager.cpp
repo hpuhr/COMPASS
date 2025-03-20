@@ -281,6 +281,7 @@ void EvaluationManager::init(ToolBox* tool_box)
         WrappedToolBoxWidget* w = new WrappedToolBoxWidget(widget(),
                                                            "Evaluation",
                                                            "Evaluation",
+                                                           { "Evaluation" },
                                                            QIcon(Utils::Files::getIconFilepath("scale.png").c_str()));
         tool_box->addTool(w);
     }

@@ -18,15 +18,19 @@
 #include "toolbox.h"
 #include "toolboxwidget.h"
 
+#include "stringconv.h"
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QToolButton>
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QLabel>
+#include <QFontMetrics>
 
-const int ToolBox::ToolIconSize     = 50;
-const int ToolBox::ToolNameFontSize = 12;
+const int ToolBox::ToolIconSize      = 50;
+const int ToolBox::ToolNameFontSize  = 12;
+const int ToolBox::ToolLabelFontSize = 8;
 
 const int ToolBox::StretchToolBox   = 1;
 const int ToolBox::StretchView      = 2;
@@ -99,17 +103,25 @@ void ToolBox::addTool(ToolBoxWidget* tool)
 {
     assert(tool);
 
-    auto icon = tool->toolIcon();
-    auto name = tool->toolName();
-    auto info = tool->toolInfo();
+    auto icon   = tool->toolIcon();
+    auto name   = tool->toolName();
+    auto info   = tool->toolInfo();
+    auto labels = tool->toolLabels();
+
+    std::string label = Utils::String::compress(labels, '\n');
 
     auto button = new QToolButton;
+
+    auto font = button->font();
+    font.setPointSize(ToolLabelFontSize);
+
     button->setIcon(icon);
-    button->setText(QString::fromStdString(name));
+    button->setText(QString::fromStdString(label));
     button->setToolTip(QString::fromStdString(info));
-    button->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonIconOnly);
+    button->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextUnderIcon);
     button->setIconSize(QSize(ToolIconSize, ToolIconSize));
     button->setCheckable(true);
+    button->setFont(font); 
 
     tool->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
@@ -129,10 +141,57 @@ void ToolBox::addTool(ToolBoxWidget* tool)
 
 /**
  */
+size_t ToolBox::numTools() const
+{
+    return tools_.size();
+}
+
+/**
+ */
+void ToolBox::selectTool(size_t idx)
+{
+    assert(idx >= 0);
+    assert(idx < numTools());
+
+    //deactivate any active tool
+    toolActivated(-1);
+
+    //activate new tool
+    tools_.at(idx).button->blockSignals(true);
+    tools_.at(idx).button->setChecked(true);
+    tools_.at(idx).button->blockSignals(false);
+
+    toolActivated((int)idx);
+}
+
+/**
+ */
+bool ToolBox::selectTool(const std::string& name)
+{
+    //find tool of the given name
+    auto it = std::find_if(tools_.begin(), tools_.end(), [ & ] (const Tool& t) { return t.widget->toolName() == name; });
+    if (it == tools_.end())
+        return false;
+
+    //select
+    int idx = std::distance(tools_.begin(), it);
+    selectTool(idx);
+
+    return true;
+}
+
+/**
+ */
 void ToolBox::toolActivated(int idx)
 {
+    assert(idx < (int)tools_.size());
+
+    if (idx < 0 && active_tool_idx_ >= 0)
+        idx = active_tool_idx_;
+
     if (idx == active_tool_idx_)
     {
+        //close active tool
         right_widget_->setVisible(false);
         active_tool_idx_ = -1;
     }
@@ -160,4 +219,37 @@ void ToolBox::toolActivated(int idx)
     }
 
     emit toolToggled(active_tool_idx_);
+}
+
+/**
+ */
+void ToolBox::adjustSizings()
+{
+    size_t maxrows = 0;
+    int    maxw    = 0;
+    int    maxh    = 0;
+    for (const auto& t : tools_)
+    {
+        auto labels = t.widget->toolLabels();
+
+        if (labels.size() > maxrows)
+            maxrows = labels.size();
+
+        for (const auto& l : labels)
+        {
+            QFontMetrics fm(t.button->font());
+            auto r = fm.boundingRect(QString::fromStdString(l));
+            if (r.height() > maxh) maxh = r.height();
+            if (r.width()  > maxw) maxw = r.width();
+        }
+    }
+
+    int textw = maxw * 1.1;
+    int texth = maxrows * maxh * 1.3;
+
+    int w = std::max(ToolIconSize + 2, textw);
+    int h = ToolIconSize + 2 + texth;
+
+    for (auto& t : tools_)
+        t.button->setFixedSize(w, h);
 }
