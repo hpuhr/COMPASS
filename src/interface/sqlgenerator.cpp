@@ -956,10 +956,6 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& tab
 
     ss << " FROM " << table_name;  // << table->getAllTableNames();
 
-    // check contributing_receivers json_each
-    if (filter.find("json_each.value") != std::string::npos)
-        ss << (", json_each(" + table_name + ".contributing_receivers)");
-
     // add extra from parts
 //    for (auto& from_part : extra_from_parts)
 //        ss << ", " << from_part;

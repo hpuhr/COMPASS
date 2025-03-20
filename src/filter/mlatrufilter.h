@@ -27,6 +27,7 @@ public:
 protected:
     std::string rus_str_;
     std::vector<unsigned int> values_;
+    bool null_wanted_ {false};
 
     virtual void checkSubConfigurables() override;
     virtual DBFilterWidget* createWidget() override;

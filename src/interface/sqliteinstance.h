@@ -37,6 +37,7 @@ protected:
     Result open_impl(const std::string& file_name) override final;
     void close_impl() override final;
     ResultT<DBConnection*> createConnection_impl(bool verbose) override final;
+    Result exportToFile_impl(const std::string& file_name) override final;
 
     /**
      */
@@ -50,8 +51,11 @@ protected:
         //needed for query speed
         config.indexing = true;
 
-        //mutlithreaded access not supported
+        //multithreaded access not supported
         config.supports_mt = false;
+
+        //in-memory db not supported
+        config.supports_in_mem = false;
 
         config.placeholder = db::SQLPlaceholder::AtVar;
         config.use_conflict_resolution = false;

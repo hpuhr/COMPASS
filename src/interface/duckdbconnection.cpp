@@ -86,7 +86,7 @@ Result DuckDBConnection::connect_impl()
     //connect to db
     auto state = duckdb_connect(duck_db->db_, &connection_);
     if (state != DuckDBSuccess)
-        return Result::failed("could not connect to database");
+        return Result::failed("Could not connect to database");
 
     return Result::succeeded();
 }
@@ -100,25 +100,6 @@ void DuckDBConnection::disconnect_impl()
     duckdb_disconnect(&connection_);
 
     connection_ = nullptr;
-}
-
-/**
- */
-Result DuckDBConnection::exportFile_impl(const std::string& file_name)
-{
-    //@TODO
-
-    // loginf << "DuckDBConnection: exportFile: file '" << file_name << "'";
-    // assert (db_opened_);
-
-    // string tmp_sql = "VACUUM INTO '"+file_name+"';";
-
-    // loginf << "DuckDBConnection: exportFile: sql '" << tmp_sql << "'";
-
-    // char* sErrMsg = 0;
-    // sqlite3_exec(db_handle_, tmp_sql.c_str(), NULL, NULL, &sErrMsg);
-
-    return Result::failed("not yet implemented");
 }
 
 /**
@@ -219,13 +200,13 @@ Result DuckDBConnection::insertBuffer_impl(const std::string& table_name,
     //loginf << "DuckDBConnection: insertBuffer_impl: inserting into table '" << table_name << "'";
 
     if (!buffer || buffer->properties().size() == 0 || buffer->size() == 0)
-        return Result::failed("input buffer invalid");
+        return Result::failed("Input buffer invalid");
 
     //loginf << "creating appender...";
 
     auto appender = createAppender(table_name);
     if (!appender->valid())
-        return Result::failed("creating duckdb appender failed: " + appender->lastError());
+        return Result::failed("Creating duckdb appender failed: " + appender->lastError());
 
     size_t appender_column_count = appender->columnCount();
 
@@ -366,7 +347,7 @@ Result DuckDBConnection::updateBuffer_impl(const std::string& table_name,
                                            const boost::optional<size_t>& idx_to)
 {
     if (!buffer || buffer->properties().size() == 0 || buffer->size() == 0)
-        return Result::failed("input buffer invalid");
+        return Result::failed("Input buffer invalid");
 
     //create temporary table for buffer data
     std::vector<DBTableColumnInfo> table_columns;
@@ -375,7 +356,7 @@ Result DuckDBConnection::updateBuffer_impl(const std::string& table_name,
 
     DBScopedTemporaryTable temp_table(this, table_columns);
     if (!temp_table.valid())
-        return Result::failed("could not create temporary table for transaction: " + temp_table.result().error());
+        return Result::failed("Could not create temporary table for transaction: " + temp_table.result().error());
 
     //insert buffer data into temp table
     auto res_insert = insertBuffer(temp_table.name(), buffer, idx_from, idx_to);
@@ -394,7 +375,7 @@ Result DuckDBConnection::updateBuffer_impl(const std::string& table_name,
     }
 
     if (!key_col_found)
-        return Result::failed("key column '" + key_column + "' not found in buffer");
+        return Result::failed("Key column '" + key_column + "' not found in buffer");
     
     auto sql = sqlGenerator().getUpdateTableFromTableStatement(temp_table.name(),
                                                                table_name,
@@ -426,7 +407,7 @@ ResultT<std::vector<std::string>> DuckDBConnection::getTableList_impl()
     if (result->hasError())
         return ResultT<std::vector<std::string>>::failed(result->error());
     if (!result->buffer() || !result->containsData())
-        return ResultT<std::vector<std::string>>::failed("table list could not be retrieved");
+        return ResultT<std::vector<std::string>>::failed("Table list could not be retrieved");
 
     std::shared_ptr<Buffer> buffer = result->buffer();
 

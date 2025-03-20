@@ -37,6 +37,7 @@
 #include "util/async.h"
 #include "licensemanager.h"
 #include "result.h"
+#include "dbinstance.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -334,16 +335,37 @@ void COMPASS::checkSubConfigurables()
     }
 }
 
-void COMPASS::openDBFile(const std::string& filename)
+bool COMPASS::openDBFile(const std::string& filename)
 {
     loginf << "COMPASS: openDBFile: opening file '" << filename << "'";
 
     assert (!db_opened_);
+
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    auto result = openDBFileInternal(filename);
+
+    lastUsedPath(Files::getDirectoryFromPath(filename));
+
+    QApplication::restoreOverrideCursor();
+
+    if (!result.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(result.error()));
+    else
+        addDBFileToList(filename);
+
+    return result.ok();
+}
+
+Result COMPASS::openDBFileInternal(const std::string& filename)
+{
     assert (db_interface_);
 
-    last_db_filename_ = filename;
+    if (dbOpened())
+        return Result::failed("Database already open");
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    last_db_filename_ = filename;
+    db_inmem_ = false;
 
     Result res = Result::succeeded();
 
@@ -351,8 +373,6 @@ void COMPASS::openDBFile(const std::string& filename)
     {
         db_interface_->openDBFile(filename, false);
         assert (db_interface_->ready());
-
-        addDBFileToList(filename);
 
         db_opened_ = true;
 
@@ -365,36 +385,36 @@ void COMPASS::openDBFile(const std::string& filename)
         db_opened_ = false;
     }
 
-    lastUsedPath(Files::getDirectoryFromPath(filename));
-
-    if (!res.ok())
-        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
-
-    QApplication::restoreOverrideCursor();
+    return res;
 }
 
-void COMPASS::createNewDBFile(const std::string& filename)
+bool COMPASS::createNewDBFile(const std::string& filename)
 {
     loginf << "COMPASS: createNewDBFile: creating new file '" << filename << "'";
 
     assert (!db_opened_);
+
+    auto result = createNewDBFileInternal(filename);
+
+    lastUsedPath(Files::getDirectoryFromPath(filename));
+
+    if (!result.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(result.error()));
+    else
+        addDBFileToList(filename);
+
+    return result.ok();
+}
+
+Result COMPASS::createNewDBFileInternal(const std::string& filename)
+{
     assert (db_interface_);
 
-    if (Files::fileExists(filename))
-    {
-        // confirmation already done by dialog
-        loginf << "COMPASS: createNewDBFile: deleting pre-existing file '" << filename << "'";
-        Files::deleteFile(filename);
-    }
-
-    //@TODO: remove
-    if (Files::fileExists(Files::replaceExtension(filename, ".duckdb")))
-    {
-        loginf << "COMPASS: createNewDBFile: deleting pre-existing file '" << Files::replaceExtension(filename, ".duckdb") << "'";
-        Files::deleteFile(Files::replaceExtension(filename, ".duckdb"));
-    }
+    if (dbOpened())
+        return Result::failed("Database already open");
 
     last_db_filename_ = filename;
+    db_inmem_ = false;
 
     Result res = Result::succeeded();
 
@@ -402,8 +422,6 @@ void COMPASS::createNewDBFile(const std::string& filename)
     {
         db_interface_->openDBFile(filename, true);
         assert (db_interface_->ready());
-
-        addDBFileToList(filename);
 
         db_opened_ = true;
 
@@ -416,21 +434,118 @@ void COMPASS::createNewDBFile(const std::string& filename)
         db_opened_ = false;
     }
 
-    lastUsedPath(Files::getDirectoryFromPath(filename));
-
-    if (!res.ok())
-        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
+    return res;
 }
 
-void COMPASS::exportDBFile(const std::string& filename)
+bool COMPASS::createInMemDBFile(const std::string& future_filename)
+{
+    loginf << "COMPASS: createInMemDBFile: future filename '" << future_filename << "'";
+
+    assert (!db_opened_);
+
+    auto result = createInMemDBFileInternal(future_filename);
+
+    if (!result.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(result.error()));
+
+    return result.ok();
+}
+
+Result COMPASS::createInMemDBFileInternal(const std::string& future_filename)
+{
+    assert (db_interface_);
+
+    if (dbOpened())
+        return Result::failed("Database already open");
+
+    inmem_future_filename_ = future_filename;
+    last_db_filename_ = DBInstance::InMemFilename;
+    db_inmem_ = true;
+
+    Result res = Result::succeeded();
+
+    try
+    {
+        db_interface_->openDBInMemory();
+        assert (db_interface_->ready());
+
+        db_opened_ = true;
+
+        emit databaseOpenedSignal();
+    }
+    catch(const std::exception& e)
+    {
+        res = Result::failed(e.what());
+
+        db_opened_ = false;
+    }
+
+    return res;
+}
+
+bool COMPASS::createNewDBFileFromMemory()
+{
+    loginf << "COMPASS: createNewDBFileFromMemory: filename '" << inmem_future_filename_ << "'";
+
+    assert (canCreateDBFileFromMemory());
+
+    QMessageBox* msg_box = new QMessageBox;
+
+    msg_box->setWindowTitle("Exporting Database");
+    msg_box->setText("Please wait ...");
+    msg_box->setStandardButtons(QMessageBox::NoButton);
+    msg_box->setWindowModality(Qt::ApplicationModal);
+    msg_box->show();
+
+    Async::waitAndProcessEventsFor(50);
+        
+    auto result = createNewDBFileFromMemoryInternal();
+
+    //@TODO: filename should be set as last path?
+
+    msg_box->close();
+    delete msg_box;
+
+    if (!result.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(result.error()));
+    else
+        addDBFileToList(last_db_filename_);
+    
+    return result.ok();
+}
+
+Result COMPASS::createNewDBFileFromMemoryInternal()
+{
+    //check first
+    if (!canCreateDBFileFromMemory())
+        return Result::failed("Cannot create database from memory in current state");
+
+    Result res;
+    
+    //export mem db to file
+    res = exportDBFileInternal(inmem_future_filename_);
+    if (!res.ok())
+        return res;
+
+    //close mem db
+    res = closeDBInternal();
+    if (!res.ok())
+        return res;
+
+    //open exportted file db
+    res = openDBFileInternal(inmem_future_filename_);
+    if (!res.ok())
+        return res;
+    
+    return Result::succeeded();
+}
+
+bool COMPASS::exportDBFile(const std::string& filename)
 {
     loginf << "COMPASS: exportDBFile: exporting as file '" << filename << "'";
 
     assert (db_opened_);
-    assert (db_interface_);
     assert (!db_export_in_progress_);
-
-    db_export_in_progress_ = true;
 
     QMessageBox* msg_box = new QMessageBox;
 
@@ -442,43 +557,86 @@ void COMPASS::exportDBFile(const std::string& filename)
 
     Async::waitAndProcessEventsFor(50);
 
-    Result res = Result::succeeded();
-
-    try
-    {
-        db_interface_->exportDBFile(filename);
-    }
-    catch(const std::exception& e)
-    {
-        res = Result::failed(e.what());
-    }
+    auto result = exportDBFileInternal(filename);
 
     lastUsedPath(Files::getDirectoryFromPath(filename));
     
     msg_box->close();
     delete msg_box;
 
-    db_export_in_progress_ = false;
+    if (!result.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(result.error()));
 
-    if (!res.ok())
-        QMessageBox::critical(nullptr, "Error", QString::fromStdString(res.error()));
+    return result.ok();
 }
 
-void COMPASS::closeDB()
+Result COMPASS::exportDBFileInternal(const std::string& filename)
+{
+    assert (db_interface_);
+
+    if (!db_opened_)
+        return Result::failed("No database opened");
+    if (db_export_in_progress_)
+        return Result::failed("Export already in progress");
+    
+    db_export_in_progress_ = true;
+
+    Result res = Result::succeeded();
+
+    try
+    {
+        db_interface_->exportDBFile(filename);
+    }
+    catch(const std::exception& ex)
+    {
+        res = Result::failed(ex.what());
+    }
+
+    db_export_in_progress_ = false;
+
+    return res;
+}
+
+bool COMPASS::closeDB()
 {
     loginf << "COMPASS: closeDB: closing db file '" << last_db_filename_ << "'";
 
     assert (db_opened_);
 
-    ds_manager_->saveDBDataSources();
-    dbcontent_manager_->saveTargets();
+    auto result = closeDBInternal();
 
-    db_interface_->closeDBFile();
-    assert (!db_interface_->ready());
+    if (!result.ok())
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(result.error()));
 
-    db_opened_ = false;
+    return result.ok();
+}
 
-    emit databaseClosedSignal();
+Result COMPASS::closeDBInternal()
+{
+    if (!db_opened_)
+        return Result::failed("No database opened");
+
+    Result res = Result::succeeded();
+
+    try
+    {
+        ds_manager_->saveDBDataSources();
+        dbcontent_manager_->saveTargets();
+
+        db_interface_->closeDB();
+        assert (!db_interface_->ready());
+
+        db_opened_ = false;
+        db_inmem_ = false;
+
+        emit databaseClosedSignal();
+    }
+    catch(const std::exception& ex)
+    {
+        res = Result::failed(ex.what());
+    }
+    
+    return res;
 }
 
 DBInterface& COMPASS::dbInterface()
@@ -552,6 +710,16 @@ bool COMPASS::dbOpened()
     return db_opened_;
 }
 
+bool COMPASS::dbInMem() const
+{
+    return db_inmem_;
+}
+
+bool COMPASS::canCreateDBFileFromMemory() const
+{
+    return db_opened_ && db_inmem_ && db_interface_ && db_interface_->canCreateDBFileFromMemory() && !inmem_future_filename_.empty();
+}
+
 void COMPASS::init()
 {
     assert(task_manager_);
@@ -607,7 +775,7 @@ void COMPASS::shutdown()
     filter_manager_ = nullptr;
 
     if (db_interface_->ready())
-        db_interface_->closeDBFile();
+        db_interface_->closeDB();
 
     db_interface_ = nullptr;
 

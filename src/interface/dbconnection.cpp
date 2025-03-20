@@ -134,21 +134,6 @@ void DBConnection::disconnect()
 }
 
 /**
- * Exports the database to the given file.
- */
-Result DBConnection::exportDB(const std::string& file_name)
-{
-    assert(connected());
-
-    auto r = exportFile_impl(file_name);
-    
-    //if (!r.ok())
-    //    logerr << "DBConnection: exportFile: export failed";
-
-    return r;
-}
-
-/**
  * Executes the given sql query without returning any data or specific error messages.
  */
 Result DBConnection::execute(const std::string& sql)
@@ -433,11 +418,11 @@ Result DBConnection::insertBuffer_impl(const std::string& table_name,
     assert(stmnt);
 
     if (!stmnt->valid())
-        return Result::failed("could not prepare insert statement: " + stmnt->lastError());
+        return Result::failed("Could not prepare insert statement: " + stmnt->lastError());
 
     auto res = stmnt->executeBuffer(buffer, idx_from, idx_to);
     if (!res.ok())
-        return Result::failed("could not execute insert statement on buffer: " + res.error());
+        return Result::failed("Could not execute insert statement on buffer: " + res.error());
 
     //cleanup prepared statement
     stmnt.reset();
@@ -460,11 +445,11 @@ Result DBConnection::updateBuffer_impl(const std::string& table_name,
     assert(stmnt);
 
     if (!stmnt->valid())
-        return Result::failed("could not prepare update statement" + stmnt->lastError());
+        return Result::failed("Could not prepare update statement" + stmnt->lastError());
 
     auto res = stmnt->executeBuffer(buffer, idx_from, idx_to);
     if (!res.ok())
-        return Result::failed("could not execute update statement on buffer: " + res.error());
+        return Result::failed("Could not execute update statement on buffer: " + res.error());
 
     //cleanup prepared statement
     stmnt.reset();
@@ -531,7 +516,7 @@ ResultT<DBTableInfo> DBConnection::getColumnList_impl(const std::string& table)
         return ResultT<DBTableInfo>::failed(result->error());
 
     if (!result->containsData())
-        return ResultT<DBTableInfo>::failed("table information could not be retrieved");
+        return ResultT<DBTableInfo>::failed("Table information could not be retrieved");
 
     std::shared_ptr<Buffer> buffer = result->buffer();
 

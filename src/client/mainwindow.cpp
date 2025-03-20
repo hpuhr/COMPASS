@@ -673,6 +673,25 @@ void MainWindow::createDB(const std::string& filename)
     updateMenus();
 }
 
+void MainWindow::createInMemoryDB(const std::string& future_filename)
+{
+    loginf << "MainWindow: createInMemoryDB: future filename '" << future_filename << "'";
+
+    COMPASS::instance().createInMemDBFile(future_filename);
+
+    updateBottomWidget();
+    updateMenus();
+}
+
+void MainWindow::createDBFromMemory()
+{
+    loginf << "MainWindow: createDBFromMemory";
+
+    COMPASS::instance().createNewDBFileFromMemory();
+
+    updateBottomWidget();
+    updateMenus();
+}
 
 void MainWindow::newDBSlot()
 {
@@ -1271,6 +1290,10 @@ void MainWindow::liveStopSlot()
     loginf << "MainWindow: liveStopSlot";
 
     COMPASS::instance().appMode(AppMode::Offline);
+
+    //transfer memory db to file
+    if (COMPASS::instance().canCreateDBFileFromMemory())
+        createDBFromMemory();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

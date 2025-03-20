@@ -109,6 +109,8 @@ public:
 
     void openExistingDB(const std::string& filename);
     void createDB(const std::string& filename);
+    void createInMemoryDB(const std::string& future_filename = "");
+    void createDBFromMemory();
 
     void updateMenus();
     void updateBottomWidget();

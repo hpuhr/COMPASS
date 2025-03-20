@@ -97,6 +97,8 @@ const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
 
+const Property DBContent::var_cat020_crontrib_recv_ {"Contributing Receivers", PropertyDataType::JSON};
+
 const Property DBContent::var_cat021_toa_position_ {"ToA Position", PropertyDataType::FLOAT};
 const Property DBContent::var_cat021_tomr_position_ {"ToMR Position", PropertyDataType::FLOAT};
 const Property DBContent::var_cat021_tort_ {"ToRT", PropertyDataType::FLOAT};
