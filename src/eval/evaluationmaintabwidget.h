@@ -48,8 +48,7 @@ private slots:
     void changedCurrentStandardSlot(); // eval man
 
 public:
-    EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
-                            EvaluationManagerWidget& man_widget);
+    EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
 
     void updateDataSources();
     void updateSectors();
@@ -59,7 +58,6 @@ protected:
 
     EvaluationManager& eval_man_;
     EvaluationManagerSettings& eval_settings_;
-    EvaluationManagerWidget& man_widget_;
 
     std::unique_ptr<EvaluationDataSourceWidget> data_source_ref_widget_ {nullptr};
     std::unique_ptr<EvaluationDataSourceWidget> data_source_tst_widget_ {nullptr};

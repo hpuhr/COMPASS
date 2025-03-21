@@ -28,10 +28,7 @@
 
 class EvaluationManager;
 class EvaluationManagerSettings;
-class EvaluationMainTabWidget;
-class EvaluationFilterTabWidget;
 class EvaluationTargetsTabWidget;
-class EvaluationStandardTabWidget;
 class EvaluationResultsTabWidget;
 
 class QVBoxLayout;
@@ -44,21 +41,13 @@ class EvaluationManagerWidget : public QWidget
     Q_OBJECT
 
 private slots:
-    void loadDataSlot();
-    void evaluateSlot();
     void generateReportSlot();
 
 public:
     EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
     virtual ~EvaluationManagerWidget();
 
-    void updateDataSources();
-    void updateSectors();
     void updateButtons();
-    void updateFilterWidget();
-    void updateResultsConfig();
-
-    void updateFromSettings();
 
     void expandResults();
 
@@ -76,19 +65,11 @@ protected:
     EvaluationManager& eval_man_;
     EvaluationManagerSettings& eval_settings_;
 
-    QVBoxLayout* main_layout_{nullptr};
-
     QTabWidget* tab_widget_{nullptr};
 
-    std::unique_ptr<EvaluationMainTabWidget> main_tab_widget_;
-    std::unique_ptr<EvaluationFilterTabWidget> filter_widget_;
     std::unique_ptr<EvaluationTargetsTabWidget> targets_tab_widget_;
-    std::unique_ptr<EvaluationStandardTabWidget> std_tab_widget_;
     std::unique_ptr<EvaluationResultsTabWidget> results_tab_widget_;
 
-    QLabel* not_eval_comment_label_ {nullptr};
-    QPushButton* load_button_ {nullptr};
-    QPushButton* evaluate_button_ {nullptr};
     QPushButton* gen_report_button_ {nullptr};
 };
 

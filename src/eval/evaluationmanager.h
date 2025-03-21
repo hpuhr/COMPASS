@@ -136,8 +136,6 @@ struct EvaluationManagerSettings
     bool report_run_pdflatex_ {true};
     bool report_open_created_pdf_ {false};
 
-    bool warning_shown_ {false};
-
     //grid generation
     unsigned int grid_num_cells_x     = 512;
     unsigned int grid_num_cells_y     = 512;
@@ -200,11 +198,12 @@ public:
 
     void init(ToolBox* tool_box);
 
-    bool canLoadData ();
-    void loadData ();
+    void showDialog();
 
-    bool canEvaluate ();
-    std::string getCannotEvaluateComment();
+    bool canLoadDataAndEvaluate();
+    void loadDataAndEvaluate ();
+
+    std::string getCannotRunAndEvaluateComment();
     void evaluate ();
     bool canGenerateReport ();
     void generateReport ();

@@ -33,9 +33,8 @@
 #include <QLineEdit>
 #include <QComboBox>
 
-EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
-                                                 EvaluationManagerWidget& man_widget)
-    : QWidget(nullptr), eval_man_(eval_man),  eval_settings_(eval_settings), man_widget_(man_widget)
+EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
+    : QWidget(nullptr), eval_man_(eval_man),  eval_settings_(eval_settings)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 

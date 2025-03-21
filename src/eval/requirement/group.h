@@ -38,13 +38,13 @@ class Group : public QObject, public Configurable, public EvaluationStandardTree
     Q_OBJECT
 
 signals:
-    void configsChangedSignal();
-    void selectionChanged();
+     void configsChangedSignal();
+//     void selectionChanged();
 
-public slots:
-    void deleteGroupSlot();
-    void addRequirementSlot();
-    void deleteRequirementSlot();
+// public slots:
+//     void deleteGroupSlot();
+//     void addRequirementSlot();
+//     void deleteRequirementSlot();
 
 public:
     Group(const std::string& class_id, const std::string& instance_id,
@@ -72,6 +72,9 @@ public:
     EvaluationRequirementConfigIterator end() { return configs_.end(); }
     unsigned int size () { return configs_.size(); };
 
+    void useAll();
+    void useNone();
+
     unsigned int numUsedRequirements() const;
 
     virtual EvaluationStandardTreeItem *child(int row) override;
@@ -80,9 +83,9 @@ public:
     virtual QVariant data(int column) const override;
     virtual int row() const override;
 
-    void showMenu ();
-
     static const std::map<std::string, std::string> requirement_type_mapping_;
+
+    const std::vector<std::unique_ptr<EvaluationRequirement::BaseConfig>>& configs() const;
 
 protected:
     EvaluationStandard& standard_;
@@ -96,9 +99,6 @@ protected:
     virtual void checkSubConfigurables() override;
 
     void sortConfigs();
-
-    void useAll();
-    void useNone();
 };
 
 #endif // EVALUATIONREQUIREMENTGROUP_H

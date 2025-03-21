@@ -58,15 +58,13 @@ private slots:
     void maxSILv2PEditedSlot (const QString& text);
 
 public:
-    EvaluationFilterTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
-                              EvaluationManagerWidget& man_widget);
+    EvaluationFilterTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
 
     void update();
 
 protected:
     EvaluationManager& eval_man_;
     EvaluationManagerSettings& eval_settings_;
-    EvaluationManagerWidget& man_widget_;
 
     QCheckBox* use_filter_check_{nullptr};
 

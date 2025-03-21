@@ -477,6 +477,11 @@ void MainWindow::createMenus ()
     connect(reconstruct_action, &QAction::triggered, this, &MainWindow::reconstructReferencesSlot);
     process_menu_->addAction(reconstruct_action);
 
+    QAction* eval_action = new QAction("Evaluate");
+    eval_action->setToolTip("Evaluate test against reference data according to defined standards");
+    connect(eval_action, &QAction::triggered, this, &MainWindow::evaluateSlot);
+    process_menu_->addAction(eval_action);
+
     // ui menu
     ui_menu_ = menuBar()->addMenu("&UI");
     ui_menu_->setToolTipsVisible(true);
@@ -1012,6 +1017,13 @@ void MainWindow::reconstructReferencesSlot()
     loginf << "MainWindow: reconstructReferencesSlot";
 
     COMPASS::instance().taskManager().reconstructReferencesTask().showDialog();
+}
+
+void MainWindow::evaluateSlot()
+{
+    loginf << "MainWindow: evaluateSlot";
+
+    COMPASS::instance().evaluationManager().showDialog();
 }
 
 void MainWindow::configureDataSourcesSlot()

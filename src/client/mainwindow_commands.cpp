@@ -467,15 +467,15 @@ bool RTCommandEvaluate::run_impl()
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
-    if (!eval_man.canLoadData())
+    if (!eval_man.canLoadDataAndEvaluate())
     {
-        setResultMessage("Unable to load evaluation data");
+        setResultMessage("Unable to load evaluation data and evaluate");
         return false;
     }
 
     loginf << "RTCommandEvaluate: run_impl: loading evaluation data";
 
-    eval_man.loadData();
+    eval_man.loadDataAndEvaluate();
 
     while (!eval_man.dataLoaded())
     {
@@ -484,12 +484,6 @@ bool RTCommandEvaluate::run_impl()
     }
 
     assert (eval_man.dataLoaded());
-
-    if (!eval_man.canEvaluate())
-    {
-        setResultMessage("Unable to evaluate");
-        return false;
-    }
 
     loginf << "RTCommandEvaluate: run_impl: doing evaluation";
 

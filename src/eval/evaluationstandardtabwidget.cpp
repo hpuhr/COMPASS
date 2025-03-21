@@ -38,8 +38,8 @@
 using namespace std;
 
 EvaluationStandardTabWidget::EvaluationStandardTabWidget(
-        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings, EvaluationManagerWidget& man_widget)
-    : QWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings), man_widget_(man_widget)
+        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
+    : QWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -274,7 +274,11 @@ void EvaluationStandardTabWidget::updateStandardStack()
     if (!standard_name.size())
     {
         while (standards_widget_->count() > 0)  // remove all widgets
-            standards_widget_->removeWidget(standards_widget_->widget(0));
+        {
+            auto std_widget = standards_widget_->widget(0);
+            standards_widget_->removeWidget(std_widget);
+            delete std_widget;
+        }
         return;
     }
 

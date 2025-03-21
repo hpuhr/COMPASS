@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONSTANDARD_H
-#define EVALUATIONSTANDARD_H
+#pragma once
 
 #include "configurable.h"
 #include "evaluationstandardtreeitem.h"
@@ -24,7 +23,6 @@
 #include "eval/results/report/rootitem.h"
 
 #include <QObject>
-#include <QMenu>
 
 #include <memory>
 
@@ -37,12 +35,12 @@ class EvaluationStandard : public QObject, public Configurable, public Evaluatio
 {
     Q_OBJECT
 
-signals:
-    void selectionChanged();
+ signals:
+    void configChangedSignal();
+//     void selectionChanged();
 
-public slots:
-    void addGroupSlot();
-    void groupsChangedSlot();
+ public slots:
+     void groupsChangedSlot();
 
 public:
     EvaluationStandard(const std::string& class_id, const std::string& instance_id, EvaluationManager& eval_man);
@@ -76,10 +74,6 @@ public:
 
     EvaluationStandardRootItem& rootItem();
 
-    void showMenu ();
-    void beginModelReset();
-    void endModelReset();
-
     void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
 
 protected:
@@ -88,13 +82,10 @@ protected:
 
     EvaluationStandardRootItem root_item_;
 
-    std::unique_ptr<EvaluationStandardWidget> widget_;
+    //std::unique_ptr<EvaluationStandardWidget> widget_;
 
     std::vector<std::unique_ptr<Group>> groups_;
-
-    QMenu menu_;
 
     virtual void checkSubConfigurables() override;
 };
 
-#endif // EVALUATIONSTANDARD_H

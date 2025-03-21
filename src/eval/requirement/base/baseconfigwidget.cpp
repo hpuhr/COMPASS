@@ -87,7 +87,9 @@ void BaseConfigWidget::changedNameSlot()
     loginf << "BaseConfigWidget: changedNameSlot: name '" << value_str << "'";
 
     if (value_str.size())
+    {
         config_.name(value_str);
+    }
     else
         logerr << "BaseConfigWidget: changedNameSlot: impossible name '" << value_str << "'";
 }
