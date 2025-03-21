@@ -65,29 +65,23 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
     logdbg << "DBFilterCondition: ctor: " << instance_id << " value " << value_
            << " usable " << usable_ << " invalid " << value_invalid_;
 
-    widget_ = new QWidget();
-    QHBoxLayout* layout = new QHBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
     label_ = new QLabel();
     if (display_instance_id_)
         label_->setText(tr((instanceId() + " " + operator_).c_str()));
     else
         label_->setText(tr((variable_name_ + " " + operator_).c_str()));
-    layout->addWidget(label_);
 
     edit_ = new QLineEdit(tr(value_.c_str()));
     connect(edit_, SIGNAL(textChanged(QString)), this, SLOT(valueChanged()));
-    layout->addWidget(edit_);
-
-    widget_->setLayout(layout);
 
     if (!usable_)
-        widget_->setDisabled(true);
+    {
+        label_->setDisabled(true);
+        edit_->setDisabled(true);
+    }
 }
 
-DBFilterCondition::~DBFilterCondition() {}
+DBFilterCondition::~DBFilterCondition() = default;
 
 void DBFilterCondition::invert()
 {

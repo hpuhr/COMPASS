@@ -19,14 +19,14 @@ TimestampFilterWidget::TimestampFilterWidget(TimestampFilter& filter)
     min_edit_ = new QDateTimeEdit(QDateTime::currentDateTime());
     min_edit_->setDisplayFormat(Time::QT_DATETIME_FORMAT.c_str());
     connect(min_edit_, &QDateTimeEdit::dateTimeChanged, this, &TimestampFilterWidget::minDateTimeChanged);
-    layout->addRow("Timestamp >=", min_edit_);
+
+    addNameValuePair("Timestamp >=", min_edit_);
 
     max_edit_ = new QDateTimeEdit(QDateTime::currentDateTime());
     max_edit_->setDisplayFormat(Time::QT_DATETIME_FORMAT.c_str());
     connect(max_edit_, &QDateTimeEdit::dateTimeChanged, this, &TimestampFilterWidget::maxDateTimeChanged);
-    layout->addRow("Timestamp <=", max_edit_);
 
-    child_layout_->addLayout(layout);
+    addNameValuePair("Timestamp <=", max_edit_);
 
     update();
 }

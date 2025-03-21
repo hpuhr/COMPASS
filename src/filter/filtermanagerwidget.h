@@ -64,6 +64,8 @@ protected:
     void collapseAll();
     void collapseUnused();
 
+    void syncFilterLayouts();
+
     FilterManager&         filter_manager_;
     FilterGeneratorWidget* filter_generator_widget_;
 

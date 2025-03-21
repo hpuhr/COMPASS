@@ -217,6 +217,8 @@ void FilterManagerWidget::updateFilters()
 
         ds_filter_layout_->addWidget(it->widget());
     }
+
+    syncFilterLayouts();
 }
 
 /**
@@ -272,4 +274,24 @@ void FilterManagerWidget::collapseUnused()
         else
             it->widget()->collapse();
     }
+}
+
+/**
+ */
+void FilterManagerWidget::syncFilterLayouts()
+{
+    auto& filters = filter_manager_.filters();
+
+    int max_width = 0;
+    for (auto& it : filters)
+    {
+        int col_width = it->widget()->columnWidth(0);
+        if (col_width > max_width)
+            max_width = col_width;
+    }
+
+    max_width *= 1.3;
+
+    for (auto& it : filters)
+        it->widget()->setFixedColumnWidth(0, max_width);
 }

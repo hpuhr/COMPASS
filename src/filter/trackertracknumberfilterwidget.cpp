@@ -17,32 +17,20 @@ using namespace Utils;
 TrackerTrackNumberFilterWidget::TrackerTrackNumberFilterWidget(TrackerTrackNumberFilter& filter)
     : DBFilterWidget(filter), filter_(filter)
 {
-    main_layout_ = new QFormLayout();
-
-    child_layout_->addLayout(main_layout_);
-
     update();
 }
 
-TrackerTrackNumberFilterWidget::~TrackerTrackNumberFilterWidget()
-{
-}
+TrackerTrackNumberFilterWidget::~TrackerTrackNumberFilterWidget() = default;
 
 void TrackerTrackNumberFilterWidget::update()
 {
     loginf << "TrackerTrackNumberFilterWidget: update";
 
-    assert (main_layout_);
+    assert (child_layout_);
 
     DBFilterWidget::update();
 
-    QLayoutItem* child;
-    while (!main_layout_->isEmpty() && (child = main_layout_->takeAt(0)) != nullptr)
-    {
-        if (child->widget())
-            delete child->widget();
-        delete child;
-    }
+    deleteChildrenFromLayout();
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
@@ -61,8 +49,8 @@ void TrackerTrackNumberFilterWidget::update()
             value_edit->setProperty("ds_id", ds_it.first);
             value_edit->setProperty("line_id", line_it.first);
             connect(value_edit, &QLineEdit::textEdited, this, &TrackerTrackNumberFilterWidget::valueEditedSlot);
-            main_layout_->addRow((ds_name + " " + String::lineStrFrom(line_it.first)
-                                  + " Track Number IN").c_str(), value_edit);
+
+            addNameValuePair(ds_name + " " + String::lineStrFrom(line_it.first) + " Track Number IN", value_edit);
         }
     }
 }

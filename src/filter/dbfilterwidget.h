@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBFILTERWIDGET_H_
-#define DBFILTERWIDGET_H_
+#pragma once
 
 #include <QFrame>
 #include <QMenu>
@@ -25,9 +24,11 @@ class DBFilter;
 
 class QWidget;
 class QCheckBox;
-class QVBoxLayout;
+class QGridLayout;
 class QPushButton;
 
+/**
+ */
 class DBFilterWidget : public QFrame
 {
     Q_OBJECT
@@ -62,7 +63,15 @@ public:
     void collapse();
     void expand();
 
+    int columnWidth(int layout_column) const;
+    void setFixedColumnWidth(int layout_column, int width);
+
 protected:
+    void createMenu();
+    void deleteChildrenFromLayout();
+    void addNameValuePair(const std::string& label, QWidget* widget, int row = -1, int col = 0);
+    void addNameValuePair(const std::string& label, const std::string& label2, int row = -1, int col = 0);
+
     DBFilter& filter_;
 
     QWidget* child_ {nullptr}; // Child widget from DBFilter
@@ -72,11 +81,7 @@ protected:
 
     QPushButton* manage_button_ {nullptr};
 
-    QVBoxLayout* child_layout_ {nullptr};
+    QGridLayout* child_layout_ {nullptr};
 
     QMenu menu_;
-
-    void createMenu();
 };
-
-#endif /* DBFILTERWIDGET_H_ */

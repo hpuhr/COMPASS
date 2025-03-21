@@ -12,27 +12,17 @@ using namespace std;
 Mode3AFilterWidget::Mode3AFilterWidget(Mode3AFilter& filter)
     : DBFilterWidget(filter), filter_(filter)
 {
-    QHBoxLayout* layout = new QHBoxLayout();
-
-    label_ = new QLabel("Mode 3/A Codes IN");
-    layout->addWidget(label_);
-
     value_edit_ = new QLineEdit();
     connect(value_edit_, &QLineEdit::textEdited, this, &Mode3AFilterWidget::valueEditedSlot);
-    layout->addWidget(value_edit_);
 
-    child_layout_->addLayout(layout);
+    addNameValuePair("Mode 3/A Codes IN", value_edit_);
 
     update();
 }
 
-Mode3AFilterWidget::~Mode3AFilterWidget()
-{
-
-}
+Mode3AFilterWidget::~Mode3AFilterWidget() = default;
 
 void Mode3AFilterWidget::update()
-
 {
     DBFilterWidget::update();
 

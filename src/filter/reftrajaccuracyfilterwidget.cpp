@@ -15,16 +15,11 @@ using namespace std;
 RefTrajAccuracyFilterWidget::RefTrajAccuracyFilterWidget(RefTrajAccuracyFilter& filter)
     : DBFilterWidget(filter), filter_(filter)
 {
-    QFormLayout* layout = new QFormLayout();
-
     min_value_edit_ = new QLineEdit();
     min_value_edit_->setValidator(new TextFieldDoubleValidator(0, 10e6, Precision));
     connect(min_value_edit_, &QLineEdit::textEdited, this, &RefTrajAccuracyFilterWidget::minValueEditedSlot);
 
-    layout->addRow("Accuracy <=", min_value_edit_);
-
-
-    child_layout_->addLayout(layout);
+    addNameValuePair("Accuracy <=", min_value_edit_);
 
     update();
 }

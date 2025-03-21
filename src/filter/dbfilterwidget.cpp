@@ -29,8 +29,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QWidget>
-
-
+#include <QLabel>
+#include <QLineEdit>
 
 using namespace Utils;
 
@@ -81,7 +81,7 @@ DBFilterWidget::DBFilterWidget(DBFilter& filter)
     child_ = new QWidget();
     child_->setVisible(filter_.widgetVisible());
 
-    child_layout_ = new QVBoxLayout();
+    child_layout_ = new QGridLayout();
     child_layout_->setContentsMargins(5, 1, 1, 1);
     child_layout_->setSpacing(1);
 
@@ -126,22 +126,21 @@ void DBFilterWidget::addChildWidget(QWidget* widget)
 
 void DBFilterWidget::updateChildWidget()
 {
-    QLayoutItem* child;
-    while (!child_layout_->isEmpty() && (child = child_layout_->takeAt(0)) != nullptr)
-    {
-        if (child->widget())
-            child_layout_->removeWidget(child->widget());
-
-        child_layout_->removeItem(child);
-        delete child;
-    }
+    deleteChildrenFromLayout();
 
     std::vector<DBFilterCondition*>& conditions = filter_.getConditions();
     for (unsigned int cnt = 0; cnt < conditions.size(); cnt++)
     {
-        QWidget* child_widget = conditions.at(cnt)->getWidget();
-        assert(child_widget);
-        child_layout_->addWidget(child_widget);
+        auto label = conditions.at(cnt)->getLabel();
+        auto edit  = conditions.at(cnt)->getEdit();
+
+        assert(label);
+        assert(edit);
+
+        int row = child_layout_->rowCount();
+        child_layout_->addWidget(label, row, 0);
+        child_layout_->addWidget(edit , row, 1);
+
         connect(conditions.at(cnt), SIGNAL(possibleFilterChange()), this,
                 SLOT(possibleSubFilterChange()), Qt::UniqueConnection);
     }
@@ -228,4 +227,77 @@ void DBFilterWidget::filterEditSlot()
 {
     logdbg << "DBFilterWidget: filterEditSlot";
     emit filterEdit(&filter_);
+}
+
+namespace
+{
+    void clearLayoutItems(QLayout* layout)
+    {
+        while (QLayoutItem* item = layout->takeAt(0)) 
+        {
+            if (QWidget* widget = item->widget()) 
+            {
+                widget->setParent(nullptr);
+                delete widget;
+            } 
+            else if (QLayout* childLayout = item->layout()) 
+            {
+                clearLayoutItems(childLayout);
+                delete childLayout;
+            }
+            delete item;
+        }
+    };
+}
+
+void DBFilterWidget::deleteChildrenFromLayout()
+{
+    clearLayoutItems(child_layout_);
+}
+
+void DBFilterWidget::addNameValuePair(const std::string& label, QWidget* widget, int row, int col)
+{
+    int insert_row = row >= 0 ? row : child_layout_->rowCount();
+
+    auto lwidget = new QLabel(label.c_str());
+    lwidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+
+    widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+    child_layout_->addWidget(lwidget, insert_row, col    );
+    child_layout_->addWidget(widget , insert_row, col + 1);
+}
+
+void DBFilterWidget::addNameValuePair(const std::string& label, const std::string& label2, int row, int col)
+{
+    addNameValuePair(label, new QLabel(label2.c_str()), row, col);
+}
+
+int DBFilterWidget::columnWidth(int layout_column) const
+{
+    if (layout_column < 0 || layout_column >= child_layout_->columnCount())
+        return 0;
+
+    int max_width = 0;
+    for (int r = 0; r < child_layout_->rowCount(); ++r)
+    {
+        auto litem = child_layout_->itemAtPosition(r, layout_column);
+        if (litem && litem->widget() && litem->widget()->sizeHint().width() > max_width)
+            max_width = litem->sizeHint().width();
+    }
+
+    return max_width;
+}
+
+void DBFilterWidget::setFixedColumnWidth(int layout_column, int width)
+{
+    if (layout_column < 0 || layout_column >= child_layout_->columnCount())
+        return;
+    
+    for (int r = 0; r < child_layout_->rowCount(); ++r)
+    {
+        auto litem = child_layout_->itemAtPosition(r, layout_column);
+        if (litem && litem->widget())
+            litem->widget()->setFixedWidth(width);
+    }
 }

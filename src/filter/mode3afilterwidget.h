@@ -1,12 +1,13 @@
-#ifndef MODE3AFILTERWIDGET_H
-#define MODE3AFILTERWIDGET_H
+
+#pragma once
 
 #include "dbfilterwidget.h"
 #include "mode3afilter.h"
 
-class QLabel;
 class QLineEdit;
 
+/**
+ */
 class Mode3AFilterWidget : public DBFilterWidget
 {
 
@@ -24,8 +25,5 @@ public:
 protected:
     Mode3AFilter& filter_;
 
-    QLabel* label_{nullptr};
     QLineEdit* value_edit_ {nullptr};
 };
-
-#endif // MODE3AFILTERWIDGET_H

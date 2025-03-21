@@ -15,20 +15,20 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UTNFILTERWIDGET_H
-#define UTNFILTERWIDGET_H
+#pragma once
 
 #include "dbfilterwidget.h"
 #include "utnfilter.h"
 
-class QLabel;
 class QLineEdit;
 
+/**
+ */
 class UTNFilterWidget : public DBFilterWidget
 {
     Q_OBJECT
 
-  protected slots:
+protected slots:
     void valueEditedSlot(const QString& value);
 
 public:
@@ -40,8 +40,5 @@ public:
 protected:
     UTNFilter& filter_;
 
-    QLabel* label_{nullptr};
     QLineEdit* value_edit_ {nullptr};
 };
-
-#endif // UTNFILTERWIDGET_H
