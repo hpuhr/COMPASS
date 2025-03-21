@@ -34,9 +34,7 @@ class DBFilterWidget : public QFrame
 
 private slots:
     void toggleVisible();
-
     void toggleAnd(); // not used
-
     void toggleActive();
 
     void possibleSubFilterChange();
@@ -61,7 +59,8 @@ public:
 
     virtual void update(void);
 
-    void setInvisible();
+    void collapse();
+    void expand();
 
 protected:
     DBFilter& filter_;

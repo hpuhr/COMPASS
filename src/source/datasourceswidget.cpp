@@ -450,16 +450,6 @@ void DataSourcesWidget::createUI()
 
     // buttons
     QHBoxLayout* button_layout = new QHBoxLayout();
-    button_layout->addStretch();
-
-    QPushButton* edit_button = new QPushButton();
-    edit_button->setIcon(QIcon(Utils::Files::getIconFilepath("edit.png").c_str()));
-    edit_button->setFixedSize(UI_ICON_SIZE);
-    edit_button->setFlat(UI_ICON_BUTTON_FLAT);
-    edit_button->setToolTip(tr("Data Source Options"));
-
-    connect(edit_button, &QPushButton::clicked, this, &DataSourcesWidget::editClicked);
-    button_layout->addWidget(edit_button);
 
     main_layout->addLayout(button_layout);
 
@@ -512,24 +502,20 @@ void DataSourcesWidget::createUI()
 
     // update
     updateContent(true);
-
-    // create menu
-    createMenu();
 }
-
 /**
  */
-void DataSourcesWidget::createMenu()
+void DataSourcesWidget::addMenuEntries(QMenu* menu)
 {
-    QAction* sel_dstyp_action = edit_menu_.addAction("Select All DSTypes");
+    QAction* sel_dstyp_action = menu->addAction("Select All DSTypes");
     connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesWidget::selectAllDSTypes);
 
-    QAction* desel_dstyp_action = edit_menu_.addAction("Deselect All DSTypes");
+    QAction* desel_dstyp_action = menu->addAction("Deselect All DSTypes");
     connect(desel_dstyp_action, &QAction::triggered, this, &DataSourcesWidget::deselectAllDSTypes);
 
-    edit_menu_.addSeparator();
+    menu->addSeparator();
 
-    QMenu* select_ds = edit_menu_.addMenu("Select Data Sources");
+    QMenu* select_ds = menu->addMenu("Select Data Sources");
 
     QAction* sel_ds_action = select_ds->addAction("All");
     connect(sel_ds_action, &QAction::triggered, this, &DataSourcesWidget::selectAllDataSources);
@@ -541,7 +527,7 @@ void DataSourcesWidget::createMenu()
         connect(action, &QAction::triggered, this, &DataSourcesWidget::selectDSTypeSpecificDataSources);
     }
 
-    QMenu* deselect_ds = edit_menu_.addMenu("Deselect Data Sources");
+    QMenu* deselect_ds = menu->addMenu("Deselect Data Sources");
 
     QAction* desel_ds_action = deselect_ds->addAction("All");
     connect(desel_ds_action, &QAction::triggered, this, &DataSourcesWidget::deselectAllDataSources);
@@ -553,9 +539,9 @@ void DataSourcesWidget::createMenu()
         connect(action, &QAction::triggered, this, &DataSourcesWidget::deselectDSTypeSpecificDataSources);
     }
 
-    edit_menu_.addSeparator();
+    menu->addSeparator();
 
-    QMenu* set_lines = edit_menu_.addMenu("Set Line");
+    QMenu* set_lines = menu->addMenu("Set Line");
 
     QAction* desel_line_action = set_lines->addAction("Deselect All");
     connect(desel_line_action, &QAction::triggered, this, &DataSourcesWidget::deselectAllLines);
@@ -567,9 +553,9 @@ void DataSourcesWidget::createMenu()
         connect(desel_line_action, &QAction::triggered, this, &DataSourcesWidget::selectSpecificLines);
     }
 
-    edit_menu_.addSeparator();
+    menu->addSeparator();
 
-    QAction* show_cnt_action = edit_menu_.addAction("Toggle Show Counts");
+    QAction* show_cnt_action = menu->addAction("Toggle Show Counts");
     connect(show_cnt_action, &QAction::triggered, this, &DataSourcesWidget::toogleShowCounts);
 }
 
@@ -896,15 +882,6 @@ void DataSourcesWidget::updateAdditionalInfo()
     {
         associations_label_->setText("None");
     }
-}
-
-/**
- */
-void DataSourcesWidget::editClicked()
-{
-    loginf << "DataSourcesWidget: editClicked";
-
-    edit_menu_.exec(QCursor::pos());
 }
 
 /**

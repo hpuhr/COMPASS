@@ -195,10 +195,16 @@ void DBFilterWidget::update(void)
     //  }
 }
 
-void DBFilterWidget::setInvisible()
+void DBFilterWidget::collapse()
 {
     filter_.widgetVisible(false);
     child_->setVisible(false);
+}
+
+void DBFilterWidget::expand()
+{
+    filter_.widgetVisible(true);
+    child_->setVisible(true);
 }
 
 void DBFilterWidget::possibleSubFilterChange()

@@ -19,6 +19,7 @@
 #include "toolboxwidget.h"
 
 #include "stringconv.h"
+#include "files.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -27,13 +28,11 @@
 #include <QStackedWidget>
 #include <QLabel>
 #include <QFontMetrics>
+#include <QMenu>
 
 const int ToolBox::ToolIconSize      = 50;
 const int ToolBox::ToolNameFontSize  = 12;
 const int ToolBox::ToolLabelFontSize = 8;
-
-const int ToolBox::StretchToolBox   = 1;
-const int ToolBox::StretchView      = 2;
 
 /**
  */
@@ -80,21 +79,75 @@ void ToolBox::createUI()
     right_widget_->setLayout(right_layout);
 
     QHBoxLayout* top_layout = new QHBoxLayout;
-    top_layout->setContentsMargins(10, 10, 10, 10);
+    top_layout->setContentsMargins(10, 5, 10, 0);
 
     tool_name_label_ = new QLabel;
     auto name_font = tool_name_label_->font();
     name_font.setBold(true);
-    name_font.setPointSize(ToolNameFontSize);
+    //name_font.setPointSize(ToolNameFontSize);
     tool_name_label_->setFont(name_font);
 
+    config_button_ = new QToolButton;
+    config_button_->setIcon(QIcon(Utils::Files::getIconFilepath("edit.png").c_str()));
+    config_button_->setPopupMode(QToolButton::ToolButtonPopupMode::InstantPopup);
+
     top_layout->addWidget(tool_name_label_);
+    top_layout->addStretch(1);
+    top_layout->addWidget(config_button_);
 
     widget_stack_ = new QStackedWidget;
+
     right_layout->addLayout(top_layout);
     right_layout->addWidget(widget_stack_);
 
     main_layout->addWidget(right_widget_);
+
+    updateMenus();
+}
+
+/**
+ */
+void ToolBox::updateMenus()
+{
+    config_button_->setMenu(nullptr);
+
+    config_menu_.reset(new QMenu);
+
+    if (active_tool_idx_ < 0)
+        return;
+
+    // tool specific custom part
+    tools_.at(active_tool_idx_).widget->addToConfigMenu(config_menu_.get());
+
+    config_menu_->addSeparator();
+
+    //screen ratio selection
+    {
+        auto sr_menu = config_menu_->addMenu("Screen Ratio");
+
+        QActionGroup* screen_ratio_group = new QActionGroup(config_menu_.get());
+        screen_ratio_group->setExclusive(true);
+
+        auto sr = currentScreenRatio();
+
+        auto addSRAction = [ & ] (const QString& label, toolbox::ScreenRatio screen_ratio)
+        {
+            auto action = sr_menu->addAction(label);
+            screen_ratio_group->addAction(action);
+
+            action->setCheckable(true);
+            action->setChecked(sr.has_value() && sr.value() == screen_ratio);
+            connect(action, &QAction::triggered, [ this, screen_ratio] () { this->screenRatioChanged(screen_ratio); });
+        };
+
+        addSRAction("1:3", toolbox::ScreenRatio::Ratio_Quarter);
+        addSRAction("1:2", toolbox::ScreenRatio::Ratio_Third);
+        addSRAction("1:1", toolbox::ScreenRatio::Ratio_Half);
+        addSRAction("2:1", toolbox::ScreenRatio::Ratio_TwoThirds);
+        addSRAction("3:1", toolbox::ScreenRatio::Ratio_ThreeQuarter);
+    }
+
+    config_button_->setMenu(config_menu_.get());
 }
 
 /**
@@ -218,7 +271,9 @@ void ToolBox::toolActivated(int idx)
         }
     }
 
-    emit toolToggled(active_tool_idx_);
+    updateMenus();
+
+    emit toolChanged();
 }
 
 /**
@@ -252,4 +307,26 @@ void ToolBox::adjustSizings()
 
     for (auto& t : tools_)
         t.button->setFixedSize(w, h);
+}
+
+/**
+ */
+boost::optional<toolbox::ScreenRatio> ToolBox::currentScreenRatio() const
+{
+    if (active_tool_idx_ < 0)
+        return boost::optional<toolbox::ScreenRatio>();
+
+    return tools_.at(active_tool_idx_).widget->screenRatio();
+}
+
+/**
+ */
+void ToolBox::screenRatioChanged(toolbox::ScreenRatio screen_ratio)
+{
+    if (active_tool_idx_ < 0)
+        return;
+    
+    tools_.at(active_tool_idx_).widget->setScreenRatio(screen_ratio);
+
+    emit toolChanged();
 }

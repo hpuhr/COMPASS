@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FILTERMANAGERWIDGET_H
-#define FILTERMANAGERWIDGET_H
+#pragma once
 
 #include <QFrame>
 #include <QMenu>
@@ -28,42 +27,39 @@ class QPushButton;
 class QVBoxLayout;
 class QCheckBox;
 
+/**
+ */
 class FilterManagerWidget : public QWidget
 {
     Q_OBJECT
-
-  signals:
-
-  public slots:
-    void toggleUseFilters();
-
-    void editClickedSlot();
-
-    void addFilterSlot();
-    void updateFiltersSlot();
-    void filterWidgetActionSlot(bool result);
-
-    void databaseOpenedSlot();
-
-    void updateUseFilters ();
-
-  public:
+public:
     explicit FilterManagerWidget(FilterManager& manager, QWidget* parent = 0,
                                  Qt::WindowFlags f = 0);
     virtual ~FilterManagerWidget();
 
     QCheckBox* filtersCheckBox() const;
 
-protected:
-    FilterManager& filter_manager_;
+    void updateUseFilters();
 
-    QMenu edit_menu_;
+    void addMenuEntries(QMenu* menu);
+
+protected:
+    void toggleUseFilters();
+
+    void addFilter();
+    void updateFilters();
+    void filterWidgetAction(bool result);
+
+    void databaseOpened();
+
+    void expandAll();
+    void collapseAll();
+    void collapseUnused();
+
+    FilterManager& filter_manager_;
 
     FilterGeneratorWidget* filter_generator_widget_;
 
-    QCheckBox* filters_check_ {nullptr};
-    QVBoxLayout* ds_filter_layout0_ {nullptr};
-    QVBoxLayout* ds_filter_layout1_ {nullptr};
+    QCheckBox*   filters_check_    {nullptr};
+    QVBoxLayout* ds_filter_layout_ {nullptr};
 };
-
-#endif  // FILTERMANAGERWIDGET_H

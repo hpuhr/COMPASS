@@ -53,6 +53,7 @@
 #include "licensemanager.h"
 #include "toolbox.h"
 #include "toolboxwidget.h"
+#include "viewpointswidget.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
@@ -172,6 +173,10 @@ void MainWindow::createUI()
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
+    //init some components before using their widgets
+    COMPASS::instance().evaluationManager().init();
+    COMPASS::instance().viewManager().init(tab_widget_);
+
     // initialize toolbox
     tool_box_ = new ToolBox;
     
@@ -179,24 +184,47 @@ void MainWindow::createUI()
                                                 "Data Sources",
                                                 "Data Sources",
                                                 { "Data", "Sources" },
-                                                QIcon(Files::getIconFilepath("db.png").c_str())));
+                                                QIcon(Files::getIconFilepath("db.png").c_str()),
+                                                toolbox::ScreenRatio::Ratio_Third,
+                                                [ & ] (QMenu* menu) { COMPASS::instance().dataSourceManager().loadWidget()->addMenuEntries(menu); }));
     tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().filterManager().widget(),
                                                 "Filters",
                                                 "Filters",
                                                 { "Filters" },
-                                                QIcon(Files::getIconFilepath("filter.png").c_str())));
+                                                QIcon(Files::getIconFilepath("filter.png").c_str()),
+                                                toolbox::ScreenRatio::Ratio_Third,
+                                                [ & ] (QMenu* menu) { COMPASS::instance().filterManager().widget()->addMenuEntries(menu); }));
     tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().dbContentManager().targetListWidget(),
                                                 "Targets",
                                                 "Targets",
                                                 { "Targets" },
-                                                QIcon(Files::getIconFilepath("globe.png").c_str())));
+                                                QIcon(Files::getIconFilepath("globe.png").c_str()),
+                                                toolbox::ScreenRatio::Ratio_Third));
+
+    if (!COMPASS::instance().hideEvaluation())
+    {
+        tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().evaluationManager().widget(),
+                                                    "Evaluation",
+                                                    "Evaluation",
+                                                    { "Evaluation" },
+                                                    QIcon(Utils::Files::getIconFilepath("scale.png").c_str()),
+                                                    toolbox::ScreenRatio::Ratio_Third));
+    }
+
+    if (!COMPASS::instance().hideViewpoints())
+    {
+        tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().viewManager().viewPointsWidget(), 
+                                                    "View Points",
+                                                    "View Points", 
+                                                    { "View", "Points" },
+                                                    QIcon(Utils::Files::getIconFilepath("eye.png").c_str()),
+                                                    toolbox::ScreenRatio::Ratio_Third));
+    }
+
     //@TODO: !handle filter check box!
     //QTabBar *tabBar = tab_widget_->tabBar();
     //tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
     //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0");
-
-    COMPASS::instance().evaluationManager().init(tool_box_); // adds eval widget
-    COMPASS::instance().viewManager().init(tool_box_, tab_widget_); // adds view points widget and view container
 
     tool_box_->adjustSizings();
     tool_box_->selectTool("Data Sources");
@@ -255,7 +283,7 @@ void MainWindow::createUI()
     createMenus();
     updateMenus();
 
-    updateSizings(-1);
+    updateSizings();
     updateWindowTitle();
 
     // connect signal slots
@@ -270,7 +298,7 @@ void MainWindow::createUI()
     connect(&COMPASS::instance().licenseManager(), &LicenseManager::changed,
             this, &MainWindow::updateWindowTitle);
 
-    connect(tool_box_, &ToolBox::toolToggled, this, &MainWindow::updateSizings);
+    connect(tool_box_, &ToolBox::toolChanged, this, &MainWindow::updateSizings);
 }
 
 void MainWindow::createMenus ()
@@ -1401,13 +1429,19 @@ void MainWindow::updateWindowTitle()
     QWidget::setWindowTitle(title.c_str());
 }
 
-void MainWindow::updateSizings(int currentToolIdx)
+void MainWindow::updateSizings()
 {
-    QSizePolicy policy_toolbox(currentToolIdx >= 0 ? QSizePolicy::Expanding : QSizePolicy::Preferred, QSizePolicy::Expanding);
-    policy_toolbox.setHorizontalStretch(currentToolIdx >= 0 ? ToolBox::StretchToolBox : 0);
+    std::pair<int, int> stretches(0, 1);
+
+    auto screen_ratio = tool_box_->currentScreenRatio();
+    if (screen_ratio.has_value())
+        stretches = toolbox::toParts(screen_ratio.value());
+
+    QSizePolicy policy_toolbox(screen_ratio.has_value() ? QSizePolicy::Expanding : QSizePolicy::Preferred, QSizePolicy::Expanding);
+    policy_toolbox.setHorizontalStretch(stretches.first);
 
     QSizePolicy policy_tabwidget(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    policy_tabwidget.setHorizontalStretch(currentToolIdx >= 0 ? ToolBox::StretchView : 0);
+    policy_tabwidget.setHorizontalStretch(stretches.second);
 
     tool_box_->setSizePolicy(policy_toolbox);
     tab_widget_->setSizePolicy(policy_tabwidget);

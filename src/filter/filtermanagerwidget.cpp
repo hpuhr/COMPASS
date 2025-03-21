@@ -33,10 +33,14 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QCheckBox>
+#include <QScrollArea>
 
 using namespace Utils;
 
-FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget* parent,
+/**
+ */
+FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, 
+                                         QWidget* parent,
                                          Qt::WindowFlags f)
     : QWidget(parent),
       filter_manager_(filter_manager),
@@ -58,61 +62,40 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, QWidget*
 
     top_layout->addStretch();
 
-    QPushButton* edit_button = new QPushButton();
-    edit_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
-    edit_button->setFixedSize(UI_ICON_SIZE);
-    edit_button->setFlat(UI_ICON_BUTTON_FLAT);
-    edit_button->setToolTip(tr("Filter Options"));
-    connect (edit_button, &QPushButton::clicked, this, &FilterManagerWidget::editClickedSlot);
-    top_layout->addWidget(edit_button);
-
-    QAction* show_cnt_action = edit_menu_.addAction("Add New Filter");
-    connect(show_cnt_action, &QAction::triggered, this, &FilterManagerWidget::addFilterSlot);
-
     layout->addLayout(top_layout);
 
-    layout->addSpacing(15);
+    QScrollArea* scroll_area = new QScrollArea;
+    scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    scroll_area->setWidgetResizable(true);
 
-    // add two filter columns
-    QHBoxLayout* ds_filter_parent_layout = new QHBoxLayout();
+    QWidget* scroll_widget = new QWidget;
 
-    {
-        QVBoxLayout* ds_filter_layout0_parent = new QVBoxLayout();
-        ds_filter_layout0_ = new QVBoxLayout();
-        ds_filter_layout0_parent->addLayout(ds_filter_layout0_);
-        ds_filter_layout0_parent->addStretch();
+    QVBoxLayout* scroll_layout = new QVBoxLayout;
+    scroll_layout->setContentsMargins(0, 0, 0, 0);
+    scroll_layout->setSpacing(0);
 
-        ds_filter_parent_layout->addLayout(ds_filter_layout0_parent);
-    }
+    ds_filter_layout_ = new QVBoxLayout;
+    ds_filter_layout_->setContentsMargins(0, 0, 0, 0);
+    ds_filter_layout_->setSpacing(0);
 
-    {
-        QVBoxLayout* ds_filter_layout1_parent = new QVBoxLayout();
-        ds_filter_layout1_ = new QVBoxLayout();
-        ds_filter_layout1_parent->addLayout(ds_filter_layout1_);
-        ds_filter_layout1_parent->addStretch();
+    scroll_layout->addLayout(ds_filter_layout_);
+    scroll_layout->addStretch(1);
 
-        ds_filter_parent_layout->addLayout(ds_filter_layout1_parent);
-    }
+    scroll_widget->setLayout(scroll_layout);
 
-    layout->addLayout(ds_filter_parent_layout);
+    scroll_area->setWidget(scroll_widget);
 
-    layout->addStretch();
-
-//    QHBoxLayout* button_layout = new QHBoxLayout();
-
-//    add_button_ = new QPushButton(tr("Add Filter"));
-//    connect(add_button_, SIGNAL(clicked()), this, SLOT(addFilterSlot()));
-//    button_layout->addWidget(add_button_);
-
-//    layout->addLayout(button_layout);
+    layout->addWidget(scroll_area);
 
     setLayout(layout);
 
-    updateFiltersSlot();
+    updateFilters();
 
     setDisabled(true);
 }
 
+/**
+ */
 FilterManagerWidget::~FilterManagerWidget()
 {
     if (filter_generator_widget_)
@@ -122,12 +105,35 @@ FilterManagerWidget::~FilterManagerWidget()
     }
 }
 
+/**
+ */
+void FilterManagerWidget::addMenuEntries(QMenu* menu)
+{
+    QAction* new_filter_action = menu->addAction("Add New Filter");
+    connect(new_filter_action, &QAction::triggered, this, &FilterManagerWidget::addFilter);
+
+    menu->addSeparator();
+
+    auto expand_all_action = menu->addAction("Expand All");
+    connect(expand_all_action, &QAction::triggered, this, &FilterManagerWidget::expandAll);
+
+    auto collapse_all_action = menu->addAction("Collapse All");
+    connect(collapse_all_action, &QAction::triggered, this, &FilterManagerWidget::collapseAll);
+
+    auto collapse_unused_action = menu->addAction("Collapse Unused");
+    connect(collapse_unused_action, &QAction::triggered, this, &FilterManagerWidget::collapseUnused);
+}
+
+/**
+ */
 QCheckBox *FilterManagerWidget::filtersCheckBox() const
 {
     assert (filters_check_);
     return filters_check_;
 }
 
+/**
+ */
 void FilterManagerWidget::toggleUseFilters()
 {
     assert(filters_check_);
@@ -137,18 +143,17 @@ void FilterManagerWidget::toggleUseFilters()
     filter_manager_.useFilters(checked);
 }
 
+/**
+ */
 void FilterManagerWidget::updateUseFilters ()
 {
     assert (filters_check_);
     filters_check_->setChecked(filter_manager_.useFilters());
 }
 
-void FilterManagerWidget::editClickedSlot()
-{
-    edit_menu_.exec(QCursor::pos());
-}
-
-void FilterManagerWidget::addFilterSlot()
+/**
+ */
+void FilterManagerWidget::addFilter()
 {
     assert(!filter_generator_widget_);
 
@@ -158,46 +163,78 @@ void FilterManagerWidget::addFilterSlot()
     filter_generator_widget_->show();
 }
 
-void FilterManagerWidget::updateFiltersSlot()
+/**
+ */
+void FilterManagerWidget::updateFilters()
 {
-    assert(ds_filter_layout0_);
-
     QLayoutItem* child;
-    while (!ds_filter_layout0_->isEmpty() && (child = ds_filter_layout0_->takeAt(0)))
-        ds_filter_layout0_->removeItem(child);
-
-    assert(ds_filter_layout1_);
-
-    while (!ds_filter_layout1_->isEmpty() && (child = ds_filter_layout1_->takeAt(0)))
-        ds_filter_layout1_->removeItem(child);
+    while (!ds_filter_layout_->isEmpty() && (child = ds_filter_layout_->takeAt(0)))
+        ds_filter_layout_->removeItem(child);
 
     auto& filters = filter_manager_.filters();
-
-    unsigned int num_filters_break = filters.size() / 2;
-    unsigned int cnt = 0;
 
     for (auto& it : filters)
     {
         logdbg << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
 
-        if (cnt < num_filters_break)
-            ds_filter_layout0_->addWidget(it->widget());
-        else
-            ds_filter_layout1_->addWidget(it->widget());
+        if (!it->getActive())
+            it->widget()->collapse();
 
-        ++cnt;
+        ds_filter_layout_->addWidget(it->widget());
     }
 }
 
-void FilterManagerWidget::filterWidgetActionSlot(bool result)
+/**
+ */
+void FilterManagerWidget::filterWidgetAction(bool result)
 {
     assert(filter_generator_widget_);
 
     if (result)
-        updateFiltersSlot();
+        updateFilters();
 
     delete filter_generator_widget_;
     filter_generator_widget_ = nullptr;
 }
 
-void FilterManagerWidget::databaseOpenedSlot() { setDisabled(false); }
+/**
+ */
+void FilterManagerWidget::databaseOpened() 
+{ 
+    setDisabled(false); 
+}
+
+/**
+ */
+void FilterManagerWidget::expandAll()
+{
+    auto& filters = filter_manager_.filters();
+
+    for (auto& it : filters)
+        it->widget()->expand();
+}
+
+/**
+ */
+void FilterManagerWidget::collapseAll()
+{
+    auto& filters = filter_manager_.filters();
+
+    for (auto& it : filters)
+        it->widget()->collapse();
+}
+
+/**
+ */
+void FilterManagerWidget::collapseUnused()
+{
+    auto& filters = filter_manager_.filters();
+
+    for (auto& it : filters)
+    {
+        if (it->getActive())
+            it->widget()->expand();
+        else
+            it->widget()->collapse();
+    }
+}

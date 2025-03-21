@@ -122,7 +122,7 @@ protected:
     void createDebugMenu();
 
     void updateWindowTitle();
-    void updateSizings(int currentToolIdx);
+    void updateSizings();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);

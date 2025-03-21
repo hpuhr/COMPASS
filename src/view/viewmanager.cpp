@@ -35,8 +35,6 @@
 #include "util/timeconv.h"
 #include "viewpoint_commands.h"
 #include "global.h"
-#include "toolbox.h"
-#include "toolboxwidget.h"
 #include "files.h"
 
 #include "json.hpp"
@@ -68,11 +66,10 @@ ViewManager::ViewManager(const std::string& class_id, const std::string& instanc
     registerParameter("automatic_redraw", &config_.automatic_redraw, Config().automatic_redraw);
 }
 
-void ViewManager::init(ToolBox* tool_box, QTabWidget* main_tab_widget)
+void ViewManager::init(QTabWidget* main_tab_widget)
 {
     logdbg << "ViewManager: init";
 
-    assert(tool_box);
     assert(main_tab_widget);
     assert(!main_tab_widget_);
     assert(!initialized_);
@@ -90,16 +87,6 @@ void ViewManager::init(ToolBox* tool_box, QTabWidget* main_tab_widget)
     QApplication::restoreOverrideCursor();
 
     assert(view_points_widget_);
-
-    if (!COMPASS::instance().hideViewpoints())
-    {
-        WrappedToolBoxWidget* w = new WrappedToolBoxWidget(view_points_widget_, 
-                                                           "View Points",
-                                                           "View Points", 
-                                                           { "View", "Points" },
-                                                           QIcon(Utils::Files::getIconFilepath("eye.png").c_str()));
-        tool_box->addTool(w);
-    }
 
     FilterManager& filter_man = COMPASS::instance().filterManager();
 

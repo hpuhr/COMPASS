@@ -44,8 +44,6 @@
 #include "viewpoint.h"
 #include "projectionmanager.h"
 #include "projection.h"
-#include "toolbox.h"
-#include "toolboxwidget.h"
 #include "files.h"
 
 #include "json.hpp"
@@ -265,26 +263,16 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     init_evaluation_commands();
 }
 
-void EvaluationManager::init(ToolBox* tool_box)
+void EvaluationManager::init()
 {
     loginf << "EvaluationManager: init";
 
     assert (!initialized_);
-    assert (tool_box);
 
     initialized_ = true;
 
-    if (!COMPASS::instance().hideEvaluation())
-    {
-        WrappedToolBoxWidget* w = new WrappedToolBoxWidget(widget(),
-                                                           "Evaluation",
-                                                           "Evaluation",
-                                                           { "Evaluation" },
-                                                           QIcon(Utils::Files::getIconFilepath("scale.png").c_str()));
-        tool_box->addTool(w);
-    }
-
-    widget()->setDisabled(true);
+    auto w = widget();
+    w->setDisabled(true);
 
     connect (&COMPASS::instance().dbContentManager(), &DBContentManager::associationStatusChangedSignal,
              this, &EvaluationManager::associationStatusChangedSlot);

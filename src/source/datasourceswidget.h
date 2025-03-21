@@ -175,6 +175,8 @@ public:
     void updateContent(bool recreate_required = false);
     void loadingDone();
 
+    void addMenuEntries(QMenu* menu);
+
     virtual void setUseDSType(const std::string& ds_type_name, bool use);
     virtual bool getUseDSType(const std::string& ds_type_name) const;
     virtual void setUseDS(unsigned int ds_id, bool use);
@@ -193,7 +195,6 @@ private:
     friend class DataSourceLineButton;
 
     void createUI();
-    void createMenu();
 
     void clear();
     int generateContent(bool force_rebuild);
@@ -213,8 +214,6 @@ private:
     void updateAllContent();
     void updateAdditionalInfo();
 
-    void editClicked();
-
     void selectAllDSTypes();
     void deselectAllDSTypes();
     void selectAllDataSources();
@@ -226,8 +225,6 @@ private:
     void toogleShowCounts();
 
     DataSourceManager& ds_man_;
-
-    QMenu edit_menu_;
 
     QLabel* ts_min_label_{nullptr};
     QLabel* ts_max_label_{nullptr};

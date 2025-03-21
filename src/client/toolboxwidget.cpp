@@ -19,10 +19,14 @@
 
 #include <QHBoxLayout>
 
+const toolbox::ScreenRatio ToolBoxWidget::ScreenRatioDefault = toolbox::ScreenRatio::Ratio_Third;
+
 /**
 */
-ToolBoxWidget::ToolBoxWidget(QWidget* parent)
-:   QWidget(parent)
+ToolBoxWidget::ToolBoxWidget(toolbox::ScreenRatio screen_ratio,
+                             QWidget* parent)
+:   QWidget      (parent      )
+,   screen_ratio_(screen_ratio)
 {
 }
 
@@ -37,12 +41,15 @@ WrappedToolBoxWidget::WrappedToolBoxWidget(QWidget* w,
                                            const std::string& info,
                                            const std::vector<std::string>& labels,
                                            const QIcon& icon,
+                                           toolbox::ScreenRatio screen_ratio,
+                                           const std::function<void(QMenu*)>& config_menu_add_cb,
                                            QWidget* parent)
-:   ToolBoxWidget(parent)
-,   name_  (name  )
-,   info_  (info  )
-,   labels_(labels)
-,   icon_  (icon  )
+:   ToolBoxWidget      (screen_ratio, parent)
+,   name_              (name                )
+,   info_              (info                )
+,   labels_            (labels              )
+,   icon_              (icon                )
+,   config_menu_add_cb_(config_menu_add_cb  )
 {
     auto layout = new QHBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
@@ -82,4 +89,12 @@ std::string WrappedToolBoxWidget::toolInfo() const
 const std::vector<std::string>& WrappedToolBoxWidget::toolLabels() const
 {
     return labels_;
+}
+
+/**
+*/
+void WrappedToolBoxWidget::addToConfigMenu(QMenu* menu) const
+{
+    if (config_menu_add_cb_)
+        config_menu_add_cb_(menu);
 }

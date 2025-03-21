@@ -35,7 +35,6 @@ class EvaluationStandard;
 class DBContent;
 class SectorLayer;
 class AirSpace;
-class ToolBox;
 
 namespace dbContent 
 {
@@ -196,7 +195,7 @@ public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~EvaluationManager();
 
-    void init(ToolBox* tool_box);
+    void init();
 
     void showDialog();
 

@@ -17,23 +17,37 @@
 
 #pragma once
 
+#include "toolboxdefs.h"
+
 #include <string>
 
 #include <QWidget>
 #include <QIcon>
+
+class QMenu;
 
 /**
  */
 class ToolBoxWidget : public QWidget
 {
 public:
-    ToolBoxWidget(QWidget* parent = nullptr);
+    ToolBoxWidget(toolbox::ScreenRatio screen_ratio = ScreenRatioDefault, 
+                  QWidget* parent = nullptr);
     virtual ~ToolBoxWidget();
+
+    void setScreenRatio(toolbox::ScreenRatio screen_ratio) { screen_ratio_ = screen_ratio; }
+    toolbox::ScreenRatio screenRatio() const { return screen_ratio_; }
 
     virtual QIcon toolIcon() const = 0;
     virtual std::string toolName() const = 0;
     virtual std::string toolInfo() const = 0;
     virtual const std::vector<std::string>& toolLabels() const = 0;
+    virtual void addToConfigMenu(QMenu* menu) const {};
+
+    static const toolbox::ScreenRatio ScreenRatioDefault;
+    
+private:
+    toolbox::ScreenRatio screen_ratio_;
 };
 
 /**
@@ -46,6 +60,8 @@ public:
                          const std::string& info,
                          const std::vector<std::string>& labels,
                          const QIcon& icon,
+                         toolbox::ScreenRatio screen_ratio = ToolBoxWidget::ScreenRatioDefault,
+                         const std::function<void(QMenu*)>& config_menu_add_cb = std::function<void(QMenu*)>(),
                          QWidget* parent = nullptr);
     virtual ~WrappedToolBoxWidget();
 
@@ -53,10 +69,12 @@ public:
     std::string toolName() const override final;
     std::string toolInfo() const override final;
     const std::vector<std::string>& toolLabels() const override final;
+    void addToConfigMenu(QMenu* menu) const override;
 
 private:
-    std::string              name_;
-    std::string              info_;
-    std::vector<std::string> labels_;
-    QIcon                    icon_;
+    std::string                 name_;
+    std::string                 info_;
+    std::vector<std::string>    labels_;
+    QIcon                       icon_;
+    std::function<void(QMenu*)> config_menu_add_cb_;
 };
