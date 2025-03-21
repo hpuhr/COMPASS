@@ -17,25 +17,33 @@
 
 #pragma once
 
-#include <QFrame>
-#include <QMenu>
+#include "toolboxwidget.h"
 
 class FilterManager;
 class FilterGeneratorWidget;
 
-class QPushButton;
 class QVBoxLayout;
 class QCheckBox;
+class QMenu;
 
 /**
  */
-class FilterManagerWidget : public QWidget
+class FilterManagerWidget : public ToolBoxWidget
 {
     Q_OBJECT
 public:
-    explicit FilterManagerWidget(FilterManager& manager, QWidget* parent = 0,
+    explicit FilterManagerWidget(FilterManager& manager, 
+                                 QWidget* parent = 0,
                                  Qt::WindowFlags f = 0);
     virtual ~FilterManagerWidget();
+
+    //ToolBoxWidget
+    QIcon toolIcon() const override final;
+    std::string toolName() const override final;
+    std::string toolInfo() const override final;
+    std::vector<std::string> toolLabels() const override final;
+    toolbox::ScreenRatio defaultScreenRatio() const override final;
+    void addToConfigMenu(QMenu* menu) const override final;
 
     QCheckBox* filtersCheckBox() const;
 
@@ -56,8 +64,7 @@ protected:
     void collapseAll();
     void collapseUnused();
 
-    FilterManager& filter_manager_;
-
+    FilterManager&         filter_manager_;
     FilterGeneratorWidget* filter_generator_widget_;
 
     QCheckBox*   filters_check_    {nullptr};

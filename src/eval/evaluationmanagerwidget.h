@@ -15,10 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONMANAGERWIDGET_H
-#define EVALUATIONMANAGERWIDGET_H
+ #pragma once
 
-#include <QWidget>
+#include "toolboxwidget.h"
 
 #include <memory>
 
@@ -36,7 +35,9 @@ class QTabWidget;
 class QPushButton;
 class QLabel;
 
-class EvaluationManagerWidget : public QWidget
+/**
+ */
+class EvaluationManagerWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
@@ -46,6 +47,14 @@ private slots:
 public:
     EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
     virtual ~EvaluationManagerWidget();
+
+    //ToolBoxWidget
+    QIcon toolIcon() const override final;
+    std::string toolName() const override final;
+    std::string toolInfo() const override final;
+    std::vector<std::string> toolLabels() const override final;
+    toolbox::ScreenRatio defaultScreenRatio() const override final;
+    void addToConfigMenu(QMenu* menu) const override final;
 
     void updateButtons();
 
@@ -72,5 +81,3 @@ protected:
 
     QPushButton* gen_report_button_ {nullptr};
 };
-
-#endif // EVALUATIONMANAGERWIDGET_H

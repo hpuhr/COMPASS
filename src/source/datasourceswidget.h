@@ -17,7 +17,8 @@
 
 #pragma once
 
-#include <QWidget>
+#include "toolboxwidget.h"
+
 #include <QMenu>
 #include <QPushButton>
 #include <QTreeWidgetItem>
@@ -165,17 +166,23 @@ private:
 
 /**
  */
-class DataSourcesWidget : public QWidget
+class DataSourcesWidget : public ToolBoxWidget
 {
     Q_OBJECT
 public:
     DataSourcesWidget(DataSourceManager& ds_man);
     virtual ~DataSourcesWidget();
 
+    //ToolBoxWidget
+    QIcon toolIcon() const override final;
+    std::string toolName() const override final;
+    std::string toolInfo() const override final;
+    std::vector<std::string> toolLabels() const override final;
+    toolbox::ScreenRatio defaultScreenRatio() const override final;
+    void addToConfigMenu(QMenu* menu) const override final;
+
     void updateContent(bool recreate_required = false);
     void loadingDone();
-
-    void addMenuEntries(QMenu* menu);
 
     virtual void setUseDSType(const std::string& ds_type_name, bool use);
     virtual bool getUseDSType(const std::string& ds_type_name) const;

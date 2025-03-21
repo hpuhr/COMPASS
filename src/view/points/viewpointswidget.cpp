@@ -26,6 +26,7 @@
 #include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
+#include "files.h"
 //#include "dbinterface.h"
 
 #include <QTableView>
@@ -39,7 +40,7 @@
 #include <QShortcut>
 
 ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
-    : QWidget(), view_manager_(view_manager)
+    : ToolBoxWidget(), view_manager_(view_manager)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -144,14 +145,52 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
         connect (p_shortcut, &QShortcut::activated, this, &ViewPointsWidget::selectPreviousSlot);
     }
 
-
     QObject::connect(&COMPASS::instance(), &COMPASS::databaseOpenedSignal,
                      this, &ViewPointsWidget::databaseOpenedSlot);
     QObject::connect(&COMPASS::instance(), &COMPASS::databaseClosedSignal,
                      this, &ViewPointsWidget::databaseClosedSlot);
 }
 
-ViewPointsWidget::~ViewPointsWidget()
+ViewPointsWidget::~ViewPointsWidget() = default;
+
+/**
+ */
+QIcon ViewPointsWidget::toolIcon() const
+{
+    return QIcon(Utils::Files::getIconFilepath("eye.png").c_str());
+}
+
+/**
+ */
+std::string ViewPointsWidget::toolName() const 
+{
+    return "View Points";
+}
+
+/**
+ */
+std::string ViewPointsWidget::toolInfo() const 
+{
+    return "View Points";
+}
+
+/**
+ */
+std::vector<std::string> ViewPointsWidget::toolLabels() const 
+{
+    return { "View", "Points" };
+}
+
+/**
+ */
+toolbox::ScreenRatio ViewPointsWidget::defaultScreenRatio() const 
+{
+    return ToolBoxWidget::defaultScreenRatio();
+}
+
+/**
+ */
+void ViewPointsWidget::addToConfigMenu(QMenu* menu) const 
 {
 }
 

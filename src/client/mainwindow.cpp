@@ -180,46 +180,15 @@ void MainWindow::createUI()
     // initialize toolbox
     tool_box_ = new ToolBox;
     
-    tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().dataSourceManager().loadWidget(),
-                                                "Data Sources",
-                                                "Data Sources",
-                                                { "Data", "Sources" },
-                                                QIcon(Files::getIconFilepath("db.png").c_str()),
-                                                toolbox::ScreenRatio::Ratio_Third,
-                                                [ & ] (QMenu* menu) { COMPASS::instance().dataSourceManager().loadWidget()->addMenuEntries(menu); }));
-    tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().filterManager().widget(),
-                                                "Filters",
-                                                "Filters",
-                                                { "Filters" },
-                                                QIcon(Files::getIconFilepath("filter.png").c_str()),
-                                                toolbox::ScreenRatio::Ratio_Third,
-                                                [ & ] (QMenu* menu) { COMPASS::instance().filterManager().widget()->addMenuEntries(menu); }));
-    tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().dbContentManager().targetListWidget(),
-                                                "Targets",
-                                                "Targets",
-                                                { "Targets" },
-                                                QIcon(Files::getIconFilepath("globe.png").c_str()),
-                                                toolbox::ScreenRatio::Ratio_Third));
+    tool_box_->addTool(COMPASS::instance().dataSourceManager().loadWidget());
+    tool_box_->addTool(COMPASS::instance().filterManager().widget());
+    tool_box_->addTool(COMPASS::instance().dbContentManager().targetListWidget());
 
     if (!COMPASS::instance().hideEvaluation())
-    {
-        tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().evaluationManager().widget(),
-                                                    "Evaluation",
-                                                    "Evaluation",
-                                                    { "Evaluation" },
-                                                    QIcon(Utils::Files::getIconFilepath("scale.png").c_str()),
-                                                    toolbox::ScreenRatio::Ratio_Third));
-    }
+        tool_box_->addTool(COMPASS::instance().evaluationManager().widget());
 
     if (!COMPASS::instance().hideViewpoints())
-    {
-        tool_box_->addTool(new WrappedToolBoxWidget(COMPASS::instance().viewManager().viewPointsWidget(), 
-                                                    "View Points",
-                                                    "View Points", 
-                                                    { "View", "Points" },
-                                                    QIcon(Utils::Files::getIconFilepath("eye.png").c_str()),
-                                                    toolbox::ScreenRatio::Ratio_Third));
-    }
+        tool_box_->addTool(COMPASS::instance().viewManager().viewPointsWidget());
 
     //@TODO: !handle filter check box!
     //QTabBar *tabBar = tab_widget_->tabBar();

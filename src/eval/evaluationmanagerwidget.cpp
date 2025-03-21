@@ -28,6 +28,7 @@
 //#include "evaluationdatasourcewidget.h"
 //#include "evaluationsectorwidget.h"
 #include "logger.h"
+#include "files.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -44,7 +45,7 @@
 #include <QTimer>
 
 EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
-    : QWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings)
+    : ToolBoxWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -90,6 +91,47 @@ EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man, Ev
 }
 
 EvaluationManagerWidget::~EvaluationManagerWidget() = default;
+
+/**
+ */
+QIcon EvaluationManagerWidget::toolIcon() const
+{
+    return QIcon(Utils::Files::getIconFilepath("scale.png").c_str());
+}
+
+/**
+ */
+std::string EvaluationManagerWidget::toolName() const 
+{
+    return "Evaluation Results";
+}
+
+/**
+ */
+std::string EvaluationManagerWidget::toolInfo() const 
+{
+    return "Evaluation Results";
+}
+
+/**
+ */
+std::vector<std::string> EvaluationManagerWidget::toolLabels() const 
+{
+    return { "Evaluation", "Results" };
+}
+
+/**
+ */
+toolbox::ScreenRatio EvaluationManagerWidget::defaultScreenRatio() const 
+{
+    return ToolBoxWidget::defaultScreenRatio();
+}
+
+/**
+ */
+void EvaluationManagerWidget::addToConfigMenu(QMenu* menu) const 
+{
+}
 
 void EvaluationManagerWidget::updateButtons()
 {

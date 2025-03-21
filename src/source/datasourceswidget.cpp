@@ -440,6 +440,97 @@ DataSourcesWidget::~DataSourcesWidget() = default;
 
 /**
  */
+QIcon DataSourcesWidget::toolIcon() const 
+{
+    return QIcon(Utils::Files::getIconFilepath("db.png").c_str());
+}
+
+/**
+ */
+std::string DataSourcesWidget::toolName() const 
+{
+    return "Data Sources";
+}
+
+/**
+ */
+std::string DataSourcesWidget::toolInfo() const 
+{
+    return "Data Sources";
+}
+
+/**
+ */
+std::vector<std::string> DataSourcesWidget::toolLabels() const 
+{
+    return { "Data", "Sources" };
+}
+
+/**
+ */
+toolbox::ScreenRatio DataSourcesWidget::defaultScreenRatio() const 
+{
+    return ToolBoxWidget::defaultScreenRatio();
+}
+
+/**
+ */
+void DataSourcesWidget::addToConfigMenu(QMenu* menu) const 
+{
+    QAction* sel_dstyp_action = menu->addAction("Select All DSTypes");
+    connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesWidget::selectAllDSTypes);
+
+    QAction* desel_dstyp_action = menu->addAction("Deselect All DSTypes");
+    connect(desel_dstyp_action, &QAction::triggered, this, &DataSourcesWidget::deselectAllDSTypes);
+
+    menu->addSeparator();
+
+    QMenu* select_ds = menu->addMenu("Select Data Sources");
+
+    QAction* sel_ds_action = select_ds->addAction("All");
+    connect(sel_ds_action, &QAction::triggered, this, &DataSourcesWidget::selectAllDataSources);
+
+    for (const auto& ds_type_it : ds_man_.data_source_types_)
+    {
+        QAction* action = select_ds->addAction(("From "+ds_type_it).c_str());
+        action->setProperty("ds_type", ds_type_it.c_str());
+        connect(action, &QAction::triggered, this, &DataSourcesWidget::selectDSTypeSpecificDataSources);
+    }
+
+    QMenu* deselect_ds = menu->addMenu("Deselect Data Sources");
+
+    QAction* desel_ds_action = deselect_ds->addAction("All");
+    connect(desel_ds_action, &QAction::triggered, this, &DataSourcesWidget::deselectAllDataSources);
+
+    for (const auto& ds_type_it : ds_man_.data_source_types_)
+    {
+        QAction* action = deselect_ds->addAction(("From "+ds_type_it).c_str());
+        action->setProperty("ds_type", ds_type_it.c_str());
+        connect(action, &QAction::triggered, this, &DataSourcesWidget::deselectDSTypeSpecificDataSources);
+    }
+
+    menu->addSeparator();
+
+    QMenu* set_lines = menu->addMenu("Set Line");
+
+    QAction* desel_line_action = set_lines->addAction("Deselect All");
+    connect(desel_line_action, &QAction::triggered, this, &DataSourcesWidget::deselectAllLines);
+
+    for (unsigned int cnt=0; cnt < 4; ++cnt)
+    {
+        QAction* desel_line_action = set_lines->addAction(("Select " + Utils::String::lineStrFrom(cnt)).c_str());
+        desel_line_action->setProperty("line_id", cnt);
+        connect(desel_line_action, &QAction::triggered, this, &DataSourcesWidget::selectSpecificLines);
+    }
+
+    menu->addSeparator();
+
+    QAction* show_cnt_action = menu->addAction("Toggle Show Counts");
+    connect(show_cnt_action, &QAction::triggered, this, &DataSourcesWidget::toogleShowCounts);
+}
+
+/**
+ */
 void DataSourcesWidget::createUI()
 {
     QFont font_bold;
@@ -502,61 +593,6 @@ void DataSourcesWidget::createUI()
 
     // update
     updateContent(true);
-}
-/**
- */
-void DataSourcesWidget::addMenuEntries(QMenu* menu)
-{
-    QAction* sel_dstyp_action = menu->addAction("Select All DSTypes");
-    connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesWidget::selectAllDSTypes);
-
-    QAction* desel_dstyp_action = menu->addAction("Deselect All DSTypes");
-    connect(desel_dstyp_action, &QAction::triggered, this, &DataSourcesWidget::deselectAllDSTypes);
-
-    menu->addSeparator();
-
-    QMenu* select_ds = menu->addMenu("Select Data Sources");
-
-    QAction* sel_ds_action = select_ds->addAction("All");
-    connect(sel_ds_action, &QAction::triggered, this, &DataSourcesWidget::selectAllDataSources);
-
-    for (const auto& ds_type_it : ds_man_.data_source_types_)
-    {
-        QAction* action = select_ds->addAction(("From "+ds_type_it).c_str());
-        action->setProperty("ds_type", ds_type_it.c_str());
-        connect(action, &QAction::triggered, this, &DataSourcesWidget::selectDSTypeSpecificDataSources);
-    }
-
-    QMenu* deselect_ds = menu->addMenu("Deselect Data Sources");
-
-    QAction* desel_ds_action = deselect_ds->addAction("All");
-    connect(desel_ds_action, &QAction::triggered, this, &DataSourcesWidget::deselectAllDataSources);
-
-    for (const auto& ds_type_it : ds_man_.data_source_types_)
-    {
-        QAction* action = deselect_ds->addAction(("From "+ds_type_it).c_str());
-        action->setProperty("ds_type", ds_type_it.c_str());
-        connect(action, &QAction::triggered, this, &DataSourcesWidget::deselectDSTypeSpecificDataSources);
-    }
-
-    menu->addSeparator();
-
-    QMenu* set_lines = menu->addMenu("Set Line");
-
-    QAction* desel_line_action = set_lines->addAction("Deselect All");
-    connect(desel_line_action, &QAction::triggered, this, &DataSourcesWidget::deselectAllLines);
-
-    for (unsigned int cnt=0; cnt < 4; ++cnt)
-    {
-        QAction* desel_line_action = set_lines->addAction(("Select " + Utils::String::lineStrFrom(cnt)).c_str());
-        desel_line_action->setProperty("line_id", cnt);
-        connect(desel_line_action, &QAction::triggered, this, &DataSourcesWidget::selectSpecificLines);
-    }
-
-    menu->addSeparator();
-
-    QAction* show_cnt_action = menu->addAction("Toggle Show Counts");
-    connect(show_cnt_action, &QAction::triggered, this, &DataSourcesWidget::toogleShowCounts);
 }
 
 /**

@@ -42,9 +42,9 @@ using namespace Utils;
 FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager, 
                                          QWidget* parent,
                                          Qt::WindowFlags f)
-    : QWidget(parent),
-      filter_manager_(filter_manager),
-      filter_generator_widget_(nullptr)
+:   ToolBoxWidget(parent)
+,   filter_manager_         (filter_manager)
+,   filter_generator_widget_(nullptr)
 {
     QFont font_bold;
     font_bold.setBold(true);
@@ -107,7 +107,42 @@ FilterManagerWidget::~FilterManagerWidget()
 
 /**
  */
-void FilterManagerWidget::addMenuEntries(QMenu* menu)
+QIcon FilterManagerWidget::toolIcon() const 
+{
+    return QIcon(Utils::Files::getIconFilepath("filter.png").c_str());
+}
+
+/**
+ */
+std::string FilterManagerWidget::toolName() const 
+{
+    return "Filters";
+}
+
+/**
+ */
+std::string FilterManagerWidget::toolInfo() const 
+{
+    return "Filters";
+}
+
+/**
+ */
+std::vector<std::string> FilterManagerWidget::toolLabels() const 
+{
+    return { "Filters" };
+}
+
+/**
+ */
+toolbox::ScreenRatio FilterManagerWidget::defaultScreenRatio() const 
+{
+    return ToolBoxWidget::defaultScreenRatio();
+}
+
+/**
+ */
+void FilterManagerWidget::addToConfigMenu(QMenu* menu) const 
 {
     QAction* new_filter_action = menu->addAction("Add New Filter");
     connect(new_filter_action, &QAction::triggered, this, &FilterManagerWidget::addFilter);

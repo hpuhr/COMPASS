@@ -15,10 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWPOINTSWIDGET_H
-#define VIEWPOINTSWIDGET_H
+#pragma once
 
-#include <QWidget>
+#include "toolboxwidget.h"
 
 #include "json.hpp"
 
@@ -31,11 +30,13 @@ class QTableView;
 class QPushButton;
 class QSortFilterProxyModel;
 
-class ViewPointsWidget : public QWidget
+/**
+ */
+class ViewPointsWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
-  public slots:
+public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
 
@@ -64,6 +65,14 @@ class ViewPointsWidget : public QWidget
 public:
     ViewPointsWidget(ViewManager& view_manager);
     virtual ~ViewPointsWidget();
+
+    //ToolBoxWidget
+    QIcon toolIcon() const override final;
+    std::string toolName() const override final;
+    std::string toolInfo() const override final;
+    std::vector<std::string> toolLabels() const override final;
+    toolbox::ScreenRatio defaultScreenRatio() const override final;
+    void addToConfigMenu(QMenu* menu) const override final;
 
     void loadViewPoints();
     void clearViewPoints();
@@ -137,5 +146,3 @@ private:
     bool load_in_progress_ {false};
     bool restore_focus_ {false};
 };
-
-#endif // VIEWPOINTSWIDGET_H

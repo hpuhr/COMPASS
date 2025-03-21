@@ -1,7 +1,8 @@
-#ifndef DBCONTENT_TARGETLISTWIDGET_H
-#define DBCONTENT_TARGETLISTWIDGET_H
 
-#include <QWidget>
+#pragma once
+
+#include "toolboxwidget.h"
+
 #include <QItemSelection>
 
 class DBContentManager;
@@ -14,7 +15,9 @@ namespace dbContent {
 
 class TargetModel;
 
-class TargetListWidget : public QWidget
+/**
+ */
+class TargetListWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
@@ -35,6 +38,14 @@ public:
     TargetListWidget(TargetModel& model, DBContentManager& dbcont_manager);
     virtual ~TargetListWidget() {};
 
+    //ToolBoxWidget
+    QIcon toolIcon() const override final;
+    std::string toolName() const override final;
+    std::string toolInfo() const override final;
+    std::vector<std::string> toolLabels() const override final;
+    toolbox::ScreenRatio defaultScreenRatio() const override final;
+    void addToConfigMenu(QMenu* menu) const override final;
+
     void resizeColumnsToContents();
 
 protected:
@@ -48,5 +59,3 @@ protected:
 };
 
 };
-
-#endif // DBCONTENT_TARGETLISTWIDGET_H

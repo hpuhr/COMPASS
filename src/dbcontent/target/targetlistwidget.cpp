@@ -1,11 +1,15 @@
+
 #include "targetlistwidget.h"
 #include "targetmodel.h"
-#include "dbcontentmanager.h"
 #include "targetfilterdialog.h"
-#include "logger.h"
+
 #include "compass.h"
 #include "taskmanager.h"
 #include "evaluationmanager.h"
+#include "dbcontentmanager.h"
+
+#include "files.h"
+#include "logger.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -18,11 +22,11 @@
 
 using namespace std;
 
-namespace dbContent {
-
+namespace dbContent 
+{
 
 TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_manager)
-    : QWidget(), model_(model), dbcont_manager_(dbcont_manager)
+    : ToolBoxWidget(), model_(model), dbcont_manager_(dbcont_manager)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -71,6 +75,47 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     main_layout->addWidget(table_view_);
 
     setLayout(main_layout);
+}
+
+/**
+ */
+QIcon TargetListWidget::toolIcon() const
+{
+    return QIcon(Utils::Files::getIconFilepath("globe.png").c_str());
+}
+
+/**
+ */
+std::string TargetListWidget::toolName() const 
+{
+    return "Targets";
+}
+
+/**
+ */
+std::string TargetListWidget::toolInfo() const 
+{
+    return "Targets";
+}
+
+/**
+ */
+std::vector<std::string> TargetListWidget::toolLabels() const 
+{
+    return { "Targets" };
+}
+
+/**
+ */
+toolbox::ScreenRatio TargetListWidget::defaultScreenRatio() const 
+{
+    return ToolBoxWidget::defaultScreenRatio();
+}
+
+/**
+ */
+void TargetListWidget::addToConfigMenu(QMenu* menu) const 
+{
 }
 
 void TargetListWidget::resizeColumnsToContents()
