@@ -29,12 +29,6 @@ EvaluationDialog::EvaluationDialog(EvaluationManager& eval_man, EvaluationManage
 
     setMinimumSize(QSize(1000, 800));
 
-    // QFont font_bold;
-    // font_bold.setBold(true);
-
-    // QFont font_big;
-    // font_big.setPointSize(16);
-
     QVBoxLayout* main_layout = new QVBoxLayout();
 
     QTabWidget* tab_widget = new QTabWidget();
@@ -48,7 +42,7 @@ EvaluationDialog::EvaluationDialog(EvaluationManager& eval_man, EvaluationManage
     std_tab_widget_.reset(new EvaluationStandardTabWidget(eval_man_, eval_settings_));
     tab_widget->addTab(std_tab_widget_.get(), "Standard");
 
-    tab_widget->addTab(&eval_man_.resultsGenerator().widget(), "Results Config");
+    tab_widget->addTab(eval_man_.resultsGenerator().widget(), "Results Config");
 
     main_layout->addWidget(tab_widget);
 
@@ -61,8 +55,6 @@ EvaluationDialog::EvaluationDialog(EvaluationManager& eval_man, EvaluationManage
     not_eval_comment_label_->setPalette(palette);
 
     main_layout->addWidget(not_eval_comment_label_);
-
-    //main_layout->addWidget(reconstructor_widget_stack_);
 
     QHBoxLayout* button_layout = new QHBoxLayout();
 
@@ -80,9 +72,12 @@ EvaluationDialog::EvaluationDialog(EvaluationManager& eval_man, EvaluationManage
 
     setLayout(main_layout);
 
-    updateFromSettings();
-    updateButtons();
+    //updateFromSettings();
 
+    updateDataSources();
+    updateSectors();
+    updateButtons();
+    updateFilterWidget();
 }
 
 EvaluationDialog::~EvaluationDialog()
@@ -108,20 +103,6 @@ void EvaluationDialog::updateFilterWidget()
 {
     assert (filter_widget_);
     filter_widget_->update();
-}
-
-void EvaluationDialog::updateResultsConfig()
-{
-    eval_man_.resultsGenerator().widget().updateFromSettings();
-}
-
-void EvaluationDialog::updateFromSettings()
-{
-    updateDataSources();
-    updateSectors();
-    updateButtons();
-    updateFilterWidget();
-    updateResultsConfig();
 }
 
 void EvaluationDialog::updateButtons()

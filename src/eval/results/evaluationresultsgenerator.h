@@ -63,7 +63,7 @@ public:
 
     void clear();
 
-    EvaluationResultsGeneratorWidget& widget();
+    EvaluationResultsGeneratorWidget* widget(); // has to take ownership
 
 protected:
     void addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
@@ -71,8 +71,6 @@ protected:
 
     EvaluationManager& eval_man_;
     EvaluationManagerSettings& eval_settings_;
-
-    std::unique_ptr<EvaluationResultsGeneratorWidget> widget_;
 
     EvaluationResultsReport::TreeModel results_model_;
 

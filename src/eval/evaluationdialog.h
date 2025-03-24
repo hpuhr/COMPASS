@@ -22,8 +22,6 @@ public:
     void updateButtons();
 
     void updateFilterWidget();
-    void updateResultsConfig();
-    void updateFromSettings();
 
 protected:
     EvaluationManager& eval_man_;
