@@ -100,6 +100,8 @@ public slots:
 
     void toggleDarkModeSlot();
 
+    void toggleFullscreenSlot();
+
 public:
     MainWindow();
     virtual ~MainWindow();
@@ -154,8 +156,9 @@ protected:
     // configuration menu
     QMenu* config_menu_ {nullptr};
     QAction* license_action_ {nullptr};
-    QAction* auto_refresh_views_action_ {nullptr};
     QAction* dark_mode_action_ {nullptr};
+    QAction* fullscreen_action_ {nullptr};
+    QAction* auto_refresh_views_action_ {nullptr};
 
     // process menu
     QMenu* process_menu_ {nullptr};
@@ -177,6 +180,9 @@ protected:
     QTimer* auto_resume_timer_ {nullptr};
 
     ToolBox* tool_box_ = nullptr;
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 private:
     void showCommandShell();

@@ -18,7 +18,6 @@
 #include "mainwindow.h"
 #include "mainwindow_commands.h"
 #include "compass.h"
-#include "config.h"
 #include "configurationmanager.h"
 #include "datasourcemanager.h"
 #include "datasourcesconfigurationdialog.h"
@@ -45,7 +44,6 @@
 #include "compass.h"
 #include "fftmanager.h"
 #include "fftsconfigurationdialog.h"
-#include "view.h"
 #include "ui_test_common.h"
 #include "ui_test_cmd.h"
 #include "rtcommand_shell.h"
@@ -113,6 +111,34 @@ MainWindow::MainWindow()
 
     QSettings settings("COMPASS", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+
+    if (settings.value("MainWindow/isMaximized", false).toBool())
+        showMaximized();
+
+    if (settings.value("MainWindow/isFullScreen", false).toBool())
+    {
+        // Enter fullscreen with no decorations
+        setWindowFlag(Qt::FramelessWindowHint, true);
+        showMaximized();
+        showFullScreen(); // Re-show to apply
+    }
+    else
+    {
+        // No fullscreen: restore window flags and normal size
+        setWindowFlag(Qt::FramelessWindowHint, false); // Remove frameless
+        setWindowFlag(Qt::Window, true);               // Ensure normal window flags
+
+        if (settings.value("MainWindow/isMaximized", false).toBool())
+        {
+            loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
+            showMaximized();
+        }
+        else
+        {
+            restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+            showNormal();
+        }
+    }
 
     //create ui
     createUI();
@@ -359,15 +385,6 @@ void MainWindow::createMenus ()
     connect(import_pcap_file_action, &QAction::triggered, this, &MainWindow::importAsterixFromPCAPSlot);
     import_menu_->addAction(import_pcap_file_action);
 
-    // if (!COMPASS::instance().isAppImage())
-    // {
-    //     QAction* import_ast_json_action = new QAction("ASTERIX From JSON Recording");
-    //     //import_ast_json_action->setShortcut(tr("Ctrl+P"));
-    //     import_ast_json_action->setToolTip("Import ASTERIX data from JSON recording file");
-    //     connect(import_ast_json_action, &QAction::triggered, this, &MainWindow::importAsterixFromJSONSlot);
-    //     import_menu_->addAction(import_ast_json_action);
-    // }
-
     QAction* import_ast_net_action = new QAction("ASTERIX From Network");
     import_ast_net_action->setToolTip("Import ASTERIX From Network");
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
@@ -384,12 +401,6 @@ void MainWindow::createMenus ()
     import_gps_nmea_action->setToolTip("Import GPS Trail NMEA File");
     connect(import_gps_nmea_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
     import_menu_->addAction(import_gps_nmea_action);
-
-    // deactivated, just for porto?
-    //    QAction* import_gps_csv_action = new QAction("&GPS Trail CSV");
-    //    import_gps_csv_action->setToolTip("Import GPS Trail CSV File");
-    //    connect(import_gps_csv_action, &QAction::triggered, this, &MainWindow::importGPSCSVSlot);
-    //    import_menu_->addAction(import_gps_csv_action);
 
     if (!COMPASS::instance().hideViewpoints())
     {
@@ -446,6 +457,11 @@ void MainWindow::createMenus ()
     dark_mode_action_->setCheckable(true);
     dark_mode_action_->setChecked(COMPASS::instance().darkMode());
     connect(dark_mode_action_, &QAction::toggled, this, &MainWindow::toggleDarkModeSlot);
+
+    fullscreen_action_ = config_menu_->addAction("Fullscreen [F11]");
+    fullscreen_action_->setCheckable(true);
+    fullscreen_action_->setChecked(isFullScreen());
+    connect(fullscreen_action_, &QAction::toggled, this, &MainWindow::toggleFullscreenSlot);
 
     ViewManager& view_manager = COMPASS::instance().viewManager();
 
@@ -1238,6 +1254,42 @@ void MainWindow::toggleDarkModeSlot()
     m_warning.exec();
 }
 
+void MainWindow::toggleFullscreenSlot()
+{
+    loginf << "MainWindow: toggleFullscreenSlot: isFullScreen " << isFullScreen();
+
+    if (isFullScreen())
+    {
+        // Exit fullscreen: restore window flags and normal size
+        setWindowFlag(Qt::FramelessWindowHint, false); // Remove frameless
+        setWindowFlag(Qt::Window, true);               // Ensure normal window flags
+
+        QSettings settings("COMPASS", "Client");
+
+        if (settings.value("MainWindow/isMaximized", false).toBool())
+        {
+            loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
+            showMaximized();
+        }
+        else
+        {
+            restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+            showNormal();
+        }
+    }
+    else
+    {
+        QSettings settings("COMPASS", "Client");
+        settings.setValue("MainWindow/geometry", saveGeometry());
+        settings.setValue("MainWindow/isMaximized", isMaximized());
+
+        // Enter fullscreen with no decorations
+        setWindowFlag(Qt::FramelessWindowHint, true);
+        showMaximized();
+        showFullScreen(); // Re-show to apply
+    }
+}
+
 void MainWindow::loadButtonSlot()
 {
     loginf << "MainWindow: loadButtonSlot";
@@ -1319,6 +1371,8 @@ void MainWindow::shutdown()
 {
     QSettings settings("COMPASS", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
+    settings.setValue("MainWindow/isMaximized", isMaximized());
+    settings.setValue("MainWindow/isFullScreen", isFullScreen());
 
     COMPASS::instance().viewManager().unsetCurrentViewPoint(); // needed to remove temporary stuff
 
@@ -1364,6 +1418,15 @@ void MainWindow::createDebugMenu()
     }
 
     debug_menu->menuAction()->setVisible(!COMPASS::instance().isAppImage());
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_F11) {
+        toggleFullscreenSlot();
+    } else {
+        QMainWindow::keyPressEvent(event); // Let base class handle other keys
+    }
 }
 
 void MainWindow::showCommandShell()
