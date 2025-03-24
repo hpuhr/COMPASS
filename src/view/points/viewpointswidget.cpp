@@ -23,7 +23,6 @@
 #include "compass.h"
 #include "mainwindow.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "viewpointstoolwidget.h"
 #include "viewpointsreportgenerator.h"
 #include "viewpointsreportgeneratordialog.h"
 #include "files.h"
@@ -38,14 +37,13 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QShortcut>
+#include <QToolBar>
+#include <QMenu>
 
 ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     : ToolBoxWidget(), view_manager_(view_manager)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
-
-    tool_widget_ = new ViewPointsToolWidget(this);
-    main_layout->addWidget(tool_widget_);
 
     table_model_ = new ViewPointsTableModel(view_manager_);
     connect (table_model_, &ViewPointsTableModel::typesChangedSignal,
@@ -87,7 +85,6 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     // HACKY adjust row size but works
     connect(table_view_->horizontalHeader(), SIGNAL(sectionResized(int, int, int)),
             table_view_, SLOT(resizeRowsToContents()));
-
 
     //connect(table_view_, &QTableView::clicked, this, &ViewPointsWidget::onTableClickedSlot);
 
@@ -190,8 +187,113 @@ toolbox::ScreenRatio ViewPointsWidget::defaultScreenRatio() const
 
 /**
  */
-void ViewPointsWidget::addToConfigMenu(QMenu* menu) const 
+void ViewPointsWidget::addToConfigMenu(QMenu* menu) 
 {
+    //edit columns
+    {
+        auto submenu = menu->addMenu("Edit Columns");
+
+        QStringList vp_columns = columns();
+        QStringList filtered_columns = filteredColumns();
+
+        for (auto& col : vp_columns)
+        {
+            QAction* action = submenu->addAction(col);
+            action->setCheckable(true);
+            action->setChecked(!filtered_columns.contains(col));
+
+            connect (action, &QAction::triggered, [ = ] () { this->filterColumn(col); });
+        }
+
+        submenu->addSeparator();
+
+        QAction* main_action = submenu->addAction("Show Only Main");
+        connect (main_action, &QAction::triggered, this, &ViewPointsWidget::showOnlyMainColumns);
+
+        QAction* all_action = submenu->addAction("Show All");
+        connect (all_action, &QAction::triggered, this, &ViewPointsWidget::showAllColumns);
+
+        QAction* none_action = submenu->addAction("Show None");
+        connect (none_action, &QAction::triggered, this, &ViewPointsWidget::showNoColumns);
+    }
+
+    //filter by type
+    {
+        auto submenu = menu->addMenu("Filter By Type");
+
+        QStringList vp_types       = types();
+        QStringList filtered_types = filteredTypes();
+
+        for (auto& type : vp_types)
+        {
+            QAction* action = submenu->addAction(type);
+            action->setCheckable(true);
+            action->setChecked(!filtered_types.contains(type));
+            connect (action, &QAction::triggered, [ = ] () { this->filterType(type); });
+        }
+
+        submenu->addSeparator();
+
+        auto all_action = submenu->addAction("Show All");
+        connect (all_action, &QAction::triggered, this, &ViewPointsWidget::showAllTypes);
+
+        auto none_action = submenu->addAction("Show None");
+        connect (none_action, &QAction::triggered, this, &ViewPointsWidget::showNoTypes);
+    }
+
+    //filter by status
+    {
+        auto submenu = menu->addMenu("Filter By Status");
+
+        QStringList vp_statuses = statuses();
+        QStringList filtered_statuses = filteredStatuses();
+
+        for (auto& status : vp_statuses)
+        {
+            QAction* action = submenu->addAction(status);
+            action->setCheckable(true);
+            action->setChecked(!filtered_statuses.contains(status));
+            connect (action, &QAction::triggered, [ = ] () { this->filterStatus(status); });
+
+        }
+
+        submenu->addSeparator();
+
+        QAction* all_action = submenu->addAction("Show All");
+        connect (all_action, &QAction::triggered, this, &ViewPointsWidget::showAllStatuses);
+
+        QAction* none_action = submenu->addAction("Show None");
+        connect (none_action, &QAction::triggered, this, &ViewPointsWidget::showNoStatuses);
+    }
+}
+
+/**
+ */
+void ViewPointsWidget::addToToolBar(QToolBar* tool_bar)
+{
+    auto action_prev = tool_bar->addAction("Select Previous [Up]");
+    action_prev->setIcon(QIcon(Utils::Files::getIconFilepath("up.png").c_str()));
+    connect(action_prev, &QAction::triggered, this, &ViewPointsWidget::selectPreviousSlot);
+
+    auto action_open = tool_bar->addAction("Set Selected Status Open [O]");
+    action_open->setIcon(QIcon(Utils::Files::getIconFilepath("not_recommended.png").c_str()));
+    connect(action_open, &QAction::triggered, this, &ViewPointsWidget::setSelectedOpenSlot);
+
+    auto action_closed = tool_bar->addAction("Set Selected Status Closed [C]");
+    action_closed->setIcon(QIcon(Utils::Files::getIconFilepath("not_todo.png").c_str()));
+    connect(action_closed, &QAction::triggered, this, &ViewPointsWidget::setSelectedClosedSlot);
+
+    auto action_todo = tool_bar->addAction("Set Selected Status ToDo [T]");
+    action_todo->setIcon(QIcon(Utils::Files::getIconFilepath("todo.png").c_str()));
+    connect(action_todo, &QAction::triggered, this, &ViewPointsWidget::setSelectedTodoSlot);
+
+    auto action_edit = tool_bar->addAction("Edit Comment [E]");
+    action_edit->setIcon(QIcon(Utils::Files::getIconFilepath("comment.png").c_str()));
+    connect(action_edit, &QAction::triggered, this, &ViewPointsWidget::editCommentSlot);
+
+    auto action_next = tool_bar->addAction("Select Next [Down]");
+    action_next->setIcon(QIcon(Utils::Files::getIconFilepath("down.png").c_str()));
+    connect(action_next, &QAction::triggered, this, &ViewPointsWidget::selectNextSlot);
 }
 
 void ViewPointsWidget::loadViewPoints()
@@ -551,8 +653,7 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
 void ViewPointsWidget::loadingStartedSlot()
 {
     load_in_progress_ = true;
-    assert (tool_widget_);
-    tool_widget_->setDisabled(true);
+
     assert (table_view_);
     table_view_->setDisabled(true);
 }
@@ -560,8 +661,7 @@ void ViewPointsWidget::loadingStartedSlot()
 void ViewPointsWidget::allLoadingDoneSlot()
 {
     load_in_progress_ = false;
-    assert (tool_widget_);
-    tool_widget_->setDisabled(false);
+
     assert (table_view_);
     table_view_->setDisabled(false);
 

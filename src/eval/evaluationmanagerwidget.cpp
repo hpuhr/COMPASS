@@ -129,7 +129,7 @@ toolbox::ScreenRatio EvaluationManagerWidget::defaultScreenRatio() const
 
 /**
  */
-void EvaluationManagerWidget::addToConfigMenu(QMenu* menu) const 
+void EvaluationManagerWidget::addToConfigMenu(QMenu* menu) 
 {
 }
 

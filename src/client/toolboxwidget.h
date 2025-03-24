@@ -27,6 +27,7 @@
 #include <boost/optional.hpp>
 
 class QMenu;
+class QToolBar;
 
 /**
  * Base class for widgets which are part of the toolbox.
@@ -55,8 +56,13 @@ public:
     /// returns the tool's default screen ratio
     virtual toolbox::ScreenRatio defaultScreenRatio() const { return ScreenRatioDefault; };
 
+    virtual bool checkable() const { return false; }
+
     /// adds the tool's config actions/menus to the given menu
-    virtual void addToConfigMenu(QMenu* menu) const {};
+    virtual void addToConfigMenu(QMenu* menu) {};
+
+    /// adds tool actions to the given toolbar
+    virtual void addToToolBar(QToolBar* tool_bar) {};
 
     static const toolbox::ScreenRatio ScreenRatioDefault;
     
@@ -76,8 +82,10 @@ public:
                          const std::string& info,
                          const std::vector<std::string>& labels,
                          const QIcon& icon,
+                         bool checkable,
                          toolbox::ScreenRatio screen_ratio_default = ToolBoxWidget::ScreenRatioDefault,
                          const std::function<void(QMenu*)>& addToConfigMenu_cb = std::function<void(QMenu*)>(),
+                         const std::function<void(QToolBar*)>& addToToolBar_cb = std::function<void(QToolBar*)>(),
                          QWidget* parent = nullptr);
     virtual ~WrappedToolBoxWidget();
 
@@ -86,13 +94,17 @@ public:
     std::string toolInfo() const override final;
     std::vector<std::string> toolLabels() const override final;
     toolbox::ScreenRatio defaultScreenRatio() const override final;
-    void addToConfigMenu(QMenu* menu) const override;
+    bool checkable() const override final;
+    void addToConfigMenu(QMenu* menu) override final;
+    void addToToolBar(QToolBar* tool_bar) override final;
 
 private:
-    std::string                 name_;
-    std::string                 info_;
-    std::vector<std::string>    labels_;
-    QIcon                       icon_;
-    toolbox::ScreenRatio        screen_ratio_default_;
-    std::function<void(QMenu*)> addToConfigMenu_cb_;
+    std::string                    name_;
+    std::string                    info_;
+    std::vector<std::string>       labels_;
+    QIcon                          icon_;
+    bool                           checkable_;
+    toolbox::ScreenRatio           screen_ratio_default_;
+    std::function<void(QMenu*)>    addToConfigMenu_cb_;
+    std::function<void(QToolBar*)> addToToolBar_cb_;
 };

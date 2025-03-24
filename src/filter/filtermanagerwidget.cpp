@@ -142,7 +142,7 @@ toolbox::ScreenRatio FilterManagerWidget::defaultScreenRatio() const
 
 /**
  */
-void FilterManagerWidget::addToConfigMenu(QMenu* menu) const 
+void FilterManagerWidget::addToConfigMenu(QMenu* menu) 
 {
     QAction* new_filter_action = menu->addAction("Add New Filter");
     connect(new_filter_action, &QAction::triggered, this, &FilterManagerWidget::addFilter);
@@ -204,16 +204,20 @@ void FilterManagerWidget::updateFilters()
 {
     QLayoutItem* child;
     while (!ds_filter_layout_->isEmpty() && (child = ds_filter_layout_->takeAt(0)))
+    {
         ds_filter_layout_->removeItem(child);
+    }
 
     auto& filters = filter_manager_.filters();
 
     for (auto& it : filters)
     {
-        logdbg << "FilterManagerWidget: updateFiltersSlot: filter " << it->getName();
+        logdbg << "FilterManagerWidget: updateFilters: filter " << it->getName();
 
         if (!it->getActive())
             it->widget()->collapse();
+
+        connect(it->widget(), &DBFilterWidget::filterContentChanged, this, &FilterManagerWidget::syncFilterLayouts, Qt::UniqueConnection);
 
         ds_filter_layout_->addWidget(it->widget());
     }

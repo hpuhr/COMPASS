@@ -69,7 +69,7 @@ DBFilterWidget::DBFilterWidget(DBFilter& filter)
     config_layout->addStretch();
 
     manage_button_ = new QPushButton();
-    manage_button_->setDisabled(true); // TODO_ASSERT
+    manage_button_->setVisible(false); // TODO_ASSERT
     manage_button_->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
     manage_button_->setFixedSize(UI_ICON_SIZE);
     manage_button_->setFlat(UI_ICON_BUTTON_FLAT);
@@ -96,6 +96,7 @@ DBFilterWidget::DBFilterWidget(DBFilter& filter)
 
 //    connect(this, SIGNAL(deleteFilterSignal(DBFilter*)), &COMPASS::instance().filterManager(),
 //            SLOT(deleteFilterSlot(DBFilter*)), Qt::QueuedConnection);
+
     createMenu();
 
     update();
@@ -283,7 +284,12 @@ int DBFilterWidget::columnWidth(int layout_column) const
     {
         auto litem = child_layout_->itemAtPosition(r, layout_column);
         if (litem && litem->widget() && litem->widget()->sizeHint().width() > max_width)
+        {
             max_width = litem->sizeHint().width();
+
+            //if (dynamic_cast<QLabel*>(litem->widget()))
+            //    loginf << "Scanned filter row '" << dynamic_cast<QLabel*>(litem->widget())->text().toStdString() << "'";
+        }
     }
 
     return max_width;

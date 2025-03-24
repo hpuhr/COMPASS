@@ -16,7 +16,6 @@
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
 #include <QMenu>
-#include <QToolBar>
 #include <QApplication>
 #include <QThread>
 
@@ -29,19 +28,6 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     : ToolBoxWidget(), model_(model), dbcont_manager_(dbcont_manager)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
-
-    // toolbar
-    toolbar_ = new QToolBar("Tools");
-
-    QWidget* spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    toolbar_->addWidget(spacer);
-
-    toolbar_->addAction("Change Usage");
-
-    connect(toolbar_, &QToolBar::actionTriggered, this, &TargetListWidget::actionTriggeredSlot);
-
-    main_layout->addWidget(toolbar_);
 
     // table
     proxy_model_ = new QSortFilterProxyModel();
@@ -114,8 +100,19 @@ toolbox::ScreenRatio TargetListWidget::defaultScreenRatio() const
 
 /**
  */
-void TargetListWidget::addToConfigMenu(QMenu* menu) const 
+void TargetListWidget::addToConfigMenu(QMenu* menu) 
 {
+    QAction* all_action = menu->addAction("Use All");
+    connect (all_action, &QAction::triggered, this, &TargetListWidget::useAllSlot);
+
+    QAction* none_action = menu->addAction("Use None");
+    connect (none_action, &QAction::triggered, this, &TargetListWidget::useNoneSlot);
+
+    QAction* clear_action = menu->addAction("Clear Comments");
+    connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearCommentsSlot);
+
+    QAction* filter_action = menu->addAction("Filter");
+    connect (filter_action, &QAction::triggered, this, &TargetListWidget::filterSlot);
 }
 
 void TargetListWidget::resizeColumnsToContents()
@@ -123,29 +120,6 @@ void TargetListWidget::resizeColumnsToContents()
     loginf << "TargetListWidget: resizeColumnsToContents";
     //table_model_->update();
     table_view_->resizeColumnsToContents();
-}
-
-void TargetListWidget::actionTriggeredSlot(QAction* action)
-{
-    QMenu menu;
-
-    QAction* all_action = new QAction("Use All", this);
-    connect (all_action, &QAction::triggered, this, &TargetListWidget::useAllSlot);
-    menu.addAction(all_action);
-
-    QAction* none_action = new QAction("Use None", this);
-    connect (none_action, &QAction::triggered, this, &TargetListWidget::useNoneSlot);
-    menu.addAction(none_action);
-
-    QAction* clear_action = new QAction("Clear Comments", this);
-    connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearCommentsSlot);
-    menu.addAction(clear_action);
-
-    QAction* filter_action = new QAction("Filter", this);
-    connect (filter_action, &QAction::triggered, this, &TargetListWidget::filterSlot);
-    menu.addAction(filter_action);
-
-    menu.exec(QCursor::pos());
 }
 
 void TargetListWidget::useAllSlot()

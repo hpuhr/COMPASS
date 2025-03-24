@@ -43,10 +43,11 @@ public:
     std::string toolInfo() const override final;
     std::vector<std::string> toolLabels() const override final;
     toolbox::ScreenRatio defaultScreenRatio() const override final;
-    void addToConfigMenu(QMenu* menu) const override final;
+    void addToConfigMenu(QMenu* menu) override final;
 
     QCheckBox* filtersCheckBox() const;
 
+    void updateFilters();
     void updateUseFilters();
 
     void addMenuEntries(QMenu* menu);
@@ -55,7 +56,6 @@ protected:
     void toggleUseFilters();
 
     void addFilter();
-    void updateFilters();
     void filterWidgetAction(bool result);
 
     void databaseOpened();

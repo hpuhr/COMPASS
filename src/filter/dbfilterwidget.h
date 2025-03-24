@@ -50,6 +50,7 @@ signals:
     void possibleFilterChange();
     void filterEdit(DBFilter* filter);
     void deleteFilterSignal(DBFilter* filter);
+    void filterContentChanged();
 
 public:
     DBFilterWidget(DBFilter& filter);

@@ -22,7 +22,6 @@
 #include "json.hpp"
 
 class ViewManager;
-class ViewPointsToolWidget;
 class ViewPointsTableModel;
 class ViewPoint;
 
@@ -72,7 +71,8 @@ public:
     std::string toolInfo() const override final;
     std::vector<std::string> toolLabels() const override final;
     toolbox::ScreenRatio defaultScreenRatio() const override final;
-    void addToConfigMenu(QMenu* menu) const override final;
+    void addToConfigMenu(QMenu* menu) override final;
+    void addToToolBar(QToolBar* tool_bar) override final;
 
     void loadViewPoints();
     void clearViewPoints();
@@ -122,8 +122,6 @@ public:
 
 private:
     ViewManager& view_manager_;
-
-    ViewPointsToolWidget* tool_widget_{nullptr};
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};

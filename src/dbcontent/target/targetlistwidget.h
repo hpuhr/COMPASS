@@ -7,7 +7,6 @@
 
 class DBContentManager;
 
-class QToolBar;
 class QTableView;
 class QSortFilterProxyModel;
 
@@ -22,7 +21,6 @@ class TargetListWidget : public ToolBoxWidget
     Q_OBJECT
 
 public slots:
-    void actionTriggeredSlot(QAction* action);
     void useAllSlot();
     void useNoneSlot();
     void clearCommentsSlot();
@@ -44,15 +42,13 @@ public:
     std::string toolInfo() const override final;
     std::vector<std::string> toolLabels() const override final;
     toolbox::ScreenRatio defaultScreenRatio() const override final;
-    void addToConfigMenu(QMenu* menu) const override final;
+    void addToConfigMenu(QMenu* menu) override final;
 
     void resizeColumnsToContents();
 
 protected:
     TargetModel& model_;
     DBContentManager& dbcont_manager_;
-
-    QToolBar* toolbar_ {nullptr};
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};

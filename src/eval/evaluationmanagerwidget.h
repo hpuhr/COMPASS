@@ -54,7 +54,7 @@ public:
     std::string toolInfo() const override final;
     std::vector<std::string> toolLabels() const override final;
     toolbox::ScreenRatio defaultScreenRatio() const override final;
-    void addToConfigMenu(QMenu* menu) const override final;
+    void addToConfigMenu(QMenu* menu) override final;
 
     void updateButtons();
 

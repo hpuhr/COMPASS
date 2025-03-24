@@ -475,7 +475,7 @@ toolbox::ScreenRatio DataSourcesWidget::defaultScreenRatio() const
 
 /**
  */
-void DataSourcesWidget::addToConfigMenu(QMenu* menu) const 
+void DataSourcesWidget::addToConfigMenu(QMenu* menu) 
 {
     QAction* sel_dstyp_action = menu->addAction("Select All DSTypes");
     connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesWidget::selectAllDSTypes);
