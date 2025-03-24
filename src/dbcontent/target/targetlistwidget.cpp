@@ -115,6 +115,16 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
     connect (filter_action, &QAction::triggered, this, &TargetListWidget::filterSlot);
 }
 
+void TargetListWidget::loadingStarted()
+{
+    table_view_->setEnabled(false);
+}
+
+void TargetListWidget::loadingDone()
+{
+    table_view_->setEnabled(true);
+}
+
 void TargetListWidget::resizeColumnsToContents()
 {
     loginf << "TargetListWidget: resizeColumnsToContents";

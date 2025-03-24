@@ -20,6 +20,7 @@
 
 #include "stringconv.h"
 #include "files.h"
+#include "logger.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -357,4 +358,28 @@ void ToolBox::screenRatioChanged(toolbox::ScreenRatio screen_ratio)
     tools_.at(active_tool_idx_).widget->setScreenRatio(screen_ratio);
 
     emit toolChanged();
+}
+
+/**
+ */
+void ToolBox::loadingStarted()
+{
+    tool_bar_->setEnabled(false);
+    config_button_->setEnabled(false);
+    right_widget_->setEnabled(false);
+
+    for (auto& t : tools_)
+        t.widget->loadingStarted();
+}
+
+/**
+ */
+void ToolBox::loadingDone()
+{
+    tool_bar_->setEnabled(true);
+    config_button_->setEnabled(true);
+    right_widget_->setEnabled(true);
+
+    for (auto& t : tools_)
+        t.widget->loadingDone();
 }

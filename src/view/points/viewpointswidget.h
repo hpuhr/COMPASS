@@ -55,9 +55,6 @@ public slots:
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     //void onTableClickedSlot(const QModelIndex& current);
 
-    void loadingStartedSlot();
-    void allLoadingDoneSlot();
-
     void typesChangedSlot(QStringList types);
     void statusesChangedSlot(QStringList statuses);
 
@@ -73,6 +70,8 @@ public:
     toolbox::ScreenRatio defaultScreenRatio() const override final;
     void addToConfigMenu(QMenu* menu) override final;
     void addToToolBar(QToolBar* tool_bar) override final;
+    void loadingStarted() override final;
+    void loadingDone() override final;
 
     void loadViewPoints();
     void clearViewPoints();

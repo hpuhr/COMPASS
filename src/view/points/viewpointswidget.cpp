@@ -118,9 +118,6 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
-    connect (&dbo_man, &DBContentManager::loadingStartedSignal, this, &ViewPointsWidget::loadingStartedSlot);
-    connect (&dbo_man, &DBContentManager::loadingDoneSignal, this, &ViewPointsWidget::allLoadingDoneSlot);
-
     // shortcuts
     {
         QShortcut* n_shortcut = new QShortcut(QKeySequence(tr("Down", "Next")), this);
@@ -294,6 +291,28 @@ void ViewPointsWidget::addToToolBar(QToolBar* tool_bar)
     auto action_next = tool_bar->addAction("Select Next [Down]");
     action_next->setIcon(QIcon(Utils::Files::getIconFilepath("down.png").c_str()));
     connect(action_next, &QAction::triggered, this, &ViewPointsWidget::selectNextSlot);
+}
+
+void ViewPointsWidget::loadingStarted()
+{
+    load_in_progress_ = true;
+
+    assert (table_view_);
+    table_view_->setDisabled(true);
+}
+
+void ViewPointsWidget::loadingDone()
+{
+    load_in_progress_ = false;
+
+    assert (table_view_);
+    table_view_->setDisabled(false);
+
+    if (restore_focus_)
+    {
+        setFocus();
+        restore_focus_ = false;
+    }
 }
 
 void ViewPointsWidget::loadViewPoints()
@@ -648,28 +667,6 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
     restore_focus_ = true;
 
     view_manager_.setCurrentViewPoint(&table_model_->viewPoint(id));
-}
-
-void ViewPointsWidget::loadingStartedSlot()
-{
-    load_in_progress_ = true;
-
-    assert (table_view_);
-    table_view_->setDisabled(true);
-}
-
-void ViewPointsWidget::allLoadingDoneSlot()
-{
-    load_in_progress_ = false;
-
-    assert (table_view_);
-    table_view_->setDisabled(false);
-
-    if (restore_focus_)
-    {
-        setFocus();
-        restore_focus_ = false;
-    }
 }
 
 void ViewPointsWidget::typesChangedSlot(QStringList types)

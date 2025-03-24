@@ -64,6 +64,10 @@ public:
     /// adds tool actions to the given toolbar
     virtual void addToToolBar(QToolBar* tool_bar) {};
 
+    /// react on data loading
+    virtual void loadingStarted() {}
+    virtual void loadingDone() {}
+
     static const toolbox::ScreenRatio ScreenRatioDefault;
     
 private:

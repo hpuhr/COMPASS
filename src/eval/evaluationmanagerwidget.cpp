@@ -133,6 +133,26 @@ void EvaluationManagerWidget::addToConfigMenu(QMenu* menu)
 {
 }
 
+/**
+ */
+void EvaluationManagerWidget::addToToolBar(QToolBar* tool_bar)
+{
+}
+
+/**
+ */
+void EvaluationManagerWidget::loadingStarted()
+{
+    tab_widget_->setEnabled(false);
+}
+
+/**
+ */
+void EvaluationManagerWidget::loadingDone()
+{
+    tab_widget_->setEnabled(true);
+}
+
 void EvaluationManagerWidget::updateButtons()
 {
     gen_report_button_->setEnabled(eval_man_.canGenerateReport());

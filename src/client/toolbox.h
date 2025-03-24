@@ -54,6 +54,9 @@ public:
 
     boost::optional<toolbox::ScreenRatio> currentScreenRatio() const;
 
+    void loadingStarted();
+    void loadingDone();
+
     static const int ToolIconSize;
     static const int ToolNameFontSize;
     static const int ToolLabelFontSize;

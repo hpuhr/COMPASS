@@ -64,9 +64,9 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager,
 
     layout->addLayout(top_layout);
 
-    QScrollArea* scroll_area = new QScrollArea;
-    scroll_area->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
-    scroll_area->setWidgetResizable(true);
+    scroll_area_ = new QScrollArea;
+    scroll_area_->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    scroll_area_->setWidgetResizable(true);
 
     QWidget* scroll_widget = new QWidget;
 
@@ -83,9 +83,9 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager,
 
     scroll_widget->setLayout(scroll_layout);
 
-    scroll_area->setWidget(scroll_widget);
+    scroll_area_->setWidget(scroll_widget);
 
-    layout->addWidget(scroll_area);
+    layout->addWidget(scroll_area_);
 
     setLayout(layout);
 
@@ -157,6 +157,26 @@ void FilterManagerWidget::addToConfigMenu(QMenu* menu)
 
     auto collapse_unused_action = menu->addAction("Collapse Unused");
     connect(collapse_unused_action, &QAction::triggered, this, &FilterManagerWidget::collapseUnused);
+}
+
+/**
+ */
+void FilterManagerWidget::addToToolBar(QToolBar* tool_bar)
+{
+}
+
+/**
+ */
+void FilterManagerWidget::loadingStarted()
+{
+    scroll_area_->setEnabled(false);
+}
+
+/**
+ */
+void FilterManagerWidget::loadingDone()
+{
+    scroll_area_->setEnabled(true);
 }
 
 /**

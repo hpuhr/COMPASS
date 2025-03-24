@@ -531,6 +531,26 @@ void DataSourcesWidget::addToConfigMenu(QMenu* menu)
 
 /**
  */
+void DataSourcesWidget::addToToolBar(QToolBar* tool_bar)
+{
+}
+
+/**
+ */
+void DataSourcesWidget::loadingStarted()
+{
+    tree_widget_->setEnabled(false);
+}
+
+/**
+ */
+void DataSourcesWidget::loadingDone()
+{
+    tree_widget_->setEnabled(true);
+}
+
+/**
+ */
 void DataSourcesWidget::createUI()
 {
     QFont font_bold;
