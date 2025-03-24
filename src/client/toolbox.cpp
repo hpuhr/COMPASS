@@ -20,6 +20,7 @@
 
 #include "stringconv.h"
 #include "files.h"
+#include "logger.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -29,6 +30,7 @@
 #include <QLabel>
 #include <QFontMetrics>
 #include <QMenu>
+#include <QToolBar>
 
 const int ToolBox::ToolIconSize      = 50;
 const int ToolBox::ToolNameFontSize  = 12;
@@ -87,11 +89,17 @@ void ToolBox::createUI()
     //name_font.setPointSize(ToolNameFontSize);
     tool_name_label_->setFont(name_font);
 
-    config_button_ = new QToolButton;
+    tool_bar_ = new QToolBar;
+
+    config_button_ = new QPushButton;
+    config_button_->setStyleSheet("QPushButton::menu-indicator { image: none; }");
     config_button_->setIcon(QIcon(Utils::Files::getIconFilepath("edit.png").c_str()));
-    config_button_->setPopupMode(QToolButton::ToolButtonPopupMode::InstantPopup);
+    config_button_->setFixedSize(UI_ICON_SIZE); 
+    config_button_->setFlat(UI_ICON_BUTTON_FLAT);
 
     top_layout->addWidget(tool_name_label_);
+    top_layout->addStretch(1);
+    top_layout->addWidget(tool_bar_);
     top_layout->addStretch(1);
     top_layout->addWidget(config_button_);
 
@@ -102,12 +110,13 @@ void ToolBox::createUI()
 
     main_layout->addWidget(right_widget_);
 
-    updateMenus();
+    updateMenu();
+    updateToolBar();
 }
 
 /**
  */
-void ToolBox::updateMenus()
+void ToolBox::updateMenu()
 {
     config_button_->setMenu(nullptr);
 
@@ -119,7 +128,8 @@ void ToolBox::updateMenus()
     // tool specific custom part
     tools_.at(active_tool_idx_).widget->addToConfigMenu(config_menu_.get());
 
-    config_menu_->addSeparator();
+    if (config_menu_->actions().size() > 0)
+        config_menu_->addSeparator();
 
     //screen ratio selection
     {
@@ -148,6 +158,24 @@ void ToolBox::updateMenus()
     }
 
     config_button_->setMenu(config_menu_.get());
+}
+
+/**
+ */
+void ToolBox::updateToolBar()
+{
+    tool_bar_->clear();
+
+    if (active_tool_idx_ < 0)
+        return;
+
+    // tool specific custom part
+    tools_.at(active_tool_idx_).widget->addToToolBar(tool_bar_);
+
+    //if (tool_bar_->actions().size() > 0)
+    //    tool_bar_->addSeparator();
+
+    //add general actions
 }
 
 /**
@@ -271,7 +299,8 @@ void ToolBox::toolActivated(int idx)
         }
     }
 
-    updateMenus();
+    updateMenu();
+    updateToolBar();
 
     emit toolChanged();
 }
@@ -329,4 +358,28 @@ void ToolBox::screenRatioChanged(toolbox::ScreenRatio screen_ratio)
     tools_.at(active_tool_idx_).widget->setScreenRatio(screen_ratio);
 
     emit toolChanged();
+}
+
+/**
+ */
+void ToolBox::loadingStarted()
+{
+    tool_bar_->setEnabled(false);
+    config_button_->setEnabled(false);
+    right_widget_->setEnabled(false);
+
+    for (auto& t : tools_)
+        t.widget->loadingStarted();
+}
+
+/**
+ */
+void ToolBox::loadingDone()
+{
+    tool_bar_->setEnabled(true);
+    config_button_->setEnabled(true);
+    right_widget_->setEnabled(true);
+
+    for (auto& t : tools_)
+        t.widget->loadingDone();
 }

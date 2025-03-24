@@ -28,10 +28,12 @@
 class ToolBoxWidget;
 
 class QToolButton;
+class QPushButton;
 class QVBoxLayout;
 class QStackedWidget;
 class QLabel;
 class QMenu;
+class QToolBar;
  
 /**
  */
@@ -52,6 +54,9 @@ public:
 
     boost::optional<toolbox::ScreenRatio> currentScreenRatio() const;
 
+    void loadingStarted();
+    void loadingDone();
+
     static const int ToolIconSize;
     static const int ToolNameFontSize;
     static const int ToolLabelFontSize;
@@ -69,17 +74,19 @@ private:
     };
 
     void createUI();
-    void updateMenus();
+    void updateMenu();
+    void updateToolBar();
     void toolActivated(int idx);
     void screenRatioChanged(toolbox::ScreenRatio screen_ratio);
 
     std::vector<Tool> tools_;
 
-    QVBoxLayout*    icon_layout_         = nullptr;
-    QStackedWidget* widget_stack_        = nullptr;
-    QWidget*        right_widget_        = nullptr;
-    QLabel*         tool_name_label_     = nullptr;
-    QToolButton*    config_button_       = nullptr;
+    QVBoxLayout*    icon_layout_     = nullptr;
+    QStackedWidget* widget_stack_    = nullptr;
+    QWidget*        right_widget_    = nullptr;
+    QLabel*         tool_name_label_ = nullptr;
+    QPushButton*    config_button_   = nullptr;
+    QToolBar*       tool_bar_        = nullptr;
 
     std::unique_ptr<QMenu> config_menu_;
 

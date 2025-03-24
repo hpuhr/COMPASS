@@ -39,16 +39,20 @@ WrappedToolBoxWidget::WrappedToolBoxWidget(QWidget* w,
                                            const std::string& info,
                                            const std::vector<std::string>& labels,
                                            const QIcon& icon,
+                                           bool checkable,
                                            toolbox::ScreenRatio screen_ratio_default,
                                            const std::function<void(QMenu*)>& addToConfigMenu_cb,
+                                           const std::function<void(QToolBar*)>& addToToolBar_cb,
                                            QWidget* parent)
 :   ToolBoxWidget        (parent              )
 ,   name_                (name                )
 ,   info_                (info                )
 ,   labels_              (labels              )
 ,   icon_                (icon                )
+,   checkable_           (checkable           )
 ,   screen_ratio_default_(screen_ratio_default)
 ,   addToConfigMenu_cb_  (addToConfigMenu_cb  )
+,   addToToolBar_cb_     (addToToolBar_cb     )
 {
     auto layout = new QHBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
@@ -99,8 +103,23 @@ toolbox::ScreenRatio WrappedToolBoxWidget::defaultScreenRatio() const
 
 /**
 */
-void WrappedToolBoxWidget::addToConfigMenu(QMenu* menu) const
+bool WrappedToolBoxWidget::checkable() const
+{
+    return checkable_;
+}
+
+/**
+*/
+void WrappedToolBoxWidget::addToConfigMenu(QMenu* menu)
 {
     if (addToConfigMenu_cb_)
         addToConfigMenu_cb_(menu);
+}
+
+/**
+*/
+void WrappedToolBoxWidget::addToToolBar(QToolBar* tool_bar)
+{
+    if (addToToolBar_cb_)
+        addToToolBar_cb_(tool_bar);
 }

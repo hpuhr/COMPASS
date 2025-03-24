@@ -179,10 +179,12 @@ public:
     std::string toolInfo() const override final;
     std::vector<std::string> toolLabels() const override final;
     toolbox::ScreenRatio defaultScreenRatio() const override final;
-    void addToConfigMenu(QMenu* menu) const override final;
+    void addToConfigMenu(QMenu* menu) override final; 
+    void addToToolBar(QToolBar* tool_bar) override final; 
+    void loadingStarted() override final;
+    void loadingDone() override final;
 
     void updateContent(bool recreate_required = false);
-    void loadingDone();
 
     virtual void setUseDSType(const std::string& ds_type_name, bool use);
     virtual bool getUseDSType(const std::string& ds_type_name) const;

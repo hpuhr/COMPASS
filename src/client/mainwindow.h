@@ -118,6 +118,9 @@ public:
     void updateMenus();
     void updateBottomWidget();
 
+    void loadingStarted();
+    void loadingDone();
+
 protected:
     void createUI();
     void createMenus();

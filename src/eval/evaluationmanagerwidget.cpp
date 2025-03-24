@@ -129,8 +129,28 @@ toolbox::ScreenRatio EvaluationManagerWidget::defaultScreenRatio() const
 
 /**
  */
-void EvaluationManagerWidget::addToConfigMenu(QMenu* menu) const 
+void EvaluationManagerWidget::addToConfigMenu(QMenu* menu) 
 {
+}
+
+/**
+ */
+void EvaluationManagerWidget::addToToolBar(QToolBar* tool_bar)
+{
+}
+
+/**
+ */
+void EvaluationManagerWidget::loadingStarted()
+{
+    tab_widget_->setEnabled(false);
+}
+
+/**
+ */
+void EvaluationManagerWidget::loadingDone()
+{
+    tab_widget_->setEnabled(true);
 }
 
 void EvaluationManagerWidget::updateButtons()

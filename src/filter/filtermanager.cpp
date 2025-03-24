@@ -494,7 +494,7 @@ FilterManagerWidget* FilterManager::widget()
     if (!widget_)
     {
         widget_ = new FilterManagerWidget(*this);
-        connect(this, SIGNAL(changedFiltersSignal()), widget_, SLOT(updateFiltersSlot()));
+        connect(this, &FilterManager::changedFiltersSignal, widget_, &FilterManagerWidget::updateFilters);
     }
 
     assert(widget_);

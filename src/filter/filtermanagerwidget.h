@@ -25,6 +25,7 @@ class FilterGeneratorWidget;
 class QVBoxLayout;
 class QCheckBox;
 class QMenu;
+class QScrollArea;
 
 /**
  */
@@ -43,10 +44,14 @@ public:
     std::string toolInfo() const override final;
     std::vector<std::string> toolLabels() const override final;
     toolbox::ScreenRatio defaultScreenRatio() const override final;
-    void addToConfigMenu(QMenu* menu) const override final;
+    void addToConfigMenu(QMenu* menu) override final;
+    void addToToolBar(QToolBar* tool_bar) override final; 
+    void loadingStarted() override final;
+    void loadingDone() override final;
 
     QCheckBox* filtersCheckBox() const;
 
+    void updateFilters();
     void updateUseFilters();
 
     void addMenuEntries(QMenu* menu);
@@ -55,7 +60,6 @@ protected:
     void toggleUseFilters();
 
     void addFilter();
-    void updateFilters();
     void filterWidgetAction(bool result);
 
     void databaseOpened();
@@ -71,4 +75,5 @@ protected:
 
     QCheckBox*   filters_check_    {nullptr};
     QVBoxLayout* ds_filter_layout_ {nullptr};
+    QScrollArea* scroll_area_      {nullptr};
 };

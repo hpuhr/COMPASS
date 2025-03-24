@@ -163,7 +163,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     // data sources changed
     QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
-            eval_manager_.get(), &EvaluationManager::dataSourcesChangedSlot); // update if data sources changed
+                     eval_manager_.get(), &EvaluationManager::dataSourcesChangedSlot); // update if data sources changed
 
     // data exchange
     QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingStartedSignal,
@@ -793,7 +793,14 @@ void COMPASS::shutdown()
 MainWindow& COMPASS::mainWindow()
 {
     if (!main_window_)
+    {
         main_window_ = new MainWindow();
+        
+        QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingStartedSignal,
+                        main_window_, &MainWindow::loadingStarted);
+        QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingDoneSignal,
+                        main_window_, &MainWindow::loadingDone);
+    }
 
     assert(main_window_);
     return *main_window_;

@@ -22,7 +22,6 @@
 #include "json.hpp"
 
 class ViewManager;
-class ViewPointsToolWidget;
 class ViewPointsTableModel;
 class ViewPoint;
 
@@ -56,9 +55,6 @@ public slots:
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     //void onTableClickedSlot(const QModelIndex& current);
 
-    void loadingStartedSlot();
-    void allLoadingDoneSlot();
-
     void typesChangedSlot(QStringList types);
     void statusesChangedSlot(QStringList statuses);
 
@@ -72,7 +68,10 @@ public:
     std::string toolInfo() const override final;
     std::vector<std::string> toolLabels() const override final;
     toolbox::ScreenRatio defaultScreenRatio() const override final;
-    void addToConfigMenu(QMenu* menu) const override final;
+    void addToConfigMenu(QMenu* menu) override final;
+    void addToToolBar(QToolBar* tool_bar) override final;
+    void loadingStarted() override final;
+    void loadingDone() override final;
 
     void loadViewPoints();
     void clearViewPoints();
@@ -122,8 +121,6 @@ public:
 
 private:
     ViewManager& view_manager_;
-
-    ViewPointsToolWidget* tool_widget_{nullptr};
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};

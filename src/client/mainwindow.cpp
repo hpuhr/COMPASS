@@ -1478,3 +1478,17 @@ void MainWindow::updateSizings()
     tool_box_->setSizePolicy(policy_toolbox);
     tab_widget_->setSizePolicy(policy_tabwidget);
 }
+
+void MainWindow::loadingStarted()
+{
+    loginf << "MainWindow: loadingStarted";
+
+    if (tool_box_)
+        tool_box_->loadingStarted();
+}
+
+void MainWindow::loadingDone()
+{
+    if (tool_box_)
+        tool_box_->loadingDone();
+}

@@ -475,7 +475,7 @@ toolbox::ScreenRatio DataSourcesWidget::defaultScreenRatio() const
 
 /**
  */
-void DataSourcesWidget::addToConfigMenu(QMenu* menu) const 
+void DataSourcesWidget::addToConfigMenu(QMenu* menu) 
 {
     QAction* sel_dstyp_action = menu->addAction("Select All DSTypes");
     connect(sel_dstyp_action, &QAction::triggered, this, &DataSourcesWidget::selectAllDSTypes);
@@ -527,6 +527,26 @@ void DataSourcesWidget::addToConfigMenu(QMenu* menu) const
 
     QAction* show_cnt_action = menu->addAction("Toggle Show Counts");
     connect(show_cnt_action, &QAction::triggered, this, &DataSourcesWidget::toogleShowCounts);
+}
+
+/**
+ */
+void DataSourcesWidget::addToToolBar(QToolBar* tool_bar)
+{
+}
+
+/**
+ */
+void DataSourcesWidget::loadingStarted()
+{
+    tree_widget_->setEnabled(false);
+}
+
+/**
+ */
+void DataSourcesWidget::loadingDone()
+{
+    tree_widget_->setEnabled(true);
 }
 
 /**
