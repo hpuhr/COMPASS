@@ -20,7 +20,6 @@
 #include "configurable.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-//#include "global.h"
 
 #include <QObject>
 
@@ -286,14 +285,10 @@ public:
                              unsigned int line_id,
                              bool cleanup_db = false);
 
-    //std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
-
     bool isLoading();
     bool isDeleting();
-    //bool isPostProcessing();
 
     bool hasData();
-
     size_t count();
     size_t loadedCount();
 
@@ -314,16 +309,8 @@ public:
     bool isStatusContent() const;
     bool isReferenceContent() const;
 
-    static bool isStatusContent(const std::string& dbc_name); // TODO change check
-    static bool isStatusContent(unsigned int dbc_id);
-    static bool isReferenceContent(const std::string& dbc_name);
-    static bool isReferenceContent(unsigned int dbc_id);
-
 protected:
     virtual void checkSubConfigurables();
-
-    //std::string associationsTableName();
-    //void sortContent();
 
     void checkStaticVariable(const Property& property);
 
@@ -336,7 +323,8 @@ protected:
     std::string  db_table_name_;
     std::string  ds_type_;
 
-    //bool constructor_active_ {false};
+    bool is_status_content_ {false};
+    bool is_reftraj_content_ {false};
 
     bool is_loadable_{false};  // loadable on its own
     size_t count_{0};

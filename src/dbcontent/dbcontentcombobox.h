@@ -42,7 +42,7 @@ class DBContentComboBox : public QComboBox
 
         for (auto& dbcont_it : COMPASS::instance().dbContentManager())
         {
-            if (no_status_content && dbcont_it.second->isStatusContent(dbcont_it.first))
+            if (no_status_content && dbcont_it.second->isStatusContent())
                 continue;
 
             addItem(dbcont_it.first.c_str());

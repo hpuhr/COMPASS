@@ -145,7 +145,7 @@ TargetFilterDialog::TargetFilterDialog(TargetModel& model, QWidget* parent, Qt::
 
     for (auto& dbcont_it : COMPASS::instance().dbContentManager())
     {
-        if (dbcont_it.second->isStatusContent(dbcont_it.first))
+        if (dbcont_it.second->isStatusContent())
             continue;
 
         QCheckBox* tmp = new QCheckBox();
