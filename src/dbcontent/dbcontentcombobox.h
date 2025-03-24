@@ -21,7 +21,7 @@
 #include <QComboBox>
 
 #include "compass.h"
-//#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "global.h"
 
@@ -33,16 +33,19 @@ class DBContentComboBox : public QComboBox
     void changedObject();
 
   public:
-    DBContentComboBox(bool allow_meta, QWidget* parent = 0)
+    DBContentComboBox(bool allow_meta, bool no_status_content, QWidget* parent = 0)
         : QComboBox(parent), allow_meta_(allow_meta)
     {
         assert(COMPASS::instance().dbContentManager().size());
         if (allow_meta_)
             addItem(META_OBJECT_NAME.c_str());
 
-        for (auto& obj_it : COMPASS::instance().dbContentManager())
+        for (auto& dbcont_it : COMPASS::instance().dbContentManager())
         {
-            addItem(obj_it.first.c_str());
+            if (no_status_content && dbcont_it.second->isStatusContent(dbcont_it.first))
+                continue;
+
+            addItem(dbcont_it.first.c_str());
         }
 
         setCurrentIndex(0);

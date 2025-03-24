@@ -39,7 +39,7 @@ EvaluationDialog::EvaluationDialog(EvaluationManager& eval_man, EvaluationManage
 
     QTabWidget* tab_widget = new QTabWidget();
 
-    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, eval_settings_));
+    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, eval_settings_, *this));
     tab_widget->addTab(main_tab_widget_.get(), "Main");
 
     filter_widget_.reset(new EvaluationFilterTabWidget(eval_man_, eval_settings_));

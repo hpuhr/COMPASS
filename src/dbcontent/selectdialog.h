@@ -45,7 +45,7 @@ class SelectDBContentDialog : public QDialog
         cat_edit_ = new QLineEdit("Category"); // TODO validate to uint´
         main_layout->addWidget(cat_edit_);
 
-        object_box_ = new DBContentComboBox(false);
+        object_box_ = new DBContentComboBox(false, false);
         main_layout->addWidget(object_box_);
 
         QDialogButtonBox* button_box =

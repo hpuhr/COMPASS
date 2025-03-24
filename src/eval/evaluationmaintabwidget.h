@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONMANAGERMAINTABWIDGET_H
-#define EVALUATIONMANAGERMAINTABWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -28,6 +27,7 @@ class EvaluationManagerWidget;
 class EvaluationDataSourceWidget;
 class EvaluationStandardComboBox;
 class EvaluationSectorWidget;
+class EvaluationDialog;
 
 class QComboBox;
 
@@ -38,17 +38,21 @@ class EvaluationMainTabWidget : public QWidget
     Q_OBJECT
 
 private slots:
-    void dboRefNameChangedSlot(const std::string& dbcontent_name);
+    void dbContentRefNameChangedSlot(const std::string& dbcontent_name);
     void lineRefChangedSlot(unsigned int line_id);
-    void dboTstNameChangedSlot(const std::string& dbcontent_name);
+    void dbContentTstNameChangedSlot(const std::string& dbcontent_name);
     void lineTstChangedSlot(unsigned int line_id);
+
+    void usedDataSourcesChangedSlot(); // to be called by data source widgets
+
     void minHeightFilterChangedSlot(int idx);
 
     void changedStandardsSlot(); // eval man
     void changedCurrentStandardSlot(); // eval man
 
 public:
-    EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
+    EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
+                            EvaluationDialog& dialog);
 
     void updateDataSources();
     void updateSectors();
@@ -58,6 +62,7 @@ protected:
 
     EvaluationManager& eval_man_;
     EvaluationManagerSettings& eval_settings_;
+    EvaluationDialog& dialog_;
 
     std::unique_ptr<EvaluationDataSourceWidget> data_source_ref_widget_ {nullptr};
     std::unique_ptr<EvaluationDataSourceWidget> data_source_tst_widget_ {nullptr};
@@ -68,4 +73,3 @@ protected:
     QComboBox* min_height_filter_combo_ {nullptr};
 };
 
-#endif // EVALUATIONMANAGERMAINTABWIDGET_H

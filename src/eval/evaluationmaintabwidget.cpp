@@ -19,9 +19,10 @@
 #include "evaluationmanagerwidget.h"
 #include "evaluationdatasourcewidget.h"
 #include "evaluationmanager.h"
+#include "evaluationdialog.h"
 #include "evaluationstandardcombobox.h"
 #include "evaluationsectorwidget.h"
-//#include "airspace.h"
+
 #include "logger.h"
 #include "sectorlayer.h"
 
@@ -33,8 +34,9 @@
 #include <QLineEdit>
 #include <QComboBox>
 
-EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
-    : QWidget(nullptr), eval_man_(eval_man),  eval_settings_(eval_settings)
+EvaluationMainTabWidget::EvaluationMainTabWidget(
+    EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings, EvaluationDialog& dialog)
+    : QWidget(nullptr), eval_man_(eval_man),  eval_settings_(eval_settings), dialog_(dialog)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -52,7 +54,9 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man, Ev
     data_source_ref_widget_.reset(
                 new EvaluationDataSourceWidget("Reference Data", eval_man_.dbContentNameRef(), eval_settings_.line_id_ref_));
     connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::dbContentNameChangedSignal,
-             this, &EvaluationMainTabWidget::dboRefNameChangedSlot);
+             this, &EvaluationMainTabWidget::dbContentRefNameChangedSlot);
+    connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::usedDataSourceChangedSignal,
+            this, &EvaluationMainTabWidget::usedDataSourcesChangedSlot);
     connect (data_source_ref_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
              this, &EvaluationMainTabWidget::lineRefChangedSlot);
     data_sources_layout->addWidget(data_source_ref_widget_.get());
@@ -60,7 +64,9 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man, Ev
     data_source_tst_widget_.reset(
                 new EvaluationDataSourceWidget("Test Data", eval_man_.dbContentNameTst(), eval_settings_.line_id_tst_));
     connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::dbContentNameChangedSignal,
-             this, &EvaluationMainTabWidget::dboTstNameChangedSlot);
+             this, &EvaluationMainTabWidget::dbContentTstNameChangedSlot);
+    connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::usedDataSourceChangedSignal,
+            this, &EvaluationMainTabWidget::usedDataSourcesChangedSlot);
     connect (data_source_tst_widget_.get(), &EvaluationDataSourceWidget::lineChangedSignal,
              this, &EvaluationMainTabWidget::lineTstChangedSlot);
     data_sources_layout->addWidget(data_source_tst_widget_.get());
@@ -100,7 +106,7 @@ EvaluationMainTabWidget::EvaluationMainTabWidget(EvaluationManager& eval_man, Ev
     sec_label->setFont(font_bold);
     sec_layout->addWidget(sec_label);
 
-    sector_widget_.reset(new EvaluationSectorWidget(eval_man_));
+    sector_widget_.reset(new EvaluationSectorWidget(eval_man_, dialog_));
     sector_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     sec_layout->addWidget(sector_widget_.get());
 
@@ -178,11 +184,13 @@ void EvaluationMainTabWidget::minHeightFilterChangedSlot(int idx)
     eval_man_.minHeightFilterLayerName(min_height_filter_combo_->itemText(idx).toStdString());
 }
 
-void EvaluationMainTabWidget::dboRefNameChangedSlot(const std::string& dbcontent_name)
+void EvaluationMainTabWidget::dbContentRefNameChangedSlot(const std::string& dbcontent_name)
 {
     loginf << "EvaluationMainTabWidget: dboRefNameChangedSlot: name " << dbcontent_name;
 
     eval_man_.dbContentNameRef(dbcontent_name);
+
+    dialog_.updateButtons();
 }
 
 void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
@@ -192,11 +200,13 @@ void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
     eval_settings_.line_id_ref_ = line_id;
 }
 
-void EvaluationMainTabWidget::dboTstNameChangedSlot(const std::string& dbcontent_name)
+void EvaluationMainTabWidget::dbContentTstNameChangedSlot(const std::string& dbcontent_name)
 {
     loginf << "EvaluationMainTabWidget: dboTstNameChangedSlot: name " << dbcontent_name;
 
     eval_man_.dbContentNameTst(dbcontent_name);
+
+    dialog_.updateButtons();
 }
 
 void EvaluationMainTabWidget::lineTstChangedSlot(unsigned int line_id)
@@ -204,6 +214,11 @@ void EvaluationMainTabWidget::lineTstChangedSlot(unsigned int line_id)
     loginf << "EvaluationMainTabWidget: lineTstChangedSlot: value " << line_id;
 
     eval_settings_.line_id_tst_ = line_id;
+}
+
+void EvaluationMainTabWidget::usedDataSourcesChangedSlot()
+{
+    dialog_.updateButtons();
 }
 
 void EvaluationMainTabWidget::changedStandardsSlot()
@@ -225,6 +240,8 @@ void EvaluationMainTabWidget::changedCurrentStandardSlot()
 
     assert (sector_widget_);
     sector_widget_->update();
+
+    dialog_.updateButtons();
 
     logdbg << "EvaluationMainTabWidget: changedCurrentStandardSlot: done";
 }

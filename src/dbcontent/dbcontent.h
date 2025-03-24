@@ -314,7 +314,7 @@ public:
     bool isStatusContent() const;
     bool isReferenceContent() const;
 
-    static bool isStatusContent(const std::string& dbc_name); 
+    static bool isStatusContent(const std::string& dbc_name); // TODO change check
     static bool isStatusContent(unsigned int dbc_id);
     static bool isReferenceContent(const std::string& dbc_name);
     static bool isReferenceContent(unsigned int dbc_id);

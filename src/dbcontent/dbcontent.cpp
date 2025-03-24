@@ -947,7 +947,7 @@ void DBContent::checkStaticVariable(const Property& property)
  */
 bool DBContent::isStatusContent(const std::string& dbc_name)
 {
-    return (dbc_name == "CAT002" || 
+    return (dbc_name == "CAT002" ||
             dbc_name == "CAT004" ||
             dbc_name == "CAT019" ||
             dbc_name == "CAT023" ||

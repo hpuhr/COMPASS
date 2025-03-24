@@ -17,11 +17,10 @@
 
 #include "evaluationsectorwidget.h"
 #include "evaluationmanager.h"
+#include "evaluationdialog.h"
 #include "sectorlayer.h"
-//#include "sector.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/group.h"
-//#include "eval/requirement/base/baseconfig.h"
 
 #include <QLabel>
 #include <QCheckBox>
@@ -31,9 +30,11 @@ using namespace std;
 
 /**
 */
-EvaluationSectorWidget::EvaluationSectorWidget(EvaluationManager& eval_man, QWidget* parent)
+EvaluationSectorWidget::EvaluationSectorWidget(
+    EvaluationManager& eval_man, EvaluationDialog& dialog, QWidget* parent)
 :   QScrollArea(parent)
 ,   eval_man_  (eval_man)
+,   dialog_(dialog)
 {
     QWidget* widget = new QWidget(this);
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -124,4 +125,6 @@ void EvaluationSectorWidget::toggleUseGroupSlot()
     assert (eval_man_.hasCurrentStandard());
 
     eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name, check->checkState() == Qt::Checked);
+
+    dialog_.updateButtons();
 }

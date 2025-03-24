@@ -21,6 +21,7 @@
 #include <QScrollArea>
 
 class EvaluationManager;
+class EvaluationDialog;
 
 class QGridLayout;
 
@@ -34,13 +35,14 @@ public slots:
     void toggleUseGroupSlot();
 
 public:
-    EvaluationSectorWidget(EvaluationManager& eval_man, QWidget* parent = nullptr);
+    EvaluationSectorWidget(EvaluationManager& eval_man, EvaluationDialog& dialog, QWidget* parent = nullptr);
     virtual ~EvaluationSectorWidget() = default;
 
     void update();
 
 protected:
     EvaluationManager& eval_man_;
+    EvaluationDialog& dialog_;
 
     QGridLayout* grid_layout_ {nullptr};
 };
