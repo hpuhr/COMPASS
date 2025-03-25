@@ -585,7 +585,8 @@ void View::updateView(int flags)
     if (flags & VU_Reload) //reload = complete update
     {
         //start reload (will reset all cached updates)
-        COMPASS::instance().dbContentManager().load();
+        if (COMPASS::instance().dbOpened())
+            COMPASS::instance().dbContentManager().load();
     }
     else //handle all other updates
     {

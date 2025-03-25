@@ -345,13 +345,13 @@ VariableSet DBContentManager::getReadSet(const std::string& dbcontent_name)
 void DBContentManager::load(const std::string& custom_filter_clause, 
                             bool measure_db_performance)
 {
-    logdbg << "DBContentManager: loadSlot: custom_filter_clause '" << custom_filter_clause << "'";
+    logdbg << "DBContentManager: load: custom_filter_clause '" << custom_filter_clause << "'";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     if (load_in_progress_)
     {
-        logdbg << "DBContentManager: loadSlot: quitting previous load";
+        logdbg << "DBContentManager: load: quitting previous load";
 
         for (auto& object : dbcontent_)
         {
@@ -361,14 +361,14 @@ void DBContentManager::load(const std::string& custom_filter_clause,
 
         while (load_in_progress_) // JobManager::instance().hasDBJobs()
         {
-            loginf << "DBContentManager: loadSlot: previous load to finish";
+            loginf << "DBContentManager: load: previous load to finish";
 
             QCoreApplication::processEvents();
             QThread::msleep(1);
         }
     }
 
-    loginf << "DBContentManager: loadSlot: starting loading";
+    loginf << "DBContentManager: load: starting loading";
 
     saveSelectedRecNums();
     clearData();
@@ -385,20 +385,20 @@ void DBContentManager::load(const std::string& custom_filter_clause,
 
     for (auto& object : dbcontent_)
     {
-        logdbg << "DBContentManager: loadSlot: object " << object.first
+        logdbg << "DBContentManager: load: object " << object.first
                << " loadable " << object.second->loadable()
                << " loading wanted " << ds_man.loadingWanted(object.first)
                << " filters " << COMPASS::instance().filterManager().useFilters();
 
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
-            logdbg << "DBContentManager: loadSlot: loading object " << object.first;
+            logdbg << "DBContentManager: load: loading object " << object.first;
             
             auto read_set = getReadSet(object.first);
 
             if (read_set.getSize() == 0)
             {
-                logwrn << "DBContentManager: loadSlot: skipping loading of object " << object.first
+                logwrn << "DBContentManager: load: skipping loading of object " << object.first
                        << " since an empty read list was detected";
                 continue;
             }
