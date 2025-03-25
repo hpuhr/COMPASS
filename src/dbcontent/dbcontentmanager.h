@@ -233,7 +233,7 @@ protected:
     boost::optional<double> longitude_max_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
-    std::map<std::string, std::vector<unsigned long>> tmp_selected_rec_nums_; // for storage between loads
+    std::map<std::string, std::set<unsigned long>> tmp_selected_rec_nums_; // for storage between loads
 
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
 
