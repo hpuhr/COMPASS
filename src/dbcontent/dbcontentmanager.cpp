@@ -1794,7 +1794,7 @@ void DBContentManager::saveSelectedRecNums()
         for (unsigned int cnt=0; cnt < data_size; ++cnt)
         {
             if (!selected_vec.isNull(cnt) && selected_vec.get(cnt))
-                tmp_selected_rec_nums_[buf_it.first].push_back(rec_num_vec.get(cnt));
+                tmp_selected_rec_nums_[buf_it.first].insert(rec_num_vec.get(cnt));
         }
 
         loginf << "DBContentManager: saveSelectedRecNums: " << buf_it.first << " has "
@@ -1818,7 +1818,7 @@ void DBContentManager::restoreSelectedRecNums()
         if (!tmp_selected_rec_nums_.count(buf_it.first))
             continue;
 
-        const auto& sel_recnums = tmp_selected_rec_nums_.at(buf_it.first);
+        auto& sel_recnums = tmp_selected_rec_nums_.at(buf_it.first);
         if (sel_recnums.empty())
             continue;
 
@@ -1832,20 +1832,18 @@ void DBContentManager::restoreSelectedRecNums()
 
         // select existing, store still unselected
 
-        std::vector<unsigned long> not_yet_found_selected_rec_nums;
+        //std::set<unsigned long> not_yet_found_selected_rec_nums;
 
         std::map<unsigned long, unsigned int> unique_rec_nums =
-            rec_num_vec.uniqueValuesWithIndexes();
+            rec_num_vec.uniqueValuesWithIndexes(sel_recnums); // indexes of selected rec nums, value->index
 
-        for (unsigned long rec_num : sel_recnums)
+        for (auto& rec_num_it : unique_rec_nums)
         {
-            if (unique_rec_nums.count(rec_num)) // previously selected found
-                selected_vec.set(unique_rec_nums.at(rec_num), true);
-            else // not found, store
-                not_yet_found_selected_rec_nums.push_back(rec_num);
+            selected_vec.set(rec_num_it.second, true);
+            sel_recnums.erase(rec_num_it.first);
         }
 
-        tmp_selected_rec_nums_[buf_it.first] = not_yet_found_selected_rec_nums; // override previous
+        //tmp_selected_rec_nums_[buf_it.first] = not_yet_found_selected_rec_nums; // override previous
     }
 }
 

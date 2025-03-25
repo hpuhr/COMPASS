@@ -98,6 +98,7 @@ public:
     std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(
             const std::vector<unsigned int>& indexes);
     std::map<T, unsigned int> uniqueValuesWithIndexes();
+    std::map<T, unsigned int> uniqueValuesWithIndexes(const std::set<T>& values); // get indexes of given values
     std::vector<unsigned int> nullValueIndexes(unsigned int from_index, unsigned int to_index);
     std::vector<unsigned int> nullValueIndexes(const std::vector<unsigned int>& indexes);
 
@@ -775,7 +776,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes()
 {
     logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
 
-    std::map<T, unsigned int> values;
+    std::map<T, unsigned int> value_indexes;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -790,14 +791,44 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes()
             if (BUFFER_PEDANTIC_CHECKING)
                 assert(index < data_.size());
 
-            assert (!values.count(data_.at(index)));
-            values[data_.at(index)] = index;
+            assert (!value_indexes.count(data_.at(index)));
+            value_indexes[data_.at(index)] = index;
         }
     }
 
     logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
-           << values.size();
-    return values;
+           << value_indexes.size();
+    return value_indexes;
+}
+
+template <class T>
+std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes(const std::set<T>& values)
+{
+    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
+
+    std::map<T, unsigned int> value_indexes;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert(data_.size() <= buffer_.size_);
+        assert(null_flags_.size() <= buffer_.size_);
+    }
+
+    for (unsigned int index = 0; index < data_.size(); ++index)
+    {
+        if (!isNull(index) && values.count(data_.at(index)))  // not for null
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert(index < data_.size());
+
+            assert (!value_indexes.count(data_.at(index)));
+            value_indexes[data_.at(index)] = index;
+        }
+    }
+
+    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
+           << value_indexes.size();
+    return value_indexes;
 }
 
 template <class T>
