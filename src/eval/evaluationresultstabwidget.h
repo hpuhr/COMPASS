@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSTABWIDGET_H
-#define EVALUATIONRESULTSTABWIDGET_H
+#pragma once
 
 #include <QWidget>
 #include <QTreeView>
@@ -32,7 +31,7 @@ class EvaluationManager;
 class EvaluationManagerWidget;
 
 class QPushButton;
-class QSplitter;
+class QMenu;
 
 class EvaluationResultsTabWidget : public QWidget
 {
@@ -65,10 +64,12 @@ protected:
     EvaluationManager& eval_man_;
     EvaluationManagerWidget& man_widget_;
 
-    QSplitter* splitter_ {nullptr};
-    std::unique_ptr<QTreeView> tree_view_;
+    QTreeView* tree_view_;
 
     QStackedWidget* results_widget_{nullptr};
+
+    QPushButton* sections_button_{nullptr};
+    std::unique_ptr<QMenu> sections_menu_;
 
     QPushButton* back_button_ {nullptr};
     std::vector<std::string> id_history_;
@@ -76,5 +77,3 @@ protected:
     void expandAllParents (QModelIndex index);
     void updateBackButton ();
 };
-
-#endif // EVALUATIONRESULTSTABWIDGET_H

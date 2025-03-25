@@ -1481,8 +1481,6 @@ void MainWindow::updateSizings()
 
 void MainWindow::loadingStarted()
 {
-    loginf << "MainWindow: loadingStarted";
-
     if (tool_box_)
         tool_box_->loadingStarted();
 }

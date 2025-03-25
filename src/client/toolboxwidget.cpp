@@ -19,7 +19,7 @@
 
 #include <QHBoxLayout>
 
-const toolbox::ScreenRatio ToolBoxWidget::ScreenRatioDefault = toolbox::ScreenRatio::Ratio_Third;
+const toolbox::ScreenRatio ToolBoxWidget::ScreenRatioDefault = toolbox::ScreenRatio::Ratio_35Percent;
 
 /**
 */

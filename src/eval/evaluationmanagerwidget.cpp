@@ -54,7 +54,6 @@ EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man, Ev
     targets_tab_widget_.reset(new EvaluationTargetsTabWidget(eval_man_, *this));
     tab_widget_->addTab(targets_tab_widget_.get(), "Targets");
 
-
     results_tab_widget_.reset(new EvaluationResultsTabWidget(eval_man_, *this));
     tab_widget_->addTab(results_tab_widget_.get(), "Results");
 

@@ -97,6 +97,22 @@ void ToolBox::createUI()
     config_button_->setFixedSize(UI_ICON_SIZE); 
     config_button_->setFlat(UI_ICON_BUTTON_FLAT);
 
+    shrink_button_ = new QPushButton;
+    shrink_button_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_left.png").c_str()));
+    shrink_button_->setFixedSize(UI_ICON_SIZE); 
+    shrink_button_->setFlat(UI_ICON_BUTTON_FLAT);
+
+    connect(shrink_button_, &QPushButton::pressed, this, &ToolBox::shrink);
+
+    grow_button_ = new QPushButton;
+    grow_button_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_right.png").c_str()));
+    grow_button_->setFixedSize(UI_ICON_SIZE); 
+    grow_button_->setFlat(UI_ICON_BUTTON_FLAT);
+
+    connect(grow_button_, &QPushButton::pressed, this, &ToolBox::grow);
+
+    top_layout->addWidget(shrink_button_);
+    top_layout->addWidget(grow_button_);
     top_layout->addWidget(tool_name_label_);
     top_layout->addStretch(1);
     top_layout->addWidget(tool_bar_);
@@ -140,9 +156,9 @@ void ToolBox::updateMenu()
 
         auto sr = currentScreenRatio();
 
-        auto addSRAction = [ & ] (const QString& label, toolbox::ScreenRatio screen_ratio)
+        auto addSRAction = [ & ] (const std::string& label, toolbox::ScreenRatio screen_ratio)
         {
-            auto action = sr_menu->addAction(label);
+            auto action = sr_menu->addAction(QString::fromStdString(label));
             screen_ratio_group->addAction(action);
 
             action->setCheckable(true);
@@ -150,11 +166,11 @@ void ToolBox::updateMenu()
             connect(action, &QAction::triggered, [ this, screen_ratio] () { this->screenRatioChanged(screen_ratio); });
         };
 
-        addSRAction("1:3", toolbox::ScreenRatio::Ratio_Quarter);
-        addSRAction("1:2", toolbox::ScreenRatio::Ratio_Third);
-        addSRAction("1:1", toolbox::ScreenRatio::Ratio_Half);
-        addSRAction("2:1", toolbox::ScreenRatio::Ratio_TwoThirds);
-        addSRAction("3:1", toolbox::ScreenRatio::Ratio_ThreeQuarter);
+        addSRAction(toolbox::toString(toolbox::ScreenRatio::Ratio_25Percent), toolbox::ScreenRatio::Ratio_25Percent);
+        addSRAction(toolbox::toString(toolbox::ScreenRatio::Ratio_35Percent), toolbox::ScreenRatio::Ratio_35Percent);
+        addSRAction(toolbox::toString(toolbox::ScreenRatio::Ratio_50Percent), toolbox::ScreenRatio::Ratio_50Percent);
+        addSRAction(toolbox::toString(toolbox::ScreenRatio::Ratio_65Percent), toolbox::ScreenRatio::Ratio_65Percent);
+        addSRAction(toolbox::toString(toolbox::ScreenRatio::Ratio_75Percent), toolbox::ScreenRatio::Ratio_75Percent);
     }
 
     config_button_->setMenu(config_menu_.get());
@@ -357,7 +373,48 @@ void ToolBox::screenRatioChanged(toolbox::ScreenRatio screen_ratio)
     
     tools_.at(active_tool_idx_).widget->setScreenRatio(screen_ratio);
 
+    updateButtons();
+
     emit toolChanged();
+}
+
+/**
+ */
+void ToolBox::shrink()
+{
+    if (active_tool_idx_ < 0)
+        return;
+
+    auto sr = tools_.at(active_tool_idx_).widget->screenRatio();
+
+    if ((int)sr > 0)
+        screenRatioChanged((toolbox::ScreenRatio)((int)sr - 1));
+}
+
+/**
+ */
+void ToolBox::grow()
+{
+    if (active_tool_idx_ < 0)
+        return;
+
+    auto sr = tools_.at(active_tool_idx_).widget->screenRatio();
+
+    if ((int)sr < (int)toolbox::ScreenRatio::RatioMax - 1)
+        screenRatioChanged((toolbox::ScreenRatio)((int)sr + 1));
+}
+
+/**
+ */
+void ToolBox::updateButtons()
+{
+    if (active_tool_idx_ >= 0)
+    {
+        auto sr = tools_.at(active_tool_idx_).widget->screenRatio();
+
+        shrink_button_->setEnabled((int)sr > 0);
+        grow_button_->setEnabled((int)sr < (int)toolbox::ScreenRatio::RatioMax - 1);
+    }
 }
 
 /**

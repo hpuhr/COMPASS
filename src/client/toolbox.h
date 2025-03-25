@@ -76,8 +76,12 @@ private:
     void createUI();
     void updateMenu();
     void updateToolBar();
+    void updateButtons();
     void toolActivated(int idx);
+
     void screenRatioChanged(toolbox::ScreenRatio screen_ratio);
+    void shrink();
+    void grow();
 
     std::vector<Tool> tools_;
 
@@ -86,6 +90,8 @@ private:
     QWidget*        right_widget_    = nullptr;
     QLabel*         tool_name_label_ = nullptr;
     QPushButton*    config_button_   = nullptr;
+    QPushButton*    shrink_button_   = nullptr;
+    QPushButton*    grow_button_     = nullptr;
     QToolBar*       tool_bar_        = nullptr;
 
     std::unique_ptr<QMenu> config_menu_;
