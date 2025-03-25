@@ -17,11 +17,30 @@
 
 #pragma once
 
+#include "configurable.h"
+
+#include <QObject>
+
+class COMPASS;
+
 /**
  */
-class ResultManager
+class ResultManager : public QObject, public Configurable
 {
+    Q_OBJECT
+
+signals:
+    void sectorsChangedSignal();
+
 public:
-    ResultManager();
+    ResultManager(const std::string& class_id,
+                  const std::string& instance_id,
+                  COMPASS* parent);
     virtual ~ResultManager();
+
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id) override {}
+
+protected:
+    virtual void checkSubConfigurables() override {}
 };

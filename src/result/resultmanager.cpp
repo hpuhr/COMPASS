@@ -15,14 +15,19 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
- #include "resultmanager.h"
+#include "resultmanager.h"
+#include "compass.h"
 
  /**
   */
- ResultManager::ResultManager()
- {
- }
+ResultManager::ResultManager(const std::string& class_id,
+                             const std::string& instance_id,
+                             COMPASS* parent)
+    :   Configurable(class_id, instance_id, parent, "results.json")
+{
+     createSubConfigurables();
+}
 
- /**
-  */
- ResultManager::~ResultManager() = default;
+/**
+ */
+ResultManager::~ResultManager() = default;

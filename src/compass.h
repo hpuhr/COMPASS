@@ -41,6 +41,7 @@ class EvaluationManager;
 class MainWindow;
 class FFTManager;
 class LicenseManager;
+class ResultManager;
 
 namespace rtcommand
 {
@@ -85,6 +86,7 @@ public:
     rtcommand::RTCommandRunner& rtCmdRunner();
     FFTManager& fftManager();
     LicenseManager& licenseManager();
+    ResultManager& resultManager();
 
     void init();
     void shutdown();
@@ -192,6 +194,7 @@ protected:
     std::unique_ptr<EvaluationManager> eval_manager_;
     std::unique_ptr<FFTManager> fft_manager_;
     std::unique_ptr<LicenseManager> license_manager_;
+    std::unique_ptr<ResultManager> result_manager_;
 
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
 

@@ -1811,8 +1811,6 @@ void DBContentManager::restoreSelectedRecNums()
     if (tmp_selected_rec_nums_.empty())
         return;
 
-    //@TODO: find faster way to do this
-
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {
         if (!tmp_selected_rec_nums_.count(buf_it.first))
@@ -1830,9 +1828,7 @@ void DBContentManager::restoreSelectedRecNums()
         NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
-        // select existing, store still unselected
-
-        //std::set<unsigned long> not_yet_found_selected_rec_nums;
+        // select existing & erase, keep still unselected
 
         std::map<unsigned long, unsigned int> unique_rec_nums =
             rec_num_vec.uniqueValuesWithIndexes(sel_recnums); // indexes of selected rec nums, value->index
@@ -1842,8 +1838,6 @@ void DBContentManager::restoreSelectedRecNums()
             selected_vec.set(rec_num_it.second, true);
             sel_recnums.erase(rec_num_it.first);
         }
-
-        //tmp_selected_rec_nums_[buf_it.first] = not_yet_found_selected_rec_nums; // override previous
     }
 }
 

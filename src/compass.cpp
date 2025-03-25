@@ -38,6 +38,7 @@
 #include "licensemanager.h"
 #include "result.h"
 #include "dbinstance.h"
+#include "resultmanager.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -282,6 +283,12 @@ void COMPASS::generateSubConfigurable(const std::string& class_id, const std::st
         license_manager_.reset(new LicenseManager(class_id, instance_id, this));
         assert(license_manager_);
     }
+    else if (class_id == "ResultManager")
+    {
+        assert(!result_manager_);
+        result_manager_.reset(new ResultManager(class_id, instance_id, this));
+        assert(result_manager_);
+    }
     else
         throw std::runtime_error("COMPASS: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -332,6 +339,11 @@ void COMPASS::checkSubConfigurables()
     {
         generateSubConfigurableFromConfig("FFTManager", "FFTManager0");
         assert(fft_manager_);
+    }
+    if (!result_manager_)
+    {
+        generateSubConfigurableFromConfig("ResultManager", "ResultManager0");
+        assert(result_manager_);
     }
 }
 
@@ -697,6 +709,12 @@ LicenseManager& COMPASS::licenseManager()
 {
     assert(license_manager_);
     return *license_manager_;
+}
+
+ResultManager& COMPASS::resultManager()
+{
+    assert(result_manager_);
+    return *result_manager_;
 }
 
 rtcommand::RTCommandRunner& COMPASS::rtCmdRunner()
