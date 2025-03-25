@@ -30,11 +30,11 @@ class Section;
 
 /**
  */
-class RootItem : public TreeItem
+class Report : public TreeItem
 {
 public:
-    RootItem(ResultManager& result_man);
-    virtual ~RootItem();
+    Report(ResultManager& result_man);
+    virtual ~Report();
 
     virtual TreeItem *child(int row) override;
     virtual int childCount() const override;

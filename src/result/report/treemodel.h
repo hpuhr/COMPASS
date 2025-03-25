@@ -28,21 +28,21 @@ class ResultManager;
 namespace ResultReport
 {
 
-class RootItem;
+class Report;
 
 /**
  */
 class TreeModel : public QAbstractItemModel
 {
 public:
-    TreeModel(ResultManager& result_man);
+    TreeModel(const std::shared_ptr<Report>& report, ResultManager& result_man);
 
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant headerData(int section, Qt::Orientation orientation,
                         int role = Qt::DisplayRole) const override;
     QModelIndex index(int row, int column,
-                        const QModelIndex& parent = QModelIndex()) const override;
+                      const QModelIndex& parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex& index) const override;
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -50,15 +50,13 @@ public:
     QModelIndex findItem (const std::string& id); // "Report:Results:Overview"
 
     void beginReset();
-    void clear();
     void endReset();
 
-    std::shared_ptr<RootItem> rootItem() const;
+    const Report* rootItem() const;
 
 protected:
-    ResultManager& result_man_;
-
-    std::shared_ptr<RootItem> root_item_;
+    std::shared_ptr<Report> report_ = nullptr;
+    ResultManager&          result_man_;
 };
 
 }
