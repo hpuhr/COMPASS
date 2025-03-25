@@ -17,7 +17,7 @@
 
 #include "result/report/treemodel.h"
 #include "result/report/treeitem.h"
-#include "result/report/rootitem.h"
+#include "result/report/report.h"
 
 #include "logger.h"
 
@@ -26,11 +26,13 @@ namespace ResultReport
 
 /**
  */
-TreeModel::TreeModel(ResultManager& result_man)
+TreeModel::TreeModel(const std::shared_ptr<Report>& report, 
+                     ResultManager& result_man)
 :   QAbstractItemModel(nullptr)
+,   report_    (report    )
 ,   result_man_(result_man)
 {
-    root_item_ = std::make_shared<RootItem>(result_man_);
+    assert(report_);
 }
 
 /**
@@ -40,7 +42,7 @@ int TreeModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
 
-    return root_item_->columnCount();
+    return report_->columnCount();
 }
 
 /**
@@ -77,7 +79,7 @@ QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
                                 int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return root_item_->data(section);
+        return report_->data(section);
 
     return QVariant();
 }
@@ -92,7 +94,7 @@ QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) con
     TreeItem *parentItem;
 
     if (!parent.isValid())
-        parentItem = root_item_.get();
+        parentItem = report_.get();
     else
         parentItem = static_cast<TreeItem*>(parent.internalPointer());
 
@@ -112,7 +114,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const
     TreeItem *childItem = static_cast<TreeItem*>(index.internalPointer());
     TreeItem *parentItem = childItem->parentItem();
 
-    if (parentItem == root_item_.get())
+    if (parentItem == report_.get())
         return QModelIndex();
 
     return createIndex(parentItem->row(), 0, parentItem);
@@ -127,7 +129,7 @@ int TreeModel::rowCount(const QModelIndex &parent) const
         return 0;
 
     if (!parent.isValid())
-        parentItem = root_item_.get();
+        parentItem = report_.get();
     else
         parentItem = static_cast<TreeItem*>(parent.internalPointer());
 
@@ -166,15 +168,6 @@ void TreeModel::beginReset()
 
 /**
  */
-void TreeModel::clear()
-{
-    loginf << "TreeModel: clear";
-
-    root_item_ = std::make_shared<RootItem>(result_man_);
-}
-
-/**
- */
 void TreeModel::endReset()
 {
     endResetModel();
@@ -182,9 +175,9 @@ void TreeModel::endReset()
 
 /**
  */
-std::shared_ptr<RootItem> TreeModel::rootItem() const
+const Report* TreeModel::rootItem() const
 {
-    return root_item_;
+    return report_.get();
 }
 
 }

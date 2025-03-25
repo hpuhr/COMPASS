@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "result/report/rootitem.h"
+#include "result/report/report.h"
 #include "result/report/section.h"
 #include "result/report/sectionid.h"
 
@@ -30,7 +30,7 @@ namespace ResultReport
 
 /**
  */
-RootItem::RootItem(ResultManager& result_man)
+Report::Report(ResultManager& result_man)
 :   TreeItem("Report", nullptr)
 ,   result_man_(result_man)
 {
@@ -39,14 +39,14 @@ RootItem::RootItem(ResultManager& result_man)
 
 /**
  */
-RootItem::~RootItem()
+Report::~Report()
 {
-    loginf << "EvaluationResultsReport::RootItem: destructor";
+    logdbg << "Report: destructor";
 }
 
 /**
  */
-TreeItem* RootItem::child(int row)
+TreeItem* Report::child(int row)
 {
     if (row < 0 || row > 0)
         return nullptr;
@@ -56,21 +56,21 @@ TreeItem* RootItem::child(int row)
 
 /**
  */
-int RootItem::childCount() const
+int Report::childCount() const
 {
     return 1;
 }
 
 /**
  */
-int RootItem::columnCount() const
+int Report::columnCount() const
 {
     return 1;
 }
 
 /**
  */
-QVariant RootItem::data(int column) const
+QVariant Report::data(int column) const
 {
     assert (column == 0);
 
@@ -79,30 +79,30 @@ QVariant RootItem::data(int column) const
 
 /**
  */
-int RootItem::row() const
+int Report::row() const
 {
     return 0;
 }
 
 /**
  */
-std::shared_ptr<Section> RootItem::rootSection()
+std::shared_ptr<Section> Report::rootSection()
 {
     return root_section_;
 }
 
 /**
  */
-Section& RootItem::getSection (const std::string& id)
+Section& Report::getSection (const std::string& id)
 {
-    logdbg << "RootItem: getSection: id '" << id << "'";
+    logdbg << "Report: getSection: id '" << id << "'";
 
     assert (id.size());
 
     std::vector<std::string> parts = SectionID::subSections(id);
     assert (parts.size());
 
-    Section* tmp;
+    Section* tmp = nullptr;
 
     for (unsigned int cnt=0; cnt < parts.size(); ++cnt)
     {
