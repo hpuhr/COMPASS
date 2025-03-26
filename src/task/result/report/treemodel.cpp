@@ -27,10 +27,10 @@ namespace ResultReport
 /**
  */
 TreeModel::TreeModel(const std::shared_ptr<Report>& report, 
-                     ResultManager& result_man)
+                     TaskManager& task_man)
 :   QAbstractItemModel(nullptr)
 ,   report_    (report    )
-,   result_man_(result_man)
+,   task_man_(task_man)
 {
     assert(report_);
 }

@@ -15,38 +15,31 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
 #include "result/report/sectioncontent.h"
+#include "result/report/section.h"
 
-#include <vector>
-#include <string>
-
-class ResultManager;
+#include <cassert>
 
 namespace ResultReport
 {
 
-class Section;
+/**
+ */
+SectionContent::SectionContent(const std::string& name, 
+                               Section* parent_section, 
+                               TaskManager& task_man)
+:   name_          (name          )
+,   parent_section_(parent_section)
+,   task_man_    (task_man    )
+{
+    assert (parent_section_);
+}
 
 /**
  */
-class SectionContentText : public SectionContent
+std::string SectionContent::name() const
 {
-public:
-    SectionContentText(const std::string& name, 
-                       Section* parent_section, 
-                       ResultManager& result_man);
-
-    void addText (const std::string& text);
-
-    virtual void addToLayout (QVBoxLayout* layout) override;
-    virtual void accept(LatexVisitor& v) override;
-
-    const std::vector<std::string>& texts() const;
-
-protected:
-    std::vector<std::string> texts_;
-};
+    return name_;
+}
 
 }

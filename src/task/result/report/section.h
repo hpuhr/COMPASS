@@ -30,7 +30,7 @@ class LatexVisitor;
 
 using namespace std;
 
-class ResultManager;
+class TaskManager;
 
 namespace ResultReport
 {
@@ -48,7 +48,7 @@ public:
     Section(const string& heading, 
             const string& parent_heading, 
             TreeItem* parent_item,
-            ResultManager& result_man);
+            TaskManager& task_man);
 
     virtual TreeItem* child(int row) override;
     virtual int childCount() const override;
@@ -108,7 +108,7 @@ protected:
     string heading_; // name same as heading
     string parent_heading_; // e.g. "head1:head2" or ""
 
-    ResultManager& result_man_;
+    TaskManager& task_man_;
 
     bool per_target_section_ {false};
     bool per_target_section_with_issues_ {false};

@@ -31,6 +31,8 @@
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
 
+#include "taskresult.h"
+
 #include <cassert>
 
 #include <QCoreApplication>
@@ -304,4 +306,57 @@ void TaskManager::updateFeatures()
     for (auto& t : tasks_)
         if (t.second)
             t.second->updateFeatures();
+}
+
+const std::map<unsigned int, std::shared_ptr<TaskResult>>& TaskManager::results() const
+{
+    return results_;
+}
+
+std::shared_ptr<TaskResult> TaskManager::result(unsigned int id) const // get existing result
+{
+    assert (results_.count(id));
+    return results_.at(id);
+}
+
+std::shared_ptr<TaskResult> TaskManager::getOrCreateResult (const std::string& name) // get or create result
+{
+    if (hasResult(name))
+        return std::find_if(results_.begin(), results_.end(),
+                            [&name](const std::pair<const unsigned int, std::shared_ptr<TaskResult>>& pair) {
+                                return pair.second && pair.second->name() == name;
+                            })->second;
+    else // create
+    {
+        unsigned int new_id{0};
+
+        if (results_.size())
+            new_id = results_.rend()->first + 1;
+
+        results_[new_id] = std::make_shared<TaskResult>(new_id);
+        results_.at(new_id)->name(name);
+
+        return results_.at(new_id);
+    }
+}
+
+bool TaskManager::hasResult (const std::string& name) const
+{
+    auto it = std::find_if(results_.begin(), results_.end(),
+                           [&name](const std::pair<const unsigned int, std::shared_ptr<TaskResult>>& pair) {
+                               return pair.second && pair.second->name() == name;
+                           });
+
+    return it != results_.end();
+}
+
+
+void TaskManager::databaseOpenedSlot()
+{
+
+}
+
+void TaskManager::databaseClosedSlot()
+{
+
 }

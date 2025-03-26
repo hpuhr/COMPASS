@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TASKMANAGER_H
-#define TASKMANAGER_H
+#pragma once
 
 #include <QObject>
 
@@ -34,6 +33,7 @@ class RadarPlotPositionCalculatorTask;
 class ManageSectorsTask;
 class ReconstructorTask;
 class MainWindow;
+class TaskResult;
 
 class QMainWindow;
 
@@ -47,7 +47,11 @@ class TaskManager : public QObject, public Configurable
 
     void quitRequestedSignal ();
 
+    void resultsChangedSignal();
+
   public slots:
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
 
   public:
     TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -75,6 +79,11 @@ class TaskManager : public QObject, public Configurable
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     ReconstructorTask& reconstructReferencesTask() const;
 
+    const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
+    std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
+    std::shared_ptr<TaskResult> getOrCreateResult (const std::string& name); // get or create result
+    bool hasResult (const std::string& name) const;
+
 protected:
     // tasks
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
@@ -91,8 +100,10 @@ protected:
 
     std::map<std::string, Task*> tasks_;
 
+    std::map<unsigned int, std::shared_ptr<TaskResult>> results_; // id -> result
+
     void addTask(const std::string& class_id, Task* task);
     MainWindow* getMainWindow();
 };
 
-#endif  // TASKMANAGER_H
+

@@ -30,11 +30,11 @@ namespace ResultReport
 
 /**
  */
-Report::Report(ResultManager& result_man)
+Report::Report(TaskManager& task_man)
 :   TreeItem("Report", nullptr)
-,   result_man_(result_man)
+,   task_man_(task_man)
 {
-    root_section_ = std::make_shared<Section>("Results", "", this, result_man_);
+    root_section_ = std::make_shared<Section>("Results", "", this, task_man_);
 }
 
 /**

@@ -17,7 +17,7 @@
 
 #include "result/report/sectioncontenttable.h"
 
-#include "resultmanager.h"
+#include "taskmanager.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
 #include "latexvisitor.h"
@@ -55,11 +55,11 @@ SectionContentTable::SectionContentTable(const std::string& name,
                                          unsigned int num_columns,
                                          const std::vector<std::string>& headings, 
                                          Section* parent_section,
-                                         ResultManager& result_man, 
+                                         TaskManager& task_man, 
                                          bool sortable,
                                          unsigned int sort_column, 
                                          Qt::SortOrder order)
-:   SectionContent(name, parent_section, result_man)
+:   SectionContent(name, parent_section, task_man)
 ,   num_columns_  (num_columns)
 ,   headings_     (headings)
 ,   sortable_     (sortable)

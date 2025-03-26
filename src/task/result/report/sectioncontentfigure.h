@@ -40,7 +40,7 @@ SectionContentFigure(const std::string& name,
                      const std::string& caption,
                      std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
                      Section* parent_section, 
-                     ResultManager& eval_man,
+                     TaskManager& eval_man,
                      int render_delay_msec = 0);
 
     virtual void addToLayout (QVBoxLayout* layout) override;

@@ -34,7 +34,7 @@
 
 #include <boost/optional.hpp>
 
-class ResultManager;
+class TaskManager;
 class Section;
 
 class ViewableDataConfig;
@@ -117,7 +117,7 @@ public:
                         unsigned int num_columns,
                         const std::vector<std::string>& headings, 
                         Section* parent_section, 
-                        ResultManager& result_man,
+                        TaskManager& task_man,
                         bool sortable=true, 
                         unsigned int sort_column=0, 
                         Qt::SortOrder order=Qt::AscendingOrder);

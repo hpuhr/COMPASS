@@ -20,7 +20,7 @@
 
 #include "section_id.h"
 
-#include "resultmanager.h"
+#include "taskmanager.h"
 //#include "latexvisitor.h"
 
 #include "logger.h"
@@ -40,10 +40,10 @@ namespace ResultReport
 SectionContentFigure::SectionContentFigure(const std::string& name, 
                                            const std::string& caption,
                                            std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
-                                           Section* parent_section, 
-                                           ResultManager& result_man, 
+                                           Section* parent_section,
+                                           TaskManager& task_man,
                                            int render_delay_msec)
-:   SectionContent    (name, parent_section, result_man)
+:   SectionContent    (name, parent_section, task_man)
 ,   caption_          (caption)
 ,   render_delay_msec_(render_delay_msec)
 ,   viewable_fnc_     (viewable_fnc)
@@ -90,7 +90,7 @@ void SectionContentFigure::viewSlot()
 void SectionContentFigure::view() const
 {
     //@TODO
-    //result_man_.setViewableDataConfig(*viewable_fnc_());
+    //task_man_.setViewableDataConfig(*viewable_fnc_());
 
     if (render_delay_msec_ > 0)
     {

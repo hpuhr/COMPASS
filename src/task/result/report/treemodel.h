@@ -23,7 +23,7 @@
 
 #include <memory>
 
-class ResultManager;
+class TaskManager;
 
 namespace ResultReport
 {
@@ -35,7 +35,7 @@ class Report;
 class TreeModel : public QAbstractItemModel
 {
 public:
-    TreeModel(const std::shared_ptr<Report>& report, ResultManager& result_man);
+    TreeModel(const std::shared_ptr<Report>& report, TaskManager& task_man);
 
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
@@ -56,7 +56,7 @@ public:
 
 protected:
     std::shared_ptr<Report> report_ = nullptr;
-    ResultManager&          result_man_;
+    TaskManager&          task_man_;
 };
 
 }

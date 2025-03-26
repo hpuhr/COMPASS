@@ -17,7 +17,7 @@
 
 #include "result/report/sectioncontenttext.h"
 
-#include "resultmanager.h"
+#include "taskmanager.h"
 //#include "latexvisitor.h"
 #include "logger.h"
 
@@ -33,8 +33,8 @@ namespace ResultReport
  */
 SectionContentText::SectionContentText(const std::string& name, 
                                        Section* parent_section, 
-                                       ResultManager& result_man)
-:   SectionContent(name, parent_section, result_man)
+                                       TaskManager& task_man)
+:   SectionContent(name, parent_section, task_man)
 {
 
 }

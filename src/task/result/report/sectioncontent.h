@@ -17,11 +17,12 @@
 
 #pragma once
 
-#include "result/report/treeitem.h"
+#include <string>
 
-#include <memory>
+class TaskManager;
 
-class ResultManager;
+class QVBoxLayout;
+class LatexVisitor;
 
 namespace ResultReport
 {
@@ -30,26 +31,23 @@ class Section;
 
 /**
  */
-class Report : public TreeItem
+class SectionContent
 {
 public:
-    Report(ResultManager& result_man);
-    virtual ~Report();
+    SectionContent(const std::string& name, 
+                   Section* parent_section, 
+                   TaskManager& task_man);
 
-    virtual TreeItem *child(int row) override;
-    virtual int childCount() const override;
-    virtual int columnCount() const override;
-    virtual QVariant data(int column) const override;
-    virtual int row() const override;
+    std::string name() const;
 
-    std::shared_ptr<Section> rootSection();
-
-    Section& getSection (const std::string& id); // bla:bla2
+    virtual void addToLayout (QVBoxLayout* layout) = 0; // add content to layout
+    virtual void accept(LatexVisitor& v) = 0;           // can not be const since on-demand tables
 
 protected:
-    ResultManager& result_man_;
+    std::string    name_;
+    Section*       parent_section_ {nullptr};
+    TaskManager& task_man_;
 
-    std::shared_ptr<Section> root_section_;
 };
 
 }

@@ -22,8 +22,6 @@
 #include "result/report/sectioncontenttable.h"
 #include "result/report/sectioncontentfigure.h"
 
-#include "resultmanager.h"
-
 //#include "latexvisitor.h"
 
 #include "logger.h"
@@ -38,11 +36,11 @@ namespace ResultReport
 Section::Section(const string& heading, 
                  const string& parent_heading, 
                  TreeItem* parent_item,
-                 ResultManager& result_man)
+                 TaskManager& task_man)
 :   TreeItem       (heading, parent_item)
 ,   heading_       (heading)
 ,   parent_heading_(parent_heading)
-,   result_man_    (result_man)
+,   task_man_    (task_man)
 {
 }
 
@@ -146,7 +144,7 @@ void Section::addSubSection (const std::string& heading)
 
     assert (!hasSubSection(heading));
 
-    sub_sections_.push_back(std::make_shared<Section>(heading, compoundHeading(), this, result_man_));
+    sub_sections_.push_back(std::make_shared<Section>(heading, compoundHeading(), this, task_man_));
     assert (hasSubSection(heading));
 }
 
@@ -184,7 +182,7 @@ SectionContentText& Section::getText (const std::string& name)
 void Section::addText(const std::string& name)
 {
     assert (!hasText(name));
-    content_.push_back(std::make_shared<SectionContentText>(name, this, result_man_));
+    content_.push_back(std::make_shared<SectionContentText>(name, this, task_man_));
     assert (hasText(name));
 }
 
@@ -235,7 +233,7 @@ void Section::addTable(const std::string& name,
                                                              num_columns, 
                                                              headings, 
                                                              this, 
-                                                             result_man_,
+                                                             task_man_,
                                                              sortable, 
                                                              sort_column, 
                                                              order));
@@ -269,7 +267,7 @@ void Section::addFigure(const std::string& name, const string& caption,
                                                               caption, 
                                                               viewable_fnc, 
                                                               this, 
-                                                              result_man_, 
+                                                              task_man_,
                                                               render_delay_msec));
     assert (hasFigure(name));
 }
