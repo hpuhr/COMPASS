@@ -18,6 +18,7 @@
 #pragma once
 
 #include "task/result/report/treeitem.h"
+#include "property.h"
 
 #include <QWidget>
 
@@ -63,6 +64,7 @@ public:
     bool hasSubSection (const std::string& heading);
     Section& getSubSection (const std::string& heading);
     void addSubSection (const std::string& heading);
+    std::vector<std::shared_ptr<Section>> subSections() const;
 
     QWidget* getContentWidget();
 
@@ -96,6 +98,11 @@ public:
 
     bool perTargetWithIssues() const; // te be set if requirement (any) requirement failed
     void perTargetWithIssues(bool value);
+
+    static const std::string DBTableName;
+    static const Property    DBColumnSectionID;
+    static const Property    DBColumnReportID;
+    static const Property    DBColumnJSONContent;
 
 protected:
     Section* findSubSection (const std::string& heading); // nullptr if not found

@@ -93,6 +93,20 @@ std::shared_ptr<Section> Report::rootSection()
 
 /**
  */
+std::vector<std::shared_ptr<Section>> Report::sections() const
+{
+    return std::vector<std::shared_ptr<Section>>();
+}
+
+/**
+ */
+std::vector<std::shared_ptr<SectionContentFigure>> Report::figures() const
+{
+    return std::vector<std::shared_ptr<SectionContentFigure>>();
+}
+
+/**
+ */
 Section& Report::getSection (const std::string& id)
 {
     logdbg << "Report: getSection: id '" << id << "'";
@@ -128,6 +142,22 @@ Section& Report::getSection (const std::string& id)
 
     assert (tmp);
     return *tmp;
+}
+
+/**
+ */
+nlohmann::json Report::toJSON() const
+{
+    nlohmann::json root;
+
+    return root;
+}
+
+/**
+ */
+bool Report::fromJSON(const nlohmann::json& j)
+{
+    return true;
 }
 
 }

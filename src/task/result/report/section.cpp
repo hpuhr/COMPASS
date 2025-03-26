@@ -31,6 +31,11 @@
 namespace ResultReport
 {
 
+const std::string Section::DBTableName         = "report_sections";
+const Property    Section::DBColumnSectionID   = Property("section_id"  , PropertyDataType::UINT);
+const Property    Section::DBColumnReportID    = Property("report_id"   , PropertyDataType::UINT);
+const Property    Section::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON);
+
 /**
 */
 Section::Section(const string& heading, 
@@ -146,6 +151,13 @@ void Section::addSubSection (const std::string& heading)
 
     sub_sections_.push_back(std::make_shared<Section>(heading, compoundHeading(), this, task_man_));
     assert (hasSubSection(heading));
+}
+
+/**
+*/
+std::vector<std::shared_ptr<Section>> Section::subSections() const
+{
+    return sub_sections_;
 }
 
 /**

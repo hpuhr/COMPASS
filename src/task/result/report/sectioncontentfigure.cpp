@@ -35,6 +35,11 @@
 namespace ResultReport
 {
 
+const std::string SectionContentFigure::DBTableName         = "report_viewables";
+const Property    SectionContentFigure::DBColumnViewableID  = Property("viewable_id" , PropertyDataType::UINT);
+const Property    SectionContentFigure::DBColumnReportID    = Property("report_id"   , PropertyDataType::UINT);
+const Property    SectionContentFigure::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON);
+
 /**
  */
 SectionContentFigure::SectionContentFigure(const std::string& name, 

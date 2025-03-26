@@ -92,6 +92,10 @@ public:
     std::string getTableSectorsCreateStatement();
     std::string getTableViewPointsCreateStatement();
     std::string getTableTargetsCreateStatement();
+    std::string getTableTaskResultsCreateStatement();
+    std::string getTableResultSectionsCreateStatement();
+    std::string getTableResultViewablesCreateStatement();
+
     std::string getDeleteStatement (const std::string& table, const std::string& filter);
 
     std::string getInsertTargetStatement(unsigned int utn, const std::string& info);

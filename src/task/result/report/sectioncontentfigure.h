@@ -18,6 +18,7 @@
 #pragma once
 
 #include "task/result/report/sectioncontent.h"
+#include "property.h"
 
 #include <QObject>
 
@@ -36,18 +37,23 @@ public slots:
     void viewSlot();
 
 public:
-SectionContentFigure(const std::string& name, 
-                     const std::string& caption,
-                     std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
-                     Section* parent_section, 
-                     TaskManager& eval_man,
-                     int render_delay_msec = 0);
+    SectionContentFigure(const std::string& name, 
+                         const std::string& caption,
+                         std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
+                         Section* parent_section, 
+                         TaskManager& eval_man,
+                         int render_delay_msec = 0);
 
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
 
     void view () const;
     std::string getSubPath() const;
+
+    static const std::string DBTableName;
+    static const Property    DBColumnViewableID;
+    static const Property    DBColumnReportID;
+    static const Property    DBColumnJSONContent;
 
 protected:
     std::string caption_;

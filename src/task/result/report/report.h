@@ -21,12 +21,15 @@
 
 #include <memory>
 
+#include "json.hpp"
+
 class TaskManager;
 
 namespace ResultReport
 {
 
 class Section;
+class SectionContentFigure;
 
 /**
  */
@@ -43,8 +46,13 @@ public:
     virtual int row() const override;
 
     std::shared_ptr<Section> rootSection();
+    std::vector<std::shared_ptr<Section>> sections() const;
+    std::vector<std::shared_ptr<SectionContentFigure>> figures() const;
 
     Section& getSection (const std::string& id); // bla:bla2
+
+    nlohmann::json toJSON() const;
+    bool fromJSON(const nlohmann::json& j);
 
 protected:
     TaskManager& task_man_;

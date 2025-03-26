@@ -30,6 +30,10 @@
 #include "util/timeconv.h"
 #include "dbinterface.h"
 
+#include "task/result/taskresult.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontentfigure.h"
+
 #include <algorithm>
 #include <iomanip>
 #include <string>
@@ -759,6 +763,55 @@ std::string SQLGenerator::getTableTargetsCreateStatement()
     ss << "CREATE TABLE " << TABLE_NAME_TARGETS
        << "(utn INT, json TEXT, PRIMARY KEY (utn));";
 
+    return ss.str();
+}
+
+/**
+ */
+std::string SQLGenerator::getTableTaskResultsCreateStatement()
+{
+    stringstream ss;
+
+    ss << "CREATE TABLE " << TaskResult::DBTableName << "("
+        << TaskResult::DBColumnID.name()          << " "  << TaskResult::DBColumnID.dbDataTypeString(config_.precise_types)          << ", "
+        << TaskResult::DBColumnName.name()        << " "  << TaskResult::DBColumnName.dbDataTypeString(config_.precise_types)        << ", "
+        << TaskResult::DBColumnJSONContent.name() << " "  << TaskResult::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
+        << TaskResult::DBColumnResultType.name()  << " "  << TaskResult::DBColumnResultType.dbDataTypeString(config_.precise_types)  << ", "
+        << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
+        << ");";
+    
+    return ss.str();
+}
+
+/**
+ */
+std::string SQLGenerator::getTableResultSectionsCreateStatement()
+{
+    stringstream ss;
+
+    ss << "CREATE TABLE " << ResultReport::Section::DBTableName << "("
+        << ResultReport::Section::DBColumnSectionID.name()   << " "  << ResultReport::Section::DBColumnSectionID.dbDataTypeString(config_.precise_types)   << ", "
+        << ResultReport::Section::DBColumnReportID.name()    << " "  << ResultReport::Section::DBColumnReportID.dbDataTypeString(config_.precise_types)    << ", "
+        << ResultReport::Section::DBColumnJSONContent.name() << " "  << ResultReport::Section::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
+        << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
+        << ");";
+    
+    return ss.str();
+}
+
+/**
+ */
+std::string SQLGenerator::getTableResultViewablesCreateStatement()
+{
+    stringstream ss;
+
+    ss << "CREATE TABLE " << ResultReport::SectionContentFigure::DBTableName << "("
+        << ResultReport::SectionContentFigure::DBColumnViewableID.name()  << " "  << ResultReport::SectionContentFigure::DBColumnViewableID.dbDataTypeString(config_.precise_types)  << ", "
+        << ResultReport::SectionContentFigure::DBColumnReportID.name()    << " "  << ResultReport::SectionContentFigure::DBColumnReportID.dbDataTypeString(config_.precise_types)    << ", "
+        << ResultReport::SectionContentFigure::DBColumnJSONContent.name() << " "  << ResultReport::SectionContentFigure::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
+        << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
+        << ");";
+    
     return ss.str();
 }
 

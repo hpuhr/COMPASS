@@ -53,6 +53,14 @@ namespace dbContent
     class Target;
 }
 
+class TaskResult;
+
+namespace ResultReport
+{
+    class Section;
+    class SectionContentFigure;
+}
+
 class QWidget;
 class QProgressDialog;
 
@@ -95,7 +103,7 @@ public:
     bool cleanupDB(bool show_dialog = false);
     bool cleanupInProgress() const { return cleanup_in_progress_; }
 
-    const std::map<std::string, DBTableInfo>& tableInfo();
+    const std::map<std::string, DBTableInfo>& tableInfo() const;
     std::string dbFilename() const;
     bool dbInMemory() const;
     bool canCreateDBFileFromMemory() const;
@@ -152,7 +160,7 @@ public:
 
     void saveProperties();
 
-    bool existsTable(const std::string& table_name);
+    bool existsTable(const std::string& table_name) const;
     void createTable(const DBContent& object);
 
     bool areColumnsNull (const std::string& table_name, const std::vector<std::string> columns);
@@ -180,6 +188,16 @@ public:
     void saveTarget(const std::unique_ptr<dbContent::Target>& target);
 
     void clearAssociations(const DBContent& dbcontent);
+
+    bool existsTaskResultsTable() const;
+    bool existsReportSectionsTable() const;
+    bool existsReportViewablesTable() const;
+    void createTaskResultsTable();
+    void createReportSectionsTable();
+    void createReportViewablesTable();
+    void saveResult(const TaskResult& result);
+    void saveReportSections(const std::vector<const ResultReport::Section*>& sections);
+    void saveReportViewables(const std::vector<const ResultReport::SectionContentFigure*>& figures);
 
     void clearTableContent(const std::string& table_name);
 

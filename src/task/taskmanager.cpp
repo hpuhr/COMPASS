@@ -333,7 +333,7 @@ std::shared_ptr<TaskResult> TaskManager::getOrCreateResult (const std::string& n
         if (results_.size())
             new_id = results_.rend()->first + 1;
 
-        results_[new_id] = std::make_shared<TaskResult>(new_id);
+        results_[new_id] = std::make_shared<TaskResult>(new_id, *this);
         results_.at(new_id)->name(name);
 
         return results_.at(new_id);

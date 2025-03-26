@@ -37,6 +37,10 @@
 #include "source/dbdatasource.h"
 #include "fft/dbfft.h"
 
+#include "task/result/taskresult.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontentfigure.h"
+
 #include "viewpoint.h"
 
 #include "compass.h"
@@ -514,7 +518,7 @@ void DBInterface::updateTableInfo()
 
 /**
  */
-const std::map<std::string, DBTableInfo>& DBInterface::tableInfo() 
+const std::map<std::string, DBTableInfo>& DBInterface::tableInfo() const
 { 
     assert(ready());
 
@@ -524,7 +528,7 @@ const std::map<std::string, DBTableInfo>& DBInterface::tableInfo()
 
 /**
  */
-bool DBInterface::existsTable(const string& table_name)
+bool DBInterface::existsTable(const string& table_name) const
 {
     return tableInfo().count(table_name) == 1;
 }
@@ -1693,6 +1697,99 @@ void DBInterface::clearAssociations(const DBContent& dbcontent)
         // uses replace with utn as unique key
         execute(str);
     }
+}
+
+/**
+ */
+bool DBInterface::existsTaskResultsTable() const
+{
+    return existsTable(TaskResult::DBTableName);
+}
+
+/**
+ */
+bool DBInterface::existsReportSectionsTable() const
+{
+    return existsTable(ResultReport::Section::DBTableName);
+}
+
+/**
+ */
+bool DBInterface::existsReportViewablesTable() const
+{
+    return existsTable(ResultReport::SectionContentFigure::DBTableName);
+}
+
+/**
+ */
+void DBInterface::createTaskResultsTable()
+{
+    assert(ready());
+    assert(!existsTaskResultsTable());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        execute(sqlGenerator().getTableTaskResultsCreateStatement());
+        updateTableInfo();
+    }
+}
+
+/**
+ */
+void DBInterface::createReportSectionsTable()
+{
+    assert(ready());
+    assert(!existsReportSectionsTable());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        execute(sqlGenerator().getTableResultSectionsCreateStatement());
+        updateTableInfo();
+    }
+}
+
+/**
+ */
+void DBInterface::createReportViewablesTable()
+{
+    assert(ready());
+    assert(!existsReportViewablesTable());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        execute(sqlGenerator().getTableResultViewablesCreateStatement());
+        updateTableInfo();
+    }
+}
+
+/**
+ */
+void DBInterface::saveResult(const TaskResult& result)
+{
+
+}
+
+/**
+ */
+void DBInterface::saveReportSections(const std::vector<const ResultReport::Section*>& sections)
+{
+
+}
+
+/**
+ */
+void DBInterface::saveReportViewables(const std::vector<const ResultReport::SectionContentFigure*>& figures)
+{
+    
 }
 
 /**
