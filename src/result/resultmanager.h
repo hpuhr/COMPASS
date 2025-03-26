@@ -21,7 +21,11 @@
 
 #include <QObject>
 
+#include <map>
+#include <memory>
+
 class COMPASS;
+class TaskResult;
 
 /**
  */
@@ -30,7 +34,11 @@ class ResultManager : public QObject, public Configurable
     Q_OBJECT
 
 signals:
-    void sectorsChangedSignal();
+    void resultsChangedSignal();
+
+public slots:
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
 
 public:
     ResultManager(const std::string& class_id,
@@ -41,6 +49,13 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override {}
 
+    const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
+    std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
+    std::shared_ptr<TaskResult> getOrCreateResult (const std::string& name); // get or create result
+    bool hasResult (const std::string& name) const;
+
 protected:
+    std::map<unsigned int, std::shared_ptr<TaskResult>> results_; // id -> result
+
     virtual void checkSubConfigurables() override {}
 };

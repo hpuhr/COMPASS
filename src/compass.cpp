@@ -127,7 +127,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     rt_cmd_runner_.reset(new rtcommand::RTCommandRunner);
 
-    // database opending
+    // database opening & closing
 
     QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseOpenedSlot);
@@ -161,6 +161,11 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
                      fft_manager_.get(), &FFTManager::databaseOpenedSlot);
     QObject::connect(this, &COMPASS::databaseClosedSignal,
                      fft_manager_.get(), &FFTManager::databaseClosedSlot);
+
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
+                     result_manager_.get(), &ResultManager::databaseOpenedSlot);
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
+                     result_manager_.get(), &ResultManager::databaseClosedSlot);
 
     // data sources changed
     QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
