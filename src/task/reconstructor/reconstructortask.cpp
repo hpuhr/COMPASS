@@ -400,6 +400,8 @@ void ReconstructorTask::run()
     COMPASS::instance().dbContentManager().clearAssociationsIdentifier();
     COMPASS::instance().dbInterface().startPerformanceMetrics();
 
+    COMPASS::instance().taskManager().beginTaskResultWriting("Reconstruct References");
+
     Projection& projection = ProjectionManager::instance().currentProjection();
     projection.clearCoordinateSystems();
     projection.addAllRadarCoordinateSystems();
@@ -872,7 +874,7 @@ void ReconstructorTask::endReconstruction()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
-                this, &ReconstructorTask::writeDoneSlot);
+               this, &ReconstructorTask::writeDoneSlot);
 
     currentReconstructor()->saveTargets();
 
@@ -912,6 +914,8 @@ void ReconstructorTask::endReconstruction()
 
     if (!skip_reference_data_writing_)
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+
+    COMPASS::instance().taskManager().endTaskResultWriting();
 
     //cleanup db after reconstruction
     COMPASS::instance().dbInterface().cleanupDB(true);
@@ -1001,6 +1005,8 @@ void ReconstructorTask::runCancelledSlot()
 
     msg_box->close();
     delete msg_box;
+
+    COMPASS::instance().taskManager().endTaskResultWriting();
 
     emit doneSignal();
 

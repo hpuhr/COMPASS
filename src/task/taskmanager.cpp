@@ -295,6 +295,34 @@ TaskResultsWidget* TaskManager::widget()
     return widget_.get();
 }
 
+void TaskManager::beginTaskResultWriting(const std::string& name)
+{
+    if (widget_)
+        widget_->setDisabled(true);
+
+    assert (!current_report_);
+    current_report_ = getOrCreateResult(name)->report();
+
+    current_report_->clear();
+}
+
+ResultReport::Report& TaskManager::currentReport()
+{
+    assert (current_report_);
+    return *current_report_;
+}
+
+void TaskManager::endTaskResultWriting()
+{
+    if (widget_)
+        widget_->setDisabled(false);
+
+    assert (current_report_);
+    current_report_ = nullptr;
+
+    emit taskResultsChangedSignal();
+}
+
 
 MainWindow* TaskManager::getMainWindow()
 {
@@ -332,11 +360,13 @@ std::shared_ptr<TaskResult> TaskManager::result(unsigned int id) const // get ex
 
 std::shared_ptr<TaskResult> TaskManager::getOrCreateResult (const std::string& name) // get or create result
 {
-    if (hasResult(name))
-        return std::find_if(results_.begin(), results_.end(),
-                            [&name](const std::pair<const unsigned int, std::shared_ptr<TaskResult>>& pair) {
-                                return pair.second && pair.second->name() == name;
-                            })->second;
+    auto it = std::find_if(results_.begin(), results_.end(),
+                           [&name](const std::pair<const unsigned int, std::shared_ptr<TaskResult>>& pair) {
+                               return pair.second && pair.second->name() == name;
+                           });
+
+    if (it != results_.end())
+        return it->second;
     else // create
     {
         unsigned int new_id{0};
@@ -349,6 +379,11 @@ std::shared_ptr<TaskResult> TaskManager::getOrCreateResult (const std::string& n
 
         return results_.at(new_id);
     }
+}
+
+ResultReport::Report& TaskManager::report(const std::string& name)
+{
+    return *getOrCreateResult(name)->report();
 }
 
 bool TaskManager::hasResult (const std::string& name) const

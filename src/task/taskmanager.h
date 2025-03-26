@@ -38,6 +38,11 @@ class TaskResultsWidget;
 
 class QMainWindow;
 
+namespace ResultReport
+{
+class Report;
+}
+
 class TaskManager : public QObject, public Configurable
 {
     Q_OBJECT
@@ -48,7 +53,7 @@ class TaskManager : public QObject, public Configurable
 
     void quitRequestedSignal ();
 
-    void resultsChangedSignal();
+    void taskResultsChangedSignal();
 
   public slots:
     void databaseOpenedSlot();
@@ -82,9 +87,14 @@ class TaskManager : public QObject, public Configurable
 
     TaskResultsWidget* widget();
 
+    void beginTaskResultWriting(const std::string& name);
+    ResultReport::Report& currentReport();
+    void endTaskResultWriting();
+
     const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
     std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
     std::shared_ptr<TaskResult> getOrCreateResult (const std::string& name); // get or create result
+    ResultReport::Report& report(const std::string& name);
     bool hasResult (const std::string& name) const;
 
 protected:
@@ -106,6 +116,7 @@ protected:
     std::unique_ptr<TaskResultsWidget> widget_{nullptr};
 
     std::map<unsigned int, std::shared_ptr<TaskResult>> results_; // id -> result
+    std::shared_ptr<ResultReport::Report> current_report_;
 
     void addTask(const std::string& class_id, Task* task);
     MainWindow* getMainWindow();

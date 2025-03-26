@@ -34,8 +34,9 @@ const std::string TaskResult::FieldReport   = "report";
 
 TaskResult::TaskResult(unsigned int id, TaskManager& task_man)
 :   id_    (id        )
-//,   report_(task_man  )
-{}
+{
+    report_ = std::make_shared<ResultReport::Report> (task_man);
+}
 
 unsigned int TaskResult::id() const
 {
@@ -59,11 +60,13 @@ void TaskResult::name(const std::string& name)
 
 const std::shared_ptr<ResultReport::Report> TaskResult::report() const
 {
+    assert (report_);
     return report_;
 }
 
 std::shared_ptr<ResultReport::Report> TaskResult::report()
 {
+    assert (report_);
     return report_;
 }
 

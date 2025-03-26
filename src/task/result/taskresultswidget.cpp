@@ -26,6 +26,12 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
 
     connect(report_combo_, QOverload<const QString &>::of(&QComboBox::currentTextChanged),
             [ = ] (const QString& text){
+
+                loginf << "TaskResultsWidget: report_combo_ currentText '" << text.toStdString() << "'";
+
+                if (!text.size()) // happens on clear
+                    return;
+
                 assert (task_man_.hasResult(text.toStdString()));
                 setReport(text.toStdString());
             });
@@ -55,7 +61,7 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout);
 
-    connect (&task_man, &TaskManager::resultsChangedSignal,
+    connect (&task_man, &TaskManager::taskResultsChangedSignal,
             this, &TaskResultsWidget::updateResultsSlot);
 }
 
@@ -67,11 +73,15 @@ void TaskResultsWidget::setReport(const std::string name)
 
     current_report_name_ = name;
 
-    int name_idx = report_combo_->findData(QVariant(current_report_name_.c_str()));
+    int name_idx = report_combo_->findText(current_report_name_.c_str());
+
+    loginf << "TaskResultsWidget: setReport: name_idx " << name_idx;
 
     if (name_idx < 0)
     {
         report_combo_->clear();
+        report_combo_->setDisabled(true);
+
         current_report_name_ = "";
 
         report_widget_->clear();
@@ -80,10 +90,16 @@ void TaskResultsWidget::setReport(const std::string name)
         return;
     }
 
-    if (report_combo_->currentIndex() == name_idx)
-        return;
+    if (report_combo_->currentIndex() != name_idx)
+    {
+        report_combo_->blockSignals(true);
 
-    report_combo_->setCurrentIndex(name_idx);
+        report_combo_->setCurrentIndex(name_idx);
+
+        report_combo_->blockSignals(false);
+    }
+
+    report_combo_->setDisabled(false);
 
     assert (task_man_.hasResult(name));
     report_widget_->setReport(task_man_.getOrCreateResult(name)->report());
@@ -93,24 +109,34 @@ void TaskResultsWidget::setReport(const std::string name)
 
 void TaskResultsWidget::updateResultsSlot()
 {
-    loginf << "TaskResultsWidget::updateResultsSlot";
+    loginf << "TaskResultsWidget: updateResultsSlot";
+
+    report_combo_->blockSignals(true);
 
     report_combo_->clear();
 
     for (auto& res_it : task_man_.results())
     {
+        loginf << "TaskResultsWidget: updateResultsSlot: adding '" << res_it.second->name() << "'";
+
         report_combo_->addItem(res_it.second->name().c_str());
 
         if (!current_report_name_.size()) // set to first if not set
             current_report_name_ = res_it.second->name().c_str();
     }
 
+    loginf << "TaskResultsWidget: updateResultsSlot: count " << report_combo_->count();
+
     if (!report_combo_->count())
     {
+
         current_report_name_ = "";
         report_combo_->setDisabled(true);
     }
 
+    report_combo_->blockSignals(false);
+
+    loginf << "TaskResultsWidget: updateResultsSlot: setReport";
     setReport(current_report_name_);
 }
 

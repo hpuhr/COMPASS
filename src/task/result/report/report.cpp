@@ -44,6 +44,11 @@ Report::~Report()
     logdbg << "Report: destructor";
 }
 
+void Report::clear()
+{
+    root_section_ = std::make_shared<Section>("Results", "", this, task_man_);
+}
+
 /**
  */
 TreeItem* Report::child(int row)

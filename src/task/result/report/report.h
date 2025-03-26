@@ -39,6 +39,8 @@ public:
     Report(TaskManager& task_man);
     virtual ~Report();
 
+    void clear();
+
     virtual TreeItem *child(int row) override;
     virtual int childCount() const override;
     virtual int columnCount() const override;
