@@ -15,12 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "result/report/section.h"
-#include "result/report/sectionid.h"
-#include "result/report/sectioncontent.h"
-#include "result/report/sectioncontenttext.h"
-#include "result/report/sectioncontenttable.h"
-#include "result/report/sectioncontentfigure.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectionid.h"
+#include "task/result/report/sectioncontent.h"
+#include "task/result/report/sectioncontenttext.h"
+#include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontentfigure.h"
 
 //#include "latexvisitor.h"
 

@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "result/report/sectioncontenttext.h"
+#include "task/result/report/sectioncontenttext.h"
 
 #include "taskmanager.h"
 //#include "latexvisitor.h"

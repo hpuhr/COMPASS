@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "result/report/treeitem.h"
+#include "task/result/report/treeitem.h"
 
 #include <QWidget>
 

@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "result/report/sectioncontent.h"
-#include "result/report/section.h"
+#include "task/result/report/sectioncontent.h"
+#include "task/result/report/section.h"
 
 #include <cassert>
 

@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontenttable.h"
 
 #include "taskmanager.h"
 #include "compass.h"
