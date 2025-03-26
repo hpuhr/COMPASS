@@ -58,6 +58,7 @@ public:
 
     Type type() const;
     std::string typeAsString() const;
+    unsigned int id() const;
     std::string name() const;
 
     nlohmann::json toJSON() const;
@@ -71,9 +72,7 @@ public:
 
     static const std::string DBTableName;
     static const Property    DBColumnContentID;
-    static const Property    DBColumnSectionID;
-    static const Property    DBColumnReportID;
-    static const Property    DBColumnName;
+    static const Property    DBColumnResultID;
     static const Property    DBColumnType;
     static const Property    DBColumnJSONContent;
 

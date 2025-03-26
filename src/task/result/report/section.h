@@ -94,7 +94,7 @@ public:
     virtual void accept(LatexVisitor& v) const;
 
     const vector<shared_ptr<SectionContent>>& content() const;
-    std::vector<SectionContentFigure*> sectionsFigures(bool recursive) const;
+    vector<shared_ptr<SectionContent>> recursiveContent() const;
 
     bool perTargetSection() const; // to be used for utn and sub-sections
     void perTargetSection(bool value);

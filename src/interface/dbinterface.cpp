@@ -40,6 +40,9 @@
 #include "task/result/taskresult.h"
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontent.h"
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontenttext.h"
 
 #include "viewpoint.h"
 
@@ -1693,7 +1696,7 @@ void DBInterface::clearAssociations(const DBContent& dbcontent)
         #endif
 
         string str = sqlGenerator().getSetNullStatement(dbcontent.dbTableName(),
-                                                    dbcontent.variable("UTN").dbColumnName());      
+                                                        dbcontent.variable("UTN").dbColumnName());      
         // uses replace with utn as unique key
         execute(str);
     }
@@ -1751,7 +1754,169 @@ void DBInterface::createReportContentsTable()
  */
 void DBInterface::saveResult(const TaskResult& result)
 {
+    assert(ready());
 
+    //create needed tables
+    if (!existsTaskResultsTable())
+        createTaskResultsTable();
+
+    if (!existsReportContentsTable())
+        createReportContentsTable();
+
+    auto result_id   = result.id();
+    auto result_name = result.name();
+
+    //write result
+    {
+        PropertyList properties;
+        properties.addProperty(TaskResult::DBColumnID);
+        properties.addProperty(TaskResult::DBColumnName);
+        properties.addProperty(TaskResult::DBColumnJSONContent);
+        properties.addProperty(TaskResult::DBColumnResultType);
+
+        std::shared_ptr<Buffer> buffer(new Buffer(properties));
+
+        auto& id_vec      = buffer->get<unsigned int>(TaskResult::DBColumnID.name());
+        auto& name_vec    = buffer->get<std::string>(TaskResult::DBColumnName.name());
+        auto& content_vec = buffer->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
+        auto& type_vec    = buffer->get<int>(TaskResult::DBColumnResultType.name());
+
+        id_vec.set(0, result_id);
+        name_vec.set(0, result.name());
+        content_vec.set(0, result.toJSON());
+        type_vec.set(0, (int)result.type());
+
+        insertBuffer(TaskResult::DBTableName, buffer);
+    }
+
+    //write contents
+    auto report_contents = result.report()->reportContents();
+    {
+        PropertyList properties;
+        properties.addProperty(ResultReport::SectionContent::DBColumnContentID);
+        properties.addProperty(ResultReport::SectionContent::DBColumnResultID);
+        properties.addProperty(ResultReport::SectionContent::DBColumnType);
+        properties.addProperty(ResultReport::SectionContent::DBColumnJSONContent);
+
+        std::shared_ptr<Buffer> buffer(new Buffer(properties));
+
+        auto& content_id_vec = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+        auto& result_id_vec  = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
+        auto& type_vec       = buffer->get<int>(ResultReport::SectionContent::DBColumnType.name());
+        auto& content_vec    = buffer->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+        size_t row = 0;
+        for (const auto& c : report_contents)
+        {
+            content_id_vec.set(row, c->id());
+            result_id_vec.set(row, result_id);
+            type_vec.set(row, (int)c->type());
+            content_vec.set(row, c->toJSON());
+
+            ++row;
+        }
+
+        insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+    }
+}
+
+/**
+ */
+std::vector<std::shared_ptr<TaskResult>> DBInterface::loadResults()
+{
+    assert(ready());
+
+    PropertyList properties;
+    properties.addProperty(TaskResult::DBColumnID);
+    properties.addProperty(TaskResult::DBColumnName);
+    properties.addProperty(TaskResult::DBColumnJSONContent);
+    properties.addProperty(TaskResult::DBColumnResultType);
+
+    auto cmd = sqlGenerator().getSelectCommand(TaskResult::DBTableName, properties, "");
+    auto result = execute(*cmd);
+    assert(!result->hasError());
+    assert(result->containsData() && result->buffer());
+
+    auto b = result->buffer();
+
+    size_t nr = b->size();
+
+    auto& id_vec      = b->get<unsigned int>(TaskResult::DBColumnID.name());
+    auto& name_vec    = b->get<std::string>(TaskResult::DBColumnName.name());
+    auto& content_vec = b->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
+    auto& type_vec    = b->get<int>(TaskResult::DBColumnResultType.name());
+
+    std::vector<std::shared_ptr<TaskResult>> results(nr);
+
+    auto& task_man = COMPASS::instance().taskManager();
+
+    for (size_t i = 0; i < nr; ++i)
+    {
+        auto id = id_vec.get(i);
+        results[ i ].reset(new TaskResult(id, task_man));
+
+        bool ok = results[ i ]->fromJSON(content_vec.get(i));
+        assert(ok);
+    }
+
+    return results;
+}
+
+/**
+ */
+std::shared_ptr<ResultReport::SectionContent> DBInterface::loadContent(ResultReport::Section* section, unsigned int content_id)
+{
+    assert(ready());
+
+    PropertyList properties;
+    properties.addProperty(ResultReport::SectionContent::DBColumnContentID);
+    properties.addProperty(ResultReport::SectionContent::DBColumnResultID);
+    properties.addProperty(ResultReport::SectionContent::DBColumnType);
+    properties.addProperty(ResultReport::SectionContent::DBColumnJSONContent);
+
+    auto cmd = sqlGenerator().getSelectCommand(ResultReport::SectionContent::DBTableName, properties, "");
+    auto result = execute(*cmd);
+    assert(!result->hasError());
+    assert(result->containsData() && result->buffer());
+
+    auto b = result->buffer();
+
+    size_t nr = b->size();
+    assert(nr == 1);
+
+    auto& content_id_vec = b->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+    auto& result_id_vec  = b->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
+    auto& type_vec       = b->get<int>(ResultReport::SectionContent::DBColumnType.name());
+    auto& content_vec    = b->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+    ResultReport::SectionContent::Type type = (ResultReport::SectionContent::Type)type_vec.get(0);
+
+    auto& task_man = COMPASS::instance().taskManager();
+
+    std::shared_ptr<ResultReport::SectionContent> content;
+
+    if (type == ResultReport::SectionContent::Type::Figure)
+    {
+        content.reset(new ResultReport::SectionContentFigure(section, task_man));
+    }
+    else if (type == ResultReport::SectionContent::Type::Table)
+    {
+        content.reset(new ResultReport::SectionContentTable(section, task_man));
+    }
+    else if (type == ResultReport::SectionContent::Type::Text)
+    {
+        content.reset(new ResultReport::SectionContentText(section, task_man));
+    }
+    else
+    {
+        bool valid_section_content_type = false;
+        assert(valid_section_content_type);
+    }
+
+    bool ok = content->fromJSON(content_vec.get(0));
+    assert(ok);
+
+    return content;
 }
 
 /**

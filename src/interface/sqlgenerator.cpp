@@ -777,7 +777,7 @@ std::string SQLGenerator::getTableTaskResultsCreateStatement()
         << TaskResult::DBColumnName.name()        << " "  << TaskResult::DBColumnName.dbDataTypeString(config_.precise_types)        << ", "
         << TaskResult::DBColumnJSONContent.name() << " "  << TaskResult::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
         << TaskResult::DBColumnResultType.name()  << " "  << TaskResult::DBColumnResultType.dbDataTypeString(config_.precise_types)  << ", "
-        << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
+        << "PRIMARY KEY (" << TaskResult::DBColumnID.name() << ")"
         << ");";
     
     return ss.str();
@@ -791,12 +791,10 @@ std::string SQLGenerator::getTableReportContentsCreateStatement()
 
     ss << "CREATE TABLE " << ResultReport::SectionContent::DBTableName << "("
         << ResultReport::SectionContent::DBColumnContentID.name()   << " "  << ResultReport::SectionContent::DBColumnContentID.dbDataTypeString(config_.precise_types)   << ", "
-        << ResultReport::SectionContent::DBColumnSectionID.name()   << " "  << ResultReport::SectionContent::DBColumnSectionID.dbDataTypeString(config_.precise_types)   << ", "
-        << ResultReport::SectionContent::DBColumnReportID.name()    << " "  << ResultReport::SectionContent::DBColumnReportID.dbDataTypeString(config_.precise_types)    << ", "
-        << ResultReport::SectionContent::DBColumnName.name()        << " "  << ResultReport::SectionContent::DBColumnName.dbDataTypeString(config_.precise_types)        << ", "
+        << ResultReport::SectionContent::DBColumnResultID.name()    << " "  << ResultReport::SectionContent::DBColumnResultID.dbDataTypeString(config_.precise_types)    << ", "
         << ResultReport::SectionContent::DBColumnType.name()        << " "  << ResultReport::SectionContent::DBColumnType.dbDataTypeString(config_.precise_types)        << ", "
         << ResultReport::SectionContent::DBColumnJSONContent.name() << " "  << ResultReport::SectionContent::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
-        << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
+        << "PRIMARY KEY (" << ResultReport::SectionContent::DBColumnContentID.name() << ")"
         << ");";
     
     return ss.str();

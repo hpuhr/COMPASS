@@ -29,7 +29,7 @@ namespace ResultReport
 {
 
 class Section;
-class SectionContentFigure;
+class SectionContent;
 
 /**
  */
@@ -49,12 +49,14 @@ public:
 
     std::shared_ptr<Section> rootSection();
     std::vector<std::shared_ptr<Section>> reportSections() const;
-    std::vector<SectionContentFigure*> reportFigures() const;
+    std::vector<std::shared_ptr<SectionContent>> reportContents() const;
 
     Section& getSection (const std::string& id); // bla:bla2
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
+
+    static const std::string FieldRootSection;
 
 protected:
     TaskManager& task_man_;

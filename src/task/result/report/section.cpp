@@ -412,20 +412,17 @@ const vector<shared_ptr<SectionContent>>& Section::content() const
 
 /**
 */
-std::vector<SectionContentFigure*> Section::sectionsFigures(bool recursive) const
+vector<shared_ptr<SectionContent>> Section::recursiveContent() const
 {
-    std::vector<SectionContentFigure*> figures = getFigures();
+    vector<shared_ptr<SectionContent>> sec_content = content();
 
-    if (recursive)
+    for (const auto& s : sub_sections_)
     {
-        for (const auto& s : sub_sections_)
-        {
-            auto f = s->sectionsFigures(true);
-            figures.insert(figures.end(), f.begin(), f.end());
-        }
+        auto c = s->recursiveContent();
+        sec_content.insert(sec_content.end(), c.begin(), c.end());
     }
 
-    return figures;
+    return sec_content;
 }
 
 /**

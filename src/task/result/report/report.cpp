@@ -28,6 +28,8 @@ using namespace Utils;
 namespace ResultReport
 {
 
+const std::string Report::FieldRootSection = "root_section";
+
 /**
  */
 Report::Report(TaskManager& task_man)
@@ -110,9 +112,9 @@ std::vector<std::shared_ptr<Section>> Report::reportSections() const
 
 /**
  */
-std::vector<SectionContentFigure*> Report::reportFigures() const
+std::vector<std::shared_ptr<SectionContent>> Report::reportContents() const
 {
-    return root_section_->sectionsFigures(true);
+    return root_section_->recursiveContent();
 }
 
 /**
@@ -160,7 +162,7 @@ nlohmann::json Report::toJSON() const
 {
     nlohmann::json root;
 
-    
+    root[ FieldRootSection ] = root_section_->toJSON();
 
     return root;
 }
@@ -169,6 +171,13 @@ nlohmann::json Report::toJSON() const
  */
 bool Report::fromJSON(const nlohmann::json& j)
 {
+    if (!j.is_object() ||
+        !j.contains(FieldRootSection))
+        return false;
+
+    if (!root_section_->fromJSON(j))
+        return false;
+
     return true;
 }
 

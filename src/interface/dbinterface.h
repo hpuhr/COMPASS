@@ -57,6 +57,7 @@ class TaskResult;
 
 namespace ResultReport
 {
+    class Section;
     class SectionContent;
 }
 
@@ -193,6 +194,8 @@ public:
     void createTaskResultsTable();
     void createReportContentsTable();
     void saveResult(const TaskResult& result);
+    std::vector<std::shared_ptr<TaskResult>> loadResults();
+    std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, unsigned int content_id);
 
     void clearTableContent(const std::string& table_name);
 

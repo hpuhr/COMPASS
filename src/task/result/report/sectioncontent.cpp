@@ -24,12 +24,10 @@ namespace ResultReport
 {
 
 const std::string SectionContent::DBTableName         = "report_viewables";
-const Property    SectionContent::DBColumnContentID   = Property("content_id"  , PropertyDataType::UINT  );
-const Property    SectionContent::DBColumnSectionID   = Property("section_id"  , PropertyDataType::UINT  );
-const Property    SectionContent::DBColumnReportID    = Property("report_id"   , PropertyDataType::UINT  );
-const Property    SectionContent::DBColumnType        = Property("type"        , PropertyDataType::INT   );
-const Property    SectionContent::DBColumnName        = Property("name"        , PropertyDataType::STRING);
-const Property    SectionContent::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON  );
+const Property    SectionContent::DBColumnContentID   = Property("content_id"  , PropertyDataType::UINT);
+const Property    SectionContent::DBColumnResultID    = Property("result_id"   , PropertyDataType::UINT);
+const Property    SectionContent::DBColumnType        = Property("type"        , PropertyDataType::INT );
+const Property    SectionContent::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON);
 
 const std::string SectionContent::FieldType = "type";
 const std::string SectionContent::FieldID   = "id";
@@ -107,6 +105,13 @@ SectionContent::Type SectionContent::type() const
 std::string SectionContent::typeAsString() const
 {
     return SectionContent::typeAsString(type_);
+}
+
+/**
+ */
+unsigned int SectionContent::id() const
+{
+    return id_;
 }
 
 /**
