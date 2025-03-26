@@ -35,25 +35,33 @@
 namespace ResultReport
 {
 
-const std::string SectionContentFigure::DBTableName         = "report_viewables";
-const Property    SectionContentFigure::DBColumnViewableID  = Property("viewable_id" , PropertyDataType::UINT);
-const Property    SectionContentFigure::DBColumnReportID    = Property("report_id"   , PropertyDataType::UINT);
-const Property    SectionContentFigure::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON);
+const std::string SectionContentFigure::FieldCaption         = "caption";
+const std::string SectionContentFigure::FieldRenderDelayMSec = "render_delay_msec";
+const std::string SectionContentFigure::FieldViewable        = "viewable";
 
 /**
  */
-SectionContentFigure::SectionContentFigure(const std::string& name, 
+SectionContentFigure::SectionContentFigure(unsigned int id,
+                                           const std::string& name, 
                                            const std::string& caption,
                                            std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
                                            Section* parent_section,
                                            TaskManager& task_man,
                                            int render_delay_msec)
-:   SectionContent    (name, parent_section, task_man)
+:   SectionContent    (Type::Figure, id, name, parent_section, task_man)
 ,   caption_          (caption)
 ,   render_delay_msec_(render_delay_msec)
 ,   viewable_fnc_     (viewable_fnc)
 {
    //assert (viewable_data_);
+}
+
+/**
+ */
+SectionContentFigure::SectionContentFigure(Section* parent_section, 
+                                           TaskManager& task_man)
+:   SectionContent(Type::Figure, parent_section, task_man)
+{
 }
 
 /**
@@ -114,6 +122,41 @@ std::string SectionContentFigure::getSubPath() const
     assert (parent_section_);
 
     return EvaluationResultsReport::SectionID::sectionID2Path(parent_section_->compoundResultsHeading());
+}
+
+void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
+{
+    root_node[ FieldCaption         ] = caption_;
+    root_node[ FieldRenderDelayMSec ] = render_delay_msec_;
+
+    nlohmann::json jviewable = nlohmann::json::object();
+    if (viewable_fnc_)
+    {
+        auto viewable = viewable_fnc_();
+        if (viewable)
+            jviewable = *viewable;
+    }
+
+    root_node[ FieldViewable ] = jviewable;
+}
+
+bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
+{
+    if (!j.is_object()                    ||
+        !j.contains(FieldCaption)         ||
+        !j.contains(FieldRenderDelayMSec) ||
+        !j.contains(FieldViewable))
+        return false;
+
+    caption_ = j[ FieldCaption ];
+    render_delay_msec_ = j[ FieldRenderDelayMSec ];
+
+    std::shared_ptr<nlohmann::json::object_t> jviewable(new nlohmann::json::object_t);
+    *jviewable = j[ FieldViewable ];
+
+    viewable_fnc_ = [ = ] () { return jviewable; };
+
+    return true;
 }
 
 }

@@ -39,7 +39,7 @@
 
 #include "task/result/taskresult.h"
 #include "task/result/report/section.h"
-#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontent.h"
 
 #include "viewpoint.h"
 
@@ -1708,16 +1708,9 @@ bool DBInterface::existsTaskResultsTable() const
 
 /**
  */
-bool DBInterface::existsReportSectionsTable() const
+bool DBInterface::existsReportContentsTable() const
 {
-    return existsTable(ResultReport::Section::DBTableName);
-}
-
-/**
- */
-bool DBInterface::existsReportViewablesTable() const
-{
-    return existsTable(ResultReport::SectionContentFigure::DBTableName);
+    return existsTable(ResultReport::SectionContent::DBTableName);
 }
 
 /**
@@ -1739,34 +1732,17 @@ void DBInterface::createTaskResultsTable()
 
 /**
  */
-void DBInterface::createReportSectionsTable()
+void DBInterface::createReportContentsTable()
 {
     assert(ready());
-    assert(!existsReportSectionsTable());
+    assert(!existsReportContentsTable());
 
     {
         #ifdef PROTECT_INSTANCE
         boost::mutex::scoped_lock locker(instance_mutex_);
         #endif
 
-        execute(sqlGenerator().getTableResultSectionsCreateStatement());
-        updateTableInfo();
-    }
-}
-
-/**
- */
-void DBInterface::createReportViewablesTable()
-{
-    assert(ready());
-    assert(!existsReportViewablesTable());
-
-    {
-        #ifdef PROTECT_INSTANCE
-        boost::mutex::scoped_lock locker(instance_mutex_);
-        #endif
-
-        execute(sqlGenerator().getTableResultViewablesCreateStatement());
+        execute(sqlGenerator().getTableReportContentsCreateStatement());
         updateTableInfo();
     }
 }
@@ -1776,20 +1752,6 @@ void DBInterface::createReportViewablesTable()
 void DBInterface::saveResult(const TaskResult& result)
 {
 
-}
-
-/**
- */
-void DBInterface::saveReportSections(const std::vector<const ResultReport::Section*>& sections)
-{
-
-}
-
-/**
- */
-void DBInterface::saveReportViewables(const std::vector<const ResultReport::SectionContentFigure*>& figures)
-{
-    
 }
 
 /**

@@ -50,6 +50,8 @@ public:
             const string& parent_heading, 
             TreeItem* parent_item,
             TaskManager& task_man);
+    Section(TreeItem* parent_item,
+            TaskManager& task_man);
 
     virtual TreeItem* child(int row) override;
     virtual int childCount() const override;
@@ -64,7 +66,7 @@ public:
     bool hasSubSection (const std::string& heading);
     Section& getSubSection (const std::string& heading);
     void addSubSection (const std::string& heading);
-    std::vector<std::shared_ptr<Section>> subSections() const;
+    std::vector<std::shared_ptr<Section>> subSections(bool recursive) const;
 
     QWidget* getContentWidget();
 
@@ -92,6 +94,7 @@ public:
     virtual void accept(LatexVisitor& v) const;
 
     const vector<shared_ptr<SectionContent>>& content() const;
+    std::vector<SectionContentFigure*> sectionsFigures(bool recursive) const;
 
     bool perTargetSection() const; // to be used for utn and sub-sections
     void perTargetSection(bool value);
@@ -99,10 +102,20 @@ public:
     bool perTargetWithIssues() const; // te be set if requirement (any) requirement failed
     void perTargetWithIssues(bool value);
 
+    nlohmann::json toJSON() const;
+    bool fromJSON(const nlohmann::json& j);
+
     static const std::string DBTableName;
     static const Property    DBColumnSectionID;
     static const Property    DBColumnReportID;
     static const Property    DBColumnJSONContent;
+
+    static const std::string FieldID;
+    static const std::string FieldHeading;
+    static const std::string FieldParentHeading;
+    static const std::string FieldPerTarget;
+    static const std::string FieldPerTargetWithIssues;
+    static const std::string FieldSubSections;
 
 protected:
     Section* findSubSection (const std::string& heading); // nullptr if not found
@@ -111,6 +124,8 @@ protected:
     SectionContentFigure* findFigure (const std::string& name); // nullptr if not found
 
     void createContentWidget();
+
+    static unsigned int newContentID();
 
     string heading_; // name same as heading
     string parent_heading_; // e.g. "head1:head2" or ""
@@ -125,6 +140,8 @@ protected:
     unique_ptr<QWidget> content_widget_;
 
     vector<shared_ptr<Section>> sub_sections_;
+
+    static unsigned int current_content_id_;
 };
 
 }

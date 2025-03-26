@@ -57,8 +57,7 @@ class TaskResult;
 
 namespace ResultReport
 {
-    class Section;
-    class SectionContentFigure;
+    class SectionContent;
 }
 
 class QWidget;
@@ -190,14 +189,10 @@ public:
     void clearAssociations(const DBContent& dbcontent);
 
     bool existsTaskResultsTable() const;
-    bool existsReportSectionsTable() const;
-    bool existsReportViewablesTable() const;
+    bool existsReportContentsTable() const;
     void createTaskResultsTable();
-    void createReportSectionsTable();
-    void createReportViewablesTable();
+    void createReportContentsTable();
     void saveResult(const TaskResult& result);
-    void saveReportSections(const std::vector<const ResultReport::Section*>& sections);
-    void saveReportViewables(const std::vector<const ResultReport::SectionContentFigure*>& figures);
 
     void clearTableContent(const std::string& table_name);
 

@@ -49,22 +49,30 @@ namespace ResultReport
 
 const int SectionContentTable::DoubleClickCheckIntervalMSecs = 300;
 
+const std::string SectionContentTable::FieldHeadings     = "headings";
+const std::string SectionContentTable::FieldSortable     = "sortable";
+const std::string SectionContentTable::FieldSortColumn   = "sort_column";
+const std::string SectionContentTable::FieldSortOrder    = "order";
+const std::string SectionContentTable::FieldRows         = "rows";
+const std::string SectionContentTable::FieldAnnotations  = "annotations";
+
 /**
  */
-SectionContentTable::SectionContentTable(const std::string& name, 
+SectionContentTable::SectionContentTable(unsigned int id,
+                                         const std::string& name, 
                                          unsigned int num_columns,
                                          const std::vector<std::string>& headings, 
                                          Section* parent_section,
                                          TaskManager& task_man, 
                                          bool sortable,
                                          unsigned int sort_column, 
-                                         Qt::SortOrder order)
-:   SectionContent(name, parent_section, task_man)
+                                         Qt::SortOrder sort_order)
+:   SectionContent(Type::Table, id, name, parent_section, task_man)
 ,   num_columns_  (num_columns)
 ,   headings_     (headings)
 ,   sortable_     (sortable)
 ,   sort_column_  (sort_column)
-,   order_        (order)
+,   sort_order_   (sort_order)
 {
     click_action_timer_.setSingleShot(true);
     click_action_timer_.setInterval(DoubleClickCheckIntervalMSecs);
@@ -73,9 +81,18 @@ SectionContentTable::SectionContentTable(const std::string& name,
 
 /**
  */
-void SectionContentTable::addRow (const std::vector<QVariant>& row,
+SectionContentTable::SectionContentTable(Section* parent_section,
+                                         TaskManager& task_man)
+:   SectionContent(Type::Table, parent_section, task_man)
+{
+}
+
+/**
+ */
+void SectionContentTable::addRow (const nlohmann::json& row,
                                   QVariant annotation)
 {
+    assert(row.is_array());
     assert (row.size() == num_columns_);
 
     rows_.push_back(row);
@@ -118,7 +135,7 @@ void SectionContentTable::addToLayout(QVBoxLayout* layout)
         if (sortable_)
         {
             table_view_->setSortingEnabled(true);
-            table_view_->sortByColumn(sort_column_, order_);
+            table_view_->sortByColumn(sort_column_, sort_order_);
         }
 
         table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -178,6 +195,27 @@ int SectionContentTable::columnCount(const QModelIndex& parent) const
     return num_columns_;
 }
 
+namespace
+{
+    QVariant qVariantFromJSON(const nlohmann::json& j)
+    {
+        if (j.is_boolean())
+            return QVariant::fromValue(j.get<bool>());
+        else if (j.is_number_integer())
+            return QVariant::fromValue(j.get<qint64>());  // or int, depending on your use case
+        else if (j.is_number_unsigned())
+            return QVariant::fromValue(j.get<quint64>());
+        else if (j.is_number_float())
+            return QVariant::fromValue(j.get<double>());
+        else if (j.is_string())
+            return QVariant::fromValue(QString::fromStdString(j.get<std::string>()));
+        else if (j.is_null())
+            return QVariant();
+        else
+            return QVariant();
+    };
+}
+
 /**
  */
 QVariant SectionContentTable::data(const QModelIndex& index, int role) const
@@ -195,7 +233,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
         assert (index.row() < rows_.size());
         assert (index.column() < num_columns_);
 
-        return rows_.at(index.row()).at(index.column());
+        return qVariantFromJSON(rows_.at(index.row()).at(index.column()));
     }
     case Qt::BackgroundRole:
     {
@@ -217,7 +255,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
         assert (index.row() < rows_.size());
         assert (index.column() < num_columns_);
 
-        QVariant data = rows_.at(index.row()).at(index.column());
+        QVariant data = qVariantFromJSON(rows_.at(index.row()).at(index.column()));
 
         if (data.userType() == QMetaType::QString)
         {
@@ -327,7 +365,7 @@ std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row,
         if (sortable_)
         {
             table_view_->setSortingEnabled(true);
-            table_view_->sortByColumn(sort_column_, order_);
+            table_view_->sortByColumn(sort_column_, sort_order_);
         }
 
         table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -893,6 +931,41 @@ nlohmann::json SectionContentTable::toJSON(bool rowwise,
                                            const std::vector<int>& cols) const
 {
     return toStringTable().toJSON(rowwise, cols);
+}
+
+/**
+ */
+void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
+{
+    root_node[ FieldHeadings   ] = headings_;
+    root_node[ FieldSortable   ] = sortable_;
+    root_node[ FieldSortColumn ] = sort_column_;
+    root_node[ FieldSortOrder  ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
+    root_node[ FieldRows       ] = rows_;
+}
+
+/**
+ */
+bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
+{
+    if (!j.is_object()               ||
+        !j.contains(FieldHeadings)   ||
+        !j.contains(FieldSortable)   ||
+        !j.contains(FieldSortColumn) ||
+        !j.contains(FieldSortOrder)  ||
+        !j.contains(FieldRows))
+        return false;
+
+    headings_    = j[ FieldHeadings   ].get<std::vector<std::string>>();
+    sortable_    = j[ FieldSortable   ];
+    sort_column_ = j[ FieldSortColumn ];
+
+    std::string sort_order = j[ FieldSortOrder ];
+    sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;
+
+    rows_ = j[ FieldRows ].get<std::vector<nlohmann::json>>();
+
+    return true;
 }
 
 }

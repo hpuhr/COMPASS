@@ -93,8 +93,7 @@ public:
     std::string getTableViewPointsCreateStatement();
     std::string getTableTargetsCreateStatement();
     std::string getTableTaskResultsCreateStatement();
-    std::string getTableResultSectionsCreateStatement();
-    std::string getTableResultViewablesCreateStatement();
+    std::string getTableReportContentsCreateStatement();
 
     std::string getDeleteStatement (const std::string& table, const std::string& filter);
 

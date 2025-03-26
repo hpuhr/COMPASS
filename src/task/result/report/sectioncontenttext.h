@@ -34,8 +34,11 @@ class Section;
 class SectionContentText : public SectionContent
 {
 public:
-    SectionContentText(const std::string& name, 
+    SectionContentText(unsigned int id, 
+                       const std::string& name, 
                        Section* parent_section, 
+                       TaskManager& task_man);
+    SectionContentText(Section* parent_section, 
                        TaskManager& task_man);
 
     void addText (const std::string& text);
@@ -45,7 +48,12 @@ public:
 
     const std::vector<std::string>& texts() const;
 
+    static const std::string FieldTexts;
+
 protected:
+    void toJSON_impl(nlohmann::json& root_node) const override final;
+    bool fromJSON_impl(const nlohmann::json& j) override final;
+
     std::vector<std::string> texts_;
 };
 

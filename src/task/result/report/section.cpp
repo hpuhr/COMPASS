@@ -36,6 +36,15 @@ const Property    Section::DBColumnSectionID   = Property("section_id"  , Proper
 const Property    Section::DBColumnReportID    = Property("report_id"   , PropertyDataType::UINT);
 const Property    Section::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON);
 
+const std::string Section::FieldID                  = "section_id";
+const std::string Section::FieldHeading             = "heading";
+const std::string Section::FieldParentHeading       = "parent_heading";
+const std::string Section::FieldPerTarget           = "per_target_section";
+const std::string Section::FieldPerTargetWithIssues = "per_target_section_with_issues";
+const std::string Section::FieldSubSections         = "sub_sections";
+
+unsigned int Section::current_content_id_ = 0;
+
 /**
 */
 Section::Section(const string& heading, 
@@ -45,15 +54,31 @@ Section::Section(const string& heading,
 :   TreeItem       (heading, parent_item)
 ,   heading_       (heading)
 ,   parent_heading_(parent_heading)
-,   task_man_    (task_man)
+,   task_man_      (task_man)
 {
+}
+
+/**
+*/
+Section::Section(TreeItem* parent_item,
+                 TaskManager& task_man)
+:   TreeItem (parent_item)
+,   task_man_(task_man   )
+{
+}
+
+/**
+*/
+unsigned int Section::newContentID()
+{
+    return current_content_id_++;
 }
 
 /**
 */
 TreeItem* Section::child(int row)
 {
-    if (row < 0 || row >= sub_sections_.size())
+    if (row < 0 || row >= (int)sub_sections_.size())
         return nullptr;
 
     return sub_sections_.at(row).get();
@@ -155,9 +180,20 @@ void Section::addSubSection (const std::string& heading)
 
 /**
 */
-std::vector<std::shared_ptr<Section>> Section::subSections() const
+std::vector<std::shared_ptr<Section>> Section::subSections(bool recursive) const
 {
-    return sub_sections_;
+    std::vector<std::shared_ptr<Section>> sections = sub_sections_;
+
+    if (recursive)
+    {
+        for (const auto& s : sub_sections_)
+        {
+            auto subs = s->subSections(true);
+            sections.insert(sections.end(), subs.begin(), subs.end());
+        }
+    }
+
+    return sections;
 }
 
 /**
@@ -194,7 +230,7 @@ SectionContentText& Section::getText (const std::string& name)
 void Section::addText(const std::string& name)
 {
     assert (!hasText(name));
-    content_.push_back(std::make_shared<SectionContentText>(name, this, task_man_));
+    content_.push_back(std::make_shared<SectionContentText>(Section::newContentID(), name, this, task_man_));
     assert (hasText(name));
 }
 
@@ -241,7 +277,8 @@ void Section::addTable(const std::string& name,
                        Qt::SortOrder order)
 {
     assert (!hasTable(name));
-    content_.push_back(std::make_shared<SectionContentTable>(name, 
+    content_.push_back(std::make_shared<SectionContentTable>(Section::newContentID(), 
+                                                             name, 
                                                              num_columns, 
                                                              headings, 
                                                              this, 
@@ -275,7 +312,8 @@ void Section::addFigure(const std::string& name, const string& caption,
                                     int render_delay_msec)
 {
     assert (!hasFigure(name));
-    content_.push_back(std::make_shared<SectionContentFigure>(name, 
+    content_.push_back(std::make_shared<SectionContentFigure>(Section::newContentID(), 
+                                                              name, 
                                                               caption, 
                                                               viewable_fnc, 
                                                               this, 
@@ -370,6 +408,24 @@ void Section::accept(LatexVisitor& v) const
 const vector<shared_ptr<SectionContent>>& Section::content() const
 {
     return content_;
+}
+
+/**
+*/
+std::vector<SectionContentFigure*> Section::sectionsFigures(bool recursive) const
+{
+    std::vector<SectionContentFigure*> figures = getFigures();
+
+    if (recursive)
+    {
+        for (const auto& s : sub_sections_)
+        {
+            auto f = s->sectionsFigures(true);
+            figures.insert(figures.end(), f.begin(), f.end());
+        }
+    }
+
+    return figures;
 }
 
 /**
@@ -480,6 +536,76 @@ void Section::createContentWidget()
     //layout->addStretch();
 
     content_widget_->setLayout(layout);
+}
+
+/**
+*/
+nlohmann::json Section::toJSON() const
+{
+    nlohmann::json root;
+
+    root[ FieldID                  ] = 0; //@TODO
+    root[ FieldHeading             ] = heading_;
+    root[ FieldParentHeading       ] = parent_heading_;
+    root[ FieldPerTarget           ] = per_target_section_;
+    root[ FieldPerTargetWithIssues ] = per_target_section_with_issues_;
+
+    nlohmann::json j_subsections = nlohmann::json::array();
+
+    for (const auto& s : sub_sections_)
+    {
+        nlohmann::json js = s->toJSON();
+        j_subsections.push_back(js);
+    }
+
+    root[ FieldSubSections ] = j_subsections;
+
+    return root;
+}
+
+/**
+*/
+bool Section::fromJSON(const nlohmann::json& j)
+{
+    if (!j.is_object()                        ||
+        !j.contains(FieldID)                  ||
+        !j.contains(FieldHeading)             ||
+        !j.contains(FieldParentHeading)       ||
+        !j.contains(FieldPerTarget)           ||
+        !j.contains(FieldPerTargetWithIssues) ||
+        !j.contains(FieldSubSections))
+        return false;
+
+    try
+    {
+        //root[ FieldID ]
+        heading_                        = j[ FieldHeading             ];
+        parent_heading_                 = j[ FieldParentHeading       ];
+        per_target_section_             = j[ FieldPerTarget           ];
+        per_target_section_with_issues_ = j[ FieldPerTargetWithIssues ];
+
+        //restore TreeItem content
+        setItemName(heading_);
+
+        const auto& j_subsections = j[ FieldSubSections ];
+        if (!j_subsections.is_array())
+            return false;
+
+        for (const auto& jss : j_subsections)
+        {
+            std::shared_ptr<Section> section(new Section(this, task_man_));
+            if (!section->fromJSON(jss))
+                return false;
+
+            sub_sections_.push_back(section);
+        }
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 }

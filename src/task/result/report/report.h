@@ -48,8 +48,8 @@ public:
     virtual int row() const override;
 
     std::shared_ptr<Section> rootSection();
-    std::vector<std::shared_ptr<Section>> sections() const;
-    std::vector<std::shared_ptr<SectionContentFigure>> figures() const;
+    std::vector<std::shared_ptr<Section>> reportSections() const;
+    std::vector<SectionContentFigure*> reportFigures() const;
 
     Section& getSection (const std::string& id); // bla:bla2
 
