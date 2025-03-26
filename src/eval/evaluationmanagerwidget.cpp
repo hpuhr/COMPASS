@@ -95,7 +95,7 @@ EvaluationManagerWidget::~EvaluationManagerWidget() = default;
  */
 QIcon EvaluationManagerWidget::toolIcon() const
 {
-    return QIcon(Utils::Files::getIconFilepath("scale.png").c_str());
+    return QIcon(Utils::Files::getIconFilepath("reports.png").c_str());
 }
 
 /**

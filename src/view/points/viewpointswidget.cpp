@@ -151,7 +151,7 @@ ViewPointsWidget::~ViewPointsWidget() = default;
  */
 QIcon ViewPointsWidget::toolIcon() const
 {
-    return QIcon(Utils::Files::getIconFilepath("eye.png").c_str());
+    return QIcon(Utils::Files::getIconFilepath("view_points.png").c_str());
 }
 
 /**
