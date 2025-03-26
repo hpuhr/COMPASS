@@ -52,6 +52,7 @@
 #include "toolbox.h"
 #include "toolboxwidget.h"
 #include "viewpointswidget.h"
+#include "taskresultswidget.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
@@ -213,7 +214,10 @@ void MainWindow::createUI()
     tool_box_->addTool(COMPASS::instance().dbContentManager().targetListWidget());
 
     if (!COMPASS::instance().hideEvaluation())
+    {
         tool_box_->addTool(COMPASS::instance().evaluationManager().widget());
+        tool_box_->addTool(COMPASS::instance().taskManager().widget());
+    }
 
     if (!COMPASS::instance().hideViewpoints())
         tool_box_->addTool(COMPASS::instance().viewManager().viewPointsWidget());

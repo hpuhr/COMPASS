@@ -32,6 +32,7 @@
 #include "asteriximporttaskwidget.h"
 
 #include "taskresult.h"
+#include "taskresultswidget.h"
 
 #include <cassert>
 
@@ -284,6 +285,16 @@ ReconstructorTask& TaskManager::reconstructReferencesTask() const
     assert(reconstruct_references_task_);
     return *reconstruct_references_task_;
 }
+
+TaskResultsWidget* TaskManager::widget()
+{
+    if (!widget_)
+        widget_.reset(new TaskResultsWidget(*this));
+
+    assert(widget_);
+    return widget_.get();
+}
+
 
 MainWindow* TaskManager::getMainWindow()
 {

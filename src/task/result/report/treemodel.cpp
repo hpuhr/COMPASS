@@ -26,13 +26,28 @@ namespace ResultReport
 
 /**
  */
-TreeModel::TreeModel(const std::shared_ptr<Report>& report, 
-                     TaskManager& task_man)
+TreeModel::TreeModel()
 :   QAbstractItemModel(nullptr)
-,   report_    (report    )
-,   task_man_(task_man)
 {
-    assert(report_);
+}
+
+void TreeModel::setReport(const std::shared_ptr<Report>& report)
+{
+    beginResetModel();
+
+    assert (report);
+    report_ = report;
+
+    endResetModel();
+}
+
+void TreeModel::clear()
+{
+    beginResetModel();
+
+    report_ = nullptr;
+
+    endResetModel();
 }
 
 /**
@@ -41,6 +56,9 @@ int TreeModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
         return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
+
+    if (!report_)
+        return 0;
 
     return report_->columnCount();
 }
@@ -78,7 +96,7 @@ Qt::ItemFlags TreeModel::flags(const QModelIndex &index) const
 QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
                                 int role) const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (report_ && orientation == Qt::Horizontal && role == Qt::DisplayRole)
         return report_->data(section);
 
     return QVariant();
@@ -88,7 +106,7 @@ QVariant TreeModel::headerData(int section, Qt::Orientation orientation,
  */
 QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) const
 {
-    if (!hasIndex(row, column, parent))
+    if (!report_ || !hasIndex(row, column, parent))
         return QModelIndex();
 
     TreeItem *parentItem;
@@ -108,7 +126,7 @@ QModelIndex TreeModel::index(int row, int column, const QModelIndex &parent) con
  */
 QModelIndex TreeModel::parent(const QModelIndex &index) const
 {
-    if (!index.isValid())
+    if (!report_ || !index.isValid())
         return QModelIndex();
 
     TreeItem *childItem = static_cast<TreeItem*>(index.internalPointer());
@@ -125,7 +143,7 @@ QModelIndex TreeModel::parent(const QModelIndex &index) const
 int TreeModel::rowCount(const QModelIndex &parent) const
 {
     TreeItem *parentItem;
-    if (parent.column() > 0)
+    if (!report_ || parent.column() > 0)
         return 0;
 
     if (!parent.isValid())
@@ -138,7 +156,7 @@ int TreeModel::rowCount(const QModelIndex &parent) const
 
 /**
  */
-QModelIndex TreeModel::findItem(const std::string& id)
+QModelIndex TreeModel::findItem(const std::string& id) const
 {
     QModelIndexList items = match(
                 index(0, 0),
@@ -177,6 +195,7 @@ void TreeModel::endReset()
  */
 const Report* TreeModel::rootItem() const
 {
+    //assert (report_);
     return report_.get();
 }
 

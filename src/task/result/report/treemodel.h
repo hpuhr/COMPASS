@@ -35,7 +35,10 @@ class Report;
 class TreeModel : public QAbstractItemModel
 {
 public:
-    TreeModel(const std::shared_ptr<Report>& report, TaskManager& task_man);
+    TreeModel();
+
+    void setReport(const std::shared_ptr<Report>& report);
+    void clear();
 
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
@@ -47,16 +50,15 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    QModelIndex findItem (const std::string& id); // "Report:Results:Overview"
+    QModelIndex findItem (const std::string& id) const; // "Report:Results:Overview"
 
     void beginReset();
     void endReset();
 
-    const Report* rootItem() const;
+    const Report* rootItem() const; // may report nullptr
 
 protected:
     std::shared_ptr<Report> report_ = nullptr;
-    TaskManager&          task_man_;
 };
 
 }

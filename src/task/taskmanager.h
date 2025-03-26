@@ -34,6 +34,7 @@ class ManageSectorsTask;
 class ReconstructorTask;
 class MainWindow;
 class TaskResult;
+class TaskResultsWidget;
 
 class QMainWindow;
 
@@ -79,6 +80,8 @@ class TaskManager : public QObject, public Configurable
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     ReconstructorTask& reconstructReferencesTask() const;
 
+    TaskResultsWidget* widget();
+
     const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
     std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
     std::shared_ptr<TaskResult> getOrCreateResult (const std::string& name); // get or create result
@@ -99,6 +102,8 @@ protected:
     virtual void checkSubConfigurables() override;
 
     std::map<std::string, Task*> tasks_;
+
+    std::unique_ptr<TaskResultsWidget> widget_{nullptr};
 
     std::map<unsigned int, std::shared_ptr<TaskResult>> results_; // id -> result
 
