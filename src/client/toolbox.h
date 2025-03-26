@@ -24,6 +24,7 @@
 #include <QWidget>
 
 #include <boost/optional.hpp>
+#include <memory>
 
 class ToolBoxWidget;
 

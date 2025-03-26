@@ -109,7 +109,7 @@ FilterManagerWidget::~FilterManagerWidget()
  */
 QIcon FilterManagerWidget::toolIcon() const 
 {
-    return QIcon(Utils::Files::getIconFilepath("filter.png").c_str());
+    return QIcon(Utils::Files::getIconFilepath("db_filters.png").c_str());
 }
 
 /**

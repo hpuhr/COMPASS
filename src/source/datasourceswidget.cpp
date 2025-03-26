@@ -442,7 +442,7 @@ DataSourcesWidget::~DataSourcesWidget() = default;
  */
 QIcon DataSourcesWidget::toolIcon() const 
 {
-    return QIcon(Utils::Files::getIconFilepath("db.png").c_str());
+    return QIcon(Utils::Files::getIconFilepath("data_sources.png").c_str());
 }
 
 /**

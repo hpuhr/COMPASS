@@ -67,7 +67,7 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
  */
 QIcon TargetListWidget::toolIcon() const
 {
-    return QIcon(Utils::Files::getIconFilepath("globe.png").c_str());
+    return QIcon(Utils::Files::getIconFilepath("targets.png").c_str());
 }
 
 /**

@@ -118,15 +118,17 @@ MainWindow::MainWindow()
     if (settings.value("MainWindow/isFullScreen", false).toBool())
     {
         // Enter fullscreen with no decorations
-        setWindowFlag(Qt::FramelessWindowHint, true);
+        //setWindowFlag(Qt::FramelessWindowHint, true);
+        setWindowFlags(Qt::FramelessWindowHint);
         showMaximized();
         showFullScreen(); // Re-show to apply
     }
     else
     {
         // No fullscreen: restore window flags and normal size
-        setWindowFlag(Qt::FramelessWindowHint, false); // Remove frameless
-        setWindowFlag(Qt::Window, true);               // Ensure normal window flags
+        //setWindowFlag(Qt::FramelessWindowHint, false); // Remove frameless
+        setWindowFlags(Qt::Window);
+        //setWindowFlag(Qt::Window, true);               // Ensure normal window flags
 
         if (settings.value("MainWindow/isMaximized", false).toBool())
         {
@@ -1261,8 +1263,9 @@ void MainWindow::toggleFullscreenSlot()
     if (isFullScreen())
     {
         // Exit fullscreen: restore window flags and normal size
-        setWindowFlag(Qt::FramelessWindowHint, false); // Remove frameless
-        setWindowFlag(Qt::Window, true);               // Ensure normal window flags
+        //setWindowFlag(Qt::FramelessWindowHint, false); // Remove frameless
+        //setWindowFlag(Qt::Window, true);               // Ensure normal window flags
+        setWindowFlags(Qt::Window);
 
         QSettings settings("COMPASS", "Client");
 
@@ -1284,7 +1287,8 @@ void MainWindow::toggleFullscreenSlot()
         settings.setValue("MainWindow/isMaximized", isMaximized());
 
         // Enter fullscreen with no decorations
-        setWindowFlag(Qt::FramelessWindowHint, true);
+        //setWindowFlag(Qt::FramelessWindowHint, true);
+        setWindowFlags(Qt::FramelessWindowHint);
         showMaximized();
         showFullScreen(); // Re-show to apply
     }

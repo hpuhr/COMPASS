@@ -2,6 +2,8 @@
 
 #include <QDialog>
 
+#include <memory>
+
 class EvaluationManager;
 class EvaluationManagerSettings;
 class EvaluationMainTabWidget;
