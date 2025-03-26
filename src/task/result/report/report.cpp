@@ -15,9 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "result/report/report.h"
-#include "result/report/section.h"
-#include "result/report/sectionid.h"
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectionid.h"
 
 #include "logger.h"
 #include "stringconv.h"

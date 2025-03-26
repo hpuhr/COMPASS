@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "result/report/sectioncontent.h"
+#include "task/result/report/sectioncontent.h"
 
 #include <QObject>
 

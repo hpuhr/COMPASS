@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "result/report/sectionid.h"
+#include "task/result/report/sectionid.h"
 
 #include "stringconv.h"
 

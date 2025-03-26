@@ -15,9 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "result/report/treemodel.h"
-#include "result/report/treeitem.h"
-#include "result/report/report.h"
+#include "task/result/report/treemodel.h"
+#include "task/result/report/treeitem.h"
+#include "task/result/report/report.h"
 
 #include "logger.h"
 

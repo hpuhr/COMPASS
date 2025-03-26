@@ -15,8 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "result/report/sectioncontentfigure.h"
-#include "result/report/section.h"
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/section.h"
 
 #include "section_id.h"
 
