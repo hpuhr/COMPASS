@@ -29,14 +29,24 @@
 namespace ResultReport
 {
 
+const std::string SectionContentText::FieldTexts = "texts";
+
 /**
  */
-SectionContentText::SectionContentText(const std::string& name, 
+SectionContentText::SectionContentText(unsigned int id,
+                                       const std::string& name, 
                                        Section* parent_section, 
                                        TaskManager& task_man)
-:   SectionContent(name, parent_section, task_man)
+:   SectionContent(Type::Text, id, name, parent_section, task_man)
 {
+}
 
+/**
+ */
+SectionContentText::SectionContentText(Section* parent_section, 
+                                       TaskManager& task_man)
+:   SectionContent(Type::Text, parent_section, task_man)
+{
 }
 
 /**
@@ -75,6 +85,26 @@ void SectionContentText::accept(LatexVisitor& v)
 const std::vector<std::string>& SectionContentText::texts() const
 {
     return texts_;
+}
+
+/**
+ */
+void SectionContentText::toJSON_impl(nlohmann::json& root_node) const
+{
+    root_node[ FieldTexts ] = texts_;
+}
+
+/**
+ */
+bool SectionContentText::fromJSON_impl(const nlohmann::json& j)
+{
+    if (!j.is_object() ||
+        !j.contains(FieldTexts))
+        return false;
+
+    texts_ = j[ FieldTexts ].get<std::vector<std::string>>();
+
+    return true;
 }
 
 }

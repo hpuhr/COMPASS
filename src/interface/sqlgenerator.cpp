@@ -32,7 +32,7 @@
 
 #include "task/result/taskresult.h"
 #include "task/result/report/section.h"
-#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontent.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -785,30 +785,17 @@ std::string SQLGenerator::getTableTaskResultsCreateStatement()
 
 /**
  */
-std::string SQLGenerator::getTableResultSectionsCreateStatement()
+std::string SQLGenerator::getTableReportContentsCreateStatement()
 {
     stringstream ss;
 
-    ss << "CREATE TABLE " << ResultReport::Section::DBTableName << "("
-        << ResultReport::Section::DBColumnSectionID.name()   << " "  << ResultReport::Section::DBColumnSectionID.dbDataTypeString(config_.precise_types)   << ", "
-        << ResultReport::Section::DBColumnReportID.name()    << " "  << ResultReport::Section::DBColumnReportID.dbDataTypeString(config_.precise_types)    << ", "
-        << ResultReport::Section::DBColumnJSONContent.name() << " "  << ResultReport::Section::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
-        << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
-        << ");";
-    
-    return ss.str();
-}
-
-/**
- */
-std::string SQLGenerator::getTableResultViewablesCreateStatement()
-{
-    stringstream ss;
-
-    ss << "CREATE TABLE " << ResultReport::SectionContentFigure::DBTableName << "("
-        << ResultReport::SectionContentFigure::DBColumnViewableID.name()  << " "  << ResultReport::SectionContentFigure::DBColumnViewableID.dbDataTypeString(config_.precise_types)  << ", "
-        << ResultReport::SectionContentFigure::DBColumnReportID.name()    << " "  << ResultReport::SectionContentFigure::DBColumnReportID.dbDataTypeString(config_.precise_types)    << ", "
-        << ResultReport::SectionContentFigure::DBColumnJSONContent.name() << " "  << ResultReport::SectionContentFigure::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
+    ss << "CREATE TABLE " << ResultReport::SectionContent::DBTableName << "("
+        << ResultReport::SectionContent::DBColumnContentID.name()   << " "  << ResultReport::SectionContent::DBColumnContentID.dbDataTypeString(config_.precise_types)   << ", "
+        << ResultReport::SectionContent::DBColumnSectionID.name()   << " "  << ResultReport::SectionContent::DBColumnSectionID.dbDataTypeString(config_.precise_types)   << ", "
+        << ResultReport::SectionContent::DBColumnReportID.name()    << " "  << ResultReport::SectionContent::DBColumnReportID.dbDataTypeString(config_.precise_types)    << ", "
+        << ResultReport::SectionContent::DBColumnName.name()        << " "  << ResultReport::SectionContent::DBColumnName.dbDataTypeString(config_.precise_types)        << ", "
+        << ResultReport::SectionContent::DBColumnType.name()        << " "  << ResultReport::SectionContent::DBColumnType.dbDataTypeString(config_.precise_types)        << ", "
+        << ResultReport::SectionContent::DBColumnJSONContent.name() << " "  << ResultReport::SectionContent::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
         << "PRIMARY KEY (" << DBDataSource::id_column_.name() << ")"
         << ");";
     

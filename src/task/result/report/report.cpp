@@ -93,16 +93,21 @@ std::shared_ptr<Section> Report::rootSection()
 
 /**
  */
-std::vector<std::shared_ptr<Section>> Report::sections() const
+std::vector<std::shared_ptr<Section>> Report::reportSections() const
 {
-    return std::vector<std::shared_ptr<Section>>();
+    std::vector<std::shared_ptr<Section>> sections = { root_section_ };
+    
+    auto subs = root_section_->subSections(true);
+    sections.insert(sections.end(), subs.begin(), subs.end());
+
+    return sections;
 }
 
 /**
  */
-std::vector<std::shared_ptr<SectionContentFigure>> Report::figures() const
+std::vector<SectionContentFigure*> Report::reportFigures() const
 {
-    return std::vector<std::shared_ptr<SectionContentFigure>>();
+    return root_section_->sectionsFigures(true);
 }
 
 /**
@@ -149,6 +154,8 @@ Section& Report::getSection (const std::string& id)
 nlohmann::json Report::toJSON() const
 {
     nlohmann::json root;
+
+    
 
     return root;
 }

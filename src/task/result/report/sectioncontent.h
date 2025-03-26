@@ -19,6 +19,12 @@
 
 #include <string>
 
+#include "property.h"
+
+#include <boost/optional.hpp>
+
+#include "json.hpp"
+
 class TaskManager;
 
 class QVBoxLayout;
@@ -34,20 +40,56 @@ class Section;
 class SectionContent
 {
 public:
-    SectionContent(const std::string& name, 
+    enum class Type
+    {
+        Figure = 0,
+        Table,
+        Text
+    };
+
+    SectionContent(Type type,
+                   unsigned int id,
+                   const std::string& name, 
+                   Section* parent_section, 
+                   TaskManager& task_man);
+    SectionContent(Type type,
                    Section* parent_section, 
                    TaskManager& task_man);
 
+    Type type() const;
+    std::string typeAsString() const;
     std::string name() const;
 
+    nlohmann::json toJSON() const;
+    bool fromJSON(const nlohmann::json& j);
+    
     virtual void addToLayout (QVBoxLayout* layout) = 0; // add content to layout
     virtual void accept(LatexVisitor& v) = 0;           // can not be const since on-demand tables
 
-protected:
-    std::string    name_;
-    Section*       parent_section_ {nullptr};
-    TaskManager& task_man_;
+    static std::string typeAsString(Type type);
+    static boost::optional<Type> typeFromString(const std::string& type_str);
 
+    static const std::string DBTableName;
+    static const Property    DBColumnContentID;
+    static const Property    DBColumnSectionID;
+    static const Property    DBColumnReportID;
+    static const Property    DBColumnName;
+    static const Property    DBColumnType;
+    static const Property    DBColumnJSONContent;
+
+    static const std::string FieldType;
+    static const std::string FieldID;
+    static const std::string FieldName;
+
+protected:
+    virtual void toJSON_impl(nlohmann::json& root_node) const = 0;
+    virtual bool fromJSON_impl(const nlohmann::json& j) = 0;
+
+    Type         type_;
+    unsigned int id_ = 0;
+    std::string  name_;
+    Section*     parent_section_ {nullptr};
+    TaskManager& task_man_;
 };
 
 }

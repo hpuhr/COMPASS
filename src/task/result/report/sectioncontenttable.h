@@ -113,16 +113,19 @@ public slots:
     void executeCallBackSlot();
 
 public:
-    SectionContentTable(const std::string& name, 
+    SectionContentTable(unsigned int id,
+                        const std::string& name, 
                         unsigned int num_columns,
                         const std::vector<std::string>& headings, 
                         Section* parent_section, 
                         TaskManager& task_man,
                         bool sortable=true, 
                         unsigned int sort_column=0, 
-                        Qt::SortOrder order=Qt::AscendingOrder);
+                        Qt::SortOrder sort_order=Qt::AscendingOrder);
+    SectionContentTable(Section* parent_section, 
+                        TaskManager& task_man);
 
-    void addRow (const std::vector<QVariant>& row,
+    void addRow (const nlohmann::json& row,
                  QVariant annotation = {});
 
     virtual void addToLayout (QVBoxLayout* layout) override;
@@ -156,9 +159,26 @@ public:
     nlohmann::json toJSON(bool rowwise = true,
                           const std::vector<int>& cols = std::vector<int>()) const;
 
+    static const std::string FieldHeadings;
+    static const std::string FieldSortable;
+    static const std::string FieldSortColumn;
+    static const std::string FieldSortOrder;
+    static const std::string FieldRows;
+    static const std::string FieldAnnotations;
+
     static const int DoubleClickCheckIntervalMSecs;
 
 protected:
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+
+    void createOnDemandIfNeeded();
+
+    void performClickAction();
+
+    void toJSON_impl(nlohmann::json& root_node) const override final;
+    bool fromJSON_impl(const nlohmann::json& j) override final;
+
     bool create_on_demand_ {false};
     std::function<void(void)> create_on_demand_fnc_;
     bool already_created_by_demand_ {false};
@@ -168,12 +188,12 @@ protected:
 
     bool sortable_ {true};
     unsigned int sort_column_ {0};
-    Qt::SortOrder order_ {Qt::AscendingOrder};
+    Qt::SortOrder sort_order_ {Qt::AscendingOrder};
 
     bool show_unused_ {false};
 
-    std::vector<std::vector<QVariant>> rows_;
-    std::vector<QVariant>              annotations_;
+    std::vector<nlohmann::json> rows_;
+    std::vector<QVariant>       annotations_;
 
     //        mutable QPushButton* toogle_show_unused_button_ {nullptr};
     //        mutable QPushButton* copy_button_ {nullptr};
@@ -186,13 +206,6 @@ protected:
 
     QTimer click_action_timer_;
     boost::optional<unsigned int> last_clicked_row_index_;
-
-    bool canFetchMore(const QModelIndex &parent) const override;
-    void fetchMore(const QModelIndex &parent) override;
-
-    void createOnDemandIfNeeded();
-
-    void performClickAction();
 };
 
 }

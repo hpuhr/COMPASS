@@ -18,7 +18,6 @@
 #pragma once
 
 #include "task/result/report/sectioncontent.h"
-#include "property.h"
 
 #include <QObject>
 
@@ -37,12 +36,15 @@ public slots:
     void viewSlot();
 
 public:
-    SectionContentFigure(const std::string& name, 
+    SectionContentFigure(unsigned int id,
+                         const std::string& name, 
                          const std::string& caption,
                          std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
                          Section* parent_section, 
-                         TaskManager& eval_man,
+                         TaskManager& task_man,
                          int render_delay_msec = 0);
+    SectionContentFigure(Section* parent_section, 
+                         TaskManager& task_man);
 
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
@@ -50,12 +52,14 @@ public:
     void view () const;
     std::string getSubPath() const;
 
-    static const std::string DBTableName;
-    static const Property    DBColumnViewableID;
-    static const Property    DBColumnReportID;
-    static const Property    DBColumnJSONContent;
+    static const std::string FieldCaption;
+    static const std::string FieldRenderDelayMSec;
+    static const std::string FieldViewable;
 
 protected:
+    void toJSON_impl(nlohmann::json& root_node) const override final;
+    bool fromJSON_impl(const nlohmann::json& j) override final;
+
     std::string caption_;
     int         render_delay_msec_ = 0;
 

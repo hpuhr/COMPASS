@@ -29,12 +29,35 @@ TreeItem::TreeItem(const std::string& name,
 :   name_       (name       )
 ,   parent_item_(parent_item)
 {
+    updateID();
+
+    logdbg << "ResultReportTreeItem: constructor: id '" << id_ << "'";
+}
+
+/**
+ */
+TreeItem::TreeItem(TreeItem* parent_item)
+:   parent_item_(parent_item)
+{
+}
+
+/**
+ */
+void TreeItem::setItemName(const std::string& name) 
+{
+    name_ = name;
+
+    updateID();
+}
+
+/**
+ */
+void TreeItem::updateID()
+{
     if (parent_item_)
         id_ = parent_item_->id() + ":" + name_;
     else
         id_ = name_;
-
-    logdbg << "ResultReportTreeItem: constructor: id '" << id_ << "'";
 }
 
 /**

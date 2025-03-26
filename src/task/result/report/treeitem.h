@@ -31,6 +31,9 @@ class TreeItem
 public:
     TreeItem(const std::string& name, 
              TreeItem* parent_item);
+    TreeItem(TreeItem* parent_item);
+
+    void setItemName(const std::string& name);
 
     virtual TreeItem *child(int row) = 0;
     virtual int childCount() const = 0;
@@ -43,6 +46,8 @@ public:
     std::string id() const; // (parent_id):name
 
 protected:
+    void updateID();
+
     std::string name_;
     std::string id_;
 
