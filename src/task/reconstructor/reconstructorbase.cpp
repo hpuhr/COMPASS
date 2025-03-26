@@ -858,10 +858,10 @@ void ReconstructorBase::processSlice()
 
         auto& section = COMPASS::instance().taskManager().currentReport().getSection("Reconstruction Statistics");
 
-        if (!section.hasTable("stats"))
-            section.addTable("stats", 4, {"", "", "Value", "Value [%]"}, false);
+        if (!section.hasTable("Reconstruction Statistics"))
+            section.addTable("Reconstruction Statistics", 4, {"", "", "Value", "Value [%]"}, false);
 
-        auto& table = section.getTable("stats");
+        auto& table = section.getTable("Reconstruction Statistics");
 
         table.addRow({"Chain updates", "", "", ""});
         table.addRow({"mm checked", "", stats.num_chain_checked, ""});
@@ -878,6 +878,7 @@ void ReconstructorBase::processSlice()
         table.addRow({"total", "", stats.num_chain_updates, ""});
         table.addRow({"proj changed", "", stats.num_chain_updates_proj_changed, num_chain_updates_proj_changed_p});
 
+        table.addRow({"", "", "", ""});
         table.addRow({"Chain predictions", "", "", ""});
 
         table.addRow({"failed", "", stats.num_chain_predictions_failed , num_chain_predictions_failed_p});
@@ -889,6 +890,7 @@ void ReconstructorBase::processSlice()
         table.addRow({"total", "", stats.num_chain_predictions, ""});
         table.addRow({"proj changed", "", stats.num_chain_predictions_proj_changed, num_chain_predictions_proj_changed_p});
 
+        table.addRow({"", "", "", ""});
         table.addRow({"Rec updates", "", "", ""});
 
         table.addRow({"ccoeff corr", "", stats.num_rec_updates_ccoeff_corr, num_rec_updates_ccoeff_corr_p});
@@ -904,11 +906,13 @@ void ReconstructorBase::processSlice()
         table.addRow({"skipped", "", stats.num_rec_updates_skipped, num_rec_updates_skipped_p});
         table.addRow({"total", "", stats.num_rec_updates, ""});
 
+        table.addRow({"", "", "", ""});
         table.addRow({"Rec smooth steps", "", "", ""});
 
         table.addRow({"failed steps", "", stats.num_rec_smooth_steps_failed, num_rec_smooth_steps_failed_p});
         table.addRow({"failed targets", "", stats.num_rec_smooth_target_failed, ""});
 
+        table.addRow({"", "", "", ""});
         table.addRow({"Rec interp steps", "", "", ""});
         table.addRow({"", "failed", stats.num_rec_interp_failed, ""});
     }

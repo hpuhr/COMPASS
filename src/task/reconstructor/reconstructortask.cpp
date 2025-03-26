@@ -23,6 +23,10 @@
 #include "projection.h"
 #include "licensemanager.h"
 
+#include "report/report.h"
+#include "report/section.h"
+#include "report/sectioncontenttable.h"
+
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
 #include "complexaccuracyestimator.h"
@@ -410,6 +414,12 @@ void ReconstructorTask::run()
 
     run_start_time_ = boost::posix_time::microsec_clock::local_time();
     run_start_time_after_del_ = {};
+
+    auto& section = COMPASS::instance().taskManager().currentReport().getSection("Overview");
+    section.addTable("Info", 3, {"Name", "Value", "Comment"}, false);
+
+    auto& table = section.getTable("Info");
+    table.addRow({"Begin", Time::toString(run_start_time_), ""});
 
     QLabel* tmp_label = new QLabel();
     tmp_label->setTextFormat(Qt::RichText);
@@ -898,8 +908,6 @@ void ReconstructorTask::endReconstruction()
         saveDebugViewPoints();
     }
 
-    currentReconstructor()->reset();
-
     double time_elapsed_s = Time::partialSeconds(
         boost::posix_time::microsec_clock::local_time() - run_start_time_);
 
@@ -907,10 +915,64 @@ void ReconstructorTask::endReconstruction()
         boost::posix_time::microsec_clock::local_time() - run_start_time_after_del_);
 
     loginf << "ReconstructorTask: finalizeSlice: done after "
-            << String::timeStringFromDouble(time_elapsed_s, false)
-            << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
+           << String::timeStringFromDouble(time_elapsed_s, false)
+           << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
 
     loginf << COMPASS::instance().dbInterface().stopPerformanceMetrics().asString();
+
+    // report: info
+    auto& section = COMPASS::instance().taskManager().currentReport().getSection("Overview");
+
+    {
+        auto& table = section.getTable("Info");
+        table.addRow({"End", Time::toString(boost::posix_time::microsec_clock::local_time()), ""});
+        table.addRow({"Elapsed", String::timeStringFromDouble(time_elapsed_s, false), ""});
+        table.addRow({"Elapsed After Deletion", String::timeStringFromDouble(time_elapsed_s_after_del, false), ""});
+    }
+
+    // report: assoc counts
+    {
+        section.addTable("Data Source Counts", 5,
+                         {"Data Source", "DBContent", "#Associated", "#Unassocated", "Associated [%]"}, false);
+
+        auto& table = section.getTable("Data Source Counts");
+
+        const auto& counts = currentReconstructor()->assocAounts();
+
+        DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+        DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+        if (counts.size())
+        {
+            // ds_id -> dbcont id -> cnt
+
+            map<string, string> tmp_rows;
+
+            for (auto& ds_it : counts)
+            {
+                for (auto& dbcont_it : ds_it.second)
+                {
+                    unsigned int assoc_cnt = dbcont_it.second.first;
+                    unsigned int unassoc_cnt = dbcont_it.second.second;
+
+                    std::string ds_name = ds_man.dbDataSource(ds_it.first).name();
+                    std::string dbcont_name = dbcont_man.dbContentWithId(dbcont_it.first);
+
+                    std::string assoc_perc_str;
+
+                    if (assoc_cnt + unassoc_cnt)
+                        assoc_perc_str = String::percentToString(
+                                              (100.0*assoc_cnt/(float)(assoc_cnt+unassoc_cnt)));
+                    else
+                        assoc_perc_str = String::percentToString(0);
+
+                    table.addRow({ds_name, dbcont_name, assoc_cnt, unassoc_cnt, assoc_perc_str});
+                }
+            }
+        }
+    }
+
+    currentReconstructor()->reset();
 
     if (!skip_reference_data_writing_)
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
