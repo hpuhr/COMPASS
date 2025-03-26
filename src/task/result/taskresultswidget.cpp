@@ -47,11 +47,6 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     // Add to a layout
     main_layout->addWidget(line);
 
-    // connect(report_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
-    //         [ = ] (int idx){
-    //             setReport(report_combo_->itemText(idx).toStdString());
-    // });
-
     report_widget_ = new ResultReport::ReportWidget(*this);
 
     main_layout->addWidget(report_widget_);

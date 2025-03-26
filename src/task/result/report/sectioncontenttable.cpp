@@ -246,7 +246,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
         //if (result_ptrs_.at(row_index) && !result_ptrs_.at(row_index)->use())
         //    return QBrush(Qt::lightGray);
         //else
-        //    return QVariant();
+        return QVariant();
 
     }
     case Qt::ForegroundRole:
