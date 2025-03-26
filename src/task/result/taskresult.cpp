@@ -34,7 +34,7 @@ const std::string TaskResult::FieldReport   = "report";
 
 TaskResult::TaskResult(unsigned int id, TaskManager& task_man)
 :   id_    (id        )
-,   report_(task_man  )
+//,   report_(task_man  )
 {}
 
 unsigned int TaskResult::id() const
@@ -57,12 +57,12 @@ void TaskResult::name(const std::string& name)
     name_ = name;
 }
 
-const ResultReport::Report& TaskResult::report() const
+const std::shared_ptr<ResultReport::Report> TaskResult::report() const
 {
     return report_;
 }
 
-ResultReport::Report& TaskResult::report()
+std::shared_ptr<ResultReport::Report> TaskResult::report()
 {
     return report_;
 }
@@ -87,7 +87,7 @@ nlohmann::json TaskResult::toJSON() const
     root[ FieldCreated  ] = Utils::Time::toString(created_);
     root[ FieldComments ] = comments_;
 
-    root[ FieldReport   ] = report_.toJSON();
+    root[ FieldReport   ] = report_->toJSON();
 
     //derived content
     toJSON_impl(root);
@@ -114,7 +114,7 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     std::string ts = j[ FieldCreated ];
     created_ = Utils::Time::fromString(ts);
 
-    if (!report_.fromJSON(j[ FieldReport ]))
+    if (!report_->fromJSON(j[ FieldReport ]))
         return false;
 
     //derived content

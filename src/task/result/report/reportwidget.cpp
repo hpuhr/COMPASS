@@ -78,6 +78,15 @@ ReportWidget::ReportWidget(TaskResultsWidget& task_result_widget)
     updateBackButton();
 }
 
+void ReportWidget::setReport(const std::shared_ptr<Report>& report)
+{
+    tree_model_.setReport(report);
+}
+void ReportWidget::clear()
+{
+    tree_model_.clear();
+}
+
 void ReportWidget::expand()
 {
     loginf << "ReportWidget: expand";

@@ -31,6 +31,9 @@ public:
     ReportWidget(TaskResultsWidget& task_result_widget);
     virtual ~ReportWidget()= default;
 
+    void setReport(const std::shared_ptr<Report>& report);
+    void clear();
+
     void expand();
 
     void showResultWidget(QWidget* widget); // can be nullptr

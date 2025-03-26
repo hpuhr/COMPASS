@@ -50,8 +50,8 @@ public:
     TaskResultType type() const;
     void type(TaskResultType type);
 
-    const ResultReport::Report& report() const;
-    ResultReport::Report& report();
+    const std::shared_ptr<ResultReport::Report> report() const;
+    std::shared_ptr<ResultReport::Report> report();
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
@@ -82,5 +82,5 @@ protected:
     boost::posix_time::ptime created_;
     std::string              comments_;
 
-    ResultReport::Report     report_;
+    std::shared_ptr<ResultReport::Report> report_;
 };
