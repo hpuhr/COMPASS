@@ -25,6 +25,11 @@
 #include "datasourcemanager.h"
 #include "evaluationmanager.h"
 
+#include "taskmanager.h"
+#include "report/report.h"
+#include "report/section.h"
+#include "report/sectioncontenttext.h"
+
 #include "kalman_chain.h"
 #include "tbbhack.h"
 
@@ -850,11 +855,9 @@ void ReconstructorBase::processSlice()
         std::string num_rec_updates_skipped_p         = perc(stats.num_rec_updates_skipped        , stats.num_rec_updates       );
         std::string num_rec_smooth_steps_failed_p     = perc(stats.num_rec_smooth_steps_failed    , stats.num_rec_updates       );
 
-        loginf << "ReconstructorBase: processSlice: last slice finished\n"
-               << "\n"
-               << "Reconstruction Statistics\n"
-               << "\n"
-               << " * Chain updates:\n"
+        stringstream ss;
+
+        ss     << " * Chain updates:\n"
                << "\n"
                << "   mm checked:   " << stats.num_chain_checked                                                                <<  "\n"
                << "   skipped pre:  " << stats.num_chain_skipped_preempt         << " (" << num_chain_skipped_preempt_p         << ")\n"
@@ -904,6 +907,18 @@ void ReconstructorBase::processSlice()
                << "\n" 
                << "   failed:" << stats.num_rec_interp_failed << "\n"
                << "\n";
+
+        loginf << "ReconstructorBase: processSlice: last slice finished\n"
+               << "\n"
+               << "Reconstruction Statistics\n"
+               << "\n"
+               << ss.str();
+
+        auto& section = COMPASS::instance().taskManager().currentReport().getSection("Reconstruction Statistics");
+
+        section.addText("stats");
+        auto& section_text = section.getText("stats");
+        section_text.addText(ss.str());
     }
 
     logdbg << "ReconstructorBase: processSlice: done";

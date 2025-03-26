@@ -81,6 +81,10 @@ ReportWidget::ReportWidget(TaskResultsWidget& task_result_widget)
 void ReportWidget::setReport(const std::shared_ptr<Report>& report)
 {
     tree_model_.setReport(report);
+
+    tree_view_->setRootIsDecorated(false);
+    tree_view_->expandToDepth(3);
+    tree_view_->setFixedSize(500, 1000);
 }
 void ReportWidget::clear()
 {
