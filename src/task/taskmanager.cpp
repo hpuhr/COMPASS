@@ -29,6 +29,7 @@
 #include "mainwindow.h"
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
+#include "dbinterface.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
@@ -302,29 +303,40 @@ void TaskManager::beginTaskResultWriting(const std::string& name)
     if (widget_)
         widget_->setDisabled(true);
 
-    assert (!current_report_);
-    current_report_ = getOrCreateResult(name)->report();
+    assert (!current_result_);
+    current_result_ = getOrCreateResult(name);
 
-    current_report_->clear();
+    current_result_->report()->clear();
 }
 
 ResultReport::Report& TaskManager::currentReport()
 {
-    assert (current_report_);
-    return *current_report_;
+    assert (current_result_);
+    return *current_result_->report();
 }
 
-void TaskManager::endTaskResultWriting()
+void TaskManager::endTaskResultWriting(bool store)
 {
     if (widget_)
         widget_->setDisabled(false);
 
-    assert (current_report_);
-    current_report_ = nullptr;
+    assert (current_result_);
+
+    if (store)
+    {
+        loginf << "TaskManager: endTaskResultWriting: Storing result...";
+
+        auto result = COMPASS::instance().dbInterface().saveResult(*current_result_);
+
+        //@TODO
+        assert(result.ok());
+    }
+
+    assert (current_result_);
+    current_result_ = nullptr;
 
     emit taskResultsChangedSignal();
 }
-
 
 MainWindow* TaskManager::getMainWindow()
 {

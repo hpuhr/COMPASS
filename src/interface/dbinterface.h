@@ -20,6 +20,7 @@
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
 #include "dbdefs.h"
+#include "result.h"
 
 #include <QObject>
 
@@ -193,9 +194,9 @@ public:
     bool existsReportContentsTable() const;
     void createTaskResultsTable();
     void createReportContentsTable();
-    void saveResult(const TaskResult& result);
-    std::vector<std::shared_ptr<TaskResult>> loadResults();
-    std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, unsigned int content_id);
+    Result saveResult(const TaskResult& result);
+    ResultT<std::vector<std::shared_ptr<TaskResult>>> loadResults();
+    ResultT<std::shared_ptr<ResultReport::SectionContent>> loadContent(ResultReport::Section* section, unsigned int content_id);
 
     void clearTableContent(const std::string& table_name);
 

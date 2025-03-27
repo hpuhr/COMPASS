@@ -59,6 +59,9 @@ public:
     TaskManager& taskManager() { return task_man_; }
     const TaskManager& taskManager() const { return task_man_; }
 
+    void setCurrentViewable(const nlohmann::json::object_t& data);
+    void setCurrentSection(const std::string& section_name);
+
     static const std::string FieldRootSection;
 
 protected:

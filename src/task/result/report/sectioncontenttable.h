@@ -167,6 +167,11 @@ public:
     static const std::string FieldRows;
     static const std::string FieldAnnotations;
 
+    static const std::string FieldAnnoFigureID;
+    static const std::string FieldAnnoSectionLink;
+    static const std::string FieldAnnoSectionFigure;
+    static const std::string FieldAnnoIndex;
+
     static const int DoubleClickCheckIntervalMSecs;
 
 protected:

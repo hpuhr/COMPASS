@@ -42,6 +42,8 @@ const std::string Section::FieldParentHeading       = "parent_heading";
 const std::string Section::FieldPerTarget           = "per_target_section";
 const std::string Section::FieldPerTargetWithIssues = "per_target_section_with_issues";
 const std::string Section::FieldSubSections         = "sub_sections";
+const std::string Section::FieldContentIDs          = "content_ids";
+const std::string Section::FieldExtraContentIDs     = "extra_content_ids";
 
 unsigned int Section::current_content_id_ = 0;
 
@@ -613,6 +615,8 @@ nlohmann::json Section::toJSON() const
     root[ FieldParentHeading       ] = parent_heading_;
     root[ FieldPerTarget           ] = per_target_section_;
     root[ FieldPerTargetWithIssues ] = per_target_section_with_issues_;
+    root[ FieldContentIDs          ] = content_ids_;
+    root[ FieldExtraContentIDs     ] = extra_content_ids_;
 
     nlohmann::json j_subsections = nlohmann::json::array();
 
@@ -637,7 +641,9 @@ bool Section::fromJSON(const nlohmann::json& j)
         !j.contains(FieldParentHeading)       ||
         !j.contains(FieldPerTarget)           ||
         !j.contains(FieldPerTargetWithIssues) ||
-        !j.contains(FieldSubSections))
+        !j.contains(FieldSubSections)         ||
+        !j.contains(FieldContentIDs)          ||
+        !j.contains(FieldExtraContentIDs))
         return false;
 
     try
@@ -647,6 +653,11 @@ bool Section::fromJSON(const nlohmann::json& j)
         parent_heading_                 = j[ FieldParentHeading       ];
         per_target_section_             = j[ FieldPerTarget           ];
         per_target_section_with_issues_ = j[ FieldPerTargetWithIssues ];
+        content_ids_                    = j[ FieldContentIDs          ].get<std::vector<unsigned int>>();
+        extra_content_ids_              = j[ FieldExtraContentIDs     ].get<std::vector<unsigned int>>();
+
+        content_.resize(content_ids_.size());
+        extra_content_.resize(extra_content_ids_.size());
 
         //restore TreeItem content
         setItemName(heading_);

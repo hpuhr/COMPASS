@@ -122,6 +122,8 @@ public:
     static const std::string FieldPerTarget;
     static const std::string FieldPerTargetWithIssues;
     static const std::string FieldSubSections;
+    static const std::string FieldContentIDs;
+    static const std::string FieldExtraContentIDs;
 
 protected:
     friend class SectionContentTable;

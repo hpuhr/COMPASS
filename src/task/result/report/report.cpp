@@ -18,6 +18,7 @@
 #include "task/result/report/report.h"
 #include "task/result/report/section.h"
 #include "task/result/report/sectionid.h"
+#include "taskmanager.h"
 
 #include "logger.h"
 #include "stringconv.h"
@@ -36,7 +37,7 @@ Report::Report(TaskManager& task_man)
 :   TreeItem("Report", nullptr)
 ,   task_man_(task_man)
 {
-    root_section_ = std::make_shared<Section>("Results", "", nullptr, this);
+    root_section_ = std::make_shared<Section>("Results", "", this, this);
 }
 
 /**
@@ -48,7 +49,7 @@ Report::~Report()
 
 void Report::clear()
 {
-    root_section_ = std::make_shared<Section>("Results", "", nullptr, this);
+    root_section_ = std::make_shared<Section>("Results", "", this, this);
 }
 
 /**
@@ -179,6 +180,20 @@ bool Report::fromJSON(const nlohmann::json& j)
         return false;
 
     return true;
+}
+
+/**
+ */
+void Report::setCurrentViewable(const nlohmann::json::object_t& data)
+{
+    task_man_.setViewableDataConfig(data);
+}
+
+/**
+ */
+void Report::setCurrentSection(const std::string& section_name)
+{
+    //@TODO
 }
 
 }

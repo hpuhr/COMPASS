@@ -59,6 +59,11 @@ const std::string SectionContentTable::FieldSortOrder    = "order";
 const std::string SectionContentTable::FieldRows         = "rows";
 const std::string SectionContentTable::FieldAnnotations  = "annotations";
 
+const std::string SectionContentTable::FieldAnnoFigureID      = "figure_id";
+const std::string SectionContentTable::FieldAnnoSectionLink   = "section_link";
+const std::string SectionContentTable::FieldAnnoSectionFigure = "section_figure";
+const std::string SectionContentTable::FieldAnnoIndex         = "index";
+
 /**
  */
 SectionContentTable::SectionContentTable(unsigned int id,
@@ -687,7 +692,7 @@ void SectionContentTable::performClickAction()
 
             assert (viewable);
 
-            report_->taskManager().setViewableDataConfig(*viewable.get());
+            report_->setCurrentViewable(*viewable.get());
         }
         else
         {
@@ -726,11 +731,12 @@ void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
         loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference '"
                << annotation.section_link << "'";
 
-        //@TODO
-        //task_man_.showResultId(annotation.section_link);
+        report_->setCurrentSection(annotation.section_link);
     }
     else
+    {
         loginf << "SectionContentTable: currentRowChangedSlot: index has no associated reference";
+    }
 }
 
 /**
@@ -991,6 +997,23 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
     root_node[ FieldSortColumn ] = sort_column_;
     root_node[ FieldSortOrder  ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
     root_node[ FieldRows       ] = rows_;
+
+    nlohmann::json j_annos = nlohmann::json::array();
+
+    for (const auto& a : annotations_)
+    {
+        nlohmann::json j_anno;
+
+        if (a.figure_id.has_value())
+            j_anno[ FieldAnnoFigureID ] = a.figure_id.value();
+        
+        j_anno[ FieldAnnoSectionLink   ] = a.section_link;
+        j_anno[ FieldAnnoSectionFigure ] = a.section_figure;
+
+        j_annos.push_back(j_anno);
+    }
+
+    root_node[ FieldAnnotations ] = j_annos;
 }
 
 /**
@@ -1002,7 +1025,8 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldSortable)   ||
         !j.contains(FieldSortColumn) ||
         !j.contains(FieldSortOrder)  ||
-        !j.contains(FieldRows))
+        !j.contains(FieldRows)       ||
+        !j.contains(FieldAnnotations))
         return false;
 
     headings_    = j[ FieldHeadings   ].get<std::vector<std::string>>();
@@ -1013,6 +1037,29 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;
 
     rows_ = j[ FieldRows ].get<std::vector<nlohmann::json>>();
+
+    auto& j_annos = j[ FieldAnnotations ];
+    if (!j_annos.is_array() || j_annos.size() != rows_.size())
+        return false;
+
+    for (const auto& j_anno : j_annos)
+    {
+        if (!j_anno.contains(FieldAnnoSectionLink) ||
+            !j_anno.contains(FieldAnnoSectionFigure))
+            return false;
+
+        RowAnnotation anno;
+        anno.section_link   = j_anno[ FieldAnnoSectionLink   ];
+        anno.section_figure = j_anno[ FieldAnnoSectionFigure ];
+
+        if (j_anno.contains(FieldAnnoFigureID))
+        {
+            unsigned int id = j_anno[ FieldAnnoFigureID ];
+            anno.figure_id = id;
+        }
+
+        annotations_.push_back(anno);
+    }
 
     return true;
 }

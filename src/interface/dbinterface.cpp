@@ -1752,21 +1752,98 @@ void DBInterface::createReportContentsTable()
 
 /**
  */
-void DBInterface::saveResult(const TaskResult& result)
+Result DBInterface::saveResult(const TaskResult& result)
 {
     assert(ready());
 
-    //create needed tables
-    if (!existsTaskResultsTable())
-        createTaskResultsTable();
+    try
+    {
+        //create needed tables
+        if (!existsTaskResultsTable())
+            createTaskResultsTable();
 
-    if (!existsReportContentsTable())
-        createReportContentsTable();
+        if (!existsReportContentsTable())
+            createReportContentsTable();
 
-    auto result_id   = result.id();
-    auto result_name = result.name();
+        auto result_id   = result.id();
+        auto result_name = result.name();
 
-    //write result
+        //write result
+        {
+            PropertyList properties;
+            properties.addProperty(TaskResult::DBColumnID);
+            properties.addProperty(TaskResult::DBColumnName);
+            properties.addProperty(TaskResult::DBColumnJSONContent);
+            properties.addProperty(TaskResult::DBColumnResultType);
+
+            std::shared_ptr<Buffer> buffer(new Buffer(properties));
+
+            auto& id_vec      = buffer->get<unsigned int>(TaskResult::DBColumnID.name());
+            auto& name_vec    = buffer->get<std::string>(TaskResult::DBColumnName.name());
+            auto& content_vec = buffer->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
+            auto& type_vec    = buffer->get<int>(TaskResult::DBColumnResultType.name());
+
+            id_vec.set(0, result_id);
+            name_vec.set(0, result.name());
+            content_vec.set(0, result.toJSON());
+            type_vec.set(0, (int)result.type());
+
+            insertBuffer(TaskResult::DBTableName, buffer);
+        }
+
+        //write contents
+        auto report_contents = result.report()->reportContents();
+        {
+            PropertyList properties;
+            properties.addProperty(ResultReport::SectionContent::DBColumnContentID);
+            properties.addProperty(ResultReport::SectionContent::DBColumnResultID);
+            properties.addProperty(ResultReport::SectionContent::DBColumnType);
+            properties.addProperty(ResultReport::SectionContent::DBColumnJSONContent);
+
+            std::shared_ptr<Buffer> buffer(new Buffer(properties));
+
+            auto& content_id_vec = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+            auto& result_id_vec  = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
+            auto& type_vec       = buffer->get<int>(ResultReport::SectionContent::DBColumnType.name());
+            auto& content_vec    = buffer->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+            size_t row = 0;
+            for (const auto& c : report_contents)
+            {
+                content_id_vec.set(row, c->id());
+                result_id_vec.set(row, result_id);
+                type_vec.set(row, (int)c->type());
+                content_vec.set(row, c->toJSON());
+
+                ++row;
+            }
+
+            insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: saveResult: Could not store result: " << ex.what();
+        return Result::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: saveResult: Could not store result: Unknown error";
+        return Result::failed("Unknown error");
+    }
+
+    return Result::succeeded();
+}
+
+/**
+ */
+ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
+{
+    assert(ready());
+
+    std::vector<std::shared_ptr<TaskResult>> results;
+
+    try
     {
         PropertyList properties;
         properties.addProperty(TaskResult::DBColumnID);
@@ -1774,23 +1851,65 @@ void DBInterface::saveResult(const TaskResult& result)
         properties.addProperty(TaskResult::DBColumnJSONContent);
         properties.addProperty(TaskResult::DBColumnResultType);
 
-        std::shared_ptr<Buffer> buffer(new Buffer(properties));
+        auto cmd = sqlGenerator().getSelectCommand(TaskResult::DBTableName, properties, "");
+        auto result = execute(*cmd);
+        if (result->hasError() || !result->containsData() || !result->buffer())
+            throw std::runtime_error("Could not obtain results table");
 
-        auto& id_vec      = buffer->get<unsigned int>(TaskResult::DBColumnID.name());
-        auto& name_vec    = buffer->get<std::string>(TaskResult::DBColumnName.name());
-        auto& content_vec = buffer->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
-        auto& type_vec    = buffer->get<int>(TaskResult::DBColumnResultType.name());
+        auto b = result->buffer();
 
-        id_vec.set(0, result_id);
-        name_vec.set(0, result.name());
-        content_vec.set(0, result.toJSON());
-        type_vec.set(0, (int)result.type());
+        size_t nr = b->size();
 
-        insertBuffer(TaskResult::DBTableName, buffer);
+        auto& id_vec      = b->get<unsigned int>(TaskResult::DBColumnID.name());
+        auto& name_vec    = b->get<std::string>(TaskResult::DBColumnName.name());
+        auto& content_vec = b->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
+        auto& type_vec    = b->get<int>(TaskResult::DBColumnResultType.name());
+
+        std::vector<std::shared_ptr<TaskResult>> results(nr);
+
+        auto& task_man = COMPASS::instance().taskManager();
+
+        for (size_t i = 0; i < nr; ++i)
+        {
+            const auto& result_name = name_vec.get(i);
+            const auto& result_type = type_vec.get(i);
+            const auto& result_id   = id_vec.get(i);
+
+            results[ i ].reset(new TaskResult(result_id, task_man));
+
+            bool ok = results[ i ]->fromJSON(content_vec.get(i));
+            if (!ok)
+                throw std::runtime_error("Could not read result from JSON");
+
+            if (results[ i ]->name() != result_name ||
+                results[ i ]->type() != result_type ||
+                results[ i ]->id()   != result_id)
+                throw std::runtime_error("Result contents invalid");
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: saveResult: Could not load results: " << ex.what();
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: saveResult: Could not load results: Unknown error";
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed("Unknown error");
     }
 
-    //write contents
-    auto report_contents = result.report()->reportContents();
+    return ResultT<std::vector<std::shared_ptr<TaskResult>>>::succeeded(results);
+}
+
+/**
+ */
+ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(ResultReport::Section* section, unsigned int content_id)
+{
+    assert(ready());
+
+    std::shared_ptr<ResultReport::SectionContent> content;
+
+    try
     {
         PropertyList properties;
         properties.addProperty(ResultReport::SectionContent::DBColumnContentID);
@@ -1798,123 +1917,60 @@ void DBInterface::saveResult(const TaskResult& result)
         properties.addProperty(ResultReport::SectionContent::DBColumnType);
         properties.addProperty(ResultReport::SectionContent::DBColumnJSONContent);
 
-        std::shared_ptr<Buffer> buffer(new Buffer(properties));
+        auto cmd = sqlGenerator().getSelectCommand(ResultReport::SectionContent::DBTableName, properties, "");
+        auto result = execute(*cmd);
 
-        auto& content_id_vec = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
-        auto& result_id_vec  = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
-        auto& type_vec       = buffer->get<int>(ResultReport::SectionContent::DBColumnType.name());
-        auto& content_vec    = buffer->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+        if (result->hasError() || !result->containsData() || !result->buffer())
+            throw std::runtime_error("Could not obtain content from table");
 
-        size_t row = 0;
-        for (const auto& c : report_contents)
+        auto b = result->buffer();
+
+        size_t nr = b->size();
+        assert(nr == 1);
+
+        auto& content_id_vec = b->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+        auto& type_vec       = b->get<int>(ResultReport::SectionContent::DBColumnType.name());
+        auto& content_vec    = b->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+        ResultReport::SectionContent::Type type = (ResultReport::SectionContent::Type)type_vec.get(0);
+
+        if (type == ResultReport::SectionContent::Type::Figure)
         {
-            content_id_vec.set(row, c->id());
-            result_id_vec.set(row, result_id);
-            type_vec.set(row, (int)c->type());
-            content_vec.set(row, c->toJSON());
-
-            ++row;
+            content.reset(new ResultReport::SectionContentFigure(section));
+        }
+        else if (type == ResultReport::SectionContent::Type::Table)
+        {
+            content.reset(new ResultReport::SectionContentTable(section));
+        }
+        else if (type == ResultReport::SectionContent::Type::Text)
+        {
+            content.reset(new ResultReport::SectionContentText(section));
+        }
+        else
+        {
+            throw std::runtime_error("Invalid content type");
         }
 
-        insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+        bool ok = content->fromJSON(content_vec.get(0));
+        if (!ok)
+            throw std::runtime_error("Could not read content from JSON");
+
+        if (content->id() != content_id_vec.get(0) ||
+            content->type() != type)
+            throw std::runtime_error("contents invalid");
     }
-}
-
-/**
- */
-std::vector<std::shared_ptr<TaskResult>> DBInterface::loadResults()
-{
-    assert(ready());
-
-    PropertyList properties;
-    properties.addProperty(TaskResult::DBColumnID);
-    properties.addProperty(TaskResult::DBColumnName);
-    properties.addProperty(TaskResult::DBColumnJSONContent);
-    properties.addProperty(TaskResult::DBColumnResultType);
-
-    auto cmd = sqlGenerator().getSelectCommand(TaskResult::DBTableName, properties, "");
-    auto result = execute(*cmd);
-    assert(!result->hasError());
-    assert(result->containsData() && result->buffer());
-
-    auto b = result->buffer();
-
-    size_t nr = b->size();
-
-    auto& id_vec      = b->get<unsigned int>(TaskResult::DBColumnID.name());
-    auto& name_vec    = b->get<std::string>(TaskResult::DBColumnName.name());
-    auto& content_vec = b->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
-    auto& type_vec    = b->get<int>(TaskResult::DBColumnResultType.name());
-
-    std::vector<std::shared_ptr<TaskResult>> results(nr);
-
-    auto& task_man = COMPASS::instance().taskManager();
-
-    for (size_t i = 0; i < nr; ++i)
+    catch(const std::exception& ex)
     {
-        auto id = id_vec.get(i);
-        results[ i ].reset(new TaskResult(id, task_man));
-
-        bool ok = results[ i ]->fromJSON(content_vec.get(i));
-        assert(ok);
+        logerr << "DBInterface: saveResult: Could not load content: " << ex.what();
+        return ResultT<std::shared_ptr<ResultReport::SectionContent>>::failed(ex.what());
     }
-
-    return results;
-}
-
-/**
- */
-std::shared_ptr<ResultReport::SectionContent> DBInterface::loadContent(ResultReport::Section* section, unsigned int content_id)
-{
-    assert(ready());
-
-    PropertyList properties;
-    properties.addProperty(ResultReport::SectionContent::DBColumnContentID);
-    properties.addProperty(ResultReport::SectionContent::DBColumnResultID);
-    properties.addProperty(ResultReport::SectionContent::DBColumnType);
-    properties.addProperty(ResultReport::SectionContent::DBColumnJSONContent);
-
-    auto cmd = sqlGenerator().getSelectCommand(ResultReport::SectionContent::DBTableName, properties, "");
-    auto result = execute(*cmd);
-    assert(!result->hasError());
-    assert(result->containsData() && result->buffer());
-
-    auto b = result->buffer();
-
-    size_t nr = b->size();
-    assert(nr == 1);
-
-    auto& content_id_vec = b->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
-    auto& result_id_vec  = b->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
-    auto& type_vec       = b->get<int>(ResultReport::SectionContent::DBColumnType.name());
-    auto& content_vec    = b->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
-
-    ResultReport::SectionContent::Type type = (ResultReport::SectionContent::Type)type_vec.get(0);
-
-    std::shared_ptr<ResultReport::SectionContent> content;
-
-    if (type == ResultReport::SectionContent::Type::Figure)
+    catch(...)
     {
-        content.reset(new ResultReport::SectionContentFigure(section));
-    }
-    else if (type == ResultReport::SectionContent::Type::Table)
-    {
-        content.reset(new ResultReport::SectionContentTable(section));
-    }
-    else if (type == ResultReport::SectionContent::Type::Text)
-    {
-        content.reset(new ResultReport::SectionContentText(section));
-    }
-    else
-    {
-        bool valid_section_content_type = false;
-        assert(valid_section_content_type);
+        logerr << "DBInterface: saveResult: Could not load content: Unknown error";
+        return ResultT<std::shared_ptr<ResultReport::SectionContent>>::failed("Unknown error");
     }
 
-    bool ok = content->fromJSON(content_vec.get(0));
-    assert(ok);
-
-    return content;
+    return ResultT<std::shared_ptr<ResultReport::SectionContent>>::succeeded(content);
 }
 
 /**

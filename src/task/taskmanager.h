@@ -90,7 +90,7 @@ class TaskManager : public QObject, public Configurable
 
     void beginTaskResultWriting(const std::string& name);
     ResultReport::Report& currentReport();
-    void endTaskResultWriting();
+    void endTaskResultWriting(bool store);
 
     const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
     std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
@@ -119,7 +119,7 @@ protected:
     std::unique_ptr<TaskResultsWidget> widget_{nullptr};
 
     std::map<unsigned int, std::shared_ptr<TaskResult>> results_; // id -> result
-    std::shared_ptr<ResultReport::Report> current_report_;
+    std::shared_ptr<TaskResult> current_result_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
 
