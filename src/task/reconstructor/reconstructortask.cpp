@@ -932,8 +932,7 @@ void ReconstructorTask::endReconstruction()
     }
 
     // report: assoc counts
-    std::future<void> tmp_fut = std::async(std::launch::async, [&]{
-        {
+    {
         if (!section.hasTable("Data Source Counts"))
             section.addTable("Data Source Counts", 5,
                          {"Data Source", "DBContent", "#Associated", "#Unassocated", "Associated [%]"}, false);
@@ -973,9 +972,7 @@ void ReconstructorTask::endReconstruction()
                 }
             }
         }
-    }});
-
-    tmp_fut.wait();
+    }
 
     currentReconstructor()->reset();
 

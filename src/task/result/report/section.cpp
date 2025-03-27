@@ -21,12 +21,15 @@
 #include "task/result/report/sectioncontenttext.h"
 #include "task/result/report/sectioncontenttable.h"
 #include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/report.h"
 
 //#include "latexvisitor.h"
 
 #include "logger.h"
 
 #include <QVBoxLayout>
+#include <QApplication>
+#include <QThread>
 
 namespace ResultReport
 {
@@ -43,6 +46,8 @@ const std::string Section::FieldPerTarget           = "per_target_section";
 const std::string Section::FieldPerTargetWithIssues = "per_target_section_with_issues";
 const std::string Section::FieldSubSections         = "sub_sections";
 const std::string Section::FieldContentIDs          = "content_ids";
+const std::string Section::FieldContentNames        = "content_names";
+const std::string Section::FieldContentTypes        = "content_types";
 const std::string Section::FieldExtraContentIDs     = "extra_content_ids";
 
 unsigned int Section::current_content_id_ = 0;
@@ -74,6 +79,13 @@ Section::Section(TreeItem* parent_item,
 unsigned int Section::newContentID()
 {
     return current_content_id_++;
+}
+
+/**
+*/
+void Section::setCurrentContentID(unsigned int id)
+{
+    current_content_id_ = id;
 }
 
 /**
@@ -215,15 +227,22 @@ QWidget* Section::getContentWidget()
 */
 bool Section::hasText (const std::string& name)
 {
-    return findText(name) != nullptr;
+    return hasContent(name, SectionContent::Type::Text);
 }
 
 /**
 */
 SectionContentText& Section::getText (const std::string& name)
 {
-    SectionContentText* tmp = findText(name);
+    auto idx = findContent(name, SectionContent::Type::Text);
+    assert(idx.has_value());
+
+    auto c = loadOrGetContent(idx.value(), false);
+    assert(c);
+
+    SectionContentText* tmp = dynamic_cast<SectionContentText*>(c.get());
     assert (tmp);
+
     return *tmp;
 }
 
@@ -234,7 +253,9 @@ void Section::addText(const std::string& name)
     assert (!hasText(name));
     auto id = Section::newContentID();
     content_ids_.push_back(id);
+    content_names_.push_back(name);
     content_.push_back(std::make_shared<SectionContentText>(id, name, this));
+    content_types_.push_back((int)content_.back()->type());
     assert (hasText(name));
 }
 
@@ -242,19 +263,22 @@ void Section::addText(const std::string& name)
 */
 bool Section::hasTable(const std::string& name)
 {
-    return findTable(name) != nullptr;
+    return hasContent(name, SectionContent::Type::Table);
 }
 
 /**
 */
 SectionContentTable& Section::getTable(const std::string& name)
 {
-    SectionContentTable* tmp = findTable (name);
+    auto idx = findContent(name, SectionContent::Type::Table);
+    assert(idx.has_value());
 
-    if (!tmp)
-        logerr << "Section: getTable: table '" << name << "' not found";
+    auto c = loadOrGetContent(idx.value(), false);
+    assert(c);
 
+    SectionContentTable* tmp = dynamic_cast<SectionContentTable*>(c.get());
     assert (tmp);
+
     return *tmp;
 }
 
@@ -264,13 +288,10 @@ std::vector<std::string> Section::getTableNames() const
 {
     std::vector<std::string> names;
 
-    for (auto& cont_it : content_)
-    {
-        auto table = dynamic_cast<SectionContentTable*>(cont_it.get());
+    auto idxs = findContents(SectionContent::Type::Table);
 
-        if (table)
-            names.push_back(table->name());
-    }
+    for (auto idx : idxs)
+        names.push_back(content_names_.at(idx));
 
     return names;
 }
@@ -284,9 +305,32 @@ void Section::addTable(const std::string& name,
                        unsigned int sort_column, 
                        Qt::SortOrder order)
 {
+    if (QApplication::instance()->thread() == QThread::currentThread())
+    {
+        //main thread: just add table
+        addTableInternal(name, num_columns, headings, sortable, sort_column, order);
+    }
+    else
+    {
+        //other thread: execute add in main thread
+        report_->addTableMainThread(this, name, num_columns, headings, sortable, sort_column, order);
+    }
+}
+
+/**
+*/
+void Section::addTableInternal(const std::string& name, 
+                               unsigned int num_columns,
+                               std::vector<std::string> headings, 
+                               bool sortable, 
+                               unsigned int sort_column, 
+                               Qt::SortOrder order)
+{
     assert (!hasTable(name));
     auto id = Section::newContentID();
     content_ids_.push_back(id);
+    content_names_.push_back(name);
+
     content_.push_back(std::make_shared<SectionContentTable>(id, 
                                                              name, 
                                                              num_columns, 
@@ -295,6 +339,8 @@ void Section::addTable(const std::string& name,
                                                              sortable, 
                                                              sort_column, 
                                                              order));
+
+    content_types_.push_back((int)content_.back()->type());
     assert (hasTable(name));
 }
 
@@ -302,15 +348,22 @@ void Section::addTable(const std::string& name,
 */
 bool Section::hasFigure (const std::string& name)
 {
-    return findFigure(name) != nullptr;
+    return hasContent(name, SectionContent::Type::Figure);
 }
 
 /**
 */
 SectionContentFigure& Section::getFigure (const std::string& name)
 {
-    SectionContentFigure* tmp = findFigure(name);
+    auto idx = findContent(name, SectionContent::Type::Figure);
+    assert(idx.has_value());
+
+    auto c = loadOrGetContent(idx.value(), false);
+    assert(c);
+
+    SectionContentFigure* tmp = dynamic_cast<SectionContentFigure*>(c.get());
     assert (tmp);
+
     return *tmp;
 }
 
@@ -324,11 +377,13 @@ unsigned int Section::addFigure(const std::string& name,
 
     unsigned int id = Section::newContentID();
     content_ids_.push_back(id);
+    content_names_.push_back(name);
     content_.push_back(std::make_shared<SectionContentFigure>(id, 
                                                               SectionContentFigure::FigureType::Section,
                                                               name, 
                                                               viewable, 
                                                               this));
+    content_types_.push_back((int)content_.back()->type());
     assert (hasFigure(name));
 
     return id;
@@ -350,15 +405,23 @@ unsigned int Section::addContentFigure(const SectionContentViewable& viewable)
 
 /**
 */
-std::vector<SectionContentFigure*> Section::getFigures() const
+std::vector<SectionContentFigure*> Section::getFigures()
 {
     std::vector<SectionContentFigure*> figures;
-    for (auto& cont_it : content_)
+
+    auto idxs = findContents(SectionContent::Type::Figure);
+
+    for (auto idx : idxs)
     {
-        auto f = dynamic_cast<SectionContentFigure*>(cont_it.get());
-        if (f)
-            figures.push_back(f);
+        auto c = loadOrGetContent(idx, false);
+        assert(c);
+
+        auto fig = dynamic_cast<SectionContentFigure*>(c.get());
+        assert(fig);
+
+        figures.push_back(fig);
     }
+
     return figures;
 }
 
@@ -496,53 +559,37 @@ Section* Section::findSubSection(const std::string& heading)
 
 /**
 */
-SectionContentText* Section::findText(const std::string& name)
+boost::optional<size_t> Section::findContent(const std::string& name, SectionContent::Type type) const
 {
-    SectionContentText* tmp;
-
-    for (auto& cont_it : content_)
+    for (size_t i = 0; i < content_.size(); ++i)
     {
-        tmp = dynamic_cast<SectionContentText*>(cont_it.get());
-
-        if (tmp && tmp->name() == name)
-            return tmp;
+        if (content_names_[ i ] == name && (SectionContent::Type)content_types_[ i ] == type)
+            return i;
     }
 
-    return nullptr;
+    return boost::optional<size_t>();
 }
 
 /**
 */
-SectionContentTable* Section::findTable (const std::string& name)
+std::vector<size_t> Section::findContents(SectionContent::Type type) const
 {
-    SectionContentTable* tmp;
+    std::vector<size_t> idxs;
 
-    for (auto& cont_it : content_)
+    for (size_t i = 0; i < content_.size(); ++i)
     {
-        tmp = dynamic_cast<SectionContentTable*>(cont_it.get());
-
-        if (tmp && tmp->name() == name)
-            return tmp;
+        if ((SectionContent::Type)content_types_[ i ] == type)
+            idxs.push_back(i);
     }
 
-    return nullptr;
+    return idxs;
 }
 
 /**
 */
-SectionContentFigure* Section::findFigure (const std::string& name)
+bool Section::hasContent(const std::string& name, SectionContent::Type type) const
 {
-    SectionContentFigure* tmp;
-
-    for (auto& cont_it : content_)
-    {
-        tmp = dynamic_cast<SectionContentFigure*>(cont_it.get());
-
-        if (tmp && tmp->name() == name)
-            return tmp;
-    }
-
-    return nullptr;
+    return findContent(name, type).has_value();
 }
 
 /**
@@ -555,8 +602,8 @@ void Section::createContentWidget()
 
     QVBoxLayout* layout = new QVBoxLayout();
 
-    for (auto& cont_it : content_)
-        cont_it->addToLayout(layout);
+    for (size_t i = 0; i < content_.size(); ++i)
+        loadOrGetContent(i, false)->addToLayout(layout);
 
     //layout->addStretch();
 
@@ -565,8 +612,8 @@ void Section::createContentWidget()
 
 namespace 
 {
-    boost::optional<size_t> findContent(const std::vector<unsigned int>& ids,
-                                        unsigned int id)
+    boost::optional<size_t> findContentInVector(const std::vector<unsigned int>& ids,
+                                                unsigned int id)
     {
         auto it = std::lower_bound(ids.begin(), ids.end(), id);
         if (it == ids.end() || *it != id)
@@ -578,30 +625,39 @@ namespace
 
 /**
 */
-std::shared_ptr<SectionContent> Section::retrieveContent(unsigned int id) const
+std::shared_ptr<SectionContent> Section::retrieveContent(unsigned int id)
 {
     bool in_extra = false;
 
-    auto idx = findContent(content_ids_, id);
+    auto idx = findContentInVector(content_ids_, id);
     if (!idx.has_value())
     {
-        idx = findContent(extra_content_ids_, id);
+        idx = findContentInVector(extra_content_ids_, id);
         in_extra = true;
     }
 
     if (!idx.has_value())
         return std::shared_ptr<SectionContent>();
 
-    auto content = in_extra ? extra_content_.at(idx.value()) : content_.at(idx.value());
+    return loadOrGetContent(idx.value(), in_extra);
+}
 
-    if (!content)
-    {
-        //@TODO try load from db
-        //...
-        assert(content);
-    }
+/**
+*/
+shared_ptr<SectionContent> Section::loadOrGetContent(size_t idx, bool is_extra_content)
+{
+    auto& c_ptr = is_extra_content ? extra_content_.at(idx) : content_.at(idx);
+    auto  id    = is_extra_content ? extra_content_ids_.at(idx) : content_ids_.at(idx);
 
-    return content;
+    if (c_ptr)
+        return c_ptr;
+
+    auto c = report_->loadContent(this, id);
+    assert(c);
+
+    c_ptr = c;
+
+    return c_ptr;
 }
 
 /**
@@ -615,6 +671,8 @@ nlohmann::json Section::toJSON() const
     root[ FieldPerTarget           ] = per_target_section_;
     root[ FieldPerTargetWithIssues ] = per_target_section_with_issues_;
     root[ FieldContentIDs          ] = content_ids_;
+    root[ FieldContentNames        ] = content_names_;
+    root[ FieldContentTypes        ] = content_types_;
     root[ FieldExtraContentIDs     ] = extra_content_ids_;
 
     nlohmann::json j_subsections = nlohmann::json::array();
@@ -641,6 +699,8 @@ bool Section::fromJSON(const nlohmann::json& j)
         !j.contains(FieldPerTargetWithIssues) ||
         !j.contains(FieldSubSections)         ||
         !j.contains(FieldContentIDs)          ||
+        !j.contains(FieldContentNames)        ||
+        !j.contains(FieldContentTypes)        ||
         !j.contains(FieldExtraContentIDs))
     {
         logerr << "Section: fromJSON: Error: Section does not obtain needed fields";
@@ -655,10 +715,15 @@ bool Section::fromJSON(const nlohmann::json& j)
         per_target_section_             = j[ FieldPerTarget           ];
         per_target_section_with_issues_ = j[ FieldPerTargetWithIssues ];
         content_ids_                    = j[ FieldContentIDs          ].get<std::vector<unsigned int>>();
+        content_names_                  = j[ FieldContentNames        ].get<std::vector<std::string>>();
+        content_types_                  = j[ FieldContentTypes        ].get<std::vector<int>>();
         extra_content_ids_              = j[ FieldExtraContentIDs     ].get<std::vector<unsigned int>>();
 
         content_.resize(content_ids_.size());
         extra_content_.resize(extra_content_ids_.size());
+
+        assert(content_ids_.size() == content_names_.size());
+        assert(content_ids_.size() == content_types_.size());
 
         //restore TreeItem content
         setItemName(heading_);

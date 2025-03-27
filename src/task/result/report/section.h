@@ -18,6 +18,7 @@
 #pragma once
 
 #include "task/result/report/treeitem.h"
+#include "task/result/report/sectioncontent.h"
 #include "property.h"
 
 #include <QWidget>
@@ -27,17 +28,19 @@
 #include <memory>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 class LatexVisitor;
 
 using namespace std;
 
 class TaskManager;
+class DBInterface;
 
 namespace ResultReport
 {
 
 class Report;
-class SectionContent;
 class SectionContentText;
 class SectionContentTable;
 class SectionContentFigure;
@@ -86,9 +89,9 @@ public:
     SectionContentFigure& getFigure (const std::string& name);
     unsigned int addFigure (const std::string& name, 
                             const SectionContentViewable& viewable);
-    std::vector<SectionContentFigure*> getFigures() const;
+    std::vector<SectionContentFigure*> getFigures();
 
-    std::shared_ptr<SectionContent> retrieveContent(unsigned int id) const;
+    std::shared_ptr<SectionContent> retrieveContent(unsigned int id);
 
     unsigned int numSections(); // all sections contained
     void addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details,
@@ -123,19 +126,30 @@ public:
     static const std::string FieldPerTargetWithIssues;
     static const std::string FieldSubSections;
     static const std::string FieldContentIDs;
+    static const std::string FieldContentNames;
+    static const std::string FieldContentTypes;
     static const std::string FieldExtraContentIDs;
+
+    static void setCurrentContentID(unsigned int id);
 
 protected:
     friend class SectionContentTable;
+    friend class DBInterface;
+    friend class Report;
+
+    void addTableInternal(const std::string& name, unsigned int num_columns, vector<string> headings,
+        bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
 
     Section* findSubSection (const std::string& heading); // nullptr if not found
-    SectionContentText* findText (const std::string& name); // nullptr if not found
-    SectionContentTable* findTable (const std::string& name); // nullptr if not found
-    SectionContentFigure* findFigure (const std::string& name); // nullptr if not found
+    boost::optional<size_t> findContent(const std::string& name, SectionContent::Type type) const;
+    std::vector<size_t> findContents(SectionContent::Type type) const;
+    bool hasContent(const std::string& name, SectionContent::Type type) const;
 
     void createContentWidget();
 
     unsigned int addContentFigure(const SectionContentViewable& viewable);
+
+    shared_ptr<SectionContent> loadOrGetContent(size_t idx, bool is_extra_content);
 
     static unsigned int newContentID();
 
@@ -147,6 +161,8 @@ protected:
     bool per_target_section_ {false};
     bool per_target_section_with_issues_ {false};
 
+    vector<int>                        content_types_;
+    vector<std::string>                content_names_;
     vector<unsigned int>               content_ids_;
     vector<shared_ptr<SectionContent>> content_;
 

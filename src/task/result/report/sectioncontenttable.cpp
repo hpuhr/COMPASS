@@ -136,7 +136,7 @@ void SectionContentTable::addToLayout(QVBoxLayout* layout)
 {
     loginf << "SectionContentTable: addToLayout";
 
-    this->moveToThread(QThread::currentThread());
+    //this->moveToThread(QThread::currentThread());
 
     assert (layout);
 

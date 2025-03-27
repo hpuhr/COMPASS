@@ -233,6 +233,8 @@ void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite
 
             assert (!existsSectorsTable());
             createSectorsTable();
+
+            ResultReport::Section::setCurrentContentID(0);
         }
         else
         {
@@ -257,6 +259,12 @@ void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite
 
             assert (existsDataSourcesTable());
             assert (existsSectorsTable());
+
+            if (existsReportContentsTable())
+            {
+                auto max_id = getMaxReportContentID();
+                ResultReport::Section::setCurrentContentID(max_id + 1);
+            }
         }
 
         if (!existsTargetsTable())
@@ -596,7 +604,7 @@ unsigned long DBInterface::getMaxRecordNumber(DBContent& object)
         #endif
 
         shared_ptr<DBCommand> command = sqlGenerator().getMaxULongIntValueCommand(object.dbTableName(),
-                                                                                rec_num_var.dbColumnName());
+                                                                                  rec_num_var.dbColumnName());
         shared_ptr<DBResult> result = execute(*command);
         assert(result->containsData());
 
@@ -659,6 +667,34 @@ unsigned int DBInterface::getMaxRefTrackTrackNum()
         assert (!buffer->get<unsigned int>(track_num_var.dbColumnName()).isNull(0));
 
         max_tn = buffer->get<unsigned int>(track_num_var.dbColumnName()).get(0);
+    }
+
+    return max_tn;
+}
+
+/**
+ */
+unsigned long DBInterface::getMaxReportContentID()
+{
+    assert(ready());
+
+    unsigned int max_tn = 0;
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        shared_ptr<DBCommand> command = sqlGenerator().getMaxUIntValueCommand(ResultReport::SectionContent::DBTableName,
+                                                                              ResultReport::SectionContent::DBColumnContentID.name());
+        shared_ptr<DBResult> result = execute(*command);
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+        assert(buffer->size() == 1);
+        assert(!buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name()).isNull(0));
+
+        max_tn = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name()).get(0);
     }
 
     return max_tn;

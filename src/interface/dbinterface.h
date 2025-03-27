@@ -202,6 +202,7 @@ public:
 
     unsigned long getMaxRecordNumber(DBContent& object);
     unsigned int getMaxRefTrackTrackNum();
+    unsigned long getMaxReportContentID();
 
     void startPerformanceMetrics() const;
     db::PerformanceMetrics stopPerformanceMetrics() const;

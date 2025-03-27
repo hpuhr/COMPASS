@@ -58,8 +58,8 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager,
     filters_check_ = new QCheckBox();
     filters_check_->setChecked(filter_manager_.useFilters());
     connect(filters_check_, &QCheckBox::clicked, this, &FilterManagerWidget::toggleUseFilters);
-    //top_layout->addWidget(filters_check_);
-
+    
+    top_layout->addWidget(filters_check_);
     top_layout->addStretch();
 
     layout->addLayout(top_layout);

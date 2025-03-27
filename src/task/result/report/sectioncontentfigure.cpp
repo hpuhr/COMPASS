@@ -72,8 +72,7 @@ void SectionContentFigure::addToLayout(QVBoxLayout* layout)
 
     QHBoxLayout* fig_layout = new QHBoxLayout();
 
-    fig_layout->addWidget(new QLabel(("Figure: "+caption_).c_str()));
-
+    fig_layout->addWidget(new QLabel(("Figure: " + name_).c_str()));
     fig_layout->addStretch();
 
     QPushButton* view_button = new QPushButton("View");
