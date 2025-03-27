@@ -413,12 +413,11 @@ bool TaskManager::hasResult (const std::string& name) const
 
 void TaskManager::databaseOpenedSlot()
 {
-
+    loadResults();
 }
 
 void TaskManager::databaseClosedSlot()
 {
-
 }
 
 void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
@@ -426,4 +425,25 @@ void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
 
     COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+}
+
+void TaskManager::loadResults()
+{
+    assert (!current_result_);
+
+    results_.clear();
+    
+    auto res = COMPASS::instance().dbInterface().loadResults();
+    if (!res.ok())
+    {
+        logerr << "TaskManager: loadResults: Could not load stored results: " << res.error();
+        return;
+    }
+
+    for (const auto& r : res.result())
+        results_[ r->id() ] = r;
+
+    loginf << "TaskManager: loadResults: Loaded " << results_.size() << " result(s)";
+
+    emit taskResultsChangedSignal();
 }

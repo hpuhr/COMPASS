@@ -610,7 +610,6 @@ nlohmann::json Section::toJSON() const
 {
     nlohmann::json root;
 
-    root[ FieldID                  ] = 0; //@TODO
     root[ FieldHeading             ] = heading_;
     root[ FieldParentHeading       ] = parent_heading_;
     root[ FieldPerTarget           ] = per_target_section_;
@@ -636,7 +635,6 @@ nlohmann::json Section::toJSON() const
 bool Section::fromJSON(const nlohmann::json& j)
 {
     if (!j.is_object()                        ||
-        !j.contains(FieldID)                  ||
         !j.contains(FieldHeading)             ||
         !j.contains(FieldParentHeading)       ||
         !j.contains(FieldPerTarget)           ||
@@ -644,7 +642,10 @@ bool Section::fromJSON(const nlohmann::json& j)
         !j.contains(FieldSubSections)         ||
         !j.contains(FieldContentIDs)          ||
         !j.contains(FieldExtraContentIDs))
+    {
+        logerr << "Section: fromJSON: Error: Section does not obtain needed fields";
         return false;
+    }
 
     try
     {
@@ -664,7 +665,10 @@ bool Section::fromJSON(const nlohmann::json& j)
 
         const auto& j_subsections = j[ FieldSubSections ];
         if (!j_subsections.is_array())
+        {
+            logerr << "Section: fromJSON: Error: Subsection is not an array";
             return false;
+        }
 
         for (const auto& jss : j_subsections)
         {
@@ -675,8 +679,14 @@ bool Section::fromJSON(const nlohmann::json& j)
             sub_sections_.push_back(section);
         }
     }
+    catch(const std::exception& ex)
+    {
+        logerr << "Section: fromJSON: Error: " << ex.what();
+        return false;
+    }
     catch(...)
     {
+        logerr << "Section: fromJSON: Error: Unknown JSON error";
         return false;
     }
 

@@ -18,6 +18,7 @@
 #include "taskresult.h"
 
 #include "timeconv.h"
+#include "logger.h"
 
 const std::string TaskResult::DBTableName         = "task_results";
 const Property    TaskResult::DBColumnID          = Property("result_id"   , PropertyDataType::UINT  );
@@ -109,16 +110,19 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
         !j.contains(FieldReport))
         return false;
 
-    id_ = j[ FieldID ];
-    id_ = j[ FieldName ];
-    id_ = j[ FieldType ];
-    id_ = j[ FieldComments ];
+    id_       = j[ FieldID ];
+    name_     = j[ FieldName ];
+    type_     = j[ FieldType ];
+    comments_ = j[ FieldComments ];
 
     std::string ts = j[ FieldCreated ];
     created_ = Utils::Time::fromString(ts);
 
     if (!report_->fromJSON(j[ FieldReport ]))
+    {
+        loginf << "could not read report";
         return false;
+    }
 
     //derived content
     if (!fromJSON_impl(j))

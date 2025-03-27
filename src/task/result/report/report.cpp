@@ -174,10 +174,16 @@ bool Report::fromJSON(const nlohmann::json& j)
 {
     if (!j.is_object() ||
         !j.contains(FieldRootSection))
+    {
+        logerr << "Report: fromJSON: Report does not contain needed fields";
         return false;
+    }
 
     if (!root_section_->fromJSON(j))
+    {
+        logerr << "Report: fromJSON: Could not reed root section";
         return false;
+    }
 
     return true;
 }

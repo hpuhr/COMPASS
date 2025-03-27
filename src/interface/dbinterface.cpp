@@ -1889,12 +1889,12 @@ ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
     }
     catch(const std::exception& ex)
     {
-        logerr << "DBInterface: saveResult: Could not load results: " << ex.what();
+        logerr << "DBInterface: loadResults: Could not load results: " << ex.what();
         return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed(ex.what());
     }
     catch(...)
     {
-        logerr << "DBInterface: saveResult: Could not load results: Unknown error";
+        logerr << "DBInterface: loadResults: Could not load results: Unknown error";
         return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed("Unknown error");
     }
 
@@ -1961,12 +1961,12 @@ ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(
     }
     catch(const std::exception& ex)
     {
-        logerr << "DBInterface: saveResult: Could not load content: " << ex.what();
+        logerr << "DBInterface: loadContent: Could not load content: " << ex.what();
         return ResultT<std::shared_ptr<ResultReport::SectionContent>>::failed(ex.what());
     }
     catch(...)
     {
-        logerr << "DBInterface: saveResult: Could not load content: Unknown error";
+        logerr << "DBInterface: loadContent: Could not load content: Unknown error";
         return ResultT<std::shared_ptr<ResultReport::SectionContent>>::failed("Unknown error");
     }
 

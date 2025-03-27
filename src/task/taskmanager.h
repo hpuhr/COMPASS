@@ -125,4 +125,6 @@ protected:
 
     void addTask(const std::string& class_id, Task* task);
     MainWindow* getMainWindow();
+
+    void loadResults();
 };
