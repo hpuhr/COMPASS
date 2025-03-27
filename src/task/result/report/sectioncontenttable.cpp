@@ -112,7 +112,7 @@ void SectionContentTable::addRow (const nlohmann::json& row,
     anno.section_link   = section_link;
     anno.section_figure = section_figure;
 
-    loginf << "SectionContentTable " << name_ << ": addRow: UGA viewable.valid " << viewable.valid();
+    logdbg<< "SectionContentTable " << name_ << ": addRow: viewable.valid " << viewable.valid();
 
     if (viewable.valid())
     {
