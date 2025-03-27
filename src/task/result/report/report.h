@@ -56,6 +56,9 @@ public:
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
 
+    TaskManager& taskManager() { return task_man_; }
+    const TaskManager& taskManager() const { return task_man_; }
+
     static const std::string FieldRootSection;
 
 protected:

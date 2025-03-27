@@ -36,15 +36,18 @@ public slots:
     void viewSlot();
 
 public:
+    enum class FigureType
+    {
+        Section = 0, // figure referenced by section (e.g. rendered in pdf report)
+        Content      // figure referenced by content (e.g. by a table, not rendered in pdf report)
+    };
+
     SectionContentFigure(unsigned int id,
+                         FigureType figure_type,
                          const std::string& name, 
-                         const std::string& caption,
-                         std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
-                         Section* parent_section, 
-                         TaskManager& task_man,
-                         int render_delay_msec = 0);
-    SectionContentFigure(Section* parent_section, 
-                         TaskManager& task_man);
+                         const SectionContentViewable& viewable,
+                         Section* parent_section);
+    SectionContentFigure(Section* parent_section);
 
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
@@ -52,6 +55,11 @@ public:
     void view () const;
     std::string getSubPath() const;
 
+    FigureType figureType() const { return fig_type_; }
+
+    std::shared_ptr<nlohmann::json::object_t> viewableContent();
+
+    static const std::string FieldType;
     static const std::string FieldCaption;
     static const std::string FieldRenderDelayMSec;
     static const std::string FieldViewable;
@@ -60,10 +68,11 @@ protected:
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
 
+    FigureType  fig_type_          = FigureType::Section;
     std::string caption_;
     int         render_delay_msec_ = 0;
 
-    std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc_;
+    SectionContentViewable::ViewableFunc viewable_fnc_;
 };
 
 }

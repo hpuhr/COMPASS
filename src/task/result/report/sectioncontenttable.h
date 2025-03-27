@@ -118,16 +118,17 @@ public:
                         unsigned int num_columns,
                         const std::vector<std::string>& headings, 
                         Section* parent_section, 
-                        TaskManager& task_man,
                         bool sortable=true, 
                         unsigned int sort_column=0, 
                         Qt::SortOrder sort_order=Qt::AscendingOrder);
-    SectionContentTable(Section* parent_section, 
-                        TaskManager& task_man);
+    SectionContentTable(Section* parent_section);
 
     void addRow (const nlohmann::json& row,
-                 QVariant annotation = {});
-
+                 const SectionContentViewable& viewable = SectionContentViewable(),
+                 const std::string& section_link = "",
+                 const std::string& section_figure = "",
+                 const QVariant& viewable_index = QVariant());
+    
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
 
@@ -179,6 +180,8 @@ protected:
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
 
+    unsigned int addFigure (const SectionContentViewable& viewable);
+
     bool create_on_demand_ {false};
     std::function<void(void)> create_on_demand_fnc_;
     bool already_created_by_demand_ {false};
@@ -192,8 +195,16 @@ protected:
 
     bool show_unused_ {false};
 
+    struct RowAnnotation
+    {
+        boost::optional<unsigned int> figure_id;
+        std::string                   section_link;
+        std::string                   section_figure;
+        QVariant                      index;
+    };
+
     std::vector<nlohmann::json> rows_;
-    std::vector<QVariant>       annotations_;
+    std::vector<RowAnnotation>  annotations_;
 
     //        mutable QPushButton* toogle_show_unused_button_ {nullptr};
     //        mutable QPushButton* copy_button_ {nullptr};

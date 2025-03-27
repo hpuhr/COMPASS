@@ -36,10 +36,12 @@ class TaskManager;
 namespace ResultReport
 {
 
+class Report;
 class SectionContent;
 class SectionContentText;
 class SectionContentTable;
 class SectionContentFigure;
+struct SectionContentViewable;
 
 /**
  */
@@ -49,9 +51,9 @@ public:
     Section(const string& heading, 
             const string& parent_heading, 
             TreeItem* parent_item,
-            TaskManager& task_man);
+            Report* report);
     Section(TreeItem* parent_item,
-            TaskManager& task_man);
+            Report* report);
 
     virtual TreeItem* child(int row) override;
     virtual int childCount() const override;
@@ -82,10 +84,11 @@ public:
 
     bool hasFigure (const std::string& name);
     SectionContentFigure& getFigure (const std::string& name);
-    void addFigure (const std::string& name, const string& caption,
-                    std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
-                    int render_delay_msec = 0);
+    unsigned int addFigure (const std::string& name, 
+                            const SectionContentViewable& viewable);
     std::vector<SectionContentFigure*> getFigures() const;
+
+    std::shared_ptr<SectionContent> retrieveContent(unsigned int id) const;
 
     unsigned int numSections(); // all sections contained
     void addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details,
@@ -93,7 +96,7 @@ public:
 
     virtual void accept(LatexVisitor& v) const;
 
-    const vector<shared_ptr<SectionContent>>& content() const;
+    const vector<shared_ptr<SectionContent>>& sectionContent() const;
     vector<shared_ptr<SectionContent>> recursiveContent() const;
 
     bool perTargetSection() const; // to be used for utn and sub-sections
@@ -104,6 +107,9 @@ public:
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
+
+    Report* report() { return report_; }
+    const Report* report() const { return report_; }
 
     static const std::string DBTableName;
     static const Property    DBColumnSectionID;
@@ -118,6 +124,8 @@ public:
     static const std::string FieldSubSections;
 
 protected:
+    friend class SectionContentTable;
+
     Section* findSubSection (const std::string& heading); // nullptr if not found
     SectionContentText* findText (const std::string& name); // nullptr if not found
     SectionContentTable* findTable (const std::string& name); // nullptr if not found
@@ -125,17 +133,23 @@ protected:
 
     void createContentWidget();
 
+    unsigned int addContentFigure(const SectionContentViewable& viewable);
+
     static unsigned int newContentID();
 
     string heading_; // name same as heading
     string parent_heading_; // e.g. "head1:head2" or ""
 
-    TaskManager& task_man_;
+    Report* report_ = nullptr;
 
     bool per_target_section_ {false};
     bool per_target_section_with_issues_ {false};
 
+    vector<unsigned int>               content_ids_;
     vector<shared_ptr<SectionContent>> content_;
+
+    vector<unsigned int>               extra_content_ids_;
+    vector<shared_ptr<SectionContent>> extra_content_;
 
     unique_ptr<QWidget> content_widget_;
 

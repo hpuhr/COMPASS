@@ -38,27 +38,27 @@ const std::string SectionContent::FieldName = "name";
 SectionContent::SectionContent(Type type,
                                unsigned int id,
                                const std::string& name, 
-                               Section* parent_section, 
-                               TaskManager& task_man)
+                               Section* parent_section)
 :   type_          (type          )
 ,   id_            (id            )
 ,   name_          (name          )
 ,   parent_section_(parent_section)
-,   task_man_      (task_man      )
 {
     assert (parent_section_);
+
+    report_ = parent_section_->report();
 }
 
 /**
  */
 SectionContent::SectionContent(Type type,
-                               Section* parent_section, 
-                               TaskManager& task_man)
+                               Section* parent_section)
 :   type_          (type          )
 ,   parent_section_(parent_section)
-,   task_man_      (task_man      )
 {
     assert (parent_section_);
+
+    report_ = parent_section_->report();
 }
 
 /**

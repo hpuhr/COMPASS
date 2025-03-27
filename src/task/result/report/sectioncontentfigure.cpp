@@ -17,6 +17,7 @@
 
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/section.h"
+#include "task/result/report/report.h"
 
 #include "section_id.h"
 
@@ -35,6 +36,7 @@
 namespace ResultReport
 {
 
+const std::string SectionContentFigure::FieldType            = "type";
 const std::string SectionContentFigure::FieldCaption         = "caption";
 const std::string SectionContentFigure::FieldRenderDelayMSec = "render_delay_msec";
 const std::string SectionContentFigure::FieldViewable        = "viewable";
@@ -42,25 +44,23 @@ const std::string SectionContentFigure::FieldViewable        = "viewable";
 /**
  */
 SectionContentFigure::SectionContentFigure(unsigned int id,
+                                           FigureType figure_type,
                                            const std::string& name, 
-                                           const std::string& caption,
-                                           std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
-                                           Section* parent_section,
-                                           TaskManager& task_man,
-                                           int render_delay_msec)
-:   SectionContent    (Type::Figure, id, name, parent_section, task_man)
-,   caption_          (caption)
-,   render_delay_msec_(render_delay_msec)
-,   viewable_fnc_     (viewable_fnc)
+                                           const SectionContentViewable& viewable,
+                                           Section* parent_section)
+:   SectionContent    (Type::Figure, id, name, parent_section)
+,   fig_type_         (figure_type)
+,   caption_          (viewable.caption)
+,   render_delay_msec_(viewable.render_delay_msec)
+,   viewable_fnc_     (viewable.viewable_func)
 {
-   //assert (viewable_data_);
+    assert (viewable_fnc_);
 }
 
 /**
  */
-SectionContentFigure::SectionContentFigure(Section* parent_section, 
-                                           TaskManager& task_man)
-:   SectionContent(Type::Figure, parent_section, task_man)
+SectionContentFigure::SectionContentFigure(Section* parent_section)
+:   SectionContent(Type::Figure, parent_section)
 {
 }
 
@@ -88,6 +88,11 @@ void SectionContentFigure::addToLayout(QVBoxLayout* layout)
 void SectionContentFigure::accept(LatexVisitor& v)
 {
     loginf << "SectionContentFigure: accept";
+
+    //do not add content figures to latex
+    if (fig_type_ == FigureType::Content)
+        return;
+
     //@TODO
     //v.visit(this);
 }
@@ -100,10 +105,11 @@ void SectionContentFigure::viewSlot()
     view();
 }
 
+/**
+ */
 void SectionContentFigure::view() const
 {
-    //@TODO
-    //task_man_.setViewableDataConfig(*viewable_fnc_());
+    report_->taskManager().setViewableDataConfig(*viewable_fnc_());
 
     if (render_delay_msec_ > 0)
     {
@@ -117,6 +123,8 @@ void SectionContentFigure::view() const
     }
 }
 
+/**
+ */
 std::string SectionContentFigure::getSubPath() const
 {
     assert (parent_section_);
@@ -124,8 +132,18 @@ std::string SectionContentFigure::getSubPath() const
     return EvaluationResultsReport::SectionID::sectionID2Path(parent_section_->compoundResultsHeading());
 }
 
+/**
+ */
+std::shared_ptr<nlohmann::json::object_t> SectionContentFigure::viewableContent()
+{
+    return viewable_fnc_();
+}
+
+/**
+ */
 void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
 {
+    root_node[ FieldType            ] = fig_type_;
     root_node[ FieldCaption         ] = caption_;
     root_node[ FieldRenderDelayMSec ] = render_delay_msec_;
 
@@ -140,15 +158,19 @@ void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
     root_node[ FieldViewable ] = jviewable;
 }
 
+/**
+ */
 bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
 {
     if (!j.is_object()                    ||
+        !j.contains(FieldType)            ||
         !j.contains(FieldCaption)         ||
         !j.contains(FieldRenderDelayMSec) ||
         !j.contains(FieldViewable))
         return false;
 
-    caption_ = j[ FieldCaption ];
+    fig_type_          = j[ FieldType            ];
+    caption_           = j[ FieldCaption         ];
     render_delay_msec_ = j[ FieldRenderDelayMSec ];
 
     std::shared_ptr<nlohmann::json::object_t> jviewable(new nlohmann::json::object_t);

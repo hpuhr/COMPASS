@@ -50,20 +50,20 @@ unsigned int Section::current_content_id_ = 0;
 Section::Section(const string& heading, 
                  const string& parent_heading, 
                  TreeItem* parent_item,
-                 TaskManager& task_man)
+                 Report* report)
 :   TreeItem       (heading, parent_item)
 ,   heading_       (heading)
 ,   parent_heading_(parent_heading)
-,   task_man_      (task_man)
+,   report_        (report)
 {
 }
 
 /**
 */
 Section::Section(TreeItem* parent_item,
-                 TaskManager& task_man)
+                 Report* report)
 :   TreeItem (parent_item)
-,   task_man_(task_man   )
+,   report_  (report)
 {
 }
 
@@ -174,7 +174,7 @@ void Section::addSubSection (const std::string& heading)
 
     assert (!hasSubSection(heading));
 
-    sub_sections_.push_back(std::make_shared<Section>(heading, compoundHeading(), this, task_man_));
+    sub_sections_.push_back(std::make_shared<Section>(heading, compoundHeading(), this, report_));
     assert (hasSubSection(heading));
 }
 
@@ -230,7 +230,9 @@ SectionContentText& Section::getText (const std::string& name)
 void Section::addText(const std::string& name)
 {
     assert (!hasText(name));
-    content_.push_back(std::make_shared<SectionContentText>(Section::newContentID(), name, this, task_man_));
+    auto id = Section::newContentID();
+    content_ids_.push_back(id);
+    content_.push_back(std::make_shared<SectionContentText>(id, name, this));
     assert (hasText(name));
 }
 
@@ -281,12 +283,13 @@ void Section::addTable(const std::string& name,
                        Qt::SortOrder order)
 {
     assert (!hasTable(name));
-    content_.push_back(std::make_shared<SectionContentTable>(Section::newContentID(), 
+    auto id = Section::newContentID();
+    content_ids_.push_back(id);
+    content_.push_back(std::make_shared<SectionContentTable>(id, 
                                                              name, 
                                                              num_columns, 
                                                              headings, 
                                                              this, 
-                                                             task_man_,
                                                              sortable, 
                                                              sort_column, 
                                                              order));
@@ -311,19 +314,36 @@ SectionContentFigure& Section::getFigure (const std::string& name)
 
 /**
 */
-void Section::addFigure(const std::string& name, const string& caption,
-                                    std::function<std::shared_ptr<nlohmann::json::object_t>(void)> viewable_fnc,
-                                    int render_delay_msec)
+unsigned int Section::addFigure(const std::string& name, 
+                                const SectionContentViewable& viewable)
 {
+    assert (!name.empty());
     assert (!hasFigure(name));
-    content_.push_back(std::make_shared<SectionContentFigure>(Section::newContentID(), 
+
+    unsigned int id = Section::newContentID();
+    content_ids_.push_back(id);
+    content_.push_back(std::make_shared<SectionContentFigure>(id, 
+                                                              SectionContentFigure::FigureType::Section,
                                                               name, 
-                                                              caption, 
-                                                              viewable_fnc, 
-                                                              this, 
-                                                              task_man_,
-                                                              render_delay_msec));
+                                                              viewable, 
+                                                              this));
     assert (hasFigure(name));
+
+    return id;
+}
+
+/**
+*/
+unsigned int Section::addContentFigure(const SectionContentViewable& viewable)
+{
+    unsigned int id = Section::newContentID();
+    extra_content_ids_.push_back(id);
+    extra_content_.push_back(std::make_shared<SectionContentFigure>(id, 
+                                                                    SectionContentFigure::FigureType::Content,
+                                                                    "", 
+                                                                    viewable, 
+                                                                    this));
+    return id;
 }
 
 /**
@@ -409,7 +429,7 @@ void Section::accept(LatexVisitor& v) const
 
 /**
 */
-const vector<shared_ptr<SectionContent>>& Section::content() const
+const vector<shared_ptr<SectionContent>>& Section::sectionContent() const
 {
     return content_;
 }
@@ -418,7 +438,9 @@ const vector<shared_ptr<SectionContent>>& Section::content() const
 */
 vector<shared_ptr<SectionContent>> Section::recursiveContent() const
 {
-    vector<shared_ptr<SectionContent>> sec_content = content();
+    vector<shared_ptr<SectionContent>> sec_content;
+    sec_content.insert(sec_content.end(), content_.begin(), content_.end());
+    sec_content.insert(sec_content.end(), extra_content_.begin(), extra_content_.end());
 
     for (const auto& s : sub_sections_)
     {
@@ -539,6 +561,47 @@ void Section::createContentWidget()
     content_widget_->setLayout(layout);
 }
 
+namespace 
+{
+    boost::optional<size_t> findContent(const std::vector<unsigned int>& ids,
+                                        unsigned int id)
+    {
+        auto it = std::lower_bound(ids.begin(), ids.end(), id);
+        if (it == ids.end() || *it != id)
+            return {};
+
+        return std::distance(ids.begin(), it);
+    }
+}
+
+/**
+*/
+std::shared_ptr<SectionContent> Section::retrieveContent(unsigned int id) const
+{
+    bool in_extra = false;
+
+    auto idx = findContent(content_ids_, id);
+    if (!idx.has_value())
+    {
+        idx = findContent(extra_content_ids_, id);
+        in_extra = true;
+    }
+
+    if (!idx.has_value())
+        return std::shared_ptr<SectionContent>();
+
+    auto content = in_extra ? extra_content_.at(idx.value()) : content_.at(idx.value());
+
+    if (!content)
+    {
+        //@TODO try load from db
+        //...
+        assert(content);
+    }
+
+    return content;
+}
+
 /**
 */
 nlohmann::json Section::toJSON() const
@@ -594,7 +657,7 @@ bool Section::fromJSON(const nlohmann::json& j)
 
         for (const auto& jss : j_subsections)
         {
-            std::shared_ptr<Section> section(new Section(this, task_man_));
+            std::shared_ptr<Section> section(new Section(this, report_));
             if (!section->fromJSON(jss))
                 return false;
 

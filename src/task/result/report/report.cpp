@@ -36,7 +36,7 @@ Report::Report(TaskManager& task_man)
 :   TreeItem("Report", nullptr)
 ,   task_man_(task_man)
 {
-    root_section_ = std::make_shared<Section>("Results", "", this, task_man_);
+    root_section_ = std::make_shared<Section>("Results", "", nullptr, this);
 }
 
 /**
@@ -48,7 +48,7 @@ Report::~Report()
 
 void Report::clear()
 {
-    root_section_ = std::make_shared<Section>("Results", "", this, task_man_);
+    root_section_ = std::make_shared<Section>("Results", "", nullptr, this);
 }
 
 /**

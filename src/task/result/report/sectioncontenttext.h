@@ -36,10 +36,8 @@ class SectionContentText : public SectionContent
 public:
     SectionContentText(unsigned int id, 
                        const std::string& name, 
-                       Section* parent_section, 
-                       TaskManager& task_man);
-    SectionContentText(Section* parent_section, 
-                       TaskManager& task_man);
+                       Section* parent_section);
+    SectionContentText(Section* parent_section);
 
     void addText (const std::string& text);
 

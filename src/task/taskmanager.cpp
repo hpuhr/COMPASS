@@ -27,6 +27,8 @@
 #include "gpsimportcsvtask.h"
 #include "reconstructortask.h"
 #include "mainwindow.h"
+#include "viewabledataconfig.h"
+#include "viewmanager.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
@@ -405,4 +407,11 @@ void TaskManager::databaseOpenedSlot()
 void TaskManager::databaseClosedSlot()
 {
 
+}
+
+void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
+{
+    viewable_data_cfg_.reset(new ViewableDataConfig(data));
+
+    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
 }

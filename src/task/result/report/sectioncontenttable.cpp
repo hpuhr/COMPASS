@@ -16,6 +16,9 @@
  */
 
 #include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/report.h"
 
 #include "taskmanager.h"
 #include "compass.h"
@@ -63,11 +66,10 @@ SectionContentTable::SectionContentTable(unsigned int id,
                                          unsigned int num_columns,
                                          const std::vector<std::string>& headings, 
                                          Section* parent_section,
-                                         TaskManager& task_man, 
                                          bool sortable,
                                          unsigned int sort_column, 
                                          Qt::SortOrder sort_order)
-:   SectionContent(Type::Table, id, name, parent_section, task_man)
+:   SectionContent(Type::Table, id, name, parent_section)
 ,   num_columns_  (num_columns)
 ,   headings_     (headings)
 ,   sortable_     (sortable)
@@ -81,24 +83,41 @@ SectionContentTable::SectionContentTable(unsigned int id,
 
 /**
  */
-SectionContentTable::SectionContentTable(Section* parent_section,
-                                         TaskManager& task_man)
-:   SectionContent(Type::Table, parent_section, task_man)
+SectionContentTable::SectionContentTable(Section* parent_section)
+:   SectionContent(Type::Table, parent_section)
 {
 }
 
 /**
  */
 void SectionContentTable::addRow (const nlohmann::json& row,
-                                  QVariant annotation)
+                                  const SectionContentViewable& viewable,
+                                  const std::string& section_link,
+                                  const std::string& section_figure,
+                                  const QVariant& viewable_index)
 {
     assert(row.is_array());
     assert (row.size() == num_columns_);
 
     rows_.push_back(row);
-    annotations_.push_back(annotation);
 
-    assert (annotations_.size() == rows_.size());
+    RowAnnotation anno;
+    anno.index          = viewable_index;
+    anno.section_link   = section_link;
+    anno.section_figure = section_figure;
+
+    if (viewable.valid())
+        anno.figure_id = addFigure(viewable);
+
+    annotations_.push_back(anno);
+}
+
+/**
+ */
+unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewable)
+{
+    assert(parent_section_);
+    return parent_section_->addContentFigure(viewable);
 }
 
 /**
@@ -166,7 +185,6 @@ void SectionContentTable::addToLayout(QVBoxLayout* layout)
     main_layout->addWidget(table_view_);
 
     layout->addLayout(main_layout);
-
 }
 
 /**
@@ -430,11 +448,13 @@ bool SectionContentTable::hasReference (unsigned int row) const
 
     unsigned int row_index = source_index.row();
 
-    //@TODO
+    const auto& annotation = annotations_.at(row_index);
+
+    //@TODO?
     //return result_ptrs_.at(row_index)
     //        && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index));
 
-    return true;
+    return !annotation.section_link.empty();
 }
 
 /**
@@ -615,35 +635,65 @@ void SectionContentTable::performClickAction()
     unsigned int row_index = last_clicked_row_index_.value();
     last_clicked_row_index_.reset();
 
-    //@TODO
-    // if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
-    // {
-    //     loginf << "SectionContentTable: performClickAction: index has associated viewable";
+    const auto& annotation = annotations_.at(row_index);
 
-    //     std::shared_ptr<nlohmann::json::object_t> viewable;
+    bool has_valid_link = false;
+    SectionContentFigure* figure = nullptr;
 
-    //     if (result_ptrs_.at(row_index)->viewableDataReady())
-    //     {
-    //         //view data ready, just get it
-    //         viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
-    //     }
-    //     else
-    //     {
-    //         //recompute async and show wait dialog, this may take a while...
-    //         auto func = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
-    //         {
-    //             viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
-    //             return Result::succeeded();
-    //         };
-            
-    //         AsyncFuncTask task(func, "Updating Contents", "Updating contents...", false);
-    //         task.runAsyncDialog();
-    //     }
+    if (annotation.figure_id.has_value())
+    {
+        loginf << "SectionContentTable: performClickAction: index has associated viewable via id " << annotation.figure_id.value();
+        has_valid_link = true;
 
-    //     assert (viewable);
+        //figure from content in parent section
+        auto c = parent_section_->retrieveContent(annotation.figure_id.value());
+        figure = dynamic_cast<SectionContentFigure*>(c.get());
+    }
+    else if (!annotation.section_link.empty() && !annotation.section_figure.empty())
+    {
+        loginf << "SectionContentTable: performClickAction: index has associated viewable via section " << annotation.section_link;
+        has_valid_link = true;
 
-    //     eval_man_.setViewableDataConfig(*viewable.get());
-    // }
+        //figure from section link + figure name
+        auto& section = report_->getSection(annotation.section_link);
+        if (section.hasFigure(annotation.section_figure))
+            figure = &section.getFigure(annotation.section_figure);
+    }
+    
+    if (has_valid_link)
+    {
+        if (figure)
+        {
+            std::shared_ptr<nlohmann::json::object_t> viewable = figure->viewableContent();
+
+            //TODO
+            // if (result_ptrs_.at(row_index)->viewableDataReady())
+            // {
+            //     //view data ready, just get it
+            //     viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
+            // }
+            // else
+            // {
+            //     //recompute async and show wait dialog, this may take a while...
+            //     auto func = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
+            //     {
+            //         viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
+            //         return Result::succeeded();
+            //     };
+                
+            //     AsyncFuncTask task(func, "Updating Contents", "Updating contents...", false);
+            //     task.runAsyncDialog();
+            // }
+
+            assert (viewable);
+
+            report_->taskManager().setViewableDataConfig(*viewable.get());
+        }
+        else
+        {
+            logerr << "SectionContentTable: performClickAction: figure could not be retrieved";
+        }
+    }
 }
 
 /**
@@ -669,19 +719,18 @@ void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
 
     unsigned int row_index = source_index.row();
 
-    //@TODO
-    // if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)))
-    // {
-    //     string reference = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
-    //     assert (reference.size());
+    const auto& annotation = annotations_.at(row_index);
 
-    //     loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference '"
-    //            << reference << "'";
+    if (!annotation.section_link.empty())
+    {
+        loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference '"
+               << annotation.section_link << "'";
 
-    //     eval_man_.showResultId(reference);
-    // }
-    // else
-    //     loginf << "SectionContentTable: currentRowChangedSlot: index has no associated reference";
+        //@TODO
+        //task_man_.showResultId(annotation.section_link);
+    }
+    else
+        loginf << "SectionContentTable: currentRowChangedSlot: index has no associated reference";
 }
 
 /**

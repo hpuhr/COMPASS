@@ -25,8 +25,6 @@
 
 #include "json.hpp"
 
-class TaskManager;
-
 class QVBoxLayout;
 class LatexVisitor;
 
@@ -34,6 +32,43 @@ namespace ResultReport
 {
 
 class Section;
+class Report;
+
+/**
+ */
+struct SectionContentViewable
+{
+    typedef std::function<std::shared_ptr<nlohmann::json::object_t>()> ViewableFunc;
+
+    SectionContentViewable() {}
+    SectionContentViewable(const ViewableFunc& func) 
+    :   viewable_func(func) {}
+    SectionContentViewable(const nlohmann::json::object_t& content) 
+    :   viewable_func()
+    {
+        std::shared_ptr<nlohmann::json::object_t> c(new nlohmann::json::object_t);
+        *c = content;
+        viewable_func = [ = ] () { return c; };
+    }
+
+    bool valid() const { return viewable_func ? true : false; }
+
+    SectionContentViewable& setCaption(const std::string& c)
+    {
+        caption = c;
+        return *this;
+    }
+
+    SectionContentViewable& setRenderDelayMS(int delay)
+    {
+        render_delay_msec = delay;
+        return *this;
+    }
+
+    ViewableFunc viewable_func;
+    std::string  caption;
+    int          render_delay_msec = 0;
+};
 
 /**
  */
@@ -50,11 +85,9 @@ public:
     SectionContent(Type type,
                    unsigned int id,
                    const std::string& name, 
-                   Section* parent_section, 
-                   TaskManager& task_man);
+                   Section* parent_section);
     SectionContent(Type type,
-                   Section* parent_section, 
-                   TaskManager& task_man);
+                   Section* parent_section);
 
     Type type() const;
     std::string typeAsString() const;
@@ -88,7 +121,7 @@ protected:
     unsigned int id_ = 0;
     std::string  name_;
     Section*     parent_section_ {nullptr};
-    TaskManager& task_man_;
+    Report*      report_ = nullptr;
 };
 
 }

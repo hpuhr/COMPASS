@@ -35,6 +35,7 @@ class ReconstructorTask;
 class MainWindow;
 class TaskResult;
 class TaskResultsWidget;
+class ViewableDataConfig;
 
 class QMainWindow;
 
@@ -97,6 +98,8 @@ class TaskManager : public QObject, public Configurable
     ResultReport::Report& report(const std::string& name);
     bool hasResult (const std::string& name) const;
 
+    void setViewableDataConfig(const nlohmann::json::object_t& data);
+
 protected:
     // tasks
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
@@ -118,8 +121,8 @@ protected:
     std::map<unsigned int, std::shared_ptr<TaskResult>> results_; // id -> result
     std::shared_ptr<ResultReport::Report> current_report_;
 
+    std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
+
     void addTask(const std::string& class_id, Task* task);
     MainWindow* getMainWindow();
 };
-
-

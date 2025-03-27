@@ -35,17 +35,15 @@ const std::string SectionContentText::FieldTexts = "texts";
  */
 SectionContentText::SectionContentText(unsigned int id,
                                        const std::string& name, 
-                                       Section* parent_section, 
-                                       TaskManager& task_man)
-:   SectionContent(Type::Text, id, name, parent_section, task_man)
+                                       Section* parent_section)
+:   SectionContent(Type::Text, id, name, parent_section)
 {
 }
 
 /**
  */
-SectionContentText::SectionContentText(Section* parent_section, 
-                                       TaskManager& task_man)
-:   SectionContent(Type::Text, parent_section, task_man)
+SectionContentText::SectionContentText(Section* parent_section)
+:   SectionContent(Type::Text, parent_section)
 {
 }
 

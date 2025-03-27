@@ -1891,21 +1891,19 @@ std::shared_ptr<ResultReport::SectionContent> DBInterface::loadContent(ResultRep
 
     ResultReport::SectionContent::Type type = (ResultReport::SectionContent::Type)type_vec.get(0);
 
-    auto& task_man = COMPASS::instance().taskManager();
-
     std::shared_ptr<ResultReport::SectionContent> content;
 
     if (type == ResultReport::SectionContent::Type::Figure)
     {
-        content.reset(new ResultReport::SectionContentFigure(section, task_man));
+        content.reset(new ResultReport::SectionContentFigure(section));
     }
     else if (type == ResultReport::SectionContent::Type::Table)
     {
-        content.reset(new ResultReport::SectionContentTable(section, task_man));
+        content.reset(new ResultReport::SectionContentTable(section));
     }
     else if (type == ResultReport::SectionContent::Type::Text)
     {
-        content.reset(new ResultReport::SectionContentText(section, task_man));
+        content.reset(new ResultReport::SectionContentText(section));
     }
     else
     {
