@@ -61,6 +61,8 @@ public:
 
     void setCurrentViewable(const nlohmann::json::object_t& data);
     void setCurrentSection(const std::string& section_name);
+    std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
+                                                              unsigned int content_id) const;
 
     static const std::string FieldRootSection;
 

@@ -427,6 +427,19 @@ void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
     COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
 }
 
+std::shared_ptr<ResultReport::SectionContent> TaskManager::loadContent(ResultReport::Section* section, 
+                                                                       unsigned int content_id) const
+{
+    auto res = COMPASS::instance().dbInterface().loadContent(section, content_id);
+    if (!res.ok())
+    {
+        logerr << "TaskManager: loadResults: Could not load stored content: " << res.error();
+        return std::shared_ptr<ResultReport::SectionContent>();
+    }
+
+    return res.result();
+}
+
 void TaskManager::loadResults()
 {
     assert (!current_result_);

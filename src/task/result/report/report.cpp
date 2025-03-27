@@ -175,13 +175,13 @@ bool Report::fromJSON(const nlohmann::json& j)
     if (!j.is_object() ||
         !j.contains(FieldRootSection))
     {
-        logerr << "Report: fromJSON: Report does not contain needed fields";
+        logerr << "Report: fromJSON: Report does not contain needed fields: isobject = " << j.is_object();
         return false;
     }
 
-    if (!root_section_->fromJSON(j))
+    if (!root_section_->fromJSON(j[ FieldRootSection ]))
     {
-        logerr << "Report: fromJSON: Could not reed root section";
+        logerr << "Report: fromJSON: Could not read root section";
         return false;
     }
 
@@ -200,6 +200,12 @@ void Report::setCurrentViewable(const nlohmann::json::object_t& data)
 void Report::setCurrentSection(const std::string& section_name)
 {
     //@TODO
+}
+
+std::shared_ptr<ResultReport::SectionContent> Report::loadContent(ResultReport::Section* section, 
+                                                                  unsigned int content_id) const
+{
+    return task_man_.loadContent(section, content_id);
 }
 
 }

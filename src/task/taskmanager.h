@@ -41,7 +41,9 @@ class QMainWindow;
 
 namespace ResultReport
 {
-class Report;
+  class Report;
+  class SectionContent;
+  class Section;
 }
 
 class TaskManager : public QObject, public Configurable
@@ -99,7 +101,8 @@ class TaskManager : public QObject, public Configurable
     bool hasResult (const std::string& name) const;
 
     void setViewableDataConfig(const nlohmann::json::object_t& data);
-
+    std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
+                                                              unsigned int content_id) const;
 protected:
     // tasks
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;

@@ -1865,7 +1865,7 @@ ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
         auto& content_vec = b->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
         auto& type_vec    = b->get<int>(TaskResult::DBColumnResultType.name());
 
-        std::vector<std::shared_ptr<TaskResult>> results(nr);
+        results.resize(nr);
 
         auto& task_man = COMPASS::instance().taskManager();
 
