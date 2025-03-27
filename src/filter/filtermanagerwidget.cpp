@@ -58,7 +58,7 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager,
     filters_check_ = new QCheckBox();
     filters_check_->setChecked(filter_manager_.useFilters());
     connect(filters_check_, &QCheckBox::clicked, this, &FilterManagerWidget::toggleUseFilters);
-    
+
     top_layout->addWidget(filters_check_);
     top_layout->addStretch();
 
@@ -224,8 +224,11 @@ void FilterManagerWidget::updateFilters()
 {
     QLayoutItem* child;
     while (!ds_filter_layout_->isEmpty() && (child = ds_filter_layout_->takeAt(0)))
+    
+    while (!ds_filter_layout_->isEmpty())
     {
-        ds_filter_layout_->removeItem(child);
+        auto item = ds_filter_layout_->takeAt(0);
+        delete item;
     }
 
     auto& filters = filter_manager_.filters();
