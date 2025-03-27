@@ -161,6 +161,7 @@ public:
     void removeDBContentFromTargets(const std::string& dbcont_name);
     void loadTargets();
     void saveTargets();
+    unsigned int numTargets() const;
 
     nlohmann::json targetsInfoAsJSON() const;
     nlohmann::json targetInfoAsJSON(unsigned int utn) const;

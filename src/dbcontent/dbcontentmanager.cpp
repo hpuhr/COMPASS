@@ -1577,6 +1577,11 @@ void DBContentManager::saveTargets()
     target_model_->saveToDB();
 }
 
+unsigned int DBContentManager::numTargets() const
+{
+    return target_model_->size();
+}
+
 /**
  */
 nlohmann::json DBContentManager::targetsInfoAsJSON() const

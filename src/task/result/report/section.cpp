@@ -246,6 +246,10 @@ bool Section::hasTable(const std::string& name)
 SectionContentTable& Section::getTable(const std::string& name)
 {
     SectionContentTable* tmp = findTable (name);
+
+    if (!tmp)
+        logerr << "Section: getTable: table '" << name << "' not found";
+
     assert (tmp);
     return *tmp;
 }

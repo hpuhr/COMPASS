@@ -928,6 +928,7 @@ void ReconstructorTask::endReconstruction()
         table.addRow({"End", Time::toString(boost::posix_time::microsec_clock::local_time()), ""});
         table.addRow({"Elapsed", String::timeStringFromDouble(time_elapsed_s, false), ""});
         table.addRow({"Elapsed After Deletion", String::timeStringFromDouble(time_elapsed_s_after_del, false), ""});
+        table.addRow({"Number of Targets", COMPASS::instance().dbContentManager().numTargets(), ""});
     }
 
     // report: assoc counts
@@ -1171,7 +1172,7 @@ const ReconstructorBase::DataSlice& ReconstructorTask::processingSlice() const
     return *processing_slice_;
 }
 
-ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type, bool* created) const
+std::unique_ptr<ViewPointGenVP> ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type, bool* created) const
 {
     auto key_str = std::pair<std::string,std::string>(name,type);
 
@@ -1189,10 +1190,13 @@ ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, co
 
     // return debug_viewpoints_.at(key_str).get();
 
-    return new ViewPointGenVP(name, 0, type);
+    std::unique_ptr<ViewPointGenVP> ptr;
+    ptr.reset(new ViewPointGenVP(name, 0, type));
+
+    return ptr;
 }
 
-ViewPointGenVP* ReconstructorTask::getDebugViewpointNoData(const std::string& name, const std::string& type)
+std::unique_ptr<ViewPointGenVP> ReconstructorTask::getDebugViewpointNoData(const std::string& name, const std::string& type)
 {
     auto vp = getDebugViewpoint(name, type);
     vp->noDataLoaded(true);
@@ -1200,7 +1204,7 @@ ViewPointGenVP* ReconstructorTask::getDebugViewpointNoData(const std::string& na
     return vp;
 }
 
-ViewPointGenVP* ReconstructorTask::getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix) const
+std::unique_ptr<ViewPointGenVP> ReconstructorTask::getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix) const
 {
     bool created;
     string name;
@@ -1222,12 +1226,12 @@ ViewPointGenVP* ReconstructorTask::getDebugViewpointForUTN(unsigned long utn, co
     return vp;
 }
 
-ViewPointGenAnnotation* ReconstructorTask::getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const
-{
-    auto vp = getDebugViewpointForUTN(utn);
+// ViewPointGenAnnotation* ReconstructorTask::getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const
+// {
+//     auto vp = getDebugViewpointForUTN(utn);
 
-    return vp->annotations().getOrCreateAnnotation("Slice " + std::to_string(slice_idx));
-}
+//     return vp->annotations().getOrCreateAnnotation("Slice " + std::to_string(slice_idx));
+// }
 
 // void ReconstructorTask::saveDebugViewPoints()
 // {

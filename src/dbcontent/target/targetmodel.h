@@ -72,6 +72,7 @@ public:
     void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     dbContent::Target& target(unsigned int utn);
     const dbContent::Target& target(unsigned int utn) const;
+    unsigned int size() const;
 
     void removeDBContentFromTargets(const std::string& dbcont_name);
 

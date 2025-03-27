@@ -150,10 +150,10 @@ public:
     ReconstructorBase::DataSlice& processingSlice();
     const ReconstructorBase::DataSlice& processingSlice() const;
 
-    ViewPointGenVP* getDebugViewpoint(const std::string& name, const std::string& type, bool* created = nullptr) const;
-    ViewPointGenVP* getDebugViewpointNoData(const std::string& name, const std::string& type); // w/o sur data
-    ViewPointGenVP* getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix="") const;
-    ViewPointGenAnnotation* getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const;
+    std::unique_ptr<ViewPointGenVP> getDebugViewpoint(const std::string& name, const std::string& type, bool* created = nullptr) const;
+    std::unique_ptr<ViewPointGenVP> getDebugViewpointNoData(const std::string& name, const std::string& type); // w/o sur data
+    std::unique_ptr<ViewPointGenVP> getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix="") const;
+    //ViewPointGenAnnotation* getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const;
     //void saveDebugViewPoints();
 
     bool skipReferenceDataWriting() const;
