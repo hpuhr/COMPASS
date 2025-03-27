@@ -101,6 +101,8 @@ nlohmann::json TaskResult::toJSON() const
 
 bool TaskResult::fromJSON(const nlohmann::json& j)
 {
+    //loginf << j.dump(4);
+
     if (!j.is_object()             || 
         !j.contains(FieldID)       ||
         !j.contains(FieldName)     ||
@@ -119,10 +121,7 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     created_ = Utils::Time::fromString(ts);
 
     if (!report_->fromJSON(j[ FieldReport ]))
-    {
-        loginf << "could not read report";
         return false;
-    }
 
     //derived content
     if (!fromJSON_impl(j))
