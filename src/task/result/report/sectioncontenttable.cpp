@@ -42,6 +42,7 @@
 #include <QClipboard>
 #include <QApplication>
 #include <QInputDialog>
+#include <QThread>
 
 #include <cassert>
 #include <type_traits>
@@ -67,12 +68,12 @@ const std::string SectionContentTable::FieldAnnoIndex         = "index";
 /**
  */
 SectionContentTable::SectionContentTable(unsigned int id,
-                                         const std::string& name, 
+                                         const std::string& name,
                                          unsigned int num_columns,
-                                         const std::vector<std::string>& headings, 
+                                         const std::vector<std::string>& headings,
                                          Section* parent_section,
                                          bool sortable,
-                                         unsigned int sort_column, 
+                                         unsigned int sort_column,
                                          Qt::SortOrder sort_order)
 :   SectionContent(Type::Table, id, name, parent_section)
 ,   num_columns_  (num_columns)
@@ -111,8 +112,12 @@ void SectionContentTable::addRow (const nlohmann::json& row,
     anno.section_link   = section_link;
     anno.section_figure = section_figure;
 
+    loginf << "SectionContentTable " << name_ << ": addRow: UGA viewable.valid " << viewable.valid();
+
     if (viewable.valid())
+    {
         anno.figure_id = addFigure(viewable);
+    }
 
     annotations_.push_back(anno);
 }
@@ -129,6 +134,10 @@ unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewab
  */
 void SectionContentTable::addToLayout(QVBoxLayout* layout)
 {
+    loginf << "SectionContentTable: addToLayout";
+
+    this->moveToThread(QThread::currentThread());
+
     assert (layout);
 
     QVBoxLayout* main_layout = new QVBoxLayout();
@@ -598,6 +607,8 @@ void SectionContentTable::createOnDemandIfNeeded()
  */
 void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)
 {
+    loginf << "SectionContentTable: currentRowChangedSlot";
+
     clickedSlot(current);
 }
 
@@ -605,6 +616,8 @@ void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, cons
  */
 void SectionContentTable::clickedSlot(const QModelIndex& index)
 {
+    loginf << "SectionContentTable: clickedSlot";
+
     if (!index.isValid())
     {
         loginf << "SectionContentTable: clickedSlot: invalid index";
@@ -633,6 +646,8 @@ void SectionContentTable::clickedSlot(const QModelIndex& index)
  */
 void SectionContentTable::performClickAction()
 {
+    loginf << "SectionContentTable: performClickAction";
+
     //double click did not interrupt click action => perform
     if (!last_clicked_row_index_.has_value())
         return;
@@ -664,7 +679,7 @@ void SectionContentTable::performClickAction()
         if (section.hasFigure(annotation.section_figure))
             figure = &section.getFigure(annotation.section_figure);
     }
-    
+
     if (has_valid_link)
     {
         if (figure)
@@ -675,17 +690,17 @@ void SectionContentTable::performClickAction()
             // if (result_ptrs_.at(row_index)->viewableDataReady())
             // {
             //     //view data ready, just get it
-            //     viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
+            //     viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index));
             // }
             // else
             // {
             //     //recompute async and show wait dialog, this may take a while...
             //     auto func = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
             //     {
-            //         viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
+            //         viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index));
             //         return Result::succeeded();
             //     };
-                
+
             //     AsyncFuncTask task(func, "Updating Contents", "Updating contents...", false);
             //     task.runAsyncDialog();
             // }
@@ -705,6 +720,8 @@ void SectionContentTable::performClickAction()
  */
 void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
 {
+    loginf << "SectionContentTable: doubleClickedSlot";
+
     //double click detected => interrupt any previously triggered click action
     click_action_timer_.stop();
 
@@ -728,14 +745,14 @@ void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
 
     if (!annotation.section_link.empty())
     {
-        loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference '"
+        loginf << "SectionContentTable: doubleClickedSlot: index has associated reference '"
                << annotation.section_link << "'";
 
         report_->setCurrentSection(annotation.section_link);
     }
     else
     {
-        loginf << "SectionContentTable: currentRowChangedSlot: index has no associated reference";
+        loginf << "SectionContentTable: doubleClickedSlot: index has no associated reference";
     }
 }
 
@@ -1006,7 +1023,7 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
 
         if (a.figure_id.has_value())
             j_anno[ FieldAnnoFigureID ] = a.figure_id.value();
-        
+
         j_anno[ FieldAnnoSectionLink   ] = a.section_link;
         j_anno[ FieldAnnoSectionFigure ] = a.section_figure;
 

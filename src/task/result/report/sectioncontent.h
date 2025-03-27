@@ -17,13 +17,15 @@
 
 #pragma once
 
+#include "logger.h"
+#include "json.hpp"
+
 #include <string>
 
 #include "property.h"
 
 #include <boost/optional.hpp>
 
-#include "json.hpp"
 
 class QVBoxLayout;
 class LatexVisitor;
@@ -43,12 +45,16 @@ struct SectionContentViewable
     SectionContentViewable() {}
     SectionContentViewable(const ViewableFunc& func) 
     :   viewable_func(func) {}
-    SectionContentViewable(const nlohmann::json::object_t& content) 
-    :   viewable_func()
+    SectionContentViewable(const nlohmann::json::object_t& content)
+    //:   viewable_func()
     {
         std::shared_ptr<nlohmann::json::object_t> c(new nlohmann::json::object_t);
         *c = content;
         viewable_func = [ = ] () { return c; };
+
+        nlohmann::json tmp = content;
+
+        loginf << "UGA content '" << tmp.dump() << "' valid() " << valid();
     }
 
     bool valid() const { return viewable_func ? true : false; }
