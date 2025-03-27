@@ -978,7 +978,7 @@ void ReconstructorTask::endReconstruction()
     if (!skip_reference_data_writing_)
         COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
 
-    COMPASS::instance().taskManager().endTaskResultWriting(true);
+    COMPASS::instance().taskManager().endTaskResultWriting(false);
 
     //cleanup db after reconstruction
     COMPASS::instance().dbInterface().cleanupDB(true);

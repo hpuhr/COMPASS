@@ -126,7 +126,7 @@ public:
     void addRow (const nlohmann::json& row,
                  const SectionContentViewable& viewable = SectionContentViewable(),
                  const std::string& section_link = "",
-                 const std::string& section_figure = "",
+                 const std::string& section_figure = "", // in section_link section
                  const QVariant& viewable_index = QVariant());
     
     virtual void addToLayout (QVBoxLayout* layout) override;
