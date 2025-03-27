@@ -905,7 +905,7 @@ void ReconstructorTask::endReconstruction()
         if (currentReconstructor())
             currentReconstructor()->createAdditionalAnnotations();
         
-        saveDebugViewPoints();
+        //saveDebugViewPoints();
     }
 
     double time_elapsed_s = Time::partialSeconds(
@@ -1053,8 +1053,8 @@ void ReconstructorTask::runCancelledSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    if (debug_settings_.debug_)
-        saveDebugViewPoints();
+    // if (debug_settings_.debug_)
+    //     saveDebugViewPoints();
 
     currentReconstructor()->reset();
 
@@ -1175,19 +1175,21 @@ ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, co
 {
     auto key_str = std::pair<std::string,std::string>(name,type);
 
-    if (created)
-        *created = false;
+    // if (created)
+    //     *created = false;
 
-    if (!debug_viewpoints_.count(key_str))
-    {
-        std::unique_ptr<ViewPointGenVP> vp(new ViewPointGenVP(name, 0, type));
-        debug_viewpoints_[ key_str ] = std::move(vp);
+    // if (!debug_viewpoints_.count(key_str))
+    // {
+    //    std::unique_ptr<ViewPointGenVP> vp(new ViewPointGenVP(name, 0, type));
+    //     debug_viewpoints_[ key_str ] = std::move(vp);
 
-        if (created)
-            *created = true;
-    }
+    //     if (created)
+    //         *created = true;
+    // }
 
-    return debug_viewpoints_.at(key_str).get();
+    // return debug_viewpoints_.at(key_str).get();
+
+    return new ViewPointGenVP(name, 0, type);
 }
 
 ViewPointGenVP* ReconstructorTask::getDebugViewpointNoData(const std::string& name, const std::string& type)
@@ -1227,26 +1229,26 @@ ViewPointGenAnnotation* ReconstructorTask::getDebugAnnotationForUTNSlice(unsigne
     return vp->annotations().getOrCreateAnnotation("Slice " + std::to_string(slice_idx));
 }
 
-void ReconstructorTask::saveDebugViewPoints()
-{
-    loginf << "ReconstructorTask: saveDebugViewPoints";
+// void ReconstructorTask::saveDebugViewPoints()
+// {
+//     loginf << "ReconstructorTask: saveDebugViewPoints";
 
-    COMPASS::instance().viewManager().clearViewPoints();
+//     COMPASS::instance().viewManager().clearViewPoints();
 
-    std::vector <nlohmann::json> view_points;
+//     std::vector <nlohmann::json> view_points;
 
-    for (auto& vp_it : debug_viewpoints_)
-    {
-        nlohmann::json j;
-        vp_it.second->toJSON(j);
+//     for (auto& vp_it : debug_viewpoints_)
+//     {
+//         nlohmann::json j;
+//         vp_it.second->toJSON(j);
 
-        view_points.emplace_back(j);
-    }
+//         view_points.emplace_back(j);
+//     }
 
-    COMPASS::instance().viewManager().addViewPoints(view_points);
+//     COMPASS::instance().viewManager().addViewPoints(view_points);
 
-    debug_viewpoints_.clear();
-}
+//     debug_viewpoints_.clear();
+// }
 
 bool ReconstructorTask::skipReferenceDataWriting() const
 {

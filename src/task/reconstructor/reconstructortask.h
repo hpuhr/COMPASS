@@ -154,7 +154,7 @@ public:
     ViewPointGenVP* getDebugViewpointNoData(const std::string& name, const std::string& type); // w/o sur data
     ViewPointGenVP* getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix="") const;
     ViewPointGenAnnotation* getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const;
-    void saveDebugViewPoints();
+    //void saveDebugViewPoints();
 
     bool skipReferenceDataWriting() const;
     void skipReferenceDataWriting(bool newSkip_reference_data_writing);
@@ -213,5 +213,5 @@ protected:
 
     bool skip_reference_data_writing_ {false};
 
-    mutable std::map<std::pair<std::string,std::string>, std::unique_ptr<ViewPointGenVP>> debug_viewpoints_;
+    //mutable std::map<std::pair<std::string,std::string>, std::unique_ptr<ViewPointGenVP>> debug_viewpoints_;
 };
