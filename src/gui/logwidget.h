@@ -11,6 +11,9 @@ class LogWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
+public slots:
+    void acceptMessages();
+
 public:
     enum class LogType { Info, Warning, Error };
 
@@ -34,16 +37,20 @@ protected:
 
 private:
     struct LogEntry {
+        QString timestamp;
         QString message;
         LogType type;
         bool accepted;
     };
 
     void updateDisplay();
-    void updateIcon();
+    void checkIcon();
 
     std::vector<LogEntry> log_entries_;
     QTextEdit* text_display_;
+
     QIcon default_icon_;
     QIcon error_icon_;
+
+    bool has_unaccepted_errors_{false};
 };
