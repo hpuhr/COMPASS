@@ -22,19 +22,45 @@
 #include <vector>
 
 #include <QWidget>
+#include <QToolButton>
+#include <QMouseEvent>
 
 #include <boost/optional.hpp>
 #include <memory>
 
 class ToolBoxWidget;
 
-class QToolButton;
 class QPushButton;
 class QVBoxLayout;
 class QStackedWidget;
 class QLabel;
 class QMenu;
 class QToolBar;
+
+/**
+ */
+class ToolButton : public QToolButton
+{
+    Q_OBJECT
+public:
+    ToolButton(QWidget* parent = nullptr) : QToolButton(parent) {}
+    virtual ~ToolButton() = default;
+
+signals:
+    void rightClicked();
+
+protected:
+    virtual void mousePressEvent(QMouseEvent *e) override
+    {
+        if (e->button() == Qt::RightButton)
+        {
+            emit rightClicked();
+            return;
+        }
+
+        QToolButton::mousePressEvent(e);
+    }
+};
  
 /**
  */
@@ -70,7 +96,7 @@ private:
     {
         int            idx    = -1;
         ToolBoxWidget* widget = nullptr;
-        QToolButton*   button = nullptr;
+        ToolButton*    button = nullptr;
         bool           hidden = false;
     };
 

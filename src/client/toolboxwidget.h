@@ -69,6 +69,9 @@ public:
     /// adds tool actions to the given toolbar
     virtual void addToToolBar(QToolBar* tool_bar) {};
 
+    /// reacts on right clicks on the tools button
+    virtual void rightClicked() {}
+
     /// react on data loading
     virtual void loadingStarted() {}
     virtual void loadingDone() {}

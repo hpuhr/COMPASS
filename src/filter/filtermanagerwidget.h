@@ -46,6 +46,7 @@ public:
     toolbox::ScreenRatio defaultScreenRatio() const override final;
     void addToConfigMenu(QMenu* menu) override final;
     void addToToolBar(QToolBar* tool_bar) override final; 
+    void rightClicked() override final;
     void loadingStarted() override final;
     void loadingDone() override final;
 

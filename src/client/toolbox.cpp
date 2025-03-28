@@ -207,7 +207,7 @@ void ToolBox::addTool(ToolBoxWidget* tool)
 
     std::string label = Utils::String::compress(labels, '\n');
 
-    auto button = new QToolButton;
+    auto button = new ToolButton;
 
     auto font = button->font();
     font.setPointSize(ToolLabelFontSize);
@@ -224,7 +224,9 @@ void ToolBox::addTool(ToolBoxWidget* tool)
 
     int toolIdx = (int)tools_.size();
 
-    connect(button, &QToolButton::pressed, [ this, toolIdx ] () { this->toolActivated(toolIdx); });
+    connect(button, &ToolButton::pressed, [ this, toolIdx ] () { this->toolActivated(toolIdx); });
+    connect(button, &ToolButton::rightClicked, [ tool ] () { tool->rightClicked(); });
+    connect(tool, &ToolBoxWidget::iconChangedSignal, [ button, tool ] { button->setIcon(tool->toolIcon()); } );
 
     Tool t;
     t.idx    = toolIdx;

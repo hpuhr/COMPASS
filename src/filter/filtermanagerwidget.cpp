@@ -109,7 +109,7 @@ FilterManagerWidget::~FilterManagerWidget()
  */
 QIcon FilterManagerWidget::toolIcon() const 
 {
-    return QIcon(Utils::Files::getIconFilepath("db_filters.png").c_str());
+    return QIcon(Utils::Files::getIconFilepath(filters_check_->isChecked() ? "db_filters_enabled.png" : "db_filters.png").c_str());
 }
 
 /**
@@ -167,6 +167,16 @@ void FilterManagerWidget::addToToolBar(QToolBar* tool_bar)
 
 /**
  */
+void FilterManagerWidget::rightClicked()
+{
+    bool enabled = filters_check_->isChecked();
+    filters_check_->setChecked(!enabled);
+
+    toggleUseFilters();
+}
+
+/**
+ */
 void FilterManagerWidget::loadingStarted()
 {
     scroll_area_->setEnabled(false);
@@ -196,6 +206,8 @@ void FilterManagerWidget::toggleUseFilters()
     bool checked = filters_check_->checkState() == Qt::Checked;
     logdbg << "FilterManagerWidget: toggleUseFilters: setting use limit to " << checked;
     filter_manager_.useFilters(checked);
+
+    emit iconChangedSignal();
 }
 
 /**
