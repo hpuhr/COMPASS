@@ -216,6 +216,8 @@ void FilterManagerWidget::updateUseFilters ()
 {
     assert (filters_check_);
     filters_check_->setChecked(filter_manager_.useFilters());
+
+    emit iconChangedSignal();
 }
 
 /**
