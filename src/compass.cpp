@@ -38,6 +38,7 @@
 #include "licensemanager.h"
 #include "result.h"
 #include "dbinstance.h"
+#include "logwidget.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -1107,4 +1108,13 @@ std::string COMPASS::licenseeString(bool licensed_to) const
         return "";
 
     return (licensed_to ? "Licensed to " : "") + vl->licensee;
+}
+
+LogWidget* COMPASS::logWidget()
+{
+    if (!log_widget_)
+        log_widget_.reset(new LogWidget());
+
+    assert(log_widget_);
+    return log_widget_.get();
 }

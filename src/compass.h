@@ -41,6 +41,7 @@ class EvaluationManager;
 class MainWindow;
 class FFTManager;
 class LicenseManager;
+class LogWidget;
 
 namespace rtcommand
 {
@@ -146,6 +147,8 @@ public:
 
     const char* lineEditInvalidStyle();
 
+    LogWidget* logWidget();
+
 protected:
     COMPASS();
 
@@ -194,6 +197,8 @@ protected:
     std::unique_ptr<LicenseManager> license_manager_;
 
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
+
+    std::unique_ptr<LogWidget> log_widget_{nullptr};
 
     std::string last_db_filename_;
     std::string inmem_future_filename_;

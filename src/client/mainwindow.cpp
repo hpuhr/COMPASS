@@ -67,6 +67,8 @@
 #include "reconstructortaskdialog.h"
 #include "util/async.h"
 
+#include "logwidget.h"
+
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "geometrytreeitem.h"
 #include "test_lab.h"
@@ -221,6 +223,8 @@ void MainWindow::createUI()
 
     if (!COMPASS::instance().hideViewpoints())
         tool_box_->addTool(COMPASS::instance().viewManager().viewPointsWidget());
+
+    tool_box_->addTool(COMPASS::instance().logWidget());
 
     //@TODO: !handle filter check box!
     //QTabBar *tabBar = tab_widget_->tabBar();

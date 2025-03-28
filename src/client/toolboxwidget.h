@@ -34,6 +34,11 @@ class QToolBar;
  */
 class ToolBoxWidget : public QWidget
 {
+    Q_OBJECT
+
+signals:
+    void iconChangedSignal();
+
 public:
     ToolBoxWidget(QWidget* parent = nullptr);
     virtual ~ToolBoxWidget();
