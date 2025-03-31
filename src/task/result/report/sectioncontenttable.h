@@ -26,8 +26,7 @@
 #include <QSortFilterProxyModel>
 #include <QBrush>
 #include <QTimer>
-
-//#include "json.hpp"
+#include <QWidget>
 
 #include <vector>
 #include <functional>
@@ -46,6 +45,7 @@ namespace Utils
 
 class QPushButton;
 class QTableView;
+class QMenu;
 
 namespace ResultReport
 {
@@ -91,28 +91,24 @@ protected:
     }
 };
 
+class SectionContentTableWidget;
+
 /**
  */
-class SectionContentTable : public QAbstractItemModel, public SectionContent
+class SectionContentTable : public SectionContent
 {
-    Q_OBJECT
-
-public slots:
-    void currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous);
-    void clickedSlot(const QModelIndex& index);
-    void doubleClickedSlot(const QModelIndex& index);
-    void customContextMenuSlot(const QPoint& p);
-    void addUTNSlot ();
-    void removeUTNSlot ();
-    void showFullUTNSlot ();
-    void showSurroundingDataSlot ();
-
-    void showMenuSlot();
-    void toggleShowUnusedSlot();
-    void copyContentSlot();
-    void executeCallBackSlot();
-
 public:
+    /**
+     */
+    struct RowInfo
+    {
+        bool enabled          = true;
+        bool has_context_menu = true;
+    };
+
+    typedef std::function<RowInfo(unsigned int)>      RowInfoCallback;
+    typedef std::function<bool(QMenu*, unsigned int)> RowContextMenuCallback;
+
     SectionContentTable(unsigned int id,
                         const std::string& name, 
                         unsigned int num_columns,
@@ -122,6 +118,7 @@ public:
                         unsigned int sort_column=0, 
                         Qt::SortOrder sort_order=Qt::AscendingOrder);
     SectionContentTable(Section* parent_section);
+    virtual ~SectionContentTable();
 
     void addRow (const nlohmann::json& row,
                  const SectionContentViewable& viewable = SectionContentViewable(),
@@ -132,15 +129,8 @@ public:
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
 
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-    QModelIndex parent(const QModelIndex& index) const override;
-
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-
+    size_t numRows() const;
+    size_t numColumns() const;
     const std::vector<std::string>& headings() const;
     unsigned int filteredRowCount () const;
     std::vector<std::string> sortedRowStrings(unsigned int row, bool latex=true) const;
@@ -151,10 +141,21 @@ public:
     bool showUnused() const;
     void showUnused(bool value);
 
-    void registerCallBack (const std::string& name, std::function<void()> func);
-    void executeCallBack (const std::string& name);
+    void registerCallBack(const std::string& name, const std::function<void()>& func);
+    void setRowInfoCallback(const RowInfoCallback& func);
+    void setRowContextMenuCallback(const RowContextMenuCallback& func);
 
     void setCreateOnDemand(std::function<void(void)> create_on_demand_fnc);
+    bool isOnDemand() const;
+    bool hasBeenCreatedOnDemand() const;
+
+    QVariant data(const QModelIndex& index, int role) const;
+    void createOnDemandIfNeeded();
+
+    void clicked(unsigned int row);
+    void doubleClicked(unsigned int row);
+    void customContextMenu(unsigned int row, const QPoint& pos);
+    void addActionsToMenu(QMenu* menu);
 
     Utils::StringTable toStringTable() const;
     nlohmann::json toJSON(bool rowwise = true,
@@ -172,20 +173,22 @@ public:
     static const std::string FieldAnnoSectionFigure;
     static const std::string FieldAnnoIndex;
 
-    static const int DoubleClickCheckIntervalMSecs;
-
 protected:
-    bool canFetchMore(const QModelIndex &parent) const override;
-    void fetchMore(const QModelIndex &parent) override;
-
-    void createOnDemandIfNeeded();
-
-    void performClickAction();
-
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
 
     unsigned int addFigure (const SectionContentViewable& viewable);
+
+    SectionContentTableWidget* tableWidget() const;
+
+    void toggleShowUnused();
+    void copyContent();
+
+    void createOnDemand();
+
+    void executeCallback(const std::string& name);
+
+    RowInfo rowInfo(unsigned int row) const;
 
     bool create_on_demand_ {false};
     std::function<void(void)> create_on_demand_fnc_;
@@ -200,25 +203,94 @@ protected:
 
     bool show_unused_ {false};
 
+    /**
+     * Describes figures and links attached to a table row.
+     */
     struct RowAnnotation
     {
-        boost::optional<unsigned int> figure_id;
-        std::string                   section_link;
-        std::string                   section_figure;
-        QVariant                      index;
+        boost::optional<unsigned int> figure_id;      //content id of a figure in the containing section
+        std::string                   section_link;   //link to another section
+        std::string                   section_figure; //figure in the linked section
+        QVariant                      index;          //detail index
     };
 
     std::vector<nlohmann::json> rows_;
     std::vector<RowAnnotation>  annotations_;
 
-    //        mutable QPushButton* toogle_show_unused_button_ {nullptr};
-    //        mutable QPushButton* copy_button_ {nullptr};
-    mutable QPushButton* options_button_ {nullptr};
-
-    mutable TableQSortFilterProxyModel* proxy_model_ {nullptr};
-    mutable QTableView* table_view_ {nullptr}; // for reset
+    mutable SectionContentTableWidget* table_widget_ {nullptr};
 
     std::map<std::string, std::function<void()>> callback_map_;
+    RowInfoCallback                              row_info_callback_;
+    RowContextMenuCallback                       row_contextmenu_callback_;
+};
+
+/**
+ */
+class SectionContentTableModel : public QAbstractItemModel
+{
+public:
+    SectionContentTableModel(SectionContentTable* content_table, QObject* parent = nullptr);
+    virtual ~SectionContentTableModel() = default;
+
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex& index) const override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+    void executeAndReset(const std::function<void()>& func);
+
+protected:
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+
+private:
+    SectionContentTable* content_table_ = nullptr;
+};
+
+/**
+ */
+class SectionContentTableWidget : public QWidget
+{
+public:
+    SectionContentTableWidget(SectionContentTable* content_table, 
+                              bool show_unused,
+                              int sort_column = -1,
+                              Qt::SortOrder sort_order = Qt::AscendingOrder,
+                              QWidget* parent = nullptr);
+    virtual ~SectionContentTableWidget();
+
+    SectionContentTableModel* itemModel();
+    const SectionContentTableModel* itemModel() const;
+    TableQSortFilterProxyModel* proxyModel();
+    const TableQSortFilterProxyModel* proxyModel() const;
+    QTableView* tableView();
+    const QTableView* tableView() const;
+
+    void showUnused(bool show);
+    void resizeColumns();
+
+    int fromProxy(int proxy_row) const;
+
+    std::vector<std::string> sortedRowStrings(unsigned int row, bool latex) const;
+
+    static const int DoubleClickCheckIntervalMSecs;
+
+private:
+    void clicked(const QModelIndex& index);
+    void doubleClicked(const QModelIndex& index);
+    void customContextMenu(const QPoint& p);
+
+    void performClickAction();
+
+    SectionContentTable*        content_table_  = nullptr;
+    SectionContentTableModel*   model_          = nullptr;
+    TableQSortFilterProxyModel* proxy_model_    = nullptr;
+    QTableView*                 table_view_     = nullptr;
+    QPushButton*                options_button_ = nullptr;
+    QMenu*                      options_menu_   = nullptr;
 
     QTimer click_action_timer_;
     boost::optional<unsigned int> last_clicked_row_index_;

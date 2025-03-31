@@ -51,7 +51,9 @@
 namespace ResultReport
 {
 
-const int SectionContentTable::DoubleClickCheckIntervalMSecs = 300;
+/***************************************************************************************************
+ * SectionContentTable
+ ***************************************************************************************************/
 
 const std::string SectionContentTable::FieldHeadings     = "headings";
 const std::string SectionContentTable::FieldSortable     = "sortable";
@@ -82,9 +84,6 @@ SectionContentTable::SectionContentTable(unsigned int id,
 ,   sort_column_  (sort_column)
 ,   sort_order_   (sort_order)
 {
-    click_action_timer_.setSingleShot(true);
-    click_action_timer_.setInterval(DoubleClickCheckIntervalMSecs);
-    connect(&click_action_timer_, &QTimer::timeout, this, &SectionContentTable::performClickAction);
 }
 
 /**
@@ -93,6 +92,10 @@ SectionContentTable::SectionContentTable(Section* parent_section)
 :   SectionContent(Type::Table, parent_section)
 {
 }
+
+/**
+ */
+SectionContentTable::~SectionContentTable() = default;
 
 /**
  */
@@ -107,6 +110,7 @@ void SectionContentTable::addRow (const nlohmann::json& row,
 
     rows_.push_back(row);
 
+    //configure attached annotation
     RowAnnotation anno;
     anno.index          = viewable_index;
     anno.section_link   = section_link;
@@ -116,6 +120,7 @@ void SectionContentTable::addRow (const nlohmann::json& row,
 
     if (viewable.valid())
     {
+        //add figure to containing section and remember id
         anno.figure_id = addFigure(viewable);
     }
 
@@ -132,73 +137,31 @@ unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewab
 
 /**
  */
+SectionContentTableWidget* SectionContentTable::tableWidget() const
+{
+    if (table_widget_)
+        return table_widget_;
+
+    //generate widget
+    SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
+    table_widget_ = new SectionContentTableWidget(tmp, 
+                                                  show_unused_, 
+                                                  sortable_ ? sort_column_ : -1, 
+                                                  sort_order_);
+    return table_widget_;
+}
+
+/**
+ */
 void SectionContentTable::addToLayout(QVBoxLayout* layout)
 {
     loginf << "SectionContentTable: addToLayout";
 
-    //this->moveToThread(QThread::currentThread());
-
     assert (layout);
 
-    QVBoxLayout* main_layout = new QVBoxLayout();
-
-    QHBoxLayout* upper_layout = new QHBoxLayout();
-
-    upper_layout->addWidget(new QLabel(("Table: "+name_).c_str()));
-    upper_layout->addStretch();
-
-    options_button_ = new QPushButton("Options");
-    connect (options_button_, &QPushButton::clicked, this, &SectionContentTable::showMenuSlot);
-    upper_layout->addWidget(options_button_);
-
-    main_layout->addLayout(upper_layout);
-
-    if (!proxy_model_)
-    {
-        proxy_model_ = new TableQSortFilterProxyModel();
-        proxy_model_->showUnused(show_unused_);
-        proxy_model_->setSourceModel(this);
-    }
-
-    if (!table_view_)
-    {
-        table_view_ = new QTableView();
-        table_view_->setModel(proxy_model_);
-
-        if (sortable_)
-        {
-            table_view_->setSortingEnabled(true);
-            table_view_->sortByColumn(sort_column_, sort_order_);
-        }
-
-        table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
-        table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
-        table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-        table_view_->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
-        table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
-        table_view_->setWordWrap(true);
-        table_view_->reset();
-
-        connect(table_view_, &QTableView::customContextMenuRequested,
-                this, &SectionContentTable::customContextMenuSlot);
-
-        connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
-                this, &SectionContentTable::clickedSlot);
-        connect(table_view_, &QTableView::pressed,
-                this, &SectionContentTable::clickedSlot);
-        connect(table_view_, &QTableView::doubleClicked,
-                this, &SectionContentTable::doubleClickedSlot);
-    }
-
-//    if (num_columns_ > 5)
-//        table_view_->horizontalHeader()->setMaximumSectionSize(150);
-
-    table_view_->resizeColumnsToContents();
-    table_view_->resizeRowsToContents();
-
-    main_layout->addWidget(table_view_);
-
-    layout->addLayout(main_layout);
+    //add widget to layout
+    auto widget = tableWidget();
+    layout->addWidget(widget);
 }
 
 /**
@@ -213,22 +176,11 @@ void SectionContentTable::accept(LatexVisitor& v)
     //v.visit(this);
 }
 
-/**
- */
-int SectionContentTable::rowCount(const QModelIndex& parent) const
-{
-    return rows_.size();
-}
-
-/**
- */
-int SectionContentTable::columnCount(const QModelIndex& parent) const
-{
-    return num_columns_;
-}
-
 namespace
 {
+    /**
+     * Converts a json value to a QVariant for display purpose.
+     */
     QVariant qVariantFromJSON(const nlohmann::json& j)
     {
         if (j.is_boolean())
@@ -262,7 +214,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
         logdbg << "SectionContentTable: data: display role: row " << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
-        assert (index.row() < rows_.size());
+        assert (index.row() < (int)rows_.size());
         assert (index.column() < num_columns_);
 
         return qVariantFromJSON(rows_.at(index.row()).at(index.column()));
@@ -270,22 +222,22 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
     case Qt::BackgroundRole:
     {
         assert (index.row() >= 0);
-        assert (index.row() < rows_.size());
+        assert (index.row() < (int)rows_.size());
 
         unsigned int row_index = index.row();
 
-        //@TODO
-        //if (result_ptrs_.at(row_index) && !result_ptrs_.at(row_index)->use())
-        //    return QBrush(Qt::lightGray);
-        //else
-        return QVariant();
+        auto info = rowInfo(row_index);
 
+        if (!info.enabled)
+            return QBrush(Qt::lightGray);
+        else
+            return QVariant();
     }
     case Qt::ForegroundRole:
     {
         assert (index.row() >= 0);
-        assert (index.row() < rows_.size());
-        assert (index.column() < num_columns_);
+        assert (index.row() < (int)rows_.size());
+        assert (index.column() < (int)num_columns_);
 
         QVariant data = qVariantFromJSON(rows_.at(index.row()).at(index.column()));
 
@@ -314,41 +266,16 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
 
 /**
  */
-QVariant SectionContentTable::headerData(int section, Qt::Orientation orientation, int role) const
+size_t SectionContentTable::numRows() const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-    {
-        assert (section < num_columns_);
-        return headings_.at(section).c_str();
-    }
-
-    return QVariant();
+    return rows_.size();
 }
 
 /**
  */
-QModelIndex SectionContentTable::index(int row, int column, const QModelIndex& parent) const
+size_t SectionContentTable::numColumns() const
 {
-    return createIndex(row, column);
-}
-
-/**
- */
-QModelIndex SectionContentTable::parent(const QModelIndex& index) const
-{
-    return QModelIndex();
-}
-
-/**
- */
-Qt::ItemFlags SectionContentTable::flags(const QModelIndex &index) const
-{
-    if (!index.isValid())
-        return Qt::ItemIsEnabled;
-
-    assert (index.column() < headings_.size());
-
-    return QAbstractItemModel::flags(index);
+    return num_columns_;
 }
 
 /**
@@ -362,111 +289,24 @@ const std::vector<std::string>& SectionContentTable::headings() const
  */
 unsigned int SectionContentTable::filteredRowCount () const
 {
-    if (!proxy_model_)
-    {
-        proxy_model_ = new TableQSortFilterProxyModel();
-        proxy_model_->showUnused(show_unused_);
-
-        SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
-        assert (tmp);
-        proxy_model_->setSourceModel(tmp);
-    }
-
-    return proxy_model_->rowCount();
+    return tableWidget()->proxyModel()->rowCount();
 }
 
 /**
  */
 std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row, bool latex) const
 {
-    if (!proxy_model_)
-    {
-        proxy_model_ = new TableQSortFilterProxyModel();
-        proxy_model_->showUnused(show_unused_);
-
-        SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
-        assert (tmp);
-        proxy_model_->setSourceModel(tmp);
-    }
-
-    if (!table_view_)
-    {
-        table_view_ = new QTableView();
-        table_view_->setModel(proxy_model_);
-
-        if (sortable_)
-        {
-            table_view_->setSortingEnabled(true);
-            table_view_->sortByColumn(sort_column_, sort_order_);
-        }
-
-        table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
-        table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
-        table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-        table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
-        table_view_->setWordWrap(true);
-        table_view_->reset();
-
-        connect(table_view_, &QTableView::customContextMenuRequested,
-                this, &SectionContentTable::customContextMenuSlot);
-
-        connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
-                this, &SectionContentTable::currentRowChangedSlot);
-        connect(table_view_, &QTableView::doubleClicked,
-                this, &SectionContentTable::doubleClickedSlot);
-    }
-
-    logdbg << "SectionContentTable: sortedRowStrings: row " << row << " rows " << proxy_model_->rowCount()
-           << " data rows " << rows_.size();
-    assert (row < proxy_model_->rowCount());
-    assert (row < rows_.size());
-
-    std::vector<std::string> result;
-
-    for (unsigned int col=0; col < num_columns_; ++col)
-    {
-        QModelIndex index = proxy_model_->index(row, col);
-        assert (index.isValid());
-        // get string can convert to latex
-        if (latex)
-            result.push_back(Utils::String::latexString(proxy_model_->data(index).toString().toStdString()));
-        else
-            result.push_back(proxy_model_->data(index).toString().toStdString());
-    }
-
-    return result;
+    return tableWidget()->sortedRowStrings(row, latex);
 }
 
 /**
  */
 bool SectionContentTable::hasReference (unsigned int row) const
 {
-    if (!proxy_model_)
-    {
-        proxy_model_ = new TableQSortFilterProxyModel();
-        proxy_model_->showUnused(show_unused_);
-
-        SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
-        assert (tmp);
-        proxy_model_->setSourceModel(tmp);
-    }
-
-    assert (row < proxy_model_->rowCount());
-    assert (row < rows_.size());
-
-    QModelIndex index = proxy_model_->index(row, 0);
-    assert (index.isValid());
-
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
-
-    unsigned int row_index = source_index.row();
+    //obtain original data row
+    unsigned int row_index = tableWidget()->fromProxy(row);
 
     const auto& annotation = annotations_.at(row_index);
-
-    //@TODO?
-    //return result_ptrs_.at(row_index)
-    //        && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index));
 
     return !annotation.section_link.empty();
 }
@@ -475,44 +315,12 @@ bool SectionContentTable::hasReference (unsigned int row) const
  */
 std::string SectionContentTable::reference(unsigned int row) const
 {
-    if (!proxy_model_)
-    {
-        proxy_model_ = new TableQSortFilterProxyModel();
-        proxy_model_->showUnused(show_unused_);
+    //obtain original data row
+    unsigned int row_index = tableWidget()->fromProxy(row);
 
-        SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
-        assert (tmp);
-        proxy_model_->setSourceModel(tmp);
-    }
+    const auto& annotation = annotations_.at(row_index);
 
-    assert (row < proxy_model_->rowCount());
-    assert (row < rows_.size());
-
-    QModelIndex index = proxy_model_->index(row, 0);
-    assert (index.isValid());
-
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
-
-    unsigned int row_index = source_index.row();
-
-    std::string tmp;
-
-    //@TODO
-    // assert (result_ptrs_.at(row_index)
-    //         && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)));
-
-    // string tmp = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
-    // //e.g. "Report:Results:"+getRequirementSectionID();
-    // assert (tmp.size() >= 14);
-
-    // if (tmp == "Report:Results")
-    //     return "";
-
-    // assert (tmp.rfind("Report:Results:", 0) == 0);
-    // tmp.erase(0,15);
-
-    return tmp;
+    return annotation.section_link;
 }
 
 /**
@@ -528,19 +336,15 @@ void SectionContentTable::showUnused(bool value)
 {
     loginf << "SectionContentTable: showUnused: value " << value;
 
-    assert (proxy_model_);
-
-    beginResetModel();
+    tableWidget()->showUnused(value);
 
     show_unused_ = value;
-    proxy_model_->showUnused(show_unused_);
-
-    endResetModel();
 }
+
 
 /**
  */
-void SectionContentTable::registerCallBack (const std::string& name, std::function<void()> func)
+void SectionContentTable::registerCallBack (const std::string& name, const std::function<void()>& func)
 {
     assert (!callback_map_.count(name));
     callback_map_.emplace(name, func);
@@ -548,7 +352,7 @@ void SectionContentTable::registerCallBack (const std::string& name, std::functi
 
 /**
  */
-void SectionContentTable::executeCallBack (const std::string& name)
+void SectionContentTable::executeCallback(const std::string& name)
 {
     assert (callback_map_.count(name));
     callback_map_.at(name)();
@@ -556,27 +360,62 @@ void SectionContentTable::executeCallBack (const std::string& name)
 
 /**
  */
+void SectionContentTable::setRowInfoCallback(const RowInfoCallback& func)
+{
+    row_info_callback_ = func;
+}
+
+/**
+ */
+void SectionContentTable::setRowContextMenuCallback(const RowContextMenuCallback& func)
+{
+    row_contextmenu_callback_ = func;
+}
+
+/**
+ */
+SectionContentTable::RowInfo SectionContentTable::rowInfo(unsigned int row) const
+{
+    return row_info_callback_ ? row_info_callback_(row) : RowInfo();
+}
+
+/**
+ */
 void SectionContentTable::setCreateOnDemand(std::function<void(void)> create_on_demand_fnc)
 {
-    create_on_demand_ = true;
-
-    create_on_demand_fnc_ = create_on_demand_fnc;
-
+    create_on_demand_          = true;
+    create_on_demand_fnc_      = create_on_demand_fnc;
     already_created_by_demand_ = false;
 }
 
 /**
  */
-bool SectionContentTable::canFetchMore(const QModelIndex& parent) const
+bool SectionContentTable::isOnDemand() const
 {
-    return create_on_demand_ && !already_created_by_demand_;
+    return create_on_demand_;
 }
 
 /**
  */
-void SectionContentTable::fetchMore(const QModelIndex& parent)
+void SectionContentTable::createOnDemand()
 {
-    createOnDemandIfNeeded();
+    assert(create_on_demand_fnc_);
+
+    //creation func
+    auto func = [ = ] ()
+    {
+        this->create_on_demand_fnc_();
+        this->already_created_by_demand_ = true;
+    };
+
+    tableWidget()->itemModel()->executeAndReset(func);
+}
+
+/**
+ */
+bool SectionContentTable::hasBeenCreatedOnDemand() const
+{
+    return create_on_demand_ && already_created_by_demand_;
 }
 
 /**
@@ -589,15 +428,11 @@ void SectionContentTable::createOnDemandIfNeeded()
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
 
-        beginResetModel();
+        createOnDemand();
 
-        create_on_demand_fnc_();
-        already_created_by_demand_ = true;
-
-        endResetModel();
-
-        if (table_view_)
-            table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+        //adapt table widget columns to new content?
+        if (table_widget_)
+            table_widget_->resizeColumns();
 
         QApplication::restoreOverrideCursor();
     }
@@ -605,64 +440,17 @@ void SectionContentTable::createOnDemandIfNeeded()
 
 /**
  */
-void SectionContentTable::currentRowChangedSlot(const QModelIndex& current, const QModelIndex& previous)
+void SectionContentTable::clicked(unsigned int row)
 {
-    loginf << "SectionContentTable: currentRowChangedSlot";
+    const auto& annotation = annotations_.at(row);
 
-    clickedSlot(current);
-}
-
-/**
- */
-void SectionContentTable::clickedSlot(const QModelIndex& index)
-{
-    loginf << "SectionContentTable: clickedSlot";
-
-    if (!index.isValid())
-    {
-        loginf << "SectionContentTable: clickedSlot: invalid index";
-        return;
-    }
-
-    if (QApplication::mouseButtons() & Qt::RightButton)
-    {
-        loginf << "SectionContentTable: clickedSlot: RMB click ignored";
-        return;
-    }
-
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
-
-    assert (source_index.row() >= 0);
-    assert (source_index.row() < rows_.size());
-
-    last_clicked_row_index_ = source_index.row();
-
-    //fire timer to perform delayed click action
-    click_action_timer_.start();
-}
-
-/**
- */
-void SectionContentTable::performClickAction()
-{
-    loginf << "SectionContentTable: performClickAction";
-
-    //double click did not interrupt click action => perform
-    if (!last_clicked_row_index_.has_value())
-        return;
-
-    unsigned int row_index = last_clicked_row_index_.value();
-    last_clicked_row_index_.reset();
-
-    const auto& annotation = annotations_.at(row_index);
-
+    //obtain figure from annotation
     bool has_valid_link = false;
     SectionContentFigure* figure = nullptr;
 
     if (annotation.figure_id.has_value())
     {
-        loginf << "SectionContentTable: performClickAction: index has associated viewable via id " << annotation.figure_id.value();
+        loginf << "SectionContentTable: clicked: index has associated viewable via id " << annotation.figure_id.value();
         has_valid_link = true;
 
         //figure from content in parent section
@@ -671,7 +459,7 @@ void SectionContentTable::performClickAction()
     }
     else if (!annotation.section_link.empty() && !annotation.section_figure.empty())
     {
-        loginf << "SectionContentTable: performClickAction: index has associated viewable via section " << annotation.section_link;
+        loginf << "SectionContentTable: clicked: index has associated viewable via section " << annotation.section_link;
         has_valid_link = true;
 
         //figure from section link + figure name
@@ -680,6 +468,7 @@ void SectionContentTable::performClickAction()
             figure = &section.getFigure(annotation.section_figure);
     }
 
+    //valid figure link found?
     if (has_valid_link)
     {
         if (figure)
@@ -707,237 +496,90 @@ void SectionContentTable::performClickAction()
 
             assert (viewable);
 
+            //show viewable
             report_->setCurrentViewable(*viewable.get());
         }
         else
         {
-            logerr << "SectionContentTable: performClickAction: figure could not be retrieved";
+            logerr << "SectionContentTable: clicked: figure could not be retrieved";
         }
     }
 }
 
 /**
  */
-void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
+void SectionContentTable::doubleClicked(unsigned int row)
 {
-    loginf << "SectionContentTable: doubleClickedSlot";
+    const auto& annotation = annotations_.at(row);
 
-    //double click detected => interrupt any previously triggered click action
-    click_action_timer_.stop();
-
-    if (!index.isValid())
-    {
-        loginf << "SectionContentTable: doubleClickedSlot: invalid index";
-        return;
-    }
-
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
-
-    assert (source_index.row() >= 0);
-    assert (source_index.row() < rows_.size());
-
-    loginf << "SectionContentTable: doubleClickedSlot: row " << source_index.row();
-
-    unsigned int row_index = source_index.row();
-
-    const auto& annotation = annotations_.at(row_index);
-
+    //link to other section stored in row?
     if (!annotation.section_link.empty())
     {
-        loginf << "SectionContentTable: doubleClickedSlot: index has associated reference '"
+        loginf << "SectionContentTable: doubleClicked: index has associated reference '"
                << annotation.section_link << "'";
 
+        //jump to row link
         report_->setCurrentSection(annotation.section_link);
     }
     else
     {
-        loginf << "SectionContentTable: doubleClickedSlot: index has no associated reference";
+        loginf << "SectionContentTable: doubleClicked: index has no associated reference";
     }
 }
 
 /**
  */
-void SectionContentTable::customContextMenuSlot(const QPoint& p)
+void SectionContentTable::customContextMenu(unsigned int row, const QPoint& pos)
 {
-    logdbg << "SectionContentTable: customContextMenuSlot";
-
-    assert (table_view_);
-
-    QModelIndex index = table_view_->indexAt(p);
-    if (!index.isValid())
-        return;
-
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
-
-    loginf << "SectionContentTable: customContextMenuSlot: row " << index.row() << " src " << source_index.row();
-
-    assert (source_index.row() >= 0);
-    assert (source_index.row() < rows_.size());
-
-    unsigned int row_index = source_index.row();
-
-    //@TODO
-    // if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->isSingle())
-    // {
-    //     EvaluationRequirementResult::Single* single_result =
-    //             static_cast<EvaluationRequirementResult::Single*>(result_ptrs_.at(row_index));
-    //     assert (single_result);
-
-    //     QMenu menu;
-
-    //     unsigned int utn = single_result->utn();
-    //     loginf << "SectionContentTable: customContextMenuSlot: utn " << utn;
-
-    //     assert (eval_man_.getData().hasTargetData(utn));
-
-    //     const EvaluationTargetData& target_data = eval_man_.getData().targetData(utn);
-
-    //     if (target_data.use())
-    //     {
-    //         QAction* action = new QAction("Remove", this);
-    //         connect (action, &QAction::triggered, this, &SectionContentTable::removeUTNSlot);
-    //         action->setData(utn);
-
-    //         menu.addAction(action);
-    //     }
-    //     else
-    //     {
-    //         QAction* action = new QAction("Add", this);
-    //         connect (action, &QAction::triggered, this, &SectionContentTable::addUTNSlot);
-    //         action->setData(utn);
-
-    //         menu.addAction(action);
-    //     }
-
-    //     QAction* action = new QAction("Show Full UTN", this);
-    //     connect (action, &QAction::triggered, this, &SectionContentTable::showFullUTNSlot);
-    //     action->setData(utn);
-    //     menu.addAction(action);
-
-    //     QAction* action2 = new QAction("Show Surrounding Data", this);
-    //     connect (action2, &QAction::triggered, this, &SectionContentTable::showSurroundingDataSlot);
-    //     action2->setData(utn);
-    //     menu.addAction(action2);
-
-    //     menu.exec(table_view_->viewport()->mapToGlobal(p));
-    // }
-    // else
-    //     loginf << "SectionContentTable: customContextMenuSlot: no associated utn";
-}
-
-/**
- */
-void SectionContentTable::addUTNSlot ()
-{
-    QAction* action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
-
-    unsigned int utn = action->data().toUInt();
-
-    loginf << "SectionContentTable: addUTNSlot: utn " << utn;
-
-    COMPASS::instance().dbContentManager().utnUseEval(utn, true);
-    //eval_man_.useUTN(utn, true, true);
-}
-
-/**
- */
-void SectionContentTable::removeUTNSlot ()
-{
-    QAction* action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
-
-    unsigned int utn = action->data().toUInt();
-
-    bool ok;
-    QString text =
-        QInputDialog::getText(nullptr, "Remove UTN "+QString::number(utn),
-                              "Please provide a comment as reason:", QLineEdit::Normal, "", &ok);
-    if (ok && !text.isEmpty())
+    if (row_contextmenu_callback_ && rowInfo(row).has_context_menu)
     {
+        QMenu menu;
 
-        loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
+        //configure menu via callback
+        bool use_menu = row_contextmenu_callback_(&menu, row);
 
-        COMPASS::instance().dbContentManager().utnUseEval(utn, false);
-        COMPASS::instance().dbContentManager().utnComment(utn, text.toStdString());
+        //show menu if valid
+        if (use_menu && menu.actions().size() > 0)
+            menu.exec(pos);
     }
 }
 
 /**
  */
-void SectionContentTable::showFullUTNSlot ()
+void SectionContentTable::addActionsToMenu(QMenu* menu)
 {
-    QAction* action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
+    //add general actions
+    QAction* unused_action = menu->addAction("Toggle Show Unused");
+    QObject::connect (unused_action, &QAction::triggered, [ this ] { this->toggleShowUnused(); });
 
-    unsigned int utn = action->data().toUInt();
+    QAction* copy_action = menu->addAction("Copy Content");
+    QObject::connect (copy_action, &QAction::triggered, [ this ] { this->copyContent(); });
 
-    loginf << "SectionContentTable: showFullUTNSlot: utn " << utn;
-
-    //@TODO
-    //eval_man_.showFullUTN(utn);
-}
-
-/**
- */
-void SectionContentTable::showSurroundingDataSlot ()
-{
-    QAction* action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
-
-    unsigned int utn = action->data().toUInt();
-
-    loginf << "SectionContentTable: showSurroundingDataSlot: utn " << utn;
-
-    //@TODO
-    //eval_man_.showSurroundingData(utn);
-}
-
-void SectionContentTable::showMenuSlot()
-{
-    QMenu menu;
-
-    //        toogle_show_unused_button_ = new QPushButton("Toggle Show Unused");
-    //        connect (toogle_show_unused_button_, &QPushButton::clicked, this, &SectionContentTable::toggleShowUnusedSlot);
-    //        upper_layout->addWidget(toogle_show_unused_button_);
-
-    //        copy_button_ = new QPushButton("Copy Content");
-    //        connect (copy_button_, &QPushButton::clicked, this, &SectionContentTable::copyContentSlot);
-    //        upper_layout->addWidget(copy_button_);
-
-    QAction* unused_action = new QAction("Toggle Show Unused", this);
-    connect (unused_action, &QAction::triggered, this, &SectionContentTable::toggleShowUnusedSlot);
-    menu.addAction(unused_action);
-
-    QAction* copy_action = new QAction("Copy Content", this);
-    connect (copy_action, &QAction::triggered, this, &SectionContentTable::copyContentSlot);
-    menu.addAction(copy_action);
-
-    for (auto& cb_it : callback_map_)
+    //add custom callbacks
+    if (callback_map_.size() > 0)
     {
-        QAction* copy_action = new QAction(cb_it.first.c_str(), this);
-        connect (copy_action, &QAction::triggered, this, &SectionContentTable::executeCallBackSlot);
-        copy_action->setData(cb_it.first.c_str());
-        menu.addAction(copy_action);
-    }
+        menu->addSeparator();
 
-    menu.exec(QCursor::pos());
+        for (auto& cb_it : callback_map_)
+        {
+            QAction* action = menu->addAction(cb_it.first.c_str());
+            QObject::connect(action, &QAction::triggered, [ = ] () { this->executeCallback(cb_it.first); });
+        }
+    }
 }
 
 /**
  */
-void SectionContentTable::toggleShowUnusedSlot()
+void SectionContentTable::toggleShowUnused()
 {
     showUnused(!show_unused_);
 }
 
 /**
  */
-void SectionContentTable::copyContentSlot()
+void SectionContentTable::copyContent()
 {
-    loginf << "SectionContentTable: copyContentSlot";
+    loginf << "SectionContentTable: copyContent";
 
     std::stringstream ss;
 
@@ -953,7 +595,9 @@ void SectionContentTable::copyContentSlot()
     }
     ss << "\n";
 
-    unsigned int num_rows = proxy_model_->rowCount();
+    auto proxy_model = tableWidget()->proxyModel();
+
+    unsigned int num_rows = proxy_model->rowCount();
 
     std::vector<std::string> row_strings;
 
@@ -977,24 +621,9 @@ void SectionContentTable::copyContentSlot()
 
 /**
  */
-void SectionContentTable::executeCallBackSlot()
-{
-    QAction* action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
-
-    std::string name = action->data().toString().toStdString();
-
-    loginf << "SectionContentTable: executeCallBackSlot: name " << name;
-
-    assert (callback_map_.count(name));
-    executeCallBack(name);
-}
-
-/**
- */
 Utils::StringTable SectionContentTable::toStringTable() const
 {
-    return Utils::StringTable(this);
+    return Utils::StringTable(tableWidget()->itemModel());
 }
 
 /**
@@ -1079,6 +708,408 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     }
 
     return true;
+}
+
+/***************************************************************************************************
+ * SectionContentTableModel
+ ***************************************************************************************************/
+
+/**
+ */
+SectionContentTableModel::SectionContentTableModel(SectionContentTable* content_table, QObject* parent)
+:   QAbstractItemModel(parent)
+,   content_table_    (content_table)
+{
+    assert(content_table_);
+}
+
+/**
+ */
+QVariant SectionContentTableModel::data(const QModelIndex& index, int role) const
+{
+    return content_table_->data(index, role);
+}
+
+/**
+ */
+QVariant SectionContentTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    {
+        assert (section < (int)content_table_->numColumns());
+        return content_table_->headings().at(section).c_str();
+    }
+
+    return QVariant();
+}
+
+/**
+ */
+QModelIndex SectionContentTableModel::index(int row, int column, const QModelIndex& parent) const
+{
+    return createIndex(row, column);
+}
+
+/**
+ */
+int SectionContentTableModel::rowCount(const QModelIndex& parent) const
+{
+    return (int)content_table_->numRows();
+}
+
+/**
+ */
+int SectionContentTableModel::columnCount(const QModelIndex& parent) const
+{
+    return (int)content_table_->numColumns();
+}
+
+/**
+ */
+QModelIndex SectionContentTableModel::parent(const QModelIndex& index) const
+{
+    return QModelIndex();
+}
+
+/**
+ */
+Qt::ItemFlags SectionContentTableModel::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::ItemIsEnabled;
+
+    assert (index.column() < (int)content_table_->headings().size());
+
+    return QAbstractItemModel::flags(index);
+}
+
+/**
+ */
+bool SectionContentTableModel::canFetchMore(const QModelIndex &parent) const
+{
+    return content_table_->isOnDemand() && !content_table_->hasBeenCreatedOnDemand();
+}
+
+/**
+ */
+void SectionContentTableModel::fetchMore(const QModelIndex &parent)
+{
+    return content_table_->createOnDemandIfNeeded();
+}
+
+/**
+ */
+void SectionContentTableModel::executeAndReset(const std::function<void()>& func)
+{
+    if (!func)
+        return;
+
+    beginResetModel();
+
+    func();
+
+    endResetModel();
+}
+
+/***************************************************************************************************
+ * SectionContentTableWidget
+ ***************************************************************************************************/
+
+const int SectionContentTableWidget::DoubleClickCheckIntervalMSecs = 300;
+
+/**
+ */
+SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* content_table, 
+                                                     bool show_unused,
+                                                     int sort_column,
+                                                     Qt::SortOrder sort_order,
+                                                     QWidget* parent)
+:   QWidget       (parent       )
+,   content_table_(content_table)
+{
+    assert(content_table_);
+
+    QVBoxLayout* main_layout = new QVBoxLayout();
+    setLayout(main_layout);
+
+    QHBoxLayout* upper_layout = new QHBoxLayout();
+
+    upper_layout->addWidget(new QLabel(("Table: " + content_table_->name()).c_str()));
+    upper_layout->addStretch();
+
+    options_menu_ = new QMenu(options_button_);
+    content_table_->addActionsToMenu(options_menu_);
+
+    options_button_ = new QPushButton("Options");
+    options_button_->setMenu(options_menu_);
+
+    upper_layout->addWidget(options_button_);
+
+    main_layout->addLayout(upper_layout);
+
+    table_view_ = new QTableView;
+
+    model_ = new SectionContentTableModel(content_table, this);
+
+    proxy_model_ = new TableQSortFilterProxyModel(this);
+    proxy_model_->showUnused(show_unused);
+    proxy_model_->setSourceModel(model_);
+
+    table_view_->setModel(proxy_model_);
+
+    if (sort_column >= 0)
+    {
+        table_view_->setSortingEnabled(true);
+        table_view_->sortByColumn(sort_column, sort_order);
+    }
+
+    table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
+    table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+    table_view_->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+    table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
+    table_view_->setWordWrap(true);
+
+    table_view_->reset();
+
+    connect(table_view_, &QTableView::customContextMenuRequested,
+            this, &SectionContentTableWidget::customContextMenu);
+    connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
+            this, &SectionContentTableWidget::clicked);
+    connect(table_view_, &QTableView::pressed,
+            this, &SectionContentTableWidget::clicked);
+    connect(table_view_, &QTableView::doubleClicked,
+            this, &SectionContentTableWidget::doubleClicked);
+        
+    //    if (num_columns_ > 5)
+    //        table_view_->horizontalHeader()->setMaximumSectionSize(150);
+    
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
+
+    main_layout->addWidget(table_view_);
+
+    click_action_timer_.setSingleShot(true);
+    click_action_timer_.setInterval(DoubleClickCheckIntervalMSecs);
+
+    QObject::connect(&click_action_timer_, &QTimer::timeout, this, &SectionContentTableWidget::performClickAction);
+}
+
+/**
+ */
+SectionContentTableWidget::~SectionContentTableWidget()
+{
+}
+
+/**
+ */
+void SectionContentTableWidget::showUnused(bool show)
+{
+    auto func = [ this, show ] ()
+    {
+        this->proxy_model_->showUnused(show);
+    };
+
+    model_->executeAndReset(func);
+}
+
+/**
+ */
+void SectionContentTableWidget::resizeColumns()
+{
+    table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+}
+
+/**
+ */
+SectionContentTableModel* SectionContentTableWidget::itemModel()
+{
+    return model_;
+}
+
+/**
+ */
+const SectionContentTableModel* SectionContentTableWidget::itemModel() const
+{
+    return model_;
+}
+
+/**
+ */
+TableQSortFilterProxyModel* SectionContentTableWidget::proxyModel()
+{
+    return proxy_model_;
+}
+
+/**
+ */
+const TableQSortFilterProxyModel* SectionContentTableWidget::proxyModel() const
+{
+    return proxy_model_;
+}
+
+/**
+ */
+QTableView* SectionContentTableWidget::tableView()
+{
+    return table_view_;
+}
+
+/**
+ */
+const QTableView* SectionContentTableWidget::tableView() const
+{
+    return table_view_;
+}
+
+/**
+ * Returns the original data row from the given proxy model's row.
+ */
+int SectionContentTableWidget::fromProxy(int proxy_row) const
+{
+    assert (proxy_row < proxy_model_->rowCount());
+    assert (proxy_row < (int)content_table_->numRows());
+
+    QModelIndex index = proxy_model_->index(proxy_row, 0);
+    assert (index.isValid());
+
+    auto const source_index = proxy_model_->mapToSource(index);
+    assert (source_index.isValid());
+
+    unsigned int row_index = source_index.row();
+
+    return row_index;
+}
+
+/**
+ */
+void SectionContentTableWidget::clicked(const QModelIndex& index)
+{
+    loginf << "SectionContentTableWidget: clicked";
+
+    if (!index.isValid())
+    {
+        loginf << "SectionContentTableWidget: clicked: invalid index";
+        return;
+    }
+
+    if (QApplication::mouseButtons() & Qt::RightButton)
+    {
+        loginf << "SectionContentTableWidget: clicked: RMB click ignored";
+        return;
+    }
+
+    auto const source_index = proxy_model_->mapToSource(index);
+    assert (source_index.isValid());
+
+    assert (source_index.row() >= 0);
+    assert (source_index.row() < (int)content_table_->numRows());
+
+    last_clicked_row_index_ = source_index.row();
+
+    //fire timer to perform delayed click action
+    click_action_timer_.start();
+}
+
+/**
+ */
+void SectionContentTableWidget::performClickAction()
+{
+    loginf << "SectionContentTableWidget: performClickAction";
+
+    //double click did not interrupt click action => perform
+    if (!last_clicked_row_index_.has_value())
+        return;
+
+    unsigned int row_index = last_clicked_row_index_.value();
+    last_clicked_row_index_.reset();
+
+    //pass row to table
+    content_table_->clicked(row_index);
+}
+
+/**
+ */
+void SectionContentTableWidget::doubleClicked(const QModelIndex& index)
+{
+    loginf << "SectionContentTableWidget: doubleClicked";
+
+    //double click detected => interrupt any previously triggered click action
+    click_action_timer_.stop();
+
+    if (!index.isValid())
+    {
+        loginf << "SectionContentTableWidget: doubleClicked: invalid index";
+        return;
+    }
+
+    auto const source_index = proxy_model_->mapToSource(index);
+    assert (source_index.isValid());
+
+    assert (source_index.row() >= 0);
+    assert (source_index.row() < (int)content_table_->numRows());
+
+    loginf << "SectionContentTableWidget: doubleClicked: row " << source_index.row();
+
+    unsigned int row_index = source_index.row();
+
+    //pass row to table
+    content_table_->doubleClicked(row_index);
+}
+
+/**
+ */
+void SectionContentTableWidget::customContextMenu(const QPoint& p)
+{
+    logdbg << "SectionContentTableWidget: customContextMenu";
+
+    QModelIndex index = table_view_->indexAt(p);
+    if (!index.isValid())
+        return;
+
+    auto const source_index = proxy_model_->mapToSource(index);
+    assert (source_index.isValid());
+
+    loginf << "SectionContentTableWidget: customContextMenu: row " << index.row() << " src " << source_index.row();
+
+    assert (source_index.row() >= 0);
+    assert (source_index.row() < (int)content_table_->numRows());
+
+    unsigned int row_index = source_index.row();
+
+    auto pos = table_view_->viewport()->mapToGlobal(p);
+
+    //pass row to table
+    content_table_->customContextMenu(row_index, pos);
+}
+
+/**
+ */
+std::vector<std::string> SectionContentTableWidget::sortedRowStrings(unsigned int row, bool latex) const
+{
+    logdbg << "SectionContentTableWidget: sortedRowStrings: row " << row << " rows " << proxy_model_->rowCount()
+           << " data rows " << content_table_->numRows();
+    
+    assert ((int)row < proxy_model_->rowCount());
+    assert (row < content_table_->numRows());
+
+    std::vector<std::string> result;
+
+    size_t nc = content_table_->numColumns();
+
+    for (size_t col=0; col < nc; ++col)
+    {
+        QModelIndex index = proxy_model_->index(row, col);
+        assert (index.isValid());
+
+        // get string can convert to latex
+        if (latex)
+            result.push_back(Utils::String::latexString(proxy_model_->data(index).toString().toStdString()));
+        else
+            result.push_back(proxy_model_->data(index).toString().toStdString());
+    }
+
+    return result;
 }
 
 }
