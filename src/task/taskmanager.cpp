@@ -445,6 +445,10 @@ void TaskManager::loadResults()
     assert (!current_result_);
 
     results_.clear();
+
+    //nothing to load?
+    if (!COMPASS::instance().dbInterface().existsTaskResultsTable())
+        return;
     
     auto res = COMPASS::instance().dbInterface().loadResults();
     if (!res.ok())
