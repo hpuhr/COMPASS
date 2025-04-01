@@ -210,37 +210,4 @@ std::shared_ptr<ResultReport::SectionContent> Report::loadContent(ResultReport::
     return task_man_.loadContent(section, content_id);
 }
 
-/**
- */
-void Report::addTableMainThread(Section* section,
-                                const std::string& name, 
-                                unsigned int num_columns,
-                                std::vector<std::string> headings, 
-                                bool sortable, 
-                                unsigned int sort_column, 
-                                Qt::SortOrder order)
-{
-    table_config_tmp_.section     = section;
-    table_config_tmp_.name        = name;
-    table_config_tmp_.num_columns = num_columns;
-    table_config_tmp_.headings    = headings;
-    table_config_tmp_.sortable    = sortable;
-    table_config_tmp_.sort_column = sort_column;
-    table_config_tmp_.order       = order;
-
-    QMetaObject::invokeMethod(this, "addTableMainThreadSlot", Qt::ConnectionType::BlockingQueuedConnection);
-}
-
-/**
- */
-void Report::addTableMainThreadSlot()
-{
-    table_config_tmp_.section->addTableInternal(table_config_tmp_.name, 
-                                                table_config_tmp_.num_columns, 
-                                                table_config_tmp_.headings, 
-                                                table_config_tmp_.sortable, 
-                                                table_config_tmp_.sort_column, 
-                                                table_config_tmp_.order);
-}
-
 }

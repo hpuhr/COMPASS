@@ -137,9 +137,6 @@ protected:
     friend class DBInterface;
     friend class Report;
 
-    void addTableInternal(const std::string& name, unsigned int num_columns, vector<string> headings,
-        bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
-
     Section* findSubSection (const std::string& heading); // nullptr if not found
     boost::optional<size_t> findContent(const std::string& name, SectionContent::Type type) const;
     std::vector<size_t> findContents(SectionContent::Type type) const;

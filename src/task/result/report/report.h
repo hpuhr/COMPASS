@@ -68,36 +68,12 @@ public:
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
                                                               unsigned int content_id) const;
 
-    void addTableMainThread(Section* section,
-                            const std::string& name, 
-                            unsigned int num_columns,
-                            std::vector<std::string> headings, 
-                            bool sortable, 
-                            unsigned int sort_column, 
-                            Qt::SortOrder order);
-
-    struct TableConfig
-    {
-        Section*                 section;
-        std::string              name;
-        unsigned int             num_columns;
-        std::vector<std::string> headings;
-        bool                     sortable;
-        unsigned int             sort_column;
-        Qt::SortOrder            order;
-    };
-
     static const std::string FieldRootSection;
-
-public slots:
-    void addTableMainThreadSlot();
 
 protected:
     TaskManager& task_man_;
 
     std::shared_ptr<Section> root_section_;
-
-    TableConfig table_config_tmp_;
 };
 
 }

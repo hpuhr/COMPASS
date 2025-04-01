@@ -305,27 +305,6 @@ void Section::addTable(const std::string& name,
                        unsigned int sort_column, 
                        Qt::SortOrder order)
 {
-    if (QApplication::instance()->thread() == QThread::currentThread())
-    {
-        //main thread: just add table
-        addTableInternal(name, num_columns, headings, sortable, sort_column, order);
-    }
-    else
-    {
-        //other thread: execute add in main thread
-        report_->addTableMainThread(this, name, num_columns, headings, sortable, sort_column, order);
-    }
-}
-
-/**
-*/
-void Section::addTableInternal(const std::string& name, 
-                               unsigned int num_columns,
-                               std::vector<std::string> headings, 
-                               bool sortable, 
-                               unsigned int sort_column, 
-                               Qt::SortOrder order)
-{
     assert (!hasTable(name));
     auto id = Section::newContentID();
     content_ids_.push_back(id);
