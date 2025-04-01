@@ -53,7 +53,8 @@ using namespace Utils;
 
 const bool COMPASS::is_app_image_ = {getenv("APPDIR") != nullptr};
 
-COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
+COMPASS::COMPASS()
+    : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "COMPASS: constructor: start";
 
@@ -842,6 +843,18 @@ const char* COMPASS::lineEditInvalidStyle()
     else
         return "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
                           " rgb(255, 200, 200); }";
+}
+
+LogStream COMPASS::logInfo() {
+    return LogStream([this](const std::string& msg) { logWidget()->addLogMessage(msg, LogStreamType::Info); });
+}
+
+LogStream COMPASS::logWarn() {
+    return LogStream([this](const std::string& msg) { logWidget()->addLogMessage(msg, LogStreamType::Warning); });
+}
+
+LogStream COMPASS::logError() {
+    return LogStream([this](const std::string& msg) { logWidget()->addLogMessage(msg, LogStreamType::Error); });
 }
 
 bool COMPASS::disableConfirmResetViews() const

@@ -30,23 +30,22 @@ LogWidget::LogWidget()
 
     checkIcon();
 
-    addLogMessage("Quest started: Seeking the Holy Grail... again.", LogWidget::LogType::Info);
-    addLogMessage("System encountered a shrubbery-related conflict.", LogWidget::LogType::Warning);
-    addLogMessage("French taunter detected on network. Expect rude messages.", LogWidget::LogType::Error);
+    // addLogMessage("Quest started: Seeking the Holy Grail... again.", LogStreamType::Info);
+    // addLogMessage("System encountered a shrubbery-related conflict.", LogStreamType::Warning);
+    // addLogMessage("French taunter detected on network. Expect rude messages.", LogStreamType::Error);
 
-    addLogMessage("User 'moss' requested admin rights. Denied for safety.", LogWidget::LogType::Info);
-    addLogMessage("Roy is asking, 'Have you tried turning it off and on again?'", LogWidget::LogType::Warning);
-    addLogMessage("Error: Jen clicked something. Nobody knows what happened.", LogWidget::LogType::Error);
+    // addLogMessage("User 'moss' requested admin rights. Denied for safety.", LogStreamType::Info);
+    // addLogMessage("Roy is asking, 'Have you tried turning it off and on again?'", LogStreamType::Warning);
+    // addLogMessage("Error: Jen clicked something. Nobody knows what happened.", LogStreamType::Error);
 
-    addLogMessage("Black Knight: 'Tis but a scratch!' Ignoring minor system fault.", LogWidget::LogType::Info);
-    addLogMessage("Cat on the keyboard. Input may be unpredictable.", LogWidget::LogType::Warning);
-    addLogMessage("The server room is on fire! Again!", LogWidget::LogType::Error);
+    // addLogMessage("Black Knight: 'Tis but a scratch!' Ignoring minor system fault.", LogStreamType::Info);
+    // addLogMessage("Cat on the keyboard. Input may be unpredictable.", LogStreamType::Warning);
+    // addLogMessage("The server room is on fire! Again!", LogStreamType::Error);
 }
 
-void LogWidget::addLogMessage(const QString& message, LogType type)
+void LogWidget::addLogMessage(const std::string& message, LogStreamType type)
 {
-    bool accepted = (type != LogType::Error);
-    log_entries_.push_back({QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"), message, type, accepted});
+    log_entries_.push_back({QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"), message, type, false});
 
     updateDisplay();
     checkIcon();
@@ -55,10 +54,7 @@ void LogWidget::addLogMessage(const QString& message, LogType type)
 void LogWidget::acceptMessages()
 {
     for (auto& entry : log_entries_)
-    {
-        if (entry.type == LogType::Error)
-            entry.accepted = true;
-    }
+        entry.accepted = true;
 
     updateDisplay();
 
@@ -78,31 +74,31 @@ void LogWidget::updateDisplay()
 
         if (!entry.accepted) {
             switch (entry.type) {
-            case LogType::Warning:
+            case LogStreamType::Warning:
                 color = "#FFA500";  // orange
                 style = "font-style:italic;";
                 prefix = "WARN";
                 break;
-            case LogType::Error:
+            case LogStreamType::Error:
                 color = "red";
                 style = "font-weight:bold;";
                 prefix = "ERR";
                 break;
-            case LogType::Info:
+            case LogStreamType::Info:
                 prefix = "INFO";
                 break;
             }
         } else {
             // Even if accepted, set prefix
             switch (entry.type) {
-            case LogType::Warning: prefix = "WARN"; break;
-            case LogType::Error:   prefix = "ERROR";  break;
-            case LogType::Info:    prefix = "INFO"; break;
+            case LogStreamType::Warning: prefix = "WARN"; break;
+            case LogStreamType::Error:   prefix = "ERROR";  break;
+            case LogStreamType::Info:    prefix = "INFO"; break;
             }
         }
 
         QString fullMessage = QString("%1 [%2]: %3")
-                                  .arg(entry.timestamp, prefix, entry.message);
+                                  .arg(entry.timestamp, prefix, entry.message.c_str());
 
         QString formatted = QString("<span style='font-family:monospace; color:%1;%2'>%3</span>")
                                 .arg(color, style, fullMessage);
@@ -120,7 +116,7 @@ void LogWidget::checkIcon()
     has_unaccepted_errors_ = std::any_of(
         log_entries_.begin(), log_entries_.end(),
         [](const LogEntry& entry) {
-            return entry.type == LogType::Error && !entry.accepted;
+            return entry.type == LogStreamType::Error && !entry.accepted;
         });
 
     if (old_val != has_unaccepted_errors_)

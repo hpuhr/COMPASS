@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "appmode.h"
 #include "result.h"
+#include "logstream.h"
 
 #include <QObject>
 
@@ -146,6 +147,10 @@ public:
     void darkMode(bool value);
 
     const char* lineEditInvalidStyle();
+
+    LogStream logInfo();
+    LogStream logWarn();
+    LogStream logError();
 
     LogWidget* logWidget();
 

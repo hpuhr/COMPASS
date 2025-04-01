@@ -1,6 +1,8 @@
 #pragma once
 
 #include "toolboxwidget.h"
+#include "util/logstream.h"
+
 #include <QTextEdit>
 #include <QIcon>
 
@@ -15,11 +17,9 @@ public slots:
     void acceptMessages();
 
 public:
-    enum class LogType { Info, Warning, Error };
-
     explicit LogWidget();
 
-    void addLogMessage(const QString& message, LogType type);
+    void addLogMessage(const std::string& message, LogStreamType type);
 
     //ToolBoxWidget
     QIcon toolIcon() const override final;
@@ -38,8 +38,8 @@ protected:
 private:
     struct LogEntry {
         QString timestamp;
-        QString message;
-        LogType type;
+        std::string message;
+        LogStreamType type;
         bool accepted;
     };
 
