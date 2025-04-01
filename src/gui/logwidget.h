@@ -9,17 +9,18 @@
 #include <string>
 #include <vector>
 
+class LogStore;
+
 class LogWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
 public slots:
-    void acceptMessages();
+    void messagesChangedSlot();
+    void acceptMessagesSlot();
 
 public:
-    explicit LogWidget();
-
-    void addLogMessage(const std::string& message, LogStreamType type);
+    explicit LogWidget(LogStore& log_store);
 
     //ToolBoxWidget
     QIcon toolIcon() const override final;
@@ -33,20 +34,11 @@ public:
     void loadingDone() override final;
 
 protected:
-    //void onWidgetActivated() override;
-
-private:
-    struct LogEntry {
-        QString timestamp;
-        std::string message;
-        LogStreamType type;
-        bool accepted;
-    };
+    LogStore& log_store_;
 
     void updateDisplay();
     void checkIcon();
 
-    std::vector<LogEntry> log_entries_;
     QTextEdit* text_display_;
 
     QIcon default_icon_;

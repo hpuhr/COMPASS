@@ -203,6 +203,7 @@ protected:
 
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
 
+    LogStore log_store_;
     std::unique_ptr<LogWidget> log_widget_{nullptr};
 
     std::string last_db_filename_;

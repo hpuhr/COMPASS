@@ -846,15 +846,15 @@ const char* COMPASS::lineEditInvalidStyle()
 }
 
 LogStream COMPASS::logInfo() {
-    return LogStream([this](const std::string& msg) { logWidget()->addLogMessage(msg, LogStreamType::Info); });
+    return log_store_.logInfo();
 }
 
 LogStream COMPASS::logWarn() {
-    return LogStream([this](const std::string& msg) { logWidget()->addLogMessage(msg, LogStreamType::Warning); });
+    return log_store_.logInfo();
 }
 
 LogStream COMPASS::logError() {
-    return LogStream([this](const std::string& msg) { logWidget()->addLogMessage(msg, LogStreamType::Error); });
+    return log_store_.logInfo();
 }
 
 bool COMPASS::disableConfirmResetViews() const
@@ -1126,7 +1126,7 @@ std::string COMPASS::licenseeString(bool licensed_to) const
 LogWidget* COMPASS::logWidget()
 {
     if (!log_widget_)
-        log_widget_.reset(new LogWidget());
+        log_widget_.reset(new LogWidget(log_store_));
 
     assert(log_widget_);
     return log_widget_.get();
