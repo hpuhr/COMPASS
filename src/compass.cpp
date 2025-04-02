@@ -53,7 +53,8 @@ using namespace Utils;
 
 const bool COMPASS::is_app_image_ = {getenv("APPDIR") != nullptr};
 
-COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
+COMPASS::COMPASS()
+    : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 {
     logdbg << "COMPASS: constructor: start";
 
@@ -844,6 +845,18 @@ const char* COMPASS::lineEditInvalidStyle()
                           " rgb(255, 200, 200); }";
 }
 
+LogStream COMPASS::logInfo() {
+    return log_store_.logInfo();
+}
+
+LogStream COMPASS::logWarn() {
+    return log_store_.logInfo();
+}
+
+LogStream COMPASS::logError() {
+    return log_store_.logInfo();
+}
+
 bool COMPASS::disableConfirmResetViews() const
 {
     return disable_confirm_reset_views_;
@@ -1113,7 +1126,7 @@ std::string COMPASS::licenseeString(bool licensed_to) const
 LogWidget* COMPASS::logWidget()
 {
     if (!log_widget_)
-        log_widget_.reset(new LogWidget());
+        log_widget_.reset(new LogWidget(log_store_));
 
     assert(log_widget_);
     return log_widget_.get();

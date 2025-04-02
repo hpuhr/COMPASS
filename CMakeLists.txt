@@ -125,8 +125,7 @@ find_package(DuckDB REQUIRED)
 
 add_library(compass "")
 
-message("Install pat
-    src/gui/logwidget.h src/gui/logwidget.cpph: ${CMAKE_INSTALL_PREFIX}")
+message("Install path: ${CMAKE_INSTALL_PREFIX}")
 
 include(lib/CMakeLists.txt)
 include(src/CMakeLists.txt)

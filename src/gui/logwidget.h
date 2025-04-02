@@ -1,25 +1,26 @@
 #pragma once
 
 #include "toolboxwidget.h"
+#include "util/logstream.h"
+
 #include <QTextEdit>
 #include <QIcon>
 
 #include <string>
 #include <vector>
 
+class LogStore;
+
 class LogWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
 public slots:
-    void acceptMessages();
+    void messagesChangedSlot();
+    void acceptMessagesSlot();
 
 public:
-    enum class LogType { Info, Warning, Error };
-
-    explicit LogWidget();
-
-    void addLogMessage(const QString& message, LogType type);
+    explicit LogWidget(LogStore& log_store);
 
     //ToolBoxWidget
     QIcon toolIcon() const override final;
@@ -33,20 +34,11 @@ public:
     void loadingDone() override final;
 
 protected:
-    //void onWidgetActivated() override;
-
-private:
-    struct LogEntry {
-        QString timestamp;
-        QString message;
-        LogType type;
-        bool accepted;
-    };
+    LogStore& log_store_;
 
     void updateDisplay();
     void checkIcon();
 
-    std::vector<LogEntry> log_entries_;
     QTextEdit* text_display_;
 
     QIcon default_icon_;

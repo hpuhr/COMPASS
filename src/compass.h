@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "appmode.h"
 #include "result.h"
+#include "logstream.h"
 
 #include <QObject>
 
@@ -147,6 +148,10 @@ public:
 
     const char* lineEditInvalidStyle();
 
+    LogStream logInfo();
+    LogStream logWarn();
+    LogStream logError();
+
     LogWidget* logWidget();
 
 protected:
@@ -198,6 +203,7 @@ protected:
 
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
 
+    LogStore log_store_;
     std::unique_ptr<LogWidget> log_widget_{nullptr};
 
     std::string last_db_filename_;

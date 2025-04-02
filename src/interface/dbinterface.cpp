@@ -173,7 +173,15 @@ bool DBInterface::ready() const
 void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 {
     assert(!filename.empty());
+
+    bool new_file = !Files::fileExists(filename) || overwrite;
+
     openDBFileInternal(filename, overwrite);
+
+    loginf << "DBInterface: openDBFile: new_file " << new_file;
+
+    if (new_file)
+        COMPASS::instance().logInfo() << "Database '" << filename << "' created";
 }
 
 /**
