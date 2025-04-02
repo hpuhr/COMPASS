@@ -1028,4 +1028,19 @@ void TargetModel::filterModeACodes(bool value)
     filter_mode_a_codes_ = value;
 }
 
+void TargetModel::showMainColumns(bool show)
+{
+    show_main_columns_ = show;
+}
+
+void TargetModel::showDurationColumns(bool show)
+{
+    show_duration_columns_ = show;
+}
+
+void TargetModel::showSecondaryColumns(bool show)
+{
+    show_secondary_columns_ = show;
+}
+
 }

@@ -18,6 +18,8 @@
 #include "toolbox.h"
 #include "toolboxwidget.h"
 
+#include "popupmenu.h"
+
 #include "stringconv.h"
 #include "files.h"
 #include "logger.h"
@@ -97,6 +99,9 @@ void ToolBox::createUI()
     config_button_->setFixedSize(UI_ICON_SIZE); 
     config_button_->setFlat(UI_ICON_BUTTON_FLAT);
 
+    config_menu_.reset(new PopupMenu(config_button_));
+    config_menu_->setPreShowCallback([ = ] () { this->updateMenu(); });
+
     shrink_button_ = new QPushButton;
     shrink_button_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_left.png").c_str()));
     shrink_button_->setFixedSize(UI_ICON_SIZE); 
@@ -127,7 +132,6 @@ void ToolBox::createUI()
 
     main_layout->addWidget(right_widget_);
 
-    updateMenu();
     updateToolBar();
 }
 
@@ -135,9 +139,7 @@ void ToolBox::createUI()
  */
 void ToolBox::updateMenu()
 {
-    config_button_->setMenu(nullptr);
-
-    config_menu_.reset(new QMenu);
+    config_menu_->clear();
 
     if (active_tool_idx_ < 0)
         return;
@@ -170,8 +172,6 @@ void ToolBox::updateMenu()
         for (int i = 0; i < (int)toolbox::ScreenRatio::RatioMax; ++i)
             addSRAction(toolbox::toString((toolbox::ScreenRatio)i), (toolbox::ScreenRatio)i);
     }
-
-    config_button_->setMenu(config_menu_.get());
 }
 
 /**
@@ -225,6 +225,7 @@ void ToolBox::addTool(ToolBoxWidget* tool)
     connect(button, &ToolButton::pressed, [ this, toolIdx ] () { this->toolActivated(toolIdx); });
     connect(button, &ToolButton::rightClicked, [ tool ] () { tool->rightClicked(); });
     connect(tool, &ToolBoxWidget::iconChangedSignal, [ button, tool ] { button->setIcon(tool->toolIcon()); } );
+    connect(tool, &ToolBoxWidget::toolsChangedSignal, [ this ] () { this->updateToolBar(); });
 
     Tool t;
     t.idx    = toolIdx;
@@ -315,7 +316,6 @@ void ToolBox::toolActivated(int idx)
         }
     }
 
-    updateMenu();
     updateToolBar();
     updateButtons();
 
@@ -375,7 +375,6 @@ void ToolBox::screenRatioChanged(toolbox::ScreenRatio screen_ratio)
     tools_.at(active_tool_idx_).widget->setScreenRatio(screen_ratio);
 
     updateButtons();
-    updateMenu();
 
     emit toolChanged();
 }

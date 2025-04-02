@@ -27,8 +27,11 @@ class PopupMenu : public QMenu
 {
 public:
     PopupMenu(QAbstractButton* host, 
-              QWidget* content);
+              QWidget* content = nullptr);
     virtual ~PopupMenu() = default;
+
+    void setPreShowCallback(const std::function<void()>& cb);
+    void setPostShowCallback(const std::function<void()>& cb);
 
 protected:
     void showEvent(QShowEvent* event);
@@ -38,4 +41,7 @@ private:
     QWidget*         content_ = nullptr;
 
     int initial_height_ = -1;
+
+    std::function<void()> cb_pre_;
+    std::function<void()> cb_post_;
 };

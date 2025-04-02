@@ -18,6 +18,7 @@
 #include <QMenu>
 #include <QApplication>
 #include <QThread>
+#include <QToolBar>
 
 using namespace std;
 
@@ -61,6 +62,10 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     main_layout->addWidget(table_view_);
 
     setLayout(main_layout);
+
+    showMainColumns(model_.showMainColumns());
+    showDurationColumns(model_.showDurationColumns());
+    showSecondaryColumns(model_.showSecondaryColumns());
 }
 
 /**
@@ -111,15 +116,70 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
     QAction* clear_action = menu->addAction("Clear Comments");
     connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearCommentsSlot);
 
-    QAction* filter_action = menu->addAction("Filter");
+    QAction* filter_action = menu->addAction("Filter Targets...");
     connect (filter_action, &QAction::triggered, this, &TargetListWidget::filterSlot);
+
+    menu->addSeparator();
+
+    QMenu* column_menu = menu->addMenu("Columns");
+
+    // auto main_cols_action = column_menu->addAction("Main");
+    // main_cols_action->setCheckable(true);
+    // main_cols_action->setChecked(model_.showMainColumns());
+
+    // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
+    // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+
+    auto dur_cols_action = column_menu->addAction("Durations");
+    dur_cols_action->setCheckable(true);
+    dur_cols_action->setChecked(model_.showDurationColumns());
+
+    connect(dur_cols_action, &QAction::toggled, this, &TargetListWidget::showDurationColumns);
+    connect(dur_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+
+    auto sec_cols_action = column_menu->addAction("Secondary Attributes");
+    sec_cols_action->setCheckable(true);
+    sec_cols_action->setChecked(model_.showSecondaryColumns());
+
+    connect(sec_cols_action, &QAction::toggled, this, &TargetListWidget::showSecondaryColumns);
+    connect(sec_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
 }
 
+/**
+ */
+void TargetListWidget::addToToolBar(QToolBar* tool_bar)
+{
+    // auto main_cols_action = tool_bar->addAction("M");
+    // main_cols_action->setCheckable(true);
+    // main_cols_action->setChecked(model_.showMainColumns());
+    // main_cols_action->setToolTip("Show Main Information");
+
+    // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
+
+    auto dur_cols_action = tool_bar->addAction("D");
+    dur_cols_action->setCheckable(true);
+    dur_cols_action->setChecked(model_.showDurationColumns());
+    dur_cols_action->setToolTip("Show Durations");
+
+    connect(dur_cols_action, &QAction::toggled, this, &TargetListWidget::showDurationColumns);
+
+    auto sec_cols_action = tool_bar->addAction("SA");
+    sec_cols_action->setCheckable(true);
+    sec_cols_action->setChecked(model_.showSecondaryColumns());
+    sec_cols_action->setToolTip("Show Secondary Attributes");
+
+    connect(sec_cols_action, &QAction::toggled, this, &TargetListWidget::showSecondaryColumns);
+}
+
+/**
+ */
 void TargetListWidget::loadingStarted()
 {
     table_view_->setEnabled(false);
 }
 
+/**
+ */
 void TargetListWidget::loadingDone()
 {
     table_view_->setEnabled(true);
@@ -254,6 +314,30 @@ void TargetListWidget::selectionChanged(const QItemSelection& selected, const QI
     logdbg << "TargetListWidget: selectionChanged: num targets " << selected_utns.size();
 
     dbcont_manager_.showUTNs(selected_utns);
+}
+
+void TargetListWidget::showMainColumns(bool show)
+{
+    model_.showMainColumns(show);
+
+    for (int c : model_.mainColumns())
+        table_view_->setColumnHidden(c, !show);
+}
+
+void TargetListWidget::showDurationColumns(bool show)
+{
+    model_.showDurationColumns(show);
+
+    for (int c : model_.durationColumns())
+        table_view_->setColumnHidden(c, !show);
+}
+
+void TargetListWidget::showSecondaryColumns(bool show)
+{
+    model_.showSecondaryColumns(show);
+
+    for (int c : model_.secondaryColumns())
+        table_view_->setColumnHidden(c, !show);
 }
 
 }

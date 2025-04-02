@@ -43,12 +43,20 @@ public:
     std::vector<std::string> toolLabels() const override final;
     toolbox::ScreenRatio defaultScreenRatio() const override final;
     void addToConfigMenu(QMenu* menu) override final;
+    void addToToolBar(QToolBar* tool_bar) override final;
     void loadingStarted() override final;
     void loadingDone() override final;
 
     void resizeColumnsToContents();
 
 protected:
+    void showMainColumns(bool show);
+    void showDurationColumns(bool show);
+    void showSecondaryColumns(bool show);
+    void showMainColumnsAndEmit(bool show);
+    void showDurationColumnsAndEmit(bool show);
+    void showSecondaryColumnsAndEmit(bool show);
+
     TargetModel& model_;
     DBContentManager& dbcont_manager_;
 

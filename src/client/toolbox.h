@@ -29,6 +29,7 @@
 #include <memory>
 
 class ToolBoxWidget;
+class PopupMenu;
 
 class QPushButton;
 class QVBoxLayout;
@@ -121,7 +122,7 @@ private:
     QPushButton*    grow_button_     = nullptr;
     QToolBar*       tool_bar_        = nullptr;
 
-    std::unique_ptr<QMenu> config_menu_;
+    std::unique_ptr<PopupMenu> config_menu_;
 
     int active_tool_idx_ = -1;
 };

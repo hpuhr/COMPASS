@@ -33,12 +33,14 @@ PopupMenu::PopupMenu(QAbstractButton* host,
 ,   content_(content)
 {
     assert(host_);
-    assert(content_);
 
-    auto w_action = new QWidgetAction(this);
-    w_action->setDefaultWidget(content);
+    if (content_)
+    {
+        auto w_action = new QWidgetAction(this);
+        w_action->setDefaultWidget(content_);
 
-    addAction(w_action);
+        addAction(w_action);
+    }
 
     bool configured = true;
     if (dynamic_cast<QPushButton*>(host_))
@@ -53,42 +55,65 @@ PopupMenu::PopupMenu(QAbstractButton* host,
 
 /**
  */
+void PopupMenu::setPreShowCallback(const std::function<void()>& cb)
+{
+    cb_pre_ = cb;
+}
+
+/**
+ */
+void PopupMenu::setPostShowCallback(const std::function<void()>& cb)
+{
+    cb_post_ = cb;
+}
+
+/**
+ */
 void PopupMenu::showEvent(QShowEvent* event)
 {
+    if (cb_pre_)
+        cb_pre_();
+
     QMenu::showEvent(event);
 
-    //remember original height chosen by qt
-    if (initial_height_ < 0)
-        initial_height_ = height();
+    if (cb_post_)
+        cb_post_();
 
-    const int ExtraSpace = 5;
-
-    auto pos_upper   = host_->mapToGlobal(QPoint(0, 0));
-    auto pos_lower   = host_->mapToGlobal(QPoint(0, host_->height()));
-    auto screen      = QApplication::desktop()->screenGeometry(host_);
-    int  space_upper = std::max(0, pos_upper.y() - ExtraSpace);
-    int  space_lower = std::max(0, screen.height() - pos_lower.y() - ExtraSpace);
-
-    //show either above or below, depending on screen space
-    bool show_above = space_upper > screen.height() / 2;
-
-    //determine y-position and height
-    int y, h;
-    if (show_above)
+    if (content_)
     {
-        //show above button
-        h = initial_height_ > space_upper ? space_upper : initial_height_;
-        y = pos_upper.y() - h;
-    }
-    else
-    {
-        //show below button
-        h = initial_height_ > space_lower ? space_lower : initial_height_;
-        y = pos_lower.y();
-    }
+        //remember original height chosen by qt
+        if (initial_height_ < 0)
+            initial_height_ = height();
 
-    //position and resize
-    move(x(), y);
-    setFixedHeight(h);
-    content_->setFixedHeight(h);
+        const int ExtraSpace = 5;
+
+        auto pos_upper   = host_->mapToGlobal(QPoint(0, 0));
+        auto pos_lower   = host_->mapToGlobal(QPoint(0, host_->height()));
+        auto screen      = QApplication::desktop()->screenGeometry(host_);
+        int  space_upper = std::max(0, pos_upper.y() - ExtraSpace);
+        int  space_lower = std::max(0, screen.height() - pos_lower.y() - ExtraSpace);
+
+        //show either above or below, depending on screen space
+        bool show_above = space_upper > screen.height() / 2;
+
+        //determine y-position and height
+        int y, h;
+        if (show_above)
+        {
+            //show above button
+            h = initial_height_ > space_upper ? space_upper : initial_height_;
+            y = pos_upper.y() - h;
+        }
+        else
+        {
+            //show below button
+            h = initial_height_ > space_lower ? space_lower : initial_height_;
+            y = pos_lower.y();
+        }
+
+        //position and resize
+        move(x(), y);
+        setFixedHeight(h);
+        content_->setFixedHeight(h);
+    }
 }

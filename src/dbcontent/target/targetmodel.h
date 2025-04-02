@@ -134,11 +134,28 @@ public:
     bool removeNotDetectedDBContent(const std::string& dbcontent_name) const;
     void removeNotDetectedDBContents(const std::string& dbcontent_name, bool value);
 
+    const std::vector<int>& mainColumns() const { return main_columns_; }
+    const std::vector<int>& durationColumns() const { return duration_columns_; }
+    const std::vector<int>& secondaryColumns() const { return secondary_columns_; }
+    bool showMainColumns() { return show_main_columns_; }
+    bool showDurationColumns() { return show_duration_columns_; }
+    bool showSecondaryColumns() { return show_secondary_columns_; }
+    void showMainColumns(bool show);
+    void showDurationColumns(bool show);
+    void showSecondaryColumns(bool show);
+
 protected:
     DBContentManager& dbcont_manager_;
 
     QStringList table_columns_ {"Use", "UTN", "Comment", "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs",
                                 "M3/A", "MC Min", "MC Max", "MOPS"};
+    std::vector<int> main_columns_      { 0, 1, 2, 3 };
+    std::vector<int> duration_columns_  { 4, 5, 6 };
+    std::vector<int> secondary_columns_ { 7, 8, 9, 10, 11, 12 };
+
+    bool show_main_columns_      = true;
+    bool show_duration_columns_ = false;
+    bool show_secondary_columns_ = false;
 
     TargetCache target_data_;
 

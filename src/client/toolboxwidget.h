@@ -38,6 +38,7 @@ class ToolBoxWidget : public QWidget
 
 signals:
     void iconChangedSignal();
+    void toolsChangedSignal();
 
 public:
     ToolBoxWidget(QWidget* parent = nullptr);
