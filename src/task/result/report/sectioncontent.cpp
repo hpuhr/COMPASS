@@ -23,12 +23,15 @@
 namespace ResultReport
 {
 
-const std::string SectionContent::DBTableName         = "report_viewables";
-const Property    SectionContent::DBColumnContentID   = Property("content_id"  , PropertyDataType::UINT);
-const Property    SectionContent::DBColumnResultID    = Property("result_id"   , PropertyDataType::UINT);
-const Property    SectionContent::DBColumnType        = Property("type"        , PropertyDataType::INT );
-const Property    SectionContent::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON);
-
+const std::string  SectionContent::DBTableName         = "report_viewables";
+const Property     SectionContent::DBColumnContentID   = Property("content_id"  , PropertyDataType::UINT);
+const Property     SectionContent::DBColumnResultID    = Property("result_id"   , PropertyDataType::UINT);
+const Property     SectionContent::DBColumnType        = Property("type"        , PropertyDataType::INT );
+const Property     SectionContent::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON);
+const PropertyList SectionContent::DBPropertyList      = PropertyList({ SectionContent::DBColumnContentID,
+                                                                        SectionContent::DBColumnResultID,
+                                                                        SectionContent::DBColumnType,
+                                                                        SectionContent::DBColumnJSONContent });
 const std::string SectionContent::FieldType = "type";
 const std::string SectionContent::FieldID   = "id";
 const std::string SectionContent::FieldName = "name";
@@ -144,14 +147,20 @@ bool SectionContent::fromJSON(const nlohmann::json& j)
         !j.contains(FieldType) ||
         !j.contains(FieldID)   ||
         !j.contains(FieldName))
+    {
+        logerr << "SectionContent: fromJSON: Error: Section content does not obtain needed fields";
         return false;
+    }
 
     try
     {
         std::string t_str = j[ FieldType ];
         auto t = typeFromString(t_str);
         if (!t.has_value())
+        {
+            logerr << "SectionContent: fromJSON: Error: Could not deduce section content type";
             return false;
+        }
 
         type_ = t.value();
         id_   = j[ FieldID   ];
@@ -160,8 +169,14 @@ bool SectionContent::fromJSON(const nlohmann::json& j)
         if (!fromJSON_impl(j))
             return false;
     }
+    catch(const std::exception& ex)
+    {
+        logerr << "SectionContent: fromJSON: Error: " << ex.what();
+        return false;
+    }
     catch(...)
     {
+        logerr << "SectionContent: fromJSON: Unknown error";
         return false;
     }
 

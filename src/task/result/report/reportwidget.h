@@ -10,9 +10,9 @@
 #include <QStackedWidget>
 
 class TaskResultsWidget;
+class PopupMenu;
 
 class QPushButton;
-class QMenu;
 
 namespace ResultReport
 {
@@ -24,12 +24,13 @@ class ReportWidget : public QWidget
 
 public slots:
     void itemClickedSlot(const QModelIndex& index);
+    void itemDblClickedSlot(const QModelIndex& index);
 
     void stepBackSlot();
 
 public:
     ReportWidget(TaskResultsWidget& task_result_widget);
-    virtual ~ReportWidget()= default;
+    virtual ~ReportWidget();
 
     void setReport(const std::shared_ptr<Report>& report);
     void clear();
@@ -57,7 +58,7 @@ protected:
     QStackedWidget* results_widget_{nullptr};
 
     QPushButton* sections_button_{nullptr};
-    std::unique_ptr<QMenu> sections_menu_;
+    std::unique_ptr<PopupMenu> sections_menu_;
 
     QPushButton* back_button_ {nullptr};
     std::vector<std::string> id_history_;

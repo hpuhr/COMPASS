@@ -6,6 +6,7 @@
 #include "report/sectioncontenttable.h"
 #include "files.h"
 #include "logger.h"
+#include "popupmenu.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -42,27 +43,20 @@ ReportWidget::ReportWidget(TaskResultsWidget& task_result_widget)
         button_layout->addWidget(sections_button_);
 
         main_layout->addLayout(button_layout);
-
     }
 
     tree_view_ = new QTreeView;
     tree_view_->setModel(&tree_model_);
     tree_view_->setRootIsDecorated(false);
     tree_view_->expandToDepth(3);
-    tree_view_->setFixedSize(500, 1000);
+    tree_view_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     connect (tree_view_, &QTreeView::clicked, this, &ReportWidget::itemClickedSlot);
+    connect (tree_view_, &QTreeView::doubleClicked, this, &ReportWidget::itemDblClickedSlot);
 
-    sections_menu_.reset(new QMenu);
-
-    auto w_action = new QWidgetAction(sections_menu_.get());
-    w_action->setDefaultWidget(tree_view_);
-
-    sections_menu_->addAction(w_action);
-    sections_button_->setMenu(sections_menu_.get());
+    sections_menu_.reset(new PopupMenu(sections_button_, tree_view_));
 
     // results stack
-
     QScrollArea* scroll_area = new QScrollArea();
     scroll_area->setWidgetResizable(true);
 
@@ -76,6 +70,10 @@ ReportWidget::ReportWidget(TaskResultsWidget& task_result_widget)
     setLayout(main_layout);
 
     updateBackButton();
+}
+
+ReportWidget::~ReportWidget()
+{
 }
 
 void ReportWidget::setReport(const std::shared_ptr<Report>& report)
@@ -159,6 +157,13 @@ void ReportWidget::itemClickedSlot(const QModelIndex& index)
     }
 
     updateBackButton();
+}
+
+void ReportWidget::itemDblClickedSlot(const QModelIndex& index)
+{
+    itemClickedSlot(index);
+
+    sections_menu_->close();
 }
 
 void ReportWidget::showFigure(const QModelIndex& index)
@@ -284,6 +289,5 @@ boost::optional<nlohmann::json> ReportWidget::getTableData(const std::string& re
 
     return section->getTable(table_id).toJSON(rowwise, cols);
 }
-
 
 }

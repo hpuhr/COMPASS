@@ -20,12 +20,15 @@
 #include "timeconv.h"
 #include "logger.h"
 
-const std::string TaskResult::DBTableName         = "task_results";
-const Property    TaskResult::DBColumnID          = Property("result_id"   , PropertyDataType::UINT  );
-const Property    TaskResult::DBColumnName        = Property("name"        , PropertyDataType::STRING);
-const Property    TaskResult::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON  );
-const Property    TaskResult::DBColumnResultType  = Property("type"        , PropertyDataType::INT   );
-
+const std::string  TaskResult::DBTableName         = "task_results";
+const Property     TaskResult::DBColumnID          = Property("result_id"   , PropertyDataType::UINT  );
+const Property     TaskResult::DBColumnName        = Property("name"        , PropertyDataType::STRING);
+const Property     TaskResult::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON  );
+const Property     TaskResult::DBColumnResultType  = Property("type"        , PropertyDataType::INT   );
+const PropertyList TaskResult::DBPropertyList      = PropertyList({ TaskResult::DBColumnID,
+                                                                    TaskResult::DBColumnName,
+                                                                    TaskResult::DBColumnJSONContent,
+                                                                    TaskResult::DBColumnResultType });
 const std::string TaskResult::FieldID       = "id";
 const std::string TaskResult::FieldName     = "name";
 const std::string TaskResult::FieldType     = "type";

@@ -36,7 +36,7 @@
 namespace ResultReport
 {
 
-const std::string SectionContentFigure::FieldType            = "type";
+const std::string SectionContentFigure::FieldFigureType      = "figure_type";
 const std::string SectionContentFigure::FieldCaption         = "caption";
 const std::string SectionContentFigure::FieldRenderDelayMSec = "render_delay_msec";
 const std::string SectionContentFigure::FieldViewable        = "viewable";
@@ -142,7 +142,7 @@ std::shared_ptr<nlohmann::json::object_t> SectionContentFigure::viewableContent(
  */
 void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
 {
-    root_node[ FieldType            ] = fig_type_;
+    root_node[ FieldFigureType      ] = fig_type_;
     root_node[ FieldCaption         ] = caption_;
     root_node[ FieldRenderDelayMSec ] = render_delay_msec_;
 
@@ -162,13 +162,16 @@ void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
 bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
 {
     if (!j.is_object()                    ||
-        !j.contains(FieldType)            ||
+        !j.contains(FieldFigureType)      ||
         !j.contains(FieldCaption)         ||
         !j.contains(FieldRenderDelayMSec) ||
         !j.contains(FieldViewable))
+    {
+        logerr << "SectionContentFigure: fromJSON: Error: Section content figure does not obtain needed fields";
         return false;
+    }
 
-    fig_type_          = j[ FieldType            ];
+    fig_type_          = j[ FieldFigureType      ];
     caption_           = j[ FieldCaption         ];
     render_delay_msec_ = j[ FieldRenderDelayMSec ];
 

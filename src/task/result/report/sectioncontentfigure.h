@@ -59,7 +59,7 @@ public:
 
     std::shared_ptr<nlohmann::json::object_t> viewableContent();
 
-    static const std::string FieldType;
+    static const std::string FieldFigureType;
     static const std::string FieldCaption;
     static const std::string FieldRenderDelayMSec;
     static const std::string FieldViewable;

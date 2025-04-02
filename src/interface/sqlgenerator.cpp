@@ -251,85 +251,80 @@ shared_ptr<DBCommand> SQLGenerator::getFFTSelectCommand()
 
 /**
  */
-std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
-        const DBContent& dbcontent, boost::posix_time::ptime before_timestamp)
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const std::string& table_name, const std::string& filter)
 {
     //DELETE FROM table WHERE search_condition;
 
     stringstream ss;
 
-    ss << "DELETE FROM " << dbcontent.dbTableName();
-    ss << " WHERE " << COMPASS::instance().dbContentManager().metaGetVariable(
-              dbcontent.name(), DBContent::meta_var_timestamp_).dbColumnName();
+    ss << "DELETE FROM " << table_name;
 
-    ss << " < " << Time::toLong(before_timestamp) << ";";
+    if (!filter.empty())
+        ss << " WHERE " << filter;
+
+    ss << ";";
 
     logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
 
     shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
     command->set(ss.str());
     return command;
+}
+
+/**
+ */
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
+        const DBContent& dbcontent, boost::posix_time::ptime before_timestamp)
+{
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    stringstream ss;
+    ss << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_timestamp_).dbColumnName();
+    ss << " < " << Time::toLong(before_timestamp);
+
+    return getDeleteCommand(dbcontent.dbTableName(), ss.str());
 }
 
 /**
  */
 std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcontent)
 {
-    //DELETE FROM table WHERE search_condition;
-
-    stringstream ss;
-
-    ss << "DELETE FROM " << dbcontent.dbTableName();
-
-    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
-
-    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
-    command->set(ss.str());
-    return command;
+    return getDeleteCommand(dbcontent.dbTableName(), "");
 }
 
 /**
  */
-std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
-        const DBContent& dbcontent, unsigned int sac, unsigned int sic)
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcontent, 
+                                                          unsigned int sac, 
+                                                          unsigned int sic)
 {
-    stringstream ss;
-
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    ss << "DELETE FROM " << dbcontent.dbTableName() << " WHERE "
-       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sac_id_).dbColumnName() << " = " << sac
+    stringstream ss;
+    ss << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sac_id_).dbColumnName() << " = " << sac
        << " AND "
        << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sic_id_).dbColumnName() << " = " << sic;
 
-    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
-
-    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
-    command->set(ss.str());
-    return command;
+    return getDeleteCommand(dbcontent.dbTableName(), ss.str());
 }
 
 /**
  */
-std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(
-        const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id)
+std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcontent, 
+                                                          unsigned int sac, 
+                                                          unsigned int sic, 
+                                                          unsigned int line_id)
 {
-    stringstream ss;
-
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    ss << "DELETE FROM " << dbcontent.dbTableName() << " WHERE "
-       << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sac_id_).dbColumnName() << " = " << sac
+    stringstream ss;
+    ss << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sac_id_).dbColumnName() << " = " << sac
        << " AND "
        << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_sic_id_).dbColumnName() << " = " << sic
        << " AND "
        << dbcont_man.metaGetVariable(dbcontent.name(), DBContent::meta_var_line_id_).dbColumnName() << " = " << line_id;
 
-    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
-
-    shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
-    command->set(ss.str());
-    return command;
+       return getDeleteCommand(dbcontent.dbTableName(), ss.str());
 }
 
 //shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBContent& object)
@@ -991,7 +986,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& tab
 
         first = false;
     }
-
+    
     ss << " FROM " << table_name;  // << table->getAllTableNames();
 
     // add extra from parts

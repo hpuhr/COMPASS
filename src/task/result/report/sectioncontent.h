@@ -23,6 +23,7 @@
 #include <string>
 
 #include "property.h"
+#include "propertylist.h"
 
 #include <boost/optional.hpp>
 
@@ -106,11 +107,12 @@ public:
     static std::string typeAsString(Type type);
     static boost::optional<Type> typeFromString(const std::string& type_str);
 
-    static const std::string DBTableName;
-    static const Property    DBColumnContentID;
-    static const Property    DBColumnResultID;
-    static const Property    DBColumnType;
-    static const Property    DBColumnJSONContent;
+    static const std::string  DBTableName;
+    static const Property     DBColumnContentID;
+    static const Property     DBColumnResultID;
+    static const Property     DBColumnType;
+    static const Property     DBColumnJSONContent;
+    static const PropertyList DBPropertyList;
 
     static const std::string FieldType;
     static const std::string FieldID;

@@ -19,6 +19,7 @@
 
 #include "json.hpp"
 #include "property.h"
+#include "propertylist.h"
 #include "task/result/report/report.h"
 
 #include <string>
@@ -56,11 +57,12 @@ public:
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
 
-    static const std::string DBTableName;
-    static const Property    DBColumnID;
-    static const Property    DBColumnName;
-    static const Property    DBColumnJSONContent;
-    static const Property    DBColumnResultType;
+    static const std::string  DBTableName;
+    static const Property     DBColumnID;
+    static const Property     DBColumnName;
+    static const Property     DBColumnJSONContent;
+    static const Property     DBColumnResultType;
+    static const PropertyList DBPropertyList;
 
     static const std::string FieldID;
     static const std::string FieldName;

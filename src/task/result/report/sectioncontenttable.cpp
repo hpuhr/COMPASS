@@ -215,7 +215,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
 
         assert (index.row() >= 0);
         assert (index.row() < (int)rows_.size());
-        assert (index.column() < num_columns_);
+        assert (index.column() < (int)num_columns_);
 
         return qVariantFromJSON(rows_.at(index.row()).at(index.column()));
     }
@@ -475,7 +475,7 @@ void SectionContentTable::clicked(unsigned int row)
         {
             std::shared_ptr<nlohmann::json::object_t> viewable = figure->viewableContent();
 
-            //TODO
+            //TODO: find a pattern to support on-demand computation of viewable data
             // if (result_ptrs_.at(row_index)->viewableDataReady())
             // {
             //     //view data ready, just get it
@@ -673,7 +673,10 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldSortOrder)  ||
         !j.contains(FieldRows)       ||
         !j.contains(FieldAnnotations))
+    {
+        logerr << "SectionContentTable: fromJSON: Error: Section content table does not obtain needed fields";
         return false;
+    }
 
     headings_    = j[ FieldHeadings   ].get<std::vector<std::string>>();
     sortable_    = j[ FieldSortable   ];
@@ -682,17 +685,27 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     std::string sort_order = j[ FieldSortOrder ];
     sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;
 
+    num_columns_               = headings_.size();
+    create_on_demand_          = false;
+    already_created_by_demand_ = false;
+
     rows_ = j[ FieldRows ].get<std::vector<nlohmann::json>>();
 
     auto& j_annos = j[ FieldAnnotations ];
     if (!j_annos.is_array() || j_annos.size() != rows_.size())
+    {
+        logerr << "SectionContentTable: fromJSON: Error: Annotation array invalid";
         return false;
+    }
 
     for (const auto& j_anno : j_annos)
     {
         if (!j_anno.contains(FieldAnnoSectionLink) ||
             !j_anno.contains(FieldAnnoSectionFigure))
+        {
+            logerr << "SectionContentTable: fromJSON: Error: Could not read annotation";
             return false;
+        }
 
         RowAnnotation anno;
         anno.section_link   = j_anno[ FieldAnnoSectionLink   ];

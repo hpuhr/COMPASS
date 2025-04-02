@@ -575,6 +575,8 @@ bool Section::hasContent(const std::string& name, SectionContent::Type type) con
 */
 void Section::createContentWidget()
 {
+    loginf << "Section: createContentWidget: Creating content widget for section '" << name_ << "'";
+
     assert (!content_widget_);
 
     content_widget_.reset(new QWidget());

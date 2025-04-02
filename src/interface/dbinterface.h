@@ -47,6 +47,8 @@ class Result;
 class DBFFT;
 class DBContent;
 
+class PropertyList;
+
 namespace dbContent
 {
     class DBDataSource;
@@ -195,14 +197,18 @@ public:
     void createTaskResultsTable();
     void createReportContentsTable();
     Result saveResult(const TaskResult& result);
+    Result deleteResult(const TaskResult& result);
     ResultT<std::vector<std::shared_ptr<TaskResult>>> loadResults();
     ResultT<std::shared_ptr<ResultReport::SectionContent>> loadContent(ResultReport::Section* section, unsigned int content_id);
 
     void clearTableContent(const std::string& table_name);
+    ResultT<std::shared_ptr<Buffer>> select(const std::string& table_name, 
+                                            const PropertyList& properties,
+                                            const std::string& filter);
 
     unsigned long getMaxRecordNumber(DBContent& object);
     unsigned int getMaxRefTrackTrackNum();
-    unsigned long getMaxReportContentID();
+    boost::optional<unsigned long> getMaxReportContentID();
 
     void startPerformanceMetrics() const;
     db::PerformanceMetrics stopPerformanceMetrics() const;
