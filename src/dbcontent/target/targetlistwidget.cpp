@@ -121,7 +121,7 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
 
     menu->addSeparator();
 
-    QMenu* column_menu = menu->addMenu("Columns");
+    QMenu* column_menu = menu->addMenu("Edit Columns");
 
     // auto main_cols_action = column_menu->addAction("Main");
     // main_cols_action->setCheckable(true);
