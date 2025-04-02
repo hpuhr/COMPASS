@@ -28,8 +28,6 @@ enum class ScreenRatio
     Ratio_25Percent = 0,
     Ratio_35Percent,
     Ratio_50Percent,
-    Ratio_65Percent,
-    Ratio_75Percent,
     RatioMax //limiter
 };
 
@@ -45,12 +43,8 @@ inline std::pair<int, int> toParts(ScreenRatio screen_ratio)
             return std::pair<int, int>(1, 2);
         case ScreenRatio::Ratio_50Percent:
             return std::pair<int, int>(1, 1);
-        case ScreenRatio::Ratio_65Percent:
-            return std::pair<int, int>(2, 1);
-        case ScreenRatio::Ratio_75Percent:
-            return std::pair<int, int>(3, 1);
         default:
-        return std::pair<int, int>(1, 1);
+            return std::pair<int, int>(1, 1);
     }
     return std::pair<int, int>(1, 1);
 }
@@ -67,10 +61,6 @@ inline std::string toString(ScreenRatio screen_ratio)
             return "35%";
         case ScreenRatio::Ratio_50Percent:
             return "50%";
-        case ScreenRatio::Ratio_65Percent:
-            return "65%";
-        case ScreenRatio::Ratio_75Percent:
-            return "75%";
         default:
         return "";
     }
