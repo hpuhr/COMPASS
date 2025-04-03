@@ -295,6 +295,13 @@ bool Client::run ()
     // Set the "Fusion" style for better cross-platform results
     QApplication::setStyle(QStyleFactory::create("Fusion"));
 
+    // Enable Qt high-DPI scaling
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    //QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+
+    // Enable High DPI support
+    QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
     splash.show();
