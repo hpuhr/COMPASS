@@ -126,7 +126,7 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
 
-        if (col_name == "Accepted")
+        if (col_name == "")
         {
             return QVariant();
         }
@@ -286,10 +286,10 @@ Qt::ItemFlags LogStore::flags(const QModelIndex &index) const
     {
         return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
     }
-    else if (index.column() == 2) // comment
-    {
-        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
-    }
+    // else if (index.column() == 2) // comment
+    // {
+    //     return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    // }
     else
         return QAbstractItemModel::flags(index);
 }
