@@ -54,7 +54,7 @@ using namespace Utils;
 const bool COMPASS::is_app_image_ = {getenv("APPDIR") != nullptr};
 
 COMPASS::COMPASS()
-    : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
+    : Configurable("COMPASS", "COMPASS0", 0, "compass.json"), log_store_(!is_app_image_)
 {
     logdbg << "COMPASS: constructor: start";
 
@@ -845,16 +845,19 @@ const char* COMPASS::lineEditInvalidStyle()
                           " rgb(255, 200, 200); }";
 }
 
-LogStream COMPASS::logInfo() {
-    return log_store_.logInfo();
+LogStream COMPASS::logInfo(const std::string& component,
+                           boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
+    return log_store_.logInfo(component, error_code, json_blob);
 }
 
-LogStream COMPASS::logWarn() {
-    return log_store_.logInfo();
+LogStream COMPASS::logWarn(const std::string& component,
+                           boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
+    return log_store_.logInfo(component, error_code, json_blob);
 }
 
-LogStream COMPASS::logError() {
-    return log_store_.logInfo();
+LogStream COMPASS::logError(const std::string& component,
+                            boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
+    return log_store_.logInfo(component, error_code, json_blob);
 }
 
 bool COMPASS::disableConfirmResetViews() const

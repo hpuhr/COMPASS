@@ -181,7 +181,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
     loginf << "DBInterface: openDBFile: new_file " << new_file;
 
     if (new_file)
-        COMPASS::instance().logInfo() << "Database '" << filename << "' created";
+        COMPASS::instance().logInfo("DBInterface") << "Database '" << filename << "' created";
 }
 
 /**

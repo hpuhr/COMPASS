@@ -1,7 +1,7 @@
 #pragma once
 
 #include "toolboxwidget.h"
-#include "util/logstream.h"
+#include "util/logmodel.h"
 
 #include <QTextEdit>
 #include <QIcon>
@@ -10,6 +10,9 @@
 #include <vector>
 
 class LogStore;
+
+class QTableView;
+class QSortFilterProxyModel;
 
 class LogWidget : public ToolBoxWidget
 {
@@ -36,10 +39,11 @@ public:
 protected:
     LogStore& log_store_;
 
-    void updateDisplay();
+    //void updateDisplay();
     void checkIcon();
 
-    QTextEdit* text_display_;
+    QTableView* table_view_{nullptr};
+    QSortFilterProxyModel* proxy_model_{nullptr};
 
     QIcon default_icon_;
     QIcon error_icon_;

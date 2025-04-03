@@ -22,7 +22,7 @@
 #include "json.hpp"
 #include "appmode.h"
 #include "result.h"
-#include "logstream.h"
+#include "logmodel.h"
 
 #include <QObject>
 
@@ -148,9 +148,12 @@ public:
 
     const char* lineEditInvalidStyle();
 
-    LogStream logInfo();
-    LogStream logWarn();
-    LogStream logError();
+    LogStream logInfo(const std::string& component,
+                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+    LogStream logWarn(const std::string& component,
+                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+    LogStream logError(const std::string& component,
+                       boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
 
     LogWidget* logWidget();
 

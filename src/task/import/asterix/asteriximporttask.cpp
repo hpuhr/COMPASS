@@ -824,7 +824,7 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
 
     loginf << "ASTERIXImportTask: run: filenames " << source_.filesAsString() << " free RAM " << free_ram << " GB";
 
-    COMPASS::instance().logInfo() << "ASTERIX Import of '" << source_.filesAsString() << "'";
+    COMPASS::instance().logInfo("ASTERIX Import") << "files '" << source_.filesAsString() << "'";
 
     if (source_.isFileType())
     {
@@ -1424,7 +1424,7 @@ void ASTERIXImportTask::checkAllDone()
         loginf << "ASTERIXImportTask: checkAllDone: import done after "
                << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
-        COMPASS::instance().logInfo() << "ASTERIX Import of '" << source_.filesAsString() << "' finished after "
+        COMPASS::instance().logInfo("ASTERIX Import") << "files '" << source_.filesAsString() << "' finished after "
             << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
         COMPASS::instance().mainWindow().updateMenus(); // re-enable import menu
