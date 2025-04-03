@@ -380,7 +380,9 @@ std::shared_ptr<TaskResult> TaskManager::getOrCreateResult (const std::string& n
                            });
 
     if (it != results_.end())
+    {
         return it->second;
+    }
     else // create
     {
         unsigned int new_id{0};
@@ -409,7 +411,6 @@ bool TaskManager::hasResult (const std::string& name) const
 
     return it != results_.end();
 }
-
 
 void TaskManager::databaseOpenedSlot()
 {

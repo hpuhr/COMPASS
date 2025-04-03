@@ -566,7 +566,6 @@ EvaluationResultsGeneratorWidget* EvaluationResultsGenerator::widget()
     return new EvaluationResultsGeneratorWidget(*this, eval_man_, eval_settings_);
 }
 
-
 void EvaluationResultsGenerator::addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {
     // standard
