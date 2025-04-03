@@ -52,7 +52,7 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
 
     dbo_lay->addWidget(new QLabel("DBContent"), 0, 0);
 
-    dbcont_combo_ = new DBContentComboBox(false);
+    dbcont_combo_ = new DBContentComboBox(false, true);
     dbcont_combo_->setObjectName(dbcontent_name_);
     connect (dbcont_combo_, &DBContentComboBox::changedObject, this, &EvaluationDataSourceWidget::dbContentNameChangedSlot);
 
@@ -216,6 +216,8 @@ void EvaluationDataSourceWidget::toggleDataSourceSlot()
     }
 
     updateCheckboxesChecked();
+
+    emit usedDataSourceChangedSignal();
 }
 
 void EvaluationDataSourceWidget::lineIDEditSlot(const QString& text)

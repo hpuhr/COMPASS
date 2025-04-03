@@ -1,43 +1,34 @@
+
 #include "targetlistwidget.h"
 #include "targetmodel.h"
-#include "dbcontentmanager.h"
 #include "targetfilterdialog.h"
-#include "logger.h"
+
 #include "compass.h"
 #include "taskmanager.h"
 #include "evaluationmanager.h"
+#include "dbcontentmanager.h"
+
+#include "files.h"
+#include "logger.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
 #include <QMenu>
-#include <QToolBar>
 #include <QApplication>
 #include <QThread>
+#include <QToolBar>
 
 using namespace std;
 
-namespace dbContent {
-
+namespace dbContent 
+{
 
 TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_manager)
-    : QWidget(), model_(model), dbcont_manager_(dbcont_manager)
+    : ToolBoxWidget(), model_(model), dbcont_manager_(dbcont_manager)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
-
-    // toolbar
-    toolbar_ = new QToolBar("Tools");
-
-    QWidget* spacer = new QWidget();
-    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    toolbar_->addWidget(spacer);
-
-    toolbar_->addAction("Change Usage");
-
-    connect(toolbar_, &QToolBar::actionTriggered, this, &TargetListWidget::actionTriggeredSlot);
-
-    main_layout->addWidget(toolbar_);
 
     // table
     proxy_model_ = new QSortFilterProxyModel();
@@ -71,6 +62,127 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     main_layout->addWidget(table_view_);
 
     setLayout(main_layout);
+
+    showMainColumns(model_.showMainColumns());
+    showDurationColumns(model_.showDurationColumns());
+    showSecondaryColumns(model_.showSecondaryColumns());
+}
+
+/**
+ */
+QIcon TargetListWidget::toolIcon() const
+{
+    return QIcon(Utils::Files::getIconFilepath("targets.png").c_str());
+}
+
+/**
+ */
+std::string TargetListWidget::toolName() const 
+{
+    return "Targets";
+}
+
+/**
+ */
+std::string TargetListWidget::toolInfo() const 
+{
+    return "Targets";
+}
+
+/**
+ */
+std::vector<std::string> TargetListWidget::toolLabels() const 
+{
+    return { "Targets" };
+}
+
+/**
+ */
+toolbox::ScreenRatio TargetListWidget::defaultScreenRatio() const 
+{
+    return ToolBoxWidget::defaultScreenRatio();
+}
+
+/**
+ */
+void TargetListWidget::addToConfigMenu(QMenu* menu) 
+{
+    QAction* all_action = menu->addAction("Use All");
+    connect (all_action, &QAction::triggered, this, &TargetListWidget::useAllSlot);
+
+    QAction* none_action = menu->addAction("Use None");
+    connect (none_action, &QAction::triggered, this, &TargetListWidget::useNoneSlot);
+
+    QAction* clear_action = menu->addAction("Clear Comments");
+    connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearCommentsSlot);
+
+    QAction* filter_action = menu->addAction("Filter Targets...");
+    connect (filter_action, &QAction::triggered, this, &TargetListWidget::filterSlot);
+
+    menu->addSeparator();
+
+    QMenu* column_menu = menu->addMenu("Edit Columns");
+
+    // auto main_cols_action = column_menu->addAction("Main");
+    // main_cols_action->setCheckable(true);
+    // main_cols_action->setChecked(model_.showMainColumns());
+
+    // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
+    // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+
+    auto dur_cols_action = column_menu->addAction("Durations");
+    dur_cols_action->setCheckable(true);
+    dur_cols_action->setChecked(model_.showDurationColumns());
+
+    connect(dur_cols_action, &QAction::toggled, this, &TargetListWidget::showDurationColumns);
+    connect(dur_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+
+    auto sec_cols_action = column_menu->addAction("Secondary Attributes");
+    sec_cols_action->setCheckable(true);
+    sec_cols_action->setChecked(model_.showSecondaryColumns());
+
+    connect(sec_cols_action, &QAction::toggled, this, &TargetListWidget::showSecondaryColumns);
+    connect(sec_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+}
+
+/**
+ */
+void TargetListWidget::addToToolBar(QToolBar* tool_bar)
+{
+    // auto main_cols_action = tool_bar->addAction("M");
+    // main_cols_action->setCheckable(true);
+    // main_cols_action->setChecked(model_.showMainColumns());
+    // main_cols_action->setToolTip("Show Main Information");
+
+    // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
+
+    auto dur_cols_action = tool_bar->addAction("D");
+    dur_cols_action->setCheckable(true);
+    dur_cols_action->setChecked(model_.showDurationColumns());
+    dur_cols_action->setToolTip("Show Durations");
+
+    connect(dur_cols_action, &QAction::toggled, this, &TargetListWidget::showDurationColumns);
+
+    auto sec_cols_action = tool_bar->addAction("SA");
+    sec_cols_action->setCheckable(true);
+    sec_cols_action->setChecked(model_.showSecondaryColumns());
+    sec_cols_action->setToolTip("Show Secondary Attributes");
+
+    connect(sec_cols_action, &QAction::toggled, this, &TargetListWidget::showSecondaryColumns);
+}
+
+/**
+ */
+void TargetListWidget::loadingStarted()
+{
+    table_view_->setEnabled(false);
+}
+
+/**
+ */
+void TargetListWidget::loadingDone()
+{
+    table_view_->setEnabled(true);
 }
 
 void TargetListWidget::resizeColumnsToContents()
@@ -78,29 +190,6 @@ void TargetListWidget::resizeColumnsToContents()
     loginf << "TargetListWidget: resizeColumnsToContents";
     //table_model_->update();
     table_view_->resizeColumnsToContents();
-}
-
-void TargetListWidget::actionTriggeredSlot(QAction* action)
-{
-    QMenu menu;
-
-    QAction* all_action = new QAction("Use All", this);
-    connect (all_action, &QAction::triggered, this, &TargetListWidget::useAllSlot);
-    menu.addAction(all_action);
-
-    QAction* none_action = new QAction("Use None", this);
-    connect (none_action, &QAction::triggered, this, &TargetListWidget::useNoneSlot);
-    menu.addAction(none_action);
-
-    QAction* clear_action = new QAction("Clear Comments", this);
-    connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearCommentsSlot);
-    menu.addAction(clear_action);
-
-    QAction* filter_action = new QAction("Filter", this);
-    connect (filter_action, &QAction::triggered, this, &TargetListWidget::filterSlot);
-    menu.addAction(filter_action);
-
-    menu.exec(QCursor::pos());
 }
 
 void TargetListWidget::useAllSlot()
@@ -225,6 +314,30 @@ void TargetListWidget::selectionChanged(const QItemSelection& selected, const QI
     logdbg << "TargetListWidget: selectionChanged: num targets " << selected_utns.size();
 
     dbcont_manager_.showUTNs(selected_utns);
+}
+
+void TargetListWidget::showMainColumns(bool show)
+{
+    model_.showMainColumns(show);
+
+    for (int c : model_.mainColumns())
+        table_view_->setColumnHidden(c, !show);
+}
+
+void TargetListWidget::showDurationColumns(bool show)
+{
+    model_.showDurationColumns(show);
+
+    for (int c : model_.durationColumns())
+        table_view_->setColumnHidden(c, !show);
+}
+
+void TargetListWidget::showSecondaryColumns(bool show)
+{
+    model_.showSecondaryColumns(show);
+
+    for (int c : model_.secondaryColumns())
+        table_view_->setColumnHidden(c, !show);
 }
 
 }

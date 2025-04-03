@@ -17,8 +17,8 @@
 using namespace Utils;
 
 EvaluationFilterTabWidget::EvaluationFilterTabWidget(
-        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings, EvaluationManagerWidget& man_widget)
-    : QWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings), man_widget_(man_widget)
+        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
+    : QWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings)
 {
     QHBoxLayout* main_layout = new QHBoxLayout();
 

@@ -1,12 +1,12 @@
-#ifndef DBCONTENT_TARGETLISTWIDGET_H
-#define DBCONTENT_TARGETLISTWIDGET_H
 
-#include <QWidget>
+#pragma once
+
+#include "toolboxwidget.h"
+
 #include <QItemSelection>
 
 class DBContentManager;
 
-class QToolBar;
 class QTableView;
 class QSortFilterProxyModel;
 
@@ -14,12 +14,13 @@ namespace dbContent {
 
 class TargetModel;
 
-class TargetListWidget : public QWidget
+/**
+ */
+class TargetListWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
 public slots:
-    void actionTriggeredSlot(QAction* action);
     void useAllSlot();
     void useNoneSlot();
     void clearCommentsSlot();
@@ -35,18 +36,32 @@ public:
     TargetListWidget(TargetModel& model, DBContentManager& dbcont_manager);
     virtual ~TargetListWidget() {};
 
+    //ToolBoxWidget
+    QIcon toolIcon() const override final;
+    std::string toolName() const override final;
+    std::string toolInfo() const override final;
+    std::vector<std::string> toolLabels() const override final;
+    toolbox::ScreenRatio defaultScreenRatio() const override final;
+    void addToConfigMenu(QMenu* menu) override final;
+    void addToToolBar(QToolBar* tool_bar) override final;
+    void loadingStarted() override final;
+    void loadingDone() override final;
+
     void resizeColumnsToContents();
 
 protected:
+    void showMainColumns(bool show);
+    void showDurationColumns(bool show);
+    void showSecondaryColumns(bool show);
+    void showMainColumnsAndEmit(bool show);
+    void showDurationColumnsAndEmit(bool show);
+    void showSecondaryColumnsAndEmit(bool show);
+
     TargetModel& model_;
     DBContentManager& dbcont_manager_;
-
-    QToolBar* toolbar_ {nullptr};
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};
 };
 
 };
-
-#endif // DBCONTENT_TARGETLISTWIDGET_H

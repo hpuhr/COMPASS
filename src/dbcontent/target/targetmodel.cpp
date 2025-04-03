@@ -665,6 +665,11 @@ const dbContent::Target& TargetModel::target(unsigned int utn) const
     return const_cast<const dbContent::Target&> (*tr_tag_it);
 }
 
+unsigned int TargetModel::size() const
+{
+    return target_data_.size();
+}
+
 void TargetModel::removeDBContentFromTargets(const std::string& dbcont_name)
 {
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
@@ -1021,6 +1026,21 @@ void TargetModel::filterModeACodes(bool value)
     loginf << "TargetModel: removeModeACodes: value " << value;
 
     filter_mode_a_codes_ = value;
+}
+
+void TargetModel::showMainColumns(bool show)
+{
+    show_main_columns_ = show;
+}
+
+void TargetModel::showDurationColumns(bool show)
+{
+    show_duration_columns_ = show;
+}
+
+void TargetModel::showSecondaryColumns(bool show)
+{
+    show_secondary_columns_ = show;
 }
 
 }

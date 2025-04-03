@@ -561,14 +561,10 @@ void EvaluationResultsGenerator::updateToChanges ()
     updateToChanges(true);
 }
 
-EvaluationResultsGeneratorWidget& EvaluationResultsGenerator::widget()
+EvaluationResultsGeneratorWidget* EvaluationResultsGenerator::widget()
 {
-    if (!widget_)
-        widget_.reset(new EvaluationResultsGeneratorWidget(*this, eval_man_, eval_settings_));
-
-    return *widget_.get();
+    return new EvaluationResultsGeneratorWidget(*this, eval_man_, eval_settings_);
 }
-
 
 void EvaluationResultsGenerator::addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
 {

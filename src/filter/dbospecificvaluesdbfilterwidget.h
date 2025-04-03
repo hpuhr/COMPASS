@@ -15,18 +15,19 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOSPECIFICVALUESDBFILTERWIDGET_H
-#define DBOSPECIFICVALUESDBFILTERWIDGET_H
+#pragma once
 
 #include <QMenu>
 
 #include "dbospecificvaluesdbfilter.h"
 #include "dbfilterwidget.h"
 
+/**
+ */
 class DBOSpecificValuesDBFilterWidget : public DBFilterWidget
 {
     Q_OBJECT
-  protected slots:
+protected slots:
     void toggleDataSource();
     void selectSensorsAll();
     void selectSensorsNone();
@@ -48,5 +49,3 @@ protected:
 
     void createMenu(bool inactive_disabled);
 };
-
-#endif // DBOSPECIFICVALUESDBFILTERWIDGET_H

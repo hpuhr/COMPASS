@@ -92,4 +92,85 @@ struct SQLPragma : public std::pair<std::string, std::string>
     const std::string& value() const { return this->second; }
 };
 
+/**
+ */
+class SQLFilter
+{
+public:
+    enum class ComparisonOp
+    {
+        Is = 0,
+        IsNot,
+        Less,
+        LessEq,
+        Greater,
+        GreaterEq 
+    };
+
+    SQLFilter() = default;
+    SQLFilter(const std::string& name, const std::string& value, ComparisonOp op)
+    {
+        set(name, value, op);
+    }
+    virtual ~SQLFilter() = default;
+
+    const std::string& statement() const { return sql_filter_statement_; }
+
+    SQLFilter& set(const std::string& name, const std::string& value, ComparisonOp op)
+    {
+        sql_filter_statement_ = SQLFilter::createFilterStatement(name, value, op);
+        return *this;
+    }
+
+    SQLFilter& AND(const std::string& name, const std::string& value, ComparisonOp op)
+    {
+        if (sql_filter_statement_.empty())
+            set(name, value, op);
+        else
+            sql_filter_statement_ += " AND " + SQLFilter::createFilterStatement(name, value, op);
+        
+        return *this;
+    }
+
+    SQLFilter& OR(const std::string& name, const std::string& value, ComparisonOp op)
+    {
+        if (sql_filter_statement_.empty())
+            set(name, value, op);
+        else
+            sql_filter_statement_ += " OR " + SQLFilter::createFilterStatement(name, value, op);
+        
+        return *this;
+    }
+
+    static std::string op2String(ComparisonOp op)
+    {
+        switch(op) 
+        {
+            case ComparisonOp::Is:
+                return "=";
+            case ComparisonOp::IsNot:
+                return "<>";
+            case ComparisonOp::Less:
+                return "<";
+            case ComparisonOp::LessEq:
+                return "<=";
+            case ComparisonOp::Greater:
+                return ">";
+            case ComparisonOp::GreaterEq:
+                return ">=";
+            default:
+                return "";
+        }
+        return "";
+    }
+
+    static std::string createFilterStatement(const std::string& name, const std::string& value, ComparisonOp op)
+    {
+        return name + " " + SQLFilter::op2String(op) + " " + value;
+    }
+
+private:
+    std::string sql_filter_statement_;
+};
+
 }

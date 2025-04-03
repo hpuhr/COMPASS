@@ -39,5 +39,3 @@ target_sources(compass
     PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/compass.cpp"
 )
-
-

@@ -187,7 +187,7 @@ void DBFilter::generateSubConfigurable(const std::string& class_id, const std::s
         {
             if (unusable_)  // bit of a hack. think about order of generation.
             {
-                widget_->setInvisible();
+                widget_->collapse();
                 widget_->setDisabled(true);
             }
             else

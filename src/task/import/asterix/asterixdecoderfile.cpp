@@ -16,7 +16,7 @@
  */
 
 #include "asterixdecoderfile.h"
-
+#include "compass.h"
 #include "logger.h"
 
 #include "files.h"
@@ -89,6 +89,8 @@ void ASTERIXDecoderFile::processCurrentFile()
     if (!current_file.used)
         return;
 
+    COMPASS::instance().logInfo("ASTERIX Import") << "reading '" << current_file.filename << "'";
+
     try
     {
         processFile(current_file);
@@ -100,11 +102,17 @@ void ASTERIXDecoderFile::processCurrentFile()
     }
     catch(const std::exception& e)
     {
+        COMPASS::instance().logError("ASTERIX Import") << "file '" << current_file.filename
+                                       << "' decode error '" << e.what() << "'";
+
         logerr << "ASTERIXDecoderFile: processCurrentFile: decode error '" << e.what() << "'";
         logError(e.what());
     }
     catch(...)
     {
+        COMPASS::instance().logError("ASTERIX Import") << "file '" << current_file.filename
+                                       << "' unknown decode error";
+
         logerr << "ASTERIXDecoderFile: processCurrentFile: unknown decode error";
         logError("Unknown decode error");
     }

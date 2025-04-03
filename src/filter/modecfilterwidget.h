@@ -1,5 +1,5 @@
-#ifndef MODECFILTERWIDGET_H
-#define MODECFILTERWIDGET_H
+
+#pragma once
 
 #include "dbfilterwidget.h"
 #include "modecfilter.h"
@@ -9,9 +9,10 @@ class QLineEdit;
 
 class RangeEditFloat;
 
+/**
+ */
 class ModeCFilterWidget : public DBFilterWidget
 {
-
     Q_OBJECT
 
 protected slots:
@@ -35,5 +36,3 @@ protected:
     QCheckBox* null_check_ {nullptr};
     RangeEditFloat* range_edit_ {nullptr};
 };
-
-#endif // MODECFILTERWIDGET_H

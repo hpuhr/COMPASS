@@ -77,7 +77,7 @@ class ViewManager : public QObject, public Configurable
     ViewManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~ViewManager();
 
-    void init(QTabWidget* tab_widget);
+    void init(QTabWidget* main_tab_widget);
     void close();
 
     void clearDataInViews();

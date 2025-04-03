@@ -10,6 +10,7 @@ include_directories (
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagerwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmaintabwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationfiltertabwidget.h"
@@ -21,6 +22,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluation_commands.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagerwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmaintabwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationfiltertabwidget.cpp"

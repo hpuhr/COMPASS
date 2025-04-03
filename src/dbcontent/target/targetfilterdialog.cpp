@@ -1,7 +1,7 @@
 #include "dbcontent/target/targetfilterdialog.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
-//#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontent.h"
 #include "logger.h"
 
 #include <QHBoxLayout>
@@ -143,15 +143,18 @@ TargetFilterDialog::TargetFilterDialog(TargetModel& model, QWidget* parent, Qt::
 
     config_layout->addRow("Remove By Non-Detection in DBContent", remove_dbo_check_);
 
-    for (auto& dbo_it : COMPASS::instance().dbContentManager())
+    for (auto& dbcont_it : COMPASS::instance().dbContentManager())
     {
+        if (dbcont_it.second->isStatusContent())
+            continue;
+
         QCheckBox* tmp = new QCheckBox();
-        tmp->setChecked(model_.removeNotDetectedDBContent(dbo_it.first));
-        tmp->setProperty("dbcontent_name", dbo_it.first.c_str());
+        tmp->setChecked(model_.removeNotDetectedDBContent(dbcont_it.first));
+        tmp->setProperty("dbcontent_name", dbcont_it.first.c_str());
         connect(tmp, &QCheckBox::clicked, this,
                 &TargetFilterDialog::removeSpecificDBContentsSlot);
 
-        config_layout->addRow(("\tNon-Detection of "+dbo_it.first).c_str(), tmp);
+        config_layout->addRow(("\tNon-Detection of "+dbcont_it.first).c_str(), tmp);
     }
 
     main_layout->addLayout(config_layout);

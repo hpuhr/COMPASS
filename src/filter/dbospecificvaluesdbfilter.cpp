@@ -90,7 +90,7 @@ DBOSpecificValuesDBFilter::DBOSpecificValuesDBFilter(const std::string& class_id
     if (object_->count() == 0)
     {
         active_ = false;
-        widget_->setInvisible();
+        widget_->collapse();
         widget_->update();
         widget_->setDisabled(true);
     }

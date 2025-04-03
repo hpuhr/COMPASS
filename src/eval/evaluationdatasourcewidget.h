@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONDATASOURCEWIDGET_H
-#define EVALUATIONDATASOURCEWIDGET_H
+#pragma once
 
 #include <QFrame>
 
@@ -31,6 +30,7 @@ class EvaluationDataSourceWidget : public QFrame
 
 signals:
     void dbContentNameChangedSignal(const std::string& dbcontent_name);
+    void usedDataSourceChangedSignal();
     void lineChangedSignal(unsigned int line_id);
 
 public slots:
@@ -59,4 +59,3 @@ protected:
     void updateCheckboxesChecked();
 };
 
-#endif // EVALUATIONDATASOURCEWIDGET_H

@@ -37,6 +37,13 @@
 #include "source/dbdatasource.h"
 #include "fft/dbfft.h"
 
+#include "task/result/taskresult.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontent.h"
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontenttext.h"
+
 #include "viewpoint.h"
 
 #include "compass.h"
@@ -166,7 +173,15 @@ bool DBInterface::ready() const
 void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 {
     assert(!filename.empty());
+
+    bool new_file = !Files::fileExists(filename) || overwrite;
+
     openDBFileInternal(filename, overwrite);
+
+    loginf << "DBInterface: openDBFile: new_file " << new_file;
+
+    if (new_file)
+        COMPASS::instance().logInfo("DBInterface") << "Database '" << filename << "' created";
 }
 
 /**
@@ -254,6 +269,10 @@ void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite
 
         if (!existsTargetsTable())
             createTargetsTable();
+
+        //determine maximum report content id
+        auto max_id = getMaxReportContentID();
+        ResultReport::Section::setCurrentContentID(max_id.has_value() ? max_id.value() + 1 : 0);
 
         //emit databaseOpenedSignal();
 
@@ -514,7 +533,7 @@ void DBInterface::updateTableInfo()
 
 /**
  */
-const std::map<std::string, DBTableInfo>& DBInterface::tableInfo() 
+const std::map<std::string, DBTableInfo>& DBInterface::tableInfo() const
 { 
     assert(ready());
 
@@ -524,7 +543,7 @@ const std::map<std::string, DBTableInfo>& DBInterface::tableInfo()
 
 /**
  */
-bool DBInterface::existsTable(const string& table_name)
+bool DBInterface::existsTable(const string& table_name) const
 {
     return tableInfo().count(table_name) == 1;
 }
@@ -589,7 +608,7 @@ unsigned long DBInterface::getMaxRecordNumber(DBContent& object)
         #endif
 
         shared_ptr<DBCommand> command = sqlGenerator().getMaxULongIntValueCommand(object.dbTableName(),
-                                                                                rec_num_var.dbColumnName());
+                                                                                  rec_num_var.dbColumnName());
         shared_ptr<DBResult> result = execute(*command);
         assert(result->containsData());
 
@@ -652,6 +671,41 @@ unsigned int DBInterface::getMaxRefTrackTrackNum()
         assert (!buffer->get<unsigned int>(track_num_var.dbColumnName()).isNull(0));
 
         max_tn = buffer->get<unsigned int>(track_num_var.dbColumnName()).get(0);
+    }
+
+    return max_tn;
+}
+
+/**
+ */
+boost::optional<unsigned long> DBInterface::getMaxReportContentID()
+{
+    assert(ready());
+
+    if (!existsReportContentsTable())
+        return boost::optional<unsigned long>();
+
+    unsigned int max_tn = 0;
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        shared_ptr<DBCommand> command = sqlGenerator().getMaxUIntValueCommand(ResultReport::SectionContent::DBTableName,
+                                                                              ResultReport::SectionContent::DBColumnContentID.name());
+        shared_ptr<DBResult> result = execute(*command);
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+        assert(buffer->size() <= 1);
+
+        if (buffer->size() == 0)
+            return boost::optional<unsigned long>();
+
+        assert(!buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name()).isNull(0));
+
+        max_tn = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name()).get(0);
     }
 
     return max_tn;
@@ -1591,6 +1645,7 @@ std::vector<std::unique_ptr<dbContent::Target>> DBInterface::loadTargets()
         command.list(list);
 
         shared_ptr<DBResult> result = execute(command);
+        assert(!result->hasError());
         assert(result->containsData());
 
         shared_ptr<Buffer> buffer = result->buffer();
@@ -1640,18 +1695,22 @@ void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Targe
 
     clearTargetsTable();
 
-    string str;
-
     {
-        #ifdef PROTECT_INSTANCE
-        boost::mutex::scoped_lock locker(instance_mutex_);
-        #endif
+        //storing all targets at once via a buffer is faster 
+        std::shared_ptr<Buffer> buffer(new Buffer(dbContent::Target::DBPropertyList));
 
+        auto& id_vec   = buffer->get<unsigned int>(dbContent::Target::DBColumnID.name());
+        auto& info_vec = buffer->get<nlohmann::json>(dbContent::Target::DBColumnInfo.name());
+
+        size_t idx = 0;
         for (auto& tgt_it : targets)
         {
-            string str = sqlGenerator().getInsertTargetStatement(tgt_it->utn_, tgt_it->info().dump());
-            execute(str);
+            id_vec.set(idx, tgt_it->utn_);
+            info_vec.set(idx, tgt_it->info());
+            ++idx;
         }
+
+        insertBuffer(TABLE_NAME_TARGETS, buffer);
     }
 
     loginf << "DBInterface: saveTargets: done";
@@ -1689,10 +1748,354 @@ void DBInterface::clearAssociations(const DBContent& dbcontent)
         #endif
 
         string str = sqlGenerator().getSetNullStatement(dbcontent.dbTableName(),
-                                                    dbcontent.variable("UTN").dbColumnName());      
+                                                        dbcontent.variable("UTN").dbColumnName());      
         // uses replace with utn as unique key
         execute(str);
     }
+}
+
+/**
+ */
+bool DBInterface::existsTaskResultsTable() const
+{
+    return existsTable(TaskResult::DBTableName);
+}
+
+/**
+ */
+bool DBInterface::existsReportContentsTable() const
+{
+    return existsTable(ResultReport::SectionContent::DBTableName);
+}
+
+/**
+ */
+void DBInterface::createTaskResultsTable()
+{
+    assert(ready());
+    assert(!existsTaskResultsTable());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        execute(sqlGenerator().getTableTaskResultsCreateStatement());
+        updateTableInfo();
+    }
+}
+
+/**
+ */
+void DBInterface::createReportContentsTable()
+{
+    assert(ready());
+    assert(!existsReportContentsTable());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        execute(sqlGenerator().getTableReportContentsCreateStatement());
+        updateTableInfo();
+    }
+}
+
+/**
+ */
+Result DBInterface::saveResult(const TaskResult& result)
+{
+    assert(ready());
+
+    try
+    {
+        //create needed tables
+        if (!existsTaskResultsTable())
+            createTaskResultsTable();
+
+        if (!existsReportContentsTable())
+            createReportContentsTable();
+        
+        //remove any old result with the same id/name
+        auto del_result = deleteResult(result);
+        if (!del_result.ok())
+            throw std::runtime_error(del_result.error());
+
+        auto result_id   = result.id();
+        auto result_name = result.name();
+
+        //write result
+        {
+            std::shared_ptr<Buffer> buffer(new Buffer(TaskResult::DBPropertyList));
+
+            auto& id_vec      = buffer->get<unsigned int>(TaskResult::DBColumnID.name());
+            auto& name_vec    = buffer->get<std::string>(TaskResult::DBColumnName.name());
+            auto& content_vec = buffer->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
+            auto& type_vec    = buffer->get<int>(TaskResult::DBColumnResultType.name());
+
+            id_vec.set(0, result_id);
+            name_vec.set(0, result.name());
+            content_vec.set(0, result.toJSON());
+            type_vec.set(0, (int)result.type());
+
+            insertBuffer(TaskResult::DBTableName, buffer);
+        }
+
+        //write contents
+        auto report_contents = result.report()->reportContents();
+        {
+            std::shared_ptr<Buffer> buffer(new Buffer(ResultReport::SectionContent::DBPropertyList));
+
+            auto& content_id_vec = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+            auto& result_id_vec  = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
+            auto& type_vec       = buffer->get<int>(ResultReport::SectionContent::DBColumnType.name());
+            auto& content_vec    = buffer->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+            size_t row = 0;
+            for (const auto& c : report_contents)
+            {
+                content_id_vec.set(row, c->id());
+                result_id_vec.set(row, result_id);
+                type_vec.set(row, (int)c->type());
+                content_vec.set(row, c->toJSON());
+
+                ++row;
+            }
+
+            insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: saveResult: Could not store result: " << ex.what();
+        return Result::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: saveResult: Could not store result: Unknown error";
+        return Result::failed("Unknown error");
+    }
+
+    return Result::succeeded();
+}
+
+/**
+ */
+Result DBInterface::deleteResult(const TaskResult& result)
+{
+    auto id = result.id();
+
+    if (!existsTaskResultsTable() || 
+        !existsReportContentsTable())
+    {
+        logerr << "DBInterface: deleteResult: Result tables do not exist";
+        return Result::failed("Result tables do not exist");
+    }
+
+    try
+    {
+        //get old result(s) which resemble(s) the new one (either in id or name)
+        auto sel_filter = db::SQLFilter(TaskResult::DBColumnID.name(), std::to_string(id), db::SQLFilter::ComparisonOp::Is)
+            .OR(TaskResult::DBColumnName.name(), "'" + result.name() + "'", db::SQLFilter::ComparisonOp::Is).statement();
+
+        auto sel_result = select(TaskResult::DBTableName, TaskResult::DBPropertyList, sel_filter);
+        if (!sel_result.ok())
+            throw std::runtime_error("Locating old result failed");
+
+        //collect id(s) of old result(s)
+        std::vector<unsigned int> ids_to_remove;
+
+        size_t n = sel_result.result()->size();
+        const auto& id_vector = sel_result.result()->get<unsigned int>(TaskResult::DBColumnID.name());
+        for (size_t i = 0; i < n; ++i)
+            ids_to_remove.push_back(id_vector.get(i));
+
+        loginf << "DBInterface: deleteResult: Deleting " << ids_to_remove.size() << " old result(s)";
+
+        //delete old result(s)
+        for (auto old_id : ids_to_remove)
+        {
+            auto del_content_cmd = sqlGenerator().getDeleteCommand(ResultReport::SectionContent::DBTableName,
+                                                                   db::SQLFilter(ResultReport::SectionContent::DBColumnResultID.name(), 
+                                                                                 std::to_string(old_id), 
+                                                                                 db::SQLFilter::ComparisonOp::Is).statement());
+            auto del_result_cmd = sqlGenerator().getDeleteCommand(TaskResult::DBTableName,
+                                                                  db::SQLFilter(TaskResult::DBColumnID.name(), 
+                                                                                std::to_string(old_id), 
+                                                                                db::SQLFilter::ComparisonOp::Is).statement());
+            auto result_del_content = execute(*del_content_cmd);
+            auto result_del_result  = execute(*del_result_cmd );
+
+            if (result_del_content->hasError())
+                throw std::runtime_error(result_del_content->error());
+            if (result_del_result->hasError())
+                throw std::runtime_error(result_del_result->error());
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: deleteResult: Could not delete result: " << ex.what();
+        return Result::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: deleteResult: Could not delete result: Unknown error";
+        return Result::failed("Unknown error");
+    }
+
+    return Result::succeeded();
+}
+
+/**
+ */
+ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
+{
+    assert(ready());
+
+    std::vector<std::shared_ptr<TaskResult>> results;
+
+    //no results stored yet?
+    if (!existsTaskResultsTable())
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::succeeded(results);
+
+    try
+    {
+        auto cmd = sqlGenerator().getSelectCommand(TaskResult::DBTableName, TaskResult::DBPropertyList, "");
+        auto result = execute(*cmd);
+        if (result->hasError() || !result->containsData() || !result->buffer())
+            throw std::runtime_error("Could not obtain results table");
+
+        auto b = result->buffer();
+
+        size_t nr = b->size();
+
+        auto& id_vec      = b->get<unsigned int>(TaskResult::DBColumnID.name());
+        auto& name_vec    = b->get<std::string>(TaskResult::DBColumnName.name());
+        auto& content_vec = b->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
+        auto& type_vec    = b->get<int>(TaskResult::DBColumnResultType.name());
+
+        results.resize(nr);
+
+        auto& task_man = COMPASS::instance().taskManager();
+
+        for (size_t i = 0; i < nr; ++i)
+        {
+            const auto& result_name = name_vec.get(i);
+            const auto& result_type = type_vec.get(i);
+            const auto& result_id   = id_vec.get(i);
+
+            results[ i ].reset(new TaskResult(result_id, task_man));
+
+            bool ok = results[ i ]->fromJSON(content_vec.get(i));
+            if (!ok)
+                throw std::runtime_error("Could not read result from JSON");
+
+            if (results[ i ]->name() != result_name ||
+                results[ i ]->type() != result_type ||
+                results[ i ]->id()   != result_id)
+                throw std::runtime_error("Result contents invalid");
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: loadResults: Could not load results: " << ex.what();
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: loadResults: Could not load results: Unknown error";
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed("Unknown error");
+    }
+
+    return ResultT<std::vector<std::shared_ptr<TaskResult>>>::succeeded(results);
+}
+
+/**
+ */
+ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(ResultReport::Section* section, unsigned int content_id)
+{
+    assert(ready());
+
+    std::shared_ptr<ResultReport::SectionContent> content;
+
+    loginf << "DBInterface: loadContent: Loading content id " << content_id << "...";
+
+    try
+    {
+        PropertyList properties;
+        properties.addProperty(ResultReport::SectionContent::DBColumnContentID);
+        properties.addProperty(ResultReport::SectionContent::DBColumnResultID);
+        properties.addProperty(ResultReport::SectionContent::DBColumnType);
+        properties.addProperty(ResultReport::SectionContent::DBColumnJSONContent);
+
+        auto filter_col = ResultReport::SectionContent::DBColumnContentID.name();
+
+        auto cmd = sqlGenerator().getSelectCommand(ResultReport::SectionContent::DBTableName, 
+                                                   ResultReport::SectionContent::DBPropertyList,
+                                                   db::SQLFilter(filter_col, std::to_string(content_id), db::SQLFilter::ComparisonOp::Is).statement());
+        auto result = execute(*cmd);
+
+        if (result->hasError() || !result->containsData() || !result->buffer())
+            throw std::runtime_error("Could not obtain content from table");
+
+        auto b = result->buffer();
+
+        size_t nr = b->size();
+        if (nr == 0)
+            throw std::runtime_error("Content id not found in table");
+        else if (nr > 1)
+            throw std::runtime_error("Multiple content ids found in table");
+
+        auto& content_id_vec = b->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+        auto& type_vec       = b->get<int>(ResultReport::SectionContent::DBColumnType.name());
+        auto& content_vec    = b->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+        ResultReport::SectionContent::Type type = (ResultReport::SectionContent::Type)type_vec.get(0);
+
+        //create empty content depending on type
+        //@TODO: small factory?
+        if (type == ResultReport::SectionContent::Type::Figure)
+        {
+            content.reset(new ResultReport::SectionContentFigure(section));
+        }
+        else if (type == ResultReport::SectionContent::Type::Table)
+        {
+            content.reset(new ResultReport::SectionContentTable(section));
+        }
+        else if (type == ResultReport::SectionContent::Type::Text)
+        {
+            content.reset(new ResultReport::SectionContentText(section));
+        }
+        else
+        {
+            throw std::runtime_error("Invalid content type");
+        }
+
+        //read content
+        bool ok = content->fromJSON(content_vec.get(0));
+        if (!ok)
+            throw std::runtime_error("Could not read content from JSON");
+
+        //check content
+        if (content->id() != content_id_vec.get(0) ||
+            content->type() != type)
+            throw std::runtime_error("contents invalid");
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: loadContent: Could not load content: " << ex.what();
+        return ResultT<std::shared_ptr<ResultReport::SectionContent>>::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: loadContent: Could not load content: Unknown error";
+        return ResultT<std::shared_ptr<ResultReport::SectionContent>>::failed("Unknown error");
+    }
+
+    loginf << "DBInterface: loadContent: Loaded.";
+
+    return ResultT<std::shared_ptr<ResultReport::SectionContent>>::succeeded(content);
 }
 
 /**
@@ -2138,6 +2541,40 @@ void DBInterface::clearTableContent(const string& table_name)
         // DELETE FROM tablename;
         execute("DELETE FROM " + table_name + ";");
     }
+}
+
+/**
+ */
+ResultT<std::shared_ptr<Buffer>> DBInterface::select(const std::string& table_name, 
+                                                     const PropertyList& properties,
+                                                     const std::string& filter)
+{
+    if (!existsTable(table_name))
+        return ResultT<std::shared_ptr<Buffer>>::failed("Table does not exist");
+
+    std::shared_ptr<Buffer> buffer;
+
+    try
+    {
+        auto cmd = sqlGenerator().getSelectCommand(table_name, properties, filter);
+        auto result = execute(*cmd);
+        if (result->hasError() || !result->containsData() || !result->buffer())
+            throw std::runtime_error("Could not obtain results table");
+
+        buffer = result->buffer();
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: select: Could not select data: " << ex.what();
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: select: Could not select data: Unknown error";
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed("Unknown error");
+    }
+
+    return ResultT<std::shared_ptr<Buffer>>::succeeded(buffer);
 }
 
 /**

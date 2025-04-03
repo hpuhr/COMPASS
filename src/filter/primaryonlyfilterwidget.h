@@ -1,9 +1,11 @@
-#ifndef PRIMARYONLYFILTERWIDGET_H
-#define PRIMARYONLYFILTERWIDGET_H
+
+#pragma once
 
 #include "dbfilterwidget.h"
 #include "primaryonlyfilter.h"
 
+/**
+ */
 class PrimaryOnlyFilterWidget : public DBFilterWidget
 {
 public:
@@ -13,5 +15,3 @@ public:
 protected:
     PrimaryOnlyFilter& filter_;
 };
-
-#endif // PRIMARYONLYFILTERWIDGET_H

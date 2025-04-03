@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TASKMANAGER_H
-#define TASKMANAGER_H
+#pragma once
 
 #include <QObject>
 
@@ -34,8 +33,18 @@ class RadarPlotPositionCalculatorTask;
 class ManageSectorsTask;
 class ReconstructorTask;
 class MainWindow;
+class TaskResult;
+class TaskResultsWidget;
+class ViewableDataConfig;
 
 class QMainWindow;
+
+namespace ResultReport
+{
+  class Report;
+  class SectionContent;
+  class Section;
+}
 
 class TaskManager : public QObject, public Configurable
 {
@@ -47,7 +56,11 @@ class TaskManager : public QObject, public Configurable
 
     void quitRequestedSignal ();
 
+    void taskResultsChangedSignal();
+
   public slots:
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
 
   public:
     TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -75,6 +88,21 @@ class TaskManager : public QObject, public Configurable
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
     ReconstructorTask& reconstructReferencesTask() const;
 
+    TaskResultsWidget* widget();
+
+    void beginTaskResultWriting(const std::string& name);
+    ResultReport::Report& currentReport();
+    void endTaskResultWriting(bool store);
+
+    const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
+    std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
+    std::shared_ptr<TaskResult> getOrCreateResult (const std::string& name); // get or create result
+    ResultReport::Report& report(const std::string& name);
+    bool hasResult (const std::string& name) const;
+
+    void setViewableDataConfig(const nlohmann::json::object_t& data);
+    std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
+                                                              unsigned int content_id) const;
 protected:
     // tasks
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
@@ -91,8 +119,15 @@ protected:
 
     std::map<std::string, Task*> tasks_;
 
+    std::unique_ptr<TaskResultsWidget> widget_{nullptr};
+
+    std::map<unsigned int, std::shared_ptr<TaskResult>> results_; // id -> result
+    std::shared_ptr<TaskResult> current_result_;
+
+    std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
+
     void addTask(const std::string& class_id, Task* task);
     MainWindow* getMainWindow();
-};
 
-#endif  // TASKMANAGER_H
+    void loadResults();
+};

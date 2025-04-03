@@ -38,6 +38,7 @@
 #include "licensemanager.h"
 #include "result.h"
 #include "dbinstance.h"
+#include "logwidget.h"
 
 #include <QMessageBox>
 #include <QApplication>
@@ -52,7 +53,8 @@ using namespace Utils;
 
 const bool COMPASS::is_app_image_ = {getenv("APPDIR") != nullptr};
 
-COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
+COMPASS::COMPASS()
+    : Configurable("COMPASS", "COMPASS0", 0, "compass.json"), log_store_(!is_app_image_)
 {
     logdbg << "COMPASS: constructor: start";
 
@@ -126,7 +128,7 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
 
     rt_cmd_runner_.reset(new rtcommand::RTCommandRunner);
 
-    // database opending
+    // database opening & closing
 
     QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      dbcontent_manager_.get(), &DBContentManager::databaseOpenedSlot);
@@ -161,9 +163,14 @@ COMPASS::COMPASS() : Configurable("COMPASS", "COMPASS0", 0, "compass.json")
     QObject::connect(this, &COMPASS::databaseClosedSignal,
                      fft_manager_.get(), &FFTManager::databaseClosedSlot);
 
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
+                     task_manager_.get(), &TaskManager::databaseOpenedSlot);
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
+                     task_manager_.get(), &TaskManager::databaseClosedSlot);
+
     // data sources changed
     QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
-            eval_manager_.get(), &EvaluationManager::dataSourcesChangedSlot); // update if data sources changed
+                     eval_manager_.get(), &EvaluationManager::dataSourcesChangedSlot); // update if data sources changed
 
     // data exchange
     QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingStartedSignal,
@@ -793,7 +800,14 @@ void COMPASS::shutdown()
 MainWindow& COMPASS::mainWindow()
 {
     if (!main_window_)
+    {
         main_window_ = new MainWindow();
+        
+        QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingStartedSignal,
+                        main_window_, &MainWindow::loadingStarted);
+        QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingDoneSignal,
+                        main_window_, &MainWindow::loadingDone);
+    }
 
     assert(main_window_);
     return *main_window_;
@@ -829,6 +843,21 @@ const char* COMPASS::lineEditInvalidStyle()
     else
         return "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
                           " rgb(255, 200, 200); }";
+}
+
+LogStream COMPASS::logInfo(const std::string& component,
+                           boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
+    return log_store_.logInfo(component, error_code, json_blob);
+}
+
+LogStream COMPASS::logWarn(const std::string& component,
+                           boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
+    return log_store_.logInfo(component, error_code, json_blob);
+}
+
+LogStream COMPASS::logError(const std::string& component,
+                            boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
+    return log_store_.logInfo(component, error_code, json_blob);
 }
 
 bool COMPASS::disableConfirmResetViews() const
@@ -1095,4 +1124,13 @@ std::string COMPASS::licenseeString(bool licensed_to) const
         return "";
 
     return (licensed_to ? "Licensed to " : "") + vl->licensee;
+}
+
+LogWidget* COMPASS::logWidget()
+{
+    if (!log_widget_)
+        log_widget_.reset(new LogWidget(log_store_));
+
+    assert(log_widget_);
+    return log_widget_.get();
 }

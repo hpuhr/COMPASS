@@ -276,7 +276,7 @@ public:
     virtual void createAdditionalAnnotations() {}
 
     virtual bool doFurtherSliceProcessing() { return false; }     // called for repeat checking
-    virtual bool isLastSliceProcessingRun() { return true; }      // called to check if another repeat run is planned
+    virtual bool isLastRunInSlice() { return true; }      // called to check if another repeat run is planned
     virtual unsigned int currentSliceRepeatRun() { return currentSlice().run_count_; }    // current repeat run
 
     virtual std::string reconstructorInfoString() { return ""; }

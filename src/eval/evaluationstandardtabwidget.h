@@ -48,13 +48,11 @@ private slots:
     void maxRefTimeDiffEditSlot(QString value);
 
 public:
-    EvaluationStandardTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
-                                EvaluationManagerWidget& man_widget);
+    EvaluationStandardTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
 
 protected:
     EvaluationManager& eval_man_;
     EvaluationManagerSettings& eval_settings_;
-    EvaluationManagerWidget& man_widget_;
 
     std::unique_ptr<EvaluationStandardComboBox> standard_box_ {nullptr};
 

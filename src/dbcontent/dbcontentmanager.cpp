@@ -345,13 +345,13 @@ VariableSet DBContentManager::getReadSet(const std::string& dbcontent_name)
 void DBContentManager::load(const std::string& custom_filter_clause, 
                             bool measure_db_performance)
 {
-    logdbg << "DBContentManager: loadSlot: custom_filter_clause '" << custom_filter_clause << "'";
+    logdbg << "DBContentManager: load: custom_filter_clause '" << custom_filter_clause << "'";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     if (load_in_progress_)
     {
-        logdbg << "DBContentManager: loadSlot: quitting previous load";
+        logdbg << "DBContentManager: load: quitting previous load";
 
         for (auto& object : dbcontent_)
         {
@@ -361,14 +361,14 @@ void DBContentManager::load(const std::string& custom_filter_clause,
 
         while (load_in_progress_) // JobManager::instance().hasDBJobs()
         {
-            loginf << "DBContentManager: loadSlot: previous load to finish";
+            loginf << "DBContentManager: load: previous load to finish";
 
             QCoreApplication::processEvents();
             QThread::msleep(1);
         }
     }
 
-    loginf << "DBContentManager: loadSlot: starting loading";
+    loginf << "DBContentManager: load: starting loading";
 
     saveSelectedRecNums();
     clearData();
@@ -385,20 +385,20 @@ void DBContentManager::load(const std::string& custom_filter_clause,
 
     for (auto& object : dbcontent_)
     {
-        logdbg << "DBContentManager: loadSlot: object " << object.first
+        logdbg << "DBContentManager: load: object " << object.first
                << " loadable " << object.second->loadable()
                << " loading wanted " << ds_man.loadingWanted(object.first)
                << " filters " << COMPASS::instance().filterManager().useFilters();
 
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
-            logdbg << "DBContentManager: loadSlot: loading object " << object.first;
+            logdbg << "DBContentManager: load: loading object " << object.first;
             
             auto read_set = getReadSet(object.first);
 
             if (read_set.getSize() == 0)
             {
-                logwrn << "DBContentManager: loadSlot: skipping loading of object " << object.first
+                logwrn << "DBContentManager: load: skipping loading of object " << object.first
                        << " since an empty read list was detected";
                 continue;
             }
@@ -1577,6 +1577,11 @@ void DBContentManager::saveTargets()
     target_model_->saveToDB();
 }
 
+unsigned int DBContentManager::numTargets() const
+{
+    return target_model_->size();
+}
+
 /**
  */
 nlohmann::json DBContentManager::targetsInfoAsJSON() const
@@ -1794,7 +1799,7 @@ void DBContentManager::saveSelectedRecNums()
         for (unsigned int cnt=0; cnt < data_size; ++cnt)
         {
             if (!selected_vec.isNull(cnt) && selected_vec.get(cnt))
-                tmp_selected_rec_nums_[buf_it.first].push_back(rec_num_vec.get(cnt));
+                tmp_selected_rec_nums_[buf_it.first].insert(rec_num_vec.get(cnt));
         }
 
         loginf << "DBContentManager: saveSelectedRecNums: " << buf_it.first << " has "
@@ -1811,14 +1816,12 @@ void DBContentManager::restoreSelectedRecNums()
     if (tmp_selected_rec_nums_.empty())
         return;
 
-    //@TODO: find faster way to do this
-
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {
         if (!tmp_selected_rec_nums_.count(buf_it.first))
             continue;
 
-        const auto& sel_recnums = tmp_selected_rec_nums_.at(buf_it.first);
+        auto& sel_recnums = tmp_selected_rec_nums_.at(buf_it.first);
         if (sel_recnums.empty())
             continue;
 
@@ -1830,22 +1833,16 @@ void DBContentManager::restoreSelectedRecNums()
         NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
-        // select existing, store still unselected
-
-        std::vector<unsigned long> not_yet_found_selected_rec_nums;
+        // select existing & erase, keep still unselected
 
         std::map<unsigned long, unsigned int> unique_rec_nums =
-            rec_num_vec.uniqueValuesWithIndexes();
+            rec_num_vec.uniqueValuesWithIndexes(sel_recnums); // indexes of selected rec nums, value->index
 
-        for (unsigned long rec_num : sel_recnums)
+        for (auto& rec_num_it : unique_rec_nums)
         {
-            if (unique_rec_nums.count(rec_num)) // previously selected found
-                selected_vec.set(unique_rec_nums.at(rec_num), true);
-            else // not found, store
-                not_yet_found_selected_rec_nums.push_back(rec_num);
+            selected_vec.set(rec_num_it.second, true);
+            sel_recnums.erase(rec_num_it.first);
         }
-
-        tmp_selected_rec_nums_[buf_it.first] = not_yet_found_selected_rec_nums; // override previous
     }
 }
 

@@ -55,10 +55,15 @@ public:
     bool filters(const std::string& dbcontent_name);
     std::string getConditionString(const std::string& dbcontent_name, bool& first);
 
-    QWidget* getWidget()
+    QLabel* getLabel()
     {
-        assert(widget_);
-        return widget_;
+        assert(label_);
+        return label_;
+    }
+    QLineEdit* getEdit()
+    {
+        assert(edit_);
+        return edit_;
     }
 
     void update();
@@ -105,8 +110,6 @@ private:
     bool usable_{true};
     bool changed_{true};
     bool value_invalid_{false};
-
-    QWidget* widget_{nullptr};
 
     QLineEdit* edit_{nullptr};
     QLabel* label_{nullptr};

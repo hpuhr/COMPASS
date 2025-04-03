@@ -6,6 +6,12 @@ PropertyList::PropertyList()
     logdbg << "PropertyList: constructor";
 }
 
+PropertyList::PropertyList(const std::vector<Property>& properties)
+:   properties_(properties)
+{
+    logdbg << "PropertyList: constructor";
+}
+
 PropertyList::~PropertyList()
 {
     logdbg << "PropertyList: destructor: start";

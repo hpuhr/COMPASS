@@ -1,15 +1,15 @@
-#ifndef ACADFILTERWIDGET_H
-#define ACADFILTERWIDGET_H
+
+#pragma once
 
 #include "dbfilterwidget.h"
 #include "acadfilter.h"
 
-class QLabel;
 class QLineEdit;
 
+/**
+ */
 class ACADFilterWidget : public DBFilterWidget
 {
-
     Q_OBJECT
 
 protected slots:
@@ -24,8 +24,5 @@ public:
 protected:
     ACADFilter& filter_;
 
-    QLabel* label_{nullptr};
     QLineEdit* value_edit_ {nullptr};
 };
-
-#endif // ACADFILTERWIDGET_H

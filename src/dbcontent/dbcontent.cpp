@@ -166,12 +166,20 @@ DBContent::DBContent(COMPASS& compass,
 
     checkStaticVariable(DBContent::meta_var_ds_id_);
 
-    if (name_ == "CAT001" || name_ == "CAT010" || name_ == "CAT020"|| name_ == "CAT021"
-        || name_ == "CAT048" || name_ == "CAT062")
+    if (name_ == "CAT001" || name_ == "CAT010"
+        || name_ == "CAT020"|| name_ == "CAT021"
+        || name_ == "CAT048" || name_ == "CAT062"
+        || name_ == "RefTraj")
     {
         checkStaticVariable(DBContent::meta_var_latitude_);
         checkStaticVariable(DBContent::meta_var_longitude_);
+
+        is_status_content_ = false;
     }
+    else
+        is_status_content_ = true;
+
+    is_reftraj_content_ = name_ == "RefTraj";
 
     if (name_ == "CAT001" || name_ == "CAT048")
     {
@@ -945,54 +953,14 @@ void DBContent::checkStaticVariable(const Property& property)
 
 /**
  */
-bool DBContent::isStatusContent(const std::string& dbc_name)
-{
-    return (dbc_name == "CAT002" || 
-            dbc_name == "CAT004" ||
-            dbc_name == "CAT019" ||
-            dbc_name == "CAT023" ||
-            dbc_name == "CAT034" ||
-            dbc_name == "CAT063" ||
-            dbc_name == "CAT065");
-}
-
-/**
- */
-bool DBContent::isStatusContent(unsigned int dbc_id)
-{
-    return (dbc_id == 2  || 
-            dbc_id == 4  ||
-            dbc_id == 19 ||
-            dbc_id == 23 ||
-            dbc_id == 34 ||
-            dbc_id == 63 ||
-            dbc_id == 65);
-}
-
-/**
- */
-bool DBContent::isReferenceContent(const std::string& dbc_name)
-{
-    return (dbc_name == "RefTraj");
-}
-
-/**
- */
-bool DBContent::isReferenceContent(unsigned int dbc_id)
-{
-    return (dbc_id == 255);
-}
-
-/**
- */
 bool DBContent::isStatusContent() const
 {
-    return DBContent::isStatusContent(id_);
+    return is_status_content_;
 }
 
 /**
  */
 bool DBContent::isReferenceContent() const
 {
-    return DBContent::isReferenceContent(id_);
+    return is_reftraj_content_;
 }

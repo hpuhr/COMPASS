@@ -1,5 +1,6 @@
+
 #include "datasourcemanager.h"
-#include "datasourcesloadwidget.h"
+#include "datasourceswidget.h"
 #include "datasourcesconfigurationdialog.h"
 #include "compass.h"
 #include "dbinterface.h"
@@ -23,19 +24,18 @@ const std::vector<std::string> DataSourceManager::data_source_types_ {"Radar", "
                                                                       "Other"};
 
 DataSourceManager::Config::Config()
-    : load_widget_show_counts_ {true}
-      , load_widget_show_lines_{true}
-      , ds_font_size_ {10}
-      , primary_azimuth_stddev_               (0.05)
-      ,   primary_range_stddev_                 (120.0)
-      ,   secondary_azimuth_stddev_             (0.025)
-      ,   secondary_range_stddev_               (70.0)
-      ,   mode_s_azimuth_stddev_                (0.02) // 70m in 200km, 0.02 * 2 * pi * 200000 /360
-      ,   mode_s_range_stddev_                  (50)
-      //,   use_radar_min_stddev_                 (false)
+:   load_widget_show_counts_ {true}
+,   load_widget_show_lines_  {true}
+,   ds_font_size_            {10}
+,   primary_azimuth_stddev_  (0.05)
+,   primary_range_stddev_    (120.0)
+,   secondary_azimuth_stddev_(0.025)
+,   secondary_range_stddev_  (70.0)
+,   mode_s_azimuth_stddev_   (0.02) // 70m in 200km, 0.02 * 2 * pi * 200000 /360
+,   mode_s_range_stddev_     (50)
+    //,   use_radar_min_stddev_                 (false)
 {
 }
-
 
 DataSourceManager::DataSourceManager(const std::string& class_id, const std::string& instance_id,
                                      COMPASS* compass)
@@ -99,11 +99,11 @@ const std::vector<unsigned int>& DataSourceManager::getAllDsIDs()
     return ds_ids_all_;
 }
 
-DataSourcesLoadWidget* DataSourceManager::loadWidget()
+DataSourcesWidget* DataSourceManager::loadWidget()
 {
     if (!load_widget_)
     {
-        load_widget_.reset(new DataSourcesLoadWidget(*this));
+        load_widget_.reset(new DataSourcesWidget(*this));
     }
 
     assert(load_widget_);
@@ -1009,7 +1009,7 @@ void DataSourceManager::createNetworkDBDataSources()
     emit dataSourcesChangedSignal();
 }
 
-std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> DataSourceManager::getNetworkLines()
+std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> DataSourceManager::getNetworkLines() const
 {
     // ds_id -> line str ->(ip, port)
     std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>>> lines;
@@ -1026,5 +1026,3 @@ std::map<unsigned int, std::map<std::string, std::shared_ptr<DataSourceLineInfo>
 
     return lines;
 }
-
-

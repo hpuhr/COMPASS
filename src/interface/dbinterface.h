@@ -20,6 +20,7 @@
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
 #include "dbdefs.h"
+#include "result.h"
 
 #include <QObject>
 
@@ -46,11 +47,21 @@ class Result;
 class DBFFT;
 class DBContent;
 
+class PropertyList;
+
 namespace dbContent
 {
     class DBDataSource;
     class Variable;
     class Target;
+}
+
+class TaskResult;
+
+namespace ResultReport
+{
+    class Section;
+    class SectionContent;
 }
 
 class QWidget;
@@ -95,7 +106,7 @@ public:
     bool cleanupDB(bool show_dialog = false);
     bool cleanupInProgress() const { return cleanup_in_progress_; }
 
-    const std::map<std::string, DBTableInfo>& tableInfo();
+    const std::map<std::string, DBTableInfo>& tableInfo() const;
     std::string dbFilename() const;
     bool dbInMemory() const;
     bool canCreateDBFileFromMemory() const;
@@ -152,7 +163,7 @@ public:
 
     void saveProperties();
 
-    bool existsTable(const std::string& table_name);
+    bool existsTable(const std::string& table_name) const;
     void createTable(const DBContent& object);
 
     bool areColumnsNull (const std::string& table_name, const std::vector<std::string> columns);
@@ -181,10 +192,23 @@ public:
 
     void clearAssociations(const DBContent& dbcontent);
 
+    bool existsTaskResultsTable() const;
+    bool existsReportContentsTable() const;
+    void createTaskResultsTable();
+    void createReportContentsTable();
+    Result saveResult(const TaskResult& result);
+    Result deleteResult(const TaskResult& result);
+    ResultT<std::vector<std::shared_ptr<TaskResult>>> loadResults();
+    ResultT<std::shared_ptr<ResultReport::SectionContent>> loadContent(ResultReport::Section* section, unsigned int content_id);
+
     void clearTableContent(const std::string& table_name);
+    ResultT<std::shared_ptr<Buffer>> select(const std::string& table_name, 
+                                            const PropertyList& properties,
+                                            const std::string& filter);
 
     unsigned long getMaxRecordNumber(DBContent& object);
     unsigned int getMaxRefTrackTrackNum();
+    boost::optional<unsigned long> getMaxReportContentID();
 
     void startPerformanceMetrics() const;
     db::PerformanceMetrics stopPerformanceMetrics() const;

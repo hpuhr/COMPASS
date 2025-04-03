@@ -70,8 +70,8 @@ public:
     std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp);
     std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent);
     std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent, unsigned int sac, unsigned int sic);
-    std::shared_ptr<DBCommand> getDeleteCommand(
-            const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id);
+    std::shared_ptr<DBCommand> getDeleteCommand(const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id);
+    std::shared_ptr<DBCommand> getDeleteCommand(const std::string& table_name, const std::string& filter);
 
     //std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand(DBContent& object);
     std::shared_ptr<DBCommand> getMaxUIntValueCommand(const std::string& table_name,
@@ -92,6 +92,9 @@ public:
     std::string getTableSectorsCreateStatement();
     std::string getTableViewPointsCreateStatement();
     std::string getTableTargetsCreateStatement();
+    std::string getTableTaskResultsCreateStatement();
+    std::string getTableReportContentsCreateStatement();
+
     std::string getDeleteStatement (const std::string& table, const std::string& filter);
 
     std::string getInsertTargetStatement(unsigned int utn, const std::string& info);
@@ -128,6 +131,10 @@ private:
 
     std::string replaceStatement(const std::string& table, 
                                  const std::vector<std::string>& values) const;
+
+    std::string getCreateTableStatement(const std::string& table_name,
+                                        const PropertyList& properties,
+                                        int primary_key = -1) const;
 
     db::SQLConfig config_;
 

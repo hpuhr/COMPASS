@@ -27,9 +27,15 @@
 #include "gpsimportcsvtask.h"
 #include "reconstructortask.h"
 #include "mainwindow.h"
+#include "viewabledataconfig.h"
+#include "viewmanager.h"
+#include "dbinterface.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
+
+#include "taskresult.h"
+#include "taskresultswidget.h"
 
 #include <cassert>
 
@@ -283,6 +289,55 @@ ReconstructorTask& TaskManager::reconstructReferencesTask() const
     return *reconstruct_references_task_;
 }
 
+TaskResultsWidget* TaskManager::widget()
+{
+    if (!widget_)
+        widget_.reset(new TaskResultsWidget(*this));
+
+    assert(widget_);
+    return widget_.get();
+}
+
+void TaskManager::beginTaskResultWriting(const std::string& name)
+{
+    if (widget_)
+        widget_->setDisabled(true);
+
+    assert (!current_result_);
+    current_result_ = getOrCreateResult(name);
+
+    current_result_->report()->clear();
+}
+
+ResultReport::Report& TaskManager::currentReport()
+{
+    assert (current_result_);
+    return *current_result_->report();
+}
+
+void TaskManager::endTaskResultWriting(bool store)
+{
+    if (widget_)
+        widget_->setDisabled(false);
+
+    assert (current_result_);
+
+    if (store)
+    {
+        loginf << "TaskManager: endTaskResultWriting: Storing result...";
+
+        auto result = COMPASS::instance().dbInterface().saveResult(*current_result_);
+
+        //@TODO
+        assert(result.ok());
+    }
+
+    assert (current_result_);
+    current_result_ = nullptr;
+
+    emit taskResultsChangedSignal();
+}
+
 MainWindow* TaskManager::getMainWindow()
 {
     for(QWidget* pWidget : QApplication::topLevelWidgets())
@@ -304,4 +359,105 @@ void TaskManager::updateFeatures()
     for (auto& t : tasks_)
         if (t.second)
             t.second->updateFeatures();
+}
+
+const std::map<unsigned int, std::shared_ptr<TaskResult>>& TaskManager::results() const
+{
+    return results_;
+}
+
+std::shared_ptr<TaskResult> TaskManager::result(unsigned int id) const // get existing result
+{
+    assert (results_.count(id));
+    return results_.at(id);
+}
+
+std::shared_ptr<TaskResult> TaskManager::getOrCreateResult (const std::string& name) // get or create result
+{
+    auto it = std::find_if(results_.begin(), results_.end(),
+                           [&name](const std::pair<const unsigned int, std::shared_ptr<TaskResult>>& pair) {
+                               return pair.second && pair.second->name() == name;
+                           });
+
+    if (it != results_.end())
+    {
+        return it->second;
+    }
+    else // create
+    {
+        unsigned int new_id{0};
+
+        if (results_.size())
+            new_id = results_.rend()->first + 1;
+
+        results_[new_id] = std::make_shared<TaskResult>(new_id, *this);
+        results_.at(new_id)->name(name);
+
+        return results_.at(new_id);
+    }
+}
+
+ResultReport::Report& TaskManager::report(const std::string& name)
+{
+    return *getOrCreateResult(name)->report();
+}
+
+bool TaskManager::hasResult (const std::string& name) const
+{
+    auto it = std::find_if(results_.begin(), results_.end(),
+                           [&name](const std::pair<const unsigned int, std::shared_ptr<TaskResult>>& pair) {
+                               return pair.second && pair.second->name() == name;
+                           });
+
+    return it != results_.end();
+}
+
+void TaskManager::databaseOpenedSlot()
+{
+    loadResults();
+}
+
+void TaskManager::databaseClosedSlot()
+{
+}
+
+void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
+{
+    viewable_data_cfg_.reset(new ViewableDataConfig(data));
+
+    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+}
+
+std::shared_ptr<ResultReport::SectionContent> TaskManager::loadContent(ResultReport::Section* section, 
+                                                                       unsigned int content_id) const
+{
+    auto res = COMPASS::instance().dbInterface().loadContent(section, content_id);
+    if (!res.ok())
+    {
+        logerr << "TaskManager: loadResults: Could not load stored content: " << res.error();
+        return std::shared_ptr<ResultReport::SectionContent>();
+    }
+
+    return res.result();
+}
+
+void TaskManager::loadResults()
+{
+    assert (!current_result_);
+
+    results_.clear();
+    
+    auto res = COMPASS::instance().dbInterface().loadResults();
+    if (!res.ok())
+    {
+        logerr << "TaskManager: loadResults: Could not load stored results: " << res.error();
+        return;
+    }
+
+    for (const auto& r : res.result())
+        results_[ r->id() ] = r;
+
+    loginf << "TaskManager: loadResults: Loaded " << results_.size() << " result(s)";
+
+    emit taskResultsChangedSignal();
 }

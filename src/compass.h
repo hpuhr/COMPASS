@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "appmode.h"
 #include "result.h"
+#include "logmodel.h"
 
 #include <QObject>
 
@@ -41,6 +42,7 @@ class EvaluationManager;
 class MainWindow;
 class FFTManager;
 class LicenseManager;
+class LogWidget;
 
 namespace rtcommand
 {
@@ -146,6 +148,15 @@ public:
 
     const char* lineEditInvalidStyle();
 
+    LogStream logInfo(const std::string& component,
+                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+    LogStream logWarn(const std::string& component,
+                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+    LogStream logError(const std::string& component,
+                       boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+
+    LogWidget* logWidget();
+
 protected:
     COMPASS();
 
@@ -194,6 +205,9 @@ protected:
     std::unique_ptr<LicenseManager> license_manager_;
 
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
+
+    LogStore log_store_;
+    std::unique_ptr<LogWidget> log_widget_{nullptr};
 
     std::string last_db_filename_;
     std::string inmem_future_filename_;

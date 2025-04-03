@@ -23,7 +23,10 @@ const std::string KEY_LATITUDE_MAX = "latitude_max";
 const std::string KEY_LONGITUDE_MIN = "longitude_min";
 const std::string KEY_LONGITUDE_MAX = "longitude_max";
 
-
+const Property     Target::DBColumnID     = Property("utn" , PropertyDataType::UINT);
+const Property     Target::DBColumnInfo   = Property("json", PropertyDataType::JSON);
+const PropertyList Target::DBPropertyList = PropertyList({ Target::DBColumnID,
+                                                           Target::DBColumnInfo });
 
 Target::Target(unsigned int utn, nlohmann::json info)
     : utn_(utn), info_(info)

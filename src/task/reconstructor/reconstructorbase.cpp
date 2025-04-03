@@ -25,6 +25,12 @@
 #include "datasourcemanager.h"
 #include "evaluationmanager.h"
 
+#include "taskmanager.h"
+#include "report/report.h"
+#include "report/section.h"
+#include "report/sectioncontenttext.h"
+#include "report/sectioncontenttable.h"
+
 #include "kalman_chain.h"
 #include "tbbhack.h"
 
@@ -850,60 +856,65 @@ void ReconstructorBase::processSlice()
         std::string num_rec_updates_skipped_p         = perc(stats.num_rec_updates_skipped        , stats.num_rec_updates       );
         std::string num_rec_smooth_steps_failed_p     = perc(stats.num_rec_smooth_steps_failed    , stats.num_rec_updates       );
 
-        loginf << "ReconstructorBase: processSlice: last slice finished\n"
-               << "\n"
-               << "Reconstruction Statistics\n"
-               << "\n"
-               << " * Chain updates:\n"
-               << "\n"
-               << "   mm checked:   " << stats.num_chain_checked                                                                <<  "\n"
-               << "   skipped pre:  " << stats.num_chain_skipped_preempt         << " (" << num_chain_skipped_preempt_p         << ")\n"
-               << "   replaced:     " << stats.num_chain_replaced                << " (" << num_chain_replaced_p                << ")\n"
-               << "   added:        " << stats.num_chain_added                   << " (" << num_chain_added_p                   << ")\n"
-               << "   mm fresh:     " << stats.num_chain_fresh                                                                  <<  "\n"
-               << "   valid:        " << stats.num_chain_updates_valid           << " (" << num_chain_updates_valid_p           << ")\n"
-               << "   failed:       " << stats.num_chain_updates_failed          << " (" << num_chain_updates_failed_p          << ")\n"
-               << "      numeric:   " << stats.num_chain_updates_failed_numeric  << " (" << num_chain_updates_failed_numeric_p  << ")\n"
-               << "      bad state: " << stats.num_chain_updates_failed_badstate << " (" << num_chain_updates_failed_badstate_p << ")\n"
-               << "      other:     " << stats.num_chain_updates_failed_other    << " (" << num_chain_updates_failed_other_p    << ")\n"
-               << "   skipped:      " << stats.num_chain_updates_skipped         << " (" << num_chain_updates_skipped_p         << ")\n"
-               << "   total:        " << stats.num_chain_updates                                                                <<  "\n"
-               << "   proj changed: " << stats.num_chain_updates_proj_changed    << " (" << num_chain_updates_proj_changed_p    << ")\n"
-               << "\n"
-               << " * Chain predictions:\n"
-               << "\n" 
-               << "   failed:       " << stats.num_chain_predictions_failed          << " ("  << num_chain_predictions_failed_p          << ")\n"
-               << "      numeric:   " << stats.num_chain_predictions_failed_numeric  << " ("   << num_chain_predictions_failed_numeric_p << ")\n"
-               << "      bad state: " << stats.num_chain_predictions_failed_badstate << " (" << num_chain_predictions_failed_badstate_p  << ")\n"
-               << "      other:     " << stats.num_chain_predictions_failed_other    << " ("     << num_chain_predictions_failed_other_p << ")\n"
-               << "   fixed:        " << stats.num_chain_predictions_fixed           << " ("   << num_chain_predictions_fixed_p          << ")\n"
-               << "   total:        " << stats.num_chain_predictions                                                                     <<  "\n"
-               << "   proj changed: " << stats.num_chain_predictions_proj_changed    << " (" << num_chain_predictions_proj_changed_p     << ")\n"
-               << "\n"
-               << " * Rec updates:\n"
-               << "\n" 
-               << "   ccoeff corr:       " << stats.num_rec_updates_ccoeff_corr     << " (" << num_rec_updates_ccoeff_corr_p     << ")\n"
-               << "   valid:             " << stats.num_rec_updates_valid           << " (" << num_rec_updates_valid_p           << ")\n"
-               << "   failed:            " << stats.num_rec_updates_failed          << " (" << num_rec_updates_failed_p          << ")\n"
-               << "      numeric:        " << stats.num_rec_updates_failed_numeric  << " (" << num_rec_updates_failed_numeric_p  << ")\n"
-               << "      bad state:      " << stats.num_rec_updates_failed_badstate << " (" << num_rec_updates_failed_badstate_p << ")\n"
-               << "      other:          " << stats.num_rec_updates_failed_other    << " (" << num_rec_updates_failed_other_p    << ")\n"
-               << "   reinit after fail: " << stats.num_rec_updates_raf             << " (" << num_rec_updates_raf_p             << ")\n"
-               << "      numeric:        " << stats.num_rec_updates_raf_numeric     << " (" << num_rec_updates_raf_numeric_p     << ")\n"
-               << "      bad state:      " << stats.num_rec_updates_raf_badstate    << " (" << num_rec_updates_raf_badstate_p    << ")\n"
-               << "      other:          " << stats.num_rec_updates_raf_other       << " (" << num_rec_updates_raf_other_p       << ")\n"
-               << "   skipped:           " << stats.num_rec_updates_skipped         << " (" << num_rec_updates_skipped_p         << ")\n"
-               << "   total:             " << stats.num_rec_updates                                                              <<  "\n"
-               << "\n"
-               << " * Rec smooth steps:\n" 
-               << "\n"
-               << "   failed steps:   " << stats.num_rec_smooth_steps_failed  << " (" << num_rec_smooth_steps_failed_p << ")\n"
-               << "   failed targets: " << stats.num_rec_smooth_target_failed                                          <<  "\n"
-               << "\n"
-               << " * Rec interp steps:\n"
-               << "\n" 
-               << "   failed:" << stats.num_rec_interp_failed << "\n"
-               << "\n";
+        auto& section = COMPASS::instance().taskManager().currentReport().getSection("Reconstruction Statistics");
+
+        if (!section.hasTable("Reconstruction Statistics"))
+            section.addTable("Reconstruction Statistics", 4, {"", "", "Value", "Value [%]"}, false);
+
+        auto& table = section.getTable("Reconstruction Statistics");
+
+        table.addRow({"Chain updates", "", "", ""});
+        table.addRow({"mm checked", "", stats.num_chain_checked, ""});
+        table.addRow({"skipped pre", "", stats.num_chain_skipped_preempt, num_chain_skipped_preempt_p});
+        table.addRow({"replaced", "", stats.num_chain_replaced, num_chain_replaced_p});
+        table.addRow({"added", "", stats.num_chain_added, num_chain_added_p});
+        table.addRow({"mm fresh", "", stats.num_chain_fresh, ""});
+        table.addRow({"valid", "", stats.num_chain_updates_valid, num_chain_updates_valid_p});
+        table.addRow({"failed", "", stats.num_chain_updates_failed, num_chain_updates_failed_p});
+        table.addRow({"", "numeric", stats.num_chain_updates_failed_numeric, num_chain_updates_failed_numeric_p});
+        table.addRow({"", "bad state", stats.num_chain_updates_failed_badstate, num_chain_updates_failed_badstate_p});
+        table.addRow({"", "other", stats.num_chain_updates_failed_other, num_chain_updates_failed_other_p});
+        table.addRow({"skipped", "", stats.num_chain_updates_skipped, num_chain_updates_skipped_p});
+        table.addRow({"total", "", stats.num_chain_updates, ""});
+        table.addRow({"proj changed", "", stats.num_chain_updates_proj_changed, num_chain_updates_proj_changed_p});
+
+        table.addRow({"", "", "", ""});
+        table.addRow({"Chain predictions", "", "", ""});
+
+        table.addRow({"failed", "", stats.num_chain_predictions_failed , num_chain_predictions_failed_p});
+        table.addRow({"", "numeric", stats.num_chain_predictions_failed_numeric, num_chain_predictions_failed_numeric_p});
+        table.addRow({"", "bad state", stats.num_chain_predictions_failed_badstate, num_chain_predictions_failed_badstate_p});
+        table.addRow({"", "other", stats.num_chain_predictions_failed_other, num_chain_predictions_failed_other_p});
+
+        table.addRow({"fixed", "", stats.num_chain_predictions_fixed, num_chain_predictions_fixed_p});
+        table.addRow({"total", "", stats.num_chain_predictions, ""});
+        table.addRow({"proj changed", "", stats.num_chain_predictions_proj_changed, num_chain_predictions_proj_changed_p});
+
+        table.addRow({"", "", "", ""});
+        table.addRow({"Rec updates", "", "", ""});
+
+        table.addRow({"ccoeff corr", "", stats.num_rec_updates_ccoeff_corr, num_rec_updates_ccoeff_corr_p});
+        table.addRow({"valid", "", stats.num_rec_updates_valid, num_rec_updates_valid_p});
+        table.addRow({"failed", "", stats.num_rec_updates_failed, num_rec_updates_failed_p});
+        table.addRow({"", "numeric", stats.num_rec_updates_failed_numeric, num_rec_updates_failed_numeric_p});
+        table.addRow({"", "bad state", stats.num_rec_updates_failed_badstate, num_rec_updates_failed_badstate_p});
+        table.addRow({"", "other", stats.num_rec_updates_failed_other, num_rec_updates_failed_other_p});
+        table.addRow({"reinit after fail", "", stats.num_rec_updates_raf, num_rec_updates_raf_p});
+        table.addRow({"", "numeric", stats.num_rec_updates_raf_numeric, num_rec_updates_raf_numeric_p});
+        table.addRow({"", "bad state", stats.num_rec_updates_raf_badstate, num_rec_updates_raf_badstate_p});
+        table.addRow({"", "other", stats.num_rec_updates_raf_other, num_rec_updates_raf_other_p});
+        table.addRow({"skipped", "", stats.num_rec_updates_skipped, num_rec_updates_skipped_p});
+        table.addRow({"total", "", stats.num_rec_updates, ""});
+
+        table.addRow({"", "", "", ""});
+        table.addRow({"Rec smooth steps", "", "", ""});
+
+        table.addRow({"failed steps", "", stats.num_rec_smooth_steps_failed, num_rec_smooth_steps_failed_p});
+        table.addRow({"failed targets", "", stats.num_rec_smooth_target_failed, ""});
+
+        table.addRow({"", "", "", ""});
+        table.addRow({"Rec interp steps", "", "", ""});
+        table.addRow({"", "failed", stats.num_rec_interp_failed, ""});
     }
 
     logdbg << "ReconstructorBase: processSlice: done";

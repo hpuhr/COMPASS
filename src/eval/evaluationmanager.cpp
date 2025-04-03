@@ -19,6 +19,7 @@
 #include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgeneratordialog.h"
 #include "evaluationstandard.h"
+#include "evaluationdialog.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/evaluation_commands.h"
@@ -43,10 +44,10 @@
 #include "viewpoint.h"
 #include "projectionmanager.h"
 #include "projection.h"
+#include "files.h"
 
 #include "json.hpp"
 
-#include <QTabWidget>
 #include <QApplication>
 #include <QCoreApplication>
 #include <QThread>
@@ -116,7 +117,6 @@ EvaluationManagerSettings::EvaluationManagerSettings()
 ,   report_wait_on_map_loading_       (true)
 ,   report_run_pdflatex_              (true)
 ,   report_open_created_pdf_          (false)
-,   warning_shown_                    (false)
 ,   dbcontent_name_ref_               ("RefTraj")
 ,   dbcontent_name_tst_               ("CAT062")
 ,   load_timestamp_begin_str_         ("")
@@ -258,41 +258,76 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     //histogram generation
     registerParameter("histogram_num_bins", &settings_.histogram_num_bins, Settings().histogram_num_bins);
     
-    registerParameter("warning_shown", &settings_.warning_shown_, Settings().warning_shown_);
-
     createSubConfigurables();
 
     init_evaluation_commands();
 }
 
-void EvaluationManager::init(QTabWidget* tab_widget)
+void EvaluationManager::init()
 {
     loginf << "EvaluationManager: init";
 
     assert (!initialized_);
-    assert (tab_widget);
 
     initialized_ = true;
 
-    if (!COMPASS::instance().hideEvaluation())
-        tab_widget->addTab(widget(), "Evaluation");
-
-    widget()->setDisabled(true);
+    auto w = widget();
+    w->setDisabled(true);
 
     connect (&COMPASS::instance().dbContentManager(), &DBContentManager::associationStatusChangedSignal,
              this, &EvaluationManager::associationStatusChangedSlot);
 }
 
-bool EvaluationManager::canLoadData ()
+void EvaluationManager::showDialog()
+{
+    EvaluationDialog dlg(*this, settings_);
+    if (dlg.exec() == QDialog::Rejected)
+        return;
+
+    assert(canLoadDataAndEvaluate());
+    loadDataAndEvaluate();
+}
+
+bool EvaluationManager::canLoadDataAndEvaluate ()
 {
     assert (initialized_);
 
-    return COMPASS::instance().dbContentManager().hasAssociations() && hasCurrentStandard();
+    if (!COMPASS::instance().dbContentManager().hasAssociations())
+        return false;
+
+    if (!hasCurrentStandard())
+        return false;
+
+    if (!hasSelectedReferenceDataSources())
+        return false;
+
+    if (!hasSelectedTestDataSources())
+        return false;
+
+    bool has_anything_to_eval = false;
+
+    if (!sectorsLoaded())
+        return false;
+
+    for (auto& sec_it : sectorsLayers())
+    {
+        const string& sector_layer_name = sec_it->name();
+
+        for (auto& req_group_it : currentStandard())
+        {
+            const string& requirement_group_name = req_group_it->name();
+
+            if (useGroupInSectorLayer(sector_layer_name, requirement_group_name))
+                has_anything_to_eval = true;
+        }
+    }
+
+    return has_anything_to_eval;
 }
 
-void EvaluationManager::loadData ()
+void EvaluationManager::loadDataAndEvaluate ()
 {
-    loginf << "EvaluationManager: loadData";
+    loginf << "EvaluationManager: loadDataAndEvaluate";
 
     assert (initialized_);
 
@@ -563,52 +598,18 @@ void EvaluationManager::loadData ()
         widget_->updateButtons();
 }
 
-bool EvaluationManager::canEvaluate ()
+std::string EvaluationManager::getCannotRunAndEvaluateComment()
 {
-    assert (initialized_);
-
-    if (!data_loaded_ || !hasCurrentStandard())
-        return false;
-
-    if (!compass_.dbContentManager().hasAssociations())
-        return false;
-
-    if (!hasSelectedReferenceDataSources())
-        return false;
-
-    if (!hasSelectedTestDataSources())
-        return false;
-
-    bool has_anything_to_eval = false;
-
-    if (!sectorsLoaded())
-        return false;
-
-    for (auto& sec_it : sectorsLayers())
-    {
-        const string& sector_layer_name = sec_it->name();
-
-        for (auto& req_group_it : currentStandard())
-        {
-            const string& requirement_group_name = req_group_it->name();
-
-            if (useGroupInSectorLayer(sector_layer_name, requirement_group_name))
-                has_anything_to_eval = true;
-        }
-    }
-
-    return has_anything_to_eval;
-}
-
-std::string EvaluationManager::getCannotEvaluateComment()
-{
-    assert (!canEvaluate());
+    assert (!canLoadDataAndEvaluate());
 
     if (!sectors_loaded_)
         return "No Database loaded";
 
     if (!compass_.dbContentManager().hasAssociations())
         return "Please run target report association";
+
+    if (!hasCurrentStandard())
+        return "Current standard not found";
 
     // no sector
     if (!sectorsLayers().size())
@@ -622,9 +623,6 @@ std::string EvaluationManager::getCannotEvaluateComment()
 
     if (!hasSelectedTestDataSources())
         return "Please select test data sources";
-
-    if (!data_loaded_)
-        return "Please load reference & test data";
 
     if (!hasCurrentStandard())
         return "Please select a standard";
@@ -656,11 +654,11 @@ void EvaluationManager::databaseOpenedSlot()
         loadTimestampBegin(get<0>(minmax_ts));
         loadTimestampEnd(get<1>(minmax_ts));
 
-        widget()->updateFilterWidget();
+        //widget()->updateFilterWidget();
     }
 
-    widget()->updateDataSources();
-    widget()->updateSectors();
+    //widget()->updateDataSources();
+    //widget()->updateSectors();
     widget()->updateButtons();
 
     emit sectorsChangedSignal();
@@ -680,8 +678,8 @@ void EvaluationManager::databaseClosedSlot()
     results_gen_.clear();
     data_.clear();
 
-    widget()->updateDataSources();
-    widget()->updateSectors();
+    //widget()->updateDataSources();
+    //widget()->updateSectors();
     widget()->setDisabled(true);
 
     emit sectorsChangedSignal();
@@ -777,9 +775,9 @@ void EvaluationManager::loadingDoneSlot()
 
     data_loaded_ = data_loaded_tmp;
 
-    if (widget_)
-        widget_->updateButtons();
+    loginf << "EvaluationManager: loadingDoneSlot: starting evaluate";
 
+    evaluate();
 }
 
 void EvaluationManager::evaluate()
@@ -1105,8 +1103,8 @@ void EvaluationManager::createNewSector (const std::string& name,
     assert (hasSector(name, layer_name));
     sector->save();
 
-    if (widget_)
-        widget_->updateSectors();
+    // if (widget_)
+    //     widget_->updateSectors();
 
     clearLoadedDataAndResults();
 
@@ -1183,8 +1181,8 @@ void EvaluationManager::moveSector(unsigned int id, const std::string& old_layer
     assert (hasSector(tmp_sector->name(), new_layer_name));
     tmp_sector->save();
 
-    if (widget_)
-        widget_->updateSectors();
+    // if (widget_)
+    //     widget_->updateSectors();
 
     clearLoadedDataAndResults();
 
@@ -1238,8 +1236,8 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
 
     COMPASS::instance().dbInterface().deleteSector(sector);
 
-    if (widget_)
-        widget_->updateSectors();
+    // if (widget_)
+    //     widget_->updateSectors();
 
     clearLoadedDataAndResults();
 
@@ -1255,8 +1253,8 @@ void EvaluationManager::deleteAllSectors()
 
     checkMinHeightFilterValid();
 
-    if (widget_)
-        widget_->updateSectors();
+    // if (widget_)
+    //     widget_->updateSectors();
 
     clearLoadedDataAndResults();
 
@@ -1341,8 +1339,8 @@ void EvaluationManager::importSectors(const std::string& filename)
 
     clearLoadedDataAndResults();
 
-    if (widget_)
-        widget_->updateSectors();
+    // if (widget_)
+    //     widget_->updateSectors();
 
     emit sectorsChangedSignal();
 }
@@ -1421,8 +1419,8 @@ bool EvaluationManager::importAirSpace(const AirSpace& air_space,
 
     updateMaxSectorID();
 
-    if (widget_)
-        widget_->updateSectors();
+    // if (widget_)
+    //     widget_->updateSectors();
 
     emit sectorsChangedSignal();
 
@@ -2270,7 +2268,7 @@ void EvaluationManager::updateCompoundCoverage(std::set<unsigned int> tst_source
 */
 void EvaluationManager::onConfigurationChanged(const std::vector<std::string>& changed_params)
 {
-    assert(widget_);
+    //assert(widget_);
 
-    widget_->updateFromSettings();
+    //widget_->updateFromSettings();
 }

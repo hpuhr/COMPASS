@@ -69,7 +69,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     APP_FILENAME = argv[0];
 
-
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 
  #ifdef OSG_GL3_AVAILABLE
@@ -97,8 +96,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 #endif
     //format.setDepthBufferSize(32); // scatterplot stops working if active
     //format.setAlphaBufferSize(8);
-
-
 
     format.setSamples(8);
     format.setStencilBufferSize(8);
@@ -946,5 +943,3 @@ void Client::copyConfigurationAndData()
 
 //    cout << " done" << endl;
 //}
-
-
