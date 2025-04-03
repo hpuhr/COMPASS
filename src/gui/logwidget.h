@@ -39,7 +39,6 @@ public:
 protected:
     LogStore& log_store_;
 
-    //void updateDisplay();
     void checkIcon();
 
     QTableView* table_view_{nullptr};

@@ -4,6 +4,7 @@
 #include "stringconv.h"
 
 #include <QBrush>
+#include <QFont>
 
 using namespace Utils;
 
@@ -76,6 +77,20 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
         else
             return QVariant();
     }
+    case Qt::ForegroundRole:
+    {
+        switch(entry.type)
+        {
+        case LogStreamType::Error:
+            return QBrush(Qt::red);
+        case LogStreamType::Warning:
+            return QBrush(Qt::darkYellow);
+        case LogStreamType::Info:
+        default:
+            break;
+        }
+
+    }
     case Qt::BackgroundRole:
     {
         if (entry.accepted)
@@ -83,6 +98,25 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
         else
             return QVariant();
 
+    }
+    case Qt::FontRole:
+    {
+        QFont font;
+
+        switch(entry.type)
+        {
+        case LogStreamType::Error:
+            font.setBold(true);
+            break;
+        case LogStreamType::Warning:
+            font.setItalic(true);
+            break;
+        case LogStreamType::Info:
+        default:
+            break;
+        }
+
+        return font;
     }
     case Qt::DisplayRole:
     //case Qt::EditRole:
@@ -129,7 +163,7 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
         }
         else if (col_name == "JSON")
         {
-            return entry.json_.dump(2).c_str();
+            return entry.json_.empty() ? QVariant() : entry.json_.dump(2).c_str();
         }
         else if (col_name == "Count")
         {
