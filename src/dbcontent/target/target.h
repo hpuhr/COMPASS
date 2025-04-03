@@ -1,5 +1,8 @@
 #pragma once
 
+
+#include "propertylist.h"
+
 #include "json.hpp"
 
 #include "boost/date_time/posix_time/ptime.hpp"
@@ -74,6 +77,10 @@ public:
     double latitudeMax() const;
     double longitudeMin() const;
     double longitudeMax() const;
+
+    static const Property     DBColumnID;
+    static const Property     DBColumnInfo;
+    static const PropertyList DBPropertyList;
 
 protected:
     nlohmann::json info_;

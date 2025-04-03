@@ -132,6 +132,10 @@ private:
     std::string replaceStatement(const std::string& table, 
                                  const std::vector<std::string>& values) const;
 
+    std::string getCreateTableStatement(const std::string& table_name,
+                                        const PropertyList& properties,
+                                        int primary_key = -1) const;
+
     db::SQLConfig config_;
 
     //    std::string subTablesWhereClause(const DBTable& table,

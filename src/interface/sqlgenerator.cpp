@@ -165,6 +165,33 @@ std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
 
 /**
  */
+std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
+                                                  const PropertyList& properties,
+                                                  int primary_key) const
+{
+    std::stringstream ss;
+
+    assert(properties.size());
+
+    ss << "CREATE TABLE " << table_name << "(";
+
+    size_t n = properties.size();
+    for (size_t i = 0; i < n; ++i)
+        ss << properties.properties().at(i).name() << " "  << properties.properties().at(i).dbDataTypeString(config_.precise_types) <<  (i < n - 1 ? ", " : "");
+
+    if (primary_key >= 0)
+        ss << ", " << "PRIMARY KEY (" << properties.properties().at(primary_key).name() << ")";
+    
+    ss << ");";
+
+    if (config_.verbose)
+        loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
+
+    return ss.str();
+}
+
+/**
+ */
 shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand()
 {
     using namespace dbContent;
@@ -753,46 +780,21 @@ string SQLGenerator::getTableViewPointsCreateStatement()
  */
 std::string SQLGenerator::getTableTargetsCreateStatement()
 {
-    stringstream ss;
-
-    ss << "CREATE TABLE " << TABLE_NAME_TARGETS
-       << "(utn INT, json TEXT, PRIMARY KEY (utn));";
-
-    return ss.str();
+    return getCreateTableStatement(TABLE_NAME_TARGETS, dbContent::Target::DBPropertyList, 0);
 }
 
 /**
  */
 std::string SQLGenerator::getTableTaskResultsCreateStatement()
 {
-    stringstream ss;
-
-    ss << "CREATE TABLE " << TaskResult::DBTableName << "("
-        << TaskResult::DBColumnID.name()          << " "  << TaskResult::DBColumnID.dbDataTypeString(config_.precise_types)          << ", "
-        << TaskResult::DBColumnName.name()        << " "  << TaskResult::DBColumnName.dbDataTypeString(config_.precise_types)        << ", "
-        << TaskResult::DBColumnJSONContent.name() << " "  << TaskResult::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
-        << TaskResult::DBColumnResultType.name()  << " "  << TaskResult::DBColumnResultType.dbDataTypeString(config_.precise_types)  << ", "
-        << "PRIMARY KEY (" << TaskResult::DBColumnID.name() << ")"
-        << ");";
-    
-    return ss.str();
+    return getCreateTableStatement(TaskResult::DBTableName, TaskResult::DBPropertyList, 0);
 }
 
 /**
  */
 std::string SQLGenerator::getTableReportContentsCreateStatement()
 {
-    stringstream ss;
-
-    ss << "CREATE TABLE " << ResultReport::SectionContent::DBTableName << "("
-        << ResultReport::SectionContent::DBColumnContentID.name()   << " "  << ResultReport::SectionContent::DBColumnContentID.dbDataTypeString(config_.precise_types)   << ", "
-        << ResultReport::SectionContent::DBColumnResultID.name()    << " "  << ResultReport::SectionContent::DBColumnResultID.dbDataTypeString(config_.precise_types)    << ", "
-        << ResultReport::SectionContent::DBColumnType.name()        << " "  << ResultReport::SectionContent::DBColumnType.dbDataTypeString(config_.precise_types)        << ", "
-        << ResultReport::SectionContent::DBColumnJSONContent.name() << " "  << ResultReport::SectionContent::DBColumnJSONContent.dbDataTypeString(config_.precise_types) << ", "
-        << "PRIMARY KEY (" << ResultReport::SectionContent::DBColumnContentID.name() << ")"
-        << ");";
-    
-    return ss.str();
+    return getCreateTableStatement(ResultReport::SectionContent::DBTableName, ResultReport::SectionContent::DBPropertyList, 0);
 }
 
 /**

@@ -1645,6 +1645,7 @@ std::vector<std::unique_ptr<dbContent::Target>> DBInterface::loadTargets()
         command.list(list);
 
         shared_ptr<DBResult> result = execute(command);
+        assert(!result->hasError());
         assert(result->containsData());
 
         shared_ptr<Buffer> buffer = result->buffer();
@@ -1694,18 +1695,22 @@ void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Targe
 
     clearTargetsTable();
 
-    string str;
-
     {
-        #ifdef PROTECT_INSTANCE
-        boost::mutex::scoped_lock locker(instance_mutex_);
-        #endif
+        //storing all targets at once via a buffer is faster 
+        std::shared_ptr<Buffer> buffer(new Buffer(dbContent::Target::DBPropertyList));
 
+        auto& id_vec   = buffer->get<unsigned int>(dbContent::Target::DBColumnID.name());
+        auto& info_vec = buffer->get<nlohmann::json>(dbContent::Target::DBColumnInfo.name());
+
+        size_t idx = 0;
         for (auto& tgt_it : targets)
         {
-            string str = sqlGenerator().getInsertTargetStatement(tgt_it->utn_, tgt_it->info().dump());
-            execute(str);
+            id_vec.set(idx, tgt_it->utn_);
+            info_vec.set(idx, tgt_it->info());
+            ++idx;
         }
+
+        insertBuffer(TABLE_NAME_TARGETS, buffer);
     }
 
     loginf << "DBInterface: saveTargets: done";
