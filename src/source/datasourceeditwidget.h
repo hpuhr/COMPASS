@@ -1,5 +1,4 @@
-#ifndef DATASOURCEEDITWIDGET_H
-#define DATASOURCEEDITWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -11,6 +10,7 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 class QGridLayout;
+class QComboBox;
 
 class DataSourceEditWidget : public QWidget
 {
@@ -22,6 +22,8 @@ public slots:
     void dsTypeEditedSlot(const QString& value);
 
     void updateIntervalEditedSlot(const QString& value_str);
+
+    void detectionTypeChangedSlot(int index); // Slot to handle detection type change
 
     void latitudeEditedSlot(const QString& value_str);
     void longitudeEditedSlot(const QString& value_str);
@@ -66,6 +68,8 @@ protected:
     // update_interval
     QLineEdit* update_interval_edit_{nullptr};
 
+    QComboBox* detection_type_combo_{nullptr}; // << Add this line
+
     // position
     QWidget* position_widget_{nullptr};
     QLineEdit* latitude_edit_{nullptr};
@@ -103,4 +107,3 @@ protected:
     QPushButton* delete_button_{nullptr};
 };
 
-#endif // DATASOURCEEDITWIDGET_H

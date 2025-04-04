@@ -62,7 +62,9 @@ LogWidget::LogWidget(LogStore& log_store)
 
 void LogWidget::messagesChangedSlot()
 {
-    //updateDisplay();
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
+
     checkIcon();
 }
 
@@ -70,54 +72,6 @@ void LogWidget::acceptMessagesSlot()
 {
     log_store_.acceptMessages();
 }
-
-// void LogWidget::updateDisplay()
-// {
-//     text_display_->clear();
-
-//     for (const auto& entry : log_store_.logEntries())
-//     {
-//         QString prefix;
-
-//         QString color = "black";
-//         QString style;
-
-//         if (!entry.accepted) {
-//             switch (entry.type) {
-//             case LogStreamType::Warning:
-//                 color = "#FFA500";  // orange
-//                 style = "font-style:italic;";
-//                 prefix = "WARN";
-//                 break;
-//             case LogStreamType::Error:
-//                 color = "red";
-//                 style = "font-weight:bold;";
-//                 prefix = "ERR";
-//                 break;
-//             case LogStreamType::Info:
-//                 prefix = "INFO";
-//                 break;
-//             }
-//         } else {
-//             // Even if accepted, set prefix
-//             switch (entry.type) {
-//             case LogStreamType::Warning: prefix = "WARN"; break;
-//             case LogStreamType::Error:   prefix = "ERROR";  break;
-//             case LogStreamType::Info:    prefix = "INFO"; break;
-//             }
-//         }
-
-//         QString fullMessage = QString("%1 [%2]: %3")
-//                                   .arg(entry.timestamp, prefix, entry.message.c_str());
-
-//         QString formatted = QString("<span style='font-family:monospace; color:%1;%2'>%3</span>")
-//                                 .arg(color, style, fullMessage);
-//         text_display_->append(formatted);
-//     }
-
-//     QScrollBar* sb = text_display_->verticalScrollBar();
-//     sb->setValue(sb->maximum());
-// }
 
 void LogWidget::checkIcon()
 {
