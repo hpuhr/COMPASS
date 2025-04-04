@@ -2,6 +2,7 @@
 #include "compass.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "files.h"
 
 #include <QBrush>
 #include <QFont>
@@ -14,6 +15,18 @@ LogStore::LogStore(bool show_everything)
 
     if (show_everything)
         table_columns_.append(QStringList::fromVector({"Error", "JSON", "Count"}));
+
+    checked_icon_ = QIcon(Files::getIconFilepath("done.png").c_str());
+
+    logInfo("Test", {}, {}) << "Test Info";
+    logWarn("Test", {}, {}) << "Test Warning";
+    logError("Test", {}, {}) << "Test Error";
+
+    acceptMessages();
+
+    logInfo("Test", {}, {}) << "Test Info2";
+    logWarn("Test", {}, {}) << "Test Warning2";
+    logError("Test", {}, {}) << "Test Error2";
 }
 
 LogStream LogStore::logInfo(const std::string& component,
@@ -47,8 +60,12 @@ void LogStore::addLogMessage(const std::string& message, LogStreamType type, con
 
 void LogStore::acceptMessages()
 {
+    beginResetModel();
+
     for (auto& entry : log_entries_)
         entry.accepted = true;
+
+    endResetModel();
 
     emit messagesChangedSignal();
 }
@@ -65,36 +82,40 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
-    case Qt::CheckStateRole:
-    {
-        if (index.column() == 0)  // selected special case
-        {
-            if (entry.accepted)
-                return Qt::Checked;
-            else
-                return Qt::Unchecked;
-        }
-        else
-            return QVariant();
-    }
+    // case Qt::CheckStateRole:
+    // {
+    //     if (index.column() == 0)  // selected special case
+    //     {
+    //         if (entry.accepted)
+    //             return Qt::Checked;
+    //         else
+    //             return Qt::Unchecked;
+    //     }
+    //     else
+    //         return QVariant();
+    // }
     case Qt::ForegroundRole:
     {
-        switch(entry.type)
+        if (!entry.accepted)
         {
-        case LogStreamType::Error:
-            return QBrush(Qt::red);
-        case LogStreamType::Warning:
-            return QBrush(Qt::darkYellow);
-        case LogStreamType::Info:
-        default:
-            break;
+            switch(entry.type)
+            {
+            case LogStreamType::Error:
+                return QBrush(Qt::red);
+            case LogStreamType::Warning:
+                return QBrush(QColor("orange"));
+            case LogStreamType::Info:
+            default:
+                break;
+            }
         }
 
+        return QVariant();
     }
     case Qt::BackgroundRole:
     {
         if (entry.accepted)
-            return QBrush(Qt::lightGray);
+            return QBrush(QColor("gainsboro"));
         else
             return QVariant();
 
@@ -103,17 +124,20 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
     {
         QFont font;
 
-        switch(entry.type)
+        if (!entry.accepted)
         {
-        case LogStreamType::Error:
-            font.setBold(true);
-            break;
-        case LogStreamType::Warning:
-            font.setItalic(true);
-            break;
-        case LogStreamType::Info:
-        default:
-            break;
+            switch(entry.type)
+            {
+            case LogStreamType::Error:
+                font.setBold(true);
+                break;
+            case LogStreamType::Warning:
+                font.setItalic(true);
+                break;
+            case LogStreamType::Info:
+            default:
+                break;
+            }
         }
 
         return font;
@@ -170,6 +194,16 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
             return entry.message_count_ ? entry.message_count_ : QVariant();
         }
 
+    }
+    case Qt::DecorationRole:
+    {
+        if (index.column() > 0)  // only col 0 have icons
+            return QVariant();
+
+        if (entry.accepted)
+            return checked_icon_;
+        else
+            return QVariant();;
     }
     // case Qt::UserRole: // to find the checkboxes
     // {
@@ -282,14 +316,14 @@ Qt::ItemFlags LogStore::flags(const QModelIndex &index) const
 
     assert (index.column() < table_columns_.size());
 
-    if (index.column() == 0) // Use
-    {
-        return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
-    }
+    // if (index.column() == 0) // Use
+    // {
+    //     return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
+    // }
     // else if (index.column() == 2) // comment
     // {
     //     return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
     // }
-    else
+    // else
         return QAbstractItemModel::flags(index);
 }
