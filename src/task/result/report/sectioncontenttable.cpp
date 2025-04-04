@@ -99,13 +99,12 @@ SectionContentTable::~SectionContentTable() = default;
 
 /**
  */
-void SectionContentTable::addRow (const nlohmann::json& row,
+void SectionContentTable::addRow (const nlohmann::json::array_t& row,
                                   const SectionContentViewable& viewable,
                                   const std::string& section_link,
                                   const std::string& section_figure,
                                   const QVariant& viewable_index)
 {
-    assert(row.is_array());
     assert (row.size() == num_columns_);
 
     rows_.push_back(row);

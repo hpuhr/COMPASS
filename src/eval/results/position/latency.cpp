@@ -63,7 +63,7 @@ std::vector<std::string> SinglePositionLatency::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SinglePositionLatency::targetTableValuesCustom() const
+nlohmann::json::array_t SinglePositionLatency::targetTableValuesCustom() const
 {
     return { formatValue(accumulator_.min()),
              formatValue(accumulator_.max()), 
@@ -99,19 +99,19 @@ std::vector<std::string> SinglePositionLatency::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SinglePositionLatency::detailValues(const EvaluationDetail& detail,
-                                                          const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SinglePositionLatency::detailValues(const EvaluationDetail& detail,
+                                                            const EvaluationDetail* parent_detail) const
 {
     bool has_ref_pos = detail.numPositions() >= 2;
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
+    return { Utils::Time::toString(detail.timestamp()),
             !has_ref_pos,
-             detail.getValue(SinglePositionBaseCommon::DetailKey::PosInside),
-             detail.getValue(SinglePositionBaseCommon::DetailKey::Value),
-             detail.getValue(SinglePositionBaseCommon::DetailKey::CheckPassed), 
-             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckPassed), 
-             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckFailed), 
-             detail.comments().generalComment().c_str() }; 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::PosInside).toBool(),
+             detail.getValue(SinglePositionBaseCommon::DetailKey::Value).toFloat(),
+             detail.getValue(SinglePositionBaseCommon::DetailKey::CheckPassed).toBool(), 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckPassed).toUInt(), 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckFailed).toUInt(), 
+             detail.comments().generalComment() }; 
 }
 
 /**********************************************************************************************

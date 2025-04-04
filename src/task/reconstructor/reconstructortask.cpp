@@ -415,7 +415,7 @@ void ReconstructorTask::run()
     run_start_time_ = boost::posix_time::microsec_clock::local_time();
     run_start_time_after_del_ = {};
 
-    auto& section = COMPASS::instance().taskManager().currentReport().getSection("Overview");
+    auto& section = COMPASS::instance().taskManager().currentReport()->getSection("Overview");
     section.addTable("Info", 3, {"Name", "Value", "Comment"}, false);
 
     auto& table = section.getTable("Info");
@@ -921,7 +921,7 @@ void ReconstructorTask::endReconstruction()
     loginf << COMPASS::instance().dbInterface().stopPerformanceMetrics().asString();
 
     // report: info
-    auto& section = COMPASS::instance().taskManager().currentReport().getSection("Overview");
+    auto& section = COMPASS::instance().taskManager().currentReport()->getSection("Overview");
 
     {
         auto& table = section.getTable("Info");

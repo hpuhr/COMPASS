@@ -161,7 +161,7 @@ std::vector<std::string> SinglePresentBase::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SinglePresentBase::targetTableValuesCustom() const
+nlohmann::json::array_t SinglePresentBase::targetTableValuesCustom() const
 {
     return { num_updates_, num_no_ref_pos_, num_no_ref_val_, num_present_, num_missing_ };
 }
@@ -170,7 +170,7 @@ std::vector<QVariant> SinglePresentBase::targetTableValuesCustom() const
 */
 std::vector<Single::TargetInfo> SinglePresentBase::targetInfos() const
 {
-    QString nrvn = QString::fromStdString(no_ref_value_name_);
+    std::string nrvn = no_ref_value_name_;
 
     return { { "#Up [1]"        , "Number of updates"                        , num_updates_     },
              { "#NoRef [1]"     , "Number of updates w/o reference position" , num_no_ref_pos_  },
@@ -191,20 +191,20 @@ std::vector<std::string> SinglePresentBase::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SinglePresentBase::detailValues(const EvaluationDetail& detail,
-                                                      const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SinglePresentBase::detailValues(const EvaluationDetail& detail,
+                                                        const EvaluationDetail* parent_detail) const
 {
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             detail.getValue(DetailKey::RefExists),
+    return { Utils::Time::toString(detail.timestamp()),
+             detail.getValue(DetailKey::RefExists).toBool(),
             !detail.getValue(DetailKey::IsNotOk).toBool(),
-             detail.getValue(DetailKey::NumUpdates),
-             detail.getValue(DetailKey::NumNoRef),
-             detail.getValue(DetailKey::NumInside),
-             detail.getValue(DetailKey::NumOutside),
-             detail.getValue(DetailKey::NumNoRefVal),
-             detail.getValue(DetailKey::NumPresent),
-             detail.getValue(DetailKey::NumMissing),
-             detail.comments().generalComment().c_str() };
+             detail.getValue(DetailKey::NumUpdates).toUInt(),
+             detail.getValue(DetailKey::NumNoRef).toUInt(),
+             detail.getValue(DetailKey::NumInside).toUInt(),
+             detail.getValue(DetailKey::NumOutside).toUInt(),
+             detail.getValue(DetailKey::NumNoRefVal).toUInt(),
+             detail.getValue(DetailKey::NumPresent).toUInt(),
+             detail.getValue(DetailKey::NumMissing).toUInt(),
+             detail.comments().generalComment() };
 }
 
 /**
@@ -321,7 +321,7 @@ boost::optional<double> JoinedPresentBase::computeResult_impl() const
 */
 std::vector<Joined::SectorInfo> JoinedPresentBase::sectorInfos() const
 {
-    QString nrvn = QString::fromStdString(no_ref_value_name_);
+    std::string nrvn = no_ref_value_name_;
     
     return { { "#Up [1]"        , "Number of updates"                        , num_updates_    },
              { "#NoRef [1]"     , "Number of updates w/o reference position" , num_no_ref_pos_ }, 

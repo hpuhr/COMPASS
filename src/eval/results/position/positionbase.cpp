@@ -297,7 +297,7 @@ SinglePositionValueBase::SinglePositionValueBase(const std::string& result_type,
 
 /**
 */
-QVariant SinglePositionValueBase::resultValue(double value) const
+nlohmann::json SinglePositionValueBase::resultValue(double value) const
 {
     //by default reformat result value to 2 decimals
     return formatValue(value);
@@ -612,7 +612,7 @@ JoinedPositionValueBase::JoinedPositionValueBase(const std::string& result_type,
 
 /**
 */
-QVariant JoinedPositionValueBase::resultValue(double value) const
+nlohmann::json JoinedPositionValueBase::resultValue(double value) const
 {
     //by default reformat result value to 2 decimals
     return formatValue(value);

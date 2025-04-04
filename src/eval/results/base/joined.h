@@ -25,6 +25,12 @@
 
 class Grid2D;
 
+namespace ResultReport
+{
+    class Report;
+    class SectionContentTable;
+};
+
 namespace EvaluationRequirementResult
 {
 
@@ -57,17 +63,17 @@ public:
     std::vector<std::shared_ptr<Single>>& singleResults();
     std::vector<std::shared_ptr<Single>> usedSingleResults() const;
 
-    void addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
+    void addToReport(std::shared_ptr<ResultReport::Report> report) override final;
 
-    bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+    bool hasViewableData (const ResultReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
     bool viewableDataReady() const override final;
-    std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    std::shared_ptr<nlohmann::json::object_t> viewableData(const ResultReport::SectionContentTable& table, 
                                                            const QVariant& annotation) const override final;
 
-    bool hasReference (const EvaluationResultsReport::SectionContentTable& table, 
+    bool hasReference (const ResultReport::SectionContentTable& table, 
                        const QVariant& annotation) const override final;
-    std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
+    std::string reference(const ResultReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
 
     void iterateDetails(const DetailFunc& func,
@@ -131,11 +137,11 @@ protected:
     std::vector<std::shared_ptr<Single>> results_;
 
 private:
-    void addOverview (EvaluationResultsReport::Section& section,
+    void addOverview (ResultReport::Section& section,
                       const std::string& name = "Sector Overview");
 
-    void addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addSectorDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addSectorToOverviewTable(std::shared_ptr<ResultReport::Report> root_item);
+    void addSectorDetailsToReport(std::shared_ptr<ResultReport::Report> root_item);
 
     std::shared_ptr<nlohmann::json::object_t> getOrCreateCachedViewable() const;
 

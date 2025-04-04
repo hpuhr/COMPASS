@@ -33,7 +33,6 @@ namespace ResultReport
 class Section;
 class SectionContent;
 
-
 /**
  */
 class Report : public QObject, public TreeItem

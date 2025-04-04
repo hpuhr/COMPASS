@@ -309,10 +309,10 @@ void TaskManager::beginTaskResultWriting(const std::string& name)
     current_result_->report()->clear();
 }
 
-ResultReport::Report& TaskManager::currentReport()
+std::shared_ptr<ResultReport::Report>& TaskManager::currentReport()
 {
     assert (current_result_);
-    return *current_result_->report();
+    return current_result_->report();
 }
 
 void TaskManager::endTaskResultWriting(bool store)
@@ -374,14 +374,11 @@ std::shared_ptr<TaskResult> TaskManager::result(unsigned int id) const // get ex
 
 std::shared_ptr<TaskResult> TaskManager::getOrCreateResult (const std::string& name) // get or create result
 {
-    auto it = std::find_if(results_.begin(), results_.end(),
-                           [&name](const std::pair<const unsigned int, std::shared_ptr<TaskResult>>& pair) {
-                               return pair.second && pair.second->name() == name;
-                           });
+    auto id = findResult(name);
 
-    if (it != results_.end())
+    if (id.has_value())
     {
-        return it->second;
+        return results_.at(id.value());
     }
     else // create
     {
@@ -402,14 +399,38 @@ ResultReport::Report& TaskManager::report(const std::string& name)
     return *getOrCreateResult(name)->report();
 }
 
-bool TaskManager::hasResult (const std::string& name) const
+boost::optional<unsigned int> TaskManager::findResult(const std::string& name) const
 {
     auto it = std::find_if(results_.begin(), results_.end(),
                            [&name](const std::pair<const unsigned int, std::shared_ptr<TaskResult>>& pair) {
-                               return pair.second && pair.second->name() == name;
-                           });
+                               return pair.second && pair.second->name() == name; });
+    if (it == results_.end())
+        return boost::optional<unsigned int>();
 
-    return it != results_.end();
+    return it->first;
+}
+
+bool TaskManager::hasResult (const std::string& name) const
+{
+    return findResult(name).has_value();
+}
+
+bool TaskManager::removeResult(const std::string& name)
+{
+    auto id = findResult(name);
+    if (!id.has_value())
+        return true;
+
+    const auto& result = results_.at(id.value());
+    assert(result);
+
+    auto res = COMPASS::instance().dbInterface().deleteResult(*result);
+    if (!res.ok())
+        return false;
+
+    results_.erase(id.value());
+
+    return true;
 }
 
 void TaskManager::databaseOpenedSlot()

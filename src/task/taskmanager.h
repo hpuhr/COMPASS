@@ -22,6 +22,8 @@
 #include "configurable.h"
 #include "task.h"
 
+#include <boost/optional.hpp>
+
 class COMPASS;
 class CreateARTASAssociationsTask;
 class JSONImportTask;
@@ -91,7 +93,7 @@ class TaskManager : public QObject, public Configurable
     TaskResultsWidget* widget();
 
     void beginTaskResultWriting(const std::string& name);
-    ResultReport::Report& currentReport();
+    std::shared_ptr<ResultReport::Report>& currentReport();
     void endTaskResultWriting(bool store);
 
     const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
@@ -99,6 +101,7 @@ class TaskManager : public QObject, public Configurable
     std::shared_ptr<TaskResult> getOrCreateResult (const std::string& name); // get or create result
     ResultReport::Report& report(const std::string& name);
     bool hasResult (const std::string& name) const;
+    bool removeResult(const std::string& name);
 
     void setViewableDataConfig(const nlohmann::json::object_t& data);
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
@@ -130,4 +133,5 @@ protected:
     MainWindow* getMainWindow();
 
     void loadResults();
+    boost::optional<unsigned int> findResult(const std::string& name) const;
 };

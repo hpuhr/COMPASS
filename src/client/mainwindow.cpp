@@ -169,11 +169,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::createUI()
 {
-    QWidget* main_widget = new QWidget();
+    main_widget_ = new QWidget();
 
     QVBoxLayout* main_layout = new QVBoxLayout();
     main_layout->setContentsMargins(0, 0, 0, 0);
-    main_widget->setLayout(main_layout);
+    main_widget_->setLayout(main_layout);
 
     QHBoxLayout* content_layout = new QHBoxLayout;
     content_layout->setContentsMargins(0, 0, 0, 0);
@@ -209,7 +209,7 @@ void MainWindow::createUI()
     COMPASS::instance().viewManager().init(tab_widget_);
 
     // initialize toolbox
-    tool_box_ = new ToolBox;
+    tool_box_ = new ToolBox(this);
     
     tool_box_->addTool(COMPASS::instance().dataSourceManager().loadWidget());
     tool_box_->addTool(COMPASS::instance().filterManager().widget());
@@ -231,12 +231,12 @@ void MainWindow::createUI()
     //tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
     //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0");
 
-    tool_box_->adjustSizings();
+    tool_box_->setMainContent(tab_widget_);
+    tool_box_->finalize();
     tool_box_->selectTool("Data Sources");
 
     // add toolbox and view tab widget
     content_layout->addWidget(tool_box_);
-    content_layout->addWidget(tab_widget_);
 
     // bottom widget
     QWidget* bottom_widget = new QWidget();
@@ -282,13 +282,14 @@ void MainWindow::createUI()
 
     main_layout->addWidget(bottom_widget);
 
-    setCentralWidget(main_widget);
+    setCentralWidget(main_widget_);
 
     // create menus
     createMenus();
     updateMenus();
 
-    updateSizings();
+    tool_box_->adjustSizings();
+
     updateWindowTitle();
 
     // connect signal slots
@@ -302,8 +303,6 @@ void MainWindow::createUI()
 
     connect(&COMPASS::instance().licenseManager(), &LicenseManager::changed,
             this, &MainWindow::updateWindowTitle);
-
-    connect(tool_box_, &ToolBox::toolChanged, this, &MainWindow::updateSizings);
 }
 
 void MainWindow::createMenus ()
@@ -1471,24 +1470,6 @@ void MainWindow::updateWindowTitle()
         title += "   |   " + licensee;
 
     QWidget::setWindowTitle(title.c_str());
-}
-
-void MainWindow::updateSizings()
-{
-    std::pair<int, int> stretches(0, 1);
-
-    auto screen_ratio = tool_box_->currentScreenRatio();
-    if (screen_ratio.has_value())
-        stretches = toolbox::toParts(screen_ratio.value());
-
-    QSizePolicy policy_toolbox(screen_ratio.has_value() ? QSizePolicy::Expanding : QSizePolicy::Preferred, QSizePolicy::Expanding);
-    policy_toolbox.setHorizontalStretch(stretches.first);
-
-    QSizePolicy policy_tabwidget(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    policy_tabwidget.setHorizontalStretch(stretches.second);
-
-    tool_box_->setSizePolicy(policy_toolbox);
-    tab_widget_->setSizePolicy(policy_tabwidget);
 }
 
 void MainWindow::loadingStarted()

@@ -20,16 +20,16 @@
 #include "eval/requirement/generic/generic.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttable.h"
+
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
 
 #include "eval/requirement/mom/momcorrect.h"
 #include "eval/requirement/status/coastingcorrect.h"
 #include "eval/requirement/mode_c/rocdcorrect.h"
 #include "eval/requirement/speed/accelerationcorrect.h"
 
-//using namespace Utils;
-using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
@@ -65,18 +65,16 @@ void GenericIntegerConfig::createWidget()
     assert (widget_);
 }
 
-void GenericIntegerConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void GenericIntegerConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Probability [1]", "Probability",
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 
 }
 
@@ -112,19 +110,17 @@ void GenericDoubleConfig::createWidget()
     assert (widget_);
 }
 
-void GenericDoubleConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void GenericDoubleConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
-
-    table.addRow({"Threshold [1]", "Threshold", threshold_}, nullptr);
+    table.addRow({"Threshold [1]", "Threshold", threshold_});
     table.addRow({"Probability [1]", "Probability",
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 
 }
 

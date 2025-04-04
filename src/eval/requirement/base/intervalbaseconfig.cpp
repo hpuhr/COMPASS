@@ -18,8 +18,10 @@
 #include "intervalbaseconfig.h"
 
 #include "eval/requirement/group.h"
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttable.h"
+
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
 
 #include "util/stringconv.h"
 
@@ -74,50 +76,50 @@ void IntervalBaseConfig::createWidget()
 
 /**
 */
-void IntervalBaseConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void IntervalBaseConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    auto& section = root_item->getSection("Appendix:Requirements:" + group_.name() + ":" + name_);
+    auto& section = report->getSection("Appendix:Requirements:" + group_.name() + ":" + name_);
 
     section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.getTable("req_table");
 
-    table.addRow({"Probability [%]", QString::fromStdString(probabilityDescription()),
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+    table.addRow({"Probability [%]", probabilityDescription(),
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 
     table.addRow({"Update Interval [s]", "",
-                  update_interval_s_}, nullptr);
+                  update_interval_s_});
 
     if (config_flags_ & ConfigFlags::UseMinGapLen)
     {
         table.addRow({"Use Minimum Gap Length", "If minimum gap length should be used",
-                      Utils::String::boolToString(use_min_gap_length_).c_str()}, nullptr);
+                      Utils::String::boolToString(use_min_gap_length_)});
         table.addRow({"Minimum Gap Length [s]", "Minimum gap length to be considered",
-                      min_gap_length_s_}, nullptr);
+                      min_gap_length_s_});
     }
 
     if (config_flags_ & ConfigFlags::UseMaxGapLen)
     {
         table.addRow({"Use Maximum Gap Length", "If maximum gap length should be used",
-                    Utils::String::boolToString(use_max_gap_length_).c_str()}, nullptr);
+                    Utils::String::boolToString(use_max_gap_length_)});
         table.addRow({"Maximum Gap Length [s]", "Maximum gap length to be considered",
-                    max_gap_length_s_}, nullptr);
+                    max_gap_length_s_});
     }
 
     if (config_flags_ & ConfigFlags::UseMissTol)
     {
         table.addRow({"Use Miss Tolerance", "If miss tolerance should be used",
-                      Utils::String::boolToString(use_miss_tolerance_).c_str()}, nullptr);
+                      Utils::String::boolToString(use_miss_tolerance_)});
         table.addRow({"Miss Tolerance [s]", "Acceptable time delta for miss detection",
-                      miss_tolerance_s_}, nullptr);
+                      miss_tolerance_s_});
     }
 
     if (config_flags_ & ConfigFlags::UseAnyTarget)
     {
         table.addRow({"Must hold for any Target", "Must hold for any target (every single target)",
-                    Utils::String::boolToString(hold_for_any_target_).c_str()}, nullptr);
+                    Utils::String::boolToString(hold_for_any_target_)});
     }
 
     addCustomTableEntries(table);

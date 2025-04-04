@@ -856,7 +856,7 @@ void ReconstructorBase::processSlice()
         std::string num_rec_updates_skipped_p         = perc(stats.num_rec_updates_skipped        , stats.num_rec_updates       );
         std::string num_rec_smooth_steps_failed_p     = perc(stats.num_rec_smooth_steps_failed    , stats.num_rec_updates       );
 
-        auto& section = COMPASS::instance().taskManager().currentReport().getSection("Reconstruction Statistics");
+        auto& section = COMPASS::instance().taskManager().currentReport()->getSection("Reconstruction Statistics");
 
         if (!section.hasTable("Reconstruction Statistics"))
             section.addTable("Reconstruction Statistics", 4, {"", "", "Value", "Value [%]"}, false);

@@ -20,13 +20,14 @@
 #include "eval/requirement/extra/trackconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
+
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 #include "stringconv.h"
 
 using namespace Utils;
-using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
@@ -93,30 +94,29 @@ void ExtraTrackConfig::createWidget()
     assert (widget_);
 }
 
-void ExtraTrackConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void ExtraTrackConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Probability [1]", "Probability of extra data",
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 
     table.addRow({"Minimum Duration [s]",
                   "Minimum track duration, requirement result is ignored if less",
-                  min_duration_}, nullptr);
+                  min_duration_});
 
     table.addRow({"Minimum Number of Updates [1]",
                   "Minimum number of extra target reports, requirement result is ignored if less",
-                  min_num_updates_}, nullptr);
+                  min_num_updates_});
 
     table.addRow({"Ignore Primary Only",
                   "Requirement result is ignored if target is primary only (has no"
                   " secondary attributes, also not in reference)",
-                  String::boolToString(ignore_primary_only_).c_str()}, nullptr);
+                  String::boolToString(ignore_primary_only_)});
 }
+
 }

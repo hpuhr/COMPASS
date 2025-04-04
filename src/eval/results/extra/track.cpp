@@ -149,7 +149,7 @@ std::vector<std::string> SingleExtraTrack::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleExtraTrack::targetTableValuesCustom() const
+nlohmann::json::array_t SingleExtraTrack::targetTableValuesCustom() const
 {
     return { target_->numTstUpdates(), isIgnored(), num_extra_ + num_ok_, num_ok_, num_extra_ };
 }
@@ -174,14 +174,14 @@ std::vector<std::string> SingleExtraTrack::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleExtraTrack::detailValues(const EvaluationDetail& detail,
-                                                     const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleExtraTrack::detailValues(const EvaluationDetail& detail,
+                                                       const EvaluationDetail* parent_detail) const
 {
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             detail.getValue(DetailKey::Inside),
-             detail.getValue(DetailKey::TrackNum),
-             detail.getValue(DetailKey::Extra),
-             detail.comments().generalComment().c_str() };
+    return { Utils::Time::toString(detail.timestamp()),
+             detail.getValue(DetailKey::Inside).toBool(),
+             detail.getValue(DetailKey::TrackNum).toUInt(),
+             detail.getValue(DetailKey::Extra).toBool(),
+             detail.comments().generalComment() };
 }
 
 /**

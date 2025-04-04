@@ -37,6 +37,7 @@ class QStackedWidget;
 class QLabel;
 class QMenu;
 class QToolBar;
+class QFrame;
 
 /**
  */
@@ -72,25 +73,34 @@ public:
     ToolBox(QWidget* parent = nullptr);
     virtual ~ToolBox();
 
+    void setMainContent(QWidget* content);
+
     void addTool(ToolBoxWidget* tool);
     size_t numTools() const;
 
+    void finalize();
     void adjustSizings();
 
     void selectTool(size_t idx);
     bool selectTool(const std::string& name);
+
+    bool isExpanded() const;
 
     boost::optional<toolbox::ScreenRatio> currentScreenRatio() const;
 
     void loadingStarted();
     void loadingDone();
 
-    static const int ToolIconSize;
-    static const int ToolNameFontSize;
-    static const int ToolLabelFontSize;
+    static const int   ToolIconSize;
+    static const int   ToolNameFontSize;
+    static const int   ToolLabelFontSize;
+    static const float ExpansionFactor;
 
 signals:
     void toolChanged();
+
+protected:
+    virtual void resizeEvent(QResizeEvent* event) override;
 
 private:
     struct Tool
@@ -110,19 +120,26 @@ private:
     void screenRatioChanged(toolbox::ScreenRatio screen_ratio);
     void shrink();
     void grow();
+    void toggleExpansion();
 
     std::vector<Tool> tools_;
 
-    QVBoxLayout*    icon_layout_     = nullptr;
-    QStackedWidget* widget_stack_    = nullptr;
-    QWidget*        right_widget_    = nullptr;
-    QLabel*         tool_name_label_ = nullptr;
-    QPushButton*    config_button_   = nullptr;
-    QPushButton*    shrink_button_   = nullptr;
-    QPushButton*    grow_button_     = nullptr;
-    QToolBar*       tool_bar_        = nullptr;
+    QVBoxLayout*    icon_layout_          = nullptr;
+    QStackedWidget* widget_stack_         = nullptr;
+    QWidget*        panel_widget_         = nullptr;
+    QVBoxLayout*    panel_layout_         = nullptr;
+    QFrame *        panel_content_widget_ = nullptr; 
+    QLabel*         tool_name_label_      = nullptr;
+    QPushButton*    config_button_        = nullptr;
+    QPushButton*    shrink_button_        = nullptr;
+    QPushButton*    grow_button_          = nullptr;
+    QToolBar*       tool_bar_             = nullptr;
+    QWidget*        main_widget_          = nullptr;
+    QVBoxLayout*    main_layout_          = nullptr;
+    QWidget*        main_content_widget_  = nullptr;
 
     std::unique_ptr<PopupMenu> config_menu_;
 
-    int active_tool_idx_ = -1;
+    int  active_tool_idx_ = -1;
+    bool expanded_        = false;
 };

@@ -207,7 +207,7 @@ std::vector<std::string> SingleTrackAngle::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleTrackAngle::targetTableValuesCustom() const
+nlohmann::json::array_t SingleTrackAngle::targetTableValuesCustom() const
 {
     return { formatValue(accumulator_.min()),    // "DMin"
              formatValue(accumulator_.max()),    // "DMax"
@@ -244,22 +244,22 @@ std::vector<std::string> SingleTrackAngle::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleTrackAngle::detailValues(const EvaluationDetail& detail,
-                                                     const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleTrackAngle::detailValues(const EvaluationDetail& detail,
+                                                       const EvaluationDetail* parent_detail) const
 {
     bool has_ref_pos = detail.numPositions() >= 2;
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
+    return { Utils::Time::toString(detail.timestamp()),
             !has_ref_pos,
-             detail.getValue(DetailKey::PosInside),
-             detail.getValue(DetailKey::Offset),           // "Distance"
-             detail.getValue(DetailKey::CheckPassed),      // CP"
-             detail.getValue(DetailKey::ValueRef),         // "Value Ref"
-             detail.getValue(DetailKey::ValueTst),         // "Value Tst"
-             detail.getValue(DetailKey::SpeedRef),         // "Speed Ref"
-             detail.getValue(DetailKey::NumCheckFailed),   // "#CF",
-             detail.getValue(DetailKey::NumCheckPassed),   // "#CP"
-             detail.comments().generalComment().c_str() };
+             detail.getValue(DetailKey::PosInside).toBool(),
+             detail.getValue(DetailKey::Offset).toFloat(),          // "Distance"
+             detail.getValue(DetailKey::CheckPassed).toBool(),      // CP"
+             detail.getValue(DetailKey::ValueRef).toDouble(),       // "Value Ref"
+             detail.getValue(DetailKey::ValueTst).toDouble(),       // "Value Tst"
+             detail.getValue(DetailKey::SpeedRef).toDouble(),       // "Speed Ref"
+             detail.getValue(DetailKey::NumCheckFailed).toUInt(),   // "#CF",
+             detail.getValue(DetailKey::NumCheckPassed).toUInt(),   // "#CP"
+             detail.comments().generalComment() };
 }
 
 /**

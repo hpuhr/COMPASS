@@ -23,6 +23,11 @@
 
 class QLineEdit;
 
+namespace ResultReport
+{
+    class SectionContentTable;
+}
+
 namespace EvaluationRequirement
 {
 
@@ -84,7 +89,7 @@ public:
 
 protected:
     virtual BaseConfigWidget* createWidget_impl() override;
-    virtual void addCustomTableEntries(EvaluationResultsReport::SectionContentTable& table) const override;
+    virtual void addCustomTableEntries(ResultReport::SectionContentTable& table) const override;
     virtual std::string probabilityDescription() const override;
 
     float max_distance_ft_ = 300.0f;

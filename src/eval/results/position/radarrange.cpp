@@ -73,7 +73,7 @@ std::vector<std::string> SinglePositionRadarRange::targetTableHeadersCustom() co
 
 /**
 */
-std::vector<QVariant> SinglePositionRadarRange::targetTableValuesCustom() const
+nlohmann::json::array_t SinglePositionRadarRange::targetTableValuesCustom() const
 {
     return { formatValue(accumulator_.min()), 
              formatValue(accumulator_.max()),
@@ -100,11 +100,11 @@ std::vector<Single::TargetInfo> SinglePositionRadarRange::targetInfos() const
           { "DSDev [m]"      , "Standard Deviation of distance"           , formatValue(accumulator_.stddev()) }, 
           { "DVar [m^2]"     , "Variance of distance"                     , formatValue(accumulator_.var())    } };
 
-    if (range_bias_.isValid())
-        infos.push_back({ "Range Bias [m]", "Range bias (linear estimation)", formatValue(range_bias_.toDouble()) });
+    if (!range_bias_.is_null())
+        infos.push_back({ "Range Bias [m]", "Range bias (linear estimation)", formatValue(range_bias_.get<double>()) });
 
-    if (range_gain_.isValid())
-        infos.push_back({ "Range Gain [1]", "Range gain (linear estimation)", formatValue(range_gain_.toDouble()) });
+    if (!range_gain_.is_null())
+        infos.push_back({ "Range Gain [1]", "Range gain (linear estimation)", formatValue(range_gain_.get<double>()) });
 
     infos.push_back({ "#CF [1]", "Number of updates with failed comparison" , num_failed_});
     infos.push_back({ "#CP [1]", "Number of updates with passed comparison" , num_passed_});
@@ -121,27 +121,27 @@ std::vector<std::string> SinglePositionRadarRange::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SinglePositionRadarRange::detailValues(const EvaluationDetail& detail,
-                                                             const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SinglePositionRadarRange::detailValues(const EvaluationDetail& detail,
+                                                               const EvaluationDetail* parent_detail) const
 {
     bool has_ref_pos = detail.numPositions() >= 2;
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
+    return { Utils::Time::toString(detail.timestamp()),
             !has_ref_pos,
-             detail.getValue(SinglePositionBaseCommon::DetailKey::PosInside),
-             detail.getValue(SinglePositionBaseCommon::DetailKey::Value),
-             detail.getValue(SinglePositionBaseCommon::DetailKey::CheckPassed), 
-             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckFailed), 
-             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckPassed), 
-             detail.comments().generalComment().c_str() }; 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::PosInside).toBool(),
+             detail.getValue(SinglePositionBaseCommon::DetailKey::Value).toFloat(),
+             detail.getValue(SinglePositionBaseCommon::DetailKey::CheckPassed).toBool(), 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckFailed).toUInt(), 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckPassed).toUInt(), 
+             detail.comments().generalComment() }; 
 }
 
 /**
 */
 boost::optional<double> SinglePositionRadarRange::computeFinalResultValue() const
 {
-    range_gain_ = QVariant();
-    range_bias_ = QVariant();
+    range_gain_ = nlohmann::json();
+    range_bias_ = nlohmann::json();
 
     if (accumulator_.numValues() == 0)
         return {};

@@ -51,8 +51,8 @@ public:
     TaskResultType type() const;
     void type(TaskResultType type);
 
-    const std::shared_ptr<ResultReport::Report> report() const;
-    std::shared_ptr<ResultReport::Report> report();
+    const std::shared_ptr<ResultReport::Report>& report() const;
+    std::shared_ptr<ResultReport::Report>& report();
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);

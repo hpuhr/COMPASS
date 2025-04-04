@@ -96,7 +96,7 @@ double SingleProbabilityBase::invertProb(double prob) const
 
 /**
 */
-QVariant SingleProbabilityBase::formatProbability(double prob)
+nlohmann::json SingleProbabilityBase::formatProbability(double prob)
 {
     //return Utils::String::percentToString(std::round(prob * 10000.0) / 100.0, 2).c_str();
 
@@ -105,10 +105,10 @@ QVariant SingleProbabilityBase::formatProbability(double prob)
 
 /**
 */
-QVariant SingleProbabilityBase::formatProbabilityOptional(const boost::optional<double>& prob)
+nlohmann::json SingleProbabilityBase::formatProbabilityOptional(const boost::optional<double>& prob)
 {
     if (!prob.has_value())
-        return QVariant();
+        return nlohmann::json();
 
     return SingleProbabilityBase::formatProbability(prob.value());
 }

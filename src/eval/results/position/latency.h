@@ -45,11 +45,11 @@ public:
 
 protected:
     virtual std::vector<std::string> targetTableHeadersCustom() const override;
-    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual nlohmann::json::array_t targetTableValuesCustom() const override;
     virtual std::vector<TargetInfo> targetInfos() const override;
     virtual std::vector<std::string> detailHeaders() const override;
-    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
-                                               const EvaluationDetail* parent_detail) const override;
+    virtual nlohmann::json::array_t detailValues(const EvaluationDetail& detail,
+                                                 const EvaluationDetail* parent_detail) const override;
 };
 
 /**
