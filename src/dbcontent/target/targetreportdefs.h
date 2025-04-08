@@ -263,7 +263,10 @@ struct ReconstructorInfo : public BaseInfo
     bool isModeACDetection() const;
     bool isPrimaryOnlyDetection() const;
 
+    bool isOnGround() const;
+
     bool doNotUsePosition() const;
+
 };
 
 // tmp list

@@ -255,6 +255,17 @@ bool ReconstructorInfo::isPrimaryOnlyDetection() const
     return !isModeSDetection() && !isModeACDetection();
 }
 
+bool ReconstructorInfo::isOnGround() const
+{
+    if (ground_bit_)
+        return *ground_bit_;
+
+    if (barometric_altitude_ && barometric_altitude_->altitude_ < 1000.0)
+        return true;
+
+    return false;
+}
+
 bool ReconstructorInfo::doNotUsePosition() const
 {
     return unsused_ds_pos_ || invalidated_pos_ || is_pos_outlier_;

@@ -1583,7 +1583,11 @@ boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime
 
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
-        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.ground_bit_.has_value(); },
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
+            // if (tr.isPrimaryOnlyDetection()) // override for primary-only CAT010 having GBS=0
+            //     return false; // bad thing to do for air PSRs
+            // else
+                return tr.ground_bit_.has_value(); },
         interp_options);
 
     bool lower_has_val = lower_tr && lower_tr->ground_bit_.has_value();
