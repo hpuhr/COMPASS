@@ -119,7 +119,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
 
     if (tr.acad_ && acads_.size() && !acads_.count(*tr.acad_))
     {
-        logerr << "Target: addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
+        logerr << "ReconstructorTarget " << utn_ << ": addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
         assert (false);
     }
 
@@ -224,7 +224,8 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     {
         if (acads_.size() && !acads_.count(*tr.acad_))
         {
-            logwrn << "Target: addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
+            logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: acad mismatch, target "
+                   << asStr() << " tr '" << tr.asStr() << "'";
         }
 
         if (!acads_.count(*tr.acad_))
@@ -237,6 +238,19 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
 
         if (!acids_.count(acid))
             acids_.insert(acid);
+    }
+
+    if (tr.ecat_)
+    {
+        if (ecat_)
+        {
+            if (*tr.ecat_ != ecat_)
+                logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: ecat mismatch, target "
+                       << String::ecatToString(*ecat_)
+                       << " tr '" << String::ecatToString(*tr.ecat_) << "'";
+        }
+        else
+            ecat_ = *tr.ecat_;
     }
 
     //    if (tr.has_adsb_info_ && tr.has_mops_version_)

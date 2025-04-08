@@ -147,11 +147,11 @@ public:
 protected:
     DBContentManager& dbcont_manager_;
 
-    QStringList table_columns_ {"Use", "UTN", "Comment", "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs",
+    QStringList table_columns_ {"Use", "UTN", "Comment", "ECAT", "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs",
                                 "M3/A", "MC Min", "MC Max", "MOPS"};
-    std::vector<int> main_columns_      { 0, 1, 2, 3 };
-    std::vector<int> duration_columns_  { 4, 5, 6 };
-    std::vector<int> secondary_columns_ { 7, 8, 9, 10, 11, 12 };
+    std::vector<int> main_columns_      { 0, 1, 2, 3};
+    std::vector<int> duration_columns_  { 4, 5, 6, 7 };
+    std::vector<int> secondary_columns_ { 8, 9, 10, 11, 12, 13 };
 
     bool show_main_columns_      = true;
     bool show_duration_columns_ = false;

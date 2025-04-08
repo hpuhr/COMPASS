@@ -126,6 +126,10 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         {
             return target.comment().c_str();
         }
+        else if (col_name == "ECAT")
+        {
+            return target.emitterCategoryStr().c_str();
+        }
         else if (col_name == "#Updates")
         {
             return target.numUpdates();
@@ -605,6 +609,9 @@ void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::Recon
         tgt.aircraftAddresses(tgt_it.second.acads_);
         tgt.aircraftIdentifications(tgt_it.second.acids_);
         tgt.modeACodes(tgt_it.second.mode_as_);
+
+        if (tgt_it.second.ecat_)
+            tgt.emitterCategory(dbContent::Target::fromECAT(tgt_it.second.ecat_));
 
         if (tgt_it.second.hasTimestamps())
         {

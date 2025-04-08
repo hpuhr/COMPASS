@@ -22,11 +22,75 @@ const std::string KEY_LATITUDE_MIN = "latitude_min";
 const std::string KEY_LATITUDE_MAX = "latitude_max";
 const std::string KEY_LONGITUDE_MIN = "longitude_min";
 const std::string KEY_LONGITUDE_MAX = "longitude_max";
+const std::string KEY_ECAT = "emitter_category";
 
 const Property     Target::DBColumnID     = Property("utn" , PropertyDataType::UINT);
 const Property     Target::DBColumnInfo   = Property("json", PropertyDataType::JSON);
 const PropertyList Target::DBPropertyList = PropertyList({ Target::DBColumnID,
                                                            Target::DBColumnInfo });
+
+const nlohmann::json Target::emitter_specs_ = {
+    { "LightAircraft", {
+                          {"avg_size_m", 10},
+                          {"max_speed_knots", 140},
+                          {"max_accel_mps2", 2.0},
+                          {"ground_only", false}
+                      }},
+    { "SmallAircraft", {
+                          {"avg_size_m", 20},
+                          {"max_speed_knots", 250},
+                          {"max_accel_mps2", 2.5},
+                          {"ground_only", false}
+                      }},
+    { "MediumAircraft", {
+                           {"avg_size_m", 35},
+                           {"max_speed_knots", 450},
+                           {"max_accel_mps2", 3.0},
+                           {"ground_only", false}
+                       }},
+    { "HighVortexLargeAircraft", {
+                                    {"avg_size_m", 60},
+                                    {"max_speed_knots", 480},
+                                    {"max_accel_mps2", 2.5},
+                                    {"ground_only", false}
+                                }},
+    { "HeavyAircraft", {
+                          {"avg_size_m", 70},
+                          {"max_speed_knots", 510},
+                          {"max_accel_mps2", 2.2},
+                          {"ground_only", false}
+                      }},
+    { "HighSpeedManoeuvrable", {
+                                  {"avg_size_m", 20},
+                                  {"max_speed_knots", 700},
+                                  {"max_accel_mps2", 9.0},
+                                  {"ground_only", false}
+                              }},
+    { "Rotocraft", {
+                      {"avg_size_m", 15},
+                      {"max_speed_knots", 160},
+                      {"max_accel_mps2", 1.5},
+                      {"ground_only", false}
+                  }},
+    { "OtherAirborne", {
+                          {"avg_size_m", 12},
+                          {"max_speed_knots", 120},
+                          {"max_accel_mps2", 1.0},
+                          {"ground_only", false}
+                      }},
+    { "Vehicle", {
+                    {"avg_size_m", 8},
+                    {"max_speed_knots", 50},
+                    {"max_accel_mps2", 1.2},
+                    {"ground_only", true}
+                }},
+    { "Obstacle", {
+                     {"avg_size_m", 1},
+                     {"max_speed_knots", 0},
+                     {"max_accel_mps2", 0},
+                     {"ground_only", true}
+                 }}
+};
 
 Target::Target(unsigned int utn, nlohmann::json info)
     : utn_(utn), info_(info)
@@ -364,6 +428,24 @@ double Target::longitudeMax() const
 {
     assert (info_.count(KEY_LONGITUDE_MAX));
     return info_.at(KEY_LONGITUDE_MAX);
+}
+
+void Target::emitterCategory(Target::EmitterCategory category)
+{
+    info_[KEY_ECAT] = static_cast<unsigned int>(category);
+}
+
+Target::EmitterCategory Target::emitterCategory() const
+{
+    if (!info_.contains(KEY_ECAT) || !info_[KEY_ECAT].is_number_unsigned()) {
+        return EmitterCategory::Unknown;
+    }
+    return fromECAT(info_[KEY_ECAT].get<unsigned int>());
+}
+
+std::string Target::emitterCategoryStr() const
+{
+    return toString(emitterCategory());
 }
 
 }
