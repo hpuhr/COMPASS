@@ -257,11 +257,11 @@ bool ReconstructorInfo::isPrimaryOnlyDetection() const
 
 bool ReconstructorInfo::isOnGround() const
 {
+    if (data_source_is_ground_only)
+        return true;
+
     if (ground_bit_)
         return *ground_bit_;
-
-    if (barometric_altitude_ && barometric_altitude_->altitude_ < 1000.0)
-        return true;
 
     return false;
 }

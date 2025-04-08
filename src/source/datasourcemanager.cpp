@@ -969,6 +969,19 @@ const std::vector<std::unique_ptr<dbContent::DBDataSource>>& DataSourceManager::
     return db_data_sources_;
 }
 
+std::set<unsigned int> DataSourceManager::groundOnlyDBDataSources() const
+{
+    std::set<unsigned int> ds_ids;
+
+    for (auto& ds_it : db_data_sources_)
+    {
+        if (ds_it->detectionType() == DataSourceBase::DetectionType::PrimaryOnlyGround)
+            ds_ids.insert(ds_it->id());
+    }
+
+    return ds_ids;
+}
+
 void DataSourceManager::createNetworkDBDataSources()
 {
     unsigned int ds_id;
@@ -983,7 +996,7 @@ void DataSourceManager::createNetworkDBDataSources()
             {
                 loginf << "DataSourceManager: createNetworkDBDataSources: ds_id " << ds_id << " from config";
 
-                db_data_sources_.emplace_back(move(ds_it->getAsNewDBDS()));
+                db_data_sources_.emplace_back(ds_it->getAsNewDBDS());
                 //addNewDataSource(ds_it->id());
             }
 

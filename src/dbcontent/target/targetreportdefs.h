@@ -253,6 +253,7 @@ struct ReconstructorInfo : public BaseInfo
 
     boost::optional<double> track_angle_;
     boost::optional<bool> ground_bit_;
+    bool data_source_is_ground_only {false};
 
     boost::optional<targetReport::Position>& position();
     const boost::optional<targetReport::Position>& position() const;
@@ -263,7 +264,7 @@ struct ReconstructorInfo : public BaseInfo
     bool isModeACDetection() const;
     bool isPrimaryOnlyDetection() const;
 
-    bool isOnGround() const;
+    bool isOnGround() const; // false if unknown
 
     bool doNotUsePosition() const;
 

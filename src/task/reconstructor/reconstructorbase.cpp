@@ -1013,6 +1013,8 @@ void ReconstructorBase::createTargetReports()
 
     auto& ds_man = COMPASS::instance().dataSourceManager();
 
+    std::set<unsigned int> ground_only_ds_ids = ds_man.groundOnlyDBDataSources();
+
     for (auto& buf_it : *accessor_)
     {
         assert (dbcont_man.existsDBContent(buf_it.first));
@@ -1087,6 +1089,7 @@ void ReconstructorBase::createTargetReports()
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
 
+
                 info.unsused_ds_pos_ =
                     !info.position().has_value()
                         || (unused_ds_ids.count(info.ds_id_)
@@ -1099,6 +1102,7 @@ void ReconstructorBase::createTargetReports()
 
                 info.track_angle_ = tgt_acc.trackAngle(cnt);
                 info.ground_bit_ = tgt_acc.groundBit(cnt);
+                info.data_source_is_ground_only = ground_only_ds_ids.count(info.ds_id_);
 
                 // insert info
                 target_reports_[record_num] = info;
