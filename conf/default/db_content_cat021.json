@@ -1445,7 +1445,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "SGV GSS",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "",
                     "unit": ""
                 }
@@ -1471,7 +1471,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "SGV HGT",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "",
                     "unit": ""
                 }
@@ -2277,7 +2277,7 @@
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Track Angle",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "TrAng",
                     "unit": "Degree"
                 }
@@ -2303,7 +2303,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "Track Angle Rate",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "TAR",
                     "unit": ""
                 }

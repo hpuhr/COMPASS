@@ -1250,7 +1250,7 @@
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Track Angle ADD",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "TAN ADD",
                     "unit": "Degree"
                 }
@@ -1276,7 +1276,7 @@
                     "dimension": "Speed",
                     "is_key": false,
                     "name": "Ground Speed ADD",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "GSP ADD",
                     "unit": "NM/Second"
                 }
@@ -2225,7 +2225,7 @@
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Track Angle",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "TrAng",
                     "unit": "Degree"
                 }

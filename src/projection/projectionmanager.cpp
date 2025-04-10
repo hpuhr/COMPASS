@@ -45,7 +45,8 @@ const string ProjectionManager::RS2G_NAME = "RS2G";
 //const string ProjectionManager::GEO_NAME = "Geo";
 
 ProjectionManager::ProjectionManager()
-    : Configurable("ProjectionManager", "ProjectionManager0", 0, "projection.json")
+    : Configurable("ProjectionManager", "ProjectionManager0", 0, "projection.json"),
+    mag_model_("wmm2020", HOME_DATA_DIRECTORY + "wmm") // WMM model (World Magnetic Model)
 {
     loginf << "ProjectionManager: constructor";
 
@@ -597,6 +598,21 @@ double ProjectionManager::geoidHeightM (double latitude_deg, double longitude_de
 
     // return geoid_height;
 }
+
+double ProjectionManager::declination(float year, double latitude_deg, double longitude_deg, double altitude_m)
+{
+    // Compute magnetic declination (variation)
+    double Bx, By, Bz;
+
+    mag_model_(year, latitude_deg, longitude_deg, altitude_m, Bx, By, Bz);
+
+    double H, F, declination, I;
+
+    GeographicLib::MagneticModel::FieldComponents(Bx, By, Bz, H, F, declination, I);
+
+    return declination;
+}
+
 
 void ProjectionManager::test()
 {
