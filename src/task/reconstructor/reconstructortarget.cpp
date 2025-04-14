@@ -2383,6 +2383,20 @@ void ReconstructorTarget::removeTargetReportsLaterOrEqualThan(boost::posix_time:
     references_.clear();
 }
 
+void ReconstructorTarget::targetCategory(TargetBase::Category category)
+{
+    ecat_ = static_cast<unsigned int>(category);
+}
+
+TargetBase::Category ReconstructorTarget::targetCategory() const
+{
+    if (!ecat_) {
+        return Category::Unknown;
+    }
+    return TargetBase::fromECAT(ecat_);
+}
+
+
 bool ReconstructorTarget::hasTracker() const
 {
     return (chain() != nullptr);

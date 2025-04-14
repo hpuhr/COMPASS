@@ -4,6 +4,7 @@
 #include "projection/transformation.h"
 #include "reconstruction_defs.h"
 #include "reconstructorbase.h"
+#include "targetbase.h"
 
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/optional.hpp>
@@ -31,7 +32,7 @@ enum class ComparisonResult
     DIFFERENT
 };
 
-class ReconstructorTarget
+class ReconstructorTarget : public TargetBase
 {
 public:
     struct GlobalStats
@@ -319,6 +320,9 @@ public:
 
     void removeOutdatedTargetReports();
     void removeTargetReportsLaterOrEqualThan(boost::posix_time::ptime ts);
+
+    virtual void targetCategory(Category ecat);
+    virtual Category targetCategory() const;
 
     // online reconstructor
     size_t trackerCount() const;
