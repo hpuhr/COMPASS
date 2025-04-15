@@ -48,10 +48,7 @@ TargetModel::TargetModel(const std::string& class_id, const std::string& instanc
     createSubConfigurables();
 }
 
-TargetModel::~TargetModel()
-{
-
-}
+TargetModel::~TargetModel() = default;
 
 void TargetModel::clear()
 {
@@ -1038,9 +1035,14 @@ void TargetModel::showDurationColumns(bool show)
     show_duration_columns_ = show;
 }
 
-void TargetModel::showSecondaryColumns(bool show)
+void TargetModel::showModeSColumns(bool show)
 {
-    show_secondary_columns_ = show;
+    show_mode_s_columns_ = show;
+}
+
+void TargetModel::showModeACColumns(bool show)
+{
+    show_mode_ac_columns_ = show;
 }
 
 }

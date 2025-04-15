@@ -555,7 +555,6 @@ void ToolBox::toggleExpansion()
         panel_content_widget_->setParent(this);
         panel_content_widget_->raise();
         panel_content_widget_->setAutoFillBackground(true);
-
         panel_content_widget_->show();
     }
 
