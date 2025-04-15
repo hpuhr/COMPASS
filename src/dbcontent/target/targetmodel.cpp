@@ -610,8 +610,8 @@ void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::Recon
         tgt.aircraftIdentifications(tgt_it.second.acids_);
         tgt.modeACodes(tgt_it.second.mode_as_);
 
-        if (tgt_it.second.ecat_)
-            tgt.emitterCategory(dbContent::Target::fromECAT(tgt_it.second.ecat_));
+        if (tgt_it.second.ecat_ && *tgt_it.second.ecat_ != (unsigned int) dbContent::Target::Category::Unknown)
+            tgt.targetCategory(dbContent::Target::fromECAT(tgt_it.second.ecat_));
 
         if (tgt_it.second.hasTimestamps())
         {
