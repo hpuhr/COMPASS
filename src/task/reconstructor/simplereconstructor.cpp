@@ -37,9 +37,19 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id,
     registerParameter("no_value_acc_fallback", &settings_.no_value_acc_fallback_, settings_.no_value_acc_fallback_);
 
 
+    // target classification
+    registerParameter("min_aircraft_modec", &base_settings_.min_aircraft_modec_, base_settings_.min_aircraft_modec_);
+
+    registerParameter("vehicle_acids", &base_settings_.vehicle_acids_, {});
+    base_settings_.setVehicleACIDs(base_settings_.vehicle_acids_);
+    registerParameter("vehicle_acads", &base_settings_.vehicle_acads_, {});
+    base_settings_.setVehicleACADs(base_settings_.vehicle_acads_);
+
     // reconstruction settings (check base for other settings)
-    registerParameter("ref_rec_type", (int*)&referenceCalculatorSettings().kalman_type_assoc, (int)kalman::KalmanType::UMKalman2D);
-    registerParameter("ref_rec_type_final", (int*)&referenceCalculatorSettings().kalman_type_final, (int)kalman::KalmanType::UMKalman2D);
+    registerParameter("ref_rec_type", (int*)&referenceCalculatorSettings().kalman_type_assoc,
+                      (int)kalman::KalmanType::UMKalman2D);
+    registerParameter("ref_rec_type_final", (int*)&referenceCalculatorSettings().kalman_type_final,
+                      (int)kalman::KalmanType::UMKalman2D);
 }
 
 SimpleReconstructor::~SimpleReconstructor() {}

@@ -38,6 +38,8 @@ extern double secondsSinceMidnightUTC();
 
 extern int tbbCurrentThreadID();
 
+extern void printBacktrace();
+
 }  // namespace System
 }  // namespace Utils
 

@@ -110,7 +110,9 @@ class ReconstructorBaseSettings
     float min_aircraft_modec_ {1000};
 
     std::string vehicle_acids_;
+    std::set<std::string> vehicle_acids_set_;
     std::string vehicle_acads_;
+    std::set<unsigned int> vehicle_acads_set_;
 
     // fallback accuracies
     double numerical_min_std_dev_ {1E-3};
@@ -120,6 +122,9 @@ class ReconstructorBaseSettings
     float unspecifc_acc_acc_fallback_ {10};
 
     float no_value_acc_fallback_ {10000};
+
+    void setVehicleACIDs(const std::string& value);
+    void setVehicleACADs(const std::string& value);
 };
 
 /**
@@ -296,6 +301,9 @@ public:
 
     void informConfigChanged();
     void resetTimeframeSettings();
+
+    bool isVehicleACID(const std::string& acid);
+    bool isVehicleACAD(unsigned int value);
 
 signals:
     void configChanged(); 

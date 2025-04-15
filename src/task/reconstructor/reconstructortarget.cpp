@@ -220,6 +220,19 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
         {tr.timestamp_, tr.record_num_});
     // dbcontent id -> ds_id -> ts -> record_num
 
+    if (tr.ecat_ && *tr.ecat_ != 0)
+    {
+        if (ecat_)
+        {
+            if (*tr.ecat_ != ecat_)
+                logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: ecat mismatch, target ecat "
+                       << *ecat_ << " " << String::ecatToString(*ecat_)
+                       << " tr " << *tr.ecat_ << " " << String::ecatToString(*tr.ecat_) << "";
+        }
+        else
+            ecat_ = *tr.ecat_;
+    }
+
     if (tr.acad_)
     {
         if (acads_.size() && !acads_.count(*tr.acad_))
@@ -229,7 +242,15 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
         }
 
         if (!acads_.count(*tr.acad_))
+        {
             acads_.insert(*tr.acad_);
+
+            if (!ecat_ || *ecat_ == 0) // no ecat info, check if vehicle by acad
+            {
+                if (reconstructor_.isVehicleACAD(*tr.acad_))
+                    ecat_ = (unsigned int) TargetBase::Category::Vehicle;
+            }
+        }
     }
 
     if (tr.acid_)
@@ -237,20 +258,15 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
         string acid = String::trim(*tr.acid_);
 
         if (!acids_.count(acid))
-            acids_.insert(acid);
-    }
-
-    if (tr.ecat_)
-    {
-        if (ecat_)
         {
-            if (*tr.ecat_ != ecat_)
-                logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: ecat mismatch, target "
-                       << String::ecatToString(*ecat_)
-                       << " tr '" << String::ecatToString(*tr.ecat_) << "'";
+            acids_.insert(acid);
+
+            if (!ecat_ || *ecat_ == 0) // no ecat info, check if vehicle by acid
+            {
+                if (reconstructor_.isVehicleACID(acid))
+                    ecat_ = (unsigned int) TargetBase::Category::Vehicle;
+            }
         }
-        else
-            ecat_ = *tr.ecat_;
     }
 
     //    if (tr.has_adsb_info_ && tr.has_mops_version_)

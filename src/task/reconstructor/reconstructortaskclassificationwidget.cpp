@@ -2,7 +2,7 @@
 #include "reconstructortask.h"
 #include "logger.h"
 
-#include <QTextEdit>>
+#include <QTextEdit>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QVBoxLayout>
@@ -34,7 +34,7 @@ ReconstructorTaskClassificationWidget::ReconstructorTaskClassificationWidget(Rec
 
     vehicle_acads_edit_ = new QTextEdit();
     connect(vehicle_acads_edit_, &QTextEdit::textChanged, this,
-            &ReconstructorTaskClassificationWidget::vehicleACIDsChangedSlot);
+            &ReconstructorTaskClassificationWidget::vehicleACADsChangedSlot);
 
     layout->addRow(new QLabel("Vehicle ACADs"), vehicle_acads_edit_);
 
@@ -61,10 +61,10 @@ void ReconstructorTaskClassificationWidget::minAircraftModeCEditedSlot (int valu
 void ReconstructorTaskClassificationWidget::vehicleACIDsChangedSlot()
 {
     assert (vehicle_acids_edit_);
-    reconstructor_.settings().vehicle_acids_ = vehicle_acids_edit_->document()->toPlainText().toStdString();
+    reconstructor_.settings().setVehicleACIDs(vehicle_acids_edit_->document()->toPlainText().toStdString());
 }
 void ReconstructorTaskClassificationWidget::vehicleACADsChangedSlot()
 {
     assert (vehicle_acads_edit_);
-    reconstructor_.settings().vehicle_acads_ = vehicle_acads_edit_->document()->toPlainText().toStdString();
+    reconstructor_.settings().setVehicleACADs(vehicle_acads_edit_->document()->toPlainText().toStdString());
 }
