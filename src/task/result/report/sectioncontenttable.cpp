@@ -458,11 +458,14 @@ void SectionContentTable::clicked(unsigned int row)
     }
     else if (!annotation.section_link.empty() && !annotation.section_figure.empty())
     {
-        loginf << "SectionContentTable: clicked: index has associated viewable via section " << annotation.section_link;
+        loginf << "SectionContentTable: clicked: index has associated viewable via" 
+               << " section '" << annotation.section_link << "'"
+               << " figure '" << annotation.section_figure << "'";
         has_valid_link = true;
 
         //figure from section link + figure name
         auto& section = report_->getSection(annotation.section_link);
+
         if (section.hasFigure(annotation.section_figure))
             figure = &section.getFigure(annotation.section_figure);
     }

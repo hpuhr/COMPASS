@@ -76,6 +76,7 @@ public:
     bool hasText (const std::string& name);
     SectionContentText& getText (const std::string& name);
     SectionContentText& addText (const std::string& name);
+    size_t numTexts() const;
 
     bool hasTable (const std::string& name);
     SectionContentTable& getTable (const std::string& name);
@@ -84,12 +85,14 @@ public:
                                    const std::vector<std::string> headings,
                                    bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
     std::vector<std::string> getTableNames() const;
+    size_t numTables() const;
 
     bool hasFigure (const std::string& name);
     SectionContentFigure& getFigure (const std::string& name);
     SectionContentFigure& addFigure (const std::string& name, 
                                      const SectionContentViewable& viewable);
     std::vector<SectionContentFigure*> getFigures();
+    size_t numFigures() const;
 
     std::shared_ptr<SectionContent> retrieveContent(unsigned int id);
 
@@ -142,6 +145,7 @@ protected:
     boost::optional<size_t> findContent(const std::string& name, SectionContent::Type type) const;
     std::vector<size_t> findContents(SectionContent::Type type) const;
     bool hasContent(const std::string& name, SectionContent::Type type) const;
+    size_t numContents(SectionContent::Type type) const;
 
     void createContentWidget();
 

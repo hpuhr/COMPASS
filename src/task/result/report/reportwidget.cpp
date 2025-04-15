@@ -37,6 +37,9 @@ ReportWidget::ReportWidget(TaskResultsWidget& task_result_widget)
         connect (back_button_, &QPushButton::clicked, this, &ReportWidget::stepBackSlot);
         button_layout->addWidget(back_button_);
 
+        current_section_label_ = new QLabel;
+        button_layout->addWidget(current_section_label_);
+
         button_layout->addStretch();
 
         sections_button_ = new QPushButton("Sections");
@@ -83,10 +86,20 @@ void ReportWidget::setReport(const std::shared_ptr<Report>& report)
     tree_view_->setRootIsDecorated(false);
     tree_view_->expandToDepth(3);
     tree_view_->setFixedSize(500, 1000);
+
+    id_history_.clear();
+
+    updateBackButton();
+    updateCurrentSection();
 }
+
 void ReportWidget::clear()
 {
     tree_model_.clear();
+    id_history_.clear();
+
+    updateBackButton();
+    updateCurrentSection();
 }
 
 void ReportWidget::expand()
@@ -153,10 +166,11 @@ void ReportWidget::itemClickedSlot(const QModelIndex& index)
         assert (section);
 
         loginf << "ReportWidget: itemClickedSlot: section " << section->name();
-        showResultWidget(section->getContentWidget());
+        showResultWidget(section);
     }
 
     updateBackButton();
+    updateCurrentSection();
 }
 
 void ReportWidget::itemDblClickedSlot(const QModelIndex& index)
@@ -200,23 +214,29 @@ void ReportWidget::stepBackSlot()
     reshowLastId(); // show last id
 
     updateBackButton();
+    updateCurrentSection();
 }
 
-void ReportWidget::showResultWidget(QWidget* widget)
+void ReportWidget::showResultWidget(Section* section)
 {
     assert(results_widget_);
 
-    if (!widget)
+    if (!section)
     {
         while (results_widget_->count() > 0)  // remove all widgets
             results_widget_->removeWidget(results_widget_->widget(0));
+
         return;
     }
+
+    auto widget = section->getContentWidget();
 
     if (results_widget_->indexOf(widget) < 0)
         results_widget_->addWidget(widget);
 
     results_widget_->setCurrentWidget(widget);
+
+    auto id = QString::fromStdString(section->id());
 }
 
 void ReportWidget::expandAllParents (QModelIndex index)
@@ -239,6 +259,11 @@ void ReportWidget::updateBackButton ()
     assert (back_button_);
 
     back_button_->setEnabled(id_history_.size() > 1);
+}
+
+void ReportWidget::updateCurrentSection()
+{
+    current_section_label_->setText(id_history_.empty() ? "" : QString::fromStdString(id_history_.back()));
 }
 
 boost::optional<nlohmann::json> ReportWidget::getTableData(const std::string& result_id,

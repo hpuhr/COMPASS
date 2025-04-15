@@ -187,15 +187,14 @@ void Joined::addSectorToOverviewTable(std::shared_ptr<ResultReport::Report> repo
 
     auto must_hold_for_any_target = requirement_->mustHoldForAnyTarget();
 
-    auto ref = reference(ov_table, {});
-    auto fig = SectorOverviewID;
+    auto ref = getRequirementSectionID(); // this gives the associated requirement section link 
+                                          // needed to retrieve the correct section from the report
+    auto fig = SectorOverviewID;          // overview figure added in addSectorDetailsToReport()
 
     if (must_hold_for_any_target.has_value() && must_hold_for_any_target.value())
     {
         //just check if any target failed
         std::string result = num_failed_targets_ == 0 ? "Passed" : "Failed";
-
-        
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result Value", "Condition", "Condition Result"
         ov_table.addRow({ sector_layer_.name(), 

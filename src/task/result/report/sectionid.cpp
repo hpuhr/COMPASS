@@ -24,7 +24,9 @@
 namespace ResultReport
 {
 
-const std::string SectionID::Sep = ":";
+const std::string SectionID::Sep            = ":";
+const std::string SectionID::SectionReport  = "Report";
+const std::string SectionID::SectionResults = "Results";
 
 /**
 */
@@ -59,6 +61,19 @@ std::string SectionID::sectionID2Path(const std::string& section_id)
     boost::replace_all(p, " ", "_");
 
     return (p + "/");
+}
+
+/**
+*/
+std::string SectionID::prependReportResults(const std::string& section_id)
+{
+    const std::string prefix = SectionReport + Sep + SectionResults + Sep;
+
+    //already prepended?
+    if (QString::fromStdString(section_id).startsWith(QString::fromStdString(prefix)))
+        return section_id;
+
+    return prefix + section_id;
 }
 
 }

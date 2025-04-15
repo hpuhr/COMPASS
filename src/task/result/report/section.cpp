@@ -266,6 +266,13 @@ SectionContentText& Section::addText(const std::string& name)
 
 /**
 */
+size_t Section::numTexts() const
+{
+    return numContents(SectionContent::Type::Text);
+}
+
+/**
+*/
 bool Section::hasTable(const std::string& name)
 {
     return hasContent(name, SectionContent::Type::Table);
@@ -330,6 +337,13 @@ SectionContentTable& Section::addTable(const std::string& name,
     assert (hasTable(name));
 
     return *ptr;
+}
+
+/**
+*/
+size_t Section::numTables() const
+{
+    return numContents(SectionContent::Type::Table);
 }
 
 /**
@@ -414,6 +428,13 @@ std::vector<SectionContentFigure*> Section::getFigures()
     }
 
     return figures;
+}
+
+/**
+*/
+size_t Section::numFigures() const
+{
+    return numContents(SectionContent::Type::Figure);
 }
 
 /**
@@ -554,6 +575,8 @@ boost::optional<size_t> Section::findContent(const std::string& name, SectionCon
 {
     for (size_t i = 0; i < content_.size(); ++i)
     {
+        //loginf << "name: " << content_names_[ i ] << " vs " << name << " - type: " << content_types_[ i ] << " vs " << (int)type;
+
         if (content_names_[ i ] == name && (SectionContent::Type)content_types_[ i ] == type)
             return i;
     }
@@ -581,6 +604,21 @@ std::vector<size_t> Section::findContents(SectionContent::Type type) const
 bool Section::hasContent(const std::string& name, SectionContent::Type type) const
 {
     return findContent(name, type).has_value();
+}
+
+/**
+*/
+size_t Section::numContents(SectionContent::Type type) const
+{
+    size_t num = 0;
+
+    for (size_t i = 0; i < content_.size(); ++i)
+    {
+        if ((SectionContent::Type)content_types_[ i ] == type)
+            ++num;
+    }
+
+    return num;
 }
 
 /**
