@@ -131,8 +131,10 @@ private:
     QFrame *        panel_content_widget_ = nullptr; 
     QLabel*         tool_name_label_      = nullptr;
     QPushButton*    config_button_        = nullptr;
-    QPushButton*    shrink_button_        = nullptr;
-    QPushButton*    grow_button_          = nullptr;
+    QAction*        shrink_action_        = nullptr;
+    QAction*        grow_action_          = nullptr;
+    QAction*        expand_action_        = nullptr;
+    QToolBar*       tool_bar_default_     = nullptr;
     QToolBar*       tool_bar_             = nullptr;
     QWidget*        main_widget_          = nullptr;
     QVBoxLayout*    main_layout_          = nullptr;

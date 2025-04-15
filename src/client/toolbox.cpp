@@ -120,6 +120,7 @@ void ToolBox::createUI()
     tool_name_label_->setFont(name_font);
 
     tool_bar_ = new QToolBar;
+    tool_bar_->setIconSize(UI_ICON_SIZE);
 
     config_button_ = new QPushButton;
     config_button_->setStyleSheet("QPushButton::menu-indicator { image: none; }");
@@ -130,22 +131,29 @@ void ToolBox::createUI()
     config_menu_.reset(new PopupMenu(config_button_));
     config_menu_->setPreShowCallback([ = ] () { this->updateMenu(); });
 
-    shrink_button_ = new QPushButton;
-    shrink_button_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_left.png").c_str()));
-    shrink_button_->setFixedSize(UI_ICON_SIZE); 
-    shrink_button_->setFlat(UI_ICON_BUTTON_FLAT);
+    tool_bar_default_ = new QToolBar;
+    tool_bar_default_->setIconSize(UI_ICON_SIZE);
 
-    connect(shrink_button_, &QPushButton::pressed, this, &ToolBox::shrink);
+    shrink_action_ = tool_bar_default_->addAction("Decrease Width");
+    shrink_action_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_left.png").c_str()));
+    shrink_action_->setToolTip("Decrease Width [-]");
+    shrink_action_->setShortcut(Qt::Key_Minus);
 
-    grow_button_ = new QPushButton;
-    grow_button_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_right.png").c_str()));
-    grow_button_->setFixedSize(UI_ICON_SIZE); 
-    grow_button_->setFlat(UI_ICON_BUTTON_FLAT);
+    connect(shrink_action_, &QAction::triggered, this, &ToolBox::shrink);
 
-    connect(grow_button_, &QPushButton::pressed, this, &ToolBox::toggleExpansion);
+    grow_action_ = tool_bar_default_->addAction("Increase Width");
+    grow_action_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_right.png").c_str()));
+    grow_action_->setToolTip("Increase Width [+]");
+    grow_action_->setShortcut(Qt::Key_Plus);
 
-    top_layout->addWidget(shrink_button_);
-    top_layout->addWidget(grow_button_);
+    connect(grow_action_, &QAction::triggered, this, &ToolBox::grow);
+
+    expand_action_ = tool_bar_default_->addAction("Expand");
+    expand_action_->setShortcut(Qt::Key_NumberSign);
+
+    connect(expand_action_, &QAction::triggered, this, &ToolBox::toggleExpansion);
+
+    top_layout->addWidget(tool_bar_default_);
     top_layout->addSpacerItem(new QSpacerItem(20, 1, QSizePolicy::Fixed, QSizePolicy::Fixed));
     top_layout->addWidget(tool_name_label_);
     top_layout->addStretch(1);
@@ -173,6 +181,7 @@ void ToolBox::createUI()
     layout->addWidget(main_widget_);
 
     updateToolBar();
+    updateButtons();
 }
 
 /**
@@ -250,25 +259,26 @@ void ToolBox::addTool(ToolBoxWidget* tool)
     auto font = button->font();
     font.setPointSize(ToolLabelFontSize);
 
+    int tool_idx = (int)tools_.size();
+
     button->setIcon(icon);
     button->setText(QString::fromStdString(label));
-    button->setToolTip(QString::fromStdString(info));
+    button->setToolTip(QString::fromStdString(info) + " [" + QString::number(tool_idx + 1) + "]");
     button->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextUnderIcon);
     button->setIconSize(QSize(ToolIconSize, ToolIconSize));
     button->setCheckable(true);
     button->setFont(font); 
+    button->setShortcut(Qt::Key_1 + tool_idx);
 
     tool->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    int toolIdx = (int)tools_.size();
-
-    connect(button, &ToolButton::pressed, [ this, toolIdx ] () { this->toolActivated(toolIdx); });
+    
+    connect(button, &ToolButton::pressed, [ this, tool_idx ] () { this->toolActivated(tool_idx); });
     connect(button, &ToolButton::rightClicked, [ tool ] () { tool->rightClicked(); });
     connect(tool, &ToolBoxWidget::iconChangedSignal, [ button, tool ] { button->setIcon(tool->toolIcon()); } );
     connect(tool, &ToolBoxWidget::toolsChangedSignal, [ this ] () { this->updateToolBar(); });
 
     Tool t;
-    t.idx    = toolIdx;
+    t.idx    = tool_idx;
     t.widget = tool;
     t.button = button;
 
@@ -484,9 +494,12 @@ void ToolBox::updateButtons()
     {
         auto sr = tools_.at(active_tool_idx_).widget->screenRatio();
 
-        shrink_button_->setEnabled((int)sr > 0);
-        grow_button_->setEnabled((int)sr < (int)toolbox::ScreenRatio::RatioMax - 1);
+        shrink_action_->setEnabled((int)sr > 0);
+        grow_action_->setEnabled((int)sr < (int)toolbox::ScreenRatio::RatioMax - 1);
     }
+
+    expand_action_->setIcon(QIcon(Utils::Files::getIconFilepath(expanded_ ? "fd_shrink.png" : "fd_expand.png").c_str()));
+    expand_action_->setToolTip(QString(expanded_ ? "Collapse" : "Expand") + " Flight Deck [#]");
 }
 
 /**
@@ -537,16 +550,19 @@ void ToolBox::toggleExpansion()
         //expand
         main_widget_->setEnabled(false);
 
+        panel_content_widget_->setVisible(false);
         panel_layout_->removeWidget(panel_content_widget_);
         panel_content_widget_->setParent(this);
         panel_content_widget_->raise();
         panel_content_widget_->setAutoFillBackground(true);
+
         panel_content_widget_->show();
     }
 
     expanded_ = !is_expanded;
 
     adjustSizings();
+    updateButtons();
 }
 
 /**
