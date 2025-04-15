@@ -106,6 +106,12 @@ class ReconstructorBaseSettings
     static const unsigned int REC_DS_SAC = 255;
     static const unsigned int REC_DS_SIC = 1;
 
+    // target classification
+    float min_aircraft_modec_ {1000};
+
+    std::string vehicle_acids_;
+    std::string vehicle_acads_;
+
     // fallback accuracies
     double numerical_min_std_dev_ {1E-3};
 

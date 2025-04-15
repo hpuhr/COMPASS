@@ -490,6 +490,12 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
     registerParameter("target_max_positions_not_ok_unknown_rate", &base_settings_.target_max_positions_not_ok_unknown_rate_,
                       base_settings_.target_max_positions_not_ok_unknown_rate_);
 
+    // target classification
+    registerParameter("min_aircraft_modec", &base_settings_.min_aircraft_modec_, base_settings_.min_aircraft_modec_);
+
+    registerParameter("vehicle_acids", &base_settings_.vehicle_acids_, base_settings_.vehicle_acids_);
+    registerParameter("vehicle_acads", &base_settings_.vehicle_acads_, base_settings_.vehicle_acads_);
+
     // reference computation
     {
         registerParameter("ref_Q_std", &ref_calc_settings_.Q_std.Q_std_static, ReferenceCalculatorSettings().Q_std.Q_std_static);
