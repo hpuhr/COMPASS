@@ -535,7 +535,9 @@ void ToolBox::toggleExpansion()
     if (active_tool_idx_ < 0)
         return;
 
-    bool is_expanded = expanded_;
+    bool is_expanded  = expanded_;
+    bool reshow_panel = false;
+
     if (is_expanded)
     {
         //de-expand
@@ -555,13 +557,18 @@ void ToolBox::toggleExpansion()
         panel_content_widget_->setParent(this);
         panel_content_widget_->raise();
         panel_content_widget_->setAutoFillBackground(true);
-        panel_content_widget_->show();
+
+        reshow_panel = true;
     }
 
     expanded_ = !is_expanded;
 
     adjustSizings();
     updateButtons();
+
+    //reshow panel after adjusting sizings
+    if (reshow_panel)
+        panel_content_widget_->show();
 }
 
 /**
