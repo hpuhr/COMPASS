@@ -541,7 +541,11 @@ void DataSourceEditWidget::detectionTypeChangedSlot(int index)
     using DetectionType = dbContent::DataSourceBase::DetectionType;
 
     DetectionType selected_type = static_cast<DetectionType>(index);
-    ds_man_.dbDataSource(current_ds_id_).detectionType(selected_type);
+
+    if (current_ds_in_db_)
+        ds_man_.dbDataSource(current_ds_id_).detectionType(selected_type);
+    else
+        ds_man_.configDataSource(current_ds_id_).detectionType(selected_type);
 }
 
 void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
@@ -802,6 +806,8 @@ void DataSourceEditWidget::updateContent()
     assert (net_widget_);
     assert (delete_button_);
 
+    detection_type_combo_->blockSignals(true);
+
     if (!has_current_ds_)
     {
         name_edit_->setText("");
@@ -1049,4 +1055,6 @@ void DataSourceEditWidget::updateContent()
         delete_button_->setHidden(true);
 
     }
+
+    detection_type_combo_->blockSignals(false);
 }
