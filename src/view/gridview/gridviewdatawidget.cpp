@@ -172,7 +172,7 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
     if (!has_data)
         return;
 
-    auto bounds = getXYBounds();
+    auto bounds = getXYBounds(true);
     if (bounds.isEmpty())
     {
         loginf << "GridViewDataWidget: processStash: bounds empty, skipping...";
@@ -180,7 +180,7 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
     }
     assert(bounds.isValid());
 
-    auto z_bounds = getZBounds();
+    auto z_bounds = getZBounds(false);
     assert(z_bounds.has_value());
 
     const auto& settings = view_->settings();
@@ -361,16 +361,16 @@ QPixmap GridViewDataWidget::renderPixmap()
 
 /**
 */
-QRectF GridViewDataWidget::getXYBounds() const
+QRectF GridViewDataWidget::getXYBounds(bool fix_small_ranges) const
 {
-    return getPlanarBounds(0, 1);
+    return getPlanarBounds(0, 1, false, fix_small_ranges);
 }
 
 /**
 */
-boost::optional<std::pair<double, double>> GridViewDataWidget::getZBounds() const
+boost::optional<std::pair<double, double>> GridViewDataWidget::getZBounds(bool fix_small_ranges) const
 {
-    return getBounds(2);
+    return getBounds(2, false, fix_small_ranges);
 }
 
 /**
@@ -683,8 +683,8 @@ void GridViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     info[ "num_selected"] = getStash().selected_count_;
     info[ "num_nan"     ] = getStash().nan_value_count_;
 
-    auto xy_bounds     = getXYBounds();
-    auto z_bounds      = getZBounds();
+    auto xy_bounds     = getXYBounds(false);
+    auto z_bounds      = getZBounds(false);
     bool bounds_valid  = xy_bounds.isValid() && z_bounds.has_value();
 
     info[ "data_bounds_valid" ] = bounds_valid;

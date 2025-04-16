@@ -32,6 +32,13 @@ enum class ComparisonResult
     DIFFERENT
 };
 
+struct AltitudeState
+{
+    bool  fl_unknown;
+    bool  fl_on_ground;
+    float alt_baro_ft;
+};
+
 class ReconstructorTarget : public TargetBase
 {
 public:
@@ -141,6 +148,8 @@ public:
 
         bool debug_ = false;
     };
+
+    
 
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,
                       dbContent::targetReport::ReconstructorInfo*> ReconstructorInfoPair; // both can be nullptr
@@ -309,9 +318,12 @@ public:
     // unknown, same, different timestamps from this
 
     //fl_unknown, fl_on_ground, alt_baro_ft
-    std::tuple<bool, bool, float> getAltitudeState (
-        const boost::posix_time::ptime& ts, boost::posix_time::time_duration max_time_diff,
-        const InterpOptions& interp_options = InterpOptions()) const;
+    std::tuple<bool, bool, float> getAltitudeState (const boost::posix_time::ptime& ts, 
+                                                    const boost::posix_time::time_duration& max_time_diff,
+                                                    const InterpOptions& interp_options = InterpOptions()) const;
+    AltitudeState getAltitudeStateStruct(const boost::posix_time::ptime& ts, 
+                                         const boost::posix_time::time_duration& max_time_diff,
+                                         const InterpOptions& interp_options = InterpOptions()) const;
 
     void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts() const;
