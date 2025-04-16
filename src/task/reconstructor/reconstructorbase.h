@@ -50,6 +50,8 @@ class KalmanChainPredictors;
 class Buffer;
 class ReconstructorTask;
 
+struct AltitudeState;
+
 typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow; // min, max
 
 class ReconstructorBaseSettings
@@ -343,11 +345,12 @@ private:
     void resetTimeframe();
     void applyTimeframeLimits();
 
-    float qVarForAltitude(bool fl_unknown, 
-                          bool fl_ground,
-                          float alt_baro_ft,
-                          bool dynamic,
-                          const ReferenceCalculatorSettings::ProcessNoise& Q_std) const;
+    double determineProcessNoise(const dbContent::targetReport::ReconstructorInfo& ri,
+                                 const dbContent::ReconstructorTarget& target,
+                                 const ReferenceCalculatorSettings::ProcessNoise& Q) const;
+    double determineProcessNoiseVariance(const dbContent::targetReport::ReconstructorInfo& ri,
+                                         const dbContent::ReconstructorTarget& target,
+                                         const ReferenceCalculatorSettings::ProcessNoise& Q) const;
 
     ReferenceCalculatorSettings ref_calc_settings_;
 
