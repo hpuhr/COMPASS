@@ -133,6 +133,8 @@ extern unsigned int portFromString(const std::string& name);
 
 extern std::string trim(const std::string& name);
 
+extern std::string ecatToString(unsigned int ecat);
+
 }  // namespace String
 
 // template <typename T> std::string formatBinaryString (T val)

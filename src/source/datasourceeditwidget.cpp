@@ -6,7 +6,9 @@
 #include "datasourcesconfigurationdialog.h"
 #include "logger.h"
 #include "textfielddoublevalidator.h"
+#include "datasourcebase.h"
 
+#include <QComboBox>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -98,6 +100,22 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     properties_layout_->addWidget(update_interval_edit_, row, 1);
 
     main_layout->addLayout(properties_layout_);
+
+    ++row;
+
+    detection_type_combo_ = new QComboBox(this);
+    detection_type_combo_->addItem("Primary Only Ground");
+    detection_type_combo_->addItem("Primary Only Air");
+    detection_type_combo_->addItem("Mode A/C");
+    detection_type_combo_->addItem("Mode A/C Combined");
+    detection_type_combo_->addItem("Mode S");
+    detection_type_combo_->addItem("Mode S Combined");
+
+    properties_layout_->addWidget(new QLabel("Detection Type"), row, 0);
+    properties_layout_->addWidget(detection_type_combo_, row, 1);
+
+    connect(detection_type_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &DataSourceEditWidget::detectionTypeChangedSlot);
 
     // position_widget_
 
@@ -515,6 +533,21 @@ void DataSourceEditWidget::updateIntervalEditedSlot(const QString& value_str)
     ds_man_.configDataSource(current_ds_id_).updateInterval(value);
 }
 
+void DataSourceEditWidget::detectionTypeChangedSlot(int index)
+{
+    if (!has_current_ds_)
+        return;
+
+    using DetectionType = dbContent::DataSourceBase::DetectionType;
+
+    DetectionType selected_type = static_cast<DetectionType>(index);
+
+    if (current_ds_in_db_)
+        ds_man_.dbDataSource(current_ds_id_).detectionType(selected_type);
+    else
+        ds_man_.configDataSource(current_ds_id_).detectionType(selected_type);
+}
+
 void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
 {
     double value = value_str.toDouble();
@@ -773,6 +806,8 @@ void DataSourceEditWidget::updateContent()
     assert (net_widget_);
     assert (delete_button_);
 
+    detection_type_combo_->blockSignals(true);
+
     if (!has_current_ds_)
     {
         name_edit_->setText("");
@@ -789,6 +824,8 @@ void DataSourceEditWidget::updateContent()
         ds_id_label_->setText("");
 
         update_interval_edit_->setText("");
+
+        detection_type_combo_->setCurrentIndex(0);
 
         position_widget_->setHidden(true);
 
@@ -841,6 +878,9 @@ void DataSourceEditWidget::updateContent()
             update_interval_edit_->setText(QString::number(ds->updateInterval()));
         else
             update_interval_edit_->setText("");
+
+        auto current_type = ds->detectionType();
+        detection_type_combo_->setCurrentIndex((int) current_type);
 
         loginf << "DataSourceEditWidget: updateContent: ds_type " << ds->dsType()
                << " has pos " << ds->hasPosition();
@@ -1015,4 +1055,6 @@ void DataSourceEditWidget::updateContent()
         delete_button_->setHidden(true);
 
     }
+
+    detection_type_combo_->blockSignals(false);
 }

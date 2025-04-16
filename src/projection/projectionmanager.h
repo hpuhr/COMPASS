@@ -29,6 +29,7 @@
 #endif
 
 //#include <GeographicLib/Geoid.hpp>
+#include <GeographicLib/MagneticModel.hpp>
 
 #include <memory>
 
@@ -77,6 +78,7 @@ public:
     //static const std::string GEO_NAME;
 
     double geoidHeightM (double latitude_deg, double longitude_deg);
+    double declination(float year, double latitude_deg, double longitude_deg, double altitude_m);
 
     void test();
 
@@ -89,6 +91,8 @@ protected:
     //std::unique_ptr<GeographicLib::Geoid> geoid_;
 
     double egm96_band_inv_geo_transform_[6];
+
+    GeographicLib::MagneticModel mag_model_;
 
     int egm96_band_width_{0};
     int egm96_band_height_{0};

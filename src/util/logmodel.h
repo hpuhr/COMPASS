@@ -9,6 +9,7 @@
 #include "boost/optional.hpp"
 
 #include <QDateTime>
+#include <QIcon>
 #include <QAbstractItemModel>
 
 enum class LogStreamType { Info, Warning, Error };
@@ -88,5 +89,7 @@ protected:
     QStringList table_columns_;
 
     std::vector<LogEntry> log_entries_;
+
+    QIcon checked_icon_;
 };
 

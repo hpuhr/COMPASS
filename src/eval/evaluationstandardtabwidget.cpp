@@ -91,13 +91,16 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(
     }
 
     // standards stack
-    {
-        standards_widget_ = new QStackedWidget();
-        main_layout->addWidget(standards_widget_);
-    }
+//    {
+        // standards_widget_ = new QStackedWidget();
+        // main_layout->addWidget(standards_widget_);
+//    }
+
+    standards_layout_ = new QHBoxLayout();
+    main_layout->addLayout(standards_layout_);
 
     if (eval_man_.hasCurrentStandard())
-        updateStandardStack();
+        updateStandardWidget();
 
     // some cfg
     {
@@ -140,7 +143,7 @@ void EvaluationStandardTabWidget::changedCurrentStandardSlot()
     standard_box_->setStandardName(eval_man_.currentStandardName());
 
     updateButtons();
-    updateStandardStack();
+    updateStandardWidget();
 }
 
 void EvaluationStandardTabWidget::addStandardSlot ()
@@ -265,29 +268,46 @@ void EvaluationStandardTabWidget::updateButtons()
     remove_button_->setEnabled(eval_man_.hasCurrentStandard());
 }
 
-void EvaluationStandardTabWidget::updateStandardStack()
+void EvaluationStandardTabWidget::updateStandardWidget()
 {
-    assert(standards_widget_);
+    // assert(standards_widget_);
 
-    string standard_name = eval_man_.currentStandardName();
+    // string standard_name = eval_man_.currentStandardName();
 
-    if (!standard_name.size())
+    // if (!standard_name.size())
+    // {
+    //     while (standards_widget_->count() > 0)  // remove all widgets
+    //     {
+    //         auto std_widget = standards_widget_->widget(0);
+    //         standards_widget_->removeWidget(std_widget);
+    //         delete std_widget;
+    //     }
+    //     return;
+    // }
+
+    // EvaluationStandard& standard = eval_man_.currentStandard();
+
+    // if (standards_widget_->indexOf(standard.widget()) < 0)
+    //     standards_widget_->addWidget(standard.widget());
+
+    // standards_widget_->setCurrentWidget(standard.widget());
+
+    assert (standards_layout_);
+    QLayoutItem* item;
+    while ((item = standards_layout_->takeAt(0)) != nullptr)
     {
-        while (standards_widget_->count() > 0)  // remove all widgets
+        if (QWidget* widget = item->widget())
         {
-            auto std_widget = standards_widget_->widget(0);
-            standards_widget_->removeWidget(std_widget);
-            delete std_widget;
+            widget->setParent(nullptr); // Optional: disconnect from layout
+            delete widget;
         }
-        return;
+        delete item;
     }
 
-    EvaluationStandard& standard = eval_man_.currentStandard();
+    auto* widget = eval_man_.currentStandard().widget();
+    widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);;
 
-    if (standards_widget_->indexOf(standard.widget()) < 0)
-        standards_widget_->addWidget(standard.widget());
-
-    standards_widget_->setCurrentWidget(standard.widget());
+    standards_layout_->addWidget(widget);
 }
 
 void EvaluationStandardTabWidget::maxRefTimeDiffEditSlot(QString value)

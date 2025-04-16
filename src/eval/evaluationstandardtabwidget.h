@@ -30,7 +30,7 @@ class EvaluationStandardComboBox;
 class QPushButton;
 class QStackedWidget;
 class QLineEdit;
-
+class QHBoxLayout;
 
 class EvaluationStandardTabWidget : public QWidget
 {
@@ -61,12 +61,13 @@ protected:
     QPushButton* copy_button_ {nullptr};
     QPushButton* remove_button_ {nullptr};
 
-    QStackedWidget* standards_widget_{nullptr};
+    //QStackedWidget* standards_widget_{nullptr};
+    QHBoxLayout* standards_layout_{nullptr};
 
     QLineEdit* max_ref_time_diff_edit_{nullptr};
 
     void updateButtons();
-    void updateStandardStack();
+    void updateStandardWidget();
 };
 
 #endif // EVALUATIONSTANDARDTABWIDGET_H

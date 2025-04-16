@@ -32,7 +32,7 @@ namespace dbContent
 TargetReportAccessor::TargetReportAccessor(const std::string& dbcontent_name, 
                                            const std::shared_ptr<Buffer>& buffer,
                                            const DBContentManager& dbcont_man)
-:   BufferAccessor(dbcontent_name, buffer, dbcont_man)
+    :   BufferAccessor(dbcontent_name, buffer, dbcont_man)
 {
     cacheVectors();
 }
@@ -40,7 +40,7 @@ TargetReportAccessor::TargetReportAccessor(const std::string& dbcontent_name,
 /**
 */
 TargetReportAccessor::TargetReportAccessor(const std::shared_ptr<DBContentVariableLookup>& lookup)
-:   BufferAccessor(lookup)
+    :   BufferAccessor(lookup)
 {
     cacheVectors();
 }
@@ -258,12 +258,12 @@ boost::optional<targetReport::Position> TargetReportAccessor::position(unsigned 
 {
     if (!meta_latitude_vec_ || 
         !meta_longitude_vec_ ||
-         meta_latitude_vec_->isNull(index) ||
-         meta_longitude_vec_->isNull(index))
+        meta_latitude_vec_->isNull(index) ||
+        meta_longitude_vec_->isNull(index))
         return {};
 
     return targetReport::Position(meta_latitude_vec_->get(index),
-                                         meta_longitude_vec_->get(index));
+                                  meta_longitude_vec_->get(index));
 }
 
 /**
@@ -277,7 +277,8 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
 
         auto mops_version = cat021_mops_version_vec_->get(index);
 
-        double x_stddev, y_stddev;
+        double qi_epu{0};
+        double x_stddev {0}, y_stddev {0}, xy_cov{0};
 
         if (mops_version == 0)
         {
@@ -289,30 +290,45 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
             if (!targetReport::AccuracyTables::adsb_v0_accuracies.count(nuc_p)) // value unknown, also for 0 (undefined)
                 return {};
 
-            x_stddev = targetReport::AccuracyTables::adsb_v0_accuracies.at(nuc_p);
-            y_stddev = x_stddev;
+            qi_epu = targetReport::AccuracyTables::adsb_v0_accuracies.at(nuc_p);
         }
         else if (mops_version == 1 || mops_version == 2)
         {
             if (!cat021_nac_p_vec_ || cat021_nac_p_vec_->isNull(index))
                 return {};
 
-            auto nac_p = cat021_nac_p_vec_->get(index);
+            auto nacp = cat021_nac_p_vec_->get(index);
 
-            if (!targetReport::AccuracyTables::adsb_v12_accuracies.count(nac_p))
+            if (!targetReport::AccuracyTables::adsb_v12_accuracies.count(nacp))
                 return {}; // value unknown
 
-            x_stddev = targetReport::AccuracyTables::adsb_v12_accuracies.at(nac_p);
-            y_stddev = x_stddev;
+            qi_epu = targetReport::AccuracyTables::adsb_v12_accuracies.at(nacp);
         }
         else
         {
             return {}; // unknown mops version
         }
 
+        float conversion_factor = 2.5f;  // Default for NACp >= 9.
+
+        if (qi_epu < 9)
+            conversion_factor = 2.0f;
+
+        // Assuming an isotropic Gaussian error, the standard deviation (σ)
+        // is approximated by dividing the 95% bound (EPU) by the conversion factor.
+        float sigma = qi_epu / conversion_factor;
+
+        x_stddev = sigma;
+        y_stddev = sigma;
+
+        if (!meta_speed_vec_->isNull(index) && !meta_track_angle_vec_->isNull(index))
+        {
+
+        }
+
         return targetReport::PositionAccuracy(x_stddev,
-                                                y_stddev,
-                                                0.0);
+                                              y_stddev,
+                                              0.0);
     }
     else if (is_radar_)
     {
@@ -322,8 +338,8 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
     {
         if (!meta_pos_std_dev_x_m_vec_ || 
             !meta_pos_std_dev_y_m_vec_ ||
-             meta_pos_std_dev_x_m_vec_->isNull(index) ||
-             meta_pos_std_dev_y_m_vec_->isNull(index))
+            meta_pos_std_dev_x_m_vec_->isNull(index) ||
+            meta_pos_std_dev_y_m_vec_->isNull(index))
         {
             return {};
         }
@@ -401,8 +417,8 @@ boost::optional<targetReport::Velocity> TargetReportAccessor::velocity(unsigned 
 {
     if (!meta_speed_vec_ || 
         !meta_track_angle_vec_ ||
-         meta_speed_vec_->isNull(index) || 
-         meta_track_angle_vec_->isNull(index))
+        meta_speed_vec_->isNull(index) ||
+        meta_track_angle_vec_->isNull(index))
         return {};
 
     return targetReport::Velocity(meta_track_angle_vec_->get(index), meta_speed_vec_->get(index)  * KNOTS2M_S);
@@ -431,12 +447,12 @@ boost::optional<targetReport::VelocityAccuracy> TargetReportAccessor::velocityAc
     {
         if (!cat062_vx_stddev_vec_ ||
             !cat062_vy_stddev_vec_ ||
-             cat062_vx_stddev_vec_->isNull(index) ||
-             cat062_vy_stddev_vec_->isNull(index))
+            cat062_vx_stddev_vec_->isNull(index) ||
+            cat062_vy_stddev_vec_->isNull(index))
             return {};
 
         return targetReport::VelocityAccuracy(cat062_vx_stddev_vec_->get(index),
-                                                cat062_vy_stddev_vec_->get(index));
+                                              cat062_vy_stddev_vec_->get(index));
     }
 
     //not implemented for dbcontent

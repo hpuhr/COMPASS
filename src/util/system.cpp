@@ -27,6 +27,9 @@
 #include <memory>
 #include <stdexcept>
 #include <array>
+#include <execinfo.h>
+#include <cstdlib>
+#include <cxxabi.h>
 
 #include <pwd.h>
 #include <unistd.h>
@@ -123,6 +126,21 @@ int tbbCurrentThreadID()
         thread_id = 0; // can be task_arena_base::not_initialized = -1
 
     return thread_id;
+}
+
+void printBacktrace() {
+    const int MAX_FRAMES = 25;
+    void* buffer[MAX_FRAMES];
+    int frames = backtrace(buffer, MAX_FRAMES);
+    char** symbols = backtrace_symbols(buffer, frames);
+
+    std::cerr << "Stack trace (" << frames << " frames):\n";
+
+    for (int i = 0; i < frames; ++i) {
+        std::cerr << symbols[i] << '\n';
+    }
+
+    free(symbols);
 }
 
 }

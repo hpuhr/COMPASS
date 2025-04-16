@@ -828,7 +828,7 @@ void DataSourcesWidget::updateContent(bool recreate_required)
 
     int changes = generateContent(recreate_required);
 
-    loginf << "DataSourcesWidget: updateContent: Update generated " << changes << " change(s)";
+    logdbg << "DataSourcesWidget: updateContent: update generated " << changes << " change(s)";
 }
 
 /**

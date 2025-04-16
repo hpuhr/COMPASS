@@ -406,6 +406,8 @@ void ReconstructorTask::run()
 
     COMPASS::instance().taskManager().beginTaskResultWriting("Reconstruct References");
 
+    COMPASS::instance().logInfo("Reconstructor") << "running " << current_reconstructor_str_;
+
     Projection& projection = ProjectionManager::instance().currentProjection();
     projection.clearCoordinateSystems();
     projection.addAllRadarCoordinateSystems();
@@ -919,6 +921,9 @@ void ReconstructorTask::endReconstruction()
            << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
 
     loginf << COMPASS::instance().dbInterface().stopPerformanceMetrics().asString();
+
+    COMPASS::instance().logInfo("Reconstructor") << "done using " << current_reconstructor_str_
+                                                 << " after " << String::timeStringFromDouble(time_elapsed_s, false);
 
     // report: info
     auto& section = COMPASS::instance().taskManager().currentReport().getSection("Overview");

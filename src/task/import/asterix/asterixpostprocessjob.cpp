@@ -11,9 +11,10 @@
 #include "util/timeconv.h"
 #include "global.h"
 
+#include <QThread>
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-#include <QThread>
 
 const float tod_24h = 24 * 60 * 60;
 
@@ -553,6 +554,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
     string dbcontent_name;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+    ProjectionManager& proj_man = ProjectionManager::instance();
 
     string vx_var_name;
     string vy_var_name;
@@ -692,6 +694,34 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
         NullableVector<bool>& sgv_htt_vec = buffer->get<bool>(DBContent::var_cat021_sgv_htt_.name());
         NullableVector<bool>& sgv_hrd_vec = buffer->get<bool>(DBContent::var_cat021_sgv_hrd_.name());
 
+        assert(buffer->has<boost::posix_time::ptime>(DBContent::meta_var_timestamp_.name()));
+        NullableVector<boost::posix_time::ptime> ts_vec =
+            buffer->get<boost::posix_time::ptime>(DBContent::meta_var_timestamp_.name());
+
+        NullableVector<double>* lat_vec {nullptr};
+        NullableVector<double>* lon_vec {nullptr};
+        NullableVector<float>* mode_c_vec {nullptr};
+
+        if(buffer->has<double>(DBContent::meta_var_latitude_.name())
+            && buffer->has<double>(DBContent::meta_var_longitude_.name()))
+        {
+
+            lat_vec = &buffer->get<double>(DBContent::meta_var_latitude_.name());
+            lon_vec = &buffer->get<double>(DBContent::meta_var_longitude_.name());
+        }
+
+        if(buffer->has<float>(DBContent::meta_var_mc_.name()))
+            mode_c_vec = &buffer->get<float>(DBContent::meta_var_mc_.name());
+
+        // Define position and date parameters
+        // double latitude = 37.7749;   // Latitude in degrees (example: San Francisco)
+        // double longitude = -122.4194; // Longitude in degrees
+        // double altitude = 0;         // Altitude in meters
+        // double time = 2024.0;        // Year (decimal format)
+
+        // Magnetic heading angle in degrees (example)
+        //double magneticHeading = 45.0;
+
         for (unsigned int index=0; index < buffer_size; index++)
         {
             if (!speed_vec.isNull(index) && !track_angle_vec.isNull(index)) // already set
@@ -721,13 +751,39 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
                 continue;
             }
 
+            double true_north_track_angle;
+
             if (sgv_hrd_vec.get(index) == 1)
             {
                 ++sgv_is_magnetic;
-                continue;
-            }
 
-            track_angle_vec.set(index, sgv_hgt_vec.get(index));
+                if (lat_vec && lon_vec && !lat_vec->isNull(index) && !lon_vec->isNull(index))
+                {
+                    assert (!ts_vec.isNull(index));
+                    float year = static_cast<float>(ts_vec.get(index).date().year());
+
+                    float altitude_m {0};
+
+                    if (mode_c_vec && !mode_c_vec->isNull(index))
+                        altitude_m = mode_c_vec->get(index) * FT2M;
+
+                    double declination = proj_man.declination(year, lat_vec->get(index), lon_vec->get(index), altitude_m);
+
+                    // Calculate the true track by adding declination.
+                    true_north_track_angle = sgv_hgt_vec.get(index) + declination;
+
+                    true_north_track_angle = fmod(true_north_track_angle, 360.0);
+
+                    if (true_north_track_angle < 0)
+                        true_north_track_angle += 360.0;
+                }
+                else
+                    continue;
+            }
+            else
+                true_north_track_angle = sgv_hgt_vec.get(index);
+
+            track_angle_vec.set(index, true_north_track_angle);
 
             sgv_usable++; // there
         }

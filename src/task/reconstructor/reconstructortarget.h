@@ -4,6 +4,7 @@
 #include "projection/transformation.h"
 #include "reconstruction_defs.h"
 #include "reconstructorbase.h"
+#include "targetbase.h"
 
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/optional.hpp>
@@ -31,7 +32,7 @@ enum class ComparisonResult
     DIFFERENT
 };
 
-class ReconstructorTarget
+class ReconstructorTarget : public TargetBase
 {
 public:
     struct GlobalStats
@@ -176,7 +177,9 @@ public:
     std::set<unsigned int> acads_;
     std::set<std::string> acids_;
     std::set<unsigned int> mode_as_;
+
     //std::set<unsigned int> mops_versions_;
+    boost::optional<unsigned int> ecat_;
 
     boost::posix_time::ptime total_timestamp_min_, total_timestamp_max_; // over all data
     boost::posix_time::ptime timestamp_min_, timestamp_max_; // in current slice
@@ -317,6 +320,9 @@ public:
 
     void removeOutdatedTargetReports();
     void removeTargetReportsLaterOrEqualThan(boost::posix_time::ptime ts);
+
+    virtual void targetCategory(Category ecat);
+    virtual Category targetCategory() const;
 
     // online reconstructor
     size_t trackerCount() const;

@@ -457,5 +457,62 @@ std::string trim(const std::string& name)
    return boost::algorithm::trim_copy(name);
 }
 
+
+std::string ecatToString(unsigned int ecat) {
+    switch (ecat) {
+    // 0 = No ADS-B Emitter Category Information
+    // 1 = light aircraft <= 15500 lbs
+    // 2 = 15500 lbs < small aircraft <75000 lbs
+    // 3 = 75000 lbs < medium a/c < 300000 lbs
+    // 4 = High Vortex Large
+    // 5 = 300000 lbs <= heavy aircraft
+    // 6 = highly manoeuvrable (5g acceleration capability) and high speed (>400 knots cruise)
+    // 7 to 9 = reserved
+    case 0:  return "No Information";
+    case 1:  return "Light aircraft";
+    case 2:  return "Small aircraft";
+    case 3:  return "Medium aircraft";
+    case 4:  return "High vortex large aircraft";
+    case 5:  return "Heavy aircraft";
+    case 6:  return "Highly manoeuvrable aircraft";
+    case 7:
+    case 8:
+    case 9:
+        return "Reserved";
+
+    // 10 = rotocraft
+    // 11 = glider / sailplane
+    // 12 = lighter-than-air
+    // 13 = unmanned aerial vehicle
+    // 14 = space / transatmospheric vehicle
+    // 15 = ultralight / handglider / paraglider
+    // 16 = parachutist / skydiver
+    // 17 to 19 = reserved
+    case 10:  return "Rotorcraft";
+    case 11:  return "Glider / sailplane";
+    case 12:  return "Lighter-than-air";
+    case 13:  return "Unmanned aerial vehicle";
+    case 14: return "Space / transatmospheric vehicle";
+    case 15: return "Ultralight / handglider / paraglider";
+    case 16: return "Parachutist / skydiver";
+    case 17:
+    case 18:
+    case 19:
+        return "Reserved";
+
+    // 20 = surface emergency vehicle
+    // 21 = surface service vehicle
+    // 22 = fixed ground or tethered obstruction
+    // 23 = cluster obstacle
+    // 24 = line obstacle
+    case 20: return "surface emergency vehicle";
+    case 21: return "surface service vehicle";
+    case 22: return "Fixed ground or tethered obstruction";
+    case 23: return "Cluster obstacle";
+    case 24: return "Line obstacle";
+    default: return "Undefined";
+    }
+}
+
 }
 }
