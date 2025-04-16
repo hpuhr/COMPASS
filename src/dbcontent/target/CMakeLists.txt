@@ -7,6 +7,7 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/targetreportdefs.h"
         "${CMAKE_CURRENT_LIST_DIR}/target.h"
+        "${CMAKE_CURRENT_LIST_DIR}/targetbase.h"
         "${CMAKE_CURRENT_LIST_DIR}/targetmodel.h"
         "${CMAKE_CURRENT_LIST_DIR}/targetfilterdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/targetlistwidget.h"
@@ -18,6 +19,7 @@ target_sources(compass
     PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/targetreportdefs.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/target.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/targetbase.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/targetmodel.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/targetfilterdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/targetlistwidget.cpp"

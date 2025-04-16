@@ -8,6 +8,7 @@
 #include "datasourcesusewidget.h"
 #include "reconstructortask.h"
 #include "reconstructortaskanalysiswidget.h"
+#include "reconstructortaskclassificationwidget.h"
 #include "compass.h"
 
 #include <QCheckBox>
@@ -58,6 +59,10 @@ SimpleReconstructorWidget::SimpleReconstructorWidget(SimpleReconstructor& recons
 
     assoc_widget_.reset(new SimpleReconstructorAssociationWidget(reconstructor_, *this));
     tab_widget->addTab(assoc_widget_.get(), "Association");
+
+    classif_widget_.reset(new ReconstructorTaskClassificationWidget(reconstructor_));
+
+    tab_widget->addTab(classif_widget_.get(), "Classification");
 
     calc_widget_.reset(new ReferenceCalculatorWidget(reconstructor_));
     tab_widget->addTab(calc_widget_.get(), "Reference Calculation");

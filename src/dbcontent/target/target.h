@@ -1,17 +1,18 @@
 #pragma once
 
-
+#include "targetbase.h"
 #include "propertylist.h"
 
 #include "json.hpp"
 
 #include "boost/date_time/posix_time/ptime.hpp"
+#include "boost/optional.hpp"
 
 #include <set>
 
 namespace dbContent {
 
-class Target
+class Target : public TargetBase
 {
 public:
     const unsigned int utn_ {0};
@@ -82,9 +83,13 @@ public:
     static const Property     DBColumnInfo;
     static const PropertyList DBPropertyList;
 
+    virtual void targetCategory(Category ecat);
+    virtual Category targetCategory() const;
+
 protected:
     nlohmann::json info_;
     mutable std::string time_duration_str_;
+
 };
 
 }

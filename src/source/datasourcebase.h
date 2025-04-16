@@ -108,6 +108,9 @@ public:
     bool isCalculatedReferenceSource();
     void setCalculatedReferenceSource();
 
+    static std::string detectionTypeToString(DetectionType type);
+    static DetectionType detectionTypeFromString(const std::string& str);
+
 protected:
     std::string ds_type_;
 
@@ -124,10 +127,6 @@ protected:
     std::map<std::string, std::shared_ptr<DataSourceLineInfo>> line_info_;
 
     void parseNetworkLineInfo();
-
-    static std::string detectionTypeToString(DetectionType type);
-    static DetectionType detectionTypeFromString(const std::string& str);
-
 };
 
 }

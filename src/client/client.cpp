@@ -29,6 +29,7 @@
 #include "mainwindow.h"
 #include "rtcommand_manager.h"
 #include "projectionmanager.h"
+#include "util/system.h"
 
 #include "json.hpp"
 #include "util/tbbhack.h"
@@ -292,15 +293,15 @@ bool Client::run ()
     //        loginf << x;
     //    });
 
-    // Set the "Fusion" style for better cross-platform results
-    QApplication::setStyle(QStyleFactory::create("Fusion"));
-
     // Enable Qt high-DPI scaling
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     //QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
     // Enable High DPI support
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+    // Set the "Fusion" style for better cross-platform results
+    QApplication::setStyle(QStyleFactory::create("Fusion"));
 
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
@@ -365,6 +366,8 @@ bool Client::run ()
     {
         logerr << "COMPASSClient: creating COMPASS instance failed: " << e.what();
         quit_requested_ = true;
+        System::printBacktrace();
+
         return false;
     }
     catch(...)

@@ -424,6 +424,8 @@ std::string GPSTrailImportTask::currentText() const
 */
 bool GPSTrailImportTask::canImportFile()
 {
+    loginf << "GPSTrailImportTask: canImportFile: current_filename '" << current_filename_ << "'";
+
     if (!current_filename_.size())
         return false;
 
@@ -433,6 +435,8 @@ bool GPSTrailImportTask::canImportFile()
                << "does not exist";
         return false;
     }
+
+    loginf << "GPSTrailImportTask: canImportFile: gps_fixes " << gps_fixes_.size();
 
     return gps_fixes_.size(); // only if fixes exist
 }

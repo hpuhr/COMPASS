@@ -119,7 +119,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
 
     if (tr.acad_ && acads_.size() && !acads_.count(*tr.acad_))
     {
-        logerr << "Target: addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
+        logerr << "ReconstructorTarget " << utn_ << ": addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
         assert (false);
     }
 
@@ -220,15 +220,37 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
         {tr.timestamp_, tr.record_num_});
     // dbcontent id -> ds_id -> ts -> record_num
 
+    if (tr.ecat_ && *tr.ecat_ != 0)
+    {
+        if (ecat_)
+        {
+            if (*tr.ecat_ != ecat_)
+                logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: ecat mismatch, target ecat "
+                       << *ecat_ << " " << String::ecatToString(*ecat_)
+                       << " tr " << *tr.ecat_ << " " << String::ecatToString(*tr.ecat_) << "";
+        }
+        else
+            ecat_ = *tr.ecat_;
+    }
+
     if (tr.acad_)
     {
         if (acads_.size() && !acads_.count(*tr.acad_))
         {
-            logwrn << "Target: addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
+            logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: acad mismatch, target "
+                   << asStr() << " tr '" << tr.asStr() << "'";
         }
 
         if (!acads_.count(*tr.acad_))
+        {
             acads_.insert(*tr.acad_);
+
+            if (!ecat_ || *ecat_ == 0) // no ecat info, check if vehicle by acad
+            {
+                if (reconstructor_.isVehicleACAD(*tr.acad_))
+                    ecat_ = (unsigned int) TargetBase::Category::Vehicle;
+            }
+        }
     }
 
     if (tr.acid_)
@@ -236,7 +258,15 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
         string acid = String::trim(*tr.acid_);
 
         if (!acids_.count(acid))
+        {
             acids_.insert(acid);
+
+            if (!ecat_ || *ecat_ == 0) // no ecat info, check if vehicle by acid
+            {
+                if (reconstructor_.isVehicleACID(acid))
+                    ecat_ = (unsigned int) TargetBase::Category::Vehicle;
+            }
+        }
     }
 
     //    if (tr.has_adsb_info_ && tr.has_mops_version_)
@@ -1583,7 +1613,11 @@ boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime
 
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
-        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) { return tr.ground_bit_.has_value(); },
+        [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
+            // if (tr.isPrimaryOnlyDetection()) // override for primary-only CAT010 having GBS=0
+            //     return false; // bad thing to do for air PSRs
+            // else
+                return tr.ground_bit_.has_value(); },
         interp_options);
 
     bool lower_has_val = lower_tr && lower_tr->ground_bit_.has_value();
@@ -2364,6 +2398,20 @@ void ReconstructorTarget::removeTargetReportsLaterOrEqualThan(boost::posix_time:
 
     references_.clear();
 }
+
+void ReconstructorTarget::targetCategory(TargetBase::Category category)
+{
+    ecat_ = static_cast<unsigned int>(category);
+}
+
+TargetBase::Category ReconstructorTarget::targetCategory() const
+{
+    if (!ecat_) {
+        return Category::Unknown;
+    }
+    return TargetBase::fromECAT(ecat_);
+}
+
 
 bool ReconstructorTarget::hasTracker() const
 {

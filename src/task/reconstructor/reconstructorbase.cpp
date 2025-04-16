@@ -38,6 +38,8 @@
 #include "targetreportaccessor.h"
 #include "number.h"
 
+#include <boost/algorithm/string.hpp>
+
 using namespace std;
 using namespace Utils;
 
@@ -480,47 +482,75 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
     registerParameter("target_prob_min_time_overlap", &base_settings_.target_prob_min_time_overlap_,
                       base_settings_.target_prob_min_time_overlap_);
     registerParameter("target_min_updates", &base_settings_.target_min_updates_, base_settings_.target_min_updates_);
-    registerParameter("target_max_positions_dubious_verified_rate", &base_settings_.target_max_positions_dubious_verified_rate_,
+    registerParameter("target_max_positions_dubious_verified_rate",
+                      &base_settings_.target_max_positions_dubious_verified_rate_,
                       base_settings_.target_max_positions_dubious_verified_rate_);
-    registerParameter("target_max_positions_dubious_unknown_rate", &base_settings_.target_max_positions_dubious_unknown_rate_,
+    registerParameter("target_max_positions_dubious_unknown_rate",
+                      &base_settings_.target_max_positions_dubious_unknown_rate_,
                       base_settings_.target_max_positions_dubious_unknown_rate_);
 
-    registerParameter("target_max_positions_not_ok_verified_rate", &base_settings_.target_max_positions_not_ok_verified_rate_,
+    registerParameter("target_max_positions_not_ok_verified_rate",
+                      &base_settings_.target_max_positions_not_ok_verified_rate_,
                       base_settings_.target_max_positions_not_ok_verified_rate_);
-    registerParameter("target_max_positions_not_ok_unknown_rate", &base_settings_.target_max_positions_not_ok_unknown_rate_,
+    registerParameter("target_max_positions_not_ok_unknown_rate",
+                      &base_settings_.target_max_positions_not_ok_unknown_rate_,
                       base_settings_.target_max_positions_not_ok_unknown_rate_);
+
+    // // target classification moved to derived since segfault
+    // registerParameter("min_aircraft_modec", &base_settings_.min_aircraft_modec_, base_settings_.min_aircraft_modec_);
+
+    // registerParameter("vehicle_acids", &base_settings_.vehicle_acids_, std::string());
+    // registerParameter("vehicle_acads", &base_settings_.vehicle_acads_, std::string());
 
     // reference computation
     {
-        registerParameter("ref_Q_std", &ref_calc_settings_.Q_std.Q_std_static, ReferenceCalculatorSettings().Q_std.Q_std_static);
-        registerParameter("ref_Q_std_ground", &ref_calc_settings_.Q_std.Q_std_ground, ReferenceCalculatorSettings().Q_std.Q_std_ground);
-        registerParameter("ref_Q_std_air", &ref_calc_settings_.Q_std.Q_std_air, ReferenceCalculatorSettings().Q_std.Q_std_air);
-        registerParameter("ref_Q_std_unknown", &ref_calc_settings_.Q_std.Q_std_unknown, ReferenceCalculatorSettings().Q_std.Q_std_unknown);
+        registerParameter("ref_Q_std", &ref_calc_settings_.Q_std.Q_std_static,
+                          ReferenceCalculatorSettings().Q_std.Q_std_static);
+        registerParameter("ref_Q_std_ground", &ref_calc_settings_.Q_std.Q_std_ground,
+                          ReferenceCalculatorSettings().Q_std.Q_std_ground);
+        registerParameter("ref_Q_std_air", &ref_calc_settings_.Q_std.Q_std_air,
+                          ReferenceCalculatorSettings().Q_std.Q_std_air);
+        registerParameter("ref_Q_std_unknown", &ref_calc_settings_.Q_std.Q_std_unknown,
+                          ReferenceCalculatorSettings().Q_std.Q_std_unknown);
 
-        registerParameter("dynamic_process_noise", &ref_calc_settings_.dynamic_process_noise, ReferenceCalculatorSettings().dynamic_process_noise);
+        registerParameter("dynamic_process_noise", &ref_calc_settings_.dynamic_process_noise,
+                          ReferenceCalculatorSettings().dynamic_process_noise);
 
         //registerParameter("ref_min_chain_size", &ref_calc_settings_.min_chain_size   , ReferenceCalculatorSettings().min_chain_size);
-        registerParameter("ref_min_dt"        , &ref_calc_settings_.min_dt   , ReferenceCalculatorSettings().min_dt);
-        registerParameter("ref_max_dt"        , &ref_calc_settings_.max_dt   , ReferenceCalculatorSettings().max_dt);
-        registerParameter("ref_max_distance"  , &ref_calc_settings_.max_distance   , ReferenceCalculatorSettings().max_distance);
+        registerParameter("ref_min_dt", &ref_calc_settings_.min_dt, ReferenceCalculatorSettings().min_dt);
+        registerParameter("ref_max_dt", &ref_calc_settings_.max_dt, ReferenceCalculatorSettings().max_dt);
+        registerParameter("ref_max_distance", &ref_calc_settings_.max_distance,
+                          ReferenceCalculatorSettings().max_distance);
 
         registerParameter("ref_smooth_rts", &ref_calc_settings_.smooth_rts, ReferenceCalculatorSettings().smooth_rts);
 
-        registerParameter("ref_resample_result", &ref_calc_settings_.resample_result, ReferenceCalculatorSettings().resample_result);
-        registerParameter("ref_resample_Q_std", &ref_calc_settings_.resample_Q_std.Q_std_static, ReferenceCalculatorSettings().resample_Q_std.Q_std_static);
-        registerParameter("ref_resample_Q_std_ground", &ref_calc_settings_.resample_Q_std.Q_std_ground, ReferenceCalculatorSettings().resample_Q_std.Q_std_ground);
-        registerParameter("ref_resample_Q_std_air", &ref_calc_settings_.resample_Q_std.Q_std_air, ReferenceCalculatorSettings().resample_Q_std.Q_std_air);
-        registerParameter("ref_resample_Q_std_unknown", &ref_calc_settings_.resample_Q_std.Q_std_unknown, ReferenceCalculatorSettings().resample_Q_std.Q_std_unknown);
-        registerParameter("ref_resample_dt"    , &ref_calc_settings_.resample_dt    , ReferenceCalculatorSettings().resample_dt);
+        registerParameter("ref_resample_result", &ref_calc_settings_.resample_result,
+                          ReferenceCalculatorSettings().resample_result);
+        registerParameter("ref_resample_Q_std", &ref_calc_settings_.resample_Q_std.Q_std_static,
+                          ReferenceCalculatorSettings().resample_Q_std.Q_std_static);
+        registerParameter("ref_resample_Q_std_ground", &ref_calc_settings_.resample_Q_std.Q_std_ground,
+                          ReferenceCalculatorSettings().resample_Q_std.Q_std_ground);
+        registerParameter("ref_resample_Q_std_air", &ref_calc_settings_.resample_Q_std.Q_std_air,
+                          ReferenceCalculatorSettings().resample_Q_std.Q_std_air);
+        registerParameter("ref_resample_Q_std_unknown", &ref_calc_settings_.resample_Q_std.Q_std_unknown,
+                          ReferenceCalculatorSettings().resample_Q_std.Q_std_unknown);
+        registerParameter("ref_resample_dt", &ref_calc_settings_.resample_dt,
+                          ReferenceCalculatorSettings().resample_dt);
 
-        registerParameter("ref_max_proj_distance_cart", &ref_calc_settings_.max_proj_distance_cart, ReferenceCalculatorSettings().max_proj_distance_cart);
+        registerParameter("ref_max_proj_distance_cart", &ref_calc_settings_.max_proj_distance_cart,
+                          ReferenceCalculatorSettings().max_proj_distance_cart);
 
-        registerParameter("ref_resample_systracks"       , &ref_calc_settings_.resample_systracks       , ReferenceCalculatorSettings().resample_systracks);
-        registerParameter("ref_resample_systracks_dt"    , &ref_calc_settings_.resample_systracks_dt    , ReferenceCalculatorSettings().resample_systracks_dt);
-        registerParameter("ref_resample_systracks_max_dt", &ref_calc_settings_.resample_systracks_max_dt, ReferenceCalculatorSettings().resample_systracks_max_dt);
+        registerParameter("ref_resample_systracks", &ref_calc_settings_.resample_systracks,
+                          ReferenceCalculatorSettings().resample_systracks);
+        registerParameter("ref_resample_systracks_dt", &ref_calc_settings_.resample_systracks_dt,
+                          ReferenceCalculatorSettings().resample_systracks_dt);
+        registerParameter("ref_resample_systracks_max_dt", &ref_calc_settings_.resample_systracks_max_dt,
+                          ReferenceCalculatorSettings().resample_systracks_max_dt);
 
-        registerParameter("filter_references_max_stddev"  , &ref_calc_settings_.filter_references_max_stddev_  , ReferenceCalculatorSettings().filter_references_max_stddev_);
-        registerParameter("filter_references_max_stddev_m", &ref_calc_settings_.filter_references_max_stddev_m_, ReferenceCalculatorSettings().filter_references_max_stddev_m_);
+        registerParameter("filter_references_max_stddev"  , &ref_calc_settings_.filter_references_max_stddev_,
+                          ReferenceCalculatorSettings().filter_references_max_stddev_);
+        registerParameter("filter_references_max_stddev_m", &ref_calc_settings_.filter_references_max_stddev_m_,
+                          ReferenceCalculatorSettings().filter_references_max_stddev_m_);
     }
 
     assert (acc_estimator_);
@@ -565,6 +595,16 @@ void ReconstructorBase::resetTimeframeSettings()
     settings().data_timestamp_max = timeframe.second;
 
     emit configChanged();
+}
+
+bool ReconstructorBase::isVehicleACID(const std::string& acid)
+{
+    return base_settings_.vehicle_acids_set_.count(acid);
+}
+
+bool ReconstructorBase::isVehicleACAD(unsigned int value)
+{
+    return base_settings_.vehicle_acads_set_.count(value);
 }
 
 std::pair<boost::posix_time::ptime, boost::posix_time::ptime> ReconstructorBase::timeFrame() const
@@ -1013,6 +1053,8 @@ void ReconstructorBase::createTargetReports()
 
     auto& ds_man = COMPASS::instance().dataSourceManager();
 
+    std::set<unsigned int> ground_only_ds_ids = ds_man.groundOnlyDBDataSources();
+
     for (auto& buf_it : *accessor_)
     {
         assert (dbcont_man.existsDBContent(buf_it.first));
@@ -1087,6 +1129,7 @@ void ReconstructorBase::createTargetReports()
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
 
+
                 info.unsused_ds_pos_ =
                     !info.position().has_value()
                         || (unused_ds_ids.count(info.ds_id_)
@@ -1099,6 +1142,9 @@ void ReconstructorBase::createTargetReports()
 
                 info.track_angle_ = tgt_acc.trackAngle(cnt);
                 info.ground_bit_ = tgt_acc.groundBit(cnt);
+                info.data_source_is_ground_only = ground_only_ds_ids.count(info.ds_id_);
+
+                info.ecat_ = tgt_acc.ecat(cnt);
 
                 // insert info
                 target_reports_[record_num] = info;
@@ -1499,4 +1545,36 @@ std::unique_ptr<reconstruction::KalmanChain>& ReconstructorBase::chain(unsigned 
 void ReconstructorBase::informConfigChanged()
 {
     emit configChanged();
+}
+
+void ReconstructorBaseSettings::setVehicleACADs(const std::string& value)
+{
+    vehicle_acads_ = value;
+
+    vehicle_acads_set_.clear();
+
+    for (const auto& acad_str : String::split(vehicle_acads_, ','))
+    {
+        try {
+            unsigned int acad = String::intFromHexString(acad_str);
+            vehicle_acads_set_.insert(acad);
+        } catch (...) {
+
+            logwrn << "ReconstructorBaseSettings: setVehicleACADs: impossible hex value '" << acad_str << "'";
+        }
+    }
+}
+
+void ReconstructorBaseSettings::setVehicleACIDs(const std::string& value)
+{
+    vehicle_acids_ = value;
+
+    vehicle_acids_set_.clear();
+
+    for (std::string acid_str : String::split(vehicle_acids_, ','))
+    {
+        acid_str = String::trim(acid_str);
+        boost::to_upper(acid_str);
+        vehicle_acids_set_.insert(acid_str);
+    }
 }
