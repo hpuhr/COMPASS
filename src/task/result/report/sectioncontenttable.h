@@ -120,7 +120,7 @@ public:
     SectionContentTable(Section* parent_section);
     virtual ~SectionContentTable();
 
-    void addRow (const nlohmann::json& row,
+    void addRow (const nlohmann::json::array_t& row,
                  const SectionContentViewable& viewable = SectionContentViewable(),
                  const std::string& section_link = "",
                  const std::string& section_figure = "", // in section_link section

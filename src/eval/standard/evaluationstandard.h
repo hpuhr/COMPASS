@@ -31,6 +31,11 @@ class Group;
 class EvaluationStandardWidget;
 class EvaluationStandardTreeModel;
 
+namespace ResultReport
+{
+    class Report;
+}
+
 class EvaluationStandard : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
     Q_OBJECT
@@ -74,7 +79,7 @@ public:
 
     EvaluationStandardRootItem& rootItem();
 
-    void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
     EvaluationManager& eval_man_;

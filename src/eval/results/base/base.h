@@ -42,10 +42,10 @@ namespace EvaluationRequirement
     class Base;
 }
 
-namespace EvaluationResultsReport 
+namespace ResultReport 
 {
+    class Report;
     class Section;
-    class RootItem;
     class SectionContentTable;
 }
 
@@ -77,17 +77,17 @@ public:
     struct Info
     {
         Info() {}
-        Info(const QString& name,
-             const QString& comment,
-             const QVariant& value)
+        Info(const std::string& name,
+             const std::string& comment,
+             const nlohmann::json& value)
         :   info_name   (name   )
         ,   info_comment(comment)
         ,   info_value  (value  )
         {}
 
-        QString  info_name;
-        QString  info_comment;
-        QVariant info_value;
+        std::string    info_name;
+        std::string    info_comment;
+        nlohmann::json info_value;
     };
 
     Base(const std::string& type, 
@@ -121,30 +121,30 @@ public:
 
     const SectorLayer& sectorLayer() const { return sector_layer_; } 
 
-    QVariant resultValue() const;
-    QVariant resultValueOptional(const boost::optional<double>& value) const;
-    virtual QVariant resultValue(double value) const;
+    nlohmann::json resultValue() const;
+    nlohmann::json resultValueOptional(const boost::optional<double>& value) const;
+    virtual nlohmann::json resultValue(double value) const;
 
     /// returns the number of issues detected for this result
     virtual unsigned int numIssues() const = 0;
 
     /// checks if the result references a specific section of the report
-    virtual bool hasReference(const EvaluationResultsReport::SectionContentTable& table, 
+    virtual bool hasReference(const ResultReport::SectionContentTable& table, 
                               const QVariant& annotation) const = 0;
     /// returns a report reference link
-    virtual std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
+    virtual std::string reference(const ResultReport::SectionContentTable& table, 
                                   const QVariant& annotation) const = 0;
 
     /// checks if the result can generate viewable data for the given table and annotation index
-    virtual bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+    virtual bool hasViewableData (const ResultReport::SectionContentTable& table, 
                                   const QVariant& annotation) const = 0;
     /// checks if the viewable data is ready (e.g. cached or invalidated)
     virtual bool viewableDataReady() const = 0;
     /// creates suitable viewable data for the given table and annotation index
-    virtual std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    virtual std::shared_ptr<nlohmann::json::object_t> viewableData(const ResultReport::SectionContentTable& table, 
                                                                    const QVariant& annotation) const = 0;
     /// adds the result to the report root item
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) = 0;
 
     /// iterate over details
     virtual void iterateDetails(const DetailFunc& func,
@@ -246,8 +246,7 @@ protected:
     /// generate definitions for the automatic generation of custom annotations (grids, histograms, etc.)
     virtual FeatureDefinitions getCustomAnnotationDefinitions() const;
 
-    EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
-            std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    ResultReport::SectionContentTable& getReqOverviewTable (std::shared_ptr<ResultReport::Report> report);
 
     /// section and annotation id strings
     virtual std::string getRequirementSectionID() const;
@@ -256,7 +255,7 @@ protected:
 
     std::string getRequirementAnnotationID() const;
     
-    EvaluationResultsReport::Section& getRequirementSection(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    ResultReport::Section& getRequirementSection(std::shared_ptr<ResultReport::Report> report);
 
     std::string type_;
     std::string result_id_;

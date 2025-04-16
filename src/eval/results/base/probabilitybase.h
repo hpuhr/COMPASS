@@ -40,8 +40,8 @@ public:
                           const EvaluationDetails& details);
     virtual ~SingleProbabilityBase();
 
-    static QVariant formatProbability(double prob);
-    static QVariant formatProbabilityOptional(const boost::optional<double>& prob);
+    static nlohmann::json formatProbability(double prob);
+    static nlohmann::json formatProbabilityOptional(const boost::optional<double>& prob);
 
 protected:
     EvaluationRequirement::ProbabilityBase& probRequirement() const;

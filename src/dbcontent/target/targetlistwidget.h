@@ -52,10 +52,8 @@ public:
 protected:
     void showMainColumns(bool show);
     void showDurationColumns(bool show);
-    void showSecondaryColumns(bool show);
-    void showMainColumnsAndEmit(bool show);
-    void showDurationColumnsAndEmit(bool show);
-    void showSecondaryColumnsAndEmit(bool show);
+    void showModeACColumns(bool show);
+    void showModeSColumns(bool show);
 
     TargetModel& model_;
     DBContentManager& dbcont_manager_;

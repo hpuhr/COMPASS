@@ -98,7 +98,7 @@ std::vector<std::string> SingleIntervalBase::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleIntervalBase::targetTableValuesCustom() const
+nlohmann::json::array_t SingleIntervalBase::targetTableValuesCustom() const
 {
     return { sum_uis_, missed_uis_ };
 }
@@ -119,7 +119,7 @@ std::vector<Single::TargetInfo> SingleIntervalBase::targetInfos() const
 
         ++inside_sectors;
 
-        infos.emplace_back(("Reference Period " + std::to_string(cnt)).c_str(), "Time inside sector", ref_periods_.period(cnt).str().c_str());
+        infos.emplace_back(("Reference Period " + std::to_string(cnt)), "Time inside sector", ref_periods_.period(cnt).str());
     }
 
     if (inside_sectors == 0)
@@ -137,16 +137,16 @@ std::vector<std::string> SingleIntervalBase::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleIntervalBase::detailValues(const EvaluationDetail& detail,
-                                                       const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleIntervalBase::detailValues(const EvaluationDetail& detail,
+                                                         const EvaluationDetail* parent_detail) const
 {
-    auto     d_tod     = detail.getValue(DetailKey::DiffTOD);
-    QVariant d_tod_str = d_tod.isValid() ? QVariant(String::timeStringFromDouble(d_tod.toFloat()).c_str()) : QVariant();
+    auto d_tod     = detail.getValue(DetailKey::DiffTOD);
+    auto d_tod_str = d_tod.isValid() ? nlohmann::json(String::timeStringFromDouble(d_tod.toFloat())) : nlohmann::json();
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
+    return { Utils::Time::toString(detail.timestamp()),
              d_tod_str,
-             detail.getValue(DetailKey::MissedUIs),
-             detail.comments().generalComment().c_str() };
+             detail.getValue(DetailKey::MissedUIs).toUInt(),
+             detail.comments().generalComment() };
 }
 
 /**

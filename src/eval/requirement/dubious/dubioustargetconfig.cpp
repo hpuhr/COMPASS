@@ -20,9 +20,11 @@
 #include "eval/requirement/dubious/dubioustarget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
 
-using namespace EvaluationResultsReport;
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 using namespace std;
 
 namespace EvaluationRequirement
@@ -247,21 +249,17 @@ void DubiousTargetConfig::createWidget()
     assert (widget_);
 }
 
-void DubiousTargetConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void DubiousTargetConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+    //   auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
-
-    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
-    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
-    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+    //    table.addRow({"Name", "Requirement name", name_});
+    //    table.addRow({"Short Name", "Requirement short name", short_name_});
+    //    table.addRow({"Comment", "", comment_});
 
     // prob & check type added in subclass
 }
-
-
 
 }

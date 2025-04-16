@@ -63,7 +63,7 @@ std::vector<std::string> SinglePositionRadarAzimuth::targetTableHeadersCustom() 
 
 /**
 */
-std::vector<QVariant> SinglePositionRadarAzimuth::targetTableValuesCustom() const
+nlohmann::json::array_t SinglePositionRadarAzimuth::targetTableValuesCustom() const
 {
     return { formatValue(accumulator_.min()),
              formatValue(accumulator_.max()), 
@@ -99,19 +99,19 @@ std::vector<std::string> SinglePositionRadarAzimuth::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SinglePositionRadarAzimuth::detailValues(const EvaluationDetail& detail,
-                                                               const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SinglePositionRadarAzimuth::detailValues(const EvaluationDetail& detail,
+                                                                 const EvaluationDetail* parent_detail) const
 {
     bool has_ref_pos = detail.numPositions() >= 2;
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
+    return { Utils::Time::toString(detail.timestamp()),
             !has_ref_pos,
-             detail.getValue(SinglePositionBaseCommon::DetailKey::PosInside),
-             detail.getValue(SinglePositionBaseCommon::DetailKey::Value),
-             detail.getValue(SinglePositionBaseCommon::DetailKey::CheckPassed), 
-             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckFailed), 
-             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckPassed), 
-             detail.comments().generalComment().c_str() }; 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::PosInside).toBool(),
+             detail.getValue(SinglePositionBaseCommon::DetailKey::Value).toFloat(),
+             detail.getValue(SinglePositionBaseCommon::DetailKey::CheckPassed).toBool(), 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckFailed).toUInt(), 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckPassed).toUInt(), 
+             detail.comments().generalComment() }; 
 }
 
 /**

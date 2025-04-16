@@ -65,7 +65,8 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
 
     showMainColumns(model_.showMainColumns());
     showDurationColumns(model_.showDurationColumns());
-    showSecondaryColumns(model_.showSecondaryColumns());
+    showModeSColumns(model_.showModeSColumns());
+    showModeACColumns(model_.showModeACColumns());
 }
 
 /**
@@ -130,19 +131,26 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
     // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
     // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
 
-    auto dur_cols_action = column_menu->addAction("Durations");
+    auto dur_cols_action = column_menu->addAction("Duration");
     dur_cols_action->setCheckable(true);
     dur_cols_action->setChecked(model_.showDurationColumns());
 
     connect(dur_cols_action, &QAction::toggled, this, &TargetListWidget::showDurationColumns);
     connect(dur_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
 
-    auto sec_cols_action = column_menu->addAction("Secondary Attributes");
-    sec_cols_action->setCheckable(true);
-    sec_cols_action->setChecked(model_.showSecondaryColumns());
+    auto mode_s_cols_action = column_menu->addAction("Mode S");
+    mode_s_cols_action->setCheckable(true);
+    mode_s_cols_action->setChecked(model_.showModeSColumns());
 
-    connect(sec_cols_action, &QAction::toggled, this, &TargetListWidget::showSecondaryColumns);
-    connect(sec_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+    connect(mode_s_cols_action, &QAction::toggled, this, &TargetListWidget::showModeSColumns);
+    connect(mode_s_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+
+    auto mode_ac_cols_action = column_menu->addAction("Mode A/C");
+    mode_ac_cols_action->setCheckable(true);
+    mode_ac_cols_action->setChecked(model_.showModeACColumns());
+
+    connect(mode_ac_cols_action, &QAction::toggled, this, &TargetListWidget::showModeACColumns);
+    connect(mode_ac_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
 }
 
 /**
@@ -156,19 +164,26 @@ void TargetListWidget::addToToolBar(QToolBar* tool_bar)
 
     // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
 
-    auto dur_cols_action = tool_bar->addAction("D");
+    auto dur_cols_action = tool_bar->addAction("Duration");
     dur_cols_action->setCheckable(true);
     dur_cols_action->setChecked(model_.showDurationColumns());
-    dur_cols_action->setToolTip("Show Durations");
+    dur_cols_action->setToolTip("Show Duration Columns");
 
     connect(dur_cols_action, &QAction::toggled, this, &TargetListWidget::showDurationColumns);
 
-    auto sec_cols_action = tool_bar->addAction("SA");
-    sec_cols_action->setCheckable(true);
-    sec_cols_action->setChecked(model_.showSecondaryColumns());
-    sec_cols_action->setToolTip("Show Secondary Attributes");
+    auto mode_s_cols_action = tool_bar->addAction("Mode S");
+    mode_s_cols_action->setCheckable(true);
+    mode_s_cols_action->setChecked(model_.showModeSColumns());
+    mode_s_cols_action->setToolTip("Show Mode S Columns");
 
-    connect(sec_cols_action, &QAction::toggled, this, &TargetListWidget::showSecondaryColumns);
+    connect(mode_s_cols_action, &QAction::toggled, this, &TargetListWidget::showModeSColumns);
+
+    auto mode_ac_cols_action = tool_bar->addAction("Mode A/C");
+    mode_ac_cols_action->setCheckable(true);
+    mode_ac_cols_action->setChecked(model_.showModeACColumns());
+    mode_ac_cols_action->setToolTip("Show Mode A/C Columns");
+
+    connect(mode_ac_cols_action, &QAction::toggled, this, &TargetListWidget::showModeACColumns);
 }
 
 /**
@@ -332,11 +347,19 @@ void TargetListWidget::showDurationColumns(bool show)
         table_view_->setColumnHidden(c, !show);
 }
 
-void TargetListWidget::showSecondaryColumns(bool show)
+void TargetListWidget::showModeSColumns(bool show)
 {
-    model_.showSecondaryColumns(show);
+    model_.showModeSColumns(show);
 
-    for (int c : model_.secondaryColumns())
+    for (int c : model_.modeSColumns())
+        table_view_->setColumnHidden(c, !show);
+}
+
+void TargetListWidget::showModeACColumns(bool show)
+{
+    model_.showModeACColumns(show);
+
+    for (int c : model_.modeACColumns())
         table_view_->setColumnHidden(c, !show);
 }
 

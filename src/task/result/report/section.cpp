@@ -54,8 +54,8 @@ unsigned int Section::current_content_id_ = 0;
 
 /**
 */
-Section::Section(const string& heading, 
-                 const string& parent_heading, 
+Section::Section(const std::string& heading, 
+                 const std::string& parent_heading, 
                  TreeItem* parent_item,
                  Report* report)
 :   TreeItem       (heading, parent_item)
@@ -149,7 +149,7 @@ std::string Section::compoundHeading() const
 */
 std::string Section::compoundResultsHeading() const
 {
-    string tmp;
+    std::string tmp;
 
     if (parent_heading_.size())
         tmp = SectionID::sectionID(parent_heading_, heading_);
@@ -248,15 +248,27 @@ SectionContentText& Section::getText (const std::string& name)
 
 /**
 */
-void Section::addText(const std::string& name)
+SectionContentText& Section::addText(const std::string& name)
 {
     assert (!hasText(name));
     auto id = Section::newContentID();
     content_ids_.push_back(id);
     content_names_.push_back(name);
-    content_.push_back(std::make_shared<SectionContentText>(id, name, this));
+
+    auto ptr = std::make_shared<SectionContentText>(id, name, this);
+    
+    content_.push_back(ptr);
     content_types_.push_back((int)content_.back()->type());
     assert (hasText(name));
+
+    return *ptr;
+}
+
+/**
+*/
+size_t Section::numTexts() const
+{
+    return numContents(SectionContent::Type::Text);
 }
 
 /**
@@ -298,29 +310,40 @@ std::vector<std::string> Section::getTableNames() const
 
 /**
 */
-void Section::addTable(const std::string& name, 
-                       unsigned int num_columns,
-                       std::vector<std::string> headings, 
-                       bool sortable, 
-                       unsigned int sort_column, 
-                       Qt::SortOrder order)
+SectionContentTable& Section::addTable(const std::string& name, 
+                                       unsigned int num_columns,
+                                       std::vector<std::string> headings, 
+                                       bool sortable, 
+                                       unsigned int sort_column, 
+                                       Qt::SortOrder order)
 {
     assert (!hasTable(name));
     auto id = Section::newContentID();
     content_ids_.push_back(id);
     content_names_.push_back(name);
 
-    content_.push_back(std::make_shared<SectionContentTable>(id, 
-                                                             name, 
-                                                             num_columns, 
-                                                             headings, 
-                                                             this, 
-                                                             sortable, 
-                                                             sort_column, 
-                                                             order));
+    auto ptr = std::make_shared<SectionContentTable>(id, 
+                                                     name, 
+                                                     num_columns, 
+                                                     headings, 
+                                                     this, 
+                                                     sortable, 
+                                                     sort_column, 
+                                                     order);
+
+    content_.push_back(ptr);
 
     content_types_.push_back((int)content_.back()->type());
     assert (hasTable(name));
+
+    return *ptr;
+}
+
+/**
+*/
+size_t Section::numTables() const
+{
+    return numContents(SectionContent::Type::Table);
 }
 
 /**
@@ -348,8 +371,8 @@ SectionContentFigure& Section::getFigure (const std::string& name)
 
 /**
 */
-unsigned int Section::addFigure(const std::string& name, 
-                                const SectionContentViewable& viewable)
+SectionContentFigure& Section::addFigure(const std::string& name, 
+                                         const SectionContentViewable& viewable)
 {
     assert (!name.empty());
     assert (!hasFigure(name));
@@ -357,15 +380,18 @@ unsigned int Section::addFigure(const std::string& name,
     unsigned int id = Section::newContentID();
     content_ids_.push_back(id);
     content_names_.push_back(name);
-    content_.push_back(std::make_shared<SectionContentFigure>(id, 
-                                                              SectionContentFigure::FigureType::Section,
-                                                              name, 
-                                                              viewable, 
-                                                              this));
+
+    auto ptr = std::make_shared<SectionContentFigure>(id, 
+                                                      SectionContentFigure::FigureType::Section,
+                                                      name, 
+                                                      viewable, 
+                                                      this);
+
+    content_.push_back(ptr);
     content_types_.push_back((int)content_.back()->type());
     assert (hasFigure(name));
 
-    return id;
+    return *ptr;
 }
 
 /**
@@ -402,6 +428,13 @@ std::vector<SectionContentFigure*> Section::getFigures()
     }
 
     return figures;
+}
+
+/**
+*/
+size_t Section::numFigures() const
+{
+    return numContents(SectionContent::Type::Figure);
 }
 
 /**
@@ -473,16 +506,16 @@ void Section::accept(LatexVisitor& v) const
 
 /**
 */
-const vector<shared_ptr<SectionContent>>& Section::sectionContent() const
+const std::vector<std::shared_ptr<SectionContent>>& Section::sectionContent() const
 {
     return content_;
 }
 
 /**
 */
-vector<shared_ptr<SectionContent>> Section::recursiveContent() const
+std::vector<std::shared_ptr<SectionContent>> Section::recursiveContent() const
 {
-    vector<shared_ptr<SectionContent>> sec_content;
+    std::vector<std::shared_ptr<SectionContent>> sec_content;
     sec_content.insert(sec_content.end(), content_.begin(), content_.end());
     sec_content.insert(sec_content.end(), extra_content_.begin(), extra_content_.end());
 
@@ -542,6 +575,8 @@ boost::optional<size_t> Section::findContent(const std::string& name, SectionCon
 {
     for (size_t i = 0; i < content_.size(); ++i)
     {
+        //loginf << "name: " << content_names_[ i ] << " vs " << name << " - type: " << content_types_[ i ] << " vs " << (int)type;
+
         if (content_names_[ i ] == name && (SectionContent::Type)content_types_[ i ] == type)
             return i;
     }
@@ -569,6 +604,21 @@ std::vector<size_t> Section::findContents(SectionContent::Type type) const
 bool Section::hasContent(const std::string& name, SectionContent::Type type) const
 {
     return findContent(name, type).has_value();
+}
+
+/**
+*/
+size_t Section::numContents(SectionContent::Type type) const
+{
+    size_t num = 0;
+
+    for (size_t i = 0; i < content_.size(); ++i)
+    {
+        if ((SectionContent::Type)content_types_[ i ] == type)
+            ++num;
+    }
+
+    return num;
 }
 
 /**
@@ -625,7 +675,7 @@ std::shared_ptr<SectionContent> Section::retrieveContent(unsigned int id)
 
 /**
 */
-shared_ptr<SectionContent> Section::loadOrGetContent(size_t idx, bool is_extra_content)
+std::shared_ptr<SectionContent> Section::loadOrGetContent(size_t idx, bool is_extra_content)
 {
     auto& c_ptr = is_extra_content ? extra_content_.at(idx) : content_.at(idx);
     auto  id    = is_extra_content ? extra_content_ids_.at(idx) : content_ids_.at(idx);

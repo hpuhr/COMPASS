@@ -18,13 +18,15 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/baseconfig.h"
-//#include "eval/requirement/position/radarazimuthconfigwidget.h"
-//#include "eval/requirement/position/radarazimuth.h"
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -41,7 +43,7 @@ public:
     double thresholdValue() const;
     void thresholdValue(double value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
 protected:
     double threshold_value_ {0};

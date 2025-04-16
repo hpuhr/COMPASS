@@ -34,8 +34,11 @@ public:
     static std::string sectionID(const std::vector<std::string>& sub_sections);
     static std::string sectionID(const std::string& section0, const std::string& section1);
     static std::string sectionID2Path(const std::string& section_id);
+    static std::string prependReportResults(const std::string& section_id);
 
     static const std::string Sep;
+    static const std::string SectionReport;
+    static const std::string SectionResults;
 };
 
 }

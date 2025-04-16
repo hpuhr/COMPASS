@@ -127,13 +127,13 @@ protected:
     void createDebugMenu();
 
     void updateWindowTitle();
-    void updateSizings();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent* event);
 
     void shutdown();
 
+    QWidget* main_widget_{nullptr};
     QTabWidget* tab_widget_{nullptr};
 
     QPushButton* add_view_button_{nullptr};

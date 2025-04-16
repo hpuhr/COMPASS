@@ -32,8 +32,6 @@
 
 class LatexVisitor;
 
-using namespace std;
-
 class TaskManager;
 class DBInterface;
 
@@ -51,8 +49,8 @@ struct SectionContentViewable;
 class Section : public TreeItem
 {
 public:
-    Section(const string& heading, 
-            const string& parent_heading, 
+    Section(const std::string& heading, 
+            const std::string& parent_heading, 
             TreeItem* parent_item,
             Report* report);
     Section(TreeItem* parent_item,
@@ -64,9 +62,9 @@ public:
     virtual QVariant data(int column) const override;
     virtual int row() const override;
 
-    string heading() const;
-    string compoundHeading() const; // "head1:head2" or "head1", starts with "Results"
-    string compoundResultsHeading() const; // without "Results", can be ""
+    std::string heading() const;
+    std::string compoundHeading() const; // "head1:head2" or "head1", starts with "Results"
+    std::string compoundResultsHeading() const; // without "Results", can be ""
 
     bool hasSubSection (const std::string& heading);
     Section& getSubSection (const std::string& heading);
@@ -77,30 +75,36 @@ public:
 
     bool hasText (const std::string& name);
     SectionContentText& getText (const std::string& name);
-    void addText (const std::string& name);
+    SectionContentText& addText (const std::string& name);
+    size_t numTexts() const;
 
     bool hasTable (const std::string& name);
     SectionContentTable& getTable (const std::string& name);
-    void addTable (const std::string& name, unsigned int num_columns, vector<string> headings,
-                    bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
+    SectionContentTable& addTable (const std::string& name, 
+                                   unsigned int num_columns, 
+                                   const std::vector<std::string> headings,
+                                   bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
     std::vector<std::string> getTableNames() const;
+    size_t numTables() const;
 
     bool hasFigure (const std::string& name);
     SectionContentFigure& getFigure (const std::string& name);
-    unsigned int addFigure (const std::string& name, 
-                            const SectionContentViewable& viewable);
+    SectionContentFigure& addFigure (const std::string& name, 
+                                     const SectionContentViewable& viewable);
     std::vector<SectionContentFigure*> getFigures();
+    size_t numFigures() const;
 
     std::shared_ptr<SectionContent> retrieveContent(unsigned int id);
 
     unsigned int numSections(); // all sections contained
-    void addSectionsFlat (vector<shared_ptr<Section>>& result, bool include_target_details,
-                            bool report_skip_targets_wo_issues);
+    void addSectionsFlat (std::vector<std::shared_ptr<Section>>& result, 
+                          bool include_target_details,
+                          bool report_skip_targets_wo_issues);
 
     virtual void accept(LatexVisitor& v) const;
 
-    const vector<shared_ptr<SectionContent>>& sectionContent() const;
-    vector<shared_ptr<SectionContent>> recursiveContent() const;
+    const std::vector<std::shared_ptr<SectionContent>>& sectionContent() const;
+    std::vector<std::shared_ptr<SectionContent>> recursiveContent() const;
 
     bool perTargetSection() const; // to be used for utn and sub-sections
     void perTargetSection(bool value);
@@ -141,34 +145,35 @@ protected:
     boost::optional<size_t> findContent(const std::string& name, SectionContent::Type type) const;
     std::vector<size_t> findContents(SectionContent::Type type) const;
     bool hasContent(const std::string& name, SectionContent::Type type) const;
+    size_t numContents(SectionContent::Type type) const;
 
     void createContentWidget();
 
     unsigned int addContentFigure(const SectionContentViewable& viewable);
 
-    shared_ptr<SectionContent> loadOrGetContent(size_t idx, bool is_extra_content);
+    std::shared_ptr<SectionContent> loadOrGetContent(size_t idx, bool is_extra_content);
 
     static unsigned int newContentID();
 
-    string heading_; // name same as heading
-    string parent_heading_; // e.g. "head1:head2" or ""
+    std::string heading_; // name same as heading
+    std::string parent_heading_; // e.g. "head1:head2" or ""
 
     Report* report_ = nullptr;
 
     bool per_target_section_ {false};
     bool per_target_section_with_issues_ {false};
 
-    vector<int>                        content_types_;
-    vector<std::string>                content_names_;
-    vector<unsigned int>               content_ids_;
-    vector<shared_ptr<SectionContent>> content_;
+    std::vector<int>                             content_types_;
+    std::vector<std::string>                     content_names_;
+    std::vector<unsigned int>                    content_ids_;
+    std::vector<std::shared_ptr<SectionContent>> content_;
 
-    vector<unsigned int>               extra_content_ids_;
-    vector<shared_ptr<SectionContent>> extra_content_;
+    std::vector<unsigned int>                    extra_content_ids_;
+    std::vector<std::shared_ptr<SectionContent>> extra_content_;
 
-    unique_ptr<QWidget> content_widget_;
+    std::unique_ptr<QWidget> content_widget_;
 
-    vector<shared_ptr<Section>> sub_sections_;
+    std::vector<std::shared_ptr<Section>> sub_sections_;
 
     static unsigned int current_content_id_;
 };

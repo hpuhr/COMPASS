@@ -24,18 +24,27 @@
 class Group;
 class EvaluationStandard;
 
+namespace ResultReport
+{
+    class Report;
+}
+
 namespace EvaluationRequirement
 {
 
 class GenericIntegerConfig : public ProbabilityBaseConfig
 {
 public:
-    GenericIntegerConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
-                     Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+    GenericIntegerConfig(const std::string& class_id, 
+                         const std::string& instance_id, 
+                         const std::string& variant,
+                         Group& group, 
+                         EvaluationStandard& standard, 
+                         EvaluationManager& eval_man);
 
     std::shared_ptr<Base> createRequirement() override;
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
 protected:
     std::string variant_;
@@ -47,12 +56,16 @@ protected:
 class GenericDoubleConfig : public ProbabilityBaseConfig
 {
   public:
-    GenericDoubleConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
-                         Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+    GenericDoubleConfig(const std::string& class_id, 
+                        const std::string& instance_id, 
+                        const std::string& variant,
+                        Group& group, 
+                        EvaluationStandard& standard, 
+                        EvaluationManager& eval_man);
 
     std::shared_ptr<Base> createRequirement() override;
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
     double threshold() const;
     void threshold(double value);

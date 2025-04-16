@@ -18,15 +18,17 @@
 #ifndef EVALUATIONREQUIREMENTEXTRATRACKCONFIG_H
 #define EVALUATIONREQUIREMENTEXTRATRACKCONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/extra/trackconfigwidget.h"
-//#include "eval/requirement/extra/track.h"
 
 #include <memory>
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -50,7 +52,7 @@ namespace EvaluationRequirement
         bool ignorePrimaryOnly() const;
         void ignorePrimaryOnly(bool value);
 
-        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+        virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
     protected:
         float min_duration_{0};

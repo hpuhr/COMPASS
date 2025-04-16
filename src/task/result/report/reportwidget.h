@@ -13,10 +13,12 @@ class TaskResultsWidget;
 class PopupMenu;
 
 class QPushButton;
+class QLabel;
 
 namespace ResultReport
 {
 
+class Section;
 
 class ReportWidget : public QWidget
 {
@@ -37,7 +39,7 @@ public:
 
     void expand();
 
-    void showResultWidget(QWidget* widget); // can be nullptr
+    void showResultWidget(Section* section); // can be nullptr
 
     void selectId (const std::string& id, bool show_figure = false);
     void reshowLastId ();
@@ -63,8 +65,11 @@ protected:
     QPushButton* back_button_ {nullptr};
     std::vector<std::string> id_history_;
 
+    QLabel* current_section_label_ = nullptr;
+
     void expandAllParents (QModelIndex index);
     void updateBackButton ();
+    void updateCurrentSection();
 };
 
 }

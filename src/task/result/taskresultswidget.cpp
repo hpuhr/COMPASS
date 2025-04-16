@@ -194,7 +194,16 @@ void TaskResultsWidget::loadingDone()
 {
 }
 
+/**
+ */
 std::string TaskResultsWidget::currentReportName() const
 {
     return current_report_name_;
+}
+
+/**
+ */
+void TaskResultsWidget::selectID(const std::string id)
+{
+    report_widget_->selectId(id);
 }

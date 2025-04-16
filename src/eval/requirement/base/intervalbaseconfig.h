@@ -21,8 +21,9 @@
 
 #include <boost/optional.hpp>
 
-namespace EvaluationResultsReport
+namespace ResultReport
 {
+    class Report;
     class SectionContentTable;
 }
 
@@ -80,7 +81,7 @@ public:
 
     uint32_t configFlags() const;
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
 protected:
     void configure(uint32_t flags);
@@ -89,7 +90,7 @@ protected:
 
     virtual std::string probabilityDescription() const = 0;
     virtual BaseConfigWidget* createWidget_impl() = 0;
-    virtual void addCustomTableEntries(EvaluationResultsReport::SectionContentTable& table) const {};
+    virtual void addCustomTableEntries(ResultReport::SectionContentTable& table) const {};
     
     uint32_t config_flags_    = std::numeric_limits<uint32_t>::max();
 

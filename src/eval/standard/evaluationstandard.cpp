@@ -22,9 +22,10 @@
 #include "evaluationstandardtreemodel.h"
 #include "logger.h"
 
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttext.h"
+#include "task/result/report/sectioncontenttable.h"
 
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/baseconfig.h"
@@ -206,15 +207,15 @@ void EvaluationStandard::groupsChangedSlot()
     emit configChangedSignal();
 }
 
-void EvaluationStandard::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void EvaluationStandard::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Overview:Standard");
+    auto& section = report->getSection("Overview:Standard");
 
     // reqs overview
 
     section.addTable("req_overview_table", 4, {"Short Name", "Name", "Group", "Type", }, false);
 
-    EvaluationResultsReport::SectionContentTable& req_table = section.getTable("req_overview_table");
+    auto& req_table = section.getTable("req_overview_table");
 
     for (auto& std_it : groups_)
     {
@@ -226,10 +227,10 @@ void EvaluationStandard::addToReport (std::shared_ptr<EvaluationResultsReport::R
             if (!req_it->used())
                 continue;
 
-            req_table.addRow({req_it->shortName().c_str(), req_it->name().c_str(), std_it->name().c_str(),
-                              Group::requirement_type_mapping_.at(req_it->classId()).c_str()}, nullptr);
+            req_table.addRow({req_it->shortName(), req_it->name(), std_it->name(),
+                              Group::requirement_type_mapping_.at(req_it->classId())});
 
-            req_it->addToReport(root_item);
+            req_it->addToReport(report);
         }
     }
 }

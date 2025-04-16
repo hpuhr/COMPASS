@@ -22,6 +22,11 @@
 class Group;
 class EvaluationStandard;
 
+namespace ResultReport
+{
+    class Report;
+}
+
 namespace EvaluationRequirement
 {
 
@@ -34,7 +39,7 @@ public:
 
     std::shared_ptr<Base> createRequirement() override;
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
     bool evalOnlySingleDsId() const;
     void evalOnlySingleDsId(bool eval_only_single_ds_id);

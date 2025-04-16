@@ -20,13 +20,14 @@
 #include "eval/requirement/identification/identificationcorrectconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
+
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 #include "stringconv.h"
 
 using namespace Utils;
-using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
@@ -101,34 +102,32 @@ void IdentificationCorrectConfig::createWidget()
     assert (widget_);
 }
 
-void IdentificationCorrectConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void IdentificationCorrectConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Probability [1]", "Probability of correct identification",
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 
     table.addRow({"Require Correctness of All",
                   "If checked, all available secondary attributes must match "
                   "the reference. If not checked, a single matching secondary attribute is enough.",
-                  String::boolToString(require_correctness_of_all_).c_str()}, nullptr);
+                  String::boolToString(require_correctness_of_all_)});
 
     table.addRow({"Use Mode 3/A Code",
                   "If the Mode 3/A code should be checked",
-                  String::boolToString(use_mode_a_).c_str()}, nullptr);
+                  String::boolToString(use_mode_a_)});
 
     table.addRow({"Use Mode S Target Address",
                   "If the Mode S target address should be checked",
-                  String::boolToString(use_ms_ta_).c_str()}, nullptr);
+                  String::boolToString(use_ms_ta_)});
 
     table.addRow({"Use Mode S Target Identification",
                   "If the Mode S target identification should be checked",
-                  String::boolToString(use_ms_ti_).c_str()}, nullptr);
+                  String::boolToString(use_ms_ti_)});
 }
 }

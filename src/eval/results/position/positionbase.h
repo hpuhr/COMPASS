@@ -161,7 +161,7 @@ public:
                        unsigned int num_failed);
     virtual ~SinglePositionValueBase() = default;
 
-    QVariant resultValue(double value) const override final;
+    nlohmann::json resultValue(double value) const override final;
 
 protected:
     virtual boost::optional<double> computeResult_impl() const override;
@@ -242,7 +242,7 @@ public:
                             EvaluationManager& eval_man,
                             const std::string& csv_header);
 
-    QVariant resultValue(double value) const override final;
+    nlohmann::json resultValue(double value) const override final;
 
 protected:
     virtual unsigned int numIssues() const override;

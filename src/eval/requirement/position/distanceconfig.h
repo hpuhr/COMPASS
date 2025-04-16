@@ -18,13 +18,15 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/position/distanceconfigwidget.h"
-//#include "eval/requirement/position/distance.h"
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -47,7 +49,7 @@ public:
     bool failedValuesOfInterest() const;
     void failedValuesOfInterest(bool value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
     float threshold_value_ {0};

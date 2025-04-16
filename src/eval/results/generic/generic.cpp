@@ -207,7 +207,7 @@ std::vector<std::string> SingleGeneric::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleGeneric::targetTableValuesCustom() const
+nlohmann::json::array_t SingleGeneric::targetTableValuesCustom() const
 {
     return { num_updates_, num_no_ref_pos_ + num_no_ref_val_, num_unknown_, num_correct_, num_false_ };
 }
@@ -220,7 +220,7 @@ std::vector<Single::TargetInfo> SingleGeneric::targetInfos() const
 
     unsigned int no_ref = num_no_ref_pos_ + num_no_ref_val_;
 
-    QString valname = QString::fromStdString(req.valueName());
+    std::string valname = req.valueName();
 
     std::vector<Single::TargetInfo> infos = 
         { { "#Up [1]"        , "Number of updates"                                     , num_updates_     },
@@ -245,20 +245,20 @@ std::vector<std::string> SingleGeneric::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleGeneric::detailValues(const EvaluationDetail& detail,
-                                                  const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleGeneric::detailValues(const EvaluationDetail& detail,
+                                                    const EvaluationDetail* parent_detail) const
 {
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             detail.getValue(DetailKey::RefExists),
+    return { Utils::Time::toString(detail.timestamp()),
+             detail.getValue(DetailKey::RefExists).toBool(),
             !detail.getValue(DetailKey::IsNotOk).toBool(),
-             detail.getValue(DetailKey::NumUpdates),
-             detail.getValue(DetailKey::NumNoRef),
-             detail.getValue(DetailKey::NumInside),
-             detail.getValue(DetailKey::NumOutside),
-             detail.getValue(DetailKey::NumUnknownID),
-             detail.getValue(DetailKey::NumCorrectID),
-             detail.getValue(DetailKey::NumFalseID),
-             detail.comments().generalComment().c_str() };
+             detail.getValue(DetailKey::NumUpdates).toUInt(),
+             detail.getValue(DetailKey::NumNoRef).toUInt(),
+             detail.getValue(DetailKey::NumInside).toUInt(),
+             detail.getValue(DetailKey::NumOutside).toUInt(),
+             detail.getValue(DetailKey::NumUnknownID).toUInt(),
+             detail.getValue(DetailKey::NumCorrectID).toUInt(),
+             detail.getValue(DetailKey::NumFalseID).toUInt(),
+             detail.comments().generalComment() };
 }
 
 /**
@@ -390,7 +390,7 @@ std::vector<Joined::SectorInfo> JoinedGeneric::sectorInfos() const
 {
     EvaluationRequirement::GenericBase& req = genericRequirement();
 
-    QString name = QString::fromStdString(req.valueName());
+    std::string name = req.valueName();
 
     unsigned int no_ref = num_no_ref_pos_ + num_no_ref_val_;
 

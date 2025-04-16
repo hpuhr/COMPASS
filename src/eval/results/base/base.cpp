@@ -19,9 +19,10 @@
 #include "eval/results/base/result_t.h"
 #include "eval/results/base/featuredefinition.h"
 
-#include "eval/results/report/rootitem.h"
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttable.h"
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 #include "eval/results/report/section_id.h"
 
 #include "eval/requirement/base/base.h"
@@ -166,26 +167,26 @@ void Base::updateResult(const boost::optional<double>& value)
 
 /**
 */
-QVariant Base::resultValue() const
+nlohmann::json Base::resultValue() const
 {
     return resultValueOptional(result_);
 }
 
 /**
 */
-QVariant Base::resultValueOptional(const boost::optional<double>& value) const
+nlohmann::json Base::resultValueOptional(const boost::optional<double>& value) const
 {
     if (!value.has_value())
-        return QVariant();
+        return nlohmann::json();
 
     return resultValue(value.value());
 }
 
 /**
 */
-QVariant Base::resultValue(double value) const
+nlohmann::json Base::resultValue(double value) const
 {
-    return requirement_->getResultValueString(value).c_str();
+    return requirement_->getResultValueString(value);
 }
 
 /**
@@ -214,10 +215,9 @@ bool Base::isIgnored() const
 
 /**
 */
-EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
-        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+ResultReport::SectionContentTable& Base::getReqOverviewTable (std::shared_ptr<ResultReport::Report> report)
 {
-    EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Results");
+    auto& ov_sec = report->getSection("Overview:Results");
 
     if (!ov_sec.hasTable(req_overview_table_name_))
         ov_sec.addTable(req_overview_table_name_, 8,
@@ -249,10 +249,9 @@ std::string Base::getRequirementAnnotationID() const
 
 /**
 */
-EvaluationResultsReport::Section& Base::getRequirementSection (
-        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+ResultReport::Section& Base::getRequirementSection (std::shared_ptr<ResultReport::Report> report)
 {
-    return root_item->getSection(getRequirementSectionID());
+    return report->getSection(getRequirementSectionID());
 }
 
 /**

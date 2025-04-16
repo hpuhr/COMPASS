@@ -214,27 +214,27 @@ std::vector<std::string> SingleDubiousTrack::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleDubiousTrack::targetTableValuesCustom() const
+nlohmann::json::array_t SingleDubiousTrack::targetTableValuesCustom() const
 {
     return { num_pos_inside_,                        // "#IU"
              num_pos_inside_dubious_,                // "#DU"
              resultValueOptional(p_dubious_update_), // "PDU"
              num_tracks_,                            // "#T"
              num_tracks_dubious_,                    // "#DT"
-             dubious_reasons_.c_str() };             // "Reasons"
+             dubious_reasons_ };                     // "Reasons"
 }
 
 /**
 */
 std::vector<Single::TargetInfo> SingleDubiousTrack::targetInfos() const
 {
-    QVariant p_dubious_up_var          = SingleProbabilityBase::formatProbabilityOptional(p_dubious_update_);
-    QVariant track_duration_var        = Utils::String::doubleToStringPrecision(track_duration_all_,2).c_str();
-    QVariant track_duration_dub_var    = Utils::String::doubleToStringPrecision(track_duration_dubious_,2).c_str();
-    QVariant track_duration_nondub_var = Utils::String::doubleToStringPrecision(track_duration_nondub_,2).c_str();
-    QVariant dubious_t_avg_var         = num_tracks_dubious_ > 0 ? roundf(track_duration_dubious_/(float)num_tracks_dubious_ * 100.0) / 100.0 : QVariant();
+    auto p_dubious_up_var          = SingleProbabilityBase::formatProbabilityOptional(p_dubious_update_);
+    auto track_duration_var        = Utils::String::doubleToStringPrecision(track_duration_all_,2).c_str();
+    auto track_duration_dub_var    = Utils::String::doubleToStringPrecision(track_duration_dubious_,2).c_str();
+    auto track_duration_nondub_var = Utils::String::doubleToStringPrecision(track_duration_nondub_,2).c_str();
+    auto dubious_t_avg_var         = num_tracks_dubious_ > 0 ? nlohmann::json(roundf(track_duration_dubious_/(float)num_tracks_dubious_ * 100.0) / 100.0) : nlohmann::json();
 
-    QVariant p_dubious_t_var, p_nondub_t_var;
+    nlohmann::json p_dubious_t_var, p_nondub_t_var;
 
     if (track_duration_all_)
     {
@@ -266,14 +266,14 @@ std::vector<std::string> SingleDubiousTrack::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleDubiousTrack::detailValues(const EvaluationDetail& detail,
-                                                       const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleDubiousTrack::detailValues(const EvaluationDetail& detail,
+                                                         const EvaluationDetail* parent_detail) const
 {
     assert(parent_detail);
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             parent_detail->getValue(DetailKey::UTNOrTrackNum),
-             dubiousReasonsString(detail.comments()).c_str() }; // "Comment"
+    return { Utils::Time::toString(detail.timestamp()),
+             parent_detail->getValue(DetailKey::UTNOrTrackNum).toUInt(),
+             dubiousReasonsString(detail.comments()) }; // "Comment"
 }
 
 /**
@@ -405,7 +405,7 @@ boost::optional<double> JoinedDubiousTrack::computeResult_impl() const
 */
 std::vector<Joined::SectorInfo> JoinedDubiousTrack::sectorInfos() const
 {
-    QVariant p_dubious_up_var = SingleProbabilityBase::formatProbabilityOptional(p_dubious_update_);
+    auto p_dubious_up_var = SingleProbabilityBase::formatProbabilityOptional(p_dubious_update_);
 
     std::vector<Joined::SectorInfo> infos = 
         { { "#Up [1]"             , "Number of updates"                      , num_updates_                   },
@@ -418,7 +418,7 @@ std::vector<Joined::SectorInfo> JoinedDubiousTrack::sectorInfos() const
           { "Duration [s]"        , "Duration of all tracks"                 , formatValue(duration_all_)     },
           { "Duration Dubious [s]", "Duration of dubious tracks"             , formatValue(duration_dubious_) } };
 
-    QVariant dubious_t_avg_var;
+    nlohmann::json dubious_t_avg_var;
 
     if (num_tracks_dubious_)
         dubious_t_avg_var = roundf(duration_dubious_/(float)num_tracks_dubious_ * 100.0) / 100.0;
@@ -426,7 +426,7 @@ std::vector<Joined::SectorInfo> JoinedDubiousTrack::sectorInfos() const
     infos.push_back({ "Duration Non-Dubious [s]", "Duration of non-dubious tracks", formatValue(duration_nondub_) });
     infos.push_back({ "Average Duration Dubious [s]", "Average duration of dubious tracks", dubious_t_avg_var });
 
-    QVariant p_dubious_t_var, p_nondub_t_var;
+    nlohmann::json p_dubious_t_var, p_nondub_t_var;
 
     if (duration_all_)
     {
