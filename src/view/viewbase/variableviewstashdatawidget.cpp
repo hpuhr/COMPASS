@@ -40,6 +40,8 @@
 using namespace std;
 using namespace Utils;
 
+const double VariableViewStashDataWidget::RangeMinDefault = 1e-12;
+
 /**
 */
 VariableViewStashDataWidget::VariableViewStashDataWidget(ViewWidget* view_widget,
@@ -360,10 +362,13 @@ void VariableViewStashDataWidget::updateStash()
 
 /**
  */
-QRectF VariableViewStashDataWidget::getPlanarBounds(int var_x, int var_y, bool correct_datetime) const
+QRectF VariableViewStashDataWidget::getPlanarBounds(int var_x, 
+                                                    int var_y, 
+                                                    bool correct_datetime,
+                                                    bool fix_small_ranges) const
 {
-    auto bounds_x = getBounds(var_x, correct_datetime);
-    auto bounds_y = getBounds(var_y, correct_datetime);
+    auto bounds_x = getBounds(var_x, correct_datetime, fix_small_ranges);
+    auto bounds_y = getBounds(var_y, correct_datetime, fix_small_ranges);
     if (!bounds_x.has_value() || !bounds_y.has_value())
         return QRectF();
 
@@ -372,17 +377,14 @@ QRectF VariableViewStashDataWidget::getPlanarBounds(int var_x, int var_y, bool c
     double ymin = bounds_y.value().first;
     double ymax = bounds_y.value().second;
 
-    assert(std::isfinite(xmin));
-    assert(std::isfinite(xmax));
-    assert(std::isfinite(ymin));
-    assert(std::isfinite(ymax));
-
     return QRectF(xmin, ymin, xmax - xmin, ymax - ymin);
 }
 
 /**
  */
-boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBounds(int var, bool correct_datetime) const
+boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBounds(int var, 
+                                                                                  bool correct_datetime,
+                                                                                  bool fix_small_ranges) const
 {
     boost::optional<std::pair<double, double>> b = getStash().dataRanges().at(var);
     if (!b.has_value())
@@ -394,6 +396,25 @@ boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBound
         b->second = Utils::Time::correctLongQtUTC((long)b->second);
     }
 
+    assert(std::isfinite(b->first));
+    assert(std::isfinite(b->second));
+    assert(b->second >= b->first);
+
+    //fix small ranges?
+    if (fix_small_ranges && b->second - b->first < RangeMinDefault)
+    {
+        //broaden range
+        const double eps = RangeMinDefault / 2;
+        const double mid = (b->first + b->second) / 2;
+
+        b->first  = mid - eps;
+        b->second = mid + eps;
+
+        assert(std::isfinite(b->first));
+        assert(std::isfinite(b->second));
+        assert(b->second >= b->first);
+    }
+
     return b;
 }
 
@@ -402,7 +423,7 @@ boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBound
 QRectF VariableViewStashDataWidget::getViewBounds() const
 {
     //meaningful default behaviour for most views
-    return getPlanarBounds(0, 1, false);
+    return getPlanarBounds(0, 1, false, true);
 }
 
 /**

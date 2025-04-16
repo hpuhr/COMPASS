@@ -16,6 +16,8 @@
 
 #include "grid2d_defs.h"
 
+#include "logger.h"
+
 #include <math.h>
 #include <limits>
 
@@ -27,6 +29,7 @@ namespace grid2d
 {
 
 const double GridResolution::DefaultBorderFactor = 0.01; //1 % border by default
+const double GridResolution::MinCellSize         = 1e-09;
 
 /**
 */
@@ -65,7 +68,7 @@ GridResolution& GridResolution::setBorder(double b)
 */
 bool GridResolution::validResolution(double cell_size)
 {
-    return (std::isfinite(cell_size) && cell_size >= 1e-09);
+    return (std::isfinite(cell_size) && cell_size >= MinCellSize);
 }
 
 /**
@@ -122,6 +125,9 @@ QRectF GridResolution::resolution(size_t& grid_cells_x,
     if (!valid())
         return QRectF();
 
+    if (roi.isEmpty() || !roi.isValid())
+        return QRectF();
+
     QRectF roi_bordered = GridResolution::addBorder(roi, border);
 
     if (type == Type::CellCount)
@@ -132,11 +138,42 @@ QRectF GridResolution::resolution(size_t& grid_cells_x,
         grid_cell_size_x = roi_bordered.width()  / num_cells_x;
         grid_cell_size_y = roi_bordered.height() / num_cells_y;
 
+        bool csx_valid = validResolution(grid_cell_size_x);
+        bool csy_valid = validResolution(grid_cell_size_y);
+
+        double rx = roi_bordered.x();
+        double ry = roi_bordered.y();
+        double rw = roi_bordered.width();
+        double rh = roi_bordered.height();
+
+        //fix x extents to valid min cell size
+        if (!csx_valid)
+        {
+            grid_cell_size_x = MinCellSize;
+            const double xmid = roi_bordered.center().x();
+            const double wmin = num_cells_x * MinCellSize;
+            rx = xmid - wmin / 2;
+            rw = wmin;
+        }
+
+        //fix y extents to valid min cell size
+        if (!csy_valid)
+        {
+            grid_cell_size_y = MinCellSize;
+            const double ymid = roi_bordered.center().y();
+            const double hmin = num_cells_y * MinCellSize;
+            ry = ymid - hmin / 2;
+            rh = hmin;
+        }
+
         if (!validResolution(grid_cell_size_x) || 
             !validResolution(grid_cell_size_y))
+        {
+            loginf << "resolution invalid: " << grid_cell_size_x << "," << grid_cell_size_y;
             return QRectF();
+        }
 
-        return roi_bordered;
+        return QRectF(rx, ry, rw, rh);
     }
     else if (type == Type::CellSize)
     {
