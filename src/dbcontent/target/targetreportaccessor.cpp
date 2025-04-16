@@ -415,6 +415,10 @@ boost::optional<double> TargetReportAccessor::radarAzimuth(unsigned int index) c
 */
 boost::optional<targetReport::Velocity> TargetReportAccessor::velocity(unsigned int index) const
 {
+    if (meta_speed_vec_
+            && !meta_speed_vec_->isNull(index) && meta_speed_vec_->get(index) == 0)
+        return targetReport::Velocity(0.0, 0.0);
+
     if (!meta_speed_vec_ || 
         !meta_track_angle_vec_ ||
         meta_speed_vec_->isNull(index) ||
