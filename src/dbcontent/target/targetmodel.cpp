@@ -123,7 +123,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         {
             return target.comment().c_str();
         }
-        else if (col_name == "ECAT")
+        else if (col_name == "Category")
         {
             return target.emitterCategoryStr().c_str();
         }
@@ -251,7 +251,6 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
 
     return false;
 }
-
 
 QVariant TargetModel::headerData(int section, Qt::Orientation orientation, int role) const
 {

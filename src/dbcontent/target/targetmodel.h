@@ -152,15 +152,15 @@ public:
 protected:
     DBContentManager& dbcont_manager_;
 
-    QStringList table_columns_ {"Use", "UTN", "Comment", "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max"};
-    std::vector<int> main_columns_     { 0, 1, 2 };
-    std::vector<int> duration_columns_ { 3, 4, 5, 6 };
-    std::vector<int> mode_s_columns_   { 7, 8 };
-    std::vector<int> mode_ac_columns_  { 9, 10, 11 };
+    QStringList table_columns_ {"Use", "UTN", "Comment", "Category", "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max"};
+    std::vector<int> main_columns_     { 0, 1, 2, 3 };
+    std::vector<int> duration_columns_ { 4, 5, 6, 7 };
+    std::vector<int> mode_s_columns_   { 8, 9 };
+    std::vector<int> mode_ac_columns_  { 10, 11, 12 };
 
     bool show_main_columns_     = true;
     bool show_duration_columns_ = false;
-    bool show_mode_s_columns_   = false;
+    bool show_mode_s_columns_   = true;
     bool show_mode_ac_columns_  = false;
     
     TargetCache target_data_;
