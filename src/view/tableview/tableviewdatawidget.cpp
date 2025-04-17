@@ -204,9 +204,12 @@ void TableViewDataWidget::showTab(QWidget* widget_ptr, bool value)
         int index = tab_widget_->indexOf(widget_ptr);
         assert (index >= 0);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
+        tab_widget_->setTabVisible(index, value);
+#else
         tab_widget_->setTabEnabled(index, value); // setTabVisitable only for >=Qt 5.15
-
         tab_widget_->setStyleSheet("QTabBar::tab::disabled {min-width: 0px;max-width: 0px;color:rgba(0,0,0,0);background-color: rgba(0,0,0,0);}");
+#endif
     }
 }
 

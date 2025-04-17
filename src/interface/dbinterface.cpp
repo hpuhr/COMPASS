@@ -2632,7 +2632,8 @@ db::PerformanceMetrics DBInterface::stopPerformanceMetrics() const
  */
 bool DBInterface::hasActivePerformanceMetrics() const
 {
-    assert(ready());
+    if (!ready())
+        return false;
 
     bool ok;
     {
