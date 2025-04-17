@@ -44,7 +44,7 @@ public slots:
     void cancelSlot();
 
 public:
-    TargetFilterDialog(TargetModel& model, QWidget* parent=nullptr, Qt::WindowFlags f=0);
+    TargetFilterDialog(TargetModel& model, QWidget* parent=nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
 protected:
     TargetModel& model_;

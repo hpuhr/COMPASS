@@ -57,7 +57,7 @@ public slots:
     void decodingStateChangedSlot();
 
   public:
-    ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
+    ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~ASTERIXImportTaskWidget();
 
     void updateSourcesGrid();

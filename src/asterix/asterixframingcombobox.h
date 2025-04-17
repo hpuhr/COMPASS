@@ -34,7 +34,7 @@ class ASTERIXFramingComboBox : public QComboBox
 
   public:
     /// @brief Constructor
-    ASTERIXFramingComboBox(ASTERIXImportTask& task, QWidget* parent = 0)
+    ASTERIXFramingComboBox(ASTERIXImportTask& task, QWidget* parent = nullptr)
         : QComboBox(parent), task_(task)
     {
         loadFramings();

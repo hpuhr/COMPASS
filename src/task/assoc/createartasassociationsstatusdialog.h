@@ -39,7 +39,7 @@ public slots:
 
 public:
     CreateARTASAssociationsStatusDialog(CreateARTASAssociationsTask& task,
-                                        QWidget* parent=nullptr, Qt::WindowFlags f=0);
+                                        QWidget* parent=nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     void markStartTime();
 

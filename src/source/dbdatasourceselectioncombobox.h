@@ -18,7 +18,7 @@ class DBDataSourceComboBox : public QComboBox
     void changedSource();
 
   public:
-    DBDataSourceComboBox(QWidget* parent = 0)
+    DBDataSourceComboBox(QWidget* parent = nullptr)
         : QComboBox(parent)
     {
         updateBox();

@@ -48,7 +48,7 @@ class MetaVariableWidget : public QWidget
     void updateSlot();
 
   public:
-    MetaVariableWidget(MetaVariable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    MetaVariableWidget(MetaVariable& variable, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~MetaVariableWidget();
 
     void lock();

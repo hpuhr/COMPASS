@@ -50,6 +50,8 @@ find_package ( Boost 1.73.0 REQUIRED COMPONENTS regex system program_options fil
 message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 
+add_definitions("-DBOOST_ALLOW_DEPRECATED_HEADERS") # suppress internal boost deprecated warnings
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${COMPASS_PATH}/cmake_modules)
 message("  CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
 set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH};/usr/local/lib/cmake/;/usr/lib/x86_64-linux-gnu/)

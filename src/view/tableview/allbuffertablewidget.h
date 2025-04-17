@@ -41,8 +41,8 @@ class AllBufferTableWidget : public QWidget
     void exportDoneSlot(bool cancelled);
 
   public:
-    AllBufferTableWidget(TableView& view, TableViewDataSource& data_source, QWidget* parent = 0,
-                         Qt::WindowFlags f = 0);
+    AllBufferTableWidget(TableView& view, TableViewDataSource& data_source, QWidget* parent = nullptr,
+                         Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~AllBufferTableWidget();
 
     void updateToSettingsChange();

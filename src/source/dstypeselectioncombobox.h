@@ -30,7 +30,7 @@ public slots:
     }
 
 public:
-    DSTypeSelectionComboBox(QWidget* parent = 0)
+    DSTypeSelectionComboBox(QWidget* parent = nullptr)
         : QComboBox(parent)
     {
         addItem(""); // to show none

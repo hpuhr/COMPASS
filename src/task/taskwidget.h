@@ -28,7 +28,7 @@ class TaskWidget : public QWidget
     virtual void expertModeChangedSlot() = 0;
 
   public:
-    TaskWidget(QWidget* parent = 0, Qt::WindowFlags f = 0) : QWidget(parent, f)
+    TaskWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags()) : QWidget(parent, f)
     {
         setContentsMargins(0, 0, 0, 0);
     }

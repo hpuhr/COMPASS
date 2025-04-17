@@ -53,7 +53,7 @@ class VariableWidget : public QWidget
 
   public:
     /// @brief Constructor
-    VariableWidget(Variable& variable, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    VariableWidget(Variable& variable, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     /// @brief Destructor
     virtual ~VariableWidget();
 

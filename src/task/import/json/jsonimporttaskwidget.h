@@ -56,7 +56,7 @@ class JSONImportTaskWidget : public TaskWidget
     void expertModeChangedSlot();
 
   public:
-    JSONImportTaskWidget(JSONImportTask& task, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    JSONImportTaskWidget(JSONImportTask& task, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~JSONImportTaskWidget();
 
     void updateSourceLabel();

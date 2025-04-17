@@ -40,7 +40,7 @@ public:
                                 VariableView* view,
                                 bool group_per_datasource,
                                 QWidget* parent = nullptr, 
-                                Qt::WindowFlags f = 0);
+                                Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~VariableViewStashDataWidget();
 
     QRectF getPlanarBounds(int var_x, 

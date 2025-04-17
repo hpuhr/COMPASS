@@ -40,7 +40,7 @@ class RadarPlotPositionCalculatorTaskWidget : public QWidget
 
   public:
     RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task,
-                                          QWidget* parent = 0, Qt::WindowFlags f = 0);
+                                          QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~RadarPlotPositionCalculatorTaskWidget();
 
   protected:

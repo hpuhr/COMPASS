@@ -56,7 +56,7 @@ class DBContentWidget : public QWidget
     void updateDBOVarsGridSlot();
 
   public:
-    DBContentWidget(DBContent* object, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    DBContentWidget(DBContent* object, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~DBContentWidget();
 
   private:
