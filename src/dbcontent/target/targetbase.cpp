@@ -66,6 +66,12 @@ const nlohmann::json TargetBase::emitter_specs_ = {
                      {"max_speed_knots", 0},
                      {"max_accel_mps2", 0},
                      {"ground_only", true}
+                 }},
+    { "FFT", {
+                     {"avg_size_m", 1},
+                     {"max_speed_knots", 0},
+                     {"max_accel_mps2", 0},
+                     {"ground_only", true}
                  }}
 };
 

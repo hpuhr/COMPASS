@@ -9,42 +9,43 @@
 class TargetBase
 {
 
-  public:
+public:
 
     enum class Category // slightly related to ADS-B ECAT
     {
         Unknown = 0,
 
-            // Light general aviation aircraft (e.g., Cessna 152, Piper Cub)
+        // Light general aviation aircraft (e.g., Cessna 152, Piper Cub)
         LightAircraft = 1,
 
-            // Small high-performance piston or turboprop aircraft (e.g., Beechcraft Bonanza, Piper Malibu)
+        // Small high-performance piston or turboprop aircraft (e.g., Beechcraft Bonanza, Piper Malibu)
         SmallAircraft = 2,
 
-            // Regional jets and smaller airliners (e.g., Embraer E175, Bombardier CRJ700)
+        // Regional jets and smaller airliners (e.g., Embraer E175, Bombardier CRJ700)
         MediumAircraft = 3,
 
-            // Large wake-generating aircraft (e.g., Airbus A310, Boeing 757)
+        // Large wake-generating aircraft (e.g., Airbus A310, Boeing 757)
         HighVortexLargeAircraft = 4,
 
-            // Large commercial airliners (e.g., Boeing 777, Airbus A380)
+        // Large commercial airliners (e.g., Boeing 777, Airbus A380)
         HeavyAircraft = 5,
 
-            // High-speed fighter or interceptor jets (e.g., F-16, Eurofighter Typhoon)
+        // High-speed fighter or interceptor jets (e.g., F-16, Eurofighter Typhoon)
         HighSpeedManoeuvrable = 6,
 
-            // Helicopters and VTOL aircraft (e.g., Bell 412, Eurocopter EC135)
+        // Helicopters and VTOL aircraft (e.g., Bell 412, Eurocopter EC135)
         Rotocraft = 10,
 
-            // Gliders, UAVs, ultralights, lighter-than-air, etc. (e.g., DJI Matrice 300, ASH 31 Mi, Paramotor)
+        // Gliders, UAVs, ultralights, lighter-than-air, etc. (e.g., DJI Matrice 300, ASH 31 Mi, Paramotor)
         OtherAirborne = 11,
 
-            // other aircraft, not from ECAT but from mode C
+        // other aircraft, not from ECAT but from mode C
         AnyAircraft = 12,
 
-            // Ground vehicles
+        // Ground vehicles
         Vehicle = 20,
-        Obstacle = 22 // obstruction or obstacles
+        Obstacle = 22, // obstruction or obstacles
+        FFT = 25
     };
 
     TargetBase();
@@ -58,38 +59,41 @@ class TargetBase
         if (!ecat) return Category::Unknown;
 
         switch (*ecat) {
-            case 1: return Category::LightAircraft;
-            case 2: return Category::SmallAircraft;
-            case 3: return Category::MediumAircraft;
-            case 4: return Category::HighVortexLargeAircraft;
-            case 5: return Category::HeavyAircraft;
-            case 6: return Category::HighSpeedManoeuvrable;
-            case 10: return Category::Rotocraft;
-            case 11: case 12: case 13: case 14: case 15: case 16:
-                return Category::OtherAirborne;
-            case 20: case 21:
-                return Category::Vehicle;
-            case 22: case 23: case 24:
-                return Category::Obstacle;
-            default: return Category::Unknown;
+        case 1: return Category::LightAircraft;
+        case 2: return Category::SmallAircraft;
+        case 3: return Category::MediumAircraft;
+        case 4: return Category::HighVortexLargeAircraft;
+        case 5: return Category::HeavyAircraft;
+        case 6: return Category::HighSpeedManoeuvrable;
+        case 10: return Category::Rotocraft;
+        case 11: case 12: case 13: case 14: case 15: case 16:
+            return Category::OtherAirborne;
+        case 20: case 21:
+            return Category::Vehicle;
+        case 22: case 23: case 24:
+            return Category::Obstacle;
+        case 25:
+            return Category::FFT; // not original in CAT021, extended using FFTManager
+        default: return Category::Unknown;
         }
     }
 
-            // String representation of EmitterCategory
+    // String representation of EmitterCategory
     static std::string toString(Category ecat) {
         switch (ecat) {
-            case Category::LightAircraft: return "LightAircraft";
-            case Category::SmallAircraft: return "SmallAircraft";
-            case Category::MediumAircraft: return "MediumAircraft";
-            case Category::HighVortexLargeAircraft: return "HighVortexLargeAircraft";
-            case Category::HeavyAircraft: return "HeavyAircraft";
-            case Category::HighSpeedManoeuvrable: return "HighSpeedManoeuvrable";
-            case Category::Rotocraft: return "Rotocraft";
-            case Category::OtherAirborne: return "OtherAirborne";
-            case Category::AnyAircraft: return "AnyAircraft";
-            case Category::Vehicle: return "Vehicle";
-            case Category::Obstacle: return "Obstacle";
-            default: return "Unknown";
+        case Category::LightAircraft: return "LightAircraft";
+        case Category::SmallAircraft: return "SmallAircraft";
+        case Category::MediumAircraft: return "MediumAircraft";
+        case Category::HighVortexLargeAircraft: return "HighVortexLargeAircraft";
+        case Category::HeavyAircraft: return "HeavyAircraft";
+        case Category::HighSpeedManoeuvrable: return "HighSpeedManoeuvrable";
+        case Category::Rotocraft: return "Rotocraft";
+        case Category::OtherAirborne: return "OtherAirborne";
+        case Category::AnyAircraft: return "AnyAircraft";
+        case Category::Vehicle: return "Vehicle";
+        case Category::Obstacle: return "Obstacle";
+        case Category::FFT: return "FFT";
+        default: return "Unknown";
         }
     }
 
@@ -106,6 +110,7 @@ class TargetBase
             { "AnyAircraft", Category::AnyAircraft },
             { "Vehicle", Category::Vehicle },
             { "Obstacle", Category::Obstacle },
+            { "FFT", Category::FFT },
             { "Unknown", Category::Unknown }
         };
 
@@ -116,7 +121,7 @@ class TargetBase
         return Category::Unknown;
     }
 
-            // Accessor helpers
+    // Accessor helpers
     static double getAvgSize(Category ecat) {
 
         //loginf << "getAvgSize " << (unsigned int) ecat << " str " << toString(ecat);

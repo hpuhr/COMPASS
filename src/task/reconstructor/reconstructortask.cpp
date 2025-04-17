@@ -760,6 +760,13 @@ void ReconstructorTask::loadingDoneSlot()
 
     assert (!processing_data_slice_);
 
+    if (!loading_slice_)
+    {
+        logwrn << "ReconstructorTask: loadingDoneSlot: no loading_slice_, cancelled_ " << cancelled_;
+        return;
+    }
+
+
     loginf << "ReconstructorTask: loadingDoneSlot: processing first slice "
            << !loading_slice_->first_slice_
            << " remove ts " << Time::toString(loading_slice_->remove_before_time_);

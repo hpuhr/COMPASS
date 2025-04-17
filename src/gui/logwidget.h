@@ -24,6 +24,7 @@ public slots:
 
 public:
     explicit LogWidget(LogStore& log_store);
+    virtual ~LogWidget();
 
     //ToolBoxWidget
     QIcon toolIcon() const override final;

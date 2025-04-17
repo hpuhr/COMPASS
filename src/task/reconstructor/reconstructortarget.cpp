@@ -11,6 +11,7 @@
 #include "global.h"
 #include "kalman_online_tracker.h"
 #include "kalman_chain.h"
+#include "fftmanager.h"
 
 #include <boost/optional/optional_io.hpp>
 
@@ -220,7 +221,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
         {tr.timestamp_, tr.record_num_});
     // dbcontent id -> ds_id -> ts -> record_num
 
-    if (tr.ecat_ && *tr.ecat_ != 0)
+    if (tr.ecat_ && *tr.ecat_ != 0) // check for FFT below
     {
         if (ecat_)
         {
@@ -267,6 +268,33 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
                     ecat_ = (unsigned int) TargetBase::Category::Vehicle;
             }
         }
+    }
+
+    if (!ecat_ || *ecat_ == 0) // check for FFT
+    {
+        FFTManager& fft_man = COMPASS::instance().fftManager();
+
+        boost::optional<float> baro_altitude_ft;
+
+        if (tr.barometric_altitude_)
+            baro_altitude_ft = tr.barometric_altitude_->altitude_;
+
+        boost::optional<unsigned int> mode_a_code;
+
+        if (tr.mode_a_code_)
+            mode_a_code = tr.mode_a_code_->code_;
+        else
+            mode_a_code =  boost::none;
+
+        bool is_from_fft;
+        float fft_altitude_ft;
+
+        std::tie(is_from_fft, fft_altitude_ft) = fft_man.isFromFFT(
+            tr.position_->latitude_, tr.position_->longitude_, tr.acad_, tr.dbcont_id_ == 1,
+            mode_a_code, baro_altitude_ft);
+
+        if (is_from_fft)
+            ecat_ = (unsigned int) TargetBase::Category::FFT;
     }
 
     //    if (tr.has_adsb_info_ && tr.has_mops_version_)

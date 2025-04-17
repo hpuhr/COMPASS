@@ -1572,6 +1572,9 @@ void ReconstructorBaseSettings::setVehicleACADs(const std::string& value)
             logwrn << "ReconstructorBaseSettings: setVehicleACADs: impossible hex value '" << acad_str << "'";
         }
     }
+
+    loginf << "ReconstructorBaseSettings: setVehicleACADs: value '" << value
+           << "' vector " << String::compress(vehicle_acads_set_, ',');
 }
 
 void ReconstructorBaseSettings::setVehicleACIDs(const std::string& value)
@@ -1586,4 +1589,7 @@ void ReconstructorBaseSettings::setVehicleACIDs(const std::string& value)
         boost::to_upper(acid_str);
         vehicle_acids_set_.insert(acid_str);
     }
+
+    loginf << "ReconstructorBaseSettings: setVehicleACIDs: value '" << value
+           << "' vector " << String::compress(vehicle_acids_set_, ',');
 }

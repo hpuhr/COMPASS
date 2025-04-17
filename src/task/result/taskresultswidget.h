@@ -24,7 +24,6 @@ public slots:
 
 public:
     TaskResultsWidget(TaskManager& task_man);
-
     virtual ~TaskResultsWidget();
 
     void setReport(const std::string name);
