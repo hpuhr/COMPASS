@@ -19,7 +19,7 @@ public slots:
     void importSlot();
 
 public:
-    ImportSectorDialog(const std::string& layer_name, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    ImportSectorDialog(const std::string& layer_name, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     std::string layerName();
     bool exclude ();

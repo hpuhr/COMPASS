@@ -32,17 +32,23 @@ LogStore::LogStore(bool show_everything)
 LogStream LogStore::logInfo(const std::string& component,
                             boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
     return LogStream([this, component, error_code, json_blob](const std::string& msg) {
-        this->addLogMessage(msg, LogStreamType::Info, component, error_code, json_blob); });
+        addLogMessage(msg, LogStreamType::Info, component, error_code, json_blob); });
 }
 LogStream LogStore::logWarn(const std::string& component,
                             boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
-    return LogStream([this, component, error_code, json_blob](const std::string& msg) {
-        this->addLogMessage(msg, LogStreamType::Warning, component, error_code, json_blob); });
+
+    LogStream::CommitFunc func = [this, component, error_code, json_blob](const std::string& msg) {
+        addLogMessage(msg, LogStreamType::Warning, component, error_code, json_blob); };
+
+    return LogStream(func);
 }
 LogStream LogStore::logError(const std::string& component,
                              boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
-    return LogStream([this, component, error_code, json_blob](const std::string& msg) {
-        this->addLogMessage(msg, LogStreamType::Error, component, error_code, json_blob); });
+
+    LogStream::CommitFunc func = [this, component, error_code, json_blob](const std::string& msg) {
+        addLogMessage(msg, LogStreamType::Error, component, error_code, json_blob); };
+
+    return LogStream(func);
 }
 
 void LogStore::addLogMessage(const std::string& message, LogStreamType type, const std::string& component,
@@ -50,8 +56,8 @@ void LogStore::addLogMessage(const std::string& message, LogStreamType type, con
 {
     beginResetModel();
 
-    log_entries_.push_back({false, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"), type,
-                            component, message, error_code, json_blob});
+    log_entries_.push_back(LogEntry(false, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"), type,
+                                    component, message, error_code, json_blob));
 
     endResetModel();
 

@@ -44,7 +44,7 @@ class BufferTableWidget : public QWidget
 
   public:
     BufferTableWidget(DBContent& object, TableView& view, TableViewDataSource& data_source,
-                      QWidget* parent = 0, Qt::WindowFlags f = 0);
+                      QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~BufferTableWidget();
 
     void updateToSettingsChange();

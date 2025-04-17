@@ -55,7 +55,7 @@ public slots:
 
 public:
     ViewPointsReportGeneratorDialog(ViewPointsReportGenerator& generator,
-                                    QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+                                    QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     void updateFileInfo ();
 

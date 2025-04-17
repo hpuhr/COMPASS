@@ -57,7 +57,7 @@ class FilterGeneratorWidget : public QWidget
     void cancel();
 
   public:
-    FilterGeneratorWidget(QWidget* parent = 0);
+    FilterGeneratorWidget(QWidget* parent = nullptr);
     virtual ~FilterGeneratorWidget();
 
   protected:

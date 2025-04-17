@@ -543,9 +543,13 @@ void DataSourceEditWidget::detectionTypeChangedSlot(int index)
     DetectionType selected_type = static_cast<DetectionType>(index);
 
     if (current_ds_in_db_)
+    {
+        assert (ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).detectionType(selected_type);
-    else
-        ds_man_.configDataSource(current_ds_id_).detectionType(selected_type);
+    }
+
+    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    ds_man_.configDataSource(current_ds_id_).detectionType(selected_type);
 }
 
 void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)

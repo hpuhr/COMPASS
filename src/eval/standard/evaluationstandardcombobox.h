@@ -31,7 +31,7 @@ public slots:
     void changedStandardSlot(const QString& standard_name); // slot for box
 
 public:
-    EvaluationStandardComboBox(EvaluationManager& eval_man, QWidget* parent=0);
+    EvaluationStandardComboBox(EvaluationManager& eval_man, QWidget* parent = nullptr);
     virtual ~EvaluationStandardComboBox();
 
     void setStandardName(const std::string& value);

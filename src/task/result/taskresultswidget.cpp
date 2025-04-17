@@ -60,7 +60,7 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
             this, &TaskResultsWidget::updateResultsSlot);
 }
 
-TaskResultsWidget::~TaskResultsWidget() = default;
+TaskResultsWidget::~TaskResultsWidget() {}
 
 void TaskResultsWidget::setReport(const std::string name)
 {

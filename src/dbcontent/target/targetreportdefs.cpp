@@ -252,7 +252,7 @@ bool ReconstructorInfo::isModeACDetection() const
 
 bool ReconstructorInfo::isPrimaryOnlyDetection() const
 {
-    return !isModeSDetection() && !isModeACDetection();
+    return !(acad_ || acid_ || mode_a_code_ || barometric_altitude_);
 }
 
 bool ReconstructorInfo::isOnGround() const

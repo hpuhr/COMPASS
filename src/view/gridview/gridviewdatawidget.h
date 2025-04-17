@@ -60,7 +60,7 @@ public:
     /// @brief Constructor
     GridViewDataWidget(GridViewWidget* view_widget,
                        QWidget* parent = nullptr, 
-                       Qt::WindowFlags f = 0);
+                       Qt::WindowFlags f = Qt::WindowFlags());
     /// @brief Destructor
     virtual ~GridViewDataWidget();
 
