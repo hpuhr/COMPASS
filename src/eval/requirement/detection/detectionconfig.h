@@ -21,9 +21,13 @@
 
 #include <memory>
 
-
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -61,7 +65,7 @@ public:
     float missTolerance() const;
     void missTolerance(float value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
     bool holdForAnyTarget() const;
     void holdForAnyTarget(bool value);

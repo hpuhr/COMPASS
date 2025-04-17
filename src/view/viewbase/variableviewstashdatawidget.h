@@ -43,8 +43,15 @@ public:
                                 Qt::WindowFlags f = 0);
     virtual ~VariableViewStashDataWidget();
 
-    QRectF getPlanarBounds(int var_x, int var_y, bool correct_datetime = false) const;
-    boost::optional<std::pair<double, double>> getBounds(int var, bool correct_datetime = false) const;
+    QRectF getPlanarBounds(int var_x, 
+                           int var_y, 
+                           bool correct_datetime,
+                           bool fix_small_ranges) const;
+    boost::optional<std::pair<double, double>> getBounds(int var, 
+                                                         bool correct_datetime,
+                                                         bool fix_small_ranges) const;
+
+    static const double RangeMinDefault;
 
 protected:
     virtual void resetVariableData() override final;

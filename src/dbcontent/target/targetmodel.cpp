@@ -48,10 +48,7 @@ TargetModel::TargetModel(const std::string& class_id, const std::string& instanc
     createSubConfigurables();
 }
 
-TargetModel::~TargetModel()
-{
-
-}
+TargetModel::~TargetModel() = default;
 
 void TargetModel::clear()
 {
@@ -126,7 +123,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         {
             return target.comment().c_str();
         }
-        else if (col_name == "ECAT")
+        else if (col_name == "Category")
         {
             return target.emitterCategoryStr().c_str();
         }
@@ -254,7 +251,6 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
 
     return false;
 }
-
 
 QVariant TargetModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
@@ -1045,9 +1041,14 @@ void TargetModel::showDurationColumns(bool show)
     show_duration_columns_ = show;
 }
 
-void TargetModel::showSecondaryColumns(bool show)
+void TargetModel::showModeSColumns(bool show)
 {
-    show_secondary_columns_ = show;
+    show_mode_s_columns_ = show;
+}
+
+void TargetModel::showModeACColumns(bool show)
+{
+    show_mode_ac_columns_ = show;
 }
 
 }

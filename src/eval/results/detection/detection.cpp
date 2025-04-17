@@ -138,7 +138,7 @@ std::vector<std::string> SingleDetection::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleDetection::targetTableValuesCustom() const
+nlohmann::json::array_t SingleDetection::targetTableValuesCustom() const
 {
     return { sum_uis_, missed_uis_ };
 }
@@ -154,7 +154,7 @@ std::vector<Single::TargetInfo> SingleDetection::targetInfos() const
                                       TargetInfo("#MUIs [1]", "Missed Update Intervals"  , missed_uis_) };
 
     for (unsigned int cnt=0; cnt < ref_periods_.size(); ++cnt)
-        infos.emplace_back(("Reference Period " + std::to_string(cnt)).c_str(), "Time inside sector", ref_periods_.period(cnt).str().c_str());
+        infos.emplace_back(("Reference Period " + std::to_string(cnt)), "Time inside sector", ref_periods_.period(cnt).str());
 
     if (!ref_periods_.size())
         infos.emplace_back("Reference Period", "Time inside sector", "None");
@@ -171,15 +171,15 @@ std::vector<std::string> SingleDetection::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleDetection::detailValues(const EvaluationDetail& detail,
-                                                    const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleDetection::detailValues(const EvaluationDetail& detail,
+                                                      const EvaluationDetail* parent_detail) const
 {
     auto d_tod = detail.getValue(DetailKey::DiffTOD);
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             d_tod.isValid() ? QVariant(Utils::String::timeStringFromDouble(d_tod.toFloat()).c_str()) : QVariant(),
-             detail.getValue(DetailKey::MissedUIs),
-             detail.comments().generalComment().c_str() };
+    return { Utils::Time::toString(detail.timestamp()),
+             d_tod.isValid() ? nlohmann::json(Utils::String::timeStringFromDouble(d_tod.toFloat())) : nlohmann::json(),
+             detail.getValue(DetailKey::MissedUIs).toUInt(),
+             detail.comments().generalComment() };
 }
 
 /**

@@ -10,7 +10,7 @@ class TaskManager;
 
 namespace ResultReport
 {
-class ReportWidget;
+    class ReportWidget;
 }
 
 class QComboBox;
@@ -24,10 +24,10 @@ public slots:
 
 public:
     TaskResultsWidget(TaskManager& task_man);
-
     virtual ~TaskResultsWidget();
 
     void setReport(const std::string name);
+    void selectID(const std::string id);
 
     //ToolBoxWidget
     QIcon toolIcon() const override final;

@@ -86,6 +86,9 @@ public:
                                     const Measurement& mm1,
                                     double interp_factor,
                                     CovMatInterpMode covmat_interp_mode);
+    static boost::optional<float> interpProcessNoise(const boost::optional<float>& Q_var0,
+                                                     const boost::optional<float>& Q_var1,
+                                                     double interp_factor);
     
     static size_t estimatedSamples(const Measurement& mm0, 
                                    const Measurement& mm1,

@@ -60,7 +60,7 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
             this, &TaskResultsWidget::updateResultsSlot);
 }
 
-TaskResultsWidget::~TaskResultsWidget() = default;
+TaskResultsWidget::~TaskResultsWidget() {}
 
 void TaskResultsWidget::setReport(const std::string name)
 {
@@ -194,7 +194,16 @@ void TaskResultsWidget::loadingDone()
 {
 }
 
+/**
+ */
 std::string TaskResultsWidget::currentReportName() const
 {
     return current_report_name_;
+}
+
+/**
+ */
+void TaskResultsWidget::selectID(const std::string id)
+{
+    report_widget_->selectId(id);
 }

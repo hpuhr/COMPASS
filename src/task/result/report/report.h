@@ -33,7 +33,6 @@ namespace ResultReport
 class Section;
 class SectionContent;
 
-
 /**
  */
 class Report : public QObject, public TreeItem
@@ -67,7 +66,6 @@ public:
     void setCurrentSection(const std::string& section_name);
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
                                                               unsigned int content_id) const;
-
     static const std::string FieldRootSection;
 
 protected:

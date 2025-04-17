@@ -21,13 +21,13 @@
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttable.h"
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
 
 #include "comparisontype.h"
 #include "stringconv.h"
 
-using namespace EvaluationResultsReport;
 using namespace std;
 using namespace Utils;
 
@@ -156,42 +156,40 @@ void DetectionConfig::createWidget()
     assert (widget_);
 }
 
-void DetectionConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void DetectionConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Probability [1]", "Probability of detection or miss (inverted probability)",
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 
     table.addRow({"Update Interval [s]", "",
-                  update_interval_s_}, nullptr);
+                  update_interval_s_});
 
     table.addRow({"Use Minimum Gap Length", "If minimum gap length should be used",
-                  String::boolToString(use_min_gap_length_).c_str()}, nullptr);
+                  String::boolToString(use_min_gap_length_)});
     table.addRow({"Minimum Gap Length [s]", "Minimum gap length to be considered",
-                  min_gap_length_s_}, nullptr);
+                  min_gap_length_s_});
 
     table.addRow({"Use Maximum Gap Length", "If maximum gap length should be used",
-                  String::boolToString(use_max_gap_length_).c_str()}, nullptr);
+                  String::boolToString(use_max_gap_length_)});
     table.addRow({"Maximum Gap Length [s]", "Maximum gap length to be considered",
-                  max_gap_length_s_}, nullptr);
+                  max_gap_length_s_});
 
     table.addRow({"Invert Probability", "If calculated probability should be inverted",
-                  comment_.c_str()}, nullptr);
+                  comment_.c_str()});
 
     table.addRow({"Use Miss Tolerance", "If miss tolerance should be used",
-                  String::boolToString(use_miss_tolerance_).c_str()}, nullptr);
+                  String::boolToString(use_miss_tolerance_)});
     table.addRow({"Miss Tolerance [s]", "Acceptable time delta for miss detection",
-                  miss_tolerance_s_}, nullptr);
+                  miss_tolerance_s_});
 
     table.addRow({"Hold for any Target", "Must hold for any target (every single targets)",
-                  String::boolToString(hold_for_any_target_).c_str()}, nullptr);
+                  String::boolToString(hold_for_any_target_)});
 }
 
 bool DetectionConfig::holdForAnyTarget() const

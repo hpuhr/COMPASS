@@ -18,15 +18,17 @@
 #ifndef EVALUATIONREQUIREMENTIDENTIFICATIONCORRECTCONFIG_H
 #define EVALUATIONREQUIREMENTIDENTIFICATIONCORRECTCONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/identification/correct.h"
-//#include "eval/requirement/identification/identificationcorrectconfigwidget.h"
 
 #include <memory>
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -52,7 +54,7 @@ public:
     bool useMsTi() const;
     void useMsTi(bool value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
     // true: all must be correct (not false), false: at least one must be correct (not false)

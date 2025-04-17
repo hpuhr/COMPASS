@@ -27,6 +27,29 @@ public:
             commit_func_(buffer_.str());
     }
 
+    LogStream(const LogStream&) = delete;
+    LogStream& operator=(const LogStream&) = delete;
+
+    LogStream(LogStream&& other) noexcept
+        : buffer_(std::move(other.buffer_)),          // Move the stream buffer
+        commit_func_(std::move(other.commit_func_)) // Move the commit function
+    {
+        // After moving, 'other' is left in a valid but unspecified state.
+    }
+
+    // Move assignment operator
+    LogStream& operator=(LogStream&& other) noexcept {
+        if (this != &other) {
+            // Move assign the stream buffer.
+            buffer_ = std::move(other.buffer_);
+            // Move assign the commit function.
+            commit_func_ = std::move(other.commit_func_);
+            // 'other' is now in a moved-from state, and its destructor
+            // will not perform the commit action if commit_func_ is empty.
+        }
+        return *this;
+    }
+
     template <typename T>
     LogStream& operator<<(const T& val) {
         buffer_ << val;
@@ -47,6 +70,17 @@ signals:
 
 public:
     struct LogEntry {
+        LogEntry(bool accepted, QString timestamp, LogStreamType type, std::string component,
+                 std::string message, boost::optional<unsigned int> error_code, nlohmann::json json)
+            : accepted(accepted),
+            timestamp(std::move(timestamp)),
+            type(type),
+            component_(std::move(component)),
+            message(std::move(message)),
+            error_code_(error_code),
+            json_(std::move(json))
+        {
+        }
         bool accepted;
         QString timestamp;
         LogStreamType type;

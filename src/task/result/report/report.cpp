@@ -19,6 +19,7 @@
 #include "task/result/report/section.h"
 #include "task/result/report/sectionid.h"
 #include "taskmanager.h"
+#include "taskresultswidget.h"
 
 #include "logger.h"
 #include "stringconv.h"
@@ -34,10 +35,10 @@ const std::string Report::FieldRootSection = "root_section";
 /**
  */
 Report::Report(TaskManager& task_man)
-:   TreeItem("Report", nullptr)
+:   TreeItem(SectionID::SectionReport, nullptr)
 ,   task_man_(task_man)
 {
-    root_section_ = std::make_shared<Section>("Results", "", this, this);
+    root_section_ = std::make_shared<Section>(SectionID::SectionResults, "", this, this);
 }
 
 /**
@@ -49,7 +50,7 @@ Report::~Report()
 
 void Report::clear()
 {
-    root_section_ = std::make_shared<Section>("Results", "", this, this);
+    root_section_ = std::make_shared<Section>(SectionID::SectionResults, "", this, this);
 }
 
 /**
@@ -199,7 +200,9 @@ void Report::setCurrentViewable(const nlohmann::json::object_t& data)
  */
 void Report::setCurrentSection(const std::string& section_name)
 {
-    //@TODO
+    std::string full_id = SectionID::prependReportResults(section_name);
+
+    task_man_.widget()->selectID(full_id);
 }
 
 /**

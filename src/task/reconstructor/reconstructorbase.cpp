@@ -896,7 +896,7 @@ void ReconstructorBase::processSlice()
         std::string num_rec_updates_skipped_p         = perc(stats.num_rec_updates_skipped        , stats.num_rec_updates       );
         std::string num_rec_smooth_steps_failed_p     = perc(stats.num_rec_smooth_steps_failed    , stats.num_rec_updates       );
 
-        auto& section = COMPASS::instance().taskManager().currentReport().getSection("Reconstruction Statistics");
+        auto& section = COMPASS::instance().taskManager().currentReport()->getSection("Reconstruction Statistics");
 
         if (!section.hasTable("Reconstruction Statistics"))
             section.addTable("Reconstruction Statistics", 4, {"", "", "Value", "Value [%]"}, false);
@@ -1397,28 +1397,43 @@ const ReconstructorBase::DataSlice& ReconstructorBase::currentSlice() const
     return task_.processingSlice();
 }
 
-float ReconstructorBase::qVarForAltitude(bool fl_unknown, 
-                                         bool fl_ground, 
-                                         float alt_baro_ft,
-                                         bool dynamic,
-                                         const ReferenceCalculatorSettings::ProcessNoise& Q_std) const
+double ReconstructorBase::determineProcessNoiseVariance(const dbContent::targetReport::ReconstructorInfo& ri,
+                                                        const dbContent::ReconstructorTarget& target,
+                                                        const ReferenceCalculatorSettings::ProcessNoise& Q) const
 {
-    if (!dynamic)
-        return Q_std.Q_std_static * Q_std.Q_std_static;
-    if (fl_unknown)
-        return Q_std.Q_std_unknown * Q_std.Q_std_unknown;
-    if (fl_ground)
-        return Q_std.Q_std_ground * Q_std.Q_std_ground;
+    auto Q_std = determineProcessNoise(ri, target, Q);
+    return Q_std * Q_std;
+}
+
+double ReconstructorBase::determineProcessNoise(const dbContent::targetReport::ReconstructorInfo& ri,
+                                                const dbContent::ReconstructorTarget& target,
+                                                const ReferenceCalculatorSettings::ProcessNoise& Q) const
+{
+    //no dynamic process noise => return static noise
+    if (!ref_calc_settings_.dynamic_process_noise)
+        return Q.Q_std_static;
+
+    if (target.targetCategory() == TargetBase::Category::Obstacle ||
+        target.targetCategory() == TargetBase::Category::Vehicle)
+        return Q.Q_std_ground;
+
+    auto alt_state = target.getAltitudeStateStruct(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
+
+    if (alt_state.fl_unknown)
+        return Q.Q_std_unknown;
+
+    if (alt_state.fl_on_ground)
+        return Q.Q_std_ground;
 
     assert (ref_calc_settings_.Q_altitude_min_ft < ref_calc_settings_.Q_altitude_max_ft);
 
-    double alt_ft       = std::max(ref_calc_settings_.Q_altitude_min_ft,
-                             std::min(ref_calc_settings_.Q_altitude_max_ft, (double) alt_baro_ft));
-    double t            = (alt_ft - ref_calc_settings_.Q_altitude_min_ft)
-               / (ref_calc_settings_.Q_altitude_max_ft - ref_calc_settings_.Q_altitude_min_ft);
-    double Q_std_interp = (1.0 - t) * Q_std.Q_std_ground + t * Q_std.Q_std_air;
+    double alt_ft = std::max(ref_calc_settings_.Q_altitude_min_ft,
+                            std::min(ref_calc_settings_.Q_altitude_max_ft, (double)alt_state.alt_baro_ft));
+    double t = (alt_ft - ref_calc_settings_.Q_altitude_min_ft)
+                / (ref_calc_settings_.Q_altitude_max_ft - ref_calc_settings_.Q_altitude_min_ft);
+    double Q_std_interp = (1.0 - t) * Q.Q_std_ground + t * Q.Q_std_air;
 
-    return Q_std_interp * Q_std_interp;
+    return Q_std_interp;
 }
 
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 
@@ -1451,17 +1466,11 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     mm.lat = pos.value().latitude_;
     mm.lon = pos.value().longitude_;
 
-    //height information
+    //if target is available determine process noise on per target report basis
     if (target)
     {
-        bool fl_unknown, fl_ground;
-        float alt_baro_ft;
-        std::tie(fl_unknown, fl_ground, alt_baro_ft) =
-            target->getAltitudeState(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
-
-        //compute measurement-specific process noise from altitude state
-        mm.Q_var        = qVarForAltitude(fl_unknown, fl_ground, alt_baro_ft, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.Q_std);
-        mm.Q_var_interp = qVarForAltitude(fl_unknown, fl_ground, alt_baro_ft, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.resample_Q_std);
+        mm.Q_var        = (float)determineProcessNoiseVariance(ri, *target, ref_calc_settings_.Q_std         );
+        mm.Q_var_interp = (float)determineProcessNoiseVariance(ri, *target, ref_calc_settings_.resample_Q_std);
     }
 
     //velocity
@@ -1563,6 +1572,9 @@ void ReconstructorBaseSettings::setVehicleACADs(const std::string& value)
             logwrn << "ReconstructorBaseSettings: setVehicleACADs: impossible hex value '" << acad_str << "'";
         }
     }
+
+    loginf << "ReconstructorBaseSettings: setVehicleACADs: value '" << value
+           << "' vector " << String::compress(vehicle_acads_set_, ',');
 }
 
 void ReconstructorBaseSettings::setVehicleACIDs(const std::string& value)
@@ -1577,4 +1589,7 @@ void ReconstructorBaseSettings::setVehicleACIDs(const std::string& value)
         boost::to_upper(acid_str);
         vehicle_acids_set_.insert(acid_str);
     }
+
+    loginf << "ReconstructorBaseSettings: setVehicleACIDs: value '" << value
+           << "' vector " << String::compress(vehicle_acids_set_, ',');
 }

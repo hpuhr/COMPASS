@@ -99,13 +99,12 @@ SectionContentTable::~SectionContentTable() = default;
 
 /**
  */
-void SectionContentTable::addRow (const nlohmann::json& row,
+void SectionContentTable::addRow (const nlohmann::json::array_t& row,
                                   const SectionContentViewable& viewable,
                                   const std::string& section_link,
                                   const std::string& section_figure,
                                   const QVariant& viewable_index)
 {
-    assert(row.is_array());
     assert (row.size() == num_columns_);
 
     rows_.push_back(row);
@@ -459,11 +458,14 @@ void SectionContentTable::clicked(unsigned int row)
     }
     else if (!annotation.section_link.empty() && !annotation.section_figure.empty())
     {
-        loginf << "SectionContentTable: clicked: index has associated viewable via section " << annotation.section_link;
+        loginf << "SectionContentTable: clicked: index has associated viewable via" 
+               << " section '" << annotation.section_link << "'"
+               << " figure '" << annotation.section_figure << "'";
         has_valid_link = true;
 
         //figure from section link + figure name
         auto& section = report_->getSection(annotation.section_link);
+
         if (section.hasFigure(annotation.section_figure))
             figure = &section.getFigure(annotation.section_figure);
     }

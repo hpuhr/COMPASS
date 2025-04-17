@@ -62,13 +62,13 @@ void TaskResult::name(const std::string& name)
     name_ = name;
 }
 
-const std::shared_ptr<ResultReport::Report> TaskResult::report() const
+const std::shared_ptr<ResultReport::Report>& TaskResult::report() const
 {
     assert (report_);
     return report_;
 }
 
-std::shared_ptr<ResultReport::Report> TaskResult::report()
+std::shared_ptr<ResultReport::Report>& TaskResult::report()
 {
     assert (report_);
     return report_;

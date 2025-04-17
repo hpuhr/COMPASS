@@ -20,15 +20,12 @@
 #include "eval/requirement/position/radarrange.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
-//#include "stringconv.h"
 
-//using namespace Utils;
-using namespace EvaluationResultsReport;
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 using namespace std;
-
 
 namespace EvaluationRequirement
 {
@@ -69,17 +66,15 @@ void PositionRadarRangeConfig::createWidget()
     assert (widget_);
 }
 
-void PositionRadarRangeConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void PositionRadarRangeConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Threshold Value [m]",
                   "Maximum allowed RMS from test target report to reference",
-                  threshold_value_}, nullptr);
+                  threshold_value_});
 
 }
 }

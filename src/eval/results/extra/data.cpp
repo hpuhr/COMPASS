@@ -147,7 +147,7 @@ std::vector<std::string> SingleExtraData::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleExtraData::targetTableValuesCustom() const
+nlohmann::json::array_t SingleExtraData::targetTableValuesCustom() const
 {
     return { target_->numTstUpdates(), isIgnored(), num_extra_ + num_ok_, num_ok_, num_extra_ };
 }
@@ -173,14 +173,14 @@ std::vector<std::string> SingleExtraData::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleExtraData::detailValues(const EvaluationDetail& detail,
-                                                    const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleExtraData::detailValues(const EvaluationDetail& detail,
+                                                      const EvaluationDetail* parent_detail) const
 {
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             detail.getValue(DetailKey::Inside),
-             detail.getValue(DetailKey::Extra),
-             detail.getValue(DetailKey::RefExists),
-             detail.comments().generalComment().c_str() };
+    return { Utils::Time::toString(detail.timestamp()),
+             detail.getValue(DetailKey::Inside).toBool(),
+             detail.getValue(DetailKey::Extra).toBool(),
+             detail.getValue(DetailKey::RefExists).toBool(),
+             detail.comments().generalComment() };
 }
 
 /**

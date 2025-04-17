@@ -26,10 +26,14 @@
 
 #include "eval/results/base/single.h"
 #include "eval/results/base/joined.h"
-#include "eval/results/report/rootitem.h"
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttable.h"
+
 #include "dbcontentmanager.h"
+
+#include "taskmanager.h"
+#include "taskresult.h"
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
 
 #include "compass.h"
 #include "logger.h"
@@ -50,11 +54,12 @@
 
 #include <future>
 
-
 using namespace std;
 using namespace EvaluationRequirementResult;
 using namespace EvaluationResultsReport;
 using namespace Utils;
+
+const std::string EvaluationResultsGenerator::EvalResultName = "Evaluation Result";
 
 EvaluationResultsGenerator::EvaluationResultsGenerator(
         EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
@@ -423,12 +428,12 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     msg_box.setWindowModality(Qt::ApplicationModal);
     msg_box.show();
 
-    // prepare for new data
-    results_model_.beginReset();
+    auto& task_manager = COMPASS::instance().taskManager();
+    task_manager.beginTaskResultWriting(EvalResultName);
 
-    std::shared_ptr<EvaluationResultsReport::RootItem> root_item = results_model_.rootItem();
+    auto& report = task_manager.currentReport();
 
-    Section& gen_sec = root_item->getSection("Overview:General");
+    auto& gen_sec = report->getSection("Overview:General");
 
     gen_sec.addText("This section contains information about the used application, database and data sources.");
 
@@ -436,14 +441,14 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     gen_sec.addTable("gen_overview_table", 3, {"Name", "Comment", "Value"}, false);
 
-    EvaluationResultsReport::SectionContentTable& gen_table = gen_sec.getTable("gen_overview_table");
+    auto& gen_table = gen_sec.getTable("gen_overview_table");
 
-    gen_table.addRow({"Application", "Application Filename", APP_FILENAME.c_str()}, nullptr);
-    gen_table.addRow({"Application Version", "Application Version", VERSION.c_str()}, nullptr);
-    gen_table.addRow({"DB", "Database Name", COMPASS::instance().lastDbFilename().c_str()}, nullptr);
+    gen_table.addRow({"Application", "Application Filename", APP_FILENAME});
+    gen_table.addRow({"Application Version", "Application Version", VERSION});
+    gen_table.addRow({"DB", "Database Name", COMPASS::instance().lastDbFilename()});
 
     assert (eval_man_.hasCurrentStandard());
-    gen_table.addRow({"Standard", "Standard name", eval_man_.currentStandardName().c_str()}, nullptr);
+    gen_table.addRow({"Standard", "Standard name", eval_man_.currentStandardName()});
 
     // add used sensors
 
@@ -462,8 +467,8 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     sensors_ref = data_source_ref.dbcontent + ": " + sensors_ref;
     sensors_tst = data_source_tst.dbcontent + ": " + sensors_tst;
     
-    gen_table.addRow({ "Reference Sensors", "Used reference sensors", sensors_ref.c_str() }, nullptr);
-    gen_table.addRow({ "Test Sensors", "Used test sensors", sensors_tst.c_str() }, nullptr);
+    gen_table.addRow({ "Reference Sensors", "Used reference sensors", sensors_ref });
+    gen_table.addRow({ "Test Sensors", "Used test sensors", sensors_tst });
 
     // generate results
 
@@ -473,7 +478,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
         if (result_it->isJoined())
         {
             QCoreApplication::processEvents();
-            result_it->addToReport(root_item);
+            result_it->addToReport(report);
         }
     }
 
@@ -487,16 +492,16 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
             if (cnt % 100 == 0)
                 QCoreApplication::processEvents();
 
-            result_it->addToReport(root_item);
+            result_it->addToReport(report);
 
             ++cnt;
         }
     }
 
     // generate non-result details
-    addNonResultsContent (root_item);
+    addNonResultsContent (report);
 
-    results_model_.endReset();
+    task_manager.endTaskResultWriting(false);
 
     loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
@@ -566,9 +571,9 @@ EvaluationResultsGeneratorWidget* EvaluationResultsGenerator::widget()
     return new EvaluationResultsGeneratorWidget(*this, eval_man_, eval_settings_);
 }
 
-void EvaluationResultsGenerator::addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void EvaluationResultsGenerator::addNonResultsContent (const std::shared_ptr<ResultReport::Report>& report)
 {
     // standard
     assert (eval_man_.hasCurrentStandard());
-    eval_man_.currentStandard().addToReport(root_item);
+    eval_man_.currentStandard().addToReport(report);
 }

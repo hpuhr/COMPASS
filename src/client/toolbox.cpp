@@ -34,9 +34,10 @@
 #include <QMenu>
 #include <QToolBar>
 
-const int ToolBox::ToolIconSize      = 50;
-const int ToolBox::ToolNameFontSize  = 12;
-const int ToolBox::ToolLabelFontSize = 8;
+const int   ToolBox::ToolIconSize      = 50;
+const int   ToolBox::ToolNameFontSize  = 12;
+const int   ToolBox::ToolLabelFontSize = 8;
+const float ToolBox::ExpansionFactor   = 0.75f;
 
 /**
  */
@@ -52,36 +53,63 @@ ToolBox::~ToolBox() = default;
 
 /**
  */
+void ToolBox::setMainContent(QWidget* content)
+{
+    assert(!main_content_widget_);
+
+    main_content_widget_ = content;
+    main_content_widget_->setParent(main_widget_);
+    main_layout_->addWidget(main_content_widget_);
+
+    main_content_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+}
+
+/**
+ */
 void ToolBox::createUI()
 {
-    QHBoxLayout* main_layout = new QHBoxLayout;
-    main_layout->setContentsMargins(0, 0, 0, 0);
-    main_layout->setSpacing(0);
-    setLayout(main_layout);
+    QHBoxLayout* layout = new QHBoxLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    setLayout(layout);
 
-    QVBoxLayout* left_layout  = new QVBoxLayout;
-    left_layout->setContentsMargins(0, 0, 0, 0);
-    left_layout->setSpacing(0);
+    //icons
+    QVBoxLayout* icon_bar_layout  = new QVBoxLayout;
+    icon_bar_layout->setContentsMargins(0, 0, 0, 0);
+    icon_bar_layout->setSpacing(0);
 
     icon_layout_ = new QVBoxLayout;
     icon_layout_->setContentsMargins(0, 0, 0, 0);
     icon_layout_->setSpacing(0);
 
-    left_layout->addLayout(icon_layout_);
-    left_layout->addStretch();
+    icon_bar_layout->addLayout(icon_layout_);
+    icon_bar_layout->addStretch();
     
-    main_layout->addLayout(left_layout);
+    layout->addLayout(icon_bar_layout);
+
+    //panel
+    panel_widget_ = new QWidget;
+    panel_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    panel_widget_->setVisible(false); //initially invisible
+
+    panel_layout_ = new QVBoxLayout;
+    panel_layout_->setContentsMargins(0, 0, 0, 0);
+    panel_layout_->setSpacing(0);
+
+    panel_widget_->setLayout(panel_layout_);
+
+    panel_content_widget_ = new QFrame;
+    panel_content_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    panel_content_widget_->setFrameStyle(QFrame::Shape::StyledPanel | QFrame::Shadow::Raised);
+
+    QVBoxLayout* panel_content_layout = new QVBoxLayout;
+    panel_content_layout->setContentsMargins(0, 0, 0, 0);
+    panel_content_layout->setSpacing(0);
+
+    panel_content_widget_->setLayout(panel_content_layout);
+
+    panel_layout_->addWidget(panel_content_widget_);
     
-    right_widget_ = new QWidget;
-    right_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    right_widget_->setVisible(false); //initiallly invisible
-
-    QVBoxLayout* right_layout = new QVBoxLayout;
-    right_layout->setContentsMargins(0, 0, 0, 0);
-    right_layout->setSpacing(0);
-
-    right_widget_->setLayout(right_layout);
-
     QHBoxLayout* top_layout = new QHBoxLayout;
     top_layout->setContentsMargins(10, 5, 10, 0);
 
@@ -92,6 +120,7 @@ void ToolBox::createUI()
     tool_name_label_->setFont(name_font);
 
     tool_bar_ = new QToolBar;
+    tool_bar_->setIconSize(UI_ICON_SIZE);
 
     config_button_ = new QPushButton;
     config_button_->setStyleSheet("QPushButton::menu-indicator { image: none; }");
@@ -102,22 +131,29 @@ void ToolBox::createUI()
     config_menu_.reset(new PopupMenu(config_button_));
     config_menu_->setPreShowCallback([ = ] () { this->updateMenu(); });
 
-    shrink_button_ = new QPushButton;
-    shrink_button_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_left.png").c_str()));
-    shrink_button_->setFixedSize(UI_ICON_SIZE); 
-    shrink_button_->setFlat(UI_ICON_BUTTON_FLAT);
+    tool_bar_default_ = new QToolBar;
+    tool_bar_default_->setIconSize(UI_ICON_SIZE);
 
-    connect(shrink_button_, &QPushButton::pressed, this, &ToolBox::shrink);
+    shrink_action_ = tool_bar_default_->addAction("Decrease Width");
+    shrink_action_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_left.png").c_str()));
+    shrink_action_->setToolTip("Decrease Width [-]");
+    shrink_action_->setShortcut(Qt::Key_Minus);
 
-    grow_button_ = new QPushButton;
-    grow_button_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_right.png").c_str()));
-    grow_button_->setFixedSize(UI_ICON_SIZE); 
-    grow_button_->setFlat(UI_ICON_BUTTON_FLAT);
+    connect(shrink_action_, &QAction::triggered, this, &ToolBox::shrink);
 
-    connect(grow_button_, &QPushButton::pressed, this, &ToolBox::grow);
+    grow_action_ = tool_bar_default_->addAction("Increase Width");
+    grow_action_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_right.png").c_str()));
+    grow_action_->setToolTip("Increase Width [+]");
+    grow_action_->setShortcut(Qt::Key_Plus);
 
-    top_layout->addWidget(shrink_button_);
-    top_layout->addWidget(grow_button_);
+    connect(grow_action_, &QAction::triggered, this, &ToolBox::grow);
+
+    expand_action_ = tool_bar_default_->addAction("Expand");
+    expand_action_->setShortcut(Qt::Key_NumberSign);
+
+    connect(expand_action_, &QAction::triggered, this, &ToolBox::toggleExpansion);
+
+    top_layout->addWidget(tool_bar_default_);
     top_layout->addSpacerItem(new QSpacerItem(20, 1, QSizePolicy::Fixed, QSizePolicy::Fixed));
     top_layout->addWidget(tool_name_label_);
     top_layout->addStretch(1);
@@ -127,12 +163,25 @@ void ToolBox::createUI()
 
     widget_stack_ = new QStackedWidget;
 
-    right_layout->addLayout(top_layout);
-    right_layout->addWidget(widget_stack_);
+    panel_content_layout->addLayout(top_layout);
+    panel_content_layout->addWidget(widget_stack_);
 
-    main_layout->addWidget(right_widget_);
+    layout->addWidget(panel_widget_);
+
+    //main content
+    main_widget_ = new QWidget;
+    main_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    main_layout_ = new QVBoxLayout;
+    main_layout_->setContentsMargins(0, 0, 0, 0);
+    main_layout_->setSpacing(0);
+
+    main_widget_->setLayout(main_layout_);
+
+    layout->addWidget(main_widget_);
 
     updateToolBar();
+    updateButtons();
 }
 
 /**
@@ -210,25 +259,26 @@ void ToolBox::addTool(ToolBoxWidget* tool)
     auto font = button->font();
     font.setPointSize(ToolLabelFontSize);
 
+    int tool_idx = (int)tools_.size();
+
     button->setIcon(icon);
     button->setText(QString::fromStdString(label));
-    button->setToolTip(QString::fromStdString(info));
+    button->setToolTip(QString::fromStdString(info) + " [" + QString::number(tool_idx + 1) + "]");
     button->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextUnderIcon);
     button->setIconSize(QSize(ToolIconSize, ToolIconSize));
     button->setCheckable(true);
     button->setFont(font); 
+    button->setShortcut(Qt::Key_1 + tool_idx);
 
     tool->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    int toolIdx = (int)tools_.size();
-
-    connect(button, &ToolButton::pressed, [ this, toolIdx ] () { this->toolActivated(toolIdx); });
+    
+    connect(button, &ToolButton::pressed, [ this, tool_idx ] () { this->toolActivated(tool_idx); });
     connect(button, &ToolButton::rightClicked, [ tool ] () { tool->rightClicked(); });
     connect(tool, &ToolBoxWidget::iconChangedSignal, [ button, tool ] { button->setIcon(tool->toolIcon()); } );
     connect(tool, &ToolBoxWidget::toolsChangedSignal, [ this ] () { this->updateToolBar(); });
 
     Tool t;
-    t.idx    = toolIdx;
+    t.idx    = tool_idx;
     t.widget = tool;
     t.button = button;
 
@@ -290,7 +340,8 @@ void ToolBox::toolActivated(int idx)
     if (idx == active_tool_idx_)
     {
         //close active tool
-        right_widget_->setVisible(false);
+        panel_widget_->setVisible(false);
+        panel_content_widget_->setVisible(false);
         active_tool_idx_ = -1;
     }
     else
@@ -303,7 +354,8 @@ void ToolBox::toolActivated(int idx)
 
         active_tool_idx_ = idx;
         widget_stack_->setCurrentIndex(idx);
-        right_widget_->setVisible(true);
+        panel_widget_->setVisible(true);
+        panel_content_widget_->setVisible(true);
 
         for (auto& t : tools_)
         {
@@ -318,13 +370,14 @@ void ToolBox::toolActivated(int idx)
 
     updateToolBar();
     updateButtons();
+    adjustSizings();
 
     emit toolChanged();
 }
 
 /**
  */
-void ToolBox::adjustSizings()
+void ToolBox::finalize()
 {
     size_t maxrows = 0;
     int    maxw    = 0;
@@ -357,6 +410,35 @@ void ToolBox::adjustSizings()
 
 /**
  */
+void ToolBox::adjustSizings()
+{
+    if (expanded_)
+    {
+        const int x0 = tools_.empty() ? 0 : tools_.at(0).button->width();
+
+        panel_content_widget_->setGeometry(x0, 0, width() * ExpansionFactor, height());
+    }
+    else
+    {
+        std::pair<int, int> stretches(0, 1);
+
+        auto screen_ratio = currentScreenRatio();
+        if (screen_ratio.has_value())
+            stretches = toolbox::toParts(screen_ratio.value());
+
+        QSizePolicy policy_toolbox(screen_ratio.has_value() ? QSizePolicy::Expanding : QSizePolicy::Preferred, QSizePolicy::Expanding);
+        policy_toolbox.setHorizontalStretch(stretches.first);
+
+        QSizePolicy policy_tabwidget(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        policy_tabwidget.setHorizontalStretch(stretches.second);
+
+        panel_widget_->setSizePolicy(policy_toolbox);
+        main_widget_->setSizePolicy(policy_tabwidget);
+    }
+}
+
+/**
+ */
 boost::optional<toolbox::ScreenRatio> ToolBox::currentScreenRatio() const
 {
     if (active_tool_idx_ < 0)
@@ -375,8 +457,7 @@ void ToolBox::screenRatioChanged(toolbox::ScreenRatio screen_ratio)
     tools_.at(active_tool_idx_).widget->setScreenRatio(screen_ratio);
 
     updateButtons();
-
-    emit toolChanged();
+    adjustSizings();
 }
 
 /**
@@ -413,9 +494,12 @@ void ToolBox::updateButtons()
     {
         auto sr = tools_.at(active_tool_idx_).widget->screenRatio();
 
-        shrink_button_->setEnabled((int)sr > 0);
-        grow_button_->setEnabled((int)sr < (int)toolbox::ScreenRatio::RatioMax - 1);
+        shrink_action_->setEnabled((int)sr > 0);
+        grow_action_->setEnabled((int)sr < (int)toolbox::ScreenRatio::RatioMax - 1);
     }
+
+    expand_action_->setIcon(QIcon(Utils::Files::getIconFilepath(expanded_ ? "fd_shrink.png" : "fd_expand.png").c_str()));
+    expand_action_->setToolTip(QString(expanded_ ? "Collapse" : "Expand") + " Flight Deck [#]");
 }
 
 /**
@@ -424,7 +508,8 @@ void ToolBox::loadingStarted()
 {
     tool_bar_->setEnabled(false);
     config_button_->setEnabled(false);
-    right_widget_->setEnabled(false);
+    panel_widget_->setEnabled(false);
+    main_widget_->setEnabled(false);
 
     for (auto& t : tools_)
         t.widget->loadingStarted();
@@ -436,8 +521,62 @@ void ToolBox::loadingDone()
 {
     tool_bar_->setEnabled(true);
     config_button_->setEnabled(true);
-    right_widget_->setEnabled(true);
+    panel_widget_->setEnabled(true);
+    main_widget_->setEnabled(true);
 
     for (auto& t : tools_)
         t.widget->loadingDone();
+}
+
+/**
+ */
+void ToolBox::toggleExpansion()
+{
+    if (active_tool_idx_ < 0)
+        return;
+
+    bool is_expanded  = expanded_;
+    bool reshow_panel = false;
+
+    if (is_expanded)
+    {
+        //de-expand
+        panel_content_widget_->setAutoFillBackground(false);
+        panel_content_widget_->setParent(panel_widget_);
+        panel_layout_->addWidget(panel_content_widget_);
+
+        main_widget_->setEnabled(true);
+    }
+    else
+    {
+        //expand
+        main_widget_->setEnabled(false);
+
+        panel_content_widget_->setVisible(false);
+        panel_layout_->removeWidget(panel_content_widget_);
+        panel_content_widget_->setParent(this);
+        panel_content_widget_->raise();
+        panel_content_widget_->setAutoFillBackground(true);
+
+        reshow_panel = true;
+    }
+
+    expanded_ = !is_expanded;
+
+    adjustSizings();
+    updateButtons();
+
+    //reshow panel after adjusting sizings
+    if (reshow_panel)
+        panel_content_widget_->show();
+}
+
+/**
+ */
+void ToolBox::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+
+    if (expanded_)
+        adjustSizings();
 }

@@ -18,13 +18,15 @@
 #ifndef EVALUATIONREQUIREMENTTRACKANGLECONFIG_H
 #define EVALUATIONREQUIREMENTTRACKANGLECONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/trackangle/trackangleconfigwidget.h"
-//#include "eval/requirement/trackangle/trackangle.h"
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -53,7 +55,7 @@ public:
     bool failedValuesOfInterest() const;
     void failedValuesOfInterest(bool value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
 protected:
     float threshold_ {15.0}; // max angle degree difference

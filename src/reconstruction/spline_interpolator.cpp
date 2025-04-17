@@ -245,6 +245,39 @@ void SplineInterpolator::interpCovarianceMat(Measurement& mm_interp,
 
 /**
 */
+boost::optional<float> SplineInterpolator::interpProcessNoise(const boost::optional<float>& Q_var0,
+                                                              const boost::optional<float>& Q_var1,
+                                                              double interp_factor)
+{
+    if (!Q_var0.has_value() && !Q_var1.has_value())
+        return boost::optional<float>();
+
+    if (Q_var0.has_value() && !Q_var1.has_value())
+    {
+        return Q_var0;
+    }
+    else if (!Q_var0.has_value() && Q_var1.has_value())
+    {
+        return Q_var1;
+    }
+    else //both available
+    {
+        if (Q_var0.value() == Q_var1.value())
+            return Q_var0;
+
+        //interpolate process noise linear
+        double Q_std0 = std::sqrt(Q_var0.value());
+        double Q_std1 = std::sqrt(Q_var1.value());
+        double Q_std  = interp(Q_std0, Q_std1, interp_factor);
+
+        return Q_std * Q_std;
+    }
+
+    return boost::optional<float>();
+}
+
+/**
+*/
 MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& pos, 
                                                         const boost::posix_time::ptime& t, 
                                                         const Measurement& mm0, 
@@ -283,27 +316,11 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
 
     //interpolate process noise if set
     if (mm0.Q_var.has_value() || mm1.Q_var.has_value())
-    {
-        if (mm0.Q_var.has_value() && !mm1.Q_var.has_value())
-        {
-            //use mm0 process noise
-            mm_interp.Q_var = mm0.Q_var;
-        }
-        else if (!mm0.Q_var.has_value() && mm1.Q_var.has_value())
-        {
-            //use mm1 process noise
-            mm_interp.Q_var = mm1.Q_var;
-        }
-        else
-        {
-            //interpolate process noise linear
-            double Q_std0 = std::sqrt(mm0.Q_var.value());
-            double Q_std1 = std::sqrt(mm1.Q_var.value());
-            double Q_std  = interp(Q_std0, Q_std1, interp_factor);
-
-            mm_interp.Q_var = Q_std * Q_std;
-        }
-    }
+        mm_interp.Q_var = interpProcessNoise(mm0.Q_var, mm1.Q_var, interp_factor);
+    
+    //interpolate process noise used for interpolation if set
+    if (mm0.Q_var_interp.has_value() || mm1.Q_var_interp.has_value())
+        mm_interp.Q_var_interp = interpProcessNoise(mm0.Q_var_interp, mm1.Q_var_interp, interp_factor);
     
     return mm_interp;
 }

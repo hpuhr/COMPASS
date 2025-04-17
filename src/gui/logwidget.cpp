@@ -60,6 +60,8 @@ LogWidget::LogWidget(LogStore& log_store)
     checkIcon();
 }
 
+LogWidget::~LogWidget(){}
+
 void LogWidget::messagesChangedSlot()
 {
     table_view_->resizeColumnsToContents();

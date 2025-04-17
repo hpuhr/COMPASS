@@ -61,6 +61,7 @@ struct GridResolution
                             const boost::optional<double>& ymax = boost::optional<double>());
 
     static const double DefaultBorderFactor;
+    static const double MinCellSize;
 
     Type   type        = Type::CellCount;
     size_t num_cells_x = 0;

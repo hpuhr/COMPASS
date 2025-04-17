@@ -19,7 +19,8 @@
 #include "eval/requirement/group.h"
 
 #include "eval/results/mode_c/correct_period.h"
-#include "eval/results/report/sectioncontenttable.h"
+
+#include "task/result/report/sectioncontenttable.h"
 
 #include "evaluationmanager.h"
 #include "sectorlayer.h"
@@ -201,11 +202,11 @@ BaseConfigWidget* ModeCCorrectPeriodConfig::createWidget_impl()
 
 /**
 */
-void ModeCCorrectPeriodConfig::addCustomTableEntries(EvaluationResultsReport::SectionContentTable& table) const
+void ModeCCorrectPeriodConfig::addCustomTableEntries(ResultReport::SectionContentTable& table) const
 {
     table.addRow( { "Maximum Difference [ft]", 
                     "Maximum altitude difference between the test and the reference",
-                    std::to_string(max_distance_ft_).c_str()}, nullptr);
+                    std::to_string(max_distance_ft_)});
 }
 
 /**

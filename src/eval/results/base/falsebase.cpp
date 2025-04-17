@@ -170,7 +170,7 @@ std::vector<std::string> SingleFalseBase::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleFalseBase::targetTableValuesCustom() const
+nlohmann::json::array_t SingleFalseBase::targetTableValuesCustom() const
 {
     return { num_updates_, num_no_ref_pos_ + num_no_ref_val_, num_unknown_, num_correct_, num_false_ };
 }
@@ -179,7 +179,7 @@ std::vector<QVariant> SingleFalseBase::targetTableValuesCustom() const
 */
 std::vector<Single::TargetInfo> SingleFalseBase::targetInfos() const
 {
-    QString name = QString::fromStdString(false_value_name_);
+    std::string name = false_value_name_;
 
     return { { "#Up [1]"        , "Number of updates"                                  , num_updates_                     }, 
              { "#NoRef [1]"     , "Number of updates w/o reference position or " + name, num_no_ref_pos_ + num_no_ref_val_}, 
@@ -201,20 +201,20 @@ std::vector<std::string> SingleFalseBase::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleFalseBase::detailValues(const EvaluationDetail& detail,
-                                                    const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleFalseBase::detailValues(const EvaluationDetail& detail,
+                                                      const EvaluationDetail* parent_detail) const
 {
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             detail.getValue(DetailKey::RefExists),
+    return { Utils::Time::toString(detail.timestamp()),
+             detail.getValue(DetailKey::RefExists).toBool(),
             !detail.getValue(DetailKey::IsNotOk).toBool(),
-             detail.getValue(DetailKey::NumUpdates),
-             detail.getValue(DetailKey::NumNoRef),
-             detail.getValue(DetailKey::NumInside),
-             detail.getValue(DetailKey::NumOutside),
-             detail.getValue(DetailKey::NumUnknownID),
-             detail.getValue(DetailKey::NumCorrectID),
-             detail.getValue(DetailKey::NumFalseID),
-             detail.comments().generalComment().c_str() };
+             detail.getValue(DetailKey::NumUpdates).toUInt(),
+             detail.getValue(DetailKey::NumNoRef).toUInt(),
+             detail.getValue(DetailKey::NumInside).toUInt(),
+             detail.getValue(DetailKey::NumOutside).toUInt(),
+             detail.getValue(DetailKey::NumUnknownID).toUInt(),
+             detail.getValue(DetailKey::NumCorrectID).toUInt(),
+             detail.getValue(DetailKey::NumFalseID).toUInt(),
+             detail.comments().generalComment() };
 }
 
 /**
@@ -334,7 +334,7 @@ boost::optional<double> JoinedFalseBase::computeResult_impl() const
 */
 std::vector<Joined::SectorInfo> JoinedFalseBase::sectorInfos() const
 {
-    QString name = QString::fromStdString(false_value_name_);
+    std::string name = false_value_name_;
 
     return { { "#Up [1]"        , "Number of updates"                                  , num_updates_                    },
              { "#NoRef [1]"     , "Number of updates w/o reference position or " + name, num_no_ref_pos_+num_no_ref_val_ },

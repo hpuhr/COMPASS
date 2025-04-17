@@ -207,7 +207,7 @@ std::vector<std::string> SingleSpeed::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleSpeed::targetTableValuesCustom() const
+nlohmann::json::array_t SingleSpeed::targetTableValuesCustom() const
 {
     return { formatValue(accumulator_.min()),    // "DMin"
              formatValue(accumulator_.max()),    // "DMax"
@@ -244,19 +244,19 @@ std::vector<std::string> SingleSpeed::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleSpeed::detailValues(const EvaluationDetail& detail,
-                                                const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleSpeed::detailValues(const EvaluationDetail& detail,
+                                                  const EvaluationDetail* parent_detail) const
 {
     bool has_ref_pos = detail.numPositions() >= 2;
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
+    return { Utils::Time::toString(detail.timestamp()),
             !has_ref_pos,
-             detail.getValue(DetailKey::PosInside),
-             detail.getValue(DetailKey::Offset),           // "Distance"
-             detail.getValue(DetailKey::CheckPassed),      // "CP"
-             detail.getValue(DetailKey::NumCheckFailed),   // "#CF",
-             detail.getValue(DetailKey::NumCheckPassed),   // "#CP"
-             detail.comments().generalComment().c_str() }; // "Comment"
+             detail.getValue(DetailKey::PosInside).toBool(),
+             detail.getValue(DetailKey::Offset).toFloat(),         // "Distance"
+             detail.getValue(DetailKey::CheckPassed).toBool(),     // "CP"
+             detail.getValue(DetailKey::NumCheckFailed).toUInt(),  // "#CF",
+             detail.getValue(DetailKey::NumCheckPassed).toUInt(),  // "#CP"
+             detail.comments().generalComment() };                 // "Comment"
 }
 
 /**

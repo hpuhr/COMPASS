@@ -38,6 +38,11 @@ namespace EvaluationRequirementResult
     class Single;
 }
 
+namespace ResultReport
+{
+    class Report;
+}
+
 class EvaluationResultsGenerator
 {
 public:
@@ -65,8 +70,10 @@ public:
 
     EvaluationResultsGeneratorWidget* widget(); // has to take ownership
 
+    static const std::string EvalResultName;
+
 protected:
-    void addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addNonResultsContent (const std::shared_ptr<ResultReport::Report>& report);
     void updateToChanges(bool reset_viewable);
 
     EvaluationManager& eval_man_;

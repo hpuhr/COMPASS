@@ -23,6 +23,7 @@
 #include "appmode.h"
 #include "result.h"
 #include "logmodel.h"
+#include "logwidget.h"
 
 #include <QObject>
 
@@ -42,7 +43,6 @@ class EvaluationManager;
 class MainWindow;
 class FFTManager;
 class LicenseManager;
-class LogWidget;
 
 namespace rtcommand
 {
@@ -207,7 +207,7 @@ protected:
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
 
     LogStore log_store_;
-    std::unique_ptr<LogWidget> log_widget_{nullptr};
+    std::unique_ptr<LogWidget> log_widget_;
 
     std::string last_db_filename_;
     std::string inmem_future_filename_;

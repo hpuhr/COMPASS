@@ -19,8 +19,9 @@
 #include "eval/results/base/single.h"
 #include "eval/results/base/result_t.h"
 
-#include "eval/results/report/sectioncontenttable.h"
-#include "eval/results/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/section.h"
+
 #include "eval/results/report/section_id.h"
 
 #include "eval/requirement/base/base.h"
@@ -122,7 +123,7 @@ unsigned int Joined::numUnusableSingleResults() const
 
 /**
 */
-bool Joined::hasReference(const EvaluationResultsReport::SectionContentTable& table, 
+bool Joined::hasReference(const ResultReport::SectionContentTable& table, 
                           const QVariant& annotation) const
 {
     if (table.name() == req_overview_table_name_)
@@ -133,7 +134,7 @@ bool Joined::hasReference(const EvaluationResultsReport::SectionContentTable& ta
 
 /**
 */
-std::string Joined::reference(const EvaluationResultsReport::SectionContentTable& table, 
+std::string Joined::reference(const ResultReport::SectionContentTable& table, 
                               const QVariant& annotation) const
 {
     assert (hasReference(table, annotation));
@@ -162,7 +163,7 @@ void Joined::iterateDetails(const DetailFunc& func,
 
 /**
 */
-void Joined::addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void Joined::addToReport(std::shared_ptr<ResultReport::Report> report)
 {
     logdbg << "Joined: addToReport: " <<  requirement_->name();
 
@@ -174,17 +175,21 @@ void Joined::addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root
 
     logdbg << "Joined: addToReport: " <<  requirement_->name() << ": adding joined result";
 
-    addSectorToOverviewTable(root_item);
-    addSectorDetailsToReport(root_item);
+    addSectorToOverviewTable(report);
+    addSectorDetailsToReport(report);
 }
 
 /**
 */
-void Joined::addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void Joined::addSectorToOverviewTable(std::shared_ptr<ResultReport::Report> report)
 {
-    EvaluationResultsReport::SectionContentTable& ov_table = getReqOverviewTable(root_item);
+    auto& ov_table = getReqOverviewTable(report);
 
     auto must_hold_for_any_target = requirement_->mustHoldForAnyTarget();
+
+    auto ref = getRequirementSectionID(); // this gives the associated requirement section link 
+                                          // needed to retrieve the correct section from the report
+    auto fig = SectorOverviewID;          // overview figure added in addSectorDetailsToReport()
 
     if (must_hold_for_any_target.has_value() && must_hold_for_any_target.value())
     {
@@ -192,33 +197,34 @@ void Joined::addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::R
         std::string result = num_failed_targets_ == 0 ? "Passed" : "Failed";
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result Value", "Condition", "Condition Result"
-        ov_table.addRow({ sector_layer_.name().c_str(), 
-                          requirement_->groupName().c_str(),
-                          requirement_->shortname().c_str(),
-                          result_id_.c_str(), 
+        ov_table.addRow({ sector_layer_.name(), 
+                          requirement_->groupName(),
+                          requirement_->shortname(),
+                          result_id_, 
                           num_targets_,
-                          num_failed_targets_, "= 0", 
-                          result.c_str() }, this, {});
+                          num_failed_targets_, 
+                          "= 0", 
+                          result }, {}, ref, fig, {});
     }
     else
     {
         //probabilisitc condition
-        QVariant result_val = resultValue();
+        auto result_val = resultValue();
 
         std::string result {"Unknown"};
 
-        if (result_val.isValid())
+        if (!result_val.is_null())
             result = conditionResultString();
 
         // "Sector Layer", "Group", "Req.", "Id", "#Updates", "Result Value", "Condition", "Condition Result"
-        ov_table.addRow({ sector_layer_.name().c_str(), 
-                          requirement_->groupName().c_str(),
-                          requirement_->shortname().c_str(),
-                          result_id_.c_str(), 
+        ov_table.addRow({ sector_layer_.name(), 
+                          requirement_->groupName(),
+                          requirement_->shortname(),
+                          result_id_, 
                           numUpdates(),
                           result_val, 
-                          requirement_->getConditionStr().c_str(), 
-                          result.c_str() }, this, {});
+                          requirement_->getConditionStr(), 
+                          result }, {}, ref, fig, {});
     }
 }
 
@@ -226,13 +232,13 @@ void Joined::addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::R
 */
 std::vector<Joined::SectorInfo> Joined::sectorInfosCommon() const
 {
-    return { { "Sector Layer"        , "Name of the sector layer"     , sector_layer_.name().c_str()     },
-             { "Reqirement Group"    , "Name of the requirement group", requirement_->groupName().c_str()},
-             { "Reqirement"          , "Name of the requirement"      , requirement_->name().c_str()     },
-             { "Num Results"         , "Total number of results"      , numSingleResults()               },
-             { "Num Usable Results"  , "Number of usable results"     , numUsableSingleResults()         },
-             { "Num Unusable Results", "Number of unusable results"   , numUnusableSingleResults()       },
-             { "Use"                 , "To be used in results"        , use_                             } };
+    return { { "Sector Layer"        , "Name of the sector layer"     , sector_layer_.name()       },
+             { "Reqirement Group"    , "Name of the requirement group", requirement_->groupName()  },
+             { "Reqirement"          , "Name of the requirement"      , requirement_->name()       },
+             { "Num Results"         , "Total number of results"      , numSingleResults()         },
+             { "Num Usable Results"  , "Number of usable results"     , numUsableSingleResults()   },
+             { "Num Unusable Results", "Number of unusable results"   , numUnusableSingleResults() },
+             { "Use"                 , "To be used in results"        , use_                       } };
 }
 
 /**
@@ -245,20 +251,20 @@ std::vector<Joined::SectorInfo> Joined::sectorConditionInfos() const
     bool show_target_condition = must_hold_for_any_target.has_value() &&
                                  must_hold_for_any_target.value();
 
-    QVariant result_val = resultValue();
+    auto result_val = resultValue();
 
     if (!show_target_condition)
     {
-        infos.push_back({ requirement_->getConditionResultNameShort(true).c_str(), 
-                          requirement_->getConditionResultName().c_str(), 
+        infos.push_back({ requirement_->getConditionResultNameShort(true), 
+                          requirement_->getConditionResultName(), 
                           result_val });
     }
 
-    QString result_name   = QString::fromStdString(requirement_->getConditionResultNameShort(false));
-    QString condition_str = QString::fromStdString(requirement_->getConditionStr());
+    std::string result_name   = requirement_->getConditionResultNameShort(false);
+    std::string condition_str = requirement_->getConditionStr();
 
-    QString condition_name   = show_target_condition ? "Single Target Condition" : "Condition";
-    QString confition_string = show_target_condition ? result_name + " " + condition_str : condition_str;
+    std::string condition_name   = show_target_condition ? "Single Target Condition" : "Condition";
+    std::string confition_string = show_target_condition ? result_name + " " + condition_str : condition_str;
 
     infos.push_back({condition_name, "", confition_string });
 
@@ -266,10 +272,10 @@ std::vector<Joined::SectorInfo> Joined::sectorConditionInfos() const
     {
         std::string result {"Unknown"};
 
-        if (result_val.isValid())
+        if (!result_val.is_null())
             result = conditionResultString();
 
-        infos.push_back({condition_name + " Fulfilled", "", result.c_str()});
+        infos.push_back({condition_name + " Fulfilled", "", result});
     }
 
     if (must_hold_for_any_target.has_value())
@@ -285,7 +291,7 @@ std::vector<Joined::SectorInfo> Joined::sectorConditionInfos() const
 
             std::string result = num_failed_targets_ == 0 ? "Passed" : "Failed";
 
-            infos.push_back({"Sum Condition Fulfilled", "", result.c_str()});
+            infos.push_back({"Sum Condition Fulfilled", "", result});
         }
     }
 
@@ -294,14 +300,14 @@ std::vector<Joined::SectorInfo> Joined::sectorConditionInfos() const
 
 /**
 */
-void Joined::addSectorDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void Joined::addSectorDetailsToReport(std::shared_ptr<ResultReport::Report> report)
 {
-    EvaluationResultsReport::Section& sector_section = getRequirementSection(root_item);
+    auto& sector_section = getRequirementSection(report);
 
     if (!sector_section.hasTable("sector_details_table"))
         sector_section.addTable("sector_details_table", 3, {"Name", "Comment", "Value"}, false);
 
-    EvaluationResultsReport::SectionContentTable& sec_det_table = sector_section.getTable("sector_details_table");
+    auto& sec_det_table = sector_section.getTable("sector_details_table");
 
     // callbacks
     if (canExportCSV())
@@ -314,18 +320,20 @@ void Joined::addSectorDetailsToReport(std::shared_ptr<EvaluationResultsReport::R
     // details
     auto infos_common = sectorInfosCommon();
 
+    //@TODO: the following rows were given this result as a pointer, is this even needed?
+
     for (const auto& info : infos_common)
-        sec_det_table.addRow({ info.info_name, info.info_comment, info.info_value }, this);
+        sec_det_table.addRow({ info.info_name, info.info_comment, info.info_value });
 
     auto infos = sectorInfos();
 
     for (const auto& info : infos)
-        sec_det_table.addRow({ info.info_name, info.info_comment, info.info_value }, this);
+        sec_det_table.addRow({ info.info_name, info.info_comment, info.info_value });
 
     auto infos_condition = sectorConditionInfos();
 
     for (const auto& info : infos_condition)
-        sec_det_table.addRow({ info.info_name, info.info_comment, info.info_value }, this);
+        sec_det_table.addRow({ info.info_name, info.info_comment, info.info_value });
 
     // figure
     addOverview(sector_section);
@@ -369,13 +377,12 @@ bool Joined::exportAsCSV() const
 
 /**
 */
-void Joined::addOverview (EvaluationResultsReport::Section& section,
+void Joined::addOverview (ResultReport::Section& section,
                           const std::string& name)
 {
     section.addFigure(SectorOverviewID, 
-                      name, 
-                      [this](void) { return this->viewableOverviewData(); }, 
-                      SectorOverviewRenderDelayMSec);
+                      ResultReport::SectionContentViewable([this]() { return this->viewableOverviewData(); })
+                        .setCaption(name).setRenderDelayMS(SectorOverviewRenderDelayMSec));
 }
 
 /**
@@ -609,7 +616,7 @@ void Joined::createAnnotations(nlohmann::json& annotations,
 
 /**
  */
-bool Joined::hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+bool Joined::hasViewableData (const ResultReport::SectionContentTable& table, 
                               const QVariant& annotation) const
 {
     if (table.name() != req_overview_table_name_)
@@ -627,7 +634,7 @@ bool Joined::viewableDataReady() const
 
 /**
  */
-std::shared_ptr<nlohmann::json::object_t> Joined::viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+std::shared_ptr<nlohmann::json::object_t> Joined::viewableData(const ResultReport::SectionContentTable& table, 
                                                                const QVariant& annotation) const
 {
     assert (hasViewableData(table, annotation));

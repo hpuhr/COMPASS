@@ -18,13 +18,15 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONLATENCYCONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONLATENCYCONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/position/latencyconfigwidget.h"
-//#include "eval/requirement/position/latency.h"
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -42,7 +44,7 @@ public:
     float maxAbsValue() const;
     void maxAbsValue(float value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
 protected:
     float max_abs_value_ {0};

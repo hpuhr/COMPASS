@@ -138,12 +138,12 @@ std::vector<std::string> SingleDubiousTarget::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleDubiousTarget::targetTableValuesCustom() const
+nlohmann::json::array_t SingleDubiousTarget::targetTableValuesCustom() const
 {
     return { num_pos_inside_,                        // "#PosInside"
              num_pos_inside_dubious_,                // "#DU"
              resultValueOptional(p_dubious_update_), // "PDU"
-             dubious_reasons_.c_str() };             // "Reasons"
+             dubious_reasons_ };                     // "Reasons"
 }
 
 /**
@@ -170,16 +170,16 @@ std::vector<std::string> SingleDubiousTarget::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleDubiousTarget::detailValues(const EvaluationDetail& detail,
-                                                        const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleDubiousTarget::detailValues(const EvaluationDetail& detail,
+                                                          const EvaluationDetail* parent_detail) const
 {
     assert(parent_detail);
 
     const std::string dub_string = dubiousReasonsString(parent_detail->comments());
 
-    return { Time::toString(detail.timestamp()).c_str(),
-             parent_detail->getValue(DetailKey::UTNOrTrackNum),
-             dub_string.c_str() };
+    return { Time::toString(detail.timestamp()),
+             parent_detail->getValue(DetailKey::UTNOrTrackNum).toUInt(),
+             dub_string };
 }
 
 /**
@@ -332,7 +332,7 @@ std::vector<Joined::SectorInfo> JoinedDubiousTarget::sectorInfos() const
           { "Duration [s]"        , "Duration of all targets"                , formatValue(duration_all_)     },
           { "Duration Dubious [s]", "Duration of dubious targets"            , formatValue(duration_dubious_) } };
 
-    QVariant dubious_t_avg_var;
+    nlohmann::json dubious_t_avg_var;
 
     if (num_utns_dubious_)
         dubious_t_avg_var = roundf(duration_dubious_/(float)num_utns_dubious_ * 100.0) / 100.0;
@@ -340,7 +340,7 @@ std::vector<Joined::SectorInfo> JoinedDubiousTarget::sectorInfos() const
     infos.push_back({"Duration Non-Dubious [s]", "Duration of non-dubious targets", formatValue(duration_nondub_)});
     infos.push_back({"Average Duration Dubious [s]", "Average duration of dubious targets", dubious_t_avg_var});
 
-    QVariant p_dubious_t_var, p_nondub_t_var;
+    nlohmann::json p_dubious_t_var, p_nondub_t_var;
 
     if (duration_all_)
     {
