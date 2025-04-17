@@ -851,7 +851,7 @@ void ReconstructorBase::processSlice()
 
     currentSlice().processing_done_ = true;
 
-    if (task().debugSettings().debug_ && currentSlice().is_last_slice_ )
+    if (task().debugSettings().analyse_ && currentSlice().is_last_slice_ )
     {
         auto& stats = dbContent::ReconstructorTarget::globalStats();
 

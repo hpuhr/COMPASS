@@ -83,6 +83,8 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
     registerParameter("debug_outlier_detection", &debug_settings_.debug_outlier_detection_,
                       debug_settings_.debug_outlier_detection_);
 
+    registerParameter("analyse", &debug_settings_.analyse_, debug_settings_.analyse_);
+
     registerParameter("analyse_outlier_detection", &debug_settings_.analyse_outlier_detection_,
                       debug_settings_.analyse_outlier_detection_);
     registerParameter("analyse_accuracy_estimation", &debug_settings_.analyse_accuracy_estimation_,

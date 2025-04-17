@@ -54,6 +54,8 @@ public:
         bool debug_association_ {false};
         bool debug_outlier_detection_ {false};
 
+        bool analyse_ {false};
+
         bool analyse_outlier_detection_ {false};
         bool analyse_accuracy_estimation_ {false};
         bool analyse_bias_correction_ {false};

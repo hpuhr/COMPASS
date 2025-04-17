@@ -72,6 +72,13 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(
         combo_layout->addRow("Debug Outlier Detection", debug_outliers_check_);
 
 
+    analyse_check_= new QCheckBox();
+    connect(analyse_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyse_ = ok; });
+
+    if (probimm_reconst_)
+        combo_layout->addRow("Analyse", analyse_check_);
+
     analyse_outliers_check_ = new QCheckBox();
     connect(analyse_outliers_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().analyse_outlier_detection_ = ok; });
@@ -183,6 +190,9 @@ void ReconstructorTaskAnalysisWidget::updateValues()
 
     assert (debug_outliers_check_);
     debug_outliers_check_->setChecked(task_.debugSettings().debug_outlier_detection_);
+
+    assert (analyse_check_);
+    analyse_check_->setChecked(task_.debugSettings().analyse_);
 
     assert (analyse_outliers_check_);
     analyse_outliers_check_->setChecked(task_.debugSettings().analyse_geo_altitude_correction_);

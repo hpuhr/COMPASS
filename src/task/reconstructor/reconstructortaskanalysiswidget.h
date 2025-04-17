@@ -39,6 +39,8 @@ class ReconstructorTaskAnalysisWidget : public QWidget
     QCheckBox* debug_association_check_{nullptr};
     QCheckBox* debug_outliers_check_{nullptr};
 
+
+    QCheckBox* analyse_check_{nullptr};
     QCheckBox* analyse_outliers_check_{nullptr};
     QCheckBox* analyse_accuracy_est_check_{nullptr};
     QCheckBox* analyse_bias_correction_check_{nullptr};
