@@ -43,7 +43,7 @@ public:
     VariableViewDataWidget(ViewWidget* view_widget,
                            VariableView* view,
                            QWidget* parent = nullptr, 
-                           Qt::WindowFlags f = 0);
+                           Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~VariableViewDataWidget();
 
     bool canUpdate(int var_idx, const std::string& dbcontent_name) const;

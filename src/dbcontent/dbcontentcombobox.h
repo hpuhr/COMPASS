@@ -33,7 +33,7 @@ class DBContentComboBox : public QComboBox
     void changedObject();
 
   public:
-    DBContentComboBox(bool allow_meta, bool no_status_content, QWidget* parent = 0)
+    DBContentComboBox(bool allow_meta, bool no_status_content, QWidget* parent = nullptr)
         : QComboBox(parent), allow_meta_(allow_meta)
     {
         assert(COMPASS::instance().dbContentManager().size());

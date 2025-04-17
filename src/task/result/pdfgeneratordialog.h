@@ -60,7 +60,7 @@ public slots:
 
 public:
     PDFGeneratorDialog(PDFGenerator& generator, EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
-                       QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+                       QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     void updateFileInfo ();
 

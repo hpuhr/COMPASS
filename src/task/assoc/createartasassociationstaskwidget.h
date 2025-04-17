@@ -53,8 +53,8 @@ public slots:
     void anyTrackFlagChangedSlot();
 
 public:
-    CreateARTASAssociationsTaskWidget(CreateARTASAssociationsTask& task, QWidget* parent = 0,
-                                      Qt::WindowFlags f = 0);
+    CreateARTASAssociationsTaskWidget(CreateARTASAssociationsTask& task, QWidget* parent = nullptr,
+                                      Qt::WindowFlags f = Qt::WindowFlags());
 
     virtual ~CreateARTASAssociationsTaskWidget();
 

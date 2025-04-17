@@ -30,7 +30,7 @@ public slots:
     void doneSlot();
 
 public:
-    VariableEditDialog(Variable& variable, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    VariableEditDialog(Variable& variable, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     bool variableEdited() const;
 

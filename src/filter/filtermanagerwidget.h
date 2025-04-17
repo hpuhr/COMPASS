@@ -34,8 +34,8 @@ class FilterManagerWidget : public ToolBoxWidget
     Q_OBJECT
 public:
     explicit FilterManagerWidget(FilterManager& manager, 
-                                 QWidget* parent = 0,
-                                 Qt::WindowFlags f = 0);
+                                 QWidget* parent = nullptr,
+                                 Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~FilterManagerWidget();
 
     //ToolBoxWidget

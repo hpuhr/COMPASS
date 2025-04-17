@@ -44,7 +44,7 @@ class StringRepresentationComboBox : public QComboBox
 
   public:
     StringRepresentationComboBox(dbContent::Variable::Representation& representation, std::string& representation_str,
-                                 QWidget* parent = 0)
+                                 QWidget* parent = nullptr)
         : QComboBox(parent), representation_(representation), representation_str_(representation_str)
     {
         for (auto it : dbContent::Variable::Representations())

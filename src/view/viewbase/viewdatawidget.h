@@ -48,7 +48,7 @@ class ViewDataWidget : public QWidget, public ViewComponent
 public:
     typedef std::map<std::string, std::shared_ptr<Buffer>> BufferData;
 
-    ViewDataWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    ViewDataWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~ViewDataWidget() = default;
 
     void setToolSwitcher(ViewToolSwitcher* tool_switcher);

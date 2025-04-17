@@ -45,7 +45,7 @@ class VariableDataTypeComboBox : public QComboBox
 
   public:
     /// @brief Constructor
-    VariableDataTypeComboBox(PropertyDataType& data_type, std::string& data_type_str, QWidget* parent = 0)
+    VariableDataTypeComboBox(PropertyDataType& data_type, std::string& data_type_str, QWidget* parent = nullptr)
         : QComboBox(parent), data_type_(data_type), data_type_str_(data_type_str)
     {
         for (auto& type_it : Property::dataTypes2Strings())

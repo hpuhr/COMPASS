@@ -32,7 +32,7 @@ public slots:
 public:
     VariableCreateDialog(DBContent& object, const std::string name="",
                             const std::string description="",
-                            QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+                            QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     std::string name() const;
 

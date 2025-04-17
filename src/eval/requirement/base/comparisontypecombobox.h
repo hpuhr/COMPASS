@@ -18,7 +18,7 @@ signals:
 
 public:
     /// @brief Constructor
-    ComparisonTypeComboBox(QWidget* parent = 0)
+    ComparisonTypeComboBox(QWidget* parent = nullptr)
         : QComboBox(parent)
     {
         addItem(comparisonTypeLongString(COMPARISON_TYPE::LESS_THAN).c_str());
