@@ -53,12 +53,11 @@ public:
 
         bool debug_association_ {false};
         bool debug_outlier_detection_ {false};
-        bool debug_accuracy_estimation_ {false};
-        bool debug_bias_correction_ {false};
-        bool debug_geo_altitude_correction_ {false};
 
-        nlohmann::json deep_debug_accuracy_estimation_; // ds type -> bool
-        nlohmann::json deep_debug_accuracy_estimation_write_wp_; // ds type -> bool
+        bool analyse_outlier_detection_ {false};
+        bool analyse_accuracy_estimation_ {false};
+        bool analyse_bias_correction_ {false};
+        bool analyse_geo_altitude_correction_ {false};
 
         bool debug_reference_calculation_ {false};
         bool debug_kalman_chains_ {false};
@@ -66,30 +65,6 @@ public:
 
         bool debugUTN(unsigned int utn) { return debug_utns_.count(utn); }
         bool debugRecNum(unsigned long rec_num) { return debug_rec_nums_.count(rec_num); }
-
-        bool deepDebugAccuracyEstimation(const std::string& ds_type)
-        {
-            if (!deep_debug_accuracy_estimation_.contains(ds_type))
-                return false;
-
-            return deep_debug_accuracy_estimation_[ds_type];
-        }
-        void deepDebugAccuracyEstimation(const std::string& ds_type, bool value)
-        {
-            deep_debug_accuracy_estimation_[ds_type] = value;
-        }
-
-        bool deepDebugAccuracyEstimationWriteVP(const std::string& ds_type)
-        {
-            if (!deep_debug_accuracy_estimation_write_wp_.contains(ds_type))
-                return false;
-
-            return deep_debug_accuracy_estimation_write_wp_[ds_type];
-        }
-        void deepDebugAccuracyEstimationWriteVP(const std::string& ds_type, bool value)
-        {
-            deep_debug_accuracy_estimation_write_wp_[ds_type] = value;
-        }
     };
 
 signals:

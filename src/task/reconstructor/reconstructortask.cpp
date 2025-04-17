@@ -82,18 +82,15 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
                       debug_settings_.debug_association_);
     registerParameter("debug_outlier_detection", &debug_settings_.debug_outlier_detection_,
                       debug_settings_.debug_outlier_detection_);
-    registerParameter("debug_accuracy_estimation", &debug_settings_.debug_accuracy_estimation_,
-                      debug_settings_.debug_accuracy_estimation_);
-    registerParameter("debug_bias_correction", &debug_settings_.debug_bias_correction_,
-                      debug_settings_.debug_bias_correction_);
-    registerParameter("debug_geo_altitude_correction", &debug_settings_.debug_geo_altitude_correction_,
-                      debug_settings_.debug_geo_altitude_correction_);
 
-    registerParameter("deep_debug_accuracy_estimation", &debug_settings_.deep_debug_accuracy_estimation_,
-                      debug_settings_.deep_debug_accuracy_estimation_);
-    registerParameter("deep_debug_accuracy_estimation_write_wp",
-                      &debug_settings_.deep_debug_accuracy_estimation_write_wp_,
-                      debug_settings_.deep_debug_accuracy_estimation_write_wp_);
+    registerParameter("analyse_outlier_detection", &debug_settings_.analyse_outlier_detection_,
+                      debug_settings_.analyse_outlier_detection_);
+    registerParameter("analyse_accuracy_estimation", &debug_settings_.analyse_accuracy_estimation_,
+                      debug_settings_.analyse_accuracy_estimation_);
+    registerParameter("analyse_bias_correction", &debug_settings_.analyse_bias_correction_,
+                      debug_settings_.analyse_bias_correction_);
+    registerParameter("analyse_geo_altitude_correction", &debug_settings_.analyse_geo_altitude_correction_,
+                      debug_settings_.analyse_geo_altitude_correction_);
 
     registerParameter("debug_reference_calculation", &debug_settings_.debug_reference_calculation_,
                       debug_settings_.debug_reference_calculation_);

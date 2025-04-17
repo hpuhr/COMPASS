@@ -71,47 +71,36 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(
     if (probimm_reconst_ && add_debug_stuff)
         combo_layout->addRow("Debug Outlier Detection", debug_outliers_check_);
 
+
+    analyse_outliers_check_ = new QCheckBox();
+    connect(analyse_outliers_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyse_outlier_detection_ = ok; });
+
+    if (probimm_reconst_)
+        combo_layout->addRow("Analyse Outlier Detection", analyse_outliers_check_);
+
     // acc est
 
-    debug_accuracy_est_check_ = new QCheckBox();
-    connect(debug_accuracy_est_check_, &QCheckBox::clicked,
-            this, [ = ] (bool ok) { task_.debugSettings().debug_accuracy_estimation_ = ok; });
+    analyse_accuracy_est_check_ = new QCheckBox();
+    connect(analyse_accuracy_est_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyse_accuracy_estimation_ = ok; });
 
     if (probimm_reconst_)
-        combo_layout->addRow("Analyse Accuracy Estimation", debug_accuracy_est_check_);
+        combo_layout->addRow("Analyse Accuracy Estimation", analyse_accuracy_est_check_);
 
-    debug_bias_correction_check_ = new QCheckBox();
-    connect(debug_bias_correction_check_, &QCheckBox::clicked,
-            this, [ = ] (bool ok) { task_.debugSettings().debug_bias_correction_ = ok; });
-
-    if (probimm_reconst_)
-        combo_layout->addRow("Analyse Bias Correction", debug_bias_correction_check_);
-
-    debug_geo_altitude_correction_check_ = new QCheckBox();
-    connect(debug_geo_altitude_correction_check_, &QCheckBox::clicked,
-            this, [ = ] (bool ok) { task_.debugSettings().debug_geo_altitude_correction_ = ok; });
+    analyse_bias_correction_check_ = new QCheckBox();
+    connect(analyse_bias_correction_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyse_bias_correction_ = ok; });
 
     if (probimm_reconst_)
-        combo_layout->addRow("Analyse Geo.Altitude Correction", debug_geo_altitude_correction_check_);
+        combo_layout->addRow("Analyse Bias Correction", analyse_bias_correction_check_);
 
-    // deep acc est
+    analyse_geo_altitude_correction_check_ = new QCheckBox();
+    connect(analyse_geo_altitude_correction_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyse_geo_altitude_correction_ = ok; });
 
-    for (auto& ds_type : COMPASS::instance().dataSourceManager().data_source_types_)
-    {
-        QCheckBox* check = new QCheckBox(("Deep Analyse "+ds_type+" Accuracy Estimation").c_str());
-        connect(check, &QCheckBox::clicked,
-                this, [ = ] (bool ok) { task_.debugSettings().deepDebugAccuracyEstimation(ds_type,ok); });
-
-        QCheckBox* write_vp_check = new QCheckBox("Write View Points");
-        connect(write_vp_check, &QCheckBox::clicked,
-                this, [ = ] (bool ok) { task_.debugSettings().deepDebugAccuracyEstimationWriteVP(ds_type,ok); });
-
-        deep_debug_accuracy_estimation_checks_[ds_type] = check;
-        deep_debug_accuracy_estimation_write_vp_checks_[ds_type] = write_vp_check;
-
-        if (probimm_reconst_)
-            combo_layout->addRow(check, write_vp_check);
-    }
+    if (probimm_reconst_)
+        combo_layout->addRow("Analyse Geo.Altitude Correction", analyse_geo_altitude_correction_check_);
 
     // reference stuff
 
@@ -195,30 +184,19 @@ void ReconstructorTaskAnalysisWidget::updateValues()
     assert (debug_outliers_check_);
     debug_outliers_check_->setChecked(task_.debugSettings().debug_outlier_detection_);
 
+    assert (analyse_outliers_check_);
+    analyse_outliers_check_->setChecked(task_.debugSettings().analyse_geo_altitude_correction_);
+
     // acc est
 
-    assert (debug_accuracy_est_check_);
-    debug_accuracy_est_check_->setChecked(task_.debugSettings().debug_accuracy_estimation_);
+    assert (analyse_accuracy_est_check_);
+    analyse_accuracy_est_check_->setChecked(task_.debugSettings().analyse_accuracy_estimation_);
 
-    assert (debug_bias_correction_check_);
-    debug_bias_correction_check_->setChecked(task_.debugSettings().debug_bias_correction_);
+    assert (analyse_bias_correction_check_);
+    analyse_bias_correction_check_->setChecked(task_.debugSettings().analyse_bias_correction_);
 
-    assert (debug_geo_altitude_correction_check_);
-    debug_geo_altitude_correction_check_->setChecked(task_.debugSettings().debug_geo_altitude_correction_);
-
-    // deep acc est
-
-    for (auto& ds_type : COMPASS::instance().dataSourceManager().data_source_types_)
-    {
-        assert (deep_debug_accuracy_estimation_checks_.count(ds_type));
-        assert (deep_debug_accuracy_estimation_write_vp_checks_.count(ds_type));
-
-        deep_debug_accuracy_estimation_checks_[ds_type]->setChecked(
-            task_.debugSettings().deepDebugAccuracyEstimation(ds_type));
-
-        deep_debug_accuracy_estimation_write_vp_checks_[ds_type]->setChecked(
-            task_.debugSettings().deepDebugAccuracyEstimationWriteVP(ds_type));
-    }
+    assert (analyse_geo_altitude_correction_check_);
+    analyse_geo_altitude_correction_check_->setChecked(task_.debugSettings().analyse_geo_altitude_correction_);
 
     // reference stuff
 
