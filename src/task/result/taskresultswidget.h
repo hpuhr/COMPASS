@@ -14,6 +14,7 @@ namespace ResultReport
 }
 
 class QComboBox;
+class QPushButton;
 
 class TaskResultsWidget : public ToolBoxWidget
 {
@@ -43,9 +44,14 @@ public:
     std::string currentReportName() const;
 
 protected:
+    void updateResults(const std::string& selected_result = "");
+    void removeCurrentResult();
+    bool removeResult(const std::string& name);
+
     TaskManager& task_man_;
 
     QComboBox* report_combo_ {nullptr};
+    QPushButton* remove_result_button_ {nullptr};
     std::string current_report_name_;
 
     ResultReport::ReportWidget* report_widget_;

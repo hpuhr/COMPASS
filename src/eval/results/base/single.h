@@ -182,8 +182,10 @@ public:
     /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
 
-    const static std::string tr_details_table_name_;
-    const static std::string target_table_name_;
+    static const std::string tr_details_table_name_;
+    static const std::string target_table_name_;
+
+    static const std::string TargetOverviewID;
 
     static const int AnnotationPointSizeOverview;
     static const int AnnotationPointSizeHighlight;
@@ -197,6 +199,9 @@ public:
     static const QColor AnnotationColorHighlight;
     static const QColor AnnotationColorError;
     static const QColor AnnotationColorOk;
+
+    static const bool WriteOnDemandTables;
+    static const bool WriteOnDemandFigures;
 
 protected:
     std::string getTargetSectionID();

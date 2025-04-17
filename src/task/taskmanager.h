@@ -101,7 +101,7 @@ class TaskManager : public QObject, public Configurable
     std::shared_ptr<TaskResult> getOrCreateResult (const std::string& name); // get or create result
     ResultReport::Report& report(const std::string& name);
     bool hasResult (const std::string& name) const;
-    bool removeResult(const std::string& name);
+    bool removeResult(const std::string& name, bool optimize_db, bool inform_changes = true);
 
     void setViewableDataConfig(const nlohmann::json::object_t& data);
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 

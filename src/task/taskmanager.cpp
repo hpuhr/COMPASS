@@ -415,7 +415,9 @@ bool TaskManager::hasResult (const std::string& name) const
     return findResult(name).has_value();
 }
 
-bool TaskManager::removeResult(const std::string& name)
+bool TaskManager::removeResult(const std::string& name, 
+                               bool optimize_db,
+                               bool inform_changes)
 {
     auto id = findResult(name);
     if (!id.has_value())
@@ -429,6 +431,12 @@ bool TaskManager::removeResult(const std::string& name)
         return false;
 
     results_.erase(id.value());
+
+    if (optimize_db)
+        COMPASS::instance().dbInterface().cleanupDB();
+
+    if (inform_changes)
+        emit taskResultsChangedSignal();
 
     return true;
 }

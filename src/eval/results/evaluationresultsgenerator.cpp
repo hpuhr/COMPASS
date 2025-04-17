@@ -28,6 +28,7 @@
 #include "eval/results/base/joined.h"
 
 #include "dbcontentmanager.h"
+#include "dbinterface.h"
 
 #include "taskmanager.h"
 #include "taskresult.h"
@@ -501,7 +502,11 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     // generate non-result details
     addNonResultsContent (report);
 
-    task_manager.endTaskResultWriting(false);
+    loginf << "EvaluationResultsGenerator: generateResultsReportGUI: storing results...";
+
+    task_manager.endTaskResultWriting(true);
+
+    loginf << "EvaluationResultsGenerator: generateResultsReportGUI: results stored";
 
     loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
@@ -513,6 +518,8 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI: done "
            << String::timeStringFromDouble(load_time, true);
+
+    COMPASS::instance().dbInterface().cleanupDB(true);
 }
 
 EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()

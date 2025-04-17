@@ -380,11 +380,13 @@ SectionContentTable::RowInfo SectionContentTable::rowInfo(unsigned int row) cons
 
 /**
  */
-void SectionContentTable::setCreateOnDemand(std::function<void(void)> create_on_demand_fnc)
+void SectionContentTable::setCreateOnDemand(std::function<void(void)> create_on_demand_fnc,
+                                            bool write_on_demand_content)
 {
     create_on_demand_          = true;
     create_on_demand_fnc_      = create_on_demand_fnc;
     already_created_by_demand_ = false;
+    write_on_demand_           = write_on_demand_content;   
 }
 
 /**
@@ -396,7 +398,7 @@ bool SectionContentTable::isOnDemand() const
 
 /**
  */
-void SectionContentTable::createOnDemand()
+void SectionContentTable::createOnDemand() const
 {
     assert(create_on_demand_fnc_);
 
@@ -419,11 +421,11 @@ bool SectionContentTable::hasBeenCreatedOnDemand() const
 
 /**
  */
-void SectionContentTable::createOnDemandIfNeeded()
+void SectionContentTable::createOnDemandIfNeeded() const
 {
     if (create_on_demand_ && !already_created_by_demand_)
     {
-        loginf << "SectionContentTable: createOnDemandIfNeeded: creating";
+        logdbg << "SectionContentTable: createOnDemandIfNeeded: creating";
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
 
@@ -435,6 +437,16 @@ void SectionContentTable::createOnDemandIfNeeded()
 
         QApplication::restoreOverrideCursor();
     }
+}
+
+/**
+ */
+void SectionContentTable::resetOnDemandContent() const
+{
+    rows_.clear();
+    annotations_.clear();
+
+    already_created_by_demand_ = false;
 }
 
 /**
@@ -640,28 +652,50 @@ nlohmann::json SectionContentTable::toJSON(bool rowwise,
  */
 void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
 {
-    root_node[ FieldHeadings   ] = headings_;
-    root_node[ FieldSortable   ] = sortable_;
-    root_node[ FieldSortColumn ] = sort_column_;
-    root_node[ FieldSortOrder  ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
-    root_node[ FieldRows       ] = rows_;
+    root_node[ FieldHeadings    ] = headings_;
+    root_node[ FieldSortable    ] = sortable_;
+    root_node[ FieldSortColumn  ] = sort_column_;
+    root_node[ FieldSortOrder   ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
+    root_node[ FieldRows        ] = std::vector<nlohmann::json>();
+    root_node[ FieldAnnotations ] = nlohmann::json::array();
 
-    nlohmann::json j_annos = nlohmann::json::array();
-
-    for (const auto& a : annotations_)
+    //write content if either not cod or we explicitely want to write cod content
+    if (!create_on_demand_ || write_on_demand_)
     {
-        nlohmann::json j_anno;
+        bool reset_content = false;
 
-        if (a.figure_id.has_value())
-            j_anno[ FieldAnnoFigureID ] = a.figure_id.value();
+        //load on demand content if not yet loaded
+        if (create_on_demand_ && write_on_demand_ && !already_created_by_demand_)
+        {
+            createOnDemandIfNeeded();
+            reset_content = true; // we want to forget the loaded content afterwards
+        }
 
-        j_anno[ FieldAnnoSectionLink   ] = a.section_link;
-        j_anno[ FieldAnnoSectionFigure ] = a.section_figure;
+        //write rows
+        root_node[ FieldRows ] = rows_;
 
-        j_annos.push_back(j_anno);
+        //write annotations
+        nlohmann::json j_annos = nlohmann::json::array();
+
+        for (const auto& a : annotations_)
+        {
+            nlohmann::json j_anno;
+
+            if (a.figure_id.has_value())
+                j_anno[ FieldAnnoFigureID ] = a.figure_id.value();
+
+            j_anno[ FieldAnnoSectionLink   ] = a.section_link;
+            j_anno[ FieldAnnoSectionFigure ] = a.section_figure;
+
+            j_annos.push_back(j_anno);
+        }
+
+        root_node[ FieldAnnotations ] = j_annos;
+
+        //reset previously cod-loaded content?
+        if (reset_content)
+            resetOnDemandContent();
     }
-
-    root_node[ FieldAnnotations ] = j_annos;
 }
 
 /**
@@ -687,9 +721,13 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     std::string sort_order = j[ FieldSortOrder ];
     sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;
 
-    num_columns_               = headings_.size();
+    num_columns_ = headings_.size();
+
+    //no create on demand on read
     create_on_demand_          = false;
     already_created_by_demand_ = false;
+    write_on_demand_           = false;
+    create_on_demand_fnc_      = {};
 
     rows_ = j[ FieldRows ].get<std::vector<nlohmann::json>>();
 
@@ -721,6 +759,8 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 
         annotations_.push_back(anno);
     }
+
+    assert(rows_.size() == annotations_.size());
 
     return true;
 }

@@ -44,6 +44,8 @@ namespace EvaluationRequirementResult
 const std::string Single::tr_details_table_name_ {"Target Reports Details"};
 const std::string Single::target_table_name_     {"Targets"};
 
+const std::string Single::TargetOverviewID     = "target_errors_overview";
+
 const int Single::AnnotationPointSizeOverview  = 8;
 const int Single::AnnotationPointSizeHighlight = 12;
 const int Single::AnnotationPointSizeError     = 16;
@@ -56,6 +58,9 @@ const int Single::AnnotationLineWidthOk        = 2;
 const QColor Single::AnnotationColorHighlight = Qt::yellow;
 const QColor Single::AnnotationColorError     = QColor("#FF6666");
 const QColor Single::AnnotationColorOk        = QColor("#66FF66");
+
+const bool Single::WriteOnDemandTables  = false;
+const bool Single::WriteOnDemandFigures = false;
 
 /**
 */
@@ -327,10 +332,12 @@ void Single::addTargetToOverviewTable(ResultReport::Section& section,
 
     auto values = targetTableValues();
 
-    assert((int)values.size() == target_table.numColumns());
+    assert(values.size() == target_table.numColumns());
 
-    //@TODO: add section and figure of single result
-    target_table.addRow(values);
+    std::string link = getTargetRequirementSectionID();
+    std::string fig  = WriteOnDemandFigures && hasIssues() ? TargetOverviewID : "";
+
+    target_table.addRow(values, ResultReport::SectionContentViewable(), link, fig);
 }
 
 /**
@@ -348,8 +355,6 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
 
     //add common infos
     auto common_infos = targetInfosCommon();
-
-    //@TODO: add viewable to rows
 
     for (const auto& info : common_infos)
         utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value });
@@ -375,16 +380,19 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
     }
 
     //generate overview figure?
-    if (hasIssues())
+    if (WriteOnDemandFigures)
     {
-        utn_req_section.addFigure("target_errors_overview", 
-                                  ResultReport::SectionContentViewable([this]() { return this->viewableOverviewData(); }).setCaption("Target Errors Overview"));
-    }
-    else
-    {
-        utn_req_section.addText("target_errors_overview_no_figure");
-        utn_req_section.getText("target_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
+        if (hasIssues())
+        {
+            utn_req_section.addFigure(TargetOverviewID, 
+                                    ResultReport::SectionContentViewable([this]() { return this->viewableOverviewData(); }).setCaption("Target Errors Overview"));
+        }
+        else
+        {
+            utn_req_section.addText("target_errors_overview_no_figure");
+            utn_req_section.getText("target_errors_overview_no_figure").addText(
+                        "No target errors found, therefore no figure was generated.");
+        }
     }
 
     //generate details table
@@ -395,6 +403,9 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
 */
 void Single::generateDetailsTable(ResultReport::Section& utn_req_section)
 {
+    if (!WriteOnDemandTables)
+        return;
+
     //init table if needed
     if (!utn_req_section.hasTable(tr_details_table_name_))
     {
@@ -422,7 +433,7 @@ void Single::generateDetailsTable(ResultReport::Section& utn_req_section)
             {
                 auto values = detailValues(detail, parent_detail);
 
-                assert((int)values.size() == utn_req_details_table.numColumns());
+                assert(values.size() == utn_req_details_table.numColumns());
 
                 //@TODO: add details (QPoint(didx0, didx1))
                 utn_req_details_table.addRow(values);
@@ -430,7 +441,7 @@ void Single::generateDetailsTable(ResultReport::Section& utn_req_section)
 
             //iterate over temporary details
             this->iterateDetails(func);
-        } );
+        }, WriteOnDemandTables);
 }
 
 /**
