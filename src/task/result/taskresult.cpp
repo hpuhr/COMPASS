@@ -35,55 +35,97 @@ const std::string TaskResult::FieldType     = "type";
 const std::string TaskResult::FieldCreated  = "created";
 const std::string TaskResult::FieldComments = "comments";
 const std::string TaskResult::FieldReport   = "report";
+const std::string TaskResult::FieldConfig   = "config";
 
+/**
+ */
 TaskResult::TaskResult(unsigned int id, TaskManager& task_man)
 :   id_    (id        )
 {
     report_ = std::make_shared<ResultReport::Report> (task_man);
 }
 
+/**
+ */
 unsigned int TaskResult::id() const
 {
     return id_;
 }
 
+/**
+ */
 void TaskResult::id(unsigned int id)
 {
     id_ = id;
 }
 
+/**
+ */
 std::string TaskResult::name() const
 {
     return name_;
 }
 
+/**
+ */
 void TaskResult::name(const std::string& name)
 {
     name_ = name;
 }
 
+/**
+ */
 const std::shared_ptr<ResultReport::Report>& TaskResult::report() const
 {
     assert (report_);
     return report_;
 }
 
+/**
+ */
 std::shared_ptr<ResultReport::Report>& TaskResult::report()
 {
     assert (report_);
     return report_;
 }
 
+/**
+ */
 TaskResult::TaskResultType TaskResult::type() const
 {
     return type_;
 }
 
+/**
+ */
 void TaskResult::type(TaskResultType type)
 {
     type_ = type;
 }
 
+/**
+ */
+void TaskResult::setConfiguration(const nlohmann::json& config)
+{
+    config_ = config;
+}
+
+/**
+ */
+bool TaskResult::hasConfiguration() const
+{
+    return config_.is_null();
+}
+
+/**
+ */
+const nlohmann::json& TaskResult::configuration() const
+{
+    return config_;
+}
+
+/**
+ */
 nlohmann::json TaskResult::toJSON() const
 {
     nlohmann::json root = nlohmann::json::object();
@@ -95,6 +137,7 @@ nlohmann::json TaskResult::toJSON() const
     root[ FieldComments ] = comments_;
 
     root[ FieldReport   ] = report_->toJSON();
+    root[ FieldConfig   ] = config_;
 
     //derived content
     toJSON_impl(root);
@@ -102,6 +145,8 @@ nlohmann::json TaskResult::toJSON() const
     return root;
 }
 
+/**
+ */
 bool TaskResult::fromJSON(const nlohmann::json& j)
 {
     //loginf << j.dump(4);
@@ -112,7 +157,8 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
         !j.contains(FieldType)     ||
         !j.contains(FieldCreated)  ||
         !j.contains(FieldComments) ||
-        !j.contains(FieldReport))
+        !j.contains(FieldReport)   ||
+        !j.contains(FieldConfig))
         return false;
 
     id_       = j[ FieldID ];
@@ -125,6 +171,8 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
 
     if (!report_->fromJSON(j[ FieldReport ]))
         return false;
+
+    config_ = j[ FieldConfig ];
 
     //derived content
     if (!fromJSON_impl(j))

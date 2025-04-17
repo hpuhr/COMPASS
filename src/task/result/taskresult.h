@@ -54,6 +54,10 @@ public:
     const std::shared_ptr<ResultReport::Report>& report() const;
     std::shared_ptr<ResultReport::Report>& report();
 
+    void setConfiguration(const nlohmann::json& config);
+    bool hasConfiguration() const;
+    const nlohmann::json& configuration() const;
+
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
 
@@ -70,6 +74,7 @@ public:
     static const std::string FieldCreated;
     static const std::string FieldComments;
     static const std::string FieldReport;
+    static const std::string FieldConfig;
 
 protected:
     void id(unsigned int id);
@@ -85,4 +90,5 @@ protected:
     std::string              comments_;
 
     std::shared_ptr<ResultReport::Report> report_;
+    nlohmann::json                        config_;
 };

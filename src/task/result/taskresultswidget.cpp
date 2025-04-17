@@ -155,11 +155,10 @@ void TaskResultsWidget::updateResults(const std::string& selected_result)
     loginf << "TaskResultsWidget: updateResultsSlot: count " << report_combo_->count();
 
     if (!report_combo_->count())
-    {
         current_report_name_ = "";
-        report_combo_->setDisabled(true);
-        remove_result_button_->setDisabled(true);
-    }
+
+    report_combo_->setEnabled(report_combo_->count() > 0);
+    remove_result_button_->setEnabled(report_combo_->count() > 0);
 
     report_combo_->blockSignals(false);
 
@@ -171,7 +170,7 @@ void TaskResultsWidget::updateResults(const std::string& selected_result)
  */
 bool TaskResultsWidget::removeResult(const std::string& name)
 {
-    return task_man_.removeResult(name, true, false);
+    return task_man_.removeResult(name, false);
 }
 
 /**

@@ -354,6 +354,7 @@ protected:
 
     void updateCompoundCoverage(std::set<unsigned int> tst_sources);
 
+    void updateDerivedParameters();
     virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
 
     COMPASS& compass_;

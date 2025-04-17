@@ -1804,7 +1804,7 @@ void DBInterface::createReportContentsTable()
 
 /**
  */
-Result DBInterface::saveResult(const TaskResult& result)
+Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_needed)
 {
     assert(ready());
 
@@ -1818,7 +1818,8 @@ Result DBInterface::saveResult(const TaskResult& result)
             createReportContentsTable();
         
         //remove any old result with the same id/name
-        auto del_result = deleteResult(result);
+        bool result_deleted = false;
+        auto del_result = deleteResult(result, false, &result_deleted);
         if (!del_result.ok())
             throw std::runtime_error(del_result.error());
 
@@ -1865,6 +1866,10 @@ Result DBInterface::saveResult(const TaskResult& result)
 
             insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
         }
+
+        //cleanup db?
+        if (result_deleted && cleanup_db_if_needed)
+            cleanupDB(false);
     }
     catch(const std::exception& ex)
     {
@@ -1882,8 +1887,13 @@ Result DBInterface::saveResult(const TaskResult& result)
 
 /**
  */
-Result DBInterface::deleteResult(const TaskResult& result)
+Result DBInterface::deleteResult(const TaskResult& result, 
+                                 bool cleanup_db_if_needed,
+                                 bool* deleted)
 {
+    if (deleted)
+        *deleted = false;
+
     auto id = result.id();
 
     if (!existsTaskResultsTable() || 
@@ -1892,6 +1902,8 @@ Result DBInterface::deleteResult(const TaskResult& result)
         logerr << "DBInterface: deleteResult: Result tables do not exist";
         return Result::failed("Result tables do not exist");
     }
+
+    bool results_deleted = false;
 
     try
     {
@@ -1931,6 +1943,8 @@ Result DBInterface::deleteResult(const TaskResult& result)
                 throw std::runtime_error(result_del_content->error());
             if (result_del_result->hasError())
                 throw std::runtime_error(result_del_result->error());
+
+            results_deleted = true;
         }
     }
     catch(const std::exception& ex)
@@ -1943,6 +1957,13 @@ Result DBInterface::deleteResult(const TaskResult& result)
         logerr << "DBInterface: deleteResult: Could not delete result: Unknown error";
         return Result::failed("Unknown error");
     }
+
+    if (deleted)
+        *deleted = results_deleted;
+
+    //cleanup db?
+    if (results_deleted && cleanup_db_if_needed)
+        cleanupDB(false);
 
     return Result::succeeded();
 }

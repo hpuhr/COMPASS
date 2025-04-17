@@ -48,6 +48,8 @@
 
 using namespace Utils;
 
+const bool TaskManager::CleanupDBIfNeeded = true;
+
 TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "task.json")
 {
@@ -309,24 +311,30 @@ void TaskManager::beginTaskResultWriting(const std::string& name)
     current_result_->report()->clear();
 }
 
+std::shared_ptr<TaskResult>& TaskManager::currentResult()
+{
+    assert (current_result_);
+    return current_result_;
+}
+
 std::shared_ptr<ResultReport::Report>& TaskManager::currentReport()
 {
     assert (current_result_);
     return current_result_->report();
 }
 
-void TaskManager::endTaskResultWriting(bool store)
+void TaskManager::endTaskResultWriting(bool store_result)
 {
     if (widget_)
         widget_->setDisabled(false);
 
     assert (current_result_);
 
-    if (store)
+    if (store_result)
     {
         loginf << "TaskManager: endTaskResultWriting: Storing result...";
 
-        auto result = COMPASS::instance().dbInterface().saveResult(*current_result_);
+        auto result = COMPASS::instance().dbInterface().saveResult(*current_result_, CleanupDBIfNeeded);
 
         //@TODO
         assert(result.ok());
@@ -415,8 +423,7 @@ bool TaskManager::hasResult (const std::string& name) const
     return findResult(name).has_value();
 }
 
-bool TaskManager::removeResult(const std::string& name, 
-                               bool optimize_db,
+bool TaskManager::removeResult(const std::string& name,
                                bool inform_changes)
 {
     auto id = findResult(name);
@@ -426,14 +433,11 @@ bool TaskManager::removeResult(const std::string& name,
     const auto& result = results_.at(id.value());
     assert(result);
 
-    auto res = COMPASS::instance().dbInterface().deleteResult(*result);
+    auto res = COMPASS::instance().dbInterface().deleteResult(*result, CleanupDBIfNeeded);
     if (!res.ok())
         return false;
 
     results_.erase(id.value());
-
-    if (optimize_db)
-        COMPASS::instance().dbInterface().cleanupDB();
 
     if (inform_changes)
         emit taskResultsChangedSignal();

@@ -137,14 +137,9 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("line_id_ref", &settings_.line_id_ref_, Settings().line_id_ref_);
     registerParameter("active_sources_ref", &settings_.active_sources_ref_, Settings().active_sources_ref_);
 
-    data_sources_ref_ = settings_.active_sources_ref_.get<std::map<std::string, std::map<std::string, bool>>>();
-
-     //j.at("foo").get<std::map<std::string, int>>();
-
     registerParameter("dbcontent_name_tst", &settings_.dbcontent_name_tst_, Settings().dbcontent_name_tst_);
     registerParameter("line_id_tst", &settings_.line_id_tst_, Settings().line_id_tst_);
     registerParameter("active_sources_tst", &settings_.active_sources_tst_, Settings().active_sources_tst_);
-    data_sources_tst_ = settings_.active_sources_tst_.get<std::map<std::string, std::map<std::string, bool>>>();
 
     registerParameter("current_standard", &settings_.current_standard_, Settings().current_standard_);
 
@@ -159,12 +154,6 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("use_timestamp_filter", &settings_.use_timestamp_filter_, Settings().use_timestamp_filter_);
     registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, Settings().load_timestamp_begin_str_);
     registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, Settings().load_timestamp_end_str_);
-
-    if (settings_.load_timestamp_begin_str_.size())
-        load_timestamp_begin_ = Time::fromString(settings_.load_timestamp_begin_str_);
-
-    if (settings_.load_timestamp_end_str_.size())
-        load_timestamp_end_ = Time::fromString(settings_.load_timestamp_end_str_);
 
     registerParameter("use_ref_traj_accuracy_filter_", &settings_.use_ref_traj_accuracy_filter_, Settings().use_ref_traj_accuracy_filter_);
     registerParameter("ref_traj_minimum_accuracy", &settings_.ref_traj_minimum_accuracy_, Settings().ref_traj_minimum_accuracy_);
@@ -221,11 +210,6 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     registerParameter("report_author", &settings_.report_author_, Settings().report_author_);
 
-    if (!settings_.report_author_.size())
-        settings_.report_author_ = System::getUserName();
-    if (!settings_.report_author_.size())
-        settings_.report_author_ = "User";
-
     registerParameter("report_abstract", &settings_.report_abstract_, Settings().report_abstract_);
 
     registerParameter("report_include_target_details", &settings_.report_include_target_details_, Settings().report_include_target_details_);
@@ -243,14 +227,6 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
 
     registerParameter("report_open_created_pdf", &settings_.report_open_created_pdf_, Settings().report_open_created_pdf_);
 
-    bool pdflatex_found = System::exec("which pdflatex").size();
-
-    if (!pdflatex_found)
-    {
-        settings_.report_run_pdflatex_ = false;
-        settings_.report_open_created_pdf_ = false;
-    }
-
     //grid generation
     registerParameter("grid_num_cells_x", &settings_.grid_num_cells_x, Settings().grid_num_cells_x);
     registerParameter("grid_num_cells_y", &settings_.grid_num_cells_y, Settings().grid_num_cells_y);
@@ -258,9 +234,37 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     //histogram generation
     registerParameter("histogram_num_bins", &settings_.histogram_num_bins, Settings().histogram_num_bins);
     
+    updateDerivedParameters();
     createSubConfigurables();
 
     init_evaluation_commands();
+}
+
+void EvaluationManager::updateDerivedParameters()
+{
+    data_sources_ref_ = settings_.active_sources_ref_.get<std::map<std::string, std::map<std::string, bool>>>();
+    data_sources_tst_ = settings_.active_sources_tst_.get<std::map<std::string, std::map<std::string, bool>>>();
+
+    load_timestamp_begin_ = {};
+    if (settings_.load_timestamp_begin_str_.size())
+        load_timestamp_begin_ = Time::fromString(settings_.load_timestamp_begin_str_);
+
+    load_timestamp_end_ = {};
+    if (settings_.load_timestamp_end_str_.size())
+        load_timestamp_end_ = Time::fromString(settings_.load_timestamp_end_str_);
+
+    if (!settings_.report_author_.size())
+        settings_.report_author_ = System::getUserName();
+    if (!settings_.report_author_.size())
+        settings_.report_author_ = "User";
+
+    bool pdflatex_found = System::exec("which pdflatex").size();
+
+    if (!pdflatex_found)
+    {
+        settings_.report_run_pdflatex_     = false;
+        settings_.report_open_created_pdf_ = false;
+    }
 }
 
 void EvaluationManager::init()
@@ -2268,7 +2272,12 @@ void EvaluationManager::updateCompoundCoverage(std::set<unsigned int> tst_source
 */
 void EvaluationManager::onConfigurationChanged(const std::vector<std::string>& changed_params)
 {
-    //assert(widget_);
+    //update some derived params after config param change
+    updateDerivedParameters();
 
-    //widget_->updateFromSettings();
+    //clear data & results
+    clearLoadedDataAndResults();
+
+    for (const auto& p : changed_params)
+        loginf << "param: " << p;
 }

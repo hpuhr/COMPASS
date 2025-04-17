@@ -432,7 +432,16 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     auto& task_manager = COMPASS::instance().taskManager();
     task_manager.beginTaskResultWriting(EvalResultName);
 
+    auto& result = task_manager.currentResult();
     auto& report = task_manager.currentReport();
+
+    //set result type
+    result->type(TaskResult::TaskResultType::Evaluation);
+
+    //store eval config
+    nlohmann::json config;
+    eval_man_.generateJSON(config, Configurable::JSONExportType::General);
+    result->setConfiguration(config);
 
     auto& gen_sec = report->getSection("Overview:General");
 
@@ -500,7 +509,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     }
 
     // generate non-result details
-    addNonResultsContent (report);
+    addNonResultsContent(report);
 
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI: storing results...";
 
@@ -518,8 +527,6 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI: done "
            << String::timeStringFromDouble(load_time, true);
-
-    COMPASS::instance().dbInterface().cleanupDB(true);
 }
 
 EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
