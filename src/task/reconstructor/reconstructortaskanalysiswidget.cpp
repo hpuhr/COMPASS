@@ -72,42 +72,42 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(
         combo_layout->addRow("Debug Outlier Detection", debug_outliers_check_);
 
 
-    analyse_check_= new QCheckBox();
-    connect(analyse_check_, &QCheckBox::clicked,
-            this, [ = ] (bool ok) { task_.debugSettings().analyse_ = ok; });
+    analyze_check_= new QCheckBox();
+    connect(analyze_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyze_ = ok; });
 
     if (probimm_reconst_)
-        combo_layout->addRow("Analyse", analyse_check_);
+        combo_layout->addRow("Analyse", analyze_check_);
 
-    analyse_outliers_check_ = new QCheckBox();
-    connect(analyse_outliers_check_, &QCheckBox::clicked,
-            this, [ = ] (bool ok) { task_.debugSettings().analyse_outlier_detection_ = ok; });
+    analyze_outliers_check_ = new QCheckBox();
+    connect(analyze_outliers_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyze_outlier_detection_ = ok; });
 
     if (probimm_reconst_)
-        combo_layout->addRow("Analyse Outlier Detection", analyse_outliers_check_);
+        combo_layout->addRow("Analyse Outlier Detection", analyze_outliers_check_);
 
     // acc est
 
-    analyse_accuracy_est_check_ = new QCheckBox();
-    connect(analyse_accuracy_est_check_, &QCheckBox::clicked,
-            this, [ = ] (bool ok) { task_.debugSettings().analyse_accuracy_estimation_ = ok; });
+    analyze_accuracy_est_check_ = new QCheckBox();
+    connect(analyze_accuracy_est_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyze_accuracy_estimation_ = ok; });
 
     if (probimm_reconst_)
-        combo_layout->addRow("Analyse Accuracy Estimation", analyse_accuracy_est_check_);
+        combo_layout->addRow("Analyse Accuracy Estimation", analyze_accuracy_est_check_);
 
-    analyse_bias_correction_check_ = new QCheckBox();
-    connect(analyse_bias_correction_check_, &QCheckBox::clicked,
-            this, [ = ] (bool ok) { task_.debugSettings().analyse_bias_correction_ = ok; });
-
-    if (probimm_reconst_)
-        combo_layout->addRow("Analyse Bias Correction", analyse_bias_correction_check_);
-
-    analyse_geo_altitude_correction_check_ = new QCheckBox();
-    connect(analyse_geo_altitude_correction_check_, &QCheckBox::clicked,
-            this, [ = ] (bool ok) { task_.debugSettings().analyse_geo_altitude_correction_ = ok; });
+    analyze_bias_correction_check_ = new QCheckBox();
+    connect(analyze_bias_correction_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyze_bias_correction_ = ok; });
 
     if (probimm_reconst_)
-        combo_layout->addRow("Analyse Geo.Altitude Correction", analyse_geo_altitude_correction_check_);
+        combo_layout->addRow("Analyse Bias Correction", analyze_bias_correction_check_);
+
+    analyze_geo_altitude_correction_check_ = new QCheckBox();
+    connect(analyze_geo_altitude_correction_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyze_geo_altitude_correction_ = ok; });
+
+    if (probimm_reconst_)
+        combo_layout->addRow("Analyse Geo.Altitude Correction", analyze_geo_altitude_correction_check_);
 
     // reference stuff
 
@@ -191,22 +191,22 @@ void ReconstructorTaskAnalysisWidget::updateValues()
     assert (debug_outliers_check_);
     debug_outliers_check_->setChecked(task_.debugSettings().debug_outlier_detection_);
 
-    assert (analyse_check_);
-    analyse_check_->setChecked(task_.debugSettings().analyse_);
+    assert (analyze_check_);
+    analyze_check_->setChecked(task_.debugSettings().analyze_);
 
-    assert (analyse_outliers_check_);
-    analyse_outliers_check_->setChecked(task_.debugSettings().analyse_geo_altitude_correction_);
+    assert (analyze_outliers_check_);
+    analyze_outliers_check_->setChecked(task_.debugSettings().analyze_geo_altitude_correction_);
 
     // acc est
 
-    assert (analyse_accuracy_est_check_);
-    analyse_accuracy_est_check_->setChecked(task_.debugSettings().analyse_accuracy_estimation_);
+    assert (analyze_accuracy_est_check_);
+    analyze_accuracy_est_check_->setChecked(task_.debugSettings().analyze_accuracy_estimation_);
 
-    assert (analyse_bias_correction_check_);
-    analyse_bias_correction_check_->setChecked(task_.debugSettings().analyse_bias_correction_);
+    assert (analyze_bias_correction_check_);
+    analyze_bias_correction_check_->setChecked(task_.debugSettings().analyze_bias_correction_);
 
-    assert (analyse_geo_altitude_correction_check_);
-    analyse_geo_altitude_correction_check_->setChecked(task_.debugSettings().analyse_geo_altitude_correction_);
+    assert (analyze_geo_altitude_correction_check_);
+    analyze_geo_altitude_correction_check_->setChecked(task_.debugSettings().analyze_geo_altitude_correction_);
 
     // reference stuff
 

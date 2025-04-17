@@ -54,12 +54,12 @@ public:
         bool debug_association_ {false};
         bool debug_outlier_detection_ {false};
 
-        bool analyse_ {false};
+        bool analyze_ {false};
 
-        bool analyse_outlier_detection_ {false};
-        bool analyse_accuracy_estimation_ {false};
-        bool analyse_bias_correction_ {false};
-        bool analyse_geo_altitude_correction_ {false};
+        bool analyze_outlier_detection_ {false};
+        bool analyze_accuracy_estimation_ {false};
+        bool analyze_bias_correction_ {false};
+        bool analyze_geo_altitude_correction_ {false};
 
         bool debug_reference_calculation_ {false};
         bool debug_kalman_chains_ {false};

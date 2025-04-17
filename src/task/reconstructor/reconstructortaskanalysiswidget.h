@@ -40,11 +40,11 @@ class ReconstructorTaskAnalysisWidget : public QWidget
     QCheckBox* debug_outliers_check_{nullptr};
 
 
-    QCheckBox* analyse_check_{nullptr};
-    QCheckBox* analyse_outliers_check_{nullptr};
-    QCheckBox* analyse_accuracy_est_check_{nullptr};
-    QCheckBox* analyse_bias_correction_check_{nullptr};
-    QCheckBox* analyse_geo_altitude_correction_check_{nullptr};
+    QCheckBox* analyze_check_{nullptr};
+    QCheckBox* analyze_outliers_check_{nullptr};
+    QCheckBox* analyze_accuracy_est_check_{nullptr};
+    QCheckBox* analyze_bias_correction_check_{nullptr};
+    QCheckBox* analyze_geo_altitude_correction_check_{nullptr};
 
     QCheckBox* debug_reference_calculation_check_{nullptr};
     QCheckBox* debug_kalman_chains_check_{nullptr};

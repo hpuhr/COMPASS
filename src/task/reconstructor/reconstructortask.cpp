@@ -83,16 +83,16 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
     registerParameter("debug_outlier_detection", &debug_settings_.debug_outlier_detection_,
                       debug_settings_.debug_outlier_detection_);
 
-    registerParameter("analyse", &debug_settings_.analyse_, debug_settings_.analyse_);
+    registerParameter("analyze", &debug_settings_.analyze_, debug_settings_.analyze_);
 
-    registerParameter("analyse_outlier_detection", &debug_settings_.analyse_outlier_detection_,
-                      debug_settings_.analyse_outlier_detection_);
-    registerParameter("analyse_accuracy_estimation", &debug_settings_.analyse_accuracy_estimation_,
-                      debug_settings_.analyse_accuracy_estimation_);
-    registerParameter("analyse_bias_correction", &debug_settings_.analyse_bias_correction_,
-                      debug_settings_.analyse_bias_correction_);
-    registerParameter("analyse_geo_altitude_correction", &debug_settings_.analyse_geo_altitude_correction_,
-                      debug_settings_.analyse_geo_altitude_correction_);
+    registerParameter("analyze_outlier_detection", &debug_settings_.analyze_outlier_detection_,
+                      debug_settings_.analyze_outlier_detection_);
+    registerParameter("analyze_accuracy_estimation", &debug_settings_.analyze_accuracy_estimation_,
+                      debug_settings_.analyze_accuracy_estimation_);
+    registerParameter("analyze_bias_correction", &debug_settings_.analyze_bias_correction_,
+                      debug_settings_.analyze_bias_correction_);
+    registerParameter("analyze_geo_altitude_correction", &debug_settings_.analyze_geo_altitude_correction_,
+                      debug_settings_.analyze_geo_altitude_correction_);
 
     registerParameter("debug_reference_calculation", &debug_settings_.debug_reference_calculation_,
                       debug_settings_.debug_reference_calculation_);
