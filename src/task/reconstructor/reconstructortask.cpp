@@ -85,6 +85,8 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
 
     registerParameter("analyze", &debug_settings_.analyze_, debug_settings_.analyze_);
 
+    registerParameter("analyze_association", &debug_settings_.analyze_association_,
+                      debug_settings_.analyze_association_);
     registerParameter("analyze_outlier_detection", &debug_settings_.analyze_outlier_detection_,
                       debug_settings_.analyze_outlier_detection_);
     registerParameter("analyze_accuracy_estimation", &debug_settings_.analyze_accuracy_estimation_,

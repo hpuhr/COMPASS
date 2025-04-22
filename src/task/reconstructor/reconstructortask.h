@@ -56,6 +56,7 @@ public:
 
         bool analyze_ {false};
 
+        bool analyze_association_ {false};
         bool analyze_outlier_detection_ {false};
         bool analyze_accuracy_estimation_ {false};
         bool analyze_bias_correction_ {false};

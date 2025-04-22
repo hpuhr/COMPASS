@@ -337,6 +337,10 @@ protected:
         std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
 
+    void doUnassociatedAnalysis();
+    void doOutlierAnalysis();
+    void doReconstructionReporting();
+
 private:
     void init();
     void initIfNeeded();

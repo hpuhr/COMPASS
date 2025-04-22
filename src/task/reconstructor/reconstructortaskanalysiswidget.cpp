@@ -31,7 +31,7 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(
     debug_check_ = new QCheckBox ();
     connect(debug_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_ = ok; });
-    combo_layout->addRow("Analyse Reconstruction", debug_check_);
+    combo_layout->addRow("Debug Reconstruction", debug_check_);
 
     utns_edit_ = new QLineEdit();
     connect(utns_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalysisWidget::utnsChangedSlot);
@@ -77,7 +77,14 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(
             this, [ = ] (bool ok) { task_.debugSettings().analyze_ = ok; });
 
     if (probimm_reconst_)
-        combo_layout->addRow("Analyse", analyze_check_);
+        combo_layout->addRow("Analyse Reconstruction", analyze_check_);
+
+    analyze_association_check_= new QCheckBox();
+    connect(analyze_association_check_, &QCheckBox::clicked,
+            this, [ = ] (bool ok) { task_.debugSettings().analyze_association_ = ok; });
+
+    if (probimm_reconst_)
+        combo_layout->addRow("Analyse Association", analyze_association_check_);
 
     analyze_outliers_check_ = new QCheckBox();
     connect(analyze_outliers_check_, &QCheckBox::clicked,
@@ -194,8 +201,11 @@ void ReconstructorTaskAnalysisWidget::updateValues()
     assert (analyze_check_);
     analyze_check_->setChecked(task_.debugSettings().analyze_);
 
+    assert (analyze_association_check_);
+    analyze_association_check_->setChecked(task_.debugSettings().analyze_association_);
+
     assert (analyze_outliers_check_);
-    analyze_outliers_check_->setChecked(task_.debugSettings().analyze_geo_altitude_correction_);
+    analyze_outliers_check_->setChecked(task_.debugSettings().analyze_outlier_detection_);
 
     // acc est
 
