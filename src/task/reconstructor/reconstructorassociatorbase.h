@@ -65,10 +65,14 @@ class ReconstructorAssociatorBase
     virtual bool isTargetAccuracyAcceptable(
         double tgt_est_std_dev, unsigned int utn, const dbContent::targetReport::ReconstructorInfo& tr, bool do_debug) = 0;
 
-  protected:
+    const std::vector<unsigned long>& unassociatedRecNums() const;
+
+protected:
 
     boost::posix_time::time_duration max_time_diff_;
 
+    std::map<unsigned int, std::map<unsigned int, std::pair<unsigned int, unsigned int>>> assoc_counts_;
+    // ds_id -> dbcont id -> (assoc, unassoc cnt)
     std::vector<unsigned long> unassoc_rec_nums_;
 
     unsigned int num_merges_ {0};
@@ -131,8 +135,5 @@ class ReconstructorAssociatorBase
     //virtual bool isTargetAverageDistanceAcceptable(double distance_score_avg, bool secondary_verified) = 0;
 
     virtual ReconstructorBase& reconstructor() = 0;
-
-    std::map<unsigned int, std::map<unsigned int, std::pair<unsigned int, unsigned int>>> assoc_counts_;
-    // ds_id -> dbcont id -> (assoc, unassoc cnt)
 };
 

@@ -13,7 +13,7 @@ class SimpleAssociator : public ReconstructorAssociatorBase
 
     virtual void associateNewData() override;
 
-  private:
+private:
     SimpleReconstructor& reconstructor_;
 
             // distance, target acc, tr acc

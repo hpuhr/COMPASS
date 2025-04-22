@@ -24,6 +24,7 @@
 #include "timeconv.h"
 #include "datasourcemanager.h"
 #include "evaluationmanager.h"
+#include "reconstructorassociatorbase.h"
 
 #include "taskmanager.h"
 #include "report/report.h"
@@ -37,6 +38,7 @@
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
 #include "number.h"
+#include "viewpoint.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -955,6 +957,8 @@ void ReconstructorBase::createTargetReports()
 
     accessors_.clear();
 
+    num_new_target_reports_in_slice_ = 0;
+
     //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     std::set<unsigned int> unused_ds_ids = task_.unusedDSIDs();
@@ -1063,6 +1067,8 @@ void ReconstructorBase::createTargetReports()
                 // dbcontent id -> ds_id -> ts ->  record_num
 
                 tr_ds_[dbcont_id][info.ds_id_][info.line_id_].push_back(record_num);
+
+                ++num_new_target_reports_in_slice_;
             }
         }
     }
@@ -1080,7 +1086,8 @@ void ReconstructorBase::createTargetReports()
     }
 #endif
 
-    loginf << "ReconstructorBase: createTargetReports: done";
+    loginf << "ReconstructorBase: createTargetReports: done with " << num_new_target_reports_in_slice_
+           << " new target reports";
 }
 
 void ReconstructorBase::removeTargetReportsLaterOrEqualThan(const boost::posix_time::ptime& ts)
@@ -1375,6 +1382,116 @@ void ReconstructorBase::doUnassociatedAnalysis()
     {
 
     }
+
+    //data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(time_end);
+
+    // if (acc_grid_)
+    // {
+    //     string name = name_+to_string(slice_cnt)+" Run"+to_string(reconstructor().currentSliceRepeatRun());
+
+    //     assert (reconstructor().settings().rescale_accuracies_);
+
+    //     acc_grid_->updateGrid(grid_update_func_);
+
+    //     double lat_min, lat_max, lon_min, lon_max;
+
+    //     tie(lat_min, lat_max, lon_min, lon_max) = acc_grid_->getMinMaxIndexes();
+
+    //     QRectF roi(lon_min, lat_min, lon_max - lon_min, lat_max - lat_min);
+
+    //     if (!roi.isEmpty())
+    //     {
+    //         auto vp = reconstructor().task().getDebugViewpointNoData(
+    //             name+" Position Std.Dev. Grid", "Grid");
+
+    //         auto anno = vp->annotations().getOrCreateAnnotation("Accuracy Grid");
+
+    //         double resolution = acc_grid_->resolution();
+
+    //         unsigned int cell_count_x = max(1.0, (lon_max - lon_min) / resolution);
+    //         unsigned int cell_count_y = max(1.0, (lat_max - lat_min) / resolution);
+
+    //         if (reconstructor().task().debugSettings().analyze_)
+    //             loginf << "RadarAccuracyEstimator SRC " << name_ << ": cell_count_x " << cell_count_x
+    //                    << " cell_count_y " << cell_count_y;
+
+    //         Grid2D grid;
+    //         grid.create(roi, grid2d::GridResolution().setCellCount(cell_count_x, cell_count_y));
+
+    //         float lat_ind, lon_ind;
+
+    //         for (auto cell_it : acc_grid_->cells())
+    //         {
+    //             std::tie(lat_ind, lon_ind) = cell_it.first;
+    //             grid.addValue(lon_ind, lat_ind, cell_it.second.avg_distance_m_);
+    //         }
+
+    //         double val_min, val_max;
+
+    //         std::tie(val_min, val_max) = acc_grid_->minMaxValue(
+    //             [](const AverageAccuracyCellInfo& cell_info) { return cell_info.avg_distance_m_; });
+
+    //         vp->appendToDescription("min value: "+String::doubleToStringPrecision(val_min, 2)+"\n");
+    //         vp->appendToDescription("max value: "+String::doubleToStringPrecision(val_max, 2));
+
+    //         Grid2DLayers layers;
+    //         grid.addToLayers(layers, "factor", grid2d::ValueType::ValueTypeMax);
+
+    //         Grid2DRenderSettings rsettings;
+    //         // rsettings.min_value       = 0.0;
+    //         // rsettings.max_value       = 10.0;
+
+    //         rsettings.color_map.create(ColorMap::ColorScale::Green2Red, 10);
+
+    //         auto result = Grid2DLayerRenderer::render(layers.layer(0), rsettings);
+    //         // loginf << "UGA" << "Slice "+to_string(reconstructor().currentSlice().slice_count_)+" "
+    //         //                        +name_+" Position Std.Dev. Scale Grid.png";
+    //         // result.first.save(("Slice "+to_string(reconstructor().currentSlice().slice_count_)+" "
+    //         //                        +name_+" Position Std.Dev. Scale Grid.png").c_str());
+
+    //         auto f = new ViewPointGenFeatureGeoImage(result.first, result.second);
+    //         anno->addFeature(f);
+
+    //         return vp;
+    //     }
+    // }
+
+    if (!section.hasTable("Unassociated Target Reports"))
+        section.addTable("Unassociated Target Reports", 8,
+                         {"Slice", "Run", "#Unassoc.", "#All", "Unassoc. [%]",
+                                               "#Unassoc.Total", "#Total", "Unassoc.Total [%]"}, true);
+
+    unsigned int num_unassociated_target_reports = associator().unassociatedRecNums().size();
+
+    num_new_target_reports_total_ += num_new_target_reports_in_slice_;
+    num_unassociated_target_reports_total_ += num_unassociated_target_reports;
+
+    auto& table = section.getTable("Unassociated Target Reports");
+
+    nlohmann::json::array_t row{slice_cnt, run_cnt};
+
+    if (num_new_target_reports_in_slice_)
+    {
+        row.insert(row.end(), {num_unassociated_target_reports, num_new_target_reports_in_slice_,
+                               String::percentToString(
+                                   100.0*num_unassociated_target_reports/ (float)num_new_target_reports_in_slice_)});
+    }
+    else
+        row.insert(row.end(), {{}, {}, {}});
+
+
+    if (num_new_target_reports_total_)
+    {
+        row.insert(row.end(), {num_unassociated_target_reports_total_, num_new_target_reports_total_,
+                               String::percentToString(
+                                   100.0*num_unassociated_target_reports_total_/ (float)num_new_target_reports_total_)});
+    }
+    else
+        row.insert(row.end(), {{}, {}, {}});
+
+    table.addRow(row);
+
+    //loginf << "UGA json '" << vp_json.dump() << "'";
 }
 
 void ReconstructorBase::doOutlierAnalysis()

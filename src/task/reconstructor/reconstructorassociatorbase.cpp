@@ -36,7 +36,7 @@ void ReconstructorAssociatorBase::associateNewData()
 
     max_time_diff_ = Time::partialSeconds(reconstructor().settings().max_time_diff_);
 
-    assert (!unassoc_rec_nums_.size());
+    unassoc_rec_nums_.clear();
 
     if (reconstructor().isCancelled())
         return;
@@ -117,7 +117,7 @@ void ReconstructorAssociatorBase::associateNewData()
     for (auto& tgt_it : reconstructor().targets_container_.targets_)
         tgt_it.second.created_in_current_slice_ = false;
 
-    unassoc_rec_nums_.clear();
+    // unassoc_rec_nums_.clear(); moved to beginning for statistics
 
     loginf << "ReconstructorAssociatorBase: associateNewData: time_assoc_trs " << Time::toString(time_assoc_trs_)
            << " time_assoc_new_utns " << Time::toString(time_assoc_new_utns_)
@@ -1331,4 +1331,9 @@ const std::map<unsigned int, std::map<unsigned int,
                                       std::pair<unsigned int, unsigned int>>>& ReconstructorAssociatorBase::assocAounts() const
 {
     return assoc_counts_;
+}
+
+const std::vector<unsigned long>& ReconstructorAssociatorBase::unassociatedRecNums() const
+{
+    return unassoc_rec_nums_;
 }

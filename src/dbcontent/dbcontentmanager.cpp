@@ -1871,7 +1871,7 @@ void DBContentManager::showSurroundingData (unsigned int utn)
     //    },
 
         // TODO_TIMESTAMP
-        data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(time_end);
+    data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(time_end);
     data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] = Time::toString(time_begin);
 
     //    "Aircraft Address": {
