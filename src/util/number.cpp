@@ -545,6 +545,52 @@ std::tuple<double,double,double> getMedianStatistics (const std::vector<double>&
     }
 }
 
+/// Computes the optimal number of grid cells in latitude and longitude,
+/// subject to a maximum resolution and a cap on the total number of cells.
+/// @param lat_min    Minimum latitude (degrees)
+/// @param lat_max    Maximum latitude (degrees)
+/// @param lon_min    Minimum longitude (degrees)
+/// @param lon_max    Maximum longitude (degrees)
+/// @returns           A pair {num_lat_cells, num_lon_cells}
+std::pair<unsigned int, unsigned int> computeGeoWindowResolution(
+    double lat_min, double lat_max, double lon_min, double lon_max,
+    double grid_max_resolution, unsigned int max_num_cells)
+{
+    // Compute extents
+    double lat_extent = std::abs(lat_max - lat_min);
+    double lon_extent = std::abs(lon_max - lon_min);
+
+    // Guard against zero-sized extents
+    if (lat_extent == 0.0) lat_extent = grid_max_resolution;
+    if (lon_extent == 0.0) lon_extent = grid_max_resolution;
+
+    // Start with the finest allowed resolution
+    double resolution = grid_max_resolution;
+
+    // If the bounding‐box at that resolution would exceed max_num_cells,
+    // increase the cell size so that:
+    //     (lat_extent / resolution) * (lon_extent / resolution) <= max_num_cells
+    double area        = lat_extent * lon_extent;
+    double min_res_for_cap = std::sqrt(area / static_cast<double>(max_num_cells));
+
+    if (min_res_for_cap > resolution) {
+        resolution = min_res_for_cap;
+    }
+
+    // Compute cell counts in each dimension
+    unsigned int num_lat_cells =
+        static_cast<unsigned int>(std::ceil(lat_extent / resolution));
+    unsigned int num_lon_cells =
+        static_cast<unsigned int>(std::ceil(lon_extent / resolution));
+
+    // Ensure at least one cell in each dimension
+    num_lat_cells = std::max<unsigned int>(1u, num_lat_cells);
+    num_lon_cells = std::max<unsigned int>(1u, num_lon_cells);
+
+    return { num_lat_cells, num_lon_cells };
+}
+
+
 }  // namespace Number
 
 //void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list) {}

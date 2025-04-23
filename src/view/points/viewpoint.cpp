@@ -56,6 +56,7 @@ const std::string ViewPoint::VP_POS_WIN_LON_KEY {"position_window_longitude"};
 const std::string ViewPoint::VP_TIMESTAMP_KEY {"timestamp"};
 const std::string ViewPoint::VP_TIME_WIN_KEY {"time_window"};
 
+
 const std::string ViewPoint::VP_ANNOTATION_KEY {"annotations"};
 
 ViewPoint::ViewPoint(unsigned int id, const nlohmann::json::object_t& data, ViewManager& view_manager, bool needs_save)

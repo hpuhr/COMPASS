@@ -293,10 +293,6 @@ bool Client::run ()
     //        loginf << x;
     //    });
 
-    // Enable Qt high-DPI scaling
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    //QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
-
     // Enable High DPI support
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 

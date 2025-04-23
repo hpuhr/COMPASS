@@ -102,8 +102,6 @@ protected:
 
     //unsigned int createNewTarget(const dbContent::targetReport::ReconstructorInfo& tr);
 
-
-
     virtual bool canGetPositionOffsetTargets(
         const boost::posix_time::ptime& ts,
         const dbContent::ReconstructorTarget& target0,

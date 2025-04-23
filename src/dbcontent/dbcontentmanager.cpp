@@ -521,6 +521,12 @@ void DBContentManager::databaseOpenedSlot()
     if (db_interface.hasProperty(PROP_TIMESTAMP_MAX_NAME))
         timestamp_max_ = Time::fromLong(stol(db_interface.getProperty(PROP_TIMESTAMP_MAX_NAME)));
 
+    if (hasMinMaxTimestamp())
+        loginf << "DBContentManager: databaseOpenedSlot: timestamp_min_ " << Time::toString(*timestamp_min_)
+               << " timestamp_max_ " << Time::toString(*timestamp_max_);
+    else
+        loginf << "DBContentManager: databaseOpenedSlot: no min/max timestamp";
+
     if (db_interface.hasProperty(PROP_LATITUDE_MIN_NAME))
         latitude_min_ = stod(db_interface.getProperty(PROP_LATITUDE_MIN_NAME));
     if (db_interface.hasProperty(PROP_LATITUDE_MAX_NAME))
@@ -530,6 +536,13 @@ void DBContentManager::databaseOpenedSlot()
         longitude_min_ = stod(db_interface.getProperty(PROP_LONGITUDE_MIN_NAME));
     if (db_interface.hasProperty(PROP_LONGITUDE_MAX_NAME))
         longitude_max_ = stod(db_interface.getProperty(PROP_LONGITUDE_MAX_NAME));
+
+    if (hasMinMaxPosition())
+        loginf << "DBContentManager: databaseOpenedSlot: latitude_min_ " << *latitude_min_
+               << " latitude_max_ " << *latitude_max_ << " longitude_min_ " << *longitude_min_
+               << " longitude_max_ " << *longitude_max_;
+    else
+        loginf << "DBContentManager: databaseOpenedSlot: no min/max position";
 
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();

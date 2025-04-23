@@ -68,6 +68,9 @@ public:
 
         bool debugUTN(unsigned int utn) { return debug_utns_.count(utn); }
         bool debugRecNum(unsigned long rec_num) { return debug_rec_nums_.count(rec_num); }
+
+        double grid_max_resolution_{0.0005};
+        unsigned int max_num_grid_cells_ {500};
     };
 
 signals:

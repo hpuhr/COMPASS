@@ -39,6 +39,9 @@
 #include "targetreportaccessor.h"
 #include "number.h"
 #include "viewpoint.h"
+#include "viewpointgenerator.h"
+#include "grid2d.h"
+#include "grid2dlayer.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -1372,89 +1375,67 @@ void ReconstructorBase::doReconstructionReporting()
 
 void ReconstructorBase::doUnassociatedAnalysis()
 {
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    assert (dbcont_man.hasMinMaxPosition());
+
     unsigned int slice_cnt = currentSlice().slice_count_;
     unsigned int run_cnt = currentSlice().run_count_;
+
+    string name = "Unassocated "+to_string(slice_cnt)+" Run"+to_string(currentSliceRepeatRun());
+
+    // unassociated grid
+    double lat_min, lat_max, lon_min, lon_max;
+
+    tie(lat_min, lat_max) = dbcont_man.minMaxLatitude();
+    tie(lon_min, lon_max) = dbcont_man.minMaxLongitude();
+
+    QRectF roi(lon_min, lat_min, lon_max - lon_min, lat_max - lat_min);
+    assert (!roi.isEmpty());
+
+    auto vp = task().getDebugViewpoint(
+        name+" Unassociated Grid", "Grid");
+
+    auto anno = vp->annotations().getOrCreateAnnotation("Unassociated Grid");
+
+    unsigned num_cells_x, num_cells_y;
+
+    std::tie(num_cells_x, num_cells_y) = Number::computeGeoWindowResolution(
+        lat_min, lat_max, lon_min, lon_max,
+        task().debugSettings().grid_max_resolution_, task().debugSettings().max_num_grid_cells_);
+
+    Grid2D grid;
+    grid.create(roi, grid2d::GridResolution().setCellCount(num_cells_x, num_cells_y));
 
     auto& section = COMPASS::instance().taskManager().currentReport()->getSection(
         "Association:Unassociated");
 
-    for (auto tr_it = target_reports_.begin(); tr_it != target_reports_.end() /* not hoisted */; /* no increment */)
+    for (auto rec_num : associator().unassociatedRecNums())
     {
+        assert (target_reports_.count(rec_num));
 
+        auto& tr = target_reports_.at(rec_num);
+
+        assert(tr.position_);
+
+        grid.addValue(tr.position_->longitude_, tr.position_->latitude_, 1.0);
     }
 
-    //data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(time_end);
+    //vp->appendToDescription("max value: "+String::doubleToStringPrecision(val_max, 2));
 
-    // if (acc_grid_)
-    // {
-    //     string name = name_+to_string(slice_cnt)+" Run"+to_string(reconstructor().currentSliceRepeatRun());
+    Grid2DLayers layers;
+    grid.addToLayers(layers, "factor", grid2d::ValueType::ValueTypeMax);
 
-    //     assert (reconstructor().settings().rescale_accuracies_);
+    Grid2DRenderSettings rsettings;
+    rsettings.min_value       = 0.0;
+    rsettings.max_value       = 1.0;
 
-    //     acc_grid_->updateGrid(grid_update_func_);
+    rsettings.color_map.create(ColorMap::ColorScale::Green2Red, 2);
 
-    //     double lat_min, lat_max, lon_min, lon_max;
+    auto result = Grid2DLayerRenderer::render(layers.layer(0), rsettings);
 
-    //     tie(lat_min, lat_max, lon_min, lon_max) = acc_grid_->getMinMaxIndexes();
-
-    //     QRectF roi(lon_min, lat_min, lon_max - lon_min, lat_max - lat_min);
-
-    //     if (!roi.isEmpty())
-    //     {
-    //         auto vp = reconstructor().task().getDebugViewpointNoData(
-    //             name+" Position Std.Dev. Grid", "Grid");
-
-    //         auto anno = vp->annotations().getOrCreateAnnotation("Accuracy Grid");
-
-    //         double resolution = acc_grid_->resolution();
-
-    //         unsigned int cell_count_x = max(1.0, (lon_max - lon_min) / resolution);
-    //         unsigned int cell_count_y = max(1.0, (lat_max - lat_min) / resolution);
-
-    //         if (reconstructor().task().debugSettings().analyze_)
-    //             loginf << "RadarAccuracyEstimator SRC " << name_ << ": cell_count_x " << cell_count_x
-    //                    << " cell_count_y " << cell_count_y;
-
-    //         Grid2D grid;
-    //         grid.create(roi, grid2d::GridResolution().setCellCount(cell_count_x, cell_count_y));
-
-    //         float lat_ind, lon_ind;
-
-    //         for (auto cell_it : acc_grid_->cells())
-    //         {
-    //             std::tie(lat_ind, lon_ind) = cell_it.first;
-    //             grid.addValue(lon_ind, lat_ind, cell_it.second.avg_distance_m_);
-    //         }
-
-    //         double val_min, val_max;
-
-    //         std::tie(val_min, val_max) = acc_grid_->minMaxValue(
-    //             [](const AverageAccuracyCellInfo& cell_info) { return cell_info.avg_distance_m_; });
-
-    //         vp->appendToDescription("min value: "+String::doubleToStringPrecision(val_min, 2)+"\n");
-    //         vp->appendToDescription("max value: "+String::doubleToStringPrecision(val_max, 2));
-
-    //         Grid2DLayers layers;
-    //         grid.addToLayers(layers, "factor", grid2d::ValueType::ValueTypeMax);
-
-    //         Grid2DRenderSettings rsettings;
-    //         // rsettings.min_value       = 0.0;
-    //         // rsettings.max_value       = 10.0;
-
-    //         rsettings.color_map.create(ColorMap::ColorScale::Green2Red, 10);
-
-    //         auto result = Grid2DLayerRenderer::render(layers.layer(0), rsettings);
-    //         // loginf << "UGA" << "Slice "+to_string(reconstructor().currentSlice().slice_count_)+" "
-    //         //                        +name_+" Position Std.Dev. Scale Grid.png";
-    //         // result.first.save(("Slice "+to_string(reconstructor().currentSlice().slice_count_)+" "
-    //         //                        +name_+" Position Std.Dev. Scale Grid.png").c_str());
-
-    //         auto f = new ViewPointGenFeatureGeoImage(result.first, result.second);
-    //         anno->addFeature(f);
-
-    //         return vp;
-    //     }
-    // }
+    auto f = new ViewPointGenFeatureGeoImage(result.first, result.second);
+    anno->addFeature(f);
 
     if (!section.hasTable("Unassociated Target Reports"))
         section.addTable("Unassociated Target Reports", 8,
@@ -1489,7 +1470,18 @@ void ReconstructorBase::doUnassociatedAnalysis()
     else
         row.insert(row.end(), {{}, {}, {}});
 
-    table.addRow(row);
+    nlohmann::json vp_json;
+    vp->toJSON(vp_json);
+    //section.addFigure("Avg. Unused Scatterplot", {vp_json});
+
+    vp_json[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(
+        next_slice_begin_ - boost::posix_time::milliseconds(1));
+    vp_json[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] = Time::toString(current_slice_begin_);
+
+    vp_json[ViewPoint::VP_FILTERS_KEY]["Record Number"]["Record NumberCondition0"] =
+        String::compress(associator().unassociatedRecNums(), ',');
+
+    table.addRow(row, {vp_json});
 
     //loginf << "UGA json '" << vp_json.dump() << "'";
 }
