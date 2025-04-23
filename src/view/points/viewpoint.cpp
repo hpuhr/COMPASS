@@ -47,6 +47,7 @@ const std::string ViewPoint::VP_DESCRIPTION_KEY {"description"};
 const std::string ViewPoint::VP_DS_TYPES_KEY {"data_source_types"};
 const std::string ViewPoint::VP_DS_KEY {"data_sources"};
 const std::string ViewPoint::VP_FILTERS_KEY {"filters"};
+const std::string ViewPoint::VP_SELECTED_RECNUMS_KEY {"selected_rec_nums"};
 
 const std::string ViewPoint::VP_POS_LAT_KEY {"position_latitude"};
 const std::string ViewPoint::VP_POS_LON_KEY {"position_longitude"};

@@ -1789,13 +1789,41 @@ void DBContentManager::setViewableDataConfig (const nlohmann::json::object_t& da
     COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
 }
 
+void DBContentManager::storeSelectedRecNums(const std::vector<unsigned long>& selected)
+{
+    clearSelectedRecNums(); // no other selected
+
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    for (auto rec_num : selected)
+    {
+        tmp_selected_rec_nums_[dbcont_man.dbContentWithId(Number::recNumGetDBContId(rec_num))].insert(rec_num);
+    }
+}
+
+void DBContentManager::clearSelectedRecNums()
+{
+    loginf << "DBContentManager: clearSelectedRecNums";
+
+    tmp_selected_rec_nums_.clear();
+
+    for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
+    {
+        assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
+
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
+        selected_vec.setAll(false);
+    }
+}
+
 /**
  */
 void DBContentManager::saveSelectedRecNums()
 {
     loginf << "DBContentManager: saveSelectedRecNums";
 
-    assert (!tmp_selected_rec_nums_.size());
+    if(tmp_selected_rec_nums_.size())
+        return; // already stored from view point
 
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {

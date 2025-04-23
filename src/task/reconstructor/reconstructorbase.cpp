@@ -1474,12 +1474,16 @@ void ReconstructorBase::doUnassociatedAnalysis()
     vp->toJSON(vp_json);
     //section.addFigure("Avg. Unused Scatterplot", {vp_json});
 
+    // slice was already switched
     vp_json[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(
-        next_slice_begin_ - boost::posix_time::milliseconds(1));
-    vp_json[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] = Time::toString(current_slice_begin_);
+        next_slice_begin_ - base_settings_.sliceDuration() - boost::posix_time::milliseconds(1));
+    vp_json[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] =
+        Time::toString(current_slice_begin_ - base_settings_.sliceDuration());
 
-    vp_json[ViewPoint::VP_FILTERS_KEY]["Record Number"]["Record NumberCondition0"] =
-        String::compress(associator().unassociatedRecNums(), ',');
+    // vp_json[ViewPoint::VP_FILTERS_KEY]["Record Number"]["Record NumberCondition0"] =
+    //     String::compress(associator().unassociatedRecNums(), ',');
+
+    vp_json[ViewPoint::VP_SELECTED_RECNUMS_KEY] = associator().unassociatedRecNums();
 
     table.addRow(row, {vp_json});
 

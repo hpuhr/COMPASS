@@ -18,14 +18,9 @@
 #include "filtermanager.h"
 
 #include "compass.h"
-//#include "configurationmanager.h"
-//#include "sqliteconnection.h"
 #include "dbfilter.h"
-//#include "dbfilterwidget.h"
-//#include "dbinterface.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
-//#include "dbcontent/variable/variable.h"
 #include "datasourcemanager.h"
 #include "filtermanagerwidget.h"
 #include "logger.h"
@@ -404,6 +399,15 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
         logdbg << "FilterManager: showViewPointSlot: load all ds_types";
 
         ds_man.setLoadDSTypes(true);
+    }
+
+    if (data.contains(ViewPoint::VP_SELECTED_RECNUMS_KEY))
+    {
+        auto& selected = data.at(ViewPoint::VP_SELECTED_RECNUMS_KEY);
+        assert (selected.is_array());
+        std::vector<unsigned long> vec = selected.get<std::vector<unsigned long>>();
+
+        COMPASS::instance().dbContentManager().storeSelectedRecNums(vec);
     }
 
     // add all data sources that need loading
