@@ -598,8 +598,9 @@ void ReconstructorTask::loadDataSlice()
 
     for (auto& dbcont_it : dbcontent_man)
     {
-        logdbg << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
-               << " has data " << dbcont_it.second->hasData();
+        loginf << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
+               << " has data " << dbcont_it.second->hasData()
+               << " has utn " << dbcont_it.second->hasVariable("UTN");
 
         if (!dbcont_it.second->hasData()
             || !dbcont_it.second->hasVariable("UTN"))
@@ -627,7 +628,7 @@ void ReconstructorTask::processDataSlice()
 
     if (!processing_slice_->data_.size())
     {
-        loginf << "ReconstructorTask: processDataSlice: empty buffer at ("
+        logdbg << "ReconstructorTask: processDataSlice: empty buffer at ("
                << Time::toString(loading_slice_->slice_begin_)<< ", no process";
 
         processing_slice_ = nullptr;

@@ -1,13 +1,10 @@
 #include "reconstructorassociatorbase.h"
 #include "logger.h"
-#include "global.h"
 #include "stringconv.h"
 #include "timeconv.h"
 #include "util/tbbhack.h"
 #include "reconstructortask.h"
 #include "number.h"
-#include "util/system.h"
-#include "kalman_chain.h"
 
 #include <QApplication>
 
@@ -476,10 +473,12 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
         do_debug = reconstructor().task().debugSettings().debug_association_
                    && reconstructor().task().debugSettings().debugRecNum(rec_num);
 
+        dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
+
+        //do_debug = tr.dbcont_id_ == 10;
+
         if (do_debug)
             loginf << "DBG tr " << rec_num;
-
-        dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
 
         if (!tr.in_current_slice_)
         {
@@ -501,8 +500,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
         if (utn != -1) // estimate accuracy and associate
         {
-            if (reconstructor().task().debugSettings().debug_association_
-                && reconstructor().task().debugSettings().debugUTN(utn))
+            if (do_debug || reconstructor().task().debugSettings().debugUTN(utn))
                 loginf << "DBG retry-associating tr " << rec_num << " to UTN " << utn;
 
             associate(tr, utn);
@@ -755,6 +753,8 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                       {
                           unsigned int other_utn = reconstructor().targets_container_.utn_vec_.at(target_cnt);
                           bool do_other_debug = false; //debug_utns.count(other_utn);
+
+                          //do_debug = tr.dbcont_id_ == 10 && other_utn == 7;
 
                           ReconstructorTarget& other = reconstructor().targets_container_.targets_.at(other_utn);
 
