@@ -1846,25 +1846,62 @@ Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_need
         //write contents
         auto report_contents = result.report()->reportContents();
         {
-            std::shared_ptr<Buffer> buffer(new Buffer(ResultReport::SectionContent::DBPropertyList));
+            size_t chunk_size_bytes = 1e09;
+            size_t current_bytes    = 0;
+            size_t current_row      = 0;
 
-            auto& content_id_vec = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
-            auto& result_id_vec  = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
-            auto& type_vec       = buffer->get<int>(ResultReport::SectionContent::DBColumnType.name());
-            auto& content_vec    = buffer->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+            std::shared_ptr<Buffer> buffer;
 
-            size_t row = 0;
+            NullableVector<unsigned int>*   content_id_vec = nullptr;
+            NullableVector<unsigned int>*   result_id_vec  = nullptr;
+            NullableVector<int>*            type_vec       = nullptr;
+            NullableVector<nlohmann::json>* content_vec    = nullptr;
+
             for (const auto& c : report_contents)
             {
-                content_id_vec.set(row, c->id());
-                result_id_vec.set(row, result_id);
-                type_vec.set(row, (int)c->type());
-                content_vec.set(row, c->toJSON());
+                if (!buffer || current_bytes > chunk_size_bytes)
+                {
+                    //insert old buffer if available
+                    if (buffer)
+                    {
+                        loginf << "WRITING " << buffer->size() << " ROW(S)";
+                        insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+                    }
 
-                ++row;
+                    //create new buffer
+                    buffer.reset(new Buffer(ResultReport::SectionContent::DBPropertyList));
+
+                    content_id_vec = &buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+                    result_id_vec  = &buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
+                    type_vec       = &buffer->get<int>(ResultReport::SectionContent::DBColumnType.name());
+                    content_vec    = &buffer->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+                    current_bytes = 0;
+                    current_row   = 0;
+                }
+
+                assert(buffer);
+
+                //!this might trigger recomputations from temporarily generated data,
+                //which is immediately thrown away afterwards!
+                auto   c_json  = c->toJSON();
+                size_t c_bytes = c_json.dump().size();
+
+                content_id_vec->set(current_row, c->id());
+                result_id_vec->set(current_row, result_id);
+                type_vec->set(current_row, (int)c->type());
+                content_vec->set(current_row, c_json);
+
+                current_bytes += c_bytes;
+                current_row   += 1;
             }
 
-            insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+            //insert remaining buffer content
+            if (current_row > 0)
+            {
+                loginf << "WRITING " << buffer->size() << " ROW(S)";
+                insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+            }
         }
 
         //cleanup db?
