@@ -59,8 +59,8 @@ const QColor Single::AnnotationColorHighlight = Qt::yellow;
 const QColor Single::AnnotationColorError     = QColor("#FF6666");
 const QColor Single::AnnotationColorOk        = QColor("#66FF66");
 
-const bool Single::WriteOnDemandTables  = false;
-const bool Single::WriteOnDemandFigures = true;
+const bool Single::WriteOnDemandTables  = false; // re-created on demand
+const bool Single::WriteOnDemandFigures = false; // re-created on demand
 
 /**
 */

@@ -112,7 +112,7 @@ void TaskResultsWidget::setReport(const std::string name)
     report_combo_->setDisabled(false);
 
     assert (task_man_.hasResult(name));
-    report_widget_->setReport(task_man_.getOrCreateResult(name)->report());
+    report_widget_->setReport(task_man_.result(name)->report());
 
     report_widget_->setDisabled(false);
 }

@@ -74,10 +74,13 @@ public:
 
     EvaluationCalculator(const std::string& class_id, 
                          const std::string& instance_id,
-                         EvaluationManager& manager,
-                         const std::vector<unsigned int>& utns = std::vector<unsigned int>(),
-                         const std::vector<std::string>& requirements = std::vector<std::string>());
+                         EvaluationManager& manager);
+    EvaluationCalculator(EvaluationManager& manager,
+                         const nlohmann::json& config);
     virtual ~EvaluationCalculator();
+
+    void setActiveUTNs(const std::vector<unsigned int>& utns);
+    void setActiveRequirements(const std::vector<std::string>& requirements);
 
     bool dataLoaded() const;
     bool evaluated() const;
@@ -210,6 +213,8 @@ signals:
     
 protected:
     virtual void checkSubConfigurables() override;
+
+    void readSettings();
 
     std::map<std::string, bool>& dataSourcesRef();
     std::map<std::string, bool>& dataSourcesTst();

@@ -432,13 +432,10 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     msg_box.show();
 
     auto& task_manager = COMPASS::instance().taskManager();
-    task_manager.beginTaskResultWriting(EvalResultName);
+    task_manager.beginTaskResultWriting(EvalResultName, task::TaskResultType::Evaluation);
 
     auto& result = task_manager.currentResult();
     auto& report = task_manager.currentReport();
-
-    //set result type
-    result->type(TaskResult::TaskResultType::Evaluation);
 
     //store eval config
     nlohmann::json config;

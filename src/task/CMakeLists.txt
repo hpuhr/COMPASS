@@ -12,6 +12,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/taskdefs.h"
         "${CMAKE_CURRENT_LIST_DIR}/taskmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/task.h"
         "${CMAKE_CURRENT_LIST_DIR}/taskwidget.h"

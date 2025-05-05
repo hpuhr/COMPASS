@@ -132,7 +132,7 @@ protected:
     TargetCache target_data_;
     bool finalized_ {false};
 
-    std::unique_ptr<EvaluationDataWidget> widget_;
+    EvaluationDataWidget* widget_ = nullptr;
 
     unsigned int unassociated_ref_cnt_ {0};
     unsigned int associated_ref_cnt_ {0};

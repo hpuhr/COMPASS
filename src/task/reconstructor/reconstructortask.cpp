@@ -404,7 +404,7 @@ void ReconstructorTask::run()
     COMPASS::instance().dbContentManager().clearAssociationsIdentifier();
     COMPASS::instance().dbInterface().startPerformanceMetrics();
 
-    COMPASS::instance().taskManager().beginTaskResultWriting("Reconstruct References");
+    COMPASS::instance().taskManager().beginTaskResultWriting("Reconstruct References", task::TaskResultType::Generic);
 
     COMPASS::instance().logInfo("Reconstructor") << "running " << current_reconstructor_str_;
 

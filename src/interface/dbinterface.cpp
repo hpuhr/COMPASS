@@ -37,12 +37,15 @@
 #include "source/dbdatasource.h"
 #include "fft/dbfft.h"
 
+#include "task/taskmanager.h"
 #include "task/result/taskresult.h"
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontent.h"
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/sectioncontenttable.h"
 #include "task/result/report/sectioncontenttext.h"
+
+#include "eval/results/evaluationtaskresult.h"
 
 #include "viewpoint.h"
 
@@ -2043,9 +2046,17 @@ ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
             const auto& result_type = type_vec.get(i);
             const auto& result_id   = id_vec.get(i);
 
-            results[ i ].reset(new TaskResult(result_id, task_man));
+            const auto& json_content = content_vec.get(i);
+            if (!json_content.contains(TaskResult::FieldType))
+                throw std::runtime_error("Missing type field in result JSON");
 
-            bool ok = results[ i ]->fromJSON(content_vec.get(i));
+            int rtype = json_content.at(TaskResult::FieldType);
+
+            results[ i ] = task_man.createResult(result_id, (task::TaskResultType)rtype);
+            if (!results[ i ])
+                throw std::runtime_error("Could not create result from type");
+
+            bool ok = results[ i ]->fromJSON(json_content);
             if (!ok)
                 throw std::runtime_error("Could not read result from JSON");
 

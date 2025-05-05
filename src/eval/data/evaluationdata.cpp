@@ -617,9 +617,9 @@ const EvaluationTargetData& EvaluationData::getTargetOf (const QModelIndex& inde
 EvaluationDataWidget* EvaluationData::widget()
 {
     if (!widget_)
-        widget_.reset(new EvaluationDataWidget(*this, calculator_));
+        widget_ = new EvaluationDataWidget(*this, calculator_);
 
-    return widget_.get();
+    return widget_;
 }
 
 void EvaluationData::clearInterestFactors()

@@ -17,16 +17,23 @@
 
 #pragma once
 
+#include "task/result/report/report.h"
+#include "task/taskdefs.h"
+
 #include "json.hpp"
 #include "property.h"
 #include "propertylist.h"
-#include "task/result/report/report.h"
 
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 class ResultManager;
+
+namespace ResultReport
+{
+    class SectionContent;
+}
 
 /**
  */
@@ -35,21 +42,16 @@ class TaskResult
     friend class TaskManager; // to change id if required
 
 public:
-    enum TaskResultType
-    {
-        Generic=0,
-        Evaluation
-    };
+    typedef std::shared_ptr<ResultReport::SectionContent> ContentPtr;
 
-    TaskResult(unsigned int id, TaskManager& task_man);
+    TaskResult(unsigned int id, 
+               TaskManager& task_man);
+    virtual ~TaskResult();
 
     unsigned int id() const;
 
     std::string name() const;
     void name(const std::string& name);
-
-    TaskResultType type() const;
-    void type(TaskResultType type);
 
     const std::shared_ptr<ResultReport::Report>& report() const;
     std::shared_ptr<ResultReport::Report>& report();
@@ -60,6 +62,8 @@ public:
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
+
+    virtual task::TaskResultType type() const { return task::TaskResultType::Generic; }
 
     static const std::string  DBTableName;
     static const Property     DBColumnID;
@@ -79,13 +83,15 @@ public:
 protected:
     void id(unsigned int id);
 
+    virtual ContentPtr createOnDemandContent(const std::string& section_id,
+                                             const std::string& content_id) const;
+
     //serialization of derived content
     virtual void toJSON_impl(nlohmann::json& root_node) const {};
     virtual bool fromJSON_impl(const nlohmann::json& j) { return true; };
 
     unsigned int             id_{0};
     std::string              name_;
-    TaskResultType           type_;
     boost::posix_time::ptime created_;
     std::string              comments_;
 

@@ -40,10 +40,14 @@ const std::string TaskResult::FieldConfig   = "config";
 /**
  */
 TaskResult::TaskResult(unsigned int id, TaskManager& task_man)
-:   id_    (id        )
+:   id_(id)
 {
     report_ = std::make_shared<ResultReport::Report> (task_man);
 }
+
+/**
+ */
+TaskResult::~TaskResult() {}
 
 /**
  */
@@ -91,20 +95,6 @@ std::shared_ptr<ResultReport::Report>& TaskResult::report()
 
 /**
  */
-TaskResult::TaskResultType TaskResult::type() const
-{
-    return type_;
-}
-
-/**
- */
-void TaskResult::type(TaskResultType type)
-{
-    type_ = type;
-}
-
-/**
- */
 void TaskResult::setConfiguration(const nlohmann::json& config)
 {
     config_ = config;
@@ -126,13 +116,21 @@ const nlohmann::json& TaskResult::configuration() const
 
 /**
  */
+TaskResult::ContentPtr TaskResult::createOnDemandContent(const std::string& section_id,
+                                                         const std::string& content_id) const
+{
+    return ContentPtr();
+}
+
+/**
+ */
 nlohmann::json TaskResult::toJSON() const
 {
     nlohmann::json root = nlohmann::json::object();
 
     root[ FieldID       ] = id_;
     root[ FieldName     ] = name_;
-    root[ FieldType     ] = type_;
+    root[ FieldType     ] = type();
     root[ FieldCreated  ] = Utils::Time::toString(created_);
     root[ FieldComments ] = comments_;
 
@@ -161,9 +159,16 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
         !j.contains(FieldConfig))
         return false;
 
+    task::TaskResultType stored_type = j[ FieldType ];
+    if (stored_type != type())
+    {
+        logerr << "TaskResult: fromJSON: Stored type " << stored_type
+               << " does not match result type " << type();
+        return false;
+    }
+
     id_       = j[ FieldID ];
     name_     = j[ FieldName ];
-    type_     = j[ FieldType ];
     comments_ = j[ FieldComments ];
 
     std::string ts = j[ FieldCreated ];

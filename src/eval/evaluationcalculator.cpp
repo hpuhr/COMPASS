@@ -69,15 +69,38 @@ using namespace boost::posix_time;
  */
 EvaluationCalculator::EvaluationCalculator(const std::string& class_id, 
                                            const std::string& instance_id,
-                                           EvaluationManager& manager,
-                                           const std::vector<unsigned int>& utns,
-                                           const std::vector<std::string>& requirements)
+                                           EvaluationManager& manager)
 :   Configurable      (class_id, instance_id, &manager)
 ,   manager_          (manager)
-,   eval_utns_        (utns)
-,   eval_requirements_(requirements)
 ,   data_             (*this, manager.compass().dbContentManager())
 ,   results_gen_      (*this)
+{
+    readSettings();
+    createSubConfigurables();
+}
+
+/**
+ */
+EvaluationCalculator::EvaluationCalculator(EvaluationManager& manager,
+                                           const nlohmann::json& config)
+:   Configurable      ("EvaluationManager", "EvaluationManager0", nullptr, "", &config)
+,   manager_          (manager)
+,   data_             (*this, manager.compass().dbContentManager())
+,   results_gen_      (*this)
+{
+    readSettings();
+    createSubConfigurables();
+}
+
+/**
+ */
+EvaluationCalculator::~EvaluationCalculator()
+{
+}
+
+/**
+ */
+void EvaluationCalculator::readSettings()
 {
     typedef EvaluationSettings Settings;
 
@@ -183,13 +206,20 @@ EvaluationCalculator::EvaluationCalculator(const std::string& class_id,
     registerParameter("histogram_num_bins", &settings_.histogram_num_bins, Settings().histogram_num_bins);
     
     updateDerivedParameters();
-    createSubConfigurables();
 }
 
 /**
  */
-EvaluationCalculator::~EvaluationCalculator()
+void EvaluationCalculator::setActiveUTNs(const std::vector<unsigned int>& utns)
 {
+    eval_utns_ = utns;
+}
+
+/**
+ */
+void EvaluationCalculator::setActiveRequirements(const std::vector<std::string>& requirements)
+{
+    eval_requirements_ = requirements;
 }
 
 /**
