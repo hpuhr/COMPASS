@@ -24,7 +24,7 @@
 #include "view/histogramview/histogram.h"
 #include "view/histogramview/histograminitializer.h"
 
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
 namespace EvaluationRequirementResult
 {
@@ -38,12 +38,12 @@ class FeatureDefinitionHistogram : public FeatureDefinition
 public:
     typedef FeatureDefinitionDataSeries<T> HistogramDataSeries;
 
-    FeatureDefinitionHistogram(const EvaluationManager& eval_manager,
+    FeatureDefinitionHistogram(const EvaluationCalculator& calculator,
                                const std::string& feature_description,
                                const std::string& x_axis_label,
                                const boost::optional<unsigned int>& num_bins = boost::optional<unsigned int>(),
                                const boost::optional<unsigned int>& num_distinct_values_min = boost::optional<unsigned int>()) 
-    :   FeatureDefinition       (eval_manager, "histogram", feature_description, x_axis_label, "") 
+    :   FeatureDefinition       (calculator, "histogram", feature_description, x_axis_label, "") 
     ,   num_bins_               (num_bins)
     ,   num_distinct_values_min_(num_distinct_values_min) {}
 
@@ -87,7 +87,7 @@ public:
 
         boost::optional<unsigned int> num_bins = num_bins_;
         if (!num_bins.has_value())
-            num_bins = evalManager().settings().histogram_num_bins;
+            num_bins = calculator().settings().histogram_num_bins;
 
         //handle data series
         for (const auto& ds : data_series_)
@@ -121,10 +121,10 @@ template<typename T>
 class FeatureDefinitionCategoryHistogram : public FeatureDefinition
 {
 public:
-    FeatureDefinitionCategoryHistogram(const EvaluationManager& eval_manager,
+    FeatureDefinitionCategoryHistogram(const EvaluationCalculator& calculator,
                                        const std::string& feature_description,
                                        const std::string& x_axis_label)
-    :   FeatureDefinition(eval_manager, "histogram_category", feature_description, x_axis_label, "") 
+    :   FeatureDefinition(calculator, "histogram_category", feature_description, x_axis_label, "") 
     {
     }
     virtual ~FeatureDefinitionCategoryHistogram() = default;
@@ -209,10 +209,10 @@ private:
 class FeatureDefinitionStringCategoryHistogram : public FeatureDefinitionCategoryHistogram<std::string>
 {
 public:
-    FeatureDefinitionStringCategoryHistogram(const EvaluationManager& eval_manager,
+    FeatureDefinitionStringCategoryHistogram(const EvaluationCalculator& calculator,
                                              const std::string& feature_description,
                                              const std::string& x_axis_label)
-    :   FeatureDefinitionCategoryHistogram<std::string>(eval_manager, feature_description, x_axis_label) 
+    :   FeatureDefinitionCategoryHistogram<std::string>(calculator, feature_description, x_axis_label) 
     {
     }
     virtual ~FeatureDefinitionStringCategoryHistogram() = default;

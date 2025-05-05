@@ -19,7 +19,7 @@
 #include "logger.h"
 #include "dbcontent/dbcontentcombobox.h"
 #include "datasourcemanager.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
 #include <QLabel>
 #include <QCheckBox>
@@ -29,10 +29,19 @@
 
 using namespace std;
 
-EvaluationDataSourceWidget::EvaluationDataSourceWidget(
-        const std::string& title, const std::string& dbcontent_name, unsigned int line_id,
-        QWidget* parent, Qt::WindowFlags f)
-    : QFrame(parent, f), title_(title), dbcontent_name_(dbcontent_name), line_id_(line_id)
+/**
+ */
+EvaluationDataSourceWidget::EvaluationDataSourceWidget(EvaluationCalculator& calculator,
+                                                       const std::string& title, 
+                                                       const std::string& dbcontent_name, 
+                                                       unsigned int line_id,
+                                                       QWidget* parent, 
+                                                       Qt::WindowFlags f)
+:   QFrame(parent, f)
+,   calculator_(calculator)
+,   title_(title)
+,   dbcontent_name_(dbcontent_name)
+,   line_id_(line_id)
 {
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     setLineWidth(2);
@@ -90,10 +99,12 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(
             this, &EvaluationDataSourceWidget::updateDataSourcesSlot); // update if data sources changed
 }
 
-EvaluationDataSourceWidget::~EvaluationDataSourceWidget()
-{
-}
+/**
+ */
+EvaluationDataSourceWidget::~EvaluationDataSourceWidget() = default;
 
+/**
+ */
 void EvaluationDataSourceWidget::updateDataSourcesSlot()
 {
     loginf << "EvaluationDataSourceWidget: updateDataSourcesSlot: title " << title_;
@@ -117,9 +128,9 @@ void EvaluationDataSourceWidget::updateDataSourcesSlot()
     map<string, bool> data_sources;
 
     if (title_ == "Reference Data")
-        data_sources = COMPASS::instance().evaluationManager().dataSourcesRef();
+        data_sources = static_cast<const EvaluationCalculator&>(calculator_).dataSourcesRef();
     else
-        data_sources = COMPASS::instance().evaluationManager().dataSourcesTst();
+        data_sources = static_cast<const EvaluationCalculator&>(calculator_).dataSourcesTst();
 
     unsigned int ds_id;
 
@@ -150,14 +161,16 @@ void EvaluationDataSourceWidget::updateDataSourcesSlot()
     }
 }
 
+/**
+ */
 void EvaluationDataSourceWidget::updateCheckboxesChecked()
 {
     map<string, bool> data_sources;
 
     if (title_ == "Reference Data")
-        data_sources = COMPASS::instance().evaluationManager().dataSourcesRef();
+        data_sources = static_cast<const EvaluationCalculator&>(calculator_).dataSourcesRef();
     else
-        data_sources = COMPASS::instance().evaluationManager().dataSourcesTst();
+        data_sources = static_cast<const EvaluationCalculator&>(calculator_).dataSourcesTst();
 
     for (auto& checkit : data_sources_checkboxes_)
     {
@@ -168,6 +181,8 @@ void EvaluationDataSourceWidget::updateCheckboxesChecked()
     }
 }
 
+/**
+ */
 void EvaluationDataSourceWidget::dbContentNameChangedSlot()
 {
     assert (dbcont_combo_);
@@ -183,6 +198,8 @@ void EvaluationDataSourceWidget::dbContentNameChangedSlot()
     updateCheckboxesChecked();
 }
 
+/**
+ */
 void EvaluationDataSourceWidget::toggleDataSourceSlot()
 {
     logdbg << "EvaluationDataSourceWidget: toggleDataSource";
@@ -192,27 +209,19 @@ void EvaluationDataSourceWidget::toggleDataSourceSlot()
 
     if (title_ == "Reference Data")
     {
-        map<string, bool>& data_sources = COMPASS::instance().evaluationManager().dataSourcesRef();
-
-        assert(data_sources.count(to_string(ds_id)));
-        data_sources.at(to_string(ds_id)) = check->checkState() == Qt::Checked;
-
         loginf << "EvaluationDataSourceWidget: toggleDataSource: ref id " << ds_id << " checked "
                << (check->checkState() == Qt::Checked);
 
-        COMPASS::instance().evaluationManager().updateActiveDataSources(); // save to cfg
+        auto ds_name = to_string(ds_id);
+        calculator_.selectDataSourceRef(ds_name, check->checkState() == Qt::Checked);
     }
     else
     {
-        map<string, bool>& data_sources = COMPASS::instance().evaluationManager().dataSourcesTst();
-
-        assert(data_sources.count(to_string(ds_id)));
-        data_sources.at(to_string(ds_id)) = check->checkState() == Qt::Checked;
-
         loginf << "EvaluationDataSourceWidget: toggleDataSource: tst id " << ds_id << " checked "
                << (check->checkState() == Qt::Checked);
 
-        COMPASS::instance().evaluationManager().updateActiveDataSources(); // save to cfg
+        auto ds_name = to_string(ds_id);
+        calculator_.selectDataSourceTst(ds_name, check->checkState() == Qt::Checked);
     }
 
     updateCheckboxesChecked();
@@ -220,6 +229,8 @@ void EvaluationDataSourceWidget::toggleDataSourceSlot()
     emit usedDataSourceChangedSignal();
 }
 
+/**
+ */
 void EvaluationDataSourceWidget::lineIDEditSlot(const QString& text)
 {
     bool ok;
@@ -231,4 +242,3 @@ void EvaluationDataSourceWidget::lineIDEditSlot(const QString& text)
 
     emit lineChangedSignal(line_id);
 }
-

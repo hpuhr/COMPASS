@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTGROUP_H
-#define EVALUATIONREQUIREMENTGROUP_H
+#pragma once
 
 #include "configurable.h"
 #include "evaluationstandardtreeitem.h"
@@ -27,7 +26,7 @@
 #include <memory>
 
 class EvaluationStandard;
-class EvaluationManager;
+class EvaluationCalculator;
 
 namespace EvaluationRequirement {
 class BaseConfig;
@@ -47,8 +46,10 @@ signals:
 //     void deleteRequirementSlot();
 
 public:
-    Group(const std::string& class_id, const std::string& instance_id,
-                               EvaluationStandard& standard, EvaluationManager& eval_man);
+    Group(const std::string& class_id, 
+          const std::string& instance_id,
+          EvaluationStandard& standard, 
+          EvaluationCalculator& calculator);
     virtual ~Group();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -89,7 +90,7 @@ public:
 
 protected:
     EvaluationStandard& standard_;
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 
     bool        use_ = true;
     std::string name_;
@@ -100,5 +101,3 @@ protected:
 
     void sortConfigs();
 };
-
-#endif // EVALUATIONREQUIREMENTGROUP_H

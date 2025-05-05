@@ -17,18 +17,14 @@
 
 #include "evaluationdata.h"
 #include "evaluationdatawidget.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 #include "evaluationstandard.h"
 #include "requirement/base/baseconfig.h"
 #include "requirement/group.h"
-#include "dbcontentmanager.h"
-#include "dbcontent/dbcontent.h"
-//#include "dbcontent/variable/variable.h"
-//#include "dbcontent/variable/metavariable.h"
-#include "buffer.h"
-//#include "stringconv.h"
-//#include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "dbcontent/dbcontent.h"
+#include "buffer.h"
+
 #include "util/async.h"
 #include "util/stringmat.h"
 
@@ -49,8 +45,9 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-EvaluationData::EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man)
-    : eval_man_(eval_man), dbcont_man_(dbcont_man)
+EvaluationData::EvaluationData(EvaluationCalculator& calculator, 
+                               DBContentManager& dbcont_man)
+    : calculator_(calculator), dbcont_man_(dbcont_man)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 
@@ -80,8 +77,8 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
     ref_line_id_ = line_id;
     assert (ref_line_id_ <= 3);
 
-    set<unsigned int> active_srcs = eval_man_.activeDataSourcesRef();
-    bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
+    set<unsigned int> active_srcs = calculator_.activeDataSourcesRef();
+    bool use_active_srcs = (calculator_.dbContentNameRef() == calculator_.dbContentNameTst());
     unsigned int num_skipped {0};
 
     assert (accessor_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
@@ -154,7 +151,7 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
         }
 
         if (!hasTargetData(utn))
-            target_data_.emplace_back(utn, *this, accessor_, eval_man_, dbcont_man_);
+            target_data_.emplace_back(utn, *this, accessor_, calculator_, dbcont_man_);
 
         assert (hasTargetData(utn));
 
@@ -184,8 +181,8 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
     tst_line_id_ = line_id;
     assert (tst_line_id_ <= 3);
 
-    set<unsigned int> active_srcs = eval_man_.activeDataSourcesTst();
-    bool use_active_srcs = (eval_man_.dbContentNameRef() == eval_man_.dbContentNameTst());
+    set<unsigned int> active_srcs = calculator_.activeDataSourcesTst();
+    bool use_active_srcs = (calculator_.dbContentNameRef() == calculator_.dbContentNameTst());
     unsigned int num_skipped {0};
 
     assert (accessor_->hasMetaVar<ptime>(dbcontent_name, DBContent::meta_var_timestamp_));
@@ -258,7 +255,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
         }
 
         if (!hasTargetData(utn))
-            target_data_.emplace_back(utn, *this, accessor_, eval_man_, dbcont_man_);
+            target_data_.emplace_back(utn, *this, accessor_, calculator_, dbcont_man_);
 
         assert (hasTargetData(utn));
 
@@ -285,7 +282,7 @@ void EvaluationData::finalize ()
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
     {
-        eval_man_.updateSectorLayers();
+        calculator_.updateSectorLayers();
         beginResetModel();
     }
     QApplication::restoreOverrideCursor();
@@ -620,7 +617,7 @@ const EvaluationTargetData& EvaluationData::getTargetOf (const QModelIndex& inde
 EvaluationDataWidget* EvaluationData::widget()
 {
     if (!widget_)
-        widget_.reset(new EvaluationDataWidget(*this, eval_man_));
+        widget_.reset(new EvaluationDataWidget(*this, calculator_));
 
     return widget_.get();
 }
@@ -663,7 +660,7 @@ void EvaluationData::targetChangedSlot(unsigned int utn) // for one utn
     {
         emit dataChanged(index(items.at(0).row(), 0), index(items.at(0).row(), columnCount()-1));
 
-        eval_man_.updateResultsToChanges();
+        calculator_.updateResultsToChanges();
     }
 }
 
@@ -674,7 +671,7 @@ void EvaluationData::allTargetsChangedSlot() // for more than 1 utn
     beginResetModel();
     endResetModel();
 
-    eval_man_.updateResultsToChanges();
+    calculator_.updateResultsToChanges();
 }
 
 boost::optional<nlohmann::json> EvaluationData::getTableData(bool rowwise,
@@ -726,10 +723,10 @@ void EvaluationData::updateInterestSwitches()
 
     interest_factor_enabled_.clear();
 
-    if (!eval_man_.hasCurrentStandard())
+    if (!calculator_.hasCurrentStandard())
         return;
 
-    auto& standard = eval_man_.currentStandard();
+    auto& standard = calculator_.currentStandard();
 
     for (auto itg = standard.begin(); itg != standard.end(); ++itg)
     {

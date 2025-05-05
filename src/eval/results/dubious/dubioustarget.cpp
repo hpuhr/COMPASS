@@ -55,14 +55,14 @@ SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id,
                                          const SectorLayer& sector_layer,
                                          unsigned int utn,
                                          const EvaluationTargetData* target,
-                                         EvaluationManager& eval_man,
+                                         EvaluationCalculator& calculator,
                                          const EvaluationDetails& details,
                                          unsigned int num_updates,
                                          unsigned int num_pos_outside,
                                          unsigned int num_pos_inside,
                                          unsigned int num_pos_inside_dubious)
 :   SingleDubiousBase("SingleDubiousTarget", result_id, requirement, sector_layer, utn, target, 
-                      eval_man, details, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
+                      calculator, details, num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
 {
     assert (details.size() >= 1);
 
@@ -83,7 +83,7 @@ SingleDubiousTarget::SingleDubiousTarget(const std::string& result_id,
 */
 std::shared_ptr<Joined> SingleDubiousTarget::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedDubiousTarget> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedDubiousTarget> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -227,8 +227,8 @@ void SingleDubiousTarget::addAnnotationForDetail(nlohmann::json& annotations_jso
 JoinedDubiousTarget::JoinedDubiousTarget(const std::string& result_id, 
                                          std::shared_ptr<EvaluationRequirement::Base> requirement,
                                          const SectorLayer& sector_layer, 
-                                         EvaluationManager& eval_man)
-:   JoinedDubiousBase("JoinedDubiousTarget", result_id, requirement, sector_layer, eval_man)
+                                         EvaluationCalculator& calculator)
+:   JoinedDubiousBase("JoinedDubiousTarget", result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -365,7 +365,7 @@ FeatureDefinitions JoinedDubiousTarget::getCustomAnnotationDefinitions() const
         return boost::optional<bool>(SingleDubiousTarget::detailIsOkStatic(detail));
     };
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(ValueSource<bool>(getValue), 
                        GridAddDetailMode::AddEvtPosition, 
                        false);

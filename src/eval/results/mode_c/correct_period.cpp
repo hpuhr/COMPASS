@@ -32,12 +32,12 @@ SingleModeCCorrectPeriod::SingleModeCCorrectPeriod(const std::string& result_typ
                                                    const SectorLayer& sector_layer, 
                                                    unsigned int utn, 
                                                    const EvaluationTargetData* target,
-                                                   EvaluationManager& eval_man,
+                                                   EvaluationCalculator& calculator,
                                                    const EvaluationDetails& details,
                                                    int sum_uis, 
                                                    int missed_uis, 
                                                    TimePeriodCollection ref_periods)
-:   SingleIntervalBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details, sum_uis, missed_uis, ref_periods)
+:   SingleIntervalBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details, sum_uis, missed_uis, ref_periods)
 {
     updateResult();
 }
@@ -46,7 +46,7 @@ SingleModeCCorrectPeriod::SingleModeCCorrectPeriod(const std::string& result_typ
 */
 std::shared_ptr<Joined> SingleModeCCorrectPeriod::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedModeCCorrectPeriod> ("JoinedModeCCorrectPeriod", result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedModeCCorrectPeriod> ("JoinedModeCCorrectPeriod", result_id, requirement_, sector_layer_, calculator_);
 }
 
 /********************************************************************************
@@ -59,8 +59,8 @@ JoinedModeCCorrectPeriod::JoinedModeCCorrectPeriod(const std::string& result_typ
                                                    const std::string& result_id, 
                                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                    const SectorLayer& sector_layer, 
-                                                   EvaluationManager& eval_man)
-:   JoinedIntervalBase(result_type, result_id, requirement, sector_layer, eval_man)
+                                                   EvaluationCalculator& calculator)
+:   JoinedIntervalBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 

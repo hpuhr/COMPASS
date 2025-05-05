@@ -15,11 +15,9 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSREPORTPDFGENERATOR_H
-#define EVALUATIONRESULTSREPORTPDFGENERATOR_H
+#pragma once
 
-class EvaluationManager;
-class EvaluationManagerSettings;
+class EvaluationCalculator;
 class LatexDocument;
 
 #include <string>
@@ -32,7 +30,7 @@ namespace EvaluationResultsReport
     class PDFGenerator
     {
     public:
-        PDFGenerator(EvaluationManager& eval_manager, EvaluationManagerSettings& eval_settings);
+        PDFGenerator(EvaluationCalculator& calculator);
 
         PDFGeneratorDialog& dialog();
 
@@ -54,8 +52,7 @@ namespace EvaluationResultsReport
         bool pdfLatexFound() const;
 
     protected:
-        EvaluationManager& eval_man_;
-        EvaluationManagerSettings& eval_settings_;
+        EvaluationCalculator& calculator_;
 
         std::unique_ptr<PDFGeneratorDialog> dialog_;
 
@@ -72,5 +69,3 @@ namespace EvaluationResultsReport
     };
 
 }
-
-#endif // EVALUATIONRESULTSREPORTPDFGENERATOR_H

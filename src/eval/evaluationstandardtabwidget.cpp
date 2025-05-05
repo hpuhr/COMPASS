@@ -37,9 +37,10 @@
 
 using namespace std;
 
-EvaluationStandardTabWidget::EvaluationStandardTabWidget(
-        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
-    : QWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings)
+/**
+ */
+EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationCalculator& calculator)
+    : QWidget(nullptr), calculator_(calculator)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -54,7 +55,7 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(
         standard_label->setFont(font_bold);
         std_layout->addWidget(standard_label);
 
-        standard_box_.reset(new EvaluationStandardComboBox(eval_man_));
+        standard_box_.reset(new EvaluationStandardComboBox(calculator_));
 
         std_layout->addWidget(standard_box_.get());
 
@@ -99,7 +100,7 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(
     standards_layout_ = new QHBoxLayout();
     main_layout->addLayout(standards_layout_);
 
-    if (eval_man_.hasCurrentStandard())
+    if (calculator_.hasCurrentStandard())
         updateStandardWidget();
 
     // some cfg
@@ -107,7 +108,7 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(
         QFormLayout* form_layout = new QFormLayout();
 
         // max ref time diff
-        max_ref_time_diff_edit_ = new QLineEdit(QString::number(eval_settings_.max_ref_time_diff_));
+        max_ref_time_diff_edit_ = new QLineEdit(QString::number(calculator_.settings().max_ref_time_diff_));
         max_ref_time_diff_edit_->setValidator(new QDoubleValidator(0.0, 30.0, 2, this));
         connect(max_ref_time_diff_edit_, &QLineEdit::textEdited,
                 this, &EvaluationStandardTabWidget::maxRefTimeDiffEditSlot);
@@ -118,15 +119,17 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(
     }
 
     // connections
-    connect (&eval_man_, &EvaluationManager::standardsChangedSignal,
+    connect (&calculator_, &EvaluationCalculator::standardsChanged,
              this, &EvaluationStandardTabWidget::changedStandardsSlot);
-    connect (&eval_man_, &EvaluationManager::currentStandardChangedSignal,
+    connect (&calculator_, &EvaluationCalculator::currentStandardChanged,
              this, &EvaluationStandardTabWidget::changedCurrentStandardSlot);
 
     setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout);
 }
 
+/**
+ */
 void EvaluationStandardTabWidget::changedStandardsSlot()
 {
     loginf << "EvaluationStandardTabWidget: changedStandardsSlot";
@@ -135,17 +138,21 @@ void EvaluationStandardTabWidget::changedStandardsSlot()
     standard_box_->updateStandards();
 }
 
+/**
+ */
 void EvaluationStandardTabWidget::changedCurrentStandardSlot()
 {
     loginf << "EvaluationStandardTabWidget: changedCurrentStandardSlot";
 
     assert (standard_box_);
-    standard_box_->setStandardName(eval_man_.currentStandardName());
+    standard_box_->setStandardName(calculator_.currentStandardName());
 
     updateButtons();
     updateStandardWidget();
 }
 
+/**
+ */
 void EvaluationStandardTabWidget::addStandardSlot ()
 {
     loginf << "EvaluationStandardTabWidget: addStandardSlot";
@@ -167,7 +174,7 @@ void EvaluationStandardTabWidget::addStandardSlot ()
             return;
         }
 
-        if (eval_man_.hasStandard(name))
+        if (calculator_.hasStandard(name))
         {
             QMessageBox m_warning(QMessageBox::Warning, "Adding Standard Failed",
                                   "Standard with this name already exists.", QMessageBox::Ok);
@@ -175,10 +182,12 @@ void EvaluationStandardTabWidget::addStandardSlot ()
             return;
         }
 
-        eval_man_.addStandard(name);
+        calculator_.addStandard(name);
     }
 }
 
+/**
+ */
 void EvaluationStandardTabWidget::renameStandardSlot ()
 {
     loginf << "EvaluationStandardTabWidget: renameStandardSlot";
@@ -187,7 +196,7 @@ void EvaluationStandardTabWidget::renameStandardSlot ()
     QString text =
             QInputDialog::getText(this, tr("Standard Name"),
                                   tr("Specify a (unique) standard name:"), QLineEdit::Normal,
-                                  eval_man_.currentStandardName().c_str(), &ok);
+                                  calculator_.currentStandardName().c_str(), &ok);
 
     if (ok)
     {
@@ -201,7 +210,7 @@ void EvaluationStandardTabWidget::renameStandardSlot ()
             return;
         }
 
-        if (eval_man_.hasStandard(new_name))
+        if (calculator_.hasStandard(new_name))
         {
             QMessageBox m_warning(QMessageBox::Warning, "Renaming Standard Failed",
                                   "Standard with this name already exists.", QMessageBox::Ok);
@@ -209,11 +218,12 @@ void EvaluationStandardTabWidget::renameStandardSlot ()
             return;
         }
 
-        eval_man_.renameCurrentStandard(new_name);
+        calculator_.renameCurrentStandard(new_name);
     }
-
 }
 
+/**
+ */
 void EvaluationStandardTabWidget::copyStandardSlot ()
 {
     loginf << "EvaluationStandardTabWidget: copyStandardSlot";
@@ -235,7 +245,7 @@ void EvaluationStandardTabWidget::copyStandardSlot ()
             return;
         }
 
-        if (eval_man_.hasStandard(new_name))
+        if (calculator_.hasStandard(new_name))
         {
             QMessageBox m_warning(QMessageBox::Warning, "Copying Standard Failed",
                                   "Standard with this name already exists.", QMessageBox::Ok);
@@ -243,36 +253,41 @@ void EvaluationStandardTabWidget::copyStandardSlot ()
             return;
         }
 
-        eval_man_.copyCurrentStandard(new_name);
+        calculator_.copyCurrentStandard(new_name);
     }
 }
 
+/**
+ */
 void EvaluationStandardTabWidget::removeStandardSlot ()
 {
     loginf << "EvaluationStandardTabWidget: removeStandardSlot";
 
-    assert (eval_man_.hasCurrentStandard());
-    eval_man_.deleteCurrentStandard();
+    assert (calculator_.hasCurrentStandard());
+    calculator_.deleteCurrentStandard();
 }
 
-
+/**
+ */
 void EvaluationStandardTabWidget::updateButtons()
 {
     assert (add_button_);
     add_button_->setDisabled(false);
     assert (rename_button_);
-    rename_button_->setEnabled(eval_man_.hasCurrentStandard());
+    rename_button_->setEnabled(calculator_.hasCurrentStandard());
     assert (copy_button_);
-    copy_button_->setEnabled(eval_man_.hasCurrentStandard());
+    copy_button_->setEnabled(calculator_.hasCurrentStandard());
     assert (remove_button_);
-    remove_button_->setEnabled(eval_man_.hasCurrentStandard());
+    remove_button_->setEnabled(calculator_.hasCurrentStandard());
 }
 
+/**
+ */
 void EvaluationStandardTabWidget::updateStandardWidget()
 {
     // assert(standards_widget_);
 
-    // string standard_name = eval_man_.currentStandardName();
+    // string standard_name = calculator_.currentStandardName();
 
     // if (!standard_name.size())
     // {
@@ -285,7 +300,7 @@ void EvaluationStandardTabWidget::updateStandardWidget()
     //     return;
     // }
 
-    // EvaluationStandard& standard = eval_man_.currentStandard();
+    // EvaluationStandard& standard = calculator_.currentStandard();
 
     // if (standards_widget_->indexOf(standard.widget()) < 0)
     //     standards_widget_->addWidget(standard.widget());
@@ -304,12 +319,14 @@ void EvaluationStandardTabWidget::updateStandardWidget()
         delete item;
     }
 
-    auto* widget = eval_man_.currentStandard().widget();
+    auto* widget = calculator_.currentStandard().widget();
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);;
 
     standards_layout_->addWidget(widget);
 }
 
+/**
+ */
 void EvaluationStandardTabWidget::maxRefTimeDiffEditSlot(QString value)
 {
     loginf << "EvaluationStandardTabWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
@@ -318,7 +335,7 @@ void EvaluationStandardTabWidget::maxRefTimeDiffEditSlot(QString value)
     float val = value.toFloat(&ok);
 
     if (ok)
-        eval_settings_.max_ref_time_diff_ = val;
+        calculator_.settings().max_ref_time_diff_ = val;
     else
         loginf << "EvaluationStandardTabWidget: maxRefTimeDiffEditSlot: invalid value";
 }

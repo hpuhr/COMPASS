@@ -33,7 +33,7 @@ SinglePositionLatency::SinglePositionLatency(const std::string& result_id,
                                              const SectorLayer& sector_layer,
                                              unsigned int utn,
                                              const EvaluationTargetData* target,
-                                             EvaluationManager& eval_man,
+                                             EvaluationCalculator& calculator,
                                              const EvaluationDetails& details,
                                              unsigned int num_pos,
                                              unsigned int num_no_ref,
@@ -41,7 +41,7 @@ SinglePositionLatency::SinglePositionLatency(const std::string& result_id,
                                              unsigned int num_pos_inside,
                                              unsigned int num_value_ok,
                                              unsigned int num_value_nok)
-:   SinglePositionProbabilityBase("SinglePositionLatency", result_id, requirement, sector_layer, utn, target, eval_man, details,
+:   SinglePositionProbabilityBase("SinglePositionLatency", result_id, requirement, sector_layer, utn, target, calculator, details,
                                   num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_value_ok, num_value_nok)
 {
     updateResult();
@@ -51,7 +51,7 @@ SinglePositionLatency::SinglePositionLatency(const std::string& result_id,
 */
 std::shared_ptr<Joined> SinglePositionLatency::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedPositionLatency> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedPositionLatency> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -123,8 +123,8 @@ nlohmann::json::array_t SinglePositionLatency::detailValues(const EvaluationDeta
 JoinedPositionLatency::JoinedPositionLatency(const std::string& result_id, 
                                              std::shared_ptr<EvaluationRequirement::Base> requirement,
                                              const SectorLayer& sector_layer, 
-                                             EvaluationManager& eval_man)
-:   JoinedPositionProbabilityBase("JoinedPositionLatency", result_id, requirement, sector_layer, eval_man, "latency")
+                                             EvaluationCalculator& calculator)
+:   JoinedPositionProbabilityBase("JoinedPositionLatency", result_id, requirement, sector_layer, calculator, "latency")
 {
 }
 

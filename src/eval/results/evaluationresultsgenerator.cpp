@@ -17,6 +17,7 @@
 
 #include "evaluationresultsgenerator.h"
 #include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 #include "evaluationdata.h"
 #include "evaluationstandard.h"
 
@@ -62,9 +63,9 @@ using namespace Utils;
 
 const std::string EvaluationResultsGenerator::EvalResultName = "Evaluation Result";
 
-EvaluationResultsGenerator::EvaluationResultsGenerator(
-        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
-    : eval_man_(eval_man), eval_settings_(eval_settings), results_model_(eval_man_)
+EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationCalculator& calculator)
+:   calculator_   (calculator)
+,   results_model_(calculator.manager())
 {
 }
 
@@ -73,20 +74,23 @@ EvaluationResultsGenerator::~EvaluationResultsGenerator()
     clear();
 }
 
-void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStandard& standard)
+void EvaluationResultsGenerator::evaluate (EvaluationData& data, 
+                                           EvaluationStandard& standard)
 {
-    loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details "
-           << eval_settings_.report_skip_no_data_details_
-           << " split_results_by_mops " << eval_settings_.report_split_results_by_mops_
-           << " report_split_results_by_aconly_ms " << eval_settings_.report_split_results_by_aconly_ms_;
+    const auto& eval_settings = calculator_.settings();
+
+    loginf << "EvaluationResultsGenerator: evaluate:"
+           << " skip_no_data_details " << eval_settings.report_skip_no_data_details_
+           << " split_results_by_mops " << eval_settings.report_split_results_by_mops_
+           << " report_split_results_by_aconly_ms " << eval_settings.report_split_results_by_aconly_ms_;
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
-    assert (eval_man_.sectorsLoaded());
-    std::vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man_.sectorsLayers();
+    assert (calculator_.sectorsLoaded());
+    std::vector<std::shared_ptr<SectorLayer>>& sector_layers = calculator_.sectorLayers();
 
     unsigned int num_req_evals = 0;
     for (auto& sec_it : sector_layers)
@@ -100,7 +104,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             const string& requirement_group_name = req_group_it->name();
 
-            if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
+            if (!calculator_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
             num_req_evals += req_group_it->numUsedRequirements() * data.size(); // num reqs * num target
@@ -164,7 +168,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             const string& requirement_group_name = req_group_it->name();
 
-            if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
+            if (!calculator_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
             loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
@@ -304,7 +308,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                     result_sum->addSingleResult(result_it);
 
-                    if (eval_man_.settings().report_split_results_by_mops_)
+                    if (eval_settings.report_split_results_by_mops_)
                     {
                         subresult_str = result_it->target()->mopsVersionStr();
 
@@ -320,7 +324,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                         extra_results_sums.at(subresult_str+" Sum")->addSingleResult(result_it);
                     }
 
-                    if (eval_man_.settings().report_split_results_by_aconly_ms_)
+                    if (eval_settings.report_split_results_by_aconly_ms_)
                     {
                         subresult_str = "Primary";
 
@@ -391,7 +395,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     // 00:06:22.852 with no parallel
 
-    emit eval_man_.resultsChangedSignal();
+    //@TODO?
+    //emit eval_calc_.resultsChangedSignal();
 
     loginf << "EvaluationResultsGenerator: evaluate: generating results";
 
@@ -406,11 +411,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 void EvaluationResultsGenerator::clear()
 {
     // clear everything
-    results_model_.beginReset();
-    results_model_.clear();
     results_.clear();
     results_vec_.clear();
-    results_model_.endReset();
 }
 
 void EvaluationResultsGenerator::generateResultsReportGUI()
@@ -440,7 +442,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     //store eval config
     nlohmann::json config;
-    eval_man_.generateJSON(config, Configurable::JSONExportType::General);
+    calculator_.generateJSON(config, Configurable::JSONExportType::General);
     result->setConfiguration(config);
 
     auto& gen_sec = report->getSection("Overview:General");
@@ -457,13 +459,13 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     gen_table.addRow({"Application Version", "Application Version", VERSION});
     gen_table.addRow({"DB", "Database Name", COMPASS::instance().lastDbFilename()});
 
-    assert (eval_man_.hasCurrentStandard());
-    gen_table.addRow({"Standard", "Standard name", eval_man_.currentStandardName()});
+    assert (calculator_.hasCurrentStandard());
+    gen_table.addRow({"Standard", "Standard name", calculator_.currentStandardName()});
 
     // add used sensors
 
-    auto data_source_ref = eval_man_.activeDataSourceInfoRef();
-    auto data_source_tst = eval_man_.activeDataSourceInfoTst();
+    auto data_source_ref = calculator_.activeDataSourceInfoRef();
+    auto data_source_tst = calculator_.activeDataSourceInfoTst();
 
     std::string sensors_ref;
     std::string sensors_tst;
@@ -529,19 +531,9 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
            << String::timeStringFromDouble(load_time, true);
 }
 
-EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
-{
-    return results_model_;
-}
-
 void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
 {
     loginf << "EvaluationResultsGenerator: updateToChanges: reset_viewable " << reset_viewable;
-
-    // clear everything
-    results_model_.beginReset();
-    results_model_.clear();
-    results_model_.endReset();
 
     // first check all single results if should be used
     for (auto& result_it : results_vec_)
@@ -580,14 +572,14 @@ void EvaluationResultsGenerator::updateToChanges ()
     updateToChanges(true);
 }
 
-EvaluationResultsGeneratorWidget* EvaluationResultsGenerator::widget()
-{
-    return new EvaluationResultsGeneratorWidget(*this, eval_man_, eval_settings_);
-}
-
 void EvaluationResultsGenerator::addNonResultsContent (const std::shared_ptr<ResultReport::Report>& report)
 {
     // standard
-    assert (eval_man_.hasCurrentStandard());
-    eval_man_.currentStandard().addToReport(report);
+    assert (calculator_.hasCurrentStandard());
+    calculator_.currentStandard().addToReport(report);
+}
+
+EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
+{
+    return results_model_;
 }

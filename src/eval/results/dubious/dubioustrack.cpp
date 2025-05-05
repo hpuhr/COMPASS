@@ -87,7 +87,7 @@ SingleDubiousTrack::SingleDubiousTrack(const std::string& result_id,
                                        const SectorLayer& sector_layer,
                                        unsigned int utn,
                                        const EvaluationTargetData* target,
-                                       EvaluationManager& eval_man,
+                                       EvaluationCalculator& calculator,
                                        const EvaluationDetails& details,
                                        unsigned int num_updates,
                                        unsigned int num_pos_outside,
@@ -96,7 +96,7 @@ SingleDubiousTrack::SingleDubiousTrack(const std::string& result_id,
                                        unsigned int num_tracks,
                                        unsigned int num_tracks_dubious)
 :   DubiousTrackBase(num_tracks, num_tracks_dubious)
-,   SingleDubiousBase ("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, eval_man, details,
+,   SingleDubiousBase ("SingleDubiousTrack", result_id, requirement, sector_layer, utn, target, calculator, details,
                        num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious)
 {
     for (const auto& detail_it : details)
@@ -142,7 +142,7 @@ float SingleDubiousTrack::trackDurationDubious() const
 */
 std::shared_ptr<Joined> SingleDubiousTrack::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedDubiousTrack> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedDubiousTrack> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -321,9 +321,9 @@ void SingleDubiousTrack::addAnnotationForDetail(nlohmann::json& annotations_json
 JoinedDubiousTrack::JoinedDubiousTrack(const std::string& result_id, 
                                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                                        const SectorLayer& sector_layer, 
-                                       EvaluationManager& eval_man)
+                                       EvaluationCalculator& calculator)
 :   DubiousTrackBase()
-,   JoinedDubiousBase("JoinedDubiousTrack", result_id, requirement, sector_layer, eval_man)
+,   JoinedDubiousBase("JoinedDubiousTrack", result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -451,7 +451,7 @@ FeatureDefinitions JoinedDubiousTrack::getCustomAnnotationDefinitions() const
         return boost::optional<bool>(SingleDubiousTrack::detailIsOkStatic(detail));
     };
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(ValueSource<bool>(getValue), 
                        GridAddDetailMode::AddEvtPosition, 
                        false);

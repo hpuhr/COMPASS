@@ -37,7 +37,7 @@ SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
                                                    const SectorLayer& sector_layer,
                                                    unsigned int utn,
                                                    const EvaluationTargetData* target,
-                                                   EvaluationManager& eval_man,
+                                                   EvaluationCalculator& calculator,
                                                    const EvaluationDetails& details,
                                                    unsigned int num_pos,
                                                    unsigned int num_no_ref,
@@ -47,7 +47,7 @@ SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
                                                    unsigned int num_comp_failed,
                                                    const std::vector<double>& range_values_ref,
                                                    const std::vector<double>& range_values_tst)
-:   SinglePositionValueBase("SinglePositionRadarRange", result_id, requirement, sector_layer, utn, target, eval_man, details,
+:   SinglePositionValueBase("SinglePositionRadarRange", result_id, requirement, sector_layer, utn, target, calculator, details,
                             num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed)
 ,   range_values_ref_(range_values_ref)
 ,   range_values_tst_(range_values_tst)
@@ -61,7 +61,7 @@ SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
 */
 std::shared_ptr<Joined> SinglePositionRadarRange::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedPositionRadarRange> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedPositionRadarRange> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -180,8 +180,8 @@ boost::optional<double> SinglePositionRadarRange::computeFinalResultValue() cons
 JoinedPositionRadarRange::JoinedPositionRadarRange(const std::string& result_id,
                                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                    const SectorLayer& sector_layer,
-                                                   EvaluationManager& eval_man)
-:   JoinedPositionValueBase("JoinedPositionRadarRange", result_id, requirement, sector_layer, eval_man, "distance")
+                                                   EvaluationCalculator& calculator)
+:   JoinedPositionValueBase("JoinedPositionRadarRange", result_id, requirement, sector_layer, calculator, "distance")
 {
 }
 

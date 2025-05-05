@@ -189,14 +189,14 @@ Base::Base(const std::string& name,
            const std::string& group_name,
            double threshold,
            COMPARISON_TYPE check_type, 
-           EvaluationManager& eval_man,
+           EvaluationCalculator& calculator,
            const boost::optional<bool>& must_hold_for_any_target)
 :   name_                    (name      )
 ,   short_name_              (short_name)
 ,   group_name_              (group_name)
 ,   threshold_               (threshold )
 ,   check_type_              (check_type)
-,   eval_man_                (eval_man  )
+,   calculator_              (calculator)
 ,   must_hold_for_any_target_(must_hold_for_any_target)
 {
 }

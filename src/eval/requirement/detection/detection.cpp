@@ -43,7 +43,7 @@ Detection::Detection(const std::string& name,
                      const std::string& group_name,
                      double prob, 
                      COMPARISON_TYPE prob_check_type, 
-                     EvaluationManager& eval_man,
+                     EvaluationCalculator& calculator,
                      float update_interval_s, 
                      bool use_min_gap_length, 
                      float min_gap_length_s,
@@ -53,7 +53,7 @@ Detection::Detection(const std::string& name,
                      bool use_miss_tolerance, 
                      float miss_tolerance_s, 
                      bool hold_for_any_target)
-    : ProbabilityBase     (name, short_name, group_name, prob, prob_check_type, invert_prob, eval_man, hold_for_any_target),
+    : ProbabilityBase     (name, short_name, group_name, prob, prob_check_type, invert_prob, calculator, hold_for_any_target),
     update_interval_s_  (update_interval_s),
     use_min_gap_length_ (use_min_gap_length),
     min_gap_length_s_   (min_gap_length_s),
@@ -133,7 +133,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
                << " update_interval " << update_interval_s_ << " prob " << threshold()
                << " use_miss_tolerance " << use_miss_tolerance_ << " miss_tolerance " << miss_tolerance_s_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     // create ref time periods
     TimePeriodCollection ref_periods;
@@ -311,7 +311,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
 
         return make_shared<EvaluationRequirementResult::SingleDetection>(
             "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-            eval_man_, details, sum_uis, sum_missed_uis, ref_periods);
+            calculator_, details, sum_uis, sum_missed_uis, ref_periods);
     }
 
     // collect test times in ref periods
@@ -329,7 +329,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
 
     string comment;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
 
     for (const auto& tst_it : tst_data)
     {
@@ -646,7 +646,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
 
     return make_shared<EvaluationRequirementResult::SingleDetection>(
         "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-        eval_man_, details, sum_uis, sum_missed_uis, ref_periods);
+        calculator_, details, sum_uis, sum_missed_uis, ref_periods);
 }
 
 /**

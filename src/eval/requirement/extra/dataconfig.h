@@ -38,7 +38,7 @@ namespace EvaluationRequirement
     public:
         ExtraDataConfig(const std::string& class_id, const std::string& instance_id,
                         Group& group, EvaluationStandard& standard,
-                        EvaluationManager& eval_man);
+                        EvaluationCalculator& calculator);
         virtual ~ExtraDataConfig();
 
         std::shared_ptr<Base> createRequirement() override;

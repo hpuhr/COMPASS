@@ -31,8 +31,8 @@ namespace EvaluationRequirement
 {
 PositionAlongConfig::PositionAlongConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("max_abs_value", &max_abs_value_, 50.0f);
 }
@@ -45,7 +45,7 @@ PositionAlongConfig::~PositionAlongConfig()
 std::shared_ptr<Base> PositionAlongConfig::createRequirement()
 {
     shared_ptr<PositionAlong> req = make_shared<PositionAlong>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_,
                 max_abs_value_);
 
     return req;

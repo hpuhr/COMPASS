@@ -34,7 +34,7 @@ public:
               const std::string& group_name,
               double prob, 
               COMPARISON_TYPE prob_check_type, 
-              EvaluationManager& eval_man,
+              EvaluationCalculator& calculator,
               float min_duration, 
               unsigned int min_num_updates, 
               bool ignore_primary_only);

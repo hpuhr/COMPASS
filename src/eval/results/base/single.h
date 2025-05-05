@@ -139,7 +139,7 @@ public:
            const SectorLayer& sector_layer,
            unsigned int utn, 
            const EvaluationTargetData* target, 
-           EvaluationManager& eval_man,
+           EvaluationCalculator& calculator,
            const EvaluationDetails& details);
     virtual ~Single();
 

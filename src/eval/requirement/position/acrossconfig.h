@@ -35,7 +35,7 @@ class PositionAcrossConfig : public ProbabilityBaseConfig
 {
 public:
     PositionAcrossConfig(const std::string& class_id, const std::string& instance_id,
-                         Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
+                         Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~PositionAcrossConfig();
 
     std::shared_ptr<Base> createRequirement() override;

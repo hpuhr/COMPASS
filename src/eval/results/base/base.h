@@ -34,7 +34,7 @@
 #include <Eigen/Core>
 
 class EvaluationTargetData;
-class EvaluationManager;
+class EvaluationCalculator;
 class SectorLayer;
 
 namespace EvaluationRequirement 
@@ -94,7 +94,7 @@ public:
          const std::string& result_id,
          std::shared_ptr<EvaluationRequirement::Base> requirement, 
          const SectorLayer& sector_layer,
-         EvaluationManager& eval_man);
+         EvaluationCalculator& calculator);
     virtual ~Base();
 
     /// returns the base type of the result (either single or joined)
@@ -266,7 +266,7 @@ protected:
     std::shared_ptr<EvaluationRequirement::Base> requirement_;
     const SectorLayer& sector_layer_;
 
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 
 private:
     boost::optional<double> result_;

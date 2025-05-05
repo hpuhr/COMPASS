@@ -17,7 +17,7 @@
 
 #include "intervalbase.h"
 #include "timeperiod.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 #include "timeconv.h"
 
 #include "eval/results/base/intervalbase.h"
@@ -49,14 +49,14 @@ IntervalBase::IntervalBase(const std::string& name,
                            const std::string& group_name,
                            double prob, 
                            COMPARISON_TYPE prob_check_type, 
-                           EvaluationManager& eval_man,
+                           EvaluationCalculator& calculator,
                            float update_interval_s, 
                            const boost::optional<float>& min_gap_length_s,
                            const boost::optional<float>& max_gap_length_s,
                            const boost::optional<float>& miss_tolerance_s,
                            const boost::optional<float>& min_ref_period_s,
                            const boost::optional<bool>& must_hold_for_any_target)
-:   ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man, must_hold_for_any_target)
+:   ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator, must_hold_for_any_target)
 ,   update_interval_s_       (update_interval_s       )
 ,   min_gap_length_s_        (min_gap_length_s        )
 ,   max_gap_length_s_        (max_gap_length_s        )
@@ -78,8 +78,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
                                                                             std::shared_ptr<Base> instance,
                                                                             const SectorLayer& sector_layer)
 {
-    auto max_ref_time_diff    = Utils::Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    auto max_ref_time_diff    = Utils::Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
 
     typedef EvaluationRequirementResult::SingleIntervalBase Result;
     typedef EvaluationDetail                                Detail;
@@ -309,7 +309,7 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
     else
     {
         //period obtains updates
-        auto max_ref_time_diff = Utils::Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+        auto max_ref_time_diff = Utils::Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
         size_t n = updates.size();
 

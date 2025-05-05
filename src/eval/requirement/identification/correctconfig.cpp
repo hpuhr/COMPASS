@@ -35,8 +35,8 @@ namespace EvaluationRequirement
 
 IdentificationCorrectConfig::IdentificationCorrectConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("require_correctness_of_all", &require_correctness_of_all_, false);
 
@@ -48,7 +48,7 @@ IdentificationCorrectConfig::IdentificationCorrectConfig(
 std::shared_ptr<Base> IdentificationCorrectConfig::createRequirement()
 {
     shared_ptr<IdentificationCorrect> req = make_shared<IdentificationCorrect>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_,
                 require_correctness_of_all_,
                 use_mode_a_, use_ms_ta_, use_ms_ti_);
 

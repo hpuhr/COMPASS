@@ -445,7 +445,7 @@ void ReconstructorTask::run()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
-    COMPASS::instance().evaluationManager().clearLoadedDataAndResults(); // in case there are previous results
+    COMPASS::instance().evaluationManager().clearData(); // in case there are previous results
 
     delcalcref_future_ = std::async(std::launch::async, [&] {
         {

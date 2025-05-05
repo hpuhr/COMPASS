@@ -33,7 +33,7 @@ SinglePositionRadarAzimuth::SinglePositionRadarAzimuth(const std::string& result
                                                        const SectorLayer& sector_layer,
                                                        unsigned int utn,
                                                        const EvaluationTargetData* target,
-                                                       EvaluationManager& eval_man,
+                                                       EvaluationCalculator& calculator,
                                                        const EvaluationDetails& details,
                                                        unsigned int num_pos,
                                                        unsigned int num_no_ref,
@@ -41,7 +41,7 @@ SinglePositionRadarAzimuth::SinglePositionRadarAzimuth(const std::string& result
                                                        unsigned int num_pos_inside,
                                                        unsigned int num_comp_passed,
                                                        unsigned int num_comp_failed)
-:   SinglePositionValueBase("SinglePositionRadarAzimuth", result_id, requirement, sector_layer, utn, target, eval_man, details,
+:   SinglePositionValueBase("SinglePositionRadarAzimuth", result_id, requirement, sector_layer, utn, target, calculator, details,
                             num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed)
 {
     updateResult();
@@ -51,7 +51,7 @@ SinglePositionRadarAzimuth::SinglePositionRadarAzimuth(const std::string& result
 */
 std::shared_ptr<Joined> SinglePositionRadarAzimuth::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedPositionRadarAzimuth> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedPositionRadarAzimuth> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -133,8 +133,8 @@ boost::optional<double> SinglePositionRadarAzimuth::computeFinalResultValue() co
 JoinedPositionRadarAzimuth::JoinedPositionRadarAzimuth(const std::string& result_id,
                                                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                        const SectorLayer& sector_layer,
-                                                       EvaluationManager& eval_man)
-:   JoinedPositionValueBase("JoinedPositionRadarAzimuth", result_id, requirement, sector_layer, eval_man, "distance")
+                                                       EvaluationCalculator& calculator)
+:   JoinedPositionValueBase("JoinedPositionRadarAzimuth", result_id, requirement, sector_layer, calculator, "distance")
 {
 }
 

@@ -30,7 +30,7 @@
 #include <memory>
 
 class EvaluationTargetData;
-class EvaluationManager;
+class EvaluationCalculator;
 class SectorLayer;
 
 namespace EvaluationRequirementResult {
@@ -61,7 +61,7 @@ public:
          const std::string& group_name,
          double threshold,
          COMPARISON_TYPE check_type, 
-         EvaluationManager& eval_man,
+         EvaluationCalculator& calculator,
          const boost::optional<bool>& must_hold_for_any_target = boost::optional<bool>());
     virtual ~Base();
 
@@ -102,7 +102,7 @@ protected:
     std::string short_name_;
     std::string group_name_;
 
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 
     virtual double convertValueToResult(double value) const;
 

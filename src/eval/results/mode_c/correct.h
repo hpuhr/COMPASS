@@ -32,7 +32,7 @@ public:
                        const SectorLayer& sector_layer,
                        unsigned int utn, 
                        const EvaluationTargetData* target, 
-                       EvaluationManager& eval_man,
+                       EvaluationCalculator& calculator,
                        const EvaluationDetails& details,
                        unsigned int num_updates, 
                        unsigned int num_no_ref_pos, 
@@ -56,7 +56,7 @@ public:
     JoinedModeCCorrect(const std::string& result_id,
                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                        const SectorLayer& sector_layer, 
-                       EvaluationManager& eval_man);
+                       EvaluationCalculator& calculator);
 };
 
 }

@@ -35,9 +35,12 @@
 using namespace std;
 using namespace EvaluationResultsReport;
 
-EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::string& instance_id,
-                                       EvaluationManager& eval_man)
-    : Configurable(class_id, instance_id, &eval_man), EvaluationStandardTreeItem(&root_item_), eval_man_(eval_man),
+EvaluationStandard::EvaluationStandard(const std::string& class_id, 
+                                       const std::string& instance_id,
+                                       EvaluationCalculator& calculator)
+    : Configurable(class_id, instance_id, &calculator), 
+      EvaluationStandardTreeItem(&root_item_), 
+      calculator_(calculator),
       root_item_(*this)
 {
     registerParameter("name", &name_, std::string());
@@ -56,7 +59,7 @@ void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "EvaluationRequirementGroup")
     {
-        Group* group = new Group(class_id, instance_id, *this, eval_man_);
+        Group* group = new Group(class_id, instance_id, *this, calculator_);
 
         logdbg << "EvaluationStandard: generateSubConfigurable: adding group " << group->name();
 

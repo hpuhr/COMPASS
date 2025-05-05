@@ -21,7 +21,7 @@
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
 #include "eval/results/base/base.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
 #include <QString>
 
@@ -242,10 +242,10 @@ std::string SectionID::createForRequirementResultSum(const EvaluationRequirement
  */
 std::string SectionID::sumResult2Target(const std::string& sum_result_id, 
                                         unsigned int utn, 
-                                        const EvaluationManager& eval_manager)
+                                        const EvaluationCalculator& eval_calc)
 {
     //iterate over all results
-    for (const auto& elem : eval_manager.results())
+    for (const auto& elem : eval_calc.results())
     {
         for (const auto& elem2 : elem.second)
         {

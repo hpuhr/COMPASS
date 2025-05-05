@@ -70,9 +70,9 @@ Single::Single(const std::string& type,
                const SectorLayer& sector_layer,
                unsigned int utn,
                const EvaluationTargetData* target,
-               EvaluationManager& eval_man,
+               EvaluationCalculator& calculator,
                const EvaluationDetails& details)
-:   Base    (type, result_id, requirement, sector_layer, eval_man)
+:   Base    (type, result_id, requirement, sector_layer, calculator)
 ,   utn_    (utn   )
 ,   target_ (target)
 ,   details_(details)
@@ -153,7 +153,7 @@ std::string Single::getTargetRequirementSectionID ()
 */
 std::string Single::getRequirementSectionID () const // TODO hack
 {
-    if (eval_man_.settings().report_split_results_by_mops_)
+    if (calculator_.settings().report_split_results_by_mops_)
     {
         string tmp = target()->mopsVersionStr();
 
@@ -164,7 +164,7 @@ std::string Single::getRequirementSectionID () const // TODO hack
 
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+":"+requirement_->name();
     }
-    else if (eval_man_.settings().report_split_results_by_aconly_ms_)
+    else if (calculator_.settings().report_split_results_by_aconly_ms_)
     {
         string tmp = "Primary";
 
@@ -226,11 +226,11 @@ Single::TemporaryDetails Single::temporaryDetails() const
 Single::EvaluationDetails Single::recomputeDetails() const
 {
     assert(requirement_);
-    assert(eval_man_.getData().hasTargetData(utn_));
+    assert(calculator_.data().hasTargetData(utn_));
 
     logdbg << "Single: recomputeDetails: recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
 
-    const auto& data = eval_man_.getData().targetData(utn_);
+    const auto& data = calculator_.data().targetData(utn_);
 
     auto result = requirement_->evaluate(data, requirement_, sector_layer_);
     assert(result);
@@ -304,8 +304,8 @@ void Single::addTargetToOverviewTable(shared_ptr<ResultReport::Report> report)
 
     addTargetToOverviewTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.settings().report_split_results_by_mops_ || 
-        eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
+    if (calculator_.settings().report_split_results_by_mops_ || 
+        calculator_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
         auto& sum_section = report->getSection(getRequirementSumSectionID());
 
@@ -988,7 +988,7 @@ void Single::iterateDetails(const EvaluationDetails& details,
 */
 std::unique_ptr<nlohmann::json::object_t> Single::createBaseViewable() const
 {
-    return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+    return calculator_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
 }
 
 /**

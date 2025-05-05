@@ -28,7 +28,7 @@ class ROCDCorrect : public GenericDouble
 {
   public:
     ROCDCorrect(const std::string& name, const std::string& short_name, const std::string& group_name,
-                double prob, COMPARISON_TYPE prob_check_type, double threshold, EvaluationManager& eval_man);
+                double prob, COMPARISON_TYPE prob_check_type, double threshold, EvaluationCalculator& calculator);
 
     std::string probabilityNameShort() const override final { return "PCROCD"; }
     std::string probabilityName() const override final { return "Probability of Correct ROCD"; }

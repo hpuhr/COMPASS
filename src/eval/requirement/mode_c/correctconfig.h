@@ -38,7 +38,7 @@ class ModeCCorrectConfig : public ProbabilityBaseConfig
 public:
     ModeCCorrectConfig(const std::string& class_id, const std::string& instance_id,
                                 Group& group, EvaluationStandard& standard,
-                                EvaluationManager& eval_man);
+                                EvaluationCalculator& calculator);
 
     std::shared_ptr<Base> createRequirement() override;
 

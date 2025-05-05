@@ -62,8 +62,8 @@ DubiousTarget::DubiousTarget(const std::string& name,
                              float dubious_prob,
                              double prob, 
                              COMPARISON_TYPE prob_check_type, 
-                             EvaluationManager& eval_man)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
+                             EvaluationCalculator& calculator)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator),
       minimum_comparison_time_(minimum_comparison_time), 
       maximum_comparison_time_(maximum_comparison_time),
       mark_primary_only_(mark_primary_only), 
@@ -183,7 +183,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (co
     {
         return make_shared<EvaluationRequirementResult::SingleDubiousTarget>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious);
+                    calculator_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious);
     }
 
     // have data, calculate
@@ -400,7 +400,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (co
 
     return make_shared<EvaluationRequirementResult::SingleDubiousTarget>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious);
+                calculator_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious);
 }
 
 /**

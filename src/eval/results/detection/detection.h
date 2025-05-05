@@ -53,7 +53,7 @@ public:
                     const SectorLayer& sector_layer, 
                     unsigned int utn, 
                     const EvaluationTargetData* target,
-                    EvaluationManager& eval_man,
+                    EvaluationCalculator& calculator,
                     const EvaluationDetails& details,
                     int sum_uis, 
                     int missed_uis, 
@@ -101,7 +101,7 @@ public:
     JoinedDetection(const std::string& result_id, 
                     std::shared_ptr<EvaluationRequirement::Base> requirement,
                     const SectorLayer& sector_layer, 
-                    EvaluationManager& eval_man);
+                    EvaluationCalculator& calculator);
 protected:
     virtual unsigned int numIssues() const override;
     virtual unsigned int numUpdates() const override;

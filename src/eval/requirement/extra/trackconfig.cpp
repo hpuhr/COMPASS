@@ -35,8 +35,8 @@ namespace EvaluationRequirement
 
 ExtraTrackConfig::ExtraTrackConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("min_duration", &min_duration_, 60.0f);
     registerParameter("min_num_updates", &min_num_updates_, 10u);
@@ -51,7 +51,7 @@ ExtraTrackConfig::~ExtraTrackConfig()
 std::shared_ptr<Base> ExtraTrackConfig::createRequirement()
 {
     shared_ptr<ExtraTrack> req = make_shared<ExtraTrack>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, min_duration_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_, min_duration_,
                 min_num_updates_, ignore_primary_only_);
 
     return req;

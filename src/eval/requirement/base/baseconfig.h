@@ -29,7 +29,7 @@ class EvaluationStandard;
 
 class QWidget;
 class QFormLayout;
-class EvaluationManager;
+class EvaluationCalculator;
 
 namespace ResultReport
 {
@@ -51,7 +51,7 @@ public:
                const std::string& instance_id,
                Group& group, 
                EvaluationStandard& standard,
-               EvaluationManager& eval_man);
+               EvaluationCalculator& calculator);
     virtual ~BaseConfig();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -85,7 +85,7 @@ public:
 protected:
     Group& group_;
     EvaluationStandard& standard_;
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 
     bool        use_ = true;
     std::string name_;

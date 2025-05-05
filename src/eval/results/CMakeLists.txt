@@ -19,10 +19,8 @@ include_directories (
 target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgenerator.h"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgeneratorwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgenerator.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/evaluationresultsgeneratorwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdetail.cpp"
     )

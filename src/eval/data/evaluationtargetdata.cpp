@@ -21,7 +21,7 @@
 #include "dbcontent/target/target.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 #include "util/timeconv.h"
 #include "sector/airspace.h"
 #include "sectorlayer.h"
@@ -57,15 +57,15 @@ double EvaluationTargetData::interest_thres_sum_mid_  = 0.05;
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, 
                                            EvaluationData& eval_data,
                                            std::shared_ptr<dbContent::DBContentAccessor> accessor,
-                                           EvaluationManager& eval_man,
+                                           EvaluationCalculator& calculator,
                                            DBContentManager& dbcont_man)
     :   utn_       (utn)
     ,   eval_data_ (eval_data)
     ,   accessor_  (accessor)
-    ,   eval_man_  (eval_man)
+    ,   calculator_(calculator)
     ,   dbcont_man_(dbcont_man)
-    ,   ref_chain_ (accessor_, eval_man_.dbContentNameRef())
-    ,   tst_chain_ (accessor_, eval_man_.dbContentNameTst())
+    ,   ref_chain_ (accessor_, calculator_.dbContentNameRef())
+    ,   tst_chain_ (accessor_, calculator_.dbContentNameTst())
 {
 }
 
@@ -1266,9 +1266,9 @@ void EvaluationTargetData::computeSectorInsideInfo() const
     inside_map_           = {};
     inside_sector_layers_ = {};
 
-    assert (eval_man_.sectorsLoaded());
+    assert (calculator_.sectorsLoaded());
 
-    auto sector_layers = eval_man_.sectorsLayers();
+    auto sector_layers = calculator_.sectorLayers();
 
     //store sector layers
     {
@@ -1279,8 +1279,8 @@ void EvaluationTargetData::computeSectorInsideInfo() const
 
     const SectorLayer* min_height_layer_ptr = nullptr;
 
-    if (eval_man_.filterMinimumHeight())
-        min_height_layer_ptr = eval_man_.minHeightFilterLayer().get();
+    if (calculator_.filterMinimumHeight())
+        min_height_layer_ptr = calculator_.minHeightFilterLayer().get();
 
     size_t num_sector_layers = sector_layers.size();
     size_t num_ref           = ref_chain_.size();
@@ -1409,7 +1409,7 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
     }
 
     // calc if insice test sensor coverage, true if not circles
-    bool inside_cov = eval_man_.tstSrcsCoverage().isInside(pos.latitude_, pos.longitude_);
+    bool inside_cov = calculator_.tstSrcsCoverage().isInside(pos.latitude_, pos.longitude_);
 
     // check sector layers
     for (const auto& sl : inside_sector_layers_)

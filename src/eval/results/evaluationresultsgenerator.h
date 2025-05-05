@@ -21,15 +21,9 @@
 #include "eval/results/base/base.h"
 
 #include "evaluationdata.h"
-#include "evaluationresultsgeneratorwidget.h"
 
-//#include "sectorlayer.h"
-//#include "logger.h"
-
-//#include <tbb/tbb.h>
-
-class EvaluationManager;
-class EvaluationManagerSettings;
+class EvaluationCalculator;
+class EvaluationSettings;
 class EvaluationStandard;
 
 namespace EvaluationRequirementResult
@@ -43,15 +37,16 @@ namespace ResultReport
     class Report;
 }
 
+/**
+ */
 class EvaluationResultsGenerator
 {
 public:
-    EvaluationResultsGenerator(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
+    EvaluationResultsGenerator(EvaluationCalculator& calculator);
     virtual ~EvaluationResultsGenerator();
 
-    void evaluate (EvaluationData& data, EvaluationStandard& standard);
-
-    EvaluationResultsReport::TreeModel& resultsModel();
+    void evaluate(EvaluationData& data, 
+                  EvaluationStandard& standard);
 
     typedef std::map<std::string,
     std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
@@ -63,12 +58,11 @@ public:
     const { return results_; } ;
 
     void updateToChanges();
-
     void generateResultsReportGUI();
 
     void clear();
 
-    EvaluationResultsGeneratorWidget* widget(); // has to take ownership
+    EvaluationResultsReport::TreeModel& resultsModel(); //@TODO: remove if no longer needed
 
     static const std::string EvalResultName;
 
@@ -76,14 +70,12 @@ protected:
     void addNonResultsContent (const std::shared_ptr<ResultReport::Report>& report);
     void updateToChanges(bool reset_viewable);
 
-    EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
+    EvaluationCalculator& calculator_;
 
-    EvaluationResultsReport::TreeModel results_model_;
+    EvaluationResultsReport::TreeModel results_model_; //@TODO: remove if no longer needed
 
     // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
     std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> results_;
     std::vector<std::shared_ptr<EvaluationRequirementResult::Base>> results_vec_; // ordered as generated
 
-    
 };

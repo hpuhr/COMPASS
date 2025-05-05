@@ -26,7 +26,7 @@
 #include "view/gridview/grid2dlayer.h"
 #include "view/points/viewpointgenerator.h"
 
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
 #include <string>
 
@@ -50,13 +50,13 @@ template<typename T>
 class FeatureDefinitionGridBase : public FeatureDefinition
 {
 public:
-    FeatureDefinitionGridBase(const EvaluationManager& eval_manager,
+    FeatureDefinitionGridBase(const EvaluationCalculator& calculator,
                               const std::string& description_type,
                               const std::string& feature_description,
                               bool generate_geoimage,
                               const boost::optional<unsigned int>& grid_num_cells_x = boost::optional<unsigned int>(),
                               const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>())
-    :   FeatureDefinition    (eval_manager, description_type, feature_description, "", "")
+    :   FeatureDefinition    (calculator, description_type, feature_description, "", "")
     ,   grid_num_cells_x_    (grid_num_cells_x)
     ,   grid_num_cells_y_    (grid_num_cells_y)
     ,   generate_geoimage_   (generate_geoimage)
@@ -90,8 +90,8 @@ public:
         //create suitably sized grid
         QRectF roi = gridBounds(result->sectorLayer(), {});
 
-        unsigned int grid_num_cells_x = grid_num_cells_x_.has_value() ? grid_num_cells_x_.value() : FeatureDefinition::evalManager().settings().grid_num_cells_x;
-        unsigned int grid_num_cells_y = grid_num_cells_y_.has_value() ? grid_num_cells_y_.value() : evalManager().settings().grid_num_cells_y;
+        unsigned int grid_num_cells_x = grid_num_cells_x_.has_value() ? grid_num_cells_x_.value() : calculator().settings().grid_num_cells_x;
+        unsigned int grid_num_cells_y = grid_num_cells_y_.has_value() ? grid_num_cells_y_.value() : calculator().settings().grid_num_cells_y;
 
         auto resolution = grid2d::GridResolution().setCellCount(grid_num_cells_x,
                                                                 grid_num_cells_y);
@@ -329,11 +329,11 @@ public:
 class FeatureDefinitionBinaryGrid : public FeatureDefinitionGridBase<bool>
 {
 public:
-    FeatureDefinitionBinaryGrid(const EvaluationManager& eval_manager,
+    FeatureDefinitionBinaryGrid(const EvaluationCalculator& calculator,
                                 const std::string& feature_description,
                                 const boost::optional<unsigned int>& grid_num_cells_x = boost::optional<unsigned int>(),
                                 const boost::optional<unsigned int>& grid_num_cells_y = boost::optional<unsigned int>())
-    :   FeatureDefinitionGridBase<bool>(eval_manager, "binary_grid", feature_description, true, grid_num_cells_x, grid_num_cells_y)
+    :   FeatureDefinitionGridBase<bool>(calculator, "binary_grid", feature_description, true, grid_num_cells_x, grid_num_cells_y)
     {
         //converts bool -> double
         converter_ = [ & ] (const bool& v) { return v ? 1.0 : 0.0; };

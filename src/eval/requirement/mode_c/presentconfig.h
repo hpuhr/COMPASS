@@ -36,7 +36,7 @@ class ModeCPresentConfig : public ProbabilityBaseConfig
 {
 public:
     ModeCPresentConfig(const std::string& class_id, const std::string& instance_id,
-                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+                       Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
 
     std::shared_ptr<Base> createRequirement() override;
 
