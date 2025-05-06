@@ -160,6 +160,9 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, Settings().load_timestamp_begin_str_);
     registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, Settings().load_timestamp_end_str_);
 
+    registerParameter("load_filtered_time_windows", &settings_.load_filtered_time_windows_,
+                      Settings().load_filtered_time_windows_);
+
     if (settings_.load_timestamp_begin_str_.size())
         load_timestamp_begin_ = Time::fromString(settings_.load_timestamp_begin_str_);
 

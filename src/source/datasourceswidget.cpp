@@ -879,7 +879,7 @@ void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
  */
 void DataSourcesWidget::lineChanged(unsigned int ds_id, unsigned int ds_line, bool use)
 {
-    loginf << "DataSourcesWidget: lineChanged: ds_id " << ds_id << " line " << ds_line << " use " << use;
+    logdbg << "DataSourcesWidget: lineChanged: ds_id " << ds_id << " line " << ds_line << " use " << use;
 
     setUseDSLine(ds_id, ds_line, use);
 }

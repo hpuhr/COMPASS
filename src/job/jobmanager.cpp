@@ -152,7 +152,8 @@ void JobManagerBase::run()
 //        changed_ = false;
 //        really_update_widget_ = false;
 
-        bool debug = !last_update_time_.is_not_a_date_time() && (boost::posix_time::microsec_clock::local_time() - last_update_time_).total_seconds() > 1;
+        bool debug = !last_update_time_.is_not_a_date_time()
+                     && (boost::posix_time::microsec_clock::local_time() - last_update_time_).total_seconds() > 10;
 
         if (hasBlockingJobs())
             handleBlockingJobs(debug);
