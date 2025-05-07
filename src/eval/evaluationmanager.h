@@ -25,6 +25,7 @@
 #include "eval/results/report/pdfgenerator.h"
 #include "datasourcecompoundcoverage.h"
 #include "sector.h"
+#include "util/timewindow.h"
 
 #include <QObject>
 
@@ -145,6 +146,8 @@ struct EvaluationManagerSettings
     //not written to config
     bool load_only_sector_data_ {true};
 
+    Utils::TimeWindowCollection load_filtered_time_windows_;
+
 private:
     friend class EvaluationManager;
 
@@ -155,7 +158,7 @@ private:
     std::string load_timestamp_begin_str_;
     std::string load_timestamp_end_str_;
 
-    nlohmann::json load_filtered_time_windows_; // TODO
+    nlohmann::json load_filtered_time_windows_json_;
 };
 
 class EvaluationManager : public QObject, public Configurable

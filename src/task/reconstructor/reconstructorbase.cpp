@@ -717,7 +717,7 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 
     boost::posix_time::ptime current_slice_end = current_slice_begin_ + base_settings_.sliceDuration();
 
-    TimeWindow window {current_slice_begin_, current_slice_end};
+    //TimeWindow window {current_slice_begin_, current_slice_end};
 
     logdbg << "ReconstructorBase: getNextTimeSlice: current_slice_begin " << Time::toString(current_slice_begin_)
            << " current_slice_end " << Time::toString(current_slice_end);

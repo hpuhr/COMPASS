@@ -31,7 +31,7 @@
 #include "sectorlayer.h"
 #include "sector.h"
 #include "airspace.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
 #include "buffer.h"
 #include "filtermanager.h"
@@ -44,7 +44,7 @@
 #include "viewpoint.h"
 #include "projectionmanager.h"
 #include "projection.h"
-#include "files.h"
+//#include "files.h"
 
 #include "json.hpp"
 
@@ -72,7 +72,6 @@ EvaluationManagerSettings::EvaluationManagerSettings()
 ,   use_grp_in_sector_                ()
 ,   use_requirement_                  ()
 ,   max_ref_time_diff_                (4.0)
-,   load_only_sector_data_            (true)
 ,   use_load_filter_                  (false)
 ,   use_timestamp_filter_             (false)
 ,   use_ref_traj_accuracy_filter_     (false)
@@ -117,6 +116,7 @@ EvaluationManagerSettings::EvaluationManagerSettings()
 ,   report_wait_on_map_loading_       (true)
 ,   report_run_pdflatex_              (true)
 ,   report_open_created_pdf_          (false)
+,   load_only_sector_data_            (true)
 ,   dbcontent_name_ref_               ("RefTraj")
 ,   dbcontent_name_tst_               ("CAT062")
 ,   load_timestamp_begin_str_         ("")
@@ -160,8 +160,10 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, Settings().load_timestamp_begin_str_);
     registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, Settings().load_timestamp_end_str_);
 
-    registerParameter("load_filtered_time_windows", &settings_.load_filtered_time_windows_,
-                      Settings().load_filtered_time_windows_);
+    registerParameter("load_filtered_time_windows", &settings_.load_filtered_time_windows_json_,
+                      nlohmann::json::array());
+
+    settings_.load_filtered_time_windows_.setFrom(settings_.load_filtered_time_windows_json_);
 
     if (settings_.load_timestamp_begin_str_.size())
         load_timestamp_begin_ = Time::fromString(settings_.load_timestamp_begin_str_);

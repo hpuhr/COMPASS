@@ -53,8 +53,6 @@ class ReconstructorAssociatorBase;
 
 struct AltitudeState;
 
-typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow; // min, max
-
 class ReconstructorBaseSettings
 {
   public:
