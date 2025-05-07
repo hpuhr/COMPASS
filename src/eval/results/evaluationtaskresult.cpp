@@ -17,6 +17,10 @@
 
 #include "evaluationtaskresult.h"
 #include "evaluationcalculator.h"
+#include "eval/results/base/single.h"
+
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontenttable.h"
 
 #include "compass.h"
 #include "logger.h"
@@ -33,19 +37,110 @@ EvaluationTaskResult::EvaluationTaskResult(unsigned int id,
  */
 EvaluationTaskResult::~EvaluationTaskResult() = default;
 
+namespace helpers
+{
+    /**
+     */
+    std::pair<unsigned int, Evaluation::RequirementResultID> resultInfoFromProperties(const ResultReport::SectionContent* content)
+    {
+        assert(content->hasJSONProperty(EvaluationRequirementResult::Single::PropertyUTN));
+        assert(content->hasJSONProperty(EvaluationRequirementResult::Single::PropertySectorLayer));
+        assert(content->hasJSONProperty(EvaluationRequirementResult::Single::PropertyReqGroup));
+        assert(content->hasJSONProperty(EvaluationRequirementResult::Single::PropertyReqName));
+
+        unsigned int utn;
+        Evaluation::RequirementResultID id;
+
+        utn               = content->jsonProperty(EvaluationRequirementResult::Single::PropertyUTN);
+        id.sec_layer_name = content->jsonProperty(EvaluationRequirementResult::Single::PropertySectorLayer);
+        id.req_group_name = content->jsonProperty(EvaluationRequirementResult::Single::PropertyReqGroup);
+        id.req_name       = content->jsonProperty(EvaluationRequirementResult::Single::PropertyReqName);
+
+        return std::make_pair(utn, id);
+    }
+
+    /**
+     */
+    EvaluationRequirementResult::Single* obtainResult(const ResultReport::SectionContent* content,
+                                                      EvaluationCalculator* calculator)
+    {
+        auto info = resultInfoFromProperties(content);
+
+        loginf << "obtainResult: Obtaining result for" 
+               << " utn " << info.first 
+               << " layer " << info.second.sec_layer_name
+               << " group " << info.second.req_group_name
+               << " req " << info.second.req_name;
+
+        //result already present?
+        auto r = calculator->singleResult(info.second, info.first);
+        if (r)
+            return r;
+
+        //otherwise evaluate for specified utn and requirement
+        calculator->evaluate(true, false, { info.first }, { info.second });
+
+        //then return result
+        return calculator->singleResult(info.second, info.first);
+    }
+}
+
 /**
  */
-EvaluationTaskResult::ContentPtr EvaluationTaskResult::createOnDemandContent(const std::string& section_id,
-                                                                             const std::string& content_id) const
+bool EvaluationTaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const
 {
-    if (!calculator_)
-        return ContentPtr();
+    if (!calculator_ || !calculator_->canEvaluate().ok())
+        return false;
 
-    ContentPtr content;
+    try
+    {
+        if (figure->name() == EvaluationRequirementResult::Single::TargetOverviewID)
+        {
+            //get result for section
+            auto result = helpers::obtainResult(figure, calculator_.get());
+            if (!result)
+                return false;
 
-    //@TODO
+            //add overview to figure
+            result->addOverviewToFigure(*figure);
 
-    return content;
+            return true;
+        }
+    }
+    catch(...)
+    {
+    }
+    
+    return false;
+}
+
+/**
+ */
+bool EvaluationTaskResult::loadOnDemandTable(ResultReport::SectionContentTable* table) const
+{
+    if (!calculator_ || !calculator_->canEvaluate().ok())
+        return false;
+
+    try
+    {
+        if (table->name() == EvaluationRequirementResult::Single::tr_details_table_name_)
+        {
+            //get result for section
+            auto result = helpers::obtainResult(table, calculator_.get());
+            if (!result)
+                return false;
+
+            //add table details
+            result->addDetailsToTable(*table);
+
+            return true;
+        }
+    }
+    catch(...)
+    {
+    }
+    
+    return false;
 }
 
 /**

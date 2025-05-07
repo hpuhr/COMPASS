@@ -35,8 +35,8 @@ public:
     task::TaskResultType type() const override final { return task::TaskResultType::Evaluation; }
 
 protected:
-    ContentPtr createOnDemandContent(const std::string& section_id,
-                                     const std::string& content_id) const override final;
+    bool loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const override;
+    bool loadOnDemandTable(ResultReport::SectionContentTable* table) const override;
 
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;

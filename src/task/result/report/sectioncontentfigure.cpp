@@ -42,19 +42,17 @@ const std::string SectionContentFigure::FieldRenderDelayMSec = "render_delay_mse
 const std::string SectionContentFigure::FieldViewable        = "viewable";
 
 /**
+ * Ctor passing an existing viewable.
  */
 SectionContentFigure::SectionContentFigure(unsigned int id,
                                            FigureType figure_type,
                                            const std::string& name, 
                                            const SectionContentViewable& viewable,
                                            Section* parent_section)
-:   SectionContent    (Type::Figure, id, name, parent_section)
-,   fig_type_         (figure_type)
-,   caption_          (viewable.caption)
-,   render_delay_msec_(viewable.render_delay_msec)
-,   viewable_fnc_     (viewable.viewable_func)
+:   SectionContent(Type::Figure, id, name, parent_section)
+,   fig_type_     (figure_type)
 {
-    assert (viewable_fnc_);
+    setViewable(viewable);
 }
 
 /**
@@ -62,6 +60,22 @@ SectionContentFigure::SectionContentFigure(unsigned int id,
 SectionContentFigure::SectionContentFigure(Section* parent_section)
 :   SectionContent(Type::Figure, parent_section)
 {
+}
+
+/**
+ */
+void SectionContentFigure::setViewable(const SectionContentViewable& viewable)
+{
+    caption_           = viewable.caption;
+    render_delay_msec_ = viewable.render_delay_msec;
+    viewable_fnc_      = viewable.viewable_func;
+}
+
+/**
+ */
+void SectionContentFigure::setViewableFunc(const SectionContentViewable::ViewableFunc& func)
+{
+    viewable_fnc_ = func;
 }
 
 /**
@@ -108,8 +122,14 @@ void SectionContentFigure::viewSlot()
  */
 void SectionContentFigure::view() const
 {
-    report_->taskManager().setViewableDataConfig(*viewable_fnc_());
+    auto content = viewableContent();
+    if (!content)
+        return;
 
+    //view content
+    report_->setCurrentViewable(*content);
+
+    //execute render delay?
     if (render_delay_msec_ > 0)
     {
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
@@ -133,8 +153,17 @@ std::string SectionContentFigure::getSubPath() const
 
 /**
  */
-std::shared_ptr<nlohmann::json::object_t> SectionContentFigure::viewableContent()
+std::shared_ptr<nlohmann::json::object_t> SectionContentFigure::viewableContent() const
 {
+    //load on-demand content if needed (@TODO: eeewwwwww)
+    auto this_unconst = const_cast<SectionContentFigure*>(this);
+    this_unconst->loadOnDemandIfNeeded();
+
+    //still no viewable? => return empty data
+    if (!viewable_fnc_)
+        return std::shared_ptr<nlohmann::json::object_t>();
+
+    //call viewable function
     return viewable_fnc_();
 }
 
@@ -147,9 +176,9 @@ void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
     root_node[ FieldRenderDelayMSec ] = render_delay_msec_;
 
     nlohmann::json jviewable = nlohmann::json::object();
-    if (viewable_fnc_)
+    if (!isOnDemand())
     {
-        auto viewable = viewable_fnc_();
+        auto viewable = viewableContent();
         if (viewable)
             jviewable = *viewable;
     }

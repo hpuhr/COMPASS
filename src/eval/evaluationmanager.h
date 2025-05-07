@@ -131,7 +131,8 @@ protected:
 
     void updateSectorLayers();
 
-    void loadData(const EvaluationCalculator& calculator);
+    void loadData(const EvaluationCalculator& calculator,
+                  bool blocking);
     std::map<std::string, std::shared_ptr<Buffer>> fetchData();
 
     COMPASS& compass() { return compass_; }
@@ -148,6 +149,7 @@ private:
 
     bool sectors_loaded_ {false};
     bool initialized_ {false};
+    bool active_load_connection_ {false};
 
     bool needs_additional_variables_ {false}; // indicates if variables should be added during loading
 

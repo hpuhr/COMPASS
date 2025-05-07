@@ -22,7 +22,11 @@
 #include "evaluationstandard.h"
 #include "evaluationdialog.h"
 #include "eval/requirement/group.h"
+#include "eval/requirement/base/base.h"
 #include "eval/requirement/base/baseconfig.h"
+#include "eval/results/base/base.h"
+#include "eval/results/base/single.h"
+#include "eval/results/base/joined.h"
 
 #include "compass.h"
 #include "dbinterface.h"
@@ -210,20 +214,6 @@ void EvaluationCalculator::readSettings()
 
 /**
  */
-void EvaluationCalculator::setActiveUTNs(const std::vector<unsigned int>& utns)
-{
-    eval_utns_ = utns;
-}
-
-/**
- */
-void EvaluationCalculator::setActiveRequirements(const std::vector<std::string>& requirements)
-{
-    eval_requirements_ = requirements;
-}
-
-/**
- */
 void EvaluationCalculator::generateSubConfigurable(const std::string& class_id,
                                                    const std::string& instance_id)
 {
@@ -345,19 +335,27 @@ void EvaluationCalculator::clearData()
 
     sector_roi_.reset();
 
-    reference_data_loaded_ = false;
-    test_data_loaded_      = false;
-    data_loaded_           = false;
-    evaluated_             = false; 
+    reference_data_loaded_  = false;
+    test_data_loaded_       = false;
+    data_loaded_            = false;
+    evaluated_              = false; 
+    active_load_connection_ = false;
 }
 
 /**
  */
-void EvaluationCalculator::evaluate ()
+void EvaluationCalculator::evaluate(bool blocking,
+                                    bool update_report,
+                                    const std::vector<unsigned int>& utns,
+                                    const std::vector<Evaluation::RequirementResultID>& requirements)
 {
     loginf << "EvaluationCalculator: evaluate";
 
     assert(canEvaluate().ok());
+
+    eval_utns_         = utns;
+    eval_requirements_ = requirements;
+    update_report_     = update_report;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -378,9 +376,17 @@ void EvaluationCalculator::evaluate ()
     updateCompoundCoverage(activeDataSourcesTst());
     updateSectorROI();
 
-    QObject::connect(&manager_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
-
-    manager_.loadData(*this);
+    if (blocking)
+    {
+        manager_.loadData(*this, true);
+        loadingDone();
+    }
+    else
+    {
+        QObject::connect(&manager_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
+        active_load_connection_ = true;
+        manager_.loadData(*this, false);
+    }
 }
 
 /**
@@ -389,15 +395,19 @@ void EvaluationCalculator::loadingDone()
 {
     loginf << "EvaluationCalculator: loadingDone";
 
-    QObject::disconnect(&manager_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
+    if (active_load_connection_)
+    {
+        QObject::disconnect(&manager_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
+        active_load_connection_ = false;
+    }
 
     auto data = manager_.fetchData();
-
     data_.setBuffers(data);
 
     //@TODO: message boxes? here?
     if (!data.count(settings_.dbcontent_name_ref_))
     {
+        emit evaluationFinished(false);
         QMessageBox::warning(nullptr, "Loading Data Failed", "No reference data was loaded.");
         return;
     }
@@ -408,6 +418,7 @@ void EvaluationCalculator::loadingDone()
     //@TODO: message boxes? here?
     if (!data.count(settings_.dbcontent_name_tst_))
     {
+        emit evaluationFinished(false);
         QMessageBox::warning(nullptr, "Loading Data Failed", "No test data was loaded.");
         return;
     }
@@ -464,13 +475,14 @@ void EvaluationCalculator::evaluateData()
     emit resultsChanged();
     
     // eval
-    results_gen_.evaluate(data_, currentStandard());
+    results_gen_.evaluate(data_, currentStandard(), eval_utns_, eval_requirements_, update_report_);
 
     data_.resetModelEnd();
 
     evaluated_ = true;
 
     emit resultsChanged();
+    emit evaluationFinished(true);
 }
 
 /**
@@ -1147,10 +1159,58 @@ bool EvaluationCalculator::hasResults() const
 
 /**
  */
-const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>&
-EvaluationCalculator::results() const
+const EvaluationCalculator::ResultMap& EvaluationCalculator::results() const
 {
     return results_gen_.results(); 
+}
+
+/**
+ */
+EvaluationRequirementResult::Single* EvaluationCalculator::singleResult(const Evaluation::RequirementResultID& id,
+                                                                        unsigned int utn) const
+{
+    for (auto& group_results : results())
+    {
+        for (auto& result : group_results.second)
+        {
+            if (!result.second->isSingle())
+                continue;
+
+            auto single_ptr = dynamic_cast<EvaluationRequirementResult::Single*>(result.second.get());
+            assert(single_ptr);
+
+            if (!single_ptr->isResult(id) || single_ptr->utn() != utn)
+                continue;
+
+            return single_ptr;
+        }
+    }
+
+    return nullptr;
+}
+
+/**
+ */
+EvaluationRequirementResult::Joined* EvaluationCalculator::joinedResult(const Evaluation::RequirementResultID& id) const
+{
+    for (auto& group_results : results())
+    {
+        for (auto& result : group_results.second)
+        {
+            if (!result.second->isJoined())
+                continue;
+
+            auto joined_ptr = dynamic_cast<EvaluationRequirementResult::Joined*>(result.second.get());
+            assert(joined_ptr);
+
+            if (!joined_ptr->isResult(id))
+                continue;
+
+            return joined_ptr;
+        }
+    }
+
+    return nullptr;
 }
 
 /**

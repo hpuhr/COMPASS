@@ -49,6 +49,9 @@ public:
                          Section* parent_section);
     SectionContentFigure(Section* parent_section);
 
+    void setViewable(const SectionContentViewable& viewable);
+    void setViewableFunc(const SectionContentViewable::ViewableFunc& func);
+
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
 
@@ -56,8 +59,10 @@ public:
     std::string getSubPath() const;
 
     FigureType figureType() const { return fig_type_; }
+    const std::string& caption() const { return caption_; }
+    int renderDelayMSec() const { return render_delay_msec_; }
 
-    std::shared_ptr<nlohmann::json::object_t> viewableContent();
+    std::shared_ptr<nlohmann::json::object_t> viewableContent() const;
 
     static const std::string FieldFigureType;
     static const std::string FieldCaption;

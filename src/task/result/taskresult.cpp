@@ -17,6 +17,10 @@
 
 #include "taskresult.h"
 
+#include "task/result/report/sectioncontent.h"
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontenttable.h"
+
 #include "timeconv.h"
 #include "logger.h"
 
@@ -40,9 +44,10 @@ const std::string TaskResult::FieldConfig   = "config";
 /**
  */
 TaskResult::TaskResult(unsigned int id, TaskManager& task_man)
-:   id_(id)
+:   task_manager_(task_man)
+,   id_          (id)
 {
-    report_ = std::make_shared<ResultReport::Report> (task_man);
+    report_ = std::make_shared<ResultReport::Report> (this);
 }
 
 /**
@@ -116,10 +121,41 @@ const nlohmann::json& TaskResult::configuration() const
 
 /**
  */
-TaskResult::ContentPtr TaskResult::createOnDemandContent(const std::string& section_id,
-                                                         const std::string& content_id) const
+bool TaskResult::loadOnDemandContent(ResultReport::SectionContent* content) const
 {
-    return ContentPtr();
+    if (!content)
+        return false;
+
+    if (content->type() == ResultReport::SectionContent::Type::Figure)
+    {
+        auto c = dynamic_cast<ResultReport::SectionContentFigure*>(content);
+        assert(c);
+
+        return loadOnDemandFigure(c);
+    }
+    else if (content->type() == ResultReport::SectionContent::Type::Table)
+    {
+        auto c = dynamic_cast<ResultReport::SectionContentTable*>(content);
+        assert(c);
+
+        return loadOnDemandTable(c);
+    }
+
+    return false;
+}
+
+/**
+ */
+bool TaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const
+{
+    return false;
+}
+
+/**
+ */
+bool TaskResult::loadOnDemandTable(ResultReport::SectionContentTable* table) const
+{
+    return false;
 }
 
 /**

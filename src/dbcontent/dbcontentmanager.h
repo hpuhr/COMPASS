@@ -106,6 +106,9 @@ public:
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
 
     void load(const std::string& custom_filter_clause="", bool measure_db_performance = false);
+    void loadBlocking(const std::string& custom_filter_clause="", 
+                      bool measure_db_performance = false,
+                      unsigned int sleep_msecs = 1);
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
     std::map<std::string, std::shared_ptr<Buffer>> loadedData();
     void loadingDone(DBContent& object); // to be called by dbo when it's loading is finished
@@ -240,6 +243,7 @@ protected:
 
     bool load_in_progress_{false};
     bool insert_in_progress_{false};
+    bool loading_done_{false};
 
     /// Container with all DBContent (DBContent name -> dbcont pointer)
     std::map<std::string, DBContent*> dbcontent_;

@@ -63,19 +63,28 @@ using namespace Utils;
 
 const std::string EvaluationResultsGenerator::EvalResultName = "Evaluation Result";
 
+/**
+ */
 EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationCalculator& calculator)
 :   calculator_   (calculator)
 ,   results_model_(calculator.manager())
 {
 }
 
+/**
+ */
 EvaluationResultsGenerator::~EvaluationResultsGenerator()
 {
     clear();
 }
 
-void EvaluationResultsGenerator::evaluate (EvaluationData& data, 
-                                           EvaluationStandard& standard)
+/**
+ */
+void EvaluationResultsGenerator::evaluate(EvaluationData& data, 
+                                          EvaluationStandard& standard,
+                                          const std::vector<unsigned int>& utns,
+                                          const std::vector<Evaluation::RequirementResultID>& requirements,
+                                          bool update_report)
 {
     const auto& eval_settings = calculator_.settings();
 
@@ -127,7 +136,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data,
 
     clear();
 
-    vector<unsigned int> utns;
+    vector<unsigned int> used_utns;
+    std::set<unsigned int> utn_set(utns.begin(), utns.end());
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -139,11 +149,15 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data,
         assert (dbcont_man.existsTarget(target_data_it.utn_));
         assert (data.hasTargetData(target_data_it.utn_));
 
+        //utn list is provided => skip utns not in list
+        if (!utn_set.empty() && !utn_set.count(target_data_it.utn_))
+            continue;
+
         //if (target_data_it.use())
-        utns.push_back(target_data_it.utn_);
+        used_utns.push_back(target_data_it.utn_);
     }
 
-    unsigned int num_utns = utns.size();
+    unsigned int num_utns = used_utns.size();
 
     unsigned int eval_cnt = 0;
 
@@ -179,7 +193,23 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data,
                 if (!req_cfg_it->used())
                     continue;
 
-                loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
+                //check list of requirements if provided
+                if (!requirements.empty())
+                {
+                    auto it = std::find_if(requirements.begin(), requirements.end(), 
+                        [ & ] (const Evaluation::RequirementResultID& id) 
+                        {
+                            return id.sec_layer_name == sector_layer_name &&
+                                   id.req_group_name == requirement_group_name &&
+                                   id.req_name == req_cfg_it->name();
+                        });
+                    
+                        if (it == requirements.end())
+                            continue;
+                }
+
+                loginf << "EvaluationResultsGenerator: evaluate:"
+                       << " sector layer " << sector_layer_name
                        << " group " << requirement_group_name
                        << " req '" << req_cfg_it->name() << "'";
 
@@ -196,7 +226,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data,
 
                 // generate results
 //                EvaluateTask* t = new (tbb::task::allocate_root()) EvaluateTask(
-//                            results, utns, data, req, *sec_it, done_flags, task_done, false);
+//                            results, used_utns, data, req, *sec_it, done_flags, task_done, false);
 //                tbb::task::enqueue(*t);
 
                 const SectorLayer& sector_layer = *sec_it;
@@ -209,14 +239,14 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data,
 
                     try
                     {
-                        unsigned int num_utns = utns.size();
+                        unsigned int num_utns = used_utns.size();
                         assert (done_flags.size() == num_utns);
 
                         if (single_thread)
                         {
                             for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
                             {
-                                results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                                results[utn_cnt] = req->evaluate(data.targetData(used_utns.at(utn_cnt)), req, sector_layer);
                                 done_flags[utn_cnt] = true;
                             }
                         }
@@ -225,7 +255,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data,
                             tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
                                               {
                                                   //assert(num_threads == oneapi::tbb::this_task_arena::max_concurrency());
-                                                  results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                                                  results[utn_cnt] = req->evaluate(data.targetData(used_utns.at(utn_cnt)), req, sector_layer);
                                                   done_flags[utn_cnt] = true;
                                               });
                         }
@@ -240,6 +270,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data,
                         logerr << "EvaluationResultsGenerator: evaluate: exception '" << e.what() << "'";
                         throw e;
                     }
+
                 });
 
                 unsigned int tmp_done_cnt;
@@ -384,11 +415,10 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data,
     postprocess_dialog.close();
 
     //viewables are up-to-date => do not reset them
-    updateToChanges(false);
+    updateToChanges(false, update_report);
 
-    elapsed_time = boost::posix_time::microsec_clock::local_time();
-
-    time_diff = elapsed_time - start_time;
+    elapsed_time   = boost::posix_time::microsec_clock::local_time();
+    time_diff      = elapsed_time - start_time;
     elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
     loginf << "EvaluationResultsGenerator: evaluate: data done " << String::timeStringFromDouble(elapsed_time_s, true);
@@ -408,6 +438,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data,
     QApplication::restoreOverrideCursor();
 }
 
+/**
+ */
 void EvaluationResultsGenerator::clear()
 {
     // clear everything
@@ -415,6 +447,8 @@ void EvaluationResultsGenerator::clear()
     results_vec_.clear();
 }
 
+/**
+ */
 void EvaluationResultsGenerator::generateResultsReportGUI()
 {
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI";
@@ -528,7 +562,10 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
            << String::timeStringFromDouble(load_time, true);
 }
 
-void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
+/**
+ */
+void EvaluationResultsGenerator::updateToChanges(bool reset_viewable, 
+                                                 bool update_report)
 {
     loginf << "EvaluationResultsGenerator: updateToChanges: reset_viewable " << reset_viewable;
 
@@ -540,7 +577,7 @@ void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
             // s starts with prefix
 
             shared_ptr<EvaluationRequirementResult::Single> result =
-                    static_pointer_cast<EvaluationRequirementResult::Single>(result_it);
+                static_pointer_cast<EvaluationRequirementResult::Single>(result_it);
 
             assert (result);
             result->updateUseFromTarget();
@@ -560,15 +597,20 @@ void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
         }
     }
 
-    generateResultsReportGUI();
+    if (update_report)
+        generateResultsReportGUI();
 }
 
+/**
+ */
 void EvaluationResultsGenerator::updateToChanges ()
 {
     //always reset the viewable on standard result updates
     updateToChanges(true);
 }
 
+/**
+ */
 void EvaluationResultsGenerator::addNonResultsContent (const std::shared_ptr<ResultReport::Report>& report)
 {
     // standard
@@ -576,6 +618,8 @@ void EvaluationResultsGenerator::addNonResultsContent (const std::shared_ptr<Res
     calculator_.currentStandard().addToReport(report);
 }
 
+/**
+ */
 EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
 {
     return results_model_;

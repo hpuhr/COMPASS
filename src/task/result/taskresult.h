@@ -33,6 +33,8 @@ class ResultManager;
 namespace ResultReport
 {
     class SectionContent;
+    class SectionContentFigure;
+    class SectionContentTable;
 }
 
 /**
@@ -53,12 +55,17 @@ public:
     std::string name() const;
     void name(const std::string& name);
 
+    const TaskManager& taskManager() const { return task_manager_; }
+    TaskManager& taskManager() { return task_manager_; }
+
     const std::shared_ptr<ResultReport::Report>& report() const;
     std::shared_ptr<ResultReport::Report>& report();
 
     void setConfiguration(const nlohmann::json& config);
     bool hasConfiguration() const;
     const nlohmann::json& configuration() const;
+
+    bool loadOnDemandContent(ResultReport::SectionContent* content) const;
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
@@ -83,12 +90,14 @@ public:
 protected:
     void id(unsigned int id);
 
-    virtual ContentPtr createOnDemandContent(const std::string& section_id,
-                                             const std::string& content_id) const;
-
+    virtual bool loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const;
+    virtual bool loadOnDemandTable(ResultReport::SectionContentTable* table) const;
+    
     //serialization of derived content
     virtual void toJSON_impl(nlohmann::json& root_node) const {};
     virtual bool fromJSON_impl(const nlohmann::json& j) { return true; };
+
+    TaskManager& task_manager_;
 
     unsigned int             id_{0};
     std::string              name_;

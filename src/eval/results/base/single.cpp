@@ -21,6 +21,7 @@
 #include "task/result/report/report.h"
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/sectioncontenttext.h"
 
 #include "eval/results/report/section_id.h"
@@ -59,8 +60,10 @@ const QColor Single::AnnotationColorHighlight = Qt::yellow;
 const QColor Single::AnnotationColorError     = QColor("#FF6666");
 const QColor Single::AnnotationColorOk        = QColor("#66FF66");
 
-const bool Single::WriteOnDemandTables  = false; // re-created on demand
-const bool Single::WriteOnDemandFigures = false; // re-created on demand
+const std::string Single::PropertyUTN         = "utn";
+const std::string Single::PropertySectorLayer = "sector_layer";
+const std::string Single::PropertyReqGroup    = "req_group";
+const std::string Single::PropertyReqName     = "req_name";
 
 /**
 */
@@ -335,7 +338,7 @@ void Single::addTargetToOverviewTable(ResultReport::Section& section,
     assert(values.size() == target_table.numColumns());
 
     std::string link = getTargetRequirementSectionID();
-    std::string fig  = WriteOnDemandFigures && hasIssues() ? TargetOverviewID : "";
+    std::string fig  = hasIssues() ? TargetOverviewID : "";
 
     target_table.addRow(values, ResultReport::SectionContentViewable(), link, fig);
 }
@@ -380,19 +383,22 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
     }
 
     //generate overview figure?
-    if (WriteOnDemandFigures)
+    if (hasIssues())
     {
-        if (hasIssues())
-        {
-            utn_req_section.addFigure(TargetOverviewID, 
-                                    ResultReport::SectionContentViewable([this]() { return this->viewableOverviewData(); }).setCaption("Target Errors Overview"));
-        }
-        else
-        {
-            utn_req_section.addText("target_errors_overview_no_figure");
-            utn_req_section.getText("target_errors_overview_no_figure").addText(
-                        "No target errors found, therefore no figure was generated.");
-        }
+        auto& fig = utn_req_section.addFigure(TargetOverviewID, ResultReport::SectionContentViewable().setCaption("Target Errors Overview"));
+
+        //setup on-demand and add result info
+        fig.setOnDemand();
+        fig.setJSONProperty(PropertyUTN, utn_);
+        fig.setJSONProperty(PropertySectorLayer, sector_layer_.name());
+        fig.setJSONProperty(PropertyReqGroup, requirement_->groupName());
+        fig.setJSONProperty(PropertyReqName, requirement_->name());
+    }
+    else
+    {
+        utn_req_section.addText("target_errors_overview_no_figure");
+        utn_req_section.getText("target_errors_overview_no_figure").
+            addText("No target errors found, therefore no figure was generated.");
     }
 
     //generate details table
@@ -403,45 +409,64 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
 */
 void Single::generateDetailsTable(ResultReport::Section& utn_req_section)
 {
-    if (!WriteOnDemandTables)
-        return;
-
     //init table if needed
     if (!utn_req_section.hasTable(tr_details_table_name_))
     {
         auto headers = detailHeaders();
 
-        utn_req_section.addTable(tr_details_table_name_, headers.size(), headers);
+        auto& utn_req_details_table = utn_req_section.addTable(tr_details_table_name_, headers.size(), headers);
+
+        //setup on-demand and add result info
+        utn_req_details_table.setOnDemand();
+        utn_req_details_table.setJSONProperty(PropertyUTN, utn_);
+        utn_req_details_table.setJSONProperty(PropertySectorLayer, sector_layer_.name());
+        utn_req_details_table.setJSONProperty(PropertyReqGroup, requirement_->groupName());
+        utn_req_details_table.setJSONProperty(PropertyReqName, requirement_->name());
     }
+}
 
-    auto& utn_req_details_table = utn_req_section.getTable(tr_details_table_name_);
+/**
+*/
+void Single::addDetailsToTable(ResultReport::SectionContentTable& table)
+{
+    //create details on demand
+    auto temp_details = temporaryDetails();
+    
+    //detail => table row functor
+    auto func = [ & ] (const EvaluationDetail& detail, 
+                       const EvaluationDetail* parent_detail, 
+                       int didx0, 
+                       int didx1,
+                       int evt_pos_idx, 
+                       int evt_ref_pos_idx)
+    {
+        auto values = detailValues(detail, parent_detail);
 
-    //setup on-demand callback
-    utn_req_details_table.setCreateOnDemand(
-        [this, &utn_req_details_table](void)
-        {
-            //create details on demand
-            auto temp_details = temporaryDetails();
+        assert(values.size() == table.numColumns());
 
-            //detail => table row functor
-            auto func = [ & ] (const EvaluationDetail& detail, 
-                               const EvaluationDetail* parent_detail, 
-                               int didx0, 
-                               int didx1,
-                               int evt_pos_idx, 
-                               int evt_ref_pos_idx)
-            {
-                auto values = detailValues(detail, parent_detail);
+        //@TODO: add details (QPoint(didx0, didx1))
+        table.addRow(values);
+    };
 
-                assert(values.size() == utn_req_details_table.numColumns());
+    //iterate over temporary details
+    iterateDetails(func);
+}
 
-                //@TODO: add details (QPoint(didx0, didx1))
-                utn_req_details_table.addRow(values);
-            };
+/**
+*/
+void Single::addOverviewToFigure(ResultReport::SectionContentFigure& figure)
+{
+    auto viewable = viewableOverviewData();
 
-            //iterate over temporary details
-            this->iterateDetails(func);
-        }, WriteOnDemandTables);
+    auto viewable_func = [viewable]() { return viewable; };
+    figure.setViewableFunc(viewable_func);
+}
+
+/**
+*/
+void Single::addHighlightToFigure(ResultReport::SectionContentFigure& figure)
+{
+    //@TODO
 }
 
 /**

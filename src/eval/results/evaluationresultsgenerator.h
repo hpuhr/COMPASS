@@ -20,11 +20,14 @@
 #include "eval/results/report/treemodel.h"
 #include "eval/results/base/base.h"
 
+#include "evaluationdefs.h"
 #include "evaluationdata.h"
 
 class EvaluationCalculator;
 class EvaluationSettings;
 class EvaluationStandard;
+
+struct RequirementID;
 
 namespace EvaluationRequirementResult
 {
@@ -46,16 +49,19 @@ public:
     virtual ~EvaluationResultsGenerator();
 
     void evaluate(EvaluationData& data, 
-                  EvaluationStandard& standard);
+                  EvaluationStandard& standard,
+                  const std::vector<unsigned int>& utns = std::vector<unsigned int>(),
+                  const std::vector<Evaluation::RequirementResultID>& requirements = std::vector<Evaluation::RequirementResultID>(),
+                  bool update_report = true);
 
-    typedef std::map<std::string,
-    std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
+    typedef std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> ResultMap;
+    typedef ResultMap::const_iterator ResultIterator;
+    typedef std::vector<std::shared_ptr<EvaluationRequirementResult::Base>> ResultVector;
 
     ResultIterator begin() { return results_.begin(); }
     ResultIterator end() { return results_.end(); }
 
-    const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results ()
-    const { return results_; } ;
+    const ResultMap& results() const { return results_; }
 
     void updateToChanges();
     void generateResultsReportGUI();
@@ -68,14 +74,13 @@ public:
 
 protected:
     void addNonResultsContent (const std::shared_ptr<ResultReport::Report>& report);
-    void updateToChanges(bool reset_viewable);
+    void updateToChanges(bool reset_viewable,
+                         bool update_report = true);
 
     EvaluationCalculator& calculator_;
 
     EvaluationResultsReport::TreeModel results_model_; //@TODO: remove if no longer needed
 
-    // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
-    std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> results_;
-    std::vector<std::shared_ptr<EvaluationRequirementResult::Base>> results_vec_; // ordered as generated
-
+    ResultMap    results_;     // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
+    ResultVector results_vec_; // ordered as generated
 };

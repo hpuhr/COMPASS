@@ -83,7 +83,9 @@ public:
     SectionContentTable& addTable (const std::string& name, 
                                    unsigned int num_columns, 
                                    const std::vector<std::string> headings,
-                                   bool sortable=true, unsigned int sort_column=0, Qt::SortOrder order=Qt::AscendingOrder);
+                                   bool sortable=true, 
+                                   unsigned int sort_column=0, 
+                                   Qt::SortOrder order=Qt::AscendingOrder);
     std::vector<std::string> getTableNames() const;
     size_t numTables() const;
 
@@ -94,7 +96,8 @@ public:
     std::vector<SectionContentFigure*> getFigures();
     size_t numFigures() const;
 
-    std::shared_ptr<SectionContent> retrieveContent(unsigned int id);
+    std::shared_ptr<SectionContent> retrieveContent(unsigned int id,
+                                                    bool show_dialog = false);
 
     unsigned int numSections(); // all sections contained
     void addSectionsFlat (std::vector<std::shared_ptr<Section>>& result, 
@@ -111,6 +114,10 @@ public:
 
     bool perTargetWithIssues() const; // te be set if requirement (any) requirement failed
     void perTargetWithIssues(bool value);
+
+    void setJSONProperty(const std::string& name, const nlohmann::json& value);
+    bool hasJSONProperty(const std::string& name) const;
+    nlohmann::json jsonProperty(const std::string& name) const;
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
@@ -133,6 +140,7 @@ public:
     static const std::string FieldContentNames;
     static const std::string FieldContentTypes;
     static const std::string FieldExtraContentIDs;
+    static const std::string FieldProperties;
 
     static void setCurrentContentID(unsigned int id);
 
@@ -151,12 +159,14 @@ protected:
 
     unsigned int addContentFigure(const SectionContentViewable& viewable);
 
-    std::shared_ptr<SectionContent> loadOrGetContent(size_t idx, bool is_extra_content);
+    std::shared_ptr<SectionContent> loadOrGetContent(size_t idx, 
+                                                     bool is_extra_content,
+                                                     bool show_dialog = false);
 
     static unsigned int newContentID();
 
-    std::string heading_; // name same as heading
-    std::string parent_heading_; // e.g. "head1:head2" or ""
+    std::string heading_;          // name same as heading
+    std::string parent_heading_;   // e.g. "head1:head2" or ""
 
     Report* report_ = nullptr;
 
@@ -174,6 +184,8 @@ protected:
     std::unique_ptr<QWidget> content_widget_;
 
     std::vector<std::shared_ptr<Section>> sub_sections_;
+
+    nlohmann::json properties_;
 
     static unsigned int current_content_id_;
 };

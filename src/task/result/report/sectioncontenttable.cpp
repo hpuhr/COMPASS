@@ -169,10 +169,27 @@ void SectionContentTable::accept(LatexVisitor& v)
 {
     loginf << "SectionContentTable: accept";
 
-    createOnDemandIfNeeded();
+    //createOnDemandIfNeeded();
 
     //@TODO:
     //v.visit(this);
+}
+
+/**
+ */
+bool SectionContentTable::loadOnDemand()
+{
+    bool ok = false;
+
+    //creation func
+    auto func = [ & ] ()
+    {
+        ok = SectionContent::loadOnDemand();
+    };
+
+    tableWidget()->itemModel()->executeAndReset(func);
+
+    return ok;
 }
 
 namespace
@@ -380,77 +397,6 @@ SectionContentTable::RowInfo SectionContentTable::rowInfo(unsigned int row) cons
 
 /**
  */
-void SectionContentTable::setCreateOnDemand(std::function<void(void)> create_on_demand_fnc,
-                                            bool write_on_demand_content)
-{
-    create_on_demand_          = true;
-    create_on_demand_fnc_      = create_on_demand_fnc;
-    already_created_by_demand_ = false;
-    write_on_demand_           = write_on_demand_content;   
-}
-
-/**
- */
-bool SectionContentTable::isOnDemand() const
-{
-    return create_on_demand_;
-}
-
-/**
- */
-void SectionContentTable::createOnDemand() const
-{
-    assert(create_on_demand_fnc_);
-
-    //creation func
-    auto func = [ = ] ()
-    {
-        this->create_on_demand_fnc_();
-        this->already_created_by_demand_ = true;
-    };
-
-    tableWidget()->itemModel()->executeAndReset(func);
-}
-
-/**
- */
-bool SectionContentTable::hasBeenCreatedOnDemand() const
-{
-    return create_on_demand_ && already_created_by_demand_;
-}
-
-/**
- */
-void SectionContentTable::createOnDemandIfNeeded() const
-{
-    if (create_on_demand_ && !already_created_by_demand_)
-    {
-        logdbg << "SectionContentTable: createOnDemandIfNeeded: creating";
-
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-
-        createOnDemand();
-
-        //adapt table widget columns to new content?
-        if (table_widget_)
-            table_widget_->resizeColumns();
-
-        QApplication::restoreOverrideCursor();
-    }
-}
-
-/**
- */
-void SectionContentTable::resetOnDemandContent() const
-{
-    rows_.clear();
-    annotations_.clear();
-
-    already_created_by_demand_ = false;
-}
-
-/**
- */
 void SectionContentTable::clicked(unsigned int row)
 {
     const auto& annotation = annotations_.at(row);
@@ -465,7 +411,7 @@ void SectionContentTable::clicked(unsigned int row)
         has_valid_link = true;
 
         //figure from content in parent section
-        auto c = parent_section_->retrieveContent(annotation.figure_id.value());
+        auto c = parent_section_->retrieveContent(annotation.figure_id.value(), true);
         figure = dynamic_cast<SectionContentFigure*>(c.get());
     }
     else if (!annotation.section_link.empty() && !annotation.section_figure.empty())
@@ -487,8 +433,6 @@ void SectionContentTable::clicked(unsigned int row)
     {
         if (figure)
         {
-            std::shared_ptr<nlohmann::json::object_t> viewable = figure->viewableContent();
-
             //TODO: find a pattern to support on-demand computation of viewable data
             // if (result_ptrs_.at(row_index)->viewableDataReady())
             // {
@@ -508,10 +452,8 @@ void SectionContentTable::clicked(unsigned int row)
             //     task.runAsyncDialog();
             // }
 
-            assert (viewable);
-
             //show viewable
-            report_->setCurrentViewable(*viewable.get());
+            figure->view();
         }
         else
         {
@@ -659,18 +601,9 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
     root_node[ FieldRows        ] = std::vector<nlohmann::json>();
     root_node[ FieldAnnotations ] = nlohmann::json::array();
 
-    //write content if either not cod or we explicitely want to write cod content
-    if (!create_on_demand_ || write_on_demand_)
+    //write content only if not on demand
+    if (!isOnDemand())
     {
-        bool reset_content = false;
-
-        //load on demand content if not yet loaded
-        if (create_on_demand_ && write_on_demand_ && !already_created_by_demand_)
-        {
-            createOnDemandIfNeeded();
-            reset_content = true; // we want to forget the loaded content afterwards
-        }
-
         //write rows
         root_node[ FieldRows ] = rows_;
 
@@ -691,10 +624,6 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
         }
 
         root_node[ FieldAnnotations ] = j_annos;
-
-        //reset previously cod-loaded content?
-        if (reset_content)
-            resetOnDemandContent();
     }
 }
 
@@ -722,12 +651,6 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;
 
     num_columns_ = headings_.size();
-
-    //no create on demand on read
-    create_on_demand_          = false;
-    already_created_by_demand_ = false;
-    write_on_demand_           = false;
-    create_on_demand_fnc_      = {};
 
     rows_ = j[ FieldRows ].get<std::vector<nlohmann::json>>();
 
@@ -842,14 +765,14 @@ Qt::ItemFlags SectionContentTableModel::flags(const QModelIndex &index) const
  */
 bool SectionContentTableModel::canFetchMore(const QModelIndex &parent) const
 {
-    return content_table_->isOnDemand() && !content_table_->hasBeenCreatedOnDemand();
+    return content_table_->isOnDemand() && !content_table_->isComplete();
 }
 
 /**
  */
 void SectionContentTableModel::fetchMore(const QModelIndex &parent)
 {
-    return content_table_->createOnDemandIfNeeded();
+    content_table_->loadOnDemandIfNeeded();
 }
 
 /**

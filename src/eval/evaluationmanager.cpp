@@ -879,7 +879,8 @@ void EvaluationManager::onConfigurationChanged(const std::vector<std::string>& c
 
 /**
  */
-void EvaluationManager::loadData(const EvaluationCalculator& calculator)
+void EvaluationManager::loadData(const EvaluationCalculator& calculator, 
+                                 bool blocking)
 {
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
@@ -898,12 +899,26 @@ void EvaluationManager::loadData(const EvaluationCalculator& calculator)
     //!do not distribute this reload to views!
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
-    connect(&dbcontent_man, &DBContentManager::loadingDoneSignal, this, &EvaluationManager::loadingDone);
+    if (!blocking)
+    {
+        connect(&dbcontent_man, &DBContentManager::loadingDoneSignal, this, &EvaluationManager::loadingDone);
+        active_load_connection_ = true;
+    }
 
     //add variables needed by evaluation
     needs_additional_variables_ = true;
 
-    dbcontent_man.load();
+    if (blocking)
+    {
+        dbcontent_man.loadBlocking();
+        loadingDone();
+    }
+    else
+    {
+        connect(&dbcontent_man, &DBContentManager::loadingDoneSignal, this, &EvaluationManager::loadingDone);
+        active_load_connection_ = true;
+        dbcontent_man.load();
+    }
 
     needs_additional_variables_ = false;
 }
@@ -920,6 +935,7 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
 
     const auto& settings = calculator.settings();
     const auto& roi      = calculator.sectorROI();
+    const auto& utns     = calculator.evaluationUTNs();
     
     // position data
     if (roi.has_value())
@@ -927,16 +943,36 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
         assert (fil_man.hasFilter("Position"));
         DBFilter* pos_fil = fil_man.getFilter("Position");
 
-        json fil_cond;
+        json filter;
 
         pos_fil->setActive(true);
 
-        fil_cond["Position"]["Latitude Maximum" ] = to_string(roi->latitude_max );
-        fil_cond["Position"]["Latitude Minimum" ] = to_string(roi->latitude_min );
-        fil_cond["Position"]["Longitude Maximum"] = to_string(roi->longitude_max);
-        fil_cond["Position"]["Longitude Minimum"] = to_string(roi->longitude_min);
+        filter["Position"]["Latitude Maximum" ] = to_string(roi->latitude_max );
+        filter["Position"]["Latitude Minimum" ] = to_string(roi->latitude_min );
+        filter["Position"]["Longitude Maximum"] = to_string(roi->longitude_max);
+        filter["Position"]["Longitude Minimum"] = to_string(roi->longitude_min);
 
-        pos_fil->loadViewPointConditions(fil_cond); 
+        pos_fil->loadViewPointConditions(filter); 
+    }
+
+    if (!utns.empty())
+    {
+        assert (fil_man.hasFilter("UTNs"));
+        DBFilter* utn_fil = fil_man.getFilter("UTNs");
+
+        json filter;
+
+        utn_fil->setActive(true);
+
+        std::vector<std::string> utn_strings;
+        for (auto utn : utns)
+             utn_strings.push_back(std::to_string(utn));
+
+        std::string utns_str = Utils::String::compress(utn_strings, ',');
+
+        filter["UTNs"]["utns" ] = utns_str;
+
+        utn_fil->loadViewPointConditions(filter);
     }
 
     // other filters
@@ -1027,8 +1063,11 @@ void EvaluationManager::loadingDone()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
-               this, &EvaluationManager::loadingDone);
+    if (!active_load_connection_)
+    {
+        disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal, this, &EvaluationManager::loadingDone);
+        active_load_connection_ = false;
+    }
 
     //!reenable distribution to views!
     COMPASS::instance().viewManager().disableDataDistribution(false);

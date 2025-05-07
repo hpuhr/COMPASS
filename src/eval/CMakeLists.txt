@@ -9,6 +9,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdefs.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationsettings.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationcalculator.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanager.h"

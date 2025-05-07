@@ -18,6 +18,7 @@
 #pragma once
 
 #include "evaluationdetail.h"
+#include "evaluationdefs.h"
 #include "eval/results/evaluationdetail.h"
 #include "eval/results/base/result_defs.h"
 
@@ -108,6 +109,7 @@ public:
 
     bool isSingle() const;
     bool isJoined() const;
+    bool isResult(const Evaluation::RequirementResultID& id) const;
 
     bool use() const;
     void use(bool use);
@@ -158,6 +160,8 @@ public:
     static const QColor HistogramColorDefault;
 
 protected:
+    friend class EvaluationTaskResult; // for loading on-demand content
+
     /**
      * Used to display a certain result parameter in the report as
      * Name | Description | Value, e.g.

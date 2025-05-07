@@ -330,6 +330,14 @@ unsigned int Base::getNumThresholdDecimals() const
 
 /**
 */
+bool Base::matchesResultID(const Evaluation::RequirementResultID& id) const
+{
+    return id.req_group_name == group_name_ &&
+           id.req_name == name_;
+}
+
+/**
+*/
 bool Base::compareValue(double val, double threshold, COMPARISON_TYPE check_type) const
 {
     if (check_type == COMPARISON_TYPE::LESS_THAN)

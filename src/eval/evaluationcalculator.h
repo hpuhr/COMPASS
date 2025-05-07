@@ -19,6 +19,7 @@
 
 #include "configurable.h"
 
+#include "evaluationdefs.h"
 #include "evaluationsettings.h"
 #include "evaluationdata.h"
 #include "evaluationresultsgenerator.h"
@@ -41,6 +42,13 @@ class EvaluationManager;
 namespace dbContent 
 {
     class VariableSet;
+}
+
+namespace EvaluationRequirementResult
+{
+    class Base;
+    class Single;
+    class Joined;
 }
 
 /**
@@ -69,8 +77,9 @@ public:
         double longitude_max {0};
     };
 
-    typedef std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> ResultMap;
-    typedef ResultMap::const_iterator ResultIterator;
+    typedef std::shared_ptr<EvaluationRequirementResult::Base>      ResultPtr;
+    typedef std::map<std::string, std::map<std::string, ResultPtr>> ResultMap;
+    typedef ResultMap::const_iterator                               ResultIterator;
 
     EvaluationCalculator(const std::string& class_id, 
                          const std::string& instance_id,
@@ -79,16 +88,16 @@ public:
                          const nlohmann::json& config);
     virtual ~EvaluationCalculator();
 
-    void setActiveUTNs(const std::vector<unsigned int>& utns);
-    void setActiveRequirements(const std::vector<std::string>& requirements);
-
     bool dataLoaded() const;
     bool evaluated() const;
     Result canEvaluate() const;
 
     void reset();
     void clearData();
-    void evaluate();
+    void evaluate(bool blocking = false,
+                  bool update_report = true,
+                  const std::vector<unsigned int>& utns = std::vector<unsigned int>(),
+                  const std::vector<Evaluation::RequirementResultID>& requirements = std::vector<Evaluation::RequirementResultID>());
     void updateResultsToChanges();
 
     // check and correct missing information
@@ -185,6 +194,10 @@ public:
     bool hasResults() const;
     const ResultMap& results() const;
 
+    EvaluationRequirementResult::Single* singleResult(const Evaluation::RequirementResultID& id,
+                                                      unsigned int utn) const;
+    EvaluationRequirementResult::Joined* joinedResult(const Evaluation::RequirementResultID& id) const;
+
     // timestamps
     boost::posix_time::ptime loadTimestampBegin() const;
     void loadTimestampBegin(boost::posix_time::ptime value, bool update_settings = true);
@@ -202,14 +215,15 @@ public:
     const EvaluationSettings& settings() const { return settings_; }
     const dbContent::DataSourceCompoundCoverage& tstSrcsCoverage() const { return tst_srcs_coverage_; }
     const boost::optional<ROI>& sectorROI() const { return sector_roi_; }
+    const std::vector<unsigned int>& evaluationUTNs() const { return eval_utns_; }
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
-
 signals:
     void standardsChanged();
     void currentStandardChanged();
     void resultsChanged();
+    void evaluationFinished(bool);
     
 protected:
     virtual void checkSubConfigurables() override;
@@ -235,8 +249,8 @@ protected:
 
     EvaluationManager& manager_;
 
-    std::vector<unsigned int> eval_utns_;
-    std::vector<std::string>  eval_requirements_;
+    std::vector<unsigned int>                    eval_utns_;
+    std::vector<Evaluation::RequirementResultID> eval_requirements_;
 
     EvaluationSettings settings_;
 
@@ -248,12 +262,12 @@ protected:
 
     boost::optional<ROI> sector_roi_;
 
-    bool data_loaded_           {false};
-    bool reference_data_loaded_ {false};
-    bool test_data_loaded_      {false};
-    bool evaluated_             {false};
-
-    bool needs_additional_variables_ {false}; // indicates if variables should be added during loading
+    bool data_loaded_            {false};
+    bool reference_data_loaded_  {false};
+    bool test_data_loaded_       {false};
+    bool evaluated_              {false};
+    bool active_load_connection_ {false};
+    bool update_report_          {true};
 
     std::vector<std::unique_ptr<EvaluationStandard>> standards_;
 

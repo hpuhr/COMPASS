@@ -30,6 +30,7 @@
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "dbinterface.h"
+#include "asynctask.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
@@ -562,16 +563,38 @@ void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
 /**
  */
 std::shared_ptr<ResultReport::SectionContent> TaskManager::loadContent(ResultReport::Section* section, 
-                                                                       unsigned int content_id) const
+                                                                       unsigned int content_id,
+                                                                       bool show_dialog) const
 {
-    auto res = COMPASS::instance().dbInterface().loadContent(section, content_id);
-    if (!res.ok())
+    ResultT<TaskResult::ContentPtr> result;
+
+    if (show_dialog)
     {
-        logerr << "TaskManager: loadResults: Could not load stored content: " << res.error();
+        //run as async task with dialog
+        auto result_ptr = &result;
+
+        auto cb = [ this, result_ptr, section, content_id ] (const AsyncTaskState&, AsyncTaskProgressWrapper&) 
+        { 
+            *result_ptr = COMPASS::instance().dbInterface().loadContent(section, content_id);
+            return true;
+        };
+
+        AsyncFuncTask task(cb, "Loading", "Loading section content", false);
+        task.runAsyncDialog();
+    }
+    else
+    {
+        //directly run
+        result = COMPASS::instance().dbInterface().loadContent(section, content_id);
+    }
+
+    if (!result.ok())
+    {
+        logerr << "TaskManager: loadResults: Could not load stored content: " << result.error();
         return std::shared_ptr<ResultReport::SectionContent>();
     }
 
-    return res.result();
+    return result.result();
 }
 
 /**

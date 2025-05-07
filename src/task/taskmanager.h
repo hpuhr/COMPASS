@@ -112,7 +112,8 @@ public:
 
     void setViewableDataConfig(const nlohmann::json::object_t& data);
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
-                                                              unsigned int content_id) const;
+                                                              unsigned int content_id,
+                                                              bool show_dialog = false) const;
 
     static const bool CleanupDBIfNeeded;
 

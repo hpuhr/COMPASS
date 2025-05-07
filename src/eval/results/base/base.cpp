@@ -89,6 +89,14 @@ bool Base::isJoined() const
 }
 
 /**
+ */
+bool Base::isResult(const Evaluation::RequirementResultID& id) const
+{
+    return requirement_->matchesResultID(id) &&
+           id.sec_layer_name == sector_layer_.name();
+}
+
+/**
 */
 std::shared_ptr<EvaluationRequirement::Base> Base::requirement() const
 {

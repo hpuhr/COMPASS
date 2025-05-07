@@ -98,6 +98,15 @@ public:
     unsigned int id() const;
     std::string name() const;
 
+    void setJSONProperty(const std::string& name, const nlohmann::json& value);
+    bool hasJSONProperty(const std::string& name) const;
+    nlohmann::json jsonProperty(const std::string& name) const;
+
+    void setOnDemand();
+    bool isOnDemand() const;
+    bool isComplete() const;
+    bool loadOnDemandIfNeeded();
+
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
     
@@ -117,16 +126,25 @@ public:
     static const std::string FieldType;
     static const std::string FieldID;
     static const std::string FieldName;
+    static const std::string FieldProperties;
+    static const std::string FieldOnDemand;
 
 protected:
     virtual void toJSON_impl(nlohmann::json& root_node) const = 0;
     virtual bool fromJSON_impl(const nlohmann::json& j) = 0;
 
-    Type         type_;
-    unsigned int id_ = 0;
-    std::string  name_;
-    Section*     parent_section_ {nullptr};
-    Report*      report_ = nullptr;
+    virtual bool loadOnDemand();
+
+    Type           type_;
+    unsigned int   id_ = 0;
+    std::string    name_;
+    Section*       parent_section_ {nullptr};
+    Report*        report_ = nullptr;
+    nlohmann::json properties_;
+
+private:
+    bool on_demand_ = false;
+    bool complete_  = false;
 };
 
 }
