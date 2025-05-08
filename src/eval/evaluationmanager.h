@@ -164,4 +164,6 @@ private:
     std::map<std::string, std::shared_ptr<Buffer>> raw_data_;
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
+
+    Utils::TimeWindowCollection load_filtered_time_windows_;
 };
