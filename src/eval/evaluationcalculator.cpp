@@ -404,32 +404,28 @@ void EvaluationCalculator::loadingDone()
     auto data = manager_.fetchData();
     data_.setBuffers(data);
 
+    reference_data_loaded_ = data.count(settings_.dbcontent_name_ref_);
+    test_data_loaded_      = data.count(settings_.dbcontent_name_tst_);
+    data_loaded_           = reference_data_loaded_ || test_data_loaded_;
+
     //@TODO: message boxes? here?
-    if (!data.count(settings_.dbcontent_name_ref_))
+    if (eval_utns_.empty() && !reference_data_loaded_)
     {
-        emit evaluationFinished(false);
         QMessageBox::warning(nullptr, "Loading Data Failed", "No reference data was loaded.");
         return;
     }
 
-    data_.addReferenceData(settings_.dbcontent_name_ref_, settings_.line_id_ref_);
-    reference_data_loaded_ = true;
-
-    //@TODO: message boxes? here?
-    if (!data.count(settings_.dbcontent_name_tst_))
+    if (eval_utns_.empty() && !test_data_loaded_)
     {
-        emit evaluationFinished(false);
         QMessageBox::warning(nullptr, "Loading Data Failed", "No test data was loaded.");
         return;
     }
 
+    data_.addReferenceData(settings_.dbcontent_name_ref_, settings_.line_id_ref_);
     data_.addTestData(settings_.dbcontent_name_tst_, settings_.line_id_tst_);
-    test_data_loaded_ = true;
 
-    bool data_loaded = reference_data_loaded_ && test_data_loaded_;
-
-    //ready to finalize?
-    if (data_loaded)
+    //ready to evaluate?
+    if (data_loaded_)
     {
         loginf << "EvaluationCalculator: loadingDone: finalizing";
 
@@ -442,13 +438,11 @@ void EvaluationCalculator::loadingDone()
 
         loginf << "EvaluationCalculator: loadingDone: finalize done "
                    << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
+
+        loginf << "EvaluationCalculator: loadingDone: starting to evaluate";
+
+        evaluateData();
     }
-
-    data_loaded_ = data_loaded;
-
-    loginf << "EvaluationCalculator: loadingDone: starting to evaluate";
-
-    evaluateData();
 }
 
 /**
@@ -457,7 +451,7 @@ void EvaluationCalculator::evaluateData()
 {
     loginf << "EvaluationCalculator: evaluateData";
 
-    assert (data_loaded_);
+    assert(data_loaded_);
     assert(canEvaluate().ok());
 
     Projection& projection = ProjectionManager::instance().currentProjection();
@@ -482,7 +476,6 @@ void EvaluationCalculator::evaluateData()
     evaluated_ = true;
 
     emit resultsChanged();
-    emit evaluationFinished(true);
 }
 
 /**

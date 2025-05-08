@@ -223,7 +223,6 @@ signals:
     void standardsChanged();
     void currentStandardChanged();
     void resultsChanged();
-    void evaluationFinished(bool);
     
 protected:
     virtual void checkSubConfigurables() override;

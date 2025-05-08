@@ -970,6 +970,8 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
 
         std::string utns_str = Utils::String::compress(utn_strings, ',');
 
+        loginf << "UTN FILTER = " << utns_str;
+
         filter["UTNs"]["utns" ] = utns_str;
 
         utn_fil->loadViewPointConditions(filter);

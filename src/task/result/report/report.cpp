@@ -217,6 +217,13 @@ void Report::setCurrentViewable(const nlohmann::json::object_t& data)
 
 /**
  */
+void Report::unsetCurrentViewable()
+{
+    result_->taskManager().unsetViewableDataConfig();
+}
+
+/**
+ */
 void Report::setCurrentSection(const std::string& section_name)
 {
     std::string full_id = SectionID::prependReportResults(section_name);

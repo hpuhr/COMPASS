@@ -123,8 +123,11 @@ void SectionContentFigure::viewSlot()
 void SectionContentFigure::view() const
 {
     auto content = viewableContent();
-    if (!content)
+    if (!content || content->empty())
+    {
+        report_->unsetCurrentViewable();
         return;
+    }
 
     //view content
     report_->setCurrentViewable(*content);

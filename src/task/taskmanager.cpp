@@ -562,6 +562,14 @@ void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
 
 /**
  */
+void TaskManager::unsetViewableDataConfig()
+{
+    COMPASS::instance().viewManager().unsetCurrentViewPoint();
+    viewable_data_cfg_.reset();
+}
+
+/**
+ */
 std::shared_ptr<ResultReport::SectionContent> TaskManager::loadContent(ResultReport::Section* section, 
                                                                        unsigned int content_id,
                                                                        bool show_dialog) const
