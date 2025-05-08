@@ -17,16 +17,25 @@
 
 #pragma once
 
+#include "task/result/report/report.h"
+#include "task/taskdefs.h"
+
 #include "json.hpp"
 #include "property.h"
 #include "propertylist.h"
-#include "task/result/report/report.h"
 
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 class ResultManager;
+
+namespace ResultReport
+{
+    class SectionContent;
+    class SectionContentFigure;
+    class SectionContentTable;
+}
 
 /**
  */
@@ -35,27 +44,33 @@ class TaskResult
     friend class TaskManager; // to change id if required
 
 public:
-    enum TaskResultType
-    {
-        Generic=0,
-        Evaluation
-    };
+    typedef std::shared_ptr<ResultReport::SectionContent> ContentPtr;
 
-    TaskResult(unsigned int id, TaskManager& task_man);
+    TaskResult(unsigned int id, 
+               TaskManager& task_man);
+    virtual ~TaskResult();
 
     unsigned int id() const;
 
     std::string name() const;
     void name(const std::string& name);
 
-    TaskResultType type() const;
-    void type(TaskResultType type);
+    const TaskManager& taskManager() const { return task_manager_; }
+    TaskManager& taskManager() { return task_manager_; }
 
     const std::shared_ptr<ResultReport::Report>& report() const;
     std::shared_ptr<ResultReport::Report>& report();
 
+    void setConfiguration(const nlohmann::json& config);
+    bool hasConfiguration() const;
+    const nlohmann::json& configuration() const;
+
+    bool loadOnDemandContent(ResultReport::SectionContent* content) const;
+
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
+
+    virtual task::TaskResultType type() const { return task::TaskResultType::Generic; }
 
     static const std::string  DBTableName;
     static const Property     DBColumnID;
@@ -70,19 +85,25 @@ public:
     static const std::string FieldCreated;
     static const std::string FieldComments;
     static const std::string FieldReport;
+    static const std::string FieldConfig;
 
 protected:
     void id(unsigned int id);
 
+    virtual bool loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const;
+    virtual bool loadOnDemandTable(ResultReport::SectionContentTable* table) const;
+    
     //serialization of derived content
     virtual void toJSON_impl(nlohmann::json& root_node) const {};
     virtual bool fromJSON_impl(const nlohmann::json& j) { return true; };
 
+    TaskManager& task_manager_;
+
     unsigned int             id_{0};
     std::string              name_;
-    TaskResultType           type_;
     boost::posix_time::ptime created_;
     std::string              comments_;
 
     std::shared_ptr<ResultReport::Report> report_;
+    nlohmann::json                        config_;
 };

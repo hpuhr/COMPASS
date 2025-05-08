@@ -28,7 +28,7 @@ class Speed : public ProbabilityBase
 {
 public:
     Speed(const std::string& name, const std::string& short_name, const std::string& group_name,
-          double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+          double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator,
           float threshold_value, bool use_percent_if_higher, float threshold_percent,
           COMPARISON_TYPE threshold_value_check_type,
           bool failed_values_of_interest);

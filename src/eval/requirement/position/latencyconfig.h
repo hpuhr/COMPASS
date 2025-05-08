@@ -36,7 +36,7 @@ class PositionLatencyConfig : public ProbabilityBaseConfig
 public:
     PositionLatencyConfig(const std::string& class_id, const std::string& instance_id,
                           Group& group, EvaluationStandard& standard,
-                          EvaluationManager& eval_ma);
+                          EvaluationCalculator& calculator);
     virtual ~PositionLatencyConfig();
 
     std::shared_ptr<Base> createRequirement() override;

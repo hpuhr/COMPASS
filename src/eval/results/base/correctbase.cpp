@@ -26,7 +26,7 @@
 #include "eval/requirement/base/base.h"
 
 #include "evaluationtargetdata.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
 #include "logger.h"
 #include "util/timeconv.h"
@@ -48,8 +48,8 @@ namespace EvaluationRequirementResult
 /**
 */
 CorrectBase::CorrectBase(const std::string& correct_value_name,
-                const std::string& correct_short_name,
-                const std::string& not_correct_short_name)
+                         const std::string& correct_short_name,
+                         const std::string& not_correct_short_name)
 :   correct_value_name_    (correct_value_name)
 ,   correct_short_name_    (correct_short_name)
 ,   not_correct_short_name_(not_correct_short_name)
@@ -142,7 +142,7 @@ SingleCorrectBase::SingleCorrectBase(const std::string& result_type,
                                      const SectorLayer& sector_layer,
                                      unsigned int utn,
                                      const EvaluationTargetData* target,
-                                     EvaluationManager& eval_man,
+                                     EvaluationCalculator& calculator,
                                      const EvaluationDetails& details,
                                      unsigned int num_updates,
                                      unsigned int num_no_ref_pos,
@@ -156,7 +156,7 @@ SingleCorrectBase::SingleCorrectBase(const std::string& result_type,
                                      const std::string& not_correct_short_name)
 :   CorrectBase(num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside, num_correct, num_not_correct,
                 correct_value_name, correct_short_name, not_correct_short_name)
-,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details)
 {
 }
 
@@ -284,12 +284,12 @@ JoinedCorrectBase::JoinedCorrectBase(const std::string& result_type,
                                      const std::string& result_id, 
                                      std::shared_ptr<EvaluationRequirement::Base> requirement,
                                      const SectorLayer& sector_layer, 
-                                     EvaluationManager& eval_man,
+                                     EvaluationCalculator& calculator,
                                      const std::string& correct_value_name,
                                      const std::string& correct_short_name,
                                      const std::string& not_correct_short_name)
 :   CorrectBase(correct_value_name, correct_short_name, not_correct_short_name)
-,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -381,7 +381,7 @@ FeatureDefinitions JoinedCorrectBase::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleCorrectBase::DetailKey::IsNotCorrect, 
                        GridAddDetailMode::AddEvtRefPosition, 
                        true);

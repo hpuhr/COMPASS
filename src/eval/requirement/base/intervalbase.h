@@ -112,7 +112,7 @@ public:
                  const std::string& group_name,
                  double prob, 
                  COMPARISON_TYPE prob_check_type, 
-                 EvaluationManager& eval_man,
+                 EvaluationCalculator& calculator,
                  float update_interval_s, 
                  const boost::optional<float>& min_gap_length_s = boost::optional<float>(),
                  const boost::optional<float>& max_gap_length_s = boost::optional<float>(),

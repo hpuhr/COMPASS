@@ -15,15 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONSTANDARDTABWIDGET_H
-#define EVALUATIONSTANDARDTABWIDGET_H
+#pragma once
 
 #include <QWidget>
 
 #include <memory>
 
-class EvaluationManager;
-class EvaluationManagerSettings;
+class EvaluationCalculator;
 class EvaluationManagerWidget;
 class EvaluationStandardComboBox;
 
@@ -32,6 +30,8 @@ class QStackedWidget;
 class QLineEdit;
 class QHBoxLayout;
 
+/**
+ */
 class EvaluationStandardTabWidget : public QWidget
 {
     Q_OBJECT
@@ -48,11 +48,10 @@ private slots:
     void maxRefTimeDiffEditSlot(QString value);
 
 public:
-    EvaluationStandardTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
+    EvaluationStandardTabWidget(EvaluationCalculator& calculator);
 
 protected:
-    EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
+    EvaluationCalculator& calculator_;
 
     std::unique_ptr<EvaluationStandardComboBox> standard_box_ {nullptr};
 
@@ -69,5 +68,3 @@ protected:
     void updateButtons();
     void updateStandardWidget();
 };
-
-#endif // EVALUATIONSTANDARDTABWIDGET_H

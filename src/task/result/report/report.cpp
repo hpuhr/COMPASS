@@ -19,6 +19,7 @@
 #include "task/result/report/section.h"
 #include "task/result/report/sectionid.h"
 #include "taskmanager.h"
+#include "taskresult.h"
 #include "taskresultswidget.h"
 
 #include "logger.h"
@@ -34,10 +35,12 @@ const std::string Report::FieldRootSection = "root_section";
 
 /**
  */
-Report::Report(TaskManager& task_man)
+Report::Report(TaskResult* result)
 :   TreeItem(SectionID::SectionReport, nullptr)
-,   task_man_(task_man)
+,   result_ (result)
 {
+    assert(result_);
+
     root_section_ = std::make_shared<Section>(SectionID::SectionResults, "", this, this);
 }
 
@@ -48,6 +51,22 @@ Report::~Report()
     logdbg << "Report: destructor";
 }
 
+/**
+ */
+const TaskManager& Report::taskManager() const
+{
+    return result_->taskManager();
+}
+
+/**
+ */
+TaskManager& Report::taskManager()
+{
+    return result_->taskManager();
+}
+
+/**
+ */
 void Report::clear()
 {
     root_section_ = std::make_shared<Section>(SectionID::SectionResults, "", this, this);
@@ -193,7 +212,14 @@ bool Report::fromJSON(const nlohmann::json& j)
  */
 void Report::setCurrentViewable(const nlohmann::json::object_t& data)
 {
-    task_man_.setViewableDataConfig(data);
+    result_->taskManager().setViewableDataConfig(data);
+}
+
+/**
+ */
+void Report::unsetCurrentViewable()
+{
+    result_->taskManager().unsetViewableDataConfig();
 }
 
 /**
@@ -202,15 +228,16 @@ void Report::setCurrentSection(const std::string& section_name)
 {
     std::string full_id = SectionID::prependReportResults(section_name);
 
-    task_man_.widget()->selectID(full_id);
+    result_->taskManager().widget()->selectID(full_id);
 }
 
 /**
  */
 std::shared_ptr<ResultReport::SectionContent> Report::loadContent(ResultReport::Section* section, 
-                                                                  unsigned int content_id) const
+                                                                  unsigned int content_id,
+                                                                  bool show_dialog) const
 {
-    return task_man_.loadContent(section, content_id);
+    return result_->taskManager().loadContent(section, content_id, show_dialog);
 }
 
 }

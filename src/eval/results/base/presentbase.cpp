@@ -114,7 +114,7 @@ SinglePresentBase::SinglePresentBase(const std::string& result_type,
                                      const SectorLayer& sector_layer,
                                      unsigned int utn, 
                                      const EvaluationTargetData* target, 
-                                     EvaluationManager& eval_man,
+                                     EvaluationCalculator& calculator,
                                      const EvaluationDetails& details,
                                      int num_updates, 
                                      int num_no_ref_pos, 
@@ -125,7 +125,7 @@ SinglePresentBase::SinglePresentBase(const std::string& result_type,
                                      int num_missing,
                                      const std::string& no_ref_value_name)
 :   PresentBase(num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside, num_no_ref_val, num_present, num_missing, no_ref_value_name)
-,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details)
 ,   no_ref_value_name_(no_ref_value_name)
 {
 }
@@ -246,10 +246,10 @@ JoinedPresentBase::JoinedPresentBase(const std::string& result_type,
                                      const std::string& result_id, 
                                      std::shared_ptr<EvaluationRequirement::Base> requirement,
                                      const SectorLayer& sector_layer, 
-                                     EvaluationManager& eval_man,
+                                     EvaluationCalculator& calculator,
                                      const std::string& no_ref_value_name)
 :   PresentBase(no_ref_value_name)
-,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -339,7 +339,7 @@ FeatureDefinitions JoinedPresentBase::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SinglePresentBase::DetailKey::IsNotOk, 
                        GridAddDetailMode::AddEvtRefPosition, 
                        true);

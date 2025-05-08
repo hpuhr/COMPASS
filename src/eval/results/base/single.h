@@ -37,6 +37,7 @@ const double OSGVIEW_POS_WINDOW_SCALE {1.8};
 namespace ResultReport
 {
     class SectionContentTable;
+    class SectionContentFigure;
     class Report;
 }
 
@@ -44,6 +45,7 @@ namespace EvaluationRequirementResult
 {
 
 class Joined;
+class EvaluationTaskResult;
 
 template <typename T>
 struct ValueSource;
@@ -139,7 +141,7 @@ public:
            const SectorLayer& sector_layer,
            unsigned int utn, 
            const EvaluationTargetData* target, 
-           EvaluationManager& eval_man,
+           EvaluationCalculator& calculator,
            const EvaluationDetails& details);
     virtual ~Single();
 
@@ -176,14 +178,20 @@ public:
     void iterateDetails(const DetailFunc& func,
                         const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
 
+    void addDetailsToTable(ResultReport::SectionContentTable& table);
+    void addOverviewToFigure(ResultReport::SectionContentFigure& figure);
+    void addHighlightToFigure(ResultReport::SectionContentFigure& figure);
+
     std::vector<double> getValues(const ValueSource<double>& source) const;
     std::vector<double> getValues(int value_id) const;
 
     /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
 
-    const static std::string tr_details_table_name_;
-    const static std::string target_table_name_;
+    static const std::string tr_details_table_name_;
+    static const std::string target_table_name_;
+
+    static const std::string TargetOverviewID;
 
     static const int AnnotationPointSizeOverview;
     static const int AnnotationPointSizeHighlight;
@@ -198,7 +206,14 @@ public:
     static const QColor AnnotationColorError;
     static const QColor AnnotationColorOk;
 
+    static const std::string PropertyUTN;
+    static const std::string PropertySectorLayer;
+    static const std::string PropertyReqGroup;
+    static const std::string PropertyReqName;
+
 protected:
+    friend class EvaluationTaskResult; // for loading on-demand content
+
     std::string getTargetSectionID();
     std::string getTargetRequirementSectionID();
 

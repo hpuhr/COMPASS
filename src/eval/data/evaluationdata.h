@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONDATA_H
-#define EVALUATIONDATA_H
+#pragma once
 
 #include "evaluationtargetdata.h"
 #include "evaluationdatawidget.h"
@@ -34,7 +33,7 @@
 #include <boost/multi_index_container.hpp>
 
 
-class EvaluationManager;
+class EvaluationCalculator;
 class DBContent;
 class DBContentManager;
 class Buffer;
@@ -53,6 +52,8 @@ typedef boost::multi_index_container<
         > >
     TargetCache;
 
+/**
+ */
 class EvaluationData : public QAbstractItemModel
 {
     Q_OBJECT
@@ -62,7 +63,8 @@ public slots:
     void allTargetsChangedSlot(); // for more than 1 utn
 
 public:
-    EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man);
+    EvaluationData(EvaluationCalculator& calculator, 
+                   DBContentManager& dbcont_man);
 
     void setBuffers(std::map<std::string, std::shared_ptr<Buffer>> buffers);
     void addReferenceData (const std::string& dbcontent_name, unsigned int line_id);
@@ -118,7 +120,7 @@ public:
 protected:
     void updateAllInterestFactors();
 
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
     DBContentManager& dbcont_man_;
 
     QStringList table_columns_ {"Use", "UTN", "Comment", "Interest",
@@ -130,7 +132,7 @@ protected:
     TargetCache target_data_;
     bool finalized_ {false};
 
-    std::unique_ptr<EvaluationDataWidget> widget_;
+    EvaluationDataWidget* widget_ = nullptr;
 
     unsigned int unassociated_ref_cnt_ {0};
     unsigned int associated_ref_cnt_ {0};
@@ -140,5 +142,3 @@ protected:
 
     std::map<std::string, bool> interest_factor_enabled_; // requirement name -> bool
 };
-
-#endif // EVALUATIONDATA_H

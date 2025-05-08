@@ -97,7 +97,7 @@ protected:
     bool common_detailIsOk(const EvaluationDetail& detail) const;
 
     FeatureDefinitions common_getCustomAnnotationDefinitions(const Single& single,
-                                                             const EvaluationManager& eval_man) const;
+                                                             const EvaluationCalculator& calculator) const;
 
     virtual boost::optional<double> computeFinalResultValue() const = 0;
 };
@@ -114,7 +114,7 @@ public:
                                   const SectorLayer& sector_layer,
                                   unsigned int utn,
                                   const EvaluationTargetData* target,
-                                  EvaluationManager& eval_man,
+                                  EvaluationCalculator& calculator,
                                   const EvaluationDetails& details,
                                   unsigned int num_pos,
                                   unsigned int num_no_ref,
@@ -151,7 +151,7 @@ public:
                        const SectorLayer& sector_layer,
                        unsigned int utn,
                        const EvaluationTargetData* target,
-                       EvaluationManager& eval_man,
+                       EvaluationCalculator& calculator,
                        const EvaluationDetails& details,
                        unsigned int num_pos,
                        unsigned int num_no_ref,
@@ -198,7 +198,7 @@ protected:
     virtual boost::optional<double> computeFinalResultValue() const = 0;
 
     FeatureDefinitions common_getCustomAnnotationDefinitions(const Joined& joined,
-                                                             const EvaluationManager& eval_man) const;
+                                                             const EvaluationCalculator& calculator) const;
 
 private:
     std::string csv_header_;
@@ -213,7 +213,7 @@ public:
                                   const std::string& result_id,
                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
                                   const SectorLayer& sector_layer,
-                                  EvaluationManager& eval_man,
+                                  EvaluationCalculator& calculator,
                                   const std::string& csv_header);
 protected:
     boost::optional<double> computeFinalResultValue() const override final;
@@ -239,7 +239,7 @@ public:
                             const std::string& result_id,
                             std::shared_ptr<EvaluationRequirement::Base> requirement,
                             const SectorLayer& sector_layer,
-                            EvaluationManager& eval_man,
+                            EvaluationCalculator& calculator,
                             const std::string& csv_header);
 
     nlohmann::json resultValue(double value) const override final;

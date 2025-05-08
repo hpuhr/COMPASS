@@ -32,8 +32,8 @@ namespace EvaluationRequirement
 
 ModeCCorrectConfig::ModeCCorrectConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("max_distance_ft", &max_distance_ft_, 300.0f);
 
@@ -42,7 +42,7 @@ ModeCCorrectConfig::ModeCCorrectConfig(
 std::shared_ptr<Base> ModeCCorrectConfig::createRequirement()
 {
     shared_ptr<ModeCCorrect> req = make_shared<ModeCCorrect>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_,
                 max_distance_ft_);
 
     return req;
@@ -52,6 +52,7 @@ float ModeCCorrectConfig::maxDistanceFt() const
 {
     return max_distance_ft_;
 }
+
 void ModeCCorrectConfig::maxDistanceFt(float value)
 {
     max_distance_ft_ = value;

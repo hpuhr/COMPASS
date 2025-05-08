@@ -71,7 +71,9 @@ public:
     Configurable(const std::string& class_id, 
                  const std::string& instance_id,
                  Configurable* parent = nullptr,
-                 const std::string& root_configuration_filename = "");
+                 const std::string& root_configuration_filename = "",
+                 const nlohmann::json* config = nullptr);
+
     /// @brief Default constructor, for STL containers
     Configurable() = default;
 
@@ -82,6 +84,8 @@ public:
 
     /// @brief Destructor
     virtual ~Configurable();
+
+    bool isTransient() const { return is_transient_; }
 
     /// @brief Reset parameters to their reset values
     virtual void resetToDefault();
@@ -236,6 +240,7 @@ private:
     /// Configuration
     Configuration* configuration_{nullptr};
     bool is_root_{false};
+    bool is_transient_{true};
 
     bool tmp_disable_remove_config_on_delete_ {false};
 

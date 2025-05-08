@@ -196,8 +196,11 @@ public:
     bool existsReportContentsTable() const;
     void createTaskResultsTable();
     void createReportContentsTable();
-    Result saveResult(const TaskResult& result);
-    Result deleteResult(const TaskResult& result);
+    Result saveResult(const TaskResult& result, 
+                      bool cleanup_db_if_needed);
+    Result deleteResult(const TaskResult& result, 
+                        bool cleanup_db_if_needed,
+                        bool* deleted = nullptr);
     ResultT<std::vector<std::shared_ptr<TaskResult>>> loadResults();
     ResultT<std::shared_ptr<ResultReport::SectionContent>> loadContent(ResultReport::Section* section, unsigned int content_id);
 

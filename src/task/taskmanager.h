@@ -20,6 +20,7 @@
 #include <QObject>
 
 #include "configurable.h"
+#include "taskdefs.h"
 #include "task.h"
 #include "taskresultswidget.h"
 
@@ -52,7 +53,7 @@ class TaskManager : public QObject, public Configurable
 {
     Q_OBJECT
 
-  signals:
+signals:
     void startInspectionSignal();
     void expertModeChangedSignal();
 
@@ -60,11 +61,11 @@ class TaskManager : public QObject, public Configurable
 
     void taskResultsChangedSignal();
 
-  public slots:
+public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
 
-  public:
+public:
     TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
 
     virtual ~TaskManager();
@@ -92,20 +93,32 @@ class TaskManager : public QObject, public Configurable
 
     TaskResultsWidget* widget();
 
-    void beginTaskResultWriting(const std::string& name);
+    void beginTaskResultWriting(const std::string& name,
+                                task::TaskResultType type);
+    std::shared_ptr<TaskResult>& currentResult();
     std::shared_ptr<ResultReport::Report>& currentReport();
-    void endTaskResultWriting(bool store);
+    void endTaskResultWriting(bool store_result);
 
     const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
     std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
-    std::shared_ptr<TaskResult> getOrCreateResult (const std::string& name); // get or create result
-    ResultReport::Report& report(const std::string& name);
+    std::shared_ptr<TaskResult> result(const std::string& name) const; // get existing result
+    std::shared_ptr<TaskResult> getOrCreateResult(const std::string& name, 
+                                                  task::TaskResultType type);
     bool hasResult (const std::string& name) const;
-    bool removeResult(const std::string& name);
+    bool removeResult(const std::string& name, 
+                      bool inform_changes = true);
+    std::shared_ptr<TaskResult> createResult(unsigned int id,
+                                             task::TaskResultType type);
 
     void setViewableDataConfig(const nlohmann::json::object_t& data);
+    void unsetViewableDataConfig();
+
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
-                                                              unsigned int content_id) const;
+                                                              unsigned int content_id,
+                                                              bool show_dialog = false) const;
+
+    static const bool CleanupDBIfNeeded;
+
 protected:
     // tasks
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;

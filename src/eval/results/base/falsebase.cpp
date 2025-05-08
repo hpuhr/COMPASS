@@ -123,7 +123,7 @@ SingleFalseBase::SingleFalseBase(const std::string& result_type,
                                  const SectorLayer& sector_layer,
                                  unsigned int utn, 
                                  const EvaluationTargetData* target, 
-                                 EvaluationManager& eval_man,
+                                 EvaluationCalculator& calculator,
                                  const EvaluationDetails& details,
                                  int num_updates, 
                                  int num_no_ref_pos, 
@@ -135,7 +135,7 @@ SingleFalseBase::SingleFalseBase(const std::string& result_type,
                                  int num_false,
                                  const std::string& false_value_name)
 :   FalseBase(num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside, num_unknown, num_correct, num_false, false_value_name)
-,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details)
 {
 }
 
@@ -256,10 +256,10 @@ JoinedFalseBase::JoinedFalseBase(const std::string& result_type,
                                  const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
                                  const SectorLayer& sector_layer, 
-                                 EvaluationManager& eval_man,
+                                 EvaluationCalculator& calculator,
                                  const std::string& false_value_name)
 :   FalseBase(false_value_name)
-,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -353,7 +353,7 @@ FeatureDefinitions JoinedFalseBase::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs; 
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleFalseBase::DetailKey::IsNotOk, 
                        GridAddDetailMode::AddEvtRefPosition, 
                        true);

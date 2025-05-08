@@ -9,6 +9,9 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationdefs.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationsettings.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationcalculator.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagerwidget.h"
@@ -17,10 +20,13 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetstabwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationstandardtabwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultstabwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationreporttabwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatasourcewidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationsectorwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluation_commands.h"
     PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationsettings.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationcalculator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationmanagerwidget.cpp"
@@ -29,6 +35,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetstabwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationstandardtabwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationresultstabwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationreporttabwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationdatasourcewidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationsectorwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluation_commands.cpp"

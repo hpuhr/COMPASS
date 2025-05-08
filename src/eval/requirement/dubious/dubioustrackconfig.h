@@ -34,7 +34,7 @@ class DubiousTrackConfig : public ProbabilityBaseConfig
 {
 public:
     DubiousTrackConfig(const std::string& class_id, const std::string& instance_id,
-                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+                       Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~DubiousTrackConfig();
 
     std::shared_ptr<Base> createRequirement() override;

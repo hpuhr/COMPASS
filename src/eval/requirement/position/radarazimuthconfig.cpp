@@ -32,8 +32,8 @@ namespace EvaluationRequirement
 {
 PositionRadarAzimuthConfig::PositionRadarAzimuthConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : BaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("threshold_value", &threshold_value_, 0.1);
 }
@@ -45,7 +45,7 @@ PositionRadarAzimuthConfig::~PositionRadarAzimuthConfig()
 std::shared_ptr<Base> PositionRadarAzimuthConfig::createRequirement()
 {
     shared_ptr<PositionRadarAzimuth> req = make_shared<PositionRadarAzimuth>(
-                name_, short_name_, group_.name(), eval_man_, threshold_value_);
+                name_, short_name_, group_.name(), calculator_, threshold_value_);
 
     return req;
 }

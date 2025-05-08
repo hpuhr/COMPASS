@@ -59,8 +59,8 @@ DubiousTrack::DubiousTrack(const std::string& name,
                            float dubious_prob,
                            double prob, 
                            COMPARISON_TYPE prob_check_type, 
-                           EvaluationManager& eval_man)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
+                           EvaluationCalculator& calculator)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator),
       eval_only_single_ds_id_(eval_only_single_ds_id), 
       single_ds_id_(single_ds_id),
       minimum_comparison_time_(minimum_comparison_time), 
@@ -273,7 +273,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (con
     {
         return make_shared<EvaluationRequirementResult::SingleDubiousTrack>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious,
+                    calculator_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious,
                     0, 0);
     }
 
@@ -467,7 +467,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (con
 
     return make_shared<EvaluationRequirementResult::SingleDubiousTrack>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious,
+                calculator_, genDetails(), num_updates, num_pos_outside, num_pos_inside, num_pos_inside_dubious,
                 num_tracks, num_tracks_dubious);
 }
 

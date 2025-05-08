@@ -33,8 +33,9 @@ namespace EvaluationRequirement
 {
 
 ModeCFalse::ModeCFalse(const std::string& name, const std::string& short_name, const std::string& group_name,
-                       double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float maximum_probability_false, float maximum_difference)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
+                       double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator, 
+                       float maximum_probability_false, float maximum_difference)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator),
       maximum_probability_false_(maximum_probability_false), maximum_difference_(maximum_difference)
 {
 }
@@ -46,7 +47,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
     logdbg << "EvaluationRequirementModeCFalse '" << name_ << "': evaluate: utn " << target_data.utn_
            << " prob " << maximum_probability_false_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -78,7 +79,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
     ValueComparisonResult cmp_res;
     string comment;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
     bool skip_detail;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -219,7 +220,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleModeCFalse>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
+                calculator_, details, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
                 num_unknown, num_correct, num_false);
 }
 

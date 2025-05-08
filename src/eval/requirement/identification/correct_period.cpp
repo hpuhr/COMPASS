@@ -47,7 +47,7 @@ IdentificationCorrectPeriod::IdentificationCorrectPeriod(const std::string& name
                                                          const std::string& group_name,
                                                          double prob, 
                                                          COMPARISON_TYPE prob_check_type, 
-                                                         EvaluationManager& eval_man,
+                                                         EvaluationCalculator& calculator,
                                                          float update_interval_s, 
                                                          bool  use_miss_tolerance,
                                                          float miss_tolerance_s,
@@ -57,7 +57,7 @@ IdentificationCorrectPeriod::IdentificationCorrectPeriod(const std::string& name
                  group_name, 
                  prob, 
                  prob_check_type, 
-                 eval_man, 
+                 calculator, 
                  update_interval_s, 
                  {}, 
                  {},
@@ -121,7 +121,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrectPeriod
                                         sector_layer, 
                                         target_data.utn_, 
                                         &target_data, 
-                                        eval_man_, 
+                                        calculator_, 
                                         details, 
                                         sum_uis, 
                                         misses_total, 
@@ -191,8 +191,8 @@ IdentificationCorrectPeriodConfig::IdentificationCorrectPeriodConfig(const std::
                                                                      const std::string& instance_id,
                                                                      Group& group, 
                                                                      EvaluationStandard& standard,
-                                                                     EvaluationManager& eval_man)
-:   IntervalBaseConfig(class_id, instance_id, group, standard, eval_man)
+                                                                     EvaluationCalculator& calculator)
+:   IntervalBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     configure(UseMissTol);
 
@@ -209,7 +209,7 @@ std::shared_ptr<Base> IdentificationCorrectPeriodConfig::createRequirement()
                 group_.name(), 
                 prob_, 
                 prob_check_type_, 
-                eval_man_,
+                calculator_,
                 update_interval_s_,
                 use_miss_tolerance_, 
                 miss_tolerance_s_,

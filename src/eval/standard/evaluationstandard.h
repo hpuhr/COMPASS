@@ -26,7 +26,7 @@
 
 #include <memory>
 
-class EvaluationManager;
+class EvaluationCalculator;
 class Group;
 class EvaluationStandardWidget;
 class EvaluationStandardTreeModel;
@@ -48,7 +48,7 @@ class EvaluationStandard : public QObject, public Configurable, public Evaluatio
      void groupsChangedSlot();
 
 public:
-    EvaluationStandard(const std::string& class_id, const std::string& instance_id, EvaluationManager& eval_man);
+    EvaluationStandard(const std::string& class_id, const std::string& instance_id, EvaluationCalculator& calculator);
     virtual ~EvaluationStandard();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -64,9 +64,13 @@ public:
 
     using EvaluationRequirementGroupIterator =
     typename std::vector<std::unique_ptr<Group>>::iterator;
+    using EvaluationRequirementGroupConstIterator =
+    typename std::vector<std::unique_ptr<Group>>::const_iterator;
 
     EvaluationRequirementGroupIterator begin() { return groups_.begin(); }
     EvaluationRequirementGroupIterator end() { return groups_.end(); }
+    EvaluationRequirementGroupConstIterator begin() const { return groups_.begin(); }
+    EvaluationRequirementGroupConstIterator end() const { return groups_.end(); }
     unsigned int size () { return groups_.size(); };
 
     EvaluationStandardWidget* widget();
@@ -82,7 +86,7 @@ public:
     void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
     std::string name_;
 
     EvaluationStandardRootItem root_item_;

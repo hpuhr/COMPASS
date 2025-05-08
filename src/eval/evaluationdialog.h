@@ -4,18 +4,18 @@
 
 #include <memory>
 
-class EvaluationManager;
-class EvaluationManagerSettings;
+class EvaluationCalculator;
 class EvaluationMainTabWidget;
 class EvaluationFilterTabWidget;
 class EvaluationStandardTabWidget;
+class EvaluationReportTabWidget;
 
 class QLabel;
 
 class EvaluationDialog : public QDialog
 {
 public:
-    EvaluationDialog(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
+    EvaluationDialog(EvaluationCalculator& calculator);
     virtual ~EvaluationDialog();
 
     void updateDataSources();
@@ -26,12 +26,12 @@ public:
     void updateFilterWidget();
 
 protected:
-    EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
+    EvaluationCalculator& calculator_;
 
     std::unique_ptr<EvaluationMainTabWidget> main_tab_widget_;
     std::unique_ptr<EvaluationFilterTabWidget> filter_widget_;
     std::unique_ptr<EvaluationStandardTabWidget> std_tab_widget_;
+    std::unique_ptr<EvaluationReportTabWidget> report_tab_widget_;
 
     QLabel* not_eval_comment_label_ {nullptr};
 

@@ -1045,7 +1045,7 @@ void MainWindow::evaluateSlot()
 {
     loginf << "MainWindow: evaluateSlot";
 
-    COMPASS::instance().evaluationManager().showDialog();
+    COMPASS::instance().evaluationManager().evaluate(true);
 }
 
 void MainWindow::configureDataSourcesSlot()

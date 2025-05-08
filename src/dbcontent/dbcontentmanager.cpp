@@ -345,6 +345,8 @@ VariableSet DBContentManager::getReadSet(const std::string& dbcontent_name)
 void DBContentManager::load(const std::string& custom_filter_clause, 
                             bool measure_db_performance)
 {
+    loading_done_ = false;
+
     logdbg << "DBContentManager: load: custom_filter_clause '" << custom_filter_clause << "'";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -415,6 +417,21 @@ void DBContentManager::load(const std::string& custom_filter_clause,
 
     if (!load_job_created)
         finishLoading();
+}
+
+/**
+ */
+void DBContentManager::loadBlocking(const std::string& custom_filter_clause, 
+                                    bool measure_db_performance,
+                                    unsigned int sleep_msecs)
+{
+    load(custom_filter_clause, measure_db_performance);
+
+    while (!loading_done_)
+    {
+        QCoreApplication::processEvents();
+        QThread::msleep(sleep_msecs);
+    }
 }
 
 /**
@@ -647,6 +664,8 @@ void DBContentManager::finishLoading()
     //COMPASS::instance().dbContentManager().labelGenerator().updateAvailableLabelLines(); // update available lines
 
     QApplication::restoreOverrideCursor();
+
+    loading_done_ = true;
 }
 
 /**

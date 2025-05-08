@@ -33,7 +33,7 @@ public:
             const std::string& group_name,
             double prob, 
             COMPARISON_TYPE prob_check_type, 
-            EvaluationManager& eval_man,
+            EvaluationCalculator& calculator,
             float update_interval_s,
             bool use_min_gap_length, 
             float min_gap_length_s,

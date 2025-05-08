@@ -94,14 +94,14 @@ SingleExtraTrack::SingleExtraTrack(const std::string& result_id,
                                    const SectorLayer& sector_layer,
                                    unsigned int utn,
                                    const EvaluationTargetData* target,
-                                   EvaluationManager& eval_man,
+                                   EvaluationCalculator& calculator,
                                    const EvaluationDetails& details,
                                    bool ignore,
                                    unsigned int num_inside,
                                    unsigned int num_extra,
                                    unsigned int num_ok)
 :   ExtraTrackBase(num_inside, num_extra, num_ok)
-,   SingleProbabilityBase("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, calculator, details)
 {
     if (ignore)
         setIgnored();
@@ -113,7 +113,7 @@ SingleExtraTrack::SingleExtraTrack(const std::string& result_id,
 */
 std::shared_ptr<Joined> SingleExtraTrack::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedExtraTrack> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedExtraTrack> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 
@@ -222,9 +222,9 @@ void SingleExtraTrack::addAnnotationForDetail(nlohmann::json& annotations_json,
 JoinedExtraTrack::JoinedExtraTrack(const std::string& result_id,
                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
                                    const SectorLayer& sector_layer,
-                                   EvaluationManager& eval_man)
+                                   EvaluationCalculator& calculator)
 :   ExtraTrackBase()
-,   JoinedProbabilityBase("JoinedExtraTrack", result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase("JoinedExtraTrack", result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -296,7 +296,7 @@ FeatureDefinitions JoinedExtraTrack::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleExtraTrack::DetailKey::Extra, 
                        GridAddDetailMode::AddEvtPosition, 
                        true);

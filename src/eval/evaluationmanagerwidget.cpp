@@ -18,15 +18,10 @@
 #include "evaluationmanagerwidget.h"
 
 #include "evaluationtargetstabwidget.h"
-
 #include "evaluationresultstabwidget.h"
-//#include "evaluationstandardcombobox.h"
 #include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
-//#include "evaluationdata.h"
-//#include "evaluationdatawidget.h"
-//#include "evaluationdatasourcewidget.h"
-//#include "evaluationsectorwidget.h"
 #include "logger.h"
 #include "files.h"
 
@@ -44,8 +39,11 @@
 #include <QHBoxLayout>
 #include <QTimer>
 
-EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
-    : ToolBoxWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings)
+/**
+ */
+EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
+:   ToolBoxWidget(nullptr)
+,   eval_man_(eval_man)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -89,6 +87,8 @@ EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man, Ev
     setLayout(main_layout);
 }
 
+/**
+ */
 EvaluationManagerWidget::~EvaluationManagerWidget() = default;
 
 /**
@@ -152,11 +152,15 @@ void EvaluationManagerWidget::loadingDone()
     tab_widget_->setEnabled(true);
 }
 
+/**
+ */
 void EvaluationManagerWidget::updateButtons()
 {
     gen_report_button_->setEnabled(eval_man_.canGenerateReport());
 }
 
+/**
+ */
 void EvaluationManagerWidget::expandResults()
 {
     assert (results_tab_widget_);
@@ -164,6 +168,8 @@ void EvaluationManagerWidget::expandResults()
     results_tab_widget_->expand();
 }
 
+/**
+ */
 void EvaluationManagerWidget::showResultId (const std::string& id, 
                                             bool select_tab,
                                             bool show_figure)
@@ -177,12 +183,16 @@ void EvaluationManagerWidget::showResultId (const std::string& id,
     results_tab_widget_->selectId(id, show_figure);
 }
 
+/**
+ */
 void EvaluationManagerWidget::reshowLastResultId()
 {
     assert (results_tab_widget_);
     results_tab_widget_->reshowLastId();
 }
 
+/**
+ */
 void EvaluationManagerWidget::generateReportSlot()
 {
     loginf << "EvaluationManagerWidget: generateReportSlot";
@@ -190,6 +200,8 @@ void EvaluationManagerWidget::generateReportSlot()
     eval_man_.generateReport();
 }
 
+/**
+ */
 boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std::string& result_id, 
                                                                       const std::string& table_id,
                                                                       bool rowwise,
@@ -197,7 +209,7 @@ boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std:
 {
     //retrieve special tables
     if (table_id == "Targets")
-        return eval_man_.getData().getTableData(rowwise, cols);
+        return eval_man_.calculator().data().getTableData(rowwise, cols);
 
     //retrieve result table
     return results_tab_widget_->getTableData(result_id, table_id, rowwise, cols);

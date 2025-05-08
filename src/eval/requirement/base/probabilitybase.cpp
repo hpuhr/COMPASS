@@ -34,9 +34,9 @@ ProbabilityBase::ProbabilityBase(const std::string& name,
                                  double prob_threshold, 
                                  COMPARISON_TYPE prob_check_type, 
                                  bool invert_prob,
-                                 EvaluationManager& eval_man,
+                                 EvaluationCalculator& calculator,
                                  const boost::optional<bool>& must_hold_for_any_target)
-:   Base(name, short_name, group_name, prob_threshold, prob_check_type, eval_man, must_hold_for_any_target)
+:   Base(name, short_name, group_name, prob_threshold, prob_check_type, calculator, must_hold_for_any_target)
 ,   invert_prob_(invert_prob)
 {
 }

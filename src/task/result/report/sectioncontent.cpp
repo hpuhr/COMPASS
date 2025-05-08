@@ -17,6 +17,8 @@
 
 #include "task/result/report/sectioncontent.h"
 #include "task/result/report/section.h"
+#include "task/result/report/report.h"
+#include "taskresult.h"
 
 #include <cassert>
 
@@ -32,9 +34,11 @@ const PropertyList SectionContent::DBPropertyList      = PropertyList({ SectionC
                                                                         SectionContent::DBColumnResultID,
                                                                         SectionContent::DBColumnType,
                                                                         SectionContent::DBColumnJSONContent });
-const std::string SectionContent::FieldType = "type";
-const std::string SectionContent::FieldID   = "id";
-const std::string SectionContent::FieldName = "name";
+const std::string SectionContent::FieldType       = "type";
+const std::string SectionContent::FieldID         = "id";
+const std::string SectionContent::FieldName       = "name";
+const std::string SectionContent::FieldProperties = "properties";
+const std::string SectionContent::FieldOnDemand   = "on_demand";
 
 /**
  */
@@ -50,6 +54,7 @@ SectionContent::SectionContent(Type type,
     assert (parent_section_);
 
     report_ = parent_section_->report();
+    assert(report_);
 }
 
 /**
@@ -62,6 +67,7 @@ SectionContent::SectionContent(Type type,
     assert (parent_section_);
 
     report_ = parent_section_->report();
+    assert(report_);
 }
 
 /**
@@ -126,13 +132,92 @@ std::string SectionContent::name() const
 
 /**
  */
+void SectionContent::setJSONProperty(const std::string& name, const nlohmann::json& value)
+{
+    properties_[ name ] = value;
+}
+
+/**
+ */
+bool SectionContent::hasJSONProperty(const std::string& name) const
+{
+    return properties_.contains(name);
+}
+
+/**
+ */
+nlohmann::json SectionContent::jsonProperty(const std::string& name) const
+{
+    if (!hasJSONProperty(name))
+        return nlohmann::json();
+
+    return properties_.at(name);
+}
+
+/**
+ */
+void SectionContent::setOnDemand()
+{
+    on_demand_ = true;
+}
+
+/**
+ */
+bool SectionContent::isOnDemand() const
+{
+    return on_demand_;
+}
+
+/**
+ */
+bool SectionContent::isComplete() const
+{
+    return complete_;
+}
+
+/**
+ */
+bool SectionContent::loadOnDemandIfNeeded()
+{
+    if (!isOnDemand() || isComplete())
+        return true;
+
+    return loadOnDemand();
+}
+
+/**
+ */
+bool SectionContent::loadOnDemand()
+{
+    loginf << "SectionContent: loadOnDemand: Loading on-demand data for content '" << name_ << "' of type '" << typeAsString() << "'";
+
+    assert(isOnDemand());
+    assert(!isComplete());
+    assert(report_);
+
+    bool ok = report_->result().loadOnDemandContent(this);
+    if (!ok)
+    {
+        logerr << "SectionContent: loadOnDemand: Could not load on-demand data for content '" << name_ << "' of type '" << typeAsString() << "'";
+        return false;
+    }
+
+    complete_ = true;
+
+    return true;
+}
+
+/**
+ */
 nlohmann::json SectionContent::toJSON() const
 {
     nlohmann::json root;
 
-    root[ FieldType ] = typeAsString(type_);
-    root[ FieldID   ] = id_;
-    root[ FieldName ] = name_;
+    root[ FieldType       ] = typeAsString(type_);
+    root[ FieldID         ] = id_;
+    root[ FieldName       ] = name_;
+    root[ FieldProperties ] = properties_;
+    root[ FieldOnDemand   ] = on_demand_;
 
     toJSON_impl(root);
 
@@ -143,10 +228,12 @@ nlohmann::json SectionContent::toJSON() const
  */
 bool SectionContent::fromJSON(const nlohmann::json& j)
 {
-    if (!j.is_object() ||
-        !j.contains(FieldType) ||
-        !j.contains(FieldID)   ||
-        !j.contains(FieldName))
+    if (!j.is_object()               ||
+        !j.contains(FieldType)       ||
+        !j.contains(FieldID)         ||
+        !j.contains(FieldName)       ||
+        !j.contains(FieldProperties) ||
+        !j.contains(FieldOnDemand))
     {
         logerr << "SectionContent: fromJSON: Error: Section content does not obtain needed fields";
         return false;
@@ -162,9 +249,11 @@ bool SectionContent::fromJSON(const nlohmann::json& j)
             return false;
         }
 
-        type_ = t.value();
-        id_   = j[ FieldID   ];
-        name_ = j[ FieldName ];
+        type_       = t.value();
+        id_         = j[ FieldID         ];
+        name_       = j[ FieldName       ];
+        properties_ = j[ FieldProperties ];
+        on_demand_  = j[ FieldOnDemand   ];
 
         if (!fromJSON_impl(j))
             return false;

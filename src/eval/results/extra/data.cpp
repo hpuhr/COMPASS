@@ -85,14 +85,14 @@ SingleExtraData::SingleExtraData(const std::string& result_id,
                                  const SectorLayer& sector_layer,
                                  unsigned int utn,
                                  const EvaluationTargetData* target,
-                                 EvaluationManager& eval_man,
+                                 EvaluationCalculator& calculator,
                                  const EvaluationDetails& details,
                                  bool ignore,
                                  unsigned int num_extra,
                                  unsigned int num_ok,
                                  bool has_extra_test_data)
 :   ExtraDataBase(num_extra, num_ok)
-,   SingleProbabilityBase("SingleExtraData", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase("SingleExtraData", result_id, requirement, sector_layer, utn, target, calculator, details)
 ,   has_extra_test_data_(has_extra_test_data)
 {
     if (ignore)
@@ -112,7 +112,7 @@ bool SingleExtraData::hasExtraTestData() const
 */
 std::shared_ptr<Joined> SingleExtraData::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedExtraData> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedExtraData> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -221,8 +221,8 @@ void SingleExtraData::addAnnotationForDetail(nlohmann::json& annotations_json,
 JoinedExtraData::JoinedExtraData(const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
                                  const SectorLayer& sector_layer,
-                                 EvaluationManager& eval_man)
-:   JoinedProbabilityBase("JoinedExtraData", result_id, requirement, sector_layer, eval_man)
+                                 EvaluationCalculator& calculator)
+:   JoinedProbabilityBase("JoinedExtraData", result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -289,7 +289,7 @@ FeatureDefinitions JoinedExtraData::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleExtraData::DetailKey::Extra, 
                        GridAddDetailMode::AddEvtPosition, 
                        true);

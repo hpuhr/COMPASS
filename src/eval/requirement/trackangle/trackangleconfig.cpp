@@ -31,8 +31,8 @@ namespace EvaluationRequirement
 {
 TrackAngleConfig::TrackAngleConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("threshold", &threshold_, 15.0f);
 
@@ -53,7 +53,7 @@ TrackAngleConfig::~TrackAngleConfig()
 std::shared_ptr<Base> TrackAngleConfig::createRequirement()
 {
     shared_ptr<TrackAngle> req = make_shared<TrackAngle>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_,
                 threshold_, use_minimum_speed_, minimum_speed_,
                 threshold_value_check_type_, failed_values_of_interest_);
 

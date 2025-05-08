@@ -49,7 +49,7 @@ public:
                        const std::string& instance_id,
                        Group& group, 
                        EvaluationStandard& standard,
-                       EvaluationManager& eval_man);
+                       EvaluationCalculator& calculator);
     virtual ~IntervalBaseConfig() = default;
 
     float updateInterval() const;

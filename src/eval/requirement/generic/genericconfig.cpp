@@ -36,24 +36,24 @@ namespace EvaluationRequirement
 {
 
 GenericIntegerConfig::GenericIntegerConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
-                                   Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man), variant_(variant)
+                                   Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator), variant_(variant)
 {
     assert (variant_.size());
 }
 
 std::shared_ptr<Base> GenericIntegerConfig::createRequirement()
 {
-    //shared_ptr<Generic> req = make_shared<Generic>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+    //shared_ptr<Generic> req = make_shared<Generic>(name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_);
 
     if (variant_ == "MomLongAccCorrect")
-        return make_shared<MomLongAccCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+        return make_shared<MomLongAccCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_);
     else if (variant_ == "MomTransAccCorrect")
-        return make_shared<MomTransAccCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+        return make_shared<MomTransAccCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_);
     else if (variant_ == "MomVertRateCorrect")
-        return make_shared<MomVertRateCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+        return make_shared<MomVertRateCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_);
     else if (variant_ == "CoastingCorrect")
-        return make_shared<CoastingCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+        return make_shared<CoastingCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_);
 
     assert (false);
 }
@@ -81,8 +81,8 @@ void GenericIntegerConfig::addToReport (std::shared_ptr<ResultReport::Report> re
 //---------------------------------------------
 
 GenericDoubleConfig::GenericDoubleConfig(const std::string& class_id, const std::string& instance_id, const std::string& variant,
-                                           Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man), variant_(variant)
+                                           Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator), variant_(variant)
 {
     assert (variant_.size());
 
@@ -91,14 +91,14 @@ GenericDoubleConfig::GenericDoubleConfig(const std::string& class_id, const std:
 
 std::shared_ptr<Base> GenericDoubleConfig::createRequirement()
 {
-    //shared_ptr<Generic> req = make_shared<Generic>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+    //shared_ptr<Generic> req = make_shared<Generic>(name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_);
 
     if (variant_ == "ROCDCorrect") // ft / min
-        return make_shared<ROCDCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, threshold_, eval_man_);
+        return make_shared<ROCDCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, threshold_, calculator_);
     else if (variant_ == "AccelerationCorrect")
-        return make_shared<AccelerationCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, threshold_, eval_man_);
+        return make_shared<AccelerationCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, threshold_, calculator_);
 //    else if (variant_ == "MomVertRateCorrect")
-//        return make_shared<MomVertRateCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+//        return make_shared<MomVertRateCorrect>(name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_);
 
     assert (false);
 }

@@ -145,13 +145,8 @@ public:
     void setRowInfoCallback(const RowInfoCallback& func);
     void setRowContextMenuCallback(const RowContextMenuCallback& func);
 
-    void setCreateOnDemand(std::function<void(void)> create_on_demand_fnc);
-    bool isOnDemand() const;
-    bool hasBeenCreatedOnDemand() const;
-
     QVariant data(const QModelIndex& index, int role) const;
-    void createOnDemandIfNeeded();
-
+    
     void clicked(unsigned int row);
     void doubleClicked(unsigned int row);
     void customContextMenu(unsigned int row, const QPoint& pos);
@@ -177,22 +172,18 @@ protected:
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
 
+    bool loadOnDemand() override final;
+
     unsigned int addFigure (const SectionContentViewable& viewable);
 
     SectionContentTableWidget* tableWidget() const;
 
     void toggleShowUnused();
     void copyContent();
-
-    void createOnDemand();
-
+    
     void executeCallback(const std::string& name);
 
     RowInfo rowInfo(unsigned int row) const;
-
-    bool create_on_demand_ {false};
-    std::function<void(void)> create_on_demand_fnc_;
-    bool already_created_by_demand_ {false};
 
     unsigned int num_columns_ {0};
     std::vector<std::string> headings_;
@@ -214,8 +205,8 @@ protected:
         QVariant                      index;          //detail index
     };
 
-    std::vector<nlohmann::json> rows_;
-    std::vector<RowAnnotation>  annotations_;
+    mutable std::vector<nlohmann::json> rows_;
+    mutable std::vector<RowAnnotation>  annotations_;
 
     mutable SectionContentTableWidget* table_widget_ {nullptr};
 
