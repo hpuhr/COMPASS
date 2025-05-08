@@ -49,10 +49,9 @@ class KalmanChainPredictors;
 
 class Buffer;
 class ReconstructorTask;
+class ReconstructorAssociatorBase;
 
 struct AltitudeState;
-
-typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow; // min, max
 
 class ReconstructorBaseSettings
 {
@@ -237,6 +236,8 @@ public:
     ReconstructorBase::DataSlice& currentSlice();
     const ReconstructorBase::DataSlice& currentSlice() const;
 
+    virtual ReconstructorAssociatorBase& associator()=0;
+
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 
     virtual void reset();
@@ -270,6 +271,10 @@ public:
 
     // our data structures
     std::map<unsigned long, dbContent::targetReport::ReconstructorInfo> target_reports_;
+    unsigned int num_new_target_reports_in_slice_{0};
+    unsigned int num_new_target_reports_total_{0};
+    unsigned int num_unassociated_target_reports_total_{0};
+
     // all sources, record_num -> base info
     std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
     // all sources sorted by time, ts -> record_num
@@ -323,6 +328,10 @@ protected:
 
     std::map<unsigned int, std::unique_ptr<reconstruction::KalmanChain>> chains_; // utn -> chain
 
+    unsigned int num_target_reports_ {0};
+    unsigned int num_target_reports_associated_ {0};
+    unsigned int num_target_reports_unassociated_ {0};
+
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual void processSlice_impl() = 0;
 
@@ -336,6 +345,10 @@ protected:
     std::map<std::string, std::shared_ptr<Buffer>> createAssociationBuffers(
         std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
+
+    void doUnassociatedAnalysis();
+    void doOutlierAnalysis();
+    void doReconstructionReporting();
 
 private:
     void init();

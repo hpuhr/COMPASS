@@ -7,6 +7,7 @@
 
 class EvaluationCalculator;
 class EvaluationManagerWidget;
+class TimeWindowCollectionWidget;
 
 class QLineEdit;
 class QCheckBox;
@@ -122,3 +123,4 @@ protected:
 
     bool update_active_ {false};
 };
+

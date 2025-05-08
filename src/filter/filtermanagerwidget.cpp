@@ -331,7 +331,7 @@ void FilterManagerWidget::syncFilterLayouts()
             max_width = col_width;
     }
 
-    max_width *= 1.3;
+    max_width *= 1.1;
 
     for (auto& it : filters)
         it->widget()->setFixedColumnWidth(0, max_width);

@@ -14,7 +14,7 @@ using namespace Utils;
 TimestampFilterWidget::TimestampFilterWidget(TimestampFilter& filter)
     : DBFilterWidget(filter), filter_(filter)
 {
-    QFormLayout* layout = new QFormLayout();
+    //QFormLayout* layout = new QFormLayout();
 
     min_edit_ = new QDateTimeEdit(QDateTime::currentDateTime());
     min_edit_->setDisplayFormat(Time::QT_DATETIME_FORMAT.c_str());

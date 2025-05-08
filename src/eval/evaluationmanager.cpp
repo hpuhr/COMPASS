@@ -32,7 +32,7 @@
 #include "sectorlayer.h"
 #include "sector.h"
 #include "airspace.h"
-#include "dbcontent/variable/metavariable.h"
+//#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
 #include "buffer.h"
 #include "filtermanager.h"
@@ -45,7 +45,7 @@
 #include "viewpoint.h"
 #include "projectionmanager.h"
 #include "projection.h"
-#include "files.h"
+//#include "files.h"
 
 #include "json.hpp"
 
@@ -991,6 +991,10 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
 
             filter["Timestamp"]["Timestamp Minimum"] = Time::toString(calculator.loadTimestampBegin());
             filter["Timestamp"]["Timestamp Maximum"] = Time::toString(calculator.loadTimestampEnd()  );
+          
+            if (settings_.load_filtered_time_windows_.size())
+                filter["Excluded Time Windows"]["Windows"] =
+                    settings_.load_filtered_time_windows_.asJSON();
 
             fil->loadViewPointConditions(filter);
         }

@@ -94,6 +94,10 @@ extern double calculateIQR(std::vector<double> data);
 extern double calculateMAD(std::vector<double> data);
 extern std::tuple<double,double,double> getMedianStatistics (const std::vector<double>& values);
 
+extern std::pair<unsigned int, unsigned int> computeGeoWindowResolution(
+    double lat_min, double lat_max, double lon_min, double lon_max,
+    double grid_max_resolution  = 0.001, unsigned int max_num_cells = 500);
+
 //template <typename T>
 //double getStatistics(const std::vector<>);
 

@@ -191,6 +191,9 @@ public:
 
     dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
 
+    void storeSelectedRecNums(const std::vector<unsigned long>& selected); // to be stored for next load
+    void clearSelectedRecNums();
+
 protected:
     virtual void checkSubConfigurables() override;
     void finishLoading();

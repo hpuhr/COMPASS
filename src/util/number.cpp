@@ -545,6 +545,61 @@ std::tuple<double,double,double> getMedianStatistics (const std::vector<double>&
     }
 }
 
+/// Computes the optimal number of grid cells in latitude and longitude,
+/// subject to a maximum resolution and a cap on the total number of cells.
+/// @param lat_min    Minimum latitude (degrees)
+/// @param lat_max    Maximum latitude (degrees)
+/// @param lon_min    Minimum longitude (degrees)
+/// @param lon_max    Maximum longitude (degrees)
+/// @returns           A pair {num_lat_cells, num_lon_cells}
+std::pair<unsigned int, unsigned int> computeGeoWindowResolution(
+    double lat_min, double lat_max, double lon_min, double lon_max,
+    double grid_max_resolution, unsigned int max_num_cells)
+{
+    // Compute extents
+    double lat_extent = std::abs(lat_max - lat_min);
+    double lon_extent = std::abs(lon_max - lon_min);
+
+    // 2) Guard against degenerate spans
+    if (lat_extent == 0.0)
+        lat_extent = grid_max_resolution;
+    if (lon_extent == 0.0)
+        lon_extent = grid_max_resolution;
+
+    // 3) Figure out the smallest resolution that won't exceed max_num_cells
+    //    along *either* axis
+    //
+    //    To limit latitude cells to max_num_cells:
+    //       resolution >= lat_extent / max_num_cells
+    //    To limit longitude cells to max_num_cells:
+    //       resolution >= lon_extent / max_num_cells
+    //
+    double min_res_lat = lat_extent / static_cast<double>(max_num_cells);
+    double min_res_lon = lon_extent / static_cast<double>(max_num_cells);
+
+    // 4) Final resolution is the worst of:
+    //       - your finest allowable (grid_max_resolution)
+    //       - the per-axis minima above
+    double resolution = std::max({
+        grid_max_resolution,
+        min_res_lat,
+        min_res_lon
+    });
+
+    // 5) Compute integer cell counts (rounding up)
+    unsigned int num_lat_cells =
+        static_cast<unsigned int>(std::ceil(lat_extent / resolution));
+    unsigned int num_lon_cells =
+        static_cast<unsigned int>(std::ceil(lon_extent / resolution));
+
+    // 6) Ensure at least one cell in each dimension
+    num_lat_cells = std::max<unsigned int>(1, num_lat_cells);
+    num_lon_cells = std::max<unsigned int>(1, num_lon_cells);
+
+    return { num_lat_cells, num_lon_cells };
+}
+
+
 }  // namespace Number
 
 //void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list) {}

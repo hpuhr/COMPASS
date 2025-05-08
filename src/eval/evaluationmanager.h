@@ -27,6 +27,7 @@
 #include "datasourcecompoundcoverage.h"
 #include "sector.h"
 #include "result.h"
+#include "util/timewindow.h"
 
 #include <QObject>
 

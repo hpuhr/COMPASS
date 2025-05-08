@@ -30,6 +30,7 @@ class SimpleReconstructor : public ReconstructorBase
                         ReconstructorTask& task, std::unique_ptr<AccuracyEstimatorBase>&& acc_estimator);
     virtual ~SimpleReconstructor();
 
+    virtual SimpleAssociator& associator() override;
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const override;
 
     virtual void reset() override;

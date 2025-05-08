@@ -49,7 +49,7 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
 
     parseNetworkLineInfo();
 
-    loginf << "ConfigurationDataSource: ctor: " << name()
+    logdbg << "ConfigurationDataSource: ctor: " << name()
            << " sac/sic " << sac() << "/" << sic();
 }
 

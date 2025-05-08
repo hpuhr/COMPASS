@@ -82,18 +82,19 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
                       debug_settings_.debug_association_);
     registerParameter("debug_outlier_detection", &debug_settings_.debug_outlier_detection_,
                       debug_settings_.debug_outlier_detection_);
-    registerParameter("debug_accuracy_estimation", &debug_settings_.debug_accuracy_estimation_,
-                      debug_settings_.debug_accuracy_estimation_);
-    registerParameter("debug_bias_correction", &debug_settings_.debug_bias_correction_,
-                      debug_settings_.debug_bias_correction_);
-    registerParameter("debug_geo_altitude_correction", &debug_settings_.debug_geo_altitude_correction_,
-                      debug_settings_.debug_geo_altitude_correction_);
 
-    registerParameter("deep_debug_accuracy_estimation", &debug_settings_.deep_debug_accuracy_estimation_,
-                      debug_settings_.deep_debug_accuracy_estimation_);
-    registerParameter("deep_debug_accuracy_estimation_write_wp",
-                      &debug_settings_.deep_debug_accuracy_estimation_write_wp_,
-                      debug_settings_.deep_debug_accuracy_estimation_write_wp_);
+    registerParameter("analyze", &debug_settings_.analyze_, debug_settings_.analyze_);
+
+    registerParameter("analyze_association", &debug_settings_.analyze_association_,
+                      debug_settings_.analyze_association_);
+    registerParameter("analyze_outlier_detection", &debug_settings_.analyze_outlier_detection_,
+                      debug_settings_.analyze_outlier_detection_);
+    registerParameter("analyze_accuracy_estimation", &debug_settings_.analyze_accuracy_estimation_,
+                      debug_settings_.analyze_accuracy_estimation_);
+    registerParameter("analyze_bias_correction", &debug_settings_.analyze_bias_correction_,
+                      debug_settings_.analyze_bias_correction_);
+    registerParameter("analyze_geo_altitude_correction", &debug_settings_.analyze_geo_altitude_correction_,
+                      debug_settings_.analyze_geo_altitude_correction_);
 
     registerParameter("debug_reference_calculation", &debug_settings_.debug_reference_calculation_,
                       debug_settings_.debug_reference_calculation_);
@@ -597,10 +598,12 @@ void ReconstructorTask::loadDataSlice()
 
     for (auto& dbcont_it : dbcontent_man)
     {
-        logdbg << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
-               << " has data " << dbcont_it.second->hasData();
+        loginf << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
+               << " has data " << dbcont_it.second->hasData()
+               << " has utn " << dbcont_it.second->hasVariable("UTN");
 
-        if (!dbcont_it.second->hasData() || !dbcont_it.second->hasVariable("UTN"))
+        if (!dbcont_it.second->hasData()
+            || !dbcont_it.second->hasVariable("UTN"))
             continue;
 
         VariableSet read_set = currentReconstructor()->getReadSetFor(dbcont_it.first);
@@ -625,7 +628,7 @@ void ReconstructorTask::processDataSlice()
 
     if (!processing_slice_->data_.size())
     {
-        loginf << "ReconstructorTask: processDataSlice: empty buffer at ("
+        logdbg << "ReconstructorTask: processDataSlice: empty buffer at ("
                << Time::toString(loading_slice_->slice_begin_)<< ", no process";
 
         processing_slice_ = nullptr;

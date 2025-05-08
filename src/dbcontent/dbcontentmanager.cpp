@@ -538,6 +538,12 @@ void DBContentManager::databaseOpenedSlot()
     if (db_interface.hasProperty(PROP_TIMESTAMP_MAX_NAME))
         timestamp_max_ = Time::fromLong(stol(db_interface.getProperty(PROP_TIMESTAMP_MAX_NAME)));
 
+    if (hasMinMaxTimestamp())
+        loginf << "DBContentManager: databaseOpenedSlot: timestamp_min_ " << Time::toString(*timestamp_min_)
+               << " timestamp_max_ " << Time::toString(*timestamp_max_);
+    else
+        loginf << "DBContentManager: databaseOpenedSlot: no min/max timestamp";
+
     if (db_interface.hasProperty(PROP_LATITUDE_MIN_NAME))
         latitude_min_ = stod(db_interface.getProperty(PROP_LATITUDE_MIN_NAME));
     if (db_interface.hasProperty(PROP_LATITUDE_MAX_NAME))
@@ -547,6 +553,13 @@ void DBContentManager::databaseOpenedSlot()
         longitude_min_ = stod(db_interface.getProperty(PROP_LONGITUDE_MIN_NAME));
     if (db_interface.hasProperty(PROP_LONGITUDE_MAX_NAME))
         longitude_max_ = stod(db_interface.getProperty(PROP_LONGITUDE_MAX_NAME));
+
+    if (hasMinMaxPosition())
+        loginf << "DBContentManager: databaseOpenedSlot: latitude_min_ " << *latitude_min_
+               << " latitude_max_ " << *latitude_max_ << " longitude_min_ " << *longitude_min_
+               << " longitude_max_ " << *longitude_max_;
+    else
+        loginf << "DBContentManager: databaseOpenedSlot: no min/max position";
 
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
@@ -1795,13 +1808,41 @@ void DBContentManager::setViewableDataConfig (const nlohmann::json::object_t& da
     COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
 }
 
+void DBContentManager::storeSelectedRecNums(const std::vector<unsigned long>& selected)
+{
+    clearSelectedRecNums(); // no other selected
+
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    for (auto rec_num : selected)
+    {
+        tmp_selected_rec_nums_[dbcont_man.dbContentWithId(Number::recNumGetDBContId(rec_num))].insert(rec_num);
+    }
+}
+
+void DBContentManager::clearSelectedRecNums()
+{
+    loginf << "DBContentManager: clearSelectedRecNums";
+
+    tmp_selected_rec_nums_.clear();
+
+    for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
+    {
+        assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
+
+        NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
+        selected_vec.setAll(false);
+    }
+}
+
 /**
  */
 void DBContentManager::saveSelectedRecNums()
 {
     loginf << "DBContentManager: saveSelectedRecNums";
 
-    assert (!tmp_selected_rec_nums_.size());
+    if(tmp_selected_rec_nums_.size())
+        return; // already stored from view point
 
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {
@@ -1890,7 +1931,7 @@ void DBContentManager::showSurroundingData (unsigned int utn)
     //    },
 
         // TODO_TIMESTAMP
-        data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(time_end);
+    data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(time_end);
     data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] = Time::toString(time_begin);
 
     //    "Aircraft Address": {

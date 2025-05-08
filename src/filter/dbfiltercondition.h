@@ -84,7 +84,7 @@ public:
     void setOperator(std::string operator_val) { operator_ = operator_val; }
 
     std::string getValue() { return value_; }
-    void setValue(std::string value);
+    void setValue(const std::string& value);
 
     std::string getResetValue() { return reset_value_; }
     void setResetValue(std::string reset_value) { reset_value_ = reset_value; }
