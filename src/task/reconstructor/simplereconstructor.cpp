@@ -54,6 +54,11 @@ SimpleReconstructor::SimpleReconstructor(const std::string& class_id,
 
 SimpleReconstructor::~SimpleReconstructor() {}
 
+SimpleAssociator& SimpleReconstructor::associator()
+{
+    return associatior_;
+}
+
 dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbcontent_name) const
 {
     dbContent::VariableSet read_set;

@@ -1,5 +1,4 @@
-#ifndef EVALUATIONFILTERTABWIDGET_H
-#define EVALUATIONFILTERTABWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -8,6 +7,7 @@
 class EvaluationManager;
 class EvaluationManagerSettings;
 class EvaluationManagerWidget;
+class TimeWindowCollectionWidget;
 
 class QLineEdit;
 class QCheckBox;
@@ -123,4 +123,3 @@ protected:
     bool update_active_ {false};
 };
 
-#endif // EVALUATIONFILTERTABWIDGET_H

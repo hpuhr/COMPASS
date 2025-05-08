@@ -1,15 +1,14 @@
 #pragma once
 
 #include "dbfilter.h"
+#include "util/timewindow.h"
 
-#include "boost/date_time/posix_time/ptime.hpp"
-
-class TimestampFilter : public DBFilter
+class ExcludedTimeWindowsFilter : public DBFilter
 {
 public:
-    TimestampFilter(const std::string& class_id, const std::string& instance_id,
-                    Configurable* parent);
-    virtual ~TimestampFilter();
+    ExcludedTimeWindowsFilter(const std::string& class_id, const std::string& instance_id,
+                              Configurable* parent);
+    virtual ~ExcludedTimeWindowsFilter();
 
     virtual std::string getConditionString(const std::string& dbcontent_name, bool& first) override;
 
@@ -22,20 +21,13 @@ public:
     virtual void saveViewPointConditions (nlohmann::json& filters) override;
     virtual void loadViewPointConditions (const nlohmann::json& filters) override;
 
-    boost::posix_time::ptime minValue() const;
-    void minValue(boost::posix_time::ptime min_value, bool update_widget=false);
-
-    boost::posix_time::ptime maxValue() const;
-    void maxValue(boost::posix_time::ptime max_value, bool update_widget=false);
+    Utils::TimeWindowCollection& timeWindows();
 
 protected:
-    boost::posix_time::ptime min_value_;
-    std::string min_value_str_;
-    boost::posix_time::ptime max_value_;
-    std::string max_value_str_;
+    nlohmann::json time_windows_json_;
+    Utils::TimeWindowCollection time_windows_;
 
     virtual void checkSubConfigurables() override;
     virtual DBFilterWidget* createWidget() override;
 };
-
 

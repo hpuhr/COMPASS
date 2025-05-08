@@ -59,7 +59,6 @@ public slots:
     void unshowViewPointSlot (const ViewableDataConfig* vp);
     void showViewPointSlot (const ViewableDataConfig* vp);
 
-
 public:
     FilterManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~FilterManager();

@@ -30,6 +30,10 @@ int main(int argc, char** argv)
 {
     try
     {
+        // Enable Qt high-DPI scaling
+        QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+        //QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+
         Client client(argc, argv);
 
         if (client.quitRequested())

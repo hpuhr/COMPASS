@@ -23,6 +23,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/propertyvalueedit.h"
         "${CMAKE_CURRENT_LIST_DIR}/logwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/popupmenu.h"
+        "${CMAKE_CURRENT_LIST_DIR}/timewindowcollectionwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/timewindowdialog.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/autoresumedialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/rangeedit.cpp"
@@ -37,4 +39,6 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/propertyvalueedit.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/logwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/popupmenu.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/timewindowcollectionwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/timewindowdialog.cpp"
 )

@@ -26,7 +26,7 @@ SimpleAssociator::SimpleAssociator(SimpleReconstructor& reconstructor)
 
 void SimpleAssociator::associateNewData()
 {
-    assert (!unassoc_rec_nums_.size());
+    unassoc_rec_nums_.clear();
 
     loginf << "SimpleAssociator: associateNewData: associating RefTraj data";
 
@@ -116,7 +116,7 @@ void SimpleAssociator::associateNewData()
     for (auto& tgt_it : reconstructor().targets_container_.targets_)
         tgt_it.second.created_in_current_slice_ = false;
 
-    unassoc_rec_nums_.clear();
+    // unassoc_rec_nums_.clear(); moved to beginning for statistics
 
     loginf << "SimpleAssociator: associateNewData: after non-tracker targets "
            << reconstructor_.targets_container_.targets_.size()

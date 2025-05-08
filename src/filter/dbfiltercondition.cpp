@@ -72,6 +72,7 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
         label_->setText(tr((variable_name_ + " " + operator_).c_str()));
 
     edit_ = new QLineEdit(tr(value_.c_str()));
+    edit_->setMaxLength(16*1024*1024);
     connect(edit_, SIGNAL(textChanged(QString)), this, SLOT(valueChanged()));
 
     if (!usable_)
@@ -269,8 +270,10 @@ void DBFilterCondition::update()
     edit_->setText(tr(value_.c_str()));
 }
 
-void DBFilterCondition::setValue(std::string value)
+void DBFilterCondition::setValue(const std::string& value)
 {
+    logdbg << "DBFilterCondition: setValue: len " << value.size();
+
     value_ = value;
 
     update();
