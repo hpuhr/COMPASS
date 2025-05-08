@@ -598,7 +598,7 @@ void ReconstructorTask::loadDataSlice()
 
     for (auto& dbcont_it : dbcontent_man)
     {
-        loginf << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
+        logdbg << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
                << " has data " << dbcont_it.second->hasData()
                << " has utn " << dbcont_it.second->hasVariable("UTN");
 

@@ -52,7 +52,7 @@
             "ASTERIXCategoryConfig11": {
                 "parameters": {
                     "category": 10,
-                    "decode": false,
+                    "decode": true,
                     "edition": "0.31",
                     "ref": "",
                     "spf": ""
