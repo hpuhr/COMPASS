@@ -15,15 +15,16 @@ class TimeWindowCollectionWidget : public QWidget
 {
     Q_OBJECT
 
-public:
-    explicit TimeWindowCollectionWidget(Utils::TimeWindowCollection& collection, QWidget* parent = nullptr);
-
 private slots:
     void addTimeWindow();
     void editTimeWindow(QListWidgetItem* item);
 
-private:
+public:
+    explicit TimeWindowCollectionWidget(Utils::TimeWindowCollection& collection, QWidget* parent = nullptr);
+
     void refreshList();
+
+private:
     QString timeWindowToString(const Utils::TimeWindow& tw) const;
 
     Utils::TimeWindowCollection& collection_;

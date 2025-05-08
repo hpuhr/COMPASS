@@ -14,13 +14,18 @@ TimeWindowCollectionWidget::TimeWindowCollectionWidget(TimeWindowCollection& col
     : QWidget(parent), collection_(collection)
 {
     list_widget_ = new QListWidget(this);
-    list_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    //list_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    add_button_ = new QPushButton("Add Time Window", this);
+    add_button_ = new QPushButton("Add", this);
 
     QVBoxLayout* main_layout = new QVBoxLayout(this);
     main_layout->addWidget(list_widget_);
-    main_layout->addWidget(add_button_);
+
+    QHBoxLayout* button_layout = new QHBoxLayout(this);
+    button_layout->addStretch();
+    button_layout->addWidget(add_button_);
+
+    main_layout->addLayout(button_layout);
 
     main_layout->setContentsMargins(0,0,0,0);
 
@@ -30,7 +35,7 @@ TimeWindowCollectionWidget::TimeWindowCollectionWidget(TimeWindowCollection& col
     refreshList();
 
     setContentsMargins(0,0,0,0);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     setLayout(main_layout);
 }

@@ -42,6 +42,7 @@ public:
     // later functions save to json_ptr_ if available
     void add(const TimeWindow& time_window);
     void erase(unsigned int index);
+    void clear();
 
     unsigned int size() const { return time_windows_.size(); }
 

@@ -25,7 +25,6 @@
 #include "filtermanagerwidget.h"
 #include "logger.h"
 #include "viewpoint.h"
-#include "dbospecificvaluesdbfilter.h"
 #include "utnfilter.h"
 #include "adsbqualityfilter.h"
 #include "acadfilter.h"
@@ -37,6 +36,7 @@
 #include "trackertracknumberfilter.h"
 #include "reftrajaccuracyfilter.h"
 #include "mlatrufilter.h"
+#include "excludedtimewindowsfilter.h"
 
 #include "json.hpp"
 
@@ -97,28 +97,6 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
         DBFilter* filter = new DBFilter(class_id, instance_id, this);
         filters_.emplace_back(filter);
     }
-    else if (class_id == "DBOSpecificValuesDBFilter")
-    {
-        std::string dbcontent_name = getSubConfiguration(class_id, instance_id).getParameterConfigValue<std::string>("dbcontent_name");
-
-        if (!checkDBContent(dbcontent_name))
-        {
-            loginf << "FilterManager: generateSubConfigurable: disabling dbo specific filter "
-                   << instance_id << " for failed check dbobject '" << dbcontent_name << "'";
-            return;
-        }
-
-        DBOSpecificValuesDBFilter* filter = new DBOSpecificValuesDBFilter(class_id, instance_id, this);
-
-        if (filter->unusable())
-        {
-            loginf << "FilterManager: generateSubConfigurable: deleting disabled dbo specific filter"
-                   << filter->instanceId();
-            delete filter;
-        }
-        else
-            filters_.emplace_back(filter);
-    }
     else if (class_id == "ADSBQualityFilter")
     {
         ADSBQualityFilter* filter = new ADSBQualityFilter(class_id, instance_id, this);
@@ -156,45 +134,29 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     }
     else if (class_id == "UTNFilter")
     {
-        //try
-        //{
-            if (hasSubConfigurable(class_id, instance_id))
-            {
-                logerr << "FilterManager: generateSubConfigurable: utn filter "
-                       << instance_id << " already present";
-                return;
-            }
+        if (hasSubConfigurable(class_id, instance_id))
+        {
+            logerr << "FilterManager: generateSubConfigurable: utn filter "
+                   << instance_id << " already present";
+            return;
+        }
 
-            UTNFilter* filter = new UTNFilter(class_id, instance_id, this);
+        UTNFilter* filter = new UTNFilter(class_id, instance_id, this);
 
-            filters_.emplace_back(filter);
-        //}
-        //catch (const std::exception& e)
-        //{
-        //    loginf << "FilterManager: generateSubConfigurable: utn filter exception '" << e.what() << "', deleting";
-        //    configuration().removeSubConfiguration(class_id, instance_id);
-        //}
+        filters_.emplace_back(filter);
     }
     else if (class_id == "ADSBQualityFilter")
     {
-        //try
-        //{
-            if (hasSubConfigurable(class_id, instance_id))
-            {
-                logerr << "FilterManager: generateSubConfigurable: adsb quality filter "
-                       << instance_id << " already present";
-                return;
-            }
+        if (hasSubConfigurable(class_id, instance_id))
+        {
+            logerr << "FilterManager: generateSubConfigurable: adsb quality filter "
+                   << instance_id << " already present";
+            return;
+        }
 
-            ADSBQualityFilter* filter = new ADSBQualityFilter(class_id, instance_id, this);
+        ADSBQualityFilter* filter = new ADSBQualityFilter(class_id, instance_id, this);
 
-            filters_.emplace_back(filter);
-        //}
-        //catch (const std::exception& e)
-        //{
-        //    loginf << "FilterManager: generateSubConfigurable: data source filter exception '" << e.what() << "', deleting";
-        //    configuration().removeSubConfiguration(class_id, instance_id);
-        //}
+        filters_.emplace_back(filter);
     }
     else if (class_id == "PrimaryOnlyFilter")
     {
@@ -209,6 +171,11 @@ void FilterManager::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "MLATRUFilter")
     {
         MLATRUFilter* filter = new MLATRUFilter(class_id, instance_id, this);
+        filters_.emplace_back(filter);
+    }
+    else if (class_id == "ExcludedTimeWindowsFilter")
+    {
+        ExcludedTimeWindowsFilter* filter = new ExcludedTimeWindowsFilter(class_id, instance_id, this);
         filters_.emplace_back(filter);
     }
     else
@@ -278,14 +245,13 @@ void FilterManager::checkSubConfigurables()
         Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
     }
 
-//    classid = "ADSBQualityFilter";
+   classid = "ExcludedTimeWindowsFilter";
 
-//    if (std::find_if(filters_.begin(), filters_.end(),
-//                     [&classid](const DBFilter* x) { return x->classId() == classid;}) == filters_.end())
-//    { // not UTN filter
-//        addNewSubConfiguration(classid, classid+"0");
-//        generateSubConfigurable(classid, classid+"0");
-//    }
+    if (std::find_if(filters_.begin(), filters_.end(),
+                     [&classid](const unique_ptr<DBFilter>& x) { return x->classId() == classid;}) == filters_.end())
+    {
+        Configurable::generateSubConfigurableFromConfig(Configuration::create(classid, classid+"0"));
+    }
 }
 
 std::string FilterManager::getSQLCondition(const std::string& dbcontent_name)

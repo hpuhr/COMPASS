@@ -134,6 +134,14 @@ void TimeWindowCollection::erase(unsigned int index)
         *json_ptr_ = asJSON();
 }
 
+void TimeWindowCollection::clear()
+{
+    time_windows_.clear();
+
+    if (json_ptr_)
+        *json_ptr_ = asJSON();
+}
+
 }
 
 
