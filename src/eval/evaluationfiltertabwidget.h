@@ -71,7 +71,6 @@ protected:
     QCheckBox* use_time_check_{nullptr};
     QDateTimeEdit* time_begin_edit_{nullptr};
     QDateTimeEdit* time_end_edit_{nullptr};
-    TimeWindowCollectionWidget* time_windows_widget_{nullptr};
 
     // reftraj
 

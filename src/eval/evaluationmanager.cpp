@@ -160,11 +160,6 @@ EvaluationManager::EvaluationManager(const std::string& class_id, const std::str
     registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, Settings().load_timestamp_begin_str_);
     registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, Settings().load_timestamp_end_str_);
 
-    registerParameter("load_filtered_time_windows", &settings_.load_filtered_time_windows_json_,
-                      nlohmann::json::array());
-
-    settings_.load_filtered_time_windows_.setFrom(settings_.load_filtered_time_windows_json_);
-
     if (settings_.load_timestamp_begin_str_.size())
         load_timestamp_begin_ = Time::fromString(settings_.load_timestamp_begin_str_);
 
@@ -2135,6 +2130,10 @@ nlohmann::json::object_t EvaluationManager::getBaseViewableDataConfig ()
         {
             data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] = Time::toString(load_timestamp_begin_);
             data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(load_timestamp_end_);
+
+            if (settings_.load_filtered_time_windows_.size())
+                data[ViewPoint::VP_FILTERS_KEY]["Excluded Time Windows"]["Windows"] =
+                    settings_.load_filtered_time_windows_.asJSON();
         }
 
         if (settings_.use_ref_traj_accuracy_filter_)

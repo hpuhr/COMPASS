@@ -157,8 +157,6 @@ private:
 
     std::string load_timestamp_begin_str_;
     std::string load_timestamp_end_str_;
-
-    nlohmann::json load_filtered_time_windows_json_;
 };
 
 class EvaluationManager : public QObject, public Configurable
