@@ -188,9 +188,10 @@ protected:
     unsigned int num_columns_ {0};
     std::vector<std::string> headings_;
 
-    bool sortable_ {true};
-    unsigned int sort_column_ {0};
-    Qt::SortOrder sort_order_ {Qt::AscendingOrder};
+    bool          sortable_     {true};
+    unsigned int  sort_column_  {0};
+    Qt::SortOrder sort_order_   {Qt::AscendingOrder};
+    unsigned int  check_column_ {0};
 
     bool show_unused_ {false};
 
