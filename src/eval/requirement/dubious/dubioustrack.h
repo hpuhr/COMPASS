@@ -52,7 +52,7 @@ public:
                  float dubious_prob,
                  double prob, 
                  COMPARISON_TYPE prob_check_type, 
-                 EvaluationManager& eval_man);
+                 EvaluationCalculator& calculator);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (const EvaluationTargetData& target_data, 
                                                                            std::shared_ptr<Base> instance,

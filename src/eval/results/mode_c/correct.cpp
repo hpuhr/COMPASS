@@ -33,7 +33,7 @@ SingleModeCCorrect::SingleModeCCorrect(const std::string& result_id,
                                        const SectorLayer& sector_layer,
                                        unsigned int utn,
                                        const EvaluationTargetData* target,
-                                       EvaluationManager& eval_man,
+                                       EvaluationCalculator& calculator,
                                        const EvaluationDetails& details,
                                        unsigned int num_updates,
                                        unsigned int num_no_ref_pos,
@@ -47,7 +47,7 @@ SingleModeCCorrect::SingleModeCCorrect(const std::string& result_id,
                       requirement, 
                       sector_layer, 
                       utn, target, 
-                      eval_man, 
+                      calculator, 
                       details, 
                       num_updates,
                       num_no_ref_pos,
@@ -67,7 +67,7 @@ SingleModeCCorrect::SingleModeCCorrect(const std::string& result_id,
 */
 std::shared_ptr<Joined> SingleModeCCorrect::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedModeCCorrect> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedModeCCorrect> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -87,12 +87,12 @@ std::vector<Single::TargetInfo> SingleModeCCorrect::additionalTargetInfos() cons
 JoinedModeCCorrect::JoinedModeCCorrect(const std::string& result_id,
                                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                                        const SectorLayer& sector_layer,
-                                       EvaluationManager& eval_man)
+                                       EvaluationCalculator& calculator)
 :   JoinedCorrectBase("JoinedModeCCorrect", 
                       result_id, 
                       requirement, 
                       sector_layer, 
-                      eval_man, 
+                      calculator, 
                       "Mode C",
                       "#CMC",
                       "#NCMC")

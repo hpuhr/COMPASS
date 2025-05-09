@@ -22,7 +22,7 @@
 
 class SectorLayer;
 
-class EvaluationManager;
+class EvaluationCalculator;
 
 namespace EvaluationRequirement
 {
@@ -55,7 +55,7 @@ public:
     //conversion
     static std::string sumResult2Target(const std::string& sum_result_id, 
                                         unsigned int utn,
-                                        const EvaluationManager& eval_manager);
+                                        const EvaluationCalculator& eval_calc);
     //tools
     static std::string prependReportResultID(const std::string& id);
     static std::vector<std::string> subSections(const std::string& section_id);

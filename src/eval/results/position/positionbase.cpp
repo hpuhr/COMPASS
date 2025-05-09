@@ -169,14 +169,14 @@ bool SinglePositionBaseCommon::common_detailIsOk(const EvaluationDetail& detail)
 /**
 */
 FeatureDefinitions SinglePositionBaseCommon::common_getCustomAnnotationDefinitions(const Single& single,
-                                                                                   const EvaluationManager& eval_man) const
+                                                                                   const EvaluationCalculator& calculator) const
 {
     FeatureDefinitions defs;
 
     //histograms
-    defs.addDefinition<FeatureDefinitionStringCategoryHistogram>("Position Error", eval_man, "Error Count", "Error Count")
+    defs.addDefinition<FeatureDefinitionStringCategoryHistogram>("Position Error", calculator, "Error Count", "Error Count")
         .addDataSeries("", { "#CF", "#CP" }, { numFailed(), numPassed() });
-    defs.addDefinition<FeatureDefinitionHistogram<double>>("Position Error", eval_man, "Full distribution", "Full distribution [m]")
+    defs.addDefinition<FeatureDefinitionHistogram<double>>("Position Error", calculator, "Full distribution", "Full distribution [m]")
         .addDataSeries("", SinglePositionBaseCommon::DetailKey::Value);
 
     return defs;
@@ -194,7 +194,7 @@ SinglePositionProbabilityBase::SinglePositionProbabilityBase(const std::string& 
                                                              const SectorLayer& sector_layer,
                                                              unsigned int utn, 
                                                              const EvaluationTargetData* target, 
-                                                             EvaluationManager& eval_man,
+                                                             EvaluationCalculator& calculator,
                                                              const EvaluationDetails& details,
                                                              unsigned int num_pos, 
                                                              unsigned int num_no_ref,
@@ -202,7 +202,7 @@ SinglePositionProbabilityBase::SinglePositionProbabilityBase(const std::string& 
                                                              unsigned int num_pos_inside,
                                                              unsigned int num_passed, 
                                                              unsigned int num_failed)
-:   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+:   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details)
 ,   SinglePositionBaseCommon(num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_passed, num_failed)
 {
 }
@@ -267,7 +267,7 @@ void SinglePositionProbabilityBase::addAnnotationForDetail(nlohmann::json& annot
 */
 FeatureDefinitions SinglePositionProbabilityBase::getCustomAnnotationDefinitions() const
 {
-    return common_getCustomAnnotationDefinitions(*this, eval_man_);
+    return common_getCustomAnnotationDefinitions(*this, calculator_);
 }
 
 /****************************************************************************
@@ -282,7 +282,7 @@ SinglePositionValueBase::SinglePositionValueBase(const std::string& result_type,
                                                  const SectorLayer& sector_layer,
                                                  unsigned int utn, 
                                                  const EvaluationTargetData* target, 
-                                                 EvaluationManager& eval_man,
+                                                 EvaluationCalculator& calculator,
                                                  const EvaluationDetails& details,
                                                  unsigned int num_pos, 
                                                  unsigned int num_no_ref,
@@ -290,7 +290,7 @@ SinglePositionValueBase::SinglePositionValueBase(const std::string& result_type,
                                                  unsigned int num_pos_inside,
                                                  unsigned int num_passed, 
                                                  unsigned int num_failed)
-:   Single(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+:   Single(result_type, result_id, requirement, sector_layer, utn, target, calculator, details)
 ,   SinglePositionBaseCommon(num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_passed, num_failed)
 {
 }
@@ -350,7 +350,7 @@ void SinglePositionValueBase::addAnnotationForDetail(nlohmann::json& annotations
 */
 FeatureDefinitions SinglePositionValueBase::getCustomAnnotationDefinitions() const
 {
-    return common_getCustomAnnotationDefinitions(*this, eval_man_);
+    return common_getCustomAnnotationDefinitions(*this, calculator_);
 }
 
 /****************************************************************************
@@ -449,7 +449,7 @@ bool JoinedPositionBase::common_exportAsCSV(std::ofstream& strm,
 }
 
 FeatureDefinitions JoinedPositionBase::common_getCustomAnnotationDefinitions(const Joined& joined,
-                                                                             const EvaluationManager& eval_man) const
+                                                                             const EvaluationCalculator& calculator) const
 {
     FeatureDefinitions defs;
 
@@ -464,40 +464,40 @@ FeatureDefinitions JoinedPositionBase::common_getCustomAnnotationDefinitions(con
     }
 
     //grids (as geoimages)
-    defs.addDefinition<FeatureDefinitionBinaryGrid>("Position Error", eval_man, "Comparison Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>("Position Error", calculator, "Comparison Passed")
         .addDataSeries(SinglePositionBaseCommon::DetailKey::CheckPassed, 
                        GridAddDetailMode::AddEvtRefPosition, 
                        invert);
     
-    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Mean", true)
+    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", calculator, "Error Mean", true)
     //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
     //                    grid2d::ValueType::ValueTypeMean, 
     //                    GridAddDetailMode::AddEvtRefPosition);
-    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Stddev", true)
+    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", calculator, "Error Stddev", true)
     //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
     //                    grid2d::ValueType::ValueTypeStddev, 
     //                    GridAddDetailMode::AddEvtRefPosition);
-    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Max", true)
+    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", calculator, "Error Max", true)
     //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
     //                    grid2d::ValueType::ValueTypeMax, 
     //                    GridAddDetailMode::AddEvtRefPosition);
 
     //histograms
-    defs.addDefinition<FeatureDefinitionStringCategoryHistogram>("Position Error", eval_man, "Error Count", "Error Count")
+    defs.addDefinition<FeatureDefinitionStringCategoryHistogram>("Position Error", calculator, "Error Count", "Error Count")
         .addDataSeries("", { "#CF", "#CP" }, { numFailed(), numPassed() });
-    defs.addDefinition<FeatureDefinitionHistogram<double>>("Position Error", eval_man, "Full distribution", "Full distribution [m]")
+    defs.addDefinition<FeatureDefinitionHistogram<double>>("Position Error", calculator, "Full distribution", "Full distribution [m]")
         .addDataSeries("", SinglePositionBaseCommon::DetailKey::Value);
 
     //scatterplot
-    // defs.addDefinition<FeatureDefinitionCustomScatterSeries>("My Scatter Series", eval_man, "Just Some Points", "X", "Y")
+    // defs.addDefinition<FeatureDefinitionCustomScatterSeries>("My Scatter Series", calculator, "Just Some Points", "X", "Y")
     //     .addDataSeries("pointset1", { {0,0}, {1,1}, {2,2}, {3,3} }, Qt::red)
     //     .addDataSeries("pointset2", { {1,0}, {2,1}, {3,2}, {4,3} }, Qt::green)
     //     .addDataSeries("pointset3", { {2,0}, {3,1}, {4,2}, {5,3} }, Qt::blue);
-    // defs.addDefinition<FeatureDefinitionTimedScatterSeries>("Position Error", eval_man, "Development over Time", "Error [m]")
+    // defs.addDefinition<FeatureDefinitionTimedScatterSeries>("Position Error", calculator, "Development over Time", "Error [m]")
     //     .addDataSeries("", SinglePositionBaseCommon::DetailKey::Value);
 
     //grids (as raw grids)
-    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", eval_man, "Error Mean", false)
+    // defs.addDefinition<FeatureDefinitionGrid<double>>("Position Error", calculator, "Error Mean", false)
     //     .addDataSeries(SinglePositionBaseCommon::DetailKey::Value, 
     //                    grid2d::ValueType::ValueTypeMean, 
     //                    GridAddDetailMode::AddEvtRefPosition);
@@ -515,10 +515,10 @@ JoinedPositionProbabilityBase::JoinedPositionProbabilityBase(const std::string& 
                                                              const std::string& result_id, 
                                                              std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                              const SectorLayer& sector_layer, 
-                                                             EvaluationManager& eval_man,
+                                                             EvaluationCalculator& calculator,
                                                              const std::string& csv_header)
 :   JoinedPositionBase(csv_header)
-,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -590,7 +590,7 @@ bool JoinedPositionProbabilityBase::exportAsCSV(std::ofstream& strm) const
 */
 FeatureDefinitions JoinedPositionProbabilityBase::getCustomAnnotationDefinitions() const
 {
-    return common_getCustomAnnotationDefinitions(*this, eval_man_);
+    return common_getCustomAnnotationDefinitions(*this, calculator_);
 }
 
 /****************************************************************************
@@ -603,10 +603,10 @@ JoinedPositionValueBase::JoinedPositionValueBase(const std::string& result_type,
                                                  const std::string& result_id, 
                                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                  const SectorLayer& sector_layer, 
-                                                 EvaluationManager& eval_man,
+                                                 EvaluationCalculator& calculator,
                                                  const std::string& csv_header)
 :   JoinedPositionBase(csv_header)
-,   Joined(result_type, result_id, requirement, sector_layer, eval_man)
+,   Joined(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -673,7 +673,7 @@ bool JoinedPositionValueBase::exportAsCSV(std::ofstream& strm) const
 */
 FeatureDefinitions JoinedPositionValueBase::getCustomAnnotationDefinitions() const
 {
-    return common_getCustomAnnotationDefinitions(*this, eval_man_);
+    return common_getCustomAnnotationDefinitions(*this, calculator_);
 }
 
 }

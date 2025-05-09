@@ -65,7 +65,7 @@ bool RTCommandGetEvalResult::checkResult_impl()
 {
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
-    if (!eval_man.hasResults())
+    if (!eval_man.calculator().hasResults())
     {
         setResultMessage("No evaluation results available");
         return false;

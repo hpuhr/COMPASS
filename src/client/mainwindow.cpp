@@ -217,8 +217,8 @@ void MainWindow::createUI()
 
     if (!COMPASS::instance().hideEvaluation())
     {
-        tool_box_->addTool(COMPASS::instance().evaluationManager().widget());
-        tool_box_->addTool(COMPASS::instance().taskManager().widget());
+    //     tool_box_->addTool(COMPASS::instance().evaluationManager().widget());
+         tool_box_->addTool(COMPASS::instance().taskManager().widget());
     }
 
     if (!COMPASS::instance().hideViewpoints())
@@ -1045,7 +1045,7 @@ void MainWindow::evaluateSlot()
 {
     loginf << "MainWindow: evaluateSlot";
 
-    COMPASS::instance().evaluationManager().showDialog();
+    COMPASS::instance().evaluationManager().evaluate(true);
 }
 
 void MainWindow::configureDataSourcesSlot()

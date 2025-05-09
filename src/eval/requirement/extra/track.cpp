@@ -41,11 +41,11 @@ ExtraTrack::ExtraTrack(const std::string& name,
                        const std::string& group_name,
                        double prob, 
                        COMPARISON_TYPE prob_check_type, 
-                       EvaluationManager& eval_man,
+                       EvaluationCalculator& calculator,
                        float min_duration, 
                        unsigned int min_num_updates, 
                        bool ignore_primary_only)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator),
       min_duration_(Time::partialSeconds(min_duration)),
       min_num_updates_(min_num_updates), 
       ignore_primary_only_(ignore_primary_only)
@@ -83,14 +83,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
            << " min_duration " << min_duration_ << " min_num_updates " << min_num_updates_
            << " ignore_primary_only " << ignore_primary_only_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
     ptime timestamp;
     bool is_inside;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
 
     boost::optional<unsigned int> track_num;
 
@@ -278,7 +278,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleExtraTrack>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, ignore, num_pos_inside, num_extra, num_ok);
+                calculator_, details, ignore, num_pos_inside, num_extra, num_ok);
 }
 
 }

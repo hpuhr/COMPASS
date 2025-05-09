@@ -97,7 +97,6 @@ protected:
     }
 };
 
-
 class SectionContentTable : public QAbstractItemModel, public SectionContent
 {
     Q_OBJECT

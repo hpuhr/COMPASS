@@ -467,29 +467,32 @@ bool RTCommandEvaluate::run_impl()
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
-    if (!eval_man.canLoadDataAndEvaluate())
-    {
-        setResultMessage("Unable to load evaluation data and evaluate");
-        return false;
-    }
+    //@TODO:
+    // if (!eval_man.canEvaluate)
+    // {
+    //     setResultMessage("Unable to load evaluation data and evaluate");
+    //     return false;
+    // }
 
-    loginf << "RTCommandEvaluate: run_impl: loading evaluation data";
+    // loginf << "RTCommandEvaluate: run_impl: loading evaluation data";
 
-    eval_man.loadDataAndEvaluate();
+    // eval_man.loadDataAndEvaluate();
 
-    while (!eval_man.dataLoaded())
-    {
-        QCoreApplication::processEvents();
-        QThread::msleep(1);
-    }
+    // while (!eval_man.dataLoaded())
+    // {
+    //     QCoreApplication::processEvents();
+    //     QThread::msleep(1);
+    // }
 
-    assert (eval_man.dataLoaded());
+    // assert (eval_man.dataLoaded());
 
-    loginf << "RTCommandEvaluate: run_impl: doing evaluation";
+    // loginf << "RTCommandEvaluate: run_impl: doing evaluation";
 
-    eval_man.evaluate();
+    // eval_man.evaluate();
 
-    return eval_man.evaluated();
+    // return eval_man.evaluated();
+
+    return false;
 }
 
 void RTCommandEvaluate::collectOptions_impl(OptionsDescription& options,
@@ -540,19 +543,20 @@ bool RTCommandExportEvaluationReport::run_impl()
         return false;
     }
 
-    EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
+    //@TODO:
+    // EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
+    // EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
+    // dialog.show();
 
-    EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
-    dialog.show();
+    // QCoreApplication::processEvents();
 
-    QCoreApplication::processEvents();
+    // gen.reportPathAndFilename(filename_);
+    // gen.showDone(false);
+    // gen.run();
 
-    gen.reportPathAndFilename(filename_);
-    gen.showDone(false);
+    // return true;
 
-    gen.run();
-
-    return true;
+    return false;
 }
 
 void RTCommandExportEvaluationReport::collectOptions_impl(OptionsDescription& options,

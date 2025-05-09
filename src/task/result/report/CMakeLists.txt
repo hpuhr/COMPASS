@@ -5,6 +5,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/reportdefs.h"
         "${CMAKE_CURRENT_LIST_DIR}/section.h"
         "${CMAKE_CURRENT_LIST_DIR}/treeitem.h"
         "${CMAKE_CURRENT_LIST_DIR}/treemodel.h"

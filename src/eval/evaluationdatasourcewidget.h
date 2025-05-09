@@ -17,8 +17,11 @@
 
 #pragma once
 
+#include <string>
+
 #include <QFrame>
 
+class EvaluationCalculator;
 class DBContentComboBox;
 
 class QCheckBox;
@@ -41,12 +44,17 @@ public slots:
     void updateDataSourcesSlot();
 
 public:
-    EvaluationDataSourceWidget(const std::string& title, const std::string& dbcontent_name, unsigned int line_id,
+    EvaluationDataSourceWidget(EvaluationCalculator& calculator,
+                               const std::string& title, 
+                               const std::string& dbcontent_name, 
+                               unsigned int line_id,
                                QWidget* parent=nullptr, Qt::WindowFlags f=Qt::WindowFlags());
 
-    virtual ~EvaluationDataSourceWidget();
+    virtual ~EvaluationDataSourceWidget(); 
 
 protected:
+    EvaluationCalculator& calculator_;
+
     std::string title_;
     std::string dbcontent_name_;
     unsigned int line_id_;
@@ -58,4 +66,3 @@ protected:
 
     void updateCheckboxesChecked();
 };
-

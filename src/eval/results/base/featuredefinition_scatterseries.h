@@ -25,7 +25,7 @@
 
 #include "dbcontent/dbcontent.h"
 
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
 namespace EvaluationRequirementResult
 {
@@ -38,7 +38,7 @@ class FeatureDefinitionScatterSeries : public FeatureDefinition
 public:
     typedef FeatureDefinitionDataSeries<double> ScatterDataSeries;
 
-    FeatureDefinitionScatterSeries(const EvaluationManager& eval_manager,
+    FeatureDefinitionScatterSeries(const EvaluationCalculator& calculator,
                                    const std::string& feature_description,
                                    const std::string& x_axis_label,
                                    const std::string& y_axis_label);
@@ -71,7 +71,7 @@ private:
 class FeatureDefinitionCustomScatterSeries : public FeatureDefinition
 {
 public:
-    FeatureDefinitionCustomScatterSeries(const EvaluationManager& eval_manager,
+    FeatureDefinitionCustomScatterSeries(const EvaluationCalculator& calculator,
                                          const std::string& feature_description,
                                          const std::string& x_axis_label,
                                        const std::string& y_axis_label);
@@ -113,7 +113,7 @@ class FeatureDefinitionTimedScatterSeries : public FeatureDefinition
 public:
     typedef FeatureDefinitionDataSeries<double> ScatterDataSeries;
 
-    FeatureDefinitionTimedScatterSeries(const EvaluationManager& eval_manager,
+    FeatureDefinitionTimedScatterSeries(const EvaluationCalculator& calculator,
                                         const std::string& feature_description,
                                         const std::string& y_axis_label) ;
 

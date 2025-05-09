@@ -169,10 +169,27 @@ void SectionContentTable::accept(LatexVisitor& v)
 {
     loginf << "SectionContentTable: accept";
 
-    createOnDemandIfNeeded();
+    //createOnDemandIfNeeded();
 
     //@TODO:
     //v.visit(this);
+}
+
+/**
+ */
+bool SectionContentTable::loadOnDemand()
+{
+    bool ok = false;
+
+    //creation func
+    auto func = [ & ] ()
+    {
+        ok = SectionContent::loadOnDemand();
+    };
+
+    tableWidget()->itemModel()->executeAndReset(func);
+
+    return ok;
 }
 
 namespace
@@ -380,65 +397,6 @@ SectionContentTable::RowInfo SectionContentTable::rowInfo(unsigned int row) cons
 
 /**
  */
-void SectionContentTable::setCreateOnDemand(std::function<void(void)> create_on_demand_fnc)
-{
-    create_on_demand_          = true;
-    create_on_demand_fnc_      = create_on_demand_fnc;
-    already_created_by_demand_ = false;
-}
-
-/**
- */
-bool SectionContentTable::isOnDemand() const
-{
-    return create_on_demand_;
-}
-
-/**
- */
-void SectionContentTable::createOnDemand()
-{
-    assert(create_on_demand_fnc_);
-
-    //creation func
-    auto func = [ = ] ()
-    {
-        this->create_on_demand_fnc_();
-        this->already_created_by_demand_ = true;
-    };
-
-    tableWidget()->itemModel()->executeAndReset(func);
-}
-
-/**
- */
-bool SectionContentTable::hasBeenCreatedOnDemand() const
-{
-    return create_on_demand_ && already_created_by_demand_;
-}
-
-/**
- */
-void SectionContentTable::createOnDemandIfNeeded()
-{
-    if (create_on_demand_ && !already_created_by_demand_)
-    {
-        loginf << "SectionContentTable: createOnDemandIfNeeded: creating";
-
-        QApplication::setOverrideCursor(Qt::WaitCursor);
-
-        createOnDemand();
-
-        //adapt table widget columns to new content?
-        if (table_widget_)
-            table_widget_->resizeColumns();
-
-        QApplication::restoreOverrideCursor();
-    }
-}
-
-/**
- */
 void SectionContentTable::clicked(unsigned int row)
 {
     const auto& annotation = annotations_.at(row);
@@ -453,7 +411,7 @@ void SectionContentTable::clicked(unsigned int row)
         has_valid_link = true;
 
         //figure from content in parent section
-        auto c = parent_section_->retrieveContent(annotation.figure_id.value());
+        auto c = parent_section_->retrieveContent(annotation.figure_id.value(), true);
         figure = dynamic_cast<SectionContentFigure*>(c.get());
     }
     else if (!annotation.section_link.empty() && !annotation.section_figure.empty())
@@ -475,8 +433,6 @@ void SectionContentTable::clicked(unsigned int row)
     {
         if (figure)
         {
-            std::shared_ptr<nlohmann::json::object_t> viewable = figure->viewableContent();
-
             //TODO: find a pattern to support on-demand computation of viewable data
             // if (result_ptrs_.at(row_index)->viewableDataReady())
             // {
@@ -496,10 +452,8 @@ void SectionContentTable::clicked(unsigned int row)
             //     task.runAsyncDialog();
             // }
 
-            assert (viewable);
-
             //show viewable
-            report_->setCurrentViewable(*viewable.get());
+            figure->view();
         }
         else
         {
@@ -640,28 +594,37 @@ nlohmann::json SectionContentTable::toJSON(bool rowwise,
  */
 void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
 {
-    root_node[ FieldHeadings   ] = headings_;
-    root_node[ FieldSortable   ] = sortable_;
-    root_node[ FieldSortColumn ] = sort_column_;
-    root_node[ FieldSortOrder  ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
-    root_node[ FieldRows       ] = rows_;
+    root_node[ FieldHeadings    ] = headings_;
+    root_node[ FieldSortable    ] = sortable_;
+    root_node[ FieldSortColumn  ] = sort_column_;
+    root_node[ FieldSortOrder   ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
+    root_node[ FieldRows        ] = std::vector<nlohmann::json>();
+    root_node[ FieldAnnotations ] = nlohmann::json::array();
 
-    nlohmann::json j_annos = nlohmann::json::array();
-
-    for (const auto& a : annotations_)
+    //write content only if not on demand
+    if (!isOnDemand())
     {
-        nlohmann::json j_anno;
+        //write rows
+        root_node[ FieldRows ] = rows_;
 
-        if (a.figure_id.has_value())
-            j_anno[ FieldAnnoFigureID ] = a.figure_id.value();
+        //write annotations
+        nlohmann::json j_annos = nlohmann::json::array();
 
-        j_anno[ FieldAnnoSectionLink   ] = a.section_link;
-        j_anno[ FieldAnnoSectionFigure ] = a.section_figure;
+        for (const auto& a : annotations_)
+        {
+            nlohmann::json j_anno;
 
-        j_annos.push_back(j_anno);
+            if (a.figure_id.has_value())
+                j_anno[ FieldAnnoFigureID ] = a.figure_id.value();
+
+            j_anno[ FieldAnnoSectionLink   ] = a.section_link;
+            j_anno[ FieldAnnoSectionFigure ] = a.section_figure;
+
+            j_annos.push_back(j_anno);
+        }
+
+        root_node[ FieldAnnotations ] = j_annos;
     }
-
-    root_node[ FieldAnnotations ] = j_annos;
 }
 
 /**
@@ -687,9 +650,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     std::string sort_order = j[ FieldSortOrder ];
     sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;
 
-    num_columns_               = headings_.size();
-    create_on_demand_          = false;
-    already_created_by_demand_ = false;
+    num_columns_ = headings_.size();
 
     rows_ = j[ FieldRows ].get<std::vector<nlohmann::json>>();
 
@@ -721,6 +682,8 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 
         annotations_.push_back(anno);
     }
+
+    assert(rows_.size() == annotations_.size());
 
     return true;
 }
@@ -802,14 +765,14 @@ Qt::ItemFlags SectionContentTableModel::flags(const QModelIndex &index) const
  */
 bool SectionContentTableModel::canFetchMore(const QModelIndex &parent) const
 {
-    return content_table_->isOnDemand() && !content_table_->hasBeenCreatedOnDemand();
+    return content_table_->isOnDemand() && !content_table_->isComplete();
 }
 
 /**
  */
 void SectionContentTableModel::fetchMore(const QModelIndex &parent)
 {
-    return content_table_->createOnDemandIfNeeded();
+    content_table_->loadOnDemandIfNeeded();
 }
 
 /**

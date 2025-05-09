@@ -37,12 +37,12 @@ FeatureDefinition::FeatureDefinition() = default;
 
 /**
 */
-FeatureDefinition::FeatureDefinition(const EvaluationManager& eval_manager,
+FeatureDefinition::FeatureDefinition(const EvaluationCalculator& calculator,
                                      const std::string& definition_type,
                                      const std::string& feature_description,
                                      const std::string& x_axis_label,
                                      const std::string& y_axis_label)
-:   eval_manager_       (&eval_manager      )
+:   calculator_         (&calculator        )
 ,   definition_type_    (definition_type    )
 ,   feature_description_(feature_description)
 ,   x_axis_label_       (x_axis_label       )
@@ -99,9 +99,9 @@ const std::string& FeatureDefinition::yAxisLabel() const
 
 /**
 */
-const EvaluationManager& FeatureDefinition::evalManager() const
+const EvaluationCalculator& FeatureDefinition::calculator() const
 {
-    return *eval_manager_;
+    return *calculator_;
 }
 
 /**************************************************************************************

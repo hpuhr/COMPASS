@@ -18,6 +18,7 @@
 #pragma once
 
 #include "evaluationdetail.h"
+#include "evaluationdefs.h"
 #include "eval/results/evaluationdetail.h"
 #include "eval/results/base/result_defs.h"
 
@@ -34,7 +35,7 @@
 #include <Eigen/Core>
 
 class EvaluationTargetData;
-class EvaluationManager;
+class EvaluationCalculator;
 class SectorLayer;
 
 namespace EvaluationRequirement 
@@ -94,7 +95,7 @@ public:
          const std::string& result_id,
          std::shared_ptr<EvaluationRequirement::Base> requirement, 
          const SectorLayer& sector_layer,
-         EvaluationManager& eval_man);
+         EvaluationCalculator& calculator);
     virtual ~Base();
 
     /// returns the base type of the result (either single or joined)
@@ -108,6 +109,7 @@ public:
 
     bool isSingle() const;
     bool isJoined() const;
+    bool isResult(const Evaluation::RequirementResultID& id) const;
 
     bool use() const;
     void use(bool use);
@@ -158,6 +160,8 @@ public:
     static const QColor HistogramColorDefault;
 
 protected:
+    friend class EvaluationTaskResult; // for loading on-demand content
+
     /**
      * Used to display a certain result parameter in the report as
      * Name | Description | Value, e.g.
@@ -266,7 +270,7 @@ protected:
     std::shared_ptr<EvaluationRequirement::Base> requirement_;
     const SectorLayer& sector_layer_;
 
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 
 private:
     boost::optional<double> result_;

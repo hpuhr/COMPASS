@@ -144,7 +144,7 @@ SingleSpeed::SingleSpeed(const std::string& result_id,
                          const SectorLayer& sector_layer,
                          unsigned int utn,
                          const EvaluationTargetData* target,
-                         EvaluationManager& eval_man,
+                         EvaluationCalculator& calculator,
                          const EvaluationDetails& details,
                          unsigned int num_pos,
                          unsigned int num_no_ref,
@@ -154,7 +154,7 @@ SingleSpeed::SingleSpeed(const std::string& result_id,
                          unsigned int num_comp_failed,
                          unsigned int num_comp_passed)
 :   SpeedBase(num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value, num_comp_failed, num_comp_passed)
-,   SingleProbabilityBase("SingleSpeed", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase("SingleSpeed", result_id, requirement, sector_layer, utn, target, calculator, details)
 {
     updateResult();
 }
@@ -163,7 +163,7 @@ SingleSpeed::SingleSpeed(const std::string& result_id,
 */
 std::shared_ptr<Joined> SingleSpeed::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedSpeed> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedSpeed> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -303,9 +303,9 @@ void SingleSpeed::addAnnotationForDetail(nlohmann::json& annotations_json,
 JoinedSpeed::JoinedSpeed(const std::string& result_id, 
                          std::shared_ptr<EvaluationRequirement::Base> requirement,
                          const SectorLayer& sector_layer, 
-                         EvaluationManager& eval_man)
+                         EvaluationCalculator& calculator)
 :   SpeedBase()
-,   JoinedProbabilityBase("JoinedSpeed", result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase("JoinedSpeed", result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -422,7 +422,7 @@ FeatureDefinitions JoinedSpeed::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleSpeed::DetailKey::CheckPassed, 
                        GridAddDetailMode::AddEvtRefPosition, 
                        false);

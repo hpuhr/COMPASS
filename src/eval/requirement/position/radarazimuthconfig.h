@@ -35,7 +35,7 @@ class PositionRadarAzimuthConfig : public BaseConfig
 {
 public:
     PositionRadarAzimuthConfig(const std::string& class_id, const std::string& instance_id,
-                        Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
+                        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~PositionRadarAzimuthConfig();
 
     std::shared_ptr<Base> createRequirement() override;

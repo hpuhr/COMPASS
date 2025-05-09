@@ -21,6 +21,7 @@
 #include "task/result/report/report.h"
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/sectioncontenttext.h"
 
 #include "eval/results/report/section_id.h"
@@ -44,6 +45,8 @@ namespace EvaluationRequirementResult
 const std::string Single::tr_details_table_name_ {"Target Reports Details"};
 const std::string Single::target_table_name_     {"Targets"};
 
+const std::string Single::TargetOverviewID     = "target_errors_overview";
+
 const int Single::AnnotationPointSizeOverview  = 8;
 const int Single::AnnotationPointSizeHighlight = 12;
 const int Single::AnnotationPointSizeError     = 16;
@@ -57,6 +60,11 @@ const QColor Single::AnnotationColorHighlight = Qt::yellow;
 const QColor Single::AnnotationColorError     = QColor("#FF6666");
 const QColor Single::AnnotationColorOk        = QColor("#66FF66");
 
+const std::string Single::PropertyUTN         = "utn";
+const std::string Single::PropertySectorLayer = "sector_layer";
+const std::string Single::PropertyReqGroup    = "req_group";
+const std::string Single::PropertyReqName     = "req_name";
+
 /**
 */
 Single::Single(const std::string& type, 
@@ -65,9 +73,9 @@ Single::Single(const std::string& type,
                const SectorLayer& sector_layer,
                unsigned int utn,
                const EvaluationTargetData* target,
-               EvaluationManager& eval_man,
+               EvaluationCalculator& calculator,
                const EvaluationDetails& details)
-:   Base    (type, result_id, requirement, sector_layer, eval_man)
+:   Base    (type, result_id, requirement, sector_layer, calculator)
 ,   utn_    (utn   )
 ,   target_ (target)
 ,   details_(details)
@@ -148,7 +156,7 @@ std::string Single::getTargetRequirementSectionID ()
 */
 std::string Single::getRequirementSectionID () const // TODO hack
 {
-    if (eval_man_.settings().report_split_results_by_mops_)
+    if (calculator_.settings().report_split_results_by_mops_)
     {
         string tmp = target()->mopsVersionStr();
 
@@ -159,7 +167,7 @@ std::string Single::getRequirementSectionID () const // TODO hack
 
         return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+":"+requirement_->name();
     }
-    else if (eval_man_.settings().report_split_results_by_aconly_ms_)
+    else if (calculator_.settings().report_split_results_by_aconly_ms_)
     {
         string tmp = "Primary";
 
@@ -221,11 +229,11 @@ Single::TemporaryDetails Single::temporaryDetails() const
 Single::EvaluationDetails Single::recomputeDetails() const
 {
     assert(requirement_);
-    assert(eval_man_.getData().hasTargetData(utn_));
+    assert(calculator_.data().hasTargetData(utn_));
 
     logdbg << "Single: recomputeDetails: recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
 
-    const auto& data = eval_man_.getData().targetData(utn_);
+    const auto& data = calculator_.data().targetData(utn_);
 
     auto result = requirement_->evaluate(data, requirement_, sector_layer_);
     assert(result);
@@ -299,8 +307,8 @@ void Single::addTargetToOverviewTable(shared_ptr<ResultReport::Report> report)
 
     addTargetToOverviewTable(tgt_overview_section, target_table_name_);
 
-    if (eval_man_.settings().report_split_results_by_mops_ || 
-        eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
+    if (calculator_.settings().report_split_results_by_mops_ || 
+        calculator_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
         auto& sum_section = report->getSection(getRequirementSumSectionID());
 
@@ -327,10 +335,12 @@ void Single::addTargetToOverviewTable(ResultReport::Section& section,
 
     auto values = targetTableValues();
 
-    assert((int)values.size() == target_table.numColumns());
+    assert(values.size() == target_table.numColumns());
 
-    //@TODO: add section and figure of single result
-    target_table.addRow(values);
+    std::string link = getTargetRequirementSectionID();
+    std::string fig  = hasIssues() ? TargetOverviewID : "";
+
+    target_table.addRow(values, ResultReport::SectionContentViewable(), link, fig);
 }
 
 /**
@@ -348,8 +358,6 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
 
     //add common infos
     auto common_infos = targetInfosCommon();
-
-    //@TODO: add viewable to rows
 
     for (const auto& info : common_infos)
         utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value });
@@ -377,14 +385,20 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
     //generate overview figure?
     if (hasIssues())
     {
-        utn_req_section.addFigure("target_errors_overview", 
-                                  ResultReport::SectionContentViewable([this]() { return this->viewableOverviewData(); }).setCaption("Target Errors Overview"));
+        auto& fig = utn_req_section.addFigure(TargetOverviewID, ResultReport::SectionContentViewable().setCaption("Target Errors Overview"));
+
+        //setup on-demand and add result info
+        fig.setOnDemand();
+        fig.setJSONProperty(PropertyUTN, utn_);
+        fig.setJSONProperty(PropertySectorLayer, sector_layer_.name());
+        fig.setJSONProperty(PropertyReqGroup, requirement_->groupName());
+        fig.setJSONProperty(PropertyReqName, requirement_->name());
     }
     else
     {
         utn_req_section.addText("target_errors_overview_no_figure");
-        utn_req_section.getText("target_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
+        utn_req_section.getText("target_errors_overview_no_figure").
+            addText("No target errors found, therefore no figure was generated.");
     }
 
     //generate details table
@@ -400,37 +414,59 @@ void Single::generateDetailsTable(ResultReport::Section& utn_req_section)
     {
         auto headers = detailHeaders();
 
-        utn_req_section.addTable(tr_details_table_name_, headers.size(), headers);
+        auto& utn_req_details_table = utn_req_section.addTable(tr_details_table_name_, headers.size(), headers);
+
+        //setup on-demand and add result info
+        utn_req_details_table.setOnDemand();
+        utn_req_details_table.setJSONProperty(PropertyUTN, utn_);
+        utn_req_details_table.setJSONProperty(PropertySectorLayer, sector_layer_.name());
+        utn_req_details_table.setJSONProperty(PropertyReqGroup, requirement_->groupName());
+        utn_req_details_table.setJSONProperty(PropertyReqName, requirement_->name());
     }
+}
 
-    auto& utn_req_details_table = utn_req_section.getTable(tr_details_table_name_);
+/**
+*/
+void Single::addDetailsToTable(ResultReport::SectionContentTable& table)
+{
+    //create details on demand
+    auto temp_details = temporaryDetails();
+    
+    //detail => table row functor
+    auto func = [ & ] (const EvaluationDetail& detail, 
+                       const EvaluationDetail* parent_detail, 
+                       int didx0, 
+                       int didx1,
+                       int evt_pos_idx, 
+                       int evt_ref_pos_idx)
+    {
+        auto values = detailValues(detail, parent_detail);
 
-    //setup on-demand callback
-    utn_req_details_table.setCreateOnDemand(
-        [this, &utn_req_details_table](void)
-        {
-            //create details on demand
-            auto temp_details = temporaryDetails();
+        assert(values.size() == table.numColumns());
 
-            //detail => table row functor
-            auto func = [ & ] (const EvaluationDetail& detail, 
-                               const EvaluationDetail* parent_detail, 
-                               int didx0, 
-                               int didx1,
-                               int evt_pos_idx, 
-                               int evt_ref_pos_idx)
-            {
-                auto values = detailValues(detail, parent_detail);
+        //@TODO: add details (QPoint(didx0, didx1))
+        table.addRow(values);
+    };
 
-                assert((int)values.size() == utn_req_details_table.numColumns());
+    //iterate over temporary details
+    iterateDetails(func);
+}
 
-                //@TODO: add details (QPoint(didx0, didx1))
-                utn_req_details_table.addRow(values);
-            };
+/**
+*/
+void Single::addOverviewToFigure(ResultReport::SectionContentFigure& figure)
+{
+    auto viewable = viewableOverviewData();
 
-            //iterate over temporary details
-            this->iterateDetails(func);
-        } );
+    auto viewable_func = [viewable]() { return viewable; };
+    figure.setViewableFunc(viewable_func);
+}
+
+/**
+*/
+void Single::addHighlightToFigure(ResultReport::SectionContentFigure& figure)
+{
+    //@TODO
 }
 
 /**
@@ -977,7 +1013,7 @@ void Single::iterateDetails(const EvaluationDetails& details,
 */
 std::unique_ptr<nlohmann::json::object_t> Single::createBaseViewable() const
 {
-    return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+    return calculator_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
 }
 
 /**

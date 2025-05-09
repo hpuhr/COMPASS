@@ -52,7 +52,7 @@ public:
            const std::string& result_id,
            std::shared_ptr<EvaluationRequirement::Base> requirement,
            const SectorLayer& sector_layer,
-           EvaluationManager& eval_man);
+           EvaluationCalculator& calculator);
     virtual ~Joined();
 
     BaseType baseType() const override final { return BaseType::Joined; }

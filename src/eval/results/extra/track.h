@@ -54,7 +54,7 @@ public:
                      const SectorLayer& sector_layer, 
                      unsigned int utn, 
                      const EvaluationTargetData* target,
-                     EvaluationManager& eval_man,
+                     EvaluationCalculator& calculator,
                      const EvaluationDetails& details,
                      bool ignore, 
                      unsigned int num_inside, 
@@ -96,7 +96,7 @@ public:
     JoinedExtraTrack(const std::string& result_id, 
                      std::shared_ptr<EvaluationRequirement::Base> requirement,
                      const SectorLayer& sector_layer, 
-                     EvaluationManager& eval_man);
+                     EvaluationCalculator& calculator);
 protected:
     virtual unsigned int numIssues() const override;
     virtual unsigned int numUpdates() const override;

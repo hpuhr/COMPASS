@@ -45,7 +45,7 @@ private slots:
     void generateReportSlot();
 
 public:
-    EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
+    EvaluationManagerWidget(EvaluationManager& eval_man);
     virtual ~EvaluationManagerWidget();
 
     //ToolBoxWidget
@@ -60,7 +60,6 @@ public:
     void loadingDone() override final;
 
     void updateButtons();
-
     void expandResults();
 
     void showResultId (const std::string& id, 
@@ -72,10 +71,8 @@ public:
                                                  const std::string& table_id,
                                                  bool rowwise = true,
                                                  const std::vector<int>& cols = std::vector<int>()) const;
-
 protected:
     EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
 
     QTabWidget* tab_widget_{nullptr};
 

@@ -30,12 +30,15 @@
 #include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "dbinterface.h"
+#include "asynctask.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskwidget.h"
 
 #include "taskresult.h"
 #include "taskresultswidget.h"
+
+#include "evaluationtaskresult.h"
 
 #include <cassert>
 
@@ -48,6 +51,10 @@
 
 using namespace Utils;
 
+const bool TaskManager::CleanupDBIfNeeded = true;
+
+/**
+ */
 TaskManager::TaskManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "task.json")
 {
@@ -56,8 +63,12 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
     setObjectName("TaskManager");
 }
 
+/**
+ */
 TaskManager::~TaskManager() {}
 
+/**
+ */
 void TaskManager::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
 {
@@ -130,6 +141,8 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
                                  class_id);
 }
 
+/**
+ */
 void TaskManager::addTask(const std::string& class_id, Task* task)
 {
     assert(task);
@@ -137,6 +150,8 @@ void TaskManager::addTask(const std::string& class_id, Task* task)
     tasks_[class_id] = task;
 }
 
+/**
+ */
 void TaskManager::checkSubConfigurables()
 {
     if (!asterix_importer_task_)
@@ -195,8 +210,15 @@ void TaskManager::checkSubConfigurables()
     }
 }
 
-std::map<std::string, Task*> TaskManager::tasks() const { return tasks_; }
+/**
+ */
+std::map<std::string, Task*> TaskManager::tasks() const 
+{ 
+    return tasks_; 
+}
 
+/**
+ */
 void TaskManager::init()
 {
     //init all tasks
@@ -208,6 +230,8 @@ void TaskManager::init()
     updateFeatures();
 }
 
+/**
+ */
 void TaskManager::shutdown()
 {
     loginf << "TaskManager: shutdown";
@@ -225,6 +249,8 @@ void TaskManager::shutdown()
     reconstruct_references_task_ = nullptr;
 }
 
+/**
+ */
 void TaskManager::runTask(const std::string& task_name)
 {
     loginf << "TaskManager: runTask: name " << task_name;
@@ -235,60 +261,80 @@ void TaskManager::runTask(const std::string& task_name)
     tasks_.at(task_name)->run();
 }
 
+/**
+ */
 ManageSectorsTask& TaskManager::manageSectorsTask() const
 {
     assert(manage_sectors_task_);
     return *manage_sectors_task_;
 }
 
+/**
+ */
 ASTERIXImportTask& TaskManager::asterixImporterTask() const
 {
     assert(asterix_importer_task_);
     return *asterix_importer_task_;
 }
 
+/**
+ */
 ViewPointsImportTask& TaskManager::viewPointsImportTask() const
 {
     assert(view_points_import_task_);
     return *view_points_import_task_;
 }
 
+/**
+ */
 JSONImportTask& TaskManager::jsonImporterTask() const
 {
     assert(json_import_task_);
     return *json_import_task_;
 }
 
+/**
+ */
 GPSTrailImportTask& TaskManager::gpsTrailImportTask() const
 {
     assert(gps_trail_import_task_);
     return *gps_trail_import_task_;
 }
 
+/**
+ */
 GPSImportCSVTask& TaskManager::gpsImportCSVTask() const
 {
     assert(gps_import_csv_task_);
     return *gps_import_csv_task_;
 }
 
+/**
+ */
 RadarPlotPositionCalculatorTask& TaskManager::radarPlotPositionCalculatorTask() const
 {
     assert(radar_plot_position_calculator_task_);
     return *radar_plot_position_calculator_task_;
 }
 
+/**
+ */
 CreateARTASAssociationsTask& TaskManager::createArtasAssociationsTask() const
 {
     assert(create_artas_associations_task_);
     return *create_artas_associations_task_;
 }
 
+/**
+ */
 ReconstructorTask& TaskManager::reconstructReferencesTask() const
 {
     assert(reconstruct_references_task_);
     return *reconstruct_references_task_;
 }
 
+/**
+ */
 TaskResultsWidget* TaskManager::widget()
 {
     if (!widget_)
@@ -298,15 +344,46 @@ TaskResultsWidget* TaskManager::widget()
     return widget_.get();
 }
 
-void TaskManager::beginTaskResultWriting(const std::string& name)
+/**
+ */
+std::shared_ptr<TaskResult> TaskManager::createResult(unsigned int id, 
+                                                      task::TaskResultType type)
+{
+    std::shared_ptr<TaskResult> result;
+
+    //generate result depending on stored type (@TODO: factory?)
+    if (type == task::TaskResultType::Generic)
+    {
+        result.reset(new TaskResult(id, *this));
+    }
+    else if (type == task::TaskResultType::Evaluation)
+    {
+        result.reset(new EvaluationTaskResult(id, *this));
+    }
+    
+    return result;
+}
+
+/**
+ */
+void TaskManager::beginTaskResultWriting(const std::string& name,
+                                         task::TaskResultType type)
 {
     if (widget_)
         widget_->setDisabled(true);
 
     assert (!current_result_);
-    current_result_ = getOrCreateResult(name);
+    current_result_ = getOrCreateResult(name, type);
 
     current_result_->report()->clear();
+}
+
+/**
+ */
+std::shared_ptr<TaskResult>& TaskManager::currentResult()
+{
+    assert (current_result_);
+    return current_result_;
 }
 
 std::shared_ptr<ResultReport::Report>& TaskManager::currentReport()
@@ -315,18 +392,20 @@ std::shared_ptr<ResultReport::Report>& TaskManager::currentReport()
     return current_result_->report();
 }
 
-void TaskManager::endTaskResultWriting(bool store)
+/**
+ */
+void TaskManager::endTaskResultWriting(bool store_result)
 {
     if (widget_)
         widget_->setDisabled(false);
 
     assert (current_result_);
 
-    if (store)
+    if (store_result)
     {
         loginf << "TaskManager: endTaskResultWriting: Storing result...";
 
-        auto result = COMPASS::instance().dbInterface().saveResult(*current_result_);
+        auto result = COMPASS::instance().dbInterface().saveResult(*current_result_, CleanupDBIfNeeded);
 
         //@TODO
         assert(result.ok());
@@ -338,6 +417,8 @@ void TaskManager::endTaskResultWriting(bool store)
     emit taskResultsChangedSignal();
 }
 
+/**
+ */
 MainWindow* TaskManager::getMainWindow()
 {
     for(QWidget* pWidget : QApplication::topLevelWidgets())
@@ -354,6 +435,8 @@ MainWindow* TaskManager::getMainWindow()
     return nullptr;
 }
 
+/**
+ */
 void TaskManager::updateFeatures()
 {
     for (auto& t : tasks_)
@@ -361,18 +444,33 @@ void TaskManager::updateFeatures()
             t.second->updateFeatures();
 }
 
+/**
+ */
 const std::map<unsigned int, std::shared_ptr<TaskResult>>& TaskManager::results() const
 {
     return results_;
 }
 
+/**
+ */
 std::shared_ptr<TaskResult> TaskManager::result(unsigned int id) const // get existing result
 {
     assert (results_.count(id));
     return results_.at(id);
 }
 
-std::shared_ptr<TaskResult> TaskManager::getOrCreateResult (const std::string& name) // get or create result
+/**
+ */
+std::shared_ptr<TaskResult> TaskManager::result(const std::string& name) const // get existing result
+{
+    auto id = findResult(name);
+    return id.has_value() ? results_.at(id.value()) : std::shared_ptr<TaskResult>();
+}
+
+/**
+ */
+std::shared_ptr<TaskResult> TaskManager::getOrCreateResult(const std::string& name,
+                                                           task::TaskResultType type)
 {
     auto id = findResult(name);
 
@@ -387,18 +485,17 @@ std::shared_ptr<TaskResult> TaskManager::getOrCreateResult (const std::string& n
         if (results_.size())
             new_id = results_.rend()->first + 1;
 
-        results_[new_id] = std::make_shared<TaskResult>(new_id, *this);
+        auto r = createResult(new_id, type);
+
+        results_[new_id] = r;
         results_.at(new_id)->name(name);
 
         return results_.at(new_id);
     }
 }
 
-ResultReport::Report& TaskManager::report(const std::string& name)
-{
-    return *getOrCreateResult(name)->report();
-}
-
+/**
+ */
 boost::optional<unsigned int> TaskManager::findResult(const std::string& name) const
 {
     auto it = std::find_if(results_.begin(), results_.end(),
@@ -410,12 +507,17 @@ boost::optional<unsigned int> TaskManager::findResult(const std::string& name) c
     return it->first;
 }
 
+/**
+ */
 bool TaskManager::hasResult (const std::string& name) const
 {
     return findResult(name).has_value();
 }
 
-bool TaskManager::removeResult(const std::string& name)
+/**
+ */
+bool TaskManager::removeResult(const std::string& name,
+                               bool inform_changes)
 {
     auto id = findResult(name);
     if (!id.has_value())
@@ -424,24 +526,33 @@ bool TaskManager::removeResult(const std::string& name)
     const auto& result = results_.at(id.value());
     assert(result);
 
-    auto res = COMPASS::instance().dbInterface().deleteResult(*result);
+    auto res = COMPASS::instance().dbInterface().deleteResult(*result, CleanupDBIfNeeded);
     if (!res.ok())
         return false;
 
     results_.erase(id.value());
 
+    if (inform_changes)
+        emit taskResultsChangedSignal();
+
     return true;
 }
 
+/**
+ */
 void TaskManager::databaseOpenedSlot()
 {
     loadResults();
 }
 
+/**
+ */
 void TaskManager::databaseClosedSlot()
 {
 }
 
+/**
+ */
 void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
 {
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
@@ -449,19 +560,53 @@ void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
     COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
 }
 
-std::shared_ptr<ResultReport::SectionContent> TaskManager::loadContent(ResultReport::Section* section, 
-                                                                       unsigned int content_id) const
+/**
+ */
+void TaskManager::unsetViewableDataConfig()
 {
-    auto res = COMPASS::instance().dbInterface().loadContent(section, content_id);
-    if (!res.ok())
+    COMPASS::instance().viewManager().unsetCurrentViewPoint();
+    viewable_data_cfg_.reset();
+}
+
+/**
+ */
+std::shared_ptr<ResultReport::SectionContent> TaskManager::loadContent(ResultReport::Section* section, 
+                                                                       unsigned int content_id,
+                                                                       bool show_dialog) const
+{
+    ResultT<TaskResult::ContentPtr> result;
+
+    if (show_dialog)
     {
-        logerr << "TaskManager: loadResults: Could not load stored content: " << res.error();
+        //run as async task with dialog
+        auto result_ptr = &result;
+
+        auto cb = [ this, result_ptr, section, content_id ] (const AsyncTaskState&, AsyncTaskProgressWrapper&) 
+        { 
+            *result_ptr = COMPASS::instance().dbInterface().loadContent(section, content_id);
+            return true;
+        };
+
+        AsyncFuncTask task(cb, "Loading", "Loading section content", false);
+        task.runAsyncDialog();
+    }
+    else
+    {
+        //directly run
+        result = COMPASS::instance().dbInterface().loadContent(section, content_id);
+    }
+
+    if (!result.ok())
+    {
+        logerr << "TaskManager: loadResults: Could not load stored content: " << result.error();
         return std::shared_ptr<ResultReport::SectionContent>();
     }
 
-    return res.result();
+    return result.result();
 }
 
+/**
+ */
 void TaskManager::loadResults()
 {
     assert (!current_result_);

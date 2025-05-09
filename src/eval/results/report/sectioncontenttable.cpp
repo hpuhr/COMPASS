@@ -612,9 +612,9 @@ void SectionContentTable::customContextMenuSlot(const QPoint& p)
         unsigned int utn = single_result->utn();
         loginf << "SectionContentTable: customContextMenuSlot: utn " << utn;
 
-        assert (eval_man_.getData().hasTargetData(utn));
+        assert (eval_man_.calculator().data().hasTargetData(utn));
 
-        const EvaluationTargetData& target_data = eval_man_.getData().targetData(utn);
+        const EvaluationTargetData& target_data = eval_man_.calculator().data().targetData(utn);
 
         if (target_data.use())
         {
@@ -693,7 +693,7 @@ void SectionContentTable::showFullUTNSlot ()
 
     loginf << "SectionContentTable: showFullUTNSlot: utn " << utn;
 
-    eval_man_.showFullUTN(utn);
+    eval_man_.calculator().showFullUTN(utn);
 }
 
 void SectionContentTable::showSurroundingDataSlot ()
@@ -705,7 +705,7 @@ void SectionContentTable::showSurroundingDataSlot ()
 
     loginf << "SectionContentTable: showSurroundingDataSlot: utn " << utn;
 
-    eval_man_.showSurroundingData(utn);
+    eval_man_.calculator().showSurroundingData(utn);
 }
 
 void SectionContentTable::showMenuSlot()

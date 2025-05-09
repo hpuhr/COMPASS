@@ -85,13 +85,13 @@ SingleDetection::SingleDetection(const std::string& result_id,
                                  const SectorLayer& sector_layer,
                                  unsigned int utn,
                                  const EvaluationTargetData* target,
-                                 EvaluationManager& eval_man,
+                                 EvaluationCalculator& calculator,
                                  const EvaluationDetails& details,
                                  int sum_uis,
                                  int missed_uis,
                                  TimePeriodCollection ref_periods)
 :   DetectionBase(sum_uis, missed_uis)
-,   SingleProbabilityBase("SingleDetection", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase("SingleDetection", result_id, requirement, sector_layer, utn, target, calculator, details)
 ,   ref_periods_(ref_periods)
 {
     updateResult();
@@ -101,7 +101,7 @@ SingleDetection::SingleDetection(const std::string& result_id,
 */
 std::shared_ptr<Joined> SingleDetection::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedDetection>(result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedDetection>(result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -221,9 +221,9 @@ void SingleDetection::addAnnotationForDetail(nlohmann::json& annotations_json,
 JoinedDetection::JoinedDetection(const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
                                  const SectorLayer& sector_layer, 
-                                 EvaluationManager& eval_man)
+                                 EvaluationCalculator& calculator)
 :   DetectionBase()
-,   JoinedProbabilityBase("JoinedDetection", result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase("JoinedDetection", result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -289,7 +289,7 @@ FeatureDefinitions JoinedDetection::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>("Missed Update Intervals", eval_man_, "Miss Occurred").
+    defs.addDefinition<FeatureDefinitionBinaryGrid>("Missed Update Intervals", calculator_, "Miss Occurred").
             addDataSeries(SingleDetection::DetailKey::MissOccurred, GridAddDetailMode::AddPositionsAsPolyLine, true);
 
     return defs;

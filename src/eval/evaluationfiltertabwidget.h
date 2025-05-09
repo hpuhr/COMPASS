@@ -1,11 +1,11 @@
+
 #pragma once
 
 #include <QWidget>
 
 #include <memory>
 
-class EvaluationManager;
-class EvaluationManagerSettings;
+class EvaluationCalculator;
 class EvaluationManagerWidget;
 class TimeWindowCollectionWidget;
 
@@ -13,6 +13,8 @@ class QLineEdit;
 class QCheckBox;
 class QDateTimeEdit;
 
+/**
+ */
 class EvaluationFilterTabWidget : public QWidget
 {
     Q_OBJECT
@@ -58,13 +60,12 @@ private slots:
     void maxSILv2PEditedSlot (const QString& text);
 
 public:
-    EvaluationFilterTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
+    EvaluationFilterTabWidget(EvaluationCalculator& calculator);
 
     void update();
 
 protected:
-    EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
+    EvaluationCalculator& calculator_;
 
     QCheckBox* use_filter_check_{nullptr};
 

@@ -67,7 +67,7 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     //QHBoxLayout* res_layout = new QHBoxLayout();
 
     tree_view_ = new QTreeView;
-    tree_view_->setModel(&eval_man_.resultsGenerator().resultsModel());
+    //tree_view_->setModel(&eval_man_.calculator().resultsGenerator().resultsModel());
     tree_view_->setRootIsDecorated(false);
     tree_view_->expandToDepth(3);
     tree_view_->setFixedSize(500, 1000);
@@ -133,26 +133,26 @@ void EvaluationResultsTabWidget::selectId (const std::string& id,
     //const auto& model = eval_man_.resultsGenerator().resultsModel();
     //iterateTreeModel(model, model.index(0, 0), "");
 
-    QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(id);
+    // QModelIndex index = eval_man_.calculator().resultsGenerator().resultsModel().findItem(id);
 
-    if (!index.isValid())
-    {
-        logerr << "EvaluationResultsTabWidget: selectId: id '" << id << "' not found";
-        return;
-    }
+    // if (!index.isValid())
+    // {
+    //     logerr << "EvaluationResultsTabWidget: selectId: id '" << id << "' not found";
+    //     return;
+    // }
 
-    assert (tree_view_);
-    tree_view_->selectionModel()->clear();
+    // assert (tree_view_);
+    // tree_view_->selectionModel()->clear();
 
-    expandAllParents(index);
+    // expandAllParents(index);
 
-    tree_view_->selectionModel()->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    tree_view_->scrollTo(index);
+    // tree_view_->selectionModel()->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    // tree_view_->scrollTo(index);
 
-    itemClickedSlot(index);
+    // itemClickedSlot(index);
 
-    if (show_figure)
-        showFigure(index);
+    // if (show_figure)
+    //     showFigure(index);
 }
 
 void EvaluationResultsTabWidget::reshowLastId ()
@@ -283,34 +283,36 @@ boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const s
     }
 
     //get result section
-    QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(result_id_corr.toStdString());
+    // QModelIndex index = eval_man_.calculator().resultsGenerator().resultsModel().findItem(result_id_corr.toStdString());
 
-    if (!index.isValid())
-    {
-        logerr << "EvaluationResultsTabWidget: getTableData: id '" << result_id_corr.toStdString() << "' not found";
-        return {};
-    }
+    // if (!index.isValid())
+    // {
+    //     logerr << "EvaluationResultsTabWidget: getTableData: id '" << result_id_corr.toStdString() << "' not found";
+    //     return {};
+    // }
 
-    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
-    if (!item)
-    {
-        logerr << "EvaluationResultsTabWidget: getTableData: item null";
-        return {};
-    }
+    // TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
+    // if (!item)
+    // {
+    //     logerr << "EvaluationResultsTabWidget: getTableData: item null";
+    //     return {};
+    // }
 
-    EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
-    if (!section)
-    {   
-        logerr << "EvaluationResultsTabWidget: getTableData: no section found";
-        return {};
-    }
+    // EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
+    // if (!section)
+    // {   
+    //     logerr << "EvaluationResultsTabWidget: getTableData: no section found";
+    //     return {};
+    // }
 
-    //check if table is available
-    if (!section->hasTable(table_id))
-    {
-        logerr << "EvaluationResultsTabWidget: getTableData: no table found";
-        return {};
-    }
+    // //check if table is available
+    // if (!section->hasTable(table_id))
+    // {
+    //     logerr << "EvaluationResultsTabWidget: getTableData: no table found";
+    //     return {};
+    // }
 
-    return section->getTable(table_id).toJSON(rowwise, cols);
+    // return section->getTable(table_id).toJSON(rowwise, cols);
+
+    return {};
 }

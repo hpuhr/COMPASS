@@ -23,11 +23,11 @@ class QLineEdit;
 class QCheckBox;
 class QSpinBox;
 
-class EvaluationResultsGenerator;
-class EvaluationManager;
-class EvaluationManagerSettings;
+class EvaluationCalculator;
 
-class EvaluationResultsGeneratorWidget : public QWidget
+/**
+ */
+class EvaluationReportTabWidget : public QWidget
 {
     Q_OBJECT
 private slots:
@@ -39,16 +39,13 @@ private slots:
     void resultDetailZoomEditSlot(QString value);
 
 public:
-    EvaluationResultsGeneratorWidget(EvaluationResultsGenerator& results_gen,
-                                     EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
-    virtual ~EvaluationResultsGeneratorWidget();
+    EvaluationReportTabWidget(EvaluationCalculator& calculator);
+    virtual ~EvaluationReportTabWidget();
 
     void updateFromSettings();
 
 protected:
-    EvaluationResultsGenerator& results_gen_;
-    EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
+    EvaluationCalculator& calculator_;
 
     QCheckBox* skip_no_data_details_check_ {nullptr};
     QCheckBox* split_results_by_mops_check_ {nullptr};

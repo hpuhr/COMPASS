@@ -54,8 +54,8 @@ Joined::Joined(const std::string& type,
                 const std::string& result_id,
                 std::shared_ptr<EvaluationRequirement::Base> requirement, 
                 const SectorLayer& sector_layer,
-                EvaluationManager& eval_man)
-:   Base(type, result_id, requirement, sector_layer, eval_man)
+                EvaluationCalculator& calculator)
+:   Base(type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -585,7 +585,7 @@ std::shared_ptr<nlohmann::json::object_t> Joined::getOrCreateCachedViewable() co
 */
 std::unique_ptr<nlohmann::json::object_t> Joined::createBaseViewable() const
 {
-    return eval_man_.getViewableForEvaluation(req_grp_id_, result_id_);
+    return calculator_.getViewableForEvaluation(req_grp_id_, result_id_);
 }
 
 /**

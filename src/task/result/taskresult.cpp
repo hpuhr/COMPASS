@@ -17,6 +17,10 @@
 
 #include "taskresult.h"
 
+#include "task/result/report/sectioncontent.h"
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontenttable.h"
+
 #include "timeconv.h"
 #include "logger.h"
 
@@ -35,66 +39,139 @@ const std::string TaskResult::FieldType     = "type";
 const std::string TaskResult::FieldCreated  = "created";
 const std::string TaskResult::FieldComments = "comments";
 const std::string TaskResult::FieldReport   = "report";
+const std::string TaskResult::FieldConfig   = "config";
 
+/**
+ */
 TaskResult::TaskResult(unsigned int id, TaskManager& task_man)
-:   id_    (id        )
+:   task_manager_(task_man)
+,   id_          (id)
 {
-    report_ = std::make_shared<ResultReport::Report> (task_man);
+    report_ = std::make_shared<ResultReport::Report> (this);
 }
 
+/**
+ */
+TaskResult::~TaskResult() {}
+
+/**
+ */
 unsigned int TaskResult::id() const
 {
     return id_;
 }
 
+/**
+ */
 void TaskResult::id(unsigned int id)
 {
     id_ = id;
 }
 
+/**
+ */
 std::string TaskResult::name() const
 {
     return name_;
 }
 
+/**
+ */
 void TaskResult::name(const std::string& name)
 {
     name_ = name;
 }
 
+/**
+ */
 const std::shared_ptr<ResultReport::Report>& TaskResult::report() const
 {
     assert (report_);
     return report_;
 }
 
+/**
+ */
 std::shared_ptr<ResultReport::Report>& TaskResult::report()
 {
     assert (report_);
     return report_;
 }
 
-TaskResult::TaskResultType TaskResult::type() const
+/**
+ */
+void TaskResult::setConfiguration(const nlohmann::json& config)
 {
-    return type_;
+    config_ = config;
 }
 
-void TaskResult::type(TaskResultType type)
+/**
+ */
+bool TaskResult::hasConfiguration() const
 {
-    type_ = type;
+    return config_.is_null();
 }
 
+/**
+ */
+const nlohmann::json& TaskResult::configuration() const
+{
+    return config_;
+}
+
+/**
+ */
+bool TaskResult::loadOnDemandContent(ResultReport::SectionContent* content) const
+{
+    if (!content)
+        return false;
+
+    if (content->type() == ResultReport::SectionContent::Type::Figure)
+    {
+        auto c = dynamic_cast<ResultReport::SectionContentFigure*>(content);
+        assert(c);
+
+        return loadOnDemandFigure(c);
+    }
+    else if (content->type() == ResultReport::SectionContent::Type::Table)
+    {
+        auto c = dynamic_cast<ResultReport::SectionContentTable*>(content);
+        assert(c);
+
+        return loadOnDemandTable(c);
+    }
+
+    return false;
+}
+
+/**
+ */
+bool TaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const
+{
+    return false;
+}
+
+/**
+ */
+bool TaskResult::loadOnDemandTable(ResultReport::SectionContentTable* table) const
+{
+    return false;
+}
+
+/**
+ */
 nlohmann::json TaskResult::toJSON() const
 {
     nlohmann::json root = nlohmann::json::object();
 
     root[ FieldID       ] = id_;
     root[ FieldName     ] = name_;
-    root[ FieldType     ] = type_;
+    root[ FieldType     ] = type();
     root[ FieldCreated  ] = Utils::Time::toString(created_);
     root[ FieldComments ] = comments_;
 
     root[ FieldReport   ] = report_->toJSON();
+    root[ FieldConfig   ] = config_;
 
     //derived content
     toJSON_impl(root);
@@ -102,6 +179,8 @@ nlohmann::json TaskResult::toJSON() const
     return root;
 }
 
+/**
+ */
 bool TaskResult::fromJSON(const nlohmann::json& j)
 {
     //loginf << j.dump(4);
@@ -112,12 +191,20 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
         !j.contains(FieldType)     ||
         !j.contains(FieldCreated)  ||
         !j.contains(FieldComments) ||
-        !j.contains(FieldReport))
+        !j.contains(FieldReport)   ||
+        !j.contains(FieldConfig))
         return false;
+
+    task::TaskResultType stored_type = j[ FieldType ];
+    if (stored_type != type())
+    {
+        logerr << "TaskResult: fromJSON: Stored type " << stored_type
+               << " does not match result type " << type();
+        return false;
+    }
 
     id_       = j[ FieldID ];
     name_     = j[ FieldName ];
-    type_     = j[ FieldType ];
     comments_ = j[ FieldComments ];
 
     std::string ts = j[ FieldCreated ];
@@ -125,6 +212,8 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
 
     if (!report_->fromJSON(j[ FieldReport ]))
         return false;
+
+    config_ = j[ FieldConfig ];
 
     //derived content
     if (!fromJSON_impl(j))

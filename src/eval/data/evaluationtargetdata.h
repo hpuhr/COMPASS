@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONTARGETDATA_H
-#define EVALUATIONTARGETDATA_H
+#pragma once
 
 #include "dbcontent/target/targetreportchain.h"
 
@@ -36,10 +35,12 @@
 
 class Buffer;
 class EvaluationData;
-class EvaluationManager;
+class EvaluationCalculator;
 class DBContentManager;
 class SectorLayer;
 
+/**
+ */
 class EvaluationTargetData
 {
 public:
@@ -48,7 +49,7 @@ public:
     EvaluationTargetData(unsigned int utn, 
                          EvaluationData& eval_data,
                          std::shared_ptr<dbContent::DBContentAccessor> accessor,
-                         EvaluationManager& eval_man, 
+                         EvaluationCalculator& calculator,
                          DBContentManager& dbcont_man);
     virtual ~EvaluationTargetData();
 
@@ -211,10 +212,10 @@ protected:
 
     bool interestFactorEnabled(const std::string& req_id) const;
     
-    EvaluationData&    eval_data_;
+    EvaluationData& eval_data_;
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
-    EvaluationManager& eval_man_;
-    DBContentManager&  dbcont_man_;
+    EvaluationCalculator& calculator_;
+    DBContentManager& dbcont_man_;
 
     dbContent::TargetReport::Chain ref_chain_;
     dbContent::TargetReport::Chain tst_chain_;
@@ -253,5 +254,3 @@ protected:
     mutable double interest_factors_sum_total_ {0};
     mutable double interest_factors_sum_enabled_ {0};
 };
-
-#endif // EVALUATIONTARGETDATA_H

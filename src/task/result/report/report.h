@@ -25,6 +25,7 @@
 
 #include "json.hpp"
 
+class TaskResult;
 class TaskManager;
 
 namespace ResultReport
@@ -39,7 +40,7 @@ class Report : public QObject, public TreeItem
 {
     Q_OBJECT
 public:
-    Report(TaskManager& task_man);
+    Report(TaskResult* result);
     virtual ~Report();
 
     void clear();
@@ -59,17 +60,23 @@ public:
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
 
-    TaskManager& taskManager() { return task_man_; }
-    const TaskManager& taskManager() const { return task_man_; }
-
     void setCurrentViewable(const nlohmann::json::object_t& data);
+    void unsetCurrentViewable();
     void setCurrentSection(const std::string& section_name);
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
-                                                              unsigned int content_id) const;
+                                                              unsigned int content_id,
+                                                              bool show_dialog = false) const;
+
+    const TaskResult& result() const { return *result_; }
+    TaskResult& result() { return *result_; }
+
+    const TaskManager& taskManager() const;
+    TaskManager& taskManager();
+
     static const std::string FieldRootSection;
 
 protected:
-    TaskManager& task_man_;
+    TaskResult* result_ = nullptr;
 
     std::shared_ptr<Section> root_section_;
 };

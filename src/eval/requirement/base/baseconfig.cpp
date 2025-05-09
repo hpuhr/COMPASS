@@ -64,9 +64,9 @@ std::string comparisonTypeLongString(COMPARISON_TYPE type)
 
 BaseConfig::BaseConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
     : Configurable(class_id, instance_id, &group), EvaluationStandardTreeItem(&group),
-      group_(group), standard_(standard), eval_man_(eval_man)
+      group_(group), standard_(standard), calculator_(calculator)
 {
     registerParameter("use", &use_, true);
     registerParameter("name", &name_, std::string());

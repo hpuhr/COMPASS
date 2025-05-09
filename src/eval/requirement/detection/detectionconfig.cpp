@@ -36,8 +36,8 @@ namespace EvaluationRequirement
 
 DetectionConfig::DetectionConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("update_interval", &update_interval_s_, 1.0f);
 
@@ -62,7 +62,7 @@ DetectionConfig::~DetectionConfig()
 std::shared_ptr<Base> DetectionConfig::createRequirement()
 {
     shared_ptr<Detection> req = make_shared<Detection>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, update_interval_s_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_, update_interval_s_,
                 use_min_gap_length_, min_gap_length_s_, use_max_gap_length_, max_gap_length_s_, invert_prob_,
                 use_miss_tolerance_, miss_tolerance_s_, hold_for_any_target_);
 

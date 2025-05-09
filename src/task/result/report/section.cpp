@@ -25,6 +25,7 @@
 
 //#include "latexvisitor.h"
 
+#include "asynctask.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -49,6 +50,7 @@ const std::string Section::FieldContentIDs          = "content_ids";
 const std::string Section::FieldContentNames        = "content_names";
 const std::string Section::FieldContentTypes        = "content_types";
 const std::string Section::FieldExtraContentIDs     = "extra_content_ids";
+const std::string Section::FieldProperties          = "properties";
 
 unsigned int Section::current_content_id_ = 0;
 
@@ -633,6 +635,19 @@ void Section::createContentWidget()
 
     QVBoxLayout* layout = new QVBoxLayout();
 
+    //preload all needed contents as async task with dialog
+    auto cb = [ this ] (const AsyncTaskState&, AsyncTaskProgressWrapper&) 
+    { 
+        for (size_t i = 0; i < this->content_.size(); ++i)
+            this->loadOrGetContent(i, false);
+
+        return true;
+    };
+
+    AsyncFuncTask task(cb, "Loading", "Loading section contents", false);
+    task.runAsyncDialog();
+
+    //add contents to layout
     for (size_t i = 0; i < content_.size(); ++i)
         loadOrGetContent(i, false)->addToLayout(layout);
 
@@ -656,7 +671,8 @@ namespace
 
 /**
 */
-std::shared_ptr<SectionContent> Section::retrieveContent(unsigned int id)
+std::shared_ptr<SectionContent> Section::retrieveContent(unsigned int id, 
+                                                         bool show_dialog)
 {
     bool in_extra = false;
 
@@ -670,12 +686,14 @@ std::shared_ptr<SectionContent> Section::retrieveContent(unsigned int id)
     if (!idx.has_value())
         return std::shared_ptr<SectionContent>();
 
-    return loadOrGetContent(idx.value(), in_extra);
+    return loadOrGetContent(idx.value(), in_extra, show_dialog);
 }
 
 /**
 */
-std::shared_ptr<SectionContent> Section::loadOrGetContent(size_t idx, bool is_extra_content)
+std::shared_ptr<SectionContent> Section::loadOrGetContent(size_t idx, 
+                                                          bool is_extra_content,
+                                                          bool show_dialog)
 {
     auto& c_ptr = is_extra_content ? extra_content_.at(idx) : content_.at(idx);
     auto  id    = is_extra_content ? extra_content_ids_.at(idx) : content_ids_.at(idx);
@@ -683,12 +701,36 @@ std::shared_ptr<SectionContent> Section::loadOrGetContent(size_t idx, bool is_ex
     if (c_ptr)
         return c_ptr;
 
-    auto c = report_->loadContent(this, id);
+    auto c = report_->loadContent(this, id, show_dialog);
     assert(c);
 
     c_ptr = c;
 
     return c_ptr;
+}
+
+/**
+ */
+void Section::setJSONProperty(const std::string& name, const nlohmann::json& value)
+{
+    properties_[ name ] = value;
+}
+
+/**
+ */
+bool Section::hasJSONProperty(const std::string& name) const
+{
+    return properties_.contains(name);
+}
+
+/**
+ */
+nlohmann::json Section::jsonProperty(const std::string& name) const
+{
+    if (!hasJSONProperty(name))
+        return nlohmann::json();
+
+    return properties_.at(name);
 }
 
 /**
@@ -705,6 +747,7 @@ nlohmann::json Section::toJSON() const
     root[ FieldContentNames        ] = content_names_;
     root[ FieldContentTypes        ] = content_types_;
     root[ FieldExtraContentIDs     ] = extra_content_ids_;
+    root[ FieldProperties          ] = properties_;
 
     nlohmann::json j_subsections = nlohmann::json::array();
 
@@ -732,7 +775,8 @@ bool Section::fromJSON(const nlohmann::json& j)
         !j.contains(FieldContentIDs)          ||
         !j.contains(FieldContentNames)        ||
         !j.contains(FieldContentTypes)        ||
-        !j.contains(FieldExtraContentIDs))
+        !j.contains(FieldExtraContentIDs)     ||
+        !j.contains(FieldProperties))
     {
         logerr << "Section: fromJSON: Error: Section does not obtain needed fields";
         return false;
@@ -740,7 +784,6 @@ bool Section::fromJSON(const nlohmann::json& j)
 
     try
     {
-        //root[ FieldID ]
         heading_                        = j[ FieldHeading             ];
         parent_heading_                 = j[ FieldParentHeading       ];
         per_target_section_             = j[ FieldPerTarget           ];
@@ -749,6 +792,7 @@ bool Section::fromJSON(const nlohmann::json& j)
         content_names_                  = j[ FieldContentNames        ].get<std::vector<std::string>>();
         content_types_                  = j[ FieldContentTypes        ].get<std::vector<int>>();
         extra_content_ids_              = j[ FieldExtraContentIDs     ].get<std::vector<unsigned int>>();
+        properties_                     = j[ FieldProperties          ];
 
         content_.resize(content_ids_.size());
         extra_content_.resize(extra_content_ids_.size());

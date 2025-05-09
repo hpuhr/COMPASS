@@ -455,7 +455,7 @@ void Configuration::parseJSONSubConfigFile(const std::string& class_id,
     assert(sub_configurations_.find(key) == sub_configurations_.end());  // should not exist
 
     logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
-           << ": parseJSONConfigurationFile: creating new configuration for class " << class_id
+           << ": parseJSONSubConfigFile: creating new configuration for class " << class_id
            << " instance " << instance_id;
     
     //create new configuration for subconfig

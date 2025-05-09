@@ -30,7 +30,7 @@
 
 #include "sectorlayer.h"
 //#include "logger.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
 #include "viewpoint.h"
 #include "viewpointgenerator.h"
@@ -58,12 +58,12 @@ Base::Base(const std::string& type,
            const std::string& result_id,
            std::shared_ptr<EvaluationRequirement::Base> requirement, 
            const SectorLayer& sector_layer,
-           EvaluationManager& eval_man)
+           EvaluationCalculator& calculator)
 :   type_        (type)
 ,   result_id_   (result_id)
 ,   requirement_ (requirement)
 ,   sector_layer_(sector_layer)
-,   eval_man_    (eval_man)
+,   calculator_  (calculator)
 {
     assert (requirement_);
 
@@ -86,6 +86,14 @@ bool Base::isSingle() const
 bool Base::isJoined() const
 {
     return (baseType() == BaseType::Joined);
+}
+
+/**
+ */
+bool Base::isResult(const Evaluation::RequirementResultID& id) const
+{
+    return requirement_->matchesResultID(id) &&
+           id.sec_layer_name == sector_layer_.name();
 }
 
 /**
@@ -273,11 +281,11 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
             double lat_w = info.bounds.width();
             double lon_w = info.bounds.height();
 
-            if (lat_w < eval_man_.settings().result_detail_zoom_)
-                lat_w = eval_man_.settings().result_detail_zoom_;
+            if (lat_w < calculator_.settings().result_detail_zoom_)
+                lat_w = calculator_.settings().result_detail_zoom_;
 
-            if (lon_w < eval_man_.settings().result_detail_zoom_)
-                lon_w = eval_man_.settings().result_detail_zoom_;
+            if (lon_w < calculator_.settings().result_detail_zoom_)
+                lon_w = calculator_.settings().result_detail_zoom_;
 
             (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
             (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
@@ -288,8 +296,8 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
         //detail => set position of interest
         (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = info.bounds.x();
         (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = info.bounds.y();
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = calculator_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = calculator_.settings().result_detail_zoom_;
         (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Utils::Time::toString(info.timestamp);
     }
 

@@ -18,7 +18,7 @@ TimeWindowCollectionWidget::TimeWindowCollectionWidget(TimeWindowCollection& col
 
     add_button_ = new QPushButton("Add", this);
 
-    QVBoxLayout* main_layout = new QVBoxLayout(this);
+    QVBoxLayout* main_layout = new QVBoxLayout();
     main_layout->addWidget(list_widget_);
 
     QHBoxLayout* button_layout = new QHBoxLayout(this);

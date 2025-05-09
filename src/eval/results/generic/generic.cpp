@@ -139,7 +139,7 @@ SingleGeneric::SingleGeneric(const std::string& result_type, const std::string& 
                                    const SectorLayer& sector_layer,
                                    unsigned int utn,
                                    const EvaluationTargetData* target,
-                                   EvaluationManager& eval_man,
+                                   EvaluationCalculator& calculator,
                                    const EvaluationDetails& details,
                                    unsigned int num_updates,
                                    unsigned int num_no_ref_pos,
@@ -151,7 +151,7 @@ SingleGeneric::SingleGeneric(const std::string& result_type, const std::string& 
                                    unsigned int num_false)
 :   GenericBase(num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside,
                 num_pos_inside, num_unknown, num_correct, num_false)
-,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details)
 {
     updateResult();
 }
@@ -160,7 +160,7 @@ SingleGeneric::SingleGeneric(const std::string& result_type, const std::string& 
 */
 std::shared_ptr<Joined> SingleGeneric::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedGeneric> (type_, result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedGeneric> (type_, result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -300,8 +300,8 @@ JoinedGeneric::JoinedGeneric(const std::string& result_type,
                              const std::string& result_id,
                              std::shared_ptr<EvaluationRequirement::Base> requirement,
                              const SectorLayer& sector_layer, 
-                             EvaluationManager& eval_man)
-:   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+                             EvaluationCalculator& calculator)
+:   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -411,7 +411,7 @@ FeatureDefinitions JoinedGeneric::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleGeneric::DetailKey::IsNotOk, 
                        GridAddDetailMode::AddEvtRefPosition, 
                        true);

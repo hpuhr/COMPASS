@@ -17,6 +17,7 @@
 
 #include "evaluationresultsgenerator.h"
 #include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 #include "evaluationdata.h"
 #include "evaluationstandard.h"
 
@@ -28,6 +29,7 @@
 #include "eval/results/base/joined.h"
 
 #include "dbcontentmanager.h"
+#include "dbinterface.h"
 
 #include "taskmanager.h"
 #include "taskresult.h"
@@ -61,31 +63,43 @@ using namespace Utils;
 
 const std::string EvaluationResultsGenerator::EvalResultName = "Evaluation Result";
 
-EvaluationResultsGenerator::EvaluationResultsGenerator(
-        EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
-    : eval_man_(eval_man), eval_settings_(eval_settings), results_model_(eval_man_)
+/**
+ */
+EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationCalculator& calculator)
+:   calculator_   (calculator)
+,   results_model_(calculator.manager())
 {
 }
 
+/**
+ */
 EvaluationResultsGenerator::~EvaluationResultsGenerator()
 {
     clear();
 }
 
-void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStandard& standard)
+/**
+ */
+void EvaluationResultsGenerator::evaluate(EvaluationData& data, 
+                                          EvaluationStandard& standard,
+                                          const std::vector<unsigned int>& utns,
+                                          const std::vector<Evaluation::RequirementResultID>& requirements,
+                                          bool update_report)
 {
-    loginf << "EvaluationResultsGenerator: evaluate: skip_no_data_details "
-           << eval_settings_.report_skip_no_data_details_
-           << " split_results_by_mops " << eval_settings_.report_split_results_by_mops_
-           << " report_split_results_by_aconly_ms " << eval_settings_.report_split_results_by_aconly_ms_;
+    const auto& eval_settings = calculator_.settings();
+
+    loginf << "EvaluationResultsGenerator: evaluate:"
+           << " skip_no_data_details " << eval_settings.report_skip_no_data_details_
+           << " split_results_by_mops " << eval_settings.report_split_results_by_mops_
+           << " report_split_results_by_aconly_ms " << eval_settings.report_split_results_by_aconly_ms_;
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
-    assert (eval_man_.sectorsLoaded());
-    std::vector<std::shared_ptr<SectorLayer>>& sector_layers = eval_man_.sectorsLayers();
+    assert (calculator_.sectorsLoaded());
+    std::vector<std::shared_ptr<SectorLayer>>& sector_layers = calculator_.sectorLayers();
 
     unsigned int num_req_evals = 0;
     for (auto& sec_it : sector_layers)
@@ -99,7 +113,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             const string& requirement_group_name = req_group_it->name();
 
-            if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
+            if (!calculator_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
             num_req_evals += req_group_it->numUsedRequirements() * data.size(); // num reqs * num target
@@ -122,7 +136,8 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
     clear();
 
-    vector<unsigned int> utns;
+    vector<unsigned int> used_utns;
+    std::set<unsigned int> utn_set(utns.begin(), utns.end());
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -134,11 +149,15 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
         assert (dbcont_man.existsTarget(target_data_it.utn_));
         assert (data.hasTargetData(target_data_it.utn_));
 
+        //utn list is provided => skip utns not in list
+        if (!utn_set.empty() && !utn_set.count(target_data_it.utn_))
+            continue;
+
         //if (target_data_it.use())
-        utns.push_back(target_data_it.utn_);
+        used_utns.push_back(target_data_it.utn_);
     }
 
-    unsigned int num_utns = utns.size();
+    unsigned int num_utns = used_utns.size();
 
     unsigned int eval_cnt = 0;
 
@@ -163,7 +182,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
             const string& requirement_group_name = req_group_it->name();
 
-            if (!eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
+            if (!calculator_.useGroupInSectorLayer(sector_layer_name, requirement_group_name))
                 continue; // skip if not used
 
             loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
@@ -174,7 +193,23 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                 if (!req_cfg_it->used())
                     continue;
 
-                loginf << "EvaluationResultsGenerator: evaluate: sector layer " << sector_layer_name
+                //check list of requirements if provided
+                if (!requirements.empty())
+                {
+                    auto it = std::find_if(requirements.begin(), requirements.end(), 
+                        [ & ] (const Evaluation::RequirementResultID& id) 
+                        {
+                            return id.sec_layer_name == sector_layer_name &&
+                                   id.req_group_name == requirement_group_name &&
+                                   id.req_name == req_cfg_it->name();
+                        });
+                    
+                        if (it == requirements.end())
+                            continue;
+                }
+
+                loginf << "EvaluationResultsGenerator: evaluate:"
+                       << " sector layer " << sector_layer_name
                        << " group " << requirement_group_name
                        << " req '" << req_cfg_it->name() << "'";
 
@@ -191,7 +226,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                 // generate results
 //                EvaluateTask* t = new (tbb::task::allocate_root()) EvaluateTask(
-//                            results, utns, data, req, *sec_it, done_flags, task_done, false);
+//                            results, used_utns, data, req, *sec_it, done_flags, task_done, false);
 //                tbb::task::enqueue(*t);
 
                 const SectorLayer& sector_layer = *sec_it;
@@ -204,14 +239,14 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                     try
                     {
-                        unsigned int num_utns = utns.size();
+                        unsigned int num_utns = used_utns.size();
                         assert (done_flags.size() == num_utns);
 
                         if (single_thread)
                         {
                             for(unsigned int utn_cnt=0; utn_cnt < num_utns; ++utn_cnt)
                             {
-                                results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                                results[utn_cnt] = req->evaluate(data.targetData(used_utns.at(utn_cnt)), req, sector_layer);
                                 done_flags[utn_cnt] = true;
                             }
                         }
@@ -220,7 +255,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                             tbb::parallel_for(uint(0), num_utns, [&](unsigned int utn_cnt)
                                               {
                                                   //assert(num_threads == oneapi::tbb::this_task_arena::max_concurrency());
-                                                  results[utn_cnt] = req->evaluate(data.targetData(utns.at(utn_cnt)), req, sector_layer);
+                                                  results[utn_cnt] = req->evaluate(data.targetData(used_utns.at(utn_cnt)), req, sector_layer);
                                                   done_flags[utn_cnt] = true;
                                               });
                         }
@@ -235,6 +270,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                         logerr << "EvaluationResultsGenerator: evaluate: exception '" << e.what() << "'";
                         throw e;
                     }
+
                 });
 
                 unsigned int tmp_done_cnt;
@@ -303,7 +339,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
 
                     result_sum->addSingleResult(result_it);
 
-                    if (eval_man_.settings().report_split_results_by_mops_)
+                    if (eval_settings.report_split_results_by_mops_)
                     {
                         subresult_str = result_it->target()->mopsVersionStr();
 
@@ -319,7 +355,7 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
                         extra_results_sums.at(subresult_str+" Sum")->addSingleResult(result_it);
                     }
 
-                    if (eval_man_.settings().report_split_results_by_aconly_ms_)
+                    if (eval_settings.report_split_results_by_aconly_ms_)
                     {
                         subresult_str = "Primary";
 
@@ -379,18 +415,18 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     postprocess_dialog.close();
 
     //viewables are up-to-date => do not reset them
-    updateToChanges(false);
+    updateToChanges(false, update_report);
 
-    elapsed_time = boost::posix_time::microsec_clock::local_time();
-
-    time_diff = elapsed_time - start_time;
+    elapsed_time   = boost::posix_time::microsec_clock::local_time();
+    time_diff      = elapsed_time - start_time;
     elapsed_time_s = time_diff.total_milliseconds() / 1000.0;
 
     loginf << "EvaluationResultsGenerator: evaluate: data done " << String::timeStringFromDouble(elapsed_time_s, true);
 
     // 00:06:22.852 with no parallel
 
-    emit eval_man_.resultsChangedSignal();
+    //@TODO?
+    //emit eval_calc_.resultsChangedSignal();
 
     loginf << "EvaluationResultsGenerator: evaluate: generating results";
 
@@ -402,16 +438,17 @@ void EvaluationResultsGenerator::evaluate (EvaluationData& data, EvaluationStand
     QApplication::restoreOverrideCursor();
 }
 
+/**
+ */
 void EvaluationResultsGenerator::clear()
 {
     // clear everything
-    results_model_.beginReset();
-    results_model_.clear();
     results_.clear();
     results_vec_.clear();
-    results_model_.endReset();
 }
 
+/**
+ */
 void EvaluationResultsGenerator::generateResultsReportGUI()
 {
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI";
@@ -429,9 +466,15 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     msg_box.show();
 
     auto& task_manager = COMPASS::instance().taskManager();
-    task_manager.beginTaskResultWriting(EvalResultName);
+    task_manager.beginTaskResultWriting(EvalResultName, task::TaskResultType::Evaluation);
 
+    auto& result = task_manager.currentResult();
     auto& report = task_manager.currentReport();
+
+    //store eval config
+    nlohmann::json config;
+    calculator_.generateJSON(config, Configurable::JSONExportType::General);
+    result->setConfiguration(config);
 
     auto& gen_sec = report->getSection("Overview:General");
 
@@ -447,13 +490,13 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     gen_table.addRow({"Application Version", "Application Version", VERSION});
     gen_table.addRow({"DB", "Database Name", COMPASS::instance().lastDbFilename()});
 
-    assert (eval_man_.hasCurrentStandard());
-    gen_table.addRow({"Standard", "Standard name", eval_man_.currentStandardName()});
+    assert (calculator_.hasCurrentStandard());
+    gen_table.addRow({"Standard", "Standard name", calculator_.currentStandardName()});
 
     // add used sensors
 
-    auto data_source_ref = eval_man_.activeDataSourceInfoRef();
-    auto data_source_tst = eval_man_.activeDataSourceInfoTst();
+    auto data_source_ref = calculator_.activeDataSourceInfoRef();
+    auto data_source_tst = calculator_.activeDataSourceInfoTst();
 
     std::string sensors_ref;
     std::string sensors_tst;
@@ -499,9 +542,13 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     }
 
     // generate non-result details
-    addNonResultsContent (report);
+    addNonResultsContent(report);
 
-    task_manager.endTaskResultWriting(false);
+    loginf << "EvaluationResultsGenerator: generateResultsReportGUI: storing results...";
+
+    task_manager.endTaskResultWriting(true);
+
+    loginf << "EvaluationResultsGenerator: generateResultsReportGUI: results stored";
 
     loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
@@ -515,19 +562,12 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
            << String::timeStringFromDouble(load_time, true);
 }
 
-EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
-{
-    return results_model_;
-}
-
-void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
+/**
+ */
+void EvaluationResultsGenerator::updateToChanges(bool reset_viewable, 
+                                                 bool update_report)
 {
     loginf << "EvaluationResultsGenerator: updateToChanges: reset_viewable " << reset_viewable;
-
-    // clear everything
-    results_model_.beginReset();
-    results_model_.clear();
-    results_model_.endReset();
 
     // first check all single results if should be used
     for (auto& result_it : results_vec_)
@@ -537,7 +577,7 @@ void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
             // s starts with prefix
 
             shared_ptr<EvaluationRequirementResult::Single> result =
-                    static_pointer_cast<EvaluationRequirementResult::Single>(result_it);
+                static_pointer_cast<EvaluationRequirementResult::Single>(result_it);
 
             assert (result);
             result->updateUseFromTarget();
@@ -557,23 +597,30 @@ void EvaluationResultsGenerator::updateToChanges(bool reset_viewable)
         }
     }
 
-    generateResultsReportGUI();
+    if (update_report)
+        generateResultsReportGUI();
 }
 
+/**
+ */
 void EvaluationResultsGenerator::updateToChanges ()
 {
     //always reset the viewable on standard result updates
     updateToChanges(true);
 }
 
-EvaluationResultsGeneratorWidget* EvaluationResultsGenerator::widget()
-{
-    return new EvaluationResultsGeneratorWidget(*this, eval_man_, eval_settings_);
-}
-
+/**
+ */
 void EvaluationResultsGenerator::addNonResultsContent (const std::shared_ptr<ResultReport::Report>& report)
 {
     // standard
-    assert (eval_man_.hasCurrentStandard());
-    eval_man_.currentStandard().addToReport(report);
+    assert (calculator_.hasCurrentStandard());
+    calculator_.currentStandard().addToReport(report);
+}
+
+/**
+ */
+EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
+{
+    return results_model_;
 }

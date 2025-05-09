@@ -33,8 +33,8 @@ namespace EvaluationRequirement
 
 PositionLatency::PositionLatency(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man, float max_abs_value)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man)
+        double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator, float max_abs_value)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator)
     , max_abs_value_(max_abs_value)
 {
 }
@@ -51,7 +51,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
     logdbg << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
            << " max_abs_value " << max_abs_value_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -87,7 +87,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
     unsigned int num_distances {0};
     string comment;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
                             const dbContent::TargetPosition& tst_pos,
@@ -280,7 +280,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
 
     return make_shared<EvaluationRequirementResult::SinglePositionLatency>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok);
+                calculator_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_value_ok, num_value_nok);
 }
 
 }

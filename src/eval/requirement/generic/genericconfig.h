@@ -40,7 +40,7 @@ public:
                          const std::string& variant,
                          Group& group, 
                          EvaluationStandard& standard, 
-                         EvaluationManager& eval_man);
+                         EvaluationCalculator& calculator);
 
     std::shared_ptr<Base> createRequirement() override;
 
@@ -61,7 +61,7 @@ class GenericDoubleConfig : public ProbabilityBaseConfig
                         const std::string& variant,
                         Group& group, 
                         EvaluationStandard& standard, 
-                        EvaluationManager& eval_man);
+                        EvaluationCalculator& calculator);
 
     std::shared_ptr<Base> createRequirement() override;
 

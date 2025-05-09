@@ -31,15 +31,15 @@ namespace EvaluationRequirement
 {
 
 ModeAPresentConfig::ModeAPresentConfig(const std::string& class_id, const std::string& instance_id,
-                                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+                                       Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
 }
 
 std::shared_ptr<Base> ModeAPresentConfig::createRequirement()
 {
     shared_ptr<ModeAPresent> req = make_shared<ModeAPresent>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_);
 
     return req;
 }

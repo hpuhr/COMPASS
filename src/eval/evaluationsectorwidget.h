@@ -15,12 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONSECTORWIDGET_H
-#define EVALUATIONSECTORWIDGET_H
+#pragma once
 
 #include <QScrollArea>
 
-class EvaluationManager;
+class EvaluationCalculator;
 class EvaluationDialog;
 
 class QGridLayout;
@@ -35,16 +34,16 @@ public slots:
     void toggleUseGroupSlot();
 
 public:
-    EvaluationSectorWidget(EvaluationManager& eval_man, EvaluationDialog& dialog, QWidget* parent = nullptr);
+    EvaluationSectorWidget(EvaluationCalculator& calculator, 
+                           EvaluationDialog& dialog, 
+                           QWidget* parent = nullptr);
     virtual ~EvaluationSectorWidget() = default;
 
     void update();
 
 protected:
-    EvaluationManager& eval_man_;
-    EvaluationDialog& dialog_;
+    EvaluationCalculator& calculator_;
+    EvaluationDialog&     dialog_;
 
     QGridLayout* grid_layout_ {nullptr};
 };
-
-#endif // EVALUATIONSECTORWIDGET_H

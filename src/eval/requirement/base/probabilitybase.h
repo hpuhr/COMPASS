@@ -23,7 +23,7 @@
 #include <string>
 #include <memory>
 
-class EvaluationManager;
+class EvaluationCalculator;
 
 namespace EvaluationRequirement 
 {
@@ -39,7 +39,7 @@ public:
                     double prob_threshold, 
                     COMPARISON_TYPE prob_check_type, 
                     bool invert_prob,
-                    EvaluationManager& eval_man,
+                    EvaluationCalculator& calculator,
                     const boost::optional<bool>& must_hold_for_any_target = boost::optional<bool>());
     virtual ~ProbabilityBase();
 

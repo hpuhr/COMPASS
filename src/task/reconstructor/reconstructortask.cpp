@@ -405,7 +405,7 @@ void ReconstructorTask::run()
     COMPASS::instance().dbContentManager().clearAssociationsIdentifier();
     COMPASS::instance().dbInterface().startPerformanceMetrics();
 
-    COMPASS::instance().taskManager().beginTaskResultWriting("Reconstruct References");
+    COMPASS::instance().taskManager().beginTaskResultWriting("Reconstruct References", task::TaskResultType::Generic);
 
     COMPASS::instance().logInfo("Reconstructor") << "running " << current_reconstructor_str_;
 
@@ -446,7 +446,7 @@ void ReconstructorTask::run()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
-    COMPASS::instance().evaluationManager().clearLoadedDataAndResults(); // in case there are previous results
+    COMPASS::instance().evaluationManager().clearData(); // in case there are previous results
 
     delcalcref_future_ = std::async(std::launch::async, [&] {
         {
@@ -598,7 +598,7 @@ void ReconstructorTask::loadDataSlice()
 
     for (auto& dbcont_it : dbcontent_man)
     {
-        loginf << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
+        logdbg << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
                << " has data " << dbcont_it.second->hasData()
                << " has utn " << dbcont_it.second->hasVariable("UTN");
 

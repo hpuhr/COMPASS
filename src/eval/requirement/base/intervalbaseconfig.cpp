@@ -34,8 +34,8 @@ IntervalBaseConfig::IntervalBaseConfig(const std::string& class_id,
                                        const std::string& instance_id,
                                        Group& group, 
                                        EvaluationStandard& standard, 
-                                       EvaluationManager& eval_man)
-:   ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+                                       EvaluationCalculator& calculator)
+:   ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("update_interval", &update_interval_s_, 1.0f);
 

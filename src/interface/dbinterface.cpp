@@ -37,12 +37,15 @@
 #include "source/dbdatasource.h"
 #include "fft/dbfft.h"
 
+#include "task/taskmanager.h"
 #include "task/result/taskresult.h"
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontent.h"
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/sectioncontenttable.h"
 #include "task/result/report/sectioncontenttext.h"
+
+#include "eval/results/evaluationtaskresult.h"
 
 #include "viewpoint.h"
 
@@ -1804,7 +1807,7 @@ void DBInterface::createReportContentsTable()
 
 /**
  */
-Result DBInterface::saveResult(const TaskResult& result)
+Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_needed)
 {
     assert(ready());
 
@@ -1818,7 +1821,8 @@ Result DBInterface::saveResult(const TaskResult& result)
             createReportContentsTable();
         
         //remove any old result with the same id/name
-        auto del_result = deleteResult(result);
+        bool result_deleted = false;
+        auto del_result = deleteResult(result, false, &result_deleted);
         if (!del_result.ok())
             throw std::runtime_error(del_result.error());
 
@@ -1845,26 +1849,67 @@ Result DBInterface::saveResult(const TaskResult& result)
         //write contents
         auto report_contents = result.report()->reportContents();
         {
-            std::shared_ptr<Buffer> buffer(new Buffer(ResultReport::SectionContent::DBPropertyList));
+            size_t chunk_size_bytes = 1e09;
+            size_t current_bytes    = 0;
+            size_t current_row      = 0;
 
-            auto& content_id_vec = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
-            auto& result_id_vec  = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
-            auto& type_vec       = buffer->get<int>(ResultReport::SectionContent::DBColumnType.name());
-            auto& content_vec    = buffer->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+            std::shared_ptr<Buffer> buffer;
 
-            size_t row = 0;
+            NullableVector<unsigned int>*   content_id_vec = nullptr;
+            NullableVector<unsigned int>*   result_id_vec  = nullptr;
+            NullableVector<int>*            type_vec       = nullptr;
+            NullableVector<nlohmann::json>* content_vec    = nullptr;
+
             for (const auto& c : report_contents)
             {
-                content_id_vec.set(row, c->id());
-                result_id_vec.set(row, result_id);
-                type_vec.set(row, (int)c->type());
-                content_vec.set(row, c->toJSON());
+                if (!buffer || current_bytes > chunk_size_bytes)
+                {
+                    //insert old buffer if available
+                    if (buffer)
+                    {
+                        loginf << "WRITING " << buffer->size() << " ROW(S)";
+                        insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+                    }
 
-                ++row;
+                    //create new buffer
+                    buffer.reset(new Buffer(ResultReport::SectionContent::DBPropertyList));
+
+                    content_id_vec = &buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+                    result_id_vec  = &buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
+                    type_vec       = &buffer->get<int>(ResultReport::SectionContent::DBColumnType.name());
+                    content_vec    = &buffer->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+                    current_bytes = 0;
+                    current_row   = 0;
+                }
+
+                assert(buffer);
+
+                //!this might trigger recomputations from temporarily generated data,
+                //which is immediately thrown away afterwards!
+                auto   c_json  = c->toJSON();
+                size_t c_bytes = c_json.dump().size();
+
+                content_id_vec->set(current_row, c->id());
+                result_id_vec->set(current_row, result_id);
+                type_vec->set(current_row, (int)c->type());
+                content_vec->set(current_row, c_json);
+
+                current_bytes += c_bytes;
+                current_row   += 1;
             }
 
-            insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+            //insert remaining buffer content
+            if (current_row > 0)
+            {
+                loginf << "WRITING " << buffer->size() << " ROW(S)";
+                insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+            }
         }
+
+        //cleanup db?
+        if (result_deleted && cleanup_db_if_needed)
+            cleanupDB(false);
     }
     catch(const std::exception& ex)
     {
@@ -1882,8 +1927,13 @@ Result DBInterface::saveResult(const TaskResult& result)
 
 /**
  */
-Result DBInterface::deleteResult(const TaskResult& result)
+Result DBInterface::deleteResult(const TaskResult& result, 
+                                 bool cleanup_db_if_needed,
+                                 bool* deleted)
 {
+    if (deleted)
+        *deleted = false;
+
     auto id = result.id();
 
     if (!existsTaskResultsTable() || 
@@ -1892,6 +1942,8 @@ Result DBInterface::deleteResult(const TaskResult& result)
         logerr << "DBInterface: deleteResult: Result tables do not exist";
         return Result::failed("Result tables do not exist");
     }
+
+    bool results_deleted = false;
 
     try
     {
@@ -1931,6 +1983,8 @@ Result DBInterface::deleteResult(const TaskResult& result)
                 throw std::runtime_error(result_del_content->error());
             if (result_del_result->hasError())
                 throw std::runtime_error(result_del_result->error());
+
+            results_deleted = true;
         }
     }
     catch(const std::exception& ex)
@@ -1943,6 +1997,13 @@ Result DBInterface::deleteResult(const TaskResult& result)
         logerr << "DBInterface: deleteResult: Could not delete result: Unknown error";
         return Result::failed("Unknown error");
     }
+
+    if (deleted)
+        *deleted = results_deleted;
+
+    //cleanup db?
+    if (results_deleted && cleanup_db_if_needed)
+        cleanupDB(false);
 
     return Result::succeeded();
 }
@@ -1985,9 +2046,17 @@ ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
             const auto& result_type = type_vec.get(i);
             const auto& result_id   = id_vec.get(i);
 
-            results[ i ].reset(new TaskResult(result_id, task_man));
+            const auto& json_content = content_vec.get(i);
+            if (!json_content.contains(TaskResult::FieldType))
+                throw std::runtime_error("Missing type field in result JSON");
 
-            bool ok = results[ i ]->fromJSON(content_vec.get(i));
+            int rtype = json_content.at(TaskResult::FieldType);
+
+            results[ i ] = task_man.createResult(result_id, (task::TaskResultType)rtype);
+            if (!results[ i ])
+                throw std::runtime_error("Could not create result from type");
+
+            bool ok = results[ i ]->fromJSON(json_content);
             if (!ok)
                 throw std::runtime_error("Could not read result from JSON");
 
@@ -2632,7 +2701,8 @@ db::PerformanceMetrics DBInterface::stopPerformanceMetrics() const
  */
 bool DBInterface::hasActivePerformanceMetrics() const
 {
-    assert(ready());
+    if (!ready())
+        return false;
 
     bool ok;
     {

@@ -31,8 +31,8 @@ namespace EvaluationRequirement
 {
     
 DubiousTargetConfig::DubiousTargetConfig(const std::string& class_id, const std::string& instance_id,
-                                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+                                       Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     prob_check_type_ = COMPARISON_TYPE::LESS_THAN_OR_EQUAL;
 
@@ -237,7 +237,7 @@ std::shared_ptr<Base> DubiousTargetConfig::createRequirement()
                 use_max_acceleration_, max_acceleration_,
                 use_max_turnrate_, max_turnrate_,
                 use_max_rocd_, max_rocd_, dubious_prob_,
-                prob_, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man_);
+                prob_, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, calculator_);
 
     return req;
 }

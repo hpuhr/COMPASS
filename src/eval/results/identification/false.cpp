@@ -31,7 +31,7 @@ SingleIdentificationFalse::SingleIdentificationFalse(const std::string& result_i
                                                      const SectorLayer& sector_layer,
                                                      unsigned int utn,
                                                      const EvaluationTargetData* target,
-                                                     EvaluationManager& eval_man,
+                                                     EvaluationCalculator& calculator,
                                                      const EvaluationDetails& details,
                                                      int num_updates,
                                                      int num_no_ref_pos,
@@ -41,7 +41,7 @@ SingleIdentificationFalse::SingleIdentificationFalse(const std::string& result_i
                                                      int num_unknown,
                                                      int num_correct,
                                                      int num_false)
-:   SingleFalseBase("SingleIdentificationFalse", result_id, requirement, sector_layer, utn, target, eval_man, details,
+:   SingleFalseBase("SingleIdentificationFalse", result_id, requirement, sector_layer, utn, target, calculator, details,
                     num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside, num_unknown, num_correct, num_false, "identification")
 {
     updateResult();
@@ -51,7 +51,7 @@ SingleIdentificationFalse::SingleIdentificationFalse(const std::string& result_i
 */
 std::shared_ptr<Joined> SingleIdentificationFalse::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedIdentificationFalse> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedIdentificationFalse> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /********************************************************************************
@@ -61,8 +61,8 @@ std::shared_ptr<Joined> SingleIdentificationFalse::createEmptyJoined(const std::
 JoinedIdentificationFalse::JoinedIdentificationFalse(const std::string& result_id, 
                                                      std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                      const SectorLayer& sector_layer, 
-                                                     EvaluationManager& eval_man)
-:   JoinedFalseBase("JoinedIdentificationFalse", result_id, requirement, sector_layer, eval_man, "identification")
+                                                     EvaluationCalculator& calculator)
+:   JoinedFalseBase("JoinedIdentificationFalse", result_id, requirement, sector_layer, calculator, "identification")
 {
 }
 

@@ -57,13 +57,13 @@ SingleIntervalBase::SingleIntervalBase(const std::string& result_type,
                                        const SectorLayer& sector_layer,
                                        unsigned int utn,
                                        const EvaluationTargetData* target,
-                                       EvaluationManager& eval_man,
+                                       EvaluationCalculator& calculator,
                                        const EvaluationDetails& details,
                                        int sum_uis,
                                        int missed_uis,
                                        TimePeriodCollection ref_periods)
 :   IntervalBase         (sum_uis, missed_uis)
-,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details)
 ,   ref_periods_         (ref_periods)
 {
 }
@@ -193,8 +193,8 @@ JoinedIntervalBase::JoinedIntervalBase(const std::string& result_type,
                                        const std::string& result_id, 
                                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                                        const SectorLayer& sector_layer, 
-                                       EvaluationManager& eval_man)
-:   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+                                       EvaluationCalculator& calculator)
+:   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -260,7 +260,7 @@ FeatureDefinitions JoinedIntervalBase::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleIntervalBase::DetailKey::MissOccurred, 
                        GridAddDetailMode::AddPositionsAsPolyLine, 
                        true);
