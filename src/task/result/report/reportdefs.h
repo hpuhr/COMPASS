@@ -37,6 +37,6 @@ namespace ResultReport
         CellStyleBGColorOrange     = 1 << 21,
         CellStyleBGColorGreen      = 1 << 22,
         CellStyleBGColorGray       = 1 << 23,
-        CellStyleBGColorYellow     = 1 << 24,
+        CellStyleBGColorYellow     = 1 << 24
     };
 }

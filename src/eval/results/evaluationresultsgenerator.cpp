@@ -514,7 +514,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     gen_table.addRow({ "Test Sensors", "Used test sensors", sensors_tst });
 
     // generate target information
-    //addTargetInformation(report);
+    addTargetInformation(report);
 
     // generate results
 

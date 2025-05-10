@@ -771,4 +771,10 @@ void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report)
 
         table.addRow(j_row, {}, "", "", {}, model->rowStyle(r));
     }
+
+    // for (int c = 0; c < cols; ++c)
+    // {
+    //     auto style = table.cellStyle(0, c);
+    //     loginf << "col " << c << ": " << ResultReport::SectionContentTable::cellStyle2String(style);
+    // }
 }

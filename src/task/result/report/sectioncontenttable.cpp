@@ -480,7 +480,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
 
             auto style = cellStyle(index.row(), index.column());
 
-            if (style != 0)
+            if (cellShowsText(style))
             {
                 auto c = cellBGColor(style);
                 if (c.has_value())
@@ -501,7 +501,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
             {
                 auto c = cellTextColor(style);
                 if (c.has_value())
-                    return c.value();
+                    return QBrush(c.value());
             }
 
             //QVariant data = qVariantFromJSON(rows_.at(index.row()).at(index.column()));

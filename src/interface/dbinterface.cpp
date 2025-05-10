@@ -1867,7 +1867,7 @@ Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_need
                     //insert old buffer if available
                     if (buffer)
                     {
-                        loginf << "WRITING " << buffer->size() << " ROW(S)";
+                        //loginf << "DBInterface: saveResult: writing" << buffer->size() << " row(s)";
                         insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
                     }
 
@@ -1902,7 +1902,7 @@ Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_need
             //insert remaining buffer content
             if (current_row > 0)
             {
-                loginf << "WRITING " << buffer->size() << " ROW(S)";
+                //loginf << "DBInterface: saveResult: writing" << buffer->size() << " row(s)";
                 insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
             }
         }

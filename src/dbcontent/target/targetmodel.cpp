@@ -226,6 +226,8 @@ nlohmann::json TargetModel::rawCellData(int row, int column) const
             else
                 return "";
     }
+
+    return nlohmann::json();
 }
 
 /**
