@@ -134,6 +134,8 @@ public:
     bool removeNotDetectedDBContent(const std::string& dbcontent_name) const;
     void removeNotDetectedDBContents(const std::string& dbcontent_name, bool value);
 
+    const QStringList& tableHeaders() const { return table_columns_; }
+
     const std::vector<int>& mainColumns() const { return main_columns_; }
     const std::vector<int>& durationColumns() const { return duration_columns_; }
     const std::vector<int>& modeSColumns() const { return mode_s_columns_; }
@@ -149,14 +151,42 @@ public:
     void showModeSColumns(bool show);
     void showModeACColumns(bool show);
 
+    nlohmann::json rawCellData(int row, int column) const;
+    unsigned int rowStyle(int row) const;
+    unsigned int columnStyle(int column) const;
+
+    enum Columns
+    {
+        ColUse = 0, 
+        ColUTN, 
+        ColComment, 
+        ColCategory, 
+        ColNumUpdates, 
+        ColBegin, 
+        ColEnd, 
+        ColDuration, 
+        ColACIDs, 
+        ColACADs, 
+        ColMode3A, 
+        ColModeCMin, 
+        ColModeCMax
+    };
+
+    static const QStringList      TableHeaders;
+
+    static const std::vector<int> MainColumns;
+    static const std::vector<int> DurationColumns;
+    static const std::vector<int> ModeSColumns;
+    static const std::vector<int> ModeACColumns;
+
 protected:
     DBContentManager& dbcont_manager_;
 
-    QStringList table_columns_ {"Use", "UTN", "Comment", "Category", "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max"};
-    std::vector<int> main_columns_     { 0, 1, 2, 3 };
-    std::vector<int> duration_columns_ { 4, 5, 6, 7 };
-    std::vector<int> mode_s_columns_   { 8, 9 };
-    std::vector<int> mode_ac_columns_  { 10, 11, 12 };
+    QStringList               table_columns_   {"Use", "UTN", "Comment", "Category", "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max"};
+    std::vector<int>          main_columns_    { ColUse, ColUTN, ColComment, ColCategory };
+    std::vector<int>          duration_columns_{ ColNumUpdates, ColBegin, ColEnd, ColDuration };
+    std::vector<int>          mode_s_columns_  { ColACIDs, ColACADs };
+    std::vector<int>          mode_ac_columns_ { ColMode3A, ColModeCMin, ColModeCMax };
 
     bool show_main_columns_     = true;
     bool show_duration_columns_ = false;

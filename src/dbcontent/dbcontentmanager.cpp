@@ -1678,6 +1678,14 @@ void DBContentManager::resetToStartupConfiguration()
 
 /**
  */
+const dbContent::TargetModel* DBContentManager::targetModel() const
+{
+    assert(target_model_);
+    return target_model_.get();
+}
+
+/**
+ */
 dbContent::TargetListWidget* DBContentManager::targetListWidget()
 {
     if (!target_list_widget_)

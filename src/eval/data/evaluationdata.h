@@ -32,7 +32,6 @@
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index_container.hpp>
 
-
 class EvaluationCalculator;
 class DBContent;
 class DBContentManager;
@@ -41,6 +40,11 @@ class Buffer;
 struct target_tag
 {
 };
+
+namespace ResultReport
+{
+    class Report;
+}
 
 typedef boost::multi_index_container<
     EvaluationTargetData,
@@ -110,6 +114,8 @@ public:
     void updateInterestSwitches();
 
     const std::map<std::string, bool>& interestSwitches() const { return interest_factor_enabled_; }
+
+    void addToReport(std::shared_ptr<ResultReport::Report> report);
 
     // ref
     unsigned int ref_line_id_;

@@ -404,25 +404,30 @@ void EvaluationCalculator::loadingDone()
     auto data = manager_.fetchData();
     data_.setBuffers(data);
 
-    reference_data_loaded_ = data.count(settings_.dbcontent_name_ref_);
-    test_data_loaded_      = data.count(settings_.dbcontent_name_tst_);
-    data_loaded_           = reference_data_loaded_ || test_data_loaded_;
+    bool has_ref_data = data.count(settings_.dbcontent_name_ref_);
+    bool has_tst_data = data.count(settings_.dbcontent_name_tst_);
 
     //@TODO: message boxes? here?
-    if (eval_utns_.empty() && !reference_data_loaded_)
+    if (eval_utns_.empty() && !has_ref_data)
     {
         QMessageBox::warning(nullptr, "Loading Data Failed", "No reference data was loaded.");
         return;
     }
 
-    if (eval_utns_.empty() && !test_data_loaded_)
+    data_.addReferenceData(settings_.dbcontent_name_ref_, settings_.line_id_ref_);
+    reference_data_loaded_ = has_ref_data;
+
+    //@TODO: message boxes? here?
+    if (eval_utns_.empty() && !has_tst_data)
     {
         QMessageBox::warning(nullptr, "Loading Data Failed", "No test data was loaded.");
         return;
     }
 
-    data_.addReferenceData(settings_.dbcontent_name_ref_, settings_.line_id_ref_);
     data_.addTestData(settings_.dbcontent_name_tst_, settings_.line_id_tst_);
+    test_data_loaded_ = has_tst_data;
+
+    data_loaded_ = reference_data_loaded_ || test_data_loaded_;
 
     //ready to evaluate?
     if (data_loaded_)

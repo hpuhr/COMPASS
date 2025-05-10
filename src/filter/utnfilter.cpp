@@ -227,16 +227,10 @@ bool UTNFilter::updateUTNSFromStr(const std::string& values_str)
         values_tmp.push_back(utn_tmp);
     }
 
-    for (auto v : values_tmp)
-        loginf << "  UTN TMP " << v;
-
     if (!ok)
         return false;
 
     values_ = values_tmp;
-
-    for (auto v : values_)
-        loginf << "  UTN " << v;
 
     return true;
 }

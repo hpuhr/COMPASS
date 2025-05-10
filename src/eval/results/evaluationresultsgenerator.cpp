@@ -513,6 +513,9 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     gen_table.addRow({ "Reference Sensors", "Used reference sensors", sensors_ref });
     gen_table.addRow({ "Test Sensors", "Used test sensors", sensors_tst });
 
+    // generate target information
+    addTargetInformation(report);
+
     // generate results
 
     // first add all joined
@@ -607,6 +610,14 @@ void EvaluationResultsGenerator::updateToChanges ()
 {
     //always reset the viewable on standard result updates
     updateToChanges(true);
+}
+
+/**
+ */
+void EvaluationResultsGenerator::addTargetInformation(const std::shared_ptr<ResultReport::Report>& report)
+{
+    //targets
+    calculator_.data().addToReport(report);
 }
 
 /**

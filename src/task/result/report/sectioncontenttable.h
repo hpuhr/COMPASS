@@ -18,6 +18,7 @@
 #pragma once
 
 #include "task/result/report/sectioncontent.h"
+#include "task/result/report/reportdefs.h"
 
 #include "json.hpp"
 
@@ -27,6 +28,7 @@
 #include <QBrush>
 #include <QTimer>
 #include <QWidget>
+#include <QVariant>
 
 #include <vector>
 #include <functional>
@@ -106,8 +108,9 @@ public:
         bool has_context_menu = true;
     };
 
-    typedef std::function<RowInfo(unsigned int)>      RowInfoCallback;
-    typedef std::function<bool(QMenu*, unsigned int)> RowContextMenuCallback;
+    typedef std::function<RowInfo(unsigned int)>       RowInfoCallback;
+    typedef std::function<bool(QMenu*, unsigned int)>  RowContextMenuCallback;
+    typedef std::map<std::pair<int,int>, unsigned int> CellStyles;
 
     SectionContentTable(unsigned int id,
                         const std::string& name, 
@@ -124,7 +127,13 @@ public:
                  const SectionContentViewable& viewable = SectionContentViewable(),
                  const std::string& section_link = "",
                  const std::string& section_figure = "", // in section_link section
-                 const QVariant& viewable_index = QVariant());
+                 const QVariant& viewable_index = QVariant(),
+                 unsigned int row_style = 0);
+
+    void setColumnStyle(int column, unsigned int style);
+    void setCellStyle(int row, int column, unsigned int style);
+
+    unsigned int cellStyle(int row, int column) const;
     
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
@@ -146,6 +155,7 @@ public:
     void setRowContextMenuCallback(const RowContextMenuCallback& func);
 
     QVariant data(const QModelIndex& index, int role) const;
+    Qt::ItemFlags flags(const QModelIndex &index) const;
     
     void clicked(unsigned int row);
     void doubleClicked(unsigned int row);
@@ -156,17 +166,45 @@ public:
     nlohmann::json toJSON(bool rowwise = true,
                           const std::vector<int>& cols = std::vector<int>()) const;
 
+    static boost::optional<QColor> cellTextColor(unsigned int style);
+    static boost::optional<QColor> cellBGColor(unsigned int style);
+    static boost::optional<QIcon> cellIcon(const nlohmann::json& data);
+    static boost::optional<bool> cellChecked(const nlohmann::json& data);
+    static void cellFont(QFont& font, unsigned int style);
+    static bool cellShowsText(unsigned int style);
+    static bool cellShowsCheckBox(unsigned int style);
+    static bool cellShowsIcon(unsigned int style);
+    static bool cellShowsSpecialFont(unsigned int style);
+    static bool cellFontIsBold(unsigned int style);
+    static bool cellFontIsItalic(unsigned int style);
+    static bool cellFontIsStrikeOut(unsigned int style);
+    static std::string cellStyle2String(unsigned int style);
+
     static const std::string FieldHeadings;
     static const std::string FieldSortable;
     static const std::string FieldSortColumn;
     static const std::string FieldSortOrder;
     static const std::string FieldRows;
     static const std::string FieldAnnotations;
+    static const std::string FieldColumnStyles;
+    static const std::string FieldCellStyles;
 
     static const std::string FieldAnnoFigureID;
     static const std::string FieldAnnoSectionLink;
     static const std::string FieldAnnoSectionFigure;
     static const std::string FieldAnnoIndex;
+    static const std::string FieldAnnoStyle;
+
+    static const QColor ColorTextRed;
+    static const QColor ColorTextOrange;
+    static const QColor ColorTextGreen;
+    static const QColor ColorTextGray;
+
+    static const QColor ColorBGRed;
+    static const QColor ColorBGOrange;
+    static const QColor ColorBGGreen;
+    static const QColor ColorBGGray;
+    static const QColor ColorBGYellow;
 
 protected:
     void toJSON_impl(nlohmann::json& root_node) const override final;
@@ -185,13 +223,13 @@ protected:
 
     RowInfo rowInfo(unsigned int row) const;
 
-    unsigned int num_columns_ {0};
-    std::vector<std::string> headings_;
+    unsigned int              num_columns_ {0};
+    std::vector<std::string>  headings_;
+    std::vector<unsigned int> column_styles_;
 
     bool          sortable_     {true};
     unsigned int  sort_column_  {0};
     Qt::SortOrder sort_order_   {Qt::AscendingOrder};
-    unsigned int  check_column_ {0};
 
     bool show_unused_ {false};
 
@@ -200,14 +238,17 @@ protected:
      */
     struct RowAnnotation
     {
-        boost::optional<unsigned int> figure_id;      //content id of a figure in the containing section
-        std::string                   section_link;   //link to another section
-        std::string                   section_figure; //figure in the linked section
-        QVariant                      index;          //detail index
+        boost::optional<unsigned int> figure_id;      // content id of a figure in the containing section
+        std::string                   section_link;   // link to another section
+        std::string                   section_figure; // figure in the linked section
+        QVariant                      index;          // detail index
+        unsigned int                  style = 0;      // row style flags
     };
 
     mutable std::vector<nlohmann::json> rows_;
     mutable std::vector<RowAnnotation>  annotations_;
+
+    CellStyles cell_styles_;
 
     mutable SectionContentTableWidget* table_widget_ {nullptr};
 

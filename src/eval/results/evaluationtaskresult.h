@@ -42,5 +42,7 @@ protected:
     bool fromJSON_impl(const nlohmann::json& j) override final;
 
 private:
+    EvaluationCalculator* calculator() const;
+
     mutable std::unique_ptr<EvaluationCalculator> calculator_;
 };
