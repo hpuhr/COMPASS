@@ -25,6 +25,10 @@
 #include "dbcontent/dbcontent.h"
 #include "buffer.h"
 
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 #include "util/async.h"
 #include "util/stringmat.h"
 
@@ -738,4 +742,33 @@ void EvaluationData::updateInterestSwitches()
 
     if (widget_) 
         widget_->updateInterestMenu();
+}
+
+void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report)
+{
+    auto& section = report->getSection("Overview:Targets");
+
+    const auto& table_headers = dbcont_man_.targetModel()->tableHeaders();
+    std::vector<std::string> headers;
+    for (const auto& h : table_headers)
+        headers.push_back(h.toStdString());
+
+    auto& table = section.addTable("evaluated_targets", table_headers.size(), headers, false);
+
+    int cols = dbcont_man_.targetModel()->columnCount();
+    int rows = dbcont_man_.targetModel()->rowCount();
+
+    auto model = dbcont_man_.targetModel();
+
+    for (int c = 0; c < cols; ++c)
+        table.setColumnStyle(c, model->columnStyle(c));
+
+    for (int r = 0; r < rows; ++r)
+    {
+        auto j_row = nlohmann::json::array();
+        for (int c = 0; c < cols; ++c)
+            j_row.push_back(model->rawCellData(r, c));
+
+        table.addRow(j_row, {}, "", "", {}, model->rowStyle(r));
+    }
 }

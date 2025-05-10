@@ -899,12 +899,6 @@ void EvaluationManager::loadData(const EvaluationCalculator& calculator,
     //!do not distribute this reload to views!
     COMPASS::instance().viewManager().disableDataDistribution(true);
 
-    if (!blocking)
-    {
-        connect(&dbcontent_man, &DBContentManager::loadingDoneSignal, this, &EvaluationManager::loadingDone);
-        active_load_connection_ = true;
-    }
-
     //add variables needed by evaluation
     needs_additional_variables_ = true;
 
@@ -969,8 +963,6 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
              utn_strings.push_back(std::to_string(utn));
 
         std::string utns_str = Utils::String::compress(utn_strings, ',');
-
-        loginf << "UTN FILTER = " << utns_str;
 
         filter["UTNs"]["utns" ] = utns_str;
 
@@ -1071,7 +1063,7 @@ void EvaluationManager::loadingDone()
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    if (!active_load_connection_)
+    if (active_load_connection_)
     {
         disconnect(&dbcontent_man, &DBContentManager::loadingDoneSignal, this, &EvaluationManager::loadingDone);
         active_load_connection_ = false;

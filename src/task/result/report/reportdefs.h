@@ -21,17 +21,22 @@ namespace ResultReport
 {
     enum CellStyle
     {
-        CellStyleTextBold        = 1 << 0,
-        CellStyleTextItalic      = 1 << 1,
+        CellStyleCheckable         = 1 << 0,  // cell obtains an icon coded into the cells bool value
+        CellStyleIcon              = 1 << 1,  // cell is checkable, its check state coded into the cells string value
 
-        CellStyleTextColorRed    = 1 << 10,
-        CellStyleTextColorOrange = 1 << 11,
-        CellStyleTextColorGreen  = 1 << 12,
-        CellStyleTextColorGray   = 1 << 13,
+        CellStyleTextBold          = 1 << 5,  // cell obtains bold text
+        CellStyleTextItalic        = 1 << 6,  // cell obtains italic text
+        CellStyleTextStrikeOut     = 1 << 7,  // cell text is strike-out
 
-        CellStyleBGColorRed      = 1 << 20,
-        CellStyleBGColorOrange   = 1 << 21,
-        CellStyleBGColorGreen    = 1 << 22,
-        CellStyleBGColorGray     = 1 << 23
+        CellStyleTextColorRed      = 1 << 10,
+        CellStyleTextColorOrange   = 1 << 11,
+        CellStyleTextColorGreen    = 1 << 12,
+        CellStyleTextColorGray     = 1 << 13,
+
+        CellStyleBGColorRed        = 1 << 20,
+        CellStyleBGColorOrange     = 1 << 21,
+        CellStyleBGColorGreen      = 1 << 22,
+        CellStyleBGColorGray       = 1 << 23,
+        CellStyleBGColorYellow     = 1 << 24,
     };
 }

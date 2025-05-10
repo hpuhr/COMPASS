@@ -73,7 +73,9 @@ public:
     static const std::string EvalResultName;
 
 protected:
-    void addNonResultsContent (const std::shared_ptr<ResultReport::Report>& report);
+    void addTargetInformation(const std::shared_ptr<ResultReport::Report>& report);
+    void addNonResultsContent(const std::shared_ptr<ResultReport::Report>& report);
+
     void updateToChanges(bool reset_viewable,
                          bool update_report = true);
 
