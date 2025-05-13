@@ -889,7 +889,7 @@ void DBContent::databaseOpenedSlot()
  */
 void DBContent::databaseClosedSlot()
 {
-    loginf << "DBContent: databaseClosedSlot";
+    logdbg << "DBContent: databaseClosedSlot";
 
     is_loadable_ = false;
     count_ = 0;

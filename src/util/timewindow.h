@@ -2,6 +2,8 @@
 
 #include "json.hpp"
 
+#include <QObject>
+
 #include <vector>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -27,14 +29,20 @@ protected:
     std::pair<boost::posix_time::ptime,boost::posix_time::ptime> time_window_;
 };
 
-class TimeWindowCollection
+// changes have to be stored manually
+class TimeWindowCollection : public QObject
 {
+    Q_OBJECT
+
+signals:
+    void changedSignal(); // emitted if a change occured, but not from setFrom
+
 public:
     TimeWindowCollection();
 
     bool valid() const;
 
-    void setFrom(nlohmann::json& json); // saves as json_ptr_, auto stores changes!
+    void setFrom(nlohmann::json& json);
     nlohmann::json asJSON() const;
 
     const Utils::TimeWindow& get(unsigned int index);
@@ -47,8 +55,6 @@ public:
     unsigned int size() const { return time_windows_.size(); }
 
 protected:
-    nlohmann::json* json_ptr_{nullptr};
-
     std::vector<Utils::TimeWindow> time_windows_;
 };
 

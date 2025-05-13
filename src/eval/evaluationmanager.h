@@ -66,6 +66,8 @@ public slots:
     void dataSourcesChangedSlot();
     void associationStatusChangedSlot();
 
+    void excludedTimeWindowsChangedSlot();
+
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~EvaluationManager();

@@ -32,7 +32,6 @@
 #include "sectorlayer.h"
 #include "sector.h"
 #include "airspace.h"
-//#include "dbcontent/variable/metavariable.h"
 #include "dbcontent/variable/variable.h"
 #include "buffer.h"
 #include "filtermanager.h"
@@ -41,11 +40,7 @@
 #include "viewmanager.h"
 #include "stringconv.h"
 #include "util/timeconv.h"
-#include "global.h"
 #include "viewpoint.h"
-#include "projectionmanager.h"
-#include "projection.h"
-//#include "files.h"
 
 #include "json.hpp"
 
@@ -234,6 +229,24 @@ void EvaluationManager::databaseOpenedSlot()
     assert (!sectors_loaded_);
     loadSectors();
 
+    auto& dbinterface = COMPASS::instance().dbInterface();
+
+    if (dbinterface.hasProperty("eval_filtered_time_windows"))
+    {
+        std::string filtered_time_windows_str = dbinterface.getProperty("eval_filtered_time_windows");
+
+        try
+        {
+            nlohmann::json filtered_time_windows_json = nlohmann::json::parse(filtered_time_windows_str);
+            load_filtered_time_windows_.setFrom(filtered_time_windows_json);
+        }
+        catch (std::exception& e)
+        {
+            logerr << "EvaluationManager: databaseOpenedSlot: unsupported eval_filtered_time_windows '"
+                   << filtered_time_windows_str << "': " << e.what();
+        }
+    }
+
     // init with false values if not in cfg
     calculator_->checkReferenceDataSources();
     calculator_->checkTestDataSources();
@@ -254,6 +267,8 @@ void EvaluationManager::databaseOpenedSlot()
 void EvaluationManager::databaseClosedSlot()
 {
     loginf << "EvaluationManager: databaseClosedSlot";
+
+    load_filtered_time_windows_.clear();
 
     assert(calculator_);
 
@@ -278,6 +293,14 @@ void EvaluationManager::dataSourcesChangedSlot()
 void EvaluationManager::associationStatusChangedSlot()
 {
     // react on association status change
+}
+
+void EvaluationManager::excludedTimeWindowsChangedSlot()
+{
+    loginf << "EvaluationManager: excludedTimeWindowsChangedSlot";
+
+    COMPASS::instance().dbInterface().setProperty("eval_filtered_time_windows",
+                                                  load_filtered_time_windows_.asJSON().dump());
 }
 
 /**

@@ -28,7 +28,6 @@
 #undef PACKAGE_VERSION
 #endif
 
-//#include <GeographicLib/Geoid.hpp>
 #include <GeographicLib/MagneticModel.hpp>
 
 #include <memory>

@@ -114,5 +114,7 @@ void TimeWindowCollectionWidget::editTimeWindow(QListWidgetItem* item)
     if (dialog.exec() == QDialog::Accepted) {
         tw = TimeWindow(dialog.begin(), dialog.end());
         refreshList();
+
+        emit collection_.changedSignal();
     }
 }

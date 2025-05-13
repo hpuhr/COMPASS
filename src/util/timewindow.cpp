@@ -96,7 +96,6 @@ void TimeWindowCollection::setFrom(nlohmann::json& json)
     }
 
     assert (valid());
-    json_ptr_ = &json;
 }
 
 nlohmann::json TimeWindowCollection::asJSON() const
@@ -121,8 +120,7 @@ void TimeWindowCollection::add(const TimeWindow& time_window)
     assert (time_window.valid());
     time_windows_.push_back(time_window);
 
-    if (json_ptr_)
-        *json_ptr_ = asJSON();
+    emit changedSignal();
 }
 
 void TimeWindowCollection::erase(unsigned int index)
@@ -130,16 +128,12 @@ void TimeWindowCollection::erase(unsigned int index)
     assert (index < time_windows_.size());
     time_windows_.erase(time_windows_.begin() + index);
 
-    if (json_ptr_)
-        *json_ptr_ = asJSON();
+    emit changedSignal();
 }
 
 void TimeWindowCollection::clear()
 {
     time_windows_.clear();
-
-    if (json_ptr_)
-        *json_ptr_ = asJSON();
 }
 
 }
