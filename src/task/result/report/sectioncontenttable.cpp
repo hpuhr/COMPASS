@@ -29,6 +29,7 @@
 #include "stringconv.h"
 #include "stringmat.h"
 #include "asynctask.h"
+#include "files.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -61,11 +62,25 @@ const std::string SectionContentTable::FieldSortColumn   = "sort_column";
 const std::string SectionContentTable::FieldSortOrder    = "order";
 const std::string SectionContentTable::FieldRows         = "rows";
 const std::string SectionContentTable::FieldAnnotations  = "annotations";
+const std::string SectionContentTable::FieldColumnStyles = "column_styles";
+const std::string SectionContentTable::FieldCellStyles   = "cell_styles";
 
 const std::string SectionContentTable::FieldAnnoFigureID      = "figure_id";
 const std::string SectionContentTable::FieldAnnoSectionLink   = "section_link";
 const std::string SectionContentTable::FieldAnnoSectionFigure = "section_figure";
 const std::string SectionContentTable::FieldAnnoIndex         = "index";
+const std::string SectionContentTable::FieldAnnoStyle         = "style";
+
+const QColor SectionContentTable::ColorTextRed    = QColor(220,20,60);
+const QColor SectionContentTable::ColorTextOrange = QColor(255,140,0);
+const QColor SectionContentTable::ColorTextGreen  = Qt::darkGreen;
+const QColor SectionContentTable::ColorTextGray   = Qt::darkGray;
+
+const QColor SectionContentTable::ColorBGRed    = QColor(240,128,128);
+const QColor SectionContentTable::ColorBGOrange = QColor(255,165,0);
+const QColor SectionContentTable::ColorBGGreen  = QColor(144,238,144);
+const QColor SectionContentTable::ColorBGGray   = Qt::lightGray;
+const QColor SectionContentTable::ColorBGYellow = QColor(255,255,153);
 
 /**
  */
@@ -80,6 +95,7 @@ SectionContentTable::SectionContentTable(unsigned int id,
 :   SectionContent(Type::Table, id, name, parent_section)
 ,   num_columns_  (num_columns)
 ,   headings_     (headings)
+,   column_styles_(num_columns, 0)
 ,   sortable_     (sortable)
 ,   sort_column_  (sort_column)
 ,   sort_order_   (sort_order)
@@ -103,7 +119,8 @@ void SectionContentTable::addRow (const nlohmann::json::array_t& row,
                                   const SectionContentViewable& viewable,
                                   const std::string& section_link,
                                   const std::string& section_figure,
-                                  const QVariant& viewable_index)
+                                  const QVariant& viewable_index,
+                                  unsigned int row_style)
 {
     assert (row.size() == num_columns_);
 
@@ -114,6 +131,7 @@ void SectionContentTable::addRow (const nlohmann::json::array_t& row,
     anno.index          = viewable_index;
     anno.section_link   = section_link;
     anno.section_figure = section_figure;
+    anno.style          = row_style;
 
     logdbg<< "SectionContentTable " << name_ << ": addRow: viewable.valid " << viewable.valid();
 
@@ -124,6 +142,43 @@ void SectionContentTable::addRow (const nlohmann::json::array_t& row,
     }
 
     annotations_.push_back(anno);
+}
+
+/**
+ */
+void SectionContentTable::setColumnStyle(int column, unsigned int style)
+{
+    column_styles_.at(column) = style;
+}
+
+/**
+ */
+void SectionContentTable::setCellStyle(int row, int column, unsigned int style)
+{
+    cell_styles_[ std::make_pair(column, row) ] = style;
+}
+
+/**
+ */
+unsigned int SectionContentTable::cellStyle(int row, int column) const
+{
+    unsigned int style = 0;
+
+    // first add column style
+    style |= column_styles_.at(column);
+
+    // overide with row style
+    style |= annotations_.at(row).style;
+
+    // override with cell stlye if available
+    if (!cell_styles_.empty())
+    {
+        auto it = cell_styles_.find(std::make_pair(column, row));
+        if (it != cell_styles_.end())
+            style |= it->second;
+    }
+
+    return style;
 }
 
 /**
@@ -218,6 +273,184 @@ namespace
 
 /**
  */
+boost::optional<QColor> SectionContentTable::cellTextColor(unsigned int style)
+{
+    if (style & CellStyleTextColorRed)
+        return ColorTextRed;
+    else if (style & CellStyleTextColorOrange)
+        return ColorTextOrange;
+    else if (style & CellStyleTextColorGreen)
+        return ColorTextGreen;
+    else if (style & CellStyleTextColorGray)
+        return ColorTextGray;
+
+    return boost::optional<QColor>();
+}
+
+/**
+ */
+boost::optional<QColor> SectionContentTable::cellBGColor(unsigned int style)
+{
+    if (style & CellStyleBGColorRed)
+        return ColorBGRed;
+    else if (style & CellStyleBGColorOrange)
+        return ColorBGOrange;
+    else if (style & CellStyleBGColorGreen)
+        return ColorBGGreen;
+    else if (style & CellStyleBGColorGray)
+        return ColorBGGray;
+    else if (style & CellStyleBGColorYellow)
+        return ColorBGYellow;
+
+    return boost::optional<QColor>();
+}
+
+/**
+ */
+boost::optional<QIcon> SectionContentTable::cellIcon(const nlohmann::json& data)
+{
+    if (!data.is_string())
+        return boost::optional<QIcon>();
+
+    std::string icon_name;
+    
+    try
+    {
+        icon_name = data;
+    }
+    catch(...)
+    {
+        return boost::optional<QIcon>();
+    }
+    
+    return QIcon(Utils::Files::getIconFilepath(icon_name).c_str());
+}
+
+/**
+ */
+boost::optional<bool> SectionContentTable::cellChecked(const nlohmann::json& data)
+{
+    if (!data.is_boolean())
+        return boost::optional<bool>();
+
+    bool check_state;
+
+    try
+    {
+        check_state = data;
+    }
+    catch(...)
+    {
+        return boost::optional<bool>();
+    }
+
+    return check_state;
+}
+
+/**
+ */
+void SectionContentTable::cellFont(QFont& font, unsigned int style)
+{
+    font.setBold(style & CellStyleTextBold);
+    font.setItalic(style & CellStyleTextItalic);
+    font.setStrikeOut(style & CellStyleTextStrikeOut);
+}
+
+/**
+ */
+bool SectionContentTable::cellShowsText(unsigned int style)
+{
+    return !cellShowsCheckBox(style) &&
+           !cellShowsIcon(style);
+}
+
+/**
+ */
+bool SectionContentTable::cellShowsCheckBox(unsigned int style)
+{
+    return (style & CellStyleCheckable) != 0;
+}
+
+/**
+ */
+bool SectionContentTable::cellShowsIcon(unsigned int style)
+{
+    return (style & CellStyleIcon) != 0;
+}
+
+/**
+ */
+bool SectionContentTable::cellShowsSpecialFont(unsigned int style)
+{
+    return cellFontIsBold(style)   ||
+           cellFontIsItalic(style) ||
+           cellFontIsStrikeOut(style);
+}
+
+/**
+ */
+bool SectionContentTable::cellFontIsBold(unsigned int style)
+{
+    return (style & CellStyleTextBold) != 0;
+}
+
+/**
+ */
+bool SectionContentTable::cellFontIsItalic(unsigned int style)
+{
+    return (style & CellStyleTextItalic) != 0;
+}
+
+/**
+ */
+bool SectionContentTable::cellFontIsStrikeOut(unsigned int style)
+{
+    return (style & CellStyleTextStrikeOut) != 0;
+}
+
+/**
+ */
+std::string SectionContentTable::cellStyle2String(unsigned int style)
+{
+    std::string str;
+
+    if (style & CellStyleCheckable)
+        str += (str.empty() ? "" : " | ") + std::string("Checkable");
+    if (style & CellStyleIcon)
+        str += (str.empty() ? "" : " | ") + std::string("Icon");
+
+    if (style & CellStyleTextBold)
+        str += (str.empty() ? "" : " | ") + std::string("Bold");
+    if (style & CellStyleTextItalic)
+        str += (str.empty() ? "" : " | ") + std::string("Italic");
+    if (style & CellStyleTextStrikeOut)
+        str += (str.empty() ? "" : " | ") + std::string("StrikeOut");
+
+    if (style & CellStyleTextColorRed)
+        str += (str.empty() ? "" : " | ") + std::string("TextRed");
+    if (style & CellStyleTextColorOrange)
+        str += (str.empty() ? "" : " | ") + std::string("TextOrange");
+    if (style & CellStyleTextColorGreen)
+        str += (str.empty() ? "" : " | ") + std::string("TextGreen");
+    if (style & CellStyleTextColorGray)
+        str += (str.empty() ? "" : " | ") + std::string("TextGray");
+
+    if (style & CellStyleBGColorRed)
+        str += (str.empty() ? "" : " | ") + std::string("BGRed");
+    if (style & CellStyleBGColorOrange)
+        str += (str.empty() ? "" : " | ") + std::string("BGOrange");
+    if (style & CellStyleBGColorGreen)
+        str += (str.empty() ? "" : " | ") + std::string("BGGreen");
+    if (style & CellStyleBGColorGray)
+        str += (str.empty() ? "" : " | ") + std::string("BGGray");
+    if (style & CellStyleBGColorYellow)
+        str += (str.empty() ? "" : " | ") + std::string("BGYellow");
+
+    return str;
+}
+
+/**
+ */
 QVariant SectionContentTable::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
@@ -225,59 +458,131 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
-    case Qt::DisplayRole:
-    {
-        logdbg << "SectionContentTable: data: display role: row " << index.row() << " col " << index.column();
+        case Qt::DisplayRole:
+        {
+            logdbg << "SectionContentTable: data: display role: row " << index.row() << " col " << index.column();
 
-        assert (index.row() >= 0);
-        assert (index.row() < (int)rows_.size());
-        assert (index.column() < (int)num_columns_);
+            assert (index.row() >= 0);
+            assert (index.row() < (int)rows_.size());
+            assert (index.column() < (int)num_columns_);
 
-        return qVariantFromJSON(rows_.at(index.row()).at(index.column()));
-    }
-    case Qt::BackgroundRole:
-    {
-        assert (index.row() >= 0);
-        assert (index.row() < (int)rows_.size());
+            auto style = cellStyle(index.row(), index.column());
 
-        unsigned int row_index = index.row();
+            if (cellShowsText(style))
+                return qVariantFromJSON(rows_.at(index.row()).at(index.column()));
 
-        auto info = rowInfo(row_index);
+            return QVariant(); 
+        }
+        case Qt::BackgroundRole:
+        {
+            assert (index.row() >= 0);
+            assert (index.row() < (int)rows_.size());
 
-        if (!info.enabled)
-            return QBrush(Qt::lightGray);
-        else
+            auto style = cellStyle(index.row(), index.column());
+
+            if (cellShowsText(style))
+            {
+                auto c = cellBGColor(style);
+                if (c.has_value())
+                    return QBrush(c.value());
+            }
+
             return QVariant();
-    }
-    case Qt::ForegroundRole:
-    {
-        assert (index.row() >= 0);
-        assert (index.row() < (int)rows_.size());
-        assert (index.column() < (int)num_columns_);
-
-        QVariant data = qVariantFromJSON(rows_.at(index.row()).at(index.column()));
-
-        if (data.userType() == QMetaType::QString)
-        {
-            if (data == "Passed")
-                return QVariant(QColor(Qt::darkGreen));
-            else if (data == "Failed")
-                return QVariant(QColor(Qt::red));
         }
-        if (data.userType() == QMetaType::Bool)
+        case Qt::ForegroundRole:
         {
-            if (data == true)
-                return QVariant(QColor(Qt::darkGreen));
-            else if (data == false)
-                return QVariant(QColor(Qt::red));
+            assert (index.row() >= 0);
+            assert (index.row() < (int)rows_.size());
+            assert (index.column() < (int)num_columns_);
+
+            auto style = cellStyle(index.row(), index.column());
+
+            if (style != 0)
+            {
+                auto c = cellTextColor(style);
+                if (c.has_value())
+                    return QBrush(c.value());
+            }
+
+            //QVariant data = qVariantFromJSON(rows_.at(index.row()).at(index.column()));
+
+            // if (data.userType() == QMetaType::QString)
+            // {
+            //     if (data == "Passed")
+            //         return QVariant(QColor(Qt::darkGreen));
+            //     else if (data == "Failed")
+            //         return QVariant(QColor(Qt::red));
+            // }
+            // if (data.userType() == QMetaType::Bool)
+            // {
+            //     if (data == true)
+            //         return QVariant(QColor(Qt::darkGreen));
+            //     else if (data == false)
+            //         return QVariant(QColor(Qt::red));
+            // }
+
+            return QVariant();
         }
-        return QVariant(QColor(Qt::black));
+        case Qt::DecorationRole:
+        {
+            auto style = cellStyle(index.row(), index.column());
+
+            if (cellShowsIcon(style))
+            {
+                const auto& j = rows_.at(index.row()).at(index.column());
+                auto icon = cellIcon(j);
+                if (icon.has_value())
+                    return icon.value();
+            }
+
+            return QVariant();
+        }
+        case Qt::CheckStateRole:
+        {
+            auto style = cellStyle(index.row(), index.column());
+
+            if (cellShowsCheckBox(style))
+            {
+                const auto& j = rows_.at(index.row()).at(index.column());
+                auto c = cellChecked(j);
+                if (c.has_value())
+                    return c.value() ? Qt::Checked : Qt::Unchecked;
+            }
+
+            return QVariant();
+        }
+        case Qt::FontRole:
+        {
+            auto style = cellStyle(index.row(), index.column());
+
+            if (cellShowsSpecialFont(style))
+            {
+                QFont f;
+                cellFont(f, style);
+                return f;
+            }
+
+            return QVariant();
+        }
+        default:
+        {
+            return QVariant();
+        }
     }
-    default:
-    {
-        return QVariant();
-    }
-    }
+}
+
+/**
+ */
+Qt::ItemFlags SectionContentTable::flags(const QModelIndex &index) const
+{
+    if (!index.isValid())
+        return Qt::NoItemFlags;
+
+    auto style = cellStyle(index.row(), index.column());
+    if (style & CellStyleCheckable)
+        return Qt::ItemIsUserCheckable;
+
+    return Qt::NoItemFlags;
 }
 
 /**
@@ -594,12 +899,14 @@ nlohmann::json SectionContentTable::toJSON(bool rowwise,
  */
 void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
 {
-    root_node[ FieldHeadings    ] = headings_;
-    root_node[ FieldSortable    ] = sortable_;
-    root_node[ FieldSortColumn  ] = sort_column_;
-    root_node[ FieldSortOrder   ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
-    root_node[ FieldRows        ] = std::vector<nlohmann::json>();
-    root_node[ FieldAnnotations ] = nlohmann::json::array();
+    root_node[ FieldHeadings     ] = headings_;
+    root_node[ FieldSortable     ] = sortable_;
+    root_node[ FieldSortColumn   ] = sort_column_;
+    root_node[ FieldSortOrder    ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
+    root_node[ FieldRows         ] = std::vector<nlohmann::json>();
+    root_node[ FieldAnnotations  ] = nlohmann::json::array();
+    root_node[ FieldColumnStyles ] = column_styles_;
+    root_node[ FieldCellStyles   ] = cell_styles_;
 
     //write content only if not on demand
     if (!isOnDemand())
@@ -619,6 +926,7 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
 
             j_anno[ FieldAnnoSectionLink   ] = a.section_link;
             j_anno[ FieldAnnoSectionFigure ] = a.section_figure;
+            j_anno[ FieldAnnoStyle         ] = a.style;
 
             j_annos.push_back(j_anno);
         }
@@ -631,21 +939,24 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
  */
 bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 {
-    if (!j.is_object()               ||
-        !j.contains(FieldHeadings)   ||
-        !j.contains(FieldSortable)   ||
-        !j.contains(FieldSortColumn) ||
-        !j.contains(FieldSortOrder)  ||
-        !j.contains(FieldRows)       ||
-        !j.contains(FieldAnnotations))
+    if (!j.is_object()                 ||
+        !j.contains(FieldHeadings)     ||
+        !j.contains(FieldSortable)     ||
+        !j.contains(FieldSortColumn)   ||
+        !j.contains(FieldSortOrder)    ||
+        !j.contains(FieldRows)         ||
+        !j.contains(FieldAnnotations)  ||
+        !j.contains(FieldColumnStyles) ||
+        !j.contains(FieldCellStyles))
     {
         logerr << "SectionContentTable: fromJSON: Error: Section content table does not obtain needed fields";
         return false;
     }
 
-    headings_    = j[ FieldHeadings   ].get<std::vector<std::string>>();
-    sortable_    = j[ FieldSortable   ];
-    sort_column_ = j[ FieldSortColumn ];
+    headings_      = j[ FieldHeadings     ].get<std::vector<std::string>>();
+    column_styles_ = j[ FieldColumnStyles ].get<std::vector<unsigned int>>();
+    sortable_      = j[ FieldSortable     ];
+    sort_column_   = j[ FieldSortColumn   ];
 
     std::string sort_order = j[ FieldSortOrder ];
     sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;
@@ -663,8 +974,9 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 
     for (const auto& j_anno : j_annos)
     {
-        if (!j_anno.contains(FieldAnnoSectionLink) ||
-            !j_anno.contains(FieldAnnoSectionFigure))
+        if (!j_anno.contains(FieldAnnoSectionLink)   ||
+            !j_anno.contains(FieldAnnoSectionFigure) ||
+            !j_anno.contains(FieldAnnoStyle))
         {
             logerr << "SectionContentTable: fromJSON: Error: Could not read annotation";
             return false;
@@ -673,6 +985,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         RowAnnotation anno;
         anno.section_link   = j_anno[ FieldAnnoSectionLink   ];
         anno.section_figure = j_anno[ FieldAnnoSectionFigure ];
+        anno.style          = j_anno[ FieldAnnoStyle         ];
 
         if (j_anno.contains(FieldAnnoFigureID))
         {
@@ -683,7 +996,10 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         annotations_.push_back(anno);
     }
 
+    cell_styles_ = j[ FieldCellStyles ].get<CellStyles>();
+
     assert(rows_.size() == annotations_.size());
+    assert(num_columns_ == column_styles_.size());
 
     return true;
 }
@@ -753,12 +1069,10 @@ QModelIndex SectionContentTableModel::parent(const QModelIndex& index) const
  */
 Qt::ItemFlags SectionContentTableModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid())
-        return Qt::ItemIsEnabled;
+    auto f = QAbstractItemModel::flags(index);
+    f |= content_table_->flags(index);
 
-    assert (index.column() < (int)content_table_->headings().size());
-
-    return QAbstractItemModel::flags(index);
+    return f;
 }
 
 /**

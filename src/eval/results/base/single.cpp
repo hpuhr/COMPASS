@@ -334,7 +334,6 @@ void Single::addTargetToOverviewTable(ResultReport::Section& section,
     auto& target_table = section.getTable(table_name);
 
     auto values = targetTableValues();
-
     assert(values.size() == target_table.numColumns());
 
     std::string link = getTargetRequirementSectionID();

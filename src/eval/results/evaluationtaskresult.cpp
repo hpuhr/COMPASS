@@ -89,17 +89,25 @@ namespace helpers
  */
 bool EvaluationTaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const
 {
-    if (!calculator_ || !calculator_->canEvaluate().ok())
+    auto calc = calculator();
+
+    if (!calc || !calc->canEvaluate().ok())
+    {
+        logerr << "EvaluationTaskResult: loadOnDemandFigure: invalid calulcator";
         return false;
+    }
 
     try
     {
         if (figure->name() == EvaluationRequirementResult::Single::TargetOverviewID)
         {
             //get result for section
-            auto result = helpers::obtainResult(figure, calculator_.get());
+            auto result = helpers::obtainResult(figure, calc);
             if (!result)
+            {
+                logerr << "EvaluationTaskResult: loadOnDemandFigure: result could not be obtained";
                 return false;
+            }
 
             //add overview to figure
             result->addOverviewToFigure(*figure);
@@ -109,6 +117,7 @@ bool EvaluationTaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure
     }
     catch(...)
     {
+        logerr << "EvaluationTaskResult: loadOnDemandFigure: critical error during load";
     }
     
     return false;
@@ -118,17 +127,25 @@ bool EvaluationTaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure
  */
 bool EvaluationTaskResult::loadOnDemandTable(ResultReport::SectionContentTable* table) const
 {
-    if (!calculator_ || !calculator_->canEvaluate().ok())
+    auto calc = calculator();
+
+    if (!calc || !calc->canEvaluate().ok())
+    {
+        logerr << "EvaluationTaskResult: loadOnDemandTable: invalid calulcator";
         return false;
+    }
 
     try
     {
         if (table->name() == EvaluationRequirementResult::Single::tr_details_table_name_)
         {
             //get result for section
-            auto result = helpers::obtainResult(table, calculator_.get());
+            auto result = helpers::obtainResult(table, calc);
             if (!result)
+            {
+                logerr << "EvaluationTaskResult: loadOnDemandTable: result could not be obtained";
                 return false;
+            }
 
             //add table details
             result->addDetailsToTable(*table);
@@ -138,9 +155,44 @@ bool EvaluationTaskResult::loadOnDemandTable(ResultReport::SectionContentTable* 
     }
     catch(...)
     {
+        logerr << "EvaluationTaskResult: loadOnDemandTable: critical error during load";
     }
     
     return false;
+}
+
+/**
+ */
+EvaluationCalculator* EvaluationTaskResult::calculator() const
+{
+    if (calculator_)
+        return calculator_.get();
+
+    if (!config_.is_object())
+    {
+        logerr << "EvaluationTaskResult: calculator: no config available";
+        return nullptr;
+    }
+
+    auto& eval_manager = COMPASS::instance().evaluationManager();
+
+    try
+    {
+        //create calculator based on stored config
+        calculator_.reset(new EvaluationCalculator(eval_manager, config_));
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "EvaluationTaskResult: toJSON_impl: Could not create calculator from stored config: " << ex.what();
+        return nullptr;
+    }
+    catch(...)
+    {
+        logerr << "EvaluationTaskResult: toJSON_impl: Could not create calculator from stored config: Unknown error";
+        return nullptr;
+    }
+
+    return calculator_.get();
 }
 
 /**
@@ -153,30 +205,5 @@ void EvaluationTaskResult::toJSON_impl(nlohmann::json& root_node) const
  */
 bool EvaluationTaskResult::fromJSON_impl(const nlohmann::json& j)
 {
-    if (!j.contains(FieldConfig))
-        return false;
-
-    const auto& jconfig = j.at(FieldConfig);
-    if (!jconfig.is_object())
-        return false;
-    
-    auto& eval_manager = COMPASS::instance().evaluationManager();
-
-    try
-    {
-        //create calculator based on stored config
-        calculator_.reset(new EvaluationCalculator(eval_manager, jconfig));
-    }
-    catch(const std::exception& ex)
-    {
-        logerr << "EvaluationTaskResult: toJSON_impl: Could not create calculator from stored config: " << ex.what();
-        return false;
-    }
-    catch(...)
-    {
-        logerr << "EvaluationTaskResult: toJSON_impl: Could not create calculator from stored config: Unknown error";
-        return false;
-    }
-    
     return true;
 }

@@ -6,6 +6,7 @@
 #include "util/timeconv.h"
 #include "logger.h"
 #include "reconstructortarget.h"
+#include "task/result/report/reportdefs.h"
 
 #include <QApplication>
 #include <QThread>
@@ -18,7 +19,8 @@ using namespace nlohmann;
 
 namespace dbContent {
 
-
+/**
+ */
 TargetModel::TargetModel(const std::string& class_id, const std::string& instance_id, DBContentManager& dbcont_manager)
     : Configurable(class_id, instance_id, &dbcont_manager), dbcont_manager_(dbcont_manager)
 {
@@ -48,8 +50,12 @@ TargetModel::TargetModel(const std::string& class_id, const std::string& instanc
     createSubConfigurables();
 }
 
+/**
+ */
 TargetModel::~TargetModel() = default;
 
+/**
+ */
 void TargetModel::clear()
 {
     beginResetModel();
@@ -59,6 +65,8 @@ void TargetModel::clear()
     endResetModel();
 }
 
+/**
+ */
 QVariant TargetModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
@@ -66,157 +74,195 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
 
     switch (role)
     {
-    case Qt::CheckStateRole:
-    {
-        if (index.column() == 0)  // selected special case
+        case Qt::CheckStateRole:
+        {
+            if (index.column() == ColUse)  // selected special case
+            {
+                assert (index.row() >= 0);
+                assert (index.row() < target_data_.size());
+
+                const Target& target = target_data_.at(index.row());
+
+                if (target.useInEval())
+                    return Qt::Checked;
+                else
+                    return Qt::Unchecked;
+            }
+            else
+                return QVariant();
+        }
+        case Qt::BackgroundRole:
         {
             assert (index.row() >= 0);
             assert (index.row() < target_data_.size());
 
             const Target& target = target_data_.at(index.row());
 
-            if (target.useInEval())
-                return Qt::Checked;
+            if (!target.useInEval())
+                return QBrush(Qt::lightGray);
             else
-                return Qt::Unchecked;
+                return QVariant();
+
         }
-        else
+        case Qt::DisplayRole:
+        case Qt::EditRole:
+        {
+            logdbg << "TargetModel: data: display role: row " << index.row() << " col " << index.column();
+
+            assert (index.row() >= 0);
+            assert (index.row() < target_data_.size());
+
+            const Target& target = target_data_.at(index.row());
+
+            logdbg << "TargetModel: data: got utn " << target.utn_;
+
+            assert (index.column() < table_columns_.size());
+            int col = index.column();
+
+            switch(col)
+            {
+                case ColUTN: 
+                    return target.utn_;
+                case ColComment: 
+                    return target.comment().c_str();
+                case ColCategory: 
+                    return target.emitterCategoryStr().c_str();
+                case ColNumUpdates: 
+                    return target.numUpdates();
+                case ColBegin:
+                    return target.timeBeginStr().c_str();
+                    //return QDateTime::fromString(target.timeBeginStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
+                case ColEnd:
+                    return target.timeEndStr().c_str();
+                    //return QDateTime::fromString(target.timeEndStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
+                case ColDuration: 
+                    return target.timeDurationStr().c_str();
+                case ColACIDs:
+                    return target.aircraftIdentificationsStr().c_str();
+                case ColACADs: 
+                    return target.aircraftAddressesStr().c_str();
+                case ColMode3A: 
+                    return target.modeACodesStr().c_str();
+                case ColModeCMin: 
+                    if (target.hasModeC())
+                        return target.modeCMin();
+                    else
+                        return "";
+                case ColModeCMax:
+                    if (target.hasModeC())
+                        return target.modeCMax();
+                    else
+                        return "";
+            }
+
             return QVariant();
-    }
-    case Qt::BackgroundRole:
-    {
-        assert (index.row() >= 0);
-        assert (index.row() < target_data_.size());
+        }
+        case Qt::UserRole: // to find the checkboxes
+        {
+            if (index.column() == ColUse)
+            {
+                assert (index.row() >= 0);
+                assert (index.row() < target_data_.size());
 
-        const Target& target = target_data_.at(index.row());
+                const Target& target = target_data_.at(index.row());
+                return target.utn_;
+            }
+            else if (index.column() == ColComment) // comment
+            {
+                assert (index.row() >= 0);
+                assert (index.row() < target_data_.size());
 
-        if (!target.useInEval())
-            return QBrush(Qt::lightGray);
-        else
-            return QVariant();
-
-    }
-    case Qt::DisplayRole:
-    case Qt::EditRole:
-    {
-        logdbg << "TargetModel: data: display role: row " << index.row() << " col " << index.column();
-
-        assert (index.row() >= 0);
-        assert (index.row() < target_data_.size());
-
-        const Target& target = target_data_.at(index.row());
-
-        logdbg << "TargetModel: data: got utn " << target.utn_;
-
-        assert (index.column() < table_columns_.size());
-        std::string col_name = table_columns_.at(index.column()).toStdString();
-
-        if (col_name == "Use")
+                const Target& target = target_data_.at(index.row());
+                return ("comment_"+to_string(target.utn_)).c_str();
+            }
+        }
+        default:
         {
             return QVariant();
         }
-        else if (col_name == "UTN")
-        {
+    }
+}
+
+/**
+ */
+nlohmann::json TargetModel::rawCellData(int row, int column) const
+{
+    const Target& target = target_data_.at(row);
+
+    switch(column)
+    {
+        case ColUse:
+            return target.useInEval();
+        case ColUTN: 
             return target.utn_;
-        }
-        else if (col_name == "Comment")
-        {
+        case ColComment: 
             return target.comment().c_str();
-        }
-        else if (col_name == "Category")
-        {
+        case ColCategory: 
             return target.emitterCategoryStr().c_str();
-        }
-        else if (col_name == "#Updates")
-        {
+        case ColNumUpdates: 
             return target.numUpdates();
-        }
-        else if (col_name == "Begin")
-        {
+        case ColBegin:
             return target.timeBeginStr().c_str();
             //return QDateTime::fromString(target.timeBeginStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
-        }
-        else if (col_name == "End")
-        {
+        case ColEnd:
             return target.timeEndStr().c_str();
             //return QDateTime::fromString(target.timeEndStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
-        }
-        else if (col_name == "Duration")
-        {
+        case ColDuration: 
             return target.timeDurationStr().c_str();
-        }
-        else if (col_name == "ACIDs")
-        {
+        case ColACIDs:
             return target.aircraftIdentificationsStr().c_str();
-        }
-        else if (col_name == "ACADs")
-        {
+        case ColACADs: 
             return target.aircraftAddressesStr().c_str();
-        }
-        else if (col_name == "M3/A")
-        {
+        case ColMode3A: 
             return target.modeACodesStr().c_str();
-        }
-        else if (col_name == "MC Min")
-        {
+        case ColModeCMin: 
             if (target.hasModeC())
                 return target.modeCMin();
             else
                 return "";
-        }
-        else if (col_name == "MC Max")
-        {
+        case ColModeCMax:
             if (target.hasModeC())
                 return target.modeCMax();
             else
                 return "";
-        }
-        else if (col_name == "MOPS")
-        {
-            if (target.hasAdsbMOPSVersions())
-                return target.adsbMOPSVersionsStr().c_str();
-            else
-                return "";
-        }
+    }
 
-    }
-    case Qt::UserRole: // to find the checkboxes
-    {
-        if (index.column() == 0)
-        {
-            assert (index.row() >= 0);
-            assert (index.row() < target_data_.size());
-
-            const Target& target = target_data_.at(index.row());
-            return target.utn_;
-        }
-        else if (index.column() == 2) // comment
-        {
-            assert (index.row() >= 0);
-            assert (index.row() < target_data_.size());
-
-            const Target& target = target_data_.at(index.row());
-            return ("comment_"+to_string(target.utn_)).c_str();
-        }
-    }
-    default:
-    {
-        return QVariant();
-    }
-    }
+    return nlohmann::json();
 }
 
+/**
+ */
+unsigned int TargetModel::rowStyle(int row) const
+{
+    if (!target_data_.at(row).useInEval())
+        return ResultReport::CellStyleBGColorGray;
+
+    return 0;
+}
+
+/**
+ */
+unsigned int TargetModel::columnStyle(int column) const
+{
+    if (column == ColUse)
+        return ResultReport::CellStyleCheckable;
+
+    return 0;
+}
+
+/**
+ */
 bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int role)
 {
     if (!index.isValid() /*|| role != Qt::EditRole*/)
         return false;
 
-    if (role == Qt::CheckStateRole && index.column() == 0)
+    if (role == Qt::CheckStateRole && index.column() == ColUse)
     {
         assert (index.row() >= 0);
         assert (index.row() < target_data_.size());
 
-        auto it = target_data_.begin()+index.row();
+        auto it = target_data_.begin() + index.row();
 
         bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
         loginf << "TargetModel: setData: utn " << it->utn_ <<" check state " << checked;
@@ -231,12 +277,12 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
 
         return true;
     }
-    else if (role == Qt::EditRole && index.column() == 2) // comment
+    else if (role == Qt::EditRole && index.column() == ColComment) // comment
     {
         assert (index.row() >= 0);
         assert (index.row() < target_data_.size());
 
-        auto it = target_data_.begin()+index.row();
+        auto it = target_data_.begin() + index.row();
 
         loginf << "TargetModel: setData: utn " << it->utn_ <<" comment '" << value.toString().toStdString() << "'";
 
@@ -252,6 +298,8 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
     return false;
 }
 
+/**
+ */
 QVariant TargetModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
@@ -263,26 +311,36 @@ QVariant TargetModel::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
+/**
+ */
 QModelIndex TargetModel::index(int row, int column, const QModelIndex& parent) const
 {
     return createIndex(row, column);
 }
 
+/**
+ */
 int TargetModel::rowCount(const QModelIndex& parent) const
 {
     return target_data_.size();
 }
 
+/**
+ */
 int TargetModel::columnCount(const QModelIndex& parent) const
 {
     return table_columns_.size();
 }
 
+/**
+ */
 QModelIndex TargetModel::parent(const QModelIndex& index) const
 {
     return QModelIndex();
 }
 
+/**
+ */
 Qt::ItemFlags TargetModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
@@ -290,11 +348,11 @@ Qt::ItemFlags TargetModel::flags(const QModelIndex &index) const
 
     assert (index.column() < table_columns_.size());
 
-    if (index.column() == 0) // Use
+    if (index.column() == ColUse) // Use
     {
         return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
     }
-    else if (index.column() == 2) // comment
+    else if (index.column() == ColComment) // comment
     {
         return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
     }
@@ -302,6 +360,8 @@ Qt::ItemFlags TargetModel::flags(const QModelIndex &index) const
         return QAbstractItemModel::flags(index);
 }
 
+/**
+ */
 const dbContent::Target& TargetModel::getTargetOf (const QModelIndex& index)
 {
     assert (index.isValid());
@@ -314,6 +374,8 @@ const dbContent::Target& TargetModel::getTargetOf (const QModelIndex& index)
     return target;
 }
 
+/**
+ */
 void TargetModel::setUseTargetData (unsigned int utn, bool value)
 {
     loginf << "TargetModel: setUseTargetData: utn " << utn << " value " << value;
@@ -322,7 +384,7 @@ void TargetModel::setUseTargetData (unsigned int utn, bool value)
 
     // search if checkbox can be found
     QModelIndexList items = match(
-                index(0, 0),
+                index(0, ColUse),
                 Qt::UserRole,
                 QVariant(utn),
                 1, // look *
@@ -336,6 +398,8 @@ void TargetModel::setUseTargetData (unsigned int utn, bool value)
     //emit dbcont_manager_.targetChangedSignal(utn);
 }
 
+/**
+ */
 void TargetModel::setTargetDataComment (unsigned int utn, std::string comment)
 {
     loginf << "TargetModel: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
@@ -344,7 +408,7 @@ void TargetModel::setTargetDataComment (unsigned int utn, std::string comment)
 
     // search if comment can be found can be found, check in COLUMN 2!
     QModelIndexList items = match(
-                index(0, 2),
+                index(0, ColComment),
                 Qt::UserRole,
                 QVariant(("comment_"+to_string(utn)).c_str()),
                 1, // look *
@@ -359,7 +423,8 @@ void TargetModel::setTargetDataComment (unsigned int utn, std::string comment)
     //emit dbcont_manager_.targetChangedSignal(utn);
 }
 
-
+/**
+ */
 void TargetModel::setUseAllTargetData (bool value)
 {
     loginf << "TargetModel: setUseAllTargetData: value " << value;
@@ -380,6 +445,8 @@ void TargetModel::setUseAllTargetData (bool value)
     QApplication::restoreOverrideCursor();
 }
 
+/**
+ */
 void TargetModel::clearComments ()
 {
     loginf << "TargetModel: clearComments";
@@ -400,6 +467,8 @@ void TargetModel::clearComments ()
     QApplication::restoreOverrideCursor();
 }
 
+/**
+ */
 void TargetModel::setUseByFilter ()
 {
     loginf << "TargetModel: setUseByFilter";
@@ -559,11 +628,15 @@ void TargetModel::setUseByFilter ()
     emit dbcont_manager_.allTargetsChangedSignal();
 }
 
+/**
+ */
 bool TargetModel::hasTargetsInfo()
 {
     return target_data_.size();
 }
 
+/**
+ */
 void TargetModel::clearTargetsInfo()
 {
     clear();
@@ -571,6 +644,8 @@ void TargetModel::clearTargetsInfo()
     COMPASS::instance().dbInterface().clearTargetsTable();
 }
 
+/**
+ */
 bool TargetModel::existsTarget(unsigned int utn) const
 {
     auto tr_tag_it = target_data_.get<target_tag>().find(utn);
@@ -578,6 +653,8 @@ bool TargetModel::existsTarget(unsigned int utn) const
     return tr_tag_it != target_data_.get<target_tag>().end();
 }
 
+/**
+ */
 void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets)
 {
     beginResetModel();
@@ -637,6 +714,8 @@ void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::Recon
     endResetModel();
 }
 
+/**
+ */
 //void TargetModel::createNewTarget(unsigned int utn)
 //{
 //    beginResetModel();
@@ -650,6 +729,8 @@ void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::Recon
 //    endResetModel();
 //}
 
+/**
+ */
 dbContent::Target& TargetModel::target(unsigned int utn)
 {
     auto tr_tag_it = target_data_.get<target_tag>().find(utn);
@@ -659,6 +740,8 @@ dbContent::Target& TargetModel::target(unsigned int utn)
     return const_cast<dbContent::Target&> (*tr_tag_it); // ok since key utn_ can not be modified, still const
 }
 
+/**
+ */
 const dbContent::Target& TargetModel::target(unsigned int utn) const
 {
     auto tr_tag_it = target_data_.get<target_tag>().find(utn);
@@ -668,17 +751,23 @@ const dbContent::Target& TargetModel::target(unsigned int utn) const
     return const_cast<const dbContent::Target&> (*tr_tag_it);
 }
 
+/**
+ */
 unsigned int TargetModel::size() const
 {
     return target_data_.size();
 }
 
+/**
+ */
 void TargetModel::removeDBContentFromTargets(const std::string& dbcont_name)
 {
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [dbcont_name](Target& p) { p.clearDBContentCount(dbcont_name); });
 }
 
+/**
+ */
 nlohmann::json TargetModel::asJSON() const
 {
     nlohmann::json data;
@@ -692,6 +781,8 @@ nlohmann::json TargetModel::asJSON() const
     return data;
 }
 
+/**
+ */
 nlohmann::json TargetModel::targetAsJSON(unsigned int utn) const
 {
     if (!existsTarget(utn))
@@ -706,6 +797,8 @@ nlohmann::json TargetModel::targetAsJSON(unsigned int utn) const
     return data;
 }
 
+/**
+ */
 nlohmann::json TargetModel::targetStatsAsJSON() const
 {
     nlohmann::json data;
@@ -742,6 +835,8 @@ nlohmann::json TargetModel::targetStatsAsJSON() const
     return data;
 }
 
+/**
+ */
 nlohmann::json TargetModel::utnsAsJSON() const
 {
     nlohmann::json data;
@@ -758,6 +853,8 @@ nlohmann::json TargetModel::utnsAsJSON() const
     return data;
 }
 
+/**
+ */
 void TargetModel::loadFromDB()
 {
     loginf << "TargetModel: loadFromDB";
@@ -777,6 +874,8 @@ void TargetModel::loadFromDB()
     loginf << "TargetModel: loadFromDB: loaded " << target_data_.size() << " targets";
 }
 
+/**
+ */
 void TargetModel::saveToDB()
 {
     loginf << "TargetModel: saveToDB: saving " << target_data_.size() << " targets";
@@ -789,6 +888,8 @@ void TargetModel::saveToDB()
     COMPASS::instance().dbInterface().saveTargets(targets);
 }
 
+/**
+ */
 void TargetModel::saveToDB(unsigned int utn)
 {
     loginf << "TargetModel: saveToDB: saving utn " << utn;
@@ -802,11 +903,15 @@ void TargetModel::saveToDB(unsigned int utn)
     COMPASS::instance().dbInterface().saveTarget(tgt_copy);
 }
 
+/**
+ */
 bool TargetModel::removeShortTargets() const
 {
     return remove_short_targets_;
 }
 
+/**
+ */
 void TargetModel::removeShortTargets(bool value)
 {
     loginf << "TargetModel: removeShortTargets: value " << value;
@@ -814,11 +919,15 @@ void TargetModel::removeShortTargets(bool value)
     remove_short_targets_ = value;
 }
 
+/**
+ */
 unsigned int TargetModel::removeShortTargetsMinUpdates() const
 {
     return remove_short_targets_min_updates_;
 }
 
+/**
+ */
 void TargetModel::removeShortTargetsMinUpdates(unsigned int value)
 {
     loginf << "TargetModel: removeShortTargetsMinUpdates: value " << value;
@@ -826,11 +935,15 @@ void TargetModel::removeShortTargetsMinUpdates(unsigned int value)
     remove_short_targets_min_updates_ = value;
 }
 
+/**
+ */
 double TargetModel::removeShortTargetsMinDuration() const
 {
     return remove_short_targets_min_duration_;
 }
 
+/**
+ */
 void TargetModel::removeShortTargetsMinDuration(double value)
 {
     loginf << "TargetModel: removeShortTargetsMinDuration: value " << value;
@@ -838,11 +951,15 @@ void TargetModel::removeShortTargetsMinDuration(double value)
     remove_short_targets_min_duration_ = value;
 }
 
+/**
+ */
 bool TargetModel::removePsrOnlyTargets() const
 {
     return remove_psr_only_targets_;
 }
 
+/**
+ */
 void TargetModel::removePsrOnlyTargets(bool value)
 {
     loginf << "TargetModel: removePsrOnlyTargets: value " << value;
@@ -850,11 +967,15 @@ void TargetModel::removePsrOnlyTargets(bool value)
     remove_psr_only_targets_ = value;
 }
 
+/**
+ */
 std::string TargetModel::filterModeACodeValues() const
 {
     return filter_mode_a_code_values_;
 }
 
+/**
+ */
 std::set<std::pair<int,int>> TargetModel::filterModeACodeData() const // single ma,-1 or range ma1,ma2
 {
     std::set<std::pair<int,int>> data;
@@ -888,6 +1009,8 @@ std::set<std::pair<int,int>> TargetModel::filterModeACodeData() const // single 
     return data;
 }
 
+/**
+ */
 void TargetModel::filterModeACodeValues(const std::string& value)
 {
     loginf << "TargetModel: removeModeACodeValues: value '" << value << "'";
@@ -895,11 +1018,15 @@ void TargetModel::filterModeACodeValues(const std::string& value)
     filter_mode_a_code_values_ = value;
 }
 
+/**
+ */
 std::string TargetModel::filterTargetAddressValues() const
 {
     return filter_target_address_values_;
 }
 
+/**
+ */
 std::set<unsigned int> TargetModel::filterTargetAddressData() const
 {
     std::set<unsigned int>  data;
@@ -915,6 +1042,8 @@ std::set<unsigned int> TargetModel::filterTargetAddressData() const
     return data;
 }
 
+/**
+ */
 void TargetModel::filterTargetAddressValues(const std::string& value)
 {
     loginf << "TargetModel: removeTargetAddressValues: value '" << value << "'";
@@ -922,22 +1051,30 @@ void TargetModel::filterTargetAddressValues(const std::string& value)
     filter_target_address_values_ = value;
 }
 
+/**
+ */
 bool TargetModel::removeModeACOnlys() const
 {
     return remove_modeac_onlys_;
 }
 
+/**
+ */
 void TargetModel::removeModeACOnlys(bool value)
 {
     loginf << "TargetModel: removeModeACOnlys: value " << value;
     remove_modeac_onlys_ = value;
 }
 
+/**
+ */
 bool TargetModel::removeNotDetectedDBContents() const
 {
     return remove_not_detected_dbos_;
 }
 
+/**
+ */
 void TargetModel::removeNotDetectedDBContents(bool value)
 {
     loginf << "TargetModel: removeNotDetectedDBOs: value " << value;
@@ -945,6 +1082,8 @@ void TargetModel::removeNotDetectedDBContents(bool value)
     remove_not_detected_dbos_ = value;
 }
 
+/**
+ */
 bool TargetModel::removeNotDetectedDBContent(const std::string& dbcontent_name) const
 {
     if (!remove_not_detected_dbo_values_.contains(dbcontent_name))
@@ -953,6 +1092,8 @@ bool TargetModel::removeNotDetectedDBContent(const std::string& dbcontent_name) 
     return remove_not_detected_dbo_values_.at(dbcontent_name);
 }
 
+/**
+ */
 void TargetModel::removeNotDetectedDBContents(const std::string& dbcontent_name, bool value)
 {
     loginf << "TargetModel: removeNotDetectedDBOs: dbo " << dbcontent_name << " value " << value;
@@ -960,11 +1101,15 @@ void TargetModel::removeNotDetectedDBContents(const std::string& dbcontent_name,
     remove_not_detected_dbo_values_[dbcontent_name] = value;
 }
 
+/**
+ */
 bool TargetModel::filterTargetAddressesBlacklist() const
 {
     return filter_target_addresses_blacklist_;
 }
 
+/**
+ */
 void TargetModel::filterTargetAddressesBlacklist(bool value)
 {
     loginf << "TargetModel: filterTargetAddressesBlacklist: value " << value;
@@ -972,11 +1117,15 @@ void TargetModel::filterTargetAddressesBlacklist(bool value)
     filter_target_addresses_blacklist_ = value;
 }
 
+/**
+ */
 bool TargetModel::filterModeACodeBlacklist() const
 {
     return filter_mode_a_code_blacklist_;
 }
 
+/**
+ */
 void TargetModel::filterModeACodeBlacklist(bool value)
 {
     loginf << "TargetModel: filterModeACodeBlacklist: value " << value;
@@ -984,11 +1133,15 @@ void TargetModel::filterModeACodeBlacklist(bool value)
     filter_mode_a_code_blacklist_ = value;
 }
 
+/**
+ */
 bool TargetModel::removeModeCValues() const
 {
     return remove_mode_c_values_;
 }
 
+/**
+ */
 void TargetModel::removeModeCValues(bool value)
 {
     loginf << "TargetModel: removeModeCValues: value " << value;
@@ -996,22 +1149,30 @@ void TargetModel::removeModeCValues(bool value)
     remove_mode_c_values_ = value;
 }
 
+/**
+ */
 float TargetModel::removeModeCMinValue() const
 {
     return remove_mode_c_min_value_;
 }
 
+/**
+ */
 void TargetModel::removeModeCMinValue(float value)
 {
     loginf << "TargetModel: removeModeCMinValue: value " << value;
     remove_mode_c_min_value_ = value;
 }
 
+/**
+ */
 bool TargetModel::filterTargetAddresses() const
 {
     return filter_target_addresses_;
 }
 
+/**
+ */
 void TargetModel::filterTargetAddresses(bool value)
 {
     loginf << "TargetModel: removeTargetAddresses: value " << value;
@@ -1019,11 +1180,15 @@ void TargetModel::filterTargetAddresses(bool value)
     filter_target_addresses_ = value;
 }
 
+/**
+ */
 bool TargetModel::filterModeACodes() const
 {
     return filter_mode_a_codes_;
 }
 
+/**
+ */
 void TargetModel::filterModeACodes(bool value)
 {
     loginf << "TargetModel: removeModeACodes: value " << value;
@@ -1031,21 +1196,29 @@ void TargetModel::filterModeACodes(bool value)
     filter_mode_a_codes_ = value;
 }
 
+/**
+ */
 void TargetModel::showMainColumns(bool show)
 {
     show_main_columns_ = show;
 }
 
+/**
+ */
 void TargetModel::showDurationColumns(bool show)
 {
     show_duration_columns_ = show;
 }
 
+/**
+ */
 void TargetModel::showModeSColumns(bool show)
 {
     show_mode_s_columns_ = show;
 }
 
+/**
+ */
 void TargetModel::showModeACColumns(bool show)
 {
     show_mode_ac_columns_ = show;
