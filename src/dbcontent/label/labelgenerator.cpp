@@ -46,7 +46,6 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
 {
     std::vector<std::string> tmp;
 
-
     std::map<std::string, std::shared_ptr<Buffer>> buffers = dbcont_manager_.loadedData();
     if (!buffers.count(dbcontent_name))
     {

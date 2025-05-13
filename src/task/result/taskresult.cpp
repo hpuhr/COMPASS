@@ -16,6 +16,7 @@
  */
 
 #include "taskresult.h"
+#include "taskmanager.h"
 
 #include "task/result/report/sectioncontent.h"
 #include "task/result/report/sectioncontentfigure.h"
@@ -23,6 +24,8 @@
 
 #include "timeconv.h"
 #include "logger.h"
+
+#include <QMenu>
 
 const std::string  TaskResult::DBTableName         = "task_results";
 const Property     TaskResult::DBColumnID          = Property("result_id"   , PropertyDataType::UINT  );
@@ -121,6 +124,78 @@ const nlohmann::json& TaskResult::configuration() const
 
 /**
  */
+Result TaskResult::canRecompute() const
+{
+    //we generally assume a config is needed to recompute the result
+    if (!config_.is_object())
+        return Result::failed("No configuration available");
+
+    //derived custom check
+    return canRecompute_impl();
+}
+
+/**
+ */
+bool TaskResult::recomputeNeeded() const
+{
+    //outdated => recompute needed
+    if (isOutdated())
+        return true;
+
+    //derived custom check
+    return recomputeNeeded_impl();
+}
+
+/**
+ */
+Result TaskResult::recompute(bool restore_section)
+{
+    //check if we can recompute
+    auto r = canRecompute();
+    if (!r.ok())
+        return r;
+
+    r = recompute_impl();
+    if (!r.ok())
+        return r;
+
+    //recompute succeeded => unset outdated flag
+    outdated_ = false;
+
+    if (restore_section)
+        task_manager_.restoreBackupSection();
+
+    return Result::succeeded();
+}
+
+/**
+ */
+Result TaskResult::recomputeIfNeeded(bool restore_section)
+{
+    //recompute needed? => recompute
+    if (recomputeNeeded())
+        return recompute(restore_section);
+
+    //still ok
+    return Result::succeeded();
+}
+
+/**
+ */
+void TaskResult::setOutdated()
+{
+    outdated_ = true;
+}
+
+/**
+ */
+bool TaskResult::isOutdated() const
+{
+    return outdated_;
+}
+
+/**
+ */
 bool TaskResult::loadOnDemandContent(ResultReport::SectionContent* content) const
 {
     if (!content)
@@ -156,6 +231,27 @@ bool TaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure* figure) 
 bool TaskResult::loadOnDemandTable(ResultReport::SectionContentTable* table) const
 {
     return false;
+}
+
+/**
+ */
+bool TaskResult::customContextMenu(QMenu& menu, 
+                                   ResultReport::SectionContentTable* table, 
+                                   unsigned int row) const
+{
+    assert (table);
+
+    bool ok = customContextMenu_impl(menu, table, row);
+
+    return ok && menu.actions().size() > 0;
+}
+
+/**
+ */
+void TaskResult::postprocessTable(ResultReport::SectionContentTable* table) const
+{
+    assert (table);
+    postprocessTable_impl(table);
 }
 
 /**

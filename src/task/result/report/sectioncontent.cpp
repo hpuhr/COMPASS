@@ -132,6 +132,20 @@ std::string SectionContent::name() const
 
 /**
  */
+TaskResult* SectionContent::taskResult()
+{
+    return &parent_section_->report()->result();
+}
+
+/**
+ */
+const TaskResult* SectionContent::taskResult() const
+{
+    return &parent_section_->report()->result();
+}
+
+/**
+ */
 void SectionContent::setJSONProperty(const std::string& name, const nlohmann::json& value)
 {
     properties_[ name ] = value;

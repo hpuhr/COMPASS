@@ -35,11 +35,20 @@ public:
     task::TaskResultType type() const override final { return task::TaskResultType::Evaluation; }
 
 protected:
+    Result recompute_impl() override;
+    Result canRecompute_impl() const override;
+    bool recomputeNeeded_impl() const override;
+
     bool loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const override;
     bool loadOnDemandTable(ResultReport::SectionContentTable* table) const override;
 
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
+
+    bool customContextMenu_impl(QMenu& menu, 
+                                ResultReport::SectionContentTable* table, 
+                                unsigned int row) const override final;
+    void postprocessTable_impl(ResultReport::SectionContentTable* table) const override final;
 
 private:
     EvaluationCalculator* calculator() const;

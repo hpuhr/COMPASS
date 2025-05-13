@@ -49,6 +49,8 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
+const std::string EvaluationData::TargetsTableName = "Evaluated Targets";
+
 EvaluationData::EvaluationData(EvaluationCalculator& calculator, 
                                DBContentManager& dbcont_man)
     : calculator_(calculator), dbcont_man_(dbcont_man)
@@ -753,7 +755,9 @@ void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report)
     for (const auto& h : table_headers)
         headers.push_back(h.toStdString());
 
-    auto& table = section.addTable("evaluated_targets", table_headers.size(), headers, false);
+    auto result = &report->result();
+
+    auto& table = section.addTable(TargetsTableName, table_headers.size(), headers, false);
 
     int cols = dbcont_man_.targetModel()->columnCount();
     int rows = dbcont_man_.targetModel()->rowCount();

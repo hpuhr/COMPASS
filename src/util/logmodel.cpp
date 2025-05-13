@@ -18,15 +18,15 @@ LogStore::LogStore(bool show_everything)
 
     checked_icon_ = QIcon(Files::getIconFilepath("done.png").c_str());
 
-    logInfo("Test", {}, {}) << "Test Info";
-    logWarn("Test", {}, {}) << "Test Warning";
-    logError("Test", {}, {}) << "Test Error";
+    // logInfo("Test", {}, {}) << "Test Info";
+    // logWarn("Test", {}, {}) << "Test Warning";
+    // logError("Test", {}, {}) << "Test Error";
 
-    acceptMessages();
+    // acceptMessages();
 
-    logInfo("Test", {}, {}) << "Test Info2";
-    logWarn("Test", {}, {}) << "Test Warning2";
-    logError("Test", {}, {}) << "Test Error2";
+    // logInfo("Test", {}, {}) << "Test Info2";
+    // logWarn("Test", {}, {}) << "Test Warning2";
+    // logError("Test", {}, {}) << "Test Error2";
 }
 
 LogStream LogStore::logInfo(const std::string& component,

@@ -213,11 +213,12 @@ string toStringLong(unsigned long value)
 
 string toTimeString(const boost::posix_time::ptime& value)
 {
-    thread_local ostringstream date_stream;
+    ostringstream date_stream; // thread_local wrong string
 
     // thread-safe static locale setup
-    static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(date_str_format.c_str()));
+    static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(str_format.c_str()));
 
+    // static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(str_format.c_str()));
     date_stream.imbue(custom_locale);
     date_stream << value;
 
@@ -231,7 +232,7 @@ string toTimeString(const boost::posix_time::ptime& value)
 
 string toDateString(const boost::posix_time::ptime& value)
 {
-    thread_local ostringstream date_stream;
+    ostringstream date_stream; // thread_local wrong string
 
     // thread-safe static locale setup
     static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(date_str_format.c_str()));

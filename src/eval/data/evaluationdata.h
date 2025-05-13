@@ -123,6 +123,8 @@ public:
     // tst
     unsigned int tst_line_id_;
 
+    static const std::string TargetsTableName;
+
 protected:
     void updateAllInterestFactors();
 

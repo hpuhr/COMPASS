@@ -27,9 +27,10 @@
 
 #include <boost/optional.hpp>
 
-
 class QVBoxLayout;
 class LatexVisitor;
+
+class TaskResult;
 
 namespace ResultReport
 {
@@ -134,6 +135,9 @@ protected:
     virtual bool fromJSON_impl(const nlohmann::json& j) = 0;
 
     virtual bool loadOnDemand();
+
+    TaskResult* taskResult();
+    const TaskResult* taskResult() const;
 
     Type           type_;
     unsigned int   id_ = 0;
