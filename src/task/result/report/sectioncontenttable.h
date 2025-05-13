@@ -100,16 +100,6 @@ class SectionContentTableWidget;
 class SectionContentTable : public SectionContent
 {
 public:
-    /**
-     */
-    struct RowInfo
-    {
-        bool enabled          = true;
-        bool has_context_menu = true;
-    };
-
-    typedef std::function<RowInfo(unsigned int)>       RowInfoCallback;
-    typedef std::function<bool(QMenu*, unsigned int)>  RowContextMenuCallback;
     typedef std::map<std::pair<int,int>, unsigned int> CellStyles;
 
     SectionContentTable(unsigned int id,
@@ -123,6 +113,9 @@ public:
     SectionContentTable(Section* parent_section);
     virtual ~SectionContentTable();
 
+    virtual void addToLayout (QVBoxLayout* layout) override;
+    virtual void accept(LatexVisitor& v) override;
+
     void addRow (const nlohmann::json::array_t& row,
                  const SectionContentViewable& viewable = SectionContentViewable(),
                  const std::string& section_link = "",
@@ -130,13 +123,15 @@ public:
                  const QVariant& viewable_index = QVariant(),
                  unsigned int row_style = 0);
 
+    const nlohmann::json& getData(int row, int column) const;
+    const nlohmann::json& getData(int row, const std::string& col_name) const;
+    bool hasColumn(const std::string& col_name) const;
+    int columnIndex(const std::string& col_name) const;
+
     void setColumnStyle(int column, unsigned int style);
     void setCellStyle(int row, int column, unsigned int style);
 
     unsigned int cellStyle(int row, int column) const;
-    
-    virtual void addToLayout (QVBoxLayout* layout) override;
-    virtual void accept(LatexVisitor& v) override;
 
     size_t numRows() const;
     size_t numColumns() const;
@@ -151,8 +146,6 @@ public:
     void showUnused(bool value);
 
     void registerCallBack(const std::string& name, const std::function<void()>& func);
-    void setRowInfoCallback(const RowInfoCallback& func);
-    void setRowContextMenuCallback(const RowContextMenuCallback& func);
 
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -207,21 +200,21 @@ public:
     static const QColor ColorBGYellow;
 
 protected:
-    void toJSON_impl(nlohmann::json& root_node) const override final;
+    void toJSON_impl(nlohmann::json& root_node) const override final; 
     bool fromJSON_impl(const nlohmann::json& j) override final;
 
     bool loadOnDemand() override final;
 
     unsigned int addFigure (const SectionContentViewable& viewable);
 
-    SectionContentTableWidget* tableWidget() const;
+    SectionContentTableWidget* createTableWidget();
+    const SectionContentTableWidget* tableWidget() const;
+    SectionContentTableWidget* tableWidget();
 
     void toggleShowUnused();
     void copyContent();
     
     void executeCallback(const std::string& name);
-
-    RowInfo rowInfo(unsigned int row) const;
 
     unsigned int              num_columns_ {0};
     std::vector<std::string>  headings_;
@@ -253,8 +246,6 @@ protected:
     mutable SectionContentTableWidget* table_widget_ {nullptr};
 
     std::map<std::string, std::function<void()>> callback_map_;
-    RowInfoCallback                              row_info_callback_;
-    RowContextMenuCallback                       row_contextmenu_callback_;
 };
 
 /**

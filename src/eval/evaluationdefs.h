@@ -26,6 +26,14 @@ namespace Evaluation
  */
 struct RequirementResultID
 {
+    RequirementResultID() = default;
+    RequirementResultID(const std::string& layer,
+                        const std::string& group,
+                        const std::string& req)
+    :   sec_layer_name(layer)
+    ,   req_group_name(group)
+    ,   req_name      (req  ) {}
+
     bool valid() const
     {
         return !sec_layer_name.empty() &&

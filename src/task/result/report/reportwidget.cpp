@@ -110,7 +110,7 @@ void ReportWidget::expand()
 }
 
 void ReportWidget::selectId (const std::string& id,
-                                 bool show_figure)
+                             bool show_figure)
 {
     loginf << "ReportWidget: selectId: id '" << id << "'";
 
@@ -264,6 +264,11 @@ void ReportWidget::updateBackButton ()
 void ReportWidget::updateCurrentSection()
 {
     current_section_label_->setText(id_history_.empty() ? "" : QString::fromStdString(id_history_.back()));
+}
+
+std::string ReportWidget::currentSection() const
+{
+    return current_section_label_->text().toStdString();
 }
 
 boost::optional<nlohmann::json> ReportWidget::getTableData(const std::string& result_id,

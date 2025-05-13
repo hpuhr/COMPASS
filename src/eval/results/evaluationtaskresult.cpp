@@ -18,12 +18,15 @@
 #include "evaluationtaskresult.h"
 #include "evaluationcalculator.h"
 #include "eval/results/base/single.h"
+#include "eval/results/base/joined.h"
 
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/sectioncontenttable.h"
 
 #include "compass.h"
 #include "logger.h"
+
+#include <QMenu>
 
 /**
  */
@@ -37,34 +40,71 @@ EvaluationTaskResult::EvaluationTaskResult(unsigned int id,
  */
 EvaluationTaskResult::~EvaluationTaskResult() = default;
 
+/**
+ */
+Result EvaluationTaskResult::recompute_impl()
+{
+    auto calc = calculator();
+
+    calc->evaluate(true, true);
+
+    return Result::succeeded();
+}
+
+/**
+ */
+Result EvaluationTaskResult::canRecompute_impl() const
+{
+    auto calc = calculator();
+    if (!calc)
+        return Result::failed("Calculator could not be instantiated");
+
+    return calc->canEvaluate();
+}
+
+/**
+ */
+bool EvaluationTaskResult::recomputeNeeded_impl() const
+{
+    auto calc = calculator();
+    if (!calc)
+        return true;
+
+    return calc->results().empty() || calc->evaluationUTNs().size() > 0;
+}
+
 namespace helpers
 {
     /**
      */
-    std::pair<unsigned int, Evaluation::RequirementResultID> resultInfoFromProperties(const ResultReport::SectionContent* content)
+    std::pair<unsigned int, Evaluation::RequirementResultID> singleResultContentProperties(const ResultReport::SectionContent* content)
     {
-        assert(content->hasJSONProperty(EvaluationRequirementResult::Single::PropertyUTN));
-        assert(content->hasJSONProperty(EvaluationRequirementResult::Single::PropertySectorLayer));
-        assert(content->hasJSONProperty(EvaluationRequirementResult::Single::PropertyReqGroup));
-        assert(content->hasJSONProperty(EvaluationRequirementResult::Single::PropertyReqName));
+        assert(content);
 
-        unsigned int utn;
-        Evaluation::RequirementResultID id;
+        auto info = EvaluationRequirementResult::Single::singleContentProperties(*content);
+        assert(info.has_value());
 
-        utn               = content->jsonProperty(EvaluationRequirementResult::Single::PropertyUTN);
-        id.sec_layer_name = content->jsonProperty(EvaluationRequirementResult::Single::PropertySectorLayer);
-        id.req_group_name = content->jsonProperty(EvaluationRequirementResult::Single::PropertyReqGroup);
-        id.req_name       = content->jsonProperty(EvaluationRequirementResult::Single::PropertyReqName);
-
-        return std::make_pair(utn, id);
+        return std::make_pair(info->first, info->second);
     }
 
     /**
      */
-    EvaluationRequirementResult::Single* obtainResult(const ResultReport::SectionContent* content,
-                                                      EvaluationCalculator* calculator)
+    Evaluation::RequirementResultID joinedResultContentProperties(const ResultReport::SectionContent* content)
     {
-        auto info = resultInfoFromProperties(content);
+        assert(content);
+
+        auto info = EvaluationRequirementResult::Joined::joinedContentProperties(*content);
+        assert(info.has_value());
+
+        return info.value();
+    }
+
+    /**
+     */
+    EvaluationRequirementResult::Single* obtainSingleResult(const ResultReport::SectionContent* content,
+                                                            EvaluationCalculator* calculator)
+    {
+        auto info = singleResultContentProperties(content);
 
         loginf << "obtainResult: Obtaining result for" 
                << " utn " << info.first 
@@ -82,6 +122,30 @@ namespace helpers
 
         //then return result
         return calculator->singleResult(info.second, info.first);
+    }
+
+    /**
+     */
+    EvaluationRequirementResult::Joined* obtainJoinedResult(const ResultReport::SectionContent* content,
+                                                            EvaluationCalculator* calculator)
+    {
+        auto info = joinedResultContentProperties(content);
+
+        loginf << "obtainResult: Obtaining result for" 
+               << " layer " << info.sec_layer_name
+               << " group " << info.req_group_name
+               << " req " << info.req_name;
+
+        //result already present?
+        auto r = calculator->joinedResult(info);
+        if (r)
+            return r;
+
+        //otherwise evaluate for specified requirement
+        calculator->evaluate(true, false, {}, { info });
+
+        //then return result
+        return calculator->joinedResult(info);
     }
 }
 
@@ -102,7 +166,7 @@ bool EvaluationTaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure
         if (figure->name() == EvaluationRequirementResult::Single::TargetOverviewID)
         {
             //get result for section
-            auto result = helpers::obtainResult(figure, calc);
+            auto result = helpers::obtainSingleResult(figure, calc);
             if (!result)
             {
                 logerr << "EvaluationTaskResult: loadOnDemandFigure: result could not be obtained";
@@ -137,10 +201,10 @@ bool EvaluationTaskResult::loadOnDemandTable(ResultReport::SectionContentTable* 
 
     try
     {
-        if (table->name() == EvaluationRequirementResult::Single::tr_details_table_name_)
+        if (table->name() == EvaluationRequirementResult::Single::TRDetailsTableName)
         {
             //get result for section
-            auto result = helpers::obtainResult(table, calc);
+            auto result = helpers::obtainSingleResult(table, calc);
             if (!result)
             {
                 logerr << "EvaluationTaskResult: loadOnDemandTable: result could not be obtained";
@@ -206,4 +270,119 @@ void EvaluationTaskResult::toJSON_impl(nlohmann::json& root_node) const
 bool EvaluationTaskResult::fromJSON_impl(const nlohmann::json& j)
 {
     return true;
+}
+
+/**
+ */
+bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu, 
+                                                  ResultReport::SectionContentTable* table, 
+                                                  unsigned int row) const
+{
+    logdbg << "EvaluationTaskResult: customContextMenu_impl";
+
+    if (table->name() == EvaluationRequirementResult::Single::TRDetailsTableName)
+    {
+        //target report details table in single result section
+    }
+    else if (table->name() == EvaluationRequirementResult::Joined::TargetsTableName)
+    {
+        //target table in joined result section
+        auto info = helpers::joinedResultContentProperties(table);
+
+        assert(table->hasColumn("UTN"));
+        const auto& d = table->getData(row, "UTN");
+
+        if (!d.is_number_unsigned())
+            return false;
+
+        unsigned int utn = d;
+        
+        //@TODO
+        loginf << "EvaluationTaskResult: customContextMenu_impl: Context menu requested for utn " << utn;
+
+        return true;
+    }
+    else if (table->name() == EvaluationRequirementResult::Base::RequirementOverviewTableName)
+    {
+        //requirement table in overview section
+    }
+    else if (table->name() == EvaluationData::TargetsTableName)
+    {
+        //evaluation target table
+    }
+
+    // unsigned int row_index = source_index.row();
+
+    // if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->isSingle())
+    // {
+    //     EvaluationRequirementResult::Single* single_result =
+    //             static_cast<EvaluationRequirementResult::Single*>(result_ptrs_.at(row_index));
+    //     assert (single_result);
+
+    //     QMenu menu;
+
+    //     unsigned int utn = single_result->utn();
+    //     loginf << "SectionContentTable: customContextMenuSlot: utn " << utn;
+
+    //     assert (eval_man_.getData().hasTargetData(utn));
+
+    //     const EvaluationTargetData& target_data = eval_man_.getData().targetData(utn);
+
+    //     if (target_data.use())
+    //     {
+    //         QAction* action = new QAction("Remove", this);
+    //         connect (action, &QAction::triggered, this, &SectionContentTable::removeUTNSlot);
+    //         action->setData(utn);
+
+    //         menu.addAction(action);
+    //     }
+    //     else
+    //     {
+    //         QAction* action = new QAction("Add", this);
+    //         connect (action, &QAction::triggered, this, &SectionContentTable::addUTNSlot);
+    //         action->setData(utn);
+
+    //         menu.addAction(action);
+    //     }
+
+    //     QAction* action = new QAction("Show Full UTN", this);
+    //     connect (action, &QAction::triggered, this, &SectionContentTable::showFullUTNSlot);
+    //     action->setData(utn);
+    //     menu.addAction(action);
+
+    //     QAction* action2 = new QAction("Show Surrounding Data", this);
+    //     connect (action2, &QAction::triggered, this, &SectionContentTable::showSurroundingDataSlot);
+    //     action2->setData(utn);
+    //     menu.addAction(action2);
+
+    //     menu.exec(table_view_->viewport()->mapToGlobal(p));
+    // }
+    // else
+    //     loginf << "SectionContentTable: customContextMenuSlot: no associated utn";
+
+    return false;
+}
+
+/**
+ */
+void EvaluationTaskResult::postprocessTable_impl(ResultReport::SectionContentTable* table) const
+{
+    if (table->name() == EvaluationRequirementResult::Single::TRDetailsTableName)
+    {
+        //target report details table in single result section
+    }
+    else if (table->name() == EvaluationRequirementResult::Joined::TargetsTableName)
+    {
+        //target table in joined result section
+    }
+    else if (table->name() == EvaluationRequirementResult::Base::RequirementOverviewTableName)
+    {
+        //requirement table in overview section
+    }
+    else if (table->name() == EvaluationData::TargetsTableName)
+    {
+        //evaluation target table
+        auto this_unconst = const_cast<EvaluationTaskResult*>(this);
+        table->registerCallBack("Rerun Evaluation", [ this_unconst ] () { this_unconst->recompute(true); });
+    }
 }

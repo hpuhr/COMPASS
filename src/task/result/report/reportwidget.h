@@ -44,6 +44,8 @@ public:
     void selectId (const std::string& id, bool show_figure = false);
     void reshowLastId ();
 
+    std::string currentSection() const;
+
     boost::optional<nlohmann::json> getTableData(const std::string& result_id,
                                                  const std::string& table_id,
                                                  bool rowwise = true,
@@ -52,6 +54,10 @@ public:
     void showFigure(const QModelIndex& index);
 
 protected:
+    void expandAllParents (QModelIndex index);
+    void updateBackButton ();
+    void updateCurrentSection();
+
     TaskResultsWidget& task_result_widget_;
 
     ResultReport::TreeModel tree_model_;
@@ -66,10 +72,6 @@ protected:
     std::vector<std::string> id_history_;
 
     QLabel* current_section_label_ = nullptr;
-
-    void expandAllParents (QModelIndex index);
-    void updateBackButton ();
-    void updateCurrentSection();
 };
 
 }

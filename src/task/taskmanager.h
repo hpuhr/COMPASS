@@ -117,9 +117,19 @@ public:
                                                               unsigned int content_id,
                                                               bool show_dialog = false) const;
 
+    void restoreBackupSection();
+
     static const bool CleanupDBIfNeeded;
 
 protected:
+    virtual void checkSubConfigurables() override;
+
+    void addTask(const std::string& class_id, Task* task);
+    MainWindow* getMainWindow();
+
+    void loadResults();
+    boost::optional<unsigned int> findResult(const std::string& name) const;
+
     // tasks
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
     std::unique_ptr<ViewPointsImportTask> view_points_import_task_;
@@ -131,8 +141,6 @@ protected:
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<ReconstructorTask> reconstruct_references_task_;
 
-    virtual void checkSubConfigurables() override;
-
     std::map<std::string, Task*> tasks_;
 
     std::unique_ptr<TaskResultsWidget> widget_;
@@ -141,10 +149,4 @@ protected:
     std::shared_ptr<TaskResult> current_result_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
-
-    void addTask(const std::string& class_id, Task* task);
-    MainWindow* getMainWindow();
-
-    void loadResults();
-    boost::optional<unsigned int> findResult(const std::string& name) const;
 };

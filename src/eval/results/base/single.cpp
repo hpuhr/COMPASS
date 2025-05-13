@@ -17,6 +17,7 @@
 
 #include "eval/results/base/single.h"
 #include "eval/results/base/result_t.h"
+#include "eval/results/base/joined.h"
 
 #include "task/result/report/report.h"
 #include "task/result/report/section.h"
@@ -42,8 +43,7 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-const std::string Single::tr_details_table_name_ {"Target Reports Details"};
-const std::string Single::target_table_name_     {"Targets"};
+const std::string Single::TRDetailsTableName   = "Target Reports Details";
 
 const std::string Single::TargetOverviewID     = "target_errors_overview";
 
@@ -60,10 +60,8 @@ const QColor Single::AnnotationColorHighlight = Qt::yellow;
 const QColor Single::AnnotationColorError     = QColor("#FF6666");
 const QColor Single::AnnotationColorOk        = QColor("#66FF66");
 
-const std::string Single::PropertyUTN         = "utn";
-const std::string Single::PropertySectorLayer = "sector_layer";
-const std::string Single::PropertyReqGroup    = "req_group";
-const std::string Single::PropertyReqName     = "req_name";
+const std::string Single::ContentPropertyUTN  = "utn";
+
 
 /**
 */
@@ -305,14 +303,14 @@ void Single::addTargetToOverviewTable(shared_ptr<ResultReport::Report> report)
 {
     auto& tgt_overview_section = getRequirementSection(report);
 
-    addTargetToOverviewTable(tgt_overview_section, target_table_name_);
+    addTargetToOverviewTable(tgt_overview_section, Joined::TargetsTableName);
 
     if (calculator_.settings().report_split_results_by_mops_ || 
         calculator_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
         auto& sum_section = report->getSection(getRequirementSumSectionID());
 
-        addTargetToOverviewTable(sum_section, target_table_name_);
+        addTargetToOverviewTable(sum_section, Joined::TargetsTableName);
     }
 }
 
@@ -328,7 +326,11 @@ void Single::addTargetToOverviewTable(ResultReport::Section& section,
 
         auto sort_order = targetTableSortOrder();
 
-        section.addTable(table_name, headers.size(), headers, true, sort_column, sort_order);
+        auto& table = section.addTable(table_name, headers.size(), headers, true, sort_column, sort_order);
+
+        Joined::setJoinedContentProperties(table, Evaluation::RequirementResultID(sector_layer_.name(),
+                                                                                  requirement_->groupName(),
+                                                                                  requirement_->name()));
     }
 
     auto& target_table = section.getTable(table_name);
@@ -388,10 +390,10 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
 
         //setup on-demand and add result info
         fig.setOnDemand();
-        fig.setJSONProperty(PropertyUTN, utn_);
-        fig.setJSONProperty(PropertySectorLayer, sector_layer_.name());
-        fig.setJSONProperty(PropertyReqGroup, requirement_->groupName());
-        fig.setJSONProperty(PropertyReqName, requirement_->name());
+
+        Single::setSingleContentProperties(fig, Evaluation::RequirementResultID(sector_layer_.name(),
+                                                                                requirement_->groupName(),
+                                                                                requirement_->name()), utn_);
     }
     else
     {
@@ -409,18 +411,18 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
 void Single::generateDetailsTable(ResultReport::Section& utn_req_section)
 {
     //init table if needed
-    if (!utn_req_section.hasTable(tr_details_table_name_))
+    if (!utn_req_section.hasTable(TRDetailsTableName))
     {
         auto headers = detailHeaders();
 
-        auto& utn_req_details_table = utn_req_section.addTable(tr_details_table_name_, headers.size(), headers);
+        auto& table = utn_req_section.addTable(TRDetailsTableName, headers.size(), headers);
 
         //setup on-demand and add result info
-        utn_req_details_table.setOnDemand();
-        utn_req_details_table.setJSONProperty(PropertyUTN, utn_);
-        utn_req_details_table.setJSONProperty(PropertySectorLayer, sector_layer_.name());
-        utn_req_details_table.setJSONProperty(PropertyReqGroup, requirement_->groupName());
-        utn_req_details_table.setJSONProperty(PropertyReqName, requirement_->name());
+        table.setOnDemand();
+
+        Single::setSingleContentProperties(table, Evaluation::RequirementResultID(sector_layer_.name(),
+                                                                                  requirement_->groupName(),
+                                                                                  requirement_->name()), utn_);
     }
 }
 
@@ -609,7 +611,7 @@ std::vector<Single::TargetInfo> Single::targetConditionInfos(bool& failed) const
 bool Single::hasReference (const ResultReport::SectionContentTable& table, 
                            const QVariant& annotation) const
 {
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
+    if (table.name() == Joined::TargetsTableName && annotation.toUInt() == utn_)
         return true;
     else
         return false;
@@ -644,9 +646,9 @@ bool Single::hasViewableData (const ResultReport::SectionContentTable& table,
                               const QVariant& annotation) const
 {
     //check validity of annotation index
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
+    if (table.name() == Joined::TargetsTableName && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && detailIndex(annotation).has_value())
+    else if (table.name() == TRDetailsTableName && annotation.isValid() && detailIndex(annotation).has_value())
         return true;
     
     return false;
@@ -671,12 +673,12 @@ std::shared_ptr<nlohmann::json::object_t> Single::viewableData(const ResultRepor
 
     auto temp_details = temporaryDetails();
 
-    if (table.name() == target_table_name_)
+    if (table.name() == Joined::TargetsTableName)
     {
         //return target overview viewable
         return createViewable(AnnotationOptions().overview());
     }
-    else if (table.name() == tr_details_table_name_ && annotation.isValid())
+    else if (table.name() == TRDetailsTableName && annotation.isValid())
     {
         //obtain detail key from annotation
         auto detail_key = detailIndex(annotation);
@@ -1177,6 +1179,42 @@ void Single::createAnnotations(nlohmann::json& annotations_json,
     {
         createTargetAnnotations(details_.value(), annotations_json, TargetAnnotationType::Highlight, options.detail_index);
     }
+}
+
+/**
+*/
+void Single::setSingleContentProperties(ResultReport::SectionContent& content,
+                                        const Evaluation::RequirementResultID& id,
+                                        unsigned int utn)
+{
+    Base::setContentProperties(content, id);
+
+    content.setJSONProperty(ContentPropertyUTN, utn);
+}
+
+/**
+*/
+boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>> Single::singleContentProperties(const ResultReport::SectionContent& content)
+{
+    if (!content.hasJSONProperty(ContentPropertyUTN))
+        return boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>>();
+
+    auto id = Base::contentProperties(content);
+    if (!id.has_value())
+        return boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>>();
+
+    unsigned int utn;
+    
+    try
+    {
+        utn = content.jsonProperty(ContentPropertyUTN);
+    }
+    catch(...)
+    {
+        return boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>>();
+    }
+
+    return std::make_pair(utn, id.value());
 }
 
 }

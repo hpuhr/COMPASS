@@ -24,6 +24,8 @@
 #include "property.h"
 #include "propertylist.h"
 
+#include "result.h"
+
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -36,6 +38,8 @@ namespace ResultReport
     class SectionContentFigure;
     class SectionContentTable;
 }
+
+class QMenu;
 
 /**
  */
@@ -65,7 +69,18 @@ public:
     bool hasConfiguration() const;
     const nlohmann::json& configuration() const;
 
+    Result canRecompute() const;
+    bool recomputeNeeded() const;
+    Result recompute(bool restore_section = false);
+    Result recomputeIfNeeded(bool restore_section = false);
+    void setOutdated();
+    bool isOutdated() const;
+
     bool loadOnDemandContent(ResultReport::SectionContent* content) const;
+    bool customContextMenu(QMenu& menu, 
+                           ResultReport::SectionContentTable* table, 
+                           unsigned int row) const;
+    void postprocessTable(ResultReport::SectionContentTable* table) const;
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
@@ -90,12 +105,24 @@ public:
 protected:
     void id(unsigned int id);
 
+    //reimplement for recomputation mechanics
+    virtual Result recompute_impl() { return false; }
+    virtual Result canRecompute_impl() const { return false; }
+    virtual bool recomputeNeeded_impl() const { return false; }
+
+    //reimplement for on-demand generation of contents
     virtual bool loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const;
     virtual bool loadOnDemandTable(ResultReport::SectionContentTable* table) const;
     
-    //serialization of derived content
+    //reimplement for serialization of derived content
     virtual void toJSON_impl(nlohmann::json& root_node) const {};
     virtual bool fromJSON_impl(const nlohmann::json& j) { return true; };
+
+    //reimplement for custom table behavior
+    virtual bool customContextMenu_impl(QMenu& menu, 
+                                        ResultReport::SectionContentTable* table, 
+                                        unsigned int row) const { return false; }
+    virtual void postprocessTable_impl(ResultReport::SectionContentTable* table) const {}
 
     TaskManager& task_manager_;
 
@@ -106,4 +133,6 @@ protected:
 
     std::shared_ptr<ResultReport::Report> report_;
     nlohmann::json                        config_;
+
+    bool outdated_ = false;
 };

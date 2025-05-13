@@ -19,6 +19,7 @@
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/report.h"
+#include "task/result/taskresult.h"
 
 #include "taskmanager.h"
 #include "compass.h"
@@ -146,6 +147,41 @@ void SectionContentTable::addRow (const nlohmann::json::array_t& row,
 
 /**
  */
+const nlohmann::json& SectionContentTable::getData(int row, int column) const
+{
+    return rows_.at(row).at(column);
+}
+
+/**
+ */
+const nlohmann::json& SectionContentTable::getData(int row, const std::string& col_name) const
+{
+    int col = columnIndex(col_name);
+    assert(col >= 0);
+
+    return getData(row, col);
+}
+
+/**
+ */
+bool SectionContentTable::hasColumn(const std::string& col_name) const
+{
+    return columnIndex(col_name) >= 0;
+}
+
+/**
+ */
+int SectionContentTable::columnIndex(const std::string& col_name) const
+{
+    auto it = std::find_if(headings_.begin(), headings_.end(), [ & ] (const std::string& cname) { return col_name == cname; });
+    if (it == headings_.end())
+        return -1;
+
+    return (int)std::distance(headings_.begin(), it);
+}
+
+/**
+ */
 void SectionContentTable::setColumnStyle(int column, unsigned int style)
 {
     column_styles_.at(column) = style;
@@ -191,18 +227,36 @@ unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewab
 
 /**
  */
-SectionContentTableWidget* SectionContentTable::tableWidget() const
+SectionContentTableWidget* SectionContentTable::createTableWidget()
 {
-    if (table_widget_)
-        return table_widget_;
+    assert(!table_widget_);
 
-    //generate widget
+    taskResult()->postprocessTable(this);
+
     SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
     table_widget_ = new SectionContentTableWidget(tmp, 
                                                   show_unused_, 
                                                   sortable_ ? sort_column_ : -1, 
                                                   sort_order_);
     return table_widget_;
+}
+
+/**
+ */
+const SectionContentTableWidget* SectionContentTable::tableWidget() const
+{
+    assert(table_widget_);
+    return table_widget_;
+    
+}
+
+/**
+ */
+SectionContentTableWidget* SectionContentTable::tableWidget()
+{
+    assert(table_widget_);
+    return table_widget_;
+    
 }
 
 /**
@@ -214,7 +268,7 @@ void SectionContentTable::addToLayout(QVBoxLayout* layout)
     assert (layout);
 
     //add widget to layout
-    auto widget = tableWidget();
+    auto widget = createTableWidget();
     layout->addWidget(widget);
 }
 
@@ -504,22 +558,31 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
                     return QBrush(c.value());
             }
 
-            //QVariant data = qVariantFromJSON(rows_.at(index.row()).at(index.column()));
+            //custom heuristics for evaluation
+            //@TODO: configure tables accordingly in evaluation results
+            if (taskResult()->type() == task::TaskResultType::Evaluation)
+            {
+                const auto& data = rows_.at(index.row()).at(index.column());
 
-            // if (data.userType() == QMetaType::QString)
-            // {
-            //     if (data == "Passed")
-            //         return QVariant(QColor(Qt::darkGreen));
-            //     else if (data == "Failed")
-            //         return QVariant(QColor(Qt::red));
-            // }
-            // if (data.userType() == QMetaType::Bool)
-            // {
-            //     if (data == true)
-            //         return QVariant(QColor(Qt::darkGreen));
-            //     else if (data == false)
-            //         return QVariant(QColor(Qt::red));
-            // }
+                if (data.is_string())
+                {
+                    auto txt = data.get<std::string>();
+
+                    if (txt == "Passed")
+                        return QBrush(ColorTextGreen);
+                    else if (txt == "Failed")
+                        return QBrush(ColorTextRed);
+                }
+                if (data.is_boolean())
+                {
+                    bool ok = data.get<bool>();
+
+                    if (ok == true)
+                        return QBrush(ColorTextGreen);
+                    else if (ok == false)
+                        return QBrush(ColorTextRed);
+                }
+            }
 
             return QVariant();
         }
@@ -608,7 +671,7 @@ const std::vector<std::string>& SectionContentTable::headings() const
 
 /**
  */
-unsigned int SectionContentTable::filteredRowCount () const
+unsigned int SectionContentTable::filteredRowCount() const
 {
     return tableWidget()->proxyModel()->rowCount();
 }
@@ -681,27 +744,6 @@ void SectionContentTable::executeCallback(const std::string& name)
 
 /**
  */
-void SectionContentTable::setRowInfoCallback(const RowInfoCallback& func)
-{
-    row_info_callback_ = func;
-}
-
-/**
- */
-void SectionContentTable::setRowContextMenuCallback(const RowContextMenuCallback& func)
-{
-    row_contextmenu_callback_ = func;
-}
-
-/**
- */
-SectionContentTable::RowInfo SectionContentTable::rowInfo(unsigned int row) const
-{
-    return row_info_callback_ ? row_info_callback_(row) : RowInfo();
-}
-
-/**
- */
 void SectionContentTable::clicked(unsigned int row)
 {
     const auto& annotation = annotations_.at(row);
@@ -738,7 +780,6 @@ void SectionContentTable::clicked(unsigned int row)
     {
         if (figure)
         {
-            //TODO: find a pattern to support on-demand computation of viewable data
             // if (result_ptrs_.at(row_index)->viewableDataReady())
             // {
             //     //view data ready, just get it
@@ -757,7 +798,7 @@ void SectionContentTable::clicked(unsigned int row)
             //     task.runAsyncDialog();
             // }
 
-            //show viewable
+            //show viewable (will now recompute internally if needed)
             figure->view();
         }
         else
@@ -792,17 +833,11 @@ void SectionContentTable::doubleClicked(unsigned int row)
  */
 void SectionContentTable::customContextMenu(unsigned int row, const QPoint& pos)
 {
-    if (row_contextmenu_callback_ && rowInfo(row).has_context_menu)
-    {
-        QMenu menu;
+    QMenu menu;
+    if (!taskResult()->customContextMenu(menu, this, row))
+        return;
 
-        //configure menu via callback
-        bool use_menu = row_contextmenu_callback_(&menu, row);
-
-        //show menu if valid
-        if (use_menu && menu.actions().size() > 0)
-            menu.exec(pos);
-    }
+    menu.exec(pos);
 }
 
 /**

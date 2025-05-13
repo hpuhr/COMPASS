@@ -179,7 +179,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentTable " << e->name();
 
-    if (!include_target_tr_details_ && e->name() == EvaluationRequirementResult::Single::tr_details_table_name_)
+    if (!include_target_tr_details_ && e->name() == EvaluationRequirementResult::Single::TRDetailsTableName)
         return; // do not generate this table
 
     LatexSection& section = report_.getSection(current_section_name_);

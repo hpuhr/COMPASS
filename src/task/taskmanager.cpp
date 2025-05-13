@@ -627,3 +627,11 @@ void TaskManager::loadResults()
 
     emit taskResultsChangedSignal();
 }
+
+/**
+ */
+void TaskManager::restoreBackupSection()
+{
+    if (widget_)
+        widget_->restoreBackupSection();
+}
