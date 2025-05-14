@@ -14,7 +14,7 @@ public:
 
     virtual void update();
 
-public:
+protected:
     ExcludedTimeWindowsFilter& filter_;
     TimeWindowCollectionWidget* tw_widget_{nullptr};
 };

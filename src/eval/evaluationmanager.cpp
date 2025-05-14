@@ -59,6 +59,12 @@ using namespace std;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
+const std::string EVAL_TIME_CONSTRAINTS_PROPRTY_NAME {"eval_time_constraints"};
+const std::string EVAL_TIME_CONSTRAINTS_USE {"use"};
+const std::string EVAL_TIME_CONSTRAINTS_BEGIN {"begin"};
+const std::string EVAL_TIME_CONSTRAINTS_END {"end"};
+const std::string EVAL_TIME_CONSTRAINTS_EXCLUDED_WINDOWS {"excluded_windows"};
+
 /**
  */
 EvaluationManager::EvaluationManager(const std::string& class_id, 
@@ -103,7 +109,7 @@ void EvaluationManager::checkSubConfigurables()
     if (!calculator_)
     {
         //generate default calculator
-        generateSubConfigurable("EvaluationCalculator", "EvaluationCalculator0");
+        generateSubConfigurable("EvaluationManager", "EvaluationManager0");
         assert(calculator_);
     }
 }
@@ -231,20 +237,49 @@ void EvaluationManager::databaseOpenedSlot()
 
     auto& dbinterface = COMPASS::instance().dbInterface();
 
-    if (dbinterface.hasProperty("eval_filtered_time_windows"))
+    use_timestamp_filter_ = false;
+    load_timestamp_begin_ = {};
+    load_timestamp_end_ = {};
+    load_filtered_time_windows_.clear();
+
+    if (dbinterface.hasProperty(EVAL_TIME_CONSTRAINTS_PROPRTY_NAME))
     {
-        std::string filtered_time_windows_str = dbinterface.getProperty("eval_filtered_time_windows");
+        std::string constraints_str = dbinterface.getProperty(EVAL_TIME_CONSTRAINTS_PROPRTY_NAME);
 
         try
         {
-            nlohmann::json filtered_time_windows_json = nlohmann::json::parse(filtered_time_windows_str);
-            load_filtered_time_windows_.setFrom(filtered_time_windows_json);
+            nlohmann::json constraints_json = nlohmann::json::parse(constraints_str);
+
+            if (constraints_json.contains(EVAL_TIME_CONSTRAINTS_USE))
+                use_timestamp_filter_ = constraints_json.at(EVAL_TIME_CONSTRAINTS_USE);
+
+            if (constraints_json.contains(EVAL_TIME_CONSTRAINTS_BEGIN))
+                load_timestamp_begin_ = Time::fromString(constraints_json.at(EVAL_TIME_CONSTRAINTS_BEGIN));
+
+            if (constraints_json.contains(EVAL_TIME_CONSTRAINTS_END))
+                load_timestamp_end_ = Time::fromString(constraints_json.at(EVAL_TIME_CONSTRAINTS_END));
+
+            if (constraints_json.contains(EVAL_TIME_CONSTRAINTS_EXCLUDED_WINDOWS))
+                load_filtered_time_windows_.setFrom(constraints_json.at(EVAL_TIME_CONSTRAINTS_EXCLUDED_WINDOWS));
         }
         catch (std::exception& e)
         {
-            logerr << "EvaluationManager: databaseOpenedSlot: unsupported eval_filtered_time_windows '"
-                   << filtered_time_windows_str << "': " << e.what();
+            logerr << "EvaluationManager: databaseOpenedSlot: unsupported eval_time_ '"
+                   << constraints_str << "': " << e.what();
         }
+    }
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    if (dbcont_man.hasMinMaxTimestamp())
+    {
+        std::pair<boost::posix_time::ptime , boost::posix_time::ptime> minmax_ts =  dbcont_man.minMaxTimestamp();
+
+        if (load_timestamp_begin_.is_not_a_date_time())
+            load_timestamp_begin_ = get<0>(minmax_ts);
+
+        if (load_timestamp_end_.is_not_a_date_time())
+            load_timestamp_end_ = get<1>(minmax_ts);
     }
 
     // init with false values if not in cfg
@@ -252,14 +287,7 @@ void EvaluationManager::databaseOpenedSlot()
     calculator_->checkTestDataSources();
     calculator_->checkMinHeightFilterValid();
 
-    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (dbcont_man.hasMinMaxTimestamp())
-    {
-        std::pair<boost::posix_time::ptime , boost::posix_time::ptime> minmax_ts =  dbcont_man.minMaxTimestamp();
-        calculator_->loadTimestampBegin(get<0>(minmax_ts));
-        calculator_->loadTimestampEnd(get<1>(minmax_ts));
-    }
 }
 
 /**
@@ -268,6 +296,9 @@ void EvaluationManager::databaseClosedSlot()
 {
     loginf << "EvaluationManager: databaseClosedSlot";
 
+    use_timestamp_filter_ = false;
+    load_timestamp_begin_ = {};
+    load_timestamp_end_ = {};
     load_filtered_time_windows_.clear();
 
     assert(calculator_);
@@ -295,7 +326,7 @@ void EvaluationManager::associationStatusChangedSlot()
     // react on association status change
 }
 
-void EvaluationManager::excludedTimeWindowsChangedSlot()
+void EvaluationManager::timeConstraintsChangedSlot()
 {
     loginf << "EvaluationManager: excludedTimeWindowsChangedSlot";
 
@@ -902,7 +933,7 @@ void EvaluationManager::onConfigurationChanged(const std::vector<std::string>& c
 
 /**
  */
-void EvaluationManager::loadData(const EvaluationCalculator& calculator, 
+void EvaluationManager::loadData(const EvaluationCalculator& calculator,
                                  bool blocking)
 {
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
@@ -992,30 +1023,33 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
         utn_fil->loadViewPointConditions(filter);
     }
 
-    // other filters
-    if (settings.use_load_filter_)
+    // timestamp filter
+
+    if (use_timestamp_filter_)
     {
-        if (settings.use_timestamp_filter_)
+        assert (fil_man.hasFilter("Timestamp"));
+        DBFilter* fil = fil_man.getFilter("Timestamp");
+
+        fil->setActive(true);
+
+        json filter;
+
+        filter["Timestamp"]["Timestamp Minimum"] = Time::toString(load_timestamp_begin_);
+        filter["Timestamp"]["Timestamp Maximum"] = Time::toString(load_timestamp_end_);
+
+        if (load_filtered_time_windows_.size())
         {
-            assert (fil_man.hasFilter("Timestamp"));
-            DBFilter* fil = fil_man.getFilter("Timestamp");
-
-            fil->setActive(true);
-
-            json filter;
-
-            filter["Timestamp"]["Timestamp Minimum"] = Time::toString(calculator.loadTimestampBegin());
-            filter["Timestamp"]["Timestamp Maximum"] = Time::toString(calculator.loadTimestampEnd()  );
-          
-            if (load_filtered_time_windows_.size())
-            {
-                filter["Excluded Time Windows"]["Windows"] =
-                    load_filtered_time_windows_.asJSON();
-            }
-
-            fil->loadViewPointConditions(filter);
+            filter["Excluded Time Windows"]["Windows"] =
+                load_filtered_time_windows_.asJSON();
         }
 
+        fil->loadViewPointConditions(filter);
+    }
+
+    // load filters
+
+    if (settings.use_load_filter_)
+    {
         if (settings.use_ref_traj_accuracy_filter_)
         {
             assert (fil_man.hasFilter("RefTraj Accuracy"));
@@ -1105,6 +1139,8 @@ void EvaluationManager::loadingDone()
     emit hasNewData();
 }
 
+
+
 /**
  */
 std::map<std::string, std::shared_ptr<Buffer>> EvaluationManager::fetchData()
@@ -1114,6 +1150,55 @@ std::map<std::string, std::shared_ptr<Buffer>> EvaluationManager::fetchData()
 
     return data_cpy;
 }
+
+bool EvaluationManager::useTimestampFilter() const
+{
+    return use_timestamp_filter_;
+}
+
+void EvaluationManager::useTimestampFilter(bool value)
+{
+    use_timestamp_filter_ = value;
+}
+
+/**
+ */
+boost::posix_time::ptime EvaluationManager::loadTimestampBegin() const
+{
+    return load_timestamp_begin_;
+}
+
+/**
+ */
+void EvaluationManager::loadTimestampBegin(boost::posix_time::ptime value)
+{
+    loginf << "EvaluationManager: loadTimeBegin: value " << Time::toString(value);
+
+    load_timestamp_begin_ = value;
+
+}
+
+/**
+ */
+boost::posix_time::ptime EvaluationManager::loadTimestampEnd() const
+{
+    return load_timestamp_end_;
+}
+
+/**
+ */
+void EvaluationManager::loadTimestampEnd(boost::posix_time::ptime value)
+{
+    loginf << "EvaluationManager: loadTimeEnd: value " << Time::toString(value);
+
+    load_timestamp_end_ = value;
+}
+
+Utils::TimeWindowCollection& EvaluationManager::excludedTimeWindows()
+{
+    return load_filtered_time_windows_;
+}
+
 
 /**
  */

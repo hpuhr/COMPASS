@@ -24,7 +24,7 @@
 #include "viewabledataconfig.h"
 #include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgenerator.h"
-#include "datasourcecompoundcoverage.h"
+//#include "datasourcecompoundcoverage.h"
 #include "sector.h"
 #include "result.h"
 #include "util/timewindow.h"
@@ -38,7 +38,7 @@ class EvaluationStandard;
 class DBContent;
 class SectorLayer;
 class AirSpace;
-class EvaluationSettings;
+struct EvaluationSettings;
 
 namespace dbContent 
 {
@@ -66,7 +66,7 @@ public slots:
     void dataSourcesChangedSlot();
     void associationStatusChangedSlot();
 
-    void excludedTimeWindowsChangedSlot();
+    void timeConstraintsChangedSlot();
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -126,6 +126,18 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
+    // timestamps
+    boost::posix_time::ptime loadTimestampBegin() const;
+    void loadTimestampBegin(boost::posix_time::ptime value);
+
+    boost::posix_time::ptime loadTimestampEnd() const;
+    void loadTimestampEnd(boost::posix_time::ptime value);
+
+    Utils::TimeWindowCollection& excludedTimeWindows(); // needs to be saved externally
+
+    bool useTimestampFilter() const;
+    void useTimestampFilter(bool value);
+
 protected:
     friend class EvaluationCalculator;
 
@@ -167,5 +179,8 @@ private:
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
+    bool use_timestamp_filter_ {false};
+    boost::posix_time::ptime load_timestamp_begin_;
+    boost::posix_time::ptime load_timestamp_end_;
     Utils::TimeWindowCollection load_filtered_time_windows_;
 };
