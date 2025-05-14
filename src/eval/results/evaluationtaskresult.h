@@ -39,8 +39,11 @@ protected:
     Result canRecompute_impl() const override;
     bool recomputeNeeded_impl() const override;
 
-    bool loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const override;
-    bool loadOnDemandTable(ResultReport::SectionContentTable* table) const override;
+    bool loadOnDemandFigure_impl(ResultReport::SectionContentFigure* figure) const override;
+    bool loadOnDemandTable_impl(ResultReport::SectionContentTable* table) const override;
+    bool loadOnDemandViewable_impl(const ResultReport::SectionContent& content,
+                                   ResultReport::SectionContentViewable& viewable, 
+                                   const QVariant& index) const override;
 
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;

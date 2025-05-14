@@ -37,6 +37,8 @@ namespace ResultReport
     class SectionContent;
     class SectionContentFigure;
     class SectionContentTable;
+    
+    struct SectionContentViewable;
 }
 
 class QMenu;
@@ -77,6 +79,9 @@ public:
     bool isOutdated() const;
 
     bool loadOnDemandContent(ResultReport::SectionContent* content) const;
+    bool loadOnDemandViewable(const ResultReport::SectionContent& content,
+                              ResultReport::SectionContentViewable& viewable, 
+                              const QVariant& index) const;
     bool customContextMenu(QMenu& menu, 
                            ResultReport::SectionContentTable* table, 
                            unsigned int row) const;
@@ -111,8 +116,11 @@ protected:
     virtual bool recomputeNeeded_impl() const { return false; }
 
     //reimplement for on-demand generation of contents
-    virtual bool loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const;
-    virtual bool loadOnDemandTable(ResultReport::SectionContentTable* table) const;
+    virtual bool loadOnDemandFigure_impl(ResultReport::SectionContentFigure* figure) const { return false; }
+    virtual bool loadOnDemandTable_impl(ResultReport::SectionContentTable* table) const { return false; }
+    virtual bool loadOnDemandViewable_impl(const ResultReport::SectionContent& content,
+                                           ResultReport::SectionContentViewable& viewable, 
+                                           const QVariant& index) const { return false; }
     
     //reimplement for serialization of derived content
     virtual void toJSON_impl(nlohmann::json& root_node) const {};

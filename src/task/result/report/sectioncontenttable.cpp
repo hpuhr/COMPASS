@@ -69,6 +69,7 @@ const std::string SectionContentTable::FieldCellStyles   = "cell_styles";
 const std::string SectionContentTable::FieldAnnoFigureID      = "figure_id";
 const std::string SectionContentTable::FieldAnnoSectionLink   = "section_link";
 const std::string SectionContentTable::FieldAnnoSectionFigure = "section_figure";
+const std::string SectionContentTable::FieldAnnoOnDemand      = "on_demand";
 const std::string SectionContentTable::FieldAnnoIndex         = "index";
 const std::string SectionContentTable::FieldAnnoStyle         = "style";
 
@@ -132,11 +133,12 @@ void SectionContentTable::addRow (const nlohmann::json::array_t& row,
     anno.index          = viewable_index;
     anno.section_link   = section_link;
     anno.section_figure = section_figure;
+    anno.on_demand      = viewable.on_demand;
     anno.style          = row_style;
 
-    logdbg<< "SectionContentTable " << name_ << ": addRow: viewable.valid " << viewable.valid();
+    logdbg<< "SectionContentTable " << name_ << ": addRow: viewable has callback " << viewable.hasCallback();
 
-    if (viewable.valid())
+    if (!viewable.on_demand && viewable.hasCallback())
     {
         //add figure to containing section and remember id
         anno.figure_id = addFigure(viewable);
@@ -748,6 +750,26 @@ void SectionContentTable::clicked(unsigned int row)
 {
     const auto& annotation = annotations_.at(row);
 
+    //generate on-demand viewable?
+    if (annotation.on_demand)
+    {
+        SectionContentViewable viewable;
+        bool ok = taskResult()->loadOnDemandViewable(*this, viewable, annotation.index);
+
+        if (ok)
+        {
+            auto content = viewable.viewable_func();
+            report_->setCurrentViewable(*content);
+        }
+        else
+        {
+            report_->unsetCurrentViewable();
+            logerr << "SectionContentTable: clicked: on-demand viewable could not be retrieved";
+        }
+
+        return;
+    }
+
     //obtain figure from annotation
     bool has_valid_link = false;
     SectionContentFigure* figure = nullptr;
@@ -961,6 +983,7 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
 
             j_anno[ FieldAnnoSectionLink   ] = a.section_link;
             j_anno[ FieldAnnoSectionFigure ] = a.section_figure;
+            j_anno[ FieldAnnoOnDemand      ] = a.on_demand;
             j_anno[ FieldAnnoStyle         ] = a.style;
 
             j_annos.push_back(j_anno);
@@ -1011,6 +1034,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     {
         if (!j_anno.contains(FieldAnnoSectionLink)   ||
             !j_anno.contains(FieldAnnoSectionFigure) ||
+            !j_anno.contains(FieldAnnoOnDemand)      ||
             !j_anno.contains(FieldAnnoStyle))
         {
             logerr << "SectionContentTable: fromJSON: Error: Could not read annotation";
@@ -1020,6 +1044,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         RowAnnotation anno;
         anno.section_link   = j_anno[ FieldAnnoSectionLink   ];
         anno.section_figure = j_anno[ FieldAnnoSectionFigure ];
+        anno.on_demand      = j_anno[ FieldAnnoOnDemand      ];
         anno.style          = j_anno[ FieldAnnoStyle         ];
 
         if (j_anno.contains(FieldAnnoFigureID))

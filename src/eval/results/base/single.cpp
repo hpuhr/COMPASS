@@ -428,7 +428,7 @@ void Single::generateDetailsTable(ResultReport::Section& utn_req_section)
 
 /**
 */
-void Single::addDetailsToTable(ResultReport::SectionContentTable& table)
+bool Single::addDetailsToTable(ResultReport::SectionContentTable& table)
 {
     //create details on demand
     auto temp_details = temporaryDetails();
@@ -445,29 +445,50 @@ void Single::addDetailsToTable(ResultReport::SectionContentTable& table)
 
         assert(values.size() == table.numColumns());
 
-        //@TODO: add details (QPoint(didx0, didx1))
-        table.addRow(values);
+        table.addRow(values, ResultReport::SectionContentViewable().setOnDemand(), "", "", QPoint(didx0, didx1));
     };
 
     //iterate over temporary details
     iterateDetails(func);
+
+    return true;
 }
 
 /**
 */
-void Single::addOverviewToFigure(ResultReport::SectionContentFigure& figure)
+bool Single::addOverviewToFigure(ResultReport::SectionContentFigure& figure)
 {
     auto viewable = viewableOverviewData();
 
     auto viewable_func = [viewable]() { return viewable; };
     figure.setViewableFunc(viewable_func);
+
+    return true;
 }
 
 /**
 */
-void Single::addHighlightToFigure(ResultReport::SectionContentFigure& figure)
+bool Single::addHighlightToViewable(ResultReport::SectionContentViewable& viewable, const QVariant& annotation)
 {
-    //@TODO
+    //obtain detail key from annotation
+    auto detail_key = detailIndex(annotation);
+    if (!detail_key.has_value())
+        return false;
+
+    //generate temporary details
+    auto temp_details = temporaryDetails();
+
+    //create highlight viewable for detail
+    auto v = createViewable(AnnotationOptions().highlight(detail_key.value()));
+    if (!v)
+        return false;
+
+    //set callback
+    nlohmann::json::object_t j = *v;
+    v.reset();
+    viewable.setCallback(j);
+
+    return true;
 }
 
 /**

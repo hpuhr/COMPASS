@@ -206,14 +206,14 @@ bool TaskResult::loadOnDemandContent(ResultReport::SectionContent* content) cons
         auto c = dynamic_cast<ResultReport::SectionContentFigure*>(content);
         assert(c);
 
-        return loadOnDemandFigure(c);
+        return loadOnDemandFigure_impl(c);
     }
     else if (content->type() == ResultReport::SectionContent::Type::Table)
     {
         auto c = dynamic_cast<ResultReport::SectionContentTable*>(content);
         assert(c);
 
-        return loadOnDemandTable(c);
+        return loadOnDemandTable_impl(c);
     }
 
     return false;
@@ -221,16 +221,14 @@ bool TaskResult::loadOnDemandContent(ResultReport::SectionContent* content) cons
 
 /**
  */
-bool TaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const
+bool TaskResult::loadOnDemandViewable(const ResultReport::SectionContent& content,
+                                      ResultReport::SectionContentViewable& viewable, 
+                                      const QVariant& index) const
 {
-    return false;
-}
-
-/**
- */
-bool TaskResult::loadOnDemandTable(ResultReport::SectionContentTable* table) const
-{
-    return false;
+    if (!loadOnDemandViewable_impl(content, viewable, index))
+        return false;
+    
+    return viewable.hasCallback();
 }
 
 /**

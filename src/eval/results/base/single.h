@@ -39,6 +39,8 @@ namespace ResultReport
     class SectionContentTable;
     class SectionContentFigure;
     class Report;
+
+    struct SectionContentViewable;
 }
 
 namespace EvaluationRequirementResult
@@ -178,9 +180,9 @@ public:
     void iterateDetails(const DetailFunc& func,
                         const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
 
-    void addDetailsToTable(ResultReport::SectionContentTable& table);
-    void addOverviewToFigure(ResultReport::SectionContentFigure& figure);
-    void addHighlightToFigure(ResultReport::SectionContentFigure& figure);
+    bool addDetailsToTable(ResultReport::SectionContentTable& table);
+    bool addOverviewToFigure(ResultReport::SectionContentFigure& figure);
+    bool addHighlightToViewable(ResultReport::SectionContentViewable& viewable, const QVariant& annotation);
 
     std::vector<double> getValues(const ValueSource<double>& source) const;
     std::vector<double> getValues(int value_id) const;

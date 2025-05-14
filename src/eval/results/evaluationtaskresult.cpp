@@ -151,13 +151,13 @@ namespace helpers
 
 /**
  */
-bool EvaluationTaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const
+bool EvaluationTaskResult::loadOnDemandFigure_impl(ResultReport::SectionContentFigure* figure) const
 {
     auto calc = calculator();
 
     if (!calc || !calc->canEvaluate().ok())
     {
-        logerr << "EvaluationTaskResult: loadOnDemandFigure: invalid calulcator";
+        logerr << "EvaluationTaskResult: loadOnDemandFigure_impl: invalid calculator";
         return false;
     }
 
@@ -169,19 +169,23 @@ bool EvaluationTaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure
             auto result = helpers::obtainSingleResult(figure, calc);
             if (!result)
             {
-                logerr << "EvaluationTaskResult: loadOnDemandFigure: result could not be obtained";
+                logerr << "EvaluationTaskResult: loadOnDemandFigure_impl: result could not be obtained";
                 return false;
             }
 
             //add overview to figure
-            result->addOverviewToFigure(*figure);
+            if (!result->addOverviewToFigure(*figure))
+            {
+                logerr << "EvaluationTaskResult: loadOnDemandFigure_impl: error configuring content";
+                return false;
+            }
 
             return true;
         }
     }
     catch(...)
     {
-        logerr << "EvaluationTaskResult: loadOnDemandFigure: critical error during load";
+        logerr << "EvaluationTaskResult: loadOnDemandFigure_impl: critical error during load";
     }
     
     return false;
@@ -189,13 +193,13 @@ bool EvaluationTaskResult::loadOnDemandFigure(ResultReport::SectionContentFigure
 
 /**
  */
-bool EvaluationTaskResult::loadOnDemandTable(ResultReport::SectionContentTable* table) const
+bool EvaluationTaskResult::loadOnDemandTable_impl(ResultReport::SectionContentTable* table) const
 {
     auto calc = calculator();
 
     if (!calc || !calc->canEvaluate().ok())
     {
-        logerr << "EvaluationTaskResult: loadOnDemandTable: invalid calulcator";
+        logerr << "EvaluationTaskResult: loadOnDemandTable_impl: invalid calculator";
         return false;
     }
 
@@ -207,21 +211,65 @@ bool EvaluationTaskResult::loadOnDemandTable(ResultReport::SectionContentTable* 
             auto result = helpers::obtainSingleResult(table, calc);
             if (!result)
             {
-                logerr << "EvaluationTaskResult: loadOnDemandTable: result could not be obtained";
+                logerr << "EvaluationTaskResult: loadOnDemandTable_impl: result could not be obtained";
                 return false;
             }
 
             //add table details
-            result->addDetailsToTable(*table);
+            if (!result->addDetailsToTable(*table))
+            {
+                logerr << "EvaluationTaskResult: loadOnDemandTable_impl: error configuring content";
+                return false;
+            }
 
             return true;
         }
     }
     catch(...)
     {
-        logerr << "EvaluationTaskResult: loadOnDemandTable: critical error during load";
+        logerr << "EvaluationTaskResult: loadOnDemandTable_impl: critical error during load";
     }
     
+    return false;
+}
+
+/**
+ */
+bool EvaluationTaskResult::loadOnDemandViewable_impl(const ResultReport::SectionContent& content,
+                                                     ResultReport::SectionContentViewable& viewable, 
+                                                     const QVariant& index) const
+{
+    auto calc = calculator();
+
+    if (!calc || !calc->canEvaluate().ok())
+    {
+        logerr << "EvaluationTaskResult: loadOnDemandViewable_impl: invalid calculator";
+        return false;
+    }
+
+    if (content.type() == ResultReport::SectionContent::Type::Table)
+    {
+        if (content.name() == EvaluationRequirementResult::Single::TRDetailsTableName)
+        {
+            //get result for section
+            auto result = helpers::obtainSingleResult(&content, calc);
+            if (!result)
+            {
+                logerr << "EvaluationTaskResult: loadOnDemandViewable_impl: result could not be obtained";
+                return false;
+            }
+
+            //configure detail highlight viewable 
+            if (!result->addHighlightToViewable(viewable, index))
+            {
+                logerr << "EvaluationTaskResult: loadOnDemandViewable_impl: error configuring content";
+                return false;
+            }
+
+            return true;
+        }
+    }
+
     return false;
 }
 
