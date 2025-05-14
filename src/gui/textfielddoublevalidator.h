@@ -15,15 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEXTFIELDDOUBLEVALIDATOR_H
-#define TEXTFIELDDOUBLEVALIDATOR_H
+#pragma once
 
 #include "compass.h"
 
 #include <QDoubleValidator>
 #include <QLineEdit>
-
-//#include "logger.h"
 
 class TextFieldDoubleValidator : public QDoubleValidator
 {
@@ -99,4 +96,3 @@ class TextFieldDoubleValidator : public QDoubleValidator
     }
 };
 
-#endif  // TEXTFIELDDOUBLEVALIDATOR_H

@@ -231,7 +231,7 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
                                       const std::string& value_str, bool debug)
 {
     logdbg << "NullableVector " << property_.name() << ": setFromFormat";
-    T value;
+    T value{};
 
     if (format == "octal")
     {
