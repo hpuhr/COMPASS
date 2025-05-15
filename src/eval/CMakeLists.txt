@@ -25,6 +25,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationsectorwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluation_commands.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtimestampconditionsdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetfilterdialog.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationsettings.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationcalculator.cpp"
@@ -41,6 +42,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationsectorwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluation_commands.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtimestampconditionsdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetfilterdialog.cpp"
 )
 
 

@@ -1,12 +1,13 @@
 
 #include "targetlistwidget.h"
 #include "targetmodel.h"
-#include "targetfilterdialog.h"
+#include "evaluationtargetfilterdialog.h"
 
 #include "compass.h"
 #include "taskmanager.h"
 #include "evaluationmanager.h"
 #include "dbcontentmanager.h"
+#include "evaluationtimestampconditionsdialog.h"
 
 #include "files.h"
 #include "logger.h"
@@ -248,15 +249,15 @@ void TargetListWidget::evalExcludeTimeWindowsSlot()
 {
     loginf << "TargetListWidget: filterSlot";
 
-    // TargetFilterDialog dialog (model_);
-    // dialog.exec();
+    EvaluationTimestampConditionsDialog dialog (COMPASS::instance().evaluationManager());
+    dialog.exec();
 }
 
 void TargetListWidget::evalFilterSlot()
 {
     loginf << "TargetListWidget: evalFilterSlot";
 
-    TargetFilterDialog dialog (model_);
+    EvaluationTargetFilterDialog dialog (model_);
     dialog.exec();
 }
 
