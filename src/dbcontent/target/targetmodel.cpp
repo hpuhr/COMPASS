@@ -76,7 +76,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
     {
         case Qt::CheckStateRole:
         {
-            if (index.column() == ColUse)  // selected special case
+            if (index.column() == ColUseEval)  // selected special case
             {
                 assert (index.row() >= 0);
                 assert (index.row() < target_data_.size());
@@ -129,12 +129,12 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                     return target.emitterCategoryStr().c_str();
                 case ColNumUpdates: 
                     return target.numUpdates();
+                case ColUseEvalDetails:
+                    return ""; // TODO
                 case ColBegin:
                     return target.timeBeginStr().c_str();
-                    //return QDateTime::fromString(target.timeBeginStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
                 case ColEnd:
                     return target.timeEndStr().c_str();
-                    //return QDateTime::fromString(target.timeEndStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
                 case ColDuration: 
                     return target.timeDurationStr().c_str();
                 case ColACIDs:
@@ -159,7 +159,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         }
         case Qt::UserRole: // to find the checkboxes
         {
-            if (index.column() == ColUse)
+            if (index.column() == ColUseEval)
             {
                 assert (index.row() >= 0);
                 assert (index.row() < target_data_.size());
@@ -191,15 +191,17 @@ nlohmann::json TargetModel::rawCellData(int row, int column) const
 
     switch(column)
     {
-        case ColUse:
-            return target.useInEval();
         case ColUTN: 
             return target.utn_;
         case ColComment: 
             return target.comment().c_str();
         case ColCategory: 
             return target.emitterCategoryStr().c_str();
-        case ColNumUpdates: 
+        case ColUseEval:
+            return target.useInEval();
+        case ColUseEvalDetails:
+            return ""; // TODO
+        case ColNumUpdates:
             return target.numUpdates();
         case ColBegin:
             return target.timeBeginStr().c_str();
@@ -244,7 +246,7 @@ unsigned int TargetModel::rowStyle(int row) const
  */
 unsigned int TargetModel::columnStyle(int column) const
 {
-    if (column == ColUse)
+    if (column == ColUseEval)
         return ResultReport::CellStyleCheckable;
 
     return 0;
@@ -257,7 +259,7 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
     if (!index.isValid() /*|| role != Qt::EditRole*/)
         return false;
 
-    if (role == Qt::CheckStateRole && index.column() == ColUse)
+    if (role == Qt::CheckStateRole && index.column() == ColUseEval)
     {
         assert (index.row() >= 0);
         assert (index.row() < target_data_.size());
@@ -348,7 +350,7 @@ Qt::ItemFlags TargetModel::flags(const QModelIndex &index) const
 
     assert (index.column() < table_columns_.size());
 
-    if (index.column() == ColUse) // Use
+    if (index.column() == ColUseEval) // Use
     {
         return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
     }
@@ -384,7 +386,7 @@ void TargetModel::setUseTargetData (unsigned int utn, bool value)
 
     // search if checkbox can be found
     QModelIndexList items = match(
-                index(0, ColUse),
+                index(0, ColUseEval),
                 Qt::UserRole,
                 QVariant(utn),
                 1, // look *
@@ -713,21 +715,6 @@ void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::Recon
 
     endResetModel();
 }
-
-/**
- */
-//void TargetModel::createNewTarget(unsigned int utn)
-//{
-//    beginResetModel();
-
-//    assert (!existsTarget(utn));
-
-//    target_data_.push_back({utn, nlohmann::json::object()});
-
-//    assert (existsTarget(utn));
-
-//    endResetModel();
-//}
 
 /**
  */
@@ -1201,6 +1188,13 @@ void TargetModel::filterModeACodes(bool value)
 void TargetModel::showMainColumns(bool show)
 {
     show_main_columns_ = show;
+}
+
+/**
+ */
+void TargetModel::showEvalColumns(bool show)
+{
+    show_eval_columns_ = show;
 }
 
 /**

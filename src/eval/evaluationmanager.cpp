@@ -75,6 +75,9 @@ EvaluationManager::EvaluationManager(const std::string& class_id,
 {
     createSubConfigurables();
     init_evaluation_commands();
+
+    connect (&load_filtered_time_windows_, &Utils::TimeWindowCollection::changedSignal,
+            this, &EvaluationManager::timeConstraintsChangedSlot);
 }
 
 /**
@@ -328,10 +331,18 @@ void EvaluationManager::associationStatusChangedSlot()
 
 void EvaluationManager::timeConstraintsChangedSlot()
 {
-    loginf << "EvaluationManager: excludedTimeWindowsChangedSlot";
+    loginf << "EvaluationManager: timeConstraintsChangedSlot";
 
-    COMPASS::instance().dbInterface().setProperty("eval_filtered_time_windows",
-                                                  load_filtered_time_windows_.asJSON().dump());
+    nlohmann::json constraints_json = nlohmann::json::object();
+
+    constraints_json.at(EVAL_TIME_CONSTRAINTS_USE) = use_timestamp_filter_;
+
+    constraints_json.at(EVAL_TIME_CONSTRAINTS_BEGIN) = Time::toString(load_timestamp_begin_);
+    constraints_json.at(EVAL_TIME_CONSTRAINTS_END) = Time::toString(load_timestamp_end_);
+
+    constraints_json.at(EVAL_TIME_CONSTRAINTS_EXCLUDED_WINDOWS) = load_filtered_time_windows_.asJSON();
+
+    COMPASS::instance().dbInterface().setProperty(EVAL_TIME_CONSTRAINTS_PROPRTY_NAME, constraints_json.dump());
 }
 
 /**
@@ -1159,6 +1170,8 @@ bool EvaluationManager::useTimestampFilter() const
 void EvaluationManager::useTimestampFilter(bool value)
 {
     use_timestamp_filter_ = value;
+
+    timeConstraintsChangedSlot();
 }
 
 /**
@@ -1176,6 +1189,7 @@ void EvaluationManager::loadTimestampBegin(boost::posix_time::ptime value)
 
     load_timestamp_begin_ = value;
 
+    timeConstraintsChangedSlot();
 }
 
 /**
@@ -1192,6 +1206,8 @@ void EvaluationManager::loadTimestampEnd(boost::posix_time::ptime value)
     loginf << "EvaluationManager: loadTimeEnd: value " << Time::toString(value);
 
     load_timestamp_end_ = value;
+
+    timeConstraintsChangedSlot();
 }
 
 Utils::TimeWindowCollection& EvaluationManager::excludedTimeWindows()

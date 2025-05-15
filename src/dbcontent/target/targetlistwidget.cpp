@@ -64,6 +64,7 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     setLayout(main_layout);
 
     showMainColumns(model_.showMainColumns());
+    showEvalColumns(model_.showEvalColumns());
     showDurationColumns(model_.showDurationColumns());
     showModeSColumns(model_.showModeSColumns());
     showModeACColumns(model_.showModeACColumns());
@@ -108,19 +109,8 @@ toolbox::ScreenRatio TargetListWidget::defaultScreenRatio() const
  */
 void TargetListWidget::addToConfigMenu(QMenu* menu) 
 {
-    QAction* all_action = menu->addAction("Use All");
-    connect (all_action, &QAction::triggered, this, &TargetListWidget::useAllSlot);
-
-    QAction* none_action = menu->addAction("Use None");
-    connect (none_action, &QAction::triggered, this, &TargetListWidget::useNoneSlot);
-
     QAction* clear_action = menu->addAction("Clear Comments");
     connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearCommentsSlot);
-
-    QAction* filter_action = menu->addAction("Filter Targets...");
-    connect (filter_action, &QAction::triggered, this, &TargetListWidget::filterSlot);
-
-    menu->addSeparator();
 
     QMenu* column_menu = menu->addMenu("Edit Columns");
 
@@ -130,6 +120,13 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
 
     // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
     // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+
+    auto eval_cols_action = column_menu->addAction("Evaluation");
+    eval_cols_action->setCheckable(true);
+    eval_cols_action->setChecked(model_.showEvalColumns());
+
+    connect(eval_cols_action, &QAction::toggled, this, &TargetListWidget::showEvalColumns);
+    connect(eval_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
 
     auto dur_cols_action = column_menu->addAction("Duration");
     dur_cols_action->setCheckable(true);
@@ -151,6 +148,24 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
 
     connect(mode_ac_cols_action, &QAction::toggled, this, &TargetListWidget::showModeACColumns);
     connect(mode_ac_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+
+    menu->addSeparator();
+
+    QMenu* eval_menu = menu->addMenu("Evaluation");
+
+    QAction* all_action = eval_menu->addAction("Use All");
+    connect (all_action, &QAction::triggered, this, &TargetListWidget::evalUseAllSlot);
+
+    QAction* none_action = eval_menu->addAction("Use None");
+    connect (none_action, &QAction::triggered, this, &TargetListWidget::evalUseNoneSlot);
+
+    QAction* filter_action = eval_menu->addAction("Filter Usage ...");
+    connect (filter_action, &QAction::triggered, this, &TargetListWidget::evalFilterSlot);
+
+    eval_menu->addSeparator();
+
+    QAction* exlcude_tw_action = eval_menu->addAction("Edit Excluded Time Windows ...");
+    connect (exlcude_tw_action, &QAction::triggered, this, &TargetListWidget::evalExcludeTimeWindowsSlot);
 }
 
 /**
@@ -163,6 +178,13 @@ void TargetListWidget::addToToolBar(QToolBar* tool_bar)
     // main_cols_action->setToolTip("Show Main Information");
 
     // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
+
+    auto eval_cols_action = tool_bar->addAction("Evaluation");
+    eval_cols_action->setCheckable(true);
+    eval_cols_action->setChecked(model_.showEvalColumns());
+    eval_cols_action->setToolTip("Show Evaluation Columns");
+
+    connect(eval_cols_action, &QAction::toggled, this, &TargetListWidget::showEvalColumns);
 
     auto dur_cols_action = tool_bar->addAction("Duration");
     dur_cols_action->setCheckable(true);
@@ -207,12 +229,12 @@ void TargetListWidget::resizeColumnsToContents()
     table_view_->resizeColumnsToContents();
 }
 
-void TargetListWidget::useAllSlot()
+void TargetListWidget::evalUseAllSlot()
 {
     model_.setUseAllTargetData(true);
 }
 
-void TargetListWidget::useNoneSlot()
+void TargetListWidget::evalUseNoneSlot()
 {
     model_.setUseAllTargetData(false);
 }
@@ -222,9 +244,17 @@ void TargetListWidget::clearCommentsSlot()
     model_.clearComments();
 }
 
-void TargetListWidget::filterSlot()
+void TargetListWidget::evalExcludeTimeWindowsSlot()
 {
     loginf << "TargetListWidget: filterSlot";
+
+    // TargetFilterDialog dialog (model_);
+    // dialog.exec();
+}
+
+void TargetListWidget::evalFilterSlot()
+{
+    loginf << "TargetListWidget: evalFilterSlot";
 
     TargetFilterDialog dialog (model_);
     dialog.exec();
@@ -336,6 +366,14 @@ void TargetListWidget::showMainColumns(bool show)
     model_.showMainColumns(show);
 
     for (int c : model_.mainColumns())
+        table_view_->setColumnHidden(c, !show);
+}
+
+void TargetListWidget::showEvalColumns(bool show)
+{
+    model_.showEvalColumns(show);
+
+    for (int c : model_.evalColumns())
         table_view_->setColumnHidden(c, !show);
 }
 

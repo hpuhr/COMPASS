@@ -685,7 +685,7 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValuesSorted(unsigned int index)
         }
     }
 
-    for (int tmp_index=data_.size()-1; tmp_index >= 0 && tmp_index >= index; --tmp_index)
+    for (int tmp_index=(int) data_.size()-1; tmp_index >= 0 && tmp_index >= index; --tmp_index)
     {
         //loginf << "UGA: minMaxValuesSorted: tmp_index " << tmp_index << " index " << index << " size " << data_.size();
 

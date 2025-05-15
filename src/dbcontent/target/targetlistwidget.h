@@ -21,10 +21,12 @@ class TargetListWidget : public ToolBoxWidget
     Q_OBJECT
 
 public slots:
-    void useAllSlot();
-    void useNoneSlot();
+    void evalUseAllSlot();
+    void evalUseNoneSlot();
+    void evalExcludeTimeWindowsSlot();
+    void evalFilterSlot();
+
     void clearCommentsSlot();
-    void filterSlot();
 
     void customContextMenuSlot(const QPoint& p);
     //void showFullUTNSlot ();
@@ -51,6 +53,7 @@ public:
 
 protected:
     void showMainColumns(bool show);
+    void showEvalColumns(bool show);
     void showDurationColumns(bool show);
     void showModeACColumns(bool show);
     void showModeSColumns(bool show);
