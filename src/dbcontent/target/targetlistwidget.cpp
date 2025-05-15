@@ -257,7 +257,7 @@ void TargetListWidget::evalFilterSlot()
 {
     loginf << "TargetListWidget: evalFilterSlot";
 
-    EvaluationTargetFilterDialog dialog (model_);
+    EvaluationTargetFilterDialog dialog (COMPASS::instance().evaluationManager().targetFilter(), model_);
     dialog.exec();
 }
 

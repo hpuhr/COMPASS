@@ -41,6 +41,7 @@
 #include "stringconv.h"
 #include "util/timeconv.h"
 #include "viewpoint.h"
+#include "evaluationtargetfilter.h"
 
 #include "json.hpp"
 
@@ -92,7 +93,12 @@ EvaluationManager::~EvaluationManager()
 void EvaluationManager::generateSubConfigurable(const std::string& class_id,
                                                 const std::string& instance_id)
 {
-    if (class_id == "EvaluationCalculator")
+    if (class_id == "EvaluationTargetFilter")
+    {
+        assert (!target_filter_);
+        target_filter_.reset(new EvaluationTargetFilter(class_id, instance_id, *this));
+    }
+    else if (class_id == "EvaluationCalculator")
     {
         assert(!calculator_);
 
@@ -109,6 +115,12 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
 */
 void EvaluationManager::checkSubConfigurables()
 {
+    if (!target_filter_)
+    {
+        generateSubConfigurable("EvaluationTargetFilter", "EvaluationTargetFilter0");
+        assert(target_filter_);
+    }
+
     if (!calculator_)
     {
         //generate default calculator
@@ -1148,6 +1160,12 @@ void EvaluationManager::loadingDone()
 
     //signal new data
     emit hasNewData();
+}
+
+EvaluationTargetFilter& EvaluationManager::targetFilter() const
+{
+    assert (target_filter_);
+    return *target_filter_.get();
 }
 
 

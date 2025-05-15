@@ -14,6 +14,8 @@ class TargetModel;
 
 }
 
+class EvaluationTargetFilter;
+
 class EvaluationTargetFilterDialog  : public QDialog
 {
     Q_OBJECT
@@ -45,9 +47,11 @@ public slots:
     void cancelSlot();
 
 public:
-    EvaluationTargetFilterDialog(dbContent::TargetModel& model, QWidget* parent=nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    EvaluationTargetFilterDialog(EvaluationTargetFilter& target_filter, dbContent::TargetModel& model,
+                               QWidget* parent=nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
 protected:
+    EvaluationTargetFilter& target_filter_;
     dbContent::TargetModel& model_;
 
     QCheckBox* remove_short_check_ {nullptr};

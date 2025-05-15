@@ -113,7 +113,7 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     if (class_id == "DBContentTargetModel")
     {
         assert (!target_model_);
-        target_model_.reset(new dbContent::TargetModel(class_id, instance_id, *this));
+        target_model_.reset(new dbContent::TargetModel(*this));
     }
     else if (class_id == "DBContent")
     {

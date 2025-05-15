@@ -24,7 +24,6 @@
 #include "viewabledataconfig.h"
 #include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgenerator.h"
-//#include "datasourcecompoundcoverage.h"
 #include "sector.h"
 #include "result.h"
 #include "util/timewindow.h"
@@ -39,6 +38,7 @@ class DBContent;
 class SectorLayer;
 class AirSpace;
 struct EvaluationSettings;
+class EvaluationTargetFilter;
 
 namespace dbContent 
 {
@@ -138,7 +138,9 @@ public:
     bool useTimestampFilter() const;
     void useTimestampFilter(bool value);
 
-protected:
+    EvaluationTargetFilter& targetFilter() const;
+
+  protected:
     friend class EvaluationCalculator;
 
     virtual void checkSubConfigurables() override;
@@ -171,6 +173,7 @@ private:
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
     unsigned int max_sector_id_ {0};
 
+    std::unique_ptr<EvaluationTargetFilter> target_filter_;
     std::unique_ptr<EvaluationCalculator> calculator_; // sub-configurable
     //EvaluationResultsReport::PDFGenerator pdf_gen_;
 
