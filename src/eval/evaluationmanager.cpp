@@ -347,12 +347,12 @@ void EvaluationManager::timeConstraintsChangedSlot()
 
     nlohmann::json constraints_json = nlohmann::json::object();
 
-    constraints_json.at(EVAL_TIME_CONSTRAINTS_USE) = use_timestamp_filter_;
+    constraints_json[EVAL_TIME_CONSTRAINTS_USE] = use_timestamp_filter_;
 
-    constraints_json.at(EVAL_TIME_CONSTRAINTS_BEGIN) = Time::toString(load_timestamp_begin_);
-    constraints_json.at(EVAL_TIME_CONSTRAINTS_END) = Time::toString(load_timestamp_end_);
+    constraints_json[EVAL_TIME_CONSTRAINTS_BEGIN] = Time::toString(load_timestamp_begin_);
+    constraints_json[EVAL_TIME_CONSTRAINTS_END] = Time::toString(load_timestamp_end_);
 
-    constraints_json.at(EVAL_TIME_CONSTRAINTS_EXCLUDED_WINDOWS) = load_filtered_time_windows_.asJSON();
+    constraints_json[EVAL_TIME_CONSTRAINTS_EXCLUDED_WINDOWS] = load_filtered_time_windows_.asJSON();
 
     COMPASS::instance().dbInterface().setProperty(EVAL_TIME_CONSTRAINTS_PROPRTY_NAME, constraints_json.dump());
 }

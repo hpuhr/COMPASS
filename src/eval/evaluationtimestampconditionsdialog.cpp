@@ -18,6 +18,14 @@ using namespace Utils;
 EvaluationTimestampConditionsDialog::EvaluationTimestampConditionsDialog(EvaluationManager& eval_man, QWidget* parent)
     : QDialog(parent), eval_man_(eval_man)
 {
+    setWindowTitle("Edit Evaluation Timestamp Conditions");
+
+    setModal(true);
+
+    setMinimumSize(QSize(600, 400));
+
+    QVBoxLayout* main_layout = new QVBoxLayout();
+
     QFormLayout* form_layout = new QFormLayout;
     form_layout->setFormAlignment(Qt::AlignLeft | Qt::AlignTop);
 
@@ -37,9 +45,26 @@ EvaluationTimestampConditionsDialog::EvaluationTimestampConditionsDialog(Evaluat
     form_layout->addRow("Timestamp End", time_end_edit_);
 
     tw_widget_ = new TimeWindowCollectionWidget(eval_man.excludedTimeWindows());
-    form_layout->addRow("Exlcuded Time Windows", tw_widget_);
+    form_layout->addRow("Excluded Time Windows", tw_widget_);
 
-    setLayout(form_layout);
+
+    main_layout->addLayout(form_layout);
+
+    main_layout->addStretch();
+
+    // buttons
+
+    QHBoxLayout* button_layout = new QHBoxLayout();
+
+    button_layout->addStretch();
+
+    QPushButton* run_button = new QPushButton("OK");
+    connect(run_button, &QPushButton::clicked, this, &QDialog::accept);
+    button_layout->addWidget(run_button);
+
+    main_layout->addLayout(button_layout);
+
+    setLayout(main_layout);
 }
 
 EvaluationTimestampConditionsDialog::~EvaluationTimestampConditionsDialog()
