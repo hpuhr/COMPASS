@@ -17,7 +17,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 IF (SOURCE_BRANCH)
 message("  Platform: Linux (inside docker)")
-add_definitions ( -UNDEBUG -Wall -std=c++14 -fext-numeric-literals -march=x86-64 -mtune=generic) # -DQT_NO_KEYWORDS
+add_definitions ( -UNDEBUG -Wall -std=c++14 -fext-numeric-literals) # -DQT_NO_KEYWORDS
 ELSE()
 message("  Platform: Linux (local)")
 add_definitions ( -UNDEBUG -Wall -std=c++17 -fext-numeric-literals) # -DQT_NO_KEYWORDS
@@ -50,7 +50,7 @@ find_package ( Boost 1.73.0 REQUIRED COMPONENTS regex system program_options fil
 message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 
-add_definitions("-DBOOST_ALLOW_DEPRECATED_HEADERS") # suppress internal boost deprecated warnings
+add_definitions("-DBOOST_ALLOW_DEPRECATED_HEADERS -DBOOST_GEOMETRY_DISABLE_DEPRECATED_03_WARNING") # suppress internal boost deprecated warnings
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${COMPASS_PATH}/cmake_modules)
 message("  CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
