@@ -81,6 +81,10 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
     qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");
 
     dbContent::init_dbcontent_commands();
+
+    assert (!target_model_);
+    target_model_.reset(new dbContent::TargetModel(*this));
+    assert (target_model_);
 }
 
 /**
@@ -110,12 +114,7 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
 
-    if (class_id == "DBContentTargetModel")
-    {
-        assert (!target_model_);
-        target_model_.reset(new dbContent::TargetModel(*this));
-    }
-    else if (class_id == "DBContent")
+    if (class_id == "DBContent")
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
         loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name()
@@ -150,11 +149,6 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
  */
 void DBContentManager::checkSubConfigurables()
 {
-    if (!target_model_)
-    {
-        generateSubConfigurable("DBContentTargetModel", "DBContentTargetModel0");
-        assert (target_model_);
-    }
 }
 
 /**
