@@ -227,8 +227,8 @@ void DBContentManagerWidget::updateDBContentsSlot()
         delete child;
     }
 
-    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
-    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
+    QIcon edit_icon(Files::IconProvider::getIcon("edit.png"));
+    QIcon del_icon(Files::IconProvider::getIcon("delete.png"));
 
     edit_dbo_buttons_.clear();
     delete_dbo_buttons_.clear();
@@ -394,8 +394,8 @@ void DBContentManagerWidget::updateMetaVariablesSlot()
         delete child;
     }
 
-    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
-    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
+    QIcon edit_icon(Files::IconProvider::getIcon("edit.png"));
+    QIcon del_icon(Files::IconProvider::getIcon("delete.png"));
 
     edit_meta_buttons_.clear();
     delete_meta_buttons_.clear();

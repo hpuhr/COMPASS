@@ -9,8 +9,8 @@ using namespace std;
 DataSourceTableModel::DataSourceTableModel(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog)
     : ds_man_(ds_man), dialog_(dialog)
 {
-    db_icon_ = QIcon(Files::getIconFilepath("db.png").c_str());
-    config_icon_ = QIcon(Files::getIconFilepath("configuration.png").c_str());
+    db_icon_ = Files::IconProvider::getIcon("db.png");
+    config_icon_ = Files::IconProvider::getIcon("configuration.png");
 }
 
 int DataSourceTableModel::rowCount(const QModelIndex& parent) const

@@ -296,8 +296,8 @@ void DBContentWidget::updateDataSourcesGridSlot()
     del_label->setFont(font_bold);
     ds_grid_->addWidget(del_label, 0, 2);
 
-    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
-    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
+    QIcon edit_icon(Files::IconProvider::getIcon("edit.png"));
+    QIcon del_icon(Files::IconProvider::getIcon("delete.png"));
 }
 
 void DBContentWidget::updateDBOVarsGridSlot()
@@ -357,7 +357,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
 
     logdbg << "DBContentWidget updateDBOVarsGrid: getting schemas";
 
-    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
+    QIcon del_icon(Files::IconProvider::getIcon("delete.png"));
 
     logdbg << "DBContentWidget updateDBOVarsGrid: creating variable rows";
 

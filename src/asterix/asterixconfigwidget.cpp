@@ -215,7 +215,7 @@ void ASTERIXConfigWidget::updateCategories()
     spf_edit_label->setFont(font_bold);
     categories_grid_->addWidget(spf_edit_label, 0, 6);
 
-    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
+    QIcon edit_icon(Files::IconProvider::getIcon("edit.png"));
 
     int row = 1;
 

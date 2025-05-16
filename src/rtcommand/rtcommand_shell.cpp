@@ -39,7 +39,7 @@ namespace
 {
     QIcon icon(const std::string& fn) 
     {
-        return QIcon(Utils::Files::getIconFilepath(fn).c_str());
+        return Utils::Files::IconProvider::getIcon(fn);
     };
 }
 

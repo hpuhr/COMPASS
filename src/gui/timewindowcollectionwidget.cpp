@@ -46,7 +46,7 @@ void TimeWindowCollectionWidget::refreshList()
 {
     list_widget_->clear();
 
-    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
+    QIcon del_icon(Files::IconProvider::getIcon("delete.png"));
 
     for (unsigned int i = 0; i < collection_.size(); ++i)
     {

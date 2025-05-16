@@ -68,7 +68,7 @@ ViewLoadStateWidget::ViewLoadStateWidget(ViewWidget* view_widget, QWidget* paren
     refresh_button_ = new QPushButton;
     refresh_button_->setToolTip("Refresh view");
     refresh_button_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    refresh_button_->setIcon(QIcon(Utils::Files::getIconFilepath("refresh.png").c_str()));
+    refresh_button_->setIcon(Utils::Files::IconProvider::getIcon("refresh.png"));
 
     UI_TEST_OBJ_NAME(refresh_button_, "refresh")
     

@@ -368,6 +368,9 @@ void TargetListWidget::showMainColumns(bool show)
 
     for (int c : model_.mainColumns())
         table_view_->setColumnHidden(c, !show);
+
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
 }
 
 void TargetListWidget::showEvalColumns(bool show)
@@ -376,6 +379,9 @@ void TargetListWidget::showEvalColumns(bool show)
 
     for (int c : model_.evalColumns())
         table_view_->setColumnHidden(c, !show);
+
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
 }
 
 void TargetListWidget::showDurationColumns(bool show)
@@ -384,6 +390,9 @@ void TargetListWidget::showDurationColumns(bool show)
 
     for (int c : model_.durationColumns())
         table_view_->setColumnHidden(c, !show);
+
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
 }
 
 void TargetListWidget::showModeSColumns(bool show)
@@ -392,6 +401,9 @@ void TargetListWidget::showModeSColumns(bool show)
 
     for (int c : model_.modeSColumns())
         table_view_->setColumnHidden(c, !show);
+
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
 }
 
 void TargetListWidget::showModeACColumns(bool show)
@@ -400,6 +412,9 @@ void TargetListWidget::showModeACColumns(bool show)
 
     for (int c : model_.modeACColumns())
         table_view_->setColumnHidden(c, !show);
+
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
 }
 
 }

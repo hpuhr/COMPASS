@@ -7,6 +7,7 @@
 #include "logger.h"
 #include "reconstructortarget.h"
 #include "task/result/report/reportdefs.h"
+#include "util/files.h"
 
 #include <QApplication>
 #include <QThread>
@@ -48,32 +49,15 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
+    assert (index.row() >= 0);
+    assert (index.row() < target_data_.size());
+
+    const Target& target = target_data_.at(index.row());
+
     switch (role)
     {
-        case Qt::CheckStateRole:
-        {
-            if (index.column() == ColUseEval)  // selected special case
-            {
-                assert (index.row() >= 0);
-                assert (index.row() < target_data_.size());
-
-                const Target& target = target_data_.at(index.row());
-
-                if (target.useInEval())
-                    return Qt::Checked;
-                else
-                    return Qt::Unchecked;
-            }
-            else
-                return QVariant();
-        }
         case Qt::BackgroundRole:
         {
-            assert (index.row() >= 0);
-            assert (index.row() < target_data_.size());
-
-            const Target& target = target_data_.at(index.row());
-
             if (!target.useInEval())
                 return QBrush(Qt::lightGray);
             else
@@ -81,16 +65,8 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
 
         }
         case Qt::DisplayRole:
-        case Qt::EditRole:
         {
             logdbg << "TargetModel: data: display role: row " << index.row() << " col " << index.column();
-
-            assert (index.row() >= 0);
-            assert (index.row() < target_data_.size());
-
-            const Target& target = target_data_.at(index.row());
-
-            logdbg << "TargetModel: data: got utn " << target.utn_;
 
             assert (index.column() < table_columns_.size());
             int col = index.column();
@@ -137,20 +113,30 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         {
             if (index.column() == ColUseEval)
             {
-                assert (index.row() >= 0);
-                assert (index.row() < target_data_.size());
-
-                const Target& target = target_data_.at(index.row());
                 return target.utn_;
             }
             else if (index.column() == ColComment) // comment
             {
-                assert (index.row() >= 0);
-                assert (index.row() < target_data_.size());
-
-                const Target& target = target_data_.at(index.row());
                 return ("comment_"+to_string(target.utn_)).c_str();
             }
+        }
+        case Qt::DecorationRole:
+        {
+            if (index.column() == ColUseEval)  // selected special case
+            {
+                if (!target.useInEval())
+                    return Utils::Files::IconProvider::getIcon("delete.png");
+
+                // could be used
+
+                if (COMPASS::instance().evaluationManager().useTimestampFilter())
+                        return Utils::Files::IconProvider::getIcon("partial_done.png");
+
+                // TODO partial
+                return Utils::Files::IconProvider::getIcon("done.png");
+            }
+            else
+                return QVariant();
         }
         default:
         {
@@ -235,27 +221,28 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
     if (!index.isValid() /*|| role != Qt::EditRole*/)
         return false;
 
-    if (role == Qt::CheckStateRole && index.column() == ColUseEval)
-    {
-        assert (index.row() >= 0);
-        assert (index.row() < target_data_.size());
+    // if (role == Qt::CheckStateRole && index.column() == ColUseEval)
+    // {
+    //     assert (index.row() >= 0);
+    //     assert (index.row() < target_data_.size());
 
-        auto it = target_data_.begin() + index.row();
+    //     auto it = target_data_.begin() + index.row();
 
-        bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
-        loginf << "TargetModel: setData: utn " << it->utn_ <<" check state " << checked;
+    //     bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
+    //     loginf << "TargetModel: setData: utn " << it->utn_ <<" check state " << checked;
 
-        //eval_man_.useUTN(it->utn_, checked, false);
-        target_data_.modify(it, [value,checked](Target& p) { p.useInEval(checked); });
+    //     //eval_man_.useUTN(it->utn_, checked, false);
+    //     target_data_.modify(it, [value,checked](Target& p) { p.useInEval(checked); });
 
-        saveToDB(it->utn_);
+    //     saveToDB(it->utn_);
 
-        emit dataChanged(index, TargetModel::index(index.row(), columnCount()-1));
-        emit dbcont_manager_.targetChangedSignal(it->utn_);
+    //     emit dataChanged(index, TargetModel::index(index.row(), columnCount()-1));
+    //     emit dbcont_manager_.targetChangedSignal(it->utn_);
 
-        return true;
-    }
-    else if (role == Qt::EditRole && index.column() == ColComment) // comment
+    //     return true;
+    // }
+    // else
+    if (role == Qt::EditRole && index.column() == ColComment) // comment
     {
         assert (index.row() >= 0);
         assert (index.row() < target_data_.size());
@@ -326,11 +313,12 @@ Qt::ItemFlags TargetModel::flags(const QModelIndex &index) const
 
     assert (index.column() < table_columns_.size());
 
-    if (index.column() == ColUseEval) // Use
-    {
-        return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
-    }
-    else if (index.column() == ColComment) // comment
+    // if (index.column() == ColUseEval) // Use
+    // {
+    //     return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
+    // }
+    // else
+    if (index.column() == ColComment) // comment
     {
         return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
     }

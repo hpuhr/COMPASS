@@ -48,7 +48,7 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     top_layout->addWidget(report_combo_);
 
     remove_result_button_ = new QPushButton("Remove Result");
-    remove_result_button_->setIcon(QIcon(Files::getIconFilepath("delete.png").c_str()));
+    remove_result_button_->setIcon(Files::IconProvider::getIcon("delete.png"));
     remove_result_button_->setEnabled(false);
 
     connect(remove_result_button_, &QPushButton::pressed, this, &TaskResultsWidget::removeCurrentResult);

@@ -70,7 +70,7 @@ DBFilterWidget::DBFilterWidget(DBFilter& filter)
 
     manage_button_ = new QPushButton();
     manage_button_->setVisible(false); // TODO_ASSERT
-    manage_button_->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    manage_button_->setIcon(Files::IconProvider::getIcon("edit.png"));
     manage_button_->setFixedSize(UI_ICON_SIZE);
     manage_button_->setFlat(UI_ICON_BUTTON_FLAT);
     manage_button_->setToolTip(tr("Manage filter"));

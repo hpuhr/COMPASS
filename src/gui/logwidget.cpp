@@ -138,7 +138,7 @@ void LogWidget::addToConfigMenu(QMenu* menu)
 void LogWidget::addToToolBar(QToolBar* tool_bar)
 {
     auto action_accept = tool_bar->addAction("Accept");
-    action_accept->setIcon(QIcon(Utils::Files::getIconFilepath("done.png").c_str()));
+    action_accept->setIcon(Utils::Files::IconProvider::getIcon("done.png"));
     connect(action_accept, &QAction::triggered, this, &LogWidget::acceptMessagesSlot);
 }
 

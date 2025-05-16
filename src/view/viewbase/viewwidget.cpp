@@ -381,7 +381,7 @@ void ViewWidget::toggleConfigWidget()
  */
 QIcon ViewWidget::getIcon(const std::string& fn)
 {
-    return QIcon(Utils::Files::getIconFilepath(fn).c_str());
+    return Utils::Files::IconProvider::getIcon(fn);
 }
 
 /**

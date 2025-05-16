@@ -11,8 +11,8 @@ using namespace std;
 FFTTableModel::FFTTableModel(FFTManager& ds_man, FFTsConfigurationDialog& dialog)
     : fft_man_(ds_man), dialog_(dialog)
 {
-    db_icon_ = QIcon(Files::getIconFilepath("db.png").c_str());
-    config_icon_ = QIcon(Files::getIconFilepath("configuration.png").c_str());
+    db_icon_ = Files::IconProvider::getIcon("db.png");
+    config_icon_ = Files::IconProvider::getIcon("configuration.png");
 }
 
 int FFTTableModel::rowCount(const QModelIndex& parent) const
