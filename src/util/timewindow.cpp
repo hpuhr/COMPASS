@@ -1,6 +1,8 @@
 #include "timewindow.h"
 #include "timeconv.h"
 
+using namespace std;
+
 namespace Utils
 {
 
@@ -51,6 +53,11 @@ nlohmann::json TimeWindow::getAsJson() const
     json_result.push_back(Time::toString(std::get<1>(time_window_)));
 
     return json_result;
+}
+
+std::string TimeWindow::asStr() const
+{
+    return Time::toString(std::get<0>(time_window_)) + " - " + Time::toString(std::get<1>(time_window_));
 }
 
 const boost::posix_time::ptime& TimeWindow::begin() const
@@ -106,6 +113,16 @@ nlohmann::json TimeWindowCollection::asJSON() const
         json_result.push_back(time_window.getAsJson());
 
     return json_result;
+}
+
+std::string TimeWindowCollection::asString() const
+{
+    ostringstream ss;
+
+    for (const auto& time_window : time_windows_)
+        ss << time_window.asStr() << endl;
+
+    return ss.str();
 }
 
 const Utils::TimeWindow& TimeWindowCollection::get(unsigned int index)

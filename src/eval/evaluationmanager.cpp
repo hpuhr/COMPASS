@@ -1192,6 +1192,22 @@ void EvaluationManager::useTimestampFilter(bool value)
     timeConstraintsChangedSlot();
 }
 
+std::string EvaluationManager::timestampFilterStr() const
+{
+    ostringstream ss;
+
+    ss << "Use: " << use_timestamp_filter_ << endl;
+
+    if (use_timestamp_filter_)
+    {
+        ss << "Begin: " << Time::toString(load_timestamp_begin_) << endl;
+        ss << "End: " << Time::toString(load_timestamp_end_) << endl;
+        ss << "Excluded: " << load_filtered_time_windows_.asString();
+    }
+
+    return ss.str();
+}
+
 /**
  */
 boost::posix_time::ptime EvaluationManager::loadTimestampBegin() const

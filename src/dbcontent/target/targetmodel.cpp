@@ -142,6 +142,20 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
             else
                 return QVariant();
         }
+        case Qt::ToolTipRole:
+        {
+            if (index.column() == ColUseEval)  // selected special case
+            {
+                QString just_the_tip;
+
+                just_the_tip.append("Use Target: " + QString((int) target.useInEval())+"\n");
+                just_the_tip.append(
+                    "Global Timestamp Filter: "
+                    + QString(COMPASS::instance().evaluationManager().timestampFilterStr().c_str())+"\n");
+
+                return just_the_tip;
+            }
+        }
         default:
         {
             return QVariant();

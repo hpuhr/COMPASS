@@ -137,6 +137,7 @@ public:
 
     bool useTimestampFilter() const;
     void useTimestampFilter(bool value);
+    std::string timestampFilterStr() const;
 
     EvaluationTargetFilter& targetFilter() const;
 

@@ -21,6 +21,7 @@ public:
 
     void setFrom(const nlohmann::json& json);
     nlohmann::json getAsJson() const;
+    std::string asStr() const;
 
     const boost::posix_time::ptime& begin() const;
     const boost::posix_time::ptime& end() const;
@@ -44,6 +45,7 @@ public:
 
     void setFrom(nlohmann::json& json);
     nlohmann::json asJSON() const;
+    std::string asString() const;
 
     const Utils::TimeWindow& get(unsigned int index);
 
