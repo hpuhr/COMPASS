@@ -2,11 +2,11 @@
 
 #include "targetbase.h"
 #include "propertylist.h"
+#include "util/timewindow.h"
 
 #include "json.hpp"
 
 #include "boost/date_time/posix_time/ptime.hpp"
-#include "boost/optional.hpp"
 
 #include <set>
 
@@ -88,6 +88,10 @@ public:
 
 protected:
     nlohmann::json info_;
+
+    // Utils::TimeWindowCollection excluded_time_windows_;
+    // std::set<std::string> excluded_requirements_;
+
     mutable std::string time_duration_str_;
 
 };

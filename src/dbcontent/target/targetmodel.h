@@ -103,6 +103,8 @@ public:
     void showModeSColumns(bool show);
     void showModeACColumns(bool show);
 
+    void updateEvalItems();
+
     nlohmann::json rawCellData(int row, int column) const;
     unsigned int rowStyle(int row) const;
     unsigned int columnStyle(int column) const;

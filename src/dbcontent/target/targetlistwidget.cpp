@@ -11,6 +11,7 @@
 
 #include "files.h"
 #include "logger.h"
+#include "stringconv.h"
 
 #include <QTableView>
 #include <QVBoxLayout>
@@ -22,6 +23,7 @@
 #include <QToolBar>
 
 using namespace std;
+using namespace Utils;
 
 namespace dbContent 
 {
@@ -267,36 +269,21 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
 
     assert (table_view_);
 
-    QModelIndex index = table_view_->indexAt(p);
-    if (!index.isValid())
-        return;
-
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
-
-    const dbContent::Target& target = model_.getTargetOf(source_index);
-
     QMenu menu;
 
-    QAction* action2 = new QAction("Show Surrounding Data", this);
-    connect (action2, &QAction::triggered, this, &TargetListWidget::showSurroundingDataSlot);
-    action2->setData(target.utn_);
-    menu.addAction(action2);
+    QAction* show_action = menu.addAction("Show Surrounding Data");
+    connect (show_action, &QAction::triggered, this, &TargetListWidget::showSurroundingDataSlot);
+
+    QMenu* eval_menu = menu.addMenu("Evaluation");
+
+    QAction* use_action = eval_menu->addAction("Use Target(s)");
+    connect (use_action, &QAction::triggered, this, &TargetListWidget::evalUseTargetsSlot);
+
+    QAction* nouse_action = eval_menu->addAction("Disable Use Target(s)");
+    connect (nouse_action, &QAction::triggered, this, &TargetListWidget::evalDisableUseTargetsSlot);
 
     menu.exec(table_view_->viewport()->mapToGlobal(p));
 }
-
-// void TargetListWidget::showFullUTNSlot ()
-// {
-//     QAction* action = dynamic_cast<QAction*> (QObject::sender());
-//     assert (action);
-
-//     unsigned int utn = action->data().toUInt();
-
-//     loginf << "TargetListWidget: showFullUTNSlot: utn " << utn;
-
-//     //eval_man_.showFullUTN(utn);
-// }
 
 void TargetListWidget::showSurroundingDataSlot ()
 {
@@ -308,14 +295,47 @@ void TargetListWidget::showSurroundingDataSlot ()
         QThread::msleep(10);
     }
 
-    QAction* action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
+    std::set<unsigned int> selected_utns = selectedUTNs();
 
-    unsigned int utn = action->data().toUInt();
+    logdbg << "TargetListWidget: showSurroundingDataSlot: utns " << String::compress(selected_utns,',');
 
-    loginf << "TargetListWidget: showSurroundingDataSlot: utn " << utn;
+    dbcont_man.showSurroundingData(selected_utns);
+}
 
-    dbcont_man.showSurroundingData(utn);
+void TargetListWidget::evalUseTargetsSlot()
+{
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    std::set<unsigned int> selected_utns = selectedUTNs();
+
+    for (auto utn : selected_utns)
+    {
+        assert (dbcont_man.existsTarget(utn));
+
+        auto& target = dbcont_man.target(utn);
+
+        target.useInEval(true);
+    }
+
+    model_.updateEvalItems();
+}
+
+void TargetListWidget::evalDisableUseTargetsSlot()
+{
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    std::set<unsigned int> selected_utns = selectedUTNs();
+
+    for (auto utn : selected_utns)
+    {
+        assert (dbcont_man.existsTarget(utn));
+
+        auto& target = dbcont_man.target(utn);
+
+        target.useInEval(false);
+    }
+
+    model_.updateEvalItems();
 }
 
 void TargetListWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
@@ -338,26 +358,7 @@ void TargetListWidget::currentRowChanged(const QModelIndex& current, const QMode
 
 void TargetListWidget::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-    vector<unsigned int> selected_utns;
-
-    QModelIndex current_index;
-    const QModelIndexList items = table_view_->selectionModel()->selectedRows();
-
-    logdbg << "TargetListWidget: selectionChanged: list size " << items.count();
-
-    foreach (current_index, items)
-    {
-        auto const source_index = proxy_model_->mapToSource(current_index);
-        assert (source_index.isValid());
-
-        const dbContent::Target& target = model_.getTargetOf(source_index);
-
-        logdbg << "TargetListWidget: selectionChanged: utn " << target.utn_;
-
-        selected_utns.push_back(target.utn_);
-    }
-
-    logdbg << "TargetListWidget: selectionChanged: num targets " << selected_utns.size();
+    std::set<unsigned int> selected_utns = selectedUTNs();
 
     dbcont_manager_.showUTNs(selected_utns);
 }
@@ -415,6 +416,34 @@ void TargetListWidget::showModeACColumns(bool show)
 
     table_view_->resizeColumnsToContents();
     table_view_->resizeRowsToContents();
+}
+
+std::set<unsigned int> TargetListWidget::selectedUTNs() const
+{
+    assert (table_view_);
+
+    std::set<unsigned int> selected_indexes;
+
+    QItemSelectionModel* selection_model = table_view_->selectionModel();
+
+    QModelIndexList selected_indexes_list = selection_model->selectedIndexes();
+
+    for (const QModelIndex& index : selected_indexes_list)
+    {
+        if (!index.isValid())
+            continue;
+
+        auto const source_index = proxy_model_->mapToSource(index);
+        assert (source_index.isValid());
+
+        const dbContent::Target& target = model_.getTargetOf(source_index);
+
+        selected_indexes.insert(target.utn_);
+    }
+
+    loginf << "TargetListWidget: selectedUTNs: " << String::compress(selected_indexes, ',');
+
+    return selected_indexes;
 }
 
 }

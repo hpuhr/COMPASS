@@ -5,6 +5,8 @@
 
 #include <QItemSelection>
 
+#include <set>
+
 class DBContentManager;
 
 class QTableView;
@@ -29,8 +31,10 @@ public slots:
     void clearCommentsSlot();
 
     void customContextMenuSlot(const QPoint& p);
-    //void showFullUTNSlot ();
     void showSurroundingDataSlot ();
+    void evalUseTargetsSlot();
+    void evalDisableUseTargetsSlot();
+
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
@@ -63,6 +67,8 @@ protected:
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};
+
+    std::set<unsigned int> selectedUTNs() const;
 };
 
 };

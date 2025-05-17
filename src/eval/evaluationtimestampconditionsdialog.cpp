@@ -65,6 +65,8 @@ EvaluationTimestampConditionsDialog::EvaluationTimestampConditionsDialog(Evaluat
     main_layout->addLayout(button_layout);
 
     setLayout(main_layout);
+
+    updateValues();
 }
 
 EvaluationTimestampConditionsDialog::~EvaluationTimestampConditionsDialog()

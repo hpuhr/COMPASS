@@ -20,6 +20,8 @@ using namespace nlohmann;
 
 namespace dbContent {
 
+const QColor very_light_gray (230, 230, 230);
+
 /**
  */
 TargetModel::TargetModel(DBContentManager& dbcont_manager)
@@ -60,6 +62,8 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         {
             if (!target.useInEval())
                 return QBrush(Qt::lightGray);
+            if (COMPASS::instance().evaluationManager().useTimestampFilter())
+                return QBrush(very_light_gray);
             else
                 return QVariant();
 
@@ -744,6 +748,17 @@ void TargetModel::showModeSColumns(bool show)
 void TargetModel::showModeACColumns(bool show)
 {
     show_mode_ac_columns_ = show;
+}
+
+void TargetModel::updateEvalItems()
+{
+    if (show_eval_columns_)
+    {
+        int row_count = this->rowCount();
+
+        emit dataChanged(index(0, ColUseEvalDetails), index(row_count, ColUseEvalDetails), {Qt::DisplayRole});
+        emit dataChanged(index(0, ColUseEval), index(row_count, ColUseEval), {Qt::DecorationRole});
+    }
 }
 
 }

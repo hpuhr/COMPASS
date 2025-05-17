@@ -187,8 +187,10 @@ public:
 
     void autoFilterUTNS();
     void showUTN (unsigned int utn);
-    void showUTNs (std::vector<unsigned int> utns);
+    void showUTNs (std::set<unsigned int> utns);
+
     void showSurroundingData (unsigned int utn);
+    void showSurroundingData (std::set<unsigned int> utns);
 
     dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
 
