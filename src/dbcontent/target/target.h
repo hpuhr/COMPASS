@@ -86,11 +86,14 @@ public:
     virtual void targetCategory(Category ecat);
     virtual Category targetCategory() const;
 
+    void storeEvalutionInfo(); // save efficient variables in json
+
 protected:
     nlohmann::json info_;
 
-    // Utils::TimeWindowCollection excluded_time_windows_;
-    // std::set<std::string> excluded_requirements_;
+    bool use_in_eval_;
+    Utils::TimeWindowCollection excluded_time_windows_;
+    std::set<std::string> excluded_requirements_;
 
     mutable std::string time_duration_str_;
 

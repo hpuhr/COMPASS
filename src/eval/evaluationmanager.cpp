@@ -76,9 +76,6 @@ EvaluationManager::EvaluationManager(const std::string& class_id,
 {
     createSubConfigurables();
     init_evaluation_commands();
-
-    connect (&load_filtered_time_windows_, &Utils::TimeWindowCollection::changedSignal,
-            this, &EvaluationManager::timeConstraintsChangedSlot);
 }
 
 /**
@@ -341,9 +338,9 @@ void EvaluationManager::associationStatusChangedSlot()
     // react on association status change
 }
 
-void EvaluationManager::timeConstraintsChangedSlot()
+void EvaluationManager::saveTimeConstraints()
 {
-    loginf << "EvaluationManager: timeConstraintsChangedSlot";
+    loginf << "EvaluationManager: saveTimeConstraints";
 
     nlohmann::json constraints_json = nlohmann::json::object();
 
@@ -1189,7 +1186,7 @@ void EvaluationManager::useTimestampFilter(bool value)
 {
     use_timestamp_filter_ = value;
 
-    timeConstraintsChangedSlot();
+    saveTimeConstraints();
 }
 
 std::string EvaluationManager::timestampFilterStr() const
@@ -1223,7 +1220,7 @@ void EvaluationManager::loadTimestampBegin(boost::posix_time::ptime value)
 
     load_timestamp_begin_ = value;
 
-    timeConstraintsChangedSlot();
+    saveTimeConstraints();
 }
 
 /**
@@ -1241,7 +1238,7 @@ void EvaluationManager::loadTimestampEnd(boost::posix_time::ptime value)
 
     load_timestamp_end_ = value;
 
-    timeConstraintsChangedSlot();
+    saveTimeConstraints();
 }
 
 Utils::TimeWindowCollection& EvaluationManager::excludedTimeWindows()

@@ -228,7 +228,7 @@ void TargetListWidget::loadingDone()
 void TargetListWidget::resizeColumnsToContents()
 {
     loginf << "TargetListWidget: resizeColumnsToContents";
-    //table_model_->update();
+
     table_view_->resizeColumnsToContents();
 }
 
@@ -253,6 +253,8 @@ void TargetListWidget::evalExcludeTimeWindowsSlot()
 
     EvaluationTimestampConditionsDialog dialog (COMPASS::instance().evaluationManager());
     dialog.exec();
+
+    COMPASS::instance().evaluationManager().saveTimeConstraints();
 }
 
 void TargetListWidget::evalFilterSlot()
@@ -304,6 +306,8 @@ void TargetListWidget::showSurroundingDataSlot ()
 
 void TargetListWidget::evalUseTargetsSlot()
 {
+    loginf << "TargetListWidget: evalUseTargetsSlot";
+
     auto& dbcont_man = COMPASS::instance().dbContentManager();
 
     std::set<unsigned int> selected_utns = selectedUTNs();
@@ -318,10 +322,13 @@ void TargetListWidget::evalUseTargetsSlot()
     }
 
     model_.updateEvalItems();
+    dbcont_man.storeTargetsEvalInfo();
 }
 
 void TargetListWidget::evalDisableUseTargetsSlot()
 {
+    loginf << "TargetListWidget: evalDisableUseTargetsSlot";
+
     auto& dbcont_man = COMPASS::instance().dbContentManager();
 
     std::set<unsigned int> selected_utns = selectedUTNs();
@@ -333,6 +340,30 @@ void TargetListWidget::evalDisableUseTargetsSlot()
         auto& target = dbcont_man.target(utn);
 
         target.useInEval(false);
+    }
+
+    model_.updateEvalItems();
+    dbcont_man.storeTargetsEvalInfo();
+}
+
+void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
+{
+    loginf << "TargetListWidget: evalExcludeTimeWindowsTargetSlot";
+
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    std::set<unsigned int> selected_utns = selectedUTNs();
+
+    Utils::TimeWindowCollection filtered_time_windows;
+
+    // collect all time windows from all targets
+    for (auto utn : selected_utns)
+    {
+        assert (dbcont_man.existsTarget(utn));
+
+        auto& target = dbcont_man.target(utn);
+
+
     }
 
     model_.updateEvalItems();

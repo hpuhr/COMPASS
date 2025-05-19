@@ -7,7 +7,11 @@ using namespace Utils;
 
 namespace dbContent {
 
-const std::string KEY_USED = "used";
+const std::string KEY_EVAL = "eval";
+const std::string KEY_EVAL_USE = "use";
+const std::string KEY_EVAL_EXCLUDED_TIME_WINDOWS = "excluded_tw";
+const std::string KEY_EVAL_EXCLUDED_REQUIREMENTS = "excluded_req";
+
 const std::string KEY_COMMENT = "comment";
 const std::string KEY_TIME_BEGIN = "time_begin";
 const std::string KEY_TIME_END = "time_end";
@@ -32,18 +36,26 @@ const PropertyList Target::DBPropertyList = PropertyList({ Target::DBColumnID,
 Target::Target(unsigned int utn, nlohmann::json info)
     : utn_(utn), info_(info)
 {
-    if (!info_.contains(KEY_USED))
-        info_[KEY_USED] = true;
+    if (!info_.contains(KEY_EVAL) || !info_.at(KEY_EVAL).contains(KEY_EVAL_USE))
+        info_[KEY_EVAL][KEY_EVAL_USE] = true;
+
+    use_in_eval_ = info_.at(KEY_EVAL).at(KEY_EVAL_USE);
+
+    if (info_.at(KEY_EVAL).contains(KEY_EVAL_EXCLUDED_TIME_WINDOWS))
+        excluded_time_windows_.setFrom(info_.at(KEY_EVAL).at(KEY_EVAL_EXCLUDED_TIME_WINDOWS));
+
+    if (info_.at(KEY_EVAL).contains(KEY_EVAL_EXCLUDED_REQUIREMENTS))
+        excluded_requirements_ = info_.at(KEY_EVAL).at(KEY_EVAL_EXCLUDED_REQUIREMENTS).get<std::set<std::string>>();
 }
 
 bool Target::useInEval() const
 {
-    return info_.at(KEY_USED);
+    return use_in_eval_;
 }
 
 void Target::useInEval(bool value)
 {
-    info_[KEY_USED] = value;
+    use_in_eval_ = value;
 }
 
 std::string Target::comment() const
@@ -386,6 +398,12 @@ TargetBase::Category Target::targetCategory() const
     return fromECAT(info_[KEY_ECAT].get<unsigned int>());
 }
 
+void Target::storeEvalutionInfo()
+{
+    info_[KEY_EVAL][KEY_EVAL_USE] = use_in_eval_;
+    info_[KEY_EVAL][KEY_EVAL_EXCLUDED_TIME_WINDOWS] = excluded_time_windows_.asJSON();
+    info_[KEY_EVAL][KEY_EVAL_EXCLUDED_REQUIREMENTS] = excluded_requirements_;
+}
 
 
 }

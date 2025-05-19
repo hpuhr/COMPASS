@@ -32,8 +32,10 @@ public slots:
 
     void customContextMenuSlot(const QPoint& p);
     void showSurroundingDataSlot ();
+
     void evalUseTargetsSlot();
     void evalDisableUseTargetsSlot();
+    void evalExcludeTimeWindowsTargetSlot();
 
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);

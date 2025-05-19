@@ -66,7 +66,6 @@ public slots:
     void dataSourcesChangedSlot();
     void associationStatusChangedSlot();
 
-    void timeConstraintsChangedSlot();
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -134,6 +133,7 @@ public:
     void loadTimestampEnd(boost::posix_time::ptime value);
 
     Utils::TimeWindowCollection& excludedTimeWindows(); // needs to be saved externally
+    void saveTimeConstraints();
 
     bool useTimestampFilter() const;
     void useTimestampFilter(bool value);

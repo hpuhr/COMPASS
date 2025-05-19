@@ -166,6 +166,8 @@ public:
     void saveTargets();
     unsigned int numTargets() const;
 
+    void storeTargetsEvalInfo(); // saves eval info from efficient variables in json, do after full change
+
     nlohmann::json targetsInfoAsJSON() const;
     nlohmann::json targetInfoAsJSON(unsigned int utn) const;
     nlohmann::json targetStatsAsJSON() const;

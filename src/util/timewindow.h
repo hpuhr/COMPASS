@@ -31,15 +31,11 @@ protected:
 };
 
 // changes have to be stored manually
-class TimeWindowCollection : public QObject
+class TimeWindowCollection
 {
-    Q_OBJECT
-
-signals:
-    void changedSignal(); // emitted if a change occured, but not from setFrom
-
 public:
     TimeWindowCollection();
+    virtual ~TimeWindowCollection()=default;
 
     bool valid() const;
 

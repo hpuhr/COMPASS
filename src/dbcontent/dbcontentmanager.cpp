@@ -1608,6 +1608,11 @@ unsigned int DBContentManager::numTargets() const
     return target_model_->size();
 }
 
+void DBContentManager::storeTargetsEvalInfo()
+{
+    target_model_->storeTargetsEvalInfo();
+}
+
 /**
  */
 nlohmann::json DBContentManager::targetsInfoAsJSON() const

@@ -424,6 +424,7 @@ void TargetModel::setUseAllTargetData (bool value)
 
     endResetModel();
 
+    dbcont_manager_.storeTargetsEvalInfo();
     emit dbcont_manager_.allTargetsChangedSignal();
 
     QApplication::restoreOverrideCursor();
@@ -589,6 +590,12 @@ void TargetModel::removeDBContentFromTargets(const std::string& dbcont_name)
 {
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [dbcont_name](Target& p) { p.clearDBContentCount(dbcont_name); });
+}
+
+void TargetModel::storeTargetsEvalInfo()
+{
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [](Target& p) { p.storeEvalutionInfo(); });
 }
 
 /**

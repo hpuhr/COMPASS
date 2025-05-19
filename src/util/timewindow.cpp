@@ -136,16 +136,12 @@ void TimeWindowCollection::add(const TimeWindow& time_window)
 {
     assert (time_window.valid());
     time_windows_.push_back(time_window);
-
-    emit changedSignal();
 }
 
 void TimeWindowCollection::erase(unsigned int index)
 {
     assert (index < time_windows_.size());
     time_windows_.erase(time_windows_.begin() + index);
-
-    emit changedSignal();
 }
 
 void TimeWindowCollection::clear()

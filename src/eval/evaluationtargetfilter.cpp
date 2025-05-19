@@ -187,6 +187,8 @@ void EvaluationTargetFilter::setUse(dbContent::TargetCache& target_data)
             target_data.modify(target_it, [comment](dbContent::Target& p) { p.comment(comment); });
         }
     }
+
+    dbcont_man.storeTargetsEvalInfo();
 }
 
 /**
