@@ -288,17 +288,36 @@ void SectionContentTable::accept(LatexVisitor& v)
 
 /**
  */
+void SectionContentTable::clearContent_impl()
+{
+    auto func = [ & ] ()
+    {
+        rows_.clear();
+        annotations_.clear();
+        cell_styles_.clear();
+    };
+
+    if (table_widget_)
+        table_widget_->itemModel()->executeAndReset(func);
+    else
+        func();
+}
+
+/**
+ */
 bool SectionContentTable::loadOnDemand()
 {
     bool ok = false;
 
-    //creation func
     auto func = [ & ] ()
     {
         ok = SectionContent::loadOnDemand();
     };
 
-    tableWidget()->itemModel()->executeAndReset(func);
+    if (table_widget_)
+        table_widget_->itemModel()->executeAndReset(func);
+    else
+        func();
 
     return ok;
 }
@@ -754,7 +773,7 @@ void SectionContentTable::clicked(unsigned int row)
     if (annotation.on_demand)
     {
         SectionContentViewable viewable;
-        bool ok = taskResult()->loadOnDemandViewable(*this, viewable, annotation.index);
+        bool ok = taskResult()->loadOnDemandViewable(*this, viewable, annotation.index, row);
 
         if (ok)
         {
@@ -873,7 +892,7 @@ void SectionContentTable::addActionsToMenu(QMenu* menu)
     QAction* copy_action = menu->addAction("Copy Content");
     QObject::connect (copy_action, &QAction::triggered, [ this ] { this->copyContent(); });
 
-    //add custom callbacks
+    //add custom callbacks stored in map
     if (callback_map_.size() > 0)
     {
         menu->addSeparator();
@@ -884,6 +903,9 @@ void SectionContentTable::addActionsToMenu(QMenu* menu)
             QObject::connect(action, &QAction::triggered, [ = ] () { this->executeCallback(cb_it.first); });
         }
     }
+
+    //add custom entries provided by task result
+    taskResult()->customContextMenu(*menu, this);
 }
 
 /**
@@ -1190,7 +1212,7 @@ SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* conten
     upper_layout->addStretch();
 
     options_menu_ = new QMenu(options_button_);
-    content_table_->addActionsToMenu(options_menu_);
+    connect(options_menu_, &QMenu::aboutToShow, this, &SectionContentTableWidget::updateOptionsMenu);
 
     options_button_ = new QPushButton("Options");
     options_button_->setMenu(options_menu_);
@@ -1462,6 +1484,17 @@ std::vector<std::string> SectionContentTableWidget::sortedRowStrings(unsigned in
     }
 
     return result;
+}
+
+/**
+ */
+void SectionContentTableWidget::updateOptionsMenu()
+{
+    if (options_menu_ && content_table_)
+    {
+        options_menu_->clear();
+        content_table_->addActionsToMenu(options_menu_);
+    }
 }
 
 }

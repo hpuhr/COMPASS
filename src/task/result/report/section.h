@@ -49,6 +49,14 @@ struct SectionContentViewable;
 class Section : public TreeItem
 {
 public:
+    enum ContentInfoFlag
+    {
+        ContentAvailable        = 1 << 0,
+        ContentLoaded           = 1 << 1,
+        ContentOnDemand         = 1 << 2,
+        ContentOnDemandComplete = 1 << 3
+    };
+
     Section(const std::string& heading, 
             const std::string& parent_heading, 
             TreeItem* parent_item,
@@ -70,8 +78,9 @@ public:
     Section& getSubSection (const std::string& heading);
     void addSubSection (const std::string& heading);
     std::vector<std::shared_ptr<Section>> subSections(bool recursive) const;
+    std::string relativeID(const std::string& id) const;
 
-    QWidget* getContentWidget();
+    QWidget* getContentWidget(bool preload_ondemand_contents);
 
     bool hasText (const std::string& name);
     SectionContentText& getText (const std::string& name);
@@ -95,6 +104,10 @@ public:
                                      const SectionContentViewable& viewable);
     std::vector<SectionContentFigure*> getFigures();
     size_t numFigures() const;
+
+    bool hasContent(const std::string& name) const;
+    unsigned int contentInfo(const std::string& name) const;
+    unsigned int contentID(const std::string& name) const;
 
     std::shared_ptr<SectionContent> retrieveContent(unsigned int id,
                                                     bool show_dialog = false);
@@ -151,11 +164,12 @@ protected:
 
     Section* findSubSection (const std::string& heading); // nullptr if not found
     boost::optional<size_t> findContent(const std::string& name, SectionContent::Type type) const;
+    boost::optional<size_t> findContent(const std::string& name) const;
     std::vector<size_t> findContents(SectionContent::Type type) const;
     bool hasContent(const std::string& name, SectionContent::Type type) const;
     size_t numContents(SectionContent::Type type) const;
 
-    void createContentWidget();
+    void createContentWidget(bool preload_ondemand_contents);
 
     unsigned int addContentFigure(const SectionContentViewable& viewable);
 

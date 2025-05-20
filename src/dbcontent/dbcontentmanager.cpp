@@ -2046,6 +2046,26 @@ void DBContentManager::utnComment (unsigned int utn, std::string value)
 
 /**
  */
+TargetBase::Category DBContentManager::emitterCategory(unsigned int utn) const
+{
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+
+    return target_model_->target(utn).targetCategory();
+}
+
+/**
+ */
+std::string DBContentManager::emitterCategoryStr(unsigned int utn) const
+{
+    assert (target_model_);
+    assert (target_model_->existsTarget(utn));
+
+    return target_model_->target(utn).emitterCategoryStr();
+}
+
+/**
+ */
 void DBContentManager::autoFilterUTNS()
 {
     assert (target_model_);

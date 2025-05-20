@@ -23,7 +23,7 @@
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontenttable.h"
 
-#include "eval/results/report/section_id.h"
+#include "eval/results/report/evalsectionid.h"
 
 #include "eval/requirement/base/base.h"
 #include "number.h"
@@ -71,7 +71,7 @@ Base::Base(const std::string& type,
 {
     assert (requirement_);
 
-    req_grp_id_ = EvaluationResultsReport::SectionID::requirementGroupResultID(*this);
+    req_grp_id_ = EvalSectionID::requirementGroupResultID(*this);
 }
 
 /**
@@ -242,14 +242,14 @@ ResultReport::SectionContentTable& Base::getReqOverviewTable (std::shared_ptr<Re
 */
 std::string Base::getRequirementSectionID() const
 {
-    return EvaluationResultsReport::SectionID::requirementResultID(*this);
+    return EvalSectionID::requirementResultID(*this);
 }
 
 /**
 */
 std::string Base::getRequirementSumSectionID() const
 {
-    return EvaluationResultsReport::SectionID::requirementResultSumID(*this);
+    return EvalSectionID::requirementResultSumID(*this);
 }
 
 /**
@@ -257,6 +257,13 @@ std::string Base::getRequirementSumSectionID() const
 std::string Base::getRequirementAnnotationID() const
 {
     return "Evaluation:" + getRequirementAnnotationID_impl();
+}
+
+/**
+*/
+std::string Base::sumSectionName() const
+{
+    return EvalSectionID::SectionSum;
 }
 
 /**

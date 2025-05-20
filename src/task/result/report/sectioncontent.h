@@ -117,6 +117,8 @@ public:
     unsigned int id() const;
     std::string name() const;
 
+    const Section* parentSection() const { return parent_section_; }
+
     void setJSONProperty(const std::string& name, const nlohmann::json& value);
     bool hasJSONProperty(const std::string& name) const;
     nlohmann::json jsonProperty(const std::string& name) const;
@@ -125,6 +127,9 @@ public:
     bool isOnDemand() const;
     bool isComplete() const;
     bool loadOnDemandIfNeeded();
+    bool forceReload();
+
+    void clearContent();
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
@@ -149,6 +154,8 @@ public:
     static const std::string FieldOnDemand;
 
 protected:
+    virtual void clearContent_impl() = 0;
+
     virtual void toJSON_impl(nlohmann::json& root_node) const = 0;
     virtual bool fromJSON_impl(const nlohmann::json& j) = 0;
 

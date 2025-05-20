@@ -76,4 +76,11 @@ std::string SectionID::prependReportResults(const std::string& section_id)
     return prefix + section_id;
 }
 
+/**
+*/
+std::string SectionID::reportResultID()
+{
+    return SectionReport + ResultReport::SectionID::Sep + SectionResults;
+}
+
 }

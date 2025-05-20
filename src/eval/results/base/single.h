@@ -43,11 +43,12 @@ namespace ResultReport
     struct SectionContentViewable;
 }
 
+class EvaluationTaskResult;
+
 namespace EvaluationRequirementResult
 {
 
 class Joined;
-class EvaluationTaskResult;
 
 template <typename T>
 struct ValueSource;
@@ -195,6 +196,8 @@ public:
                                            unsigned int utn);
     static boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>> 
     singleContentProperties(const ResultReport::SectionContent& content);
+
+    std::string sumSectionName() const override final;
 
     static const std::string TRDetailsTableName;
     

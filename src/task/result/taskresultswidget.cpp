@@ -284,15 +284,17 @@ std::string TaskResultsWidget::currentReportName() const
 
 /**
  */
-void TaskResultsWidget::selectID(const std::string id)
+void TaskResultsWidget::selectID(const std::string id, bool show_figure)
 {
-    report_widget_->selectId(id);
+    report_widget_->selectId(id, show_figure);
 }
 
 /**
  */
 void TaskResultsWidget::restoreBackupSection()
 {
+    loginf << "TaskResultsWidget: restoreBackupSection: trying to restore section";
+
     if (current_report_name_backup_.empty())
         return;
 
@@ -302,8 +304,12 @@ void TaskResultsWidget::restoreBackupSection()
     if (current_report_name_backup_ != current_report_name_)
         return;
 
+    loginf << "TaskResultsWidget: restoreBackupSection: restored report '" << current_report_name_backup_ << "'";
+
     if (current_section_name_backup_.empty())
         return;
 
     report_widget_->selectId(current_section_name_backup_);
+
+    loginf << "TaskResultsWidget: restoreBackupSection: restored section '" << current_section_name_backup_ << "'";
 }

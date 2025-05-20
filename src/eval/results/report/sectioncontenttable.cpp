@@ -705,7 +705,7 @@ void SectionContentTable::showSurroundingDataSlot ()
 
     loginf << "SectionContentTable: showSurroundingDataSlot: utn " << utn;
 
-    eval_man_.calculator().showSurroundingData(utn);
+    //eval_man_.calculator().showSurroundingData(utn);
 }
 
 void SectionContentTable::showMenuSlot()

@@ -28,7 +28,8 @@ public:
     virtual ~TaskResultsWidget();
 
     void setReport(const std::string name);
-    void selectID(const std::string id);
+    void selectID(const std::string id,
+                  bool show_figure = false);
     void restoreBackupSection();
 
     //ToolBoxWidget

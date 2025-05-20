@@ -22,7 +22,6 @@
 #include <memory>
 
 class EvaluationCalculator;
-class EvaluationManagerWidget;
 class EvaluationStandardComboBox;
 
 class QPushButton;

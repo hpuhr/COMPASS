@@ -20,6 +20,7 @@
 #include "evaluationcalculator.h"
 #include "evaluationdata.h"
 #include "evaluationstandard.h"
+#include "evaluationtaskresult.h"
 
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/baseconfig.h"
@@ -66,8 +67,7 @@ const std::string EvaluationResultsGenerator::EvalResultName = "Evaluation Resul
 /**
  */
 EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationCalculator& calculator)
-:   calculator_   (calculator)
-,   results_model_(calculator.manager())
+:   calculator_(calculator)
 {
 }
 
@@ -471,6 +471,9 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     auto& result = task_manager.currentResult();
     auto& report = task_manager.currentReport();
 
+    EvaluationTaskResult* eval_result = dynamic_cast<EvaluationTaskResult*>(result.get());
+    assert(eval_result);
+
     //store eval config
     nlohmann::json config;
     calculator_.generateJSON(config, Configurable::JSONExportType::General);
@@ -513,8 +516,8 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     gen_table.addRow({ "Reference Sensors", "Used reference sensors", sensors_ref });
     gen_table.addRow({ "Test Sensors", "Used test sensors", sensors_tst });
 
-    // generate target information
-    addTargetInformation(report);
+    // generate target section
+    addTargetSection(report);
 
     // generate results
 
@@ -546,6 +549,9 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     // generate non-result details
     addNonResultsContent(report);
+
+    // store targets to result
+    eval_result->setTargets(calculator_.data().toTargets());
 
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI: storing results...";
 
@@ -614,9 +620,8 @@ void EvaluationResultsGenerator::updateToChanges ()
 
 /**
  */
-void EvaluationResultsGenerator::addTargetInformation(const std::shared_ptr<ResultReport::Report>& report)
+void EvaluationResultsGenerator::addTargetSection(const std::shared_ptr<ResultReport::Report>& report)
 {
-    //targets
     calculator_.data().addToReport(report);
 }
 
@@ -627,11 +632,4 @@ void EvaluationResultsGenerator::addNonResultsContent (const std::shared_ptr<Res
     // standard
     assert (calculator_.hasCurrentStandard());
     calculator_.currentStandard().addToReport(report);
-}
-
-/**
- */
-EvaluationResultsReport::TreeModel& EvaluationResultsGenerator::resultsModel()
-{
-    return results_model_;
 }

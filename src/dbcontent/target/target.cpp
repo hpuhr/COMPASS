@@ -7,22 +7,22 @@ using namespace Utils;
 
 namespace dbContent {
 
-const std::string KEY_USED = "used";
-const std::string KEY_COMMENT = "comment";
-const std::string KEY_TIME_BEGIN = "time_begin";
-const std::string KEY_TIME_END = "time_end";
-const std::string KEY_ACAD = "aircraft_addresses";
-const std::string KEY_ACID = "aircraft_identifications";
-const std::string KEY_MODE_3A = "mode_3a_codes";
-const std::string KEY_MODE_C_MIN = "mode_c_min";
-const std::string KEY_MODE_C_MAX = "mode_c_max";
-const std::string KEY_COUNTS = "dbcontent_counts";
-const std::string KEY_ADSD_MOPS_VERSION = "adsb_mops_versions";
-const std::string KEY_LATITUDE_MIN = "latitude_min";
-const std::string KEY_LATITUDE_MAX = "latitude_max";
-const std::string KEY_LONGITUDE_MIN = "longitude_min";
-const std::string KEY_LONGITUDE_MAX = "longitude_max";
-const std::string KEY_ECAT = "emitter_category";
+const std::string Target::KEY_USED              = "used";
+const std::string Target::KEY_COMMENT           = "comment";
+const std::string Target::KEY_TIME_BEGIN        = "time_begin";
+const std::string Target::KEY_TIME_END          = "time_end";
+const std::string Target::KEY_ACAD              = "aircraft_addresses";
+const std::string Target::KEY_ACID              = "aircraft_identifications";
+const std::string Target::KEY_MODE_3A           = "mode_3a_codes";
+const std::string Target::KEY_MODE_C_MIN        = "mode_c_min";
+const std::string Target::KEY_MODE_C_MAX        = "mode_c_max";
+const std::string Target::KEY_COUNTS            = "dbcontent_counts";
+const std::string Target::KEY_ADSD_MOPS_VERSION = "adsb_mops_versions";
+const std::string Target::KEY_LATITUDE_MIN      = "latitude_min";
+const std::string Target::KEY_LATITUDE_MAX      = "latitude_max";
+const std::string Target::KEY_LONGITUDE_MIN     = "longitude_min";
+const std::string Target::KEY_LONGITUDE_MAX     = "longitude_max";
+const std::string Target::KEY_ECAT              = "emitter_category";
 
 const Property     Target::DBColumnID     = Property("utn" , PropertyDataType::UINT);
 const Property     Target::DBColumnInfo   = Property("json", PropertyDataType::JSON);
@@ -225,7 +225,7 @@ void Target::modeCMinMax(float min, float max)
     if (max > 1000)
     {
         if (targetCategory() == Category::Unknown)
-        targetCategory(Category::AnyAircraft);
+            targetCategory(Category::AnyAircraft);
     }
 }
 

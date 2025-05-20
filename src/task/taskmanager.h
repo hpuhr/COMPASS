@@ -102,14 +102,13 @@ public:
     const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
     std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
     std::shared_ptr<TaskResult> result(const std::string& name) const; // get existing result
-    std::shared_ptr<TaskResult> getOrCreateResult(const std::string& name, 
-                                                  task::TaskResultType type);
     bool hasResult (const std::string& name) const;
     bool removeResult(const std::string& name, 
                       bool inform_changes = true);
-    std::shared_ptr<TaskResult> createResult(unsigned int id,
+    
+    std::shared_ptr<TaskResult> createResult(unsigned int id, 
                                              task::TaskResultType type);
-
+    
     void setViewableDataConfig(const nlohmann::json::object_t& data);
     void unsetViewableDataConfig();
 
@@ -127,6 +126,8 @@ protected:
     void addTask(const std::string& class_id, Task* task);
     MainWindow* getMainWindow();
 
+    std::shared_ptr<TaskResult> getOrCreateResult(const std::string& name, 
+                                                  task::TaskResultType type);
     void loadResults();
     boost::optional<unsigned int> findResult(const std::string& name) const;
 

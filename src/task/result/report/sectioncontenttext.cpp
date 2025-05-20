@@ -87,6 +87,13 @@ const std::vector<std::string>& SectionContentText::texts() const
 
 /**
  */
+void SectionContentText::clearContent_impl()
+{
+    texts_.clear();
+}
+
+/**
+ */
 void SectionContentText::toJSON_impl(nlohmann::json& root_node) const
 {
     root_node[ FieldTexts ] = texts_;

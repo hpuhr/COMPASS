@@ -201,6 +201,8 @@ public:
     static const QColor ColorBGYellow;
 
 protected:
+    void clearContent_impl() override final;
+
     void toJSON_impl(nlohmann::json& root_node) const override final; 
     bool fromJSON_impl(const nlohmann::json& j) override final;
 
@@ -242,8 +244,7 @@ protected:
 
     mutable std::vector<nlohmann::json> rows_;
     mutable std::vector<RowAnnotation>  annotations_;
-
-    CellStyles cell_styles_;
+    CellStyles                          cell_styles_;
 
     mutable SectionContentTableWidget* table_widget_ {nullptr};
 
@@ -308,8 +309,8 @@ private:
     void clicked(const QModelIndex& index);
     void doubleClicked(const QModelIndex& index);
     void customContextMenu(const QPoint& p);
-
     void performClickAction();
+    void updateOptionsMenu();
 
     SectionContentTable*        content_table_  = nullptr;
     SectionContentTableModel*   model_          = nullptr;

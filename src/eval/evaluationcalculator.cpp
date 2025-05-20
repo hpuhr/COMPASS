@@ -17,6 +17,7 @@
 
 #include "evaluationcalculator.h"
 #include "evaluationmanager.h"
+#include "evaluationtarget.h"
 
 #include "eval/results/report/pdfgeneratordialog.h"
 #include "evaluationstandard.h"
@@ -383,6 +384,8 @@ void EvaluationCalculator::evaluate(bool blocking,
     }
     else
     {
+        assert(!active_load_connection_);
+
         QObject::connect(&manager_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
         active_load_connection_ = true;
         manager_.loadData(*this, false);
@@ -402,6 +405,7 @@ void EvaluationCalculator::loadingDone()
     }
 
     auto data = manager_.fetchData();
+
     data_.setBuffers(data);
 
     bool has_ref_data = data.count(settings_.dbcontent_name_ref_);
@@ -466,17 +470,12 @@ void EvaluationCalculator::evaluateData()
     // clean previous
     results_gen_.clear();
 
-    data_.resetModelBegin();
-    data_.clearInterestFactors();
-
     evaluated_ = false;
 
     emit resultsChanged();
     
     // eval
     results_gen_.evaluate(data_, currentStandard(), eval_utns_, eval_requirements_, update_report_);
-
-    data_.resetModelEnd();
 
     evaluated_ = true;
 
@@ -1223,7 +1222,7 @@ void EvaluationCalculator::updateResultsToChanges ()
 
 /**
  */
-nlohmann::json::object_t EvaluationCalculator::getBaseViewableDataConfig ()
+nlohmann::json::object_t EvaluationCalculator::getBaseViewableDataConfig () const
 {
     nlohmann::json data;
 
@@ -1231,11 +1230,11 @@ nlohmann::json::object_t EvaluationCalculator::getBaseViewableDataConfig ()
 
     std::map<unsigned int, std::set<unsigned int>> data_sources;
 
-    for (auto& src_it : data_sources_ref_[settings_.dbcontent_name_ref_])
+    for (auto& src_it : data_sources_ref_.at(settings_.dbcontent_name_ref_))
         if (src_it.second)
             data_sources[stoul(src_it.first)].insert(settings_.line_id_ref_);
 
-    for (auto& src_it : data_sources_tst_[settings_.dbcontent_name_tst_])
+    for (auto& src_it : data_sources_tst_.at(settings_.dbcontent_name_tst_))
         if (src_it.second)
             data_sources[stoul(src_it.first)].insert(settings_.line_id_tst_);
 
@@ -1305,7 +1304,7 @@ nlohmann::json::object_t EvaluationCalculator::getBaseViewableDataConfig ()
 
 /**
  */
-nlohmann::json::object_t EvaluationCalculator::getBaseViewableNoDataConfig ()
+nlohmann::json::object_t EvaluationCalculator::getBaseViewableNoDataConfig () const
 {
     nlohmann::json data;
 
@@ -1316,7 +1315,7 @@ nlohmann::json::object_t EvaluationCalculator::getBaseViewableNoDataConfig ()
 
 /**
  */
-std::unique_ptr<nlohmann::json::object_t> EvaluationCalculator::getViewableForUTN (unsigned int utn)
+std::unique_ptr<nlohmann::json::object_t> EvaluationCalculator::getViewableForUTN (unsigned int utn) const
 {
     nlohmann::json::object_t data = getBaseViewableDataConfig();
     data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
@@ -1327,7 +1326,7 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationCalculator::getViewableForUT
 /**
  */
 std::unique_ptr<nlohmann::json::object_t> EvaluationCalculator::getViewableForEvaluation (const std::string& req_grp_id, 
-                                                                                          const std::string& result_id)
+                                                                                          const std::string& result_id) const
 {
     nlohmann::json::object_t data = getBaseViewableNoDataConfig();
 
@@ -1338,12 +1337,9 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationCalculator::getViewableForEv
  */
 std::unique_ptr<nlohmann::json::object_t> EvaluationCalculator::getViewableForEvaluation (unsigned int utn, 
                                                                                           const std::string& req_grp_id, 
-                                                                                          const std::string& result_id)
+                                                                                          const std::string& result_id) const
 {
-    nlohmann::json::object_t data = getBaseViewableDataConfig();
-    data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
-
-    return std::unique_ptr<nlohmann::json::object_t>{new nlohmann::json::object_t(move(data))};
+    return getViewableForUTN(utn);
 }
 
 /**
@@ -1371,18 +1367,14 @@ void EvaluationCalculator::showFullUTN (unsigned int utn)
 
 /**
  */
-void EvaluationCalculator::showSurroundingData (unsigned int utn)
+void EvaluationCalculator::showSurroundingData (const EvaluationTarget& target)
 {
     nlohmann::json::object_t data;
 
-    assert (data_.hasTargetData(utn));
-
-    const EvaluationTargetData& target_data = data_.targetData(utn);
-
-    ptime time_begin = target_data.timeBegin();
+    ptime time_begin = target.timeBegin();
     time_begin -= seconds(60);
 
-    ptime time_end = target_data.timeEnd();
+    ptime time_end = target.timeEnd();
     time_end += seconds(60);
 
     //    "Timestamp": {
@@ -1397,15 +1389,15 @@ void EvaluationCalculator::showSurroundingData (unsigned int utn)
     //    "Aircraft Address": {
     //    "Aircraft Address Values": "FEFE10"
     //    },
-    if (target_data.acads().size())
-        data[ViewPoint::VP_FILTERS_KEY]["Aircraft Address"]["Aircraft Address Values"] = target_data.acadsStr()+",NULL";
+    if (target.aircraftAddresses().size())
+        data[ViewPoint::VP_FILTERS_KEY]["Aircraft Address"]["Aircraft Address Values"] = target.aircraftAddressesStr()+",NULL";
 
     //    "Mode 3/A Code": {
     //    "Mode 3/A Code Values": "7000"
     //    }
 
-    if (target_data.modeACodes().size())
-        data[ViewPoint::VP_FILTERS_KEY]["Mode 3/A Codes"]["Mode 3/A Codes Values"] = target_data.modeACodesStr()+",NULL";
+    if (target.modeACodes().size())
+        data[ViewPoint::VP_FILTERS_KEY]["Mode 3/A Codes"]["Mode 3/A Codes Values"] = target.modeACodesStr()+",NULL";
 
     //    VP_FILTERS_KEY: {
     //    "Barometric Altitude": {
@@ -1414,11 +1406,11 @@ void EvaluationCalculator::showSurroundingData (unsigned int utn)
     //    "Barometric Altitude NULL": false
     //    },
 
-    if (target_data.hasModeC())
+    if (target.hasModeC())
     {
-        float alt_min = target_data.modeCMin();
+        float alt_min = target.modeCMin();
         alt_min -= 300;
-        float alt_max = target_data.modeCMax();
+        float alt_max = target.modeCMax();
         alt_max += 300;
 
         data[ViewPoint::VP_FILTERS_KEY]["Barometric Altitude"]["Barometric Altitude Maximum"] = alt_max;
@@ -1433,17 +1425,17 @@ void EvaluationCalculator::showSurroundingData (unsigned int utn)
     //    "Longitude Minimum": "8.5801592186"
     //    }
 
-    if (target_data.hasPos())
+    if (target.hasPositionBounds())
     {
-        double lat_eps = (target_data.latitudeMax() - target_data.latitudeMin()) / 10.0;
+        double lat_eps = (target.latitudeMax() - target.latitudeMin()) / 10.0;
         lat_eps = min(lat_eps, 0.1); // 10% or 0.1 at max
-        double lon_eps = (target_data.longitudeMax() - target_data.longitudeMin()) / 10.0; // 10%
+        double lon_eps = (target.longitudeMax() - target.longitudeMin()) / 10.0; // 10%
         lon_eps = min(lon_eps, 0.1); // 10% or 0.1 at max
 
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(target_data.latitudeMax()+lat_eps);
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(target_data.latitudeMin()-lat_eps);
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(target_data.longitudeMax()+lon_eps);
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(target_data.longitudeMin()-lon_eps);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(target.latitudeMax()+lat_eps);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(target.latitudeMin()-lat_eps);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(target.longitudeMax()+lon_eps);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(target.longitudeMin()-lon_eps);
     }
 
     manager_.setViewableDataConfig(data);

@@ -25,7 +25,7 @@
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/sectioncontenttext.h"
 
-#include "eval/results/report/section_id.h"
+#include "eval/results/report/evalsectionid.h"
 
 #include "eval/requirement/base/base.h"
 
@@ -110,7 +110,10 @@ void Single::setInterestFactor(double factor)
 
     assert (target_);
 
-    target_->addInterestFactor(getRequirementSectionID(), factor);
+    Evaluation::RequirementSumResultID id;
+    id.fromResult(*this);
+
+    target_->addInterestFactor(id, factor);
 }
 
 /**
@@ -140,19 +143,19 @@ boost::optional<double> Single::computeResult() const
 */
 std::string Single::getTargetSectionID()
 {
-    return EvaluationResultsReport::SectionID::targetID(utn_);
+    return EvalSectionID::targetID(utn_);
 }
 
 /**
 */
 std::string Single::getTargetRequirementSectionID ()
 {
-    return EvaluationResultsReport::SectionID::targetResultID(utn_, *this);
+    return EvalSectionID::targetResultID(utn_, *this);
 }
 
 /**
 */
-std::string Single::getRequirementSectionID () const // TODO hack
+std::string Single::sumSectionName() const
 {
     if (calculator_.settings().report_split_results_by_mops_)
     {
@@ -161,9 +164,9 @@ std::string Single::getRequirementSectionID () const // TODO hack
         if (!tmp.size())
             tmp = "Unknown";
 
-        tmp = "MOPS "+tmp+" Sum";
+        tmp = "MOPS " + tmp;
 
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+":"+requirement_->name();
+        return tmp + " " + EvalSectionID::SectionSum;
     }
     else if (calculator_.settings().report_split_results_by_aconly_ms_)
     {
@@ -176,12 +179,18 @@ std::string Single::getRequirementSectionID () const // TODO hack
         else
             assert (target()->isPrimaryOnly());
 
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+" Sum"+":"+requirement_->name();
+        return tmp + " " + EvalSectionID::SectionSum;
     }
-    else
-    {
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":Sum:"+requirement_->name();
-    }
+
+    //default sum section name
+    return Base::sumSectionName();
+}
+
+/**
+*/
+std::string Single::getRequirementSectionID () const // TODO hack
+{
+    return EvalSectionID::requirementResultSumID(*this);
 }
 
 /**
@@ -644,7 +653,7 @@ std::string Single::reference(const ResultReport::SectionContentTable& table,
                               const QVariant& annotation) const
 {
     assert (hasReference(table, annotation));
-    return EvaluationResultsReport::SectionID::createForTargetResult(utn_, *this);
+    return EvalSectionID::createForTargetResult(utn_, *this);
 }
 
 /**

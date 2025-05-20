@@ -34,10 +34,12 @@
 #include <QObject>
 
 class EvaluationStandard;
+struct EvaluationTarget;
+class EvaluationManager;
+
 class DBContent;
 class SectorLayer;
 class AirSpace;
-class EvaluationManager;
 
 namespace dbContent 
 {
@@ -164,6 +166,7 @@ public:
     std::vector<std::shared_ptr<SectorLayer>>& sectorLayers();
     const std::vector<std::shared_ptr<SectorLayer>>& sectorLayers() const;
     void updateSectorLayers();
+    void updateSectorROI();
 
     bool filterMinimumHeight() const;
     const std::string& minHeightFilterLayerName() const;
@@ -179,14 +182,14 @@ public:
     // base viewables
     void showUTN (unsigned int utn);
     void showFullUTN (unsigned int utn);
-    void showSurroundingData (unsigned int utn);
+    void showSurroundingData (const EvaluationTarget& target);
 
-    std::unique_ptr<nlohmann::json::object_t> getViewableForUTN (unsigned int utn);
+    std::unique_ptr<nlohmann::json::object_t> getViewableForUTN (unsigned int utn) const;
     std::unique_ptr<nlohmann::json::object_t> getViewableForEvaluation (const std::string& req_grp_id, 
-                                                                        const std::string& result_id); // empty load
+                                                                        const std::string& result_id) const; // empty load
     std::unique_ptr<nlohmann::json::object_t> getViewableForEvaluation (unsigned int utn, 
                                                                         const std::string& req_grp_id, 
-                                                                        const std::string& result_id); // with data                                                            
+                                                                        const std::string& result_id) const; // with data                                                            
     // results
     ResultIterator begin();
     ResultIterator end();
@@ -232,10 +235,9 @@ protected:
     std::map<std::string, bool>& dataSourcesRef();
     std::map<std::string, bool>& dataSourcesTst();
 
-    nlohmann::json::object_t getBaseViewableDataConfig ();
-    nlohmann::json::object_t getBaseViewableNoDataConfig ();
+    nlohmann::json::object_t getBaseViewableDataConfig () const;
+    nlohmann::json::object_t getBaseViewableNoDataConfig () const;
 
-    void updateSectorROI();
     void updateCompoundCoverage(std::set<unsigned int> tst_sources);
 
     void updateDerivedParameters();

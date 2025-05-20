@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LATEXVISITOR_H
-#define LATEXVISITOR_H
+#pragma once
 
 #include "global.h"
 
@@ -32,7 +31,7 @@ class ScatterPlotView;
 class GridView;
 class LatexDocument;
 
-namespace EvaluationResultsReport
+namespace ResultReport
 {
     class Section;
     class SectionContentTable;
@@ -40,6 +39,8 @@ namespace EvaluationResultsReport
     class SectionContentFigure;
 }
 
+/**
+ */
 class LatexVisitor
 {
 public:
@@ -56,10 +57,10 @@ public:
     virtual void visit(ScatterPlotView* e);
     virtual void visit(GridView* e);
 
-    virtual void visit(const EvaluationResultsReport::Section* e);
-    virtual void visit(const EvaluationResultsReport::SectionContentTable* e);
-    virtual void visit(const EvaluationResultsReport::SectionContentText* e);
-    virtual void visit(const EvaluationResultsReport::SectionContentFigure* e);
+    virtual void visit(const ResultReport::Section* e);
+    virtual void visit(const ResultReport::SectionContentTable* e);
+    virtual void visit(const ResultReport::SectionContentText* e);
+    virtual void visit(const ResultReport::SectionContentFigure* e);
 
     void imagePrefix(const std::string& image_prefix);
 
@@ -80,5 +81,3 @@ protected:
     std::string current_section_name_;
     std::string image_prefix_;
 };
-
-#endif // LATEXVISITOR_H
