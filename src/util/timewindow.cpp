@@ -60,6 +60,11 @@ std::string TimeWindow::asStr() const
     return Time::toString(std::get<0>(time_window_)) + " - " + Time::toString(std::get<1>(time_window_));
 }
 
+bool TimeWindow::contains(const TimeWindow& tw) const
+{
+    return (std::get<0>(time_window_) <= tw.begin() && std::get<1>(time_window_) >= tw.end());
+}
+
 const boost::posix_time::ptime& TimeWindow::begin() const
 {
     return std::get<0>(time_window_);
@@ -119,8 +124,8 @@ std::string TimeWindowCollection::asString() const
 {
     ostringstream ss;
 
-    for (const auto& time_window : time_windows_)
-        ss << time_window.asStr() << endl;
+    for (const auto& tw_it : time_windows_)
+        ss << tw_it.asStr() << endl;
 
     return ss.str();
 }
@@ -136,6 +141,17 @@ void TimeWindowCollection::add(const TimeWindow& time_window)
 {
     assert (time_window.valid());
     time_windows_.push_back(time_window);
+}
+
+bool TimeWindowCollection::contains(const TimeWindow& time_window)
+{
+    for (const auto& tw_it : time_windows_)
+    {
+        if (tw_it.contains(time_window))
+            return true;
+    }
+
+    return false;
 }
 
 void TimeWindowCollection::erase(unsigned int index)

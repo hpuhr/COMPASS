@@ -284,6 +284,14 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
     QAction* nouse_action = eval_menu->addAction("Disable Use Target(s)");
     connect (nouse_action, &QAction::triggered, this, &TargetListWidget::evalDisableUseTargetsSlot);
 
+    eval_menu->addSeparator();
+
+    QAction* tw_action = eval_menu->addAction("Edit Excluded Time Windows");
+    connect (tw_action, &QAction::triggered, this, &TargetListWidget::evalExcludeTimeWindowsTargetSlot);
+
+    QAction* req_action = eval_menu->addAction("Edit Excluded Requirements");
+    connect (req_action, &QAction::triggered, this, &TargetListWidget::evalExcludeTimeWindowsTargetSlot);
+
     menu.exec(table_view_->viewport()->mapToGlobal(p));
 }
 
@@ -363,10 +371,19 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
 
         auto& target = dbcont_man.target(utn);
 
-
+        for (auto& tw : target.evalExcludedTimeWindows())
+        {
+            if (!filtered_time_windows.contains(tw))
+                filtered_time_windows.add(tw);
+        }
     }
 
     model_.updateEvalItems();
+}
+
+void TargetListWidget::evalExcludeRequirementsTargetSlot()
+{
+
 }
 
 void TargetListWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)

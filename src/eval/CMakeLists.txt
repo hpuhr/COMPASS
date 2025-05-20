@@ -27,6 +27,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtimestampconditionsdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetfilter.h"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetfilterdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetexcludedtimewindowsdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetexcludedrequirementsdialog.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/evaluationsettings.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationcalculator.cpp"
@@ -45,6 +47,8 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtimestampconditionsdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetfilter.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetfilterdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetexcludedtimewindowsdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/evaluationtargetexcludedrequirementsdialog.cpp"        
 )
 
 

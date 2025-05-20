@@ -405,5 +405,15 @@ void Target::storeEvalutionInfo()
     info_[KEY_EVAL][KEY_EVAL_EXCLUDED_REQUIREMENTS] = excluded_requirements_;
 }
 
+Utils::TimeWindowCollection& Target::evalExcludedTimeWindows()
+{
+    return excluded_time_windows_;
+}
+
+std::set<std::string>& Target::evalExcludedRequirements()
+{
+    return excluded_requirements_;
+}
+
 
 }

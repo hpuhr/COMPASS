@@ -24,6 +24,11 @@ public:
     bool useInEval() const;
     void useInEval(bool value);
 
+    Utils::TimeWindowCollection& evalExcludedTimeWindows();
+    std::set<std::string>& evalExcludedRequirements();
+
+    void storeEvalutionInfo(); // save efficient variables in json
+
     std::string comment() const;
     void comment (const std::string& value);
 
@@ -85,8 +90,6 @@ public:
 
     virtual void targetCategory(Category ecat);
     virtual Category targetCategory() const;
-
-    void storeEvalutionInfo(); // save efficient variables in json
 
 protected:
     nlohmann::json info_;

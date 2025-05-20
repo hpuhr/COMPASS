@@ -36,6 +36,7 @@ public slots:
     void evalUseTargetsSlot();
     void evalDisableUseTargetsSlot();
     void evalExcludeTimeWindowsTargetSlot();
+    void evalExcludeRequirementsTargetSlot();
 
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
