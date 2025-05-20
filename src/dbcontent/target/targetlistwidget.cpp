@@ -8,6 +8,7 @@
 #include "evaluationmanager.h"
 #include "dbcontentmanager.h"
 #include "evaluationtimestampconditionsdialog.h"
+#include "evaluationtargetexcludedtimewindowsdialog.h"
 
 #include "files.h"
 #include "logger.h"
@@ -376,6 +377,23 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
             if (!filtered_time_windows.contains(tw))
                 filtered_time_windows.add(tw);
         }
+    }
+
+    EvaluationTargetExcludedTimeWindowsDialog dialog (String::compress(selected_utns, ','), filtered_time_windows);
+    int result = dialog.exec();
+
+    if (result == QDialog::Rejected)
+        return;
+
+    // set time windows for all targets
+    for (auto utn : selected_utns)
+    {
+        assert (dbcont_man.existsTarget(utn));
+
+        auto& target = dbcont_man.target(utn);
+
+        target.evalExcludedTimeWindows() = filtered_time_windows;
+        target.storeEvalutionInfo();
     }
 
     model_.updateEvalItems();

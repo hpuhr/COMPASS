@@ -47,6 +47,10 @@ EvaluationTargetExcludedTimeWindowsDialog::EvaluationTargetExcludedTimeWindowsDi
 
     QHBoxLayout* button_layout = new QHBoxLayout();
 
+    QPushButton* cancel_button = new QPushButton("Cancel");
+    connect(cancel_button, &QPushButton::clicked, this, &QDialog::reject);
+    button_layout->addWidget(cancel_button);
+
     button_layout->addStretch();
 
     QPushButton* run_button = new QPushButton("OK");

@@ -27,6 +27,9 @@ public:
     Utils::TimeWindowCollection& evalExcludedTimeWindows();
     std::set<std::string>& evalExcludedRequirements();
 
+    const Utils::TimeWindowCollection& evalExcludedTimeWindows() const;
+    const std::set<std::string>& evalExcludedRequirements() const;
+
     void storeEvalutionInfo(); // save efficient variables in json
 
     std::string comment() const;

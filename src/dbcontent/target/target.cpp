@@ -415,5 +415,14 @@ std::set<std::string>& Target::evalExcludedRequirements()
     return excluded_requirements_;
 }
 
+const Utils::TimeWindowCollection& Target::evalExcludedTimeWindows() const
+{
+    return excluded_time_windows_;
+}
+
+const std::set<std::string>& Target::evalExcludedRequirements() const
+{
+    return excluded_requirements_;
+}
 
 }

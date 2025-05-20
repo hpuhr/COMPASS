@@ -62,7 +62,9 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         {
             if (!target.useInEval())
                 return QBrush(Qt::lightGray);
-            if (COMPASS::instance().evaluationManager().useTimestampFilter())
+            if (COMPASS::instance().evaluationManager().useTimestampFilter()
+                    || target.evalExcludedTimeWindows().size()
+                    || target.evalExcludedRequirements().size())
                 return QBrush(very_light_gray);
             else
                 return QVariant();
@@ -86,7 +88,22 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                 case ColNumUpdates: 
                     return target.numUpdates();
                 case ColUseEvalDetails:
-                    return ""; // TODO
+                {
+                    QString tmp;
+
+                    if (target.evalExcludedTimeWindows().size())
+                        tmp = target.evalExcludedTimeWindows().asString().c_str();
+
+                    if (target.evalExcludedRequirements().size())
+                    {
+                        if (tmp.size())
+                            tmp += "\n";
+
+                        tmp += target.evalExcludedTimeWindows().asString().c_str();
+                    }
+
+                    return tmp;
+                }
                 case ColBegin:
                     return target.timeBeginStr().c_str();
                 case ColEnd:
@@ -133,7 +150,9 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
 
                 // could be used
 
-                if (COMPASS::instance().evaluationManager().useTimestampFilter())
+                if (COMPASS::instance().evaluationManager().useTimestampFilter()
+                    || target.evalExcludedTimeWindows().size()
+                    || target.evalExcludedRequirements().size())
                         return Utils::Files::IconProvider::getIcon("partial_done.png");
 
                 // TODO partial
