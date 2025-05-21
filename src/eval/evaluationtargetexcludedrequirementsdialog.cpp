@@ -53,6 +53,8 @@ EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirements
 
     form_layout->addRow("UTNs", utn_label);
 
+    main_layout->addLayout(form_layout);
+
     // add gui items here
 
     // Scroll area container for checkboxes
