@@ -87,6 +87,23 @@ public:
     double longitudeMin() const;
     double longitudeMax() const;
 
+    static const std::string KEY_USED;
+    static const std::string KEY_COMMENT;
+    static const std::string KEY_TIME_BEGIN;
+    static const std::string KEY_TIME_END;
+    static const std::string KEY_ACAD;
+    static const std::string KEY_ACID;
+    static const std::string KEY_MODE_3A;
+    static const std::string KEY_MODE_C_MIN;
+    static const std::string KEY_MODE_C_MAX;
+    static const std::string KEY_COUNTS;
+    static const std::string KEY_ADSD_MOPS_VERSION;
+    static const std::string KEY_LATITUDE_MIN;
+    static const std::string KEY_LATITUDE_MAX;
+    static const std::string KEY_LONGITUDE_MIN;
+    static const std::string KEY_LONGITUDE_MAX;
+    static const std::string KEY_ECAT;
+
     static const Property     DBColumnID;
     static const Property     DBColumnInfo;
     static const PropertyList DBPropertyList;

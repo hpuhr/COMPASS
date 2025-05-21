@@ -39,13 +39,16 @@ namespace ResultReport
     class SectionContentTable;
     class SectionContentFigure;
     class Report;
+
+    struct SectionContentViewable;
 }
+
+class EvaluationTaskResult;
 
 namespace EvaluationRequirementResult
 {
 
 class Joined;
-class EvaluationTaskResult;
 
 template <typename T>
 struct ValueSource;
@@ -178,9 +181,9 @@ public:
     void iterateDetails(const DetailFunc& func,
                         const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
 
-    void addDetailsToTable(ResultReport::SectionContentTable& table);
-    void addOverviewToFigure(ResultReport::SectionContentFigure& figure);
-    void addHighlightToFigure(ResultReport::SectionContentFigure& figure);
+    bool addDetailsToTable(ResultReport::SectionContentTable& table);
+    bool addOverviewToFigure(ResultReport::SectionContentFigure& figure);
+    bool addHighlightToViewable(ResultReport::SectionContentViewable& viewable, const QVariant& annotation);
 
     std::vector<double> getValues(const ValueSource<double>& source) const;
     std::vector<double> getValues(int value_id) const;
@@ -193,6 +196,8 @@ public:
                                            unsigned int utn);
     static boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>> 
     singleContentProperties(const ResultReport::SectionContent& content);
+
+    std::string sumSectionName() const override final;
 
     static const std::string TRDetailsTableName;
     

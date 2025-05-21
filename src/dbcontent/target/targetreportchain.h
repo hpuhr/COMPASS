@@ -127,6 +127,8 @@ public:
 
     void finalize () const;
 
+    const std::string& dbContent() const { return dbcontent_name_; }
+
     unsigned int size () const;
     unsigned int ignoredSize() const;
 

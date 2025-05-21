@@ -105,6 +105,8 @@ public:
     std::string type() const;
     std::string resultId() const;
     std::string reqGrpId() const;
+    
+    virtual std::string sumSectionName() const;
 
     std::shared_ptr<EvaluationRequirement::Base> requirement() const;
 

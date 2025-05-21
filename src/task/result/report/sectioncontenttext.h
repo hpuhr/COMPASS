@@ -49,6 +49,8 @@ public:
     static const std::string FieldTexts;
 
 protected:
+    void clearContent_impl() override final;
+
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
 

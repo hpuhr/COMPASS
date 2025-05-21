@@ -16,9 +16,9 @@
  */
 
 #include "evaluationdata.h"
-#include "evaluationdatawidget.h"
 #include "evaluationcalculator.h"
 #include "evaluationstandard.h"
+#include "evaluationtarget.h"
 #include "requirement/base/baseconfig.h"
 #include "requirement/group.h"
 #include "dbcontent/dbcontentmanager.h"
@@ -49,18 +49,21 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace boost::posix_time;
 
-const std::string EvaluationData::TargetsTableName = "Evaluated Targets";
+const std::string EvaluationData::SectionID              = "Overview:Targets";
+const std::string EvaluationData::TargetsTableName       = "Evaluated Targets";
+const std::string EvaluationData::ContentPropertyTargets = "targets";
 
+/**
+ */
 EvaluationData::EvaluationData(EvaluationCalculator& calculator, 
                                DBContentManager& dbcont_man)
     : calculator_(calculator), dbcont_man_(dbcont_man)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
-
-    connect(&dbcont_man, &DBContentManager::targetChangedSignal, this, &EvaluationData::targetChangedSlot);
-    connect(&dbcont_man, &DBContentManager::allTargetsChangedSignal, this, &EvaluationData::allTargetsChangedSlot);
 }
 
+/**
+ */
 void EvaluationData::setBuffers(std::map<std::string, std::shared_ptr<Buffer>> buffers)
 {
     loginf << "EvaluationData: setBuffers";
@@ -69,6 +72,8 @@ void EvaluationData::setBuffers(std::map<std::string, std::shared_ptr<Buffer>> b
     accessor_->add(buffers);
 }
 
+/**
+ */
 void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsigned int line_id)
 {
     loginf << "EvaluationData: addReferenceData: dbcontent " << dbcontent_name;
@@ -109,7 +114,6 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
         unsigned int utn;
 
         loginf << "EvaluationData: addReferenceData: adding target data";
-
         loginf << "EvaluationData: addReferenceData: use_active_srcs " << use_active_srcs;
 
         for (auto ds_id : active_srcs)
@@ -173,6 +177,8 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
            << " num_skipped " << num_skipped;
 }
 
+/**
+ */
 void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned int line_id)
 {
     loginf << "EvaluationData: addTestData: dbcontent " << dbcontent_name;
@@ -276,6 +282,8 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
            << " num_skipped " << num_skipped;
 }
 
+/**
+ */
 void EvaluationData::finalize ()
 {
     loginf << "EvaluationData: finalize";
@@ -287,7 +295,6 @@ void EvaluationData::finalize ()
     QApplication::setOverrideCursor(Qt::WaitCursor);
     {
         calculator_.updateSectorLayers();
-        beginResetModel();
     }
     QApplication::restoreOverrideCursor();
 
@@ -303,22 +310,17 @@ void EvaluationData::finalize ()
     }
 
     finalized_ = true;
-
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    {
-        endResetModel();
-
-        if (widget_)
-            widget_->resizeColumnsToContents();
-    }
-    QApplication::restoreOverrideCursor();
 }
 
+/**
+ */
 bool EvaluationData::hasTargetData (unsigned int utn)
 {
     return target_data_.get<target_tag>().find(utn) != target_data_.get<target_tag>().end();
 }
 
+/**
+ */
 const EvaluationTargetData& EvaluationData::targetData(unsigned int utn)
 {
     assert (hasTargetData(utn));
@@ -326,10 +328,10 @@ const EvaluationTargetData& EvaluationData::targetData(unsigned int utn)
     return *target_data_.get<target_tag>().find(utn);
 }
 
+/**
+ */
 void EvaluationData::clear()
 {
-    beginResetModel();
-
     accessor_->clear();
 
     target_data_.clear();
@@ -340,445 +342,320 @@ void EvaluationData::clear()
 
     unassociated_tst_cnt_ = 0;
     associated_tst_cnt_ = 0;
-
-    interest_factor_enabled_.clear();
-
-    endResetModel();
-
-    if (widget_)
-        widget_->updateInterestMenu();
 }
 
-QVariant EvaluationData::data(const QModelIndex& index, int role) const
+// /**
+//  */
+// QVariant EvaluationData::data(const QModelIndex& index, int role) const
+// {
+//     if (!index.isValid() || !finalized_)
+//         return QVariant();
+
+//     switch (role)
+//     {
+//     case Qt::CheckStateRole:
+//     {
+//         if (index.column() == 0)  // selected special case
+//         {
+//             assert (index.row() >= 0);
+//             assert (index.row() < (int)target_data_.size());
+
+//             const EvaluationTargetData& target = target_data_.at(index.row());
+
+//             if (dbcont_man_.utnUseEval(target.utn_))
+//                 return Qt::Checked;
+//             else
+//                 return Qt::Unchecked;
+//         }
+//         else
+//             return QVariant();
+//     }
+//     case Qt::BackgroundRole:
+//     {
+//         assert (index.row() >= 0);
+//         assert (index.row() < (int)target_data_.size());
+
+//         const EvaluationTargetData& target = target_data_.at(index.row());
+
+//         assert (index.column() < table_columns_.size());
+//         std::string col_name = table_columns_.at(index.column()).toStdString();
+
+//         if (!dbcont_man_.utnUseEval(target.utn_))
+//             return QBrush(Qt::lightGray);
+//         else if (col_name == "Interest")
+//         {
+//             const auto& ifactors = target.interestFactors();
+
+//             double interest = target.enabledInterestFactorsSum();
+
+//             return ifactors.empty() ? QVariant() : EvaluationTargetData::colorForInterestFactorSum(interest);
+//         }
+//         else
+//             return QVariant();
+
+//     }
+//     case Qt::DisplayRole:
+//     case Qt::EditRole:
+//     {
+//         logdbg << "EvaluationData: data: display role: row " << index.row() << " col " << index.column();
+
+//         assert (index.row() >= 0);
+//         assert (index.row() < (int)target_data_.size());
+
+//         const EvaluationTargetData& target = target_data_.at(index.row());
+
+//         logdbg << "EvaluationData: data: got utn " << target.utn_;
+
+//         assert (index.column() < table_columns_.size());
+//         std::string col_name = table_columns_.at(index.column()).toStdString();
+
+//         if (col_name == "Use")
+//         {
+//             return QVariant();
+//         }
+//         else if (col_name == "UTN")
+//         {
+//             return target.utn_;
+//         }
+//         else if (col_name == "Comment")
+//         {
+//             return dbcont_man_.utnComment(target.utn_).c_str();
+//         }
+//         else if (col_name == "Interest")
+//         {
+//             const auto& ifactors = target.interestFactors();
+
+//             return ifactors.empty() ? "" : QString::number(target.enabledInterestFactorsSum(), 'f', 3);
+//         }
+//         else if (col_name == "Begin")
+//         {
+//             return target.timeBeginStr().c_str();
+//         }
+//         else if (col_name == "End")
+//         {
+//             return target.timeEndStr().c_str();
+//         }
+//         else if (col_name == "#All")
+//         {
+//             return target.numUpdates();
+//         }
+//         else if (col_name == "#Ref")
+//         {
+//             return target.numRefUpdates();
+//         }
+//         else if (col_name == "#Tst")
+//         {
+//             return target.numTstUpdates();
+//         }
+//         else if (col_name == "ACIDs")
+//         {
+//             return target.acidsStr().c_str();
+//         }
+//         else if (col_name == "ACADs")
+//         {
+//             return target.acadsStr().c_str();
+//         }
+//         else if (col_name == "M3/A")
+//         {
+//             return target.modeACodesStr().c_str();
+//         }
+//         else if (col_name == "MC Min")
+//         {
+//             return target.modeCMinStr().c_str();
+//         }
+//         else if (col_name == "MC Max")
+//         {
+//             return target.modeCMaxStr().c_str();
+//         }
+//     }
+//     case Qt::UserRole: // to find the checkboxes
+//     {
+//         if (index.column() == 0)
+//         {
+//             assert (index.row() >= 0);
+//             assert (index.row() < (int)target_data_.size());
+
+//             const EvaluationTargetData& target = target_data_.at(index.row());
+
+//             return target.utn_;
+//         }
+//         else if (index.column() == 2) // comment
+//         {
+//             assert (index.row() >= 0);
+//             assert (index.row() < (int)target_data_.size());
+
+//             const EvaluationTargetData& target = target_data_.at(index.row());
+//             return ("comment_"+to_string(target.utn_)).c_str();
+//         }
+//     }
+//     case Qt::ToolTipRole:
+//     {
+//         logdbg << "EvaluationData: data: tooltip role: row " << index.row() << " col " << index.column();
+
+//         assert (index.row() >= 0);
+//         assert (index.row() < (int)target_data_.size());
+
+//         const EvaluationTargetData& target = target_data_.at(index.row());
+
+//         logdbg << "EvaluationData: data: got utn " << target.utn_;
+
+//         assert (index.column() < table_columns_.size());
+//         std::string col_name = table_columns_.at(index.column()).toStdString();
+
+//         if (col_name == "Interest")
+//         {
+//             return target.enabledInterestFactorsStr().c_str();
+//         }
+//     }
+//     default:
+//     {
+//         return QVariant();
+//     }
+//     }
+// }
+
+// bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, int role)
+// {
+//     if (!index.isValid() /*|| role != Qt::EditRole*/)
+//         return false;
+
+//     if (role == Qt::CheckStateRole && index.column() == 0)
+//     {
+//         assert (index.row() >= 0);
+//         assert (index.row() < (int)target_data_.size());
+
+//         auto it = target_data_.begin()+index.row();
+
+//         bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
+//         loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << checked;
+
+//         dbcont_man_.utnUseEval(it->utn_, checked);
+
+//         emit dataChanged(index, EvaluationData::index(index.row(), columnCount()-1));
+//         return true;
+//     }
+//     else if (role == Qt::EditRole && index.column() == 2) // comment
+//     {
+//         assert (index.row() >= 0);
+//         assert (index.row() < (int)target_data_.size());
+
+//         auto it = target_data_.begin()+index.row();
+
+//         dbcont_man_.utnComment(it->utn_, value.toString().toStdString());
+//         return true;
+//     }
+
+//     return false;
+// }
+
+/**
+ */
+std::map<unsigned int, EvaluationTarget> EvaluationData::toTargets() const
 {
-    if (!index.isValid() || !finalized_)
-        return QVariant();
+    std::map<unsigned int, EvaluationTarget> targets;
+    for (const auto& target : target_data_)
+        targets.emplace(target.utn_, target.toTarget());
 
-    switch (role)
+    return targets;
+}
+
+/**
+ */
+void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report) const
+{
+    //add target section
+    auto& section = report->getSection(SectionID);
+
+    //add target table
+    std::vector<std::string> headings;
+    for (const auto& h : table_columns_)
+        headings.push_back(h.toStdString());
+
+    auto& table = section.addTable(TargetsTableName, headings.size(), headings);
+    table.setOnDemand();
+}
+
+/**
+ */
+nlohmann::json EvaluationData::rawCellData(const EvaluationTarget& target, 
+                                           int column,
+                                           const InterestEnabledFunc & interest_enabled_func) const
+{
+    switch (column)
     {
-    case Qt::CheckStateRole:
-    {
-        if (index.column() == 0)  // selected special case
-        {
-            assert (index.row() >= 0);
-            assert (index.row() < (int)target_data_.size());
-
-            const EvaluationTargetData& target = target_data_.at(index.row());
-
-            if (dbcont_man_.utnUseEval(target.utn_))
-                return Qt::Checked;
-            else
-                return Qt::Unchecked;
-        }
-        else
-            return QVariant();
-    }
-    case Qt::BackgroundRole:
-    {
-        assert (index.row() >= 0);
-        assert (index.row() < (int)target_data_.size());
-
-        const EvaluationTargetData& target = target_data_.at(index.row());
-
-        assert (index.column() < table_columns_.size());
-        std::string col_name = table_columns_.at(index.column()).toStdString();
-
-        if (!dbcont_man_.utnUseEval(target.utn_))
-            return QBrush(Qt::lightGray);
-        else if (col_name == "Interest")
-        {
-            const auto& ifactors = target.interestFactors();
-
-            double interest = target.enabledInterestFactorsSum();
-
-            return ifactors.empty() ? QVariant() : EvaluationTargetData::colorForInterestFactorSum(interest);
-        }
-        else
-            return QVariant();
-
-    }
-    case Qt::DisplayRole:
-    case Qt::EditRole:
-    {
-        logdbg << "EvaluationData: data: display role: row " << index.row() << " col " << index.column();
-
-        assert (index.row() >= 0);
-        assert (index.row() < (int)target_data_.size());
-
-        const EvaluationTargetData& target = target_data_.at(index.row());
-
-        logdbg << "EvaluationData: data: got utn " << target.utn_;
-
-        assert (index.column() < table_columns_.size());
-        std::string col_name = table_columns_.at(index.column()).toStdString();
-
-        if (col_name == "Use")
-        {
-            return QVariant();
-        }
-        else if (col_name == "UTN")
-        {
+        case ColUse:
+            return target.useInEval();
+        case ColUTN: 
             return target.utn_;
-        }
-        else if (col_name == "Comment")
-        {
-            return dbcont_man_.utnComment(target.utn_).c_str();
-        }
-        else if (col_name == "Interest")
-        {
-            const auto& ifactors = target.interestFactors();
-
-            return ifactors.empty() ? "" : QString::number(target.enabledInterestFactorsSum(), 'f', 3);
-        }
-        else if (col_name == "Begin")
-        {
-            return target.timeBeginStr().c_str();
-        }
-        else if (col_name == "End")
-        {
-            return target.timeEndStr().c_str();
-        }
-        else if (col_name == "#All")
-        {
+        case ColComment:
+            return target.comment();
+        case ColCategory:
+            return target.emitterCategoryStr();
+        case ColInterest: 
+            return target.totalInterest(interest_enabled_func);
+        case ColNumUpdates:
             return target.numUpdates();
-        }
-        else if (col_name == "#Ref")
-        {
-            return target.numRefUpdates();
-        }
-        else if (col_name == "#Tst")
-        {
-            return target.numTstUpdates();
-        }
-        else if (col_name == "ACIDs")
-        {
-            return target.acidsStr().c_str();
-        }
-        else if (col_name == "ACADs")
-        {
-            return target.acadsStr().c_str();
-        }
-        else if (col_name == "M3/A")
-        {
-            return target.modeACodesStr().c_str();
-        }
-        else if (col_name == "MC Min")
-        {
-            return target.modeCMinStr().c_str();
-        }
-        else if (col_name == "MC Max")
-        {
-            return target.modeCMaxStr().c_str();
-        }
-
+        case ColNumRef:
+            return target.refCount();
+        case ColNumTest:
+            return target.testCount();
+        case ColBegin:
+            return target.timeBeginStr();
+        case ColEnd:
+            return target.timeEndStr();
+        case ColDuration:
+            return target.timeDurationStr();
+        case ColACIDs:
+            return target.aircraftIdentificationsStr();
+        case ColACADs: 
+            return target.aircraftAddressesStr();
+        case ColMode3A: 
+            return target.modeACodesStr();
+        case ColModeCMin: 
+            return target.hasModeC() ? target.modeCMinStr() : "";
+        case ColModeCMax:
+            return target.hasModeC() ? target.modeCMaxStr() : "";
     }
-    case Qt::UserRole: // to find the checkboxes
+    return nlohmann::json();
+}
+
+/**
+ */
+unsigned int EvaluationData::rowStyle(const EvaluationTarget& target) const
+{
+    if (!target.useInEval())
+        return ResultReport::CellStyleBGColorGray;
+
+    return 0;
+}
+
+/**
+ */
+unsigned int EvaluationData::columnStyle(int column) const
+{
+    if (column == ColUse)
+        return ResultReport::CellStyleCheckable;
+
+    return 0;
+}
+
+/**
+ */
+void EvaluationData::fillTargetsTable(const std::map<unsigned int, EvaluationTarget>& targets,
+                                      ResultReport::SectionContentTable& table,
+                                      const InterestEnabledFunc & interest_enabled_func) const
+{
+    const int nc = (int)table.numColumns();
+
+    for (int c = 0; c < nc; ++c)
+        table.setColumnStyle(c, columnStyle(c));
+
+    for (const auto& t : targets)
     {
-        if (index.column() == 0)
-        {
-            assert (index.row() >= 0);
-            assert (index.row() < (int)target_data_.size());
+        auto row = nlohmann::json::array();
+        for (int c = 0; c < nc; ++c)
+            row.push_back(rawCellData(t.second, c, interest_enabled_func));
 
-            const EvaluationTargetData& target = target_data_.at(index.row());
-
-            return target.utn_;
-        }
-        else if (index.column() == 2) // comment
-        {
-            assert (index.row() >= 0);
-            assert (index.row() < (int)target_data_.size());
-
-            const EvaluationTargetData& target = target_data_.at(index.row());
-            return ("comment_"+to_string(target.utn_)).c_str();
-        }
+        table.addRow(row, ResultReport::SectionContentViewable().setOnDemand(), "", "", {}, rowStyle(t.second));
     }
-    case Qt::ToolTipRole:
-    {
-        logdbg << "EvaluationData: data: tooltip role: row " << index.row() << " col " << index.column();
-
-        assert (index.row() >= 0);
-        assert (index.row() < (int)target_data_.size());
-
-        const EvaluationTargetData& target = target_data_.at(index.row());
-
-        logdbg << "EvaluationData: data: got utn " << target.utn_;
-
-        assert (index.column() < table_columns_.size());
-        std::string col_name = table_columns_.at(index.column()).toStdString();
-
-        if (col_name == "Interest")
-        {
-            return target.enabledInterestFactorsStr().c_str();
-        }
-    }
-    default:
-    {
-        return QVariant();
-    }
-    }
-}
-
-bool EvaluationData::setData(const QModelIndex &index, const QVariant& value, int role)
-{
-    if (!index.isValid() /*|| role != Qt::EditRole*/)
-        return false;
-
-    if (role == Qt::CheckStateRole && index.column() == 0)
-    {
-        assert (index.row() >= 0);
-        assert (index.row() < (int)target_data_.size());
-
-        auto it = target_data_.begin()+index.row();
-
-        bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
-        loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << checked;
-
-        dbcont_man_.utnUseEval(it->utn_, checked);
-
-        emit dataChanged(index, EvaluationData::index(index.row(), columnCount()-1));
-        return true;
-    }
-    else if (role == Qt::EditRole && index.column() == 2) // comment
-    {
-        assert (index.row() >= 0);
-        assert (index.row() < (int)target_data_.size());
-
-        auto it = target_data_.begin()+index.row();
-
-        dbcont_man_.utnComment(it->utn_, value.toString().toStdString());
-        return true;
-    }
-
-    return false;
-}
-
-
-QVariant EvaluationData::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-    {
-        assert (section < table_columns_.size());
-        return table_columns_.at(section);
-    }
-
-    return QVariant();
-}
-
-QModelIndex EvaluationData::index(int row, int column, const QModelIndex& parent) const
-{
-    return createIndex(row, column);
-}
-
-int EvaluationData::rowCount(const QModelIndex& parent) const
-{
-    if (!finalized_)
-        return 0;
-
-    return target_data_.size();
-}
-
-int EvaluationData::columnCount(const QModelIndex& parent) const
-{
-    return table_columns_.size();
-}
-
-QModelIndex EvaluationData::parent(const QModelIndex& index) const
-{
-    return QModelIndex();
-}
-
-Qt::ItemFlags EvaluationData::flags(const QModelIndex &index) const
-{
-    if (!index.isValid())
-        return Qt::ItemIsEnabled;
-
-    assert (index.column() < table_columns_.size());
-
-    if (index.column() == 0) // Use
-    {
-        return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
-    }
-    else if (index.column() == 2)
-    {
-        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
-    }
-    else
-        return QAbstractItemModel::flags(index);
-}
-
-const EvaluationTargetData& EvaluationData::getTargetOf (const QModelIndex& index)
-{
-    assert (index.isValid());
-
-    assert (index.row() >= 0);
-    assert (index.row() < (int)target_data_.size());
-
-    const EvaluationTargetData& target = target_data_.at(index.row());
-
-    return target;
-}
-
-EvaluationDataWidget* EvaluationData::widget()
-{
-    if (!widget_)
-        widget_ = new EvaluationDataWidget(*this, calculator_);
-
-    return widget_;
-}
-
-void EvaluationData::clearInterestFactors()
-{
-    for (auto tgt_it = begin(); tgt_it != end(); ++tgt_it)
-    {
-        target_data_.modify(target_data_.project<0>(tgt_it), [](EvaluationTargetData& t) { t.clearInterestFactors(); });
-    }
-
-    updateInterestSwitches();
-}
-
-void EvaluationData::resetModelBegin()
-{
-    beginResetModel();
-}
-
-void EvaluationData::resetModelEnd()
-{
-    endResetModel();
-}
-
-void EvaluationData::targetChangedSlot(unsigned int utn) // for one utn
-{
-    loginf << "EvaluationData: targetChangedSlot: utn " << utn;
-
-    // check if checkbox utn thingi is found
-    QModelIndexList items = match(
-                index(0, 0),
-                Qt::UserRole,
-                QVariant(utn),
-                1, // look *
-                Qt::MatchExactly); // look *
-
-    loginf << "EvaluationData: targetChangedSlot: utn " << utn << " matches " << items.size();
-
-    if (items.size() == 1)
-    {
-        emit dataChanged(index(items.at(0).row(), 0), index(items.at(0).row(), columnCount()-1));
-
-        calculator_.updateResultsToChanges();
-    }
-}
-
-void EvaluationData::allTargetsChangedSlot() // for more than 1 utn
-{
-    loginf << "EvaluationData: allTargetsChangedSlot";
-
-    beginResetModel();
-    endResetModel();
-
-    calculator_.updateResultsToChanges();
-}
-
-boost::optional<nlohmann::json> EvaluationData::getTableData(bool rowwise,
-                                                             const std::vector<int>& cols) const
-{
-    return Utils::StringTable(this).toJSON(rowwise, cols);
-}
-
-void EvaluationData::setInterestFactorEnabled(const std::string& req_name, bool ok, bool update)
-{
-    interest_factor_enabled_[ req_name ] = ok;
-
-    if (update)
-        updateAllInterestFactors();
-}
-
-void EvaluationData::setInterestFactorEnabled(bool ok, bool update)
-{
-    for (auto& ife : interest_factor_enabled_)
-        ife.second = ok;
-
-    if (update)
-        updateAllInterestFactors();
-}
-
-bool EvaluationData::interestFactorEnabled(const std::string& req_name) const
-{
-    auto it = interest_factor_enabled_.find(req_name);
-    if (it == interest_factor_enabled_.end())
-        return false;
-
-    return it->second;
-}
-
-void EvaluationData::updateAllInterestFactors()
-{
-    for (auto tgt_it = begin(); tgt_it != end(); ++tgt_it)
-    {
-        target_data_.modify(target_data_.project<0>(tgt_it), [](EvaluationTargetData& t) { t.updateInterestFactors(); });
-    }
-
-    beginResetModel();
-    endResetModel();
-}
-
-void EvaluationData::updateInterestSwitches()
-{
-    loginf << "EvaluationData: updateAvailableInterests";
-
-    interest_factor_enabled_.clear();
-
-    if (!calculator_.hasCurrentStandard())
-        return;
-
-    auto& standard = calculator_.currentStandard();
-
-    for (auto itg = standard.begin(); itg != standard.end(); ++itg)
-    {
-        for (auto itr = (*itg)->begin(); itr != (*itg)->end(); ++itr)
-        {
-            interest_factor_enabled_[ (*itr)->name() ] = true;
-        }
-    }
-
-    updateAllInterestFactors();
-
-    if (widget_) 
-        widget_->updateInterestMenu();
-}
-
-void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report)
-{
-    auto& section = report->getSection("Overview:Targets");
-
-    const auto& table_headers = dbcont_man_.targetModel()->tableHeaders();
-    std::vector<std::string> headers;
-    for (const auto& h : table_headers)
-        headers.push_back(h.toStdString());
-
-    auto result = &report->result();
-
-    auto& table = section.addTable(TargetsTableName, table_headers.size(), headers, false);
-
-    int cols = dbcont_man_.targetModel()->columnCount();
-    int rows = dbcont_man_.targetModel()->rowCount();
-
-    auto model = dbcont_man_.targetModel();
-
-    for (int c = 0; c < cols; ++c)
-        table.setColumnStyle(c, model->columnStyle(c));
-
-    for (int r = 0; r < rows; ++r)
-    {
-        auto j_row = nlohmann::json::array();
-        for (int c = 0; c < cols; ++c)
-            j_row.push_back(model->rawCellData(r, c));
-
-        table.addRow(j_row, {}, "", "", {}, model->rowStyle(r));
-    }
-
-    // for (int c = 0; c < cols; ++c)
-    // {
-    //     auto style = table.cellStyle(0, c);
-    //     loginf << "col " << c << ": " << ResultReport::SectionContentTable::cellStyle2String(style);
-    // }
 }

@@ -49,14 +49,25 @@ struct SectionContentViewable
     :   viewable_func(func) {}
     SectionContentViewable(const nlohmann::json::object_t& content)
     {
+        setCallback(content);
+    }
+
+    bool hasCallback() const { return viewable_func ? true : false; }
+
+    SectionContentViewable& setCallback(const ViewableFunc& func)
+    {
+        viewable_func = func;
+        return *this;
+    }
+
+    SectionContentViewable& setCallback(const nlohmann::json::object_t& content)
+    {
         std::shared_ptr<nlohmann::json::object_t> c(new nlohmann::json::object_t);
         *c = content;
         viewable_func = [ = ] () { return c; };
 
-        nlohmann::json tmp = content;
+        return *this;
     }
-
-    bool valid() const { return viewable_func ? true : false; }
 
     SectionContentViewable& setCaption(const std::string& c)
     {
@@ -70,9 +81,16 @@ struct SectionContentViewable
         return *this;
     }
 
+    SectionContentViewable& setOnDemand()
+    {
+        on_demand = true;
+        return *this;
+    }
+
     ViewableFunc viewable_func;
     std::string  caption;
     int          render_delay_msec = 0;
+    bool         on_demand         = false;
 };
 
 /**
@@ -99,6 +117,8 @@ public:
     unsigned int id() const;
     std::string name() const;
 
+    const Section* parentSection() const { return parent_section_; }
+
     void setJSONProperty(const std::string& name, const nlohmann::json& value);
     bool hasJSONProperty(const std::string& name) const;
     nlohmann::json jsonProperty(const std::string& name) const;
@@ -107,6 +127,9 @@ public:
     bool isOnDemand() const;
     bool isComplete() const;
     bool loadOnDemandIfNeeded();
+    bool forceReload();
+
+    void clearContent();
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
@@ -131,6 +154,8 @@ public:
     static const std::string FieldOnDemand;
 
 protected:
+    virtual void clearContent_impl() = 0;
+
     virtual void toJSON_impl(nlohmann::json& root_node) const = 0;
     virtual bool fromJSON_impl(const nlohmann::json& j) = 0;
 

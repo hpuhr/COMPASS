@@ -185,6 +185,7 @@ public:
     static const std::string FieldAnnoFigureID;
     static const std::string FieldAnnoSectionLink;
     static const std::string FieldAnnoSectionFigure;
+    static const std::string FieldAnnoOnDemand;
     static const std::string FieldAnnoIndex;
     static const std::string FieldAnnoStyle;
 
@@ -200,6 +201,8 @@ public:
     static const QColor ColorBGYellow;
 
 protected:
+    void clearContent_impl() override final;
+
     void toJSON_impl(nlohmann::json& root_node) const override final; 
     bool fromJSON_impl(const nlohmann::json& j) override final;
 
@@ -231,17 +234,17 @@ protected:
      */
     struct RowAnnotation
     {
-        boost::optional<unsigned int> figure_id;      // content id of a figure in the containing section
-        std::string                   section_link;   // link to another section
-        std::string                   section_figure; // figure in the linked section
-        QVariant                      index;          // detail index
-        unsigned int                  style = 0;      // row style flags
+        boost::optional<unsigned int> figure_id;         // content id of a figure in the containing section
+        std::string                   section_link;      // link to another section
+        std::string                   section_figure;    // figure in the linked section
+        bool                          on_demand = false; // viewable is generated on-demand
+        QVariant                      index;             // detail index
+        unsigned int                  style = 0;         // row style flags
     };
 
     mutable std::vector<nlohmann::json> rows_;
     mutable std::vector<RowAnnotation>  annotations_;
-
-    CellStyles cell_styles_;
+    CellStyles                          cell_styles_;
 
     mutable SectionContentTableWidget* table_widget_ {nullptr};
 
@@ -306,8 +309,8 @@ private:
     void clicked(const QModelIndex& index);
     void doubleClicked(const QModelIndex& index);
     void customContextMenu(const QPoint& p);
-
     void performClickAction();
+    void updateOptionsMenu();
 
     SectionContentTable*        content_table_  = nullptr;
     SectionContentTableModel*   model_          = nullptr;

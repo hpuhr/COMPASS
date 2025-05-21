@@ -187,6 +187,9 @@ public:
     std::string utnComment (unsigned int utn);
     void utnComment (unsigned int utn, std::string value);
 
+    TargetBase::Category emitterCategory(unsigned int utn) const;
+    std::string emitterCategoryStr(unsigned int utn) const;
+
     void autoFilterUTNS();
     void showUTN (unsigned int utn);
     void showUTNs (std::set<unsigned int> utns);

@@ -18,8 +18,14 @@
 #pragma once
 
 #include "taskresult.h"
+#include "evaluationtarget.h"
+#include "evaluationdefs.h"
 
 #include <memory>
+
+class QWidgetAction;
+class QWidget;
+class QCheckBox;
 
 class EvaluationCalculator;
 
@@ -31,27 +37,69 @@ public:
     EvaluationTaskResult(unsigned int id, 
                          TaskManager& task_man);
     virtual ~EvaluationTaskResult();
+
+    typedef std::map<unsigned int, EvaluationTarget> TargetMap;
+    typedef std::map<std::string, bool>              InterestSwitches;
+
+    void setTargets(const TargetMap& targets);
     
     task::TaskResultType type() const override final { return task::TaskResultType::Evaluation; }
 
-protected:
-    Result recompute_impl() override;
-    Result canRecompute_impl() const override;
-    bool recomputeNeeded_impl() const override;
+    void showUTN (unsigned int utn) const;
+    void showFullUTN (unsigned int utn) const;
+    void showSurroundingData (unsigned int utn) const;
 
-    bool loadOnDemandFigure(ResultReport::SectionContentFigure* figure) const override;
-    bool loadOnDemandTable(ResultReport::SectionContentTable* table) const override;
+    const InterestSwitches& interestSwitches() const;
+
+    static const std::string FieldTargets;
+    static const std::string FieldTargetUTN;
+    static const std::string FieldTargetInfo;
+
+protected:
+    Result update_impl(UpdateEvent evt) override final;
+    Result canUpdate_impl(UpdateEvent evt) const override final;
+
+    Result finalizeResult_impl() override final;
+
+    bool loadOnDemandFigure_impl(ResultReport::SectionContentFigure* figure) const override;
+    bool loadOnDemandTable_impl(ResultReport::SectionContentTable* table) const override;
+    bool loadOnDemandViewable_impl(const ResultReport::SectionContent& content,
+                                   ResultReport::SectionContentViewable& viewable, 
+                                   const QVariant& index,
+                                   unsigned int row) const override;
 
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
 
     bool customContextMenu_impl(QMenu& menu, 
                                 ResultReport::SectionContentTable* table, 
-                                unsigned int row) const override final;
-    void postprocessTable_impl(ResultReport::SectionContentTable* table) const override final;
+                                unsigned int row) override final;
+    bool customContextMenu_impl(QMenu& menu, 
+                                ResultReport::SectionContent* content) override final;
+    void postprocessTable_impl(ResultReport::SectionContentTable* table) override final;
 
 private:
-    EvaluationCalculator* calculator() const;
+    Result createCalculator();
+
+    void updateTargets();
+    void updateInterestSwitches();
+
+    void setInterestFactorEnabled(const Evaluation::RequirementSumResultID& id, bool ok);
+    void setInterestFactorEnabled(const std::string& req_name, bool ok);
+    void setInterestFactorsEnabled(bool ok);
+    bool interestFactorEnabled(const Evaluation::RequirementSumResultID& id) const;
+    EvaluationTarget::InterestMap activeInterestFactors(unsigned int utn) const;
+
+    void jumpToRequirement(const Evaluation::RequirementSumResultID& id, unsigned int utn, bool show_image);
+
+    void createInterestMenu(QMenu& menu);
+    void createRequirementLinkMenu(unsigned int utn, QMenu& menu);
 
     mutable std::unique_ptr<EvaluationCalculator> calculator_;
+    TargetMap                                     targets_;
+    mutable InterestSwitches                      interest_factor_enabled_; //req sum result id => enabled
+
+    std::unique_ptr<QWidgetAction>    interest_menu_action_;
+    QWidget*                          interest_widget_ = nullptr;
+    std::map<std::string, QCheckBox*> interest_boxes_;
 };

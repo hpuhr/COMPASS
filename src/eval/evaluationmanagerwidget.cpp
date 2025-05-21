@@ -207,10 +207,13 @@ boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std:
                                                                       bool rowwise,
                                                                       const std::vector<int>& cols) const
 {
-    //retrieve special tables
-    if (table_id == "Targets")
-        return eval_man_.calculator().data().getTableData(rowwise, cols);
+    //@TODO: solve this in a better way via task results
+    return boost::optional<nlohmann::json>();
 
-    //retrieve result table
-    return results_tab_widget_->getTableData(result_id, table_id, rowwise, cols);
+    // //retrieve special tables
+    // if (table_id == "Targets")
+    //     return eval_man_.calculator().data().getTableData(rowwise, cols);
+
+    // //retrieve result table
+    // return results_tab_widget_->getTableData(result_id, table_id, rowwise, cols);
 }

@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "eval/results/report/treemodel.h"
 #include "eval/results/base/base.h"
 
 #include "evaluationdefs.h"
@@ -68,20 +67,16 @@ public:
 
     void clear();
 
-    EvaluationResultsReport::TreeModel& resultsModel(); //@TODO: remove if no longer needed
-
     static const std::string EvalResultName;
 
 protected:
-    void addTargetInformation(const std::shared_ptr<ResultReport::Report>& report);
+    void addTargetSection(const std::shared_ptr<ResultReport::Report>& report);
     void addNonResultsContent(const std::shared_ptr<ResultReport::Report>& report);
 
     void updateToChanges(bool reset_viewable,
                          bool update_report = true);
 
     EvaluationCalculator& calculator_;
-
-    EvaluationResultsReport::TreeModel results_model_; //@TODO: remove if no longer needed
 
     ResultMap    results_;     // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
     ResultVector results_vec_; // ordered as generated

@@ -83,25 +83,26 @@ bool RTCommandGetEvalResult::checkResult_impl()
         return false;
     }
 
-    auto eval_widget = eval_man.widget();
+    //@TODO
+    // auto eval_widget = eval_man.widget();
 
-    if (!eval_widget)
-    {
-        setResultMessage("No evaluation widget");
-        return false;
-    }
+    // if (!eval_widget)
+    // {
+    //     setResultMessage("No evaluation widget");
+    //     return false;
+    // }
 
-    auto json_reply = eval_widget->getTableData(result, table, !colwise, columns);
+    // auto json_reply = eval_widget->getTableData(result, table, !colwise, columns);
 
-    if (!json_reply.has_value())
-    {
-        setResultMessage("Could not obtain table for given id");
-        return false;
-    }
+    // if (!json_reply.has_value())
+    // {
+    //     setResultMessage("Could not obtain table for given id");
+    //     return false;
+    // }
 
-    setJSONReply(json_reply.value());
+    // setJSONReply(json_reply.value());
 
-    return true;
+    return false;
 }
 
 /**

@@ -22,7 +22,7 @@
 #include "task/result/report/sectioncontenttable.h"
 #include "task/result/report/section.h"
 
-#include "eval/results/report/section_id.h"
+#include "eval/results/report/evalsectionid.h"
 
 #include "eval/requirement/base/base.h"
 
@@ -140,7 +140,7 @@ std::string Joined::reference(const ResultReport::SectionContentTable& table,
                               const QVariant& annotation) const
 {
     assert (hasReference(table, annotation));
-    return EvaluationResultsReport::SectionID::createForRequirementResult(*this);
+    return EvalSectionID::createForRequirementResult(*this);
 }
 
 /**

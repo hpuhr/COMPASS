@@ -16,6 +16,7 @@
 #include <QSettings>
 #include <QMenu>
 #include <QWidgetAction>
+#include <QApplication>
 
 using namespace Utils;
 
@@ -130,7 +131,13 @@ void ReportWidget::selectId (const std::string& id,
     tree_view_->selectionModel()->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     tree_view_->scrollTo(index);
 
-    itemClickedSlot(index);
+    //note: we should preload on-demand contents such as on-demand tables before showing a figure. 
+    //otherwise loading the figure on-demand and loading the table on-demand could interfere with each other, 
+    //as there is a timegap before a table is loaded on-demand.
+    //(either signal-slot mechanics or multithreading related)
+    bool preload_ondemand_contents = show_figure;
+
+    triggerItem(index, preload_ondemand_contents);
 
     if (show_figure)
         showFigure(index);
@@ -146,36 +153,42 @@ void ReportWidget::reshowLastId ()
     }
 }
 
-void ReportWidget::itemClickedSlot(const QModelIndex& index)
+void ReportWidget::triggerItem (const QModelIndex& index,
+                                bool preload_ondemand_contents)
 {
     TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
     assert (item);
 
     id_history_.push_back(item->id());
 
-    loginf << "ReportWidget: itemClickedSlot: name " << item->name() << " id " << item->id();
+    loginf << "ReportWidget: triggerItem: name " << item->name() << " id " << item->id();
 
     if (dynamic_cast<ResultReport::Report*>(item))
     {
-        loginf << "ReportWidget: itemClickedSlot: root report";
-        showResultWidget(nullptr);
+        loginf << "ReportWidget: triggerItem: root report";
+        showResultWidget(nullptr, preload_ondemand_contents);
     }
     else if (dynamic_cast<ResultReport::Section*>(item))
     {
         ResultReport::Section* section = dynamic_cast<ResultReport::Section*>(item);
         assert (section);
 
-        loginf << "ReportWidget: itemClickedSlot: section " << section->name();
-        showResultWidget(section);
+        loginf << "ReportWidget: triggerItem: section " << section->name();
+        showResultWidget(section, preload_ondemand_contents);
     }
 
     updateBackButton();
     updateCurrentSection();
 }
 
+void ReportWidget::itemClickedSlot(const QModelIndex& index)
+{
+    triggerItem(index, false);
+}
+
 void ReportWidget::itemDblClickedSlot(const QModelIndex& index)
 {
-    itemClickedSlot(index);
+    triggerItem(index, false);
 
     sections_menu_->close();
 }
@@ -200,7 +213,9 @@ void ReportWidget::showFigure(const QModelIndex& index)
 
         auto figures = section->getFigures();
         if (!figures.empty())
-            figures[ 0 ]->viewSlot();
+        {
+            figures[ 0 ]->view();
+        }
     }
 }
 
@@ -217,7 +232,8 @@ void ReportWidget::stepBackSlot()
     updateCurrentSection();
 }
 
-void ReportWidget::showResultWidget(Section* section)
+void ReportWidget::showResultWidget(Section* section, 
+                                    bool preload_ondemand_contents)
 {
     assert(results_widget_);
 
@@ -229,7 +245,7 @@ void ReportWidget::showResultWidget(Section* section)
         return;
     }
 
-    auto widget = section->getContentWidget();
+    auto widget = section->getContentWidget(preload_ondemand_contents);
 
     if (results_widget_->indexOf(widget) < 0)
         results_widget_->addWidget(widget);

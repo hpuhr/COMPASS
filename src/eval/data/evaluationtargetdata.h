@@ -18,6 +18,7 @@
 #pragma once
 
 #include "dbcontent/target/targetreportchain.h"
+#include "evaluationdefs.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
 #include <boost/optional.hpp>
@@ -34,17 +35,22 @@
 #include <QColor>
 
 class Buffer;
+class EvaluationTarget;
 class EvaluationData;
 class EvaluationCalculator;
 class DBContentManager;
 class SectorLayer;
+
+class QAction;
 
 /**
  */
 class EvaluationTargetData
 {
 public:
-    typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> InsideCheckMatrix;
+    typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic>            InsideCheckMatrix;
+    typedef std::function<bool(const Evaluation::RequirementSumResultID&)> InterestEnabledFunc; 
+    typedef std::map<Evaluation::RequirementSumResultID, double>           InterestMap;
 
     EvaluationTargetData(unsigned int utn, 
                          EvaluationData& eval_data,
@@ -73,6 +79,7 @@ public:
     boost::posix_time::ptime timeEnd() const;
     std::string timeEndStr() const;
     boost::posix_time::time_duration timeDuration() const;
+    std::string timeDurationStr() const;
 
     std::set<std::string> acids() const;
     std::string acidsStr() const;
@@ -169,19 +176,22 @@ public:
     static const int InterestFactorPrecision   = 3;
 
     // targets of interest
-    void updateInterestFactors() const;
     void clearInterestFactors() const;
-    void addInterestFactor (const std::string& req_id, double factor) const;
-    const std::map<std::string, double>& interestFactors() const;
-    std::map<std::string, double> enabledInterestFactors() const;
-    std::string enabledInterestFactorsStr() const;
-    double enabledInterestFactorsSum() const;
-    double totalInterestFactorsSum() const;
+    void addInterestFactor(const Evaluation::RequirementSumResultID& id, double factor) const;
+    const InterestMap& interestFactors() const;
 
-    static std::string stringForInterestFactor(const std::string& req_id, double factor);
+    EvaluationTarget toTarget() const;
+    static void updateTarget(DBContentManager& dbcontent_manager,
+                             EvaluationTarget& target);
 
+    static std::string stringForInterestFactor(const Evaluation::RequirementSumResultID& id, 
+                                               double factor);
     static QColor colorForInterestFactorRequirement(double factor);
     static QColor colorForInterestFactorSum(double factor);
+    static std::string enabledInterestFactorsString(const InterestMap& interest_factors,
+                                                    const InterestEnabledFunc& interest_enabled_func);
+    static QAction* interestFactorAction(const Evaluation::RequirementSumResultID& id, 
+                                         double interest_factor);
 
     static QColor color_interest_high_, color_interest_mid_, color_interest_low_;
     static double interest_thres_req_high_, interest_thres_req_mid_;
@@ -209,8 +219,6 @@ protected:
     bool checkInside(const SectorLayer& layer,
                      const InsideCheckMatrix& mat,
                      const dbContent::TargetReport::Index& index) const;
-
-    bool interestFactorEnabled(const std::string& req_id) const;
     
     EvaluationData& eval_data_;
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
@@ -250,7 +258,5 @@ protected:
     mutable InsideCheckMatrix                    inside_map_;
     mutable std::map<const SectorLayer*, size_t> inside_sector_layers_;
 
-    mutable std::map<std::string, double> interest_factors_;
-    mutable double interest_factors_sum_total_ {0};
-    mutable double interest_factors_sum_enabled_ {0};
+    mutable InterestMap interest_factors_;
 };

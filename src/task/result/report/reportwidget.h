@@ -39,7 +39,8 @@ public:
 
     void expand();
 
-    void showResultWidget(Section* section); // can be nullptr
+    void showResultWidget(Section* section, // can be nullptr
+                          bool preload_ondemand_contents); 
 
     void selectId (const std::string& id, bool show_figure = false);
     void reshowLastId ();
@@ -57,6 +58,8 @@ protected:
     void expandAllParents (QModelIndex index);
     void updateBackButton ();
     void updateCurrentSection();
+    void triggerItem (const QModelIndex& index,
+                      bool preload_ondemand_contents);
 
     TaskResultsWidget& task_result_widget_;
 

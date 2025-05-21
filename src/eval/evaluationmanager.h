@@ -117,8 +117,6 @@ public:
     void setViewableDataConfig (const nlohmann::json::object_t& data);
     void resetViewableDataConfig(bool reset_view_point);
 
-    EvaluationManagerWidget* widget();
-
     const EvaluationCalculator& calculator() const;
     EvaluationCalculator& calculator();
 
@@ -180,8 +178,7 @@ private:
 
     std::unique_ptr<ViewableDataConfig>            viewable_data_cfg_;
     std::map<std::string, std::shared_ptr<Buffer>> raw_data_;
-
-    std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
+    bool                                           raw_data_available_ = false;
 
     bool use_timestamp_filter_ {false};
     boost::posix_time::ptime load_timestamp_begin_;

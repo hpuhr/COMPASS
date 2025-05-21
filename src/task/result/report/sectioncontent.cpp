@@ -223,6 +223,27 @@ bool SectionContent::loadOnDemand()
 
 /**
  */
+bool SectionContent::forceReload()
+{
+    if (!isOnDemand())
+        return true;
+
+    clearContent();
+    
+    return loadOnDemand();
+}
+
+/**
+ */
+void SectionContent::clearContent()
+{
+    clearContent_impl();
+
+    complete_ = false;
+}
+
+/**
+ */
 nlohmann::json SectionContent::toJSON() const
 {
     nlohmann::json root;
