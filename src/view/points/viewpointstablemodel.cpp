@@ -41,10 +41,10 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
 {
     table_columns_ = default_table_columns_;
 
-    open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
-    closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
-    todo_icon_ = QIcon(Files::getIconFilepath("todo.png").c_str());
-    unknown_icon_ = QIcon(Files::getIconFilepath("todo_maybe.png").c_str());
+    open_icon_ = Files::IconProvider::getIcon("not_recommended.png");
+    closed_icon_ = Files::IconProvider::getIcon("not_todo.png");
+    todo_icon_ = Files::IconProvider::getIcon("todo.png");
+    unknown_icon_ = Files::IconProvider::getIcon("todo_maybe.png");
 }
 
 //ViewPointsTableModel::~ViewPointsTableModel()

@@ -238,3 +238,18 @@ void EvaluationStandard::addToReport (std::shared_ptr<ResultReport::Report> repo
     }
 }
 
+std::set<std::string> EvaluationStandard::getAllRequirementNames() const
+{
+    std::set<std::string> names;
+
+    for (auto& std_it : groups_)
+    {
+        for (auto& req_it : *std_it)
+        {
+            if (!names.count(req_it->name()))
+                names.insert(req_it->name());
+        }
+    }
+
+    return names;
+}

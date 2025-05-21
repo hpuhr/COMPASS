@@ -36,14 +36,14 @@
 #include "datasourcemanager.h"
 
 #include "sectorlayer.h"
-#include "sector.h"
+//#include "sector.h"
 #include "airspace.h"
-#include "dbcontent/variable/metavariable.h"
-#include "dbcontent/variable/variable.h"
-#include "buffer.h"
+//#include "dbcontent/variable/metavariable.h"
+//#include "dbcontent/variable/variable.h"
+//#include "buffer.h"
 #include "filtermanager.h"
-#include "dbfilter.h"
-#include "viewabledataconfig.h"
+//#include "dbfilter.h"
+//#include "viewabledataconfig.h"
 #include "viewmanager.h"
 #include "stringconv.h"
 #include "util/timeconv.h"
@@ -51,7 +51,7 @@
 #include "viewpoint.h"
 #include "projectionmanager.h"
 #include "projection.h"
-#include "files.h"
+//#include "files.h"
 
 #include "json.hpp"
 
@@ -61,7 +61,7 @@
 #include <QMessageBox>
 
 #include <memory>
-#include <fstream>
+//#include <fstream>
 #include <cstdlib>
 #include <system.h>
 
@@ -126,10 +126,6 @@ void EvaluationCalculator::readSettings()
 
     // load filter
     registerParameter("use_load_filter", &settings_.use_load_filter_, Settings().use_load_filter_);
-
-    registerParameter("use_timestamp_filter", &settings_.use_timestamp_filter_, Settings().use_timestamp_filter_);
-    registerParameter("load_timestamp_begin", &settings_.load_timestamp_begin_str_, Settings().load_timestamp_begin_str_);
-    registerParameter("load_timestamp_end", &settings_.load_timestamp_end_str_, Settings().load_timestamp_end_str_);
 
     registerParameter("use_ref_traj_accuracy_filter_", &settings_.use_ref_traj_accuracy_filter_, Settings().use_ref_traj_accuracy_filter_);
     registerParameter("ref_traj_minimum_accuracy", &settings_.ref_traj_minimum_accuracy_, Settings().ref_traj_minimum_accuracy_);
@@ -251,14 +247,6 @@ void EvaluationCalculator::updateDerivedParameters()
     data_sources_ref_ = settings_.active_sources_ref_.get<std::map<std::string, std::map<std::string, bool>>>();
     data_sources_tst_ = settings_.active_sources_tst_.get<std::map<std::string, std::map<std::string, bool>>>();
 
-    load_timestamp_begin_ = {};
-    if (settings_.load_timestamp_begin_str_.size())
-        load_timestamp_begin_ = Time::fromString(settings_.load_timestamp_begin_str_);
-
-    load_timestamp_end_ = {};
-    if (settings_.load_timestamp_end_str_.size())
-        load_timestamp_end_ = Time::fromString(settings_.load_timestamp_end_str_);
-
     //fill in some default values if missing
     if (!settings_.report_author_.size())
         settings_.report_author_ = System::getUserName();
@@ -319,10 +307,6 @@ void EvaluationCalculator::reset()
     //clear data sources
     data_sources_ref_.clear();
     data_sources_tst_.clear();
-
-    //clear time range
-    load_timestamp_begin_ = {};
-    load_timestamp_end_   = {};
 }
 
 /**
@@ -1250,12 +1234,6 @@ nlohmann::json::object_t EvaluationCalculator::getBaseViewableDataConfig () cons
 
     if (settings_.use_load_filter_)
     {
-        if (settings_.use_timestamp_filter_)
-        {
-            data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] = Time::toString(load_timestamp_begin_);
-            data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(load_timestamp_end_);
-        }
-
         if (settings_.use_ref_traj_accuracy_filter_)
         {
             data[ViewPoint::VP_FILTERS_KEY]["RefTraj Accuracy"]["Accuracy Minimum"] = to_string(settings_.ref_traj_minimum_accuracy_);
@@ -1297,6 +1275,14 @@ nlohmann::json::object_t EvaluationCalculator::getBaseViewableDataConfig () cons
             data[ViewPoint::VP_FILTERS_KEY]["ADSB Quality"]["use_max_sil_v2"] = settings_.use_max_sil_v2_;
             data[ViewPoint::VP_FILTERS_KEY]["ADSB Quality"]["max_sil_v2"] = settings_.max_sil_v2_;
         }
+    }
+
+    if (manager_.use_timestamp_filter_)
+    {
+        data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] =
+            Time::toString(manager_.load_timestamp_begin_);
+        data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] =
+            Time::toString(manager_.load_timestamp_end_);
     }
 
     return data;
@@ -1507,46 +1493,6 @@ void EvaluationCalculator::useRequirement(const std::string& standard_name,
            << " value " << value;
 
     settings_.use_requirement_[standard_name][group_name][req_name] = value;
-}
-
-/**
- */
-boost::posix_time::ptime EvaluationCalculator::loadTimestampBegin() const
-{
-    return load_timestamp_begin_;
-}
-
-/**
- */
-void EvaluationCalculator::loadTimestampBegin(boost::posix_time::ptime value,
-                                              bool update_settings)
-{
-    loginf << "EvaluationCalculator: loadTimeBegin: value " << Time::toString(value);
-
-    load_timestamp_begin_ = value;
-
-    if (update_settings)
-        settings_.load_timestamp_begin_str_ = Time::toString(load_timestamp_begin_);
-}
-
-/**
- */
-boost::posix_time::ptime EvaluationCalculator::loadTimestampEnd() const
-{
-    return load_timestamp_end_;
-}
-
-/**
- */
-void EvaluationCalculator::loadTimestampEnd(boost::posix_time::ptime value,
-                                            bool update_settings)
-{
-    loginf << "EvaluationCalculator: loadTimeEnd: value " << Time::toString(value);
-
-    load_timestamp_end_ = value;
-
-    if (update_settings)
-        settings_.load_timestamp_end_str_ = Time::toString(load_timestamp_end_);
 }
 
 /**

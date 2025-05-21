@@ -2,11 +2,11 @@
 
 #include "targetbase.h"
 #include "propertylist.h"
+#include "util/timewindow.h"
 
 #include "json.hpp"
 
 #include "boost/date_time/posix_time/ptime.hpp"
-#include "boost/optional.hpp"
 
 #include <set>
 
@@ -23,6 +23,14 @@ public:
 
     bool useInEval() const;
     void useInEval(bool value);
+
+    Utils::TimeWindowCollection& evalExcludedTimeWindows();
+    std::set<std::string>& evalExcludedRequirements();
+
+    const Utils::TimeWindowCollection& evalExcludedTimeWindows() const;
+    const std::set<std::string>& evalExcludedRequirements() const;
+
+    void storeEvalutionInfo(); // save efficient variables in json
 
     std::string comment() const;
     void comment (const std::string& value);
@@ -105,6 +113,11 @@ public:
 
 protected:
     nlohmann::json info_;
+
+    bool use_in_eval_;
+    Utils::TimeWindowCollection excluded_time_windows_;
+    std::set<std::string> excluded_requirements_;
+
     mutable std::string time_duration_str_;
 
 };

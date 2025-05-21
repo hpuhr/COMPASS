@@ -35,7 +35,7 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     edit_layout->addStretch();
 
     QPushButton* ed_edit = new QPushButton();
-    ed_edit->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    ed_edit->setIcon(Files::IconProvider::getIcon("edit.png"));
     ed_edit->setFixedSize(UI_ICON_SIZE);
     ed_edit->setFlat(UI_ICON_BUTTON_FLAT);
     connect(ed_edit, &QPushButton::clicked,

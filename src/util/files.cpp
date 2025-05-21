@@ -21,6 +21,8 @@
 #include <QFileInfo>
 #include <QString>
 #include <QRegularExpression>
+#include <QApplication>
+#include <QStyle>
 
 #include <cassert>
 #include <iostream>
@@ -245,6 +247,28 @@ std::string normalizeFilename(const std::string& filename_without_ext, bool remo
     fn_lower.replace(QRegularExpression("[/\\s]+"), "_"); //replace sequences of unwanted chars with _
     
     return fn_lower.toStdString();
+}
+
+QIcon IconProvider::getIcon(const std::string& name)
+{
+    static std::map<std::string, QIcon> icon_cache_;
+
+    if (!icon_cache_.count(name))
+    {
+        QIcon icon;
+        QString path = getIconFilepath(name).c_str();
+
+        icon.addFile(path, QSize(QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize),
+                                 QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize)));
+        icon.addFile(path, QSize(QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize),
+                                 QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize)));
+        icon.addFile(path, QSize(QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize),
+                                 QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize)));
+
+        icon_cache_[name] = icon;
+    }
+
+    return icon_cache_.at(name);
 }
 
 }  // namespace Files

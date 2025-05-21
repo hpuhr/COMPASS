@@ -166,6 +166,8 @@ public:
     void saveTargets();
     unsigned int numTargets() const;
 
+    void storeTargetsEvalInfo(); // saves eval info from efficient variables in json, do after full change
+
     nlohmann::json targetsInfoAsJSON() const;
     nlohmann::json targetInfoAsJSON(unsigned int utn) const;
     nlohmann::json targetStatsAsJSON() const;
@@ -190,8 +192,10 @@ public:
 
     void autoFilterUTNS();
     void showUTN (unsigned int utn);
-    void showUTNs (std::vector<unsigned int> utns);
+    void showUTNs (std::set<unsigned int> utns);
+
     void showSurroundingData (unsigned int utn);
+    void showSurroundingData (std::set<unsigned int> utns);
 
     dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
 

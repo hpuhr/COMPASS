@@ -56,8 +56,8 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
     //set a nice object name by which we can differentiate multiple windows in qt's object hierarchy
     UI_TEST_OBJ_NAME(this, QString::fromStdString(name_))
 
-    QIcon atsdb_icon(Files::getIconFilepath("ats.png").c_str());
-    setWindowIcon(atsdb_icon);  // for the glory of the empire
+    QIcon ats_icon(Files::getIconFilepath("ats.png").c_str());
+    setWindowIcon(ats_icon);  // for the glory of the empire
 
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);

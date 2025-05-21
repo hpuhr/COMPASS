@@ -124,7 +124,7 @@ void ToolBox::createUI()
 
     config_button_ = new QPushButton;
     config_button_->setStyleSheet("QPushButton::menu-indicator { image: none; }");
-    config_button_->setIcon(QIcon(Utils::Files::getIconFilepath("edit.png").c_str()));
+    config_button_->setIcon(Utils::Files::IconProvider::getIcon("edit.png"));
     config_button_->setFixedSize(UI_ICON_SIZE); 
     config_button_->setFlat(UI_ICON_BUTTON_FLAT);
 
@@ -135,14 +135,14 @@ void ToolBox::createUI()
     tool_bar_default_->setIconSize(UI_ICON_SIZE);
 
     shrink_action_ = tool_bar_default_->addAction("Decrease Width");
-    shrink_action_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_left.png").c_str()));
+    shrink_action_->setIcon(Utils::Files::IconProvider::getIcon("arrow_to_left.png"));
     shrink_action_->setToolTip("Decrease Width [-]");
     shrink_action_->setShortcut(Qt::Key_Minus);
 
     connect(shrink_action_, &QAction::triggered, this, &ToolBox::shrink);
 
     grow_action_ = tool_bar_default_->addAction("Increase Width");
-    grow_action_->setIcon(QIcon(Utils::Files::getIconFilepath("arrow_to_right.png").c_str()));
+    grow_action_->setIcon(Utils::Files::IconProvider::getIcon("arrow_to_right.png"));
     grow_action_->setToolTip("Increase Width [+]");
     grow_action_->setShortcut(Qt::Key_Plus);
 
@@ -498,7 +498,7 @@ void ToolBox::updateButtons()
         grow_action_->setEnabled((int)sr < (int)toolbox::ScreenRatio::RatioMax - 1);
     }
 
-    expand_action_->setIcon(QIcon(Utils::Files::getIconFilepath(expanded_ ? "fd_shrink.png" : "fd_expand.png").c_str()));
+    expand_action_->setIcon(Utils::Files::IconProvider::getIcon(expanded_ ? "fd_shrink.png" : "fd_expand.png"));
     expand_action_->setToolTip(QString(expanded_ ? "Collapse" : "Expand") + " Flight Deck [#]");
 }
 

@@ -15,13 +15,10 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEXTFIELDOCTVALIDATOR_H
-#define TEXTFIELDOCTVALIDATOR_H
+#pragma once
 
 #include <QValidator>
 #include <QLineEdit>
-
-//#include "logger.h"
 
 class TextFieldOctValidator : public QValidator
 {
@@ -37,7 +34,7 @@ public:
         if (!input.size())
             return QValidator::Acceptable;
 
-        if (input.size() > max_length_ )
+        if (input.size() > (int) max_length_ )
             return QValidator::Invalid;
 
         // match against needed regexp
@@ -53,4 +50,3 @@ protected:
 };
 
 
-#endif // TEXTFIELDOCTVALIDATOR_H

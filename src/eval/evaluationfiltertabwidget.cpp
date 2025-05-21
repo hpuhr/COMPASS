@@ -1,9 +1,6 @@
 #include "evaluationfiltertabwidget.h"
-#include "evaluationmanagerwidget.h"
 #include "evaluationmanager.h"
 #include "textfielddoublevalidator.h"
-#include "util/timeconv.h"
-#include "timewindowcollectionwidget.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -28,21 +25,6 @@ EvaluationFilterTabWidget::EvaluationFilterTabWidget(EvaluationCalculator& calcu
     use_filter_check_ = new QCheckBox ();
     connect(use_filter_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseFiltersSlot);
     form_layout->addRow("Use Load Filter", use_filter_check_);
-
-    // time
-    use_time_check_ = new QCheckBox ();
-    connect(use_time_check_, &QCheckBox::clicked, this, &EvaluationFilterTabWidget::toggleUseTimeSlot);
-    form_layout->addRow("Use Timestamp Filter", use_time_check_);
-
-    time_begin_edit_ = new QDateTimeEdit(QDateTime::currentDateTime());
-    time_begin_edit_->setDisplayFormat(Time::QT_DATETIME_FORMAT.c_str());
-    connect(time_begin_edit_, &QDateTimeEdit::dateTimeChanged, this, &EvaluationFilterTabWidget::timeBeginEditedSlot);
-    form_layout->addRow("Timestamp Begin", time_begin_edit_);
-
-    time_end_edit_ = new QDateTimeEdit(QDateTime::currentDateTime());
-    time_end_edit_->setDisplayFormat(Time::QT_DATETIME_FORMAT.c_str());
-    connect(time_end_edit_, &QDateTimeEdit::dateTimeChanged, this, &EvaluationFilterTabWidget::timeEndEditedSlot);
-    form_layout->addRow("Timestamp End", time_end_edit_);
 
     // reftraj
 
@@ -152,7 +134,7 @@ EvaluationFilterTabWidget::EvaluationFilterTabWidget(EvaluationCalculator& calcu
     connect(max_sil_v2_edit_, &QLineEdit::textEdited, this, &EvaluationFilterTabWidget::maxSILv2PEditedSlot);
     form_layout->addRow(use_max_sil_v2_check_, max_sil_v2_edit_);
 
-    update();
+    updateValues();
 
     setContentsMargins(0, 0, 0, 0);
 
@@ -166,44 +148,10 @@ void EvaluationFilterTabWidget::toggleUseFiltersSlot()
     assert (use_filter_check_);
     calculator_.settings().use_load_filter_ = use_filter_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
-/**
- */
-void EvaluationFilterTabWidget::toggleUseTimeSlot()
-{
-    assert (use_time_check_);
-    calculator_.settings().use_timestamp_filter_ = use_time_check_->checkState() == Qt::Checked;
 
-    update();
-}
-
-/**
- */
-void EvaluationFilterTabWidget::timeBeginEditedSlot (const QDateTime& datetime)
-{
-    if (update_active_)
-        return;
-
-    loginf << "EvaluationFilterTabWidget: timeBeginEditedSlot: value "
-           << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
-
-    calculator_.loadTimestampBegin(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()));
-}
-
-/**
- */
-void EvaluationFilterTabWidget::timeEndEditedSlot (const QDateTime& datetime)
-{
-    if (update_active_)
-        return;
-
-    loginf << "EvaluationFilterTabWidget: timeEndEditedSlot: value "
-           << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
-
-    calculator_.loadTimestampEnd(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()));
-}
 
 /**
  */
@@ -225,7 +173,7 @@ void EvaluationFilterTabWidget::minRefTrajAccuracyEditedSlot (const QString& tex
     if (!ok)
         logwrn << "EvaluationFilterTabWidget: minRefTrajAccuracyEditedSlot: unable to parse value '" << text.toStdString() << "'";
     else
-    calculator_.settings().ref_traj_minimum_accuracy_ = val;
+        calculator_.settings().ref_traj_minimum_accuracy_ = val;
 }
 
 /**
@@ -235,7 +183,7 @@ void EvaluationFilterTabWidget::toggleUseADSBSlot()
     assert (use_adsb_check_);
     calculator_.settings().use_adsb_filter_ = use_adsb_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -245,7 +193,7 @@ void EvaluationFilterTabWidget::toggleUseV0Slot()
     assert (use_v0_check_);
     calculator_.settings().use_v0_ = use_v0_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -255,7 +203,7 @@ void EvaluationFilterTabWidget::toggleUseV1Slot()
     assert (use_v1_check_);
     calculator_.settings().use_v1_ = use_v1_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -265,7 +213,7 @@ void EvaluationFilterTabWidget::toggleUseV2Slot()
     assert (use_v2_check_);
     calculator_.settings().use_v2_ = use_v2_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -275,7 +223,7 @@ void EvaluationFilterTabWidget::toggleUseMinNUCPSlot()
     assert (use_min_nucp_check_);
     calculator_.settings().use_min_nucp_ = use_min_nucp_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -300,7 +248,7 @@ void EvaluationFilterTabWidget::toggleUseMinNICSlot()
     assert (use_min_nic_check_);
     calculator_.settings().use_min_nic_ = use_min_nic_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -325,7 +273,7 @@ void EvaluationFilterTabWidget::toggleUseMinNACpSlot()
     assert (use_min_nacp_check_);
     calculator_.settings().use_min_nacp_ = use_min_nacp_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -350,7 +298,7 @@ void EvaluationFilterTabWidget::toggleUseMinSILv1Slot()
     assert (use_min_sil_v1_check_);
     calculator_.settings().use_min_sil_v1_ = use_min_sil_v1_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -375,7 +323,7 @@ void EvaluationFilterTabWidget::toggleUseMinSILv2Slot()
     assert (use_min_sil_v2_check_);
     calculator_.settings().use_min_sil_v2_ = use_min_sil_v2_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -400,7 +348,7 @@ void EvaluationFilterTabWidget::toggleUseMaxNUCPSlot()
     assert (use_max_nucp_check_);
     calculator_.settings().use_max_nucp_ = use_max_nucp_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -425,7 +373,7 @@ void EvaluationFilterTabWidget::toggleUseMaxNICSlot()
     assert (use_max_nic_check_);
     calculator_.settings().use_max_nic_ = use_max_nic_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -450,7 +398,7 @@ void EvaluationFilterTabWidget::toggleUseMaxNACpSlot()
     assert (use_max_nacp_check_);
     calculator_.settings().use_max_nacp_ = use_max_nacp_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -475,7 +423,7 @@ void EvaluationFilterTabWidget::toggleUseMaxSILv1Slot()
     assert (use_max_sil_v1_check_);
     calculator_.settings().use_max_sil_v1_ = use_max_sil_v1_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -500,7 +448,7 @@ void EvaluationFilterTabWidget::toggleUseMaxSILv2Slot()
     assert (use_max_sil_v2_check_);
     calculator_.settings().use_max_sil_v2_ = use_max_sil_v2_check_->checkState() == Qt::Checked;
 
-    update();
+    updateValues();
 }
 
 /**
@@ -520,7 +468,7 @@ void EvaluationFilterTabWidget::maxSILv2PEditedSlot (const QString& text)
 
 /**
  */
-void EvaluationFilterTabWidget::update()
+void EvaluationFilterTabWidget::updateValues()
 {
     const auto& eval_settings = calculator_.settings();
 
@@ -528,27 +476,6 @@ void EvaluationFilterTabWidget::update()
 
     assert (use_filter_check_);
     use_filter_check_->setChecked(eval_settings.use_load_filter_);
-
-    // time filter
-    assert (use_time_check_);
-    use_time_check_->setChecked(eval_settings.use_timestamp_filter_);
-    use_time_check_->setEnabled(use_filter);
-
-    update_active_ = true;
-
-    assert (time_begin_edit_);
-    //time_begin_edit_->setText(String::timeStringFromDouble(eval_man_.loadTimestampBegin()).c_str());
-    time_begin_edit_->setDateTime(QDateTime::fromString(Time::toString(calculator_.loadTimestampBegin()).c_str(),
-                                                 Time::QT_DATETIME_FORMAT.c_str()));
-    time_begin_edit_->setEnabled(use_filter && eval_settings.use_timestamp_filter_);
-
-    assert (time_end_edit_);
-    //time_end_edit_->setText(String::timeStringFromDouble(eval_man_.loadTimestampEnd()).c_str());
-    time_end_edit_->setDateTime(QDateTime::fromString(Time::toString(calculator_.loadTimestampEnd()).c_str(),
-                                                 Time::QT_DATETIME_FORMAT.c_str()));
-    time_end_edit_->setEnabled(use_filter && eval_settings.use_timestamp_filter_);
-
-    update_active_ = false;
 
     // reftraj
 

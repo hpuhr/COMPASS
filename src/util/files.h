@@ -15,10 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FILES_H
-#define FILES_H
+#pragma once
 
 #include <QDir>
+#include <QIcon>
+
+#include <map>
+#include <string>
 
 #include "global.h"
 
@@ -69,7 +72,11 @@ std::string replaceExtension(const std::string& path, const std::string& new_ext
 
 std::string normalizeFilename(const std::string& filename_without_ext, bool remove_special_chars);
 
+class IconProvider {
+public:
+    static QIcon getIcon(const std::string& name);
+};
+
 }  // namespace Files
 }  // namespace Utils
 
-#endif  // FILES_H

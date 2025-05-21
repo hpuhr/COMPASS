@@ -67,7 +67,7 @@ VariableOrderedSetWidget::VariableOrderedSetWidget(VariableOrderedSet& set,
         QVBoxLayout* vupdown_layout = new QVBoxLayout();
 
         QPushButton* up = new QPushButton();
-        up->setIcon(QIcon(Files::getIconFilepath("up.png").c_str()));
+        up->setIcon(Files::IconProvider::getIcon("up.png"));
         up->setFixedSize(UI_ICON_SIZE);
         up->setFlat(UI_ICON_BUTTON_FLAT);
         up->setToolTip(tr("Move variable up"));
@@ -78,7 +78,7 @@ VariableOrderedSetWidget::VariableOrderedSetWidget(VariableOrderedSet& set,
         vupdown_layout->addStretch();
 
         QPushButton* down = new QPushButton();
-        down->setIcon(QIcon(Files::getIconFilepath("down.png").c_str()));
+        down->setIcon(Files::IconProvider::getIcon("down.png"));
         down->setFixedSize(UI_ICON_SIZE);
         down->setFlat(UI_ICON_BUTTON_FLAT);
         down->setToolTip(tr("Move variable down"));
@@ -126,7 +126,7 @@ void VariableOrderedSetWidget::showMenuSlot()
     QMenu* meta_menu = menu.addMenu(META_OBJECT_NAME.c_str());
     meta_menu->setToolTipsVisible(true);
 
-    QIcon tmp = QIcon(Files::getIconFilepath("db_empty.png").c_str());
+    QIcon tmp = Files::IconProvider::getIcon("db_empty.png");
 
     QFont font_italic;
     font_italic.setItalic(true);

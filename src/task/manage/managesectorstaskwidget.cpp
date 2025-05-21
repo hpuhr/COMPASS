@@ -334,7 +334,7 @@ void ManageSectorsTaskWidget::updateSectorTableSlot()
                 ++col;
 
                 QPushButton* button = new QPushButton();
-                button->setIcon(QIcon(Files::getIconFilepath("delete.png").c_str()));
+                button->setIcon(Files::IconProvider::getIcon("delete.png"));
                 button->setFlat(true);
 
                 connect (button, &QPushButton::clicked, this, &ManageSectorsTaskWidget::deleteSectorSlot);

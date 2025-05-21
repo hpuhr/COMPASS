@@ -980,7 +980,7 @@ std::vector<std::unique_ptr<DBFFT>> DBInterface::getFFTs()
 
         shared_ptr<DBCommand> command = sqlGenerator().getFFTSelectCommand();
 
-        loginf << "DBInterface: getFFTs: sql '" << command->get() << "'";
+        logdbg << "DBInterface: getFFTs: sql '" << command->get() << "'";
 
         shared_ptr<DBResult> result = execute(*command);
         assert(result->containsData());

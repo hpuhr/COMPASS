@@ -790,7 +790,7 @@ void DataSourceManager::createConfigDataSourcesFromDB()
                    << " sac/sic " << cfg_ds.sac() << "/" << cfg_ds.sic();
         }
         else
-            loginf << "DataSourceManager: createConfigDataSourcesFromDB: ds " << ds_it->name()
+            logdbg << "DataSourceManager: createConfigDataSourcesFromDB: ds " << ds_it->name()
                    << " sac/sic " << ds_it->sac() << "/" << ds_it->sic() << " already exists";
     }
 }

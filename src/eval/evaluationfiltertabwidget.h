@@ -21,10 +21,6 @@ class EvaluationFilterTabWidget : public QWidget
 private slots:
     void toggleUseFiltersSlot();
 
-    void toggleUseTimeSlot();
-    void timeBeginEditedSlot (const QDateTime& datetime);
-    void timeEndEditedSlot (const QDateTime& datetime);
-
     void toggleUseRefTrajAccuracySlot();
     void minRefTrajAccuracyEditedSlot (const QString& text);
 
@@ -61,16 +57,12 @@ private slots:
 public:
     EvaluationFilterTabWidget(EvaluationCalculator& calculator);
 
-    void update();
+    void updateValues();
 
 protected:
     EvaluationCalculator& calculator_;
 
     QCheckBox* use_filter_check_{nullptr};
-
-    QCheckBox* use_time_check_{nullptr};
-    QDateTimeEdit* time_begin_edit_{nullptr};
-    QDateTimeEdit* time_end_edit_{nullptr};
 
     // reftraj
 
@@ -120,6 +112,5 @@ protected:
     QCheckBox* use_max_sil_v2_check_{nullptr};
     QLineEdit* max_sil_v2_edit_{nullptr};
 
-    bool update_active_ {false};
 };
 

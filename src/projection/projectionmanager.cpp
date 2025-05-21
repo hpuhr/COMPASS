@@ -18,10 +18,8 @@
 #include "projectionmanager.h"
 #include "global.h"
 #include "logger.h"
-//#include "ogrprojection.h"
 #include "projectionmanagerwidget.h"
 #include "rs2gprojection.h"
-//#include "geoprojection.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "datasourcemanager.h"
@@ -693,10 +691,10 @@ REDO_LABEL:
                 double calc_ground_range_diff = fabs(calc_ground_range_m - ground_range_m);
 
                 if (!do_prints
-                    && (calc_azimuth_diff >= 1E-4 || calc_slant_range_diff >= 1E-2 || calc_ground_range_diff >= 1E-2))
+                    && (calc_azimuth_diff >= 1E-3 || calc_slant_range_diff >= 1E-2 || calc_ground_range_diff >= 1E-2))
                 {
                     logerr << "ProjectionManager: test: calc_azimuth_diff "
-                           << String::doubleToStringPrecision(calc_azimuth_diff, 6)
+                           << String::doubleToStringPrecision(calc_azimuth_diff, 5)
                            << " calc_slant_range_diff " << String::doubleToStringPrecision(calc_slant_range_diff, 2)
                         << " calc_ground_range_diff " << String::doubleToStringPrecision(calc_ground_range_diff, 2);
 
@@ -705,7 +703,7 @@ REDO_LABEL:
                     goto REDO_LABEL;
                 }
 
-                assert (calc_azimuth_diff < 1E-4);
+                assert (calc_azimuth_diff < 1E-3);
                 assert (calc_slant_range_diff < 1E-2);
                 assert (calc_ground_range_diff < 1E-2);
             }

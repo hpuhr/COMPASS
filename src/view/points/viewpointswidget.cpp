@@ -269,27 +269,27 @@ void ViewPointsWidget::addToConfigMenu(QMenu* menu)
 void ViewPointsWidget::addToToolBar(QToolBar* tool_bar)
 {
     auto action_prev = tool_bar->addAction("Select Previous [Up]");
-    action_prev->setIcon(QIcon(Utils::Files::getIconFilepath("up.png").c_str()));
+    action_prev->setIcon(Utils::Files::IconProvider::getIcon("up.png"));
     connect(action_prev, &QAction::triggered, this, &ViewPointsWidget::selectPreviousSlot);
 
     auto action_open = tool_bar->addAction("Set Selected Status Open [O]");
-    action_open->setIcon(QIcon(Utils::Files::getIconFilepath("not_recommended.png").c_str()));
+    action_open->setIcon(Utils::Files::IconProvider::getIcon("not_recommended.png"));
     connect(action_open, &QAction::triggered, this, &ViewPointsWidget::setSelectedOpenSlot);
 
     auto action_closed = tool_bar->addAction("Set Selected Status Closed [C]");
-    action_closed->setIcon(QIcon(Utils::Files::getIconFilepath("not_todo.png").c_str()));
+    action_closed->setIcon(Utils::Files::IconProvider::getIcon("not_todo.png"));
     connect(action_closed, &QAction::triggered, this, &ViewPointsWidget::setSelectedClosedSlot);
 
     auto action_todo = tool_bar->addAction("Set Selected Status ToDo [T]");
-    action_todo->setIcon(QIcon(Utils::Files::getIconFilepath("todo.png").c_str()));
+    action_todo->setIcon(Utils::Files::IconProvider::getIcon("todo.png"));
     connect(action_todo, &QAction::triggered, this, &ViewPointsWidget::setSelectedTodoSlot);
 
     auto action_edit = tool_bar->addAction("Edit Comment [E]");
-    action_edit->setIcon(QIcon(Utils::Files::getIconFilepath("comment.png").c_str()));
+    action_edit->setIcon(Utils::Files::IconProvider::getIcon("comment.png"));
     connect(action_edit, &QAction::triggered, this, &ViewPointsWidget::editCommentSlot);
 
     auto action_next = tool_bar->addAction("Select Next [Down]");
-    action_next->setIcon(QIcon(Utils::Files::getIconFilepath("down.png").c_str()));
+    action_next->setIcon(Utils::Files::IconProvider::getIcon("down.png"));
     connect(action_next, &QAction::triggered, this, &ViewPointsWidget::selectNextSlot);
 }
 

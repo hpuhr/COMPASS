@@ -1,5 +1,4 @@
-#ifndef DBCONTENTTARGETFILTERDIALOG_H
-#define DBCONTENTTARGETFILTERDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -13,7 +12,11 @@ namespace dbContent {
 
 class TargetModel;
 
-class TargetFilterDialog  : public QDialog
+}
+
+class EvaluationTargetFilter;
+
+class EvaluationTargetFilterDialog  : public QDialog
 {
     Q_OBJECT
 
@@ -44,10 +47,12 @@ public slots:
     void cancelSlot();
 
 public:
-    TargetFilterDialog(TargetModel& model, QWidget* parent=nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    EvaluationTargetFilterDialog(EvaluationTargetFilter& target_filter, dbContent::TargetModel& model,
+                               QWidget* parent=nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
 protected:
-    TargetModel& model_;
+    EvaluationTargetFilter& target_filter_;
+    dbContent::TargetModel& model_;
 
     QCheckBox* remove_short_check_ {nullptr};
 
@@ -76,6 +81,4 @@ protected:
 
 };
 
-}
 
-#endif // DBCONTENTTARGETFILTERDIALOG_H
