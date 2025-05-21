@@ -19,6 +19,7 @@
 
 #include "dbcontent/target/targetreportchain.h"
 #include "evaluationdefs.h"
+#include "timewindow.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
 #include <boost/optional.hpp>
@@ -100,7 +101,10 @@ public:
     bool isModeS () const;
     bool isModeACOnly () const;
 
+    void updateUseInfo() const; // updates evaluation use information
     bool use() const;
+    const Utils::TimeWindowCollection& excludedTimeWindows() const;
+    const std::set<std::string>& excludedRequirements() const;
 
     const dbContent::TargetReport::Chain& refChain() const;
     const dbContent::TargetReport::Chain& tstChain() const;
@@ -252,6 +256,10 @@ protected:
     //    mutable unsigned int min_nucp_nic_, max_nucp_nic_;
     //    mutable bool has_nacp {false};
     //    mutable unsigned int min_nacp_, max_nacp_;
+
+    mutable bool use_in_eval_;
+    mutable Utils::TimeWindowCollection excluded_time_windows_;
+    mutable std::set<std::string> excluded_requirements_;
 
     mutable InsideCheckMatrix                    inside_ref_;
     mutable InsideCheckMatrix                    inside_tst_;

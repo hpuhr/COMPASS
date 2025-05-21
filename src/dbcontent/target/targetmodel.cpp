@@ -139,7 +139,6 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                 else
                     eval_value = "Yes";
 
-                // first row, label in bold
                 append_row("Eval", eval_value);
 
                 append_row(table_columns_.at(ColUseEvalDetails),

@@ -2160,32 +2160,6 @@ void DBContentManager::showSurroundingData (std::set<unsigned int> utns)
 
 /**
  */
-bool DBContentManager::utnUseEval (unsigned int utn)
-{
-    assert (target_model_);
-
-    if (!target_model_->existsTarget(utn))
-        logerr << "DBContentManager: utnUseEval: utn " << utn << " does not exist";
-
-    assert (target_model_->existsTarget(utn));
-    return target_model_->target(utn).useInEval();
-}
-
-/**
- */
-void DBContentManager::utnUseEval (unsigned int utn, bool value)
-{
-    assert (target_model_);
-    assert (target_model_->existsTarget(utn));
-    target_model_->setUseTargetData(utn, value);
-
-    // eval man
-    //    data_.setUseTargetData(utn, value);
-    //    updateResultsToUseChangeOf(utn);
-}
-
-/**
- */
 std::string DBContentManager::utnComment (unsigned int utn)
 {
     assert (target_model_);

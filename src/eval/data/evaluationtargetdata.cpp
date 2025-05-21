@@ -132,6 +132,8 @@ void EvaluationTargetData::finalize () const
     updateModeCMinMax();
     updatePositionMinMax();
 
+    updateUseInfo();
+
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (dbcont_man.hasTargetsInfo() && dbcont_man.existsTarget(utn_)
@@ -378,11 +380,20 @@ bool EvaluationTargetData::isModeACOnly () const
     return (mode_a_codes_.size() || has_mode_c_) && !isModeS();
 }
 
+void EvaluationTargetData::updateUseInfo() const
+{
+    const auto& target = dbcont_man_.target(utn_);
+
+    use_in_eval_ = target.useInEval();
+    excluded_time_windows_ = target.evalExcludedTimeWindows();
+    excluded_requirements_ = target.evalExcludedRequirements();
+}
+
 /**
  */
 bool EvaluationTargetData::use() const
 {
-    return dbcont_man_.utnUseEval(utn_);
+    return use_in_eval_;
 }
 
 /**
@@ -1682,6 +1693,16 @@ bool EvaluationTargetData::checkInside(const SectorLayer& layer,
     assert(lidx < mat.cols());
 
     return mat(idx_internal, lidx);
+}
+
+const std::set<std::string>& EvaluationTargetData::excludedRequirements() const
+{
+    return excluded_requirements_;
+}
+
+const Utils::TimeWindowCollection& EvaluationTargetData::excludedTimeWindows() const
+{
+    return excluded_time_windows_;
 }
 
 /**

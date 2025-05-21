@@ -1,4 +1,6 @@
 #include "evaluationtargetexcludedrequirementsdialog.h"
+#include "stringconv.h"
+#include "logger.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -14,13 +16,21 @@
 #include <QGridLayout>
 #include <QCheckBox>
 
+using namespace Utils;
+
 EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirementsDialog(
     const std::string utn_str, std::set<std::string> selected_requirements,
     std::set<std::string> available_requirements, QWidget* parent)
     : QDialog(parent)
     , selected_requirements_(std::move(selected_requirements))
     , available_requirements_(std::move(available_requirements))
- {
+{
+    logdbg << "EvaluationTargetExcludedRequirementsDialog: ctor: selected_requirements '"
+           << String::compress(selected_requirements_,',') << "'";
+
+    logdbg << "EvaluationTargetExcludedRequirementsDialog: ctor: available_requirements '"
+           << String::compress(available_requirements_,',') << "'";
+
     setWindowTitle("Edit Evaluation Excluded Requirements");
 
     setModal(true);
@@ -95,7 +105,7 @@ EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirements
     main_layout->addLayout(button_layout);
 
     setLayout(main_layout);
- }
+}
 
 std::set<std::string> EvaluationTargetExcludedRequirementsDialog::selectedRequirements() const
 {
