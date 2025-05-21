@@ -132,10 +132,10 @@ public:
 protected:
     DBContentManager& dbcont_manager_;
 
-    QStringList               table_columns_   { "UTN", "Comment", "Category", "Use Eval", "Eval Excluded",
+    QStringList               table_columns_   { "UTN", "Comment", "Category", "Eval", "Eval Excluded",
                                "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max"};
-    std::vector<int>          main_columns_    { ColUTN, ColComment, ColCategory };
-    std::vector<int>          eval_columns_    { ColUseEval, ColUseEvalDetails };
+    std::vector<int>          main_columns_    { ColUTN, ColComment, ColCategory, ColUseEval };
+    std::vector<int>          eval_columns_    { ColUseEvalDetails };
     std::vector<int>          duration_columns_{ ColNumUpdates, ColBegin, ColEnd, ColDuration };
     std::vector<int>          mode_s_columns_  { ColACIDs, ColACADs };
     std::vector<int>          mode_ac_columns_ { ColMode3A, ColModeCMin, ColModeCMax };

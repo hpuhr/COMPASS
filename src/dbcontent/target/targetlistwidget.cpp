@@ -129,7 +129,7 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
     // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
     // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
 
-    auto eval_cols_action = column_menu->addAction("Evaluation");
+    auto eval_cols_action = column_menu->addAction("Eval Details");
     eval_cols_action->setCheckable(true);
     eval_cols_action->setChecked(model_.showEvalColumns());
 
@@ -187,7 +187,7 @@ void TargetListWidget::addToToolBar(QToolBar* tool_bar)
 
     // connect(main_cols_action, &QAction::toggled, this, &TargetListWidget::showMainColumns);
 
-    auto eval_cols_action = tool_bar->addAction("Evaluation");
+    auto eval_cols_action = tool_bar->addAction("Eval Details");
     eval_cols_action->setCheckable(true);
     eval_cols_action->setChecked(model_.showEvalColumns());
     eval_cols_action->setToolTip("Show Evaluation Columns");
