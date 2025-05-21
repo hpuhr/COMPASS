@@ -1,6 +1,8 @@
 #include "timewindow.h"
 #include "timeconv.h"
 
+using namespace std;
+
 namespace Utils
 {
 
@@ -53,6 +55,16 @@ nlohmann::json TimeWindow::getAsJson() const
     return json_result;
 }
 
+std::string TimeWindow::asStr() const
+{
+    return Time::toString(std::get<0>(time_window_)) + " - " + Time::toString(std::get<1>(time_window_));
+}
+
+bool TimeWindow::contains(const TimeWindow& tw) const
+{
+    return (std::get<0>(time_window_) <= tw.begin() && std::get<1>(time_window_) >= tw.end());
+}
+
 const boost::posix_time::ptime& TimeWindow::begin() const
 {
     return std::get<0>(time_window_);
@@ -96,7 +108,6 @@ void TimeWindowCollection::setFrom(nlohmann::json& json)
     }
 
     assert (valid());
-    json_ptr_ = &json;
 }
 
 nlohmann::json TimeWindowCollection::asJSON() const
@@ -107,6 +118,16 @@ nlohmann::json TimeWindowCollection::asJSON() const
         json_result.push_back(time_window.getAsJson());
 
     return json_result;
+}
+
+std::string TimeWindowCollection::asString() const
+{
+    ostringstream ss;
+
+    for (const auto& tw_it : time_windows_)
+        ss << tw_it.asStr() << endl;
+
+    return ss.str();
 }
 
 const Utils::TimeWindow& TimeWindowCollection::get(unsigned int index)
@@ -120,26 +141,28 @@ void TimeWindowCollection::add(const TimeWindow& time_window)
 {
     assert (time_window.valid());
     time_windows_.push_back(time_window);
+}
 
-    if (json_ptr_)
-        *json_ptr_ = asJSON();
+bool TimeWindowCollection::contains(const TimeWindow& time_window)
+{
+    for (const auto& tw_it : time_windows_)
+    {
+        if (tw_it.contains(time_window))
+            return true;
+    }
+
+    return false;
 }
 
 void TimeWindowCollection::erase(unsigned int index)
 {
     assert (index < time_windows_.size());
     time_windows_.erase(time_windows_.begin() + index);
-
-    if (json_ptr_)
-        *json_ptr_ = asJSON();
 }
 
 void TimeWindowCollection::clear()
 {
     time_windows_.clear();
-
-    if (json_ptr_)
-        *json_ptr_ = asJSON();
 }
 
 }

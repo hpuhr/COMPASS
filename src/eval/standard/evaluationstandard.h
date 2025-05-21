@@ -85,6 +85,8 @@ public:
 
     void addToReport (std::shared_ptr<ResultReport::Report> report);
 
+    std::set<std::string> getAllRequirementNames() const;
+
 protected:
     EvaluationCalculator& calculator_;
     std::string name_;

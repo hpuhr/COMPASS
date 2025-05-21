@@ -24,7 +24,6 @@
 #include "viewabledataconfig.h"
 #include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgenerator.h"
-#include "datasourcecompoundcoverage.h"
 #include "sector.h"
 #include "result.h"
 #include "util/timewindow.h"
@@ -38,7 +37,8 @@ class EvaluationStandard;
 class DBContent;
 class SectorLayer;
 class AirSpace;
-class EvaluationSettings;
+struct EvaluationSettings;
+class EvaluationTargetFilter;
 
 namespace dbContent 
 {
@@ -65,6 +65,7 @@ public slots:
     void databaseClosedSlot();
     void dataSourcesChangedSlot();
     void associationStatusChangedSlot();
+
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
@@ -124,7 +125,23 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
-protected:
+    // timestamps
+    boost::posix_time::ptime loadTimestampBegin() const;
+    void loadTimestampBegin(boost::posix_time::ptime value);
+
+    boost::posix_time::ptime loadTimestampEnd() const;
+    void loadTimestampEnd(boost::posix_time::ptime value);
+
+    Utils::TimeWindowCollection& excludedTimeWindows(); // needs to be saved externally
+    void saveTimeConstraints();
+
+    bool useTimestampFilter() const;
+    void useTimestampFilter(bool value);
+    std::string timestampFilterStr() const;
+
+    EvaluationTargetFilter& targetFilter() const;
+
+  protected:
     friend class EvaluationCalculator;
 
     virtual void checkSubConfigurables() override;
@@ -157,6 +174,7 @@ private:
     std::vector<std::shared_ptr<SectorLayer>> sector_layers_;
     unsigned int max_sector_id_ {0};
 
+    std::unique_ptr<EvaluationTargetFilter> target_filter_;
     std::unique_ptr<EvaluationCalculator> calculator_; // sub-configurable
     //EvaluationResultsReport::PDFGenerator pdf_gen_;
 
@@ -165,5 +183,8 @@ private:
 
     std::unique_ptr<EvaluationManagerWidget> widget_{nullptr};
 
+    bool use_timestamp_filter_ {false};
+    boost::posix_time::ptime load_timestamp_begin_;
+    boost::posix_time::ptime load_timestamp_end_;
     Utils::TimeWindowCollection load_filtered_time_windows_;
 };

@@ -1,13 +1,10 @@
-#ifndef DBCONTENT_TARGETMODEL_H
-#define DBCONTENT_TARGETMODEL_H
+#pragma once
 
 #include "target.h"
-#include "configurable.h"
 #include "json.hpp"
 
 #include <QAbstractItemModel>
 
-#include <memory>
 #include <map>
 
 #include <boost/multi_index/hashed_index.hpp>
@@ -36,15 +33,13 @@ typedef boost::multi_index_container<
         > >
     TargetCache;
 
-class TargetModel : public QAbstractItemModel, public Configurable
+class TargetModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    TargetModel(const std::string& class_id, const std::string& instance_id, DBContentManager& dbcont_manager);
+    TargetModel(DBContentManager& dbcont_manager);
     virtual ~TargetModel();
-
-    virtual void generateSubConfigurable(const std::string& class_id, const std::string& instance_id) override {};
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant& value, int role) override;
@@ -63,6 +58,7 @@ public:
     void setTargetDataComment (unsigned int utn, std::string comment);
     void setUseAllTargetData (bool value);
     void clearComments ();
+
     void setUseByFilter ();
 
     bool hasTargetsInfo();
@@ -76,6 +72,8 @@ public:
 
     void removeDBContentFromTargets(const std::string& dbcont_name);
 
+    void storeTargetsEvalInfo();
+
     nlohmann::json asJSON() const;
     nlohmann::json targetAsJSON(unsigned int utn) const;
     nlohmann::json targetStatsAsJSON() const;
@@ -87,69 +85,27 @@ public:
 
     void clear();
 
-    // use filter stuff
-
-    bool removeShortTargets() const;
-    void removeShortTargets(bool value);
-
-    unsigned int removeShortTargetsMinUpdates() const;
-    void removeShortTargetsMinUpdates(unsigned int value);
-
-    double removeShortTargetsMinDuration() const;
-    void removeShortTargetsMinDuration(double value);
-
-    bool removePsrOnlyTargets() const;
-    void removePsrOnlyTargets(bool value);
-
-    bool filterModeACodes() const;
-    void filterModeACodes(bool value);
-    bool filterModeACodeBlacklist() const;
-    void filterModeACodeBlacklist(bool value);
-
-    bool removeModeCValues() const;
-    void removeModeCValues(bool value);
-
-    float removeModeCMinValue() const;
-    void removeModeCMinValue(float value);
-
-    std::string filterModeACodeValues() const;
-    std::set<std::pair<int,int>> filterModeACodeData() const; // single ma,-1 or range ma1,ma2
-    void filterModeACodeValues(const std::string& value);
-
-    bool filterTargetAddresses() const;
-    void filterTargetAddresses(bool value);
-    bool filterTargetAddressesBlacklist() const;
-    void filterTargetAddressesBlacklist(bool value);
-
-    std::string filterTargetAddressValues() const;
-    std::set<unsigned int> filterTargetAddressData() const;
-    void filterTargetAddressValues(const std::string& value);
-
-    bool removeModeACOnlys() const;
-    void removeModeACOnlys(bool value);
-
-    bool removeNotDetectedDBContents() const;
-    void removeNotDetectedDBContents(bool value);
-
-    bool removeNotDetectedDBContent(const std::string& dbcontent_name) const;
-    void removeNotDetectedDBContents(const std::string& dbcontent_name, bool value);
-
     const QStringList& tableHeaders() const { return table_columns_; }
 
     const std::vector<int>& mainColumns() const { return main_columns_; }
+    const std::vector<int>& evalColumns() const { return eval_columns_; }
     const std::vector<int>& durationColumns() const { return duration_columns_; }
     const std::vector<int>& modeSColumns() const { return mode_s_columns_; }
     const std::vector<int>& modeACColumns() const { return mode_ac_columns_; }
 
     bool showMainColumns() { return show_main_columns_; }
+    bool showEvalColumns() { return show_eval_columns_; }
     bool showDurationColumns() { return show_duration_columns_; }
     bool showModeSColumns() { return show_mode_s_columns_; }
     bool showModeACColumns() { return show_mode_ac_columns_; }
 
     void showMainColumns(bool show);
+    void showEvalColumns(bool show);
     void showDurationColumns(bool show);
     void showModeSColumns(bool show);
     void showModeACColumns(bool show);
+
+    void updateEvalItems();
 
     nlohmann::json rawCellData(int row, int column) const;
     unsigned int rowStyle(int row) const;
@@ -157,10 +113,11 @@ public:
 
     enum Columns
     {
-        ColUse = 0, 
-        ColUTN, 
-        ColComment, 
-        ColCategory, 
+        ColUTN = 0,
+        ColComment,
+        ColCategory,
+        ColUseEval,
+        ColUseEvalDetails,
         ColNumUpdates, 
         ColBegin, 
         ColEnd, 
@@ -172,55 +129,25 @@ public:
         ColModeCMax
     };
 
-    static const QStringList      TableHeaders;
-
-    static const std::vector<int> MainColumns;
-    static const std::vector<int> DurationColumns;
-    static const std::vector<int> ModeSColumns;
-    static const std::vector<int> ModeACColumns;
-
 protected:
     DBContentManager& dbcont_manager_;
 
-    QStringList               table_columns_   {"Use", "UTN", "Comment", "Category", "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max"};
-    std::vector<int>          main_columns_    { ColUse, ColUTN, ColComment, ColCategory };
+    QStringList               table_columns_   { "UTN", "Comment", "Category", "Eval", "Eval Excluded",
+                               "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max"};
+    std::vector<int>          main_columns_    { ColUTN, ColComment, ColCategory, ColUseEval };
+    std::vector<int>          eval_columns_    { ColUseEvalDetails };
     std::vector<int>          duration_columns_{ ColNumUpdates, ColBegin, ColEnd, ColDuration };
     std::vector<int>          mode_s_columns_  { ColACIDs, ColACADs };
     std::vector<int>          mode_ac_columns_ { ColMode3A, ColModeCMin, ColModeCMax };
 
     bool show_main_columns_     = true;
+    bool show_eval_columns_     = false;
     bool show_duration_columns_ = false;
     bool show_mode_s_columns_   = true;
     bool show_mode_ac_columns_  = false;
     
     TargetCache target_data_;
-
-    // utn use filter stuff
-
-    bool remove_short_targets_ {true};
-    unsigned int remove_short_targets_min_updates_ {10};
-    double remove_short_targets_min_duration_ {60.0};
-
-    bool remove_psr_only_targets_ {true};
-    bool remove_modeac_onlys_ {false};
-
-    bool filter_mode_a_codes_{false};
-    bool filter_mode_a_code_blacklist_{true};
-    std::string filter_mode_a_code_values_;
-
-    bool remove_mode_c_values_{false};
-    float remove_mode_c_min_value_;
-
-    bool filter_target_addresses_{false};
-    bool filter_target_addresses_blacklist_{true};
-    std::string filter_target_address_values_;
-
-    bool remove_not_detected_dbos_{false};
-    nlohmann::json remove_not_detected_dbo_values_;
-
-    virtual void checkSubConfigurables() override {};
 };
 
 }
 
-#endif // DBCONTENT_TARGETMODEL_H

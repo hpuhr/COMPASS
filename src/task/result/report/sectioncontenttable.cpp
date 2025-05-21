@@ -377,7 +377,7 @@ boost::optional<QIcon> SectionContentTable::cellIcon(const nlohmann::json& data)
         return boost::optional<QIcon>();
     }
     
-    return QIcon(Utils::Files::getIconFilepath(icon_name).c_str());
+    return Utils::Files::IconProvider::getIcon(icon_name);
 }
 
 /**

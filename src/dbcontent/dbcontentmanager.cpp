@@ -81,6 +81,10 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
     qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");
 
     dbContent::init_dbcontent_commands();
+
+    assert (!target_model_);
+    target_model_.reset(new dbContent::TargetModel(*this));
+    assert (target_model_);
 }
 
 /**
@@ -110,12 +114,7 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
            << instance_id;
 
-    if (class_id == "DBContentTargetModel")
-    {
-        assert (!target_model_);
-        target_model_.reset(new dbContent::TargetModel(class_id, instance_id, *this));
-    }
-    else if (class_id == "DBContent")
+    if (class_id == "DBContent")
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
         loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name()
@@ -150,11 +149,6 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
  */
 void DBContentManager::checkSubConfigurables()
 {
-    if (!target_model_)
-    {
-        generateSubConfigurable("DBContentTargetModel", "DBContentTargetModel0");
-        assert (target_model_);
-    }
 }
 
 /**
@@ -1614,6 +1608,11 @@ unsigned int DBContentManager::numTargets() const
     return target_model_->size();
 }
 
+void DBContentManager::storeTargetsEvalInfo()
+{
+    target_model_->storeTargetsEvalInfo();
+}
+
 /**
  */
 nlohmann::json DBContentManager::targetsInfoAsJSON() const
@@ -1998,6 +1997,167 @@ void DBContentManager::showSurroundingData (unsigned int utn)
     setViewableDataConfig(data);
 }
 
+void DBContentManager::showSurroundingData (std::set<unsigned int> utns)
+{
+    nlohmann::json::object_t data;
+
+    using namespace boost::posix_time;
+
+    assert (target_model_);
+
+    ptime sum_time_begin, sum_time_end;
+
+    std::set<std::string> aircraft_adresses;
+    std::set<std::string> mode_a_codes;
+
+    float sum_alt_min{0}, sum_alt_max{0};
+    double sum_lat_min{0},sum_lat_max{0},sum_lon_min{0},sum_lon_max{0};
+
+    bool first_ts{true}, first_alt{true}, first_pos{true};
+
+    for (auto utn : utns)
+    {
+        assert (target_model_->existsTarget(utn));
+
+        dbContent::Target& target = target_model_->target(utn);
+
+        ptime time_begin = target.timeBegin();
+        time_begin -= seconds(60);
+
+        ptime time_end = target.timeEnd();
+        time_end += seconds(60);
+
+        if (first_ts)
+        {
+            sum_time_begin = time_begin;
+            sum_time_end = time_end;
+        }
+        else
+        {
+            sum_time_begin = min(sum_time_begin, time_begin);
+            sum_time_end = max(sum_time_end, time_end);
+        }
+        first_ts = false;
+
+        for (auto acad : target.aircraftAddresses())
+        {
+            if (!aircraft_adresses.count(String::hexStringFromInt(acad, 6, '0')))
+                aircraft_adresses.insert(String::hexStringFromInt(acad, 6, '0'));
+        }
+
+        for (auto m3a : target.modeACodes())
+        {
+            if (!mode_a_codes.count(String::octStringFromInt(m3a, 4, '0')))
+                mode_a_codes.insert(String::octStringFromInt(m3a, 4, '0'));
+        }
+
+        if (target.hasModeC())
+        {
+            float alt_min = target.modeCMin() - 300;
+            float alt_max = target.modeCMax() + 300;
+
+            if (first_alt)
+            {
+                sum_alt_min = alt_min;
+                sum_alt_max = alt_max;
+            }
+            else
+            {
+                sum_alt_min = min(sum_alt_min, alt_min);
+                sum_alt_max = max(sum_alt_max, alt_max);
+            }
+
+            first_alt = false;
+        }
+
+        if (target.hasPositionBounds())
+        {
+            double lat_eps = (target.latitudeMax() - target.latitudeMin()) / 10.0;
+            lat_eps = min(lat_eps, 0.1); // 10% or 0.1 at max
+            double lon_eps = (target.longitudeMax() - target.longitudeMin()) / 10.0; // 10%
+            lon_eps = min(lon_eps, 0.1); // 10% or 0.1 at max
+
+            double lat_max = target.latitudeMax()+lat_eps;
+            double lat_min = target.latitudeMin()-lat_eps;
+            double lon_max = target.longitudeMax()+lon_eps;
+            double lon_min = target.longitudeMin()-lon_eps;
+
+            if (first_pos)
+            {
+                sum_lat_min = lat_min;
+                sum_lat_max = lat_max;
+                sum_lon_min = lon_min;
+                sum_lon_max = lon_max;
+            }
+            else
+            {
+                sum_lat_min = min(lat_min,sum_lat_min);
+                sum_lat_max = max(lat_max,sum_lat_max);
+                sum_lon_min = min(lon_min,sum_lon_min);
+                sum_lon_max = max(lon_max,sum_lon_max);
+            }
+
+            first_pos = false;
+        }
+    }
+
+    //    "Timestamp": {
+    //    "Timestamp Maximum": "05:56:32.297",
+    //    "Timestamp Minimum": "05:44:58.445"
+    //    },
+
+        // TODO_TIMESTAMP
+    data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(sum_time_end);
+    data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] = Time::toString(sum_time_begin);
+
+    //    "Aircraft Address": {
+    //    "Aircraft Address Values": "FEFE10"
+    //    },
+    if (aircraft_adresses.size())
+        data[ViewPoint::VP_FILTERS_KEY]["Aircraft Address"]["Aircraft Address Values"] =
+            String::compress(aircraft_adresses,',')+",NULL";
+
+    //    "Mode 3/A Code": {
+    //    "Mode 3/A Code Values": "7000"
+    //    }
+
+    if (mode_a_codes.size())
+        data[ViewPoint::VP_FILTERS_KEY]["Mode 3/A Codes"]["Mode 3/A Codes Values"] =
+            String::compress(mode_a_codes,',')+",NULL";
+
+    //    VP_FILTERS_KEY: {
+    //    "Barometric Altitude": {
+    //    "Barometric Altitude Maximum": "43000",
+    //    "Barometric Altitude Minimum": "500",
+    //    "Barometric Altitude NULL": false
+    //    },
+
+    if (!first_alt)
+    {
+        data[ViewPoint::VP_FILTERS_KEY]["Barometric Altitude"]["Barometric Altitude Maximum"] = sum_alt_max;
+        data[ViewPoint::VP_FILTERS_KEY]["Barometric Altitude"]["Barometric Altitude Minimum"] = sum_alt_min;
+        data[ViewPoint::VP_FILTERS_KEY]["Barometric Altitude"]["Barometric Altitude NULL"] = true;
+    }
+
+    //    "Position": {
+    //    "Latitude Maximum": "50.78493920733",
+    //    "Latitude Minimum": "44.31547147615",
+    //    "Longitude Maximum": "20.76559892354",
+    //    "Longitude Minimum": "8.5801592186"
+    //    }
+
+    if (!first_pos)
+    {
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(sum_lat_max);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(sum_lat_min);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(sum_lon_max);
+        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(sum_lon_min);
+
+    }
+
+    setViewableDataConfig(data);
+}
+
 /**
  */
 bool DBContentManager::utnUseEval (unsigned int utn)
@@ -2071,14 +2231,19 @@ void DBContentManager::showUTN (unsigned int utn)
 
 /**
  */
-void DBContentManager::showUTNs (std::vector<unsigned int> utns)
+void DBContentManager::showUTNs (std::set<unsigned int> utns)
 {
     loginf << "DBContentManager: showUTNs: len " << utns.size();
 
-    nlohmann::json data;
-    data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = String::compress(utns, ',');
+    if (utns.size())
+    {
+        nlohmann::json data;
+        data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = String::compress(utns, ',');
 
-    loginf << "DBContentManager: showUTNs: showing '" << String::compress(utns, ',') << "'";
-    setViewableDataConfig(data);
+        loginf << "DBContentManager: showUTNs: showing '" << String::compress(utns, ',') << "'";
+        setViewableDataConfig(data);
+    }
+    else
+        clearData();
 }
 

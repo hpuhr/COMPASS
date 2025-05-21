@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRINGMANIPULATION_H_
-#define STRINGMANIPULATION_H_
+#pragma once
 
 #include "json.hpp"
 
@@ -152,4 +151,3 @@ extern std::string ecatToString(unsigned int ecat);
 
 }  // namespace Utils
 
-#endif /* STRINGMANIPULATION_H_ */

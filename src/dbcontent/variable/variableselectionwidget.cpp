@@ -51,7 +51,7 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
     variable_label_->setAlignment(Qt::AlignRight);
 
     sel_button_ = new QPushButton(this);
-    sel_button_->setIcon(QIcon(Files::getIconFilepath("expand.png").c_str()));
+    sel_button_->setIcon(Files::IconProvider::getIcon("expand.png"));
     sel_button_->setFixedSize(UI_ICON_SIZE);
     sel_button_->setFlat(UI_ICON_BUTTON_FLAT);
 
@@ -128,7 +128,7 @@ void VariableSelectionWidget::showMenuSlot()
         action->setData(QVariant(vmap));
     }
 
-    QIcon tmp = QIcon(Files::getIconFilepath("db_empty.png").c_str());
+    QIcon tmp = Files::IconProvider::getIcon("db_empty.png");
 
     QFont font_italic;
     font_italic.setItalic(true);

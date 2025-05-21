@@ -109,7 +109,7 @@ MainWindow::MainWindow()
 
     setMinimumSize(QSize(1800, 900));
 
-    QIcon ats_icon(Files::getIconFilepath("ats.png").c_str());
+    QIcon ats_icon(Files::IconProvider::getIcon("ats.png"));
     setWindowIcon(ats_icon);  // for the glory of the empire
 
     QSettings settings("COMPASS", "Client");
@@ -187,7 +187,7 @@ void MainWindow::createUI()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    tab_widget_->setCurrentIndex(0);
+    //tab_widget_->setCurrentIndex(0);
 
     QApplication::restoreOverrideCursor();
 
@@ -195,7 +195,7 @@ void MainWindow::createUI()
 
     add_view_button_ = new QPushButton();
     UI_TEST_OBJ_NAME(add_view_button_, tool_tip);
-    add_view_button_->setIcon(QIcon(Files::getIconFilepath("crosshair_fat.png").c_str()));
+    add_view_button_->setIcon(Files::IconProvider::getIcon("crosshair_fat.png"));
     add_view_button_->setFixedSize(UI_ICON_SIZE);
     add_view_button_->setFlat(UI_ICON_BUTTON_FLAT);
     add_view_button_->setToolTip(tr(tool_tip.toStdString().c_str()));
@@ -660,24 +660,24 @@ void MainWindow::showEvaluationTab()
 {
     assert (!COMPASS::instance().hideEvaluation());
 
-    assert (tab_widget_->count() > 3);
-    tab_widget_->setCurrentIndex(3);
+    // assert (tab_widget_->count() > 3);
+    // tab_widget_->setCurrentIndex(3);
 }
 
 void MainWindow::showViewPointsTab()
 {
     assert (!COMPASS::instance().hideViewpoints());
 
-    if (COMPASS::instance().hideEvaluation())
-    {
-        assert (tab_widget_->count() > 3);
-        tab_widget_->setCurrentIndex(3);
-    }
-    else
-    {
-        assert (tab_widget_->count() > 4);
-        tab_widget_->setCurrentIndex(4);
-    }
+    // if (COMPASS::instance().hideEvaluation())
+    // {
+    //     assert (tab_widget_->count() > 3);
+    //     tab_widget_->setCurrentIndex(3);
+    // }
+    // else
+    // {
+    //     assert (tab_widget_->count() > 4);
+    //     tab_widget_->setCurrentIndex(4);
+    // }
 }
 
 void MainWindow::openExistingDB(const std::string& filename)
@@ -1114,7 +1114,7 @@ void MainWindow::resetViewsMenuSlot()
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
         assert (tab_widget_);
-        int index = tab_widget_->currentIndex();
+        //int index = tab_widget_->currentIndex();
 
         {
             QMessageBox msg_box;
@@ -1153,7 +1153,7 @@ void MainWindow::resetViewsMenuSlot()
             msg_box.hide();
         }
 
-        tab_widget_->setCurrentIndex(index);
+        //tab_widget_->setCurrentIndex(index);
 
         setVisible(true);
 
@@ -1175,17 +1175,17 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
     else if (!COMPASS::instance().hideEvaluation() && !COMPASS::instance().hideViewpoints())
     {
         // both
-        assert (tab_widget_->count() > 3); // 2 eval, 3 vp
+        // assert (tab_widget_->count() > 3); // 2 eval, 3 vp
 
-        tab_widget_->setTabEnabled(2, enable_tabs);
-        tab_widget_->setTabEnabled(3, enable_tabs);
+        // tab_widget_->setTabEnabled(2, enable_tabs);
+        // tab_widget_->setTabEnabled(3, enable_tabs);
     }
     else
     {
         // one
-        assert (tab_widget_->count() > 2); // 2 is the other
+        // assert (tab_widget_->count() > 2); // 2 is the other
 
-        tab_widget_->setTabEnabled(2, enable_tabs);
+        // tab_widget_->setTabEnabled(2, enable_tabs);
     }
 
     updateBottomWidget();

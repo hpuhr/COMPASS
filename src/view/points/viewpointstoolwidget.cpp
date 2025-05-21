@@ -46,8 +46,7 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
 
     // previous
     {
-        toolbar_->addAction(QIcon(Files::getIconFilepath("up.png").c_str()),
-                            "Select Previous [Up]");
+        toolbar_->addAction(Files::IconProvider::getIcon("up.png"), "Select Previous [Up]");
     }
 
     toolbar_->addSeparator();
@@ -55,14 +54,11 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
     // selected
 
     {
-        toolbar_->addAction(QIcon(Files::getIconFilepath("not_recommended.png").c_str()),
-                            "Set Selected Status Open [O]");
+        toolbar_->addAction(Files::IconProvider::getIcon("not_recommended.png"), "Set Selected Status Open [O]");
 
-        toolbar_->addAction(QIcon(Files::getIconFilepath("not_todo.png").c_str()),
-                            "Set Selected Status Closed [C]");
+        toolbar_->addAction(Files::IconProvider::getIcon("not_todo.png"), "Set Selected Status Closed [C]");
 
-        toolbar_->addAction(QIcon(Files::getIconFilepath("todo.png").c_str()),
-                            "Set Selected Status ToDo [T]");
+        toolbar_->addAction(Files::IconProvider::getIcon("todo.png"), "Set Selected Status ToDo [T]");
 
     }
 
@@ -71,17 +67,14 @@ ViewPointsToolWidget::ViewPointsToolWidget(ViewPointsWidget* vp_widget, QWidget*
     // comment
 
     {
-        toolbar_->addAction(QIcon(Files::getIconFilepath("comment.png").c_str()),
-                            "Edit Comment [E]");
+        toolbar_->addAction(Files::IconProvider::getIcon("comment.png"), "Edit Comment [E]");
     }
-
 
     toolbar_->addSeparator();
 
      // next
      {
-         toolbar_->addAction(QIcon(Files::getIconFilepath("down.png").c_str()),
-                             "Select Next [Down]");
+         toolbar_->addAction(Files::IconProvider::getIcon("down.png"), "Select Next [Down]");
      }
 
     QWidget* empty = new QWidget();

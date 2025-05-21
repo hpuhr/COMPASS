@@ -5,6 +5,8 @@
 
 #include <QItemSelection>
 
+#include <set>
+
 class DBContentManager;
 
 class QTableView;
@@ -21,14 +23,21 @@ class TargetListWidget : public ToolBoxWidget
     Q_OBJECT
 
 public slots:
-    void useAllSlot();
-    void useNoneSlot();
+    void evalUseAllSlot();
+    void evalUseNoneSlot();
+    void evalExcludeTimeWindowsSlot();
+    void evalFilterSlot();
+
     void clearCommentsSlot();
-    void filterSlot();
 
     void customContextMenuSlot(const QPoint& p);
-    //void showFullUTNSlot ();
     void showSurroundingDataSlot ();
+
+    void evalUseTargetsSlot();
+    void evalDisableUseTargetsSlot();
+    void evalExcludeTimeWindowsTargetSlot();
+    void evalExcludeRequirementsTargetSlot();
+
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
@@ -51,6 +60,7 @@ public:
 
 protected:
     void showMainColumns(bool show);
+    void showEvalColumns(bool show);
     void showDurationColumns(bool show);
     void showModeACColumns(bool show);
     void showModeSColumns(bool show);
@@ -60,6 +70,8 @@ protected:
 
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};
+
+    std::set<unsigned int> selectedUTNs() const;
 };
 
 };

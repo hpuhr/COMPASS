@@ -198,13 +198,6 @@ public:
                                                       unsigned int utn) const;
     EvaluationRequirementResult::Joined* joinedResult(const Evaluation::RequirementResultID& id) const;
 
-    // timestamps
-    boost::posix_time::ptime loadTimestampBegin() const;
-    void loadTimestampBegin(boost::posix_time::ptime value, bool update_settings = true);
-
-    boost::posix_time::ptime loadTimestampEnd() const;
-    void loadTimestampEnd(boost::posix_time::ptime value, bool update_settings = true);
-
     EvaluationManager& manager() { return manager_; }
     const EvaluationManager& manager() const { return manager_; }
     EvaluationData& data() { return data_; }
@@ -256,8 +249,6 @@ protected:
     //values derived from settings
     std::map<std::string, std::map<std::string, bool>> data_sources_ref_ ;    // db_content -> ds_id -> active flag
     std::map<std::string, std::map<std::string, bool>> data_sources_tst_;     // db_content -> ds_id -> active flag
-    boost::posix_time::ptime                           load_timestamp_begin_;
-    boost::posix_time::ptime                           load_timestamp_end_;
 
     boost::optional<ROI> sector_roi_;
 

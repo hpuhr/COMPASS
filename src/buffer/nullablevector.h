@@ -231,7 +231,7 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
                                       const std::string& value_str, bool debug)
 {
     logdbg << "NullableVector " << property_.name() << ": setFromFormat";
-    T value;
+    T value{};
 
     if (format == "octal")
     {
@@ -685,7 +685,7 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValuesSorted(unsigned int index)
         }
     }
 
-    for (int tmp_index=data_.size()-1; tmp_index >= 0 && tmp_index >= index; --tmp_index)
+    for (int tmp_index=(int) data_.size()-1; tmp_index >= 0 && tmp_index >= index; --tmp_index)
     {
         //loginf << "UGA: minMaxValuesSorted: tmp_index " << tmp_index << " index " << index << " size " << data_.size();
 

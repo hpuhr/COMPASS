@@ -42,8 +42,6 @@ struct EvaluationSettings
     // load filter
     bool use_load_filter_ {false};
 
-    bool use_timestamp_filter_ {false};
-
     bool use_ref_traj_accuracy_filter_ {false};
     float ref_traj_minimum_accuracy_ {30};
 
@@ -129,7 +127,4 @@ private:
     // private since specific setter functions
     std::string dbcontent_name_ref_;
     std::string dbcontent_name_tst_;
-
-    std::string load_timestamp_begin_str_;
-    std::string load_timestamp_end_str_;
 };

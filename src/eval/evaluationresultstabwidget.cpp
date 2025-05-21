@@ -49,7 +49,7 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     { // button layout
         QHBoxLayout* button_layout = new QHBoxLayout();
 
-        QIcon left_icon(Files::getIconFilepath("arrow_to_left.png").c_str());
+        QIcon left_icon(Files::IconProvider::getIcon("arrow_to_left.png"));
 
         back_button_ = new QPushButton ();
         back_button_->setIcon(left_icon);

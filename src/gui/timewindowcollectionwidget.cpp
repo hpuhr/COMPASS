@@ -13,16 +13,18 @@ using namespace Utils;
 TimeWindowCollectionWidget::TimeWindowCollectionWidget(TimeWindowCollection& collection, QWidget* parent)
     : QWidget(parent), collection_(collection)
 {
-    list_widget_ = new QListWidget(this);
     //list_widget_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    add_button_ = new QPushButton("Add", this);
 
     QVBoxLayout* main_layout = new QVBoxLayout();
+
+    list_widget_ = new QListWidget();
     main_layout->addWidget(list_widget_);
 
-    QHBoxLayout* button_layout = new QHBoxLayout(this);
+    QHBoxLayout* button_layout = new QHBoxLayout();
     button_layout->addStretch();
+
+    add_button_ = new QPushButton("Add");
     button_layout->addWidget(add_button_);
 
     main_layout->addLayout(button_layout);
@@ -44,7 +46,7 @@ void TimeWindowCollectionWidget::refreshList()
 {
     list_widget_->clear();
 
-    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
+    QIcon del_icon(Files::IconProvider::getIcon("delete.png"));
 
     for (unsigned int i = 0; i < collection_.size(); ++i)
     {
