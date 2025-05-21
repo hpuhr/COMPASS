@@ -1251,15 +1251,3 @@ Utils::TimeWindowCollection& EvaluationManager::excludedTimeWindows()
 {
     return load_filtered_time_windows_;
 }
-
-/**
- */
-EvaluationManagerWidget* EvaluationManager::widget()
-{
-    if (!widget_)
-        widget_.reset(new EvaluationManagerWidget(*this));
-
-    assert(widget_);
-    return widget_.get();
-}
-

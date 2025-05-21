@@ -87,6 +87,10 @@ public:
     double longitudeMin() const;
     double longitudeMax() const;
 
+    static const std::string KEY_EVAL;
+    static const std::string KEY_EVAL_USE;
+    static const std::string KEY_EVAL_EXCLUDED_TIME_WINDOWS;
+    static const std::string KEY_EVAL_EXCLUDED_REQUIREMENTS;
     static const std::string KEY_USED;
     static const std::string KEY_COMMENT;
     static const std::string KEY_TIME_BEGIN;
