@@ -38,6 +38,24 @@ class TargetModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
+    enum Columns
+    {
+        ColUTN = 0,
+        ColComment,
+        ColCategory,
+        ColUseEval,
+        ColUseEvalDetails,
+        ColNumUpdates,
+        ColBegin,
+        ColEnd,
+        ColDuration,
+        ColACIDs,
+        ColACADs,
+        ColMode3A,
+        ColModeCMin,
+        ColModeCMax
+    };
+
     TargetModel(DBContentManager& dbcont_manager);
     virtual ~TargetModel();
 
@@ -51,6 +69,8 @@ public:
     QModelIndex parent(const QModelIndex& index) const override;
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+    QVariant getCellContent(const Target& target, Columns col) const;
 
     const dbContent::Target& getTargetOf (const QModelIndex& index);
 
@@ -106,28 +126,6 @@ public:
     void showModeACColumns(bool show);
 
     void updateEvalItems();
-
-    nlohmann::json rawCellData(int row, int column) const;
-    unsigned int rowStyle(int row) const;
-    unsigned int columnStyle(int column) const;
-
-    enum Columns
-    {
-        ColUTN = 0,
-        ColComment,
-        ColCategory,
-        ColUseEval,
-        ColUseEvalDetails,
-        ColNumUpdates, 
-        ColBegin, 
-        ColEnd, 
-        ColDuration, 
-        ColACIDs, 
-        ColACADs, 
-        ColMode3A, 
-        ColModeCMin, 
-        ColModeCMax
-    };
 
 protected:
     DBContentManager& dbcont_manager_;

@@ -125,7 +125,12 @@ std::string TimeWindowCollection::asString() const
     ostringstream ss;
 
     for (const auto& tw_it : time_windows_)
-        ss << tw_it.asStr() << endl;
+    {
+        if (ss.str().size())
+            ss << endl;
+
+        ss << tw_it.asStr();
+    }
 
     return ss.str();
 }
