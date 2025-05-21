@@ -9,6 +9,7 @@
 #include <QDateTime>
 #include <QDateTimeEdit>
 #include <QPlainTextEdit>
+#include <QPushButton>
 
 EvaluationTargetExcludedTimeWindowsDialog::EvaluationTargetExcludedTimeWindowsDialog(
     const std::string utn_str,Utils::TimeWindowCollection& collection, QWidget* parent)

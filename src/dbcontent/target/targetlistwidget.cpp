@@ -9,6 +9,9 @@
 #include "dbcontentmanager.h"
 #include "evaluationtimestampconditionsdialog.h"
 #include "evaluationtargetexcludedtimewindowsdialog.h"
+#include "evaluationtargetexcludedrequirementsdialog.h"
+#include "evaluationcalculator.h"
+#include "evaluationstandard.h"
 
 #include "files.h"
 #include "logger.h"
@@ -22,6 +25,7 @@
 #include <QApplication>
 #include <QThread>
 #include <QToolBar>
+#include <QMessageBox>
 
 using namespace std;
 using namespace Utils;
@@ -291,7 +295,7 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
     connect (tw_action, &QAction::triggered, this, &TargetListWidget::evalExcludeTimeWindowsTargetSlot);
 
     QAction* req_action = eval_menu->addAction("Edit Excluded Requirements");
-    connect (req_action, &QAction::triggered, this, &TargetListWidget::evalExcludeTimeWindowsTargetSlot);
+    connect (req_action, &QAction::triggered, this, &TargetListWidget::evalExcludeRequirementsTargetSlot);
 
     menu.exec(table_view_->viewport()->mapToGlobal(p));
 }
@@ -401,7 +405,61 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
 
 void TargetListWidget::evalExcludeRequirementsTargetSlot()
 {
+    loginf << "TargetListWidget: evalExcludeRequirementsTargetSlot";
 
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+    auto& eval_man = COMPASS::instance().evaluationManager();
+
+    if (!eval_man.calculator().hasCurrentStandard())
+    {
+        QMessageBox m_warning(QMessageBox::Information, "Exclude Requirements",
+                              "Please select a current evaluation standard to disable requirements.",
+                              QMessageBox::Ok);
+        m_warning.exec();
+
+        return;
+    }
+
+    std::set<unsigned int> selected_utns = selectedUTNs();
+
+    set<string> selected_requirements;
+    set<string> all_requirements = eval_man.calculator().currentStandard().getAllRequirementNames();
+
+    // collect all time windows from all targets
+    for (auto utn : selected_utns)
+    {
+        assert (dbcont_man.existsTarget(utn));
+
+        auto& target = dbcont_man.target(utn);
+
+        for (auto& req_name : target.evalExcludedRequirements())
+        {
+            if (!selected_requirements.count(req_name))
+                selected_requirements.insert(req_name);
+        }
+    }
+
+    EvaluationTargetExcludedRequirementsDialog dialog (String::compress(selected_utns, ','),
+                                                      selected_requirements, all_requirements);
+    int result = dialog.exec();
+
+    if (result == QDialog::Rejected)
+        return;
+
+    selected_requirements = dialog.selectedRequirements();
+
+    // set reqs for all targets
+    for (auto utn : selected_utns)
+    {
+        assert (dbcont_man.existsTarget(utn));
+
+        auto& target = dbcont_man.target(utn);
+
+        target.evalExcludedRequirements() = selected_requirements;
+        target.storeEvalutionInfo();
+    }
+
+    model_.updateEvalItems();
 }
 
 void TargetListWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)

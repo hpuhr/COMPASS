@@ -11,7 +11,7 @@ class EvaluationTargetExcludedTimeWindowsDialog : public QDialog
 public:
     EvaluationTargetExcludedTimeWindowsDialog(
         const std::string utn_str,
-        Utils::TimeWindowCollection& collection,QWidget* parent=nullptr);
+        Utils::TimeWindowCollection& collection, QWidget* parent=nullptr);
     virtual ~EvaluationTargetExcludedTimeWindowsDialog() = default;
 
 protected:

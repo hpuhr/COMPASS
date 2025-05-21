@@ -99,7 +99,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                         if (tmp.size())
                             tmp += "\n";
 
-                        tmp += target.evalExcludedTimeWindows().asString().c_str();
+                        tmp += String::compress(target.evalExcludedRequirements(),',').c_str();
                     }
 
                     return tmp;
