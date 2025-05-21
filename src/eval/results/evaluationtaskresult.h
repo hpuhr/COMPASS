@@ -23,6 +23,10 @@
 
 #include <memory>
 
+class QWidgetAction;
+class QWidget;
+class QCheckBox;
+
 class EvaluationCalculator;
 
 /**
@@ -94,4 +98,8 @@ private:
     mutable std::unique_ptr<EvaluationCalculator> calculator_;
     TargetMap                                     targets_;
     mutable InterestSwitches                      interest_factor_enabled_; //req sum result id => enabled
+
+    std::unique_ptr<QWidgetAction>    interest_menu_action_;
+    QWidget*                          interest_widget_ = nullptr;
+    std::map<std::string, QCheckBox*> interest_boxes_;
 };

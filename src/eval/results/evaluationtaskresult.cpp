@@ -30,6 +30,8 @@
 #include "logger.h"
 
 #include <QMenu>
+#include <QWidgetAction>
+#include <QCheckBox>
 
 const std::string EvaluationTaskResult::FieldTargets    = "targets";
 const std::string EvaluationTaskResult::FieldTargetUTN  = "utn";
@@ -681,6 +683,7 @@ void EvaluationTaskResult::createInterestMenu(QMenu& menu)
     if (interest_factor_enabled_.empty())
         return;
 
+#if 1
     auto interest_menu = menu.addMenu("Edit Shown Interest Factors");
 
     auto action_all  = interest_menu->addAction("Show All");
@@ -704,6 +707,69 @@ void EvaluationTaskResult::createInterestMenu(QMenu& menu)
 
         QObject::connect(action, &QAction::triggered, clickCB);
     }
+#else
+    if (!interest_menu_action_)
+    {
+        auto w      = new QWidget;
+        auto layout = new QHBoxLayout;
+
+        w->setLayout(layout);
+
+        auto button_all  = new QPushButton("All");
+        auto button_none = new QPushButton("None");
+
+        layout->addWidget(button_all);
+        layout->addWidget(button_none);
+        layout->addStretch(1);
+
+        auto wa = new QWidgetAction(interest_menu_);
+        wa->setDefaultWidget(w);
+
+        interest_menu_->addAction(wa);
+
+        std::vector<QCheckBox*> boxes;
+
+        for (const auto& ife : eval_data_.interestSwitches())
+        {
+            auto wa = new QWidgetAction(interest_menu_);
+
+            auto cb = new QCheckBox(QString::fromStdString(ife.first));
+            cb->setChecked(ife.second);
+
+            wa->setDefaultWidget(cb);
+
+            interest_menu_->addAction(wa);
+
+            auto clickCB = [ eval_data, cb ] (bool ok) { eval_data->setInterestFactorEnabled(cb->text().toStdString(), ok, true); };
+
+            connect(cb, &QCheckBox::toggled, clickCB);
+
+            boxes.push_back(cb);
+        }
+
+        auto updateBoxesCB = [ = ] ()
+        {
+            for (auto b : boxes)
+            {
+                b->blockSignals(true);
+                b->setChecked(eval_data->interestFactorEnabled(b->text().toStdString()));
+                b->blockSignals(false);
+            }
+        };
+
+        auto allCB  = [ = ] () { eval_data->setInterestFactorEnabled(true , true); updateBoxesCB(); };
+        auto noneCB = [ = ] () { eval_data->setInterestFactorEnabled(false, true); updateBoxesCB(); };
+
+        connect(button_all , &QPushButton::pressed, allCB );
+        connect(button_none, &QPushButton::pressed, noneCB);
+    }
+
+
+
+    auto interest_menu = menu.addMenu("Edit Shown Interest Factors");
+
+    interest_menu->addAction(interest_menu_action_.get());
+#endif
 }
 
 /**
