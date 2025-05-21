@@ -163,6 +163,7 @@ public:
     static boost::optional<Evaluation::RequirementResultID> contentProperties(const ResultReport::SectionContent& content);
 
     const static std::string RequirementOverviewTableName;
+    const static std::string RequirementOverviewSectionName;
 
     static const QColor HistogramColorDefault;
 

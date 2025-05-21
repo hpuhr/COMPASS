@@ -23,8 +23,7 @@
 
 #include <memory>
 
-class QWidgetAction;
-class QWidget;
+class QMenu;
 class QCheckBox;
 
 class EvaluationCalculator;
@@ -50,6 +49,8 @@ public:
     void showSurroundingData (unsigned int utn) const;
 
     const InterestSwitches& interestSwitches() const;
+
+    std::string startSection() const override final;
 
     static const std::string FieldTargets;
     static const std::string FieldTargetUTN;
@@ -83,6 +84,7 @@ private:
 
     void updateTargets();
     void updateInterestSwitches();
+    void updateInterestMenu();
 
     void setInterestFactorEnabled(const Evaluation::RequirementSumResultID& id, bool ok);
     void setInterestFactorEnabled(const std::string& req_name, bool ok);
@@ -99,7 +101,6 @@ private:
     TargetMap                                     targets_;
     mutable InterestSwitches                      interest_factor_enabled_; //req sum result id => enabled
 
-    std::unique_ptr<QWidgetAction>    interest_menu_action_;
-    QWidget*                          interest_widget_ = nullptr;
+    std::unique_ptr<QMenu>            interest_menu_;
     std::map<std::string, QCheckBox*> interest_boxes_;
 };

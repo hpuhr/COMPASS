@@ -118,6 +118,9 @@ void TaskResultsWidget::setReport(const std::string name)
     assert (task_man_.hasResult(name));
     report_widget_->setReport(task_man_.result(name)->report());
 
+    if (!task_man_.result(name)->startSection().empty())
+        report_widget_->selectId(task_man_.result(name)->startSection());
+
     report_widget_->setDisabled(false);
 }
 

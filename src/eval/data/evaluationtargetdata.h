@@ -188,6 +188,7 @@ public:
                                                double factor);
     static QColor colorForInterestFactorRequirement(double factor);
     static QColor colorForInterestFactorSum(double factor);
+    static unsigned int styleForInterestFactorSum(double factor);
     static std::string enabledInterestFactorsString(const InterestMap& interest_factors,
                                                     const InterestEnabledFunc& interest_enabled_func);
     static QAction* interestFactorAction(const Evaluation::RequirementSumResultID& id, 

@@ -29,6 +29,7 @@
 #include "sector/airspace.h"
 #include "sectorlayer.h"
 #include "evalsectionid.h"
+#include "reportdefs.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -49,8 +50,8 @@ using namespace dbContent::TargetReport;
 //const unsigned int debug_utn = 3275;
 
 QColor EvaluationTargetData::color_interest_high_{"#FF6666"};
-QColor EvaluationTargetData::color_interest_mid_{"#FFA500"};
-QColor EvaluationTargetData::color_interest_low_{"#66AA66"};
+QColor EvaluationTargetData::color_interest_mid_ {"#FFA500"};
+QColor EvaluationTargetData::color_interest_low_ {"#66AA66"};
 
 double EvaluationTargetData::interest_thres_req_high_ = 0.05;
 double EvaluationTargetData::interest_thres_req_mid_  = 0.01;
@@ -1102,6 +1103,18 @@ QColor EvaluationTargetData::colorForInterestFactorSum(double factor)
         return EvaluationTargetData::color_interest_mid_;
     
     return EvaluationTargetData::color_interest_high_;
+}
+
+/**
+ */
+unsigned int EvaluationTargetData::styleForInterestFactorSum(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_sum_mid_)
+        return ResultReport::CellStyleBGColorGreen;
+    else if (factor < EvaluationTargetData::interest_thres_sum_high_)
+        return ResultReport::CellStyleBGColorOrange;
+    
+    return ResultReport::CellStyleBGColorRed;
 }
 
 /**

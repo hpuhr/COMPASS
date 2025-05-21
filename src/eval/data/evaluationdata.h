@@ -123,6 +123,9 @@ protected:
                                const InterestEnabledFunc & interest_enabled_func) const;
     unsigned int rowStyle(const EvaluationTarget& target) const;
     unsigned int columnStyle(int column) const;
+    unsigned int cellStyle(const EvaluationTarget& target, 
+                           int column,
+                           const nlohmann::json& data) const;
 
     EvaluationCalculator& calculator_;
     DBContentManager&     dbcont_man_;

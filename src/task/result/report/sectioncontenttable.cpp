@@ -581,7 +581,8 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
 
             //custom heuristics for evaluation
             //@TODO: configure tables accordingly in evaluation results
-            if (taskResult()->type() == task::TaskResultType::Evaluation)
+            if (cellShowsText(style) &&
+                taskResult()->type() == task::TaskResultType::Evaluation)
             {
                 const auto& data = rows_.at(index.row()).at(index.column());
 

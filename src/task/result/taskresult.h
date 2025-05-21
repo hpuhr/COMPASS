@@ -107,6 +107,8 @@ public:
 
     virtual task::TaskResultType type() const { return task::TaskResultType::Generic; }
 
+    virtual std::string startSection() const { return ""; }
+
     static const std::string  DBTableName;
     static const Property     DBColumnID;
     static const Property     DBColumnName;

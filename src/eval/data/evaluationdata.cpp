@@ -641,6 +641,24 @@ unsigned int EvaluationData::columnStyle(int column) const
 
 /**
  */
+unsigned int EvaluationData::cellStyle(const EvaluationTarget& target, 
+                                       int column,
+                                       const nlohmann::json& data) const
+{
+    if (!target.useInEval())
+        return 0;
+
+    if (column == ColInterest)
+    {
+        double interest = data;
+        return EvaluationTargetData::styleForInterestFactorSum(interest);
+    }
+
+    return 0;
+}
+
+/**
+ */
 void EvaluationData::fillTargetsTable(const std::map<unsigned int, EvaluationTarget>& targets,
                                       ResultReport::SectionContentTable& table,
                                       const InterestEnabledFunc & interest_enabled_func) const
@@ -650,12 +668,23 @@ void EvaluationData::fillTargetsTable(const std::map<unsigned int, EvaluationTar
     for (int c = 0; c < nc; ++c)
         table.setColumnStyle(c, columnStyle(c));
 
+    int r = 0;
     for (const auto& t : targets)
     {
         auto row = nlohmann::json::array();
         for (int c = 0; c < nc; ++c)
-            row.push_back(rawCellData(t.second, c, interest_enabled_func));
+        {
+            auto data  = rawCellData(t.second, c, interest_enabled_func);
+            auto style = cellStyle(t.second, c, data);
+
+            row.push_back(data);
+
+            if (style != 0)
+                table.setCellStyle(r, c, style);
+        }
 
         table.addRow(row, ResultReport::SectionContentViewable().setOnDemand(), "", "", {}, rowStyle(t.second));
+
+        ++r;
     }
 }
