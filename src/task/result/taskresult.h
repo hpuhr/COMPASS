@@ -101,6 +101,12 @@ public:
     bool customContextMenu(QMenu& menu,
                            ResultReport::SectionContent* content);
     void postprocessTable(ResultReport::SectionContentTable* table);
+    bool hasCustomTooltip(const ResultReport::SectionContentTable* table, 
+                          unsigned int row,
+                          unsigned int col) const;
+    std::string customTooltip(const ResultReport::SectionContentTable* table, 
+                              unsigned int row,
+                              unsigned int col) const;
 
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
@@ -163,7 +169,12 @@ protected:
     virtual bool customContextMenu_impl(QMenu& menu, 
                                         ResultReport::SectionContent* content) { return false; }
     virtual void postprocessTable_impl(ResultReport::SectionContentTable* table) {}
-
+    virtual bool hasCustomTooltip_impl(const ResultReport::SectionContentTable* table, 
+                                       unsigned int row,
+                                       unsigned int col) const { return false; }
+    virtual std::string customTooltip_impl(const ResultReport::SectionContentTable* table, 
+                                           unsigned int row,
+                                           unsigned int col) const { return ""; }
     TaskManager& task_manager_;
 
     unsigned int             id_{0};

@@ -116,6 +116,8 @@ public:
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
 
+    void enableTooltips();
+
     void addRow (const nlohmann::json::array_t& row,
                  const SectionContentViewable& viewable = SectionContentViewable(),
                  const std::string& section_link = "",
@@ -181,6 +183,7 @@ public:
     static const std::string FieldAnnotations;
     static const std::string FieldColumnStyles;
     static const std::string FieldCellStyles;
+    static const std::string FieldShowTooltips;
 
     static const std::string FieldAnnoFigureID;
     static const std::string FieldAnnoSectionLink;
@@ -227,7 +230,8 @@ protected:
     unsigned int  sort_column_  {0};
     Qt::SortOrder sort_order_   {Qt::AscendingOrder};
 
-    bool show_unused_ {false};
+    bool show_unused_   {false};
+    bool show_tooltips_ {false};
 
     /**
      * Describes figures and links attached to a table row.

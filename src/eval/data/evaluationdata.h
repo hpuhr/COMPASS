@@ -86,6 +86,10 @@ public:
     void fillTargetsTable(const std::map<unsigned int, EvaluationTarget>& targets,
                           ResultReport::SectionContentTable& table,
                           const InterestEnabledFunc & interest_enabled_func) const;
+    bool hasTargetTableTooltip(int col) const;
+    std::string targetTableToolTip(const EvaluationTarget& target,
+                                   int col,
+                                   const InterestEnabledFunc & interest_enabled_func) const;
 
     enum Columns
     {

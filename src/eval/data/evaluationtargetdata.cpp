@@ -19,6 +19,8 @@
 #include "evaluationtarget.h"
 #include "evaluationdefs.h"
 
+#include "task/result/report/reportdefs.h"
+
 #include "logger.h"
 #include "stringconv.h"
 #include "dbcontent/target/target.h"
@@ -48,10 +50,6 @@ using namespace boost::posix_time;
 using namespace dbContent::TargetReport;
 
 //const unsigned int debug_utn = 3275;
-
-QColor EvaluationTargetData::color_interest_high_{"#FF6666"};
-QColor EvaluationTargetData::color_interest_mid_ {"#FFA500"};
-QColor EvaluationTargetData::color_interest_low_ {"#66AA66"};
 
 double EvaluationTargetData::interest_thres_req_high_ = 0.05;
 double EvaluationTargetData::interest_thres_req_mid_  = 0.01;
@@ -1043,7 +1041,7 @@ std::string EvaluationTargetData::enabledInterestFactorsString(const InterestMap
 
     auto generateRow = [ & ] (const Evaluation::RequirementSumResultID& id, double factor, int prec, int spacing)
     {
-        auto factor_color = EvaluationTargetData::colorForInterestFactorRequirement(factor);
+        auto factor_color = EvaluationTargetData::fgColorForInterestFactorRequirement(factor);
         auto prec_str     = String::doubleToStringPrecision(factor, prec);
 
         std::string ret;
@@ -1083,31 +1081,55 @@ std::string EvaluationTargetData::enabledInterestFactorsString(const InterestMap
 
 /**
  */
-QColor EvaluationTargetData::colorForInterestFactorRequirement(double factor)
+QColor EvaluationTargetData::bgColorForInterestFactorRequirement(double factor)
 {
     if (factor < EvaluationTargetData::interest_thres_req_mid_)
-        return EvaluationTargetData::color_interest_low_;
+        return ResultReport::Colors::BGGreen;
     else if (factor < EvaluationTargetData::interest_thres_req_high_)
-        return EvaluationTargetData::color_interest_mid_;
+        return ResultReport::Colors::BGOrange;
     
-    return EvaluationTargetData::color_interest_high_;
+    return ResultReport::Colors::BGRed;
 }
 
 /**
  */
-QColor EvaluationTargetData::colorForInterestFactorSum(double factor)
+QColor EvaluationTargetData::fgColorForInterestFactorRequirement(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_req_mid_)
+        return ResultReport::Colors::TextGreen;
+    else if (factor < EvaluationTargetData::interest_thres_req_high_)
+        return ResultReport::Colors::TextOrange;
+    
+    return ResultReport::Colors::TextRed;
+}
+
+/**
+ */
+QColor EvaluationTargetData::bgColorForInterestFactorSum(double factor)
 {
     if (factor < EvaluationTargetData::interest_thres_sum_mid_)
-        return EvaluationTargetData::color_interest_low_;
+        return ResultReport::Colors::BGGreen;
     else if (factor < EvaluationTargetData::interest_thres_sum_high_)
-        return EvaluationTargetData::color_interest_mid_;
+        return ResultReport::Colors::BGOrange;
     
-    return EvaluationTargetData::color_interest_high_;
+    return ResultReport::Colors::BGRed;
 }
 
 /**
  */
-unsigned int EvaluationTargetData::styleForInterestFactorSum(double factor)
+QColor EvaluationTargetData::fgColorForInterestFactorSum(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_sum_mid_)
+        return ResultReport::Colors::TextGreen;
+    else if (factor < EvaluationTargetData::interest_thres_sum_high_)
+        return ResultReport::Colors::TextOrange;
+    
+    return ResultReport::Colors::TextRed;
+}
+
+/**
+ */
+unsigned int EvaluationTargetData::bgStyleForInterestFactorSum(double factor)
 {
     if (factor < EvaluationTargetData::interest_thres_sum_mid_)
         return ResultReport::CellStyleBGColorGreen;
@@ -1119,10 +1141,22 @@ unsigned int EvaluationTargetData::styleForInterestFactorSum(double factor)
 
 /**
  */
+unsigned int EvaluationTargetData::fgStyleForInterestFactorSum(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_sum_mid_)
+        return ResultReport::CellStyleTextColorGreen;
+    else if (factor < EvaluationTargetData::interest_thres_sum_high_)
+        return ResultReport::CellStyleTextColorOrange;
+    
+    return ResultReport::CellStyleTextColorRed;
+}
+
+/**
+ */
 QAction* EvaluationTargetData::interestFactorAction(const Evaluation::RequirementSumResultID& id, 
                                                     double interest_factor)
 {
-    QColor      color = EvaluationTargetData::colorForInterestFactorRequirement (interest_factor);
+    QColor      color = EvaluationTargetData::bgColorForInterestFactorRequirement(interest_factor);
     std::string name  = EvaluationTargetData::stringForInterestFactor(id, interest_factor);
 
     QAction* action = new QAction(QString::fromStdString(name));

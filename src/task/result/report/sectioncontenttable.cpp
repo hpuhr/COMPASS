@@ -65,6 +65,7 @@ const std::string SectionContentTable::FieldRows         = "rows";
 const std::string SectionContentTable::FieldAnnotations  = "annotations";
 const std::string SectionContentTable::FieldColumnStyles = "column_styles";
 const std::string SectionContentTable::FieldCellStyles   = "cell_styles";
+const std::string SectionContentTable::FieldShowTooltips = "show_tooltips";
 
 const std::string SectionContentTable::FieldAnnoFigureID      = "figure_id";
 const std::string SectionContentTable::FieldAnnoSectionLink   = "section_link";
@@ -73,16 +74,16 @@ const std::string SectionContentTable::FieldAnnoOnDemand      = "on_demand";
 const std::string SectionContentTable::FieldAnnoIndex         = "index";
 const std::string SectionContentTable::FieldAnnoStyle         = "style";
 
-const QColor SectionContentTable::ColorTextRed    = QColor(220,20,60);
-const QColor SectionContentTable::ColorTextOrange = QColor(255,140,0);
-const QColor SectionContentTable::ColorTextGreen  = Qt::darkGreen;
-const QColor SectionContentTable::ColorTextGray   = Qt::darkGray;
+const QColor SectionContentTable::ColorTextRed    = Colors::TextRed;
+const QColor SectionContentTable::ColorTextOrange = Colors::TextOrange;
+const QColor SectionContentTable::ColorTextGreen  = Colors::TextGreen;
+const QColor SectionContentTable::ColorTextGray   = Colors::TextGray;
 
-const QColor SectionContentTable::ColorBGRed    = QColor(240,128,128);
-const QColor SectionContentTable::ColorBGOrange = QColor(255,165,0);
-const QColor SectionContentTable::ColorBGGreen  = QColor(144,238,144);
-const QColor SectionContentTable::ColorBGGray   = Qt::lightGray;
-const QColor SectionContentTable::ColorBGYellow = QColor(255,255,153);
+const QColor SectionContentTable::ColorBGRed      = Colors::BGRed;
+const QColor SectionContentTable::ColorBGOrange   = Colors::BGOrange;
+const QColor SectionContentTable::ColorBGGreen    = Colors::BGGreen;
+const QColor SectionContentTable::ColorBGGray     = Colors::BGGray;
+const QColor SectionContentTable::ColorBGYellow   = Colors::BGYellow;
 
 /**
  */
@@ -114,6 +115,13 @@ SectionContentTable::SectionContentTable(Section* parent_section)
 /**
  */
 SectionContentTable::~SectionContentTable() = default;
+
+/**
+ */
+void SectionContentTable::enableTooltips()
+{
+    show_tooltips_ = true;
+}
 
 /**
  */
@@ -649,6 +657,21 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
 
             return QVariant();
         }
+        case Qt::ToolTipRole:
+        {
+            if (show_tooltips_)
+            {
+                auto tResult = taskResult();
+                if (tResult->hasCustomTooltip(this, (unsigned int)index.row(), (unsigned int)index.column()))
+                {
+                    auto ttip = tResult->customTooltip(this, (unsigned int)index.row(), (unsigned int)index.column());
+                    if (!ttip.empty())
+                        return QString::fromStdString(ttip);
+                }
+            }
+
+            return QVariant();
+        }
         default:
         {
             return QVariant();
@@ -987,6 +1010,7 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
     root_node[ FieldAnnotations  ] = nlohmann::json::array();
     root_node[ FieldColumnStyles ] = column_styles_;
     root_node[ FieldCellStyles   ] = cell_styles_;
+    root_node[ FieldShowTooltips ] = show_tooltips_;
 
     //write content only if not on demand
     if (!isOnDemand())
@@ -1028,7 +1052,8 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldRows)         ||
         !j.contains(FieldAnnotations)  ||
         !j.contains(FieldColumnStyles) ||
-        !j.contains(FieldCellStyles))
+        !j.contains(FieldCellStyles)   ||
+        !j.contains(FieldShowTooltips))
     {
         logerr << "SectionContentTable: fromJSON: Error: Section content table does not obtain needed fields";
         return false;
@@ -1038,6 +1063,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     column_styles_ = j[ FieldColumnStyles ].get<std::vector<unsigned int>>();
     sortable_      = j[ FieldSortable     ];
     sort_column_   = j[ FieldSortColumn   ];
+    show_tooltips_ = j[ FieldShowTooltips ];
 
     std::string sort_order = j[ FieldSortOrder ];
     sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;

@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <QColor>
+
 namespace ResultReport
 {
     enum CellStyle
@@ -38,5 +40,22 @@ namespace ResultReport
         CellStyleBGColorGreen      = 1 << 22,
         CellStyleBGColorGray       = 1 << 23,
         CellStyleBGColorYellow     = 1 << 24
+    };
+
+    /**
+     */
+    class Colors
+    {
+    public:
+        static const QColor TextRed;
+        static const QColor TextOrange;
+        static const QColor TextGreen;
+        static const QColor TextGray;
+
+        static const QColor BGRed;
+        static const QColor BGOrange;
+        static const QColor BGGreen;
+        static const QColor BGGray;
+        static const QColor BGYellow;
     };
 }

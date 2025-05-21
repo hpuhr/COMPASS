@@ -18,6 +18,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/sectioncontentfigure.h"
 
     PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/reportdefs.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/section.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/treeitem.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/treemodel.cpp"

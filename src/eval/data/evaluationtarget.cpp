@@ -106,13 +106,24 @@ const EvaluationTarget::InterestMap& EvaluationTarget::interestFactors() const
 
 /**
  */
-double EvaluationTarget::totalInterest(const InterestEnabledFunc& enabled_func) const
+double EvaluationTarget::totalInterest(const InterestEnabledFunc& enabled_func,
+                                       size_t* num_contributors) const
 {
     double sum = 0.0;
 
+    if (num_contributors)
+        *num_contributors = 0;
+
     for (const auto& ifactor : interest_factors_)
+    {
         if (!enabled_func || enabled_func(ifactor.first))
+        {
             sum += ifactor.second;
+
+            if (num_contributors)
+                *num_contributors += 1;
+        }
+    }
 
     return sum;
 }

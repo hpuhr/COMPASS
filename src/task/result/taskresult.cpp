@@ -406,6 +406,26 @@ void TaskResult::postprocessTable(ResultReport::SectionContentTable* table)
 
 /**
  */
+bool TaskResult::hasCustomTooltip(const ResultReport::SectionContentTable* table, 
+                                  unsigned int row,
+                                  unsigned int col) const
+{
+    assert (table);
+    return hasCustomTooltip_impl(table, row, col);
+}
+
+/**
+ */
+std::string TaskResult::customTooltip(const ResultReport::SectionContentTable* table, 
+                                      unsigned int row,
+                                      unsigned int col) const
+{
+    assert (table);
+    return customTooltip_impl(table, row, col);
+}
+
+/**
+ */
 nlohmann::json TaskResult::toJSON() const
 {
     nlohmann::json root = nlohmann::json::object();

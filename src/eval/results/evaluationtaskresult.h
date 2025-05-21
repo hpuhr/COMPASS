@@ -78,6 +78,12 @@ protected:
     bool customContextMenu_impl(QMenu& menu, 
                                 ResultReport::SectionContent* content) override final;
     void postprocessTable_impl(ResultReport::SectionContentTable* table) override final;
+    bool hasCustomTooltip_impl(const ResultReport::SectionContentTable* table, 
+                               unsigned int row,
+                               unsigned int col) const override final;
+    std::string customTooltip_impl(const ResultReport::SectionContentTable* table, 
+                                   unsigned int row,
+                                   unsigned int col) const override final;
 
 private:
     Result createCalculator();

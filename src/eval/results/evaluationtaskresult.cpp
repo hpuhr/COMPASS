@@ -425,55 +425,6 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
         return true;
     }
 
-    // unsigned int row_index = source_index.row();
-
-    // if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->isSingle())
-    // {
-    //     EvaluationRequirementResult::Single* single_result =
-    //             static_cast<EvaluationRequirementResult::Single*>(result_ptrs_.at(row_index));
-    //     assert (single_result);
-
-    //     QMenu menu;
-
-    //     unsigned int utn = single_result->utn();
-    //     loginf << "SectionContentTable: customContextMenuSlot: utn " << utn;
-
-    //     assert (eval_man_.getData().hasTargetData(utn));
-
-    //     const EvaluationTargetData& target_data = eval_man_.getData().targetData(utn);
-
-    //     if (target_data.use())
-    //     {
-    //         QAction* action = new QAction("Remove", this);
-    //         connect (action, &QAction::triggered, this, &SectionContentTable::removeUTNSlot);
-    //         action->setData(utn);
-
-    //         menu.addAction(action);
-    //     }
-    //     else
-    //     {
-    //         QAction* action = new QAction("Add", this);
-    //         connect (action, &QAction::triggered, this, &SectionContentTable::addUTNSlot);
-    //         action->setData(utn);
-
-    //         menu.addAction(action);
-    //     }
-
-    //     QAction* action = new QAction("Show Full UTN", this);
-    //     connect (action, &QAction::triggered, this, &SectionContentTable::showFullUTNSlot);
-    //     action->setData(utn);
-    //     menu.addAction(action);
-
-    //     QAction* action2 = new QAction("Show Surrounding Data", this);
-    //     connect (action2, &QAction::triggered, this, &SectionContentTable::showSurroundingDataSlot);
-    //     action2->setData(utn);
-    //     menu.addAction(action2);
-
-    //     menu.exec(table_view_->viewport()->mapToGlobal(p));
-    // }
-    // else
-    //     loginf << "SectionContentTable: customContextMenuSlot: no associated utn";
-
     return false;
 }
 
@@ -519,30 +470,43 @@ void EvaluationTaskResult::postprocessTable_impl(ResultReport::SectionContentTab
     }
     else if (table->name() == EvaluationData::TargetsTableName)
     {
-        //createInterestMenu()
-
-
         //evaluation target table
-        //auto this_unconst = const_cast<EvaluationTaskResult*>(this);
-
-        // table->registerCallBack("Rerun Evaluation", 
-        //     [ this_unconst ] () 
-        //     { 
-        //         this_unconst->informUpdate(UpdateEvent::Complete);
-        //         this_unconst->update(true);
-        //     });
-
-        // std::string section = table->parentSection()->id();
-        // std::string name    = table->name();
-
-        // table->registerCallBack("Update Target Table", 
-        //     [ this_unconst, section, name ] () 
-        //     { 
-        //         this_unconst->updateTargets();
-        //         this_unconst->informUpdate(UpdateEvent::Content, std::make_pair(section, name));
-        //         this_unconst->update(true);
-        //     });
     }
+}
+
+/**
+ */
+bool EvaluationTaskResult::hasCustomTooltip_impl(const ResultReport::SectionContentTable* table, 
+                                                 unsigned int row,
+                                                 unsigned int col) const
+{
+    if (table->name() == EvaluationData::TargetsTableName)
+    {
+        //evaluation target table
+        return calculator_->data().hasTargetTableTooltip(col);
+    }
+
+    return false;
+}
+
+/**
+ */
+std::string EvaluationTaskResult::customTooltip_impl(const ResultReport::SectionContentTable* table, 
+                                                     unsigned int row,
+                                                     unsigned int col) const
+{
+    if (table->name() == EvaluationData::TargetsTableName)
+    {
+        //evaluation target table
+        auto utn = helpers::utnFromTable(table, row);
+
+        const auto& target = targets_.at(utn);
+
+        return calculator_->data().targetTableToolTip(target, col,
+            [ this ] (const Evaluation::RequirementSumResultID& id) { return this->interestFactorEnabled(id); });
+    }
+
+    return "";
 }
 
 /**

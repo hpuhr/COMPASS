@@ -186,15 +186,18 @@ public:
 
     static std::string stringForInterestFactor(const Evaluation::RequirementSumResultID& id, 
                                                double factor);
-    static QColor colorForInterestFactorRequirement(double factor);
-    static QColor colorForInterestFactorSum(double factor);
-    static unsigned int styleForInterestFactorSum(double factor);
+    static QColor bgColorForInterestFactorRequirement(double factor);
+    static QColor fgColorForInterestFactorRequirement(double factor);
+    static QColor bgColorForInterestFactorSum(double factor);
+    static QColor fgColorForInterestFactorSum(double factor);
+    static unsigned int bgStyleForInterestFactorSum(double factor);
+    static unsigned int fgStyleForInterestFactorSum(double factor);
+
     static std::string enabledInterestFactorsString(const InterestMap& interest_factors,
                                                     const InterestEnabledFunc& interest_enabled_func);
     static QAction* interestFactorAction(const Evaluation::RequirementSumResultID& id, 
                                          double interest_factor);
 
-    static QColor color_interest_high_, color_interest_mid_, color_interest_low_;
     static double interest_thres_req_high_, interest_thres_req_mid_;
     static double interest_thres_sum_high_, interest_thres_sum_mid_;
 

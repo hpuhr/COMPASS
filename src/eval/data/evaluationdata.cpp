@@ -573,6 +573,24 @@ void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report) c
 
     auto& table = section.addTable(TargetsTableName, headings.size(), headings);
     table.setOnDemand();
+    table.enableTooltips();
+}
+
+namespace
+{
+    /**
+     */
+    nlohmann::json interestData(const EvaluationTarget& target,
+                                const EvaluationData::InterestEnabledFunc & interest_enabled_func)
+    {
+        size_t num_contributors;
+        auto interest = target.totalInterest(interest_enabled_func, &num_contributors);
+
+        if (num_contributors == 0)
+            return "-";
+
+        return interest;
+    }
 }
 
 /**
@@ -592,7 +610,7 @@ nlohmann::json EvaluationData::rawCellData(const EvaluationTarget& target,
         case ColCategory:
             return target.emitterCategoryStr();
         case ColInterest: 
-            return target.totalInterest(interest_enabled_func);
+            return interestData(target, interest_enabled_func);
         case ColNumUpdates:
             return target.numUpdates();
         case ColNumRef:
@@ -650,8 +668,11 @@ unsigned int EvaluationData::cellStyle(const EvaluationTarget& target,
 
     if (column == ColInterest)
     {
-        double interest = data;
-        return EvaluationTargetData::styleForInterestFactorSum(interest);
+        if (data.is_number_float())
+        {
+            double interest = data;
+            return EvaluationTargetData::bgStyleForInterestFactorSum(interest);
+        }
     }
 
     return 0;
@@ -687,4 +708,23 @@ void EvaluationData::fillTargetsTable(const std::map<unsigned int, EvaluationTar
 
         ++r;
     }
+}
+
+/**
+ */
+bool EvaluationData::hasTargetTableTooltip(int col) const
+{
+    return (col == ColInterest);
+}
+
+/**
+ */
+std::string EvaluationData::targetTableToolTip(const EvaluationTarget& target,
+                                               int col,
+                                               const InterestEnabledFunc & interest_enabled_func) const
+{
+    if (col == ColInterest)
+        return EvaluationTargetData::enabledInterestFactorsString(target.interestFactors(), interest_enabled_func);
+
+    return "";
 }
