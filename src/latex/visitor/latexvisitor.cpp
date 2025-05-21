@@ -20,6 +20,10 @@
 #include "latexsection.h"
 #include "latextable.h"
 //#include "lateximage.h"
+
+#include "dbcontent/dbcontentmanager.h"
+#include "viewmanager.h"
+
 #include "viewpoint.h"
 #include "tableview.h"
 #include "tableviewdatawidget.h"
@@ -30,19 +34,17 @@
 #include "scatterplotviewdatawidget.h"
 #include "gridview.h"
 #include "gridviewdatawidget.h"
+
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontenttext.h"
+#include "task/result/report/sectioncontentfigure.h"
+
 #include "logger.h"
 #include "stringconv.h"
 #include "json.h"
 #include "files.h"
-#include "eval/results/base/single.h"
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttable.h"
-#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontentfigure.h"
 #include "compass.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "viewmanager.h"
-#include "files.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "ViewerWidget.h"
@@ -156,7 +158,7 @@ void LatexVisitor::visit(const ViewPoint* e)
     }
 }
 
-void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
+void LatexVisitor::visit(const ResultReport::Section* e)
 {
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSection " << e->heading();
@@ -170,17 +172,18 @@ void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
     LatexSection& section = report_.getSection(current_section_name_);
     section.label("sec:"+e->compoundResultsHeading());
 
-    for (const auto& cont_it : e->content())
+    for (const auto& cont_it : e->sectionContent())
         cont_it->accept(*this);
 }
 
-void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
+void LatexVisitor::visit(const ResultReport::SectionContentTable* e)
 {
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentTable " << e->name();
 
-    if (!include_target_tr_details_ && e->name() == EvaluationRequirementResult::Single::tr_details_table_name_)
-        return; // do not generate this table
+    //@TODO
+    //if (!include_target_tr_details_ && e->name() == EvaluationRequirementResult::Single::TRDetailsTableName)
+    //    return; // do not generate this table
 
     LatexSection& section = report_.getSection(current_section_name_);
 
@@ -276,7 +279,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
 
 }
 
-void LatexVisitor::visit(const EvaluationResultsReport::SectionContentText* e)
+void LatexVisitor::visit(const ResultReport::SectionContentText* e)
 {
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentText" << e->name();
@@ -287,7 +290,7 @@ void LatexVisitor::visit(const EvaluationResultsReport::SectionContentText* e)
         section.addText(txt_it);
 }
 
-void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
+void LatexVisitor::visit(const ResultReport::SectionContentFigure* e)
 {
     assert (e);
     loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure " << e->name();

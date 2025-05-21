@@ -28,7 +28,9 @@ public:
     virtual ~TaskResultsWidget();
 
     void setReport(const std::string name);
-    void selectID(const std::string id);
+    void selectID(const std::string id,
+                  bool show_figure = false);
+    void restoreBackupSection();
 
     //ToolBoxWidget
     QIcon toolIcon() const override final;
@@ -53,6 +55,8 @@ protected:
     QComboBox* report_combo_ {nullptr};
     QPushButton* remove_result_button_ {nullptr};
     std::string current_report_name_;
+    std::string current_report_name_backup_;
+    std::string current_section_name_backup_;
 
     ResultReport::ReportWidget* report_widget_;
 };

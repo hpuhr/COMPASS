@@ -20,6 +20,8 @@
 
 using namespace Utils;
 
+/**
+ */
 TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     : ToolBoxWidget(nullptr), task_man_(task_man)
 {
@@ -75,8 +77,12 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
             this, &TaskResultsWidget::updateResultsSlot);
 }
 
+/**
+ */
 TaskResultsWidget::~TaskResultsWidget() {}
 
+/**
+ */
 void TaskResultsWidget::setReport(const std::string name)
 {
     loginf << "TaskResultsWidget: setReport: name '" << name << "'";
@@ -103,9 +109,7 @@ void TaskResultsWidget::setReport(const std::string name)
     if (report_combo_->currentIndex() != name_idx)
     {
         report_combo_->blockSignals(true);
-
         report_combo_->setCurrentIndex(name_idx);
-
         report_combo_->blockSignals(false);
     }
 
@@ -117,14 +121,21 @@ void TaskResultsWidget::setReport(const std::string name)
     report_widget_->setDisabled(false);
 }
 
+/**
+ */
 void TaskResultsWidget::updateResultsSlot()
 {
     updateResults();
 }
 
+/**
+ */
 void TaskResultsWidget::updateResults(const std::string& selected_result)
 {
     loginf << "TaskResultsWidget: updateResultsSlot";
+
+    current_report_name_backup_  = current_report_name_;
+    current_section_name_backup_ = report_widget_->currentSection();
 
     report_combo_->blockSignals(true);
     report_combo_->clear();
@@ -273,7 +284,32 @@ std::string TaskResultsWidget::currentReportName() const
 
 /**
  */
-void TaskResultsWidget::selectID(const std::string id)
+void TaskResultsWidget::selectID(const std::string id, bool show_figure)
 {
-    report_widget_->selectId(id);
+    report_widget_->selectId(id, show_figure);
+}
+
+/**
+ */
+void TaskResultsWidget::restoreBackupSection()
+{
+    loginf << "TaskResultsWidget: restoreBackupSection: trying to restore section";
+
+    if (current_report_name_backup_.empty())
+        return;
+
+    if (current_report_name_backup_ != current_report_name_)
+        setReport(current_report_name_backup_);
+
+    if (current_report_name_backup_ != current_report_name_)
+        return;
+
+    loginf << "TaskResultsWidget: restoreBackupSection: restored report '" << current_report_name_backup_ << "'";
+
+    if (current_section_name_backup_.empty())
+        return;
+
+    report_widget_->selectId(current_section_name_backup_);
+
+    loginf << "TaskResultsWidget: restoreBackupSection: restored section '" << current_section_name_backup_ << "'";
 }

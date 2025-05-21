@@ -55,6 +55,7 @@ public:
     std::vector<std::shared_ptr<Section>> reportSections() const;
     std::vector<std::shared_ptr<SectionContent>> reportContents() const;
 
+    bool hasSection(const std::string& id) const;
     Section& getSection (const std::string& id); // bla:bla2
 
     nlohmann::json toJSON() const;
@@ -62,7 +63,7 @@ public:
 
     void setCurrentViewable(const nlohmann::json::object_t& data);
     void unsetCurrentViewable();
-    void setCurrentSection(const std::string& section_name);
+    void setCurrentSection(const std::string& section_name, bool show_figure = false);
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
                                                               unsigned int content_id,
                                                               bool show_dialog = false) const;

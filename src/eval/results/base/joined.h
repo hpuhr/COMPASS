@@ -90,8 +90,14 @@ public:
     std::vector<double> getValues(const ValueSource<double>& source) const;
     std::vector<double> getValues(int value_id) const;
 
+    static void setJoinedContentProperties(ResultReport::SectionContent& content,
+                                           const Evaluation::RequirementResultID& id);
+    static boost::optional<Evaluation::RequirementResultID> joinedContentProperties(const ResultReport::SectionContent& content);
+
     static const std::string SectorOverviewID;
     static const int         SectorOverviewRenderDelayMSec;
+
+    static const std::string TargetsTableName;
 
 protected:
     bool resultUsed(const std::shared_ptr<Single>& result) const;

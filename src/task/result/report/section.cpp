@@ -214,11 +214,32 @@ std::vector<std::shared_ptr<Section>> Section::subSections(bool recursive) const
 
 /**
 */
-QWidget* Section::getContentWidget()
+std::string Section::relativeID(const std::string& id) const
+{
+    if(id.empty())
+        return id;
+
+    QString id0    = QString::fromStdString(id);
+    QString id1    = QString::fromStdString(this->id());
+
+    if (id0 == id1)
+        return id;
+
+    QString prefix = id1 + QString::fromStdString(SectionID::Sep);
+
+    if (!id0.startsWith(prefix))
+        return id;
+
+    return id0.mid(prefix.count(), -1).toStdString();
+}
+
+/**
+*/
+QWidget* Section::getContentWidget(bool preload_ondemand_contents)
 {
     if (!content_widget_)
     {
-        createContentWidget();
+        createContentWidget(preload_ondemand_contents);
         assert(content_widget_);
     }
 
@@ -588,6 +609,19 @@ boost::optional<size_t> Section::findContent(const std::string& name, SectionCon
 
 /**
 */
+boost::optional<size_t> Section::findContent(const std::string& name) const
+{
+    for (size_t i = 0; i < content_.size(); ++i)
+    {
+        if (content_names_[ i ] == name)
+            return i;
+    }
+
+    return boost::optional<size_t>();
+}
+
+/**
+*/
 std::vector<size_t> Section::findContents(SectionContent::Type type) const
 {
     std::vector<size_t> idxs;
@@ -610,6 +644,55 @@ bool Section::hasContent(const std::string& name, SectionContent::Type type) con
 
 /**
 */
+bool Section::hasContent(const std::string& name) const
+{
+    return findContent(name).has_value();
+}
+
+unsigned int Section::contentID(const std::string& name) const
+{
+    auto idx = findContent(name);
+    assert(idx.has_value());
+
+    return content_ids_.at(idx.value());
+}
+
+/**
+*/
+unsigned int Section::contentInfo(const std::string& name) const
+{
+    unsigned int flags = 0;
+
+    //has content of the given name?
+    auto idx = findContent(name);
+    if (!idx.has_value())
+        return flags;
+
+    flags |= ContentInfoFlag::ContentAvailable;
+
+    const auto& c = content_.at(idx.value());
+
+    //not yet loaded from db?
+    if (!c)
+        return flags;
+
+    flags |= ContentInfoFlag::ContentLoaded;
+
+    if (!c->isOnDemand())
+        return flags;
+
+    flags |= ContentInfoFlag::ContentOnDemand;
+
+    if (!c->isComplete())
+        return flags;
+
+    flags |= ContentInfoFlag::ContentOnDemandComplete;
+
+    return flags;
+}
+
+/**
+*/
 size_t Section::numContents(SectionContent::Type type) const
 {
     size_t num = 0;
@@ -625,7 +708,7 @@ size_t Section::numContents(SectionContent::Type type) const
 
 /**
 */
-void Section::createContentWidget()
+void Section::createContentWidget(bool preload_ondemand_contents)
 {
     loginf << "Section: createContentWidget: Creating content widget for section '" << name_ << "'";
 
@@ -646,6 +729,21 @@ void Section::createContentWidget()
 
     AsyncFuncTask task(cb, "Loading", "Loading section contents", false);
     task.runAsyncDialog();
+
+    //preload some on-demand resources if desired
+    //note: not possible on other thread because it e.g. might trigger ui stuff on reload
+    if (preload_ondemand_contents)
+    {
+        for (size_t i = 0; i < this->content_.size(); ++i)
+        {
+            auto c = this->loadOrGetContent(i, false);
+            if (c->isOnDemand() &&
+                c->type() == SectionContent::Type::Table)
+            {
+                c->loadOnDemandIfNeeded();
+            }
+        }
+    }
 
     //add contents to layout
     for (size_t i = 0; i < content_.size(); ++i)

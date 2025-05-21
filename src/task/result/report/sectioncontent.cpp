@@ -132,6 +132,20 @@ std::string SectionContent::name() const
 
 /**
  */
+TaskResult* SectionContent::taskResult()
+{
+    return &parent_section_->report()->result();
+}
+
+/**
+ */
+const TaskResult* SectionContent::taskResult() const
+{
+    return &parent_section_->report()->result();
+}
+
+/**
+ */
 void SectionContent::setJSONProperty(const std::string& name, const nlohmann::json& value)
 {
     properties_[ name ] = value;
@@ -205,6 +219,27 @@ bool SectionContent::loadOnDemand()
     complete_ = true;
 
     return true;
+}
+
+/**
+ */
+bool SectionContent::forceReload()
+{
+    if (!isOnDemand())
+        return true;
+
+    clearContent();
+    
+    return loadOnDemand();
+}
+
+/**
+ */
+void SectionContent::clearContent()
+{
+    clearContent_impl();
+
+    complete_ = false;
 }
 
 /**

@@ -6,7 +6,6 @@
 #include <memory>
 
 class EvaluationCalculator;
-class EvaluationManagerWidget;
 class TimeWindowCollectionWidget;
 
 class QLineEdit;

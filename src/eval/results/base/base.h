@@ -47,6 +47,7 @@ namespace ResultReport
 {
     class Report;
     class Section;
+    class SectionContent;
     class SectionContentTable;
 }
 
@@ -104,6 +105,8 @@ public:
     std::string type() const;
     std::string resultId() const;
     std::string reqGrpId() const;
+    
+    virtual std::string sumSectionName() const;
 
     std::shared_ptr<EvaluationRequirement::Base> requirement() const;
 
@@ -155,9 +158,17 @@ public:
     size_t totalNumDetails() const;
     size_t totalNumPositions() const;
 
-    const static std::string req_overview_table_name_;
+    static void setContentProperties(ResultReport::SectionContent& content,
+                                     const Evaluation::RequirementResultID& id);
+    static boost::optional<Evaluation::RequirementResultID> contentProperties(const ResultReport::SectionContent& content);
+
+    const static std::string RequirementOverviewTableName;
 
     static const QColor HistogramColorDefault;
+
+    static const std::string ContentPropertySectorLayer;
+    static const std::string ContentPropertyReqGroup;
+    static const std::string ContentPropertyReqName;
 
 protected:
     friend class EvaluationTaskResult; // for loading on-demand content

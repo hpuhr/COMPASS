@@ -18,8 +18,7 @@
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/section.h"
 #include "task/result/report/report.h"
-
-#include "section_id.h"
+#include "task/result/report/sectionid.h"
 
 #include "taskmanager.h"
 //#include "latexvisitor.h"
@@ -90,7 +89,7 @@ void SectionContentFigure::addToLayout(QVBoxLayout* layout)
     fig_layout->addStretch();
 
     QPushButton* view_button = new QPushButton("View");
-    connect (view_button, &QPushButton::clicked, this, &SectionContentFigure::viewSlot);
+    QObject::connect (view_button, &QPushButton::clicked, [ this ] () { this->view(); });
     fig_layout->addWidget(view_button);
 
     layout->addLayout(fig_layout);
@@ -112,19 +111,14 @@ void SectionContentFigure::accept(LatexVisitor& v)
 
 /**
  */
-void SectionContentFigure::viewSlot()
-{
-    loginf << "SectionContentFigure: viewSlot";
-    view();
-}
-
-/**
- */
 void SectionContentFigure::view() const
 {
+    loginf << "SectionContentFigure: view: viewing figure '" << name();
+
     auto content = viewableContent();
     if (!content || content->empty())
     {
+        loginf << "SectionContentFigure: view: no content";
         report_->unsetCurrentViewable();
         return;
     }
@@ -151,7 +145,7 @@ std::string SectionContentFigure::getSubPath() const
 {
     assert (parent_section_);
 
-    return EvaluationResultsReport::SectionID::sectionID2Path(parent_section_->compoundResultsHeading());
+    return ResultReport::SectionID::sectionID2Path(parent_section_->compoundResultsHeading());
 }
 
 /**
@@ -168,6 +162,13 @@ std::shared_ptr<nlohmann::json::object_t> SectionContentFigure::viewableContent(
 
     //call viewable function
     return viewable_fnc_();
+}
+
+/**
+ */
+void SectionContentFigure::clearContent_impl()
+{
+    viewable_fnc_ = {};
 }
 
 /**

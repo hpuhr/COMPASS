@@ -39,10 +39,13 @@ public:
 
     void expand();
 
-    void showResultWidget(Section* section); // can be nullptr
+    void showResultWidget(Section* section, // can be nullptr
+                          bool preload_ondemand_contents); 
 
     void selectId (const std::string& id, bool show_figure = false);
     void reshowLastId ();
+
+    std::string currentSection() const;
 
     boost::optional<nlohmann::json> getTableData(const std::string& result_id,
                                                  const std::string& table_id,
@@ -52,6 +55,12 @@ public:
     void showFigure(const QModelIndex& index);
 
 protected:
+    void expandAllParents (QModelIndex index);
+    void updateBackButton ();
+    void updateCurrentSection();
+    void triggerItem (const QModelIndex& index,
+                      bool preload_ondemand_contents);
+
     TaskResultsWidget& task_result_widget_;
 
     ResultReport::TreeModel tree_model_;
@@ -66,10 +75,6 @@ protected:
     std::vector<std::string> id_history_;
 
     QLabel* current_section_label_ = nullptr;
-
-    void expandAllParents (QModelIndex index);
-    void updateBackButton ();
-    void updateCurrentSection();
 };
 
 }

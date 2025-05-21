@@ -140,13 +140,59 @@ std::vector<std::shared_ptr<SectionContent>> Report::reportContents() const
 
 /**
  */
+bool Report::hasSection(const std::string& id) const
+{
+    if (id.empty())
+        return false;
+
+    loginf << "Report: hasSection: Checking for section '" << id << "'";
+
+    std::string id_in = root_section_->relativeID(id);
+
+    loginf << "Report: hasSection: Checking for relative section '" << id_in << "'";
+
+    std::vector<std::string> parts = SectionID::subSections(id_in);
+    if (parts.empty())
+        return false;
+
+    Section* tmp = nullptr;
+
+    for (unsigned int cnt=0; cnt < parts.size(); ++cnt)
+    {
+        std::string& heading = parts.at(cnt);
+
+        if (cnt == 0) // first
+        {
+            if (!root_section_->hasSubSection(heading))
+                return false;
+
+            tmp = &root_section_->getSubSection(heading);
+        }
+        else // previous section
+        {
+            assert (tmp);
+
+            if (!tmp->hasSubSection(heading))
+                return false;
+
+            tmp = &tmp->getSubSection(heading);
+        }
+    }
+
+    return tmp != nullptr;
+}
+
+/**
+ */
 Section& Report::getSection (const std::string& id)
 {
     logdbg << "Report: getSection: id '" << id << "'";
 
     assert (id.size());
 
-    std::vector<std::string> parts = SectionID::subSections(id);
+    std::string id_in = root_section_->relativeID(id);
+
+    std::vector<std::string> parts = SectionID::subSections(id_in);
     assert (parts.size());
 
     Section* tmp = nullptr;
@@ -224,11 +270,11 @@ void Report::unsetCurrentViewable()
 
 /**
  */
-void Report::setCurrentSection(const std::string& section_name)
+void Report::setCurrentSection(const std::string& section_name, bool show_figure)
 {
     std::string full_id = SectionID::prependReportResults(section_name);
 
-    result_->taskManager().widget()->selectID(full_id);
+    result_->taskManager().widget()->selectID(full_id, show_figure);
 }
 
 /**

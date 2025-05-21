@@ -16,7 +16,6 @@
  */
 
 #include "evaluationmanager.h"
-#include "evaluationmanagerwidget.h"
 #include "eval/results/report/pdfgeneratordialog.h"
 #include "evaluationstandard.h"
 #include "evaluationdialog.h"
@@ -231,9 +230,6 @@ void EvaluationManager::generateReport()
     assert (calculator_->hasResults());
 
     //pdf_gen_.dialog().exec();
-
-    if (widget_)
-        widget_->updateButtons();
 }
 
 /**
@@ -956,6 +952,8 @@ void EvaluationManager::onConfigurationChanged(const std::vector<std::string>& c
 void EvaluationManager::loadData(const EvaluationCalculator& calculator,
                                  bool blocking)
 {
+    assert(!raw_data_available_);
+
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
     auto ds_ids = calculator.usedDataSources();
@@ -1149,8 +1147,11 @@ void EvaluationManager::loadingDone()
     //!reenable distribution to views!
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
+    assert(!raw_data_available_);
+
     //obtain data
     raw_data_ = dbcontent_man.loadedData();
+    raw_data_available_ = true;
 
     //clear local data
     dbcontent_man.clearData();
@@ -1159,20 +1160,23 @@ void EvaluationManager::loadingDone()
     emit hasNewData();
 }
 
+/**
+*/
 EvaluationTargetFilter& EvaluationManager::targetFilter() const
 {
     assert (target_filter_);
     return *target_filter_.get();
 }
 
-
-
 /**
  */
 std::map<std::string, std::shared_ptr<Buffer>> EvaluationManager::fetchData()
 {
+    assert(raw_data_available_);
+
     auto data_cpy = raw_data_;
     raw_data_ = {};
+    raw_data_available_ = false;
 
     return data_cpy;
 }
@@ -1241,19 +1245,9 @@ void EvaluationManager::loadTimestampEnd(boost::posix_time::ptime value)
     saveTimeConstraints();
 }
 
+/**
+ */
 Utils::TimeWindowCollection& EvaluationManager::excludedTimeWindows()
 {
     return load_filtered_time_windows_;
-}
-
-
-/**
- */
-EvaluationManagerWidget* EvaluationManager::widget()
-{
-    if (!widget_)
-        widget_.reset(new EvaluationManagerWidget(*this));
-
-    assert(widget_);
-    return widget_.get();
 }

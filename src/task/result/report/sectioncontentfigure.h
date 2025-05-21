@@ -28,13 +28,8 @@ namespace ResultReport
 
 /**
  */
-class SectionContentFigure : public QObject, public SectionContent
+class SectionContentFigure : public SectionContent
 {
-    Q_OBJECT
-
-public slots:
-    void viewSlot();
-
 public:
     enum class FigureType
     {
@@ -70,6 +65,8 @@ public:
     static const std::string FieldViewable;
 
 protected:
+    void clearContent_impl() override final;
+
     void toJSON_impl(nlohmann::json& root_node) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
 

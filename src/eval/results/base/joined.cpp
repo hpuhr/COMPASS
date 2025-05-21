@@ -22,7 +22,7 @@
 #include "task/result/report/sectioncontenttable.h"
 #include "task/result/report/section.h"
 
-#include "eval/results/report/section_id.h"
+#include "eval/results/report/evalsectionid.h"
 
 #include "eval/requirement/base/base.h"
 
@@ -47,6 +47,8 @@ namespace EvaluationRequirementResult
 
 const std::string Joined::SectorOverviewID              = "sector_overview";
 const int         Joined::SectorOverviewRenderDelayMSec = 2000;
+
+const std::string Joined::TargetsTableName              = "Targets";
 
 /**
 */
@@ -126,7 +128,7 @@ unsigned int Joined::numUnusableSingleResults() const
 bool Joined::hasReference(const ResultReport::SectionContentTable& table, 
                           const QVariant& annotation) const
 {
-    if (table.name() == req_overview_table_name_)
+    if (table.name() == RequirementOverviewTableName)
         return true;
     else
         return false;;
@@ -138,7 +140,7 @@ std::string Joined::reference(const ResultReport::SectionContentTable& table,
                               const QVariant& annotation) const
 {
     assert (hasReference(table, annotation));
-    return EvaluationResultsReport::SectionID::createForRequirementResult(*this);
+    return EvalSectionID::createForRequirementResult(*this);
 }
 
 /**
@@ -619,7 +621,7 @@ void Joined::createAnnotations(nlohmann::json& annotations,
 bool Joined::hasViewableData (const ResultReport::SectionContentTable& table, 
                               const QVariant& annotation) const
 {
-    if (table.name() != req_overview_table_name_)
+    if (table.name() != RequirementOverviewTableName)
         return false;
 
     return true;
@@ -667,5 +669,20 @@ std::shared_ptr<nlohmann::json::object_t> Joined::viewableOverviewData() const
 //         }
 //     }
 // }
+
+/**
+*/
+void Joined::setJoinedContentProperties(ResultReport::SectionContent& content,
+                                        const Evaluation::RequirementResultID& id)
+{
+    Base::setContentProperties(content, id);
+}
+
+/**
+*/
+boost::optional<Evaluation::RequirementResultID> Joined::joinedContentProperties(const ResultReport::SectionContent& content)
+{
+    return Base::contentProperties(content);
+}
 
 }

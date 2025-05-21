@@ -39,13 +39,16 @@ namespace ResultReport
     class SectionContentTable;
     class SectionContentFigure;
     class Report;
+
+    struct SectionContentViewable;
 }
+
+class EvaluationTaskResult;
 
 namespace EvaluationRequirementResult
 {
 
 class Joined;
-class EvaluationTaskResult;
 
 template <typename T>
 struct ValueSource;
@@ -178,9 +181,9 @@ public:
     void iterateDetails(const DetailFunc& func,
                         const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
 
-    void addDetailsToTable(ResultReport::SectionContentTable& table);
-    void addOverviewToFigure(ResultReport::SectionContentFigure& figure);
-    void addHighlightToFigure(ResultReport::SectionContentFigure& figure);
+    bool addDetailsToTable(ResultReport::SectionContentTable& table);
+    bool addOverviewToFigure(ResultReport::SectionContentFigure& figure);
+    bool addHighlightToViewable(ResultReport::SectionContentViewable& viewable, const QVariant& annotation);
 
     std::vector<double> getValues(const ValueSource<double>& source) const;
     std::vector<double> getValues(int value_id) const;
@@ -188,9 +191,16 @@ public:
     /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
 
-    static const std::string tr_details_table_name_;
-    static const std::string target_table_name_;
+    static void setSingleContentProperties(ResultReport::SectionContent& content,
+                                           const Evaluation::RequirementResultID& id,
+                                           unsigned int utn);
+    static boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>> 
+    singleContentProperties(const ResultReport::SectionContent& content);
 
+    std::string sumSectionName() const override final;
+
+    static const std::string TRDetailsTableName;
+    
     static const std::string TargetOverviewID;
 
     static const int AnnotationPointSizeOverview;
@@ -206,10 +216,7 @@ public:
     static const QColor AnnotationColorError;
     static const QColor AnnotationColorOk;
 
-    static const std::string PropertyUTN;
-    static const std::string PropertySectorLayer;
-    static const std::string PropertyReqGroup;
-    static const std::string PropertyReqName;
+    static const std::string ContentPropertyUTN;
 
 protected:
     friend class EvaluationTaskResult; // for loading on-demand content

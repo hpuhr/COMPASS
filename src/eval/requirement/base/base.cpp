@@ -194,9 +194,9 @@ Base::Base(const std::string& name,
 :   name_                    (name      )
 ,   short_name_              (short_name)
 ,   group_name_              (group_name)
+,   calculator_              (calculator)
 ,   threshold_               (threshold )
 ,   check_type_              (check_type)
-,   calculator_              (calculator)
 ,   must_hold_for_any_target_(must_hold_for_any_target)
 {
 }

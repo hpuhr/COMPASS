@@ -310,7 +310,7 @@ void EvaluationDataWidget::showSurroundingDataSlot ()
 
     loginf << "EvaluationDataWidget: showSurroundingDataSlot: utn " << utn;
 
-    calculator_.showSurroundingData(utn);
+    //calculator_.showSurroundingData(utn);
 }
 
 void EvaluationDataWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)

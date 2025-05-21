@@ -146,7 +146,7 @@ void EvaluationStandard::checkSubConfigurables()
 
 EvaluationStandardTreeItem* EvaluationStandard::child(int row)
 {
-    if (row < 0 || row >= groups_.size())
+    if (row < 0 || row >= (int)groups_.size())
         return nullptr;
 
     auto group_it = groups_.begin();

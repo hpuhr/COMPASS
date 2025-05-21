@@ -375,7 +375,12 @@ void TaskManager::beginTaskResultWriting(const std::string& name,
     assert (!current_result_);
     current_result_ = getOrCreateResult(name, type);
 
-    current_result_->report()->clear();
+    //init result
+    auto res = current_result_->initResult();
+    if (!res.ok())
+        logerr << "TaskManager: beginTaskResultWriting: Result could not be initialized: " << res.error();
+
+    assert(res.ok());
 }
 
 /**
@@ -401,6 +406,14 @@ void TaskManager::endTaskResultWriting(bool store_result)
 
     assert (current_result_);
 
+    //finalize result
+    auto res = current_result_->finalizeResult();
+    if (!res.ok())
+        logerr << "TaskManager: endTaskResultWriting: Result could not be finalized: " << res.error();
+
+    assert(res.ok());
+
+    //store result?
     if (store_result)
     {
         loginf << "TaskManager: endTaskResultWriting: Storing result...";
@@ -408,6 +421,9 @@ void TaskManager::endTaskResultWriting(bool store_result)
         auto result = COMPASS::instance().dbInterface().saveResult(*current_result_, CleanupDBIfNeeded);
 
         //@TODO
+        if (!result.ok())
+            logerr << "TaskManager: endTaskResultWriting: Storing result failed: " << result.error();
+        
         assert(result.ok());
     }
 
@@ -626,4 +642,12 @@ void TaskManager::loadResults()
     loginf << "TaskManager: loadResults: Loaded " << results_.size() << " result(s)";
 
     emit taskResultsChangedSignal();
+}
+
+/**
+ */
+void TaskManager::restoreBackupSection()
+{
+    if (widget_)
+        widget_->restoreBackupSection();
 }

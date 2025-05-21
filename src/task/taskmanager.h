@@ -102,14 +102,13 @@ public:
     const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
     std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
     std::shared_ptr<TaskResult> result(const std::string& name) const; // get existing result
-    std::shared_ptr<TaskResult> getOrCreateResult(const std::string& name, 
-                                                  task::TaskResultType type);
     bool hasResult (const std::string& name) const;
     bool removeResult(const std::string& name, 
                       bool inform_changes = true);
-    std::shared_ptr<TaskResult> createResult(unsigned int id,
+    
+    std::shared_ptr<TaskResult> createResult(unsigned int id, 
                                              task::TaskResultType type);
-
+    
     void setViewableDataConfig(const nlohmann::json::object_t& data);
     void unsetViewableDataConfig();
 
@@ -117,9 +116,21 @@ public:
                                                               unsigned int content_id,
                                                               bool show_dialog = false) const;
 
+    void restoreBackupSection();
+
     static const bool CleanupDBIfNeeded;
 
 protected:
+    virtual void checkSubConfigurables() override;
+
+    void addTask(const std::string& class_id, Task* task);
+    MainWindow* getMainWindow();
+
+    std::shared_ptr<TaskResult> getOrCreateResult(const std::string& name, 
+                                                  task::TaskResultType type);
+    void loadResults();
+    boost::optional<unsigned int> findResult(const std::string& name) const;
+
     // tasks
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
     std::unique_ptr<ViewPointsImportTask> view_points_import_task_;
@@ -131,8 +142,6 @@ protected:
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<ReconstructorTask> reconstruct_references_task_;
 
-    virtual void checkSubConfigurables() override;
-
     std::map<std::string, Task*> tasks_;
 
     std::unique_ptr<TaskResultsWidget> widget_;
@@ -141,10 +150,4 @@ protected:
     std::shared_ptr<TaskResult> current_result_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
-
-    void addTask(const std::string& class_id, Task* task);
-    MainWindow* getMainWindow();
-
-    void loadResults();
-    boost::optional<unsigned int> findResult(const std::string& name) const;
 };
