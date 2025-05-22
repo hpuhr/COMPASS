@@ -173,7 +173,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
 //        ref_spd = ret_spd.first;
 //        assert (ret_pos.second); // must be set of ref pos exists
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {

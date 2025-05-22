@@ -1705,6 +1705,11 @@ const Utils::TimeWindowCollection& EvaluationTargetData::excludedTimeWindows() c
     return excluded_time_windows_;
 }
 
+bool EvaluationTargetData::isTimeStampNotExcluded(const boost::posix_time::ptime& ts) const
+{
+    return excluded_time_windows_.contains(ts);
+}
+
 /**
  */
 EvaluationTarget EvaluationTargetData::toTarget() const

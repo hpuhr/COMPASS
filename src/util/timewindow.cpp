@@ -60,6 +60,11 @@ std::string TimeWindow::asStr() const
     return Time::toString(std::get<0>(time_window_)) + " - " + Time::toString(std::get<1>(time_window_));
 }
 
+bool TimeWindow::contains(const boost::posix_time::ptime& ts) const
+{
+    return (std::get<0>(time_window_) <= ts && std::get<1>(time_window_) >= ts);
+}
+
 bool TimeWindow::contains(const TimeWindow& tw) const
 {
     return (std::get<0>(time_window_) <= tw.begin() && std::get<1>(time_window_) >= tw.end());
@@ -87,6 +92,15 @@ bool TimeWindowCollection::valid() const
             return false;
 
     return true;
+}
+
+bool TimeWindowCollection::contains(const boost::posix_time::ptime& ts) const
+{
+    for (const auto& time_window : time_windows_)
+        if (time_window.contains(ts))
+            return true;
+
+    return false;
 }
 
 void TimeWindowCollection::setFrom(nlohmann::json& json)

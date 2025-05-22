@@ -104,7 +104,10 @@ public:
     void updateUseInfo() const; // updates evaluation use information
     bool use() const;
     const Utils::TimeWindowCollection& excludedTimeWindows() const;
+    bool isTimeStampNotExcluded(const boost::posix_time::ptime& ts) const;
+
     const std::set<std::string>& excludedRequirements() const;
+
 
     const dbContent::TargetReport::Chain& refChain() const;
     const dbContent::TargetReport::Chain& tstChain() const;

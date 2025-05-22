@@ -105,7 +105,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         if (!target_data.hasMappedRefData(tst_id, max_ref_time_diff))
             continue;
 
-        is_inside = target_data.tstPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.tstPosInside(sector_layer, tst_id);
 
         if (!is_inside)
             continue;
@@ -200,7 +201,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
         else
             track_num_var = QVariant::Invalid;
 
-        is_inside = target_data.tstPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.tstPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
