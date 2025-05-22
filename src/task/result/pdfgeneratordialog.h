@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSREPORTPDFGENERATORDIALOG_H
-#define EVALUATIONRESULTSREPORTPDFGENERATORDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -107,5 +106,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONRESULTSREPORTPDFGENERATORDIALOG_H

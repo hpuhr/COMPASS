@@ -158,8 +158,8 @@ public:
     void addActionsToMenu(QMenu* menu);
 
     Utils::StringTable toStringTable() const;
-    nlohmann::json toJSON(bool rowwise = true,
-                          const std::vector<int>& cols = std::vector<int>()) const;
+    nlohmann::json toJSONTable(bool rowwise = true,
+                               const std::vector<int>& cols = std::vector<int>()) const;
 
     static boost::optional<QColor> cellTextColor(unsigned int style);
     static boost::optional<QColor> cellBGColor(unsigned int style);

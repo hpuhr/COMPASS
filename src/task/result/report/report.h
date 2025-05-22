@@ -53,13 +53,10 @@ public:
 
     std::shared_ptr<Section> rootSection();
     std::vector<std::shared_ptr<Section>> reportSections() const;
-    std::vector<std::shared_ptr<SectionContent>> reportContents() const;
+    std::vector<std::shared_ptr<SectionContent>> reportContents(bool with_hidden_content = false) const;
 
     bool hasSection(const std::string& id) const;
     Section& getSection (const std::string& id); // bla:bla2
-
-    nlohmann::json toJSON() const;
-    bool fromJSON(const nlohmann::json& j);
 
     void setCurrentViewable(const nlohmann::json::object_t& data);
     void unsetCurrentViewable();
@@ -77,6 +74,9 @@ public:
     static const std::string FieldRootSection;
 
 protected:
+    void toJSON_impl(nlohmann::json& j) const override final;
+    bool fromJSON_impl(const nlohmann::json& j) override final;
+
     TaskResult* result_ = nullptr;
 
     std::shared_ptr<Section> root_section_;

@@ -95,12 +95,15 @@ public:
                               ResultReport::SectionContentViewable& viewable, 
                               const QVariant& index,
                               unsigned int row) const;
+    
+    void postprocessTable(ResultReport::SectionContentTable* table);
+
     bool customContextMenu(QMenu& menu, 
                            ResultReport::SectionContentTable* table, 
                            unsigned int row);
     bool customContextMenu(QMenu& menu,
                            ResultReport::SectionContent* content);
-    void postprocessTable(ResultReport::SectionContentTable* table);
+    
     bool hasCustomTooltip(const ResultReport::SectionContentTable* table, 
                           unsigned int row,
                           unsigned int col) const;
@@ -136,6 +139,8 @@ protected:
     void id(unsigned int id);
     void clearPendingUpdates();
 
+    Result updateContents(const std::vector<ContentID>& contents);
+
     //reimplement for custom result clearing
     virtual void clear_impl() {}
 
@@ -143,8 +148,6 @@ protected:
     virtual Result update_impl(UpdateEvent evt) { return false; }
     virtual Result canUpdate_impl(UpdateEvent evt) const { return false; }
     virtual Result updateContents_impl(const std::vector<ContentID>& contents);
-
-    Result updateContents(const std::vector<ContentID>& contents);
 
     //reimplement for custom initialization/finalization of a result
     virtual Result initResult_impl() { return Result::succeeded(); }
@@ -157,22 +160,26 @@ protected:
                                            ResultReport::SectionContentViewable& viewable, 
                                            const QVariant& index,
                                            unsigned int row) const { return false; }
+
+    //reimplement for postprocessing of contents
+    virtual void postprocessTable_impl(ResultReport::SectionContentTable* table) {}
     
     //reimplement for serialization of derived content
     virtual void toJSON_impl(nlohmann::json& root_node) const {};
     virtual bool fromJSON_impl(const nlohmann::json& j) { return true; };
 
-    //reimplement for custom table behavior
+    //reimplement for custom context menus
     virtual bool customContextMenu_impl(QMenu& menu, 
                                         ResultReport::SectionContentTable* table, 
                                         unsigned int row) { return false; }
     virtual bool customContextMenu_impl(QMenu& menu, 
                                         ResultReport::SectionContent* content) { return false; }
-    virtual void postprocessTable_impl(ResultReport::SectionContentTable* table) {}
+    
+    //reimplement for custom tooltips
     virtual bool hasCustomTooltip_impl(const ResultReport::SectionContentTable* table, 
                                        unsigned int row,
                                        unsigned int col) const { return false; }
-    virtual std::string customTooltip_impl(const ResultReport::SectionContentTable* table, 
+    virtual std::string customTooltip_impl(const ResultReport::SectionContentTable* table,
                                            unsigned int row,
                                            unsigned int col) const { return ""; }
     TaskManager& task_manager_;

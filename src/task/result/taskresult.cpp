@@ -342,14 +342,14 @@ bool TaskResult::loadOnDemandContent(ResultReport::SectionContent* content) cons
     if (!content)
         return false;
 
-    if (content->type() == ResultReport::SectionContent::Type::Figure)
+    if (content->contentType() == ResultReport::SectionContent::ContentType::Figure)
     {
         auto c = dynamic_cast<ResultReport::SectionContentFigure*>(content);
         assert(c);
 
         return loadOnDemandFigure_impl(c);
     }
-    else if (content->type() == ResultReport::SectionContent::Type::Table)
+    else if (content->contentType() == ResultReport::SectionContent::ContentType::Table)
     {
         auto c = dynamic_cast<ResultReport::SectionContentTable*>(content);
         assert(c);

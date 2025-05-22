@@ -95,7 +95,7 @@ SectionContentTable::SectionContentTable(unsigned int id,
                                          bool sortable,
                                          unsigned int sort_column,
                                          Qt::SortOrder sort_order)
-:   SectionContent(Type::Table, id, name, parent_section)
+:   SectionContent(ContentType::Table, id, name, parent_section)
 ,   num_columns_  (num_columns)
 ,   headings_     (headings)
 ,   column_styles_(num_columns, 0)
@@ -108,7 +108,7 @@ SectionContentTable::SectionContentTable(unsigned int id,
 /**
  */
 SectionContentTable::SectionContentTable(Section* parent_section)
-:   SectionContent(Type::Table, parent_section)
+:   SectionContent(ContentType::Table, parent_section)
 {
 }
 
@@ -144,7 +144,7 @@ void SectionContentTable::addRow (const nlohmann::json::array_t& row,
     anno.on_demand      = viewable.on_demand;
     anno.style          = row_style;
 
-    logdbg<< "SectionContentTable " << name_ << ": addRow: viewable has callback " << viewable.hasCallback();
+    logdbg<< "SectionContentTable " << name() << ": addRow: viewable has callback " << viewable.hasCallback();
 
     if (!viewable.on_demand && viewable.hasCallback())
     {
@@ -231,8 +231,7 @@ unsigned int SectionContentTable::cellStyle(int row, int column) const
  */
 unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewable)
 {
-    assert(parent_section_);
-    return parent_section_->addContentFigure(viewable);
+    return parentSection()->addHiddenFigure(viewable);
 }
 
 /**
@@ -823,7 +822,7 @@ void SectionContentTable::clicked(unsigned int row)
         has_valid_link = true;
 
         //figure from content in parent section
-        auto c = parent_section_->retrieveContent(annotation.figure_id.value(), true);
+        auto c = parentSection()->retrieveContent(annotation.figure_id.value(), true);
         figure = dynamic_cast<SectionContentFigure*>(c.get());
     }
     else if (!annotation.section_link.empty() && !annotation.section_figure.empty())
@@ -992,8 +991,8 @@ Utils::StringTable SectionContentTable::toStringTable() const
 
 /**
  */
-nlohmann::json SectionContentTable::toJSON(bool rowwise,
-                                           const std::vector<int>& cols) const
+nlohmann::json SectionContentTable::toJSONTable(bool rowwise,
+                                                const std::vector<int>& cols) const
 {
     return toStringTable().toJSON(rowwise, cols);
 }
@@ -1002,6 +1001,9 @@ nlohmann::json SectionContentTable::toJSON(bool rowwise,
  */
 void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
 {
+    //call base
+    SectionContent::toJSON_impl(root_node);
+
     root_node[ FieldHeadings     ] = headings_;
     root_node[ FieldSortable     ] = sortable_;
     root_node[ FieldSortColumn   ] = sort_column_;
@@ -1044,6 +1046,10 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
  */
 bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 {
+    //call base
+    if (!SectionContent::fromJSON_impl(j))
+        return false;
+    
     if (!j.is_object()                 ||
         !j.contains(FieldHeadings)     ||
         !j.contains(FieldSortable)     ||

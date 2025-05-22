@@ -62,17 +62,29 @@
 using namespace std;
 using namespace Utils;
 
-LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table,
-                           bool add_overview_screenshot, bool include_target_details,
-                           bool include_target_tr_details, unsigned int max_table_col_width, bool wait_on_map_loading)
-    : report_(report), group_by_type_(group_by_type), add_overview_table_(add_overview_table),
-      add_overview_screenshot_(add_overview_screenshot), include_target_details_(include_target_details),
-      include_target_tr_details_(include_target_tr_details), max_table_col_width_(max_table_col_width),
-      wait_on_map_loading_(wait_on_map_loading)
+/**
+ */
+LatexVisitor::LatexVisitor(LatexDocument& report, 
+                           bool group_by_type, 
+                           bool add_overview_table,
+                           bool add_overview_screenshot, 
+                           bool include_target_details,
+                           bool include_target_tr_details, 
+                           unsigned int max_table_col_width, 
+                           bool wait_on_map_loading)
+:   report_                   (report                   )
+,   group_by_type_            (group_by_type            )
+,   add_overview_table_       (add_overview_table       )
+,   add_overview_screenshot_  (add_overview_screenshot  )
+,   include_target_details_   (include_target_details   )
+,   include_target_tr_details_(include_target_tr_details)
+,   max_table_col_width_      (max_table_col_width      )
+,   wait_on_map_loading_      (wait_on_map_loading      )
 {
 }
 
-
+/**
+ */
 void LatexVisitor::visit(const ViewPoint* e)
 {
     assert (e);
@@ -158,6 +170,8 @@ void LatexVisitor::visit(const ViewPoint* e)
     }
 }
 
+/**
+ */
 void LatexVisitor::visit(const ResultReport::Section* e)
 {
     assert (e);
@@ -172,10 +186,12 @@ void LatexVisitor::visit(const ResultReport::Section* e)
     LatexSection& section = report_.getSection(current_section_name_);
     section.label("sec:"+e->compoundResultsHeading());
 
-    for (const auto& cont_it : e->sectionContent())
+    for (const auto& cont_it : e->sectionContent(false))
         cont_it->accept(*this);
 }
 
+/**
+ */
 void LatexVisitor::visit(const ResultReport::SectionContentTable* e)
 {
     assert (e);
@@ -242,12 +258,12 @@ void LatexVisitor::visit(const ResultReport::SectionContentTable* e)
                         }
                         else
                         {
-                            row_strings[cnt] = row_strings[cnt].substr(0, comma_pos)+"...";
+                            row_strings[cnt] = row_strings[cnt].substr(0, comma_pos) + "...";
                         }
                     }
                     else
                     {
-                        row_strings[cnt] = row_strings[cnt].substr(0, space_pos)+"...";
+                        row_strings[cnt] = row_strings[cnt].substr(0, space_pos) + "...";
                     }
                 }
             }
@@ -260,8 +276,6 @@ void LatexVisitor::visit(const ResultReport::SectionContentTable* e)
                 ; // do not do hyperref
             else
             {
-
-
                 row_strings[0] = "\\hyperref[sec:"+ref+"]{"+row_strings.at(0)+"}";
             }
         }
@@ -276,9 +290,10 @@ void LatexVisitor::visit(const ResultReport::SectionContentTable* e)
 
         table.addRow(move(row_strings));
     }
-
 }
 
+/**
+ */
 void LatexVisitor::visit(const ResultReport::SectionContentText* e)
 {
     assert (e);
@@ -290,6 +305,8 @@ void LatexVisitor::visit(const ResultReport::SectionContentText* e)
         section.addText(txt_it);
 }
 
+/**
+ */
 void LatexVisitor::visit(const ResultReport::SectionContentFigure* e)
 {
     assert (e);
@@ -322,6 +339,8 @@ void LatexVisitor::visit(const ResultReport::SectionContentFigure* e)
 #endif
 }
 
+/**
+ */
 void LatexVisitor::visit(TableView* e)
 {
     assert (e);
@@ -369,6 +388,8 @@ void LatexVisitor::visit(TableView* e)
     }
 }
 
+/**
+ */
 void LatexVisitor::visit(HistogramView* e)
 {
     assert (e);
@@ -423,6 +444,9 @@ void LatexVisitor::visit(HistogramView* e)
 }
 
 #if USE_EXPERIMENTAL_SOURCE == true
+
+/**
+ */
 void LatexVisitor::visit(GeographicView* e)
 {
     assert (e);
@@ -494,8 +518,11 @@ void LatexVisitor::visit(GeographicView* e)
     // add normal screenshot after overview
     sec.addImage(image_path, e->instanceId());
 }
+
 #endif
 
+/**
+ */
 void LatexVisitor::visit(ScatterPlotView* e)
 {
     assert (e);
@@ -549,6 +576,8 @@ void LatexVisitor::visit(ScatterPlotView* e)
     sec.addImage(image_path, e->instanceId());
 }
 
+/**
+ */
 void LatexVisitor::visit(GridView* e)
 {
     assert (e);
@@ -602,8 +631,9 @@ void LatexVisitor::visit(GridView* e)
     sec.addImage(image_path, e->instanceId());
 }
 
+/**
+ */
 void LatexVisitor::imagePrefix(const std::string& image_prefix)
 {
     image_prefix_ = image_prefix;
 }
-

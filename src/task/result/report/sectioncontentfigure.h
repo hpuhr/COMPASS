@@ -34,7 +34,7 @@ public:
     enum class FigureType
     {
         Section = 0, // figure referenced by section (e.g. rendered in pdf report)
-        Content      // figure referenced by content (e.g. by a table, not rendered in pdf report)
+        Hidden       // hidden figure referenced by content (e.g. by a table, not rendered in pdf report)
     };
 
     SectionContentFigure(unsigned int id,

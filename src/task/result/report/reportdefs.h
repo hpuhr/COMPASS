@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <limits>
+
 #include <QColor>
 
 namespace ResultReport
@@ -57,5 +59,25 @@ namespace ResultReport
         static const QColor BGGreen;
         static const QColor BGGray;
         static const QColor BGYellow;
+    };
+
+    enum class ReportExportMode
+    {
+        JSONFile = 0,
+        JSONBlob,
+        Latex,
+        PDF
+    };
+
+    enum ReportExportFlag
+    {
+        ExportNone     = 0,
+
+        ExportJSONFile = 1 << 0,
+        ExportJSONBlob = 1 << 1,
+        ExportLatex    = 1 << 2,
+        ExportPDF      = 1 << 3,
+        
+        ExportAll      = std::numeric_limits<int>::max()
     };
 }

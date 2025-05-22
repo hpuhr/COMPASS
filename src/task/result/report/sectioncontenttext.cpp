@@ -36,14 +36,14 @@ const std::string SectionContentText::FieldTexts = "texts";
 SectionContentText::SectionContentText(unsigned int id,
                                        const std::string& name, 
                                        Section* parent_section)
-:   SectionContent(Type::Text, id, name, parent_section)
+:   SectionContent(ContentType::Text, id, name, parent_section)
 {
 }
 
 /**
  */
 SectionContentText::SectionContentText(Section* parent_section)
-:   SectionContent(Type::Text, parent_section)
+:   SectionContent(ContentType::Text, parent_section)
 {
 }
 
@@ -96,6 +96,9 @@ void SectionContentText::clearContent_impl()
  */
 void SectionContentText::toJSON_impl(nlohmann::json& root_node) const
 {
+    //call base
+    SectionContent::toJSON_impl(root_node);
+
     root_node[ FieldTexts ] = texts_;
 }
 
@@ -103,6 +106,10 @@ void SectionContentText::toJSON_impl(nlohmann::json& root_node) const
  */
 bool SectionContentText::fromJSON_impl(const nlohmann::json& j)
 {
+    //call base
+    if (!SectionContent::fromJSON_impl(j))
+        return false;
+    
     if (!j.is_object() ||
         !j.contains(FieldTexts))
     {

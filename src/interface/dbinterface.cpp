@@ -1847,7 +1847,7 @@ Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_need
         }
 
         //write contents
-        auto report_contents = result.report()->reportContents();
+        auto report_contents = result.report()->reportContents(true);
         {
             size_t chunk_size_bytes = 1e09;
             size_t current_bytes    = 0;
@@ -1890,9 +1890,9 @@ Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_need
                 auto   c_json  = c->toJSON();
                 size_t c_bytes = c_json.dump().size();
 
-                content_id_vec->set(current_row, c->id());
+                content_id_vec->set(current_row, c->contentID());
                 result_id_vec->set(current_row, result_id);
-                type_vec->set(current_row, (int)c->type());
+                type_vec->set(current_row, (int)c->contentType());
                 content_vec->set(current_row, c_json);
 
                 current_bytes += c_bytes;
@@ -2082,7 +2082,8 @@ ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
 
 /**
  */
-ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(ResultReport::Section* section, unsigned int content_id)
+ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(ResultReport::Section* section, 
+                                                                                unsigned int content_id)
 {
     assert(ready());
 
@@ -2120,19 +2121,19 @@ ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(
         auto& type_vec       = b->get<int>(ResultReport::SectionContent::DBColumnType.name());
         auto& content_vec    = b->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
 
-        ResultReport::SectionContent::Type type = (ResultReport::SectionContent::Type)type_vec.get(0);
+        ResultReport::SectionContent::ContentType type = (ResultReport::SectionContent::ContentType)type_vec.get(0);
 
         //create empty content depending on type
         //@TODO: small factory?
-        if (type == ResultReport::SectionContent::Type::Figure)
+        if (type == ResultReport::SectionContent::ContentType::Figure)
         {
             content.reset(new ResultReport::SectionContentFigure(section));
         }
-        else if (type == ResultReport::SectionContent::Type::Table)
+        else if (type == ResultReport::SectionContent::ContentType::Table)
         {
             content.reset(new ResultReport::SectionContentTable(section));
         }
-        else if (type == ResultReport::SectionContent::Type::Text)
+        else if (type == ResultReport::SectionContent::ContentType::Text)
         {
             content.reset(new ResultReport::SectionContentText(section));
         }
@@ -2147,8 +2148,8 @@ ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(
             throw std::runtime_error("Could not read content from JSON");
 
         //check content
-        if (content->id() != content_id_vec.get(0) ||
-            content->type() != type)
+        if (content->contentID() != content_id_vec.get(0) ||
+            content->contentType() != type)
             throw std::runtime_error("contents invalid");
     }
     catch(const std::exception& ex)

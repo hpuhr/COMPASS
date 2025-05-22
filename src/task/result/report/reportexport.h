@@ -17,34 +17,40 @@
 
 #pragma once
 
-#include "task/result/report/reportitem.h"
+#include "reportdefs.h"
 
-#include <QVariant>
+#include "result.h"
 
+#include <map>
+#include <string>
 #include <memory>
+
+class TaskResult;
 
 namespace ResultReport
 {
 
+class Section;
+class SectionContent;
+
+class ReportExporter;
+
 /**
- * ReportItem which can be visualized as part of an item model (Report, Section, etc.)
  */
-class TreeItem : public ReportItem
+class ReportExport
 {
 public:
-    TreeItem(const std::string& name,
-             TreeItem* parent_item);
-    TreeItem(TreeItem* parent_item);
-    virtual ~TreeItem();
+    ReportExport();
+    virtual ~ReportExport();
 
-    virtual TreeItem *child(int row) = 0;
-    virtual int childCount() const = 0;
-    virtual int columnCount() const = 0;
-    virtual QVariant data(int column) const = 0;
-    virtual int row() const = 0;
-
-    virtual TreeItem* parentItem() override;
-    virtual const TreeItem* parentItem() const override;
+    Result exportReport(TaskResult& result,
+                        ReportExportMode mode,
+                        const std::string& fn,
+                        const std::string& temp_dir);
+private:
+    std::unique_ptr<ReportExporter> createExporter(ReportExportMode mode,
+                                                   const std::string& fn,
+                                                   const std::string& temp_dir) const;
 };
 
-}
+} // namespace ResultReport

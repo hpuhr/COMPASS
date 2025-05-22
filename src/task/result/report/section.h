@@ -27,6 +27,7 @@
 
 #include <memory>
 #include <vector>
+#include <bitset>
 
 #include <boost/optional.hpp>
 
@@ -56,6 +57,8 @@ public:
         ContentOnDemand         = 1 << 2,
         ContentOnDemandComplete = 1 << 3
     };
+
+    typedef std::bitset<32> ExportFlags;
 
     Section(const std::string& heading, 
             const std::string& parent_heading, 
@@ -110,7 +113,7 @@ public:
     unsigned int contentID(const std::string& name) const;
 
     std::shared_ptr<SectionContent> retrieveContent(unsigned int id,
-                                                    bool show_dialog = false);
+                                                    bool show_dialog = false) const;
 
     unsigned int numSections(); // all sections contained
     void addSectionsFlat (std::vector<std::shared_ptr<Section>>& result, 
@@ -119,21 +122,14 @@ public:
 
     virtual void accept(LatexVisitor& v) const;
 
-    const std::vector<std::shared_ptr<SectionContent>>& sectionContent() const;
-    std::vector<std::shared_ptr<SectionContent>> recursiveContent() const;
+    std::vector<std::shared_ptr<SectionContent>> sectionContent(bool with_hidden_content = false) const;
+    std::vector<std::shared_ptr<SectionContent>> recursiveContent(bool with_hidden_content = false) const;
 
     bool perTargetSection() const; // to be used for utn and sub-sections
     void perTargetSection(bool value);
 
     bool perTargetWithIssues() const; // te be set if requirement (any) requirement failed
     void perTargetWithIssues(bool value);
-
-    void setJSONProperty(const std::string& name, const nlohmann::json& value);
-    bool hasJSONProperty(const std::string& name) const;
-    nlohmann::json jsonProperty(const std::string& name) const;
-
-    nlohmann::json toJSON() const;
-    bool fromJSON(const nlohmann::json& j);
 
     Report* report() { return report_; }
     const Report* report() const { return report_; }
@@ -143,7 +139,6 @@ public:
     static const Property    DBColumnReportID;
     static const Property    DBColumnJSONContent;
 
-    static const std::string FieldID;
     static const std::string FieldHeading;
     static const std::string FieldParentHeading;
     static const std::string FieldPerTarget;
@@ -152,8 +147,7 @@ public:
     static const std::string FieldContentIDs;
     static const std::string FieldContentNames;
     static const std::string FieldContentTypes;
-    static const std::string FieldExtraContentIDs;
-    static const std::string FieldProperties;
+    static const std::string FieldHiddenContentIDs;
 
     static void setCurrentContentID(unsigned int id);
 
@@ -162,21 +156,23 @@ protected:
     friend class DBInterface;
     friend class Report;
 
+    void toJSON_impl(nlohmann::json& j) const override final;
+    bool fromJSON_impl(const nlohmann::json& j) override final;
+
     Section* findSubSection (const std::string& heading); // nullptr if not found
-    boost::optional<size_t> findContent(const std::string& name, SectionContent::Type type) const;
+    boost::optional<size_t> findContent(const std::string& name, SectionContent::ContentType type) const;
     boost::optional<size_t> findContent(const std::string& name) const;
-    std::vector<size_t> findContents(SectionContent::Type type) const;
-    bool hasContent(const std::string& name, SectionContent::Type type) const;
-    size_t numContents(SectionContent::Type type) const;
+    std::vector<size_t> findContents(SectionContent::ContentType type) const;
+    bool hasContent(const std::string& name, SectionContent::ContentType type) const;
+    size_t numContents(SectionContent::ContentType type) const;
 
     void createContentWidget(bool preload_ondemand_contents);
 
-    unsigned int addContentFigure(const SectionContentViewable& viewable);
+    unsigned int addHiddenFigure(const SectionContentViewable& viewable);
 
     std::shared_ptr<SectionContent> loadOrGetContent(size_t idx, 
-                                                     bool is_extra_content,
-                                                     bool show_dialog = false);
-
+                                                     bool is_hidden_content,
+                                                     bool show_dialog = false) const;
     static unsigned int newContentID();
 
     std::string heading_;          // name same as heading
@@ -187,19 +183,17 @@ protected:
     bool per_target_section_ {false};
     bool per_target_section_with_issues_ {false};
 
-    std::vector<int>                             content_types_;
-    std::vector<std::string>                     content_names_;
-    std::vector<unsigned int>                    content_ids_;
-    std::vector<std::shared_ptr<SectionContent>> content_;
+    std::vector<int>                                     content_types_;
+    std::vector<std::string>                             content_names_;
+    std::vector<unsigned int>                            content_ids_;
+    mutable std::vector<std::shared_ptr<SectionContent>> content_;
 
-    std::vector<unsigned int>                    extra_content_ids_;
-    std::vector<std::shared_ptr<SectionContent>> extra_content_;
+    std::vector<unsigned int>                            hidden_content_ids_;
+    mutable std::vector<std::shared_ptr<SectionContent>> hidden_content_;
 
     std::unique_ptr<QWidget> content_widget_;
 
     std::vector<std::shared_ptr<Section>> sub_sections_;
-
-    nlohmann::json properties_;
 
     static unsigned int current_content_id_;
 };

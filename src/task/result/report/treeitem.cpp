@@ -26,59 +26,33 @@ namespace ResultReport
  */
 TreeItem::TreeItem(const std::string& name, 
                    TreeItem* parent_item)
-:   name_       (name       )
-,   parent_item_(parent_item)
+:   ReportItem(name, parent_item)
 {
-    updateID();
-
-    logdbg << "ResultReportTreeItem: constructor: id '" << id_ << "'";
 }
 
 /**
  */
 TreeItem::TreeItem(TreeItem* parent_item)
-:   parent_item_(parent_item)
+:   ReportItem(parent_item)
 {
 }
 
 /**
  */
-void TreeItem::setItemName(const std::string& name) 
-{
-    name_ = name;
-
-    updateID();
-}
-
-/**
- */
-void TreeItem::updateID()
-{
-    if (parent_item_)
-        id_ = parent_item_->id() + ":" + name_;
-    else
-        id_ = name_;
-}
+TreeItem::~TreeItem() = default;
 
 /**
  */
 TreeItem* TreeItem::parentItem()
 {
-    return parent_item_;
+    return dynamic_cast<TreeItem*>(parent_item_);
 }
 
 /**
  */
-std::string TreeItem::name() const
+const TreeItem* TreeItem::parentItem() const
 {
-    return name_;
-}
-
-/**
- */
-std::string TreeItem::id() const
-{
-    return id_;
+    return dynamic_cast<const TreeItem*>(parent_item_);
 }
 
 }

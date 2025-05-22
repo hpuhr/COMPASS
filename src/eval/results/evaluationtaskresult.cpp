@@ -326,7 +326,7 @@ bool EvaluationTaskResult::loadOnDemandViewable_impl(const ResultReport::Section
     if (!calculator_)
         return false;
 
-    if (content.type() == ResultReport::SectionContent::Type::Table)
+    if (content.contentType() == ResultReport::SectionContent::ContentType::Table)
     {
         if (content.name() == EvaluationRequirementResult::Single::TRDetailsTableName)
         {
@@ -436,7 +436,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
     if (!calculator_)
         return false;
 
-    if (content->type() == ResultReport::SectionContent::Type::Table)
+    if (content->contentType() == ResultReport::SectionContent::ContentType::Table)
     {
         if (content->name() == EvaluationData::TargetsTableName)
         {

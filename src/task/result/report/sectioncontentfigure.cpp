@@ -48,7 +48,7 @@ SectionContentFigure::SectionContentFigure(unsigned int id,
                                            const std::string& name, 
                                            const SectionContentViewable& viewable,
                                            Section* parent_section)
-:   SectionContent(Type::Figure, id, name, parent_section)
+:   SectionContent(ContentType::Figure, id, name, parent_section)
 ,   fig_type_     (figure_type)
 {
     setViewable(viewable);
@@ -57,7 +57,7 @@ SectionContentFigure::SectionContentFigure(unsigned int id,
 /**
  */
 SectionContentFigure::SectionContentFigure(Section* parent_section)
-:   SectionContent(Type::Figure, parent_section)
+:   SectionContent(ContentType::Figure, parent_section)
 {
 }
 
@@ -85,7 +85,7 @@ void SectionContentFigure::addToLayout(QVBoxLayout* layout)
 
     QHBoxLayout* fig_layout = new QHBoxLayout();
 
-    fig_layout->addWidget(new QLabel(("Figure: " + name_).c_str()));
+    fig_layout->addWidget(new QLabel(("Figure: " + name()).c_str()));
     fig_layout->addStretch();
 
     QPushButton* view_button = new QPushButton("View");
@@ -102,7 +102,7 @@ void SectionContentFigure::accept(LatexVisitor& v)
     loginf << "SectionContentFigure: accept";
 
     //do not add content figures to latex
-    if (fig_type_ == FigureType::Content)
+    if (fig_type_ == FigureType::Hidden)
         return;
 
     //@TODO
@@ -143,9 +143,7 @@ void SectionContentFigure::view() const
  */
 std::string SectionContentFigure::getSubPath() const
 {
-    assert (parent_section_);
-
-    return ResultReport::SectionID::sectionID2Path(parent_section_->compoundResultsHeading());
+    return ResultReport::SectionID::sectionID2Path(parentSection()->compoundResultsHeading());
 }
 
 /**
@@ -175,6 +173,9 @@ void SectionContentFigure::clearContent_impl()
  */
 void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
 {
+    //call base
+    SectionContent::toJSON_impl(root_node);
+
     root_node[ FieldFigureType      ] = fig_type_;
     root_node[ FieldCaption         ] = caption_;
     root_node[ FieldRenderDelayMSec ] = render_delay_msec_;
@@ -194,6 +195,10 @@ void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
  */
 bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
 {
+    //call base
+    if (!SectionContent::fromJSON_impl(j))
+        return false;
+
     if (!j.is_object()                    ||
         !j.contains(FieldFigureType)      ||
         !j.contains(FieldCaption)         ||
