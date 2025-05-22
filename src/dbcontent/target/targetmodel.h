@@ -77,7 +77,10 @@ public:
     void setUseTargetData (unsigned int utn, bool value);
     void setTargetDataComment (unsigned int utn, std::string comment);
     void setUseAllTargetData (bool value);
-    void clearComments ();
+
+    void clearComments();
+    void clearEvalExcludeTimeWindows();
+    void clearEvalExcludeRequirements();
 
     void setUseByFilter ();
 
@@ -90,7 +93,7 @@ public:
     const dbContent::Target& target(unsigned int utn) const;
     unsigned int size() const;
 
-    void removeDBContentFromTargets(const std::string& dbcont_name);
+    //void removeDBContentFromTargets(const std::string& dbcont_name);
 
     void storeTargetsEvalInfo();
 

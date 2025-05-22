@@ -1576,11 +1576,11 @@ dbContent::Target& DBContentManager::target(unsigned int utn)
 
 /**
  */
-void DBContentManager::removeDBContentFromTargets(const std::string& dbcont_name)
-{
-    target_model_->removeDBContentFromTargets(dbcont_name);
-    saveTargets();
-}
+// void DBContentManager::removeDBContentFromTargets(const std::string& dbcont_name)
+// {
+//     target_model_->removeDBContentFromTargets(dbcont_name);
+//     saveTargets();
+// }
 
 /**
  */

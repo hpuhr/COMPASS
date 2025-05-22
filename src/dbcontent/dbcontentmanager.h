@@ -161,7 +161,7 @@ public:
     bool existsTarget(unsigned int utn);
     void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     dbContent::Target& target(unsigned int utn);
-    void removeDBContentFromTargets(const std::string& dbcont_name);
+    //void removeDBContentFromTargets(const std::string& dbcont_name);
     void loadTargets();
     void saveTargets();
     unsigned int numTargets() const;

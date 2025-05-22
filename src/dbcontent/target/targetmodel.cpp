@@ -391,21 +391,21 @@ void TargetModel::setUseAllTargetData (bool value)
 {
     loginf << "TargetModel: setUseAllTargetData: value " << value;
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    //QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     beginResetModel();
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [value](Target& p) { p.useInEval(value); });
 
-    saveToDB();
+    //saveToDB();
 
     endResetModel();
 
     dbcont_manager_.storeTargetsEvalInfo();
     emit dbcont_manager_.allTargetsChangedSignal();
 
-    QApplication::restoreOverrideCursor();
+    //QApplication::restoreOverrideCursor();
 }
 
 /**
@@ -414,20 +414,47 @@ void TargetModel::clearComments ()
 {
     loginf << "TargetModel: clearComments";
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
     beginResetModel();
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [](Target& p) { p.comment(""); });
 
-    saveToDB();
+    //saveToDB();
 
     endResetModel();
 
     emit dbcont_manager_.allTargetsChangedSignal();
+}
 
-    QApplication::restoreOverrideCursor();
+void TargetModel::clearEvalExcludeTimeWindows()
+{
+    loginf << "TargetModel: clearEvalExcludeTimeWindows";
+
+    beginResetModel();
+
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [](Target& p) { p.evalExcludedTimeWindows().clear(); });
+
+    //saveToDB();
+
+    endResetModel();
+
+    emit dbcont_manager_.allTargetsChangedSignal();
+}
+void TargetModel::clearEvalExcludeRequirements()
+{
+    loginf << "TargetModel: clearEvalExcludeTimeWindows";
+
+    beginResetModel();
+
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [](Target& p) { p.evalExcludedRequirements().clear(); });
+
+    //saveToDB();
+
+    endResetModel();
+
+    emit dbcont_manager_.allTargetsChangedSignal();
 }
 
 /**
@@ -440,7 +467,7 @@ void TargetModel::setUseByFilter ()
 
     COMPASS::instance().evaluationManager().targetFilter().setUse(target_data_);
 
-    saveToDB();
+    //saveToDB();
 
     endResetModel();
 
@@ -564,11 +591,11 @@ unsigned int TargetModel::size() const
 
 /**
  */
-void TargetModel::removeDBContentFromTargets(const std::string& dbcont_name)
-{
-    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-        target_data_.modify(target_it, [dbcont_name](Target& p) { p.clearDBContentCount(dbcont_name); });
-}
+// void TargetModel::removeDBContentFromTargets(const std::string& dbcont_name)
+// {
+//     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+//         target_data_.modify(target_it, [dbcont_name](Target& p) { p.clearDBContentCount(dbcont_name); });
+// }
 
 void TargetModel::storeTargetsEvalInfo()
 {
