@@ -15,86 +15,29 @@ layout crop_features="true"
             <color>#000000FF</color>
         </terrain>
     </options>
-
-    <feature_model name="world boundaries">
-        <features name="world boundaries" driver="ogr">
-            <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
-        </features>       
-        
-        <styles>
-            <style type="text/css">
-                states {
-                   stroke:                   #ffff00;
-                   stroke-width:             2px;
-                   render-lighting:          false;
-                   stroke-tessellation-size: 1km;
-                   altitude-clamping:   terrain-gpu;
-                   render-depth-offset:      true;     
-                }                    
-            </style>
-        </styles>        
-    </feature_model>
     
-    <feature_model name="Airports Europe">
-        <features name="Airports Europe" driver="ogr">
-            <url>shapefiles/AIRP_PT_2013.shp</url>
-            <build_spatial_index>true</build_spatial_index>
-        </features>       
-        
-        <layout>
-            <level name="far"    style="large"  max_range="1e10"/>
-            <level name="medium" style="medium" max_range="3000000"/>
-            <level name="close"  style="small"  max_range="500000"/>
-        </layout>
+    <OGRFeatures name="world-data">
+        <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
+    </OGRFeatures>
+  
+  <FeatureModel name="world_boundaries" features="world-data">
+      <styles>
+          <style type="text/css">
+              world {
+                 stroke:       #ffff00;
+                 stroke-width: 2px;
+                 stroke-smooth:            true;
+                 render-anti-aliased:  true;
+                 stroke-tessellation-size: 500m;
+                 altitude-clamping:        terrain-gpu;
+                 altitude-technique:       scene;
+                 render-clip-plane: 0;
+                 render-anti-aliased:      true;
+                 render-depth-test: false;
+              }                
+          </style>
+      </styles>
+  </FeatureModel>
 
-        <styles>
-            <selector name="large" class="label-large">
-                <query>
-                    <expr> <![CDATA[ AIRP_PASS = 2 ]]> </expr>
-                </query>
-            </selector>
-            
-            <selector name="medium" class="label-medium">
-                <query>
-                    <expr> <![CDATA[ AIRP_PASS = 1 ]]> </expr>
-                </query>
-            </selector>
-            
-            <selector name="small" class="label-small">
-                <query>
-                    <expr> <![CDATA[ AIRP_PASS = 0 ]]> </expr>
-                </query>
-            </selector>
-            
-            <style type="text/css">   
-                label {
-                    text-declutter: true;
-                    text-content:   [AIRP_ICAO_];
-                    text-encoding:  utf-8;
-                    text-align:     right_right;
-                    text-priority:  [AIRP_PASS];
-                    text-halo:      #2f2f2f;
-                }                
-                label-large : label {
-                    text-size:      18.0;
-                    text-color: #ffffff;
-                    icon: "../icons/placemark.png";
-                    icon-scale:      0.7;
-                }
-                label-medium : label {
-                    text-size:      16.0;
-                    text-color: #eeeeee;
-                    icon: "../icons/placemark.png";
-                    icon-scale : 0.6;
-                }           
-                label-small : label {
-                    text-size:      14.0;
-                    text-color: #dddddd;
-                    icon: "../icons/placemark.png";
-                    icon-scale : 0.5;
-                }
-            </style>
-        </styles>
-    </feature_model>
     
 </map>
