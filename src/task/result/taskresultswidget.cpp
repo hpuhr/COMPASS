@@ -51,17 +51,31 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
 
     top_layout->addWidget(report_combo_);
 
-    remove_result_button_ = new QPushButton("Remove Result");
+    refresh_result_button_ = new QPushButton();
+    refresh_result_button_->setIcon(Files::IconProvider::getIcon("refresh.png"));
+    refresh_result_button_->setEnabled(false);
+    refresh_result_button_->setFlat(true);
+    refresh_result_button_->setToolTip("Refresh Result");
+
+    connect(refresh_result_button_, &QPushButton::pressed, this, &TaskResultsWidget::refreshCurrentResult);
+
+    top_layout->addWidget(refresh_result_button_);
+
+    remove_result_button_ = new QPushButton();
     remove_result_button_->setIcon(Files::IconProvider::getIcon("delete.png"));
     remove_result_button_->setEnabled(false);
+    remove_result_button_->setFlat(true);
+    remove_result_button_->setToolTip("Remove Result");
 
     connect(remove_result_button_, &QPushButton::pressed, this, &TaskResultsWidget::removeCurrentResult);
 
     top_layout->addWidget(remove_result_button_);
 
-    export_result_button_ = new QPushButton("Export Result");
+    export_result_button_ = new QPushButton();
     export_result_button_->setIcon(Files::IconProvider::getIcon("right.png"));
     export_result_button_->setEnabled(false);
+    export_result_button_->setFlat(true);
+    export_result_button_->setToolTip("Export Result");
 
     connect(export_result_button_, &QPushButton::pressed, this, &TaskResultsWidget::exportCurrentResult);
 
@@ -85,6 +99,8 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
 
     connect (&task_man, &TaskManager::taskResultsChangedSignal,
             this, &TaskResultsWidget::updateResultsSlot);
+    connect (&task_man, &TaskManager::taskResultChangedSignal,
+            this, &TaskResultsWidget::updateResult);
 }
 
 /**
@@ -132,6 +148,8 @@ void TaskResultsWidget::setReport(const std::string name)
         report_widget_->selectId(task_man_.result(name)->startSection());
 
     report_widget_->setDisabled(false);
+
+    updateResultUI(name);
 }
 
 /**
@@ -193,6 +211,26 @@ void TaskResultsWidget::updateResults(const std::string& selected_result)
 
 /**
  */
+void TaskResultsWidget::updateResult(const QString& name)
+{
+    updateResultUI(name.toStdString());
+}
+
+/**
+ */
+void TaskResultsWidget::updateResultUI(const std::string& name)
+{
+    if (current_report_name_ != name)
+        return;
+
+    auto result = task_man_.result(name);
+    assert(result);
+
+    refresh_result_button_->setEnabled(result->updateNeeded());
+}
+
+/**
+ */
 bool TaskResultsWidget::removeResult(const std::string& name)
 {
     return task_man_.removeResult(name, false);
@@ -248,6 +286,21 @@ void TaskResultsWidget::exportCurrentResult()
     {
         logerr << "TaskResultsWidget: exportCurrentResult: Exporting result failed: " << res.error();
         QMessageBox::critical(this, "Error", "Exporting report failed.");
+    }
+}
+
+/**
+ */
+void TaskResultsWidget::refreshCurrentResult()
+{
+    auto name = report_combo_->currentText().toStdString();
+    assert(task_man_.hasResult(name));
+
+    auto res = task_man_.result(name)->update(true);
+    if (!res.ok())
+    {
+        logerr << "TaskResultsWidget: refreshCurrentResult: failed: " << res.error();
+        QMessageBox::critical(this, "Error", "Refreshing result failed.");
     }
 }
 

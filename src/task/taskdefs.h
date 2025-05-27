@@ -24,4 +24,12 @@ namespace task
         Generic = 0,
         Evaluation
     };
+
+    enum UpdateEvent
+    {
+        NoUpdate = 0, // no update needed
+        Content,      // specific contents need update (e.g. tables)
+        Partial,      // partial update needed
+        Complete      // full update needed
+    };
 }

@@ -60,6 +60,7 @@ signals:
     void quitRequestedSignal ();
 
     void taskResultsChangedSignal();
+    void taskResultChangedSignal(const QString& result_name);
 
 public slots:
     void databaseOpenedSlot();
@@ -108,6 +109,8 @@ public:
     
     std::shared_ptr<TaskResult> createResult(unsigned int id, 
                                              task::TaskResultType type);
+
+    void resultChanged(const TaskResult& result);
     
     void setViewableDataConfig(const nlohmann::json::object_t& data);
     void unsetViewableDataConfig();

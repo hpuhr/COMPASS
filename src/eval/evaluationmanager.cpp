@@ -41,6 +41,7 @@
 #include "util/timeconv.h"
 #include "viewpoint.h"
 #include "evaluationtargetfilter.h"
+#include "taskdefs.h"
 
 #include "json.hpp"
 
@@ -345,20 +346,21 @@ void EvaluationManager::targetInfoChangedSlot()
 {
     loginf << "EvaluationManager: targetInfoChangedSlot";
 
-    // TODO
+    emit resultsNeedUpdate(task::UpdateEvent::Content);
 }
 
 void EvaluationManager::partialResultsUpdateNeededSlot()
 {
     loginf << "EvaluationManager: partialResultsUpdateNeededSlot";
 
-    // TODO
+    emit resultsNeedUpdate(task::UpdateEvent::Partial);
 }
+
 void EvaluationManager::fullResultsUpdateNeededSlot()
 {
     loginf << "EvaluationManager: fullResultsUpdateNeededSlot";
 
-    // TODO
+    emit resultsNeedUpdate(task::UpdateEvent::Complete);
 }
 
 void EvaluationManager::saveTimeConstraints()

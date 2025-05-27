@@ -25,6 +25,7 @@
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/sectioncontenttable.h"
 #include "task/result/report/section.h"
+#include "task/taskdefs.h"
 
 #include "compass.h"
 #include "logger.h"
@@ -111,6 +112,10 @@ Result EvaluationTaskResult::finalizeResult_impl()
     auto res = createCalculator();
     if (!res.ok())
         return res;
+
+    //connect to eval manager
+    auto& eval_manager = COMPASS::instance().evaluationManager();
+    connect(&eval_manager, &EvaluationManager::resultsNeedUpdate, this, &EvaluationTaskResult::informUpdateEvalResult);
 
     return Result::succeeded();
 }
@@ -772,6 +777,27 @@ void EvaluationTaskResult::jumpToRequirement(const Evaluation::RequirementSumRes
     loginf << "EvaluationTaskResult: jumpToRequirement: utn id: " << utn_id;
 
     report_->setCurrentSection(utn_id, show_image);
+}
+
+/**
+ */
+void EvaluationTaskResult::informUpdateEvalResult(int update_type)
+{
+    TaskResult::ContentID content_id;
+    if (update_type == task::Content)
+    {
+        content_id = TaskResult::ContentID(EvaluationData::SectionID, EvaluationData::TargetsTableName);
+        updateTargets();
+    }
+
+    //inform update
+    informUpdate((task::UpdateEvent)update_type, content_id);
+
+    if (update_type == task::Content)
+    {
+        //in case of content update run update immediately
+        //auto res = update(true);
+    }
 }
 
 /**

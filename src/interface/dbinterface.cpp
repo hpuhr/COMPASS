@@ -1720,6 +1720,21 @@ void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Targe
 }
 
 /**
+ * Inserts or updates individual targets.
+ * Note: Slow when applied to many targets, because each target is inserted/updated individually. 
+ * Use updateTargets() to update many targets.
+ */
+void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
+                              const std::set<unsigned int>& utns)
+{
+    loginf << "DBInterface: saveTargets: saving " << utns.size() << " utn(s)";
+
+    for (const auto& t : targets)
+        if (utns.count(t->utn()))
+            saveTarget(t);
+}
+
+/**
  */
 void DBInterface::saveTarget(const std::unique_ptr<dbContent::Target>& target)
 {
@@ -1736,6 +1751,39 @@ void DBInterface::saveTarget(const std::unique_ptr<dbContent::Target>& target)
 
         // uses replace with utn as unique key
         execute(str);
+    }
+}
+
+/**
+ * Updates existing targets.
+ * Note: This is faster than saveTargets() when many targets are updated.
+ */
+void DBInterface::updateTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
+                                const std::set<unsigned int>& utns)
+{
+    loginf << "DBInterface: updateTargets: updating " << utns.size() << " utn(s)";
+
+    assert(ready());
+
+    {
+        //updating many targets at once via a buffer is faster 
+        std::shared_ptr<Buffer> buffer(new Buffer(dbContent::Target::DBPropertyList));
+
+        auto& id_vec   = buffer->get<unsigned int>(dbContent::Target::DBColumnID.name());
+        auto& info_vec = buffer->get<nlohmann::json>(dbContent::Target::DBColumnInfo.name());
+
+        size_t idx = 0;
+        for (auto& tgt_it : targets)
+        {
+            if (utns.count(tgt_it->utn()) == 0)
+                continue;
+
+            id_vec.set(idx, tgt_it->utn_);
+            info_vec.set(idx, tgt_it->info());
+            ++idx;
+        }
+
+        updateBuffer(TABLE_NAME_TARGETS, Target::DBColumnID.name(), buffer);
     }
 }
 

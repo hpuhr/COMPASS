@@ -60,6 +60,8 @@ signals:
     void resultsChangedSignal();
     void hasNewData();
 
+    void resultsNeedUpdate(int type);
+
 public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
