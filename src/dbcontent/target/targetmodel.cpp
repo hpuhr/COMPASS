@@ -246,15 +246,8 @@ Qt::ItemFlags TargetModel::flags(const QModelIndex &index) const
 
     assert (index.column() < table_columns_.size());
 
-    // if (index.column() == ColUseEval) // Use
-    // {
-    //     return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
-    // }
-    // else
     if (index.column() == ColComment) // comment
-    {
         return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
-    }
     else
         return QAbstractItemModel::flags(index);
 }
@@ -355,6 +348,8 @@ void TargetModel::setEvalUseTarget (unsigned int utn, bool value)
 
     updateEvalUseColumn();
     emit targetEvalUsageChangedSignal();
+
+    updateToDB(utn);
 }
 
 void TargetModel::setEvalUseTarget (std::set<unsigned int> utns, bool value)
@@ -364,6 +359,8 @@ void TargetModel::setEvalUseTarget (std::set<unsigned int> utns, bool value)
 
     updateEvalUseColumn();
     emit targetEvalUsageChangedSignal();
+
+    updateToDB(utns);
 }
 
 /**
@@ -377,6 +374,8 @@ void TargetModel::setAllUseTargets (bool value)
 
     updateEvalUseColumn();
     emit targetEvalUsageChangedSignal();
+
+    saveToDB();
 }
 
 /**
@@ -405,7 +404,7 @@ void TargetModel::setTargetComment (unsigned int utn, std::string comment)
     updateCommentColumn();
     emit targetInfoChangedSignal();
 
-    saveToDB(utn);
+    updateToDB(utn);
 }
 
 void TargetModel::setTargetComment (std::set<unsigned int> utns, std::string comment)
@@ -416,7 +415,7 @@ void TargetModel::setTargetComment (std::set<unsigned int> utns, std::string com
     updateCommentColumn();
     emit targetInfoChangedSignal();
 
-    saveToDB(utns);
+    updateToDB(utns);
 }
 
 /**
@@ -444,7 +443,7 @@ void TargetModel::setEvalExcludeTimeWindows(
     updateEvalDetailsColumn();
     emit targetEvalFullChangeSignal();
 
-    saveToDB(utns);
+    updateToDB(utns);
 }
 
 void TargetModel::clearEvalExcludeTimeWindows(std::set<unsigned int> utns)
@@ -455,7 +454,7 @@ void TargetModel::clearEvalExcludeTimeWindows(std::set<unsigned int> utns)
     updateEvalDetailsColumn();
     emit targetEvalFullChangeSignal();
 
-    saveToDB(utns);
+    updateToDB(utns);
 }
 
 void TargetModel::clearAllEvalExcludeTimeWindows()
@@ -479,7 +478,7 @@ void TargetModel::setEvalExcludeRequirements(std::set<unsigned int> utns, const 
     updateEvalDetailsColumn();
     emit targetEvalUsageChangedSignal();
 
-    saveToDB(utns);
+    updateToDB(utns);
 }
 
 void TargetModel::clearEvalExcludeRequirements(std::set<unsigned int> utns)
@@ -490,7 +489,7 @@ void TargetModel::clearEvalExcludeRequirements(std::set<unsigned int> utns)
     updateEvalDetailsColumn();
     emit targetEvalUsageChangedSignal();
 
-    saveToDB(utns);
+    updateToDB(utns);
 }
 
 void TargetModel::clearAllEvalExcludeRequirements()
@@ -773,7 +772,7 @@ void TargetModel::saveToDB()
 
 /**
  */
-void TargetModel::saveToDB(unsigned int utn)
+void TargetModel::updateToDB(unsigned int utn)
 {
     loginf << "TargetModel: saveToDB: saving utn " << utn;
 
@@ -785,10 +784,10 @@ void TargetModel::saveToDB(unsigned int utn)
 
     targets_info[tr_tag_it->utn_] = tr_tag_it->info();
 
-    COMPASS::instance().dbInterface().saveTargets(targets_info);
+    COMPASS::instance().dbInterface().updateTargets(targets_info);
 }
 
-void TargetModel::saveToDB(std::set<unsigned int> utns)
+void TargetModel::updateToDB(std::set<unsigned int> utns)
 {
     loginf << "TargetModel: saveToDB: saving utns " << String::compress(utns,',');
 
@@ -801,7 +800,7 @@ void TargetModel::saveToDB(std::set<unsigned int> utns)
         targets_info[tgt.utn_] = tgt.info();
     }
 
-    COMPASS::instance().dbInterface().saveTargets(targets_info);
+    COMPASS::instance().dbInterface().updateTargets(targets_info);
 }
 
 /**
