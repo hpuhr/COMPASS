@@ -1,10 +1,18 @@
 FROM debian:10
 
-ENV USER_NAME=sk
-ENV USER_ID=1000
-ENV USER_GROUP_ID=1000
+ARG USER_NAME
+ARG USER_ID
+ARG USER_GROUP_ID
 
 ARG DEBIAN_FRONTEND=noninteractive
+
+ENV USER_NAME=${USER_NAME} \
+    USER_ID=${USER_ID} \
+    USER_GROUP_ID=${USER_GROUP_ID}
+
+RUN echo ">>> USER_NAME=${USER_NAME}" \
+ && echo ">>> USER_ID=${USER_ID}" \
+ && echo ">>> USER_GROUP_ID=${USER_GROUP_ID}"
 
 RUN apt-get update
 RUN apt-get install -y openssl
@@ -67,13 +75,8 @@ RUN apt-get install gedit khronos-api libgl1-mesa-dev libegl1-mesa-dev libxkbcom
 RUN apt-get install qt5-* libqt5* -y
 
 ENV QT_SELECT=5
-ENV QT_QPA_PLATFORMTHEME=gtk3
-ENV UBUNTU_MENUPROXY=
-#ENV QT_STYLE_OVERRIDE=adwaita
-#ENV QTDIR=/qt/${QT_VERSION_A}
-#ENV PATH="${QTDIR}/gcc_64/bin:${PATH}"
-#ENV QTTOOLDIR="${QTDIR}/gcc_64/bin"
-#ENV QTLIBDIR="${QTDIR}/gcc_64/"
+#ENV QT_QPA_PLATFORMTHEME=gtk3
+#ENV UBUNTU_MENUPROXY=
 
 RUN apt-get install libgif-dev -y
 RUN apt-get install libjpeg-dev -y
@@ -108,7 +111,8 @@ RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.5/build
 #RUN sed -i '461a message("  OPENGL_PROFILE: ${OPENGL_PROFILE}")' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
 #RUN sed -i '502a message("  OSG_GL3_AVAILABLE: ${OSG_GL3_AVAILABLE}")' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
 
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DOPENGL_PROFILE=GL2 -DCMAKE_CXX_STANDARD=11 ..
+#-DOPENGL_PROFILE=GL2
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=11 ..
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make -j$(nproc)
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make install
 RUN osgversion

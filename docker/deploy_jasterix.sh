@@ -7,12 +7,12 @@ mkdir -p appimage/appdir/lib/
 cp /usr/lib/libjasterix.a appimage/appdir/lib/
 
 
-if [[ $1 == "oldos" ]]
+if [[ $1 == "deb9" ]]
 then
-/app/tools/linuxdeployqt-oldos-x86_64.AppImage --appimage-extract-and-run appimage/appdir/jasterix.desktop -appimage -bundle-non-qt-libs -verbose=2
-elif [[ $1 == "newos" ]]
+  /app/workspace/compass/docker/linuxdeployqt/linuxdeployqt-deb9-x86_64.AppImage --appimage-extract-and-run appimage/appdir/jasterix.desktop -appimage -bundle-non-qt-libs -verbose=2
+elif [[ $1 == "deb10" ]]
 then	
-/app/tools/linuxdeployqt-continuous-x86_64.AppImage --appimage-extract-and-run appimage/appdir/jasterix.desktop -appimage -bundle-non-qt-libs -verbose=2
+/app/workspace/compass/docker/linuxdeployqt/linuxdeployqt-deb10-x86_64.AppImage --appimage-extract-and-run appimage/appdir/jasterix.desktop -appimage -bundle-non-qt-libs -verbose=2
 fi
 
 cd definitions/
