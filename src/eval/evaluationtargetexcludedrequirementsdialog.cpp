@@ -90,7 +90,9 @@ EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirements
 
     main_layout->addWidget(new QLabel("Comment"));
 
-    QLineEdit* comment_edit_ = new QLineEdit(comment.c_str());
+    comment_edit_ = new QLineEdit(comment.c_str());
+    comment_edit_->setMinimumHeight(QFontMetrics(comment_edit_->font()).height() * 3);
+
     main_layout->addWidget(comment_edit_);
 
     main_layout->addStretch();
