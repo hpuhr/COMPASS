@@ -475,6 +475,7 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
     std::set<unsigned int> selected_utns = selectedUTNs();
 
     Utils::TimeWindowCollection filtered_time_windows;
+        set<string> comments;
 
     // collect all time windows from all targets
     for (auto utn : selected_utns)
@@ -488,13 +489,20 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
             if (!filtered_time_windows.contains(tw))
                 filtered_time_windows.add(tw);
         }
+
+        if (target.comment().size() && !comments.count(target.comment()))
+            comments.insert(target.comment());
     }
 
-    EvaluationTargetExcludedTimeWindowsDialog dialog (String::compress(selected_utns, ','), filtered_time_windows);
+    EvaluationTargetExcludedTimeWindowsDialog dialog (String::compress(selected_utns, ','),
+                                                     filtered_time_windows,
+                                                     String::compress(comments, '\n'));
     int result = dialog.exec();
 
     if (result == QDialog::Rejected)
         return;
+
+    string comment = dialog.comment();
 
     // set time windows for all targets
     for (auto utn : selected_utns)
@@ -504,6 +512,10 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
         auto& target = dbcont_man.target(utn);
 
         target.evalExcludedTimeWindows() = filtered_time_windows;
+
+        if (comment.size())
+            target.comment(comment);
+
         target.storeEvalutionInfo();
     }
 
@@ -532,6 +544,7 @@ void TargetListWidget::evalExcludeRequirementsTargetSlot()
 
     set<string> selected_requirements;
     set<string> all_requirements = eval_man.calculator().currentStandard().getAllRequirementNames();
+    set<string> comments;
 
     // collect all time windows from all targets
     for (auto utn : selected_utns)
@@ -545,16 +558,21 @@ void TargetListWidget::evalExcludeRequirementsTargetSlot()
             if (!selected_requirements.count(req_name))
                 selected_requirements.insert(req_name);
         }
+
+        if (target.comment().size() && !comments.count(target.comment()))
+            comments.insert(target.comment());
     }
 
     EvaluationTargetExcludedRequirementsDialog dialog (String::compress(selected_utns, ','),
-                                                      selected_requirements, all_requirements);
+                                                      selected_requirements, all_requirements,
+                                                      String::compress(comments, '\n'));
     int result = dialog.exec();
 
     if (result == QDialog::Rejected)
         return;
 
     selected_requirements = dialog.selectedRequirements();
+    string comment = dialog.comment();
 
     // set reqs for all targets
     for (auto utn : selected_utns)
@@ -564,6 +582,10 @@ void TargetListWidget::evalExcludeRequirementsTargetSlot()
         auto& target = dbcont_man.target(utn);
 
         target.evalExcludedRequirements() = selected_requirements;
+
+        if (comment.size())
+            target.comment(comment);
+
         target.storeEvalutionInfo();
     }
 

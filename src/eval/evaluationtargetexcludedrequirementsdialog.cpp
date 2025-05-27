@@ -20,7 +20,7 @@ using namespace Utils;
 
 EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirementsDialog(
     const std::string utn_str, std::set<std::string> selected_requirements,
-    std::set<std::string> available_requirements, QWidget* parent)
+    std::set<std::string> available_requirements, std::string comment, QWidget* parent)
     : QDialog(parent)
     , selected_requirements_(std::move(selected_requirements))
     , available_requirements_(std::move(available_requirements))
@@ -88,6 +88,11 @@ EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirements
     scroll_area_->setWidget(scroll_widget_);
     main_layout->addWidget(scroll_area_);
 
+    main_layout->addWidget(new QLabel("Comment"));
+
+    QLineEdit* comment_edit_ = new QLineEdit(comment.c_str());
+    main_layout->addWidget(comment_edit_);
+
     main_layout->addStretch();
 
     // buttons
@@ -112,4 +117,10 @@ EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirements
 std::set<std::string> EvaluationTargetExcludedRequirementsDialog::selectedRequirements() const
 {
     return selected_requirements_;
+}
+
+std::string EvaluationTargetExcludedRequirementsDialog::comment() const
+{
+    assert (comment_edit_);
+    return comment_edit_->text().toStdString();
 }
