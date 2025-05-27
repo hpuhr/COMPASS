@@ -138,7 +138,8 @@ const nlohmann::json& TaskResult::configuration() const
 /**
  */
 void TaskResult::informUpdate(UpdateEvent evt, 
-                              const ContentID& cid)
+                              const ContentID& cid,
+                              bool inform_manager)
 {
     //"biggest" update wins
     if (evt > update_evt_)
@@ -157,6 +158,10 @@ void TaskResult::informUpdate(UpdateEvent evt,
         //content info not needed any more
         update_contents_.clear();
     }
+
+    //inform task manager?
+    if (inform_manager)
+        task_manager_.resultChanged(*this);
 }
 
 /**
@@ -190,7 +195,8 @@ Result TaskResult::canUpdate() const
 
 /**
  */
-Result TaskResult::update(bool restore_section)
+Result TaskResult::update(bool restore_section,
+                          bool inform_manager)
 {
     if (!updateNeeded())
         return Result::succeeded();
@@ -215,7 +221,7 @@ Result TaskResult::update(bool restore_section)
     }
     else if (update_evt_ != UpdateEvent::NoUpdate)
     {
-        loginf << "TaskResult: update: running " << (update_evt_ == Partial ? "partial" : "full") << " update";
+        loginf << "TaskResult: update: running " << (update_evt_ == UpdateEvent::Partial ? "partial" : "full") << " update";
 
         //partial and full update
         r = update_impl(update_evt_);
@@ -237,6 +243,10 @@ Result TaskResult::update(bool restore_section)
     //restore current section in widgets if desired
     if (restore_needed && restore_section)
         task_manager_.restoreBackupSection();
+
+    //inform task manager?
+    if (inform_manager)
+        task_manager_.resultChanged(*this);
 
     return Result::succeeded();
 }

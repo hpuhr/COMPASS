@@ -47,16 +47,20 @@ public:
 
 protected:
     void updateResults(const std::string& selected_result = "");
+    void updateResult(const QString& name);
+    void updateResultUI(const std::string& name);
+
     void removeCurrentResult();
     bool removeResult(const std::string& name);
     void exportCurrentResult();
+    void refreshCurrentResult();
 
     TaskManager& task_man_;
 
-    QComboBox* report_combo_ {nullptr};
-    QPushButton* remove_result_button_ {nullptr};
-    QPushButton* export_result_button_ {nullptr};
-    
+    QComboBox*   report_combo_          {nullptr};
+    QPushButton* remove_result_button_  {nullptr};
+    QPushButton* export_result_button_  {nullptr};
+    QPushButton* refresh_result_button_ {nullptr};
 
     std::string current_report_name_;
     std::string current_report_name_backup_;

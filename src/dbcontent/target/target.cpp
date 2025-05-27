@@ -30,7 +30,7 @@ const std::string Target::KEY_ECAT                       = "emitter_category";
 const Property     Target::DBColumnID     = Property("utn" , PropertyDataType::UINT);
 const Property     Target::DBColumnInfo   = Property("json", PropertyDataType::JSON);
 const PropertyList Target::DBPropertyList = PropertyList({ Target::DBColumnID,
-                                                          Target::DBColumnInfo });
+                                                           Target::DBColumnInfo });
 
 Target::Target(unsigned int utn, nlohmann::json info)
     : utn_(utn), info_(info)

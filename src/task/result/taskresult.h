@@ -50,16 +50,9 @@ class TaskResult
     friend class TaskManager; // to change id if required
 
 public:
-    enum UpdateEvent
-    {
-        NoUpdate = 0, // no update needed
-        Content,      // specific contents need update (e.g. tables)
-        Partial,      // partial update needed
-        Complete      // full update needed
-    };
-
     typedef std::shared_ptr<ResultReport::SectionContent> ContentPtr;
     typedef std::pair<std::string, std::string>           ContentID;
+    typedef task::UpdateEvent                             UpdateEvent;
 
     TaskResult(unsigned int id, 
                TaskManager& task_man);
@@ -83,9 +76,11 @@ public:
     bool updateNeeded() const;
     UpdateEvent neededUpdate() const;
     void informUpdate(UpdateEvent evt, 
-                      const ContentID& cid = ContentID());
+                      const ContentID& cid = ContentID(),
+                      bool inform_manager = true);
     Result canUpdate() const;
-    Result update(bool restore_section = false);
+    Result update(bool restore_section = false,
+                  bool inform_manager = true);
 
     Result initResult();
     Result finalizeResult();

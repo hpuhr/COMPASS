@@ -23,6 +23,8 @@
 
 #include <memory>
 
+#include <QObject>
+
 class QMenu;
 class QCheckBox;
 
@@ -30,7 +32,7 @@ class EvaluationCalculator;
 
 /**
  */
-class EvaluationTaskResult : public TaskResult
+class EvaluationTaskResult : public QObject, public TaskResult
 {
 public:
     EvaluationTaskResult(unsigned int id, 
@@ -84,7 +86,6 @@ protected:
     std::string customTooltip_impl(const ResultReport::SectionContentTable* table, 
                                    unsigned int row,
                                    unsigned int col) const override final;
-
 private:
     Result createCalculator();
 
@@ -102,6 +103,8 @@ private:
 
     void createInterestMenu(QMenu& menu);
     void createRequirementLinkMenu(unsigned int utn, QMenu& menu);
+
+    void informUpdateEvalResult(int update_type);
 
     mutable std::unique_ptr<EvaluationCalculator> calculator_;
     TargetMap                                     targets_;

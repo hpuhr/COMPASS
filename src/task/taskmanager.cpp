@@ -435,6 +435,15 @@ void TaskManager::endTaskResultWriting(bool store_result)
 
 /**
  */
+void TaskManager::resultChanged(const TaskResult& result)
+{
+    //@TODO: update result's info json in db
+
+    emit taskResultChangedSignal(QString::fromStdString(result.name()));
+}
+
+/**
+ */
 MainWindow* TaskManager::getMainWindow()
 {
     for(QWidget* pWidget : QApplication::topLevelWidgets())
