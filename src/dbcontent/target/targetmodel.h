@@ -37,6 +37,11 @@ class TargetModel : public QAbstractItemModel
 {
     Q_OBJECT
 
+signals:
+    void targetInfoChangedSignal();
+    void targetEvalUsageChangedSignal(); // for eval use flag, or disabled requirements (only)
+    void targetEvalFullChangeSignal(); // for full changes
+
 public:
     enum Columns
     {

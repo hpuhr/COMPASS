@@ -193,7 +193,7 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
 
         saveToDB(it->utn_);
 
-        emit dbcont_manager_.targetChangedSignal(it->utn_);
+        emit targetInfoChangedSignal();
 
         return true;
     }
@@ -403,7 +403,7 @@ void TargetModel::setUseAllTargetData (bool value)
     endResetModel();
 
     dbcont_manager_.storeTargetsEvalInfo();
-    emit dbcont_manager_.allTargetsChangedSignal();
+    emit targetEvalUsageChangedSignal();
 
     //QApplication::restoreOverrideCursor();
 }
@@ -423,7 +423,7 @@ void TargetModel::clearComments ()
 
     endResetModel();
 
-    emit dbcont_manager_.allTargetsChangedSignal();
+    emit targetInfoChangedSignal();
 }
 
 void TargetModel::clearEvalExcludeTimeWindows()
@@ -439,7 +439,7 @@ void TargetModel::clearEvalExcludeTimeWindows()
 
     endResetModel();
 
-    emit dbcont_manager_.allTargetsChangedSignal();
+    emit targetEvalFullChangeSignal();
 }
 void TargetModel::clearEvalExcludeRequirements()
 {
@@ -454,7 +454,7 @@ void TargetModel::clearEvalExcludeRequirements()
 
     endResetModel();
 
-    emit dbcont_manager_.allTargetsChangedSignal();
+    emit targetEvalUsageChangedSignal();
 }
 
 /**
@@ -471,7 +471,7 @@ void TargetModel::setUseByFilter ()
 
     endResetModel();
 
-    emit dbcont_manager_.allTargetsChangedSignal();
+    emit targetEvalUsageChangedSignal();
 }
 
 /**

@@ -152,6 +152,13 @@ void EvaluationManager::init()
 
     connect (&COMPASS::instance().dbContentManager(), &DBContentManager::associationStatusChangedSignal,
              this, &EvaluationManager::associationStatusChangedSlot);
+
+    connect (COMPASS::instance().dbContentManager().targetModel(), &dbContent::TargetModel::targetInfoChangedSignal,
+            this, &EvaluationManager::targetInfoChangedSlot);
+    connect (COMPASS::instance().dbContentManager().targetModel(), &dbContent::TargetModel::targetEvalUsageChangedSignal,
+            this, &EvaluationManager::partialResultsUpdateNeededSlot);
+    connect (COMPASS::instance().dbContentManager().targetModel(), &dbContent::TargetModel::targetEvalFullChangeSignal,
+            this, &EvaluationManager::fullResultsUpdateNeededSlot);
 }
 
 /**
@@ -332,6 +339,26 @@ void EvaluationManager::dataSourcesChangedSlot()
 void EvaluationManager::associationStatusChangedSlot()
 {
     // react on association status change
+}
+
+void EvaluationManager::targetInfoChangedSlot()
+{
+    loginf << "EvaluationManager: targetInfoChangedSlot";
+
+    // TODO
+}
+
+void EvaluationManager::partialResultsUpdateNeededSlot()
+{
+    loginf << "EvaluationManager: partialResultsUpdateNeededSlot";
+
+    // TODO
+}
+void EvaluationManager::fullResultsUpdateNeededSlot()
+{
+    loginf << "EvaluationManager: fullResultsUpdateNeededSlot";
+
+    // TODO
 }
 
 void EvaluationManager::saveTimeConstraints()
