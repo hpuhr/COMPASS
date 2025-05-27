@@ -29,6 +29,8 @@
 #include "eval/results/base/single.h"
 #include "eval/results/base/joined.h"
 
+#include "eval/results/report/evalsectionid.h"
+
 #include "dbcontentmanager.h"
 #include "dbinterface.h"
 
@@ -549,6 +551,10 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     // generate non-result details
     addNonResultsContent(report);
+
+    // disable per target result section for report exports (too detailed)
+    auto& target_sec = report->getSection(EvalSectionID::targetID());
+    target_sec.enableExports(false);   
 
     // store targets to result
     eval_result->setTargets(calculator_.data().toTargets());

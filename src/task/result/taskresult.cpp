@@ -22,11 +22,21 @@
 #include "task/result/report/sectioncontent.h"
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/reportexport.h"
+
+#include "compass.h"
+#include "dbcontentmanager.h"
+#include "viewmanager.h"
+#include "view.h"
 
 #include "timeconv.h"
 #include "logger.h"
+#include "files.h"
+
+#include <boost/filesystem.hpp>
 
 #include <QMenu>
+#include <QApplication>
 
 const std::string  TaskResult::DBTableName         = "task_results";
 const Property     TaskResult::DBColumnID          = Property("result_id"   , PropertyDataType::UINT  );
@@ -502,4 +512,57 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     }
 
     return true;
+}
+
+/**
+ */
+ResultT<nlohmann::json> TaskResult::exportResult(const std::string& fn,
+                                                 ResultReport::ReportExportMode mode)
+{
+    auto dir      = boost::filesystem::path(fn).parent_path().string();
+    auto filename = boost::filesystem::path(fn).filename().string();
+
+    std::string temp_dir = dir + "/" + "report_" + name() + "_" + filename;
+
+    ResultReport::ReportExport r_export;
+    return r_export.exportReport(*this, mode, fn, temp_dir);
+}
+
+/**
+ */
+std::vector<std::pair<QImage, std::string>> TaskResult::renderFigure(const ResultReport::SectionContentFigure& figure) const
+{
+    std::vector<std::pair<QImage, std::string>> renderings;
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+    ViewManager&      view_man   = COMPASS::instance().viewManager();
+
+    //while (QCoreApplication::hasPendingEvents())
+    QCoreApplication::processEvents();
+
+    figure.view();
+
+    while (dbcont_man.loadInProgress())
+        QCoreApplication::processEvents();
+
+    QCoreApplication::processEvents();
+
+    figure.executeRenderDelay();
+
+    for (auto& view_it : view_man.getViews())
+    {
+        //skip table views
+        if (view_it.second->classId() == "TableView")
+            continue;
+        
+        //skip views which show no data
+        if (view_it.second->classId() != "GeographicView" && !view_it.second->showsData())
+            continue;
+
+        //render view and collect
+        auto img = view_it.second->renderData();
+        renderings.emplace_back(img, view_it.second->instanceId());
+    }
+
+    return renderings;
 }

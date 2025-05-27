@@ -17,6 +17,8 @@
 
 #include "task/result/report/reportexport.h"
 #include "task/result/report/reportexporter.h"
+#include "task/result/report/reportexporterjson.h"
+#include "task/result/report/reportexporterlatex.h"
 
 namespace ResultReport
 {
@@ -38,10 +40,10 @@ ReportExport::~ReportExport()
 Result ReportExport::exportReport(TaskResult& result,
                                   ReportExportMode mode,
                                   const std::string& fn,
-                                  const std::string& temp_dir)
+                                  const std::string& resource_dir)
 {
     //create exporter
-    auto exporter = createExporter(mode, fn, temp_dir);
+    auto exporter = createExporter(mode, fn, resource_dir);
     if (!exporter)
         return Result::failed("Exporter could not be created for export type ''");
 
@@ -53,23 +55,23 @@ Result ReportExport::exportReport(TaskResult& result,
  */
 std::unique_ptr<ReportExporter> ReportExport::createExporter(ReportExportMode mode,
                                                              const std::string& fn,
-                                                             const std::string& temp_dir) const
+                                                             const std::string& resource_dir) const
 {
     if (mode == ReportExportMode::JSONFile)
     {
-        //@TODO
+        return std::unique_ptr<ReportExporter>(new ReportExporterJSONFile(this, fn, resource_dir));
     }
     else if (mode == ReportExportMode::JSONBlob)
     {
-        //@TODO
+        return std::unique_ptr<ReportExporter>(new ReportExporterJSONBlob(this, fn, resource_dir));
     }
     else if (mode == ReportExportMode::Latex)
     {
-        //@TODO
+        return std::unique_ptr<ReportExporter>(new ReportExporterLatexFiles(this, fn, resource_dir));
     }
-    else if (mode == ReportExportMode::PDF)
+    else if (mode == ReportExportMode::LatexPDF)
     {
-        //@TODO
+        return std::unique_ptr<ReportExporter>(new ReportExporterLatexPDF(this, fn, resource_dir));
     }
 
     return std::unique_ptr<ReportExporter>();

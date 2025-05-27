@@ -114,6 +114,10 @@ public:
     nlohmann::json toJSON() const;
     bool fromJSON(const nlohmann::json& j);
 
+    ResultT<nlohmann::json> exportResult(const std::string& fn,
+                                         ResultReport::ReportExportMode mode);
+    std::vector<std::pair<QImage, std::string>> renderFigure(const ResultReport::SectionContentFigure& figure) const;
+
     virtual task::TaskResultType type() const { return task::TaskResultType::Generic; }
 
     virtual std::string startSection() const { return ""; }

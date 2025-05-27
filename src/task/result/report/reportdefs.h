@@ -66,18 +66,21 @@ namespace ResultReport
         JSONFile = 0,
         JSONBlob,
         Latex,
-        PDF
+        LatexPDF
     };
 
-    enum ReportExportFlag
+    enum class ResourceDir
     {
-        ExportNone     = 0,
+        Root = 0,
+        Screenshots,
+        Tables
+    };
 
-        ExportJSONFile = 1 << 0,
-        ExportJSONBlob = 1 << 1,
-        ExportLatex    = 1 << 2,
-        ExportPDF      = 1 << 3,
-        
-        ExportAll      = std::numeric_limits<int>::max()
+    struct ReportExportSettings
+    {
+        std::string author;
+        std::string abstract;
+
+        bool open_created_file = true;
     };
 }

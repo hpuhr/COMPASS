@@ -16,23 +16,44 @@
  */
 
 #include "task/result/report/reportexporter.h"
+#include "task/result/report/reportexport.h"
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontent.h"
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontenttext.h"
+
 #include "task/result/taskresult.h"
 
 #include "files.h"
+#include "global.h"
+
+#if USE_EXPERIMENTAL_SOURCE == true
+#include "geographicview.h"
+#endif
 
 namespace ResultReport
 {
 
+const int ReportExporter::TableMaxRows        = 0;
+const int ReportExporter::TableMaxColumnsWide = 8;
+const int ReportExporter::TableMaxColumns     = 0;
+
+const std::string ReportExporter::ResourceFolderScreenshots = "screenshots";
+const std::string ReportExporter::ResourceFolderTables      = "tables";
+
+const std::string ReportExporter::ExportImageFormat = ".jpg";
+const std::string ReportExporter::ExportTableFormat = ".json";
+const std::string ReportExporter::ExportTextFormat  = ".txt";
+
 /**
  */
-ReportExporter::ReportExporter(ReportExport* report_export,
+ReportExporter::ReportExporter(const ReportExport* report_export,
                                const std::string& export_fn,
-                               const std::string& export_temp_dir)
-:   report_export_  (report_export  )
-,   export_fn_      (export_fn      )
-,   export_temp_dir_(export_temp_dir)
+                               const std::string& export_resource_dir)
+:   report_export_      (report_export      )
+,   export_fn_          (export_fn          )
+,   export_resource_dir_(export_resource_dir)
 {
     assert(report_export_);
 }
@@ -45,50 +66,114 @@ ReportExporter::~ReportExporter()
 
 /**
  */
+const ReportExportSettings& ReportExporter::settings() const
+{
+    return report_export_->settings();
+}
+
+/**
+ */
+std::string ReportExporter::resourceSubDir(ResourceDir dir)
+{
+    switch (dir)
+    {
+        case ResourceDir::Root:
+            return "";
+        case ResourceDir::Screenshots:
+            return ResourceFolderScreenshots;
+        case ResourceDir::Tables:
+            return ResourceFolderTables;
+    }
+
+    return "";
+}
+
+/**
+ */
+Result ReportExporter::initExport(TaskResult& result)
+{
+    return initExport_impl(result);
+}
+
+/**
+ */
+ResultT<nlohmann::json> ReportExporter::finalizeExport(TaskResult& result)
+{
+    return finalizeExport_impl(result);
+}
+
+/**
+ */
 ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
                                                      const std::string& section,
                                                      const std::string& content)
 {
-    //check stuff
-    if (exportCreatesFile() && export_fn_.empty())
-        return Result::failed("Filename not provided");
-    if (exportCreatesTempFiles() && export_temp_dir_.empty())
-        return Result::failed("Temporary directory not provided");
-    if (exportCreatesTempFiles() && !Utils::Files::createMissingDirectories(export_temp_dir_))
-        return Result::failed("Temporary directory could not be created");
+    loginf << "ReportExporter: exportReport: Exporting result '" << result.name() << "'";
 
-    Section*                      section_ptr = nullptr;
-    boost::optional<unsigned int> content_id;
-
-    //retrieve initial section and content id
-    if (!section.empty())
+    try
     {
-        if (!result.report()->hasSection(section))
-            return Result::failed("Section '" + section + "' not found in report");
-
-        section_ptr = &result.report()->getSection(section);
-
-        if (!content.empty())
+        //check stuff
+        if (exportCreatesFile() && export_fn_.empty())
+            return Result::failed("Filename not provided");
+        if (exportCreatesResources() && export_resource_dir_.empty())
+            return Result::failed("Resource directory not provided");
+        if (exportCreatesResources() && Utils::Files::directoryExists(export_resource_dir_))
         {
-            if (!section_ptr->hasContent(content))
-                return Result::failed("Content '" + content + "' not found in report section '" + section + "'");
-
-            content_id = section_ptr->contentID(content);
+            Utils::Files::deleteFolder(export_resource_dir_);
+            if (Utils::Files::directoryExists(export_resource_dir_))
+                return Result::failed("Existing report resources could not be removed");
         }
+        if (exportCreatesResources() && !Utils::Files::createMissingDirectories(export_resource_dir_))
+            return Result::failed("Resource directory could not be created");
+
+        Section*                      section_ptr = nullptr;
+        boost::optional<unsigned int> content_id;
+
+        //retrieve initial section and content id
+        if (!section.empty())
+        {
+            if (!result.report()->hasSection(section))
+                return Result::failed("Section '" + section + "' not found in report");
+
+            section_ptr = &result.report()->getSection(section);
+
+            if (!content.empty())
+            {
+                if (!section_ptr->hasContent(content))
+                    return Result::failed("Content '" + content + "' not found in report section '" + section + "'");
+
+                content_id = section_ptr->contentID(content);
+            }
+        }
+
+        //for immediate rendering of geographic view during image generation
+#if USE_EXPERIMENTAL_SOURCE == true
+        GeographicView::instant_display_ = true;
+#endif
+
+        //export
+        auto res = exportReport_impl(result, section_ptr, content_id);
+        if (!res.ok())
+            return res;
+
+#if USE_EXPERIMENTAL_SOURCE == true
+        GeographicView::instant_display_ = false;
+#endif
+
+        //check on created in-mem data
+        if (exportCreatesInMemoryData() && res.result().is_null())
+            return Result::failed("Creating in-memory data failed");
+
+        //check on created file
+        if (exportCreatesFile() && !Utils::Files::fileExists(export_fn_))
+            return Result::failed("Creating report file failed");
+    }
+    catch (const std::exception& ex)
+    {
+        return Result::failed("Exporting report failed: " + std::string(ex.what())); 
     }
 
-    //export
-    auto res = exportReport_impl(result, section_ptr, content_id);
-    if (!res.ok())
-        return res;
-
-    //check on created in-mem data
-    if (exportCreatesInMemoryData() && res.result().is_null())
-        return Result::failed("Creating in-memory data failed");
-
-    //check on created file
-    if (exportCreatesFile() && !Utils::Files::fileExists(export_fn_))
-        return Result::failed("Creating report file failed");
+    loginf << "ReportExporter: exportReport: Exporting result '" << result.name() << "' succeeded";
 
     return Result::succeeded();
 }
@@ -99,36 +184,130 @@ ResultT<nlohmann::json> ReportExporter::exportReport_impl(TaskResult& result,
                                                           Section* section,
                                                           const boost::optional<unsigned int>& content_id)
 {
+    auto res = initExport(result);
+    if (!res.ok())
+        return res;
+
     Section* start_section = section;
     if (!start_section)
         start_section = result.report()->rootSection().get();
 
     assert(start_section);
 
-    if (content_id.has_value())
+    loginf << "ReportExporter: exportReport_impl: start section = " << start_section->name();
+
+    //visit start section
+    res = visitSection(*start_section);
+    if (!res.ok())
+        return res;
+
+    return finalizeExport(result);
+}
+
+/**
+ */
+Result ReportExporter::visitSection(Section& section)
+{
+    //skip section?
+    if (!section.exportEnabled(exportMode()))
     {
-        
+        loginf << "Skipping section '" << section.id() << "'";
+        return Result::succeeded();
     }
 
-    return ResultT<nlohmann::json>::failed("");
+    loginf << "Exporting section '" << section.id() << "'";
+
+    //export section first
+    auto res = exportSection_impl(section);
+    if (!res.ok())
+        return res;
+
+    current_content_section_ = &section;
+
+    //then its contents
+    auto contents = section.sectionContent();
+    for (auto& c : contents)
+    {
+        if (!c)
+            return Result::failed("Contents could not be loaded in section '" + section.name() + "'");
+
+        res = visitContent(*c);
+        if (!res.ok())
+            return res;
+    }
+
+    current_content_section_ = nullptr;
+
+    //then its subsections
+    for (const auto& sec_it : section.subSections(false))
+    {
+        res = visitSection(*sec_it);
+        if (!res.ok())
+            return res;
+    }
+
+    return Result::succeeded();
 }
 
 /**
  */
-Result ReportExporter::visitSection(const Section& section) const
+Result ReportExporter::visitContent(SectionContent& content)
 {
-    //@TODO: do stuff in base class?
+    //skip content?
+    if (!content.exportEnabled(exportMode()))
+    {
+        loginf << "Skipping content '" << content.id() << "'";
+        return Result::succeeded();
+    }
 
-    return exportSection_impl(section);
+    loginf << "Exporting content '" << content.id() << "'";
+
+    //load content?
+    if (content.isOnDemand() && !content.loadOnDemandIfNeeded())
+        return Result::failed("Content '" + content.name() + "' could not be loaded on demand");
+
+    //check which content
+    if (content.contentType() == SectionContent::ContentType::Figure)
+    {
+        auto c = dynamic_cast<SectionContentFigure*>(&content);
+        if (c) 
+            return exportFigure(*c);
+    }
+    else if (content.contentType() == SectionContent::ContentType::Table)
+    {
+        auto c = dynamic_cast<SectionContentTable*>(&content);
+        if (c) 
+            return exportTable(*c);
+    }
+    else if (content.contentType() == SectionContent::ContentType::Text)
+    {
+        auto c = dynamic_cast<SectionContentText*>(&content);
+        if (c) 
+            return exportText(*c);
+    }
+
+    return Result::failed("Content '" + content.name() + "' is of illegal type");
 }
 
 /**
  */
-Result ReportExporter::visitContent(const SectionContent& content) const
+Result ReportExporter::exportFigure(SectionContentFigure& figure)
 {
-    //@TODO: do stuff in base class?
+    return exportFigure_impl(figure);
+}
 
-    return exportContent_impl(content);
+/**
+ */
+Result ReportExporter::exportTable(SectionContentTable& table)
+{
+    return exportTable_impl(table);
+}
+
+/**
+ */
+Result ReportExporter::exportText(SectionContentText& text)
+{
+    return exportText_impl(text);
 }
 
 }

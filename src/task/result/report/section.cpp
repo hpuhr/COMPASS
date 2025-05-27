@@ -50,6 +50,8 @@ const std::string Section::FieldContentNames        = "content_names";
 const std::string Section::FieldContentTypes        = "content_types";
 const std::string Section::FieldHiddenContentIDs    = "hidden_content_ids";
 
+const std::string Section::FieldDocContents         = "contents";
+
 unsigned int Section::current_content_id_ = 0;
 
 /**
@@ -72,6 +74,20 @@ Section::Section(TreeItem* parent_item,
 :   TreeItem (parent_item)
 ,   report_  (report)
 {
+}
+
+/**
+ */
+Section* Section::parentSection()
+{
+    return dynamic_cast<Section*>(parent_item_);
+}
+
+/**
+ */
+const Section* Section::parentSection() const
+{
+    return dynamic_cast<const Section*>(parent_item_);
 }
 
 /**
@@ -156,10 +172,7 @@ std::string Section::compoundResultsHeading() const
     else
         tmp = heading_;
 
-    //@TODO
-    //return SectionID::sectionIDWithoutResults(tmp);
-
-    return "";
+    return SectionID::sectionIDWithoutResults(tmp);
 }
 
 /**
@@ -898,6 +911,18 @@ bool Section::fromJSON_impl(const nlohmann::json& j)
     }
 
     return true;
+}
+
+/**
+ */
+Result Section::toJSONDocument_impl(nlohmann::json& j,
+                                    const std::string* resource_dir) const
+{
+    j[ FieldName        ] = name();
+    j[ FieldSubSections ] = nlohmann::json::array();
+    j[ FieldDocContents ] = nlohmann::json::array();
+    
+    return Result::succeeded();
 }
 
 }

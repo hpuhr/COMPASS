@@ -67,6 +67,9 @@ public:
     Section(TreeItem* parent_item,
             Report* report);
 
+    Section* parentSection();
+    const Section* parentSection() const;
+
     virtual TreeItem* child(int row) override;
     virtual int childCount() const override;
     virtual int columnCount() const override;
@@ -149,6 +152,8 @@ public:
     static const std::string FieldContentTypes;
     static const std::string FieldHiddenContentIDs;
 
+    static const std::string FieldDocContents;
+
     static void setCurrentContentID(unsigned int id);
 
 protected:
@@ -158,6 +163,8 @@ protected:
 
     void toJSON_impl(nlohmann::json& j) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
+    Result toJSONDocument_impl(nlohmann::json& j, 
+                               const std::string* resource_dir) const override final;
 
     Section* findSubSection (const std::string& heading); // nullptr if not found
     boost::optional<size_t> findContent(const std::string& name, SectionContent::ContentType type) const;

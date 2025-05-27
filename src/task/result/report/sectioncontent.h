@@ -18,6 +18,7 @@
 #pragma once
 
 #include "task/result/report/reportitem.h"
+#include "task/result/report/reportdefs.h"
 
 #include "logger.h"
 #include "json.hpp"
@@ -31,6 +32,7 @@
 
 class QVBoxLayout;
 class LatexVisitor;
+class LatexSection;
 
 class TaskResult;
 
@@ -121,6 +123,14 @@ public:
     Section* parentSection();
     const Section* parentSection() const;
 
+    std::string contentPath() const;
+
+    std::string resourceRelDirectory(ResourceDir rdir) const;
+    std::string resourceFilename(const std::string& postfix = "") const;
+    std::string resourceLink(ResourceDir rdir, const std::string& postfix = "") const;
+
+    virtual std::string resourceExtension() const = 0;
+
     void setOnDemand();
     bool isOnDemand() const;
     bool isComplete() const;
@@ -147,10 +157,22 @@ public:
     static const std::string FieldOnDemand;
 
 protected:
+    struct ResourceLink
+    {
+        std::string link;
+        std::string path;
+    };
+
+    ResultT<ResourceLink> prepareResource(const std::string& resource_dir,
+                                          ResourceDir rdir,
+                                          const std::string& prefix = "") const;
+
     virtual void clearContent_impl() = 0;
 
     virtual void toJSON_impl(nlohmann::json& j) const override;
     virtual bool fromJSON_impl(const nlohmann::json& j) override;
+    Result toJSONDocument_impl(nlohmann::json& j,
+                               const std::string* resource_dir) const override;
 
     virtual bool loadOnDemand();
 

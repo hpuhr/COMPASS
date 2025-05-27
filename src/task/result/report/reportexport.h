@@ -46,11 +46,16 @@ public:
     Result exportReport(TaskResult& result,
                         ReportExportMode mode,
                         const std::string& fn,
-                        const std::string& temp_dir);
+                        const std::string& resource_dir);
+
+    ReportExportSettings& settings() { return settings_; }
+    const ReportExportSettings& settings() const { return settings_; }
+
 private:
     std::unique_ptr<ReportExporter> createExporter(ReportExportMode mode,
                                                    const std::string& fn,
-                                                   const std::string& temp_dir) const;
+                                                   const std::string& resource_dir) const;
+    ReportExportSettings settings_;
 };
 
 } // namespace ResultReport

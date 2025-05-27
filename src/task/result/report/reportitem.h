@@ -18,6 +18,7 @@
 #pragma once
 
 #include "reportdefs.h"
+#include "result.h"
 
 #include <bitset>
 
@@ -48,13 +49,16 @@ public:
 
     bool exportEnabled(ReportExportMode mode) const;
     void enableExport(ReportExportMode mode, bool ok);
+    void enableExports(bool ok);
 
     void setJSONProperty(const std::string& name, const nlohmann::json& value);
     bool hasJSONProperty(const std::string& name) const;
     nlohmann::json jsonProperty(const std::string& name) const;
 
-    virtual nlohmann::json toJSON() const;
-    virtual bool fromJSON(const nlohmann::json& j);
+    nlohmann::json toJSON() const;
+    bool fromJSON(const nlohmann::json& j);
+
+    ResultT<nlohmann::json> toJSONDocument(const std::string* resource_dir = nullptr) const;
 
     static const std::string FieldName;
     static const std::string FieldProperties;
@@ -63,6 +67,9 @@ public:
 protected:
     virtual void toJSON_impl(nlohmann::json& j) const = 0;
     virtual bool fromJSON_impl(const nlohmann::json& j) = 0;
+
+    virtual Result toJSONDocument_impl(nlohmann::json& j,
+                                       const std::string* temp_dir) const = 0;
 
     ReportItem* parent_item_ = nullptr;
 

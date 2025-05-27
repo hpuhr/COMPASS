@@ -78,6 +78,26 @@ std::string SectionID::prependReportResults(const std::string& section_id)
 
 /**
 */
+std::string SectionID::sectionIDWithoutResults(const std::string& section_id)
+{
+    //root?
+    if (section_id == SectionResults)
+        return "";
+
+    const std::string ResultsHeader = SectionResults + Sep;
+
+    //valid?
+    assert (section_id.rfind(ResultsHeader, 0) == 0);
+
+    //chop result header
+    std::string ret = section_id;
+    ret.erase(0,ResultsHeader.size());
+
+    return ret;
+}
+
+/**
+*/
 std::string SectionID::reportResultID()
 {
     return SectionReport + ResultReport::SectionID::Sep + SectionResults;

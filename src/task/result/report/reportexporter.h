@@ -36,6 +36,9 @@ namespace ResultReport
 
 class Section;
 class SectionContent;
+class SectionContentFigure;
+class SectionContentTable;
+class SectionContentText;
 
 class ReportExport;
 
@@ -44,37 +47,74 @@ class ReportExport;
 class ReportExporter
 {
 public:
-    ReportExporter(ReportExport* report_export,
+    
+
+    ReportExporter(const ReportExport* report_export,
                    const std::string& export_fn,
-                   const std::string& export_temp_dir);
+                   const std::string& export_resource_dir);
     virtual ~ReportExporter();
+
+    const ReportExportSettings& settings() const;
 
     ResultT<nlohmann::json> exportReport(TaskResult& result,
                                          const std::string& section = "",
                                          const std::string& content = "");
 
     virtual ReportExportMode exportMode() const = 0;
-    virtual ReportExportFlag exportFlag() const = 0;
+
+    static const int TableMaxRows;
+    static const int TableMaxColumnsWide;
+    static const int TableMaxColumns;
+
+    static const std::string ResourceFolderScreenshots;
+    static const std::string ResourceFolderTables;
+
+    static const std::string ExportImageFormat;
+    static const std::string ExportTableFormat;
+    static const std::string ExportTextFormat;
+
+    static std::string resourceSubDir(ResourceDir dir);
 
 protected:
     virtual ResultT<nlohmann::json> exportReport_impl(TaskResult& result,
                                                       Section* section,
                                                       const boost::optional<unsigned int>& content_id);
+    virtual Result initExport_impl(TaskResult& result) = 0;
+    virtual ResultT<nlohmann::json> finalizeExport_impl(TaskResult& result) = 0;
 
-    virtual Result exportSection_impl(const Section& section) const = 0;
-    virtual Result exportContent_impl(const SectionContent& content) const = 0;
+    virtual Result exportSection_impl(Section& section) = 0;
+    virtual Result exportFigure_impl(SectionContentFigure& figure) = 0;
+    virtual Result exportTable_impl(SectionContentTable& table) = 0;
+    virtual Result exportText_impl(SectionContentText& text) = 0;
 
     virtual bool exportCreatesFile() const { return false; }
-    virtual bool exportCreatesTempFiles() const { return false; }
+    virtual bool exportCreatesResources() const { return false; }
     virtual bool exportCreatesInMemoryData() const { return false; } 
 
-private:
-    Result visitSection(const Section& section) const;
-    Result visitContent(const SectionContent& content) const;
+    const std::string& exportFilename() const { return export_fn_; }
+    const std::string& exportResourceDir() const { return export_resource_dir_; }
 
-    ReportExport* report_export_ = nullptr;
-    std::string   export_fn_;
-    std::string   export_temp_dir_;
+private:
+    Result initExport(TaskResult& result);
+    ResultT<nlohmann::json> finalizeExport(TaskResult& result);
+
+    Result visitSection(Section& section);
+    Result visitContent(SectionContent& content);
+
+    Result exportFigure(SectionContentFigure& figure);
+    Result exportTable(SectionContentTable& table);
+    Result exportText(SectionContentText& text);
+
+    const ReportExport* report_export_ = nullptr;
+    std::string         export_fn_;
+    std::string         export_resource_dir_;
+
+    Section* current_content_section_ = nullptr;
+
+    size_t num_sections_total_    = 0;
+    size_t num_contents_total_    = 0;
+    size_t num_sections_exported_ = 0;
+    size_t num_contents_exported_ = 0;
 };
 
 } // namespace ResultReport

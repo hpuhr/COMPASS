@@ -20,6 +20,7 @@
 #include "task/result/report/sectioncontent.h"
 
 #include <QObject>
+#include <QImage>
 
 #include "json.hpp"
 
@@ -37,6 +38,14 @@ public:
         Hidden       // hidden figure referenced by content (e.g. by a table, not rendered in pdf report)
     };
 
+    struct ImageResource
+    {
+        std::string name;
+        std::string path;
+        std::string link;
+        QImage      data;
+    };
+
     SectionContentFigure(unsigned int id,
                          FigureType figure_type,
                          const std::string& name, 
@@ -47,11 +56,13 @@ public:
     void setViewable(const SectionContentViewable& viewable);
     void setViewableFunc(const SectionContentViewable::ViewableFunc& func);
 
+    virtual std::string resourceExtension() const override;
+
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
 
     void view () const;
-    std::string getSubPath() const;
+    void executeRenderDelay() const;
 
     FigureType figureType() const { return fig_type_; }
     const std::string& caption() const { return caption_; }
@@ -59,16 +70,23 @@ public:
 
     std::shared_ptr<nlohmann::json::object_t> viewableContent() const;
 
+    ResultT<std::vector<ImageResource>> obtainImages(const std::string* resource_dir) const;
+
     static const std::string FieldFigureType;
     static const std::string FieldCaption;
     static const std::string FieldRenderDelayMSec;
     static const std::string FieldViewable;
 
+    static const std::string FieldDocPath;
+    static const std::string FieldDocData;
+
 protected:
     void clearContent_impl() override final;
 
-    void toJSON_impl(nlohmann::json& root_node) const override final;
+    void toJSON_impl(nlohmann::json& j) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
+    Result toJSONDocument_impl(nlohmann::json& j,
+                               const std::string* resource_dir) const override final;
 
     FigureType  fig_type_          = FigureType::Section;
     std::string caption_;

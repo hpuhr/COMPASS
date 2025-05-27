@@ -19,18 +19,24 @@
 #include "task/result/report/section.h"
 #include "task/result/report/report.h"
 #include "task/result/report/sectionid.h"
+#include "task/result/report/reportexporter.h"
+#include "task/result/taskresult.h"
+
 
 #include "taskmanager.h"
 //#include "latexvisitor.h"
+#include "viewpointgenerator.h"
 
 #include "logger.h"
 #include "stringconv.h"
+#include "files.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QApplication>
 #include <QThread>
+#include <QImage>
 
 namespace ResultReport
 {
@@ -39,6 +45,9 @@ const std::string SectionContentFigure::FieldFigureType      = "figure_type";
 const std::string SectionContentFigure::FieldCaption         = "caption";
 const std::string SectionContentFigure::FieldRenderDelayMSec = "render_delay_msec";
 const std::string SectionContentFigure::FieldViewable        = "viewable";
+
+const std::string SectionContentFigure::FieldDocPath         = "path";
+const std::string SectionContentFigure::FieldDocData         = "data_base64";
 
 /**
  * Ctor passing an existing viewable.
@@ -75,6 +84,13 @@ void SectionContentFigure::setViewable(const SectionContentViewable& viewable)
 void SectionContentFigure::setViewableFunc(const SectionContentViewable::ViewableFunc& func)
 {
     viewable_fnc_ = func;
+}
+
+/**
+ */
+std::string SectionContentFigure::resourceExtension() const
+{
+    return ReportExporter::ExportImageFormat;
 }
 
 /**
@@ -125,8 +141,12 @@ void SectionContentFigure::view() const
 
     //view content
     report_->setCurrentViewable(*content);
+}
 
-    //execute render delay?
+/**
+ */
+void SectionContentFigure::executeRenderDelay() const
+{
     if (render_delay_msec_ > 0)
     {
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
@@ -137,13 +157,6 @@ void SectionContentFigure::view() const
             QThread::msleep(10);
         }
     }
-}
-
-/**
- */
-std::string SectionContentFigure::getSubPath() const
-{
-    return ResultReport::SectionID::sectionID2Path(parentSection()->compoundResultsHeading());
 }
 
 /**
@@ -171,14 +184,14 @@ void SectionContentFigure::clearContent_impl()
 
 /**
  */
-void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
+void SectionContentFigure::toJSON_impl(nlohmann::json& j) const
 {
     //call base
-    SectionContent::toJSON_impl(root_node);
+    SectionContent::toJSON_impl(j);
 
-    root_node[ FieldFigureType      ] = fig_type_;
-    root_node[ FieldCaption         ] = caption_;
-    root_node[ FieldRenderDelayMSec ] = render_delay_msec_;
+    j[ FieldFigureType      ] = fig_type_;
+    j[ FieldCaption         ] = caption_;
+    j[ FieldRenderDelayMSec ] = render_delay_msec_;
 
     nlohmann::json jviewable = nlohmann::json::object();
     if (!isOnDemand())
@@ -188,7 +201,7 @@ void SectionContentFigure::toJSON_impl(nlohmann::json& root_node) const
             jviewable = *viewable;
     }
 
-    root_node[ FieldViewable ] = jviewable;
+    j[ FieldViewable ] = jviewable;
 }
 
 /**
@@ -219,6 +232,72 @@ bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
     viewable_fnc_ = [ = ] () { return jviewable; };
 
     return true;
+}
+
+/**
+ */
+ResultT<std::vector<SectionContentFigure::ImageResource>> SectionContentFigure::obtainImages(const std::string* resource_dir) const
+{
+    auto renderings = taskResult()->renderFigure(*this);
+
+    std::vector<SectionContentFigure::ImageResource> resources;
+
+    for (const auto& r : renderings)
+    {
+        ImageResource img_res;
+        img_res.data = r.first;
+        img_res.name = r.second;
+        
+        if (resource_dir)
+        {
+            auto res = prepareResource(*resource_dir, ResourceDir::Screenshots, r.second);
+            if (!res.ok())
+                return res;
+
+            if (!r.first.save(QString::fromStdString(res.result().path)))
+                return Result::failed("Could not store resource for content '" + name() + "'");
+
+            img_res.link = res.result().link;
+            img_res.path = res.result().path;
+        }
+        
+        resources.push_back(img_res);
+    }
+
+    return ResultT<std::vector<SectionContentFigure::ImageResource>>::succeeded(resources);
+}
+
+/**
+ */
+Result SectionContentFigure::toJSONDocument_impl(nlohmann::json& j,
+                                                 const std::string* resource_dir) const
+{
+    j = nlohmann::json::array();
+
+    auto resources = obtainImages(resource_dir);
+    if (!resources.ok())
+        return resources;
+
+    for (const auto& r : resources.result())
+    {
+        nlohmann::json j_fig;
+        j_fig[ FieldContentType ] = contentTypeAsString(content_type_);
+
+        if (resource_dir)
+        {
+            //store link to file
+            j_fig[ FieldDocPath ] = r.link;
+        }
+        else
+        {
+            //store data as json encoding
+            j_fig[ FieldDocData ] = ViewPointGenFeatureGeoImage::imageToByteString(r.data);
+        }
+
+        j.push_back(j_fig);
+    }
+
+    return Result::succeeded();
 }
 
 }

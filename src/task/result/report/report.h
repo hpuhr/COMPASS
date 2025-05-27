@@ -76,6 +76,8 @@ public:
 protected:
     void toJSON_impl(nlohmann::json& j) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
+    Result toJSONDocument_impl(nlohmann::json& j, 
+                               const std::string* resource_dir) const override final;
 
     TaskResult* result_ = nullptr;
 

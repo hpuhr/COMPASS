@@ -327,7 +327,7 @@ void LatexVisitor::visit(const ResultReport::SectionContentFigure* e)
     while (dbcont_man.loadInProgress() || QCoreApplication::hasPendingEvents())
         QCoreApplication::processEvents();
 
-    image_prefix_ = e->getSubPath()+e->name();
+    image_prefix_ = e->contentPath() + e->name();
 
     loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure " << e->name()
            << " prefix " << image_prefix_;

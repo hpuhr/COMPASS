@@ -34,6 +34,8 @@ ReportItem::ReportItem(const std::string& name,
 :   parent_item_(parent_item)
 ,   name_       (name       )
 {
+    export_flags_.set();
+
     updateID();
 }
 
@@ -103,6 +105,16 @@ void ReportItem::enableExport(ReportExportMode mode, bool ok)
 
 /**
  */
+void ReportItem::enableExports(bool ok)
+{
+    if (ok)
+        export_flags_.set();
+    else
+        export_flags_.reset();
+}
+
+/**
+ */
 void ReportItem::setJSONProperty(const std::string& name, const nlohmann::json& value)
 {
     properties_[ name ] = value;
@@ -129,15 +141,15 @@ nlohmann::json ReportItem::jsonProperty(const std::string& name) const
 */
 nlohmann::json ReportItem::toJSON() const
 {
-    nlohmann::json root;
+    nlohmann::json j;
 
-    root[ FieldName        ] = name_;
-    root[ FieldProperties  ] = properties_;
-    root[ FieldExportFlags ] = export_flags_.to_ulong();
+    j[ FieldName        ] = name_;
+    j[ FieldProperties  ] = properties_;
+    j[ FieldExportFlags ] = export_flags_.to_ulong();
 
-    toJSON_impl(root);
+    toJSON_impl(j);
 
-    return root;
+    return j;
 }
 
 /**
@@ -178,6 +190,22 @@ bool ReportItem::fromJSON(const nlohmann::json& j)
     }
 
     return true;
+}
+
+/**
+*/
+ResultT<nlohmann::json> ReportItem::toJSONDocument(const std::string* resource_dir) const
+{
+    nlohmann::json j;
+
+    //not for now because not all contents do provide a meaningful name
+    //j[ FieldName ] = name_;
+
+    auto res = toJSONDocument_impl(j, resource_dir);
+    if (!res.ok())
+        return res;
+
+    return ResultT<nlohmann::json>::succeeded(j);
 }
 
 }

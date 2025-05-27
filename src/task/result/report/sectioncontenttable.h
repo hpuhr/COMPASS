@@ -113,6 +113,8 @@ public:
     SectionContentTable(Section* parent_section);
     virtual ~SectionContentTable();
 
+    virtual std::string resourceExtension() const override;
+
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
 
@@ -185,6 +187,10 @@ public:
     static const std::string FieldCellStyles;
     static const std::string FieldShowTooltips;
 
+    static const std::string FieldDocColumns;
+    static const std::string FieldDocData;
+    static const std::string FieldDocPath;
+
     static const std::string FieldAnnoFigureID;
     static const std::string FieldAnnoSectionLink;
     static const std::string FieldAnnoSectionFigure;
@@ -206,16 +212,20 @@ public:
 protected:
     void clearContent_impl() override final;
 
-    void toJSON_impl(nlohmann::json& root_node) const override final; 
+    void toJSON_impl(nlohmann::json& j) const override final; 
     bool fromJSON_impl(const nlohmann::json& j) override final;
+    Result toJSONDocument_impl(nlohmann::json& j,
+                               const std::string* resource_dir) const override final;
 
     bool loadOnDemand() override final;
 
     unsigned int addFigure (const SectionContentViewable& viewable);
 
-    SectionContentTableWidget* createTableWidget();
+    SectionContentTableWidget* createTableWidget() const;
     const SectionContentTableWidget* tableWidget() const;
     SectionContentTableWidget* tableWidget();
+    SectionContentTableWidget* getOrCreateTableWidget();
+    const SectionContentTableWidget* getOrCreateTableWidget() const;
 
     void toggleShowUnused();
     void copyContent();

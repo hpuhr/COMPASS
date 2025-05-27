@@ -17,8 +17,13 @@
 
 #include "task/result/report/sectioncontent.h"
 #include "task/result/report/section.h"
+#include "task/result/report/sectionid.h"
 #include "task/result/report/report.h"
+#include "task/result/report/reportexporter.h"
+
 #include "taskresult.h"
+
+#include "files.h"
 
 #include <cassert>
 
@@ -79,6 +84,61 @@ Section* SectionContent::parentSection()
 const Section* SectionContent::parentSection() const
 {
     return dynamic_cast<const Section*>(parent_item_);
+}
+
+/**
+ */
+std::string SectionContent::contentPath() const
+{
+    return ResultReport::SectionID::sectionID2Path(parentSection()->compoundResultsHeading());
+}
+
+/**
+ * Filename of the content in the resource filesystem.
+ */
+std::string SectionContent::resourceFilename(const std::string& postfix) const
+{
+    auto pf = (postfix.empty() ? "" : "_") + postfix;
+    auto fn = name() + pf + resourceExtension();
+
+    return fn;
+}
+
+/**
+ * Relative directory of the content in the resource filesystem.
+ */
+std::string SectionContent::resourceRelDirectory(ResourceDir rdir) const
+{
+    return ReportExporter::resourceSubDir(rdir) + "/" + contentPath();
+}
+
+/**
+ * Relative path of the content in the resource filesystem.
+ */
+std::string SectionContent::resourceLink(ResourceDir rdir, const std::string& postfix) const
+{
+    return resourceRelDirectory(rdir) + resourceFilename(postfix);
+}
+
+/**
+ */
+ResultT<SectionContent::ResourceLink> SectionContent::prepareResource(const std::string& resource_dir,
+                                                                      ResourceDir rdir,
+                                                                      const std::string& prefix) const
+{
+    //store data in temp dir
+    auto link = resourceLink(rdir, prefix);
+    auto path = resource_dir + "/" + link;
+    auto dir  = Utils::Files::getDirectoryFromPath(path);
+
+    if (!Utils::Files::createMissingDirectories(dir))
+        return ResultT<ResourceLink>::failed("Could not create resource subdirectory for content '" + name() + "'");
+
+    ResourceLink rl;
+    rl.link = link;
+    rl.path = path;
+
+    return ResultT<ResourceLink>::succeeded(rl);
 }
 
 /**
@@ -257,6 +317,16 @@ bool SectionContent::fromJSON_impl(const nlohmann::json& j)
     on_demand_     = j[ FieldOnDemand  ];
 
     return true;
+}
+
+/**
+ */
+Result SectionContent::toJSONDocument_impl(nlohmann::json& j,
+                                           const std::string* resource_dir) const
+{
+    j[ FieldContentType ] = contentTypeAsString(content_type_);
+
+    return Result::succeeded();
 }
 
 }

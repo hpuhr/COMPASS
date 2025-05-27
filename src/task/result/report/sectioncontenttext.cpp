@@ -16,6 +16,7 @@
  */
 
 #include "task/result/report/sectioncontenttext.h"
+#include "task/result/report/reportexporter.h"
 
 #include "taskmanager.h"
 //#include "latexvisitor.h"
@@ -52,6 +53,13 @@ SectionContentText::SectionContentText(Section* parent_section)
 void SectionContentText::addText(const std::string& text)
 {
     texts_.push_back(text);
+}
+
+/**
+ */
+std::string SectionContentText::resourceExtension() const
+{
+    return ReportExporter::ExportTextFormat;
 }
 
 /**
@@ -94,12 +102,12 @@ void SectionContentText::clearContent_impl()
 
 /**
  */
-void SectionContentText::toJSON_impl(nlohmann::json& root_node) const
+void SectionContentText::toJSON_impl(nlohmann::json& j) const
 {
     //call base
-    SectionContent::toJSON_impl(root_node);
+    SectionContent::toJSON_impl(j);
 
-    root_node[ FieldTexts ] = texts_;
+    j[ FieldTexts ] = texts_;
 }
 
 /**
@@ -120,6 +128,21 @@ bool SectionContentText::fromJSON_impl(const nlohmann::json& j)
     texts_ = j[ FieldTexts ].get<std::vector<std::string>>();
 
     return true;
+}
+
+/**
+ */
+Result SectionContentText::toJSONDocument_impl(nlohmann::json& j, 
+                                               const std::string* resource_dir) const
+{
+    //call base
+    auto r = SectionContent::toJSONDocument_impl(j, resource_dir);
+    if (!r.ok())
+        return r;
+
+    j[ FieldTexts ] = texts_;
+
+    return Result::succeeded();
 }
 
 }

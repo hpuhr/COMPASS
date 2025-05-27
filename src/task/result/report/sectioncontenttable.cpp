@@ -19,6 +19,7 @@
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/report.h"
+#include "task/result/report/reportexporter.h"
 #include "task/result/taskresult.h"
 
 #include "taskmanager.h"
@@ -49,6 +50,7 @@
 #include <cassert>
 #include <type_traits>
 #include <iostream>
+#include <fstream>
 
 namespace ResultReport
 {
@@ -66,6 +68,10 @@ const std::string SectionContentTable::FieldAnnotations  = "annotations";
 const std::string SectionContentTable::FieldColumnStyles = "column_styles";
 const std::string SectionContentTable::FieldCellStyles   = "cell_styles";
 const std::string SectionContentTable::FieldShowTooltips = "show_tooltips";
+
+const std::string SectionContentTable::FieldDocColumns  = "columns";
+const std::string SectionContentTable::FieldDocData     = "data";
+const std::string SectionContentTable::FieldDocPath     = "path";
 
 const std::string SectionContentTable::FieldAnnoFigureID      = "figure_id";
 const std::string SectionContentTable::FieldAnnoSectionLink   = "section_link";
@@ -236,11 +242,9 @@ unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewab
 
 /**
  */
-SectionContentTableWidget* SectionContentTable::createTableWidget()
+SectionContentTableWidget* SectionContentTable::createTableWidget() const
 {
     assert(!table_widget_);
-
-    taskResult()->postprocessTable(this);
 
     SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
     table_widget_ = new SectionContentTableWidget(tmp, 
@@ -256,7 +260,6 @@ const SectionContentTableWidget* SectionContentTable::tableWidget() const
 {
     assert(table_widget_);
     return table_widget_;
-    
 }
 
 /**
@@ -265,7 +268,33 @@ SectionContentTableWidget* SectionContentTable::tableWidget()
 {
     assert(table_widget_);
     return table_widget_;
-    
+}
+
+/**
+ */
+SectionContentTableWidget* SectionContentTable::getOrCreateTableWidget()
+{
+    if (table_widget_)
+        return table_widget_;
+
+    return createTableWidget();
+}
+
+/**
+ */
+const SectionContentTableWidget* SectionContentTable::getOrCreateTableWidget() const
+{
+    if (table_widget_)
+        return table_widget_;
+
+    return createTableWidget();
+}
+
+/**
+ */
+std::string SectionContentTable::resourceExtension() const
+{
+    return ReportExporter::ExportTableFormat;
 }
 
 /**
@@ -276,8 +305,11 @@ void SectionContentTable::addToLayout(QVBoxLayout* layout)
 
     assert (layout);
 
+    //finalize some custom stuff before showing the table in a layout
+    taskResult()->postprocessTable(this);
+
     //add widget to layout
-    auto widget = createTableWidget();
+    auto widget = getOrCreateTableWidget();
     layout->addWidget(widget);
 }
 
@@ -717,14 +749,14 @@ const std::vector<std::string>& SectionContentTable::headings() const
  */
 unsigned int SectionContentTable::filteredRowCount() const
 {
-    return tableWidget()->proxyModel()->rowCount();
+    return getOrCreateTableWidget()->proxyModel()->rowCount();
 }
 
 /**
  */
 std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row, bool latex) const
 {
-    return tableWidget()->sortedRowStrings(row, latex);
+    return getOrCreateTableWidget()->sortedRowStrings(row, latex);
 }
 
 /**
@@ -732,7 +764,7 @@ std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row,
 bool SectionContentTable::hasReference (unsigned int row) const
 {
     //obtain original data row
-    unsigned int row_index = tableWidget()->fromProxy(row);
+    unsigned int row_index = getOrCreateTableWidget()->fromProxy(row);
 
     const auto& annotation = annotations_.at(row_index);
 
@@ -744,7 +776,7 @@ bool SectionContentTable::hasReference (unsigned int row) const
 std::string SectionContentTable::reference(unsigned int row) const
 {
     //obtain original data row
-    unsigned int row_index = tableWidget()->fromProxy(row);
+    unsigned int row_index = getOrCreateTableWidget()->fromProxy(row);
 
     const auto& annotation = annotations_.at(row_index);
 
@@ -764,7 +796,7 @@ void SectionContentTable::showUnused(bool value)
 {
     loginf << "SectionContentTable: showUnused: value " << value;
 
-    tableWidget()->showUnused(value);
+    getOrCreateTableWidget()->showUnused(value);
 
     show_unused_ = value;
 }
@@ -958,7 +990,7 @@ void SectionContentTable::copyContent()
     }
     ss << "\n";
 
-    auto proxy_model = tableWidget()->proxyModel();
+    auto proxy_model = getOrCreateTableWidget()->proxyModel();
 
     unsigned int num_rows = proxy_model->rowCount();
 
@@ -986,7 +1018,7 @@ void SectionContentTable::copyContent()
  */
 Utils::StringTable SectionContentTable::toStringTable() const
 {
-    return Utils::StringTable(tableWidget()->itemModel());
+    return Utils::StringTable(getOrCreateTableWidget()->itemModel());
 }
 
 /**
@@ -999,26 +1031,26 @@ nlohmann::json SectionContentTable::toJSONTable(bool rowwise,
 
 /**
  */
-void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
+void SectionContentTable::toJSON_impl(nlohmann::json& j) const
 {
     //call base
-    SectionContent::toJSON_impl(root_node);
+    SectionContent::toJSON_impl(j);
 
-    root_node[ FieldHeadings     ] = headings_;
-    root_node[ FieldSortable     ] = sortable_;
-    root_node[ FieldSortColumn   ] = sort_column_;
-    root_node[ FieldSortOrder    ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
-    root_node[ FieldRows         ] = std::vector<nlohmann::json>();
-    root_node[ FieldAnnotations  ] = nlohmann::json::array();
-    root_node[ FieldColumnStyles ] = column_styles_;
-    root_node[ FieldCellStyles   ] = cell_styles_;
-    root_node[ FieldShowTooltips ] = show_tooltips_;
+    j[ FieldHeadings     ] = headings_;
+    j[ FieldSortable     ] = sortable_;
+    j[ FieldSortColumn   ] = sort_column_;
+    j[ FieldSortOrder    ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
+    j[ FieldRows         ] = std::vector<nlohmann::json>();
+    j[ FieldAnnotations  ] = nlohmann::json::array();
+    j[ FieldColumnStyles ] = column_styles_;
+    j[ FieldCellStyles   ] = cell_styles_;
+    j[ FieldShowTooltips ] = show_tooltips_;
 
     //write content only if not on demand
     if (!isOnDemand())
     {
         //write rows
-        root_node[ FieldRows ] = rows_;
+        j[ FieldRows ] = rows_;
 
         //write annotations
         nlohmann::json j_annos = nlohmann::json::array();
@@ -1038,7 +1070,7 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
             j_annos.push_back(j_anno);
         }
 
-        root_node[ FieldAnnotations ] = j_annos;
+        j[ FieldAnnotations ] = j_annos;
     }
 }
 
@@ -1117,6 +1149,50 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     assert(num_columns_ == column_styles_.size());
 
     return true;
+}
+
+/**
+ */
+Result SectionContentTable::toJSONDocument_impl(nlohmann::json& j,
+                                                const std::string* resource_dir) const
+{
+    //call base
+    auto r = SectionContent::toJSONDocument_impl(j, resource_dir);
+    if (!r.ok())
+        return r;
+
+    bool write_to_file = (ReportExporter::TableMaxRows    >= 0 && numRows()    > (signed)ReportExporter::TableMaxRows   ) ||
+                         (ReportExporter::TableMaxColumns >= 0 && numColumns() > (signed)ReportExporter::TableMaxColumns);
+
+    if (resource_dir && write_to_file)
+    {
+        auto res = prepareResource(*resource_dir, ResourceDir::Tables);
+        if (!res.ok())
+            return res;
+
+        nlohmann::json j_ext;
+        j_ext[ FieldDocColumns ] = headings_;
+        j_ext[ FieldDocData    ] = rows_;
+
+        std::ofstream of(res.result().path);
+        if (!of.is_open())
+            return Result::failed("Could not store resource for content '" + name() + "'");
+
+        of << j_ext.dump(4);
+        if (!of)
+            return Result::failed("Could not store resource for content '" + name() + "'");
+
+        of.close();
+
+        j[ FieldDocPath ] = res.result().link;
+    }
+    else
+    {
+        j[ FieldDocColumns ] = headings_;
+        j[ FieldDocData    ] = rows_;
+    }
+
+    return Result::succeeded();
 }
 
 /***************************************************************************************************

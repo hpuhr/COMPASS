@@ -252,6 +252,16 @@ bool Report::fromJSON_impl(const nlohmann::json& j)
 
 /**
  */
+Result Report::toJSONDocument_impl(nlohmann::json& j,
+                                   const std::string* resource_dir) const
+{
+    //nothing to do yet
+
+    return Result::succeeded();
+}
+
+/**
+ */
 void Report::setCurrentViewable(const nlohmann::json::object_t& data)
 {
     result_->taskManager().setViewableDataConfig(data);
