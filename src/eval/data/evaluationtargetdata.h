@@ -189,7 +189,7 @@ public:
 
     EvaluationTarget toTarget() const;
     static void updateTarget(DBContentManager& dbcontent_manager,
-                             EvaluationTarget& target);
+                             EvaluationTarget& target); // updates only comment, nothing more
 
     static std::string stringForInterestFactor(const Evaluation::RequirementSumResultID& id, 
                                                double factor);

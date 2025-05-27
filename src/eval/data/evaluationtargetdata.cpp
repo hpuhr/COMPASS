@@ -1766,8 +1766,12 @@ EvaluationTarget EvaluationTargetData::toTarget() const
     const auto& dbcontent_ref = refChain().dbContent();
     const auto& dbcontent_tst = tstChain().dbContent();
 
-    target.useInEval(use());
     target.comment(dbcont_man_.utnComment(utn_));
+
+    target.useInEval(use());
+    target.evalExcludedRequirements(excludedRequirements());
+    target.evalExcludedTimeWindows(excludedTimeWindows());
+
     target.timeBegin(timeBegin());
     target.timeEnd(timeEnd());
     target.aircraftAddresses(acads());

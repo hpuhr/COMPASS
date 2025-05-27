@@ -487,6 +487,8 @@ void TargetModel::clearAllEvalExcludeRequirements()
 
     updateEvalDetailsColumn();
     emit targetEvalUsageChangedSignal();
+
+
 }
 
 /**
