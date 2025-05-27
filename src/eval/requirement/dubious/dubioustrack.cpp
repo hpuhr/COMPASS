@@ -190,7 +190,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (con
         // check if inside based on test position only
 
         tst_pos   = target_data.tstChain().pos(tst_id);
-        is_inside = target_data.tstPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.tstPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {

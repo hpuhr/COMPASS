@@ -38,6 +38,24 @@ class TargetModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
+    enum Columns
+    {
+        ColUTN = 0,
+        ColComment,
+        ColCategory,
+        ColUseEval,
+        ColUseEvalDetails,
+        ColNumUpdates,
+        ColBegin,
+        ColEnd,
+        ColDuration,
+        ColACIDs,
+        ColACADs,
+        ColMode3A,
+        ColModeCMin,
+        ColModeCMax
+    };
+
     TargetModel(DBContentManager& dbcont_manager);
     virtual ~TargetModel();
 
@@ -52,12 +70,17 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+    QVariant getCellContent(const Target& target, Columns col) const;
+
     const dbContent::Target& getTargetOf (const QModelIndex& index);
 
     void setUseTargetData (unsigned int utn, bool value);
     void setTargetDataComment (unsigned int utn, std::string comment);
     void setUseAllTargetData (bool value);
-    void clearComments ();
+
+    void clearComments();
+    void clearEvalExcludeTimeWindows();
+    void clearEvalExcludeRequirements();
 
     void setUseByFilter ();
 
@@ -70,7 +93,7 @@ public:
     const dbContent::Target& target(unsigned int utn) const;
     unsigned int size() const;
 
-    void removeDBContentFromTargets(const std::string& dbcont_name);
+    //void removeDBContentFromTargets(const std::string& dbcont_name);
 
     void storeTargetsEvalInfo();
 
@@ -106,28 +129,6 @@ public:
     void showModeACColumns(bool show);
 
     void updateEvalItems();
-
-    nlohmann::json rawCellData(int row, int column) const;
-    unsigned int rowStyle(int row) const;
-    unsigned int columnStyle(int column) const;
-
-    enum Columns
-    {
-        ColUTN = 0,
-        ColComment,
-        ColCategory,
-        ColUseEval,
-        ColUseEvalDetails,
-        ColNumUpdates, 
-        ColBegin, 
-        ColEnd, 
-        ColDuration, 
-        ColACIDs, 
-        ColACADs, 
-        ColMode3A, 
-        ColModeCMin, 
-        ColModeCMax
-    };
 
 protected:
     DBContentManager& dbcont_manager_;

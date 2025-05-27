@@ -1576,11 +1576,11 @@ dbContent::Target& DBContentManager::target(unsigned int utn)
 
 /**
  */
-void DBContentManager::removeDBContentFromTargets(const std::string& dbcont_name)
-{
-    target_model_->removeDBContentFromTargets(dbcont_name);
-    saveTargets();
-}
+// void DBContentManager::removeDBContentFromTargets(const std::string& dbcont_name)
+// {
+//     target_model_->removeDBContentFromTargets(dbcont_name);
+//     saveTargets();
+// }
 
 /**
  */
@@ -2156,32 +2156,6 @@ void DBContentManager::showSurroundingData (std::set<unsigned int> utns)
     }
 
     setViewableDataConfig(data);
-}
-
-/**
- */
-bool DBContentManager::utnUseEval (unsigned int utn)
-{
-    assert (target_model_);
-
-    if (!target_model_->existsTarget(utn))
-        logerr << "DBContentManager: utnUseEval: utn " << utn << " does not exist";
-
-    assert (target_model_->existsTarget(utn));
-    return target_model_->target(utn).useInEval();
-}
-
-/**
- */
-void DBContentManager::utnUseEval (unsigned int utn, bool value)
-{
-    assert (target_model_);
-    assert (target_model_->existsTarget(utn));
-    target_model_->setUseTargetData(utn, value);
-
-    // eval man
-    //    data_.setUseTargetData(utn, value);
-    //    updateResultsToUseChangeOf(utn);
 }
 
 /**

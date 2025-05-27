@@ -456,7 +456,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
             continue;
         }
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_it);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_it);
 
         if (!is_inside)
         {

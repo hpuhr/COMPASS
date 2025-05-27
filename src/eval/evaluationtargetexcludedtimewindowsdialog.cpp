@@ -12,7 +12,7 @@
 #include <QPushButton>
 
 EvaluationTargetExcludedTimeWindowsDialog::EvaluationTargetExcludedTimeWindowsDialog(
-    const std::string utn_str,Utils::TimeWindowCollection& collection, QWidget* parent)
+    const std::string utn_str,Utils::TimeWindowCollection& collection, std::string comment, QWidget* parent)
     : QDialog(parent), collection_(collection)
 {
     setWindowTitle("Edit Evaluation Excluded Time Windows");
@@ -42,6 +42,12 @@ EvaluationTargetExcludedTimeWindowsDialog::EvaluationTargetExcludedTimeWindowsDi
 
     main_layout->addLayout(form_layout);
 
+    main_layout->addWidget(new QLabel("Comment"));
+
+    QLineEdit* comment_edit_ = new QLineEdit(comment.c_str());
+    main_layout->addWidget(comment_edit_);
+
+
     main_layout->addStretch();
 
     // buttons
@@ -61,4 +67,10 @@ EvaluationTargetExcludedTimeWindowsDialog::EvaluationTargetExcludedTimeWindowsDi
     main_layout->addLayout(button_layout);
 
     setLayout(main_layout);
+}
+
+std::string EvaluationTargetExcludedTimeWindowsDialog::comment() const
+{
+    assert (comment_edit_);
+    return comment_edit_->text().toStdString();
 }

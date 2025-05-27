@@ -5,12 +5,12 @@ set -e
 
 echo "os: '$1'"
 
-if [[ $1 == "oldos" ]]
+if [[ $1 == "deb9" ]]
 then
-  docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --user $(id -u):$(id -g) -v $PWD/../../..:/app -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -it sk/build_ub14:latest
-elif [[ $1 == "newos" ]]
+  docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --user $(id -u):$(id -g) -v $PWD/../../..:/app -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -it compass/build_deb9:latest
+elif [[ $1 == "deb10" ]]
 then	
-  docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --user $(id -u):$(id -g) -v $PWD/../../..:/app -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -it sk/build_deb9
+  docker run --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --user $(id -u):$(id -g) -v $PWD/../../..:/app -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -it compass/build_deb10
 else
   echo "Unknown argument"
 fi

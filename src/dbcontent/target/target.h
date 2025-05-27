@@ -72,7 +72,7 @@ public:
 
     unsigned int dbContentCount(const std::string& dbcontent_name) const;
     void dbContentCount(const std::string& dbcontent_name, unsigned int value);
-    void clearDBContentCount(const std::string& dbcontent_name);
+    //void clearDBContentCount(const std::string& dbcontent_name);
 
     bool hasAdsbMOPSVersions() const;
     std::set<unsigned int> adsbMOPSVersions() const;

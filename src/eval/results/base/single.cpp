@@ -120,7 +120,7 @@ void Single::setInterestFactor(double factor)
 */
 void Single::updateUseFromTarget()
 {
-    use_ = (resultUsable() && target_->use());
+    use_ = (resultUsable() && target_->use() && !target_->excludedRequirements().count(requirement_->name()));
 }
 
 /**

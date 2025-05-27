@@ -302,11 +302,11 @@ void Target::dbContentCount(const std::string& dbcontent_name, unsigned int valu
     info_[KEY_COUNTS][dbcontent_name] = value;
 }
 
-void Target::clearDBContentCount(const std::string& dbcontent_name)
-{
-    if (info_[KEY_COUNTS].contains(dbcontent_name))
-        info_[KEY_COUNTS].erase(dbcontent_name);
-}
+// void Target::clearDBContentCount(const std::string& dbcontent_name)
+// {
+//     if (info_[KEY_COUNTS].contains(dbcontent_name))
+//         info_[KEY_COUNTS].erase(dbcontent_name);
+// }
 
 bool Target::hasAdsbMOPSVersions() const
 {

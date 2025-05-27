@@ -117,8 +117,8 @@ toolbox::ScreenRatio TargetListWidget::defaultScreenRatio() const
  */
 void TargetListWidget::addToConfigMenu(QMenu* menu) 
 {
-    QAction* clear_action = menu->addAction("Clear Comments");
-    connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearCommentsSlot);
+    QAction* clear_action = menu->addAction("Clear All Comments");
+    connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearAllCommentsSlot);
 
     QMenu* column_menu = menu->addMenu("Edit Columns");
 
@@ -161,10 +161,10 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
 
     QMenu* eval_menu = menu->addMenu("Evaluation");
 
-    QAction* all_action = eval_menu->addAction("Use All");
+    QAction* all_action = eval_menu->addAction("Use All Targets");
     connect (all_action, &QAction::triggered, this, &TargetListWidget::evalUseAllSlot);
 
-    QAction* none_action = eval_menu->addAction("Use None");
+    QAction* none_action = eval_menu->addAction("Disable All Targets");
     connect (none_action, &QAction::triggered, this, &TargetListWidget::evalUseNoneSlot);
 
     QAction* filter_action = eval_menu->addAction("Filter Usage ...");
@@ -172,8 +172,17 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
 
     eval_menu->addSeparator();
 
-    QAction* exlcude_tw_action = eval_menu->addAction("Edit Excluded Time Windows ...");
-    connect (exlcude_tw_action, &QAction::triggered, this, &TargetListWidget::evalExcludeTimeWindowsSlot);
+    QAction* tw_action = eval_menu->addAction("Clear All Targets Excluded Time Windows");
+    connect (tw_action, &QAction::triggered, this, &TargetListWidget::evalClearAllExcludeTimeWindowsSlot);
+
+    QAction* req_action = eval_menu->addAction("Clear All Targets Excluded Requirements");
+    connect (req_action, &QAction::triggered, this, &TargetListWidget::evalClearAllExcludeRequirementsSlot);
+
+    eval_menu->addSeparator();
+
+    QAction* exlcude_tw_action = eval_menu->addAction("Edit Global Excluded Time Windows ...");
+    connect (exlcude_tw_action, &QAction::triggered, this, &TargetListWidget::evalEditGlobalExcludeTimeWindowsSlot);
+
 }
 
 /**
@@ -247,12 +256,55 @@ void TargetListWidget::evalUseNoneSlot()
     model_.setUseAllTargetData(false);
 }
 
-void TargetListWidget::clearCommentsSlot()
+void TargetListWidget::clearAllCommentsSlot()
 {
     model_.clearComments();
 }
 
-void TargetListWidget::evalExcludeTimeWindowsSlot()
+void TargetListWidget::clearTargetsCommentsSlot()
+{
+    loginf << "TargetListWidget: clearTargetsCommentsSlot";
+
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    std::set<unsigned int> selected_utns = selectedUTNs();
+
+    for (auto utn : selected_utns)
+    {
+        assert (dbcont_man.existsTarget(utn));
+
+        auto& target = dbcont_man.target(utn);
+
+        target.comment("");
+    }
+}
+
+void TargetListWidget::evalClearAllExcludeTimeWindowsSlot()
+{
+    loginf << "TargetListWidget: evalClearAllExcludeTimeWindowsSlot";
+
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    model_.clearEvalExcludeTimeWindows();
+
+    dbcont_man.storeTargetsEvalInfo();
+
+    resizeColumnsToContents();
+}
+
+void TargetListWidget::evalClearAllExcludeRequirementsSlot()
+{
+    loginf << "TargetListWidget: evalClearAllExcludeTimeWindowsSlot";
+
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    model_.clearEvalExcludeRequirements();
+    dbcont_man.storeTargetsEvalInfo();
+
+    resizeColumnsToContents();
+}
+
+void TargetListWidget::evalEditGlobalExcludeTimeWindowsSlot()
 {
     loginf << "TargetListWidget: filterSlot";
 
@@ -278,6 +330,9 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
 
     QMenu menu;
 
+    QAction* clear_action = menu.addAction("Clear Comment(s)");
+    connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearTargetsCommentsSlot);
+
     QAction* show_action = menu.addAction("Show Surrounding Data");
     connect (show_action, &QAction::triggered, this, &TargetListWidget::showSurroundingDataSlot);
 
@@ -286,7 +341,7 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
     QAction* use_action = eval_menu->addAction("Use Target(s)");
     connect (use_action, &QAction::triggered, this, &TargetListWidget::evalUseTargetsSlot);
 
-    QAction* nouse_action = eval_menu->addAction("Disable Use Target(s)");
+    QAction* nouse_action = eval_menu->addAction("Disable Target(s)");
     connect (nouse_action, &QAction::triggered, this, &TargetListWidget::evalDisableUseTargetsSlot);
 
     eval_menu->addSeparator();
@@ -294,8 +349,15 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
     QAction* tw_action = eval_menu->addAction("Edit Excluded Time Windows");
     connect (tw_action, &QAction::triggered, this, &TargetListWidget::evalExcludeTimeWindowsTargetSlot);
 
+    QAction* tw_clear_action = eval_menu->addAction("Clear Excluded Time Windows");
+    connect (tw_clear_action, &QAction::triggered, this, &TargetListWidget::evalClearTargetsExcludeTimeWindowsSlot);
+
     QAction* req_action = eval_menu->addAction("Edit Excluded Requirements");
     connect (req_action, &QAction::triggered, this, &TargetListWidget::evalExcludeRequirementsTargetSlot);
+
+    QAction* req_clear_action = eval_menu->addAction("Clear Excluded Requirements");
+    connect (req_clear_action, &QAction::triggered, this, &TargetListWidget::evalClearTargetsExcludeRequirementsSlot);
+
 
     menu.exec(table_view_->viewport()->mapToGlobal(p));
 }
@@ -359,6 +421,51 @@ void TargetListWidget::evalDisableUseTargetsSlot()
     dbcont_man.storeTargetsEvalInfo();
 }
 
+void TargetListWidget::evalClearTargetsExcludeTimeWindowsSlot()
+{
+    loginf << "TargetListWidget: evalClearTargetsExcludeTimeWindowsSlot";
+
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    std::set<unsigned int> selected_utns = selectedUTNs();
+
+    for (auto utn : selected_utns)
+    {
+        assert (dbcont_man.existsTarget(utn));
+
+        auto& target = dbcont_man.target(utn);
+
+        target.evalExcludedTimeWindows().clear();
+    }
+
+    model_.updateEvalItems();
+    dbcont_man.storeTargetsEvalInfo();
+
+    resizeColumnsToContents();
+}
+void TargetListWidget::evalClearTargetsExcludeRequirementsSlot()
+{
+    loginf << "TargetListWidget: evalClearTargetsExcludeRequirementsSlot";
+
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    std::set<unsigned int> selected_utns = selectedUTNs();
+
+    for (auto utn : selected_utns)
+    {
+        assert (dbcont_man.existsTarget(utn));
+
+        auto& target = dbcont_man.target(utn);
+
+        target.evalExcludedRequirements().clear();
+    }
+
+    model_.updateEvalItems();
+    dbcont_man.storeTargetsEvalInfo();
+
+    resizeColumnsToContents();
+}
+
 void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
 {
     loginf << "TargetListWidget: evalExcludeTimeWindowsTargetSlot";
@@ -368,6 +475,7 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
     std::set<unsigned int> selected_utns = selectedUTNs();
 
     Utils::TimeWindowCollection filtered_time_windows;
+        set<string> comments;
 
     // collect all time windows from all targets
     for (auto utn : selected_utns)
@@ -381,13 +489,20 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
             if (!filtered_time_windows.contains(tw))
                 filtered_time_windows.add(tw);
         }
+
+        if (target.comment().size() && !comments.count(target.comment()))
+            comments.insert(target.comment());
     }
 
-    EvaluationTargetExcludedTimeWindowsDialog dialog (String::compress(selected_utns, ','), filtered_time_windows);
+    EvaluationTargetExcludedTimeWindowsDialog dialog (String::compress(selected_utns, ','),
+                                                     filtered_time_windows,
+                                                     String::compress(comments, '\n'));
     int result = dialog.exec();
 
     if (result == QDialog::Rejected)
         return;
+
+    string comment = dialog.comment();
 
     // set time windows for all targets
     for (auto utn : selected_utns)
@@ -397,10 +512,14 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
         auto& target = dbcont_man.target(utn);
 
         target.evalExcludedTimeWindows() = filtered_time_windows;
+
+        target.comment(comment);
+
         target.storeEvalutionInfo();
     }
 
     model_.updateEvalItems();
+    resizeColumnsToContents();
 }
 
 void TargetListWidget::evalExcludeRequirementsTargetSlot()
@@ -424,6 +543,7 @@ void TargetListWidget::evalExcludeRequirementsTargetSlot()
 
     set<string> selected_requirements;
     set<string> all_requirements = eval_man.calculator().currentStandard().getAllRequirementNames();
+    set<string> comments;
 
     // collect all time windows from all targets
     for (auto utn : selected_utns)
@@ -437,16 +557,21 @@ void TargetListWidget::evalExcludeRequirementsTargetSlot()
             if (!selected_requirements.count(req_name))
                 selected_requirements.insert(req_name);
         }
+
+        if (target.comment().size() && !comments.count(target.comment()))
+            comments.insert(target.comment());
     }
 
     EvaluationTargetExcludedRequirementsDialog dialog (String::compress(selected_utns, ','),
-                                                      selected_requirements, all_requirements);
+                                                      selected_requirements, all_requirements,
+                                                      String::compress(comments, '\n'));
     int result = dialog.exec();
 
     if (result == QDialog::Rejected)
         return;
 
     selected_requirements = dialog.selectedRequirements();
+    string comment = dialog.comment();
 
     // set reqs for all targets
     for (auto utn : selected_utns)
@@ -456,10 +581,14 @@ void TargetListWidget::evalExcludeRequirementsTargetSlot()
         auto& target = dbcont_man.target(utn);
 
         target.evalExcludedRequirements() = selected_requirements;
+
+        target.comment(comment);
+
         target.storeEvalutionInfo();
     }
 
     model_.updateEvalItems();
+    resizeColumnsToContents();
 }
 
 void TargetListWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)

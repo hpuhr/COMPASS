@@ -1,7 +1,19 @@
 FROM debian:stretch
 
+ARG USER_NAME
+ARG USER_ID
+ARG USER_GROUP_ID
+
 ARG DEBIAN_FRONTEND=noninteractive
 
+ENV USER_NAME=${USER_NAME} \
+    USER_ID=${USER_ID} \
+    USER_GROUP_ID=${USER_GROUP_ID}
+
+RUN echo ">>> USER_NAME=${USER_NAME}" \
+ && echo ">>> USER_ID=${USER_ID}" \
+ && echo ">>> USER_GROUP_ID=${USER_GROUP_ID}"
+    
 RUN sed -i -e 's/deb.debian.org/archive.debian.org/g' \
            -e 's|security.debian.org|archive.debian.org/|g' \
            -e '/stretch-updates/d' /etc/apt/sources.list
@@ -9,8 +21,8 @@ RUN sed -i -e 's/deb.debian.org/archive.debian.org/g' \
 RUN apt-get update
 RUN apt-get install -y openssl 
 
-RUN groupadd -r someusers --gid=1000 
-RUN useradd -r -p "$(openssl passwd -1 sk)" -g someusers -G sudo --uid=1000 --create-home --shell /bin/bash sk 
+RUN groupadd -r someusers --gid=${USER_GROUP_ID} 
+RUN useradd -r -p "$(openssl passwd -1 ${USER_NAME})" -g someusers -G sudo --uid=${USER_ID} --create-home --shell /bin/bash ${USER_NAME} 
 
 # Update and allow for apt over HTTPS
 RUN apt-get install -y apt-utils
@@ -190,8 +202,8 @@ RUN locate libboost
 
 RUN apt install sudo
 
-RUN echo 'sk ALL=(ALL)  ALL' >> /etc/sudoers
+RUN echo "${USER_NAME} ALL=(ALL)  ALL" >> /etc/sudoers
 RUN more /etc/sudoers
 
-USER sk
+USER ${USER_NAME}
 WORKDIR /app/workspace/compass/docker

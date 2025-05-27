@@ -1,4 +1,6 @@
 #include "evaluationtargetexcludedrequirementsdialog.h"
+#include "stringconv.h"
+#include "logger.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -14,13 +16,21 @@
 #include <QGridLayout>
 #include <QCheckBox>
 
+using namespace Utils;
+
 EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirementsDialog(
     const std::string utn_str, std::set<std::string> selected_requirements,
-    std::set<std::string> available_requirements, QWidget* parent)
+    std::set<std::string> available_requirements, std::string comment, QWidget* parent)
     : QDialog(parent)
     , selected_requirements_(std::move(selected_requirements))
     , available_requirements_(std::move(available_requirements))
- {
+{
+    logdbg << "EvaluationTargetExcludedRequirementsDialog: ctor: selected_requirements '"
+           << String::compress(selected_requirements_,',') << "'";
+
+    logdbg << "EvaluationTargetExcludedRequirementsDialog: ctor: available_requirements '"
+           << String::compress(available_requirements_,',') << "'";
+
     setWindowTitle("Edit Evaluation Excluded Requirements");
 
     setModal(true);
@@ -42,6 +52,8 @@ EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirements
     utn_label->setFixedHeight(metrics.lineSpacing() * line_count_to_show + 4); // +4 for padding
 
     form_layout->addRow("UTNs", utn_label);
+
+    main_layout->addLayout(form_layout);
 
     // add gui items here
 
@@ -76,6 +88,11 @@ EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirements
     scroll_area_->setWidget(scroll_widget_);
     main_layout->addWidget(scroll_area_);
 
+    main_layout->addWidget(new QLabel("Comment"));
+
+    QLineEdit* comment_edit_ = new QLineEdit(comment.c_str());
+    main_layout->addWidget(comment_edit_);
+
     main_layout->addStretch();
 
     // buttons
@@ -95,9 +112,15 @@ EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirements
     main_layout->addLayout(button_layout);
 
     setLayout(main_layout);
- }
+}
 
 std::set<std::string> EvaluationTargetExcludedRequirementsDialog::selectedRequirements() const
 {
     return selected_requirements_;
+}
+
+std::string EvaluationTargetExcludedRequirementsDialog::comment() const
+{
+    assert (comment_edit_);
+    return comment_edit_->text().toStdString();
 }

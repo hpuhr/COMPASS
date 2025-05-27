@@ -23,6 +23,7 @@ public:
     nlohmann::json getAsJson() const;
     std::string asStr() const;
 
+    bool contains(const boost::posix_time::ptime& ts) const;
     bool contains(const TimeWindow& tw) const;
 
     const boost::posix_time::ptime& begin() const;
@@ -40,6 +41,7 @@ public:
     virtual ~TimeWindowCollection()=default;
 
     bool valid() const;
+    bool contains(const boost::posix_time::ptime& ts) const;
 
     void setFrom(nlohmann::json& json);
     nlohmann::json asJSON() const;

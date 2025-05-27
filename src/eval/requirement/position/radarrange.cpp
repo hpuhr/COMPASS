@@ -177,7 +177,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
             continue;
         }
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {

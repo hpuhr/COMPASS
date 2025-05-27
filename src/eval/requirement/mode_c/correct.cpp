@@ -167,7 +167,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
         }
         ref_exists = true;
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {

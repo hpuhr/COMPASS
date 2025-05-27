@@ -76,59 +76,9 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
 
             assert (index.column() < table_columns_.size());
             int col = index.column();
+            assert (col >= 0);
 
-            switch(col)
-            {
-                case ColUTN: 
-                    return target.utn_;
-                case ColComment: 
-                    return target.comment().c_str();
-                case ColCategory: 
-                    return target.emitterCategoryStr().c_str();
-                case ColNumUpdates: 
-                    return target.numUpdates();
-                case ColUseEvalDetails:
-                {
-                    QString tmp;
-
-                    if (target.evalExcludedTimeWindows().size())
-                        tmp = target.evalExcludedTimeWindows().asString().c_str();
-
-                    if (target.evalExcludedRequirements().size())
-                    {
-                        if (tmp.size())
-                            tmp += "\n";
-
-                        tmp += String::compress(target.evalExcludedRequirements(),',').c_str();
-                    }
-
-                    return tmp;
-                }
-                case ColBegin:
-                    return target.timeBeginStr().c_str();
-                case ColEnd:
-                    return target.timeEndStr().c_str();
-                case ColDuration: 
-                    return target.timeDurationStr().c_str();
-                case ColACIDs:
-                    return target.aircraftIdentificationsStr().c_str();
-                case ColACADs: 
-                    return target.aircraftAddressesStr().c_str();
-                case ColMode3A: 
-                    return target.modeACodesStr().c_str();
-                case ColModeCMin: 
-                    if (target.hasModeC())
-                        return target.modeCMin();
-                    else
-                        return "";
-                case ColModeCMax:
-                    if (target.hasModeC())
-                        return target.modeCMax();
-                    else
-                        return "";
-            }
-
-            return QVariant();
+            return getCellContent(target, (Columns) col);
         }
         case Qt::UserRole: // to find the checkboxes
         {
@@ -155,7 +105,6 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                     || target.evalExcludedRequirements().size())
                         return Utils::Files::IconProvider::getIcon("partial_done.png");
 
-                // TODO partial
                 return Utils::Files::IconProvider::getIcon("done.png");
             }
             else
@@ -163,17 +112,59 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         }
         case Qt::ToolTipRole:
         {
-            if (index.column() == ColUseEval)  // selected special case
+            QString tooltip_html;
+            tooltip_html += "<html><body><table>";
+
+            // Helper lambda to append any (label,value) pair as a right-aligned row
+            auto append_row = [&](const QString& label, const QString& value, bool bold_label = true)
             {
-                QString just_the_tip;
+                QString tmp_value = value;
+                tmp_value.replace("\n", "<br/>");
 
-                just_the_tip.append("Use Target: " + QString((int) target.useInEval())+"\n");
-                just_the_tip.append(
-                    "Global Timestamp Filter: "
-                    + QString(COMPASS::instance().evaluationManager().timestampFilterStr().c_str())+"\n");
+                tooltip_html += "<tr>"
+                                "<td>" + (bold_label ? "<b>" + label + "</b>" : label) + ":</td>"
+                                + "<td align=\"left\">" + tmp_value + "</td>"
+                                + "</tr>";
+            };
 
-                return just_the_tip;
+            if (!show_eval_columns_)
+            {
+                QString eval_value;
+                if (!target.useInEval())
+                    eval_value = "No";
+                else if (COMPASS::instance().evaluationManager().useTimestampFilter()
+                           || target.evalExcludedTimeWindows().size()
+                           || target.evalExcludedRequirements().size())
+                    eval_value = "Partial";
+                else
+                    eval_value = "Yes";
+
+                append_row("Eval", eval_value);
+
+                append_row(table_columns_.at(ColUseEvalDetails),
+                           getCellContent(target, ColUseEvalDetails).toString());
             }
+
+            if (!show_duration_columns_)
+            {
+                for (auto column : duration_columns_)
+                    append_row(table_columns_.at(column), getCellContent(target, (Columns)column).toString());
+            }
+
+            if (!show_mode_s_columns_)
+            {
+                for (auto column : mode_s_columns_)
+                    append_row(table_columns_.at(column), getCellContent(target, (Columns)column).toString());
+            }
+
+            if (!show_mode_ac_columns_)
+            {
+                for (auto column : mode_ac_columns_)
+                    append_row(table_columns_.at(column), getCellContent(target, (Columns)column).toString());
+            }
+
+            tooltip_html += "</table></body></html>";
+            return tooltip_html;
         }
         default:
         {
@@ -184,101 +175,11 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
 
 /**
  */
-nlohmann::json TargetModel::rawCellData(int row, int column) const
-{
-    const Target& target = target_data_.at(row);
-
-    switch(column)
-    {
-        case ColUTN: 
-            return target.utn_;
-        case ColComment: 
-            return target.comment().c_str();
-        case ColCategory: 
-            return target.emitterCategoryStr().c_str();
-        case ColUseEval:
-            return target.useInEval();
-        case ColUseEvalDetails:
-            return ""; // TODO
-        case ColNumUpdates:
-            return target.numUpdates();
-        case ColBegin:
-            return target.timeBeginStr().c_str();
-            //return QDateTime::fromString(target.timeBeginStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
-        case ColEnd:
-            return target.timeEndStr().c_str();
-            //return QDateTime::fromString(target.timeEndStr().c_str(), Time::QT_DATETIME_FORMAT.c_str());
-        case ColDuration: 
-            return target.timeDurationStr().c_str();
-        case ColACIDs:
-            return target.aircraftIdentificationsStr().c_str();
-        case ColACADs: 
-            return target.aircraftAddressesStr().c_str();
-        case ColMode3A: 
-            return target.modeACodesStr().c_str();
-        case ColModeCMin: 
-            if (target.hasModeC())
-                return target.modeCMin();
-            else
-                return "";
-        case ColModeCMax:
-            if (target.hasModeC())
-                return target.modeCMax();
-            else
-                return "";
-    }
-
-    return nlohmann::json();
-}
-
-/**
- */
-unsigned int TargetModel::rowStyle(int row) const
-{
-    if (!target_data_.at(row).useInEval())
-        return ResultReport::CellStyleBGColorGray;
-
-    return 0;
-}
-
-/**
- */
-unsigned int TargetModel::columnStyle(int column) const
-{
-    if (column == ColUseEval)
-        return ResultReport::CellStyleCheckable;
-
-    return 0;
-}
-
-/**
- */
 bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int role)
 {
     if (!index.isValid() /*|| role != Qt::EditRole*/)
         return false;
 
-    // if (role == Qt::CheckStateRole && index.column() == ColUseEval)
-    // {
-    //     assert (index.row() >= 0);
-    //     assert (index.row() < target_data_.size());
-
-    //     auto it = target_data_.begin() + index.row();
-
-    //     bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
-    //     loginf << "TargetModel: setData: utn " << it->utn_ <<" check state " << checked;
-
-    //     //eval_man_.useUTN(it->utn_, checked, false);
-    //     target_data_.modify(it, [value,checked](Target& p) { p.useInEval(checked); });
-
-    //     saveToDB(it->utn_);
-
-    //     emit dataChanged(index, TargetModel::index(index.row(), columnCount()-1));
-    //     emit dbcont_manager_.targetChangedSignal(it->utn_);
-
-    //     return true;
-    // }
-    // else
     if (role == Qt::EditRole && index.column() == ColComment) // comment
     {
         assert (index.row() >= 0);
@@ -363,6 +264,64 @@ Qt::ItemFlags TargetModel::flags(const QModelIndex &index) const
         return QAbstractItemModel::flags(index);
 }
 
+QVariant TargetModel::getCellContent(const Target& target, Columns col) const
+{
+    switch(col)
+    {
+    case ColUTN:
+        return target.utn_;
+    case ColComment:
+        return target.comment().c_str();
+    case ColCategory:
+        return target.emitterCategoryStr().c_str();
+    case ColUseEval:
+        return QVariant();
+    case ColUseEvalDetails:
+    {
+        QString tmp;
+
+        if (target.evalExcludedTimeWindows().size())
+            tmp = target.evalExcludedTimeWindows().asString().c_str();
+
+        if (target.evalExcludedRequirements().size())
+        {
+            if (tmp.size())
+                tmp += "\n";
+
+            tmp += String::compress(target.evalExcludedRequirements(),',').c_str();
+        }
+
+        return tmp;
+    }
+    case ColNumUpdates:
+        return target.numUpdates();
+    case ColBegin:
+        return target.timeBeginStr().c_str();
+    case ColEnd:
+        return target.timeEndStr().c_str();
+    case ColDuration:
+        return target.timeDurationStr().c_str();
+    case ColACIDs:
+        return target.aircraftIdentificationsStr().c_str();
+    case ColACADs:
+        return target.aircraftAddressesStr().c_str();
+    case ColMode3A:
+        return target.modeACodesStr().c_str();
+    case ColModeCMin:
+        if (target.hasModeC())
+            return target.modeCMin();
+        else
+            return "";
+    case ColModeCMax:
+        if (target.hasModeC())
+            return target.modeCMax();
+        else
+            return "";
+    }
+
+    return QVariant();
+}
+
 /**
  */
 const dbContent::Target& TargetModel::getTargetOf (const QModelIndex& index)
@@ -432,21 +391,21 @@ void TargetModel::setUseAllTargetData (bool value)
 {
     loginf << "TargetModel: setUseAllTargetData: value " << value;
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    //QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     beginResetModel();
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [value](Target& p) { p.useInEval(value); });
 
-    saveToDB();
+    //saveToDB();
 
     endResetModel();
 
     dbcont_manager_.storeTargetsEvalInfo();
     emit dbcont_manager_.allTargetsChangedSignal();
 
-    QApplication::restoreOverrideCursor();
+    //QApplication::restoreOverrideCursor();
 }
 
 /**
@@ -455,20 +414,47 @@ void TargetModel::clearComments ()
 {
     loginf << "TargetModel: clearComments";
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
     beginResetModel();
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [](Target& p) { p.comment(""); });
 
-    saveToDB();
+    //saveToDB();
 
     endResetModel();
 
     emit dbcont_manager_.allTargetsChangedSignal();
+}
 
-    QApplication::restoreOverrideCursor();
+void TargetModel::clearEvalExcludeTimeWindows()
+{
+    loginf << "TargetModel: clearEvalExcludeTimeWindows";
+
+    beginResetModel();
+
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [](Target& p) { p.evalExcludedTimeWindows().clear(); });
+
+    //saveToDB();
+
+    endResetModel();
+
+    emit dbcont_manager_.allTargetsChangedSignal();
+}
+void TargetModel::clearEvalExcludeRequirements()
+{
+    loginf << "TargetModel: clearEvalExcludeTimeWindows";
+
+    beginResetModel();
+
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [](Target& p) { p.evalExcludedRequirements().clear(); });
+
+    //saveToDB();
+
+    endResetModel();
+
+    emit dbcont_manager_.allTargetsChangedSignal();
 }
 
 /**
@@ -481,7 +467,7 @@ void TargetModel::setUseByFilter ()
 
     COMPASS::instance().evaluationManager().targetFilter().setUse(target_data_);
 
-    saveToDB();
+    //saveToDB();
 
     endResetModel();
 
@@ -605,11 +591,11 @@ unsigned int TargetModel::size() const
 
 /**
  */
-void TargetModel::removeDBContentFromTargets(const std::string& dbcont_name)
-{
-    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-        target_data_.modify(target_it, [dbcont_name](Target& p) { p.clearDBContentCount(dbcont_name); });
-}
+// void TargetModel::removeDBContentFromTargets(const std::string& dbcont_name)
+// {
+//     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+//         target_data_.modify(target_it, [dbcont_name](Target& p) { p.clearDBContentCount(dbcont_name); });
+// }
 
 void TargetModel::storeTargetsEvalInfo()
 {

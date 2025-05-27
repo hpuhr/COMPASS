@@ -147,7 +147,7 @@
                                                     "parameters": {
                                                         "comment": "From EUROCAE ED-117A Table 3-1",
                                                         "failed_values_of_interest": true,
-                                                        "name": "Reported Position Accuracy ",
+                                                        "name": "Reported Position Accuracy",
                                                         "prob": 0.95,
                                                         "prob_check_type": 3,
                                                         "short_name": "RPA",
@@ -474,7 +474,7 @@
                                                     "parameters": {
                                                         "comment": "From EUROCAE ED-87E Table 3-1",
                                                         "failed_values_of_interest": true,
-                                                        "name": "Reported Position Accuracy ",
+                                                        "name": "Reported Position Accuracy",
                                                         "prob": 0.95,
                                                         "prob_check_type": 3,
                                                         "short_name": "RPA",
@@ -912,7 +912,7 @@
                                                     "parameters": {
                                                         "comment": "From EUROCAE ED-87D Table 3-1",
                                                         "failed_values_of_interest": true,
-                                                        "name": "Reported Position Accuracy ",
+                                                        "name": "Reported Position Accuracy",
                                                         "prob": 0.95,
                                                         "prob_check_type": 3,
                                                         "short_name": "RPA",
@@ -2472,7 +2472,7 @@
                                                     "parameters": {
                                                         "comment": "From EUROCAE ED-87C Table 3-1",
                                                         "failed_values_of_interest": true,
-                                                        "name": "Reported Position Accuracy ",
+                                                        "name": "Reported Position Accuracy",
                                                         "prob": 0.95,
                                                         "prob_check_type": 3,
                                                         "short_name": "RPA",

@@ -161,7 +161,7 @@ public:
     bool existsTarget(unsigned int utn);
     void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     dbContent::Target& target(unsigned int utn);
-    void removeDBContentFromTargets(const std::string& dbcont_name);
+    //void removeDBContentFromTargets(const std::string& dbcont_name);
     void loadTargets();
     void saveTargets();
     unsigned int numTargets() const;
@@ -180,9 +180,6 @@ public:
     const dbContent::TargetModel* targetModel() const;
     dbContent::TargetListWidget* targetListWidget();
     void resizeTargetListWidget();
-
-    bool utnUseEval (unsigned int utn);
-    void utnUseEval (unsigned int utn, bool value);
 
     std::string utnComment (unsigned int utn);
     void utnComment (unsigned int utn, std::string value);
