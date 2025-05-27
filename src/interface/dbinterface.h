@@ -189,14 +189,7 @@ public:
     std::vector<std::unique_ptr<dbContent::Target>> loadTargets();
 
     void saveTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
-    void updateFewTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
     void updateTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
-
-    // void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
-    //                  const std::set<unsigned int>& utns);
-    // void saveTarget(const std::unique_ptr<dbContent::Target>& target);
-    // void updateTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
-    //                    const std::set<unsigned int>& utns);
 
     void clearAssociations(const DBContent& dbcontent);
 
@@ -230,6 +223,8 @@ public:
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
     // ta -> mops versions, nucp_nics, nac_ps
+
+    static const size_t TableBulkUpdateMinRows;
 
 protected:
     void openDBFileInternal(const std::string& filename, bool overwrite);
