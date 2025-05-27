@@ -746,12 +746,12 @@ void TargetModel::saveToDB()
 {
     loginf << "TargetModel: saveToDB: saving " << target_data_.size() << " targets";
 
-    std::vector<std::unique_ptr<dbContent::Target>> targets;
+    std::map<unsigned int, nlohmann::json> targets_info;
 
     for (auto& target : target_data_)
-        targets.emplace_back(new dbContent::Target(target.utn_, target.info()));
+        targets_info[target.utn_] = target.info();
 
-    COMPASS::instance().dbInterface().saveTargets(targets);
+    COMPASS::instance().dbInterface().saveTargets(targets_info);
 }
 
 /**
@@ -764,9 +764,11 @@ void TargetModel::saveToDB(unsigned int utn)
 
     assert (tr_tag_it != target_data_.get<target_tag>().end());
 
-    std::unique_ptr<dbContent::Target> tgt_copy {new dbContent::Target(tr_tag_it->utn_, tr_tag_it->info())};
+    std::map<unsigned int, nlohmann::json> targets_info;
 
-    COMPASS::instance().dbInterface().saveTarget(tgt_copy);
+    targets_info[tr_tag_it->utn_] = tr_tag_it->info();
+
+    COMPASS::instance().dbInterface().saveTargets(targets_info);
 }
 
 
