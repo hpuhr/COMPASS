@@ -513,8 +513,7 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
 
         target.evalExcludedTimeWindows() = filtered_time_windows;
 
-        if (comment.size())
-            target.comment(comment);
+        target.comment(comment);
 
         target.storeEvalutionInfo();
     }
@@ -583,8 +582,7 @@ void TargetListWidget::evalExcludeRequirementsTargetSlot()
 
         target.evalExcludedRequirements() = selected_requirements;
 
-        if (comment.size())
-            target.comment(comment);
+        target.comment(comment);
 
         target.storeEvalutionInfo();
     }
