@@ -187,12 +187,16 @@ public:
     void createTargetsTable();
     void clearTargetsTable();
     std::vector<std::unique_ptr<dbContent::Target>> loadTargets();
-    void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets);
-    void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
-                     const std::set<unsigned int>& utns);
-    void saveTarget(const std::unique_ptr<dbContent::Target>& target);
-    void updateTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
-                       const std::set<unsigned int>& utns);
+
+    void saveTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
+    void updateFewTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
+    void updateTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
+
+    // void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
+    //                  const std::set<unsigned int>& utns);
+    // void saveTarget(const std::unique_ptr<dbContent::Target>& target);
+    // void updateTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
+    //                    const std::set<unsigned int>& utns);
 
     void clearAssociations(const DBContent& dbcontent);
 
