@@ -6,7 +6,6 @@
 #include "evaluationtargetfilter.h"
 #include "logger.h"
 #include "reconstructortarget.h"
-#include "task/result/report/reportdefs.h"
 #include "util/files.h"
 
 #include <QApplication>
@@ -405,6 +404,8 @@ void TargetModel::setTargetComment (unsigned int utn, std::string comment)
 
     updateCommentColumn();
     emit targetInfoChangedSignal();
+
+    saveToDB(utn);
 }
 
 void TargetModel::setTargetComment (std::set<unsigned int> utns, std::string comment)
@@ -414,6 +415,8 @@ void TargetModel::setTargetComment (std::set<unsigned int> utns, std::string com
 
     updateCommentColumn();
     emit targetInfoChangedSignal();
+
+    saveToDB(utns);
 }
 
 /**
@@ -428,6 +431,8 @@ void TargetModel::clearAllTargetComments ()
 
     updateCommentColumn();
     emit targetInfoChangedSignal();
+
+    saveToDB();
 }
 
 void TargetModel::setEvalExcludeTimeWindows(
@@ -438,6 +443,8 @@ void TargetModel::setEvalExcludeTimeWindows(
 
     updateEvalDetailsColumn();
     emit targetEvalFullChangeSignal();
+
+    saveToDB(utns);
 }
 
 void TargetModel::clearEvalExcludeTimeWindows(std::set<unsigned int> utns)
@@ -447,6 +454,8 @@ void TargetModel::clearEvalExcludeTimeWindows(std::set<unsigned int> utns)
 
     updateEvalDetailsColumn();
     emit targetEvalFullChangeSignal();
+
+    saveToDB(utns);
 }
 
 void TargetModel::clearAllEvalExcludeTimeWindows()
@@ -458,6 +467,8 @@ void TargetModel::clearAllEvalExcludeTimeWindows()
 
     updateEvalDetailsColumn();
     emit targetEvalFullChangeSignal();
+
+    saveToDB();
 }
 
 void TargetModel::setEvalExcludeRequirements(std::set<unsigned int> utns, const std::set<std::string>& excl_req)
@@ -467,6 +478,8 @@ void TargetModel::setEvalExcludeRequirements(std::set<unsigned int> utns, const 
 
     updateEvalDetailsColumn();
     emit targetEvalUsageChangedSignal();
+
+    saveToDB(utns);
 }
 
 void TargetModel::clearEvalExcludeRequirements(std::set<unsigned int> utns)
@@ -476,6 +489,8 @@ void TargetModel::clearEvalExcludeRequirements(std::set<unsigned int> utns)
 
     updateEvalDetailsColumn();
     emit targetEvalUsageChangedSignal();
+
+    saveToDB(utns);
 }
 
 void TargetModel::clearAllEvalExcludeRequirements()
@@ -488,7 +503,7 @@ void TargetModel::clearAllEvalExcludeRequirements()
     updateEvalDetailsColumn();
     emit targetEvalUsageChangedSignal();
 
-
+    saveToDB();
 }
 
 /**
@@ -501,6 +516,8 @@ void TargetModel::setUseByFilter ()
 
     updateEvalUseColumn();
     emit targetEvalUsageChangedSignal();
+
+    saveToDB();
 }
 
 /**
@@ -771,6 +788,21 @@ void TargetModel::saveToDB(unsigned int utn)
     COMPASS::instance().dbInterface().saveTargets(targets_info);
 }
 
+void TargetModel::saveToDB(std::set<unsigned int> utns)
+{
+    loginf << "TargetModel: saveToDB: saving utns " << String::compress(utns,',');
+
+    std::map<unsigned int, nlohmann::json> targets_info;
+
+    for (auto utn : utns)
+    {
+        const auto& tgt = target(utn);
+
+        targets_info[tgt.utn_] = tgt.info();
+    }
+
+    COMPASS::instance().dbInterface().saveTargets(targets_info);
+}
 
 /**
  */
@@ -820,16 +852,5 @@ void TargetModel::updateEvalDetailsColumn()
 {
     emit dataChanged(index(0, ColUseEvalDetails), index(this->rowCount(), ColUseEvalDetails), {Qt::DisplayRole});
 }
-
-// void TargetModel::updateEvalItems()
-// {
-//     if (show_eval_columns_)
-//     {
-//         int row_count = this->rowCount();
-
-//         emit dataChanged(index(0, ColUseInEval), index(row_count, ColUseInEval), {Qt::DecorationRole});
-//         emit dataChanged(index(0, ColUseEvalDetails), index(row_count, ColUseEvalDetails), {Qt::DisplayRole});
-//     }
-// }
 
 }

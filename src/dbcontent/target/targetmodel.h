@@ -118,6 +118,7 @@ public:
     void loadFromDB();
     void saveToDB();
     void saveToDB(unsigned int utn);
+    void saveToDB(std::set<unsigned int> utns);
 
     void clear();
 
