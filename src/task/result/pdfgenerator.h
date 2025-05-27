@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSREPORTPDFGENERATOR_H
-#define EVALUATIONRESULTSREPORTPDFGENERATOR_H
+#pragma once
 
 class EvaluationManager;
 class EvaluationManagerSettings;
@@ -72,5 +71,3 @@ namespace EvaluationResultsReport
     };
 
 }
-
-#endif // EVALUATIONRESULTSREPORTPDFGENERATOR_H

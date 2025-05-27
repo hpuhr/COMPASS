@@ -357,8 +357,10 @@ void Single::addTargetToOverviewTable(ResultReport::Section& section,
 */
 void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> report)
 {
-    report->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
+    auto& utn_section     = report->getSection(getTargetSectionID());
     auto& utn_req_section = report->getSection(getTargetRequirementSectionID());
+
+    utn_section.perTargetSection(true); // mark utn section per target
 
     //generate details overview table
     if (!utn_req_section.hasTable("details_overview_table"))
@@ -388,7 +390,7 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
     if (failed)
     {
         // mark utn section as with issue
-        report->getSection(getTargetSectionID()).perTargetWithIssues(true); 
+        utn_section.perTargetWithIssues(true); 
         utn_req_section.perTargetWithIssues(true);
     }
 

@@ -86,6 +86,10 @@ public:
     void fillTargetsTable(const std::map<unsigned int, EvaluationTarget>& targets,
                           ResultReport::SectionContentTable& table,
                           const InterestEnabledFunc & interest_enabled_func) const;
+    bool hasTargetTableTooltip(int col) const;
+    std::string targetTableToolTip(const EvaluationTarget& target,
+                                   int col,
+                                   const InterestEnabledFunc & interest_enabled_func) const;
 
     enum Columns
     {
@@ -123,6 +127,9 @@ protected:
                                const InterestEnabledFunc & interest_enabled_func) const;
     unsigned int rowStyle(const EvaluationTarget& target) const;
     unsigned int columnStyle(int column) const;
+    unsigned int cellStyle(const EvaluationTarget& target, 
+                           int column,
+                           const nlohmann::json& data) const;
 
     EvaluationCalculator& calculator_;
     DBContentManager&     dbcont_man_;

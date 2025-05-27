@@ -34,7 +34,8 @@ public:
 
     void interestFactors(const InterestMap& interests);
     const InterestMap& interestFactors() const;
-    double totalInterest(const InterestEnabledFunc& enabled_func = InterestEnabledFunc()) const;
+    double totalInterest(const InterestEnabledFunc& enabled_func = InterestEnabledFunc(),
+                         size_t* num_contributors = nullptr) const;
 
     void dbContentRef(const std::string& db_content);
     std::string dbContentRef() const;

@@ -40,7 +40,6 @@ const Property    Section::DBColumnSectionID   = Property("section_id"  , Proper
 const Property    Section::DBColumnReportID    = Property("report_id"   , PropertyDataType::UINT);
 const Property    Section::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON);
 
-const std::string Section::FieldID                  = "section_id";
 const std::string Section::FieldHeading             = "heading";
 const std::string Section::FieldParentHeading       = "parent_heading";
 const std::string Section::FieldPerTarget           = "per_target_section";
@@ -49,8 +48,9 @@ const std::string Section::FieldSubSections         = "sub_sections";
 const std::string Section::FieldContentIDs          = "content_ids";
 const std::string Section::FieldContentNames        = "content_names";
 const std::string Section::FieldContentTypes        = "content_types";
-const std::string Section::FieldExtraContentIDs     = "extra_content_ids";
-const std::string Section::FieldProperties          = "properties";
+const std::string Section::FieldHiddenContentIDs    = "hidden_content_ids";
+
+const std::string Section::FieldDocContents         = "contents";
 
 unsigned int Section::current_content_id_ = 0;
 
@@ -74,6 +74,20 @@ Section::Section(TreeItem* parent_item,
 :   TreeItem (parent_item)
 ,   report_  (report)
 {
+}
+
+/**
+ */
+Section* Section::parentSection()
+{
+    return dynamic_cast<Section*>(parent_item_);
+}
+
+/**
+ */
+const Section* Section::parentSection() const
+{
+    return dynamic_cast<const Section*>(parent_item_);
 }
 
 /**
@@ -158,10 +172,7 @@ std::string Section::compoundResultsHeading() const
     else
         tmp = heading_;
 
-    //@TODO
-    //return SectionID::sectionIDWithoutResults(tmp);
-
-    return "";
+    return SectionID::sectionIDWithoutResults(tmp);
 }
 
 /**
@@ -250,14 +261,14 @@ QWidget* Section::getContentWidget(bool preload_ondemand_contents)
 */
 bool Section::hasText (const std::string& name)
 {
-    return hasContent(name, SectionContent::Type::Text);
+    return hasContent(name, SectionContent::ContentType::Text);
 }
 
 /**
 */
 SectionContentText& Section::getText (const std::string& name)
 {
-    auto idx = findContent(name, SectionContent::Type::Text);
+    auto idx = findContent(name, SectionContent::ContentType::Text);
     assert(idx.has_value());
 
     auto c = loadOrGetContent(idx.value(), false);
@@ -281,7 +292,7 @@ SectionContentText& Section::addText(const std::string& name)
     auto ptr = std::make_shared<SectionContentText>(id, name, this);
     
     content_.push_back(ptr);
-    content_types_.push_back((int)content_.back()->type());
+    content_types_.push_back((int)content_.back()->contentType());
     assert (hasText(name));
 
     return *ptr;
@@ -291,21 +302,21 @@ SectionContentText& Section::addText(const std::string& name)
 */
 size_t Section::numTexts() const
 {
-    return numContents(SectionContent::Type::Text);
+    return numContents(SectionContent::ContentType::Text);
 }
 
 /**
 */
 bool Section::hasTable(const std::string& name)
 {
-    return hasContent(name, SectionContent::Type::Table);
+    return hasContent(name, SectionContent::ContentType::Table);
 }
 
 /**
 */
 SectionContentTable& Section::getTable(const std::string& name)
 {
-    auto idx = findContent(name, SectionContent::Type::Table);
+    auto idx = findContent(name, SectionContent::ContentType::Table);
     assert(idx.has_value());
 
     auto c = loadOrGetContent(idx.value(), false);
@@ -323,7 +334,7 @@ std::vector<std::string> Section::getTableNames() const
 {
     std::vector<std::string> names;
 
-    auto idxs = findContents(SectionContent::Type::Table);
+    auto idxs = findContents(SectionContent::ContentType::Table);
 
     for (auto idx : idxs)
         names.push_back(content_names_.at(idx));
@@ -356,7 +367,7 @@ SectionContentTable& Section::addTable(const std::string& name,
 
     content_.push_back(ptr);
 
-    content_types_.push_back((int)content_.back()->type());
+    content_types_.push_back((int)content_.back()->contentType());
     assert (hasTable(name));
 
     return *ptr;
@@ -366,21 +377,21 @@ SectionContentTable& Section::addTable(const std::string& name,
 */
 size_t Section::numTables() const
 {
-    return numContents(SectionContent::Type::Table);
+    return numContents(SectionContent::ContentType::Table);
 }
 
 /**
 */
 bool Section::hasFigure (const std::string& name)
 {
-    return hasContent(name, SectionContent::Type::Figure);
+    return hasContent(name, SectionContent::ContentType::Figure);
 }
 
 /**
 */
 SectionContentFigure& Section::getFigure (const std::string& name)
 {
-    auto idx = findContent(name, SectionContent::Type::Figure);
+    auto idx = findContent(name, SectionContent::ContentType::Figure);
     assert(idx.has_value());
 
     auto c = loadOrGetContent(idx.value(), false);
@@ -411,7 +422,7 @@ SectionContentFigure& Section::addFigure(const std::string& name,
                                                       this);
 
     content_.push_back(ptr);
-    content_types_.push_back((int)content_.back()->type());
+    content_types_.push_back((int)content_.back()->contentType());
     assert (hasFigure(name));
 
     return *ptr;
@@ -419,12 +430,12 @@ SectionContentFigure& Section::addFigure(const std::string& name,
 
 /**
 */
-unsigned int Section::addContentFigure(const SectionContentViewable& viewable)
+unsigned int Section::addHiddenFigure(const SectionContentViewable& viewable)
 {
     unsigned int id = Section::newContentID();
-    extra_content_ids_.push_back(id);
-    extra_content_.push_back(std::make_shared<SectionContentFigure>(id, 
-                                                                    SectionContentFigure::FigureType::Content,
+    hidden_content_ids_.push_back(id);
+    hidden_content_.push_back(std::make_shared<SectionContentFigure>(id, 
+                                                                    SectionContentFigure::FigureType::Hidden,
                                                                     "", 
                                                                     viewable, 
                                                                     this));
@@ -437,7 +448,7 @@ std::vector<SectionContentFigure*> Section::getFigures()
 {
     std::vector<SectionContentFigure*> figures;
 
-    auto idxs = findContents(SectionContent::Type::Figure);
+    auto idxs = findContents(SectionContent::ContentType::Figure);
 
     for (auto idx : idxs)
     {
@@ -457,7 +468,7 @@ std::vector<SectionContentFigure*> Section::getFigures()
 */
 size_t Section::numFigures() const
 {
-    return numContents(SectionContent::Type::Figure);
+    return numContents(SectionContent::ContentType::Figure);
 }
 
 /**
@@ -529,26 +540,43 @@ void Section::accept(LatexVisitor& v) const
 
 /**
 */
-const std::vector<std::shared_ptr<SectionContent>>& Section::sectionContent() const
+std::vector<std::shared_ptr<SectionContent>> Section::sectionContent(bool with_hidden_content) const
 {
-    return content_;
+    std::vector<std::shared_ptr<SectionContent>> content;
+
+    size_t n = content_.size();
+    for (size_t i = 0; i < n; ++i)
+    {
+        auto c = loadOrGetContent(i, false, false);
+        if (c) content.push_back(c);
+    }
+
+    if (with_hidden_content)
+    {
+        size_t ne = hidden_content_.size();
+        for (size_t i = 0; i < ne; ++i)
+        {
+            auto c = loadOrGetContent(i, true, false);
+            if (c) content.push_back(c);
+        }
+    }
+
+    return content;
 }
 
 /**
 */
-std::vector<std::shared_ptr<SectionContent>> Section::recursiveContent() const
+std::vector<std::shared_ptr<SectionContent>> Section::recursiveContent(bool with_hidden_content) const
 {
-    std::vector<std::shared_ptr<SectionContent>> sec_content;
-    sec_content.insert(sec_content.end(), content_.begin(), content_.end());
-    sec_content.insert(sec_content.end(), extra_content_.begin(), extra_content_.end());
+    std::vector<std::shared_ptr<SectionContent>> sec_content_rec = sectionContent(with_hidden_content);
 
     for (const auto& s : sub_sections_)
     {
-        auto c = s->recursiveContent();
-        sec_content.insert(sec_content.end(), c.begin(), c.end());
+        auto sec_content = s->recursiveContent(with_hidden_content);
+        sec_content_rec.insert(sec_content_rec.end(), sec_content.begin(), sec_content.end());
     }
 
-    return sec_content;
+    return sec_content_rec;
 }
 
 /**
@@ -594,13 +622,13 @@ Section* Section::findSubSection(const std::string& heading)
 
 /**
 */
-boost::optional<size_t> Section::findContent(const std::string& name, SectionContent::Type type) const
+boost::optional<size_t> Section::findContent(const std::string& name, SectionContent::ContentType type) const
 {
     for (size_t i = 0; i < content_.size(); ++i)
     {
         //loginf << "name: " << content_names_[ i ] << " vs " << name << " - type: " << content_types_[ i ] << " vs " << (int)type;
 
-        if (content_names_[ i ] == name && (SectionContent::Type)content_types_[ i ] == type)
+        if (content_names_[ i ] == name && (SectionContent::ContentType)content_types_[ i ] == type)
             return i;
     }
 
@@ -622,13 +650,13 @@ boost::optional<size_t> Section::findContent(const std::string& name) const
 
 /**
 */
-std::vector<size_t> Section::findContents(SectionContent::Type type) const
+std::vector<size_t> Section::findContents(SectionContent::ContentType type) const
 {
     std::vector<size_t> idxs;
 
     for (size_t i = 0; i < content_.size(); ++i)
     {
-        if ((SectionContent::Type)content_types_[ i ] == type)
+        if ((SectionContent::ContentType)content_types_[ i ] == type)
             idxs.push_back(i);
     }
 
@@ -637,7 +665,7 @@ std::vector<size_t> Section::findContents(SectionContent::Type type) const
 
 /**
 */
-bool Section::hasContent(const std::string& name, SectionContent::Type type) const
+bool Section::hasContent(const std::string& name, SectionContent::ContentType type) const
 {
     return findContent(name, type).has_value();
 }
@@ -693,13 +721,13 @@ unsigned int Section::contentInfo(const std::string& name) const
 
 /**
 */
-size_t Section::numContents(SectionContent::Type type) const
+size_t Section::numContents(SectionContent::ContentType type) const
 {
     size_t num = 0;
 
     for (size_t i = 0; i < content_.size(); ++i)
     {
-        if ((SectionContent::Type)content_types_[ i ] == type)
+        if ((SectionContent::ContentType)content_types_[ i ] == type)
             ++num;
     }
 
@@ -710,7 +738,7 @@ size_t Section::numContents(SectionContent::Type type) const
 */
 void Section::createContentWidget(bool preload_ondemand_contents)
 {
-    loginf << "Section: createContentWidget: Creating content widget for section '" << name_ << "'";
+    loginf << "Section: createContentWidget: Creating content widget for section '" << name() << "'";
 
     assert (!content_widget_);
 
@@ -738,7 +766,7 @@ void Section::createContentWidget(bool preload_ondemand_contents)
         {
             auto c = this->loadOrGetContent(i, false);
             if (c->isOnDemand() &&
-                c->type() == SectionContent::Type::Table)
+                c->contentType() == SectionContent::ContentType::Table)
             {
                 c->loadOnDemandIfNeeded();
             }
@@ -770,36 +798,37 @@ namespace
 /**
 */
 std::shared_ptr<SectionContent> Section::retrieveContent(unsigned int id, 
-                                                         bool show_dialog)
+                                                         bool show_dialog) const
 {
-    bool in_extra = false;
+    bool in_hidden = false;
 
     auto idx = findContentInVector(content_ids_, id);
     if (!idx.has_value())
     {
-        idx = findContentInVector(extra_content_ids_, id);
-        in_extra = true;
+        idx = findContentInVector(hidden_content_ids_, id);
+        in_hidden = true;
     }
 
     if (!idx.has_value())
         return std::shared_ptr<SectionContent>();
 
-    return loadOrGetContent(idx.value(), in_extra, show_dialog);
+    return loadOrGetContent(idx.value(), in_hidden, show_dialog);
 }
 
 /**
 */
 std::shared_ptr<SectionContent> Section::loadOrGetContent(size_t idx, 
-                                                          bool is_extra_content,
-                                                          bool show_dialog)
+                                                          bool is_hidden_content,
+                                                          bool show_dialog) const
 {
-    auto& c_ptr = is_extra_content ? extra_content_.at(idx) : content_.at(idx);
-    auto  id    = is_extra_content ? extra_content_ids_.at(idx) : content_ids_.at(idx);
+    auto& c_ptr = is_hidden_content ? hidden_content_.at(idx) : content_.at(idx);
+    auto  id    = is_hidden_content ? hidden_content_ids_.at(idx) : content_ids_.at(idx);
 
     if (c_ptr)
         return c_ptr;
 
-    auto c = report_->loadContent(this, id, show_dialog);
+    Section* s = const_cast<Section*>(this); //@TODO
+    auto c = report_->loadContent(s, id, show_dialog);
     assert(c);
 
     c_ptr = c;
@@ -808,44 +837,17 @@ std::shared_ptr<SectionContent> Section::loadOrGetContent(size_t idx,
 }
 
 /**
- */
-void Section::setJSONProperty(const std::string& name, const nlohmann::json& value)
-{
-    properties_[ name ] = value;
-}
-
-/**
- */
-bool Section::hasJSONProperty(const std::string& name) const
-{
-    return properties_.contains(name);
-}
-
-/**
- */
-nlohmann::json Section::jsonProperty(const std::string& name) const
-{
-    if (!hasJSONProperty(name))
-        return nlohmann::json();
-
-    return properties_.at(name);
-}
-
-/**
 */
-nlohmann::json Section::toJSON() const
+void Section::toJSON_impl(nlohmann::json& j) const
 {
-    nlohmann::json root;
-
-    root[ FieldHeading             ] = heading_;
-    root[ FieldParentHeading       ] = parent_heading_;
-    root[ FieldPerTarget           ] = per_target_section_;
-    root[ FieldPerTargetWithIssues ] = per_target_section_with_issues_;
-    root[ FieldContentIDs          ] = content_ids_;
-    root[ FieldContentNames        ] = content_names_;
-    root[ FieldContentTypes        ] = content_types_;
-    root[ FieldExtraContentIDs     ] = extra_content_ids_;
-    root[ FieldProperties          ] = properties_;
+    j[ FieldHeading             ] = heading_;
+    j[ FieldParentHeading       ] = parent_heading_;
+    j[ FieldPerTarget           ] = per_target_section_;
+    j[ FieldPerTargetWithIssues ] = per_target_section_with_issues_;
+    j[ FieldContentIDs          ] = content_ids_;
+    j[ FieldContentNames        ] = content_names_;
+    j[ FieldContentTypes        ] = content_types_;
+    j[ FieldHiddenContentIDs    ] = hidden_content_ids_;
 
     nlohmann::json j_subsections = nlohmann::json::array();
 
@@ -855,14 +857,12 @@ nlohmann::json Section::toJSON() const
         j_subsections.push_back(js);
     }
 
-    root[ FieldSubSections ] = j_subsections;
-
-    return root;
+    j[ FieldSubSections ] = j_subsections;
 }
 
 /**
 */
-bool Section::fromJSON(const nlohmann::json& j)
+bool Section::fromJSON_impl(const nlohmann::json& j)
 {
     if (!j.is_object()                        ||
         !j.contains(FieldHeading)             ||
@@ -873,62 +873,56 @@ bool Section::fromJSON(const nlohmann::json& j)
         !j.contains(FieldContentIDs)          ||
         !j.contains(FieldContentNames)        ||
         !j.contains(FieldContentTypes)        ||
-        !j.contains(FieldExtraContentIDs)     ||
-        !j.contains(FieldProperties))
+        !j.contains(FieldHiddenContentIDs))
     {
-        logerr << "Section: fromJSON: Error: Section does not obtain needed fields";
+        logerr << "Section: fromJSON_impl: Error: Section does not obtain needed fields";
         return false;
     }
 
-    try
+    heading_                        = j[ FieldHeading             ];
+    parent_heading_                 = j[ FieldParentHeading       ];
+    per_target_section_             = j[ FieldPerTarget           ];
+    per_target_section_with_issues_ = j[ FieldPerTargetWithIssues ];
+    content_ids_                    = j[ FieldContentIDs          ].get<std::vector<unsigned int>>();
+    content_names_                  = j[ FieldContentNames        ].get<std::vector<std::string>>();
+    content_types_                  = j[ FieldContentTypes        ].get<std::vector<int>>();
+    hidden_content_ids_             = j[ FieldHiddenContentIDs    ].get<std::vector<unsigned int>>();
+
+    content_.resize(content_ids_.size());
+    hidden_content_.resize(hidden_content_ids_.size());
+
+    assert(content_ids_.size() == content_names_.size());
+    assert(content_ids_.size() == content_types_.size());
+
+    const auto& j_subsections = j[ FieldSubSections ];
+    if (!j_subsections.is_array())
     {
-        heading_                        = j[ FieldHeading             ];
-        parent_heading_                 = j[ FieldParentHeading       ];
-        per_target_section_             = j[ FieldPerTarget           ];
-        per_target_section_with_issues_ = j[ FieldPerTargetWithIssues ];
-        content_ids_                    = j[ FieldContentIDs          ].get<std::vector<unsigned int>>();
-        content_names_                  = j[ FieldContentNames        ].get<std::vector<std::string>>();
-        content_types_                  = j[ FieldContentTypes        ].get<std::vector<int>>();
-        extra_content_ids_              = j[ FieldExtraContentIDs     ].get<std::vector<unsigned int>>();
-        properties_                     = j[ FieldProperties          ];
+        logerr << "Section: fromJSON_impl: Error: Subsection is not an array";
+        return false;
+    }
 
-        content_.resize(content_ids_.size());
-        extra_content_.resize(extra_content_ids_.size());
-
-        assert(content_ids_.size() == content_names_.size());
-        assert(content_ids_.size() == content_types_.size());
-
-        //restore TreeItem content
-        setItemName(heading_);
-
-        const auto& j_subsections = j[ FieldSubSections ];
-        if (!j_subsections.is_array())
-        {
-            logerr << "Section: fromJSON: Error: Subsection is not an array";
+    for (const auto& jss : j_subsections)
+    {
+        std::shared_ptr<Section> section(new Section(this, report_));
+        if (!section->fromJSON(jss))
             return false;
-        }
 
-        for (const auto& jss : j_subsections)
-        {
-            std::shared_ptr<Section> section(new Section(this, report_));
-            if (!section->fromJSON(jss))
-                return false;
-
-            sub_sections_.push_back(section);
-        }
-    }
-    catch(const std::exception& ex)
-    {
-        logerr << "Section: fromJSON: Error: " << ex.what();
-        return false;
-    }
-    catch(...)
-    {
-        logerr << "Section: fromJSON: Error: Unknown JSON error";
-        return false;
+        sub_sections_.push_back(section);
     }
 
     return true;
+}
+
+/**
+ */
+Result Section::toJSONDocument_impl(nlohmann::json& j,
+                                    const std::string* resource_dir) const
+{
+    j[ FieldName        ] = name();
+    j[ FieldSubSections ] = nlohmann::json::array();
+    j[ FieldDocContents ] = nlohmann::json::array();
+    
+    return Result::succeeded();
 }
 
 }

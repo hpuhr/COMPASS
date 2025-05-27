@@ -17,8 +17,13 @@
 
 #include "task/result/report/sectioncontent.h"
 #include "task/result/report/section.h"
+#include "task/result/report/sectionid.h"
 #include "task/result/report/report.h"
+#include "task/result/report/reportexporter.h"
+
 #include "taskresult.h"
+
+#include "files.h"
 
 #include <cassert>
 
@@ -34,53 +39,119 @@ const PropertyList SectionContent::DBPropertyList      = PropertyList({ SectionC
                                                                         SectionContent::DBColumnResultID,
                                                                         SectionContent::DBColumnType,
                                                                         SectionContent::DBColumnJSONContent });
-const std::string SectionContent::FieldType       = "type";
-const std::string SectionContent::FieldID         = "id";
-const std::string SectionContent::FieldName       = "name";
-const std::string SectionContent::FieldProperties = "properties";
-const std::string SectionContent::FieldOnDemand   = "on_demand";
+const std::string SectionContent::FieldContentType = "content_type";
+const std::string SectionContent::FieldContentID   = "content_id";
+const std::string SectionContent::FieldOnDemand    = "on_demand";
 
 /**
  */
-SectionContent::SectionContent(Type type,
+SectionContent::SectionContent(ContentType type,
                                unsigned int id,
                                const std::string& name, 
                                Section* parent_section)
-:   type_          (type          )
-,   id_            (id            )
-,   name_          (name          )
-,   parent_section_(parent_section)
+:   ReportItem     (name, parent_section)
+,   content_type_  (type                )
+,   content_id_    (id                  )
 {
-    assert (parent_section_);
+    assert(parent_section);
 
-    report_ = parent_section_->report();
+    report_ = parent_section->report();
     assert(report_);
 }
 
 /**
  */
-SectionContent::SectionContent(Type type,
+SectionContent::SectionContent(ContentType type,
                                Section* parent_section)
-:   type_          (type          )
-,   parent_section_(parent_section)
+:   ReportItem     (parent_section)
+,   content_type_  (type          )
 {
-    assert (parent_section_);
+    assert(parent_section);
 
-    report_ = parent_section_->report();
+    report_ = parent_section->report();
     assert(report_);
 }
 
 /**
  */
-std::string SectionContent::typeAsString(Type type)
+Section* SectionContent::parentSection()
+{
+    return dynamic_cast<Section*>(parent_item_);
+}
+
+/**
+ */
+const Section* SectionContent::parentSection() const
+{
+    return dynamic_cast<const Section*>(parent_item_);
+}
+
+/**
+ */
+std::string SectionContent::contentPath() const
+{
+    return ResultReport::SectionID::sectionID2Path(parentSection()->compoundResultsHeading());
+}
+
+/**
+ * Filename of the content in the resource filesystem.
+ */
+std::string SectionContent::resourceFilename(const std::string& postfix) const
+{
+    auto pf = (postfix.empty() ? "" : "_") + postfix;
+    auto fn = name() + pf + resourceExtension();
+
+    return fn;
+}
+
+/**
+ * Relative directory of the content in the resource filesystem.
+ */
+std::string SectionContent::resourceRelDirectory(ResourceDir rdir) const
+{
+    return ReportExporter::resourceSubDir(rdir) + "/" + contentPath();
+}
+
+/**
+ * Relative path of the content in the resource filesystem.
+ */
+std::string SectionContent::resourceLink(ResourceDir rdir, const std::string& postfix) const
+{
+    return resourceRelDirectory(rdir) + resourceFilename(postfix);
+}
+
+/**
+ */
+ResultT<SectionContent::ResourceLink> SectionContent::prepareResource(const std::string& resource_dir,
+                                                                      ResourceDir rdir,
+                                                                      const std::string& prefix) const
+{
+    //store data in temp dir
+    auto link = resourceLink(rdir, prefix);
+    auto path = resource_dir + "/" + link;
+    auto dir  = Utils::Files::getDirectoryFromPath(path);
+
+    if (!Utils::Files::createMissingDirectories(dir))
+        return ResultT<ResourceLink>::failed("Could not create resource subdirectory for content '" + name() + "'");
+
+    ResourceLink rl;
+    rl.link = link;
+    rl.path = path;
+
+    return ResultT<ResourceLink>::succeeded(rl);
+}
+
+/**
+ */
+std::string SectionContent::contentTypeAsString(ContentType type)
 {
     switch(type)
     {
-        case Type::Figure:
+        case ContentType::Figure:
             return "figure";
-        case Type::Table:
+        case ContentType::Table:
             return "table";
-        case Type::Text:
+        case ContentType::Text:
             return "text";
         default:
             return "";
@@ -90,82 +161,51 @@ std::string SectionContent::typeAsString(Type type)
 
 /**
  */
-boost::optional<SectionContent::Type> SectionContent::typeFromString(const std::string& type_str)
+boost::optional<SectionContent::ContentType> SectionContent::contentTypeFromString(const std::string& type_str)
 {
     if (type_str == "figure")
-        return Type::Figure;
+        return ContentType::Figure;
     else if (type_str == "table")
-        return Type::Table;
+        return ContentType::Table;
     else if (type_str == "text")
-        return Type::Text;
+        return ContentType::Text;
 
-    return boost::optional<SectionContent::Type>();
+    return boost::optional<SectionContent::ContentType>();
 }
 
 /**
  */
-SectionContent::Type SectionContent::type() const
+SectionContent::ContentType SectionContent::contentType() const
 {
-    return type_;
+    return content_type_;
 }
 
 /**
  */
-std::string SectionContent::typeAsString() const
+std::string SectionContent::contentTypeAsString() const
 {
-    return SectionContent::typeAsString(type_);
+    return SectionContent::contentTypeAsString(content_type_);
 }
 
 /**
  */
-unsigned int SectionContent::id() const
+unsigned int SectionContent::contentID() const
 {
-    return id_;
-}
-
-/**
- */
-std::string SectionContent::name() const
-{
-    return name_;
+    return content_id_;
 }
 
 /**
  */
 TaskResult* SectionContent::taskResult()
 {
-    return &parent_section_->report()->result();
+    return &parentSection()->report()->result();
 }
 
 /**
  */
 const TaskResult* SectionContent::taskResult() const
 {
-    return &parent_section_->report()->result();
-}
-
-/**
- */
-void SectionContent::setJSONProperty(const std::string& name, const nlohmann::json& value)
-{
-    properties_[ name ] = value;
-}
-
-/**
- */
-bool SectionContent::hasJSONProperty(const std::string& name) const
-{
-    return properties_.contains(name);
-}
-
-/**
- */
-nlohmann::json SectionContent::jsonProperty(const std::string& name) const
-{
-    if (!hasJSONProperty(name))
-        return nlohmann::json();
-
-    return properties_.at(name);
+    return &parentSection()->report()->result();
 }
 
 /**
@@ -203,7 +243,7 @@ bool SectionContent::loadOnDemandIfNeeded()
  */
 bool SectionContent::loadOnDemand()
 {
-    loginf << "SectionContent: loadOnDemand: Loading on-demand data for content '" << name_ << "' of type '" << typeAsString() << "'";
+    loginf << "SectionContent: loadOnDemand: Loading on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
 
     assert(isOnDemand());
     assert(!isComplete());
@@ -212,7 +252,7 @@ bool SectionContent::loadOnDemand()
     bool ok = report_->result().loadOnDemandContent(this);
     if (!ok)
     {
-        logerr << "SectionContent: loadOnDemand: Could not load on-demand data for content '" << name_ << "' of type '" << typeAsString() << "'";
+        logerr << "SectionContent: loadOnDemand: Could not load on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
         return false;
     }
 
@@ -244,67 +284,49 @@ void SectionContent::clearContent()
 
 /**
  */
-nlohmann::json SectionContent::toJSON() const
+void SectionContent::toJSON_impl(nlohmann::json& j) const
 {
-    nlohmann::json root;
-
-    root[ FieldType       ] = typeAsString(type_);
-    root[ FieldID         ] = id_;
-    root[ FieldName       ] = name_;
-    root[ FieldProperties ] = properties_;
-    root[ FieldOnDemand   ] = on_demand_;
-
-    toJSON_impl(root);
-
-    return root;
+    j[ FieldContentType ] = contentTypeAsString(content_type_);
+    j[ FieldContentID   ] = content_id_;
+    j[ FieldOnDemand    ] = on_demand_;
 }
 
 /**
  */
-bool SectionContent::fromJSON(const nlohmann::json& j)
+bool SectionContent::fromJSON_impl(const nlohmann::json& j)
 {
-    if (!j.is_object()               ||
-        !j.contains(FieldType)       ||
-        !j.contains(FieldID)         ||
-        !j.contains(FieldName)       ||
-        !j.contains(FieldProperties) ||
+    if (!j.is_object()                ||
+        !j.contains(FieldContentType) ||
+        !j.contains(FieldContentID)   ||
         !j.contains(FieldOnDemand))
     {
-        logerr << "SectionContent: fromJSON: Error: Section content does not obtain needed fields";
+        logerr << "SectionContent: fromJSON_impl: Error: Section content does not obtain needed fields";
         return false;
     }
 
-    try
+    std::string t_str = j[ FieldContentType ];
+    auto t = contentTypeFromString(t_str);
+    if (!t.has_value())
     {
-        std::string t_str = j[ FieldType ];
-        auto t = typeFromString(t_str);
-        if (!t.has_value())
-        {
-            logerr << "SectionContent: fromJSON: Error: Could not deduce section content type";
-            return false;
-        }
-
-        type_       = t.value();
-        id_         = j[ FieldID         ];
-        name_       = j[ FieldName       ];
-        properties_ = j[ FieldProperties ];
-        on_demand_  = j[ FieldOnDemand   ];
-
-        if (!fromJSON_impl(j))
-            return false;
-    }
-    catch(const std::exception& ex)
-    {
-        logerr << "SectionContent: fromJSON: Error: " << ex.what();
+        logerr << "SectionContent: fromJSON_impl: Error: Could not deduce section content type";
         return false;
     }
-    catch(...)
-    {
-        logerr << "SectionContent: fromJSON: Unknown error";
-        return false;
-    }
+
+    content_type_  = t.value();
+    content_id_    = j[ FieldContentID ];
+    on_demand_     = j[ FieldOnDemand  ];
 
     return true;
+}
+
+/**
+ */
+Result SectionContent::toJSONDocument_impl(nlohmann::json& j,
+                                           const std::string* resource_dir) const
+{
+    j[ FieldContentType ] = contentTypeAsString(content_type_);
+
+    return Result::succeeded();
 }
 
 }

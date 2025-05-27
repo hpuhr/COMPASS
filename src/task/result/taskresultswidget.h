@@ -49,11 +49,15 @@ protected:
     void updateResults(const std::string& selected_result = "");
     void removeCurrentResult();
     bool removeResult(const std::string& name);
+    void exportCurrentResult();
 
     TaskManager& task_man_;
 
     QComboBox* report_combo_ {nullptr};
     QPushButton* remove_result_button_ {nullptr};
+    QPushButton* export_result_button_ {nullptr};
+    
+
     std::string current_report_name_;
     std::string current_report_name_backup_;
     std::string current_section_name_backup_;

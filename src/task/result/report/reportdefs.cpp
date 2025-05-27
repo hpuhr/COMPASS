@@ -15,44 +15,20 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "task/result/report/treeitem.h"
-
-#include "logger.h"
+#include "reportdefs.h"
 
 namespace ResultReport
 {
 
-/**
- */
-TreeItem::TreeItem(const std::string& name, 
-                   TreeItem* parent_item)
-:   ReportItem(name, parent_item)
-{
-}
+const QColor Colors::TextRed    = QColor(220,20,60);
+const QColor Colors::TextOrange = QColor(255,140,0);
+const QColor Colors::TextGreen  = Qt::darkGreen;
+const QColor Colors::TextGray   = Qt::darkGray;
 
-/**
- */
-TreeItem::TreeItem(TreeItem* parent_item)
-:   ReportItem(parent_item)
-{
-}
-
-/**
- */
-TreeItem::~TreeItem() = default;
-
-/**
- */
-TreeItem* TreeItem::parentItem()
-{
-    return dynamic_cast<TreeItem*>(parent_item_);
-}
-
-/**
- */
-const TreeItem* TreeItem::parentItem() const
-{
-    return dynamic_cast<const TreeItem*>(parent_item_);
-}
+const QColor Colors::BGRed    = QColor(240,128,128);
+const QColor Colors::BGOrange = QColor(255,165,0);
+const QColor Colors::BGGreen  = QColor(144,238,144);
+const QColor Colors::BGGray   = Qt::lightGray;
+const QColor Colors::BGYellow = QColor(255,255,153);
 
 }

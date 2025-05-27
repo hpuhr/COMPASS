@@ -6,6 +6,7 @@
 #include "logger.h"
 #include "taskmanager.h"
 #include "asynctask.h"
+#include "compass.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -17,6 +18,7 @@
 #include <QWidgetAction>
 #include <QComboBox>
 #include <QMessageBox>
+#include <QFileDialog>
 
 using namespace Utils;
 
@@ -56,6 +58,14 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     connect(remove_result_button_, &QPushButton::pressed, this, &TaskResultsWidget::removeCurrentResult);
 
     top_layout->addWidget(remove_result_button_);
+
+    export_result_button_ = new QPushButton("Export Result");
+    export_result_button_->setIcon(Files::IconProvider::getIcon("right.png"));
+    export_result_button_->setEnabled(false);
+
+    connect(export_result_button_, &QPushButton::pressed, this, &TaskResultsWidget::exportCurrentResult);
+
+    top_layout->addWidget(export_result_button_);
 
     QFrame *line = new QFrame;
     line->setFrameShape(QFrame::HLine);
@@ -118,6 +128,9 @@ void TaskResultsWidget::setReport(const std::string name)
     assert (task_man_.hasResult(name));
     report_widget_->setReport(task_man_.result(name)->report());
 
+    if (!task_man_.result(name)->startSection().empty())
+        report_widget_->selectId(task_man_.result(name)->startSection());
+
     report_widget_->setDisabled(false);
 }
 
@@ -170,6 +183,7 @@ void TaskResultsWidget::updateResults(const std::string& selected_result)
 
     report_combo_->setEnabled(report_combo_->count() > 0);
     remove_result_button_->setEnabled(report_combo_->count() > 0);
+    export_result_button_->setEnabled(report_combo_->count() > 0);
 
     report_combo_->blockSignals(false);
 
@@ -214,6 +228,27 @@ void TaskResultsWidget::removeCurrentResult()
     std::string selection_name = new_index >= 0 ? report_combo_->itemText(new_index).toStdString() : "";
 
     updateResults(selection_name);
+}
+
+/**
+ */
+void TaskResultsWidget::exportCurrentResult()
+{
+    auto name = report_combo_->currentText().toStdString();
+    assert(task_man_.hasResult(name));
+
+    auto dir = QString::fromStdString(COMPASS::instance().lastUsedPath());
+
+    auto fn = QFileDialog::getSaveFileName(this, "Select Filename", dir, "*.tex");
+    if  (fn.isEmpty())
+        return;
+
+    auto res = task_man_.result(name)->exportResult(fn.toStdString(), ResultReport::ReportExportMode::LatexPDF);
+    if (!res.ok())
+    {
+        logerr << "TaskResultsWidget: exportCurrentResult: Exporting result failed: " << res.error();
+        QMessageBox::critical(this, "Error", "Exporting report failed.");
+    }
 }
 
 /**

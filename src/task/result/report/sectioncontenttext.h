@@ -41,6 +41,8 @@ public:
 
     void addText (const std::string& text);
 
+    virtual std::string resourceExtension() const override;
+
     virtual void addToLayout (QVBoxLayout* layout) override;
     virtual void accept(LatexVisitor& v) override;
 
@@ -51,8 +53,10 @@ public:
 protected:
     void clearContent_impl() override final;
 
-    void toJSON_impl(nlohmann::json& root_node) const override final;
+    void toJSON_impl(nlohmann::json& j) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
+    Result toJSONDocument_impl(nlohmann::json& j,
+                               const std::string* resource_dir) const override final;
 
     std::vector<std::string> texts_;
 };

@@ -32,6 +32,8 @@
 #include <QMenu>
 #include <QWidgetAction>
 #include <QCheckBox>
+#include <QHBoxLayout>
+#include <QPushButton>
 
 const std::string EvaluationTaskResult::FieldTargets    = "targets";
 const std::string EvaluationTaskResult::FieldTargetUTN  = "utn";
@@ -48,6 +50,13 @@ EvaluationTaskResult::EvaluationTaskResult(unsigned int id,
 /**
  */
 EvaluationTaskResult::~EvaluationTaskResult() = default;
+
+/**
+ */
+std::string EvaluationTaskResult::startSection() const
+{
+    return EvalSectionID::prependReportResults(EvaluationRequirementResult::Base::RequirementOverviewSectionName);
+}
 
 /**
  */
@@ -317,7 +326,7 @@ bool EvaluationTaskResult::loadOnDemandViewable_impl(const ResultReport::Section
     if (!calculator_)
         return false;
 
-    if (content.type() == ResultReport::SectionContent::Type::Table)
+    if (content.contentType() == ResultReport::SectionContent::ContentType::Table)
     {
         if (content.name() == EvaluationRequirementResult::Single::TRDetailsTableName)
         {
@@ -416,55 +425,6 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
         return true;
     }
 
-    // unsigned int row_index = source_index.row();
-
-    // if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->isSingle())
-    // {
-    //     EvaluationRequirementResult::Single* single_result =
-    //             static_cast<EvaluationRequirementResult::Single*>(result_ptrs_.at(row_index));
-    //     assert (single_result);
-
-    //     QMenu menu;
-
-    //     unsigned int utn = single_result->utn();
-    //     loginf << "SectionContentTable: customContextMenuSlot: utn " << utn;
-
-    //     assert (eval_man_.getData().hasTargetData(utn));
-
-    //     const EvaluationTargetData& target_data = eval_man_.getData().targetData(utn);
-
-    //     if (target_data.use())
-    //     {
-    //         QAction* action = new QAction("Remove", this);
-    //         connect (action, &QAction::triggered, this, &SectionContentTable::removeUTNSlot);
-    //         action->setData(utn);
-
-    //         menu.addAction(action);
-    //     }
-    //     else
-    //     {
-    //         QAction* action = new QAction("Add", this);
-    //         connect (action, &QAction::triggered, this, &SectionContentTable::addUTNSlot);
-    //         action->setData(utn);
-
-    //         menu.addAction(action);
-    //     }
-
-    //     QAction* action = new QAction("Show Full UTN", this);
-    //     connect (action, &QAction::triggered, this, &SectionContentTable::showFullUTNSlot);
-    //     action->setData(utn);
-    //     menu.addAction(action);
-
-    //     QAction* action2 = new QAction("Show Surrounding Data", this);
-    //     connect (action2, &QAction::triggered, this, &SectionContentTable::showSurroundingDataSlot);
-    //     action2->setData(utn);
-    //     menu.addAction(action2);
-
-    //     menu.exec(table_view_->viewport()->mapToGlobal(p));
-    // }
-    // else
-    //     loginf << "SectionContentTable: customContextMenuSlot: no associated utn";
-
     return false;
 }
 
@@ -476,7 +436,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
     if (!calculator_)
         return false;
 
-    if (content->type() == ResultReport::SectionContent::Type::Table)
+    if (content->contentType() == ResultReport::SectionContent::ContentType::Table)
     {
         if (content->name() == EvaluationData::TargetsTableName)
         {
@@ -510,30 +470,43 @@ void EvaluationTaskResult::postprocessTable_impl(ResultReport::SectionContentTab
     }
     else if (table->name() == EvaluationData::TargetsTableName)
     {
-        //createInterestMenu()
-
-
         //evaluation target table
-        //auto this_unconst = const_cast<EvaluationTaskResult*>(this);
-
-        // table->registerCallBack("Rerun Evaluation", 
-        //     [ this_unconst ] () 
-        //     { 
-        //         this_unconst->informUpdate(UpdateEvent::Complete);
-        //         this_unconst->update(true);
-        //     });
-
-        // std::string section = table->parentSection()->id();
-        // std::string name    = table->name();
-
-        // table->registerCallBack("Update Target Table", 
-        //     [ this_unconst, section, name ] () 
-        //     { 
-        //         this_unconst->updateTargets();
-        //         this_unconst->informUpdate(UpdateEvent::Content, std::make_pair(section, name));
-        //         this_unconst->update(true);
-        //     });
     }
+}
+
+/**
+ */
+bool EvaluationTaskResult::hasCustomTooltip_impl(const ResultReport::SectionContentTable* table, 
+                                                 unsigned int row,
+                                                 unsigned int col) const
+{
+    if (table->name() == EvaluationData::TargetsTableName)
+    {
+        //evaluation target table
+        return calculator_->data().hasTargetTableTooltip(col);
+    }
+
+    return false;
+}
+
+/**
+ */
+std::string EvaluationTaskResult::customTooltip_impl(const ResultReport::SectionContentTable* table, 
+                                                     unsigned int row,
+                                                     unsigned int col) const
+{
+    if (table->name() == EvaluationData::TargetsTableName)
+    {
+        //evaluation target table
+        auto utn = helpers::utnFromTable(table, row);
+
+        const auto& target = targets_.at(utn);
+
+        return calculator_->data().targetTableToolTip(target, col,
+            [ this ] (const Evaluation::RequirementSumResultID& id) { return this->interestFactorEnabled(id); });
+    }
+
+    return "";
 }
 
 /**
@@ -678,38 +651,32 @@ EvaluationTarget::InterestMap EvaluationTaskResult::activeInterestFactors(unsign
 
 /**
  */
+void EvaluationTaskResult::updateInterestMenu()
+{
+    if (!interest_menu_)
+        return;
+
+    for (const auto& ife : interestSwitches())
+    {
+        auto cb = interest_boxes_.at(ife.first);
+
+        cb->blockSignals(true);
+        cb->setChecked(ife.second);
+        cb->blockSignals(false);
+    }
+}
+
+/**
+ */
 void EvaluationTaskResult::createInterestMenu(QMenu& menu)
 {
     if (interest_factor_enabled_.empty())
         return;
 
-#if 1
-    auto interest_menu = menu.addMenu("Edit Shown Interest Factors");
-
-    auto action_all  = interest_menu->addAction("Show All");
-    auto action_none = interest_menu->addAction("Show None");
-
-    QObject::connect(action_all , &QAction::triggered, [ this ] () { this->setInterestFactorsEnabled(true);  });
-    QObject::connect(action_none, &QAction::triggered, [ this ] () { this->setInterestFactorsEnabled(false); });
-
-    for (const auto& ife : interest_factor_enabled_)
+    if (!interest_menu_)
     {
-        std::string req_name = ife.first;
+        interest_menu_.reset(new QMenu("Edit Shown Interest Factors"));
 
-        auto action = interest_menu->addAction(QString::fromStdString(ife.first));
-        action->setCheckable(true);
-        action->setChecked(ife.second);
-
-        auto clickCB = [ this, req_name ] (bool ok) 
-        { 
-            this->setInterestFactorEnabled(req_name, ok);
-        };
-
-        QObject::connect(action, &QAction::triggered, clickCB);
-    }
-#else
-    if (!interest_menu_action_)
-    {
         auto w      = new QWidget;
         auto layout = new QHBoxLayout;
 
@@ -718,58 +685,48 @@ void EvaluationTaskResult::createInterestMenu(QMenu& menu)
         auto button_all  = new QPushButton("All");
         auto button_none = new QPushButton("None");
 
+        auto buttonCB = [ this ] (bool ok)
+        {
+            this->setInterestFactorsEnabled(ok);
+            this->updateInterestMenu();
+        };
+
+        QObject::connect(button_all , &QPushButton::pressed, [ = ] () { buttonCB(true);  });
+        QObject::connect(button_none, &QPushButton::pressed, [ = ] () { buttonCB(false); });
+
         layout->addWidget(button_all);
         layout->addWidget(button_none);
         layout->addStretch(1);
 
-        auto wa = new QWidgetAction(interest_menu_);
+        auto wa = new QWidgetAction(interest_menu_.get());
         wa->setDefaultWidget(w);
 
         interest_menu_->addAction(wa);
 
-        std::vector<QCheckBox*> boxes;
-
-        for (const auto& ife : eval_data_.interestSwitches())
+        for (const auto& ife : interestSwitches())
         {
-            auto wa = new QWidgetAction(interest_menu_);
+            std::string req_name = ife.first;
 
-            auto cb = new QCheckBox(QString::fromStdString(ife.first));
-            cb->setChecked(ife.second);
+            auto wa = new QWidgetAction(interest_menu_.get());
+            auto cb = new QCheckBox(QString::fromStdString(req_name));
 
             wa->setDefaultWidget(cb);
-
             interest_menu_->addAction(wa);
 
-            auto clickCB = [ eval_data, cb ] (bool ok) { eval_data->setInterestFactorEnabled(cb->text().toStdString(), ok, true); };
+            auto clickCB = [ this, req_name ] (bool ok) 
+            { 
+                this->setInterestFactorEnabled(req_name, ok);
+            };
 
-            connect(cb, &QCheckBox::toggled, clickCB);
+            QObject::connect(cb, &QCheckBox::toggled, clickCB);
 
-            boxes.push_back(cb);
+            interest_boxes_[ req_name ] = cb;
         }
-
-        auto updateBoxesCB = [ = ] ()
-        {
-            for (auto b : boxes)
-            {
-                b->blockSignals(true);
-                b->setChecked(eval_data->interestFactorEnabled(b->text().toStdString()));
-                b->blockSignals(false);
-            }
-        };
-
-        auto allCB  = [ = ] () { eval_data->setInterestFactorEnabled(true , true); updateBoxesCB(); };
-        auto noneCB = [ = ] () { eval_data->setInterestFactorEnabled(false, true); updateBoxesCB(); };
-
-        connect(button_all , &QPushButton::pressed, allCB );
-        connect(button_none, &QPushButton::pressed, noneCB);
     }
 
+    updateInterestMenu();
 
-
-    auto interest_menu = menu.addMenu("Edit Shown Interest Factors");
-
-    interest_menu->addAction(interest_menu_action_.get());
-#endif
+    menu.addMenu(interest_menu_.get());
 }
 
 /**

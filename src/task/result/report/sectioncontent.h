@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include "task/result/report/reportitem.h"
+#include "task/result/report/reportdefs.h"
+
 #include "logger.h"
 #include "json.hpp"
 
@@ -29,6 +32,7 @@
 
 class QVBoxLayout;
 class LatexVisitor;
+class LatexSection;
 
 class TaskResult;
 
@@ -95,33 +99,37 @@ struct SectionContentViewable
 
 /**
  */
-class SectionContent
+class SectionContent : public ReportItem
 {
 public:
-    enum class Type
+    enum class ContentType
     {
         Figure = 0,
         Table,
         Text
     };
 
-    SectionContent(Type type,
+    SectionContent(ContentType type,
                    unsigned int id,
                    const std::string& name, 
                    Section* parent_section);
-    SectionContent(Type type,
+    SectionContent(ContentType type,
                    Section* parent_section);
 
-    Type type() const;
-    std::string typeAsString() const;
-    unsigned int id() const;
-    std::string name() const;
+    ContentType contentType() const;
+    std::string contentTypeAsString() const;
+    unsigned int contentID() const;
 
-    const Section* parentSection() const { return parent_section_; }
+    Section* parentSection();
+    const Section* parentSection() const;
 
-    void setJSONProperty(const std::string& name, const nlohmann::json& value);
-    bool hasJSONProperty(const std::string& name) const;
-    nlohmann::json jsonProperty(const std::string& name) const;
+    std::string contentPath() const;
+
+    std::string resourceRelDirectory(ResourceDir rdir) const;
+    std::string resourceFilename(const std::string& postfix = "") const;
+    std::string resourceLink(ResourceDir rdir, const std::string& postfix = "") const;
+
+    virtual std::string resourceExtension() const = 0;
 
     void setOnDemand();
     bool isOnDemand() const;
@@ -130,15 +138,12 @@ public:
     bool forceReload();
 
     void clearContent();
-
-    nlohmann::json toJSON() const;
-    bool fromJSON(const nlohmann::json& j);
     
     virtual void addToLayout (QVBoxLayout* layout) = 0; // add content to layout
     virtual void accept(LatexVisitor& v) = 0;           // can not be const since on-demand tables
 
-    static std::string typeAsString(Type type);
-    static boost::optional<Type> typeFromString(const std::string& type_str);
+    static std::string contentTypeAsString(ContentType type);
+    static boost::optional<ContentType> contentTypeFromString(const std::string& type_str);
 
     static const std::string  DBTableName;
     static const Property     DBColumnContentID;
@@ -147,29 +152,36 @@ public:
     static const Property     DBColumnJSONContent;
     static const PropertyList DBPropertyList;
 
-    static const std::string FieldType;
-    static const std::string FieldID;
-    static const std::string FieldName;
-    static const std::string FieldProperties;
+    static const std::string FieldContentType;
+    static const std::string FieldContentID;
     static const std::string FieldOnDemand;
 
 protected:
+    struct ResourceLink
+    {
+        std::string link;
+        std::string path;
+    };
+
+    ResultT<ResourceLink> prepareResource(const std::string& resource_dir,
+                                          ResourceDir rdir,
+                                          const std::string& prefix = "") const;
+
     virtual void clearContent_impl() = 0;
 
-    virtual void toJSON_impl(nlohmann::json& root_node) const = 0;
-    virtual bool fromJSON_impl(const nlohmann::json& j) = 0;
+    virtual void toJSON_impl(nlohmann::json& j) const override;
+    virtual bool fromJSON_impl(const nlohmann::json& j) override;
+    Result toJSONDocument_impl(nlohmann::json& j,
+                               const std::string* resource_dir) const override;
 
     virtual bool loadOnDemand();
 
     TaskResult* taskResult();
     const TaskResult* taskResult() const;
 
-    Type           type_;
-    unsigned int   id_ = 0;
-    std::string    name_;
-    Section*       parent_section_ {nullptr};
-    Report*        report_ = nullptr;
-    nlohmann::json properties_;
+    ContentType  content_type_;
+    unsigned int content_id_     = 0;
+    Report*      report_         = nullptr;
 
 private:
     bool on_demand_ = false;

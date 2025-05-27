@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "task/result/report/reportitem.h"
+
 #include <QVariant>
 
 #include <memory>
@@ -25,33 +27,24 @@ namespace ResultReport
 {
 
 /**
+ * ReportItem which can be visualized as part of an item model (Report, Section, etc.)
  */
-class TreeItem
+class TreeItem : public ReportItem
 {
 public:
-    TreeItem(const std::string& name, 
+    TreeItem(const std::string& name,
              TreeItem* parent_item);
     TreeItem(TreeItem* parent_item);
-
-    void setItemName(const std::string& name);
+    virtual ~TreeItem();
 
     virtual TreeItem *child(int row) = 0;
     virtual int childCount() const = 0;
     virtual int columnCount() const = 0;
     virtual QVariant data(int column) const = 0;
     virtual int row() const = 0;
-    TreeItem* parentItem();
 
-    std::string name() const;
-    std::string id() const; // (parent_id):name
-
-protected:
-    void updateID();
-
-    std::string name_;
-    std::string id_;
-
-    TreeItem* parent_item_ {nullptr};
+    virtual TreeItem* parentItem() override;
+    virtual const TreeItem* parentItem() const override;
 };
 
 }

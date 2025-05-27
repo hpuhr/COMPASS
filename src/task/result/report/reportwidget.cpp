@@ -333,7 +333,7 @@ boost::optional<nlohmann::json> ReportWidget::getTableData(const std::string& re
         return {};
     }
 
-    return section->getTable(table_id).toJSON(rowwise, cols);
+    return section->getTable(table_id).toJSONTable(rowwise, cols);
 }
 
 }

@@ -48,7 +48,8 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-const std::string Base::RequirementOverviewTableName = "Results Overview";
+const std::string Base::RequirementOverviewTableName   = "Results Overview";
+const std::string Base::RequirementOverviewSectionName = "Overview:Results";
 
 const QColor Base::HistogramColorDefault = QColor(0, 0, 255);
 
@@ -229,7 +230,7 @@ bool Base::isIgnored() const
 */
 ResultReport::SectionContentTable& Base::getReqOverviewTable (std::shared_ptr<ResultReport::Report> report)
 {
-    auto& ov_sec = report->getSection("Overview:Results");
+    auto& ov_sec = report->getSection(RequirementOverviewSectionName);
 
     if (!ov_sec.hasTable(RequirementOverviewTableName))
         ov_sec.addTable(RequirementOverviewTableName, 8,

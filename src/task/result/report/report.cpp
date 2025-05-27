@@ -102,7 +102,7 @@ QVariant Report::data(int column) const
 {
     assert (column == 0);
 
-    return name_.c_str();
+    return name().c_str();
 }
 
 /**
@@ -133,9 +133,9 @@ std::vector<std::shared_ptr<Section>> Report::reportSections() const
 
 /**
  */
-std::vector<std::shared_ptr<SectionContent>> Report::reportContents() const
+std::vector<std::shared_ptr<SectionContent>> Report::reportContents(bool with_extra_content) const
 {
-    return root_section_->recursiveContent();
+    return root_section_->recursiveContent(with_extra_content);
 }
 
 /**
@@ -225,33 +225,39 @@ Section& Report::getSection (const std::string& id)
 
 /**
  */
-nlohmann::json Report::toJSON() const
+void Report::toJSON_impl(nlohmann::json& j) const
 {
-    nlohmann::json root;
-
-    root[ FieldRootSection ] = root_section_->toJSON();
-
-    return root;
+    j[ FieldRootSection ] = root_section_->toJSON();
 }
 
 /**
  */
-bool Report::fromJSON(const nlohmann::json& j)
+bool Report::fromJSON_impl(const nlohmann::json& j)
 {
     if (!j.is_object() ||
         !j.contains(FieldRootSection))
     {
-        logerr << "Report: fromJSON: Report does not contain needed fields: isobject = " << j.is_object();
+        logerr << "Report: fromJSON_impl: Report does not contain needed fields: isobject = " << j.is_object();
         return false;
     }
 
     if (!root_section_->fromJSON(j[ FieldRootSection ]))
     {
-        logerr << "Report: fromJSON: Could not read root section";
+        logerr << "Report: fromJSON_impl: Could not read root section";
         return false;
     }
 
     return true;
+}
+
+/**
+ */
+Result Report::toJSONDocument_impl(nlohmann::json& j,
+                                   const std::string* resource_dir) const
+{
+    //nothing to do yet
+
+    return Result::succeeded();
 }
 
 /**

@@ -23,8 +23,7 @@
 
 #include <memory>
 
-class QWidgetAction;
-class QWidget;
+class QMenu;
 class QCheckBox;
 
 class EvaluationCalculator;
@@ -50,6 +49,8 @@ public:
     void showSurroundingData (unsigned int utn) const;
 
     const InterestSwitches& interestSwitches() const;
+
+    std::string startSection() const override final;
 
     static const std::string FieldTargets;
     static const std::string FieldTargetUTN;
@@ -77,12 +78,19 @@ protected:
     bool customContextMenu_impl(QMenu& menu, 
                                 ResultReport::SectionContent* content) override final;
     void postprocessTable_impl(ResultReport::SectionContentTable* table) override final;
+    bool hasCustomTooltip_impl(const ResultReport::SectionContentTable* table, 
+                               unsigned int row,
+                               unsigned int col) const override final;
+    std::string customTooltip_impl(const ResultReport::SectionContentTable* table, 
+                                   unsigned int row,
+                                   unsigned int col) const override final;
 
 private:
     Result createCalculator();
 
     void updateTargets();
     void updateInterestSwitches();
+    void updateInterestMenu();
 
     void setInterestFactorEnabled(const Evaluation::RequirementSumResultID& id, bool ok);
     void setInterestFactorEnabled(const std::string& req_name, bool ok);
@@ -99,7 +107,6 @@ private:
     TargetMap                                     targets_;
     mutable InterestSwitches                      interest_factor_enabled_; //req sum result id => enabled
 
-    std::unique_ptr<QWidgetAction>    interest_menu_action_;
-    QWidget*                          interest_widget_ = nullptr;
+    std::unique_ptr<QMenu>            interest_menu_;
     std::map<std::string, QCheckBox*> interest_boxes_;
 };

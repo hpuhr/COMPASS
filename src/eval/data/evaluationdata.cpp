@@ -573,6 +573,24 @@ void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report) c
 
     auto& table = section.addTable(TargetsTableName, headings.size(), headings);
     table.setOnDemand();
+    table.enableTooltips();
+}
+
+namespace
+{
+    /**
+     */
+    nlohmann::json interestData(const EvaluationTarget& target,
+                                const EvaluationData::InterestEnabledFunc & interest_enabled_func)
+    {
+        size_t num_contributors;
+        auto interest = target.totalInterest(interest_enabled_func, &num_contributors);
+
+        if (num_contributors == 0)
+            return "-";
+
+        return interest;
+    }
 }
 
 /**
@@ -592,7 +610,7 @@ nlohmann::json EvaluationData::rawCellData(const EvaluationTarget& target,
         case ColCategory:
             return target.emitterCategoryStr();
         case ColInterest: 
-            return target.totalInterest(interest_enabled_func);
+            return interestData(target, interest_enabled_func);
         case ColNumUpdates:
             return target.numUpdates();
         case ColNumRef:
@@ -641,6 +659,27 @@ unsigned int EvaluationData::columnStyle(int column) const
 
 /**
  */
+unsigned int EvaluationData::cellStyle(const EvaluationTarget& target, 
+                                       int column,
+                                       const nlohmann::json& data) const
+{
+    if (!target.useInEval())
+        return 0;
+
+    if (column == ColInterest)
+    {
+        if (data.is_number_float())
+        {
+            double interest = data;
+            return EvaluationTargetData::bgStyleForInterestFactorSum(interest);
+        }
+    }
+
+    return 0;
+}
+
+/**
+ */
 void EvaluationData::fillTargetsTable(const std::map<unsigned int, EvaluationTarget>& targets,
                                       ResultReport::SectionContentTable& table,
                                       const InterestEnabledFunc & interest_enabled_func) const
@@ -650,12 +689,42 @@ void EvaluationData::fillTargetsTable(const std::map<unsigned int, EvaluationTar
     for (int c = 0; c < nc; ++c)
         table.setColumnStyle(c, columnStyle(c));
 
+    int r = 0;
     for (const auto& t : targets)
     {
         auto row = nlohmann::json::array();
         for (int c = 0; c < nc; ++c)
-            row.push_back(rawCellData(t.second, c, interest_enabled_func));
+        {
+            auto data  = rawCellData(t.second, c, interest_enabled_func);
+            auto style = cellStyle(t.second, c, data);
+
+            row.push_back(data);
+
+            if (style != 0)
+                table.setCellStyle(r, c, style);
+        }
 
         table.addRow(row, ResultReport::SectionContentViewable().setOnDemand(), "", "", {}, rowStyle(t.second));
+
+        ++r;
     }
+}
+
+/**
+ */
+bool EvaluationData::hasTargetTableTooltip(int col) const
+{
+    return (col == ColInterest);
+}
+
+/**
+ */
+std::string EvaluationData::targetTableToolTip(const EvaluationTarget& target,
+                                               int col,
+                                               const InterestEnabledFunc & interest_enabled_func) const
+{
+    if (col == ColInterest)
+        return EvaluationTargetData::enabledInterestFactorsString(target.interestFactors(), interest_enabled_func);
+
+    return "";
 }

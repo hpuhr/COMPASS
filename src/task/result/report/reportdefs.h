@@ -17,6 +17,10 @@
 
 #pragma once
 
+#include <limits>
+
+#include <QColor>
+
 namespace ResultReport
 {
     enum CellStyle
@@ -38,5 +42,45 @@ namespace ResultReport
         CellStyleBGColorGreen      = 1 << 22,
         CellStyleBGColorGray       = 1 << 23,
         CellStyleBGColorYellow     = 1 << 24
+    };
+
+    /**
+     */
+    class Colors
+    {
+    public:
+        static const QColor TextRed;
+        static const QColor TextOrange;
+        static const QColor TextGreen;
+        static const QColor TextGray;
+
+        static const QColor BGRed;
+        static const QColor BGOrange;
+        static const QColor BGGreen;
+        static const QColor BGGray;
+        static const QColor BGYellow;
+    };
+
+    enum class ReportExportMode
+    {
+        JSONFile = 0,
+        JSONBlob,
+        Latex,
+        LatexPDF
+    };
+
+    enum class ResourceDir
+    {
+        Root = 0,
+        Screenshots,
+        Tables
+    };
+
+    struct ReportExportSettings
+    {
+        std::string author;
+        std::string abstract;
+
+        bool open_created_file = true;
     };
 }

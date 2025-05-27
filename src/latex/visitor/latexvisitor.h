@@ -44,8 +44,13 @@ namespace ResultReport
 class LatexVisitor
 {
 public:
-    LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table, bool add_overview_screenshot,
-                 bool include_target_details, bool include_target_tr_details, unsigned int max_table_col_width,
+    LatexVisitor(LatexDocument& report, 
+                 bool group_by_type, 
+                 bool add_overview_table, 
+                 bool add_overview_screenshot,
+                 bool include_target_details, 
+                 bool include_target_tr_details, 
+                 unsigned int max_table_col_width,
                  bool wait_on_map_loading);
 
     virtual void visit(const ViewPoint* e);

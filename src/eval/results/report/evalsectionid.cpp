@@ -52,14 +52,14 @@ std::string EvalSectionID::targetResultsID()
 */
 std::string EvalSectionID::targetID()
 {
-    return SectionTargets + Sep + SectionUTN;
+    return SectionTargets;
 }
 
 /**
 */
 std::string EvalSectionID::targetID(unsigned int utn)
 {
-    return targetID() + std::to_string(utn);
+    return targetID() + Sep + SectionUTN + std::to_string(utn);
 }
 
 /**

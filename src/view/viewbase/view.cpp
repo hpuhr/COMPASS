@@ -368,6 +368,15 @@ QImage View::renderView() const
 }
 
 /**
+ * Asks the data widget if it shows any data.
+ */
+bool View::showsData() const
+{
+    assert (widget_ && widget_->getViewDataWidget());  
+    return widget_->getViewDataWidget()->showsData();
+}
+
+/**
  * Reacts on a changed global load state in the view manager.
  */
 void View::viewManagerReloadStateChanged()

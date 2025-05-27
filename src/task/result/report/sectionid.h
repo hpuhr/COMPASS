@@ -35,6 +35,7 @@ public:
     static std::string sectionID(const std::string& section0, const std::string& section1);
     static std::string sectionID2Path(const std::string& section_id);
     static std::string prependReportResults(const std::string& section_id);
+    static std::string sectionIDWithoutResults(const std::string& section_id);
 
     static std::string reportResultID();
 

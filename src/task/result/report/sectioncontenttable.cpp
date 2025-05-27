@@ -19,6 +19,7 @@
 #include "task/result/report/section.h"
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/report.h"
+#include "task/result/report/reportexporter.h"
 #include "task/result/taskresult.h"
 
 #include "taskmanager.h"
@@ -49,6 +50,7 @@
 #include <cassert>
 #include <type_traits>
 #include <iostream>
+#include <fstream>
 
 namespace ResultReport
 {
@@ -65,6 +67,11 @@ const std::string SectionContentTable::FieldRows         = "rows";
 const std::string SectionContentTable::FieldAnnotations  = "annotations";
 const std::string SectionContentTable::FieldColumnStyles = "column_styles";
 const std::string SectionContentTable::FieldCellStyles   = "cell_styles";
+const std::string SectionContentTable::FieldShowTooltips = "show_tooltips";
+
+const std::string SectionContentTable::FieldDocColumns  = "columns";
+const std::string SectionContentTable::FieldDocData     = "data";
+const std::string SectionContentTable::FieldDocPath     = "path";
 
 const std::string SectionContentTable::FieldAnnoFigureID      = "figure_id";
 const std::string SectionContentTable::FieldAnnoSectionLink   = "section_link";
@@ -73,16 +80,16 @@ const std::string SectionContentTable::FieldAnnoOnDemand      = "on_demand";
 const std::string SectionContentTable::FieldAnnoIndex         = "index";
 const std::string SectionContentTable::FieldAnnoStyle         = "style";
 
-const QColor SectionContentTable::ColorTextRed    = QColor(220,20,60);
-const QColor SectionContentTable::ColorTextOrange = QColor(255,140,0);
-const QColor SectionContentTable::ColorTextGreen  = Qt::darkGreen;
-const QColor SectionContentTable::ColorTextGray   = Qt::darkGray;
+const QColor SectionContentTable::ColorTextRed    = Colors::TextRed;
+const QColor SectionContentTable::ColorTextOrange = Colors::TextOrange;
+const QColor SectionContentTable::ColorTextGreen  = Colors::TextGreen;
+const QColor SectionContentTable::ColorTextGray   = Colors::TextGray;
 
-const QColor SectionContentTable::ColorBGRed    = QColor(240,128,128);
-const QColor SectionContentTable::ColorBGOrange = QColor(255,165,0);
-const QColor SectionContentTable::ColorBGGreen  = QColor(144,238,144);
-const QColor SectionContentTable::ColorBGGray   = Qt::lightGray;
-const QColor SectionContentTable::ColorBGYellow = QColor(255,255,153);
+const QColor SectionContentTable::ColorBGRed      = Colors::BGRed;
+const QColor SectionContentTable::ColorBGOrange   = Colors::BGOrange;
+const QColor SectionContentTable::ColorBGGreen    = Colors::BGGreen;
+const QColor SectionContentTable::ColorBGGray     = Colors::BGGray;
+const QColor SectionContentTable::ColorBGYellow   = Colors::BGYellow;
 
 /**
  */
@@ -94,7 +101,7 @@ SectionContentTable::SectionContentTable(unsigned int id,
                                          bool sortable,
                                          unsigned int sort_column,
                                          Qt::SortOrder sort_order)
-:   SectionContent(Type::Table, id, name, parent_section)
+:   SectionContent(ContentType::Table, id, name, parent_section)
 ,   num_columns_  (num_columns)
 ,   headings_     (headings)
 ,   column_styles_(num_columns, 0)
@@ -107,13 +114,20 @@ SectionContentTable::SectionContentTable(unsigned int id,
 /**
  */
 SectionContentTable::SectionContentTable(Section* parent_section)
-:   SectionContent(Type::Table, parent_section)
+:   SectionContent(ContentType::Table, parent_section)
 {
 }
 
 /**
  */
 SectionContentTable::~SectionContentTable() = default;
+
+/**
+ */
+void SectionContentTable::enableTooltips()
+{
+    show_tooltips_ = true;
+}
 
 /**
  */
@@ -136,7 +150,7 @@ void SectionContentTable::addRow (const nlohmann::json::array_t& row,
     anno.on_demand      = viewable.on_demand;
     anno.style          = row_style;
 
-    logdbg<< "SectionContentTable " << name_ << ": addRow: viewable has callback " << viewable.hasCallback();
+    logdbg<< "SectionContentTable " << name() << ": addRow: viewable has callback " << viewable.hasCallback();
 
     if (!viewable.on_demand && viewable.hasCallback())
     {
@@ -223,17 +237,14 @@ unsigned int SectionContentTable::cellStyle(int row, int column) const
  */
 unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewable)
 {
-    assert(parent_section_);
-    return parent_section_->addContentFigure(viewable);
+    return parentSection()->addHiddenFigure(viewable);
 }
 
 /**
  */
-SectionContentTableWidget* SectionContentTable::createTableWidget()
+SectionContentTableWidget* SectionContentTable::createTableWidget() const
 {
     assert(!table_widget_);
-
-    taskResult()->postprocessTable(this);
 
     SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
     table_widget_ = new SectionContentTableWidget(tmp, 
@@ -249,7 +260,6 @@ const SectionContentTableWidget* SectionContentTable::tableWidget() const
 {
     assert(table_widget_);
     return table_widget_;
-    
 }
 
 /**
@@ -258,7 +268,33 @@ SectionContentTableWidget* SectionContentTable::tableWidget()
 {
     assert(table_widget_);
     return table_widget_;
-    
+}
+
+/**
+ */
+SectionContentTableWidget* SectionContentTable::getOrCreateTableWidget()
+{
+    if (table_widget_)
+        return table_widget_;
+
+    return createTableWidget();
+}
+
+/**
+ */
+const SectionContentTableWidget* SectionContentTable::getOrCreateTableWidget() const
+{
+    if (table_widget_)
+        return table_widget_;
+
+    return createTableWidget();
+}
+
+/**
+ */
+std::string SectionContentTable::resourceExtension() const
+{
+    return ReportExporter::ExportTableFormat;
 }
 
 /**
@@ -269,8 +305,11 @@ void SectionContentTable::addToLayout(QVBoxLayout* layout)
 
     assert (layout);
 
+    //finalize some custom stuff before showing the table in a layout
+    taskResult()->postprocessTable(this);
+
     //add widget to layout
-    auto widget = createTableWidget();
+    auto widget = getOrCreateTableWidget();
     layout->addWidget(widget);
 }
 
@@ -581,7 +620,8 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
 
             //custom heuristics for evaluation
             //@TODO: configure tables accordingly in evaluation results
-            if (taskResult()->type() == task::TaskResultType::Evaluation)
+            if (cellShowsText(style) &&
+                taskResult()->type() == task::TaskResultType::Evaluation)
             {
                 const auto& data = rows_.at(index.row()).at(index.column());
 
@@ -648,6 +688,21 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
 
             return QVariant();
         }
+        case Qt::ToolTipRole:
+        {
+            if (show_tooltips_)
+            {
+                auto tResult = taskResult();
+                if (tResult->hasCustomTooltip(this, (unsigned int)index.row(), (unsigned int)index.column()))
+                {
+                    auto ttip = tResult->customTooltip(this, (unsigned int)index.row(), (unsigned int)index.column());
+                    if (!ttip.empty())
+                        return QString::fromStdString(ttip);
+                }
+            }
+
+            return QVariant();
+        }
         default:
         {
             return QVariant();
@@ -694,14 +749,14 @@ const std::vector<std::string>& SectionContentTable::headings() const
  */
 unsigned int SectionContentTable::filteredRowCount() const
 {
-    return tableWidget()->proxyModel()->rowCount();
+    return getOrCreateTableWidget()->proxyModel()->rowCount();
 }
 
 /**
  */
 std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row, bool latex) const
 {
-    return tableWidget()->sortedRowStrings(row, latex);
+    return getOrCreateTableWidget()->sortedRowStrings(row, latex);
 }
 
 /**
@@ -709,7 +764,7 @@ std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row,
 bool SectionContentTable::hasReference (unsigned int row) const
 {
     //obtain original data row
-    unsigned int row_index = tableWidget()->fromProxy(row);
+    unsigned int row_index = getOrCreateTableWidget()->fromProxy(row);
 
     const auto& annotation = annotations_.at(row_index);
 
@@ -721,7 +776,7 @@ bool SectionContentTable::hasReference (unsigned int row) const
 std::string SectionContentTable::reference(unsigned int row) const
 {
     //obtain original data row
-    unsigned int row_index = tableWidget()->fromProxy(row);
+    unsigned int row_index = getOrCreateTableWidget()->fromProxy(row);
 
     const auto& annotation = annotations_.at(row_index);
 
@@ -741,7 +796,7 @@ void SectionContentTable::showUnused(bool value)
 {
     loginf << "SectionContentTable: showUnused: value " << value;
 
-    tableWidget()->showUnused(value);
+    getOrCreateTableWidget()->showUnused(value);
 
     show_unused_ = value;
 }
@@ -799,7 +854,7 @@ void SectionContentTable::clicked(unsigned int row)
         has_valid_link = true;
 
         //figure from content in parent section
-        auto c = parent_section_->retrieveContent(annotation.figure_id.value(), true);
+        auto c = parentSection()->retrieveContent(annotation.figure_id.value(), true);
         figure = dynamic_cast<SectionContentFigure*>(c.get());
     }
     else if (!annotation.section_link.empty() && !annotation.section_figure.empty())
@@ -935,7 +990,7 @@ void SectionContentTable::copyContent()
     }
     ss << "\n";
 
-    auto proxy_model = tableWidget()->proxyModel();
+    auto proxy_model = getOrCreateTableWidget()->proxyModel();
 
     unsigned int num_rows = proxy_model->rowCount();
 
@@ -963,35 +1018,39 @@ void SectionContentTable::copyContent()
  */
 Utils::StringTable SectionContentTable::toStringTable() const
 {
-    return Utils::StringTable(tableWidget()->itemModel());
+    return Utils::StringTable(getOrCreateTableWidget()->itemModel());
 }
 
 /**
  */
-nlohmann::json SectionContentTable::toJSON(bool rowwise,
-                                           const std::vector<int>& cols) const
+nlohmann::json SectionContentTable::toJSONTable(bool rowwise,
+                                                const std::vector<int>& cols) const
 {
     return toStringTable().toJSON(rowwise, cols);
 }
 
 /**
  */
-void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
+void SectionContentTable::toJSON_impl(nlohmann::json& j) const
 {
-    root_node[ FieldHeadings     ] = headings_;
-    root_node[ FieldSortable     ] = sortable_;
-    root_node[ FieldSortColumn   ] = sort_column_;
-    root_node[ FieldSortOrder    ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
-    root_node[ FieldRows         ] = std::vector<nlohmann::json>();
-    root_node[ FieldAnnotations  ] = nlohmann::json::array();
-    root_node[ FieldColumnStyles ] = column_styles_;
-    root_node[ FieldCellStyles   ] = cell_styles_;
+    //call base
+    SectionContent::toJSON_impl(j);
+
+    j[ FieldHeadings     ] = headings_;
+    j[ FieldSortable     ] = sortable_;
+    j[ FieldSortColumn   ] = sort_column_;
+    j[ FieldSortOrder    ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
+    j[ FieldRows         ] = std::vector<nlohmann::json>();
+    j[ FieldAnnotations  ] = nlohmann::json::array();
+    j[ FieldColumnStyles ] = column_styles_;
+    j[ FieldCellStyles   ] = cell_styles_;
+    j[ FieldShowTooltips ] = show_tooltips_;
 
     //write content only if not on demand
     if (!isOnDemand())
     {
         //write rows
-        root_node[ FieldRows ] = rows_;
+        j[ FieldRows ] = rows_;
 
         //write annotations
         nlohmann::json j_annos = nlohmann::json::array();
@@ -1011,7 +1070,7 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
             j_annos.push_back(j_anno);
         }
 
-        root_node[ FieldAnnotations ] = j_annos;
+        j[ FieldAnnotations ] = j_annos;
     }
 }
 
@@ -1019,6 +1078,10 @@ void SectionContentTable::toJSON_impl(nlohmann::json& root_node) const
  */
 bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 {
+    //call base
+    if (!SectionContent::fromJSON_impl(j))
+        return false;
+    
     if (!j.is_object()                 ||
         !j.contains(FieldHeadings)     ||
         !j.contains(FieldSortable)     ||
@@ -1027,7 +1090,8 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldRows)         ||
         !j.contains(FieldAnnotations)  ||
         !j.contains(FieldColumnStyles) ||
-        !j.contains(FieldCellStyles))
+        !j.contains(FieldCellStyles)   ||
+        !j.contains(FieldShowTooltips))
     {
         logerr << "SectionContentTable: fromJSON: Error: Section content table does not obtain needed fields";
         return false;
@@ -1037,6 +1101,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     column_styles_ = j[ FieldColumnStyles ].get<std::vector<unsigned int>>();
     sortable_      = j[ FieldSortable     ];
     sort_column_   = j[ FieldSortColumn   ];
+    show_tooltips_ = j[ FieldShowTooltips ];
 
     std::string sort_order = j[ FieldSortOrder ];
     sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;
@@ -1084,6 +1149,50 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     assert(num_columns_ == column_styles_.size());
 
     return true;
+}
+
+/**
+ */
+Result SectionContentTable::toJSONDocument_impl(nlohmann::json& j,
+                                                const std::string* resource_dir) const
+{
+    //call base
+    auto r = SectionContent::toJSONDocument_impl(j, resource_dir);
+    if (!r.ok())
+        return r;
+
+    bool write_to_file = (ReportExporter::TableMaxRows    >= 0 && numRows()    > (signed)ReportExporter::TableMaxRows   ) ||
+                         (ReportExporter::TableMaxColumns >= 0 && numColumns() > (signed)ReportExporter::TableMaxColumns);
+
+    if (resource_dir && write_to_file)
+    {
+        auto res = prepareResource(*resource_dir, ResourceDir::Tables);
+        if (!res.ok())
+            return res;
+
+        nlohmann::json j_ext;
+        j_ext[ FieldDocColumns ] = headings_;
+        j_ext[ FieldDocData    ] = rows_;
+
+        std::ofstream of(res.result().path);
+        if (!of.is_open())
+            return Result::failed("Could not store resource for content '" + name() + "'");
+
+        of << j_ext.dump(4);
+        if (!of)
+            return Result::failed("Could not store resource for content '" + name() + "'");
+
+        of.close();
+
+        j[ FieldDocPath ] = res.result().link;
+    }
+    else
+    {
+        j[ FieldDocColumns ] = headings_;
+        j[ FieldDocData    ] = rows_;
+    }
+
+    return Result::succeeded();
 }
 
 /***************************************************************************************************
