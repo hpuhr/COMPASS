@@ -81,6 +81,8 @@ const string PROP_LATITUDE_MAX_NAME  {"latitude_max"};
 const string PROP_LONGITUDE_MIN_NAME {"longitude_min"};
 const string PROP_LONGITUDE_MAX_NAME {"longitude_max"};
 
+const size_t DBInterface::TableBulkUpdateMinRows = 50;
+
 #define PROTECT_INSTANCE
 
 /**
@@ -1688,117 +1690,81 @@ std::vector<std::unique_ptr<dbContent::Target>> DBInterface::loadTargets()
     return targets;
 }
 
+/**
+ */
 void DBInterface::saveTargets(const std::map<unsigned int, nlohmann::json>& targets_info)
 {
-    // TODO
-}
-void DBInterface::updateFewTargets(const std::map<unsigned int, nlohmann::json>& targets_info)
-{
-    // TODO
-}
-void DBInterface::updateTargets(const std::map<unsigned int, nlohmann::json>& targets_info)
-{
-    // TODO
+    loginf << "DBInterface: saveTargets";
+
+    assert(ready());
+
+    clearTargetsTable();
+
+    {
+        //storing all targets at once via a buffer is faster
+        std::shared_ptr<Buffer> buffer(new Buffer(dbContent::Target::DBPropertyList));
+
+        auto& id_vec   = buffer->get<unsigned int>(dbContent::Target::DBColumnID.name());
+        auto& info_vec = buffer->get<nlohmann::json>(dbContent::Target::DBColumnInfo.name());
+
+        size_t idx = 0;
+        for (auto& tgt_it : targets_info)
+        {
+            id_vec.set(idx, tgt_it.first);
+            info_vec.set(idx, tgt_it.second);
+            ++idx;
+        }
+
+        insertBuffer(TABLE_NAME_TARGETS, buffer);
+    }
+
+    loginf << "DBInterface: saveTargets: done";
 }
 
 /**
  */
-// void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets)
-// {
-//     loginf << "DBInterface: saveTargets";
+void DBInterface::updateTargets(const std::map<unsigned int, nlohmann::json>& targets_info)
+{
+    loginf << "DBInterface: updateTargets: updating " << targets_info.size() << " utn(s)";
 
-//     assert(ready());
+    assert(ready());
 
-//     clearTargetsTable();
+    if (targets_info.size() > TableBulkUpdateMinRows)
+    {
+        //updating many targets at once via a buffer is faster
+        std::shared_ptr<Buffer> buffer(new Buffer(dbContent::Target::DBPropertyList));
 
-//     {
-//         //storing all targets at once via a buffer is faster
-//         std::shared_ptr<Buffer> buffer(new Buffer(dbContent::Target::DBPropertyList));
+        auto& id_vec   = buffer->get<unsigned int>(dbContent::Target::DBColumnID.name());
+        auto& info_vec = buffer->get<nlohmann::json>(dbContent::Target::DBColumnInfo.name());
 
-//         auto& id_vec   = buffer->get<unsigned int>(dbContent::Target::DBColumnID.name());
-//         auto& info_vec = buffer->get<nlohmann::json>(dbContent::Target::DBColumnInfo.name());
+        size_t idx = 0;
+        for (auto& tgt_it : targets_info)
+        {
+            id_vec.set(idx, tgt_it.first);
+            info_vec.set(idx, tgt_it.second);
+            ++idx;
+        }
 
-//         size_t idx = 0;
-//         for (auto& tgt_it : targets)
-//         {
-//             id_vec.set(idx, tgt_it->utn_);
-//             info_vec.set(idx, tgt_it->info());
-//             ++idx;
-//         }
+        updateBuffer(TABLE_NAME_TARGETS, Target::DBColumnID.name(), buffer);
+    }
+    else
+    {
+        //run individual update for each target
+        for (auto& tgt_it : targets_info)
+        {
+            #ifdef PROTECT_INSTANCE
+            boost::mutex::scoped_lock locker(instance_mutex_);
+            #endif
 
-//         insertBuffer(TABLE_NAME_TARGETS, buffer);
-//     }
+            string str = sqlGenerator().getInsertTargetStatement(tgt_it.first, tgt_it.second.dump());
 
-//     loginf << "DBInterface: saveTargets: done";
-// }
+            // uses replace with utn as unique key
+            execute(str);
+        }
+    }
 
-// /**
-//  * Inserts or updates individual targets.
-//  * Note: Slow when applied to many targets, because each target is inserted/updated individually.
-//  * Use updateTargets() to update many targets.
-//  */
-// void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
-//                               const std::set<unsigned int>& utns)
-// {
-//     loginf << "DBInterface: saveTargets: saving " << utns.size() << " utn(s)";
-
-//     for (const auto& t : targets)
-//         if (utns.count(t->utn()))
-//             saveTarget(t);
-// }
-
-// /**
-//  */
-// void DBInterface::saveTarget(const std::unique_ptr<dbContent::Target>& target)
-// {
-//     loginf << "DBInterface: saveTarget: utn " << target->utn();
-
-//     assert(ready());
-
-//     {
-//         #ifdef PROTECT_INSTANCE
-//         boost::mutex::scoped_lock locker(instance_mutex_);
-//         #endif
-
-//         string str = sqlGenerator().getInsertTargetStatement(target->utn_, target->info().dump());
-
-//         // uses replace with utn as unique key
-//         execute(str);
-//     }
-// }
-
-// /**
-//  * Updates existing targets.
-//  * Note: This is faster than saveTargets() when many targets are updated.
-//  */
-// void DBInterface::updateTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets,
-//                                 const std::set<unsigned int>& utns)
-// {
-//     loginf << "DBInterface: updateTargets: updating " << utns.size() << " utn(s)";
-
-//     assert(ready());
-
-//     {
-//         //updating many targets at once via a buffer is faster
-//         std::shared_ptr<Buffer> buffer(new Buffer(dbContent::Target::DBPropertyList));
-
-//         auto& id_vec   = buffer->get<unsigned int>(dbContent::Target::DBColumnID.name());
-//         auto& info_vec = buffer->get<nlohmann::json>(dbContent::Target::DBColumnInfo.name());
-
-//         size_t idx = 0;
-//         for (auto& tgt_it : targets)
-//         {
-//             if (utns.count(tgt_it->utn()) == 0)
-//                 continue;
-
-//             id_vec.set(idx, tgt_it->utn_);
-//             info_vec.set(idx, tgt_it->info());
-//             ++idx;
-//         }
-
-//         updateBuffer(TABLE_NAME_TARGETS, Target::DBColumnID.name(), buffer);
-//     }
-// }
+    loginf << "DBInterface: updateTargets: done";
+}
 
 /**
  */
