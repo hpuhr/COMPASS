@@ -248,46 +248,63 @@ void TargetListWidget::resizeColumnsToContents()
 
 void TargetListWidget::evalUseAllSlot()
 {
-    model_.setUseAllTargetData(true);
+    model_.setAllUseTargets(true);
 }
 
 void TargetListWidget::evalUseNoneSlot()
 {
-    model_.setUseAllTargetData(false);
+    model_.setAllUseTargets(false);
+}
+
+void TargetListWidget::evalUseSelectedTargetsSlot()
+{
+    loginf << "TargetListWidget: evalUseTargetsSlot";
+
+    std::set<unsigned int> selected_utns = selectedUTNs();
+
+    model_.setEvalUseTarget(selected_utns, true);
+}
+
+void TargetListWidget::evalDisableSelectedTargetsSlot()
+{
+    loginf << "TargetListWidget: evalDisableUseTargetsSlot";
+
+    std::set<unsigned int> selected_utns = selectedUTNs();
+
+    model_.setEvalUseTarget(selected_utns, false);
+}
+
+void TargetListWidget::evalFilterSlot()
+{
+    loginf << "TargetListWidget: evalFilterSlot";
+
+    EvaluationTargetFilterDialog dialog (COMPASS::instance().evaluationManager().targetFilter(), model_);
+    dialog.exec();
 }
 
 void TargetListWidget::clearAllCommentsSlot()
 {
-    model_.clearComments();
+    model_.clearAllTargetComments();
+
+    resizeColumnsToContents();
 }
 
-void TargetListWidget::clearTargetsCommentsSlot()
+void TargetListWidget::clearSelectedTargetsCommentsSlot()
 {
     loginf << "TargetListWidget: clearTargetsCommentsSlot";
 
-    auto& dbcont_man = COMPASS::instance().dbContentManager();
-
     std::set<unsigned int> selected_utns = selectedUTNs();
 
-    for (auto utn : selected_utns)
-    {
-        assert (dbcont_man.existsTarget(utn));
+    model_.setTargetComment(selected_utns, "");
 
-        auto& target = dbcont_man.target(utn);
-
-        target.comment("");
-    }
+    resizeColumnsToContents();
 }
 
 void TargetListWidget::evalClearAllExcludeTimeWindowsSlot()
 {
     loginf << "TargetListWidget: evalClearAllExcludeTimeWindowsSlot";
 
-    auto& dbcont_man = COMPASS::instance().dbContentManager();
-
-    model_.clearEvalExcludeTimeWindows();
-
-    dbcont_man.storeTargetsEvalInfo();
+    model_.clearAllEvalExcludeTimeWindows();
 
     resizeColumnsToContents();
 }
@@ -296,10 +313,7 @@ void TargetListWidget::evalClearAllExcludeRequirementsSlot()
 {
     loginf << "TargetListWidget: evalClearAllExcludeTimeWindowsSlot";
 
-    auto& dbcont_man = COMPASS::instance().dbContentManager();
-
-    model_.clearEvalExcludeRequirements();
-    dbcont_man.storeTargetsEvalInfo();
+    model_.clearAllEvalExcludeRequirements();
 
     resizeColumnsToContents();
 }
@@ -312,15 +326,10 @@ void TargetListWidget::evalEditGlobalExcludeTimeWindowsSlot()
     dialog.exec();
 
     COMPASS::instance().evaluationManager().saveTimeConstraints();
+
+    model_.updateEvalUseColumn();
 }
 
-void TargetListWidget::evalFilterSlot()
-{
-    loginf << "TargetListWidget: evalFilterSlot";
-
-    EvaluationTargetFilterDialog dialog (COMPASS::instance().evaluationManager().targetFilter(), model_);
-    dialog.exec();
-}
 
 void TargetListWidget::customContextMenuSlot(const QPoint& p)
 {
@@ -331,7 +340,7 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
     QMenu menu;
 
     QAction* clear_action = menu.addAction("Clear Comment(s)");
-    connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearTargetsCommentsSlot);
+    connect (clear_action, &QAction::triggered, this, &TargetListWidget::clearSelectedTargetsCommentsSlot);
 
     QAction* show_action = menu.addAction("Show Surrounding Data");
     connect (show_action, &QAction::triggered, this, &TargetListWidget::showSurroundingDataSlot);
@@ -339,10 +348,10 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
     QMenu* eval_menu = menu.addMenu("Evaluation");
 
     QAction* use_action = eval_menu->addAction("Use Target(s)");
-    connect (use_action, &QAction::triggered, this, &TargetListWidget::evalUseTargetsSlot);
+    connect (use_action, &QAction::triggered, this, &TargetListWidget::evalUseSelectedTargetsSlot);
 
     QAction* nouse_action = eval_menu->addAction("Disable Target(s)");
-    connect (nouse_action, &QAction::triggered, this, &TargetListWidget::evalDisableUseTargetsSlot);
+    connect (nouse_action, &QAction::triggered, this, &TargetListWidget::evalDisableSelectedTargetsSlot);
 
     eval_menu->addSeparator();
 
@@ -379,67 +388,15 @@ void TargetListWidget::showSurroundingDataSlot ()
     dbcont_man.showSurroundingData(selected_utns);
 }
 
-void TargetListWidget::evalUseTargetsSlot()
-{
-    loginf << "TargetListWidget: evalUseTargetsSlot";
 
-    auto& dbcont_man = COMPASS::instance().dbContentManager();
-
-    std::set<unsigned int> selected_utns = selectedUTNs();
-
-    for (auto utn : selected_utns)
-    {
-        assert (dbcont_man.existsTarget(utn));
-
-        auto& target = dbcont_man.target(utn);
-
-        target.useInEval(true);
-    }
-
-    model_.updateEvalItems();
-    dbcont_man.storeTargetsEvalInfo();
-}
-
-void TargetListWidget::evalDisableUseTargetsSlot()
-{
-    loginf << "TargetListWidget: evalDisableUseTargetsSlot";
-
-    auto& dbcont_man = COMPASS::instance().dbContentManager();
-
-    std::set<unsigned int> selected_utns = selectedUTNs();
-
-    for (auto utn : selected_utns)
-    {
-        assert (dbcont_man.existsTarget(utn));
-
-        auto& target = dbcont_man.target(utn);
-
-        target.useInEval(false);
-    }
-
-    model_.updateEvalItems();
-    dbcont_man.storeTargetsEvalInfo();
-}
 
 void TargetListWidget::evalClearTargetsExcludeTimeWindowsSlot()
 {
     loginf << "TargetListWidget: evalClearTargetsExcludeTimeWindowsSlot";
 
-    auto& dbcont_man = COMPASS::instance().dbContentManager();
-
     std::set<unsigned int> selected_utns = selectedUTNs();
 
-    for (auto utn : selected_utns)
-    {
-        assert (dbcont_man.existsTarget(utn));
-
-        auto& target = dbcont_man.target(utn);
-
-        target.evalExcludedTimeWindows().clear();
-    }
-
-    model_.updateEvalItems();
-    dbcont_man.storeTargetsEvalInfo();
+    model_.clearEvalExcludeTimeWindows(selected_utns);
 
     resizeColumnsToContents();
 }
@@ -447,21 +404,9 @@ void TargetListWidget::evalClearTargetsExcludeRequirementsSlot()
 {
     loginf << "TargetListWidget: evalClearTargetsExcludeRequirementsSlot";
 
-    auto& dbcont_man = COMPASS::instance().dbContentManager();
-
     std::set<unsigned int> selected_utns = selectedUTNs();
 
-    for (auto utn : selected_utns)
-    {
-        assert (dbcont_man.existsTarget(utn));
-
-        auto& target = dbcont_man.target(utn);
-
-        target.evalExcludedRequirements().clear();
-    }
-
-    model_.updateEvalItems();
-    dbcont_man.storeTargetsEvalInfo();
+    model_.clearEvalExcludeRequirements(selected_utns);
 
     resizeColumnsToContents();
 }
@@ -475,7 +420,7 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
     std::set<unsigned int> selected_utns = selectedUTNs();
 
     Utils::TimeWindowCollection filtered_time_windows;
-        set<string> comments;
+    set<string> comments;
 
     // collect all time windows from all targets
     for (auto utn : selected_utns)
@@ -505,20 +450,9 @@ void TargetListWidget::evalExcludeTimeWindowsTargetSlot()
     string comment = dialog.comment();
 
     // set time windows for all targets
-    for (auto utn : selected_utns)
-    {
-        assert (dbcont_man.existsTarget(utn));
+    model_.setTargetComment(selected_utns, comment);
+    model_.setEvalExcludeTimeWindows(selected_utns, filtered_time_windows);
 
-        auto& target = dbcont_man.target(utn);
-
-        target.evalExcludedTimeWindows() = filtered_time_windows;
-
-        target.comment(comment);
-
-        target.storeEvalutionInfo();
-    }
-
-    model_.updateEvalItems();
     resizeColumnsToContents();
 }
 
@@ -574,20 +508,9 @@ void TargetListWidget::evalExcludeRequirementsTargetSlot()
     string comment = dialog.comment();
 
     // set reqs for all targets
-    for (auto utn : selected_utns)
-    {
-        assert (dbcont_man.existsTarget(utn));
+    model_.setTargetComment(selected_utns, comment);
+    model_.setEvalExcludeRequirements(selected_utns, selected_requirements);
 
-        auto& target = dbcont_man.target(utn);
-
-        target.evalExcludedRequirements() = selected_requirements;
-
-        target.comment(comment);
-
-        target.storeEvalutionInfo();
-    }
-
-    model_.updateEvalItems();
     resizeColumnsToContents();
 }
 

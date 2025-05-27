@@ -24,13 +24,13 @@ public:
     bool useInEval() const;
     void useInEval(bool value);
 
-    Utils::TimeWindowCollection& evalExcludedTimeWindows();
-    std::set<std::string>& evalExcludedRequirements();
-
     const Utils::TimeWindowCollection& evalExcludedTimeWindows() const;
-    const std::set<std::string>& evalExcludedRequirements() const;
+    void evalExcludedTimeWindows(const Utils::TimeWindowCollection& collection);
+    void clearEvalExcludedTimeWindows();
 
-    void storeEvalutionInfo(); // save efficient variables in json
+    const std::set<std::string>& evalExcludedRequirements() const;
+    void evalExcludedRequirements(const std::set<std::string>& excl_req);
+    void clearEvalExcludedRequirements();
 
     std::string comment() const;
     void comment (const std::string& value);

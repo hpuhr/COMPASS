@@ -48,7 +48,7 @@ public:
         ColUTN = 0,
         ColComment,
         ColCategory,
-        ColUseEval,
+        ColUseInEval,
         ColUseEvalDetails,
         ColNumUpdates,
         ColBegin,
@@ -79,13 +79,21 @@ public:
 
     const dbContent::Target& getTargetOf (const QModelIndex& index);
 
-    void setUseTargetData (unsigned int utn, bool value);
-    void setTargetDataComment (unsigned int utn, std::string comment);
-    void setUseAllTargetData (bool value);
+    void setTargetComment (unsigned int utn, std::string comment);
+    void setTargetComment (std::set<unsigned int> utns, std::string comment);
+    void clearAllTargetComments();
 
-    void clearComments();
-    void clearEvalExcludeTimeWindows();
-    void clearEvalExcludeRequirements();
+    void setEvalUseTarget (unsigned int utn, bool value);
+    void setEvalUseTarget (std::set<unsigned int> utns, bool value);
+    void setAllUseTargets (bool value);
+
+    void setEvalExcludeTimeWindows(std::set<unsigned int> utns, const Utils::TimeWindowCollection& collection);
+    void clearEvalExcludeTimeWindows(std::set<unsigned int> utns);
+    void clearAllEvalExcludeTimeWindows();
+
+    void setEvalExcludeRequirements(std::set<unsigned int> utns, const std::set<std::string>& excl_req);
+    void clearEvalExcludeRequirements(std::set<unsigned int> utns);
+    void clearAllEvalExcludeRequirements();
 
     void setUseByFilter ();
 
@@ -100,7 +108,7 @@ public:
 
     //void removeDBContentFromTargets(const std::string& dbcont_name);
 
-    void storeTargetsEvalInfo();
+    //void storeTargetsEvalInfo();
 
     nlohmann::json asJSON() const;
     nlohmann::json targetAsJSON(unsigned int utn) const;
@@ -133,14 +141,16 @@ public:
     void showModeSColumns(bool show);
     void showModeACColumns(bool show);
 
-    void updateEvalItems();
+    void updateCommentColumn();
+    void updateEvalUseColumn();
+    void updateEvalDetailsColumn();
 
 protected:
     DBContentManager& dbcont_manager_;
 
     QStringList               table_columns_   { "UTN", "Comment", "Category", "Eval", "Eval Excluded",
                                "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max"};
-    std::vector<int>          main_columns_    { ColUTN, ColComment, ColCategory, ColUseEval };
+    std::vector<int>          main_columns_    { ColUTN, ColComment, ColCategory, ColUseInEval };
     std::vector<int>          eval_columns_    { ColUseEvalDetails };
     std::vector<int>          duration_columns_{ ColNumUpdates, ColBegin, ColEnd, ColDuration };
     std::vector<int>          mode_s_columns_  { ColACIDs, ColACADs };

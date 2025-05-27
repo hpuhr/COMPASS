@@ -1608,11 +1608,6 @@ unsigned int DBContentManager::numTargets() const
     return target_model_->size();
 }
 
-void DBContentManager::storeTargetsEvalInfo()
-{
-    target_model_->storeTargetsEvalInfo();
-}
-
 /**
  */
 nlohmann::json DBContentManager::targetsInfoAsJSON() const
@@ -2175,7 +2170,7 @@ void DBContentManager::utnComment (unsigned int utn, std::string value)
 
     assert (target_model_);
     assert (target_model_->existsTarget(utn));
-    target_model_->setTargetDataComment(utn, value);
+    target_model_->setTargetComment(utn, value);
 }
 
 /**

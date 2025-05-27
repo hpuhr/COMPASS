@@ -25,11 +25,14 @@ class TargetListWidget : public ToolBoxWidget
 public slots:
     void evalUseAllSlot();
     void evalUseNoneSlot();
-    void evalEditGlobalExcludeTimeWindowsSlot();
+    void evalUseSelectedTargetsSlot();
+    void evalDisableSelectedTargetsSlot();
     void evalFilterSlot();
 
+    void evalEditGlobalExcludeTimeWindowsSlot();
+
     void clearAllCommentsSlot();
-    void clearTargetsCommentsSlot();
+    void clearSelectedTargetsCommentsSlot();
 
     void evalClearAllExcludeTimeWindowsSlot();
     void evalClearAllExcludeRequirementsSlot();
@@ -37,8 +40,7 @@ public slots:
     void customContextMenuSlot(const QPoint& p);
     void showSurroundingDataSlot ();
 
-    void evalUseTargetsSlot();
-    void evalDisableUseTargetsSlot();
+
     void evalClearTargetsExcludeTimeWindowsSlot();
     void evalClearTargetsExcludeRequirementsSlot();
     void evalExcludeTimeWindowsTargetSlot();

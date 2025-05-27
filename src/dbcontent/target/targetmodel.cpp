@@ -82,7 +82,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         }
         case Qt::UserRole: // to find the checkboxes
         {
-            if (index.column() == ColUseEval)
+            if (index.column() == ColUseInEval)
             {
                 return target.utn_;
             }
@@ -93,7 +93,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         }
         case Qt::DecorationRole:
         {
-            if (index.column() == ColUseEval)  // selected special case
+            if (index.column() == ColUseInEval)  // selected special case
             {
                 if (!target.useInEval())
                     return Utils::Files::IconProvider::getIcon("delete.png");
@@ -189,11 +189,7 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
 
         loginf << "TargetModel: setData: utn " << it->utn_ <<" comment '" << value.toString().toStdString() << "'";
 
-        target_data_.modify(it, [value](Target& p) { p.comment(value.toString().toStdString()); });
-
-        saveToDB(it->utn_);
-
-        emit targetInfoChangedSignal();
+        setTargetComment(it->utn_, value.toString().toStdString());
 
         return true;
     }
@@ -274,7 +270,7 @@ QVariant TargetModel::getCellContent(const Target& target, Columns col) const
         return target.comment().c_str();
     case ColCategory:
         return target.emitterCategoryStr().c_str();
-    case ColUseEval:
+    case ColUseInEval:
         return QVariant();
     case ColUseEvalDetails:
     {
@@ -338,122 +334,158 @@ const dbContent::Target& TargetModel::getTargetOf (const QModelIndex& index)
 
 /**
  */
-void TargetModel::setUseTargetData (unsigned int utn, bool value)
+void TargetModel::setEvalUseTarget (unsigned int utn, bool value)
 {
     loginf << "TargetModel: setUseTargetData: utn " << utn << " value " << value;
 
     assert (existsTarget(utn));
 
     // search if checkbox can be found
-    QModelIndexList items = match(
-                index(0, ColUseEval),
-                Qt::UserRole,
-                QVariant(utn),
-                1, // look *
-                Qt::MatchExactly); // look *
+    // QModelIndexList items = match(
+    //             index(0, ColUseEval),
+    //             Qt::UserRole,
+    //             QVariant(utn),
+    //             1, // look *
+    //             Qt::MatchExactly); // look *
 
-    assert (items.size() == 1);
+    // assert (items.size() == 1);
 
-    setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
+    // setData(items.at(0), {value ? Qt::Checked: Qt::Unchecked}, Qt::CheckStateRole);
 
-    // already emitted in setData
-    //emit dbcont_manager_.targetChangedSignal(utn);
+    target(utn).useInEval(value);
+
+    updateEvalUseColumn();
+    emit targetEvalUsageChangedSignal();
+}
+
+void TargetModel::setEvalUseTarget (std::set<unsigned int> utns, bool value)
+{
+    for (auto utn : utns)
+        target(utn).useInEval(value);
+
+    updateEvalUseColumn();
+    emit targetEvalUsageChangedSignal();
 }
 
 /**
  */
-void TargetModel::setTargetDataComment (unsigned int utn, std::string comment)
+void TargetModel::setAllUseTargets (bool value)
+{
+    loginf << "TargetModel: setUseAllTargetData: value " << value;
+
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [value](Target& p) { p.useInEval(value); });
+
+    updateEvalUseColumn();
+    emit targetEvalUsageChangedSignal();
+}
+
+/**
+ */
+void TargetModel::setTargetComment (unsigned int utn, std::string comment)
 {
     loginf << "TargetModel: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
 
     assert (existsTarget(utn));
 
     // search if comment can be found can be found, check in COLUMN 2!
-    QModelIndexList items = match(
-                index(0, ColComment),
-                Qt::UserRole,
-                QVariant(("comment_"+to_string(utn)).c_str()),
-                1, // look *
-                Qt::MatchExactly); // look *
+    // QModelIndexList items = match(
+    //             index(0, ColComment),
+    //             Qt::UserRole,
+    //             QVariant(("comment_"+to_string(utn)).c_str()),
+    //             1, // look *
+    //             Qt::MatchExactly); // look *
 
-     loginf << "TargetModel: setTargetDataComment: size " << items.size();
+    //  loginf << "TargetModel: setTargetDataComment: size " << items.size();
 
-    assert (items.size() == 1);
-    setData(items.at(0), comment.c_str(), Qt::EditRole);
+    // assert (items.size() == 1);
+    // setData(items.at(0), comment.c_str(), Qt::EditRole);
 
-    // already emitted in setData
-    //emit dbcont_manager_.targetChangedSignal(utn);
+    target(utn).comment(comment);
+
+    updateCommentColumn();
+    emit targetInfoChangedSignal();
 }
 
-/**
- */
-void TargetModel::setUseAllTargetData (bool value)
+void TargetModel::setTargetComment (std::set<unsigned int> utns, std::string comment)
 {
-    loginf << "TargetModel: setUseAllTargetData: value " << value;
+    for (auto utn : utns)
+        target(utn).comment(comment);
 
-    //QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    beginResetModel();
-
-    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-        target_data_.modify(target_it, [value](Target& p) { p.useInEval(value); });
-
-    //saveToDB();
-
-    endResetModel();
-
-    dbcont_manager_.storeTargetsEvalInfo();
-    emit targetEvalUsageChangedSignal();
-
-    //QApplication::restoreOverrideCursor();
+    updateCommentColumn();
+    emit targetInfoChangedSignal();
 }
 
 /**
  */
-void TargetModel::clearComments ()
+void TargetModel::clearAllTargetComments ()
 {
     loginf << "TargetModel: clearComments";
-
-    beginResetModel();
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [](Target& p) { p.comment(""); });
 
-    //saveToDB();
 
-    endResetModel();
-
+    updateCommentColumn();
     emit targetInfoChangedSignal();
 }
 
-void TargetModel::clearEvalExcludeTimeWindows()
+void TargetModel::setEvalExcludeTimeWindows(
+    std::set<unsigned int> utns, const Utils::TimeWindowCollection& collection)
 {
-    loginf << "TargetModel: clearEvalExcludeTimeWindows";
+    for (auto utn : utns)
+        target(utn).evalExcludedTimeWindows(collection);
 
-    beginResetModel();
-
-    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-        target_data_.modify(target_it, [](Target& p) { p.evalExcludedTimeWindows().clear(); });
-
-    //saveToDB();
-
-    endResetModel();
-
+    updateEvalDetailsColumn();
     emit targetEvalFullChangeSignal();
 }
-void TargetModel::clearEvalExcludeRequirements()
+
+void TargetModel::clearEvalExcludeTimeWindows(std::set<unsigned int> utns)
+{
+    for (auto utn : utns)
+        target(utn).clearEvalExcludedTimeWindows();
+
+    updateEvalDetailsColumn();
+    emit targetEvalFullChangeSignal();
+}
+
+void TargetModel::clearAllEvalExcludeTimeWindows()
 {
     loginf << "TargetModel: clearEvalExcludeTimeWindows";
 
-    beginResetModel();
+    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+        target_data_.modify(target_it, [](Target& p) { p.clearEvalExcludedTimeWindows(); });
+
+    updateEvalDetailsColumn();
+    emit targetEvalFullChangeSignal();
+}
+
+void TargetModel::setEvalExcludeRequirements(std::set<unsigned int> utns, const std::set<std::string>& excl_req)
+{
+    for (auto utn : utns)
+        target(utn).evalExcludedRequirements(excl_req);
+
+    updateEvalDetailsColumn();
+    emit targetEvalUsageChangedSignal();
+}
+
+void TargetModel::clearEvalExcludeRequirements(std::set<unsigned int> utns)
+{
+    for (auto utn : utns)
+        target(utn).clearEvalExcludedRequirements();
+
+    updateEvalDetailsColumn();
+    emit targetEvalUsageChangedSignal();
+}
+
+void TargetModel::clearAllEvalExcludeRequirements()
+{
+    loginf << "TargetModel: clearEvalExcludeTimeWindows";
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-        target_data_.modify(target_it, [](Target& p) { p.evalExcludedRequirements().clear(); });
+        target_data_.modify(target_it, [](Target& p) { p.clearEvalExcludedRequirements(); });
 
-    //saveToDB();
-
-    endResetModel();
-
+    updateEvalDetailsColumn();
     emit targetEvalUsageChangedSignal();
 }
 
@@ -463,14 +495,9 @@ void TargetModel::setUseByFilter ()
 {
     loginf << "TargetModel: setUseByFilter";
 
-    beginResetModel();
-
     COMPASS::instance().evaluationManager().targetFilter().setUse(target_data_);
 
-    //saveToDB();
-
-    endResetModel();
-
+    updateEvalUseColumn();
     emit targetEvalUsageChangedSignal();
 }
 
@@ -597,11 +624,11 @@ unsigned int TargetModel::size() const
 //         target_data_.modify(target_it, [dbcont_name](Target& p) { p.clearDBContentCount(dbcont_name); });
 // }
 
-void TargetModel::storeTargetsEvalInfo()
-{
-    for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
-        target_data_.modify(target_it, [](Target& p) { p.storeEvalutionInfo(); });
-}
+// void TargetModel::storeTargetsEvalInfo()
+// {
+//     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
+//         target_data_.modify(target_it, [](Target& p) { p.storeEvalutionInfo(); });
+// }
 
 /**
  */
@@ -776,15 +803,29 @@ void TargetModel::showModeACColumns(bool show)
     show_mode_ac_columns_ = show;
 }
 
-void TargetModel::updateEvalItems()
+void TargetModel::updateCommentColumn()
 {
-    if (show_eval_columns_)
-    {
-        int row_count = this->rowCount();
-
-        emit dataChanged(index(0, ColUseEvalDetails), index(row_count, ColUseEvalDetails), {Qt::DisplayRole});
-        emit dataChanged(index(0, ColUseEval), index(row_count, ColUseEval), {Qt::DecorationRole});
-    }
+    emit dataChanged(index(0, ColComment), index(this->rowCount(), ColComment), {Qt::DisplayRole});
 }
+
+void TargetModel::updateEvalUseColumn()
+{
+    emit dataChanged(index(0, ColUseInEval), index(this->rowCount(), ColUseInEval), {Qt::DecorationRole});
+}
+void TargetModel::updateEvalDetailsColumn()
+{
+    emit dataChanged(index(0, ColUseEvalDetails), index(this->rowCount(), ColUseEvalDetails), {Qt::DisplayRole});
+}
+
+// void TargetModel::updateEvalItems()
+// {
+//     if (show_eval_columns_)
+//     {
+//         int row_count = this->rowCount();
+
+//         emit dataChanged(index(0, ColUseInEval), index(row_count, ColUseInEval), {Qt::DecorationRole});
+//         emit dataChanged(index(0, ColUseEvalDetails), index(row_count, ColUseEvalDetails), {Qt::DisplayRole});
+//     }
+// }
 
 }

@@ -55,6 +55,8 @@ bool Target::useInEval() const
 void Target::useInEval(bool value)
 {
     use_in_eval_ = value;
+
+    info_[KEY_EVAL][KEY_EVAL_USE] = use_in_eval_;
 }
 
 std::string Target::comment() const
@@ -397,26 +399,23 @@ TargetBase::Category Target::targetCategory() const
     return fromECAT(info_[KEY_ECAT].get<unsigned int>());
 }
 
-void Target::storeEvalutionInfo()
-{
-    info_[KEY_EVAL][KEY_EVAL_USE] = use_in_eval_;
-    info_[KEY_EVAL][KEY_EVAL_EXCLUDED_TIME_WINDOWS] = excluded_time_windows_.asJSON();
-    info_[KEY_EVAL][KEY_EVAL_EXCLUDED_REQUIREMENTS] = excluded_requirements_;
-}
-
-Utils::TimeWindowCollection& Target::evalExcludedTimeWindows()
-{
-    return excluded_time_windows_;
-}
-
-std::set<std::string>& Target::evalExcludedRequirements()
-{
-    return excluded_requirements_;
-}
-
 const Utils::TimeWindowCollection& Target::evalExcludedTimeWindows() const
 {
     return excluded_time_windows_;
+}
+
+void Target::evalExcludedTimeWindows(const Utils::TimeWindowCollection& collection)
+{
+    excluded_time_windows_ = collection;
+    info_[KEY_EVAL][KEY_EVAL_EXCLUDED_TIME_WINDOWS] = excluded_time_windows_.asJSON();
+}
+
+void Target::clearEvalExcludedTimeWindows()
+{
+    excluded_time_windows_.clear();
+
+    if (info_[KEY_EVAL].contains(KEY_EVAL_EXCLUDED_TIME_WINDOWS))
+        info_[KEY_EVAL].erase(KEY_EVAL_EXCLUDED_TIME_WINDOWS);
 }
 
 const std::set<std::string>& Target::evalExcludedRequirements() const
@@ -424,4 +423,21 @@ const std::set<std::string>& Target::evalExcludedRequirements() const
     return excluded_requirements_;
 }
 
+void Target::evalExcludedRequirements(const std::set<std::string>& excl_req)
+{
+    excluded_requirements_ = excl_req;
+    info_[KEY_EVAL][KEY_EVAL_EXCLUDED_REQUIREMENTS] = excluded_requirements_;
 }
+
+void Target::clearEvalExcludedRequirements()
+{
+    excluded_requirements_.clear();
+
+    if (info_[KEY_EVAL].contains(KEY_EVAL_EXCLUDED_REQUIREMENTS))
+        info_[KEY_EVAL].erase(KEY_EVAL_EXCLUDED_REQUIREMENTS);
+}
+
+}
+
+
+

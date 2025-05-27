@@ -188,7 +188,7 @@ void EvaluationTargetFilter::setUse(dbContent::TargetCache& target_data)
         }
     }
 
-    dbcont_man.storeTargetsEvalInfo();
+    // updates done in TargetModel::setUseByFilter
 }
 
 /**
