@@ -557,9 +557,10 @@ bool DBInterface::existsTable(const string& table_name) const
  */
 void DBInterface::createTable(const DBContent& object)
 {
+    loginf << "DBInterface: createTable: obj " << object.name();
+
     assert(ready());
 
-    loginf << "DBInterface: createTable: obj " << object.name();
     if (existsTable(object.dbTableName()))
     {
         logerr << "DBInterface: createTable: table " << object.dbTableName() << " already exists";
@@ -580,6 +581,31 @@ void DBInterface::createTable(const DBContent& object)
     loginf << "DBInterface: createTable: checking " << object.dbTableName();
 
     assert(existsTable(object.dbTableName()));
+}
+
+/**
+ */
+void DBInterface::removeTable(const std::string& table_name)
+{
+    loginf << "DBInterface: removeTable: name " << table_name;
+
+    assert(ready());
+
+    if (!existsTable(table_name))
+    {
+        logwrn << "DBInterface: removeTable: table " << table_name << " does not exist";
+        return;
+    }
+
+    auto res = db_instance_->defaultConnection().deleteTable(table_name);
+    
+    loginf << "DBInterface: createTable: checking " << table_name;
+
+    assert(res.ok());
+
+    updateTableInfo();
+
+    assert(!existsTable(table_name));
 }
 
 /**
@@ -1840,6 +1866,8 @@ Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_need
 
     try
     {
+        //removeTable(TaskResult::DBTableName);
+
         //create needed tables
         if (!existsTaskResultsTable())
             createTaskResultsTable();
@@ -1862,11 +1890,13 @@ Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_need
 
             auto& id_vec      = buffer->get<unsigned int>(TaskResult::DBColumnID.name());
             auto& name_vec    = buffer->get<std::string>(TaskResult::DBColumnName.name());
+            auto& header_vec  = buffer->get<nlohmann::json>(TaskResult::DBColumnJSONHeader.name());
             auto& content_vec = buffer->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
             auto& type_vec    = buffer->get<int>(TaskResult::DBColumnResultType.name());
 
             id_vec.set(0, result_id);
             name_vec.set(0, result.name());
+            header_vec.set(0, result.header().toJSON());
             content_vec.set(0, result.toJSON());
             type_vec.set(0, (int)result.type());
 
@@ -1978,7 +2008,9 @@ Result DBInterface::deleteResult(const TaskResult& result,
         auto sel_filter = db::SQLFilter(TaskResult::DBColumnID.name(), std::to_string(id), db::SQLFilter::ComparisonOp::Is)
             .OR(TaskResult::DBColumnName.name(), "'" + result.name() + "'", db::SQLFilter::ComparisonOp::Is).statement();
 
-        auto sel_result = select(TaskResult::DBTableName, TaskResult::DBPropertyList, sel_filter);
+        PropertyList properties = PropertyList({ TaskResult::DBColumnID });
+
+        auto sel_result = select(TaskResult::DBTableName, properties, sel_filter);
         if (!sel_result.ok())
             throw std::runtime_error("Locating old result failed");
 
@@ -2037,6 +2069,44 @@ Result DBInterface::deleteResult(const TaskResult& result,
 
 /**
  */
+Result DBInterface::updateResultHeader(const TaskResult& result)
+{
+    loginf << "DBInterface: updateResultHeader: updating header of result '" << result.name() << "'";
+
+    assert(ready());
+
+    try
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        string str = sqlGenerator().getUpdateCellStatement(TaskResult::DBTableName,
+                                                           TaskResult::DBColumnJSONHeader.name(),
+                                                           result.header().toJSON(),
+                                                           TaskResult::DBColumnID.name(),
+                                                           result.id());
+        // uses replace with utn as unique key
+        auto res = execute(str);
+        if (!res.ok())
+            return res;
+    }
+    catch(const std::exception& ex)
+    {
+        return Result::failed(std::string(ex.what()));
+    }
+    catch(...)
+    {
+        return Result::failed("Unknown error");
+    }
+
+    loginf << "DBInterface: updateResultHeader: done";
+
+    return Result::succeeded();
+}
+
+/**
+ */
 ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
 {
     assert(ready());
@@ -2056,10 +2126,19 @@ ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
 
         auto b = result->buffer();
 
+        //@TODO: check more tables obtained this way for having the right properties
+        if (!b->hasProperty(TaskResult::DBColumnID) ||
+            !b->hasProperty(TaskResult::DBColumnName) ||
+            !b->hasProperty(TaskResult::DBColumnJSONHeader) ||
+            !b->hasProperty(TaskResult::DBColumnJSONContent) ||
+            !b->hasProperty(TaskResult::DBColumnResultType))
+            throw std::runtime_error("Results table invalid");
+
         size_t nr = b->size();
 
         auto& id_vec      = b->get<unsigned int>(TaskResult::DBColumnID.name());
         auto& name_vec    = b->get<std::string>(TaskResult::DBColumnName.name());
+        auto& header_vec  = b->get<nlohmann::json>(TaskResult::DBColumnJSONHeader.name());
         auto& content_vec = b->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
         auto& type_vec    = b->get<int>(TaskResult::DBColumnResultType.name());
 
@@ -2069,28 +2148,34 @@ ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
 
         for (size_t i = 0; i < nr; ++i)
         {
-            const auto& result_name = name_vec.get(i);
-            const auto& result_type = type_vec.get(i);
-            const auto& result_id   = id_vec.get(i);
-
+            const auto& result_name  = name_vec.get(i);
+            const auto& result_type  = type_vec.get(i);
+            const auto& result_id    = id_vec.get(i);
+            const auto& json_header  = header_vec.get(i);
             const auto& json_content = content_vec.get(i);
-            if (!json_content.contains(TaskResult::FieldType))
-                throw std::runtime_error("Missing type field in result JSON");
 
-            int rtype = json_content.at(TaskResult::FieldType);
-
-            results[ i ] = task_man.createResult(result_id, (task::TaskResultType)rtype);
+            //create result of given type
+            results[ i ] = task_man.createResult(result_id, (task::TaskResultType)result_type);
             if (!results[ i ])
                 throw std::runtime_error("Could not create result from type");
 
-            bool ok = results[ i ]->fromJSON(json_content);
-            if (!ok)
-                throw std::runtime_error("Could not read result from JSON");
+            //try to read result header
+            TaskResultHeader header;
+            if (!header.fromJSON(json_header))
+                throw std::runtime_error("Could not read header of result '" + result_name + "'");
 
+            //try to read result
+            if (!results[ i ]->fromJSON(json_content))
+                throw std::runtime_error("Could not read content of result '" + result_name + "'");
+
+            //configure result using header information (update state etc.)
+            results[ i ]->configure(header);
+
+            //final checks
             if (results[ i ]->name() != result_name ||
                 results[ i ]->type() != result_type ||
                 results[ i ]->id()   != result_id)
-                throw std::runtime_error("Result contents invalid");
+                throw std::runtime_error("Result '" + result_name + "' obtains invalid content");
         }
     }
     catch(const std::exception& ex)

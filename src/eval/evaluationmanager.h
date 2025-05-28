@@ -71,6 +71,7 @@ public slots:
     void targetInfoChangedSlot();
     void partialResultsUpdateNeededSlot();
     void fullResultsUpdateNeededSlot();
+    void lockResultsSlot();
 
 public:
     EvaluationManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);

@@ -7,6 +7,7 @@
 #include "taskmanager.h"
 #include "asynctask.h"
 #include "compass.h"
+#include "reportdefs.h";
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -99,8 +100,8 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
 
     connect (&task_man, &TaskManager::taskResultsChangedSignal,
             this, &TaskResultsWidget::updateResultsSlot);
-    connect (&task_man, &TaskManager::taskResultChangedSignal,
-            this, &TaskResultsWidget::updateResult);
+    connect (&task_man, &TaskManager::taskResultHeaderChangedSignal,
+            this, &TaskResultsWidget::resultHeaderChanged);
 }
 
 /**
@@ -211,7 +212,7 @@ void TaskResultsWidget::updateResults(const std::string& selected_result)
 
 /**
  */
-void TaskResultsWidget::updateResult(const QString& name)
+void TaskResultsWidget::resultHeaderChanged(const QString& name)
 {
     updateResultUI(name.toStdString());
 }
@@ -226,7 +227,11 @@ void TaskResultsWidget::updateResultUI(const std::string& name)
     auto result = task_man_.result(name);
     assert(result);
 
-    refresh_result_button_->setEnabled(result->updateNeeded());
+    bool update_needed = result->updateNeeded();
+
+    refresh_result_button_->setEnabled(update_needed);
+    refresh_result_button_->setIcon(
+        Utils::Files::getIcon("refresh.png", update_needed ? ResultReport::Colors::TextOrange : QColor()));
 }
 
 /**

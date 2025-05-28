@@ -81,6 +81,8 @@ Result ReportExporterLatex::initExport_impl(TaskResult& result)
     if (s.abstract.size())
         latex_doc_->abstract(s.abstract);
 
+    LatexTable::num_max_rows_ = 500;
+
     return Result::succeeded();
 }
 
@@ -166,7 +168,7 @@ Result ReportExporterLatex::exportTable_impl(SectionContentTable& table)
 
     bool wide_table = false;
 
-    if (headings.size() >= (size_t)TableMaxColumnsWide)
+    if (headings.size() > (size_t)TableMaxColumnsWide)
     {
         latex_table.setWideTable(true);
         wide_table = true;

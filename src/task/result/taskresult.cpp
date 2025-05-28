@@ -38,24 +38,110 @@
 #include <QMenu>
 #include <QApplication>
 
-const std::string  TaskResult::DBTableName         = "task_results";
-const Property     TaskResult::DBColumnID          = Property("result_id"   , PropertyDataType::UINT  );
-const Property     TaskResult::DBColumnName        = Property("name"        , PropertyDataType::STRING);
-const Property     TaskResult::DBColumnJSONContent = Property("json_content", PropertyDataType::JSON  );
-const Property     TaskResult::DBColumnResultType  = Property("type"        , PropertyDataType::INT   );
-const PropertyList TaskResult::DBPropertyList      = PropertyList({ TaskResult::DBColumnID,
-                                                                    TaskResult::DBColumnName,
-                                                                    TaskResult::DBColumnJSONContent,
-                                                                    TaskResult::DBColumnResultType });
-const std::string TaskResult::FieldID             = "id";
-const std::string TaskResult::FieldName           = "name";
-const std::string TaskResult::FieldType           = "type";
-const std::string TaskResult::FieldCreated        = "created";
-const std::string TaskResult::FieldComments       = "comments";
-const std::string TaskResult::FieldReport         = "report";
-const std::string TaskResult::FieldConfig         = "config";
-const std::string TaskResult::FieldUpdateEvent    = "update_event";
-const std::string TaskResult::FieldUpdateContents = "update_contents";
+const std::string  TaskResult::DBTableName          = "task_results";
+const Property     TaskResult::DBColumnID           = Property("result_id"    , PropertyDataType::UINT  );
+const Property     TaskResult::DBColumnName         = Property("name"         , PropertyDataType::STRING);
+const Property     TaskResult::DBColumnJSONHeader   = Property("json_header"  , PropertyDataType::JSON  );
+const Property     TaskResult::DBColumnJSONContent  = Property("json_content" , PropertyDataType::JSON  );
+const Property     TaskResult::DBColumnResultType   = Property("type"         , PropertyDataType::INT   );
+const PropertyList TaskResult::DBPropertyList       = PropertyList({ TaskResult::DBColumnID,
+                                                                     TaskResult::DBColumnName,
+                                                                     TaskResult::DBColumnJSONHeader,
+                                                                     TaskResult::DBColumnJSONContent,
+                                                                     TaskResult::DBColumnResultType });
+const std::string TaskResult::FieldID                   = "id";
+const std::string TaskResult::FieldName                 = "name";
+const std::string TaskResult::FieldType                 = "type";
+const std::string TaskResult::FieldMetaDataCreated      = "ts_created";
+const std::string TaskResult::FieldMetaDataRefreshed    = "ts_refreshed";
+const std::string TaskResult::FieldMetaDataUser         = "user";
+const std::string TaskResult::FieldMetaDataComments     = "comments";
+const std::string TaskResult::FieldMetaData             = "metadata";
+const std::string TaskResult::FieldHeaderUpdateState    = "update_state";
+const std::string TaskResult::FieldHeaderUpdateContents = "update_contents";
+const std::string TaskResult::FieldReport               = "report";
+const std::string TaskResult::FieldConfig               = "config";
+
+/************************************************************************************************
+ * TaskResultMetaData
+ ************************************************************************************************/
+
+/**
+ */
+nlohmann::json TaskResultMetaData::toJSON() const
+{
+    nlohmann::json j;
+
+    j[ TaskResult::FieldMetaDataCreated   ] = Utils::Time::toString(ts_created);
+    j[ TaskResult::FieldMetaDataRefreshed ] = Utils::Time::toString(ts_refreshed);
+    j[ TaskResult::FieldMetaDataUser      ] = user;
+    j[ TaskResult::FieldMetaDataComments  ] = comments;
+
+    return j;
+}
+
+/**
+ */
+bool TaskResultMetaData::fromJSON(const nlohmann::json& j)
+{
+    if (!j.is_object() ||
+        !j.contains(TaskResult::FieldMetaDataCreated)   ||
+        !j.contains(TaskResult::FieldMetaDataRefreshed) ||
+        !j.contains(TaskResult::FieldMetaDataUser)      ||
+        !j.contains(TaskResult::FieldMetaDataComments))
+        return false;
+
+    std::string ts_created_str = j[ TaskResult::FieldMetaDataCreated ];
+    ts_created = Utils::Time::fromString(ts_created_str);
+
+    std::string ts_refreshed_str = j[ TaskResult::FieldMetaDataRefreshed ];
+    ts_refreshed = Utils::Time::fromString(ts_refreshed_str);
+
+    user     = j[ TaskResult::FieldMetaDataUser     ];
+    comments = j[ TaskResult::FieldMetaDataComments ];
+
+    return true;
+}
+
+/************************************************************************************************
+ * TaskResultHeader
+ ************************************************************************************************/
+
+/**
+ */
+nlohmann::json TaskResultHeader::toJSON() const
+{
+    nlohmann::json j;
+
+    j[ TaskResult::FieldMetaData             ] = metadata.toJSON();
+    j[ TaskResult::FieldHeaderUpdateState    ] = update_state;
+    j[ TaskResult::FieldHeaderUpdateContents ] = update_contents;
+
+    return j;
+}
+
+/**
+ */
+bool TaskResultHeader::fromJSON(const nlohmann::json& j)
+{
+    if (!j.is_object() ||
+        !j.contains(TaskResult::FieldMetaData)             ||
+        !j.contains(TaskResult::FieldHeaderUpdateState)    ||
+        !j.contains(TaskResult::FieldHeaderUpdateContents))
+        return false;
+
+    if (!metadata.fromJSON(j[ TaskResult::FieldMetaData ]))
+        return false;
+
+    update_state    = j[ TaskResult::FieldHeaderUpdateState    ];
+    update_contents = j[ TaskResult::FieldHeaderUpdateContents ].get<std::vector<std::pair<std::string, std::string>>>();
+
+    return true;
+}
+
+/************************************************************************************************
+ * TaskResult
+ ************************************************************************************************/
 
 /**
  */
@@ -100,6 +186,25 @@ void TaskResult::name(const std::string& name)
 
 /**
  */
+const TaskResultMetaData& TaskResult::metadata() const
+{
+    return metadata_;
+}
+
+/**
+ */
+TaskResultHeader TaskResult::header() const
+{
+    TaskResultHeader header;
+    header.metadata        = metadata_;
+    header.update_state    = update_state_;
+    header.update_contents = update_contents_;
+
+    return header;
+}
+
+/**
+ */
 const std::shared_ptr<ResultReport::Report>& TaskResult::report() const
 {
     assert (report_);
@@ -116,36 +221,52 @@ std::shared_ptr<ResultReport::Report>& TaskResult::report()
 
 /**
  */
-void TaskResult::setConfiguration(const nlohmann::json& config)
+void TaskResult::configure(const TaskResultHeader& header)
+{
+    //apply update state stored in header
+    if (header.update_state == UpdateState::ContentUpdateNeeded)
+    {
+        for (const auto& c : header.update_contents)
+            informUpdate(header.update_state, c, false);
+    }
+    else
+    {
+        informUpdate(header.update_state, ContentID(), false);
+    }
+}
+
+/**
+ */
+void TaskResult::setJSONConfiguration(const nlohmann::json& config)
 {
     config_ = config;
 }
 
 /**
  */
-bool TaskResult::hasConfiguration() const
+bool TaskResult::hasJSONConfiguration() const
 {
     return config_.is_null();
 }
 
 /**
  */
-const nlohmann::json& TaskResult::configuration() const
+const nlohmann::json& TaskResult::jsonConfiguration() const
 {
     return config_;
 }
 
 /**
  */
-void TaskResult::informUpdate(UpdateEvent evt, 
+void TaskResult::informUpdate(UpdateState state, 
                               const ContentID& cid,
                               bool inform_manager)
 {
     //"biggest" update wins
-    if (evt > update_evt_)
-        update_evt_ = evt;
+    if (state > update_state_)
+        update_state_ = state;
 
-    if (update_evt_ == UpdateEvent::Content)
+    if (update_state_ == UpdateState::ContentUpdateNeeded)
     {
         //add content info
         assert(!cid.first.empty());
@@ -161,21 +282,28 @@ void TaskResult::informUpdate(UpdateEvent evt,
 
     //inform task manager?
     if (inform_manager)
-        task_manager_.resultChanged(*this);
+        task_manager_.resultHeaderChanged(*this);
+}
+
+/**
+ */
+bool TaskResult::isLocked() const
+{
+    return update_state_ == UpdateState::Locked;
 }
 
 /**
  */
 bool TaskResult::updateNeeded() const
 {
-    return update_evt_ != UpdateEvent::NoUpdate;
+    return update_state_ != UpdateState::UpToDate;
 }
 
 /**
  */
-TaskResult::UpdateEvent TaskResult::neededUpdate() const
+TaskResult::UpdateState TaskResult::updateState() const
 {
-    return update_evt_;
+    return update_state_;
 }
 
 /**
@@ -186,11 +314,11 @@ Result TaskResult::canUpdate() const
     if (!config_.is_object())
         return Result::failed("No configuration available");
 
-    if (update_evt_ == UpdateEvent::NoUpdate)
+    if (update_state_ == UpdateState::UpToDate)
         return Result::succeeded();
 
     //derived custom check
-    return canUpdate_impl(update_evt_);
+    return canUpdate_impl(update_state_);
 }
 
 /**
@@ -209,7 +337,7 @@ Result TaskResult::update(bool restore_section,
     r = Result::succeeded();
     bool restore_needed = false;
 
-    if (update_evt_ == UpdateEvent::Content)
+    if (update_state_ == UpdateState::ContentUpdateNeeded)
     {
         loginf << "TaskResult: update: running content update";
 
@@ -219,12 +347,13 @@ Result TaskResult::update(bool restore_section,
         //update specific contents
         r = updateContents(update_contents_);
     }
-    else if (update_evt_ != UpdateEvent::NoUpdate)
+    else if (update_state_ != UpdateState::UpToDate)
     {
-        loginf << "TaskResult: update: running " << (update_evt_ == UpdateEvent::Partial ? "partial" : "full") << " update";
+        loginf << "TaskResult: update: running " 
+               << (update_state_ == UpdateState::PartialUpdateNeeded ? "partial" : "full") << " update";
 
         //partial and full update
-        r = update_impl(update_evt_);
+        r = update_impl(update_state_);
 
         // these bigger updates might trigger report regeneration
         restore_needed = true;
@@ -246,7 +375,7 @@ Result TaskResult::update(bool restore_section,
 
     //inform task manager?
     if (inform_manager)
-        task_manager_.resultChanged(*this);
+        task_manager_.resultHeaderChanged(*this);
 
     return Result::succeeded();
 }
@@ -318,7 +447,7 @@ Result TaskResult::updateContents_impl(const std::vector<ContentID>& contents)
  */
 void TaskResult::clearPendingUpdates()
 {
-    update_evt_ = UpdateEvent::NoUpdate;
+    update_state_ = UpdateState::UpToDate;
     update_contents_.clear();
 }
 
@@ -448,24 +577,19 @@ std::string TaskResult::customTooltip(const ResultReport::SectionContentTable* t
  */
 nlohmann::json TaskResult::toJSON() const
 {
-    nlohmann::json root = nlohmann::json::object();
+    nlohmann::json j = nlohmann::json::object();
 
-    root[ FieldID             ] = id_;
-    root[ FieldName           ] = name_;
-    root[ FieldType           ] = type();
-    root[ FieldCreated        ] = Utils::Time::toString(created_);
-    root[ FieldComments       ] = comments_;
-
-    root[ FieldUpdateEvent    ] = update_evt_;
-    root[ FieldUpdateContents ] = update_contents_;
-
-    root[ FieldReport         ] = report_->toJSON();
-    root[ FieldConfig         ] = config_;
+    j[ FieldType           ] = type();
+    j[ FieldID             ] = id_;
+    j[ FieldName           ] = name_;
+    j[ FieldMetaData       ] = metadata_.toJSON();
+    j[ FieldReport         ] = report_->toJSON();
+    j[ FieldConfig         ] = config_;
 
     //derived content
-    toJSON_impl(root);
+    toJSON_impl(j);
 
-    return root;
+    return j;
 }
 
 /**
@@ -475,13 +599,10 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     //loginf << j.dump(4);
 
     if (!j.is_object()                    || 
+        !j.contains(FieldType)            ||
         !j.contains(FieldID)              ||
         !j.contains(FieldName)            ||
-        !j.contains(FieldType)            ||
-        !j.contains(FieldCreated)         ||
-        !j.contains(FieldComments)        ||
-        !j.contains(FieldUpdateEvent)     ||
-        !j.contains(FieldUpdateContents)  ||
+        !j.contains(FieldMetaData)        ||
         !j.contains(FieldReport)          ||
         !j.contains(FieldConfig))
         return false;
@@ -494,15 +615,11 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
         return false;
     }
 
-    id_       = j[ FieldID       ];
-    name_     = j[ FieldName     ];
-    comments_ = j[ FieldComments ];
+    id_       = j[ FieldID   ];
+    name_     = j[ FieldName ];
 
-    update_evt_      = j[ FieldUpdateEvent    ];
-    update_contents_ = j[ FieldUpdateContents ].get<std::vector<std::pair<std::string, std::string>>>();
-
-    std::string ts = j[ FieldCreated ];
-    created_ = Utils::Time::fromString(ts);
+    if (!metadata_.fromJSON(j[ FieldMetaData ]))
+        return false;
 
     if (!report_->fromJSON(j[ FieldReport ]))
         return false;
@@ -513,7 +630,7 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     if (!fromJSON_impl(j))
         return false;
 
-    //finalize
+    //finalize after reading in data
     auto f_res = finalizeResult();
     if (!f_res.ok())
     {

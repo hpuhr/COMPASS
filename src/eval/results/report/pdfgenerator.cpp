@@ -136,7 +136,6 @@ void PDFGenerator::run ()
         assert (calculator_.hasResults());
         std::shared_ptr<Section> root_section = calculator_.resultsGenerator().resultsModel().rootItem()->rootSection();
 
-
         string status_str, elapsed_time_str, remaining_time_str;
 
         // create sections

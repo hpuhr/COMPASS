@@ -930,7 +930,33 @@ std::string SQLGenerator::getUpdateTableFromTableStatement(const std::string& ta
     logdbg << "SQLGenerator: getUpdateTableFromTableStatement: sql '" << ss.str() << "'";
 
     return ss.str();
-    
+}
+
+/**
+ */
+std::string SQLGenerator::getUpdateCellStatement(const std::string& table_name,
+                                                 const std::string& col_name,
+                                                 const nlohmann::json& col_value,
+                                                 const std::string& key_col_name,
+                                                 const nlohmann::json& key_col_value)
+{
+    auto jsonString = [ & ] (const nlohmann::json& j)
+    {
+        std::string jstr = j.dump();
+        bool value_quoted = j.is_string() || !j.is_primitive();
+
+        return value_quoted ? "'" + jstr + "'" : jstr;
+    };
+
+    std::string col_value_str     = col_value.is_string()     ? "'" + col_value.dump()     + "'" : col_value.dump();
+    std::string key_col_value_str = key_col_value.is_string() ? "'" + key_col_value.dump() + "'" : key_col_value.dump();
+
+    stringstream ss;
+    ss << "UPDATE " + table_name + " "
+       << "SET "   << col_name     << " = " << jsonString(col_value    ) << " "
+       << "WHERE " << key_col_name << " = " << jsonString(key_col_value) << ";";
+
+    return ss.str();
 }
 
 /**

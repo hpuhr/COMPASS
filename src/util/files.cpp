@@ -249,6 +249,36 @@ std::string normalizeFilename(const std::string& filename_without_ext, bool remo
     return fn_lower.toStdString();
 }
 
+QIcon getIcon(const std::string& name, const QColor& color)
+{
+    QString path = getIconFilepath(name).c_str();
+    if (!color.isValid())
+        return QIcon(path);
+
+    QImage img(path);
+    if (img.isNull())
+        return QIcon();
+
+    int w = img.width();
+    int h = img.height();
+
+    QImage img_out(w, h, QImage::Format_ARGB32);
+
+    for (int y = 0; y < h; ++y)
+    {
+        for (int x = 0; x < w; ++x)
+        {
+            auto c  = img.pixelColor(x, y);
+            float v = c.redF();
+
+            QColor col_new(v * color.red(), v * color.green(), v * color.blue(), c.alpha());
+            img_out.setPixelColor(x, y, col_new);
+        }
+    }
+    
+    return QIcon(QPixmap::fromImage(img_out));
+}
+
 QIcon IconProvider::getIcon(const std::string& name)
 {
     static std::map<std::string, QIcon> icon_cache_;

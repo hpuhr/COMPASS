@@ -479,7 +479,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     //store eval config
     nlohmann::json config;
     calculator_.generateJSON(config, Configurable::JSONExportType::General);
-    result->setConfiguration(config);
+    result->setJSONConfiguration(config);
 
     auto& gen_sec = report->getSection("Overview:General");
 

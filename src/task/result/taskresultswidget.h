@@ -47,7 +47,7 @@ public:
 
 protected:
     void updateResults(const std::string& selected_result = "");
-    void updateResult(const QString& name);
+    void resultHeaderChanged(const QString& name);
     void updateResultUI(const std::string& name);
 
     void removeCurrentResult();

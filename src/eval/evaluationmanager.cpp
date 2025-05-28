@@ -346,21 +346,28 @@ void EvaluationManager::targetInfoChangedSlot()
 {
     loginf << "EvaluationManager: targetInfoChangedSlot";
 
-    emit resultsNeedUpdate(task::UpdateEvent::Content);
+    emit resultsNeedUpdate(task::UpdateState::ContentUpdateNeeded);
 }
 
 void EvaluationManager::partialResultsUpdateNeededSlot()
 {
     loginf << "EvaluationManager: partialResultsUpdateNeededSlot";
 
-    emit resultsNeedUpdate(task::UpdateEvent::Partial);
+    emit resultsNeedUpdate(task::UpdateState::PartialUpdateNeeded);
 }
 
 void EvaluationManager::fullResultsUpdateNeededSlot()
 {
     loginf << "EvaluationManager: fullResultsUpdateNeededSlot";
 
-    emit resultsNeedUpdate(task::UpdateEvent::Complete);
+    emit resultsNeedUpdate(task::UpdateState::FullUpdateNeeded);
+}
+
+void EvaluationManager::lockResultsSlot()
+{
+    loginf << "EvaluationManager: lockResultsSlot";
+
+    emit resultsNeedUpdate(task::UpdateState::Locked);
 }
 
 void EvaluationManager::saveTimeConstraints()

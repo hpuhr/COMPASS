@@ -59,8 +59,8 @@ public:
     static const std::string FieldTargetInfo;
 
 protected:
-    Result update_impl(UpdateEvent evt) override final;
-    Result canUpdate_impl(UpdateEvent evt) const override final;
+    Result update_impl(UpdateState state) override final;
+    Result canUpdate_impl(UpdateState state) const override final;
 
     Result finalizeResult_impl() override final;
 

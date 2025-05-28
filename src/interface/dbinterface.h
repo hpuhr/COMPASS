@@ -165,6 +165,7 @@ public:
 
     bool existsTable(const std::string& table_name) const;
     void createTable(const DBContent& object);
+    void removeTable(const std::string& table_name);
 
     bool areColumnsNull (const std::string& table_name, const std::vector<std::string> columns);
 
@@ -202,6 +203,7 @@ public:
     Result deleteResult(const TaskResult& result, 
                         bool cleanup_db_if_needed,
                         bool* deleted = nullptr);
+    Result updateResultHeader(const TaskResult& result);
     ResultT<std::vector<std::shared_ptr<TaskResult>>> loadResults();
     ResultT<std::shared_ptr<ResultReport::SectionContent>> loadContent(ResultReport::Section* section, unsigned int content_id);
 

@@ -25,11 +25,12 @@ namespace task
         Evaluation
     };
 
-    enum UpdateEvent
+    enum UpdateState
     {
-        NoUpdate = 0, // no update needed
-        Content,      // specific contents need update (e.g. tables)
-        Partial,      // partial update needed
-        Complete      // full update needed
+        UpToDate = 0,         // no update needed
+        ContentUpdateNeeded,  // specific contents need update (e.g. tables)
+        PartialUpdateNeeded,  // partial update needed
+        FullUpdateNeeded,     // full update needed
+        Locked                // critical full update needed, result is locked
     };
 }

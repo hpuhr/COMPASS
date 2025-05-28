@@ -122,7 +122,7 @@ Result EvaluationTaskResult::finalizeResult_impl()
 
 /**
  */
-Result EvaluationTaskResult::update_impl(UpdateEvent evt)
+Result EvaluationTaskResult::update_impl(UpdateState state)
 {
     //@TODO: !support partial update!
     calculator_->evaluate(true, true);
@@ -132,7 +132,7 @@ Result EvaluationTaskResult::update_impl(UpdateEvent evt)
 
 /**
  */
-Result EvaluationTaskResult::canUpdate_impl(UpdateEvent evt) const
+Result EvaluationTaskResult::canUpdate_impl(UpdateState state) const
 {
     //true for all kinds of updates
     if (!calculator_)
@@ -603,7 +603,7 @@ void EvaluationTaskResult::setInterestFactorEnabled(const Evaluation::Requiremen
 
     interest_factor_enabled_.at(id.req_name) = ok;
 
-    informUpdate(UpdateEvent::Content, std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName));
+    informUpdate(UpdateState::ContentUpdateNeeded, std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName));
     update(true);
 }
 
@@ -615,7 +615,7 @@ void EvaluationTaskResult::setInterestFactorEnabled(const std::string& req_name,
 
     interest_factor_enabled_.at(req_name) = ok;
 
-    informUpdate(UpdateEvent::Content, std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName));
+    informUpdate(UpdateState::ContentUpdateNeeded, std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName));
     update(true);
 }
 
@@ -626,7 +626,7 @@ void EvaluationTaskResult::setInterestFactorsEnabled(bool ok)
     for (auto& it : interest_factor_enabled_)
         it.second = ok;
 
-    informUpdate(UpdateEvent::Content, std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName));
+    informUpdate(UpdateState::ContentUpdateNeeded, std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName));
     update(true);
 }
 
@@ -784,20 +784,14 @@ void EvaluationTaskResult::jumpToRequirement(const Evaluation::RequirementSumRes
 void EvaluationTaskResult::informUpdateEvalResult(int update_type)
 {
     TaskResult::ContentID content_id;
-    if (update_type == task::Content)
+    if (update_type == task::ContentUpdateNeeded)
     {
         content_id = TaskResult::ContentID(EvaluationData::SectionID, EvaluationData::TargetsTableName);
         updateTargets();
     }
 
     //inform update
-    informUpdate((task::UpdateEvent)update_type, content_id);
-
-    if (update_type == task::Content)
-    {
-        //in case of content update run update immediately
-        //auto res = update(true);
-    }
+    informUpdate((task::UpdateState)update_type, content_id);
 }
 
 /**

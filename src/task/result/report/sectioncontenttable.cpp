@@ -1161,8 +1161,8 @@ Result SectionContentTable::toJSONDocument_impl(nlohmann::json& j,
     if (!r.ok())
         return r;
 
-    bool write_to_file = (ReportExporter::TableMaxRows    >= 0 && numRows()    > (signed)ReportExporter::TableMaxRows   ) ||
-                         (ReportExporter::TableMaxColumns >= 0 && numColumns() > (signed)ReportExporter::TableMaxColumns);
+    bool write_to_file = (ReportExporter::TableMaxRows    >= 0 && numRows()    > (size_t)ReportExporter::TableMaxRows   ) ||
+                         (ReportExporter::TableMaxColumns >= 0 && numColumns() > (size_t)ReportExporter::TableMaxColumns);
 
     if (resource_dir && write_to_file)
     {

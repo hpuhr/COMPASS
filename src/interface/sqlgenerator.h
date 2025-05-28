@@ -26,6 +26,8 @@
 #include <memory>
 #include <string>
 
+#include "json.hpp"
+
 class Buffer;
 class DBCommand;
 class DBCommandList;
@@ -52,6 +54,11 @@ public:
                                                  const std::string& table_name_dst,
                                                  const std::vector<std::string>& col_names,
                                                  const std::string& key_col);
+    std::string getUpdateCellStatement(const std::string& table_name,
+                                       const std::string& col_name,
+                                       const nlohmann::json& col_value,
+                                       const std::string& key_col_name,
+                                       const nlohmann::json& key_col_value);
 
     std::shared_ptr<DBCommand> getSelectCommand(const DBContent& object, 
                                                 dbContent::VariableSet read_list, 

@@ -25,6 +25,8 @@
 
 #include "global.h"
 
+class QColor;
+
 static const std::string SYSTEM_INSTALL_PATH = CMAKE_INSTALL_PREFIX + std::string("/compass/");
 
 static const std::string HOME_PATH = QDir::homePath().toStdString();
@@ -60,6 +62,7 @@ QStringList getSubdirectories(const std::string& path);
 
 std::string getIconFilepath(const std::string& filename);
 std::string getImageFilepath(const std::string& filename);
+QIcon getIcon(const std::string& name, const QColor& color = QColor());
 
 void deleteFile(const std::string& filename);
 void deleteFolder(const std::string& path);
@@ -79,4 +82,3 @@ public:
 
 }  // namespace Files
 }  // namespace Utils
-

@@ -81,6 +81,9 @@ namespace ResultReport
         std::string author;
         std::string abstract;
 
+        unsigned int latex_table_max_columns = 500;
+        unsigned int latex_table_max_width   = 24;
+
         bool open_created_file = true;
     };
 }

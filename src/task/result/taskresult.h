@@ -45,6 +45,40 @@ class QMenu;
 
 /**
  */
+struct TaskResultMetaData
+{
+    TaskResultMetaData() = default;
+    virtual ~TaskResultMetaData() = default;
+
+    nlohmann::json toJSON() const;
+    bool fromJSON(const nlohmann::json& j);
+
+    boost::posix_time::ptime ts_created;
+    boost::posix_time::ptime ts_refreshed;
+    std::string              user;
+    std::string              comments;
+};
+
+/**
+*/
+struct TaskResultHeader
+{
+    typedef task::UpdateState                   UpdateState;
+    typedef std::pair<std::string, std::string> ContentID;
+
+    TaskResultHeader() = default;
+    virtual ~TaskResultHeader() = default;
+
+    nlohmann::json toJSON() const;
+    bool fromJSON(const nlohmann::json& j);
+
+    TaskResultMetaData       metadata;
+    UpdateState              update_state = UpdateState::UpToDate;
+    std::vector<ContentID>   update_contents;
+};
+
+/**
+ */
 class TaskResult
 {
     friend class TaskManager; // to change id if required
@@ -52,7 +86,7 @@ class TaskResult
 public:
     typedef std::shared_ptr<ResultReport::SectionContent> ContentPtr;
     typedef std::pair<std::string, std::string>           ContentID;
-    typedef task::UpdateEvent                             UpdateEvent;
+    typedef task::UpdateState                             UpdateState;
 
     TaskResult(unsigned int id, 
                TaskManager& task_man);
@@ -63,19 +97,25 @@ public:
     std::string name() const;
     void name(const std::string& name);
 
+    const TaskResultMetaData& metadata() const;
+    TaskResultHeader header() const;
+
     const TaskManager& taskManager() const { return task_manager_; }
     TaskManager& taskManager() { return task_manager_; }
 
     const std::shared_ptr<ResultReport::Report>& report() const;
     std::shared_ptr<ResultReport::Report>& report();
 
-    void setConfiguration(const nlohmann::json& config);
-    bool hasConfiguration() const;
-    const nlohmann::json& configuration() const;
+    void configure(const TaskResultHeader& header);
 
+    void setJSONConfiguration(const nlohmann::json& config);
+    bool hasJSONConfiguration() const;
+    const nlohmann::json& jsonConfiguration() const;
+
+    bool isLocked() const;
     bool updateNeeded() const;
-    UpdateEvent neededUpdate() const;
-    void informUpdate(UpdateEvent evt, 
+    UpdateState updateState() const;
+    void informUpdate(UpdateState state, 
                       const ContentID& cid = ContentID(),
                       bool inform_manager = true);
     Result canUpdate() const;
@@ -120,6 +160,7 @@ public:
     static const std::string  DBTableName;
     static const Property     DBColumnID;
     static const Property     DBColumnName;
+    static const Property     DBColumnJSONHeader;
     static const Property     DBColumnJSONContent;
     static const Property     DBColumnResultType;
     static const PropertyList DBPropertyList;
@@ -127,13 +168,16 @@ public:
     static const std::string FieldID;
     static const std::string FieldName;
     static const std::string FieldType;
-    static const std::string FieldCreated;
-    static const std::string FieldComments;
+    static const std::string FieldMetaDataCreated;
+    static const std::string FieldMetaDataRefreshed;
+    static const std::string FieldMetaDataUser;
+    static const std::string FieldMetaDataComments;
+    static const std::string FieldMetaData;
+    static const std::string FieldHeaderUpdateState;
+    static const std::string FieldHeaderUpdateContents;
     static const std::string FieldReport;
     static const std::string FieldConfig;
-    static const std::string FieldUpdateEvent;
-    static const std::string FieldUpdateContents;
-
+    
 protected:
     void id(unsigned int id);
     void clearPendingUpdates();
@@ -144,8 +188,8 @@ protected:
     virtual void clear_impl() {}
 
     //reimplement for recomputation mechanics
-    virtual Result update_impl(UpdateEvent evt) { return false; }
-    virtual Result canUpdate_impl(UpdateEvent evt) const { return false; }
+    virtual Result update_impl(UpdateState state) { return false; }
+    virtual Result canUpdate_impl(UpdateState state) const { return false; }
     virtual Result updateContents_impl(const std::vector<ContentID>& contents);
 
     //reimplement for custom initialization/finalization of a result
@@ -183,16 +227,15 @@ protected:
                                            unsigned int col) const { return ""; }
     TaskManager& task_manager_;
 
-    unsigned int             id_{0};
-    std::string              name_;
-    boost::posix_time::ptime created_;
-    std::string              comments_;
-
-    bool finalized_ = false;
-
-    UpdateEvent            update_evt_ = UpdateEvent::NoUpdate;
-    std::vector<ContentID> update_contents_;
-
+    unsigned int                          id_{0};
+    std::string                           name_;
+    TaskResultMetaData                    metadata_;
     std::shared_ptr<ResultReport::Report> report_;
     nlohmann::json                        config_;
+
+    //serialized in the task result's header json
+    UpdateState            update_state_ = UpdateState::UpToDate;
+    std::vector<ContentID> update_contents_;
+
+    bool finalized_ = false;
 };

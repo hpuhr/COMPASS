@@ -435,11 +435,13 @@ void TaskManager::endTaskResultWriting(bool store_result)
 
 /**
  */
-void TaskManager::resultChanged(const TaskResult& result)
+void TaskManager::resultHeaderChanged(const TaskResult& result)
 {
-    //@TODO: update result's info json in db
+    //update result header upon change
+    auto res = COMPASS::instance().dbInterface().updateResultHeader(result);
+    assert(res.ok());
 
-    emit taskResultChangedSignal(QString::fromStdString(result.name()));
+    emit taskResultHeaderChangedSignal(QString::fromStdString(result.name()));
 }
 
 /**
