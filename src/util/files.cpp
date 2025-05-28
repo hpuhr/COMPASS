@@ -259,24 +259,39 @@ QIcon getIcon(const std::string& name, const QColor& color)
     if (img.isNull())
         return QIcon();
 
+    img.convertTo(QImage::Format_ARGB32);
+
     int w = img.width();
     int h = img.height();
 
-    QImage img_out(w, h, QImage::Format_ARGB32);
+    const int r = color.red();
+    const int g = color.green();
+    const int b = color.blue();
 
     for (int y = 0; y < h; ++y)
     {
+        auto line = img.scanLine(y);
+        QRgb* pixel = reinterpret_cast<QRgb*>(line);
+        
         for (int x = 0; x < w; ++x)
         {
-            auto c  = img.pixelColor(x, y);
-            float v = c.redF();
+            QRgb& px = pixel[ x ];
 
-            QColor col_new(v * color.red(), v * color.green(), v * color.blue(), c.alpha());
-            img_out.setPixelColor(x, y, col_new);
+            int alpha = qAlpha(px);
+            if (alpha == 0) 
+                continue;
+
+            int gray = 255 - qRed(px);
+
+            int newR = (gray * r) / 255;
+            int newG = (gray * g) / 255;
+            int newB = (gray * b) / 255;
+
+            px = qRgba(newR, newG, newB, alpha);
         }
     }
     
-    return QIcon(QPixmap::fromImage(img_out));
+    return QIcon(QPixmap::fromImage(img));
 }
 
 QIcon IconProvider::getIcon(const std::string& name)

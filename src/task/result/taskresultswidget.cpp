@@ -7,7 +7,7 @@
 #include "taskmanager.h"
 #include "asynctask.h"
 #include "compass.h"
-#include "reportdefs.h";
+#include "reportdefs.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -228,10 +228,33 @@ void TaskResultsWidget::updateResultUI(const std::string& name)
     assert(result);
 
     bool update_needed = result->updateNeeded();
+    bool locked        = result->isLocked();
+
+    std::string icon_file;
+    QColor      icon_color;
+    QString     icon_tooltip;
+    
+    if (locked)
+    {
+        icon_file    = "refresh.png";
+        icon_color   = ResultReport::Colors::TextRed;
+        icon_tooltip = "Result in read-only mode.\nRefresh to unlock.";
+    }
+    else if(update_needed)
+    {
+        icon_file    = "refresh.png";
+        icon_color   = ResultReport::Colors::TextOrange;
+        icon_tooltip = "Refresh needed";
+    }
+    else
+    {
+        icon_file    = "refresh.png";
+        icon_tooltip = "Up-to-date";
+    }
 
     refresh_result_button_->setEnabled(update_needed);
-    refresh_result_button_->setIcon(
-        Utils::Files::getIcon("refresh.png", update_needed ? ResultReport::Colors::TextOrange : QColor()));
+    refresh_result_button_->setIcon(Utils::Files::getIcon(icon_file, icon_color));
+    refresh_result_button_->setToolTip(icon_tooltip);
 }
 
 /**
