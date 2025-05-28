@@ -155,7 +155,7 @@ public:
 
     void updateUseFromTarget();
 
-    void setInterestFactor(double factor);
+    void setInterestFactor(double factor, bool reset_in_target = false);
 
     bool hasViewableData (const ResultReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;

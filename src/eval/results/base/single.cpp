@@ -104,7 +104,7 @@ const EvaluationTargetData* Single::target() const
 
 /**
 */
-void Single::setInterestFactor(double factor)
+void Single::setInterestFactor(double factor, bool reset_in_target)
 {
     interest_factor_ = factor;
 
@@ -113,7 +113,7 @@ void Single::setInterestFactor(double factor)
     Evaluation::RequirementSumResultID id;
     id.fromResult(*this);
 
-    target_->addInterestFactor(id, factor);
+    target_->addInterestFactor(id, factor, reset_in_target);
 }
 
 /**

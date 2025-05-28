@@ -135,8 +135,9 @@ void EvaluationTargetData::finalize () const
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (dbcont_man.hasTargetsInfo() && dbcont_man.existsTarget(utn_)
-            && dbcont_man.target(utn_).hasAdsbMOPSVersions())
+    if (dbcont_man.hasTargetsInfo()   && 
+        dbcont_man.existsTarget(utn_) && 
+        dbcont_man.target(utn_).hasAdsbMOPSVersions())
     {
         has_adsb_info_ = true;
         has_mops_versions_ = true;
@@ -196,6 +197,14 @@ void EvaluationTargetData::finalize () const
 
     calculateTestDataMappings();
     computeSectorInsideInfo();
+}
+
+/**
+ */
+void EvaluationTargetData::updateToChanges() const
+{
+    clearInterestFactors();
+    updateUseInfo();
 }
 
 /**
@@ -379,11 +388,13 @@ bool EvaluationTargetData::isModeACOnly () const
     return (mode_a_codes_.size() || has_mode_c_) && !isModeS();
 }
 
+/**
+ */
 void EvaluationTargetData::updateUseInfo() const
 {
     const auto& target = dbcont_man_.target(utn_);
 
-    use_in_eval_ = target.useInEval();
+    use_in_eval_           = target.useInEval();
     excluded_time_windows_ = target.evalExcludedTimeWindows();
     excluded_requirements_ = target.evalExcludedRequirements();
 }
@@ -1010,10 +1021,17 @@ void EvaluationTargetData::clearInterestFactors() const
 
 /**
  */
-void EvaluationTargetData::addInterestFactor (const Evaluation::RequirementSumResultID& id, double factor) const
+void EvaluationTargetData::addInterestFactor (const Evaluation::RequirementSumResultID& id, 
+                                              double factor, 
+                                              bool reset) const
 {
     logdbg << "EvaluationTargetData: addInterestFactor: utn " << utn_
-           << " req_section_id " << EvalSectionID::requirementResultSumID(id) << " factor " << factor;
+           << " req_section_id " << EvalSectionID::requirementResultSumID(id)
+           << " factor " << factor
+           << " reset " << reset;
+
+    if (reset)
+        interest_factors_[ id ] = 0;
 
     interest_factors_[ id ] += factor;
 }

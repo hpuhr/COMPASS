@@ -459,7 +459,7 @@ void EvaluationCalculator::evaluateData()
     emit resultsChanged();
     
     // eval
-    results_gen_.evaluate(data_, currentStandard(), eval_utns_, eval_requirements_, update_report_);
+    results_gen_.evaluate(currentStandard(), eval_utns_, eval_requirements_, update_report_);
 
     evaluated_ = true;
 
@@ -765,6 +765,13 @@ void EvaluationCalculator::selectDataSourceTst(const std::string& name,
 
     if (update_settings)
         settings_.active_sources_tst_ = data_sources_tst_;
+}
+
+/**
+ */
+bool EvaluationCalculator::hasConstraints() const
+{
+    return !eval_utns_.empty() || !eval_requirements_.empty();
 }
 
 /**

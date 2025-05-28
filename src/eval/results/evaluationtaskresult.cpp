@@ -124,9 +124,29 @@ Result EvaluationTaskResult::finalizeResult_impl()
  */
 Result EvaluationTaskResult::update_impl(UpdateState state)
 {
-    //@TODO: !support partial update!
-    calculator_->evaluate(true, true);
+    if (state == UpdateState::FullUpdateNeeded ||
+        state == UpdateState::Locked)
+    {
+        loginf << "EvaluationTaskResult: update_impl: Running full update";
+        calculator_->evaluate(true, true);
+    }
+    else if (state == UpdateState::PartialUpdateNeeded)
+    {
+        bool needs_recompute = !calculator_->evaluated() || 
+                                calculator_->hasConstraints();
 
+        if (needs_recompute)
+        {
+            loginf << "EvaluationTaskResult: update_impl: Running initial full update";
+            calculator_->evaluate(true, true);
+        }
+        else
+        {
+            loginf << "EvaluationTaskResult: update_impl: Running partial update";
+            calculator_->updateResultsToChanges();
+        }
+    }
+    
     return Result::succeeded();
 }
 

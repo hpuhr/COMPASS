@@ -90,6 +90,7 @@ public:
                          const nlohmann::json& config);
     virtual ~EvaluationCalculator();
 
+    bool hasConstraints() const;
     bool dataLoaded() const;
     bool evaluated() const;
     Result canEvaluate() const;

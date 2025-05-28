@@ -82,13 +82,13 @@ EvaluationResultsGenerator::~EvaluationResultsGenerator()
 
 /**
  */
-void EvaluationResultsGenerator::evaluate(EvaluationData& data, 
-                                          EvaluationStandard& standard,
+void EvaluationResultsGenerator::evaluate(EvaluationStandard& standard,
                                           const std::vector<unsigned int>& utns,
                                           const std::vector<Evaluation::RequirementResultID>& requirements,
                                           bool update_report)
 {
     const auto& eval_settings = calculator_.settings();
+    auto&       data          = calculator_.data();
 
     loginf << "EvaluationResultsGenerator: evaluate:"
            << " skip_no_data_details " << eval_settings.report_skip_no_data_details_
@@ -583,6 +583,9 @@ void EvaluationResultsGenerator::updateToChanges(bool reset_viewable,
                                                  bool update_report)
 {
     loginf << "EvaluationResultsGenerator: updateToChanges: reset_viewable " << reset_viewable;
+
+    //update data to changes (target usage, reset interest factors etc.)
+    calculator_.data().updateToChanges();
 
     // first check all single results if should be used
     for (auto& result_it : results_vec_)

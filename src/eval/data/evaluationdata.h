@@ -70,6 +70,8 @@ public:
     void addTestData (const std::string& dbcontent_name, unsigned int line_id);
     void finalize ();
 
+    void updateToChanges();
+
     bool hasTargetData (unsigned int utn);
     const EvaluationTargetData& targetData(unsigned int utn);
     unsigned int size() { return target_data_.size(); }

@@ -314,6 +314,14 @@ void EvaluationData::finalize ()
 
 /**
  */
+void EvaluationData::updateToChanges()
+{
+    for (auto& target : target_data_)
+        target.updateToChanges();
+}
+
+/**
+ */
 bool EvaluationData::hasTargetData (unsigned int utn)
 {
     return target_data_.get<target_tag>().find(utn) != target_data_.get<target_tag>().end();

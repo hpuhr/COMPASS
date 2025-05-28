@@ -68,6 +68,7 @@ public:
     bool hasTstData () const;
 
     void finalize () const;
+    void updateToChanges() const;
 
     const unsigned int utn_{0};
 
@@ -107,7 +108,6 @@ public:
     bool isTimeStampNotExcluded(const boost::posix_time::ptime& ts) const;
 
     const std::set<std::string>& excludedRequirements() const;
-
 
     const dbContent::TargetReport::Chain& refChain() const;
     const dbContent::TargetReport::Chain& tstChain() const;
@@ -184,7 +184,9 @@ public:
 
     // targets of interest
     void clearInterestFactors() const;
-    void addInterestFactor(const Evaluation::RequirementSumResultID& id, double factor) const;
+    void addInterestFactor(const Evaluation::RequirementSumResultID& id, 
+                           double factor,
+                           bool reset) const;
     const InterestMap& interestFactors() const;
 
     EvaluationTarget toTarget() const;

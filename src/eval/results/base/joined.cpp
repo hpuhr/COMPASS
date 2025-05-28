@@ -492,7 +492,7 @@ void Joined::updateToChanges(bool reset_viewable)
         auto& single = results_[ i ];
 
         //reset interest
-        single->setInterestFactor(0);
+        single->setInterestFactor(0, true);
 
         if (resultUsed(single))
             used.push_back(i);

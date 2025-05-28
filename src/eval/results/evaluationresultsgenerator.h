@@ -47,8 +47,7 @@ public:
     EvaluationResultsGenerator(EvaluationCalculator& calculator);
     virtual ~EvaluationResultsGenerator();
 
-    void evaluate(EvaluationData& data, 
-                  EvaluationStandard& standard,
+    void evaluate(EvaluationStandard& standard,
                   const std::vector<unsigned int>& utns = std::vector<unsigned int>(),
                   const std::vector<Evaluation::RequirementResultID>& requirements = std::vector<Evaluation::RequirementResultID>(),
                   bool update_report = true);
