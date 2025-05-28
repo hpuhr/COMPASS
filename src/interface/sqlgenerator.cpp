@@ -130,7 +130,7 @@ std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
     unsigned int cnt = 0;
     for (const auto& cinfo : column_infos)
     {
-        ss << cinfo.name();
+        ss << "\"" << cinfo.name() << "\"";
 
         //should always be true (as the column info was most likely feed with a property data type)
         assert(cinfo.hasDBType());
