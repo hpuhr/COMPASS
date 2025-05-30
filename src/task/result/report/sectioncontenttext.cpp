@@ -17,9 +17,9 @@
 
 #include "task/result/report/sectioncontenttext.h"
 #include "task/result/report/reportexporter.h"
+#include "task/result/taskresult.h"
 
 #include "taskmanager.h"
-//#include "latexvisitor.h"
 #include "logger.h"
 
 #include <QLabel>
@@ -64,26 +64,25 @@ std::string SectionContentText::resourceExtension() const
 
 /**
  */
-void SectionContentText::addToLayout (QVBoxLayout* layout)
+void SectionContentText::addContentUI(QVBoxLayout* layout, 
+                                      bool force_ui_reset)
 {
     assert (layout);
 
-    for (auto& text : texts_)
+    if (isLocked())
     {
-        QLabel* label = new QLabel((text+"\n\n").c_str());
-        label->setWordWrap(true);
-
-        layout->addWidget(label);
+        layout->addWidget(lockStatePlaceholderWidget());
     }
-}
+    else
+    {
+        for (auto& text : texts_)
+        {
+            QLabel* label = new QLabel((text+"\n\n").c_str());
+            label->setWordWrap(true);
 
-/**
- */
-void SectionContentText::accept(LatexVisitor& v)
-{
-    loginf << "SectionContentText: accept";
-    //@TODO
-    //v.visit(this);
+            layout->addWidget(label);
+        }
+    }
 }
 
 /**

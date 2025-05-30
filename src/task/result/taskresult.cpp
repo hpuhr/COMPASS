@@ -263,8 +263,12 @@ void TaskResult::informUpdate(UpdateState state,
                               bool inform_manager)
 {
     //"biggest" update wins
+    bool state_changed = false;
     if (state > update_state_)
+    {
         update_state_ = state;
+        state_changed = true;
+    }
 
     if (update_state_ == UpdateState::ContentUpdateNeeded)
     {
@@ -281,8 +285,16 @@ void TaskResult::informUpdate(UpdateState state,
     }
 
     //inform task manager?
-    if (inform_manager)
+    if (state_changed && inform_manager)
+    {
+        if (update_state_ == UpdateState::Locked)
+        {
+            //result is now locked => update contents of report accordingly
+            report_->updateContents();
+        }
+
         task_manager_.resultHeaderChanged(*this);
+    }
 }
 
 /**
@@ -491,6 +503,9 @@ bool TaskResult::loadOnDemandContent(ResultReport::SectionContent* content) cons
     if (!content)
         return false;
 
+    if (content->isLocked())
+        return false;
+
     if (content->contentType() == ResultReport::SectionContent::ContentType::Figure)
     {
         auto c = dynamic_cast<ResultReport::SectionContentFigure*>(content);
@@ -516,6 +531,10 @@ bool TaskResult::loadOnDemandViewable(const ResultReport::SectionContent& conten
                                       const QVariant& index,
                                       unsigned int row) const
 {
+    //on demand viewables cannot be loaded if the result is locked
+    if (isLocked())
+        return false;
+
     if (!loadOnDemandViewable_impl(content, viewable, index, row))
         return false;
     
@@ -530,6 +549,9 @@ bool TaskResult::customContextMenu(QMenu& menu,
 {
     assert (table);
 
+    if (table->isLocked())
+        return false;
+
     bool ok = customContextMenu_impl(menu, table, row);
 
     return ok && menu.actions().size() > 0;
@@ -537,18 +559,25 @@ bool TaskResult::customContextMenu(QMenu& menu,
 
 /**
  */
-bool TaskResult::customContextMenu(QMenu& menu,
-                                   ResultReport::SectionContent* content)
+bool TaskResult::customMenu(QMenu& menu,
+                            ResultReport::SectionContent* content)
 {
     assert (content);
 
-    return customContextMenu_impl(menu, content);
+    if (content->isLocked())
+        return false;
+
+    return customMenu_impl(menu, content);
 }
 
 /**
  */
 void TaskResult::postprocessTable(ResultReport::SectionContentTable* table)
 {
+    //no need to postprocess locked tables
+    if (table->isLocked())
+        return;
+
     assert (table);
     postprocessTable_impl(table);
 }
@@ -560,6 +589,10 @@ bool TaskResult::hasCustomTooltip(const ResultReport::SectionContentTable* table
                                   unsigned int col) const
 {
     assert (table);
+
+    if (table->isLocked())
+        return false;
+
     return hasCustomTooltip_impl(table, row, col);
 }
 
@@ -570,6 +603,7 @@ std::string TaskResult::customTooltip(const ResultReport::SectionContentTable* t
                                       unsigned int col) const
 {
     assert (table);
+    assert (!table->isLocked());
     return customTooltip_impl(table, row, col);
 }
 
@@ -659,6 +693,10 @@ ResultT<nlohmann::json> TaskResult::exportResult(const std::string& fn,
  */
 std::vector<std::pair<QImage, std::string>> TaskResult::renderFigure(const ResultReport::SectionContentFigure& figure) const
 {
+    //do net render locked figures
+    if (figure.isLocked())
+        return std::vector<std::pair<QImage, std::string>>();
+
     std::vector<std::pair<QImage, std::string>> renderings;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();

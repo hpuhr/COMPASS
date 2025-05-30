@@ -43,8 +43,8 @@ public:
 
     virtual std::string resourceExtension() const override;
 
-    virtual void addToLayout (QVBoxLayout* layout) override;
-    virtual void accept(LatexVisitor& v) override;
+    virtual void addContentUI(QVBoxLayout* layout,
+                              bool force_ui_reset) override;
 
     const std::vector<std::string>& texts() const;
 

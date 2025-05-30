@@ -22,9 +22,7 @@
 #include "task/result/report/reportexporter.h"
 #include "task/result/taskresult.h"
 
-
 #include "taskmanager.h"
-//#include "latexvisitor.h"
 #include "viewpointgenerator.h"
 
 #include "logger.h"
@@ -95,41 +93,41 @@ std::string SectionContentFigure::resourceExtension() const
 
 /**
  */
-void SectionContentFigure::addToLayout(QVBoxLayout* layout)
+void SectionContentFigure::addContentUI(QVBoxLayout* layout, 
+                                        bool force_ui_reset)
 {
     assert (layout);
 
-    QHBoxLayout* fig_layout = new QHBoxLayout();
+    if (isLocked())
+    {
+        layout->addWidget(lockStatePlaceholderWidget());
+    }
+    else
+    {
+        QHBoxLayout* fig_layout = new QHBoxLayout();
 
-    fig_layout->addWidget(new QLabel(("Figure: " + name()).c_str()));
-    fig_layout->addStretch();
+        fig_layout->addWidget(new QLabel(("Figure: " + name()).c_str()));
+        fig_layout->addStretch();
 
-    QPushButton* view_button = new QPushButton("View");
-    QObject::connect (view_button, &QPushButton::clicked, [ this ] () { this->view(); });
-    fig_layout->addWidget(view_button);
+        QPushButton* view_button = new QPushButton("View");
+        QObject::connect (view_button, &QPushButton::clicked, [ this ] () { this->view(); });
+        fig_layout->addWidget(view_button);
 
-    layout->addLayout(fig_layout);
-}
-
-/**
- */
-void SectionContentFigure::accept(LatexVisitor& v)
-{
-    loginf << "SectionContentFigure: accept";
-
-    //do not add content figures to latex
-    if (fig_type_ == FigureType::Hidden)
-        return;
-
-    //@TODO
-    //v.visit(this);
+        layout->addLayout(fig_layout);
+    }
 }
 
 /**
  */
 void SectionContentFigure::view() const
 {
-    loginf << "SectionContentFigure: view: viewing figure '" << name();
+    loginf << "SectionContentFigure: view: viewing figure '" << name() << "'";
+
+    if (isLocked())
+    {
+        loginf << "SectionContentFigure: view: on-demand figure is locked";
+        return;
+    }
 
     auto content = viewableContent();
     if (!content || content->empty())
@@ -238,9 +236,11 @@ bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
  */
 ResultT<std::vector<SectionContentFigure::ImageResource>> SectionContentFigure::obtainImages(const std::string* resource_dir) const
 {
-    auto renderings = taskResult()->renderFigure(*this);
+    assert(!isLocked());
 
     std::vector<SectionContentFigure::ImageResource> resources;
+
+    auto renderings = taskResult()->renderFigure(*this);
 
     for (const auto& r : renderings)
     {

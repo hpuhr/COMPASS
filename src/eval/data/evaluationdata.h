@@ -124,14 +124,11 @@ public:
     static const std::string ContentPropertyTargets;
 
 protected:
-    nlohmann::json rawCellData(const EvaluationTarget& target, 
-                               int column,
-                               const InterestEnabledFunc & interest_enabled_func) const;
+    std::pair<nlohmann::json, unsigned int> rawCellData(const EvaluationTarget& target, 
+                                                        int column,
+                                                        const InterestEnabledFunc & interest_enabled_func) const;
     unsigned int rowStyle(const EvaluationTarget& target) const;
     unsigned int columnStyle(int column) const;
-    unsigned int cellStyle(const EvaluationTarget& target, 
-                           int column,
-                           const nlohmann::json& data) const;
 
     EvaluationCalculator& calculator_;
     DBContentManager&     dbcont_man_;

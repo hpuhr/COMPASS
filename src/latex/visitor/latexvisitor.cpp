@@ -186,8 +186,8 @@ void LatexVisitor::visit(const ResultReport::Section* e)
     LatexSection& section = report_.getSection(current_section_name_);
     section.label("sec:"+e->compoundResultsHeading());
 
-    for (const auto& cont_it : e->sectionContent(false))
-        cont_it->accept(*this);
+    //for (const auto& cont_it : e->sectionContent(false))
+    //    cont_it->accept(*this);
 }
 
 /**

@@ -412,7 +412,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
         
         loginf << "EvaluationTaskResult: customContextMenu_impl: Context menu requested for utn " << utn;
 
-        if (calculator_)
+        if (calculator_ && !isLocked())
         {
             auto action_show_utn = menu.addAction("Show Full UTN");
             QObject::connect (action_show_utn, &QAction::triggered, [ = ] () { this->showFullUTN(utn); });
@@ -436,7 +436,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
 
         loginf << "EvaluationTaskResult: customContextMenu_impl: Context menu requested for utn " << utn;
 
-        if (calculator_)
+        if (calculator_ && !isLocked())
         {
             auto action_show_utn = menu.addAction("Show Full UTN");
             QObject::connect (action_show_utn, &QAction::triggered, [ = ] () { this->showFullUTN(utn); });
@@ -455,8 +455,8 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
 
 /**
  */
-bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu, 
-                                                  ResultReport::SectionContent* content)
+bool EvaluationTaskResult::customMenu_impl(QMenu& menu, 
+                                           ResultReport::SectionContent* content)
 {
     if (!calculator_)
         return false;
@@ -623,8 +623,7 @@ void EvaluationTaskResult::setInterestFactorEnabled(const Evaluation::Requiremen
 
     interest_factor_enabled_.at(id.req_name) = ok;
 
-    informUpdate(UpdateState::ContentUpdateNeeded, std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName));
-    update(true);
+    updateContents({ std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName) });
 }
 
 /**
@@ -635,8 +634,7 @@ void EvaluationTaskResult::setInterestFactorEnabled(const std::string& req_name,
 
     interest_factor_enabled_.at(req_name) = ok;
 
-    informUpdate(UpdateState::ContentUpdateNeeded, std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName));
-    update(true);
+    updateContents({ std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName) });
 }
 
 /**
@@ -646,8 +644,7 @@ void EvaluationTaskResult::setInterestFactorsEnabled(bool ok)
     for (auto& it : interest_factor_enabled_)
         it.second = ok;
 
-    informUpdate(UpdateState::ContentUpdateNeeded, std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName));
-    update(true);
+    updateContents({ std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName) });
 }
 
 /**
@@ -803,6 +800,8 @@ void EvaluationTaskResult::jumpToRequirement(const Evaluation::RequirementSumRes
  */
 void EvaluationTaskResult::informUpdateEvalResult(int update_type)
 {
+    update_type = task::Locked;
+
     TaskResult::ContentID content_id;
     if (update_type == task::ContentUpdateNeeded)
     {

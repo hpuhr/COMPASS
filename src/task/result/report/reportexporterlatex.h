@@ -37,9 +37,6 @@ public:
                         bool write_pdf);
     virtual ~ReportExporterLatex();
 
-    static const unsigned int LatexTableMaxColWidth;
-    static const unsigned int LatexPDFMaxReruns;
-
 protected:
     Result initExport_impl(TaskResult& result) override final;
     ResultT<nlohmann::json> finalizeExport_impl(TaskResult& result) override final;

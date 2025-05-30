@@ -47,8 +47,6 @@ class ReportExport;
 class ReportExporter
 {
 public:
-    
-
     ReportExporter(const ReportExport* report_export,
                    const std::string& export_fn,
                    const std::string& export_resource_dir);
@@ -63,7 +61,6 @@ public:
     virtual ReportExportMode exportMode() const = 0;
 
     static const int TableMaxRows;
-    static const int TableMaxColumnsWide;
     static const int TableMaxColumns;
 
     static const std::string ResourceFolderScreenshots;

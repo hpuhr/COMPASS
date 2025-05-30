@@ -77,8 +77,8 @@ protected:
     bool customContextMenu_impl(QMenu& menu, 
                                 ResultReport::SectionContentTable* table, 
                                 unsigned int row) override final;
-    bool customContextMenu_impl(QMenu& menu, 
-                                ResultReport::SectionContent* content) override final;
+    bool customMenu_impl(QMenu& menu, 
+                         ResultReport::SectionContent* content) override final;
     void postprocessTable_impl(ResultReport::SectionContentTable* table) override final;
     bool hasCustomTooltip_impl(const ResultReport::SectionContentTable* table, 
                                unsigned int row,

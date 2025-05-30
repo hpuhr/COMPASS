@@ -31,8 +31,6 @@
 
 #include <boost/optional.hpp>
 
-class LatexVisitor;
-
 class TaskManager;
 class DBInterface;
 
@@ -87,6 +85,7 @@ public:
     std::string relativeID(const std::string& id) const;
 
     QWidget* getContentWidget(bool preload_ondemand_contents);
+    void updateContents(bool recursive);
 
     bool hasText (const std::string& name);
     SectionContentText& getText (const std::string& name);
@@ -122,8 +121,6 @@ public:
     void addSectionsFlat (std::vector<std::shared_ptr<Section>>& result, 
                           bool include_target_details,
                           bool report_skip_targets_wo_issues);
-
-    virtual void accept(LatexVisitor& v) const;
 
     std::vector<std::shared_ptr<SectionContent>> sectionContent(bool with_hidden_content = false) const;
     std::vector<std::shared_ptr<SectionContent>> recursiveContent(bool with_hidden_content = false) const;
@@ -174,6 +171,8 @@ protected:
     size_t numContents(SectionContent::ContentType type) const;
 
     void createContentWidget(bool preload_ondemand_contents);
+    void recreateContentUI(bool force_ui_reset, 
+                           bool preload_ondemand_contents);
 
     unsigned int addHiddenFigure(const SectionContentViewable& viewable);
 
@@ -198,7 +197,9 @@ protected:
     std::vector<unsigned int>                            hidden_content_ids_;
     mutable std::vector<std::shared_ptr<SectionContent>> hidden_content_;
 
-    std::unique_ptr<QWidget> content_widget_;
+    std::unique_ptr<QWidget> content_widget_container_;
+    QVBoxLayout*             content_widget_container_layout_ = nullptr;
+    QWidget*                 content_widget_                  = nullptr;
 
     std::vector<std::shared_ptr<Section>> sub_sections_;
 

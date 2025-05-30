@@ -44,6 +44,7 @@ public:
     virtual ~Report();
 
     void clear();
+    void updateContents();
 
     virtual TreeItem *child(int row) override;
     virtual int childCount() const override;

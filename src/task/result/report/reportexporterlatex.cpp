@@ -43,9 +43,6 @@
 namespace ResultReport
 {
 
-const unsigned int ReportExporterLatex::LatexTableMaxColWidth = 24;
-const unsigned int ReportExporterLatex::LatexPDFMaxReruns     = 3;
-
 /**
  */
 ReportExporterLatex::ReportExporterLatex(const ReportExport* report_export,
@@ -80,8 +77,6 @@ Result ReportExporterLatex::initExport_impl(TaskResult& result)
 
     if (s.abstract.size())
         latex_doc_->abstract(s.abstract);
-
-    LatexTable::num_max_rows_ = 500;
 
     return Result::succeeded();
 }
@@ -150,6 +145,8 @@ Result ReportExporterLatex::exportTable_impl(SectionContentTable& table)
     if (it == latex_sections_.end())
         return Result::failed("Content '" + table.name() + "' obtains no parent section in report"); 
 
+    const auto& s = settings();
+
     auto& latex_section = latex_doc_->getSection(it->second);
 
     std::string table_name = table.name();
@@ -166,13 +163,23 @@ Result ReportExporterLatex::exportTable_impl(SectionContentTable& table)
     latex_section.addTable(table_name, num_cols, headings, "", false);
     LatexTable& latex_table = latex_section.getTable(table_name);
 
+    //configure wide table settings
     bool wide_table = false;
-
-    if (headings.size() > (size_t)TableMaxColumnsWide)
+    if (s.latex_table_min_cols_wide >= 0 && headings.size() >= (size_t)s.latex_table_min_cols_wide)
     {
         latex_table.setWideTable(true);
         wide_table = true;
     }
+
+    //determine max row count
+    //table > settings
+    int max_row_count;
+    if (table.maxRowCount().has_value())
+        max_row_count = table.maxRowCount().value();
+    else // from settings
+        max_row_count = s.latex_table_max_rows;
+    
+    latex_table.setMaxRowCount(max_row_count);
 
     unsigned int num_rows = table.filteredRowCount();
     std::vector<std::string> row_strings;
@@ -187,10 +194,12 @@ Result ReportExporterLatex::exportTable_impl(SectionContentTable& table)
         {
             for (unsigned int cnt=0; cnt < num_cols; ++cnt)
             {
-                if (cnt > 2 && row_strings[cnt].size() > LatexTableMaxColWidth)
+                if (cnt > 2 && 
+                    s.latex_table_max_col_width >= 0 &&  
+                    row_strings[cnt].size() > (size_t)s.latex_table_max_col_width)
                 {
-                    std::string::size_type space_pos = row_strings[cnt].rfind(' ', LatexTableMaxColWidth);
-                    std::string::size_type comma_pos = row_strings[cnt].rfind(',', LatexTableMaxColWidth);
+                    std::string::size_type space_pos = row_strings[cnt].rfind(' ', (size_t)s.latex_table_max_col_width);
+                    std::string::size_type comma_pos = row_strings[cnt].rfind(',', (size_t)s.latex_table_max_col_width);
 
                     if (space_pos == std::string::npos)
                     {
@@ -268,9 +277,12 @@ Result ReportExporterLatex::writePDF() const
 
     logdbg << "ReportExporterLatex: writePDF: cmd done";
 
-    unsigned int run_cnt = 0;
+    const auto& s = settings();
 
-    while (run_cnt < LatexPDFMaxReruns || 
+    unsigned int max_runs = s.latex_pdf_max_reruns;
+    unsigned int run_cnt  = 0;
+
+    while (run_cnt < max_runs || 
            (command_out.find("Rerun to get outlines right"        ) != std::string::npos) || 
            (command_out.find("Rerun to get cross-references right") != std::string::npos))
     {

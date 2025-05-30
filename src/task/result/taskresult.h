@@ -136,8 +136,8 @@ public:
     bool customContextMenu(QMenu& menu, 
                            ResultReport::SectionContentTable* table, 
                            unsigned int row);
-    bool customContextMenu(QMenu& menu,
-                           ResultReport::SectionContent* content);
+    bool customMenu(QMenu& menu,
+                    ResultReport::SectionContent* content);
     
     bool hasCustomTooltip(const ResultReport::SectionContentTable* table, 
                           unsigned int row,
@@ -215,8 +215,8 @@ protected:
     virtual bool customContextMenu_impl(QMenu& menu, 
                                         ResultReport::SectionContentTable* table, 
                                         unsigned int row) { return false; }
-    virtual bool customContextMenu_impl(QMenu& menu, 
-                                        ResultReport::SectionContent* content) { return false; }
+    virtual bool customMenu_impl(QMenu& menu, 
+                                 ResultReport::SectionContent* content) { return false; }
     
     //reimplement for custom tooltips
     virtual bool hasCustomTooltip_impl(const ResultReport::SectionContentTable* table, 

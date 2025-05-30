@@ -23,8 +23,6 @@
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/report.h"
 
-//#include "latexvisitor.h"
-
 #include "asynctask.h"
 #include "logger.h"
 
@@ -75,6 +73,8 @@ Section::Section(TreeItem* parent_item,
 ,   report_  (report)
 {
 }
+
+void clearUI();
 
 /**
  */
@@ -248,13 +248,37 @@ std::string Section::relativeID(const std::string& id) const
 */
 QWidget* Section::getContentWidget(bool preload_ondemand_contents)
 {
-    if (!content_widget_)
+    if (!content_widget_container_)
     {
         createContentWidget(preload_ondemand_contents);
-        assert(content_widget_);
+        assert(content_widget_container_);
     }
 
-    return content_widget_.get();
+    return content_widget_container_.get();
+}
+
+/**
+*/
+void Section::updateContents(bool recursive)
+{
+    //clear all loaded demand content
+    for (auto& c : content_)
+        if (c)
+            c->clearOnDemandContent();
+
+    for (auto& c : hidden_content_)
+        if (c)
+            c->clearOnDemandContent();
+
+    //recreate section ui
+    recreateContentUI(true, false);
+
+    //apply recursively?
+    if (recursive)
+    {
+        for (auto& sub_section : sub_sections_)
+            sub_section->updateContents(recursive);
+    }
 }
 
 /**
@@ -531,15 +555,6 @@ void Section::addSectionsFlat(std::vector<std::shared_ptr<Section>>& result,
 
 /**
 */
-void Section::accept(LatexVisitor& v) const
-{
-    loginf << "Section: accept";
-    //@TODO
-    //v.visit(this);
-}
-
-/**
-*/
 std::vector<std::shared_ptr<SectionContent>> Section::sectionContent(bool with_hidden_content) const
 {
     std::vector<std::shared_ptr<SectionContent>> content;
@@ -740,9 +755,39 @@ void Section::createContentWidget(bool preload_ondemand_contents)
 {
     loginf << "Section: createContentWidget: Creating content widget for section '" << name() << "'";
 
-    assert (!content_widget_);
+    assert (!content_widget_container_);
 
-    content_widget_.reset(new QWidget());
+    content_widget_container_.reset(new QWidget());
+
+    content_widget_container_layout_ = new QVBoxLayout;
+    content_widget_container_layout_->setContentsMargins(0, 0, 0, 0);
+
+    content_widget_container_->setLayout(content_widget_container_layout_);
+    
+    recreateContentUI(false, preload_ondemand_contents);
+}
+
+/**
+*/
+void Section::recreateContentUI(bool force_ui_reset,
+                                bool preload_ondemand_contents)
+{
+    //container not yet created => return
+    if (!content_widget_container_)
+        return;
+
+    assert(content_widget_container_layout_);
+
+    //destroy old content widget
+    if (content_widget_)
+    {
+        content_widget_container_layout_->removeWidget(content_widget_);
+        delete content_widget_;
+        content_widget_ = nullptr;
+    }
+
+    //create new one
+    content_widget_ = new QWidget;
 
     QVBoxLayout* layout = new QVBoxLayout();
 
@@ -766,6 +811,7 @@ void Section::createContentWidget(bool preload_ondemand_contents)
         {
             auto c = this->loadOrGetContent(i, false);
             if (c->isOnDemand() &&
+                !c->isLocked() &&
                 c->contentType() == SectionContent::ContentType::Table)
             {
                 c->loadOnDemandIfNeeded();
@@ -775,11 +821,13 @@ void Section::createContentWidget(bool preload_ondemand_contents)
 
     //add contents to layout
     for (size_t i = 0; i < content_.size(); ++i)
-        loadOrGetContent(i, false)->addToLayout(layout);
+        loadOrGetContent(i, false)->addContentUI(layout, force_ui_reset);
 
     //layout->addStretch();
 
     content_widget_->setLayout(layout);
+
+    content_widget_container_layout_->addWidget(content_widget_);
 }
 
 namespace 

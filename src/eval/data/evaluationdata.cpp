@@ -580,67 +580,73 @@ void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report) c
         headings.push_back(h.toStdString());
 
     auto& table = section.addTable(TargetsTableName, headings.size(), headings);
-    table.setOnDemand();
-    table.enableTooltips();
+    table.setOnDemand();      // on demand content
+    table.setLockStateSafe(); // can be reloaded and exported in lock state
+    table.enableTooltips();   // shows custom tooltips
+    table.setMaxRowCount(-1); // override row count
 }
 
 namespace
 {
     /**
      */
-    nlohmann::json interestData(const EvaluationTarget& target,
-                                const EvaluationData::InterestEnabledFunc & interest_enabled_func)
+    std::pair<nlohmann::json, unsigned int> interestData(const EvaluationTarget& target,
+                                                         const EvaluationData::InterestEnabledFunc & interest_enabled_func)
     {
+        if (!target.useInEval())
+            return std::make_pair("-", 0);
+
         size_t num_contributors;
         auto interest = target.totalInterest(interest_enabled_func, &num_contributors);
 
         if (num_contributors == 0)
-            return "-";
+            return std::make_pair("-", 0);
 
-        return interest;
+        return std::make_pair(QString::number(interest, 'f', 3).toStdString(),
+                              EvaluationTargetData::bgStyleForInterestFactorSum(interest));
     }
 }
 
 /**
  */
-nlohmann::json EvaluationData::rawCellData(const EvaluationTarget& target, 
-                                           int column,
-                                           const InterestEnabledFunc & interest_enabled_func) const
+std::pair<nlohmann::json, unsigned int> EvaluationData::rawCellData(const EvaluationTarget& target, 
+                                                                    int column,
+                                                                    const InterestEnabledFunc & interest_enabled_func) const
 {
     switch (column)
     {
         case ColUse:
-            return target.useInEval();
+            return std::make_pair(target.useInEval(), 0);
         case ColUTN: 
-            return target.utn_;
+            return std::make_pair(target.utn_, 0);
         case ColComment:
-            return target.comment();
+            return std::make_pair(target.comment(), 0);
         case ColCategory:
-            return target.emitterCategoryStr();
+            return std::make_pair(target.emitterCategoryStr(), 0);
         case ColInterest: 
             return interestData(target, interest_enabled_func);
         case ColNumUpdates:
-            return target.numUpdates();
+            return std::make_pair(target.numUpdates(), 0);
         case ColNumRef:
-            return target.refCount();
+            return std::make_pair(target.refCount(), 0);
         case ColNumTest:
-            return target.testCount();
+            return std::make_pair(target.testCount(), 0);
         case ColBegin:
-            return target.timeBeginStr();
+            return std::make_pair(target.timeBeginStr(), 0);
         case ColEnd:
-            return target.timeEndStr();
+            return std::make_pair(target.timeEndStr(), 0);
         case ColDuration:
-            return target.timeDurationStr();
+            return std::make_pair(target.timeDurationStr(), 0);
         case ColACIDs:
-            return target.aircraftIdentificationsStr();
+            return std::make_pair(target.aircraftIdentificationsStr(), 0);
         case ColACADs: 
-            return target.aircraftAddressesStr();
+            return std::make_pair(target.aircraftAddressesStr(), 0);
         case ColMode3A: 
-            return target.modeACodesStr();
+            return std::make_pair(target.modeACodesStr(), 0);
         case ColModeCMin: 
-            return target.hasModeC() ? target.modeCMinStr() : "";
+            return std::make_pair(target.hasModeC() ? target.modeCMinStr() : "", 0);
         case ColModeCMax:
-            return target.hasModeC() ? target.modeCMaxStr() : "";
+            return std::make_pair(target.hasModeC() ? target.modeCMaxStr() : "", 0);
     }
     return nlohmann::json();
 }
@@ -667,27 +673,6 @@ unsigned int EvaluationData::columnStyle(int column) const
 
 /**
  */
-unsigned int EvaluationData::cellStyle(const EvaluationTarget& target, 
-                                       int column,
-                                       const nlohmann::json& data) const
-{
-    if (!target.useInEval())
-        return 0;
-
-    if (column == ColInterest)
-    {
-        if (data.is_number_float())
-        {
-            double interest = data;
-            return EvaluationTargetData::bgStyleForInterestFactorSum(interest);
-        }
-    }
-
-    return 0;
-}
-
-/**
- */
 void EvaluationData::fillTargetsTable(const std::map<unsigned int, EvaluationTarget>& targets,
                                       ResultReport::SectionContentTable& table,
                                       const InterestEnabledFunc & interest_enabled_func) const
@@ -703,13 +688,12 @@ void EvaluationData::fillTargetsTable(const std::map<unsigned int, EvaluationTar
         auto row = nlohmann::json::array();
         for (int c = 0; c < nc; ++c)
         {
-            auto data  = rawCellData(t.second, c, interest_enabled_func);
-            auto style = cellStyle(t.second, c, data);
+            auto data = rawCellData(t.second, c, interest_enabled_func);
 
-            row.push_back(data);
+            row.push_back(data.first);
 
-            if (style != 0)
-                table.setCellStyle(r, c, style);
+            if (data.second != 0)
+                table.setCellStyle(r, c, data.second);
         }
 
         table.addRow(row, ResultReport::SectionContentViewable().setOnDemand(), "", "", {}, rowStyle(t.second));

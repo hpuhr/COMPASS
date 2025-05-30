@@ -35,9 +35,8 @@
 namespace ResultReport
 {
 
-const int ReportExporter::TableMaxRows        = 0;
-const int ReportExporter::TableMaxColumnsWide = 8;
-const int ReportExporter::TableMaxColumns     = 0;
+const int ReportExporter::TableMaxRows    = -1;
+const int ReportExporter::TableMaxColumns = -1;
 
 const std::string ReportExporter::ResourceFolderScreenshots = "screenshots";
 const std::string ReportExporter::ResourceFolderTables      = "tables";
@@ -254,7 +253,8 @@ Result ReportExporter::visitSection(Section& section)
 Result ReportExporter::visitContent(SectionContent& content)
 {
     //skip content?
-    if (!content.exportEnabled(exportMode()))
+    if (!content.exportEnabled(exportMode()) ||
+         content.isLocked())
     {
         loginf << "Skipping content '" << content.id() << "'";
         return Result::succeeded();

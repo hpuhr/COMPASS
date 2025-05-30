@@ -74,6 +74,13 @@ void Report::clear()
 
 /**
  */
+void Report::updateContents()
+{
+    root_section_->updateContents(true);
+}
+
+/**
+ */
 TreeItem* Report::child(int row)
 {
     if (row < 0 || row > 0)

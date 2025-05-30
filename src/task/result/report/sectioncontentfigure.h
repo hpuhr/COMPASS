@@ -58,8 +58,8 @@ public:
 
     virtual std::string resourceExtension() const override;
 
-    virtual void addToLayout (QVBoxLayout* layout) override;
-    virtual void accept(LatexVisitor& v) override;
+    virtual void addContentUI(QVBoxLayout* layout,
+                              bool force_ui_reset) override;
 
     void view () const;
     void executeRenderDelay() const;
@@ -67,8 +67,6 @@ public:
     FigureType figureType() const { return fig_type_; }
     const std::string& caption() const { return caption_; }
     int renderDelayMSec() const { return render_delay_msec_; }
-
-    std::shared_ptr<nlohmann::json::object_t> viewableContent() const;
 
     ResultT<std::vector<ImageResource>> obtainImages(const std::string* resource_dir) const;
 
@@ -81,6 +79,8 @@ public:
     static const std::string FieldDocData;
 
 protected:
+    std::shared_ptr<nlohmann::json::object_t> viewableContent() const;
+
     void clearContent_impl() override final;
 
     void toJSON_impl(nlohmann::json& j) const override final;

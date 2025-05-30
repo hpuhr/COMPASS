@@ -25,7 +25,6 @@
 #include "taskmanager.h"
 #include "compass.h"
 #include "dbcontentmanager.h"
-#include "latexvisitor.h"
 
 #include "logger.h"
 #include "stringconv.h"
@@ -59,15 +58,16 @@ namespace ResultReport
  * SectionContentTable
  ***************************************************************************************************/
 
-const std::string SectionContentTable::FieldHeadings     = "headings";
-const std::string SectionContentTable::FieldSortable     = "sortable";
-const std::string SectionContentTable::FieldSortColumn   = "sort_column";
-const std::string SectionContentTable::FieldSortOrder    = "order";
-const std::string SectionContentTable::FieldRows         = "rows";
-const std::string SectionContentTable::FieldAnnotations  = "annotations";
-const std::string SectionContentTable::FieldColumnStyles = "column_styles";
-const std::string SectionContentTable::FieldCellStyles   = "cell_styles";
-const std::string SectionContentTable::FieldShowTooltips = "show_tooltips";
+const std::string SectionContentTable::FieldHeadings      = "headings";
+const std::string SectionContentTable::FieldSortable      = "sortable";
+const std::string SectionContentTable::FieldSortColumn    = "sort_column";
+const std::string SectionContentTable::FieldSortOrder     = "order";
+const std::string SectionContentTable::FieldRows          = "rows";
+const std::string SectionContentTable::FieldAnnotations   = "annotations";
+const std::string SectionContentTable::FieldColumnStyles  = "column_styles";
+const std::string SectionContentTable::FieldCellStyles    = "cell_styles";
+const std::string SectionContentTable::FieldShowTooltips  = "show_tooltips";
+const std::string SectionContentTable::FieldMaxRowCount   = "max_row_count";
 
 const std::string SectionContentTable::FieldDocColumns  = "columns";
 const std::string SectionContentTable::FieldDocData     = "data";
@@ -235,6 +235,20 @@ unsigned int SectionContentTable::cellStyle(int row, int column) const
 
 /**
  */
+void SectionContentTable::setMaxRowCount(const boost::optional<int>& max_row_count)
+{
+    max_row_count_ = max_row_count;
+}
+
+/**
+ */
+const boost::optional<int>& SectionContentTable::maxRowCount() const
+{
+    return max_row_count_;
+}
+
+/**
+ */
 unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewable)
 {
     return parentSection()->addHiddenFigure(viewable);
@@ -244,6 +258,7 @@ unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewab
  */
 SectionContentTableWidget* SectionContentTable::createTableWidget() const
 {
+    assert(!isLocked());
     assert(!table_widget_);
 
     SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
@@ -299,7 +314,8 @@ std::string SectionContentTable::resourceExtension() const
 
 /**
  */
-void SectionContentTable::addToLayout(QVBoxLayout* layout)
+void SectionContentTable::addContentUI(QVBoxLayout* layout, 
+                                       bool force_ui_reset)
 {
     loginf << "SectionContentTable: addToLayout";
 
@@ -308,21 +324,20 @@ void SectionContentTable::addToLayout(QVBoxLayout* layout)
     //finalize some custom stuff before showing the table in a layout
     taskResult()->postprocessTable(this);
 
-    //add widget to layout
-    auto widget = getOrCreateTableWidget();
-    layout->addWidget(widget);
-}
+    //force recreation of table widget?
+    if (force_ui_reset)
+        table_widget_ = nullptr;
 
-/**
- */
-void SectionContentTable::accept(LatexVisitor& v)
-{
-    loginf << "SectionContentTable: accept";
-
-    //createOnDemandIfNeeded();
-
-    //@TODO:
-    //v.visit(this);
+    if (isLocked())
+    {
+        layout->addWidget(lockStatePlaceholderWidget());
+    }
+    else
+    {
+        //add widget to layout
+        auto widget = getOrCreateTableWidget();
+        layout->addWidget(widget);
+    }
 }
 
 /**
@@ -827,18 +842,22 @@ void SectionContentTable::clicked(unsigned int row)
     //generate on-demand viewable?
     if (annotation.on_demand)
     {
-        SectionContentViewable viewable;
-        bool ok = taskResult()->loadOnDemandViewable(*this, viewable, annotation.index, row);
+        //only show on demand figure if result is not locked
+        if (!taskResult()->isLocked())
+        {
+            SectionContentViewable viewable;
+            bool ok = taskResult()->loadOnDemandViewable(*this, viewable, annotation.index, row);
 
-        if (ok)
-        {
-            auto content = viewable.viewable_func();
-            report_->setCurrentViewable(*content);
-        }
-        else
-        {
-            report_->unsetCurrentViewable();
-            logerr << "SectionContentTable: clicked: on-demand viewable could not be retrieved";
+            if (ok)
+            {
+                auto content = viewable.viewable_func();
+                report_->setCurrentViewable(*content);
+            }
+            else
+            {
+                report_->unsetCurrentViewable();
+                logerr << "SectionContentTable: clicked: on-demand viewable could not be retrieved";
+            }
         }
 
         return;
@@ -895,6 +914,7 @@ void SectionContentTable::clicked(unsigned int row)
             // }
 
             //show viewable (will now recompute internally if needed)
+            //              (might get cancelled if the figure is locked)
             figure->view();
         }
         else
@@ -960,7 +980,7 @@ void SectionContentTable::addActionsToMenu(QMenu* menu)
     }
 
     //add custom entries provided by task result
-    taskResult()->customContextMenu(*menu, this);
+    taskResult()->customMenu(*menu, this);
 }
 
 /**
@@ -1036,15 +1056,18 @@ void SectionContentTable::toJSON_impl(nlohmann::json& j) const
     //call base
     SectionContent::toJSON_impl(j);
 
-    j[ FieldHeadings     ] = headings_;
-    j[ FieldSortable     ] = sortable_;
-    j[ FieldSortColumn   ] = sort_column_;
-    j[ FieldSortOrder    ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
-    j[ FieldRows         ] = std::vector<nlohmann::json>();
-    j[ FieldAnnotations  ] = nlohmann::json::array();
-    j[ FieldColumnStyles ] = column_styles_;
-    j[ FieldCellStyles   ] = cell_styles_;
-    j[ FieldShowTooltips ] = show_tooltips_;
+    j[ FieldHeadings      ] = headings_;
+    j[ FieldSortable      ] = sortable_;
+    j[ FieldSortColumn    ] = sort_column_;
+    j[ FieldSortOrder     ] = sort_order_ == Qt::AscendingOrder ? "ascending" : "descending";
+    j[ FieldRows          ] = std::vector<nlohmann::json>();
+    j[ FieldAnnotations   ] = nlohmann::json::array();
+    j[ FieldColumnStyles  ] = column_styles_;
+    j[ FieldCellStyles    ] = cell_styles_;
+    j[ FieldShowTooltips  ] = show_tooltips_;
+
+    if (max_row_count_.has_value())
+        j[ FieldMaxRowCount ] = max_row_count_.value();
 
     //write content only if not on demand
     if (!isOnDemand())
@@ -1105,6 +1128,12 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 
     std::string sort_order = j[ FieldSortOrder ];
     sort_order_ = sort_order == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder;
+
+    if (j.contains(FieldMaxRowCount))
+    {
+        int v = j[ FieldMaxRowCount ];
+        max_row_count_ = v;
+    }
 
     num_columns_ = headings_.size();
 

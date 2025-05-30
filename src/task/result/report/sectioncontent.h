@@ -31,8 +31,7 @@
 #include <boost/optional.hpp>
 
 class QVBoxLayout;
-class LatexVisitor;
-class LatexSection;
+class QWidget;
 
 class TaskResult;
 
@@ -131,16 +130,20 @@ public:
 
     virtual std::string resourceExtension() const = 0;
 
+    void setLockStateSafe();
+    bool isLockStateSafe() const;
+    bool isLocked() const;
+
     void setOnDemand();
     bool isOnDemand() const;
     bool isComplete() const;
     bool loadOnDemandIfNeeded();
     bool forceReload();
 
-    void clearContent();
+    void clearOnDemandContent();
     
-    virtual void addToLayout (QVBoxLayout* layout) = 0; // add content to layout
-    virtual void accept(LatexVisitor& v) = 0;           // can not be const since on-demand tables
+    virtual void addContentUI(QVBoxLayout* layout, 
+                              bool force_ui_reset) = 0;
 
     static std::string contentTypeAsString(ContentType type);
     static boost::optional<ContentType> contentTypeFromString(const std::string& type_str);
@@ -155,6 +158,7 @@ public:
     static const std::string FieldContentType;
     static const std::string FieldContentID;
     static const std::string FieldOnDemand;
+    static const std::string FieldLockStateSafe;
 
 protected:
     struct ResourceLink
@@ -166,7 +170,6 @@ protected:
     ResultT<ResourceLink> prepareResource(const std::string& resource_dir,
                                           ResourceDir rdir,
                                           const std::string& prefix = "") const;
-
     virtual void clearContent_impl() = 0;
 
     virtual void toJSON_impl(nlohmann::json& j) const override;
@@ -179,13 +182,18 @@ protected:
     TaskResult* taskResult();
     const TaskResult* taskResult() const;
 
+    QWidget* lockStatePlaceholderWidget() const;
+
     ContentType  content_type_;
     unsigned int content_id_     = 0;
     Report*      report_         = nullptr;
 
 private:
-    bool on_demand_ = false;
-    bool complete_  = false;
+    void clearContent();
+
+    bool on_demand_       = false;
+    bool complete_        = false;
+    bool lock_state_safe_ = false;
 };
 
 }

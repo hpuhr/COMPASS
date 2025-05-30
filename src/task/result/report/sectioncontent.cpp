@@ -27,6 +27,10 @@
 
 #include <cassert>
 
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QFrame>
+
 namespace ResultReport
 {
 
@@ -39,9 +43,10 @@ const PropertyList SectionContent::DBPropertyList      = PropertyList({ SectionC
                                                                         SectionContent::DBColumnResultID,
                                                                         SectionContent::DBColumnType,
                                                                         SectionContent::DBColumnJSONContent });
-const std::string SectionContent::FieldContentType = "content_type";
-const std::string SectionContent::FieldContentID   = "content_id";
-const std::string SectionContent::FieldOnDemand    = "on_demand";
+const std::string SectionContent::FieldContentType   = "content_type";
+const std::string SectionContent::FieldContentID     = "content_id";
+const std::string SectionContent::FieldOnDemand      = "on_demand";
+const std::string SectionContent::FieldLockStateSafe = "lock_state_safe";
 
 /**
  */
@@ -210,6 +215,29 @@ const TaskResult* SectionContent::taskResult() const
 
 /**
  */
+void SectionContent::setLockStateSafe()
+{
+    lock_state_safe_ = true;
+}
+
+/**
+ */
+bool SectionContent::isLockStateSafe() const
+{
+    return lock_state_safe_;
+}
+
+/**
+ */
+bool SectionContent::isLocked() const
+{
+    return isOnDemand() && 
+           !isLockStateSafe() &&
+           taskResult()->isLocked();
+}
+
+/**
+ */
 void SectionContent::setOnDemand()
 {
     on_demand_ = true;
@@ -243,6 +271,9 @@ bool SectionContent::loadOnDemandIfNeeded()
  */
 bool SectionContent::loadOnDemand()
 {
+    //if the task result is locked we should never give an opportunity to load on demand content
+    assert(!isLocked());
+
     loginf << "SectionContent: loadOnDemand: Loading on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
 
     assert(isOnDemand());
@@ -275,6 +306,15 @@ bool SectionContent::forceReload()
 
 /**
  */
+void SectionContent::clearOnDemandContent()
+{
+    //reset already loaded on-demand content
+    if (isOnDemand() && isComplete())
+        clearContent();
+}
+
+/**
+ */
 void SectionContent::clearContent()
 {
     clearContent_impl();
@@ -284,11 +324,32 @@ void SectionContent::clearContent()
 
 /**
  */
+QWidget* SectionContent::lockStatePlaceholderWidget() const
+{
+    QFrame*      w      = new QFrame;
+    QVBoxLayout* layout = new QVBoxLayout;
+
+    w->setLayout(layout);
+    w->setFrameStyle(QFrame::Box | QFrame::Plain);
+    w->setLineWidth(1);
+
+    auto txt = QString::fromStdString(contentTypeAsString(contentType()));
+    txt[ 0 ] = txt[ 0 ].toUpper();
+
+    QLabel* label = new QLabel(txt + " is locked. Refresh to show on-demand content.");
+    layout->addWidget(label);
+
+    return w;
+}
+
+/**
+ */
 void SectionContent::toJSON_impl(nlohmann::json& j) const
 {
-    j[ FieldContentType ] = contentTypeAsString(content_type_);
-    j[ FieldContentID   ] = content_id_;
-    j[ FieldOnDemand    ] = on_demand_;
+    j[ FieldContentType   ] = contentTypeAsString(content_type_);
+    j[ FieldContentID     ] = content_id_;
+    j[ FieldOnDemand      ] = on_demand_;
+    j[ FieldLockStateSafe ] = lock_state_safe_;
 }
 
 /**
@@ -303,6 +364,9 @@ bool SectionContent::fromJSON_impl(const nlohmann::json& j)
         logerr << "SectionContent: fromJSON_impl: Error: Section content does not obtain needed fields";
         return false;
     }
+
+    if (j.contains(FieldLockStateSafe))
+        lock_state_safe_ = j[ FieldLockStateSafe ];
 
     std::string t_str = j[ FieldContentType ];
     auto t = contentTypeFromString(t_str);

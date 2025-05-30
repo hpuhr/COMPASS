@@ -78,12 +78,16 @@ namespace ResultReport
 
     struct ReportExportSettings
     {
-        std::string author;
-        std::string abstract;
+        //general settings
+        std::string  author;
+        std::string  abstract;
 
-        unsigned int latex_table_max_columns = 500;
-        unsigned int latex_table_max_width   = 24;
+        bool         open_created_file = true;
 
-        bool open_created_file = true;
+        //latex settings
+        int          latex_table_max_rows      = 500;
+        int          latex_table_max_col_width = 24;
+        int          latex_table_min_cols_wide = 9;
+        unsigned int latex_pdf_max_reruns      = 3;
     };
 }

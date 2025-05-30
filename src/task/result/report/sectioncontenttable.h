@@ -115,8 +115,8 @@ public:
 
     virtual std::string resourceExtension() const override;
 
-    virtual void addToLayout (QVBoxLayout* layout) override;
-    virtual void accept(LatexVisitor& v) override;
+    virtual void addContentUI(QVBoxLayout* layout, 
+                              bool force_ui_reset) override;
 
     void enableTooltips();
 
@@ -136,6 +136,9 @@ public:
     void setCellStyle(int row, int column, unsigned int style);
 
     unsigned int cellStyle(int row, int column) const;
+
+    void setMaxRowCount(const boost::optional<int>& max_row_count);
+    const boost::optional<int>& maxRowCount() const;
 
     size_t numRows() const;
     size_t numColumns() const;
@@ -186,6 +189,7 @@ public:
     static const std::string FieldColumnStyles;
     static const std::string FieldCellStyles;
     static const std::string FieldShowTooltips;
+    static const std::string FieldMaxRowCount;
 
     static const std::string FieldDocColumns;
     static const std::string FieldDocData;
@@ -242,6 +246,8 @@ protected:
 
     bool show_unused_   {false};
     bool show_tooltips_ {false};
+
+    boost::optional<int> max_row_count_;
 
     /**
      * Describes figures and links attached to a table row.
