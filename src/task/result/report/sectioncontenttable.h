@@ -317,7 +317,7 @@ public:
     const QTableView* tableView() const;
 
     void showUnused(bool show);
-    void resizeColumns();
+    void resizeContent();
 
     int fromProxy(int proxy_row) const;
 

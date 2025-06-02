@@ -337,6 +337,8 @@ void SectionContentTable::addContentUI(QVBoxLayout* layout,
         //add widget to layout
         auto widget = getOrCreateTableWidget();
         layout->addWidget(widget);
+
+        widget->resizeContent();
     }
 }
 
@@ -369,9 +371,14 @@ bool SectionContentTable::loadOnDemand()
     };
 
     if (table_widget_)
+    {
         table_widget_->itemModel()->executeAndReset(func);
+        table_widget_->resizeContent();
+    }
     else
+    {
         func();
+    }
 
     return ok;
 }
@@ -1429,9 +1436,10 @@ void SectionContentTableWidget::showUnused(bool show)
 
 /**
  */
-void SectionContentTableWidget::resizeColumns()
+void SectionContentTableWidget::resizeContent()
 {
-    table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
 }
 
 /**
