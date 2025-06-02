@@ -508,6 +508,7 @@ void EvaluationTaskResult::postprocessTable_impl(ResultReport::SectionContentTab
     else if (table->name() == EvaluationData::TargetsTableName)
     {
         //evaluation target table
+        calculator_->data().postprocessTargetsTable(*table);
     }
 }
 

@@ -146,6 +146,8 @@ public:
     void updateEvalUseColumn();
     void updateEvalDetailsColumn();
 
+    static std::string iconForTarget(const Target& target);
+
 protected:
     DBContentManager& dbcont_manager_;
 

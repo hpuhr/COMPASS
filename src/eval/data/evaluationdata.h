@@ -87,6 +87,7 @@ public:
     std::map<unsigned int, EvaluationTarget> toTargets() const;
 
     void addToReport(std::shared_ptr<ResultReport::Report> report) const;
+    void postprocessTargetsTable(ResultReport::SectionContentTable& table) const;
     void fillTargetsTable(const std::map<unsigned int, EvaluationTarget>& targets,
                           ResultReport::SectionContentTable& table,
                           const InterestEnabledFunc & interest_enabled_func) const;

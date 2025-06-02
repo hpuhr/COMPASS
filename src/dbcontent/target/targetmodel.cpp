@@ -45,6 +45,23 @@ void TargetModel::clear()
 
 /**
  */
+std::string TargetModel::iconForTarget(const Target& target)
+{
+    if (!target.useInEval())
+        return "delete.png";
+
+    // could be used
+
+    if (COMPASS::instance().evaluationManager().useTimestampFilter()
+        || target.evalExcludedTimeWindows().size()
+        || target.evalExcludedRequirements().size())
+            return "partial_done.png";
+
+    return "done.png";
+}
+
+/**
+ */
 QVariant TargetModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
@@ -94,17 +111,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         {
             if (index.column() == ColUseInEval)  // selected special case
             {
-                if (!target.useInEval())
-                    return Utils::Files::IconProvider::getIcon("delete.png");
-
-                // could be used
-
-                if (COMPASS::instance().evaluationManager().useTimestampFilter()
-                    || target.evalExcludedTimeWindows().size()
-                    || target.evalExcludedRequirements().size())
-                        return Utils::Files::IconProvider::getIcon("partial_done.png");
-
-                return Utils::Files::IconProvider::getIcon("done.png");
+                return Utils::Files::IconProvider::getIcon(TargetModel::iconForTarget(target));
             }
             else
                 return QVariant();

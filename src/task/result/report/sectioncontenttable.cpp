@@ -336,9 +336,11 @@ void SectionContentTable::addContentUI(QVBoxLayout* layout,
     {
         //add widget to layout
         auto widget = getOrCreateTableWidget();
-        layout->addWidget(widget);
 
+        widget->updateColumnVisibility();
         widget->resizeContent();
+
+        layout->addWidget(widget);
     }
 }
 
@@ -783,6 +785,49 @@ std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row,
 
 /**
  */
+const SectionContentTable::ColumnGroups& SectionContentTable::columnGroups() const
+{
+    return column_groups_;
+}
+
+/**
+ */
+SectionContentTable::ColumnGroup& SectionContentTable::setColumnGroup(const std::string& name, 
+                                                                      const std::vector<int>& columns,
+                                                                      bool visible)
+{
+    auto& col_group = column_groups_[ name ];
+
+    col_group         = {};
+    col_group.columns = columns;
+    col_group.visible = visible;
+
+    if (table_widget_)
+        table_widget_->updateColumnVisibility();
+
+    return col_group;
+}
+
+/**
+ */
+void SectionContentTable::setColumnGroupVisible(const std::string& name,
+                                                bool ok)
+{
+    column_groups_.at(name).visible = ok;
+
+    if (table_widget_)
+        table_widget_->updateColumnVisibility();
+}
+
+/**
+ */
+bool SectionContentTable::columnGroupVisible(const std::string& name) const
+{
+    return column_groups_.at(name).visible;
+}
+
+/**
+ */
 bool SectionContentTable::hasReference (unsigned int row) const
 {
     //obtain original data row
@@ -822,7 +867,6 @@ void SectionContentTable::showUnused(bool value)
 
     show_unused_ = value;
 }
-
 
 /**
  */
@@ -1440,6 +1484,17 @@ void SectionContentTableWidget::resizeContent()
 {
     table_view_->resizeColumnsToContents();
     table_view_->resizeRowsToContents();
+}
+
+/**
+ */
+void SectionContentTableWidget::updateColumnVisibility()
+{
+    for (const auto& group : content_table_->columnGroups())
+    {
+        for (auto col : group.second.columns)
+            table_view_->setColumnHidden(col, !group.second.visible);
+    }
 }
 
 /**
