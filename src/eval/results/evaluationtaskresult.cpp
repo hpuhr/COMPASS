@@ -28,6 +28,10 @@
 #include "task/taskdefs.h"
 
 #include "compass.h"
+#include "dbcontentmanager.h"
+#include "targetmodel.h"
+#include "targetlistwidget.h"
+
 #include "logger.h"
 
 #include <QMenu>
@@ -446,7 +450,14 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
             QObject::connect (action_show_data, &QAction::triggered, [ = ] () { this->showSurroundingData(utn); });
         }
 
+        //no harm showing this one in locked state
         createRequirementLinkMenu(utn, menu);
+
+        if (calculator_ && !isLocked())
+        {
+            auto usage_menu = menu.addMenu("Target Usage");
+            COMPASS::instance().dbContentManager().targetListWidget()->createTargetEvalMenu(*usage_menu, { utn });
+        }
 
         return true;
     }
@@ -497,6 +508,7 @@ void EvaluationTaskResult::postprocessTable_impl(ResultReport::SectionContentTab
     else if (table->name() == EvaluationData::TargetsTableName)
     {
         //evaluation target table
+        calculator_->data().postprocessTargetsTable(*table);
     }
 }
 

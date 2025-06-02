@@ -12,7 +12,10 @@ class DBContentManager;
 class QTableView;
 class QSortFilterProxyModel;
 
-namespace dbContent {
+class QMenu;
+
+namespace dbContent 
+{
 
 class TargetModel;
 
@@ -25,22 +28,21 @@ class TargetListWidget : public ToolBoxWidget
 public slots:
     void evalUseAllSlot();
     void evalUseNoneSlot();
-    void evalUseSelectedTargetsSlot();
-    void evalDisableSelectedTargetsSlot();
     void evalFilterSlot();
 
     void evalEditGlobalExcludeTimeWindowsSlot();
 
     void clearAllCommentsSlot();
-    void clearSelectedTargetsCommentsSlot();
-
     void evalClearAllExcludeTimeWindowsSlot();
     void evalClearAllExcludeRequirementsSlot();
 
     void customContextMenuSlot(const QPoint& p);
     void showSurroundingDataSlot ();
 
-
+    //per-target
+    void clearSelectedTargetsCommentsSlot();
+    void evalUseSelectedTargetsSlot();
+    void evalDisableSelectedTargetsSlot();
     void evalClearTargetsExcludeTimeWindowsSlot();
     void evalClearTargetsExcludeRequirementsSlot();
     void evalExcludeTimeWindowsTargetSlot();
@@ -66,12 +68,22 @@ public:
 
     void resizeColumnsToContents();
 
+    void createTargetEvalMenu(QMenu& menu, const std::set<unsigned int>& utns);
+
 protected:
     void showMainColumns(bool show);
     void showEvalColumns(bool show);
     void showDurationColumns(bool show);
     void showModeACColumns(bool show);
     void showModeSColumns(bool show);
+
+    void clearSelectedTargetsComments(const std::set<unsigned int>& utns);
+    void evalUseSelectedTargets(const std::set<unsigned int>& utns);
+    void evalDisableSelectedTargets(const std::set<unsigned int>& utns);
+    void evalClearTargetsExcludeTimeWindows(const std::set<unsigned int>& utns);
+    void evalClearTargetsExcludeRequirements(const std::set<unsigned int>& utns);
+    void evalExcludeTimeWindowsTarget(const std::set<unsigned int>& utns);
+    void evalExcludeRequirementsTarget(const std::set<unsigned int>& utns);
 
     TargetModel& model_;
     DBContentManager& dbcont_manager_;

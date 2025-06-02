@@ -303,6 +303,9 @@ void MainWindow::createUI()
 
     connect(&COMPASS::instance().licenseManager(), &LicenseManager::changed,
             this, &MainWindow::updateWindowTitle);
+
+    connect(&COMPASS::instance().evaluationManager(), &EvaluationManager::evaluationDoneSignal,
+            this, &MainWindow::showEvaluationResult);
 }
 
 void MainWindow::createMenus ()
@@ -1482,4 +1485,34 @@ void MainWindow::loadingDone()
 {
     if (tool_box_)
         tool_box_->loadingDone();
+}
+
+void MainWindow::selectTool(const std::string& name)
+{
+    loginf << "MainWindow: selectTool: selecting tool '" << name << "'";
+
+    if (tool_box_)
+        tool_box_->selectTool(name);
+}
+
+void MainWindow::showResult(const std::string& name)
+{
+    loginf << "MainWindow: showResult: showing result '" << name << "'";
+
+    auto& task_manager = COMPASS::instance().taskManager();
+
+    //select task results tool
+    std::string tool_name = task_manager.widget()->toolName();
+    selectTool(tool_name);
+
+    //show result of given name
+    task_manager.widget()->setReport(name);
+}
+
+void MainWindow::showEvaluationResult()
+{
+    std::string result_name = COMPASS::instance().evaluationManager().calculator().resultName();
+
+    if (!result_name.empty())
+        showResult(result_name);
 }

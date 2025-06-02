@@ -102,6 +102,9 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
 
         EvaluationCalculator* calculator = new EvaluationCalculator(class_id, instance_id, *this, dbcontent_man_);
         calculator_.reset(calculator);
+
+        connect(calculator_.get(), &EvaluationCalculator::resultsChanged, this, &EvaluationManager::resultsChangedSignal);
+        connect(calculator_.get(), &EvaluationCalculator::evaluationDone, this, &EvaluationManager::evaluationDoneSignal);
     }
     else
     {
@@ -190,7 +193,7 @@ Result EvaluationManager::canEvaluate() const
 
 /**
  */
-void EvaluationManager::evaluate(bool show_dialog)
+void EvaluationManager::evaluate(bool show_dialog, bool blocking)
 {
     loginf << "EvaluationManager: evaluate";
 
@@ -204,7 +207,7 @@ void EvaluationManager::evaluate(bool show_dialog)
             return;
     }
 
-    calculator_->evaluate();
+    calculator_->evaluate(blocking);
 }
 
 /**

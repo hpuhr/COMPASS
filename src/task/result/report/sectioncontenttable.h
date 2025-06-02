@@ -100,7 +100,17 @@ class SectionContentTableWidget;
 class SectionContentTable : public SectionContent
 {
 public:
+    /**
+     */
+    struct ColumnGroup
+    {
+        std::vector<int> columns;
+        bool             visible = true;
+    };
+
     typedef std::map<std::pair<int,int>, unsigned int> CellStyles;
+    typedef std::map<std::string, ColumnGroup>         ColumnGroups;
+    
 
     SectionContentTable(unsigned int id,
                         const std::string& name, 
@@ -129,6 +139,7 @@ public:
 
     const nlohmann::json& getData(int row, int column) const;
     const nlohmann::json& getData(int row, const std::string& col_name) const;
+
     bool hasColumn(const std::string& col_name) const;
     int columnIndex(const std::string& col_name) const;
 
@@ -145,6 +156,14 @@ public:
     const std::vector<std::string>& headings() const;
     unsigned int filteredRowCount () const;
     std::vector<std::string> sortedRowStrings(unsigned int row, bool latex=true) const;
+
+    const ColumnGroups& columnGroups() const;
+    ColumnGroup& setColumnGroup(const std::string& name, 
+                                const std::vector<int>& columns,
+                                bool visible = true);
+    void setColumnGroupVisible(const std::string& name,
+                               bool ok);
+    bool columnGroupVisible(const std::string& name) const;
 
     bool hasReference (unsigned int row) const;
     std::string reference (unsigned int row) const;
@@ -265,6 +284,7 @@ protected:
     mutable std::vector<nlohmann::json> rows_;
     mutable std::vector<RowAnnotation>  annotations_;
     CellStyles                          cell_styles_;
+    std::map<std::string, ColumnGroup>  column_groups_;
 
     mutable SectionContentTableWidget* table_widget_ {nullptr};
 
@@ -317,7 +337,8 @@ public:
     const QTableView* tableView() const;
 
     void showUnused(bool show);
-    void resizeColumns();
+    void resizeContent();
+    void updateColumnVisibility();
 
     int fromProxy(int proxy_row) const;
 

@@ -60,6 +60,7 @@ public:
     ResultIterator end() { return results_.end(); }
 
     const ResultMap& results() const { return results_; }
+    const std::string& resultName() const { return result_name_; }
 
     void updateToChanges();
     void generateResultsReportGUI();
@@ -79,4 +80,5 @@ protected:
 
     ResultMap    results_;     // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
     ResultVector results_vec_; // ordered as generated
+    std::string  result_name_;
 };

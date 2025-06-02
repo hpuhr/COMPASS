@@ -588,6 +588,14 @@ void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report) c
     table.setMaxRowCount(-1); // override row count
 }
 
+/**
+ */
+void EvaluationData::postprocessTargetsTable(ResultReport::SectionContentTable& table) const
+{
+    //hide modeac min/max for now
+    table.setColumnGroup("modeac_minmax", { ColModeCMin, ColModeCMax }, false );
+}
+
 namespace
 {
     /**
@@ -618,7 +626,7 @@ std::pair<nlohmann::json, unsigned int> EvaluationData::rawCellData(const Evalua
     switch (column)
     {
         case ColUse:
-            return std::make_pair(target.useInEval(), 0);
+            return std::make_pair(dbContent::TargetModel::iconForTarget(target), 0);
         case ColUTN: 
             return std::make_pair(target.utn_, 0);
         case ColComment:
@@ -668,7 +676,7 @@ unsigned int EvaluationData::rowStyle(const EvaluationTarget& target) const
 unsigned int EvaluationData::columnStyle(int column) const
 {
     if (column == ColUse)
-        return ResultReport::CellStyleCheckable;
+        return ResultReport::CellStyleIcon;
 
     return 0;
 }

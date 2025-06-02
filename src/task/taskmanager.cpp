@@ -51,7 +51,7 @@
 
 using namespace Utils;
 
-const bool TaskManager::CleanupDBIfNeeded = true;
+const bool TaskManager::CleanupDBIfNeeded = false;
 
 /**
  */

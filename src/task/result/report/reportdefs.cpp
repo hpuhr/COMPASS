@@ -22,7 +22,7 @@ namespace ResultReport
 
 const QColor Colors::TextRed    = QColor(220,20,60);
 const QColor Colors::TextOrange = QColor(255,140,0);
-const QColor Colors::TextGreen  = Qt::darkGreen;
+const QColor Colors::TextGreen  = QColor(0,128,0);
 const QColor Colors::TextGray   = Qt::darkGray;
 
 const QColor Colors::BGRed    = QColor(240,128,128);

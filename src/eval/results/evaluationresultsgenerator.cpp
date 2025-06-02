@@ -95,6 +95,8 @@ void EvaluationResultsGenerator::evaluate(EvaluationStandard& standard,
            << " split_results_by_mops " << eval_settings.report_split_results_by_mops_
            << " report_split_results_by_aconly_ms " << eval_settings.report_split_results_by_aconly_ms_;
 
+    result_name_ = "";
+
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;
 
@@ -447,6 +449,8 @@ void EvaluationResultsGenerator::clear()
     // clear everything
     results_.clear();
     results_vec_.clear();
+
+    result_name_ = "";
 }
 
 /**
@@ -467,8 +471,11 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     msg_box.setWindowModality(Qt::ApplicationModal);
     msg_box.show();
 
+    //@TODO: allow multiple eval results by letting the user provide a result name
+    result_name_ = EvalResultName;
+
     auto& task_manager = COMPASS::instance().taskManager();
-    task_manager.beginTaskResultWriting(EvalResultName, task::TaskResultType::Evaluation);
+    task_manager.beginTaskResultWriting(result_name_, task::TaskResultType::Evaluation);
 
     auto& result = task_manager.currentResult();
     auto& report = task_manager.currentReport();

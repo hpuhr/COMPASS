@@ -467,32 +467,17 @@ bool RTCommandEvaluate::run_impl()
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
-    //@TODO:
-    // if (!eval_man.canEvaluate)
-    // {
-    //     setResultMessage("Unable to load evaluation data and evaluate");
-    //     return false;
-    // }
+    if (!eval_man.canEvaluate().ok())
+    {
+        setResultMessage("Unable to load evaluation data and evaluate");
+        return false;
+    }
 
-    // loginf << "RTCommandEvaluate: run_impl: loading evaluation data";
+    loginf << "RTCommandEvaluate: run_impl: loading evaluation data";
 
-    // eval_man.loadDataAndEvaluate();
+    eval_man.evaluate(false, true);
 
-    // while (!eval_man.dataLoaded())
-    // {
-    //     QCoreApplication::processEvents();
-    //     QThread::msleep(1);
-    // }
-
-    // assert (eval_man.dataLoaded());
-
-    // loginf << "RTCommandEvaluate: run_impl: doing evaluation";
-
-    // eval_man.evaluate();
-
-    // return eval_man.evaluated();
-
-    return false;
+    return eval_man.evaluated();
 }
 
 void RTCommandEvaluate::collectOptions_impl(OptionsDescription& options,
