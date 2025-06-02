@@ -339,27 +339,76 @@ void TargetListWidget::showSurroundingDataSlot ()
     dbcont_man.showSurroundingData(selected_utns);
 }
 
-void TargetListWidget::createTargetEvalMenu(QMenu& menu, const std::set<unsigned int>& utns)
+void TargetListWidget::createTargetEvalMenu(QMenu& menu, 
+                                            const std::set<unsigned int>& utns,
+                                            bool check_utns)
 {
+    bool targets_ok = true;
+    if (check_utns)
+    {
+        for (auto utn : utns)
+        {
+            if (!model_.existsTarget(utn))
+            {
+                targets_ok = false;
+                break;
+            }
+        }
+    }
+
     QAction* use_action = menu.addAction("Use Target(s)");
+    use_action->setEnabled(targets_ok);
     connect (use_action, &QAction::triggered, [ this, utns ] () { this->evalUseSelectedTargets(utns); });
 
     QAction* nouse_action = menu.addAction("Disable Target(s)");
+    nouse_action->setEnabled(targets_ok);
     connect (nouse_action, &QAction::triggered, [ this, utns ] () { this->evalDisableSelectedTargets(utns); });
 
     menu.addSeparator();
 
     QAction* tw_action = menu.addAction("Edit Excluded Time Windows");
+    tw_action->setEnabled(targets_ok);
     connect (tw_action, &QAction::triggered, [ this, utns ] () { this->evalExcludeTimeWindowsTarget(utns); });
 
     QAction* tw_clear_action = menu.addAction("Clear Excluded Time Windows");
+    tw_clear_action->setEnabled(targets_ok);
     connect (tw_clear_action, &QAction::triggered, [ this, utns ] () { this->evalClearTargetsExcludeTimeWindows(utns); });
 
     QAction* req_action = menu.addAction("Edit Excluded Requirements");
+    req_action->setEnabled(targets_ok);
     connect (req_action, &QAction::triggered, [ this, utns ] () { this->evalExcludeRequirementsTarget(utns); });
 
     QAction* req_clear_action = menu.addAction("Clear Excluded Requirements");
+    req_clear_action->setEnabled(targets_ok);
     connect (req_clear_action, &QAction::triggered, [ this, utns ] () { this->evalClearTargetsExcludeRequirements(utns); });
+}
+
+void TargetListWidget::createTargetEvalMenu(QMenu& menu, 
+                                            const Target& target,
+                                            const std::string& req_name)
+{
+    bool  target_ok        = model_.existsTarget(target.utn_);
+    auto  target_ptr       = &target;
+    auto& eval_man         = COMPASS::instance().evaluationManager();
+    auto  all_requirements = eval_man.calculator().currentStandard().getAllRequirementNames();
+    bool  has_requirement  = all_requirements.count(req_name) > 0;
+    bool  has_timewin      = !target.timeBegin().is_not_a_date_time() &&
+                             !target.timeEnd().is_not_a_date_time();
+
+    QAction* tw_action = menu.addAction("Exclude Time Window");
+    tw_action->setEnabled(target_ok && has_timewin);
+    connect (tw_action, &QAction::triggered, 
+        [ this, target_ptr ] () { this->evalExcludeTimeWindowTarget(*target_ptr); });
+
+    QAction* req_action = menu.addAction("Exclude From Requirement '" + QString::fromStdString(req_name) + "'");
+    req_action->setEnabled(target_ok && has_requirement);
+    connect (req_action, &QAction::triggered, 
+        [ this, target_ptr, req_name ] () { this->evalExcludeRequirementTarget(*target_ptr, req_name); });
+
+    QAction* req_all_action = menu.addAction("Exclude From All Requirements");
+    req_all_action->setEnabled(target_ok);
+    connect (req_all_action, &QAction::triggered, 
+        [ this, target_ptr ] () { this->evalExcludeAllRequirementsTarget(*target_ptr); });
 }
 
 void TargetListWidget::clearSelectedTargetsComments(const std::set<unsigned int>& utns)
@@ -403,7 +452,8 @@ void TargetListWidget::evalClearTargetsExcludeRequirements(const std::set<unsign
     resizeColumnsToContents();
 }
 
-void TargetListWidget::evalExcludeTimeWindowsTarget(const std::set<unsigned int>& utns)
+void TargetListWidget::evalExcludeTimeWindowsTarget(const std::set<unsigned int>& utns,
+                                                    const Utils::TimeWindowCollection* exclude_windows)
 {
     loginf << "TargetListWidget: evalExcludeTimeWindowsTarget";
 
@@ -429,6 +479,16 @@ void TargetListWidget::evalExcludeTimeWindowsTarget(const std::set<unsigned int>
             comments.insert(target.comment());
     }
 
+    // add externally provided time windows
+    if (exclude_windows)
+    {
+        for (const auto& tw : *exclude_windows)
+        {
+            if (!filtered_time_windows.contains(tw))
+                filtered_time_windows.add(tw);
+        }
+    }
+
     EvaluationTargetExcludedTimeWindowsDialog dialog (String::compress(utns, ','),
                                                      filtered_time_windows,
                                                      String::compress(comments, '\n'));
@@ -446,7 +506,8 @@ void TargetListWidget::evalExcludeTimeWindowsTarget(const std::set<unsigned int>
     resizeColumnsToContents();
 }
 
-void TargetListWidget::evalExcludeRequirementsTarget(const std::set<unsigned int>& utns)
+void TargetListWidget::evalExcludeRequirementsTarget(const std::set<unsigned int>& utns,
+                                                     const std::set<std::string>* exclude_requirements)
 {
     loginf << "TargetListWidget: evalExcludeRequirementsTarget";
 
@@ -467,7 +528,7 @@ void TargetListWidget::evalExcludeRequirementsTarget(const std::set<unsigned int
     set<string> all_requirements = eval_man.calculator().currentStandard().getAllRequirementNames();
     set<string> comments;
 
-    // collect all time windows from all targets
+    // collect all requirements from all targets
     for (auto utn : utns)
     {
         assert (dbcont_man.existsTarget(utn));
@@ -484,8 +545,19 @@ void TargetListWidget::evalExcludeRequirementsTarget(const std::set<unsigned int
             comments.insert(target.comment());
     }
 
-    EvaluationTargetExcludedRequirementsDialog dialog (String::compress(utns, ','),
-                                                      selected_requirements, all_requirements,
+    // add externally provided requirements
+    if (exclude_requirements)
+    {
+        for (const auto& req_name : *exclude_requirements)
+        {
+            if (!selected_requirements.count(req_name))
+                selected_requirements.insert(req_name);
+        }
+    }
+
+    EvaluationTargetExcludedRequirementsDialog dialog(String::compress(utns, ','),
+                                                      selected_requirements, 
+                                                      all_requirements,
                                                       String::compress(comments, '\n'));
     int result = dialog.exec();
 
@@ -500,6 +572,31 @@ void TargetListWidget::evalExcludeRequirementsTarget(const std::set<unsigned int
     model_.setEvalExcludeRequirements(utns, selected_requirements);
 
     resizeColumnsToContents();
+}
+
+void TargetListWidget::evalExcludeTimeWindowTarget(const Target& target)
+{
+    Utils::TimeWindowCollection twc;
+    twc.add(Utils::TimeWindow(target.timeBegin(), target.timeEnd()));
+
+    evalExcludeTimeWindowsTarget({ target.utn_ }, &twc);
+}
+
+void TargetListWidget::evalExcludeRequirementTarget(const Target& target,
+                                                    const std::string& req_name)
+{
+    std::set<std::string> requirements;
+    requirements.insert(req_name);
+
+    evalExcludeRequirementsTarget({ target.utn_ }, &requirements);
+}
+
+void TargetListWidget::evalExcludeAllRequirementsTarget(const Target& target)
+{
+    auto& eval_man         = COMPASS::instance().evaluationManager();
+    auto  all_requirements = eval_man.calculator().currentStandard().getAllRequirementNames();
+
+    evalExcludeRequirementsTarget({ target.utn_ }, &all_requirements);
 }
 
 void TargetListWidget::clearSelectedTargetsCommentsSlot()

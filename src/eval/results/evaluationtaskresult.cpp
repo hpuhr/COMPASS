@@ -424,6 +424,15 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
 
             auto action_show_data = menu.addAction("Show Surrounding Data");
             QObject::connect (action_show_data, &QAction::triggered, [ = ] () { this->showSurroundingData(utn); });
+
+            auto usage_menu = menu.addMenu("Target Usage");
+
+            const auto& target             = targets_.at(utn);
+            auto        target_list_widget = COMPASS::instance().dbContentManager().targetListWidget();
+
+            target_list_widget->createTargetEvalMenu(*usage_menu, 
+                                                     target,
+                                                     info.req_name);
         }
 
         //@TODO: jump to requirement
@@ -456,7 +465,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
         if (calculator_ && !isLocked())
         {
             auto usage_menu = menu.addMenu("Target Usage");
-            COMPASS::instance().dbContentManager().targetListWidget()->createTargetEvalMenu(*usage_menu, { utn });
+            COMPASS::instance().dbContentManager().targetListWidget()->createTargetEvalMenu(*usage_menu, { utn }, true);
         }
 
         return true;
@@ -813,7 +822,7 @@ void EvaluationTaskResult::jumpToRequirement(const Evaluation::RequirementSumRes
  */
 void EvaluationTaskResult::informUpdateEvalResult(int update_type)
 {
-    update_type = task::Locked;
+    //update_type = task::Locked;
 
     TaskResult::ContentID content_id;
     if (update_type == task::ContentUpdateNeeded)

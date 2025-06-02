@@ -7,6 +7,8 @@
 
 #include <set>
 
+#include <boost/date_time/posix_time/ptime.hpp>
+
 class DBContentManager;
 
 class QTableView;
@@ -14,9 +16,15 @@ class QSortFilterProxyModel;
 
 class QMenu;
 
+namespace Utils
+{
+    class TimeWindowCollection;
+}
+
 namespace dbContent 
 {
 
+class Target;
 class TargetModel;
 
 /**
@@ -68,8 +76,12 @@ public:
 
     void resizeColumnsToContents();
 
-    void createTargetEvalMenu(QMenu& menu, const std::set<unsigned int>& utns);
-
+    void createTargetEvalMenu(QMenu& menu, 
+                              const std::set<unsigned int>& utns,
+                              bool check_utns = false);
+    void createTargetEvalMenu(QMenu& menu, 
+                              const Target& target,
+                              const std::string& req_name);
 protected:
     void showMainColumns(bool show);
     void showEvalColumns(bool show);
@@ -82,8 +94,15 @@ protected:
     void evalDisableSelectedTargets(const std::set<unsigned int>& utns);
     void evalClearTargetsExcludeTimeWindows(const std::set<unsigned int>& utns);
     void evalClearTargetsExcludeRequirements(const std::set<unsigned int>& utns);
-    void evalExcludeTimeWindowsTarget(const std::set<unsigned int>& utns);
-    void evalExcludeRequirementsTarget(const std::set<unsigned int>& utns);
+    void evalExcludeTimeWindowsTarget(const std::set<unsigned int>& utns,
+                                      const Utils::TimeWindowCollection* exclude_windows = nullptr);
+    void evalExcludeRequirementsTarget(const std::set<unsigned int>& utns,
+                                       const std::set<std::string>* exclude_requirements = nullptr);
+
+    void evalExcludeTimeWindowTarget(const Target& target);
+    void evalExcludeRequirementTarget(const Target& target,
+                                      const std::string& req_name);
+    void evalExcludeAllRequirementsTarget(const Target& target);
 
     TargetModel& model_;
     DBContentManager& dbcont_manager_;
