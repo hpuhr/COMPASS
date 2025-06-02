@@ -59,6 +59,7 @@ signals:
     void standardsChangedSignal(); // emitted if standard was added or deleted
     void currentStandardChangedSignal(); // emitted if current standard was changed
     void resultsChangedSignal();
+    void evaluationDoneSignal();
     void hasNewData();
 
     void resultsNeedUpdate(int type);
@@ -84,7 +85,7 @@ public:
 
     bool evaluated() const;
     Result canEvaluate() const;
-    void evaluate(bool show_dialog);
+    void evaluate(bool show_dialog, bool blocking = false);
 
     bool canGenerateReport() const;
     void generateReport();

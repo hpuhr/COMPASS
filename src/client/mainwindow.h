@@ -121,6 +121,9 @@ public:
     void loadingStarted();
     void loadingDone();
 
+    void selectTool(const std::string& name);
+    void showResult(const std::string& name);
+
 protected:
     void createUI();
     void createMenus();
@@ -132,6 +135,8 @@ protected:
     void closeEvent(QCloseEvent* event);
 
     void shutdown();
+
+    void showEvaluationResult();
 
     QWidget* main_widget_{nullptr};
     QTabWidget* tab_widget_{nullptr};

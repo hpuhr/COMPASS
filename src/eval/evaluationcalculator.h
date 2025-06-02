@@ -198,6 +198,7 @@ public:
 
     bool hasResults() const;
     const ResultMap& results() const;
+    const std::string& resultName() const;
 
     EvaluationRequirementResult::Single* singleResult(const Evaluation::RequirementResultID& id,
                                                       unsigned int utn) const;
@@ -221,6 +222,7 @@ signals:
     void standardsChanged();
     void currentStandardChanged();
     void resultsChanged();
+    void evaluationDone();
     
 protected:
     virtual void checkSubConfigurables() override;
@@ -261,7 +263,7 @@ protected:
     bool test_data_loaded_       {false};
     bool evaluated_              {false};
     bool active_load_connection_ {false};
-    bool update_report_          {true};
+    bool update_report_          {true };
 
     std::vector<std::unique_ptr<EvaluationStandard>> standards_;
 

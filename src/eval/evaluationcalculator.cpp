@@ -464,6 +464,7 @@ void EvaluationCalculator::evaluateData()
     evaluated_ = true;
 
     emit resultsChanged();
+    emit evaluationDone();
 }
 
 /**
@@ -1150,6 +1151,11 @@ bool EvaluationCalculator::hasResults() const
 const EvaluationCalculator::ResultMap& EvaluationCalculator::results() const
 {
     return results_gen_.results(); 
+}
+
+const std::string& EvaluationCalculator::resultName() const
+{
+    return results_gen_.resultName(); 
 }
 
 /**

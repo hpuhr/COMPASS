@@ -961,8 +961,10 @@ void SectionContentTable::customContextMenu(unsigned int row, const QPoint& pos)
 void SectionContentTable::addActionsToMenu(QMenu* menu)
 {
     //add general actions
-    QAction* unused_action = menu->addAction("Toggle Show Unused");
-    QObject::connect (unused_action, &QAction::triggered, [ this ] { this->toggleShowUnused(); });
+
+    //@TODO: seems to be broken at the moment, fix functionality
+    //QAction* unused_action = menu->addAction("Toggle Show Unused");
+    //QObject::connect (unused_action, &QAction::triggered, [ this ] { this->toggleShowUnused(); });
 
     QAction* copy_action = menu->addAction("Copy Content");
     QObject::connect (copy_action, &QAction::triggered, [ this ] { this->copyContent(); });
