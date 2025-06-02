@@ -74,10 +74,10 @@ using namespace boost::posix_time;
  */
 EvaluationCalculator::EvaluationCalculator(const std::string& class_id, 
                                            const std::string& instance_id,
-                                           EvaluationManager& manager)
-:   Configurable      (class_id, instance_id, &manager)
-,   manager_          (manager)
-,   data_             (*this, manager.compass().dbContentManager())
+                                           EvaluationManager& eval_man, DBContentManager& dbcontent_man)
+:   Configurable      (class_id, instance_id, &eval_man)
+,   eval_man_          (eval_man)
+,   data_             (*this, eval_man_, dbcontent_man)
 ,   results_gen_      (*this)
 {
     readSettings();
@@ -86,11 +86,11 @@ EvaluationCalculator::EvaluationCalculator(const std::string& class_id,
 
 /**
  */
-EvaluationCalculator::EvaluationCalculator(EvaluationManager& manager,
+EvaluationCalculator::EvaluationCalculator(EvaluationManager& eval_man, DBContentManager& dbcontent_man,
                                            const nlohmann::json& config)
 :   Configurable      ("EvaluationManager", "EvaluationManager0", nullptr, "", &config)
-,   manager_          (manager)
-,   data_             (*this, manager.compass().dbContentManager())
+,   eval_man_          (eval_man)
+,   data_             (*this, eval_man_, dbcontent_man)
 ,   results_gen_      (*this)
 {
     readSettings();
@@ -345,7 +345,7 @@ void EvaluationCalculator::evaluate(bool blocking,
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     // remove previous stuff
-    manager_.resetViewableDataConfig(true);
+    eval_man_.resetViewableDataConfig(true);
 
     clearData();
 
@@ -363,16 +363,16 @@ void EvaluationCalculator::evaluate(bool blocking,
 
     if (blocking)
     {
-        manager_.loadData(*this, true);
+        eval_man_.loadData(*this, true);
         loadingDone();
     }
     else
     {
         assert(!active_load_connection_);
 
-        QObject::connect(&manager_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
+        QObject::connect(&eval_man_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
         active_load_connection_ = true;
-        manager_.loadData(*this, false);
+        eval_man_.loadData(*this, false);
     }
 }
 
@@ -384,11 +384,11 @@ void EvaluationCalculator::loadingDone()
 
     if (active_load_connection_)
     {
-        QObject::disconnect(&manager_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
+        QObject::disconnect(&eval_man_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
         active_load_connection_ = false;
     }
 
-    auto data = manager_.fetchData();
+    auto data = eval_man_.fetchData();
 
     data_.setBuffers(data);
 
@@ -536,7 +536,7 @@ const std::string& EvaluationCalculator::minHeightFilterLayerName() const
  */
 void EvaluationCalculator::minHeightFilterLayerName(const std::string& layer_name)
 {
-    assert(layer_name.empty() || manager_.hasSectorLayer(layer_name));
+    assert(layer_name.empty() || eval_man_.hasSectorLayer(layer_name));
 
     loginf << "EvaluationCalculator: minHeightFilterLayerName: layer changed to "
            << (layer_name.empty() ? "null" : "'" + layer_name + "'");
@@ -552,7 +552,7 @@ std::shared_ptr<SectorLayer> EvaluationCalculator::minHeightFilterLayer() const
         return {};
 
     //!will assert on non-existing layer name!
-    return manager_.sectorLayer(settings_.min_height_filter_layer_);
+    return eval_man_.sectorLayer(settings_.min_height_filter_layer_);
 }
 
 /**
@@ -561,7 +561,7 @@ std::shared_ptr<SectorLayer> EvaluationCalculator::minHeightFilterLayer() const
  */
 void EvaluationCalculator::checkMinHeightFilterValid()
 {
-    if (!settings_.min_height_filter_layer_.empty() && !manager_.hasSectorLayer(settings_.min_height_filter_layer_))
+    if (!settings_.min_height_filter_layer_.empty() && !eval_man_.hasSectorLayer(settings_.min_height_filter_layer_))
     {
         logerr << "EvaluationCalculator: checkMinHeightFilterValid: Layer '" << settings_.min_height_filter_layer_ << "'"
                << " not present, resetting min height filter";
@@ -959,7 +959,7 @@ std::vector<std::string> EvaluationCalculator::currentRequirementNames() const
  */
 bool EvaluationCalculator::sectorsLoaded() const
 {
-    return manager_.sectorsLoaded();
+    return eval_man_.sectorsLoaded();
 }
 
 /**
@@ -1000,14 +1000,14 @@ bool EvaluationCalculator::anySectorsWithReq() const
  */
 std::vector<std::shared_ptr<SectorLayer>>& EvaluationCalculator::sectorLayers()
 {
-    return manager_.sectorsLayers();
+    return eval_man_.sectorsLayers();
 }
 
 /**
  */
 const std::vector<std::shared_ptr<SectorLayer>>& EvaluationCalculator::sectorLayers() const
 {
-    return manager_.sectorsLayers();
+    return eval_man_.sectorsLayers();
 }
 
 /**
@@ -1015,7 +1015,7 @@ const std::vector<std::shared_ptr<SectorLayer>>& EvaluationCalculator::sectorLay
 void EvaluationCalculator::updateSectorLayers()
 {
     if (use_fast_sector_inside_check_)
-        manager_.updateSectorLayers();
+        eval_man_.updateSectorLayers();
 }
 
 /**
@@ -1284,12 +1284,12 @@ nlohmann::json::object_t EvaluationCalculator::getBaseViewableDataConfig () cons
         }
     }
 
-    if (manager_.use_timestamp_filter_)
+    if (eval_man_.use_timestamp_filter_)
     {
         data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] =
-            Time::toString(manager_.load_timestamp_begin_);
+            Time::toString(eval_man_.load_timestamp_begin_);
         data[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] =
-            Time::toString(manager_.load_timestamp_end_);
+            Time::toString(eval_man_.load_timestamp_end_);
     }
 
     return data;
@@ -1345,7 +1345,7 @@ void EvaluationCalculator::showUTN (unsigned int utn)
     data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
     loginf << "EvaluationCalculator: showUTN: showing";
-    manager_.setViewableDataConfig(data);
+    eval_man_.setViewableDataConfig(data);
 }
 
 /**
@@ -1355,7 +1355,7 @@ void EvaluationCalculator::showFullUTN (unsigned int utn)
     nlohmann::json::object_t data;
     data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
-    manager_.setViewableDataConfig(data);
+    eval_man_.setViewableDataConfig(data);
 }
 
 /**
@@ -1431,7 +1431,7 @@ void EvaluationCalculator::showSurroundingData (const EvaluationTarget& target)
         data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(target.longitudeMin()-lon_eps);
     }
 
-    manager_.setViewableDataConfig(data);
+    eval_man_.setViewableDataConfig(data);
 }
 
 /**

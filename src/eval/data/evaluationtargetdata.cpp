@@ -26,6 +26,7 @@
 #include "dbcontent/target/target.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "evaluationmanager.h"
 #include "evaluationcalculator.h"
 #include "util/timeconv.h"
 #include "sector/airspace.h"
@@ -63,11 +64,13 @@ EvaluationTargetData::EvaluationTargetData(unsigned int utn,
                                            EvaluationData& eval_data,
                                            std::shared_ptr<dbContent::DBContentAccessor> accessor,
                                            EvaluationCalculator& calculator,
+                                           EvaluationManager& eval_man,
                                            DBContentManager& dbcont_man)
     :   utn_       (utn)
     ,   eval_data_ (eval_data)
     ,   accessor_  (accessor)
     ,   calculator_(calculator)
+    ,   eval_man_(eval_man)
     ,   dbcont_man_(dbcont_man)
     ,   ref_chain_ (accessor_, calculator_.dbContentNameRef())
     ,   tst_chain_ (accessor_, calculator_.dbContentNameTst())
@@ -1772,6 +1775,10 @@ const Utils::TimeWindowCollection& EvaluationTargetData::excludedTimeWindows() c
 
 bool EvaluationTargetData::isTimeStampNotExcluded(const boost::posix_time::ptime& ts) const
 {
+    // check global, begin/end are excluded by load filter
+    if (eval_man_.useTimestampFilter() && eval_man_.excludedTimeWindows().contains(ts))
+        return false;
+
     return !excluded_time_windows_.contains(ts);
 }
 

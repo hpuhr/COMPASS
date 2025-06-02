@@ -1866,7 +1866,7 @@ Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_need
 
     try
     {
-        //removeTable(TaskResult::DBTableName);
+        // removeTable(TaskResult::DBTableName); // UGA TABLEHACK
 
         //create needed tables
         if (!existsTaskResultsTable())

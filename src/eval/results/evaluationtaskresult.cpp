@@ -77,11 +77,12 @@ Result EvaluationTaskResult::createCalculator()
     }
 
     auto& eval_manager = COMPASS::instance().evaluationManager();
+    auto& dbcontent_man = COMPASS::instance().dbContentManager();
 
     try
     {
         //create calculator based on stored config
-        calculator_.reset(new EvaluationCalculator(eval_manager, config_));
+        calculator_.reset(new EvaluationCalculator(eval_manager, dbcontent_man, config_));
     }
     catch(const std::exception& ex)
     {

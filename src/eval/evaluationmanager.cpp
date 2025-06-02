@@ -72,7 +72,8 @@ EvaluationManager::EvaluationManager(const std::string& class_id,
                                      const std::string& instance_id, 
                                      COMPASS* compass)
 :   Configurable(class_id, instance_id, compass, "eval.json")
-,   compass_    (*compass)
+//,   compass_    (*compass)
+    , dbcontent_man_(compass->dbContentManager())
 {
     createSubConfigurables();
     init_evaluation_commands();
@@ -99,7 +100,7 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
     {
         assert(!calculator_);
 
-        EvaluationCalculator* calculator = new EvaluationCalculator(class_id, instance_id, *this);
+        EvaluationCalculator* calculator = new EvaluationCalculator(class_id, instance_id, *this, dbcontent_man_);
         calculator_.reset(calculator);
     }
     else

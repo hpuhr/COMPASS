@@ -35,6 +35,7 @@
 class COMPASS;
 class EvaluationStandard;
 class DBContent;
+class DBContentManager;
 class SectorLayer;
 class AirSpace;
 struct EvaluationSettings;
@@ -145,6 +146,7 @@ public:
 
     EvaluationTargetFilter& targetFilter() const;
 
+
   protected:
     friend class EvaluationCalculator;
 
@@ -157,7 +159,7 @@ public:
                   bool blocking);
     std::map<std::string, std::shared_ptr<Buffer>> fetchData();
 
-    COMPASS& compass() { return compass_; }
+    //COMPASS& compass() { return compass_; }
 
 private:
     void loadSectors();
@@ -167,7 +169,8 @@ private:
     void configureLoadFilters(const EvaluationCalculator& calculator);
     void loadingDone();
 
-    COMPASS& compass_;
+    //COMPASS& compass_;
+    DBContentManager& dbcontent_man_;
 
     bool sectors_loaded_ {false};
     bool initialized_ {false};

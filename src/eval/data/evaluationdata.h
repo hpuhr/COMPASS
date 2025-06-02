@@ -32,6 +32,7 @@
 
 class EvaluationCalculator;
 class DBContent;
+class EvaluationManager;
 class DBContentManager;
 class Buffer;
 
@@ -62,7 +63,8 @@ class EvaluationData
 public:
     typedef EvaluationTarget::InterestEnabledFunc InterestEnabledFunc;
 
-    EvaluationData(EvaluationCalculator& calculator, 
+    EvaluationData(EvaluationCalculator& calculator,
+                   EvaluationManager& eval_man,
                    DBContentManager& dbcont_man);
 
     void setBuffers(std::map<std::string, std::shared_ptr<Buffer>> buffers);
@@ -131,6 +133,7 @@ protected:
     unsigned int columnStyle(int column) const;
 
     EvaluationCalculator& calculator_;
+    EvaluationManager&    eval_man_;
     DBContentManager&     dbcont_man_;
 
     QStringList table_columns_ { "Use", 

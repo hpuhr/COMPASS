@@ -34,8 +34,9 @@
 #include <QObject>
 
 class EvaluationStandard;
-struct EvaluationTarget;
+class EvaluationTarget;
 class EvaluationManager;
+class DBContentManager;
 
 class DBContent;
 class SectorLayer;
@@ -85,8 +86,8 @@ public:
 
     EvaluationCalculator(const std::string& class_id, 
                          const std::string& instance_id,
-                         EvaluationManager& manager);
-    EvaluationCalculator(EvaluationManager& manager,
+                         EvaluationManager& eval_man, DBContentManager& dbcontent_man);
+    EvaluationCalculator(EvaluationManager& eval_man, DBContentManager& dbcontent_man,
                          const nlohmann::json& config);
     virtual ~EvaluationCalculator();
 
@@ -202,8 +203,8 @@ public:
                                                       unsigned int utn) const;
     EvaluationRequirementResult::Joined* joinedResult(const Evaluation::RequirementResultID& id) const;
 
-    EvaluationManager& manager() { return manager_; }
-    const EvaluationManager& manager() const { return manager_; }
+    EvaluationManager& manager() { return eval_man_; }
+    const EvaluationManager& manager() const { return eval_man_; }
     EvaluationData& data() { return data_; }
     const EvaluationData& data() const { return data_; }
     EvaluationResultsGenerator& resultsGenerator() { return results_gen_; }
@@ -242,7 +243,7 @@ protected:
 
     void evaluateData();
 
-    EvaluationManager& manager_;
+    EvaluationManager& eval_man_;
 
     std::vector<unsigned int>                    eval_utns_;
     std::vector<Evaluation::RequirementResultID> eval_requirements_;

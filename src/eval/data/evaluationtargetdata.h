@@ -39,6 +39,7 @@ class Buffer;
 class EvaluationTarget;
 class EvaluationData;
 class EvaluationCalculator;
+class EvaluationManager;
 class DBContentManager;
 class SectorLayer;
 
@@ -57,6 +58,7 @@ public:
                          EvaluationData& eval_data,
                          std::shared_ptr<dbContent::DBContentAccessor> accessor,
                          EvaluationCalculator& calculator,
+                         EvaluationManager& eval_man,
                          DBContentManager& dbcont_man);
     virtual ~EvaluationTargetData();
 
@@ -236,6 +238,7 @@ protected:
     EvaluationData& eval_data_;
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
     EvaluationCalculator& calculator_;
+    EvaluationManager& eval_man_;
     DBContentManager& dbcont_man_;
 
     dbContent::TargetReport::Chain ref_chain_;

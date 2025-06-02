@@ -21,6 +21,7 @@
 #include "evaluationtarget.h"
 #include "requirement/base/baseconfig.h"
 #include "requirement/group.h"
+#include "evaluationmanager.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "buffer.h"
@@ -30,7 +31,7 @@
 #include "task/result/report/sectioncontenttable.h"
 
 #include "util/async.h"
-#include "util/stringmat.h"
+//#include "util/stringmat.h"
 
 #include <QApplication>
 #include <QThread>
@@ -39,10 +40,10 @@
 
 #include "util/tbbhack.h"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+//#include "boost/date_time/posix_time/posix_time.hpp"
 
-#include <sstream>
-#include <future>
+//#include <sstream>
+//#include <future>
 
 using namespace std;
 using namespace Utils;
@@ -55,9 +56,10 @@ const std::string EvaluationData::ContentPropertyTargets = "targets";
 
 /**
  */
-EvaluationData::EvaluationData(EvaluationCalculator& calculator, 
+EvaluationData::EvaluationData(EvaluationCalculator& calculator,
+                               EvaluationManager& eval_man,
                                DBContentManager& dbcont_man)
-    : calculator_(calculator), dbcont_man_(dbcont_man)
+    : calculator_(calculator), eval_man_(eval_man), dbcont_man_(dbcont_man)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
 }
@@ -159,7 +161,7 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
             }
 
             if (!hasTargetData(utn))
-                target_data_.emplace_back(utn, *this, accessor_, calculator_, dbcont_man_);
+                target_data_.emplace_back(utn, *this, accessor_, calculator_, eval_man_, dbcont_man_);
 
             assert (hasTargetData(utn));
 
@@ -264,7 +266,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
             }
 
             if (!hasTargetData(utn))
-                target_data_.emplace_back(utn, *this, accessor_, calculator_, dbcont_man_);
+                target_data_.emplace_back(utn, *this, accessor_, calculator_, eval_man_, dbcont_man_);
 
             assert (hasTargetData(utn));
 
