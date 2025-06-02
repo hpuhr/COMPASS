@@ -160,7 +160,8 @@ public:
 
     // test
     unsigned int tstDSID(const dbContent::TargetReport::Chain::DataID& ref_id) const;
-    boost::optional<bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& tst_id) const; // gds
+    boost::optional<bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& tst_id,
+                                                   const boost::posix_time::time_duration& d_max) const; // gds
 
     // TODO d_max not used
     boost::optional<bool> availableRefGroundBit(const dbContent::TargetReport::Chain::DataID& id,
@@ -168,16 +169,16 @@ public:
     boost::optional<bool> availableTstGroundBit(const dbContent::TargetReport::Chain::DataID& id,
                                                 const boost::posix_time::time_duration& d_max) const;
 
-    bool refPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
-    bool refPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool refPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool refPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
     bool refPosInside(const SectorLayer& layer,
                       const dbContent::TargetReport::Chain::DataID& id) const;
-    bool tstPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
-    bool tstPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool tstPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool tstPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
     bool tstPosInside(const SectorLayer& layer,
                       const dbContent::TargetReport::Chain::DataID& id) const;
-    bool mappedRefPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
-    bool mappedRefPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool mappedRefPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool mappedRefPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
     bool mappedRefPosInside(const SectorLayer& layer, 
                             const dbContent::TargetReport::Chain::DataID& id) const;
 
@@ -227,10 +228,10 @@ protected:
                                  unsigned int idx_internal,
                                  const boost::optional<bool>& ground_bit,
                                  const SectorLayer* min_height_filter = nullptr) const;
-    bool checkAbove(const InsideCheckMatrix& mat,
-                    const dbContent::TargetReport::Index& index) const;
-    bool checkGroundBit(const InsideCheckMatrix& mat,
-                        const dbContent::TargetReport::Index& index) const;
+    // bool checkAbove(const InsideCheckMatrix& mat,
+    //                 const dbContent::TargetReport::Index& index) const;
+    // bool checkGroundBit(const InsideCheckMatrix& mat,
+    //                     const dbContent::TargetReport::Index& index) const;
     bool checkInside(const SectorLayer& layer,
                      const InsideCheckMatrix& mat,
                      const dbContent::TargetReport::Index& index) const;

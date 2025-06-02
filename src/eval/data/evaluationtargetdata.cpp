@@ -708,29 +708,25 @@ unsigned int EvaluationTargetData::tstDSID(const dbContent::TargetReport::Chain:
 
 /**
  */
-boost::optional<bool> EvaluationTargetData::tstGroundBitInterpolated(const DataID& ref_id) const // true is on ground
+boost::optional<bool> EvaluationTargetData::tstGroundBitInterpolated(
+    const DataID& ref_id, const boost::posix_time::time_duration& d_max) const // true is on ground
 {
     auto ref_timestamp = ref_chain_.timestampFromDataID(ref_id);
 
     DataMappingTimes times = tst_chain_.findDataMappingTimes(ref_timestamp);
 
-    if (times.has_other1_ && (ref_timestamp - times.timestamp_other1_).abs() < seconds(InterpGroundBitMaxSeconds))
+    if (times.has_other1_ && (ref_timestamp - times.timestamp_other1_).abs() < d_max)
     {
         auto gbs = tst_chain_.groundBit(times.dataid_other1_);
 
         if (gbs.has_value() && *gbs)
             return gbs;
     }
-    //            && tst_chain_.hasGroundBit(times.dataid_other1_)
-    //            && get<1>(tst_chain_.groundBit(times.dataid_other1_)))
-    //        return pair<bool,bool> (true, true);
 
-    if (times.has_other2_ && (ref_timestamp - times.timestamp_other2_).abs() < seconds(InterpGroundBitMaxSeconds))
+    if (times.has_other2_ && (ref_timestamp - times.timestamp_other2_).abs() < d_max)
     {
         return tst_chain_.groundBit(times.dataid_other2_);
     }
-    //            && tst_chain_.hasGroundBit(times.timestamp_other2_))
-    //        return pair<bool,bool> (true, get<1>(tst_chain_.groundBit(times.timestamp_other2_)));
 
     return {};
 }
@@ -1554,7 +1550,7 @@ boost::optional<bool> EvaluationTargetData::availableRefGroundBit(
     if (gbs.has_value() && *gbs)
         return gbs;
 
-    return tstGroundBitInterpolated(ts);
+    return tstGroundBitInterpolated(ts, d_max);
 }
 
 /**
@@ -1626,27 +1622,27 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
         }
     }
 
-    mat(idx_internal, extra_offset     ) = has_gb;
-    mat(idx_internal, extra_offset + 1 ) = above_ok;
+    mat(idx_internal, extra_offset     ) = has_gb; // TODO unsused
+    mat(idx_internal, extra_offset + 1 ) = above_ok; // TODO unsused
 }
 
 /**
 */
-bool EvaluationTargetData::refPosAbove(const DataID& id) const
-{
-    auto index = ref_chain_.indexFromDataID(id);
+// bool EvaluationTargetData::refPosAbove(const DataID& id) const
+// {
+//     auto index = ref_chain_.indexFromDataID(id);
 
-    return checkAbove(inside_ref_, index);
-}
+//     return checkAbove(inside_ref_, index);
+// }
 
-/**
-*/
-bool EvaluationTargetData::refPosGroundBitAvailable(const DataID& id) const
-{
-    auto index = ref_chain_.indexFromDataID(id);
+// /**
+// */
+// bool EvaluationTargetData::refPosGroundBitAvailable(const DataID& id) const
+// {
+//     auto index = ref_chain_.indexFromDataID(id);
 
-    return checkGroundBit(inside_ref_, index);
-}
+//     return checkGroundBit(inside_ref_, index);
+// }
 
 /**
 */
@@ -1660,21 +1656,21 @@ bool EvaluationTargetData::refPosInside(const SectorLayer& layer,
 
 /**
 */
-bool EvaluationTargetData::tstPosAbove(const DataID& id) const
-{
-    auto index = tst_chain_.indexFromDataID(id);
+// bool EvaluationTargetData::tstPosAbove(const DataID& id) const
+// {
+//     auto index = tst_chain_.indexFromDataID(id);
 
-    return checkAbove(inside_tst_, index);
-}
+//     return checkAbove(inside_tst_, index);
+// }
 
-/**
-*/
-bool EvaluationTargetData::tstPosGroundBitAvailable(const DataID& id) const
-{
-    auto index = tst_chain_.indexFromDataID(id);
+// /**
+// */
+// bool EvaluationTargetData::tstPosGroundBitAvailable(const DataID& id) const
+// {
+//     auto index = tst_chain_.indexFromDataID(id);
 
-    return checkGroundBit(inside_tst_, index);
-}
+//     return checkGroundBit(inside_tst_, index);
+//}
 
 /**
 */
@@ -1688,21 +1684,21 @@ bool EvaluationTargetData::tstPosInside(const SectorLayer& layer,
 
 /**
 */
-bool EvaluationTargetData::mappedRefPosAbove(const DataID& id) const
-{
-    auto index = tst_chain_.indexFromDataID(id); // really tst
+// bool EvaluationTargetData::mappedRefPosAbove(const DataID& id) const
+// {
+//     auto index = tst_chain_.indexFromDataID(id); // really tst
 
-    return checkAbove(inside_map_, index);
-}
+//     return checkAbove(inside_map_, index);
+// }
 
-/**
-*/
-bool EvaluationTargetData::mappedRefPosGroundBitAvailable(const DataID& id) const
-{
-    auto index = tst_chain_.indexFromDataID(id);
+// /**
+// */
+// bool EvaluationTargetData::mappedRefPosGroundBitAvailable(const DataID& id) const
+// {
+//     auto index = tst_chain_.indexFromDataID(id);
 
-    return checkGroundBit(inside_map_, index);
-}
+//     return checkGroundBit(inside_map_, index);
+// }
 
 /**
 */
@@ -1716,33 +1712,33 @@ bool EvaluationTargetData::mappedRefPosInside(const SectorLayer& layer,
 
 /**
 */
-bool EvaluationTargetData::checkGroundBit(const InsideCheckMatrix& mat,
-                                          const Index& index) const
-{
-    //check cached inside info
-    auto idx_internal = index.idx_internal;
-    assert(idx_internal < mat.rows());
+// bool EvaluationTargetData::checkGroundBit(const InsideCheckMatrix& mat,
+//                                           const Index& index) const
+// {
+//     //check cached inside info
+//     auto idx_internal = index.idx_internal;
+//     assert(idx_internal < mat.rows());
 
-    auto extra_offset = (int)inside_sector_layers_.size();
-    assert(extra_offset < mat.cols());
+//     auto extra_offset = (int)inside_sector_layers_.size();
+//     assert(extra_offset < mat.cols());
 
-    return mat(idx_internal, extra_offset);
-}
+//     return mat(idx_internal, extra_offset);
+// }
 
-/**
-*/
-bool EvaluationTargetData::checkAbove(const InsideCheckMatrix& mat,
-                                      const Index& index) const
-{
-    //check cached inside info
-    auto idx_internal = index.idx_internal;
-    assert(idx_internal < mat.rows());
+// /**
+// */
+// bool EvaluationTargetData::checkAbove(const InsideCheckMatrix& mat,
+//                                       const Index& index) const
+// {
+//     //check cached inside info
+//     auto idx_internal = index.idx_internal;
+//     assert(idx_internal < mat.rows());
 
-    auto extra_offset = (int)inside_sector_layers_.size();
-    assert(extra_offset + 1 < mat.cols());
+//     auto extra_offset = (int)inside_sector_layers_.size();
+//     assert(extra_offset + 1 < mat.cols());
 
-    return mat(idx_internal, extra_offset + 1);
-}
+//     return mat(idx_internal, extra_offset + 1);
+// }
 
 /**
 */
