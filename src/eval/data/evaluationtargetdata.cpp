@@ -1616,10 +1616,10 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
             mat(idx_internal, lidx) = false;
         else // check with sectors
         {
-            bool inside = above_ok && layer->isInside(pos, has_gb, gb_set);
+            bool pos_inside = above_ok && layer->isInside(pos, has_gb, gb_set);
 
             //check pos against layer and write to mat
-            mat(idx_internal, lidx) = inside;
+            mat(idx_internal, lidx) = pos_inside;
         }
     }
 
@@ -1772,7 +1772,7 @@ const Utils::TimeWindowCollection& EvaluationTargetData::excludedTimeWindows() c
 
 bool EvaluationTargetData::isTimeStampNotExcluded(const boost::posix_time::ptime& ts) const
 {
-    return excluded_time_windows_.contains(ts);
+    return !excluded_time_windows_.contains(ts);
 }
 
 /**

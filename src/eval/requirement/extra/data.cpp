@@ -89,7 +89,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     ref_periods.createFromReference(target_data, sector_layer, max_ref_time_diff);
  
     ptime timestamp;
-    bool inside;
+    bool is_inside;
 
     ref_periods.removeSmallPeriods(seconds(1));
 
@@ -139,9 +139,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
             }
 
             // no ref
-            inside = target_data.tstPosInside(sector_layer, tst_it);
+            is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                     && target_data.tstPosInside(sector_layer, tst_it);
 
-            if (inside)
+            if (is_inside)
             {
                 ++num_extra;
                 addDetail(timestamp, tst_pos, true, true, false, "Extra"); // inside, extra, ref

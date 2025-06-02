@@ -141,7 +141,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
     boost::optional<dbContent::TargetPosition> ref_pos;
     ptime timestamp, last_ts;
 
-    bool inside, was_inside;
+    bool is_inside, was_inside;
     {
         const auto& ref_data = target_data.refChain().timestampIndexes();
         bool first {true};
@@ -149,13 +149,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
         for (auto& ref_it : ref_data)
         {
             timestamp = ref_it.first;
-            was_inside = inside;
+            was_inside = is_inside;
 
-            inside = target_data.refPosInside(sector_layer, ref_it);
+            is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                     && target_data.refPosInside(sector_layer, ref_it);
 
             if (first)
             {
-                if (inside) // create time period
+                if (is_inside) // create time period
                     ref_periods.add({timestamp, timestamp});
 
                 first = false;
@@ -167,7 +168,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
 
             if (was_inside)
             {
-                if (inside)
+                if (is_inside)
                 {
                     // extend last time period, if possible, or finish last and create new one
                     if (ref_periods.lastPeriod().isCloseToEnd(timestamp, max_ref_time_diff)) // 4.9
@@ -176,7 +177,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
                         ref_periods.add({timestamp, timestamp});
                 }
             }
-            else if (inside) // was not inside and is now inside
+            else if (is_inside) // was not inside and is now inside
                 ref_periods.add({timestamp, timestamp}); // create new time period
         }
     }
@@ -196,7 +197,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
 
     float t_diff;
     int sum_missed_uis {0};
-    bool is_inside {false}, was_outside {false};
+    bool was_outside {false};
+    is_inside = false;
     //bool ok;
 
     typedef EvaluationRequirementResult::SingleDetection Result;

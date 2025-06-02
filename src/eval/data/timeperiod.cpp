@@ -151,9 +151,10 @@ void TimePeriodCollection::createFromReference(const EvaluationTargetData& targe
     {
         timestamp = ref_it.first;
 
-        bool inside = target_data.refPosInside(sector_layer, ref_it);
+        bool is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                      && target_data.refPosInside(sector_layer, ref_it);
 
-        if (inside)
+        if (is_inside)
         {
             if (!was_inside.has_value())
             {
@@ -175,7 +176,7 @@ void TimePeriodCollection::createFromReference(const EvaluationTargetData& targe
             }
         }
 
-        was_inside = inside;
+        was_inside = is_inside;
     }
 }
 
