@@ -702,7 +702,6 @@ std::vector<std::pair<QImage, std::string>> TaskResult::renderFigure(const Resul
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     ViewManager&      view_man   = COMPASS::instance().viewManager();
 
-    //while (QCoreApplication::hasPendingEvents())
     QCoreApplication::processEvents();
 
     figure.view();

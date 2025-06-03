@@ -268,7 +268,6 @@ Result ReportExporterLatex::writePDF() const
 
     loginf << "ReportExporterLatex: writePDF: running pdflatex";
 
-    //while (QCoreApplication::hasPendingEvents())
     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     loginf << "ReportExporterLatex: writePDF: cmd '" << command << "'";

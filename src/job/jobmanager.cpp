@@ -178,9 +178,6 @@ void JobManagerBase::run()
 //        if (!stop_requested_ && changed_ && !hasDBJobs())
 //            emit databaseIdle();
 
-        // if (QCoreApplication::hasPendingEvents())
-        //     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        // else
         msleep(1);
 
 //        if ((boost::posix_time::microsec_clock::local_time() - log_time_).total_seconds() > 1)
@@ -222,8 +219,6 @@ void JobManagerBase::shutdown()
     while (!stopped_)
     {
         loginf << "JobManagerBase: shutdown: waiting on run stop";
-        //        while (QCoreApplication::hasPendingEvents())
-        //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         msleep(1000);
     }
 

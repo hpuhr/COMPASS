@@ -766,8 +766,7 @@ void ASTERIXImportTask::stop()
     {
         loginf << "ASTERIXImportTask: stop: waiting for decode job to finish";
 
-        if (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         QThread::msleep(1);
     }
@@ -776,8 +775,8 @@ void ASTERIXImportTask::stop()
     {
         loginf << "ASTERIXImportTask: stop: waiting for map job to finish";
 
-        if (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         QThread::msleep(1);
     }
 
@@ -785,8 +784,8 @@ void ASTERIXImportTask::stop()
     {
         loginf << "ASTERIXImportTask: stop: waiting for post-process job to finish";
 
-        if (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
         QThread::msleep(1);
     }
 
@@ -813,7 +812,14 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
     assert (canRun());
 
     if (source_.isNetworkType())
+    {
         COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
+
+        COMPASS::instance().logInfo("ASTERIX Import") << "network";
+    }
+    else
+        COMPASS::instance().logInfo("ASTERIX Import") << "files '" << source_.filesAsString() << "'";
+
 
     //reset state before new run
     reset();
@@ -821,8 +827,6 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
     float free_ram = System::getFreeRAMinGB();
 
     loginf << "ASTERIXImportTask: run: filenames " << source_.filesAsString() << " free RAM " << free_ram << " GB";
-
-    COMPASS::instance().logInfo("ASTERIX Import") << "files '" << source_.filesAsString() << "'";
 
     if (source_.isFileType())
     {
