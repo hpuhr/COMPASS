@@ -1927,11 +1927,11 @@ TimedDataSeries<unsigned int> ReconstructorTarget::getMode3ASeries() const
                 || (info.isModeSDetection() && value.valid_ && *value.valid_ && !value.garbled_ && !value.smoothed_)
                 || (value.valid_ && *value.valid_ && value.garbled_ && !(*value.garbled_) && !value.smoothed_)
                 || (value.valid_ && *value.valid_ && value.garbled_ && !(*value.garbled_) && value.smoothed_ && !(*value.smoothed_)))
-                return 3;
+                return 5 + (info.dbcont_id_ != 62);
             if (value.valid_ && *value.valid_ && !value.garbled_) // might be smoothed
-                return 2;
+                return 3 + (info.dbcont_id_ != 62);
             if (info.isModeSDetection())
-                return 1;
+                return 1 + (info.dbcont_id_ != 62);
 
             return 0;
         }
@@ -1986,11 +1986,11 @@ TimedDataSeries<float> ReconstructorTarget::getAltitudeSeries() const
             if (info.dbcont_id_ == 21
                 || (info.isModeSDetection() && value.valid_ && *value.valid_ && !value.garbled_)
                 || (value.valid_ && *value.valid_ && value.garbled_ && !(*value.garbled_)))
-                return 3;
+                return 5 + (info.dbcont_id_ != 62);
             if (value.valid_ && *value.valid_ && !value.garbled_)
-                return 2;
+                return 3 + (info.dbcont_id_ != 62);
             if (info.isModeSDetection())
-                return 1;
+                return 1 + (info.dbcont_id_ != 62);
 
             return 0;
         }
