@@ -974,8 +974,8 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
                 logdbg << "Chain: addPositionsSpeedsToMapping: offsets x " << fixed << x_pos
                        << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
 
-                double x_pos_orig = x_pos;
-                double y_pos_orig = y_pos;
+                // double x_pos_orig = x_pos;
+                // double y_pos_orig = y_pos;
 
                 double v_x = x_pos/d_t;
                 double v_y = y_pos/d_t;

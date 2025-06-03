@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENTTARGETPOSITION_H
-#define DBCONTENTTARGETPOSITION_H
+#pragma once
 
 #include <vector>
 
@@ -48,4 +47,3 @@ public:
 
 }
 
-#endif // DBCONTENTTARGETPOSITION_H

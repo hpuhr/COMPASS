@@ -9,9 +9,10 @@
 #include "util/number.h"
 #include "util/timeconv.h"
 #include "global.h"
-#include "kalman_online_tracker.h"
+//#include "kalman_online_tracker.h"
 #include "kalman_chain.h"
 #include "fftmanager.h"
+#include "timeddataseries.h"
 
 #include <boost/optional/optional_io.hpp>
 
@@ -117,6 +118,21 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     assert (reconstructor_.target_reports_.count(rec_num));
 
     const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
+
+
+    // TimedDataSeries<std::function<int(unsigned long)>> ts(
+    //     timestamp_min_,
+    //     timestamp_max_,
+    //     5,
+    //     // Lambda: capture reconstructor_ by reference, look up ReconstructorInfo, but always return 0
+    //     [this](unsigned long rec_num) -> int
+    //     {
+    //         const dbContent::targetReport::ReconstructorInfo& info =
+    //             reconstructor_.target_reports_.at(rec_num);
+    //         (void)info;  // suppress unused-variable warning
+    //         return 0;    // Always return confidence = 0
+    //     }
+    //     );
 
     if (tr.acad_ && acads_.size() && !acads_.count(*tr.acad_))
     {
@@ -1856,9 +1872,10 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
 }
 
 //fl_unknown, fl_on_ground, alt_baro_ft
-std::tuple<bool, bool, float> ReconstructorTarget::getAltitudeState (const boost::posix_time::ptime& ts, 
-                                                                     const boost::posix_time::time_duration& max_time_diff,
-                                                                     const ReconstructorTarget::InterpOptions& interp_options) const
+std::tuple<bool, bool, float> ReconstructorTarget::getAltitudeState (
+    const boost::posix_time::ptime& ts,
+    const boost::posix_time::time_duration& max_time_diff,
+    const ReconstructorTarget::InterpOptions& interp_options) const
 {
     boost::optional<float> mode_c_code = modeCCodeAt (ts, max_time_diff, interp_options);
     boost::optional<bool> gbs          = groundBitAt (ts, max_time_diff, interp_options);
