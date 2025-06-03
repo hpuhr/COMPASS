@@ -23,6 +23,8 @@ class KalmanOnlineTracker;
 class KalmanChain;
 }
 
+template <typename T> class TimedDataSeries;
+
 namespace dbContent {
 
 enum class ComparisonResult
@@ -323,6 +325,8 @@ public:
     AltitudeState getAltitudeStateStruct(const boost::posix_time::ptime& ts, 
                                          const boost::posix_time::time_duration& max_time_diff,
                                          const InterpOptions& interp_options = InterpOptions()) const;
+
+    TimedDataSeries<float> getAltitudeSeries() const;
 
     void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts() const;

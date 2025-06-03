@@ -120,19 +120,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
 
-    // TimedDataSeries<std::function<int(unsigned long)>> ts(
-    //     timestamp_min_,
-    //     timestamp_max_,
-    //     5,
-    //     // Lambda: capture reconstructor_ by reference, look up ReconstructorInfo, but always return 0
-    //     [this](unsigned long rec_num) -> int
-    //     {
-    //         const dbContent::targetReport::ReconstructorInfo& info =
-    //             reconstructor_.target_reports_.at(rec_num);
-    //         (void)info;  // suppress unused-variable warning
-    //         return 0;    // Always return confidence = 0
-    //     }
-    //     );
+
 
     if (tr.acad_ && acads_.size() && !acads_.count(*tr.acad_))
     {
@@ -1913,6 +1901,59 @@ AltitudeState ReconstructorTarget::getAltitudeStateStruct(const boost::posix_tim
     return as;
 }
 
+TimedDataSeries<float> ReconstructorTarget::getAltitudeSeries() const
+{
+    auto ts_begin = tr_timestamps_.begin()->first;
+    auto ts_end = tr_timestamps_.rbegin()->first;
+
+    float altitude_usage_seconds = 10; //+/-
+
+    std::function<int(unsigned long)> confidence_func =
+        [this](unsigned long rec_num) -> int
+    {
+        const dbContent::targetReport::ReconstructorInfo& info =
+            reconstructor_.target_reports_.at(rec_num);
+
+        if (info.barometric_altitude_.has_value())
+        {
+            const targetReport::BarometricAltitude& alt = *info.barometric_altitude_;
+
+            if (info.dbcont_id_ == 21
+                || (info.isModeSDetection() && alt.valid_ && *alt.valid_ && !alt.garbled_)
+                || (alt.valid_ && *alt.valid_ && alt.garbled_ && !(*alt.garbled_)))
+                return 3;
+            if (alt.valid_ && *alt.valid_ && !alt.garbled_)
+                return 2;
+            if (info.dbcont_id_ != 1 && info.dbcont_id_ != 48) // non-radar
+                return 1;
+
+            return 0;
+        }
+
+        return -1;  // Always return confidence = -1 if no value
+    };
+
+    std::function<boost::optional<float>(unsigned long)> value_func =
+        [this](unsigned long rec_num) -> boost::optional<float>
+    {
+        const dbContent::targetReport::ReconstructorInfo& info =
+            reconstructor_.target_reports_.at(rec_num);
+
+        if (info.barometric_altitude_.has_value())
+            return info.barometric_altitude_->altitude_;
+
+        return boost::none;
+    };
+
+    TimedDataSeries<float> ts(
+        ts_begin, ts_end, altitude_usage_seconds, confidence_func, value_func);
+
+    for (auto tr_it : tr_timestamps_)
+        ts.insert(tr_it.first, tr_it.second); // , utn_ == 8
+
+    return ts;
+}
+
 void ReconstructorTarget::updateCounts()
 {
     for (auto& rn_it : target_reports_)
@@ -2004,6 +2045,10 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     std::shared_ptr<Buffer> buffer = std::make_shared<Buffer>(buffer_list, dbcontent_name);
 
+    // exit if no data
+    if (tr_timestamps_.size() <= 1 || references_.size() <= 1)
+        return buffer;
+
     NullableVector<unsigned int>& ds_id_vec = buffer->get<unsigned int> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_).name());
     NullableVector<unsigned char>& sac_vec = buffer->get<unsigned char> (
@@ -2083,11 +2128,10 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int> (
         dbcontent_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_).name());
 
-    unsigned int sac = reconstructor_.settings().ds_sac;
-    unsigned int sic = reconstructor_.settings().ds_sic;
-    unsigned int ds_id = Number::dsIdFrom(sac, sic);
+    unsigned int ref_sac = reconstructor_.settings().ds_sac;
+    unsigned int ref_sic = reconstructor_.settings().ds_sic;
+    unsigned int ref_ds_id = Number::dsIdFrom(ref_sac, ref_sic);
     assert (reconstructor_.settings().ds_line >= 0 && reconstructor_.settings().ds_line <= 3);
-    //std::vector<unsigned int> assoc_val ({utn_});
 
     double speed_ms, bearing_rad, xy_cov;
     double ax, ay, bearing_new_rad, turnrate_rad, a_ms2;
@@ -2099,7 +2143,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     boost::posix_time::time_duration d_max = Time::partialSeconds(10);
     boost::posix_time::time_duration track_end_time = Time::partialSeconds(30);
 
-    //boost::posix_time::ptime ts_prev;
+    auto altitude_series = getAltitudeSeries();
 
     const auto& ref_calc_settings = reconstructor_.referenceCalculatorSettings();
 
@@ -2126,9 +2170,9 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
                 continue;
         }
 
-        ds_id_vec.set(buffer_cnt, ds_id);
-        sac_vec.set(buffer_cnt, sac);
-        sic_vec.set(buffer_cnt, sic);
+        ds_id_vec.set(buffer_cnt, ref_ds_id);
+        sac_vec.set(buffer_cnt, ref_sac);
+        sic_vec.set(buffer_cnt, ref_sic);
         line_vec.set(buffer_cnt, reconstructor_.settings().ds_line);
 
         ts_vec.set(buffer_cnt, ref_it.second.t);
@@ -2270,24 +2314,27 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         // set other data
         // TODO crappy
         {
-            ReconstructorInfoPair info = dataFor(
-                ref_it.second.t, d_max,
-                [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
-                    return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); });
+            // ReconstructorInfoPair info = dataFor(
+            //     ref_it.second.t, d_max,
+            //     [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
+            //         return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); });
 
-            if (info.first && info.first->barometric_altitude_
-                && info.first->barometric_altitude_->hasReliableValue() && mc_vec.isNull(buffer_cnt))
-                mc_vec.set(buffer_cnt, info.first->barometric_altitude_->altitude_);
+            // if (info.first && info.first->barometric_altitude_
+            //     && info.first->barometric_altitude_->hasReliableValue() && mc_vec.isNull(buffer_cnt))
+            //     mc_vec.set(buffer_cnt, info.first->barometric_altitude_->altitude_);
 
-            if (info.second && info.second->barometric_altitude_
-                && info.second->barometric_altitude_->hasReliableValue())
-            {
-                if (mc_vec.isNull(buffer_cnt))
-                    mc_vec.set(buffer_cnt, info.second->barometric_altitude_->altitude_);
-                else
-                    mc_vec.set(buffer_cnt,
-                               (info.second->barometric_altitude_->altitude_ + mc_vec.get(buffer_cnt))/2.0);
-            }
+            // if (info.second && info.second->barometric_altitude_
+            //     && info.second->barometric_altitude_->hasReliableValue())
+            // {
+            //     if (mc_vec.isNull(buffer_cnt))
+            //         mc_vec.set(buffer_cnt, info.second->barometric_altitude_->altitude_);
+            //     else
+            //         mc_vec.set(buffer_cnt,
+            //                    (info.second->barometric_altitude_->altitude_ + mc_vec.get(buffer_cnt))/2.0);
+            // }
+
+            if (altitude_series.hasValueAt(ref_it.second.t))
+                mc_vec.set(buffer_cnt, altitude_series.getValueAt(ref_it.second.t));
 
             if (!mc_vec.isNull(buffer_cnt)) // has current alt
             {

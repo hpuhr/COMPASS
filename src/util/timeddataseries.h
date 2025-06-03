@@ -4,6 +4,10 @@
 #include <boost/optional.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include "logger.h"
+#include "stringconv.h"
+#include "timeconv.h"
+
 /**
  * @brief A time‐indexed series storing unsigned long values along with an integer confidence
  *        and the original insert timestamp.
@@ -38,9 +42,6 @@
  *         abs((timestamp) – (slot_timestamp)).
  *       If the new timestamp is strictly closer, override.
  *
- * Any timestamp outside [min_ptime_, max_ptime_] is ignored by insert().
- *
- * Function names use CamelCase; member variables use snake_case.
  */
 template <typename T>
 class TimedDataSeries
@@ -49,7 +50,7 @@ public:
     /// Internal storage type for each slot: (value + confidence + insert_time)
     struct Entry
     {
-        unsigned long                value;
+        unsigned long                value_index;
         int                          confidence;
         boost::posix_time::ptime     insert_time;
     };
@@ -63,7 +64,7 @@ public:
      *
      * @param min_ptime     The earliest timestamp (inclusive) that the vector will cover.
      * @param max_ptime     The latest timestamp (inclusive) that the vector will cover.
-     * @param confidenceFunc A callable (e.g., lambda) that takes an unsigned long and returns an int confidence.
+     * @param confidence_func A callable (e.g., lambda) that takes an unsigned long and returns an int confidence.
      *
      * Initializes an internal std::vector of size ((max_ptime - min_ptime).total_seconds() + 1).
      * All slots start out empty (boost::none).  Timestamps outside this range will be ignored by insert().
@@ -71,15 +72,17 @@ public:
     TimedDataSeries(const ptime&                 min_ptime,
                const ptime&                      max_ptime,
                unsigned int                      max_seconds,
-               const T&                          confidenceFunc)
+               const std::function<int(unsigned long)>& confidence_func,
+               const std::function<boost::optional<T>(unsigned long)>& value_func)
         : min_ptime_(min_ptime)
         , max_ptime_(max_ptime)
         , max_seconds_(max_seconds)
-        , confidence_func_(confidenceFunc)
+        , confidence_func_(confidence_func)
+        , value_func_(value_func)
     {
         assert (!min_ptime_.is_not_a_date_time());
         assert (!max_ptime_.is_not_a_date_time());
-        assert (min_ptime_ < max_ptime_);
+        assert (min_ptime_ <= max_ptime_);
 
         initializeDataVector();
     }
@@ -98,7 +101,7 @@ public:
     {
         assert (!new_min_ptime.is_not_a_date_time());
         assert (!new_max_ptime.is_not_a_date_time());
-        assert (new_min_ptime < new_max_ptime);
+        assert (new_min_ptime <= new_max_ptime);
 
         min_ptime_ = new_min_ptime;
         max_ptime_ = new_max_ptime;
@@ -107,14 +110,14 @@ public:
     }
 
     /**
-     * @brief Insert a (timestamp, value) pair, with propagation to ±max_seconds, using the stored confidence functor.
+     * @brief Insert a (timestamp, value_index) pair, with propagation to ±max_seconds, using the stored confidence functor.
      *
      * This computes:
-     *   int conf = confidence_func_(value);
+     *   int conf = confidence_func_(value_index);
      *
      * Then, for each second‐offset i in [ -max_seconds, +max_seconds ], it checks the slot at:
      *   index = convertTimestampToIndex(timestamp) + i
-     * If index is in‐bounds, it will write { value, conf, timestamp } into data_[index]
+     * If index is in‐bounds, it will write { value_index, conf, timestamp } into data_[index]
      * under these rules:
      *   1) If the slot is empty → accept immediately.
      *   2) If existing.confidence < conf → override.
@@ -126,18 +129,18 @@ public:
      *
      * Any timestamp outside [min_ptime_, max_ptime_] is ignored entirely.
      *
-     * @param timestamp   The ptime at which the value was measured.
-     * @param value       The unsigned long measurement.
-     * @param max_seconds  How many seconds around `timestamp` to propagate this value.
+     * @param timestamp   The ptime at which the value_index was measured.
+     * @param value_index       The unsigned long measurement.
+     * @param max_seconds  How many seconds around `timestamp` to propagate this value_index.
      */
     void insert(const ptime& timestamp,
-                unsigned long value)
+                unsigned long value_index, bool debug=false)
     {
         // Reject if outside the defined range
         assert (timestamp >= min_ptime_ && timestamp <= max_ptime_);
 
         // Compute confidence for this value
-        int conf = confidence_func_(value);
+        int conf = confidence_func_(value_index);
 
         // Base index for this exact timestamp
         std::size_t base_index = convertTimestampToIndex(timestamp);
@@ -158,35 +161,46 @@ public:
 
             // Compute the ptime corresponding to this slot index:
             //   slot_ptime = min_ptime_ + seconds(idx)
-            ptime slot_ptime = min_ptime_ + time_duration(static_cast<long>(uidx), 0, 0);
+            ptime slot_ptime = min_ptime_ + boost::posix_time::seconds(uidx);
 
             // If slot is empty, accept immediately
             if (!data_[uidx].is_initialized()) {
-                data_[uidx] = Entry{ value, conf, insertion_time };
+                data_[uidx] = Entry{ value_index, conf, insertion_time };
                 continue;
             }
 
             // Slot already has an entry: compare confidences
             Entry const& existing = *data_[uidx];
 
-            if (existing.confidence < conf) {
+            if (existing.confidence < conf)
+            {
                 // New sample has strictly higher confidence → override
-                data_[uidx] = Entry{ value, conf, insertion_time };
+                data_[uidx] = Entry{ value_index, conf, insertion_time };
+
+                if (debug)
+                    loginf << "TDS: new conf " << conf
+                           << " slot " << Utils::Time::toString(slot_ptime)
+                           << " insert " << Utils::Time::toString(insertion_time);
             }
             else if (existing.confidence == conf)
             {
                 // Same confidence tier → compare which insertion time is closer to slot_ptime
                 time_duration existing_diff = existing.insert_time - slot_ptime;
-                double existing_abs_secs =
-                    std::abs(existing_diff.total_microseconds() / 1e6);
+                float existing_abs_secs = std::abs(existing_diff.total_milliseconds()) / 1000.0;
 
                 time_duration new_diff = insertion_time - slot_ptime;
-                double new_abs_secs =
-                    std::abs(new_diff.total_microseconds() / 1e6);
+                float new_abs_secs = std::abs(new_diff.total_milliseconds()) / 1000.0;
 
                 if (new_abs_secs < existing_abs_secs) {
                     // The new insertion timestamp is strictly closer → override
-                    data_[uidx] = Entry{ value, conf, insertion_time };
+                    data_[uidx] = Entry{ value_index, conf, insertion_time };
+
+                    if (debug)
+                        loginf << "TDS: override conf " << conf
+                               << " slot " << Utils::Time::toString(slot_ptime)
+                               << " insert " << Utils::Time::toString(insertion_time)
+                               << " existing_abs_secs " << Utils::String::doubleToStringPrecision(existing_abs_secs, 2)
+                               << " new_abs_secs " << Utils::String::doubleToStringPrecision(new_abs_secs, 2);
                 }
                 // Otherwise, keep the existing entry
             }
@@ -202,11 +216,33 @@ public:
      */
     OptionalEntry getAt(const ptime& timestamp) const
     {
-        if (timestamp < min_ptime_ || timestamp > max_ptime_) {
+        if (timestamp < min_ptime_ || timestamp > max_ptime_)
             return boost::none;
-        }
+
         std::size_t idx = convertTimestampToIndex(timestamp);
         return data_[idx];
+    }
+
+    bool hasValueAt(const ptime& timestamp) const
+    {
+        OptionalEntry entry = getAt(timestamp); // boost::none if outside of time
+
+        if (!entry || entry->confidence == -1)
+            return false;
+
+        return (value_func_(entry->value_index)).has_value();
+    }
+
+    T getValueAt(const ptime& timestamp) const
+    {
+        OptionalEntry entry = getAt(timestamp);
+
+        assert (entry && entry->confidence != -1);
+
+        auto opt_val = value_func_(entry->value_index);
+        assert (opt_val.has_value());
+
+        return *opt_val;
     }
 
     /**
@@ -227,7 +263,9 @@ private:
     unsigned int                  max_seconds_{0};
 
     std::vector<OptionalEntry>    data_;
-    T                             confidence_func_;
+    std::function<int(unsigned long)> confidence_func_;
+    std::function<boost::optional<T>(unsigned long)> value_func_;
+
     /**
      * @brief (Re)initialize the internal data vector based on min_ptime_ and max_ptime_.
      *

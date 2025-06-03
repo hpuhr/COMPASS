@@ -74,13 +74,7 @@ class BarometricAltitude
 
     bool hasReliableValue () const
     {
-        if (valid_ && *valid_ == false)
-            return false;
-
-        if (garbled_ && *garbled_ == true)
-            return false;
-
-        return true;
+        return valid_ && *valid_ && garbled_ && !(*garbled_) ;
     }
 };
 
