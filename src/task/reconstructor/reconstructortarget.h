@@ -326,7 +326,9 @@ public:
                                          const boost::posix_time::time_duration& max_time_diff,
                                          const InterpOptions& interp_options = InterpOptions()) const;
 
+    TimedDataSeries<unsigned int> getMode3ASeries() const;
     TimedDataSeries<float> getAltitudeSeries() const;
+    TimedDataSeries<bool> getGroundBitSeries() const;
 
     void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts() const;

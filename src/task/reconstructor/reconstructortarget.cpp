@@ -9,7 +9,6 @@
 #include "util/number.h"
 #include "util/timeconv.h"
 #include "global.h"
-//#include "kalman_online_tracker.h"
 #include "kalman_chain.h"
 #include "fftmanager.h"
 #include "timeddataseries.h"
@@ -1901,12 +1900,72 @@ AltitudeState ReconstructorTarget::getAltitudeStateStruct(const boost::posix_tim
     return as;
 }
 
+TimedDataSeries<unsigned int> ReconstructorTarget::getMode3ASeries() const
+{
+    auto ts_begin = tr_timestamps_.begin()->first;
+    auto ts_end = tr_timestamps_.rbegin()->first;
+
+    float value_usage_seconds = 10; //+/-
+
+    std::function<int(unsigned long)> confidence_func =
+        [this](unsigned long rec_num) -> int
+    {
+        const dbContent::targetReport::ReconstructorInfo& info =
+            reconstructor_.target_reports_.at(rec_num);
+
+        if (info.mode_a_code_.has_value())
+        {
+            const targetReport::ModeACode& value = *info.mode_a_code_;
+
+            if (value.valid_ && (!*value.valid_))
+                return -1;
+
+            if (value.garbled_ && *value.garbled_)
+                return -1;
+
+            if (info.dbcont_id_ == 21
+                || (info.isModeSDetection() && value.valid_ && *value.valid_ && !value.garbled_ && !value.smoothed_)
+                || (value.valid_ && *value.valid_ && value.garbled_ && !(*value.garbled_) && !value.smoothed_)
+                || (value.valid_ && *value.valid_ && value.garbled_ && !(*value.garbled_) && value.smoothed_ && !(*value.smoothed_)))
+                return 3;
+            if (value.valid_ && *value.valid_ && !value.garbled_) // might be smoothed
+                return 2;
+            if (info.isModeSDetection())
+                return 1;
+
+            return 0;
+        }
+
+        return -1;  // Always return confidence = -1 if no value
+    };
+
+    std::function<boost::optional<unsigned int>(unsigned long)> value_func =
+        [this](unsigned long rec_num) -> boost::optional<unsigned int>
+    {
+        const dbContent::targetReport::ReconstructorInfo& info =
+            reconstructor_.target_reports_.at(rec_num);
+
+        if (info.mode_a_code_.has_value())
+            return info.mode_a_code_->code_;
+
+        return boost::none;
+    };
+
+    TimedDataSeries<unsigned int> ts(
+        ts_begin, ts_end, value_usage_seconds, confidence_func, value_func);
+
+    for (auto tr_it : tr_timestamps_)
+        ts.insert(tr_it.first, tr_it.second); // , utn_ == 8
+
+    return ts;
+}
+
 TimedDataSeries<float> ReconstructorTarget::getAltitudeSeries() const
 {
     auto ts_begin = tr_timestamps_.begin()->first;
     auto ts_end = tr_timestamps_.rbegin()->first;
 
-    float altitude_usage_seconds = 10; //+/-
+    float value_usage_seconds = 5; //+/-
 
     std::function<int(unsigned long)> confidence_func =
         [this](unsigned long rec_num) -> int
@@ -1916,15 +1975,21 @@ TimedDataSeries<float> ReconstructorTarget::getAltitudeSeries() const
 
         if (info.barometric_altitude_.has_value())
         {
-            const targetReport::BarometricAltitude& alt = *info.barometric_altitude_;
+            const targetReport::BarometricAltitude& value = *info.barometric_altitude_;
+
+            if (value.valid_ && (!*value.valid_))
+                return -1;
+
+            if (value.garbled_ && *value.garbled_)
+                return -1;
 
             if (info.dbcont_id_ == 21
-                || (info.isModeSDetection() && alt.valid_ && *alt.valid_ && !alt.garbled_)
-                || (alt.valid_ && *alt.valid_ && alt.garbled_ && !(*alt.garbled_)))
+                || (info.isModeSDetection() && value.valid_ && *value.valid_ && !value.garbled_)
+                || (value.valid_ && *value.valid_ && value.garbled_ && !(*value.garbled_)))
                 return 3;
-            if (alt.valid_ && *alt.valid_ && !alt.garbled_)
+            if (value.valid_ && *value.valid_ && !value.garbled_)
                 return 2;
-            if (info.dbcont_id_ != 1 && info.dbcont_id_ != 48) // non-radar
+            if (info.isModeSDetection())
                 return 1;
 
             return 0;
@@ -1946,6 +2011,57 @@ TimedDataSeries<float> ReconstructorTarget::getAltitudeSeries() const
     };
 
     TimedDataSeries<float> ts(
+        ts_begin, ts_end, value_usage_seconds, confidence_func, value_func);
+
+    for (auto tr_it : tr_timestamps_)
+        ts.insert(tr_it.first, tr_it.second); // , utn_ == 8
+
+    return ts;
+}
+
+TimedDataSeries<bool> ReconstructorTarget::getGroundBitSeries() const
+{
+    auto ts_begin = tr_timestamps_.begin()->first;
+    auto ts_end = tr_timestamps_.rbegin()->first;
+
+    float altitude_usage_seconds = 5; //+/-
+
+    std::function<int(unsigned long)> confidence_func =
+        [this](unsigned long rec_num) -> int
+    {
+        const dbContent::targetReport::ReconstructorInfo& info =
+            reconstructor_.target_reports_.at(rec_num);
+
+        if (info.ground_bit_.has_value())
+        {
+            if (info.data_source_is_ground_only)
+                return 2;
+
+            if (info.dbcont_id_ == 21 || info.isModeSDetection())
+                return 1;
+
+            return 0;
+        }
+
+        return -1;  // Always return confidence = -1 if no value
+    };
+
+    std::function<boost::optional<bool>(unsigned long)> value_func =
+        [this](unsigned long rec_num) -> boost::optional<bool>
+    {
+        const dbContent::targetReport::ReconstructorInfo& info =
+            reconstructor_.target_reports_.at(rec_num);
+
+        if (info.data_source_is_ground_only)
+            return true;
+
+        if (info.ground_bit_.has_value())
+            return *info.ground_bit_;
+
+        return boost::none;
+    };
+
+    TimedDataSeries<bool> ts(
         ts_begin, ts_end, altitude_usage_seconds, confidence_func, value_func);
 
     for (auto tr_it : tr_timestamps_)
@@ -2143,7 +2259,9 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     boost::posix_time::time_duration d_max = Time::partialSeconds(10);
     boost::posix_time::time_duration track_end_time = Time::partialSeconds(30);
 
+    auto m3a_series = getMode3ASeries();
     auto altitude_series = getAltitudeSeries();
+    auto gbs_series = getGroundBitSeries();
 
     const auto& ref_calc_settings = reconstructor_.referenceCalculatorSettings();
 
@@ -2312,27 +2430,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         }
 
         // set other data
-        // TODO crappy
         {
-            // ReconstructorInfoPair info = dataFor(
-            //     ref_it.second.t, d_max,
-            //     [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
-            //         return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); });
-
-            // if (info.first && info.first->barometric_altitude_
-            //     && info.first->barometric_altitude_->hasReliableValue() && mc_vec.isNull(buffer_cnt))
-            //     mc_vec.set(buffer_cnt, info.first->barometric_altitude_->altitude_);
-
-            // if (info.second && info.second->barometric_altitude_
-            //     && info.second->barometric_altitude_->hasReliableValue())
-            // {
-            //     if (mc_vec.isNull(buffer_cnt))
-            //         mc_vec.set(buffer_cnt, info.second->barometric_altitude_->altitude_);
-            //     else
-            //         mc_vec.set(buffer_cnt,
-            //                    (info.second->barometric_altitude_->altitude_ + mc_vec.get(buffer_cnt))/2.0);
-            // }
-
             if (altitude_series.hasValueAt(ref_it.second.t))
                 mc_vec.set(buffer_cnt, altitude_series.getValueAt(ref_it.second.t));
 
@@ -2366,18 +2464,22 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
             mom_vert_rate_vec.set(buffer_cnt, (unsigned char) MOM_VERT_RATE::Undetermined);
 
         { // mode a
-            ReconstructorInfoPair info = dataFor(
-                ref_it.second.t, d_max,
-                [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
-                    return tr.mode_a_code_.has_value() && tr.mode_a_code_->hasReliableValue(); });
 
-            if (info.first && info.first->mode_a_code_
-                && info.first->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
-                m3a_vec.set(buffer_cnt, info.first->mode_a_code_->code_);
+            if (m3a_series.hasValueAt(ref_it.second.t))
+                m3a_vec.set(buffer_cnt, m3a_series.getValueAt(ref_it.second.t));
 
-            if (info.second && info.second->mode_a_code_
-                && info.second->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
-                m3a_vec.set(buffer_cnt, info.second->mode_a_code_->code_);
+            // ReconstructorInfoPair info = dataFor(
+            //     ref_it.second.t, d_max,
+            //     [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
+            //         return tr.mode_a_code_.has_value() && tr.mode_a_code_->hasReliableValue(); });
+
+            // if (info.first && info.first->mode_a_code_
+            //     && info.first->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
+            //     m3a_vec.set(buffer_cnt, info.first->mode_a_code_->code_);
+
+            // if (info.second && info.second->mode_a_code_
+            //     && info.second->mode_a_code_->hasReliableValue() && m3a_vec.isNull(buffer_cnt))
+            //     m3a_vec.set(buffer_cnt, info.second->mode_a_code_->code_);
 
         }
 
@@ -2410,17 +2512,9 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
         }
 
         { // gbs
-            ReconstructorInfoPair info = dataFor(
-                ref_it.second.t, d_max,
-                [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {
-                    return tr.ground_bit_.has_value(); });
 
-            if (info.first && info.first->ground_bit_ && gb_vec.isNull(buffer_cnt))
-                gb_vec.set(buffer_cnt, *info.first->ground_bit_);
-
-            if (info.second && info.second->ground_bit_ && gb_vec.isNull(buffer_cnt))
-                gb_vec.set(buffer_cnt, *info.second->ground_bit_);
-
+            if (gbs_series.hasValueAt(ref_it.second.t))
+                gb_vec.set(buffer_cnt, gbs_series.getValueAt(ref_it.second.t));
         }
 
         ++buffer_cnt;
