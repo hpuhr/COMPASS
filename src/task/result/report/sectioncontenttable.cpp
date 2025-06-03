@@ -321,12 +321,12 @@ void SectionContentTable::addContentUI(QVBoxLayout* layout,
 
     assert (layout);
 
-    //finalize some custom stuff before showing the table in a layout
-    taskResult()->postprocessTable(this);
-
     //force recreation of table widget?
     if (force_ui_reset)
         table_widget_ = nullptr;
+
+    //finalize some custom stuff before showing the table in a layout
+    taskResult()->postprocessTable(this);
 
     if (isLocked())
     {
