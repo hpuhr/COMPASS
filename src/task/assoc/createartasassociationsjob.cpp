@@ -71,6 +71,8 @@ void CreateARTASAssociationsJob::run_impl()
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
+    COMPASS::instance().logInfo("Create ARTAS Associations") << "started";
+
     // clear previous associations
 
     loginf << "CreateARTASAssociationsJob: run: clearing associations";
@@ -89,12 +91,18 @@ void CreateARTASAssociationsJob::run_impl()
     // create associations for sensors
     createSensorAssociations();
 
+    COMPASS::instance().logInfo("Create ARTAS Associations")
+        << missing_hashes_cnt_ << " missing hashes and "
+        << dubious_associations_cnt_ << " dubious associations ("
+        << found_hashes_cnt_ << " found total";
+
     if (task_.allowUserInteractions() && (missing_hashes_cnt_ || dubious_associations_cnt_))
     {
         stringstream ss;
         ss << "There are " << missing_hashes_cnt_ << " missing hashes and "
            << dubious_associations_cnt_ << " dubious associations ("
            << found_hashes_cnt_ << " found total).\nDo you want to still save the associations?";
+
         emit saveAssociationsQuestionSignal(ss.str().c_str());
 
         while (!save_question_answered_)
@@ -103,6 +111,8 @@ void CreateARTASAssociationsJob::run_impl()
         if (!save_question_answer_)  // nope
         {
             stop_time = boost::posix_time::microsec_clock::local_time();
+
+            COMPASS::instance().logInfo("Create ARTAS Associations") << "save declined";
 
             double load_time;
             boost::posix_time::time_duration diff = stop_time - start_time;
@@ -132,6 +142,10 @@ void CreateARTASAssociationsJob::run_impl()
 
     loginf << "CreateARTASAssociationsJob: run: done ("
            << String::doubleToStringPrecision(load_time, 2) << " s).";
+
+    COMPASS::instance().logInfo("Create ARTAS Associations")
+        << "finished after "
+        << String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
 
     done_ = true;
 }

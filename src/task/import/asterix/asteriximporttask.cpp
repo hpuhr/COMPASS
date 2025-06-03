@@ -56,8 +56,6 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace std;
 
-const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
-
 //const float ram_threshold = 4.0;
 
 /**

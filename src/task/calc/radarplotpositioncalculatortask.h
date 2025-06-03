@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RADARPLOTPOSITIONCALCULATOR_H_
-#define RADARPLOTPOSITIONCALCULATOR_H_
+#pragma once
 
 #include "configurable.h"
 #include "task.h"
@@ -66,8 +65,6 @@ public:
     virtual bool canRun() override;
     virtual void run() override;
 
-    static const std::string DONE_PROPERTY_NAME;
-
 protected:
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
@@ -84,4 +81,3 @@ protected:
     dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name);
 };
 
-#endif /* RADARPLOTPOSITIONCALCULATOR_H_ */

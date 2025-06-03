@@ -406,9 +406,13 @@ bool COMPASS::createNewDBFile(const std::string& filename)
     lastUsedPath(Files::getDirectoryFromPath(filename));
 
     if (!result.ok())
+    {
         QMessageBox::critical(nullptr, "Error", QString::fromStdString(result.error()));
+    }
     else
+    {
         addDBFileToList(filename);
+    }
 
     return result.ok();
 }
@@ -418,7 +422,12 @@ Result COMPASS::createNewDBFileInternal(const std::string& filename)
     assert (db_interface_);
 
     if (dbOpened())
+    {
+        COMPASS::instance().logError("COMPASS") << "Database '" << filename
+                                                << "' creation failed: Database already open";
+
         return Result::failed("Database already open");
+    }
 
     last_db_filename_ = filename;
     db_inmem_ = false;
