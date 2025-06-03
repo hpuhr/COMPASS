@@ -12,8 +12,6 @@ using namespace std;
 ACIDFilterWidget::ACIDFilterWidget(ACIDFilter& filter)
     : DBFilterWidget(filter), filter_(filter)
 {
-    QHBoxLayout* layout = new QHBoxLayout();
-
     value_edit_ = new QLineEdit();
     connect(value_edit_, &QLineEdit::textEdited, this, &ACIDFilterWidget::valueEditedSlot);
 

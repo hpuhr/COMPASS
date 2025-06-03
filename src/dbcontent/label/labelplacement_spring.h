@@ -2,12 +2,15 @@
 #pragma once
 
 #include "labelplacement_defs.h"
+#include "labelplacement_helpers.h"
 #include "logger.h"
 
 #include <vector>
 #include <cmath>
 
 #include <boost/optional.hpp>
+
+#include <Eigen/Core>
 
 namespace label_placement
 {
@@ -80,7 +83,7 @@ namespace force_exact
         const double d  = p2.y() - p2.x() * k;
 
         Eigen::Vector2d p1e(p1.x(), p1.y());
-        Eigen::Vector2d isec_min;
+        Eigen::Vector2d isec_min(0, 0);
         double dmin = std::numeric_limits<double>::max();
         double x, y;
 
@@ -550,8 +553,8 @@ namespace force_exact
         const double velocity_decay      = 0.7;
         const double force_push_decay    = 0.99999;
         const double force_pull_decay    = 0.9999;
-        const double line_clash_bump     = 1.25;
-        const int    line_clash_interval = 5;
+        //const double line_clash_bump     = 1.25;
+        //const int    line_clash_interval = 5;
 
         //init anchor points
         std::vector<QPointF> anchor_points(nl);
