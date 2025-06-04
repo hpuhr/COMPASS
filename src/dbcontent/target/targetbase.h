@@ -148,6 +148,17 @@ public:
         return emitter_specs_.at(toString(ecat)).at("ground_only");
     }
 
+    static bool processNoiseFactorGround(Category ecat) {
+        assert (emitter_specs_.count(toString(ecat)));
+        assert (emitter_specs_.at(toString(ecat)).count("process_noise_factor_ground"));
+        return emitter_specs_.at(toString(ecat)).at("process_noise_factor_ground");
+    }
+
+    static bool processNoiseFactorAir(Category ecat) {
+        assert (emitter_specs_.count(toString(ecat)));
+        assert (emitter_specs_.at(toString(ecat)).count("process_noise_factor_air"));
+        return emitter_specs_.at(toString(ecat)).at("process_noise_factor_air");
+    }
+
     static const nlohmann::json emitter_specs_;
 };
-
