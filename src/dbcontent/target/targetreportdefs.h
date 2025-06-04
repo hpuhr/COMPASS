@@ -114,6 +114,7 @@ class PositionAccuracy
 
     PositionAccuracy getScaledToMinStdDev (double min_std_dev) const;
     void scaleToMinStdDev(double min_stddev);
+    void scaleUsing(double scale_factor);
 
     std::string asStr() const;
 
