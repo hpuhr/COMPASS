@@ -117,7 +117,8 @@ public:
     std::shared_ptr<SectionContent> retrieveContent(unsigned int id,
                                                     bool show_dialog = false) const;
 
-    unsigned int numSections(); // all sections contained
+    unsigned int numSections() const;
+    unsigned int numSections(const std::function<bool(const Section&)>& func) const;
     void addSectionsFlat (std::vector<std::shared_ptr<Section>>& result, 
                           bool include_target_details,
                           bool report_skip_targets_wo_issues);

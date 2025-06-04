@@ -1,5 +1,6 @@
 
 #include "taskresultswidget.h"
+
 #include "taskresult.h"
 #include "reportwidget.h"
 #include "files.h"
@@ -8,6 +9,7 @@
 #include "asynctask.h"
 #include "compass.h"
 #include "reportdefs.h"
+#include "system.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -73,12 +75,30 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     top_layout->addWidget(remove_result_button_);
 
     export_result_button_ = new QPushButton();
-    export_result_button_->setIcon(Files::IconProvider::getIcon("right.png"));
+    export_result_button_->setIcon(Files::IconProvider::getIcon("save.png"));
     export_result_button_->setEnabled(false);
     export_result_button_->setFlat(true);
     export_result_button_->setToolTip("Export Result");
 
-    connect(export_result_button_, &QPushButton::pressed, this, &TaskResultsWidget::exportCurrentResult);
+    QMenu* export_menu = new QMenu(export_result_button_);
+
+    bool pdflatex_found = Utils::System::exec("which pdflatex").size();
+
+    auto action_export_json  = export_menu->addAction("Export as JSON");
+    auto action_export_latex = export_menu->addAction("Export as Latex");
+    auto action_export_pdf   = export_menu->addAction("Export as PDF");
+
+    action_export_pdf->setEnabled(pdflatex_found);
+    action_export_pdf->setToolTip(pdflatex_found ? "" : "pdflatex not installed");
+
+    connect(action_export_json, &QAction::triggered, 
+        [ this ] () { this->exportCurrentResult(ResultReport::ReportExportMode::JSONFile); });
+    connect(action_export_latex, &QAction::triggered, 
+        [ this ] () { this->exportCurrentResult(ResultReport::ReportExportMode::Latex); });
+    connect(action_export_pdf, &QAction::triggered, 
+        [ this ] () { this->exportCurrentResult(ResultReport::ReportExportMode::LatexPDF); });
+
+    export_result_button_->setMenu(export_menu);
 
     top_layout->addWidget(export_result_button_);
 
@@ -298,23 +318,12 @@ void TaskResultsWidget::removeCurrentResult()
 
 /**
  */
-void TaskResultsWidget::exportCurrentResult()
+void TaskResultsWidget::exportCurrentResult(ResultReport::ReportExportMode mode)
 {
     auto name = report_combo_->currentText().toStdString();
     assert(task_man_.hasResult(name));
 
-    auto dir = QString::fromStdString(COMPASS::instance().lastUsedPath());
-
-    auto fn = QFileDialog::getSaveFileName(this, "Select Filename", dir, "*.tex");
-    if  (fn.isEmpty())
-        return;
-
-    auto res = task_man_.result(name)->exportResult(fn.toStdString(), ResultReport::ReportExportMode::LatexPDF);
-    if (!res.ok())
-    {
-        logerr << "TaskResultsWidget: exportCurrentResult: Exporting result failed: " << res.error();
-        QMessageBox::critical(this, "Error", "Exporting report failed.");
-    }
+    task_man_.exportResult(name, mode);
 }
 
 /**

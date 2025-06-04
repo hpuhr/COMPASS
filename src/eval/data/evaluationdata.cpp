@@ -592,8 +592,6 @@ void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report) c
  */
 void EvaluationData::postprocessTargetsTable(ResultReport::SectionContentTable& table) const
 {
-    //hide modeac min/max for now
-    table.setColumnGroup("modeac_minmax", { ColModeCMin, ColModeCMax }, false );
 }
 
 namespace
@@ -653,10 +651,10 @@ std::pair<nlohmann::json, unsigned int> EvaluationData::rawCellData(const Evalua
             return std::make_pair(target.aircraftAddressesStr(), 0);
         case ColMode3A: 
             return std::make_pair(target.modeACodesStr(), 0);
-        case ColModeCMin: 
-            return std::make_pair(target.hasModeC() ? target.modeCMinStr() : "", 0);
-        case ColModeCMax:
-            return std::make_pair(target.hasModeC() ? target.modeCMaxStr() : "", 0);
+        //case ColModeCMin: 
+        //    return std::make_pair(target.hasModeC() ? target.modeCMinStr() : "", 0);
+        //case ColModeCMax:
+        //    return std::make_pair(target.hasModeC() ? target.modeCMaxStr() : "", 0);
     }
     return nlohmann::json();
 }

@@ -59,6 +59,8 @@ ResultT<nlohmann::json> ReportExporterJSON::finalizeExport_impl(TaskResult& resu
     if (!write_files_)
         return ResultT<nlohmann::json>::succeeded(json_data_);
 
+    setStatus("Writing report file");
+
     std::ofstream file(exportFilename());
     if (!file.is_open())
         return ResultT<nlohmann::json>::failed("Could not create file '" + exportFilename() + "'");

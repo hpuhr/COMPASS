@@ -22,7 +22,6 @@
 #include "task/result/report/sectioncontent.h"
 #include "task/result/report/sectioncontentfigure.h"
 #include "task/result/report/sectioncontenttable.h"
-#include "task/result/report/reportexport.h"
 
 #include "compass.h"
 #include "dbcontentmanager.h"
@@ -673,20 +672,6 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     }
 
     return true;
-}
-
-/**
- */
-ResultT<nlohmann::json> TaskResult::exportResult(const std::string& fn,
-                                                 ResultReport::ReportExportMode mode)
-{
-    auto dir      = boost::filesystem::path(fn).parent_path().string();
-    auto filename = boost::filesystem::path(fn).filename().string();
-
-    std::string temp_dir = dir + "/" + "report_" + name() + "_" + filename;
-
-    ResultReport::ReportExport r_export;
-    return r_export.exportReport(*this, mode, fn, temp_dir);
 }
 
 /**

@@ -105,7 +105,13 @@ public:
     struct ColumnGroup
     {
         std::vector<int> columns;
-        bool             visible = true;
+        bool             enabled = true;
+    };
+
+    enum ColumnFlag
+    {
+        ColumnHidden      = 1 << 0,
+        ColumnNotExported = 1 << 1
     };
 
     typedef std::map<std::pair<int,int>, unsigned int> CellStyles;
@@ -157,13 +163,14 @@ public:
     unsigned int filteredRowCount () const;
     std::vector<std::string> sortedRowStrings(unsigned int row, bool latex=true) const;
 
-    const ColumnGroups& columnGroups() const;
     ColumnGroup& setColumnGroup(const std::string& name, 
                                 const std::vector<int>& columns,
-                                bool visible = true);
-    void setColumnGroupVisible(const std::string& name,
-                               bool ok);
-    bool columnGroupVisible(const std::string& name) const;
+                                bool enabled = true);
+    void enableColumnGroup(const std::string& name,
+                           bool ok);
+    bool columnGroupEnabled(const std::string& name) const;
+
+    bool columnVisible(int column) const;
 
     bool hasReference (unsigned int row) const;
     std::string reference (unsigned int row) const;
@@ -255,10 +262,13 @@ protected:
     
     void executeCallback(const std::string& name);
 
-    unsigned int              num_columns_ {0};
-    std::vector<std::string>  headings_;
-    std::vector<unsigned int> column_styles_;
+    void updateGroupColumns(const ColumnGroup& col_group);
 
+    unsigned int               num_columns_ {0};
+    std::vector<std::string>   headings_;
+    std::vector<unsigned int>  column_styles_;
+    std::vector<unsigned char> column_flags_;
+    
     bool          sortable_     {true};
     unsigned int  sort_column_  {0};
     Qt::SortOrder sort_order_   {Qt::AscendingOrder};
@@ -283,6 +293,7 @@ protected:
 
     mutable std::vector<nlohmann::json> rows_;
     mutable std::vector<RowAnnotation>  annotations_;
+    
     CellStyles                          cell_styles_;
     std::map<std::string, ColumnGroup>  column_groups_;
 

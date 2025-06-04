@@ -497,12 +497,27 @@ size_t Section::numFigures() const
 
 /**
 */
-unsigned int Section::numSections()
+unsigned int Section::numSections() const
 {
     unsigned int num = 1; // me
 
     for (auto& sec_it : sub_sections_)
         num += sec_it->numSections();
+
+    return num;
+}
+
+/**
+*/
+unsigned int Section::numSections(const std::function<bool(const Section&)>& func) const
+{
+    if (!func(*this))
+        return 0;
+
+    unsigned int num = 1; // me
+
+    for (auto& sec_it : sub_sections_)
+        num += sec_it->numSections(func);
 
     return num;
 }

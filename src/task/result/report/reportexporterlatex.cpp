@@ -64,6 +64,10 @@ ReportExporterLatex::~ReportExporterLatex()
  */
 Result ReportExporterLatex::initExport_impl(TaskResult& result)
 {
+    bool pdflatex_found = Utils::System::exec("which pdflatex").size();
+    if (write_pdf_ && !pdflatex_found)
+        return Result::failed("Cannot generate PDF: pdflatex not installed");
+
     std::string report_fn = boost::filesystem::path(exportFilename()).stem().string() + ".tex";
 
     latex_doc_.reset(new LatexDocument(exportResourceDir(), report_fn));
@@ -85,10 +89,14 @@ Result ReportExporterLatex::initExport_impl(TaskResult& result)
  */
 ResultT<nlohmann::json> ReportExporterLatex::finalizeExport_impl(TaskResult& result)
 {
+    setStatus("Writing report file");
+
     latex_doc_->write();
 
     if (write_pdf_)
     {
+        setStatus("Converting to PDF");
+
         auto res_pdf = writePDF();
         if (!res_pdf.ok())
             return res_pdf;
@@ -149,9 +157,6 @@ Result ReportExporterLatex::exportTable_impl(SectionContentTable& table)
 
     auto& latex_section = latex_doc_->getSection(it->second);
 
-    std::string table_name = table.name();
-    assert (!latex_section.hasTable(table_name));
-
     std::vector<std::string> headings = table.headings();
     unsigned int num_cols = headings.size();
 
@@ -160,33 +165,61 @@ Result ReportExporterLatex::exportTable_impl(SectionContentTable& table)
 
     assert (num_cols);
 
-    latex_section.addTable(table_name, num_cols, headings, "", false);
-    LatexTable& latex_table = latex_section.getTable(table_name);
-
     //configure wide table settings
     bool wide_table = false;
     if (s.latex_table_min_cols_wide >= 0 && headings.size() >= (size_t)s.latex_table_min_cols_wide)
-    {
-        latex_table.setWideTable(true);
         wide_table = true;
-    }
 
     //determine max row count
     //table > settings
+    bool has_max_row_override = table.maxRowCount().has_value();
+
     int max_row_count;
-    if (table.maxRowCount().has_value())
+    if (has_max_row_override) // from internal override
         max_row_count = table.maxRowCount().value();
     else // from settings
         max_row_count = s.latex_table_max_rows;
-    
-    latex_table.setMaxRowCount(max_row_count);
 
     unsigned int num_rows = table.filteredRowCount();
     std::vector<std::string> row_strings;
     std::string ref;
 
-    for (unsigned int row=0; row < num_rows; ++row)
+    // split all too long tables with internal max row override into subtables
+    bool split_tables = has_max_row_override; 
+
+    //apply a hard limit to maximum rows when splitting tables
+    const int HardLimit = 500;
+    max_row_count = split_tables ? std::max(max_row_count, HardLimit) : max_row_count;
+
+    LatexTable*  current_table    = nullptr;
+    unsigned int current_rows     = 0;
+    unsigned int num_tables       = 0;
+
+    for (unsigned int row=0; row < num_rows; ++row, ++current_rows)
     {
+        //create initial table or change table on hitting max row count when in split mode
+        if (!current_table || (split_tables && current_rows > (unsigned int)max_row_count))
+        {
+            std::string table_name_cur = table.name();
+
+            //split mode => keep track of tables
+            if (split_tables)
+            {
+                current_rows = 0;
+                ++num_tables;
+                table_name_cur += std::to_string(num_tables);
+            }
+
+            //create new table
+            assert (!latex_section.hasTable(table_name_cur));
+
+            latex_section.addTable(table_name_cur, num_cols, headings, "", false);
+            current_table = &latex_section.getTable(table_name_cur);
+
+            current_table->setMaxRowCount(max_row_count);
+            current_table->setWideTable(wide_table);
+        }
+
         row_strings = table.sortedRowStrings(row);
         assert (row_strings.size() == num_cols);
 
@@ -234,7 +267,8 @@ Result ReportExporterLatex::exportTable_impl(SectionContentTable& table)
                 row_strings[cnt] = "\\textcolor{red}{"+row_strings[cnt]+"}";
         }
 
-        latex_table.addRow(std::move(row_strings));
+        //add row to current table
+        current_table->addRow(std::move(row_strings));
     }
 
     return Result::succeeded();

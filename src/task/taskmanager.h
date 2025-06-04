@@ -23,6 +23,8 @@
 #include "taskdefs.h"
 #include "task.h"
 #include "taskresultswidget.h"
+#include "reportdefs.h"
+#include "result.h"
 
 #include <boost/optional.hpp>
 
@@ -44,9 +46,10 @@ class QMainWindow;
 
 namespace ResultReport
 {
-  class Report;
-  class SectionContent;
-  class Section;
+    class Report;
+    class SectionContent;
+    class Section;
+    class ReportExport;
 }
 
 class TaskManager : public QObject, public Configurable
@@ -106,6 +109,8 @@ public:
     bool hasResult (const std::string& name) const;
     bool removeResult(const std::string& name, 
                       bool inform_changes = true);
+    ResultT<nlohmann::json> exportResult(const std::string& name, 
+                                         ResultReport::ReportExportMode mode);
     
     std::shared_ptr<TaskResult> createResult(unsigned int id, 
                                              task::TaskResultType type);
@@ -151,6 +156,8 @@ protected:
 
     std::map<unsigned int, std::shared_ptr<TaskResult>> results_; // id -> result
     std::shared_ptr<TaskResult> current_result_;
+
+    std::unique_ptr<ResultReport::ReportExport> report_export_;
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
 };

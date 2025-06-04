@@ -31,4 +31,55 @@ const QColor Colors::BGGreen  = QColor(144,238,144);
 const QColor Colors::BGGray   = Qt::lightGray;
 const QColor Colors::BGYellow = QColor(255,255,153);
 
+/**
+ */
+std::string reportExportMode2String(ReportExportMode mode)
+{
+    switch(mode)
+    {
+        case ReportExportMode::JSONFile:
+            return "JSON";
+        case ReportExportMode::JSONBlob:
+            return "JSON Blob";
+        case ReportExportMode::Latex:
+            return "Latex";
+        case ReportExportMode::LatexPDF:
+            return "PDF";
+    }
+    return "";
+}
+
+/**
+ */
+std::string reportExportMode2Extension(ReportExportMode mode)
+{
+    switch(mode)
+    {
+        case ReportExportMode::JSONFile:
+        case ReportExportMode::JSONBlob:
+            return ".json";
+        case ReportExportMode::Latex:
+            return ".tex";
+        case ReportExportMode::LatexPDF:
+            return ".pdf";
+    }
+    return "";
+}
+
+/**
+ */
+std::string reportExportMode2Folder(ReportExportMode mode)
+{
+    switch(mode)
+    {
+        case ReportExportMode::JSONFile:
+        case ReportExportMode::JSONBlob:
+            return "json";
+        case ReportExportMode::Latex:
+        case ReportExportMode::LatexPDF:
+            return "tex";
+    }
+    return "";
+}
+
 }
