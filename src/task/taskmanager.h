@@ -30,7 +30,7 @@ class COMPASS;
 class CreateARTASAssociationsTask;
 class JSONImportTask;
 class GPSTrailImportTask;
-class GPSImportCSVTask;
+//class GPSImportCSVTask;
 class ASTERIXImportTask;
 class ViewPointsImportTask;
 class RadarPlotPositionCalculatorTask;
@@ -86,7 +86,7 @@ public:
     ViewPointsImportTask& viewPointsImportTask() const;
     JSONImportTask& jsonImporterTask() const;
     GPSTrailImportTask& gpsTrailImportTask() const;
-    GPSImportCSVTask& gpsImportCSVTask() const;
+    //GPSImportCSVTask& gpsImportCSVTask() const;
     ManageSectorsTask& manageSectorsTask() const;
     RadarPlotPositionCalculatorTask& radarPlotPositionCalculatorTask() const;
     CreateARTASAssociationsTask& createArtasAssociationsTask() const;
@@ -139,7 +139,7 @@ protected:
     std::unique_ptr<ViewPointsImportTask> view_points_import_task_;
     std::unique_ptr<JSONImportTask> json_import_task_;
     std::unique_ptr<GPSTrailImportTask> gps_trail_import_task_;
-    std::unique_ptr<GPSImportCSVTask> gps_import_csv_task_;
+    //std::unique_ptr<GPSImportCSVTask> gps_import_csv_task_;
     std::unique_ptr<ManageSectorsTask> manage_sectors_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;

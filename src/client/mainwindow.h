@@ -76,7 +76,7 @@ public slots:
     void importJSONRecordingSlot();
 
     void importGPSTrailSlot();
-    void importGPSCSVSlot();
+    //void importGPSCSVSlot();
 
     void importViewPointsSlot();
 

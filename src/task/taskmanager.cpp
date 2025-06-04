@@ -24,7 +24,7 @@
 #include "radarplotpositioncalculatortask.h"
 #include "viewpointsimporttask.h"
 #include "gpstrailimporttask.h"
-#include "gpsimportcsvtask.h"
+//#include "gpsimportcsvtask.h"
 #include "reconstructortask.h"
 #include "mainwindow.h"
 #include "viewabledataconfig.h"
@@ -47,7 +47,7 @@
 #include <QMainWindow>
 #include <QThread>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+//#include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace Utils;
 
@@ -100,13 +100,13 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(gps_trail_import_task_);
         addTask(class_id, gps_trail_import_task_.get());
     }
-    else if (class_id == "GPSImportCSVTask")
-    {
-        assert(!gps_import_csv_task_);
-        gps_import_csv_task_.reset(new GPSImportCSVTask(class_id, instance_id, *this));
-        assert(gps_import_csv_task_);
-        addTask(class_id, gps_import_csv_task_.get());
-    }
+    // else if (class_id == "GPSImportCSVTask")
+    // {
+    //     assert(!gps_import_csv_task_);
+    //     gps_import_csv_task_.reset(new GPSImportCSVTask(class_id, instance_id, *this));
+    //     assert(gps_import_csv_task_);
+    //     addTask(class_id, gps_import_csv_task_.get());
+    // }
     else if (class_id == "ManageSectorsTask")
     {
         assert(!manage_sectors_task_);
@@ -178,11 +178,11 @@ void TaskManager::checkSubConfigurables()
         assert(gps_trail_import_task_);
     }
 
-    if (!gps_import_csv_task_)
-    {
-        generateSubConfigurable("GPSImportCSVTask", "GPSImportCSVTask0");
-        assert(gps_import_csv_task_);
-    }
+    // if (!gps_import_csv_task_)
+    // {
+    //     generateSubConfigurable("GPSImportCSVTask", "GPSImportCSVTask0");
+    //     assert(gps_import_csv_task_);
+    // }
 
     if (!manage_sectors_task_)
     {
@@ -242,7 +242,7 @@ void TaskManager::shutdown()
     view_points_import_task_ = nullptr;
     json_import_task_ = nullptr;
     gps_trail_import_task_ = nullptr;
-    gps_import_csv_task_ = nullptr;
+    //gps_import_csv_task_ = nullptr;
     manage_sectors_task_ = nullptr;
     radar_plot_position_calculator_task_ = nullptr;
     create_artas_associations_task_ = nullptr;
@@ -303,11 +303,11 @@ GPSTrailImportTask& TaskManager::gpsTrailImportTask() const
 
 /**
  */
-GPSImportCSVTask& TaskManager::gpsImportCSVTask() const
-{
-    assert(gps_import_csv_task_);
-    return *gps_import_csv_task_;
-}
+// GPSImportCSVTask& TaskManager::gpsImportCSVTask() const
+// {
+//     assert(gps_import_csv_task_);
+//     return *gps_import_csv_task_;
+// }
 
 /**
  */

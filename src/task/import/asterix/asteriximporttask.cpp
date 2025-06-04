@@ -815,10 +815,10 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
     {
         COMPASS::instance().appMode(AppMode::LiveRunning); // set live mode
 
-        COMPASS::instance().logInfo("ASTERIX Import") << "network";
+        COMPASS::instance().logInfo("ASTERIX Import") << "started: network";
     }
     else
-        COMPASS::instance().logInfo("ASTERIX Import") << "files '" << source_.filesAsString() << "'";
+        COMPASS::instance().logInfo("ASTERIX Import") << "started: files '" << source_.filesAsString() << "'";
 
 
     //reset state before new run

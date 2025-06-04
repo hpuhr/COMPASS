@@ -14,11 +14,6 @@
             "path": "task_calc_artas_assoc.json"
         },
         {
-            "class_id": "GPSImportCSVTask",
-            "instance_id": "GPSImportCSVTask0",
-            "path": "task_import_gps_csv.json"
-        },
-        {
             "class_id": "GPSTrailImportTask",
             "instance_id": "GPSTrailImportTask0",
             "path": "task_import_gps.json"

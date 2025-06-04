@@ -990,22 +990,22 @@ void MainWindow::importGPSTrailSlot()
     }
 }
 
-void MainWindow::importGPSCSVSlot()
-{
-    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV",
-                                                   COMPASS::instance().lastUsedPath().c_str(),
-                                                   "Text Files (*.csv *.txt)").toStdString();
+// void MainWindow::importGPSCSVSlot()
+// {
+//     string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV",
+//                                                    COMPASS::instance().lastUsedPath().c_str(),
+//                                                    "Text Files (*.csv *.txt)").toStdString();
 
-    if (filename.size() > 0)
-    {
-        COMPASS::instance().taskManager().gpsImportCSVTask().importFilename(filename);
-        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
+//     if (filename.size() > 0)
+//     {
+//         COMPASS::instance().taskManager().gpsImportCSVTask().importFilename(filename);
+//         COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
-        updateMenus();
+//         updateMenus();
 
-        COMPASS::instance().taskManager().gpsImportCSVTask().dialog()->show();
-    }
-}
+//         COMPASS::instance().taskManager().gpsImportCSVTask().dialog()->show();
+//     }
+// }
 
 void MainWindow::importViewPointsSlot()
 {
