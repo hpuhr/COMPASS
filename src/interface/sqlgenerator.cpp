@@ -653,6 +653,13 @@ string SQLGenerator::getSelectAllTargetsStatement()
     return ss.str();
 }
 
+std::string SQLGenerator::getSelectAllTaslLogMessagesStatement()
+{
+    stringstream ss;
+    ss << "SELECT msg_id, json FROM " << TABLE_NAME_TASK_LOG << ";";
+    return ss.str();
+}
+
 //@TODO: !rewrite using replaceStatement() if again using these!
 //string SQLGenerator::getInsertMinMaxStatement(const string& variable_name,
 //                                              const string& object_name,
@@ -781,6 +788,11 @@ string SQLGenerator::getTableViewPointsCreateStatement()
 std::string SQLGenerator::getTableTargetsCreateStatement()
 {
     return getCreateTableStatement(TABLE_NAME_TARGETS, dbContent::Target::DBPropertyList, 0);
+}
+
+std::string SQLGenerator::getTableTaskLogCreateStatement()
+{
+    return getCreateTableStatement(TABLE_NAME_TASK_LOG, LogStore::LogEntry::DBPropertyList, 0);
 }
 
 /**

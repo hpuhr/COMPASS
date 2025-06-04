@@ -1,13 +1,93 @@
 #include "logmodel.h"
-#include "compass.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "files.h"
+#include "compass.h"
+#include "dbinterface.h"
 
 #include <QBrush>
 #include <QFont>
 
 using namespace Utils;
+
+// bool accepted;
+// QString timestamp;
+// LogStreamType type;
+// std::string component_; // A, A:B
+// std::string message;
+// boost::optional<unsigned int> error_code_;
+// nlohmann::json json_;
+// unsigned int message_count_ {0};
+
+const std::string LOGENTRY_MSG_ID_KEY {"msg_id"};
+const std::string LOGENTRY_ACCEPTED_KEY {"accepted"};
+const std::string LOGENTRY_TIMESTAMP_KEY {"timestamp"};
+const std::string LOGENTRY_TYPE_STR_KEY {"type_str"};
+const std::string LOGENTRY_COMPONENT_KEY {"component"};
+const std::string LOGENTRY_MESSAGE_KEY {"message"};
+const std::string LOGENTRY_ERROR_CODE_KEY {"error_code"};
+const std::string LOGENTRY_JSON_KEY {"json"};
+const std::string LOGENTRY_MESSAGE_COUNT_KEY {"message_count"};
+
+const Property     LogStore::LogEntry::DBColumnID     = Property("msg_id" , PropertyDataType::UINT);
+const Property     LogStore::LogEntry::DBColumnInfo   = Property("json", PropertyDataType::JSON);
+const PropertyList LogStore::LogEntry::DBPropertyList = PropertyList({ LogStore::LogEntry::DBColumnID,
+                                                          LogStore::LogEntry::DBColumnInfo });
+
+LogStore::LogEntry::LogEntry(const nlohmann::json& info)
+    : msg_id_(info.at(LOGENTRY_MSG_ID_KEY))
+{
+    assert (info.contains(LOGENTRY_ACCEPTED_KEY));
+    accepted_ = info.at(LOGENTRY_ACCEPTED_KEY);
+
+    assert (info.contains(LOGENTRY_TIMESTAMP_KEY));
+    timestamp_ = info.at(LOGENTRY_TIMESTAMP_KEY);
+
+    assert (info.contains(LOGENTRY_TYPE_STR_KEY));
+    type_ = logStreamTypeFromStr(info.at(LOGENTRY_TYPE_STR_KEY));
+
+    assert (info.contains(LOGENTRY_COMPONENT_KEY));
+    component_ = info.at(LOGENTRY_COMPONENT_KEY);
+
+    assert (info.contains(LOGENTRY_MESSAGE_KEY));
+    message_ = info.at(LOGENTRY_MESSAGE_KEY);
+
+    if (info.contains(LOGENTRY_ERROR_CODE_KEY))
+        error_code_ = info.at(LOGENTRY_ERROR_CODE_KEY);
+
+    assert (info.contains(LOGENTRY_JSON_KEY));
+    json_ = info.at(LOGENTRY_JSON_KEY);
+
+    assert (info.contains(LOGENTRY_MESSAGE_COUNT_KEY));
+    message_count_ = info.at(LOGENTRY_MESSAGE_COUNT_KEY);
+}
+
+
+nlohmann::json LogStore::LogEntry::asJSON() const
+{
+    nlohmann::json info;
+
+    info[LOGENTRY_MSG_ID_KEY] = msg_id_;
+
+    info[LOGENTRY_ACCEPTED_KEY] = accepted_;
+
+    info[LOGENTRY_TIMESTAMP_KEY] = timestamp_;
+
+    info[LOGENTRY_TYPE_STR_KEY] = logStreamTypeStr(type_);
+
+    info[LOGENTRY_COMPONENT_KEY] = component_;
+    info[LOGENTRY_MESSAGE_KEY] = message_;
+
+    if (error_code_)
+        info[LOGENTRY_ERROR_CODE_KEY] = *error_code_;
+
+    info[LOGENTRY_JSON_KEY] = json_;
+
+    info[LOGENTRY_MESSAGE_COUNT_KEY] = message_count_;
+
+    return info;
+}
+
 
 LogStore::LogStore(bool show_everything)
 {
@@ -17,16 +97,6 @@ LogStore::LogStore(bool show_everything)
         table_columns_.append(QStringList::fromVector({"Error", "JSON", "Count"}));
 
     checked_icon_ = QIcon(Files::getIconFilepath("done.png").c_str());
-
-    // logInfo("Test", {}, {}) << "Test Info";
-    // logWarn("Test", {}, {}) << "Test Warning";
-    // logError("Test", {}, {}) << "Test Error";
-
-    // acceptMessages();
-
-    // logInfo("Test", {}, {}) << "Test Info2";
-    // logWarn("Test", {}, {}) << "Test Warning2";
-    // logError("Test", {}, {}) << "Test Error2";
 }
 
 LogStream LogStore::logInfo(const std::string& component,
@@ -56,8 +126,13 @@ void LogStore::addLogMessage(const std::string& message, LogStreamType type, con
 {
     beginResetModel();
 
-    log_entries_.push_back(LogEntry(false, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss"), type,
-                                    component, message, error_code, json_blob));
+    log_entries_.push_back(
+        LogEntry(log_entries_.size(), false, QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss").toStdString(), type,
+                 component, message, error_code, json_blob));
+
+    const LogEntry& entry = *log_entries_.rbegin();
+
+    COMPASS::instance().dbInterface().saveTaskLogInfo(entry.msg_id_, entry.asJSON());
 
     endResetModel();
 
@@ -69,7 +144,7 @@ void LogStore::acceptMessages()
     beginResetModel();
 
     for (auto& entry : log_entries_)
-        entry.accepted = true;
+        entry.accepted_ = true;
 
     endResetModel();
 
@@ -102,9 +177,9 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
     // }
     case Qt::ForegroundRole:
     {
-        if (!entry.accepted)
+        if (!entry.accepted_)
         {
-            switch(entry.type)
+            switch(entry.type_)
             {
             case LogStreamType::Error:
                 return QBrush(Qt::red);
@@ -120,7 +195,7 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
     }
     case Qt::BackgroundRole:
     {
-        if (entry.accepted)
+        if (entry.accepted_)
             return QBrush(QColor("gainsboro"));
         else
             return QVariant();
@@ -130,9 +205,9 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
     {
         QFont font;
 
-        if (!entry.accepted)
+        if (!entry.accepted_)
         {
-            switch(entry.type)
+            switch(entry.type_)
             {
             case LogStreamType::Error:
                 font.setBold(true);
@@ -162,11 +237,11 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
         }
         else if (col_name == "Time")
         {
-            return entry.timestamp;
+            return entry.timestamp_.c_str();
         }
         else if (col_name == "Type")
         {
-            switch(entry.type)
+            switch(entry.type_)
             {
             case LogStreamType::Info:
                 return "Info";
@@ -184,7 +259,7 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
         }
         else if (col_name == "Message")
         {
-            return entry.message.c_str();
+            return entry.message_.c_str();
         }
         else if (col_name == "Error")
         {
@@ -206,7 +281,7 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
         if (index.column() > 0)  // only col 0 have icons
             return QVariant();
 
-        if (entry.accepted)
+        if (entry.accepted_)
             return checked_icon_;
         else
             return QVariant();;
@@ -332,4 +407,70 @@ Qt::ItemFlags LogStore::flags(const QModelIndex &index) const
     // }
     // else
         return QAbstractItemModel::flags(index);
+}
+
+std::string LogStore::LogEntry::logStreamTypeStr (LogStreamType type)
+{
+    // enum class LogStreamType { Info, Warning, Error };
+
+    switch(type)
+    {
+    case LogStreamType::Info:
+        return "Info";
+    case LogStreamType::Warning:
+        return "Warning";
+    case LogStreamType::Error:
+        return "Error";
+    default:
+        assert (false);
+    }
+
+}
+
+LogStreamType LogStore::LogEntry::logStreamTypeFromStr (const std::string& type_str)
+{
+    if (type_str == "Info")
+        return LogStreamType::Info;
+    if (type_str == "Warning")
+        return LogStreamType::Warning;
+    if (type_str == "Error")
+        return LogStreamType::Error;
+    else
+        assert (false);
+}
+
+void LogStore::clearMessages()
+{
+    loginf << "LogStore: clearMessages";
+
+    beginResetModel();
+
+    log_entries_.clear();
+
+    endResetModel();
+
+}
+void LogStore::loadMessagesFromDB()
+{
+    loginf << "LogStore: loadMessagesFromDB";
+
+    beginResetModel();
+
+    log_entries_.clear();
+
+    for (auto& info : COMPASS::instance().dbInterface().loadTaskLogInfo())
+        log_entries_.emplace_back(info);
+
+    endResetModel();
+
+    emit messagesChangedSignal();
+}
+
+void LogStore::databaseOpenedSlot()
+{
+    loadMessagesFromDB();
+}
+void LogStore::databaseClosedSlot()
+{
+    clearMessages();
 }

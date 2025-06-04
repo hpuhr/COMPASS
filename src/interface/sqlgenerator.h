@@ -99,6 +99,7 @@ public:
     std::string getTableSectorsCreateStatement();
     std::string getTableViewPointsCreateStatement();
     std::string getTableTargetsCreateStatement();
+    std::string getTableTaskLogCreateStatement();
     std::string getTableTaskResultsCreateStatement();
     std::string getTableReportContentsCreateStatement();
 
@@ -128,6 +129,7 @@ public:
                                           const std::string& layer_name, const std::string& json);
     std::string getSelectAllSectorsStatement();
     std::string getSelectAllTargetsStatement();
+    std::string getSelectAllTaslLogMessagesStatement();
 
     std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement(const DBContent& object);
 

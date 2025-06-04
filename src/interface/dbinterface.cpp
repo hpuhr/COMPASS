@@ -186,7 +186,7 @@ void DBInterface::openDBFile(const std::string& filename, bool overwrite)
     loginf << "DBInterface: openDBFile: new_file " << new_file;
 
     if (new_file)
-        COMPASS::instance().logInfo("DBInterface") << "Database '" << filename << "' created";
+        COMPASS::instance().logInfo("DBInterface") << "database '" << filename << "' created";
 }
 
 /**
@@ -274,6 +274,9 @@ void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite
 
         if (!existsTargetsTable())
             createTargetsTable();
+
+        if (!existsTaskLogTable())
+            createTaskLogTable();
 
         //determine maximum report content id
         auto max_id = getMaxReportContentID();
@@ -1790,6 +1793,108 @@ void DBInterface::updateTargets(const std::map<unsigned int, nlohmann::json>& ta
     }
 
     loginf << "DBInterface: updateTargets: done";
+}
+
+
+bool DBInterface::existsTaskLogTable()
+{
+    return existsTable(TABLE_NAME_TASK_LOG);
+}
+void DBInterface::createTaskLogTable()
+{
+    loginf << "DBInterface: createTaskLogTable";
+
+    assert(ready());
+    assert(!existsTaskLogTable());
+
+    {
+#ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+#endif
+
+        auto sql = sqlGenerator().getTableTaskLogCreateStatement();
+
+        loginf << "DBInterface: createTaskLogTable: sql '" << sql << "'";
+
+        execute(sql);
+        updateTableInfo();
+    }
+}
+std::vector<nlohmann::json> DBInterface::loadTaskLogInfo()
+{
+    loginf << "DBInterface: loadTaskLogInfo";
+
+    assert(ready());
+    assert(existsTaskLogTable());
+
+    std::vector<nlohmann::json> info;
+
+    {
+#ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+#endif
+
+        DBCommand command;
+        command.set(sqlGenerator().getSelectAllTaslLogMessagesStatement());
+
+        PropertyList list;
+        list.addProperty("msg_id", PropertyDataType::UINT);
+        list.addProperty("json", PropertyDataType::STRING);
+        command.list(list);
+
+        shared_ptr<DBResult> result = execute(command);
+        assert(!result->hasError());
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+
+        assert(buffer);
+        assert(buffer->has<unsigned int>("msg_id"));
+        assert(buffer->has<string>("json"));
+
+        NullableVector<unsigned int>& msg_id_vec = buffer->get<unsigned int>("msg_id");
+        NullableVector<string>& json_vec = buffer->get<string>("json");
+
+        unsigned int msg_id;
+        string json_str;
+
+        std::set<unsigned int> existing_msg_ids;
+
+        for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
+        {
+            assert(!msg_id_vec.isNull(cnt));
+            assert(!json_vec.isNull(cnt));
+
+            msg_id = msg_id_vec.get(cnt);
+            json_str = json_vec.get(cnt);
+
+            assert (!existing_msg_ids.count(msg_id));
+            existing_msg_ids.insert(msg_id);
+
+            info.emplace_back(nlohmann::json::parse(json_str));
+        }
+    }
+
+    return info;
+}
+
+void DBInterface::saveTaskLogInfo(unsigned int msg_id, const nlohmann::json& info)
+{
+    assert (ready());
+    assert(existsTaskLogTable());
+
+    {
+        //storing all targets at once via a buffer is faster
+        std::shared_ptr<Buffer> buffer(new Buffer(LogStore::LogEntry::DBPropertyList));
+
+        auto& msg_id_vec   = buffer->get<unsigned int>(LogStore::LogEntry::DBColumnID.name());
+        auto& info_vec = buffer->get<nlohmann::json>(LogStore::LogEntry::DBColumnInfo.name());
+
+        msg_id_vec.set(0, msg_id);
+        info_vec.set(0, info);
+
+        insertBuffer(TABLE_NAME_TASK_LOG, buffer);
+    }
 }
 
 /**

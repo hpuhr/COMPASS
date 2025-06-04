@@ -1,6 +1,8 @@
 #pragma once
 
 #include "json.hpp"
+#include "property.h"
+#include "propertylist.h"
 
 #include <string>
 #include <sstream>
@@ -68,27 +70,45 @@ class LogStore : public QAbstractItemModel
 signals:
     void messagesChangedSignal();
 
+public slots:
+    void databaseOpenedSlot();
+    void databaseClosedSlot();
+
 public:
     struct LogEntry {
-        LogEntry(bool accepted, QString timestamp, LogStreamType type, std::string component,
-                 std::string message, boost::optional<unsigned int> error_code, nlohmann::json json)
-            : accepted(accepted),
-            timestamp(std::move(timestamp)),
-            type(type),
-            component_(std::move(component)),
-            message(std::move(message)),
+        LogEntry(unsigned int msg_id, bool accepted, const std::string timestamp, LogStreamType type,
+                 const std::string& component,
+                 const std::string& message, boost::optional<unsigned int> error_code, const nlohmann::json& json)
+            : msg_id_(msg_id),accepted_(accepted),
+            timestamp_(timestamp),
+            type_(type),
+            component_(component),
+            message_(message),
             error_code_(error_code),
-            json_(std::move(json))
+            json_(json)
         {
         }
-        bool accepted;
-        QString timestamp;
-        LogStreamType type;
+
+        LogEntry(const nlohmann::json& info); // from database
+
+        const unsigned int msg_id_;
+        bool accepted_;
+        std::string timestamp_;
+        LogStreamType type_;
         std::string component_; // A, A:B
-        std::string message;
+        std::string message_;
         boost::optional<unsigned int> error_code_;
         nlohmann::json json_;
         unsigned int message_count_ {0};
+
+        nlohmann::json asJSON() const;
+
+        static std::string logStreamTypeStr (LogStreamType type);
+        static LogStreamType logStreamTypeFromStr (const std::string& type_str);
+
+        static const Property     DBColumnID;
+        static const Property     DBColumnInfo;
+        static const PropertyList DBPropertyList;
     };
 
     LogStore(bool show_everything);
@@ -118,6 +138,9 @@ public:
     QModelIndex parent(const QModelIndex& index) const override;
 
     Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+    void clearMessages();
+    void loadMessagesFromDB();
 
 protected:
     QStringList table_columns_;

@@ -168,6 +168,11 @@ COMPASS::COMPASS()
     QObject::connect(this, &COMPASS::databaseClosedSignal,
                      task_manager_.get(), &TaskManager::databaseClosedSlot);
 
+    QObject::connect(this, &COMPASS::databaseOpenedSignal,
+                     &log_store_, &LogStore::databaseOpenedSlot);
+    QObject::connect(this, &COMPASS::databaseClosedSignal,
+                     &log_store_, &LogStore::databaseClosedSlot);
+
     // data sources changed
     QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
                      eval_manager_.get(), &EvaluationManager::dataSourcesChangedSlot); // update if data sources changed

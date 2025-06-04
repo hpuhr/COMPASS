@@ -82,7 +82,7 @@ void LogWidget::checkIcon()
     has_unaccepted_errors_ = std::any_of(
         log_store_.logEntries().begin(), log_store_.logEntries().end(),
         [](const LogStore::LogEntry& entry) {
-            return entry.type == LogStreamType::Error && !entry.accepted;
+            return entry.type_ == LogStreamType::Error && !entry.accepted_;
         });
 
     if (old_val != has_unaccepted_errors_)

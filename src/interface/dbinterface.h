@@ -71,6 +71,7 @@ static const std::string TABLE_NAME_PROPERTIES = "properties";
 static const std::string TABLE_NAME_SECTORS    = "sectors";
 static const std::string TABLE_NAME_VIEWPOINTS = "viewpoints";
 static const std::string TABLE_NAME_TARGETS    = "targets";
+static const std::string TABLE_NAME_TASK_LOG   = "task_log";
 
 extern const std::string PROP_TIMESTAMP_MIN_NAME;
 extern const std::string PROP_TIMESTAMP_MAX_NAME;
@@ -191,6 +192,11 @@ public:
 
     void saveTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
     void updateTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
+
+    bool existsTaskLogTable();
+    void createTaskLogTable();
+    std::vector<nlohmann::json> loadTaskLogInfo();
+    void saveTaskLogInfo(unsigned int msg_id, const nlohmann::json& info);
 
     void clearAssociations(const DBContent& dbcontent);
 

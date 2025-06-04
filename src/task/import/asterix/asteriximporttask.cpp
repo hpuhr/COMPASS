@@ -818,7 +818,7 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
         COMPASS::instance().logInfo("ASTERIX Import") << "started: network";
     }
     else
-        COMPASS::instance().logInfo("ASTERIX Import") << "started: files '" << source_.filesAsString() << "'";
+        COMPASS::instance().logInfo("ASTERIX Import") << "started: files";
 
 
     //reset state before new run
@@ -1429,7 +1429,7 @@ void ASTERIXImportTask::checkAllDone()
         double records_per_second = num_records_ / (time_diff.total_milliseconds() / 1000.0);
 
         COMPASS::instance().logInfo("ASTERIX Import")
-            << "files '" << source_.filesAsString() << "' finished after "
+            << " finished after "
             << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false)
             << ", inserted " << num_records_ << " rec"
             << " with " << String::doubleToStringPrecision(records_per_second, 2) << " rec/s";
