@@ -20,13 +20,39 @@
 #include "task/result/report/reportexporterjson.h"
 #include "task/result/report/reportexporterlatex.h"
 
+#include "taskmanager.h"
+
+#include "system.h"
+#include "logger.h"
+
+#include <QApplication>
+
 namespace ResultReport
 {
 
 /**
  */
-ReportExport::ReportExport()
+ReportExport::ReportExport(const std::string& class_id, 
+                           const std::string& instance_id, 
+                           TaskManager* task_manager)
+:   Configurable(class_id, instance_id, task_manager)
 {
+    registerParameter("author"           , &settings_.author           , ReportExportSettings().author           );
+    registerParameter("open_created_file", &settings_.open_created_file, ReportExportSettings().open_created_file);
+
+    registerParameter("latex_table_max_rows"     , &settings_.latex_table_max_rows     , ReportExportSettings().latex_table_max_rows     );
+    registerParameter("latex_table_max_col_width", &settings_.latex_table_max_col_width, ReportExportSettings().latex_table_max_col_width);
+    registerParameter("latex_table_min_cols_wide", &settings_.latex_table_min_cols_wide, ReportExportSettings().latex_table_min_cols_wide);
+    registerParameter("latex_pdf_max_reruns"     , &settings_.latex_pdf_max_reruns     , ReportExportSettings().latex_pdf_max_reruns     );
+
+    registerParameter("json_table_max_rows_inline", &settings_.json_table_max_rows_inline, ReportExportSettings().json_table_max_rows_inline);
+    registerParameter("json_table_max_cols_inline", &settings_.json_table_max_cols_inline, ReportExportSettings().json_table_max_cols_inline);
+
+    //fill in some default values if missing
+    if (!settings_.author.size())
+        settings_.author = Utils::System::getUserName();
+    if (!settings_.author.size())
+        settings_.author = "User";
 }
 
 /**
@@ -46,6 +72,11 @@ Result ReportExport::exportReport(TaskResult& result,
     auto exporter = createExporter(mode, fn, resource_dir);
     if (!exporter)
         return Result::failed("Exporter could not be created for export type ''");
+
+    auto exporter_ptr = exporter.get();
+
+    connect(exporter.get(), &ReportExporter::progressChanged, 
+        [ this, exporter_ptr ] () { this->updateProgress(exporter_ptr); });
 
     //export using exporter
     return exporter->exportReport(result);
@@ -75,6 +106,21 @@ std::unique_ptr<ReportExporter> ReportExport::createExporter(ReportExportMode mo
     }
 
     return std::unique_ptr<ReportExporter>();
+}
+
+/**
+ */
+void ReportExport::updateProgress(ReportExporter* exporter)
+{
+    assert(exporter);
+
+    //loginf << "num exported: " << exporter->numSectionsExported() << ", num total: " << exporter->numSectionsTotal();
+
+    status_   = exporter->status();
+    progress_ = (double)exporter->numSectionsExported() / (double)exporter->numSectionsTotal() * 0.9 + 
+                exporter->isDone() * 0.1;
+
+    emit progressChanged();
 }
 
 }

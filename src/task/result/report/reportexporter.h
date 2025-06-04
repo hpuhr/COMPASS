@@ -27,6 +27,8 @@
 
 #include <boost/optional.hpp>
 
+#include <QObject>
+
 #include "json.hpp"
 
 class TaskResult;
@@ -44,8 +46,9 @@ class ReportExport;
 
 /**
  */
-class ReportExporter
+class ReportExporter : public QObject
 {
+    Q_OBJECT
 public:
     ReportExporter(const ReportExport* report_export,
                    const std::string& export_fn,
@@ -60,6 +63,11 @@ public:
 
     virtual ReportExportMode exportMode() const = 0;
 
+    size_t numSectionsTotal() const { return num_sections_total_; }
+    size_t numSectionsExported() const { return num_sections_exported_; }
+    const std::string& status() const { return status_; }
+    bool isDone() const { return done_; }
+
     static const int TableMaxRows;
     static const int TableMaxColumns;
 
@@ -71,6 +79,9 @@ public:
     static const std::string ExportTextFormat;
 
     static std::string resourceSubDir(ResourceDir dir);
+
+signals:
+    void progressChanged();
 
 protected:
     virtual ResultT<nlohmann::json> exportReport_impl(TaskResult& result,
@@ -91,6 +102,8 @@ protected:
     const std::string& exportFilename() const { return export_fn_; }
     const std::string& exportResourceDir() const { return export_resource_dir_; }
 
+    void setStatus(const std::string& status);
+
 private:
     Result initExport(TaskResult& result);
     ResultT<nlohmann::json> finalizeExport(TaskResult& result);
@@ -108,10 +121,10 @@ private:
 
     Section* current_content_section_ = nullptr;
 
-    size_t num_sections_total_    = 0;
-    size_t num_contents_total_    = 0;
-    size_t num_sections_exported_ = 0;
-    size_t num_contents_exported_ = 0;
+    size_t      num_sections_total_    = 0;
+    size_t      num_sections_exported_ = 0;
+    bool        done_                  = false;
+    std::string status_;
 };
 
 } // namespace ResultReport

@@ -69,6 +69,10 @@ namespace ResultReport
         LatexPDF
     };
 
+    extern std::string reportExportMode2String(ReportExportMode mode);
+    extern std::string reportExportMode2Extension(ReportExportMode mode);
+    extern std::string reportExportMode2Folder(ReportExportMode mode);
+
     enum class ResourceDir
     {
         Root = 0,
@@ -79,15 +83,19 @@ namespace ResultReport
     struct ReportExportSettings
     {
         //general settings
-        std::string  author;
-        std::string  abstract;
+        std::string      author;
+        std::string      abstract;
 
-        bool         open_created_file = true;
+        bool             open_created_file = true;
 
         //latex settings
-        int          latex_table_max_rows      = 500;
-        int          latex_table_max_col_width = 24;
-        int          latex_table_min_cols_wide = 9;
-        unsigned int latex_pdf_max_reruns      = 3;
+        int              latex_table_max_rows      = 500;
+        int              latex_table_max_col_width = 24;
+        int              latex_table_min_cols_wide = 9;
+        unsigned int     latex_pdf_max_reruns      = 3;
+
+        //json settings
+        int              json_table_max_rows_inline = 0;
+        int              json_table_max_cols_inline = 0;
     };
 }

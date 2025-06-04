@@ -94,22 +94,7 @@ struct EvaluationSettings
     bool report_split_results_by_mops_ {false};
     bool report_split_results_by_aconly_ms_ {false};
 
-    std::string report_author_;
-    std::string report_abstract_;
-
-    bool report_include_target_details_ {false};
-    bool report_skip_targets_wo_issues_ {false};
-    bool report_include_target_tr_details_ {false};
-
     bool show_ok_joined_target_reports_ {false};
-
-    unsigned int report_num_max_table_rows_ {1000};
-    unsigned int report_num_max_table_col_width_ {18};
-
-    bool report_wait_on_map_loading_ {true};
-
-    bool report_run_pdflatex_ {true};
-    bool report_open_created_pdf_ {false};
 
     //grid generation
     unsigned int grid_num_cells_x     = 512;

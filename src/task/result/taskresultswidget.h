@@ -1,6 +1,7 @@
 #pragma once
 
 #include "toolboxwidget.h"
+#include "reportdefs.h"
 
 #include <boost/optional.hpp>
 
@@ -52,7 +53,7 @@ protected:
 
     void removeCurrentResult();
     bool removeResult(const std::string& name);
-    void exportCurrentResult();
+    void exportCurrentResult(ResultReport::ReportExportMode mode);
     void refreshCurrentResult();
 
     TaskManager& task_man_;
@@ -68,5 +69,3 @@ protected:
 
     ResultReport::ReportWidget* report_widget_;
 };
-
-

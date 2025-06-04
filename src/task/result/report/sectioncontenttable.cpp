@@ -105,6 +105,7 @@ SectionContentTable::SectionContentTable(unsigned int id,
 ,   num_columns_  (num_columns)
 ,   headings_     (headings)
 ,   column_styles_(num_columns, 0)
+,   column_flags_ (num_columns, 0)
 ,   sortable_     (sortable)
 ,   sort_column_  (sort_column)
 ,   sort_order_   (sort_order)
@@ -785,35 +786,44 @@ std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row,
 
 /**
  */
-const SectionContentTable::ColumnGroups& SectionContentTable::columnGroups() const
-{
-    return column_groups_;
-}
-
-/**
- */
 SectionContentTable::ColumnGroup& SectionContentTable::setColumnGroup(const std::string& name, 
                                                                       const std::vector<int>& columns,
-                                                                      bool visible)
+                                                                      bool enabled)
 {
     auto& col_group = column_groups_[ name ];
 
     col_group         = {};
     col_group.columns = columns;
-    col_group.visible = visible;
-
-    if (table_widget_)
-        table_widget_->updateColumnVisibility();
+    col_group.enabled = enabled;
+    
+    updateGroupColumns(col_group);
 
     return col_group;
 }
 
 /**
  */
-void SectionContentTable::setColumnGroupVisible(const std::string& name,
-                                                bool ok)
+void SectionContentTable::enableColumnGroup(const std::string& name,
+                                            bool ok)
 {
-    column_groups_.at(name).visible = ok;
+    auto& column_group = column_groups_.at(name);
+    column_group.enabled = ok;
+
+    updateGroupColumns(column_group);
+}
+
+/**
+ */
+void SectionContentTable::updateGroupColumns(const ColumnGroup& col_group)
+{
+    for (auto col : col_group.columns)
+    {
+        auto& f = column_flags_.at(col);
+        if (col_group.enabled)
+            f &= ~ColumnHidden;
+        else
+            f |= ColumnHidden;
+    }
 
     if (table_widget_)
         table_widget_->updateColumnVisibility();
@@ -821,9 +831,16 @@ void SectionContentTable::setColumnGroupVisible(const std::string& name,
 
 /**
  */
-bool SectionContentTable::columnGroupVisible(const std::string& name) const
+bool SectionContentTable::columnGroupEnabled(const std::string& name) const
 {
-    return column_groups_.at(name).visible;
+    return column_groups_.at(name).enabled;
+}
+
+/**
+ */
+bool SectionContentTable::columnVisible(int column) const
+{
+    return (column_flags_.at(column) & ColumnHidden) == 0;
 }
 
 /**
@@ -1190,6 +1207,9 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 
     num_columns_ = headings_.size();
 
+    //@TODO: maybe serialize these flags in the future
+    column_flags_.assign(num_columns_, 0);
+
     rows_ = j[ FieldRows ].get<std::vector<nlohmann::json>>();
 
     auto& j_annos = j[ FieldAnnotations ];
@@ -1490,11 +1510,8 @@ void SectionContentTableWidget::resizeContent()
  */
 void SectionContentTableWidget::updateColumnVisibility()
 {
-    for (const auto& group : content_table_->columnGroups())
-    {
-        for (auto col : group.second.columns)
-            table_view_->setColumnHidden(col, !group.second.visible);
-    }
+    for (unsigned int c = 0; c < content_table_->numColumns(); ++c)
+        table_view_->setColumnHidden(c, !content_table_->columnVisible(c));
 }
 
 /**

@@ -38,6 +38,9 @@
 #include "taskresult.h"
 #include "taskresultswidget.h"
 
+#include "reportexport.h"
+#include "reportexportdialog.h"
+
 #include "evaluationtaskresult.h"
 
 #include <cassert>
@@ -46,6 +49,8 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QThread>
+#include <QProgressDialog>
+#include <QMessageBox>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -136,9 +141,17 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         assert(reconstruct_references_task_);
         addTask(class_id, reconstruct_references_task_.get());
     }
+    else if (class_id == "ReportExport")
+    {
+        assert(!report_export_);
+        report_export_.reset(new ResultReport::ReportExport(class_id, instance_id, this));
+        assert(report_export_);
+    }
     else
+    {
         throw std::runtime_error("TaskManager: generateSubConfigurable: unknown class_id " +
                                  class_id);
+    }
 }
 
 /**
@@ -207,6 +220,12 @@ void TaskManager::checkSubConfigurables()
     {
         generateSubConfigurable("ReconstructorTask", "ReconstructorTask0");
         assert(reconstruct_references_task_);
+    }
+
+    if (!report_export_)
+    {
+        generateSubConfigurable("ReportExport", "ReportExport0");
+        assert(report_export_);
     }
 }
 
@@ -563,6 +582,26 @@ bool TaskManager::removeResult(const std::string& name,
         emit taskResultsChangedSignal();
 
     return true;
+}
+
+/**
+ */
+ResultT<nlohmann::json> TaskManager::exportResult(const std::string& name, 
+                                                  ResultReport::ReportExportMode mode)
+{
+    assert(report_export_);
+    assert(hasResult(name));
+
+    auto r = result(name);
+    assert(r);
+
+    ResultReport::ReportExportDialog dlg(*r, 
+                                         *report_export_, 
+                                         mode,
+                                         mode == ResultReport::ReportExportMode::JSONBlob);
+    dlg.exec();
+
+    return dlg.result();
 }
 
 /**

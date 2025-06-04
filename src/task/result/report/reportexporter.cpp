@@ -109,6 +109,9 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
 {
     loginf << "ReportExporter: exportReport: Exporting result '" << result.name() << "'";
 
+    num_sections_exported_ = 0;
+    done_                  = false;
+
     try
     {
         //check stuff
@@ -145,6 +148,18 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
             }
         }
 
+        if (!section_ptr)
+            section_ptr = result.report()->rootSection().get();
+
+        assert(section_ptr);
+
+        //pre-compute total number of exported sections
+        auto func = [ this ] (const Section& s)
+        {
+            return s.exportEnabled(this->exportMode());
+        };
+        num_sections_total_ = section_ptr->numSections(func);
+
         //for immediate rendering of geographic view during image generation
 #if USE_EXPERIMENTAL_SOURCE == true
         GeographicView::instant_display_ = true;
@@ -174,6 +189,9 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
 
     loginf << "ReportExporter: exportReport: Exporting result '" << result.name() << "' succeeded";
 
+    done_ = true;
+    emit progressChanged();
+
     return Result::succeeded();
 }
 
@@ -183,20 +201,16 @@ ResultT<nlohmann::json> ReportExporter::exportReport_impl(TaskResult& result,
                                                           Section* section,
                                                           const boost::optional<unsigned int>& content_id)
 {
+    assert(section);
+
     auto res = initExport(result);
     if (!res.ok())
         return res;
 
-    Section* start_section = section;
-    if (!start_section)
-        start_section = result.report()->rootSection().get();
-
-    assert(start_section);
-
-    loginf << "ReportExporter: exportReport_impl: start section = " << start_section->name();
+    loginf << "ReportExporter: exportReport_impl: start section = " << section->name();
 
     //visit start section
-    res = visitSection(*start_section);
+    res = visitSection(*section);
     if (!res.ok())
         return res;
 
@@ -214,7 +228,9 @@ Result ReportExporter::visitSection(Section& section)
         return Result::succeeded();
     }
 
-    loginf << "Exporting section '" << section.id() << "'";
+    //loginf << "Exporting section '" << section.id() << "'";
+
+    setStatus("Exporting section '" + section.name() + "'");
 
     //export section first
     auto res = exportSection_impl(section);
@@ -236,6 +252,9 @@ Result ReportExporter::visitSection(Section& section)
     }
 
     current_content_section_ = nullptr;
+
+    ++num_sections_exported_;
+    emit progressChanged();
 
     //then its subsections
     for (const auto& sec_it : section.subSections(false))
@@ -260,7 +279,7 @@ Result ReportExporter::visitContent(SectionContent& content)
         return Result::succeeded();
     }
 
-    loginf << "Exporting content '" << content.id() << "'";
+    //loginf << "Exporting content '" << content.id() << "'";
 
     //load content?
     if (content.isOnDemand() && !content.loadOnDemandIfNeeded())
@@ -308,6 +327,15 @@ Result ReportExporter::exportTable(SectionContentTable& table)
 Result ReportExporter::exportText(SectionContentText& text)
 {
     return exportText_impl(text);
+}
+
+/**
+ */
+void ReportExporter::setStatus(const std::string& status)
+{
+    status_ = status;
+
+    emit progressChanged();
 }
 
 }

@@ -180,25 +180,6 @@ void EvaluationCalculator::readSettings()
     registerParameter("report_split_results_by_mops", &settings_.report_split_results_by_mops_, Settings().report_split_results_by_mops_);
     registerParameter("report_split_results_by_aconly_ms", &settings_.report_split_results_by_aconly_ms_, Settings().report_split_results_by_aconly_ms_);
 
-    registerParameter("report_author", &settings_.report_author_, Settings().report_author_);
-
-    registerParameter("report_abstract", &settings_.report_abstract_, Settings().report_abstract_);
-
-    registerParameter("report_include_target_details", &settings_.report_include_target_details_, Settings().report_include_target_details_);
-    registerParameter("report_skip_targets_wo_issues", &settings_.report_skip_targets_wo_issues_, Settings().report_skip_targets_wo_issues_);
-    registerParameter("report_include_target_tr_details", &settings_.report_include_target_tr_details_, Settings().report_include_target_tr_details_);
-
-    registerParameter("show_ok_joined_target_reports", &settings_.show_ok_joined_target_reports_, Settings().show_ok_joined_target_reports_);
-
-    registerParameter("report_num_max_table_rows", &settings_.report_num_max_table_rows_, Settings().report_num_max_table_rows_);
-    registerParameter("report_num_max_table_col_width", &settings_.report_num_max_table_col_width_, Settings().report_num_max_table_col_width_);
-
-    registerParameter("report_wait_on_map_loading", &settings_.report_wait_on_map_loading_, Settings().report_wait_on_map_loading_);
-
-    registerParameter("report_run_pdflatex", &settings_.report_run_pdflatex_, Settings().report_run_pdflatex_);
-
-    registerParameter("report_open_created_pdf", &settings_.report_open_created_pdf_, Settings().report_open_created_pdf_);
-
     //grid generation
     registerParameter("grid_num_cells_x", &settings_.grid_num_cells_x, Settings().grid_num_cells_x);
     registerParameter("grid_num_cells_y", &settings_.grid_num_cells_y, Settings().grid_num_cells_y);
@@ -246,20 +227,6 @@ void EvaluationCalculator::updateDerivedParameters()
 {
     data_sources_ref_ = settings_.active_sources_ref_.get<std::map<std::string, std::map<std::string, bool>>>();
     data_sources_tst_ = settings_.active_sources_tst_.get<std::map<std::string, std::map<std::string, bool>>>();
-
-    //fill in some default values if missing
-    if (!settings_.report_author_.size())
-        settings_.report_author_ = System::getUserName();
-    if (!settings_.report_author_.size())
-        settings_.report_author_ = "User";
-
-    bool pdflatex_found = System::exec("which pdflatex").size();
-
-    if (!pdflatex_found)
-    {
-        settings_.report_run_pdflatex_     = false;
-        settings_.report_open_created_pdf_ = false;
-    }
 }
 
 /**

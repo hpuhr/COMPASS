@@ -111,9 +111,9 @@ public:
         ColDuration,
         ColACIDs, 
         ColACADs, 
-        ColMode3A, 
-        ColModeCMin, 
-        ColModeCMax
+        ColMode3A//, 
+        //ColModeCMin, 
+        //ColModeCMax
     };
 
     // ref
@@ -150,14 +150,15 @@ protected:
                                  "Duration",
                                  "ACIDs", 
                                  "ACADs",
-                                 "M3/A", 
-                                 "MC Min", 
-                                 "MC Max" };
+                                 "M3/A"//, 
+                                 //"MC Min", 
+                                 //"MC Max" 
+                                };
     
     std::vector<int> main_columns_    { ColUse, ColUTN, ColComment, ColCategory, ColInterest };
     std::vector<int> duration_columns_{ ColNumUpdates, ColNumRef, ColNumTest, ColBegin, ColEnd, ColDuration };
     std::vector<int> mode_s_columns_  { ColACIDs, ColACADs };
-    std::vector<int> mode_ac_columns_ { ColMode3A, ColModeCMin, ColModeCMax };
+    std::vector<int> mode_ac_columns_ { ColMode3A, /*ColModeCMin, ColModeCMax*/ };
 
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 

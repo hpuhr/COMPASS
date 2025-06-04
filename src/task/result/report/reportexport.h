@@ -18,6 +18,7 @@
 #pragma once
 
 #include "reportdefs.h"
+#include "configurable.h"
 
 #include "result.h"
 
@@ -25,7 +26,10 @@
 #include <string>
 #include <memory>
 
+#include <QObject>
+
 class TaskResult;
+class TaskManager;
 
 namespace ResultReport
 {
@@ -37,10 +41,13 @@ class ReportExporter;
 
 /**
  */
-class ReportExport
+class ReportExport : public QObject, public Configurable
 {
+    Q_OBJECT
 public:
-    ReportExport();
+    ReportExport(const std::string& class_id, 
+                 const std::string& instance_id, 
+                 TaskManager* task_manager);
     virtual ~ReportExport();
 
     Result exportReport(TaskResult& result,
@@ -51,11 +58,22 @@ public:
     ReportExportSettings& settings() { return settings_; }
     const ReportExportSettings& settings() const { return settings_; }
 
+    const std::string& status() const { return status_; }
+    double progress() const { return progress_; }
+
+signals:
+    void progressChanged();
+
 private:
     std::unique_ptr<ReportExporter> createExporter(ReportExportMode mode,
                                                    const std::string& fn,
                                                    const std::string& resource_dir) const;
+    void updateProgress(ReportExporter* exporter);
+
     ReportExportSettings settings_;
+
+    std::string status_;
+    double      progress_ = 0.0;
 };
 
 } // namespace ResultReport
