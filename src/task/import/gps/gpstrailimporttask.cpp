@@ -626,6 +626,14 @@ void GPSTrailImportTask::run()
     assert (gps_fixes_.size());
     assert (!buffer_);
 
+    COMPASS::instance().logInfo("GPS Trail NMEA Import") << "started";
+
+    if (currentError().size())
+        COMPASS::instance().logWarn("GPS Trail NMEA Import") << "errors:\n" << currentError();
+
+    if (currentText().size())
+        COMPASS::instance().logInfo("GPS Trail NMEA Import") << currentText();
+
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     string dbcontent_name = "RefTraj";
@@ -935,6 +943,8 @@ void GPSTrailImportTask::insertDoneSlot()
     COMPASS::instance().dataSourceManager().saveDBDataSources();
     emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
     emit COMPASS::instance().dbContentManager().dbContentStatusChanged();
+
+    COMPASS::instance().logInfo("GPS Trail NMEA Import") << "done with " << gps_fixes_.size() << " GPS fixes";
 
     done_ = true;
 

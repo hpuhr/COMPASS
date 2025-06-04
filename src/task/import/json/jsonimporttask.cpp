@@ -254,6 +254,8 @@ void JSONImportTask::run()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
+    COMPASS::instance().logInfo("JSON Import") << "started";
+
     assert(canImportFile());
 
     objects_read_ = 0;
@@ -855,12 +857,18 @@ void JSONImportTask::checkAllDone()
 
         all_done_ = true;
 
+        double records_per_second = records_inserted_ / (diff.total_milliseconds() / 1000.0);
+
+        COMPASS::instance().logInfo("JSON Import")
+            << "done after " << time_str
+            << ", inserted " << records_inserted_ << " rec"
+            << " with " << String::doubleToStringPrecision(records_per_second, 2) << " rec/s";
+
         QApplication::restoreOverrideCursor();
 
         // if (!test_)
         //     emit COMPASS::instance().interface().databaseContentChangedSignal();
 
-        double records_per_second = records_inserted_ / (diff.total_milliseconds() / 1000.0);
 
         if (!test_)
         {

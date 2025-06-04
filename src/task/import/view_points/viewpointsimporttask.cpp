@@ -202,9 +202,13 @@ void ViewPointsImportTask::run()
         }
     }
 
+    COMPASS::instance().logInfo("ViewPoints Import") << "started, clearing previous viewpoints";
+
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     COMPASS::instance().viewManager().loadViewPoints(current_data_);
+
+    COMPASS::instance().logInfo("ViewPoints Import") << "imported";
 
     QApplication::restoreOverrideCursor();
 
@@ -215,6 +219,8 @@ void ViewPointsImportTask::run()
 
         if (context.contains(ViewPoint::VP_CONTEXT_DATASETS_KEY))
         {
+            COMPASS::instance().logInfo("ViewPoints Import") << "importing datasets";
+
             for (auto& ds_it : context.at(ViewPoint::VP_CONTEXT_DATASETS_KEY).get<json::array_t>())
             {
 //                std::string name;
@@ -300,8 +306,12 @@ void ViewPointsImportTask::run()
             }
 
             Async::waitAndProcessEventsFor(50);
+
+            COMPASS::instance().logInfo("ViewPoints Import") << "importing datasets done";
         }
     }
+
+    COMPASS::instance().logInfo("ViewPoints Import") << "done";
 
     done_ = true;
 

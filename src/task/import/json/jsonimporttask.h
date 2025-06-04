@@ -15,21 +15,19 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JSONIMPORTERTASK_H
-#define JSONIMPORTERTASK_H
+#pragma once
 
 #include "configurable.h"
-#include "json.hpp"
 #include "jsonparsingschema.h"
 #include "task.h"
 #include "asterixpostprocess.h"
 #include "asterixpostprocessjob.h"
 
 #include <QObject>
+
 #include <memory>
 #include <set>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
 class JSONImportTaskDialog;
@@ -176,4 +174,3 @@ class JSONImportTask : public Task, public Configurable
     virtual void checkSubConfigurables() override {}
 };
 
-#endif  // JSONIMPORTERTASK_H

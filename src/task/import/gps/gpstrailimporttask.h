@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GPSTRAILIMPORTTASK_H
-#define GPSTRAILIMPORTTASK_H
+#pragma once
 
 #include "configurable.h"
 #include "task.h"
@@ -182,4 +181,3 @@ protected:
     std::shared_ptr<Buffer> buffer_;
 };
 
-#endif // GPSTRAILIMPORTTASK_H

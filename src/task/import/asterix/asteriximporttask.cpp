@@ -1298,7 +1298,7 @@ void ASTERIXImportTask::insertData()
             job_it.second->deleteEmptyProperties();
     }
 
-    logdbg << "ASTERIXImportTask: insertData: inserting " << current_num_records << " records/s";
+    logdbg << "ASTERIXImportTask: insertData: inserting " << current_num_records << " records";
 
     if (!insert_slot_connected_)
     {
@@ -1426,8 +1426,13 @@ void ASTERIXImportTask::checkAllDone()
         loginf << "ASTERIXImportTask: checkAllDone: import done after "
                << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
-        COMPASS::instance().logInfo("ASTERIX Import") << "files '" << source_.filesAsString() << "' finished after "
-            << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
+        double records_per_second = num_records_ / (time_diff.total_milliseconds() / 1000.0);
+
+        COMPASS::instance().logInfo("ASTERIX Import")
+            << "files '" << source_.filesAsString() << "' finished after "
+            << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false)
+            << ", inserted " << num_records_ << " rec"
+            << " with " << String::doubleToStringPrecision(records_per_second, 2) << " rec/s";
 
         COMPASS::instance().mainWindow().updateMenus(); // re-enable import menu
 
