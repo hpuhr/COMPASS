@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CREATEARTASASSOCIATIONSJOB_H
-#define CREATEARTASASSOCIATIONSJOB_H
+#pragma once
 
 #include "job.h"
 
@@ -94,7 +93,6 @@ protected:
     std::map<unsigned long, std::vector<unsigned long>> cat062_associations_;
     // cat062 rec_num -> < src rec_nums>
 
-
     boost::posix_time::ptime first_track_ts_;
     boost::posix_time::ptime last_track_ts_;
 
@@ -131,4 +129,3 @@ protected:
     void run_impl() override;
 };
 
-#endif  // CREATEARTASASSOCIATIONSJOB_H

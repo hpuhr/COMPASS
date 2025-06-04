@@ -53,8 +53,6 @@ using namespace std;
 
 const unsigned int num_objects_chunk = 10000;
 
-const std::string DONE_PROPERTY_NAME = "json_data_imported";
-
 JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& instance_id,
                                TaskManager& task_manager)
     : Task(task_manager),
@@ -869,11 +867,6 @@ void JSONImportTask::checkAllDone()
             loginf << "JSONImporterTask: checkAllDone: setting done";
 
             done_ = true;
-
-//            COMPASS::instance().interface().setProperty(
-//                        CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
-
-//            COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
             emit doneSignal();
         }

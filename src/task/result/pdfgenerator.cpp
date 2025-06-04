@@ -156,8 +156,7 @@ void PDFGenerator::run ()
 
         for (auto& sec_it : sections)
         {
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents();
+            QCoreApplication::processEvents();
 
             if (cancel_)
             {
@@ -209,8 +208,7 @@ void PDFGenerator::run ()
             dialog_->setStatus("Writing section cancelled");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else // proceed
         {
@@ -218,8 +216,7 @@ void PDFGenerator::run ()
             dialog_->setStatus("Writing sections done");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
             doc.write();
 
@@ -233,7 +230,6 @@ void PDFGenerator::run ()
                 dialog_->setStatus("Running pdflatex");
                 dialog_->setRemainingTime("");
 
-                //while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
                 loginf << "EvaluationResultsReportPDFGenerator: run: cmd '" << command << "'";
@@ -258,7 +254,6 @@ void PDFGenerator::run ()
                     loginf << "EvaluationResultsReportPDFGenerator: run: re-running pdflatex";
                     dialog_->setStatus("Re-running pdflatex");
 
-                    //                while (QCoreApplication::hasPendingEvents())
                     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
                     command_out = System::exec(command);

@@ -319,12 +319,11 @@ void LatexVisitor::visit(const ResultReport::SectionContentFigure* e)
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     ViewManager& view_man = COMPASS::instance().viewManager();
 
-    while (QCoreApplication::hasPendingEvents())
-        QCoreApplication::processEvents();
+    QCoreApplication::processEvents();
 
     e->view();
 
-    while (dbcont_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+    while (dbcont_man.loadInProgress())
         QCoreApplication::processEvents();
 
     image_prefix_ = e->contentPath() + e->name();

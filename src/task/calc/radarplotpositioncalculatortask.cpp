@@ -26,13 +26,11 @@
 #include "logger.h"
 #include "projection.h"
 #include "projectionmanager.h"
-#include "propertylist.h"
 #include "radarplotpositioncalculatortaskdialog.h"
 #include "stringconv.h"
 #include "taskmanager.h"
 #include "viewmanager.h"
 #include "datasourcemanager.h"
-#include "global.h"
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -41,9 +39,6 @@
 using namespace std;
 using namespace Utils;
 using namespace dbContent;
-
-const std::string RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME =
-        "radar_plot_positions_calculated";
 
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::string& class_id,
                                                                  const std::string& instance_id,
@@ -115,6 +110,9 @@ void RadarPlotPositionCalculatorTask::run()
     assert(canRun());
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
+
+    COMPASS::instance().logInfo("Radar Plot Position Calculation")
+        << "started";
 
     // set up projections
     ProjectionManager& proj_man = ProjectionManager::instance();
@@ -202,6 +200,9 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
     assert(msg_box_);
     delete msg_box_;
 
+    COMPASS::instance().logInfo("Radar Plot Position Calculation")
+        << transformation_errors << " transformation errors";
+
     if (transformation_errors)
     {
         QApplication::restoreOverrideCursor();
@@ -221,6 +222,9 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
         {
             loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of "
                       "transformation errors";
+
+            COMPASS::instance().logInfo("Radar Plot Position Calculation") << "save declined";
+
             return;
         }
     }
@@ -283,7 +287,6 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
                 String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
         done_ = true;
-        COMPASS::instance().dbInterface().setProperty(DONE_PROPERTY_NAME, "1");
 
         QApplication::restoreOverrideCursor();
 
@@ -298,6 +301,10 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
 
         delete msg_box_;
         msg_box_ = nullptr;
+
+        COMPASS::instance().logInfo("Radar Plot Position Calculation")
+            << "finished after "
+            << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
         emit doneSignal();
     }

@@ -39,7 +39,6 @@
 #include <QApplication>
 #include <QMessageBox>
 
-const std::string DONE_PROPERTY_NAME = "gps_trail_imported";
 const float tod_24h = 24 * 60 * 60;
 
 using namespace Utils;
@@ -161,9 +160,6 @@ bool GPSTrailImportTask::checkPrerequisites()
 {
     if (!COMPASS::instance().dbInterface().ready())  // must be connected
         return false;
-
-    if (COMPASS::instance().dbInterface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().dbInterface().getProperty(DONE_PROPERTY_NAME) == "1";
 
     if (!COMPASS::instance().dbContentManager().existsDBContent("RefTraj"))
         return false;
@@ -941,10 +937,6 @@ void GPSTrailImportTask::insertDoneSlot()
     emit COMPASS::instance().dbContentManager().dbContentStatusChanged();
 
     done_ = true;
-
-    //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
-
-    COMPASS::instance().dbInterface().setProperty(DONE_PROPERTY_NAME, "1");
 
     //    COMPASS::instance().interface().databaseContentChanged();
     //    object.updateToDatabaseContent();

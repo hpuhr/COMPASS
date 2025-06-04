@@ -180,8 +180,7 @@ void ViewPointsReportGenerator::run ()
 
         for (auto vp_id : vp_ids)
         {
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents();
+            QCoreApplication::processEvents();
 
             if (cancel_)
             {
@@ -195,7 +194,7 @@ void ViewPointsReportGenerator::run ()
             loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id;
             view_manager_.setCurrentViewPoint(&view_point);
 
-            while (dbcont_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+            while (dbcont_man.loadInProgress())
                 QCoreApplication::processEvents();
 
             // do stuff
@@ -246,8 +245,7 @@ void ViewPointsReportGenerator::run ()
             dialog_->setStatus("Writing view points cancelled");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else // proceed
         {
@@ -255,8 +253,7 @@ void ViewPointsReportGenerator::run ()
             dialog_->setStatus("Writing view points done");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
             doc.write();
 
@@ -270,7 +267,6 @@ void ViewPointsReportGenerator::run ()
                 dialog_->setStatus("Running pdflatex");
                 dialog_->setRemainingTime("");
 
-                //while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
                 logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
@@ -293,7 +289,6 @@ void ViewPointsReportGenerator::run ()
                     loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
                     dialog_->setStatus("Re-running pdflatex");
 
-                    //                while (QCoreApplication::hasPendingEvents())
                     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
                     command_out = System::exec(command);

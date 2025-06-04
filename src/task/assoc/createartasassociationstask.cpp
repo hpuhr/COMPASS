@@ -27,21 +27,18 @@
 #include "dbcontent/variable/variableset.h"
 #include "datasourcemanager.h"
 #include "jobmanager.h"
-#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 #include "taskmanager.h"
-//#include "sqliteconnection.h"
 #include "viewmanager.h"
 
 #include <QApplication>
 #include <QMessageBox>
-#include <sstream>
 
 using namespace std;
 using namespace Utils;
 using namespace dbContent;
 
-const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_associations_created";
+const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_associations_created"; // really needed
 
 CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& class_id,
                                                          const std::string& instance_id,

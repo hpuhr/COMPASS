@@ -259,7 +259,7 @@ QIcon getIcon(const std::string& name, const QColor& color)
     if (img.isNull())
         return QIcon();
 
-    img.convertTo(QImage::Format_ARGB32);
+    img = img.convertToFormat(QImage::Format_ARGB32);
 
     int w = img.width();
     int h = img.height();

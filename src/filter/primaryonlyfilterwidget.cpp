@@ -7,8 +7,6 @@
 PrimaryOnlyFilterWidget::PrimaryOnlyFilterWidget(PrimaryOnlyFilter& filter)
     : DBFilterWidget(filter), filter_(filter)
 {
-    QFormLayout* layout = new QFormLayout();
-
     addNameValuePair(DBContent::meta_var_m3a_.name(), "IS NULL");
     addNameValuePair(DBContent::meta_var_mc_.name(), "IS NULL");
     addNameValuePair(DBContent::meta_var_acad_.name(), "IS NULL");

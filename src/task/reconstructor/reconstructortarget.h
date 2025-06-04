@@ -23,6 +23,8 @@ class KalmanOnlineTracker;
 class KalmanChain;
 }
 
+template <typename T> class TimedDataSeries;
+
 namespace dbContent {
 
 enum class ComparisonResult
@@ -133,7 +135,8 @@ public:
         InterpOptions& initFirst() { init_mode_ = InitMode::First; return *this; }
         InterpOptions& initLast() { init_mode_ = InitMode::Last; return *this; }
         InterpOptions& initFirstValid() { init_mode_ = InitMode::FirstValid; return *this; }
-        InterpOptions& initRecNum(unsigned long rec_num) { init_mode_ = InitMode::RecNum; init_rec_num_ = rec_num; return *this; }
+        InterpOptions& initRecNum(unsigned long rec_num) {
+            init_mode_ = InitMode::RecNum; init_rec_num_ = rec_num; return *this; }
 
         InterpOptions& enableDebug(bool ok) { debug_ = ok; return *this; }
 
@@ -148,8 +151,6 @@ public:
 
         bool debug_ = false;
     };
-
-    
 
     typedef std::pair<dbContent::targetReport::ReconstructorInfo*,
                       dbContent::targetReport::ReconstructorInfo*> ReconstructorInfoPair; // both can be nullptr
@@ -249,7 +250,7 @@ public:
     bool isTimeInside (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     bool hasDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
-    // TODO lambda for selective data
+    // tr_valid_func lambda for selective data
     ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp,
                                   boost::posix_time::time_duration d_max,
                                   const InfoValidFunc& tr_valid_func = InfoValidFunc(),
@@ -324,6 +325,10 @@ public:
     AltitudeState getAltitudeStateStruct(const boost::posix_time::ptime& ts, 
                                          const boost::posix_time::time_duration& max_time_diff,
                                          const InterpOptions& interp_options = InterpOptions()) const;
+
+    TimedDataSeries<unsigned int> getMode3ASeries() const;
+    TimedDataSeries<float> getAltitudeSeries() const;
+    TimedDataSeries<bool> getGroundBitSeries() const;
 
     void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts() const;
