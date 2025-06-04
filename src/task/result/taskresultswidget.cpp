@@ -256,7 +256,7 @@ void TaskResultsWidget::updateResultUI(const std::string& name)
     
     if (locked)
     {
-        icon_file    = "refresh.png";
+        icon_file    = "lock.png";
         icon_color   = ResultReport::Colors::TextRed;
         icon_tooltip = "Result in read-only mode.\nRefresh to unlock.";
     }

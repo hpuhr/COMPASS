@@ -1563,27 +1563,38 @@ double ReconstructorBase::determineProcessNoise(const dbContent::targetReport::R
     if (!ref_calc_settings_.dynamic_process_noise)
         return Q.Q_std_static;
 
-    if (target.targetCategory() == TargetBase::Category::Obstacle ||
-        target.targetCategory() == TargetBase::Category::Vehicle)
-        return Q.Q_std_ground;
+    double f_ground = dbContent::Target::processNoiseFactorGround(target.targetCategory());
+
+    if (dbContent::Target::isGroundOnly(target.targetCategory()))
+        return Q.Q_std_ground * f_ground;
+
+    double f_air = dbContent::Target::processNoiseFactorAir(target.targetCategory());
 
     auto alt_state = target.getAltitudeStateStruct(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
 
     if (alt_state.fl_unknown)
-        return Q.Q_std_unknown;
+        return Q.Q_std_unknown; // use unknown value with factor 1
 
     if (alt_state.fl_on_ground)
-        return Q.Q_std_ground;
+        return Q.Q_std_ground * f_ground; // on ground
 
+    double Q_std;
+
+#if 0
+    //interp between min/max altitude
     assert (ref_calc_settings_.Q_altitude_min_ft < ref_calc_settings_.Q_altitude_max_ft);
 
     double alt_ft = std::max(ref_calc_settings_.Q_altitude_min_ft,
                             std::min(ref_calc_settings_.Q_altitude_max_ft, (double)alt_state.alt_baro_ft));
     double t = (alt_ft - ref_calc_settings_.Q_altitude_min_ft)
                 / (ref_calc_settings_.Q_altitude_max_ft - ref_calc_settings_.Q_altitude_min_ft);
-    double Q_std_interp = (1.0 - t) * Q.Q_std_ground + t * Q.Q_std_air;
+    Q_std = (1.0 - t) * Q.Q_std_ground + t * Q.Q_std_air;
+#else
+    //
+    Q_std = Q.Q_std_air * f_air; // in air
+#endif
 
-    return Q_std_interp;
+    return Q_std;
 }
 
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 
