@@ -140,6 +140,32 @@ bool AsyncTask::runAsyncDialog(bool auto_close,
     return result.get();
 }
 
+/**
+*/
+bool AsyncTask::runAsync()
+{
+    //start async task
+    auto result = std::async(std::launch::async, 
+        [ this ] ()
+        {
+            try
+            {
+                this->run();
+                return this->taskState().isDone();
+            }
+            catch (const std::exception& e)
+            {
+                logerr << "AsyncTask: runAsyncDialog: exception '" << e.what() << "'";
+                throw e;
+            }
+        });
+
+    while (result.wait_for(std::chrono::milliseconds(10)) != std::future_status::ready)
+        QApplication::processEvents();
+
+    return result.get();
+}
+
 /************************************************************************************
  * AsyncFuncTask
  ************************************************************************************/
@@ -209,11 +235,14 @@ AsyncTaskDialog::AsyncTaskDialog(AsyncTask* task,
     assert(task);
 
     setWindowTitle(task_->title());
+    setMinimumWidth(500);
 
     createUI();
     updateState();
 
     connect(task, &AsyncTask::stateChanged, this, &AsyncTaskDialog::updateState, Qt::ConnectionType::QueuedConnection);
+
+    updateProgress();
 }
 
 /**

@@ -1544,9 +1544,9 @@ bool DBContentManager::hasTargetsInfo() const
 
 /**
  */
-void DBContentManager::clearTargetsInfo()
+void DBContentManager::deleteAllTargets()
 {
-    target_model_->clearTargetsInfo();
+    target_model_->deleteAllTargets();
 }
 
 /**

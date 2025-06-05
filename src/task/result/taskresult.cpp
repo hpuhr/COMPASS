@@ -464,7 +464,32 @@ void TaskResult::clearPendingUpdates()
 
 /**
  */
+void TaskResult::lock()
+{
+    informUpdate(UpdateState::Locked);
+}
+
+/**
+ */
 Result TaskResult::initResult()
+{
+    if (init_)
+        return Result::succeeded();
+
+    auto r = initResult_impl();
+    if (!r.ok())
+        return r;
+
+    init_ = true;
+
+    return Result::succeeded();
+}
+
+
+/**
+ * Prepares the result for new content.
+ */
+Result TaskResult::prepareResult()
 {
     //clear report
     report()->clear();
@@ -476,21 +501,23 @@ Result TaskResult::initResult()
     clearPendingUpdates();
 
     //custom init
-    return initResult_impl();
+    return prepareResult_impl();
 }
 
 /**
+ * Finalizes result after adding content.
  */
 Result TaskResult::finalizeResult()
 {
-    if (finalized_)
-        return Result::succeeded();
-
+    //custom finalization
     auto r = finalizeResult_impl();
+        if (!r.ok())
+            return r;
+
+    //ensure result is initialized
+    r = initResult();
     if (!r.ok())
         return r;
-
-    finalized_ = true;
 
     return Result::succeeded();
 }
@@ -663,11 +690,11 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     if (!fromJSON_impl(j))
         return false;
 
-    //finalize after reading in data
-    auto f_res = finalizeResult();
-    if (!f_res.ok())
+    //init after reading in data
+    auto init_res = initResult();
+    if (!init_res.ok())
     {
-        logerr << "TaskResult: fromJSON: Finalizing result failed: " << f_res.error();
+        logerr << "TaskResult: fromJSON: Initializing result failed: " << init_res.error();
         return false;
     }
 

@@ -196,7 +196,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
     for (auto& buf_it : update_buffers)
         buffers_size += buf_it.second->size();
 
-
     assert(msg_box_);
     delete msg_box_;
 
@@ -244,7 +243,6 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
         for (auto& buf_it : update_buffers)
         {
-
             DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
 
             dbcontent.updateData(dbcontent_man.metaGetVariable(

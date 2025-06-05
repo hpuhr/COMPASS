@@ -86,8 +86,10 @@ public:
 
     EvaluationCalculator(const std::string& class_id, 
                          const std::string& instance_id,
-                         EvaluationManager& eval_man, DBContentManager& dbcontent_man);
-    EvaluationCalculator(EvaluationManager& eval_man, DBContentManager& dbcontent_man,
+                         EvaluationManager& eval_man, 
+                         DBContentManager& dbcontent_man);
+    EvaluationCalculator(EvaluationManager& eval_man, 
+                         DBContentManager& dbcontent_man,
                          const nlohmann::json& config);
     virtual ~EvaluationCalculator();
 
@@ -103,6 +105,8 @@ public:
                   const std::vector<unsigned int>& utns = std::vector<unsigned int>(),
                   const std::vector<Evaluation::RequirementResultID>& requirements = std::vector<Evaluation::RequirementResultID>());
     void updateResultsToChanges();
+
+    void copyResultsTo(EvaluationCalculator& other);
 
     // check and correct missing information
     void checkReferenceDataSources();
@@ -206,13 +210,13 @@ public:
 
     EvaluationManager& manager() { return eval_man_; }
     const EvaluationManager& manager() const { return eval_man_; }
-    EvaluationData& data() { return data_; }
-    const EvaluationData& data() const { return data_; }
-    EvaluationResultsGenerator& resultsGenerator() { return results_gen_; }
-    const EvaluationResultsGenerator& resultsGenerator() const { return results_gen_; }
+    EvaluationData& data() { return *data_; }
+    const EvaluationData& data() const { return *data_; }
+    EvaluationResultsGenerator& resultsGenerator() { return *results_gen_; }
+    const EvaluationResultsGenerator& resultsGenerator() const { return *results_gen_; }
     EvaluationSettings& settings() { return settings_; }
     const EvaluationSettings& settings() const { return settings_; }
-    const dbContent::DataSourceCompoundCoverage& tstSrcsCoverage() const { return tst_srcs_coverage_; }
+    const dbContent::DataSourceCompoundCoverage& tstSrcsCoverage() const { return *tst_srcs_coverage_; }
     const boost::optional<ROI>& sectorROI() const { return sector_roi_; }
     const std::vector<unsigned int>& evaluationUTNs() const { return eval_utns_; }
 
@@ -262,15 +266,15 @@ protected:
     bool reference_data_loaded_  {false};
     bool test_data_loaded_       {false};
     bool evaluated_              {false};
+    
     bool active_load_connection_ {false};
     bool update_report_          {true };
 
     std::vector<std::unique_ptr<EvaluationStandard>> standards_;
 
-    EvaluationData             data_;
-    EvaluationResultsGenerator results_gen_;
+    std::unique_ptr<EvaluationData>                        data_;
+    std::unique_ptr<EvaluationResultsGenerator>            results_gen_;
+    std::unique_ptr<dbContent::DataSourceCompoundCoverage> tst_srcs_coverage_;
 
     bool use_fast_sector_inside_check_ = true;
-
-    dbContent::DataSourceCompoundCoverage tst_srcs_coverage_;
 };

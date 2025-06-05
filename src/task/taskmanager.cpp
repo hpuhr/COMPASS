@@ -56,7 +56,7 @@
 
 using namespace Utils;
 
-const bool TaskManager::CleanupDBIfNeeded = false;
+const bool TaskManager::CleanupDBIfNeeded = true;
 
 /**
  */
@@ -125,6 +125,9 @@ void TaskManager::generateSubConfigurable(const std::string& class_id,
         radar_plot_position_calculator_task_.reset(new RadarPlotPositionCalculatorTask(class_id, instance_id, *this));
         assert(radar_plot_position_calculator_task_);
         addTask(class_id, radar_plot_position_calculator_task_.get());
+
+        connect(radar_plot_position_calculator_task_.get(), &RadarPlotPositionCalculatorTask::doneSignal,
+                this, &TaskManager::taskRadarPlotPositionsDoneSignal);
     }
     else if (class_id == "CreateARTASAssociationsTask")
     {
@@ -394,8 +397,8 @@ void TaskManager::beginTaskResultWriting(const std::string& name,
     assert (!current_result_);
     current_result_ = getOrCreateResult(name, type);
 
-    //init result
-    auto res = current_result_->initResult();
+    //prepare result for new content
+    auto res = current_result_->prepareResult();
     if (!res.ok())
         logerr << "TaskManager: beginTaskResultWriting: Result could not be initialized: " << res.error();
 
@@ -425,7 +428,7 @@ void TaskManager::endTaskResultWriting(bool store_result)
 
     assert (current_result_);
 
-    //finalize result
+    //finalize result after adding content
     auto res = current_result_->finalizeResult();
     if (!res.ok())
         logerr << "TaskManager: endTaskResultWriting: Result could not be finalized: " << res.error();
@@ -437,13 +440,22 @@ void TaskManager::endTaskResultWriting(bool store_result)
     {
         loginf << "TaskManager: endTaskResultWriting: Storing result...";
 
-        auto result = COMPASS::instance().dbInterface().saveResult(*current_result_, CleanupDBIfNeeded);
+        auto result_ptr = current_result_.get();
+        bool cleanup_db = CleanupDBIfNeeded;
+
+        auto cb = [ result_ptr, cleanup_db ] (const AsyncTaskState& s, AsyncTaskProgressWrapper& p)
+        {
+            return COMPASS::instance().dbInterface().saveResult(*result_ptr, cleanup_db);
+        };
+
+        AsyncFuncTask task(cb, "Save Result", "Saving result", false);
+        bool ok = task.runAsync();
 
         //@TODO
-        if (!result.ok())
-            logerr << "TaskManager: endTaskResultWriting: Storing result failed: " << result.error();
+        if (!ok)
+            logerr << "TaskManager: endTaskResultWriting: Storing result failed: " << task.taskState().error;
         
-        assert(result.ok());
+        assert(ok);
     }
 
     assert (current_result_);

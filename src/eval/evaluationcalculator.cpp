@@ -76,9 +76,10 @@ EvaluationCalculator::EvaluationCalculator(const std::string& class_id,
                                            const std::string& instance_id,
                                            EvaluationManager& eval_man, DBContentManager& dbcontent_man)
 :   Configurable      (class_id, instance_id, &eval_man)
-,   eval_man_          (eval_man)
-,   data_             (*this, eval_man_, dbcontent_man)
-,   results_gen_      (*this)
+,   eval_man_         (eval_man)
+,   data_             (new EvaluationData(*this, eval_man_, dbcontent_man))
+,   results_gen_      (new EvaluationResultsGenerator(*this))
+,   tst_srcs_coverage_(new dbContent::DataSourceCompoundCoverage)
 {
     readSettings();
     createSubConfigurables();
@@ -86,12 +87,14 @@ EvaluationCalculator::EvaluationCalculator(const std::string& class_id,
 
 /**
  */
-EvaluationCalculator::EvaluationCalculator(EvaluationManager& eval_man, DBContentManager& dbcontent_man,
+EvaluationCalculator::EvaluationCalculator(EvaluationManager& eval_man, 
+                                           DBContentManager& dbcontent_man,
                                            const nlohmann::json& config)
 :   Configurable      ("EvaluationManager", "EvaluationManager0", nullptr, "", &config)
-,   eval_man_          (eval_man)
-,   data_             (*this, eval_man_, dbcontent_man)
-,   results_gen_      (*this)
+,   eval_man_         (eval_man)
+,   data_             (new EvaluationData(*this, eval_man_, dbcontent_man))
+,   results_gen_      (new EvaluationResultsGenerator(*this))
+,   tst_srcs_coverage_(new dbContent::DataSourceCompoundCoverage)
 {
     readSettings();
     createSubConfigurables();
@@ -101,6 +104,33 @@ EvaluationCalculator::EvaluationCalculator(EvaluationManager& eval_man, DBConten
  */
 EvaluationCalculator::~EvaluationCalculator()
 {
+}
+
+/**
+ * Copies results to the given calculator.
+ * Beware: Only copies the result part. Does not take care of initializing
+ * everything handled by the configurable (settings, standards, etc.)!
+ * Will clear the calculator's own result data.
+ */
+void EvaluationCalculator::copyResultsTo(EvaluationCalculator& other)
+{
+    other.eval_utns_         = eval_utns_;
+    other.eval_requirements_ = eval_requirements_;
+
+    other.sector_roi_ = sector_roi_;
+
+    other.data_loaded_           = data_loaded_;
+    other.reference_data_loaded_ = reference_data_loaded_;
+    other.test_data_loaded_      = test_data_loaded_;
+    other.evaluated_             = evaluated_;
+
+    other.data_.reset(new EvaluationData(*data_));
+    other.results_gen_.reset(new EvaluationResultsGenerator(*results_gen_));
+    other.tst_srcs_coverage_.reset(new dbContent::DataSourceCompoundCoverage(*tst_srcs_coverage_));
+
+    other.use_fast_sector_inside_check_ = use_fast_sector_inside_check_;
+
+    clearData();
 }
 
 /**
@@ -282,8 +312,8 @@ void EvaluationCalculator::clearData()
 {
     loginf << "EvaluationCalculator: clearLoadedDataAndResults";
 
-    data_.clear();
-    results_gen_.clear();
+    data_->clear();
+    results_gen_->clear();
 
     sector_roi_.reset();
 
@@ -322,7 +352,7 @@ void EvaluationCalculator::evaluate(bool blocking,
     QApplication::restoreOverrideCursor();
 
     // clear data
-    data_.clear();
+    data_->clear();
 
     // update stuff before load
     updateCompoundCoverage(activeDataSourcesTst());
@@ -357,7 +387,7 @@ void EvaluationCalculator::loadingDone()
 
     auto data = eval_man_.fetchData();
 
-    data_.setBuffers(data);
+    data_->setBuffers(data);
 
     bool has_ref_data = data.count(settings_.dbcontent_name_ref_);
     bool has_tst_data = data.count(settings_.dbcontent_name_tst_);
@@ -369,7 +399,7 @@ void EvaluationCalculator::loadingDone()
         return;
     }
 
-    data_.addReferenceData(settings_.dbcontent_name_ref_, settings_.line_id_ref_);
+    data_->addReferenceData(settings_.dbcontent_name_ref_, settings_.line_id_ref_);
     reference_data_loaded_ = has_ref_data;
 
     //@TODO: message boxes? here?
@@ -379,7 +409,7 @@ void EvaluationCalculator::loadingDone()
         return;
     }
 
-    data_.addTestData(settings_.dbcontent_name_tst_, settings_.line_id_tst_);
+    data_->addTestData(settings_.dbcontent_name_tst_, settings_.line_id_tst_);
     test_data_loaded_ = has_tst_data;
 
     data_loaded_ = reference_data_loaded_ || test_data_loaded_;
@@ -392,7 +422,7 @@ void EvaluationCalculator::loadingDone()
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
         //finalize loaded data
-        data_.finalize();
+        data_->finalize();
 
         boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
 
@@ -419,14 +449,14 @@ void EvaluationCalculator::evaluateData()
     projection.addAllRadarCoordinateSystems();
 
     // clean previous
-    results_gen_.clear();
+    results_gen_->clear();
 
     evaluated_ = false;
 
     emit resultsChanged();
     
     // eval
-    results_gen_.evaluate(currentStandard(), eval_utns_, eval_requirements_, update_report_);
+    results_gen_->evaluate(currentStandard(), eval_utns_, eval_requirements_, update_report_);
 
     evaluated_ = true;
 
@@ -1096,33 +1126,33 @@ bool EvaluationCalculator::hasSelectedTestDataSources() const
  */
 EvaluationCalculator::ResultIterator EvaluationCalculator::begin()
 {
-    return results_gen_.begin();
+    return results_gen_->begin();
 }
 
 /**
  */
 EvaluationCalculator::ResultIterator EvaluationCalculator::end()
 {
-    return results_gen_.end();
+    return results_gen_->end();
 }
 
 /**
  */
 bool EvaluationCalculator::hasResults() const
 {
-    return results_gen_.results().size();
+    return results_gen_->results().size();
 }
 
 /**
  */
 const EvaluationCalculator::ResultMap& EvaluationCalculator::results() const
 {
-    return results_gen_.results(); 
+    return results_gen_->results(); 
 }
 
 const std::string& EvaluationCalculator::resultName() const
 {
-    return results_gen_.resultName(); 
+    return results_gen_->resultName(); 
 }
 
 /**
@@ -1180,7 +1210,7 @@ void EvaluationCalculator::updateResultsToChanges ()
 {
     if (evaluated_)
     {
-        results_gen_.updateToChanges();
+        results_gen_->updateToChanges();
     }
 }
 
@@ -1549,7 +1579,7 @@ void EvaluationCalculator::updateCompoundCoverage(std::set<unsigned int> tst_sou
 {
     loginf << "EvaluationCalculator: updateCompoundCoverage";
 
-    tst_srcs_coverage_.clear();
+    tst_srcs_coverage_->clear();
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
@@ -1580,12 +1610,12 @@ void EvaluationCalculator::updateCompoundCoverage(std::set<unsigned int> tst_sou
                 loginf << "EvaluationCalculator: updateCompoundCoverage: adding src " << ds.name()
                        << " range " << range_max * NM2M;
 
-                tst_srcs_coverage_.addRangeCircle(ds_id, ds.latitude(), ds.longitude(), range_max * NM2M);
+                tst_srcs_coverage_->addRangeCircle(ds_id, ds.latitude(), ds.longitude(), range_max * NM2M);
             }
         }
     }
 
-    tst_srcs_coverage_.finalize();
+    tst_srcs_coverage_->finalize();
 }
 
 /**

@@ -62,7 +62,6 @@ const QColor Single::AnnotationColorOk        = QColor("#66FF66");
 
 const std::string Single::ContentPropertyUTN  = "utn";
 
-
 /**
 */
 Single::Single(const std::string& type, 

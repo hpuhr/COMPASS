@@ -153,7 +153,7 @@ public:
     dbContent::Variable& metaGetVariable (const std::string& dbcont_name, const Property& meta_property);
 
     bool hasTargetsInfo() const;
-    void clearTargetsInfo();
+    void deleteAllTargets();
     bool existsTarget(unsigned int utn);
     void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     dbContent::Target& target(unsigned int utn);

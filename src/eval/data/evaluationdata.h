@@ -66,6 +66,7 @@ public:
     EvaluationData(EvaluationCalculator& calculator,
                    EvaluationManager& eval_man,
                    DBContentManager& dbcont_man);
+    EvaluationData(EvaluationData& other);
 
     void setBuffers(std::map<std::string, std::shared_ptr<Buffer>> buffers);
     void addReferenceData (const std::string& dbcontent_name, unsigned int line_id);

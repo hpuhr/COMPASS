@@ -23,25 +23,32 @@
 #include "eval/requirement/base/baseconfig.h"
 #include "eval/evaluation_commands.h"
 #include "evaluationsettings.h"
-#include "compass.h"
-#include "dbinterface.h"
-#include "dbcontent/dbcontent.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "datasourcemanager.h"
+#include "evaluationtargetfilter.h"
+
 #include "sectorlayer.h"
 #include "sector.h"
 #include "airspace.h"
+
+#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
-#include "buffer.h"
+
+#include "compass.h"
+#include "dbinterface.h"
+#include "datasourcemanager.h"
 #include "filtermanager.h"
-#include "dbfilter.h"
-#include "viewabledataconfig.h"
 #include "viewmanager.h"
-#include "stringconv.h"
-#include "util/timeconv.h"
+#include "taskmanager.h"
+
+#include "buffer.h"
+#include "dbfilter.h"
 #include "viewpoint.h"
-#include "evaluationtargetfilter.h"
+#include "viewabledataconfig.h"
+
 #include "taskdefs.h"
+
+#include "stringconv.h"
+#include "timeconv.h"
 
 #include "json.hpp"
 
@@ -104,7 +111,7 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
         calculator_.reset(calculator);
 
         connect(calculator_.get(), &EvaluationCalculator::resultsChanged, this, &EvaluationManager::resultsChangedSignal);
-        connect(calculator_.get(), &EvaluationCalculator::evaluationDone, this, &EvaluationManager::evaluationDoneSignal);
+        connect(calculator_.get(), &EvaluationCalculator::evaluationDone, this, &EvaluationManager::evaluationDone);
     }
     else
     {
@@ -155,15 +162,23 @@ void EvaluationManager::init()
     assert (!initialized_);
     initialized_ = true;
 
-    connect (&COMPASS::instance().dbContentManager(), &DBContentManager::associationStatusChangedSignal,
-             this, &EvaluationManager::associationStatusChangedSlot);
+    auto& dbc_manager = COMPASS::instance().dbContentManager();
 
-    connect (COMPASS::instance().dbContentManager().targetModel(), &dbContent::TargetModel::targetInfoChangedSignal,
+    connect (&dbc_manager, &DBContentManager::associationStatusChangedSignal,
+            this, &EvaluationManager::associationStatusChangedSlot);
+    connect (dbc_manager.targetModel(), &dbContent::TargetModel::targetInfoChangedSignal,
             this, &EvaluationManager::targetInfoChangedSlot);
-    connect (COMPASS::instance().dbContentManager().targetModel(), &dbContent::TargetModel::targetEvalUsageChangedSignal,
+    connect (dbc_manager.targetModel(), &dbContent::TargetModel::targetEvalUsageChangedSignal,
             this, &EvaluationManager::partialResultsUpdateNeededSlot);
-    connect (COMPASS::instance().dbContentManager().targetModel(), &dbContent::TargetModel::targetEvalFullChangeSignal,
+    connect (dbc_manager.targetModel(), &dbContent::TargetModel::targetEvalFullChangeSignal,
             this, &EvaluationManager::fullResultsUpdateNeededSlot);
+    connect (dbc_manager.targetModel(), &dbContent::TargetModel::targetsDeletedSignal,
+            this, &EvaluationManager::lockResultsSlot);
+
+    auto& task_manager = COMPASS::instance().taskManager();
+
+    connect (&task_manager, &TaskManager::taskRadarPlotPositionsDoneSignal, 
+             this, &EvaluationManager::lockResultsSlot);
 }
 
 /**
@@ -255,6 +270,9 @@ void EvaluationManager::databaseOpenedSlot()
     assert (!sectors_loaded_);
     loadSectors();
 
+    //load sectors before locking any results via this connections
+    connect(this, &EvaluationManager::sectorsChangedSignal, this, &EvaluationManager::lockResultsSlot);
+
     auto& dbinterface = COMPASS::instance().dbInterface();
 
     use_timestamp_filter_ = false;
@@ -306,8 +324,6 @@ void EvaluationManager::databaseOpenedSlot()
     calculator_->checkReferenceDataSources();
     calculator_->checkTestDataSources();
     calculator_->checkMinHeightFilterValid();
-
-
 }
 
 /**
@@ -315,6 +331,9 @@ void EvaluationManager::databaseOpenedSlot()
 void EvaluationManager::databaseClosedSlot()
 {
     loginf << "EvaluationManager: databaseClosedSlot";
+
+    //disconnect result locking before clearing the sectors
+    disconnect(this, &EvaluationManager::sectorsChangedSignal, this, &EvaluationManager::lockResultsSlot);
 
     use_timestamp_filter_ = false;
     load_timestamp_begin_ = {};
@@ -1198,6 +1217,15 @@ void EvaluationManager::loadingDone()
 
     //signal new data
     emit hasNewData();
+}
+
+/**
+ */
+void EvaluationManager::evaluationDone()
+{
+    loginf << "EvaluationManager: evaluationDone";
+
+    emit evaluationDoneSignal();
 }
 
 /**

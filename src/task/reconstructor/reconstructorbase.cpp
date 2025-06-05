@@ -1563,12 +1563,12 @@ double ReconstructorBase::determineProcessNoise(const dbContent::targetReport::R
     if (!ref_calc_settings_.dynamic_process_noise)
         return Q.Q_std_static;
 
-    double f_ground = dbContent::Target::processNoiseFactorGround(target.targetCategory());
+    const double f_ground = dbContent::Target::processNoiseFactorGround(target.targetCategory());
 
     if (dbContent::Target::isGroundOnly(target.targetCategory()))
         return Q.Q_std_ground * f_ground;
 
-    double f_air = dbContent::Target::processNoiseFactorAir(target.targetCategory());
+    const double f_air = dbContent::Target::processNoiseFactorAir(target.targetCategory());
 
     auto alt_state = target.getAltitudeStateStruct(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
 
@@ -1588,7 +1588,7 @@ double ReconstructorBase::determineProcessNoise(const dbContent::targetReport::R
                             std::min(ref_calc_settings_.Q_altitude_max_ft, (double)alt_state.alt_baro_ft));
     double t = (alt_ft - ref_calc_settings_.Q_altitude_min_ft)
                 / (ref_calc_settings_.Q_altitude_max_ft - ref_calc_settings_.Q_altitude_min_ft);
-    Q_std = (1.0 - t) * Q.Q_std_ground + t * Q.Q_std_air;
+    Q_std = (1.0 - t) * Q.Q_std_ground * f_ground + t * Q.Q_std_air * f_air;
 #else
     //
     Q_std = Q.Q_std_air * f_air; // in air

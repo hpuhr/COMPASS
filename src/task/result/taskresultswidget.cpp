@@ -22,6 +22,7 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QApplication>
 
 using namespace Utils;
 
@@ -275,6 +276,8 @@ void TaskResultsWidget::updateResultUI(const std::string& name)
     refresh_result_button_->setEnabled(update_needed);
     refresh_result_button_->setIcon(Utils::Files::getIcon(icon_file, icon_color));
     refresh_result_button_->setToolTip(icon_tooltip);
+
+    QApplication::processEvents();
 }
 
 /**

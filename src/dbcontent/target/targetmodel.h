@@ -41,6 +41,7 @@ signals:
     void targetInfoChangedSignal();
     void targetEvalUsageChangedSignal(); // for eval use flag, or disabled requirements (only)
     void targetEvalFullChangeSignal(); // for full changes
+    void targetsDeletedSignal();
 
 public:
     enum Columns
@@ -98,7 +99,7 @@ public:
     void setUseByFilter ();
 
     bool hasTargetsInfo();
-    void clearTargetsInfo();
+    void deleteAllTargets();
     bool existsTarget(unsigned int utn) const;
     //void createNewTarget(unsigned int utn);
     void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);

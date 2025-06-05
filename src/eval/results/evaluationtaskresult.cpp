@@ -26,6 +26,8 @@
 #include "task/result/report/sectioncontenttable.h"
 #include "task/result/report/section.h"
 #include "task/taskdefs.h"
+#include "taskmanager.h"
+#include "radarplotpositioncalculatortask.h"
 
 #include "compass.h"
 #include "dbcontentmanager.h"
@@ -111,7 +113,7 @@ Result EvaluationTaskResult::createCalculator()
 
 /**
  */
-Result EvaluationTaskResult::finalizeResult_impl()
+Result EvaluationTaskResult::initResult_impl()
 {
     //create calculator
     auto res = createCalculator();
@@ -121,7 +123,22 @@ Result EvaluationTaskResult::finalizeResult_impl()
     //connect to eval manager
     auto& eval_manager = COMPASS::instance().evaluationManager();
     connect(&eval_manager, &EvaluationManager::resultsNeedUpdate, this, &EvaluationTaskResult::informUpdateEvalResult);
+    connect(&eval_manager, &EvaluationManager::evaluationDoneSignal, this, &EvaluationTaskResult::evaluationDone);
 
+    return Result::succeeded();
+}
+
+/**
+ */
+Result EvaluationTaskResult::prepareResult_impl()
+{
+    return Result::succeeded();
+}
+
+/**
+ */
+Result EvaluationTaskResult::finalizeResult_impl()
+{
     return Result::succeeded();
 }
 
@@ -833,6 +850,24 @@ void EvaluationTaskResult::informUpdateEvalResult(int update_type)
 
     //inform update
     informUpdate((task::UpdateState)update_type, content_id);
+}
+
+/**
+ */
+void EvaluationTaskResult::evaluationDone()
+{
+    auto& eval_manager = COMPASS::instance().evaluationManager();
+
+    if (eval_manager.evaluated() && eval_manager.calculator().resultName() == name())
+    {
+        // loginf << "EvaluationTaskResult: evaluationDone: Fetching evaluated data for result '" << name() << "'";
+
+        // // evaluated result is me => fetch result data so we do not need to recompute
+        // assert(calculator_);
+        // eval_manager.calculator().copyResultsTo(*calculator_);
+
+        // assert(calculator_->evaluated());
+    }
 }
 
 /**

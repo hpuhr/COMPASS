@@ -75,6 +75,16 @@ EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationCalculator& cal
 
 /**
  */
+EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationResultsGenerator& other)
+:   calculator_ (other.calculator_ )
+,   results_    (other.results_    )
+,   results_vec_(other.results_vec_)
+,   result_name_(other.result_name_)
+{
+}
+
+/**
+ */
 EvaluationResultsGenerator::~EvaluationResultsGenerator()
 {
     clear();
@@ -94,8 +104,6 @@ void EvaluationResultsGenerator::evaluate(EvaluationStandard& standard,
            << " skip_no_data_details " << eval_settings.report_skip_no_data_details_
            << " split_results_by_mops " << eval_settings.report_split_results_by_mops_
            << " report_split_results_by_aconly_ms " << eval_settings.report_split_results_by_aconly_ms_;
-
-    result_name_ = "";
 
     boost::posix_time::ptime start_time;
     boost::posix_time::ptime elapsed_time;
@@ -139,6 +147,9 @@ void EvaluationResultsGenerator::evaluate(EvaluationStandard& standard,
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     clear();
+
+    //@TODO
+    result_name_ = standard.name();
 
     vector<unsigned int> used_utns;
     std::set<unsigned int> utn_set(utns.begin(), utns.end());
@@ -464,15 +475,14 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
-    QMessageBox msg_box; // QApplication::topLevelWidgets().first()
-    msg_box.setWindowTitle("Updating Results");
-    msg_box.setText( "Please wait...");
-    msg_box.setStandardButtons(QMessageBox::NoButton);
-    msg_box.setWindowModality(Qt::ApplicationModal);
-    msg_box.show();
-
-    //@TODO: allow multiple eval results by letting the user provide a result name
-    result_name_ = EvalResultName;
+    QProgressDialog dlg; // QApplication::topLevelWidgets().first()
+    dlg.setWindowTitle("Updating Results");
+    dlg.setLabelText( "Please wait...");
+    dlg.setRange(0, 0);
+    dlg.setCancelButton(nullptr);
+    dlg.setWindowModality(Qt::ApplicationModal);
+    dlg.setMinimumWidth(500);
+    dlg.show();
 
     auto& task_manager = COMPASS::instance().taskManager();
     task_manager.beginTaskResultWriting(result_name_, task::TaskResultType::Evaluation);
@@ -561,7 +571,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     // disable per target result section for report exports (too detailed)
     auto& target_sec = report->getSection(EvalSectionID::targetID());
-    target_sec.enableExports(false);   
+    target_sec.enableExports(false);
 
     // store targets to result
     eval_result->setTargets(calculator_.data().toTargets());
@@ -578,7 +588,7 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
     load_time = diff.total_milliseconds() / 1000.0;
 
-    msg_box.close();
+    dlg.close();
 
     loginf << "EvaluationResultsGenerator: generateResultsReportGUI: done "
            << String::timeStringFromDouble(load_time, true);

@@ -535,11 +535,13 @@ bool TargetModel::hasTargetsInfo()
 
 /**
  */
-void TargetModel::clearTargetsInfo()
+void TargetModel::deleteAllTargets()
 {
     clear();
 
     COMPASS::instance().dbInterface().clearTargetsTable();
+
+    emit targetsDeletedSignal();
 }
 
 /**

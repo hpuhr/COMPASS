@@ -55,14 +55,14 @@ class EvaluationManager : public QObject, public Configurable
     Q_OBJECT
 
 signals:
-    void sectorsChangedSignal();
-    void standardsChangedSignal(); // emitted if standard was added or deleted
+    void sectorsChangedSignal();         // sectors changed (due to manual editing, loading, etc.)
+    void sectorsEditedSignal();          // sector edit dialog closed
+    void standardsChangedSignal();       // emitted if standard was added or deleted
     void currentStandardChangedSignal(); // emitted if current standard was changed
-    void resultsChangedSignal();
-    void evaluationDoneSignal();
-    void hasNewData();
-
-    void resultsNeedUpdate(int type);
+    void resultsChangedSignal();         // results changed in calculator
+    void evaluationDoneSignal();         // evaluation ended
+    void hasNewData();                   // new data for evaluation is ready to be fetched
+    void resultsNeedUpdate(int type);    // evaluation results need the sent update
 
 public slots:
     void databaseOpenedSlot();
@@ -148,7 +148,7 @@ public:
     EvaluationTargetFilter& targetFilter() const;
 
 
-  protected:
+protected:
     friend class EvaluationCalculator;
 
     virtual void checkSubConfigurables() override;
@@ -169,6 +169,7 @@ private:
 
     void configureLoadFilters(const EvaluationCalculator& calculator);
     void loadingDone();
+    void evaluationDone();
 
     //COMPASS& compass_;
     DBContentManager& dbcontent_man_;

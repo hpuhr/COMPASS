@@ -479,7 +479,7 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
         {
             try
             {
-                cont_man.clearTargetsInfo();
+                cont_man.deleteAllTargets();
 
                 if (cancelled_)
                     return;

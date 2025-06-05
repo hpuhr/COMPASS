@@ -65,6 +65,8 @@ signals:
     void taskResultsChangedSignal();
     void taskResultHeaderChangedSignal(const QString& result_name);
 
+    void taskRadarPlotPositionsDoneSignal();
+
 public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();

@@ -59,9 +59,29 @@ const std::string EvaluationData::ContentPropertyTargets = "targets";
 EvaluationData::EvaluationData(EvaluationCalculator& calculator,
                                EvaluationManager& eval_man,
                                DBContentManager& dbcont_man)
-    : calculator_(calculator), eval_man_(eval_man), dbcont_man_(dbcont_man)
+:   calculator_(calculator)
+,   eval_man_  (eval_man)
+,   dbcont_man_(dbcont_man)
 {
     accessor_ = make_shared<dbContent::DBContentAccessor>();
+}
+
+/**
+ */
+EvaluationData::EvaluationData(EvaluationData& other)
+:   ref_line_id_         (other.ref_line_id_         )
+,   tst_line_id_         (other.tst_line_id_         )
+,   calculator_          (other.calculator_          )
+,   eval_man_            (other.eval_man_            )
+,   dbcont_man_          (other.dbcont_man_          )
+,   accessor_            (other.accessor_            )
+,   target_data_         (other.target_data_         )
+,   finalized_           (other.finalized_           )
+,   unassociated_ref_cnt_(other.unassociated_ref_cnt_)
+,   associated_ref_cnt_  (other.associated_ref_cnt_  )
+,   unassociated_tst_cnt_(other.unassociated_tst_cnt_)
+,   associated_tst_cnt_  (other.associated_tst_cnt_  )
+{
 }
 
 /**

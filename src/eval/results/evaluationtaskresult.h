@@ -62,6 +62,8 @@ protected:
     Result update_impl(UpdateState state) override final;
     Result canUpdate_impl(UpdateState state) const override final;
 
+    Result initResult_impl() override final;
+    Result prepareResult_impl() override final;
     Result finalizeResult_impl() override final;
 
     bool loadOnDemandFigure_impl(ResultReport::SectionContentFigure* figure) const override;
@@ -105,6 +107,7 @@ private:
     void createRequirementLinkMenu(unsigned int utn, QMenu& menu);
 
     void informUpdateEvalResult(int update_type);
+    void evaluationDone();
 
     mutable std::unique_ptr<EvaluationCalculator> calculator_;
     TargetMap                                     targets_;

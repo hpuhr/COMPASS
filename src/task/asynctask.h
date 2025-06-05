@@ -207,6 +207,8 @@ public:
 
     bool runAsyncDialog(bool auto_close = true,
                         QWidget* parent = nullptr);
+    bool runAsync();
+
 signals:
     void stateChanged();
 

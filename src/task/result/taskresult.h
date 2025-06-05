@@ -122,7 +122,9 @@ public:
     Result update(bool restore_section = false,
                   bool inform_manager = true);
 
-    Result initResult();
+    void lock();
+
+    Result prepareResult();
     Result finalizeResult();
 
     bool loadOnDemandContent(ResultReport::SectionContent* content) const;
@@ -180,6 +182,7 @@ protected:
     void id(unsigned int id);
     void clearPendingUpdates();
 
+    Result initResult();
     Result updateContents(const std::vector<ContentID>& contents);
 
     //reimplement for custom result clearing
@@ -190,8 +193,9 @@ protected:
     virtual Result canUpdate_impl(UpdateState state) const { return false; }
     virtual Result updateContents_impl(const std::vector<ContentID>& contents);
 
-    //reimplement for custom initialization/finalization of a result
+    //reimplement for custom initialization/preparation/finalization of a result
     virtual Result initResult_impl() { return Result::succeeded(); }
+    virtual Result prepareResult_impl() { return Result::succeeded(); }
     virtual Result finalizeResult_impl() { return Result::succeeded(); }
 
     //reimplement for on-demand generation of contents
@@ -235,5 +239,5 @@ protected:
     UpdateState            update_state_ = UpdateState::UpToDate;
     std::vector<ContentID> update_contents_;
 
-    bool finalized_ = false;
+    bool init_ = false;
 };

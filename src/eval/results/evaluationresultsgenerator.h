@@ -45,6 +45,7 @@ class EvaluationResultsGenerator
 {
 public:
     EvaluationResultsGenerator(EvaluationCalculator& calculator);
+    EvaluationResultsGenerator(EvaluationResultsGenerator& other);
     virtual ~EvaluationResultsGenerator();
 
     void evaluate(EvaluationStandard& standard,
