@@ -163,6 +163,15 @@ void PositionAccuracy::scaleToMinStdDev(double min_stddev)
     }
 }
 
+void PositionAccuracy::scaleUsing(double scale_factor)
+{
+    assert (std::isfinite(scale_factor));
+
+    x_stddev_ *= scale_factor;
+    y_stddev_ *= scale_factor;
+    xy_cov_ *= scale_factor * scale_factor; // Covariance scales with the square of the factor
+}
+
 VelocityAccuracy VelocityAccuracy::getScaledToMinStdDev (double min_std_dev) const
 {
     VelocityAccuracy ret = *this;
@@ -199,8 +208,6 @@ void VelocityAccuracy::scaleToMinStdDev(double min_stddev)
         }
     }
 }
-
-
 
 boost::optional<targetReport::Position>& ReconstructorInfo::position()
 {

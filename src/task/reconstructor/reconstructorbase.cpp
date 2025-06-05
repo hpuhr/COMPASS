@@ -1563,12 +1563,19 @@ double ReconstructorBase::determineProcessNoise(const dbContent::targetReport::R
     if (!ref_calc_settings_.dynamic_process_noise)
         return Q.Q_std_static;
 
-    const double f_ground = dbContent::Target::processNoiseFactorGround(target.targetCategory());
+    double f_ground {1.0};
 
-    if (dbContent::Target::isGroundOnly(target.targetCategory()))
+    if (target.targetCategory() != TargetBase::Category::Unknown)
+        f_ground = dbContent::Target::processNoiseFactorGround(target.targetCategory());
+
+    if (target.targetCategory() != TargetBase::Category::Unknown
+        && dbContent::Target::isGroundOnly(target.targetCategory()))
         return Q.Q_std_ground * f_ground;
 
-    const double f_air = dbContent::Target::processNoiseFactorAir(target.targetCategory());
+    double f_air {1.0};
+
+    if (target.targetCategory() != TargetBase::Category::Unknown)
+        f_air = dbContent::Target::processNoiseFactorAir(target.targetCategory());
 
     auto alt_state = target.getAltitudeStateStruct(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
 
