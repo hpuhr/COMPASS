@@ -107,33 +107,6 @@ EvaluationCalculator::~EvaluationCalculator()
 }
 
 /**
- * Copies results to the given calculator.
- * Beware: Only copies the result part. Does not take care of initializing
- * everything handled by the configurable (settings, standards, etc.)!
- * Will clear the calculator's own result data.
- */
-void EvaluationCalculator::copyResultsTo(EvaluationCalculator& other)
-{
-    other.eval_utns_         = eval_utns_;
-    other.eval_requirements_ = eval_requirements_;
-
-    other.sector_roi_ = sector_roi_;
-
-    other.data_loaded_           = data_loaded_;
-    other.reference_data_loaded_ = reference_data_loaded_;
-    other.test_data_loaded_      = test_data_loaded_;
-    other.evaluated_             = evaluated_;
-
-    other.data_.reset(new EvaluationData(*data_));
-    other.results_gen_.reset(new EvaluationResultsGenerator(*results_gen_));
-    other.tst_srcs_coverage_.reset(new dbContent::DataSourceCompoundCoverage(*tst_srcs_coverage_));
-
-    other.use_fast_sector_inside_check_ = use_fast_sector_inside_check_;
-
-    clearData();
-}
-
-/**
  */
 void EvaluationCalculator::readSettings()
 {

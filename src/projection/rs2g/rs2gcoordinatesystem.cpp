@@ -71,18 +71,6 @@ RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
     h_r_ = altitude_m_;
 }
 
-RS2GCoordinateSystem::RS2GCoordinateSystem(const RS2GCoordinateSystem& other)
-:   ProjectionCoordinateSystemBase(other)
-,   rs2g_A_     (other.rs2g_A_     )
-,   rs2g_T_Ai_  (other.rs2g_T_Ai_  )
-,   rs2g_bi_    (other.rs2g_bi_    )
-,   rs2g_ho_    (other.rs2g_ho_    )
-,   rs2g_Rto_   (other.rs2g_Rto_   )
-,   rs2g_A_p0q0_(other.rs2g_A_p0q0_)
-,   rs2g_b_p0q0_(other.rs2g_b_p0q0_)
-{
-}
-
 double RS2GCoordinateSystem::azimuth(double x_m, double y_m)
 {
     double azimuth_rad = 0.0;

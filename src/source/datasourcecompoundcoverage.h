@@ -13,7 +13,6 @@ class DataSourceCompoundCoverage
 {
 public:
     DataSourceCompoundCoverage();
-    DataSourceCompoundCoverage(const DataSourceCompoundCoverage& other);
 
     void clear();
     void addRangeCircle (unsigned int ds_id, double center_lat, double center_long, double range_m);

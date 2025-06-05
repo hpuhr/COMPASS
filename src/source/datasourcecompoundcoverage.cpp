@@ -10,17 +10,6 @@ DataSourceCompoundCoverage::DataSourceCompoundCoverage()
 {
 }
 
-DataSourceCompoundCoverage::DataSourceCompoundCoverage(const DataSourceCompoundCoverage& other)
-:   is_finalized_ (other.is_finalized_ )
-,   range_circles_(other.range_circles_)
-{
-    for (const auto& rccs : other.range_circles_cs_)
-    {
-        std::unique_ptr<RS2GCoordinateSystem> coord_sys(new RS2GCoordinateSystem(*rccs.first));
-        range_circles_cs_.emplace_back(std::move(coord_sys), rccs.second);
-    }
-}
-
 void DataSourceCompoundCoverage::clear()
 {
     range_circles_.clear();

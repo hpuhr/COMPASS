@@ -106,8 +106,6 @@ public:
                   const std::vector<Evaluation::RequirementResultID>& requirements = std::vector<Evaluation::RequirementResultID>());
     void updateResultsToChanges();
 
-    void copyResultsTo(EvaluationCalculator& other);
-
     // check and correct missing information
     void checkReferenceDataSources();
     void checkTestDataSources();

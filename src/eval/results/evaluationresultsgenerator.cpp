@@ -75,16 +75,6 @@ EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationCalculator& cal
 
 /**
  */
-EvaluationResultsGenerator::EvaluationResultsGenerator(EvaluationResultsGenerator& other)
-:   calculator_ (other.calculator_ )
-,   results_    (other.results_    )
-,   results_vec_(other.results_vec_)
-,   result_name_(other.result_name_)
-{
-}
-
-/**
- */
 EvaluationResultsGenerator::~EvaluationResultsGenerator()
 {
     clear();

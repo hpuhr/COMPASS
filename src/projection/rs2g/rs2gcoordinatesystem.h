@@ -30,7 +30,6 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
                          double latitude_deg, 
                          double longitude_deg,
                          double altitude_m);
-    RS2GCoordinateSystem(const RS2GCoordinateSystem& other);
 
     bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
                                     bool has_altitude, double altitude_m, double& ground_range_m,
