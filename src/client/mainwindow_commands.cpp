@@ -335,6 +335,32 @@ bool RTCommandReconstructReferences::run_impl()
 
     ReconstructorTask& task = COMPASS::instance().taskManager().reconstructReferencesTask();
 
+    if (!disabled_sensors_.empty())
+    {
+        auto& ds_manager = COMPASS::instance().dataSourceManager();
+
+        std::vector<std::string> sensors_to_disable = Utils::String::split(disabled_sensors_, ';');
+        for (const auto& sensor_name : sensors_to_disable)
+        {
+            if (sensor_name.empty())
+            {
+                setResultMessage("Invalid list of disabled sensors");
+                return false;
+            }
+
+            if (!ds_manager.hasDBDataSource(sensor_name))
+            {
+                setResultMessage("Invalid sensor '" + sensor_name + "'");
+                return false;
+            }
+
+            auto ds_id = ds_manager.getDBDataSourceDSID(sensor_name);
+
+            //deactivate sensor
+            task.useDataSource(ds_id, false);
+        }
+    }
+
     if(!task.canRun())
     {
         setResultMessage("Reconstruct references task can not be run");
@@ -346,6 +372,18 @@ bool RTCommandReconstructReferences::run_impl()
 
     // if ok
     return true;
+}
+
+void RTCommandReconstructReferences::collectOptions_impl(OptionsDescription& options,
+                                                         PosOptionsDescription& positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("disable_sensors,d", po::value<std::string>()->default_value(""), "optional list of sensor names to disables, e.g. ’GPS Trail 1;GPS Trail 2'");
+}
+
+void RTCommandReconstructReferences::assignVariables_impl(const VariablesMap& variables)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "disable_sensors", std::string, disabled_sensors_)
 }
 
 // load data

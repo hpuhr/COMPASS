@@ -67,11 +67,13 @@ struct RTCommandReconstructReferences : public rtcommand::RTCommand
 {
     RTCommandReconstructReferences();
 
+    std::string disabled_sensors_;
+
 protected:
     virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(reconstruct_references, "reconstruct references")
-    DECLARE_RTCOMMAND_NOOPTIONS
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 // load data

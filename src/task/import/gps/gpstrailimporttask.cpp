@@ -451,6 +451,7 @@ void GPSTrailImportTask::parseCurrentFile ()
     gps_fixes_cnt_ = 0;
     gps_fixes_skipped_quality_cnt_ = 0;
     gps_fixes_skipped_time_cnt_ = 0;
+    gps_fixes_zero_datetime_ = 0;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -486,8 +487,8 @@ void GPSTrailImportTask::parseCurrentFile ()
 
         if (gps.fix.timestamp.rawDate == 0 && gps.fix.timestamp.rawTime == 0)
         {
-            ++gps_fixes_zero_datetime_;
-            return;
+           ++gps_fixes_zero_datetime_;
+           return;
         }
 
         if (gps.fix.quality == 0)

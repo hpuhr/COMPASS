@@ -182,7 +182,6 @@ bool RTCommandImportASTERIXFile::run_impl()
                 import_task.asterixFileFraming(framing_);
         }
 
-
         if (line_id_.size())
         {
             file_line = String::lineFromStr(line_id_);
@@ -394,7 +393,6 @@ bool RTCommandImportASTERIXFiles::run_impl()
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }
-
 
     assert (filenames_.size());
 
@@ -1068,6 +1066,60 @@ bool RTCommandImportGPSTrail::run_impl()
 
     GPSTrailImportTask& import_task = COMPASS::instance().taskManager().gpsTrailImportTask();
 
+    //deactivate extra information
+    import_task.useTodOffset(false);
+    import_task.useOverrideDate(false);
+    import_task.setMode3aCode(false);
+    import_task.setTargetAddress(false);
+    import_task.setCallsign(false);
+
+    //reenable extra information based on whats provided
+    if (has_tod_offset_)
+    {
+        import_task.useTodOffset(true);
+        import_task.todOffset(tod_offset_);
+    }
+
+    if (!date_.empty())
+    {
+        import_task.useOverrideDate(true);
+        import_task.overrideDate(boost::gregorian::from_string(date_));
+    }
+
+    if (!mode_3a_code_.empty())
+    {
+        import_task.setMode3aCode(true);
+        import_task.mode3aCode(String::intFromOctalString(mode_3a_code_));
+    }
+
+    if (!aircraft_address_.empty())
+    {
+        import_task.setTargetAddress(true);
+        import_task.targetAddress(String::intFromHexString(aircraft_address_));
+    }
+
+    if (!aircraft_id_.empty())
+    {
+        import_task.setCallsign(true);
+        import_task.callsign(aircraft_id_);
+    }
+
+    if (!name_.empty())
+    {
+        import_task.dsName(name_);
+    }
+
+    if (sac_ >=  0)
+    {
+        import_task.dsSAC((unsigned int)sac_);
+    }
+
+    if (sic_ >=  0)
+    {
+        import_task.dsSIC((unsigned int)sic_);
+    }
+
+    //will parse the file
     import_task.importFilename(filename_);
 
     if (!import_task.canRun())
@@ -1077,7 +1129,6 @@ bool RTCommandImportGPSTrail::run_impl()
     }
 
     import_task.allowUserInteractions(false);
-
     import_task.run();
 
     return true;
@@ -1087,7 +1138,15 @@ void RTCommandImportGPSTrail::collectOptions_impl(OptionsDescription& options,
                                                   PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-    ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.json’");
+    ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.nmea'")
+    ("name,n", po::value<std::string>()->required(), "optional data source name, e.g. ’GPS Trail'")
+    ("sac", po::value<int>()->default_value(-1), "optional sac, e.g. 255")
+    ("sic", po::value<int>()->default_value(-1), "optional sic, e.g. 0")
+    ("tod_offset,t", po::value<double>(), "optional time of day offset, e.g. -10000.0")
+    ("date,d", po::value<std::string>()->default_value(""), "optional override date, e.g. ’2025-01-01'")
+    ("mode3a,m", po::value<std::string>()->default_value(""), "optional mode3a code in octal, e.g. ")
+    ("address,a", po::value<std::string>()->default_value(""), "optional aircraft address in hex, e.g. ’0xffffff'")
+    ("id,i", po::value<std::string>()->default_value(""), "optional aircraft identification, e.g. ’ENTE'");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
 }
@@ -1095,6 +1154,15 @@ void RTCommandImportGPSTrail::collectOptions_impl(OptionsDescription& options,
 void RTCommandImportGPSTrail::assignVariables_impl(const VariablesMap& variables)
 {
     RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "name", std::string, name_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "sac", int, sac_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "sic", int, sic_)
+    RTCOMMAND_CHECK_VAR(variables, "tod_offset", has_tod_offset_)
+    RTCOMMAND_GET_VAR(variables, "tod_offset", double, tod_offset_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "date", std::string, date_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "mode3a", std::string, mode_3a_code_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "address", std::string, aircraft_address_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "id", std::string, aircraft_id_)
 }
 
 }

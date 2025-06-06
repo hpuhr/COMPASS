@@ -29,7 +29,7 @@ struct RTCommandImportASTERIXFile : public rtcommand::RTCommand
     std::string line_id_;
     std::string date_str_;
     std::string time_offset_str_;
-    bool ignore_time_jumps_ {false};
+    bool        ignore_time_jumps_ {false};
 
     virtual rtcommand::IsValid valid() const override;
 
@@ -158,7 +158,16 @@ protected:
 // import_gps
 struct RTCommandImportGPSTrail : public rtcommand::RTCommand
 {
-    std::string filename_;
+    std::string  filename_;
+    std::string  name_;
+    int          sac_;
+    int          sic_;
+    bool         has_tod_offset_ = false;
+    double       tod_offset_     =  0.0;
+    std::string  date_;
+    std::string  mode_3a_code_;
+    std::string  aircraft_address_;
+    std::string  aircraft_id_;
 
     virtual rtcommand::IsValid valid() const override;
 
