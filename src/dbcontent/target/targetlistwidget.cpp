@@ -390,7 +390,7 @@ void TargetListWidget::createTargetEvalMenu(QMenu& menu,
     bool  target_ok        = model_.existsTarget(target.utn_);
     auto  target_ptr       = &target;
     auto& eval_man         = COMPASS::instance().evaluationManager();
-    auto  all_requirements = eval_man.calculator().currentStandard().getAllRequirementNames();
+    auto  all_requirements = eval_man.currentStandard().getAllRequirementNames();
     bool  has_requirement  = all_requirements.count(req_name) > 0;
     bool  has_timewin      = !target.timeBegin().is_not_a_date_time() &&
                              !target.timeEnd().is_not_a_date_time();
@@ -514,7 +514,7 @@ void TargetListWidget::evalExcludeRequirementsTarget(const std::set<unsigned int
     auto& dbcont_man = COMPASS::instance().dbContentManager();
     auto& eval_man = COMPASS::instance().evaluationManager();
 
-    if (!eval_man.calculator().hasCurrentStandard())
+    if (!eval_man.hasCurrentStandard())
     {
         QMessageBox m_warning(QMessageBox::Information, "Exclude Requirements",
                               "Please select a current evaluation standard to disable requirements.",
@@ -525,7 +525,7 @@ void TargetListWidget::evalExcludeRequirementsTarget(const std::set<unsigned int
     }
 
     set<string> selected_requirements;
-    set<string> all_requirements = eval_man.calculator().currentStandard().getAllRequirementNames();
+    set<string> all_requirements = eval_man.currentStandard().getAllRequirementNames();
     set<string> comments;
 
     // collect all requirements from all targets
@@ -594,7 +594,7 @@ void TargetListWidget::evalExcludeRequirementTarget(const Target& target,
 void TargetListWidget::evalExcludeAllRequirementsTarget(const Target& target)
 {
     auto& eval_man         = COMPASS::instance().evaluationManager();
-    auto  all_requirements = eval_man.calculator().currentStandard().getAllRequirementNames();
+    auto  all_requirements = eval_man.currentStandard().getAllRequirementNames();
 
     evalExcludeRequirementsTarget({ target.utn_ }, &all_requirements);
 }

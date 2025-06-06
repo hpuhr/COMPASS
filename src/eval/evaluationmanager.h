@@ -119,18 +119,11 @@ public:
     bool needsAdditionalVariables() const;
     void addVariables(const std::string dbcontent_name, dbContent::VariableSet& read_set);
 
-    //EvaluationResultsReport::PDFGenerator& pdfGenerator();
-
+    //viewables
     void setViewableDataConfig (const nlohmann::json::object_t& data);
     void resetViewableDataConfig(bool reset_view_point);
 
-    const EvaluationCalculator& calculator() const;
-    EvaluationCalculator& calculator();
-
-    virtual void generateSubConfigurable(const std::string& class_id,
-                                         const std::string& instance_id) override;
-
-    // timestamps
+    //timestamps
     boost::posix_time::ptime loadTimestampBegin() const;
     void loadTimestampBegin(boost::posix_time::ptime value);
 
@@ -144,10 +137,16 @@ public:
     void useTimestampFilter(bool value);
     std::string timestampFilterStr() const;
 
-    EvaluationTargetFilter& targetFilter() const;
+    //standards
+    bool hasCurrentStandard() const;
+    const EvaluationStandard& currentStandard() const;
 
+    //other stuff
+    EvaluationTargetFilter& targetFilter() const;
     const std::string& lastResultName() const { return last_result_name_; }
 
+    virtual void generateSubConfigurable(const std::string& class_id,
+                                         const std::string& instance_id) override;
 protected:
     friend class EvaluationCalculator;
 

@@ -137,22 +137,6 @@ void EvaluationManager::checkSubConfigurables()
 
 /**
  */
-const EvaluationCalculator& EvaluationManager::calculator() const
-{
-    assert(calculator_);
-    return *calculator_;
-}
-
-/**
- */
-EvaluationCalculator& EvaluationManager::calculator()
-{
-    assert(calculator_);
-    return *calculator_;
-}
-
-/**
- */
 void EvaluationManager::init()
 {
     loginf << "EvaluationManager: init";
@@ -1347,4 +1331,20 @@ void EvaluationManager::loadTimestampEnd(boost::posix_time::ptime value)
 Utils::TimeWindowCollection& EvaluationManager::excludedTimeWindows()
 {
     return load_filtered_time_windows_;
+}
+
+/**
+ */
+bool EvaluationManager::hasCurrentStandard() const
+{
+    assert(calculator_);
+    return calculator_->hasCurrentStandard();
+}
+
+/**
+ */
+const EvaluationStandard& EvaluationManager::currentStandard() const
+{
+    assert(calculator_);
+    return calculator_->currentStandard();
 }
