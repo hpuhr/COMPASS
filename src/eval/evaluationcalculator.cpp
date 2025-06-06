@@ -108,6 +108,58 @@ EvaluationCalculator::~EvaluationCalculator()
 
 /**
  */
+ResultT<EvaluationCalculator*> EvaluationCalculator::clone() const
+{
+    //obtain current json config
+    nlohmann::json config;
+    generateJSON(config, Configurable::JSONExportType::General);
+
+    //clone from config
+    return EvaluationCalculator::clone(config);
+}
+
+/**
+ */
+ResultT<EvaluationCalculator*> EvaluationCalculator::clone(const nlohmann::json& config)
+{
+    if (!config.is_object())
+        return Result::failed("Config not available");
+
+    auto& eval_man = COMPASS::instance().evaluationManager();
+    auto& dbc_man  = COMPASS::instance().dbContentManager();
+
+    EvaluationCalculator* c = nullptr;
+
+    try
+    {
+        //create calculator based on given config
+        c = new EvaluationCalculator(eval_man, dbc_man, config);
+    }
+    catch(const std::exception& ex)
+    {
+        return ResultT<EvaluationCalculator*>::failed("Could not create calculator from stored config: " + std::string(ex.what()));
+    }
+    catch(...)
+    {
+        return ResultT<EvaluationCalculator*>::failed("Could not create calculator from stored config: Unknown error");
+    }
+
+    assert(c);
+
+    if (c->canEvaluate().ok())
+    {
+        //update some stuff in case the cloned calculator can evaluate
+        c->updateSectorROI();
+    }
+
+    auto res = ResultT<EvaluationCalculator*>::succeeded(c);
+    assert(res.hasResult() && res.result());
+
+    return res;
+}
+
+/**
+ */
 void EvaluationCalculator::readSettings()
 {
     typedef EvaluationSettings Settings;
@@ -299,56 +351,69 @@ void EvaluationCalculator::clearData()
 
 /**
  */
-void EvaluationCalculator::evaluate(bool blocking,
-                                    bool update_report,
-                                    const std::vector<unsigned int>& utns,
-                                    const std::vector<Evaluation::RequirementResultID>& requirements)
+Result EvaluationCalculator::evaluate(bool update_report,
+                                      const std::vector<unsigned int>& utns,
+                                      const std::vector<Evaluation::RequirementResultID>& requirements)
 {
     loginf << "EvaluationCalculator: evaluate";
 
     assert(canEvaluate().ok());
 
-    eval_utns_         = utns;
-    eval_requirements_ = requirements;
-    update_report_     = update_report;
+    //always load blocking for now
+    const bool Blocking = true;
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    // remove previous stuff
-    eval_man_.resetViewableDataConfig(true);
-
-    clearData();
-
-    emit resultsChanged();
-
-    // actually load
-    QApplication::restoreOverrideCursor();
-
-    // clear data
-    data_->clear();
-
-    // update stuff before load
-    updateCompoundCoverage(activeDataSourcesTst());
-    updateSectorROI();
-
-    if (blocking)
+    try
     {
-        eval_man_.loadData(*this, true);
-        loadingDone();
-    }
-    else
-    {
-        assert(!active_load_connection_);
+        eval_utns_         = utns;
+        eval_requirements_ = requirements;
+        update_report_     = update_report;
 
-        QObject::connect(&eval_man_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
-        active_load_connection_ = true;
-        eval_man_.loadData(*this, false);
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+        // remove previous stuff
+        eval_man_.resetViewableDataConfig(true);
+
+        clearData();
+
+        emit resultsChanged();
+
+        // actually load
+        QApplication::restoreOverrideCursor();
+
+        // clear data
+        data_->clear();
+
+        // update stuff before load
+        updateCompoundCoverage(activeDataSourcesTst());
+        updateSectorROI();
+
+        if (Blocking)
+        {
+            eval_man_.loadData(*this, true);
+            auto res = loadingDone();
+            if (!res.ok())
+                return res;
+        }
+        else
+        {
+            assert(!active_load_connection_);
+
+            QObject::connect(&eval_man_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
+            active_load_connection_ = true;
+            eval_man_.loadData(*this, false);
+        }
     }
+    catch (...)
+    {
+        return Result::failed("Evaluation failed due to errors");
+    }
+
+    return Result::succeeded();
 }
 
 /**
  */
-void EvaluationCalculator::loadingDone()
+Result EvaluationCalculator::loadingDone()
 {
     loginf << "EvaluationCalculator: loadingDone";
 
@@ -365,22 +430,14 @@ void EvaluationCalculator::loadingDone()
     bool has_ref_data = data.count(settings_.dbcontent_name_ref_);
     bool has_tst_data = data.count(settings_.dbcontent_name_tst_);
 
-    //@TODO: message boxes? here?
     if (eval_utns_.empty() && !has_ref_data)
-    {
-        QMessageBox::warning(nullptr, "Loading Data Failed", "No reference data was loaded.");
-        return;
-    }
+        return Result::failed("Loading data failed, no reference data was loaded");
 
     data_->addReferenceData(settings_.dbcontent_name_ref_, settings_.line_id_ref_);
     reference_data_loaded_ = has_ref_data;
 
-    //@TODO: message boxes? here?
     if (eval_utns_.empty() && !has_tst_data)
-    {
-        QMessageBox::warning(nullptr, "Loading Data Failed", "No test data was loaded.");
-        return;
-    }
+        return Result::failed("Loading data failed, no test data was loaded");
 
     data_->addTestData(settings_.dbcontent_name_tst_, settings_.line_id_tst_);
     test_data_loaded_ = has_tst_data;
@@ -400,17 +457,20 @@ void EvaluationCalculator::loadingDone()
         boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
 
         loginf << "EvaluationCalculator: loadingDone: finalize done "
-                   << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
+                << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
 
         loginf << "EvaluationCalculator: loadingDone: starting to evaluate";
 
-        evaluateData();
+        return evaluateData();
     }
+
+    //no data loaded => no eval needed
+    return Result::succeeded();
 }
 
 /**
  */
-void EvaluationCalculator::evaluateData()
+Result EvaluationCalculator::evaluateData()
 {
     loginf << "EvaluationCalculator: evaluateData";
 
@@ -435,6 +495,8 @@ void EvaluationCalculator::evaluateData()
 
     emit resultsChanged();
     emit evaluationDone();
+
+    return Result::succeeded();
 }
 
 /**

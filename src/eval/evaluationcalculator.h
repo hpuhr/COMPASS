@@ -93,17 +93,19 @@ public:
                          const nlohmann::json& config);
     virtual ~EvaluationCalculator();
 
+    ResultT<EvaluationCalculator*> clone() const;
+    static ResultT<EvaluationCalculator*> clone(const nlohmann::json& config);
+
     bool hasConstraints() const;
-    bool dataLoaded() const;
+    bool dataLoaded() const; 
     bool evaluated() const;
     Result canEvaluate() const;
 
     void reset();
     void clearData();
-    void evaluate(bool blocking = false,
-                  bool update_report = true,
-                  const std::vector<unsigned int>& utns = std::vector<unsigned int>(),
-                  const std::vector<Evaluation::RequirementResultID>& requirements = std::vector<Evaluation::RequirementResultID>());
+    Result evaluate(bool update_report = true,
+                    const std::vector<unsigned int>& utns = std::vector<unsigned int>(),
+                    const std::vector<Evaluation::RequirementResultID>& requirements = std::vector<Evaluation::RequirementResultID>());
     void updateResultsToChanges();
 
     // check and correct missing information
@@ -243,9 +245,8 @@ protected:
     virtual void onConfigurationChanged(const std::vector<std::string>& changed_params) override;
 
     void loadedDataData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
-    void loadingDone();
-
-    void evaluateData();
+    Result loadingDone();
+    Result evaluateData();
 
     EvaluationManager& eval_man_;
 

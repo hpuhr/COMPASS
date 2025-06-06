@@ -33,6 +33,22 @@ const QColor Colors::BGYellow = QColor(255,255,153);
 
 /**
  */
+ReportExportMode reportExportModeFromString(const std::string& str)
+{
+    if (str == "JSON")
+        return ReportExportMode::JSONFile;
+    else if (str == "JSONBlob")
+        return ReportExportMode::JSONBlob;
+    else if (str == "Latex")
+        return ReportExportMode::Latex;
+    else if (str == "PDF")
+        return ReportExportMode::LatexPDF;
+
+    return ReportExportMode::LatexPDF;
+}
+
+/**
+ */
 std::string reportExportMode2String(ReportExportMode mode)
 {
     switch(mode)
@@ -40,7 +56,7 @@ std::string reportExportMode2String(ReportExportMode mode)
         case ReportExportMode::JSONFile:
             return "JSON";
         case ReportExportMode::JSONBlob:
-            return "JSON Blob";
+            return "JSONBlob";
         case ReportExportMode::Latex:
             return "Latex";
         case ReportExportMode::LatexPDF:

@@ -63,10 +63,11 @@ ReportExport::~ReportExport()
 
 /**
  */
-Result ReportExport::exportReport(TaskResult& result,
-                                  ReportExportMode mode,
-                                  const std::string& fn,
-                                  const std::string& resource_dir)
+ResultT<nlohmann::json> ReportExport::exportReport(TaskResult& result,
+                                                   ReportExportMode mode,
+                                                   const std::string& fn,
+                                                   const std::string& resource_dir,
+                                                   const std::string& section)
 {
     //create exporter
     auto exporter = createExporter(mode, fn, resource_dir);
@@ -79,7 +80,9 @@ Result ReportExport::exportReport(TaskResult& result,
         [ this, exporter_ptr ] () { this->updateProgress(exporter_ptr); });
 
     //export using exporter
-    return exporter->exportReport(result);
+    auto res = exporter->exportReport(result, section);
+
+    return res;
 }
 
 /**

@@ -1511,7 +1511,7 @@ void MainWindow::showResult(const std::string& name)
 
 void MainWindow::showEvaluationResult()
 {
-    std::string result_name = COMPASS::instance().evaluationManager().calculator().resultName();
+    std::string result_name = COMPASS::instance().evaluationManager().lastResultName();
 
     if (!result_name.empty())
         showResult(result_name);

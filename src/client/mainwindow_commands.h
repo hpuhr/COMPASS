@@ -1,7 +1,9 @@
 #pragma once
 
+
 #include "rtcommand.h"
 #include "rtcommand_macros.h"
+#include "reportdefs.h"
 
 namespace main_window
 {
@@ -99,32 +101,44 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
-// evaluate
-struct RTCommandEvaluate : public rtcommand::RTCommand
+// export report
+struct RTCommandExportReport : public rtcommand::RTCommand
 {
-    bool run_filter_ {false};
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(evaluate, "run evaluation")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// export evaluation report
-struct RTCommandExportEvaluationReport : public rtcommand::RTCommand
-{
-    std::string filename_;
+    std::string                    result_name_;
+    std::string                    export_dir_;
+    ResultReport::ReportExportMode mode_ = ResultReport::ReportExportMode::LatexPDF;
 
     virtual rtcommand::IsValid valid() const override;
 
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(export_eval_report,
-                      "export evaluation report after start with given filename, e.g. ’/data/eval_db2/report.tex'")
+    DECLARE_RTCOMMAND(export_report,
+                      "export existing report")
     DECLARE_RTCOMMAND_OPTIONS
 };
+
+/**
+ * get_eval_results
+ */
+struct RTCommandGetResult : public rtcommand::RTCommand
+{
+public:
+    RTCommandGetResult();
+
+    virtual rtcommand::IsValid valid() const override;
+
+    std::string result_name;
+    std::string section;
+    
+protected:
+    virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
+
+    DECLARE_RTCOMMAND(get_result, "obtain result json data")
+    DECLARE_RTCOMMAND_OPTIONS
+};
+
 
 // get_events
 struct RTCommandGetEvents : public rtcommand::RTCommand

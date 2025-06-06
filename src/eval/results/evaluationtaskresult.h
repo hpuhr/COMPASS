@@ -43,6 +43,7 @@ public:
     typedef std::map<std::string, bool>              InterestSwitches;
 
     void setTargets(const TargetMap& targets);
+    void injectCalculator(EvaluationCalculator* calculator);
     
     task::TaskResultType type() const override final { return task::TaskResultType::Evaluation; }
 
@@ -107,7 +108,6 @@ private:
     void createRequirementLinkMenu(unsigned int utn, QMenu& menu);
 
     void informUpdateEvalResult(int update_type);
-    void evaluationDone();
 
     mutable std::unique_ptr<EvaluationCalculator> calculator_;
     TargetMap                                     targets_;

@@ -59,7 +59,6 @@ signals:
     void sectorsEditedSignal();          // sector edit dialog closed
     void standardsChangedSignal();       // emitted if standard was added or deleted
     void currentStandardChangedSignal(); // emitted if current standard was changed
-    void resultsChangedSignal();         // results changed in calculator
     void evaluationDoneSignal();         // evaluation ended
     void hasNewData();                   // new data for evaluation is ready to be fetched
     void resultsNeedUpdate(int type);    // evaluation results need the sent update
@@ -85,7 +84,7 @@ public:
 
     bool evaluated() const;
     Result canEvaluate() const;
-    void evaluate(bool show_dialog, bool blocking = false);
+    Result evaluate(bool show_dialog);
 
     bool canGenerateReport() const;
     void generateReport();
@@ -147,6 +146,7 @@ public:
 
     EvaluationTargetFilter& targetFilter() const;
 
+    const std::string& lastResultName() const { return last_result_name_; }
 
 protected:
     friend class EvaluationCalculator;
@@ -169,7 +169,6 @@ private:
 
     void configureLoadFilters(const EvaluationCalculator& calculator);
     void loadingDone();
-    void evaluationDone();
 
     //COMPASS& compass_;
     DBContentManager& dbcontent_man_;
@@ -195,4 +194,6 @@ private:
     boost::posix_time::ptime load_timestamp_begin_;
     boost::posix_time::ptime load_timestamp_end_;
     Utils::TimeWindowCollection load_filtered_time_windows_;
+
+    std::string last_result_name_;
 };

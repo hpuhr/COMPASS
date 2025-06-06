@@ -51,6 +51,8 @@ ReportExportDialog::ReportExportDialog(TaskResult& task_result,
                                        ReportExport& report_export, 
                                        ReportExportMode export_mode,
                                        bool no_interaction_mode,
+                                       const boost::optional<std::string>& export_dir,
+                                       const std::string& section,
                                        QWidget* parent, 
                                        Qt::WindowFlags f)
 :   QDialog             (parent, f          )
@@ -58,6 +60,7 @@ ReportExportDialog::ReportExportDialog(TaskResult& task_result,
 ,   report_export_      (report_export      )
 ,   export_mode_        (export_mode        )
 ,   no_interaction_mode_(no_interaction_mode)
+,   section_            (section            )
 {
     format_str_ = QString::fromStdString(reportExportMode2String(export_mode));
 
@@ -65,7 +68,7 @@ ReportExportDialog::ReportExportDialog(TaskResult& task_result,
     setMinimumSize(QSize(800, 600));
 
     createUI();
-    configureUI();
+    configureUI(export_dir);
 
     connect(&report_export, &ReportExport::progressChanged, this, &ReportExportDialog::updateProgress);
 }
@@ -181,10 +184,10 @@ void ReportExportDialog::createUI()
 
 /**
  */
-void ReportExportDialog::configureUI()
+void ReportExportDialog::configureUI(const boost::optional<std::string>& export_dir)
 {
     auto db_fn      = COMPASS::instance().lastDbFilename();
-    auto db_dir     = Utils::Files::getDirectoryFromPath(db_fn);
+    auto db_dir     = export_dir.has_value() ? export_dir.value() : Utils::Files::getDirectoryFromPath(db_fn);
     auto base_name  = boost::filesystem::path(db_fn).stem().string();
     auto res_name   = task_result_.name();
     auto exp_folder = reportExportMode2Folder(export_mode_);
@@ -282,7 +285,7 @@ void ReportExportDialog::exportReport()
 
     QApplication::processEvents();
 
-    export_result_ = report_export_.exportReport(task_result_, export_mode_, fn, dir);
+    export_result_ = report_export_.exportReport(task_result_, export_mode_, fn, dir, section_);
 
     QApplication::processEvents();
 

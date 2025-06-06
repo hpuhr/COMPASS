@@ -92,7 +92,7 @@ Result ReportExporterJSON::exportSection_impl(Section& section)
     nlohmann::json* jptr = nullptr;
 
     auto parent = section.parentSection();
-    if (parent)
+    if (parent && !json_sections_.empty())
     {
         //section obtains parent => try to find json section of parent
         auto it = json_sections_.find(parent);
@@ -115,6 +115,8 @@ Result ReportExporterJSON::exportSection_impl(Section& section)
     }
     else
     {
+        assert(json_sections_.empty());
+
         //root section => init json data
         json_data_ = res_json.result();
 

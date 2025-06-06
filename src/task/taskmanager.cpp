@@ -599,7 +599,10 @@ bool TaskManager::removeResult(const std::string& name,
 /**
  */
 ResultT<nlohmann::json> TaskManager::exportResult(const std::string& name, 
-                                                  ResultReport::ReportExportMode mode)
+                                                  ResultReport::ReportExportMode mode,
+                                                  bool no_interaction_mode,
+                                                  const boost::optional<std::string>& export_dir,
+                                                  const std::string& section)
 {
     assert(report_export_);
     assert(hasResult(name));
@@ -610,7 +613,9 @@ ResultT<nlohmann::json> TaskManager::exportResult(const std::string& name,
     ResultReport::ReportExportDialog dlg(*r, 
                                          *report_export_, 
                                          mode,
-                                         mode == ResultReport::ReportExportMode::JSONBlob);
+                                         no_interaction_mode,
+                                         export_dir,
+                                         section);
     dlg.exec();
 
     return dlg.result();

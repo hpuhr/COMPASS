@@ -301,7 +301,7 @@ void TaskResultsWidget::removeCurrentResult()
     auto name = report_combo_->currentText().toStdString();
     assert(task_man_.hasResult(name));
 
-    QString msg = "Do you relly want to remove result '" + QString::fromStdString(name) + "'?";
+    QString msg = "Do you really want to remove result '" + QString::fromStdString(name) + "'?";
     auto answer = QMessageBox::question(this, "Remove Result", msg, QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No);
     if (answer == QMessageBox::StandardButton::No)
         return;

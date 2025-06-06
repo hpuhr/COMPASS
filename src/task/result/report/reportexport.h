@@ -50,10 +50,11 @@ public:
                  TaskManager* task_manager);
     virtual ~ReportExport();
 
-    Result exportReport(TaskResult& result,
-                        ReportExportMode mode,
-                        const std::string& fn,
-                        const std::string& resource_dir);
+    ResultT<nlohmann::json> exportReport(TaskResult& result,
+                                         ReportExportMode mode,
+                                         const std::string& fn,
+                                         const std::string& resource_dir,
+                                         const std::string& section = std::string());
 
     ReportExportSettings& settings() { return settings_; }
     const ReportExportSettings& settings() const { return settings_; }

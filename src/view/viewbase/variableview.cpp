@@ -35,8 +35,6 @@ VariableView::VariableView(const std::string& class_id,
                            ViewManager& view_manager)
 :   View(class_id, instance_id, w, view_manager)
 {
-    // eval
-    connect(&COMPASS::instance().evaluationManager(), &EvaluationManager::resultsChangedSignal, this, &VariableView::onEvalResultsChanged);
 }
 
 /**

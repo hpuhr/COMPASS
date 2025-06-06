@@ -24,6 +24,7 @@
 #include "eval/evaluation_commands.h"
 #include "evaluationsettings.h"
 #include "evaluationtargetfilter.h"
+#include "evaluationtaskresult.h"
 
 #include "sectorlayer.h"
 #include "sector.h"
@@ -109,9 +110,6 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
 
         EvaluationCalculator* calculator = new EvaluationCalculator(class_id, instance_id, *this, dbcontent_man_);
         calculator_.reset(calculator);
-
-        connect(calculator_.get(), &EvaluationCalculator::resultsChanged, this, &EvaluationManager::resultsChangedSignal);
-        connect(calculator_.get(), &EvaluationCalculator::evaluationDone, this, &EvaluationManager::evaluationDone);
     }
     else
     {
@@ -208,21 +206,61 @@ Result EvaluationManager::canEvaluate() const
 
 /**
  */
-void EvaluationManager::evaluate(bool show_dialog, bool blocking)
+Result EvaluationManager::evaluate(bool show_dialog)
 {
     loginf << "EvaluationManager: evaluate";
 
     assert (initialized_);
     assert (calculator_);
 
+    //show config dialog?
     if (show_dialog)
     {
         EvaluationDialog dlg(*calculator_);
         if (dlg.exec() == QDialog::Rejected)
-            return;
+            return Result::succeeded();
     }
 
-    calculator_->evaluate(blocking);
+    //create clone of current calculator
+    auto res = calculator_->clone();
+
+    if (!res.ok())
+        logerr << "EvaluationManager: evaluate: Evaluation error: " << res.error();
+    assert(res.ok());
+
+    auto calculator_local = res.result();
+    assert(calculator_local);
+
+    //evaluate
+    auto eval_res = calculator_local->evaluate(true);
+
+    if (!eval_res.ok())
+    {
+        //interaction mode => show error immediately
+        if (show_dialog)
+            QMessageBox::critical(nullptr, "Evaluation Failed", QString::fromStdString(eval_res.error()));
+
+        return eval_res;
+    }
+
+    //store calculator to task result
+    auto& task_man = COMPASS::instance().taskManager();
+
+    assert(task_man.hasResult(calculator_local->resultName()));
+
+    auto task_result = task_man.result(calculator_local->resultName());
+    assert(task_result);
+
+    auto eval_result = dynamic_cast<EvaluationTaskResult*>(task_result.get());
+    assert(eval_result);
+
+    eval_result->injectCalculator(calculator_local);
+
+    last_result_name_ = calculator_local->resultName();
+
+    emit evaluationDoneSignal();
+
+    return Result::succeeded();
 }
 
 /**
@@ -1217,15 +1255,6 @@ void EvaluationManager::loadingDone()
 
     //signal new data
     emit hasNewData();
-}
-
-/**
- */
-void EvaluationManager::evaluationDone()
-{
-    loginf << "EvaluationManager: evaluationDone";
-
-    emit evaluationDoneSignal();
 }
 
 /**

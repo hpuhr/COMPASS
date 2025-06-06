@@ -27,6 +27,7 @@ class ReportWidget : public QWidget
 public slots:
     void itemClickedSlot(const QModelIndex& index);
     void itemDblClickedSlot(const QModelIndex& index);
+    void contextMenuSlot(const QPoint& pos);
 
     void stepBackSlot();
 

@@ -87,6 +87,9 @@ void EvaluationResultsGenerator::evaluate(EvaluationStandard& standard,
                                           const std::vector<Evaluation::RequirementResultID>& requirements,
                                           bool update_report)
 {
+    assert (calculator_.dataLoaded());
+    assert (calculator_.sectorsLoaded());
+
     const auto& eval_settings = calculator_.settings();
     auto&       data          = calculator_.data();
 
@@ -100,7 +103,6 @@ void EvaluationResultsGenerator::evaluate(EvaluationStandard& standard,
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
-    assert (calculator_.sectorsLoaded());
     std::vector<std::shared_ptr<SectorLayer>>& sector_layers = calculator_.sectorLayers();
 
     unsigned int num_req_evals = 0;
@@ -163,7 +165,6 @@ void EvaluationResultsGenerator::evaluate(EvaluationStandard& standard,
     }
 
     unsigned int num_utns = used_utns.size();
-
     unsigned int eval_cnt = 0;
 
     boost::posix_time::time_duration time_diff;

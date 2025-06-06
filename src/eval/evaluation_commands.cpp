@@ -21,112 +21,76 @@
 #include "compass.h"
 #include "evaluationmanager.h"
 #include "evaluationmanagerwidget.h"
+#include "mainwindow.h"
+#include "compass.h"
+#include "dbcontentmanager.h"
 
 #include <boost/program_options.hpp>
 
-REGISTER_RTCOMMAND(RTCommandGetEvalResult)
+REGISTER_RTCOMMAND(RTCommandEvaluate)
 
 /**
 */
 void init_evaluation_commands()
 {
-    RTCommandGetEvalResult::init();
+    RTCommandEvaluate::init();
 }
 
 /***************************************************************************************
- * RTCommandGetEvalResult
+ * RTCommandEvaluate
  ***************************************************************************************/
 
-/**
-*/
-RTCommandGetEvalResult::RTCommandGetEvalResult()
-    : rtcommand::RTCommand()
+bool RTCommandEvaluate::run_impl()
 {
-}
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
 
-rtcommand::IsValid RTCommandGetEvalResult::valid() const 
-{
-    CHECK_RTCOMMAND_INVALID_CONDITION(result.empty(), "Result ID must not be empty")
-    CHECK_RTCOMMAND_INVALID_CONDITION(table.empty(), "Table ID must not be empty")
-    
-    return rtcommand::RTCommand::valid(); 
-}
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
 
-/**
-*/
-bool RTCommandGetEvalResult::run_impl()
-{
+    if (run_filter_)
+        COMPASS::instance().dbContentManager().autoFilterUTNS();
+
+    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+
+    if (!eval_man.canEvaluate().ok())
+    {
+        setResultMessage("Unable to load evaluation data and evaluate");
+        return false;
+    }
+
+    loginf << "RTCommandEvaluate: run_impl: loading evaluation data";
+
+    auto res = eval_man.evaluate(false);
+    if (!res.ok())
+    {
+        setResultMessage(res.error());
+        return false;
+    }
+
+    if (!eval_man.evaluated())
+    {
+        setResultMessage("Bad evaluation state");
+        return false;
+    }
+
     return true;
 }
 
-/**
-*/
-bool RTCommandGetEvalResult::checkResult_impl()
-{
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
-
-    if (!eval_man.calculator().hasResults())
-    {
-        setResultMessage("No evaluation results available");
-        return false;
-    }
-
-    if (result.empty())
-    {
-        setResultMessage("No result id specified");
-        return false;
-    }
-
-    if (table.empty())
-    {
-        setResultMessage("No table id specified");
-        return false;
-    }
-
-    //@TODO
-    // auto eval_widget = eval_man.widget();
-
-    // if (!eval_widget)
-    // {
-    //     setResultMessage("No evaluation widget");
-    //     return false;
-    // }
-
-    // auto json_reply = eval_widget->getTableData(result, table, !colwise, columns);
-
-    // if (!json_reply.has_value())
-    // {
-    //     setResultMessage("Could not obtain table for given id");
-    //     return false;
-    // }
-
-    // setJSONReply(json_reply.value());
-
-    return false;
-}
-
-/**
- */
-void RTCommandGetEvalResult::collectOptions_impl(OptionsDescription &options,
-                                                 PosOptionsDescription &positional)
+void RTCommandEvaluate::collectOptions_impl(OptionsDescription& options,
+                                          PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("result", po::value<std::string>()->default_value(""), "which evaluation result to retrieve")
-        ("table", po::value<std::string>()->default_value(""), "which evaluation result table to retrieve")
-        ("columns", po::value<std::string>()->default_value(""), "which table columns to retrieve")
-        ("colwise", "retrieve evaluation result table column-wise");
-
-    ADD_RTCOMMAND_POS_OPTION(positional, "result")
-    ADD_RTCOMMAND_POS_OPTION(positional, "table")
-    ADD_RTCOMMAND_POS_OPTION(positional, "columns")
+        ("run_filter,f", "run evaluation filter before evaluation");
 }
 
-/**
- */
-void RTCommandGetEvalResult::assignVariables_impl(const VariablesMap &vars)
+void RTCommandEvaluate::assignVariables_impl(const VariablesMap& variables)
 {
-    RTCOMMAND_GET_VAR_OR_THROW(vars, "result", std::string, result)
-    RTCOMMAND_GET_VAR_OR_THROW(vars, "table", std::string, table)
-    RTCOMMAND_GET_INTVECTOR_OR_THROW(vars, "columns", columns)
-    RTCOMMAND_CHECK_VAR(vars, "colwise", colwise)
+    RTCOMMAND_CHECK_VAR(variables, "run_filter", run_filter_)
 }

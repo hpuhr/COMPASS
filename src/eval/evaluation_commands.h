@@ -19,6 +19,7 @@
 
 #include "buffer/buffer.h"
 #include "rtcommand/rtcommand.h"
+#include "reportdefs.h"
 
 #include <vector>
 #include <memory>
@@ -28,23 +29,15 @@
 extern void init_evaluation_commands();
 
 /**
-*/
-struct RTCommandGetEvalResult : public rtcommand::RTCommand
+ * evaluate
+ */
+struct RTCommandEvaluate : public rtcommand::RTCommand
 {
-public:
-    RTCommandGetEvalResult();
+    bool run_filter_ {false};
 
-    virtual rtcommand::IsValid valid() const override;
-
-    std::string      result;
-    std::string      table;
-    bool             colwise = false;
-    std::vector<int> columns;
-    
 protected:
     virtual bool run_impl() override;
-    virtual bool checkResult_impl() override;
 
-    DECLARE_RTCOMMAND(get_eval_results, "obtain evaluation results")
+    DECLARE_RTCOMMAND(evaluate, "run evaluation")
     DECLARE_RTCOMMAND_OPTIONS
 };

@@ -69,6 +69,7 @@ namespace ResultReport
         LatexPDF
     };
 
+    extern ReportExportMode reportExportModeFromString(const std::string& str);
     extern std::string reportExportMode2String(ReportExportMode mode);
     extern std::string reportExportMode2Extension(ReportExportMode mode);
     extern std::string reportExportMode2Folder(ReportExportMode mode);

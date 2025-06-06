@@ -112,6 +112,8 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
     num_sections_exported_ = 0;
     done_                  = false;
 
+    ResultT<nlohmann::json> res_final;
+
     try
     {
         //check stuff
@@ -166,16 +168,16 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
 #endif
 
         //export
-        auto res = exportReport_impl(result, section_ptr, content_id);
-        if (!res.ok())
-            return res;
+        res_final = exportReport_impl(result, section_ptr, content_id);
+        if (!res_final.ok())
+            return res_final;
 
 #if USE_EXPERIMENTAL_SOURCE == true
         GeographicView::instant_display_ = false;
 #endif
 
         //check on created in-mem data
-        if (exportCreatesInMemoryData() && res.result().is_null())
+        if (exportCreatesInMemoryData() && res_final.result().is_null())
             return Result::failed("Creating in-memory data failed");
 
         //check on created file
@@ -192,7 +194,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
     done_ = true;
     emit progressChanged();
 
-    return Result::succeeded();
+    return res_final;
 }
 
 /**

@@ -73,38 +73,29 @@ void EvaluationTaskResult::setTargets(const TargetMap& targets)
 }
 
 /**
+ * !Handle with care!
+ */
+void EvaluationTaskResult::injectCalculator(EvaluationCalculator* calculator)
+{
+    assert(calculator);
+    calculator_.reset(calculator);
+}
+
+/**
  */
 Result EvaluationTaskResult::createCalculator()
 {
-    if (!config_.is_object())
-    {
-        Result::failed("Config not available");
-        return false;
-    }
+    //clone calculator from config
+    auto res = EvaluationCalculator::clone(config_);
+    if (!res.ok())
+        return res;
 
-    auto& eval_manager = COMPASS::instance().evaluationManager();
-    auto& dbcontent_man = COMPASS::instance().dbContentManager();
-
-    try
-    {
-        //create calculator based on stored config
-        calculator_.reset(new EvaluationCalculator(eval_manager, dbcontent_man, config_));
-    }
-    catch(const std::exception& ex)
-    {
-        return ResultT<EvaluationCalculator*>::failed("Could not create calculator from stored config: " + std::string(ex.what()));
-    }
-    catch(...)
-    {
-        return ResultT<EvaluationCalculator*>::failed("Could not create calculator from stored config: Unknown error");
-    }
-
+    calculator_.reset(res.result());
+    
+    //created calculator should be properly configured
     auto can_eval = calculator_->canEvaluate();
     if (!can_eval.ok())
         return can_eval;
-
-    //update some stuff
-    calculator_->updateSectorROI();
 
     updateInterestSwitches();
 
@@ -123,7 +114,6 @@ Result EvaluationTaskResult::initResult_impl()
     //connect to eval manager
     auto& eval_manager = COMPASS::instance().evaluationManager();
     connect(&eval_manager, &EvaluationManager::resultsNeedUpdate, this, &EvaluationTaskResult::informUpdateEvalResult);
-    connect(&eval_manager, &EvaluationManager::evaluationDoneSignal, this, &EvaluationTaskResult::evaluationDone);
 
     return Result::succeeded();
 }
@@ -139,6 +129,10 @@ Result EvaluationTaskResult::prepareResult_impl()
  */
 Result EvaluationTaskResult::finalizeResult_impl()
 {
+    //connect to eval manager
+    auto& eval_manager = COMPASS::instance().evaluationManager();
+    connect(&eval_manager, &EvaluationManager::resultsNeedUpdate, this, &EvaluationTaskResult::informUpdateEvalResult);
+
     return Result::succeeded();
 }
 
@@ -146,11 +140,13 @@ Result EvaluationTaskResult::finalizeResult_impl()
  */
 Result EvaluationTaskResult::update_impl(UpdateState state)
 {
+    Result res = Result::succeeded();
+
     if (state == UpdateState::FullUpdateNeeded ||
         state == UpdateState::Locked)
     {
         loginf << "EvaluationTaskResult: update_impl: Running full update";
-        calculator_->evaluate(true, true);
+        res = calculator_->evaluate(true);
     }
     else if (state == UpdateState::PartialUpdateNeeded)
     {
@@ -160,7 +156,7 @@ Result EvaluationTaskResult::update_impl(UpdateState state)
         if (needs_recompute)
         {
             loginf << "EvaluationTaskResult: update_impl: Running initial full update";
-            calculator_->evaluate(true, true);
+            res = calculator_->evaluate(true);
         }
         else
         {
@@ -169,7 +165,7 @@ Result EvaluationTaskResult::update_impl(UpdateState state)
         }
     }
     
-    return Result::succeeded();
+    return res;
 }
 
 /**
@@ -232,8 +228,9 @@ namespace helpers
             return r;
 
         //otherwise evaluate for specified utn and requirement
-        calculator->evaluate(true, false, { info.first }, { info.second });
-
+        //note: if eval fails a nullptr is returned in the next step
+        calculator->evaluate(false, { info.first }, { info.second });
+        
         //then return result
         return calculator->singleResult(info.second, info.first);
     }
@@ -256,7 +253,8 @@ namespace helpers
             return r;
 
         //otherwise evaluate for specified requirement
-        calculator->evaluate(true, false, {}, { info });
+        //note: if eval fails a nullptr is returned in the next step
+        calculator->evaluate(false, {}, { info });
 
         //then return result
         return calculator->joinedResult(info);
@@ -850,24 +848,6 @@ void EvaluationTaskResult::informUpdateEvalResult(int update_type)
 
     //inform update
     informUpdate((task::UpdateState)update_type, content_id);
-}
-
-/**
- */
-void EvaluationTaskResult::evaluationDone()
-{
-    auto& eval_manager = COMPASS::instance().evaluationManager();
-
-    if (eval_manager.evaluated() && eval_manager.calculator().resultName() == name())
-    {
-        // loginf << "EvaluationTaskResult: evaluationDone: Fetching evaluated data for result '" << name() << "'";
-
-        // // evaluated result is me => fetch result data so we do not need to recompute
-        // assert(calculator_);
-        // eval_manager.calculator().copyResultsTo(*calculator_);
-
-        // assert(calculator_->evaluated());
-    }
 }
 
 /**

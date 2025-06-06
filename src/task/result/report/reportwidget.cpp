@@ -17,6 +17,7 @@
 #include <QMenu>
 #include <QWidgetAction>
 #include <QApplication>
+#include <QClipboard>
 
 using namespace Utils;
 
@@ -54,9 +55,11 @@ ReportWidget::ReportWidget(TaskResultsWidget& task_result_widget)
     tree_view_->setRootIsDecorated(false);
     tree_view_->expandToDepth(3);
     tree_view_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    tree_view_->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
 
     connect (tree_view_, &QTreeView::clicked, this, &ReportWidget::itemClickedSlot);
     connect (tree_view_, &QTreeView::doubleClicked, this, &ReportWidget::itemDblClickedSlot);
+    connect (tree_view_, &QTreeView::customContextMenuRequested, this, &ReportWidget::contextMenuSlot);
 
     sections_menu_.reset(new PopupMenu(sections_button_, tree_view_));
 
@@ -191,6 +194,25 @@ void ReportWidget::itemDblClickedSlot(const QModelIndex& index)
     triggerItem(index, false);
 
     sections_menu_->close();
+}
+
+void ReportWidget::contextMenuSlot(const QPoint& pos)
+{
+    auto index = tree_view_->indexAt(pos);
+    if (!index.isValid())
+        return;
+
+    Section* section = static_cast<Section*>(index.internalPointer());
+    if (!section)
+        return;
+
+    QMenu menu;
+
+    auto action_copy_id = menu.addAction("Copy Section ID");
+    connect(action_copy_id, &QAction::triggered, 
+        [ section ] () { qApp->clipboard()->setText(QString::fromStdString(section->id())); });
+
+    menu.exec(tree_view_->mapToGlobal(pos));
 }
 
 void ReportWidget::showFigure(const QModelIndex& index)

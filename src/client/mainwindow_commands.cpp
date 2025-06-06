@@ -59,8 +59,8 @@ REGISTER_RTCOMMAND(main_window::RTCommandCalculateARTASAssociations)
 REGISTER_RTCOMMAND(main_window::RTCommandReconstructReferences)
 REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
 REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
-REGISTER_RTCOMMAND(main_window::RTCommandEvaluate)
-REGISTER_RTCOMMAND(main_window::RTCommandExportEvaluationReport)
+REGISTER_RTCOMMAND(main_window::RTCommandExportReport)
+REGISTER_RTCOMMAND(main_window::RTCommandGetResult)
 
 REGISTER_RTCOMMAND(main_window::RTCommandGetEvents)
 REGISTER_RTCOMMAND(main_window::RTCommandReconfigure)
@@ -95,15 +95,13 @@ void init_commands()
     main_window::RTCommandReconstructReferences::init();
     main_window::RTCommandLoadData::init();
     main_window::RTCommandExportViewPointsReport::init();
-    main_window::RTCommandEvaluate::init();
-    main_window::RTCommandExportEvaluationReport::init();
+    main_window::RTCommandExportReport::init();
+    main_window::RTCommandGetResult::init();
 
     main_window::RTCommandGetEvents::init();
     main_window::RTCommandReconfigure::init();
     main_window::RTCommandClientInfo::init();
 }
-
-
 
 // import ds
 
@@ -442,69 +440,20 @@ void RTCommandExportViewPointsReport::assignVariables_impl(const VariablesMap& v
     RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
 }
 
-// evaluate
-bool RTCommandEvaluate::run_impl()
-{
-    if (!COMPASS::instance().dbOpened())
-    {
-        setResultMessage("Database not opened");
-        return false;
-    }
-
-    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
-    {
-        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
-        return false;
-    }
-
-    MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
-    assert (main_window);
-
-    if (run_filter_)
-        COMPASS::instance().dbContentManager().autoFilterUTNS();
-
-    main_window->showEvaluationTab();
-
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
-
-    if (!eval_man.canEvaluate().ok())
-    {
-        setResultMessage("Unable to load evaluation data and evaluate");
-        return false;
-    }
-
-    loginf << "RTCommandEvaluate: run_impl: loading evaluation data";
-
-    eval_man.evaluate(false, true);
-
-    return eval_man.evaluated();
-}
-
-void RTCommandEvaluate::collectOptions_impl(OptionsDescription& options,
-                                          PosOptionsDescription& positional)
-{
-    ADD_RTCOMMAND_OPTIONS(options)
-        ("run_filter,f", "run evaluation filter before evaluation");
-}
-
-void RTCommandEvaluate::assignVariables_impl(const VariablesMap& variables)
-{
-    RTCOMMAND_CHECK_VAR(variables, "run_filter", run_filter_)
-}
-
 // export evaluation report
-rtcommand::IsValid  RTCommandExportEvaluationReport::valid() const
+rtcommand::IsValid  RTCommandExportReport::valid() const
 {
-    CHECK_RTCOMMAND_INVALID_CONDITION(!filename_.size(), "Filename empty")
-
+    CHECK_RTCOMMAND_INVALID_CONDITION(!result_name_.size(), "Result name empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(mode_ == ResultReport::ReportExportMode::JSONBlob, "Command not available for JSONBlob mode")
+    
     return RTCommand::valid();
 }
 
-bool RTCommandExportEvaluationReport::run_impl()
+bool RTCommandExportReport::run_impl()
 {
-    if (!filename_.size())
+    if (!result_name_.size())
     {
-        setResultMessage("Filename empty");
+        setResultMessage("Result name empty");
         return false;
     }
 
@@ -520,44 +469,133 @@ bool RTCommandExportEvaluationReport::run_impl()
         return false;
     }
 
-    EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
+    auto& task_manager = COMPASS::instance().taskManager();
 
-    if (!eval_man.evaluated())
+    if (!task_manager.hasResult(result_name_))
     {
-        setResultMessage("No evaluation was performed, unable to generate report");
+        setResultMessage("Result '" + result_name_ + "' not available");
         return false;
     }
 
-    //@TODO:
-    // EvaluationResultsReport::PDFGenerator& gen = eval_man.pdfGenerator();
-    // EvaluationResultsReport::PDFGeneratorDialog& dialog = gen.dialog();
-    // dialog.show();
+    boost::optional<std::string> export_dir;
+    if (!export_dir_.empty())
+        export_dir = export_dir_;
 
-    // QCoreApplication::processEvents();
+    auto res = task_manager.exportResult(result_name_, mode_, true, export_dir);
 
-    // gen.reportPathAndFilename(filename_);
-    // gen.showDone(false);
-    // gen.run();
+    if (!res.ok())
+    {
+        setResultMessage(res.error());
+        return false;
+    }
 
-    // return true;
-
-    return false;
+    return true;
 }
 
-void RTCommandExportEvaluationReport::collectOptions_impl(OptionsDescription& options,
-                                          PosOptionsDescription& positional)
+void RTCommandExportReport::collectOptions_impl(OptionsDescription& options,
+                                                PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/db2/report.tex'");
+        ("result,r", po::value<std::string>()->required(), "result name, e.g. ’EUROCAE ED-87E'")
+        ("dir,f", po::value<std::string>()->default_value(""), "export directory, e.g. ’/data/db2/'")
+        ("mode,m", po::value<std::string>()->required(), "export mode, e.g. ’PDF'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "filename") // give position
+    ADD_RTCOMMAND_POS_OPTION(positional, "result")
+    ADD_RTCOMMAND_POS_OPTION(positional, "dir"   )
+    ADD_RTCOMMAND_POS_OPTION(positional, "mode"  )
 }
 
-void RTCommandExportEvaluationReport::assignVariables_impl(const VariablesMap& variables)
+void RTCommandExportReport::assignVariables_impl(const VariablesMap& variables)
 {
-    RTCOMMAND_GET_VAR_OR_THROW(variables, "filename", std::string, filename_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "result", std::string, result_name_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "dir"   , std::string, export_dir_)
+
+    std::string mode_str;
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "mode"  , std::string, mode_str)
+
+    mode_ = ResultReport::reportExportModeFromString(mode_str);
 }
 
+// get_result
+
+/**
+*/
+RTCommandGetResult::RTCommandGetResult()
+    : rtcommand::RTCommand()
+{
+}
+
+rtcommand::IsValid RTCommandGetResult::valid() const 
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(result_name.empty(), "Result name missing")
+    
+    return rtcommand::RTCommand::valid(); 
+}
+
+/**
+*/
+bool RTCommandGetResult::run_impl()
+{
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    auto& task_manager = COMPASS::instance().taskManager();
+
+    if (!task_manager.hasResult(result_name))
+    {
+        setResultMessage("Result '" + result_name + "' not available");
+        return false;
+    }
+
+    auto res = task_manager.exportResult(result_name, ResultReport::ReportExportMode::JSONBlob, true, {}, section);
+
+    if (!res.ok())
+    {
+        setResultMessage(res.error());
+        return false;
+    }
+
+    setJSONReply(res.result());
+
+    return true;
+}
+
+/**
+*/
+bool RTCommandGetResult::checkResult_impl()
+{
+    return true;
+}
+
+/**
+ */
+void RTCommandGetResult::collectOptions_impl(OptionsDescription &options,
+                                             PosOptionsDescription &positional)
+{
+    ADD_RTCOMMAND_OPTIONS(options)
+        ("result", po::value<std::string>()->default_value(""), "name of the result to retrieve")
+        ("section", po::value<std::string>()->default_value(""), "optional name of the section to retrieve");
+
+    ADD_RTCOMMAND_POS_OPTION(positional, "result" )
+    ADD_RTCOMMAND_POS_OPTION(positional, "section")
+}
+
+/**
+ */
+void RTCommandGetResult::assignVariables_impl(const VariablesMap &vars)
+{
+    RTCOMMAND_GET_VAR_OR_THROW(vars, "result" , std::string, result_name)
+    RTCOMMAND_GET_VAR_OR_THROW(vars, "section", std::string, section    )
+}
 
 // get_events
 

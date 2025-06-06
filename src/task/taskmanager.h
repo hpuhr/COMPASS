@@ -112,7 +112,10 @@ public:
     bool removeResult(const std::string& name, 
                       bool inform_changes = true);
     ResultT<nlohmann::json> exportResult(const std::string& name, 
-                                         ResultReport::ReportExportMode mode);
+                                         ResultReport::ReportExportMode mode,
+                                         bool no_interaction_mode = false,
+                                         const boost::optional<std::string>& export_dir = boost::optional<std::string>(),
+                                         const std::string& section = std::string());
     
     std::shared_ptr<TaskResult> createResult(unsigned int id, 
                                              task::TaskResultType type);

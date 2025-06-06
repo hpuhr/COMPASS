@@ -50,6 +50,8 @@ public:
                        ReportExport& report_export, 
                        ReportExportMode export_mode,
                        bool no_interaction_mode,
+                       const boost::optional<std::string>& export_dir = boost::optional<std::string>(),
+                       const std::string& section = std::string(),
                        QWidget* parent = nullptr, 
                        Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~ReportExportDialog() = default;
@@ -58,7 +60,7 @@ public:
 
 protected:
     void createUI();
-    void configureUI();
+    void configureUI(const boost::optional<std::string>& export_dir);
     void loadSettings();
     void writeSettings();
 
@@ -76,6 +78,7 @@ protected:
     ReportExport&    report_export_;
     ReportExportMode export_mode_;
     bool             no_interaction_mode_;
+    std::string      section_;
 
     QString          format_str_;
 

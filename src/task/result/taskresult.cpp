@@ -511,11 +511,6 @@ Result TaskResult::finalizeResult()
 {
     //custom finalization
     auto r = finalizeResult_impl();
-        if (!r.ok())
-            return r;
-
-    //ensure result is initialized
-    r = initResult();
     if (!r.ok())
         return r;
 
