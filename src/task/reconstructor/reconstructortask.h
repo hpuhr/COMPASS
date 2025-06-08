@@ -53,6 +53,7 @@ public:
 
         bool debug_association_ {false};
         bool debug_outlier_detection_ {false};
+        bool debug_geo_altitude_correction_ {false}; // not yet set using gui
 
         bool analyze_ {false};
 

@@ -441,6 +441,13 @@ size_t ColorMap::indexFromFactor(double t) const
         const size_t n_inner = n_colors_ - 2;
         idx                  = (size_t)std::floor(t * n_inner) + 1;
 
+        if (idx > n_colors_ - 2)
+        {
+            logerr << "ColorMap: indexFromFactor: idx " << idx << " > " << n_colors_ - 2
+                   << " for t " << t;
+            idx = n_colors_ - 2;
+        }
+
         assert(idx <= n_colors_ - 2);
     }
     else // Type::LinearSamples
@@ -459,6 +466,13 @@ size_t ColorMap::indexFromFactor(double t) const
         const size_t n_inner   = n_colors_ - 2;
         const size_t idx_inner = (size_t)std::floor((t - hstep) * n_inner);
         idx                    = 1 + idx_inner;
+
+        if (idx > n_colors_ - 2)
+        {
+            logerr << "ColorMap: indexFromFactor: idx " << idx << " > " << n_colors_ - 2
+                   << " for t " << t;
+            idx = n_colors_ - 2;
+        }
 
         assert(idx <= n_colors_ - 2);
     }
