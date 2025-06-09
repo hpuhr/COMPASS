@@ -174,7 +174,7 @@ std::pair<rtcommand::FindObjectErrCode, QObject *> getCommandReceiver(const std:
     }
     else if (first_part == "compass")
     {
-        std::pair<rtcommand::FindObjectErrCode, Configurable*> ret = COMPASS::instance().findSubConfigurable(remainder);
+        std::pair<rtcommand::FindObjectErrCode, Configurable*> ret = COMPASS::instance().findSubConfigurablePath(remainder);
 
         QObject *obj_casted = dynamic_cast<QObject *>(ret.second);
 

@@ -33,6 +33,9 @@ class QPushButton;
 class QLabel;
 class QProgressBar;
 class QCheckBox;
+class QFormLayout;
+class QHBoxLayout;
+class QSpacerItem;
 
 class TaskResult;
 
@@ -72,6 +75,11 @@ protected:
     void checkExport();
     void updateProgress();
 
+    QLabel* configLabel(QWidget* w);
+    QLabel* configLabel(QLayout* l);
+    void setRowVisible(QWidget* w, bool ok);
+    void setRowVisible(QLayout* l, bool ok);
+
     void showEvent(QShowEvent *event) override;
 
     TaskResult&      task_result_;
@@ -82,12 +90,14 @@ protected:
 
     QString          format_str_;
 
-    QLabel*          base_dir_label_       = nullptr;
+    QWidget*         config_widget_        = nullptr;
+    QFormLayout*     config_layout_        = nullptr;
+    QWidget*         config_spacer_        = nullptr;
+
+    QHBoxLayout*     base_dir_layout_      = nullptr;
     QPushButton*     base_dir_button_      = nullptr;
     QLineEdit*       base_dir_edit_        = nullptr;
-    QLabel*          res_dir_name_label_   = nullptr;
     QLineEdit*       res_dir_name_edit_    = nullptr;
-    QLabel*          report_name_label_    = nullptr;
     QLineEdit*       report_name_edit_     = nullptr;
 
     QLineEdit*       author_edit_          = nullptr;
@@ -101,12 +111,9 @@ protected:
     QLabel*          status_label_         = nullptr;
     QProgressBar*    progress_bar_         = nullptr;
 
-    QLabel*          open_file_label_      = nullptr;
     QCheckBox*       open_file_box_        = nullptr;
     
-    QLabel*          latex_max_rows_label_ = nullptr;
     QSpinBox*        latex_max_rows_edit_  = nullptr;
-    QLabel*          latex_max_colw_label_ = nullptr;
     QSpinBox*        latex_max_colw_edit_  = nullptr;
 
     ResultT<nlohmann::json> export_result_;

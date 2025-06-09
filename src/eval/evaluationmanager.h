@@ -82,12 +82,8 @@ public:
     void close();
     void clearData();
 
-    bool evaluated() const;
     Result canEvaluate() const;
     Result evaluate(bool show_dialog);
-
-    bool canGenerateReport() const;
-    void generateReport();
 
     // sectors
     bool sectorsLoaded() const;

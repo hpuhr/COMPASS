@@ -65,7 +65,7 @@ ReportExportDialog::ReportExportDialog(TaskResult& task_result,
     format_str_ = QString::fromStdString(reportExportMode2String(export_mode));
 
     setWindowTitle("Export Report as " + format_str_);
-    setMinimumSize(QSize(800, 600));
+    setMinimumWidth(800);
 
     createUI();
     configureUI(export_dir);
@@ -83,13 +83,61 @@ void ReportExportDialog::showEvent(QShowEvent *event)
 
 /**
  */
+QLabel* ReportExportDialog::configLabel(QWidget* w)
+{
+    auto label = dynamic_cast<QLabel*>(config_layout_->labelForField(w));
+    assert(label);
+    return label;
+}
+
+/**
+ */
+QLabel* ReportExportDialog::configLabel(QLayout* l)
+{
+    auto label = dynamic_cast<QLabel*>(config_layout_->labelForField(l));
+    assert(label);
+    return label;
+}
+
+/**
+ */
+void ReportExportDialog::setRowVisible(QWidget* w, bool ok)
+{
+    w->setVisible(ok);
+    configLabel(w)->setVisible(ok);
+}
+
+/**
+ */
+void ReportExportDialog::setRowVisible(QLayout* l, bool ok)
+{
+    for (int i = 0; i < l->count(); ++i) 
+    {
+        QLayoutItem* item = l->itemAt(i);
+        if (!item)
+            continue;
+
+        QWidget* widget = item->widget();
+        if (widget) 
+            widget->setVisible(ok);
+    }
+
+    configLabel(l)->setVisible(ok);
+}
+
+/**
+ */
 void ReportExportDialog::createUI()
 {
     auto main_layout = new QVBoxLayout;
     setLayout(main_layout);
 
-    auto layout = new QFormLayout;
-    main_layout->addLayout(layout);
+    config_widget_ = new QWidget;
+
+    config_layout_ = new QFormLayout;
+    config_widget_->setLayout(config_layout_);
+
+    main_layout->addWidget(config_widget_);
     
     base_dir_button_ = new QPushButton;
     base_dir_button_->setIcon(Utils::Files::getIcon("folder.png"));
@@ -98,57 +146,48 @@ void ReportExportDialog::createUI()
 
     base_dir_edit_ = new QLineEdit;
 
-    auto base_dir_layout = new QHBoxLayout;
-    base_dir_layout->setSpacing(0);
-    base_dir_layout->setContentsMargins(0, 0, 0, 0);
+    base_dir_layout_ = new QHBoxLayout;
+    base_dir_layout_->setSpacing(0);
+    base_dir_layout_->setContentsMargins(0, 0, 0, 0);
 
-    base_dir_layout->addWidget(base_dir_button_);
-    base_dir_layout->addWidget(base_dir_edit_);
+    base_dir_layout_->addWidget(base_dir_button_);
+    base_dir_layout_->addWidget(base_dir_edit_);
 
-    layout->addRow("Base Directory", base_dir_layout);
-    base_dir_label_ = dynamic_cast<QLabel*>(layout->labelForField(base_dir_layout));
-    assert(base_dir_label_);
+    config_layout_->addRow("Base Directory", base_dir_layout_);
 
     res_dir_name_edit_ = new QLineEdit;
-    layout->addRow("Report Directory", res_dir_name_edit_);
-    res_dir_name_label_ = dynamic_cast<QLabel*>(layout->labelForField(res_dir_name_edit_));
-    assert(res_dir_name_label_);
+    config_layout_->addRow("Report Directory", res_dir_name_edit_);
 
     connect(res_dir_name_edit_, &QLineEdit::textChanged, this, &ReportExportDialog::checkExport);
 
     report_name_edit_ = new QLineEdit;
-    layout->addRow("Report Name", report_name_edit_);
-    report_name_label_ = dynamic_cast<QLabel*>(layout->labelForField(report_name_edit_));
-    assert(report_name_label_);
+    config_layout_->addRow("Report Name", report_name_edit_);
 
     connect(report_name_edit_, &QLineEdit::textChanged, this, &ReportExportDialog::checkExport);
 
     author_edit_ = new QLineEdit;
-    layout->addRow("Author", author_edit_);
+    config_layout_->addRow("Author", author_edit_);
 
     comment_edit_ = new QTextEdit;
-    layout->addRow("Comments", comment_edit_);
+    config_layout_->addRow("Comments", comment_edit_);
 
     latex_max_rows_edit_ = new QSpinBox;
     latex_max_rows_edit_->setMinimum(0);
     latex_max_rows_edit_->setMaximum(std::numeric_limits<int>::max());
-    layout->addRow("Maximum Table Rows", latex_max_rows_edit_);
-    latex_max_rows_label_ = dynamic_cast<QLabel*>(layout->labelForField(latex_max_rows_edit_));
-    assert(latex_max_rows_label_);
+    config_layout_->addRow("Maximum Table Rows", latex_max_rows_edit_);
 
     latex_max_colw_edit_ = new QSpinBox;
     latex_max_colw_edit_->setMinimum(0);
     latex_max_colw_edit_->setMaximum(std::numeric_limits<int>::max());
-    layout->addRow("Maximum Table Column Width", latex_max_colw_edit_);
-    latex_max_colw_label_ = dynamic_cast<QLabel*>(layout->labelForField(latex_max_colw_edit_));
-    assert(latex_max_colw_label_);
+    config_layout_->addRow("Maximum Table Column Width", latex_max_colw_edit_);
 
     open_file_box_ = new QCheckBox;
-    layout->addRow("Open Created " + format_str_ + " File", open_file_box_);
-    open_file_label_ = dynamic_cast<QLabel*>(layout->labelForField(open_file_box_));
-    assert(open_file_label_);
+    config_layout_->addRow("Open Created " + format_str_ + " File", open_file_box_);
 
-    main_layout->addStretch(1);
+    config_spacer_ = new QWidget;
+    config_spacer_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+
+    main_layout->addWidget(config_spacer_);
 
     elapsed_label_   = new QLabel;
     remaining_label_ = new QLabel;
@@ -203,26 +242,16 @@ void ReportExportDialog::configureUI(const boost::optional<std::string>& export_
     res_dir_name_edit_->setText(QString::fromStdString(report_dir));
     report_name_edit_->setText(QString::fromStdString(report_name));
 
-    base_dir_label_->setVisible(export_mode_ != ReportExportMode::JSONBlob);
-    base_dir_button_->setVisible(export_mode_ != ReportExportMode::JSONBlob);
-    base_dir_edit_->setVisible(export_mode_ != ReportExportMode::JSONBlob);
-    res_dir_name_label_->setVisible(export_mode_ != ReportExportMode::JSONBlob);
-    res_dir_name_edit_->setVisible(export_mode_ != ReportExportMode::JSONBlob);
-    report_name_label_->setVisible(export_mode_ != ReportExportMode::JSONBlob);
-    report_name_edit_->setVisible(export_mode_ != ReportExportMode::JSONBlob);
+    bool is_latex_mode = export_mode_ == ReportExportMode::Latex ||
+                         export_mode_ == ReportExportMode::LatexPDF;
+    bool is_pdf_mode   = export_mode_ == ReportExportMode::LatexPDF;
 
-    latex_max_rows_label_->setVisible(export_mode_ == ReportExportMode::Latex ||
-                                      export_mode_ == ReportExportMode::LatexPDF);
-    latex_max_rows_edit_->setVisible(export_mode_ == ReportExportMode::Latex ||
-                                     export_mode_ == ReportExportMode::LatexPDF);
+    config_widget_->setVisible(export_mode_ != ReportExportMode::JSONBlob);
+    config_spacer_->setVisible(export_mode_ != ReportExportMode::JSONBlob);
 
-    latex_max_colw_label_->setVisible(export_mode_ == ReportExportMode::Latex ||
-                                      export_mode_ == ReportExportMode::LatexPDF);
-    latex_max_colw_edit_->setVisible(export_mode_ == ReportExportMode::Latex ||
-                                     export_mode_ == ReportExportMode::LatexPDF);
-
-    open_file_label_->setVisible(export_mode_ == ReportExportMode::LatexPDF);
-    open_file_box_->setVisible(export_mode_ == ReportExportMode::LatexPDF);
+    setRowVisible(latex_max_rows_edit_, is_latex_mode);
+    setRowVisible(latex_max_colw_edit_, is_latex_mode);
+    setRowVisible(open_file_box_      , is_pdf_mode  );
 
     loadSettings();
 }
@@ -278,6 +307,7 @@ void ReportExportDialog::exportReport()
 
     export_button_->setEnabled(false);
     cancel_button_->setEnabled(false);
+    config_widget_->setEnabled(false);
 
     auto dir = base_dir_edit_->text().toStdString() + "/" +
                res_dir_name_edit_->text().toStdString();
@@ -299,6 +329,7 @@ void ReportExportDialog::exportReport()
 
     export_button_->setEnabled(true);
     cancel_button_->setEnabled(true);
+    config_widget_->setEnabled(true);
 
     if (export_result_.ok() || no_interaction_mode_)
         accept();

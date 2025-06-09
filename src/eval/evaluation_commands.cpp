@@ -74,12 +74,6 @@ bool RTCommandEvaluate::run_impl()
         return false;
     }
 
-    if (!eval_man.evaluated())
-    {
-        setResultMessage("Bad evaluation state");
-        return false;
-    }
-
     return true;
 }
 
