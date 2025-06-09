@@ -1070,8 +1070,7 @@ void ReconstructorTask::runCancelledSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    // if (debug_settings_.debug_)
-    //     saveDebugViewPoints();
+    COMPASS::instance().logInfo("Reconstructor") << "cancelled by user";
 
     currentReconstructor()->reset();
 
