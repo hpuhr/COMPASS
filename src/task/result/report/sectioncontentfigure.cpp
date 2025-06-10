@@ -281,7 +281,7 @@ Result SectionContentFigure::toJSONDocument_impl(nlohmann::json& j,
     for (const auto& r : resources.result())
     {
         nlohmann::json j_fig;
-        j_fig[ FieldContentType ] = contentTypeAsString(content_type_);
+        SectionContent::toJSONDocument_impl(j_fig, resource_dir);
 
         if (resource_dir)
         {
@@ -291,7 +291,7 @@ Result SectionContentFigure::toJSONDocument_impl(nlohmann::json& j,
         else
         {
             //store data as json encoding
-            j_fig[ FieldDocData ] = ViewPointGenFeatureGeoImage::imageToByteString(r.data);
+            j_fig[ FieldDocData ] = ViewPointGenFeatureGeoImage::imageToByteString(r.data, "PNG");
         }
 
         j.push_back(j_fig);

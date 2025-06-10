@@ -981,7 +981,6 @@ bool Section::fromJSON_impl(const nlohmann::json& j)
 Result Section::toJSONDocument_impl(nlohmann::json& j,
                                     const std::string* resource_dir) const
 {
-    j[ FieldName        ] = name();
     j[ FieldSubSections ] = nlohmann::json::array();
     j[ FieldDocContents ] = nlohmann::json::array();
     
