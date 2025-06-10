@@ -632,6 +632,7 @@ void TaskManager::databaseOpenedSlot()
  */
 void TaskManager::databaseClosedSlot()
 {
+    clearResults();
 }
 
 /**
@@ -708,6 +709,17 @@ void TaskManager::loadResults()
 
     loginf << "TaskManager: loadResults: Loaded " << results_.size() << " result(s)";
 
+    emit taskResultsChangedSignal();
+}
+
+/**
+ */
+void TaskManager::clearResults()
+{
+    assert (!current_result_);
+
+    results_.clear();
+    
     emit taskResultsChangedSignal();
 }
 

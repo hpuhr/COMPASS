@@ -142,6 +142,7 @@ protected:
     std::shared_ptr<TaskResult> getOrCreateResult(const std::string& name, 
                                                   task::TaskResultType type);
     void loadResults();
+    void clearResults();
     boost::optional<unsigned int> findResult(const std::string& name) const;
 
     // tasks
