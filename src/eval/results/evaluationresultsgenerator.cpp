@@ -560,7 +560,12 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     // generate non-result details
     addNonResultsContent(report);
 
-    // disable per target result section for report exports (too detailed)
+    // disable per target result section for all report exports (too detailed, too much overhead)
+    // @TODO: additionally we could also deactivate all subitems separately.
+    // advantage of only activating the parent node:
+    // - whole node skipped in standard exports
+    // - node deactivated when trying to fetch it via get_result rtcommand (could take forever to fetch)
+    // - fetching subnodes (=single targets) via get_result rtcommand still possible if really desired
     auto& target_sec = report->getSection(EvalSectionID::targetID());
     target_sec.enableExports(false);
 

@@ -153,6 +153,10 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
         if (!section_ptr)
             section_ptr = result.report()->rootSection().get();
 
+        //check if section is deactivated for export
+        if (!section_ptr->exportEnabled(exportMode()))
+            return Result::failed("Parent section '" + section_ptr->name() + "' is disabled for export");
+
         assert(section_ptr);
 
         //pre-compute total number of exported sections
@@ -226,7 +230,7 @@ Result ReportExporter::visitSection(Section& section)
     //skip section?
     if (!section.exportEnabled(exportMode()))
     {
-        loginf << "Skipping section '" << section.id() << "'";
+        loginf << "ReportExporter: visitSection: Skipping, section '" << section.id() << "' disabled for export";
         return Result::succeeded();
     }
 
@@ -274,10 +278,15 @@ Result ReportExporter::visitSection(Section& section)
 Result ReportExporter::visitContent(SectionContent& content)
 {
     //skip content?
-    if (!content.exportEnabled(exportMode()) ||
-         content.isLocked())
+    if (!content.exportEnabled(exportMode()))
     {
-        loginf << "Skipping content '" << content.id() << "'";
+        loginf << "ReportExporter: visitContent: Skipping, content '" << content.id() << "' disabled for export";
+        return Result::succeeded();
+    }
+
+    if (content.isLocked())
+    {
+        loginf << "ReportExporter: visitContent: Skipping, content '" << content.id() << "' locked";
         return Result::succeeded();
     }
 
