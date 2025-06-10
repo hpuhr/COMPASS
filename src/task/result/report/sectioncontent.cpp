@@ -252,6 +252,13 @@ bool SectionContent::isOnDemand() const
 
 /**
  */
+bool SectionContent::isLoading() const
+{
+    return loading_;
+}
+
+/**
+ */
 bool SectionContent::isComplete() const
 {
     return complete_;
@@ -271,6 +278,8 @@ bool SectionContent::loadOnDemandIfNeeded()
  */
 bool SectionContent::loadOnDemand()
 {
+    loading_ = true;
+
     //if the task result is locked we should never give an opportunity to load on demand content
     assert(!isLocked());
 
@@ -281,13 +290,15 @@ bool SectionContent::loadOnDemand()
     assert(report_);
 
     bool ok = report_->result().loadOnDemandContent(this);
+
+    complete_ = ok;
+    loading_  = false;
+
     if (!ok)
     {
         logerr << "SectionContent: loadOnDemand: Could not load on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
         return false;
     }
-
-    complete_ = true;
 
     return true;
 }

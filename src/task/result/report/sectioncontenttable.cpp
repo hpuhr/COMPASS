@@ -1379,7 +1379,8 @@ bool SectionContentTableModel::canFetchMore(const QModelIndex &parent) const
  */
 void SectionContentTableModel::fetchMore(const QModelIndex &parent)
 {
-    content_table_->loadOnDemandIfNeeded();
+    if (!content_table_->isLoading())
+        content_table_->loadOnDemandIfNeeded();
 }
 
 /**

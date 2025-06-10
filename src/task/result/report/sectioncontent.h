@@ -136,6 +136,7 @@ public:
 
     void setOnDemand();
     bool isOnDemand() const;
+    bool isLoading() const;
     bool isComplete() const;
     bool loadOnDemandIfNeeded();
     bool forceReload();
@@ -192,6 +193,7 @@ private:
     void clearContent();
 
     bool on_demand_       = false;
+    bool loading_         = false;
     bool complete_        = false;
     bool lock_state_safe_ = false;
 };

@@ -424,7 +424,7 @@ Result EvaluationCalculator::loadingDone()
     }
 
     auto data = eval_man_.fetchData();
-
+ 
     data_->setBuffers(data);
 
     bool has_ref_data = data.count(settings_.dbcontent_name_ref_);
@@ -447,7 +447,7 @@ Result EvaluationCalculator::loadingDone()
     //ready to evaluate?
     if (data_loaded_)
     {
-        loginf << "EvaluationCalculator: loadingDone: finalizing";
+        loginf << "EvaluationCalculator: loadingDone: finalizing: has ref data " << has_ref_data << " has tst data " << has_tst_data;
 
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
