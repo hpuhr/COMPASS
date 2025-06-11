@@ -39,7 +39,12 @@ RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
     rs2g_T_Ai_ = rs2g_A_.transpose();
 
     Eigen::Matrix3d A_p0(3, 3), A_q0(3, 3);
+    A_p0.setZero();
+    A_q0.setZero();
+
     Eigen::Vector3d b_p0(3), b_q0(3);
+    b_p0.setZero();
+    b_q0.setZero();
 
     rs2gFillMat(lat_rad, long_rad, A_p0);
     // mult(A_q0, trans(A_p0), *A_p0q0_); // A_p0q0 = A_q0 * Transpose(A_p0) in doxygen ...
