@@ -109,8 +109,8 @@ public:
     void updateResultsToChanges();
 
     // check and correct missing information
-    void checkReferenceDataSources();
-    void checkTestDataSources();
+    void checkReferenceDataSources(bool update_settings = true);
+    void checkTestDataSources(bool update_settings = true);
     void checkMinHeightFilterValid();
 
     // data sources

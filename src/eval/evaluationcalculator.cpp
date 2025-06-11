@@ -1053,7 +1053,7 @@ void EvaluationCalculator::updateSectorLayers()
 
 /**
  */
-void EvaluationCalculator::checkReferenceDataSources()
+void EvaluationCalculator::checkReferenceDataSources(bool update_settings)
 {
     loginf << "EvaluationCalculator: checkReferenceDataSources";
 
@@ -1088,11 +1088,14 @@ void EvaluationCalculator::checkReferenceDataSources()
                 data_sources_ref_[settings_.dbcontent_name_ref_][ds_id_str] = false; // init with default false
         }
     }
+
+    if (update_settings)
+        settings_.active_sources_ref_ = data_sources_ref_;
 }
 
 /**
  */
-void EvaluationCalculator::checkTestDataSources()
+void EvaluationCalculator::checkTestDataSources(bool update_settings)
 {
     loginf << "EvaluationCalculator: checkTestDataSources";
 
@@ -1127,6 +1130,9 @@ void EvaluationCalculator::checkTestDataSources()
                 data_sources_tst_[settings_.dbcontent_name_tst_][ds_id_str] = false; // init with default false
         }
     }
+
+    if (update_settings)
+        settings_.active_sources_tst_ = data_sources_tst_;
 }
 
 /**
