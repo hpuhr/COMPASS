@@ -94,7 +94,8 @@ public:
 protected:
     boost::optional<double> common_computeResult(const Single* single_result) const;
     unsigned int common_numIssues() const;
-    bool common_detailIsOk(const EvaluationDetail& detail) const;
+    bool common_detailIsOk(const EvaluationDetail& detail,
+                           const std::shared_ptr<EvaluationRequirement::Base>& requirement) const;
 
     FeatureDefinitions common_getCustomAnnotationDefinitions(const Single& single,
                                                              const EvaluationCalculator& calculator) const;
