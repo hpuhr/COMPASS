@@ -100,6 +100,32 @@ void RTCommandImportViewPointsFile::assignVariables_impl(const VariablesMap& var
 
 // import asterix file
 
+namespace helpers
+{
+    void addImportErrorFiles(nlohmann::json& j,
+                             ASTERIXImportTask& import_task)
+    {
+        assert (import_task.source().isFileType());
+
+        auto err_files = nlohmann::json::array();
+
+        for (const auto& f : import_task.source().files())
+        {
+            if (f.hasError())
+            {
+                nlohmann::json jfile;
+                jfile[ "filename" ] = f.filename;
+                jfile[ "error"    ] = f.error.errinfo;
+
+                err_files.push_back(jfile);
+            }
+        }
+
+        j[ "file_errors"     ] = err_files;
+        j[ "has_file_errors" ] = err_files.size() > 0;
+    }
+}
+
 RTCommandImportASTERIXFile::RTCommandImportASTERIXFile()
     : rtcommand::RTCommand()
 {
@@ -227,16 +253,25 @@ bool RTCommandImportASTERIXFile::run_impl()
     }
 
     import_task.allowUserInteractions(false);
-
     import_task.run();
 
-    // handle errors
+    return true;
+}
 
-    // if shitty
-    //setResultMessage("VP error case 3");
-    //return false;
+bool RTCommandImportASTERIXFile::checkResult_impl()
+{
+    ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    // if ok
+    if (import_task.hasError())
+    {
+        setResultMessage(import_task.error());
+        return false;
+    }
+
+    nlohmann::json j;
+    helpers::addImportErrorFiles(j, import_task);
+    setJSONReply(j);
+
     return true;
 }
 
@@ -412,7 +447,6 @@ bool RTCommandImportASTERIXFiles::run_impl()
     }
 
     import_task.allowUserInteractions(false);
-
     import_task.run();
 
     // handle errors
@@ -422,6 +456,23 @@ bool RTCommandImportASTERIXFiles::run_impl()
     //return false;
 
     // if ok
+    return true;
+}
+
+bool RTCommandImportASTERIXFiles::checkResult_impl()
+{
+    ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
+
+    if (import_task.hasError())
+    {
+        setResultMessage(import_task.error());
+        return false;
+    }
+
+    nlohmann::json j;
+    helpers::addImportErrorFiles(j, import_task);
+    setJSONReply(j);
+
     return true;
 }
 
@@ -579,16 +630,25 @@ bool RTCommandImportASTERIXPCAPFile::run_impl()
     }
 
     import_task.allowUserInteractions(false);
-
     import_task.run();
 
-    // handle errors
+    return true;
+}
 
-    // if shitty
-    //setResultMessage("VP error case 3");
-    //return false;
+bool RTCommandImportASTERIXPCAPFile::checkResult_impl()
+{
+    ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    // if ok
+    if (import_task.hasError())
+    {
+        setResultMessage(import_task.error());
+        return false;
+    }
+
+    nlohmann::json j;
+    helpers::addImportErrorFiles(j, import_task);
+    setJSONReply(j);
+
     return true;
 }
 
@@ -727,7 +787,6 @@ bool RTCommandImportASTERIXPCAPFiles::run_impl()
         return false;
     }
 
-
     assert (filenames_.size());
 
     for (const auto& filename : split_filenames_)
@@ -746,16 +805,25 @@ bool RTCommandImportASTERIXPCAPFiles::run_impl()
     }
 
     import_task.allowUserInteractions(false);
-
     import_task.run();
 
-    // handle errors
+    return true;
+}
 
-    // if shitty
-    //setResultMessage("VP error case 3");
-    //return false;
+bool RTCommandImportASTERIXPCAPFiles::checkResult_impl()
+{
+    ASTERIXImportTask& import_task = COMPASS::instance().taskManager().asterixImporterTask();
 
-    // if ok
+    if (import_task.hasError())
+    {
+        setResultMessage(import_task.error());
+        return false;
+    }
+
+    nlohmann::json j;
+    helpers::addImportErrorFiles(j, import_task);
+    setJSONReply(j);
+
     return true;
 }
 
@@ -1003,7 +1071,6 @@ bool RTCommandImportJSONFile::run_impl()
     }
 
     import_task.allowUserInteractions(false);
-
     import_task.run();
 
     return true;

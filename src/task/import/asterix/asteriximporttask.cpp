@@ -897,13 +897,17 @@ void ASTERIXImportTask::decodeASTERIXDoneSlot()
     if (!stopped_ && decode_job_->error())
     {
         loginf << "ASTERIXImportTask: decodeASTERIXDoneSlot: error";
-        error_ = decode_job_->error();
+
+        error_         = decode_job_->error();
         error_message_ = decode_job_->errorMessage();
 
-        QMessageBox msgBox;
-        msgBox.setText(("Decoding error: " + error_message_ + "\n\nPlease check the decoder settings.").c_str());
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.exec();
+        if (allow_user_interactions_)
+        {
+            QMessageBox msgBox;
+            msgBox.setText(("Decoding error: " + error_message_ + "\n\nPlease check the decoder settings.").c_str());
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.exec();
+        }
     }
 
     decode_job_ = nullptr;
@@ -1547,6 +1551,9 @@ void ASTERIXImportTask::runDialog(QWidget* parent)
     //cancelled?
     if (dlg.exec() != QDialog::Accepted)
         return;
+
+    //enable user interactions
+    allowUserInteractions(true);
 
     //otherwise run import
     run();

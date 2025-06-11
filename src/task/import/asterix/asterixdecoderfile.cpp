@@ -99,6 +99,9 @@ void ASTERIXDecoderFile::processCurrentFile()
         done_file_size_          += current_file.sizeInBytes(true);
         current_file_bytes_read_  = 0;
         current_chunk_bytes_read_ = 0;
+
+        //flag file as processed
+        current_file.processed = true;
     }
     catch(const std::exception& e)
     {

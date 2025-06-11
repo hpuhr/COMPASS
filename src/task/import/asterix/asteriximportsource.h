@@ -89,6 +89,7 @@ struct ASTERIXImportFileInfo
     bool hasError() const;
     bool canDecode() const;
     bool decodingTested() const { return decoding_tested; }
+    bool fileProcessed() const { return processed; }
 
     bool   hasSections() const;
     size_t numUsedSections() const;
@@ -109,6 +110,7 @@ private:
     friend class ASTERIXDecoderFile;
 
     bool decoding_tested = false;
+    bool processed       = false;
 };
 
 /**

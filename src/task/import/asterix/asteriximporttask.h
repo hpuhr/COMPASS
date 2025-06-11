@@ -140,7 +140,8 @@ public slots:
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
 public:
-    ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
+    ASTERIXImportTask(const std::string& class_id, 
+                      const std::string& instance_id,
                       TaskManager& task_manager);
     virtual ~ASTERIXImportTask();
 
@@ -183,6 +184,9 @@ public:
 
     ASTERIXDecoderBase* decoder() { return decoder_.get(); }
     const ASTERIXDecoderBase* decoder() const { return decoder_.get(); }
+
+    bool hasError() const { return error_; }
+    const std::string& error() const { return error_message_; }
 
     void testFileDecoding();
 

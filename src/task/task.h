@@ -50,7 +50,6 @@ class Task : public QObject
     std::string tooltip() const { return tooltip_; }
 
     bool allowUserInteractions() const { return allow_user_interactions_; }
-
     void allowUserInteractions(bool value) { allow_user_interactions_ = value; }
 
   protected:

@@ -37,6 +37,7 @@ struct RTCommandImportASTERIXFile : public rtcommand::RTCommand
 
 protected:
     virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
 
     DECLARE_RTCOMMAND(import_asterix_file,
                       "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
@@ -60,6 +61,7 @@ struct RTCommandImportASTERIXFiles : public rtcommand::RTCommand
 
 protected:
     virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
 
     DECLARE_RTCOMMAND(import_asterix_files,
                       "imports multiple ASTERIX files with given filenames, e.g. '/data/file1.ff;/data/file2.ff'")
@@ -81,6 +83,7 @@ struct RTCommandImportASTERIXPCAPFile : public rtcommand::RTCommand
 
 protected:
     virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
 
     DECLARE_RTCOMMAND(import_asterix_pcap_file,
                       "imports ASTERIX PCAP file with given filename, e.g. '/data/file1.pcap'")
@@ -103,6 +106,7 @@ struct RTCommandImportASTERIXPCAPFiles : public rtcommand::RTCommand
 
 protected:
     virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
 
     DECLARE_RTCOMMAND(import_asterix_pcap_files,
                       "imports multiple ASTERIX PCAP files with given filenames, e.g. '/data/file1.pcap;/data/file2.pcap'")
