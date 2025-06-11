@@ -16,6 +16,7 @@
  */
 
 #include "eval/results/position/positionbase.h"
+#include "eval/requirement/position/distance.h"
 
 #include "eval/results/base/featuredefinitions.h"
 
@@ -158,10 +159,22 @@ unsigned int SinglePositionBaseCommon::common_numIssues() const
 
 /**
 */
-bool SinglePositionBaseCommon::common_detailIsOk(const EvaluationDetail& detail) const
+bool SinglePositionBaseCommon::common_detailIsOk(const EvaluationDetail& detail,
+                                                 const std::shared_ptr<EvaluationRequirement::Base>& requirement) const
 {
+    const EvaluationRequirement::PositionDistance* req = dynamic_cast<const EvaluationRequirement::PositionDistance*>(requirement.get());
+
     auto check_passed = detail.getValueAs<bool>(DetailKey::CheckPassed);
     assert(check_passed.has_value());
+
+    if (req)
+    {
+        //distance requirement => check failed values of interest
+        auto failed_values_of_interest = req->failedValuesOfInterest();
+
+        return (( failed_values_of_interest &&  check_passed.value()) ||
+                (!failed_values_of_interest && !check_passed.value()));
+    }
 
     return check_passed.value();
 }
@@ -238,7 +251,7 @@ unsigned int SinglePositionProbabilityBase::numIssues() const
 */
 bool SinglePositionProbabilityBase::detailIsOk(const EvaluationDetail& detail) const
 {
-    return common_detailIsOk(detail);
+    return common_detailIsOk(detail, requirement_);
 }
 
 /**
@@ -321,7 +334,7 @@ unsigned int SinglePositionValueBase::numIssues() const
 */
 bool SinglePositionValueBase::detailIsOk(const EvaluationDetail& detail) const
 {
-    return common_detailIsOk(detail);
+    return common_detailIsOk(detail, requirement_);
 }
 
 /**
