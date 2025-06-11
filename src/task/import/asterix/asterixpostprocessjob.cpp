@@ -844,7 +844,7 @@ void ASTERIXPostprocessJob::doFilters()
 
 
     // others
-    if (filter_modec_active_ || filter_modec_active_)
+    if (filter_position_active_ || filter_modec_active_)
     {
         string lat_var_name;
         string lon_var_name;
