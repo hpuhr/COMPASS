@@ -428,7 +428,7 @@ std::shared_ptr<ResultReport::Report>& TaskManager::currentReport()
 
 /**
  */
-void TaskManager::endTaskResultWriting(bool store_result)
+void TaskManager::endTaskResultWriting(bool store_result, bool show_dialog)
 {
     loginf << "TaskManager: endTaskResultWriting: store_result " << store_result;
 
@@ -458,7 +458,7 @@ void TaskManager::endTaskResultWriting(bool store_result)
         };
 
         AsyncFuncTask task(cb, "Save Result", "Saving result", false);
-        bool ok = task.runAsync();
+        bool ok = show_dialog ? task.runAsyncDialog() : task.runAsync();
 
         //@TODO
         if (!ok)

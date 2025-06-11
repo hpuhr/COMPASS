@@ -319,10 +319,13 @@ void EvaluationStandardTabWidget::updateStandardWidget()
         delete item;
     }
 
-    auto* widget = calculator_.currentStandard().widget();
-    widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);;
+    if (calculator_.hasCurrentStandard())
+    {
+        auto* widget = calculator_.currentStandard().widget();
+        widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);;
 
-    standards_layout_->addWidget(widget);
+        standards_layout_->addWidget(widget);
+    }
 }
 
 /**

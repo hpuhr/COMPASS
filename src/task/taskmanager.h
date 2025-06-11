@@ -103,7 +103,8 @@ public:
                                 task::TaskResultType type);
     std::shared_ptr<TaskResult>& currentResult();
     std::shared_ptr<ResultReport::Report>& currentReport();
-    void endTaskResultWriting(bool store_result);
+    void endTaskResultWriting(bool store_result,
+                              bool show_dialog = false);
 
     const std::map<unsigned int, std::shared_ptr<TaskResult>>& results() const;
     std::shared_ptr<TaskResult> result(unsigned int id) const; // get existing result
