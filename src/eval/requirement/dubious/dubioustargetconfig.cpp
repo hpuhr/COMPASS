@@ -242,11 +242,9 @@ std::shared_ptr<Base> DubiousTargetConfig::createRequirement()
     return req;
 }
 
-void DubiousTargetConfig::createWidget()
+BaseConfigWidget* DubiousTargetConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new DubiousTargetConfigWidget(*this));
-    assert (widget_);
+    return new DubiousTargetConfigWidget(*this);
 }
 
 void DubiousTargetConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

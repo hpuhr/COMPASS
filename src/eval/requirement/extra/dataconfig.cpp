@@ -86,11 +86,9 @@ void ExtraDataConfig::ignorePrimaryOnly(bool value)
     ignore_primary_only_ = value;
 }
 
-void ExtraDataConfig::createWidget()
+BaseConfigWidget* ExtraDataConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new ExtraDataConfigWidget(*this));
-    assert (widget_);
+    return new ExtraDataConfigWidget(*this);
 }
 
 void ExtraDataConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

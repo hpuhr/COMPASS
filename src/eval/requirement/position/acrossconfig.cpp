@@ -59,11 +59,9 @@ void PositionAcrossConfig::maxAbsValue(float value)
     max_abs_value_ = value;
 }
 
-void PositionAcrossConfig::createWidget()
+BaseConfigWidget* PositionAcrossConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new PositionAcrossConfigWidget(*this));
-    assert (widget_);
+    return new PositionAcrossConfigWidget(*this);
 }
 
 void PositionAcrossConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

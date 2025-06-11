@@ -115,13 +115,7 @@ void BaseConfig::checkSubConfigurables()
 
 BaseConfigWidget* BaseConfig::widget()
 {
-    if (!widget_)
-    {
-        createWidget();
-        assert (widget_);
-    }
-
-    return widget_.get();
+    return createWidget();
 }
 
 std::string BaseConfig::comment() const
@@ -134,11 +128,9 @@ void BaseConfig::comment(const std::string &comment)
     comment_ = comment;
 }
 
-void BaseConfig::createWidget()
+BaseConfigWidget* BaseConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new BaseConfigWidget(*this));
-    assert (widget_);
+    return new BaseConfigWidget(*this);
 }
 
 EvaluationStandardTreeItem* BaseConfig::child(int row)

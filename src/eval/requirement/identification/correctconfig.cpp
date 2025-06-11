@@ -95,11 +95,9 @@ void IdentificationCorrectConfig::useMsTi(bool value)
     use_ms_ti_ = value;
 }
 
-void IdentificationCorrectConfig::createWidget()
+BaseConfigWidget* IdentificationCorrectConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new IdentificationCorrectConfigWidget(*this));
-    assert (widget_);
+    return new IdentificationCorrectConfigWidget(*this);
 }
 
 void IdentificationCorrectConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

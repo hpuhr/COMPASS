@@ -90,11 +90,9 @@ void TrackAngleConfig::threshold(float value)
     threshold_ = value;
 }
 
-void TrackAngleConfig::createWidget()
+BaseConfigWidget* TrackAngleConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new TrackAngleConfigWidget(*this));
-    assert (widget_);
+    return new TrackAngleConfigWidget(*this);
 }
 
 void TrackAngleConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

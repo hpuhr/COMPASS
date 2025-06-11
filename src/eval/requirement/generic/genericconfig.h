@@ -49,7 +49,7 @@ public:
 protected:
     std::string variant_;
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 
@@ -75,7 +75,7 @@ class GenericDoubleConfig : public ProbabilityBaseConfig
 
     double threshold_ {0};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 

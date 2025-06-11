@@ -50,7 +50,7 @@ public:
 protected:
     float max_distance_ft_ {300};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

@@ -86,7 +86,7 @@ protected:
 
     bool hold_for_any_target_ {false}; // if requirement must hold for any target (all single targets)
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

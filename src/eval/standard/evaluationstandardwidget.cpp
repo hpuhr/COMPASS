@@ -341,7 +341,11 @@ void EvaluationStandardWidget::showRequirementWidget(QWidget* widget)
     if (!widget)
     {
         while (requirements_widget_->count() > 0)  // remove all widgets
-            requirements_widget_->removeWidget(requirements_widget_->widget(0));
+        {
+            auto* widget = requirements_widget_->widget(0);
+            requirements_widget_->removeWidget(widget);
+            delete widget;
+        }
         return;
     }
 

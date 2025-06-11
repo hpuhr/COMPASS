@@ -68,11 +68,9 @@ void ModeCFalseConfig::maxDifference(float value)
     max_difference_ = value;
 }
 
-void ModeCFalseConfig::createWidget()
+BaseConfigWidget* ModeCFalseConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new ModeCFalseConfigWidget(*this));
-    assert (widget_);
+    return new ModeCFalseConfigWidget(*this);
 }
 
 void ModeCFalseConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

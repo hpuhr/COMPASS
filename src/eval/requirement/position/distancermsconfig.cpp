@@ -60,11 +60,9 @@ void PositionDistanceRMSConfig::thresholdValue(double value)
     threshold_value_ = value;
 }
 
-void PositionDistanceRMSConfig::createWidget()
+BaseConfigWidget* PositionDistanceRMSConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new PositionDistanceRMSConfigWidget(*this));
-    assert (widget_);
+    return new PositionDistanceRMSConfigWidget(*this);
 }
 
 void PositionDistanceRMSConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

@@ -92,10 +92,8 @@ protected:
     std::string short_name_;
     std::string comment_;
 
-    std::unique_ptr<BaseConfigWidget> widget_ {nullptr};
-
     virtual void checkSubConfigurables() override;
-    virtual void createWidget(); // creates BaseConfigWidget, override to change
+    virtual BaseConfigWidget* createWidget(); // creates BaseConfigWidget, override to change
 };
 
 }

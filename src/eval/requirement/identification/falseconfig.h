@@ -65,7 +65,7 @@ protected:
     // downlinked aircraft identification
     bool use_ms_ti_ {true};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

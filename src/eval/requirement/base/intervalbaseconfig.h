@@ -86,7 +86,7 @@ public:
 protected:
     void configure(uint32_t flags);
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 
     virtual std::string probabilityDescription() const = 0;
     virtual BaseConfigWidget* createWidget_impl() = 0;

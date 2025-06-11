@@ -45,11 +45,9 @@ std::shared_ptr<Base> ModeCPresentConfig::createRequirement()
 }
 
 
-void ModeCPresentConfig::createWidget()
+BaseConfigWidget* ModeCPresentConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new ModeCPresentConfigWidget(*this));
-    assert (widget_);
+    return new ModeCPresentConfigWidget(*this);
 }
 
 void ModeCPresentConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

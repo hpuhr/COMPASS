@@ -87,11 +87,9 @@ void ExtraTrackConfig::ignorePrimaryOnly(bool value)
     ignore_primary_only_ = value;
 }
 
-void ExtraTrackConfig::createWidget()
+BaseConfigWidget* ExtraTrackConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new ExtraTrackConfigWidget(*this));
-    assert (widget_);
+    return new ExtraTrackConfigWidget(*this);
 }
 
 void ExtraTrackConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

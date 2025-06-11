@@ -125,7 +125,7 @@ protected:
 
     float dubious_prob_ {0.05};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

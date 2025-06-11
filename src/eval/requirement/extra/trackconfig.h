@@ -59,7 +59,7 @@ namespace EvaluationRequirement
         unsigned int min_num_updates_ {0};
         bool ignore_primary_only_ {true};
 
-        virtual void createWidget() override;
+        virtual BaseConfigWidget* createWidget() override;
     };
 
 }

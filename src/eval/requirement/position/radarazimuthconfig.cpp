@@ -60,11 +60,9 @@ void PositionRadarAzimuthConfig::thresholdValue(double value)
     threshold_value_ = value;
 }
 
-void PositionRadarAzimuthConfig::createWidget()
+BaseConfigWidget* PositionRadarAzimuthConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new PositionRadarAzimuthConfigWidget(*this));
-    assert (widget_);
+    return new PositionRadarAzimuthConfigWidget(*this);
 }
 
 void PositionRadarAzimuthConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

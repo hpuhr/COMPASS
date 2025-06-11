@@ -110,11 +110,9 @@ void SpeedConfig::thresholdPercent(float value)
     threshold_percent_ = value;
 }
 
-void SpeedConfig::createWidget()
+BaseConfigWidget* SpeedConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new SpeedConfigWidget(*this));
-    assert (widget_);
+    return new SpeedConfigWidget(*this);
 }
 
 void SpeedConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

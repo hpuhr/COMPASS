@@ -67,11 +67,9 @@ uint32_t IntervalBaseConfig::configFlags() const
 
 /**
 */
-void IntervalBaseConfig::createWidget()
+BaseConfigWidget* IntervalBaseConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(createWidget_impl());
-    assert (widget_);
+    return createWidget_impl();
 }
 
 /**

@@ -59,11 +59,9 @@ void PositionRadarRangeConfig::thresholdValue(double value)
     threshold_value_ = value;
 }
 
-void PositionRadarRangeConfig::createWidget()
+BaseConfigWidget* PositionRadarRangeConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new PositionRadarRangeConfigWidget(*this));
-    assert (widget_);
+    return new PositionRadarRangeConfigWidget(*this);
 }
 
 void PositionRadarRangeConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

@@ -86,11 +86,9 @@ void PositionDistanceConfig::failedValuesOfInterest(bool value)
     failed_values_of_interest_ = value;
 }
 
-void PositionDistanceConfig::createWidget()
+BaseConfigWidget* PositionDistanceConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new PositionDistanceConfigWidget(*this));
-    assert (widget_);
+    return new PositionDistanceConfigWidget(*this);
 }
 
 void PositionDistanceConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

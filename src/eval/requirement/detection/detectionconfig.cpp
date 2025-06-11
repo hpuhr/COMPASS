@@ -149,11 +149,9 @@ void DetectionConfig::maxGapLength(float value)
     max_gap_length_s_ = value;
 }
 
-void DetectionConfig::createWidget()
+BaseConfigWidget* DetectionConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new DetectionConfigWidget(*this));
-    assert (widget_);
+    return new DetectionConfigWidget(*this);
 }
 
 void DetectionConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

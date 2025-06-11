@@ -49,7 +49,7 @@ public:
 protected:
     float max_abs_value_ {0};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

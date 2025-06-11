@@ -53,11 +53,9 @@ std::shared_ptr<Base> IdentificationFalseConfig::createRequirement()
     return req;
 }
 
-void IdentificationFalseConfig::createWidget()
+BaseConfigWidget* IdentificationFalseConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new IdentificationFalseConfigWidget(*this));
-    assert (widget_);
+    return new IdentificationFalseConfigWidget(*this);
 }
 
 bool IdentificationFalseConfig::requireAllFalse() const

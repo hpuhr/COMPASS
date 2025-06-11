@@ -60,11 +60,9 @@ void PositionLatencyConfig::maxAbsValue(float value)
     max_abs_value_ = value;
 }
 
-void PositionLatencyConfig::createWidget()
+BaseConfigWidget* PositionLatencyConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new PositionLatencyConfigWidget(*this));
-    assert (widget_);
+    return new PositionLatencyConfigWidget(*this);
 }
 
 void PositionLatencyConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

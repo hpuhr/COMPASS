@@ -58,11 +58,9 @@ std::shared_ptr<Base> GenericIntegerConfig::createRequirement()
     assert (false);
 }
 
-void GenericIntegerConfig::createWidget()
+BaseConfigWidget* GenericIntegerConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new GenericIntegerConfigWidget(*this));
-    assert (widget_);
+    return new GenericIntegerConfigWidget(*this);
 }
 
 void GenericIntegerConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
@@ -103,11 +101,9 @@ std::shared_ptr<Base> GenericDoubleConfig::createRequirement()
     assert (false);
 }
 
-void GenericDoubleConfig::createWidget()
+BaseConfigWidget* GenericDoubleConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new GenericDoubleConfigWidget(*this));
-    assert (widget_);
+    return new GenericDoubleConfigWidget(*this);
 }
 
 void GenericDoubleConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

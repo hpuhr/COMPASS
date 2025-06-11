@@ -48,7 +48,7 @@ public:
 protected:
     double threshold_value_ {0};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

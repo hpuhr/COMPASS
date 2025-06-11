@@ -67,7 +67,7 @@ protected:
 
     bool failed_values_of_interest_ {true};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

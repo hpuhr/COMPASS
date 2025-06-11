@@ -45,11 +45,9 @@ std::shared_ptr<Base> ModeAFalseConfig::createRequirement()
     return req;
 }
 
-void ModeAFalseConfig::createWidget()
+BaseConfigWidget* ModeAFalseConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new ModeAFalseConfigWidget(*this));
-    assert (widget_);
+    return new ModeAFalseConfigWidget(*this);
 }
 
 void ModeAFalseConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

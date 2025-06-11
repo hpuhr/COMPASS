@@ -58,11 +58,9 @@ void ModeCCorrectConfig::maxDistanceFt(float value)
     max_distance_ft_ = value;
 }
 
-void ModeCCorrectConfig::createWidget()
+BaseConfigWidget* ModeCCorrectConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new ModeCCorrectConfigWidget(*this));
-    assert (widget_);
+    return new ModeCCorrectConfigWidget(*this);
 }
 
 void ModeCCorrectConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

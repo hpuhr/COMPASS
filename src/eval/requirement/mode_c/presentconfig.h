@@ -43,7 +43,7 @@ public:
     virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

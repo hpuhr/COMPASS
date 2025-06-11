@@ -267,11 +267,9 @@ std::shared_ptr<Base> DubiousTrackConfig::createRequirement()
     return req;
 }
 
-void DubiousTrackConfig::createWidget()
+BaseConfigWidget* DubiousTrackConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new DubiousTrackConfigWidget(*this));
-    assert (widget_);
+    return new DubiousTrackConfigWidget(*this);
 }
 
 void DubiousTrackConfig::addToReport (std::shared_ptr<ResultReport::Report> report)

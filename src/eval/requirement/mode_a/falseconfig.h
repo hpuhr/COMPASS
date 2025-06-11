@@ -44,7 +44,7 @@ public:
 
 protected:
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }
