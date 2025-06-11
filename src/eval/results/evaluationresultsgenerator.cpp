@@ -64,7 +64,7 @@ using namespace EvaluationRequirementResult;
 using namespace EvaluationResultsReport;
 using namespace Utils;
 
-const std::string EvaluationResultsGenerator::EvalResultName = "Evaluation Result";
+const std::string EvaluationResultsGenerator::EvalResultName = "Evaluation";
 
 /**
  */
@@ -140,8 +140,7 @@ void EvaluationResultsGenerator::evaluate(EvaluationStandard& standard,
 
     clear();
 
-    //@TODO
-    result_name_ = standard.name();
+    result_name_ = standard.name() + " " + EvalResultName;
 
     vector<unsigned int> used_utns;
     std::set<unsigned int> utn_set(utns.begin(), utns.end());
@@ -526,9 +525,6 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     gen_table.addRow({ "Reference Sensors", "Used reference sensors", sensors_ref });
     gen_table.addRow({ "Test Sensors", "Used test sensors", sensors_tst });
 
-    // generate target section
-    addTargetSection(report);
-
     // generate results
 
     // first add all joined
@@ -556,6 +552,9 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
             ++cnt;
         }
     }
+
+    // generate target section
+    addTargetSection(report);
 
     // generate non-result details
     addNonResultsContent(report);

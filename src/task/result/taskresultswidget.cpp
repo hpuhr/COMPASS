@@ -1,6 +1,8 @@
 
 #include "taskresultswidget.h"
 
+#include "task/result/report/sectionid.h"
+
 #include "taskresult.h"
 #include "reportwidget.h"
 #include "files.h"
@@ -164,10 +166,17 @@ void TaskResultsWidget::setReport(const std::string name)
     report_combo_->setDisabled(false);
 
     assert (task_man_.hasResult(name));
-    report_widget_->setReport(task_man_.result(name)->report());
+    auto result = task_man_.result(name);
+    auto report = result->report();
 
-    if (!task_man_.result(name)->startSection().empty())
-        report_widget_->selectId(task_man_.result(name)->startSection());
+    report_widget_->setReport(report);
+
+    std::string default_section = ResultReport::SectionID::reportResultOverviewID();
+
+    if (!result->startSection().empty())
+        report_widget_->selectId(result->startSection());
+    else if (report->hasSection(default_section))
+        report_widget_->selectId(default_section);
 
     report_widget_->setDisabled(false);
 

@@ -24,9 +24,10 @@
 namespace ResultReport
 {
 
-const std::string SectionID::Sep            = ":";
-const std::string SectionID::SectionReport  = "Report";
-const std::string SectionID::SectionResults = "Results";
+const std::string SectionID::Sep             = ":";
+const std::string SectionID::SectionReport   = "Report";
+const std::string SectionID::SectionResults  = "Results";
+const std::string SectionID::SectionOverview = "Overview";
 
 /**
 */
@@ -67,7 +68,7 @@ std::string SectionID::sectionID2Path(const std::string& section_id)
 */
 std::string SectionID::prependReportResults(const std::string& section_id)
 {
-    const std::string prefix = SectionReport + Sep + SectionResults + Sep;
+    const std::string prefix = SectionID::reportResultID() + Sep;
 
     //already prepended?
     if (QString::fromStdString(section_id).startsWith(QString::fromStdString(prefix)))
@@ -100,7 +101,14 @@ std::string SectionID::sectionIDWithoutResults(const std::string& section_id)
 */
 std::string SectionID::reportResultID()
 {
-    return SectionReport + ResultReport::SectionID::Sep + SectionResults;
+    return SectionReport + Sep + SectionResults;
+}
+
+/**
+*/
+std::string SectionID::reportResultOverviewID()
+{
+    return SectionID::reportResultID() + Sep + SectionOverview;
 }
 
 }

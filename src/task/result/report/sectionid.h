@@ -38,10 +38,12 @@ public:
     static std::string sectionIDWithoutResults(const std::string& section_id);
 
     static std::string reportResultID();
+    static std::string reportResultOverviewID();
 
     static const std::string Sep;
     static const std::string SectionReport;
     static const std::string SectionResults;
+    static const std::string SectionOverview;
 };
 
 }
