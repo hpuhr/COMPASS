@@ -24,10 +24,14 @@ public:
 
     void refreshList();
 
+    bool somethingChangedFlag() const;
+
 private:
     QString timeWindowToString(const Utils::TimeWindow& tw) const;
 
     Utils::TimeWindowCollection& collection_;
     QListWidget* list_widget_;
     QPushButton* add_button_;
+
+    bool something_changed_flag_ {false};
 };

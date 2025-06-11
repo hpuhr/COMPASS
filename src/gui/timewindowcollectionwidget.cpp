@@ -104,6 +104,8 @@ void TimeWindowCollectionWidget::addTimeWindow()
         TimeWindow new_tw(dialog->begin(), dialog->end());
         collection_.add(new_tw);
         refreshList();
+
+        something_changed_flag_ = true;
     }
 }
 
@@ -116,5 +118,12 @@ void TimeWindowCollectionWidget::editTimeWindow(QListWidgetItem* item)
     if (dialog.exec() == QDialog::Accepted) {
         tw = TimeWindow(dialog.begin(), dialog.end());
         refreshList();
+
+        something_changed_flag_ = true;
     }
+}
+
+bool TimeWindowCollectionWidget::somethingChangedFlag() const
+{
+    return something_changed_flag_;
 }

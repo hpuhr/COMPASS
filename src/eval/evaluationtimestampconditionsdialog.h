@@ -22,6 +22,8 @@ public:
     EvaluationTimestampConditionsDialog(EvaluationManager& eval_man, QWidget* parent=nullptr);
     virtual ~EvaluationTimestampConditionsDialog();
 
+    bool somethingChangedFlag() const;
+
 protected:
     EvaluationManager& eval_man_;
 
@@ -32,6 +34,7 @@ protected:
     TimeWindowCollectionWidget* tw_widget_{nullptr};
 
     bool update_active_ {false};
+    bool something_changed_flag_ {false};
 
     void updateValues();
 

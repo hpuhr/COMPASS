@@ -295,9 +295,14 @@ void TargetListWidget::evalEditGlobalExcludeTimeWindowsSlot()
     EvaluationTimestampConditionsDialog dialog (COMPASS::instance().evaluationManager());
     dialog.exec();
 
-    COMPASS::instance().evaluationManager().saveTimeConstraints();
+    if (dialog.somethingChangedFlag())
+    {
+        COMPASS::instance().evaluationManager().saveTimeConstraints();
 
-    model_.updateEvalUseColumn();
+        emit model_.targetEvalFullChangeSignal();
+
+        model_.updateEvalUseColumn();
+    }
 }
 
 void TargetListWidget::customContextMenuSlot(const QPoint& p)

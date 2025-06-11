@@ -74,6 +74,12 @@ EvaluationTimestampConditionsDialog::~EvaluationTimestampConditionsDialog()
     tw_widget_ = nullptr;
 }
 
+bool EvaluationTimestampConditionsDialog::somethingChangedFlag() const
+{
+    assert (tw_widget_);
+    return something_changed_flag_ || tw_widget_->somethingChangedFlag();
+}
+
 void EvaluationTimestampConditionsDialog::updateValues()
 {
     update_active_ = true;
@@ -102,6 +108,8 @@ void EvaluationTimestampConditionsDialog::toggleUseTimeSlot()
 {
     assert (use_time_check_);
     eval_man_.useTimestampFilter(use_time_check_->checkState() == Qt::Checked);
+
+    something_changed_flag_ = true;
 }
 
 /**
@@ -115,6 +123,8 @@ void EvaluationTimestampConditionsDialog::timeBeginEditedSlot (const QDateTime& 
            << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
     eval_man_.loadTimestampBegin(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()));
+
+    something_changed_flag_ = true;
 }
 
 /**
@@ -128,4 +138,6 @@ void EvaluationTimestampConditionsDialog::timeEndEditedSlot (const QDateTime& da
            << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
     eval_man_.loadTimestampEnd(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()));
+
+    something_changed_flag_ = true;
 }
