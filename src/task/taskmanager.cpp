@@ -394,13 +394,20 @@ void TaskManager::beginTaskResultWriting(const std::string& name,
     if (widget_)
         widget_->setDisabled(true);
 
+    if (current_result_)
+        logerr << "TaskManager: beginTaskResultWriting: result id " << current_result_->id()
+               << " name " << current_result_->name() << " already present";
+
     assert (!current_result_);
     current_result_ = getOrCreateResult(name, type);
 
     //prepare result for new content
     auto res = current_result_->prepareResult();
     if (!res.ok())
-        logerr << "TaskManager: beginTaskResultWriting: Result could not be initialized: " << res.error();
+        logerr << "TaskManager: beginTaskResultWriting: result could not be initialized: " << res.error();
+
+    loginf << "TaskManager: beginTaskResultWriting: begining result id " << current_result_->id()
+           << " name " << current_result_->name();
 
     assert(res.ok());
 }
@@ -423,6 +430,8 @@ std::shared_ptr<ResultReport::Report>& TaskManager::currentReport()
  */
 void TaskManager::endTaskResultWriting(bool store_result)
 {
+    loginf << "TaskManager: endTaskResultWriting: store_result " << store_result;
+
     if (widget_)
         widget_->setDisabled(false);
 
@@ -459,6 +468,10 @@ void TaskManager::endTaskResultWriting(bool store_result)
     }
 
     assert (current_result_);
+
+    loginf << "TaskManager: endTaskResultWriting: ending result id " << current_result_->id()
+           << " name " << current_result_->name();
+
     current_result_ = nullptr;
 
     emit taskResultsChangedSignal();
