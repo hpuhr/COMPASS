@@ -426,9 +426,9 @@ bool Configurable::hasSubConfigurable(const std::string& class_id,
 
 /**
 */
-std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConfigurable(const std::string& approx_name)
+std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConfigurablePath(const std::string& path)
 {
-    vector<string> parts = String::split(approx_name, ConfigurablePathSeparator);
+    vector<string> parts = String::split(path, ConfigurablePathSeparator);
 
     if (!parts.size())
         return {rtcommand::FindObjectErrCode::NotFound, nullptr};
@@ -444,6 +444,25 @@ std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConf
     }
 
     return {rtcommand::FindObjectErrCode::NoError, child};
+}
+
+/**
+*/
+std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConfigurableName(const std::string& name)
+{
+    auto child = getApproximateChildNamed(name);
+    if (child)
+        return {rtcommand::FindObjectErrCode::NoError, child};
+
+    //not found, try in children
+    for (auto& c : children_)
+    {
+        auto res = c.second.findSubConfigurableName(name);
+        if (res.first == rtcommand::FindObjectErrCode::NoError)
+            return res;
+    }
+
+    return {rtcommand::FindObjectErrCode::NotFound, nullptr};
 }
 
 /**

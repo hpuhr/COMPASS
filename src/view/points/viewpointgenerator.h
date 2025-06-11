@@ -368,8 +368,9 @@ public:
                                 int subsampling = -1);
     virtual ~ViewPointGenFeatureGeoImage() = default;
 
-    static std::string imageToByteString(const QImage& img);
-    static QImage byteStringToImage(const std::string& str);
+    static std::string imageToByteString(const QImage& img, const std::string& format);
+    static std::string imageToByteStringWithMetadata(const QImage& img);
+    static QImage byteStringWithMetadataToImage(const std::string& str);
 
     virtual size_t size() const { return 1; }
 

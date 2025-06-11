@@ -692,15 +692,24 @@ void RTCommandReconfigure::assignVariables_impl(const VariablesMap& variables)
 
 bool RTCommandReconfigure::run_impl()
 {
-    //try to find configurable in root
-    auto find_result = COMPASS::instance().findSubConfigurable(path);
+    //try to find configurable by path
+    auto find_result = COMPASS::instance().findSubConfigurablePath(path);
     if (find_result.first != rtcommand::FindObjectErrCode::NoError)
     {
-        setResultMessage("Configurable '" + path + "' not found");
-        return false;
+        //not found by path => try to find configurable by name
+        find_result = COMPASS::instance().findSubConfigurableName(path);
+
+        //not found
+        if (find_result.first != rtcommand::FindObjectErrCode::NoError)
+        {
+            setResultMessage("Configurable '" + path + "' not found");
+            return false;
+        }
     }
 
     nlohmann::json config;
+
+    loginf << "config: " << json_config;
 
     try
     {

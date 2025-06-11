@@ -95,6 +95,8 @@ void ReportWidget::setReport(const std::shared_ptr<Report>& report)
 
     updateBackButton();
     updateCurrentSection();
+
+    showResultWidget(nullptr, false);
 }
 
 void ReportWidget::clear()

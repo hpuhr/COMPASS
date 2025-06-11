@@ -198,12 +198,27 @@ ResultT<nlohmann::json> ReportItem::toJSONDocument(const std::string* resource_d
 {
     nlohmann::json j;
 
-    //not for now because not all contents do provide a meaningful name
-    //j[ FieldName ] = name_;
+    auto addBaseItems = [ & ] (nlohmann::json& j_item)
+    {
+        j_item[ FieldName ] = name_;
+    };
 
     auto res = toJSONDocument_impl(j, resource_dir);
     if (!res.ok())
         return res;
+
+    if (j.is_array())
+    {
+        //some report items generate multiple objects in an array (e.g. figures),
+        //so add base items to each generated item
+        for (auto& j_item : j)
+            addBaseItems(j_item);
+    }
+    else
+    {
+        //default case: add base items to single object
+        addBaseItems(j);
+    }
 
     return ResultT<nlohmann::json>::succeeded(j);
 }

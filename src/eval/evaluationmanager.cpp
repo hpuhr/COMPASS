@@ -227,6 +227,8 @@ Result EvaluationManager::evaluate(bool show_dialog)
         return eval_res;
     }
 
+    assert(calculator_local->evaluated());
+
     //store calculator to task result
     auto& task_man = COMPASS::instance().taskManager();
 
@@ -245,40 +247,6 @@ Result EvaluationManager::evaluate(bool show_dialog)
     emit evaluationDoneSignal();
 
     return Result::succeeded();
-}
-
-/**
- */
-bool EvaluationManager::evaluated() const
-{
-    assert (calculator_);
-    return calculator_->evaluated();
-}
-
-/**
- */
-bool EvaluationManager::canGenerateReport() const
-{
-    assert (initialized_);
-    
-    return calculator_->dataLoaded() &&
-           calculator_->evaluated() && 
-           calculator_->hasResults();
-}
-
-/**
- */
-void EvaluationManager::generateReport()
-{
-    loginf << "EvaluationManager: generateReport";
-
-    assert (initialized_);
-    assert (calculator_);
-    assert (calculator_->dataLoaded());
-    assert (calculator_->evaluated());
-    assert (calculator_->hasResults());
-
-    //pdf_gen_.dialog().exec();
 }
 
 /**

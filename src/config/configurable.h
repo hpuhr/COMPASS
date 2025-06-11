@@ -104,7 +104,8 @@ public:
     /// @brief Returns if a specified sub-configurable exists
     bool hasSubConfigurable(const std::string& class_id, const std::string& instance_id) const;
     // finds by approx name, either exact instance id or first matching class id
-    std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurable(const std::string& approx_name);
+    std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurablePath(const std::string& path);
+    std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurableName(const std::string& name);
     // returns nullptr if not found
     Configurable* getApproximateChildNamed(const std::string& approx_name);
     const Configurable& getChild(const std::string& class_id,
