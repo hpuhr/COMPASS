@@ -74,7 +74,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
     boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
-    bool comp_passed;
+    bool comp_passed{false};
 
     unsigned int num_distances {0};
     string comment;
