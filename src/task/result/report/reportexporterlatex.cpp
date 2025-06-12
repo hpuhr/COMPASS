@@ -49,8 +49,9 @@ namespace ResultReport
 ReportExporterLatex::ReportExporterLatex(const ReportExport* report_export,
                                          const std::string& export_fn,
                                          const std::string& export_resource_dir,
+                                         bool interaction_mode,
                                          bool write_pdf)
-:   ReportExporter(report_export, export_fn, export_resource_dir)
+:   ReportExporter(report_export, export_fn, export_resource_dir, interaction_mode)
 ,   write_pdf_    (write_pdf)
 {
 }
@@ -334,7 +335,7 @@ Result ReportExporterLatex::writePDF() const
     if (command_out.size())
         return Result::failed("PDF Latex failed with warnings:\n\n" + std::string(command_out.c_str()));
 
-    if (settings().open_created_file)
+    if (settings().open_created_file && hasInteraction())
     {
         std::string fullpath = exportResourceDir() + "/" + exportFilename();
         if (Utils::String::hasEnding(fullpath, ".tex"))

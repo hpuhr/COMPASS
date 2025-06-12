@@ -67,10 +67,11 @@ ResultT<nlohmann::json> ReportExport::exportReport(TaskResult& result,
                                                    ReportExportMode mode,
                                                    const std::string& fn,
                                                    const std::string& resource_dir,
-                                                   const std::string& section)
+                                                   const std::string& section,
+                                                   bool interaction_mode)
 {
     //create exporter
-    auto exporter = createExporter(mode, fn, resource_dir);
+    auto exporter = createExporter(mode, fn, resource_dir, interaction_mode);
     if (!exporter)
         return Result::failed("Exporter could not be created for export type ''");
 
@@ -89,23 +90,24 @@ ResultT<nlohmann::json> ReportExport::exportReport(TaskResult& result,
  */
 std::unique_ptr<ReportExporter> ReportExport::createExporter(ReportExportMode mode,
                                                              const std::string& fn,
-                                                             const std::string& resource_dir) const
+                                                             const std::string& resource_dir,
+                                                             bool interaction_mode) const
 {
     if (mode == ReportExportMode::JSONFile)
     {
-        return std::unique_ptr<ReportExporter>(new ReportExporterJSONFile(this, fn, resource_dir));
+        return std::unique_ptr<ReportExporter>(new ReportExporterJSONFile(this, fn, resource_dir, interaction_mode));
     }
     else if (mode == ReportExportMode::JSONBlob)
     {
-        return std::unique_ptr<ReportExporter>(new ReportExporterJSONBlob(this, fn, resource_dir));
+        return std::unique_ptr<ReportExporter>(new ReportExporterJSONBlob(this, fn, resource_dir, interaction_mode));
     }
     else if (mode == ReportExportMode::Latex)
     {
-        return std::unique_ptr<ReportExporter>(new ReportExporterLatexFiles(this, fn, resource_dir));
+        return std::unique_ptr<ReportExporter>(new ReportExporterLatexFiles(this, fn, resource_dir, interaction_mode));
     }
     else if (mode == ReportExportMode::LatexPDF)
     {
-        return std::unique_ptr<ReportExporter>(new ReportExporterLatexPDF(this, fn, resource_dir));
+        return std::unique_ptr<ReportExporter>(new ReportExporterLatexPDF(this, fn, resource_dir, interaction_mode));
     }
 
     return std::unique_ptr<ReportExporter>();

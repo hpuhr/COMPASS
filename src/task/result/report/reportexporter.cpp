@@ -49,10 +49,12 @@ const std::string ReportExporter::ExportTextFormat  = ".txt";
  */
 ReportExporter::ReportExporter(const ReportExport* report_export,
                                const std::string& export_fn,
-                               const std::string& export_resource_dir)
+                               const std::string& export_resource_dir,
+                               bool interaction_mode)
 :   report_export_      (report_export      )
 ,   export_fn_          (export_fn          )
 ,   export_resource_dir_(export_resource_dir)
+,   interaction_mode_   (interaction_mode   )
 {
     assert(report_export_);
 }

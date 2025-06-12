@@ -30,6 +30,7 @@ public:
     ReportExporterJSON(const ReportExport* report_export,
                        const std::string& export_fn,
                        const std::string& export_resource_dir,
+                       bool interaction_mode,
                        bool write_files);
     virtual ~ReportExporterJSON();
 
@@ -62,8 +63,9 @@ class ReportExporterJSONFile : public ReportExporterJSON
 public:
     ReportExporterJSONFile(const ReportExport* report_export,
                            const std::string& export_fn,
-                           const std::string& export_resource_dir)
-    :   ReportExporterJSON(report_export, export_fn, export_resource_dir, true) {}
+                           const std::string& export_resource_dir,
+                           bool interaction_mode)
+    :   ReportExporterJSON(report_export, export_fn, export_resource_dir, interaction_mode, true) {}
 
     virtual ~ReportExporterJSONFile() = default;
 
@@ -77,8 +79,9 @@ class ReportExporterJSONBlob : public ReportExporterJSON
 public:
     ReportExporterJSONBlob(const ReportExport* report_export,
                            const std::string& export_fn,
-                           const std::string& export_resource_dir)
-    :   ReportExporterJSON(report_export, export_fn, export_resource_dir, false) {}
+                           const std::string& export_resource_dir,
+                           bool interaction_mode)
+    :   ReportExporterJSON(report_export, export_fn, export_resource_dir, interaction_mode, false) {}
 
     virtual ~ReportExporterJSONBlob() = default;
 

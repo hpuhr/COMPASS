@@ -54,7 +54,8 @@ public:
                                          ReportExportMode mode,
                                          const std::string& fn,
                                          const std::string& resource_dir,
-                                         const std::string& section = std::string());
+                                         const std::string& section = std::string(),
+                                         bool interaction_mode = true);
 
     ReportExportSettings& settings() { return settings_; }
     const ReportExportSettings& settings() const { return settings_; }
@@ -68,7 +69,8 @@ signals:
 private:
     std::unique_ptr<ReportExporter> createExporter(ReportExportMode mode,
                                                    const std::string& fn,
-                                                   const std::string& resource_dir) const;
+                                                   const std::string& resource_dir,
+                                                   bool interaction_mode) const;
     void updateProgress(ReportExporter* exporter);
 
     ReportExportSettings settings_;

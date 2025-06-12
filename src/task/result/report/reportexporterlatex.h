@@ -34,6 +34,7 @@ public:
     ReportExporterLatex(const ReportExport* report_export,
                         const std::string& export_fn,
                         const std::string& export_resource_dir,
+                        bool interaction_mode,
                         bool write_pdf);
     virtual ~ReportExporterLatex();
 
@@ -66,8 +67,9 @@ class ReportExporterLatexFiles : public ReportExporterLatex
 public:
     ReportExporterLatexFiles(const ReportExport* report_export,
                              const std::string& export_fn,
-                             const std::string& export_resource_dir)
-    :   ReportExporterLatex(report_export, export_fn, export_resource_dir, false) {}
+                             const std::string& export_resource_dir,
+                             bool interaction_mode)
+    :   ReportExporterLatex(report_export, export_fn, export_resource_dir, interaction_mode, false) {}
 
     virtual ~ReportExporterLatexFiles() = default;
 
@@ -81,8 +83,9 @@ class ReportExporterLatexPDF : public ReportExporterLatex
 public:
     ReportExporterLatexPDF(const ReportExport* report_export,
                            const std::string& export_fn,
-                           const std::string& export_resource_dir)
-    :   ReportExporterLatex(report_export, export_fn, export_resource_dir, true) {}
+                           const std::string& export_resource_dir,
+                           bool interaction_mode)
+    :   ReportExporterLatex(report_export, export_fn, export_resource_dir, interaction_mode, true) {}
 
     virtual ~ReportExporterLatexPDF() = default;
 

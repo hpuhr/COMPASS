@@ -315,7 +315,7 @@ void ReportExportDialog::exportReport()
 
     QApplication::processEvents();
 
-    export_result_ = report_export_.exportReport(task_result_, export_mode_, fn, dir, section_);
+    export_result_ = report_export_.exportReport(task_result_, export_mode_, fn, dir, section_, !no_interaction_mode_);
 
     QApplication::processEvents();
 

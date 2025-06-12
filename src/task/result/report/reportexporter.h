@@ -52,7 +52,8 @@ class ReportExporter : public QObject
 public:
     ReportExporter(const ReportExport* report_export,
                    const std::string& export_fn,
-                   const std::string& export_resource_dir);
+                   const std::string& export_resource_dir,
+                   bool interaction_mode);
     virtual ~ReportExporter();
 
     const ReportExportSettings& settings() const;
@@ -101,6 +102,7 @@ protected:
 
     const std::string& exportFilename() const { return export_fn_; }
     const std::string& exportResourceDir() const { return export_resource_dir_; }
+    bool hasInteraction() const { return interaction_mode_; }
 
     void setStatus(const std::string& status);
 
@@ -118,6 +120,8 @@ private:
     const ReportExport* report_export_ = nullptr;
     std::string         export_fn_;
     std::string         export_resource_dir_;
+
+    bool                interaction_mode_ = true;
 
     Section* current_content_section_ = nullptr;
 
