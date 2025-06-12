@@ -29,10 +29,10 @@ mkdir -p appimage/appdir/lib
 
 if [[ $1 == "deb9" ]]
 then
-  /app/workspace/compass/docker/linuxdeployqt/linuxdeployqt-deb9-x86_64.AppImage --appimage-extract-and-run appimage/appdir/compass.desktop -appimage -bundle-non-qt-libs -verbose=2 -extra-plugins=iconengines,platformthemes/libqgtk3.so -exclude-libs=libglib-2.0.so.0,libgio-2.0.so.0
+  /app/workspace/compass/docker/linuxdeployqt/linuxdeployqt-deb9-x86_64.AppImage --appimage-extract-and-run appimage/appdir/compass.desktop -appimage -bundle-non-qt-libs -verbose=2 -extra-plugins=iconengines,platformthemes/libqgtk3.so #-exclude-libs=libglib-2.0.so.0,libgio-2.0.so.0
 elif [[ $1 == "deb10" ]]
 then	
-  /app/workspace/compass/docker/linuxdeployqt/linuxdeployqt-deb10-x86_64.AppImage --appimage-extract-and-run appimage/appdir/compass.desktop -appimage -bundle-non-qt-libs -verbose=2 -extra-plugins=iconengines,platformthemes/libqgtk3.so -exclude-libs=libglib-2.0.so.0,libgio-2.0.so.0
+  /app/workspace/compass/docker/linuxdeployqt/linuxdeployqt-deb10-x86_64.AppImage --appimage-extract-and-run appimage/appdir/compass.desktop -appimage -bundle-non-qt-libs -verbose=2 -extra-plugins=iconengines,platformthemes/libqgtk3.so #-exclude-libs=libglib-2.0.so.0,libgio-2.0.so.0
 fi
 
 cd /app/workspace/compass/docker
