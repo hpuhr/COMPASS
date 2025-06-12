@@ -408,7 +408,7 @@ void TaskManager::beginTaskResultWriting(const std::string& name,
 
     loginf << "TaskManager: beginTaskResultWriting: begining result id " << current_result_->id()
            << " name " << current_result_->name();
-
+    
     assert(res.ok());
 }
 
@@ -554,7 +554,7 @@ std::shared_ptr<TaskResult> TaskManager::getOrCreateResult(const std::string& na
         unsigned int new_id{0};
 
         if (results_.size())
-            new_id = results_.rend()->first + 1;
+            new_id = results_.rbegin()->first + 1;
 
         auto r = createResult(new_id, type);
 
