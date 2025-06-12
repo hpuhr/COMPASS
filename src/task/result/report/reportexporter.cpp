@@ -35,8 +35,8 @@
 namespace ResultReport
 {
 
-const int ReportExporter::TableMaxRows    = -1;
-const int ReportExporter::TableMaxColumns = -1;
+const int ReportExporter::TableMaxRows    = 0;
+const int ReportExporter::TableMaxColumns = 0;
 
 const std::string ReportExporter::ResourceFolderScreenshots = "screenshots";
 const std::string ReportExporter::ResourceFolderTables      = "tables";

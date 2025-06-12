@@ -39,6 +39,7 @@
 
 #include <QApplication>
 #include <QDesktopServices>
+#include <QUrl>
 
 namespace ResultReport
 {
@@ -332,6 +333,18 @@ Result ReportExporterLatex::writePDF() const
 
     if (command_out.size())
         return Result::failed("PDF Latex failed with warnings:\n\n" + std::string(command_out.c_str()));
+
+    if (settings().open_created_file)
+    {
+        std::string fullpath = exportResourceDir() + "/" + exportFilename();
+        if (Utils::String::hasEnding(fullpath, ".tex"))
+            Utils::String::replace(fullpath, ".tex", ".pdf");
+
+        loginf << "ReportExporterLatex: writePDF: opening '" << fullpath << "'";
+
+        if (!QDesktopServices::openUrl(QUrl(fullpath.c_str())))
+            logerr << "ReportExporterLatex: writePDF: could not open created file";
+    }
 
     return Result::succeeded();
 }
