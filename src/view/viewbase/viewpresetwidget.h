@@ -19,7 +19,7 @@
 
 #include "viewcomponent.h"
 #include "viewpresets.h"
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <QWidget>
 #include <QDialog>

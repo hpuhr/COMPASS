@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <QWidget>
 

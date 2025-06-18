@@ -19,7 +19,7 @@
 #include "latexdocument.h"
 #include "latexsection.h"
 #include "latextable.h"
-//#include "lateximage.h"
+
 
 #include "dbcontent/dbcontentmanager.h"
 #include "viewmanager.h"

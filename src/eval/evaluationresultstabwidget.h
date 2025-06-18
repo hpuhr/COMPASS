@@ -25,7 +25,7 @@
 
 #include <boost/optional.hpp>
 
-#include "json.h"
+#include "json_fwd.hpp"
 
 class EvaluationManager;
 class EvaluationManagerWidget;

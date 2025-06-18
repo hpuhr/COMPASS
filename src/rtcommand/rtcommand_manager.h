@@ -5,7 +5,7 @@
 #include "singleton.h"
 //#include "logger.h"
 #include "rtcommand_defs.h"
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <QThread>
 

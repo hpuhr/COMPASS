@@ -19,15 +19,15 @@
 #include "asteriximporttask.h"
 #include "json.h"
 #include "logger.h"
-#include "asterixfiledecoder.h"
-#include "asterixnetworkdecoder.h"
-#include "asterixpcapdecoder.h"
+//#include "asterixfiledecoder.h"
+//#include "asterixnetworkdecoder.h"
+//#include "asterixpcapdecoder.h"
 #include "asteriximportsource.h"
 
 #include <QThread>
 
-#include <chrono>
-#include <thread>
+//#include <chrono>
+//#include <thread>
 #include <memory>
 
 using namespace nlohmann;

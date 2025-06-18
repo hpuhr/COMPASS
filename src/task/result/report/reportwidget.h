@@ -1,7 +1,7 @@
 #pragma once
 
 #include "report/treemodel.h"
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <boost/optional.hpp>
 

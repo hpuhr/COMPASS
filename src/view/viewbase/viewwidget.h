@@ -25,7 +25,7 @@
 #include "configurable.h"
 #include "appmode.h"
 #include "ui_test_testable.h"
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <boost/optional.hpp>
 
