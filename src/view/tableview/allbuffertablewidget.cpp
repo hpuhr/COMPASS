@@ -344,14 +344,17 @@ std::vector<std::vector<std::string>> AllBufferTableWidget::getText (unsigned in
 
     QModelIndex current_index;
 
-    auto rows = model->rowCount();
-    auto cols = model->columnCount();
+    int rows = model->rowCount();
+    int cols = model->columnCount();
+
+    assert (rows >= 0);
+    assert (cols >= 0);
 
     bool max_rows_hit = false;
 
-    for (int row_cnt = 0; row_cnt < rows; ++row_cnt)
+    for (unsigned int row_cnt = 0; row_cnt < (unsigned int) rows; ++row_cnt)
     {
-        for (int col_cnt = 0; col_cnt < cols; ++col_cnt)
+        for (unsigned int col_cnt = 0; col_cnt < (unsigned int) cols; ++col_cnt)
         {
             if (row_cnt == 0 && col_cnt == 0) // first, skip for previous
                 continue;

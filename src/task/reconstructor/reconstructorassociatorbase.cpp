@@ -752,7 +752,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #endif
                       {
                           unsigned int other_utn = reconstructor().targets_container_.utn_vec_.at(target_cnt);
-                          bool do_other_debug = false; //debug_utns.count(other_utn);
+                          //bool do_other_debug = false; //debug_utns.count(other_utn);
 
                           //do_debug = tr.dbcont_id_ == 10 && other_utn == 7;
 
@@ -907,9 +907,9 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     unsigned int other_utn;
 
     bool first = true;
-    unsigned int best_other_utn;
-    double best_mahalanobis_dist;
-    double mahalanobis_dist;
+    unsigned int best_other_utn {0};
+    double best_mahalanobis_dist {0};
+    double mahalanobis_dist {0};
 
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
     {
@@ -1262,7 +1262,7 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
 
     bool best_found = false;
     unsigned int best_other_utn {0};
-    unsigned int best_num_updates {0};
+    //unsigned int best_num_updates {0};
     unsigned int best_score {0};
 
     float score;
@@ -1305,14 +1305,14 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
                 if (best_score < score)
                 {
                     best_other_utn = res_it.other_utn_;
-                    best_num_updates = res_it.num_updates_;
+                    //best_num_updates = res_it.num_updates_;
                     best_score = score;
                 }
             }
             else
             {
                 best_other_utn = res_it.other_utn_;
-                best_num_updates = res_it.num_updates_;
+                //best_num_updates = res_it.num_updates_;
                 best_score = score;
             }
 

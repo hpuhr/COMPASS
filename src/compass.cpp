@@ -97,6 +97,9 @@ COMPASS::COMPASS()
 
     registerParameter("disable_confirm_reset_views", &disable_confirm_reset_views_, false);
 
+    registerParameter("min_app_width", &min_app_width_, min_app_width_);
+    registerParameter("min_app_height", &min_app_height_, min_app_height_);
+
     assert (auto_live_running_resume_ask_time_ > 0);
     assert (auto_live_running_resume_ask_wait_time_ > 0);
     assert (auto_live_running_resume_ask_time_ > auto_live_running_resume_ask_wait_time_);
@@ -345,6 +348,16 @@ void COMPASS::checkSubConfigurables()
         generateSubConfigurableFromConfig("FFTManager", "FFTManager0");
         assert(fft_manager_);
     }
+}
+
+unsigned int COMPASS::minAppHeight() const
+{
+    return min_app_height_;
+}
+
+unsigned int COMPASS::minAppWidth() const
+{
+    return min_app_width_;
 }
 
 bool COMPASS::openDBFile(const std::string& filename)

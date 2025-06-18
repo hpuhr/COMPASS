@@ -157,6 +157,10 @@ public:
 
     LogWidget* logWidget();
 
+    unsigned int minAppWidth() const;
+
+    unsigned int minAppHeight() const;
+
 protected:
     COMPASS();
 
@@ -192,6 +196,9 @@ protected:
     unsigned int auto_live_running_resume_ask_wait_time_ {1}; // minutes
 
     unsigned int max_fps_ {30};
+
+    unsigned int min_app_width_ {1600};
+    unsigned int min_app_height_ {1080};
 
     std::unique_ptr<SimpleConfig> simple_config_;
     std::unique_ptr<DBInterface> db_interface_;

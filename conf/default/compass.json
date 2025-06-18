@@ -4,7 +4,9 @@
         ],
         "hide_evaluation": false,
         "hide_viewpoints": false,
-        "last_db_filename": "/home/sk/data/austria/live_test/test.db"
+        "last_db_filename": "",
+        "min_app_height": 1080,
+        "min_app_width": 1600
     },
     "sub_config_files": [
         {

@@ -157,7 +157,7 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
         return QVariant();
 
     assert (index.row() >= 0);
-    assert (index.row() < log_entries_.size());
+    assert ((unsigned int)index.row() < log_entries_.size());
 
     const LogEntry& entry = log_entries_.at(index.row());
 

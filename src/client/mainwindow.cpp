@@ -107,7 +107,7 @@ MainWindow::MainWindow()
     if (appdir)
         QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs); // disable native since they cause crashes
 
-    setMinimumSize(QSize(1800, 900));
+    setMinimumSize(QSize(COMPASS::instance().minAppWidth(), COMPASS::instance().minAppHeight()));
 
     QIcon ats_icon(Files::IconProvider::getIcon("ats.png"));
     setWindowIcon(ats_icon);  // for the glory of the empire
