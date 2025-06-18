@@ -354,6 +354,11 @@ void COMPASS::checkSubConfigurables()
     }
 }
 
+LogStore& COMPASS::logStore()
+{
+    return log_store_;
+}
+
 bool COMPASS::disableNativeDialogs() const
 {
     return disable_native_dialogs_;
@@ -830,8 +835,6 @@ void COMPASS::shutdown()
     assert(license_manager_);
     license_manager_ = nullptr;
 
-    //main_window_ = nullptr;
-
     //shut down command manager at the end
     RTCommandManager::instance().shutdown();
 
@@ -1167,11 +1170,4 @@ std::string COMPASS::licenseeString(bool licensed_to) const
     return (licensed_to ? "Licensed to " : "") + vl->licensee;
 }
 
-LogWidget* COMPASS::logWidget()
-{
-    if (!log_widget_)
-        log_widget_.reset(new LogWidget(log_store_));
 
-    assert(log_widget_);
-    return log_widget_.get();
-}

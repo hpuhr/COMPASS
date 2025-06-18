@@ -37,7 +37,6 @@
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskdialog.h"
 #include "gpsimportcsvtask.h"
-#include "gpsimportcsvtaskdialog.h"
 #include "managesectorstask.h"
 #include "managesectorstaskdialog.h"
 #include "evaluationmanager.h"
@@ -224,7 +223,7 @@ void MainWindow::createUI()
     if (!COMPASS::instance().hideViewpoints())
         tool_box_->addTool(COMPASS::instance().viewManager().viewPointsWidget());
 
-    tool_box_->addTool(COMPASS::instance().logWidget());
+    tool_box_->addTool(new LogWidget(COMPASS::instance().logStore()));
 
     //@TODO: !handle filter check box!
     //QTabBar *tabBar = tab_widget_->tabBar();

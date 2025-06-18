@@ -23,13 +23,12 @@
 #include "appmode.h"
 #include "result.h"
 #include "logmodel.h"
-#include "logwidget.h"
+
 
 #include <QObject>
 
 #include <memory>
 #include <map>
-#include <set>
 #include <vector>
 
 class DBInterface;
@@ -155,8 +154,6 @@ public:
     LogStream logError(const std::string& component,
                        boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
 
-    LogWidget* logWidget();
-
     unsigned int minAppWidth() const;
 
     unsigned int minAppHeight() const;
@@ -164,6 +161,8 @@ public:
     float appFontScale() const;
 
     bool disableNativeDialogs() const;
+
+    LogStore& logStore();
 
 protected:
     COMPASS();
@@ -222,7 +221,6 @@ protected:
     std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
 
     LogStore log_store_;
-    std::unique_ptr<LogWidget> log_widget_;
 
     std::string last_db_filename_;
     std::string inmem_future_filename_;

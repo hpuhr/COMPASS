@@ -31,6 +31,8 @@ export EXTRA_QT_PLUGINS="iconengines"
 export APPIMAGE_EXTRACT_AND_RUN=1
 export DEPLOY_GTK_VERSION=3
 
+export NO_STRIP=1
+
 if [[ $1 == "deb9" ]]
 then
   export QMAKE=/qt/5.8/gcc_64/bin/qmake
