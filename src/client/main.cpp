@@ -23,6 +23,7 @@
 #include "taskmanager.h"
 
 #include <QThread>
+#include <QFontDatabase>
 
 using namespace std;
 
@@ -32,9 +33,13 @@ int main(int argc, char** argv)
     {
         // Enable Qt high-DPI scaling
         QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-        //QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
         Client client(argc, argv);
+
+        //QFont systemFont = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+
+        // 2) Make it your application font (applies to all widgets)
+        //client.setFont(systemFont);
 
         if (client.quitRequested())
             return 0;

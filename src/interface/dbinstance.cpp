@@ -212,6 +212,11 @@ Result DBInstance::reconnect(bool cleanup_db, Result* cleanup_result)
 {
     assert(dbReady());
 
+    // if (cleanup_result)
+    //     *cleanup_result = Result::succeeded();
+
+    // return Result::succeeded();
+
     //no reconnection to in-mem db
     if (db_in_mem_)
     {

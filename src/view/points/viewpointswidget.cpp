@@ -116,7 +116,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     setLayout(main_layout);
 
-    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
 
     // shortcuts
     {

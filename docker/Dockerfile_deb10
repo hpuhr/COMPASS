@@ -68,7 +68,7 @@ RUN apt-get update
 RUN apt-get install libgeos-dev -y
 
 # gui/x11 
-RUN apt-get install gedit khronos-api libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-x11-dev -y # khronos-api libgl1-mesa-dev libegl1-mesa-dev libegl1-mesa-drivers
+RUN apt-get install gedit libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-x11-dev -y # khronos-api libgl1-mesa-dev libegl1-mesa-dev libegl1-mesa-drivers
 
 # qt
 
@@ -112,7 +112,7 @@ RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.5/build
 #RUN sed -i '502a message("  OSG_GL3_AVAILABLE: ${OSG_GL3_AVAILABLE}")' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
 
 #-DOPENGL_PROFILE=GL2
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=11 ..
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make -j$(nproc)
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make install
 RUN osgversion
@@ -142,7 +142,7 @@ RUN apt-get install libglew-dev libzip-dev -y
 RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-3.2.zip
 RUN unzip osgearth-3.2.zip
 RUN mkdir osgearth-osgearth-3.2/build
-RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_STANDARD=11 -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd osgearth-osgearth-3.2/build && cmake -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
 RUN cd osgearth-osgearth-3.2/build && make -j$(nproc)
 RUN cd osgearth-osgearth-3.2/build && make install
 
@@ -163,7 +163,7 @@ RUN apt-get install libpcap-dev -y
 
 RUN apt-get install libgeographic-dev -y
 
-RUN wget https://github.com/duckdb/duckdb/releases/download/v1.2.0/libduckdb-linux-amd64.zip
+RUN wget https://github.com/duckdb/duckdb/releases/download/v1.3.1/libduckdb-linux-amd64.zip
 RUN mkdir libduckdb-linux-amd64
 RUN unzip libduckdb-linux-amd64.zip -d libduckdb-linux-amd64
 RUN cd libduckdb-linux-amd64 && cp *.h /usr/include

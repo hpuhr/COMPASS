@@ -159,7 +159,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
     boost::posix_time::ptime last_ts;
 
-    auto one_min = boost::posix_time::seconds(60);
+    auto five_min = boost::posix_time::seconds(5*60);
     unsigned int ts_cnt=0;
 
     for (auto& ts_it : reconstructor().tr_timestamps_)
@@ -174,7 +174,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
                    << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
         }
 
-        if (ts_it.first - last_ts > one_min)
+        if (ts_it.first - last_ts > five_min)
         {
             last_ts = ts_it.first;
             loginf << "ReconstructorAssociatorBase: associateTargetReports: processed time "
@@ -1261,9 +1261,9 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
     // TODO rework to 1?
 
     bool best_found = false;
-    unsigned int best_other_utn;
-    unsigned int best_num_updates;
-    unsigned int best_score;
+    unsigned int best_other_utn {0};
+    unsigned int best_num_updates {0};
+    unsigned int best_score {0};
 
     float score;
     for (auto& res_it : results) // usable, other utn, num updates, avg distance

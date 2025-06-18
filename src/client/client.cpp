@@ -258,7 +258,7 @@ bool Client::run ()
 
     int num_threads = 0;
 
-#if TBB_VERSION_MAJOR <= 2018
+#if TBB_VERSION_MAJOR <= 2020
 
     // in appimage
 
@@ -297,7 +297,7 @@ bool Client::run ()
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
     // Set the "Fusion" style for better cross-platform results
-    QApplication::setStyle(QStyleFactory::create("Fusion"));
+    //QApplication::setStyle(QStyleFactory::create("Fusion"));
 
     QPixmap pixmap(Files::getImageFilepath("logo.png").c_str());
     QSplashScreen splash(pixmap);
@@ -623,23 +623,24 @@ void Client::checkAndSetupConfig()
         const char* appdir = getenv("APPDIR");
         if (appdir)
         {
-            cout << "COMPASSClient: assuming fuse environment in " << appdir << endl;
+            cout << "COMPASSClient: assuming fuse environment in '" << appdir << "'" << endl;
             assert(appdir);
+            assert (Files::directoryExists(appdir));
 
-            system_install_path_ = string(appdir) + "/appdir/compass/";
+            system_install_path_ = string(appdir) + "/compass/";
 
             cout << "COMPASSClient: set install path to '" << system_install_path_ << "'" << endl;
             assert(Files::directoryExists(system_install_path_));
 
             osgDB::FilePathList path_list;
 
-            path_list.push_back("$ORIGIN/appdir/lib");
+            //path_list.push_back("$ORIGIN/appdir/lib");
             path_list.push_back("$ORIGIN/lib");
-            path_list.push_back("appdir/lib");
+            path_list.push_back("lib");
 
-            osgDB::Registry::instance()->setLibraryFilePathList(string(appdir) + "/appdir/lib");
+            osgDB::Registry::instance()->setLibraryFilePathList(string(appdir) + "/lib");
 
-            string gdal_path = string(appdir) + "/appdir/compass/data/gdal";
+            string gdal_path = string(appdir) + "/compass/data/gdal";
             CPLSetConfigOption("GDAL_DATA", gdal_path.c_str());
         }
 #endif

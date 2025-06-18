@@ -35,7 +35,7 @@ QVariant DataSourceTableModel::data(const QModelIndex& index, int role) const
         logdbg << "DataSourceTableModel: data: display role: row " << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
-        assert (index.row() < ds_man_.getAllDsIDs().size());
+        assert ((unsigned int)index.row() < ds_man_.getAllDsIDs().size());
 
         unsigned int ds_id = ds_man_.getAllDsIDs().at(index.row());
 
@@ -95,7 +95,7 @@ QVariant DataSourceTableModel::data(const QModelIndex& index, int role) const
     case Qt::DecorationRole:
     {
         assert (index.row() >= 0);
-        assert (index.row() < ds_man_.getAllDsIDs().size());
+        assert ((unsigned int)index.row() < ds_man_.getAllDsIDs().size());
 
         unsigned int ds_id = ds_man_.getAllDsIDs().at(index.row());
 
@@ -162,7 +162,7 @@ unsigned int DataSourceTableModel::getIdOf (const QModelIndex& index)
     assert (index.isValid());
 
     assert (index.row() >= 0);
-    assert (index.row() < ds_man_.getAllDsIDs().size());
+    assert ((unsigned int)index.row() < ds_man_.getAllDsIDs().size());
 
     return ds_man_.getAllDsIDs().at(index.row());
 }
