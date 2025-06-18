@@ -20,7 +20,7 @@
 #include "task/result/report/sectioncontent.h"
 #include "task/result/report/reportdefs.h"
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QVariant>
 #include <QAbstractItemModel>

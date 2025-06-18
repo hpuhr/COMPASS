@@ -22,7 +22,7 @@
 #include <QObject>
 #include <QImage>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 namespace ResultReport
 {

@@ -17,22 +17,16 @@
 
 #pragma once
 
-#include "json.hpp"
+#include "json_fwd.hpp"
+
+#include <functional>
 
 namespace Utils
 {
 namespace JSON
 {
 
-inline std::string toString(const nlohmann::json& j)
-{
-    if (j.type() == nlohmann::json::value_t::string)
-    {
-        return j.get<std::string>();
-    }
-
-    return j.dump();
-}
+extern std::string toString(const nlohmann::json& j);
 
 extern bool canFindKey(const nlohmann::json& j, const std::vector<std::string>& keys);
 extern const nlohmann::json& findKey(const nlohmann::json& j, const std::vector<std::string>& keys);

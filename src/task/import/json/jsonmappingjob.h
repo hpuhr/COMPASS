@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "job.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class JSONObjectParser;
 class ASTERIXJSONParser;

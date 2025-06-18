@@ -21,7 +21,7 @@
 #include <memory>
 
 #include "job.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class ASTERIXPostProcess;
 

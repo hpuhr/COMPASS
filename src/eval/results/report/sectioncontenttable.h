@@ -19,7 +19,7 @@
 
 #include "eval/results/report/sectioncontent.h"
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QVariant>
 #include <QAbstractItemModel>
@@ -27,7 +27,7 @@
 #include <QBrush>
 #include <QTimer>
 
-//#include "json.hpp"
+//#include "json_fwd.hpp"
 
 #include <vector>
 #include <functional>

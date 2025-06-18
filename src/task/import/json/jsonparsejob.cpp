@@ -17,6 +17,7 @@
 
 #include "jsonparsejob.h"
 #include "json.h"
+#include "json.hpp"
 #include "asterixpostprocess.h"
 #include "logger.h"
 

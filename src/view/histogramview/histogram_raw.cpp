@@ -16,6 +16,8 @@
 
 #include "histogram_raw.h"
 
+#include "json.hpp"
+
 const std::string RawHistogram::TagBins        = "bins";
 const std::string RawHistogram::TagBinTag      = "tag";
 const std::string RawHistogram::TagBinCount    = "count";

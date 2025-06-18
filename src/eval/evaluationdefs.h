@@ -19,7 +19,7 @@
 
 #include <string>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 namespace EvaluationRequirementResult
 {

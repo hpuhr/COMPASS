@@ -1,8 +1,7 @@
 #include "stringconv.h"
-//#include "global.h"
 #include "logger.h"
-//#include "property.h"
 #include "util/timeconv.h"
+#include "json.hpp"
 
 #include <openssl/sha.h>
 

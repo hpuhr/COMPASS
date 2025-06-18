@@ -18,7 +18,7 @@
 #pragma once
 
 #include "rtcommand_defs.h"
-#include "json.h"
+#include "json.hpp"
 
 #include <string>
 

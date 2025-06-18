@@ -26,7 +26,7 @@
 #include <map>
 #include <vector>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 /**
  * @brief Configuration storage and retrieval functionality with sub-class generation

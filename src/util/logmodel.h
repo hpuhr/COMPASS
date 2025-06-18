@@ -8,7 +8,7 @@
 #include <sstream>
 #include <functional>
 
-#include "boost/optional.hpp"
+#include <boost/optional.hpp>
 
 #include <QDateTime>
 #include <QIcon>

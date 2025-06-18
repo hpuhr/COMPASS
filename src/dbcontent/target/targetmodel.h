@@ -1,7 +1,7 @@
 #pragma once
 
 #include "target.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QAbstractItemModel>
 

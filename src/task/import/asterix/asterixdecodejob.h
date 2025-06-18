@@ -20,7 +20,7 @@
 #include "job.h"
 #include "asterixdecoderbase.h"
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread/mutex.hpp>

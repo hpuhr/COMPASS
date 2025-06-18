@@ -23,7 +23,7 @@
 
 #include <QObject>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class TaskResult;
 class TaskManager;

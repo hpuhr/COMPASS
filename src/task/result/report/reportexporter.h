@@ -21,9 +21,9 @@
 
 #include "result.h"
 
-#include <map>
+//#include <map>
 #include <string>
-#include <memory>
+//#include <memory>
 
 #include <boost/optional.hpp>
 

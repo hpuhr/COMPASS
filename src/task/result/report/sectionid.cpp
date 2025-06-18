@@ -20,6 +20,7 @@
 #include "stringconv.h"
 
 #include <QString>
+#include <boost/algorithm/string/replace.hpp>
 
 namespace ResultReport
 {

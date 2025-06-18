@@ -22,7 +22,7 @@
 
 #include "configurable.h"
 #include "format.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 #include "jsondatamappingwidget.h"
 //#include "logger.h"
 #include "nullablevector.h"

@@ -4,7 +4,7 @@
 #include "configurable.h"
 #include "source/configurationdatasource.h"
 #include "source/dbdatasource.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QObject>
 

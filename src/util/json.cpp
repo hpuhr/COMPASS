@@ -17,12 +17,23 @@
 
 #include "json.h"
 
-//#include "logger.h"
+#include "json.hpp"
 
 namespace Utils
 {
 namespace JSON
 {
+
+std::string toString(const nlohmann::json& j)
+{
+    if (j.type() == nlohmann::json::value_t::string)
+    {
+        return j.get<std::string>();
+    }
+
+    return j.dump();
+}
+
 bool canFindKey(const nlohmann::json& j, const std::vector<std::string>& keys)
 {
     if (!keys.size())

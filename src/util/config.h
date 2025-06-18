@@ -15,10 +15,8 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#pragma once
 
-#include <map>
 #include <string>
 
 #include "json.hpp"
@@ -62,5 +60,3 @@ class SimpleConfig
     /// @brief  Gets value from map by id string and doesn't convert it
     std::string getString(const std::string& id);
 };
-
-#endif

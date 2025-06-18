@@ -19,7 +19,7 @@
 #include "sectorlayer.h"
 #include "sector.h"
 #include "dbcontent/target/targetposition.h"
-#include "json.h"
+#include "json.hpp"
 #include "logger.h"
 
 #include <fstream>

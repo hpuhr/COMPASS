@@ -30,7 +30,7 @@
 
 #include <QColor>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 const double OSGVIEW_POS_WINDOW_SCALE {1.8};
 

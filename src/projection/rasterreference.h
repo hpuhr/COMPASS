@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "json.h"
+#include "json.hpp"
 #include "geotiff_defs.h"
 
 #include <string>

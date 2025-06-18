@@ -20,7 +20,7 @@
 #include "ui_test_common.h"
 #include "ui_test_conversions.h"
 
-#include "json.h"
+#include "json.hpp"
 
 #include <QMenu>
 #include <QMenuBar>

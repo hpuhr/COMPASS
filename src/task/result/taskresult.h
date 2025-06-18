@@ -20,7 +20,7 @@
 #include "task/result/report/report.h"
 #include "task/taskdefs.h"
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 #include "property.h"
 #include "propertylist.h"
 

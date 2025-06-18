@@ -25,7 +25,7 @@
 #include <memory>
 
 #include "configurableparameter.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 //#include "string.h"
 //#include "logger.h"
 

@@ -2,7 +2,7 @@
 #define ASTERIXJSONMAPPINGJOB_H
 
 #include "job.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <boost/asio.hpp>
 

@@ -19,7 +19,7 @@
 
 #include "toolboxwidget.h"
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class ViewManager;
 class ViewPointsTableModel;

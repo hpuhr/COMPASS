@@ -21,7 +21,7 @@
 #include "task/result/report/reportdefs.h"
 
 #include "logger.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <string>
 

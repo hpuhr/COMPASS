@@ -26,7 +26,7 @@
 #include <memory>
 #include <string>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class Buffer;
 class DBCommand;

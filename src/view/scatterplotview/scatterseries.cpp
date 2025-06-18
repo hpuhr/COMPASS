@@ -16,7 +16,9 @@
 
 #include "scatterseries.h"
 
-#include "timeconv.h"
+//#include "timeconv.h"
+
+#include "json.hpp"
 
 /*******************************************************************************************
  * ScatterSeries

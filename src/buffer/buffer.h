@@ -20,7 +20,7 @@
 #include "propertylist.h"
 #include "logger.h"
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 

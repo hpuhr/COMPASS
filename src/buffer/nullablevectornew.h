@@ -3,7 +3,7 @@
 #include "buffer.h"
 #include "property.h"
 #include "stringconv.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QDateTime>
 

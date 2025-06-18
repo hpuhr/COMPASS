@@ -23,7 +23,7 @@
 
 #include <boost/optional.hpp>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class EvaluationManager;
 class EvaluationManagerSettings;

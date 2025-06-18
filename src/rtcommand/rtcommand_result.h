@@ -19,7 +19,7 @@
 
 #include "rtcommand_defs.h"
 
-#include "json.h"
+#include "json.hpp"
 
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <boost/optional.hpp>

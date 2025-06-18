@@ -20,12 +20,13 @@
 #include "logger.h"
 #include "stringconv.h"
 #include "number.h"
+#include "json.hpp"
 
 #include <boost/range/adaptor/reversed.hpp>
 #include <bitset>
 
 using namespace Utils;
-using namespace nlohmann;
+using namespace nlohmann; //#define NDEBUG #undef NDEBUG
 using namespace std;
 
 ASTERIXPostProcess::ASTERIXPostProcess() {}

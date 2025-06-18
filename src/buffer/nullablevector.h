@@ -24,13 +24,13 @@
 
 #include <QDateTime>
 
-#include <array>
-#include <bitset>
-#include <iomanip>
+//#include <array>
+//#include <bitset>
+//#include <iomanip>
 #include <map>
-#include <memory>
+//#include <memory>
 #include <set>
-#include <sstream>
+//#include <sstream>
 #include <vector>
 #include <type_traits>
 
@@ -1263,7 +1263,7 @@ void NullableVector<T>::sortByPermutation(const std::vector<unsigned int>& perm)
 }
 
 template <class T>
-nlohmann::json  NullableVector<T>::asJSON(unsigned int max_size)
+nlohmann::json NullableVector<T>::asJSON(unsigned int max_size)
 {
     nlohmann::json list = nlohmann::json::array();
 

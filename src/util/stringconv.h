@@ -17,15 +17,23 @@
 
 #pragma once
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+//#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <iomanip>
 
-#include <map>
+//#include <map>
 #include <vector>
 #include <set>
+
+namespace boost
+{
+namespace posix_time
+{
+class ptime;
+}
+}
 
 namespace Utils
 {

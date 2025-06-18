@@ -16,6 +16,7 @@
  */
 
 #include "colorlegend.h"
+#include "json.hpp"
 
 /**
  */

@@ -22,6 +22,8 @@
 #include <QRubberBand>
 #include <QBarSet>
 
+#include <cmath>
+
 namespace QtCharts
 {
 

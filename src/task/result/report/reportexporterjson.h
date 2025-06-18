@@ -52,7 +52,7 @@ private:
 
     bool write_files_ = false;
 
-    nlohmann::json  json_data_;
+    nlohmann::json json_data_;
     std::map<const Section*, nlohmann::json*> json_sections_;
 };
 

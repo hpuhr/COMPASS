@@ -19,7 +19,7 @@
 
 #include "configurable.h"
 #include "singleton.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 #include "appmode.h"
 #include "result.h"
 #include "logmodel.h"

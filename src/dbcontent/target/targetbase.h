@@ -3,8 +3,9 @@
 #include <string>
 #include "json.hpp"
 
-#include "boost/optional.hpp"
 #include "logger.h"
+
+#include <boost/optional.hpp>
 
 class TargetBase
 {

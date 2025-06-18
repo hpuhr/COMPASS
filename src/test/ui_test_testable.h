@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "json.h"
+#include "json.hpp"
 
 #include <boost/optional.hpp>
 

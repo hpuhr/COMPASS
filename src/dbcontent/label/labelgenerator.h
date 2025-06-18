@@ -2,7 +2,7 @@
 #define DBCONTENTLABELGENERATOR_H
 
 #include "labelgeneratorconfig.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 #include "labeldirection.h"
 
 //#include <osg/Matrixd>

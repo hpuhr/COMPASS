@@ -18,7 +18,7 @@
 #ifndef ASTERIXPOSTPROCESS_H
 #define ASTERIXPOSTPROCESS_H
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class ASTERIXImportTask;
 

@@ -6,7 +6,7 @@
 #include "reconstructorbase.h"
 #include "task.h"
 #include "global.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QObject>
 
