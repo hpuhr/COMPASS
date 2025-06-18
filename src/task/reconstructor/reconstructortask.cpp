@@ -788,6 +788,15 @@ void ReconstructorTask::loadingDoneSlot()
 
         loading_slice_ = nullptr;
         assert (!processing_data_slice_);
+
+        if (last_slice)
+        {
+            loginf << "ReconstructorTask: loadingDoneSlot: finalizing last empty slice";
+
+            endReconstruction();
+            // release unused memory
+            malloc_trim(0);
+        }
     }
 
     if (cancelled_)
