@@ -321,14 +321,12 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
         x_stddev = sigma;
         y_stddev = sigma;
 
-        if (!meta_speed_vec_->isNull(index) && !meta_track_angle_vec_->isNull(index))
-        {
+        // if (!meta_speed_vec_->isNull(index) && !meta_track_angle_vec_->isNull(index))
+        // {
+        // speed based adaptation possible later
+        // }
 
-        }
-
-        return targetReport::PositionAccuracy(x_stddev,
-                                              y_stddev,
-                                              0.0);
+        return targetReport::PositionAccuracy(x_stddev, y_stddev, xy_cov);
     }
     else if (is_radar_)
     {

@@ -15,10 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLIENT_H_
-#define CLIENT_H_
-
-//#include "global.h"
+#pragma once
 
 #include <QApplication>
 
@@ -108,4 +105,3 @@ private:
     void copyConfigurationAndData();
 };
 
-#endif /* CLIENT_H_ */

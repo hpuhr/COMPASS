@@ -74,7 +74,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
     bool is_inside;
     //pair<dbContent::TargetPosition, bool> ret_pos;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    bool ok;
+    //bool ok;
 
     ValueComparisonResult cmp_res;
     string comment;

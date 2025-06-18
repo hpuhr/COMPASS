@@ -85,7 +85,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
     bool is_inside;
     //pair<dbContent::TargetPosition, bool> ret_pos;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    bool ok;
+    //bool ok;
 
     string comment;
 

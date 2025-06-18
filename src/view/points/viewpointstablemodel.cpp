@@ -141,7 +141,7 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
         logdbg << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
-        assert (index.row() < view_points_.size());
+        assert ((unsigned int)index.row() < view_points_.size());
 
         const ViewPoint& vp = view_points_.at(index.row());
 
@@ -177,7 +177,7 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
         if (table_columns_.at(index.column()).toStdString() == ViewPoint::VP_STATUS_KEY)
         {
             assert (index.row() >= 0);
-            assert (index.row() < view_points_.size());
+            assert ((unsigned int)index.row() < view_points_.size());
 
             const ViewPoint& vp = view_points_.at(index.row());
 
@@ -544,7 +544,7 @@ unsigned int ViewPointsTableModel::getIdOf (const QModelIndex& index)
     //    assert (map_it != view_points_.end());
 
     assert (index.row() >= 0);
-    assert (index.row() < view_points_.size());
+    assert ((unsigned int)index.row() < view_points_.size());
 
     return view_points_.at(index.row()).id();
 

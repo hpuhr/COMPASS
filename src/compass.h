@@ -161,6 +161,8 @@ public:
 
     unsigned int minAppHeight() const;
 
+    float appFontScale() const;
+
 protected:
     COMPASS();
 
@@ -199,6 +201,8 @@ protected:
 
     unsigned int min_app_width_ {1600};
     unsigned int min_app_height_ {1080};
+
+    float app_font_scale_{1.0};
 
     std::unique_ptr<SimpleConfig> simple_config_;
     std::unique_ptr<DBInterface> db_interface_;

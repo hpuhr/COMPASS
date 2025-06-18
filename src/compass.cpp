@@ -100,6 +100,8 @@ COMPASS::COMPASS()
     registerParameter("min_app_width", &min_app_width_, min_app_width_);
     registerParameter("min_app_height", &min_app_height_, min_app_height_);
 
+    registerParameter("app_font_scale", &app_font_scale_, app_font_scale_);
+
     assert (auto_live_running_resume_ask_time_ > 0);
     assert (auto_live_running_resume_ask_wait_time_ > 0);
     assert (auto_live_running_resume_ask_time_ > auto_live_running_resume_ask_wait_time_);
@@ -348,6 +350,11 @@ void COMPASS::checkSubConfigurables()
         generateSubConfigurableFromConfig("FFTManager", "FFTManager0");
         assert(fft_manager_);
     }
+}
+
+float COMPASS::appFontScale() const
+{
+    return app_font_scale_;
 }
 
 unsigned int COMPASS::minAppHeight() const

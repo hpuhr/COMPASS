@@ -18,7 +18,6 @@
 #include <iostream>
 
 #include "client.h"
-#include "mainwindow.h"
 #include "compass.h"
 #include "taskmanager.h"
 
@@ -36,24 +35,20 @@ int main(int argc, char** argv)
 
         Client client(argc, argv);
 
-        //QFont systemFont = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+        // make system your application font (applies to all widgets)
+        if (COMPASS::instance().isAppImage())
+        {
+            QFont system_font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
 
-        // 2) Make it your application font (applies to all widgets)
-        //client.setFont(systemFont);
+            system_font.setPointSizeF(system_font.pointSizeF() * COMPASS::instance().appFontScale());
+            client.setFont(system_font);
+        }
 
         if (client.quitRequested())
             return 0;
 
         if (!client.run())
             return -1;
-
-//        if (COMPASS::instance().mainWindow().automaticTasksDefined())
-//        {
-//            COMPASS::instance().mainWindow().performAutomaticTasks();
-
-//            if (COMPASS::instance().mainWindow().quitNeeded())
-//                return 0;
-//        }
 
         return client.exec();
     }
