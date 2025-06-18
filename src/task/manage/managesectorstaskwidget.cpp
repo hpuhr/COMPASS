@@ -595,8 +595,7 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
     QColor current_color = QColor(sector->colorStr().c_str());
 
     QColor color =
-            QColorDialog::getColor(current_color, QApplication::activeWindow(), "Select Sector Color",
-                                   QColorDialog::DontUseNativeDialog);
+            QColorDialog::getColor(current_color, QApplication::activeWindow(), "Select Sector Color");
 
     if (color.isValid())
     {

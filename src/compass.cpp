@@ -102,6 +102,8 @@ COMPASS::COMPASS()
 
     registerParameter("app_font_scale", &app_font_scale_, app_font_scale_);
 
+    registerParameter("disable_native_dialogs", &disable_native_dialogs_, disable_native_dialogs_);
+
     assert (auto_live_running_resume_ask_time_ > 0);
     assert (auto_live_running_resume_ask_wait_time_ > 0);
     assert (auto_live_running_resume_ask_time_ > auto_live_running_resume_ask_wait_time_);
@@ -350,6 +352,11 @@ void COMPASS::checkSubConfigurables()
         generateSubConfigurableFromConfig("FFTManager", "FFTManager0");
         assert(fft_manager_);
     }
+}
+
+bool COMPASS::disableNativeDialogs() const
+{
+    return disable_native_dialogs_;
 }
 
 float COMPASS::appFontScale() const

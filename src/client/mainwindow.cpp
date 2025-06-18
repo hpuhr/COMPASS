@@ -104,8 +104,8 @@ MainWindow::MainWindow()
     setLocale(QLocale::c());
 
     const char* appdir = getenv("APPDIR");
-    if (appdir)
-        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs); // disable native since they cause crashes
+    if (appdir && COMPASS::instance().disableNativeDialogs())
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs); // disable native
 
     setMinimumSize(QSize(COMPASS::instance().minAppWidth(), COMPASS::instance().minAppHeight()));
 

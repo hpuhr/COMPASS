@@ -163,6 +163,8 @@ public:
 
     float appFontScale() const;
 
+    bool disableNativeDialogs() const;
+
 protected:
     COMPASS();
 
@@ -203,6 +205,8 @@ protected:
     unsigned int min_app_height_ {1080};
 
     float app_font_scale_{1.0};
+
+    bool disable_native_dialogs_ {false};
 
     std::unique_ptr<SimpleConfig> simple_config_;
     std::unique_ptr<DBInterface> db_interface_;

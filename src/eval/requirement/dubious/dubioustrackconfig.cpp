@@ -274,7 +274,7 @@ BaseConfigWidget* DubiousTrackConfig::createWidget()
 
 void DubiousTrackConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    //auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
     //   auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
