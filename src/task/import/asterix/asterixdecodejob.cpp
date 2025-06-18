@@ -17,7 +17,7 @@
 
 #include "asterixdecodejob.h"
 #include "asteriximporttask.h"
-#include "json.h"
+#include "json_tools.h"
 #include "logger.h"
 //#include "asterixfiledecoder.h"
 //#include "asterixnetworkdecoder.h"

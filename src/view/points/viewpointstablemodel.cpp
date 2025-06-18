@@ -19,7 +19,7 @@
 #include "viewmanager.h"
 #include "viewpoint.h"
 #include "json.hpp"
-#include "json.h"
+#include "json_tools.h"
 //#include "stringconv.h"
 #include "files.h"
 #include "compass.h"

@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "json.h"
+#include "json_tools.h"
 
 #include "json.hpp"
 

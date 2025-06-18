@@ -42,7 +42,7 @@
 
 #include "logger.h"
 #include "stringconv.h"
-#include "json.h"
+#include "json_tools.h"
 #include "files.h"
 #include "compass.h"
 
