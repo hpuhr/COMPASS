@@ -600,6 +600,72 @@ std::pair<unsigned int, unsigned int> computeGeoWindowResolution(
 }
 
 
+/**
+ * @brief Converts a latitude string "DD:MM:SS.SSS[NS]" (or without hemisphere suffix) to decimal degrees.
+ *
+ * @param lat_str Latitude string, e.g. "47:26:58.9526N" or "47:26:58.9526"
+ * @param ok Reference to a boolean flag set to true on success, false on format error
+ * @return double Signed decimal degrees (positive for N, negative for S), undefined if !ok
+ */
+double convertLatitude(const std::string& lat_str, bool& ok)
+{
+    ok = false;
+    if (lat_str.empty())
+        return 0.0;
+
+    // Determine hemisphere: default to North if not specified
+    char hemisphere = 'N';
+    std::string core = lat_str;
+    char last_char = lat_str.back();
+    if (last_char == 'N' || last_char == 'S') {
+        hemisphere = last_char;
+        core = lat_str.substr(0, lat_str.size() - 1);
+    }
+
+    std::istringstream ss(core);
+    double degrees = 0.0, minutes = 0.0, seconds = 0.0;
+    char sep1 = '\0', sep2 = '\0';
+    if (!(ss >> degrees >> sep1 >> minutes >> sep2 >> seconds) || sep1 != ':' || sep2 != ':') {
+        return 0.0;
+    }
+
+    double decimal_degrees = degrees + (minutes / 60.0) + (seconds / 3600.0);
+    ok = true;
+    return (hemisphere == 'S') ? -decimal_degrees : decimal_degrees;
+}
+
+/**
+ * @brief Converts a longitude string "DDD:MM:SS.SSS[EW]" (or without hemisphere suffix) to decimal degrees.
+ *
+ * @param lon_str Longitude string, e.g. "008:34:25.5397E" or "008:34:25.5397"
+ * @param ok Reference to a boolean flag set to true on success, false on format error
+ * @return double Signed decimal degrees (positive for E, negative for W), undefined if !ok
+ */
+double convertLongitude(const std::string& lon_str, bool& ok) {
+    ok = false;
+    if (lon_str.empty())
+        return 0.0;
+
+    // Determine hemisphere: default to East if not specified
+    char hemisphere = 'E';
+    std::string core = lon_str;
+    char last_char = lon_str.back();
+    if (last_char == 'E' || last_char == 'W') {
+        hemisphere = last_char;
+        core = lon_str.substr(0, lon_str.size() - 1);
+    }
+
+    std::istringstream ss(core);
+    double degrees = 0.0, minutes = 0.0, seconds = 0.0;
+    char sep1 = '\0', sep2 = '\0';
+    if (!(ss >> degrees >> sep1 >> minutes >> sep2 >> seconds) || sep1 != ':' || sep2 != ':') {
+        return 0.0;
+    }
+
+    double decimal_degrees = degrees + (minutes / 60.0) + (seconds / 3600.0);
+    ok = true;
+    return (hemisphere == 'W') ? -decimal_degrees : decimal_degrees;
+}
 }  // namespace Number
 
 //void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list) {}

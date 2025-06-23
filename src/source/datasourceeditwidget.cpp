@@ -7,6 +7,7 @@
 #include "logger.h"
 #include "textfielddoublevalidator.h"
 #include "datasourcebase.h"
+#include "number.h"
 
 #include <QComboBox>
 #include <QLineEdit>
@@ -20,6 +21,7 @@
 
 using namespace std;
 using namespace dbContent;
+using namespace Utils;
 
 DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSourcesConfigurationDialog& dialog)
     : ds_man_(ds_man), dialog_(dialog)
@@ -128,14 +130,14 @@ DataSourceEditWidget::DataSourceEditWidget(DataSourceManager& ds_man, DataSource
     position_layout->addWidget(new QLabel("Latitude"), 0, 0);
 
     latitude_edit_ = new QLineEdit();
-    latitude_edit_->setValidator(new TextFieldDoubleValidator(-90, 90, 12));
+    //latitude_edit_->setValidator(new TextFieldDoubleValidator(-90, 90, 12));
     connect(latitude_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::latitudeEditedSlot);
     position_layout->addWidget(latitude_edit_, 0, 1);
 
     position_layout->addWidget(new QLabel("Longitude"), 1, 0);
 
     longitude_edit_ = new QLineEdit();
-    longitude_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 12));
+    //longitude_edit_->setValidator(new TextFieldDoubleValidator(-180, 180, 12));
     connect(longitude_edit_, &QLineEdit::textEdited, this, &DataSourceEditWidget::longitudeEditedSlot);
     position_layout->addWidget(longitude_edit_, 1, 1);
 
@@ -554,9 +556,25 @@ void DataSourceEditWidget::detectionTypeChangedSlot(int index)
 
 void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
 {
-    double value = value_str.toDouble();
+    bool ok;
 
-    loginf << "DataSourceEditWidget: latitudeEditedSlot: '" << value << "'";
+    double value = value_str.toDouble(&ok);
+
+    if (!ok)
+    {
+        value = Number::convertLatitude(value_str.toStdString(), ok);
+
+        if (ok)
+        {
+            assert (latitude_edit_);
+            latitude_edit_->setText(QString::number(value, 'g', 12));
+        }
+    }
+
+    loginf << "DataSourceEditWidget: latitudeEditedSlot: '" << value << "' ok " << ok;
+
+    if (!ok)
+        return;
 
     if (current_ds_in_db_)
     {
@@ -570,7 +588,20 @@ void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
 
 void DataSourceEditWidget::longitudeEditedSlot(const QString& value_str)
 {
-    double value = value_str.toDouble();
+    bool ok;
+
+    double value = value_str.toDouble(&ok);
+
+    if (!ok)
+    {
+        value = Number::convertLongitude(value_str.toStdString(), ok);
+
+        if (ok)
+        {
+            assert (longitude_edit_);
+            longitude_edit_->setText(QString::number(value, 'g', 12));
+        }
+    }
 
     loginf << "DataSourceEditWidget: longitudeEditedSlot: '" << value << "'";
 

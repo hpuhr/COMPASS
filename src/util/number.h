@@ -98,6 +98,9 @@ extern std::pair<unsigned int, unsigned int> computeGeoWindowResolution(
     double lat_min, double lat_max, double lon_min, double lon_max,
     double grid_max_resolution  = 0.001, unsigned int max_num_cells = 500);
 
+extern double convertLatitude(const std::string& latStr, bool& ok);
+extern double convertLongitude(const std::string& lonStr, bool& ok);
+
 //template <typename T>
 //double getStatistics(const std::vector<>);
 
