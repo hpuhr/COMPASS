@@ -1,14 +1,9 @@
-#ifndef ASTERIXJSONPARSER_H
-#define ASTERIXJSONPARSER_H
-
+#pragma once
 #include "configurable.h"
-//#include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-//#include "format.h"
 #include "jsondatamapping.h"
 #include "asterixjsonparserwidget.h"
 #include "propertylist.h"
-//#include "stringconv.h"
 
 #include <jasterix/iteminfo.h>
 
@@ -68,8 +63,6 @@ public:
     std::string dbContentName() const;
 
     void setMappingActive(JSONDataMapping& mapping, bool active);
-
-    //void updateMappings();
 
     std::string name() const;
     void name(const std::string& name);
@@ -157,4 +150,3 @@ protected:
 
 };
 
-#endif // ASTERIXJSONPARSER_H

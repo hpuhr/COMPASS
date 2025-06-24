@@ -267,8 +267,11 @@ void ASTERIXJSONParser::initialize()
 
             mapping->initializeIfRequired();
 
-            list_.addProperty(mapping->variable().name(), mapping->variable().dataType());
-            var_list_.add(mapping->variable());
+            if (!list_.hasProperty(mapping->variable().name()))
+                list_.addProperty(mapping->variable().name(), mapping->variable().dataType());
+
+            if (!var_list_.hasVariable(mapping->variable()))
+                var_list_.add(mapping->variable());
         }
 
         initialized_ = true;

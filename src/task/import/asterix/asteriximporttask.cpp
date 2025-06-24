@@ -35,6 +35,7 @@
 #include "projection.h"
 #include "projectionmanager.h"
 #include "asynctask.h"
+#include "dbcontent.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
@@ -738,6 +739,8 @@ void ASTERIXImportTask::reset()
     error_message_ = "";
 
     added_data_sources_.clear();
+
+    ASTERIXPostprocessJob::clearTimeJumpStats();
 }
 
 /**
@@ -991,6 +994,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         {
             loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: resetting date";
             ASTERIXPostprocessJob::clearCurrentDate();
+            ASTERIXPostprocessJob::clearTimeJumpStats();
         }
 
         current_data_source_name_ = tmp;
@@ -1131,7 +1135,7 @@ void ASTERIXImportTask::mapJSONObsoleteSlot()
 */
 void ASTERIXImportTask::postprocessDoneSlot()
 {
-    logdbg << "ASTERIXImportTask: postprocessDoneSlot: import_file " << source_.isFileType();
+    logdbg << "ASTERIXImportTask: postprocessDoneSlot";
 
     if (stopped_)
     {
@@ -1157,16 +1161,45 @@ void ASTERIXImportTask::postprocessDoneSlot()
     unsigned int buffer_cnt {0};
 
     for (auto& buf_it : job_buffers)
+    {
+        logdbg << "ASTERIXImportTask: postprocessDoneSlot: buffer " << buf_it.second->dbContentName()
+               << " size " << buf_it.second->size();
+
+        assert (buf_it.second->hasProperty(DBContent::meta_var_timestamp_));
+
         buffer_cnt += buf_it.second->size();
+    }
 
     logdbg << "ASTERIXImportTask: postprocessDoneSlot: buffer cnt " << buffer_cnt;
 
     if (buffer_cnt == 0)
     {
-        // quit
-        assert (num_packets_in_processing_);
-        --num_packets_in_processing_;
+        if (accumulated_buffers_.size())
+        {
+            // --num_packets_in_processing_; not required since queued and decrement will be done by insert
 
+            //queued buffers exist => add to queue since 0 data after
+            queued_insert_buffers_.push_back(std::move(accumulated_buffers_));
+            accumulated_buffers_.clear();
+
+            if (!insert_active_ &&
+                !queued_insert_buffers_.empty() &&
+                !COMPASS::instance().dbExportInProgress() &&
+                !COMPASS::instance().dbContentManager().loadInProgress())
+            {
+                logdbg << "ASTERIXImportTask: postprocessDoneSlot: inserting";
+                assert (!COMPASS::instance().dbContentManager().insertInProgress());
+
+                insertData();
+            }
+        }
+        else
+        {
+            assert (num_packets_in_processing_);
+            --num_packets_in_processing_;
+
+            updateFileProgressDialog();
+        }
 
         logdbg << "ASTERIXImportTask: postprocessDoneSlot: no data,"
                << " num_packets_in_processing_ " << num_packets_in_processing_
@@ -1202,6 +1235,9 @@ void ASTERIXImportTask::postprocessDoneSlot()
 
             for (auto& b : insert_buffers)
             {
+                if (!b.second->size())
+                    continue;
+
                 auto it = accumulated_buffers_.find(b.first);
                 if (it == accumulated_buffers_.end())
                     accumulated_buffers_[ b.first ] = std::move(b.second);
@@ -1213,10 +1249,18 @@ void ASTERIXImportTask::postprocessDoneSlot()
             // check if ready to queue in
             size_t size_max = 0;
             for (const auto& b : accumulated_buffers_)
+            {
+                logdbg << "ASTERIXImportTask: postprocessDoneSlot: buffer " << b.second->dbContentName()
+                       << " size " << b.second->size();
+
+                assert (b.second->hasProperty(DBContent::meta_var_timestamp_));
+
                 if (b.second->size() > size_max)
                     size_max = b.second->size();
+            }
 
-            logdbg << "ASTERIXImportTask: postprocessDoneSlot: accumulated buffers, maximum size " << size_max << " / " << settings_.chunk_size_insert;
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: accumulated buffers, maximum size "
+                   << size_max << " / " << settings_.chunk_size_insert;
 
             if (!decode_job_ || size_max >= settings_.chunk_size_insert)
             {
@@ -1244,8 +1288,9 @@ void ASTERIXImportTask::postprocessDoneSlot()
             !COMPASS::instance().dbExportInProgress() && 
             !COMPASS::instance().dbContentManager().loadInProgress())
         {
-            logdbg << "ASTERIXImportTask: postprocessDoneSlot: inserting, thread " << QThread::currentThreadId();
+            logdbg << "ASTERIXImportTask: postprocessDoneSlot: inserting";
             assert (!COMPASS::instance().dbContentManager().insertInProgress());
+
             insertData();
         }
     }
@@ -1404,8 +1449,9 @@ void ASTERIXImportTask::appModeSwitchSlot (AppMode app_mode_previous, AppMode ap
 */
 void ASTERIXImportTask::checkAllDone()
 {
-    logdbg << "ASTERIXImportTask: checkAllDone: all done " << all_done_ << " decode "
-           << (decode_job_ != nullptr)
+    logdbg << "ASTERIXImportTask: checkAllDone: all done " << all_done_
+           << " num_packets_in_processing_ " << num_packets_in_processing_
+           << " decode " << (decode_job_ != nullptr)
            << " map jobs " << json_map_jobs_.size()
            << " post jobs " << postprocess_jobs_.size()
            << " accumulated for insert " << accumulated_buffers_.size()
@@ -1420,7 +1466,7 @@ void ASTERIXImportTask::checkAllDone()
         !queued_insert_buffers_.size() && 
         !insert_active_)
     {
-        logdbg << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
+        loginf << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
 
         all_done_ = true;
         done_     = true; // why was this not set?

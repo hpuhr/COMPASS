@@ -604,6 +604,10 @@ void DBContent::updateDataSourcesBeforeInsert (shared_ptr<Buffer>& buffer)
     Variable& timestamp_var = variable(DBContent::meta_var_timestamp_.name());
     assert (timestamp_var.dataType() == PropertyDataType::TIMESTAMP);
     string timestamp_col_str = timestamp_var.dbColumnName();
+
+    if (!buffer->has<boost::posix_time::ptime>(timestamp_col_str))
+        logerr << "DBContent: updateDataSourcesBeforeInsert: no timestamp info given in " << name_;
+
     assert (buffer->has<boost::posix_time::ptime>(timestamp_col_str));
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();

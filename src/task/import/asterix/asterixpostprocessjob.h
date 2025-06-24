@@ -1,9 +1,9 @@
-#ifndef ASTERIXPOSTPROCESSJOB_H
-#define ASTERIXPOSTPROCESSJOB_H
+#pragma once
 
 #include "job.h"
 
-#include "boost/date_time/posix_time/ptime.hpp"
+#include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <memory>
 #include <map>
@@ -34,6 +34,7 @@ public:
     std::map<std::string, std::shared_ptr<Buffer>> buffers() { return std::move(buffers_); }
 
     static void clearCurrentDate();
+    static void clearTimeJumpStats();
 
 protected:
     void run_impl() override;
@@ -68,6 +69,10 @@ private:
     static std::map<std::string, std::string> obfuscate_acid_map_;
 
     // static vars for timestamp / timejump handling
+    static boost::mutex timestamp_mutex_;
+    static bool first_tod_;
+    static float last_reported_tod_;
+
     static bool current_date_set_;
     static boost::posix_time::ptime current_date_;
     static boost::posix_time::ptime previous_date_;
@@ -90,4 +95,3 @@ private:
     void obfuscateACID (std::string& value);
 };
 
-#endif // ASTERIXPOSTPROCESSJOB_H

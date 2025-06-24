@@ -4,8 +4,6 @@
 #include "buffer.h"
 #include "compass.h"
 #include "projectionmanager.h"
-//#include "projection.h"
-#include "json.hpp"
 #include "dbcontent/variable/metavariable.h"
 #include "util/stringconv.h"
 #include "util/timeconv.h"
@@ -13,10 +11,11 @@
 
 #include <QThread>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 
 const float tod_24h = 24 * 60 * 60;
+const float close_to_midgnight_offset_s = 60; // seconds
+const float not_close_to_midgnight_offset_s = 300; // seconds
 
 using namespace std;
 using namespace nlohmann;
@@ -26,6 +25,11 @@ using namespace Utils;
 std::map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_m3a_map_;
 std::map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_acad_map_;
 std::map<std::string, std::string> ASTERIXPostprocessJob::obfuscate_acid_map_;
+
+boost::mutex ASTERIXPostprocessJob::timestamp_mutex_;
+
+bool ASTERIXPostprocessJob::first_tod_ = true;
+float ASTERIXPostprocessJob::last_reported_tod_{0};
 
 bool ASTERIXPostprocessJob::current_date_set_ = false;
 boost::posix_time::ptime ASTERIXPostprocessJob::current_date_;
@@ -95,6 +99,15 @@ void ASTERIXPostprocessJob::clearCurrentDate()
     current_date_set_ = false;
     current_date_ = {};
     previous_date_ = {};
+}
+
+void ASTERIXPostprocessJob::clearTimeJumpStats()
+{
+    first_tod_ = true;
+    last_reported_tod_ = 0;
+
+    did_recent_time_jump_ = false;
+    had_late_time_ = false;
 }
 
 void ASTERIXPostprocessJob::run_impl()
@@ -199,8 +212,6 @@ void ASTERIXPostprocessJob::doADSBTimeProcessing()
 
     if (buffer->has<float>(DBContent::var_cat021_tod_dep_.name()))
         tod_dep_vec = &buffer->get<float>(DBContent::var_cat021_tod_dep_.name());
-
-
 
     for (unsigned int index=0; index < buffer_size; index++)
     {
@@ -366,6 +377,8 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
 void ASTERIXPostprocessJob::doTimeStampCalculation()
 {
+    boost::mutex::scoped_lock locker(timestamp_mutex_);
+
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     unsigned int buffer_size;
@@ -376,7 +389,8 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
 
         // tod
         assert (dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
-        dbContent::Variable& tod_var = dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
+        dbContent::Variable& tod_var =
+            dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
 
         Property tod_prop {tod_var.name(), tod_var.dataType()};
         assert (buf_it.second->hasProperty(tod_prop));
@@ -385,7 +399,8 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
 
         // timestamp
         assert (dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
-        dbContent::Variable& timestamp_var = dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
+        dbContent::Variable& timestamp_var =
+            dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
 
         Property timestamp_prop {timestamp_var.name(), timestamp_var.dataType()};
         assert (!buf_it.second->hasProperty(timestamp_prop));
@@ -395,8 +410,8 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
             buf_it.second->get<boost::posix_time::ptime>(timestamp_var.name());
 
         float tod;
-        //boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
         boost::posix_time::ptime timestamp;
+
         bool in_vicinity_of_24h_time = false; // within 5min of 24hrs
         bool outside_vicinity_of_24h_time = false; // outside of 10min to 24hrs
 
@@ -406,17 +421,42 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
             {
                 tod = tod_vec.get(index);
 
-                had_late_time_ |= (tod >= (tod_24h - 300.0)); // within last 5min before midnight
+                if (tod < 0 || tod > tod_24h)
+                {
+                    logerr << "ASTERIXPostprocessJob: doTimeStampCalculation: impossible tod "
+                           << String::timeStringFromDouble(tod);
+                    continue;
+                }
 
-                in_vicinity_of_24h_time = tod <= 300.0 || tod >= (tod_24h - 300.0); // within 10 minutes of midnight
+                if (first_tod_)
+                {
+                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: processing tod "
+                           << String::timeStringFromDouble(tod);
+
+                    first_tod_ = false;
+                    last_reported_tod_ = tod;
+                }
+                else if (tod - last_reported_tod_ >= 3600) // 1h
+                {
+                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: processing tod "
+                           << String::timeStringFromDouble(tod);
+                    last_reported_tod_ = tod;
+                }
+
+                had_late_time_ |= (tod >= (tod_24h - close_to_midgnight_offset_s)); // close before midnight
+
+                // within close time midnight
+                in_vicinity_of_24h_time = tod <= close_to_midgnight_offset_s
+                                          || tod >= (tod_24h - close_to_midgnight_offset_s);
 
                 if (tod > tod_24h/2) // late
-                    outside_vicinity_of_24h_time = tod <= tod_24h - 600.0;
+                    outside_vicinity_of_24h_time = tod <= tod_24h - not_close_to_midgnight_offset_s;
                 else // early
-                    outside_vicinity_of_24h_time = tod >= 600.0 ;
+                    outside_vicinity_of_24h_time = tod >= not_close_to_midgnight_offset_s;
 
                 if (in_vicinity_of_24h_time)
-                    logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
+                    logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod "
+                           << String::timeStringFromDouble(tod)
                            << " in 24h vicinity, had_late_time_ " << had_late_time_
                            << " did_recent_time_jump " << did_recent_time_jump_;
 
@@ -426,22 +466,25 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                     did_recent_time_jump_ = false;
                 }
 
-                if (!ignore_time_jumps_ && in_vicinity_of_24h_time) // check if timejump and assign timestamp to correct day
+                // check if timejump and assign timestamp to correct day
+                if (!ignore_time_jumps_ && in_vicinity_of_24h_time)
                 {
                     // check if timejump (if not yet done)
-                    if (!did_recent_time_jump_ && had_late_time_ && tod <= 300.0) // not yet handled timejump
+                    if (!did_recent_time_jump_ && had_late_time_
+                        && tod <= close_to_midgnight_offset_s) // not yet handled timejump
                     {
                         current_date_ += boost::posix_time::seconds((unsigned int) tod_24h);
                         previous_date_ = current_date_ - boost::posix_time::seconds((unsigned int) tod_24h);
 
-                        loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: detected time-jump from"
-                               << " previous " << Time::toDateString(previous_date_)
+                        loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: tod "
+                               << String::timeStringFromDouble(tod)
+                               << " detected time-jump from previous " << Time::toDateString(previous_date_)
                                << " to current " << Time::toDateString(current_date_);
 
                         did_recent_time_jump_ = true;
                     }
 
-                    if (tod <= 300.0) // early time of current day
+                    if (tod <= close_to_midgnight_offset_s) // early time of current day
                         timestamp = current_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
                     else // late time of previous day
                         timestamp = previous_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
@@ -470,10 +513,10 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
             }
         }
 
-        bool has_vec_min_max;
-        boost::posix_time::ptime ts_vec_min, ts_vec_max;
+        // bool has_vec_min_max;
+        // boost::posix_time::ptime ts_vec_min, ts_vec_max;
 
-        tie(has_vec_min_max, ts_vec_min, ts_vec_max) = timestamp_vec.minMaxValues();
+        // tie(has_vec_min_max, ts_vec_min, ts_vec_max) = timestamp_vec.minMaxValues();
     }
 }
 
@@ -830,11 +873,14 @@ void ASTERIXPostprocessJob::doFilters()
 
             for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
             {
-                if (filter_tod_active_ && !tod_vec.isNull(cnt)
-                    && (tod_vec.get(cnt) < filter_tod_min_ || tod_vec.get(cnt) > filter_tod_max_))
+                if (filter_tod_active_)
                 {
-                    to_be_removed.push_back(cnt);
-                    continue;
+                    if (tod_vec.isNull(cnt)
+                        || (tod_vec.get(cnt) < filter_tod_min_ || tod_vec.get(cnt) > filter_tod_max_))
+                    {
+                        to_be_removed.push_back(cnt);
+                        continue;
+                    }
                 }
             }
 

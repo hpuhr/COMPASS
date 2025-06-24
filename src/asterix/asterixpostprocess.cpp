@@ -23,11 +23,12 @@
 #include "json.hpp"
 
 #include <boost/range/adaptor/reversed.hpp>
-#include <bitset>
 
 using namespace Utils;
 using namespace nlohmann; //#define NDEBUG #undef NDEBUG
 using namespace std;
+
+const float tod_24h = 24 * 60 * 60;
 
 ASTERIXPostProcess::ASTERIXPostProcess() {}
 
@@ -109,11 +110,35 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
         {
             std::pair<unsigned int, unsigned int> sac_sic({sac, sic});
 
-            if (cat002_last_tod_period_.count(sac_sic) > 0)
+            if (cat002_last_tod_period_.count(sac_sic))
             {
                 double tod = record.at("141").at("Truncated Time of Day");
-                // double tod = record.at("140").at("Time-of-Day");
+
+                if (tod < 0 || tod >= tod_24h)
+                {
+                    logerr << "ASTERIXPostProcess: postProcessCAT001: impossible tod "
+                           << String::timeStringFromDouble(tod);
+                    record["140"]["Time-of-Day"] = nullptr;
+                    return;
+                }
+
+                if (cat002_last_tod_period_.at(sac_sic) < 0 || cat002_last_tod_period_.at(sac_sic) >= tod_24h)
+                {
+                    logerr << "ASTERIXPostProcess: postProcessCAT001: impossible cat002 time "
+                           << String::timeStringFromDouble(cat002_last_tod_period_.at(sac_sic));
+                    record["140"]["Time-of-Day"] = nullptr;
+                    return;
+                }
+
                 tod += cat002_last_tod_period_.at(sac_sic);
+
+                if (tod < 0 || tod >= tod_24h)
+                {
+                    logerr << "ASTERIXPostProcess: postProcessCAT001: impossible corrected tod "
+                           << String::timeStringFromDouble(tod);
+                    record["140"]["Time-of-Day"] = nullptr;
+                    return;
+                }
 
                 //  loginf << "corrected " <<
                 //  String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
@@ -149,10 +174,13 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
         {
             std::pair<unsigned int, unsigned int> sac_sic({sac, sic});
 
-            if (cat002_last_tod_.count(sac_sic) > 0)
+            if (cat002_last_tod_.count(sac_sic))
             {
-                record["140"]["Time-of-Day"] =
-                    cat002_last_tod_.at(sac_sic);  // set tod, better than nothing
+                double tod = cat002_last_tod_.at(sac_sic);
+
+                assert (tod >= 0 && tod <= tod_24h);
+                record["140"]["Time-of-Day"] = tod;  // set tod, better than nothing
+
             }
             else
                 logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without "
@@ -177,6 +205,24 @@ void ASTERIXPostProcess::postProcessCAT002(int sac, int sic, nlohmann::json& rec
             // std::pair<unsigned int, unsigned int> sac_sic ({sac, sic});
             double cat002_last_tod = record.at("030").at("Time of Day");
             double cat002_last_tod_period = 512.0 * ((int)(cat002_last_tod / 512));
+
+            if (cat002_last_tod < 0 || cat002_last_tod > tod_24h)
+            {
+                logerr << "ASTERIXPostProcess: postProcessCAT002: cat002_last_tod "
+                       << String::timeStringFromDouble(cat002_last_tod);
+                return;
+            }
+
+            if (cat002_last_tod_period < 0 || cat002_last_tod_period > tod_24h)
+            {
+                logerr << "ASTERIXPostProcess: postProcessCAT002: cat002_last_tod_period "
+                       << String::timeStringFromDouble(cat002_last_tod_period);
+                return;
+            }
+
+            assert (cat002_last_tod >= 0 && cat002_last_tod <= tod_24h);
+            assert (cat002_last_tod_period >= 0 && cat002_last_tod_period <= tod_24h);
+
             cat002_last_tod_period_[std::make_pair(sac, sic)] = cat002_last_tod_period;
             cat002_last_tod_[std::make_pair(sac, sic)] = cat002_last_tod;
         }
