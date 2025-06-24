@@ -116,7 +116,7 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
 
                 if (tod < 0 || tod >= tod_24h)
                 {
-                    logerr << "ASTERIXPostProcess: postProcessCAT001: impossible tod "
+                    logwrn << "ASTERIXPostProcess: postProcessCAT001: impossible tod "
                            << String::timeStringFromDouble(tod);
                     record["140"]["Time-of-Day"] = nullptr;
                     return;
@@ -124,7 +124,7 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
 
                 if (cat002_last_tod_period_.at(sac_sic) < 0 || cat002_last_tod_period_.at(sac_sic) >= tod_24h)
                 {
-                    logerr << "ASTERIXPostProcess: postProcessCAT001: impossible cat002 time "
+                    logwrn << "ASTERIXPostProcess: postProcessCAT001: impossible cat002 time "
                            << String::timeStringFromDouble(cat002_last_tod_period_.at(sac_sic));
                     record["140"]["Time-of-Day"] = nullptr;
                     return;
@@ -134,7 +134,7 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
 
                 if (tod < 0 || tod >= tod_24h)
                 {
-                    logerr << "ASTERIXPostProcess: postProcessCAT001: impossible corrected tod "
+                    logwrn << "ASTERIXPostProcess: postProcessCAT001: impossible corrected tod "
                            << String::timeStringFromDouble(tod);
                     record["140"]["Time-of-Day"] = nullptr;
                     return;

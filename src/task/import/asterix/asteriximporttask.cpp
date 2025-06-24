@@ -740,7 +740,7 @@ void ASTERIXImportTask::reset()
 
     added_data_sources_.clear();
 
-    ASTERIXPostprocessJob::clearTimeJumpStats();
+    ASTERIXPostprocessJob::clearTimeStats();
 }
 
 /**
@@ -993,9 +993,10 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         if (settings_.reset_date_between_files_)
         {
             loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: resetting date";
-            ASTERIXPostprocessJob::clearCurrentDate();
-            ASTERIXPostprocessJob::clearTimeJumpStats();
+            ASTERIXPostprocessJob::resetDateInfo();
         }
+
+        ASTERIXPostprocessJob::clearTimeStats();
 
         current_data_source_name_ = tmp;
     }

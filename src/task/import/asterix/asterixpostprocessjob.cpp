@@ -94,20 +94,22 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
 
 ASTERIXPostprocessJob::~ASTERIXPostprocessJob() { logdbg << "ASTERIXPostprocessJob: dtor"; }
 
-void ASTERIXPostprocessJob::clearCurrentDate()
+void ASTERIXPostprocessJob::resetDateInfo()
 {
     current_date_set_ = false;
     current_date_ = {};
     previous_date_ = {};
-}
-
-void ASTERIXPostprocessJob::clearTimeJumpStats()
-{
-    first_tod_ = true;
-    last_reported_tod_ = 0;
 
     did_recent_time_jump_ = false;
     had_late_time_ = false;
+}
+
+void ASTERIXPostprocessJob::clearTimeStats()
+{
+    loginf << "ASTERIXPostprocessJob: clearTimeJumpStats";
+
+    first_tod_ = true;
+    last_reported_tod_ = 0;
 }
 
 void ASTERIXPostprocessJob::run_impl()
@@ -423,10 +425,13 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
 
                 if (tod < 0 || tod > tod_24h)
                 {
-                    logerr << "ASTERIXPostprocessJob: doTimeStampCalculation: impossible tod "
+                    logwrn << "ASTERIXPostprocessJob: doTimeStampCalculation: impossible tod "
                            << String::timeStringFromDouble(tod);
                     continue;
                 }
+
+                if (tod - last_reported_tod_ < -12 * 3600) // timejump in reporting
+                    last_reported_tod_ = 0;
 
                 if (first_tod_)
                 {

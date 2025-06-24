@@ -33,8 +33,8 @@ public:
 
     std::map<std::string, std::shared_ptr<Buffer>> buffers() { return std::move(buffers_); }
 
-    static void clearCurrentDate();
-    static void clearTimeJumpStats();
+    static void resetDateInfo();
+    static void clearTimeStats();
 
 protected:
     void run_impl() override;
