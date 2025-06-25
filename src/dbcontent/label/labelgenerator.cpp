@@ -306,7 +306,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
             index = 0*3+2;
             varname = getVariableName(dbcontent_name, index);
             tmp.push_back(varname);
-            tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+            tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index, true));
             tmp.push_back(getVariableUnit(dbcontent_name, index));
 
             if (varname.size())
@@ -356,7 +356,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         index = 1*3+2;
         varname = getVariableName(dbcontent_name, index);
         tmp.push_back(varname);
-        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index, true));
         tmp.push_back(getVariableUnit(dbcontent_name, index));
 
         if (varname.size())
@@ -369,7 +369,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         varname = getVariableName(dbcontent_name, index);
 
         tmp.push_back(varname);
-        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index, true));
         tmp.push_back(getVariableUnit(dbcontent_name, index));
 
         if (varname.size())
@@ -380,7 +380,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         varname = getVariableName(dbcontent_name, index);
 
         tmp.push_back(varname);
-        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index, true));
         tmp.push_back(getVariableUnit(dbcontent_name, index));
 
         if (varname.size())
@@ -391,7 +391,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         varname = getVariableName(dbcontent_name, index);
 
         tmp.push_back(varname);
-        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index));
+        tmp.push_back(getVariableValue(dbcontent_name, index, buffer, buffer_index, true));
         tmp.push_back(getVariableUnit(dbcontent_name, index));
 
         if (varname.size())
