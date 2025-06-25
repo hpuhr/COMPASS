@@ -1588,7 +1588,7 @@ std::string LabelGenerator::getVariableName(const std::string& dbcontent_name, u
 }
 
 std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, unsigned int key,
-                                             std::shared_ptr<Buffer>& buffer, unsigned int index)
+                                             std::shared_ptr<Buffer>& buffer, unsigned int index, bool long_val)
 {
     assert (key != 0);
     assert (config_.label_config_.contains(dbcontent_name));
@@ -1848,7 +1848,10 @@ std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, 
             assert (var.representation() == Variable::Representation::STANDARD); // only 1 representation
             //value = values.getAsString(index);
 
-            value = Time::toTimeString(values.get(index)); // only display as HH:SS:MM:ZZZ
+            if (long_val)
+                value = Time::toString(values.get(index)); // display with date
+            else
+                value = Time::toTimeString(values.get(index)); // only display as HH:SS:MM:ZZZ
 
             return value;
         }
