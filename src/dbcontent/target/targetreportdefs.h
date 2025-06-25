@@ -249,6 +249,8 @@ struct ReconstructorInfo : public BaseInfo
     boost::optional<bool> ground_bit_;
     bool data_source_is_ground_only {false};
 
+    // adsb
+    boost::optional<unsigned int> mops_;
     boost::optional<unsigned int> ecat_;
 
     boost::optional<targetReport::Position>& position();

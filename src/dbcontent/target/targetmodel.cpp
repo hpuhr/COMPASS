@@ -169,6 +169,12 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
                     append_row(table_columns_.at(column), getCellContent(target, (Columns)column).toString());
             }
 
+            if (!show_adsb_columns_)
+            {
+                for (auto column : adsb_columns_)
+                    append_row(table_columns_.at(column), getCellContent(target, (Columns)column).toString());
+            }
+
             tooltip_html += "</table></body></html>";
             return tooltip_html;
         }
@@ -312,6 +318,10 @@ QVariant TargetModel::getCellContent(const Target& target, Columns col) const
             return target.modeCMax();
         else
             return "";
+    case ColADSBCount:
+        return target.adsbCount() ? target.adsbCount() : QVariant();
+    case ColADSBMOPS:
+        return target.adsbMopsStr().c_str();
     }
 
     return QVariant();
@@ -605,8 +615,8 @@ void TargetModel::createNewTargets(const std::map<unsigned int, dbContent::Recon
             tgt.dbContentCount(count_it.first, count_it.second);
 
                 // set adsb stuff
-        //        if (tgt_it.second.hasADSBMOPSVersion() && tgt_it.second.getADSBMOPSVersions().size())
-        //            target.adsbMOPSVersions(tgt_it.second.getADSBMOPSVersions());
+        tgt.adsbCount(tgt_it.second.adsb_count_);
+        tgt.adsbMOPSCount(tgt_it.second.adsb_mops_count_);
 
         //++utn;
     }
@@ -845,6 +855,11 @@ void TargetModel::showModeSColumns(bool show)
 void TargetModel::showModeACColumns(bool show)
 {
     show_mode_ac_columns_ = show;
+}
+
+void TargetModel::showADSBColumns(bool show)
+{
+    show_adsb_columns_ = show;
 }
 
 void TargetModel::updateCommentColumn()

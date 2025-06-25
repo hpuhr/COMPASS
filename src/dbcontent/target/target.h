@@ -74,11 +74,6 @@ public:
     void dbContentCount(const std::string& dbcontent_name, unsigned int value);
     //void clearDBContentCount(const std::string& dbcontent_name);
 
-    bool hasAdsbMOPSVersions() const;
-    std::set<unsigned int> adsbMOPSVersions() const;
-    void adsbMOPSVersions(std::set<unsigned int> values);
-    std::string adsbMOPSVersionsStr() const;
-
     bool hasPositionBounds() const;
     void setPositionBounds (double latitude_min, double latitude_max,
                            double longitude_min, double longitude_max);
@@ -86,6 +81,15 @@ public:
     double latitudeMax() const;
     double longitudeMin() const;
     double longitudeMax() const;
+
+    void adsbCount(unsigned int count);
+    unsigned int adsbCount() const;
+
+    void adsbMOPSCount(std::map<std::string, unsigned int> adsb_mops_count);
+
+    bool hasADSBMOPS() const;
+    std::set<unsigned int> adsbMopsList() const;
+    std::string adsbMopsStr() const;
 
     static const std::string KEY_EVAL;
     static const std::string KEY_EVAL_USE;
@@ -101,19 +105,21 @@ public:
     static const std::string KEY_MODE_C_MIN;
     static const std::string KEY_MODE_C_MAX;
     static const std::string KEY_COUNTS;
-    static const std::string KEY_ADSD_MOPS_VERSION;
+    static const std::string KEY_ADSB_COUNT;
+    static const std::string KEY_ADSB_MOPS;
     static const std::string KEY_LATITUDE_MIN;
     static const std::string KEY_LATITUDE_MAX;
     static const std::string KEY_LONGITUDE_MIN;
     static const std::string KEY_LONGITUDE_MAX;
     static const std::string KEY_ECAT;
+    static const std::string KEY_ADSB_INFO;
 
     static const Property     DBColumnID;
     static const Property     DBColumnInfo;
     static const PropertyList DBPropertyList;
 
-    virtual void targetCategory(Category ecat);
-    virtual Category targetCategory() const;
+    virtual void targetCategory(Category ecat) override;
+    virtual Category targetCategory() const override;
 
 protected:
     nlohmann::json info_;

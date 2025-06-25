@@ -88,6 +88,7 @@ protected:
     void showDurationColumns(bool show);
     void showModeACColumns(bool show);
     void showModeSColumns(bool show);
+    void showADSBColumns(bool show);
 
     void clearSelectedTargetsComments(const std::set<unsigned int>& utns);
     void evalUseSelectedTargets(const std::set<unsigned int>& utns);

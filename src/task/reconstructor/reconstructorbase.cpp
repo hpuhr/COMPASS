@@ -1060,6 +1060,7 @@ void ReconstructorBase::createTargetReports()
                 info.ground_bit_ = tgt_acc.groundBit(cnt);
                 info.data_source_is_ground_only = ground_only_ds_ids.count(info.ds_id_);
 
+                info.mops_ = tgt_acc.mopsVersion(cnt);
                 info.ecat_ = tgt_acc.ecat(cnt);
 
                 // insert info

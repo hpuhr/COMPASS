@@ -59,7 +59,9 @@ public:
         ColACADs,
         ColMode3A,
         ColModeCMin,
-        ColModeCMax
+        ColModeCMax,
+        ColADSBCount,
+        ColADSBMOPS
     };
 
     TargetModel(DBContentManager& dbcont_manager);
@@ -101,15 +103,10 @@ public:
     bool hasTargetsInfo();
     void deleteAllTargets();
     bool existsTarget(unsigned int utn) const;
-    //void createNewTarget(unsigned int utn);
     void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     dbContent::Target& target(unsigned int utn);
     const dbContent::Target& target(unsigned int utn) const;
     unsigned int size() const;
-
-    //void removeDBContentFromTargets(const std::string& dbcont_name);
-
-    //void storeTargetsEvalInfo();
 
     nlohmann::json asJSON() const;
     nlohmann::json targetAsJSON(unsigned int utn) const;
@@ -130,18 +127,21 @@ public:
     const std::vector<int>& durationColumns() const { return duration_columns_; }
     const std::vector<int>& modeSColumns() const { return mode_s_columns_; }
     const std::vector<int>& modeACColumns() const { return mode_ac_columns_; }
+    const std::vector<int>& adsbColumns() const { return adsb_columns_; }
 
     bool showMainColumns() { return show_main_columns_; }
     bool showEvalColumns() { return show_eval_columns_; }
     bool showDurationColumns() { return show_duration_columns_; }
     bool showModeSColumns() { return show_mode_s_columns_; }
     bool showModeACColumns() { return show_mode_ac_columns_; }
+    bool showADSBColumns() { return show_adsb_columns_; }
 
     void showMainColumns(bool show);
     void showEvalColumns(bool show);
     void showDurationColumns(bool show);
     void showModeSColumns(bool show);
     void showModeACColumns(bool show);
+    void showADSBColumns(bool show);
 
     void updateCommentColumn();
     void updateEvalUseColumn();
@@ -153,18 +153,21 @@ protected:
     DBContentManager& dbcont_manager_;
 
     QStringList               table_columns_   { "UTN", "Comment", "Category", "Eval", "Eval Excluded",
-                               "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max"};
+                               "#Updates", "Begin", "End", "Duration", "ACIDs", "ACADs", "M3/A", "MC Min", "MC Max",
+                               "ADS-B", "MOPS"};
     std::vector<int>          main_columns_    { ColUTN, ColComment, ColCategory, ColUseInEval };
     std::vector<int>          eval_columns_    { ColUseEvalDetails };
     std::vector<int>          duration_columns_{ ColNumUpdates, ColBegin, ColEnd, ColDuration };
     std::vector<int>          mode_s_columns_  { ColACIDs, ColACADs };
     std::vector<int>          mode_ac_columns_ { ColMode3A, ColModeCMin, ColModeCMax };
+    std::vector<int>          adsb_columns_    { ColADSBCount, ColADSBMOPS };
 
     bool show_main_columns_     = true;
     bool show_eval_columns_     = false;
     bool show_duration_columns_ = false;
     bool show_mode_s_columns_   = true;
     bool show_mode_ac_columns_  = false;
+    bool show_adsb_columns_     = false;
     
     TargetCache target_data_;
 };

@@ -188,7 +188,6 @@ public:
     std::set<std::string> acids_;
     std::set<unsigned int> mode_as_;
 
-    //std::set<unsigned int> mops_versions_;
     boost::optional<unsigned int> ecat_;
 
     boost::posix_time::ptime total_timestamp_min_, total_timestamp_max_; // over all data
@@ -206,6 +205,9 @@ public:
     //std::set <std::pair<unsigned int, unsigned int>> track_nums_; // ds_id, tn
 
     std::map <unsigned int, unsigned int> counts_; // dbcontent id -> count
+
+    unsigned int adsb_count_{0};
+    std::map<std::string, unsigned int> adsb_mops_count_; // mops str -> count
 
     std::map<boost::posix_time::ptime, reconstruction::Reference> references_; // ts -> tr
 
@@ -338,8 +340,8 @@ public:
     void removeOutdatedTargetReports();
     void removeTargetReportsLaterOrEqualThan(boost::posix_time::ptime ts);
 
-    virtual void targetCategory(Category ecat);
-    virtual Category targetCategory() const;
+    virtual void targetCategory(Category ecat) override;
+    virtual Category targetCategory() const override;
 
     // online reconstructor
     size_t trackerCount() const;
@@ -387,6 +389,12 @@ protected:
     static const double on_ground_max_alt_ft_;
     static const double on_ground_max_speed_ms_;
 
+    bool multithreaded_predictions_ = true;
+    bool dynamic_insertions_        = true;
+
+    nlohmann::json adsb_info_json_;
+
+    static GlobalStats global_stats_;
     bool hasTracker() const;
     void reinitTracker();
     //void reinitChain();
@@ -409,13 +417,6 @@ protected:
                                             const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
 
     std::unique_ptr<reconstruction::KalmanChain>& chain() const;
-
-    //std::unique_ptr<reconstruction::KalmanChain> chain_;
-
-    bool multithreaded_predictions_ = true;
-    bool dynamic_insertions_        = true;
-
-    static GlobalStats global_stats_;
 };
 
 } // namespace dbContent

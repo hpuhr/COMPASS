@@ -1,11 +1,13 @@
 #pragma once
 
-#include <string>
 #include "json.hpp"
 
 #include "logger.h"
 
 #include <boost/optional.hpp>
+
+#include <string>
+
 
 class TargetBase
 {
@@ -50,6 +52,7 @@ public:
     };
 
     TargetBase();
+    virtual ~TargetBase() {}
 
     virtual void targetCategory(Category ecat)=0;
     virtual Category targetCategory() const=0;

@@ -76,6 +76,7 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     showDurationColumns(model_.showDurationColumns());
     showModeSColumns(model_.showModeSColumns());
     showModeACColumns(model_.showModeACColumns());
+    showADSBColumns(model_.showADSBColumns());
 }
 
 /**
@@ -157,6 +158,13 @@ void TargetListWidget::addToConfigMenu(QMenu* menu)
     connect(mode_ac_cols_action, &QAction::toggled, this, &TargetListWidget::showModeACColumns);
     connect(mode_ac_cols_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
 
+    auto mode_adsb_action = column_menu->addAction("ADS-B");
+    mode_adsb_action->setCheckable(true);
+    mode_adsb_action->setChecked(model_.showModeACColumns());
+
+    connect(mode_adsb_action, &QAction::toggled, this, &TargetListWidget::showADSBColumns);
+    connect(mode_adsb_action, &QAction::toggled, this, &TargetListWidget::toolsChangedSignal);
+
     menu->addSeparator();
 
     QMenu* eval_menu = menu->addMenu("Evaluation");
@@ -222,6 +230,13 @@ void TargetListWidget::addToToolBar(QToolBar* tool_bar)
     mode_ac_cols_action->setToolTip("Show Mode A/C Columns");
 
     connect(mode_ac_cols_action, &QAction::toggled, this, &TargetListWidget::showModeACColumns);
+
+    auto mode_adsb_action = tool_bar->addAction("ADS-B");
+    mode_adsb_action->setCheckable(true);
+    mode_adsb_action->setChecked(model_.showModeACColumns());
+    mode_adsb_action->setToolTip("Show ADS-B Columns");
+
+    connect(mode_adsb_action, &QAction::toggled, this, &TargetListWidget::showADSBColumns);
 }
 
 /**
@@ -702,6 +717,17 @@ void TargetListWidget::showModeSColumns(bool show)
     model_.showModeSColumns(show);
 
     for (int c : model_.modeSColumns())
+        table_view_->setColumnHidden(c, !show);
+
+    table_view_->resizeColumnsToContents();
+    table_view_->resizeRowsToContents();
+}
+
+void TargetListWidget::showADSBColumns(bool show)
+{
+    model_.showADSBColumns(show);
+
+    for (int c : model_.adsbColumns())
         table_view_->setColumnHidden(c, !show);
 
     table_view_->resizeColumnsToContents();

@@ -300,14 +300,15 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
             ecat_ = (unsigned int) TargetBase::Category::FFT;
     }
 
-    //    if (tr.has_adsb_info_ && tr.has_mops_version_)
-    //    {
-    //        if (!mops_versions_.count(tr.mops_version_))
-    //            mops_versions_.insert(tr.mops_version_);
-    //    }
+    if (tr.dbcont_id_ == 21)
+    {
+        adsb_count_++;
 
-    //    if (!tmp_)
-    //        tr.addAssociated(this);
+        if (tr.mops_)
+            adsb_mops_count_[to_string(*tr.mops_)] += 1;
+        else
+            adsb_mops_count_["NULL"] += 1;
+    }
 
     if (do_debug)
         loginf << "DBG add to tracker";

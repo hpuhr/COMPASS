@@ -96,10 +96,12 @@ const nlohmann::json TargetBase::emitter_specs_ = {
                  }}
 };
 
-TargetBase::TargetBase() {}
+TargetBase::TargetBase()
+{}
 
 std::string TargetBase::emitterCategoryStr() const
 {
     return toString(targetCategory());
 }
+
 

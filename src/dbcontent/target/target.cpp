@@ -20,12 +20,14 @@ const std::string Target::KEY_MODE_3A                    = "mode_3a_codes";
 const std::string Target::KEY_MODE_C_MIN                 = "mode_c_min";
 const std::string Target::KEY_MODE_C_MAX                 = "mode_c_max";
 const std::string Target::KEY_COUNTS                     = "dbcontent_counts";
-const std::string Target::KEY_ADSD_MOPS_VERSION          = "adsb_mops_versions";
 const std::string Target::KEY_LATITUDE_MIN               = "latitude_min";
 const std::string Target::KEY_LATITUDE_MAX               = "latitude_max";
 const std::string Target::KEY_LONGITUDE_MIN              = "longitude_min";
 const std::string Target::KEY_LONGITUDE_MAX              = "longitude_max";
 const std::string Target::KEY_ECAT                       = "emitter_category";
+const std::string Target::KEY_ADSB_INFO                  = "adsb_info";
+const std::string Target::KEY_ADSB_COUNT                 = "count";
+const std::string Target::KEY_ADSB_MOPS                  = "mops";
 
 const Property     Target::DBColumnID     = Property("utn" , PropertyDataType::UINT);
 const Property     Target::DBColumnInfo   = Property("json", PropertyDataType::JSON);
@@ -310,44 +312,6 @@ void Target::dbContentCount(const std::string& dbcontent_name, unsigned int valu
 //         info_[KEY_COUNTS].erase(dbcontent_name);
 // }
 
-bool Target::hasAdsbMOPSVersions() const
-{
-    if (!info_.contains(KEY_ADSD_MOPS_VERSION))
-        return false;
-
-    return info_.at(KEY_ADSD_MOPS_VERSION).get<std::set<unsigned int>>().size();
-}
-
-std::set<unsigned int> Target::adsbMOPSVersions() const
-{
-    if (!info_.contains(KEY_ADSD_MOPS_VERSION))
-        return {};
-
-    return info_.at(KEY_ADSD_MOPS_VERSION).get<std::set<unsigned int>>();
-}
-
-void Target::adsbMOPSVersions(std::set<unsigned int> values)
-{
-    info_[KEY_ADSD_MOPS_VERSION] = values;
-}
-
-std::string Target::adsbMOPSVersionsStr() const
-{
-    std::ostringstream out;
-
-    unsigned int cnt=0;
-    for (const auto it : adsbMOPSVersions())
-    {
-        if (cnt != 0)
-            out << ", ";
-
-        out << it;
-        ++cnt;
-    }
-
-    return out.str().c_str();
-}
-
 bool Target::hasPositionBounds() const
 {
     return info_.count(KEY_LATITUDE_MIN) && info_.count(KEY_LATITUDE_MAX)
@@ -384,6 +348,82 @@ double Target::longitudeMax() const
 {
     assert (info_.count(KEY_LONGITUDE_MAX));
     return info_.at(KEY_LONGITUDE_MAX);
+}
+
+void Target::adsbCount(unsigned int count)
+{
+    info_[KEY_ADSB_INFO][KEY_ADSB_COUNT] = count;
+}
+
+unsigned int Target::adsbCount() const
+{
+    logdbg << "Target: adsbCount";
+
+    unsigned int count = 0;
+
+    if (info_.count(KEY_ADSB_INFO) && info_.at(KEY_ADSB_INFO).count(KEY_ADSB_COUNT))
+    {
+        assert (info_.at(KEY_ADSB_INFO).at(KEY_ADSB_COUNT).is_number());
+        count = info_.at(KEY_ADSB_INFO).at(KEY_ADSB_COUNT);
+    }
+
+    return count;
+}
+
+void Target::adsbMOPSCount(std::map<std::string, unsigned int> adsb_mops_count)
+{
+    logdbg << "Target: adsbMOPSCount";
+
+    info_[KEY_ADSB_INFO][KEY_ADSB_MOPS] = adsb_mops_count;
+}
+
+
+bool Target::hasADSBMOPS() const
+{
+    return info_.count(KEY_ADSB_INFO) && info_.at(KEY_ADSB_INFO).count(KEY_ADSB_MOPS);
+}
+
+std::set<unsigned int> Target::adsbMopsList() const
+{
+    logdbg << "Target: adsbMopsList";
+
+    std::set<unsigned int> ret;
+
+    if (hasADSBMOPS())
+    {
+        for (const auto& mops_it : info_.at(KEY_ADSB_INFO).at(KEY_ADSB_MOPS).get<
+                                   std::map<std::string, nlohmann::json>>())
+            ret.insert(std::stoul(mops_it.first));
+    }
+
+    return ret;
+}
+
+std::string Target::adsbMopsStr() const
+{
+    logdbg << "Target: adsbMopsStr";
+
+    assert (hasADSBMOPS());
+
+    unsigned int count = 0;
+
+    std::ostringstream out;
+
+    if (hasADSBMOPS())
+    {
+        for (const auto& mops_it : info_.at(KEY_ADSB_INFO).at(KEY_ADSB_MOPS).get<
+                                   std::map<std::string, nlohmann::json>>())
+        {
+            count = mops_it.second;
+
+            if (out.str().size())
+                out << "\n";
+
+            out << mops_it.first << " (" << count << ")";
+        }
+    }
+
+    return out.str();
 }
 
 void Target::targetCategory(TargetBase::Category category)

@@ -138,13 +138,13 @@ void EvaluationTargetData::finalize () const
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (dbcont_man.hasTargetsInfo()   && 
-        dbcont_man.existsTarget(utn_) && 
-        dbcont_man.target(utn_).hasAdsbMOPSVersions())
+    if (dbcont_man.hasTargetsInfo()   &&
+        dbcont_man.existsTarget(utn_) &&
+        dbcont_man.target(utn_).hasADSBMOPS())
     {
         has_adsb_info_ = true;
         has_mops_versions_ = true;
-        mops_versions_ = dbcont_man.target(utn_).adsbMOPSVersions();
+        mops_versions_ = dbcont_man.target(utn_).adsbMopsList();
     }
 
     //    std::set<unsigned int> mops_version;
@@ -1801,7 +1801,7 @@ EvaluationTarget EvaluationTargetData::toTarget() const
     if (has_mode_c_) target.modeCMinMax(modeCMin(), modeCMax());
     target.dbContentCount(dbcontent_ref, numRefUpdates());
     target.dbContentCount(dbcontent_tst, numTstUpdates());
-    if (hasMOPSVersion()) target.adsbMOPSVersions(mopsVersions());
+    //if (hasMOPSVersion()) target.adsbMOPSVersions(mopsVersions());
     if (hasPos()) target.setPositionBounds(latitudeMin(), latitudeMax(), longitudeMin(), longitudeMax());
     target.targetCategory(dbcont_man_.emitterCategory(utn_));
     target.interestFactors(interestFactors());
