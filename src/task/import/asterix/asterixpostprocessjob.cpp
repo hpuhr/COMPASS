@@ -11,20 +11,18 @@
 
 #include <QThread>
 
-
-
 const float tod_24h = 24 * 60 * 60;
-const float close_to_midgnight_offset_s = 60; // seconds
-const float not_close_to_midgnight_offset_s = 300; // seconds
+const float close_to_midgnight_offset_s = 300; // seconds
+const float not_close_to_midgnight_offset_s = 600; // seconds
 
 using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
 
-std::map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_m3a_map_;
-std::map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_acad_map_;
-std::map<std::string, std::string> ASTERIXPostprocessJob::obfuscate_acid_map_;
+tbb::concurrent_unordered_map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_m3a_map_;
+tbb::concurrent_unordered_map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_acad_map_;
+tbb::concurrent_unordered_map<std::string, std::string> ASTERIXPostprocessJob::obfuscate_acid_map_;
 
 boost::mutex ASTERIXPostprocessJob::timestamp_mutex_;
 

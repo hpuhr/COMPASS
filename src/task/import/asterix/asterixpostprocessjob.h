@@ -5,6 +5,8 @@
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/thread/mutex.hpp>
 
+#include "tbbhack.h"
+
 #include <memory>
 #include <map>
 
@@ -64,9 +66,9 @@ private:
 
     bool do_obfuscate_secondary_info_{false};
 
-    static std::map<unsigned int, unsigned int> obfuscate_m3a_map_;
-    static std::map<unsigned int, unsigned int> obfuscate_acad_map_;
-    static std::map<std::string, std::string> obfuscate_acid_map_;
+    static tbb::concurrent_unordered_map<unsigned int, unsigned int> obfuscate_m3a_map_;
+    static tbb::concurrent_unordered_map<unsigned int, unsigned int> obfuscate_acad_map_;
+    static tbb::concurrent_unordered_map<std::string, std::string> obfuscate_acid_map_;
 
     // static vars for timestamp / timejump handling
     static boost::mutex timestamp_mutex_;

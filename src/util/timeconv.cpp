@@ -216,7 +216,7 @@ string toTimeString(const boost::posix_time::ptime& value)
     ostringstream date_stream; // thread_local wrong string
 
     // thread-safe static locale setup
-    static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(str_format.c_str()));
+    static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(time_str_format.c_str()));
 
     // static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(str_format.c_str()));
     date_stream.imbue(custom_locale);
