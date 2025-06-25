@@ -50,15 +50,15 @@ void Projection::getGroundRange(
     return;
 }
 
-void Projection::addAllRadarCoordinateSystems()
+void Projection::addAllCoordinateSystems()
 {
-    logdbg << "Projection: addAllRadarCoordinateSystems: added " << radar_coordinate_systems_added_;
+    loginf << "Projection: addAllCoordinateSystems: adding";
 
-    if (!radar_coordinate_systems_added_)
+    if (!coordinate_systems_added_)
     {
-        boost::mutex::scoped_lock locker(radar_coordinate_systems_mutex_);
+        boost::mutex::scoped_lock locker(coordinate_systems_mutex_);
 
-        if (radar_coordinate_systems_added_)
+        if (coordinate_systems_added_)
             return;
 
         DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
@@ -70,6 +70,7 @@ void Projection::addAllRadarCoordinateSystems()
                 if (!ds_it->hasPosition())
                     continue;
 
+                loginf << "Projection: addAllCoordinateSystems: adding " << ds_it->name();
                 addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());
             }
         }
@@ -81,11 +82,12 @@ void Projection::addAllRadarCoordinateSystems()
                 if (!ds_it->hasPosition())
                     continue;
 
+                loginf << "Projection: addAllCoordinateSystems: adding " << ds_it->name();
                 addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());
             }
         }
 
-        radar_coordinate_systems_added_ = true;
+        coordinate_systems_added_ = true;
     }
 }
 
@@ -93,11 +95,11 @@ std::string Projection::name() const { return name_; }
 
 void Projection::name(const std::string& name) { name_ = name; }
 
-bool Projection::radarCoordinateSystemsAdded()
+bool Projection::coordinateSystemsAdded()
 {
-    boost::mutex::scoped_lock locker(radar_coordinate_systems_mutex_);
+    boost::mutex::scoped_lock locker(coordinate_systems_mutex_);
 
-    return radar_coordinate_systems_added_;
+    return coordinate_systems_added_;
 }
 
 void Projection::checkSubConfigurables() {}

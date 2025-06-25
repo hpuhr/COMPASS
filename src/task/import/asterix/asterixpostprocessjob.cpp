@@ -129,6 +129,7 @@ void ASTERIXPostprocessJob::run_impl()
 
     doTimeStampCalculation();
     doRadarPlotPositionCalculations();
+    doXYPositionCalculations();
     doADSBPositionProcessing();
     doGroundSpeedCalculations();
 
@@ -527,6 +528,14 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 {
     // radar calculations
     ProjectionManager::instance().doRadarPlotPositionCalculations(buffers_);
+}
+
+void ASTERIXPostprocessJob::doXYPositionCalculations()
+{
+    logdbg << "ASTERIXPostprocessJob: doXYPositionCalculations";
+
+    // tracked data sources with only x/y coordinates
+    ProjectionManager::instance().doXYPositionCalculations(buffers_);
 }
 
 void ASTERIXPostprocessJob::doADSBPositionProcessing()

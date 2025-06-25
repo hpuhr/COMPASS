@@ -479,7 +479,7 @@ Result EvaluationCalculator::evaluateData()
 
     Projection& projection = ProjectionManager::instance().currentProjection();
     projection.clearCoordinateSystems();
-    projection.addAllRadarCoordinateSystems();
+    projection.addAllCoordinateSystems();
 
     // clean previous
     results_gen_->clear();

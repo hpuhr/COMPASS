@@ -411,7 +411,7 @@ void ReconstructorTask::run()
 
     Projection& projection = ProjectionManager::instance().currentProjection();
     projection.clearCoordinateSystems();
-    projection.addAllRadarCoordinateSystems();
+    projection.addAllCoordinateSystems();
 
     loginf << "ReconstructorTask: run: started";
 

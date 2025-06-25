@@ -863,7 +863,7 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
     assert(proj_man.hasCurrentProjection());
     Projection& projection = proj_man.currentProjection();
     projection.clearCoordinateSystems(); // to rebuild from data sources
-    projection.addAllRadarCoordinateSystems();
+    projection.addAllCoordinateSystems();
 
     loginf << "ASTERIXImportTask: run: starting decode job";
 

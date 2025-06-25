@@ -68,6 +68,7 @@ public:
 
     // in place calculation, returns transformation errors count
     unsigned int doRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
+    unsigned int doXYPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
     // returns transformation errors count, update buffers
     std::pair<unsigned int, std::map<std::string, std::shared_ptr<Buffer>>>
       doUpdateRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
@@ -108,5 +109,8 @@ protected:
     unsigned int calculateRadarPlotPositions (std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
                                               NullableVector<double>& target_latitudes_vec,
                                               NullableVector<double>& target_longitudes_vec);
+    unsigned int doXYPositionCalculations (std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
+                                             NullableVector<double>& target_latitudes_vec,
+                                             NullableVector<double>& target_longitudes_vec);
 };
 

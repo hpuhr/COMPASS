@@ -111,7 +111,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     Projection& projection = proj_man.currentProjection();
-    assert (projection.radarCoordinateSystemsAdded());
+    assert (projection.coordinateSystemsAdded());
 
     unsigned int tst_ds_id;
 
