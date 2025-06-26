@@ -89,8 +89,8 @@ void ASTERIXDecoderFile::processCurrentFile()
     if (!current_file.used)
         return;
 
-    //COMPASS::instance().logInfo("ASTERIX Import") << "reading '" << current_file.filename << "'";
-    // logging one after decoding stage
+    //COMPASS::instance().logInfo("ASTERIX Import") << "decoding '" << current_file.filename << "'";
+    // done in ASTERIXTimestampCalculator
 
     try
     {

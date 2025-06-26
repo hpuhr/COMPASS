@@ -25,15 +25,15 @@
 #include "asterixpostprocessjob.h"
 #include "asterixjsonparsingschema.h"
 #include "asteriximportsource.h"
+#include "asterixtimestampcalculator.h"
 #include "task.h"
 #include "appmode.h"
 
 #include <QObject>
 #include <QMessageBox>
 
-//#include <deque>
 #include <memory>
-//#include <mutex>
+
 
 class TaskManager;
 
@@ -131,6 +131,8 @@ public slots:
 
     void mapJSONDoneSlot();
     void mapJSONObsoleteSlot();
+
+    void timestampCalculationDoneSlot();
 
     void postprocessDoneSlot();
     void postprocessObsoleteSlot();
@@ -233,6 +235,8 @@ protected:
     unsigned int num_records_ {0};
 
     std::vector<std::shared_ptr<ASTERIXJSONMappingJob>>         json_map_jobs_;
+    ASTERIXTimestampCalculator ts_calculator_;
+    std::future<void> ts_calc_future_;
     std::vector<std::shared_ptr<ASTERIXPostprocessJob>>         postprocess_jobs_;
     std::map<std::string, std::shared_ptr<Buffer>>              accumulated_buffers_;
     std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_insert_buffers_;

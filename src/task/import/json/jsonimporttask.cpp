@@ -529,8 +529,10 @@ void JSONImportTask::mapJSONDoneSlot()
             read_json_job_->unpause();
     }
 
+    // date_
+
     std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
-            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_);
+            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers));
 
     postprocess_jobs_.push_back(postprocess_job);
 

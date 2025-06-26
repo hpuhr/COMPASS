@@ -632,6 +632,33 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValues(unsigned int index)
     return std::tuple<bool,T,T> {set, min, max};
 }
 
+// template <>
+// std::tuple<bool,boost::posix_time::ptime,boost::posix_time::ptime> NullableVector<boost::posix_time::ptime>::minMaxValues(unsigned int index)
+// {
+//     bool set = false;
+//     boost::posix_time::ptime min{}, max{};
+
+//     for (; index < data_.size(); ++index)
+//     {
+//         if (!isNull(index) && !data_.at(index).is_not_a_date_time())  // not for null
+//         {
+//             if (!set)
+//             {
+//                 min = data_.at(index);
+//                 max = data_.at(index);
+//                 set = true;
+//             }
+//             else
+//             {
+//                 min = std::min(min, data_.at(index));
+//                 max = std::max(max, data_.at(index));
+//             }
+//         }
+//     }
+
+//     return std::tuple<bool,boost::posix_time::ptime,boost::posix_time::ptime> {set, min, max};
+// }
+
 /**
  * Special case for booleans.
  */
