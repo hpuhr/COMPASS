@@ -1,3 +1,4 @@
+
 \chapter{UI Overview}
 \label{sec:ui_overview}
 
@@ -6,11 +7,12 @@ In this section, the main GUI components are described, to give an overview and 
 \subfile{ui_main_window}
 
 \section{Main Menu}
+\label{sec:main_menu}
 
 \subsection{File Menu}
 \label{sec:ui_overview_file_menu}
 
-Databases can be created, opened and closed using the File menu.
+Databases can be created, opened and closed using the 'File' menu.
 
 \begin{figure}[H]
   \center
@@ -30,23 +32,23 @@ Databases can be created, opened and closed using the File menu.
 \end{itemize}
 \  \\
 
-After a database was opened, the 'Import' menu becomes available, and the main window looks as follows:
+After a database was opened, the 'Import' menu becomes available, and the Main Window looks as follows:
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
     \includegraphics[width=19cm]{figures/main_window_opened.png}
-  \caption{Main Window After Opening a Database}
+  \caption{Main Window after opening an empty database}
 \end{figure}
 
 \subsection{Import Menu}
 \label{sec:ui_overview_import_menu}
 
-Data can be imported into the database using the Import menu. This menu is only accessible if a database has been opened.
+Data can be imported into the database using the 'Import' menu. This menu is only accessible if a database has been opened.
 
 \begin{figure}[H]
   \center
     \includegraphics[width=6cm,frame]{figures/ui_import_menu.png}
-  \caption{File Menu}
+  \caption{Import Menu}
 \end{figure}
 
 \begin{itemize}
@@ -80,7 +82,7 @@ Data can be imported into the database using the Import menu. This menu is only 
 \subsection{Configuration Menu}
 \label{sec:ui_overview_config_menu}
 
-Data sources and sectors can be configured using the Configuration menu. Further, the currently defined Meta Variables can be inspected.
+Data Sources and Sectors can be configured using the 'Configuration' menu. Further, the currently defined Meta Variables can be inspected.
 
 \begin{figure}[H]
   \center
@@ -89,71 +91,56 @@ Data sources and sectors can be configured using the Configuration menu. Further
 \end{figure}
 
 \begin{itemize}
- \item Data Sources: Configure data sources
+ \item Data Sources: Configure Data Sources
   \begin{itemize}
- \item see \nameref{sec:ui_configure_data_sources}
- \end{itemize}
+   \item see \nameref{sec:ui_configure_data_sources}
+  \end{itemize}
+ \item FFTs: Configure Fixed Field Transponders
+  \begin{itemize}
+   \item see \nameref{sec:ui_configure_ffts}
+  \end{itemize}
  \item Meta Variables: Display current Meta Variables
   \begin{itemize}
- \item see \nameref{sec:configure_meta_vars}
- \end{itemize}
- \item Sectors: Configure sectors in the database
- \begin{itemize}
- \item see \nameref{sec:ui_configure_sectors}
- \end{itemize}
-  \item Licenses: Manage licences
- \begin{itemize}
- \item see \nameref{sec:ui_configure_licenses}
- \end{itemize}
-   \item Dark Mode: Enable/Disable dark mode (after restart)
- \begin{itemize}
- \item see \nameref{sec:ui_overview_dark_mode}
- \end{itemize}
+   \item see \nameref{sec:configure_meta_vars}
+  \end{itemize}
+ \item Sectors: Configure Sectors in the database
+  \begin{itemize}
+   \item see \nameref{sec:ui_configure_sectors}
+  \end{itemize}
+ \item \nameref{sec:ui_configure_licenses}: Manage licences
+ \item \nameref{sec:ui_overview_dark_mode}: Enable/Disable dark mode (after restart)
+ \item Refresh Views Automatically: Sets if views show trigger an automatic data re-load process if any configuration changes are made (e.g. adding a DBContent variable in Table View)
 \end{itemize}
-\  \\
-
-The 'Refresh Views Automatically' checkbox sets if views show trigger an automatic data re-load process if any configuration changes are made (e.g. adding a DBContent variable in TextView, ...).
+\  \\ 
 
 \subsection{Process Menu}
 \label{sec:ui_overview_process_menu}
 
-Post-processing tasks can be performed using the Process menu. This menu is only accessible if a database was opened.
+Post-processing tasks can be performed using the 'Process' menu. This menu is only accessible if a database was opened.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{figures/ui_process_menu.png}
+    \includegraphics[width=5cm,frame]{figures/ui_process_menu.png}
   \caption{Process Menu}
 \end{figure}
 
 \begin{itemize}
- \item Calculate Radar Plot Positions: (Re-)Calculate Radar plot position information
-   \begin{itemize}
- \item see \nameref{sec:ui_proc_radar_plot_pos}
- \end{itemize}
- \item Calculate ARTAS Target Report Usage: Associate used target reports to ARTAS tracks based on ARTAS TRI information
-   \begin{itemize}
-   \item see \nameref{sec:ui_associate_tr_artas}
-   \end{itemize}
-  \item Reconstruct References: Find unique targets, associate target reports and calculate reference trajectories
-   \begin{itemize}
- \item see \nameref{sec:ui_proc_reconst_references}
- \end{itemize}
-
+ \item \nameref{sec:ui_proc_radar_plot_pos}: (Re-)Calculate Radar plot position information
+ \item \nameref{sec:ui_associate_tr_artas}: Associate used target reports to ARTAS tracks based on ARTAS TRI information
+ \item \nameref{sec:ui_proc_reconst_references}: Find unique targets, associate target reports and calculate reference trajectories
+ \item \nameref{sec:ui_proc_evaluate}: Run a new Evaluation
 \end{itemize}
 \  \\
 
 \subsection{UI Menu}
 \label{sec:ui_overview_ui_menu}
 
-The UI can be reset to a "default" state (as existed at application startup) using the "Reset Views" function.
+The UI can be reset to a "default" state (as existed at application startup) using the 'Reset Views' function.
 
 \subfile{import/ui_import}
 \subfile{config/ui_configuration}
 \subfile{process/ui_process}
 \subfile{ui_ui}
-\subfile{ui_data_sources}
-\subfile{ui_filters}
-\subfile{ui_targets}
 \subfile{ui_views}
 
 \section{Dark Mode}

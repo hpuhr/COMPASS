@@ -1,17 +1,55 @@
 
-\chapter{Filters}
+\section{Filters}
 \label{sec:filters} 
 
-\section{Default Filters}
-\label{sec:default_filters}
-
 \begin{figure}[H]
-    \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/ui_filters.png}
-  \caption{Filters Overview}
+  \hspace*{-2.5cm}
+  \includegraphics[width=19cm,frame]{figures/ui_filters.png}
+\caption{Filters Overview}
 \end{figure}
 
-\subsection{Aircraft Address Filter}
+In this Flight Deck tool, filters can be specified in order to determine which data is loaded into the current dataset and distributed to the Views. \\
+
+At the top of the 'Filter' tool's contents, a checkbox defines whether filtering is activated. Disabling this checkbox will always disable filtering in general, 
+independent of any individually activated filters. Enabling/disabling of filtering can also be achieved by right-clicking the 'Filter' tool's icon in the Flight Deck.
+If filtering is active, this will be indicated by an additional check sign in the 'Filter' tool's icon. \\
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm,frame]{figures/filter_active.png}
+  \caption{Filtering enabled}
+\end{figure}
+
+Each filter consists of a checkbox, defining if a filter is active (contributes to the search query), a triangle-button to show/hide the filter configuration elements, and a unique name. \\
+
+The \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png} button in the top right corner can be used to execute several actions.
+Clicking the button opens the following menu.
+
+\begin{figure}[H]
+    \center
+    \includegraphics[width=3cm,frame]{figures/filter_config.png}
+  %\caption{Data Sources Overview}
+\end{figure}
+
+\begin{itemize}
+  \item Add New Filter: Can be used to add a custom filter, see \nameref{sec:filter_add}
+  \item Expand All: Expands all filters, showing their configuration elements
+  \item Collapse All: Collapses all filters, hiding their configuration elements
+  \item Collapse Unused: Collapses all deselected filters, hiding their configuration elements
+ \end{itemize} 
+ \  \\
+
+Please \textbf{note} that the filter configuration will be saved at program shutdown, which is also true for new filters. At startup, all filters from the configuration are generated and restored to their previous state. \\
+
+Please also \textbf{note} that active filters, at the moment, are always combined with a logical AND. Therefore, when two filters are active, only the intersection of data which both filters allow is loaded.
+
+As an example, the 'Time of Day' filter limits the loaded data to a specific time window, to load only time slices of the dataset. 
+The 'Mode 3/A Codes' filter restricts to a list of (comma-separated) Mode 3/A codes, to single out specific flights. \\
+
+\subsection{Default Filters}
+\label{sec:default_filters}
+
+\subsubsection{Aircraft Address Filter}
 
 \begin{figure}[H]
   \center
@@ -21,7 +59,7 @@
 
 When active, this filter forces loading of data with the given Mode S address(es), so it is possible to give multiple values (in hexadecimal notation, irrespective of upper or lower case characters, separated by commas). E.g. 'FEFE10' is possible, or 'FEFE10,FEFE11,FEFE12'. Target reports without a given Mode S address will not be loaded unless the value 'NULL' is (also) given.
 
-\subsection{Aircraft Identification Filter}
+\subsubsection{Aircraft Identification Filter}
 
 \begin{figure}[H]
   \center
@@ -31,7 +69,7 @@ When active, this filter forces loading of data with the given Mode S address(es
 
 When active, this filter forces loading of data only from aircraft identifications matching the given expression. So e.g. 'TEST' will match 'TEST123' or 'TEST123   ' (with spaces) or 'MYTEST'. Target reports without a given aircraft identification are not restricted by this filter. If multiple values are entered (separated by comma), any in-between space characters are removed, so 'TEST1,TEST2' will give the same result as 'TEST1 , TEST2'.
 
-\subsection{ADSB Quality Filter}
+\subsubsection{ADSB Quality Filter}
 
 \begin{figure}[H]
   \center
@@ -41,7 +79,7 @@ When active, this filter forces loading of data only from aircraft identificatio
 
 When active, this filter restricts the loaded ADS-B data based on the transponder MOPS version and various quality indicators. 
 
-\subsection{ADSB MOPS Filter}
+\subsubsection{ADSB MOPS Filter}
 
 \begin{figure}[H]
   \center
@@ -51,7 +89,7 @@ When active, this filter restricts the loaded ADS-B data based on the transponde
 
 When active, this filter restricts the loaded ADS-B data based on the transponder MOPS version. Multiple values can also be given, e.g. '0', '0,1', etc. 
 
-\subsection{ARTAS Hash Code Filter}
+\subsubsection{ARTAS Hash Code Filter}
 
 \begin{figure}[H]
   \center
@@ -61,7 +99,7 @@ When active, this filter restricts the loaded ADS-B data based on the transponde
 
 When active, this filter forces loading of data only from target reports with a specific ARTAS MD5 hash code, or system track updates referencing this hash code (in their TRI information). If no hash information is available (e.g. in SASS-C Verif databases or when this information was not present in the ASTERIX data), this filter should not be used.
 
-\subsection{Detection Type Filter}
+\subsubsection{Detection Type Filter}
 
 \begin{figure}[H]
   \center
@@ -84,7 +122,7 @@ The following detection types exist:
 
 Please note that for CAT062 data the detection type reflects the most recent detection type used to update the track (last measured detection type).
 
-\subsection{Position Filter}
+\subsubsection{Position Filter}
 
 \begin{figure}[H]
   \center
@@ -94,7 +132,7 @@ Please note that for CAT062 data the detection type reflects the most recent det
 
 When active, this filter forces loading of data with latitude/longitude inside the given thresholds (in degrees).
 
-\subsection{Time of Day Filter}
+\subsubsection{Time of Day Filter}
 
 \begin{figure}[H]
   \center
@@ -104,7 +142,7 @@ When active, this filter forces loading of data with latitude/longitude inside t
 
 When active, this filter forces loading of data with the Time of Day inside the given thresholds (in HH:MM:SS.SSS).
 
-\subsection{Track Number Filter}
+\subsubsection{Track Number Filter}
 
 \begin{figure}[H]
   \center
@@ -116,7 +154,7 @@ When active, this filter forces loading of data with the given track numbers, so
 
 Please note that ADS-B target reports can also contain a track number in ASTERIX, but since the information can not currently be mapped to the database (missing in schema), this filter does not influence ADS-B data loading.
 
-\subsection{MLAT RUs Filter}
+\subsubsection{MLAT RUs Filter}
 
 \begin{figure}[H]
   \center
@@ -126,7 +164,7 @@ Please note that ADS-B target reports can also contain a track number in ASTERIX
 
 When active, this filter forces loading of MLAT data where at least one of the given RUs participated.
 
-\subsection{Mode 3/A Codes Filter}
+\subsubsection{Mode 3/A Codes Filter}
 
 \begin{figure}[H]
   \center
@@ -138,7 +176,7 @@ When active, this filter forces loading of data with the given Mode A code(s), s
 
 Please note that ADS-B target reports can also contain Mode 3/A code information.
 
-\subsection{Mode C Codes Filter}
+\subsubsection{Mode C Codes Filter}
 
 \begin{figure}[H]
   \center
@@ -148,7 +186,7 @@ Please note that ADS-B target reports can also contain Mode 3/A code information
 
 When active, this filter forces loading of data with a barometric altitude inside the given thresholds (in feet). If Target reports without a barometric altitude should not be loaded can be set using the 'NULL Values' checkbox.
 
-\subsection{Primary Only}
+\subsubsection{Primary Only}
 
 \begin{figure}[H]
   \center
@@ -158,7 +196,7 @@ When active, this filter forces loading of data with a barometric altitude insid
 
 When active, this filter forces loading of data without any secondary attributes.
 
-\subsection{RefTraj Accuracy}
+\subsubsection{RefTraj Accuracy}
 
 \begin{figure}[H]
   \center
@@ -168,8 +206,7 @@ When active, this filter forces loading of data without any secondary attributes
 
 When active, this filter forces loading of RefTraj data with of a lower Square-Root-Sum value of the standard deviations than the given threshold.
 
-
-\subsection{Timestamp Filter}
+\subsubsection{Timestamp Filter}
 
 \begin{figure}[H]
   \center
@@ -179,9 +216,8 @@ When active, this filter forces loading of RefTraj data with of a lower Square-R
 
 When active, this filter forces loading of data with the EPOCH timestamp inside the given thresholds (in YYYY-mm-DD HH:MM:SS.SSS).
 
-
 % 
-% \subsection{Tracker Multiple Sources Filter}
+% \subsubsection{Tracker Multiple Sources Filter}
 % 
 % \begin{figure}[H]
 %   \center
@@ -191,7 +227,7 @@ When active, this filter forces loading of data with the EPOCH timestamp inside 
 % 
 % When active, this filter forces loading of Tracker data with the multiple sources flag, e.g. 'Y' (only track updates formed from multiple sources) or 'N' (only track updates formed using 1 source). Tracker target reports without such information will not be loaded.
 % 
-\subsection{Tracker Track Number Filter}
+\subsubsection{Tracker Track Number Filter}
 
 \begin{figure}[H]
   \center
@@ -203,7 +239,7 @@ This filter works similar to the 'Track Number' filter, but filters only CAT062 
 
 It can be used when e.g. several Tracker runs were added in different lines, so that track numbers (from the same target) for each run can be specified separately. \\
 
-\subsection{UTN Filter}
+\subsubsection{UTN Filter}
 
 \begin{figure}[H]
   \center
@@ -215,7 +251,8 @@ This filter is only available if target report associations have been generated 
 
 When active, this filter forces loading of data with the given unique target numbers (UTNs), so it is possible to give multiple values (separated by commas). E.g. '1' is possible, or '1,2,3'. Target reports without an associated UTN will not be loaded. \\
 
-\section{Adding a New Filter}
+\subsection{Adding a New Filter}
+\label{sec:filter_add}
 
 A new filter can be added by clicking the \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png} button in the filter tab.
 
@@ -260,7 +297,7 @@ button. The process of adding a new filter can be canceled by using the 'Cancel'
 settings. When added, a new filter shows up immediately in the filter list and is saved to the configuration
 for persistence.
 
-% \subsection{Managing Filters}
+% \subsubsection{Managing Filters}
 % \label{sec:filter_management}
 % 
 % By clicking on the gear symbol \includegraphics[scale=0.025]{../../data/icons/edit.png}, a menu allows the following operations on some of the filters:
