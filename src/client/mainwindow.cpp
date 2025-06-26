@@ -727,7 +727,7 @@ void MainWindow::newDBSlot()
     loginf << "MainWindow: newDBSlot";
 
     string filename = QFileDialog::getSaveFileName(
-                          this, "New SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
+                          this, "New Database File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         createDB(filename);
@@ -738,7 +738,7 @@ void MainWindow::openExistingDBSlot()
     loginf << "MainWindow: openExistingDBSlot";
 
     string filename = QFileDialog::getOpenFileName(
-                          this, "Open SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
+                          this, "Open Database File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         openExistingDB(filename);
@@ -763,7 +763,7 @@ void MainWindow::exportDBSlot()
     loginf << "MainWindow: exportDBSlot";
 
     string filename = QFileDialog::getSaveFileName(
-                          this, "Export DB SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
+                          this, "Export Database File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
     {

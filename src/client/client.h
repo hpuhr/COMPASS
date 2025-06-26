@@ -41,8 +41,8 @@ private:
 
     std::string override_cfg_path_;
 
-    std::string create_new_sqlite3_db_filename_;
-    std::string open_sqlite3_db_filename_;
+    std::string create_new_db_filename_;
+    std::string open_db_filename_;
 
     std::string import_data_sources_filename_;
 

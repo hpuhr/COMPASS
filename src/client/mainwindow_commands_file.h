@@ -16,7 +16,7 @@ struct RTCommandOpenDB : public rtcommand::RTCommand
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(open_db, "opens existing SQLite3 database with given filename, e.g. ’/data/file1.db’")
+    DECLARE_RTCOMMAND(open_db, "opens existing database file with given filename, e.g. ’/data/file1.db’")
     DECLARE_RTCOMMAND_OPTIONS
 };
 
@@ -33,7 +33,7 @@ protected:
     int         index = -1;
     std::string filename;
 
-    DECLARE_RTCOMMAND(open_recent_db, "opens a SQLite3 database from the recent file history")
+    DECLARE_RTCOMMAND(open_recent_db, "opens a database file from the recent file history")
     DECLARE_RTCOMMAND_OPTIONS
 };
 
@@ -47,7 +47,7 @@ struct RTCommandCreateDB : public rtcommand::RTCommand
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(create_db, "creates and opens new SQLite3 database with given filename, e.g. ’/data/file1.db’")
+    DECLARE_RTCOMMAND(create_db, "creates and opens new database file with given filename, e.g. ’/data/file1.db’")
     DECLARE_RTCOMMAND_OPTIONS
 };
 

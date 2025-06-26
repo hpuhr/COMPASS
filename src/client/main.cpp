@@ -35,6 +35,9 @@ int main(int argc, char** argv)
 
         Client client(argc, argv);
 
+        if (client.quitRequested())
+            return 0;
+
         // make system your application font (applies to all widgets)
         if (COMPASS::instance().isAppImage())
         {
@@ -43,9 +46,6 @@ int main(int argc, char** argv)
             system_font.setPointSizeF(system_font.pointSizeF() * COMPASS::instance().appFontScale());
             client.setFont(system_font);
         }
-
-        if (client.quitRequested())
-            return 0;
 
         if (!client.run())
             return -1;

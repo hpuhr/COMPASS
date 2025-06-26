@@ -241,23 +241,4 @@ To decode and write a JSON zip-text file 'test\_json.zip', use:
 *** End of Surveillance Data Decoder and Lister ***
 \end{lstlisting}
 
-\subsection{ADS-B exchange}
 
-For information about ADS-B exchange please refer to section \nameref{sec:adsbex}. \\
-
-It is usually possible to obtain a dataset from any day prior to the current one, covering the whole world. \\
-
-The data contents is coded in JSON and is described in \url{https://www.adsbexchange.com/datafields/}. \\
-
-Please be aware that using the produced data for commercial purposes (without a specific agreement) would violate the ADSB exchange terms \& conditions. Please refer to \url{https://www.adsbexchange.com/legal-and-privacy/} for additional information.\\
-
-The user could try to obtain a day with:
-\begin{lstlisting}
-$ wget http://history.adsbexchange.com/Aircraftlist.json/2016-06-20.zip
-\end{lstlisting}
-
-The time taken to get the file depends on the user's internet provider. The files are usually around 8G bytes.
-
-To create a file loadable in COMPASS, and after installing the COMPASS utils, the user can run the 'test.sh' script found in the utils directory. \\
-
-The script expects to find an ADS-B exchange database in the current working directory and generates a SQLite3 database ready to be loaded into COMPASS containing the traffic between 08Z and 09Z of the given day.

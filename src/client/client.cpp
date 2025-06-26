@@ -135,10 +135,10 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         ("override_cfg_path", po::value<std::string>(&override_cfg_path_),
          "overrides 'default' config subfolder to other value, e.g. 'org'")
         ("expert_mode", po::bool_switch(&expert_mode_) ,"set expert mode")
-        ("create_db", po::value<std::string>(&create_new_sqlite3_db_filename_),
-         "creates and opens new SQLite3 database with given filename, e.g. '/data/file1.db'")
-        ("open_db", po::value<std::string>(&open_sqlite3_db_filename_),
-         "opens existing SQLite3 database with given filename, e.g. '/data/file1.db'")
+        ("create_db", po::value<std::string>(&create_new_db_filename_),
+         "creates and opens new DuckDB database with given filename, e.g. '/data/file1.db'")
+        ("open_db", po::value<std::string>(&open_db_filename_),
+         "opens existing DuckDB database with given filename, e.g. '/data/file1.db'")
         ("import_data_sources_file", po::value<std::string>(&import_data_sources_filename_),
          "imports data sources JSON file with given filename, e.g. '/data/ds1.json'")
         ("import_view_points", po::value<std::string>(&import_view_points_filename_),
@@ -394,11 +394,11 @@ bool Client::run ()
     if (no_config_save_)
         main_window.disableConfigurationSaving();
 
-    if (create_new_sqlite3_db_filename_.size())
-        rt_man.addCommand("create_db "+create_new_sqlite3_db_filename_);
+    if (create_new_db_filename_.size())
+        rt_man.addCommand("create_db "+create_new_db_filename_);
 
-    if (open_sqlite3_db_filename_.size())
-        rt_man.addCommand("open_db "+open_sqlite3_db_filename_);
+    if (open_db_filename_.size())
+        rt_man.addCommand("open_db "+open_db_filename_);
 
     if (import_data_sources_filename_.size())
         rt_man.addCommand("import_data_sources "+import_data_sources_filename_);
