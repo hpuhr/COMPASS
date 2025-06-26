@@ -32,7 +32,7 @@ class DBScopedPrepare;
 class DBScopedReader;
 
 /**
- * @brief Interface for a SQLite3 database connection
+ * @brief Interface for a database connection
  *
  */
 class SQLiteConnection : public DBConnection

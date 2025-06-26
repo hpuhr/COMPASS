@@ -5,9 +5,9 @@ In this section, a few key concepts are introduced to convey a somewhat deeper u
 This should also give indications about the strengths and draw-backs of the chosen approach.
 
 \subsection*{Database Systems}
-A database allows for storage, retrieval and filtering of the data of interest. While SQLite3 - being a stand-alone database - also has some drawbacks, 
+A database allows for storage, retrieval and filtering of the data of interest. While DuckDB - being a stand-alone database - also has some drawbacks, 
 it was chosen for its performance and ease of use (compared to e.g. NoSQL databases or MySQL variants). \\\\
-SQLite3 encapsulates a database in a single file container, which is read from a storage medium (e.g. hard drive). 
+DuckDB encapsulates a database in a single file container, which is read from a storage medium (e.g. hard drive). 
 Therefore, it does not require the installation of a database service, which is one of the advantages of the current solution. \\
 
 \begin{itemize}
@@ -15,11 +15,11 @@ Therefore, it does not require the installation of a database service, which is 
 \begin{itemize}
 \item Can easily be copied, shared, archived, ..
 \end{itemize}
-\item SQLite3 database
+\item DuckDB database
 \begin{itemize}
 \item Can be read/edited with other tools
 \begin{itemize}
-\item e.g. sqlitebrowser, from Python scripts, ...
+\item e.g. dbeaver, from Python scripts, ...
 \end{itemize}
 \item Nothing has to be additionally installed
 \end{itemize}
@@ -37,7 +37,7 @@ Using this configuration, a user can have a specific program configuration for a
 \begin{itemize}
 \item Stored in a home folder for current AppImage version
 \begin{itemize}
-\item e.g. \textasciitilde/.compass/0.7.0
+\item e.g. \textasciitilde/.compass/0.9.0
 \end{itemize}
 \item Read at application startup
 \item Written at application shutdown (if wanted)
