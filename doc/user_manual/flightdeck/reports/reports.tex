@@ -194,27 +194,85 @@ After export the folder structure created will e.g. look like this.
   \caption{Export as PDF: Resulting folder structure}
 \end{figure}
 
-\section{Reports}
+\subsection{Report Structure}
 
+A report consists of a hierarchy of nested sections. 
+A section obtains a name, and may contain multiple subsections and a number of so-called \textit{contents}.
+When selecting a report in the report selection, the report's main section will be shown. \\
 
+Above the displayed section, a couple of navigation elements reside.
 
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \center
+    \includegraphics[width=12cm,frame]{figures/naviagtion.png}
+  \caption{Navigating sections}
+\end{figure}
 
+By pressing the \includegraphics[width=0.5cm,frame]{../../data/icons/arrow_to_left.png} button,
+one can navigate back to the last displayed section.
+
+Next to the back button the path of the currently display section in the report will be displayed.
+
+On the right side the 'Sections' button resides. Pressing the 'Sections' button will open a table of 
+contents listing all available sections.
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \center
+    \includegraphics[width=7cm,frame]{figures/section_button.png}
+  \caption{Section table of contents}
+\end{figure}
+
+Clicking a section entry once will navigate to the selected section. Double-clicking the section entry will 
+in addition close the table of contents. Pressing the 'Sections' button again will close the table of contents
+without selecting a section. \\
+
+When navigating to a section, the section's contents will be displayed. \\
+
+A section can obtain three types of contents:
 
 \begin{itemize}  
-    \item Figures: Viewable data, which can be visualized in certain Views and exported to a file as image data
-    \item Tables: Tabular data, which can be inspected and exported
-    \item Texts: Textual data
-\end{itemize}
-
-
-A report consists of sections, which are often linked to each other.
-The user can step through these sections and inspect a section's contents.
-At the moment three types of section contents exist.
-
-\begin{itemize}  
-    \item Figures: Viewable data, which can be visualized in certain Views and exported to a file as image data
-    \item Tables: Tabular data, which can be inspected and exported
-    \item Texts: Textual data
+    \item \nameref{sec:report_section_figures}: Viewable data, which can be visualized in certain Views and exported to a file as image data
+    \item \nameref{sec:report_section_tables}: Tabular data, which can be inspected and exported
+    \item \nameref{sec:report_section_texts}: Textual data
 \end{itemize}
 \ \\
 
+\subsubsection{Figures} 
+\label{sec:report_section_figures}
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \center
+    \includegraphics[width=12cm,frame]{figures/content_figure.png}
+  \caption{Figure content}
+\end{figure}
+
+Figures will be displayed as a text label showing the figure's name, and a 'View' button. When pressed, the figures 
+drawable contents will be shown in all Views that are able to display it.
+
+\subsubsection{Tables} 
+\label{sec:report_section_tables}
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \center
+    \includegraphics[width=12cm,frame]{figures/content_table.png}
+  \caption{Table content}
+\end{figure}
+
+Tables will be displayed as a text label showing the table's name, the table's contents, 
+and an 'Options' button. \\
+
+Clicking the 'Options' button will show a menu.
+The 'Copy Content' action can be used to copy the table's contents to the clipboard as CSV representation. \\
+
+Table rows might additionally be linked to either viewable data or another section.
+Clicking on a table row will trigger the linked viewable data to be displayed if available.
+Double-clicking on a table row will navigate to the linked section if available.
+
+\subsubsection{Texts} 
+\label{sec:report_section_texts}
+
+Texts contain textual data, which will be displayed as a list of text labels. \\
