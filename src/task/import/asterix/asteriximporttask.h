@@ -109,8 +109,7 @@ public:
     unsigned int chunk_size_jasterix;
     unsigned int chunk_size_insert;
 
-    unsigned int max_packets_in_processing_{3};
-
+    unsigned int max_packets_in_processing_{5};
 };
 
 /**
