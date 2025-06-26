@@ -1,17 +1,19 @@
-\chapter{View Points}
+
+\section{View Points}
 \label{sec:view_points} 
 
-The 'View Points' tab displays existing view points, allows selection, stepping and editing of view points. Additionally, view points can be imported, removed and exported.
+The 'View Points' tool of the Flight Deck displays existing view points, allows selection, stepping and editing of view points. 
+Additionally, view points can be imported, removed and exported.
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
     \includegraphics[width=19cm]{figures/view_points.png}
-  \caption{View Points Tab}
+  \caption{View Points Overview}
 \end{figure}
 
 At the top, a toolbar is shown. In the middle, a table showing all existing view points exists. At the bottom, general function buttons exist. \\
 
-\section{View Point}
+\subsection{View Point}
 
 A view point is a point of interest in the data persisted in the database. It can have the following attributes:
 
@@ -49,7 +51,7 @@ When a view point is selected, the dataset defined by the view point is loaded a
 
 Please \textbf{note} that changes to view points are saved immediately to the database and no undo function exists.
 
-\section{Toolbar}
+\subsection{Toolbar}
 
 \begin{table}[H]
   \center
@@ -72,7 +74,7 @@ Please \textbf{note} that changes to view points are saved immediately to the da
 
 All of the actions can be triggered using the listed keyboard shortcut in the square brackets. Up/Down refers to the keyboard arrows.
 
-\section{Table}
+\subsection{Table}
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -94,13 +96,13 @@ This automatically triggers loading of the data and display in the existing View
 
 The status can only be set using the toolbar buttons or keyboard shortcuts, while editing the comment can also be triggered by a double-click on the respective cell.
 
-\section{Re-Sorting Using Columns}
+\subsection{Re-Sorting Using Columns}
 
 By clicking on a column, the View Points Table is sorted on the information in the column. Ascending/descending can be changed by clicking again on a column already used for sorting. \\
 
 Per default, the table is sorted by the 'id' column.
 
-\section{Showing/Hiding Columns}
+\subsection{Showing/Hiding Columns}
 
 Using the 'Edit Columns' button in the toolbar, unwanted columns can be hidden. Click on the button to activate the following menu:
 
@@ -120,7 +122,7 @@ The following entries exist:
 \end{itemize}
 \ \\
 
-\section{Filtering Based on Type}
+\subsection{Filtering Based on Type}
 
 Using the 'Filter By Type' button in the toolbar, unwanted view points can be hidden. Click on the button to activate the following menu:
 
@@ -139,7 +141,7 @@ The following entries exist:
 \end{itemize}
 \ \\
 
-\section{Filtering Based on Status}
+\subsection{Filtering Based on Status}
 
 Using the 'Filter By Status' button in the toolbar, unwanted view points can be hidden. Click on the button to activate the following menu:
 
@@ -158,7 +160,7 @@ The following entries exist:
 \end{itemize}
 \ \\
 
-\section{Function Buttons}
+\subsection{Function Buttons}
 
 There exist 3 buttons for general functions:
 
@@ -170,16 +172,16 @@ There exist 3 buttons for general functions:
 \end{itemize}
 \ \\
 
-\section{Stepping View Points}
+\subsection{Stepping View Points}
 
 \subsection{Management Tab} 
 When selecting a new view point, the information set 'data\_sources' and 'data\_sources\_types' attributes are used to select which DBContent is loaded. The 'filters' attribute to set the filter active flags and respective conditions. After that, a loading process is triggered. \\
 
-\subsection{Data Selection}
+\subsubsection{Data Selection}
 
 When the loading process is finished, data is automatically selected using the 'time' and 'time\_window' attributes.
 
-\subsection{Table View} 
+\subsubsection{Table View} 
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -189,7 +191,7 @@ When the loading process is finished, data is automatically selected using the '
 
 In the Table View, the variables set in the 'context\_variables' attribute are added temporarily to the list of variables. Loaded data is presented as always. When the loading process is finished, selected data is highlighed.
 
-\subsection{Geographic View}
+\subsubsection{Geographic View}
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -201,17 +203,17 @@ Loaded data is presented as always and can be adapted to a users needs. After lo
 
 Please \textbf{note} that using view points in 3D maps is currently not recommended, since the zoom-to-data function does not work well with small data geometry. If a view point is used with a 3D map, a warning is shown (only once per COMPASS usage, but ignored for subsequent usages).
 
-\subsection{After Selection}
+\subsubsection{After Selection}
 
 After data loading, the application can be used as in any other situation, therefore changing filters, adapting the Geographic View style or re-loading the dataset is possible.
 
-\subsection{Assessment}
+\subsubsection{Assessment}
 
 In the 'View Points' tab, after assessing the view point, a user can add a comment and change the status to annotate the view point with additional information. \\
 
 After this e.g. the next view point can be selected.
 
-\section{Exporting View Points to PDF}
+\subsection{Exporting View Points to PDF}
 \label{sec:view_points_export_pdf} 
 
 Using the "Export PDF" button, a PDF can be generated. A PDF can only be generated if a Latex environment is installed on the workstation, as described in \nameref{sec:appendix_latex}. \\
