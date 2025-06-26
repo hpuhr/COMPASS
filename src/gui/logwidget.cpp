@@ -34,7 +34,7 @@ LogWidget::LogWidget(LogStore& log_store)
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-    table_view_->horizontalHeader()->setMaximumSectionSize(300);
+    table_view_->horizontalHeader()->setMaximumSectionSize(700);
     //table_view_->setIconSize(QSize(24, 24));
     table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
     table_view_->setWordWrap(true);

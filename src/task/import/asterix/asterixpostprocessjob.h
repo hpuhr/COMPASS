@@ -37,6 +37,17 @@ public:
 
     static void resetDateInfo();
     static void clearTimeStats();
+    static void logLastTimestamp();
+
+    // static vars for time reporting
+    static boost::mutex timestamp_mutex_;
+
+    static bool first_time_;
+    static boost::posix_time::ptime timestamp_first_;
+    static float tod_first_;
+    static boost::posix_time::ptime timestamp_last_;
+    static float tod_last_;
+    static float last_reported_tod_;
 
 protected:
     void run_impl() override;
@@ -71,19 +82,15 @@ private:
     static tbb::concurrent_unordered_map<std::string, std::string> obfuscate_acid_map_;
 
     // static vars for timestamp / timejump handling
-    static boost::mutex timestamp_mutex_;
-    static bool first_tod_;
-    static float last_reported_tod_;
-
     static bool current_date_set_;
     static boost::posix_time::ptime current_date_;
     static boost::posix_time::ptime previous_date_;
     static bool did_recent_time_jump_; // indicator if recently a time jump was performed
     static bool had_late_time_; // indicator if time late before 24h mark occured
 
+
     void doADSBTimeProcessing();
     void doTodOverride();
-    //void doNetworkTimeOverride();
     void doFutureTimestampsCheck();
     void doTimeStampCalculation();
     void doRadarPlotPositionCalculations();

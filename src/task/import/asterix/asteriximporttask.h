@@ -31,9 +31,9 @@
 #include <QObject>
 #include <QMessageBox>
 
-#include <deque>
+//#include <deque>
 #include <memory>
-#include <mutex>
+//#include <mutex>
 
 class TaskManager;
 

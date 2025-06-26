@@ -26,14 +26,18 @@ tbb::concurrent_unordered_map<std::string, std::string> ASTERIXPostprocessJob::o
 
 boost::mutex ASTERIXPostprocessJob::timestamp_mutex_;
 
-bool ASTERIXPostprocessJob::first_tod_ = true;
-float ASTERIXPostprocessJob::last_reported_tod_{0};
+bool ASTERIXPostprocessJob::first_time_{true};
+boost::posix_time::ptime ASTERIXPostprocessJob::timestamp_first_;
+float ASTERIXPostprocessJob::tod_first_{0};
+boost::posix_time::ptime ASTERIXPostprocessJob::timestamp_last_;
+float ASTERIXPostprocessJob::tod_last_{0};
+float ASTERIXPostprocessJob::last_reported_tod_{-3600};
 
-bool ASTERIXPostprocessJob::current_date_set_ = false;
+bool ASTERIXPostprocessJob::current_date_set_{false};
 boost::posix_time::ptime ASTERIXPostprocessJob::current_date_;
 boost::posix_time::ptime ASTERIXPostprocessJob::previous_date_;
-bool ASTERIXPostprocessJob::did_recent_time_jump_ = false;
-bool ASTERIXPostprocessJob::had_late_time_ = false;
+bool ASTERIXPostprocessJob::did_recent_time_jump_{false};
+bool ASTERIXPostprocessJob::had_late_time_{false};
 
 ASTERIXPostprocessJob::ASTERIXPostprocessJob(
     map<string, shared_ptr<Buffer>> buffers,
@@ -90,7 +94,10 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
     //ignore_time_jumps_ = true; // do if problems with import
 }
 
-ASTERIXPostprocessJob::~ASTERIXPostprocessJob() { logdbg << "ASTERIXPostprocessJob: dtor"; }
+ASTERIXPostprocessJob::~ASTERIXPostprocessJob()
+{
+    logdbg << "ASTERIXPostprocessJob: dtor";
+}
 
 void ASTERIXPostprocessJob::resetDateInfo()
 {
@@ -106,8 +113,25 @@ void ASTERIXPostprocessJob::clearTimeStats()
 {
     loginf << "ASTERIXPostprocessJob: clearTimeJumpStats";
 
-    first_tod_ = true;
-    last_reported_tod_ = 0;
+    boost::mutex::scoped_lock locker(timestamp_mutex_);
+
+    first_time_ = true;
+    timestamp_first_ = {};
+    tod_first_ = 0;
+    timestamp_last_ = {};
+    tod_last_ = 0;
+
+    last_reported_tod_ = -3600;
+}
+
+void ASTERIXPostprocessJob::logLastTimestamp()
+{
+    if (!first_time_ && !timestamp_last_.is_not_a_date_time())
+    {
+        COMPASS::instance().logInfo("ASTERIX Import")
+        << "last ToD " << String::timeStringFromDouble(tod_last_)
+        << " timestamp " << Time::toString(timestamp_last_);
+    }
 }
 
 void ASTERIXPostprocessJob::run_impl()
@@ -304,7 +328,6 @@ void ASTERIXPostprocessJob::doFutureTimestampsCheck()
 
     auto p_time = microsec_clock::universal_time (); // UTC
 
-
     double current_time_utc = p_time.time_of_day().total_milliseconds() / 1000.0;
     double tod_utc_max = (p_time + Time::partialSeconds(TMAX_FUTURE_OFFSET)).time_of_day().total_milliseconds() / 1000.0;
 
@@ -429,24 +452,6 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                     continue;
                 }
 
-                if (tod - last_reported_tod_ < -12 * 3600) // timejump in reporting
-                    last_reported_tod_ = 0;
-
-                if (first_tod_)
-                {
-                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: processing tod "
-                           << String::timeStringFromDouble(tod);
-
-                    first_tod_ = false;
-                    last_reported_tod_ = tod;
-                }
-                else if (tod - last_reported_tod_ >= 3600) // 1h
-                {
-                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: processing tod "
-                           << String::timeStringFromDouble(tod);
-                    last_reported_tod_ = tod;
-                }
-
                 had_late_time_ |= (tod >= (tod_24h - close_to_midgnight_offset_s)); // close before midnight
 
                 // within close time midnight
@@ -485,6 +490,11 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                                << " detected time-jump from previous " << Time::toDateString(previous_date_)
                                << " to current " << Time::toDateString(current_date_);
 
+                        COMPASS::instance().logInfo("ASTERIX Import")
+                            << "ToD " << String::timeStringFromDouble(tod)
+                            << " detected time-jump from previous " << Time::toDateString(previous_date_)
+                            << " to current " << Time::toDateString(current_date_);
+
                         did_recent_time_jump_ = true;
                     }
 
@@ -514,6 +524,33 @@ void ASTERIXPostprocessJob::doTimeStampCalculation()
                 timestamp_vec.set(index, timestamp);
                 assert (!timestamp_vec.isNull(index));
                 assert (timestamp_vec.get(index) == timestamp);
+
+                // set first and last timestamp
+
+                if (first_time_)
+                {
+                    tod_first_ = tod;
+                    timestamp_first_ = timestamp;
+
+                    first_time_ = false;
+
+                    COMPASS::instance().logInfo("ASTERIX Import")
+                        << "first ToD " << String::timeStringFromDouble(tod_first_)
+                        << " timestamp " << Time::toString(timestamp_first_);
+                }
+
+                if (fabs(tod - last_reported_tod_) > 3600) // timejump in reporting
+                    last_reported_tod_ = -3600;
+
+                if (tod - last_reported_tod_ >= 3600) // 1h
+                {
+                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: processing tod "
+                           << String::timeStringFromDouble(tod);
+                    last_reported_tod_ = tod;
+                }
+
+                tod_last_ = tod;
+                timestamp_last_ = timestamp;
             }
         }
 

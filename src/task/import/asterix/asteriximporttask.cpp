@@ -740,6 +740,7 @@ void ASTERIXImportTask::reset()
 
     added_data_sources_.clear();
 
+    ASTERIXPostprocessJob::resetDateInfo();
     ASTERIXPostprocessJob::clearTimeStats();
 }
 
@@ -985,7 +986,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     std::string tmp = decode_job_->currentDataSourceName();
 
-    if (current_data_source_name_ != tmp)
+    if (current_data_source_name_ != tmp && tmp.size()) // new file
     {
         loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: current data source name changed, '"
                << current_data_source_name_ << "' to '" << tmp << "'";
@@ -996,9 +997,13 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
             ASTERIXPostprocessJob::resetDateInfo();
         }
 
+        if (current_data_source_name_.size()) // if not first
+            ASTERIXPostprocessJob::logLastTimestamp();
         ASTERIXPostprocessJob::clearTimeStats();
 
         current_data_source_name_ = tmp;
+
+        COMPASS::instance().logInfo("ASTERIX Import") << "decoding " << current_data_source_name_;
     }
 
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
@@ -1469,6 +1474,8 @@ void ASTERIXImportTask::checkAllDone()
     {
         loginf << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
 
+        ASTERIXPostprocessJob::logLastTimestamp();
+
         all_done_ = true;
         done_     = true; // why was this not set?
         running_  = false;
@@ -1477,13 +1484,13 @@ void ASTERIXImportTask::checkAllDone()
         loginf << "ASTERIXImportTask: checkAllDone: import done after "
                << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
-        double records_per_second = num_records_ / (time_diff.total_milliseconds() / 1000.0);
+        int records_per_second = num_records_ / time_diff.total_seconds();
 
         COMPASS::instance().logInfo("ASTERIX Import")
             << " finished after "
             << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false)
             << ", inserted " << num_records_ << " rec"
-            << " with " << String::doubleToStringPrecision(records_per_second, 2) << " rec/s";
+            << " with " << records_per_second << " rec/s";
 
         COMPASS::instance().mainWindow().updateMenus(); // re-enable import menu
 
