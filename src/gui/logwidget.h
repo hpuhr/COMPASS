@@ -49,4 +49,6 @@ protected:
     QIcon error_icon_;
 
     bool has_unaccepted_errors_{false};
+
+    void resizeEvent(QResizeEvent* event) override;
 };

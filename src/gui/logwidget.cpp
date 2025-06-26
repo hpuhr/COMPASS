@@ -1,8 +1,8 @@
 #include "logwidget.h"
-#include "reportwidget.h"
+//#include "reportwidget.h"
 #include "files.h"
 #include "logger.h"
-#include "taskmanager.h"
+//#include "taskmanager.h"
 
 #include <QVBoxLayout>
 #include <QDateTime>
@@ -12,6 +12,7 @@
 #include <QVBoxLayout>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
+#include <QResizeEvent>
 
 #include <algorithm>
 
@@ -20,7 +21,6 @@ using namespace Utils;
 LogWidget::LogWidget(LogStore& log_store)
     : ToolBoxWidget(nullptr), log_store_(log_store)
 {
-
     QVBoxLayout* main_layout = new QVBoxLayout();
 
     // table
@@ -34,7 +34,7 @@ LogWidget::LogWidget(LogStore& log_store)
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-    table_view_->horizontalHeader()->setMaximumSectionSize(300);
+    table_view_->horizontalHeader()->setMaximumSectionSize(600);
     //table_view_->setIconSize(QSize(24, 24));
     table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
     table_view_->setWordWrap(true);
@@ -154,4 +154,18 @@ void LogWidget::loadingDone()
 {
 }
 
+void LogWidget::resizeEvent(QResizeEvent* event)
+{
+    const QSize new_size = event->size();
+
+    if (table_view_)
+    {
+        table_view_->horizontalHeader()->setMaximumSectionSize(2 * new_size.width() / 3);
+
+        table_view_->resizeColumnsToContents();
+        table_view_->resizeRowsToContents();
+    }
+
+    QWidget::resizeEvent(event);
+}
 

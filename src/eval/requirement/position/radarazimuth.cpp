@@ -113,7 +113,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     Projection& projection = proj_man.currentProjection();
-    assert (projection.radarCoordinateSystemsAdded());
+    assert (projection.coordinateSystemsAdded());
 
     double ref_slant_range_m, ref_ground_range_m, ref_alt_m, ref_azm_rad,
         tst_slant_range_m, tst_ground_range_m, tst_alt_m, tst_azm_rad;

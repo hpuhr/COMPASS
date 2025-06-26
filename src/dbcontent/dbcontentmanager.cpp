@@ -528,9 +528,15 @@ void DBContentManager::databaseOpenedSlot()
 
     // load min max values
     if (db_interface.hasProperty(PROP_TIMESTAMP_MIN_NAME))
+    {
         timestamp_min_ = Time::fromLong(stol(db_interface.getProperty(PROP_TIMESTAMP_MIN_NAME)));
+        assert (!timestamp_max_->is_not_a_date_time());
+    }
     if (db_interface.hasProperty(PROP_TIMESTAMP_MAX_NAME))
+    {
         timestamp_max_ = Time::fromLong(stol(db_interface.getProperty(PROP_TIMESTAMP_MAX_NAME)));
+        assert (!timestamp_max_->is_not_a_date_time());
+    }
 
     if (hasMinMaxTimestamp())
         loginf << "DBContentManager: databaseOpenedSlot: timestamp_min_ " << Time::toString(*timestamp_min_)
@@ -1418,6 +1424,9 @@ bool DBContentManager::hasMinMaxTimestamp() const
  */
 void DBContentManager::setMinMaxTimestamp(boost::posix_time::ptime min, boost::posix_time::ptime max)
 {
+    assert (!min.is_not_a_date_time());
+    assert (!max.is_not_a_date_time());
+
     timestamp_min_ = min;
     timestamp_max_ = max;
 

@@ -47,6 +47,9 @@ public:
                               bool has_baro_altitude, double baro_altitude_ft,
                               double& latitude_deg, double& longitude_deg, double& alt_wgs_m, bool debug=false) = 0;
 
+    virtual bool localXYToWGS84(unsigned int id, double x_m, double y_m,
+                              double& latitude_deg, double& longitude_deg, double& alt_wgs_m, bool debug=false) = 0;
+
     virtual bool polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
                               bool has_baro_altitude, double baro_altitude_ft,
                               double& ground_range_m,
@@ -65,20 +68,20 @@ public:
                           bool has_altitude, double altitude_m,
                           double& ground_range_m, double& adjusted_altitude_m, bool debug=false);
 
-    void addAllRadarCoordinateSystems(); // only adds if not already added
+    void addAllCoordinateSystems(); // only adds if not already added
 
     std::string name() const;
     void name(const std::string& name);
 
-    bool radarCoordinateSystemsAdded();
+    bool coordinateSystemsAdded();
 
 protected:
     ProjectionManager& proj_manager_;
 
     std::string name_;
 
-    boost::mutex radar_coordinate_systems_mutex_;
-    bool radar_coordinate_systems_added_ {false};
+    boost::mutex coordinate_systems_mutex_;
+    bool coordinate_systems_added_ {false};
 
     virtual void checkSubConfigurables();
 };

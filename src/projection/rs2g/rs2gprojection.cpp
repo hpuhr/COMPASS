@@ -70,7 +70,7 @@ ProjectionCoordinateSystemBase& RS2GProjection::coordinateSystem(unsigned int id
 void RS2GProjection::clearCoordinateSystems()
 {
     coordinate_systems_.clear();
-    radar_coordinate_systems_added_ = false;
+    coordinate_systems_added_ = false;
 }
 
 bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double slant_range_m,
@@ -109,6 +109,37 @@ bool RS2GProjection::polarToWGS84(unsigned int id, double azimuth_rad, double sl
                    << " longitude_deg " << longitude_deg << " alt_wgs_m " << alt_wgs_m;
         // what to do with altitude?
     }
+
+    return ret;
+}
+
+
+bool RS2GProjection::localXYToWGS84(unsigned int id, double x_m, double y_m,
+                                    double& latitude_deg, double& longitude_deg, double& alt_wgs_m, bool debug)
+{
+    if (!hasCoordinateSystem(id))
+        logerr << "RS2GProjection: localXYToWGS84: no coord system for " << id;
+
+    assert(hasCoordinateSystem(id));
+
+    bool ret {false};
+
+    double ecef_x, ecef_y, ecef_z;
+
+    coordinate_systems_.at(id)->localCart2Geocentric(x_m, y_m, 0, ecef_x, ecef_y, ecef_z);
+
+    if (debug)
+        loginf << "RS2GProjection: localXYToWGS84: ecef_x " << std::fixed << ecef_x << " ecef_y " << ecef_y
+               << " ecef_z " << ecef_z;
+
+    ret = coordinate_systems_.at(id)->geocentric2Geodesic(ecef_x, ecef_y, ecef_z,
+                                                          latitude_deg, longitude_deg, alt_wgs_m, debug);
+
+
+    if (debug)
+        loginf << "RS2GProjection: localXYToWGS84: latitude_deg " << latitude_deg
+               << " longitude_deg " << longitude_deg << " alt_wgs_m " << alt_wgs_m;
+    // what to do with altitude?
 
     return ret;
 }

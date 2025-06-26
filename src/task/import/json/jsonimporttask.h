@@ -22,6 +22,7 @@
 #include "task.h"
 #include "asterixpostprocess.h"
 #include "asterixpostprocessjob.h"
+#include "asterixtimestampcalculator.h"
 
 #include <QObject>
 
@@ -132,6 +133,7 @@ class JSONImportTask : public Task, public Configurable
     std::shared_ptr<ReadJSONFileJob> read_json_job_;
     std::shared_ptr<JSONParseJob> json_parse_job_;
     std::vector<std::shared_ptr<JSONMappingJob>> json_map_jobs_;
+    ASTERIXTimestampCalculator ts_calculator_;
     std::vector<std::shared_ptr<ASTERIXPostprocessJob>> postprocess_jobs_;
 
     bool test_{false};

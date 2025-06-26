@@ -921,25 +921,20 @@ void DataSourceEditWidget::updateContent()
                << " has pos " << ds->hasPosition();
 
         // position
-        if (ds->dsType() == "Radar" || ds->hasPosition())
+        if (ds->hasPosition())
         {
-            if (ds->hasPosition())
-            {
-                latitude_edit_->setText(QString::number(ds->latitude(), 'g', 12));
-                longitude_edit_->setText(QString::number(ds->longitude(), 'g', 12));
-                altitude_edit_->setText(QString::number(ds->altitude(), 'g', 12));
-            }
-            else
-            {
-                latitude_edit_->setText("0");
-                longitude_edit_->setText("0");
-                altitude_edit_->setText("0");
-            }
-
-            position_widget_->setHidden(false);
+            latitude_edit_->setText(QString::number(ds->latitude(), 'g', 12));
+            longitude_edit_->setText(QString::number(ds->longitude(), 'g', 12));
+            altitude_edit_->setText(QString::number(ds->altitude(), 'g', 12));
         }
         else
-            position_widget_->setHidden(true);
+        {
+            latitude_edit_->setText("0");
+            longitude_edit_->setText("0");
+            altitude_edit_->setText("0");
+        }
+
+        position_widget_->setHidden(false);
 
         // ranges
         if (ds->dsType() == "Radar")

@@ -153,8 +153,8 @@ private:
     AsyncJobPtr active_blocking_job_;
     tbb::concurrent_queue<AsyncJobPtr> blocking_jobs_;
 
-    AsyncJobPtr active_non_blocking_job_;
-    tbb::concurrent_queue<AsyncJobPtr> non_blocking_jobs_;
+    //AsyncJobPtr active_non_blocking_job_;
+    tbb::concurrent_unordered_map<std::string,tbb::concurrent_queue<AsyncJobPtr>> non_blocking_jobs_;
 
     AsyncJobPtr active_db_job_;
     tbb::concurrent_queue<AsyncJobPtr> queued_db_jobs_;

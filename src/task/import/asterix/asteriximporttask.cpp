@@ -740,7 +740,7 @@ void ASTERIXImportTask::reset()
 
     added_data_sources_.clear();
 
-    ASTERIXPostprocessJob::clearTimeStats();
+    ts_calculator_.reset();
 }
 
 /**
@@ -863,7 +863,7 @@ void ASTERIXImportTask::run() // , bool create_mapping_stubs
     assert(proj_man.hasCurrentProjection());
     Projection& projection = proj_man.currentProjection();
     projection.clearCoordinateSystems(); // to rebuild from data sources
-    projection.addAllRadarCoordinateSystems();
+    projection.addAllCoordinateSystems();
 
     loginf << "ASTERIXImportTask: run: starting decode job";
 
@@ -942,6 +942,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
     }
 
     assert(decode_job_);
+    std::string source_name = decode_job_->currentDataSourceName();
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: errors " << decode_job_->numErrors()
            << " num records " << jasterix_->numRecords();
@@ -983,24 +984,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
 
     logdbg << "ASTERIXImportTask: addDecodedASTERIXSlot: processing data total cnt " << num_packets_total_;
 
-    std::string tmp = decode_job_->currentDataSourceName();
-
-    if (current_data_source_name_ != tmp)
-    {
-        loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: current data source name changed, '"
-               << current_data_source_name_ << "' to '" << tmp << "'";
-
-        if (settings_.reset_date_between_files_)
-        {
-            loginf << "ASTERIXImportTask: addDecodedASTERIXSlot: resetting date";
-            ASTERIXPostprocessJob::resetDateInfo();
-        }
-
-        ASTERIXPostprocessJob::clearTimeStats();
-
-        current_data_source_name_ = tmp;
-    }
-
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data {decode_job_->extractedData()};
 
     if (!extracted_data.size())
@@ -1029,7 +1012,7 @@ void ASTERIXImportTask::addDecodedASTERIXSlot()
         keys = {"frames", "content", "data_blocks", "content", "records"};
 
     std::shared_ptr<ASTERIXJSONMappingJob> json_map_job =
-        make_shared<ASTERIXJSONMappingJob>(std::move(extracted_data), keys, schema_->parsers());
+        make_shared<ASTERIXJSONMappingJob>(std::move(extracted_data), source_name, keys, schema_->parsers());
 
     json_map_jobs_.push_back(json_map_job);
 
@@ -1064,6 +1047,7 @@ void ASTERIXImportTask::mapJSONDoneSlot()
 
     ASTERIXJSONMappingJob* map_job = dynamic_cast<ASTERIXJSONMappingJob*>(QObject::sender());
     assert(map_job);
+    std::string source_name = map_job->sourceName();
 
     std::map<std::string, std::shared_ptr<Buffer>> job_buffers {map_job->buffers()};
 
@@ -1081,16 +1065,89 @@ void ASTERIXImportTask::mapJSONDoneSlot()
         return;
     }
 
+    assert (!ts_calculator_.processing());
+    ts_calculator_.setBuffers(std::move(job_buffers));
+
     bool check_future_ts = source_.isNetworkType();
 
     if (settings_.network_ignore_future_ts_)
         check_future_ts = false;
 
+    ts_calculator_.calculate(source_name,
+                             settings_.date_, settings_.reset_date_between_files_,
+                             settings_.override_tod_active_, settings_.override_tod_offset_,
+                             settings_.ignore_time_jumps_, check_future_ts);
+
+    timestampCalculationDoneSlot();
+
+    // while (ts_calculator_.processing())
+    // {
+    //     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    //     loginf << "ASTERIXImportTask: mapJSONDoneSlot: waiting on ts calc";
+    //     QThread::msleep(100);
+    // }
+
+    // assert (!ts_calculator_.processing());
+    // ts_calculator_.setBuffers(std::move(job_buffers));
+
+    // // start calculate timestamp job
+    // bool check_future_ts = source_.isNetworkType();
+
+    // if (settings_.network_ignore_future_ts_)
+    //     check_future_ts = false;
+
+    // ts_calc_future_ = std::async(std::launch::async,
+    //                              [this, current_source_name=source_name, settings=settings_,check_future_ts] {
+    //     {
+    //         try
+    //         {
+    //             //loginf << "ASTERIXImportTask: time stamp calc lambda: start";
+
+    //             ts_calculator_.calculate(current_source_name,
+    //                                      settings.date_, settings.reset_date_between_files_,
+    //                                      settings.override_tod_active_, settings.override_tod_offset_,
+    //                                      settings.ignore_time_jumps_, check_future_ts);
+
+    //             QMetaObject::invokeMethod(this, "timestampCalculationDoneSlot", Qt::QueuedConnection);
+    //         }
+    //         catch (const std::exception& e)
+    //         {
+    //             loginf << "ASTERIXImportTask: mapJSONDoneSlot: calc ts threw exception '" << e.what() << "'";
+    //             assert (false);
+    //         }
+    //     }});
+
+    logdbg << "ASTERIXImportTask: mapJSONDoneSlot: done";
+}
+
+/**
+*/
+void ASTERIXImportTask::mapJSONObsoleteSlot()
+{
+    logdbg << "ASTERIXImportTask: mapJSONObsoleteSlot";
+
+    ASTERIXJSONMappingJob* map_job = dynamic_cast<ASTERIXJSONMappingJob*>(QObject::sender());
+    assert(map_job);
+
+    assert (json_map_jobs_.size());
+    assert (json_map_jobs_.begin()->get() == map_job);
+    map_job = nullptr;
+    json_map_jobs_.erase(json_map_jobs_.begin()); // remove
+
+    checkAllDone();
+}
+
+void ASTERIXImportTask::timestampCalculationDoneSlot()
+{
+    logdbg << "ASTERIXImportTask: timestampCalculationDoneSlot";
+
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers {ts_calculator_.buffers()};
+    ts_calculator_.setProcessingDone();
+
     std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
         make_shared<ASTERIXPostprocessJob>(
-            std::move(job_buffers), settings_.date_,
-            settings_.override_tod_active_, settings_.override_tod_offset_,
-            settings_.ignore_time_jumps_, check_future_ts,
+            std::move(job_buffers),
             settings_.filter_tod_active_,
             settings_.filter_tod_min_, settings_.filter_tod_max_,
             settings_.filter_position_active_,
@@ -1111,25 +1168,6 @@ void ASTERIXImportTask::mapJSONDoneSlot()
             &ASTERIXImportTask::postprocessDoneSlot, Qt::QueuedConnection);
 
     JobManager::instance().addNonBlockingJob(postprocess_job);
-
-    logdbg << "ASTERIXImportTask: mapJSONDoneSlot: done";
-}
-
-/**
-*/
-void ASTERIXImportTask::mapJSONObsoleteSlot()
-{
-    logdbg << "ASTERIXImportTask: mapJSONObsoleteSlot";
-
-    ASTERIXJSONMappingJob* map_job = dynamic_cast<ASTERIXJSONMappingJob*>(QObject::sender());
-    assert(map_job);
-
-    assert (json_map_jobs_.size());
-    assert (json_map_jobs_.begin()->get() == map_job);
-    map_job = nullptr;
-    json_map_jobs_.erase(json_map_jobs_.begin()); // remove
-
-    checkAllDone();
 }
 
 /**
@@ -1454,20 +1492,24 @@ void ASTERIXImportTask::checkAllDone()
            << " num_packets_in_processing_ " << num_packets_in_processing_
            << " decode " << (decode_job_ != nullptr)
            << " map jobs " << json_map_jobs_.size()
+           << " ts calc " << ts_calculator_.processing()
            << " post jobs " << postprocess_jobs_.size()
            << " accumulated for insert " << accumulated_buffers_.size()
            << " queued insert " << queued_insert_buffers_.size()
            << " insert active " << insert_active_;
 
-    if (!all_done_ && 
-        decode_job_ == nullptr && 
-        !json_map_jobs_.size() && 
-        !postprocess_jobs_.size() && 
-        !accumulated_buffers_.size() &&
-        !queued_insert_buffers_.size() && 
-        !insert_active_)
+    if (!all_done_
+        && decode_job_ == nullptr
+        && !json_map_jobs_.size()
+        && !ts_calculator_.processing()
+        && !postprocess_jobs_.size()
+        && !accumulated_buffers_.size()
+        && !queued_insert_buffers_.size()
+        && !insert_active_)
     {
         loginf << "ASTERIXImportTask: checkAllDone: setting all done: total packets " << num_packets_total_;
+
+        ts_calculator_.logLastTimestamp();
 
         all_done_ = true;
         done_     = true; // why was this not set?
@@ -1477,13 +1519,13 @@ void ASTERIXImportTask::checkAllDone()
         loginf << "ASTERIXImportTask: checkAllDone: import done after "
                << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
-        double records_per_second = num_records_ / (time_diff.total_milliseconds() / 1000.0);
+        int records_per_second = num_records_ / time_diff.total_seconds();
 
         COMPASS::instance().logInfo("ASTERIX Import")
             << " finished after "
             << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false)
             << ", inserted " << num_records_ << " rec"
-            << " with " << String::doubleToStringPrecision(records_per_second, 2) << " rec/s";
+            << " with " << records_per_second << " rec/s";
 
         COMPASS::instance().mainWindow().updateMenus(); // re-enable import menu
 

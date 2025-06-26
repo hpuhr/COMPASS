@@ -188,7 +188,11 @@ bool DataSourceBase::hasPosition() const
 {
     return info_.contains(position_key)
            && info_.at(position_key).contains("latitude")
-           && info_.at(position_key).contains("longitude");
+           && info_.at(position_key).contains("longitude")
+           && info_.at(position_key).at("latitude").is_number()
+           && info_.at(position_key).at("longitude").is_number()
+           && info_.at(position_key).at("latitude") != 0
+           && info_.at(position_key).at("longitude") != 0;
 }
 
 void DataSourceBase::latitude (double value)
@@ -553,4 +557,5 @@ void DataSourceBase::parseNetworkLineInfo()
 }
 
 }
+
 

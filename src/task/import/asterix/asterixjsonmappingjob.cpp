@@ -15,12 +15,14 @@ using namespace Utils;
 using namespace nlohmann;
 
 ASTERIXJSONMappingJob::ASTERIXJSONMappingJob(std::vector<std::unique_ptr<nlohmann::json>> data,
+                                             const std::string& source_name,
                                              const std::vector<std::string>& data_record_keys,
                                              const std::map<unsigned int, std::unique_ptr<ASTERIXJSONParser>>& parsers)
     : Job("ASTERIXJSONMappingJob"),
-      data_(std::move(data)),
-      data_record_keys_(data_record_keys),
-      parsers_(parsers)
+    data_(std::move(data)),
+    source_name_(source_name),
+    data_record_keys_(data_record_keys),
+    parsers_(parsers)
 {
     logdbg << "ASTERIXJSONMappingJob: ctor";
 }
@@ -153,6 +155,11 @@ void ASTERIXJSONMappingJob::run_impl()
 
     logdbg << "ASTERIXJSONMappingJob: run: done: mapped " << num_created_ << " skipped "
            << num_not_mapped_;
+}
+
+std::string ASTERIXJSONMappingJob::sourceName() const
+{
+    return source_name_;
 }
 
 size_t ASTERIXJSONMappingJob::numMapped() const { return num_mapped_; }

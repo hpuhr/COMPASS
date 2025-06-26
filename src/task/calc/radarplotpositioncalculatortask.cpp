@@ -120,7 +120,7 @@ void RadarPlotPositionCalculatorTask::run()
     assert(proj_man.hasCurrentProjection());
     Projection& projection = proj_man.currentProjection();
     projection.clearCoordinateSystems(); // to rebuild from data sources
-    projection.addAllRadarCoordinateSystems();
+    projection.addAllCoordinateSystems();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 

@@ -4,16 +4,10 @@
 #include "buffer.h"
 #include "compass.h"
 #include "projectionmanager.h"
-#include "dbcontent/variable/metavariable.h"
 #include "util/stringconv.h"
-#include "util/timeconv.h"
 #include "global.h"
 
 #include <QThread>
-
-const float tod_24h = 24 * 60 * 60;
-const float close_to_midgnight_offset_s = 300; // seconds
-const float not_close_to_midgnight_offset_s = 600; // seconds
 
 using namespace std;
 using namespace nlohmann;
@@ -24,22 +18,8 @@ tbb::concurrent_unordered_map<unsigned int, unsigned int> ASTERIXPostprocessJob:
 tbb::concurrent_unordered_map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_acad_map_;
 tbb::concurrent_unordered_map<std::string, std::string> ASTERIXPostprocessJob::obfuscate_acid_map_;
 
-boost::mutex ASTERIXPostprocessJob::timestamp_mutex_;
-
-bool ASTERIXPostprocessJob::first_tod_ = true;
-float ASTERIXPostprocessJob::last_reported_tod_{0};
-
-bool ASTERIXPostprocessJob::current_date_set_ = false;
-boost::posix_time::ptime ASTERIXPostprocessJob::current_date_;
-boost::posix_time::ptime ASTERIXPostprocessJob::previous_date_;
-bool ASTERIXPostprocessJob::did_recent_time_jump_ = false;
-bool ASTERIXPostprocessJob::had_late_time_ = false;
-
 ASTERIXPostprocessJob::ASTERIXPostprocessJob(
     map<string, shared_ptr<Buffer>> buffers,
-    boost::posix_time::ptime date,
-    bool override_tod_active, float override_tod_offset,
-    bool ignore_time_jumps, bool do_timestamp_checks,
     bool filter_tod_active, float filter_tod_min, float filter_tod_max,
     bool filter_position_active,
     float filter_latitude_min, float filter_latitude_max,
@@ -49,8 +29,6 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(
     bool do_obfuscate_secondary_info)
     : Job("ASTERIXPostprocessJob"),
     buffers_(std::move(buffers)),
-    override_tod_active_(override_tod_active), override_tod_offset_(override_tod_offset),
-    ignore_time_jumps_(ignore_time_jumps), do_timestamp_checks_(do_timestamp_checks),
     filter_tod_active_(filter_tod_active), filter_tod_min_(filter_tod_min), filter_tod_max_(filter_tod_max),
     filter_position_active_(filter_position_active),
     filter_latitude_min_(filter_latitude_min), filter_latitude_max_(filter_latitude_max),
@@ -59,14 +37,6 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(
     filter_modec_min_(filter_modec_min), filter_modec_max_(filter_modec_max),
     do_obfuscate_secondary_info_(do_obfuscate_secondary_info)
 {
-    if (!current_date_set_) // init if first time
-    {
-        current_date_ = date;
-        previous_date_ = current_date_;
-
-        current_date_set_ = true;
-    }
-
     obfuscate_m3a_map_[512] = 512; // 1000
     obfuscate_m3a_map_[1024] = 1024; // 2000
     obfuscate_m3a_map_[3584] = 3584; // 7000
@@ -74,41 +44,18 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(
 
 }
 
-ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers,
-                                             boost::posix_time::ptime date)
+ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buffers)
     : Job("ASTERIXPostprocessJob"),
     buffers_(std::move(buffers))
 {
-    if (!current_date_set_) // init if first time
-    {
-        current_date_ = date;
-        previous_date_ = current_date_;
-
-        current_date_set_ = true;
-    }
-
-    //ignore_time_jumps_ = true; // do if problems with import
 }
 
-ASTERIXPostprocessJob::~ASTERIXPostprocessJob() { logdbg << "ASTERIXPostprocessJob: dtor"; }
-
-void ASTERIXPostprocessJob::resetDateInfo()
+ASTERIXPostprocessJob::~ASTERIXPostprocessJob()
 {
-    current_date_set_ = false;
-    current_date_ = {};
-    previous_date_ = {};
-
-    did_recent_time_jump_ = false;
-    had_late_time_ = false;
+    logdbg << "ASTERIXPostprocessJob: dtor";
 }
 
-void ASTERIXPostprocessJob::clearTimeStats()
-{
-    loginf << "ASTERIXPostprocessJob: clearTimeJumpStats";
 
-    first_tod_ = true;
-    last_reported_tod_ = 0;
-}
 
 void ASTERIXPostprocessJob::run_impl()
 {
@@ -119,16 +66,8 @@ void ASTERIXPostprocessJob::run_impl()
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-    doADSBTimeProcessing();
-
-    if (override_tod_active_)
-        doTodOverride();
-
-    if (do_timestamp_checks_) // out of sync issue during 24h replay
-        doFutureTimestampsCheck();
-
-    doTimeStampCalculation();
     doRadarPlotPositionCalculations();
+    doXYPositionCalculations();
     doADSBPositionProcessing();
     doGroundSpeedCalculations();
 
@@ -158,375 +97,20 @@ void ASTERIXPostprocessJob::run_impl()
     done_ = true;
 }
 
-void ASTERIXPostprocessJob::doADSBTimeProcessing()
-{
-    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    string dbcontent_name = "CAT021";
-
-    if (!buffers_.count(dbcontent_name))
-        return;
-
-    shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
-    unsigned int buffer_size = buffer->size();
-
-    if (!buffer_size)
-        return;
-
-
-    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
-
-    assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_));
-
-    dbContent::Variable& tod_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_time_of_day_);
-
-    assert (tod_var.dataType() == PropertyDataType::FLOAT);
-
-    string tod_var_name = tod_var.name();
-
-    if (!buffer->has<float>(tod_var_name))
-        buffer->addProperty(tod_var_name, PropertyDataType::FLOAT); // add if needed
-
-    NullableVector<float>& tod_vec = buffer->get<float>(tod_var_name);
-
-    // check if other sources for tod exist
-
-    // "ToA Position" 071.Time of Applicability for Position
-    // "ToMR Position" 0.73 Time of Message Reception for Position
-    // "ToRT" 077.Time of Report Transmission
-    // "Time of Day Deprecated" 030.Time of Day
-
-    NullableVector<float>* toa_position_vec {nullptr};
-    NullableVector<float>* tomr_position_vec {nullptr};
-    NullableVector<float>* tort_vec {nullptr};
-    NullableVector<float>* tod_dep_vec {nullptr};
-
-    if (buffer->has<float>(DBContent::var_cat021_toa_position_.name()))
-        toa_position_vec = &buffer->get<float>(DBContent::var_cat021_toa_position_.name());
-
-    if (buffer->has<float>(DBContent::var_cat021_tomr_position_.name()))
-        tomr_position_vec = &buffer->get<float>(DBContent::var_cat021_tomr_position_.name());
-
-    if (buffer->has<float>(DBContent::var_cat021_tort_.name()))
-        tort_vec = &buffer->get<float>(DBContent::var_cat021_tort_.name());
-
-    if (buffer->has<float>(DBContent::var_cat021_tod_dep_.name()))
-        tod_dep_vec = &buffer->get<float>(DBContent::var_cat021_tod_dep_.name());
-
-    for (unsigned int index=0; index < buffer_size; index++)
-    {
-        if (!tod_vec.isNull(index)) // no need to copy, should not happen
-            continue;
-
-        if (toa_position_vec && !toa_position_vec->isNull(index))
-        {
-            tod_vec.set(index, toa_position_vec->get(index));
-            continue;
-        }
-
-        if (tomr_position_vec && !tomr_position_vec->isNull(index))
-        {
-            tod_vec.set(index, tomr_position_vec->get(index));
-            continue;
-        }
-
-        if (tort_vec && !tort_vec->isNull(index))
-        {
-            tod_vec.set(index, tort_vec->get(index));
-            continue;
-        }
-
-        if (tod_dep_vec && !tod_dep_vec->isNull(index))
-        {
-            tod_vec.set(index, tod_dep_vec->get(index));
-            continue;
-        }
-    }
-}
-
-void ASTERIXPostprocessJob::doTodOverride()
-{
-    logdbg << "ASTERIXPostprocessJob: doTodOverride: offset "
-           << String::doubleToStringPrecision(override_tod_offset_, 3);
-
-    assert (override_tod_active_);
-
-    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
-
-    unsigned int buffer_size;
-
-    for (auto& buf_it : buffers_)
-    {
-        buffer_size = buf_it.second->size();
-
-        assert (dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
-
-        dbContent::Variable& tod_var = dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
-
-        Property tod_prop {tod_var.name(), tod_var.dataType()};
-
-        assert (buf_it.second->hasProperty(tod_prop));
-
-        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
-
-        for (unsigned int index=0; index < buffer_size; ++index)
-        {
-            if (!tod_vec.isNull(index))
-            {
-                float& tod_ref = tod_vec.getRef(index);
-
-                tod_ref += override_tod_offset_;
-
-                // check for out-of-bounds because of midnight-jump
-                while (tod_ref < 0.0f)
-                    tod_ref += tod_24h;
-                while (tod_ref > tod_24h)
-                    tod_ref -= tod_24h;
-
-                assert(tod_ref >= 0.0f);
-                assert(tod_ref <= tod_24h);
-            }
-        }
-    }
-}
-
-const double TMAX_FUTURE_OFFSET = 3*60.0;
-const double T24H_OFFSET = 5*60.0;
-
-void ASTERIXPostprocessJob::doFutureTimestampsCheck()
-{
-    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
-
-    unsigned int buffer_size;
-
-    using namespace boost::posix_time;
-
-    auto p_time = microsec_clock::universal_time (); // UTC
-
-
-    double current_time_utc = p_time.time_of_day().total_milliseconds() / 1000.0;
-    double tod_utc_max = (p_time + Time::partialSeconds(TMAX_FUTURE_OFFSET)).time_of_day().total_milliseconds() / 1000.0;
-
-    bool in_vicinity_of_24h_time = current_time_utc <= T24H_OFFSET || current_time_utc >= (tod_24h - T24H_OFFSET);
-
-    loginf << "ASTERIXPostprocessJob: doFutureTimestampsCheck: maximum time is "
-           << String::timeStringFromDouble(tod_utc_max) << " 24h vicinity " << in_vicinity_of_24h_time;
-
-    for (auto& buf_it : buffers_)
-    {
-        buffer_size = buf_it.second->size();
-
-        assert (dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
-
-        dbContent::Variable& tod_var = dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
-
-        Property tod_prop {tod_var.name(), tod_var.dataType()};
-
-        assert (buf_it.second->hasProperty(tod_prop));
-
-        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
-
-        std::tuple<bool,float,float> min_max_tod = tod_vec.minMaxValues();
-
-        if (get<0>(min_max_tod))
-            loginf << "ASTERIXPostprocessJob: doFutureTimestampsCheck: " << buf_it.first
-                   << " min tod " << String::timeStringFromDouble(get<1>(min_max_tod))
-                   << " max " << String::timeStringFromDouble(get<2>(min_max_tod));
-
-        for (unsigned int index=0; index < buffer_size; ++index)
-        {
-            if (!tod_vec.isNull(index))
-            {
-                if (in_vicinity_of_24h_time)
-                {
-                    // not at end of day and bigger than max
-                    if (tod_vec.get(index) < (tod_24h - T24H_OFFSET) && tod_vec.get(index) > tod_utc_max)
-                    {
-                        logwrn << "ASTERIXPostprocessJob: doFutureTimestampsCheck: vic doing " << buf_it.first
-                               << " cutoff tod index " << index
-                               << " tod " << String::timeStringFromDouble(tod_vec.get(index));
-
-                        buf_it.second->cutToSize(index);
-                        break;
-                    }
-                }
-                else
-                {
-                    if (tod_vec.get(index) > tod_utc_max)
-                    {
-                        logwrn << "ASTERIXPostprocessJob: doFutureTimestampsCheck: doing " << buf_it.first
-                               << " cutoff tod index " << index
-                               << " tod " << String::timeStringFromDouble(tod_vec.get(index));
-
-                        buf_it.second->cutToSize(index);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    // remove empty buffers
-
-    std::map<std::string, std::shared_ptr<Buffer>> tmp_data = buffers_;
-
-    for (auto& buf_it : tmp_data)
-        if (!buf_it.second->size())
-            buffers_.erase(buf_it.first);
-}
-
-void ASTERIXPostprocessJob::doTimeStampCalculation()
-{
-    boost::mutex::scoped_lock locker(timestamp_mutex_);
-
-    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
-
-    unsigned int buffer_size;
-
-    for (auto& buf_it : buffers_)
-    {
-        buffer_size = buf_it.second->size();
-
-        // tod
-        assert (dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).existsIn(buf_it.first));
-        dbContent::Variable& tod_var =
-            dbcont_man.metaVariable(DBContent::meta_var_time_of_day_.name()).getFor(buf_it.first);
-
-        Property tod_prop {tod_var.name(), tod_var.dataType()};
-        assert (buf_it.second->hasProperty(tod_prop));
-
-        NullableVector<float>& tod_vec = buf_it.second->get<float>(tod_var.name());
-
-        // timestamp
-        assert (dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
-        dbContent::Variable& timestamp_var =
-            dbcont_man.metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
-
-        Property timestamp_prop {timestamp_var.name(), timestamp_var.dataType()};
-        assert (!buf_it.second->hasProperty(timestamp_prop));
-        buf_it.second->addProperty(timestamp_prop);
-
-        NullableVector<boost::posix_time::ptime>& timestamp_vec =
-            buf_it.second->get<boost::posix_time::ptime>(timestamp_var.name());
-
-        float tod;
-        boost::posix_time::ptime timestamp;
-
-        bool in_vicinity_of_24h_time = false; // within 5min of 24hrs
-        bool outside_vicinity_of_24h_time = false; // outside of 10min to 24hrs
-
-        for (unsigned int index=0; index < buffer_size; ++index)
-        {
-            if (!tod_vec.isNull(index))
-            {
-                tod = tod_vec.get(index);
-
-                if (tod < 0 || tod > tod_24h)
-                {
-                    logwrn << "ASTERIXPostprocessJob: doTimeStampCalculation: impossible tod "
-                           << String::timeStringFromDouble(tod);
-                    continue;
-                }
-
-                if (tod - last_reported_tod_ < -12 * 3600) // timejump in reporting
-                    last_reported_tod_ = 0;
-
-                if (first_tod_)
-                {
-                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: processing tod "
-                           << String::timeStringFromDouble(tod);
-
-                    first_tod_ = false;
-                    last_reported_tod_ = tod;
-                }
-                else if (tod - last_reported_tod_ >= 3600) // 1h
-                {
-                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: processing tod "
-                           << String::timeStringFromDouble(tod);
-                    last_reported_tod_ = tod;
-                }
-
-                had_late_time_ |= (tod >= (tod_24h - close_to_midgnight_offset_s)); // close before midnight
-
-                // within close time midnight
-                in_vicinity_of_24h_time = tod <= close_to_midgnight_offset_s
-                                          || tod >= (tod_24h - close_to_midgnight_offset_s);
-
-                if (tod > tod_24h/2) // late
-                    outside_vicinity_of_24h_time = tod <= tod_24h - not_close_to_midgnight_offset_s;
-                else // early
-                    outside_vicinity_of_24h_time = tod >= not_close_to_midgnight_offset_s;
-
-                if (in_vicinity_of_24h_time)
-                    logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod "
-                           << String::timeStringFromDouble(tod)
-                           << " in 24h vicinity, had_late_time_ " << had_late_time_
-                           << " did_recent_time_jump " << did_recent_time_jump_;
-
-                if (did_recent_time_jump_ && outside_vicinity_of_24h_time) // clear if set and 10min outside again
-                {
-                    loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: clearing did_recent_time_jump_";
-                    did_recent_time_jump_ = false;
-                }
-
-                // check if timejump and assign timestamp to correct day
-                if (!ignore_time_jumps_ && in_vicinity_of_24h_time)
-                {
-                    // check if timejump (if not yet done)
-                    if (!did_recent_time_jump_ && had_late_time_
-                        && tod <= close_to_midgnight_offset_s) // not yet handled timejump
-                    {
-                        current_date_ += boost::posix_time::seconds((unsigned int) tod_24h);
-                        previous_date_ = current_date_ - boost::posix_time::seconds((unsigned int) tod_24h);
-
-                        loginf << "ASTERIXPostprocessJob: doTimeStampCalculation: tod "
-                               << String::timeStringFromDouble(tod)
-                               << " detected time-jump from previous " << Time::toDateString(previous_date_)
-                               << " to current " << Time::toDateString(current_date_);
-
-                        did_recent_time_jump_ = true;
-                    }
-
-                    if (tod <= close_to_midgnight_offset_s) // early time of current day
-                        timestamp = current_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
-                    else // late time of previous day
-                        timestamp = previous_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
-                }
-                else // normal timestamp
-                {
-                    timestamp = current_date_ + boost::posix_time::millisec((unsigned int) (tod * 1000));
-                }
-
-                if (in_vicinity_of_24h_time)
-                    logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
-                           << " timestamp " << Time::toString(timestamp);
-
-                if (outside_vicinity_of_24h_time)
-                {
-                    did_recent_time_jump_ = false;
-                    had_late_time_ = false;
-                }
-
-                logdbg << "ASTERIXPostprocessJob: doTimeStampCalculation: tod " << String::timeStringFromDouble(tod)
-                       << " ts " << Time::toString(timestamp);
-
-                timestamp_vec.set(index, timestamp);
-                assert (!timestamp_vec.isNull(index));
-                assert (timestamp_vec.get(index) == timestamp);
-            }
-        }
-
-        // bool has_vec_min_max;
-        // boost::posix_time::ptime ts_vec_min, ts_vec_max;
-
-        // tie(has_vec_min_max, ts_vec_min, ts_vec_max) = timestamp_vec.minMaxValues();
-    }
-}
 
 void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 {
     // radar calculations
     ProjectionManager::instance().doRadarPlotPositionCalculations(buffers_);
+}
+
+void ASTERIXPostprocessJob::doXYPositionCalculations()
+{
+    logdbg << "ASTERIXPostprocessJob: doXYPositionCalculations";
+
+    // tracked data sources with only x/y coordinates
+    ProjectionManager::instance().doXYPositionCalculations(buffers_);
 }
 
 void ASTERIXPostprocessJob::doADSBPositionProcessing()
