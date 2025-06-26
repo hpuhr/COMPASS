@@ -17,8 +17,9 @@ It is useful to define all existing data sources in the configuration, since the
 A data source is stored in the database only if data from said source is imported. 
 During the import, if a data source can be found (matching SAC/SIC) in the configuration, it is automatically added to the database. \\
 
-Please \textbf{note} that currently the position of data sources is only required for \textbf{Radar} data sources (in the plot position calculation), 
-for all other data sources it would suffice to have SAC/SIC and name information for display purposes.
+Please \textbf{note} that currently the position of data sources is only required for \textbf{Radar} data sources (in the plot position calculation), for all other data sources it would suffice to have SAC/SIC and name information for display purposes. \\
+
+However, for CAT010,CAT020 and CAT062 exists the option to project from a Cartesian X/Y coordinate system to WGS84 latitude and longitudes (when not available in the ASTERIX data). To use this feature during ASTERIX import, set a latitude/longitude for the respective data source.
 
 \paragraph {Data Sources Table Content}
 \label{sec:configure_datasources_table_content}
@@ -98,10 +99,10 @@ Additional optional information can be provided:
 Using the 4 buttons on the bottom the following functions can be used:
 
 \begin{itemize}
-\item Export All: Export all configuration data sources as JSON file
-\item Clear All: Delete all configuration data sources
+\item Create New: Create new data source
 \item Import: Import configuration data sources from JSON file
-\item Auto Sync All to DB: Automatically synchronize all configuration data sources to database
+\item Delete All: Delete all configuration data sources
+\item Export: Export all configuration data sources as JSON file
 \end{itemize}
 \ \\
 
