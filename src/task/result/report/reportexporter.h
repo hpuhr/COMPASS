@@ -102,6 +102,7 @@ protected:
 
     const std::string& exportFilename() const { return export_fn_; }
     const std::string& exportResourceDir() const { return export_resource_dir_; }
+    std::string exportPath() const;
     bool hasInteraction() const { return interaction_mode_; }
 
     void setStatus(const std::string& status);

@@ -61,7 +61,7 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     refresh_result_button_->setIcon(Files::IconProvider::getIcon("refresh.png"));
     refresh_result_button_->setEnabled(false);
     refresh_result_button_->setFlat(true);
-    refresh_result_button_->setToolTip("Refresh Result");
+    refresh_result_button_->setToolTip("Refresh Report");
 
     connect(refresh_result_button_, &QPushButton::pressed, this, &TaskResultsWidget::refreshCurrentResult);
 
@@ -71,7 +71,7 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     remove_result_button_->setIcon(Files::IconProvider::getIcon("delete.png"));
     remove_result_button_->setEnabled(false);
     remove_result_button_->setFlat(true);
-    remove_result_button_->setToolTip("Remove Result");
+    remove_result_button_->setToolTip("Remove Report");
 
     connect(remove_result_button_, &QPushButton::pressed, this, &TaskResultsWidget::removeCurrentResult);
 
@@ -81,7 +81,7 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     export_result_button_->setIcon(Files::IconProvider::getIcon("save.png"));
     export_result_button_->setEnabled(false);
     export_result_button_->setFlat(true);
-    export_result_button_->setToolTip("Export Result");
+    export_result_button_->setToolTip("Export Report");
 
     QMenu* export_menu = new QMenu(export_result_button_);
 
@@ -268,7 +268,7 @@ void TaskResultsWidget::updateResultUI(const std::string& name)
     {
         icon_file    = "lock.png";
         icon_color   = ResultReport::Colors::TextRed;
-        icon_tooltip = "Result in read-only mode.\nRefresh to unlock.";
+        icon_tooltip = "Report in read-only mode.\nRefresh to unlock.";
     }
     else if(update_needed)
     {
@@ -310,8 +310,8 @@ void TaskResultsWidget::removeCurrentResult()
     auto name = report_combo_->currentText().toStdString();
     assert(task_man_.hasResult(name));
 
-    QString msg = "Do you really want to remove result '" + QString::fromStdString(name) + "'?";
-    auto answer = QMessageBox::question(this, "Remove Result", msg, QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No);
+    QString msg = "Do you really want to remove report '" + QString::fromStdString(name) + "'?";
+    auto answer = QMessageBox::question(this, "Remove Report", msg, QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::No);
     if (answer == QMessageBox::StandardButton::No)
         return;
 
@@ -320,7 +320,7 @@ void TaskResultsWidget::removeCurrentResult()
         return this->removeResult(name);
     };
 
-    AsyncFuncTask task(cb, "Remove Result", "Removing result", false);
+    AsyncFuncTask task(cb, "Remove Report", "Removing report", false);
     task.runAsyncDialog(true, this);
 
     std::string selection_name = new_index >= 0 ? report_combo_->itemText(new_index).toStdString() : "";
@@ -349,7 +349,7 @@ void TaskResultsWidget::refreshCurrentResult()
     if (!res.ok())
     {
         logerr << "TaskResultsWidget: refreshCurrentResult: failed: " << res.error();
-        QMessageBox::critical(this, "Error", "Refreshing result failed.");
+        QMessageBox::critical(this, "Error", "Refreshing report failed.");
     }
 }
 

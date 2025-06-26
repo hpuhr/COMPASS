@@ -145,6 +145,8 @@ void ReportExportDialog::createUI()
     connect(base_dir_button_, &QPushButton::pressed, this, &ReportExportDialog::editBaseDir);
 
     base_dir_edit_ = new QLineEdit;
+    base_dir_edit_->setReadOnly(true);
+    base_dir_edit_->setFrame(false);
 
     base_dir_layout_ = new QHBoxLayout;
     base_dir_layout_->setSpacing(0);

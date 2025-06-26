@@ -74,6 +74,13 @@ const ReportExportSettings& ReportExporter::settings() const
 
 /**
  */
+std::string ReportExporter::exportPath() const
+{
+    return exportResourceDir() + "/" + exportFilename();
+}
+
+/**
+ */
 std::string ReportExporter::resourceSubDir(ResourceDir dir)
 {
     switch (dir)
@@ -187,7 +194,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
             return Result::failed("Creating in-memory data failed");
 
         //check on created file
-        if (exportCreatesFile() && !Utils::Files::fileExists(export_fn_))
+        if (exportCreatesFile() && !Utils::Files::fileExists(exportPath()))
             return Result::failed("Creating report file failed");
     }
     catch (const std::exception& ex)

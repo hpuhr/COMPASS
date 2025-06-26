@@ -62,7 +62,7 @@ ResultT<nlohmann::json> ReportExporterJSON::finalizeExport_impl(TaskResult& resu
 
     setStatus("Writing report file");
 
-    std::string fn = exportResourceDir() + "/" + exportFilename();
+    std::string fn = exportPath();
 
     std::ofstream file(fn);
     if (!file.is_open())
