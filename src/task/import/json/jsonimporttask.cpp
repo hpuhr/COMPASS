@@ -531,8 +531,19 @@ void JSONImportTask::mapJSONDoneSlot()
 
     // date_
 
+    assert (!ts_calculator_.processing());
+    ts_calculator_.setBuffers(std::move(job_buffers));
+
+    ts_calculator_.calculate(import_filename_,
+                             boost::posix_time::ptime(boost::gregorian::day_clock::universal_day()), false,
+                             false, 0,
+                             false, 0);
+
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers2 {ts_calculator_.buffers()};
+    ts_calculator_.setProcessingDone();
+
     std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
-            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers));
+            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers2));
 
     postprocess_jobs_.push_back(postprocess_job);
 

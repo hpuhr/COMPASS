@@ -236,7 +236,7 @@ protected:
 
     std::vector<std::shared_ptr<ASTERIXJSONMappingJob>>         json_map_jobs_;
     ASTERIXTimestampCalculator ts_calculator_;
-    std::future<void> ts_calc_future_;
+    //std::future<void> ts_calc_future_;
     std::vector<std::shared_ptr<ASTERIXPostprocessJob>>         postprocess_jobs_;
     std::map<std::string, std::shared_ptr<Buffer>>              accumulated_buffers_;
     std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_insert_buffers_;
