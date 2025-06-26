@@ -530,7 +530,7 @@ void DBContentManager::databaseOpenedSlot()
     if (db_interface.hasProperty(PROP_TIMESTAMP_MIN_NAME))
     {
         timestamp_min_ = Time::fromLong(stol(db_interface.getProperty(PROP_TIMESTAMP_MIN_NAME)));
-        assert (!timestamp_max_->is_not_a_date_time());
+        assert (!timestamp_min_->is_not_a_date_time());
     }
     if (db_interface.hasProperty(PROP_TIMESTAMP_MAX_NAME))
     {
