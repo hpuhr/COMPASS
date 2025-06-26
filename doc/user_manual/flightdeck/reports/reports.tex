@@ -75,7 +75,7 @@ A menu will open, giving multiple options for export.
 
 \begin{figure}[H]
     \center
-    \includegraphics[width=6cm,frame]{figures/export_options.png}
+    \includegraphics[width=4cm,frame]{figures/export_options.png}
   %\caption{Data Sources Overview}
 \end{figure}
 
@@ -120,17 +120,79 @@ After export the folder structure created will e.g. look like this.
     \hspace*{-2.5cm}
     \center
     \includegraphics[width=10cm,frame]{figures/export_json_result.png}
-  \caption{Export as JSON}
+  \caption{Export as JSON: Resulting folder structure}
 \end{figure}
 
-The folder 'tables' contains all tabular data in JSON format linked in the main JSON file. \\
-The folder 'screenshots' contains all image data linked in the main JSON file.
+The folder 'tables' contains all tabular data in JSON format linked in the main JSON file.
+The folder 'screenshots' contains all image data linked in the main JSON file. \\
+
+Please \textbf{note} that all paths linked in the created JSON file are relative to the 
+JSON file's directory.
 
 \subsubsection{Export as Latex}
 \label{sec:report_export_latex}
 
+This export will generate a Latex file and a list of exported resources which are linked in the Latex file. \\
+
+The following dialog will open.
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \center
+    \includegraphics[width=12cm,frame]{figures/export_latex.png}
+  \caption{Export as Latex}
+\end{figure}
+
+In addition to the input fields described in Section \nameref{sec:report_export_json}, 
+the following fields are available.
+
+\begin{itemize}  
+    \item Maximum Table Rows: Maximum number of rows exported to Latex tables
+    \item Maximum Table Column Width: Can be used to limit Latex table column widths
+\end{itemize}
+\ \\
+
+When pressing 'Export' the report will be exported using the specified settings.
+After export the folder structure created will e.g. look like this.
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \center
+    \includegraphics[width=10cm,frame]{figures/export_latex_result.png}
+  \caption{Export as Latex: Resulting folder structure}
+\end{figure}
+
 \subsubsection{Export as PDF}
 \label{sec:report_export_pdf}
+
+This export will generate a PDF file. It will also create an intermediate latex file the PDF file is generated from. \\
+
+The following dialog will open.
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \center
+    \includegraphics[width=12cm,frame]{figures/export_pdf.png}
+  \caption{Export as Latex}
+\end{figure}
+
+In addition to the input fields described in Section \nameref{sec:report_export_latex}, 
+the following fields are available.
+
+\begin{itemize}  
+    \item Open Created PDF File: If checked, the created PDF file will be opened in the system's default PDF viewer
+\end{itemize}
+\ \\
+
+When pressing 'Export' the report will be exported using the specified settings.
+After export the folder structure created will e.g. look like this.
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \center
+    \includegraphics[width=10cm,frame]{figures/export_pdf_result.png}
+  \caption{Export as PDF: Resulting folder structure}
+\end{figure}
 
 \section{Reports}
 
