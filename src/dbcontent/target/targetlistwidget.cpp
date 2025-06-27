@@ -410,7 +410,7 @@ void TargetListWidget::createTargetEvalMenu(QMenu& menu,
     bool  target_ok        = model_.existsTarget(target.utn_);
     auto  target_ptr       = &target;
     auto& eval_man         = COMPASS::instance().evaluationManager();
-    auto  all_requirements = eval_man.currentStandard().getAllRequirementNames();
+    auto  all_requirements = eval_man.hasCurrentStandard() ? eval_man.currentStandard().getAllRequirementNames() : std::set<std::string>();
     bool  has_requirement  = all_requirements.count(req_name) > 0;
     bool  has_timewin      = !target.timeBegin().is_not_a_date_time() &&
                              !target.timeEnd().is_not_a_date_time();
