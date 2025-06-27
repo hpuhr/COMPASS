@@ -187,6 +187,8 @@ namespace rtcommand
     const char        RTCommand::ObjectPathSeparator    = '.';
     const char        RTCommand::ParameterListSeparator = '|';
 
+    std::vector<std::string> RTCommand::DefaultOptions = { "wait", "wait_signal", "async", HelpOption };
+
     /**
      */
     RTCommand::RTCommand() = default;
@@ -539,8 +541,47 @@ namespace rtcommand
                 entry[ "command_name"        ] = elem.first.toStdString();
                 entry[ "command_description" ] = elem.second.description.toStdString();
 
+                std::string options;
+
+                if (with_options)
+                {
+                    auto cmd = RTCommandRegistry::instance().createCommandTemplate(elem.first);
+                    if (cmd)
+                    {
+                        rtcommand::RTCommand::OptionsDescription    opt;
+                        rtcommand::RTCommand::PosOptionsDescription pos;
+                        bool ok = cmd->collectOptions(opt, pos);
+                        if (ok)
+                        {
+                            for (const auto& o : opt.options())
+                            {
+                                //skip default options
+                                auto it = std::find(rtcommand::RTCommand::DefaultOptions.begin(), 
+                                                    rtcommand::RTCommand::DefaultOptions.end(), 
+                                                    o->long_name());
+                                if (it != rtcommand::RTCommand::DefaultOptions.end())
+                                    continue;
+
+                                options += ReplyStringIndentation
+                                        +  ReplyStringIndentation
+                                        +  o->long_name() + "\t\t" + o->description() 
+                                        + "\n";
+                            }
+                        }
+                        else
+                        {
+                            options = "could not retrieve options";
+                        }
+                    }
+                    else
+                    {
+                        options = "could not create command";
+                    }
+                }
+
                 str += elem.first.toStdString() + "\n";
                 str += ReplyStringIndentation + elem.second.description.toStdString() + "\n";
+                str += options;
                 str += "\n";
 
                 root.push_back(entry);
