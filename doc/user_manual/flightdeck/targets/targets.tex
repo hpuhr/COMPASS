@@ -91,7 +91,7 @@ Clicking the button opens the following menu.
 
 \begin{figure}[H]
     \center
-    \includegraphics[width=6cm,frame]{figures/ui_targets_config.png}
+    \includegraphics[width=3.5cm,frame]{figures/ui_targets_config.png}
   %\caption{Data Sources Overview}
 \end{figure}
 
@@ -105,13 +105,39 @@ Clicking the button opens the following menu.
 \subsection{Evaluation Usage and Constraints}
 \label{sec:ui_eval_usage}
 
-\hl{TODO: Describe usage and constraints principle, describe single target operations} \\
+In the Targets table:
+\begin{itemize}
+  \item All existing targets are listed by UTN, ...
+  \item Eval: Icon representation if used of evaluation
+  \begin{itemize}
+  \item Full usage, partial usage, no usage possible
+  \item Partial usage if some time or requirements excluded
+ \end{itemize} 
+ \item Eval Details can be shown if wanted
+ \end{itemize} 
+ \  \\
+
+Commonly, all targets are using in an evaluation. However, there are several method how to de-selection certain parts of the evaluated data:
+\begin{itemize}
+  \item Global: 'Edit Global Excluded Time Windows'
+\begin{itemize}
+  \item Specify begin/end time: Nothing outside this time is evaluated
+  \item Specify exlude time window(s): Nothing inside these time windows is evaluated
+ \end{itemize}   
+  \item For certain target(s)
+\begin{itemize}
+  \item Exclude targets fully: Nothing is evaluated (for the given targets)
+  \item Specify exlude time window(s): Nothing inside these time windows is evaluated (for the given targets)
+  \item Specify exlude requirements: These requirements are not evaluated (for the given targets)
+ \end{itemize}   
+ \end{itemize} 
+ \  \\
 
 The 'Evaluation' submenu provides global operations for settings Evaluation target usage and constraints for all listed targets.
 
 \begin{figure}[H]
   \center
-  \includegraphics[width=6cm,frame]{figures/ui_targets_config_eval.png}
+  \includegraphics[width=10cm,frame]{figures/ui_targets_config_eval.png}
 %\caption{Data Sources Overview}
 \end{figure}
 
@@ -125,7 +151,77 @@ The 'Evaluation' submenu provides global operations for settings Evaluation targ
 \end{itemize} 
 \ \\
 
-\hl{TODO: Describe global target operations listed above} \\
+\subsubsection{Global Excluded Time Windows}
+
+\begin{figure}[H]
+  \center
+  \includegraphics[width=10cm,frame]{figures/eval_global_excl_tw.png}
+\end{figure}
+
+\begin{itemize}
+  \item Use Timestamp Filter: Toggles usage of the defined values
+  \item Timestamp Begin: First timestamp to be loaded
+  \item Timestamp End: Last timestamp to be loaded
+  \item Excluded Time Windows
+  \begin{itemize}
+  \item Simple list
+  \item Existing ones can be edited with double click or deleted
+  \item New ones can be added using 'Add' button
+\end{itemize} 
+\end{itemize} 
+\ \\
+
+\subsubsection{Single Targets: Context Menu}
+
+For any number of selected targets, the operation can be performed:
+
+\begin{figure}[H]
+  \center
+  \includegraphics[width=14cm,frame]{figures/eval_targets_context_menu.png}
+\end{figure}
+
+\subsubsection{Single Targets: Edit Excluded Time Windows}
+
+\begin{figure}[H]
+  \center
+  \includegraphics[width=10cm,frame]{figures/eval_targets_excl_tw.png}
+\end{figure}
+
+For any number of selected targets, the operation can be performed:
+\begin{itemize}
+  \item UTNs: List, read-only
+  \item Excluded Time Windows
+  \begin{itemize}
+  \item Simple list
+  \item Existing ones can be edited with double click or deleted
+  \item New ones can be added using 'Add' button
+\end{itemize} 
+  \item Comment: Set in all listed UTNs if given
+  \item Only set if 'OK' is clicked
+\end{itemize} 
+\ \\
+
+\subsubsection{Single Targets: Edit Excluded Requirements}
+
+\begin{figure}[H]
+  \center
+  \includegraphics[width=10cm,frame]{figures/eval_targets_excl_req.png}
+\end{figure}
+
+For any number of selected targets, the operation can be performed:
+\begin{itemize}
+  \item UTNs: List, read-only
+  \item Excluded Requirement List
+  \begin{itemize}
+  \item List of requirements from \textbf{current standard}
+  \item EChecked means excluded
+\end{itemize} 
+  \item Comment: Set in all listed UTNs if given
+  \item Only set if 'OK' is clicked
+\end{itemize} 
+\ \\
+
+\subsubsection{Evaluation Refresh}
 
 Please \textbf{note} that Evaluation usage and constraints of the targets can also be configured after an Evaluation has been run.
 This will mark all existing Evaluation Reports as outdated, these can be refreshed afterwards to adapt to the target changes.
