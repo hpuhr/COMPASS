@@ -71,6 +71,18 @@ For sources of DSType 'Radar', the follwing additional information should be pro
 
 Additional optional information can be provided:
 
+\subsubsection{Detection Type}
+
+A detection type can be given of any data source, 'Mode S' is given as default. Currently only 'Primary Ground Only" used during reconstruction, but it is very important to set this type for SMRs, to mitigate sub-optimal association of primary-only target reports in close distances to clutter. \\
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{figures/configure_ds_dettyp.png}
+  \caption{Configure Data Sources: Detection type}
+\end{figure}
+
+\subsubsection{Radar Ranges \& Accuracies}
+
 \begin{figure}[H]
   \center
     \includegraphics[width=8cm,frame]{figures/configure_data_sources_radar_details.png}
