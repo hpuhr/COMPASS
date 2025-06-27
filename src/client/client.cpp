@@ -311,7 +311,9 @@ bool Client::run ()
     }
 
     if (open_rt_cmd_port_)
+    {
         RTCommandManager::open_port_ = true; // has to be done before COMPASS ctor is called
+    }
 
     loginf << "COMPASSClient: creating COMPASS instance...";
 

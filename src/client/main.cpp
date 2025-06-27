@@ -39,7 +39,9 @@ int main(int argc, char** argv)
             return 0;
 
         // make system your application font (applies to all widgets)
-        if (COMPASS::instance().isAppImage())
+        // note: we cannot use the COMPASS classes isAppImage() method here,
+        // because we cannot create the COMPASS instance at this point of time
+        if (getenv("APPDIR") != nullptr)
         {
             QFont system_font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
 
