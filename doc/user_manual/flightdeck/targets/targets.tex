@@ -18,13 +18,13 @@ These groups can be hidden or shown individually for more clarity. The following
 \item Base Items: These columns are always visible
 \begin{itemize}  
   \item UTN: Unique Target Number
-  \item Comment: A comment which can be set by the user \hl{TODO?}
-  \item Category: The target's emitter category \hl{TODO?}
+  \item Comment: A comment which can be set by the user or by a 'Evaluation $\rightarrow$ Filter Usage' feature
+  \item Category: The target category, as set e.g. by ADS-B Emitter Category
   \item Eval: An icon showing the target's Evaluation usage status
 \end{itemize}
-\item Eval Details: Columns showing details for Evaluation \hl{TODO?}
+\item Eval Details: Columns showing details for Evaluation
 \begin{itemize}  
-  \item Eval Excluded: \hl{TODO}
+  \item Eval Excluded: List of excluded time windows or requirements
 \end{itemize}
 \item Duration: Columns showing details about the target's duration
 \begin{itemize}  
@@ -36,7 +36,7 @@ These groups can be hidden or shown individually for more clarity. The following
 \item Mode S: Columns regarding the target's Mode S attributes
 \begin{itemize}  
   \item ACIDs: Target identification(s)
-  \item ACADs: Target addresses (hexadecimal)
+  \item ACADs: Target address (hexadecimal, assumed to be unique)
 \end{itemize}
 \item Mode A/C: Columns regarding the target's Mode A/C attributes
 \begin{itemize}  
@@ -44,10 +44,13 @@ These groups can be hidden or shown individually for more clarity. The following
   \item MC Min: Mode C code minimum [ft]
   \item MC Max: Mode C code maximum [ft]
 \end{itemize}
+\item ADS-B: Columns regarding minimal ADS-B information
+\begin{itemize}  
+  \item ADS-B: Count of associated ADS-B target reports
+  \item MOPS: ADS-B MOPS version and target report cout
+\end{itemize}
 \end{itemize}
 \ \\
-
-\hl{TODO} Check table \\
 
 The individual groups can be enabled/disabled by clicking the group buttons above the target list. \\
 
@@ -59,8 +62,7 @@ After running the Reconstruct References task, the table can look as follows:
   \caption{Targets Tab with reconstructed unique targets}
 \end{figure}
 
-When clicking a target, all data associated to the respective target is loaded. The Targets tab is useful for inspecting the association results, 
-removing certain targets from Evaluation and inspecting already removed ones. \\
+When clicking a target, all data associated to the respective target is loaded. The Targets tab is useful for inspecting the association results, removing certain targets from Evaluation and inspecting already removed ones. \\
 
 Single rows can be selected by clicking on them which triggers a loading process showing this exact target(s) (with all associated data) in the available Views. 
 Multiple targets can be selected using the shift key (range selection) or control key (add/remove single targets).
