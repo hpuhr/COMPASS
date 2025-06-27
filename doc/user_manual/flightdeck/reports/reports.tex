@@ -129,7 +129,9 @@ The folder 'tables' contains all tabular data in JSON format linked in the main 
 The folder 'screenshots' contains all image data linked in the main JSON file. \\
 
 Please \textbf{note} that all paths linked in the created JSON file are relative to the 
-JSON file's directory.
+JSON file's directory. \\
+
+The structure of the exported JSON is described in section \nameref{sec:report_json_struct}.
 
 \subsubsection{Export as Latex}
 \label{sec:report_export_latex}
@@ -145,7 +147,7 @@ The following dialog will open.
   \caption{Export as Latex}
 \end{figure}
 
-In addition to the input fields described in section \nameref{sec:report_export_json}, 
+In addition to the input fields described in Section \nameref{sec:report_export_json}, 
 the following fields are available.
 
 \begin{itemize}  
@@ -184,7 +186,7 @@ The following dialog will open.
   \caption{Export as Latex}
 \end{figure}
 
-In addition to the input fields described in section \nameref{sec:report_export_latex}, 
+In addition to the input fields described in Section \nameref{sec:report_export_latex}, 
 the following fields are available.
 
 \begin{itemize}  
@@ -293,3 +295,50 @@ Double-clicking on a table row will navigate to the linked section if available.
 \label{sec:report_section_texts}
 
 Texts contain textual data, which will be displayed as a list of text labels. \\
+
+\subsection{Report JSON Structure}
+\label{sec:report_json_struct}
+
+The exported report JSON file contains the following structure. Sections are exported as follows.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+    "contents": [ SECTION_CONTENTS ],         // List of section contents
+    "name": "Results",                        // Section name
+    "sub_sections": [ NESTED_SUB_SECTIONS ]   // List of nested sub-sections
+}
+\end{lstlisting}
+
+Contents are exported as follows.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+    "content_type": CONTENT_TYPE,            // Content type: "table"/"figure"/"text"
+    "name": "gen_overview_table",            // Content name 
+    
+    ...                                      // Additional content-specific fields
+}
+\end{lstlisting}
+
+Specific contents will in addition obtain special fields storing their data.
+
+\paragraph{Tables} Tables can contain the following attributes in addition.
+
+\begin{itemize}  
+  \item columns: List of strings describing the table's columns
+  \item data: List of lists containing the table's individual columns
+  \item path: Relative path to an external json file containing a JSON object with the table data fields "columns" and "data"
+\end{itemize}
+
+\paragraph{Figures} Figures can contain the following attributes in addition.
+
+\begin{itemize}  
+  \item data\_base64: base64-encoded PNG image data stored as a string
+  \item path: Relative path to an external image file
+\end{itemize}
+
+\paragraph{Texts} Texts can contain the following attributes in addition.
+
+\begin{itemize}  
+  \item texts: List of text strings
+\end{itemize}
