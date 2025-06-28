@@ -799,11 +799,11 @@ void DBContentManager::finishInserting()
         dbContent(buf_it.first).finalizeInsert(buf_it.second);
     }
 
-    unsigned int insert_cnt = 0;
+    unsigned int buffer_cnt = 0;
     for (auto& buf_it : insert_data_)
-        insert_cnt += buf_it.second->size();
+        buffer_cnt += buf_it.second->size();
 
-    logdbg << "DBContentManager: finishInserting: size " << insert_cnt;
+    logdbg << "DBContentManager: finishInserting: size " << buffer_cnt;
 
     assert (existsMetaVariable(DBContent::meta_var_timestamp_.name()));
 
@@ -962,8 +962,10 @@ void DBContentManager::finishInserting()
     }
 
     logdbg << "DBContentManager: finishInserting: clear old took "
-           << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
-           << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
+           << String::timeStringFromDouble(
+                  (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
+           << " full " << String::timeStringFromDouble(
+                  (microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 
     tmp_time = microsec_clock::local_time();
 
@@ -981,33 +983,43 @@ void DBContentManager::finishInserting()
 
         tmp_time = microsec_clock::local_time();
 
-        insert_cnt = 0;
+        buffer_cnt = 0;
         for (auto& buf_it : data_)
-            insert_cnt += buf_it.second->size();
+            buffer_cnt += buf_it.second->size();
 
-        logdbg << "DBContentManager: finishInserting: before cut data size " << insert_cnt;
+        logdbg << "DBContentManager: finishInserting: before cut data size " << buffer_cnt;
 
         cutCachedData();
 
         logdbg << "DBContentManager: finishInserting: cut cache took "
-               << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
-               << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
+               << String::timeStringFromDouble(
+                      (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
+               << " full " << String::timeStringFromDouble(
+                      (microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 
         tmp_time = microsec_clock::local_time();
 
-        insert_cnt = 0;
+        buffer_cnt = 0;
         for (auto& buf_it : data_)
-            insert_cnt += buf_it.second->size();
+            buffer_cnt += buf_it.second->size();
 
-        logdbg << "DBContentManager: finishInserting: after cut data size " << insert_cnt;
+        logdbg << "DBContentManager: finishInserting: after cut data size " << buffer_cnt;
 
         // INFO] DBContentManager: finishInserting: size 220692
         // filter ds took 00:00:13.266 full 00:00:13.395
         filterDataSources();
 
-        loginf << "DBContentManager: finishInserting: filterDataSources took "
-               << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
-               << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
+        logdbg << "DBContentManager: finishInserting: filterDataSources took "
+               << String::timeStringFromDouble(
+                      (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
+               << " full " << String::timeStringFromDouble(
+                      (microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
+
+        buffer_cnt = 0;
+        for (auto& buf_it : data_)
+            buffer_cnt += buf_it.second->size();
+
+        logdbg << "DBContentManager: finishInserting: after ds filter data size " << buffer_cnt;
 
         tmp_time = microsec_clock::local_time();
 
@@ -1015,14 +1027,16 @@ void DBContentManager::finishInserting()
         {
             COMPASS::instance().filterManager().filterBuffers(data_);
 
-            loginf << "DBContentManager: finishInserting: filter buffs took "
-                   << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
-                   << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
+            logdbg << "DBContentManager: finishInserting: filter buffs took "
+                   << String::timeStringFromDouble(
+                          (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
+                   << " full " << String::timeStringFromDouble(
+                          (microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 
             tmp_time = microsec_clock::local_time();
         }
 
-        logdbg << "DBContentManager: finishInserting: distributing data";
+        logdbg << "DBContentManager: finishInserting: distributing data " << (bool) data_.size();
 
         if (data_.size())
             emit loadedDataSignal(data_, true);
@@ -1030,16 +1044,20 @@ void DBContentManager::finishInserting()
             COMPASS::instance().viewManager().clearDataInViews();
 
         logdbg << "DBContentManager: finishInserting: distribute took "
-               << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
-               << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
+               << String::timeStringFromDouble(
+                      (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
+               << " full " << String::timeStringFromDouble(
+                      (microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 
         tmp_time = microsec_clock::local_time();
 
         updateNumLoadedCounts();
 
         logdbg << "DBContentManager: finishInserting: update cnts took "
-               << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
-               << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
+               << String::timeStringFromDouble(
+                      (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
+               << " full " << String::timeStringFromDouble(
+                      (microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 
         tmp_time = microsec_clock::local_time();
 
@@ -1053,8 +1071,10 @@ void DBContentManager::finishInserting()
     //COMPASS::instance().dbContentManager().labelGenerator().updateAvailableLabelLines(); // update available lines
 
     logdbg << "DBContentManager: finishInserting: update lines took "
-           << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
-           << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
+           << String::timeStringFromDouble(
+                  (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
+           << " full " << String::timeStringFromDouble(
+                  (microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 }
 
 /**
@@ -1158,8 +1178,10 @@ void DBContentManager::filterDataSources()
                           assert (metaVariable(DBContent::meta_var_ds_id_.name()).existsIn(buf_it->first));
                           assert (metaVariable(DBContent::meta_var_line_id_.name()).existsIn(buf_it->first));
 
-                          Variable& ds_id_var = metaVariable(DBContent::meta_var_ds_id_.name()).getFor(buf_it->first);
-                          Variable& line_id_var = metaVariable(DBContent::meta_var_line_id_.name()).getFor(buf_it->first);
+                          Variable& ds_id_var =
+                              metaVariable(DBContent::meta_var_ds_id_.name()).getFor(buf_it->first);
+                          Variable& line_id_var =
+                              metaVariable(DBContent::meta_var_line_id_.name()).getFor(buf_it->first);
 
                           Property ds_id_prop {ds_id_var.name(), ds_id_var.dataType()};
                           assert (buf_it->second->hasProperty(ds_id_prop));
@@ -1167,8 +1189,10 @@ void DBContentManager::filterDataSources()
                           Property line_id_prop {line_id_var.name(), line_id_var.dataType()};
                           assert (buf_it->second->hasProperty(ds_id_prop));
 
-                          NullableVector<unsigned int>& ds_id_vec = buf_it->second->get<unsigned int>(ds_id_var.name());
-                          NullableVector<unsigned int>& line_id_vec = buf_it->second->get<unsigned int>(line_id_var.name());
+                          NullableVector<unsigned int>& ds_id_vec =
+                              buf_it->second->get<unsigned int>(ds_id_var.name());
+                          NullableVector<unsigned int>& line_id_vec =
+                              buf_it->second->get<unsigned int>(line_id_var.name());
 
                           unsigned int buffer_size = buf_it->second->size();
 
@@ -1185,7 +1209,7 @@ void DBContentManager::filterDataSources()
                                   indexes_to_remove.push_back(index);
                           }
 
-                          logdbg << "DBContentManager: filterDataSources: in " << buf_it->first << " remove "
+                          loginf << "DBContentManager: filterDataSources: in " << buf_it->first << " remove "
                                  << indexes_to_remove.size() << " of " << buffer_size;
 
                           // remove unwanted indexes
@@ -1213,74 +1237,8 @@ void DBContentManager::cutCachedData()
     boost::posix_time::ptime min_ts = Time::currentUTCTime() - boost::posix_time::minutes(max_live_data_age_cache_);
     // max - x minutes
 
-    loginf << "DBContentManager: cutCachedData: current ts " << Time::toString(Time::currentUTCTime())
+    logdbg << "DBContentManager: cutCachedData: current ts " << Time::toString(Time::currentUTCTime())
            << " min_ts " << Time::toString(min_ts);
-
-    // for (auto buf_it = data_.begin(); buf_it != data_.end(); ++buf_it)
-    // {
-    //     buffer_size = buf_it->second->size();
-
-    //     if (buffer_size == 0)
-    //         continue;
-
-    //     assert (metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it->first));
-
-    //     Variable& ts_var = metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it->first);
-
-    //     Property ts_prop {ts_var.name(), ts_var.dataType()};
-
-    //     if (buf_it->second->hasProperty(ts_prop))
-    //     {
-    //         NullableVector<boost::posix_time::ptime>& ts_vec = buf_it->second->get<boost::posix_time::ptime>(
-    //                     ts_var.name());
-
-    //         unsigned int index=0;
-    //         bool cutoff_found = false;
-
-    //         for (; index < buffer_size; ++index)
-    //         {
-    //             if (!ts_vec.isNull(index) && ts_vec.get(index) > min_ts)
-    //             {
-    //                 logdbg << "DBContentManager: cutCachedData: found " << buf_it->first
-    //                        << " cutoff tod index " << index
-    //                        << " ts " << Time::toString(ts_vec.get(index));
-
-    //                 cutoff_found = true;
-    //                 break; // index is on first index where ts > min_ts
-    //             }
-    //         }
-    //         // index == buffer_size if none bigger than min_ts
-
-    //         if (!cutoff_found) // no ts bigger than remove:ts found, remove all data
-    //         {
-    //             buf_it = data_.erase(buf_it);
-    //         }
-    //         else if (cutoff_found && index != 0) // if index == 0, all ok, otherwise remove
-    //         {
-    //             assert (index >= 1);
-    //             assert (index < buffer_size);
-
-    //             index--; // cut at previous
-
-    //             logdbg << "DBContentManager: cutCachedData: cutting " << buf_it->first
-    //                    << " up to index " << index
-    //                    << " total size " << buffer_size
-    //                    << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
-
-    //             buf_it->second->cutUpToIndex(index);
-    //         }
-    //     }
-    //     else
-    //         logwrn << "DBContentManager: cutCachedData: buffer " << buf_it->first << " has not tod for cutoff";
-    // }
-
-    // remove empty buffers
-    // std::map<std::string, std::shared_ptr<Buffer>> tmp_data = data_;
-
-    // for (auto& buf_it : tmp_data)
-    //     if (!buf_it.second->size())
-    //         data_.erase(buf_it.first);
-
 
     for (auto& buf_it : data_)
     {

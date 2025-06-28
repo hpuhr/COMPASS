@@ -243,8 +243,14 @@ void ASTERIXTimestampCalculator::doFutureTimestampsCheck()
 
     bool in_vicinity_of_24h_time = current_time_utc <= T24H_OFFSET || current_time_utc >= (tod_24h - T24H_OFFSET);
 
-    loginf << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: maximum time is "
-           << String::timeStringFromDouble(tod_utc_max) << " 24h vicinity " << in_vicinity_of_24h_time;
+    unsigned int cnt=0;
+
+    for (auto& buf_it : buffers_)
+        cnt += buf_it.second->size();
+
+    logdbg << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: maximum time is "
+           << String::timeStringFromDouble(tod_utc_max) << " 24h vicinity " << in_vicinity_of_24h_time
+           << " buf size " << cnt;
 
     for (auto& buf_it : buffers_)
     {
@@ -263,7 +269,7 @@ void ASTERIXTimestampCalculator::doFutureTimestampsCheck()
         std::tuple<bool,float,float> min_max_tod = tod_vec.minMaxValues();
 
         if (get<0>(min_max_tod))
-            loginf << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: " << buf_it.first
+            logdbg << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: " << buf_it.first
                    << " min tod " << String::timeStringFromDouble(get<1>(min_max_tod))
                    << " max " << String::timeStringFromDouble(get<2>(min_max_tod));
 
@@ -307,6 +313,13 @@ void ASTERIXTimestampCalculator::doFutureTimestampsCheck()
     for (auto& buf_it : tmp_data)
         if (!buf_it.second->size())
             buffers_.erase(buf_it.first);
+
+    cnt=0;
+
+    for (auto& buf_it : buffers_)
+        cnt += buf_it.second->size();
+
+    logdbg << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: buf size " << cnt;
 }
 
 void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
@@ -464,11 +477,6 @@ void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
                 timestamp_last_ = timestamp;
             }
         }
-
-        // bool has_vec_min_max;
-        // boost::posix_time::ptime ts_vec_min, ts_vec_max;
-
-        // tie(has_vec_min_max, ts_vec_min, ts_vec_max) = timestamp_vec.minMaxValues();
     }
 }
 

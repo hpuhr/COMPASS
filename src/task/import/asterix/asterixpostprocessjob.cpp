@@ -59,8 +59,15 @@ ASTERIXPostprocessJob::~ASTERIXPostprocessJob()
 
 void ASTERIXPostprocessJob::run_impl()
 {
-    logdbg << "ASTERIXPostprocessJob: " << this << " run on thread " << QThread::currentThreadId() << " on cpu " << sched_getcpu();
-    logdbg << "ASTERIXPostprocessJob: run: num buffers " << buffers_.size();
+    logdbg << "ASTERIXPostprocessJob: " << this << " run on thread " << QThread::currentThreadId()
+           << " on cpu " << sched_getcpu();
+
+    unsigned cnt=0;
+
+    for (auto& buf_it : buffers_)
+        cnt += buf_it.second->size();
+
+    logdbg << "ASTERIXPostprocessJob: run: num buffers " << buffers_.size() << " size " << cnt;
 
     started_ = true;
 

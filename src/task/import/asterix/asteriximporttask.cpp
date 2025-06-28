@@ -1237,7 +1237,8 @@ void ASTERIXImportTask::postprocessDoneSlot()
             assert (num_packets_in_processing_);
             --num_packets_in_processing_;
 
-            updateFileProgressDialog();
+            if (source_.isFileType())
+                updateFileProgressDialog();
         }
 
         logdbg << "ASTERIXImportTask: postprocessDoneSlot: no data,"
@@ -1362,8 +1363,12 @@ void ASTERIXImportTask::insertData()
     std::map<std::string, std::shared_ptr<Buffer>> job_buffers = *queued_insert_buffers_.begin();
     queued_insert_buffers_.erase(queued_insert_buffers_.begin());
 
-    logdbg << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database, thread "
-           << QThread::currentThreadId();
+    unsigned cnt=0;
+
+    for (auto& buf_it : job_buffers)
+        cnt += buf_it.second->size();
+
+    logdbg << "ASTERIXImportTask: insertData: inserting " << job_buffers.size() << " into database, cnt " << cnt;
 
     if (stopped_)
     {
