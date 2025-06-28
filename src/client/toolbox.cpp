@@ -294,6 +294,25 @@ size_t ToolBox::numTools() const
     return tools_.size();
 }
 
+void ToolBox::disableTools(std::set<unsigned int> indexes)
+{
+    // enable all tools
+
+    unsigned int index=0;
+    for (const auto& t : tools_)
+    {
+        bool disable = indexes.count(index);
+
+        if (t.button)
+            t.button->setDisabled(disable);
+
+        if (t.widget)
+            t.button->setDisabled(disable);
+
+        ++index;
+    }
+}
+
 /**
  */
 void ToolBox::selectTool(size_t idx)

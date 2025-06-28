@@ -26,7 +26,9 @@
 #include <QMouseEvent>
 
 #include <boost/optional.hpp>
+
 #include <memory>
+#include <set>
 
 class ToolBoxWidget;
 class PopupMenu;
@@ -77,6 +79,8 @@ public:
 
     void addTool(ToolBoxWidget* tool);
     size_t numTools() const;
+
+    void disableTools(std::set<unsigned int> indexes);
 
     void finalize();
     void adjustSizings();

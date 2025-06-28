@@ -629,7 +629,7 @@ void DBContentManager::loadingDone(DBContent& object)
  */
 void DBContentManager::deleteJobDoneSlot()
 {
-    loginf << "DBContentManager: deleteJobDoneSlot";
+    logdbg << "DBContentManager: deleteJobDoneSlot";
 
     assert (delete_job_);
 
@@ -1209,7 +1209,7 @@ void DBContentManager::filterDataSources()
                                   indexes_to_remove.push_back(index);
                           }
 
-                          loginf << "DBContentManager: filterDataSources: in " << buf_it->first << " remove "
+                          logdbg << "DBContentManager: filterDataSources: in " << buf_it->first << " remove "
                                  << indexes_to_remove.size() << " of " << buffer_size;
 
                           // remove unwanted indexes

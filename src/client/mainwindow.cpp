@@ -210,20 +210,12 @@ void MainWindow::createUI()
     // initialize toolbox
     tool_box_ = new ToolBox(this);
     
-    tool_box_->addTool(COMPASS::instance().dataSourceManager().loadWidget());
-    tool_box_->addTool(COMPASS::instance().filterManager().widget());
-    tool_box_->addTool(COMPASS::instance().dbContentManager().targetListWidget());
-
-    if (!COMPASS::instance().hideEvaluation())
-    {
-    //     tool_box_->addTool(COMPASS::instance().evaluationManager().widget());
-         tool_box_->addTool(COMPASS::instance().taskManager().widget());
-    }
-
-    if (!COMPASS::instance().hideViewpoints())
-        tool_box_->addTool(COMPASS::instance().viewManager().viewPointsWidget());
-
-    tool_box_->addTool(new LogWidget(COMPASS::instance().logStore()));
+    tool_box_->addTool(COMPASS::instance().dataSourceManager().loadWidget()); // 0
+    tool_box_->addTool(COMPASS::instance().filterManager().widget()); // 1
+    tool_box_->addTool(COMPASS::instance().dbContentManager().targetListWidget()); // 2
+    tool_box_->addTool(COMPASS::instance().taskManager().widget()); // 3
+    tool_box_->addTool(COMPASS::instance().viewManager().viewPointsWidget()); // 4
+    tool_box_->addTool(new LogWidget(COMPASS::instance().logStore())); // 5
 
     //@TODO: !handle filter check box!
     //QTabBar *tabBar = tab_widget_->tabBar();
@@ -413,14 +405,11 @@ void MainWindow::createMenus ()
     connect(import_gps_nmea_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
     import_menu_->addAction(import_gps_nmea_action);
 
-    if (!COMPASS::instance().hideViewpoints())
-    {
-        QAction* import_vp_file_action = new QAction("&View Points");
-        import_vp_file_action->setShortcut(tr("Ctrl+V"));
-        import_vp_file_action->setToolTip("Import View Points File");
-        connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
-        import_menu_->addAction(import_vp_file_action);
-    }
+    QAction* import_vp_file_action = new QAction("&View Points");
+    import_vp_file_action->setShortcut(tr("Ctrl+V"));
+    import_vp_file_action->setToolTip("Import View Points File");
+    connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
+    import_menu_->addAction(import_vp_file_action);
 
     // configuration menu
     config_menu_ = menuBar()->addMenu("&Configuration");
@@ -656,30 +645,6 @@ void MainWindow::disableConfigurationSaving()
 
     assert (quit_wo_cfg_sav_action_);
     quit_wo_cfg_sav_action_->setEnabled(save_configuration_);
-}
-
-void MainWindow::showEvaluationTab()
-{
-    assert (!COMPASS::instance().hideEvaluation());
-
-    // assert (tab_widget_->count() > 3);
-    // tab_widget_->setCurrentIndex(3);
-}
-
-void MainWindow::showViewPointsTab()
-{
-    assert (!COMPASS::instance().hideViewpoints());
-
-    // if (COMPASS::instance().hideEvaluation())
-    // {
-    //     assert (tab_widget_->count() > 3);
-    //     tab_widget_->setCurrentIndex(3);
-    // }
-    // else
-    // {
-    //     assert (tab_widget_->count() > 4);
-    //     tab_widget_->setCurrentIndex(4);
-    // }
 }
 
 void MainWindow::openExistingDB(const std::string& filename)
@@ -1170,25 +1135,14 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
     loginf << "MainWindow: appModeSwitch: app_mode " << COMPASS::instance().appModeStr()
            << " enable_tabs " << enable_tabs;
 
-    if (COMPASS::instance().hideEvaluation() && COMPASS::instance().hideViewpoints())
+    assert (tool_box_);
+    if (app_mode_current == AppMode::LiveRunning)
     {
-       // nothing
-    }
-    else if (!COMPASS::instance().hideEvaluation() && !COMPASS::instance().hideViewpoints())
-    {
-        // both
-        // assert (tab_widget_->count() > 3); // 2 eval, 3 vp
-
-        // tab_widget_->setTabEnabled(2, enable_tabs);
-        // tab_widget_->setTabEnabled(3, enable_tabs);
+        tool_box_->disableTools({2,3,4});
+        selectTool("Data Sources");
     }
     else
-    {
-        // one
-        // assert (tab_widget_->count() > 2); // 2 is the other
-
-        // tab_widget_->setTabEnabled(2, enable_tabs);
-    }
+        tool_box_->disableTools({}); // enable all
 
     updateBottomWidget();
     updateMenus();

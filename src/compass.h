@@ -126,9 +126,6 @@ public:
     bool isShutDown() const;
     bool isRunning() const;
 
-    bool hideEvaluation() const;
-    bool hideViewpoints() const;
-
     unsigned int maxFPS() const;
     void maxFPS(unsigned int max_fps);
 
@@ -185,8 +182,6 @@ protected:
     AppMode app_mode_ {AppMode::Offline};
     AppState app_state_ = AppState::Starting;
 
-    bool hide_evaluation_ {false};
-    bool hide_viewpoints_ {false};
     bool disable_live_to_offline_switch_ {false};
     bool disable_menu_config_save_ {false};
     bool disable_geographicview_rotate_ {false};

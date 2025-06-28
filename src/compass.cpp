@@ -82,9 +82,6 @@ COMPASS::COMPASS()
     if (!Files::directoryExists(last_path_))
         last_path_ = QDir::homePath().toStdString();
 
-    registerParameter("hide_evaluation", &hide_evaluation_, false);
-    registerParameter("hide_viewpoints", &hide_viewpoints_, false);
-
     registerParameter("disable_live_to_offline_switch", &disable_live_to_offline_switch_, false);
     registerParameter("disable_menu_config_save", &disable_menu_config_save_, false);
 
@@ -952,16 +949,6 @@ unsigned int COMPASS::maxFPS() const
 void COMPASS::maxFPS(unsigned int max_fps)
 {
     max_fps_ = max_fps;
-}
-
-bool COMPASS::hideViewpoints() const
-{
-    return hide_viewpoints_;
-}
-
-bool COMPASS::hideEvaluation() const
-{
-    return hide_evaluation_;
 }
 
 bool COMPASS::isShutDown() const

@@ -76,7 +76,6 @@ public slots:
     void importJSONRecordingSlot();
 
     void importGPSTrailSlot();
-    //void importGPSCSVSlot();
 
     void importViewPointsSlot();
 
@@ -107,8 +106,6 @@ public:
     virtual ~MainWindow();
 
     void disableConfigurationSaving();
-    void showEvaluationTab();
-    void showViewPointsTab();
 
     void openExistingDB(const std::string& filename);
     void createDB(const std::string& filename);

@@ -97,25 +97,6 @@ In this use case, usage of a rotating log file (as described in \nameref{sec:app
 
 Since the Live mode may be set up for users which only use COMPASS for limited use cases, a number of configuration options were added to allow for a simpler usage. The listed files exist in the configuration folder in the 'conf/default' subfolder.
 
-\subsection{Hide Evaluation and View Points}
-
-To hide the respective tabs in the main window, in the file 'compass.json' change:
-
-\begin{lstlisting}
-...
-        "hide_evaluation": false,
-        "hide_viewpoints": false,
-...        
-\end{lstlisting}
-
-to:
-\begin{lstlisting}
-...
-        "hide_evaluation": true,
-        "hide_viewpoints": true,
-...        
-\end{lstlisting}
-
 \subsection{Disable Adding/Removing Views}
 
 In the file 'compass.json' the following parameters can be set:

@@ -2,8 +2,6 @@
     "parameters": {
         "db_file_list": [
         ],
-        "hide_evaluation": false,
-        "hide_viewpoints": false,
         "last_db_filename": "",
         "min_app_height": 1080,
         "min_app_width": 1600

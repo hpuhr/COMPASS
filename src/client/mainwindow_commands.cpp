@@ -447,7 +447,7 @@ bool RTCommandExportViewPointsReport::run_impl()
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
     assert (main_window);
 
-    main_window->showViewPointsTab();
+    //main_window->showViewPointsTab();
 
     ViewPointsReportGenerator& gen = COMPASS::instance().viewManager().viewPointsGenerator();
 
