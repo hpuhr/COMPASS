@@ -196,7 +196,7 @@ protected:
     unsigned int max_fps_ {30};
 
     unsigned int min_app_width_ {1600};
-    unsigned int min_app_height_ {1080};
+    unsigned int min_app_height_ {800};
 
     float app_font_scale_{1.0};
 
