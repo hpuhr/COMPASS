@@ -18,11 +18,9 @@
 #include <iostream>
 
 #include "client.h"
-#include "compass.h"
-#include "taskmanager.h"
 
 #include <QThread>
-#include <QFontDatabase>
+
 
 using namespace std;
 
@@ -38,16 +36,7 @@ int main(int argc, char** argv)
         if (client.quitRequested())
             return 0;
 
-        // make system your application font (applies to all widgets)
-        // note: we cannot use the COMPASS classes isAppImage() method here,
-        // because we cannot create the COMPASS instance at this point of time
-        if (getenv("APPDIR") != nullptr)
-        {
-            QFont system_font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
-
-            system_font.setPointSizeF(system_font.pointSizeF() * COMPASS::instance().appFontScale());
-            client.setFont(system_font);
-        }
+        // note: do not use COMPASS::instance functions here
 
         if (!client.run())
             return -1;

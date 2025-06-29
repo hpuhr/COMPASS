@@ -40,6 +40,7 @@
 #include <QSplashScreen>
 #include <QStyleFactory>
 #include <QThreadPool>
+#include <QFontDatabase>
 
 #include "util/tbbhack.h"
 
@@ -356,6 +357,16 @@ bool Client::run ()
             // (Optional) Apply a global stylesheet for further refinement
             QApplication::setStyleSheet("QToolTip { color: #ffffff; background-color: #2a2a2a; border: 1px solid white; }");
         }
+
+        // make system your application font (applies to all widgets)
+        if (getenv("APPDIR") != nullptr)
+        {
+            QFont system_font = QFontDatabase::systemFont(QFontDatabase::GeneralFont);
+
+            system_font.setPointSizeF(system_font.pointSizeF() * COMPASS::instance().appFontScale());
+            setFont(system_font);
+        }
+
         COMPASS::instance().init(); //here everything created in compass instance should be available
 
         ProjectionManager::instance().test();
