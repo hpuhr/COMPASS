@@ -19,6 +19,8 @@
 
 #include "toolboxwidget.h"
 
+#include <memory>
+
 class FilterManager;
 class FilterGeneratorWidget;
 
@@ -32,6 +34,10 @@ class QScrollArea;
 class FilterManagerWidget : public ToolBoxWidget
 {
     Q_OBJECT
+
+  public slots:
+    void filterWidgetActionSlot(bool generated);
+
 public:
     explicit FilterManagerWidget(FilterManager& manager, 
                                  QWidget* parent = nullptr,
@@ -61,7 +67,6 @@ protected:
     void toggleUseFilters();
 
     void addFilter();
-    void filterWidgetAction(bool result);
 
     void databaseOpened();
 
@@ -72,7 +77,7 @@ protected:
     void syncFilterLayouts();
 
     FilterManager&         filter_manager_;
-    FilterGeneratorWidget* filter_generator_widget_;
+    std::unique_ptr<FilterGeneratorWidget> filter_generator_widget_;
 
     QCheckBox*   filters_check_    {nullptr};
     QVBoxLayout* ds_filter_layout_ {nullptr};

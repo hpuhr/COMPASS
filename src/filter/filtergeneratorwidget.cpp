@@ -258,6 +258,8 @@ void FilterGeneratorWidget::closeEvent(QCloseEvent* event) { emit filterWidgetAc
 
 void FilterGeneratorWidget::accept()
 {
+    loginf << "FilterGeneratorWidget: accept";
+
     std::string filter_name = filter_name_->text().toStdString();
 
     auto configuration = Configuration::create("DBFilter", filter_name);
