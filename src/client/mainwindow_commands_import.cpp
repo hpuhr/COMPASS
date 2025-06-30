@@ -1206,7 +1206,7 @@ void RTCommandImportGPSTrail::collectOptions_impl(OptionsDescription& options,
 {
     ADD_RTCOMMAND_OPTIONS(options)
     ("filename,f", po::value<std::string>()->required(), "given filename, e.g. ’/data/file1.nmea'")
-    ("name,n", po::value<std::string>()->required(), "optional data source name, e.g. ’GPS Trail'")
+    ("name,n", po::value<std::string>()->default_value(""), "optional data source name, e.g. ’GPS Trail'")
     ("sac", po::value<int>()->default_value(-1), "optional sac, e.g. 255")
     ("sic", po::value<int>()->default_value(-1), "optional sic, e.g. 0")
     ("tod_offset,t", po::value<double>(), "optional time of day offset, e.g. -10000.0")
