@@ -114,8 +114,8 @@ MainWindow::MainWindow()
     QSettings settings("COMPASS", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 
-    if (settings.value("MainWindow/isMaximized", false).toBool())
-        showMaximized();
+    // if (settings.value("MainWindow/isMaximized", false).toBool())
+    //     showMaximized();
 
     if (settings.value("MainWindow/isFullScreen", false).toBool())
     {
@@ -132,12 +132,12 @@ MainWindow::MainWindow()
         setWindowFlags(Qt::Window);
         //setWindowFlag(Qt::Window, true);               // Ensure normal window flags
 
-        if (settings.value("MainWindow/isMaximized", false).toBool())
-        {
-            loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
-            showMaximized();
-        }
-        else
+        // if (settings.value("MainWindow/isMaximized", false).toBool())
+        // {
+        //     loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
+        //     showMaximized();
+        // }
+        // else
         {
             restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
             showNormal();
@@ -574,7 +574,8 @@ void MainWindow::updateMenus()
     for (auto a : config_menu_->actions())
         a->setEnabled(a == license_action_
                       || a == auto_refresh_views_action_
-                              || a == dark_mode_action_ ? true : db_open);
+                              || a == dark_mode_action_
+                              || a == fullscreen_action_ ? true : db_open);
 }
 
 void MainWindow::updateBottomWidget()
@@ -1232,12 +1233,12 @@ void MainWindow::toggleFullscreenSlot()
 
         QSettings settings("COMPASS", "Client");
 
-        if (settings.value("MainWindow/isMaximized", false).toBool())
-        {
-            loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
-            showMaximized();
-        }
-        else
+        // if (settings.value("MainWindow/isMaximized", false).toBool())
+        // {
+        //     loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
+        //     showMaximized();
+        // }
+        // else
         {
             restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
             showNormal();
@@ -1247,7 +1248,7 @@ void MainWindow::toggleFullscreenSlot()
     {
         QSettings settings("COMPASS", "Client");
         settings.setValue("MainWindow/geometry", saveGeometry());
-        settings.setValue("MainWindow/isMaximized", isMaximized());
+        //settings.setValue("MainWindow/isMaximized", isMaximized());
 
         // Enter fullscreen with no decorations
         //setWindowFlag(Qt::FramelessWindowHint, true);
@@ -1338,7 +1339,7 @@ void MainWindow::shutdown()
 {
     QSettings settings("COMPASS", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
-    settings.setValue("MainWindow/isMaximized", isMaximized());
+    //settings.setValue("MainWindow/isMaximized", isMaximized());
     settings.setValue("MainWindow/isFullScreen", isFullScreen());
 
     COMPASS::instance().viewManager().unsetCurrentViewPoint(); // needed to remove temporary stuff
