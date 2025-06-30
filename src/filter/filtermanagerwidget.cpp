@@ -99,10 +99,7 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager,
 FilterManagerWidget::~FilterManagerWidget()
 {
     if (filter_generator_widget_)
-    {
-        delete filter_generator_widget_;
         filter_generator_widget_ = nullptr;
-    }
 }
 
 /**
@@ -225,18 +222,32 @@ void FilterManagerWidget::updateUseFilters ()
  */
 void FilterManagerWidget::addFilter()
 {
+    loginf << "FilterManagerWidget: addFilter";
     assert(!filter_generator_widget_);
 
-    filter_generator_widget_ = new FilterGeneratorWidget();
-    connect(filter_generator_widget_, SIGNAL(filterWidgetAction(bool)), this,
-            SLOT(filterWidgetActionSlot(bool)));
+    filter_generator_widget_.reset(new FilterGeneratorWidget());
+    connect(filter_generator_widget_.get(), SIGNAL(filterWidgetAction(bool)),
+            this, SLOT(filterWidgetActionSlot(bool)));
+
     filter_generator_widget_->show();
+}
+
+void FilterManagerWidget::filterWidgetActionSlot(bool generated)
+{
+    loginf << "FilterManagerWidget: filterWidgetActionSlot: generated " << generated;
+
+    assert(filter_generator_widget_);
+    filter_generator_widget_ = nullptr;
+
+    updateFilters();
 }
 
 /**
  */
 void FilterManagerWidget::updateFilters()
 {
+    loginf << "FilterManagerWidget: updateFilters";
+
     QLayoutItem* child;
     while (!ds_filter_layout_->isEmpty() && (child = ds_filter_layout_->takeAt(0)))
     
@@ -261,19 +272,8 @@ void FilterManagerWidget::updateFilters()
     }
 
     syncFilterLayouts();
-}
 
-/**
- */
-void FilterManagerWidget::filterWidgetAction(bool result)
-{
-    assert(filter_generator_widget_);
-
-    if (result)
-        updateFilters();
-
-    delete filter_generator_widget_;
-    filter_generator_widget_ = nullptr;
+    loginf << "FilterManagerWidget: updateFilters: done";
 }
 
 /**
