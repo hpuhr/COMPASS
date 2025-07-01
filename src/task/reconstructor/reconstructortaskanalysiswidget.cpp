@@ -31,7 +31,9 @@ ReconstructorTaskAnalysisWidget::ReconstructorTaskAnalysisWidget(
     debug_check_ = new QCheckBox ();
     connect(debug_check_, &QCheckBox::clicked,
             this, [ = ] (bool ok) { task_.debugSettings().debug_ = ok; });
-    combo_layout->addRow("Debug Reconstruction", debug_check_);
+
+    if (add_debug_stuff)
+        combo_layout->addRow("Debug Reconstruction", debug_check_);
 
     utns_edit_ = new QLineEdit();
     connect(utns_edit_, &QLineEdit::textEdited, this, &ReconstructorTaskAnalysisWidget::utnsChangedSlot);
@@ -206,6 +208,7 @@ void ReconstructorTaskAnalysisWidget::updateValues()
 
     assert (analyze_outliers_check_);
     analyze_outliers_check_->setChecked(task_.debugSettings().analyze_outlier_detection_);
+    analyze_outliers_check_->setDisabled(true);
 
     // acc est
 

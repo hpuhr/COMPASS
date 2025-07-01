@@ -56,7 +56,7 @@ class EvaluationManager : public QObject, public Configurable
 
 signals:
     void sectorsChangedSignal();         // sectors changed (due to manual editing, loading, etc.)
-    void sectorsEditedSignal();          // sector edit dialog closed
+    //void sectorsEditedSignal();          // sector edit dialog closed
     void standardsChangedSignal();       // emitted if standard was added or deleted
     void currentStandardChangedSignal(); // emitted if current standard was changed
     void evaluationDoneSignal();         // evaluation ended

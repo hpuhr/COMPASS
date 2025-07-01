@@ -89,7 +89,7 @@ void ManageSectorsTask::dialogDoneSlot()
     assert (dialog_);
     dialog_->hide();
 
-    emit COMPASS::instance().evaluationManager().sectorsEditedSignal();
+    emit COMPASS::instance().evaluationManager().sectorsChangedSignal();
 }
 
 void ManageSectorsTask::generateSubConfigurable(const std::string& class_id,
