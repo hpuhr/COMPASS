@@ -66,6 +66,8 @@ public:
 
     int columnWidth(int layout_column) const;
     void setFixedColumnWidth(int layout_column, int width);
+    void setMaximumColumnWidth(int layout_column, int width);
+    void setFlexibleColumnWidth(int layout_column, int width);
 
 protected:
     void createMenu();

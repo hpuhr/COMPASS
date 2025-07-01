@@ -283,10 +283,10 @@ int DBFilterWidget::columnWidth(int layout_column) const
     for (int r = 0; r < child_layout_->rowCount(); ++r)
     {
         auto litem = child_layout_->itemAtPosition(r, layout_column);
+
         if (litem && litem->widget() && litem->widget()->sizeHint().width() > max_width)
         {
-            max_width = litem->sizeHint().width();
-
+            max_width = litem->widget()->sizeHint().width();
             //if (dynamic_cast<QLabel*>(litem->widget()))
             //    loginf << "Scanned filter row '" << dynamic_cast<QLabel*>(litem->widget())->text().toStdString() << "'";
         }
@@ -305,5 +305,18 @@ void DBFilterWidget::setFixedColumnWidth(int layout_column, int width)
         auto litem = child_layout_->itemAtPosition(r, layout_column);
         if (litem && litem->widget())
             litem->widget()->setFixedWidth(width);
+    }
+}
+
+void DBFilterWidget::setMaximumColumnWidth(int layout_column, int width)
+{
+    if (layout_column < 0 || layout_column >= child_layout_->columnCount())
+        return;
+    
+    for (int r = 0; r < child_layout_->rowCount(); ++r)
+    {
+        auto litem = child_layout_->itemAtPosition(r, layout_column);
+        if (litem && litem->widget())
+            litem->widget()->setMaximumWidth(width);
     }
 }

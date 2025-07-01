@@ -65,7 +65,7 @@ FilterManagerWidget::FilterManagerWidget(FilterManager& filter_manager,
     layout->addLayout(top_layout);
 
     scroll_area_ = new QScrollArea;
-    scroll_area_->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    scroll_area_->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAsNeeded);
     scroll_area_->setWidgetResizable(true);
 
     QWidget* scroll_widget = new QWidget;
@@ -254,6 +254,8 @@ void FilterManagerWidget::updateFilters()
     while (!ds_filter_layout_->isEmpty())
     {
         auto item = ds_filter_layout_->takeAt(0);
+
+        //deletes only the layout item, not the contained widget
         delete item;
     }
 
@@ -324,30 +326,34 @@ void FilterManagerWidget::syncFilterLayouts()
 {
     auto& filters = filter_manager_.filters();
 
-    const int MaxWidth = 400;
+    const int MaxWidth = 300;
 
-    std::vector<DBFilter*> filters_to_sync;
+    std::map<DBFilter*, bool> has_acceptable_width;
 
     int max_width = 0;
     for (auto& it : filters)
     {
-        int col_width = it->widget()->columnWidth(0);
-        if (col_width > MaxWidth)
-            continue;
+        int  col_width = it->widget()->columnWidth(0);
+        bool width_ok  = col_width > 0 && col_width <= MaxWidth;
 
-        filters_to_sync.push_back(it.get());
+        has_acceptable_width[ it.get() ] = width_ok;
 
-        if (col_width > max_width)
+        if (width_ok && col_width > max_width)
             max_width = col_width;
     }
 
-    max_width *= 1.1;
+    if (max_width <= 0)
+        max_width = MaxWidth;
 
-    if (max_width > 0)
+    for (auto& it : filters)
     {
-        for (auto& it : filters_to_sync)
-        {
+        bool width_ok = has_acceptable_width.at(it.get());
+
+        //if label had a valid width, set it to the synced width
+        if (width_ok)
             it->widget()->setFixedColumnWidth(0, max_width);
-        }
+
+        //no label can be bigger than max width
+        it->widget()->setMaximumColumnWidth(0, MaxWidth);
     }
 }
