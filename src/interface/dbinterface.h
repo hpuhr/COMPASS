@@ -235,6 +235,8 @@ public:
     static const size_t TableBulkUpdateMinRows;
 
 protected:
+    virtual void checkSubConfigurables() override {}
+
     void openDBFileInternal(const std::string& filename, bool overwrite);
 
     void loadProperties();
