@@ -21,6 +21,8 @@
 #include <QFormLayout>
 #include <QComboBox>
 #include <QStandardItemModel>
+#include <QDesktopServices>
+#include <QUrl>
 
 ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     : QDialog(), task_(task)
@@ -51,9 +53,14 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
 
     const auto& license_manager = COMPASS::instance().licenseManager();
 
+    bool has_adv_rec = false;
+
 #if USE_EXPERIMENTAL_SOURCE == true
     if (license_manager.componentEnabled(license::License::Component::ComponentProbIMMReconstructor))
+    {
         reconstructor_box_->addItem(QString::fromStdString(ReconstructorTask::ProbImmReconstructorName));
+        has_adv_rec = true;
+    }
 #endif
 
     int idx = reconstructor_box_->findText(QString::fromStdString(task_.currentReconstructorStr()));
@@ -92,6 +99,26 @@ ReconstructorTaskDialog::ReconstructorTaskDialog(ReconstructorTask& task)
     showCurrentReconstructorWidget();
 
     main_layout->addWidget(reconstructor_widget_stack_);
+
+    if (!has_adv_rec)
+    {
+        QString msg = "<b>Please consider supporting us by obtaining a commercial license</b>.<br>This will unlock all advanced reconstructor features. ";
+        msg += "<br>For more information contact us at ";
+        msg += "<a href='mailto:compass@openats.at'>mailto:compass@openats.at</a>.";
+
+        auto message_label = new QLabel;
+        message_label->setWordWrap(true);
+        message_label->setText(msg);
+
+        auto cb = [ = ] (const QString& link)
+        {
+            QDesktopServices::openUrl(QUrl(link));
+        };
+
+        connect(message_label, &QLabel::linkActivated, cb);
+
+        main_layout->addWidget(message_label);
+    }
 
     QHBoxLayout* button_layout = new QHBoxLayout();
 
