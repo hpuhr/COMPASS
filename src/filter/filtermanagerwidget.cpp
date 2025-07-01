@@ -324,16 +324,30 @@ void FilterManagerWidget::syncFilterLayouts()
 {
     auto& filters = filter_manager_.filters();
 
+    const int MaxWidth = 400;
+
+    std::vector<DBFilter*> filters_to_sync;
+
     int max_width = 0;
     for (auto& it : filters)
     {
         int col_width = it->widget()->columnWidth(0);
+        if (col_width > MaxWidth)
+            continue;
+
+        filters_to_sync.push_back(it.get());
+
         if (col_width > max_width)
             max_width = col_width;
     }
 
     max_width *= 1.1;
 
-    for (auto& it : filters)
-        it->widget()->setFixedColumnWidth(0, max_width);
+    if (max_width > 0)
+    {
+        for (auto& it : filters_to_sync)
+        {
+            it->widget()->setFixedColumnWidth(0, max_width);
+        }
+    }
 }
