@@ -3,6 +3,7 @@
 #include "compass.h"
 #include "datasourcemanager.h"
 #include "taskmanager.h"
+#include "taskresult.h"
 #include "evaluationmanager.h"
 #include "dbcontentmanager.h"
 #include "radarplotpositioncalculatortask.h"
@@ -60,7 +61,8 @@ REGISTER_RTCOMMAND(main_window::RTCommandReconstructReferences)
 REGISTER_RTCOMMAND(main_window::RTCommandLoadData)
 REGISTER_RTCOMMAND(main_window::RTCommandExportViewPointsReport)
 REGISTER_RTCOMMAND(main_window::RTCommandExportReport)
-REGISTER_RTCOMMAND(main_window::RTCommandGetResult)
+REGISTER_RTCOMMAND(main_window::RTCommandGetExistingReports)
+REGISTER_RTCOMMAND(main_window::RTCommandGetReport)
 
 REGISTER_RTCOMMAND(main_window::RTCommandGetEvents)
 REGISTER_RTCOMMAND(main_window::RTCommandReconfigure)
@@ -96,7 +98,8 @@ void init_commands()
     main_window::RTCommandLoadData::init();
     main_window::RTCommandExportViewPointsReport::init();
     main_window::RTCommandExportReport::init();
-    main_window::RTCommandGetResult::init();
+    main_window::RTCommandGetExistingReports::init();
+    main_window::RTCommandGetReport::init();
 
     main_window::RTCommandGetEvents::init();
     main_window::RTCommandReconfigure::init();
@@ -554,25 +557,65 @@ void RTCommandExportReport::assignVariables_impl(const VariablesMap& variables)
     mode_ = ResultReport::reportExportModeFromString(mode_str);
 }
 
-// get_result
+// get_existing_reports
 
 /**
 */
-RTCommandGetResult::RTCommandGetResult()
+RTCommandGetExistingReports::RTCommandGetExistingReports()
     : rtcommand::RTCommand()
 {
 }
 
-rtcommand::IsValid RTCommandGetResult::valid() const 
+/**
+*/
+bool RTCommandGetExistingReports::run_impl()
 {
-    CHECK_RTCOMMAND_INVALID_CONDITION(result_name.empty(), "Result name missing")
+    if (!COMPASS::instance().dbOpened())
+    {
+        setResultMessage("Database not opened");
+        return false;
+    }
+
+    if (COMPASS::instance().appMode() != AppMode::Offline) // to be sure
+    {
+        setResultMessage("Wrong application mode "+COMPASS::instance().appModeStr());
+        return false;
+    }
+
+    auto& task_manager = COMPASS::instance().taskManager();
+
+    std::vector<std::string> results;
+
+    for (const auto& r : task_manager.results())
+        results.push_back(r.second->name());
+
+    nlohmann::json j;
+    j["reports"] = results;
+
+    setJSONReply(j);
+
+    return true;
+}
+
+// get_report
+
+/**
+*/
+RTCommandGetReport::RTCommandGetReport()
+    : rtcommand::RTCommand()
+{
+}
+
+rtcommand::IsValid RTCommandGetReport::valid() const 
+{
+    CHECK_RTCOMMAND_INVALID_CONDITION(result_name.empty(), "Report name missing")
     
     return rtcommand::RTCommand::valid(); 
 }
 
 /**
 */
-bool RTCommandGetResult::run_impl()
+bool RTCommandGetReport::run_impl()
 {
     if (!COMPASS::instance().dbOpened())
     {
@@ -590,7 +633,7 @@ bool RTCommandGetResult::run_impl()
 
     if (!task_manager.hasResult(result_name))
     {
-        setResultMessage("Result '" + result_name + "' not available");
+        setResultMessage("Report '" + result_name + "' not available");
         return false;
     }
 
@@ -609,29 +652,29 @@ bool RTCommandGetResult::run_impl()
 
 /**
 */
-bool RTCommandGetResult::checkResult_impl()
+bool RTCommandGetReport::checkResult_impl()
 {
     return true;
 }
 
 /**
  */
-void RTCommandGetResult::collectOptions_impl(OptionsDescription &options,
+void RTCommandGetReport::collectOptions_impl(OptionsDescription &options,
                                              PosOptionsDescription &positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("result", po::value<std::string>()->default_value(""), "name of the result to retrieve")
-        ("section", po::value<std::string>()->default_value(""), "optional name of the section to retrieve");
+        ("report", po::value<std::string>()->default_value(""), "name of the report to retrieve, e.g. 'EUROCAE ED-87E Evaluation'")
+        ("section", po::value<std::string>()->default_value(""), "optional path of the section to retrieve, e.g. 'Report:Results:Overview:Results'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "result" )
+    ADD_RTCOMMAND_POS_OPTION(positional, "report" )
     ADD_RTCOMMAND_POS_OPTION(positional, "section")
 }
 
 /**
  */
-void RTCommandGetResult::assignVariables_impl(const VariablesMap &vars)
+void RTCommandGetReport::assignVariables_impl(const VariablesMap &vars)
 {
-    RTCOMMAND_GET_VAR_OR_THROW(vars, "result" , std::string, result_name)
+    RTCOMMAND_GET_VAR_OR_THROW(vars, "report" , std::string, result_name)
     RTCOMMAND_GET_VAR_OR_THROW(vars, "section", std::string, section    )
 }
 

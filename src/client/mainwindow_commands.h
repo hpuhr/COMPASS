@@ -121,12 +121,27 @@ protected:
 };
 
 /**
- * get_eval_results
+ * get_existing_reports
  */
-struct RTCommandGetResult : public rtcommand::RTCommand
+struct RTCommandGetExistingReports : public rtcommand::RTCommand
 {
 public:
-    RTCommandGetResult();
+    RTCommandGetExistingReports();
+    
+protected:
+    virtual bool run_impl() override;
+
+    DECLARE_RTCOMMAND(get_existing_reports, "returns a list of names of all existing reports")
+    DECLARE_RTCOMMAND_NOOPTIONS
+};
+
+/**
+ * get_report
+ */
+struct RTCommandGetReport : public rtcommand::RTCommand
+{
+public:
+    RTCommandGetReport();
 
     virtual rtcommand::IsValid valid() const override;
 
@@ -137,10 +152,9 @@ protected:
     virtual bool run_impl() override;
     virtual bool checkResult_impl() override;
 
-    DECLARE_RTCOMMAND(get_result, "obtain result json data")
+    DECLARE_RTCOMMAND(get_report, "obtain report json data")
     DECLARE_RTCOMMAND_OPTIONS
 };
-
 
 // get_events
 struct RTCommandGetEvents : public rtcommand::RTCommand

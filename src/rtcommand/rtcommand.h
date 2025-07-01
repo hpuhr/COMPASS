@@ -205,7 +205,7 @@ protected:
 struct RTCommandHelp : public RTCommand 
 {
     QString command;
-    bool    with_options = false;
+    bool    details = false;
 protected:
     virtual bool run_impl() override;
 
