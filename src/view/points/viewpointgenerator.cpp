@@ -653,10 +653,12 @@ const std::string ViewPointGenFeatureGrid::FeatureGridFieldNameGrid = "grid";
 
 /**
 */
-ViewPointGenFeatureGrid::ViewPointGenFeatureGrid(const Grid2DLayer& grid)
+ViewPointGenFeatureGrid::ViewPointGenFeatureGrid(const Grid2DLayer& grid,
+                                                 const boost::optional<PlotMetadata>& metadata)
 :   ViewPointGenFeature(FeatureName)
 ,   grid_(grid)
 {
+    plot_metadata_ = metadata;
 }
 
 /**

@@ -400,7 +400,8 @@ private:
 class ViewPointGenFeatureGrid : public ViewPointGenFeature
 {
 public:
-    ViewPointGenFeatureGrid(const Grid2DLayer& grid);
+    ViewPointGenFeatureGrid(const Grid2DLayer& grid, 
+                            const boost::optional<PlotMetadata>& metadata = boost::optional<PlotMetadata>());
     virtual ~ViewPointGenFeatureGrid() = default;
 
     virtual size_t size() const { return 1; }
