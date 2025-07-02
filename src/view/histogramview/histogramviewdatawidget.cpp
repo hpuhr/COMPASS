@@ -614,8 +614,8 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
             std::vector<std::string> ranges;
             for (const auto& bin : bins)
-                    ranges.push_back(bin.labels.label_min);
-                ranges.push_back(bins.rbegin()->labels.label_max);
+                ranges.push_back(bin.labels.label_min);
+            ranges.push_back(bins.rbegin()->labels.label_max);
 
             return ranges;
         };
