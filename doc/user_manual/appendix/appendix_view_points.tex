@@ -361,7 +361,7 @@ Please \textbf{note} that setting custom filters (created by the user) is also p
 
 \subsubsection{View Point Annotations}
 
-The 'annotations' attribute stores custom geometry information, which can be displayed in an Geographic View. \\
+The 'annotations' attribute stores custom geometry information, which can be displayed in a Geographic View. \\
 
 A simple example is shown below.
 
@@ -474,7 +474,7 @@ Depending on its type a feature may contain additional fields. Examples for the 
 \end{figure}
 
 \paragraph{Lines} The 'lines' feature displays an array of lines. 
-Two consecutive coordinates hereby form an individual line, which means that the size of the coordinate array needs to be even.
+Two consecutive coordinates form an individual line, which means that the size of the coordinate array needs to be even.
 
 \begin{lstlisting}[basicstyle=\small\ttfamily]
 {
@@ -629,44 +629,199 @@ At the moment only GeoTIFF files are supported.
 %    \caption{View Point Annotations - Text} 
 %\end{figure}
 
-% \paragraph{Histogram} The 'histogram' feature displays custom histogram data. 
-% Such a histogram may contain multiple data layers of the same resolution, which can be
-% displayed simultaneously in HistogramView.
+\paragraph{Grid} The 'grid' feature displays custom grid data in a Grid View.
 
-% \begin{lstlisting}[basicstyle=\small\ttfamily]
-% {
-%         ...
-%         {
-%             "type": "histogram",
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "grid",
+            "grid": 
+            {
+                // grid data row by row (here 4x4)
+                "data": [ [0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [8.0, 9.0, 10.0, 11.0], [12.0, 13.0, 14.0, 15.0] ],
 
-%             "layers":                                     // Histogram layers, each layer must obtain the same number of bins
-%             [
-%                 {
-%                     "name": "Layer1",                     // Display name for the histogram layer
-%                     "bins":                               // Histogram bins
-%                     [
-%                         // Bin count and a display label describing the bin, e.g. a numerical value or a certain category/state
-%                         { "count": 100, "label": "1.1" }, 
-%                         { "count": 100, "label": "1.2" },
-%                         { "count": 100, "label": "1.3" },
-%                         ...
-%                     ],
-%                     "color": "#AA00FF"                    // Display color for the layer
-%                 },
-%                 ...
-%             ]
-%         }
-%         ...
-% }
-% \end{lstlisting}
+                // grid layer name
+                "name": "my grid layer",
 
-%TODO: Figure
+                // grid size
+                "num_cells_x": 4,
+                "num_cells_y": 4,
 
-%\begin{figure}[H]
-%    \center
-%        \includegraphics[width=10cm]{figures/viewpoints_anno_example_text.png}
-%    \caption{View Point Annotations - Text} 
-%\end{figure}
+                // reference for the grid (provide template below if not needed)
+                "reference": 
+                {
+                    "img_origin_x": 0.0,      // x-coordinate of the upper left pixel
+                    "img_origin_y": 0.0,      // y-coordinate of the upper left pixel
+                    "img_pixel_size_x": 1.0,  // size of a pixel in x direction
+                    "img_pixel_size_y": 1.0,  // size of a pixel in y direction
+                    "is_north_up": true,      // srs is north-up
+                    "srs": "wgs84",           // spatial reference system, e.g. wgs84, epsg:XXXX
+                    "srs_is_wkt": false       // srs string directly stores a wkt string
+                }
+            },
+            "plot_metadata": 
+            {
+                "plot_group": "",
+                "subtitle": "Just a random grid",
+                "title": "My Grid",
+                "x_axis_label": "My X-Axis",
+                "y_axis_label": "My Y-Axis"
+            }
+        }
+        ...                  
+}
+\end{lstlisting}
+
+\textbf{Note} that the value '1.7976931348623157e+308' can be provided to signal an undefined grid cell, which will not be colored.
+
+\begin{figure}[H]
+    \center
+        \includegraphics[width=15cm]{figures/viewpoints_anno_example_grid.png}
+    \caption{View Point Annotations - Grid} 
+\end{figure}
+
+\paragraph{Histogram} The 'histogram' feature displays custom histogram data in a Histogram View. 
+Such a histogram may contain multiple data series of the same resolution, which can be
+displayed simultaneously in HistogramView.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "histogram",
+            "histogram": 
+            {
+                // multiple data series are possible 
+                // each must obtain the same number of bins and a unique name
+                "dataseries": 
+                [
+                    {
+                        "name": "my data series", // unique name of the data series
+                        "color": "#0000ff",       // color of the data series
+                        "histogram":              // bins of the data series
+                        {
+                            "bins": 
+                            [
+                                {
+                                    "count": 1,              // bin count
+                                    "label": "0.500000",     // bin center label
+                                    "label_max": "1.000000", // bin begin label
+                                    "label_min": "0.000000", // bin end label
+                                },
+                                {
+                                    "count": 2,
+                                    "label": "1.500000",
+                                    "label_max": "2.000000",
+                                    "label_min": "1.000000",
+                                },
+                                {
+                                    "count": 3,
+                                    "label": "2.500000",
+                                    "label_max": "3.000000",
+                                    "label_min": "2.000000",
+                                },
+                                ...
+                            ]
+                        }
+                        
+                    }
+                    ...
+                ]
+            },
+            "plot_metadata": 
+            {
+                "plot_group": "Plot Group 1",
+                "subtitle": "Just a random histogram",
+                "title": "My Histogram",
+                "x_axis_label": "My X-Axis",
+                "y_axis_label": "My Y-Axis"
+            },
+        }
+        ...
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+    \center
+        \includegraphics[width=15cm]{figures/viewpoints_anno_example_histogram.png}
+    \caption{View Point Annotations - Histogram} 
+\end{figure}
+
+\paragraph{Scatter Series} The 'scatterseries' feature displays custom scatter data in a Scatterplot View. 
+The feature may contain multiple data series.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        {
+            "type": "scatterseries",
+            "scatterseries": 
+            {
+                "dataseries": 
+                [
+                    {
+                        "name": "my data series", // unique name of the data series
+                        "color": "#0000ff",       // color of the data series
+                        "data_type_x": 0,         // data type: 0 = floating point, 1 = timestamp (ms since epoch)
+                        "data_type_y": 0,         // data type: 0 = floating point, 1 = timestamp (ms since epoch)
+                        "marker_size": 10.0,      // displayed marker size
+
+                        //data points as [x, y]
+                        "data": [[0.0, 0.0], [0.1, 0.1], [0.2, 0.2], [0.3, 0.3], [0.4, 0.4], [0.5, 0.5], [0.6, 0.6], [0.7, 0.7], [0.8, 0.8], [0.9, 0.9], [1.0, 1.0]]
+                    }
+                    ...
+                ]
+            },
+            "plot_metadata": 
+            {
+                "plot_group": "",
+                "subtitle": "Just a random scatter series",
+                "title": "My Scatter Series",
+                "x_axis_label": "My X-Axis",
+                "y_axis_label": "My Y-Axis"
+            }
+        }
+        ...
+}
+\end{lstlisting}
+
+\begin{figure}[H]
+    \center
+        \includegraphics[width=15cm]{figures/viewpoints_anno_example_scatter.png}
+    \caption{View Point Annotations - Scatter Series} 
+\end{figure}
+
+\paragraph{Plot Metadata}
+
+Some types of features represent displayable data for specific Views, e.g. the Histogram feature,
+which can be displayed specifically in a Histogram View. \\
+
+If these Views support the concept of Plots and Plot Groups, as described in section \nameref{sec:plots},
+metadata for displaying the item in such a view can be provided by the feature by specifiying an additional item 'plot\_metadata'.
+
+\begin{lstlisting}[basicstyle=\small\ttfamily]
+{
+        ...
+        // Feature 
+        {
+            ...
+            "plot_metadata": 
+            {
+                "plot_group": "My Plot Group",    // Plot group name used to group displayable items (optional), 
+                                                  // will be displayed in the Plot Group selection
+                "title": "My Title",              // Plot title, will be displayed above the plotted data and in the Plot selection
+                "subtitle": "My Subtitle",        // Plot subtitle, will be displayed in the Plot selection
+                "x_axis_label": "My X-Axis",      // X-axis label, will be displayed in the plotted data
+                "y_axis_label": "My Y-Axis"       // Y-axis label, will be displayed in the plotted data
+            },
+            ...
+        }
+        ...
+}
+\end{lstlisting}
+
+See section \nameref{sec:plots} for more details.
 
 \paragraph{Showing Color Arrays} In all examples provided above, a single color has been used for the geometry stored in a feature.
 In order to show each geometrical primitive in a separate color, the 'color' tag can be removed, and a 'colors' array provided instead.
