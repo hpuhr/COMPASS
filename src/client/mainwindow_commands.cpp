@@ -484,7 +484,7 @@ void RTCommandExportViewPointsReport::assignVariables_impl(const VariablesMap& v
 // export evaluation report
 rtcommand::IsValid  RTCommandExportReport::valid() const
 {
-    CHECK_RTCOMMAND_INVALID_CONDITION(!result_name_.size(), "Result name empty")
+    CHECK_RTCOMMAND_INVALID_CONDITION(!result_name_.size(), "Report name empty")
     CHECK_RTCOMMAND_INVALID_CONDITION(mode_ == ResultReport::ReportExportMode::JSONBlob, "Command not available for JSONBlob mode")
     
     return RTCommand::valid();
@@ -494,7 +494,7 @@ bool RTCommandExportReport::run_impl()
 {
     if (!result_name_.size())
     {
-        setResultMessage("Result name empty");
+        setResultMessage("Report name empty");
         return false;
     }
 
@@ -514,7 +514,7 @@ bool RTCommandExportReport::run_impl()
 
     if (!task_manager.hasResult(result_name_))
     {
-        setResultMessage("Result '" + result_name_ + "' not available");
+        setResultMessage("Report '" + result_name_ + "' not available");
         return false;
     }
 
@@ -537,18 +537,18 @@ void RTCommandExportReport::collectOptions_impl(OptionsDescription& options,
                                                 PosOptionsDescription& positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("result,r", po::value<std::string>()->required(), "result name, e.g. ’EUROCAE ED-87E'")
+        ("report,r", po::value<std::string>()->required(), "report name, e.g. ’EUROCAE ED-87E Evaluation'")
         ("dir,f", po::value<std::string>()->default_value(""), "export directory, e.g. ’/data/db2/'")
         ("mode,m", po::value<std::string>()->required(), "export mode, e.g. ’PDF'");
 
-    ADD_RTCOMMAND_POS_OPTION(positional, "result")
+    ADD_RTCOMMAND_POS_OPTION(positional, "report")
     ADD_RTCOMMAND_POS_OPTION(positional, "dir"   )
     ADD_RTCOMMAND_POS_OPTION(positional, "mode"  )
 }
 
 void RTCommandExportReport::assignVariables_impl(const VariablesMap& variables)
 {
-    RTCOMMAND_GET_VAR_OR_THROW(variables, "result", std::string, result_name_)
+    RTCOMMAND_GET_VAR_OR_THROW(variables, "report", std::string, result_name_)
     RTCOMMAND_GET_VAR_OR_THROW(variables, "dir"   , std::string, export_dir_)
 
     std::string mode_str;
@@ -663,7 +663,7 @@ void RTCommandGetReport::collectOptions_impl(OptionsDescription &options,
                                              PosOptionsDescription &positional)
 {
     ADD_RTCOMMAND_OPTIONS(options)
-        ("report", po::value<std::string>()->default_value(""), "name of the report to retrieve, e.g. 'EUROCAE ED-87E Evaluation'")
+        ("report", po::value<std::string>()->required(), "name of the report to retrieve, e.g. 'EUROCAE ED-87E Evaluation'")
         ("section", po::value<std::string>()->default_value(""), "optional path of the section to retrieve, e.g. 'Report:Results:Overview:Results'");
 
     ADD_RTCOMMAND_POS_OPTION(positional, "report" )
