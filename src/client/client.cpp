@@ -773,7 +773,11 @@ void Client::checkAndSetupConfig()
                 Configuration& eval_man_config = compass_config.getOrCreateSubConfiguration(
                     "EvaluationManager", "EvaluationManager0");
 
-                eval_man_config.overrideJSONParameters(json_config);
+                assert (eval_man_config.hasSubConfiguration("EvaluationCalculator", "EvaluationCalculator0"));
+                Configuration& eval_calc_config = eval_man_config.getOrCreateSubConfiguration(
+                    "EvaluationCalculator", "EvaluationCalculator0");
+
+                eval_calc_config.overrideJSONParameters(json_config);
             }
             catch (exception& e)
             {

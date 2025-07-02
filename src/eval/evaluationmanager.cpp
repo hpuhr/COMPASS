@@ -130,7 +130,7 @@ void EvaluationManager::checkSubConfigurables()
     if (!calculator_)
     {
         //generate default calculator
-        generateSubConfigurable("EvaluationManager", "EvaluationManager0");
+        generateSubConfigurable("EvaluationCalculator", "EvaluationCalculator0");
         assert(calculator_);
     }
 }
