@@ -62,11 +62,6 @@ public:
     virtual void visit(ScatterPlotView* e);
     virtual void visit(GridView* e);
 
-    virtual void visit(const ResultReport::Section* e);
-    virtual void visit(const ResultReport::SectionContentTable* e);
-    virtual void visit(const ResultReport::SectionContentText* e);
-    virtual void visit(const ResultReport::SectionContentFigure* e);
-
     void imagePrefix(const std::string& image_prefix);
 
 protected:
