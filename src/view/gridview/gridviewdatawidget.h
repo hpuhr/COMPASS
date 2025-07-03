@@ -68,7 +68,7 @@ public:
 
     bool hasValidGrid() const;
 
-    QRectF getXYBounds(bool fix_small_ranges) const;
+    boost::optional<QRectF> getXYBounds(bool fix_small_ranges) const;
     boost::optional<std::pair<double, double>> getZBounds(bool fix_small_ranges) const;
 
     QPixmap renderPixmap();

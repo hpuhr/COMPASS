@@ -337,12 +337,17 @@ QPixmap ScatterPlotViewDataWidget::renderPixmap()
 
 /**
 */
-QRectF ScatterPlotViewDataWidget::getViewBounds() const
+boost::optional<QRectF> ScatterPlotViewDataWidget::getViewBounds() const
 {
+    bool bounds_valid = bounds_.has_value();
+
     loginf << "ScatterPlotViewDataWidget: getViewBounds: data range bounds"
-               << " x min " << bounds_.left() << " max " << bounds_.right() 
-               << " y min " << bounds_.top() << " max " << bounds_.bottom()
-               << " bounds empty " << bounds_.isEmpty();
+           << " x min " << (bounds_valid ? bounds_->left() : 0)
+           << " max " << (bounds_valid ? bounds_->right() : 0)
+           << " y min " << (bounds_valid ? bounds_->top() : 0)
+           << " max " << (bounds_valid ? bounds_->bottom() : 0)
+           << " bounds valid " << bounds_valid
+           << " bounds empty " << (bounds_valid? bounds_->isEmpty() : true);
 
     return bounds_;
 }
@@ -474,19 +479,24 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
         if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
         {
             auto bounds = getViewBounds();
+            bool bounds_valid = bounds.has_value();
 
-            loginf << "ScatterPlotViewDataWidget: resetZoomSlot: X min " << bounds.left()
-                   << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom()
-                   << " bounds empty " << bounds.isEmpty();
+            loginf << "ScatterPlotViewDataWidget: resetZoomSlot:"
+                   << " x min " << (bounds_valid ? bounds->left() : 0)
+                   << " max " << (bounds_valid ? bounds->right() : 0)
+                   << " y min " << (bounds_valid ? bounds->top() : 0)
+                   << " max " << (bounds_valid ? bounds->bottom() : 0)
+                   << " bounds valid " << bounds_valid
+                   << " bounds empty " << (bounds_valid? bounds->isEmpty() : true);
 
-            if (!bounds.isEmpty())
+            if (bounds_valid)
             {
-                double x0 = bounds.left();
-                double x1 = bounds.right();
-                double y0 = bounds.top();
-                double y1 = bounds.bottom();
-                double w  = bounds.width();
-                double h  = bounds.height();
+                double x0 = bounds->left();
+                double x1 = bounds->right();
+                double y0 = bounds->top();
+                double y1 = bounds->bottom();
+                double w  = bounds->width();
+                double h  = bounds->height();
 
                 double bx = w < 1e-12 ? 0.1 : w * 0.03;
                 double by = h < 1e-12 ? 0.1 : h * 0.03;
@@ -827,13 +837,13 @@ void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     VariableViewStashDataWidget::viewInfoJSON_impl(info);
 
     auto bounds       = getViewBounds();
-    bool bounds_valid = bounds.isValid();
+    bool bounds_valid = bounds.has_value();
 
     info[ "data_bounds_valid" ] = bounds_valid;
-    info[ "data_bounds_xmin"  ] = bounds_valid ? bounds.left()   : 0.0;
-    info[ "data_bounds_ymin"  ] = bounds_valid ? bounds.top()    : 0.0;
-    info[ "data_bounds_xmax"  ] = bounds_valid ? bounds.right()  : 0.0;
-    info[ "data_bounds_ymax"  ] = bounds_valid ? bounds.bottom() : 0.0;
+    info[ "data_bounds_xmin"  ] = bounds_valid ? bounds->left()   : 0.0;
+    info[ "data_bounds_ymin"  ] = bounds_valid ? bounds->top()    : 0.0;
+    info[ "data_bounds_xmax"  ] = bounds_valid ? bounds->right()  : 0.0;
+    info[ "data_bounds_ymax"  ] = bounds_valid ? bounds->bottom() : 0.0;
 
     auto zoomActive = [ & ] (const QRectF& bounds_data, const QRectF& bounds_axis)
     {
@@ -870,7 +880,7 @@ void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
         info[ "axis_bounds_ymin"  ] = has_axis_bounds ? axis_bounds.top()    : 0.0;
         info[ "axis_bounds_ymax"  ] = has_axis_bounds ? axis_bounds.bottom() : 0.0;
 
-        info[ "axis_zoom_active"  ] = zoomActive(bounds, axis_bounds);
+        info[ "axis_zoom_active"  ] = bounds_valid ? zoomActive(bounds.value(), axis_bounds) : false;
 
         chart_info[ "num_series"] = series.count();
 

@@ -213,6 +213,13 @@ void GridViewConfigWidget::variableChangedEvent(int idx)
 
 /**
 */
+void GridViewConfigWidget::dataSourceChangedEvent()
+{
+    updateExport();
+}
+
+/**
+*/
 void GridViewConfigWidget::redrawDone()
 {
     VariableViewConfigWidget::redrawDone();
@@ -240,6 +247,7 @@ void GridViewConfigWidget::updateExport()
     auto const_view = dynamic_cast<const GridView*>(view_);
     assert(const_view);
 
+    //no valid grid no export
     if (!const_view->isInit() || !const_view->getDataWidget()->hasValidGrid())
     {
         export_button_->setEnabled(false);
@@ -248,30 +256,44 @@ void GridViewConfigWidget::updateExport()
         return;
     }
 
-    auto var_sel_x = variableSelection(0);
-    auto var_sel_y = variableSelection(1);
+    bool enable_export = false;
+    std::string tooltip;
 
-    assert(var_sel_x && var_sel_y);
+    if (showsAnnotation())
+    {
+        //annotation shown => allow export on users discretion
+        enable_export = false;
+        tooltip = "Export disabled for annotations";
+    }
+    else
+    {
+        //variables shown => allow if longitude-latitude is selected
+        auto var_sel_x = variableSelection(0);
+        auto var_sel_y = variableSelection(1);
 
-    auto& dbc_man = COMPASS::instance().dbContentManager();
+        assert(var_sel_x && var_sel_y);
 
-    const auto& metavar_lon = dbc_man.metaVariable(DBContent::meta_var_longitude_.name());
-    const auto& metavar_lat = dbc_man.metaVariable(DBContent::meta_var_latitude_.name());
+        auto& dbc_man = COMPASS::instance().dbContentManager();
 
-    bool has_lon       = var_sel_x->hasMetaVariable() && &var_sel_x->selectedMetaVariable() == &metavar_lon;
-    bool has_lat       = var_sel_y->hasMetaVariable() && &var_sel_y->selectedMetaVariable() == &metavar_lat;
-    bool enable_export = has_lon && has_lat;
+        const auto& metavar_lon = dbc_man.metaVariable(DBContent::meta_var_longitude_.name());
+        const auto& metavar_lat = dbc_man.metaVariable(DBContent::meta_var_latitude_.name());
 
-    const std::string tt_deactiv = "<html><head/><body>"
-                                   "<p>To reenable export, please select the following variables.</p>"
-                                   "<ul>"
-                                   "<li><b>X Variable</b>: Meta - Longitude</li>"
-                                   "<li><b>Y Variable</b>: Meta - Latitude</li>"
-                                   "</ul>"
-                                   "<p></p>"
-                                   "</body></html>";
+        bool has_lon = var_sel_x->hasMetaVariable() && &var_sel_x->selectedMetaVariable() == &metavar_lon;
+        bool has_lat = var_sel_y->hasMetaVariable() && &var_sel_y->selectedMetaVariable() == &metavar_lat;
 
-    std::string tooltip = enable_export ? "" : tt_deactiv;
+        enable_export = has_lon && has_lat;
+
+        const std::string tt_deactiv = "<html><head/><body>"
+                                    "<p>To reenable export, please select the following variables.</p>"
+                                    "<ul>"
+                                    "<li><b>X Variable</b>: Meta - Longitude</li>"
+                                    "<li><b>Y Variable</b>: Meta - Latitude</li>"
+                                    "</ul>"
+                                    "<p></p>"
+                                    "</body></html>";
+
+        tooltip = enable_export ? "" : tt_deactiv;
+    }
 
     export_button_->setEnabled(enable_export);
     export_button_->setToolTip(QString::fromStdString(tooltip));

@@ -424,6 +424,7 @@ public:
     ViewPointGenFeatureHistogram(const RawHistogram& histogram,
                                  const std::string& series_name = "",
                                  const QColor& series_color = Qt::blue,
+                                 const boost::optional<bool>& use_log_scale = boost::optional<bool>(),
                                  const PlotMetadata& metadata = PlotMetadata());
     ViewPointGenFeatureHistogram(const RawHistogramCollection& histogram_collection,
                                  const PlotMetadata& metadata = PlotMetadata());
@@ -452,6 +453,7 @@ public:
                                      const std::string& series_name = "",
                                      const QColor& series_color = Qt::blue,
                                      double marker_size = 8.0,
+                                     const boost::optional<bool>& use_connection_lines = boost::optional<bool>(),
                                      const PlotMetadata& metadata = PlotMetadata());
     ViewPointGenFeatureScatterSeries(const ScatterSeriesCollection& scatter_series_collection,
                                      const PlotMetadata& metadata = PlotMetadata());

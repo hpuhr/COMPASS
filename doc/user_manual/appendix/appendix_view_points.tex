@@ -660,7 +660,7 @@ At the moment only GeoTIFF files are supported.
                     "srs_is_wkt": false       // srs string directly stores a wkt string
                 }
             },
-            "plot_metadata": 
+            "plot_metadata":   // metadata for display in Grid View (optional)
             {
                 "plot_group": "",
                 "subtitle": "Just a random grid",
@@ -692,6 +692,8 @@ displayed simultaneously in HistogramView.
             "type": "histogram",
             "histogram": 
             {
+                "log_scale": true,   // enable/disable logarithmic scale (optional)
+
                 // multiple data series are possible 
                 // each must obtain the same number of bins and a unique name
                 "dataseries": 
@@ -729,7 +731,7 @@ displayed simultaneously in HistogramView.
                     ...
                 ]
             },
-            "plot_metadata": 
+            "plot_metadata":   // metadata for display in HistogramView View (optional)
             {
                 "plot_group": "Plot Group 1",
                 "subtitle": "Just a random histogram",
@@ -758,6 +760,7 @@ The feature may contain multiple data series.
             "type": "scatterseries",
             "scatterseries": 
             {
+                "connection_lines": true,  // enable/disable connection lines (optional)
                 "dataseries": 
                 [
                     {
@@ -773,7 +776,7 @@ The feature may contain multiple data series.
                     ...
                 ]
             },
-            "plot_metadata": 
+            "plot_metadata":   // metadata for display in ScatterPlot View (optional)
             {
                 "plot_group": "",
                 "subtitle": "Just a random scatter series",

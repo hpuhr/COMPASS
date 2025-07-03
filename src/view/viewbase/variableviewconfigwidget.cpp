@@ -251,6 +251,13 @@ const dbContent::VariableSelectionWidget* VariableViewConfigWidget::variableSele
 
 /**
 */
+bool VariableViewConfigWidget::showsAnnotation() const
+{
+    return show_annotations_box_->isChecked();
+}
+
+/**
+*/
 void VariableViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
 {
     //variable related
@@ -312,6 +319,9 @@ void VariableViewConfigWidget::dataSourceToggled()
 
     //update ui
     updateConfig();
+
+    //invoke derived class
+    dataSourceChangedEvent();
 }
 
 /**

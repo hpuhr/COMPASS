@@ -574,7 +574,7 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
                 HistogramInitializerT<double> init;
                 if (init.createRAW(h, values, true, 20))
                 {
-                    auto f = new ViewPointGenFeatureHistogram(h, data.name, style.base_color_, 
+                    auto f = new ViewPointGenFeatureHistogram(h, data.name, style.base_color_, {},
                         PlotMetadata("Reconstruction", "Speed " + data.name, "Speed", "", PlotGroup));
                     anno->addFeature(f);
                 }
@@ -592,7 +592,7 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
                 feat_speed_scatter->scatterSeries().addDataSeries(series, data.name, style.base_color_, style.point_size_);
 
                 //add own feature
-                auto f = new ViewPointGenFeatureScatterSeries(series, data.name, style.base_color_, style.point_size_, 
+                auto f = new ViewPointGenFeatureScatterSeries(series, data.name, style.base_color_, style.point_size_, {},
                     PlotMetadata("Reconstruction", "Speed " + data.name, "Timestamp", "Speed", PlotGroup));
                 anno->addFeature(f);
             }
@@ -702,7 +702,7 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
             series.data_type_x = ScatterSeries::DataType::DataTypeTimestamp;
 
             //add own feature
-            auto f = new ViewPointGenFeatureScatterSeries(series, data.name, style.base_color_, style.point_size_, 
+            auto f = new ViewPointGenFeatureScatterSeries(series, data.name, style.base_color_, style.point_size_, {},
                 PlotMetadata("Reconstruction", "Used Q_vars " + data.name, "Timestamp", "Q_var", PlotGroup));
             anno->addFeature(f);
         }

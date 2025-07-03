@@ -680,10 +680,14 @@ const std::string ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogr
 ViewPointGenFeatureHistogram::ViewPointGenFeatureHistogram(const RawHistogram& histogram,
                                                            const std::string& series_name,
                                                            const QColor& series_color,
+                                                           const boost::optional<bool>& use_log_scale,
                                                            const PlotMetadata& metadata)
 :   ViewPointGenFeature(FeatureName)
 {
     histogram_.addDataSeries(histogram, series_name, series_color);
+
+    if (use_log_scale.has_value())
+        histogram_.setUseLogScale(use_log_scale.value());
 
     plot_metadata_ = metadata;
 }
@@ -725,10 +729,14 @@ ViewPointGenFeatureScatterSeries::ViewPointGenFeatureScatterSeries(const Scatter
                                                                    const std::string& series_name,
                                                                    const QColor& series_color,
                                                                    double marker_size,
+                                                                   const boost::optional<bool>& use_connection_lines,
                                                                    const PlotMetadata& metadata)
 :   ViewPointGenFeature(FeatureName)
 {
     scatter_series_.addDataSeries(scatter_series, series_name, series_color, marker_size);
+
+    if (use_connection_lines.has_value())
+        scatter_series_.setUseConnectionLines(use_connection_lines.value());
 
     plot_metadata_ = metadata;
 }
