@@ -98,6 +98,7 @@ void GridViewDataWidget::resetGridChart()
 
     legend_->setColorMap(ColorMap());
     legend_->setVisible(false);
+    legend_->showSelectionColor(false);
 
     grid_chart_.reset();
 
@@ -685,16 +686,16 @@ void GridViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     info[ "num_selected"] = getStash().selected_count_;
     info[ "num_nan"     ] = getStash().nan_value_count_;
 
-    auto xy_bounds     = getXYBounds(false);
-    auto z_bounds      = getZBounds(false);
-    bool bounds_valid  = xy_bounds.has_value() && xy_bounds->isValid() && z_bounds.has_value();
+    auto xy_bounds    = getXYBounds(false);
+    auto z_bounds     = getZBounds(false);
+    bool bounds_valid = xy_bounds.has_value() && xy_bounds->isValid() && z_bounds.has_value();
 
     info[ "data_bounds_valid" ] = bounds_valid;
-    info[ "data_bounds_xmin"  ] = bounds_valid ? xy_bounds->left()         : 0.0;
-    info[ "data_bounds_ymin"  ] = bounds_valid ? xy_bounds->top()          : 0.0;
+    info[ "data_bounds_xmin"  ] = bounds_valid ? xy_bounds->left()        : 0.0;
+    info[ "data_bounds_ymin"  ] = bounds_valid ? xy_bounds->top()         : 0.0;
     info[ "data_bounds_zmin"  ] = bounds_valid ?  z_bounds.value().first  : 0.0;
-    info[ "data_bounds_xmax"  ] = bounds_valid ? xy_bounds->right()        : 0.0;
-    info[ "data_bounds_ymax"  ] = bounds_valid ? xy_bounds->bottom()       : 0.0;
+    info[ "data_bounds_xmax"  ] = bounds_valid ? xy_bounds->right()       : 0.0;
+    info[ "data_bounds_ymax"  ] = bounds_valid ? xy_bounds->bottom()      : 0.0;
     info[ "data_bounds_zmax"  ] = bounds_valid ?  z_bounds.value().second : 0.0;
 
     // auto zoomActive = [ & ] (const QRectF& bounds_data, const QRectF& bounds_axis)
