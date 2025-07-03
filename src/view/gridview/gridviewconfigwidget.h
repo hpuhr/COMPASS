@@ -57,6 +57,7 @@ protected:
     virtual void configChanged_impl() override;
 
     virtual void variableChangedEvent(int idx) override;
+    virtual void dataSourceChangedEvent() override;
 
     void attachExportMenu();
 

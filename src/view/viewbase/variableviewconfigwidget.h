@@ -60,11 +60,13 @@ protected:
     void showSwitch(int var0, bool ok);
 
     const dbContent::VariableSelectionWidget* variableSelection(size_t idx) const;
+    bool showsAnnotation() const;
 
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
     virtual void configChanged_impl() {};
 
     virtual void variableChangedEvent(int idx) {}
+    virtual void dataSourceChangedEvent() {}
 
     QVBoxLayout* configLayout() { return config_layout_; }
 

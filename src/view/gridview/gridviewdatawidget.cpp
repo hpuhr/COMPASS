@@ -309,6 +309,8 @@ void GridViewDataWidget::updateFromAnnotations()
         assert(grid_value_min_.value() <= grid_value_max_.value());
     }
 
+    
+
     loginf << "GridViewDataWidget: updateFromAnnotations: done, generated " << grid_layers_.numLayers() << " layers";
 }
 
