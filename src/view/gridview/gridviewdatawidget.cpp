@@ -173,12 +173,12 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
         return;
 
     auto bounds = getXYBounds(true);
-    if (bounds.isEmpty())
+    if (!bounds.has_value() || bounds->isEmpty())
     {
         loginf << "GridViewDataWidget: processStash: bounds empty, skipping...";
         return;
     }
-    assert(bounds.isValid());
+    assert(bounds->isValid());
 
     auto z_bounds = getZBounds(false);
     assert(z_bounds.has_value());
@@ -190,7 +190,7 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
     grid_.reset(new Grid2D);
 
     std::string err;
-    bool ok = grid_->create(bounds, res, "wgs84", true, &err);
+    bool ok = grid_->create(bounds.value(), res, "wgs84", true, &err);
 
     if (!ok)
         logerr << "GridViewDataWidget: processStash: creation of grid failed: " << err;
@@ -363,7 +363,7 @@ QPixmap GridViewDataWidget::renderPixmap()
 
 /**
 */
-QRectF GridViewDataWidget::getXYBounds(bool fix_small_ranges) const
+boost::optional<QRectF> GridViewDataWidget::getXYBounds(bool fix_small_ranges) const
 {
     return getPlanarBounds(0, 1, false, fix_small_ranges);
 }
@@ -687,14 +687,14 @@ void GridViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
     auto xy_bounds     = getXYBounds(false);
     auto z_bounds      = getZBounds(false);
-    bool bounds_valid  = xy_bounds.isValid() && z_bounds.has_value();
+    bool bounds_valid  = xy_bounds.has_value() && xy_bounds->isValid() && z_bounds.has_value();
 
     info[ "data_bounds_valid" ] = bounds_valid;
-    info[ "data_bounds_xmin"  ] = bounds_valid ? xy_bounds.left()         : 0.0;
-    info[ "data_bounds_ymin"  ] = bounds_valid ? xy_bounds.top()          : 0.0;
+    info[ "data_bounds_xmin"  ] = bounds_valid ? xy_bounds->left()         : 0.0;
+    info[ "data_bounds_ymin"  ] = bounds_valid ? xy_bounds->top()          : 0.0;
     info[ "data_bounds_zmin"  ] = bounds_valid ?  z_bounds.value().first  : 0.0;
-    info[ "data_bounds_xmax"  ] = bounds_valid ? xy_bounds.right()        : 0.0;
-    info[ "data_bounds_ymax"  ] = bounds_valid ? xy_bounds.bottom()       : 0.0;
+    info[ "data_bounds_xmax"  ] = bounds_valid ? xy_bounds->right()        : 0.0;
+    info[ "data_bounds_ymax"  ] = bounds_valid ? xy_bounds->bottom()       : 0.0;
     info[ "data_bounds_zmax"  ] = bounds_valid ?  z_bounds.value().second : 0.0;
 
     // auto zoomActive = [ & ] (const QRectF& bounds_data, const QRectF& bounds_axis)

@@ -93,7 +93,7 @@ protected:
     virtual void processStash(const VariableViewStash<double>& stash) override final;
     virtual void resetStashDependentData() override final;
 
-    virtual QRectF getViewBounds() const override final;
+    virtual boost::optional<QRectF> getViewBounds() const override final;
 
     void viewInfoJSON_impl(nlohmann::json& info) const override;
 
@@ -125,5 +125,5 @@ private:
 
     ScatterSeriesModel data_model_;
 
-    QRectF bounds_;
+    boost::optional<QRectF> bounds_;
 };

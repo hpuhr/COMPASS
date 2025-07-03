@@ -43,10 +43,10 @@ public:
                                 Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~VariableViewStashDataWidget();
 
-    QRectF getPlanarBounds(int var_x, 
-                           int var_y, 
-                           bool correct_datetime,
-                           bool fix_small_ranges) const;
+    boost::optional<QRectF> getPlanarBounds(int var_x, 
+                                            int var_y, 
+                                            bool correct_datetime,
+                                            bool fix_small_ranges) const;
     boost::optional<std::pair<double, double>> getBounds(int var, 
                                                          bool correct_datetime,
                                                          bool fix_small_ranges) const;
@@ -61,7 +61,7 @@ protected:
     virtual void updateVariableData(const std::string& dbcontent_name,
                                     Buffer& buffer) override final;
 
-    virtual QRectF getViewBounds() const;
+    virtual boost::optional<QRectF> getViewBounds() const;
 
     /// derived behavior during postUpdateVariableDataEvent()
     virtual void processStash(const VariableViewStash<double>& stash) = 0;
