@@ -17,6 +17,9 @@
 
 #include "geotiff_defs.h"
 #include "rasterreference.h"
+#include "coordconverter.h"
+
+#include "geotiff.h"
 
 /**
 */
@@ -29,6 +32,14 @@ QRectF GeoTIFFInfo::roi() const
     ref.set(geo_srs, geo_transform);
 
     return ref.getROI(img_w, img_h);
+}
+
+/**
+*/
+QRectF GeoTIFFInfo::roiAsWGS84() const
+{
+    auto r = roi();
+    return projection::CoordConverter::convert(r, geo_srs, GeoTIFF::wktStringFromSRSName("wgs84"));
 }
 
 /**

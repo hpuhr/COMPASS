@@ -718,6 +718,7 @@ std::vector<std::pair<QImage, std::string>> TaskResult::renderFigure(const Resul
 
     QCoreApplication::processEvents();
 
+    //wait a little for e.g. geoimages to warp and render correctly in geographic view
     figure.executeRenderDelay();
 
     for (auto& view_it : view_man.getViews())

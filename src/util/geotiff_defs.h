@@ -36,6 +36,7 @@ struct GeoTIFFInfo
     };
 
     QRectF roi() const;
+    QRectF roiAsWGS84() const;
 
     bool isValid() const;
 
