@@ -87,7 +87,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
  #else
     cout << "COMPASSClient: OSG_GL3_AVAILABLE false, version "
          << format.version().first << "." << format.version().second << endl;
-
     // format.setVersion(2, 0);
     // format.setProfile(QSurfaceFormat::CompatibilityProfile);
     // format.setRenderableType(QSurfaceFormat::OpenGL);
@@ -129,6 +128,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     //    bool load_data {false};
 
     //    bool quit {false};
+
+    cout << "COMPASSClient: qt platform in use " << QGuiApplication::platformName().toStdString() << endl;
 
     po::options_description desc("Allowed options");
     desc.add_options()("help", "produce help message")

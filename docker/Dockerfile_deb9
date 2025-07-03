@@ -91,27 +91,39 @@ RUN apt-get remove qt4-qmake libqt4* qt4-dev-tools libopenscenegraph-dev opensce
 RUN apt-get install gedit libgl1-mesa-dev libegl1-mesa-drivers libxkbcommon-x11-dev -y
 
 # qt
-ENV QT_VERSION_A=5.8
-ENV QT_VERSION_B=5.8.0
-ENV QT_VERSION_SCRIPT=580
-#ENV QT_VERSION_A=5.9
-#ENV QT_VERSION_B=5.9.0
-#ENV QT_VERSION_SCRIPT=590
+# 1) Install build prerequisites (including Wayland libs for QtWayland)
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      build-essential \
+      libfontconfig1-dev libx11-dev libxcb1-dev libxkbcommon-dev \
+      libglu1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev \
+      libxrender-dev libxcb-xinerama0-dev libxcb-image0-dev \
+      libwayland-dev \
+ && rm -rf /var/lib/apt/lists/*
 
-#RUN wget https://download.qt.io/archive/qt/${QT_VERSION_A}/${QT_VERSION_B}/qt-opensource-linux-x64-${QT_VERSION_B}.run
-RUN wget https://download.qt.io/new_archive/qt/${QT_VERSION_A}/${QT_VERSION_B}/qt-opensource-linux-x64-${QT_VERSION_B}.run
-RUN chmod +x qt-opensource-linux-x64-${QT_VERSION_B}.run 
-COPY qt-noninteractive.qs /qt-noninteractive.qs
-RUN ./qt-opensource-linux-x64-${QT_VERSION_B}.run --script qt-noninteractive.qs  -platform minimal
+# 2) Download & extract Qt 5.12.7 sources
+WORKDIR /tmp
+RUN wget https://download.qt.io/archive/qt/5.12/5.12.7/single/qt-everywhere-src-5.12.7.tar.xz \
+ && tar xf qt-everywhere-src-5.12.7.tar.xz
 
-ENV QT_SELECT=5
-ENV QT_QPA_PLATFORMTHEME=gtk3
-ENV UBUNTU_MENUPROXY=
-#ENV QT_STYLE_OVERRIDE=adwaita
-ENV QTDIR=/qt/${QT_VERSION_A}
-ENV PATH="${QTDIR}/gcc_64/bin:${PATH}"
-ENV QTTOOLDIR="${QTDIR}/gcc_64/bin"
-ENV QTLIBDIR="${QTDIR}/gcc_64/"
+# 3) Configure, build & install Qt (core + all modules, including qtwayland)
+WORKDIR /tmp/qt-everywhere-src-5.12.7
+RUN ./configure \
+       -prefix /opt/qt5.12.7 \
+       -opensource -confirm-license \
+       -nomake tests -nomake examples \
+    && make -j"$(nproc)" \
+    && make install
+
+# 4) Set up environment so CMake & runtime find it by default
+ENV PATH=/opt/qt5.12.7/bin:$PATH \
+    CMAKE_PREFIX_PATH=/opt/qt5.12.7${CMAKE_PREFIX_PATH:+":$CMAKE_PREFIX_PATH"} \
+    LD_LIBRARY_PATH=/opt/qt5.12.7/lib${LD_LIBRARY_PATH:+":$LD_LIBRARY_PATH"}
+
+ 
+    
+# reset WORKDIR
+WORKDIR /
 
 #RUN  wget http://download.osgeo.org/gdal/2.2.0/gdal220.zip
 #RUN unzip gdal220.zip
@@ -135,9 +147,7 @@ RUN cd osgQt-Qt4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr --config Release ..
 RUN cd osgQt-Qt4/build && make -j $(nproc)
 RUN cd osgQt-Qt4/build && make install
 
-RUN apt-get install libgeos++-dev -y
-
-RUN apt-get install autoconf automake libtool curl -y
+RUN apt-get update && apt-get install libgeos++-dev autoconf automake libtool curl libpcap-dev libgeographic-dev sudo -y
 
 RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/protobuf-cpp-3.19.1.zip
 RUN unzip protobuf-cpp-3.19.1.zip
@@ -162,14 +172,6 @@ RUN cd osgearth-osgearth-3.2/build && cmake -DCMAKE_CXX_FLAGS=-std=c++11 -DOSGEA
 RUN cd osgearth-osgearth-3.2/build && make -j $(nproc)
 RUN cd osgearth-osgearth-3.2/build && make install
 
-#RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-2.10.2.zip
-#RUN unzip osgearth-2.10.2.zip
-#RUN mkdir osgearth-osgearth-2.10.2/build
-#RUN cd osgearth-osgearth-2.10.2/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DOSGEARTH_USE_QT=TRUE -DDESIRED_QT_VERSION=5 --config Release ..
-#RUN cd osgearth-osgearth-2.10.2/build && make -j $(nproc)
-#RUN cd osgearth-osgearth-2.10.2/build && make install
-
-#RUN wget https://github.com/ckgt/NemaTode/archive/master.zip
 RUN wget https://github.com/hpuhr/NemaTode/archive/refs/heads/master.zip
 RUN unzip master.zip
 RUN mkdir NemaTode-master/build
@@ -177,17 +179,10 @@ RUN cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_
 RUN cd NemaTode-master/build && make -j $(nproc)
 RUN cd NemaTode-master/build && make install
 
-#RUN apt-get install gdb -y
 RUN mkdir jasper
-#RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
-#RUN cd jasper && wget http://ftp.us.debian.org/debian/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
 RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/main/j/jasper/libjasper1_1.900.1-debian1-2.4+deb8u3_amd64.deb
 RUN cd jasper && wget https://debian-security.sipwise.com/debian-security/pool/main/j/jasper/libjasper-dev_1.900.1-debian1-2.4+deb8u3_amd64.deb
 RUN cd jasper && dpkg -i *.deb
-
-RUN apt-get install libpcap-dev -y
-
-RUN apt-get install libgeographic-dev -y
 
 RUN wget https://github.com/duckdb/duckdb/releases/download/v1.2.0/libduckdb-linux-amd64.zip
 RUN mkdir libduckdb-linux-amd64
@@ -197,10 +192,6 @@ RUN cd libduckdb-linux-amd64 && cp lib* /usr/lib
 
 RUN ldconfig -v /usr/lib64/ /usr/local/
 RUN updatedb
-
-RUN locate libboost
-
-RUN apt install sudo
 
 RUN echo "${USER_NAME} ALL=(ALL)  ALL" >> /etc/sudoers
 RUN more /etc/sudoers

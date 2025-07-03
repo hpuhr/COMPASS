@@ -33,14 +33,6 @@ export DEPLOY_GTK_VERSION=3
 
 export NO_STRIP=1
 
-if [[ $1 == "deb9" ]]
-then
-  export QMAKE=/qt/5.8/gcc_64/bin/qmake
-  export LD_LIBRARY_PATH=/qt/5.8/gcc_64/lib:/usr/lib64/:$LD_LIBRARY_PATH
-elif [[ $1 == "deb10" || $1 == "ub18" ]]
-then	
-  echo "i know nothing"
-fi
 
 cd /app/workspace/compass/docker/linuxdeploy/
 ./linuxdeploy-x86_64.AppImage --appdir /app/workspace/compass/appimage/appdir --executable /usr/bin/compass_client --desktop-file=/app/workspace/compass/appimage/compass.desktop --plugin qt --plugin gtk --icon-file /app/workspace/compass/appimage/ats.png --output appimage
