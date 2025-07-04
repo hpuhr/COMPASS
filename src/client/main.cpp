@@ -21,6 +21,7 @@
 
 #include <QThread>
 
+#include <osgEarth/Registry>
 
 using namespace std;
 
@@ -30,6 +31,12 @@ int main(int argc, char** argv)
     {
         // Enable Qt high-DPI scaling
         QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+        // 1) Force-initialize the GDAL mutex (and register its atexit-hook)
+        //osgEarth::getGDALMutex();
+
+        // 2) Then initialize the Registry (which registers its destructor next)
+        //osgEarth::Registry::instance();
 
         Client client(argc, argv);
 

@@ -14,25 +14,25 @@ RUN echo ">>> USER_NAME=${USER_NAME}" \
  && echo ">>> USER_ID=${USER_ID}" \
  && echo ">>> USER_GROUP_ID=${USER_GROUP_ID}"
 
-RUN apt-get update
-RUN apt-get install -y openssl
+RUN cp /etc/apt/sources.list /etc/apt/sources.list~ \ 
+  && echo 'deb-src http://archive.debian.org/debian buster main' >> /etc/apt/sources.list \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends openssl apt-utils software-properties-common build-essential gcc g++ wget libssl-dev liblog4cpp5-dev libssl-dev libarchive-dev libeigen3-dev libgdal-dev libkml-dev locate zip unzip qtchooser chrpath libtbb-dev libgeos-dev gedit libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-x11-dev qt5-* libqt5* qtwayland5 libgif-dev libjpeg-dev libgeos++-dev autoconf automake libtool curl libglew-dev libzip-dev libpcap-dev libgeographic-dev python2.7-dev sudo \
+  && apt-get build-dep -y libopenscenegraph-dev libosgearth-dev libboost-all-dev \
+  && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && \
+    apt-get remove --purge -y libopenscenegraph-3.4-131 && \
+    apt-get autoremove -y && \
+    rm -rf /usr/lib/x86_64-linux-gnu/osgPlugins-3.4.1  
+  
 RUN groupadd -r someusers --gid=${USER_GROUP_ID} 
 RUN useradd -r -p "$(openssl passwd -1 ${USER_NAME})" -g someusers -G sudo --uid=${USER_ID} --create-home --shell /bin/bash ${USER_NAME} 
-
-# Update and allow for apt over HTTPS
-RUN apt-get install -y apt-utils
-RUN apt-get install software-properties-common build-essential -y
-RUN apt-get install gcc g++ -y
-
-RUN apt-get install wget -y
 
 ENV CXXFLAGS="-march=x86-64 -mtune=generic"
 ENV CFLAGS="-march=x86-64 -mtune=generic"
 
 #install cmake
-
-RUN apt-get install -y libssl-dev
 
 ENV CMAKE_VERSION=3.28
 ENV CMAKE_BUILD=1
@@ -52,70 +52,14 @@ RUN cd boost_1_83_0/ && ./bootstrap.sh --prefix=/usr/local/
 RUN cd boost_1_83_0/ && ./b2 headers cxxflags="-std=c++17 -march=x86-64 -mtune=generic"
 RUN cd boost_1_83_0/ && ./b2 install cxxflags="-std=c++17 -march=x86-64 -mtune=generic"
 
-# install atsdb deps
-RUN apt-get install liblog4cpp5-dev libssl-dev libarchive-dev libeigen3-dev libgdal-dev libkml-dev -y
-# tools
-RUN apt-get install locate zip unzip qtchooser chrpath -y
-
-RUN apt-get install libtbb-dev -y
-
-RUN more /etc/apt/sources.list
-RUN cp /etc/apt/sources.list /etc/apt/sources.list~
-RUN echo 'deb-src http://archive.debian.org/debian buster main' >> /etc/apt/sources.list
-RUN more /etc/apt/sources.list
-RUN apt-get update
-
-RUN apt-get install libgeos-dev -y
-
-# gui/x11 
-RUN apt-get install gedit libgl1-mesa-dev libegl1-mesa-dev libxkbcommon-x11-dev -y # khronos-api libgl1-mesa-dev libegl1-mesa-dev libegl1-mesa-drivers
-
-# qt
-
-RUN apt-get install qt5-* libqt5* -y
-
-ENV QT_SELECT=5
-#ENV QT_QPA_PLATFORMTHEME=gtk3
-#ENV UBUNTU_MENUPROXY=
-
-RUN apt-get install libgif-dev -y
-RUN apt-get install libjpeg-dev -y
-
-RUN apt-get install git -y
-
-#opengl core
-#RUN mkdir glcore
-#RUN cd glcore && git clone https://github.com/KhronosGroup/OpenGL-Registry.git
-#RUN ls glcore
-#ENV GL_PATH="/glcore/OpenGL-Registry/api/"
-#ENV CMAKE_OPTS="-DOPENGL_INCLUDE_DIR=$GL_PATH -DOPENGL_PROFILE=GL2 -Dosg_OPENGL_PROFILE=GL2 -DGLCORE_GLCOREARB_HEADER=$GL_PATH"
-
-#ENV CMAKE_OPTS="-DOPENGL_INCLUDE_DIR=$GL_PATH -DOPENGL_PROFILE=GL3 -Dosg_OPENGL_PROFILE=GLCORE -DGLCORE_GLCOREARB_HEADER=$GL_PATH \
-#-DOSG_GLU_AVAILABLE=OFF \
-#-DOSG_GL3_AVAILABLE=ON \
-#-DOSG_GL1_AVAILABLE=OFF \
-#-DOSG_GL2_AVAILABLE=OFF \
-#-DOSG_GLES1_AVAILABLE=OFF \
-#-DOSG_GLES2_AVAILABLE=OFF \
-#-DOSG_GL_DISPLAYLISTS_AVAILABLE=OFF \
-#-DOSG_GL_FIXED_FUNCTION_AVAILABLE=OFF \
-#-DOSG_GL_MATRICES_AVAILABLE=OFF \
-#-DOSG_GL_VERTEX_ARRAY_FUNCS_AVAILABLE=OFF \
-#-DOSG_GL_VERTEX_FUNCS_AVAILABLE=OFF \
-#"
-
 RUN wget https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.zip
 RUN unzip OpenSceneGraph-3.6.5.zip
 RUN mkdir OpenSceneGraph-OpenSceneGraph-3.6.5/build
-#RUN sed -i '461s/.*/SET(OPENGL_PROFILE \"GLCORE\")/' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
-#RUN sed -i '461a message("  OPENGL_PROFILE: ${OPENGL_PROFILE}")' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
-#RUN sed -i '502a message("  OSG_GL3_AVAILABLE: ${OSG_GL3_AVAILABLE}")' OpenSceneGraph-OpenSceneGraph-3.6.5/CMakeLists.txt
-
-#-DOPENGL_PROFILE=GL2
-RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && cmake -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make -j$(nproc)
 RUN cd OpenSceneGraph-OpenSceneGraph-3.6.5/build && make install
-RUN osgversion
+
+RUN rm -rf OpenSceneGraph-OpenSceneGraph-3.6.5/build/lib
 
 RUN wget https://github.com/openscenegraph/osgQt/archive/Qt4.zip
 RUN unzip Qt4.zip
@@ -123,10 +67,6 @@ RUN mkdir osgQt-Qt4/build
 RUN cd osgQt-Qt4/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
 RUN cd osgQt-Qt4/build && make -j$(nproc)
 RUN cd osgQt-Qt4/build && make install
-
-RUN apt-get install libgeos++-dev -y
-
-RUN apt-get install autoconf automake libtool curl -y
 
 RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v3.19.1/protobuf-cpp-3.19.1.zip
 RUN unzip protobuf-cpp-3.19.1.zip
@@ -137,20 +77,12 @@ RUN cd protobuf-3.19.1 && make -j$(nproc)
 RUN cd protobuf-3.19.1 && make install
 RUN cd protobuf-3.19.1 && ldconfig # refresh shared library cache.
 
-RUN apt-get install libglew-dev libzip-dev -y
-
 RUN wget https://github.com/gwaldron/osgearth/archive/osgearth-3.2.zip
 RUN unzip osgearth-3.2.zip
 RUN mkdir osgearth-osgearth-3.2/build
-RUN cd osgearth-osgearth-3.2/build && cmake -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
+RUN cd osgearth-osgearth-3.2/build && cmake -DOSGEARTH_BUILD_TESTS=OFF -DOSGEARTH_BUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON -DCMAKE_INSTALL_PREFIX=/usr -DOPENTHREADS_INCLUDE_DIR=/usr/include   -DOPENTHREADS_LIBRARY=/usr/lib/libOpenThreads.so \-DCMAKE_BUILD_TYPE=Release ..
 RUN cd osgearth-osgearth-3.2/build && make -j$(nproc)
 RUN cd osgearth-osgearth-3.2/build && make install
-
-#test GLCORE?
-#RUN ldconfig -v /usr/lib64/ /usr/local/
-#RUN updatedb
-#RUN osgearth_version --caps
-#RUN exit 1
 
 RUN wget https://github.com/hpuhr/NemaTode/archive/refs/heads/master.zip
 RUN unzip master.zip
@@ -158,10 +90,6 @@ RUN mkdir NemaTode-master/build
 RUN cd NemaTode-master/build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release ..
 RUN cd NemaTode-master/build && make -j$(nproc)
 RUN cd NemaTode-master/build && make install
-
-RUN apt-get install libpcap-dev -y
-
-RUN apt-get install libgeographic-dev -y
 
 RUN wget https://github.com/duckdb/duckdb/releases/download/v1.3.1/libduckdb-linux-amd64.zip
 RUN mkdir libduckdb-linux-amd64
@@ -171,8 +99,6 @@ RUN cd libduckdb-linux-amd64 && cp lib* /usr/lib
 
 RUN ldconfig -v /usr/lib64/ /usr/local/
 RUN updatedb
-
-RUN apt install sudo
 
 RUN echo "${USER_NAME} ALL=(ALL)  ALL" >> /etc/sudoers
 RUN more /etc/sudoers
