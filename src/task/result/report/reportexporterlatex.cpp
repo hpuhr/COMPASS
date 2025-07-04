@@ -109,7 +109,10 @@ ResultT<nlohmann::json> ReportExporterLatex::finalizeExport_impl(TaskResult& res
 
 /**
  */
-Result ReportExporterLatex::exportSection_impl(Section& section)
+Result ReportExporterLatex::exportSection_impl(Section& section, 
+                                               bool is_root_section,
+                                               bool write_subsections,
+                                               bool write_contents)
 {
     auto heading      = section.compoundResultsHeading();
     auto section_name = Utils::String::latexString(heading);
@@ -128,7 +131,8 @@ Result ReportExporterLatex::exportSection_impl(Section& section)
 
 /**
  */
-Result ReportExporterLatex::exportFigure_impl(SectionContentFigure& figure)
+Result ReportExporterLatex::exportFigure_impl(SectionContentFigure& figure, 
+                                              bool is_root_section)
 {
     auto it = latex_sections_.find(figure.parentSection());
     if (it == latex_sections_.end())
@@ -149,7 +153,8 @@ Result ReportExporterLatex::exportFigure_impl(SectionContentFigure& figure)
 
 /**
  */
-Result ReportExporterLatex::exportTable_impl(SectionContentTable& table)
+Result ReportExporterLatex::exportTable_impl(SectionContentTable& table, 
+                                             bool is_root_section)
 {
     auto it = latex_sections_.find(table.parentSection());
     if (it == latex_sections_.end())
@@ -278,7 +283,8 @@ Result ReportExporterLatex::exportTable_impl(SectionContentTable& table)
 
 /**
  */
-Result ReportExporterLatex::exportText_impl(SectionContentText& text)
+Result ReportExporterLatex::exportText_impl(SectionContentText& text, 
+                                            bool is_root_section)
 {
     auto it = latex_sections_.find(text.parentSection());
     if (it == latex_sections_.end())

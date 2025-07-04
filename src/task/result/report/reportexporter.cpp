@@ -160,7 +160,12 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
         }
 
         if (!section_ptr)
+        {
+            if (exportNeedsRootSection())
+                return Result::failed("No root section specified");
+
             section_ptr = result.report()->rootSection().get();
+        }
 
         //check if section is deactivated for export
         if (!section_ptr->exportEnabled(exportMode()))
@@ -225,7 +230,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport_impl(TaskResult& result,
     loginf << "ReportExporter: exportReport_impl: start section = " << section->name();
 
     //visit start section
-    res = visitSection(*section);
+    res = visitSection(*section, true, true, true);
     if (!res.ok())
         return res;
 
@@ -234,7 +239,10 @@ ResultT<nlohmann::json> ReportExporter::exportReport_impl(TaskResult& result,
 
 /**
  */
-Result ReportExporter::visitSection(Section& section)
+Result ReportExporter::visitSection(Section& section, 
+                                    bool is_root_section,
+                                    bool write_subsections,
+                                    bool write_contents)
 {
     //skip section?
     if (!section.exportEnabled(exportMode()))
@@ -248,22 +256,28 @@ Result ReportExporter::visitSection(Section& section)
     setStatus("Exporting section '" + section.name() + "'");
 
     //export section first
-    auto res = exportSection_impl(section);
+    auto res = exportSection_impl(section, 
+                                  is_root_section,
+                                  write_subsections,
+                                  write_contents);
     if (!res.ok())
         return res;
 
     current_content_section_ = &section;
 
     //then its contents
-    auto contents = section.sectionContent();
-    for (auto& c : contents)
+    if (write_contents)
     {
-        if (!c)
-            return Result::failed("Contents could not be loaded in section '" + section.name() + "'");
+        auto contents = section.sectionContent();
+        for (auto& c : contents)
+        {
+            if (!c)
+                return Result::failed("Contents could not be loaded in section '" + section.name() + "'");
 
-        res = visitContent(*c);
-        if (!res.ok())
-            return res;
+            res = visitContent(*c, is_root_section);
+            if (!res.ok())
+                return res;
+        }
     }
 
     current_content_section_ = nullptr;
@@ -272,11 +286,17 @@ Result ReportExporter::visitSection(Section& section)
     emit progressChanged();
 
     //then its subsections
-    for (const auto& sec_it : section.subSections(false))
+    if (write_subsections)
     {
-        res = visitSection(*sec_it);
-        if (!res.ok())
-            return res;
+        for (const auto& sec_it : section.subSections(false))
+        {
+            bool export_more = !exportNeedsRootSection();
+
+            //subsections are never a root section
+            res = visitSection(*sec_it, false, export_more, export_more);
+            if (!res.ok())
+                return res;
+        }
     }
 
     return Result::succeeded();
@@ -284,7 +304,7 @@ Result ReportExporter::visitSection(Section& section)
 
 /**
  */
-Result ReportExporter::visitContent(SectionContent& content)
+Result ReportExporter::visitContent(SectionContent& content, bool is_root_section)
 {
     //skip content?
     if (!content.exportEnabled(exportMode()))
@@ -310,19 +330,19 @@ Result ReportExporter::visitContent(SectionContent& content)
     {
         auto c = dynamic_cast<SectionContentFigure*>(&content);
         if (c) 
-            return exportFigure(*c);
+            return exportFigure(*c, is_root_section);
     }
     else if (content.contentType() == SectionContent::ContentType::Table)
     {
         auto c = dynamic_cast<SectionContentTable*>(&content);
         if (c) 
-            return exportTable(*c);
+            return exportTable(*c, is_root_section);
     }
     else if (content.contentType() == SectionContent::ContentType::Text)
     {
         auto c = dynamic_cast<SectionContentText*>(&content);
         if (c) 
-            return exportText(*c);
+            return exportText(*c, is_root_section);
     }
 
     return Result::failed("Content '" + content.name() + "' is of illegal type");
@@ -330,23 +350,23 @@ Result ReportExporter::visitContent(SectionContent& content)
 
 /**
  */
-Result ReportExporter::exportFigure(SectionContentFigure& figure)
+Result ReportExporter::exportFigure(SectionContentFigure& figure, bool is_root_section)
 {
-    return exportFigure_impl(figure);
+    return exportFigure_impl(figure, is_root_section);
 }
 
 /**
  */
-Result ReportExporter::exportTable(SectionContentTable& table)
+Result ReportExporter::exportTable(SectionContentTable& table, bool is_root_section)
 {
-    return exportTable_impl(table);
+    return exportTable_impl(table, is_root_section);
 }
 
 /**
  */
-Result ReportExporter::exportText(SectionContentText& text)
+Result ReportExporter::exportText(SectionContentText& text, bool is_root_section)
 {
-    return exportText_impl(text);
+    return exportText_impl(text, is_root_section);
 }
 
 /**

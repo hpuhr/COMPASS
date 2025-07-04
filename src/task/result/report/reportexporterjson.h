@@ -38,17 +38,21 @@ protected:
     Result initExport_impl(TaskResult& result) override final;
     ResultT<nlohmann::json> finalizeExport_impl(TaskResult& result) override final;
 
-    Result exportSection_impl(Section& section) override final;
-    Result exportFigure_impl(SectionContentFigure& figure) override final;
-    Result exportTable_impl(SectionContentTable& table) override final;
-    Result exportText_impl(SectionContentText& text) override final;
+    Result exportSection_impl(Section& section, 
+                              bool is_root_section,
+                              bool write_subsections,
+                              bool write_contents) override final;
+    Result exportFigure_impl(SectionContentFigure& figure, bool is_root_section) override final;
+    Result exportTable_impl(SectionContentTable& table, bool is_root_section) override final;
+    Result exportText_impl(SectionContentText& text, bool is_root_section) override final;
 
     bool exportCreatesFile() const override final { return write_files_; }
     bool exportCreatesResources() const override final { return write_files_; }
     bool exportCreatesInMemoryData() const override final { return !write_files_; }
+    bool exportNeedsRootSection() const override final { return !write_files_; }
 
 private:
-    Result exportContentToJSON(SectionContent& content);
+    Result exportContentToJSON(SectionContent& content, bool is_root_section);
 
     bool write_files_ = false;
 

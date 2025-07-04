@@ -59,6 +59,8 @@ public:
     bool hasSection(const std::string& id) const;
     Section& getSection (const std::string& id); // bla:bla2
 
+    std::vector<std::string> getReportSectionIDs(ReportExportMode* export_mode = nullptr) const;
+
     void setCurrentViewable(const nlohmann::json::object_t& data);
     void unsetCurrentViewable();
     void setCurrentSection(const std::string& section_name, bool show_figure = false);

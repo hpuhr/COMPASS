@@ -91,14 +91,18 @@ protected:
     virtual Result initExport_impl(TaskResult& result) = 0;
     virtual ResultT<nlohmann::json> finalizeExport_impl(TaskResult& result) = 0;
 
-    virtual Result exportSection_impl(Section& section) = 0;
-    virtual Result exportFigure_impl(SectionContentFigure& figure) = 0;
-    virtual Result exportTable_impl(SectionContentTable& table) = 0;
-    virtual Result exportText_impl(SectionContentText& text) = 0;
+    virtual Result exportSection_impl(Section& section, 
+                                      bool is_root_section,
+                                      bool write_subsections,
+                                      bool write_contents) = 0;
+    virtual Result exportFigure_impl(SectionContentFigure& figure, bool is_root_section) = 0;
+    virtual Result exportTable_impl(SectionContentTable& table, bool is_root_section) = 0;
+    virtual Result exportText_impl(SectionContentText& text, bool is_root_section) = 0;
 
     virtual bool exportCreatesFile() const { return false; }
     virtual bool exportCreatesResources() const { return false; }
     virtual bool exportCreatesInMemoryData() const { return false; } 
+    virtual bool exportNeedsRootSection() const { return false; }
 
     const std::string& exportFilename() const { return export_fn_; }
     const std::string& exportResourceDir() const { return export_resource_dir_; }
@@ -111,12 +115,15 @@ private:
     Result initExport(TaskResult& result);
     ResultT<nlohmann::json> finalizeExport(TaskResult& result);
 
-    Result visitSection(Section& section);
-    Result visitContent(SectionContent& content);
+    Result visitSection(Section& section, 
+                        bool is_root_section,
+                        bool write_subsections,
+                        bool write_contents);
+    Result visitContent(SectionContent& content, bool is_root_section);
 
-    Result exportFigure(SectionContentFigure& figure);
-    Result exportTable(SectionContentTable& table);
-    Result exportText(SectionContentText& text);
+    Result exportFigure(SectionContentFigure& figure, bool is_root_section);
+    Result exportTable(SectionContentTable& table, bool is_root_section);
+    Result exportText(SectionContentText& text, bool is_root_section);
 
     const ReportExport* report_export_ = nullptr;
     std::string         export_fn_;

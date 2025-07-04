@@ -24,6 +24,7 @@ namespace ResultReport
 {
 
 const std::string ReportItem::FieldName        = "name";
+const std::string ReportItem::FieldID          = "id";
 const std::string ReportItem::FieldProperties  = "properties";
 const std::string ReportItem::FieldExportFlags = "export_flags";
 
@@ -201,6 +202,8 @@ ResultT<nlohmann::json> ReportItem::toJSONDocument(const std::string* resource_d
     auto addBaseItems = [ & ] (nlohmann::json& j_item)
     {
         j_item[ FieldName ] = name_;
+
+        // id is only added in sections
     };
 
     auto res = toJSONDocument_impl(j, resource_dir);

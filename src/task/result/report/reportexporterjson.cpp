@@ -80,7 +80,10 @@ ResultT<nlohmann::json> ReportExporterJSON::finalizeExport_impl(TaskResult& resu
 
 /**
  */
-Result ReportExporterJSON::exportSection_impl(Section& section)
+Result ReportExporterJSON::exportSection_impl(Section& section, 
+                                              bool is_root_section,
+                                              bool write_subsections,
+                                              bool write_contents)
 {
     auto res_dir     = exportResourceDir();
     auto res_dir_ptr = exportCreatesResources() ? &res_dir : nullptr;
@@ -91,6 +94,13 @@ Result ReportExporterJSON::exportSection_impl(Section& section)
         return res_json;
 
     assert(res_json.result().is_object());
+
+    auto sec_json = res_json.result();
+
+    if (!write_files_ && !write_subsections)
+        sec_json.erase(Section::FieldSubSections);
+    if (!write_files_ && !write_contents)
+        sec_json.erase(Section::FieldDocContents);
 
     nlohmann::json* jptr = nullptr;
 
@@ -112,7 +122,7 @@ Result ReportExporterJSON::exportSection_impl(Section& section)
         assert(subsections.is_array());
 
         //add to parents subsections
-        subsections.push_back(res_json.result());
+        subsections.push_back(sec_json);
 
         jptr = &subsections.back();
     }
@@ -121,7 +131,7 @@ Result ReportExporterJSON::exportSection_impl(Section& section)
         assert(json_sections_.empty());
 
         //root section => init json data
-        json_data_ = res_json.result();
+        json_data_ = sec_json;
 
         jptr = &json_data_;
     }
@@ -136,7 +146,8 @@ Result ReportExporterJSON::exportSection_impl(Section& section)
 
 /**
  */
-Result ReportExporterJSON::exportContentToJSON(SectionContent& content)
+Result ReportExporterJSON::exportContentToJSON(SectionContent& content, 
+                                               bool is_root_section)
 {
     //loginf << "ReportExporterJSON: exportContentToJSON";
 
@@ -193,23 +204,26 @@ Result ReportExporterJSON::exportContentToJSON(SectionContent& content)
 
 /**
  */
-Result ReportExporterJSON::exportFigure_impl(SectionContentFigure& figure)
+Result ReportExporterJSON::exportFigure_impl(SectionContentFigure& figure, 
+                                             bool is_root_section)
 {
-    return exportContentToJSON(figure);
+    return exportContentToJSON(figure, is_root_section);
 }
 
 /**
  */
-Result ReportExporterJSON::exportTable_impl(SectionContentTable& table)
+Result ReportExporterJSON::exportTable_impl(SectionContentTable& table, 
+                                            bool is_root_section)
 {
-    return exportContentToJSON(table);
+    return exportContentToJSON(table, is_root_section);
 }
 
 /**
  */
-Result ReportExporterJSON::exportText_impl(SectionContentText& text)
+Result ReportExporterJSON::exportText_impl(SectionContentText& text, 
+                                           bool is_root_section)
 {
-    return exportContentToJSON(text);
+    return exportContentToJSON(text, is_root_section);
 }
 
 }

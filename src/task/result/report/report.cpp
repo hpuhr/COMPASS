@@ -140,6 +140,21 @@ std::vector<std::shared_ptr<Section>> Report::reportSections() const
 
 /**
  */
+std::vector<std::string> Report::getReportSectionIDs(ReportExportMode* export_mode) const
+{
+    auto sections = reportSections();
+
+    std::vector<std::string> ids;
+
+    for (const auto& s : sections)
+        if (!export_mode || s->exportEnabled(*export_mode))
+            ids.push_back(s->id());
+
+    return ids;
+}
+
+/**
+ */
 std::vector<std::shared_ptr<SectionContent>> Report::reportContents(bool with_extra_content) const
 {
     return root_section_->recursiveContent(with_extra_content);

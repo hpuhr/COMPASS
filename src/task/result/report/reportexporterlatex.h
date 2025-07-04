@@ -42,14 +42,18 @@ protected:
     Result initExport_impl(TaskResult& result) override final;
     ResultT<nlohmann::json> finalizeExport_impl(TaskResult& result) override final;
 
-    Result exportSection_impl(Section& section) override final;
-    Result exportFigure_impl(SectionContentFigure& figure) override final;
-    Result exportTable_impl(SectionContentTable& table) override final;
-    Result exportText_impl(SectionContentText& text) override final;
+    Result exportSection_impl(Section& section, 
+                              bool is_root_section,
+                              bool write_subsections,
+                              bool write_contents) override final;
+    Result exportFigure_impl(SectionContentFigure& figure, bool is_root_section) override final;
+    Result exportTable_impl(SectionContentTable& table, bool is_root_section) override final;
+    Result exportText_impl(SectionContentText& text, bool is_root_section) override final;
 
     bool exportCreatesFile() const override final { return false; }
     bool exportCreatesResources() const override final { return true; }
     bool exportCreatesInMemoryData() const override final { return false; }
+    bool exportNeedsRootSection() const override final { return false; }
 
 private:
     Result writePDF() const;

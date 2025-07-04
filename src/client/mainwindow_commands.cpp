@@ -637,15 +637,30 @@ bool RTCommandGetReport::run_impl()
         return false;
     }
 
-    auto res = task_manager.exportResult(result_name, ResultReport::ReportExportMode::JSONBlob, true, {}, section);
-
-    if (!res.ok())
+    if (!section.empty())
     {
-        setResultMessage(res.error());
-        return false;
-    }
+        //export specified section
+        auto res = task_manager.exportResult(result_name, ResultReport::ReportExportMode::JSONBlob, true, {}, section);
 
-    setJSONReply(res.result());
+        if (!res.ok())
+        {
+            setResultMessage(res.error());
+            return false;
+        }
+
+        setJSONReply(res.result());
+    }
+    else
+    {
+        //return list of existing sections
+        auto mode = ResultReport::ReportExportMode::JSONBlob;
+        auto ids = task_manager.result(result_name)->report()->getReportSectionIDs(&mode);
+
+        nlohmann::json j;
+        j[ "sections" ] = ids;
+
+        setJSONReply(j);
+    }
 
     return true;
 }

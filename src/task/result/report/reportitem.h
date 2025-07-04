@@ -61,6 +61,7 @@ public:
     ResultT<nlohmann::json> toJSONDocument(const std::string* resource_dir = nullptr) const;
 
     static const std::string FieldName;
+    static const std::string FieldID;
     static const std::string FieldProperties;
     static const std::string FieldExportFlags;
 
