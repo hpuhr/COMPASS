@@ -312,79 +312,6 @@ See section \nameref{sec:appendix_view_points} for how the JSON definition has t
 %       uidelay		delay added after each injected ui event
 %       value		new value to set, content depending on the addressed ui element
 
-\subsection{Python Example}
-
-The following example will make use of the python class \textit{COMPASSInstance}, 
-which makes it quite easy to start a COMPASS instance, connect to it, send commands,
-and receive their reply data. \\
-
-For readers interested in obtaining the python code for the COMPASSInstance class and 
-more detailed example scripts, please contact us at \href{mailto:compass@openats.at}{compass@openats.at}. \\
-
-Start a COMPASS instance and connect to it:
-
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
-
-from compass_interface import COMPASSInstance
-
-import json
-
-binary = 'home/user/path_to_binary'
-
-compass_instance = COMPASSInstance() 
-
-ok, error = compass_instance.runCOMPASS(binary = binary,
-                                        wait_for_commands = True, # wait until commands can be received
-                                        no_cfg_save = True)       # do not save config on close
-
-# handle any errors
-
-# ready to send commands!
-\end{lstlisting}
-
-Sending commands:
-
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
-
-# open database
-filename = '/home/user/path_to_db_file'
-
-# escape quotes for filename argument
-# the reply variable will hold the command's reply data as a python dictionary
-reply, ok, err = compass_instance.interface.sendCommandAndUnpack('open_db \"' + filename + '\"')
-
-# handly any errors 
-
-# get result overview section of existing evaluation report
-report_name = 'test Evaluation'
-section     = 'Report:Results:Overview:Results'
-
-reply, ok, err = compass_instance.interface.sendCommandAndUnpack('get_report \"{}\" \"{}\"'.format(report_name, section))
-
-# handle any errors 
-
-# the reply will contain the result overview section of the evaluated test standard as a json object
-# we can print it to view the reply result
-print('Retrieved section:\n')
-print(json.dumps(reply, indent = 4))
-
-\end{lstlisting}
-
-Close the COMPASS instance:
-
-\begin{lstlisting}[basicstyle=\tiny\ttfamily]
-
-compass_instance.closeCOMPASS()
-
-\end{lstlisting}
-
-As a result the script will output the retrieved result overview section of a pre-computed Evaluation report.
-
-\begin{figure}[H]
-    \hspace*{-2.5cm}
-    \includegraphics[width=18cm,frame]{figures/script_result.png}
-  \caption{Script output}
-\end{figure}
 
 \subsection{Fetching Reports via get\_report}
 \label{sec:get_report}
@@ -458,3 +385,77 @@ Fetched JSON data: \\
   ]
 }
 \end{lstlisting}
+
+\subsection{Python Example}
+
+The following example will make use of the python class \textit{COMPASSInstance}, 
+which makes it quite easy to start a COMPASS instance, connect to it, send commands,
+and receive their reply data. \\
+
+For readers interested in obtaining the python code for the COMPASSInstance class and 
+more detailed example scripts, please contact us at \href{mailto:compass@openats.at}{compass@openats.at}. \\
+
+Start a COMPASS instance and connect to it:
+
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+
+from compass_interface import COMPASSInstance
+
+import json
+
+binary = 'home/user/path_to_binary'
+
+compass_instance = COMPASSInstance() 
+
+ok, error = compass_instance.runCOMPASS(binary = binary,
+                                        wait_for_commands = True, # wait until commands can be received
+                                        no_cfg_save = True)       # do not save config on close
+
+# handle any errors
+
+# ready to send commands!
+\end{lstlisting}
+
+Sending commands:
+
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+
+# open database
+filename = '/home/user/path_to_db_file'
+
+# escape quotes for filename argument
+# the reply variable will hold the command's reply data as a python dictionary
+reply, ok, err = compass_instance.interface.sendCommandAndUnpack('open_db \"' + filename + '\"')
+
+# handly any errors 
+
+# get result overview section of existing evaluation report
+report_name = 'test Evaluation'
+section     = 'Report:Results:Overview:Results'
+
+reply, ok, err = compass_instance.interface.sendCommandAndUnpack('get_report \"{}\" \"{}\"'.format(report_name, section))
+
+# handle any errors 
+
+# the reply will contain the result overview section of the evaluated test standard as a json object
+# we can print it to view the reply result
+print('Retrieved section:\n')
+print(json.dumps(reply, indent = 4))
+
+\end{lstlisting}
+
+Close the COMPASS instance:
+
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+
+compass_instance.closeCOMPASS()
+
+\end{lstlisting}
+
+As a result the script will output the retrieved result overview section of a pre-computed Evaluation report.
+
+\begin{figure}[H]
+    \hspace*{-2.5cm}
+    \includegraphics[width=18cm,frame]{figures/script_result.png}
+  \caption{Script output}
+\end{figure}
