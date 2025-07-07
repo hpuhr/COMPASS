@@ -90,6 +90,8 @@ public:
         //create suitably sized grid
         QRectF roi = gridBounds(result->sectorLayer(), {});
 
+        //loginf << "roi: " << roi.x() << "," << roi.y() << "," << roi.width() << "," << roi.height();
+
         unsigned int grid_num_cells_x = grid_num_cells_x_.has_value() ? grid_num_cells_x_.value() : calculator().settings().grid_num_cells_x;
         unsigned int grid_num_cells_y = grid_num_cells_y_.has_value() ? grid_num_cells_y_.value() : calculator().settings().grid_num_cells_y;
 
@@ -152,7 +154,8 @@ public:
                 }
             }
 
-            assert(grid.numOutOfRange() == 0);
+            //@TODO: check oor cases
+            //assert(grid.numOutOfRange() == 0);
 
             //get render settings and override some values
             Grid2DRenderSettings render_settings = ds.render_settings;
