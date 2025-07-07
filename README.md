@@ -10,13 +10,13 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 
 ## Screenshots
 
-![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss1.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/ss1.png)
 
-![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss3.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/ss3.png)
 
-![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss2.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/ss2.png)
 
-![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss4.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/ss4.png)
 
 ## YouTube Videos
 ### v0.6.2
