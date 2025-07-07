@@ -5,10 +5,8 @@ For a detailed list of features, as well as the offered commercial services, ple
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released COMPASS Version v0.8.0
-- [Release](https://github.com/hpuhr/COMPASS/releases/tag/v0.8.0)
-- [Improved Offline Map](https://github.com/hpuhr/COMPASS/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
-
+## Released COMPASS Version v0.9.0
+- [Release](https://github.com/hpuhr/COMPASS/releases/tag/v0.9.0)
 
 ## Screenshots
 
