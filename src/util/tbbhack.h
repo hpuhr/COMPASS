@@ -12,6 +12,7 @@
 
 #include <tbb/tbb.h>
 #include <tbb/concurrent_queue.h>
+#include <tbb/concurrent_unordered_map.h>
 
 #pragma pop_macro("emit")
 
@@ -19,6 +20,7 @@
 
 #include <tbb/tbb.h>
 #include <tbb/concurrent_queue.h>
+#include <tbb/concurrent_unordered_map.h>
 
 #endif
 

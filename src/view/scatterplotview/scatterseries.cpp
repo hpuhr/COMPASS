@@ -16,7 +16,9 @@
 
 #include "scatterseries.h"
 
-#include "timeconv.h"
+//#include "timeconv.h"
+
+#include "json.hpp"
 
 /*******************************************************************************************
  * ScatterSeries
@@ -124,7 +126,9 @@ nlohmann::json ScatterSeries::toJSON(bool binary) const
     return jpoints;
 }
 
-QRectF ScatterSeries::getDataBounds() const
+/**
+*/
+boost::optional<QRectF> ScatterSeries::getDataBounds() const
 {
     bool empty = true;
 
@@ -368,12 +372,25 @@ nlohmann::json ScatterSeriesCollection::toJSON(bool binary) const
     return obj;
 }
 
-QRectF ScatterSeriesCollection::getDataBounds() const
+/**
+*/
+boost::optional<QRectF> ScatterSeriesCollection::getDataBounds() const
 {
     QRectF bounds;
+    bool empty = true;
 
     for (const auto& dseries : data_series_)
-        bounds = bounds.united(dseries.second.scatter_series.getDataBounds());
+    {
+        auto b = dseries.second.scatter_series.getDataBounds();
+        if (!b.has_value())
+            continue;
+
+        bounds = bounds.united(b.value());
+        empty = false;
+    }
+
+    if (empty)
+        return {};
 
     return bounds;
 }

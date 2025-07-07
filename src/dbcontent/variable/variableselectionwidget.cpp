@@ -51,7 +51,7 @@ VariableSelectionWidget::VariableSelectionWidget(bool h_box, QWidget* parent)
     variable_label_->setAlignment(Qt::AlignRight);
 
     sel_button_ = new QPushButton(this);
-    sel_button_->setIcon(QIcon(Files::getIconFilepath("expand.png").c_str()));
+    sel_button_->setIcon(Files::IconProvider::getIcon("expand.png"));
     sel_button_->setFixedSize(UI_ICON_SIZE);
     sel_button_->setFlat(UI_ICON_BUTTON_FLAT);
 
@@ -128,7 +128,7 @@ void VariableSelectionWidget::showMenuSlot()
         action->setData(QVariant(vmap));
     }
 
-    QIcon tmp = QIcon(Files::getIconFilepath("db_empty.png").c_str());
+    QIcon tmp = Files::IconProvider::getIcon("db_empty.png");
 
     QFont font_italic;
     font_italic.setItalic(true);
@@ -143,9 +143,13 @@ void VariableSelectionWidget::showMenuSlot()
             if (show_data_types_only_ && !showDataType(var_it.second->dataType()))
                 continue;
 
+            bool has_dbc = var_it.second->hasDBContent();
+            if (show_existing_in_db_only_ && !has_dbc)
+                continue;
+
             QAction* action = menu.addAction(var_it.first.c_str());
 
-            if (!var_it.second->hasDBContent())
+            if (!has_dbc)
             {
                 action->setFont(font_italic);
                 action->setIcon(tmp);
@@ -171,9 +175,13 @@ void VariableSelectionWidget::showMenuSlot()
                 if (show_data_types_only_ && !showDataType(meta_it.second->dataType()))
                     continue;
 
+                bool has_dbc = meta_it.second->hasDBContent();
+                if (show_existing_in_db_only_ && !has_dbc)
+                    continue;
+
                 QAction* action = meta_menu->addAction(QString::fromStdString(meta_it.first));
 
-                if (!meta_it.second->hasDBContent())
+                if (!has_dbc)
                     action->setFont(font_italic);
 
                 action->setToolTip(meta_it.second->info().c_str());
@@ -189,10 +197,14 @@ void VariableSelectionWidget::showMenuSlot()
         {
             for (auto& object_it : dbo_man_)
             {
+                bool has_object_data = object_it.second->hasData();
+                if (show_existing_in_db_only_ && !has_object_data)
+                    continue;
+
                 QMenu* m2 = menu.addMenu(QString::fromStdString(object_it.first));
                 m2->setToolTipsVisible(true);
 
-                if (!object_it.second->hasData())
+                if (!has_object_data)
                 {
                     m2->menuAction()->setFont(font_italic);
                     m2->menuAction()->setIcon(tmp);
@@ -203,9 +215,13 @@ void VariableSelectionWidget::showMenuSlot()
                     if (show_data_types_only_ && !showDataType(var_it.second->dataType()))
                         continue;
 
+                    bool has_dbc = var_it.second->hasDBContent();
+                    if (show_existing_in_db_only_ && !has_dbc)
+                        continue;
+
                     QAction* action = m2->addAction(QString::fromStdString(var_it.first));
 
-                    if (!var_it.second->hasDBContent())
+                    if (!has_dbc)
                     {
                         action->setFont(font_italic);
                         action->setIcon(tmp);
@@ -406,6 +422,16 @@ bool VariableSelectionWidget::showMetaVariables() const { return show_meta_varia
 void VariableSelectionWidget::showMetaVariables(bool show_meta_variables)
 {
     show_meta_variables_ = show_meta_variables;
+}
+
+bool VariableSelectionWidget::showExistingInDBOnly() const
+{
+    return show_existing_in_db_only_;
+}
+
+void VariableSelectionWidget::showExistingInDBOnly(bool show_existing_only)
+{
+    show_existing_in_db_only_ = show_existing_only;
 }
 
 boost::optional<QString> VariableSelectionWidget::uiGet(const QString& what) const

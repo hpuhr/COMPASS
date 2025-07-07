@@ -28,7 +28,7 @@ public:
     void valuesString(const std::string& values_str);
 
     virtual bool activeInLiveMode() override;
-    virtual std::vector<size_t> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer) override;
+    virtual std::vector<unsigned int> filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer) override;
 
 protected:
     std::string values_str_; // org string for display

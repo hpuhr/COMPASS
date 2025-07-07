@@ -103,7 +103,7 @@ bool HistogramGenerator::hasValidResult() const
 {
     return (num_bins_ > 0 && 
             !results_.content_results.empty() &&
-            results_.content_results.size() == intermediate_data_.size());
+            results_.content_results.size() == intermediate_data_.content_data.size());
 }
 
 /**
@@ -243,15 +243,15 @@ bool HistogramGenerator::finalizeResults()
     results_  = {};
     num_bins_ = 0;
 
-    if (!intermediate_data_.empty())
+    if (!intermediate_data_.content_data.empty())
     {
-        num_bins_ = (unsigned int)intermediate_data_.begin()->second.bin_data.size();
+        num_bins_ = (unsigned int)intermediate_data_.content_data.begin()->second.bin_data.size();
     }
 
     results_.valid_counts.assign(num_bins_, 0);
     results_.selected_counts.assign(num_bins_, 0);
 
-    for (auto& elem : intermediate_data_)
+    for (auto& elem : intermediate_data_.content_data)
     {
         const auto& d = elem.second;
         auto&       r = results_.content_results[ elem.first ];
@@ -261,6 +261,7 @@ bool HistogramGenerator::finalizeResults()
         r.null_count          = d.null_count;
         r.null_selected_count = d.null_selected_count;
         r.not_inserted_count  = d.not_inserted_count;
+        r.nan_count           = d.nan_count;
 
         r.bins_are_sorted     = d.bins_are_sorted;
         r.bins_are_categories = d.bins_are_categories;
@@ -288,6 +289,7 @@ bool HistogramGenerator::finalizeResults()
         results_.valid_count         += r.valid_count;
         results_.selected_count      += r.selected_count;
         results_.null_count          += r.null_count;
+        results_.nan_count           += r.nan_count;
         results_.null_selected_count += r.null_selected_count;
         results_.not_inserted_count  += r.not_inserted_count;
         
@@ -296,6 +298,9 @@ bool HistogramGenerator::finalizeResults()
 
         num_bins_ = (int)r.bins.size();
     }
+
+    results_.buffer_nan_count  = intermediate_data_.buffer_nan_count;
+    results_.buffer_null_count = intermediate_data_.buffer_null_count;
 
     assert(subRangeActive() || results_.not_inserted_count == 0);
 
@@ -325,6 +330,7 @@ void HistogramGenerator::print() const
         std::cout << "  null:            " << r.null_count << std::endl;
         std::cout << "  null + selected: " << r.null_selected_count << std::endl;
         std::cout << "  not inserted:    " << r.not_inserted_count << std::endl;
+        std::cout << "  nan:             " << r.nan_count << std::endl;
         
         std::cout << std::endl;
     }

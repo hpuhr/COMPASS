@@ -20,6 +20,8 @@
 
 #include "util/stringconv.h"
 
+#include <QBuffer>
+
 /********************************************************************************
  * ViewPointGenFilters
  ********************************************************************************/
@@ -502,22 +504,28 @@ void ViewPointGenFeatureText::toJSON_impl(nlohmann::json& j, bool write_binary_i
  * ViewPointGenFeatureGeoImage
  ********************************************************************************/
 
-const std::string ViewPointGenFeatureGeoImage::FeatureName                       = "geoimage";
-const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSource    = "source";
-const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameFn        = "fn";
-const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameData      = "data";
-const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameReference = "reference";
-const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSubsample = "subsample";
+const std::string ViewPointGenFeatureGeoImage::FeatureName                         = "geoimage";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSource      = "source";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameFn          = "fn";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameData        = "data";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameReference   = "reference";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameLegend      = "legend";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSubsample   = "subsample";
+const std::string ViewPointGenFeatureGeoImage::FeatureGeoImageFieldNameSubsampling = "subsampling";
 
 /**
 */
 ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const std::string& fn,
                                                          const RasterReference& ref,
-                                                         bool subsample)
+                                                         const ColorLegend& legend,
+                                                         bool subsample,
+                                                         int subsampling)
 :   ViewPointGenFeature(FeatureName)
-,   fn_       (fn       )
-,   ref_      (ref      )
-,   subsample_(subsample)
+,   fn_         (fn         )
+,   ref_        (ref        )
+,   legend_     (legend     )
+,   subsample_  (subsample  )
+,   subsampling_(subsampling)
 {
 }
 
@@ -525,11 +533,15 @@ ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const std::string& fn,
 */
 ViewPointGenFeatureGeoImage::ViewPointGenFeatureGeoImage(const QImage& data,
                                                          const RasterReference& ref,
-                                                         bool subsample)
+                                                         const ColorLegend& legend,
+                                                         bool subsample,
+                                                         int subsampling)
 :   ViewPointGenFeature(FeatureName)
-,   data_     (data     )
-,   ref_      (ref      )
-,   subsample_(subsample)
+,   data_       (data       )
+,   ref_        (ref        )
+,   legend_     (legend     )
+,   subsample_  (subsample  )
+,   subsampling_(subsampling)
 {
 }
 
@@ -543,7 +555,7 @@ void ViewPointGenFeatureGeoImage::toJSON_impl(nlohmann::json& j, bool write_bina
 
     if (!data_.isNull())
     {
-        source[ FeatureGeoImageFieldNameData ] = ViewPointGenFeatureGeoImage::imageToByteString(data_);
+        source[ FeatureGeoImageFieldNameData ] = ViewPointGenFeatureGeoImage::imageToByteStringWithMetadata(data_);
     }
     else
     {
@@ -553,13 +565,38 @@ void ViewPointGenFeatureGeoImage::toJSON_impl(nlohmann::json& j, bool write_bina
     //reference
     j[FeatureGeoImageFieldNameReference] = ref_.toJSON();
 
+    //legend
+    if (!legend_.empty())
+        j[FeatureGeoImageFieldNameLegend] = legend_.toJSON();
+
     //subsampling
-    j[FeatureGeoImageFieldNameSubsample] = subsample_;
+    j[FeatureGeoImageFieldNameSubsample  ] = subsample_;
+    j[FeatureGeoImageFieldNameSubsampling] = subsampling_;
 }
 
 /**
+ * Encodes an image to a base64 string representation of a certain image format (e.g. 'PNG').
+ * This method can be used for embedding an image for external use.
 */
-std::string ViewPointGenFeatureGeoImage::imageToByteString(const QImage& img)
+std::string ViewPointGenFeatureGeoImage::imageToByteString(const QImage& img, const std::string& format)
+{
+    //prepare buffer
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    buffer.open(QIODevice::WriteOnly);
+
+    //encode image to given format
+    img.save(&buffer, format.c_str(), 0);
+
+    QByteArray base64Data = byteArray.toBase64();
+    return QString::fromLatin1(base64Data).toStdString();
+}
+
+/**
+ * Encodes an image to a base64 string and adds some metadata to it for decoding.
+ * This method is meant for internal use, as no standard format is used for encoding/decoding.
+*/
+std::string ViewPointGenFeatureGeoImage::imageToByteStringWithMetadata(const QImage& img)
 {
     int w      = img.width();
     int h      = img.height();
@@ -568,7 +605,7 @@ std::string ViewPointGenFeatureGeoImage::imageToByteString(const QImage& img)
 
     QByteArray ba;
 
-    //add meta-info
+    //add meta-data
     ba.append((const char*)&w     , sizeof(int));
     ba.append((const char*)&h     , sizeof(int));
     ba.append((const char*)&stride, sizeof(int));
@@ -584,12 +621,15 @@ std::string ViewPointGenFeatureGeoImage::imageToByteString(const QImage& img)
 }
 
 /**
+ * Decodes a base64 string to an image, using its metadata (see imageToByteStringWithMetadata()).
+ * This method is meant for internal use, as no standard format is used for encoding/decoding.
 */
-QImage ViewPointGenFeatureGeoImage::byteStringToImage(const std::string& str)
+QImage ViewPointGenFeatureGeoImage::byteStringWithMetadataToImage(const std::string& str)
 {
     QByteArray ba_base64(str.data(), str.size());
     QByteArray ba = QByteArray::fromBase64(ba_base64);
 
+    //get meta-data
     int* w      = (int*)(ba.data() + 0 * sizeof(int));
     int* h      = (int*)(ba.data() + 1 * sizeof(int));
     int* stride = (int*)(ba.data() + 2 * sizeof(int));
@@ -613,10 +653,12 @@ const std::string ViewPointGenFeatureGrid::FeatureGridFieldNameGrid = "grid";
 
 /**
 */
-ViewPointGenFeatureGrid::ViewPointGenFeatureGrid(const Grid2DLayer& grid)
+ViewPointGenFeatureGrid::ViewPointGenFeatureGrid(const Grid2DLayer& grid,
+                                                 const boost::optional<PlotMetadata>& metadata)
 :   ViewPointGenFeature(FeatureName)
 ,   grid_(grid)
 {
+    plot_metadata_ = metadata;
 }
 
 /**
@@ -638,10 +680,14 @@ const std::string ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogr
 ViewPointGenFeatureHistogram::ViewPointGenFeatureHistogram(const RawHistogram& histogram,
                                                            const std::string& series_name,
                                                            const QColor& series_color,
+                                                           const boost::optional<bool>& use_log_scale,
                                                            const PlotMetadata& metadata)
 :   ViewPointGenFeature(FeatureName)
 {
     histogram_.addDataSeries(histogram, series_name, series_color);
+
+    if (use_log_scale.has_value())
+        histogram_.setUseLogScale(use_log_scale.value());
 
     plot_metadata_ = metadata;
 }
@@ -683,10 +729,14 @@ ViewPointGenFeatureScatterSeries::ViewPointGenFeatureScatterSeries(const Scatter
                                                                    const std::string& series_name,
                                                                    const QColor& series_color,
                                                                    double marker_size,
+                                                                   const boost::optional<bool>& use_connection_lines,
                                                                    const PlotMetadata& metadata)
 :   ViewPointGenFeature(FeatureName)
 {
     scatter_series_.addDataSeries(scatter_series, series_name, series_color, marker_size);
+
+    if (use_connection_lines.has_value())
+        scatter_series_.setUseConnectionLines(use_connection_lines.value());
 
     plot_metadata_ = metadata;
 }

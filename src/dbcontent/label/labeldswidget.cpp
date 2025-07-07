@@ -26,10 +26,10 @@ namespace dbContent
 LabelDSWidget::LabelDSWidget(LabelGenerator& label_generator, QWidget* parent, Qt::WindowFlags f)
     : QWidget(parent, f), label_generator_(label_generator)
 {
-    arrow_lu_ = QIcon(Files::getIconFilepath("arrow_lu.png").c_str());
-    arrow_ru_ = QIcon(Files::getIconFilepath("arrow_ru.png").c_str());
-    arrow_ld_ = QIcon(Files::getIconFilepath("arrow_ld.png").c_str());
-    arrow_rd_ = QIcon(Files::getIconFilepath("arrow_rd.png").c_str());
+    arrow_lu_ = Files::IconProvider::getIcon("arrow_lu.png");
+    arrow_ru_ = Files::IconProvider::getIcon("arrow_ru.png");
+    arrow_ld_ = Files::IconProvider::getIcon("arrow_ld.png");
+    arrow_rd_ = Files::IconProvider::getIcon("arrow_rd.png");
 
     QVBoxLayout* main_layout = new QVBoxLayout();
 

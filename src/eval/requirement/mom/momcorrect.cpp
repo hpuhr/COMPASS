@@ -22,8 +22,8 @@ namespace EvaluationRequirement
 
 
 MomLongAccCorrect::MomLongAccCorrect(const std::string& name, const std::string& short_name, const std::string& group_name,
-                                     double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-: GenericInteger(name, short_name, group_name, prob, prob_check_type, eval_man)
+                                     double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator)
+: GenericInteger(name, short_name, group_name, prob, prob_check_type, calculator)
 {
     result_type_ = "MomLongAccCorrect";
 
@@ -39,8 +39,8 @@ MomLongAccCorrect::MomLongAccCorrect(const std::string& name, const std::string&
 
 
 MomTransAccCorrect::MomTransAccCorrect(const std::string& name, const std::string& short_name, const std::string& group_name,
-                                     double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : GenericInteger(name, short_name, group_name, prob, prob_check_type, eval_man)
+                                     double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator)
+    : GenericInteger(name, short_name, group_name, prob, prob_check_type, calculator)
 {
     result_type_ = "MomTransAccCorrect";
 
@@ -55,8 +55,8 @@ MomTransAccCorrect::MomTransAccCorrect(const std::string& name, const std::strin
 }
 
 MomVertRateCorrect::MomVertRateCorrect(const std::string& name, const std::string& short_name, const std::string& group_name,
-                                       double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : GenericInteger(name, short_name, group_name, prob, prob_check_type, eval_man)
+                                       double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator)
+    : GenericInteger(name, short_name, group_name, prob, prob_check_type, calculator)
 {
     result_type_ = "MomVertRateCorrect";
 

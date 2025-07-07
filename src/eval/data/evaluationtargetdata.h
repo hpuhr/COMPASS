@@ -15,10 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONTARGETDATA_H
-#define EVALUATIONTARGETDATA_H
+#pragma once
 
 #include "dbcontent/target/targetreportchain.h"
+#include "evaluationdefs.h"
+#include "timewindow.h"
 
 #include "boost/date_time/posix_time/ptime.hpp"
 #include <boost/optional.hpp>
@@ -35,20 +36,29 @@
 #include <QColor>
 
 class Buffer;
+class EvaluationTarget;
 class EvaluationData;
+class EvaluationCalculator;
 class EvaluationManager;
 class DBContentManager;
 class SectorLayer;
 
+class QAction;
+
+/**
+ */
 class EvaluationTargetData
 {
 public:
-    typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic> InsideCheckMatrix;
+    typedef Eigen::Matrix<bool, Eigen::Dynamic, Eigen::Dynamic>            InsideCheckMatrix;
+    typedef std::function<bool(const Evaluation::RequirementSumResultID&)> InterestEnabledFunc; 
+    typedef std::map<Evaluation::RequirementSumResultID, double>           InterestMap;
 
     EvaluationTargetData(unsigned int utn, 
                          EvaluationData& eval_data,
                          std::shared_ptr<dbContent::DBContentAccessor> accessor,
-                         EvaluationManager& eval_man, 
+                         EvaluationCalculator& calculator,
+                         EvaluationManager& eval_man,
                          DBContentManager& dbcont_man);
     virtual ~EvaluationTargetData();
 
@@ -60,6 +70,7 @@ public:
     bool hasTstData () const;
 
     void finalize () const;
+    void updateToChanges() const;
 
     const unsigned int utn_{0};
 
@@ -72,6 +83,7 @@ public:
     boost::posix_time::ptime timeEnd() const;
     std::string timeEndStr() const;
     boost::posix_time::time_duration timeDuration() const;
+    std::string timeDurationStr() const;
 
     std::set<std::string> acids() const;
     std::string acidsStr() const;
@@ -92,7 +104,12 @@ public:
     bool isModeS () const;
     bool isModeACOnly () const;
 
+    void updateUseInfo() const; // updates evaluation use information
     bool use() const;
+    const Utils::TimeWindowCollection& excludedTimeWindows() const;
+    bool isTimeStampNotExcluded(const boost::posix_time::ptime& ts) const;
+
+    const std::set<std::string>& excludedRequirements() const;
 
     const dbContent::TargetReport::Chain& refChain() const;
     const dbContent::TargetReport::Chain& tstChain() const;
@@ -143,7 +160,8 @@ public:
 
     // test
     unsigned int tstDSID(const dbContent::TargetReport::Chain::DataID& ref_id) const;
-    boost::optional<bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& tst_id) const; // gds
+    boost::optional<bool> tstGroundBitInterpolated(const dbContent::TargetReport::Chain::DataID& tst_id,
+                                                   const boost::posix_time::time_duration& d_max) const; // gds
 
     // TODO d_max not used
     boost::optional<bool> availableRefGroundBit(const dbContent::TargetReport::Chain::DataID& id,
@@ -151,16 +169,16 @@ public:
     boost::optional<bool> availableTstGroundBit(const dbContent::TargetReport::Chain::DataID& id,
                                                 const boost::posix_time::time_duration& d_max) const;
 
-    bool refPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
-    bool refPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool refPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool refPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
     bool refPosInside(const SectorLayer& layer,
                       const dbContent::TargetReport::Chain::DataID& id) const;
-    bool tstPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
-    bool tstPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool tstPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool tstPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
     bool tstPosInside(const SectorLayer& layer,
                       const dbContent::TargetReport::Chain::DataID& id) const;
-    bool mappedRefPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
-    bool mappedRefPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool mappedRefPosAbove(const dbContent::TargetReport::Chain::DataID& id) const;
+    // bool mappedRefPosGroundBitAvailable(const dbContent::TargetReport::Chain::DataID& id) const;
     bool mappedRefPosInside(const SectorLayer& layer, 
                             const dbContent::TargetReport::Chain::DataID& id) const;
 
@@ -168,21 +186,30 @@ public:
     static const int InterestFactorPrecision   = 3;
 
     // targets of interest
-    void updateInterestFactors() const;
     void clearInterestFactors() const;
-    void addInterestFactor (const std::string& req_id, double factor) const;
-    const std::map<std::string, double>& interestFactors() const;
-    std::map<std::string, double> enabledInterestFactors() const;
-    std::string enabledInterestFactorsStr() const;
-    double enabledInterestFactorsSum() const;
-    double totalInterestFactorsSum() const;
+    void addInterestFactor(const Evaluation::RequirementSumResultID& id, 
+                           double factor,
+                           bool reset) const;
+    const InterestMap& interestFactors() const;
 
-    static std::string stringForInterestFactor(const std::string& req_id, double factor);
+    EvaluationTarget toTarget() const;
+    static void updateTarget(DBContentManager& dbcontent_manager,
+                             EvaluationTarget& target); // updates only comment, nothing more
 
-    static QColor colorForInterestFactorRequirement(double factor);
-    static QColor colorForInterestFactorSum(double factor);
+    static std::string stringForInterestFactor(const Evaluation::RequirementSumResultID& id, 
+                                               double factor);
+    static QColor bgColorForInterestFactorRequirement(double factor);
+    static QColor fgColorForInterestFactorRequirement(double factor);
+    static QColor bgColorForInterestFactorSum(double factor);
+    static QColor fgColorForInterestFactorSum(double factor);
+    static unsigned int bgStyleForInterestFactorSum(double factor);
+    static unsigned int fgStyleForInterestFactorSum(double factor);
 
-    static QColor color_interest_high_, color_interest_mid_, color_interest_low_;
+    static std::string enabledInterestFactorsString(const InterestMap& interest_factors,
+                                                    const InterestEnabledFunc& interest_enabled_func);
+    static QAction* interestFactorAction(const Evaluation::RequirementSumResultID& id, 
+                                         double interest_factor);
+
     static double interest_thres_req_high_, interest_thres_req_mid_;
     static double interest_thres_sum_high_, interest_thres_sum_mid_;
 
@@ -201,20 +228,19 @@ protected:
                                  unsigned int idx_internal,
                                  const boost::optional<bool>& ground_bit,
                                  const SectorLayer* min_height_filter = nullptr) const;
-    bool checkAbove(const InsideCheckMatrix& mat,
-                    const dbContent::TargetReport::Index& index) const;
-    bool checkGroundBit(const InsideCheckMatrix& mat,
-                        const dbContent::TargetReport::Index& index) const;
+    // bool checkAbove(const InsideCheckMatrix& mat,
+    //                 const dbContent::TargetReport::Index& index) const;
+    // bool checkGroundBit(const InsideCheckMatrix& mat,
+    //                     const dbContent::TargetReport::Index& index) const;
     bool checkInside(const SectorLayer& layer,
                      const InsideCheckMatrix& mat,
                      const dbContent::TargetReport::Index& index) const;
-
-    bool interestFactorEnabled(const std::string& req_id) const;
     
-    EvaluationData&    eval_data_;
+    EvaluationData& eval_data_;
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
+    EvaluationCalculator& calculator_;
     EvaluationManager& eval_man_;
-    DBContentManager&  dbcont_man_;
+    DBContentManager& dbcont_man_;
 
     dbContent::TargetReport::Chain ref_chain_;
     dbContent::TargetReport::Chain tst_chain_;
@@ -244,14 +270,14 @@ protected:
     //    mutable bool has_nacp {false};
     //    mutable unsigned int min_nacp_, max_nacp_;
 
+    mutable bool use_in_eval_;
+    mutable Utils::TimeWindowCollection excluded_time_windows_;
+    mutable std::set<std::string> excluded_requirements_;
+
     mutable InsideCheckMatrix                    inside_ref_;
     mutable InsideCheckMatrix                    inside_tst_;
     mutable InsideCheckMatrix                    inside_map_;
     mutable std::map<const SectorLayer*, size_t> inside_sector_layers_;
 
-    mutable std::map<std::string, double> interest_factors_;
-    mutable double interest_factors_sum_total_ {0};
-    mutable double interest_factors_sum_enabled_ {0};
+    mutable InterestMap interest_factors_;
 };
-
-#endif // EVALUATIONTARGETDATA_H

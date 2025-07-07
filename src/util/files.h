@@ -15,12 +15,17 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FILES_H
-#define FILES_H
+#pragma once
 
 #include <QDir>
+#include <QIcon>
+
+#include <map>
+#include <string>
 
 #include "global.h"
+
+class QColor;
 
 static const std::string SYSTEM_INSTALL_PATH = CMAKE_INSTALL_PREFIX + std::string("/compass/");
 
@@ -48,6 +53,7 @@ namespace Files
 {
 bool fileExists(const std::string& path);
 size_t fileSize(const std::string& path);
+std::string fileSizeString(size_t file_size_in_bytes);
 void verifyFileExists(const std::string& path);
 bool directoryExists(const std::string& path);
 bool copyRecursively(const std::string& source_folder, const std::string& dest_folder);
@@ -56,6 +62,7 @@ QStringList getSubdirectories(const std::string& path);
 
 std::string getIconFilepath(const std::string& filename);
 std::string getImageFilepath(const std::string& filename);
+QIcon getIcon(const std::string& name, const QColor& color = QColor());
 
 void deleteFile(const std::string& filename);
 void deleteFolder(const std::string& path);
@@ -68,7 +75,10 @@ std::string replaceExtension(const std::string& path, const std::string& new_ext
 
 std::string normalizeFilename(const std::string& filename_without_ext, bool remove_special_chars);
 
+class IconProvider {
+public:
+    static QIcon getIcon(const std::string& name);
+};
+
 }  // namespace Files
 }  // namespace Utils
-
-#endif  // FILES_H

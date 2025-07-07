@@ -16,6 +16,7 @@
  */
 
 #include "plotmetadata.h"
+#include "json.hpp"
 
 const std::string PlotMetadata::TagPlotGroup  = "plot_group";
 const std::string PlotMetadata::TagTitle      = "title";

@@ -20,13 +20,11 @@
 #include "eval/requirement/position/distancerms.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
-//#include "stringconv.h"
 
-//using namespace Utils;
-using namespace EvaluationResultsReport;
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 using namespace std;
 
 
@@ -34,8 +32,8 @@ namespace EvaluationRequirement
 {
 PositionDistanceRMSConfig::PositionDistanceRMSConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : BaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("threshold_value", &threshold_value_, 50.0);
 }
@@ -47,7 +45,7 @@ PositionDistanceRMSConfig::~PositionDistanceRMSConfig()
 std::shared_ptr<Base> PositionDistanceRMSConfig::createRequirement()
 {
     shared_ptr<PositionDistanceRMS> req = make_shared<PositionDistanceRMS>(
-                name_, short_name_, group_.name(), eval_man_, threshold_value_);
+                name_, short_name_, group_.name(), calculator_, threshold_value_);
 
     return req;
 }
@@ -62,24 +60,20 @@ void PositionDistanceRMSConfig::thresholdValue(double value)
     threshold_value_ = value;
 }
 
-void PositionDistanceRMSConfig::createWidget()
+BaseConfigWidget* PositionDistanceRMSConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new PositionDistanceRMSConfigWidget(*this));
-    assert (widget_);
+    return new PositionDistanceRMSConfigWidget(*this);
 }
 
-void PositionDistanceRMSConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void PositionDistanceRMSConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Threshold Value [m]",
                   "Maximum allowed RMS from test target report to reference",
-                  threshold_value_}, nullptr);
+                  threshold_value_});
 
 }
 }

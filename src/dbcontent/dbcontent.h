@@ -15,13 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_DBCONTENT_H_
-#define DBCONTENT_DBCONTENT_H_
+#pragma once
 
 #include "configurable.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
-//#include "global.h"
 
 #include <QObject>
 
@@ -36,7 +34,6 @@ class DBContentWidget;
 class Buffer;
 class Job;
 class DBContentReadDBJob;
-class InsertBufferDBJob;
 class UpdateBufferDBJob;
 class DBContentManager;
 class DBContentDeleteDBJob;
@@ -95,8 +92,8 @@ enum class MOM_VERT_RATE
 
 }
 
-
-
+/**
+ */
 class DBContent : public QObject, public Configurable
 {
     Q_OBJECT
@@ -112,8 +109,6 @@ public slots:
     void readJobIntermediateSlot(std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot();
     void readJobDoneSlot();
-
-    void insertDoneSlot();
 
     void updateProgressSlot(float percent);
     void updateDoneSlot();
@@ -148,6 +143,8 @@ public:
     static const Property meta_var_latitude_;
     static const Property meta_var_longitude_;
     static const Property meta_var_detection_type_;
+    static const Property meta_var_x_;
+    static const Property meta_var_y_;
 
     static const Property meta_var_artas_hash_;
     static const Property meta_var_utn_;
@@ -180,6 +177,13 @@ public:
     static const Property var_radar_range_;
     static const Property var_radar_azimuth_;
     static const Property var_radar_altitude_;
+
+    static const Property var_cat020_crontrib_recv_;
+
+    static const Property var_cat021_toa_position_;     // "ToA Position" 071.Time of Applicability for Position
+    static const Property var_cat021_tomr_position_; // "ToMR Position" 0.73 Time of Message Reception for Position
+    static const Property var_cat021_tort_; // "ToRT" 077.Time of Report Transmission
+    static const Property var_cat021_tod_dep_; // "Time of Day Deprecated" 030.Time of Day
 
     static const Property var_cat021_mops_version_;
     static const Property var_cat021_nacp_;
@@ -223,13 +227,17 @@ public:
 
     static const Property selected_var;
 
-    DBContent(COMPASS& compass, const std::string& class_id, const std::string& instance_id,
-             DBContentManager* manager);
+public:
+    DBContent(COMPASS& compass, 
+              const std::string& class_id, 
+              const std::string& instance_id,
+              DBContentManager* manager);
     virtual ~DBContent();
 
     bool hasVariable(const std::string& name) const;
     dbContent::Variable& variable(const std::string& name) const;
-    void renameVariable(const std::string& name, const std::string& new_name);
+    void renameVariable(const std::string& name, 
+                        const std::string& new_name);
     void deleteVariable(const std::string& name);
 
     const std::map<std::string, std::unique_ptr<dbContent::Variable>>& variables() const { return variables_; }
@@ -252,26 +260,36 @@ public:
 
     bool loadable() const { return is_loadable_; }
 
-    void load(dbContent::VariableSet& read_set, bool use_datasrc_filters, bool use_filters,
+    void load(dbContent::VariableSet& read_set, 
+              bool use_datasrc_filters, 
+              bool use_filters,
               const std::string& custom_filter_clause=""); // main load function
-    void loadFiltered(dbContent::VariableSet& read_set, std::string custom_filter_clause);
+    void loadFiltered(dbContent::VariableSet& read_set, 
+                      std::string custom_filter_clause);
+    
     // load function for custom filtering
     void quitLoading();
 
-    void insertData(std::shared_ptr<Buffer> buffer);
-    void updateData(dbContent::Variable& key_var, std::shared_ptr<Buffer> buffer);
+    bool prepareInsert(std::shared_ptr<Buffer>& buffer);
+    void updateDataSourcesBeforeInsert(std::shared_ptr<Buffer>& buffer);
+    void finalizeInsert(std::shared_ptr<Buffer>& buffer);
+
+    void updateData(dbContent::Variable& key_var, 
+                    std::shared_ptr<Buffer> buffer);
 
     // counts and targets have to be adjusted outside
-    void deleteDBContentData();
-    void deleteDBContentData(unsigned int sac, unsigned int sic);
-    void deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id);
-
-    //std::map<unsigned int, std::string> loadLabelData(std::vector<unsigned int> rec_nums, int break_item_cnt);
+    void deleteDBContentData(bool cleanup_db = false);
+    void deleteDBContentData(unsigned int sac, 
+                             unsigned int sic,
+                             bool cleanup_db = false);
+    void deleteDBContentData(unsigned int sac, 
+                             unsigned int sic, 
+                             unsigned int line_id,
+                             bool cleanup_db = false);
 
     bool isLoading();
-    bool isInserting();
     bool isDeleting();
-    //bool isPostProcessing();
+
     bool hasData();
     size_t count();
     size_t loadedCount();
@@ -290,32 +308,32 @@ public:
 
     std::string dbTableName() const;
 
-    static bool isStatusContent(const std::string& dbc_name); 
-    static bool isStatusContent(unsigned int dbc_id);
-    static bool isReferenceContent(const std::string& dbc_name);
-    static bool isReferenceContent(unsigned int dbc_id);
-
     bool isStatusContent() const;
     bool isReferenceContent() const;
 
 protected:
-    COMPASS& compass_;
-    DBContentManager& dbcont_manager_;
-    std::string name_;
-    unsigned int id_ {0};
-    std::string info_;
-    std::string db_table_name_;
-    std::string ds_type_;
+    virtual void checkSubConfigurables();
 
-    //bool constructor_active_ {false};
+    void checkStaticVariable(const Property& property);
+
+    COMPASS&          compass_;
+    DBContentManager& dbcont_manager_;
+
+    std::string  name_;
+    unsigned int id_ {0};
+    std::string  info_;
+    std::string  db_table_name_;
+    std::string  ds_type_;
+
+    bool is_status_content_ {false};
+    bool is_reftraj_content_ {false};
 
     bool is_loadable_{false};  // loadable on its own
     size_t count_{0};
 
-    std::shared_ptr<DBContentReadDBJob> read_job_{nullptr};
+    bool insert_active_ = false;
 
-    bool insert_active_ {false};
-    std::shared_ptr<InsertBufferDBJob> insert_job_{nullptr};
+    std::shared_ptr<DBContentReadDBJob> read_job_{nullptr};
     std::shared_ptr<UpdateBufferDBJob> update_job_{nullptr};
     std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
 
@@ -323,17 +341,4 @@ protected:
     std::map<std::string, std::unique_ptr<dbContent::Variable>> variables_;
 
     std::unique_ptr<DBContentWidget> widget_;
-
-    virtual void checkSubConfigurables();
-
-    void doDataSourcesBeforeInsert (std::shared_ptr<Buffer> buffer);
-
-    //std::string associationsTableName();
-
-    //void sortContent();
-
-    void checkStaticVariable(const Property& property);
-
 };
-
-#endif /* DBCONTENT_DBCONTENT_H_ */

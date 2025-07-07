@@ -17,6 +17,7 @@
 
 #include "evaluationdatawidget.h"
 #include "evaluationdata.h"
+#include "evaluationcalculator.h"
 #include "evaluationmanager.h"
 #include "logger.h"
 
@@ -34,8 +35,9 @@
 #include <QWidgetAction>
 #include <QCheckBox>
 
-EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, EvaluationManager& eval_man)
-    : QWidget(), eval_data_(eval_data), eval_man_(eval_man)
+EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data, 
+                                           EvaluationCalculator& calculator)
+    : QWidget(), eval_data_(eval_data), calculator_(calculator)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -232,7 +234,7 @@ void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)
 
     unsigned int utn = target.utn_;
     loginf << "EvaluationDataWidget: customContextMenuSlot: row " << index.row() << " utn " << utn;
-    assert (eval_man_.getData().hasTargetData(utn));
+    assert (calculator_.data().hasTargetData(utn));
 
     QMenu menu;
 
@@ -280,11 +282,11 @@ void EvaluationDataWidget::jumpToRequirement(const std::string& req_id, unsigned
 
     loginf << "EvaluationDataWidget: jumpToRequirement: sum id: " << sum_id;
 
-    std::string utn_id = EvaluationResultsReport::SectionID::sumResult2Target(sum_id, utn, eval_man_);
+    std::string utn_id = EvaluationResultsReport::SectionID::sumResult2Target(sum_id, utn, calculator_);
 
     loginf << "EvaluationDataWidget: jumpToRequirement: utn id: " << utn_id;
 
-    eval_man_.widget()->showResultId(utn_id, true, true);
+    //calculator_.manager().widget(showResultId(utn_id, true, true);
 }
 
 void EvaluationDataWidget::showFullUTNSlot ()
@@ -296,7 +298,7 @@ void EvaluationDataWidget::showFullUTNSlot ()
 
     loginf << "EvaluationDataWidget: showFullUTNSlot: utn " << utn;
 
-    eval_man_.showFullUTN(utn);
+    calculator_.showFullUTN(utn);
 }
 
 void EvaluationDataWidget::showSurroundingDataSlot ()
@@ -308,7 +310,7 @@ void EvaluationDataWidget::showSurroundingDataSlot ()
 
     loginf << "EvaluationDataWidget: showSurroundingDataSlot: utn " << utn;
 
-    eval_man_.showSurroundingData(utn);
+    //calculator_.showSurroundingData(utn);
 }
 
 void EvaluationDataWidget::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
@@ -332,7 +334,7 @@ void EvaluationDataWidget::itemClicked(const QModelIndex& index)
     loginf << "EvaluationDataWidget: itemClicked: current target " << target.utn_;
     //restore_focus_ = true;
 
-    eval_man_.showUTN(target.utn_);
+    calculator_.showUTN(target.utn_);
 }
 
 void EvaluationDataWidget::updateInterestMenu()

@@ -20,8 +20,10 @@
 
 #include <QComboBox>
 
-class EvaluationManager;
+class EvaluationCalculator;
 
+/**
+ */
 class EvaluationStandardComboBox : public QComboBox
 {
     Q_OBJECT
@@ -31,14 +33,14 @@ public slots:
     void changedStandardSlot(const QString& standard_name); // slot for box
 
 public:
-    EvaluationStandardComboBox(EvaluationManager& eval_man, QWidget* parent=0);
+    EvaluationStandardComboBox(EvaluationCalculator& calculator, QWidget* parent = nullptr);
     virtual ~EvaluationStandardComboBox();
 
     void setStandardName(const std::string& value);
     void updateStandards();
 
 protected:
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 };
 
 #endif // EVALUATIONSTANDARDCOMBOBOX_H

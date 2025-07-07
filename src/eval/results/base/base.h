@@ -18,6 +18,7 @@
 #pragma once
 
 #include "evaluationdetail.h"
+#include "evaluationdefs.h"
 #include "eval/results/evaluationdetail.h"
 #include "eval/results/base/result_defs.h"
 
@@ -34,7 +35,7 @@
 #include <Eigen/Core>
 
 class EvaluationTargetData;
-class EvaluationManager;
+class EvaluationCalculator;
 class SectorLayer;
 
 namespace EvaluationRequirement 
@@ -42,10 +43,11 @@ namespace EvaluationRequirement
     class Base;
 }
 
-namespace EvaluationResultsReport 
+namespace ResultReport 
 {
+    class Report;
     class Section;
-    class RootItem;
+    class SectionContent;
     class SectionContentTable;
 }
 
@@ -77,24 +79,24 @@ public:
     struct Info
     {
         Info() {}
-        Info(const QString& name,
-             const QString& comment,
-             const QVariant& value)
+        Info(const std::string& name,
+             const std::string& comment,
+             const nlohmann::json& value)
         :   info_name   (name   )
         ,   info_comment(comment)
         ,   info_value  (value  )
         {}
 
-        QString  info_name;
-        QString  info_comment;
-        QVariant info_value;
+        std::string    info_name;
+        std::string    info_comment;
+        nlohmann::json info_value;
     };
 
     Base(const std::string& type, 
          const std::string& result_id,
          std::shared_ptr<EvaluationRequirement::Base> requirement, 
          const SectorLayer& sector_layer,
-         EvaluationManager& eval_man);
+         EvaluationCalculator& calculator);
     virtual ~Base();
 
     /// returns the base type of the result (either single or joined)
@@ -103,11 +105,14 @@ public:
     std::string type() const;
     std::string resultId() const;
     std::string reqGrpId() const;
+    
+    virtual std::string sumSectionName() const;
 
     std::shared_ptr<EvaluationRequirement::Base> requirement() const;
 
     bool isSingle() const;
     bool isJoined() const;
+    bool isResult(const Evaluation::RequirementResultID& id) const;
 
     bool use() const;
     void use(bool use);
@@ -121,30 +126,30 @@ public:
 
     const SectorLayer& sectorLayer() const { return sector_layer_; } 
 
-    QVariant resultValue() const;
-    QVariant resultValueOptional(const boost::optional<double>& value) const;
-    virtual QVariant resultValue(double value) const;
+    nlohmann::json resultValue() const;
+    nlohmann::json resultValueOptional(const boost::optional<double>& value) const;
+    virtual nlohmann::json resultValue(double value) const;
 
     /// returns the number of issues detected for this result
     virtual unsigned int numIssues() const = 0;
 
     /// checks if the result references a specific section of the report
-    virtual bool hasReference(const EvaluationResultsReport::SectionContentTable& table, 
+    virtual bool hasReference(const ResultReport::SectionContentTable& table, 
                               const QVariant& annotation) const = 0;
     /// returns a report reference link
-    virtual std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
+    virtual std::string reference(const ResultReport::SectionContentTable& table, 
                                   const QVariant& annotation) const = 0;
 
     /// checks if the result can generate viewable data for the given table and annotation index
-    virtual bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+    virtual bool hasViewableData (const ResultReport::SectionContentTable& table, 
                                   const QVariant& annotation) const = 0;
     /// checks if the viewable data is ready (e.g. cached or invalidated)
     virtual bool viewableDataReady() const = 0;
     /// creates suitable viewable data for the given table and annotation index
-    virtual std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    virtual std::shared_ptr<nlohmann::json::object_t> viewableData(const ResultReport::SectionContentTable& table, 
                                                                    const QVariant& annotation) const = 0;
     /// adds the result to the report root item
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) = 0;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) = 0;
 
     /// iterate over details
     virtual void iterateDetails(const DetailFunc& func,
@@ -153,11 +158,22 @@ public:
     size_t totalNumDetails() const;
     size_t totalNumPositions() const;
 
-    const static std::string req_overview_table_name_;
+    static void setContentProperties(ResultReport::SectionContent& content,
+                                     const Evaluation::RequirementResultID& id);
+    static boost::optional<Evaluation::RequirementResultID> contentProperties(const ResultReport::SectionContent& content);
+
+    const static std::string RequirementOverviewTableName;
+    const static std::string RequirementOverviewSectionName;
 
     static const QColor HistogramColorDefault;
 
+    static const std::string ContentPropertySectorLayer;
+    static const std::string ContentPropertyReqGroup;
+    static const std::string ContentPropertyReqName;
+
 protected:
+    friend class EvaluationTaskResult; // for loading on-demand content
+
     /**
      * Used to display a certain result parameter in the report as
      * Name | Description | Value, e.g.
@@ -246,8 +262,7 @@ protected:
     /// generate definitions for the automatic generation of custom annotations (grids, histograms, etc.)
     virtual FeatureDefinitions getCustomAnnotationDefinitions() const;
 
-    EvaluationResultsReport::SectionContentTable& getReqOverviewTable (
-            std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    ResultReport::SectionContentTable& getReqOverviewTable (std::shared_ptr<ResultReport::Report> report);
 
     /// section and annotation id strings
     virtual std::string getRequirementSectionID() const;
@@ -256,7 +271,7 @@ protected:
 
     std::string getRequirementAnnotationID() const;
     
-    EvaluationResultsReport::Section& getRequirementSection(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    ResultReport::Section& getRequirementSection(std::shared_ptr<ResultReport::Report> report);
 
     std::string type_;
     std::string result_id_;
@@ -267,7 +282,7 @@ protected:
     std::shared_ptr<EvaluationRequirement::Base> requirement_;
     const SectorLayer& sector_layer_;
 
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 
 private:
     boost::optional<double> result_;

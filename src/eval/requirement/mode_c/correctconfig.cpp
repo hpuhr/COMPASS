@@ -20,13 +20,11 @@
 #include "eval/requirement/mode_c/modeccorrectconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
-//#include "stringconv.h"
 
-//using namespace Utils;
-using namespace EvaluationResultsReport;
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 using namespace std;
 
 namespace EvaluationRequirement
@@ -34,8 +32,8 @@ namespace EvaluationRequirement
 
 ModeCCorrectConfig::ModeCCorrectConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("max_distance_ft", &max_distance_ft_, 300.0f);
 
@@ -44,7 +42,7 @@ ModeCCorrectConfig::ModeCCorrectConfig(
 std::shared_ptr<Base> ModeCCorrectConfig::createRequirement()
 {
     shared_ptr<ModeCCorrect> req = make_shared<ModeCCorrect>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_,
                 max_distance_ft_);
 
     return req;
@@ -54,34 +52,32 @@ float ModeCCorrectConfig::maxDistanceFt() const
 {
     return max_distance_ft_;
 }
+
 void ModeCCorrectConfig::maxDistanceFt(float value)
 {
     max_distance_ft_ = value;
 }
 
-void ModeCCorrectConfig::createWidget()
+BaseConfigWidget* ModeCCorrectConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new ModeCCorrectConfigWidget(*this));
-    assert (widget_);
+    return new ModeCCorrectConfigWidget(*this);
 }
 
-void ModeCCorrectConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void ModeCCorrectConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Probability [1]", "Probability of correct Mode C",
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 
     table.addRow({"Max Distance",
                   "If checked, value must match "
                   "the reference with the given maximum distance",
-                 to_string(max_distance_ft_).c_str()}, nullptr);
+                 to_string(max_distance_ft_)});
 }
+
 }

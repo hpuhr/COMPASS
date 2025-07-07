@@ -84,30 +84,6 @@
         }
     ],
     "sub_configs": {
-        "DBContentTargetModel": {
-            "DBContentTargetModel0": {
-                "parameters": {
-                    "filter_mode_a_code_blacklist": false,
-                    "filter_mode_a_code_values": "7000,7777",
-                    "filter_mode_a_codes": false,
-                    "filter_target_address_values": "",
-                    "filter_target_addresses": false,
-                    "filter_target_addresses_blacklist": false,
-                    "remove_mode_c_min_value": 3000.0,
-                    "remove_mode_c_values": true,
-                    "remove_modeac_onlys": false,
-                    "remove_not_detected_dbo_values": {
-                        "CAT001": false,
-                        "CAT021": true
-                    },
-                    "remove_not_detected_dbos": false,
-                    "remove_psr_only_targets": true,
-                    "remove_short_targets": false,
-                    "remove_short_targets_min_duration": 60.0,
-                    "remove_short_targets_min_updates": 10
-                }
-            }
-        },
         "MetaVariable": {
             "MetaMOMLongitudinalAcc0": {
                 "parameters": {

@@ -46,28 +46,22 @@ Also, since target secondary attributes are used in the 'Reconstruct References'
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/eval.png}
-  \caption{Evaluation tab}
+    \includegraphics[width=19cm]{figures/eval_overview.png}
+  \caption{Evaluation dialog}
 \end{figure}
 
-At the top, 6 tabs exist:
+When selecting \textit{Process $\rightarrow$ Evaluate} in the Main Menubar, the Evaluation dialog opens. \\
+
+At the top, 4 tabs exist:
 \begin{itemize}  
 \item Main: Main configuration
-\item Targets: Table of existing targets in reference / test data (filled after data was loaded)
 \item Filter: Filter which data is loaded, by time and/or ADS-B quality indicators
 \item Standard: Definition of standards, selection of current standard, configuration of requirements to be checked
-\item Results Config: Additional configration for the result generation
-\item Results: Evaluation results (created after data was evaluated)
+\item Results Config: Additional configuration for the result generation
 \end{itemize}
 \ \\
 
-Below 3 buttons exist:
-\begin{itemize}  
-\item Load Data: Loads the reference/test data
-\item Evaluate: Runs the evaluation of the current standard (available after data was loaded)
-\item Generate Report: Generates a report PDF (available when evaluation result exists)
-\end{itemize}
-\ \\
+Pressing the 'Run' button at the bottom will run the Evaluation, and generate a new Evaluation report.
 
 \section{Configuration}
 \label{sec:eval_config} 
@@ -76,11 +70,11 @@ Below 3 buttons exist:
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm]{figures/eval.png}
+    \includegraphics[width=18cm,frame]{figures/eval_main.png}
   \caption{Evaluation Main tab}
 \end{figure}
 
-In the main tab, the main configuration settings can be set. \\
+In the 'Main' tab, the main configuration settings can be set. \\
 
 \subsubsection{Data Selection}
 
@@ -144,54 +138,6 @@ All requirement mappings thus should be deselected for this layer (see figure be
   \caption{Minimum Height Filter}
 \end{figure}
 
-\subsection{Targets Tab}
-
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_targets_empty.png}
-  \caption{Evaluation Targets tab}
-\end{figure}
-
-Before the data was loaded, the table is empty. Each target (defined by the UTN) is shown in a dedicated row. \\
-
-The following columns exist:
-
-\begin{itemize}  
-\item Use: Checkbox defining if the target should be used in the evaluation
-\item UTN: Unique Target Number
-\item Comment: User comment, can be set with double-click, persisted into database
-\item Interest: Score showing how strong a negative impact a target had on all requirement results. Please refer to \nameref{sec:eval_targets_of_interest} for details.
-\item Begin: First timestamp of UTN
-\item End: Last timestamp of UTN
-\item \#All: Sum number of target reports
-\item \#Ref: Number of target reports in reference data
-\item \#Tst: Number of target reports in test data
-\item ACIDs: Mode S aircraft identification(s)
-\item ACADs: Mode S aircraft address (hexadecimal)
-\item M3/A: Mode 3/A code(s) (octal)
-\item MC Min: Mode C code minimum [ft]
-\item MC Max: Mode C code maximum [ft]
-\end{itemize}
-\ \\
-
-Unless otherwise specified, the column content reflects the values from both reference and test data. \\
-
-After loading the data, the table can look as follows:
-
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_targets_loaded.png}
-  \caption{Evaluation Targets tab with loaded data}
-\end{figure}
-
-After evaluation (and sorting by interest), the table can look as follows:
-
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_targets_eval.png}
-  \caption{Evaluation Targets tab with evaluated data}
-\end{figure}
-
 \subsection{Filter Tab}
 
 \begin{figure}[H]
@@ -205,7 +151,6 @@ In the Filter tab, what data is loaded for evaluation can be filtered \\
 Below, the following elements exist:
 \begin{itemize}  
 \item 'Use Load Filter': Toggles usage of the load filter
-\item 'Use Timestamp Filter: Toggles usage of the timestamp filter
 \item 'Use RefTraj Accuracy Filter: Toggles usage of the minimum accuracy filter for DBContent RefTraj
 \item 'Use ADS-B Filter: Toggles usage of the ADS-B filter
 \item 'Use v0: Toggles usage of MOPS Version 0
@@ -265,7 +210,6 @@ Please note that, while the EUROCAE ED-117A has been tested using simulator data
 Please note that these limitations will be corrected in the near future. \\ 
 
 The other standards have not yet been tested to the fullest degree, which is work in progress.
-
 
 \subsubsection{Current Standard}
 
@@ -357,81 +301,87 @@ For detailed information about each requirement please refer to section \nameref
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_config.png}
+  \center
+    \includegraphics[width=12cm,frame]{figures/eval_results_config.png}
   \caption{Evaluation Results tab}
 \end{figure}
 
 The following settings can be used to configure the content of the generated results:
+
 \begin{itemize}  
 \item Skip No Data Details: Skip per target report details of no evaluated data existsed (recomended)
 \item Split Results by MOPS Version: Split sector aggregations also by ADS-B MOPS Versions (unknown,V0,V1,V2)
 \item Split Results by Mode A/C Only and Mode S: Split sector aggregations also by Mode A/C Only and Mode S results
-\item Show ADS-B Info: Show ADS-B MOPS Version in results target lists
+%\item Show ADS-B Info: Show ADS-B MOPS Version in results target lists
 \item Show OK data in Sector Results: Show also OK markings in sector aggregations (not only errors)
 \item Results Detail WGS84 Zoom Factor: Zoom factor in Geographic View for target report details
+\item Grid Cells X: X-resolution of generated sector overview grids
+\item Grid Cells Y: Y-resolution of generated sector overview grids
 \end{itemize}
 \ \\
 
-\subsection{Results Tab}
+% \subsection{Results Tab}
 
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_empty.png}
-  \caption{Evaluation Results tab}
-\end{figure}
+% \begin{figure}[H]
+%   \hspace*{-2cm}
+%     \includegraphics[width=18cm,frame]{figures/eval_results_empty.png}
+%   \caption{Evaluation Results tab}
+% \end{figure}
 
-Before the data was evaluated, the results are empty.\\
+% Before the data was evaluated, the results are empty.\\
 
-There are several levels of detail for the results, and each sub-result is shown in a tree-view on the left side, grouped into sections. Using this tree-view, the results can be "navigated", and the currently selected results contents are shown on the right side. \\
+% There are several levels of detail for the results, and each sub-result is shown in a tree-view on the left side, grouped into sections. Using this tree-view, the results can be "navigated", and the currently selected results contents are shown on the right side. \\
 
-More details will be described in the following section \nameref{sec:eval_inspect}.
+% More details will be described in the following section \nameref{sec:eval_inspect}.
 
-\section{Running}
-\label{sec:eval_run} 
+% \section{Running}
+% \label{sec:eval_run} 
 
-\subsection{Load Data}
-\label{sec:eval_run_load} 
+% \subsection{Load Data}
+% \label{sec:eval_run_load} 
 
-After the wanted configuration (in the Main tab) has been set, the 'Load Data' button can be clicked. This results in the reference/test data being loaded, after which a post-processing will be performed. \\
+% After the wanted configuration (in the Main tab) has been set, the 'Load Data' button can be clicked. This results in the reference/test data being loaded, after which a post-processing will be performed. \\
 
-Please note that the post-processing step uses all available cores on the CPU.
+% Please note that the post-processing step uses all available cores on the CPU.
 
-\begin{figure}[H]
-  \centering 
-    \includegraphics[width=8cm]{figures/eval_post.png}
-  \caption{Evaluation: Post-processing after loading}
-\end{figure}
+% \begin{figure}[H]
+%   \centering 
+%     \includegraphics[width=8cm]{figures/eval_post.png}
+%   \caption{Evaluation: Post-processing after loading}
+% \end{figure}
 
-The post-processing pre-calculates only which reference target reports can be used for direct comparison for specific test target reports. \\
+% The post-processing pre-calculates only which reference target reports can be used for direct comparison for specific test target reports. \\
 
-Therefore, please note that re-loading the data is only required when changes to the reference/test data settings in the Main tab have been made. Changing requirements or removing targets from evaluation does not require re-loading. \\
+% Therefore, please note that re-loading the data is only required when changes to the reference/test data settings in the Main tab have been made. Changing requirements or removing targets from evaluation does not require re-loading. \\
 
-After the loading and the post-processing have been performed, all targets are shown in the Targets tab.
+% After the loading and the post-processing have been performed, all targets are shown in the Targets tab.
 
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_targets_loaded.png}
-  \caption{Evaluation Targets tab after loading}
-\end{figure}
-\ \\
+% \begin{figure}[H]
+%   \hspace*{-2cm}
+%     \includegraphics[width=18cm,frame]{figures/eval_targets_loaded.png}
+%   \caption{Evaluation Targets tab after loading}
+% \end{figure}
+% \ \\
 
-Please note that the difference to the main 'Targets' tab list consists in only evaluation targets being shown - i.e. only targets which are present in the currently selected reference / test data.
+% Please note that the difference to the main 'Targets' tab list consists in only evaluation targets being shown - i.e. only targets which are present in the currently selected reference / test data.
 
-\subsection{Filtering Targets}
-\label{sec:eval_filter_targets} 
+% \subsection{Filtering Targets}
+% \label{sec:eval_filter_targets} 
 
-The Targets tab is useful for removing certain targets from the evaluation ('Use' checkbox) and inspecting already removed ones. 
+% The Targets tab is useful for removing certain targets from the evaluation ('Use' checkbox) and inspecting already removed ones. 
 
-Single rows can be selected by clicking on them, which triggers a loading process showing this exact target (with all associated data) in the available Views. Please note that this does not require re-loading the evaluation data, but can be used at all times during the evaluation. \\
+% Single rows can be selected by clicking on them, which triggers a loading process showing this exact target (with all associated data) in the available Views. Please note that this does not require re-loading the evaluation data, but can be used at all times during the evaluation. \\
 
-To remove targets with certain parameters (e.g. primary-only, black-whitelisting, always low Mode C, ...) please refer to section \nameref{sec:ui_target_filtering}.
+% To remove targets with certain parameters (e.g. primary-only, black-whitelisting, always low Mode C, ...) please refer to section \nameref{sec:ui_target_filtering}.
 
 \subsection{Evaluation}
 \label{sec:eval_run_eval} 
 
-After the data was loaded, the configuration relating to current standard, requirements and sector/requirement group usage can be adapted. After that, the evaluation can be (re-)run using the 'Evaluate' button. \\
+After configuration, the evaluation can be run using the 'Run' button. \\
 
-This will trigger evaluation of the requirements in all sectors (as configured). The requirement values will be calculated for each target (whether to be used or not). Then, for each requirement and sector, the results are summed-up as per-sector average (if target should be used). \\
+This will trigger evaluation of the requirements in all sectors (as configured). 
+The requirement values will be calculated for each target (whether to be used or not). 
+Then, for each requirement and sector, the results are summed-up as per-sector average (if target should be used). \\
 
 Please note that the post-processing step uses all available cores on the CPU.
 
@@ -441,51 +391,50 @@ Please note that the post-processing step uses all available cores on the CPU.
   \caption{Evaluation: Running evaluation status}
 \end{figure}
 
-The results are then shown in the Results tab.
-
 \subfile{eval_inspect}
+\subfile{eval_targets}
 
-\section{Generate Report}
-\label{sec:eval_report}
+% \section{Generate Report}
+% \label{sec:eval_report}
 
-Using the "Export PDF" button, a PDF can be generated. A PDF can only be generated if a Latex environment is installed on the workstation, as described in \nameref{sec:appendix_latex}.
+% Using the "Export PDF" button, a PDF can be generated. A PDF can only be generated if a Latex environment is installed on the workstation, as described in \nameref{sec:appendix_latex}.
 
-\begin{figure}[H]
-    \includegraphics[width=14cm]{figures/eval_report.png}
-  \caption{Evaluation results: Generate report dialog}
-\end{figure}
+% \begin{figure}[H]
+%     \includegraphics[width=14cm]{figures/eval_report.png}
+%   \caption{Evaluation results: Generate report dialog}
+% \end{figure}
 
-At the top, the following configuration options exist:
+% At the top, the following configuration options exist:
 
-\begin{itemize}  
-\item Report Path: Directory to which the report will be written.
-\item Report Filename: Filename of the report, to be created in the report path. File extension must be '.tex'.
-\item Change Location: Button to set the report path and filename.
-\item Author: Author string, is added to the first page of the report.
-\item Abstract: Abstract string, is added to the first page of the report.
-\item Include Per-Target Details: Whether to include the per-target details.
-\item Include Per-Target Target Report Details: Whether to include the per-target target report details.
-\item Wait on Map Loading: When Geographic View screenshots are created, some maps require downloading terrain from the Internet.  This option enables to wait on completion of such activities, to generate high-quality screenshots. Disable only when operating on cached maps without an Internet connection.
-\item Run PDFLatex: Automatically runs the pdflatex compile process, immediately creating a PDF after finished export. Is disabled if command could not be found.
-\item Open Created PDF: Automatically opens the created PDF. Is disabled if pdflatex command could not be found.
-\end{itemize}
-\ \\
+% \begin{itemize}  
+% \item Report Path: Directory to which the report will be written.
+% \item Report Filename: Filename of the report, to be created in the report path. File extension must be '.tex'.
+% \item Change Location: Button to set the report path and filename.
+% \item Author: Author string, is added to the first page of the report.
+% \item Abstract: Abstract string, is added to the first page of the report.
+% \item Include Per-Target Details: Whether to include the per-target details.
+% \item Include Per-Target Target Report Details: Whether to include the per-target target report details.
+% \item Wait on Map Loading: When Geographic View screenshots are created, some maps require downloading terrain from the Internet.  This option enables to wait on completion of such activities, to generate high-quality screenshots. Disable only when operating on cached maps without an Internet connection.
+% \item Run PDFLatex: Automatically runs the pdflatex compile process, immediately creating a PDF after finished export. Is disabled if command could not be found.
+% \item Open Created PDF: Automatically opens the created PDF. Is disabled if pdflatex command could not be found.
+% \end{itemize}
+% \ \\
 
-Please \textbf{note} that the two 'Include ... Details' options can produce very large PDF reports (10.000+ pages), and may even overload the Latex sub-system (will result in 'TeX capacity exceeded, sorry' error). It is therefore recommended to only activate these options for small datasets with very few sector layers. \\
+% Please \textbf{note} that the two 'Include ... Details' options can produce very large PDF reports (10.000+ pages), and may even overload the Latex sub-system (will result in 'TeX capacity exceeded, sorry' error). It is therefore recommended to only activate these options for small datasets with very few sector layers. \\
 
-The 'Run' button startes the export process. At the bottom, status information and a cancel button exists. \\
+% The 'Run' button startes the export process. At the bottom, status information and a cancel button exists. \\
 
-To run the export process, click the 'Run' button.
+% To run the export process, click the 'Run' button.
 
-\begin{figure}[H]
-    \includegraphics[width=14cm]{figures/eval_report_status.png}
-  \caption{Evaluation results: Generate report in progress}
-\end{figure}
+% \begin{figure}[H]
+%     \includegraphics[width=14cm]{figures/eval_report_status.png}
+%   \caption{Evaluation results: Generate report in progress}
+% \end{figure}
 
-If the export process was sucessful, the dialog is closed automatically. The report Latex file was written into the report directory, with screenshots in the 'screenshots' subfolder. If the respective options were set, a PDF was automatically generated and is opened using the default PDF application. \\
+% If the export process was sucessful, the dialog is closed automatically. The report Latex file was written into the report directory, with screenshots in the 'screenshots' subfolder. If the respective options were set, a PDF was automatically generated and is opened using the default PDF application. \\
 
-If a Latex error ocurred, a message box with the error message is shown. If the 'TeX capacity exceeded, sorry' error is shown, disable one or both of the 'Include ... Details' options.\\
+% If a Latex error ocurred, a message box with the error message is shown. If the 'TeX capacity exceeded, sorry' error is shown, disable one or both of the 'Include ... Details' options.\\
 
-Please note that the generated report can of course be edited by the user and re-generated using pdflatex, which allows for better customization options (adding e.g. details, corporate identity etc.).
+% Please note that the generated report can of course be edited by the user and re-generated using pdflatex, which allows for better customization options (adding e.g. details, corporate identity etc.).
 
 \subfile{eval_requirements}

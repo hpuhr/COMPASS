@@ -1,5 +1,4 @@
-#ifndef TIMESTAMPFILTER_H
-#define TIMESTAMPFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 
@@ -39,4 +38,4 @@ protected:
     virtual DBFilterWidget* createWidget() override;
 };
 
-#endif // TIMESTAMPFILTER_H
+

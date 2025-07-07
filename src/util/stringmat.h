@@ -21,7 +21,7 @@
 #include <string>
 #include <cassert>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class QAbstractItemModel;
 

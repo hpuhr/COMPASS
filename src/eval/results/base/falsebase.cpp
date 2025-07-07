@@ -123,7 +123,7 @@ SingleFalseBase::SingleFalseBase(const std::string& result_type,
                                  const SectorLayer& sector_layer,
                                  unsigned int utn, 
                                  const EvaluationTargetData* target, 
-                                 EvaluationManager& eval_man,
+                                 EvaluationCalculator& calculator,
                                  const EvaluationDetails& details,
                                  int num_updates, 
                                  int num_no_ref_pos, 
@@ -135,7 +135,7 @@ SingleFalseBase::SingleFalseBase(const std::string& result_type,
                                  int num_false,
                                  const std::string& false_value_name)
 :   FalseBase(num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside, num_unknown, num_correct, num_false, false_value_name)
-,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details)
 {
 }
 
@@ -170,7 +170,7 @@ std::vector<std::string> SingleFalseBase::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleFalseBase::targetTableValuesCustom() const
+nlohmann::json::array_t SingleFalseBase::targetTableValuesCustom() const
 {
     return { num_updates_, num_no_ref_pos_ + num_no_ref_val_, num_unknown_, num_correct_, num_false_ };
 }
@@ -179,7 +179,7 @@ std::vector<QVariant> SingleFalseBase::targetTableValuesCustom() const
 */
 std::vector<Single::TargetInfo> SingleFalseBase::targetInfos() const
 {
-    QString name = QString::fromStdString(false_value_name_);
+    std::string name = false_value_name_;
 
     return { { "#Up [1]"        , "Number of updates"                                  , num_updates_                     }, 
              { "#NoRef [1]"     , "Number of updates w/o reference position or " + name, num_no_ref_pos_ + num_no_ref_val_}, 
@@ -201,20 +201,20 @@ std::vector<std::string> SingleFalseBase::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleFalseBase::detailValues(const EvaluationDetail& detail,
-                                                    const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleFalseBase::detailValues(const EvaluationDetail& detail,
+                                                      const EvaluationDetail* parent_detail) const
 {
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             detail.getValue(DetailKey::RefExists),
+    return { Utils::Time::toString(detail.timestamp()),
+             detail.getValue(DetailKey::RefExists).toBool(),
             !detail.getValue(DetailKey::IsNotOk).toBool(),
-             detail.getValue(DetailKey::NumUpdates),
-             detail.getValue(DetailKey::NumNoRef),
-             detail.getValue(DetailKey::NumInside),
-             detail.getValue(DetailKey::NumOutside),
-             detail.getValue(DetailKey::NumUnknownID),
-             detail.getValue(DetailKey::NumCorrectID),
-             detail.getValue(DetailKey::NumFalseID),
-             detail.comments().generalComment().c_str() };
+             detail.getValue(DetailKey::NumUpdates).toUInt(),
+             detail.getValue(DetailKey::NumNoRef).toUInt(),
+             detail.getValue(DetailKey::NumInside).toUInt(),
+             detail.getValue(DetailKey::NumOutside).toUInt(),
+             detail.getValue(DetailKey::NumUnknownID).toUInt(),
+             detail.getValue(DetailKey::NumCorrectID).toUInt(),
+             detail.getValue(DetailKey::NumFalseID).toUInt(),
+             detail.comments().generalComment() };
 }
 
 /**
@@ -256,10 +256,10 @@ JoinedFalseBase::JoinedFalseBase(const std::string& result_type,
                                  const std::string& result_id, 
                                  std::shared_ptr<EvaluationRequirement::Base> requirement,
                                  const SectorLayer& sector_layer, 
-                                 EvaluationManager& eval_man,
+                                 EvaluationCalculator& calculator,
                                  const std::string& false_value_name)
 :   FalseBase(false_value_name)
-,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -334,7 +334,7 @@ boost::optional<double> JoinedFalseBase::computeResult_impl() const
 */
 std::vector<Joined::SectorInfo> JoinedFalseBase::sectorInfos() const
 {
-    QString name = QString::fromStdString(false_value_name_);
+    std::string name = false_value_name_;
 
     return { { "#Up [1]"        , "Number of updates"                                  , num_updates_                    },
              { "#NoRef [1]"     , "Number of updates w/o reference position or " + name, num_no_ref_pos_+num_no_ref_val_ },
@@ -353,7 +353,7 @@ FeatureDefinitions JoinedFalseBase::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs; 
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleFalseBase::DetailKey::IsNotOk, 
                        GridAddDetailMode::AddEvtRefPosition, 
                        true);

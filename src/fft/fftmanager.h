@@ -3,7 +3,7 @@
 
 #include "configurable.h"
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QObject>
 

@@ -1,19 +1,19 @@
 #pragma once
 
 #include "configurable.h"
-#include "dbcontent/variable/variableset.h"
-#include "dbcontent/dbcontentaccessor.h"
+//#include "dbcontent/variable/variableset.h"
+//#include "dbcontent/dbcontentaccessor.h"
 #include "reconstructorbase.h"
 #include "task.h"
 #include "global.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QObject>
 
 #include <memory>
 #include <future>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+//#include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
 class DBContent;
@@ -53,12 +53,15 @@ public:
 
         bool debug_association_ {false};
         bool debug_outlier_detection_ {false};
-        bool debug_accuracy_estimation_ {false};
-        bool debug_bias_correction_ {false};
-        bool debug_geo_altitude_correction_ {false};
+        bool debug_geo_altitude_correction_ {false}; // not yet set using gui
 
-        nlohmann::json deep_debug_accuracy_estimation_; // ds type -> bool
-        nlohmann::json deep_debug_accuracy_estimation_write_wp_; // ds type -> bool
+        bool analyze_ {false};
+
+        bool analyze_association_ {false};
+        bool analyze_outlier_detection_ {false};
+        bool analyze_accuracy_estimation_ {false};
+        bool analyze_bias_correction_ {false};
+        bool analyze_geo_altitude_correction_ {false};
 
         bool debug_reference_calculation_ {false};
         bool debug_kalman_chains_ {false};
@@ -67,35 +70,14 @@ public:
         bool debugUTN(unsigned int utn) { return debug_utns_.count(utn); }
         bool debugRecNum(unsigned long rec_num) { return debug_rec_nums_.count(rec_num); }
 
-        bool deepDebugAccuracyEstimation(const std::string& ds_type)
-        {
-            if (!deep_debug_accuracy_estimation_.contains(ds_type))
-                return false;
-
-            return deep_debug_accuracy_estimation_[ds_type];
-        }
-        void deepDebugAccuracyEstimation(const std::string& ds_type, bool value)
-        {
-            deep_debug_accuracy_estimation_[ds_type] = value;
-        }
-
-        bool deepDebugAccuracyEstimationWriteVP(const std::string& ds_type)
-        {
-            if (!deep_debug_accuracy_estimation_write_wp_.contains(ds_type))
-                return false;
-
-            return deep_debug_accuracy_estimation_write_wp_[ds_type];
-        }
-        void deepDebugAccuracyEstimationWriteVP(const std::string& ds_type, bool value)
-        {
-            deep_debug_accuracy_estimation_write_wp_[ds_type] = value;
-        }
+        double grid_max_resolution_{0.0005};
+        unsigned int max_num_grid_cells_ {500};
     };
 
-  signals:
+signals:
     void configChanged();
 
-  public slots:
+public slots:
     void deleteCalculatedReferencesDoneSlot();
     void deleteTargetsDoneSlot();
     void deleteAssociationsDoneSlot();
@@ -110,7 +92,7 @@ public:
 
     void updateProgressSlot(const QString& msg, bool add_slice_progress);
 
-  public:
+public:
     ReconstructorTask(const std::string& class_id, const std::string& instance_id,
                       TaskManager& task_manager);
     virtual ~ReconstructorTask();
@@ -150,11 +132,9 @@ public:
     ReconstructorBase::DataSlice& processingSlice();
     const ReconstructorBase::DataSlice& processingSlice() const;
 
-    ViewPointGenVP* getDebugViewpoint(const std::string& name, const std::string& type, bool* created = nullptr) const;
-    ViewPointGenVP* getDebugViewpointNoData(const std::string& name, const std::string& type); // w/o sur data
-    ViewPointGenVP* getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix="") const;
-    ViewPointGenAnnotation* getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const;
-    void saveDebugViewPoints();
+    std::unique_ptr<ViewPointGenVP> getDebugViewpoint(const std::string& name, const std::string& type, bool* created = nullptr) const;
+    std::unique_ptr<ViewPointGenVP> getDebugViewpointNoData(const std::string& name, const std::string& type); // w/o sur data
+    std::unique_ptr<ViewPointGenVP> getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix="") const;
 
     bool skipReferenceDataWriting() const;
     void skipReferenceDataWriting(bool newSkip_reference_data_writing);
@@ -169,6 +149,16 @@ public:
     DebugSettings& debugSettings() { return debug_settings_; }
 
 protected:
+    virtual void checkSubConfigurables() override;
+    void deleteCalculatedReferences();
+
+    void loadDataSlice();
+    void processDataSlice();
+    void writeDataSlice();
+    void endReconstruction();
+
+    void finalizeSlice(std::unique_ptr<ReconstructorBase::DataSlice>& slice);
+
     std::string current_reconstructor_str_;
 
     nlohmann::json use_dstypes_; // dstype -> bool
@@ -203,12 +193,5 @@ protected:
 
     bool skip_reference_data_writing_ {false};
 
-    mutable std::map<std::pair<std::string,std::string>, std::unique_ptr<ViewPointGenVP>> debug_viewpoints_;
-
-    virtual void checkSubConfigurables() override;
-    void deleteCalculatedReferences();
-
-    void loadDataSlice();
-    void processDataSlice();
-    void writeDataSlice();
+    //mutable std::map<std::pair<std::string,std::string>, std::unique_ptr<ViewPointGenVP>> debug_viewpoints_;
 };

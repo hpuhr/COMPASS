@@ -15,18 +15,25 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONSTANDARDWIDGET_H
-#define EVALUATIONSTANDARDWIDGET_H
+#pragma once
+
+class Group;
 
 #include <QWidget>
 #include <QModelIndex>
 #include <QTreeView>
+#include <QMenu>
 
 #include <memory>
 
 #include "evaluationstandardtreemodel.h"
 
 class EvaluationStandard;
+
+namespace EvaluationRequirement {
+class BaseConfig;
+}
+
 
 class QTreeView;
 class QStackedWidget;
@@ -37,7 +44,14 @@ class EvaluationStandardWidget : public QWidget
     Q_OBJECT
 
 public slots:
+    void standardConfigChangedSlot();
+
     void itemClickedSlot(const QModelIndex& index);
+    void addGroupSlot();
+
+    void deleteGroupSlot(Group& group);
+    void addRequirementSlot(Group& group);
+    void deleteRequirementSlot(Group& group, EvaluationRequirement::BaseConfig& req);
 
 public:
     EvaluationStandardWidget(EvaluationStandard& standard);
@@ -47,6 +61,9 @@ public:
     void expandAll();
 
     void showRequirementWidget(QWidget* widget); // can be nullptr
+
+    void showMenu ();
+    void showGroupMenu (Group& group);
 
 protected:
     void showContextMenu(const QPoint& pos);
@@ -59,6 +76,7 @@ protected:
     QSplitter* splitter_ {nullptr};
 
     QStackedWidget* requirements_widget_{nullptr};
+
+    QMenu menu_;
 };
 
-#endif // EVALUATIONSTANDARDWIDGET_H

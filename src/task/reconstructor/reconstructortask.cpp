@@ -23,6 +23,10 @@
 #include "projection.h"
 #include "licensemanager.h"
 
+#include "report/report.h"
+#include "report/section.h"
+#include "report/sectioncontenttable.h"
+
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "probimmreconstructor.h"
 #include "complexaccuracyestimator.h"
@@ -34,6 +38,7 @@
 #include <QThread>
 #include <QPushButton>
 #include <QLabel>
+#include <QElapsedTimer>
 
 #include <malloc.h>
 
@@ -77,18 +82,19 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
                       debug_settings_.debug_association_);
     registerParameter("debug_outlier_detection", &debug_settings_.debug_outlier_detection_,
                       debug_settings_.debug_outlier_detection_);
-    registerParameter("debug_accuracy_estimation", &debug_settings_.debug_accuracy_estimation_,
-                      debug_settings_.debug_accuracy_estimation_);
-    registerParameter("debug_bias_correction", &debug_settings_.debug_bias_correction_,
-                      debug_settings_.debug_bias_correction_);
-    registerParameter("debug_geo_altitude_correction", &debug_settings_.debug_geo_altitude_correction_,
-                      debug_settings_.debug_geo_altitude_correction_);
 
-    registerParameter("deep_debug_accuracy_estimation", &debug_settings_.deep_debug_accuracy_estimation_,
-                      debug_settings_.deep_debug_accuracy_estimation_);
-    registerParameter("deep_debug_accuracy_estimation_write_wp",
-                      &debug_settings_.deep_debug_accuracy_estimation_write_wp_,
-                      debug_settings_.deep_debug_accuracy_estimation_write_wp_);
+    registerParameter("analyze", &debug_settings_.analyze_, debug_settings_.analyze_);
+
+    registerParameter("analyze_association", &debug_settings_.analyze_association_,
+                      debug_settings_.analyze_association_);
+    registerParameter("analyze_outlier_detection", &debug_settings_.analyze_outlier_detection_,
+                      debug_settings_.analyze_outlier_detection_);
+    registerParameter("analyze_accuracy_estimation", &debug_settings_.analyze_accuracy_estimation_,
+                      debug_settings_.analyze_accuracy_estimation_);
+    registerParameter("analyze_bias_correction", &debug_settings_.analyze_bias_correction_,
+                      debug_settings_.analyze_bias_correction_);
+    registerParameter("analyze_geo_altitude_correction", &debug_settings_.analyze_geo_altitude_correction_,
+                      debug_settings_.analyze_geo_altitude_correction_);
 
     registerParameter("debug_reference_calculation", &debug_settings_.debug_reference_calculation_,
                       debug_settings_.debug_reference_calculation_);
@@ -396,14 +402,27 @@ void ReconstructorTask::run()
     delassocs_future_ = {};
     process_future_ = {};
 
+    COMPASS::instance().dbContentManager().clearAssociationsIdentifier();
+    COMPASS::instance().dbInterface().startPerformanceMetrics();
+
+    COMPASS::instance().taskManager().beginTaskResultWriting("Reconstruct References", task::TaskResultType::Generic);
+
+    COMPASS::instance().logInfo("Reconstructor") << "running " << current_reconstructor_str_;
+
     Projection& projection = ProjectionManager::instance().currentProjection();
     projection.clearCoordinateSystems();
-    projection.addAllRadarCoordinateSystems();
+    projection.addAllCoordinateSystems();
 
     loginf << "ReconstructorTask: run: started";
 
     run_start_time_ = boost::posix_time::microsec_clock::local_time();
     run_start_time_after_del_ = {};
+
+    auto& section = COMPASS::instance().taskManager().currentReport()->getSection("Overview");
+    section.addTable("Info", 3, {"Name", "Value", "Comment"}, false);
+
+    auto& table = section.getTable("Info");
+    table.addRow({"Begin", Time::toString(run_start_time_), ""});
 
     QLabel* tmp_label = new QLabel();
     tmp_label->setTextFormat(Qt::RichText);
@@ -427,7 +446,7 @@ void ReconstructorTask::run()
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     dbcontent_man.clearData();
 
-    COMPASS::instance().evaluationManager().clearLoadedDataAndResults(); // in case there are previous results
+    COMPASS::instance().evaluationManager().clearData(); // in case there are previous results
 
     delcalcref_future_ = std::async(std::launch::async, [&] {
         {
@@ -460,7 +479,7 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
         {
             try
             {
-                cont_man.clearTargetsInfo();
+                cont_man.deleteAllTargets();
 
                 if (cancelled_)
                     return;
@@ -496,7 +515,7 @@ void ReconstructorTask::deleteTargetsDoneSlot()
                                                   Q_ARG(const QString&, "Deleting Previous Associations"),
                                                   Q_ARG(bool, false));
 
-                        COMPASS::instance().interface().clearAssociations(*dbcont_it.second);
+                        COMPASS::instance().dbInterface().clearAssociations(*dbcont_it.second);
                     }
                 }
 
@@ -580,9 +599,11 @@ void ReconstructorTask::loadDataSlice()
     for (auto& dbcont_it : dbcontent_man)
     {
         logdbg << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
-               << " has data " << dbcont_it.second->hasData();
+               << " has data " << dbcont_it.second->hasData()
+               << " has utn " << dbcont_it.second->hasVariable("UTN");
 
-        if (!dbcont_it.second->hasData() || !dbcont_it.second->hasVariable("UTN"))
+        if (!dbcont_it.second->hasData()
+            || !dbcont_it.second->hasVariable("UTN"))
             continue;
 
         VariableSet read_set = currentReconstructor()->getReadSetFor(dbcont_it.first);
@@ -607,7 +628,7 @@ void ReconstructorTask::processDataSlice()
 
     if (!processing_slice_->data_.size())
     {
-        loginf << "ReconstructorTask: processDataSlice: empty buffer at ("
+        logdbg << "ReconstructorTask: processDataSlice: empty buffer at ("
                << Time::toString(loading_slice_->slice_begin_)<< ", no process";
 
         processing_slice_ = nullptr;
@@ -655,7 +676,6 @@ void ReconstructorTask::processDataSlice()
     });
 }
 
-
 void ReconstructorTask::writeDataSlice()
 {
     loginf << "ReconstructorTask: writeDataSlice";
@@ -679,9 +699,9 @@ void ReconstructorTask::writeDataSlice()
                 this, &ReconstructorTask::writeDoneSlot);
 
     loginf << "ReconstructorTask: writeDataSlice: references dbcontent";
+
     dbcontent_man.insertData(writing_slice_->reftraj_data_);
 }
-
 
 void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
@@ -743,6 +763,13 @@ void ReconstructorTask::loadingDoneSlot()
 
     assert (!processing_data_slice_);
 
+    if (!loading_slice_)
+    {
+        logwrn << "ReconstructorTask: loadingDoneSlot: no loading_slice_, cancelled_ " << cancelled_;
+        return;
+    }
+
+
     loginf << "ReconstructorTask: loadingDoneSlot: processing first slice "
            << !loading_slice_->first_slice_
            << " remove ts " << Time::toString(loading_slice_->remove_before_time_);
@@ -761,6 +788,15 @@ void ReconstructorTask::loadingDoneSlot()
 
         loading_slice_ = nullptr;
         assert (!processing_data_slice_);
+
+        if (last_slice)
+        {
+            loginf << "ReconstructorTask: loadingDoneSlot: finalizing last empty slice";
+
+            endReconstruction();
+            // release unused memory
+            malloc_trim(0);
+        }
     }
 
     if (cancelled_)
@@ -811,12 +847,15 @@ void ReconstructorTask::processingDoneSlot()
 
     if (skip_reference_data_writing_)
     {
-        writing_slice_ = nullptr;
-
         loginf << "ReconstructorTask: processingDoneSlot: skipping reference writing";
+
+        //immediately finalize slice
+        finalizeSlice(writing_slice_);
     }
     else
+    {
         writeDataSlice(); // starts the async jobs
+    }
 }
 
 void ReconstructorTask::writeDoneSlot()
@@ -829,64 +868,151 @@ void ReconstructorTask::writeDoneSlot()
     if (cancelled_)
     {
         writing_slice_ = nullptr;
-
         return;
     }
 
-    if (writing_slice_->is_last_slice_)
-    {
-        DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
-
-        disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
-                   this, &ReconstructorTask::writeDoneSlot);
-
-        currentReconstructor()->saveTargets();
-
-        COMPASS::instance().dataSourceManager().saveDBDataSources();
-        emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
-        COMPASS::instance().interface().saveProperties();
-
-        done_ = true;
-
-        assert (progress_dialog_);
-        progress_dialog_->setCancelButtonText("OK");
-
-        updateProgressSlot("Reference Calculation Done", true);
-
-        if (debug_settings_.debug_)
-        {
-            //write some additional stuff before saving
-            if (currentReconstructor())
-                currentReconstructor()->createAdditionalAnnotations();
-            
-            saveDebugViewPoints();
-        }
-
-        currentReconstructor()->reset();
-
-        double time_elapsed_s = Time::partialSeconds(
-            boost::posix_time::microsec_clock::local_time() - run_start_time_);
-
-        double time_elapsed_s_after_del = Time::partialSeconds(
-            boost::posix_time::microsec_clock::local_time() - run_start_time_after_del_);
-
-        loginf << "ReconstructorTask: writeDoneSlot: done after "
-               << String::timeStringFromDouble(time_elapsed_s, false)
-               << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
-
-        COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
-
-        if (!allow_user_interactions_)
-            progress_dialog_->close();
-    }
-
-    loginf << "ReconstructorTask: writeDoneSlot: trim";
-
-    malloc_trim(0); // release unused memory
-
-    writing_slice_ = nullptr;
+    //writing finished, finalize slice
+    finalizeSlice(writing_slice_);
 
     loginf << "ReconstructorTask: writeDoneSlot: done";
+}
+
+void ReconstructorTask::finalizeSlice(std::unique_ptr<ReconstructorBase::DataSlice>& slice)
+{
+    assert(slice);
+
+    loginf << "ReconstructorTask: finalizeSlice: is last = " << slice->is_last_slice_;
+
+    if (slice->is_last_slice_)
+    {
+        //last slice finalized => end reconstruction
+        endReconstruction();
+    }
+
+    loginf << "ReconstructorTask: finalizeSlice: trim";
+
+    // release unused memory
+    malloc_trim(0); 
+
+    // free slice
+    slice.reset();
+}
+
+void ReconstructorTask::endReconstruction()
+{
+    loginf << "ReconstructorTask: endReconstruction: ending reconstruction...";
+
+    DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
+
+    disconnect(&dbcontent_man, &DBContentManager::insertDoneSignal,
+               this, &ReconstructorTask::writeDoneSlot);
+
+    currentReconstructor()->saveTargets();
+
+    COMPASS::instance().dataSourceManager().saveDBDataSources();
+    emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
+    COMPASS::instance().dbInterface().saveProperties();
+
+    done_ = true;
+
+    assert (progress_dialog_);
+    progress_dialog_->setCancelButtonText("OK");
+
+    updateProgressSlot("Reference Calculation Done", true);
+
+    if (debug_settings_.debug_)
+    {
+        //write some additional stuff before saving
+        if (currentReconstructor())
+            currentReconstructor()->createAdditionalAnnotations();
+        
+        //saveDebugViewPoints();
+    }
+
+    double time_elapsed_s = Time::partialSeconds(
+        boost::posix_time::microsec_clock::local_time() - run_start_time_);
+
+    double time_elapsed_s_after_del = Time::partialSeconds(
+        boost::posix_time::microsec_clock::local_time() - run_start_time_after_del_);
+
+    loginf << "ReconstructorTask: finalizeSlice: done after "
+           << String::timeStringFromDouble(time_elapsed_s, false)
+           << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
+
+    loginf << COMPASS::instance().dbInterface().stopPerformanceMetrics().asString();
+
+    COMPASS::instance().logInfo("Reconstructor") << "done using " << current_reconstructor_str_
+                                                 << " after " << String::timeStringFromDouble(time_elapsed_s, false);
+
+    // report: info
+    auto& section = COMPASS::instance().taskManager().currentReport()->getSection("Overview");
+
+    {
+        auto& table = section.getTable("Info");
+        table.addRow({"End", Time::toString(boost::posix_time::microsec_clock::local_time()), ""});
+        table.addRow({"Elapsed", String::timeStringFromDouble(time_elapsed_s, false), ""});
+        table.addRow({"Elapsed After Deletion", String::timeStringFromDouble(time_elapsed_s_after_del, false), ""});
+        table.addRow({"Number of Targets", COMPASS::instance().dbContentManager().numTargets(), ""});
+    }
+
+    // report: assoc counts
+    {
+        if (!section.hasTable("Data Source Counts"))
+            section.addTable("Data Source Counts", 5,
+                         {"Data Source", "DBContent", "#Associated", "#Unassocated", "Associated [%]"}, false);
+
+        auto& table = section.getTable("Data Source Counts");
+
+        const auto& counts = currentReconstructor()->assocAounts();
+
+        DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+        DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+        if (counts.size())
+        {
+            // ds_id -> dbcont id -> cnt
+
+            map<string, string> tmp_rows;
+
+            for (auto& ds_it : counts)
+            {
+                for (auto& dbcont_it : ds_it.second)
+                {
+                    unsigned int assoc_cnt = dbcont_it.second.first;
+                    unsigned int unassoc_cnt = dbcont_it.second.second;
+
+                    std::string ds_name = ds_man.dbDataSource(ds_it.first).name();
+                    std::string dbcont_name = dbcont_man.dbContentWithId(dbcont_it.first);
+
+                    std::string assoc_perc_str;
+
+                    if (assoc_cnt + unassoc_cnt)
+                        assoc_perc_str = String::percentToString(
+                                              (100.0*assoc_cnt/(float)(assoc_cnt+unassoc_cnt)));
+                    else
+                        assoc_perc_str = String::percentToString(0);
+
+                    table.addRow({ds_name, dbcont_name, assoc_cnt, unassoc_cnt, assoc_perc_str});
+                }
+            }
+        }
+    }
+
+    currentReconstructor()->reset();
+
+    if (!skip_reference_data_writing_)
+        COMPASS::instance().dbContentManager().setAssociationsIdentifier("All");
+
+    COMPASS::instance().taskManager().endTaskResultWriting(true, true);
+
+    //cleanup db after reconstruction
+    COMPASS::instance().dbInterface().cleanupDB(true);
+
+    if (!allow_user_interactions_)
+    {
+        //auto-close dialog and immediately cleanup db
+        progress_dialog_->close();
+    }
 }
 
 void ReconstructorTask::runCancelledSlot()
@@ -953,8 +1079,7 @@ void ReconstructorTask::runCancelledSlot()
 
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    if (debug_settings_.debug_)
-        saveDebugViewPoints();
+    COMPASS::instance().logInfo("Reconstructor") << "cancelled by user";
 
     currentReconstructor()->reset();
 
@@ -967,6 +1092,8 @@ void ReconstructorTask::runCancelledSlot()
 
     msg_box->close();
     delete msg_box;
+
+    COMPASS::instance().taskManager().endTaskResultWriting(false);
 
     emit doneSignal();
 
@@ -1069,26 +1196,31 @@ const ReconstructorBase::DataSlice& ReconstructorTask::processingSlice() const
     return *processing_slice_;
 }
 
-ViewPointGenVP* ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type, bool* created) const
+std::unique_ptr<ViewPointGenVP> ReconstructorTask::getDebugViewpoint(const std::string& name, const std::string& type, bool* created) const
 {
     auto key_str = std::pair<std::string,std::string>(name,type);
 
-    if (created)
-        *created = false;
+    // if (created)
+    //     *created = false;
 
-    if (!debug_viewpoints_.count(key_str))
-    {
-        std::unique_ptr<ViewPointGenVP> vp(new ViewPointGenVP(name, 0, type));
-        debug_viewpoints_[ key_str ] = std::move(vp);
+    // if (!debug_viewpoints_.count(key_str))
+    // {
+    //    std::unique_ptr<ViewPointGenVP> vp(new ViewPointGenVP(name, 0, type));
+    //     debug_viewpoints_[ key_str ] = std::move(vp);
 
-        if (created)
-            *created = true;
-    }
+    //     if (created)
+    //         *created = true;
+    // }
 
-    return debug_viewpoints_.at(key_str).get();
+    // return debug_viewpoints_.at(key_str).get();
+
+    std::unique_ptr<ViewPointGenVP> ptr;
+    ptr.reset(new ViewPointGenVP(name, 0, type));
+
+    return ptr;
 }
 
-ViewPointGenVP* ReconstructorTask::getDebugViewpointNoData(const std::string& name, const std::string& type)
+std::unique_ptr<ViewPointGenVP> ReconstructorTask::getDebugViewpointNoData(const std::string& name, const std::string& type)
 {
     auto vp = getDebugViewpoint(name, type);
     vp->noDataLoaded(true);
@@ -1096,7 +1228,7 @@ ViewPointGenVP* ReconstructorTask::getDebugViewpointNoData(const std::string& na
     return vp;
 }
 
-ViewPointGenVP* ReconstructorTask::getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix) const
+std::unique_ptr<ViewPointGenVP> ReconstructorTask::getDebugViewpointForUTN(unsigned long utn, const std::string& name_prefix) const
 {
     bool created;
     string name;
@@ -1118,33 +1250,33 @@ ViewPointGenVP* ReconstructorTask::getDebugViewpointForUTN(unsigned long utn, co
     return vp;
 }
 
-ViewPointGenAnnotation* ReconstructorTask::getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const
-{
-    auto vp = getDebugViewpointForUTN(utn);
+// ViewPointGenAnnotation* ReconstructorTask::getDebugAnnotationForUTNSlice(unsigned long utn, size_t slice_idx) const
+// {
+//     auto vp = getDebugViewpointForUTN(utn);
 
-    return vp->annotations().getOrCreateAnnotation("Slice " + std::to_string(slice_idx));
-}
+//     return vp->annotations().getOrCreateAnnotation("Slice " + std::to_string(slice_idx));
+// }
 
-void ReconstructorTask::saveDebugViewPoints()
-{
-    loginf << "ReconstructorTask: saveDebugViewPoints";
+// void ReconstructorTask::saveDebugViewPoints()
+// {
+//     loginf << "ReconstructorTask: saveDebugViewPoints";
 
-    COMPASS::instance().viewManager().clearViewPoints();
+//     COMPASS::instance().viewManager().clearViewPoints();
 
-    std::vector <nlohmann::json> view_points;
+//     std::vector <nlohmann::json> view_points;
 
-    for (auto& vp_it : debug_viewpoints_)
-    {
-        nlohmann::json j;
-        vp_it.second->toJSON(j);
+//     for (auto& vp_it : debug_viewpoints_)
+//     {
+//         nlohmann::json j;
+//         vp_it.second->toJSON(j);
 
-        view_points.emplace_back(j);
-    }
+//         view_points.emplace_back(j);
+//     }
 
-    COMPASS::instance().viewManager().addViewPoints(view_points);
+//     COMPASS::instance().viewManager().addViewPoints(view_points);
 
-    debug_viewpoints_.clear();
-}
+//     debug_viewpoints_.clear();
+// }
 
 bool ReconstructorTask::skipReferenceDataWriting() const
 {
@@ -1182,12 +1314,16 @@ void ReconstructorTask::deleteCalculatedReferences() // called in async
 
     loginf << "ReconstructorTask: deleteCalculatedReferences: deleting";
 
+    //cleanup db on delete (for re-compression)
+
     if (currentReconstructor()->settings().delete_all_calc_reftraj)
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-            currentReconstructor()->settings().ds_sac, currentReconstructor()->settings().ds_sic);
+            currentReconstructor()->settings().ds_sac, 
+            currentReconstructor()->settings().ds_sic);
     else
         dbcontent_man.dbContent("RefTraj").deleteDBContentData(
-            currentReconstructor()->settings().ds_sac, currentReconstructor()->settings().ds_sic,
+            currentReconstructor()->settings().ds_sac, 
+            currentReconstructor()->settings().ds_sic,
             currentReconstructor()->settings().ds_line);
 
     loginf << "ReconstructorTask: deleteCalculatedReferences: waiting on delete";

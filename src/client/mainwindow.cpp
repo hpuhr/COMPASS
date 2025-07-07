@@ -18,13 +18,12 @@
 #include "mainwindow.h"
 #include "mainwindow_commands.h"
 #include "compass.h"
-#include "config.h"
 #include "configurationmanager.h"
 #include "datasourcemanager.h"
 #include "datasourcesconfigurationdialog.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/target/targetlistwidget.h"
-#include "datasourcesloadwidget.h"
+#include "datasourceswidget.h"
 #include "dbcontent/variable/metavariableconfigurationdialog.h"
 #include "files.h"
 #include "filtermanager.h"
@@ -38,19 +37,21 @@
 #include "gpstrailimporttask.h"
 #include "gpstrailimporttaskdialog.h"
 #include "gpsimportcsvtask.h"
-#include "gpsimportcsvtaskdialog.h"
 #include "managesectorstask.h"
 #include "managesectorstaskdialog.h"
 #include "evaluationmanager.h"
 #include "compass.h"
 #include "fftmanager.h"
 #include "fftsconfigurationdialog.h"
-#include "view.h"
 #include "ui_test_common.h"
 #include "ui_test_cmd.h"
 #include "rtcommand_shell.h"
 #include "licensemanagerdialog.h"
 #include "licensemanager.h"
+#include "toolbox.h"
+#include "toolboxwidget.h"
+#include "viewpointswidget.h"
+#include "taskresultswidget.h"
 
 #include "asteriximporttask.h"
 #include "asteriximporttaskdialog.h"
@@ -65,9 +66,12 @@
 #include "reconstructortaskdialog.h"
 #include "util/async.h"
 
+#include "logwidget.h"
+
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "geometrytreeitem.h"
 #include "test_lab.h"
+#include "extra_commands.h"
 #endif
 
 #include <QApplication>
@@ -99,54 +103,98 @@ MainWindow::MainWindow()
     setLocale(QLocale::c());
 
     const char* appdir = getenv("APPDIR");
-    if (appdir)
-        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs); // disable native since they cause crashes
+    if (appdir && COMPASS::instance().disableNativeDialogs())
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs); // disable native
 
-    setMinimumSize(QSize(1200, 900));
+    setMinimumSize(QSize(COMPASS::instance().minAppWidth(), COMPASS::instance().minAppHeight()));
 
-    QIcon ats_icon(Files::getIconFilepath("ats.png").c_str());
+    QIcon ats_icon(Files::IconProvider::getIcon("ats.png"));
     setWindowIcon(ats_icon);  // for the glory of the empire
 
     QSettings settings("COMPASS", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 
-    QWidget* main_widget = new QWidget();
+    // if (settings.value("MainWindow/isMaximized", false).toBool())
+    //     showMaximized();
+
+    if (settings.value("MainWindow/isFullScreen", false).toBool())
+    {
+        // Enter fullscreen with no decorations
+        //setWindowFlag(Qt::FramelessWindowHint, true);
+        setWindowFlags(Qt::FramelessWindowHint);
+        showMaximized();
+        showFullScreen(); // Re-show to apply
+    }
+    else
+    {
+        // No fullscreen: restore window flags and normal size
+        //setWindowFlag(Qt::FramelessWindowHint, false); // Remove frameless
+        setWindowFlags(Qt::Window);
+        //setWindowFlag(Qt::Window, true);               // Ensure normal window flags
+
+        // if (settings.value("MainWindow/isMaximized", false).toBool())
+        // {
+        //     loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
+        //     showMaximized();
+        // }
+        // else
+        {
+            restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+            showNormal();
+        }
+    }
+
+    //create ui
+    createUI();
+
+    //init ui related commands
+    ui_test::initUITestCommands();
+
+    //init extra commands
+#if USE_EXPERIMENTAL_SOURCE == true
+    if (!COMPASS::instance().isAppImage())
+        extra::init_extra_commands();
+#endif
+
+    main_window::init_commands();
+}
+
+MainWindow::~MainWindow()
+{
+    logdbg << "MainWindow: destructor";
+
+            // remember: this not called! insert deletes into closeEvent function
+}
+
+void MainWindow::createUI()
+{
+    main_widget_ = new QWidget();
 
     QVBoxLayout* main_layout = new QVBoxLayout();
     main_layout->setContentsMargins(0, 0, 0, 0);
+    main_widget_->setLayout(main_layout);
 
-    main_widget->setLayout(main_layout);
+    QHBoxLayout* content_layout = new QHBoxLayout;
+    content_layout->setContentsMargins(0, 0, 0, 0);
+    content_layout->setSpacing(0);
 
-            // initialize tabs
+    main_layout->addLayout(content_layout);
 
+    // initialize tabs
     tab_widget_ = new QTabWidget();
     tab_widget_->setObjectName("container0");
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    tab_widget_->addTab(COMPASS::instance().dataSourceManager().loadWidget(), "Data Sources");
-    tab_widget_->addTab(COMPASS::instance().filterManager().widget(), "Filters");
-    tab_widget_->addTab(COMPASS::instance().dbContentManager().targetListWidget(), "Targets");
-
-    QTabBar *tabBar = tab_widget_->tabBar();
-
-    tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
-    //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0");
-
-    COMPASS::instance().evaluationManager().init(tab_widget_); // adds eval widget
-    COMPASS::instance().viewManager().init(tab_widget_); // adds view points widget and view container
-
-    tab_widget_->setCurrentIndex(0);
+    //tab_widget_->setCurrentIndex(0);
 
     QApplication::restoreOverrideCursor();
-
-            //tab_widget_->setCurrentIndex(0);
 
     const QString tool_tip = "Add view";
 
     add_view_button_ = new QPushButton();
     UI_TEST_OBJ_NAME(add_view_button_, tool_tip);
-    add_view_button_->setIcon(QIcon(Files::getIconFilepath("crosshair_fat.png").c_str()));
+    add_view_button_->setIcon(Files::IconProvider::getIcon("crosshair_fat.png"));
     add_view_button_->setFixedSize(UI_ICON_SIZE);
     add_view_button_->setFlat(UI_ICON_BUTTON_FLAT);
     add_view_button_->setToolTip(tr(tool_tip.toStdString().c_str()));
@@ -155,9 +203,33 @@ MainWindow::MainWindow()
     connect(add_view_button_, &QPushButton::clicked, this, &MainWindow::showAddViewMenuSlot);
     tab_widget_->setCornerWidget(add_view_button_);
 
-    main_layout->addWidget(tab_widget_);
+    //init some components before using their widgets
+    COMPASS::instance().evaluationManager().init();
+    COMPASS::instance().viewManager().init(tab_widget_);
 
-            // bottom widget
+    // initialize toolbox
+    tool_box_ = new ToolBox(this);
+    
+    tool_box_->addTool(COMPASS::instance().dataSourceManager().loadWidget()); // 0
+    tool_box_->addTool(COMPASS::instance().filterManager().widget()); // 1
+    tool_box_->addTool(COMPASS::instance().dbContentManager().targetListWidget()); // 2
+    tool_box_->addTool(COMPASS::instance().taskManager().widget()); // 3
+    tool_box_->addTool(COMPASS::instance().viewManager().viewPointsWidget()); // 4
+    tool_box_->addTool(new LogWidget(COMPASS::instance().logStore())); // 5
+
+    //@TODO: !handle filter check box!
+    //QTabBar *tabBar = tab_widget_->tabBar();
+    //tabBar->setTabButton(1, QTabBar::LeftSide, COMPASS::instance().filterManager().widget()->filtersCheckBox());
+    //tabBar->setTabButton(0, QTabBar::RightSide, new QLabel("label0");
+
+    tool_box_->setMainContent(tab_widget_);
+    tool_box_->finalize();
+    tool_box_->selectTool("Data Sources");
+
+    // add toolbox and view tab widget
+    content_layout->addWidget(tool_box_);
+
+    // bottom widget
     QWidget* bottom_widget = new QWidget();
     bottom_widget->setMaximumHeight(40);
 
@@ -169,7 +241,7 @@ MainWindow::MainWindow()
 
     bottom_layout->addStretch();
 
-            // add status & button
+    // add status & button
     status_label_ = new QLabel();
     bottom_layout->addWidget(status_label_);
 
@@ -188,7 +260,7 @@ MainWindow::MainWindow()
 
     bottom_layout->addStretch();
 
-            // load button
+    // load button
     load_button_ = new QPushButton("Load");
     connect(load_button_, &QPushButton::clicked, this, &MainWindow::loadButtonSlot);
     bottom_layout->addWidget(load_button_);
@@ -201,15 +273,17 @@ MainWindow::MainWindow()
 
     main_layout->addWidget(bottom_widget);
 
-    setCentralWidget(main_widget);
+    setCentralWidget(main_widget_);
 
-            // do menus
-    createMenus ();
-    updateMenus ();
+    // create menus
+    createMenus();
+    updateMenus();
+
+    tool_box_->adjustSizings();
 
     updateWindowTitle();
 
-            // do signal slots
+    // connect signal slots
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal,
             this, &MainWindow::appModeSwitchSlot);
 
@@ -221,17 +295,8 @@ MainWindow::MainWindow()
     connect(&COMPASS::instance().licenseManager(), &LicenseManager::changed,
             this, &MainWindow::updateWindowTitle);
 
-            //init ui related commands
-    ui_test::initUITestCommands();
-
-    main_window::init_commands();
-}
-
-MainWindow::~MainWindow()
-{
-    logdbg << "MainWindow: destructor";
-
-            // remember: this not called! insert deletes into closeEvent function
+    connect(&COMPASS::instance().evaluationManager(), &EvaluationManager::evaluationDoneSignal,
+            this, &MainWindow::showEvaluationResult);
 }
 
 void MainWindow::createMenus ()
@@ -323,15 +388,6 @@ void MainWindow::createMenus ()
     connect(import_pcap_file_action, &QAction::triggered, this, &MainWindow::importAsterixFromPCAPSlot);
     import_menu_->addAction(import_pcap_file_action);
 
-    // if (!COMPASS::instance().isAppImage())
-    // {
-    //     QAction* import_ast_json_action = new QAction("ASTERIX From JSON Recording");
-    //     //import_ast_json_action->setShortcut(tr("Ctrl+P"));
-    //     import_ast_json_action->setToolTip("Import ASTERIX data from JSON recording file");
-    //     connect(import_ast_json_action, &QAction::triggered, this, &MainWindow::importAsterixFromJSONSlot);
-    //     import_menu_->addAction(import_ast_json_action);
-    // }
-
     QAction* import_ast_net_action = new QAction("ASTERIX From Network");
     import_ast_net_action->setToolTip("Import ASTERIX From Network");
     connect(import_ast_net_action, &QAction::triggered, this, &MainWindow::importAsterixFromNetworkSlot);
@@ -349,20 +405,11 @@ void MainWindow::createMenus ()
     connect(import_gps_nmea_action, &QAction::triggered, this, &MainWindow::importGPSTrailSlot);
     import_menu_->addAction(import_gps_nmea_action);
 
-    // deactivated, just for porto?
-    //    QAction* import_gps_csv_action = new QAction("&GPS Trail CSV");
-    //    import_gps_csv_action->setToolTip("Import GPS Trail CSV File");
-    //    connect(import_gps_csv_action, &QAction::triggered, this, &MainWindow::importGPSCSVSlot);
-    //    import_menu_->addAction(import_gps_csv_action);
-
-    if (!COMPASS::instance().hideViewpoints())
-    {
-        QAction* import_vp_file_action = new QAction("&View Points");
-        import_vp_file_action->setShortcut(tr("Ctrl+V"));
-        import_vp_file_action->setToolTip("Import View Points File");
-        connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
-        import_menu_->addAction(import_vp_file_action);
-    }
+    QAction* import_vp_file_action = new QAction("&View Points");
+    import_vp_file_action->setShortcut(tr("Ctrl+V"));
+    import_vp_file_action->setToolTip("Import View Points File");
+    connect(import_vp_file_action, &QAction::triggered, this, &MainWindow::importViewPointsSlot);
+    import_menu_->addAction(import_vp_file_action);
 
     // configuration menu
     config_menu_ = menuBar()->addMenu("&Configuration");
@@ -406,6 +453,16 @@ void MainWindow::createMenus ()
 
     config_menu_->addSeparator();
 
+    dark_mode_action_ = config_menu_->addAction("Dark Mode");
+    dark_mode_action_->setCheckable(true);
+    dark_mode_action_->setChecked(COMPASS::instance().darkMode());
+    connect(dark_mode_action_, &QAction::toggled, this, &MainWindow::toggleDarkModeSlot);
+
+    fullscreen_action_ = config_menu_->addAction("Fullscreen [F11]");
+    fullscreen_action_->setCheckable(true);
+    fullscreen_action_->setChecked(isFullScreen());
+    connect(fullscreen_action_, &QAction::toggled, this, &MainWindow::toggleFullscreenSlot);
+
     ViewManager& view_manager = COMPASS::instance().viewManager();
 
     auto_refresh_views_action_ = config_menu_->addAction("Refresh Views Automatically");
@@ -432,6 +489,11 @@ void MainWindow::createMenus ()
     reconstruct_action->setToolTip("Associate Unique Targets andd reconstruct Reference Trajectories");
     connect(reconstruct_action, &QAction::triggered, this, &MainWindow::reconstructReferencesSlot);
     process_menu_->addAction(reconstruct_action);
+
+    QAction* eval_action = new QAction("Evaluate");
+    eval_action->setToolTip("Evaluate test against reference data according to defined standards");
+    connect(eval_action, &QAction::triggered, this, &MainWindow::evaluateSlot);
+    process_menu_->addAction(eval_action);
 
     // ui menu
     ui_menu_ = menuBar()->addMenu("&UI");
@@ -510,8 +572,10 @@ void MainWindow::updateMenus()
     config_menu_->setDisabled(asterix_import_running || in_live);
 
     for (auto a : config_menu_->actions())
-        a->setEnabled(a == license_action_ || 
-                      a == auto_refresh_views_action_ ? true : db_open);
+        a->setEnabled(a == license_action_
+                      || a == auto_refresh_views_action_
+                              || a == dark_mode_action_
+                              || a == fullscreen_action_ ? true : db_open);
 }
 
 void MainWindow::updateBottomWidget()
@@ -584,30 +648,6 @@ void MainWindow::disableConfigurationSaving()
     quit_wo_cfg_sav_action_->setEnabled(save_configuration_);
 }
 
-void MainWindow::showEvaluationTab()
-{
-    assert (!COMPASS::instance().hideEvaluation());
-
-    assert (tab_widget_->count() > 3);
-    tab_widget_->setCurrentIndex(3);
-}
-
-void MainWindow::showViewPointsTab()
-{
-    assert (!COMPASS::instance().hideViewpoints());
-
-    if (COMPASS::instance().hideEvaluation())
-    {
-        assert (tab_widget_->count() > 3);
-        tab_widget_->setCurrentIndex(3);
-    }
-    else
-    {
-        assert (tab_widget_->count() > 4);
-        tab_widget_->setCurrentIndex(4);
-    }
-}
-
 void MainWindow::openExistingDB(const std::string& filename)
 {
     loginf << "MainWindow: openExistingDB: filename '" << filename << "'";
@@ -628,13 +668,32 @@ void MainWindow::createDB(const std::string& filename)
     updateMenus();
 }
 
+void MainWindow::createInMemoryDB(const std::string& future_filename)
+{
+    loginf << "MainWindow: createInMemoryDB: future filename '" << future_filename << "'";
+
+    COMPASS::instance().createInMemDBFile(future_filename);
+
+    updateBottomWidget();
+    updateMenus();
+}
+
+void MainWindow::createDBFromMemory()
+{
+    loginf << "MainWindow: createDBFromMemory";
+
+    COMPASS::instance().createNewDBFileFromMemory();
+
+    updateBottomWidget();
+    updateMenus();
+}
 
 void MainWindow::newDBSlot()
 {
     loginf << "MainWindow: newDBSlot";
 
     string filename = QFileDialog::getSaveFileName(
-                          this, "New SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
+                          this, "New Database File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         createDB(filename);
@@ -645,7 +704,7 @@ void MainWindow::openExistingDBSlot()
     loginf << "MainWindow: openExistingDBSlot";
 
     string filename = QFileDialog::getOpenFileName(
-                          this, "Open SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
+                          this, "Open Database File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
         openExistingDB(filename);
@@ -670,7 +729,7 @@ void MainWindow::exportDBSlot()
     loginf << "MainWindow: exportDBSlot";
 
     string filename = QFileDialog::getSaveFileName(
-                          this, "Export DB SQLite3 File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
+                          this, "Export Database File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
 
     if (filename.size() > 0)
     {
@@ -896,22 +955,22 @@ void MainWindow::importGPSTrailSlot()
     }
 }
 
-void MainWindow::importGPSCSVSlot()
-{
-    string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV",
-                                                   COMPASS::instance().lastUsedPath().c_str(),
-                                                   "Text Files (*.csv *.txt)").toStdString();
+// void MainWindow::importGPSCSVSlot()
+// {
+//     string filename = QFileDialog::getOpenFileName(this, "Import GPS Trail CSV",
+//                                                    COMPASS::instance().lastUsedPath().c_str(),
+//                                                    "Text Files (*.csv *.txt)").toStdString();
 
-    if (filename.size() > 0)
-    {
-        COMPASS::instance().taskManager().gpsImportCSVTask().importFilename(filename);
-        COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
+//     if (filename.size() > 0)
+//     {
+//         COMPASS::instance().taskManager().gpsImportCSVTask().importFilename(filename);
+//         COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename));
 
-        updateMenus();
+//         updateMenus();
 
-        COMPASS::instance().taskManager().gpsImportCSVTask().dialog()->show();
-    }
-}
+//         COMPASS::instance().taskManager().gpsImportCSVTask().dialog()->show();
+//     }
+// }
 
 void MainWindow::importViewPointsSlot()
 {
@@ -948,6 +1007,13 @@ void MainWindow::reconstructReferencesSlot()
     loginf << "MainWindow: reconstructReferencesSlot";
 
     COMPASS::instance().taskManager().reconstructReferencesTask().showDialog();
+}
+
+void MainWindow::evaluateSlot()
+{
+    loginf << "MainWindow: evaluateSlot";
+
+    COMPASS::instance().evaluationManager().evaluate(true);
 }
 
 void MainWindow::configureDataSourcesSlot()
@@ -1016,7 +1082,7 @@ void MainWindow::resetViewsMenuSlot()
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
         assert (tab_widget_);
-        int index = tab_widget_->currentIndex();
+        //int index = tab_widget_->currentIndex();
 
         {
             QMessageBox msg_box;
@@ -1055,7 +1121,7 @@ void MainWindow::resetViewsMenuSlot()
             msg_box.hide();
         }
 
-        tab_widget_->setCurrentIndex(index);
+        //tab_widget_->setCurrentIndex(index);
 
         setVisible(true);
 
@@ -1070,25 +1136,14 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
     loginf << "MainWindow: appModeSwitch: app_mode " << COMPASS::instance().appModeStr()
            << " enable_tabs " << enable_tabs;
 
-    if (COMPASS::instance().hideEvaluation() && COMPASS::instance().hideViewpoints())
+    assert (tool_box_);
+    if (app_mode_current == AppMode::LiveRunning)
     {
-       // nothing
-    }
-    else if (!COMPASS::instance().hideEvaluation() && !COMPASS::instance().hideViewpoints())
-    {
-        // both
-        assert (tab_widget_->count() > 3); // 2 eval, 3 vp
-
-        tab_widget_->setTabEnabled(2, enable_tabs);
-        tab_widget_->setTabEnabled(3, enable_tabs);
+        tool_box_->disableTools({2,3,4});
+        selectTool("Data Sources");
     }
     else
-    {
-        // one
-        assert (tab_widget_->count() > 2); // 2 is the other
-
-        tab_widget_->setTabEnabled(2, enable_tabs);
-    }
+        tool_box_->disableTools({}); // enable all
 
     updateBottomWidget();
     updateMenus();
@@ -1154,6 +1209,55 @@ void MainWindow::autoResumeStaySlot()
     auto_resume_timer_->start(COMPASS::instance().autoLiveRunningResumeAskTime() * 60 * 1000); // min -> ms
 }
 
+void MainWindow::toggleDarkModeSlot()
+{
+    loginf << "MainWindow: toggleDarkModeSlot";
+
+    COMPASS::instance().darkMode(!COMPASS::instance().darkMode());
+
+    QMessageBox m_warning(QMessageBox::Information, "Dark Mode",
+                          "Please restart the applications for the Dark Mode change to take effect.", QMessageBox::Ok);
+    m_warning.exec();
+}
+
+void MainWindow::toggleFullscreenSlot()
+{
+    loginf << "MainWindow: toggleFullscreenSlot: isFullScreen " << isFullScreen();
+
+    if (isFullScreen())
+    {
+        // Exit fullscreen: restore window flags and normal size
+        //setWindowFlag(Qt::FramelessWindowHint, false); // Remove frameless
+        //setWindowFlag(Qt::Window, true);               // Ensure normal window flags
+        setWindowFlags(Qt::Window);
+
+        QSettings settings("COMPASS", "Client");
+
+        // if (settings.value("MainWindow/isMaximized", false).toBool())
+        // {
+        //     loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
+        //     showMaximized();
+        // }
+        // else
+        {
+            restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+            showNormal();
+        }
+    }
+    else
+    {
+        QSettings settings("COMPASS", "Client");
+        settings.setValue("MainWindow/geometry", saveGeometry());
+        //settings.setValue("MainWindow/isMaximized", isMaximized());
+
+        // Enter fullscreen with no decorations
+        //setWindowFlag(Qt::FramelessWindowHint, true);
+        setWindowFlags(Qt::FramelessWindowHint);
+        showMaximized();
+        showFullScreen(); // Re-show to apply
+    }
+}
+
 void MainWindow::loadButtonSlot()
 {
     loginf << "MainWindow: loadButtonSlot";
@@ -1180,7 +1284,7 @@ void MainWindow::loadButtonSlot()
     loading_ = true;
     load_button_->setText("Stop");
 
-    COMPASS::instance().dbContentManager().load();
+    COMPASS::instance().dbContentManager().load("", true);
 }
 
 void MainWindow::loadingDoneSlot()
@@ -1215,6 +1319,10 @@ void MainWindow::liveStopSlot()
     loginf << "MainWindow: liveStopSlot";
 
     COMPASS::instance().appMode(AppMode::Offline);
+
+    //transfer memory db to file
+    if (COMPASS::instance().canCreateDBFileFromMemory())
+        createDBFromMemory();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -1231,6 +1339,8 @@ void MainWindow::shutdown()
 {
     QSettings settings("COMPASS", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
+    //settings.setValue("MainWindow/isMaximized", isMaximized());
+    settings.setValue("MainWindow/isFullScreen", isFullScreen());
 
     COMPASS::instance().viewManager().unsetCurrentViewPoint(); // needed to remove temporary stuff
 
@@ -1278,6 +1388,15 @@ void MainWindow::createDebugMenu()
     debug_menu->menuAction()->setVisible(!COMPASS::instance().isAppImage());
 }
 
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_F11) {
+        toggleFullscreenSlot();
+    } else {
+        QMainWindow::keyPressEvent(event); // Let base class handle other keys
+    }
+}
+
 void MainWindow::showCommandShell()
 {
     QDialog dlg(this);
@@ -1308,4 +1427,46 @@ void MainWindow::updateWindowTitle()
         title += "   |   " + licensee;
 
     QWidget::setWindowTitle(title.c_str());
+}
+
+void MainWindow::loadingStarted()
+{
+    if (tool_box_)
+        tool_box_->loadingStarted();
+}
+
+void MainWindow::loadingDone()
+{
+    if (tool_box_)
+        tool_box_->loadingDone();
+}
+
+void MainWindow::selectTool(const std::string& name)
+{
+    loginf << "MainWindow: selectTool: selecting tool '" << name << "'";
+
+    if (tool_box_)
+        tool_box_->selectTool(name);
+}
+
+void MainWindow::showResult(const std::string& name)
+{
+    loginf << "MainWindow: showResult: showing result '" << name << "'";
+
+    auto& task_manager = COMPASS::instance().taskManager();
+
+    //select task results tool
+    std::string tool_name = task_manager.widget()->toolName();
+    selectTool(tool_name);
+
+    //show result of given name
+    task_manager.widget()->setReport(name);
+}
+
+void MainWindow::showEvaluationResult()
+{
+    std::string result_name = COMPASS::instance().evaluationManager().lastResultName();
+
+    if (!result_name.empty())
+        showResult(result_name);
 }

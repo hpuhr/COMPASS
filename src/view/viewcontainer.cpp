@@ -76,7 +76,7 @@ ViewContainer::ViewContainer(const std::string& class_id,
 
         QPushButton* add_button = new QPushButton(tab_widget_);
         UI_TEST_OBJ_NAME(add_button, tool_tip);
-        add_button->setIcon(QIcon(Files::getIconFilepath("crosshair_fat.png").c_str()));
+        add_button->setIcon(Files::IconProvider::getIcon("crosshair_fat.png"));
         add_button->setFixedSize(UI_ICON_SIZE);
         add_button->setFlat(UI_ICON_BUTTON_FLAT);
         add_button->setToolTip(tr(tool_tip.toStdString().c_str()));
@@ -160,7 +160,7 @@ void ViewContainer::addView(View* view)
     QPushButton* manage_button = new QPushButton();
     UI_TEST_OBJ_NAME(manage_button, view_name + " Manager"); //manage buttons can be reached via e.g. window1.geographicview2_manager
 
-    manage_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    manage_button->setIcon(Files::IconProvider::getIcon("edit.png"));
     manage_button->setFixedSize(UI_ICON_SIZE);
     manage_button->setFlat(UI_ICON_BUTTON_FLAT);
     manage_button->setToolTip(tr("Manage view"));

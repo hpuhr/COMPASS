@@ -1,20 +1,71 @@
 {
-    "parameters": null,
+    "parameters": {
+        "automatic_redraw": true,
+        "automatic_reload": true
+    },
     "sub_configs": {
         "ViewContainer": {
             "ViewContainer0": {
                 "parameters": null,
                 "sub_configs": {
+                    "GeographicView": {
+                        "GeographicView0": {
+                            "parameters": {
+                                "name": "Geographic View 0"
+                            }
+                        }
+                    },
                     "TableView": {
                         "TableView0": {
                             "parameters": {
-                                "name" : "Table View 0",
+                                "ignore_non_target_reports": true,
+                                "name": "Table View 0",
                                 "show_only_selected": false,
                                 "use_presentation": true
                             },
                             "sub_configs": {
                                 "TableViewDataSource": {
-                                    "TableViewDataSource0": {}
+                                    "TableViewDataSource0": {
+                                        "parameters": null,
+                                        "sub_configs": {
+                                            "VariableOrderedSet": {
+                                                "Default": {
+                                                    "parameters": {
+                                                        "variable_definitions": [
+                                                            [
+                                                                "Meta",
+                                                                "Timestamp"
+                                                            ],
+                                                            [
+                                                                "Meta",
+                                                                "DS ID"
+                                                            ],
+                                                            [
+                                                                "Meta",
+                                                                "Mode 3/A Code"
+                                                            ],
+                                                            [
+                                                                "Meta",
+                                                                "Aircraft Address"
+                                                            ],
+                                                            [
+                                                                "Meta",
+                                                                "Aircraft Identification"
+                                                            ],
+                                                            [
+                                                                "Meta",
+                                                                "Mode C Code"
+                                                            ],
+                                                            [
+                                                                "Meta",
+                                                                "Track Number"
+                                                            ]
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 },
                                 "TableViewWidget": {
                                     "TableViewWidget0": {
@@ -24,21 +75,6 @@
                             }
                         }
                     }
-                }
-            }
-        },
-        "ViewPointsReportGenerator": {
-            "ViewPointsReportGenerator0": {
-                "parameters": {
-                    "abstract": "",
-                    "add_overview_screenshot": false,
-                    "add_overview_table": true,
-                    "author": "",
-                    "export_all_unsorted": false,
-                    "group_by_type": true,
-                    "open_created_pdf": true,
-                    "run_pdflatex": true,
-                    "wait_on_map_loading": true
                 }
             }
         }

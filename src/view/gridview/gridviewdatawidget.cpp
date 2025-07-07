@@ -94,6 +94,12 @@ void GridViewDataWidget::resetGrid()
 */
 void GridViewDataWidget::resetGridChart()
 {
+    colormap_.reset();
+
+    legend_->setColorMap(ColorMap());
+    legend_->setVisible(false);
+    legend_->showSelectionColor(false);
+
     grid_chart_.reset();
 
     grid_rendering_ = QImage();
@@ -108,8 +114,8 @@ void GridViewDataWidget::resetGridLayers()
 {
     grid_layers_.clear();
 
-    grid_value_min_ = 0.0;
-    grid_value_max_ = 1.0;
+    grid_value_min_.reset();
+    grid_value_max_.reset();
 
     x_axis_name_ = "";
     y_axis_name_ = "";
@@ -167,15 +173,15 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
     if (!has_data)
         return;
 
-    auto bounds = getXYBounds();
-    if (bounds.isEmpty())
+    auto bounds = getXYBounds(true);
+    if (!bounds.has_value() || bounds->isEmpty())
     {
         loginf << "GridViewDataWidget: processStash: bounds empty, skipping...";
         return;
     }
-    assert(bounds.isValid());
+    assert(bounds->isValid());
 
-    auto z_bounds = getZBounds();
+    auto z_bounds = getZBounds(false);
     assert(z_bounds.has_value());
 
     const auto& settings = view_->settings();
@@ -185,14 +191,16 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
     grid_.reset(new Grid2D);
 
     std::string err;
-    bool ok = grid_->create(bounds, res, "wgs84", true, &err);
+    bool ok = grid_->create(bounds.value(), res, "wgs84", true, &err);
 
     if (!ok)
-        logerr << "GridViewDataWidget: renderGrid: creation of grid failed: " << err;
+        logerr << "GridViewDataWidget: processStash: creation of grid failed: " << err;
 
     assert(ok);
 
-    loginf << "GridViewDataWidget: renderGrid: Created grid of " << grid_->numCellsX() << "x" << grid_->numCellsY();
+    loginf << "GridViewDataWidget: processStash: Created grid of " << grid_->numCellsX() << "x" << grid_->numCellsY();
+
+    size_t num_null_values = 0;
 
     for (const auto& dbc_values : getStash().groupedStashes())
     {
@@ -200,27 +208,53 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
         const auto& y_values = dbc_values.second.variable_stashes[ 1 ].values;
         const auto& z_values = dbc_values.second.variable_stashes[ 2 ].values;
 
-        loginf << "GridViewDataWidget: renderGrid: dbcontent " << dbc_values.first
+        assert(x_values.size() == y_values.size() &&
+               y_values.size() == z_values.size());
+
+        loginf << "GridViewDataWidget: processStash: dbcontent " << dbc_values.first
                << " #x " << x_values.size()
                << " #y " << y_values.size()
                << " #z " << z_values.size();
 
         for (size_t i = 0; i < z_values.size(); ++i)
-            if (!dbc_values.second.nan_values[ i ])
+        {
+            if (dbc_values.second.nan_values[ i ])
+                ++num_null_values;
+
+            if (!dbc_values.second.isNan(0, i) && !dbc_values.second.isNan(1, i))
                 grid_->addValue(x_values[ i ], y_values[ i ], z_values[ i ]);
+        }
     }
 
-    loginf << "GridViewDataWidget: renderGrid: getting layer";
+    addNullCount(num_null_values);
+
+    loginf << "GridViewDataWidget: processStash:"
+           << " added " << grid_->numAdded() 
+           << " oor "   << grid_->numOutOfRange() 
+           << " inf "   << grid_->numInf();
+
+    loginf << "GridViewDataWidget: processStash: getting layer";
 
     auto layer_name = grid2d::valueTypeToString((grid2d::ValueType)settings.value_type);
+
+    loginf << "GridViewDataWidget: processStash: value type = " << layer_name;
 
     grid_->addToLayers(grid_layers_, layer_name, (grid2d::ValueType)settings.value_type);
 
     auto range = grid_layers_.layer(0).range();
 
-    grid_value_min_ = range.has_value() ? range->first  : 0.0;
-    grid_value_max_ = range.has_value() ? range->second : 1.0;
-    assert(grid_value_min_ <= grid_value_max_);
+    grid_value_min_.reset();
+    grid_value_max_.reset();
+
+    if (range.has_value())
+    {
+        loginf << "GridViewDataWidget: processStash: grid range min " << range->first << " max " << range->second;
+
+        grid_value_min_ = range->first;
+        grid_value_max_ = range->second;
+
+        assert(grid_value_min_.value() <= grid_value_max_.value());
+    }
 
     loginf << "GridViewDataWidget: processStash: done, generated " << grid_layers_.numLayers() << " layers";
 }
@@ -263,9 +297,20 @@ void GridViewDataWidget::updateFromAnnotations()
 
     auto range = grid_layers_.layer(0).range();
 
-    grid_value_min_ = range.has_value() ? range->first  : 0.0;
-    grid_value_max_ = range.has_value() ? range->second : 1.0;
-    assert(grid_value_min_ <= grid_value_max_);
+    grid_value_min_.reset();
+    grid_value_max_.reset();
+
+    if (range.has_value())
+    {
+        loginf << "GridViewDataWidget: updateFromAnnotations: grid range min " << range->first << " max " << range->second;
+
+        grid_value_min_ = range->first;
+        grid_value_max_ = range->second;
+
+        assert(grid_value_min_.value() <= grid_value_max_.value());
+    }
+
+    
 
     loginf << "GridViewDataWidget: updateFromAnnotations: done, generated " << grid_layers_.numLayers() << " layers";
 }
@@ -319,16 +364,16 @@ QPixmap GridViewDataWidget::renderPixmap()
 
 /**
 */
-QRectF GridViewDataWidget::getXYBounds() const
+boost::optional<QRectF> GridViewDataWidget::getXYBounds(bool fix_small_ranges) const
 {
-    return getPlanarBounds(0, 1);
+    return getPlanarBounds(0, 1, false, fix_small_ranges);
 }
 
 /**
 */
-boost::optional<std::pair<double, double>> GridViewDataWidget::getZBounds() const
+boost::optional<std::pair<double, double>> GridViewDataWidget::getZBounds(bool fix_small_ranges) const
 {
-    return getBounds(2);
+    return getBounds(2, false, fix_small_ranges);
 }
 
 /**
@@ -437,6 +482,21 @@ bool GridViewDataWidget::updateGridChart()
 
     main_layout_->insertWidget(0, grid_chart_.get());
 
+    if (colormap_.has_value())
+    {
+        auto dtype = view_->currentLegendDataType();
+
+        //update legend widget
+        auto decoratorFunc = [ = ] (double v)
+        {
+            return property_templates::double2String(dtype, v, GridView::DecimalsDefault);
+        };
+
+        legend_->setColorMap(colormap_.value());
+        legend_->setDecorator(decoratorFunc);
+        legend_->setVisible(true);
+    }
+
     return has_data;
 }
 
@@ -447,89 +507,100 @@ void GridViewDataWidget::updateRendering()
     loginf << "GridViewDataWidget: updateRendering: rendering";
 
     custom_range_invalid_ = false;
+    colormap_.reset();
 
+    //no valid grid no rendering
     if (!hasValidGrid())
         return;
 
     const auto& layer    = grid_layers_.layer(0);
     const auto& settings = view_->settings();
 
-    loginf << "GridViewDataWidget: updateRendering: min = " << grid_value_min_ << " max = " << grid_value_max_;
-
-    std::pair<double, double> range(grid_value_min_, grid_value_max_);
-
-    auto vmin = view_->getMinValue();
-    auto vmax = view_->getMaxValue();
-    
-    if (vmin.has_value() || vmax.has_value())
-    {
-        if (vmin.has_value() && vmax.has_value() && vmin.value() <= vmax.value())
-        {
-            range = std::pair<double, double>(vmin.value(), vmax.value());
-        }
-        else if (vmin.has_value() && !vmax.has_value())
-        {
-            range.first = vmin.value();
-
-            if (vmin.value() > grid_value_max_)
-                range.second = vmin.value();
-        }
-        else if (vmax.has_value() && !vmin.has_value())
-        {
-            range.second = vmax.value();
-
-            if (vmax.value() < grid_value_min_)
-                range.first = vmax.value();
-        }
-        else
-        {
-            custom_range_invalid_ = true;
-        }
-    }
-
-    auto dtype = view_->currentLegendDataType();
-
-    auto decoratorFunc = [ = ] (double v)
-    {
-        return property_templates::double2String(dtype, v, GridView::DecimalsDefault);
-    };
-
-    size_t num_steps = property_templates::suggestedNumColorSteps(dtype, 
-                                                                  range.first, 
-                                                                  range.second, 
-                                                                  settings.render_color_num_steps);
-    if (num_steps == 0)
-        return;
+    loginf << "GridViewDataWidget: updateRendering: input range " 
+           << "min = " 
+           << (grid_value_min_.has_value() ? std::to_string(grid_value_min_.value()) : "undef") << " "
+           << "max = " 
+           << (grid_value_max_.has_value() ? std::to_string(grid_value_max_.value()) : "undef");
 
     Grid2DRenderSettings render_settings;
 
-    if (num_steps == 1)
+    //if there is a valid range for the layer values we can do a little extra stuff
+    if (grid_value_min_.has_value() && grid_value_max_.has_value())
     {
-        //single value
-        render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
-                                          1,
-                                          ColorMap::Type::LinearSamples,
-                                          range);
-    }
-    else if (num_steps == 2)
-    {
-        //binary
-        render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
-                                          2,
-                                          ColorMap::Type::Binary,
-                                          range);
-    }
-    else
-    {
-        render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
-                                          num_steps,
-                                          ColorMap::Type::LinearSamples,
-                                          range);
+        //combine data range with user override range
+        std::pair<double, double> range(grid_value_min_.value(), grid_value_max_.value());
+
+        auto vmin = view_->getMinValue();
+        auto vmax = view_->getMaxValue();
+        
+        if (vmin.has_value() || vmax.has_value())
+        {
+            if (vmin.has_value() && vmax.has_value() && vmin.value() <= vmax.value())
+            {
+                range = std::pair<double, double>(vmin.value(), vmax.value());
+            }
+            else if (vmin.has_value() && !vmax.has_value())
+            {
+                range.first = vmin.value();
+
+                if (vmin.value() > grid_value_max_)
+                    range.second = vmin.value();
+            }
+            else if (vmax.has_value() && !vmin.has_value())
+            {
+                range.second = vmax.value();
+
+                if (vmax.value() < grid_value_min_)
+                    range.first = vmax.value();
+            }
+            else
+            {
+                custom_range_invalid_ = true;
+            }
+        }
+
+        loginf << "GridViewDataWidget: updateRendering: combined range min = " << range.first << " max = " << range.second;
+
+        auto dtype = view_->currentLegendDataType();
+
+        //derive suggested number of color steps from ui value
+        size_t num_steps = property_templates::suggestedNumColorSteps(dtype, 
+                                                                      range.first, 
+                                                                      range.second, 
+                                                                      settings.render_color_num_steps);
+
+        loginf << "GridViewDataWidget: updateRendering: suggested color steps = " << num_steps;
+
+        //create color map
+        if (num_steps == 1)
+        {
+            //single value
+            render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
+                                            1,
+                                            ColorMap::Type::LinearSamples,
+                                            range);
+        }
+        else if (num_steps == 2)
+        {
+            //binary
+            render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
+                                            2,
+                                            ColorMap::Type::Binary,
+                                            range);
+        }
+        else if (num_steps > 0)
+        {
+            //multi-value
+            render_settings.color_map.create((colorscale::ColorScale)settings.render_color_scale,
+                                            num_steps,
+                                            ColorMap::Type::LinearSamples,
+                                            range);
+        }
+
+        colormap_ = render_settings.color_map;
     }
 
-    legend_->setColorMap(render_settings.color_map);
-    legend_->setDecorator(decoratorFunc);    
-
+    //render grid
     auto rendering = Grid2DLayerRenderer::render(layer, render_settings);
 
     grid_rendering_ = rendering.first;
@@ -615,16 +686,16 @@ void GridViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     info[ "num_selected"] = getStash().selected_count_;
     info[ "num_nan"     ] = getStash().nan_value_count_;
 
-    auto xy_bounds     = getXYBounds();
-    auto z_bounds      = getZBounds();
-    bool bounds_valid  = xy_bounds.isValid() && z_bounds.has_value();
+    auto xy_bounds    = getXYBounds(false);
+    auto z_bounds     = getZBounds(false);
+    bool bounds_valid = xy_bounds.has_value() && xy_bounds->isValid() && z_bounds.has_value();
 
     info[ "data_bounds_valid" ] = bounds_valid;
-    info[ "data_bounds_xmin"  ] = bounds_valid ? xy_bounds.left()         : 0.0;
-    info[ "data_bounds_ymin"  ] = bounds_valid ? xy_bounds.top()          : 0.0;
+    info[ "data_bounds_xmin"  ] = bounds_valid ? xy_bounds->left()        : 0.0;
+    info[ "data_bounds_ymin"  ] = bounds_valid ? xy_bounds->top()         : 0.0;
     info[ "data_bounds_zmin"  ] = bounds_valid ?  z_bounds.value().first  : 0.0;
-    info[ "data_bounds_xmax"  ] = bounds_valid ? xy_bounds.right()        : 0.0;
-    info[ "data_bounds_ymax"  ] = bounds_valid ? xy_bounds.bottom()       : 0.0;
+    info[ "data_bounds_xmax"  ] = bounds_valid ? xy_bounds->right()       : 0.0;
+    info[ "data_bounds_ymax"  ] = bounds_valid ? xy_bounds->bottom()      : 0.0;
     info[ "data_bounds_zmax"  ] = bounds_valid ?  z_bounds.value().second : 0.0;
 
     // auto zoomActive = [ & ] (const QRectF& bounds_data, const QRectF& bounds_axis)
@@ -646,4 +717,12 @@ void GridViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 boost::optional<std::pair<QImage, RasterReference>> GridViewDataWidget::currentGeoImage() const
 {
     return std::make_pair(grid_rendering_, ref_);
+}
+
+/**
+*/
+const ColorLegend& GridViewDataWidget::currentLegend() const
+{
+    assert(legend_);
+    return legend_->currentLegend();
 }

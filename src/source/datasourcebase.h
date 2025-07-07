@@ -12,6 +12,18 @@ namespace dbContent
 class DataSourceBase
 {
 public:
+    enum class DetectionType
+    {
+        PrimaryOnlyGround,
+        PrimaryOnlyAir,
+        ModeAC,
+        ModeACCombined,
+        ModeS,
+        ModeSCombined
+    };
+
+    static const std::string DetectionKey;
+
     static const std::string PSRIRMinKey;
     static const std::string PSRIRMaxKey;
     static const std::string SSRIRMinKey;
@@ -50,6 +62,9 @@ public:
     void info(const std::string& info);
     nlohmann::json& info(); // for direct use, var->value
     std::string infoStr();
+
+    DetectionType detectionType() const;
+    void detectionType(DetectionType type);
 
     bool hasUpdateInterval() const;
     void removeUpdateInterval();
@@ -92,6 +107,9 @@ public:
 
     bool isCalculatedReferenceSource();
     void setCalculatedReferenceSource();
+
+    static std::string detectionTypeToString(DetectionType type);
+    static DetectionType detectionTypeFromString(const std::string& str);
 
 protected:
     std::string ds_type_;

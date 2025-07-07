@@ -48,9 +48,9 @@ ASTERIXJSONParser::ASTERIXJSONParser(const std::string& class_id, const std::str
 
     createSubConfigurables();
 
-    todo_icon_ = QIcon(Files::getIconFilepath("todo.png").c_str());
-    unknown_icon_ = QIcon(Files::getIconFilepath("todo_maybe.png").c_str());
-    hint_icon_ = QIcon(Files::getIconFilepath("hint.png").c_str());
+    todo_icon_ = Files::IconProvider::getIcon("todo.png");
+    unknown_icon_ = Files::IconProvider::getIcon("todo_maybe.png");
+    hint_icon_ = Files::IconProvider::getIcon("hint.png");
 }
 
 void ASTERIXJSONParser::generateSubConfigurable(const std::string& class_id,
@@ -253,7 +253,7 @@ DBContent& ASTERIXJSONParser::dbContent() const
 
 void ASTERIXJSONParser::initialize()
 {
-    loginf << "ASTERIXJSONParser: initialize: name " << name_;
+    logdbg << "ASTERIXJSONParser: initialize: name " << name_;
 
     if (!initialized_)
     {
@@ -267,8 +267,11 @@ void ASTERIXJSONParser::initialize()
 
             mapping->initializeIfRequired();
 
-            list_.addProperty(mapping->variable().name(), mapping->variable().dataType());
-            var_list_.add(mapping->variable());
+            if (!list_.hasProperty(mapping->variable().name()))
+                list_.addProperty(mapping->variable().name(), mapping->variable().dataType());
+
+            if (!var_list_.hasVariable(mapping->variable()))
+                var_list_.add(mapping->variable());
         }
 
         initialized_ = true;

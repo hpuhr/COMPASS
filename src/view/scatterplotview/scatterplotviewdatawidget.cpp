@@ -195,10 +195,12 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
     ScatterSeries selected_series;
     selected_series.points.reserve(stash.selected_count_);
 
+    size_t num_null_values = 0;
+
     for (const auto& dbc_stash : stash.groupedStashes())
     {
-        if (!dbc_stash.second.valid_count)
-            continue;
+        //if (!dbc_stash.second.valid_count)
+        //    continue;
 
         ScatterSeries dbc_series;
         dbc_series.points.reserve(dbc_stash.second.unsel_count);
@@ -211,11 +213,19 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
         for (size_t i = 0; i < n; ++i)
         {
             if (dbc_stash.second.nan_values[ i ])
+            {
+                //nan = null, each value of the triplet must not be null
+                ++num_null_values;
                 continue;
+            }
             else if (dbc_stash.second.selected_values[ i ])
+            {
                 selected_series.points.emplace_back(x_values[ i ], y_values[ i ]);
+            }
             else
+            {
                 dbc_series.points.emplace_back(x_values[ i ], y_values[ i ]);
+            }
         }
 
         if (!dbc_series.points.empty())
@@ -225,6 +235,9 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
             scatter_series_.addDataSeries(dbc_series, name, colorForGroupName(dbc_stash.first), MarkerSizePx);
         }
     }
+
+    //@TODO
+    addNullCount(num_null_values);
 
     //add selected dataset as the last one (important for render order)
     if (!selected_series.points.empty())
@@ -324,12 +337,17 @@ QPixmap ScatterPlotViewDataWidget::renderPixmap()
 
 /**
 */
-QRectF ScatterPlotViewDataWidget::getViewBounds() const
+boost::optional<QRectF> ScatterPlotViewDataWidget::getViewBounds() const
 {
+    bool bounds_valid = bounds_.has_value();
+
     loginf << "ScatterPlotViewDataWidget: getViewBounds: data range bounds"
-               << " x min " << bounds_.left() << " max " << bounds_.right() 
-               << " y min " << bounds_.top() << " max " << bounds_.bottom()
-               << " bounds empty " << bounds_.isEmpty();
+           << " x min " << (bounds_valid ? bounds_->left() : 0)
+           << " max " << (bounds_valid ? bounds_->right() : 0)
+           << " y min " << (bounds_valid ? bounds_->top() : 0)
+           << " max " << (bounds_valid ? bounds_->bottom() : 0)
+           << " bounds valid " << bounds_valid
+           << " bounds empty " << (bounds_valid? bounds_->isEmpty() : true);
 
     return bounds_;
 }
@@ -461,19 +479,24 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
         if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
         {
             auto bounds = getViewBounds();
+            bool bounds_valid = bounds.has_value();
 
-            loginf << "ScatterPlotViewDataWidget: resetZoomSlot: X min " << bounds.left()
-                   << " max " << bounds.right() << " y min " << bounds.top() << " max " << bounds.bottom()
-                   << " bounds empty " << bounds.isEmpty();
+            loginf << "ScatterPlotViewDataWidget: resetZoomSlot:"
+                   << " x min " << (bounds_valid ? bounds->left() : 0)
+                   << " max " << (bounds_valid ? bounds->right() : 0)
+                   << " y min " << (bounds_valid ? bounds->top() : 0)
+                   << " max " << (bounds_valid ? bounds->bottom() : 0)
+                   << " bounds valid " << bounds_valid
+                   << " bounds empty " << (bounds_valid? bounds->isEmpty() : true);
 
-            if (!bounds.isEmpty())
+            if (bounds_valid)
             {
-                double x0 = bounds.left();
-                double x1 = bounds.right();
-                double y0 = bounds.top();
-                double y1 = bounds.bottom();
-                double w  = bounds.width();
-                double h  = bounds.height();
+                double x0 = bounds->left();
+                double x1 = bounds->right();
+                double y0 = bounds->top();
+                double y1 = bounds->bottom();
+                double w  = bounds->width();
+                double h  = bounds->height();
 
                 double bx = w < 1e-12 ? 0.1 : w * 0.03;
                 double by = h < 1e-12 ? 0.1 : h * 0.03;
@@ -814,13 +837,13 @@ void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     VariableViewStashDataWidget::viewInfoJSON_impl(info);
 
     auto bounds       = getViewBounds();
-    bool bounds_valid = bounds.isValid();
+    bool bounds_valid = bounds.has_value();
 
     info[ "data_bounds_valid" ] = bounds_valid;
-    info[ "data_bounds_xmin"  ] = bounds_valid ? bounds.left()   : 0.0;
-    info[ "data_bounds_ymin"  ] = bounds_valid ? bounds.top()    : 0.0;
-    info[ "data_bounds_xmax"  ] = bounds_valid ? bounds.right()  : 0.0;
-    info[ "data_bounds_ymax"  ] = bounds_valid ? bounds.bottom() : 0.0;
+    info[ "data_bounds_xmin"  ] = bounds_valid ? bounds->left()   : 0.0;
+    info[ "data_bounds_ymin"  ] = bounds_valid ? bounds->top()    : 0.0;
+    info[ "data_bounds_xmax"  ] = bounds_valid ? bounds->right()  : 0.0;
+    info[ "data_bounds_ymax"  ] = bounds_valid ? bounds->bottom() : 0.0;
 
     auto zoomActive = [ & ] (const QRectF& bounds_data, const QRectF& bounds_axis)
     {
@@ -857,7 +880,7 @@ void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
         info[ "axis_bounds_ymin"  ] = has_axis_bounds ? axis_bounds.top()    : 0.0;
         info[ "axis_bounds_ymax"  ] = has_axis_bounds ? axis_bounds.bottom() : 0.0;
 
-        info[ "axis_zoom_active"  ] = zoomActive(bounds, axis_bounds);
+        info[ "axis_zoom_active"  ] = bounds_valid ? zoomActive(bounds.value(), axis_bounds) : false;
 
         chart_info[ "num_series"] = series.count();
 

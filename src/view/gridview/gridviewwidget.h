@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "viewwidget.h"
+#include "variableviewwidget.h"
 
 class GridView;
 class GridViewConfigWidget;
@@ -25,7 +25,7 @@ class GridViewDataWidget;
 
 /**
 */
-class GridViewWidget : public ViewWidget
+class GridViewWidget : public VariableViewWidget
 {
 public:
     GridViewWidget(const std::string& class_id, 
@@ -41,7 +41,4 @@ public:
     const GridViewConfigWidget* getViewConfigWidget() const;
 
     GridView* getView();
-
-protected:
-    virtual std::string loadedMessage_impl() const override;
 };

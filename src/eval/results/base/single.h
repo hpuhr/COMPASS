@@ -30,13 +30,20 @@
 
 #include <QColor>
 
+#include "json_fwd.hpp"
+
 const double OSGVIEW_POS_WINDOW_SCALE {1.8};
 
-namespace EvaluationResultsReport
+namespace ResultReport
 {
     class SectionContentTable;
-    class RootItem;
+    class SectionContentFigure;
+    class Report;
+
+    struct SectionContentViewable;
 }
+
+class EvaluationTaskResult;
 
 namespace EvaluationRequirementResult
 {
@@ -137,7 +144,7 @@ public:
            const SectorLayer& sector_layer,
            unsigned int utn, 
            const EvaluationTargetData* target, 
-           EvaluationManager& eval_man,
+           EvaluationCalculator& calculator,
            const EvaluationDetails& details);
     virtual ~Single();
 
@@ -148,23 +155,23 @@ public:
 
     void updateUseFromTarget();
 
-    void setInterestFactor(double factor);
+    void setInterestFactor(double factor, bool reset_in_target = false);
 
-    bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+    bool hasViewableData (const ResultReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
     bool viewableDataReady() const override final;
-    std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    std::shared_ptr<nlohmann::json::object_t> viewableData(const ResultReport::SectionContentTable& table, 
                                                            const QVariant& annotation) const override final;
     
     void createSumOverviewAnnotations(nlohmann::json& annotations_json,
                                       bool add_ok_details_to_overview = true) const;
 
-    bool hasReference (const EvaluationResultsReport::SectionContentTable& table, 
+    bool hasReference (const ResultReport::SectionContentTable& table, 
                        const QVariant& annotation) const override final;
-    std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
+    std::string reference(const ResultReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
 
-    void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
+    void addToReport (std::shared_ptr<ResultReport::Report> report) override final;
 
     bool hasStoredDetails() const;
     size_t numStoredDetails() const;
@@ -174,14 +181,27 @@ public:
     void iterateDetails(const DetailFunc& func,
                         const DetailSkipFunc& skip_func = DetailSkipFunc()) const override final;
 
+    bool addDetailsToTable(ResultReport::SectionContentTable& table);
+    bool addOverviewToFigure(ResultReport::SectionContentFigure& figure);
+    bool addHighlightToViewable(ResultReport::SectionContentViewable& viewable, const QVariant& annotation);
+
     std::vector<double> getValues(const ValueSource<double>& source) const;
     std::vector<double> getValues(int value_id) const;
 
     /// create empty joined result
     virtual std::shared_ptr<Joined> createEmptyJoined(const std::string& result_id) = 0;
 
-    const static std::string tr_details_table_name_;
-    const static std::string target_table_name_;
+    static void setSingleContentProperties(ResultReport::SectionContent& content,
+                                           const Evaluation::RequirementResultID& id,
+                                           unsigned int utn);
+    static boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>> 
+    singleContentProperties(const ResultReport::SectionContent& content);
+
+    std::string sumSectionName() const override final;
+
+    static const std::string TRDetailsTableName;
+    
+    static const std::string TargetOverviewID;
 
     static const int AnnotationPointSizeOverview;
     static const int AnnotationPointSizeHighlight;
@@ -196,7 +216,11 @@ public:
     static const QColor AnnotationColorError;
     static const QColor AnnotationColorOk;
 
+    static const std::string ContentPropertyUTN;
+
 protected:
+    friend class EvaluationTaskResult; // for loading on-demand content
+
     std::string getTargetSectionID();
     std::string getTargetRequirementSectionID();
 
@@ -213,9 +237,9 @@ protected:
     virtual std::vector<std::string> targetTableHeadersCommon() const;
     virtual std::vector<std::string> targetTableHeadersOptional() const;
     std::vector<std::string> targetTableHeaders(unsigned int* sort_column = nullptr) const;
-    virtual std::vector<QVariant> targetTableValuesCommon() const;
-    virtual std::vector<QVariant> targetTableValuesOptional() const;
-    std::vector<QVariant> targetTableValues() const;
+    virtual nlohmann::json::array_t targetTableValuesCommon() const;
+    virtual nlohmann::json::array_t targetTableValuesOptional() const;
+    nlohmann::json::array_t targetTableValues() const;
 
     virtual std::vector<TargetInfo> targetInfosCommon() const;
     std::vector<TargetInfo> targetConditionInfos(bool& failed) const;
@@ -223,7 +247,7 @@ protected:
     /// derive to obtain custom target table header strings
     virtual std::vector<std::string> targetTableHeadersCustom() const = 0;
     /// derive to obtain custom target table row values (size must match targetTableHeadersDerived())
-    virtual std::vector<QVariant> targetTableValuesCustom() const = 0;
+    virtual nlohmann::json::array_t targetTableValuesCustom() const = 0;
     /// derive to obtain a custom sort column for the target table (!index relative to custom values!)
     virtual int targetTableCustomSortColumn() const { return -1; }
     /// derive to obtain a custom sort order for the target table
@@ -233,14 +257,14 @@ protected:
     /// derive to obtain header strings for the target details table
     virtual std::vector<std::string> detailHeaders() const = 0;
     /// derive to obtain values for the target details table (size must match detailHeaders())
-    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail, 
-                                               const EvaluationDetail* parent_detail) const = 0;
+    virtual nlohmann::json::array_t detailValues(const EvaluationDetail& detail, 
+                                                 const EvaluationDetail* parent_detail) const = 0;
 
-    virtual void addTargetToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    virtual void addTargetToOverviewTable(EvaluationResultsReport::Section& section, 
+    virtual void addTargetToOverviewTable(std::shared_ptr<ResultReport::Report> report);
+    virtual void addTargetToOverviewTable(ResultReport::Section& section, 
                                           const std::string& table_name);
-    virtual void addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    virtual void generateDetailsTable(EvaluationResultsReport::Section& utn_req_section);
+    virtual void addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> report);
+    virtual void generateDetailsTable(ResultReport::Section& utn_req_section);
 
     /*details related*/
     const EvaluationDetails& getDetails() const;

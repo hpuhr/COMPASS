@@ -74,13 +74,7 @@ class BarometricAltitude
 
     bool hasReliableValue () const
     {
-        if (valid_ && *valid_ == false)
-            return false;
-
-        if (garbled_ && *garbled_ == true)
-            return false;
-
-        return true;
+        return valid_ && *valid_ && garbled_ && !(*garbled_) ;
     }
 };
 
@@ -120,6 +114,7 @@ class PositionAccuracy
 
     PositionAccuracy getScaledToMinStdDev (double min_std_dev) const;
     void scaleToMinStdDev(double min_stddev);
+    void scaleUsing(double scale_factor);
 
     std::string asStr() const;
 
@@ -241,7 +236,6 @@ struct ReconstructorInfo : public BaseInfo
     boost::optional<targetReport::Position> position_corrected_;
     boost::optional<targetReport::PositionAccuracy> position_accuracy_;
 
-    //bool do_not_use_position_ {false};
     bool unsused_ds_pos_ {false}; // set if data source should not be used for pos
     bool invalidated_pos_ {false}; // if invalidated by validate function
     bool is_pos_outlier_ {false}; // if set by outlier detection
@@ -253,6 +247,11 @@ struct ReconstructorInfo : public BaseInfo
 
     boost::optional<double> track_angle_;
     boost::optional<bool> ground_bit_;
+    bool data_source_is_ground_only {false};
+
+    // adsb
+    boost::optional<unsigned int> mops_;
+    boost::optional<unsigned int> ecat_;
 
     boost::optional<targetReport::Position>& position();
     const boost::optional<targetReport::Position>& position() const;
@@ -263,7 +262,10 @@ struct ReconstructorInfo : public BaseInfo
     bool isModeACDetection() const;
     bool isPrimaryOnlyDetection() const;
 
+    bool isOnGround() const; // false if unknown
+
     bool doNotUsePosition() const;
+
 };
 
 // tmp list

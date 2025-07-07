@@ -36,12 +36,12 @@ public:
                           const SectorLayer& sector_layer,
                           unsigned int utn, 
                           const EvaluationTargetData* target, 
-                          EvaluationManager& eval_man,
+                          EvaluationCalculator& calculator,
                           const EvaluationDetails& details);
     virtual ~SingleProbabilityBase();
 
-    static QVariant formatProbability(double prob);
-    static QVariant formatProbabilityOptional(const boost::optional<double>& prob);
+    static nlohmann::json formatProbability(double prob);
+    static nlohmann::json formatProbabilityOptional(const boost::optional<double>& prob);
 
 protected:
     EvaluationRequirement::ProbabilityBase& probRequirement() const;
@@ -61,7 +61,7 @@ public:
                           const std::string& result_id,
                           std::shared_ptr<EvaluationRequirement::Base> requirement,
                           const SectorLayer& sector_layer,
-                          EvaluationManager& eval_man);
+                          EvaluationCalculator& calculator);
     virtual ~JoinedProbabilityBase();
 
 protected:

@@ -20,20 +20,20 @@
 #include "asterixdecodejob.h"
 #include "asterixpostprocess.h"
 #include "configurable.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 #include "asterixjsonmappingjob.h"
 #include "asterixpostprocessjob.h"
 #include "asterixjsonparsingschema.h"
 #include "asteriximportsource.h"
+#include "asterixtimestampcalculator.h"
 #include "task.h"
 #include "appmode.h"
 
 #include <QObject>
 #include <QMessageBox>
 
-#include <deque>
 #include <memory>
-#include <mutex>
+
 
 class TaskManager;
 
@@ -66,45 +66,50 @@ struct ASTERIXFileInfo
 class ASTERIXImportTaskSettings
 {
 public:
-    ASTERIXImportTaskSettings();
+    ASTERIXImportTaskSettings(); // defines default param values
 
     // registered
-    bool reset_date_between_files_ {true};
-    bool ignore_time_jumps_{false};
+    bool reset_date_between_files_;
+    bool ignore_time_jumps_;
     bool debug_jasterix_;
     std::string current_file_framing_;
 
-    unsigned int num_packets_overload_ {60};
+    unsigned int num_packets_overload_;
 
-    double override_tod_offset_{0};
+    bool override_tod_active_; // not saved
+    double override_tod_offset_;
 
-    float filter_tod_min_{0};
-    float filter_tod_max_{0};
+    bool filter_tod_active_; // not saved
+    float filter_tod_min_;
+    float filter_tod_max_;
 
-    double filter_latitude_min_{0};
-    double filter_latitude_max_{0};
-    double filter_longitude_min_{0};
-    double filter_longitude_max_{0};
+    bool filter_position_active_; // not saved
+    double filter_latitude_min_;
+    double filter_latitude_max_;
+    double filter_longitude_min_;
+    double filter_longitude_max_;
 
-    float filter_modec_min_{0};
-    float filter_modec_max_{0};
+    bool filter_modec_active_; // not saved
+    float filter_modec_min_;
+    float filter_modec_max_;
 
-    // unregistered, for passing on
+    // not saved
+    unsigned int file_line_id_;
+    std::string date_str_;
 
-    unsigned int file_line_id_ {0};
+    bool network_ignore_future_ts_;
+
+    bool obfuscate_secondary_info_;
+
+    // not in config
     boost::posix_time::ptime date_;
+    unsigned int max_network_lines_;
 
-    unsigned int max_network_lines_ {4};
+    //import chunk sizes
+    unsigned int chunk_size_jasterix;
+    unsigned int chunk_size_insert;
 
-    bool override_tod_active_{false};
-
-    bool network_ignore_future_ts_ {false};
-
-    bool filter_tod_active_{false};
-    bool filter_position_active_{false};
-    bool filter_modec_active_{false};
-
-    bool obfuscate_secondary_info_{false};
+    unsigned int max_packets_in_processing_{5};
 };
 
 /**
@@ -126,6 +131,8 @@ public slots:
     void mapJSONDoneSlot();
     void mapJSONObsoleteSlot();
 
+    void timestampCalculationDoneSlot();
+
     void postprocessDoneSlot();
     void postprocessObsoleteSlot();
 
@@ -134,7 +141,8 @@ public slots:
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 
 public:
-    ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
+    ASTERIXImportTask(const std::string& class_id, 
+                      const std::string& instance_id,
                       TaskManager& task_manager);
     virtual ~ASTERIXImportTask();
 
@@ -178,10 +186,15 @@ public:
     ASTERIXDecoderBase* decoder() { return decoder_.get(); }
     const ASTERIXDecoderBase* decoder() const { return decoder_.get(); }
 
+    bool hasError() const { return error_; }
+    const std::string& error() const { return error_message_; }
+
     void testFileDecoding();
 
 protected:
     virtual void checkSubConfigurables() override;
+
+    void reset();
 
     void insertData(); // inserts queued job buffers
     void checkAllDone();
@@ -195,11 +208,21 @@ protected:
 
     void sourceChanged();
 
+    ASTERIXImportTaskSettings settings_;
+    ASTERIXImportSource       source_;
+
+    std::unique_ptr<QProgressDialog> file_progress_dialog_;
+
     mutable std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
     ASTERIXPostProcess post_process_;
 
-    ASTERIXImportTaskSettings settings_;
-    ASTERIXImportSource       source_;
+    //sub-configurables
+    std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
+    std::shared_ptr<ASTERIXJSONParsingSchema>     schema_;
+
+    std::unique_ptr<ASTERIXDecoderBase> decoder_;
+    std::shared_ptr<ASTERIXDecodeJob>   decode_job_;
+    
     std::string current_data_source_name_; // used to check for decode file changes
 
     bool file_decoding_tested_ {false};
@@ -210,20 +233,16 @@ protected:
     unsigned int num_packets_total_{0};
     unsigned int num_records_ {0};
 
-    boost::posix_time::ptime start_time_;
-    std::unique_ptr<QProgressDialog> file_progress_dialog_;
-
-    std::map<unsigned int, ASTERIXCategoryConfig> category_configs_;
-
-    std::shared_ptr<ASTERIXJSONParsingSchema> schema_;
-    std::shared_ptr<ASTERIXDecodeJob>         decode_job_;
-    std::unique_ptr<ASTERIXDecoderBase>       decoder_;
-
     std::vector<std::shared_ptr<ASTERIXJSONMappingJob>>         json_map_jobs_;
+    ASTERIXTimestampCalculator ts_calculator_;
+    //std::future<void> ts_calc_future_;
     std::vector<std::shared_ptr<ASTERIXPostprocessJob>>         postprocess_jobs_;
-    std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_job_buffers_;
+    std::map<std::string, std::shared_ptr<Buffer>>              accumulated_buffers_;
+    std::vector<std::map<std::string, std::shared_ptr<Buffer>>> queued_insert_buffers_;
 
+    boost::posix_time::ptime start_time_;
     boost::posix_time::ptime last_insert_time_;
+    boost::posix_time::ptime last_file_progress_time_;
 
     bool error_{false};
     std::string error_message_;
@@ -231,8 +250,6 @@ protected:
     bool insert_active_{false};
     //boost::posix_time::ptime insert_start_time_;
     //double total_insert_time_ms_ {0};
-
-    boost::posix_time::ptime last_file_progress_time_;
 
     std::set<int> added_data_sources_;
 

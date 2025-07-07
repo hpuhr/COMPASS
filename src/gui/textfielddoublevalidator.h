@@ -15,13 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEXTFIELDDOUBLEVALIDATOR_H
-#define TEXTFIELDDOUBLEVALIDATOR_H
+#pragma once
+
+#include "compass.h"
 
 #include <QDoubleValidator>
 #include <QLineEdit>
-
-//#include "logger.h"
 
 class TextFieldDoubleValidator : public QDoubleValidator
 {
@@ -91,14 +90,9 @@ class TextFieldDoubleValidator : public QDoubleValidator
         assert(line_edit);
 
         if (line_edit->hasAcceptableInput())
-            line_edit->setStyleSheet(
-                "QLineEdit { background: rgb(255, 255, 255); "
-                "selection-background-color: rgb(200, 200, 200); }");
+            line_edit->setStyleSheet("");
         else
-            line_edit->setStyleSheet(
-                "QLineEdit { background: rgb(255, 100, 100); "
-                "selection-background-color: rgb(255, 200, 200); }");
+            line_edit->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
     }
 };
 
-#endif  // TEXTFIELDDOUBLEVALIDATOR_H

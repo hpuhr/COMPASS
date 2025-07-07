@@ -31,6 +31,7 @@ class VariableViewAnnotationWidget;
 
 class QVBoxLayout;
 class QRadioButton;
+class QToolButton;
 class QWidget;
 
 /**
@@ -56,19 +57,24 @@ protected:
     void updateSelectedVariables();
     void updateSelectedVariables(size_t idx);
 
+    void showSwitch(int var0, bool ok);
+
     const dbContent::VariableSelectionWidget* variableSelection(size_t idx) const;
+    bool showsAnnotation() const;
 
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
     virtual void configChanged_impl() {};
 
-    virtual void preVariableChangedEvent(int idx) {}
-    virtual void postVariableChangedEvent(int idx) {}
+    virtual void variableChangedEvent(int idx) {}
+    virtual void dataSourceChangedEvent() {}
 
     QVBoxLayout* configLayout() { return config_layout_; }
 
 private:
     void dataSourceToggled();
     void annotationChanged();
+
+    void switchVariables(int idx0, int idx1);
 
     VariableView* var_view_      = nullptr;
     QVBoxLayout*  config_layout_ = nullptr;
@@ -80,4 +86,5 @@ private:
     VariableViewAnnotationWidget* annotation_widget_   = nullptr;
 
     std::vector<dbContent::VariableSelectionWidget*> var_selection_widgets_;
+    std::vector<QToolButton*> var_switches_;
 };

@@ -189,14 +189,14 @@ Base::Base(const std::string& name,
            const std::string& group_name,
            double threshold,
            COMPARISON_TYPE check_type, 
-           EvaluationManager& eval_man,
+           EvaluationCalculator& calculator,
            const boost::optional<bool>& must_hold_for_any_target)
 :   name_                    (name      )
 ,   short_name_              (short_name)
 ,   group_name_              (group_name)
+,   calculator_              (calculator)
 ,   threshold_               (threshold )
 ,   check_type_              (check_type)
-,   eval_man_                (eval_man  )
 ,   must_hold_for_any_target_(must_hold_for_any_target)
 {
 }
@@ -326,6 +326,14 @@ unsigned int Base::getNumThresholdDecimals() const
 
     // use one more than needed and at least dec min
     return std::max(NumThresholdDecimalsMin, num_dec_needed + 1); 
+}
+
+/**
+*/
+bool Base::matchesResultID(const Evaluation::RequirementResultID& id) const
+{
+    return id.req_group_name == group_name_ &&
+           id.req_name == name_;
 }
 
 /**

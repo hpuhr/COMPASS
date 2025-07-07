@@ -17,13 +17,13 @@
 
 #include "evaluationstandardcombobox.h"
 #include "evaluationstandard.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 #include "logger.h"
 
 using namespace std;
 
-EvaluationStandardComboBox::EvaluationStandardComboBox(EvaluationManager& eval_man, QWidget* parent)
-    : QComboBox(parent), eval_man_(eval_man)
+EvaluationStandardComboBox::EvaluationStandardComboBox(EvaluationCalculator& calculator, QWidget* parent)
+    : QComboBox(parent), calculator_(calculator)
 {
     updateStandards();
 
@@ -41,10 +41,10 @@ void EvaluationStandardComboBox::changedStandardSlot(const QString& standard_nam
 
     loginf << "EvaluationStandardComboBox: changedStandardSlot: standard '" << std_name << "'";
 
-    if (eval_man_.currentStandardName() != std_name)
+    if (calculator_.currentStandardName() != std_name)
     {
         loginf << "EvaluationStandardComboBox: changedStandardSlot: setting standard '" << std_name << "'";
-        eval_man_.currentStandardName(std_name);
+        calculator_.currentStandardName(std_name);
     }
 }
 
@@ -65,14 +65,14 @@ void EvaluationStandardComboBox::updateStandards()
 
     addItem("");
 
-    for (auto std_it = eval_man_.standardsBegin(); std_it != eval_man_.standardsEnd(); ++std_it)
+    for (auto std_it = calculator_.standardsBegin(); std_it != calculator_.standardsEnd(); ++std_it)
     {
         addItem((*std_it)->name().c_str());
     }
 
-    if (eval_man_.hasCurrentStandard())
+    if (calculator_.hasCurrentStandard())
     {
-        int index = findText(eval_man_.currentStandardName().c_str());
+        int index = findText(calculator_.currentStandardName().c_str());
 
         if (index >= 0)
             setCurrentIndex(index);

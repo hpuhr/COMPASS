@@ -18,15 +18,17 @@
 #ifndef EVALUATIONREQUIREMENTIDENTIFICATIONFALSECONFIG_H
 #define EVALUATIONREQUIREMENTIDENTIFICATIONFALSECONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/identification/false.h"
-//#include "eval/requirement/identification/identificationfalseconfigwidget.h"
 
 #include <memory>
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -34,7 +36,7 @@ class IdentificationFalseConfig : public ProbabilityBaseConfig
 {
 public:
     IdentificationFalseConfig(const std::string& class_id, const std::string& instance_id,
-                              Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+                              Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
 
     std::shared_ptr<Base> createRequirement() override;
 
@@ -50,7 +52,7 @@ public:
     bool useMsTi() const;
     void useMsTi(bool value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
     // true: all must be false, false: at least one must be false
@@ -63,7 +65,7 @@ protected:
     // downlinked aircraft identification
     bool use_ms_ti_ {true};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

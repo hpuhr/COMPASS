@@ -51,9 +51,19 @@ void LatexDocument::write()
     if (!ret)
         throw runtime_error("LatexDocument: write: unable to create directories for '"+path_+"'");
 
-    ofstream file (path_+filename_);
+    std::string path = path_ + "/" + filename_;
+
+    loginf << "LatexDocument: write: writing file to '" << path << "'";
+
+    ofstream file (path);
+    if (!file.is_open())
+        throw runtime_error("LatexDocument: write: could not write tex file to '" + path + "'");
 
     file << toString();
+    if (!file)
+        throw runtime_error("LatexDocument: write: could not write tex file to '" + path + "'");
+
+    file.close();
 
     loginf << "LatexDocument: write: done";
 }

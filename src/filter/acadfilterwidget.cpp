@@ -12,24 +12,16 @@ using namespace std;
 ACADFilterWidget::ACADFilterWidget(ACADFilter& filter)
     : DBFilterWidget(filter), filter_(filter)
 {
-    QHBoxLayout* layout = new QHBoxLayout();
-
-    label_ = new QLabel("ACADs IN");
-    layout->addWidget(label_);
-
     value_edit_ = new QLineEdit();
-    connect(value_edit_, &QLineEdit::textEdited, this, &ACADFilterWidget::valueEditedSlot);
-    layout->addWidget(value_edit_);
 
-    child_layout_->addLayout(layout);
+    addNameValuePair("ACADs IN", value_edit_);
 
     update();
+
+    connect(value_edit_, &QLineEdit::textEdited, this, &ACADFilterWidget::valueEditedSlot);
 }
 
-ACADFilterWidget::~ACADFilterWidget()
-{
-
-}
+ACADFilterWidget::~ACADFilterWidget() = default;
 
 void ACADFilterWidget::update()
 

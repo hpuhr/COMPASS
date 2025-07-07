@@ -44,23 +44,35 @@ const char Configurable::ConfigurablePathSeparator = '.';
 Configurable::Configurable(const std::string& class_id, 
                            const std::string& instance_id,
                            Configurable* parent, 
-                           const std::string& root_configuration_filename)
-    : class_id_   (class_id),
-      instance_id_(instance_id),
-      key_id_     (keyID(class_id, instance_id)),
-      parent_     (parent)
+                           const std::string& root_configuration_filename,
+                           const nlohmann::json* config)
+    : class_id_    (class_id),
+      instance_id_ (instance_id),
+      key_id_      (keyID(class_id, instance_id)),
+      parent_      (parent),
+      is_transient_(config != nullptr)
 {
     logdbg << "Configurable: constructor: class_id " << class_id_ << " instance_id " << instance_id_;
 
-    if (parent)
+    if (config)
     {
-        parent_ = parent;
-        configuration_ = &parent_->registerSubConfigurable(*this);
+        //init config from json => transient configurable
+        configuration_ = new Configuration(class_id_, instance_id_);
+        configuration_->parseJSONConfig(*config);
     }
     else
     {
-        is_root_ = true;
-        configuration_ = &ConfigurationManager::getInstance().registerRootConfigurable(*this);
+        //init from configurable hierarchy
+        if (parent)
+        {
+            parent_ = parent;
+            configuration_ = &parent_->registerSubConfigurable(*this);
+        }
+        else
+        {
+            is_root_ = true;
+            configuration_ = &ConfigurationManager::getInstance().registerRootConfigurable(*this);
+        }
     }
 
     assert(configuration_);
@@ -113,6 +125,12 @@ Configurable::~Configurable()
             logwrn << "Configurable: destructor: class_id " << class_id_ << " instance_id "
                    << instance_id_ << " undelete child ptr " << &child_it.second;
         }
+    }
+
+    if (is_transient_ && configuration_)
+    {
+        //manually delete configuration
+        delete configuration_;
     }
 }
 
@@ -186,7 +204,7 @@ Configuration& Configurable::registerSubConfigurable(Configurable& child, bool c
     if (config_must_exist)
         assert(configuration_->hasSubConfiguration(child.classId(), child.instanceId()));
 
-    return configuration_->assertSubConfiguration(child.classId(), child.instanceId());
+    return configuration_->getOrCreateSubConfiguration(child.classId(), child.instanceId());
 }
 
 /**
@@ -408,9 +426,9 @@ bool Configurable::hasSubConfigurable(const std::string& class_id,
 
 /**
 */
-std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConfigurable(const std::string& approx_name)
+std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConfigurablePath(const std::string& path)
 {
-    vector<string> parts = String::split(approx_name, ConfigurablePathSeparator);
+    vector<string> parts = String::split(path, ConfigurablePathSeparator);
 
     if (!parts.size())
         return {rtcommand::FindObjectErrCode::NotFound, nullptr};
@@ -426,6 +444,25 @@ std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConf
     }
 
     return {rtcommand::FindObjectErrCode::NoError, child};
+}
+
+/**
+*/
+std::pair<rtcommand::FindObjectErrCode, Configurable*> Configurable::findSubConfigurableName(const std::string& name)
+{
+    auto child = getApproximateChildNamed(name);
+    if (child)
+        return {rtcommand::FindObjectErrCode::NoError, child};
+
+    //not found, try in children
+    for (auto& c : children_)
+    {
+        auto res = c.second.findSubConfigurableName(name);
+        if (res.first == rtcommand::FindObjectErrCode::NoError)
+            return res;
+    }
+
+    return {rtcommand::FindObjectErrCode::NotFound, nullptr};
 }
 
 /**

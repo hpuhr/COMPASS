@@ -2,7 +2,7 @@
 #define DBCONTENTLABELGENERATOR_H
 
 #include "labelgeneratorconfig.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 #include "labeldirection.h"
 
 //#include <osg/Matrixd>
@@ -140,7 +140,7 @@ protected:
 
     std::string getVariableName(const std::string& dbcontent_name, unsigned int key);
     std::string getVariableValue(const std::string& dbcontent_name, unsigned int key,
-                                 std::shared_ptr<Buffer>& buffer, unsigned int index);
+                                 std::shared_ptr<Buffer>& buffer, unsigned int index, bool long_val=false);
     std::string getVariableUnit(const std::string& dbcontent_name, unsigned int key);
 
     std::string getMode3AText (const std::string& dbcontent_name,

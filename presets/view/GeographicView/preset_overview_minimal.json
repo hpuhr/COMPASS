@@ -1,5 +1,5 @@
 {
-    "app_version": "0.8.0",
+    "app_version": "0.7.6",
     "category": "Default",
     "deployed": true,
     "description": "Gives an overview of the data, color by DBContent over the minimal 2D map.",
@@ -114,8 +114,6 @@
             "map_name": "minimal_2d.earth",
             "map_opacity": 0.4000000059604645,
             "max_declutter_labels": 200,
-            "mode_s_azimuth_stddev": 0.06,
-            "mode_s_range_stddev": 50.0,
             "null_height_offset": 0.0,
             "num_accuracy_ellipse_points_factor": 4.0,
             "num_accuracy_ellipse_points_max": 32.0,
@@ -126,8 +124,6 @@
             "overlay_text_color_invert": false,
             "overload_text_color_str": "#FF0000",
             "position_accuracy_vars_scale": 2.0,
-            "primary_azimuth_stddev": 0.15,
-            "primary_range_stddev": 120.0,
             "radar_layer_config": {
                 "show_fft": {},
                 "show_labels": true,
@@ -136,8 +132,6 @@
                 "show_range_ring": true,
                 "show_range_rings": true
             },
-            "secondary_azimuth_stddev": 0.08,
-            "secondary_range_stddev": 70.0,
             "sector_layer_config": {
                 "show_layer": false,
                 "show_layers": {}
@@ -154,7 +148,6 @@
             "use_depth_check": false,
             "use_height": false,
             "use_online_messages": false,
-            "use_radar_min_stddev": false,
             "use_utn_as_id": false
         },
         "sub_configs": {

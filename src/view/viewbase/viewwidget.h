@@ -25,7 +25,7 @@
 #include "configurable.h"
 #include "appmode.h"
 #include "ui_test_testable.h"
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <boost/optional.hpp>
 
@@ -37,6 +37,7 @@ class ViewConfigWidget;
 class ViewToolSwitcher;
 class ViewLoadStateWidget;
 class ViewPresetWidget;
+class ViewInfoWidget;
 
 class QSplitter;
 class QLayout;
@@ -65,7 +66,8 @@ _____________________________________________________________________________
 |                                              ||                            |
 |                                              ||                            |
 |                                              ||                            |
-|                                              ||                            |
+|                                              ||____________________________|
+|                                              ||ViewInfoWidget              |
 |                                              ||                            |
 |                                              ||____________________________|
 |                                              ||ViewLoadStateWidget         |
@@ -113,6 +115,7 @@ public:
 
     void updateToolWidget();
     void updateLoadState();
+    void updateInfoWidget();
     void updateComponents();
 
     bool refreshView();
@@ -161,6 +164,8 @@ protected:
     const ViewLoadStateWidget* getViewLoadStateWidget() const { assert(state_widget_); return state_widget_; }
     ViewPresetWidget* getViewPresetWidget() { return preset_widget_; }
     const ViewPresetWidget* getViewPresetWidget() const { return preset_widget_; }
+    ViewInfoWidget* getViewInfoWidget() { return info_widget_; }
+    const ViewInfoWidget* getViewInfoWidget() const { return info_widget_; }
 
     /**
      * Reimplement to provide the ViewLoadStateWidget with view specific load information.
@@ -176,6 +181,11 @@ protected:
      * Reimplement to add additional information to the view's view info.
      */
     virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
+
+    /**
+     * Reimplement to show the info widget or not.
+     */
+    virtual bool showInfoWidget() { return false; }
 
     void setDataWidget(ViewDataWidget* w);
     void setConfigWidget(ViewConfigWidget* w);
@@ -202,6 +212,7 @@ private:
     ViewToolWidget*      tool_widget_   = nullptr;
     ViewDataWidget*      data_widget_   = nullptr;
     ViewConfigWidget*    config_widget_ = nullptr;
+    ViewInfoWidget*      info_widget_   = nullptr;
     ViewLoadStateWidget* state_widget_  = nullptr;
     ViewPresetWidget*    preset_widget_ = nullptr;
     

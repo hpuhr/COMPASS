@@ -77,7 +77,7 @@ public:
                       const SectorLayer& sector_layer,
                       unsigned int utn, 
                       const EvaluationTargetData* target, 
-                      EvaluationManager& eval_man,
+                      EvaluationCalculator& calculator,
                       const EvaluationDetails& details,
                       unsigned int num_updates, 
                       unsigned int num_no_ref_pos, 
@@ -108,11 +108,11 @@ protected:
     virtual unsigned int numIssues() const override final;
 
     virtual std::vector<std::string> targetTableHeadersCustom() const override final;
-    virtual std::vector<QVariant> targetTableValuesCustom() const override final;
+    virtual nlohmann::json::array_t targetTableValuesCustom() const override final;
     virtual std::vector<TargetInfo> targetInfos() const override final;
     virtual std::vector<std::string> detailHeaders() const override final;
-    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
-                                               const EvaluationDetail* parent_detail) const override final;
+    virtual nlohmann::json::array_t detailValues(const EvaluationDetail& detail,
+                                                 const EvaluationDetail* parent_detail) const override final;
 
     virtual bool detailIsOk(const EvaluationDetail& detail) const override final;
     virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
@@ -132,7 +132,7 @@ public:
                       const std::string& result_id, 
                       std::shared_ptr<EvaluationRequirement::Base> requirement,
                       const SectorLayer& sector_layer, 
-                      EvaluationManager& eval_man,
+                      EvaluationCalculator& calculator,
                       const std::string& correct_value_name,
                       const std::string& correct_short_name,
                       const std::string& not_correct_short_name);

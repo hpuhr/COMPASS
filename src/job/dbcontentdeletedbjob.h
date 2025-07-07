@@ -19,13 +19,14 @@ public:
     void setSpecificDBContent(const std::string& specific_dbcontent); // delete everything in dbcontent
     void setSpecificSacSic(unsigned int sac, unsigned int sic);
     void setSpecificLineId(unsigned int line_id);
-
-    virtual void run();
+    void cleanupDB(bool cleanup_db);
 
     bool useSpecificDBContent() const;
     bool useBeforeTimestamp() const;
 
 protected:
+    virtual void run_impl();
+
     DBInterface& db_interface_;
 
     bool use_before_timestamp_ {false};
@@ -40,6 +41,8 @@ protected:
 
     bool use_specific_line_id_ {false};
     unsigned int specific_line_id_ {0};
+
+    bool cleanup_db_ = false;
 };
 
 #endif // DBCONTENTDELETEDBJOB_H

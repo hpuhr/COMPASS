@@ -19,7 +19,7 @@
 
 #include "ui_test_common.h"
 
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <boost/optional.hpp>
 

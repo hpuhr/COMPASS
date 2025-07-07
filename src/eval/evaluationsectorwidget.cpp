@@ -16,12 +16,11 @@
  */
 
 #include "evaluationsectorwidget.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
+#include "evaluationdialog.h"
 #include "sectorlayer.h"
-//#include "sector.h"
 #include "evaluationstandard.h"
 #include "eval/requirement/group.h"
-//#include "eval/requirement/base/baseconfig.h"
 
 #include <QLabel>
 #include <QCheckBox>
@@ -31,9 +30,12 @@ using namespace std;
 
 /**
 */
-EvaluationSectorWidget::EvaluationSectorWidget(EvaluationManager& eval_man, QWidget* parent)
+EvaluationSectorWidget::EvaluationSectorWidget(EvaluationCalculator& calculator, 
+                                               EvaluationDialog& dialog, 
+                                               QWidget* parent)
 :   QScrollArea(parent)
-,   eval_man_  (eval_man)
+,   calculator_(calculator)
+,   dialog_    (dialog)
 {
     QWidget* widget = new QWidget(this);
     widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -72,11 +74,11 @@ void EvaluationSectorWidget::update()
     QFont font_italic;
     font_italic.setItalic(true);
 
-    if (eval_man_.hasCurrentStandard() && eval_man_.sectorsLoaded())
+    if (calculator_.hasCurrentStandard() && calculator_.sectorsLoaded())
     {
-        EvaluationStandard& standard = eval_man_.currentStandard();
+        EvaluationStandard& standard = calculator_.currentStandard();
 
-        for (const auto& sec_lay_it : eval_man_.sectorsLayers())
+        for (const auto& sec_lay_it : calculator_.sectorLayers())
         {
             col = 0;
             const string& sector_layer_name = sec_lay_it->name();
@@ -91,7 +93,7 @@ void EvaluationSectorWidget::update()
                 const string& requirement_group_name = req_grp_it->name();
 
                 QCheckBox* check = new QCheckBox(requirement_group_name.c_str());
-                check->setChecked(eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name));
+                check->setChecked(calculator_.useGroupInSectorLayer(sector_layer_name, requirement_group_name));
                 check->setProperty("sector_layer_name", sector_layer_name.c_str());
                 check->setProperty("requirement_group_name", requirement_group_name.c_str());
 
@@ -121,7 +123,9 @@ void EvaluationSectorWidget::toggleUseGroupSlot()
     string sector_layer_name = check->property("sector_layer_name").toString().toStdString();
     string requirement_group_name = check->property("requirement_group_name").toString().toStdString();
 
-    assert (eval_man_.hasCurrentStandard());
+    assert (calculator_.hasCurrentStandard());
 
-    eval_man_.useGroupInSectorLayer(sector_layer_name, requirement_group_name, check->checkState() == Qt::Checked);
+    calculator_.useGroupInSectorLayer(sector_layer_name, requirement_group_name, check->checkState() == Qt::Checked);
+
+    dialog_.updateButtons();
 }

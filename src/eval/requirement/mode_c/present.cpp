@@ -33,8 +33,8 @@ namespace EvaluationRequirement
 {
 
 ModeCPresent::ModeCPresent(const std::string& name, const std::string& short_name, const std::string& group_name,
-                           double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man)
+                           double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator)
 {
 }
 
@@ -44,7 +44,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCPresent::evaluate (
 {
     logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -79,12 +79,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCPresent::evaluate (
     bool is_inside;
     //pair<dbContent::TargetPosition, bool> ret_pos;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    bool ok;
+    //bool ok;
 
     string comment;
     //bool lower_nok, upper_nok;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
     bool skip_detail;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -158,7 +158,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCPresent::evaluate (
             continue;
         }
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
@@ -239,7 +240,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCPresent::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleModeCPresent>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside,
+                calculator_, details, num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside,
                 num_no_ref_id, num_present_id, num_missing_id);
 }
 }

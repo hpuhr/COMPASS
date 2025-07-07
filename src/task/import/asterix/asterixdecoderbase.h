@@ -18,7 +18,7 @@
 #pragma once 
 
 #include "asteriximportsource.h"
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <string>
 

@@ -21,7 +21,6 @@
 #include "evaluationstandardtreeitem.h"
 #include "eval/requirement/base/baseconfigwidget.h"
 //#include "eval/requirement/base/comparisontype.h"
-#include "eval/results/report/rootitem.h"
 
 #include <QObject>
 
@@ -30,10 +29,16 @@ class EvaluationStandard;
 
 class QWidget;
 class QFormLayout;
-class EvaluationManager;
+class EvaluationCalculator;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
+
 class Base;
 
 /**
@@ -46,7 +51,7 @@ public:
                const std::string& instance_id,
                Group& group, 
                EvaluationStandard& standard,
-               EvaluationManager& eval_man);
+               EvaluationCalculator& calculator);
     virtual ~BaseConfig();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -75,22 +80,20 @@ public:
     std::string comment() const;
     void comment(const std::string& comment);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
     Group& group_;
     EvaluationStandard& standard_;
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 
     bool        use_ = true;
     std::string name_;
     std::string short_name_;
     std::string comment_;
 
-    std::unique_ptr<BaseConfigWidget> widget_ {nullptr};
-
     virtual void checkSubConfigurables() override;
-    virtual void createWidget(); // creates BaseConfigWidget, override to change
+    virtual BaseConfigWidget* createWidget(); // creates BaseConfigWidget, override to change
 };
 
 }

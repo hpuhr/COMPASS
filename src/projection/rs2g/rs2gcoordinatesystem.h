@@ -26,7 +26,9 @@ class RadarBiasInfo;
 class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
 {
   public:
-    RS2GCoordinateSystem(unsigned int id, double latitude_deg, double longitude_deg,
+    RS2GCoordinateSystem(unsigned int id, 
+                         double latitude_deg, 
+                         double longitude_deg,
                          double altitude_m);
 
     bool calculateRadSlt2Geocentric(double azimuth_rad, double slant_range_m,
@@ -67,16 +69,16 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
                             double& local_x, double& local_y, double& local_z, bool debug=false);
 
   protected:
-    Eigen::Matrix3d rs2g_A_;     // R matrix
+     Eigen::Matrix3d rs2g_A_;     // R matrix
 
-    Eigen::Matrix3d rs2g_T_Ai_;  // transposed matrix R^T (depends on radar)
-    Eigen::Vector3d rs2g_bi_;    // vector (depends on radar)
+     Eigen::Matrix3d rs2g_T_Ai_;  // transposed matrix R^T (depends on radar)
+     Eigen::Vector3d rs2g_bi_;    // vector (depends on radar)
 
-    double rs2g_ho_;             // height of COP
-    double rs2g_Rto_;            // earth radius of tangent sphere at the COP
+    // double rs2g_ho_;             // height of COP
+    // double rs2g_Rto_;            // earth radius of tangent sphere at the COP
 
-    Eigen::Matrix3d rs2g_A_p0q0_;
-    Eigen::Vector3d rs2g_b_p0q0_;
+    // Eigen::Matrix3d rs2g_A_p0q0_;
+    // Eigen::Vector3d rs2g_b_p0q0_;
 
     double azimuth(double x_m, double y_m);
     // calculates elevation angle El using H (altitude of aircraft) and rho (slant range)
@@ -86,7 +88,7 @@ class RS2GCoordinateSystem : public ProjectionCoordinateSystemBase
 
     void rs2gFillVec(double lat_rad, double lon_rad, double height_m, Eigen::Vector3d& b);
 
-    Eigen::Vector3d getTVector(double lat_rad, double lon_rad, double height_m);
+    // Eigen::Vector3d getTVector(double lat_rad, double lon_rad, double height_m);
 };
 
 

@@ -102,8 +102,7 @@ QColor ImportSectorDialog::color ()
 void ImportSectorDialog::colorSlot()
 {
     QColor color =
-            QColorDialog::getColor(color_, QApplication::activeWindow(), "Select Sector",
-                                   QColorDialog::DontUseNativeDialog);
+            QColorDialog::getColor(color_, QApplication::activeWindow(), "Select Sector");
 
     if (color.isValid())
     {

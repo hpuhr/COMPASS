@@ -33,10 +33,10 @@ namespace EvaluationRequirement
 
 PositionDistance::PositionDistance(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+        double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator,
         float threshold_value, COMPARISON_TYPE threshold_value_check_type,
         bool failed_values_of_interest)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator),
       threshold_value_(threshold_value), threshold_value_check_type_(threshold_value_check_type),
       failed_values_of_interest_(failed_values_of_interest)
 {
@@ -64,7 +64,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     logdbg << "EvaluationRequirementPositionDistance '" << name_ << "': evaluate: utn " << target_data.utn_
            << " threshold_value " << threshold_value_ << " threshold_value_check_type " << threshold_value_check_type_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -96,7 +96,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
     unsigned int num_distances {0};
     string comment;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
                             const dbContent::TargetPosition& tst_pos,
@@ -164,7 +164,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
             continue;
         }
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
@@ -243,7 +244,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
 
     return make_shared<EvaluationRequirementResult::SinglePositionDistance>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed);
+                calculator_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed);
 }
 
 }

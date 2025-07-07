@@ -15,14 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONDATA_H
-#define EVALUATIONDATA_H
+#pragma once
 
 #include "evaluationtargetdata.h"
-#include "evaluationdatawidget.h"
+#include "evaluationtarget.h"
 #include "dbcontentaccessor.h"
-
-#include <QAbstractItemModel>
 
 #include <memory>
 #include <map>
@@ -33,15 +30,21 @@
 #include <boost/multi_index/random_access_index.hpp>
 #include <boost/multi_index_container.hpp>
 
-
-class EvaluationManager;
+class EvaluationCalculator;
 class DBContent;
+class EvaluationManager;
 class DBContentManager;
 class Buffer;
 
 struct target_tag
 {
 };
+
+namespace ResultReport
+{
+    class Report;
+    class SectionContentTable;
+}
 
 typedef boost::multi_index_container<
     EvaluationTargetData,
@@ -53,21 +56,23 @@ typedef boost::multi_index_container<
         > >
     TargetCache;
 
-class EvaluationData : public QAbstractItemModel
+/**
+ */
+class EvaluationData
 {
-    Q_OBJECT
-
-public slots:
-    void targetChangedSlot(unsigned int utn); // for one utn
-    void allTargetsChangedSlot(); // for more than 1 utn
-
 public:
-    EvaluationData(EvaluationManager& eval_man, DBContentManager& dbcont_man);
+    typedef EvaluationTarget::InterestEnabledFunc InterestEnabledFunc;
+
+    EvaluationData(EvaluationCalculator& calculator,
+                   EvaluationManager& eval_man,
+                   DBContentManager& dbcont_man);
 
     void setBuffers(std::map<std::string, std::shared_ptr<Buffer>> buffers);
     void addReferenceData (const std::string& dbcontent_name, unsigned int line_id);
     void addTestData (const std::string& dbcontent_name, unsigned int line_id);
     void finalize ();
+
+    void updateToChanges();
 
     bool hasTargetData (unsigned int utn);
     const EvaluationTargetData& targetData(unsigned int utn);
@@ -79,35 +84,37 @@ public:
 
     void clear();
 
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
-    bool setData(const QModelIndex &index, const QVariant& value, int role) override;
+    std::map<unsigned int, EvaluationTarget> toTargets() const;
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-    QModelIndex parent(const QModelIndex& index) const override;
+    void addToReport(std::shared_ptr<ResultReport::Report> report) const;
+    void postprocessTargetsTable(ResultReport::SectionContentTable& table) const;
+    void fillTargetsTable(const std::map<unsigned int, EvaluationTarget>& targets,
+                          ResultReport::SectionContentTable& table,
+                          const InterestEnabledFunc & interest_enabled_func) const;
+    bool hasTargetTableTooltip(int col) const;
+    std::string targetTableToolTip(const EvaluationTarget& target,
+                                   int col,
+                                   const InterestEnabledFunc & interest_enabled_func) const;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-
-    const EvaluationTargetData& getTargetOf (const QModelIndex& index);
-
-    boost::optional<nlohmann::json> getTableData(bool rowwise = true,
-                                                 const std::vector<int>& cols = std::vector<int>()) const;
-
-    EvaluationDataWidget* widget();
-
-    void clearInterestFactors();
-    void resetModelBegin();
-    void resetModelEnd();
-
-    void setInterestFactorEnabled(const std::string& req_name, bool ok, bool update);
-    void setInterestFactorEnabled(bool ok, bool update);
-    bool interestFactorEnabled(const std::string& req_name) const;
-    
-    void updateInterestSwitches();
-
-    const std::map<std::string, bool>& interestSwitches() const { return interest_factor_enabled_; }
+    enum Columns
+    {
+        ColUse = 0, 
+        ColUTN, 
+        ColComment, 
+        ColCategory,
+        ColInterest, 
+        ColNumUpdates,
+        ColNumRef,
+        ColNumTest,
+        ColBegin, 
+        ColEnd, 
+        ColDuration,
+        ColACIDs, 
+        ColACADs, 
+        ColMode3A//, 
+        //ColModeCMin, 
+        //ColModeCMax
+    };
 
     // ref
     unsigned int ref_line_id_;
@@ -115,30 +122,52 @@ public:
     // tst
     unsigned int tst_line_id_;
 
+    static const std::string SectionID;
+    static const std::string TargetsTableName;
+    static const std::string ContentPropertyTargets;
+
 protected:
-    void updateAllInterestFactors();
+    std::pair<nlohmann::json, unsigned int> rawCellData(const EvaluationTarget& target, 
+                                                        int column,
+                                                        const InterestEnabledFunc & interest_enabled_func) const;
+    unsigned int rowStyle(const EvaluationTarget& target) const;
+    unsigned int columnStyle(int column) const;
 
-    EvaluationManager& eval_man_;
-    DBContentManager& dbcont_man_;
+    EvaluationCalculator& calculator_;
+    EvaluationManager&    eval_man_;
+    DBContentManager&     dbcont_man_;
 
-    QStringList table_columns_ {"Use", "UTN", "Comment", "Interest",
-                               "Begin", "End", "#All", "#Ref", "#Tst", "ACIDs", "ACADs",
-                                "M3/A", "MC Min", "MC Max"};
+    QStringList table_columns_ { "Use", 
+                                 "UTN", 
+                                 "Comment", 
+                                 "Category", 
+                                 "Interest",
+                                 "#Updates", 
+                                 "#Ref", 
+                                 "#Tst",
+                                 "Begin", 
+                                 "End", 
+                                 "Duration",
+                                 "ACIDs", 
+                                 "ACADs",
+                                 "M3/A"//, 
+                                 //"MC Min", 
+                                 //"MC Max" 
+                                };
+    
+    std::vector<int> main_columns_    { ColUse, ColUTN, ColComment, ColCategory, ColInterest };
+    std::vector<int> duration_columns_{ ColNumUpdates, ColNumRef, ColNumTest, ColBegin, ColEnd, ColDuration };
+    std::vector<int> mode_s_columns_  { ColACIDs, ColACADs };
+    std::vector<int> mode_ac_columns_ { ColMode3A, /*ColModeCMin, ColModeCMax*/ };
 
     std::shared_ptr<dbContent::DBContentAccessor> accessor_;
 
     TargetCache target_data_;
     bool finalized_ {false};
 
-    std::unique_ptr<EvaluationDataWidget> widget_;
-
     unsigned int unassociated_ref_cnt_ {0};
     unsigned int associated_ref_cnt_ {0};
 
     unsigned int unassociated_tst_cnt_ {0};
     unsigned int associated_tst_cnt_ {0};
-
-    std::map<std::string, bool> interest_factor_enabled_; // requirement name -> bool
 };
-
-#endif // EVALUATIONDATA_H

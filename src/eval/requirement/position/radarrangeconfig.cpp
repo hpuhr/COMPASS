@@ -20,22 +20,19 @@
 #include "eval/requirement/position/radarrange.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
-//#include "stringconv.h"
 
-//using namespace Utils;
-using namespace EvaluationResultsReport;
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 using namespace std;
-
 
 namespace EvaluationRequirement
 {
 PositionRadarRangeConfig::PositionRadarRangeConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : BaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : BaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("threshold_value", &threshold_value_, 50.0);
 }
@@ -47,7 +44,7 @@ PositionRadarRangeConfig::~PositionRadarRangeConfig()
 std::shared_ptr<Base> PositionRadarRangeConfig::createRequirement()
 {
     shared_ptr<PositionRadarRange> req = make_shared<PositionRadarRange>(
-                name_, short_name_, group_.name(), eval_man_, threshold_value_);
+                name_, short_name_, group_.name(), calculator_, threshold_value_);
 
     return req;
 }
@@ -62,24 +59,20 @@ void PositionRadarRangeConfig::thresholdValue(double value)
     threshold_value_ = value;
 }
 
-void PositionRadarRangeConfig::createWidget()
+BaseConfigWidget* PositionRadarRangeConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new PositionRadarRangeConfigWidget(*this));
-    assert (widget_);
+    return new PositionRadarRangeConfigWidget(*this);
 }
 
-void PositionRadarRangeConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void PositionRadarRangeConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Threshold Value [m]",
                   "Maximum allowed RMS from test target report to reference",
-                  threshold_value_}, nullptr);
+                  threshold_value_});
 
 }
 }

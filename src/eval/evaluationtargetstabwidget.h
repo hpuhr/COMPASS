@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONTARGETSTABWIDGET_H
-#define EVALUATIONTARGETSTABWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -39,4 +38,3 @@ protected:
     EvaluationManagerWidget& man_widget_;
 };
 
-#endif // EVALUATIONTARGETSTABWIDGET_H

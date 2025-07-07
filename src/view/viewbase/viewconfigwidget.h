@@ -19,7 +19,7 @@
 
 #include "viewcomponent.h"
 #include "appmode.h"
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <QWidget>
 
@@ -36,7 +36,7 @@ class QVBoxLayout;
 class ViewConfigWidget : public QWidget, public ViewComponent
 {
 public:
-    ViewConfigWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    ViewConfigWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~ViewConfigWidget() = default;
 
     void onDisplayChange();
@@ -69,7 +69,7 @@ private:
 class TabStyleViewConfigWidget : public ViewConfigWidget
 {
 public:
-    TabStyleViewConfigWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    TabStyleViewConfigWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~TabStyleViewConfigWidget() = default;
 
     static const int TabHeight = 42;

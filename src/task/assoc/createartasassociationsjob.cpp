@@ -60,7 +60,7 @@ CreateARTASAssociationsJob::CreateARTASAssociationsJob(
 
 CreateARTASAssociationsJob::~CreateARTASAssociationsJob() {}
 
-void CreateARTASAssociationsJob::run()
+void CreateARTASAssociationsJob::run_impl()
 {
     logdbg << "CreateARTASAssociationsJob: run: start";
 
@@ -70,6 +70,8 @@ void CreateARTASAssociationsJob::run()
     boost::posix_time::ptime stop_time;
 
     start_time = boost::posix_time::microsec_clock::local_time();
+
+    COMPASS::instance().logInfo("Create ARTAS Associations") << "started";
 
     // clear previous associations
 
@@ -89,12 +91,18 @@ void CreateARTASAssociationsJob::run()
     // create associations for sensors
     createSensorAssociations();
 
+    COMPASS::instance().logInfo("Create ARTAS Associations")
+        << missing_hashes_cnt_ << " missing hashes and "
+        << dubious_associations_cnt_ << " dubious associations ("
+        << found_hashes_cnt_ << " found total";
+
     if (task_.allowUserInteractions() && (missing_hashes_cnt_ || dubious_associations_cnt_))
     {
         stringstream ss;
         ss << "There are " << missing_hashes_cnt_ << " missing hashes and "
            << dubious_associations_cnt_ << " dubious associations ("
            << found_hashes_cnt_ << " found total).\nDo you want to still save the associations?";
+
         emit saveAssociationsQuestionSignal(ss.str().c_str());
 
         while (!save_question_answered_)
@@ -103,6 +111,8 @@ void CreateARTASAssociationsJob::run()
         if (!save_question_answer_)  // nope
         {
             stop_time = boost::posix_time::microsec_clock::local_time();
+
+            COMPASS::instance().logInfo("Create ARTAS Associations") << "save declined";
 
             double load_time;
             boost::posix_time::time_duration diff = stop_time - start_time;
@@ -132,6 +142,10 @@ void CreateARTASAssociationsJob::run()
 
     loginf << "CreateARTASAssociationsJob: run: done ("
            << String::doubleToStringPrecision(load_time, 2) << " s).";
+
+    COMPASS::instance().logInfo("Create ARTAS Associations")
+        << "finished after "
+        << String::timeStringFromDouble(diff.total_milliseconds() / 1000.0, false);
 
     done_ = true;
 }
@@ -182,20 +196,20 @@ void CreateARTASAssociationsJob::createUniqueARTASTracks()
     assert(buffer->has<boost::posix_time::ptime>(
                dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_timestamp_).name()));
 
-    NullableVector<unsigned int> track_num_vec = buffer->get<unsigned int>(
+    NullableVector<unsigned int>& track_num_vec = buffer->get<unsigned int>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_num_).name());
-    NullableVector<bool> track_begin_vec = buffer->get<bool>(
+    NullableVector<bool>& track_begin_vec = buffer->get<bool>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_begin_).name());
-    NullableVector<bool> track_end_vec = buffer->get<bool>(
+    NullableVector<bool>& track_end_vec = buffer->get<bool>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_end_).name());
-    NullableVector<unsigned char> track_coasting_vec = buffer->get<unsigned char>(
+    NullableVector<unsigned char>& track_coasting_vec = buffer->get<unsigned char>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_track_coasting_).name());
-    NullableVector<string> tri_hash_vec = buffer->get<string>(
+    NullableVector<string>& tri_hash_vec = buffer->get<string>(
                 dbcont_man.getVariable(tracker_dbcontent_name_, DBContent::var_cat062_tris_).name());
 
-    NullableVector<unsigned long> rec_num_vec = buffer->get<unsigned long>(
+    NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_rec_num_).name());
-    NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(
+    NullableVector<boost::posix_time::ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(
                 dbcont_man.metaGetVariable(tracker_dbcontent_name_, DBContent::meta_var_timestamp_).name());
 
     map<int, UniqueARTASTrack> current_tracks;  // utn -> unique track
@@ -763,9 +777,9 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
     assert(buffer->has<string>(hash_var.name()));
     assert(buffer->has<boost::posix_time::ptime>(ts_var.name()));
 
-    NullableVector<unsigned long> rec_nums = buffer->get<unsigned long>(rec_num_var.name());
-    NullableVector<string> hashes = buffer->get<string>(hash_var.name());
-    NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(ts_var.name());
+    NullableVector<unsigned long>& rec_nums = buffer->get<unsigned long>(rec_num_var.name());
+    NullableVector<string>& hashes = buffer->get<string>(hash_var.name());
+    NullableVector<boost::posix_time::ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(ts_var.name());
 
     for (size_t cnt = 0; cnt < buffer_size; ++cnt)
     {

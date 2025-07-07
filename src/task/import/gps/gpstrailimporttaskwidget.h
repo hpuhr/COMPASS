@@ -58,7 +58,7 @@ class GPSTrailImportTaskWidget : public TaskWidget
     void lineIDEditSlot(const QString& text);
 
 public:
-    GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    GPSTrailImportTaskWidget(GPSTrailImportTask& task, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~GPSTrailImportTaskWidget();
 
     void selectFile(const std::string& filename);

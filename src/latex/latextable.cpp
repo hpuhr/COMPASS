@@ -25,10 +25,10 @@
 using namespace std;
 using namespace Utils;
 
-unsigned int LatexTable::num_max_rows_ = 1000;
-
-LatexTable::LatexTable(const std::string& name, unsigned int num_columns,
-                       std::vector<std::string> headings, std::string heading_alignment,
+LatexTable::LatexTable(const std::string& name, 
+                       unsigned int num_columns,
+                       std::vector<std::string> headings, 
+                       std::string heading_alignment,
                        bool convert_to_latex)
     : name_(name), num_columns_(num_columns), headings_(headings), heading_alignment_(heading_alignment),
       convert_to_latex_(convert_to_latex)
@@ -88,7 +88,7 @@ std::string LatexTable::toString()
     bool max_rows_reached = false;
     for (auto& row : rows_)
     {
-        if (row_cnt > num_max_rows_)
+        if (num_max_rows_ >= 0 && row_cnt > (unsigned int)num_max_rows_)
         {
             max_rows_reached = true;
             break;
@@ -123,6 +123,11 @@ std::string LatexTable::name() const
 void LatexTable::setWideTable(bool wide_table)
 {
     wide_table_ = wide_table;
+}
+
+void LatexTable::setMaxRowCount(int max_row_count)
+{
+    num_max_rows_ = max_row_count;
 }
 
 std::string LatexTable::getLine (const std::vector<std::string>& row, bool bold)

@@ -18,11 +18,15 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONACROSSCONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONACROSSCONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -31,7 +35,7 @@ class PositionAcrossConfig : public ProbabilityBaseConfig
 {
 public:
     PositionAcrossConfig(const std::string& class_id, const std::string& instance_id,
-                         Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
+                         Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~PositionAcrossConfig();
 
     std::shared_ptr<Base> createRequirement() override;
@@ -39,12 +43,12 @@ public:
     float maxAbsValue() const;
     void maxAbsValue(float value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
     float max_abs_value_ {0};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

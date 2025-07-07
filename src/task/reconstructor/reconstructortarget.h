@@ -4,6 +4,7 @@
 #include "projection/transformation.h"
 #include "reconstruction_defs.h"
 #include "reconstructorbase.h"
+#include "targetbase.h"
 
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/optional.hpp>
@@ -22,6 +23,8 @@ class KalmanOnlineTracker;
 class KalmanChain;
 }
 
+template <typename T> class TimedDataSeries;
+
 namespace dbContent {
 
 enum class ComparisonResult
@@ -31,7 +34,14 @@ enum class ComparisonResult
     DIFFERENT
 };
 
-class ReconstructorTarget
+struct AltitudeState
+{
+    bool  fl_unknown;
+    bool  fl_on_ground;
+    float alt_baro_ft;
+};
+
+class ReconstructorTarget : public TargetBase
 {
 public:
     struct GlobalStats
@@ -125,7 +135,8 @@ public:
         InterpOptions& initFirst() { init_mode_ = InitMode::First; return *this; }
         InterpOptions& initLast() { init_mode_ = InitMode::Last; return *this; }
         InterpOptions& initFirstValid() { init_mode_ = InitMode::FirstValid; return *this; }
-        InterpOptions& initRecNum(unsigned long rec_num) { init_mode_ = InitMode::RecNum; init_rec_num_ = rec_num; return *this; }
+        InterpOptions& initRecNum(unsigned long rec_num) {
+            init_mode_ = InitMode::RecNum; init_rec_num_ = rec_num; return *this; }
 
         InterpOptions& enableDebug(bool ok) { debug_ = ok; return *this; }
 
@@ -176,7 +187,8 @@ public:
     std::set<unsigned int> acads_;
     std::set<std::string> acids_;
     std::set<unsigned int> mode_as_;
-    //std::set<unsigned int> mops_versions_;
+
+    boost::optional<unsigned int> ecat_;
 
     boost::posix_time::ptime total_timestamp_min_, total_timestamp_max_; // over all data
     boost::posix_time::ptime timestamp_min_, timestamp_max_; // in current slice
@@ -193,6 +205,9 @@ public:
     //std::set <std::pair<unsigned int, unsigned int>> track_nums_; // ds_id, tn
 
     std::map <unsigned int, unsigned int> counts_; // dbcontent id -> count
+
+    unsigned int adsb_count_{0};
+    std::map<std::string, unsigned int> adsb_mops_count_; // mops str -> count
 
     std::map<boost::posix_time::ptime, reconstruction::Reference> references_; // ts -> tr
 
@@ -237,7 +252,7 @@ public:
     bool isTimeInside (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
     bool hasDataForTime (boost::posix_time::ptime timestamp, boost::posix_time::time_duration d_max) const;
 
-    // TODO lambda for selective data
+    // tr_valid_func lambda for selective data
     ReconstructorInfoPair dataFor (boost::posix_time::ptime timestamp,
                                   boost::posix_time::time_duration d_max,
                                   const InfoValidFunc& tr_valid_func = InfoValidFunc(),
@@ -306,9 +321,16 @@ public:
     // unknown, same, different timestamps from this
 
     //fl_unknown, fl_on_ground, alt_baro_ft
-    std::tuple<bool, bool, float> getAltitudeState (
-        const boost::posix_time::ptime& ts, boost::posix_time::time_duration max_time_diff,
-        const InterpOptions& interp_options = InterpOptions()) const;
+    std::tuple<bool, bool, float> getAltitudeState (const boost::posix_time::ptime& ts, 
+                                                    const boost::posix_time::time_duration& max_time_diff,
+                                                    const InterpOptions& interp_options = InterpOptions()) const;
+    AltitudeState getAltitudeStateStruct(const boost::posix_time::ptime& ts, 
+                                         const boost::posix_time::time_duration& max_time_diff,
+                                         const InterpOptions& interp_options = InterpOptions()) const;
+
+    TimedDataSeries<unsigned int> getMode3ASeries() const;
+    TimedDataSeries<float> getAltitudeSeries() const;
+    TimedDataSeries<bool> getGroundBitSeries() const;
 
     void updateCounts();
     std::map <std::string, unsigned int> getDBContentCounts() const;
@@ -317,6 +339,9 @@ public:
 
     void removeOutdatedTargetReports();
     void removeTargetReportsLaterOrEqualThan(boost::posix_time::ptime ts);
+
+    virtual void targetCategory(Category ecat) override;
+    virtual Category targetCategory() const override;
 
     // online reconstructor
     size_t trackerCount() const;
@@ -364,6 +389,12 @@ protected:
     static const double on_ground_max_alt_ft_;
     static const double on_ground_max_speed_ms_;
 
+    bool multithreaded_predictions_ = true;
+    bool dynamic_insertions_        = true;
+
+    nlohmann::json adsb_info_json_;
+
+    static GlobalStats global_stats_;
     bool hasTracker() const;
     void reinitTracker();
     //void reinitChain();
@@ -386,13 +417,6 @@ protected:
                                             const InfoValidFunc& tr_valid_func = InfoValidFunc()) const;
 
     std::unique_ptr<reconstruction::KalmanChain>& chain() const;
-
-    //std::unique_ptr<reconstruction::KalmanChain> chain_;
-
-    bool multithreaded_predictions_ = true;
-    bool dynamic_insertions_        = true;
-
-    static GlobalStats global_stats_;
 };
 
 } // namespace dbContent

@@ -15,13 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBINTERFACE_H_
-#define DBINTERFACE_H_
+#pragma once
 
 #include "configurable.h"
 #include "dbcontent/variable/variableset.h"
-//#include "propertylist.h"
-#include "sqlgenerator.h"
+#include "dbdefs.h"
+#include "result.h"
 
 #include <QObject>
 
@@ -30,35 +29,49 @@
 #include <memory>
 #include <set>
 
-static const std::string TABLE_NAME_PROPERTIES = "properties";
-static const std::string TABLE_NAME_SECTORS = "sectors";
-static const std::string TABLE_NAME_VIEWPOINTS = "viewpoints";
-static const std::string TABLE_NAME_TARGETS = "targets";
-
-class COMPASS;
-class Buffer;
-class BufferWriter;
-class SQLiteConnection;
-class QProgressDialog;
-class DBContent;
+class DBInstance;
+class DBConnection;
 class DBResult;
 class DBTableInfo;
-class Job;
+class DBCommand;
+class SQLGenerator;
+
+class COMPASS;
+
+class Buffer;
 class BufferWriter;
+class Job;
 class Sector;
 class SectorLayer;
-
-class SQLGenerator;
-class QWidget;
-
+class Result;
 class DBFFT;
+class DBContent;
+
+class PropertyList;
 
 namespace dbContent
 {
-class DBDataSource;
-class Variable;
-class Target;
+    class DBDataSource;
+    class Variable;
+    class Target;
 }
+
+class TaskResult;
+
+namespace ResultReport
+{
+    class Section;
+    class SectionContent;
+}
+
+class QWidget;
+class QProgressDialog;
+
+static const std::string TABLE_NAME_PROPERTIES = "properties";
+static const std::string TABLE_NAME_SECTORS    = "sectors";
+static const std::string TABLE_NAME_VIEWPOINTS = "viewpoints";
+static const std::string TABLE_NAME_TARGETS    = "targets";
+static const std::string TABLE_NAME_TASK_LOG   = "task_log";
 
 extern const std::string PROP_TIMESTAMP_MIN_NAME;
 extern const std::string PROP_TIMESTAMP_MAX_NAME;
@@ -67,6 +80,8 @@ extern const std::string PROP_LATITUDE_MAX_NAME;
 extern const std::string PROP_LONGITUDE_MIN_NAME;
 extern const std::string PROP_LONGITUDE_MAX_NAME;
 
+/**
+ */
 class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT
@@ -84,15 +99,22 @@ public:
                                          const std::string& instance_id);
 
     void openDBFile(const std::string& filename, bool overwrite);
+    void openDBInMemory();
+    void openDBFileFromMemory(const std::string& filename);
     void exportDBFile(const std::string& filename);
-    void closeDBFile();
-    bool dbOpen();
+    void closeDB();
 
-    const std::map<std::string, DBTableInfo>& tableInfo() { return table_info_; }
+    bool cleanupDB(bool show_dialog = false);
+    bool cleanupInProgress() const { return cleanup_in_progress_; }
 
-    bool ready();
+    const std::map<std::string, DBTableInfo>& tableInfo() const;
+    std::string dbFilename() const;
+    bool dbInMemory() const;
+    bool canCreateDBFileFromMemory() const;
 
-    SQLiteConnection& connection();
+    bool ready() const;
+
+    const DBInstance& dbInstance() const;
 
     // data sources
     bool existsDataSourcesTable();
@@ -109,9 +131,10 @@ public:
     // clears previous and saves new ones
 
     // insert data and create associated data sources
-    void insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buffer);
+    void insertDBContent(DBContent& dbcontent, std::shared_ptr<Buffer> buffer);
+    void insertDBContent(const std::map<std::string, std::shared_ptr<Buffer>>& buffers);
     void insertBuffer(const std::string& table_name, std::shared_ptr<Buffer> buffer);
-
+    
     void updateBuffer(const std::string& table_name, const std::string& key_col, std::shared_ptr<Buffer> buffer,
                       int from_index = -1, int to_index = -1);  // no indexes means full buffer
 
@@ -133,6 +156,7 @@ public:
     void createPropertiesTable();
     void setProperty(const std::string& id, const std::string& value);
     std::string getProperty(const std::string& id);
+    void removeProperty(const std::string& id);
     bool hasProperty(const std::string& id);
 
     bool hasContentIn(const std::string& table_name, const std::string& column_name) const;
@@ -140,8 +164,9 @@ public:
 
     void saveProperties();
 
-    bool existsTable(const std::string& table_name);
+    bool existsTable(const std::string& table_name) const;
     void createTable(const DBContent& object);
+    void removeTable(const std::string& table_name);
 
     bool areColumnsNull (const std::string& table_name, const std::vector<std::string> columns);
 
@@ -164,45 +189,85 @@ public:
     void createTargetsTable();
     void clearTargetsTable();
     std::vector<std::unique_ptr<dbContent::Target>> loadTargets();
-    void saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets);
-    void saveTarget(const std::unique_ptr<dbContent::Target>& target);
+
+    void saveTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
+    void updateTargets(const std::map<unsigned int, nlohmann::json>& targets_info);
+
+    bool existsTaskLogTable();
+    void createTaskLogTable();
+    std::vector<nlohmann::json> loadTaskLogInfo();
+    void saveTaskLogInfo(unsigned int msg_id, const nlohmann::json& info);
 
     void clearAssociations(const DBContent& dbcontent);
 
+    bool existsTaskResultsTable() const;
+    bool existsReportContentsTable() const;
+    void createTaskResultsTable();
+    void createReportContentsTable();
+    Result saveResult(const TaskResult& result, 
+                      bool cleanup_db_if_needed);
+    Result deleteResult(const TaskResult& result, 
+                        bool cleanup_db_if_needed,
+                        bool* deleted = nullptr);
+    Result updateResultHeader(const TaskResult& result);
+    ResultT<std::vector<std::shared_ptr<TaskResult>>> loadResults();
+    ResultT<std::shared_ptr<ResultReport::SectionContent>> loadContent(ResultReport::Section* section, unsigned int content_id);
+
     void clearTableContent(const std::string& table_name);
+    ResultT<std::shared_ptr<Buffer>> select(const std::string& table_name, 
+                                            const PropertyList& properties,
+                                            const std::string& filter);
 
     unsigned long getMaxRecordNumber(DBContent& object);
     unsigned int getMaxRefTrackTrackNum();
+    boost::optional<unsigned long> getMaxReportContentID();
+
+    void startPerformanceMetrics() const;
+    db::PerformanceMetrics stopPerformanceMetrics() const;
+    bool hasActivePerformanceMetrics() const;
+
+    std::string dbInfo();
 
     //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
     //std::tuple<bool, unsigned int, unsigned int>>> queryADSBInfo();
     // ta -> mops versions, nucp_nics, nac_ps
 
+    static const size_t TableBulkUpdateMinRows;
+
 protected:
-    std::unique_ptr<SQLiteConnection> db_connection_;
+    virtual void checkSubConfigurables() override {}
+
+    void openDBFileInternal(const std::string& filename, bool overwrite);
+
+    void loadProperties();
+    void reset();
+
+    void recreateConcurrentConnections();
+
+    void initDBContentBuffer(DBContent& dbcontent, 
+                             std::shared_ptr<Buffer> buffer);
+
+    SQLGenerator sqlGenerator() const;
+    
+    Result execute(const std::string& sql);
+    std::shared_ptr<DBResult> execute(const DBCommand& cmd);
+
+    void updateTableInfo();
+    Result cleanupDBInternal();
+
+    std::unique_ptr<DBInstance> db_instance_;
 
     bool properties_loaded_ {false};
     const std::string dbcolumn_content_property_name_{"dbcolumn_content"};
 
-    boost::mutex connection_mutex_;
-    boost::mutex table_info_mutex_;
+    mutable boost::mutex instance_mutex_;
 
     unsigned int read_chunk_size_;
-
-    SQLGenerator sql_generator_;
-
-    std::map<std::string, DBTableInfo> table_info_;
 
     std::map<std::string, std::string> properties_;
     std::map<std::string, std::set<std::string>> dbcolumn_content_flags_; // dbtable -> dbcols with content
 
-    virtual void checkSubConfigurables();
+    bool insert_mt_ = false;
 
-    void insertBindStatementUpdateForCurrentIndex(std::shared_ptr<Buffer> buffer, unsigned int buffer_index);
-
-    void loadProperties();
-
-    void updateTableInfo();
+    bool cleanup_in_progress_ = false;
 };
-
-#endif /* DBINTERFACE_H_ */

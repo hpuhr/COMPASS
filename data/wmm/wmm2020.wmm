@@ -1,0 +1,23 @@
+WMMF-1
+# A World Magnetic Model (Format 1) file.  For documentation on the
+# format of this file see
+# http://geographiclib.sf.net/html/magnetic.html#magneticformat
+Name            wmm2020
+Description     World Magnetic Model 2020
+URL             https://ngdc.noaa.gov/geomag/WMM/DoDWMM.shtml
+Publisher       National Oceanic and Atmospheric Administration
+ReleaseDate     2019-12-10
+# DataCutOff      2019-10-01
+ConversionDate  2019-12-10
+DataVersion     1
+Radius          6371200
+Epoch           2020
+MinTime         2020
+MaxTime         2025
+MinHeight       -1000
+MaxHeight       850000
+
+# The coefficients are stored in a file obtained by appending ".cof" to
+# the name of this file.  The coefficients were obtained from
+# WMM.COF in the wmm2020 distribution.
+ID              WMM2020A

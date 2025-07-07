@@ -18,11 +18,10 @@
 #include <iostream>
 
 #include "client.h"
-#include "mainwindow.h"
-#include "compass.h"
-#include "taskmanager.h"
 
 #include <QThread>
+
+#include <osgEarth/Registry>
 
 using namespace std;
 
@@ -30,21 +29,24 @@ int main(int argc, char** argv)
 {
     try
     {
+        // Enable Qt high-DPI scaling
+        QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+        // 1) Force-initialize the GDAL mutex (and register its atexit-hook)
+        //osgEarth::getGDALMutex();
+
+        // 2) Then initialize the Registry (which registers its destructor next)
+        //osgEarth::Registry::instance();
+
         Client client(argc, argv);
 
         if (client.quitRequested())
             return 0;
 
+        // note: do not use COMPASS::instance functions here
+
         if (!client.run())
             return -1;
-
-//        if (COMPASS::instance().mainWindow().automaticTasksDefined())
-//        {
-//            COMPASS::instance().mainWindow().performAutomaticTasks();
-
-//            if (COMPASS::instance().mainWindow().quitNeeded())
-//                return 0;
-//        }
 
         return client.exec();
     }

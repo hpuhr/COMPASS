@@ -16,16 +16,23 @@
  */
 
 #include "evaluationtargetdata.h"
+#include "evaluationtarget.h"
+#include "evaluationdefs.h"
+
+#include "task/result/report/reportdefs.h"
+
 #include "logger.h"
 #include "stringconv.h"
 #include "dbcontent/target/target.h"
 #include "compass.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 #include "util/timeconv.h"
 #include "sector/airspace.h"
 #include "sectorlayer.h"
-#include "section_id.h"
+#include "evalsectionid.h"
+#include "reportdefs.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -36,6 +43,7 @@
 #include <Eigen/Core>
 
 #include <QString>
+#include <QAction>
 
 using namespace std;
 using namespace Utils;
@@ -44,59 +52,73 @@ using namespace dbContent::TargetReport;
 
 //const unsigned int debug_utn = 3275;
 
-QColor EvaluationTargetData::color_interest_high_{"#FF6666"};
-QColor EvaluationTargetData::color_interest_mid_{"#FFA500"};
-QColor EvaluationTargetData::color_interest_low_{"#66AA66"};
-
 double EvaluationTargetData::interest_thres_req_high_ = 0.05;
 double EvaluationTargetData::interest_thres_req_mid_  = 0.01;
 
 double EvaluationTargetData::interest_thres_sum_high_ = 0.1;
 double EvaluationTargetData::interest_thres_sum_mid_  = 0.05;
 
+/**
+ */
 EvaluationTargetData::EvaluationTargetData(unsigned int utn, 
                                            EvaluationData& eval_data,
                                            std::shared_ptr<dbContent::DBContentAccessor> accessor,
+                                           EvaluationCalculator& calculator,
                                            EvaluationManager& eval_man,
                                            DBContentManager& dbcont_man)
     :   utn_       (utn)
     ,   eval_data_ (eval_data)
     ,   accessor_  (accessor)
-    ,   eval_man_  (eval_man)
+    ,   calculator_(calculator)
+    ,   eval_man_(eval_man)
     ,   dbcont_man_(dbcont_man)
-    ,   ref_chain_ (accessor_, eval_man_.dbContentNameRef())
-    ,   tst_chain_ (accessor_, eval_man_.dbContentNameTst())
+    ,   ref_chain_ (accessor_, calculator_.dbContentNameRef())
+    ,   tst_chain_ (accessor_, calculator_.dbContentNameTst())
 {
 }
 
+/**
+ */
 EvaluationTargetData::~EvaluationTargetData() = default;
 
+/**
+ */
 void EvaluationTargetData::addRefIndex (boost::posix_time::ptime timestamp, unsigned int index)
 {
     ref_chain_.addIndex(timestamp, index);
 }
 
+/**
+ */
 void EvaluationTargetData::addTstIndex (boost::posix_time::ptime timestamp, unsigned int index)
 {
     tst_chain_.addIndex(timestamp, index);
 }
 
+/**
+ */
 bool EvaluationTargetData::hasData() const
 {
     return (hasRefData() || hasTstData());
 }
 
+/**
+ */
 bool EvaluationTargetData::hasRefData () const
 {
     return ref_chain_.hasData();
 }
 
+/**
+ */
 bool EvaluationTargetData::hasTstData () const
 {
     //return !tst_chain_.empty();
     return tst_chain_.hasData();
 }
 
+/**
+ */
 void EvaluationTargetData::finalize () const
 {
     //    loginf << "EvaluationTargetData: finalize: utn " << utn_
@@ -112,14 +134,17 @@ void EvaluationTargetData::finalize () const
     updateModeCMinMax();
     updatePositionMinMax();
 
+    updateUseInfo();
+
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    if (dbcont_man.hasTargetsInfo() && dbcont_man.existsTarget(utn_)
-            && dbcont_man.target(utn_).hasAdsbMOPSVersions())
+    if (dbcont_man.hasTargetsInfo()   &&
+        dbcont_man.existsTarget(utn_) &&
+        dbcont_man.target(utn_).hasADSBMOPS())
     {
         has_adsb_info_ = true;
         has_mops_versions_ = true;
-        mops_versions_ = dbcont_man.target(utn_).adsbMOPSVersions();
+        mops_versions_ = dbcont_man.target(utn_).adsbMopsList();
     }
 
     //    std::set<unsigned int> mops_version;
@@ -177,21 +202,37 @@ void EvaluationTargetData::finalize () const
     computeSectorInsideInfo();
 }
 
+/**
+ */
+void EvaluationTargetData::updateToChanges() const
+{
+    clearInterestFactors();
+    updateUseInfo();
+}
+
+/**
+ */
 unsigned int EvaluationTargetData::numUpdates () const
 {
     return ref_chain_.size() + tst_chain_.size();
 }
 
+/**
+ */
 unsigned int EvaluationTargetData::numRefUpdates () const
 {
     return ref_chain_.size() ;
 }
 
+/**
+ */
 unsigned int EvaluationTargetData::numTstUpdates () const
 {
     return tst_chain_.size() ;
 }
 
+/**
+ */
 ptime EvaluationTargetData::timeBegin() const
 {
     if (ref_chain_.size() && tst_chain_.size())
@@ -204,6 +245,8 @@ ptime EvaluationTargetData::timeBegin() const
         throw std::runtime_error("EvaluationTargetData: timeBegin: no data");
 }
 
+/**
+ */
 std::string EvaluationTargetData::timeBeginStr() const
 {
     if (hasData())
@@ -212,6 +255,8 @@ std::string EvaluationTargetData::timeBeginStr() const
         return "";
 }
 
+/**
+ */
 ptime EvaluationTargetData::timeEnd() const
 {
     if (ref_chain_.size() && tst_chain_.size())
@@ -224,6 +269,8 @@ ptime EvaluationTargetData::timeEnd() const
         throw std::runtime_error("EvaluationTargetData: timeEnd: no data");
 }
 
+/**
+ */
 std::string EvaluationTargetData::timeEndStr() const
 {
     if (hasData())
@@ -232,6 +279,8 @@ std::string EvaluationTargetData::timeEndStr() const
         return "";
 }
 
+/**
+ */
 time_duration EvaluationTargetData::timeDuration() const
 {
     if (hasData())
@@ -240,12 +289,26 @@ time_duration EvaluationTargetData::timeDuration() const
         return {};
 }
 
+/**
+ */
+std::string EvaluationTargetData::timeDurationStr() const
+{
+    if (hasData())
+        return Time::toString(timeDuration());
+    else
+        return "";
+}
+
+/**
+ */
 std::set<unsigned int> EvaluationTargetData::modeACodes() const
 {
     logdbg << "EvaluationTargetData: modeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
     return mode_a_codes_;
 }
 
+/**
+ */
 std::string EvaluationTargetData::modeACodesStr() const
 {
     std::ostringstream out;
@@ -264,17 +327,23 @@ std::string EvaluationTargetData::modeACodesStr() const
     return out.str();
 }
 
+/**
+ */
 bool EvaluationTargetData::hasModeC() const
 {
     return has_mode_c_;
 }
 
+/**
+ */
 float EvaluationTargetData::modeCMin() const
 {
     assert (has_mode_c_);
     return mode_c_min_;
 }
 
+/**
+ */
 std::string EvaluationTargetData::modeCMinStr() const
 {
     if (has_mode_c_)
@@ -283,12 +352,16 @@ std::string EvaluationTargetData::modeCMinStr() const
         return "";
 }
 
+/**
+ */
 float EvaluationTargetData::modeCMax() const
 {
     assert (has_mode_c_);
     return mode_c_max_;
 }
 
+/**
+ */
 std::string EvaluationTargetData::modeCMaxStr() const
 {
     if (has_mode_c_)
@@ -297,36 +370,61 @@ std::string EvaluationTargetData::modeCMaxStr() const
         return "";
 }
 
+/**
+ */
 bool EvaluationTargetData::isPrimaryOnly () const
 {
     return !acids_.size() && !acads_.size() && !mode_a_codes_.size() && !has_mode_c_;
 }
 
+/**
+ */
 bool EvaluationTargetData::isModeS () const
 {
     return acids_.size() || acads_.size();
 }
 
+/**
+ */
 bool EvaluationTargetData::isModeACOnly () const
 {
     return (mode_a_codes_.size() || has_mode_c_) && !isModeS();
 }
 
-bool EvaluationTargetData::use() const
+/**
+ */
+void EvaluationTargetData::updateUseInfo() const
 {
-    return dbcont_man_.utnUseEval(utn_);
+    const auto& target = dbcont_man_.target(utn_);
+
+    use_in_eval_           = target.useInEval();
+    excluded_time_windows_ = target.evalExcludedTimeWindows();
+    excluded_requirements_ = target.evalExcludedRequirements();
 }
 
+/**
+ */
+bool EvaluationTargetData::use() const
+{
+    return use_in_eval_;
+}
+
+/**
+ */
 const dbContent::TargetReport::Chain& EvaluationTargetData::refChain() const
 {
     return ref_chain_;
 }
 
+/**
+ */
 const dbContent::TargetReport::Chain& EvaluationTargetData::tstChain() const
 {
     return tst_chain_;
 }
 
+/**
+ */
 bool EvaluationTargetData::hasMappedRefData(const DataID& tst_id,
                                             time_duration d_max) const
 {
@@ -358,6 +456,8 @@ bool EvaluationTargetData::hasMappedRefData(const DataID& tst_id,
     return false;
 }
 
+/**
+ */
 std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& tst_id,
                                                              time_duration d_max)  const
 {
@@ -389,6 +489,8 @@ std::pair<ptime, ptime> EvaluationTargetData::mappedRefTimes(const DataID& tst_i
     return {{}, {}};
 }
 
+/**
+ */
 boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(const DataID& tst_id) const
 {
     auto index = tst_chain_.indexFromDataID(tst_id);
@@ -400,6 +502,8 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(co
     return tdm.pos_ref_;
 }
 
+/**
+ */
 boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
     const DataID& tst_id, time_duration d_max, bool debug) const
 {
@@ -490,6 +594,8 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
     return {};
 }
 
+/**
+ */
 boost::optional<dbContent::TargetVelocity> EvaluationTargetData::mappedRefSpeed(const DataID& tst_id,
                                                                                 time_duration d_max) const
 {
@@ -545,6 +651,8 @@ boost::optional<dbContent::TargetVelocity> EvaluationTargetData::mappedRefSpeed(
     return {};
 }
 
+/**
+ */
 boost::optional<bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst_id,
                                                                time_duration d_max) const
 // has gbs, gbs true
@@ -590,35 +698,35 @@ boost::optional<bool> EvaluationTargetData::mappedRefGroundBit(const DataID& tst
     return {};
 }
 
+/**
+ */
 unsigned int EvaluationTargetData::tstDSID(const dbContent::TargetReport::Chain::DataID& tst_id) const
 {
     //auto index     = tst_chain_.indexFromDataID(tst_id);
     return tst_chain_.dsID(tst_id);
 }
 
-boost::optional<bool> EvaluationTargetData::tstGroundBitInterpolated(const DataID& ref_id) const // true is on ground
+/**
+ */
+boost::optional<bool> EvaluationTargetData::tstGroundBitInterpolated(
+    const DataID& ref_id, const boost::posix_time::time_duration& d_max) const // true is on ground
 {
     auto ref_timestamp = ref_chain_.timestampFromDataID(ref_id);
 
     DataMappingTimes times = tst_chain_.findDataMappingTimes(ref_timestamp);
 
-    if (times.has_other1_ && (ref_timestamp - times.timestamp_other1_).abs() < seconds(InterpGroundBitMaxSeconds))
+    if (times.has_other1_ && (ref_timestamp - times.timestamp_other1_).abs() < d_max)
     {
         auto gbs = tst_chain_.groundBit(times.dataid_other1_);
 
         if (gbs.has_value() && *gbs)
             return gbs;
     }
-    //            && tst_chain_.hasGroundBit(times.dataid_other1_)
-    //            && get<1>(tst_chain_.groundBit(times.dataid_other1_)))
-    //        return pair<bool,bool> (true, true);
 
-    if (times.has_other2_ && (ref_timestamp - times.timestamp_other2_).abs() < seconds(InterpGroundBitMaxSeconds))
+    if (times.has_other2_ && (ref_timestamp - times.timestamp_other2_).abs() < d_max)
     {
         return tst_chain_.groundBit(times.dataid_other2_);
     }
-    //            && tst_chain_.hasGroundBit(times.timestamp_other2_))
-    //        return pair<bool,bool> (true, get<1>(tst_chain_.groundBit(times.timestamp_other2_)));
 
     return {};
 }
@@ -730,51 +838,69 @@ boost::optional<bool> EvaluationTargetData::tstGroundBitInterpolated(const DataI
 //    assert (false); // can not be reached
 //}
 
+/**
+ */
 double EvaluationTargetData::latitudeMin() const
 {
     assert (has_pos_);
     return latitude_min_;
 }
 
+/**
+ */
 double EvaluationTargetData::latitudeMax() const
 {
     assert (has_pos_);
     return latitude_max_;
 }
 
+/**
+ */
 double EvaluationTargetData::longitudeMin() const
 {
     assert (has_pos_);
     return longitude_min_;
 }
 
+/**
+ */
 double EvaluationTargetData::longitudeMax() const
 {
     assert (has_pos_);
     return longitude_max_;
 }
 
+/**
+ */
 bool EvaluationTargetData::hasPos() const
 {
     return has_pos_;
 }
 
+/**
+ */
 bool EvaluationTargetData::hasADSBInfo() const
 {
     return has_adsb_info_;
 }
 
+/**
+ */
 bool EvaluationTargetData::hasMOPSVersion() const
 {
     return has_mops_versions_;
 }
 
+/**
+ */
 std::set<unsigned int> EvaluationTargetData::mopsVersions() const
 {
     assert (has_mops_versions_);
     return mops_versions_;
 }
 
+/**
+ */
 std::string EvaluationTargetData::mopsVersionStr() const
 {
     if (hasMOPSVersion())
@@ -833,11 +959,15 @@ std::string EvaluationTargetData::mopsVersionStr() const
 //    return has_nacp;
 //}
 
+/**
+ */
 std::set<string> EvaluationTargetData::acids() const
 {
     return acids_;
 }
 
+/**
+ */
 string EvaluationTargetData::acidsStr() const
 {
     std::ostringstream out;
@@ -855,11 +985,15 @@ string EvaluationTargetData::acidsStr() const
     return out.str().c_str();
 }
 
+/**
+ */
 std::set<unsigned int> EvaluationTargetData::acads() const
 {
     return acads_;
 }
 
+/**
+ */
 std::string EvaluationTargetData::acadsStr() const
 {
     std::ostringstream out;
@@ -877,52 +1011,55 @@ std::string EvaluationTargetData::acadsStr() const
     return out.str().c_str();
 }
 
+/**
+ */
 void EvaluationTargetData::clearInterestFactors() const
 {
     interest_factors_.clear();
-
-    interest_factors_sum_total_   = 0.0;
-    interest_factors_sum_enabled_ = 0.0;
 }
 
-void EvaluationTargetData::addInterestFactor (const std::string& req_section_id, double factor) const
+/**
+ */
+void EvaluationTargetData::addInterestFactor (const Evaluation::RequirementSumResultID& id, 
+                                              double factor, 
+                                              bool reset) const
 {
     logdbg << "EvaluationTargetData: addInterestFactor: utn " << utn_
-           << " req_section_id " << req_section_id << " factor " << factor;
+           << " req_section_id " << EvalSectionID::requirementResultSumID(id)
+           << " factor " << factor
+           << " reset " << reset;
 
-    interest_factors_[req_section_id] += factor;
-    interest_factors_sum_total_ += factor;
+    if (reset)
+        interest_factors_[ id ] = 0;
+
+    interest_factors_[ id ] += factor;
 }
 
-const std::map<std::string, double>& EvaluationTargetData::interestFactors() const
+/**
+ */
+const EvaluationTargetData::InterestMap& EvaluationTargetData::interestFactors() const
 {
     return interest_factors_;
 }
 
-std::map<std::string, double> EvaluationTargetData::enabledInterestFactors() const
+/**
+ */
+std::string EvaluationTargetData::stringForInterestFactor(const Evaluation::RequirementSumResultID& id, 
+                                                          double factor)
 {
-    std::map<std::string, double> ifactors;
-
-    for (auto& fac_it : interest_factors_)
-    {
-        if (!interestFactorEnabled(fac_it.first))
-            continue;
-
-        ifactors[ fac_it.first ] = fac_it.second;
-    }
-
-    return ifactors;
+    return EvalSectionID::requirementResultSumID(id) + 
+           " (" + String::doubleToStringPrecision(factor, InterestFactorPrecision) + ")";
 }
 
-std::string EvaluationTargetData::stringForInterestFactor(const std::string& req_id, double factor)
+/**
+ */
+std::string EvaluationTargetData::enabledInterestFactorsString(const InterestMap& interest_factors,
+                                                               const InterestEnabledFunc& interest_enabled_func)
 {
-    return req_id + " (" + String::doubleToStringPrecision(factor, InterestFactorPrecision) + ")";
-}
+    assert(interest_enabled_func);
 
-std::string EvaluationTargetData::enabledInterestFactorsStr() const
-{
     std::string ret;
-    if (interest_factors_.empty())
+    if (interest_factors.empty())
         return ret;
 
     auto coloredText = [ & ] (const std::string& txt, const QColor& color)
@@ -930,14 +1067,14 @@ std::string EvaluationTargetData::enabledInterestFactorsStr() const
         return "<font color=\"" + color.name().toStdString() + "\">" + txt + "</font>";
     };
 
-    auto generateRow = [ & ] (const std::string& interest, double factor, int prec, int spacing)
+    auto generateRow = [ & ] (const Evaluation::RequirementSumResultID& id, double factor, int prec, int spacing)
     {
-        auto factor_color = EvaluationTargetData::colorForInterestFactorRequirement(factor);
+        auto factor_color = EvaluationTargetData::fgColorForInterestFactorRequirement(factor);
         auto prec_str     = String::doubleToStringPrecision(factor, prec);
 
         std::string ret;
         ret += "<tr>";
-        ret += "<td align=\"left\">"  + coloredText(interest, factor_color) + "</td>";
+        ret += "<td align=\"left\">"  + coloredText(EvalSectionID::requirementResultSumID(id), factor_color) + "</td>";
         ret += "<td>" + QString().fill(' ', spacing).toStdString() + "</td>";
         ret += "<td align=\"right\">" + coloredText(prec_str, factor_color) + "</td>";
         ret += "</tr>";
@@ -952,9 +1089,9 @@ std::string EvaluationTargetData::enabledInterestFactorsStr() const
     ret = "<html><body><table>";
 
     size_t added = 0;
-    for (auto& fac_it : interest_factors_)
+    for (auto& fac_it : interest_factors)
     {
-        if (!interestFactorEnabled(fac_it.first))
+        if (!interest_enabled_func(fac_it.first))
             continue;
 
         ret += generateRow(fac_it.first, fac_it.second, InterestFactorPrecision, Spacing);
@@ -970,58 +1107,99 @@ std::string EvaluationTargetData::enabledInterestFactorsStr() const
     return ret;
 }
 
-double EvaluationTargetData::totalInterestFactorsSum() const
-{
-    return interest_factors_sum_total_;
-}
-
-double EvaluationTargetData::enabledInterestFactorsSum() const
-{
-    updateInterestFactors();
-
-    return interest_factors_sum_enabled_;
-}
-
-bool EvaluationTargetData::interestFactorEnabled(const std::string& req_id) const
-{
-    std::string req_name = EvaluationResultsReport::SectionID::reqNameFromReqResultID(req_id);
-
-    return eval_data_.interestFactorEnabled(req_name);
-}
-
-void EvaluationTargetData::updateInterestFactors() const
-{
-    interest_factors_sum_enabled_ = 0.0;
-
-    for (auto& fac_it : interest_factors_)
-    {
-        if (!interestFactorEnabled(fac_it.first))
-            continue;
-
-        interest_factors_sum_enabled_ += fac_it.second;
-    }
-}
-
-QColor EvaluationTargetData::colorForInterestFactorRequirement(double factor)
+/**
+ */
+QColor EvaluationTargetData::bgColorForInterestFactorRequirement(double factor)
 {
     if (factor < EvaluationTargetData::interest_thres_req_mid_)
-        return EvaluationTargetData::color_interest_low_;
+        return ResultReport::Colors::BGGreen;
     else if (factor < EvaluationTargetData::interest_thres_req_high_)
-        return EvaluationTargetData::color_interest_mid_;
+        return ResultReport::Colors::BGOrange;
     
-    return EvaluationTargetData::color_interest_high_;
+    return ResultReport::Colors::BGRed;
 }
 
-QColor EvaluationTargetData::colorForInterestFactorSum(double factor)
+/**
+ */
+QColor EvaluationTargetData::fgColorForInterestFactorRequirement(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_req_mid_)
+        return ResultReport::Colors::TextGreen;
+    else if (factor < EvaluationTargetData::interest_thres_req_high_)
+        return ResultReport::Colors::TextOrange;
+    
+    return ResultReport::Colors::TextRed;
+}
+
+/**
+ */
+QColor EvaluationTargetData::bgColorForInterestFactorSum(double factor)
 {
     if (factor < EvaluationTargetData::interest_thres_sum_mid_)
-        return EvaluationTargetData::color_interest_low_;
+        return ResultReport::Colors::BGGreen;
     else if (factor < EvaluationTargetData::interest_thres_sum_high_)
-        return EvaluationTargetData::color_interest_mid_;
+        return ResultReport::Colors::BGOrange;
     
-    return EvaluationTargetData::color_interest_high_;
+    return ResultReport::Colors::BGRed;
 }
 
+/**
+ */
+QColor EvaluationTargetData::fgColorForInterestFactorSum(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_sum_mid_)
+        return ResultReport::Colors::TextGreen;
+    else if (factor < EvaluationTargetData::interest_thres_sum_high_)
+        return ResultReport::Colors::TextOrange;
+    
+    return ResultReport::Colors::TextRed;
+}
+
+/**
+ */
+unsigned int EvaluationTargetData::bgStyleForInterestFactorSum(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_sum_mid_)
+        return ResultReport::CellStyleBGColorGreen;
+    else if (factor < EvaluationTargetData::interest_thres_sum_high_)
+        return ResultReport::CellStyleBGColorOrange;
+    
+    return ResultReport::CellStyleBGColorRed;
+}
+
+/**
+ */
+unsigned int EvaluationTargetData::fgStyleForInterestFactorSum(double factor)
+{
+    if (factor < EvaluationTargetData::interest_thres_sum_mid_)
+        return ResultReport::CellStyleTextColorGreen;
+    else if (factor < EvaluationTargetData::interest_thres_sum_high_)
+        return ResultReport::CellStyleTextColorOrange;
+    
+    return ResultReport::CellStyleTextColorRed;
+}
+
+/**
+ */
+QAction* EvaluationTargetData::interestFactorAction(const Evaluation::RequirementSumResultID& id, 
+                                                    double interest_factor)
+{
+    QColor      color = EvaluationTargetData::bgColorForInterestFactorRequirement(interest_factor);
+    std::string name  = EvaluationTargetData::stringForInterestFactor(id, interest_factor);
+
+    QAction* action = new QAction(QString::fromStdString(name));
+
+    QImage img(16, 16, QImage::Format_ARGB32);
+    img.fill(color);
+    QIcon icon = QIcon(QPixmap::fromImage(img));
+
+    action->setIcon(icon);
+
+    return action;
+}
+
+/**
+ */
 void EvaluationTargetData::updateACIDs() const
 {
     acids_.clear();
@@ -1039,6 +1217,8 @@ void EvaluationTargetData::updateACIDs() const
     }
 }
 
+/**
+ */
 void EvaluationTargetData::updateACADs() const
 {
     acads_.clear();
@@ -1056,6 +1236,8 @@ void EvaluationTargetData::updateACADs() const
     }
 }
 
+/**
+ */
 void EvaluationTargetData::updateModeACodes() const
 {
     logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_;
@@ -1077,6 +1259,8 @@ void EvaluationTargetData::updateModeACodes() const
     logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
 }
 
+/**
+ */
 void EvaluationTargetData::updateModeCMinMax() const
 {
     logdbg << "EvaluationTargetData: updateModeC: utn " << utn_;
@@ -1109,6 +1293,8 @@ void EvaluationTargetData::updateModeCMinMax() const
     }
 }
 
+/**
+ */
 void EvaluationTargetData::updatePositionMinMax() const
 {
     has_pos_ = false;
@@ -1232,6 +1418,8 @@ void EvaluationTargetData::updatePositionMinMax() const
 //    }
 //}
 
+/**
+ */
 void EvaluationTargetData::calculateTestDataMappings() const
 {
     logdbg << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_;
@@ -1266,9 +1454,9 @@ void EvaluationTargetData::computeSectorInsideInfo() const
     inside_map_           = {};
     inside_sector_layers_ = {};
 
-    assert (eval_man_.sectorsLoaded());
+    assert (calculator_.sectorsLoaded());
 
-    auto sector_layers = eval_man_.sectorsLayers();
+    auto sector_layers = calculator_.sectorLayers();
 
     //store sector layers
     {
@@ -1279,8 +1467,8 @@ void EvaluationTargetData::computeSectorInsideInfo() const
 
     const SectorLayer* min_height_layer_ptr = nullptr;
 
-    if (eval_man_.filterMinimumHeight())
-        min_height_layer_ptr = eval_man_.minHeightFilterLayer().get();
+    if (calculator_.filterMinimumHeight())
+        min_height_layer_ptr = calculator_.minHeightFilterLayer().get();
 
     size_t num_sector_layers = sector_layers.size();
     size_t num_ref           = ref_chain_.size();
@@ -1347,6 +1535,8 @@ void EvaluationTargetData::computeSectorInsideInfo() const
     }
 }
 
+/**
+ */
 boost::optional<bool> EvaluationTargetData::availableRefGroundBit(
         const Chain::DataID& id, const boost::posix_time::time_duration& d_max) const
 {
@@ -1360,9 +1550,11 @@ boost::optional<bool> EvaluationTargetData::availableRefGroundBit(
     if (gbs.has_value() && *gbs)
         return gbs;
 
-    return tstGroundBitInterpolated(ts);
+    return tstGroundBitInterpolated(ts, d_max);
 }
 
+/**
+ */
 boost::optional<bool> EvaluationTargetData::availableTstGroundBit(
         const Chain::DataID& id, const boost::posix_time::time_duration& d_max) const
 {
@@ -1409,7 +1601,7 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
     }
 
     // calc if insice test sensor coverage, true if not circles
-    bool inside_cov = eval_man_.tstSrcsCoverage().isInside(pos.latitude_, pos.longitude_);
+    bool inside_cov = calculator_.tstSrcsCoverage().isInside(pos.latitude_, pos.longitude_);
 
     // check sector layers
     for (const auto& sl : inside_sector_layers_)
@@ -1423,34 +1615,34 @@ void EvaluationTargetData::computeSectorInsideInfo(InsideCheckMatrix& mat,
             mat(idx_internal, lidx) = false;
         else // check with sectors
         {
-            bool inside = above_ok && layer->isInside(pos, has_gb, gb_set);
+            bool pos_inside = above_ok && layer->isInside(pos, has_gb, gb_set);
 
             //check pos against layer and write to mat
-            mat(idx_internal, lidx) = inside;
+            mat(idx_internal, lidx) = pos_inside;
         }
     }
 
-    mat(idx_internal, extra_offset     ) = has_gb;
-    mat(idx_internal, extra_offset + 1 ) = above_ok;
+    mat(idx_internal, extra_offset     ) = has_gb; // TODO unsused
+    mat(idx_internal, extra_offset + 1 ) = above_ok; // TODO unsused
 }
 
 /**
 */
-bool EvaluationTargetData::refPosAbove(const DataID& id) const
-{
-    auto index = ref_chain_.indexFromDataID(id);
+// bool EvaluationTargetData::refPosAbove(const DataID& id) const
+// {
+//     auto index = ref_chain_.indexFromDataID(id);
 
-    return checkAbove(inside_ref_, index);
-}
+//     return checkAbove(inside_ref_, index);
+// }
 
-/**
-*/
-bool EvaluationTargetData::refPosGroundBitAvailable(const DataID& id) const
-{
-    auto index = ref_chain_.indexFromDataID(id);
+// /**
+// */
+// bool EvaluationTargetData::refPosGroundBitAvailable(const DataID& id) const
+// {
+//     auto index = ref_chain_.indexFromDataID(id);
 
-    return checkGroundBit(inside_ref_, index);
-}
+//     return checkGroundBit(inside_ref_, index);
+// }
 
 /**
 */
@@ -1464,21 +1656,21 @@ bool EvaluationTargetData::refPosInside(const SectorLayer& layer,
 
 /**
 */
-bool EvaluationTargetData::tstPosAbove(const DataID& id) const
-{
-    auto index = tst_chain_.indexFromDataID(id);
+// bool EvaluationTargetData::tstPosAbove(const DataID& id) const
+// {
+//     auto index = tst_chain_.indexFromDataID(id);
 
-    return checkAbove(inside_tst_, index);
-}
+//     return checkAbove(inside_tst_, index);
+// }
 
-/**
-*/
-bool EvaluationTargetData::tstPosGroundBitAvailable(const DataID& id) const
-{
-    auto index = tst_chain_.indexFromDataID(id);
+// /**
+// */
+// bool EvaluationTargetData::tstPosGroundBitAvailable(const DataID& id) const
+// {
+//     auto index = tst_chain_.indexFromDataID(id);
 
-    return checkGroundBit(inside_tst_, index);
-}
+//     return checkGroundBit(inside_tst_, index);
+//}
 
 /**
 */
@@ -1492,21 +1684,21 @@ bool EvaluationTargetData::tstPosInside(const SectorLayer& layer,
 
 /**
 */
-bool EvaluationTargetData::mappedRefPosAbove(const DataID& id) const
-{
-    auto index = tst_chain_.indexFromDataID(id); // really tst
+// bool EvaluationTargetData::mappedRefPosAbove(const DataID& id) const
+// {
+//     auto index = tst_chain_.indexFromDataID(id); // really tst
 
-    return checkAbove(inside_map_, index);
-}
+//     return checkAbove(inside_map_, index);
+// }
 
-/**
-*/
-bool EvaluationTargetData::mappedRefPosGroundBitAvailable(const DataID& id) const
-{
-    auto index = tst_chain_.indexFromDataID(id);
+// /**
+// */
+// bool EvaluationTargetData::mappedRefPosGroundBitAvailable(const DataID& id) const
+// {
+//     auto index = tst_chain_.indexFromDataID(id);
 
-    return checkGroundBit(inside_map_, index);
-}
+//     return checkGroundBit(inside_map_, index);
+// }
 
 /**
 */
@@ -1520,33 +1712,33 @@ bool EvaluationTargetData::mappedRefPosInside(const SectorLayer& layer,
 
 /**
 */
-bool EvaluationTargetData::checkGroundBit(const InsideCheckMatrix& mat,
-                                          const Index& index) const
-{
-    //check cached inside info
-    auto idx_internal = index.idx_internal;
-    assert(idx_internal < mat.rows());
+// bool EvaluationTargetData::checkGroundBit(const InsideCheckMatrix& mat,
+//                                           const Index& index) const
+// {
+//     //check cached inside info
+//     auto idx_internal = index.idx_internal;
+//     assert(idx_internal < mat.rows());
 
-    auto extra_offset = (int)inside_sector_layers_.size();
-    assert(extra_offset < mat.cols());
+//     auto extra_offset = (int)inside_sector_layers_.size();
+//     assert(extra_offset < mat.cols());
 
-    return mat(idx_internal, extra_offset);
-}
+//     return mat(idx_internal, extra_offset);
+// }
 
-/**
-*/
-bool EvaluationTargetData::checkAbove(const InsideCheckMatrix& mat,
-                                      const Index& index) const
-{
-    //check cached inside info
-    auto idx_internal = index.idx_internal;
-    assert(idx_internal < mat.rows());
+// /**
+// */
+// bool EvaluationTargetData::checkAbove(const InsideCheckMatrix& mat,
+//                                       const Index& index) const
+// {
+//     //check cached inside info
+//     auto idx_internal = index.idx_internal;
+//     assert(idx_internal < mat.rows());
 
-    auto extra_offset = (int)inside_sector_layers_.size();
-    assert(extra_offset + 1 < mat.cols());
+//     auto extra_offset = (int)inside_sector_layers_.size();
+//     assert(extra_offset + 1 < mat.cols());
 
-    return mat(idx_internal, extra_offset + 1);
-}
+//     return mat(idx_internal, extra_offset + 1);
+// }
 
 /**
 */
@@ -1565,4 +1757,64 @@ bool EvaluationTargetData::checkInside(const SectorLayer& layer,
     assert(lidx < mat.cols());
 
     return mat(idx_internal, lidx);
+}
+
+const std::set<std::string>& EvaluationTargetData::excludedRequirements() const
+{
+    return excluded_requirements_;
+}
+
+const Utils::TimeWindowCollection& EvaluationTargetData::excludedTimeWindows() const
+{
+    return excluded_time_windows_;
+}
+
+bool EvaluationTargetData::isTimeStampNotExcluded(const boost::posix_time::ptime& ts) const
+{
+    // check global, begin/end are excluded by load filter
+    if (eval_man_.useTimestampFilter() && eval_man_.excludedTimeWindows().contains(ts))
+        return false;
+
+    return !excluded_time_windows_.contains(ts);
+}
+
+/**
+ */
+EvaluationTarget EvaluationTargetData::toTarget() const
+{
+    EvaluationTarget target(utn_, nlohmann::json());
+
+    const auto& dbcontent_ref = refChain().dbContent();
+    const auto& dbcontent_tst = tstChain().dbContent();
+
+    target.comment(dbcont_man_.utnComment(utn_));
+
+    target.useInEval(use());
+    target.evalExcludedRequirements(excludedRequirements());
+    target.evalExcludedTimeWindows(excludedTimeWindows());
+
+    target.timeBegin(timeBegin());
+    target.timeEnd(timeEnd());
+    target.aircraftAddresses(acads());
+    target.aircraftIdentifications(acids());
+    target.modeACodes(modeACodes());
+    if (has_mode_c_) target.modeCMinMax(modeCMin(), modeCMax());
+    target.dbContentCount(dbcontent_ref, numRefUpdates());
+    target.dbContentCount(dbcontent_tst, numTstUpdates());
+    //if (hasMOPSVersion()) target.adsbMOPSVersions(mopsVersions());
+    if (hasPos()) target.setPositionBounds(latitudeMin(), latitudeMax(), longitudeMin(), longitudeMax());
+    target.targetCategory(dbcont_man_.emitterCategory(utn_));
+    target.interestFactors(interestFactors());
+    target.dbContentRef(dbcontent_ref);
+    target.dbContentTest(dbcontent_tst);
+
+    return target;
+}
+
+/**
+ */
+void EvaluationTargetData::updateTarget(DBContentManager& dbcontent_manager,
+                                        EvaluationTarget& target)
+{
+    target.comment(dbcontent_manager.utnComment(target.utn_));
 }

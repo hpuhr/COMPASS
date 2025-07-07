@@ -16,20 +16,14 @@
  */
 
 #include "evaluationmanagerwidget.h"
-#include "evaluationmaintabwidget.h"
-#include "evaluationfiltertabwidget.h"
+
 #include "evaluationtargetstabwidget.h"
-#include "evaluationstandardtabwidget.h"
 #include "evaluationresultstabwidget.h"
-#include "evaluationstandardcombobox.h"
 #include "evaluationmanager.h"
-#include "evaluationresultsgenerator.h"
-#include "evaluationresultsgeneratorwidget.h"
-//#include "evaluationdata.h"
-//#include "evaluationdatawidget.h"
-#include "evaluationdatasourcewidget.h"
-#include "evaluationsectorwidget.h"
+#include "evaluationcalculator.h"
+
 #include "logger.h"
+#include "files.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -45,119 +39,128 @@
 #include <QHBoxLayout>
 #include <QTimer>
 
-EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings)
-    : QWidget(nullptr), eval_man_(eval_man), eval_settings_(eval_settings)
+/**
+ */
+EvaluationManagerWidget::EvaluationManagerWidget(EvaluationManager& eval_man)
+:   ToolBoxWidget(nullptr)
+,   eval_man_(eval_man)
 {
-    main_layout_ = new QVBoxLayout();
+    QVBoxLayout* main_layout = new QVBoxLayout();
 
     tab_widget_ = new QTabWidget();
-
-    main_tab_widget_.reset(new EvaluationMainTabWidget(eval_man_, eval_settings_, *this));
-    tab_widget_->addTab(main_tab_widget_.get(), "Main");
 
     targets_tab_widget_.reset(new EvaluationTargetsTabWidget(eval_man_, *this));
     tab_widget_->addTab(targets_tab_widget_.get(), "Targets");
 
-    filter_widget_.reset(new EvaluationFilterTabWidget(eval_man_, eval_settings_, *this));
-    tab_widget_->addTab(filter_widget_.get(), "Filter");
-
-    std_tab_widget_.reset(new EvaluationStandardTabWidget(eval_man_, eval_settings_, *this));
-    tab_widget_->addTab(std_tab_widget_.get(), "Standard");
-
-    tab_widget_->addTab(&eval_man_.resultsGenerator().widget(), "Results Config");
-
     results_tab_widget_.reset(new EvaluationResultsTabWidget(eval_man_, *this));
     tab_widget_->addTab(results_tab_widget_.get(), "Results");
 
-    main_layout_->addWidget(tab_widget_);
+    main_layout->addWidget(tab_widget_);
 
-    // not evaluate comment
-    not_eval_comment_label_ = new QLabel();
-    QPalette palette = not_eval_comment_label_->palette();
-    palette.setColor(not_eval_comment_label_->foregroundRole(), Qt::red);
-    not_eval_comment_label_->setPalette(palette);
+    // // not evaluate comment
+    // not_eval_comment_label_ = new QLabel();
+    // QPalette palette = not_eval_comment_label_->palette();
+    // palette.setColor(not_eval_comment_label_->foregroundRole(), Qt::red);
+    // not_eval_comment_label_->setPalette(palette);
 
-    main_layout_->addWidget(not_eval_comment_label_);
+    // main_layout_->addWidget(not_eval_comment_label_);
 
     // buttons
     QHBoxLayout* button_layout = new QHBoxLayout();
 
-    load_button_ = new QPushButton("Load Data");
-    connect (load_button_, &QPushButton::clicked, this, &EvaluationManagerWidget::loadDataSlot);
-    button_layout->addWidget(load_button_);
+    // load_button_ = new QPushButton("Load Data");
+    // connect (load_button_, &QPushButton::clicked, this, &EvaluationManagerWidget::loadDataSlot);
+    // button_layout->addWidget(load_button_);
 
-    evaluate_button_ = new QPushButton("Evaluate");
-    connect (evaluate_button_, &QPushButton::clicked, this, &EvaluationManagerWidget::evaluateSlot);
-    button_layout->addWidget(evaluate_button_);
+    // evaluate_button_ = new QPushButton("Evaluate");
+    // connect (evaluate_button_, &QPushButton::clicked, this, &EvaluationManagerWidget::evaluateSlot);
+    // button_layout->addWidget(evaluate_button_);
 
     gen_report_button_ = new QPushButton("Generate Report");
     connect (gen_report_button_, &QPushButton::clicked, this, &EvaluationManagerWidget::generateReportSlot);
     button_layout->addWidget(gen_report_button_);
 
-    main_layout_->addLayout(button_layout);
+    main_layout->addLayout(button_layout);
 
     updateButtons();
 
-    setLayout(main_layout_);
+    setLayout(main_layout);
 }
 
+/**
+ */
 EvaluationManagerWidget::~EvaluationManagerWidget() = default;
 
-void EvaluationManagerWidget::updateDataSources()
+/**
+ */
+QIcon EvaluationManagerWidget::toolIcon() const
 {
-    if (main_tab_widget_)
-        main_tab_widget_->updateDataSources();
+    return QIcon(Utils::Files::getIconFilepath("reports.png").c_str());
 }
 
-void EvaluationManagerWidget::updateSectors()
+/**
+ */
+std::string EvaluationManagerWidget::toolName() const 
 {
-    if (main_tab_widget_)
-        main_tab_widget_->updateSectors();
-
-    updateButtons();
+    return "Evaluation Results";
 }
 
+/**
+ */
+std::string EvaluationManagerWidget::toolInfo() const 
+{
+    return "Evaluation Results";
+}
+
+/**
+ */
+std::vector<std::string> EvaluationManagerWidget::toolLabels() const 
+{
+    return { "Evaluation", "Results" };
+}
+
+/**
+ */
+toolbox::ScreenRatio EvaluationManagerWidget::defaultScreenRatio() const 
+{
+    return ToolBoxWidget::defaultScreenRatio();
+}
+
+/**
+ */
+void EvaluationManagerWidget::addToConfigMenu(QMenu* menu) 
+{
+}
+
+/**
+ */
+void EvaluationManagerWidget::addToToolBar(QToolBar* tool_bar)
+{
+}
+
+/**
+ */
+void EvaluationManagerWidget::loadingStarted()
+{
+    tab_widget_->setEnabled(false);
+}
+
+/**
+ */
+void EvaluationManagerWidget::loadingDone()
+{
+    tab_widget_->setEnabled(true);
+}
+
+/**
+ */
 void EvaluationManagerWidget::updateButtons()
 {
-    load_button_->setEnabled(eval_man_.anySectorsWithReq()
-                             && eval_man_.hasSelectedReferenceDataSources()
-                             && eval_man_.hasSelectedTestDataSources());
-
-    evaluate_button_->setEnabled(eval_man_.canEvaluate());
     gen_report_button_->setEnabled(eval_man_.canGenerateReport());
-
-    if (eval_man_.canEvaluate())
-    {
-        not_eval_comment_label_->setText("");
-        not_eval_comment_label_->setHidden(true);
-    }
-    else
-    {
-        not_eval_comment_label_->setText(eval_man_.getCannotEvaluateComment().c_str());
-        not_eval_comment_label_->setHidden(false);
-    }
 }
 
-void EvaluationManagerWidget::updateFilterWidget()
-{
-    assert (filter_widget_);
-    filter_widget_->update();
-}
-
-void EvaluationManagerWidget::updateResultsConfig()
-{
-    eval_man_.resultsGenerator().widget().updateFromSettings();
-}
-
-void EvaluationManagerWidget::updateFromSettings()
-{
-    updateDataSources();
-    updateSectors();
-    updateButtons();
-    updateFilterWidget();
-    updateResultsConfig();
-}
-
+/**
+ */
 void EvaluationManagerWidget::expandResults()
 {
     assert (results_tab_widget_);
@@ -165,6 +168,8 @@ void EvaluationManagerWidget::expandResults()
     results_tab_widget_->expand();
 }
 
+/**
+ */
 void EvaluationManagerWidget::showResultId (const std::string& id, 
                                             bool select_tab,
                                             bool show_figure)
@@ -178,37 +183,16 @@ void EvaluationManagerWidget::showResultId (const std::string& id,
     results_tab_widget_->selectId(id, show_figure);
 }
 
+/**
+ */
 void EvaluationManagerWidget::reshowLastResultId()
 {
     assert (results_tab_widget_);
     results_tab_widget_->reshowLastId();
 }
 
-void EvaluationManagerWidget::loadDataSlot()
-{
-    loginf << "EvaluationManagerWidget: loadDataSlot";
-
-    if (!eval_settings_.warning_shown_)
-    {
-        QMessageBox* mbox = new QMessageBox;
-        mbox->setWindowTitle(tr("Warning"));
-        mbox->setText("Please note that the Evaluation feature is currently not verified and should be used"
-                      " for testing/validation purposes only.");
-        mbox->exec();
-
-        eval_settings_.warning_shown_ = true;
-    }
-
-    eval_man_.loadData();
-}
-
-void EvaluationManagerWidget::evaluateSlot()
-{
-    loginf << "EvaluationManagerWidget: evaluateSlot";
-
-    eval_man_.evaluate();
-}
-
+/**
+ */
 void EvaluationManagerWidget::generateReportSlot()
 {
     loginf << "EvaluationManagerWidget: generateReportSlot";
@@ -216,15 +200,20 @@ void EvaluationManagerWidget::generateReportSlot()
     eval_man_.generateReport();
 }
 
+/**
+ */
 boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std::string& result_id, 
                                                                       const std::string& table_id,
                                                                       bool rowwise,
                                                                       const std::vector<int>& cols) const
 {
-    //retrieve special tables
-    if (table_id == "Targets")
-        return eval_man_.getData().getTableData(rowwise, cols);
+    //@TODO: solve this in a better way via task results
+    return boost::optional<nlohmann::json>();
 
-    //retrieve result table
-    return results_tab_widget_->getTableData(result_id, table_id, rowwise, cols);
+    // //retrieve special tables
+    // if (table_id == "Targets")
+    //     return eval_man_.calculator().data().getTableData(rowwise, cols);
+
+    // //retrieve result table
+    // return results_tab_widget_->getTableData(result_id, table_id, rowwise, cols);
 }

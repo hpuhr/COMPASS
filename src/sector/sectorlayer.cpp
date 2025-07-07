@@ -145,8 +145,8 @@ bool SectorLayer::isInside(const dbContent::TargetPosition& pos,
 
 std::pair<double, double> SectorLayer::getMinMaxLatitude() const
 {
-    double min, max;
-    double tmp_min, tmp_max;
+    double min{0}, max{0};
+    double tmp_min{0}, tmp_max{0};
     bool first = true;
 
     assert (sectors_.size());
@@ -171,8 +171,8 @@ std::pair<double, double> SectorLayer::getMinMaxLatitude() const
 
 std::pair<double, double> SectorLayer::getMinMaxLongitude() const
 {
-    double min, max;
-    double tmp_min, tmp_max;
+    double min{0}, max{0};
+    double tmp_min{0}, tmp_max{0};
     bool first = true;
 
     assert (sectors_.size());

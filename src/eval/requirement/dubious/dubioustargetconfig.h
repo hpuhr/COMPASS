@@ -22,6 +22,11 @@
 class Group;
 class EvaluationStandard;
 
+namespace ResultReport
+{
+    class Report;
+}
+
 namespace EvaluationRequirement
 {
 
@@ -29,12 +34,12 @@ class DubiousTargetConfig : public ProbabilityBaseConfig
 {
 public:
     DubiousTargetConfig(const std::string& class_id, const std::string& instance_id,
-                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+                       Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~DubiousTargetConfig();
 
     std::shared_ptr<Base> createRequirement() override;
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
     bool markPrimaryOnly() const;
     void markPrimaryOnly(bool mark_primary_only);
@@ -111,7 +116,7 @@ protected:
 
     float dubious_prob_ {0.05};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

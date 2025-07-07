@@ -42,7 +42,7 @@ public:
                                       const std::string& instance_id,
                                       Group& group, 
                                       EvaluationStandard& standard,
-                                      EvaluationManager& eval_man);
+                                      EvaluationCalculator& calculator);
     virtual ~IdentificationCorrectPeriodConfig() = default;
 
     IdentificationType identificationType() const { return identification_type_; }
@@ -70,7 +70,7 @@ public:
             const std::string& group_name,
             double prob, 
             COMPARISON_TYPE prob_check_type,
-            EvaluationManager& eval_man,
+            EvaluationCalculator& calculator,
             float update_interval_s, 
             bool  use_miss_tolerance,
             float miss_tolerance_s,

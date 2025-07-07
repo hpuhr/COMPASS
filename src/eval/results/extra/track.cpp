@@ -94,14 +94,14 @@ SingleExtraTrack::SingleExtraTrack(const std::string& result_id,
                                    const SectorLayer& sector_layer,
                                    unsigned int utn,
                                    const EvaluationTargetData* target,
-                                   EvaluationManager& eval_man,
+                                   EvaluationCalculator& calculator,
                                    const EvaluationDetails& details,
                                    bool ignore,
                                    unsigned int num_inside,
                                    unsigned int num_extra,
                                    unsigned int num_ok)
 :   ExtraTrackBase(num_inside, num_extra, num_ok)
-,   SingleProbabilityBase("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase("SingleExtraTrack", result_id, requirement, sector_layer, utn, target, calculator, details)
 {
     if (ignore)
         setIgnored();
@@ -113,7 +113,7 @@ SingleExtraTrack::SingleExtraTrack(const std::string& result_id,
 */
 std::shared_ptr<Joined> SingleExtraTrack::createEmptyJoined(const std::string& result_id)
 {
-    return make_shared<JoinedExtraTrack> (result_id, requirement_, sector_layer_, eval_man_);
+    return make_shared<JoinedExtraTrack> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 
@@ -149,7 +149,7 @@ std::vector<std::string> SingleExtraTrack::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleExtraTrack::targetTableValuesCustom() const
+nlohmann::json::array_t SingleExtraTrack::targetTableValuesCustom() const
 {
     return { target_->numTstUpdates(), isIgnored(), num_extra_ + num_ok_, num_ok_, num_extra_ };
 }
@@ -174,14 +174,14 @@ std::vector<std::string> SingleExtraTrack::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleExtraTrack::detailValues(const EvaluationDetail& detail,
-                                                     const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleExtraTrack::detailValues(const EvaluationDetail& detail,
+                                                       const EvaluationDetail* parent_detail) const
 {
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             detail.getValue(DetailKey::Inside),
-             detail.getValue(DetailKey::TrackNum),
-             detail.getValue(DetailKey::Extra),
-             detail.comments().generalComment().c_str() };
+    return { Utils::Time::toString(detail.timestamp()),
+             detail.getValue(DetailKey::Inside).toBool(),
+             detail.getValue(DetailKey::TrackNum).toUInt(),
+             detail.getValue(DetailKey::Extra).toBool(),
+             detail.comments().generalComment() };
 }
 
 /**
@@ -222,9 +222,9 @@ void SingleExtraTrack::addAnnotationForDetail(nlohmann::json& annotations_json,
 JoinedExtraTrack::JoinedExtraTrack(const std::string& result_id,
                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
                                    const SectorLayer& sector_layer,
-                                   EvaluationManager& eval_man)
+                                   EvaluationCalculator& calculator)
 :   ExtraTrackBase()
-,   JoinedProbabilityBase("JoinedExtraTrack", result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase("JoinedExtraTrack", result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -296,7 +296,7 @@ FeatureDefinitions JoinedExtraTrack::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleExtraTrack::DetailKey::Extra, 
                        GridAddDetailMode::AddEvtPosition, 
                        true);

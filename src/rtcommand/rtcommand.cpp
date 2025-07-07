@@ -187,6 +187,8 @@ namespace rtcommand
     const char        RTCommand::ObjectPathSeparator    = '.';
     const char        RTCommand::ParameterListSeparator = '|';
 
+    std::vector<std::string> RTCommand::DefaultOptions = { "wait", "wait_signal", "async", HelpOptionFull };
+
     /**
      */
     RTCommand::RTCommand() = default;
@@ -529,21 +531,75 @@ namespace rtcommand
         nlohmann::json root;
         std::string    str;
 
+        auto getCommandInfo = [ & ] (const QString& cmd_name)
+        {
+            std::string info;
+            nlohmann::json info_json;
+
+            auto cmd = RTCommandRegistry::instance().createCommandTemplate(cmd_name);
+            assert(cmd);
+
+            info += cmd->name().toStdString() + "\n";
+            info += ReplyStringIndentation + cmd->description().toStdString() + "\n";
+
+            info_json[ "command_name"        ] = cmd->name().toStdString();
+            info_json[ "command_description" ] = cmd->description().toStdString();
+
+            if (details)
+            {
+                std::string    options_info;
+                nlohmann::json options_info_json;
+
+                rtcommand::RTCommand::OptionsDescription    opt;
+                rtcommand::RTCommand::PosOptionsDescription pos;
+                bool ok = cmd->collectOptions(opt, pos);
+                if (ok)
+                {
+                    for (const auto& o : opt.options())
+                    {
+                        //skip default options
+                        auto it = std::find(rtcommand::RTCommand::DefaultOptions.begin(), 
+                                            rtcommand::RTCommand::DefaultOptions.end(), 
+                                            o->long_name());
+                        if (it != rtcommand::RTCommand::DefaultOptions.end())
+                            continue;
+
+                        options_info += ReplyStringIndentation
+                                     +  ReplyStringIndentation
+                                     +  o->long_name() + "\t\t" + o->description() 
+                                     + "\n";
+
+                        nlohmann::json option;
+                        option[ "option_name"        ] = o->long_name();
+                        option[ "option_name_format" ] = o->format_name();
+                        option[ "option_description" ] = o->description();
+
+                        options_info_json.push_back(option);
+                    }
+                }
+                else
+                {
+                    options_info = "options info not available\n";
+                }
+
+                info += options_info;
+
+                info_json[ "command_options" ] = options_info_json;
+            }
+
+            return std::make_pair(info, info_json);
+        };
+
         if (command.isEmpty())
         {
             const auto &cmds = RTCommandRegistry::instance().availableCommands();
 
             for (const auto &elem : cmds)
             {
-                nlohmann::json entry;
-                entry[ "command_name"        ] = elem.first.toStdString();
-                entry[ "command_description" ] = elem.second.description.toStdString();
+                auto info = getCommandInfo(elem.first);
 
-                str += elem.first.toStdString() + "\n";
-                str += ReplyStringIndentation + elem.second.description.toStdString() + "\n";
-                str += "\n";
-
-                root.push_back(entry);
+                str += info.first + "\n";
+                root.push_back(info.second);
             }
         }
         else
@@ -554,46 +610,10 @@ namespace rtcommand
                 return false;
             }
 
-            auto cmd = RTCommandRegistry::instance().createCommandTemplate(command);
-            if (!cmd)
-            {
-                setResultMessage("Command '" + command.toStdString() + "' could not be created");
-                return false;
-            }
+            auto info = getCommandInfo(command);
 
-            boost::program_options::options_description options;
-            boost::program_options::positional_options_description p_options;
-            QString err_msg;
-            if (!cmd->collectOptions(options, p_options, &err_msg))
-            {
-                setResultMessage(err_msg.toStdString());
-                return false;
-            }
-
-            root[ "command_name"        ] = cmd->name().toStdString();
-            root[ "command_description" ] = cmd->description().toStdString();
-
-            str += cmd->description().toStdString() + "\n";
-            str += "\n";
-            
-            nlohmann::json option_node;
-
-            for (const auto &o : options.options())
-            {
-                nlohmann::json option;
-                option[ "option_name"        ] = o->long_name();
-                option[ "option_name_format" ] = o->format_name();
-                option[ "option_description" ] = o->description();
-
-                str += ReplyStringIndentation + o->long_name() + " " + o->format_name() + "\n";
-                str += "\n";
-                str += ReplyStringIndentation + ReplyStringIndentation + o->description() + "\n";
-                str += "\n";
-
-                option_node.push_back(option);
-            }
-
-            root[ "command_options" ] = option_node;
+            str += info.first;
+            root = info.second;
         }
 
         setJSONReply(root, str);
@@ -607,7 +627,8 @@ namespace rtcommand
                                             PosOptionsDescription &positional)
     {
         ADD_RTCOMMAND_OPTIONS(options)
-        ("command", po::value<std::string>()->default_value(""), "command to retrieve help information for");
+        ("command", po::value<std::string>()->default_value(""), "command to retrieve help information for")
+        ("details", "obtain detailed information such as parameter lists");
 
         ADD_RTCOMMAND_POS_OPTION(positional, "command")
     }
@@ -617,6 +638,7 @@ namespace rtcommand
     void RTCommandHelp::assignVariables_impl(const VariablesMap &variables)
     {
         RTCOMMAND_GET_QSTRING_OR_THROW(variables, "command", command)
+        RTCOMMAND_CHECK_VAR(variables, "details", details)
     }
 
 } // namespace rtcommand

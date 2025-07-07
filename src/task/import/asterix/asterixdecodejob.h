@@ -20,9 +20,10 @@
 #include "job.h"
 #include "asterixdecoderbase.h"
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/thread/mutex.hpp>
 
 class ASTERIXImportTask;
 class ASTERIXImportTaskSettings;
@@ -44,7 +45,6 @@ public:
                      ASTERIXPostProcess& post_process);
     virtual ~ASTERIXDecodeJob();
 
-    virtual void run() override;
     virtual void setObsolete() override;
 
     size_t numFrames() const;
@@ -66,6 +66,9 @@ public:
     std::string currentDataSourceName(); // used to distinguish file switches
 
     void forceBlockingDataProcessing();
+
+protected:
+    void run_impl() override;
 
 private:
     void fileJasterixCallback(std::unique_ptr<nlohmann::json> data, 
@@ -102,6 +105,7 @@ private:
     size_t num_errors_ {0};
 
     std::vector<std::unique_ptr<nlohmann::json>> extracted_data_;
+    boost::mutex extracted_data_mutex_;
 
     std::map<unsigned int, size_t> category_counts_;
 

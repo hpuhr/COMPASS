@@ -496,7 +496,7 @@
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Track Angle",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "Ang",
                     "unit": "Degree"
                 }

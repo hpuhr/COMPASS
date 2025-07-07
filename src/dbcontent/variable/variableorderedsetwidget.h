@@ -45,7 +45,7 @@ protected slots:
     void showMenuSlot();
 
 public:
-    VariableOrderedSetWidget(VariableOrderedSet& set, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    VariableOrderedSetWidget(VariableOrderedSet& set, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~VariableOrderedSetWidget();
 
     const QListWidget* listWidget() const { return list_widget_; }

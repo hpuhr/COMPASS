@@ -20,13 +20,14 @@
 #include "eval/requirement/extra/trackconfigwidget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
+
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 #include "stringconv.h"
 
 using namespace Utils;
-using namespace EvaluationResultsReport;
 using namespace std;
 
 namespace EvaluationRequirement
@@ -34,8 +35,8 @@ namespace EvaluationRequirement
 
 ExtraTrackConfig::ExtraTrackConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("min_duration", &min_duration_, 60.0f);
     registerParameter("min_num_updates", &min_num_updates_, 10u);
@@ -50,7 +51,7 @@ ExtraTrackConfig::~ExtraTrackConfig()
 std::shared_ptr<Base> ExtraTrackConfig::createRequirement()
 {
     shared_ptr<ExtraTrack> req = make_shared<ExtraTrack>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_, min_duration_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_, min_duration_,
                 min_num_updates_, ignore_primary_only_);
 
     return req;
@@ -86,37 +87,34 @@ void ExtraTrackConfig::ignorePrimaryOnly(bool value)
     ignore_primary_only_ = value;
 }
 
-void ExtraTrackConfig::createWidget()
+BaseConfigWidget* ExtraTrackConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new ExtraTrackConfigWidget(*this));
-    assert (widget_);
+    return new ExtraTrackConfigWidget(*this);
 }
 
-void ExtraTrackConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void ExtraTrackConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Probability [1]", "Probability of extra data",
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 
     table.addRow({"Minimum Duration [s]",
                   "Minimum track duration, requirement result is ignored if less",
-                  min_duration_}, nullptr);
+                  min_duration_});
 
     table.addRow({"Minimum Number of Updates [1]",
                   "Minimum number of extra target reports, requirement result is ignored if less",
-                  min_num_updates_}, nullptr);
+                  min_num_updates_});
 
     table.addRow({"Ignore Primary Only",
                   "Requirement result is ignored if target is primary only (has no"
                   " secondary attributes, also not in reference)",
-                  String::boolToString(ignore_primary_only_).c_str()}, nullptr);
+                  String::boolToString(ignore_primary_only_)});
 }
+
 }

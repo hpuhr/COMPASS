@@ -178,7 +178,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
     QFont font_bold;
     font_bold.setBold(true);
 
-    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
+    QIcon del_icon(Files::IconProvider::getIcon("delete.png"));
 
     int row = 0;
 

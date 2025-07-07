@@ -144,7 +144,7 @@ SingleTrackAngle::SingleTrackAngle(const std::string& result_id,
                                    const SectorLayer& sector_layer,
                                    unsigned int utn,
                                    const EvaluationTargetData* target,
-                                   EvaluationManager& eval_man,
+                                   EvaluationCalculator& calculator,
                                    const EvaluationDetails& details,
                                    unsigned int num_pos,
                                    unsigned int num_no_ref,
@@ -154,7 +154,7 @@ SingleTrackAngle::SingleTrackAngle(const std::string& result_id,
                                    unsigned int num_comp_failed,
                                    unsigned int num_comp_passed)
 :   TrackAngleBase(num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_no_tst_value, num_comp_failed, num_comp_passed)
-,   SingleProbabilityBase("SingleTrackAngle", result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase("SingleTrackAngle", result_id, requirement, sector_layer, utn, target, calculator, details)
 {
     updateResult();
 }
@@ -163,7 +163,7 @@ SingleTrackAngle::SingleTrackAngle(const std::string& result_id,
 */
 std::shared_ptr<Joined> SingleTrackAngle::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedTrackAngle> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedTrackAngle> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -207,7 +207,7 @@ std::vector<std::string> SingleTrackAngle::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleTrackAngle::targetTableValuesCustom() const
+nlohmann::json::array_t SingleTrackAngle::targetTableValuesCustom() const
 {
     return { formatValue(accumulator_.min()),    // "DMin"
              formatValue(accumulator_.max()),    // "DMax"
@@ -244,22 +244,22 @@ std::vector<std::string> SingleTrackAngle::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleTrackAngle::detailValues(const EvaluationDetail& detail,
-                                                     const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleTrackAngle::detailValues(const EvaluationDetail& detail,
+                                                       const EvaluationDetail* parent_detail) const
 {
     bool has_ref_pos = detail.numPositions() >= 2;
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
+    return { Utils::Time::toString(detail.timestamp()),
             !has_ref_pos,
-             detail.getValue(DetailKey::PosInside),
-             detail.getValue(DetailKey::Offset),           // "Distance"
-             detail.getValue(DetailKey::CheckPassed),      // CP"
-             detail.getValue(DetailKey::ValueRef),         // "Value Ref"
-             detail.getValue(DetailKey::ValueTst),         // "Value Tst"
-             detail.getValue(DetailKey::SpeedRef),         // "Speed Ref"
-             detail.getValue(DetailKey::NumCheckFailed),   // "#CF",
-             detail.getValue(DetailKey::NumCheckPassed),   // "#CP"
-             detail.comments().generalComment().c_str() };
+             detail.getValue(DetailKey::PosInside).toBool(),
+             detail.getValue(DetailKey::Offset).toFloat(),          // "Distance"
+             detail.getValue(DetailKey::CheckPassed).toBool(),      // CP"
+             detail.getValue(DetailKey::ValueRef).toDouble(),       // "Value Ref"
+             detail.getValue(DetailKey::ValueTst).toDouble(),       // "Value Tst"
+             detail.getValue(DetailKey::SpeedRef).toDouble(),       // "Speed Ref"
+             detail.getValue(DetailKey::NumCheckFailed).toUInt(),   // "#CF",
+             detail.getValue(DetailKey::NumCheckPassed).toUInt(),   // "#CP"
+             detail.comments().generalComment() };
 }
 
 /**
@@ -314,9 +314,9 @@ void SingleTrackAngle::addAnnotationForDetail(nlohmann::json& annotations_json,
 JoinedTrackAngle::JoinedTrackAngle(const std::string& result_id, 
                                    std::shared_ptr<EvaluationRequirement::Base> requirement,
                                    const SectorLayer& sector_layer, 
-                                   EvaluationManager& eval_man)
+                                   EvaluationCalculator& calculator)
 :   TrackAngleBase()
-,   JoinedProbabilityBase("JoinedTrackAngle", result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase("JoinedTrackAngle", result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -433,7 +433,7 @@ FeatureDefinitions JoinedTrackAngle::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleTrackAngle::DetailKey::CheckPassed, 
                        GridAddDetailMode::AddEvtRefPosition, 
                        false);

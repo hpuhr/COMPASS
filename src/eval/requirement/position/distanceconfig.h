@@ -18,13 +18,15 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/position/distanceconfigwidget.h"
-//#include "eval/requirement/position/distance.h"
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -33,7 +35,7 @@ class PositionDistanceConfig : public ProbabilityBaseConfig
 {
 public:
     PositionDistanceConfig(const std::string& class_id, const std::string& instance_id,
-                        Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
+                        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~PositionDistanceConfig();
 
     std::shared_ptr<Base> createRequirement() override;
@@ -47,14 +49,14 @@ public:
     bool failedValuesOfInterest() const;
     void failedValuesOfInterest(bool value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
     float threshold_value_ {0};
     COMPARISON_TYPE threshold_value_check_type_ {COMPARISON_TYPE::LESS_THAN_OR_EQUAL};
     bool failed_values_of_interest_ {true};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

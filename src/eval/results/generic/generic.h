@@ -77,7 +77,7 @@ public:
                   const SectorLayer& sector_layer,
                   unsigned int utn,
                   const EvaluationTargetData* target,
-                  EvaluationManager& eval_man,
+                  EvaluationCalculator& calculator,
                   const EvaluationDetails& details,
                   unsigned int num_updates,
                   unsigned int num_no_ref_pos,
@@ -97,7 +97,7 @@ public:
         IsNotOk,      //bool
         NumUpdates,   //unsigned int
         NumNoRef,     //unsigned int
-        NumInside,    //unsigned ints
+        NumInside,    //unsigned int
         NumOutside,   //unsigned int
         NumUnknownID, //unsigned int
         NumCorrectID, //unsigned int
@@ -111,11 +111,11 @@ protected:
     virtual unsigned int numIssues() const override;
 
     virtual std::vector<std::string> targetTableHeadersCustom() const override;
-    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual nlohmann::json::array_t targetTableValuesCustom() const override;
     virtual std::vector<TargetInfo> targetInfos() const override;
     virtual std::vector<std::string> detailHeaders() const override;
-    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
-                                               const EvaluationDetail* parent_detail) const override;
+    virtual nlohmann::json::array_t detailValues(const EvaluationDetail& detail,
+                                                 const EvaluationDetail* parent_detail) const override;
 
     virtual bool detailIsOk(const EvaluationDetail& detail) const override;
     virtual void addAnnotationForDetail(nlohmann::json& annotations_json, 
@@ -133,7 +133,7 @@ public:
                   const std::string& result_id,
                   std::shared_ptr<EvaluationRequirement::Base> requirement,
                   const SectorLayer& sector_layer, 
-                  EvaluationManager& eval_man);
+                  EvaluationCalculator& calculator);
 
 protected:
     EvaluationRequirement::GenericBase& genericRequirement() const;

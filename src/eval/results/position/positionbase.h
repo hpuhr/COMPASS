@@ -23,7 +23,7 @@
 
 #include "valueaccumulator.h"
 
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <boost/optional.hpp>
 
@@ -94,10 +94,11 @@ public:
 protected:
     boost::optional<double> common_computeResult(const Single* single_result) const;
     unsigned int common_numIssues() const;
-    bool common_detailIsOk(const EvaluationDetail& detail) const;
+    bool common_detailIsOk(const EvaluationDetail& detail,
+                           const std::shared_ptr<EvaluationRequirement::Base>& requirement) const;
 
     FeatureDefinitions common_getCustomAnnotationDefinitions(const Single& single,
-                                                             const EvaluationManager& eval_man) const;
+                                                             const EvaluationCalculator& calculator) const;
 
     virtual boost::optional<double> computeFinalResultValue() const = 0;
 };
@@ -114,7 +115,7 @@ public:
                                   const SectorLayer& sector_layer,
                                   unsigned int utn,
                                   const EvaluationTargetData* target,
-                                  EvaluationManager& eval_man,
+                                  EvaluationCalculator& calculator,
                                   const EvaluationDetails& details,
                                   unsigned int num_pos,
                                   unsigned int num_no_ref,
@@ -151,7 +152,7 @@ public:
                        const SectorLayer& sector_layer,
                        unsigned int utn,
                        const EvaluationTargetData* target,
-                       EvaluationManager& eval_man,
+                       EvaluationCalculator& calculator,
                        const EvaluationDetails& details,
                        unsigned int num_pos,
                        unsigned int num_no_ref,
@@ -161,7 +162,7 @@ public:
                        unsigned int num_failed);
     virtual ~SinglePositionValueBase() = default;
 
-    QVariant resultValue(double value) const override final;
+    nlohmann::json resultValue(double value) const override final;
 
 protected:
     virtual boost::optional<double> computeResult_impl() const override;
@@ -198,7 +199,7 @@ protected:
     virtual boost::optional<double> computeFinalResultValue() const = 0;
 
     FeatureDefinitions common_getCustomAnnotationDefinitions(const Joined& joined,
-                                                             const EvaluationManager& eval_man) const;
+                                                             const EvaluationCalculator& calculator) const;
 
 private:
     std::string csv_header_;
@@ -213,7 +214,7 @@ public:
                                   const std::string& result_id,
                                   std::shared_ptr<EvaluationRequirement::Base> requirement,
                                   const SectorLayer& sector_layer,
-                                  EvaluationManager& eval_man,
+                                  EvaluationCalculator& calculator,
                                   const std::string& csv_header);
 protected:
     boost::optional<double> computeFinalResultValue() const override final;
@@ -239,10 +240,10 @@ public:
                             const std::string& result_id,
                             std::shared_ptr<EvaluationRequirement::Base> requirement,
                             const SectorLayer& sector_layer,
-                            EvaluationManager& eval_man,
+                            EvaluationCalculator& calculator,
                             const std::string& csv_header);
 
-    QVariant resultValue(double value) const override final;
+    nlohmann::json resultValue(double value) const override final;
 
 protected:
     virtual unsigned int numIssues() const override;

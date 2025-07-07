@@ -18,6 +18,7 @@
 #include "variableviewstashdatawidget.h"
 #include "viewvariable.h"
 #include "variableview.h"
+#include "viewwidget.h"
 
 #include "buffer.h"
 #include "dbcontent/dbcontent.h"
@@ -39,6 +40,8 @@
 using namespace std;
 using namespace Utils;
 
+const double VariableViewStashDataWidget::RangeMinDefault = 1e-12;
+
 /**
 */
 VariableViewStashDataWidget::VariableViewStashDataWidget(ViewWidget* view_widget,
@@ -55,13 +58,6 @@ VariableViewStashDataWidget::VariableViewStashDataWidget(ViewWidget* view_widget
 /**
 */
 VariableViewStashDataWidget::~VariableViewStashDataWidget() = default;
-
-/**
-*/
-unsigned int VariableViewStashDataWidget::nullValueCount() const
-{
-    return stash_.nan_value_count_;
-}
 
 /**
 */
@@ -118,6 +114,15 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
     {
         const ViewVariable& view_var = variableView()->variable(i);
 
+        //legit empty variables are handled in a special way, so do not return
+        bool is_empty = view_var.settings().allow_empty_var && view_var.isEmpty();
+        if (is_empty)
+        {
+            loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.id() << " empty";
+            continue;
+        }
+
+        //otherwise return on invalid variable
         if (!view_var.getFor(dbcontent_name))
         {
             loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.variableName()
@@ -278,8 +283,25 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     const ViewVariable& view_var = variableView()->variable(var_idx);
     const dbContent::Variable* data_var = view_var.getFor(buffer.dbContentName());
 
-    if (!data_var)
+    bool is_empty = view_var.settings().allow_empty_var && view_var.isEmpty();
+
+    //handle special cases
+    if (is_empty)
     {
+        loginf << "VariableViewStashDataWidget: updateVariableData: adding empty variable to stash";
+
+        //empty variable selected => add zero values (valid values)
+        //(a little bit hacky, but we do not want to count the values as Nan or NULL values)
+        const double DefaultEmptyVarValue = 0.0;
+        
+        std::vector<double> vempty(indexes.size(), DefaultEmptyVarValue);
+        values.insert(values.end(), vempty.begin(), vempty.end());
+
+        return;
+    }
+    else if (!data_var)
+    {
+        //if not empty and no data var, something is fishy
         logwrn << "VariableViewStashDataWidget: updateVariableData: could not retrieve data var";
         return;
     }
@@ -289,13 +311,15 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
 
     logdbg << "VariableViewStashDataWidget: updateVariableData: updating, last size " << last_size;
 
-#define UpdateFunc(PDType, DType)                                                \
+    
+
+#define UpdateFunc(PDType, DType, Suffix)                                                \
         assert(view_var.settings().valid_data_types.count(PDType) != 0);         \
         assert(buffer.has<DType>(current_var_name));                             \
                                                                                  \
         const NullableVector<DType>& data = buffer.get<DType>(current_var_name); \
                                                                                  \
-        appendData(data, values, indexes);                                       \
+        appendData(data, values, indexes);                       \
         //buffer_counts = current_size;
 
 #define NotFoundFunc                                                                                          \
@@ -338,29 +362,29 @@ void VariableViewStashDataWidget::updateStash()
 
 /**
  */
-QRectF VariableViewStashDataWidget::getPlanarBounds(int var_x, int var_y, bool correct_datetime) const
+boost::optional<QRectF> VariableViewStashDataWidget::getPlanarBounds(int var_x, 
+                                                                     int var_y, 
+                                                                     bool correct_datetime,
+                                                                     bool fix_small_ranges) const
 {
-    auto bounds_x = getBounds(var_x, correct_datetime);
-    auto bounds_y = getBounds(var_y, correct_datetime);
+    auto bounds_x = getBounds(var_x, correct_datetime, fix_small_ranges);
+    auto bounds_y = getBounds(var_y, correct_datetime, fix_small_ranges);
     if (!bounds_x.has_value() || !bounds_y.has_value())
-        return QRectF();
+        return {};
 
     double xmin = bounds_x.value().first;
     double xmax = bounds_x.value().second;
     double ymin = bounds_y.value().first;
     double ymax = bounds_y.value().second;
 
-    assert(std::isfinite(xmin));
-    assert(std::isfinite(xmax));
-    assert(std::isfinite(ymin));
-    assert(std::isfinite(ymax));
-
     return QRectF(xmin, ymin, xmax - xmin, ymax - ymin);
 }
 
 /**
  */
-boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBounds(int var, bool correct_datetime) const
+boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBounds(int var, 
+                                                                                  bool correct_datetime,
+                                                                                  bool fix_small_ranges) const
 {
     boost::optional<std::pair<double, double>> b = getStash().dataRanges().at(var);
     if (!b.has_value())
@@ -372,15 +396,34 @@ boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBound
         b->second = Utils::Time::correctLongQtUTC((long)b->second);
     }
 
+    assert(std::isfinite(b->first));
+    assert(std::isfinite(b->second));
+    assert(b->second >= b->first);
+
+    //fix small ranges?
+    if (fix_small_ranges && b->second - b->first < RangeMinDefault)
+    {
+        //broaden range
+        const double eps = RangeMinDefault / 2;
+        const double mid = (b->first + b->second) / 2;
+
+        b->first  = mid - eps;
+        b->second = mid + eps;
+
+        assert(std::isfinite(b->first));
+        assert(std::isfinite(b->second));
+        assert(b->second >= b->first);
+    }
+
     return b;
 }
 
 /**
 */
-QRectF VariableViewStashDataWidget::getViewBounds() const
+boost::optional<QRectF> VariableViewStashDataWidget::getViewBounds() const
 {
     //meaningful default behaviour for most views
-    return getPlanarBounds(0, 1, false);
+    return getPlanarBounds(0, 1, false, true);
 }
 
 /**
@@ -494,7 +537,7 @@ void VariableViewStashDataWidget::selectData(double x_min,
             DBContent::meta_var_rec_num_.name());
 
         std::map<unsigned long, std::vector<unsigned int>> rec_num_indexes =
-            rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.size());
+            rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.contentSize());
         // rec_num -> index
 
         for (const auto rec_num : sel_cont_id_it.second) // iterator over all selected rec_nums

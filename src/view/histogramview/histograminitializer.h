@@ -58,6 +58,9 @@ public:
         return std::make_pair(data_min_.value(), data_max_.value());
     }
 
+    size_t numNullValues() const { return num_null_values_; }
+    size_t numNanValues() const { return num_nan_values_; }
+
     /**
      * Resets all scanned information.
      */
@@ -66,6 +69,8 @@ public:
         data_min_        = {};
         data_max_        = {};
         distinct_values_ = {};
+        num_nan_values_  = 0;
+        num_null_values_ = 0;
     }
 
     /**
@@ -80,6 +85,16 @@ public:
      */
     bool scan(NullableVector<T>& data)
     {
+        size_t data_size = data.contentSize();
+
+        for (size_t i = 0; i < data_size; ++i)
+        {
+            if (data.isNull(i))
+                ++num_null_values_;
+            else if (!isFinite(data.get(i)))
+                ++num_nan_values_;
+        }
+
         //keep track of min max values
         bool min_max_set = true;
         T data_min, data_max;
@@ -122,7 +137,10 @@ public:
         for (const auto& v : data)
         {
             if (!isFinite(v))
+            {
+                ++num_nan_values_;
                 continue;
+            }
 
             if (!data_min.has_value() || v < data_min.value())
                 data_min = v;
@@ -171,7 +189,10 @@ public:
             T v = get_value_func(i);
 
             if (!isFinite(v))
+            {
+                ++num_nan_values_;
                 continue;
+            }
 
             if (!data_min.has_value() || v < data_min.value())
                 data_min = v;
@@ -451,6 +472,8 @@ protected:
     boost::optional<T>                   data_min_;
     boost::optional<T>                   data_max_;
     mutable boost::optional<std::set<T>> distinct_values_;
+    size_t                               num_null_values_ = 0;
+    size_t                               num_nan_values_ = 0;
 };
 
 /**
@@ -476,6 +499,16 @@ inline std::set<boost::posix_time::ptime> HistogramInitializerT<boost::posix_tim
 */
 template<>
 inline bool HistogramInitializerT<std::string>::isFinite(const std::string& v) const
+{
+    return true;
+}
+template<>
+inline bool HistogramInitializerT<boost::posix_time::ptime>::isFinite(const boost::posix_time::ptime& v) const
+{
+    return true;
+}
+template<>
+inline bool HistogramInitializerT<nlohmann::json>::isFinite(const nlohmann::json& v) const
 {
     return true;
 }

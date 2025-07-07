@@ -32,8 +32,8 @@ class ProjectionManagerWidget : public QWidget
     void selectedObjectParserSlot(const QString& name);
 
   public:
-    ProjectionManagerWidget(ProjectionManager& proj_man, QWidget* parent = 0,
-                            Qt::WindowFlags f = 0);
+    ProjectionManagerWidget(ProjectionManager& proj_man, QWidget* parent = nullptr,
+                            Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~ProjectionManagerWidget();
 
   protected:

@@ -22,23 +22,25 @@
 #include "evaluationstandardtreemodel.h"
 #include "logger.h"
 
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttext.h"
+#include "task/result/report/sectioncontenttable.h"
 
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/baseconfig.h"
 
 #include <QTreeView>
-#include <QInputDialog>
-#include <QMessageBox>
 
 using namespace std;
 using namespace EvaluationResultsReport;
 
-EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::string& instance_id,
-                                       EvaluationManager& eval_man)
-    : Configurable(class_id, instance_id, &eval_man), EvaluationStandardTreeItem(&root_item_), eval_man_(eval_man),
+EvaluationStandard::EvaluationStandard(const std::string& class_id, 
+                                       const std::string& instance_id,
+                                       EvaluationCalculator& calculator)
+    : Configurable(class_id, instance_id, &calculator), 
+      EvaluationStandardTreeItem(&root_item_), 
+      calculator_(calculator),
       root_item_(*this)
 {
     registerParameter("name", &name_, std::string());
@@ -46,12 +48,6 @@ EvaluationStandard::EvaluationStandard(const std::string& class_id, const std::s
     assert (name_.size());
 
     createSubConfigurables();
-
-    // menu creation
-    {
-        QAction* add_action = menu_.addAction("Add Group");
-        connect(add_action, &QAction::triggered, this, &EvaluationStandard::addGroupSlot);
-    }
 }
 
 EvaluationStandard::~EvaluationStandard()
@@ -61,9 +57,9 @@ EvaluationStandard::~EvaluationStandard()
 void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
                                                  const std::string& instance_id)
 {
-    if (class_id.compare("EvaluationRequirementGroup") == 0)
+    if (class_id == "EvaluationRequirementGroup")
     {
-        Group* group = new Group(class_id, instance_id, *this, eval_man_);
+        Group* group = new Group(class_id, instance_id, *this, calculator_);
 
         logdbg << "EvaluationStandard: generateSubConfigurable: adding group " << group->name();
 
@@ -72,7 +68,7 @@ void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
         groups_.emplace_back(group);
 
         connect (group, &Group::configsChangedSignal, this, &EvaluationStandard::groupsChangedSlot);
-        connect (group, &Group::selectionChanged, this, &EvaluationStandard::selectionChanged);
+        // connect (group, &Group::selectionChanged, this, &EvaluationStandard::selectionChanged);
     }
     else
         throw std::runtime_error("EvaluationStandard: generateSubConfigurable: unknown class_id " +
@@ -96,8 +92,8 @@ void EvaluationStandard::addGroup (const std::string& name)
 {
     assert (!hasGroup(name));
 
-    if (widget_)
-        beginModelReset();
+    // if (widget_)
+    //     beginModelReset();
 
     std::string instance = "EvaluationRequirementGroup" + name + "0";
 
@@ -108,10 +104,8 @@ void EvaluationStandard::addGroup (const std::string& name)
 
     assert (hasGroup(name));
 
-    if (widget_)
-        endModelReset();
-
-    //emit groupsChangedSignal();
+    // if (widget_)
+    //     endModelReset();
 }
 
 Group& EvaluationStandard::group (const std::string& name)
@@ -137,18 +131,13 @@ void EvaluationStandard::removeGroup (const std::string& name)
 
     groups_.erase(iter);
 
-    if (widget_)
-        endModelReset();
-
-    //emit groupsChangedSignal();
+    // if (widget_)
+    //     endModelReset();
 }
 
 EvaluationStandardWidget* EvaluationStandard::widget()
 {
-    if (!widget_)
-        widget_.reset(new EvaluationStandardWidget(*this));
-
-    return widget_.get();
+    return new EvaluationStandardWidget(*this);
 }
 
 void EvaluationStandard::checkSubConfigurables()
@@ -157,7 +146,7 @@ void EvaluationStandard::checkSubConfigurables()
 
 EvaluationStandardTreeItem* EvaluationStandard::child(int row)
 {
-    if (row < 0 || row >= groups_.size())
+    if (row < 0 || row >= (int)groups_.size())
         return nullptr;
 
     auto group_it = groups_.begin();
@@ -196,21 +185,17 @@ EvaluationStandardRootItem& EvaluationStandard::rootItem()
     return root_item_;
 }
 
-void EvaluationStandard::showMenu ()
-{
-    menu_.exec(QCursor::pos());
-}
 
-void EvaluationStandard::beginModelReset()
-{
-    widget()->model().beginReset();
-}
+// void EvaluationStandard::beginModelReset()
+// {
+//     widget()->model().beginReset();
+// }
 
-void EvaluationStandard::endModelReset()
-{
-    widget()->model().endReset();
-    widget()->expandAll();
-}
+// void EvaluationStandard::endModelReset()
+// {
+//     widget()->model().endReset();
+//     widget()->expandAll();
+// }
 
 void EvaluationStandard::name(const std::string &name)
 {
@@ -218,62 +203,22 @@ void EvaluationStandard::name(const std::string &name)
 }
 
 
-void EvaluationStandard::addGroupSlot()
-{
-    loginf << "EvaluationRequirementGroup " << name_ << ": addGroupSlot: " << groups_.size() << " groups" ;
-
-    bool ok;
-    QString text =
-            QInputDialog::getText(nullptr, tr("Group Name"),
-                                  tr("Specify a (unique) group name:"), QLineEdit::Normal, "", &ok);
-
-    if (ok && !text.isEmpty())
-    {
-        std::string name = text.toStdString();
-
-        if (!name.size())
-        {
-            QMessageBox m_warning(QMessageBox::Warning, "Adding Group Failed",
-                                  "Group has to have a non-empty name.", QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        if (hasGroup(name))
-        {
-            QMessageBox m_warning(QMessageBox::Warning, "Adding Group Failed",
-                                  "Group with this name already exists.", QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        addGroup(name);
-
-        loginf << "EvaluationRequirementGroup " << name_ << ": addGroupSlot: added " << name << ", "
-               << groups_.size() << " groups" ;
-    }
-}
-
 void EvaluationStandard::groupsChangedSlot()
 {
     loginf << "EvaluationStandard: groupsChangedSlot";
 
-    if (widget_)
-    {
-        beginModelReset();
-        endModelReset();
-    }
+    emit configChangedSignal();
 }
 
-void EvaluationStandard::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void EvaluationStandard::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Overview:Standard");
+    auto& section = report->getSection("Overview:Standard");
 
     // reqs overview
 
     section.addTable("req_overview_table", 4, {"Short Name", "Name", "Group", "Type", }, false);
 
-    EvaluationResultsReport::SectionContentTable& req_table = section.getTable("req_overview_table");
+    auto& req_table = section.getTable("req_overview_table");
 
     for (auto& std_it : groups_)
     {
@@ -285,11 +230,26 @@ void EvaluationStandard::addToReport (std::shared_ptr<EvaluationResultsReport::R
             if (!req_it->used())
                 continue;
 
-            req_table.addRow({req_it->shortName().c_str(), req_it->name().c_str(), std_it->name().c_str(),
-                              Group::requirement_type_mapping_.at(req_it->classId()).c_str()}, nullptr);
+            req_table.addRow({req_it->shortName(), req_it->name(), std_it->name(),
+                              Group::requirement_type_mapping_.at(req_it->classId())});
 
-            req_it->addToReport(root_item);
+            req_it->addToReport(report);
         }
     }
 }
 
+std::set<std::string> EvaluationStandard::getAllRequirementNames() const
+{
+    std::set<std::string> names;
+
+    for (auto& std_it : groups_)
+    {
+        for (auto& req_it : *std_it)
+        {
+            if (!names.count(req_it->name()))
+                names.insert(req_it->name());
+        }
+    }
+
+    return names;
+}

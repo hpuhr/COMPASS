@@ -17,6 +17,7 @@
 
 #include "event_log.h"
 #include "util/timeconv.h"
+#include "json.hpp"
 
 namespace logger
 {

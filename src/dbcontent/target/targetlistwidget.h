@@ -1,33 +1,61 @@
-#ifndef DBCONTENT_TARGETLISTWIDGET_H
-#define DBCONTENT_TARGETLISTWIDGET_H
 
-#include <QWidget>
+#pragma once
+
+#include "toolboxwidget.h"
+
 #include <QItemSelection>
+
+#include <set>
+
+#include <boost/date_time/posix_time/ptime.hpp>
 
 class DBContentManager;
 
-class QToolBar;
 class QTableView;
 class QSortFilterProxyModel;
 
-namespace dbContent {
+class QMenu;
 
+namespace Utils
+{
+    class TimeWindowCollection;
+}
+
+namespace dbContent 
+{
+
+class Target;
 class TargetModel;
 
-class TargetListWidget : public QWidget
+/**
+ */
+class TargetListWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
 public slots:
-    void actionTriggeredSlot(QAction* action);
-    void useAllSlot();
-    void useNoneSlot();
-    void clearCommentsSlot();
-    void filterSlot();
+    void evalUseAllSlot();
+    void evalUseNoneSlot();
+    void evalFilterSlot();
+
+    void evalEditGlobalExcludeTimeWindowsSlot();
+
+    void clearAllCommentsSlot();
+    void evalClearAllExcludeTimeWindowsSlot();
+    void evalClearAllExcludeRequirementsSlot();
 
     void customContextMenuSlot(const QPoint& p);
-    //void showFullUTNSlot ();
     void showSurroundingDataSlot ();
+
+    //per-target
+    void clearSelectedTargetsCommentsSlot();
+    void evalUseSelectedTargetsSlot();
+    void evalDisableSelectedTargetsSlot();
+    void evalClearTargetsExcludeTimeWindowsSlot();
+    void evalClearTargetsExcludeRequirementsSlot();
+    void evalExcludeTimeWindowsTargetSlot();
+    void evalExcludeRequirementsTargetSlot();
+
     void currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
@@ -35,18 +63,55 @@ public:
     TargetListWidget(TargetModel& model, DBContentManager& dbcont_manager);
     virtual ~TargetListWidget() {};
 
+    //ToolBoxWidget
+    QIcon toolIcon() const override final;
+    std::string toolName() const override final;
+    std::string toolInfo() const override final;
+    std::vector<std::string> toolLabels() const override final;
+    toolbox::ScreenRatio defaultScreenRatio() const override final;
+    void addToConfigMenu(QMenu* menu) override final;
+    void addToToolBar(QToolBar* tool_bar) override final;
+    void loadingStarted() override final;
+    void loadingDone() override final;
+
     void resizeColumnsToContents();
 
+    void createTargetEvalMenu(QMenu& menu, 
+                              const std::set<unsigned int>& utns,
+                              bool check_utns = false);
+    void createTargetEvalMenu(QMenu& menu, 
+                              const Target& target,
+                              const std::string& req_name);
 protected:
+    void showMainColumns(bool show);
+    void showEvalColumns(bool show);
+    void showDurationColumns(bool show);
+    void showModeACColumns(bool show);
+    void showModeSColumns(bool show);
+    void showADSBColumns(bool show);
+
+    void clearSelectedTargetsComments(const std::set<unsigned int>& utns);
+    void evalUseSelectedTargets(const std::set<unsigned int>& utns);
+    void evalDisableSelectedTargets(const std::set<unsigned int>& utns);
+    void evalClearTargetsExcludeTimeWindows(const std::set<unsigned int>& utns);
+    void evalClearTargetsExcludeRequirements(const std::set<unsigned int>& utns);
+    void evalExcludeTimeWindowsTarget(const std::set<unsigned int>& utns,
+                                      const Utils::TimeWindowCollection* exclude_windows = nullptr);
+    void evalExcludeRequirementsTarget(const std::set<unsigned int>& utns,
+                                       const std::set<std::string>* exclude_requirements = nullptr);
+
+    void evalExcludeTimeWindowTarget(const Target& target);
+    void evalExcludeRequirementTarget(const Target& target,
+                                      const std::string& req_name);
+    void evalExcludeAllRequirementsTarget(const Target& target);
+
     TargetModel& model_;
     DBContentManager& dbcont_manager_;
 
-    QToolBar* toolbar_ {nullptr};
-
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};
+
+    std::set<unsigned int> selectedUTNs() const;
 };
 
 };
-
-#endif // DBCONTENT_TARGETLISTWIDGET_H

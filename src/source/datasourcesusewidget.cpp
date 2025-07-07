@@ -82,7 +82,7 @@ DataSourcesUseWidget::DataSourcesUseWidget(std::function<bool(const std::string&
     button_layout->addStretch();
 
     QPushButton* edit_button = new QPushButton();
-    edit_button->setIcon(QIcon(Files::getIconFilepath("edit.png").c_str()));
+    edit_button->setIcon(Files::IconProvider::getIcon("edit.png"));
     edit_button->setFixedSize(UI_ICON_SIZE);
     edit_button->setFlat(UI_ICON_BUTTON_FLAT);
     edit_button->setToolTip(tr("Data Source Options"));

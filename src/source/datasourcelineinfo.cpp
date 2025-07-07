@@ -2,6 +2,8 @@
 #include "stringconv.h"
 #include "logger.h"
 
+#include "json.hpp"
+
 using namespace Utils;
 using namespace std;
 using namespace nlohmann;

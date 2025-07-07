@@ -40,7 +40,7 @@ BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer,
 
 BufferCSVExportJob::~BufferCSVExportJob() {}
 
-void BufferCSVExportJob::run()
+void BufferCSVExportJob::run_impl()
 {
     logdbg << "BufferCSVExportJob: execute: start";
     started_ = true;
@@ -56,7 +56,7 @@ void BufferCSVExportJob::run()
 
     if (output_file)
     {
-        const PropertyList& properties = buffer_->properties();
+        //const PropertyList& properties = buffer_->properties();
         size_t read_set_size = read_set_.getSize();
         size_t buffer_size = buffer_->size();
         std::stringstream ss;
@@ -75,10 +75,10 @@ void BufferCSVExportJob::run()
         output_file << ss.str() << "\n";
 
         assert(buffer_->has<bool>(DBContent::selected_var.name()));
-        NullableVector<bool> selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
+        NullableVector<bool>& selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
 
-        assert(buffer_->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
-        NullableVector<unsigned long> rec_num_vec = buffer_->get<unsigned long>(DBContent::meta_var_rec_num_.name());
+        //assert(buffer_->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
+        //NullableVector<unsigned long>& rec_num_vec = buffer_->get<unsigned long>(DBContent::meta_var_rec_num_.name());
 
         std::string dbcontent_name = buffer_->dbContentName();
         assert(dbcontent_name.size());

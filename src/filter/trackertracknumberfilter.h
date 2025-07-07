@@ -2,7 +2,7 @@
 #define TRACKERTRACKNUMBERFILTER_H
 
 #include "dbfilter.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QObject>
 

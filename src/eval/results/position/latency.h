@@ -32,7 +32,7 @@ public:
                           const SectorLayer& sector_layer,
                           unsigned int utn, 
                           const EvaluationTargetData* target, 
-                          EvaluationManager& eval_man,
+                          EvaluationCalculator& calculator,
                           const EvaluationDetails& details,
                           unsigned int num_pos, 
                           unsigned int num_no_ref,
@@ -45,11 +45,11 @@ public:
 
 protected:
     virtual std::vector<std::string> targetTableHeadersCustom() const override;
-    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual nlohmann::json::array_t targetTableValuesCustom() const override;
     virtual std::vector<TargetInfo> targetInfos() const override;
     virtual std::vector<std::string> detailHeaders() const override;
-    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
-                                               const EvaluationDetail* parent_detail) const override;
+    virtual nlohmann::json::array_t detailValues(const EvaluationDetail& detail,
+                                                 const EvaluationDetail* parent_detail) const override;
 };
 
 /**
@@ -58,9 +58,9 @@ class JoinedPositionLatency : public JoinedPositionProbabilityBase
 {
 public:
     JoinedPositionLatency(const std::string& result_id, 
-                            std::shared_ptr<EvaluationRequirement::Base> requirement,
-                            const SectorLayer& sector_layer, 
-                            EvaluationManager& eval_man);
+                          std::shared_ptr<EvaluationRequirement::Base> requirement,
+                          const SectorLayer& sector_layer, 
+                          EvaluationCalculator& calculator);
 protected:
     virtual std::vector<SectorInfo> sectorInfos() const override;
 };

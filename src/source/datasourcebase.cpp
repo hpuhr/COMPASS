@@ -16,6 +16,8 @@ const std::string network_lines_key = "network_lines";
 namespace dbContent
 {
 
+const std::string DataSourceBase::DetectionKey{"detection_type"};
+
 const std::string DataSourceBase::PSRIRMinKey{"primary_ir_min"};
 const std::string DataSourceBase::PSRIRMaxKey{"primary_ir_max"};
 const std::string DataSourceBase::SSRIRMinKey{"secondary_ir_min"};
@@ -30,6 +32,31 @@ const std::string DataSourceBase::SSRRngSDKey{"secondary_range_stddev"};
 const std::string DataSourceBase::ModeSAzmSDKey{"mode_s_azimuth_stddev"};
 const std::string DataSourceBase::ModeSRngSDKey{"mode_s_range_stddev"};
 
+
+std::string DataSourceBase::detectionTypeToString(DetectionType type)
+{
+    switch (type)
+    {
+    case DetectionType::PrimaryOnlyGround: return "PrimaryOnlyGround";
+    case DetectionType::PrimaryOnlyAir: return "PrimaryOnlyAir";
+    case DetectionType::ModeAC: return "ModeAC";
+    case DetectionType::ModeACCombined: return "ModeACCombined";
+    case DetectionType::ModeS: return "ModeS";
+    case DetectionType::ModeSCombined: return "ModeSCombined";
+    default: return "ModeS"; // fallback
+    }
+}
+
+DataSourceBase::DetectionType DataSourceBase::detectionTypeFromString(const std::string& str)
+{
+    if (str == "PrimaryOnlyGround") return DetectionType::PrimaryOnlyGround;
+    if (str == "PrimaryOnlyAir") return DetectionType::PrimaryOnlyAir;
+    if (str == "ModeAC") return DetectionType::ModeAC;
+    if (str == "ModeACCombined") return DetectionType::ModeACCombined;
+    if (str == "ModeS") return DetectionType::ModeS;
+    if (str == "ModeSCombined") return DetectionType::ModeSCombined;
+    return DetectionType::ModeS; // fallback
+}
 
 DataSourceBase::DataSourceBase()
 {
@@ -119,6 +146,20 @@ std::string DataSourceBase::infoStr()
     return info_.dump();
 }
 
+DataSourceBase::DetectionType DataSourceBase::detectionType() const
+{
+    if (info_.contains(DetectionKey) && info_[DetectionKey].is_string())
+    {
+        return detectionTypeFromString(info_[DetectionKey].get<std::string>());
+    }
+    return DetectionType::ModeS;
+}
+
+void DataSourceBase::detectionType(DetectionType type)
+{
+    info_[DetectionKey] = detectionTypeToString(type);
+}
+
 bool DataSourceBase::hasUpdateInterval() const
 {
     return info_.contains(update_interval_key) && info_.at(update_interval_key) != 0;
@@ -147,7 +188,11 @@ bool DataSourceBase::hasPosition() const
 {
     return info_.contains(position_key)
            && info_.at(position_key).contains("latitude")
-           && info_.at(position_key).contains("longitude");
+           && info_.at(position_key).contains("longitude")
+           && info_.at(position_key).at("latitude").is_number()
+           && info_.at(position_key).at("longitude").is_number()
+           && info_.at(position_key).at("latitude") != 0
+           && info_.at(position_key).at("longitude") != 0;
 }
 
 void DataSourceBase::latitude (double value)
@@ -512,4 +557,5 @@ void DataSourceBase::parseNetworkLineInfo()
 }
 
 }
+
 

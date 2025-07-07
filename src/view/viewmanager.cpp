@@ -35,14 +35,15 @@
 #include "util/timeconv.h"
 #include "viewpoint_commands.h"
 #include "global.h"
+#include "files.h"
 
 #include "json.hpp"
 
 #include <QMessageBox>
 #include <QWidget>
-#include <QTabWidget>
 #include <QMetaType>
 #include <QApplication>
+#include <QTabWidget>
 
 #include <cassert>
 
@@ -65,14 +66,15 @@ ViewManager::ViewManager(const std::string& class_id, const std::string& instanc
     registerParameter("automatic_redraw", &config_.automatic_redraw, Config().automatic_redraw);
 }
 
-void ViewManager::init(QTabWidget* tab_widget)
+void ViewManager::init(QTabWidget* main_tab_widget)
 {
     logdbg << "ViewManager: init";
-    assert(tab_widget);
+
+    assert(main_tab_widget);
     assert(!main_tab_widget_);
     assert(!initialized_);
 
-    main_tab_widget_ = tab_widget;
+    main_tab_widget_ = main_tab_widget;
 
     connect (&COMPASS::instance(), &COMPASS::appModeSwitchSignal, this, &ViewManager::appModeSwitchSlot);
 
@@ -85,9 +87,6 @@ void ViewManager::init(QTabWidget* tab_widget)
     QApplication::restoreOverrideCursor();
 
     assert(view_points_widget_);
-
-    if (!COMPASS::instance().hideViewpoints())
-        tab_widget->addTab(view_points_widget_, "View Points");
 
     FilterManager& filter_man = COMPASS::instance().filterManager();
 
@@ -291,7 +290,7 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
         if (!json_ok)
             return std::make_pair(false, err);
 
-        DBInterface& db_interface = COMPASS::instance().interface();
+        DBInterface& db_interface = COMPASS::instance().dbInterface();
 
         //delete existing viewpoints
         if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())
@@ -335,7 +334,7 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
 
 void ViewManager::clearViewPoints()
 {
-    DBInterface& db_interface = COMPASS::instance().interface();
+    DBInterface& db_interface = COMPASS::instance().dbInterface();
 
             //delete existing viewpoints
     if (db_interface.existsViewPointsTable() && db_interface.viewPoints().size())

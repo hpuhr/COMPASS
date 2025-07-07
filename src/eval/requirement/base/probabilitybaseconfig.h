@@ -29,7 +29,7 @@ public:
                           const std::string& instance_id,
                           Group& group, 
                           EvaluationStandard& standard,
-                          EvaluationManager& eval_man);
+                          EvaluationCalculator& calculator);
     virtual ~ProbabilityBaseConfig() {}
 
     double prob() const;

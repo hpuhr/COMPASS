@@ -16,7 +16,7 @@
  */
 
 #include "asterixdecoderfile.h"
-
+#include "compass.h"
 #include "logger.h"
 
 #include "files.h"
@@ -89,6 +89,9 @@ void ASTERIXDecoderFile::processCurrentFile()
     if (!current_file.used)
         return;
 
+    //COMPASS::instance().logInfo("ASTERIX Import") << "decoding '" << current_file.filename << "'";
+    // done in ASTERIXTimestampCalculator
+
     try
     {
         processFile(current_file);
@@ -97,14 +100,23 @@ void ASTERIXDecoderFile::processCurrentFile()
         done_file_size_          += current_file.sizeInBytes(true);
         current_file_bytes_read_  = 0;
         current_chunk_bytes_read_ = 0;
+
+        //flag file as processed
+        current_file.processed = true;
     }
     catch(const std::exception& e)
     {
+        COMPASS::instance().logError("ASTERIX Import") << "file '" << current_file.filename
+                                       << "' decode error '" << e.what() << "'";
+
         logerr << "ASTERIXDecoderFile: processCurrentFile: decode error '" << e.what() << "'";
         logError(e.what());
     }
     catch(...)
     {
+        COMPASS::instance().logError("ASTERIX Import") << "file '" << current_file.filename
+                                       << "' unknown decode error";
+
         logerr << "ASTERIXDecoderFile: processCurrentFile: unknown decode error";
         logError("Unknown decode error");
     }
@@ -272,26 +284,92 @@ std::string ASTERIXDecoderFile::getCurrentFilename() const
 */
 std::string ASTERIXDecoderFile::statusInfoString() const
 {
-    std::string text;
+    // std::string text;
+
+    // const auto& file_infos = source_.files();
+
+    // for (const auto& file_info : file_infos)
+    // {
+    //     //skip unused
+    //     if (!file_info.used)
+    //         continue;
+
+    //     if (file_info.filename == getCurrentFilename())
+    //         text += "<p align=\"left\"><b>" + file_info.filename + "</b>";
+    //     else
+    //         text += "<p align=\"left\">"+file_info.filename + "";
+    // }
+
+    // text += "<br><p align=\"left\">Records/s: " + std::to_string((unsigned int) getRecordsPerSecond());
+    // text += "<p align=\"right\">Remaining: "+ Utils::String::timeStringFromDouble(getRemainingTime() + 1.0, false);
+
+    // return text;
+
+    std::ostringstream html;
+    // Start table and header row
+    html << "<table border=\"0\" width=\"100%\">"
+         << "<tr>"
+            "<th align=\"left\">Filename</th>"
+            "<th align=\"right\">Size (MB)</th>"
+            "<th align=\"center\">Status</th>"
+         << "</tr>";
 
     const auto& file_infos = source_.files();
-
     for (const auto& file_info : file_infos)
     {
-        //skip unused
+        // Skip unused files
         if (!file_info.used)
             continue;
 
-        if (file_info.filename == getCurrentFilename())
-            text += "<p align=\"left\"><b>" + file_info.filename + "</b>";
-        else
-            text += "<p align=\"left\">"+file_info.filename + "";
+        // Filename cell, bold if current
+        std::string filename_cell = (file_info.filename == getCurrentFilename())
+                                   ? "<b>" + file_info.filename + "</b>"
+                                   : file_info.filename;
+
+        // Size in megabytes
+        double mb = file_info.sizeInBytes(/*used_only=*/true) / (1024.0 * 1024.0);
+
+        std::ostringstream size_fmt;
+        size_fmt << std::fixed << std::setprecision(2) << mb;
+
+        // Decoded‐status cell
+        std::string status_cell = file_info.fileProcessed() ? "Done" : "";
+
+        // One row per file
+        html << "<tr>"
+                "<td align=\"left\">"   << filename_cell    << "</td>"
+                            "<td align=\"right\">"  << size_fmt.str() << "</td>"
+                                 "<td align=\"center\">" << status_cell  << "</td>"
+             << "</tr>";
     }
 
-    text += "<br><p align=\"left\">Records/s: " + std::to_string((unsigned int) getRecordsPerSecond());
-    text += "<p align=\"right\">Remaining: "+ Utils::String::timeStringFromDouble(getRemainingTime() + 1.0, false);
+    // Two empty spacer rows
+    html << "<tr><td colspan=\"3\">&nbsp;</td></tr>"
+         << "<tr><td colspan=\"3\">&nbsp;</td></tr>";
 
-    return text;
+    // Elapsed / Remaining row
+    html << "<tr>"
+            "<td colspan=\"2\" align=\"left\">Elapsed:  "
+         << Utils::String::timeStringFromDouble(elapsedSeconds(), false)
+         << "</td>"
+            "<td align=\"right\">Remaining: "
+         << Utils::String::timeStringFromDouble(getRemainingTime(), false)
+         << "</td>"
+         << "</tr>";
+
+    html << "<tr><td colspan=\"3\">&nbsp;</td></tr>";
+
+    // Records/sec row
+    html << "<tr>"
+            "<td colspan=\"3\" align=\"right\">"
+            "Records/s: " << static_cast<unsigned int>(getRecordsPerSecond())
+         << "</td>"
+         << "</tr>"
+
+         // Close table
+         << "</table>";
+
+    return html.str();
 }
 
 /**

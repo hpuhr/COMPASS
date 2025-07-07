@@ -112,6 +112,58 @@ This enables merging of created targets even if single target reports (e.g. duri
 \end{itemize}
 \ \\
 
+\subsection{Target Type}
+
+A target type is defined based the following information (if available):
+
+\begin{itemize}
+\item ADS-B emitter category (ECAT)
+\item Vehicle Mode S address list
+\item Defined FFTs
+\item Reported Altitudes
+\end{itemize}
+
+\ \\
+
+It encompasses a type (e.g. aircraft type, vehicle, FFT, ...), and adds information about an average target size, expected movement dynamics and ground only flag - all of which are used during reconstruction. \\
+
+The following target types exist:
+
+\begin{itemize}
+\item Unknown: No information
+\item By ECAT
+\begin{itemize}
+\item LightAircraft
+\item SmallAircraft
+\item MediumAircraft
+\item HighVortexLargeAircraft
+\item HeavyAircraft
+\item HighSpeedManoeuvrable
+\item Rotocraft
+\item OtherAirborne (Gliders, UAVs, ultralights, lighter-than-air, etc. )
+\item Vehicle
+\item Obstacle
+\end{itemize}
+\item Other aircraft, not from ECAT but from Mode C
+\begin{itemize}
+\item AnyAircraft
+\end{itemize}
+\item By defined FFTs
+\begin{itemize}
+\item FFT
+\end{itemize}
+\end{itemize}
+\ \\
+
+The target size is used in Primary-Only Association in the Prob+IMM reconstructor:
+
+\begin{itemize}
+\item For each target type, an average size is defined
+\item As radius in meters
+\item For each primary-only association, if the target type is known, the average target size is subtracted from the "distance threshold" (rather: probabilistic distance criteria)
+\item Allows for distinction between small targets (obstacles, vehicles) and big ones (large aircraft)
+\end{itemize}
+
 \subsection{Discussion}
 
 The user should be aware that, while this association feature is quite capable, it is still somewhat limited. 

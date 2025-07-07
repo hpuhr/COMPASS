@@ -7,7 +7,7 @@ set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 
 project( COMPASS )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "8")
+SET(CPACK_PACKAGE_VERSION_MINOR "9")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 
 message("  System: ${CMAKE_SYSTEM}")
@@ -17,10 +17,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 IF (SOURCE_BRANCH)
 message("  Platform: Linux (inside docker)")
-add_definitions ( -UNDEBUG -Wall -std=c++11 -fext-numeric-literals) # -DQT_NO_KEYWORDS
+add_definitions ( -UNDEBUG -Wall -std=c++14 -fext-numeric-literals) # -DQT_NO_KEYWORDS
 ELSE()
 message("  Platform: Linux (local)")
-add_definitions ( -UNDEBUG -Wall -std=c++14 -fext-numeric-literals) # -DQT_NO_KEYWORDS
+add_definitions ( -UNDEBUG -Wall -std=c++17 -fext-numeric-literals) # -DQT_NO_KEYWORDS
 ENDIF()
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
@@ -49,6 +49,8 @@ set(CMAKE_AUTOMOC ON)
 find_package ( Boost 1.73.0 REQUIRED COMPONENTS regex system program_options filesystem iostreams thread)
 message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
+
+add_definitions("-DBOOST_ALLOW_DEPRECATED_HEADERS -DBOOST_GEOMETRY_DISABLE_DEPRECATED_03_WARNING") # suppress internal boost deprecated warnings
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${COMPASS_PATH}/cmake_modules)
 message("  CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
@@ -119,6 +121,9 @@ find_package(GeographicLib REQUIRED)
 message("  GeographicLib_INCLUDE_DIRS:  ${GeographicLib_INCLUDE_DIRS}")
 message("  GeographicLib_LIBRARIES: ${GeographicLib_LIBRARIES}")
 
+#find_package(Arrow REQUIRED)
+#find_package(Parquet REQUIRED)
+find_package(DuckDB REQUIRED)
 
 add_library(compass "")
 
@@ -167,6 +172,9 @@ include_directories (
     ${jASTERIX_INCLUDE_DIR}
     ${PCAP_INCLUDE_DIR}
     ${GeographicLib_INCLUDE_DIRS}
+    #${Arrow_INCLUDE_DIRS}
+    #${Parquet_INCLUDE_DIRS}
+    ${DUCKDB_INCLUDE_DIR}
     )
 
 link_directories(
@@ -197,6 +205,9 @@ target_link_libraries ( compass
     ${OSGQT_LIBRARIES}
     ${OSGEARTH_LIBRARY}
     ${GeographicLib_LIBRARIES}
+    #Arrow::arrow_static 
+    #Parquet::parquet_static
+    ${DUCKDB_LIBRARIES}
     )
 
 # installation stuff

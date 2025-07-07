@@ -32,12 +32,12 @@ SingleIdentificationCorrectPeriod::SingleIdentificationCorrectPeriod(const std::
                                                                      const SectorLayer& sector_layer, 
                                                                      unsigned int utn, 
                                                                      const EvaluationTargetData* target,
-                                                                     EvaluationManager& eval_man,
+                                                                     EvaluationCalculator& calculator,
                                                                      const EvaluationDetails& details,
                                                                      int sum_uis, 
                                                                      int missed_uis, 
                                                                      TimePeriodCollection ref_periods)
-:   SingleIntervalBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details, sum_uis, missed_uis, ref_periods)
+:   SingleIntervalBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details, sum_uis, missed_uis, ref_periods)
 {
     updateResult();
 }
@@ -46,7 +46,7 @@ SingleIdentificationCorrectPeriod::SingleIdentificationCorrectPeriod(const std::
 */
 std::shared_ptr<Joined> SingleIdentificationCorrectPeriod::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedIdentificationCorrectPeriod> ("JoinedIdentificationCorrectPeriod", result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedIdentificationCorrectPeriod> ("JoinedIdentificationCorrectPeriod", result_id, requirement_, sector_layer_, calculator_);
 }
 
 /********************************************************************************
@@ -59,8 +59,8 @@ JoinedIdentificationCorrectPeriod::JoinedIdentificationCorrectPeriod(const std::
                                                                      const std::string& result_id, 
                                                                      std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                                      const SectorLayer& sector_layer, 
-                                                                     EvaluationManager& eval_man)
-:   JoinedIntervalBase(result_type, result_id, requirement, sector_layer, eval_man)
+                                                                     EvaluationCalculator& calculator)
+:   JoinedIntervalBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 

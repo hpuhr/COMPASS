@@ -17,12 +17,15 @@
 
 #include "eval/results/base/single.h"
 #include "eval/results/base/result_t.h"
+#include "eval/results/base/joined.h"
 
-#include "eval/results/report/rootitem.h"
-#include "eval/results/report/section.h"
-#include "eval/results/report/section_id.h"
-#include "eval/results/report/sectioncontenttable.h"
-#include "eval/results/report/sectioncontenttext.h"
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontenttext.h"
+
+#include "eval/results/report/evalsectionid.h"
 
 #include "eval/requirement/base/base.h"
 
@@ -40,8 +43,9 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-const std::string Single::tr_details_table_name_ {"Target Reports Details"};
-const std::string Single::target_table_name_     {"Targets"};
+const std::string Single::TRDetailsTableName   = "Target Reports Details";
+
+const std::string Single::TargetOverviewID     = "target_errors_overview";
 
 const int Single::AnnotationPointSizeOverview  = 8;
 const int Single::AnnotationPointSizeHighlight = 12;
@@ -56,6 +60,8 @@ const QColor Single::AnnotationColorHighlight = Qt::yellow;
 const QColor Single::AnnotationColorError     = QColor("#FF6666");
 const QColor Single::AnnotationColorOk        = QColor("#66FF66");
 
+const std::string Single::ContentPropertyUTN  = "utn";
+
 /**
 */
 Single::Single(const std::string& type, 
@@ -64,9 +70,9 @@ Single::Single(const std::string& type,
                const SectorLayer& sector_layer,
                unsigned int utn,
                const EvaluationTargetData* target,
-               EvaluationManager& eval_man,
+               EvaluationCalculator& calculator,
                const EvaluationDetails& details)
-:   Base    (type, result_id, requirement, sector_layer, eval_man)
+:   Base    (type, result_id, requirement, sector_layer, calculator)
 ,   utn_    (utn   )
 ,   target_ (target)
 ,   details_(details)
@@ -97,20 +103,23 @@ const EvaluationTargetData* Single::target() const
 
 /**
 */
-void Single::setInterestFactor(double factor)
+void Single::setInterestFactor(double factor, bool reset_in_target)
 {
     interest_factor_ = factor;
 
     assert (target_);
 
-    target_->addInterestFactor(getRequirementSectionID(), factor);
+    Evaluation::RequirementSumResultID id;
+    id.fromResult(*this);
+
+    target_->addInterestFactor(id, factor, reset_in_target);
 }
 
 /**
 */
 void Single::updateUseFromTarget()
 {
-    use_ = (resultUsable() && target_->use());
+    use_ = (resultUsable() && target_->use() && !target_->excludedRequirements().count(requirement_->name()));
 }
 
 /**
@@ -133,32 +142,32 @@ boost::optional<double> Single::computeResult() const
 */
 std::string Single::getTargetSectionID()
 {
-    return EvaluationResultsReport::SectionID::targetID(utn_);
+    return EvalSectionID::targetID(utn_);
 }
 
 /**
 */
 std::string Single::getTargetRequirementSectionID ()
 {
-    return EvaluationResultsReport::SectionID::targetResultID(utn_, *this);
+    return EvalSectionID::targetResultID(utn_, *this);
 }
 
 /**
 */
-std::string Single::getRequirementSectionID () const // TODO hack
+std::string Single::sumSectionName() const
 {
-    if (eval_man_.settings().report_split_results_by_mops_)
+    if (calculator_.settings().report_split_results_by_mops_)
     {
         string tmp = target()->mopsVersionStr();
 
         if (!tmp.size())
             tmp = "Unknown";
 
-        tmp = "MOPS "+tmp+" Sum";
+        tmp = "MOPS " + tmp;
 
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+":"+requirement_->name();
+        return tmp + " " + EvalSectionID::SectionSum;
     }
-    else if (eval_man_.settings().report_split_results_by_aconly_ms_)
+    else if (calculator_.settings().report_split_results_by_aconly_ms_)
     {
         string tmp = "Primary";
 
@@ -169,12 +178,18 @@ std::string Single::getRequirementSectionID () const // TODO hack
         else
             assert (target()->isPrimaryOnly());
 
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":"+tmp+" Sum"+":"+requirement_->name();
+        return tmp + " " + EvalSectionID::SectionSum;
     }
-    else
-    {
-        return "Sectors:"+requirement_->groupName()+" "+sector_layer_.name()+":Sum:"+requirement_->name();
-    }
+
+    //default sum section name
+    return Base::sumSectionName();
+}
+
+/**
+*/
+std::string Single::getRequirementSectionID () const // TODO hack
+{
+    return EvalSectionID::requirementResultSumID(*this);
 }
 
 /**
@@ -220,11 +235,11 @@ Single::TemporaryDetails Single::temporaryDetails() const
 Single::EvaluationDetails Single::recomputeDetails() const
 {
     assert(requirement_);
-    assert(eval_man_.getData().hasTargetData(utn_));
+    assert(calculator_.data().hasTargetData(utn_));
 
     logdbg << "Single: recomputeDetails: recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
 
-    const auto& data = eval_man_.getData().targetData(utn_);
+    const auto& data = calculator_.data().targetData(utn_);
 
     auto result = requirement_->evaluate(data, requirement_, sector_layer_);
     assert(result);
@@ -277,39 +292,39 @@ void Single::clearDetails()
 
 /**
 */
-void Single::addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void Single::addToReport(std::shared_ptr<ResultReport::Report> report)
 {
     logdbg << "Single: addToReport: " <<  requirement_->name();
 
     // add target to requirements->group->req
-    addTargetToOverviewTable(root_item);
+    addTargetToOverviewTable(report);
 
     // add requirement results to targets->utn->requirements->group->req
-    addTargetDetailsToReport(root_item);
+    addTargetDetailsToReport(report);
 
     // @TODO add requirement description, methods
 }
 
 /**
 */
-void Single::addTargetToOverviewTable(shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void Single::addTargetToOverviewTable(shared_ptr<ResultReport::Report> report)
 {
-    EvaluationResultsReport::Section& tgt_overview_section = getRequirementSection(root_item);
+    auto& tgt_overview_section = getRequirementSection(report);
 
-    addTargetToOverviewTable(tgt_overview_section, target_table_name_);
+    addTargetToOverviewTable(tgt_overview_section, Joined::TargetsTableName);
 
-    if (eval_man_.settings().report_split_results_by_mops_ || 
-        eval_man_.settings().report_split_results_by_aconly_ms_) // add to general sum table
+    if (calculator_.settings().report_split_results_by_mops_ || 
+        calculator_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
-        EvaluationResultsReport::Section& sum_section = root_item->getSection(getRequirementSumSectionID());
+        auto& sum_section = report->getSection(getRequirementSumSectionID());
 
-        addTargetToOverviewTable(sum_section, target_table_name_);
+        addTargetToOverviewTable(sum_section, Joined::TargetsTableName);
     }
 }
 
 /**
 */
-void Single::addTargetToOverviewTable(EvaluationResultsReport::Section& section, 
+void Single::addTargetToOverviewTable(ResultReport::Section& section, 
                                       const std::string& table_name)
 {
     if (!section.hasTable(table_name))
@@ -319,69 +334,82 @@ void Single::addTargetToOverviewTable(EvaluationResultsReport::Section& section,
 
         auto sort_order = targetTableSortOrder();
 
-        section.addTable(table_name, headers.size(), headers, true, sort_column, sort_order);
+        auto& table = section.addTable(table_name, headers.size(), headers, true, sort_column, sort_order);
+
+        Joined::setJoinedContentProperties(table, Evaluation::RequirementResultID(sector_layer_.name(),
+                                                                                  requirement_->groupName(),
+                                                                                  requirement_->name()));
     }
 
-    EvaluationResultsReport::SectionContentTable& target_table = section.getTable(table_name);
+    auto& target_table = section.getTable(table_name);
 
     auto values = targetTableValues();
+    assert(values.size() == target_table.numColumns());
 
-    assert((int)values.size() == target_table.columnCount());
+    std::string link = getTargetRequirementSectionID();
+    std::string fig  = hasIssues() ? TargetOverviewID : "";
 
-    target_table.addRow(values, this, { utn_ });
+    target_table.addRow(values, ResultReport::SectionContentViewable(), link, fig);
 }
 
 /**
 */
-void Single::addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> report)
 {
-    root_item->getSection(getTargetSectionID()).perTargetSection(true); // mark utn section per target
-    EvaluationResultsReport::Section& utn_req_section = root_item->getSection(getTargetRequirementSectionID());
+    auto& utn_section     = report->getSection(getTargetSectionID());
+    auto& utn_req_section = report->getSection(getTargetRequirementSectionID());
+
+    utn_section.perTargetSection(true); // mark utn section per target
 
     //generate details overview table
     if (!utn_req_section.hasTable("details_overview_table"))
         utn_req_section.addTable("details_overview_table", 3, {"Name", "Comment", "Value"}, false);
 
-    EvaluationResultsReport::SectionContentTable& utn_req_table = utn_req_section.getTable("details_overview_table");
+    auto& utn_req_table = utn_req_section.getTable("details_overview_table");
 
     //add common infos
     auto common_infos = targetInfosCommon();
 
     for (const auto& info : common_infos)
-        utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value }, this);
+        utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value });
 
     //add custom infos
     auto infos = targetInfos();
 
     for (const auto& info : infos)
-        utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value }, this);
+        utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value });
 
     //add condition result
     bool failed;
     auto infos_condition = targetConditionInfos(failed);
 
     for (const auto& info : infos_condition)
-        utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value }, this);
+        utn_req_table.addRow({ info.info_name, info.info_comment, info.info_value });
 
     if (failed)
     {
         // mark utn section as with issue
-        root_item->getSection(getTargetSectionID()).perTargetWithIssues(true); 
+        utn_section.perTargetWithIssues(true); 
         utn_req_section.perTargetWithIssues(true);
     }
 
     //generate overview figure?
     if (hasIssues())
     {
-        utn_req_section.addFigure("target_errors_overview", 
-                                  "Target Errors Overview",
-                                  [this](void) { return this->viewableOverviewData(); });
+        auto& fig = utn_req_section.addFigure(TargetOverviewID, ResultReport::SectionContentViewable().setCaption("Target Errors Overview"));
+
+        //setup on-demand and add result info
+        fig.setOnDemand();
+
+        Single::setSingleContentProperties(fig, Evaluation::RequirementResultID(sector_layer_.name(),
+                                                                                requirement_->groupName(),
+                                                                                requirement_->name()), utn_);
     }
     else
     {
         utn_req_section.addText("target_errors_overview_no_figure");
-        utn_req_section.getText("target_errors_overview_no_figure").addText(
-                    "No target errors found, therefore no figure was generated.");
+        utn_req_section.getText("target_errors_overview_no_figure").
+            addText("No target errors found, therefore no figure was generated.");
     }
 
     //generate details table
@@ -390,44 +418,87 @@ void Single::addTargetDetailsToReport(std::shared_ptr<EvaluationResultsReport::R
 
 /**
 */
-void Single::generateDetailsTable(EvaluationResultsReport::Section& utn_req_section)
+void Single::generateDetailsTable(ResultReport::Section& utn_req_section)
 {
     //init table if needed
-    if (!utn_req_section.hasTable(tr_details_table_name_))
+    if (!utn_req_section.hasTable(TRDetailsTableName))
     {
         auto headers = detailHeaders();
 
-        utn_req_section.addTable(tr_details_table_name_, headers.size(), headers);
+        auto& table = utn_req_section.addTable(TRDetailsTableName, headers.size(), headers);
+
+        //setup on-demand and add result info
+        table.setOnDemand();
+
+        Single::setSingleContentProperties(table, Evaluation::RequirementResultID(sector_layer_.name(),
+                                                                                  requirement_->groupName(),
+                                                                                  requirement_->name()), utn_);
     }
+}
 
-    EvaluationResultsReport::SectionContentTable& utn_req_details_table =
-            utn_req_section.getTable(tr_details_table_name_);
+/**
+*/
+bool Single::addDetailsToTable(ResultReport::SectionContentTable& table)
+{
+    //create details on demand
+    auto temp_details = temporaryDetails();
+    
+    //detail => table row functor
+    auto func = [ & ] (const EvaluationDetail& detail, 
+                       const EvaluationDetail* parent_detail, 
+                       int didx0, 
+                       int didx1,
+                       int evt_pos_idx, 
+                       int evt_ref_pos_idx)
+    {
+        auto values = detailValues(detail, parent_detail);
 
-    //setup on-demand callback
-    utn_req_details_table.setCreateOnDemand(
-        [this, &utn_req_details_table](void)
-        {
-            //create details on demand
-            auto temp_details = temporaryDetails();
+        assert(values.size() == table.numColumns());
 
-            //detail => table row functor
-            auto func = [ & ] (const EvaluationDetail& detail, 
-                               const EvaluationDetail* parent_detail, 
-                               int didx0, 
-                               int didx1,
-                               int evt_pos_idx, 
-                               int evt_ref_pos_idx)
-            {
-                auto values = detailValues(detail, parent_detail);
+        table.addRow(values, ResultReport::SectionContentViewable().setOnDemand(), "", "", QPoint(didx0, didx1));
+    };
 
-                assert((int)values.size() == utn_req_details_table.columnCount());
+    //iterate over temporary details
+    iterateDetails(func);
 
-                utn_req_details_table.addRow(values, this, QPoint(didx0, didx1));
-            };
+    return true;
+}
 
-            //iterate over temporary details
-            this->iterateDetails(func);
-        } );
+/**
+*/
+bool Single::addOverviewToFigure(ResultReport::SectionContentFigure& figure)
+{
+    auto viewable = viewableOverviewData();
+
+    auto viewable_func = [viewable]() { return viewable; };
+    figure.setViewableFunc(viewable_func);
+
+    return true;
+}
+
+/**
+*/
+bool Single::addHighlightToViewable(ResultReport::SectionContentViewable& viewable, const QVariant& annotation)
+{
+    //obtain detail key from annotation
+    auto detail_key = detailIndex(annotation);
+    if (!detail_key.has_value())
+        return false;
+
+    //generate temporary details
+    auto temp_details = temporaryDetails();
+
+    //create highlight viewable for detail
+    auto v = createViewable(AnnotationOptions().highlight(detail_key.value()));
+    if (!v)
+        return false;
+
+    //set callback
+    nlohmann::json::object_t j = *v;
+    v.reset();
+    viewable.setCallback(j);
+
+    return true;
 }
 
 /**
@@ -483,28 +554,28 @@ Qt::SortOrder Single::targetTableSortOrder() const
 
 /**
 */
-std::vector<QVariant> Single::targetTableValuesCommon() const
+nlohmann::json::array_t Single::targetTableValuesCommon() const
 {
     return { utn_, 
-             target_->timeBeginStr().c_str(), 
-             target_->timeEndStr().c_str(),
-             target_->acidsStr().c_str(), 
-             target_->acadsStr().c_str(),
-             target_->modeACodesStr().c_str(), 
-             target_->modeCMinStr().c_str(), 
-             target_->modeCMaxStr().c_str() };
+             target_->timeBeginStr(), 
+             target_->timeEndStr(),
+             target_->acidsStr(), 
+             target_->acadsStr(),
+             target_->modeACodesStr(), 
+             target_->modeCMinStr(), 
+             target_->modeCMaxStr() };
 }
 
 /**
 */
-std::vector<QVariant> Single::targetTableValuesOptional() const
+nlohmann::json::array_t Single::targetTableValuesOptional() const
 {
     return {};
 }
 
 /**
 */
-std::vector<QVariant> Single::targetTableValues() const
+nlohmann::json::array_t Single::targetTableValues() const
 {
     auto values          = targetTableValuesCommon();
     auto values_custom   = targetTableValuesCustom();
@@ -526,15 +597,15 @@ std::vector<QVariant> Single::targetTableValues() const
 */
 std::vector<Single::TargetInfo> Single::targetInfosCommon() const
 {
-    return { { "UTN"         , "Unique Target Number"            , utn_                             },
-             { "Begin"       , "Begin time of target"            , target_->timeBeginStr().c_str()  },
-             { "End"         , "End time of target"              , target_->timeEndStr().c_str()    },
-             { "ACIDs"       , "Mode S aicraft identification(s)", target_->acidsStr().c_str()      },
-             { "ACADs"       , "Mode S aircraft address(es)"     , target_->acadsStr().c_str()      },
-             { "Mode 3/A"    , "Mode 3/A code(s)"                , target_->modeACodesStr().c_str() },
-             { "Mode C Min"  , "Minimum Mode C code [ft]"        , target_->modeCMinStr().c_str()   },
-             { "Mode C Max"  , "Maximum Mode C code [ft]"        , target_->modeCMaxStr().c_str()   },
-             { "Use"         , "To be used in results"           , use_                             }};
+    return { { "UTN"         , "Unique Target Number"            , utn_                     },
+             { "Begin"       , "Begin time of target"            , target_->timeBeginStr()  },
+             { "End"         , "End time of target"              , target_->timeEndStr()    },
+             { "ACIDs"       , "Mode S aicraft identification(s)", target_->acidsStr()      },
+             { "ACADs"       , "Mode S aircraft address(es)"     , target_->acadsStr()      },
+             { "Mode 3/A"    , "Mode 3/A code(s)"                , target_->modeACodesStr() },
+             { "Mode C Min"  , "Minimum Mode C code [ft]"        , target_->modeCMinStr()   },
+             { "Mode C Max"  , "Maximum Mode C code [ft]"        , target_->modeCMaxStr()   },
+             { "Use"         , "To be used in results"           , use_                     }};
 }
 
 /**
@@ -543,20 +614,20 @@ std::vector<Single::TargetInfo> Single::targetConditionInfos(bool& failed) const
 {
     std::vector<TargetInfo> infos;
 
-    QVariant result_val = resultValue();
+    auto result_val = resultValue();
 
-    infos.push_back({ requirement_->getConditionResultNameShort(true).c_str(), 
-                       requirement_->getConditionResultName().c_str(), 
+    infos.push_back({ requirement_->getConditionResultNameShort(true), 
+                       requirement_->getConditionResultName(), 
                        result_val });
 
-    infos.push_back({"Condition", "", requirement_->getConditionStr().c_str() });
+    infos.push_back({"Condition", "", requirement_->getConditionStr() });
 
     string result {"Unknown"};
 
-    if (result_val.isValid())
+    if (!result_val.is_null())
         result = conditionResultString();
 
-    infos.push_back({"Condition Fulfilled", "", result.c_str()});
+    infos.push_back({"Condition Fulfilled", "", result});
 
     if (requirement_->mustHoldForAnyTarget().has_value())
         infos.emplace_back("Must hold for any target ", "", requirement_->mustHoldForAnyTarget().value());
@@ -568,10 +639,10 @@ std::vector<Single::TargetInfo> Single::targetConditionInfos(bool& failed) const
 
 /**
 */
-bool Single::hasReference (const EvaluationResultsReport::SectionContentTable& table, 
+bool Single::hasReference (const ResultReport::SectionContentTable& table, 
                            const QVariant& annotation) const
 {
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
+    if (table.name() == Joined::TargetsTableName && annotation.toUInt() == utn_)
         return true;
     else
         return false;
@@ -579,11 +650,11 @@ bool Single::hasReference (const EvaluationResultsReport::SectionContentTable& t
 
 /**
 */
-std::string Single::reference(const EvaluationResultsReport::SectionContentTable& table, 
+std::string Single::reference(const ResultReport::SectionContentTable& table, 
                               const QVariant& annotation) const
 {
     assert (hasReference(table, annotation));
-    return EvaluationResultsReport::SectionID::createForTargetResult(utn_, *this);
+    return EvalSectionID::createForTargetResult(utn_, *this);
 }
 
 /**
@@ -602,13 +673,13 @@ std::vector<double> Single::getValues(int value_id) const
 
 /**
 */
-bool Single::hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+bool Single::hasViewableData (const ResultReport::SectionContentTable& table, 
                               const QVariant& annotation) const
 {
     //check validity of annotation index
-    if (table.name() == target_table_name_ && annotation.toUInt() == utn_)
+    if (table.name() == Joined::TargetsTableName && annotation.toUInt() == utn_)
         return true;
-    else if (table.name() == tr_details_table_name_ && annotation.isValid() && detailIndex(annotation).has_value())
+    else if (table.name() == TRDetailsTableName && annotation.isValid() && detailIndex(annotation).has_value())
         return true;
     
     return false;
@@ -626,19 +697,19 @@ bool Single::viewableDataReady() const
  * Creates viewable data for this target for the given section.
  * BEWARE: !will always recompute the details!
 */
-std::shared_ptr<nlohmann::json::object_t> Single::viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+std::shared_ptr<nlohmann::json::object_t> Single::viewableData(const ResultReport::SectionContentTable& table, 
                                                                const QVariant& annotation) const
 {
     assert (hasViewableData(table, annotation));
 
     auto temp_details = temporaryDetails();
 
-    if (table.name() == target_table_name_)
+    if (table.name() == Joined::TargetsTableName)
     {
         //return target overview viewable
         return createViewable(AnnotationOptions().overview());
     }
-    else if (table.name() == tr_details_table_name_ && annotation.isValid())
+    else if (table.name() == TRDetailsTableName && annotation.isValid())
     {
         //obtain detail key from annotation
         auto detail_key = detailIndex(annotation);
@@ -974,7 +1045,7 @@ void Single::iterateDetails(const EvaluationDetails& details,
 */
 std::unique_ptr<nlohmann::json::object_t> Single::createBaseViewable() const
 {
-    return eval_man_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
+    return calculator_.getViewableForEvaluation(utn_, req_grp_id_, result_id_);
 }
 
 /**
@@ -1139,6 +1210,42 @@ void Single::createAnnotations(nlohmann::json& annotations_json,
     {
         createTargetAnnotations(details_.value(), annotations_json, TargetAnnotationType::Highlight, options.detail_index);
     }
+}
+
+/**
+*/
+void Single::setSingleContentProperties(ResultReport::SectionContent& content,
+                                        const Evaluation::RequirementResultID& id,
+                                        unsigned int utn)
+{
+    Base::setContentProperties(content, id);
+
+    content.setJSONProperty(ContentPropertyUTN, utn);
+}
+
+/**
+*/
+boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>> Single::singleContentProperties(const ResultReport::SectionContent& content)
+{
+    if (!content.hasJSONProperty(ContentPropertyUTN))
+        return boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>>();
+
+    auto id = Base::contentProperties(content);
+    if (!id.has_value())
+        return boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>>();
+
+    unsigned int utn;
+    
+    try
+    {
+        utn = content.jsonProperty(ContentPropertyUTN);
+    }
+    catch(...)
+    {
+        return boost::optional<std::pair<unsigned int, Evaluation::RequirementResultID>>();
+    }
+
+    return std::make_pair(utn, id.value());
 }
 
 }

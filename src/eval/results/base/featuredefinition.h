@@ -26,7 +26,7 @@
 
 #include <QColor>
 
-class EvaluationManager;
+class EvaluationCalculator;
 class ViewPointGenFeature;
 class EvaluationDetail;
 
@@ -42,7 +42,7 @@ class FeatureDefinition
 {
 public:
     FeatureDefinition();
-    FeatureDefinition(const EvaluationManager& eval_manager,
+    FeatureDefinition(const EvaluationCalculator& calculator,
                       const std::string& definition_type,
                       const std::string& feature_description,
                       const std::string& x_axis_label,
@@ -67,10 +67,10 @@ protected:
     /// creates a feature which can be part of an annotation
     virtual std::unique_ptr<ViewPointGenFeature> createFeature_impl(const Base* result) const = 0;
     
-    const EvaluationManager& evalManager() const;
+    const EvaluationCalculator& calculator() const;
 
 private:
-    const EvaluationManager* eval_manager_ = nullptr;
+    const EvaluationCalculator* calculator_ = nullptr;
 
     std::string definition_type_;
 

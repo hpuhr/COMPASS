@@ -15,23 +15,22 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONSTANDARDTABWIDGET_H
-#define EVALUATIONSTANDARDTABWIDGET_H
+#pragma once
 
 #include <QWidget>
 
 #include <memory>
 
-class EvaluationManager;
-class EvaluationManagerSettings;
-class EvaluationManagerWidget;
+class EvaluationCalculator;
 class EvaluationStandardComboBox;
 
 class QPushButton;
 class QStackedWidget;
 class QLineEdit;
+class QHBoxLayout;
 
-
+/**
+ */
 class EvaluationStandardTabWidget : public QWidget
 {
     Q_OBJECT
@@ -48,13 +47,10 @@ private slots:
     void maxRefTimeDiffEditSlot(QString value);
 
 public:
-    EvaluationStandardTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
-                                EvaluationManagerWidget& man_widget);
+    EvaluationStandardTabWidget(EvaluationCalculator& calculator);
 
 protected:
-    EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
-    EvaluationManagerWidget& man_widget_;
+    EvaluationCalculator& calculator_;
 
     std::unique_ptr<EvaluationStandardComboBox> standard_box_ {nullptr};
 
@@ -63,12 +59,11 @@ protected:
     QPushButton* copy_button_ {nullptr};
     QPushButton* remove_button_ {nullptr};
 
-    QStackedWidget* standards_widget_{nullptr};
+    //QStackedWidget* standards_widget_{nullptr};
+    QHBoxLayout* standards_layout_{nullptr};
 
     QLineEdit* max_ref_time_diff_edit_{nullptr};
 
     void updateButtons();
-    void updateStandardStack();
+    void updateStandardWidget();
 };
-
-#endif // EVALUATIONSTANDARDTABWIDGET_H

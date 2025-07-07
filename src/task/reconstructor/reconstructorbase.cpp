@@ -24,6 +24,13 @@
 #include "timeconv.h"
 #include "datasourcemanager.h"
 #include "evaluationmanager.h"
+#include "reconstructorassociatorbase.h"
+
+#include "taskmanager.h"
+#include "report/report.h"
+#include "report/section.h"
+#include "report/sectioncontenttext.h"
+#include "report/sectioncontenttable.h"
 
 #include "kalman_chain.h"
 #include "tbbhack.h"
@@ -31,6 +38,12 @@
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
 #include "number.h"
+#include "viewpoint.h"
+#include "viewpointgenerator.h"
+#include "grid2d.h"
+#include "grid2dlayer.h"
+
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 using namespace Utils;
@@ -286,7 +299,9 @@ bool ReconstructorBase::TargetsContainer::canAssocByACID(
             && !targets_.at(acid_2_utn_.at(*tr.acid_)).hasACAD(!tr.acad_))
         {
             if (do_debug)
-                loginf << "DBG same acid used by different transponders '" << *tr.acid_ << "'";
+                loginf << "DBG same acid used by different transponders '" << *tr.acid_ << "', utn "
+                       << targets_.at(acid_2_utn_.at(*tr.acid_)).asStr()
+                       << " tr " << tr.asStr();
 
             return false;
         }
@@ -331,7 +346,42 @@ bool ReconstructorBase::TargetsContainer::canAssocByTrackNumber(
         loginf << "DBG canAssocByTrackNumber can use stored utn in tn2utn_ "
                << tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
 
-    return tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_);
+    if (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_))
+        return false;
+
+    int utn {-1};
+
+    boost::posix_time::ptime timestamp_prev;
+
+    std::tie(utn, timestamp_prev) = tn2utn_.at(tr.ds_id_).at(tr.line_id_).at(*tr.track_number_);
+
+    if (do_debug || reconstructor_->task().debugSettings().debugUTN(utn))
+        loginf << "DBG can assoc by tn " << *tr.track_number_ << " to utn " << utn;
+
+    // tr has acad, target has an acad but not the target reports
+    // happens if same acid is used by 2 different transponders
+    if (tr.acad_ && targets_.at(utn).hasACAD()
+        && !targets_.at(utn).hasACAD(!tr.acad_))
+    {
+        logwrn << "ReconstructorBase: TargetsContainer: canAssocByTrackNumber:"
+                  << " same track num reused by different ACAD transponders, tr " << *tr.track_number_ << ", utn "
+               << targets_.at(utn).asStr() << " tr " << tr.asStr() << ", unassociating";
+
+        eraseTrackNumberLookup(tr);
+
+        if (tr.acid_ && acid_2_utn_.count(*tr.acid_))
+        {
+            if (do_debug || reconstructor_->task().debugSettings().debugUTN(utn))
+                loginf << "DBG removing from acid lookup " << *tr.acid_ << " to utn " << acid_2_utn_.at(*tr.acid_);
+
+            acid_2_utn_.erase(*tr.acid_);
+            unspecific_acids_.insert(*tr.acid_);
+        }
+
+        return false;
+    }
+
+    return true;
 }
 
 int ReconstructorBase::TargetsContainer::assocByTrackNumber(
@@ -366,6 +416,9 @@ int ReconstructorBase::TargetsContainer::assocByTrackNumber(
 
         return -1; // disassoc case
     }
+
+     if (do_debug || reconstructor_->task().debugSettings().debugUTN(utn))
+        loginf << "DBG assoc by tn " << *tr.track_number_ << " to utn " << utn;
 
     return utn;
 }
@@ -434,47 +487,75 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
     registerParameter("target_prob_min_time_overlap", &base_settings_.target_prob_min_time_overlap_,
                       base_settings_.target_prob_min_time_overlap_);
     registerParameter("target_min_updates", &base_settings_.target_min_updates_, base_settings_.target_min_updates_);
-    registerParameter("target_max_positions_dubious_verified_rate", &base_settings_.target_max_positions_dubious_verified_rate_,
+    registerParameter("target_max_positions_dubious_verified_rate",
+                      &base_settings_.target_max_positions_dubious_verified_rate_,
                       base_settings_.target_max_positions_dubious_verified_rate_);
-    registerParameter("target_max_positions_dubious_unknown_rate", &base_settings_.target_max_positions_dubious_unknown_rate_,
+    registerParameter("target_max_positions_dubious_unknown_rate",
+                      &base_settings_.target_max_positions_dubious_unknown_rate_,
                       base_settings_.target_max_positions_dubious_unknown_rate_);
 
-    registerParameter("target_max_positions_not_ok_verified_rate", &base_settings_.target_max_positions_not_ok_verified_rate_,
+    registerParameter("target_max_positions_not_ok_verified_rate",
+                      &base_settings_.target_max_positions_not_ok_verified_rate_,
                       base_settings_.target_max_positions_not_ok_verified_rate_);
-    registerParameter("target_max_positions_not_ok_unknown_rate", &base_settings_.target_max_positions_not_ok_unknown_rate_,
+    registerParameter("target_max_positions_not_ok_unknown_rate",
+                      &base_settings_.target_max_positions_not_ok_unknown_rate_,
                       base_settings_.target_max_positions_not_ok_unknown_rate_);
+
+    // // target classification moved to derived since segfault
+    // registerParameter("min_aircraft_modec", &base_settings_.min_aircraft_modec_, base_settings_.min_aircraft_modec_);
+
+    // registerParameter("vehicle_acids", &base_settings_.vehicle_acids_, std::string());
+    // registerParameter("vehicle_acads", &base_settings_.vehicle_acads_, std::string());
 
     // reference computation
     {
-        registerParameter("ref_Q_std", &ref_calc_settings_.Q_std.Q_std_static, ReferenceCalculatorSettings().Q_std.Q_std_static);
-        registerParameter("ref_Q_std_ground", &ref_calc_settings_.Q_std.Q_std_ground, ReferenceCalculatorSettings().Q_std.Q_std_ground);
-        registerParameter("ref_Q_std_air", &ref_calc_settings_.Q_std.Q_std_air, ReferenceCalculatorSettings().Q_std.Q_std_air);
-        registerParameter("ref_Q_std_unknown", &ref_calc_settings_.Q_std.Q_std_unknown, ReferenceCalculatorSettings().Q_std.Q_std_unknown);
+        registerParameter("ref_Q_std", &ref_calc_settings_.Q_std.Q_std_static,
+                          ReferenceCalculatorSettings().Q_std.Q_std_static);
+        registerParameter("ref_Q_std_ground", &ref_calc_settings_.Q_std.Q_std_ground,
+                          ReferenceCalculatorSettings().Q_std.Q_std_ground);
+        registerParameter("ref_Q_std_air", &ref_calc_settings_.Q_std.Q_std_air,
+                          ReferenceCalculatorSettings().Q_std.Q_std_air);
+        registerParameter("ref_Q_std_unknown", &ref_calc_settings_.Q_std.Q_std_unknown,
+                          ReferenceCalculatorSettings().Q_std.Q_std_unknown);
 
-        registerParameter("dynamic_process_noise", &ref_calc_settings_.dynamic_process_noise, ReferenceCalculatorSettings().dynamic_process_noise);
+        registerParameter("dynamic_process_noise", &ref_calc_settings_.dynamic_process_noise,
+                          ReferenceCalculatorSettings().dynamic_process_noise);
 
         //registerParameter("ref_min_chain_size", &ref_calc_settings_.min_chain_size   , ReferenceCalculatorSettings().min_chain_size);
-        registerParameter("ref_min_dt"        , &ref_calc_settings_.min_dt   , ReferenceCalculatorSettings().min_dt);
-        registerParameter("ref_max_dt"        , &ref_calc_settings_.max_dt   , ReferenceCalculatorSettings().max_dt);
-        registerParameter("ref_max_distance"  , &ref_calc_settings_.max_distance   , ReferenceCalculatorSettings().max_distance);
+        registerParameter("ref_min_dt", &ref_calc_settings_.min_dt, ReferenceCalculatorSettings().min_dt);
+        registerParameter("ref_max_dt", &ref_calc_settings_.max_dt, ReferenceCalculatorSettings().max_dt);
+        registerParameter("ref_max_distance", &ref_calc_settings_.max_distance,
+                          ReferenceCalculatorSettings().max_distance);
 
         registerParameter("ref_smooth_rts", &ref_calc_settings_.smooth_rts, ReferenceCalculatorSettings().smooth_rts);
 
-        registerParameter("ref_resample_result", &ref_calc_settings_.resample_result, ReferenceCalculatorSettings().resample_result);
-        registerParameter("ref_resample_Q_std", &ref_calc_settings_.resample_Q_std.Q_std_static, ReferenceCalculatorSettings().resample_Q_std.Q_std_static);
-        registerParameter("ref_resample_Q_std_ground", &ref_calc_settings_.resample_Q_std.Q_std_ground, ReferenceCalculatorSettings().resample_Q_std.Q_std_ground);
-        registerParameter("ref_resample_Q_std_air", &ref_calc_settings_.resample_Q_std.Q_std_air, ReferenceCalculatorSettings().resample_Q_std.Q_std_air);
-        registerParameter("ref_resample_Q_std_unknown", &ref_calc_settings_.resample_Q_std.Q_std_unknown, ReferenceCalculatorSettings().resample_Q_std.Q_std_unknown);
-        registerParameter("ref_resample_dt"    , &ref_calc_settings_.resample_dt    , ReferenceCalculatorSettings().resample_dt);
+        registerParameter("ref_resample_result", &ref_calc_settings_.resample_result,
+                          ReferenceCalculatorSettings().resample_result);
+        registerParameter("ref_resample_Q_std", &ref_calc_settings_.resample_Q_std.Q_std_static,
+                          ReferenceCalculatorSettings().resample_Q_std.Q_std_static);
+        registerParameter("ref_resample_Q_std_ground", &ref_calc_settings_.resample_Q_std.Q_std_ground,
+                          ReferenceCalculatorSettings().resample_Q_std.Q_std_ground);
+        registerParameter("ref_resample_Q_std_air", &ref_calc_settings_.resample_Q_std.Q_std_air,
+                          ReferenceCalculatorSettings().resample_Q_std.Q_std_air);
+        registerParameter("ref_resample_Q_std_unknown", &ref_calc_settings_.resample_Q_std.Q_std_unknown,
+                          ReferenceCalculatorSettings().resample_Q_std.Q_std_unknown);
+        registerParameter("ref_resample_dt", &ref_calc_settings_.resample_dt,
+                          ReferenceCalculatorSettings().resample_dt);
 
-        registerParameter("ref_max_proj_distance_cart", &ref_calc_settings_.max_proj_distance_cart, ReferenceCalculatorSettings().max_proj_distance_cart);
+        registerParameter("ref_max_proj_distance_cart", &ref_calc_settings_.max_proj_distance_cart,
+                          ReferenceCalculatorSettings().max_proj_distance_cart);
 
-        registerParameter("ref_resample_systracks"       , &ref_calc_settings_.resample_systracks       , ReferenceCalculatorSettings().resample_systracks);
-        registerParameter("ref_resample_systracks_dt"    , &ref_calc_settings_.resample_systracks_dt    , ReferenceCalculatorSettings().resample_systracks_dt);
-        registerParameter("ref_resample_systracks_max_dt", &ref_calc_settings_.resample_systracks_max_dt, ReferenceCalculatorSettings().resample_systracks_max_dt);
+        registerParameter("ref_resample_systracks", &ref_calc_settings_.resample_systracks,
+                          ReferenceCalculatorSettings().resample_systracks);
+        registerParameter("ref_resample_systracks_dt", &ref_calc_settings_.resample_systracks_dt,
+                          ReferenceCalculatorSettings().resample_systracks_dt);
+        registerParameter("ref_resample_systracks_max_dt", &ref_calc_settings_.resample_systracks_max_dt,
+                          ReferenceCalculatorSettings().resample_systracks_max_dt);
 
-        registerParameter("filter_references_max_stddev"  , &ref_calc_settings_.filter_references_max_stddev_  , ReferenceCalculatorSettings().filter_references_max_stddev_);
-        registerParameter("filter_references_max_stddev_m", &ref_calc_settings_.filter_references_max_stddev_m_, ReferenceCalculatorSettings().filter_references_max_stddev_m_);
+        registerParameter("filter_references_max_stddev"  , &ref_calc_settings_.filter_references_max_stddev_,
+                          ReferenceCalculatorSettings().filter_references_max_stddev_);
+        registerParameter("filter_references_max_stddev_m", &ref_calc_settings_.filter_references_max_stddev_m_,
+                          ReferenceCalculatorSettings().filter_references_max_stddev_m_);
     }
 
     assert (acc_estimator_);
@@ -519,6 +600,16 @@ void ReconstructorBase::resetTimeframeSettings()
     settings().data_timestamp_max = timeframe.second;
 
     emit configChanged();
+}
+
+bool ReconstructorBase::isVehicleACID(const std::string& acid)
+{
+    return base_settings_.vehicle_acids_set_.count(acid);
+}
+
+bool ReconstructorBase::isVehicleACAD(unsigned int value)
+{
+    return base_settings_.vehicle_acads_set_.count(value);
 }
 
 std::pair<boost::posix_time::ptime, boost::posix_time::ptime> ReconstructorBase::timeFrame() const
@@ -626,7 +717,7 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 
     boost::posix_time::ptime current_slice_end = current_slice_begin_ + base_settings_.sliceDuration();
 
-    TimeWindow window {current_slice_begin_, current_slice_end};
+    //TimeWindow window {current_slice_begin_, current_slice_end};
 
     logdbg << "ReconstructorBase: getNextTimeSlice: current_slice_begin " << Time::toString(current_slice_begin_)
            << " current_slice_end " << Time::toString(current_slice_end);
@@ -719,10 +810,10 @@ void ReconstructorBase::initChainPredictors()
 
 //int num_threads = std::max(1, tbb::task_scheduler_init::default_num_threads());
 
-#if TBB_VERSION_MAJOR <= 4
+#if TBB_VERSION_MAJOR <= 2020
     int num_threads = tbb::task_scheduler_init::default_num_threads(); // TODO PHIL
 #else
-    int num_threads = oneapi::tbb::info::default_concurrency();
+    int num_threads = tbb::info::default_concurrency();
 #endif
 
     assert (num_threads > 0);
@@ -765,105 +856,19 @@ void ReconstructorBase::processSlice()
 
     currentSlice().processing_done_ = true;
 
-    if (task().debugSettings().debug_ && currentSlice().is_last_slice_ )
+    if (task().debugSettings().analyze_)
     {
-        auto& stats = dbContent::ReconstructorTarget::globalStats();
+        if (task().debugSettings().analyze_association_)
+            doUnassociatedAnalysis();
 
-        const int Decimals = 3;
+        if (task().debugSettings().analyze_outlier_detection_)
+            doOutlierAnalysis();
 
-        auto perc = [ & ] (size_t num, size_t num_total)
+        if (currentSlice().is_last_slice_)
         {
-            if (num_total == 0)
-                return std::string("0%");
-            
-            return QString::number((double)num / (double)num_total * 100.0, 'f', Decimals).toStdString() + "%";
-        };
-
-        std::string num_chain_skipped_preempt_p         = perc(stats.num_chain_skipped_preempt        , stats.num_chain_checked       );
-        std::string num_chain_replaced_p                = perc(stats.num_chain_replaced               , stats.num_chain_checked       );
-        std::string num_chain_added_p                   = perc(stats.num_chain_added                  , stats.num_chain_checked       );
-        std::string num_chain_updates_valid_p           = perc(stats.num_chain_updates_valid          , stats.num_chain_updates       );
-        std::string num_chain_updates_failed_p          = perc(stats.num_chain_updates_failed         , stats.num_chain_updates       );
-        std::string num_chain_updates_failed_numeric_p  = perc(stats.num_chain_updates_failed_numeric , stats.num_chain_updates_failed);
-        std::string num_chain_updates_failed_badstate_p = perc(stats.num_chain_updates_failed_badstate, stats.num_chain_updates_failed);
-        std::string num_chain_updates_failed_other_p    = perc(stats.num_chain_updates_failed_other   , stats.num_chain_updates_failed);
-        std::string num_chain_updates_skipped_p         = perc(stats.num_chain_updates_skipped        , stats.num_chain_updates       );
-        std::string num_chain_updates_proj_changed_p    = perc(stats.num_chain_updates_proj_changed   , stats.num_chain_updates       );
-
-        std::string num_chain_predictions_failed_p          = perc(stats.num_chain_predictions_failed         , stats.num_chain_predictions       );
-        std::string num_chain_predictions_failed_numeric_p  = perc(stats.num_chain_predictions_failed_numeric , stats.num_chain_predictions_failed);
-        std::string num_chain_predictions_failed_badstate_p = perc(stats.num_chain_predictions_failed_badstate, stats.num_chain_predictions_failed);
-        std::string num_chain_predictions_failed_other_p    = perc(stats.num_chain_predictions_failed_other   , stats.num_chain_predictions_failed);
-        std::string num_chain_predictions_fixed_p           = perc(stats.num_chain_predictions_fixed          , stats.num_chain_predictions       );
-        std::string num_chain_predictions_proj_changed_p    = perc(stats.num_chain_predictions_proj_changed   , stats.num_chain_predictions       );
-
-        std::string num_rec_updates_ccoeff_corr_p     = perc(stats.num_rec_updates_ccoeff_corr    , stats.num_rec_updates       );
-        std::string num_rec_updates_valid_p           = perc(stats.num_rec_updates_valid          , stats.num_rec_updates       );
-        std::string num_rec_updates_failed_p          = perc(stats.num_rec_updates_failed         , stats.num_rec_updates       );
-        std::string num_rec_updates_failed_numeric_p  = perc(stats.num_rec_updates_failed_numeric , stats.num_rec_updates_failed);
-        std::string num_rec_updates_failed_badstate_p = perc(stats.num_rec_updates_failed_badstate, stats.num_rec_updates_failed);
-        std::string num_rec_updates_failed_other_p    = perc(stats.num_rec_updates_failed_other   , stats.num_rec_updates_failed);
-        std::string num_rec_updates_raf_p             = perc(stats.num_rec_updates_raf            , stats.num_rec_updates       );
-        std::string num_rec_updates_raf_numeric_p     = perc(stats.num_rec_updates_raf_numeric    , stats.num_rec_updates_raf   );
-        std::string num_rec_updates_raf_badstate_p    = perc(stats.num_rec_updates_raf_badstate   , stats.num_rec_updates_raf   );
-        std::string num_rec_updates_raf_other_p       = perc(stats.num_rec_updates_raf_other      , stats.num_rec_updates_raf   );
-        std::string num_rec_updates_skipped_p         = perc(stats.num_rec_updates_skipped        , stats.num_rec_updates       );
-        std::string num_rec_smooth_steps_failed_p     = perc(stats.num_rec_smooth_steps_failed    , stats.num_rec_updates       );
-
-        loginf << "ReconstructorBase: processSlice: last slice finished\n"
-               << "\n"
-               << "Reconstruction Statistics\n"
-               << "\n"
-               << " * Chain updates:\n"
-               << "\n"
-               << "   mm checked:   " << stats.num_chain_checked                                                                <<  "\n"
-               << "   skipped pre:  " << stats.num_chain_skipped_preempt         << " (" << num_chain_skipped_preempt_p         << ")\n"
-               << "   replaced:     " << stats.num_chain_replaced                << " (" << num_chain_replaced_p                << ")\n"
-               << "   added:        " << stats.num_chain_added                   << " (" << num_chain_added_p                   << ")\n"
-               << "   mm fresh:     " << stats.num_chain_fresh                                                                  <<  "\n"
-               << "   valid:        " << stats.num_chain_updates_valid           << " (" << num_chain_updates_valid_p           << ")\n"
-               << "   failed:       " << stats.num_chain_updates_failed          << " (" << num_chain_updates_failed_p          << ")\n"
-               << "      numeric:   " << stats.num_chain_updates_failed_numeric  << " (" << num_chain_updates_failed_numeric_p  << ")\n"
-               << "      bad state: " << stats.num_chain_updates_failed_badstate << " (" << num_chain_updates_failed_badstate_p << ")\n"
-               << "      other:     " << stats.num_chain_updates_failed_other    << " (" << num_chain_updates_failed_other_p    << ")\n"
-               << "   skipped:      " << stats.num_chain_updates_skipped         << " (" << num_chain_updates_skipped_p         << ")\n"
-               << "   total:        " << stats.num_chain_updates                                                                <<  "\n"
-               << "   proj changed: " << stats.num_chain_updates_proj_changed    << " (" << num_chain_updates_proj_changed_p    << ")\n"
-               << "\n"
-               << " * Chain predictions:\n"
-               << "\n" 
-               << "   failed:       " << stats.num_chain_predictions_failed          << " ("  << num_chain_predictions_failed_p          << ")\n"
-               << "      numeric:   " << stats.num_chain_predictions_failed_numeric  << " ("   << num_chain_predictions_failed_numeric_p << ")\n"
-               << "      bad state: " << stats.num_chain_predictions_failed_badstate << " (" << num_chain_predictions_failed_badstate_p  << ")\n"
-               << "      other:     " << stats.num_chain_predictions_failed_other    << " ("     << num_chain_predictions_failed_other_p << ")\n"
-               << "   fixed:        " << stats.num_chain_predictions_fixed           << " ("   << num_chain_predictions_fixed_p          << ")\n"
-               << "   total:        " << stats.num_chain_predictions                                                                     <<  "\n"
-               << "   proj changed: " << stats.num_chain_predictions_proj_changed    << " (" << num_chain_predictions_proj_changed_p     << ")\n"
-               << "\n"
-               << " * Rec updates:\n"
-               << "\n" 
-               << "   ccoeff corr:       " << stats.num_rec_updates_ccoeff_corr     << " (" << num_rec_updates_ccoeff_corr_p     << ")\n"
-               << "   valid:             " << stats.num_rec_updates_valid           << " (" << num_rec_updates_valid_p           << ")\n"
-               << "   failed:            " << stats.num_rec_updates_failed          << " (" << num_rec_updates_failed_p          << ")\n"
-               << "      numeric:        " << stats.num_rec_updates_failed_numeric  << " (" << num_rec_updates_failed_numeric_p  << ")\n"
-               << "      bad state:      " << stats.num_rec_updates_failed_badstate << " (" << num_rec_updates_failed_badstate_p << ")\n"
-               << "      other:          " << stats.num_rec_updates_failed_other    << " (" << num_rec_updates_failed_other_p    << ")\n"
-               << "   reinit after fail: " << stats.num_rec_updates_raf             << " (" << num_rec_updates_raf_p             << ")\n"
-               << "      numeric:        " << stats.num_rec_updates_raf_numeric     << " (" << num_rec_updates_raf_numeric_p     << ")\n"
-               << "      bad state:      " << stats.num_rec_updates_raf_badstate    << " (" << num_rec_updates_raf_badstate_p    << ")\n"
-               << "      other:          " << stats.num_rec_updates_raf_other       << " (" << num_rec_updates_raf_other_p       << ")\n"
-               << "   skipped:           " << stats.num_rec_updates_skipped         << " (" << num_rec_updates_skipped_p         << ")\n"
-               << "   total:             " << stats.num_rec_updates                                                              <<  "\n"
-               << "\n"
-               << " * Rec smooth steps:\n" 
-               << "\n"
-               << "   failed steps:   " << stats.num_rec_smooth_steps_failed  << " (" << num_rec_smooth_steps_failed_p << ")\n"
-               << "   failed targets: " << stats.num_rec_smooth_target_failed                                          <<  "\n"
-               << "\n"
-               << " * Rec interp steps:\n"
-               << "\n" 
-               << "   failed:" << stats.num_rec_interp_failed << "\n"
-               << "\n";
+            if(task().debugSettings().debug_reference_calculation_)
+                doReconstructionReporting();
+        }
     }
 
     logdbg << "ReconstructorBase: processSlice: done";
@@ -955,12 +960,16 @@ void ReconstructorBase::createTargetReports()
 
     accessors_.clear();
 
+    num_new_target_reports_in_slice_ = 0;
+
     //unsigned int calc_ref_ds_id = Number::dsIdFrom(ds_sac_, ds_sic_);
 
     std::set<unsigned int> unused_ds_ids = task_.unusedDSIDs();
     std::map<unsigned int, std::set<unsigned int>> unused_lines = task_.unusedDSIDLines();
 
     auto& ds_man = COMPASS::instance().dataSourceManager();
+
+    std::set<unsigned int> ground_only_ds_ids = ds_man.groundOnlyDBDataSources();
 
     for (auto& buf_it : *accessor_)
     {
@@ -1036,6 +1045,7 @@ void ReconstructorBase::createTargetReports()
                 info.position_ = tgt_acc.position(cnt);
                 info.position_accuracy_ = tgt_acc.positionAccuracy(cnt);
 
+
                 info.unsused_ds_pos_ =
                     !info.position().has_value()
                         || (unused_ds_ids.count(info.ds_id_)
@@ -1048,6 +1058,10 @@ void ReconstructorBase::createTargetReports()
 
                 info.track_angle_ = tgt_acc.trackAngle(cnt);
                 info.ground_bit_ = tgt_acc.groundBit(cnt);
+                info.data_source_is_ground_only = ground_only_ds_ids.count(info.ds_id_);
+
+                info.mops_ = tgt_acc.mopsVersion(cnt);
+                info.ecat_ = tgt_acc.ecat(cnt);
 
                 // insert info
                 target_reports_[record_num] = info;
@@ -1057,6 +1071,8 @@ void ReconstructorBase::createTargetReports()
                 // dbcontent id -> ds_id -> ts ->  record_num
 
                 tr_ds_[dbcont_id][info.ds_id_][info.line_id_].push_back(record_num);
+
+                ++num_new_target_reports_in_slice_;
             }
         }
     }
@@ -1074,7 +1090,8 @@ void ReconstructorBase::createTargetReports()
     }
 #endif
 
-    loginf << "ReconstructorBase: createTargetReports: done";
+    loginf << "ReconstructorBase: createTargetReports: done with " << num_new_target_reports_in_slice_
+           << " new target reports";
 }
 
 void ReconstructorBase::removeTargetReportsLaterOrEqualThan(const boost::posix_time::ptime& ts)
@@ -1222,7 +1239,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
 
         logdbg << "ReconstructorBase: createReferenceBuffers: buffer size " << buffer->size()
                << " ts min " << Time::toString(ts_vec.get(0))
-               << " max " << Time::toString(ts_vec.get(ts_vec.size()-1));
+               << " max " << Time::toString(ts_vec.get(ts_vec.contentSize()-1));
 
         DataSourceManager& src_man = COMPASS::instance().dataSourceManager();
 
@@ -1249,6 +1266,237 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
 
         return std::map<std::string, std::shared_ptr<Buffer>> {};
     }
+}
+
+void ReconstructorBase::doReconstructionReporting()
+{
+    auto& stats = dbContent::ReconstructorTarget::globalStats();
+
+    const int Decimals = 3;
+
+    auto perc = [ & ] (size_t num, size_t num_total)
+    {
+        if (num_total == 0)
+            return std::string("0%");
+
+        return QString::number((double)num / (double)num_total * 100.0, 'f', Decimals).toStdString() + "%";
+    };
+
+    std::string num_chain_skipped_preempt_p         = perc(stats.num_chain_skipped_preempt        , stats.num_chain_checked       );
+    std::string num_chain_replaced_p                = perc(stats.num_chain_replaced               , stats.num_chain_checked       );
+    std::string num_chain_added_p                   = perc(stats.num_chain_added                  , stats.num_chain_checked       );
+    std::string num_chain_updates_valid_p           = perc(stats.num_chain_updates_valid          , stats.num_chain_updates       );
+    std::string num_chain_updates_failed_p          = perc(stats.num_chain_updates_failed         , stats.num_chain_updates       );
+    std::string num_chain_updates_failed_numeric_p  = perc(stats.num_chain_updates_failed_numeric , stats.num_chain_updates_failed);
+    std::string num_chain_updates_failed_badstate_p = perc(stats.num_chain_updates_failed_badstate, stats.num_chain_updates_failed);
+    std::string num_chain_updates_failed_other_p    = perc(stats.num_chain_updates_failed_other   , stats.num_chain_updates_failed);
+    std::string num_chain_updates_skipped_p         = perc(stats.num_chain_updates_skipped        , stats.num_chain_updates       );
+    std::string num_chain_updates_proj_changed_p    = perc(stats.num_chain_updates_proj_changed   , stats.num_chain_updates       );
+
+    std::string num_chain_predictions_failed_p          = perc(stats.num_chain_predictions_failed         , stats.num_chain_predictions       );
+    std::string num_chain_predictions_failed_numeric_p  = perc(stats.num_chain_predictions_failed_numeric , stats.num_chain_predictions_failed);
+    std::string num_chain_predictions_failed_badstate_p = perc(stats.num_chain_predictions_failed_badstate, stats.num_chain_predictions_failed);
+    std::string num_chain_predictions_failed_other_p    = perc(stats.num_chain_predictions_failed_other   , stats.num_chain_predictions_failed);
+    std::string num_chain_predictions_fixed_p           = perc(stats.num_chain_predictions_fixed          , stats.num_chain_predictions       );
+    std::string num_chain_predictions_proj_changed_p    = perc(stats.num_chain_predictions_proj_changed   , stats.num_chain_predictions       );
+
+    std::string num_rec_updates_ccoeff_corr_p     = perc(stats.num_rec_updates_ccoeff_corr    , stats.num_rec_updates       );
+    std::string num_rec_updates_valid_p           = perc(stats.num_rec_updates_valid          , stats.num_rec_updates       );
+    std::string num_rec_updates_failed_p          = perc(stats.num_rec_updates_failed         , stats.num_rec_updates       );
+    std::string num_rec_updates_failed_numeric_p  = perc(stats.num_rec_updates_failed_numeric , stats.num_rec_updates_failed);
+    std::string num_rec_updates_failed_badstate_p = perc(stats.num_rec_updates_failed_badstate, stats.num_rec_updates_failed);
+    std::string num_rec_updates_failed_other_p    = perc(stats.num_rec_updates_failed_other   , stats.num_rec_updates_failed);
+    std::string num_rec_updates_raf_p             = perc(stats.num_rec_updates_raf            , stats.num_rec_updates       );
+    std::string num_rec_updates_raf_numeric_p     = perc(stats.num_rec_updates_raf_numeric    , stats.num_rec_updates_raf   );
+    std::string num_rec_updates_raf_badstate_p    = perc(stats.num_rec_updates_raf_badstate   , stats.num_rec_updates_raf   );
+    std::string num_rec_updates_raf_other_p       = perc(stats.num_rec_updates_raf_other      , stats.num_rec_updates_raf   );
+    std::string num_rec_updates_skipped_p         = perc(stats.num_rec_updates_skipped        , stats.num_rec_updates       );
+    std::string num_rec_smooth_steps_failed_p     = perc(stats.num_rec_smooth_steps_failed    , stats.num_rec_updates       );
+
+    auto& section = COMPASS::instance().taskManager().currentReport()->getSection("Reconstruction Statistics");
+
+    if (!section.hasTable("Reconstruction Statistics"))
+        section.addTable("Reconstruction Statistics", 4, {"", "", "Value", "Value [%]"}, false);
+
+    auto& table = section.getTable("Reconstruction Statistics");
+
+    table.addRow({"Chain updates", "", "", ""});
+    table.addRow({"mm checked", "", stats.num_chain_checked, ""});
+    table.addRow({"skipped pre", "", stats.num_chain_skipped_preempt, num_chain_skipped_preempt_p});
+    table.addRow({"replaced", "", stats.num_chain_replaced, num_chain_replaced_p});
+    table.addRow({"added", "", stats.num_chain_added, num_chain_added_p});
+    table.addRow({"mm fresh", "", stats.num_chain_fresh, ""});
+    table.addRow({"valid", "", stats.num_chain_updates_valid, num_chain_updates_valid_p});
+    table.addRow({"failed", "", stats.num_chain_updates_failed, num_chain_updates_failed_p});
+    table.addRow({"", "numeric", stats.num_chain_updates_failed_numeric, num_chain_updates_failed_numeric_p});
+    table.addRow({"", "bad state", stats.num_chain_updates_failed_badstate, num_chain_updates_failed_badstate_p});
+    table.addRow({"", "other", stats.num_chain_updates_failed_other, num_chain_updates_failed_other_p});
+    table.addRow({"skipped", "", stats.num_chain_updates_skipped, num_chain_updates_skipped_p});
+    table.addRow({"total", "", stats.num_chain_updates, ""});
+    table.addRow({"proj changed", "", stats.num_chain_updates_proj_changed, num_chain_updates_proj_changed_p});
+
+    table.addRow({"", "", "", ""});
+    table.addRow({"Chain predictions", "", "", ""});
+
+    table.addRow({"failed", "", stats.num_chain_predictions_failed , num_chain_predictions_failed_p});
+    table.addRow({"", "numeric", stats.num_chain_predictions_failed_numeric, num_chain_predictions_failed_numeric_p});
+    table.addRow({"", "bad state", stats.num_chain_predictions_failed_badstate, num_chain_predictions_failed_badstate_p});
+    table.addRow({"", "other", stats.num_chain_predictions_failed_other, num_chain_predictions_failed_other_p});
+
+    table.addRow({"fixed", "", stats.num_chain_predictions_fixed, num_chain_predictions_fixed_p});
+    table.addRow({"total", "", stats.num_chain_predictions, ""});
+    table.addRow({"proj changed", "", stats.num_chain_predictions_proj_changed, num_chain_predictions_proj_changed_p});
+
+    table.addRow({"", "", "", ""});
+    table.addRow({"Rec updates", "", "", ""});
+
+    table.addRow({"ccoeff corr", "", stats.num_rec_updates_ccoeff_corr, num_rec_updates_ccoeff_corr_p});
+    table.addRow({"valid", "", stats.num_rec_updates_valid, num_rec_updates_valid_p});
+    table.addRow({"failed", "", stats.num_rec_updates_failed, num_rec_updates_failed_p});
+    table.addRow({"", "numeric", stats.num_rec_updates_failed_numeric, num_rec_updates_failed_numeric_p});
+    table.addRow({"", "bad state", stats.num_rec_updates_failed_badstate, num_rec_updates_failed_badstate_p});
+    table.addRow({"", "other", stats.num_rec_updates_failed_other, num_rec_updates_failed_other_p});
+    table.addRow({"reinit after fail", "", stats.num_rec_updates_raf, num_rec_updates_raf_p});
+    table.addRow({"", "numeric", stats.num_rec_updates_raf_numeric, num_rec_updates_raf_numeric_p});
+    table.addRow({"", "bad state", stats.num_rec_updates_raf_badstate, num_rec_updates_raf_badstate_p});
+    table.addRow({"", "other", stats.num_rec_updates_raf_other, num_rec_updates_raf_other_p});
+    table.addRow({"skipped", "", stats.num_rec_updates_skipped, num_rec_updates_skipped_p});
+    table.addRow({"total", "", stats.num_rec_updates, ""});
+
+    table.addRow({"", "", "", ""});
+    table.addRow({"Rec smooth steps", "", "", ""});
+
+    table.addRow({"failed steps", "", stats.num_rec_smooth_steps_failed, num_rec_smooth_steps_failed_p});
+    table.addRow({"failed targets", "", stats.num_rec_smooth_target_failed, ""});
+
+    table.addRow({"", "", "", ""});
+    table.addRow({"Rec interp steps", "", "", ""});
+    table.addRow({"", "failed", stats.num_rec_interp_failed, ""});
+}
+
+void ReconstructorBase::doUnassociatedAnalysis()
+{
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    assert (dbcont_man.hasMinMaxPosition());
+
+    unsigned int slice_cnt = currentSlice().slice_count_;
+    unsigned int run_cnt = currentSlice().run_count_;
+
+    string name = "Unassocated "+to_string(slice_cnt)+" Run"+to_string(currentSliceRepeatRun());
+
+    // unassociated grid
+    double lat_min, lat_max, lon_min, lon_max;
+
+    tie(lat_min, lat_max) = dbcont_man.minMaxLatitude();
+    tie(lon_min, lon_max) = dbcont_man.minMaxLongitude();
+
+    QRectF roi(lon_min, lat_min, lon_max - lon_min, lat_max - lat_min);
+    assert (!roi.isEmpty());
+
+    auto vp = task().getDebugViewpoint(
+        name+" Unassociated Grid", "Grid");
+
+    auto anno = vp->annotations().getOrCreateAnnotation("Unassociated Grid");
+
+    unsigned num_cells_x, num_cells_y;
+
+    std::tie(num_cells_x, num_cells_y) = Number::computeGeoWindowResolution(
+        lat_min, lat_max, lon_min, lon_max,
+        task().debugSettings().grid_max_resolution_, task().debugSettings().max_num_grid_cells_);
+
+    Grid2D grid;
+    grid.create(roi, grid2d::GridResolution().setCellCount(num_cells_x, num_cells_y));
+
+    auto& section = COMPASS::instance().taskManager().currentReport()->getSection(
+        "Association:Unassociated");
+
+    for (auto rec_num : associator().unassociatedRecNums())
+    {
+        assert (target_reports_.count(rec_num));
+
+        auto& tr = target_reports_.at(rec_num);
+
+        assert(tr.position_);
+
+        grid.addValue(tr.position_->longitude_, tr.position_->latitude_, 1.0);
+    }
+
+    //vp->appendToDescription("max value: "+String::doubleToStringPrecision(val_max, 2));
+
+    Grid2DLayers layers;
+    grid.addToLayers(layers, "factor", grid2d::ValueType::ValueTypeMax);
+
+    Grid2DRenderSettings rsettings;
+    rsettings.min_value       = 0.0;
+    rsettings.max_value       = 1.0;
+
+    rsettings.color_map.create(ColorMap::ColorScale::Green2Red, 2);
+
+    auto result = Grid2DLayerRenderer::render(layers.layer(0), rsettings);
+
+    auto f = new ViewPointGenFeatureGeoImage(result.first, result.second);
+    anno->addFeature(f);
+
+    if (!section.hasTable("Unassociated Target Reports"))
+        section.addTable("Unassociated Target Reports", 8,
+                         {"Slice", "Run", "#Unassoc.", "#All", "Unassoc. [%]",
+                                               "#Unassoc.Total", "#Total", "Unassoc.Total [%]"}, true);
+
+    unsigned int num_unassociated_target_reports = associator().unassociatedRecNums().size();
+
+    num_new_target_reports_total_ += num_new_target_reports_in_slice_;
+    num_unassociated_target_reports_total_ += num_unassociated_target_reports;
+
+    auto& table = section.getTable("Unassociated Target Reports");
+
+    nlohmann::json::array_t row{slice_cnt, run_cnt};
+
+    if (num_new_target_reports_in_slice_)
+    {
+        row.insert(row.end(), {num_unassociated_target_reports, num_new_target_reports_in_slice_,
+                               String::percentToString(
+                                   100.0*num_unassociated_target_reports/ (float)num_new_target_reports_in_slice_)});
+    }
+    else
+        row.insert(row.end(), {{}, {}, {}});
+
+
+    if (num_new_target_reports_total_)
+    {
+        row.insert(row.end(), {num_unassociated_target_reports_total_, num_new_target_reports_total_,
+                               String::percentToString(
+                                   100.0*num_unassociated_target_reports_total_/ (float)num_new_target_reports_total_)});
+    }
+    else
+        row.insert(row.end(), {{}, {}, {}});
+
+    nlohmann::json vp_json;
+    vp->toJSON(vp_json);
+    //section.addFigure("Avg. Unused Scatterplot", {vp_json});
+
+    // slice was already switched
+    vp_json[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Maximum"] = Time::toString(
+        next_slice_begin_ - base_settings_.sliceDuration() - boost::posix_time::milliseconds(1));
+    vp_json[ViewPoint::VP_FILTERS_KEY]["Timestamp"]["Timestamp Minimum"] =
+        Time::toString(current_slice_begin_ - base_settings_.sliceDuration());
+
+    // vp_json[ViewPoint::VP_FILTERS_KEY]["Record Number"]["Record NumberCondition0"] =
+    //     String::compress(associator().unassociatedRecNums(), ',');
+
+    vp_json[ViewPoint::VP_SELECTED_RECNUMS_KEY] = associator().unassociatedRecNums();
+
+    table.addRow(row, {vp_json});
+
+    //loginf << "UGA json '" << vp_json.dump() << "'";
+}
+
+void ReconstructorBase::doOutlierAnalysis()
+{
+    // for (auto tr_it = target_reports_.begin(); tr_it != target_reports_.end() /* not hoisted */; /* no increment */)
+    // {
+
+    // }
 }
 
 bool ReconstructorBase::processing() const
@@ -1300,28 +1548,61 @@ const ReconstructorBase::DataSlice& ReconstructorBase::currentSlice() const
     return task_.processingSlice();
 }
 
-float ReconstructorBase::qVarForAltitude(bool fl_unknown, 
-                                         bool fl_ground, 
-                                         float alt_baro_ft,
-                                         bool dynamic,
-                                         const ReferenceCalculatorSettings::ProcessNoise& Q_std) const
+double ReconstructorBase::determineProcessNoiseVariance(const dbContent::targetReport::ReconstructorInfo& ri,
+                                                        const dbContent::ReconstructorTarget& target,
+                                                        const ReferenceCalculatorSettings::ProcessNoise& Q) const
 {
-    if (!dynamic)
-        return Q_std.Q_std_static * Q_std.Q_std_static;
-    if (fl_unknown)
-        return Q_std.Q_std_unknown * Q_std.Q_std_unknown;
-    if (fl_ground)
-        return Q_std.Q_std_ground * Q_std.Q_std_ground;
+    auto Q_std = determineProcessNoise(ri, target, Q);
+    return Q_std * Q_std;
+}
 
+double ReconstructorBase::determineProcessNoise(const dbContent::targetReport::ReconstructorInfo& ri,
+                                                const dbContent::ReconstructorTarget& target,
+                                                const ReferenceCalculatorSettings::ProcessNoise& Q) const
+{
+    //no dynamic process noise => return static noise
+    if (!ref_calc_settings_.dynamic_process_noise)
+        return Q.Q_std_static;
+
+    double f_ground {1.0};
+
+    if (target.targetCategory() != TargetBase::Category::Unknown)
+        f_ground = dbContent::Target::processNoiseFactorGround(target.targetCategory());
+
+    if (target.targetCategory() != TargetBase::Category::Unknown
+        && dbContent::Target::isGroundOnly(target.targetCategory()))
+        return Q.Q_std_ground * f_ground;
+
+    double f_air {1.0};
+
+    if (target.targetCategory() != TargetBase::Category::Unknown)
+        f_air = dbContent::Target::processNoiseFactorAir(target.targetCategory());
+
+    auto alt_state = target.getAltitudeStateStruct(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
+
+    if (alt_state.fl_unknown)
+        return Q.Q_std_unknown; // use unknown value with factor 1
+
+    if (alt_state.fl_on_ground)
+        return Q.Q_std_ground * f_ground; // on ground
+
+    double Q_std;
+
+#if 0
+    //interp between min/max altitude
     assert (ref_calc_settings_.Q_altitude_min_ft < ref_calc_settings_.Q_altitude_max_ft);
 
-    double alt_ft       = std::max(ref_calc_settings_.Q_altitude_min_ft,
-                             std::min(ref_calc_settings_.Q_altitude_max_ft, (double) alt_baro_ft));
-    double t            = (alt_ft - ref_calc_settings_.Q_altitude_min_ft)
-               / (ref_calc_settings_.Q_altitude_max_ft - ref_calc_settings_.Q_altitude_min_ft);
-    double Q_std_interp = (1.0 - t) * Q_std.Q_std_ground + t * Q_std.Q_std_air;
+    double alt_ft = std::max(ref_calc_settings_.Q_altitude_min_ft,
+                            std::min(ref_calc_settings_.Q_altitude_max_ft, (double)alt_state.alt_baro_ft));
+    double t = (alt_ft - ref_calc_settings_.Q_altitude_min_ft)
+                / (ref_calc_settings_.Q_altitude_max_ft - ref_calc_settings_.Q_altitude_min_ft);
+    Q_std = (1.0 - t) * Q.Q_std_ground * f_ground + t * Q.Q_std_air * f_air;
+#else
+    //
+    Q_std = Q.Q_std_air * f_air; // in air
+#endif
 
-    return Q_std_interp * Q_std_interp;
+    return Q_std;
 }
 
 void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm, 
@@ -1354,17 +1635,11 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     mm.lat = pos.value().latitude_;
     mm.lon = pos.value().longitude_;
 
-    //height information
+    //if target is available determine process noise on per target report basis
     if (target)
     {
-        bool fl_unknown, fl_ground;
-        float alt_baro_ft;
-        std::tie(fl_unknown, fl_ground, alt_baro_ft) =
-            target->getAltitudeState(ri.timestamp_, Time::partialSeconds(base_settings_.max_time_diff_));
-
-        //compute measurement-specific process noise from altitude state
-        mm.Q_var        = qVarForAltitude(fl_unknown, fl_ground, alt_baro_ft, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.Q_std);
-        mm.Q_var_interp = qVarForAltitude(fl_unknown, fl_ground, alt_baro_ft, ref_calc_settings_.dynamic_process_noise, ref_calc_settings_.resample_Q_std);
+        mm.Q_var        = (float)determineProcessNoiseVariance(ri, *target, ref_calc_settings_.Q_std         );
+        mm.Q_var_interp = (float)determineProcessNoiseVariance(ri, *target, ref_calc_settings_.resample_Q_std);
     }
 
     //velocity
@@ -1448,4 +1723,42 @@ std::unique_ptr<reconstruction::KalmanChain>& ReconstructorBase::chain(unsigned 
 void ReconstructorBase::informConfigChanged()
 {
     emit configChanged();
+}
+
+void ReconstructorBaseSettings::setVehicleACADs(const std::string& value)
+{
+    vehicle_acads_ = value;
+
+    vehicle_acads_set_.clear();
+
+    for (const auto& acad_str : String::split(vehicle_acads_, ','))
+    {
+        try {
+            unsigned int acad = String::intFromHexString(acad_str);
+            vehicle_acads_set_.insert(acad);
+        } catch (...) {
+
+            logwrn << "ReconstructorBaseSettings: setVehicleACADs: impossible hex value '" << acad_str << "'";
+        }
+    }
+
+    loginf << "ReconstructorBaseSettings: setVehicleACADs: value '" << value
+           << "' vector " << String::compress(vehicle_acads_set_, ',');
+}
+
+void ReconstructorBaseSettings::setVehicleACIDs(const std::string& value)
+{
+    vehicle_acids_ = value;
+
+    vehicle_acids_set_.clear();
+
+    for (std::string acid_str : String::split(vehicle_acids_, ','))
+    {
+        acid_str = String::trim(acid_str);
+        boost::to_upper(acid_str);
+        vehicle_acids_set_.insert(acid_str);
+    }
+
+    loginf << "ReconstructorBaseSettings: setVehicleACIDs: value '" << value
+           << "' vector " << String::compress(vehicle_acids_set_, ',');
 }

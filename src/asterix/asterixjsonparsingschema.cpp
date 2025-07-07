@@ -35,7 +35,7 @@ void ASTERIXJSONParsingSchema::generateSubConfigurable(const std::string& class_
     {
         const Configuration& sub_config = Configurable::getSubConfiguration(class_id, instance_id);
 
-        unsigned int category;
+        unsigned int category{0};
 
         if (sub_config.hasParameterConfigValue("category"))
             category = sub_config.getParameterConfigValue<unsigned int>("category");

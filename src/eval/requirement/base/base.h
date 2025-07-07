@@ -21,6 +21,7 @@
 #include "evaluationdata.h"
 #include "util/timeconv.h"
 #include "eval/requirement/base/comparisontype.h"
+#include "evaluationdefs.h"
 
 #include "boost/optional.hpp"
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -30,16 +31,18 @@
 #include <memory>
 
 class EvaluationTargetData;
-class EvaluationManager;
+class EvaluationCalculator;
 class SectorLayer;
 
-namespace EvaluationRequirementResult {
-class Single;
+namespace EvaluationRequirementResult 
+{
+    class Single;
 }
 
 namespace Evaluation
 {
-class DataID;
+    class DataID;
+    class RequirementResultID;
 }
 
 namespace EvaluationRequirement
@@ -57,12 +60,12 @@ class Base
 {
 public:
     explicit Base(const std::string& name, 
-         const std::string& short_name, 
-         const std::string& group_name,
-         double threshold,
-         COMPARISON_TYPE check_type, 
-         EvaluationManager& eval_man,
-         const boost::optional<bool>& must_hold_for_any_target = boost::optional<bool>());
+                  const std::string& short_name, 
+                  const std::string& group_name,
+                  double threshold,
+                  COMPARISON_TYPE check_type, 
+                  EvaluationCalculator& calculator,
+                  const boost::optional<bool>& must_hold_for_any_target = boost::optional<bool>());
     virtual ~Base();
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
@@ -90,6 +93,8 @@ public:
 
     std::string getConditionResultNameShort(bool with_units) const;
 
+    bool matchesResultID(const Evaluation::RequirementResultID& id) const;
+
     virtual std::string getConditionResultNameShort() const = 0;
     virtual std::string getConditionResultName() const = 0;
     virtual std::string getConditionUnits() const = 0;
@@ -102,7 +107,7 @@ protected:
     std::string short_name_;
     std::string group_name_;
 
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 
     virtual double convertValueToResult(double value) const;
 

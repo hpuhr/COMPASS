@@ -15,23 +15,19 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONMANAGERWIDGET_H
-#define EVALUATIONMANAGERWIDGET_H
+ #pragma once
 
-#include <QWidget>
+#include "toolboxwidget.h"
 
 #include <memory>
 
 #include <boost/optional.hpp>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class EvaluationManager;
 class EvaluationManagerSettings;
-class EvaluationMainTabWidget;
-class EvaluationFilterTabWidget;
 class EvaluationTargetsTabWidget;
-class EvaluationStandardTabWidget;
 class EvaluationResultsTabWidget;
 
 class QVBoxLayout;
@@ -39,27 +35,31 @@ class QTabWidget;
 class QPushButton;
 class QLabel;
 
-class EvaluationManagerWidget : public QWidget
+/**
+ */
+class EvaluationManagerWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
 private slots:
-    void loadDataSlot();
-    void evaluateSlot();
     void generateReportSlot();
 
 public:
-    EvaluationManagerWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
+    EvaluationManagerWidget(EvaluationManager& eval_man);
     virtual ~EvaluationManagerWidget();
 
-    void updateDataSources();
-    void updateSectors();
+    //ToolBoxWidget
+    QIcon toolIcon() const override final;
+    std::string toolName() const override final;
+    std::string toolInfo() const override final;
+    std::vector<std::string> toolLabels() const override final;
+    toolbox::ScreenRatio defaultScreenRatio() const override final;
+    void addToConfigMenu(QMenu* menu) override final;
+    void addToToolBar(QToolBar* tool_bar) override final; 
+    void loadingStarted() override final;
+    void loadingDone() override final;
+
     void updateButtons();
-    void updateFilterWidget();
-    void updateResultsConfig();
-
-    void updateFromSettings();
-
     void expandResults();
 
     void showResultId (const std::string& id, 
@@ -71,25 +71,13 @@ public:
                                                  const std::string& table_id,
                                                  bool rowwise = true,
                                                  const std::vector<int>& cols = std::vector<int>()) const;
-
 protected:
     EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
-
-    QVBoxLayout* main_layout_{nullptr};
 
     QTabWidget* tab_widget_{nullptr};
 
-    std::unique_ptr<EvaluationMainTabWidget> main_tab_widget_;
-    std::unique_ptr<EvaluationFilterTabWidget> filter_widget_;
     std::unique_ptr<EvaluationTargetsTabWidget> targets_tab_widget_;
-    std::unique_ptr<EvaluationStandardTabWidget> std_tab_widget_;
     std::unique_ptr<EvaluationResultsTabWidget> results_tab_widget_;
 
-    QLabel* not_eval_comment_label_ {nullptr};
-    QPushButton* load_button_ {nullptr};
-    QPushButton* evaluate_button_ {nullptr};
     QPushButton* gen_report_button_ {nullptr};
 };
-
-#endif // EVALUATIONMANAGERWIDGET_H

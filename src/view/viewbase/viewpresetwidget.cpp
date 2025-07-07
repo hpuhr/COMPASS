@@ -543,25 +543,25 @@ void ViewPresetItemWidget::createUI()
 
             //buttons
             edit_button_ = new QToolButton;
-            edit_button_->setIcon(QIcon(Utils::Files::getIconFilepath("edit_old.png").c_str()));
+            edit_button_->setIcon(Utils::Files::IconProvider::getIcon("edit_old.png"));
             edit_button_->setToolTip("Edit preset");
             edit_button_->setAutoRaise(true);
             edit_button_->setCursor(Qt::CursorShape::ArrowCursor);
 
             copy_button_ = new QToolButton;
-            copy_button_->setIcon(QIcon(Utils::Files::getIconFilepath("copy.png").c_str()));
+            copy_button_->setIcon(Utils::Files::IconProvider::getIcon("copy.png"));
             copy_button_->setToolTip("Copy preset");
             copy_button_->setAutoRaise(true);
             copy_button_->setCursor(Qt::CursorShape::ArrowCursor);
 
             save_button_ = new QToolButton;
-            save_button_->setIcon(QIcon(Utils::Files::getIconFilepath("save.png").c_str()));
+            save_button_->setIcon(Utils::Files::IconProvider::getIcon("save.png"));
             save_button_->setToolTip("Save view changes to preset");
             save_button_->setAutoRaise(true);
             save_button_->setCursor(Qt::CursorShape::ArrowCursor);
 
             remove_button_ = new QToolButton;
-            remove_button_->setIcon(QIcon(Utils::Files::getIconFilepath("delete.png").c_str()));
+            remove_button_->setIcon(Utils::Files::IconProvider::getIcon("delete.png"));
             remove_button_->setToolTip("Remove preset");
             remove_button_->setAutoRaise(true);
             remove_button_->setCursor(Qt::CursorShape::ArrowCursor);
@@ -884,7 +884,7 @@ void ViewPresetItemListWidget::createUI()
     layout->addLayout(footer_layout);
 
     QPushButton* add_button = new QPushButton;
-    add_button->setIcon(QIcon(Utils::Files::getIconFilepath("crosshair_fat.png").c_str()));
+    add_button->setIcon(Utils::Files::IconProvider::getIcon("crosshair_fat.png"));
     add_button->setText("Add preset");
     footer_layout->addWidget(add_button);
     footer_layout->addStretch(1);
@@ -1156,7 +1156,7 @@ void ViewPresetWidget::createUI()
     preset_list_ = new ViewPresetItemListWidget(view_, this);
 
     show_button_ = new QToolButton;
-    show_button_->setIcon(QIcon(Utils::Files::getIconFilepath("preset.png").c_str()));
+    show_button_->setIcon(Utils::Files::IconProvider::getIcon("preset.png"));
     show_button_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     show_button_->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextBesideIcon);
     show_button_->setPopupMode(QToolButton::ToolButtonPopupMode::InstantPopup);

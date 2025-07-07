@@ -37,8 +37,8 @@ namespace EvaluationRequirement
 
 PositionRadarRange::PositionRadarRange(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        EvaluationManager& eval_man, double threshold_value)
-    : Base(name, short_name, group_name, threshold_value, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man)
+        EvaluationCalculator& calculator, double threshold_value)
+    : Base(name, short_name, group_name, threshold_value, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, calculator)
 {
 }
 
@@ -49,7 +49,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     logdbg << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
            << " threshold_value " << threshold();
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -74,12 +74,12 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     boost::optional<dbContent::TargetPosition> ref_pos;
     bool ok;
 
-    bool comp_passed;
+    bool comp_passed{false};
 
     unsigned int num_distances {0};
     string comment;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
 
     auto addDetail = [ & ] (const ptime& ts,
                             const dbContent::TargetPosition& tst_pos,
@@ -111,7 +111,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     Projection& projection = proj_man.currentProjection();
-    assert (projection.radarCoordinateSystemsAdded());
+    assert (projection.coordinateSystemsAdded());
 
     unsigned int tst_ds_id;
 
@@ -177,7 +177,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
             continue;
         }
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
@@ -287,7 +288,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
 
     return make_shared<EvaluationRequirementResult::SinglePositionRadarRange>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, range_values_ref, range_values_tst);
+                calculator_, details, num_pos, num_no_ref, num_pos_outside, num_pos_inside, num_comp_passed, num_comp_failed, range_values_ref, range_values_tst);
 }
 
 }

@@ -38,32 +38,37 @@ RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
 
     rs2g_T_Ai_ = rs2g_A_.transpose();
 
-    Eigen::Matrix3d A_p0(3, 3), A_q0(3, 3);
-    Eigen::Vector3d b_p0(3), b_q0(3);
+    // Eigen::Matrix3d A_p0(3, 3), A_q0(3, 3);
+    // A_p0.setZero();
+    // A_q0.setZero();
 
-    rs2gFillMat(lat_rad, long_rad, A_p0);
-    // mult(A_q0, trans(A_p0), *A_p0q0_); // A_p0q0 = A_q0 * Transpose(A_p0) in doxygen ...
-    rs2g_A_p0q0_ = A_q0 * A_p0.transpose();
-    //(*it).second.A_p0q0 = A_p0q0_;
+    // Eigen::Vector3d b_p0(3), b_q0(3);
+    // b_p0.setZero();
+    // b_q0.setZero();
 
-    // #if defined(DEBUG_ARTAS_TRF)
-    //       printf(" - radar matrix final values\n");
-    //       print_all_matrix(*A_p0q0_);
-    // #endif
+    // rs2gFillMat(lat_rad, long_rad, A_p0);
+    // // mult(A_q0, trans(A_p0), *A_p0q0_); // A_p0q0 = A_q0 * Transpose(A_p0) in doxygen ...
+    // rs2g_A_p0q0_ = A_q0 * A_p0.transpose();
+    // //(*it).second.A_p0q0 = A_p0q0_;
 
-    rs2gFillVec(lat_rad, long_rad, altitude_m_, b_p0);
+    // // #if defined(DEBUG_ARTAS_TRF)
+    // //       printf(" - radar matrix final values\n");
+    // //       print_all_matrix(*A_p0q0_);
+    // // #endif
 
-    // add(scaled(b_q0, -1.0), b_p0, b_p0); // b_p0 = b_p0 - b_q0 in doxygen ...
-    b_p0 = b_p0 - b_q0;
+    // rs2gFillVec(lat_rad, long_rad, altitude_m_, b_p0);
 
-    // mult(A_q0, b_p0, *b_p0q0);    // b_p0q0 = A_q0 * (b_p0 - b_q0) in doxygen ...
-    rs2g_b_p0q0_ = A_q0 * b_p0;
+    // // add(scaled(b_q0, -1.0), b_p0, b_p0); // b_p0 = b_p0 - b_q0 in doxygen ...
+    // b_p0 = b_p0 - b_q0;
 
-    // #if defined(DEBUG_ARTAS_TRF)
-    //       printf(" - radar vector final values\n");
-    //       print_vector(*b_p0q0);
-    // #endif
-    //    }
+    // // mult(A_q0, b_p0, *b_p0q0);    // b_p0q0 = A_q0 * (b_p0 - b_q0) in doxygen ...
+    // rs2g_b_p0q0_ = A_q0 * b_p0;
+
+    // // #if defined(DEBUG_ARTAS_TRF)
+    // //       printf(" - radar vector final values\n");
+    // //       print_vector(*b_p0q0);
+    // // #endif
+    // //    }
 
     // from setradar
     rs2gFillVec(lat_rad, long_rad, altitude_m_, rs2g_bi_);
@@ -362,20 +367,20 @@ void RS2GCoordinateSystem::rs2gFillVec(double lat_rad, double lon_rad, double he
     geodesic2Geocentric(lat_rad, lon_rad, height_m, b[0], b[1], b[2]);
 }
 
-Eigen::Vector3d RS2GCoordinateSystem::getTVector(double lat_rad, double lon_rad, double height_m)
-{
-    double eta_s = EE_A / sqrt(1 - EE_E2 * pow(sin(lat_rad), 2));
+// Eigen::Vector3d RS2GCoordinateSystem::getTVector(double lat_rad, double lon_rad, double height_m)
+// {
+//     double eta_s = EE_A / sqrt(1 - EE_E2 * pow(sin(lat_rad), 2));
 
-    // L_S = lat_rad
-    // G_S = lon_rad
-    // h_s = height_m
+//     // L_S = lat_rad
+//     // G_S = lon_rad
+//     // h_s = height_m
 
-    double sin_lat = sin(lat_rad);
+//     double sin_lat = sin(lat_rad);
 
-    return Eigen::Vector3d (0,
-                           EE_E2 * eta_s * sin_lat * cos (lat_rad),
-                           EE_E2 * eta_s * sin_lat * sin_lat - (eta_s + height_m));
-}
+//     return Eigen::Vector3d (0,
+//                            EE_E2 * eta_s * sin_lat * cos (lat_rad),
+//                            EE_E2 * eta_s * sin_lat * sin_lat - (eta_s + height_m));
+// }
 
 
 bool RS2GCoordinateSystem::geocentric2Geodesic(double ecef_x, double ecef_y, double ecef_z,

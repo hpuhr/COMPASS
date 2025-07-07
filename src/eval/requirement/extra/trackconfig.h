@@ -18,15 +18,17 @@
 #ifndef EVALUATIONREQUIREMENTEXTRATRACKCONFIG_H
 #define EVALUATIONREQUIREMENTEXTRATRACKCONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/extra/trackconfigwidget.h"
-//#include "eval/requirement/extra/track.h"
 
 #include <memory>
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -36,7 +38,7 @@ namespace EvaluationRequirement
     public:
         ExtraTrackConfig(const std::string& class_id, const std::string& instance_id,
                         Group& group, EvaluationStandard& standard,
-                        EvaluationManager& eval_man);
+                        EvaluationCalculator& calculator);
         virtual ~ExtraTrackConfig();
 
         std::shared_ptr<Base> createRequirement() override;
@@ -50,14 +52,14 @@ namespace EvaluationRequirement
         bool ignorePrimaryOnly() const;
         void ignorePrimaryOnly(bool value);
 
-        virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+        virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
     protected:
         float min_duration_{0};
         unsigned int min_num_updates_ {0};
         bool ignore_primary_only_ {true};
 
-        virtual void createWidget() override;
+        virtual BaseConfigWidget* createWidget() override;
     };
 
 }

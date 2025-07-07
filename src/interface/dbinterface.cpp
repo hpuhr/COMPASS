@@ -16,34 +16,57 @@
  */
 
 #include "dbinterface.h"
-#include "compass.h"
-#include "buffer.h"
-#include "config.h"
+
+#include "dbinstance.h"
 #include "dbcommand.h"
-#include "sqliteconnection.h"
+#include "dbresult.h"
+#include "dbtableinfo.h"
+#include "dbconnection.h"
+#include "sqlgenerator.h"
+
+#include "duckdbinstance.h"
+
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
-#include "dbresult.h"
-#include "dbtableinfo.h"
-#include "sqliteconnection.h"
-#include "files.h"
-#include "util/timeconv.h"
-#include "util/number.h"
+#include "dbcontent/variable/metavariable.h"
+#include "dbcontent/target/target.h"
+
 #include "sector.h"
 #include "sectorlayer.h"
 #include "source/dbdatasource.h"
 #include "fft/dbfft.h"
-#include "dbcontent/variable/metavariable.h"
-#include "dbcontent/target/target.h"
+
+#include "task/taskmanager.h"
+#include "task/result/taskresult.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontent.h"
+#include "task/result/report/sectioncontentfigure.h"
+#include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontenttext.h"
+
+#include "eval/results/evaluationtaskresult.h"
+
 #include "viewpoint.h"
+
+#include "compass.h"
+#include "buffer.h"
+#include "config.h"
+#include "files.h"
+#include "timeconv.h"
+#include "number.h"
+#include "asynctask.h"
+
+#include "tbbhack.h"
 
 #include <QApplication>
 #include <QMessageBox>
 #include <QMutexLocker>
 #include <QThread>
+#include <QElapsedTimer>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <fstream>
 
@@ -53,146 +76,282 @@ using namespace dbContent;
 
 const string PROP_TIMESTAMP_MIN_NAME {"timestamp_min"};
 const string PROP_TIMESTAMP_MAX_NAME {"timestamp_max"};
-const string PROP_LATITUDE_MIN_NAME {"latitude_min"};
-const string PROP_LATITUDE_MAX_NAME {"latitude_max"};
+const string PROP_LATITUDE_MIN_NAME  {"latitude_min"};
+const string PROP_LATITUDE_MAX_NAME  {"latitude_max"};
 const string PROP_LONGITUDE_MIN_NAME {"longitude_min"};
 const string PROP_LONGITUDE_MAX_NAME {"longitude_max"};
 
-DBInterface::DBInterface(string class_id, string instance_id, COMPASS* compass)
-    : Configurable(class_id, instance_id, compass), sql_generator_(*this)
-{
-    boost::mutex::scoped_lock locker(connection_mutex_);
+const size_t DBInterface::TableBulkUpdateMinRows = 50;
 
+#define PROTECT_INSTANCE
+
+/**
+ */
+DBInterface::DBInterface(string class_id, 
+                         string instance_id, 
+                         COMPASS* compass)
+:   Configurable(class_id, instance_id, compass)
+,   insert_mt_(true)
+{
     registerParameter("read_chunk_size", &read_chunk_size_, 50000u);
 
     createSubConfigurables();
 }
 
+/**
+ */
 DBInterface::~DBInterface()
 {
     logdbg << "DBInterface: desctructor: start";
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    db_connection_ = nullptr;
+    db_instance_ = nullptr;
 
     logdbg << "DBInterface: desctructor: end";
 }
 
-void DBInterface::updateTableInfo()
+/**
+ * Returns a connection-specific SQL generator.
+ */
+SQLGenerator DBInterface::sqlGenerator() const
 {
-    boost::mutex::scoped_lock locker2(table_info_mutex_);
-
-    loginf << "DBInterface: updateTableInfo";
-    table_info_.clear();
-
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    assert(db_connection_);
-    table_info_ = db_connection_->getTableInfo();
-
-    loginf << "DBInterface: updateTableInfo: found " << table_info_.size() << " tables";
+    assert(db_instance_);
+    return SQLGenerator(db_instance_->sqlConfiguration());
 }
 
+/**
+ * Internal reset on fail.
+ */
+void DBInterface::reset()
+{
+    properties_loaded_ = false;
+    properties_.clear();
+
+    dbcolumn_content_flags_.clear();
+
+    if (db_instance_)
+    {
+        db_instance_->close();
+        db_instance_.reset();
+    }
+}
+
+/**
+ */
+std::string DBInterface::dbFilename() const
+{
+    if (!db_instance_)
+        return "";
+
+    return db_instance_->dbFilename();
+}
+
+/**
+ */
+bool DBInterface::dbInMemory() const
+{
+    if (!db_instance_)
+        return false;
+
+    return db_instance_->dbInMem();
+}
+
+/**
+ */
+bool DBInterface::canCreateDBFileFromMemory() const
+{
+    return (ready() && dbInMemory());
+}
+
+/**
+ */
+bool DBInterface::ready() const
+{
+    if (!db_instance_)
+        return false;
+    
+    return db_instance_->dbReady(); //ready means open and connected
+}
+
+/**
+ * Opens a database file.
+ */
 void DBInterface::openDBFile(const std::string& filename, bool overwrite)
 {
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    assert(!filename.empty());
 
-    if (overwrite && Files::fileExists(filename))
+    bool new_file = !Files::fileExists(filename) || overwrite;
+
+    openDBFileInternal(filename, overwrite);
+
+    loginf << "DBInterface: openDBFile: new_file " << new_file;
+
+    if (new_file)
+        COMPASS::instance().logInfo("DBInterface") << "database '" << filename << "' created";
+}
+
+/**
+ * Opens an in-memory database.
+ */
+void DBInterface::openDBInMemory()
+{
+    openDBFileInternal("", false);
+}
+
+/**
+ */
+void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite)
+{
+    try
     {
-        loginf << "DBInterface: openDBFile: deleting pre-existing file '" << filename << "'";
-        Files::deleteFile(filename);
-    }
+        bool in_mem = filename.empty();
+        std::string filename_internal = in_mem ? DBInstance::InMemFilename : filename;
 
-    bool created_new_db = !Files::fileExists(filename);
-
-    loginf << "DBInterface: openDBFile: opening file '" << filename << "'";
-    assert (db_connection_);
-    db_connection_->openFile(filename);
-
-    updateTableInfo();
-
-    if (created_new_db)
-    {
-        assert (!existsPropertiesTable());
-        createPropertiesTable();
-        properties_loaded_ = true;
-
-        setProperty("APP_VERSION", COMPASS::instance().config().getString("version"));
-        saveProperties();
-
-        assert (!existsDataSourcesTable());
-        createDataSourcesTable();
-
-        assert (!existsSectorsTable());
-        createSectorsTable();
-    }
-    else
-    {
-        assert (existsPropertiesTable());
-        loadProperties();
-
-        if (!hasProperty("APP_VERSION")
-                 || getProperty("APP_VERSION") != COMPASS::instance().config().getString("version"))
+        //delete old file?
+        if (!in_mem && overwrite && Files::fileExists(filename))
         {
-            string reason = hasProperty("APP_VERSION") ?
-                        "DB from Version " + getProperty("APP_VERSION") + ", current "
-                           + COMPASS::instance().config().getString("version") : "DB from Version older than 0.7.0";
-
-            table_info_.clear(); // not need to lock
-            properties_loaded_ = false;
-            properties_.clear();
-            db_connection_->disconnect();
-
-            QApplication::restoreOverrideCursor();
-
-            throw std::runtime_error ("Incorrect application version for database:\n "+reason);
+            loginf << "DBInterface: openDBFile: deleting pre-existing file '" << filename << "'";
+            Files::deleteFile(filename);
         }
 
-        assert (existsDataSourcesTable());
-        assert (existsSectorsTable());
-    }
+        bool created_new_db = in_mem || !Files::fileExists(filename);
 
-    if (!existsTargetsTable())
-        createTargetsTable();
+        //create connection
+        db_instance_.reset(new DuckDBInstance(this));
+        
+        loginf << "DBInterface: openDBFile: opening file '" << filename_internal << "'";
 
-    //emit databaseOpenedSignal();
+        //connect to db
+        assert (db_instance_);
 
-    QApplication::restoreOverrideCursor();
+        auto open_result = in_mem ? db_instance_->openInMemory() : db_instance_->open(filename);
 
-    loginf << "DBInterface: openDBFile: done";
-}
+        if (!open_result.ok())
+        {
+            logerr << "DBInterface: openDBFile: Database could not be opened: " << open_result.second;
+            throw std::runtime_error ("Database could not be opened: " + open_result.second);
+        }
 
-void DBInterface::exportDBFile(const std::string& filename)
-{
-    assert (dbOpen());
+        if (created_new_db)
+        {
+            //create some default tables
+            assert (!existsPropertiesTable());
+            createPropertiesTable();
+            properties_loaded_ = true;
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    db_connection_->exportFile(filename);
-
-    QApplication::restoreOverrideCursor();
-}
-
-void DBInterface::closeDBFile()
-{
-    loginf << "DBInterface: closeDBFile";
-
-    {
-        boost::mutex::scoped_lock locker(connection_mutex_);
-
-        if (properties_loaded_)  // false if database not opened
+            setProperty("APP_VERSION", COMPASS::instance().config().getString("version"));
             saveProperties();
 
-        assert (db_connection_);
-        db_connection_->disconnect();
+            assert (!existsDataSourcesTable());
+            createDataSourcesTable();
+
+            assert (!existsSectorsTable());
+            createSectorsTable();
+        }
+        else
+        {
+            assert (existsPropertiesTable());
+            loadProperties();
+
+            //check db version against app version
+            if (!hasProperty("APP_VERSION")
+                    || getProperty("APP_VERSION") != COMPASS::instance().config().getString("version"))
+            {
+                string reason = hasProperty("APP_VERSION") ?
+                            "DB from Version " + getProperty("APP_VERSION") + ", current "
+                            + COMPASS::instance().config().getString("version") : "DB from Version older than 0.7.0";
+
+                properties_loaded_ = false;
+                properties_.clear();
+                db_instance_->close();
+
+                logerr << "DBInterface: openDBFile: Incorrect application version for database:\n " << reason;
+                throw std::runtime_error ("Incorrect application version for database:\n "+reason);
+            }
+
+            assert (existsDataSourcesTable());
+            assert (existsSectorsTable());
+        }
+
+        if (!existsTargetsTable())
+            createTargetsTable();
+
+        if (!existsTaskLogTable())
+            createTaskLogTable();
+
+        //determine maximum report content id
+        auto max_id = getMaxReportContentID();
+        ResultReport::Section::setCurrentContentID(max_id.has_value() ? max_id.value() + 1 : 0);
+
+        //emit databaseOpenedSignal();
+
+        loginf << "DBInterface: openDBFile: done";
+    }
+    catch(const std::exception& ex)
+    {
+        reset();
+
+        logerr << "DBInterface: openDBFile: Error: " << ex.what();
+        throw std::runtime_error(ex.what());
+    }
+}
+
+/**
+ * Transfers an opened memory database to the given file and switches to this version.
+ */
+void DBInterface::openDBFileFromMemory(const std::string& filename)
+{
+    assert(canCreateDBFileFromMemory());
+    assert(!filename.empty());
+
+    try
+    {
+        if (Files::fileExists(filename))
+            Files::deleteFile(filename);
+
+        //export memory database to given file
+        auto export_result = db_instance_->exportToFile(filename);
+
+        if (!export_result.ok())
+        {
+            logerr << "DBInterface: openDBFileFromMemory: Database could not be exported: " << export_result.second;
+            throw std::runtime_error ("Database could not be exported: " + export_result.second);
+        }
+
+        //close current (in-mem) db
+        closeDB();
+
+        //open new physical db
+        openDBFile(filename, false);
+    }
+    catch(const std::exception& ex)
+    {
+        reset();
+
+        logerr << "DBInterface: openDBFileFromMemory: Error: " << ex.what();
+        throw std::runtime_error(ex.what());
+    }
+}
+
+/**
+ * Closes the currently open database.
+ */
+void DBInterface::closeDB()
+{
+    loginf << "DBInterface: closeDB";
+
+    if (properties_loaded_)  // false if database not opened
+        saveProperties();
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        assert (db_instance_);
+        db_instance_->close();
 
         properties_loaded_ = false;
-
         properties_.clear();
-        table_info_.clear(); // no need to lock
 
         dbcolumn_content_flags_.clear();
     }
@@ -200,90 +359,270 @@ void DBInterface::closeDBFile()
     // signal emitted in COMPASS
 }
 
-bool DBInterface::dbOpen()
+/**
+ * Exports the currently opened database to the given file.
+ */
+void DBInterface::exportDBFile(const std::string& filename)
 {
-    assert (db_connection_);
-    return db_connection_->dbOpened();
-}
+    assert (ready());
 
-bool DBInterface::ready()
-{
-    if (!db_connection_)
+    Result export_result;
+
+    //delete any existing file
+    if (Utils::Files::fileExists(filename))
+        Utils::Files::deleteFile(filename);
+
+    try
     {
-        logdbg << "DBInterface: ready: no connection";
-        return false;
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        export_result = db_instance_->exportToFile(filename);
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: exportDBFile: Database could not be exported: " << ex.what();
+        throw std::runtime_error ("Database could not be exported: " + std::string(ex.what()));
     }
 
-    logdbg << "DBInterface: ready: connection ready " << db_connection_->dbOpened();
-    return db_connection_->dbOpened();
+    if (!export_result.ok())
+    {
+        logerr << "DBInterface: exportDBFile: Database could not be exported: " << export_result.second;
+        throw std::runtime_error ("Database could not be exported: " + export_result.second);
+    }
 }
 
-SQLiteConnection& DBInterface::connection()
+/**
+ * Cleans the current db.
+ * Note that the current database will be closed and reopened for this purpose.
+ */
+bool DBInterface::cleanupDB(bool show_dialog)
 {
-    assert(db_connection_);
-    return *db_connection_;
+    loginf << "DBInterface: cleanupDB";
+
+    assert (ready());
+
+    //in-mem => nothing to do
+    if (dbInMemory())
+        return true;
+
+    bool ok;
+
+    if (show_dialog)
+    {
+        auto cb = [ this ] (const AsyncTaskState&, AsyncTaskProgressWrapper&) 
+        { 
+            return this->cleanupDBInternal();
+        };
+
+        AsyncFuncTask task(cb, "Optimizing Database", "Optimizing database", false);
+        ok = task.runAsyncDialog();
+    }
+    else
+    {
+        ok = cleanupDBInternal().ok();
+    }
+
+    return ok;
 }
 
+/**
+ */
+Result DBInterface::cleanupDBInternal()
+{
+    loginf << "DBInterface: cleanupDBInternal: cleaning db...";
+
+    assert(ready());
+    assert(!cleanup_in_progress_);
+    assert(!dbInMemory());
+
+    cleanup_in_progress_ = true;
+
+    Result res_cleanup, res_critical;
+
+    try
+    {
+        auto res_reconnect = db_instance_->reconnect(true, &res_cleanup);
+
+        //reconnection shall never fail
+        if (!res_reconnect.ok())
+            throw std::runtime_error("Reconnecting to database failed: " + res_reconnect.error());
+
+        if (!res_cleanup.ok())
+        {
+            //cleanup didn't work => log and return false
+            logerr << "DBInterface: cleanupDBInternal: Cleanup failed: " << res_cleanup.error();
+        }
+
+        res_critical = Result::succeeded();
+    }
+    catch(const std::exception& ex)
+    {
+        res_critical = Result::failed(ex.what());
+    }
+
+    cleanup_in_progress_ = false;
+
+    if (!res_critical.ok())
+    {
+        //@TODO: correct way to resolve this worst case?
+
+        reset();
+
+        logerr << "DBInterface: cleanupDBInternal: Error: " << res_critical.error();
+        throw std::runtime_error(res_critical.error());
+    }
+
+    return res_cleanup;
+}
+
+/**
+ */
 void DBInterface::generateSubConfigurable(const string& class_id,
                                           const string& instance_id)
 {
-    logdbg << "DBInterface: generateSubConfigurable: generating variable " << instance_id;
-
-    if (class_id == "SQLiteConnection")
-    {
-        assert (!db_connection_);
-
-        db_connection_.reset( new SQLiteConnection(class_id, instance_id, this));
-        assert (db_connection_);
-
-    }
-    else
-        throw runtime_error("DBInterface: generateSubConfigurable: unknown class_id " +
-                            class_id);
+    throw std::runtime_error("DBInterface: generateSubConfigurable: unknown class_id " + class_id);
 }
 
-void DBInterface::checkSubConfigurables()
+
+
+/**
+ * !Protect by mutex when calling!
+ */
+Result DBInterface::execute(const std::string& sql)
 {
-    if (!db_connection_)
+    assert(ready());
+
+    auto res = db_instance_->defaultConnection().execute(sql);
+
+    if (!res.ok())
     {
-        generateSubConfigurableFromConfig(Configuration::create("SQLiteConnection", "SQLite Connection"));
+        logerr << "DBInterface: execute: Error executing statement '" << sql << "': " << res.error();
+        throw std::runtime_error("Error executing statement '" + sql + "': " + res.error());
+    }
+
+    return res;
+}
+
+/**
+ * !Protect by mutex when calling!
+ */
+std::shared_ptr<DBResult> DBInterface::execute(const DBCommand& cmd)
+{
+    assert(ready());
+
+    auto res = db_instance_->defaultConnection().execute(cmd);
+
+    if (res->hasError())
+    {
+        logerr << "DBInterface: execute: Error executing command '" << cmd.get() << "': " << res->error();
+        throw std::runtime_error("Error executing command '" + cmd.get() + "': " + res->error());
+    }
+
+    return res;
+}
+
+/**
+ * !Protect by mutex when calling!
+ */
+void DBInterface::updateTableInfo()
+{
+    assert(ready());
+
+    auto res = db_instance_->updateTableInfo();
+
+    if (!res.ok())
+    {
+        logerr << "DBInterface: updateTableInfo: Error updating table info: " << res.error();
+        throw std::runtime_error("Error updating table info: " + res.error());
     }
 }
 
-bool DBInterface::existsTable(const string& table_name)
-{
-    boost::mutex::scoped_lock locker(table_info_mutex_);
-    return table_info_.count(table_name) == 1;
+/**
+ */
+const std::map<std::string, DBTableInfo>& DBInterface::tableInfo() const
+{ 
+    assert(ready());
+
+    //@TODO: needs protection?
+    return db_instance_->tableInfo();
 }
 
+/**
+ */
+bool DBInterface::existsTable(const string& table_name) const
+{
+    return tableInfo().count(table_name) == 1;
+}
+
+/**
+ */
 void DBInterface::createTable(const DBContent& object)
 {
     loginf << "DBInterface: createTable: obj " << object.name();
+
+    assert(ready());
+
     if (existsTable(object.dbTableName()))
     {
         logerr << "DBInterface: createTable: table " << object.dbTableName() << " already exists";
         return;
     }
 
-    string statement = sql_generator_.getCreateTableStatement(object);
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
+        string statement = sqlGenerator().getCreateTableStatement(object);
 
-    db_connection_->executeSQL(statement);
-
-    locker.unlock();
-
-    updateTableInfo();
+        execute(statement);
+        updateTableInfo();
+    }
 
     loginf << "DBInterface: createTable: checking " << object.dbTableName();
+
     assert(existsTable(object.dbTableName()));
 }
 
-bool DBInterface::existsPropertiesTable() { return existsTable(TABLE_NAME_PROPERTIES); }
+/**
+ */
+void DBInterface::removeTable(const std::string& table_name)
+{
+    loginf << "DBInterface: removeTable: name " << table_name;
 
+    assert(ready());
+
+    if (!existsTable(table_name))
+    {
+        logwrn << "DBInterface: removeTable: table " << table_name << " does not exist";
+        return;
+    }
+
+    auto res = db_instance_->defaultConnection().deleteTable(table_name);
+    
+    loginf << "DBInterface: createTable: checking " << table_name;
+
+    assert(res.ok());
+
+    updateTableInfo();
+
+    assert(!existsTable(table_name));
+}
+
+/**
+ */
+bool DBInterface::existsPropertiesTable() 
+{ 
+    return existsTable(TABLE_NAME_PROPERTIES); 
+}
+
+/**
+ */
 unsigned long DBInterface::getMaxRecordNumber(DBContent& object)
 {
-    assert (dbOpen());
+    assert (ready());
     assert(object.existsInDB());
 
     assert (COMPASS::instance().dbContentManager().existsMetaVariable(DBContent::meta_var_rec_num_.name()));
@@ -295,30 +634,39 @@ unsigned long DBInterface::getMaxRecordNumber(DBContent& object)
 
     assert (object.hasVariable(rec_num_var.name()));
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
+    unsigned long max_rn = 0;
 
-    shared_ptr<DBCommand> command = sql_generator_.getMaxULongIntValueCommand(object.dbTableName(),
-                                                                              rec_num_var.dbColumnName());
-
-    shared_ptr<DBResult> result = db_connection_->execute(*command);
-
-    assert(result->containsData());
-
-    shared_ptr<Buffer> buffer = result->buffer();
-
-    if (!buffer->size())
     {
-        logwrn << "DBInterface: getMaxRecordNumber: no max record number found";
-        return 0;
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        shared_ptr<DBCommand> command = sqlGenerator().getMaxULongIntValueCommand(object.dbTableName(),
+                                                                                  rec_num_var.dbColumnName());
+        shared_ptr<DBResult> result = execute(*command);
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+
+        if (!buffer->size())
+        {
+            logwrn << "DBInterface: getMaxRecordNumber: no max record number found";
+            return 0;
+        }
+
+        assert (!buffer->get<unsigned long>(rec_num_var.dbColumnName()).isNull(0));
+
+        max_rn = buffer->get<unsigned long>(rec_num_var.dbColumnName()).get(0);
     }
 
-    assert (!buffer->get<unsigned long>(rec_num_var.dbColumnName()).isNull(0));
-    return buffer->get<unsigned long>(rec_num_var.dbColumnName()).get(0);
+    return max_rn;
 }
 
+/**
+ */
 unsigned int DBInterface::getMaxRefTrackTrackNum()
 {
-    assert (dbOpen());
+    assert(ready());
 
     DBContent& reftraj_content = COMPASS::instance().dbContentManager().dbContent("RefTraj");
 
@@ -334,27 +682,68 @@ unsigned int DBInterface::getMaxRefTrackTrackNum()
 
     assert (reftraj_content.hasVariable(track_num_var.name()));
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
+    unsigned int max_tn = 0;
 
-    shared_ptr<DBCommand> command = sql_generator_.getMaxUIntValueCommand(reftraj_content.dbTableName(),
-                                                                          track_num_var.dbColumnName());
-
-    shared_ptr<DBResult> result = db_connection_->execute(*command);
-
-    assert(result->containsData());
-
-    shared_ptr<Buffer> buffer = result->buffer();
-
-    if (!buffer->size())
     {
-        logwrn << "DBInterface: getMaxRefTrackTrackNum: no max track number found";
-        return 0;
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        shared_ptr<DBCommand> command = sqlGenerator().getMaxUIntValueCommand(reftraj_content.dbTableName(),
+                                                                            track_num_var.dbColumnName());
+        shared_ptr<DBResult> result = execute(*command);
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+
+        if (!buffer->size())
+        {
+            logwrn << "DBInterface: getMaxRefTrackTrackNum: no max track number found";
+            return 0;
+        }
+
+        assert (!buffer->get<unsigned int>(track_num_var.dbColumnName()).isNull(0));
+
+        max_tn = buffer->get<unsigned int>(track_num_var.dbColumnName()).get(0);
     }
 
-    assert (!buffer->get<unsigned int>(track_num_var.dbColumnName()).isNull(0));
-    return buffer->get<unsigned int>(track_num_var.dbColumnName()).get(0);
+    return max_tn;
 }
 
+/**
+ */
+boost::optional<unsigned long> DBInterface::getMaxReportContentID()
+{
+    assert(ready());
+
+    if (!existsReportContentsTable())
+        return boost::optional<unsigned long>();
+
+    unsigned int max_tn = 0;
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        shared_ptr<DBCommand> command = sqlGenerator().getMaxUIntValueCommand(ResultReport::SectionContent::DBTableName,
+                                                                              ResultReport::SectionContent::DBColumnContentID.name());
+        shared_ptr<DBResult> result = execute(*command);
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+        assert(buffer->size() <= 1);
+
+        if (buffer->size() == 0)
+            return boost::optional<unsigned long>();
+
+        assert(!buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name()).isNull(0));
+
+        max_tn = buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name()).get(0);
+    }
+
+    return max_tn;
+}
 
 //std::map<unsigned int, std::tuple<std::set<unsigned int>, std::tuple<bool, unsigned int, unsigned int>,
 //std::tuple<bool, unsigned int, unsigned int>>> DBInterface::queryADSBInfo()
@@ -370,7 +759,7 @@ unsigned int DBInterface::getMaxRefTrackTrackNum()
 
 //    shared_ptr<DBCommand> command = sql_generator_.getADSBInfoCommand(object);
 
-//    shared_ptr<DBResult> result = db_connection_->execute(*command);
+//    shared_ptr<DBResult> result = execute(*command);
 
 //    assert(result->containsData());
 
@@ -409,117 +798,136 @@ unsigned int DBInterface::getMaxRefTrackTrackNum()
 //    return data;
 //}
 
+/**
+ */
 bool DBInterface::existsDataSourcesTable()
 {
     return existsTable(dbContent::DBDataSource::table_name_);
 }
 
+/**
+ */
 void DBInterface::createDataSourcesTable()
 {
+    assert(ready());
     assert(!existsDataSourcesTable());
-    connection_mutex_.lock();
-    db_connection_->executeSQL(sql_generator_.getTableDataSourcesCreateStatement());
-    connection_mutex_.unlock();
 
-    updateTableInfo();
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        execute(sqlGenerator().getTableDataSourcesCreateStatement());
+        updateTableInfo();
+    }
 }
 
+/**
+ */
 std::vector<std::unique_ptr<dbContent::DBDataSource>> DBInterface::getDataSources()
 {
     logdbg << "DBInterface: getDataSources: start";
 
+    assert(ready());
+
     using namespace dbContent;
-
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand();
-
-    loginf << "DBInterface: getDataSources: sql '" << command->get() << "'";
-
-    shared_ptr<DBResult> result = db_connection_->execute(*command);
-    assert(result->containsData());
-    shared_ptr<Buffer> buffer = result->buffer();
-
-    logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
-
-    assert(buffer->properties().hasProperty(DBDataSource::id_column_));
-    assert(buffer->properties().hasProperty(DBDataSource::ds_type_column_));
-    assert(buffer->properties().hasProperty(DBDataSource::sac_column_));
-    assert(buffer->properties().hasProperty(DBDataSource::sic_column_));
-    assert(buffer->properties().hasProperty(DBDataSource::name_column_));
-    assert(buffer->properties().hasProperty(DBDataSource::short_name_));
-    assert(buffer->properties().hasProperty(DBDataSource::info_column_));
-    assert(buffer->properties().hasProperty(DBDataSource::counts_column_));
 
     std::vector<std::unique_ptr<DBDataSource>> sources;
 
-    for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
     {
-        if (buffer->get<unsigned int>(DBDataSource::id_column_.name()).isNull(cnt))
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        shared_ptr<DBCommand> command = sqlGenerator().getDataSourcesSelectCommand();
+
+        loginf << "DBInterface: getDataSources: sql '" << command->get() << "'";
+
+        shared_ptr<DBResult> result = execute(*command);
+        assert(result->containsData());
+        shared_ptr<Buffer> buffer = result->buffer();
+
+        logdbg << "DBInterface: getDataSources: json '" << buffer->asJSON().dump(4) << "'";
+
+        assert(buffer->properties().hasProperty(DBDataSource::id_column_));
+        assert(buffer->properties().hasProperty(DBDataSource::ds_type_column_));
+        assert(buffer->properties().hasProperty(DBDataSource::sac_column_));
+        assert(buffer->properties().hasProperty(DBDataSource::sic_column_));
+        assert(buffer->properties().hasProperty(DBDataSource::name_column_));
+        assert(buffer->properties().hasProperty(DBDataSource::short_name_));
+        assert(buffer->properties().hasProperty(DBDataSource::info_column_));
+        assert(buffer->properties().hasProperty(DBDataSource::counts_column_));
+
+        for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
         {
-            logerr << "DBInterface: getDataSources: data source cnt " << cnt
-                   << " has NULL id, will be omitted";
-            continue;
+            if (buffer->get<unsigned int>(DBDataSource::id_column_.name()).isNull(cnt))
+            {
+                logerr << "DBInterface: getDataSources: data source cnt " << cnt
+                    << " has NULL id, will be omitted";
+                continue;
+            }
+
+            if (buffer->get<string>(DBDataSource::ds_type_column_.name()).isNull(cnt))
+            {
+                logerr << "DBInterface: getDataSources: data source cnt " << cnt
+                    << " has NULL content type, will be omitted";
+                continue;
+            }
+
+            if (buffer->get<unsigned int>(DBDataSource::sac_column_.name()).isNull(cnt))
+            {
+                logerr << "DBInterface: getDataSources: data source cnt " << cnt
+                    << " has NULL sac, will be omitted";
+                continue;
+            }
+
+            if (buffer->get<unsigned int>(DBDataSource::sic_column_.name()).isNull(cnt))
+            {
+                logerr << "DBInterface: getDataSources: data source cnt " << cnt
+                    << " has NULL sic, will be omitted";
+                continue;
+            }
+
+            if (buffer->get<string>(DBDataSource::name_column_.name()).isNull(cnt))
+            {
+                logerr << "DBInterface: getDataSources: data source cnt " << cnt
+                    << " has NULL name, will be omitted";
+                continue;
+            }
+
+            std::unique_ptr<DBDataSource> src {new DBDataSource()};
+
+            src->id(buffer->get<unsigned int>(DBDataSource::id_column_.name()).get(cnt));
+            src->dsType(buffer->get<string>(DBDataSource::ds_type_column_.name()).get(cnt));
+            src->sac(buffer->get<unsigned int>(DBDataSource::sac_column_.name()).get(cnt));
+            src->sic(buffer->get<unsigned int>(DBDataSource::sic_column_.name()).get(cnt));
+            src->name(buffer->get<string>(DBDataSource::name_column_.name()).get(cnt));
+
+            if (!buffer->get<string>(DBDataSource::short_name_.name()).isNull(cnt))
+                src->shortName(buffer->get<string>(DBDataSource::short_name_.name()).get(cnt));
+
+            if (!buffer->get<string>(DBDataSource::info_column_.name()).isNull(cnt))
+                src->info(buffer->get<string>(DBDataSource::info_column_.name()).get(cnt));
+
+            if (!buffer->get<string>(DBDataSource::counts_column_.name()).isNull(cnt))
+                src->counts(buffer->get<string>(DBDataSource::counts_column_.name()).get(cnt));
+
+            sources.emplace_back(move(src));
         }
-
-        if (buffer->get<string>(DBDataSource::ds_type_column_.name()).isNull(cnt))
-        {
-            logerr << "DBInterface: getDataSources: data source cnt " << cnt
-                   << " has NULL content type, will be omitted";
-            continue;
-        }
-
-        if (buffer->get<unsigned int>(DBDataSource::sac_column_.name()).isNull(cnt))
-        {
-            logerr << "DBInterface: getDataSources: data source cnt " << cnt
-                   << " has NULL sac, will be omitted";
-            continue;
-        }
-
-        if (buffer->get<unsigned int>(DBDataSource::sic_column_.name()).isNull(cnt))
-        {
-            logerr << "DBInterface: getDataSources: data source cnt " << cnt
-                   << " has NULL sic, will be omitted";
-            continue;
-        }
-
-        if (buffer->get<string>(DBDataSource::name_column_.name()).isNull(cnt))
-        {
-            logerr << "DBInterface: getDataSources: data source cnt " << cnt
-                   << " has NULL name, will be omitted";
-            continue;
-        }
-
-        std::unique_ptr<DBDataSource> src {new DBDataSource()};
-
-        src->id(buffer->get<unsigned int>(DBDataSource::id_column_.name()).get(cnt));
-        src->dsType(buffer->get<string>(DBDataSource::ds_type_column_.name()).get(cnt));
-        src->sac(buffer->get<unsigned int>(DBDataSource::sac_column_.name()).get(cnt));
-        src->sic(buffer->get<unsigned int>(DBDataSource::sic_column_.name()).get(cnt));
-        src->name(buffer->get<string>(DBDataSource::name_column_.name()).get(cnt));
-
-        if (!buffer->get<string>(DBDataSource::short_name_.name()).isNull(cnt))
-            src->shortName(buffer->get<string>(DBDataSource::short_name_.name()).get(cnt));
-
-        if (!buffer->get<string>(DBDataSource::info_column_.name()).isNull(cnt))
-            src->info(buffer->get<string>(DBDataSource::info_column_.name()).get(cnt));
-
-        if (!buffer->get<string>(DBDataSource::counts_column_.name()).isNull(cnt))
-            src->counts(buffer->get<string>(DBDataSource::counts_column_.name()).get(cnt));
-
-        sources.emplace_back(move(src));
     }
 
     return sources;
 }
 
+/**
+ */
 void DBInterface::saveDataSources(const std::vector<std::unique_ptr<dbContent::DBDataSource>>& data_sources)
 {
     loginf << "DBInterface: saveDataSources: num " << data_sources.size();
 
     using namespace dbContent;
 
-    assert (dbOpen());
+    assert (ready());
 
     clearTableContent(DBDataSource::table_name_);
 
@@ -560,70 +968,92 @@ void DBInterface::saveDataSources(const std::vector<std::unique_ptr<dbContent::D
     loginf << "DBInterface: saveDataSources: done";
 }
 
+/**
+ */
 bool DBInterface::existsFFTsTable()
 {
     return existsTable(DBFFT::table_name_);
 }
+
+/**
+ */
 void DBInterface::createFFTsTable()
 {
+    assert(ready());
     assert(!existsFFTsTable());
-    connection_mutex_.lock();
-    db_connection_->executeSQL(sql_generator_.getTableFFTsCreateStatement());
-    connection_mutex_.unlock();
 
-    updateTableInfo();
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        execute(sqlGenerator().getTableFFTsCreateStatement());
+        updateTableInfo();
+    }
 }
+
+/**
+ */
 std::vector<std::unique_ptr<DBFFT>> DBInterface::getFFTs()
 {
     logdbg << "DBInterface: getFFTs: start";
 
+    assert(ready());
+
     using namespace dbContent;
-
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    shared_ptr<DBCommand> command = sql_generator_.getFFTSelectCommand();
-
-    loginf << "DBInterface: getFFTs: sql '" << command->get() << "'";
-
-    shared_ptr<DBResult> result = db_connection_->execute(*command);
-    assert(result->containsData());
-    shared_ptr<Buffer> buffer = result->buffer();
-
-    logdbg << "DBInterface: getFFTs: json '" << buffer->asJSON().dump(4) << "'";
-
-    assert(buffer->properties().hasProperty(DBFFT::name_column_));
-    assert(buffer->properties().hasProperty(DBFFT::info_column_));
 
     std::vector<std::unique_ptr<DBFFT>> sources;
 
-    for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
     {
-        if (buffer->get<string>(DBFFT::name_column_.name()).isNull(cnt))
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        shared_ptr<DBCommand> command = sqlGenerator().getFFTSelectCommand();
+
+        logdbg << "DBInterface: getFFTs: sql '" << command->get() << "'";
+
+        shared_ptr<DBResult> result = execute(*command);
+        assert(result->containsData());
+        shared_ptr<Buffer> buffer = result->buffer();
+
+        logdbg << "DBInterface: getFFTs: json '" << buffer->asJSON().dump(4) << "'";
+
+        assert(buffer->properties().hasProperty(DBFFT::name_column_));
+        assert(buffer->properties().hasProperty(DBFFT::info_column_));
+
+        for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
         {
-            logerr << "DBInterface: getFFTs: data source cnt " << cnt
-                   << " has NULL name, will be omitted";
-            continue;
+            if (buffer->get<string>(DBFFT::name_column_.name()).isNull(cnt))
+            {
+                logerr << "DBInterface: getFFTs: data source cnt " << cnt
+                    << " has NULL name, will be omitted";
+                continue;
+            }
+
+            std::unique_ptr<DBFFT> src {new DBFFT()};
+
+            src->name(buffer->get<string>(DBFFT::name_column_.name()).get(cnt));
+
+            if (!buffer->get<string>(DBFFT::info_column_.name()).isNull(cnt))
+                src->info(nlohmann::json::parse(buffer->get<string>(DBFFT::info_column_.name()).get(cnt)));
+
+            sources.emplace_back(std::move(src));
         }
-
-        std::unique_ptr<DBFFT> src {new DBFFT()};
-
-        src->name(buffer->get<string>(DBFFT::name_column_.name()).get(cnt));
-
-        if (!buffer->get<string>(DBFFT::info_column_.name()).isNull(cnt))
-            src->info(nlohmann::json::parse(buffer->get<string>(DBFFT::info_column_.name()).get(cnt)));
-
-        sources.emplace_back(std::move(src));
     }
 
     return sources;
 }
+
+/**
+ */
 void DBInterface::saveFFTs(const std::vector<std::unique_ptr<DBFFT>>& ffts)
 {
     logdbg << "DBInterface: saveFFTs: num " << ffts.size();
 
     using namespace dbContent;
 
-    assert (dbOpen());
+    assert (ready());
 
     if (existsFFTsTable())
         clearTableContent(DBFFT::table_name_);
@@ -652,103 +1082,137 @@ void DBInterface::saveFFTs(const std::vector<std::unique_ptr<DBFFT>>& ffts)
     logdbg << "DBInterface: saveFFTs: done";
 }
 
-
+/**
+ */
 size_t DBInterface::count(const string& table)
 {
     logdbg << "DBInterface: count: table " << table;
+
+    assert(ready());
     assert(existsTable(table));
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
-    assert(db_connection_);
+    int tmp;
 
-    string sql = sql_generator_.getCountStatement(table);
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    logdbg << "DBInterface: count: sql '" << sql << "'";
+        string sql = sqlGenerator().getCountStatement(table);
 
-    DBCommand command;
-    command.set(sql);
+        logdbg << "DBInterface: count: sql '" << sql << "'";
 
-    PropertyList list;
-    list.addProperty("count", PropertyDataType::INT);
-    command.list(list);
+        DBCommand command;
+        command.set(sql);
 
-    shared_ptr<DBResult> result = db_connection_->execute(command);
+        PropertyList list;
+        list.addProperty("count", PropertyDataType::INT);
+        command.list(list);
 
-    assert(result->containsData());
-    int tmp = result->buffer()->get<int>("count").get(0);
+        shared_ptr<DBResult> result = execute(command);
+        assert(result->containsData());
+
+        tmp = result->buffer()->get<int>("count").get(0);
+    }
 
     logdbg << "DBInterface: count: " << table << ": " << tmp << " end";
+
     return static_cast<size_t>(tmp);
 }
 
+/**
+ */
 void DBInterface::setProperty(const string& id, const string& value)
 {
     properties_[id] = value;
 }
 
+/**
+ */
 string DBInterface::getProperty(const string& id)
 {
     assert(hasProperty(id));
     return properties_.at(id);
 }
 
-bool DBInterface::hasProperty(const string& id) { return properties_.count(id); }
+/**
+ */
+void DBInterface::removeProperty(const std::string& id)
+{
+    assert(hasProperty(id));
+    properties_.erase(id);
+}
 
+/**
+ */
+bool DBInterface::hasProperty(const string& id) 
+{ 
+    return properties_.count(id); 
+}
+
+/**
+ */
 void DBInterface::loadProperties()
 {
     loginf << "DBInterface: loadProperties";
 
+    assert(ready());
     assert (!properties_loaded_);
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    DBCommand command;
-    command.set(sql_generator_.getSelectAllPropertiesStatement());
-
-    PropertyList list;
-    list.addProperty("id", PropertyDataType::STRING);
-    list.addProperty("value", PropertyDataType::STRING);
-    command.list(list);
-
-    shared_ptr<DBResult> result = db_connection_->execute(command);
-
-    assert(result->containsData());
-
-    shared_ptr<Buffer> buffer = result->buffer();
-
-    assert(buffer);
-    assert(buffer->has<string>("id"));
-    assert(buffer->has<string>("value"));
-
-    NullableVector<string> id_vec = buffer->get<string>("id");
-    NullableVector<string> value_vec = buffer->get<string>("value");
-
-    for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
-        assert(!id_vec.isNull(cnt));
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-        if (properties_.count(id_vec.get(cnt)))
-            logerr << "DBInterface: loadProperties: property '" << id_vec.get(cnt) << "' already exists";
+        DBCommand command;
+        command.set(sqlGenerator().getSelectAllPropertiesStatement());
 
-        assert(!properties_.count(id_vec.get(cnt)));
-        if (!value_vec.isNull(cnt))
-            properties_[id_vec.get(cnt)] = value_vec.get(cnt);
+        PropertyList list;
+        list.addProperty("id", PropertyDataType::STRING);
+        list.addProperty("value", PropertyDataType::STRING);
+        command.list(list);
+
+        shared_ptr<DBResult> result = execute(command);
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+
+        assert(buffer);
+        assert(buffer->has<string>("id"));
+        assert(buffer->has<string>("value"));
+
+        NullableVector<string>& id_vec = buffer->get<string>("id");
+        NullableVector<string>& value_vec = buffer->get<string>("value");
+
+        for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
+        {
+            assert(!id_vec.isNull(cnt));
+
+            if (properties_.count(id_vec.get(cnt)))
+                logerr << "DBInterface: loadProperties: property '" << id_vec.get(cnt) << "' already exists";
+
+            assert(!properties_.count(id_vec.get(cnt)));
+            if (!value_vec.isNull(cnt))
+                properties_[id_vec.get(cnt)] = value_vec.get(cnt);
+        }
+
+        for (auto& prop_it : properties_)
+            loginf << "DBInterface: loadProperties: id '" << prop_it.first << "' value '"
+                << prop_it.second << "'";
+
+        // column with content
+        if (properties_.count(dbcolumn_content_property_name_))
+        {
+            nlohmann::json dbcolumn_content_json = nlohmann::json::parse(properties_.at(dbcolumn_content_property_name_));
+            dbcolumn_content_flags_ = dbcolumn_content_json.get<std::map<std::string, std::set<std::string>>>();
+        }
+
+        properties_loaded_ = true;
     }
-
-    for (auto& prop_it : properties_)
-        loginf << "DBInterface: loadProperties: id '" << prop_it.first << "' value '"
-               << prop_it.second << "'";
-
-    // column with content
-    if (properties_.count(dbcolumn_content_property_name_))
-    {
-        nlohmann::json dbcolumn_content_json = nlohmann::json::parse(properties_.at(dbcolumn_content_property_name_));
-        dbcolumn_content_flags_ = dbcolumn_content_json.get<std::map<std::string, std::set<std::string>>>();
-    }
-
-    properties_loaded_ = true;
 }
 
+/**
+ */
 bool DBInterface::hasContentIn(const std::string& table_name, const std::string& column_name) const
 {
     if (!properties_loaded_)
@@ -760,6 +1224,8 @@ bool DBInterface::hasContentIn(const std::string& table_name, const std::string&
     return false;
 }
 
+/**
+ */
 void DBInterface::setContentIn(const std::string& table_name, const std::string& column_name)
 {
     if (!properties_loaded_)
@@ -769,18 +1235,19 @@ void DBInterface::setContentIn(const std::string& table_name, const std::string&
         dbcolumn_content_flags_[table_name].insert(column_name);
 }
 
+/**
+ */
 void DBInterface::saveProperties()
 {
     loginf << "DBInterface: saveProperties";
 
-    if (!db_connection_)
+    if (!db_instance_)
     {
-        logwrn << "DBInterface: saveProperties: failed since no database connection exists";
+        logwrn << "DBInterface: saveProperties: failed since no database instance exists";
         return;
     }
 
     // boost::mutex::scoped_lock locker(connection_mutex_); // done in closeConnection
-    assert(db_connection_);
     assert (properties_loaded_);
 
     nlohmann::json dbcolumn_content_json = dbcolumn_content_flags_;
@@ -788,202 +1255,246 @@ void DBInterface::saveProperties()
 
     string str;
 
-    for (auto& prop_it : properties_)
     {
-        string str = sql_generator_.getInsertPropertyStatement(prop_it.first, prop_it.second);
-        db_connection_->executeSQL(str);
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        for (auto& prop_it : properties_)
+        {
+            auto sql = sqlGenerator().getInsertPropertyStatement(prop_it.first, prop_it.second);
+            execute(sql);
+        }
     }
 
     loginf << "DBInterface: saveProperties: done";
 }
 
+/**
+ */
 std::vector<std::shared_ptr<SectorLayer>> DBInterface::loadSectors()
 {
     loginf << "DBInterface: loadSectors";
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    DBCommand command;
-    command.set(sql_generator_.getSelectAllSectorsStatement());
-
-    PropertyList list;
-    list.addProperty("id", PropertyDataType::INT);
-    list.addProperty("name", PropertyDataType::STRING);
-    list.addProperty("layer_name", PropertyDataType::STRING);
-    list.addProperty("json", PropertyDataType::STRING);
-    command.list(list);
-
-    shared_ptr<DBResult> result = db_connection_->execute(command);
-
-    assert(result->containsData());
-
-    shared_ptr<Buffer> buffer = result->buffer();
-
-    assert(buffer);
-    assert(buffer->has<int>("id"));
-    assert(buffer->has<string>("name"));
-    assert(buffer->has<string>("layer_name"));
-    assert(buffer->has<string>("json"));
-
-    NullableVector<int> id_vec = buffer->get<int>("id");
-    NullableVector<string> name_vec = buffer->get<string>("name");
-    NullableVector<string> layer_name_vec = buffer->get<string>("layer_name");
-    NullableVector<string> json_vec = buffer->get<string>("json");
-
-    int id;
-    string name;
-    string layer_name;
-    string json_str;
+    assert(ready());
 
     std::vector<std::shared_ptr<SectorLayer>> sector_layers;
 
-    for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
-        assert(!id_vec.isNull(cnt));
-        assert(!name_vec.isNull(cnt));
-        assert(!layer_name_vec.isNull(cnt));
-        assert(!json_vec.isNull(cnt));
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-        id = id_vec.get(cnt);
-        name = name_vec.get(cnt);
-        layer_name = layer_name_vec.get(cnt);
-        json_str = json_vec.get(cnt);
+        DBCommand command;
+        command.set(sqlGenerator().getSelectAllSectorsStatement());
 
-        auto lay_it = std::find_if(sector_layers.begin(), sector_layers.end(),
-                                   [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+        PropertyList list;
+        list.addProperty("id", PropertyDataType::INT);
+        list.addProperty("name", PropertyDataType::STRING);
+        list.addProperty("layer_name", PropertyDataType::STRING);
+        list.addProperty("json", PropertyDataType::STRING);
+        command.list(list);
 
-        if (lay_it == sector_layers.end())
+        shared_ptr<DBResult> result = execute(command);
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+
+        assert(buffer);
+        assert(buffer->has<int>("id"));
+        assert(buffer->has<string>("name"));
+        assert(buffer->has<string>("layer_name"));
+        assert(buffer->has<string>("json"));
+
+        NullableVector<int>& id_vec = buffer->get<int>("id");
+        NullableVector<string>& name_vec = buffer->get<string>("name");
+        NullableVector<string>& layer_name_vec = buffer->get<string>("layer_name");
+        NullableVector<string>& json_vec = buffer->get<string>("json");
+
+        int id;
+        string name;
+        string layer_name;
+        string json_str;
+
+        for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
         {
-            sector_layers.push_back(make_shared<SectorLayer>(layer_name));
+            assert(!id_vec.isNull(cnt));
+            assert(!name_vec.isNull(cnt));
+            assert(!layer_name_vec.isNull(cnt));
+            assert(!json_vec.isNull(cnt));
 
-            lay_it = std::find_if(
-                        sector_layers.begin(), sector_layers.end(),
-                        [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+            id = id_vec.get(cnt);
+            name = name_vec.get(cnt);
+            layer_name = layer_name_vec.get(cnt);
+            json_str = json_vec.get(cnt);
+
+            auto lay_it = std::find_if(sector_layers.begin(), sector_layers.end(),
+                                    [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+
+            if (lay_it == sector_layers.end())
+            {
+                sector_layers.push_back(make_shared<SectorLayer>(layer_name));
+
+                lay_it = std::find_if(
+                            sector_layers.begin(), sector_layers.end(),
+                            [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
+            }
+
+            auto eval_sector = new Sector(id, name, layer_name, true);
+            bool ok = eval_sector->readJSON(json_str);
+            assert(ok);
+
+            string layer_name = eval_sector->layerName();
+
+            (*lay_it)->addSector(shared_ptr<Sector>(eval_sector));
+            assert ((*lay_it)->hasSector(name));
+
+            loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '"
+                << layer_name << "' num points " << (*lay_it)->sector(name)->size();
         }
-
-        auto eval_sector = new Sector(id, name, layer_name, true);
-        bool ok = eval_sector->readJSON(json_str);
-        assert(ok);
-
-        string layer_name = eval_sector->layerName();
-
-        (*lay_it)->addSector(shared_ptr<Sector>(eval_sector));
-        assert ((*lay_it)->hasSector(name));
-
-        loginf << "DBInterface: loadSectors: loaded sector '" << name << "' in layer '"
-               << layer_name << "' num points " << (*lay_it)->sector(name)->size();
     }
 
     return sector_layers;
 }
 
-bool DBInterface::areColumnsNull (const std::string& table_name, const std::vector<std::string> columns)
+/**
+ */
+bool DBInterface::areColumnsNull(const std::string& table_name, 
+                                 const std::vector<std::string> columns)
 {
-    boost::mutex::scoped_lock locker(connection_mutex_);
+    assert(ready());
 
-    string str = sql_generator_.getSelectNullCount(table_name, columns);
+    bool cols_null = false;
 
-    loginf << "DBInterface: areColumnsNull: sql '" << str << "'";
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    DBCommand command;
-    command.set(str);
+        string str = sqlGenerator().getSelectNullCount(table_name, columns);
 
-    PropertyList list;
-    list.addProperty("count", PropertyDataType::INT);
-    command.list(list);
+        loginf << "DBInterface: areColumnsNull: sql '" << str << "'";
 
-    shared_ptr<DBResult> result = db_connection_->execute(command);
+        DBCommand command;
+        command.set(str);
 
-    assert(result->containsData());
+        PropertyList list;
+        list.addProperty("count", PropertyDataType::INT);
+        command.list(list);
 
-    shared_ptr<Buffer> buffer = result->buffer();
+        shared_ptr<DBResult> result = execute(command);
+        assert(result->containsData());
 
-    assert(buffer);
-    assert(buffer->has<int>("count"));
+        shared_ptr<Buffer> buffer = result->buffer();
 
-    NullableVector<int> count_vec = buffer->get<int>("count");
-    assert (count_vec.size() == 1);
+        assert(buffer);
+        assert(buffer->has<int>("count"));
 
-    loginf << "DBInterface: areColumnsNull: null count " << count_vec.get(0);
+        NullableVector<int>& count_vec = buffer->get<int>("count");
+        assert (count_vec.contentSize() == 1);
 
-    return count_vec.get(0) != 0;
+        cols_null = count_vec.get(0) != 0;
+
+        loginf << "DBInterface: areColumnsNull: null count " << count_vec.get(0);
+    }
+
+    return cols_null;
 }
 
+/**
+ */
 bool DBInterface::existsViewPointsTable()
 {
     return existsTable(TABLE_NAME_VIEWPOINTS);
 }
 
+/**
+ */
 void DBInterface::createViewPointsTable()
 {
+    assert(ready());
     assert(!existsViewPointsTable());
 
     setProperty("view_points_version", ViewPoint::VP_COLLECTION_CONTENT_VERSION);
 
-    connection_mutex_.lock();
-    db_connection_->executeSQL(sql_generator_.getTableViewPointsCreateStatement());
-    connection_mutex_.unlock();
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    updateTableInfo();
+        execute(sqlGenerator().getTableViewPointsCreateStatement());
+        updateTableInfo();
+    }
 }
 
+/**
+ */
 void DBInterface::setViewPoint(const unsigned int id, const string& value)
 {
-    if (!db_connection_)
+    if (!db_instance_)
     {
-        logwrn << "DBInterface: setViewPoint: failed since no database connection exists";
+        logwrn << "DBInterface: setViewPoint: failed since no database instance exists";
         return;
     }
-
-    // boost::mutex::scoped_lock locker(connection_mutex_); // done in closeConnection
-    assert(db_connection_);
 
     if (!existsViewPointsTable())
         createViewPointsTable();
 
-    string str = sql_generator_.getInsertViewPointStatement(id, value);
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    logdbg << "DBInterface: setViewPoint: cmd '" << str << "'";
-    db_connection_->executeSQL(str);
+        string str = sqlGenerator().getInsertViewPointStatement(id, value);
+        logdbg << "DBInterface: setViewPoint: cmd '" << str << "'";
+
+        execute(str);
+    }
 }
 
+/**
+ */
 map<unsigned int, string> DBInterface::viewPoints()
 {
     loginf << "DBInterface: viewPoints";
 
-    assert (existsViewPointsTable());
-
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    DBCommand command;
-    command.set(sql_generator_.getSelectAllViewPointsStatement());
-
-    PropertyList list;
-    list.addProperty("id", PropertyDataType::UINT);
-    list.addProperty("json", PropertyDataType::STRING);
-    command.list(list);
-
-    shared_ptr<DBResult> result = db_connection_->execute(command);
-
-    assert(result->containsData());
-
-    shared_ptr<Buffer> buffer = result->buffer();
-
-    assert(buffer);
-    assert(buffer->has<unsigned int>("id"));
-    assert(buffer->has<string>("json"));
-
-    NullableVector<unsigned int> id_vec = buffer->get<unsigned int>("id");
-    NullableVector<string> json_vec = buffer->get<string>("json");
+    assert(ready());
+    assert(existsViewPointsTable());
 
     map<unsigned int, string> view_points;
 
-    for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
-        assert(!id_vec.isNull(cnt));
-        assert(!view_points.count(id_vec.get(cnt)));
-        if (!json_vec.isNull(cnt))
-            view_points[id_vec.get(cnt)] = json_vec.get(cnt);
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        DBCommand command;
+        command.set(sqlGenerator().getSelectAllViewPointsStatement());
+
+        PropertyList list;
+        list.addProperty("id", PropertyDataType::UINT);
+        list.addProperty("json", PropertyDataType::STRING);
+        command.list(list);
+
+        shared_ptr<DBResult> result = execute(command);
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+
+        assert(buffer);
+        assert(buffer->has<unsigned int>("id"));
+        assert(buffer->has<string>("json"));
+      
+        NullableVector<unsigned int>& id_vec = buffer->get<unsigned int>("id");
+        NullableVector<string>& json_vec = buffer->get<string>("json");
+
+        for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
+        {
+            assert(!id_vec.isNull(cnt));
+            assert(!view_points.count(id_vec.get(cnt)));
+            if (!json_vec.isNull(cnt))
+                view_points[id_vec.get(cnt)] = json_vec.get(cnt);
+        }
     }
 
     loginf << "DBInterface: loadViewPoints: loaded " << view_points.size() << " view points";
@@ -991,389 +1502,1220 @@ map<unsigned int, string> DBInterface::viewPoints()
     return view_points;
 }
 
+/**
+ */
 void DBInterface::deleteViewPoint(const unsigned int id)
 {
-    boost::mutex::scoped_lock locker(connection_mutex_);
-    db_connection_->executeSQL(sql_generator_.getDeleteStatement(TABLE_NAME_VIEWPOINTS,
-                                                                 "id="+to_string(id)));
+    assert(ready());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        auto sql = sqlGenerator().getDeleteStatement(TABLE_NAME_VIEWPOINTS, "id="+to_string(id));
+        execute(sql);
+    }
 }
 
+/**
+ */
 void DBInterface::deleteAllViewPoints()
 {
     clearTableContent(TABLE_NAME_VIEWPOINTS);
 }
 
-
+/**
+ */
 bool DBInterface::existsSectorsTable()
 {
     return existsTable(TABLE_NAME_SECTORS);
 }
 
+/**
+ */
 void DBInterface::createSectorsTable()
 {
     loginf << "DBInterface: createSectorsTable";
 
+    assert(ready());
     assert(!existsSectorsTable());
 
-    connection_mutex_.lock();
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    loginf << "DBInterface: createSectorsTable: sql '" << sql_generator_.getTableSectorsCreateStatement() << "'";
-    db_connection_->executeSQL(sql_generator_.getTableSectorsCreateStatement());
-    connection_mutex_.unlock();
+        auto sql = sqlGenerator().getTableSectorsCreateStatement();
 
-    updateTableInfo();
+        loginf << "DBInterface: createSectorsTable: sql '" << sql << "'";
+
+        execute(sql);
+        updateTableInfo();
+    }
 }
 
+/**
+ */
 void DBInterface::clearSectorsTable()
 {
     clearTableContent(TABLE_NAME_SECTORS);
 }
 
+/**
+ */
 void DBInterface::saveSector(shared_ptr<Sector> sector)
 {
     loginf << "DBInterface: saveSector: sector " << sector->name() << " layer " << sector->layerName()
            << " id " << sector->id();
 
-    if (!db_connection_)
+    if (!db_instance_)
     {
-        logwrn << "DBInterface: saveSector: failed since no database connection exists";
+        logwrn << "DBInterface: saveSector: failed since no database instance exists";
         return;
     }
 
-    assert(db_connection_);
+    assert(ready());
 
     if (!existsSectorsTable())
         createSectorsTable();
 
-    // insert and replace
-    string str = sql_generator_.getReplaceSectorStatement(sector->id(), sector->name(), sector->layerName(),
-                                                          sector->jsonDataStr());
-
-    logdbg << "DBInterface: saveSector: cmd '" << str << "'";
     {
-        boost::mutex::scoped_lock locker(connection_mutex_);
-        db_connection_->executeSQL(str);
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        // insert and replace
+        string str = sqlGenerator().getReplaceSectorStatement(sector->id(), sector->name(), sector->layerName(), sector->jsonDataStr());
+        logdbg << "DBInterface: saveSector: cmd '" << str << "'";
+
+        execute(str);
     }
-
-
 }
 
+/**
+ */
 void DBInterface::deleteSector(shared_ptr<Sector> sector)
 {
+    assert(ready());
+
     unsigned int sector_id = sector->id();
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
-    string cmd = sql_generator_.getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    //loginf << "UGA '" << cmd << "'";
-    db_connection_->executeSQL(cmd);
+        string cmd = sqlGenerator().getDeleteStatement(TABLE_NAME_SECTORS,"id="+to_string(sector_id));
+        execute(cmd);
+    }
 }
 
+/**
+ */
 void DBInterface::deleteAllSectors()
 {
     clearTableContent(TABLE_NAME_SECTORS);
 }
 
+/**
+ */
 bool DBInterface::existsTargetsTable()
 {
     return existsTable(TABLE_NAME_TARGETS);
 }
 
+/**
+ */
 void DBInterface::createTargetsTable()
 {
     loginf << "DBInterface: createTargetsTable";
 
+    assert(ready());
     assert(!existsTargetsTable());
 
-    connection_mutex_.lock();
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    loginf << "DBInterface: createTargetsTable: sql '" << sql_generator_.getTableTargetsCreateStatement() << "'";
-    db_connection_->executeSQL(sql_generator_.getTableTargetsCreateStatement());
-    connection_mutex_.unlock();
+        auto sql = sqlGenerator().getTableTargetsCreateStatement();
 
-    updateTableInfo();
+        loginf << "DBInterface: createTargetsTable: sql '" << sql << "'";
+
+        execute(sql);
+        updateTableInfo();
+    }
 }
 
+/**
+ */
 void DBInterface::clearTargetsTable()
 {
     clearTableContent(TABLE_NAME_TARGETS);
 }
 
+/**
+ */
 std::vector<std::unique_ptr<dbContent::Target>> DBInterface::loadTargets()
 {
     loginf << "DBInterface: loadTargets";
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    DBCommand command;
-    command.set(sql_generator_.getSelectAllTargetsStatement());
-
-    PropertyList list;
-    list.addProperty("utn", PropertyDataType::UINT);
-    list.addProperty("json", PropertyDataType::STRING);
-    command.list(list);
-
-    shared_ptr<DBResult> result = db_connection_->execute(command);
-
-    assert(result->containsData());
-
-    shared_ptr<Buffer> buffer = result->buffer();
-
-    assert(buffer);
-    assert(buffer->has<unsigned int>("utn"));
-    assert(buffer->has<string>("json"));
-
-    NullableVector<unsigned int> utn_vec = buffer->get<unsigned int>("utn");
-    NullableVector<string> json_vec = buffer->get<string>("json");
-
-    unsigned int utn;
-    string json_str;
+    assert(ready());
 
     std::vector<std::unique_ptr<dbContent::Target>> targets;
-    std::set<unsigned int> existing_utns;
 
-    for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
     {
-        assert(!utn_vec.isNull(cnt));
-        assert(!json_vec.isNull(cnt));
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-        utn = utn_vec.get(cnt);
-        json_str = json_vec.get(cnt);
+        DBCommand command;
+        command.set(sqlGenerator().getSelectAllTargetsStatement());
 
-        assert (!existing_utns.count(utn));
-        existing_utns.insert(utn);
+        PropertyList list;
+        list.addProperty("utn", PropertyDataType::UINT);
+        list.addProperty("json", PropertyDataType::STRING);
+        command.list(list);
 
-        //shared_ptr<dbContent::Target> target = make_shared<dbContent::Target>(utn, nlohmann::json::parse(json_str));
+        shared_ptr<DBResult> result = execute(command);
+        assert(!result->hasError());
+        assert(result->containsData());
 
-        targets.emplace_back(new dbContent::Target(utn, nlohmann::json::parse(json_str)));
+        shared_ptr<Buffer> buffer = result->buffer();
 
-//        loginf << "DBInterface: loadTargets: loaded target " << utn << " json '"
-//               << json_str << "'";
+        assert(buffer);
+        assert(buffer->has<unsigned int>("utn"));
+        assert(buffer->has<string>("json"));
+
+        NullableVector<unsigned int>& utn_vec = buffer->get<unsigned int>("utn");
+        NullableVector<string>& json_vec = buffer->get<string>("json");
+
+        unsigned int utn;
+        string json_str;
+
+        std::set<unsigned int> existing_utns;
+
+        for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
+        {
+            assert(!utn_vec.isNull(cnt));
+            assert(!json_vec.isNull(cnt));
+
+            utn = utn_vec.get(cnt);
+            json_str = json_vec.get(cnt);
+
+            assert (!existing_utns.count(utn));
+            existing_utns.insert(utn);
+
+            //shared_ptr<dbContent::Target> target = make_shared<dbContent::Target>(utn, nlohmann::json::parse(json_str));
+
+            targets.emplace_back(new dbContent::Target(utn, nlohmann::json::parse(json_str)));
+
+            //        loginf << "DBInterface: loadTargets: loaded target " << utn << " json '"
+            //               << json_str << "'";
+        }
     }
 
     return targets;
 }
 
-void DBInterface::saveTargets(const std::vector<std::unique_ptr<dbContent::Target>>& targets)
+/**
+ */
+void DBInterface::saveTargets(const std::map<unsigned int, nlohmann::json>& targets_info)
 {
     loginf << "DBInterface: saveTargets";
 
-    assert (db_connection_);
+    assert(ready());
 
     clearTargetsTable();
 
-    string str;
-
-    for (auto& tgt_it : targets)
     {
-        string str = sql_generator_.getInsertTargetStatement(tgt_it->utn_, tgt_it->info().dump());
-        db_connection_->executeSQL(str);
+        //storing all targets at once via a buffer is faster
+        std::shared_ptr<Buffer> buffer(new Buffer(dbContent::Target::DBPropertyList));
+
+        auto& id_vec   = buffer->get<unsigned int>(dbContent::Target::DBColumnID.name());
+        auto& info_vec = buffer->get<nlohmann::json>(dbContent::Target::DBColumnInfo.name());
+
+        size_t idx = 0;
+        for (auto& tgt_it : targets_info)
+        {
+            id_vec.set(idx, tgt_it.first);
+            info_vec.set(idx, tgt_it.second);
+            ++idx;
+        }
+
+        insertBuffer(TABLE_NAME_TARGETS, buffer);
     }
 
     loginf << "DBInterface: saveTargets: done";
 }
 
-void DBInterface::saveTarget(const std::unique_ptr<dbContent::Target>& target)
+/**
+ */
+void DBInterface::updateTargets(const std::map<unsigned int, nlohmann::json>& targets_info)
 {
-    loginf << "DBInterface: saveTarget: utn " << target->utn();
+    loginf << "DBInterface: updateTargets: updating " << targets_info.size() << " utn(s)";
 
-    string str = sql_generator_.getInsertTargetStatement(target->utn_, target->info().dump());
-    // uses replace with utn as unique key
-    db_connection_->executeSQL(str);
+    assert(ready());
+
+    if (targets_info.size() > TableBulkUpdateMinRows)
+    {
+        //updating many targets at once via a buffer is faster
+        std::shared_ptr<Buffer> buffer(new Buffer(dbContent::Target::DBPropertyList));
+
+        auto& id_vec   = buffer->get<unsigned int>(dbContent::Target::DBColumnID.name());
+        auto& info_vec = buffer->get<nlohmann::json>(dbContent::Target::DBColumnInfo.name());
+
+        size_t idx = 0;
+        for (auto& tgt_it : targets_info)
+        {
+            id_vec.set(idx, tgt_it.first);
+            info_vec.set(idx, tgt_it.second);
+            ++idx;
+        }
+
+        updateBuffer(TABLE_NAME_TARGETS, Target::DBColumnID.name(), buffer);
+    }
+    else
+    {
+        //run individual update for each target
+        for (auto& tgt_it : targets_info)
+        {
+            #ifdef PROTECT_INSTANCE
+            boost::mutex::scoped_lock locker(instance_mutex_);
+            #endif
+
+            string str = sqlGenerator().getInsertTargetStatement(tgt_it.first, tgt_it.second.dump());
+
+            // uses replace with utn as unique key
+            execute(str);
+        }
+    }
+
+    loginf << "DBInterface: updateTargets: done";
 }
 
+
+bool DBInterface::existsTaskLogTable()
+{
+    return existsTable(TABLE_NAME_TASK_LOG);
+}
+void DBInterface::createTaskLogTable()
+{
+    loginf << "DBInterface: createTaskLogTable";
+
+    assert(ready());
+    assert(!existsTaskLogTable());
+
+    {
+#ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+#endif
+
+        auto sql = sqlGenerator().getTableTaskLogCreateStatement();
+
+        loginf << "DBInterface: createTaskLogTable: sql '" << sql << "'";
+
+        execute(sql);
+        updateTableInfo();
+    }
+}
+std::vector<nlohmann::json> DBInterface::loadTaskLogInfo()
+{
+    loginf << "DBInterface: loadTaskLogInfo";
+
+    assert(ready());
+    assert(existsTaskLogTable());
+
+    std::vector<nlohmann::json> info;
+
+    {
+#ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+#endif
+
+        DBCommand command;
+        command.set(sqlGenerator().getSelectAllTaslLogMessagesStatement());
+
+        PropertyList list;
+        list.addProperty("msg_id", PropertyDataType::UINT);
+        list.addProperty("json", PropertyDataType::STRING);
+        command.list(list);
+
+        shared_ptr<DBResult> result = execute(command);
+        assert(!result->hasError());
+        assert(result->containsData());
+
+        shared_ptr<Buffer> buffer = result->buffer();
+
+        assert(buffer);
+        assert(buffer->has<unsigned int>("msg_id"));
+        assert(buffer->has<string>("json"));
+
+        NullableVector<unsigned int>& msg_id_vec = buffer->get<unsigned int>("msg_id");
+        NullableVector<string>& json_vec = buffer->get<string>("json");
+
+        unsigned int msg_id;
+        string json_str;
+
+        std::set<unsigned int> existing_msg_ids;
+
+        for (size_t cnt = 0; cnt < buffer->size(); ++cnt)
+        {
+            assert(!msg_id_vec.isNull(cnt));
+            assert(!json_vec.isNull(cnt));
+
+            msg_id = msg_id_vec.get(cnt);
+            json_str = json_vec.get(cnt);
+
+            assert (!existing_msg_ids.count(msg_id));
+            existing_msg_ids.insert(msg_id);
+
+            info.emplace_back(nlohmann::json::parse(json_str));
+        }
+    }
+
+    return info;
+}
+
+void DBInterface::saveTaskLogInfo(unsigned int msg_id, const nlohmann::json& info)
+{
+    assert (ready());
+    assert(existsTaskLogTable());
+
+    {
+        //storing all targets at once via a buffer is faster
+        std::shared_ptr<Buffer> buffer(new Buffer(LogStore::LogEntry::DBPropertyList));
+
+        auto& msg_id_vec   = buffer->get<unsigned int>(LogStore::LogEntry::DBColumnID.name());
+        auto& info_vec = buffer->get<nlohmann::json>(LogStore::LogEntry::DBColumnInfo.name());
+
+        msg_id_vec.set(0, msg_id);
+        info_vec.set(0, info);
+
+        insertBuffer(TABLE_NAME_TASK_LOG, buffer);
+    }
+}
+
+/**
+ */
 void DBInterface::clearAssociations(const DBContent& dbcontent)
 {
-    string str = sql_generator_.getSetNullStatement(dbcontent.dbTableName(),
-                                                    dbcontent.variable("UTN").dbColumnName());
-    // uses replace with utn as unique key
-    db_connection_->executeSQL(str);
+    assert(ready());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        string str = sqlGenerator().getSetNullStatement(dbcontent.dbTableName(),
+                                                        dbcontent.variable("UTN").dbColumnName());      
+        // uses replace with utn as unique key
+        execute(str);
+    }
 }
 
-
-void DBInterface::insertBuffer(DBContent& dbcontent, std::shared_ptr<Buffer> buffer)
+/**
+ */
+bool DBInterface::existsTaskResultsTable() const
 {
-    logdbg << "DBInterface: insertBuffer: dbo " << dbcontent.name() << " buffer size "
-           << buffer->size();
+    return existsTable(TaskResult::DBTableName);
+}
+
+/**
+ */
+bool DBInterface::existsReportContentsTable() const
+{
+    return existsTable(ResultReport::SectionContent::DBTableName);
+}
+
+/**
+ */
+void DBInterface::createTaskResultsTable()
+{
+    assert(ready());
+    assert(!existsTaskResultsTable());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        execute(sqlGenerator().getTableTaskResultsCreateStatement());
+        updateTableInfo();
+    }
+}
+
+/**
+ */
+void DBInterface::createReportContentsTable()
+{
+    assert(ready());
+    assert(!existsReportContentsTable());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        execute(sqlGenerator().getTableReportContentsCreateStatement());
+        updateTableInfo();
+    }
+}
+
+/**
+ */
+Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_needed)
+{
+    assert(ready());
+
+    try
+    {
+        // removeTable(TaskResult::DBTableName); // UGA TABLEHACK
+
+        //create needed tables
+        if (!existsTaskResultsTable())
+            createTaskResultsTable();
+
+        if (!existsReportContentsTable())
+            createReportContentsTable();
+        
+        //remove any old result with the same id/name
+        bool result_deleted = false;
+        auto del_result = deleteResult(result, false, &result_deleted);
+        if (!del_result.ok())
+            throw std::runtime_error(del_result.error());
+
+        auto result_id   = result.id();
+        auto result_name = result.name();
+
+        //write result
+        {
+            std::shared_ptr<Buffer> buffer(new Buffer(TaskResult::DBPropertyList));
+
+            auto& id_vec      = buffer->get<unsigned int>(TaskResult::DBColumnID.name());
+            auto& name_vec    = buffer->get<std::string>(TaskResult::DBColumnName.name());
+            auto& header_vec  = buffer->get<nlohmann::json>(TaskResult::DBColumnJSONHeader.name());
+            auto& content_vec = buffer->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
+            auto& type_vec    = buffer->get<int>(TaskResult::DBColumnResultType.name());
+
+            id_vec.set(0, result_id);
+            name_vec.set(0, result.name());
+            header_vec.set(0, result.header().toJSON());
+            content_vec.set(0, result.toJSON());
+            type_vec.set(0, (int)result.type());
+
+            insertBuffer(TaskResult::DBTableName, buffer);
+        }
+
+        //write contents
+        auto report_contents = result.report()->reportContents(true);
+        {
+            size_t chunk_size_bytes = 1e09;
+            size_t current_bytes    = 0;
+            size_t current_row      = 0;
+
+            std::shared_ptr<Buffer> buffer;
+
+            NullableVector<unsigned int>*   content_id_vec = nullptr;
+            NullableVector<unsigned int>*   result_id_vec  = nullptr;
+            NullableVector<int>*            type_vec       = nullptr;
+            NullableVector<nlohmann::json>* content_vec    = nullptr;
+
+            for (const auto& c : report_contents)
+            {
+                if (!buffer || current_bytes > chunk_size_bytes)
+                {
+                    //insert old buffer if available
+                    if (buffer)
+                    {
+                        //loginf << "DBInterface: saveResult: writing" << buffer->size() << " row(s)";
+                        insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+                    }
+
+                    //create new buffer
+                    buffer.reset(new Buffer(ResultReport::SectionContent::DBPropertyList));
+
+                    content_id_vec = &buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+                    result_id_vec  = &buffer->get<unsigned int>(ResultReport::SectionContent::DBColumnResultID.name());
+                    type_vec       = &buffer->get<int>(ResultReport::SectionContent::DBColumnType.name());
+                    content_vec    = &buffer->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+                    current_bytes = 0;
+                    current_row   = 0;
+                }
+
+                assert(buffer);
+
+                //!this might trigger recomputations from temporarily generated data,
+                //which is immediately thrown away afterwards!
+                auto   c_json  = c->toJSON();
+                size_t c_bytes = c_json.dump().size();
+
+                content_id_vec->set(current_row, c->contentID());
+                result_id_vec->set(current_row, result_id);
+                type_vec->set(current_row, (int)c->contentType());
+                content_vec->set(current_row, c_json);
+
+                current_bytes += c_bytes;
+                current_row   += 1;
+            }
+
+            //insert remaining buffer content
+            if (current_row > 0)
+            {
+                //loginf << "DBInterface: saveResult: writing" << buffer->size() << " row(s)";
+                insertBuffer(ResultReport::SectionContent::DBTableName, buffer);
+            }
+        }
+
+        //cleanup db?
+        if (result_deleted && cleanup_db_if_needed)
+            cleanupDB(false);
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: saveResult: Could not store result: " << ex.what();
+        return Result::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: saveResult: Could not store result: Unknown error";
+        return Result::failed("Unknown error");
+    }
+
+    return Result::succeeded();
+}
+
+/**
+ */
+Result DBInterface::deleteResult(const TaskResult& result, 
+                                 bool cleanup_db_if_needed,
+                                 bool* deleted)
+{
+    if (deleted)
+        *deleted = false;
+
+    auto id = result.id();
+
+    if (!existsTaskResultsTable() || 
+        !existsReportContentsTable())
+    {
+        logerr << "DBInterface: deleteResult: Result tables do not exist";
+        return Result::failed("Result tables do not exist");
+    }
+
+    bool results_deleted = false;
+
+    try
+    {
+        //get old result(s) which resemble(s) the new one (either in id or name)
+        auto sel_filter = db::SQLFilter(TaskResult::DBColumnID.name(), std::to_string(id), db::SQLFilter::ComparisonOp::Is)
+            .OR(TaskResult::DBColumnName.name(), "'" + result.name() + "'", db::SQLFilter::ComparisonOp::Is).statement();
+
+        PropertyList properties = PropertyList({ TaskResult::DBColumnID });
+
+        auto sel_result = select(TaskResult::DBTableName, properties, sel_filter);
+        if (!sel_result.ok())
+            throw std::runtime_error("Locating old result failed");
+
+        //collect id(s) of old result(s)
+        std::vector<unsigned int> ids_to_remove;
+
+        size_t n = sel_result.result()->size();
+        const auto& id_vector = sel_result.result()->get<unsigned int>(TaskResult::DBColumnID.name());
+        for (size_t i = 0; i < n; ++i)
+            ids_to_remove.push_back(id_vector.get(i));
+
+        loginf << "DBInterface: deleteResult: Deleting " << ids_to_remove.size() << " old result(s)";
+
+        //delete old result(s)
+        for (auto old_id : ids_to_remove)
+        {
+            auto del_content_cmd = sqlGenerator().getDeleteCommand(ResultReport::SectionContent::DBTableName,
+                                                                   db::SQLFilter(ResultReport::SectionContent::DBColumnResultID.name(), 
+                                                                                 std::to_string(old_id), 
+                                                                                 db::SQLFilter::ComparisonOp::Is).statement());
+            auto del_result_cmd = sqlGenerator().getDeleteCommand(TaskResult::DBTableName,
+                                                                  db::SQLFilter(TaskResult::DBColumnID.name(), 
+                                                                                std::to_string(old_id), 
+                                                                                db::SQLFilter::ComparisonOp::Is).statement());
+            auto result_del_content = execute(*del_content_cmd);
+            auto result_del_result  = execute(*del_result_cmd );
+
+            if (result_del_content->hasError())
+                throw std::runtime_error(result_del_content->error());
+            if (result_del_result->hasError())
+                throw std::runtime_error(result_del_result->error());
+
+            results_deleted = true;
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: deleteResult: Could not delete result: " << ex.what();
+        return Result::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: deleteResult: Could not delete result: Unknown error";
+        return Result::failed("Unknown error");
+    }
+
+    if (deleted)
+        *deleted = results_deleted;
+
+    //cleanup db?
+    if (results_deleted && cleanup_db_if_needed)
+        cleanupDB(false);
+
+    return Result::succeeded();
+}
+
+/**
+ */
+Result DBInterface::updateResultHeader(const TaskResult& result)
+{
+    loginf << "DBInterface: updateResultHeader: updating header of result '" << result.name() << "'";
+
+    assert(ready());
+
+    try
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        string str = sqlGenerator().getUpdateCellStatement(TaskResult::DBTableName,
+                                                           TaskResult::DBColumnJSONHeader.name(),
+                                                           result.header().toJSON(),
+                                                           TaskResult::DBColumnID.name(),
+                                                           result.id());
+        // uses replace with utn as unique key
+        auto res = execute(str);
+        if (!res.ok())
+            return res;
+    }
+    catch(const std::exception& ex)
+    {
+        return Result::failed(std::string(ex.what()));
+    }
+    catch(...)
+    {
+        return Result::failed("Unknown error");
+    }
+
+    loginf << "DBInterface: updateResultHeader: done";
+
+    return Result::succeeded();
+}
+
+/**
+ */
+ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
+{
+    assert(ready());
+
+    std::vector<std::shared_ptr<TaskResult>> results;
+
+    //no results stored yet?
+    if (!existsTaskResultsTable())
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::succeeded(results);
+
+    try
+    {
+        auto cmd = sqlGenerator().getSelectCommand(TaskResult::DBTableName, TaskResult::DBPropertyList, "");
+        auto result = execute(*cmd);
+        if (result->hasError() || !result->containsData() || !result->buffer())
+            throw std::runtime_error("Could not obtain results table");
+
+        auto b = result->buffer();
+
+        //@TODO: check more tables obtained this way for having the right properties
+        if (!b->hasProperty(TaskResult::DBColumnID) ||
+            !b->hasProperty(TaskResult::DBColumnName) ||
+            !b->hasProperty(TaskResult::DBColumnJSONHeader) ||
+            !b->hasProperty(TaskResult::DBColumnJSONContent) ||
+            !b->hasProperty(TaskResult::DBColumnResultType))
+            throw std::runtime_error("Results table invalid");
+
+        size_t nr = b->size();
+
+        auto& id_vec      = b->get<unsigned int>(TaskResult::DBColumnID.name());
+        auto& name_vec    = b->get<std::string>(TaskResult::DBColumnName.name());
+        auto& header_vec  = b->get<nlohmann::json>(TaskResult::DBColumnJSONHeader.name());
+        auto& content_vec = b->get<nlohmann::json>(TaskResult::DBColumnJSONContent.name());
+        auto& type_vec    = b->get<int>(TaskResult::DBColumnResultType.name());
+
+        results.resize(nr);
+
+        auto& task_man = COMPASS::instance().taskManager();
+
+        for (size_t i = 0; i < nr; ++i)
+        {
+            const auto& result_name  = name_vec.get(i);
+            const auto& result_type  = type_vec.get(i);
+            const auto& result_id    = id_vec.get(i);
+            const auto& json_header  = header_vec.get(i);
+            const auto& json_content = content_vec.get(i);
+
+            //create result of given type
+            results[ i ] = task_man.createResult(result_id, (task::TaskResultType)result_type);
+            if (!results[ i ])
+                throw std::runtime_error("Could not create result from type");
+
+            //try to read result header
+            TaskResultHeader header;
+            if (!header.fromJSON(json_header))
+                throw std::runtime_error("Could not read header of result '" + result_name + "'");
+
+            //try to read result
+            if (!results[ i ]->fromJSON(json_content))
+                throw std::runtime_error("Could not read content of result '" + result_name + "'");
+
+            //configure result using header information (update state etc.)
+            results[ i ]->configure(header);
+
+            //final checks
+            if (results[ i ]->name() != result_name ||
+                results[ i ]->type() != result_type ||
+                results[ i ]->id()   != result_id)
+                throw std::runtime_error("Result '" + result_name + "' obtains invalid content");
+        }
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: loadResults: Could not load results: " << ex.what();
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: loadResults: Could not load results: Unknown error";
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed("Unknown error");
+    }
+
+    return ResultT<std::vector<std::shared_ptr<TaskResult>>>::succeeded(results);
+}
+
+/**
+ */
+ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(ResultReport::Section* section, 
+                                                                                unsigned int content_id)
+{
+    assert(ready());
+
+    std::shared_ptr<ResultReport::SectionContent> content;
+
+    loginf << "DBInterface: loadContent: Loading content id " << content_id << "...";
+
+    try
+    {
+        PropertyList properties;
+        properties.addProperty(ResultReport::SectionContent::DBColumnContentID);
+        properties.addProperty(ResultReport::SectionContent::DBColumnResultID);
+        properties.addProperty(ResultReport::SectionContent::DBColumnType);
+        properties.addProperty(ResultReport::SectionContent::DBColumnJSONContent);
+
+        auto filter_col = ResultReport::SectionContent::DBColumnContentID.name();
+
+        auto cmd = sqlGenerator().getSelectCommand(ResultReport::SectionContent::DBTableName, 
+                                                   ResultReport::SectionContent::DBPropertyList,
+                                                   db::SQLFilter(filter_col, std::to_string(content_id), db::SQLFilter::ComparisonOp::Is).statement());
+        auto result = execute(*cmd);
+
+        if (result->hasError() || !result->containsData() || !result->buffer())
+            throw std::runtime_error("Could not obtain content from table");
+
+        auto b = result->buffer();
+
+        size_t nr = b->size();
+        if (nr == 0)
+            throw std::runtime_error("Content id not found in table");
+        else if (nr > 1)
+            throw std::runtime_error("Multiple content ids found in table");
+
+        auto& content_id_vec = b->get<unsigned int>(ResultReport::SectionContent::DBColumnContentID.name());
+        auto& type_vec       = b->get<int>(ResultReport::SectionContent::DBColumnType.name());
+        auto& content_vec    = b->get<nlohmann::json>(ResultReport::SectionContent::DBColumnJSONContent.name());
+
+        ResultReport::SectionContent::ContentType type = (ResultReport::SectionContent::ContentType)type_vec.get(0);
+
+        //create empty content depending on type
+        //@TODO: small factory?
+        if (type == ResultReport::SectionContent::ContentType::Figure)
+        {
+            content.reset(new ResultReport::SectionContentFigure(section));
+        }
+        else if (type == ResultReport::SectionContent::ContentType::Table)
+        {
+            content.reset(new ResultReport::SectionContentTable(section));
+        }
+        else if (type == ResultReport::SectionContent::ContentType::Text)
+        {
+            content.reset(new ResultReport::SectionContentText(section));
+        }
+        else
+        {
+            throw std::runtime_error("Invalid content type");
+        }
+
+        //read content
+        bool ok = content->fromJSON(content_vec.get(0));
+        if (!ok)
+            throw std::runtime_error("Could not read content from JSON");
+
+        //check content
+        if (content->contentID() != content_id_vec.get(0) ||
+            content->contentType() != type)
+            throw std::runtime_error("contents invalid");
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: loadContent: Could not load content: " << ex.what();
+        return ResultT<std::shared_ptr<ResultReport::SectionContent>>::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: loadContent: Could not load content: Unknown error";
+        return ResultT<std::shared_ptr<ResultReport::SectionContent>>::failed("Unknown error");
+    }
+
+    loginf << "DBInterface: loadContent: Loaded.";
+
+    return ResultT<std::shared_ptr<ResultReport::SectionContent>>::succeeded(content);
+}
+
+/**
+ */
+void DBInterface::initDBContentBuffer(DBContent& dbcontent, 
+                                      std::shared_ptr<Buffer> buffer)
+{
+    // create record numbers & and store new max rec num
+    assert (dbcontent.hasVariable(DBContent::meta_var_rec_num_.name()));
+
+    Variable& rec_num_var = dbcontent.variable(DBContent::meta_var_rec_num_.name());
+    assert (rec_num_var.dataType() == PropertyDataType::ULONGINT);
+
+    string rec_num_col_str = rec_num_var.dbColumnName();
+    assert (!buffer->has<unsigned long>(rec_num_col_str));
+
+    buffer->addProperty(rec_num_col_str, PropertyDataType::ULONGINT);
+
+    assert (COMPASS::instance().dbContentManager().hasMaxRecordNumberWODBContentID());
+    unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID();
+
+    NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(rec_num_col_str);
+
+    unsigned int buffer_size = buffer->size();
+    unsigned int dbcont_id = dbcontent.id();
+
+    for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+    {
+        ++max_rec_num;
+        rec_num_vec.set(cnt, Number::recNumAddDBContId(max_rec_num, dbcont_id));
+    }
+
+    COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID(max_rec_num);
+}
+
+/**
+ */
+void DBInterface::insertDBContent(DBContent& dbcontent, std::shared_ptr<Buffer> buffer)
+{
+    logdbg << "DBInterface: insertDBContent: dbo " << dbcontent.name() << " buffer size " << buffer->size();
+
+    assert(ready());
+    assert(buffer);
 
     // create table if required
     if (!existsTable(dbcontent.dbTableName()))
         createTable(dbcontent);
 
-    // create record numbers & and store new max rec num
-    {
-        assert (dbcontent.hasVariable(DBContent::meta_var_rec_num_.name()));
-
-        Variable& rec_num_var = dbcontent.variable(DBContent::meta_var_rec_num_.name());
-        assert (rec_num_var.dataType() == PropertyDataType::ULONGINT);
-
-        string rec_num_col_str = rec_num_var.dbColumnName();
-        assert (!buffer->has<unsigned long>(rec_num_col_str));
-
-        buffer->addProperty(rec_num_col_str, PropertyDataType::ULONGINT);
-
-        assert (COMPASS::instance().dbContentManager().hasMaxRecordNumberWODBContentID());
-        unsigned long max_rec_num = COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID();
-
-        NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(rec_num_col_str);
-
-        unsigned int buffer_size = buffer->size();
-        unsigned int dbcont_id = dbcontent.id();
-
-
-        for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
-        {
-            ++max_rec_num;
-            rec_num_vec.set(cnt, Number::recNumAddDBContId(max_rec_num, dbcont_id));
-        }
-
-        COMPASS::instance().dbContentManager().maxRecordNumberWODBContentID(max_rec_num);
-    }
-
+    initDBContentBuffer(dbcontent, buffer);
     insertBuffer(dbcontent.dbTableName(), buffer);
 }
 
-void DBInterface::insertBuffer(const string& table_name, shared_ptr<Buffer> buffer)
+/**
+ */
+void DBInterface::insertBuffer(const string& table_name, 
+                               shared_ptr<Buffer> buffer)
 {
-    logdbg << "DBInterface: insertBuffer: table name " << table_name << " buffer size "
-           << buffer->size();
+    logdbg << "DBInterface: insertBuffer: table name " << table_name << " buffer size " << buffer->size();
 
-    assert(db_connection_);
+    assert(ready());
     assert(buffer);
 
     if (!existsTable(table_name))
-        throw runtime_error("DBInterface: insertBuffer: table with name '" + table_name +
-                            "' does not exist");
+    {
+        logerr << "DBInterface: insertBuffer: table with name '" << table_name << "' does not exist";
+        throw runtime_error("DBInterface: insertBuffer: table with name '" + table_name + "' does not exist");
+    }
 
-    const PropertyList& properties = buffer->properties();
+    Result res;
 
-    { // check table exists and has correct columns
-        boost::mutex::scoped_lock locker(table_info_mutex_);
-        assert(table_info_.count(table_name));
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-        DBTableInfo& table_info = table_info_.at(table_name);
+        res = db_instance_->defaultConnection().insertBuffer(table_name, buffer);
+    }
 
-        for (unsigned int cnt = 0; cnt < properties.size(); ++cnt)
+    if (!res.ok())
+    {
+        logerr << "DBInterface: insertBuffer: inserting into table '" << table_name << "' failed: " << res.error();
+        throw runtime_error("DBInterface: insertBuffer: inserting into table '" + table_name + "' failed: " + res.error());
+    }
+}
+
+/**
+ * Inserts multiple dbcontent buffers at once, possibly utilizing parallelization.
+ */
+void DBInterface::insertDBContent(const std::map<std::string, std::shared_ptr<Buffer>>& buffers)
+{
+    assert(ready());
+
+    bool db_supports_mt = db_instance_->sqlConfiguration().supports_mt;
+    bool exec_mt        = insert_mt_ && db_supports_mt && buffers.size() > 1;
+
+    size_t max_size = 0;
+    size_t min_size = std::numeric_limits<size_t>::max();
+    for (const auto& it : buffers)
+    {
+        if (it.second->size() < min_size)
+            min_size = it.second->size();
+        if (it.second->size() > max_size)
+            max_size = it.second->size();
+    }
+
+    logdbg << "DBInterface: insertDBContent: inserting " << buffers.size() << " object(s) " 
+           << (exec_mt ? "multi-threaded" : "single-threaded") 
+           << " min_size " << (buffers.size() ? min_size : 0) << " max_size " << (buffers.size() ? max_size : 0);
+
+    auto& dbc_manager = COMPASS::instance().dbContentManager();
+
+    struct Job
+    {
+        Job() = default;
+        Job(size_t idx,
+            const std::string& tname,
+            const std::shared_ptr<Buffer>& b,
+            const boost::optional<size_t>& from,
+            const boost::optional<size_t>& to)
+        :   index   (idx  )
+        ,   table   (tname)
+        ,   buffer  (b    )
+        ,   idx_from(from )
+        ,   idx_to  (to   ) {}
+
+        size_t                  index;
+        std::string             table;
+        std::shared_ptr<Buffer> buffer;
+        boost::optional<size_t> idx_from;
+        boost::optional<size_t> idx_to;
+    };
+
+    std::vector<Job> insert_jobs;
+
+    int chunk_size = -1;
+
+    //init single-threaded
+    size_t idx = 0;
+    for (auto& it : buffers)
+    {
+        assert(it.second);
+
+        auto& dbcontent = dbc_manager.dbContent(it.first);
+
+        //create table if needed
+        if (!existsTable(dbcontent.dbTableName()))
+            createTable(dbcontent);
+
+        //init buffer
+        initDBContentBuffer(dbcontent, it.second);
+
+        if (chunk_size < 1 || !exec_mt)
         {
-            logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name()
-                   << "'";
+            insert_jobs.push_back(Job(idx++, dbcontent.dbTableName(), it.second, {}, {}));
+        }
+        else
+        {
+            auto n = it.second->size();
+            for (size_t idx = 0; idx < n; idx += (size_t)chunk_size)
+            {
+                size_t idx_start = idx;
+                size_t idx_end   = std::min(idx_start + chunk_size, n);
 
-            if (!table_info.hasColumn(properties.at(cnt).name()))
-                throw runtime_error("DBInterface: insertBuffer: column '" +
-                                    properties.at(cnt).name() + "' does not exist in table " +
-                                    table_name);
+                assert(idx_start < idx_end);
+
+                insert_jobs.push_back(Job(idx++, dbcontent.dbTableName(), it.second, idx_start, idx_end - 1));
+            }
         }
     }
 
-    string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table_name);
+    unsigned int n = insert_jobs.size();
 
-    boost::mutex::scoped_lock locker(connection_mutex_);
+    logdbg << "DBInterface: insertDBContent: created " << n << " job(s)";
 
-    logdbg << "DBInterface: insertBuffer: preparing bind statement";
-    db_connection_->prepareBindStatement(bind_statement);
-    db_connection_->beginBindTransaction();
-
-    logdbg << "DBInterface: insertBuffer: starting inserts";
-    size_t size = buffer->size();
-
-    for (unsigned int cnt = 0; cnt < size; ++cnt)
+    //create connections for multithreading (if supported)
+    std::vector<DBConnectionWrapper> mt_connections;
+    if (db_supports_mt)
     {
-        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
+        mt_connections.resize(n);
+
+        for (unsigned int i = 0; i < n; ++i)
+        {
+            mt_connections[ i ] = db_instance_->concurrentConnection(i);
+            assert(!mt_connections[ i ].isEmpty());
+
+            if (mt_connections[ i ].hasError())
+            {
+                logerr << "DBInterface: insertDBContent: creating mt connection failed: " << mt_connections[ i ].error();
+                throw runtime_error("DBInterface: insertDBContent: creating mt connection failed: " + mt_connections[ i ].error());
+            }
+        }
     }
 
-    logdbg << "DBInterface: insertBuffer: ending bind transactions";
-    db_connection_->endBindTransaction();
-    logdbg << "DBInterface: insertBuffer: finalizing bind statement";
-    db_connection_->finalizeBindStatement();
+    //insert buffers
+    std::vector<Result> results(n, 0);
+    if (exec_mt)
+    {
+        //insert multithreaded (if supported)
+        tbb::parallel_for(uint(0), n, [ & ](unsigned int i) 
+        {
+            auto& job = insert_jobs.at(i);
+            results.at(i) = mt_connections.at(i).connection().insertBuffer(job.table, job.buffer, job.idx_from, job.idx_to);
+        });
+    }
+    else
+    {
+        //single threaded insert
+        for (unsigned int i = 0; i < n; ++i)
+        {
+            auto& job = insert_jobs.at(i);
+            results.at(i) = db_instance_->defaultConnection().insertBuffer(job.table, job.buffer, job.idx_from, job.idx_to);
+        }
+    }
+
+    //check results
+    for (unsigned int i = 0; i < n; ++i)
+    {
+        const auto& table_name = insert_jobs.at(i).table;
+        const auto& result     = results.at(i);
+        if (!result.ok())
+        {
+            logerr << "DBInterface: insertBuffer: inserting into table '" << table_name << "' failed: " << result.error();
+            throw runtime_error("DBInterface: insertBuffer: inserting into table '" + table_name + "' failed: " + result.error());
+        }
+    }
 }
 
-void DBInterface::updateBuffer(const std::string& table_name, const std::string& key_col,
-                               shared_ptr<Buffer> buffer, int from_index, int to_index)
+/**
+ */
+void DBInterface::updateBuffer(const std::string& table_name, 
+                               const std::string& key_col,
+                               shared_ptr<Buffer> buffer, 
+                               int from_index, 
+                               int to_index)
 {
-    logdbg << "DBInterface: updateBuffer: table " << table_name << " buffer size "
-           << buffer->size() << " key " << key_col;
+    logdbg << "DBInterface: updateBuffer: table " << table_name << " buffer size " << buffer->size() << " key " << key_col;
 
-    assert(db_connection_);
+    assert(ready());
     assert(buffer);
 
-    // TODO check
-    //    const PropertyList& properties = buffer->properties();
-
-    //    for (unsigned int cnt = 0; cnt < properties.size(); cnt++)
-    //    {
-    //        if (!table.hasColumn(properties.at(cnt).name()))
-    //            throw runtime_error("DBInterface: updateBuffer: column '" +
-    //                                properties.at(cnt).name() + "' does not exist in table " +
-    //                                table.name());
-    //    }
-
-    string bind_statement =
-            sql_generator_.createDBUpdateStringBind(buffer, key_col, table_name);
-
-    boost::mutex::scoped_lock locker(connection_mutex_);
-
-    logdbg << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
-    db_connection_->prepareBindStatement(bind_statement);
-    db_connection_->beginBindTransaction();
-
-    if (from_index < 0)
-        from_index = 0;
-    if (to_index < 0)
-        to_index = buffer->size() - 1;
-
-    logdbg << "DBInterface: updateBuffer: starting inserts";
-    for (int cnt = from_index; cnt <= to_index; cnt++)
+    if (!existsTable(table_name))
     {
-        logdbg << "DBInterface: updateBuffer: insert cnt " << cnt;
-        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
+        logerr << "DBInterface: updateBuffer: table with name '" << table_name << "' does not exist";
+        throw runtime_error("DBInterface: updateBuffer: table with name '" + table_name + "' does not exist");
     }
 
-    logdbg << "DBInterface: updateBuffer: ending bind transactions";
-    db_connection_->endBindTransaction();
-    logdbg << "DBInterface: updateBuffer: finalizing bind statement";
-    db_connection_->finalizeBindStatement();
+    Result res;
 
-    logdbg << "DBInterface: updateBuffer: changes " << db_connection_->changes() << " indexes " << to_index - from_index +1;
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        res = db_instance_->defaultConnection().updateBuffer(table_name, buffer, key_col, from_index, to_index);
+    }
+
+    if (!res.ok())
+    {
+        logerr << "DBInterface: updateBuffer: updating table '" << table_name << "' failed: " << res.error();
+        throw runtime_error("DBInterface: updateBuffer: updating table '" + table_name + "' failed: " + res.error());
+    }
 }
 
-void DBInterface::prepareRead(
-        const DBContent& dbobject, VariableSet read_list, string custom_filter_clause,
-        bool use_order, Variable* order_variable)
+/**
+ */
+void DBInterface::prepareRead(const DBContent& dbobject, 
+                              VariableSet read_list, 
+                              string custom_filter_clause,
+                              bool use_order, 
+                              Variable* order_variable)
 {
-    assert(db_connection_);
+    logdbg << "DBInterface: prepareRead: dbo " << dbobject.name();
 
+    assert(ready());
     assert(dbobject.existsInDB());
 
-    connection_mutex_.lock();
+    shared_ptr<DBCommand> read = sqlGenerator().getSelectCommand(
+        dbobject, read_list, custom_filter_clause, use_order, order_variable);
 
-    shared_ptr<DBCommand> read = sql_generator_.getSelectCommand(
-                dbobject, read_list, custom_filter_clause, use_order, order_variable);
+    logdbg << "DBInterface: prepareRead: sql '" << read->get() << "'";
 
-    logdbg << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
-    db_connection_->prepareCommand(read);
+    Result res;
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        res = db_instance_->defaultConnection().startRead(read, 0, read_chunk_size_);
+    }
+    
+    if (!res.ok())
+    {
+        logerr << "DBInterface: prepareRead: preparing read for dbcontent '" << dbobject.name() << "' failed: " << res.error();
+        throw runtime_error("DBInterface: prepareRead: preparing read for dbcontent '" + dbobject.name() + "' failed: " + res.error());
+    }
 }
 
+/**
+ */
 std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBContent& dbobject)
 {
     // locked by prepareRead
-    assert(db_connection_);
+    assert(ready());
 
     shared_ptr<DBResult> result;
     bool last_one = false;
 
-    std::tie(result, last_one) = db_connection_->stepPreparedCommand(read_chunk_size_);
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        result = db_instance_->defaultConnection().readChunk();
+    }
 
     if (!result)
     {
-        logerr << "DBInterface: readDataChunk: connection returned error";
-        throw runtime_error("DBInterface: readDataChunk: connection returned error");
+        logerr << "DBInterface: readDataChunk: connection returned unknown error";
+        throw runtime_error("DBInterface: readDataChunk: connection returned unknown error");
     }
-
+    if (result->hasError())
+    {
+        logerr << "DBInterface: readDataChunk: connection returned error: " << result->error();
+        throw runtime_error("DBInterface: readDataChunk: connection returned unknown error: " + result->error());
+    }
     if (!result->containsData())
     {
         logerr << "DBInterface: readDataChunk: buffer does not contain data";
         throw runtime_error("DBInterface: readDataChunk: buffer does not contain data");
     }
+
+    last_one = !result->hasMore();
 
     shared_ptr<Buffer> buffer = result->buffer();
 
@@ -1384,180 +2726,220 @@ std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBCont
     return {buffer, last_one};
 }
 
+/**
+ */
 void DBInterface::finalizeReadStatement(const DBContent& dbobject)
 {
-    connection_mutex_.unlock();
-    assert(db_connection_);
+    assert(ready());
 
-    logdbg << "DBInterface: finishReadSystemTracks: start ";
-    db_connection_->finalizeCommand();
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        db_instance_->defaultConnection().stopRead();
+    }
 }
 
-void DBInterface::deleteBefore(const DBContent& dbcontent, boost::posix_time::ptime before_timestamp)
+/**
+ */
+void DBInterface::deleteBefore(const DBContent& dbcontent, 
+                               boost::posix_time::ptime before_timestamp)
 {
-    connection_mutex_.lock();
-    assert(db_connection_);
+    assert(ready());
 
-    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, before_timestamp);
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    db_connection_->execute(*command.get());
-
-    connection_mutex_.unlock();
+        std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent, before_timestamp);
+        execute(*command.get());
+    }
 }
 
+/**
+ */
 void DBInterface::deleteAll(const DBContent& dbcontent)
 {
-    connection_mutex_.lock();
-    assert(db_connection_);
+    assert(ready());
 
-    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent);
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    db_connection_->execute(*command.get());
-
-    connection_mutex_.unlock();
+        std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent);
+        execute(*command.get());
+    }
 }
 
-void DBInterface::deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic)
+/**
+ */
+void DBInterface::deleteContent(const DBContent& dbcontent, 
+                                unsigned int sac, 
+                                unsigned int sic)
 {
-    loginf << "DBInterface: deleteContent: dbcontent " << dbcontent.name()
-           << " sac/sic " << sac << "/" << sic;
+    loginf << "DBInterface: deleteContent: dbcontent " << dbcontent.name() << " sac/sic " << sac << "/" << sic;
 
-    connection_mutex_.lock();
-    assert(db_connection_);
+    assert(ready());
 
-    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, sac, sic);
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    db_connection_->execute(*command.get());
+        std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent, sac, sic);
 
-    connection_mutex_.unlock();
+        execute(*command.get());
+    }
 }
 
+/**
+ */
 void DBInterface::deleteContent(const DBContent& dbcontent, unsigned int sac, unsigned int sic, unsigned int line_id)
 {
-    loginf << "DBInterface: deleteContent: dbcontent " << dbcontent.name()
-           << " sac/sic " << sac << "/" << sic << " line " << line_id;
+    loginf << "DBInterface: deleteContent: dbcontent " << dbcontent.name() << " sac/sic " << sac << "/" << sic << " line " << line_id;
 
-    connection_mutex_.lock();
-    assert(db_connection_);
+    assert(ready());
 
-    std::shared_ptr<DBCommand> command = sql_generator_.getDeleteCommand(dbcontent, sac, sic, line_id);
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
-    db_connection_->execute(*command.get());
+        std::shared_ptr<DBCommand> command = sqlGenerator().getDeleteCommand(dbcontent, sac, sic, line_id);
 
-    connection_mutex_.unlock();
+        execute(*command.get());
+    }
 }
 
-void DBInterface::createPropertiesTable()
-{
-    assert(!existsPropertiesTable());
-    connection_mutex_.lock();
-    db_connection_->executeSQL(sql_generator_.getTablePropertiesCreateStatement());
-    connection_mutex_.unlock();
-
-    updateTableInfo();
-}
-
+/**
+ */
 void DBInterface::clearTableContent(const string& table_name)
 {
-    boost::mutex::scoped_lock locker(connection_mutex_);
-    // DELETE FROM tablename;
-    db_connection_->executeSQL("DELETE FROM " + table_name + ";");
+    assert(ready());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        // DELETE FROM tablename;
+        execute("DELETE FROM " + table_name + ";");
+    }
 }
 
-void DBInterface::insertBindStatementUpdateForCurrentIndex(shared_ptr<Buffer> buffer,
-                                                           unsigned int buffer_index)
+/**
+ */
+ResultT<std::shared_ptr<Buffer>> DBInterface::select(const std::string& table_name, 
+                                                     const PropertyList& properties,
+                                                     const std::string& filter)
 {
-    assert(buffer);
-    logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: start";
-    const PropertyList& list = buffer->properties();
-    unsigned int size = list.size();
-    logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: creating bind for " << size
-           << " elements";
+    if (!existsTable(table_name))
+        return ResultT<std::shared_ptr<Buffer>>::failed("Table does not exist");
 
-    unsigned int index_cnt = 0;
+    std::shared_ptr<Buffer> buffer;
 
-    logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: starting for loop";
-    for (unsigned int property_cnt = 0; property_cnt < size; property_cnt++)
+    try
     {
-        const Property& property = list.at(property_cnt);
-        PropertyDataType data_type = property.dataType();
+        auto cmd = sqlGenerator().getSelectCommand(table_name, properties, filter);
+        auto result = execute(*cmd);
+        if (result->hasError() || !result->containsData() || !result->buffer())
+            throw std::runtime_error("Could not obtain results table");
 
-//        loginf << "DBInterface: insertBindStatementUpdateForCurrentIndex: at cnt " << cnt << " id "
-//               << property.name() << " index cnt " << index_cnt;
-
-        index_cnt = property_cnt + 1;
-
-        if (buffer->isNull(property, buffer_index))
-        {
-            db_connection_->bindVariableNull(index_cnt);
-//            logwrn << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << property.name()
-//                   << " buffer_index " << buffer_index << " is null";
-            continue;
-        }
-
-        switch (data_type)
-        {
-        case PropertyDataType::BOOL:
-            db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<bool>(property.name()).get(buffer_index)));
-            break;
-        case PropertyDataType::CHAR:
-            db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<char>(property.name()).get(buffer_index)));
-            break;
-        case PropertyDataType::UCHAR:
-            db_connection_->bindVariable(
-                        index_cnt,
-                        static_cast<int>(buffer->get<unsigned char>(property.name()).get(buffer_index)));
-            break;
-        case PropertyDataType::INT:
-            db_connection_->bindVariable(
-                        index_cnt, buffer->get<int>(property.name()).get(buffer_index));
-            break;
-        case PropertyDataType::UINT:
-            db_connection_->bindVariable(
-                        index_cnt, static_cast<int>(buffer->get<unsigned int>(property.name()).get(buffer_index)));
-            break;
-        case PropertyDataType::LONGINT:
-            db_connection_->bindVariable(index_cnt, buffer->get<long>(property.name()).get(buffer_index));
-            break;
-        case PropertyDataType::ULONGINT:
-            db_connection_->bindVariable(
-                        index_cnt, static_cast<long>(buffer->get<unsigned long>(property.name()).get(buffer_index)));
-            break;
-        case PropertyDataType::FLOAT:
-            db_connection_->bindVariable(
-                        index_cnt, static_cast<double>(buffer->get<float>(property.name()).get(buffer_index)));
-            break;
-        case PropertyDataType::DOUBLE:
-            db_connection_->bindVariable(index_cnt,
-                                         buffer->get<double>(property.name()).get(buffer_index));
-            break;
-        case PropertyDataType::STRING:
-            db_connection_->bindVariable(
-                        index_cnt, buffer->get<string>(property.name()).get(buffer_index));
-            break;
-        case PropertyDataType::JSON:
-            db_connection_->bindVariable(
-                        index_cnt, buffer->get<nlohmann::json>(property.name()).get(buffer_index).dump());
-            break;
-        case PropertyDataType::TIMESTAMP:
-            db_connection_->bindVariable(
-                        index_cnt, Time::toLong(buffer->get<boost::posix_time::ptime>(property.name()).get(buffer_index)));
-            break;
-        default:
-            logerr << "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "
-                       << Property::asString(data_type);
-            throw runtime_error(
-                        "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type " +
-                        Property::asString(data_type));
-        }
+        buffer = result->buffer();
+    }
+    catch(const std::exception& ex)
+    {
+        logerr << "DBInterface: select: Could not select data: " << ex.what();
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed(ex.what());
+    }
+    catch(...)
+    {
+        logerr << "DBInterface: select: Could not select data: Unknown error";
+        return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed("Unknown error");
     }
 
-    db_connection_->stepAndClearBindings();
-
-    logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: done";
+    return ResultT<std::shared_ptr<Buffer>>::succeeded(buffer);
 }
 
+/**
+ */
+void DBInterface::createPropertiesTable()
+{
+    assert(ready());
+    assert(!existsPropertiesTable());
 
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
 
+        execute(sqlGenerator().getTablePropertiesCreateStatement());
+        updateTableInfo();
+    }
+}
+
+/**
+ */
+void DBInterface::startPerformanceMetrics() const
+{
+    assert(ready());
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        db_instance_->defaultConnection().startPerformanceMetrics();
+    }
+}
+
+/**
+ */
+db::PerformanceMetrics DBInterface::stopPerformanceMetrics() const
+{
+    assert(ready());
+
+    db::PerformanceMetrics pm;
+
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        pm = db_instance_->defaultConnection().stopPerformanceMetrics();
+    }
+
+    return pm;
+}
+
+/**
+ */
+bool DBInterface::hasActivePerformanceMetrics() const
+{
+    if (!ready())
+        return false;
+
+    bool ok;
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        ok = db_instance_->defaultConnection().hasActivePerformanceMetrics();
+    }
+
+    return ok;
+}
+
+/**
+ */
+std::string DBInterface::dbInfo()
+{
+    if (!ready())
+        return "db not ready";
+
+    return db_instance_->dbInfo();
+}

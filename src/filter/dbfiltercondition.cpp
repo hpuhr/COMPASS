@@ -18,26 +18,24 @@
 #include "dbfiltercondition.h"
 #include "compass.h"
 #include "dbfilter.h"
-//#include "dbfilterwidget.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
-//#include "unit.h"
-//#include "unitmanager.h"
 #include "global.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QWidget>
+#include <QApplication>
+#include <QStyle>
 
 #include <boost/algorithm/string/join.hpp>
 
 #include <cassert>
 #include <sstream>
-//#include <boost/algorithm/string.hpp>
 
 using namespace Utils;
 using namespace std;
@@ -64,32 +62,27 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
 //    if (usable_)
 //        value_invalid_ = checkValueInvalid(value_);
 
-    loginf << "DBFilterCondition: DBFilterCondition: " << instance_id << " value " << value_
+    logdbg << "DBFilterCondition: ctor: " << instance_id << " value " << value_
            << " usable " << usable_ << " invalid " << value_invalid_;
-
-    widget_ = new QWidget();
-    QHBoxLayout* layout = new QHBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
 
     label_ = new QLabel();
     if (display_instance_id_)
         label_->setText(tr((instanceId() + " " + operator_).c_str()));
     else
         label_->setText(tr((variable_name_ + " " + operator_).c_str()));
-    layout->addWidget(label_);
 
     edit_ = new QLineEdit(tr(value_.c_str()));
+    edit_->setMaxLength(16*1024*1024);
     connect(edit_, SIGNAL(textChanged(QString)), this, SLOT(valueChanged()));
-    layout->addWidget(edit_);
-
-    widget_->setLayout(layout);
 
     if (!usable_)
-        widget_->setDisabled(true);
+    {
+        label_->setDisabled(true);
+        edit_->setDisabled(true);
+    }
 }
 
-DBFilterCondition::~DBFilterCondition() {}
+DBFilterCondition::~DBFilterCondition() = default;
 
 void DBFilterCondition::invert()
 {
@@ -199,13 +192,18 @@ void DBFilterCondition::valueChanged()
            << value_invalid_;
 
     if (value_invalid_)
-        edit_->setStyleSheet(
-                    "QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
-                    " rgb(255, 200, 200); }");
+    {
+        edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
+    }
     else
-        edit_->setStyleSheet(
-                    "QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
-                    " rgb(200, 200, 200); }");
+    {
+        //edit_->setStyleSheet(QApplication::style()->objectName());
+        edit_->setStyleSheet("");
+
+        // edit_->setStyleSheet(
+        //             "QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
+        //             " rgb(200, 200, 200); }");
+    }
 }
 
 std::string DBFilterCondition::getVariableName() const
@@ -272,8 +270,10 @@ void DBFilterCondition::update()
     edit_->setText(tr(value_.c_str()));
 }
 
-void DBFilterCondition::setValue(std::string value)
+void DBFilterCondition::setValue(const std::string& value)
 {
+    logdbg << "DBFilterCondition: setValue: len " << value.size();
+
     value_ = value;
 
     update();
@@ -393,7 +393,7 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
     std::vector<std::string> value_strings;
     std::vector<std::string> transformed_value_strings;
 
-    if (operator_ == "IN")
+    if (operator_ == "IN" || operator_ == "NOT IN")
     {
         value_strings = String::split(untransformed_value, ',');
     }
@@ -445,7 +445,7 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
 
     if (transformed_value_strings.size()) // can be empty if only NULL
     {
-        if (operator_ != "IN")
+        if (operator_ != "IN" && operator_ != "NOT IN")
         {
             assert(transformed_value_strings.size() == 1);
             value_str = transformed_value_strings.at(0);

@@ -49,8 +49,9 @@ class KalmanChainPredictors;
 
 class Buffer;
 class ReconstructorTask;
+class ReconstructorAssociatorBase;
 
-typedef std::pair<boost::posix_time::ptime, boost::posix_time::ptime> TimeWindow; // min, max
+struct AltitudeState;
 
 class ReconstructorBaseSettings
 {
@@ -106,6 +107,14 @@ class ReconstructorBaseSettings
     static const unsigned int REC_DS_SAC = 255;
     static const unsigned int REC_DS_SIC = 1;
 
+    // target classification
+    float min_aircraft_modec_ {1000};
+
+    std::string vehicle_acids_;
+    std::set<std::string> vehicle_acids_set_;
+    std::string vehicle_acads_;
+    std::set<unsigned int> vehicle_acads_set_;
+
     // fallback accuracies
     double numerical_min_std_dev_ {1E-3};
 
@@ -114,6 +123,9 @@ class ReconstructorBaseSettings
     float unspecifc_acc_acc_fallback_ {10};
 
     float no_value_acc_fallback_ {10000};
+
+    void setVehicleACIDs(const std::string& value);
+    void setVehicleACADs(const std::string& value);
 };
 
 /**
@@ -224,6 +236,8 @@ public:
     ReconstructorBase::DataSlice& currentSlice();
     const ReconstructorBase::DataSlice& currentSlice() const;
 
+    virtual ReconstructorAssociatorBase& associator()=0;
+
     virtual dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name) const = 0;
 
     virtual void reset();
@@ -257,6 +271,10 @@ public:
 
     // our data structures
     std::map<unsigned long, dbContent::targetReport::ReconstructorInfo> target_reports_;
+    unsigned int num_new_target_reports_in_slice_{0};
+    unsigned int num_new_target_reports_total_{0};
+    unsigned int num_unassociated_target_reports_total_{0};
+
     // all sources, record_num -> base info
     std::multimap<boost::posix_time::ptime, unsigned long> tr_timestamps_;
     // all sources sorted by time, ts -> record_num
@@ -276,7 +294,7 @@ public:
     virtual void createAdditionalAnnotations() {}
 
     virtual bool doFurtherSliceProcessing() { return false; }     // called for repeat checking
-    virtual bool isLastSliceProcessingRun() { return true; }      // called to check if another repeat run is planned
+    virtual bool isLastRunInSlice() { return true; }      // called to check if another repeat run is planned
     virtual unsigned int currentSliceRepeatRun() { return currentSlice().run_count_; }    // current repeat run
 
     virtual std::string reconstructorInfoString() { return ""; }
@@ -290,6 +308,9 @@ public:
 
     void informConfigChanged();
     void resetTimeframeSettings();
+
+    bool isVehicleACID(const std::string& acid);
+    bool isVehicleACAD(unsigned int value);
 
 signals:
     void configChanged(); 
@@ -307,6 +328,10 @@ protected:
 
     std::map<unsigned int, std::unique_ptr<reconstruction::KalmanChain>> chains_; // utn -> chain
 
+    unsigned int num_target_reports_ {0};
+    unsigned int num_target_reports_associated_ {0};
+    unsigned int num_target_reports_unassociated_ {0};
+
     void removeOldBufferData(); // remove all data before current_slice_begin_
     virtual void processSlice_impl() = 0;
 
@@ -321,6 +346,10 @@ protected:
         std::map<unsigned int, std::map<unsigned long, unsigned int>> associations);
     std::map<std::string, std::shared_ptr<Buffer>> createReferenceBuffers();
 
+    void doUnassociatedAnalysis();
+    void doOutlierAnalysis();
+    void doReconstructionReporting();
+
 private:
     void init();
     void initIfNeeded();
@@ -329,11 +358,12 @@ private:
     void resetTimeframe();
     void applyTimeframeLimits();
 
-    float qVarForAltitude(bool fl_unknown, 
-                          bool fl_ground,
-                          float alt_baro_ft,
-                          bool dynamic,
-                          const ReferenceCalculatorSettings::ProcessNoise& Q_std) const;
+    double determineProcessNoise(const dbContent::targetReport::ReconstructorInfo& ri,
+                                 const dbContent::ReconstructorTarget& target,
+                                 const ReferenceCalculatorSettings::ProcessNoise& Q) const;
+    double determineProcessNoiseVariance(const dbContent::targetReport::ReconstructorInfo& ri,
+                                         const dbContent::ReconstructorTarget& target,
+                                         const ReferenceCalculatorSettings::ProcessNoise& Q) const;
 
     ReferenceCalculatorSettings ref_calc_settings_;
 

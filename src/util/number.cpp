@@ -545,6 +545,127 @@ std::tuple<double,double,double> getMedianStatistics (const std::vector<double>&
     }
 }
 
+/// Computes the optimal number of grid cells in latitude and longitude,
+/// subject to a maximum resolution and a cap on the total number of cells.
+/// @param lat_min    Minimum latitude (degrees)
+/// @param lat_max    Maximum latitude (degrees)
+/// @param lon_min    Minimum longitude (degrees)
+/// @param lon_max    Maximum longitude (degrees)
+/// @returns           A pair {num_lat_cells, num_lon_cells}
+std::pair<unsigned int, unsigned int> computeGeoWindowResolution(
+    double lat_min, double lat_max, double lon_min, double lon_max,
+    double grid_max_resolution, unsigned int max_num_cells)
+{
+    // Compute extents
+    double lat_extent = std::abs(lat_max - lat_min);
+    double lon_extent = std::abs(lon_max - lon_min);
+
+    // 2) Guard against degenerate spans
+    if (lat_extent == 0.0)
+        lat_extent = grid_max_resolution;
+    if (lon_extent == 0.0)
+        lon_extent = grid_max_resolution;
+
+    // 3) Figure out the smallest resolution that won't exceed max_num_cells
+    //    along *either* axis
+    //
+    //    To limit latitude cells to max_num_cells:
+    //       resolution >= lat_extent / max_num_cells
+    //    To limit longitude cells to max_num_cells:
+    //       resolution >= lon_extent / max_num_cells
+    //
+    double min_res_lat = lat_extent / static_cast<double>(max_num_cells);
+    double min_res_lon = lon_extent / static_cast<double>(max_num_cells);
+
+    // 4) Final resolution is the worst of:
+    //       - your finest allowable (grid_max_resolution)
+    //       - the per-axis minima above
+    double resolution = std::max({
+        grid_max_resolution,
+        min_res_lat,
+        min_res_lon
+    });
+
+    // 5) Compute integer cell counts (rounding up)
+    unsigned int num_lat_cells =
+        static_cast<unsigned int>(std::ceil(lat_extent / resolution));
+    unsigned int num_lon_cells =
+        static_cast<unsigned int>(std::ceil(lon_extent / resolution));
+
+    // 6) Ensure at least one cell in each dimension
+    num_lat_cells = std::max<unsigned int>(1, num_lat_cells);
+    num_lon_cells = std::max<unsigned int>(1, num_lon_cells);
+
+    return { num_lat_cells, num_lon_cells };
+}
+
+
+/**
+ * @brief Converts a latitude string "DD:MM:SS.SSS[NS]" (or without hemisphere suffix) to decimal degrees.
+ *
+ * @param lat_str Latitude string, e.g. "47:26:58.9526N" or "47:26:58.9526"
+ * @param ok Reference to a boolean flag set to true on success, false on format error
+ * @return double Signed decimal degrees (positive for N, negative for S), undefined if !ok
+ */
+double convertLatitude(const std::string& lat_str, bool& ok)
+{
+    ok = false;
+    if (lat_str.empty())
+        return 0.0;
+
+    // Determine hemisphere: default to North if not specified
+    char hemisphere = 'N';
+    std::string core = lat_str;
+    char last_char = lat_str.back();
+    if (last_char == 'N' || last_char == 'S') {
+        hemisphere = last_char;
+        core = lat_str.substr(0, lat_str.size() - 1);
+    }
+
+    std::istringstream ss(core);
+    double degrees = 0.0, minutes = 0.0, seconds = 0.0;
+    char sep1 = '\0', sep2 = '\0';
+    if (!(ss >> degrees >> sep1 >> minutes >> sep2 >> seconds) || sep1 != ':' || sep2 != ':') {
+        return 0.0;
+    }
+
+    double decimal_degrees = degrees + (minutes / 60.0) + (seconds / 3600.0);
+    ok = true;
+    return (hemisphere == 'S') ? -decimal_degrees : decimal_degrees;
+}
+
+/**
+ * @brief Converts a longitude string "DDD:MM:SS.SSS[EW]" (or without hemisphere suffix) to decimal degrees.
+ *
+ * @param lon_str Longitude string, e.g. "008:34:25.5397E" or "008:34:25.5397"
+ * @param ok Reference to a boolean flag set to true on success, false on format error
+ * @return double Signed decimal degrees (positive for E, negative for W), undefined if !ok
+ */
+double convertLongitude(const std::string& lon_str, bool& ok) {
+    ok = false;
+    if (lon_str.empty())
+        return 0.0;
+
+    // Determine hemisphere: default to East if not specified
+    char hemisphere = 'E';
+    std::string core = lon_str;
+    char last_char = lon_str.back();
+    if (last_char == 'E' || last_char == 'W') {
+        hemisphere = last_char;
+        core = lon_str.substr(0, lon_str.size() - 1);
+    }
+
+    std::istringstream ss(core);
+    double degrees = 0.0, minutes = 0.0, seconds = 0.0;
+    char sep1 = '\0', sep2 = '\0';
+    if (!(ss >> degrees >> sep1 >> minutes >> sep2 >> seconds) || sep1 != ':' || sep2 != ':') {
+        return 0.0;
+    }
+
+    double decimal_degrees = degrees + (minutes / 60.0) + (seconds / 3600.0);
+    ok = true;
+    return (hemisphere == 'W') ? -decimal_degrees : decimal_degrees;
+}
 }  // namespace Number
 
 //void convert(const std::string& conversion_type, NullableVector<unsigned int>& array_list) {}

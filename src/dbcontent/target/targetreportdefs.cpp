@@ -71,17 +71,17 @@ const std::map<int, float> AccuracyTables::adsb_nucr_nacv_accuracies =
 // 0   & > 20 NM (37040 m)  & > 10 NM (18520 m) & -  \\ \hline
 
 const std::map<int, float> AccuracyTables::adsb_v0_accuracies =
-    {
-        {0, 92600},
-        {1, 9260 },
-        {2, 4630 },
-        {3, 926  },
-        {4, 463  },
-        {5, 231.5},
-        {6, 92.5 },
-        {7, 46.5 },
-        {8, 5    },
-        {9, 1.5  }
+{
+    {9,    7.5f},     // NUCp = 9: <7.5 m
+    {8,   25.0f},     // NUCp = 8: <25 m
+    {7,  185.0f},     // NUCp = 7: <0.1 NM (~185 m)
+    {6,  370.0f},     // NUCp = 6: <0.2 NM (~370 m)
+    {5,  926.0f},     // NUCp = 5: <0.5 NM (~926 m)
+    {4, 1852.0f},     // NUCp = 4: <1.0 NM (~1852 m)
+    {3, 3704.0f},     // NUCp = 3: <2.0 NM (~3704 m)
+    {2, 18520.0f},    // NUCp = 2: <10 NM (~18520 m)
+    {1, 37040.0f},    // NUCp = 1: <20 NM (~37040 m)
+    {0, 37040.0f}     // NUCp = 0: >20 NM (37040 m used as worst-case)
 };
 
 //    NACp | EPU (HFOM)         | VEPU (VFOM) |
@@ -99,19 +99,19 @@ const std::map<int, float> AccuracyTables::adsb_v0_accuracies =
 //    0   & > 10 NM or Unknown & & - \\ \hline|
 
 const std::map<int, float> AccuracyTables::adsb_v12_accuracies =
-    {
-        { 0, 92600},
-        { 1, 9260 },
-        { 2, 3704 },
-        { 3, 1852 },
-        { 4, 926  },
-        { 5, 463  },
-        { 6, 278  },
-        { 7, 92.5 },
-        { 8, 46.5 },
-        { 9, 15   },
-        {10, 5    },
-        {11, 1.5  }
+{
+    {11, 3.0f},       // NACp = 11: < 3 m
+    {10, 10.0f},      // NACp = 10: < 10 m
+    {9, 30.0f},       // NACp = 9:  < 30 m
+    {8, 93.0f},       // NACp = 8:  < 0.05 NM ~ 93 m
+    {7, 185.0f},      // NACp = 7:  < 0.1 NM ~ 185 m
+    {6, 556.0f},      // NACp = 6:  < 0.3 NM ~ 556 m
+    {5, 926.0f},      // NACp = 5:  < 0.5 NM ~ 926 m
+    {4, 1852.0f},     // NACp = 4:  < 1.0 NM ~ 1852 m
+    {3, 3704.0f},     // NACp = 3:  < 2 NM ~ 3704 m
+    {2, 7408.0f},     // NACp = 2:  < 4 NM ~ 7408 m
+    {1, 18520.0f},    // NACp = 1:  < 10 NM ~ 18520 m
+    {0, 37040.0f}     // NACp = 0:  > 10 NM (unknown); worst-case value chosen here
 };
 
 std::string BaseInfo::asStr() const
@@ -163,6 +163,15 @@ void PositionAccuracy::scaleToMinStdDev(double min_stddev)
     }
 }
 
+void PositionAccuracy::scaleUsing(double scale_factor)
+{
+    assert (std::isfinite(scale_factor));
+
+    x_stddev_ *= scale_factor;
+    y_stddev_ *= scale_factor;
+    xy_cov_ *= scale_factor * scale_factor; // Covariance scales with the square of the factor
+}
+
 VelocityAccuracy VelocityAccuracy::getScaledToMinStdDev (double min_std_dev) const
 {
     VelocityAccuracy ret = *this;
@@ -200,8 +209,6 @@ void VelocityAccuracy::scaleToMinStdDev(double min_stddev)
     }
 }
 
-
-
 boost::optional<targetReport::Position>& ReconstructorInfo::position()
 {
     if (position_corrected_)
@@ -226,8 +233,16 @@ std::string ReconstructorInfo::asStr() const
 
     ss << " acad " << (acad_ ? String::hexStringFromInt(*acad_, 6, '0') : "''")
        << " acid '" << (acid_ ? *acid_ : "")  << "'"
-       << " m3a " << (mode_a_code_ ? mode_a_code_->asStr() : "")
-       << " curslc " << in_current_slice_;
+       << " m3a " << (mode_a_code_ ? mode_a_code_->asStr() : "");
+
+    if (track_number_)
+        ss << " tn " << *track_number_;
+    if (track_begin_)
+        ss << " tbeg " << *track_begin_;
+    if (track_end_)
+        ss << " tend " << *track_end_;
+
+    ss << " curslc " << in_current_slice_;
 
     return ss.str();
 }
@@ -244,7 +259,18 @@ bool ReconstructorInfo::isModeACDetection() const
 
 bool ReconstructorInfo::isPrimaryOnlyDetection() const
 {
-    return !isModeSDetection() && !isModeACDetection();
+    return !(acad_ || acid_ || mode_a_code_ || barometric_altitude_);
+}
+
+bool ReconstructorInfo::isOnGround() const
+{
+    if (data_source_is_ground_only)
+        return true;
+
+    if (ground_bit_)
+        return *ground_bit_;
+
+    return false;
 }
 
 bool ReconstructorInfo::doNotUsePosition() const

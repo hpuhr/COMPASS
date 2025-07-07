@@ -19,7 +19,7 @@
 #include "viewmanager.h"
 #include "viewpoint.h"
 #include "json.hpp"
-#include "json.h"
+#include "json_tools.h"
 //#include "stringconv.h"
 #include "files.h"
 #include "compass.h"
@@ -41,10 +41,10 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
 {
     table_columns_ = default_table_columns_;
 
-    open_icon_ = QIcon(Files::getIconFilepath("not_recommended.png").c_str());
-    closed_icon_ = QIcon(Files::getIconFilepath("not_todo.png").c_str());
-    todo_icon_ = QIcon(Files::getIconFilepath("todo.png").c_str());
-    unknown_icon_ = QIcon(Files::getIconFilepath("todo_maybe.png").c_str());
+    open_icon_ = Files::IconProvider::getIcon("not_recommended.png");
+    closed_icon_ = Files::IconProvider::getIcon("not_todo.png");
+    todo_icon_ = Files::IconProvider::getIcon("todo.png");
+    unknown_icon_ = Files::IconProvider::getIcon("todo_maybe.png");
 }
 
 //ViewPointsTableModel::~ViewPointsTableModel()
@@ -60,9 +60,9 @@ void ViewPointsTableModel::loadViewPoints()
     beginResetModel();
 
     // load view points
-    if (COMPASS::instance().interface().existsViewPointsTable())
+    if (COMPASS::instance().dbInterface().existsViewPointsTable())
     {
-        for (const auto& vp_it : COMPASS::instance().interface().viewPoints())
+        for (const auto& vp_it : COMPASS::instance().dbInterface().viewPoints())
         {
             //assert (!view_points_.count(vp_it.first));
             assert (!hasViewPoint(vp_it.first));
@@ -141,7 +141,7 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
         logdbg << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
-        assert (index.row() < view_points_.size());
+        assert ((unsigned int)index.row() < view_points_.size());
 
         const ViewPoint& vp = view_points_.at(index.row());
 
@@ -177,7 +177,7 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
         if (table_columns_.at(index.column()).toStdString() == ViewPoint::VP_STATUS_KEY)
         {
             assert (index.row() >= 0);
-            assert (index.row() < view_points_.size());
+            assert ((unsigned int)index.row() < view_points_.size());
 
             const ViewPoint& vp = view_points_.at(index.row());
 
@@ -486,7 +486,7 @@ void ViewPointsTableModel::deleteAllViewPoints ()
     beginRemoveRows(QModelIndex(), 0, view_points_.size()-1); // TODO
 
     view_points_.clear();
-    COMPASS::instance().interface().deleteAllViewPoints();
+    COMPASS::instance().dbInterface().deleteAllViewPoints();
 
     endRemoveRows();
 }
@@ -544,7 +544,7 @@ unsigned int ViewPointsTableModel::getIdOf (const QModelIndex& index)
     //    assert (map_it != view_points_.end());
 
     assert (index.row() >= 0);
-    assert (index.row() < view_points_.size());
+    assert ((unsigned int)index.row() < view_points_.size());
 
     return view_points_.at(index.row()).id();
 

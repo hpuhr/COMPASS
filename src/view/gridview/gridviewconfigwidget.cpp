@@ -20,6 +20,8 @@
 #include "gridviewdatawidget.h"
 #include "gridview.h"
 
+#include "geotiff.h"
+
 #include "viewvariable.h"
 
 #include "logger.h"
@@ -160,6 +162,9 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     attachExportMenu();
     updateConfig();
     updateExport();
+    updateDistributedVariable();
+
+    //showSwitch(0, true);
 }
 
 /**
@@ -198,12 +203,19 @@ void GridViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
 /**
 */
-void GridViewConfigWidget::postVariableChangedEvent(int idx)
+void GridViewConfigWidget::variableChangedEvent(int idx)
 {
     if (idx == 0 || idx == 1)
         updateExport();
     else if (idx == 2)
-        updateVariableDataType();
+        updateDistributedVariable();
+}
+
+/**
+*/
+void GridViewConfigWidget::dataSourceChangedEvent()
+{
+    updateExport();
 }
 
 /**
@@ -235,6 +247,7 @@ void GridViewConfigWidget::updateExport()
     auto const_view = dynamic_cast<const GridView*>(view_);
     assert(const_view);
 
+    //no valid grid no export
     if (!const_view->isInit() || !const_view->getDataWidget()->hasValidGrid())
     {
         export_button_->setEnabled(false);
@@ -243,30 +256,44 @@ void GridViewConfigWidget::updateExport()
         return;
     }
 
-    auto var_sel_x = variableSelection(0);
-    auto var_sel_y = variableSelection(1);
+    bool enable_export = false;
+    std::string tooltip;
 
-    assert(var_sel_x && var_sel_y);
+    if (showsAnnotation())
+    {
+        //annotation shown => allow export on users discretion
+        enable_export = false;
+        tooltip = "Export disabled for annotations";
+    }
+    else
+    {
+        //variables shown => allow if longitude-latitude is selected
+        auto var_sel_x = variableSelection(0);
+        auto var_sel_y = variableSelection(1);
 
-    auto& dbc_man = COMPASS::instance().dbContentManager();
+        assert(var_sel_x && var_sel_y);
 
-    const auto& metavar_lon = dbc_man.metaVariable(DBContent::meta_var_longitude_.name());
-    const auto& metavar_lat = dbc_man.metaVariable(DBContent::meta_var_latitude_.name());
+        auto& dbc_man = COMPASS::instance().dbContentManager();
 
-    bool has_lon       = var_sel_x->hasMetaVariable() && &var_sel_x->selectedMetaVariable() == &metavar_lon;
-    bool has_lat       = var_sel_y->hasMetaVariable() && &var_sel_y->selectedMetaVariable() == &metavar_lat;
-    bool enable_export = has_lon && has_lat;
+        const auto& metavar_lon = dbc_man.metaVariable(DBContent::meta_var_longitude_.name());
+        const auto& metavar_lat = dbc_man.metaVariable(DBContent::meta_var_latitude_.name());
 
-    const std::string tt_deactiv = "<html><head/><body>"
-                                   "<p>To reenable export, please select the following variables.</p>"
-                                   "<ul>"
-                                   "<li><b>X Variable</b>: Meta - Longitude</li>"
-                                   "<li><b>Y Variable</b>: Meta - Latitude</li>"
-                                   "</ul>"
-                                   "<p></p>"
-                                   "</body></html>";
+        bool has_lon = var_sel_x->hasMetaVariable() && &var_sel_x->selectedMetaVariable() == &metavar_lon;
+        bool has_lat = var_sel_y->hasMetaVariable() && &var_sel_y->selectedMetaVariable() == &metavar_lat;
 
-    std::string tooltip = enable_export ? "" : tt_deactiv;
+        enable_export = has_lon && has_lat;
+
+        const std::string tt_deactiv = "<html><head/><body>"
+                                    "<p>To reenable export, please select the following variables.</p>"
+                                    "<ul>"
+                                    "<li><b>X Variable</b>: Meta - Longitude</li>"
+                                    "<li><b>Y Variable</b>: Meta - Latitude</li>"
+                                    "</ul>"
+                                    "<p></p>"
+                                    "</body></html>";
+
+        tooltip = enable_export ? "" : tt_deactiv;
+    }
 
     export_button_->setEnabled(enable_export);
     export_button_->setToolTip(QString::fromStdString(tooltip));
@@ -350,6 +377,7 @@ void GridViewConfigWidget::updateConfig()
     color_steps_box_->setValue((int)settings.render_color_num_steps);
     color_steps_box_->blockSignals(false);
 
+    //@TODO: updateDistributedVariable()?
     updateVariableDataType();
 
     color_value_min_box_->blockSignals(true);
@@ -359,6 +387,26 @@ void GridViewConfigWidget::updateConfig()
     color_value_max_box_->blockSignals(true);
     color_value_max_box_->setValue(settings.render_color_value_max);
     color_value_max_box_->blockSignals(false);
+}
+
+/**
+*/
+void GridViewConfigWidget::updateDistributedVariable()
+{
+    updateVariableDataType();
+
+    bool var_empty = view_->variable(2).isEmpty();
+
+    if (var_empty)
+    {
+        loginf << "GridViewConfigWidget: updateDistributedVariable: setting distributed variable to empty";
+
+        value_type_combo_->blockSignals(true);
+        value_type_combo_->setCurrentIndex(value_type_combo_->findData(QVariant((int)grid2d::ValueType::ValueTypeCountValid)));
+        value_type_combo_->blockSignals(false);
+    }
+
+    value_type_combo_->setEnabled(!var_empty);
 }
 
 /**
@@ -500,6 +548,8 @@ void GridViewConfigWidget::exportToGeographicView()
         return;
     }
 
+    const auto& legend = data_widget->currentLegend();
+
     std::string name = exportName();
 
     auto export_config = getExportGeoViewConfig(this, name);
@@ -511,7 +561,10 @@ void GridViewConfigWidget::exportToGeographicView()
 
     ViewPointGenAnnotation anno(export_config->item_name);
 
-    auto geo_image_feat = new ViewPointGenFeatureGeoImage(geo_image->first, geo_image->second);
+    auto geo_image_feat = new ViewPointGenFeatureGeoImage(geo_image->first, 
+                                                          geo_image->second, 
+                                                          legend, 
+                                                          true);
     anno.addFeature(geo_image_feat);
 
     nlohmann::json j;
@@ -542,6 +595,6 @@ void GridViewConfigWidget::exportToGeoTiff()
     if (fn.isEmpty())
         return;
 
-    if (!GeoTIFFWriter::writeGeoTIFF(fn.toStdString(), geo_image->first, geo_image->second))
+    if (!GeoTIFF::writeGeoTIFF(fn.toStdString(), geo_image->first, geo_image->second))
         QMessageBox::critical(this, "Error", "Export to GeoTIFF failed.");
 }

@@ -19,17 +19,18 @@
 #include "eval/results/base/result_t.h"
 #include "eval/results/base/featuredefinition.h"
 
-#include "eval/results/report/rootitem.h"
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttable.h"
-#include "eval/results/report/section_id.h"
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
+#include "eval/results/report/evalsectionid.h"
 
 #include "eval/requirement/base/base.h"
 #include "number.h"
 
 #include "sectorlayer.h"
 //#include "logger.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
 #include "viewpoint.h"
 #include "viewpointgenerator.h"
@@ -47,9 +48,14 @@ using namespace Utils;
 namespace EvaluationRequirementResult
 {
 
-const std::string Base::req_overview_table_name_ {"Results Overview"};
+const std::string Base::RequirementOverviewTableName   = "Results Overview";
+const std::string Base::RequirementOverviewSectionName = "Overview:Results";
 
 const QColor Base::HistogramColorDefault = QColor(0, 0, 255);
+
+const std::string Base::ContentPropertySectorLayer = "sector_layer";
+const std::string Base::ContentPropertyReqGroup    = "req_group";
+const std::string Base::ContentPropertyReqName     = "req_name";
 
 /**
 */
@@ -57,16 +63,16 @@ Base::Base(const std::string& type,
            const std::string& result_id,
            std::shared_ptr<EvaluationRequirement::Base> requirement, 
            const SectorLayer& sector_layer,
-           EvaluationManager& eval_man)
+           EvaluationCalculator& calculator)
 :   type_        (type)
 ,   result_id_   (result_id)
 ,   requirement_ (requirement)
 ,   sector_layer_(sector_layer)
-,   eval_man_    (eval_man)
+,   calculator_  (calculator)
 {
     assert (requirement_);
 
-    req_grp_id_ = EvaluationResultsReport::SectionID::requirementGroupResultID(*this);
+    req_grp_id_ = EvalSectionID::requirementGroupResultID(*this);
 }
 
 /**
@@ -85,6 +91,14 @@ bool Base::isSingle() const
 bool Base::isJoined() const
 {
     return (baseType() == BaseType::Joined);
+}
+
+/**
+ */
+bool Base::isResult(const Evaluation::RequirementResultID& id) const
+{
+    return requirement_->matchesResultID(id) &&
+           id.sec_layer_name == sector_layer_.name();
 }
 
 /**
@@ -166,26 +180,26 @@ void Base::updateResult(const boost::optional<double>& value)
 
 /**
 */
-QVariant Base::resultValue() const
+nlohmann::json Base::resultValue() const
 {
     return resultValueOptional(result_);
 }
 
 /**
 */
-QVariant Base::resultValueOptional(const boost::optional<double>& value) const
+nlohmann::json Base::resultValueOptional(const boost::optional<double>& value) const
 {
     if (!value.has_value())
-        return QVariant();
+        return nlohmann::json();
 
     return resultValue(value.value());
 }
 
 /**
 */
-QVariant Base::resultValue(double value) const
+nlohmann::json Base::resultValue(double value) const
 {
-    return requirement_->getResultValueString(value).c_str();
+    return requirement_->getResultValueString(value);
 }
 
 /**
@@ -214,30 +228,29 @@ bool Base::isIgnored() const
 
 /**
 */
-EvaluationResultsReport::SectionContentTable& Base::getReqOverviewTable (
-        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+ResultReport::SectionContentTable& Base::getReqOverviewTable (std::shared_ptr<ResultReport::Report> report)
 {
-    EvaluationResultsReport::Section& ov_sec = root_item->getSection("Overview:Results");
+    auto& ov_sec = report->getSection(RequirementOverviewSectionName);
 
-    if (!ov_sec.hasTable(req_overview_table_name_))
-        ov_sec.addTable(req_overview_table_name_, 8,
+    if (!ov_sec.hasTable(RequirementOverviewTableName))
+        ov_sec.addTable(RequirementOverviewTableName, 8,
         {"Sector Layer", "Group", "Req.", "Id", "#Updates", "Value", "Condition", "Result"});
 
-    return ov_sec.getTable(req_overview_table_name_);
+    return ov_sec.getTable(RequirementOverviewTableName);
 }
 
 /**
 */
 std::string Base::getRequirementSectionID() const
 {
-    return EvaluationResultsReport::SectionID::requirementResultID(*this);
+    return EvalSectionID::requirementResultID(*this);
 }
 
 /**
 */
 std::string Base::getRequirementSumSectionID() const
 {
-    return EvaluationResultsReport::SectionID::requirementResultSumID(*this);
+    return EvalSectionID::requirementResultSumID(*this);
 }
 
 /**
@@ -249,10 +262,16 @@ std::string Base::getRequirementAnnotationID() const
 
 /**
 */
-EvaluationResultsReport::Section& Base::getRequirementSection (
-        std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+std::string Base::sumSectionName() const
 {
-    return root_item->getSection(getRequirementSectionID());
+    return EvalSectionID::SectionSum;
+}
+
+/**
+*/
+ResultReport::Section& Base::getRequirementSection (std::shared_ptr<ResultReport::Report> report)
+{
+    return report->getSection(getRequirementSectionID());
 }
 
 /**
@@ -274,11 +293,11 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
             double lat_w = info.bounds.width();
             double lon_w = info.bounds.height();
 
-            if (lat_w < eval_man_.settings().result_detail_zoom_)
-                lat_w = eval_man_.settings().result_detail_zoom_;
+            if (lat_w < calculator_.settings().result_detail_zoom_)
+                lat_w = calculator_.settings().result_detail_zoom_;
 
-            if (lon_w < eval_man_.settings().result_detail_zoom_)
-                lon_w = eval_man_.settings().result_detail_zoom_;
+            if (lon_w < calculator_.settings().result_detail_zoom_)
+                lon_w = calculator_.settings().result_detail_zoom_;
 
             (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = lat_w;
             (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = lon_w;
@@ -289,8 +308,8 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
         //detail => set position of interest
         (*viewable_ptr)[ViewPoint::VP_POS_LAT_KEY    ] = info.bounds.x();
         (*viewable_ptr)[ViewPoint::VP_POS_LON_KEY    ] = info.bounds.y();
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = eval_man_.settings().result_detail_zoom_;
-        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = eval_man_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LAT_KEY] = calculator_.settings().result_detail_zoom_;
+        (*viewable_ptr)[ViewPoint::VP_POS_WIN_LON_KEY] = calculator_.settings().result_detail_zoom_;
         (*viewable_ptr)[ViewPoint::VP_TIMESTAMP_KEY  ] = Utils::Time::toString(info.timestamp);
     }
 
@@ -434,6 +453,41 @@ size_t Base::totalNumPositions() const
     iterateDetails(funcScan, {});
 
     return num_positions;
+}
+
+/**
+*/
+void Base::setContentProperties(ResultReport::SectionContent& content,
+                                const Evaluation::RequirementResultID& id)
+{
+    content.setJSONProperty(ContentPropertySectorLayer, id.sec_layer_name);
+    content.setJSONProperty(ContentPropertyReqGroup, id.req_group_name);
+    content.setJSONProperty(ContentPropertyReqName, id.req_name);
+}
+
+/**
+*/
+boost::optional<Evaluation::RequirementResultID> Base::contentProperties(const ResultReport::SectionContent& content)
+{
+    if (!content.hasJSONProperty(ContentPropertySectorLayer) ||
+        !content.hasJSONProperty(ContentPropertyReqGroup) ||
+        !content.hasJSONProperty(ContentPropertyReqName))
+        return boost::optional<Evaluation::RequirementResultID>();
+
+    Evaluation::RequirementResultID id;
+
+    try
+    {
+        id.sec_layer_name = content.jsonProperty(ContentPropertySectorLayer);
+        id.req_group_name = content.jsonProperty(ContentPropertyReqGroup);
+        id.req_name       = content.jsonProperty(ContentPropertyReqName);
+    }
+    catch(...)
+    {
+        return boost::optional<Evaluation::RequirementResultID>();
+    }
+    
+    return id;
 }
 
 }

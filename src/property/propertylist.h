@@ -38,6 +38,8 @@ class PropertyList
   public:
     /// @brief Constructor
     PropertyList();
+    /// @brief Constructor
+    PropertyList(const std::vector<Property>& properties);
     /// @brief Desctructor. Calls clear.
     virtual ~PropertyList();
 

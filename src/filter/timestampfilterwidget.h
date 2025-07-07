@@ -1,11 +1,13 @@
-#ifndef TIMESTAMPFILTERWIDGET_H
-#define TIMESTAMPFILTERWIDGET_H
+
+#pragma once
 
 #include "dbfilterwidget.h"
 #include "timestampfilter.h"
 
 class QDateTimeEdit;
 
+/**
+ */
 class TimestampFilterWidget : public DBFilterWidget
 {
     Q_OBJECT
@@ -28,5 +30,3 @@ protected:
 
     bool update_active_ {false};
 };
-
-#endif // TIMESTAMPFILTERWIDGET_H

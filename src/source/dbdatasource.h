@@ -11,6 +11,7 @@
 namespace dbContent
 {
 
+class ConfigurationDataSource;
 class DBDataSourceWidget;
 
 class DBDataSource : public DataSourceBase
@@ -46,11 +47,11 @@ public:
     void clearNumInserted(const std::string& db_content, unsigned int line_id);
 
     void addNumLoaded(const std::string& db_content, unsigned int line_id, unsigned int num);
-    unsigned int numLoaded (unsigned int line_id);
-    unsigned int numLoaded (const std::string& db_content);
-    unsigned int numLoaded (const std::string& db_content, unsigned int line_id);
-    bool hasNumLoaded (unsigned int line_id); // for any DBContent
-    bool hasAnyNumLoaded (); // for any DBContent, line
+    unsigned int numLoaded (unsigned int line_id) const;
+    unsigned int numLoaded (const std::string& db_content) const;
+    unsigned int numLoaded (const std::string& db_content, unsigned int line_id) const;
+    bool hasNumLoaded (unsigned int line_id) const; // for any DBContent
+    bool hasAnyNumLoaded () const; // for any DBContent, line
     unsigned int getFirstLoadedLine(); // for any DBContent
     void clearNumLoaded();
 

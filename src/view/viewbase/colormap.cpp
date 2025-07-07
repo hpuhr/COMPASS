@@ -17,6 +17,7 @@
 
 #include "colormap.h"
 #include "colorscales.h"
+#include "colorlegend.h"
 
 #include "logger.h"
 
@@ -440,6 +441,13 @@ size_t ColorMap::indexFromFactor(double t) const
         const size_t n_inner = n_colors_ - 2;
         idx                  = (size_t)std::floor(t * n_inner) + 1;
 
+        if (idx > n_colors_ - 2)
+        {
+            logerr << "ColorMap: indexFromFactor: idx " << idx << " > " << n_colors_ - 2
+                   << " for t " << t;
+            idx = n_colors_ - 2;
+        }
+
         assert(idx <= n_colors_ - 2);
     }
     else // Type::LinearSamples
@@ -458,6 +466,13 @@ size_t ColorMap::indexFromFactor(double t) const
         const size_t n_inner   = n_colors_ - 2;
         const size_t idx_inner = (size_t)std::floor((t - hstep) * n_inner);
         idx                    = 1 + idx_inner;
+
+        if (idx > n_colors_ - 2)
+        {
+            logerr << "ColorMap: indexFromFactor: idx " << idx << " > " << n_colors_ - 2
+                   << " for t " << t;
+            idx = n_colors_ - 2;
+        }
 
         assert(idx <= n_colors_ - 2);
     }
@@ -513,18 +528,18 @@ ColorMap::ValueRange ColorMap::activeRange() const
 
 /**
 */
-std::vector<std::pair<QColor, std::string>> ColorMap::getDescription(bool add_sel_color,
-                                                                     bool add_null_color,
-                                                                     const ValueDecorator& decorator) const
+ColorLegend ColorMap::colorLegend(bool add_sel_color,
+                                  bool add_null_color,
+                                  const ValueDecorator& decorator) const
 {
     if (!valid() || !canSampleValues())
-        return std::vector<std::pair<QColor, std::string>>();
+        return ColorLegend();
 
     ValueDecorator active_decorator = decorator;
     if (!active_decorator)
         active_decorator = [ & ] (double value) { return std::to_string(value); };
 
-    std::vector<std::pair<QColor, std::string>> descr;
+    ColorLegend legend;
 
     auto range = activeRange();
 
@@ -533,41 +548,41 @@ std::vector<std::pair<QColor, std::string>> ColorMap::getDescription(bool add_se
     if (vrange < 1e-12 || numColors() == 1)
     {
         if (type_ == Type::LinearRanges)
-            descr.emplace_back(colors_.front(), " = " + active_decorator(range.first));
+            legend.addEntry(colors_.front(), " = " + active_decorator(range.first));
         else
-            descr.emplace_back(colors_.front(), active_decorator(range.first));
+            legend.addEntry(colors_.front(), active_decorator(range.first));
     }
     else
     {
         if (type_ == Type::LinearRanges)
         {
-            descr.emplace_back(colors_.front(), "< " + active_decorator(range.first));
+            legend.addEntry(colors_.front(), "< " + active_decorator(range.first));
 
             for (size_t i = 1; i < n_colors_ - 1; ++i)
             {
                 const double v0 = range.first + value_factors_[ i     ] * vrange;
                 const double v1 = range.first + value_factors_[ i + 1 ] * vrange;
 
-                descr.emplace_back(colors_[ i ], active_decorator(v0) + " - " + active_decorator(v1));
+                legend.addEntry(colors_[ i ], active_decorator(v0) + " - " + active_decorator(v1));
             }
 
-            descr.emplace_back(colors_.back(), ">= " + active_decorator(range.second));
+            legend.addEntry(colors_.back(), ">= " + active_decorator(range.second));
         }
         else
         {
             for (size_t i = 0; i < n_colors_; ++i)
             {
                 const double v = range.first + value_factors_[ i ] * vrange;
-                descr.emplace_back(colors_[ i ], active_decorator(v));
+                legend.addEntry(colors_[ i ], active_decorator(v));
             }
         }
     }
 
     if (add_sel_color)
-        descr.emplace_back(specialColor(SpecialColor::SpecialColorSelected), "Selected");
+        legend.addEntry(specialColor(SpecialColor::SpecialColorSelected), "Selected");
 
     if (add_null_color)
-        descr.emplace_back(specialColor(SpecialColor::SpecialColorNull), "NULL");
+        legend.addEntry(specialColor(SpecialColor::SpecialColorNull), "NULL");
 
-    return descr;
+    return legend;
 }

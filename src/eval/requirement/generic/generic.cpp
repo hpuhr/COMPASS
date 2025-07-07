@@ -33,8 +33,8 @@ namespace EvaluationRequirement
 {
 
 GenericBase::GenericBase(const std::string& name, const std::string& short_name, const std::string& group_name,
-                               double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man)
+                               double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator)
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator)
 {
 }
 
@@ -57,8 +57,8 @@ std::string GenericBase::valueNamePlural() const
 
 
 GenericInteger::GenericInteger(const std::string& name, const std::string& short_name, const std::string& group_name,
-                       double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man)
-    : GenericBase(name, short_name, group_name, prob, prob_check_type, eval_man)
+                       double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator)
+    : GenericBase(name, short_name, group_name, prob, prob_check_type, calculator)
 {
 }
 
@@ -68,7 +68,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericInteger::evaluate (
 {
     logdbg << "EvaluationRequirementGenericInteger '" << name_ << "': evaluate: utn " << target_data.utn_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -98,7 +98,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericInteger::evaluate (
     ValueComparisonResult cmp_res;
     string comment;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
     bool skip_detail;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -173,7 +173,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericInteger::evaluate (
         }
         ref_exists = true;
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
@@ -237,7 +238,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericInteger::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleGeneric>(
                 result_type_, "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
+                calculator_, details, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
         num_unknown, num_correct, num_false);
 }
 
@@ -246,8 +247,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericInteger::evaluate (
 
 
 GenericDouble::GenericDouble(const std::string& name, const std::string& short_name, const std::string& group_name,
-                               double prob, COMPARISON_TYPE prob_check_type, double threshold, EvaluationManager& eval_man)
-    : GenericBase(name, short_name, group_name, prob, prob_check_type, eval_man), threshold_(threshold)
+                               double prob, COMPARISON_TYPE prob_check_type, double threshold, EvaluationCalculator& calculator)
+    : GenericBase(name, short_name, group_name, prob, prob_check_type, calculator), threshold_(threshold)
 {
 }
 
@@ -257,7 +258,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericDouble::evaluate (
 {
     logdbg << "EvaluationRequirementGenericDouble '" << name_ << "': evaluate: utn " << target_data.utn_;
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -287,7 +288,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericDouble::evaluate (
     ValueComparisonResult cmp_res;
     string comment;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
     bool skip_detail;
 
     auto addDetail = [ & ] (const ptime& ts,
@@ -362,7 +363,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericDouble::evaluate (
         }
         ref_exists = true;
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
@@ -426,7 +428,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericDouble::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleGeneric>(
         result_type_, "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-        eval_man_, details, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
+        calculator_, details, num_updates, num_no_ref_pos, num_no_ref_val, num_pos_outside, num_pos_inside,
         num_unknown, num_correct, num_false);
 }
 

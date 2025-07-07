@@ -173,7 +173,7 @@ namespace force
 //        for (size_t i = 0; i < n; ++i)
 //        {
         tbb::parallel_for(size_t(0), n, [&](size_t i) {
-            const auto& l = labels[ i ];
+            //const auto& l = labels[ i ];
 
             const auto& bbox = bboxes[ i ];
 
@@ -182,7 +182,7 @@ namespace force
                 if (i == j)
                     continue;
 
-                const auto& l2 = labels[ j ];
+                //const auto& l2 = labels[ j ];
 
                 const auto& bbox2 = bboxes[ j ];
 
@@ -257,16 +257,16 @@ namespace force
 
         std::vector<QRectF> bboxes = collectBoundingBoxes(labels, tx, ty);
 
-        auto coutBBox = [ & ] (const QRectF& bbox) 
-        {
-            loginf << "label_placement: force: repelFromObjects: ("
-                   << bbox.x() << "," << bbox.y() << "," << bbox.width() << "x" << bbox.height() << ")";
-        };
+        // auto coutBBox = [ & ] (const QRectF& bbox)
+        // {
+        //     loginf << "label_placement: force: repelFromObjects: ("
+        //            << bbox.x() << "," << bbox.y() << "," << bbox.width() << "x" << bbox.height() << ")";
+        // };
 
         //for (size_t i = 0; i < n; ++i)
         //{
         tbb::parallel_for(size_t(0), n, [&](size_t i) {
-            const auto& l = labels[ i ];
+            //const auto& l = labels[ i ];
 
             const auto& bbox = bboxes[ i ];
 
@@ -347,7 +347,7 @@ namespace force
 //        for (size_t i = 0; i < n; ++i)
 //        {
          tbb::parallel_for(size_t(0), n, [&](size_t i) {
-            const auto& l = labels[ i ];
+            //const auto& l = labels[ i ];
 
             const auto& bbox = bboxes[ i ];
 
@@ -741,7 +741,7 @@ namespace force
         bool   converged = false;
         double last_dx   = 0.0;
         double last_dy   = 0.0;
-        int    used_iter = -1;
+        //int    used_iter = -1;
         
         bool simple_mode = settings.method == Method::ForceBasedSimple;
 
@@ -856,7 +856,7 @@ namespace force
             if (total.x() <= tol_x && total.y() < tol_y)
             {
                 converged = true;
-                used_iter = i + 1;
+                //used_iter = i + 1;
 
                 break;
             }

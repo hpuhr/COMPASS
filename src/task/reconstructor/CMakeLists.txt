@@ -21,6 +21,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/referencecalculatorannotations.h"
         "${CMAKE_CURRENT_LIST_DIR}/simpleaccuracyestimator.h"
         "${CMAKE_CURRENT_LIST_DIR}/accuracyestimatorbase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskclassificationwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskanalysiswidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructormainwidget.h"
 
@@ -39,6 +40,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/referencecalculatorannotations.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/simpleaccuracyestimator.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/accuracyestimatorbase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskclassificationwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructortaskanalysiswidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/reconstructormainwidget.cpp"
 )

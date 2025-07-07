@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONSTANDARD_H
-#define EVALUATIONSTANDARD_H
+#pragma once
 
 #include "configurable.h"
 #include "evaluationstandardtreeitem.h"
@@ -24,28 +23,32 @@
 #include "eval/results/report/rootitem.h"
 
 #include <QObject>
-#include <QMenu>
 
 #include <memory>
 
-class EvaluationManager;
+class EvaluationCalculator;
 class Group;
 class EvaluationStandardWidget;
 class EvaluationStandardTreeModel;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 class EvaluationStandard : public QObject, public Configurable, public EvaluationStandardTreeItem
 {
     Q_OBJECT
 
-signals:
-    void selectionChanged();
+ signals:
+    void configChangedSignal();
+//     void selectionChanged();
 
-public slots:
-    void addGroupSlot();
-    void groupsChangedSlot();
+ public slots:
+     void groupsChangedSlot();
 
 public:
-    EvaluationStandard(const std::string& class_id, const std::string& instance_id, EvaluationManager& eval_man);
+    EvaluationStandard(const std::string& class_id, const std::string& instance_id, EvaluationCalculator& calculator);
     virtual ~EvaluationStandard();
 
     virtual void generateSubConfigurable(const std::string& class_id,
@@ -61,9 +64,13 @@ public:
 
     using EvaluationRequirementGroupIterator =
     typename std::vector<std::unique_ptr<Group>>::iterator;
+    using EvaluationRequirementGroupConstIterator =
+    typename std::vector<std::unique_ptr<Group>>::const_iterator;
 
     EvaluationRequirementGroupIterator begin() { return groups_.begin(); }
     EvaluationRequirementGroupIterator end() { return groups_.end(); }
+    EvaluationRequirementGroupConstIterator begin() const { return groups_.begin(); }
+    EvaluationRequirementGroupConstIterator end() const { return groups_.end(); }
     unsigned int size () { return groups_.size(); };
 
     EvaluationStandardWidget* widget();
@@ -76,25 +83,20 @@ public:
 
     EvaluationStandardRootItem& rootItem();
 
-    void showMenu ();
-    void beginModelReset();
-    void endModelReset();
+    void addToReport (std::shared_ptr<ResultReport::Report> report);
 
-    void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    std::set<std::string> getAllRequirementNames() const;
 
 protected:
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
     std::string name_;
 
     EvaluationStandardRootItem root_item_;
 
-    std::unique_ptr<EvaluationStandardWidget> widget_;
+    //std::unique_ptr<EvaluationStandardWidget> widget_;
 
     std::vector<std::unique_ptr<Group>> groups_;
-
-    QMenu menu_;
 
     virtual void checkSubConfigurables() override;
 };
 
-#endif // EVALUATIONSTANDARD_H

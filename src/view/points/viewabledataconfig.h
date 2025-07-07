@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWABLEDATACONFIG_H
-#define VIEWABLEDATACONFIG_H
+#pragma once
 
 #include "json.hpp"
 
@@ -39,4 +38,3 @@ protected:
     nlohmann::json data_;
 };
 
-#endif // VIEWABLEDATACONFIG_H

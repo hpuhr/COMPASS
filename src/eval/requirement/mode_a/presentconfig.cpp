@@ -20,50 +20,45 @@
 #include "eval/requirement/mode_a/present.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
-//#include "stringconv.h"
 
-//using namespace Utils;
-using namespace EvaluationResultsReport;
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 using namespace std;
 
 namespace EvaluationRequirement
 {
 
 ModeAPresentConfig::ModeAPresentConfig(const std::string& class_id, const std::string& instance_id,
-                                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+                                       Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
 }
 
 std::shared_ptr<Base> ModeAPresentConfig::createRequirement()
 {
     shared_ptr<ModeAPresent> req = make_shared<ModeAPresent>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_);
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_);
 
     return req;
 }
 
-void ModeAPresentConfig::createWidget()
+BaseConfigWidget* ModeAPresentConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new ModeAPresentConfigWidget(*this));
-    assert (widget_);
+    return new ModeAPresentConfigWidget(*this);
 }
 
-void ModeAPresentConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void ModeAPresentConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Probability [1]", "Probability of Mode 3/A code present",
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 }
+
 }

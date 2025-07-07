@@ -68,7 +68,7 @@ void AsyncTask::run()
 
     setState(AsyncTaskState::State::Running);
 
-    AsyncTaskResult result(false, "");
+    Result result;
     
     try
     {
@@ -76,11 +76,11 @@ void AsyncTask::run()
     }
     catch(const std::exception& e)
     {
-        result = AsyncTaskResult(false, e.what());
+        result = Result::failed(e.what());
     }
     catch(...)
     {
-        result = AsyncTaskResult(false, "Unknown error");
+        result = Result::failed("Unknown error");
     }
     
     //task has been aborted?
@@ -91,9 +91,9 @@ void AsyncTask::run()
     }
 
     //task failed?
-    if (!result.ok)
+    if (!result.ok())
     {
-        setError(result.error);
+        setError(result.error());
         return;
     }
 
@@ -112,8 +112,10 @@ void AsyncTask::abort()
 bool AsyncTask::runAsyncDialog(bool auto_close,
                                QWidget* parent)
 {
+    //generate the managing dialog
     AsyncTaskDialog dlg(this, auto_close, parent);
 
+    //start async task
     auto result = std::async(std::launch::async, 
         [ this ] ()
         {
@@ -129,9 +131,37 @@ bool AsyncTask::runAsyncDialog(bool auto_close,
             }
         });
 
+    //run dialog
     dlg.exec();
 
+    //wait for result (should not be needed)
     result.wait();
+
+    return result.get();
+}
+
+/**
+*/
+bool AsyncTask::runAsync()
+{
+    //start async task
+    auto result = std::async(std::launch::async, 
+        [ this ] ()
+        {
+            try
+            {
+                this->run();
+                return this->taskState().isDone();
+            }
+            catch (const std::exception& e)
+            {
+                logerr << "AsyncTask: runAsyncDialog: exception '" << e.what() << "'";
+                throw e;
+            }
+        });
+
+    while (result.wait_for(std::chrono::milliseconds(10)) != std::future_status::ready)
+        QApplication::processEvents();
 
     return result.get();
 }
@@ -180,8 +210,8 @@ QString AsyncFuncTask::defaultMessage() const
 
 /**
 */
-AsyncTaskResult AsyncFuncTask::run_impl(const AsyncTaskState& state,
-                                        AsyncTaskProgressWrapper& progress)
+Result AsyncFuncTask::run_impl(const AsyncTaskState& state,
+                               AsyncTaskProgressWrapper& progress)
 {
     if (!func_)
         throw std::runtime_error("No func to execute in async task");
@@ -198,18 +228,21 @@ AsyncTaskResult AsyncFuncTask::run_impl(const AsyncTaskState& state,
 AsyncTaskDialog::AsyncTaskDialog(AsyncTask* task, 
                                  bool auto_close,
                                  QWidget* parent)
-:   QDialog           (parent           )
-,   task_             (task             )
-,   auto_close_       (auto_close       )
+:   QDialog    (parent    )
+,   task_      (task      )
+,   auto_close_(auto_close)
 {
     assert(task);
 
     setWindowTitle(task_->title());
+    setMinimumWidth(500);
 
     createUI();
     updateState();
 
     connect(task, &AsyncTask::stateChanged, this, &AsyncTaskDialog::updateState, Qt::ConnectionType::QueuedConnection);
+
+    updateProgress();
 }
 
 /**
@@ -335,7 +368,7 @@ void AsyncTaskDialog::updateProgress()
     if (progress.flags & AsyncTaskProgress::Flags::Steps)
     {
         if (p < 0)
-            p = 100 * progress.stepsPerc();
+            p = 100 * progress.stepsPercent();
         
         step  = progress.step;
         steps = progress.steps;

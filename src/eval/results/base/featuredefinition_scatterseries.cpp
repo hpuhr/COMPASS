@@ -1,13 +1,14 @@
+
 #include "featuredefinition_scatterseries.h"
 
 namespace EvaluationRequirementResult
 {
 
-FeatureDefinitionScatterSeries::FeatureDefinitionScatterSeries(const EvaluationManager& eval_manager,
-                               const std::string& feature_description,
-                               const std::string& x_axis_label,
-                               const std::string& y_axis_label)
-    :   FeatureDefinition(eval_manager, "scatterseries", feature_description, x_axis_label, y_axis_label) {}
+FeatureDefinitionScatterSeries::FeatureDefinitionScatterSeries(const EvaluationCalculator& calculator,
+                                                               const std::string& feature_description,
+                                                               const std::string& x_axis_label,
+                                                               const std::string& y_axis_label)
+    :   FeatureDefinition(calculator, "scatterseries", feature_description, x_axis_label, y_axis_label) {}
 
 /**
  */
@@ -91,11 +92,11 @@ std::unique_ptr<ViewPointGenFeature> FeatureDefinitionScatterSeries::createFeatu
     return std::unique_ptr<ViewPointGenFeature>(feat);
 }
 
-FeatureDefinitionCustomScatterSeries::FeatureDefinitionCustomScatterSeries(const EvaluationManager& eval_manager,
-                                     const std::string& feature_description,
-                                     const std::string& x_axis_label,
-                                     const std::string& y_axis_label)
-    :   FeatureDefinition(eval_manager, "scatterseries_custom", feature_description, x_axis_label, y_axis_label)
+FeatureDefinitionCustomScatterSeries::FeatureDefinitionCustomScatterSeries(const EvaluationCalculator& calculator,
+                                                                           const std::string& feature_description,
+                                                                           const std::string& x_axis_label,
+                                                                           const std::string& y_axis_label)
+    :   FeatureDefinition(calculator, "scatterseries_custom", feature_description, x_axis_label, y_axis_label)
 {
 }
 
@@ -145,10 +146,10 @@ std::unique_ptr<ViewPointGenFeature> FeatureDefinitionCustomScatterSeries::creat
     return std::unique_ptr<ViewPointGenFeature>(feat);
 }
 
-FeatureDefinitionTimedScatterSeries::FeatureDefinitionTimedScatterSeries(const EvaluationManager& eval_manager,
+FeatureDefinitionTimedScatterSeries::FeatureDefinitionTimedScatterSeries(const EvaluationCalculator& calculator,
                                                                          const std::string& feature_description,
                                                                          const std::string& y_axis_label)
-:   FeatureDefinition(eval_manager, "scatterseries_timed", feature_description, DBContent::meta_var_timestamp_.name(), y_axis_label) {}
+:   FeatureDefinition(calculator, "scatterseries_timed", feature_description, DBContent::meta_var_timestamp_.name(), y_axis_label) {}
 
 
 /**

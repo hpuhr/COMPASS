@@ -18,15 +18,17 @@
 #ifndef EVALUATIONREQUIREMENTMODECFALSECONFIG_H
 #define EVALUATIONREQUIREMENTMODECFALSECONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/mode_c/false.h"
-//#include "eval/requirement/mode_c/modecfalseconfigwidget.h"
 
 #include <memory>
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -34,7 +36,7 @@ class ModeCFalseConfig : public ProbabilityBaseConfig
 {
 public:
     ModeCFalseConfig(const std::string& class_id, const std::string& instance_id,
-                     Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+                     Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
 
     std::shared_ptr<Base> createRequirement() override;
 
@@ -44,14 +46,14 @@ public:
     float maxDifference() const;
     void maxDifference(float value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
     float maximum_probability_false_{0};
 
     float max_difference_ {0};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 
 };
 

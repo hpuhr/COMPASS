@@ -16,6 +16,7 @@
  */
 
 #include "viewcomponent.h"
+#include "json.hpp"
 
 /**
 */

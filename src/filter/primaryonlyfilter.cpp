@@ -169,9 +169,9 @@ bool PrimaryOnlyFilter::activeInLiveMode()
     return true;
 }
 
-std::vector<size_t> PrimaryOnlyFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
+std::vector<unsigned int> PrimaryOnlyFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
 {
-    std::vector<size_t> to_be_removed;
+    std::vector<unsigned int> to_be_removed;
 
     DBContentManager& cont_man = COMPASS::instance().dbContentManager();
 

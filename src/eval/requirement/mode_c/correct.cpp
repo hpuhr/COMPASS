@@ -33,9 +33,9 @@ namespace EvaluationRequirement
 
 ModeCCorrect::ModeCCorrect(
         const std::string& name, const std::string& short_name, const std::string& group_name,
-        double prob, COMPARISON_TYPE prob_check_type, EvaluationManager& eval_man,
+        double prob, COMPARISON_TYPE prob_check_type, EvaluationCalculator& calculator,
         float max_distance_ft)
-    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, eval_man),
+    : ProbabilityBase(name, short_name, group_name, prob, prob_check_type, false, calculator),
       max_distance_ft_(max_distance_ft)
 {
 
@@ -58,10 +58,10 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
 
         return make_shared<EvaluationRequirementResult::SingleModeCCorrect>(
                     "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                    eval_man_, Details(), 0, 0, 0, 0, 0, 0, 0);
+                    calculator_, Details(), 0, 0, 0, 0, 0, 0, 0);
     }
 
-    time_duration max_ref_time_diff = Time::partialSeconds(eval_man_.settings().max_ref_time_diff_);
+    time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
 
     const auto& tst_data = target_data.tstChain().timestampIndexes();
 
@@ -83,11 +83,11 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
     bool is_inside;
     //pair<dbContent::TargetPosition, bool> ret_pos;
     boost::optional<dbContent::TargetPosition> ref_pos;
-    bool ok;
+    //bool ok;
 
     string comment;
 
-    bool skip_no_data_details = eval_man_.settings().report_skip_no_data_details_;
+    bool skip_no_data_details = calculator_.settings().report_skip_no_data_details_;
     bool skip_detail;
 
     ValueComparisonResult cmp_res_mc;
@@ -167,7 +167,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
         }
         ref_exists = true;
 
-        is_inside = target_data.mappedRefPosInside(sector_layer, tst_id);
+        is_inside = target_data.isTimeStampNotExcluded(timestamp)
+                    && target_data.mappedRefPosInside(sector_layer, tst_id);
 
         if (!is_inside)
         {
@@ -234,7 +235,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
 
     return make_shared<EvaluationRequirementResult::SingleModeCCorrect>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
-                eval_man_, details, num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside,
+                calculator_, details, num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside,
                 num_correct, num_not_correct);
 }
 

@@ -7,8 +7,9 @@ target_sources(compass
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/targetreportdefs.h"
         "${CMAKE_CURRENT_LIST_DIR}/target.h"
+        "${CMAKE_CURRENT_LIST_DIR}/targetbase.h"
+        "${CMAKE_CURRENT_LIST_DIR}/targetadsbinfo.h"
         "${CMAKE_CURRENT_LIST_DIR}/targetmodel.h"
-        "${CMAKE_CURRENT_LIST_DIR}/targetfilterdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/targetlistwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/targetreportchain.h"
         "${CMAKE_CURRENT_LIST_DIR}/targetposition.h"
@@ -18,8 +19,9 @@ target_sources(compass
     PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/targetreportdefs.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/target.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/targetbase.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/targetadsbinfo.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/targetmodel.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/targetfilterdialog.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/targetlistwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/targetreportchain.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/targetpositionaccuracy.cpp"

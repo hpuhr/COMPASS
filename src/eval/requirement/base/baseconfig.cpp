@@ -20,14 +20,14 @@
 #include "eval/requirement/base/comparisontype.h"
 #include "logger.h"
 
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttable.h"
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
 
 #include <QFormLayout>
 #include <QLineEdit>
 
 using namespace std;
-using namespace EvaluationResultsReport;
 
 namespace EvaluationRequirement
 {
@@ -64,9 +64,9 @@ std::string comparisonTypeLongString(COMPARISON_TYPE type)
 
 BaseConfig::BaseConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
     : Configurable(class_id, instance_id, &group), EvaluationStandardTreeItem(&group),
-      group_(group), standard_(standard), eval_man_(eval_man)
+      group_(group), standard_(standard), calculator_(calculator)
 {
     registerParameter("use", &use_, true);
     registerParameter("name", &name_, std::string());
@@ -115,13 +115,7 @@ void BaseConfig::checkSubConfigurables()
 
 BaseConfigWidget* BaseConfig::widget()
 {
-    if (!widget_)
-    {
-        createWidget();
-        assert (widget_);
-    }
-
-    return widget_.get();
+    return createWidget();
 }
 
 std::string BaseConfig::comment() const
@@ -134,11 +128,9 @@ void BaseConfig::comment(const std::string &comment)
     comment_ = comment;
 }
 
-void BaseConfig::createWidget()
+BaseConfigWidget* BaseConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new BaseConfigWidget(*this));
-    assert (widget_);
+    return new BaseConfigWidget(*this);
 }
 
 EvaluationStandardTreeItem* BaseConfig::child(int row)
@@ -189,18 +181,18 @@ std::string BaseConfig::shortName() const
     return short_name_;
 }
 
-void BaseConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void BaseConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.getTable("req_table");
 
-    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
-    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
-    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
-    table.addRow({"Group", "Group name", group_.name().c_str()}, nullptr);
+    table.addRow({"Name", "Requirement name", name_});
+    table.addRow({"Short Name", "Requirement short name", short_name_});
+    table.addRow({"Comment", "", comment_});
+    table.addRow({"Group", "Group name", group_.name()});
 
     // prob & check type added in subclass
 }

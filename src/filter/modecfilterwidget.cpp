@@ -15,8 +15,6 @@ using namespace std;
 ModeCFilterWidget::ModeCFilterWidget(ModeCFilter& filter)
     : DBFilterWidget(filter), filter_(filter)
 {
-    QFormLayout* layout = new QFormLayout();
-
     const float ModeCMin    = -10000.0f;
     const float ModeCMax    =  100000.0f;
     const int   SliderSteps = 1000;
@@ -25,13 +23,13 @@ ModeCFilterWidget::ModeCFilterWidget(ModeCFilter& filter)
     min_value_edit_->setValidator(new TextFieldDoubleValidator(ModeCMin, ModeCMax, Precision));
     connect(min_value_edit_, &QLineEdit::textEdited, this, &ModeCFilterWidget::minValueEditedSlot);
 
-    layout->addRow("Mode C Code >=", min_value_edit_);
+    addNameValuePair("Mode C Code >=", min_value_edit_);
 
     max_value_edit_ = new QLineEdit();
     max_value_edit_->setValidator(new TextFieldDoubleValidator(ModeCMin, ModeCMax, Precision));
     connect(max_value_edit_, &QLineEdit::textEdited, this, &ModeCFilterWidget::maxValueEditedSlot);
 
-    layout->addRow("Mode C Code <=", max_value_edit_);
+    addNameValuePair("Mode C Code <=", max_value_edit_);
 
     const QString limit0 = QString::number(ModeCMin, 'f', Precision);
     const QString limit1 = QString::number(ModeCMax, 'f', Precision);
@@ -39,20 +37,17 @@ ModeCFilterWidget::ModeCFilterWidget(ModeCFilter& filter)
     range_edit_ = new RangeEditFloat(SliderSteps, Precision);
     range_edit_->setLimits(limit0, limit1);
     range_edit_->connectToFields(min_value_edit_, max_value_edit_);
-    layout->addRow("", range_edit_);
+
+    addNameValuePair("", range_edit_);
 
     null_check_ = new QCheckBox();
     connect(null_check_, &QCheckBox::clicked, this, &ModeCFilterWidget::nullWantedChangedSlot);
-    layout->addRow("NULL Values", null_check_);
-
-    child_layout_->addLayout(layout);
+    addNameValuePair("NULL Values", null_check_);
 
     update();
 }
 
-ModeCFilterWidget::~ModeCFilterWidget()
-{
-}
+ModeCFilterWidget::~ModeCFilterWidget() = default;
 
 void ModeCFilterWidget::update()
 {

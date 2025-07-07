@@ -16,6 +16,7 @@
  */
 
 #include "stringmat.h"
+#include "json.hpp"
 
 #include <set>
 

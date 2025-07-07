@@ -66,6 +66,10 @@ void VariableViewDataWidget::clearIntermediateRedrawData_impl()
 {
     resetIntermediateVariableData(); // reset any intermediate data generated during redraw
     resetVariableStates();           // reset var states
+
+    //every variable-based view should support these counts, so init them to zero
+    addNullCount(0);
+    addNanCount(0);
 }
 
 /**
@@ -223,20 +227,24 @@ namespace
 bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent_name) const
 {
     auto& variable = variable_view_->variable(var_idx);
-
+    
     if (!viewData().count(dbcontent_name))
     {
-        loginf << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no buffer";
+        logdbg << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no buffer";
         return false;
     }
 
     Buffer* buffer = viewData().at(dbcontent_name).get();
     assert(buffer);
 
+    //allow empty variables if configured correctly
+    if (variable.settings().allow_empty_var && variable.isEmpty())
+        return true;
+
     auto data_var = variable.getFor(dbcontent_name);
     if (!data_var)
     {
-        loginf << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no metavar";
+        logdbg << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no metavar";
         return false;
     }
 
@@ -254,8 +262,9 @@ bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent
 
     if (!ok)
     {
-        loginf << "VariableViewDataWidget: canUpdate: variable " << variable.id() 
-               << " dbcontent " << dbcontent_name << ": data var '" << current_var_name << "' not in buffer or not supported by view";
+        logdbg << "VariableViewDataWidget: canUpdate: variable " << variable.id()
+               << " dbcontent " << dbcontent_name << ": data var '" << current_var_name
+               << "' not in buffer or not supported by view";
     }
 
     return ok;
@@ -344,7 +353,7 @@ void VariableViewDataWidget::updateFromVariables()
 
         bool can_update = canUpdate(dbcontent_name);
 
-        loginf << "VariableViewDataWidget: updateData: dbo " << dbcontent_name << " canUpdate " << can_update;
+        logdbg << "VariableViewDataWidget: updateData: dbo " << dbcontent_name << " canUpdate " << can_update;
 
         if (can_update)
             updateVariableData(dbcontent_name, *buffer);

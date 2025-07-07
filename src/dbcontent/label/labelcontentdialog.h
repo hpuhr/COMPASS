@@ -1,5 +1,4 @@
-#ifndef LABELCONTENTDIALOG_H
-#define LABELCONTENTDIALOG_H
+#pragma once
 
 #include "json.hpp"
 
@@ -43,4 +42,3 @@ protected:
 
 }
 
-#endif // LABELCONTENTDIALOG_H

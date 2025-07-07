@@ -20,7 +20,7 @@
 
 #include "configurable.h"
 #include "task.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <QObject>
 
@@ -28,7 +28,6 @@
 
 class ViewPointsImportTaskDialog;
 class TaskManager;
-class SavedFile;
 
 class ViewPointsImportTask : public Task, public Configurable
 {

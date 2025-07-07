@@ -18,15 +18,15 @@
 #ifndef EVALUATIONREQUIREMENTPOSITIONDISTANCERMSCONFIG_H
 #define EVALUATIONREQUIREMENTPOSITIONDISTANCERMSCONFIG_H
 
-//#include "configurable.h"
-//#include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/position/distancermsconfigwidget.h"
-//#include "eval/requirement/position/distancerms.h"
-
 #include "eval/requirement/base/baseconfig.h"
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -35,7 +35,7 @@ class PositionDistanceRMSConfig : public BaseConfig
 {
 public:
     PositionDistanceRMSConfig(const std::string& class_id, const std::string& instance_id,
-                        Group& group, EvaluationStandard& standard, EvaluationManager& eval_ma);
+                        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~PositionDistanceRMSConfig();
 
     std::shared_ptr<Base> createRequirement() override;
@@ -43,12 +43,12 @@ public:
     double thresholdValue() const;
     void thresholdValue(double value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
 protected:
     double threshold_value_ {0};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

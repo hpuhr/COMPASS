@@ -1,17 +1,37 @@
+
 \section{Results Inspection \& Analysis}
 \label{sec:eval_inspect}
 
-As described before, there are several levels of detail in which sub-results can be inspected.\\
+After an Evaluation has been run, a new Evaluation report is generated, which is named by the evaluation standard used. 
+This report is persisted to the database and can be inspected in the 'Reports' tool of the Flight Deck.
+It will be opened automatically as soon as the Evaluation run has ended. \\
 
-The uppermost is the 'Requirements$\rightarrow$Overview', giving the sector sums for all requirements. \\
+Please \textbf{note} that at the moment only one Evaluation report can be persisted for each evaluation standard.
+Another Evaluation run for a certain standard will overwrite any existing report for this standard. \\
+
+After selection of the report in the Flight Deck, it will present itself as follows.
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{figures/eval_report_overview.png}
+  \caption{Evaluation report: Overview}
+\end{figure}
+
+There are several levels of detail in which sub-results can be inspected. \\
+
+The uppermost is the 'Requirements$\rightarrow$Overview$\rightarrow$Results', giving the sector sums for all requirements. 
+This is also the main section of any Evaluation report, which will be displayed when the report is selected. \\
 
 The next level of detail are the sector sum details, located in 'Sectors$\rightarrow$Sector Layer Name$\rightarrow$Requirement Group Name$\rightarrow$Requirement Name'. \\
 
-The lowest level are the per-target details, located in 'Targets$\rightarrow$UTN' and the respective per-target results located in 'Targets$\rightarrow$UTN$\rightarrow$Sector Layer Name$\rightarrow$Requirement Group Name$\rightarrow$Requirement Name'. \\
+The lowest level are the per-target details, located in 'Targets$\rightarrow$UTN' and the respective per-target results located in 
+'Targets$\rightarrow$UTN$\rightarrow$Sector Layer Name$\rightarrow$Requirement Group Name$\rightarrow$Requirement Name'. \\
 
-By default, when single-clicking a row in a table the respective results are shown in the existing Views. When double-clicking, a step into the next level of detail is performed (if available). \\
+By default, when single-clicking a row in a table the respective results are shown in the existing Views. When double-clicking, 
+a step into the next level of detail is performed (if available) and the respective report section is opened. \\
 
-Navigation can be made more efficient by returning to the last sub-result by using the 'Back' button on the top-left. \\
+Navigation can be made more efficient by returning to the last sub-result by using the 'Back' button on the top-left. 
+Every section of the report can also be selected by showing the table of contents by clicking the 'Sections' button on the top right.\\
 
 Different requirement results may use different views to display additional result details for deeper inspection:
 
@@ -29,9 +49,10 @@ Different requirement results may use different views to display additional resu
 \ \\
 
 \subsection{Results Overview}
+
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_results_overview.png}
+    \includegraphics[width=18cm,frame]{figures/eval_report_overview.png}
   \caption{Evaluation results: Overview}
 \end{figure}
 
@@ -53,14 +74,13 @@ When single-clicking a row, the respective sector requirement results are shown 
 
 \begin{figure}[H]
   \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{figures/histogram_eval_pos_correct.png}
+    \includegraphics[width=19cm,frame]{figures/histogram_eval_pos_correct.png}
   \caption{Evaluation Results: Position Correct in Histogram View}
 \end{figure}
 
-
 Please note that currently evaluation result data can not be selected in Histogram Views. This may be improved in one of the next versions. \\
 
-When double-clicking a row in the Overview results table, a step into the respective sector sum details is performed.
+When double-clicking a row in the Overview results table, a step into the respective sector sum details section is performed.
 
 \subsection{Result Sector Details}
 
@@ -70,7 +90,7 @@ When double-clicking a row in the Overview results table, a step into the respec
   \caption{Evaluation results: Sector Detail Example}
 \end{figure}
 
-On the left side, the current position in the results sections is shown. On the right, the current results are shown. At the top, there is an overview table giving the details of the calculation results in the respective sector layer and requirement. \\
+At the top, there is an overview table giving the details of the calculation results in the respective sector layer and requirement. \\
 
 At the bottom, further result details are listed per-target, sorted in this example by the Probability of Detection (PD). \\
 
@@ -83,11 +103,18 @@ When left clicking a row, the respective target data and result errors are shown
 \end{figure}
 
 When right-clicking a target, several options are shown:
+
 \begin{itemize}  
-\item Remove: Remove this specific target from the evaluation (giving a reason as comment)
 \item Show full UTN: Load all data from the respective target (not just used reference / test data)
 \item Show Surrounding Data: Load all data surrounding the target in position and time (e.g. to find association issues)
-\end{itemize}  
+\item Target Usage: Edit the target's usage and constraints, as described in section \nameref{sec:eval_report_targets}
+\begin{itemize} 
+  \item Exclude Time Window: Exclude the target's time window from Evaluation
+  \item Exclude From Requirement: Exclude the target from the currently inspected requirement
+  \item Exclude From All Requirements: Exclude the target from all requirements
+  \item \textbf{Note} that editing target usage will set the report to out-of-date, making a manual refresh necessary to see the changes
+\end{itemize}
+\end{itemize}
 \ \\
 
 When double-clicking a row, a step into the respective target details is performed.
@@ -100,7 +127,7 @@ When double-clicking a row, a step into the respective target details is perform
   \caption{Evaluation results: Per-Target Detail Example}
 \end{figure}
 
-On the left side, the current position in the results sections is shown. On the right, the current results are shown. At the top, there is an overview table giving the details of the calculation results for the target in the respective sector layer and requirement. \\
+At the top, there is an overview table giving the details of the calculation results for the target in the respective sector layer and requirement. \\
 
 At the bottom, further result details are listed per-target-report, sorted in this example by time. \\
 
@@ -111,49 +138,3 @@ When single-clicking a row, the respective target data and the respective single
     \includegraphics[width=19cm]{figures/eval_results_pd_single_tr_geoview.png}
   \caption{Evaluation results: Target Single PD Error in Geographic View}
 \end{figure}
-
-\subsection{Targets of Interest}
-\label{sec:eval_targets_of_interest}
-
-\begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{figures/eval_targets_eval.png}
-  \caption{Evaluation Targets tab with evaluated data}
-\end{figure}
-
-After running an evaluation, in the Evaluation Targets tab, the displayed interest is a numerical score showing how strong a negative impact a target had on all requirement results. \\
-
-The interest factor is calculated by:
-\begin{itemize}  
-\item Stepping through all targets in all given sectors and requirements
-\item For each target and requirement, the negative contribution of said target to the respective requirement is calculated
-\begin{itemize}  
-\item Resulting in a value between 0 (no negative impact) and 1 (all negative contributions come from this single target
-\end{itemize}
-\item For each target an accumulated sum of per-requirement interest factors is calculated
-\end{itemize}
-\ \\
-
-The coloring is performed as follows:
-\begin{itemize}  
-\item higher than 0.1: red
-\item higher than 0.05 and lower than 0.1: orange
-\item 0.05 and below: green
-\end{itemize}
-\ \\
-
-When right-clicking a target, several options are shown:
-\begin{itemize}  
-\item Show full UTN: Load all data from the respective target (not just used reference / test data)
-\item Show Surrounding Data: Load all data surrounding the target in position and time (e.g. to find association issues)
-\item Jump to requirement: Jump to the respective requirement results section
-\end{itemize}
-\ \\
-
-Using the 'Configure Interest' button, a list of all requirements is given to select which interest values should be aggregated.
-\begin{figure}[H]
-  \hspace*{-2.5cm}
-    \includegraphics[width=19cm,frame]{figures/eval_targets_config_interest.png}
-  \caption{Evaluation Targets: Configure Interest}
-\end{figure}
-

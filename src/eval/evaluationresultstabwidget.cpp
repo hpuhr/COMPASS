@@ -34,8 +34,9 @@
 #include <QLabel>
 #include <QScrollArea>
 #include <QPushButton>
-#include <QSplitter>
 #include <QSettings>
+#include <QMenu>
+#include <QWidgetAction>
 
 using namespace EvaluationResultsReport;
 using namespace Utils;
@@ -48,7 +49,7 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     { // button layout
         QHBoxLayout* button_layout = new QHBoxLayout();
 
-        QIcon left_icon(Files::getIconFilepath("arrow_to_left.png").c_str());
+        QIcon left_icon(Files::IconProvider::getIcon("arrow_to_left.png"));
 
         back_button_ = new QPushButton ();
         back_button_->setIcon(left_icon);
@@ -57,22 +58,29 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
 
         button_layout->addStretch();
 
+        sections_button_ = new QPushButton("Sections");
+        button_layout->addWidget(sections_button_);
+
         main_layout->addLayout(button_layout);
 
     }
     //QHBoxLayout* res_layout = new QHBoxLayout();
 
-    splitter_ = new QSplitter();
-    splitter_->setOrientation(Qt::Horizontal);
-
-    tree_view_.reset(new QTreeView());
-    tree_view_->setModel(&eval_man_.resultsGenerator().resultsModel());
+    tree_view_ = new QTreeView;
+    //tree_view_->setModel(&eval_man_.calculator().resultsGenerator().resultsModel());
     tree_view_->setRootIsDecorated(false);
     tree_view_->expandToDepth(3);
+    tree_view_->setFixedSize(500, 1000);
 
-    connect (tree_view_.get(), &QTreeView::clicked, this, &EvaluationResultsTabWidget::itemClickedSlot);
+    connect (tree_view_, &QTreeView::clicked, this, &EvaluationResultsTabWidget::itemClickedSlot);
 
-    splitter_->addWidget(tree_view_.get());
+    sections_menu_.reset(new QMenu);
+    
+    auto w_action = new QWidgetAction(sections_menu_.get());
+    w_action->setDefaultWidget(tree_view_);
+
+    sections_menu_->addAction(w_action);
+    sections_button_->setMenu(sections_menu_.get());
 
     // results stack
 
@@ -82,16 +90,8 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     results_widget_ = new QStackedWidget();
 
     scroll_area->setWidget(results_widget_);
-    splitter_->addWidget(scroll_area);
 
-    //qt hack: very big screen size x stretch 
-    splitter_->setSizes({ 10000, 30000 });
-
-    QSettings settings("COMPASS", "EvalManagerResultsWidget");
-    if (settings.value("splitterSizes").isValid())
-        splitter_->restoreState(settings.value("splitterSizes").toByteArray());
-
-    main_layout->addWidget(splitter_);
+    main_layout->addWidget(scroll_area);
 
     setContentsMargins(0, 0, 0, 0);
     setLayout(main_layout);
@@ -99,13 +99,7 @@ EvaluationResultsTabWidget::EvaluationResultsTabWidget(EvaluationManager& eval_m
     updateBackButton();
 }
 
-EvaluationResultsTabWidget::~EvaluationResultsTabWidget()
-{
-    assert (splitter_);
-
-    QSettings settings("COMPASS", "EvalManagerResultsWidget");
-    settings.setValue("splitterSizes", splitter_->saveState());
-}
+EvaluationResultsTabWidget::~EvaluationResultsTabWidget() = default;
 
 void EvaluationResultsTabWidget::expand()
 {
@@ -139,26 +133,26 @@ void EvaluationResultsTabWidget::selectId (const std::string& id,
     //const auto& model = eval_man_.resultsGenerator().resultsModel();
     //iterateTreeModel(model, model.index(0, 0), "");
 
-    QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(id);
+    // QModelIndex index = eval_man_.calculator().resultsGenerator().resultsModel().findItem(id);
 
-    if (!index.isValid())
-    {
-        logerr << "EvaluationResultsTabWidget: selectId: id '" << id << "' not found";
-        return;
-    }
+    // if (!index.isValid())
+    // {
+    //     logerr << "EvaluationResultsTabWidget: selectId: id '" << id << "' not found";
+    //     return;
+    // }
 
-    assert (tree_view_);
-    tree_view_->selectionModel()->clear();
+    // assert (tree_view_);
+    // tree_view_->selectionModel()->clear();
 
-    expandAllParents(index);
+    // expandAllParents(index);
 
-    tree_view_->selectionModel()->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    tree_view_->scrollTo(index);
+    // tree_view_->selectionModel()->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    // tree_view_->scrollTo(index);
 
-    itemClickedSlot(index);
+    // itemClickedSlot(index);
 
-    if (show_figure)
-        showFigure(index);
+    // if (show_figure)
+    //     showFigure(index);
 }
 
 void EvaluationResultsTabWidget::reshowLastId ()
@@ -289,34 +283,36 @@ boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const s
     }
 
     //get result section
-    QModelIndex index = eval_man_.resultsGenerator().resultsModel().findItem(result_id_corr.toStdString());
+    // QModelIndex index = eval_man_.calculator().resultsGenerator().resultsModel().findItem(result_id_corr.toStdString());
 
-    if (!index.isValid())
-    {
-        logerr << "EvaluationResultsTabWidget: getTableData: id '" << result_id_corr.toStdString() << "' not found";
-        return {};
-    }
+    // if (!index.isValid())
+    // {
+    //     logerr << "EvaluationResultsTabWidget: getTableData: id '" << result_id_corr.toStdString() << "' not found";
+    //     return {};
+    // }
 
-    TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
-    if (!item)
-    {
-        logerr << "EvaluationResultsTabWidget: getTableData: item null";
-        return {};
-    }
+    // TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
+    // if (!item)
+    // {
+    //     logerr << "EvaluationResultsTabWidget: getTableData: item null";
+    //     return {};
+    // }
 
-    EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
-    if (!section)
-    {   
-        logerr << "EvaluationResultsTabWidget: getTableData: no section found";
-        return {};
-    }
+    // EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
+    // if (!section)
+    // {   
+    //     logerr << "EvaluationResultsTabWidget: getTableData: no section found";
+    //     return {};
+    // }
 
-    //check if table is available
-    if (!section->hasTable(table_id))
-    {
-        logerr << "EvaluationResultsTabWidget: getTableData: no table found";
-        return {};
-    }
+    // //check if table is available
+    // if (!section->hasTable(table_id))
+    // {
+    //     logerr << "EvaluationResultsTabWidget: getTableData: no table found";
+    //     return {};
+    // }
 
-    return section->getTable(table_id).toJSON(rowwise, cols);
+    // return section->getTable(table_id).toJSON(rowwise, cols);
+
+    return {};
 }

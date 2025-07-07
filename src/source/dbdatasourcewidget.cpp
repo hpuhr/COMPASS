@@ -195,6 +195,8 @@ QWidget* DBDataSourceWidget::createLinesWidget()
     unsigned int button_size = 26;
     widget->setMinimumHeight(button_size);
 
+    bool dark_mode = COMPASS::instance().darkMode();
+
     for (unsigned int cnt=0; cnt < 4; ++cnt)
     {
         line_str = "L"+to_string(cnt+1);
@@ -202,8 +204,14 @@ QWidget* DBDataSourceWidget::createLinesWidget()
         QPushButton* button = new QPushButton (line_str.c_str());
         button->setFixedSize(button_size,button_size);
         button->setCheckable(true);
-        button->setStyleSheet(" QPushButton:pressed { border: 3px outset; } " \
-        " QPushButton:checked { border: 3px outset; }");
+
+        if (dark_mode)
+            button->setStyleSheet(" QPushButton:pressed { border: 3px outset white; } " \
+                                  " QPushButton:checked { border: 3px outset white; }");
+        else
+            button->setStyleSheet(" QPushButton:pressed { border: 3px outset; } " \
+                                  " QPushButton:checked { border: 3px outset; }");
+
         button->setChecked(true);
 
         button->setProperty("Line ID", cnt);
@@ -253,6 +261,8 @@ void DBDataSourceWidget::updateWidgets()
 
         boost::posix_time::ptime current_time = Time::currentUTCTime();
 
+        bool dark_mode = COMPASS::instance().darkMode();
+
         for (unsigned int line_cnt=0; line_cnt < 4; ++line_cnt)
         {
             line_str = "L"+to_string(line_cnt+1);
@@ -282,7 +292,12 @@ void DBDataSourceWidget::updateWidgets()
                     button->setChecked(false);
 
                     QPalette pal = button->palette();
-                    pal.setColor(QPalette::Button, QColor(Qt::lightGray));
+
+                    if (dark_mode)
+                        pal.setColor(QPalette::Button, QColor(Qt::darkGray));
+                    else
+                        pal.setColor(QPalette::Button, QColor(Qt::lightGray));
+
                     button->setAutoFillBackground(true);
                     button->setPalette(pal);
                     button->update();
@@ -297,7 +312,12 @@ void DBDataSourceWidget::updateWidgets()
                     if (src_.hasLiveData(line_cnt, current_time))
                     {
                         QPalette pal = button->palette();
-                        pal.setColor(QPalette::Button, QColor(Qt::green));
+
+                        if (dark_mode)
+                            pal.setColor(QPalette::Button, QColor(Qt::darkGreen));
+                        else
+                            pal.setColor(QPalette::Button, QColor(Qt::green));
+
                         button->setAutoFillBackground(true);
                         button->setPalette(pal);
                         button->update();
@@ -305,7 +325,12 @@ void DBDataSourceWidget::updateWidgets()
                     else
                     {
                         QPalette pal = button->palette();
-                        pal.setColor(QPalette::Button, QColor(Qt::lightGray));
+
+                        if (dark_mode)
+                            pal.setColor(QPalette::Button, QColor(Qt::darkGray));
+                        else
+                            pal.setColor(QPalette::Button, QColor(Qt::lightGray));
+
                         button->setAutoFillBackground(true);
                         button->setPalette(pal);
                         button->update();
@@ -333,7 +358,6 @@ void DBDataSourceWidget::updateWidgets()
             line_buttons_.at(line_str)->setHidden(!inserted_lines.count(line_cnt)); // hide if no data
         }
     }
-
 
     if (show_counts)
     {

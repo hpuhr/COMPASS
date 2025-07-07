@@ -53,8 +53,6 @@ using namespace std;
 
 const unsigned int num_objects_chunk = 10000;
 
-const std::string DONE_PROPERTY_NAME = "json_data_imported";
-
 JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& instance_id,
                                TaskManager& task_manager)
     : Task(task_manager),
@@ -255,6 +253,8 @@ void JSONImportTask::run()
         tmp = "import of file ";
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
+
+    COMPASS::instance().logInfo("JSON Import") << "started";
 
     assert(canImportFile());
 
@@ -529,8 +529,21 @@ void JSONImportTask::mapJSONDoneSlot()
             read_json_job_->unpause();
     }
 
+    // date_
+
+    assert (!ts_calculator_.processing());
+    ts_calculator_.setBuffers(std::move(job_buffers));
+
+    ts_calculator_.calculate(import_filename_,
+                             boost::posix_time::ptime(boost::gregorian::day_clock::universal_day()), false,
+                             false, 0,
+                             false, 0);
+
+    std::map<std::string, std::shared_ptr<Buffer>> job_buffers2 {ts_calculator_.buffers()};
+    ts_calculator_.setProcessingDone();
+
     std::shared_ptr<ASTERIXPostprocessJob> postprocess_job =
-            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers), date_);
+            make_shared<ASTERIXPostprocessJob>(std::move(job_buffers2));
 
     postprocess_jobs_.push_back(postprocess_job);
 
@@ -857,23 +870,24 @@ void JSONImportTask::checkAllDone()
 
         all_done_ = true;
 
+        double records_per_second = records_inserted_ / (diff.total_milliseconds() / 1000.0);
+
+        COMPASS::instance().logInfo("JSON Import")
+            << "done after " << time_str
+            << ", inserted " << records_inserted_ << " rec"
+            << " with " << String::doubleToStringPrecision(records_per_second, 2) << " rec/s";
+
         QApplication::restoreOverrideCursor();
 
         // if (!test_)
         //     emit COMPASS::instance().interface().databaseContentChangedSignal();
 
-        double records_per_second = records_inserted_ / (diff.total_milliseconds() / 1000.0);
 
         if (!test_)
         {
             loginf << "JSONImporterTask: checkAllDone: setting done";
 
             done_ = true;
-
-//            COMPASS::instance().interface().setProperty(
-//                        CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
-
-//            COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
             emit doneSignal();
         }

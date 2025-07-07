@@ -32,7 +32,7 @@ class GenericBase : public ProbabilityBase
                 const std::string& group_name,
                 double prob, 
                 COMPARISON_TYPE prob_check_type, 
-                EvaluationManager& eval_man);
+                EvaluationCalculator& calculator);
 
     std::string valueName() const;
     std::string valueNameShort() const;
@@ -55,7 +55,7 @@ public:
                    const std::string& group_name,
                    double prob, 
                    COMPARISON_TYPE prob_check_type, 
-                   EvaluationManager& eval_man);
+                   EvaluationCalculator& calculator);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
@@ -79,7 +79,7 @@ public:
                   double prob, 
                   COMPARISON_TYPE prob_check_type, 
                   double threshold, 
-                  EvaluationManager& eval_man);
+                  EvaluationCalculator& calculator);
 
     virtual std::shared_ptr<EvaluationRequirementResult::Single> evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,

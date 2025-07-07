@@ -28,7 +28,7 @@
 #undef PACKAGE_VERSION
 #endif
 
-//#include <GeographicLib/Geoid.hpp>
+#include <GeographicLib/MagneticModel.hpp>
 
 #include <memory>
 
@@ -68,6 +68,7 @@ public:
 
     // in place calculation, returns transformation errors count
     unsigned int doRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
+    unsigned int doXYPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
     // returns transformation errors count, update buffers
     std::pair<unsigned int, std::map<std::string, std::shared_ptr<Buffer>>>
       doUpdateRadarPlotPositionCalculations (std::map<std::string, std::shared_ptr<Buffer>> buffers);
@@ -77,6 +78,7 @@ public:
     //static const std::string GEO_NAME;
 
     double geoidHeightM (double latitude_deg, double longitude_deg);
+    double declination(float year, double latitude_deg, double longitude_deg, double altitude_m);
 
     void test();
 
@@ -89,6 +91,8 @@ protected:
     //std::unique_ptr<GeographicLib::Geoid> geoid_;
 
     double egm96_band_inv_geo_transform_[6];
+
+    GeographicLib::MagneticModel mag_model_;
 
     int egm96_band_width_{0};
     int egm96_band_height_{0};
@@ -105,5 +109,8 @@ protected:
     unsigned int calculateRadarPlotPositions (std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
                                               NullableVector<double>& target_latitudes_vec,
                                               NullableVector<double>& target_longitudes_vec);
+    unsigned int doXYPositionCalculations (std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
+                                             NullableVector<double>& target_latitudes_vec,
+                                             NullableVector<double>& target_longitudes_vec);
 };
 

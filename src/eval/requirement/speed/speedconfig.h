@@ -18,11 +18,15 @@
 #ifndef EVALUATIONREQUIREMENTSPEEDCONFIG_H
 #define EVALUATIONREQUIREMENTSPEEDCONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -31,7 +35,7 @@ class SpeedConfig : public ProbabilityBaseConfig
 {
 public:
     SpeedConfig(const std::string& class_id, const std::string& instance_id,
-                Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+                Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~SpeedConfig();
 
     std::shared_ptr<Base> createRequirement() override;
@@ -51,7 +55,7 @@ public:
     bool failedValuesOfInterest() const;
     void failedValuesOfInterest(bool value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
 protected:
     float threshold_value_ {0};
@@ -63,7 +67,7 @@ protected:
 
     bool failed_values_of_interest_ {true};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

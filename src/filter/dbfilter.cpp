@@ -187,7 +187,7 @@ void DBFilter::generateSubConfigurable(const std::string& class_id, const std::s
         {
             if (unusable_)  // bit of a hack. think about order of generation.
             {
-                widget_->setInvisible();
+                widget_->collapse();
                 widget_->setDisabled(true);
             }
             else
@@ -302,10 +302,10 @@ bool DBFilter::activeInLiveMode()
     return false;
 }
 
-std::vector<size_t> DBFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
+std::vector<unsigned int> DBFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
 {
     assert (activeInLiveMode()); // re-implement in sub-class
-    return std::vector<size_t>();
+    return std::vector<unsigned int>();
 }
 
 bool DBFilter::widgetVisible() const

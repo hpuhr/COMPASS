@@ -36,6 +36,7 @@ class DBSelectionWidget;
 class DBSchemaManagerWidget;
 class DBContentManagerWidget;
 class MainLoadWidget;
+class ToolBox;
 
 class MainWindow : public QMainWindow
 {
@@ -75,13 +76,13 @@ public slots:
     void importJSONRecordingSlot();
 
     void importGPSTrailSlot();
-    void importGPSCSVSlot();
 
     void importViewPointsSlot();
 
     void calculateRadarPlotPositionsSlot();
     void calculateAssociationsARTASSlot();
     void reconstructReferencesSlot();
+    void evaluateSlot();
 
     void quitRequestedSlot();
     void showAddViewMenuSlot();
@@ -96,22 +97,33 @@ public slots:
     void autoResumeResumeSlot();
     void autoResumeStaySlot();
 
+    void toggleDarkModeSlot();
+
+    void toggleFullscreenSlot();
+
 public:
     MainWindow();
     virtual ~MainWindow();
 
     void disableConfigurationSaving();
-    void showEvaluationTab();
-    void showViewPointsTab();
 
     void openExistingDB(const std::string& filename);
     void createDB(const std::string& filename);
+    void createInMemoryDB(const std::string& future_filename = "");
+    void createDBFromMemory();
 
     void updateMenus();
     void updateBottomWidget();
 
+    void loadingStarted();
+    void loadingDone();
+
+    void selectTool(const std::string& name);
+    void showResult(const std::string& name);
+
 protected:
-    void createMenus ();
+    void createUI();
+    void createMenus();
     void createDebugMenu();
 
     void updateWindowTitle();
@@ -121,6 +133,9 @@ protected:
 
     void shutdown();
 
+    void showEvaluationResult();
+
+    QWidget* main_widget_{nullptr};
     QTabWidget* tab_widget_{nullptr};
 
     QPushButton* add_view_button_{nullptr};
@@ -146,6 +161,8 @@ protected:
     // configuration menu
     QMenu* config_menu_ {nullptr};
     QAction* license_action_ {nullptr};
+    QAction* dark_mode_action_ {nullptr};
+    QAction* fullscreen_action_ {nullptr};
     QAction* auto_refresh_views_action_ {nullptr};
 
     // process menu
@@ -166,6 +183,11 @@ protected:
 
     std::unique_ptr<AutoResumeDialog> auto_resume_dialog_;
     QTimer* auto_resume_timer_ {nullptr};
+
+    ToolBox* tool_box_ = nullptr;
+
+protected:
+    void keyPressEvent(QKeyEvent *event);
 
 private:
     void showCommandShell();

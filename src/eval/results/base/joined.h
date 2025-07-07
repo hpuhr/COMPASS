@@ -25,6 +25,12 @@
 
 class Grid2D;
 
+namespace ResultReport
+{
+    class Report;
+    class SectionContentTable;
+};
+
 namespace EvaluationRequirementResult
 {
 
@@ -46,7 +52,7 @@ public:
            const std::string& result_id,
            std::shared_ptr<EvaluationRequirement::Base> requirement,
            const SectorLayer& sector_layer,
-           EvaluationManager& eval_man);
+           EvaluationCalculator& calculator);
     virtual ~Joined();
 
     BaseType baseType() const override final { return BaseType::Joined; }
@@ -57,17 +63,17 @@ public:
     std::vector<std::shared_ptr<Single>>& singleResults();
     std::vector<std::shared_ptr<Single>> usedSingleResults() const;
 
-    void addToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override final;
+    void addToReport(std::shared_ptr<ResultReport::Report> report) override final;
 
-    bool hasViewableData (const EvaluationResultsReport::SectionContentTable& table, 
+    bool hasViewableData (const ResultReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
     bool viewableDataReady() const override final;
-    std::shared_ptr<nlohmann::json::object_t> viewableData(const EvaluationResultsReport::SectionContentTable& table, 
+    std::shared_ptr<nlohmann::json::object_t> viewableData(const ResultReport::SectionContentTable& table, 
                                                            const QVariant& annotation) const override final;
 
-    bool hasReference (const EvaluationResultsReport::SectionContentTable& table, 
+    bool hasReference (const ResultReport::SectionContentTable& table, 
                        const QVariant& annotation) const override final;
-    std::string reference(const EvaluationResultsReport::SectionContentTable& table, 
+    std::string reference(const ResultReport::SectionContentTable& table, 
                           const QVariant& annotation) const override final;
 
     void iterateDetails(const DetailFunc& func,
@@ -84,8 +90,14 @@ public:
     std::vector<double> getValues(const ValueSource<double>& source) const;
     std::vector<double> getValues(int value_id) const;
 
+    static void setJoinedContentProperties(ResultReport::SectionContent& content,
+                                           const Evaluation::RequirementResultID& id);
+    static boost::optional<Evaluation::RequirementResultID> joinedContentProperties(const ResultReport::SectionContent& content);
+
     static const std::string SectorOverviewID;
     static const int         SectorOverviewRenderDelayMSec;
+
+    static const std::string TargetsTableName;
 
 protected:
     bool resultUsed(const std::shared_ptr<Single>& result) const;
@@ -131,11 +143,11 @@ protected:
     std::vector<std::shared_ptr<Single>> results_;
 
 private:
-    void addOverview (EvaluationResultsReport::Section& section,
+    void addOverview (ResultReport::Section& section,
                       const std::string& name = "Sector Overview");
 
-    void addSectorToOverviewTable(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void addSectorDetailsToReport(std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    void addSectorToOverviewTable(std::shared_ptr<ResultReport::Report> root_item);
+    void addSectorDetailsToReport(std::shared_ptr<ResultReport::Report> root_item);
 
     std::shared_ptr<nlohmann::json::object_t> getOrCreateCachedViewable() const;
 

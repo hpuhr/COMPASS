@@ -28,7 +28,7 @@ In the main tab, the following parameters can be set:
     \item Slice Overlap Length: Duration of an overlap region to "glue" slices together
     \end{itemize}
 \item Delete All Calculated Reference Trajectories: If active, all previous calculated references are deleted
-\item Skip Writing of Reference Trajectories: If active, calculated references are not written into the database, only the associations
+\item Skip Writing of Reference Trajectories: If active, calculated references and associations are not written into the database
 \end{itemize}
 \ \\
 
@@ -43,6 +43,16 @@ In the main tab, the following parameters can be set:
 In this tab, the data sources to contribute to the calculated references can be selected. \\
 
 Please \textbf{note} that de-selected data sources are still associated, but only their target report positions do not contribute to the references.
+
+\subsubsection{Classification}
+
+In the classification, special parameters can be set to identity the AnyAircraft and Vehicle categories. Any target (without any other class information) and any Mode C code about the given 'Minimum Aircraft Altitude' will be classified as AnyAircraft. Vehicles (with any other class information) can be set by giving a list of Mode S Aircraft Identification and/or Aircraft Addresses. \\
+
+\begin{figure}[H]
+    \center
+      \includegraphics[width=16cm]{figures/dialog_class.png}
+    \caption{Classification Parameters}
+\end{figure}
 
 \subsection{Scoring + UMKalman Parameters}
 

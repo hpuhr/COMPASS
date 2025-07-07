@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "result.h"
+
 #include <QObject>
 #include <QDialog>
 
@@ -28,6 +30,7 @@ class QLabel;
 class QPushButton;
 
 /**
+ * Progress struct holding various types of progress and a status message.
 */
 struct AsyncTaskProgress
 {
@@ -59,22 +62,23 @@ struct AsyncTaskProgress
         flags |= Flags::Percent;
     }
 
-    float stepsPerc() const
+    float stepsPercent() const
     {
         if (step < 0 || steps <= 0)
             return 0.0f;
         return (float)step / (float)steps;
     };
 
-    std::string message;
-    int         step;
-    int         steps;
-    float       percent;
+    std::string message;  // status message
+    int         step;     // current step
+    int         steps;    // total steps
+    float       percent;  // progress in percent
 
     int flags = 0;
 };
 
 /**
+ * Wraps an AsyncTaskProgress and informs about progress changes.
 */
 class AsyncTaskProgressWrapper : public QObject
 {
@@ -145,6 +149,7 @@ private:
 };
 
 /**
+ * Current state of an AsyncTask.
 */
 struct AsyncTaskState 
 {
@@ -170,22 +175,18 @@ struct AsyncTaskState
         error = "";
     }
 
+    void setError(const std::string& err)
+    {
+        state = State::Error;
+        error = err;
+    }
+
     State       state = State::Fresh;
     std::string error;
 };
 
 /**
-*/
-struct AsyncTaskResult
-{
-    AsyncTaskResult() = default;
-    AsyncTaskResult(bool task_ok, const std::string& task_error) : ok(task_ok), error(task_error) {}
-
-    bool        ok = false;
-    std::string error;
-};
-
-/**
+ * An async task.
 */
 class AsyncTask : public QObject
 {
@@ -206,13 +207,14 @@ public:
 
     bool runAsyncDialog(bool auto_close = true,
                         QWidget* parent = nullptr);
+    bool runAsync();
+
 signals:
     void stateChanged();
 
 protected:
-    virtual AsyncTaskResult run_impl(const AsyncTaskState& state,
-                                     AsyncTaskProgressWrapper& progress) = 0;
-
+    virtual Result run_impl(const AsyncTaskState& state,
+                            AsyncTaskProgressWrapper& progress) = 0;
 private:
     void setState(AsyncTaskState::State state);
     void setError(const std::string& error);
@@ -223,11 +225,12 @@ private:
 };
 
 /**
+ * Async task execturing a passed functional.
 */
 class AsyncFuncTask : public AsyncTask
 {
 public:
-    typedef std::function<AsyncTaskResult(const AsyncTaskState&, AsyncTaskProgressWrapper&)> Func;
+    typedef std::function<Result(const AsyncTaskState&, AsyncTaskProgressWrapper&)> Func;
 
     AsyncFuncTask(const Func& func,
                   const QString& title,
@@ -240,9 +243,8 @@ public:
     virtual QString defaultMessage() const override;
 
 protected:
-    virtual AsyncTaskResult run_impl(const AsyncTaskState& state,
-                                     AsyncTaskProgressWrapper& progress) override;
-
+    virtual Result run_impl(const AsyncTaskState& state,
+                            AsyncTaskProgressWrapper& progress) override;
 private:
     Func    func_;
     QString title_;
@@ -251,6 +253,7 @@ private:
 };
 
 /**
+ * A dialog showing task progress during the execution of an AsyncTask.
 */
 class AsyncTaskDialog : public QDialog
 {

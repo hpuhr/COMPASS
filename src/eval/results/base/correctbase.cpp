@@ -26,7 +26,7 @@
 #include "eval/requirement/base/base.h"
 
 #include "evaluationtargetdata.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 
 #include "logger.h"
 #include "util/timeconv.h"
@@ -48,8 +48,8 @@ namespace EvaluationRequirementResult
 /**
 */
 CorrectBase::CorrectBase(const std::string& correct_value_name,
-                const std::string& correct_short_name,
-                const std::string& not_correct_short_name)
+                         const std::string& correct_short_name,
+                         const std::string& not_correct_short_name)
 :   correct_value_name_    (correct_value_name)
 ,   correct_short_name_    (correct_short_name)
 ,   not_correct_short_name_(not_correct_short_name)
@@ -142,7 +142,7 @@ SingleCorrectBase::SingleCorrectBase(const std::string& result_type,
                                      const SectorLayer& sector_layer,
                                      unsigned int utn,
                                      const EvaluationTargetData* target,
-                                     EvaluationManager& eval_man,
+                                     EvaluationCalculator& calculator,
                                      const EvaluationDetails& details,
                                      unsigned int num_updates,
                                      unsigned int num_no_ref_pos,
@@ -156,7 +156,7 @@ SingleCorrectBase::SingleCorrectBase(const std::string& result_type,
                                      const std::string& not_correct_short_name)
 :   CorrectBase(num_updates, num_no_ref_pos, num_no_ref_id, num_pos_outside, num_pos_inside, num_correct, num_not_correct,
                 correct_value_name, correct_short_name, not_correct_short_name)
-,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+,   SingleProbabilityBase(result_type, result_id, requirement, sector_layer, utn, target, calculator, details)
 {
 }
 
@@ -191,7 +191,7 @@ std::vector<std::string> SingleCorrectBase::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SingleCorrectBase::targetTableValuesCustom() const
+nlohmann::json::array_t SingleCorrectBase::targetTableValuesCustom() const
 {
     return { num_updates_, num_no_ref_pos_ + num_no_ref_id_, num_correct_, num_not_correct_ };
 }
@@ -200,9 +200,9 @@ std::vector<QVariant> SingleCorrectBase::targetTableValuesCustom() const
 */
 std::vector<Single::TargetInfo> SingleCorrectBase::targetInfos() const
 {
-    QString sn_c  = QString::fromStdString(correct_short_name_);
-    QString sn_nc = QString::fromStdString(not_correct_short_name_);
-    QString cvn   = QString::fromStdString(correct_value_name_);
+    std::string sn_c  = correct_short_name_;
+    std::string sn_nc = not_correct_short_name_;
+    std::string cvn   = correct_value_name_;
 
     std::vector<Single::TargetInfo> infos = 
         { { "#Up [1]"        , "Number of updates"                                 , num_updates_                     },
@@ -230,19 +230,19 @@ std::vector<std::string> SingleCorrectBase::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SingleCorrectBase::detailValues(const EvaluationDetail& detail,
-                                                      const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SingleCorrectBase::detailValues(const EvaluationDetail& detail,
+                                                        const EvaluationDetail* parent_detail) const
 {
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
-             detail.getValue(DetailKey::RefExists),
+    return { Utils::Time::toString(detail.timestamp()),
+             detail.getValue(DetailKey::RefExists).toBool(),
             !detail.getValue(DetailKey::IsNotCorrect).toBool(),
-             detail.getValue(DetailKey::NumUpdates),
-             detail.getValue(DetailKey::NumNoRef),
-             detail.getValue(DetailKey::NumInside),
-             detail.getValue(DetailKey::NumOutside),
-             detail.getValue(DetailKey::NumCorrect),
-             detail.getValue(DetailKey::NumNotCorrect),
-             detail.comments().generalComment().c_str() };
+             detail.getValue(DetailKey::NumUpdates).toUInt(),
+             detail.getValue(DetailKey::NumNoRef).toUInt(),
+             detail.getValue(DetailKey::NumInside).toUInt(),
+             detail.getValue(DetailKey::NumOutside).toUInt(),
+             detail.getValue(DetailKey::NumCorrect).toUInt(),
+             detail.getValue(DetailKey::NumNotCorrect).toUInt(),
+             detail.comments().generalComment() };
 }
 
 /**
@@ -284,12 +284,12 @@ JoinedCorrectBase::JoinedCorrectBase(const std::string& result_type,
                                      const std::string& result_id, 
                                      std::shared_ptr<EvaluationRequirement::Base> requirement,
                                      const SectorLayer& sector_layer, 
-                                     EvaluationManager& eval_man,
+                                     EvaluationCalculator& calculator,
                                      const std::string& correct_value_name,
                                      const std::string& correct_short_name,
                                      const std::string& not_correct_short_name)
 :   CorrectBase(correct_value_name, correct_short_name, not_correct_short_name)
-,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, eval_man)
+,   JoinedProbabilityBase(result_type, result_id, requirement, sector_layer, calculator)
 {
 }
 
@@ -361,9 +361,9 @@ boost::optional<double> JoinedCorrectBase::computeResult_impl() const
 */
 std::vector<Joined::SectorInfo> JoinedCorrectBase::sectorInfos() const
 {
-    QString sn_c  = QString::fromStdString(correct_short_name_);
-    QString sn_nc = QString::fromStdString(not_correct_short_name_);
-    QString cvn   = QString::fromStdString(correct_value_name_);
+    std::string sn_c  = correct_short_name_;
+    std::string sn_nc = not_correct_short_name_;
+    std::string cvn   = correct_value_name_;
 
     return { { "#Updates [1]"   , "Total number target reports"                       , num_updates_                     },
              { "#NoRef [1]"     , "Number of updates w/o reference position or " + cvn, num_no_ref_pos_ + num_no_ref_id_ },
@@ -381,7 +381,7 @@ FeatureDefinitions JoinedCorrectBase::getCustomAnnotationDefinitions() const
 {
     FeatureDefinitions defs;
 
-    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), eval_man_, "Passed")
+    defs.addDefinition<FeatureDefinitionBinaryGrid>(requirement()->name(), calculator_, "Passed")
         .addDataSeries(SingleCorrectBase::DetailKey::IsNotCorrect, 
                        GridAddDetailMode::AddEvtRefPosition, 
                        true);

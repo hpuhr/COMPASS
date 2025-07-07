@@ -41,7 +41,7 @@ UpdateBufferDBJob::UpdateBufferDBJob(DBInterface& db_interface, DBContent& dbobj
 
 UpdateBufferDBJob::~UpdateBufferDBJob() {}
 
-void UpdateBufferDBJob::run()
+void UpdateBufferDBJob::run_impl()
 {
     logdbg << "UpdateBufferDBJob: run: start";
 

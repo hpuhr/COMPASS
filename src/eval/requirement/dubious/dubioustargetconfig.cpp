@@ -20,17 +20,19 @@
 #include "eval/requirement/dubious/dubioustarget.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
 
-using namespace EvaluationResultsReport;
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 using namespace std;
 
 namespace EvaluationRequirement
 {
     
 DubiousTargetConfig::DubiousTargetConfig(const std::string& class_id, const std::string& instance_id,
-                                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+                                       Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     prob_check_type_ = COMPARISON_TYPE::LESS_THAN_OR_EQUAL;
 
@@ -235,33 +237,27 @@ std::shared_ptr<Base> DubiousTargetConfig::createRequirement()
                 use_max_acceleration_, max_acceleration_,
                 use_max_turnrate_, max_turnrate_,
                 use_max_rocd_, max_rocd_, dubious_prob_,
-                prob_, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, eval_man_);
+                prob_, COMPARISON_TYPE::LESS_THAN_OR_EQUAL, calculator_);
 
     return req;
 }
 
-void DubiousTargetConfig::createWidget()
+BaseConfigWidget* DubiousTargetConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new DubiousTargetConfigWidget(*this));
-    assert (widget_);
+    return new DubiousTargetConfigWidget(*this);
 }
 
-void DubiousTargetConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void DubiousTargetConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    //auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+    //   auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
-
-    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
-    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
-    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+    //    table.addRow({"Name", "Requirement name", name_});
+    //    table.addRow({"Short Name", "Requirement short name", short_name_});
+    //    table.addRow({"Comment", "", comment_});
 
     // prob & check type added in subclass
 }
-
-
 
 }

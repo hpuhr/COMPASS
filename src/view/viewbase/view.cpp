@@ -368,6 +368,15 @@ QImage View::renderView() const
 }
 
 /**
+ * Asks the data widget if it shows any data.
+ */
+bool View::showsData() const
+{
+    assert (widget_ && widget_->getViewDataWidget());  
+    return widget_->getViewDataWidget()->showsData();
+}
+
+/**
  * Reacts on a changed global load state in the view manager.
  */
 void View::viewManagerReloadStateChanged()
@@ -585,7 +594,8 @@ void View::updateView(int flags)
     if (flags & VU_Reload) //reload = complete update
     {
         //start reload (will reset all cached updates)
-        COMPASS::instance().dbContentManager().load();
+        if (COMPASS::instance().dbOpened())
+            COMPASS::instance().dbContentManager().load();
     }
     else //handle all other updates
     {
@@ -733,6 +743,37 @@ const ViewPresets::Preset* View::activePreset() const
 bool View::presetChanged() const
 {
     return (active_preset_.has_value() && preset_changed_);
+}
+
+/**
+ * Returns view information to be displayed by the view info widget.
+ */
+ViewInfos View::viewInfos() const
+{
+    if (!widget_ || !widget_->isInit())
+        return ViewInfos();
+
+    ViewInfos vinfos;
+    
+    //get custom infos
+    ViewInfos vinfos_custom = viewInfos_impl();
+
+    //create standard view infos
+    ViewInfos vinfos_standard;
+    vinfos_standard.addSection("Loaded Data");
+
+    const auto& null_cnt = widget_->getViewDataWidget()->nullCount();
+
+    if (null_cnt.has_value())
+        vinfos_standard.addInfo("info_null_values", "NULL values:", std::to_string(null_cnt.value()));
+
+    //add custom infos, then standard ones
+    if (vinfos_custom.numInfos() > 0)
+        vinfos.addInfos(vinfos_custom);
+    if (vinfos_standard.numInfos() > 0)
+        vinfos.addInfos(vinfos_standard);
+
+    return vinfos;
 }
 
 /**

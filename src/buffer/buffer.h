@@ -20,7 +20,7 @@
 #include "propertylist.h"
 #include "logger.h"
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -38,6 +38,9 @@ class VariableSet;
 
 template <class T>
 class NullableVector;
+
+// template <class T>
+// class OldNullableVector;
 
 typedef std::tuple<std::map<std::string, std::shared_ptr<NullableVector<bool>>>,
 std::map<std::string, std::shared_ptr<NullableVector<char>>>,
@@ -72,6 +75,7 @@ class Buffer
 {
     template <class T>
     friend class NullableVector;
+    //friend class OldNullableVector;
 
 public:
     Buffer(PropertyList properties, const std::string& dbcontent_name = "");
@@ -86,7 +90,7 @@ public:
     void addProperty(const Property& property);
     void deleteProperty(const Property& property);
 
-    const PropertyList& properties();
+    const PropertyList& properties() const;
     void printProperties();
 
     void sortByProperty(const Property& property);
@@ -103,11 +107,11 @@ public:
     void rename(const std::string& id, const std::string& id_new);
 
     // Returns current size
-    size_t size();
+    size_t size() const;
     void cutToSize(size_t size);
 
     void cutUpToIndex(size_t index); // everything up to index is removed
-    void removeIndexes(const std::vector<size_t>& indexes_to_remove); // must be sorted
+    void removeIndexes(const std::vector<unsigned int>& indexes_to_remove); // must be sorted
 
     const std::string& dbContentName() const { return dbcontent_name_; }
 
@@ -127,7 +131,7 @@ protected:
     std::string dbcontent_name_;
 
     ArrayListMapTupel array_list_tuple_;
-    size_t data_size_ {0};
+    size_t size_ {0};
 
 private:
     template <typename T>
@@ -144,6 +148,7 @@ private:
 };
 
 #include "nullablevector.h"
+//#include "oldnullablevector.h"
 
 template <typename T>
 inline bool Buffer::has(const std::string& id) const
@@ -265,5 +270,7 @@ void Buffer::seizeArrayListMap(Buffer& other_buffer)
     }
 
     other_buffer.getArrayListMap<T>().clear();
+
+    // size_adjusted in seizeBuffer
 }
 

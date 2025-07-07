@@ -22,7 +22,7 @@
 
 #include <QWidget>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <memory>
 #include <vector>

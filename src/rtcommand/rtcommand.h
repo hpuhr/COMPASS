@@ -29,7 +29,7 @@
 
 #include <boost/optional.hpp>
 
-#include "json.h"
+#include "json_fwd.hpp"
 
 class QObject;
 class QMainWindow;
@@ -145,15 +145,17 @@ struct RTCommand
     bool                   execute_async = false; //if true execution will immediately return after deploying the command to the main thread's event loop,
                                                   //if false execution will wait for the command to finish running in the main thread
 
-    static const std::string HelpOptionFull;
-    static const std::string HelpOptionShort;
-    static const std::string HelpOption;
-    static const std::string HelpOptionCmdFull;
-    static const std::string HelpOptionCmdShort;
+    static const std::string        HelpOptionFull;
+    static const std::string        HelpOptionShort;
+    static const std::string        HelpOption;
+    static const std::string        HelpOptionCmdFull;
+    static const std::string        HelpOptionCmdShort;
 
-    static const std::string ReplyStringIndentation;
-    static const char        ObjectPathSeparator;
-    static const char        ParameterListSeparator;
+    static const std::string        ReplyStringIndentation;
+    static const char               ObjectPathSeparator;
+    static const char               ParameterListSeparator;
+
+    static std::vector<std::string> DefaultOptions;
 
 protected:
     void setResultMessage(const std::string& m) const;
@@ -203,6 +205,7 @@ protected:
 struct RTCommandHelp : public RTCommand 
 {
     QString command;
+    bool    details = false;
 protected:
     virtual bool run_impl() override;
 

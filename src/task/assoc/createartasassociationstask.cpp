@@ -27,21 +27,18 @@
 #include "dbcontent/variable/variableset.h"
 #include "datasourcemanager.h"
 #include "jobmanager.h"
-#include "dbcontent/variable/metavariable.h"
 #include "stringconv.h"
 #include "taskmanager.h"
-//#include "sqliteconnection.h"
 #include "viewmanager.h"
 
 #include <QApplication>
 #include <QMessageBox>
-#include <sstream>
 
 using namespace std;
 using namespace Utils;
 using namespace dbContent;
 
-const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_associations_created";
+const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_associations_created"; // really needed
 
 CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& class_id,
                                                          const std::string& instance_id,
@@ -278,8 +275,8 @@ void CreateARTASAssociationsTask::run()
 
 bool CreateARTASAssociationsTask::wasRun()
 {
-    return COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME)
-             && COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+    return COMPASS::instance().dbInterface().hasProperty(DONE_PROPERTY_NAME)
+             && COMPASS::instance().dbInterface().getProperty(DONE_PROPERTY_NAME) == "1";
 }
 
 void CreateARTASAssociationsTask::loadedDataDataSlot(
@@ -311,7 +308,7 @@ void CreateARTASAssociationsTask::loadingDoneSlot()
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
     create_job_ = std::make_shared<CreateARTASAssociationsJob>(
-                *this, COMPASS::instance().interface(), data_);
+                *this, COMPASS::instance().dbInterface(), data_);
 
     connect(create_job_.get(), &CreateARTASAssociationsJob::doneSignal, this,
             &CreateARTASAssociationsTask::createDoneSlot, Qt::QueuedConnection);
@@ -379,9 +376,9 @@ void CreateARTASAssociationsTask::createDoneSlot()
 
     if (save_associations_)
     {
-        COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+        COMPASS::instance().dbInterface().setProperty(DONE_PROPERTY_NAME, "1");
 
-        COMPASS::instance().interface().saveProperties();
+        COMPASS::instance().dbInterface().saveProperties();
 
         done_ = true;
     }

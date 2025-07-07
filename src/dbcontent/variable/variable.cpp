@@ -804,12 +804,12 @@ void Variable::shortName(const std::string& short_name)
 
 bool Variable::hasDBContent() const
 {
-    return COMPASS::instance().interface().hasContentIn(dbTableName(), db_column_name_);
+    return COMPASS::instance().dbInterface().hasContentIn(dbTableName(), db_column_name_);
 }
 
 void Variable::setHasDBContent()
 {
-    COMPASS::instance().interface().setContentIn(dbTableName(), db_column_name_);
+    COMPASS::instance().dbInterface().setContentIn(dbTableName(), db_column_name_);
 }
 
 bool Variable::isKey() const

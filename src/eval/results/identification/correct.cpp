@@ -31,7 +31,7 @@ SingleIdentificationCorrect::SingleIdentificationCorrect(const std::string& resu
                                                          const SectorLayer& sector_layer,
                                                          unsigned int utn,
                                                          const EvaluationTargetData* target,
-                                                         EvaluationManager& eval_man,
+                                                         EvaluationCalculator& calculator,
                                                          const EvaluationDetails& details,
                                                          unsigned int num_updates,
                                                          unsigned int num_no_ref_pos,
@@ -46,7 +46,7 @@ SingleIdentificationCorrect::SingleIdentificationCorrect(const std::string& resu
                       sector_layer, 
                       utn, 
                       target, 
-                      eval_man, 
+                      calculator, 
                       details,
                       num_updates,
                       num_no_ref_pos,
@@ -66,7 +66,7 @@ SingleIdentificationCorrect::SingleIdentificationCorrect(const std::string& resu
 */
 std::shared_ptr<Joined> SingleIdentificationCorrect::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedIdentificationCorrect> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedIdentificationCorrect> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /********************************************************************************
@@ -78,12 +78,12 @@ std::shared_ptr<Joined> SingleIdentificationCorrect::createEmptyJoined(const std
 JoinedIdentificationCorrect::JoinedIdentificationCorrect(const std::string& result_id, 
                                                          std::shared_ptr<EvaluationRequirement::Base> requirement,
                                                          const SectorLayer& sector_layer, 
-                                                         EvaluationManager& eval_man)
+                                                         EvaluationCalculator& calculator)
 :   JoinedCorrectBase("JoinedIdentificationCorrect", 
                       result_id, 
                       requirement, 
                       sector_layer, 
-                      eval_man, 
+                      calculator, 
                       "identification",
                       "#CID",
                       "#NCID")

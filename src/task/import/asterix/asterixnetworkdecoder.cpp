@@ -174,7 +174,9 @@ void ASTERIXNetworkDecoder::start_impl()
 
                     auto callback = [this, line_id](std::unique_ptr<nlohmann::json> data, size_t num_frames,
                             size_t num_records, size_t numErrors) {
-                        job()->netJasterixCallback(std::move(data), line_id, num_frames, num_records, numErrors);
+
+                        if (job() && !job()->obsolete())
+                            job()->netJasterixCallback(std::move(data), line_id, num_frames, num_records, numErrors);
                     };
 
                     task().jASTERIX()->decodeData((char*) receive_buffers_copy_.at(line_id)->data(),
@@ -185,7 +187,8 @@ void ASTERIXNetworkDecoder::start_impl()
 
                 receive_copy_buffer_sizes_.clear();
 
-                job()->forceBlockingDataProcessing();
+                if (job() && !job()->obsolete())
+                    job()->forceBlockingDataProcessing();
             }
         }
     }

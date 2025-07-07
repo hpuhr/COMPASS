@@ -15,11 +15,13 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONDATASOURCEWIDGET_H
-#define EVALUATIONDATASOURCEWIDGET_H
+#pragma once
+
+#include <string>
 
 #include <QFrame>
 
+class EvaluationCalculator;
 class DBContentComboBox;
 
 class QCheckBox;
@@ -31,6 +33,7 @@ class EvaluationDataSourceWidget : public QFrame
 
 signals:
     void dbContentNameChangedSignal(const std::string& dbcontent_name);
+    void usedDataSourceChangedSignal();
     void lineChangedSignal(unsigned int line_id);
 
 public slots:
@@ -41,12 +44,17 @@ public slots:
     void updateDataSourcesSlot();
 
 public:
-    EvaluationDataSourceWidget(const std::string& title, const std::string& dbcontent_name, unsigned int line_id,
+    EvaluationDataSourceWidget(EvaluationCalculator& calculator,
+                               const std::string& title, 
+                               const std::string& dbcontent_name, 
+                               unsigned int line_id,
                                QWidget* parent=nullptr, Qt::WindowFlags f=Qt::WindowFlags());
 
-    virtual ~EvaluationDataSourceWidget();
+    virtual ~EvaluationDataSourceWidget(); 
 
 protected:
+    EvaluationCalculator& calculator_;
+
     std::string title_;
     std::string dbcontent_name_;
     unsigned int line_id_;
@@ -58,5 +66,3 @@ protected:
 
     void updateCheckboxesChecked();
 };
-
-#endif // EVALUATIONDATASOURCEWIDGET_H

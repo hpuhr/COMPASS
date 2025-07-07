@@ -17,10 +17,12 @@
 
 #pragma once
 
-#include "json.h"
+#include "json.hpp"
+#include "geotiff_defs.h"
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include <QRectF>
 
@@ -34,7 +36,8 @@ struct RasterReference
              const QRectF& roi,
              int w,
              int h,
-             bool srs_is_north_up)
+             bool srs_is_north_up,
+             bool srs_str_is_wkt = false)
     {
         srs              = srs_str;
         img_origin_x     = roi.left();
@@ -42,10 +45,12 @@ struct RasterReference
         img_pixel_size_x = roi.width()  / w;
         img_pixel_size_y = roi.height() / h;
         is_north_up      = srs_is_north_up;
+        srs_is_wkt       = srs_str_is_wkt;
     }
 
     void set(const std::string& srs_str,
-             const std::vector<double>& geo_transform)
+             const std::vector<double>& geo_transform,
+             bool srs_str_is_wkt = false)
     {
         assert(geo_transform.size() == 6);
 
@@ -57,6 +62,13 @@ struct RasterReference
         img_pixel_size_x = geo_transform[ 1 ];
         img_origin_y     = geo_transform[ 3 ];
         img_pixel_size_y = is_north_up ? -geo_transform[ 5 ] : geo_transform[ 5 ];
+
+        srs_is_wkt = srs_str_is_wkt;
+    }
+
+    void set(const GeoTIFFInfo& info)
+    {
+        set(info.geo_srs, info.geo_transform, true);
     }
 
     QRectF getROI(int w, int h) const
@@ -114,6 +126,10 @@ struct RasterReference
         if (json_ref.contains("is_north_up"))
             is_north_up = json_ref[ "is_north_up" ];
 
+        srs_is_wkt = false;
+        if (json_ref.contains("srs_is_wkt"))
+            srs_is_wkt = json_ref[ "srs_is_wkt" ];
+
         return true;
     }
 
@@ -126,8 +142,23 @@ struct RasterReference
         j[ "img_pixel_size_x" ] = img_pixel_size_x;
         j[ "img_pixel_size_y" ] = img_pixel_size_y;
         j[ "is_north_up"      ] = is_north_up;
+        j[ "srs_is_wkt"       ] = srs_is_wkt;
 
         return j;
+    }
+
+    std::string asString() const 
+    {
+        std::stringstream ss;
+        ss << "srs:              " << srs              << std::endl;
+        ss << "img_origin_x:     " << img_origin_x     << std::endl;
+        ss << "img_origin_y:     " << img_origin_y     << std::endl;
+        ss << "img_pixel_size_x: " << img_pixel_size_x << std::endl;
+        ss << "img_pixel_size_y: " << img_pixel_size_y << std::endl;
+        ss << "is_north_up:      " << is_north_up      << std::endl;
+        ss << "srs_is_wkt:       " << srs_is_wkt;
+
+        return ss.str();
     }
 
     std::string srs;                  // srs name, either a well-known system identifier (e.g. "wgs84") or an epsg code (e.g. "epsg:3857")
@@ -136,4 +167,5 @@ struct RasterReference
     double      img_pixel_size_x;     // width of a pixel in srs units
     double      img_pixel_size_y;     // height of a pixel in srs units
     bool        is_north_up = true;   // is the srs north-up (most likely)
+    bool        srs_is_wkt = false;   // if true the srs name can directly be interpreted as a wkt string
 };

@@ -26,7 +26,7 @@
 #include <map>
 #include <vector>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 /**
  * @brief Configuration storage and retrieval functionality with sub-class generation
@@ -71,7 +71,9 @@ public:
     Configurable(const std::string& class_id, 
                  const std::string& instance_id,
                  Configurable* parent = nullptr,
-                 const std::string& root_configuration_filename = "");
+                 const std::string& root_configuration_filename = "",
+                 const nlohmann::json* config = nullptr);
+
     /// @brief Default constructor, for STL containers
     Configurable() = default;
 
@@ -82,6 +84,8 @@ public:
 
     /// @brief Destructor
     virtual ~Configurable();
+
+    bool isTransient() const { return is_transient_; }
 
     /// @brief Reset parameters to their reset values
     virtual void resetToDefault();
@@ -100,7 +104,8 @@ public:
     /// @brief Returns if a specified sub-configurable exists
     bool hasSubConfigurable(const std::string& class_id, const std::string& instance_id) const;
     // finds by approx name, either exact instance id or first matching class id
-    std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurable(const std::string& approx_name);
+    std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurablePath(const std::string& path);
+    std::pair<rtcommand::FindObjectErrCode, Configurable*> findSubConfigurableName(const std::string& name);
     // returns nullptr if not found
     Configurable* getApproximateChildNamed(const std::string& approx_name);
     const Configurable& getChild(const std::string& class_id,
@@ -236,6 +241,7 @@ private:
     /// Configuration
     Configuration* configuration_{nullptr};
     bool is_root_{false};
+    bool is_transient_{true};
 
     bool tmp_disable_remove_config_on_delete_ {false};
 

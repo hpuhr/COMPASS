@@ -42,7 +42,7 @@ class Unit : public Configurable
         registerParameter("definition", &definition_, std::string());
         registerParameter("factor", &factor_, 1.0);
 
-        loginf << "Unit: constructor: dimension " << parent.instanceId() << " unit " << instance_id
+        logdbg << "Unit: constructor: dimension " << parent.instanceId() << " unit " << instance_id
                << " factor " << factor_;
 
         assert(factor_ != 0);

@@ -42,6 +42,7 @@ class FilterConditionOperatorComboBox : public QComboBox
             }
 
             stringlist.append("IN");
+            stringlist.append("NOT IN");
 
             if (!numeric_only)
             {

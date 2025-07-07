@@ -47,7 +47,7 @@ GPSTrailImportTaskDialog::GPSTrailImportTaskDialog(GPSTrailImportTask& task)
 
     connect(&task_, &GPSTrailImportTask::fileChanged, this, &GPSTrailImportTaskDialog::updateButtons);
 
-    update();
+    updateButtons();
 }
 
 void GPSTrailImportTaskDialog::updateButtons()

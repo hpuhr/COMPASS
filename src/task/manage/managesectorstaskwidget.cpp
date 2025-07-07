@@ -334,7 +334,7 @@ void ManageSectorsTaskWidget::updateSectorTableSlot()
                 ++col;
 
                 QPushButton* button = new QPushButton();
-                button->setIcon(QIcon(Files::getIconFilepath("delete.png").c_str()));
+                button->setIcon(Files::IconProvider::getIcon("delete.png"));
                 button->setFlat(true);
 
                 connect (button, &QPushButton::clicked, this, &ManageSectorsTaskWidget::deleteSectorSlot);
@@ -426,10 +426,12 @@ void ManageSectorsTaskWidget::deleteAllFilesSlot()
 
 void ManageSectorsTaskWidget::selectedFileSlot()
 {
-    loginf << "ManageSectorsTaskWidget: selectedFileSlot";
     assert(file_list_->currentItem());
 
     QString filename = file_list_->currentItem()->text();
+
+    loginf << "ManageSectorsTaskWidget: selectedFileSlot: filename '" << filename.toStdString();
+
     assert(task_.hasFile(filename.toStdString()));
     task_.currentFilename(filename.toStdString());
 }
@@ -442,15 +444,15 @@ void ManageSectorsTaskWidget::updateFileListSlot()
 
     for (auto it : task_.fileList())
     {
-        if (!Files::fileExists(it.first))
+        if (!Files::fileExists(it))
         {
-            logwrn << "ManageSectorsTaskWidget: updateFileListSlot: file '" << it.first << "' does not exist";
+            logwrn << "ManageSectorsTaskWidget: updateFileListSlot: file '" << it << "' does not exist";
             continue;
         }
 
-        QListWidgetItem* item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
+        QListWidgetItem* item = new QListWidgetItem(tr(it.c_str()), file_list_);
 
-        if (it.first == task_.currentFilename())
+        if (it == task_.currentFilename())
             file_list_->setCurrentItem(item);
     }
 }
@@ -593,8 +595,7 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
     QColor current_color = QColor(sector->colorStr().c_str());
 
     QColor color =
-            QColorDialog::getColor(current_color, QApplication::activeWindow(), "Select Sector Color",
-                                   QColorDialog::DontUseNativeDialog);
+            QColorDialog::getColor(current_color, QApplication::activeWindow(), "Select Sector Color");
 
     if (color.isValid())
     {

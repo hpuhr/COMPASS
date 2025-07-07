@@ -15,63 +15,186 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBTABLEINFO_H_
-#define DBTABLEINFO_H_
+#pragma once
+
+#include "property.h"
+#include "propertylist.h"
 
 #include <map>
 #include <string>
 
+#include <boost/optional.hpp>
+
+/**
+ */
 class DBTableColumnInfo
 {
-  public:
-    DBTableColumnInfo(const std::string& name, const std::string& type, bool key, bool null_allowed,
-                      const std::string& comment)
-        : name_(name), type_(type), null_allowed_(null_allowed), key_(key), comment_(comment)
+public:
+    /**
+     */
+    DBTableColumnInfo(const std::string& name, 
+                      PropertyDataType type_prop,
+                      bool key,
+                      bool null_allowed = true,
+                      const std::string& comment = "",
+                      bool precise_db_types = true)
+    :   name_        (name)
+    ,   type_prop_   (type_prop)
+    ,   null_allowed_(null_allowed)
+    ,   key_         (key)
+    ,   comment_     (comment)
     {
+        const auto& types2str_db = Property::dbDataTypes2Strings(precise_db_types);
+        if (types2str_db.count(type_prop))
+            type_db_ = types2str_db.at(type_prop);
     }
+
+    /**
+     */
+    DBTableColumnInfo(const std::string& name, 
+                      const std::string& type_db,
+                      bool key,
+                      bool null_allowed = true,
+                      const std::string& comment = "")
+    :   name_        (name)
+    ,   type_db_     (type_db)
+    ,   null_allowed_(null_allowed)
+    ,   key_         (key)
+    ,   comment_     (comment)
+    {
+        const auto& str2types_db = Property::strings2DBDataTypes();
+        if (str2types_db.count(type_db))
+            type_prop_ = str2types_db.at(type_db);
+    }
+
     virtual ~DBTableColumnInfo() {}
 
     std::string name() const { return name_; }
 
-    std::string type() const { return type_; }
+    /**
+     */
+    bool hasPropertyType() const
+    {
+        return type_prop_.has_value();
+    }
+
+    /**
+     */
+    PropertyDataType propertyType() const
+    { 
+        assert(type_prop_.has_value());
+        return type_prop_.value();
+    }
+
+    /**
+     */
+    bool hasDBType() const
+    {
+        return type_db_.has_value();
+    }
+
+    /**
+     */
+    const std::string& dbType() const 
+    {
+        assert(type_db_.has_value());
+        return type_db_.value();
+    }
 
     bool nullAllowed() const { return null_allowed_; }
-
     bool key() const { return key_; }
-
     std::string comment() const { return comment_; }
 
-  protected:
-    std::string name_;
-    std::string type_;
-    bool null_allowed_;
-    bool key_;
-    std::string comment_;
+protected:
+    std::string                       name_;
+    boost::optional<PropertyDataType> type_prop_;
+    boost::optional<std::string>      type_db_;
+    bool                              null_allowed_;
+    bool                              key_;
+    std::string                       comment_;
 };
 
+/**
+ */
 class DBTableInfo
 {
-  public:
+public:
+    DBTableInfo() {}
     DBTableInfo(const std::string name) : name_(name) {}
     virtual ~DBTableInfo() {}
 
-    bool hasColumn(const std::string& name) const { return columns_.count(name) > 0; }
-    const DBTableColumnInfo& column(const std::string& name) const { return columns_.at(name); }
-    void addColumn(const std::string& name, const std::string& type, bool key, bool null_allowed,
+    void name(const std::string& name) { name_ = name; }
+    const std::string& name() const { return name_; }
+
+    /**
+     */
+    bool hasColumn(const std::string& name) const 
+    { 
+        return column_map_.count(name) > 0; 
+    }
+
+    /**
+     */
+    const DBTableColumnInfo& column(const std::string& name) const 
+    { 
+        auto it = column_map_.find(name);
+        assert(it != column_map_.end());
+
+        return columns_.at(it->second);
+    }
+
+    /**
+     */
+    void addColumn(const std::string& name, 
+                   const std::string& type, 
+                   bool key, 
+                   bool null_allowed,
                    const std::string& comment)
     {
-        columns_.insert(std::pair<std::string, DBTableColumnInfo>(
-            name, DBTableColumnInfo(name, type, key, null_allowed, comment)));
+        assert(column_map_.count(name) == 0);
+        size_t idx = columns_.size();
+        columns_.push_back(DBTableColumnInfo(name, type, key, null_allowed, comment));
+        column_map_[ name ] = idx;
+    }
+
+    /**
+     */
+    void addColumn(const std::string& name, 
+                   PropertyDataType type, 
+                   bool key, 
+                   bool null_allowed,
+                   const std::string& comment,
+                   bool precise_db_types = true)
+    {
+        assert(column_map_.count(name) == 0);
+        size_t idx = columns_.size();
+        columns_.push_back(DBTableColumnInfo(name, type, key, null_allowed, comment, precise_db_types));
+        column_map_[ name ] = idx;
     }
 
     unsigned int size() { return columns_.size(); }
 
-    const std::map<std::string, DBTableColumnInfo>& columns() const { return columns_; }
+    const std::vector<DBTableColumnInfo>& columns() const { return columns_; }
 
-  protected:
-    std::string name_;
+    /**
+     */
+    boost::optional<PropertyList> tableProperties() const
+    {
+        PropertyList p;
 
-    std::map<std::string, DBTableColumnInfo> columns_;
+        for (const auto& c : columns_)
+        {
+            if (!c.hasPropertyType())
+                return boost::optional<PropertyList>();
+            
+            p.addProperty(c.name(), c.propertyType());
+        }
+        
+        return p;
+    }
+
+protected:
+    std::string                    name_;
+    std::vector<DBTableColumnInfo> columns_;
+    std::map<std::string, size_t>  column_map_;
 };
-
-#endif

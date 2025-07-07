@@ -74,9 +74,19 @@ public:
         unsigned int null_count          = 0; //number of encountered null values
         unsigned int null_selected_count = 0; //number of encountered selected null values
         unsigned int not_inserted_count  = 0; //number of encountered non-insertable values (e.g. out of histogram range)
+        unsigned int nan_count           = 0; //number of nan values
     };
 
-    typedef std::map<std::string, IntermediateContentData> IntermediateData;
+    /**
+     */
+    struct IntermediateData
+    {
+        std::map<std::string, IntermediateContentData> content_data;
+
+        unsigned int buffer_null_count = 0;
+        unsigned int buffer_nan_count  = 0;
+    };
+
 
     /**
      * Result for a certain DBContent.
@@ -89,6 +99,7 @@ public:
         unsigned int         null_count          = 0; //number of encountered null values in result
         unsigned int         null_selected_count = 0; //number of encountered selected null values in result
         unsigned int         not_inserted_count  = 0; //number of encountered non-insertable values in result (e.g. out of histogram range)
+        unsigned int         nan_count           = 0; //number of nan values in result
         unsigned int         max_count           = 0; //maximum encountered bin count
 
         bool                 bins_are_sorted     = false;
@@ -105,6 +116,10 @@ public:
         bool hasNullValues() const
         {
             return (null_selected_count > 0 || null_count > 0);
+        }
+        bool hasNanValues() const
+        {
+            return (nan_count > 0);
         }
         bool hasSelectedValues() const
         {
@@ -127,7 +142,11 @@ public:
         unsigned int              null_count          = 0; //total null data
         unsigned int              null_selected_count = 0; //total selected null data 
         unsigned int              not_inserted_count  = 0; //total non-insertable data (e.g. out of histogram range)
+        unsigned int              nan_count           = 0; //total nan data
         unsigned int              max_count           = 0; //total maximum bin count
+
+        unsigned int              buffer_null_count   = 0;
+        unsigned int              buffer_nan_count    = 0;
     };
 
     HistogramGenerator() = default;

@@ -1,5 +1,5 @@
-#ifndef REFTRAJACCURCYFILTERWIDGET_H
-#define REFTRAJACCURCYFILTERWIDGET_H
+
+#pragma once
 
 #include "dbfilterwidget.h"
 #include "reftrajaccuracyfilter.h"
@@ -9,9 +9,10 @@ class QLineEdit;
 
 class RangeEditFloat;
 
+/**
+ */
 class RefTrajAccuracyFilterWidget : public DBFilterWidget
 {
-
     Q_OBJECT
 
 protected slots:
@@ -30,5 +31,3 @@ protected:
 
     QLineEdit* min_value_edit_ {nullptr};
 };
-
-#endif // REFTRAJACCURCYFILTERWIDGET_H

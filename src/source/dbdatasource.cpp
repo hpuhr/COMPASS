@@ -1,6 +1,8 @@
 #include "source/dbdatasource.h"
 #include "source/dbdatasourcewidget.h"
+#include "source/configurationdatasource.h"
 #include "util/timeconv.h"
+#include "util/number.h"
 #include "logger.h"
 
 using namespace nlohmann;
@@ -140,7 +142,7 @@ void DBDataSource::addNumLoaded(const std::string& db_content, unsigned int line
     num_loaded_[db_content][line_id] += num;
 }
 
-unsigned int DBDataSource::numLoaded (unsigned int line_id)
+unsigned int DBDataSource::numLoaded (unsigned int line_id) const
 {
     unsigned int num_loaded = 0;
 
@@ -153,7 +155,7 @@ unsigned int DBDataSource::numLoaded (unsigned int line_id)
     return num_loaded;
 }
 
-unsigned int DBDataSource::numLoaded (const std::string& db_content)
+unsigned int DBDataSource::numLoaded (const std::string& db_content) const
 {
     unsigned int num_loaded = 0;
 
@@ -166,7 +168,7 @@ unsigned int DBDataSource::numLoaded (const std::string& db_content)
     return num_loaded;
 }
 
-unsigned int DBDataSource::numLoaded (const std::string& db_content, unsigned int line_id)
+unsigned int DBDataSource::numLoaded (const std::string& db_content, unsigned int line_id) const
 {
     if (num_loaded_.count(db_content) && num_loaded_.at(db_content).count(line_id))
         return num_loaded_.at(db_content).at(line_id);
@@ -174,7 +176,7 @@ unsigned int DBDataSource::numLoaded (const std::string& db_content, unsigned in
     return 0;
 }
 
-bool DBDataSource::hasNumLoaded (unsigned int line_id) // for any DBContent
+bool DBDataSource::hasNumLoaded (unsigned int line_id) const // for any DBContent
 {
     for (auto& loaded_it : num_loaded_)
         if (loaded_it.second.count(line_id))
@@ -183,7 +185,7 @@ bool DBDataSource::hasNumLoaded (unsigned int line_id) // for any DBContent
     return false;
 }
 
-bool DBDataSource::hasAnyNumLoaded () // for any DBContent, line
+bool DBDataSource::hasAnyNumLoaded () const // for any DBContent, line
 {
     for (auto& loaded_it : num_loaded_)
     {

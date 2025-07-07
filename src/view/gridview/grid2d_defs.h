@@ -61,6 +61,7 @@ struct GridResolution
                             const boost::optional<double>& ymax = boost::optional<double>());
 
     static const double DefaultBorderFactor;
+    static const double MinCellSize;
 
     Type   type        = Type::CellCount;
     size_t num_cells_x = 0;
@@ -72,7 +73,8 @@ struct GridResolution
 
 enum ValueType
 {
-    ValueTypeCount = 0,
+    ValueTypeCountValid = 0,
+    ValueTypeCountNan,
     ValueTypeMin,
     ValueTypeMax,
     ValueTypeMean,
@@ -92,8 +94,10 @@ inline std::string valueTypeToString(ValueType vtype)
 {
     switch (vtype)
     {
-        case ValueTypeCount:
+        case ValueTypeCountValid:
             return "Count";
+        case ValueTypeCountNan:
+            return "Count NULL";
         case ValueTypeMin:
             return "Min";
         case ValueTypeMax:

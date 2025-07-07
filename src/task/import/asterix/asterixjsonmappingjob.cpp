@@ -2,23 +2,27 @@
 #include "asterixjsonparser.h"
 #include "buffer.h"
 //#include "dbcontent/dbcontent.h"
-#include "json.h"
+#include "json_tools.h"
 //#include "jsonobjectparser.h"
 #include "logger.h"
 
 #include <exception>
+
+#include <QThread>
 
 using namespace std;
 using namespace Utils;
 using namespace nlohmann;
 
 ASTERIXJSONMappingJob::ASTERIXJSONMappingJob(std::vector<std::unique_ptr<nlohmann::json>> data,
+                                             const std::string& source_name,
                                              const std::vector<std::string>& data_record_keys,
                                              const std::map<unsigned int, std::unique_ptr<ASTERIXJSONParser>>& parsers)
     : Job("ASTERIXJSONMappingJob"),
-      data_(std::move(data)),
-      data_record_keys_(data_record_keys),
-      parsers_(parsers)
+    data_(std::move(data)),
+    source_name_(source_name),
+    data_record_keys_(data_record_keys),
+    parsers_(parsers)
 {
     logdbg << "ASTERIXJSONMappingJob: ctor";
 }
@@ -28,9 +32,11 @@ ASTERIXJSONMappingJob::~ASTERIXJSONMappingJob()
     logdbg << "ASTERIXJSONMappingJob: dtor";
 }
 
-void ASTERIXJSONMappingJob::run()
+void ASTERIXJSONMappingJob::run_impl()
 {
-    logdbg << "ASTERIXJSONMappingJob: run";
+    logdbg << "ASTERIXJSONMappingJob: " << this << " run on thread " << QThread::currentThreadId() << " on cpu " << sched_getcpu();
+
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
     started_ = true;
 
@@ -46,7 +52,8 @@ void ASTERIXJSONMappingJob::run()
             parser_it.second->appendVariablesToBuffer(*buffers_.at(dbcontent_name));
     }
 
-    auto process_lambda = [this](nlohmann::json& record) {
+    auto process_lambda = [this](nlohmann::json& record) 
+    {
         //loginf << "UGA '" << record.dump(4) << "'";
 
         if (this->obsolete_)
@@ -138,8 +145,21 @@ void ASTERIXJSONMappingJob::run()
 
     done_ = true;
 
+    auto t_diff = boost::posix_time::microsec_clock::local_time() - start_time;
+    float num_secs =  t_diff.total_milliseconds() ? t_diff.total_milliseconds() / 1000.0 : 10E-6;
+
+    logdbg << "ASTERIXJSONMappingJob: run: done: took "
+           << String::timeStringFromDouble(num_secs, true)
+           << " full " << String::timeStringFromDouble(num_secs, true)
+           << " " << ((float) num_created_+num_not_mapped_) / num_secs << " rec/s";
+
     logdbg << "ASTERIXJSONMappingJob: run: done: mapped " << num_created_ << " skipped "
            << num_not_mapped_;
+}
+
+std::string ASTERIXJSONMappingJob::sourceName() const
+{
+    return source_name_;
 }
 
 size_t ASTERIXJSONMappingJob::numMapped() const { return num_mapped_; }

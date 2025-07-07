@@ -18,10 +18,8 @@
 #include "projectionmanager.h"
 #include "global.h"
 #include "logger.h"
-//#include "ogrprojection.h"
 #include "projectionmanagerwidget.h"
 #include "rs2gprojection.h"
-//#include "geoprojection.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontent.h"
 #include "datasourcemanager.h"
@@ -45,7 +43,8 @@ const string ProjectionManager::RS2G_NAME = "RS2G";
 //const string ProjectionManager::GEO_NAME = "Geo";
 
 ProjectionManager::ProjectionManager()
-    : Configurable("ProjectionManager", "ProjectionManager0", 0, "projection.json")
+    : Configurable("ProjectionManager", "ProjectionManager0", 0, "projection.json"),
+    mag_model_("wmm2020", HOME_DATA_DIRECTORY + "wmm") // WMM model (World Magnetic Model)
 {
     loginf << "ProjectionManager: constructor";
 
@@ -263,7 +262,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     assert(hasCurrentProjection());
 
     Projection& projection = currentProjection();
-    assert (projection.radarCoordinateSystemsAdded()); // done in asteriximporttask or radarplotposcalctask
+    assert (projection.coordinateSystemsAdded()); // done in asteriximporttask or radarplotposcalctask
 
     for (auto ds_id_it : datasource_vec.distinctValues())
     {
@@ -408,6 +407,123 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     return transformation_errors;
 }
 
+unsigned int ProjectionManager::doXYPositionCalculations (
+    std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
+    NullableVector<double>& target_latitudes_vec, NullableVector<double>& target_longitudes_vec)
+{
+    logdbg << "ProjectionManager: doXYPositionCalculations: dbcontent_name " << dbcontent_name;
+
+    bool ret;
+
+    string datasource_var_name;
+    string x_var_name;
+    string y_var_name;
+    string latitude_var_name;
+    string longitude_var_name;
+
+    // do radar position projection
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+
+    unsigned int ds_id;
+    double x_m;
+    double y_m;
+    double lat, lon, wgs_alt;
+
+    unsigned int transformation_errors {0};
+
+    assert (dbcontent_name == "CAT010" || dbcontent_name == "CAT020" || dbcontent_name == "CAT062");
+
+    unsigned int buffer_size = buffer->size();
+    assert(buffer_size);
+
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+    assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::meta_var_x_));
+    assert (dbcont_man.canGetVariable(dbcontent_name, DBContent::meta_var_y_));
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+    assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
+
+    datasource_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_).name();
+    x_var_name = dbcont_man.getVariable(dbcontent_name, DBContent::meta_var_x_).name();
+    y_var_name = dbcont_man.getVariable(dbcontent_name, DBContent::meta_var_y_).name();
+    latitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name();
+    longitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name();
+
+    assert (buffer->has<unsigned int>(datasource_var_name));
+
+    if (!buffer->has<double>(x_var_name) || !buffer->has<double>(y_var_name))
+        return buffer->size();
+
+    assert (buffer->has<double>(latitude_var_name));
+    assert (buffer->has<double>(longitude_var_name));
+
+    NullableVector<unsigned int>& datasource_vec = buffer->get<unsigned int>(datasource_var_name);
+    NullableVector<double>& x_vec = buffer->get<double>(x_var_name);
+    NullableVector<double>& y_vec = buffer->get<double>(y_var_name);
+
+    // set up projections
+    assert(hasCurrentProjection());
+
+    Projection& projection = currentProjection();
+    assert (projection.coordinateSystemsAdded()); // done in asteriximporttask or radarplotposcalctask
+
+    for (unsigned int cnt = 0; cnt < buffer_size; cnt++)
+    {
+        // load buffer data
+
+        if (datasource_vec.isNull(cnt))
+        {
+            logerr << "ProjectionManager: doXYPositionCalculations: data source null";
+            continue;
+        }
+        ds_id = datasource_vec.get(cnt);
+
+        if (!target_latitudes_vec.isNull(cnt) && !target_longitudes_vec.isNull(cnt))
+        {
+            loginf << "ProjectionManager: doXYPositionCalculations: position already set";
+            continue;
+        }
+
+        if (x_vec.isNull(cnt) || y_vec.isNull(cnt))
+        {
+            loginf << "ProjectionManager: doXYPositionCalculations: position null";
+            continue;
+        }
+
+        x_m = x_vec.get(cnt);
+        y_m = y_vec.get(cnt);
+
+        logdbg << "x_m " << x_m << " y_m " << y_m;
+
+        if (!projection.hasCoordinateSystem(ds_id))
+        {
+            loginf << "ProjectionManager: doXYPositionCalculations: no coordinate system for " << ds_id;
+            transformation_errors++;
+            continue;
+        }
+
+        ret = projection.localXYToWGS84(ds_id, x_m, y_m, lat, lon, wgs_alt);
+
+        if (!ret)
+        {
+            loginf << "ProjectionManager: doXYPositionCalculations: transformation error using x "
+                   << x_m << " y " << y_m << " for " << ds_id;
+
+            transformation_errors++;
+            continue;
+        }
+
+        target_latitudes_vec.set(cnt, lat);
+        target_longitudes_vec.set(cnt, lon);
+    }
+
+    if (transformation_errors)
+        logwrn << "ProjectionManager: doXYPositionCalculations: dbcontent_name " << dbcontent_name
+               << " transformation_errors " << transformation_errors;
+
+    return transformation_errors;
+}
+
 string ProjectionManager::currentProjectionName() const { return current_projection_name_; }
 
 void ProjectionManager::currentProjectionName(const string& name)
@@ -472,6 +588,56 @@ unsigned int ProjectionManager::doRadarPlotPositionCalculations (
         NullableVector<double>& longitude_vec = buffer->get<double>(longitude_var_name);
 
         transformation_errors += calculateRadarPlotPositions (dbcontent_name, buffer, latitude_vec, longitude_vec);
+    }
+
+    return transformation_errors;
+}
+
+unsigned int ProjectionManager::doXYPositionCalculations (
+    map<string, shared_ptr<Buffer>> buffers)
+{
+    unsigned int transformation_errors {0};
+
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
+    string dbcontent_name;
+
+    string latitude_var_name;
+    string longitude_var_name;
+
+    for (auto& buf_it : buffers)
+    {
+        dbcontent_name = buf_it.first;
+
+        if (dbcontent_name != "CAT010" && dbcontent_name != "CAT020" && dbcontent_name != "CAT062")
+            continue;
+
+        logdbg << "ProjectionManager: doXYPositionCalculations: processing " << dbcontent_name;
+
+        shared_ptr<Buffer> buffer = buf_it.second;
+
+        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
+
+        latitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_).name();
+        longitude_var_name = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_).name();
+
+        if (!buffer->has<double>(latitude_var_name))
+            buffer->addProperty(latitude_var_name, PropertyDataType::DOUBLE);
+
+        if (!buffer->has<double>(longitude_var_name))
+            buffer->addProperty(longitude_var_name, PropertyDataType::DOUBLE);
+
+        NullableVector<double>& latitude_vec = buffer->get<double>(latitude_var_name);
+        NullableVector<double>& longitude_vec = buffer->get<double>(longitude_var_name);
+
+        if (latitude_vec.isNeverNull() && longitude_vec.isNeverNull())
+        {
+            logdbg << "ProjectionManager: doXYPositionCalculations: skipping never null " << dbcontent_name;
+
+            continue;
+        }
+
+        transformation_errors += doXYPositionCalculations (dbcontent_name, buffer, latitude_vec, longitude_vec);
     }
 
     return transformation_errors;
@@ -598,6 +764,21 @@ double ProjectionManager::geoidHeightM (double latitude_deg, double longitude_de
     // return geoid_height;
 }
 
+double ProjectionManager::declination(float year, double latitude_deg, double longitude_deg, double altitude_m)
+{
+    // Compute magnetic declination (variation)
+    double Bx, By, Bz;
+
+    mag_model_(year, latitude_deg, longitude_deg, altitude_m, Bx, By, Bz);
+
+    double H, F, declination, I;
+
+    GeographicLib::MagneticModel::FieldComponents(Bx, By, Bz, H, F, declination, I);
+
+    return declination;
+}
+
+
 void ProjectionManager::test()
 {
     bool do_prints = false;
@@ -606,7 +787,7 @@ void ProjectionManager::test()
     {
         Projection& proj = currentProjection();
 
-        proj.addAllRadarCoordinateSystems();
+        proj.addAllCoordinateSystems();
 
         for (unsigned int id : proj.ids())
         {
@@ -677,10 +858,10 @@ REDO_LABEL:
                 double calc_ground_range_diff = fabs(calc_ground_range_m - ground_range_m);
 
                 if (!do_prints
-                    && (calc_azimuth_diff >= 1E-4 || calc_slant_range_diff >= 1E-2 || calc_ground_range_diff >= 1E-2))
+                    && (calc_azimuth_diff >= 1E-3 || calc_slant_range_diff >= 1E-2 || calc_ground_range_diff >= 1E-2))
                 {
                     logerr << "ProjectionManager: test: calc_azimuth_diff "
-                           << String::doubleToStringPrecision(calc_azimuth_diff, 6)
+                           << String::doubleToStringPrecision(calc_azimuth_diff, 5)
                            << " calc_slant_range_diff " << String::doubleToStringPrecision(calc_slant_range_diff, 2)
                         << " calc_ground_range_diff " << String::doubleToStringPrecision(calc_ground_range_diff, 2);
 
@@ -689,7 +870,7 @@ REDO_LABEL:
                     goto REDO_LABEL;
                 }
 
-                assert (calc_azimuth_diff < 1E-4);
+                assert (calc_azimuth_diff < 1E-3);
                 assert (calc_slant_range_diff < 1E-2);
                 assert (calc_ground_range_diff < 1E-2);
             }

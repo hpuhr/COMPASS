@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ADSBQUALITYFILTERWIDGET_H
-#define ADSBQUALITYFILTERWIDGET_H
+#pragma once
 
 #include "dbfilterwidget.h"
 #include "adsbqualityfilter.h"
@@ -25,6 +24,8 @@ class QLabel;
 class QLineEdit;
 class QCheckBox;
 
+/**
+ */
 class ADSBQualityFilterWidget : public DBFilterWidget
 {
     Q_OBJECT
@@ -107,5 +108,3 @@ protected:
     QCheckBox* use_max_sil_v2_check_{nullptr};
     QLineEdit* max_sil_v2_edit_{nullptr};
 };
-
-#endif // ADSBQUALITYFILTERWIDGET_H

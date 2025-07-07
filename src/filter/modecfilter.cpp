@@ -13,7 +13,7 @@ using namespace nlohmann;
 using namespace dbContent;
 
 ModeCFilter::ModeCFilter(const std::string& class_id, const std::string& instance_id,
-                       Configurable* parent)
+                         Configurable* parent)
     : DBFilter(class_id, instance_id, parent, false)
 {
     registerParameter("min_value", &min_value_, -1000.0f);
@@ -34,37 +34,94 @@ bool ModeCFilter::filters(const std::string& dbo_type)
 
 std::string ModeCFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "ModeCFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "ModeCFilter: getConditionString: dbcont " << dbcontent_name << " active " << active_;
 
-    if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbcontent_name))
+    auto& dbcont_man = COMPASS::instance().dbContentManager();
+
+    if (!dbcont_man.metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbcontent_name))
         return "";
 
     stringstream ss;
 
     if (active_)
     {
-        dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_mc_.name()).getFor(dbcontent_name);
+        // if (!first)
+        // {
+        //     ss << " AND";
+        // }
 
-        if (!first)
-        {
-            ss << " AND";
+                // if (null_wanted_)
+                // {
+                //     ss << " (" << var.dbColumnName() << " IS NULL OR";
+                //     ss << " (" << var.dbColumnName() << " >= " << min_value_
+                //        << " AND " << var.dbColumnName() << " <= " << max_value_ << "))";
+
+                // }
+                // else
+                // {
+                //     ss << " (" << var.dbColumnName() << " >= " << min_value_
+                //        << " AND " << var.dbColumnName() << " <= " << max_value_ << ")";
+                // }
+
+        { // first check always to enforce if null_wanted_
+            dbContent::Variable& var = dbcont_man.metaGetVariable(
+                dbcontent_name, DBContent::meta_var_mc_);
+
+            if (!first)
+                ss << " AND";
+
+            ss << " (" << var.dbColumnName() << " BETWEEN " << min_value_ << " AND " << max_value_;
+
+            if (null_wanted_)
+                ss << " OR " << var.dbColumnName() << " IS NULL";
+
+            ss << ")";
+
+            first = false;
         }
 
-        if (null_wanted_)
+        if (dbcontent_name == "CAT062")
         {
-            ss << " (" << var.dbColumnName() << " IS NULL OR";
-            ss << " (" << var.dbColumnName() << " >= " << min_value_
-               << " AND " << var.dbColumnName() << " <= " << max_value_ << "))";
+            {
+                dbContent::Variable& var = dbcont_man.getVariable(
+                    dbcontent_name, DBContent::var_cat062_baro_alt_);
 
-        }
-        else
-        {
-            ss << " (" << var.dbColumnName() << " >= " << min_value_
-               << " AND " << var.dbColumnName() << " <= " << max_value_ << ")";
-        }
+                if (var.hasDBContent())
+                {
+                    if (!first)
+                        ss << " AND";
 
-        first = false;
+                    ss << " (" << var.dbColumnName() << " BETWEEN " << min_value_ << " AND " << max_value_;
+
+                    if (null_wanted_)
+                        ss << " OR " << var.dbColumnName() << " IS NULL";
+
+                    ss << ")";
+
+                    first = false;
+                }
+            }
+
+            {
+                dbContent::Variable& var = dbcont_man.getVariable(
+                    dbcontent_name, DBContent::var_cat062_fl_measured_);
+
+                if (var.hasDBContent())
+                {
+                    if (!first)
+                        ss << " AND";
+
+                    ss << " (" << var.dbColumnName() << " BETWEEN " << min_value_ << " AND " << max_value_;
+
+                    if (null_wanted_)
+                        ss << " OR " << var.dbColumnName() << " IS NULL";
+
+                    ss << ")";
+
+                    first = false;
+                }
+            }
+        }
     }
 
     logdbg << "ModeCFilter: getConditionString: here '" << ss.str() << "'";
@@ -137,15 +194,15 @@ bool ModeCFilter::activeInLiveMode()
     return true;
 }
 
-std::vector<size_t> ModeCFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
+std::vector<unsigned int> ModeCFilter::filterBuffer(const std::string& dbcontent_name, std::shared_ptr<Buffer> buffer)
 {
-    std::vector<size_t> to_be_removed;
+    std::vector<unsigned int> to_be_removed;
 
     if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbcontent_name))
         return to_be_removed;
 
     dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
-                DBContent::meta_var_mc_.name()).getFor(dbcontent_name);
+                                                                         DBContent::meta_var_mc_.name()).getFor(dbcontent_name);
 
     assert (buffer->has<float> (var.name()));
 
@@ -189,7 +246,7 @@ float ModeCFilter::maxValue() const
 
 void ModeCFilter::maxValue(float max_value)
 {
-    max_value_ = max_value;
+    max_value_ = max_value_;
 }
 
 bool ModeCFilter::nullWanted() const

@@ -23,6 +23,11 @@
 
 class QLineEdit;
 
+namespace ResultReport
+{
+    class SectionContentTable;
+}
+
 namespace EvaluationRequirement
 {
 
@@ -37,7 +42,7 @@ public:
             const std::string& group_name,
             double prob, 
             COMPARISON_TYPE prob_check_type,
-            EvaluationManager& eval_man,
+            EvaluationCalculator& calculator,
             float update_interval_s, 
             bool  use_miss_tolerance,
             float miss_tolerance_s,
@@ -74,7 +79,7 @@ public:
                              const std::string& instance_id,
                              Group& group, 
                              EvaluationStandard& standard,
-                             EvaluationManager& eval_man);
+                             EvaluationCalculator& calculator);
     virtual ~ModeCCorrectPeriodConfig() = default;
 
     std::shared_ptr<Base> createRequirement() override;
@@ -84,7 +89,7 @@ public:
 
 protected:
     virtual BaseConfigWidget* createWidget_impl() override;
-    virtual void addCustomTableEntries(EvaluationResultsReport::SectionContentTable& table) const override;
+    virtual void addCustomTableEntries(ResultReport::SectionContentTable& table) const override;
     virtual std::string probabilityDescription() const override;
 
     float max_distance_ft_ = 300.0f;

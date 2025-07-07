@@ -19,7 +19,7 @@
 
 //#include "buffer.h"
 //#include "dbcontent/dbcontent.h"
-#include "json.h"
+#include "json_tools.h"
 #include "jsonobjectparser.h"
 
 using namespace Utils;
@@ -36,7 +36,7 @@ JSONMappingStubsJob::JSONMappingStubsJob(std::unique_ptr<nlohmann::json> data,
 
 JSONMappingStubsJob::~JSONMappingStubsJob() {}
 
-void JSONMappingStubsJob::run()
+void JSONMappingStubsJob::run_impl()
 {
     logdbg << "JSONMappingStubsJob: run";
 

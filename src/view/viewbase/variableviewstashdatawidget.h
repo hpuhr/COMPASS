@@ -21,6 +21,7 @@
 #include "variableviewstash.h"
 #include "nullablevector.h"
 #include "util/timeconv.h"
+#include "property_templates.h"
 
 #include <limits>
 
@@ -31,7 +32,6 @@ class Buffer;
 /**
  * Base view data class for variable-based views which stash their buffer data on a per-variable basis.
  * This stash also does a lot of counting and can be processed later on to generate the final view data.
- *
  */
 class VariableViewStashDataWidget : public VariableViewDataWidget
 {
@@ -40,13 +40,18 @@ public:
                                 VariableView* view,
                                 bool group_per_datasource,
                                 QWidget* parent = nullptr, 
-                                Qt::WindowFlags f = 0);
+                                Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~VariableViewStashDataWidget();
 
-    unsigned int nullValueCount() const;
+    boost::optional<QRectF> getPlanarBounds(int var_x, 
+                                            int var_y, 
+                                            bool correct_datetime,
+                                            bool fix_small_ranges) const;
+    boost::optional<std::pair<double, double>> getBounds(int var, 
+                                                         bool correct_datetime,
+                                                         bool fix_small_ranges) const;
 
-    QRectF getPlanarBounds(int var_x, int var_y, bool correct_datetime = false) const;
-    boost::optional<std::pair<double, double>> getBounds(int var, bool correct_datetime = false) const;
+    static const double RangeMinDefault;
 
 protected:
     virtual void resetVariableData() override final;
@@ -56,7 +61,7 @@ protected:
     virtual void updateVariableData(const std::string& dbcontent_name,
                                     Buffer& buffer) override final;
 
-    virtual QRectF getViewBounds() const;
+    virtual boost::optional<QRectF> getViewBounds() const;
 
     /// derived behavior during postUpdateVariableDataEvent()
     virtual void processStash(const VariableViewStash<double>& stash) = 0;
@@ -89,13 +94,30 @@ private:
                     unsigned int last_size,
                     unsigned int current_size)
     {
+        bool ok;
+
+        size_t num_nan_values = 0;
+
         for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
         {
             if (data.isNull(cnt))
+            {
                 target.push_back(std::numeric_limits<double>::signaling_NaN());
+            }
             else
-                target.push_back(data.get(cnt));
+            {
+                auto v = property_templates::toDouble<T>(data.get(cnt), &ok);
+                if (!ok)
+                    throw std::runtime_error("VariableViewStashDataWidget: appendData: data type not supported");
+
+                target.push_back(v);
+
+                if (!std::isfinite(v))
+                    ++num_nan_values;
+            }
         }
+
+        addNanCount(num_nan_values);
     }
 
     template<typename T>
@@ -103,80 +125,33 @@ private:
                     std::vector<double>& target,
                     std::vector<unsigned int> indexes)
     {
+        bool ok;
+
+        size_t num_nan_values = 0;
+
         for (unsigned int index : indexes)
         {
             if (data.isNull(index))
+            {
                 target.push_back(std::numeric_limits<double>::signaling_NaN());
+            }
             else
-                target.push_back(data.get(index));
+            {
+                auto v = property_templates::toDouble<T>(data.get(index), &ok);
+                if (!ok)
+                    throw std::runtime_error("VariableViewStashDataWidget: appendData: data type not supported");
+
+                target.push_back(v);
+
+                if (!std::isfinite(v))
+                    ++num_nan_values;
+            }
         }
+
+        addNanCount(num_nan_values);
     }
 
     VariableViewStash<double> stash_;
     bool group_per_datasource_ {false}; // true = DS ID + Line ID, false = DBContent
     std::map<std::string, unsigned int> last_buffer_size_; // dbcontent name -> last buffer size, only used if group_per_datasource_
 };
-
-/**
-*/
-template<>
-inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(
-    const NullableVector<boost::posix_time::ptime>& data,
-    std::vector<double>& target,
-    unsigned int last_size,
-    unsigned int current_size)
-{
-    for (unsigned int cnt=last_size; cnt < current_size; ++cnt)
-    {
-        if (data.isNull(cnt))
-        {
-            target.push_back(std::numeric_limits<double>::signaling_NaN());
-            continue;
-        }
-
-        //to utc msecs since epoch
-        long t = Utils::Time::toLong(data.get(cnt));
-
-        target.push_back(t);
-    }
-}
-
-template<>
-inline void VariableViewStashDataWidget::appendData<boost::posix_time::ptime>(
-    const NullableVector<boost::posix_time::ptime>& data,
-    std::vector<double>& target,
-    std::vector<unsigned int> indexes)
-{
-    for (unsigned int index : indexes)
-    {
-        if (data.isNull(index))
-        {
-            target.push_back(std::numeric_limits<double>::signaling_NaN());
-            continue;
-        }
-
-        //to utc msecs since epoch
-        long t = Utils::Time::toLong(data.get(index));
-
-        target.push_back(t);
-    }
-}
-
-/**
-*/
-template<>
-inline void VariableViewStashDataWidget::appendData<std::string>(const NullableVector<std::string>& data,
-                                                                 std::vector<double>& target, 
-                                                                 unsigned int last_size,
-                                                                 unsigned int current_size)
-{
-    throw std::runtime_error("VariableViewStashDataWidget: appendData: string not supported");
-}
-
-template<>
-inline void VariableViewStashDataWidget::appendData<std::string>(const NullableVector<std::string>& data,
-                                                                 std::vector<double>& target,
-                                                                 std::vector<unsigned int> indexes)
-{
-    throw std::runtime_error("VariableViewStashDataWidget: appendData: string not supported");
-}

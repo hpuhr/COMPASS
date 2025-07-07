@@ -21,6 +21,8 @@
 #include <QFileInfo>
 #include <QString>
 #include <QRegularExpression>
+#include <QApplication>
+#include <QStyle>
 
 #include <cassert>
 #include <iostream>
@@ -46,6 +48,44 @@ size_t fileSize(const std::string& path)
     verifyFileExists(path);
 
     return boost::filesystem::file_size(path);
+}
+
+std::string fileSizeString(size_t file_size_in_bytes)
+{
+    double size = file_size_in_bytes;
+    std::string unit = "";
+    int dec = 0;
+
+    if (size >= 1e12)
+    {
+        size /= 1e12;
+        unit = "TB";
+        dec = 1;
+    }
+    else if (size >= 1e09)
+    {
+        size /= 1e09;
+        unit = "GB";
+        dec = 1;
+    }
+    else if (size >= 1e06)
+    {
+        size /= 1e06;
+        unit = "MB";
+    }
+    else if (size >= 1e03)
+    {
+        size /= 1e03;
+        unit = "KB";
+    }
+    else
+    {
+        size /= 1e03;
+        unit = "KB";
+        dec = 1;
+    }
+
+    return QString::number(size, 'f', dec).toStdString() + " " + unit;
 }
 
 void verifyFileExists(const std::string& path)
@@ -207,6 +247,73 @@ std::string normalizeFilename(const std::string& filename_without_ext, bool remo
     fn_lower.replace(QRegularExpression("[/\\s]+"), "_"); //replace sequences of unwanted chars with _
     
     return fn_lower.toStdString();
+}
+
+QIcon getIcon(const std::string& name, const QColor& color)
+{
+    QString path = getIconFilepath(name).c_str();
+    if (!color.isValid())
+        return QIcon(path);
+
+    QImage img(path);
+    if (img.isNull())
+        return QIcon();
+
+    img = img.convertToFormat(QImage::Format_ARGB32);
+
+    int w = img.width();
+    int h = img.height();
+
+    const int r = color.red();
+    const int g = color.green();
+    const int b = color.blue();
+
+    for (int y = 0; y < h; ++y)
+    {
+        auto line = img.scanLine(y);
+        QRgb* pixel = reinterpret_cast<QRgb*>(line);
+        
+        for (int x = 0; x < w; ++x)
+        {
+            QRgb& px = pixel[ x ];
+
+            int alpha = qAlpha(px);
+            if (alpha == 0) 
+                continue;
+
+            int gray = 255 - qRed(px);
+
+            int newR = (gray * r) / 255;
+            int newG = (gray * g) / 255;
+            int newB = (gray * b) / 255;
+
+            px = qRgba(newR, newG, newB, alpha);
+        }
+    }
+    
+    return QIcon(QPixmap::fromImage(img));
+}
+
+QIcon IconProvider::getIcon(const std::string& name)
+{
+    static std::map<std::string, QIcon> icon_cache_;
+
+    if (!icon_cache_.count(name))
+    {
+        QIcon icon;
+        QString path = getIconFilepath(name).c_str();
+
+        icon.addFile(path, QSize(QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize),
+                                 QApplication::style()->pixelMetric(QStyle::PM_ToolBarIconSize)));
+        icon.addFile(path, QSize(QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize),
+                                 QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize)));
+        icon.addFile(path, QSize(QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize),
+                                 QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize)));
+
+        icon_cache_[name] = icon;
+    }
+
+    return icon_cache_.at(name);
 }
 
 }  // namespace Files

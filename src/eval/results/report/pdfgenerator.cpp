@@ -17,14 +17,14 @@
 
 #include "eval/results/report/pdfgenerator.h"
 #include "eval/results/report/pdfgeneratordialog.h"
-#include "evaluationmanager.h"
+#include "evaluationcalculator.h"
 #include "compass.h"
 #include "global.h"
 #include "dbinterface.h"
 #include "logger.h"
 #include "files.h"
 #include "stringconv.h"
-#include "sqliteconnection.h"
+#include "dbconnection.h"
 #include "latexdocument.h"
 #include "latexvisitor.h"
 #include "latextable.h"
@@ -53,8 +53,8 @@ using namespace Utils;
 namespace EvaluationResultsReport
 {
 
-PDFGenerator::PDFGenerator(EvaluationManager& eval_manager, EvaluationManagerSettings& eval_settings)
-    : eval_man_(eval_manager), eval_settings_(eval_settings)
+PDFGenerator::PDFGenerator(EvaluationCalculator& calculator)
+:   calculator_(calculator)
 {
     report_filename_ = "report.tex";
 
@@ -65,8 +65,10 @@ PDFGeneratorDialog& PDFGenerator::dialog()
 {
     if (!report_path_.size())
     {
-        SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
-        assert (sql_con);
+        //const DBConnection* db_con = dynamic_cast<const DBConnection*>(&COMPASS::instance().dbInterface().connection());
+        //assert (db_con);
+        //@TODO: PWa: did not understand why we need to check the connection at this point?
+        assert(COMPASS::instance().dbInterface().ready());
 
         string current_filename = COMPASS::instance().lastDbFilename();
 
@@ -80,7 +82,7 @@ PDFGeneratorDialog& PDFGenerator::dialog()
     }
 
     if (!dialog_)
-        dialog_.reset(new PDFGeneratorDialog(*this, eval_man_, eval_settings_));
+        dialog_.reset(new PDFGeneratorDialog(*this, calculator_));
 
     return *dialog_;
 }
@@ -97,24 +99,25 @@ void PDFGenerator::run ()
     assert (dialog_);
     dialog_->setRunning(true);
 
+    const auto& eval_settings = calculator_.settings();
+
     try
     {
-
         LatexDocument doc (report_path_, report_filename_);
         doc.title("OpenATS COMPASS Evaluation Report");
 
-        if (eval_settings_.report_author_.size())
-            doc.author(eval_settings_.report_author_);
+        if (eval_settings.report_author_.size())
+            doc.author(eval_settings.report_author_);
 
-        if (eval_settings_.report_abstract_.size())
-            doc.abstract(eval_settings_.report_abstract_);
+        if (eval_settings.report_abstract_.size())
+            doc.abstract(eval_settings.report_abstract_);
 
-        LatexTable::num_max_rows_ = eval_settings_.report_num_max_table_rows_;
+        LatexTable::num_max_rows_ = eval_settings.report_num_max_table_rows_;
         LatexVisitor visitor (doc, false, false, false,
-                              eval_settings_.report_include_target_details_,
-                              eval_settings_.report_include_target_tr_details_,
-                              eval_settings_.report_num_max_table_col_width_,
-                              eval_settings_.report_wait_on_map_loading_);
+                              eval_settings.report_include_target_details_,
+                              eval_settings.report_include_target_tr_details_,
+                              eval_settings.report_num_max_table_col_width_,
+                              eval_settings.report_wait_on_map_loading_);
 
         cancel_ = false;
         running_ = true;
@@ -130,17 +133,16 @@ void PDFGenerator::run ()
 
         start_time = boost::posix_time::microsec_clock::local_time();
 
-        assert (eval_man_.hasResults());
-        std::shared_ptr<Section> root_section = eval_man_.resultsGenerator().resultsModel().rootItem()->rootSection();
-
+        assert (calculator_.hasResults());
+        std::shared_ptr<Section> root_section = calculator_.resultsGenerator().resultsModel().rootItem()->rootSection();
 
         string status_str, elapsed_time_str, remaining_time_str;
 
         // create sections
         vector<shared_ptr<Section>> sections;
         sections.push_back(root_section);
-        root_section->addSectionsFlat(sections, eval_settings_.report_include_target_details_,
-                                      eval_settings_.report_skip_targets_wo_issues_);
+        root_section->addSectionsFlat(sections, eval_settings.report_include_target_details_,
+                                      eval_settings.report_skip_targets_wo_issues_);
 
         unsigned int num_sections = sections.size();
 
@@ -154,8 +156,7 @@ void PDFGenerator::run ()
 
         for (auto& sec_it : sections)
         {
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents();
+            QCoreApplication::processEvents();
 
             if (cancel_)
             {
@@ -207,8 +208,7 @@ void PDFGenerator::run ()
             dialog_->setStatus("Writing section cancelled");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else // proceed
         {
@@ -216,12 +216,11 @@ void PDFGenerator::run ()
             dialog_->setStatus("Writing sections done");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
             doc.write();
 
-            if (eval_settings_.report_run_pdflatex_)
+            if (eval_settings.report_run_pdflatex_)
             {
                 std::string command_out;
                 std::string command = "cd \""+report_path_+"\" && pdflatex --interaction=nonstopmode \""+report_filename_
@@ -231,7 +230,6 @@ void PDFGenerator::run ()
                 dialog_->setStatus("Running pdflatex");
                 dialog_->setRemainingTime("");
 
-                //while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
                 loginf << "EvaluationResultsReportPDFGenerator: run: cmd '" << command << "'";
@@ -256,7 +254,6 @@ void PDFGenerator::run ()
                     loginf << "EvaluationResultsReportPDFGenerator: run: re-running pdflatex";
                     dialog_->setStatus("Re-running pdflatex");
 
-                    //                while (QCoreApplication::hasPendingEvents())
                     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
                     command_out = System::exec(command);
@@ -279,7 +276,7 @@ void PDFGenerator::run ()
 
                     dialog_->setStatus("Running pdflatex done");
 
-                    if (eval_settings_.report_open_created_pdf_)
+                    if (eval_settings.report_open_created_pdf_)
                     {
                         std::string fullpath = report_path_+report_filename_;
 

@@ -91,11 +91,13 @@ protected:
 
     virtual bool refreshScreenOnNeededReload() const override { return true; }
 
+    virtual ViewInfos viewInfos_impl() const override;
     virtual void viewInfoJSON_impl(nlohmann::json& info) const override;
 
     virtual dbContent::VariableSet getBaseSet(const std::string& dbcontent_name) override;
 
     HistogramViewDataWidget* getDataWidget();
+    const HistogramViewDataWidget* getDataWidget() const;
 
     /// For data display
     HistogramViewWidget* widget_{nullptr};

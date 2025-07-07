@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "job.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class JSONObjectParser;
 class ASTERIXJSONParser;
@@ -43,8 +43,6 @@ class JSONMappingJob : public Job
     // json obj moved, mappings referenced
     virtual ~JSONMappingJob();
 
-    virtual void run();
-
     size_t numMapped() const;
     size_t numNotMapped() const;
     size_t numErrors() const;
@@ -54,6 +52,8 @@ class JSONMappingJob : public Job
 
     std::map<unsigned int, std::pair<size_t, size_t>> categoryMappedCounts() const;
 
+protected:
+    void run_impl() override;
 
 private:
     std::map<unsigned int, std::pair<size_t, size_t>>

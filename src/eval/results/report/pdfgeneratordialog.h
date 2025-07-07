@@ -15,13 +15,11 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSREPORTPDFGENERATORDIALOG_H
-#define EVALUATIONRESULTSREPORTPDFGENERATORDIALOG_H
+#pragma once
 
 #include <QDialog>
 
-class EvaluationManager;
-class EvaluationManagerSettings;
+class EvaluationCalculator;
 
 class QPushButton;
 class QLabel;
@@ -33,6 +31,8 @@ namespace EvaluationResultsReport
 {
 class PDFGenerator;
 
+/**
+ */
 class PDFGeneratorDialog : public QDialog
 {
     Q_OBJECT
@@ -59,8 +59,10 @@ public slots:
     void cancelSlot();
 
 public:
-    PDFGeneratorDialog(PDFGenerator& generator, EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
-                       QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    PDFGeneratorDialog(PDFGenerator& generator, 
+                       EvaluationCalculator& calculator,
+                       QWidget* parent = nullptr, 
+                       Qt::WindowFlags f = Qt::WindowFlags());
 
     void updateFileInfo ();
 
@@ -73,8 +75,7 @@ public:
 
 protected:
     PDFGenerator& generator_;
-    EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
+    EvaluationCalculator& calculator_;
 
     QWidget* config_container_ {nullptr};
 
@@ -107,5 +108,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONRESULTSREPORTPDFGENERATORDIALOG_H

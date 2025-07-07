@@ -23,7 +23,7 @@
 #include <QAbstractItemModel>
 #include <QIcon>
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>

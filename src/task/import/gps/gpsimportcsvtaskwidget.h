@@ -53,7 +53,7 @@ class GPSImportCSVTaskWidget : public TaskWidget
     void lineIDEditSlot(const QString& text);
 
 public:
-    GPSImportCSVTaskWidget(GPSImportCSVTask& task, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    GPSImportCSVTaskWidget(GPSImportCSVTask& task, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~GPSImportCSVTaskWidget();
 
     void selectFile(const std::string& filename);

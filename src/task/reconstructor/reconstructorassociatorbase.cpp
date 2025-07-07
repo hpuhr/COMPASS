@@ -1,13 +1,10 @@
 #include "reconstructorassociatorbase.h"
 #include "logger.h"
-#include "global.h"
 #include "stringconv.h"
 #include "timeconv.h"
 #include "util/tbbhack.h"
 #include "reconstructortask.h"
 #include "number.h"
-#include "util/system.h"
-#include "kalman_chain.h"
 
 #include <QApplication>
 
@@ -36,7 +33,7 @@ void ReconstructorAssociatorBase::associateNewData()
 
     max_time_diff_ = Time::partialSeconds(reconstructor().settings().max_time_diff_);
 
-    assert (!unassoc_rec_nums_.size());
+    unassoc_rec_nums_.clear();
 
     if (reconstructor().isCancelled())
         return;
@@ -117,7 +114,7 @@ void ReconstructorAssociatorBase::associateNewData()
     for (auto& tgt_it : reconstructor().targets_container_.targets_)
         tgt_it.second.created_in_current_slice_ = false;
 
-    unassoc_rec_nums_.clear();
+    // unassoc_rec_nums_.clear(); moved to beginning for statistics
 
     loginf << "ReconstructorAssociatorBase: associateNewData: time_assoc_trs " << Time::toString(time_assoc_trs_)
            << " time_assoc_new_utns " << Time::toString(time_assoc_new_utns_)
@@ -162,7 +159,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
 
     boost::posix_time::ptime last_ts;
 
-    auto one_min = boost::posix_time::seconds(60);
+    auto five_min = boost::posix_time::seconds(5*60);
     unsigned int ts_cnt=0;
 
     for (auto& ts_it : reconstructor().tr_timestamps_)
@@ -177,7 +174,7 @@ void ReconstructorAssociatorBase::associateTargetReports()
                    << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
         }
 
-        if (ts_it.first - last_ts > one_min)
+        if (ts_it.first - last_ts > five_min)
         {
             last_ts = ts_it.first;
             loginf << "ReconstructorAssociatorBase: associateTargetReports: processed time "
@@ -476,10 +473,12 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
         do_debug = reconstructor().task().debugSettings().debug_association_
                    && reconstructor().task().debugSettings().debugRecNum(rec_num);
 
+        dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
+
+        //do_debug = tr.dbcont_id_ == 10;
+
         if (do_debug)
             loginf << "DBG tr " << rec_num;
-
-        dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
 
         if (!tr.in_current_slice_)
         {
@@ -501,8 +500,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
         if (utn != -1) // estimate accuracy and associate
         {
-            if (reconstructor().task().debugSettings().debug_association_
-                && reconstructor().task().debugSettings().debugUTN(utn))
+            if (do_debug || reconstructor().task().debugSettings().debugUTN(utn))
                 loginf << "DBG retry-associating tr " << rec_num << " to UTN " << utn;
 
             associate(tr, utn);
@@ -754,7 +752,9 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
 #endif
                       {
                           unsigned int other_utn = reconstructor().targets_container_.utn_vec_.at(target_cnt);
-                          bool do_other_debug = false; //debug_utns.count(other_utn);
+                          //bool do_other_debug = false; //debug_utns.count(other_utn);
+
+                          //do_debug = tr.dbcont_id_ == 10 && other_utn == 7;
 
                           ReconstructorTarget& other = reconstructor().targets_container_.targets_.at(other_utn);
 
@@ -907,9 +907,9 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     unsigned int other_utn;
 
     bool first = true;
-    unsigned int best_other_utn;
-    double best_mahalanobis_dist;
-    double mahalanobis_dist;
+    unsigned int best_other_utn {0};
+    double best_mahalanobis_dist {0};
+    double mahalanobis_dist {0};
 
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
     {
@@ -1261,9 +1261,9 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
     // TODO rework to 1?
 
     bool best_found = false;
-    unsigned int best_other_utn;
-    unsigned int best_num_updates;
-    unsigned int best_score;
+    unsigned int best_other_utn {0};
+    //unsigned int best_num_updates {0};
+    unsigned int best_score {0};
 
     float score;
     for (auto& res_it : results) // usable, other utn, num updates, avg distance
@@ -1305,14 +1305,14 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
                 if (best_score < score)
                 {
                     best_other_utn = res_it.other_utn_;
-                    best_num_updates = res_it.num_updates_;
+                    //best_num_updates = res_it.num_updates_;
                     best_score = score;
                 }
             }
             else
             {
                 best_other_utn = res_it.other_utn_;
-                best_num_updates = res_it.num_updates_;
+                //best_num_updates = res_it.num_updates_;
                 best_score = score;
             }
 
@@ -1331,4 +1331,9 @@ const std::map<unsigned int, std::map<unsigned int,
                                       std::pair<unsigned int, unsigned int>>>& ReconstructorAssociatorBase::assocAounts() const
 {
     return assoc_counts_;
+}
+
+const std::vector<unsigned long>& ReconstructorAssociatorBase::unassociatedRecNums() const
+{
+    return unassoc_rec_nums_;
 }

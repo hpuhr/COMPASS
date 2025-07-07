@@ -27,6 +27,7 @@ namespace Time
 using namespace std;
 
 const std::string QT_DATETIME_FORMAT {"yyyy-MM-dd hh:mm:ss.zzz"};
+const std::string QT_DATETIME_FORMAT_SHORT {"yyyy-MM-dd hh:mm:ss"};
 
 string str_format = "%Y-%m-%d %H:%M:%S.%f";
 string date_str_format = "%Y-%m-%d";
@@ -83,7 +84,7 @@ boost::posix_time::ptime fromLong(unsigned long value)
     return timestamp;
 }
 
-long toLong(boost::posix_time::ptime value)
+long toLong(const boost::posix_time::ptime& value)
 {
     long result;
 
@@ -122,7 +123,7 @@ long decorrectLongQtUTC(long t)
     return fixed_timestamp;
 }
 
-string toString(boost::posix_time::ptime value, unsigned int partial_digits, bool* ok)
+string toString(const boost::posix_time::ptime& value, unsigned int partial_digits, bool* ok)
 {
     if (ok)
         *ok = true;
@@ -147,7 +148,7 @@ string toString(boost::posix_time::ptime value, unsigned int partial_digits, boo
     return tmp;
 }
 
-string toString(boost::posix_time::time_duration duration, unsigned int partial_digits)
+string toString(const boost::posix_time::time_duration& duration, unsigned int partial_digits)
 {
     assert (partial_digits <= 3);
 
@@ -210,11 +211,15 @@ string toStringLong(unsigned long value)
    return toString(fromLong(value));
 }
 
-string toTimeString(boost::posix_time::ptime value)
+string toTimeString(const boost::posix_time::ptime& value)
 {
-    stringstream date_stream;
+    ostringstream date_stream; // thread_local wrong string
 
-    date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(time_str_format.c_str())));
+    // thread-safe static locale setup
+    static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(time_str_format.c_str()));
+
+    // static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(str_format.c_str()));
+    date_stream.imbue(custom_locale);
     date_stream << value;
 
     //loginf << "UGA1 " << Time::toString(value) << " " << date_stream.str();
@@ -225,11 +230,15 @@ string toTimeString(boost::posix_time::ptime value)
     return tmp;
 }
 
-string toDateString(boost::posix_time::ptime value)
+string toDateString(const boost::posix_time::ptime& value)
 {
-    stringstream date_stream;
+    ostringstream date_stream; // thread_local wrong string
 
-    date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(date_str_format.c_str())));
+    // thread-safe static locale setup
+    static std::locale custom_locale(std::locale::classic(), new boost::posix_time::time_facet(date_str_format.c_str()));
+
+    //date_stream.imbue(locale(date_stream.getloc(), new boost::posix_time::time_facet(date_str_format.c_str())));
+    date_stream.imbue(custom_locale);
     date_stream << value;
 
     //loginf << "UGA1 " << Time::toString(value) << " " << date_stream.str();
@@ -237,7 +246,7 @@ string toDateString(boost::posix_time::ptime value)
     return date_stream.str();
 }
 
-boost::posix_time::ptime fromDateString(string value)
+boost::posix_time::ptime fromDateString(const string& value)
 {
     return boost::posix_time::ptime(boost::gregorian::from_string(value));
 }
@@ -263,7 +272,7 @@ boost::posix_time::time_duration partialSeconds(double seconds, bool ignore_full
     return value;
 }
 
-double partialSeconds(boost::posix_time::time_duration seconds)
+double partialSeconds(const boost::posix_time::time_duration& seconds)
 {
     double value {0.0};
 
@@ -273,6 +282,14 @@ double partialSeconds(boost::posix_time::time_duration seconds)
     value = (double) seconds.total_microseconds() / 1000000.0;
 
     return value;
+}
+
+QDateTime qtFrom (const boost::posix_time::ptime& value, bool include_ms)
+{
+    if (include_ms)
+        return QDateTime::fromString(Time::toString(value).c_str(), Time::QT_DATETIME_FORMAT.c_str());
+    else
+        return QDateTime::fromString(Time::toString(value, false).c_str(), Time::QT_DATETIME_FORMAT_SHORT.c_str());
 }
 
 }

@@ -1,5 +1,9 @@
 #pragma once
 
+#include "targetbase.h"
+#include "propertylist.h"
+#include "util/timewindow.h"
+
 #include "json.hpp"
 
 #include "boost/date_time/posix_time/ptime.hpp"
@@ -8,7 +12,7 @@
 
 namespace dbContent {
 
-class Target
+class Target : public TargetBase
 {
 public:
     const unsigned int utn_ {0};
@@ -19,6 +23,14 @@ public:
 
     bool useInEval() const;
     void useInEval(bool value);
+
+    const Utils::TimeWindowCollection& evalExcludedTimeWindows() const;
+    void evalExcludedTimeWindows(const Utils::TimeWindowCollection& collection);
+    void clearEvalExcludedTimeWindows();
+
+    const std::set<std::string>& evalExcludedRequirements() const;
+    void evalExcludedRequirements(const std::set<std::string>& excl_req);
+    void clearEvalExcludedRequirements();
 
     std::string comment() const;
     void comment (const std::string& value);
@@ -60,12 +72,7 @@ public:
 
     unsigned int dbContentCount(const std::string& dbcontent_name) const;
     void dbContentCount(const std::string& dbcontent_name, unsigned int value);
-    void clearDBContentCount(const std::string& dbcontent_name);
-
-    bool hasAdsbMOPSVersions() const;
-    std::set<unsigned int> adsbMOPSVersions() const;
-    void adsbMOPSVersions(std::set<unsigned int> values);
-    std::string adsbMOPSVersionsStr() const;
+    //void clearDBContentCount(const std::string& dbcontent_name);
 
     bool hasPositionBounds() const;
     void setPositionBounds (double latitude_min, double latitude_max,
@@ -75,9 +82,54 @@ public:
     double longitudeMin() const;
     double longitudeMax() const;
 
+    void adsbCount(unsigned int count);
+    unsigned int adsbCount() const;
+
+    void adsbMOPSCount(std::map<std::string, unsigned int> adsb_mops_count);
+
+    bool hasADSBMOPS() const;
+    std::set<unsigned int> adsbMopsList() const;
+    std::string adsbMopsStr() const;
+
+    static const std::string KEY_EVAL;
+    static const std::string KEY_EVAL_USE;
+    static const std::string KEY_EVAL_EXCLUDED_TIME_WINDOWS;
+    static const std::string KEY_EVAL_EXCLUDED_REQUIREMENTS;
+    static const std::string KEY_USED;
+    static const std::string KEY_COMMENT;
+    static const std::string KEY_TIME_BEGIN;
+    static const std::string KEY_TIME_END;
+    static const std::string KEY_ACAD;
+    static const std::string KEY_ACID;
+    static const std::string KEY_MODE_3A;
+    static const std::string KEY_MODE_C_MIN;
+    static const std::string KEY_MODE_C_MAX;
+    static const std::string KEY_COUNTS;
+    static const std::string KEY_ADSB_COUNT;
+    static const std::string KEY_ADSB_MOPS;
+    static const std::string KEY_LATITUDE_MIN;
+    static const std::string KEY_LATITUDE_MAX;
+    static const std::string KEY_LONGITUDE_MIN;
+    static const std::string KEY_LONGITUDE_MAX;
+    static const std::string KEY_ECAT;
+    static const std::string KEY_ADSB_INFO;
+
+    static const Property     DBColumnID;
+    static const Property     DBColumnInfo;
+    static const PropertyList DBPropertyList;
+
+    virtual void targetCategory(Category ecat) override;
+    virtual Category targetCategory() const override;
+
 protected:
     nlohmann::json info_;
+
+    bool use_in_eval_;
+    Utils::TimeWindowCollection excluded_time_windows_;
+    std::set<std::string> excluded_requirements_;
+
     mutable std::string time_duration_str_;
+
 };
 
 }

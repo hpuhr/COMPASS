@@ -1,28 +1,25 @@
-#ifndef EVALUATIONFILTERTABWIDGET_H
-#define EVALUATIONFILTERTABWIDGET_H
+
+#pragma once
 
 #include <QWidget>
 
 #include <memory>
 
-class EvaluationManager;
-class EvaluationManagerSettings;
-class EvaluationManagerWidget;
+class EvaluationCalculator;
+class TimeWindowCollectionWidget;
 
 class QLineEdit;
 class QCheckBox;
 class QDateTimeEdit;
 
+/**
+ */
 class EvaluationFilterTabWidget : public QWidget
 {
     Q_OBJECT
 
 private slots:
     void toggleUseFiltersSlot();
-
-    void toggleUseTimeSlot();
-    void timeBeginEditedSlot (const QDateTime& datetime);
-    void timeEndEditedSlot (const QDateTime& datetime);
 
     void toggleUseRefTrajAccuracySlot();
     void minRefTrajAccuracyEditedSlot (const QString& text);
@@ -58,21 +55,14 @@ private slots:
     void maxSILv2PEditedSlot (const QString& text);
 
 public:
-    EvaluationFilterTabWidget(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings,
-                              EvaluationManagerWidget& man_widget);
+    EvaluationFilterTabWidget(EvaluationCalculator& calculator);
 
-    void update();
+    void updateValues();
 
 protected:
-    EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
-    EvaluationManagerWidget& man_widget_;
+    EvaluationCalculator& calculator_;
 
     QCheckBox* use_filter_check_{nullptr};
-
-    QCheckBox* use_time_check_{nullptr};
-    QDateTimeEdit* time_begin_edit_{nullptr};
-    QDateTimeEdit* time_end_edit_{nullptr};
 
     // reftraj
 
@@ -122,7 +112,5 @@ protected:
     QCheckBox* use_max_sil_v2_check_{nullptr};
     QLineEdit* max_sil_v2_edit_{nullptr};
 
-    bool update_active_ {false};
 };
 
-#endif // EVALUATIONFILTERTABWIDGET_H

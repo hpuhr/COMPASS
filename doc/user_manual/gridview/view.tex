@@ -19,7 +19,7 @@ Both areas can be resized and hidden if desired.
 
 \section{Data Loading}
 
-To load the data the mechanism described in Section \nameref{sec:ui_overview} or the 'Reload' button can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filters} can be used. \\
+To load the data the mechanism described in section \nameref{sec:ui_overview} or the 'Reload' button can be used. To filter the dataset, the mechanism described in section \nameref{sec:filters} can be used. \\
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -38,7 +38,8 @@ The desired statistical value is extracted from each grid cell, and the grid is 
 Available statistical grid cell values at the moment include:
 
 \begin{itemize}
-    \item \textbf{Count}: The number of data items sorted into a grid cell
+    \item \textbf{Count}: The number of valid data values sorted into a grid cell
+    \item \textbf{Count NULL}: The number of NULL values sorted into a grid cell
     \item \textbf{Min}: The minimum of values inside a grid cell
     \item \textbf{Max}: The maximum of values inside a grid cell
     \item \textbf{Mean}: The mean of values inside grid cell
@@ -52,7 +53,17 @@ The data count of each grid cell is visualized, ranging from green (minimum cell
 
 The coloring of displayed grid cells due to the visualized statistical values can be customized to the users needs. \\
 
-On the right side of the plot a color legend is shown, describing which displayed color belongs to which value of the distributed variable.
+On the right side of the plot a color legend is shown, describing which displayed color belongs to which value of the distributed variable. \\
+
+For the distributed variable it is also possible to select the empty variable in the respective variable selection. 
+In this case, each data item with a valid X- and Y-variable will be sorted into the grid, 
+and only the grid counts will be visualized. This mode can e.g. be used to visualize traffic patterns.
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+  \includegraphics[width=18cm,frame]{figures/grid_loaded_emptyvar.png}
+\caption{Grid View with empty variable selected}
+\end{figure}
 
 \section{Usage}
 
@@ -115,6 +126,9 @@ Below the variable selection, several parameters can be used to further configur
         If empty, a clue about the needed value format is shown (e.g. DOUBLE). 
    \end{itemize}
    \ \\
+
+\textbf{Note} that the 'Value Type' selection may be locked and set to 'Count' in case the empty variable is selected 
+as the distributed variable. \\
 
 \textit{Example}: The following example illustrates how the coloring can be adjusted using minimum and maximum color limits. \\
 

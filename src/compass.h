@@ -15,19 +15,20 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef COMPASS_H_
-#define COMPASS_H_
+#pragma once
 
 #include "configurable.h"
 #include "singleton.h"
-#include "json.hpp"
+#include "json_fwd.hpp"
 #include "appmode.h"
+#include "result.h"
+#include "logmodel.h"
+
 
 #include <QObject>
 
 #include <memory>
 #include <map>
-#include <set>
 #include <vector>
 
 class DBInterface;
@@ -63,13 +64,18 @@ public:
                                          const std::string& instance_id) override;
     std::string getPath() const override final;
 
-    void openDBFile(const std::string& filename);
-    void createNewDBFile(const std::string& filename);
-    void exportDBFile(const std::string& filename);
-    bool dbOpened();
-    void closeDB();
+    bool openDBFile(const std::string& filename);
+    bool createNewDBFile(const std::string& filename);
+    bool createInMemDBFile(const std::string& future_filename = "");
+    bool createNewDBFileFromMemory();
+    bool exportDBFile(const std::string& filename);
+    bool closeDB();
 
-    DBInterface& interface();
+    bool dbOpened();
+    bool dbInMem() const;
+    bool canCreateDBFileFromMemory() const;
+
+    DBInterface& dbInterface();
     DBContentManager& dbContentManager();
     DataSourceManager& dataSourceManager();
     FilterManager& filterManager();
@@ -93,65 +99,12 @@ public:
                               bool license_type = true) const;
     std::string licenseeString(bool licensed_to = true) const;
 
-protected:
-    bool db_opened_{false};
-    bool expert_mode_ {false};
-
-    AppMode app_mode_ {AppMode::Offline};
-    AppState app_state_ = AppState::Starting;
-
-    bool hide_evaluation_ {false};
-    bool hide_viewpoints_ {false};
-    bool disable_live_to_offline_switch_ {false};
-    bool disable_menu_config_save_ {false};
-    bool disable_geographicview_rotate_ {false};
-    bool disable_add_remove_views_ {false};
-    bool disable_confirm_reset_views_ {false};
-
-    static const bool is_app_image_;
-
-    unsigned int auto_live_running_resume_ask_time_ {60}; // minutes
-    unsigned int auto_live_running_resume_ask_wait_time_ {1}; // minutes
-
-    unsigned int max_fps_ {30};
-
-    std::unique_ptr<SimpleConfig> simple_config_;
-    std::unique_ptr<DBInterface> db_interface_;
-    std::unique_ptr<DBContentManager> dbcontent_manager_;
-    std::unique_ptr<DataSourceManager> ds_manager_;
-    std::unique_ptr<FilterManager> filter_manager_;
-    std::unique_ptr<TaskManager> task_manager_;
-    std::unique_ptr<ViewManager> view_manager_;
-    std::unique_ptr<EvaluationManager> eval_manager_;
-    std::unique_ptr<FFTManager> fft_manager_;
-    std::unique_ptr<LicenseManager> license_manager_;
-
-    std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
-
-    std::string last_db_filename_;
-    nlohmann::json db_file_list_;
-
-    std::string last_path_;
-
-    bool db_export_in_progress_ {false};
-
-    virtual void checkSubConfigurables() override;
-
-    MainWindow* main_window_;
-
-    COMPASS();
-
-private:
-    friend class Client;
-
-    void setAppState(AppState state);
-
-public:
     static COMPASS& instance()
     {
         static COMPASS instance;
         return instance;
     }
+
     std::string lastDbFilename() const;
     std::vector<std::string> dbFileList() const;
     void clearDBFileList();
@@ -173,9 +126,6 @@ public:
     bool isShutDown() const;
     bool isRunning() const;
 
-    bool hideEvaluation() const;
-    bool hideViewpoints() const;
-
     unsigned int maxFPS() const;
     void maxFPS(unsigned int max_fps);
 
@@ -188,6 +138,97 @@ public:
     unsigned int autoLiveRunningResumeAskTime() const; // min
     unsigned int autoLiveRunningResumeAskWaitTime() const; // min
     bool disableConfirmResetViews() const;
-};
 
-#endif /* COMPASS_H_ */
+    bool darkMode() const;
+    void darkMode(bool value);
+
+    const char* lineEditInvalidStyle();
+
+    LogStream logInfo(const std::string& component,
+                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+    LogStream logWarn(const std::string& component,
+                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+    LogStream logError(const std::string& component,
+                       boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+
+    unsigned int minAppWidth() const;
+
+    unsigned int minAppHeight() const;
+
+    float appFontScale() const;
+
+    bool disableNativeDialogs() const;
+
+    LogStore& logStore();
+
+protected:
+    COMPASS();
+
+    Result openDBFileInternal(const std::string& filename);
+    Result createNewDBFileInternal(const std::string& filename);
+    Result createInMemDBFileInternal(const std::string& future_filename);
+    Result createNewDBFileFromMemoryInternal();
+    Result exportDBFileInternal(const std::string& filename);
+    Result closeDBInternal();
+
+    virtual void checkSubConfigurables() override;
+
+    bool db_opened_{false};
+    bool db_inmem_{false};
+    bool expert_mode_ {false};
+
+    bool dark_mode_ {false};
+
+    AppMode app_mode_ {AppMode::Offline};
+    AppState app_state_ = AppState::Starting;
+
+    bool disable_live_to_offline_switch_ {false};
+    bool disable_menu_config_save_ {false};
+    bool disable_geographicview_rotate_ {false};
+    bool disable_add_remove_views_ {false};
+    bool disable_confirm_reset_views_ {false};
+
+    static const bool is_app_image_;
+
+    unsigned int auto_live_running_resume_ask_time_ {60}; // minutes
+    unsigned int auto_live_running_resume_ask_wait_time_ {1}; // minutes
+
+    unsigned int max_fps_ {30};
+
+    unsigned int min_app_width_ {1600};
+    unsigned int min_app_height_ {800};
+
+    float app_font_scale_{1.0};
+
+    bool disable_native_dialogs_ {false};
+
+    std::unique_ptr<SimpleConfig> simple_config_;
+    std::unique_ptr<DBInterface> db_interface_;
+    std::unique_ptr<DBContentManager> dbcontent_manager_;
+    std::unique_ptr<DataSourceManager> ds_manager_;
+    std::unique_ptr<FilterManager> filter_manager_;
+    std::unique_ptr<TaskManager> task_manager_;
+    std::unique_ptr<ViewManager> view_manager_;
+    std::unique_ptr<EvaluationManager> eval_manager_;
+    std::unique_ptr<FFTManager> fft_manager_;
+    std::unique_ptr<LicenseManager> license_manager_;
+
+    std::unique_ptr<rtcommand::RTCommandRunner> rt_cmd_runner_;
+
+    LogStore log_store_;
+
+    std::string last_db_filename_;
+    std::string inmem_future_filename_;
+    nlohmann::json db_file_list_;
+
+    std::string last_path_;
+
+    bool db_export_in_progress_ {false};
+
+    MainWindow* main_window_;
+
+private:
+    friend class Client;
+
+    void setAppState(AppState state);
+};

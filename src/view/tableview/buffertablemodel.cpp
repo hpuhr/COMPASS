@@ -439,7 +439,7 @@ void BufferTableModel::updateRows()
     unsigned int buffer_size = buffer_->size();
 
     assert(buffer_->has<bool>(DBContent::selected_var.name()));
-    NullableVector<bool> selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
+    NullableVector<bool>& selected_vec = buffer_->get<bool>(DBContent::selected_var.name());
 
     while (buffer_index < buffer_size)
     {

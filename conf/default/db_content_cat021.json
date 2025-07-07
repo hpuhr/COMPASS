@@ -1012,7 +1012,7 @@
                 "parameters": {
                     "data_type_str": "FLOAT",
                     "db_column_name": "time_of_day",
-                    "description": "From 030.Time of Day\n\nTime of applicability (measurement) of the reported position, in the form of elapsed time since last midnight, expressed as UTC.\n\nOutdated in Edition 0.26, uses ToA Poistion data for compatibility until correct timestamp is used",
+                    "description": "Time of day, either from 030.Time of Day (edition 0.26) or\n \n\nin the form of elapsed time since last midnight, expressed as UTC",
                     "dimension": "Time",
                     "is_key": false,
                     "name": "Time of Day",
@@ -1148,6 +1148,19 @@
                     "name": "MET Age",
                     "representation_str": "STANDARD",
                     "short_name": "",
+                    "unit": "Second"
+                }
+            },
+            "Variable6Old": {
+                "parameters": {
+                    "data_type_str": "FLOAT",
+                    "db_column_name": "time_of_day_dep",
+                    "description": "Deprecated Time of day from 030.Time of Day\n \n\nTime of applicability (measurement) of the reported position, in the form of elapsed time since last midnight, expressed as UTC.\n\nOutdated in Edition 0.26",
+                    "dimension": "Time",
+                    "is_key": false,
+                    "name": "Time of Day Deprecated",
+                    "representation_str": "SECONDS_TO_TIME",
+                    "short_name": "ToDDep",
                     "unit": "Second"
                 }
             },
@@ -1432,7 +1445,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "SGV GSS",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "",
                     "unit": ""
                 }
@@ -1458,7 +1471,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "SGV HGT",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "",
                     "unit": ""
                 }
@@ -2264,7 +2277,7 @@
                     "dimension": "Angle",
                     "is_key": false,
                     "name": "Track Angle",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC1",
                     "short_name": "TrAng",
                     "unit": "Degree"
                 }
@@ -2290,7 +2303,7 @@
                     "dimension": "",
                     "is_key": false,
                     "name": "Track Angle Rate",
-                    "representation_str": "STANDARD",
+                    "representation_str": "FLOAT_PREC2",
                     "short_name": "TAR",
                     "unit": ""
                 }

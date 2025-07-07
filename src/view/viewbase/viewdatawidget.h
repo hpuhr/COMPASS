@@ -19,10 +19,12 @@
 
 #include "viewcomponent.h"
 #include "appmode.h"
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <map>
 #include <memory>
+
+#include <boost/optional.hpp>
 
 #include <QWidget>
 
@@ -46,7 +48,7 @@ class ViewDataWidget : public QWidget, public ViewComponent
 public:
     typedef std::map<std::string, std::shared_ptr<Buffer>> BufferData;
 
-    ViewDataWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = 0);
+    ViewDataWidget(ViewWidget* view_widget, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~ViewDataWidget() = default;
 
     void setToolSwitcher(ViewToolSwitcher* tool_switcher);
@@ -73,6 +75,9 @@ public:
 
     QColor colorForGroupName(const std::string& group_name); // creates new one of required
     const std::map<std::string, QColor>& dbContentColors() const;
+
+    const boost::optional<size_t>& nullCount() const { return count_null_; }
+    const boost::optional<size_t>& nanCount() const { return count_nan_; }
 
     static const double      MarkerSizePx;
     static const double      MarkerSizeSelectedPx;
@@ -108,6 +113,9 @@ protected:
 
     virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
+    void addNullCount(size_t n);
+    void addNanCount(size_t n);
+
     void endTool();
 
     const BufferData& viewData() const { return data_; }
@@ -118,6 +126,7 @@ protected:
 private:
     friend class ViewLoadStateWidget;
 
+    void clearIntermediateRedrawData();
     void toolChanged(int mode, const QCursor& cursor);
 
     ViewWidget*       view_widget_   = nullptr;
@@ -127,4 +136,7 @@ private:
     bool       drawn_ = false;
 
     std::map<std::string, QColor> dbc_colors_;
+
+    boost::optional<size_t> count_null_ = 0;
+    boost::optional<size_t> count_nan_  = 0;
 };

@@ -18,15 +18,17 @@
 #ifndef EVALUATIONREQUIREMENTMODECCORRECTCONFIG_H
 #define EVALUATIONREQUIREMENTMODECCORRECTCONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/mode_c/correct.h"
-//#include "eval/requirement/mode_c/modeccorrectconfigwidget.h"
 
 #include <memory>
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -36,19 +38,19 @@ class ModeCCorrectConfig : public ProbabilityBaseConfig
 public:
     ModeCCorrectConfig(const std::string& class_id, const std::string& instance_id,
                                 Group& group, EvaluationStandard& standard,
-                                EvaluationManager& eval_man);
+                                EvaluationCalculator& calculator);
 
     std::shared_ptr<Base> createRequirement() override;
 
     float maxDistanceFt() const;
     void maxDistanceFt(float value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
 protected:
     float max_distance_ft_ {300};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

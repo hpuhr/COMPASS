@@ -34,6 +34,7 @@ class DBContent;
 class DBContentManagerWidget;
 class DBSchemaManager;
 class DBContentDeleteDBJob;
+class DBContentInsertDBJob;
 
 namespace dbContent 
 {
@@ -71,10 +72,6 @@ signals:
     void loadingDoneSignal(); // emitted when all dbos have finished loading
     void insertDoneSignal(); // emitted when all dbos have finished loading
 
-    // if useInEval or comment changed signals, to be sent from model
-    void targetChangedSignal(unsigned int utn); // for one utn
-    void allTargetsChangedSignal(); // for more than 1 utn
-
 public:
     DBContentManager(const std::string& class_id, const std::string& instance_id, COMPASS* compass);
     virtual ~DBContentManager();
@@ -104,7 +101,10 @@ public:
     bool usedInMetaVariable(const dbContent::Variable& variable);
     dbContent::MetaVariableConfigurationDialog* metaVariableConfigdialog();
 
-    void load(const std::string& custom_filter_clause="");
+    void load(const std::string& custom_filter_clause="", bool measure_db_performance = false);
+    void loadBlocking(const std::string& custom_filter_clause="", 
+                      bool measure_db_performance = false,
+                      unsigned int sleep_msecs = 1);
     void addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data);
     std::map<std::string, std::shared_ptr<Buffer>> loadedData();
     void loadingDone(DBContent& object); // to be called by dbo when it's loading is finished
@@ -112,7 +112,6 @@ public:
     void clearData();
 
     void insertData(std::map<std::string, std::shared_ptr<Buffer>> data);
-    void insertDone(DBContent& object); // to be called by dbo when it's insert is finished
     bool insertInProgress() const;
 
     void deleteDBContentData(boost::posix_time::ptime before_timestamp);
@@ -124,6 +123,7 @@ public:
     bool hasAssociations() const;
     void setAssociationsIdentifier(const std::string& assoc_id);
     std::string associationsID() const;
+    void clearAssociationsIdentifier();
 
     bool hasMaxRecordNumberWODBContentID() const { return has_max_rec_num_wo_dbcontid_; }
     unsigned long maxRecordNumberWODBContentID() const;
@@ -144,8 +144,6 @@ public:
     void setMinMaxLongitude(double min, double max);
     std::pair<double, double> minMaxLongitude() const;
 
-    bool hasContentIn (const std::string& dbcont_name, const std::string& variable_name) const;
-
     const std::map<std::string, std::shared_ptr<Buffer>>& data() const;
 
     bool canGetVariable (const std::string& dbcont_name, const Property& property);
@@ -155,13 +153,14 @@ public:
     dbContent::Variable& metaGetVariable (const std::string& dbcont_name, const Property& meta_property);
 
     bool hasTargetsInfo() const;
-    void clearTargetsInfo();
+    void deleteAllTargets();
     bool existsTarget(unsigned int utn);
     void createNewTargets(const std::map<unsigned int, dbContent::ReconstructorTarget>& targets);
     dbContent::Target& target(unsigned int utn);
-    void removeDBContentFromTargets(const std::string& dbcont_name);
+    //void removeDBContentFromTargets(const std::string& dbcont_name);
     void loadTargets();
     void saveTargets();
+    unsigned int numTargets() const;
 
     nlohmann::json targetsInfoAsJSON() const;
     nlohmann::json targetInfoAsJSON(unsigned int utn) const;
@@ -172,21 +171,49 @@ public:
 
     void resetToStartupConfiguration(); // only resets label generator
 
+    const dbContent::TargetModel* targetModel() const;
     dbContent::TargetListWidget* targetListWidget();
     void resizeTargetListWidget();
-
-    bool utnUseEval (unsigned int utn);
-    void utnUseEval (unsigned int utn, bool value);
 
     std::string utnComment (unsigned int utn);
     void utnComment (unsigned int utn, std::string value);
 
+    TargetBase::Category emitterCategory(unsigned int utn) const;
+    std::string emitterCategoryStr(unsigned int utn) const;
+
     void autoFilterUTNS();
     void showUTN (unsigned int utn);
-    void showUTNs (std::vector<unsigned int> utns);
+    void showUTNs (std::set<unsigned int> utns);
+
     void showSurroundingData (unsigned int utn);
+    void showSurroundingData (std::set<unsigned int> utns);
+
+    dbContent::VariableSet getReadSet(const std::string& dbcontent_name);
+
+    void storeSelectedRecNums(const std::vector<unsigned long>& selected); // to be stored for next load
+    void clearSelectedRecNums();
 
 protected:
+    virtual void checkSubConfigurables() override;
+    void finishLoading();
+    void finishInserting();
+
+    void addInsertedDataToChache();
+    void filterDataSources();
+    void cutCachedData();
+
+    void updateNumLoadedCounts(); // from data_
+
+    void loadMaxRecordNumberWODBContentID();
+    void loadMaxRefTrajTrackNum();
+
+    void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
+
+    void setViewableDataConfig (const nlohmann::json::object_t& data);
+
+    void saveSelectedRecNums();
+    void restoreSelectedRecNums();
+
     COMPASS& compass_;
 
     std::unique_ptr<dbContent::TargetModel> target_model_;
@@ -212,12 +239,13 @@ protected:
     boost::optional<double> longitude_max_;
 
     std::map<std::string, std::shared_ptr<Buffer>> data_;
-    std::map<std::string, std::vector<unsigned long>> tmp_selected_rec_nums_; // for storage between loads
+    std::map<std::string, std::set<unsigned long>> tmp_selected_rec_nums_; // for storage between loads
 
     std::map<std::string, std::shared_ptr<Buffer>> insert_data_;
 
     bool load_in_progress_{false};
     bool insert_in_progress_{false};
+    bool loading_done_{false};
 
     /// Container with all DBContent (DBContent name -> dbcont pointer)
     std::map<std::string, DBContent*> dbcontent_;
@@ -229,27 +257,7 @@ protected:
     std::unique_ptr<dbContent::MetaVariableConfigurationDialog> meta_cfg_dialog_;
 
     std::shared_ptr<DBContentDeleteDBJob> delete_job_{nullptr};
+    std::shared_ptr<DBContentInsertDBJob> insert_job_{nullptr};
 
     std::unique_ptr<ViewableDataConfig> viewable_data_cfg_;
-
-    virtual void checkSubConfigurables() override;
-    void finishLoading();
-    void finishInserting();
-
-    void addInsertedDataToChache();
-    void filterDataSources();
-    void cutCachedData();
-
-    void updateNumLoadedCounts(); // from data_
-
-    void loadMaxRecordNumberWODBContentID();
-    void loadMaxRefTrajTrackNum();
-
-    void addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set);
-
-    void setViewableDataConfig (const nlohmann::json::object_t& data);
-
-    void saveSelectedRecNums();
-    void restoreSelectedRecNums();
 };
-

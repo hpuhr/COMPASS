@@ -22,6 +22,11 @@
 class Group;
 class EvaluationStandard;
 
+namespace ResultReport
+{
+    class Report;
+}
+
 namespace EvaluationRequirement
 {
 
@@ -29,12 +34,12 @@ class DubiousTrackConfig : public ProbabilityBaseConfig
 {
 public:
     DubiousTrackConfig(const std::string& class_id, const std::string& instance_id,
-                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+                       Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~DubiousTrackConfig();
 
     std::shared_ptr<Base> createRequirement() override;
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
     bool evalOnlySingleDsId() const;
     void evalOnlySingleDsId(bool eval_only_single_ds_id);
@@ -120,7 +125,7 @@ protected:
 
     float dubious_prob_ {0.05};
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

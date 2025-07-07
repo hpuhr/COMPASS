@@ -20,22 +20,19 @@
 #include "eval/requirement/trackangle/trackangle.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/base.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-//#include "eval/results/report/sectioncontenttable.h"
-//#include "stringconv.h"
 
-//using namespace Utils;
-using namespace EvaluationResultsReport;
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 using namespace std;
-
 
 namespace EvaluationRequirement
 {
 TrackAngleConfig::TrackAngleConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("threshold", &threshold_, 15.0f);
 
@@ -56,7 +53,7 @@ TrackAngleConfig::~TrackAngleConfig()
 std::shared_ptr<Base> TrackAngleConfig::createRequirement()
 {
     shared_ptr<TrackAngle> req = make_shared<TrackAngle>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_,
                 threshold_, use_minimum_speed_, minimum_speed_,
                 threshold_value_check_type_, failed_values_of_interest_);
 
@@ -93,24 +90,20 @@ void TrackAngleConfig::threshold(float value)
     threshold_ = value;
 }
 
-void TrackAngleConfig::createWidget()
+BaseConfigWidget* TrackAngleConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new TrackAngleConfigWidget(*this));
-    assert (widget_);
+    return new TrackAngleConfigWidget(*this);
 }
 
-void TrackAngleConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void TrackAngleConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    //   section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
+    //   auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
-    //    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
-
-    //    table.addRow({"Name", "Requirement name", name_.c_str()}, nullptr);
-    //    table.addRow({"Short Name", "Requirement short name", short_name_.c_str()}, nullptr);
-    //    table.addRow({"Comment", "", comment_.c_str()}, nullptr);
+    //    table.addRow({"Name", "Requirement name", name_});
+    //    table.addRow({"Short Name", "Requirement short name", short_name_});
+    //    table.addRow({"Comment", "", comment_});
 
     // prob & check type added in subclass
 }

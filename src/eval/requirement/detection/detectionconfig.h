@@ -21,9 +21,13 @@
 
 #include <memory>
 
-
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -32,7 +36,7 @@ class DetectionConfig : public ProbabilityBaseConfig
 {
 public:
     DetectionConfig(const std::string& class_id, const std::string& instance_id,
-                    Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+                    Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
     virtual ~DetectionConfig();
 
     std::shared_ptr<Base> createRequirement() override;
@@ -61,7 +65,7 @@ public:
     float missTolerance() const;
     void missTolerance(float value);
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item) override;
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report) override;
 
     bool holdForAnyTarget() const;
     void holdForAnyTarget(bool value);
@@ -82,7 +86,7 @@ protected:
 
     bool hold_for_any_target_ {false}; // if requirement must hold for any target (all single targets)
 
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

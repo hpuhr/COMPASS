@@ -18,14 +18,17 @@
 #ifndef EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H
 #define EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H
 
-//#include "configurable.h"
 #include "eval/requirement/base/probabilitybaseconfig.h"
-//#include "eval/requirement/mode_c/present.h"
 
 #include <memory>
 
 class Group;
 class EvaluationStandard;
+
+namespace ResultReport
+{
+    class Report;
+}
 
 namespace EvaluationRequirement
 {
@@ -33,14 +36,14 @@ class ModeCPresentConfig : public ProbabilityBaseConfig
 {
 public:
     ModeCPresentConfig(const std::string& class_id, const std::string& instance_id,
-                       Group& group, EvaluationStandard& standard, EvaluationManager& eval_man);
+                       Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator);
 
     std::shared_ptr<Base> createRequirement() override;
 
-    virtual void addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
+    virtual void addToReport (std::shared_ptr<ResultReport::Report> report);
 
 protected:
-    virtual void createWidget() override;
+    virtual BaseConfigWidget* createWidget() override;
 };
 
 }

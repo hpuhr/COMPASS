@@ -15,18 +15,22 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRINGMANIPULATION_H_
-#define STRINGMANIPULATION_H_
+#pragma once
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <sstream>
 
-#include <iomanip>
-
-#include <map>
 #include <vector>
 #include <set>
+
+namespace boost
+{
+namespace posix_time
+{
+class ptime;
+}
+}
 
 namespace Utils
 {
@@ -133,6 +137,8 @@ extern unsigned int portFromString(const std::string& name);
 
 extern std::string trim(const std::string& name);
 
+extern std::string ecatToString(unsigned int ecat);
+
 }  // namespace String
 
 // template <typename T> std::string formatBinaryString (T val)
@@ -150,4 +156,3 @@ extern std::string trim(const std::string& name);
 
 }  // namespace Utils
 
-#endif /* STRINGMANIPULATION_H_ */

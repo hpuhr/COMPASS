@@ -57,9 +57,9 @@ SingleProbabilityBase::SingleProbabilityBase(const std::string& type,
                                              const SectorLayer& sector_layer,
                                              unsigned int utn,
                                              const EvaluationTargetData* target,
-                                             EvaluationManager& eval_man,
+                                             EvaluationCalculator& calculator,
                                              const EvaluationDetails& details)
-:   Single(type, result_id, requirement, sector_layer, utn, target, eval_man, details)
+:   Single(type, result_id, requirement, sector_layer, utn, target, calculator, details)
 {
 }
 
@@ -96,7 +96,7 @@ double SingleProbabilityBase::invertProb(double prob) const
 
 /**
 */
-QVariant SingleProbabilityBase::formatProbability(double prob)
+nlohmann::json SingleProbabilityBase::formatProbability(double prob)
 {
     //return Utils::String::percentToString(std::round(prob * 10000.0) / 100.0, 2).c_str();
 
@@ -105,10 +105,10 @@ QVariant SingleProbabilityBase::formatProbability(double prob)
 
 /**
 */
-QVariant SingleProbabilityBase::formatProbabilityOptional(const boost::optional<double>& prob)
+nlohmann::json SingleProbabilityBase::formatProbabilityOptional(const boost::optional<double>& prob)
 {
     if (!prob.has_value())
-        return QVariant();
+        return nlohmann::json();
 
     return SingleProbabilityBase::formatProbability(prob.value());
 }
@@ -123,8 +123,8 @@ JoinedProbabilityBase::JoinedProbabilityBase(const std::string& type,
                                              const std::string& result_id,
                                              std::shared_ptr<EvaluationRequirement::Base> requirement,
                                              const SectorLayer& sector_layer,
-                                             EvaluationManager& eval_man)
-:   Joined(type, result_id, requirement, sector_layer, eval_man)
+                                             EvaluationCalculator& calculator)
+:   Joined(type, result_id, requirement, sector_layer, calculator)
 {
 }
 

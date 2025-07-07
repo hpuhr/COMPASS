@@ -1,13 +1,11 @@
-#ifndef TRACKERTRACKNUMBERFILTERWIDGET_H
-#define TRACKERTRACKNUMBERFILTERWIDGET_H
 
+#pragma once
 
 #include "dbfilterwidget.h"
 #include "trackertracknumberfilter.h"
 
-
-class QFormLayout;
-
+/**
+ */
 class TrackerTrackNumberFilterWidget : public DBFilterWidget
 {
     Q_OBJECT
@@ -23,10 +21,4 @@ public:
 
 protected:
     TrackerTrackNumberFilter& filter_;
-
-    QFormLayout* main_layout_ {nullptr};
 };
-
-
-
-#endif // TRACKERTRACKNUMBERFILTERWIDGET_H

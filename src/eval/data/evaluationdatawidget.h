@@ -15,13 +15,12 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONDATAWIDGET_H
-#define EVALUATIONDATAWIDGET_H
+#pragma once
 
 #include <QWidget>
 
 class EvaluationData;
-class EvaluationManager;
+class EvaluationCalculator;
 
 class QToolBar;
 class QTableView;
@@ -29,6 +28,8 @@ class QSortFilterProxyModel;
 class QMenu;
 class QPushButton;
 
+/**
+ */
 class EvaluationDataWidget : public QWidget
 {
     Q_OBJECT
@@ -41,7 +42,7 @@ public slots:
     void itemClicked(const QModelIndex& index);
 
 public:
-    EvaluationDataWidget(EvaluationData& eval_data, EvaluationManager& eval_man);
+    EvaluationDataWidget(EvaluationData& eval_data, EvaluationCalculator& calculator);
 
     void resizeColumnsToContents();
     void updateInterestMenu();
@@ -50,7 +51,7 @@ protected:
     void jumpToRequirement(const std::string& req_id, unsigned int utn);
 
     EvaluationData& eval_data_;
-    EvaluationManager& eval_man_;
+    EvaluationCalculator& calculator_;
 
     //QToolBar* toolbar_ {nullptr};
     QMenu*       interest_menu_   = nullptr;
@@ -59,5 +60,3 @@ protected:
     QTableView* table_view_{nullptr};
     QSortFilterProxyModel* proxy_model_{nullptr};
 };
-
-#endif // EVALUATIONDATAWIDGET_H

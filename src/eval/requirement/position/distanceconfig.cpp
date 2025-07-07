@@ -20,22 +20,22 @@
 #include "eval/requirement/position/distance.h"
 #include "eval/requirement/group.h"
 #include "eval/requirement/base/probabilitybase.h"
-#include "eval/results/report/section.h"
-//#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontenttable.h"
+
+#include "task/result/report/report.h"
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+
 #include "stringconv.h"
 
 using namespace Utils;
-using namespace EvaluationResultsReport;
 using namespace std;
-
 
 namespace EvaluationRequirement
 {
 PositionDistanceConfig::PositionDistanceConfig(
         const std::string& class_id, const std::string& instance_id,
-        Group& group, EvaluationStandard& standard, EvaluationManager& eval_man)
-    : ProbabilityBaseConfig(class_id, instance_id, group, standard, eval_man)
+        Group& group, EvaluationStandard& standard, EvaluationCalculator& calculator)
+    : ProbabilityBaseConfig(class_id, instance_id, group, standard, calculator)
 {
     registerParameter("threshold_value", &threshold_value_, 50.0f);
     registerParameter("threshold_value_check_type", (unsigned int*)&threshold_value_check_type_,
@@ -50,7 +50,7 @@ PositionDistanceConfig::~PositionDistanceConfig()
 std::shared_ptr<Base> PositionDistanceConfig::createRequirement()
 {
     shared_ptr<PositionDistance> req = make_shared<PositionDistance>(
-                name_, short_name_, group_.name(), prob_, prob_check_type_, eval_man_,
+                name_, short_name_, group_.name(), prob_, prob_check_type_, calculator_,
                 threshold_value_, threshold_value_check_type_, failed_values_of_interest_);
 
     return req;
@@ -86,36 +86,32 @@ void PositionDistanceConfig::failedValuesOfInterest(bool value)
     failed_values_of_interest_ = value;
 }
 
-void PositionDistanceConfig::createWidget()
+BaseConfigWidget* PositionDistanceConfig::createWidget()
 {
-    assert (!widget_);
-    widget_.reset(new PositionDistanceConfigWidget(*this));
-    assert (widget_);
+    return new PositionDistanceConfigWidget(*this);
 }
 
-void PositionDistanceConfig::addToReport (std::shared_ptr<EvaluationResultsReport::RootItem> root_item)
+void PositionDistanceConfig::addToReport (std::shared_ptr<ResultReport::Report> report)
 {
-    Section& section = root_item->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
+    auto& section = report->getSection("Appendix:Requirements:"+group_.name()+":"+name_);
 
-    section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
-
-    EvaluationResultsReport::SectionContentTable& table = section.getTable("req_table");
+    auto& table = section.addTable("req_table", 3, {"Name", "Comment", "Value"}, false);
 
     table.addRow({"Probability [1]", "Probability of correct/false position",
-                  roundf(prob_ * 10000.0) / 100.0}, nullptr);
+                  roundf(prob_ * 10000.0) / 100.0});
     table.addRow({"Probability Check Type", "",
-                  comparisonTypeString(prob_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(prob_check_type_)});
 
     table.addRow({"Threshold Value [m]",
                   "Minimum/Maximum allowed distance from test target report to reference",
-                  threshold_value_}, nullptr);
+                  threshold_value_});
 
     table.addRow({"Threshold Value Check Type",
                   "Distance comparison operator with the given threshold",
-                  comparisonTypeString(threshold_value_check_type_).c_str()}, nullptr);
+                  comparisonTypeString(threshold_value_check_type_)});
 
     table.addRow({"Failed Values are of Interest",
                   "If the distances of interest are the ones not passing the check",
-                  String::boolToString(failed_values_of_interest_).c_str()}, nullptr);
+                  String::boolToString(failed_values_of_interest_)});
 }
 }

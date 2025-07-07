@@ -20,7 +20,7 @@
 #include "log4cpp/AppenderSkeleton.hh"
 #include "log4cpp/Category.hh"
 
-#include "json.h"
+#include "json_fwd.hpp"
 
 #include <boost/optional.hpp>
 #include <boost/thread.hpp>

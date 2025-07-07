@@ -48,6 +48,9 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
         has_short_name_ = false;
 
     parseNetworkLineInfo();
+
+    logdbg << "ConfigurationDataSource: ctor: " << name()
+           << " sac/sic " << sac() << "/" << sic();
 }
 
 ConfigurationDataSource::~ConfigurationDataSource()

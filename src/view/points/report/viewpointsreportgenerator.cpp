@@ -28,6 +28,7 @@
 #include "compass.h"
 #include "global.h"
 #include "dbinterface.h"
+#include "dbconnection.h"
 #include "sqliteconnection.h"
 #include "files.h"
 #include "latexdocument.h"
@@ -62,8 +63,9 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
 
     registerParameter("abstract", &abstract_, std::string());
 
-    SQLiteConnection* sql_con = dynamic_cast<SQLiteConnection*>(&COMPASS::instance().interface().connection());
-    assert (sql_con);
+    //@TODO: remove?
+    //const DBConnection* db_con = dynamic_cast<const DBConnection*>(&COMPASS::instance().dbInterface().connection());
+    //assert (db_con);
 
     string current_filename = COMPASS::instance().lastDbFilename();
 
@@ -71,7 +73,6 @@ ViewPointsReportGenerator::ViewPointsReportGenerator(const std::string& class_id
                 + Files::getFilenameFromPath(current_filename) + "/";
 
     report_filename_ = "report.tex";
-
 
     loginf << "ViewPointsReportGenerator: constructor: report path '" << report_path_ << "'"
            << " filename '"  << report_filename_ << "'";
@@ -179,8 +180,7 @@ void ViewPointsReportGenerator::run ()
 
         for (auto vp_id : vp_ids)
         {
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents();
+            QCoreApplication::processEvents();
 
             if (cancel_)
             {
@@ -194,7 +194,7 @@ void ViewPointsReportGenerator::run ()
             loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id;
             view_manager_.setCurrentViewPoint(&view_point);
 
-            while (dbcont_man.loadInProgress() || QCoreApplication::hasPendingEvents())
+            while (dbcont_man.loadInProgress())
                 QCoreApplication::processEvents();
 
             // do stuff
@@ -245,8 +245,7 @@ void ViewPointsReportGenerator::run ()
             dialog_->setStatus("Writing view points cancelled");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
         else // proceed
         {
@@ -254,8 +253,7 @@ void ViewPointsReportGenerator::run ()
             dialog_->setStatus("Writing view points done");
             dialog_->setRemainingTime(String::timeStringFromDouble(0, false));
 
-            while (QCoreApplication::hasPendingEvents())
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
             doc.write();
 
@@ -269,7 +267,6 @@ void ViewPointsReportGenerator::run ()
                 dialog_->setStatus("Running pdflatex");
                 dialog_->setRemainingTime("");
 
-                //while (QCoreApplication::hasPendingEvents())
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
                 logdbg << "ViewPointsReportGenerator: run: cmd '" << command << "'";
@@ -292,7 +289,6 @@ void ViewPointsReportGenerator::run ()
                     loginf << "ViewPointsReportGenerator: run: re-running pdflatex";
                     dialog_->setStatus("Re-running pdflatex");
 
-                    //                while (QCoreApplication::hasPendingEvents())
                     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
                     command_out = System::exec(command);

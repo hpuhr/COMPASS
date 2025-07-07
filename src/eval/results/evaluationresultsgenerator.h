@@ -17,20 +17,16 @@
 
 #pragma once
 
-#include "eval/results/report/treemodel.h"
 #include "eval/results/base/base.h"
 
+#include "evaluationdefs.h"
 #include "evaluationdata.h"
-#include "evaluationresultsgeneratorwidget.h"
 
-//#include "sectorlayer.h"
-//#include "logger.h"
-
-//#include <tbb/tbb.h>
-
-class EvaluationManager;
-class EvaluationManagerSettings;
+class EvaluationCalculator;
+class EvaluationSettings;
 class EvaluationStandard;
+
+struct RequirementID;
 
 namespace EvaluationRequirementResult
 {
@@ -38,47 +34,51 @@ namespace EvaluationRequirementResult
     class Single;
 }
 
+namespace ResultReport
+{
+    class Report;
+}
+
+/**
+ */
 class EvaluationResultsGenerator
 {
 public:
-    EvaluationResultsGenerator(EvaluationManager& eval_man, EvaluationManagerSettings& eval_settings);
+    EvaluationResultsGenerator(EvaluationCalculator& calculator);
     virtual ~EvaluationResultsGenerator();
 
-    void evaluate (EvaluationData& data, EvaluationStandard& standard);
+    void evaluate(EvaluationStandard& standard,
+                  const std::vector<unsigned int>& utns = std::vector<unsigned int>(),
+                  const std::vector<Evaluation::RequirementResultID>& requirements = std::vector<Evaluation::RequirementResultID>(),
+                  bool update_report = true);
 
-    EvaluationResultsReport::TreeModel& resultsModel();
-
-    typedef std::map<std::string,
-    std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>::const_iterator ResultIterator;
+    typedef std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> ResultMap;
+    typedef ResultMap::const_iterator ResultIterator;
+    typedef std::vector<std::shared_ptr<EvaluationRequirementResult::Base>> ResultVector;
 
     ResultIterator begin() { return results_.begin(); }
     ResultIterator end() { return results_.end(); }
 
-    const std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>>& results ()
-    const { return results_; } ;
+    const ResultMap& results() const { return results_; }
+    const std::string& resultName() const { return result_name_; }
 
     void updateToChanges();
-
     void generateResultsReportGUI();
 
     void clear();
 
-    EvaluationResultsGeneratorWidget& widget();
+    static const std::string EvalResultName;
 
 protected:
-    void addNonResultsContent (std::shared_ptr<EvaluationResultsReport::RootItem> root_item);
-    void updateToChanges(bool reset_viewable);
+    void addTargetSection(const std::shared_ptr<ResultReport::Report>& report);
+    void addNonResultsContent(const std::shared_ptr<ResultReport::Report>& report);
 
-    EvaluationManager& eval_man_;
-    EvaluationManagerSettings& eval_settings_;
+    void updateToChanges(bool reset_viewable,
+                         bool update_report = true);
 
-    std::unique_ptr<EvaluationResultsGeneratorWidget> widget_;
+    EvaluationCalculator& calculator_;
 
-    EvaluationResultsReport::TreeModel results_model_;
-
-    // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
-    std::map<std::string, std::map<std::string, std::shared_ptr<EvaluationRequirementResult::Base>>> results_;
-    std::vector<std::shared_ptr<EvaluationRequirementResult::Base>> results_vec_; // ordered as generated
-
-    
+    ResultMap    results_;     // rq group+name -> id -> result, e.g. "All:PD"->"UTN:22"-> or "SectorX:PD"->"All"
+    ResultVector results_vec_; // ordered as generated
+    std::string  result_name_;
 };

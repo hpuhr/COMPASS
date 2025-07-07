@@ -12,27 +12,17 @@ using namespace std;
 ACIDFilterWidget::ACIDFilterWidget(ACIDFilter& filter)
     : DBFilterWidget(filter), filter_(filter)
 {
-    QHBoxLayout* layout = new QHBoxLayout();
-
-    label_ = new QLabel("ACIDs IN");
-    layout->addWidget(label_);
-
     value_edit_ = new QLineEdit();
     connect(value_edit_, &QLineEdit::textEdited, this, &ACIDFilterWidget::valueEditedSlot);
-    layout->addWidget(value_edit_);
 
-    child_layout_->addLayout(layout);
+    addNameValuePair("ACIDs IN", value_edit_);
 
     update();
 }
 
-ACIDFilterWidget::~ACIDFilterWidget()
-{
-
-}
+ACIDFilterWidget::~ACIDFilterWidget() = default;
 
 void ACIDFilterWidget::update()
-
 {
     DBFilterWidget::update();
 

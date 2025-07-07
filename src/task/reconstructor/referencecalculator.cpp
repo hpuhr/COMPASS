@@ -1005,7 +1005,7 @@ bool ReferenceCalculator::writeTargetData(TargetReferences& refs,
 bool ReferenceCalculator::shallAddAnnotationData() const
 {
     //add only if in last iteration
-    return reconstructor_.isLastSliceProcessingRun();
+    return reconstructor_.isLastRunInSlice();
 }
 
 /**

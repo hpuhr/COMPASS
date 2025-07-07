@@ -15,21 +15,20 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JSONIMPORTERTASK_H
-#define JSONIMPORTERTASK_H
+#pragma once
 
 #include "configurable.h"
-#include "json.hpp"
 #include "jsonparsingschema.h"
 #include "task.h"
 #include "asterixpostprocess.h"
 #include "asterixpostprocessjob.h"
+#include "asterixtimestampcalculator.h"
 
 #include <QObject>
+
 #include <memory>
 #include <set>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
 class JSONImportTaskDialog;
@@ -134,6 +133,7 @@ class JSONImportTask : public Task, public Configurable
     std::shared_ptr<ReadJSONFileJob> read_json_job_;
     std::shared_ptr<JSONParseJob> json_parse_job_;
     std::vector<std::shared_ptr<JSONMappingJob>> json_map_jobs_;
+    ASTERIXTimestampCalculator ts_calculator_;
     std::vector<std::shared_ptr<ASTERIXPostprocessJob>> postprocess_jobs_;
 
     bool test_{false};
@@ -176,4 +176,3 @@ class JSONImportTask : public Task, public Configurable
     virtual void checkSubConfigurables() override {}
 };
 
-#endif  // JSONIMPORTERTASK_H

@@ -32,7 +32,7 @@ public:
                              const SectorLayer& sector_layer,
                              unsigned int utn,
                              const EvaluationTargetData* target,
-                             EvaluationManager& eval_man,
+                             EvaluationCalculator& calculator,
                              const EvaluationDetails& details,
                              unsigned int num_pos,
                              unsigned int num_no_ref,
@@ -52,15 +52,15 @@ protected:
     virtual boost::optional<double> computeFinalResultValue() const override;
 
     virtual std::vector<std::string> targetTableHeadersCustom() const override;
-    virtual std::vector<QVariant> targetTableValuesCustom() const override;
+    virtual nlohmann::json::array_t targetTableValuesCustom() const override;
     virtual std::vector<TargetInfo> targetInfos() const override;
     virtual std::vector<std::string> detailHeaders() const override;
-    virtual std::vector<QVariant> detailValues(const EvaluationDetail& detail,
-                                               const EvaluationDetail* parent_detail) const override;
+    virtual nlohmann::json::array_t detailValues(const EvaluationDetail& detail,
+                                                 const EvaluationDetail* parent_detail) const override;
 
 private:
-    mutable QVariant range_bias_;
-    mutable QVariant range_gain_;
+    mutable nlohmann::json range_bias_;
+    mutable nlohmann::json range_gain_;
 
     std::vector<double> range_values_ref_;
     std::vector<double> range_values_tst_;
@@ -74,7 +74,7 @@ public:
     JoinedPositionRadarRange(const std::string& result_id,
                              std::shared_ptr<EvaluationRequirement::Base> requirement,
                              const SectorLayer& sector_layer,
-                             EvaluationManager& eval_man);
+                             EvaluationCalculator& calculator);
 protected:
     virtual boost::optional<double> computeFinalResultValue() const override;
 

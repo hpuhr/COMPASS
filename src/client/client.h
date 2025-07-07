@@ -15,10 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CLIENT_H_
-#define CLIENT_H_
-
-//#include "global.h"
+#pragma once
 
 #include <QApplication>
 
@@ -44,13 +41,17 @@ private:
 
     std::string override_cfg_path_;
 
-    std::string create_new_sqlite3_db_filename_;
-    std::string open_sqlite3_db_filename_;
+    std::string create_new_db_filename_;
+    std::string open_db_filename_;
 
     std::string import_data_sources_filename_;
 
     std::string import_asterix_filename_;
     std::string import_asterix_filenames_;
+
+    std::string import_asterix_pcap_filename_;
+    std::string import_asterix_pcap_filenames_;
+
     std::string import_asterix_file_line_;
     std::string import_asterix_date_;
     std::string import_asterix_file_time_offset_;
@@ -62,6 +63,7 @@ private:
     bool import_asterix_network_ignore_future_ts_ {false};
     std::string asterix_framing;
     std::string asterix_decoder_cfg;
+    std::string import_asterix_parameters_;
 
     std::string import_json_filename_;
 
@@ -103,4 +105,3 @@ private:
     void copyConfigurationAndData();
 };
 
-#endif /* CLIENT_H_ */

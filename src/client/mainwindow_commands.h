@@ -1,57 +1,13 @@
 #pragma once
 
+
 #include "rtcommand.h"
 #include "rtcommand_macros.h"
+#include "reportdefs.h"
 
 namespace main_window
 {
 extern void init_commands();
-
-// open_db
-struct RTCommandOpenDB : public rtcommand::RTCommand
-{
-    std::string filename_;
-    bool        assure_open_ = false;
-
-    virtual rtcommand::IsValid valid() const override;
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(open_db, "opens existing SQLite3 database with given filename, e.g. ’/data/file1.db’")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// open_recent_db
-struct RTCommandOpenRecentDB : public rtcommand::RTCommand
-{
-    virtual rtcommand::IsValid valid() const override;
-
-protected:
-    virtual bool run_impl() override;
-
-    std::string getPath() const;
-
-    int         index = -1;
-    std::string filename;
-
-    DECLARE_RTCOMMAND(open_recent_db, "opens a SQLite3 database from the recent file history")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// create_db
-struct RTCommandCreateDB : public rtcommand::RTCommand
-{
-    std::string filename_;
-
-    virtual rtcommand::IsValid valid() const override;
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(create_db, "creates and opens new SQLite3 database with given filename, e.g. ’/data/file1.db’")
-    DECLARE_RTCOMMAND_OPTIONS
-};
 
 // import_data_sources_file
 struct RTCommandImportDataSourcesFile : public rtcommand::RTCommand
@@ -64,131 +20,6 @@ protected:
     virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(import_data_sources, "imports data sources JSON file with given filename, e.g. '/data/ds1.json'")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// import_view_points
-struct RTCommandImportViewPointsFile : public rtcommand::RTCommand
-{
-    std::string filename_;
-
-    virtual rtcommand::IsValid valid() const override;
-
-    RTCommandImportViewPointsFile();
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(import_view_points, "imports view points JSON file with given filename, e.g. '/data/file1.json'")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// import_asterix_file
-struct RTCommandImportASTERIXFile : public rtcommand::RTCommand
-{
-    std::string filename_;
-    std::string framing_;
-    std::string line_id_;
-    std::string date_str_;
-    std::string time_offset_str_;
-    bool ignore_time_jumps_ {false};
-
-    virtual rtcommand::IsValid valid() const override;
-
-    RTCommandImportASTERIXFile();
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(import_asterix_file,
-                      "imports ASTERIX file with given filename, e.g. '/data/file1.ff'")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// import_asterix_files
-struct RTCommandImportASTERIXFiles : public rtcommand::RTCommand
-{
-    std::string filenames_;
-    std::vector<std::string> split_filenames_;
-    std::string framing_;
-    std::string line_id_;
-    std::string date_str_;
-    std::string time_offset_str_;
-    bool ignore_time_jumps_ {false};
-
-    virtual rtcommand::IsValid valid() const override;
-
-    RTCommandImportASTERIXFiles();
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(import_asterix_files,
-                      "imports multiple ASTERIX files with given filenames, e.g. '/data/file1.ff;/data/file2.ff'")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-
-
-// import_asterix_network
-struct RTCommandImportASTERIXNetworkStart : public rtcommand::RTCommand
-{
-    std::string time_offset_str_;
-    int max_lines_ {-1};
-    bool ignore_future_ts_ {false};
-
-    virtual rtcommand::IsValid valid() const override;
-
-    RTCommandImportASTERIXNetworkStart();
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(import_asterix_network, "imports ASTERIX from defined network UDP streams")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// import_asterix_network_stop
-struct RTCommandImportASTERIXNetworkStop : public rtcommand::RTCommand
-{
-    RTCommandImportASTERIXNetworkStop();
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(import_asterix_network_stop, "stops import ASTERIX from network")
-    DECLARE_RTCOMMAND_NOOPTIONS
-};
-
-// import_json
-struct RTCommandImportJSONFile : public rtcommand::RTCommand
-{
-    std::string filename_;
-
-    virtual rtcommand::IsValid valid() const override;
-
-    RTCommandImportJSONFile();
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(import_json, "imports JSON file with given filename, e.g. ’/data/file1.json’")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// import_gps
-struct RTCommandImportGPSTrail : public rtcommand::RTCommand
-{
-    std::string filename_;
-
-    virtual rtcommand::IsValid valid() const override;
-
-    RTCommandImportGPSTrail();
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(import_gps_trail, "imports gps trail NMEA with given filename, e.g. ’/data/file2.txt’")
     DECLARE_RTCOMMAND_OPTIONS
 };
 
@@ -236,11 +67,13 @@ struct RTCommandReconstructReferences : public rtcommand::RTCommand
 {
     RTCommandReconstructReferences();
 
+    std::string disabled_sensors_;
+
 protected:
     virtual bool run_impl() override;
 
     DECLARE_RTCOMMAND(reconstruct_references, "reconstruct references")
-    DECLARE_RTCOMMAND_NOOPTIONS
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 // load data
@@ -270,52 +103,57 @@ protected:
     DECLARE_RTCOMMAND_OPTIONS
 };
 
-// evaluate
-struct RTCommandEvaluate : public rtcommand::RTCommand
+// export report
+struct RTCommandExportReport : public rtcommand::RTCommand
 {
-    bool run_filter_ {false};
-
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(evaluate, "run evaluation")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// export evaluation report
-struct RTCommandExportEvaluationReport : public rtcommand::RTCommand
-{
-    std::string filename_;
+    std::string                    result_name_;
+    std::string                    export_dir_;
+    ResultReport::ReportExportMode mode_ = ResultReport::ReportExportMode::LatexPDF;
 
     virtual rtcommand::IsValid valid() const override;
 
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(export_eval_report,
-                      "export evaluation report after start with given filename, e.g. ’/data/eval_db2/report.tex'")
+    DECLARE_RTCOMMAND(export_report,
+                      "export existing report")
     DECLARE_RTCOMMAND_OPTIONS
 };
 
-// close_db
-struct RTCommandCloseDB : public rtcommand::RTCommand
+/**
+ * get_existing_reports
+ */
+struct RTCommandGetExistingReports : public rtcommand::RTCommand
 {
-    bool strict_ = false;
+public:
+    RTCommandGetExistingReports();
+    
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(close_db, "closes a currently opened database")
-    DECLARE_RTCOMMAND_OPTIONS
-};
-
-// quit
-struct RTCommandQuit : public rtcommand::RTCommand
-{
-protected:
-    virtual bool run_impl() override;
-
-    DECLARE_RTCOMMAND(quit, "quits the application")
+    DECLARE_RTCOMMAND(get_existing_reports, "returns a list of names of all existing reports")
     DECLARE_RTCOMMAND_NOOPTIONS
+};
+
+/**
+ * get_report
+ */
+struct RTCommandGetReport : public rtcommand::RTCommand
+{
+public:
+    RTCommandGetReport();
+
+    virtual rtcommand::IsValid valid() const override;
+
+    std::string result_name;
+    std::string section;
+    
+protected:
+    virtual bool run_impl() override;
+    virtual bool checkResult_impl() override;
+
+    DECLARE_RTCOMMAND(get_report, "obtain report json data")
+    DECLARE_RTCOMMAND_OPTIONS
 };
 
 // get_events

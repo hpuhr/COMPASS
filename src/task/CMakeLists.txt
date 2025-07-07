@@ -4,6 +4,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/calc/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/import/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/manage/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/reconstructor/CMakeLists.txt")
+include("${CMAKE_CURRENT_LIST_DIR}/result/CMakeLists.txt")
 
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
@@ -11,6 +12,7 @@ include_directories (
 
 target_sources(compass
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/taskdefs.h"
         "${CMAKE_CURRENT_LIST_DIR}/taskmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/task.h"
         "${CMAKE_CURRENT_LIST_DIR}/taskwidget.h"

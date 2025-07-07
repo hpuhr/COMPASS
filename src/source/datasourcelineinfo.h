@@ -1,7 +1,7 @@
 #ifndef DATASOURCELINEINFO_H
 #define DATASOURCELINEINFO_H
 
-#include "json.hpp"
+#include "json_fwd.hpp"
 
 class DataSourceLineInfo
 {

@@ -35,8 +35,6 @@ VariableView::VariableView(const std::string& class_id,
                            ViewManager& view_manager)
 :   View(class_id, instance_id, w, view_manager)
 {
-    // eval
-    connect(&COMPASS::instance().evaluationManager(), &EvaluationManager::resultsChangedSignal, this, &VariableView::onEvalResultsChanged);
 }
 
 /**
@@ -105,9 +103,16 @@ ViewVariable& VariableView::addVariable(const std::string& id,
                                         const std::string& default_name,
                                         bool show_meta_vars,
                                         bool show_empty_vars,
+                                        bool allow_empty_var,
                                         const std::vector<PropertyDataType>& valid_data_types)
 {
-    variables_.emplace_back(new ViewVariable(id, this));
+    bool empty = default_dbo.empty() || default_name.empty();
+
+    assert(!empty || allow_empty_var);
+
+    int idx = (int)variables_.size();
+
+    variables_.emplace_back(new ViewVariable(id, idx, this));
 
     ViewVariable& var = *variables_.back();
 
@@ -116,6 +121,7 @@ ViewVariable& VariableView::addVariable(const std::string& id,
 
     var.settings().show_meta_vars   = show_meta_vars;
     var.settings().show_empty_vars  = show_empty_vars;
+    var.settings().allow_empty_var  = allow_empty_var;
     var.settings().valid_data_types = std::set<PropertyDataType>(valid_data_types.begin(), valid_data_types.end());
 
     registerParameter(var.regParamDBO() , &var.settings().data_var_dbo , default_dbo );
@@ -187,6 +193,26 @@ void VariableView::showVariables()
 bool VariableView::showsVariables() const
 {
     return !show_annotation_;
+}
+
+/**
+*/
+void VariableView::switchVariables(int var0, int var1, bool inform_config_widget)
+{
+    auto& variable0 = variable(var0);
+    auto& variable1 = variable(var1);
+
+    std::string var0_dbo  = variable0.settings().data_var_dbo;
+    std::string var0_name = variable0.settings().data_var_name;
+
+    std::string var1_dbo  = variable1.settings().data_var_dbo;
+    std::string var1_name = variable1.settings().data_var_name;
+
+    variable0.set(var1_dbo, var1_name, true);
+    variable1.set(var0_dbo, var0_name, true);
+
+    if (inform_config_widget) 
+        getConfigWidget()->configChanged();
 }
 
 /**

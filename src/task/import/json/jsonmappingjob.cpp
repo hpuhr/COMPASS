@@ -19,7 +19,7 @@
 
 #include "buffer.h"
 //#include "dbcontent/dbcontent.h"
-#include "json.h"
+#include "json_tools.h"
 #include "jsonobjectparser.h"
 #include "asterixjsonparser.h"
 #include "logger.h"
@@ -61,7 +61,7 @@ JSONMappingJob::~JSONMappingJob()
     assert (done_);
 }
 
-void JSONMappingJob::run()
+void JSONMappingJob::run_impl()
 {
     logdbg << "JSONMappingJob: run";
 

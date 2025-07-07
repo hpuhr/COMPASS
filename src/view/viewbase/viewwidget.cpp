@@ -23,6 +23,7 @@
 #include "viewtoolswitcher.h"
 #include "viewloadstatewidget.h"
 #include "viewpresetwidget.h"
+#include "viewinfowidget.h"
 #include "files.h"
 #include "compass.h"
 #include "ui_test_common.h"
@@ -202,6 +203,15 @@ void ViewWidget::createStandardLayout()
     }
 #endif
 
+    //create info widget
+    {
+        info_widget_ = new ViewInfoWidget(view_, right_widget_);
+        info_widget_->setVisible(false);
+        info_widget_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
+        right_layout->addWidget(info_widget_);
+    }
+
     //create load state widget in right widget
     {
         state_widget_ = new ViewLoadStateWidget(this, right_widget_);
@@ -219,6 +229,7 @@ void ViewWidget::createStandardLayout()
         main_splitter_->setCollapsible(i, false);
 }
 
+
 /**
  * View initialization. Called by View on view creation.
 */
@@ -233,12 +244,16 @@ void ViewWidget::init()
     assert(config_widget_);
     assert(tool_widget_);
     assert(state_widget_);
+    assert(info_widget_);
 
     //add screenshot button
     tool_widget_->addScreenshotButton();
 
     //add toggle button for config widget
     tool_widget_->addConfigWidgetToggle();
+
+    //set info widget visibility
+    info_widget_->setVisible(showInfoWidget());
 
     //call derived
     init_impl();
@@ -322,6 +337,9 @@ void ViewWidget::connectWidgets()
     if (config_widget_ && data_widget_)
     {
         connect(data_widget_, &ViewDataWidget::displayChanged, config_widget_, &ViewConfigWidget::onDisplayChange);
+
+        if (info_widget_)
+            connect(data_widget_, &ViewDataWidget::displayChanged, info_widget_, &ViewInfoWidget::onDisplayChange);
     }
 }
 
@@ -363,7 +381,7 @@ void ViewWidget::toggleConfigWidget()
  */
 QIcon ViewWidget::getIcon(const std::string& fn)
 {
-    return QIcon(Utils::Files::getIconFilepath(fn).c_str());
+    return Utils::Files::IconProvider::getIcon(fn);
 }
 
 /**
@@ -428,6 +446,7 @@ void ViewWidget::loadingStarted()
     getViewConfigWidget()->loadingStarted();
     getViewLoadStateWidget()->loadingStarted();
     getViewToolWidget()->loadingStarted();
+    getViewInfoWidget()->loadingStarted();
 }
 
 /**
@@ -439,6 +458,7 @@ void ViewWidget::loadingDone()
     getViewConfigWidget()->loadingDone();
     getViewLoadStateWidget()->loadingDone();
     getViewToolWidget()->loadingDone();
+    getViewInfoWidget()->loadingDone();
 
     emit viewRefreshed();
 }
@@ -451,6 +471,7 @@ void ViewWidget::redrawStarted()
     getViewConfigWidget()->redrawStarted();
     getViewLoadStateWidget()->redrawStarted();
     getViewToolWidget()->redrawStarted();
+    getViewInfoWidget()->redrawStarted();
 }
 
 /**
@@ -461,6 +482,7 @@ void ViewWidget::redrawDone()
     getViewConfigWidget()->redrawDone();
     getViewLoadStateWidget()->redrawDone();
     getViewToolWidget()->redrawDone();
+    getViewInfoWidget()->redrawDone();
 
     emit viewRefreshed();
 }
@@ -474,6 +496,7 @@ void ViewWidget::appModeSwitch(AppMode app_mode)
     getViewConfigWidget()->appModeSwitch(app_mode);
     getViewLoadStateWidget()->appModeSwitch(app_mode);
     getViewToolWidget()->appModeSwitch(app_mode);
+    getViewInfoWidget()->appModeSwitch(app_mode);
 }
 
 /**
@@ -484,6 +507,7 @@ void ViewWidget::configChanged()
     getViewConfigWidget()->configChanged();
     getViewDataWidget()->configChanged();
     getViewToolWidget()->configChanged();
+    getViewInfoWidget()->configChanged();
 }
 
 /**
@@ -509,12 +533,24 @@ void ViewWidget::updateLoadState()
 }
 
 /**
+ * Updates the info widget.
+ */
+void ViewWidget::updateInfoWidget()
+{
+    if (!info_widget_)
+        return;
+
+    getViewInfoWidget()->updateInfos();
+}
+
+/**
  * Updates the view widget's individual components.
 */
 void ViewWidget::updateComponents()
 {
     updateToolWidget();
     updateLoadState();
+    updateInfoWidget();
 }
 
 /**
@@ -540,6 +576,7 @@ nlohmann::json ViewWidget::viewInfoJSON() const
     info[ "load_state" ] = getViewLoadStateWidget()->viewInfoJSON();
     info[ "toolbar"    ] = getViewToolWidget()->viewInfoJSON();
     info[ "presets"    ] = getViewPresetWidget() ? getViewPresetWidget()->viewInfoJSON() : nlohmann::json();
+    info[ "info"       ] = getViewInfoWidget()->viewInfoJSON();
 
     //add view-specific widget information
     viewInfoJSON_impl(info);

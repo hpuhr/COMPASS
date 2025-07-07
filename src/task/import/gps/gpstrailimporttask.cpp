@@ -39,7 +39,6 @@
 #include <QApplication>
 #include <QMessageBox>
 
-const std::string DONE_PROPERTY_NAME = "gps_trail_imported";
 const float tod_24h = 24 * 60 * 60;
 
 using namespace Utils;
@@ -159,11 +158,8 @@ void GPSTrailImportTask::importFilename(const std::string& filename)
 */
 bool GPSTrailImportTask::checkPrerequisites()
 {
-    if (!COMPASS::instance().interface().ready())  // must be connected
+    if (!COMPASS::instance().dbInterface().ready())  // must be connected
         return false;
-
-    if (COMPASS::instance().interface().hasProperty(DONE_PROPERTY_NAME))
-        done_ = COMPASS::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
     if (!COMPASS::instance().dbContentManager().existsDBContent("RefTraj"))
         return false;
@@ -424,6 +420,8 @@ std::string GPSTrailImportTask::currentText() const
 */
 bool GPSTrailImportTask::canImportFile()
 {
+    loginf << "GPSTrailImportTask: canImportFile: current_filename '" << current_filename_ << "'";
+
     if (!current_filename_.size())
         return false;
 
@@ -433,6 +431,8 @@ bool GPSTrailImportTask::canImportFile()
                << "does not exist";
         return false;
     }
+
+    loginf << "GPSTrailImportTask: canImportFile: gps_fixes " << gps_fixes_.size();
 
     return gps_fixes_.size(); // only if fixes exist
 }
@@ -451,6 +451,7 @@ void GPSTrailImportTask::parseCurrentFile ()
     gps_fixes_cnt_ = 0;
     gps_fixes_skipped_quality_cnt_ = 0;
     gps_fixes_skipped_time_cnt_ = 0;
+    gps_fixes_zero_datetime_ = 0;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -486,8 +487,8 @@ void GPSTrailImportTask::parseCurrentFile ()
 
         if (gps.fix.timestamp.rawDate == 0 && gps.fix.timestamp.rawTime == 0)
         {
-            ++gps_fixes_zero_datetime_;
-            return;
+           ++gps_fixes_zero_datetime_;
+           return;
         }
 
         if (gps.fix.quality == 0)
@@ -625,6 +626,14 @@ void GPSTrailImportTask::run()
 
     assert (gps_fixes_.size());
     assert (!buffer_);
+
+    COMPASS::instance().logInfo("GPS Trail NMEA Import") << "started";
+
+    if (currentError().size())
+        COMPASS::instance().logWarn("GPS Trail NMEA Import") << "errors:\n" << currentError();
+
+    if (currentText().size())
+        COMPASS::instance().logInfo("GPS Trail NMEA Import") << currentText();
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -936,11 +945,9 @@ void GPSTrailImportTask::insertDoneSlot()
     emit COMPASS::instance().dataSourceManager().dataSourcesChangedSignal();
     emit COMPASS::instance().dbContentManager().dbContentStatusChanged();
 
+    COMPASS::instance().logInfo("GPS Trail NMEA Import") << "done with " << gps_fixes_.size() << " GPS fixes";
+
     done_ = true;
-
-    //COMPASS::instance().interface().setProperty(PostProcessTask::DONE_PROPERTY_NAME, "0");
-
-    COMPASS::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
     //    COMPASS::instance().interface().databaseContentChanged();
     //    object.updateToDatabaseContent();

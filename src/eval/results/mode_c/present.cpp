@@ -31,7 +31,7 @@ SingleModeCPresent::SingleModeCPresent(const std::string& result_id,
                                        const SectorLayer& sector_layer,
                                        unsigned int utn,
                                        const EvaluationTargetData* target,
-                                       EvaluationManager& eval_man,
+                                       EvaluationCalculator& calculator,
                                        const EvaluationDetails& details,
                                        int num_updates,
                                        int num_no_ref_pos,
@@ -40,7 +40,7 @@ SingleModeCPresent::SingleModeCPresent(const std::string& result_id,
                                        int num_no_ref_id,
                                        int num_present_id,
                                        int num_missing_id)
-:   SinglePresentBase("SingleModeAPresent", result_id, requirement, sector_layer, utn, target, eval_man, details,
+:   SinglePresentBase("SingleModeAPresent", result_id, requirement, sector_layer, utn, target, calculator, details,
                         num_updates, num_no_ref_pos, num_pos_outside, num_pos_inside, num_no_ref_id, num_present_id, num_missing_id, "#NoRefC")
 {
     updateResult();
@@ -50,7 +50,7 @@ SingleModeCPresent::SingleModeCPresent(const std::string& result_id,
 */
 std::shared_ptr<Joined> SingleModeCPresent::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedModeCPresent> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedModeCPresent> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /********************************************************************************
@@ -62,8 +62,8 @@ std::shared_ptr<Joined> SingleModeCPresent::createEmptyJoined(const std::string&
 JoinedModeCPresent::JoinedModeCPresent(const std::string& result_id, 
                                        std::shared_ptr<EvaluationRequirement::Base> requirement,
                                        const SectorLayer& sector_layer, 
-                                       EvaluationManager& eval_man)
-:   JoinedPresentBase("JoinedModeCPresent", result_id, requirement, sector_layer, eval_man, "#NoRefC")
+                                       EvaluationCalculator& calculator)
+:   JoinedPresentBase("JoinedModeCPresent", result_id, requirement, sector_layer, calculator, "#NoRefC")
 {
 }
 

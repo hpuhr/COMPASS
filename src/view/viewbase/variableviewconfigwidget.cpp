@@ -33,6 +33,8 @@
 #include <QLabel>
 #include <QTabWidget>
 #include <QRadioButton>
+#include <QToolButton>
+#include <QPainter>
 
 /**
 */
@@ -44,7 +46,7 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
 {
     assert(var_view_);
 
-    auto addVariableUI = [ & ] (QVBoxLayout* layout, int idx)
+    auto addVariableUI = [ & ] (QVBoxLayout* layout, QVBoxLayout* switch_layout, int idx)
     {
         const auto& var = var_view_->variable(idx);
 
@@ -65,6 +67,61 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
             [ this, idx ] () { this->selectedVariableChangedSlot(idx); } );
 
         layout->addWidget(sel_widget);
+
+        if (idx > 0)
+        {
+            int idx0 = idx - 1;
+            int idx1 = idx;
+
+            const auto& var0 = var_view_->variable(idx0);
+
+            auto var_w = new QWidget;
+            auto layout = new QHBoxLayout;
+            layout->setContentsMargins(0, 0, 0, 0);
+            var_w->setLayout(layout);
+
+            QImage icon_img_upper(Utils::Files::getIconFilepath("collapse.png").c_str());
+            QImage icon_img_lower = icon_img_upper.transformed(QTransform().rotate(180));
+            QIcon icon;
+            if (!icon_img_upper.isNull())
+            {
+                int w = icon_img_upper.width();
+                int h = icon_img_upper.height();
+                int h_half  = h / 2;
+                int h_arrow = h_half * 0.7;
+                int w_offs  = (w - h_arrow) / 2;
+                int h_offs  = (h_half - h_arrow) / 2;
+
+                auto icon_img_upper_scaled = icon_img_upper.scaled(h_arrow, h_arrow);
+                auto icon_img_lower_scaled = icon_img_lower.scaled(h_arrow, h_arrow);
+
+                QImage img(w, h_half * 2, icon_img_upper.format());
+                QPainter p(&img);
+                p.drawImage(QPoint(w_offs, h_offs), icon_img_upper_scaled);
+                p.drawImage(QPoint(w_offs, h_half + h_offs), icon_img_lower_scaled);
+
+                icon = QIcon(QPixmap::fromImage(img));
+            }
+
+            auto var_switch = new QToolButton;
+            var_switch->setIcon(icon);
+            var_switch->setToolTip(QString::fromStdString("Switch " + var0.settings().display_name + " and " + var.settings().display_name));
+            var_switch->setVisible(false);
+
+            var_w->setFixedSize(var_switch->sizeHint());
+            layout->addWidget(var_switch);
+
+            auto switch_cb = [ = ] () { this->switchVariables(idx0, idx1); };
+
+            connect(var_switch, &QToolButton::pressed, switch_cb);
+
+            var_switches_.push_back(var_switch);
+
+            switch_layout->addWidget(var_w);
+        }
+
+        switch_layout->addSpacerItem(new QSpacerItem(1, 1, QSizePolicy::Fixed, QSizePolicy::Minimum));
+        //switch_layout->addStretch(1);
     };
 
     bool show_annotation = var_view_->showsAnnotation() && 
@@ -85,11 +142,17 @@ VariableViewConfigWidget::VariableViewConfigWidget(ViewWidget* view_widget,
 
         variables_widget_ = new QWidget;
 
+        QHBoxLayout* var_layout_outer = new QHBoxLayout;
+        variables_widget_->setLayout(var_layout_outer);
+
         QVBoxLayout* var_layout = new QVBoxLayout;
-        variables_widget_->setLayout(var_layout);
+        var_layout_outer->addLayout(var_layout);
+
+        QVBoxLayout* switch_layout = new QVBoxLayout;
+        var_layout_outer->addLayout(switch_layout);
 
         for (size_t i = 0; i < var_view_->numVariables(); ++i)
-            addVariableUI(var_layout, i);
+            addVariableUI(var_layout, switch_layout, i);
 
         cfg_layout->addWidget(variables_widget_);
     }
@@ -142,11 +205,9 @@ void VariableViewConfigWidget::selectedVariableChangedSlot(int idx)
     auto selection = var_selection_widgets_.at(idx);
     assert(selection);
 
-    preVariableChangedEvent(idx);
-
     var_view_->variable(idx).setVariable(*selection, true);
 
-    postVariableChangedEvent(idx);
+    variableChangedEvent(idx);
 }
 
 /**
@@ -177,6 +238,8 @@ void VariableViewConfigWidget::updateSelectedVariables(size_t idx)
     assert(selection);
 
     var_view_->variable(idx).updateWidget(*selection);
+
+    variableChangedEvent(idx);
 }
 
 /**
@@ -184,6 +247,13 @@ void VariableViewConfigWidget::updateSelectedVariables(size_t idx)
 const dbContent::VariableSelectionWidget* VariableViewConfigWidget::variableSelection(size_t idx) const
 {
     return var_selection_widgets_.at(idx);
+}
+
+/**
+*/
+bool VariableViewConfigWidget::showsAnnotation() const
+{
+    return show_annotations_box_->isChecked();
 }
 
 /**
@@ -249,6 +319,9 @@ void VariableViewConfigWidget::dataSourceToggled()
 
     //update ui
     updateConfig();
+
+    //invoke derived class
+    dataSourceChangedEvent();
 }
 
 /**
@@ -257,4 +330,18 @@ void VariableViewConfigWidget::annotationChanged()
 {
     var_view_->setCurrentAnnotation(annotation_widget_->currentGroupIdx(),
                                     annotation_widget_->currentAnnotationIdx());
+}
+
+/**
+ */
+void VariableViewConfigWidget::showSwitch(int var0, bool ok)
+{
+    var_switches_.at(var0)->setVisible(ok);
+}
+
+/**
+ */
+void VariableViewConfigWidget::switchVariables(int idx0, int idx1)
+{
+    var_view_->switchVariables(idx0, idx1, true);
 }

@@ -19,7 +19,10 @@
 #include "latexdocument.h"
 #include "latexsection.h"
 #include "latextable.h"
-//#include "lateximage.h"
+
+#include "dbcontent/dbcontentmanager.h"
+#include "viewmanager.h"
+
 #include "viewpoint.h"
 #include "tableview.h"
 #include "tableviewdatawidget.h"
@@ -30,19 +33,17 @@
 #include "scatterplotviewdatawidget.h"
 #include "gridview.h"
 #include "gridviewdatawidget.h"
+
+#include "task/result/report/section.h"
+#include "task/result/report/sectioncontenttable.h"
+#include "task/result/report/sectioncontenttext.h"
+#include "task/result/report/sectioncontentfigure.h"
+
 #include "logger.h"
 #include "stringconv.h"
-#include "json.h"
+#include "json_tools.h"
 #include "files.h"
-#include "eval/results/base/single.h"
-#include "eval/results/report/section.h"
-#include "eval/results/report/sectioncontenttable.h"
-#include "eval/results/report/sectioncontenttext.h"
-#include "eval/results/report/sectioncontentfigure.h"
 #include "compass.h"
-#include "dbcontent/dbcontentmanager.h"
-#include "viewmanager.h"
-#include "files.h"
 
 #if USE_EXPERIMENTAL_SOURCE == true
 #include "ViewerWidget.h"
@@ -52,6 +53,7 @@
 
 #include <QCoreApplication>
 #include <QApplication>
+#include <QThread>
 
 #include <sstream>
 
@@ -60,22 +62,34 @@
 using namespace std;
 using namespace Utils;
 
-LatexVisitor::LatexVisitor(LatexDocument& report, bool group_by_type, bool add_overview_table,
-                           bool add_overview_screenshot, bool include_target_details,
-                           bool include_target_tr_details, unsigned int max_table_col_width, bool wait_on_map_loading)
-    : report_(report), group_by_type_(group_by_type), add_overview_table_(add_overview_table),
-      add_overview_screenshot_(add_overview_screenshot), include_target_details_(include_target_details),
-      include_target_tr_details_(include_target_tr_details), max_table_col_width_(max_table_col_width),
-      wait_on_map_loading_(wait_on_map_loading)
+/**
+ */
+LatexVisitor::LatexVisitor(LatexDocument& report, 
+                           bool group_by_type, 
+                           bool add_overview_table,
+                           bool add_overview_screenshot, 
+                           bool include_target_details,
+                           bool include_target_tr_details, 
+                           unsigned int max_table_col_width, 
+                           bool wait_on_map_loading)
+:   report_                   (report                   )
+,   group_by_type_            (group_by_type            )
+,   add_overview_table_       (add_overview_table       )
+,   add_overview_screenshot_  (add_overview_screenshot  )
+,   include_target_details_   (include_target_details   )
+,   include_target_tr_details_(include_target_tr_details)
+,   max_table_col_width_      (max_table_col_width      )
+,   wait_on_map_loading_      (wait_on_map_loading      )
 {
 }
 
-
+/**
+ */
 void LatexVisitor::visit(const ViewPoint* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: ViewPoint id " << e->id();
+    loginf << "LatexVisitor: visit: ViewPoint id " << e->id(); 
 
     const nlohmann::json& j_data = e->data();
 
@@ -156,169 +170,8 @@ void LatexVisitor::visit(const ViewPoint* e)
     }
 }
 
-void LatexVisitor::visit(const EvaluationResultsReport::Section* e)
-{
-    assert (e);
-    loginf << "LatexVisitor: visit: EvaluationResultsReportSection " << e->heading();
-
-    current_section_name_ = String::latexString(e->compoundResultsHeading()); // slightly hacky, remove "Results" from top
-
-    // ignore if top "Results"
-    if (current_section_name_ == "")
-        return;
-
-    LatexSection& section = report_.getSection(current_section_name_);
-    section.label("sec:"+e->compoundResultsHeading());
-
-    for (const auto& cont_it : e->content())
-        cont_it->accept(*this);
-}
-
-void LatexVisitor::visit(const EvaluationResultsReport::SectionContentTable* e)
-{
-    assert (e);
-    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentTable " << e->name();
-
-    if (!include_target_tr_details_ && e->name() == EvaluationRequirementResult::Single::tr_details_table_name_)
-        return; // do not generate this table
-
-    LatexSection& section = report_.getSection(current_section_name_);
-
-    string table_name = e->name();
-    assert (!section.hasTable(table_name));
-
-    vector<string> headings = e->headings();
-    unsigned int num_cols = headings.size();
-
-    for (unsigned int cnt=0; cnt < num_cols; ++cnt) // latexify headings
-        headings[cnt] = String::latexString(headings[cnt]);
-
-    assert (num_cols);
-
-    //    const std::string& name, unsigned int num_columns,
-    //                                 std::vector<std::string> headings, std::string heading_alignment,
-    //                                 bool convert_to_latex
-    //    if (!overview_sec.hasTable("ViewPoints Overview"))
-    //        overview_sec.addTable("ViewPoints Overview", 6, {"id","name","type", "status", "comment", ""},
-    //                              "| l | l | l | l | X | l |", false);
-
-    section.addTable(table_name, num_cols, headings, "", false);
-    LatexTable& table = section.getTable(table_name);
-
-    bool wide_table = false;
-
-    if (headings.size() >= 9)
-    {
-        table.setWideTable(true);
-        wide_table = true;
-    }
-
-    unsigned int num_rows = e->filteredRowCount();
-    vector<string> row_strings;
-    string ref;
-
-    for (unsigned int row=0; row < num_rows; ++row)
-    {
-        row_strings = e->sortedRowStrings(row);
-        assert (row_strings.size() == num_cols);
-
-        if (wide_table) // truncate texts
-        {
-            for (unsigned int cnt=0; cnt < num_cols; ++cnt)
-            {
-                if (cnt > 2 && row_strings[cnt].size() > max_table_col_width_)
-                {
-                    std::string::size_type space_pos = row_strings[cnt].rfind(' ', max_table_col_width_);
-                    std::string::size_type comma_pos = row_strings[cnt].rfind(',', max_table_col_width_);
-
-                    if (space_pos == std::string::npos)
-                    {
-                        if (comma_pos == std::string::npos)
-                        {
-                            break; // no 64-bit-or-less substring
-                        }
-                        else
-                        {
-                            row_strings[cnt] = row_strings[cnt].substr(0, comma_pos)+"...";
-                        }
-                    }
-                    else
-                    {
-                        row_strings[cnt] = row_strings[cnt].substr(0, space_pos)+"...";
-                    }
-                }
-            }
-        }
-
-        if (e->hasReference(row)) // \hyperref[sec:marker2]{SecondSection}
-        {
-            ref = e->reference(row);
-            if (!include_target_details_ && (ref.rfind("Targets", 0) == 0)) // reference to details
-                ; // do not do hyperref
-            else
-            {
-
-
-                row_strings[0] = "\\hyperref[sec:"+ref+"]{"+row_strings.at(0)+"}";
-            }
-        }
-
-        for (unsigned int cnt=0; cnt < num_cols; ++cnt)
-        {
-            if (row_strings[cnt] == "true" || row_strings[cnt] == "Passed")
-                row_strings[cnt] = "\\textcolor{darkgreen}{"+row_strings[cnt]+"}";
-            else if (row_strings[cnt] == "false" || row_strings[cnt] == "Failed")
-                row_strings[cnt] = "\\textcolor{red}{"+row_strings[cnt]+"}";
-        }
-
-        table.addRow(move(row_strings));
-    }
-
-}
-
-void LatexVisitor::visit(const EvaluationResultsReport::SectionContentText* e)
-{
-    assert (e);
-    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentText" << e->name();
-
-    LatexSection& section = report_.getSection(current_section_name_);
-
-    for (const auto& txt_it : e->texts())
-        section.addText(txt_it);
-}
-
-void LatexVisitor::visit(const EvaluationResultsReport::SectionContentFigure* e)
-{
-    assert (e);
-    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure " << e->name();
-
-#if USE_EXPERIMENTAL_SOURCE == true
-
-    ignore_table_views_ = true;
-
-    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
-    ViewManager& view_man = COMPASS::instance().viewManager();
-
-    while (QCoreApplication::hasPendingEvents())
-        QCoreApplication::processEvents();
-
-    e->view();
-
-    while (dbcont_man.loadInProgress() || QCoreApplication::hasPendingEvents())
-        QCoreApplication::processEvents();
-
-    image_prefix_ = e->getSubPath()+e->name();
-
-    loginf << "LatexVisitor: visit: EvaluationResultsReportSectionContentFigure " << e->name()
-           << " prefix " << image_prefix_;
-
-    for (auto& view_it : view_man.getViews())
-        view_it.second->accept(*this);
-
-    ignore_table_views_ = false;
-#endif
-}
-
+/**
+ */
 void LatexVisitor::visit(TableView* e)
 {
     assert (e);
@@ -366,6 +219,8 @@ void LatexVisitor::visit(TableView* e)
     }
 }
 
+/**
+ */
 void LatexVisitor::visit(HistogramView* e)
 {
     assert (e);
@@ -420,6 +275,9 @@ void LatexVisitor::visit(HistogramView* e)
 }
 
 #if USE_EXPERIMENTAL_SOURCE == true
+
+/**
+ */
 void LatexVisitor::visit(GeographicView* e)
 {
     assert (e);
@@ -447,6 +305,17 @@ void LatexVisitor::visit(GeographicView* e)
 
     if (wait_on_map_loading_)
         data_widget->waitUntilMapLoaded();
+
+    const int RenderDelayMSec = 2000;
+
+    //wait a little for e.g. geoimages to warp and render correctly
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+    while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds()
+            < RenderDelayMSec)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(10);
+    }
 
     //data_widget->clearMouseCoordinates();
 
@@ -491,8 +360,11 @@ void LatexVisitor::visit(GeographicView* e)
     // add normal screenshot after overview
     sec.addImage(image_path, e->instanceId());
 }
+
 #endif
 
+/**
+ */
 void LatexVisitor::visit(ScatterPlotView* e)
 {
     assert (e);
@@ -546,6 +418,8 @@ void LatexVisitor::visit(ScatterPlotView* e)
     sec.addImage(image_path, e->instanceId());
 }
 
+/**
+ */
 void LatexVisitor::visit(GridView* e)
 {
     assert (e);
@@ -576,9 +450,7 @@ void LatexVisitor::visit(GridView* e)
         return;
 
     // normal screenshot
-    QPixmap pmap = data_widget->renderPixmap();
-
-    QImage screenshot = pmap.toImage();
+    auto screenshot = data_widget->renderData();
 
     std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
     assert (!screenshot.isNull());
@@ -599,8 +471,9 @@ void LatexVisitor::visit(GridView* e)
     sec.addImage(image_path, e->instanceId());
 }
 
+/**
+ */
 void LatexVisitor::imagePrefix(const std::string& image_prefix)
 {
     image_prefix_ = image_prefix;
 }
-

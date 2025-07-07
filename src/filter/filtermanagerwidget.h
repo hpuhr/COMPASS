@@ -15,55 +15,71 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FILTERMANAGERWIDGET_H
-#define FILTERMANAGERWIDGET_H
+#pragma once
 
-#include <QFrame>
-#include <QMenu>
+#include "toolboxwidget.h"
+
+#include <memory>
 
 class FilterManager;
 class FilterGeneratorWidget;
 
-class QPushButton;
 class QVBoxLayout;
 class QCheckBox;
+class QMenu;
+class QScrollArea;
 
-class FilterManagerWidget : public QWidget
+/**
+ */
+class FilterManagerWidget : public ToolBoxWidget
 {
     Q_OBJECT
 
-  signals:
-
   public slots:
-    void toggleUseFilters();
+    void filterWidgetActionSlot(bool generated);
 
-    void editClickedSlot();
-
-    void addFilterSlot();
-    void updateFiltersSlot();
-    void filterWidgetActionSlot(bool result);
-
-    void databaseOpenedSlot();
-
-    void updateUseFilters ();
-
-  public:
-    explicit FilterManagerWidget(FilterManager& manager, QWidget* parent = 0,
-                                 Qt::WindowFlags f = 0);
+public:
+    explicit FilterManagerWidget(FilterManager& manager, 
+                                 QWidget* parent = nullptr,
+                                 Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~FilterManagerWidget();
+
+    //ToolBoxWidget
+    QIcon toolIcon() const override final;
+    std::string toolName() const override final;
+    std::string toolInfo() const override final;
+    std::vector<std::string> toolLabels() const override final;
+    toolbox::ScreenRatio defaultScreenRatio() const override final;
+    void addToConfigMenu(QMenu* menu) override final;
+    void addToToolBar(QToolBar* tool_bar) override final; 
+    void rightClicked() override final;
+    void loadingStarted() override final;
+    void loadingDone() override final;
 
     QCheckBox* filtersCheckBox() const;
 
+    void updateFilters();
+    void updateUseFilters();
+
+    void addMenuEntries(QMenu* menu);
+
 protected:
-    FilterManager& filter_manager_;
+    void toggleUseFilters();
 
-    QMenu edit_menu_;
+    void addFilter();
 
-    FilterGeneratorWidget* filter_generator_widget_;
+    void databaseOpened();
 
-    QCheckBox* filters_check_ {nullptr};
-    QVBoxLayout* ds_filter_layout0_ {nullptr};
-    QVBoxLayout* ds_filter_layout1_ {nullptr};
+    void expandAll();
+    void collapseAll();
+    void collapseUnused();
+
+    void syncFilterLayouts();
+
+    FilterManager&         filter_manager_;
+    std::unique_ptr<FilterGeneratorWidget> filter_generator_widget_;
+
+    QCheckBox*   filters_check_    {nullptr};
+    QVBoxLayout* ds_filter_layout_ {nullptr};
+    QScrollArea* scroll_area_      {nullptr};
 };
-
-#endif  // FILTERMANAGERWIDGET_H

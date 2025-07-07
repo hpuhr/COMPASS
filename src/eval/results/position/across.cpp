@@ -35,7 +35,7 @@ SinglePositionAcross::SinglePositionAcross(const std::string& result_id,
                                            const SectorLayer& sector_layer,
                                            unsigned int utn,
                                            const EvaluationTargetData* target,
-                                           EvaluationManager& eval_man,
+                                           EvaluationCalculator& calculator,
                                            const EvaluationDetails& details,
                                            unsigned int num_pos,
                                            unsigned int num_no_ref,
@@ -43,7 +43,7 @@ SinglePositionAcross::SinglePositionAcross(const std::string& result_id,
                                            unsigned int num_pos_inside,
                                            unsigned int num_value_ok,
                                            unsigned int num_value_nok)
-:   SinglePositionProbabilityBase("SinglePositionAcross", result_id, requirement, sector_layer, utn, target, eval_man, details,
+:   SinglePositionProbabilityBase("SinglePositionAcross", result_id, requirement, sector_layer, utn, target, calculator, details,
                                   num_pos, num_no_ref,num_pos_outside, num_pos_inside, num_value_ok, num_value_nok)
 {
     updateResult();
@@ -53,7 +53,7 @@ SinglePositionAcross::SinglePositionAcross(const std::string& result_id,
 */
 std::shared_ptr<Joined> SinglePositionAcross::createEmptyJoined(const std::string& result_id)
 {
-    return std::make_shared<JoinedPositionAcross> (result_id, requirement_, sector_layer_, eval_man_);
+    return std::make_shared<JoinedPositionAcross> (result_id, requirement_, sector_layer_, calculator_);
 }
 
 /**
@@ -65,7 +65,7 @@ std::vector<std::string> SinglePositionAcross::targetTableHeadersCustom() const
 
 /**
 */
-std::vector<QVariant> SinglePositionAcross::targetTableValuesCustom() const
+nlohmann::json::array_t SinglePositionAcross::targetTableValuesCustom() const
 {
     return { formatValue(accumulator_.min()),
              formatValue(accumulator_.max()), 
@@ -101,19 +101,19 @@ std::vector<std::string> SinglePositionAcross::detailHeaders() const
 
 /**
 */
-std::vector<QVariant> SinglePositionAcross::detailValues(const EvaluationDetail& detail,
-                                                         const EvaluationDetail* parent_detail) const
+nlohmann::json::array_t SinglePositionAcross::detailValues(const EvaluationDetail& detail,
+                                                           const EvaluationDetail* parent_detail) const
 {
     bool has_ref_pos = detail.numPositions() >= 2;
 
-    return { Utils::Time::toString(detail.timestamp()).c_str(),
+    return { Utils::Time::toString(detail.timestamp()),
             !has_ref_pos,
-             detail.getValue(SinglePositionBaseCommon::DetailKey::PosInside),
-             detail.getValue(SinglePositionBaseCommon::DetailKey::Value),
-             detail.getValue(SinglePositionBaseCommon::DetailKey::CheckPassed), 
-             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckPassed), 
-             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckFailed), 
-             detail.comments().generalComment().c_str() }; 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::PosInside).toBool(),
+             detail.getValue(SinglePositionBaseCommon::DetailKey::Value).toFloat(),
+             detail.getValue(SinglePositionBaseCommon::DetailKey::CheckPassed).toBool(), 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckPassed).toUInt(), 
+             detail.getValue(SinglePositionBaseCommon::DetailKey::NumCheckFailed).toUInt(), 
+             detail.comments().generalComment() }; 
 }
 
 /**********************************************************************************************
@@ -125,8 +125,8 @@ std::vector<QVariant> SinglePositionAcross::detailValues(const EvaluationDetail&
 JoinedPositionAcross::JoinedPositionAcross(const std::string& result_id, 
                                            std::shared_ptr<EvaluationRequirement::Base> requirement,
                                            const SectorLayer& sector_layer, 
-                                           EvaluationManager& eval_man)
-:   JoinedPositionProbabilityBase("JoinedPositionAcross", result_id, requirement, sector_layer, eval_man, "d_across")
+                                           EvaluationCalculator& calculator)
+:   JoinedPositionProbabilityBase("JoinedPositionAcross", result_id, requirement, sector_layer, calculator, "d_across")
 {
 }
 

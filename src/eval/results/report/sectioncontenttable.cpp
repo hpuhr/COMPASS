@@ -336,68 +336,72 @@ std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row,
 
 bool SectionContentTable::hasReference (unsigned int row) const
 {
-    if (!proxy_model_)
-    {
-        proxy_model_ = new TableQSortFilterProxyModel();
-        proxy_model_->showUnused(show_unused_);
+    // if (!proxy_model_)
+    // {
+    //     proxy_model_ = new TableQSortFilterProxyModel();
+    //     proxy_model_->showUnused(show_unused_);
 
-        SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
-        assert (tmp);
-        proxy_model_->setSourceModel(tmp);
-    }
+    //     SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
+    //     assert (tmp);
+    //     proxy_model_->setSourceModel(tmp);
+    // }
 
-    assert (row < proxy_model_->rowCount());
-    assert (row < rows_.size());
+    // assert (row < proxy_model_->rowCount());
+    // assert (row < rows_.size());
 
-    QModelIndex index = proxy_model_->index(row, 0);
-    assert (index.isValid());
+    // QModelIndex index = proxy_model_->index(row, 0);
+    // assert (index.isValid());
 
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
+    // auto const source_index = proxy_model_->mapToSource(index);
+    // assert (source_index.isValid());
 
-    unsigned int row_index = source_index.row();
+    // unsigned int row_index = source_index.row();
 
-    return result_ptrs_.at(row_index)
-            && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index));
+    // return result_ptrs_.at(row_index)
+    //         && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index));
+
+    return false;
 }
 
 std::string SectionContentTable::reference (unsigned int row) const
 {
-    if (!proxy_model_)
-    {
-        proxy_model_ = new TableQSortFilterProxyModel();
-        proxy_model_->showUnused(show_unused_);
+    // if (!proxy_model_)
+    // {
+    //     proxy_model_ = new TableQSortFilterProxyModel();
+    //     proxy_model_->showUnused(show_unused_);
 
-        SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
-        assert (tmp);
-        proxy_model_->setSourceModel(tmp);
-    }
+    //     SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
+    //     assert (tmp);
+    //     proxy_model_->setSourceModel(tmp);
+    // }
 
-    assert (row < proxy_model_->rowCount());
-    assert (row < rows_.size());
+    // assert (row < proxy_model_->rowCount());
+    // assert (row < rows_.size());
 
-    QModelIndex index = proxy_model_->index(row, 0);
-    assert (index.isValid());
+    // QModelIndex index = proxy_model_->index(row, 0);
+    // assert (index.isValid());
 
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
+    // auto const source_index = proxy_model_->mapToSource(index);
+    // assert (source_index.isValid());
 
-    unsigned int row_index = source_index.row();
+    // unsigned int row_index = source_index.row();
 
-    assert (result_ptrs_.at(row_index)
-            && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)));
+    // assert (result_ptrs_.at(row_index)
+    //         && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)));
 
-    string tmp = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
-    //e.g. "Report:Results:"+getRequirementSectionID();
-    assert (tmp.size() >= 14);
+    // string tmp = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
+    // //e.g. "Report:Results:"+getRequirementSectionID();
+    // assert (tmp.size() >= 14);
 
-    if (tmp == "Report:Results")
-        return "";
+    // if (tmp == "Report:Results")
+    //     return "";
 
-    assert (tmp.rfind("Report:Results:", 0) == 0);
-    tmp.erase(0,15);
+    // assert (tmp.rfind("Report:Results:", 0) == 0);
+    // tmp.erase(0,15);
 
-    return tmp;;
+    // return tmp;
+
+    return "";
 }
 
 bool SectionContentTable::showUnused() const
@@ -505,76 +509,76 @@ void SectionContentTable::clickedSlot(const QModelIndex& index)
 
 void SectionContentTable::performClickAction()
 {
-    //double click did not interrupt click action => perform
-    if (!last_clicked_row_index_.has_value())
-        return;
+    // //double click did not interrupt click action => perform
+    // if (!last_clicked_row_index_.has_value())
+    //     return;
 
-    unsigned int row_index = last_clicked_row_index_.value();
-    last_clicked_row_index_.reset();
+    // unsigned int row_index = last_clicked_row_index_.value();
+    // last_clicked_row_index_.reset();
 
-    if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
-    {
-        loginf << "SectionContentTable: performClickAction: index has associated viewable";
+    // if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
+    // {
+    //     loginf << "SectionContentTable: performClickAction: index has associated viewable";
 
-        std::shared_ptr<nlohmann::json::object_t> viewable;
+    //     std::shared_ptr<nlohmann::json::object_t> viewable;
 
-        if (result_ptrs_.at(row_index)->viewableDataReady())
-        {
-            //view data ready, just get it
-            viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
-        }
-        else
-        {
-            //recompute async and show wait dialog, this may take a while...
-            auto func = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
-            {
-                viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
-                return AsyncTaskResult(true, "");
-            };
+    //     if (result_ptrs_.at(row_index)->viewableDataReady())
+    //     {
+    //         //view data ready, just get it
+    //         viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
+    //     }
+    //     else
+    //     {
+    //         //recompute async and show wait dialog, this may take a while...
+    //         auto func = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
+    //         {
+    //             viewable = result_ptrs_.at(row_index)->viewableData(*this, annotations_.at(row_index)); 
+    //             return Result::succeeded();
+    //         };
             
-            AsyncFuncTask task(func, "Updating Contents", "Updating contents...", false);
-            task.runAsyncDialog();
-        }
+    //         AsyncFuncTask task(func, "Updating Contents", "Updating contents...", false);
+    //         task.runAsyncDialog();
+    //     }
 
-        assert (viewable);
+    //     assert (viewable);
 
-        eval_man_.setViewableDataConfig(*viewable.get());
-    }
+    //     eval_man_.setViewableDataConfig(*viewable.get());
+    // }
 }
 
 void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
 {
-    //double click detected => interrupt any previously triggered click action
-    click_action_timer_.stop();
+    // //double click detected => interrupt any previously triggered click action
+    // click_action_timer_.stop();
 
-    if (!index.isValid())
-    {
-        loginf << "SectionContentTable: doubleClickedSlot: invalid index";
-        return;
-    }
+    // if (!index.isValid())
+    // {
+    //     loginf << "SectionContentTable: doubleClickedSlot: invalid index";
+    //     return;
+    // }
 
-    auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
+    // auto const source_index = proxy_model_->mapToSource(index);
+    // assert (source_index.isValid());
 
-    assert (source_index.row() >= 0);
-    assert (source_index.row() < rows_.size());
+    // assert (source_index.row() >= 0);
+    // assert (source_index.row() < rows_.size());
 
-    loginf << "SectionContentTable: doubleClickedSlot: row " << source_index.row();
+    // loginf << "SectionContentTable: doubleClickedSlot: row " << source_index.row();
 
-    unsigned int row_index = source_index.row();
+    // unsigned int row_index = source_index.row();
 
-    if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)))
-    {
-        string reference = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
-        assert (reference.size());
+    // if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasReference(*this, annotations_.at(row_index)))
+    // {
+    //     string reference = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
+    //     assert (reference.size());
 
-        loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference '"
-               << reference << "'";
+    //     loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference '"
+    //            << reference << "'";
 
-        eval_man_.showResultId(reference);
-    }
-    else
-        loginf << "SectionContentTable: currentRowChangedSlot: index has no associated reference";
+    //     eval_man_.showResultId(reference);
+    // }
+    // else
+    //     loginf << "SectionContentTable: currentRowChangedSlot: index has no associated reference";
 }
 
 void SectionContentTable::customContextMenuSlot(const QPoint& p)
@@ -608,9 +612,9 @@ void SectionContentTable::customContextMenuSlot(const QPoint& p)
         unsigned int utn = single_result->utn();
         loginf << "SectionContentTable: customContextMenuSlot: utn " << utn;
 
-        assert (eval_man_.getData().hasTargetData(utn));
+        assert (eval_man_.calculator().data().hasTargetData(utn));
 
-        const EvaluationTargetData& target_data = eval_man_.getData().targetData(utn);
+        const EvaluationTargetData& target_data = eval_man_.calculator().data().targetData(utn);
 
         if (target_data.use())
         {
@@ -689,7 +693,7 @@ void SectionContentTable::showFullUTNSlot ()
 
     loginf << "SectionContentTable: showFullUTNSlot: utn " << utn;
 
-    eval_man_.showFullUTN(utn);
+    eval_man_.calculator().showFullUTN(utn);
 }
 
 void SectionContentTable::showSurroundingDataSlot ()
@@ -701,7 +705,7 @@ void SectionContentTable::showSurroundingDataSlot ()
 
     loginf << "SectionContentTable: showSurroundingDataSlot: utn " << utn;
 
-    eval_man_.showSurroundingData(utn);
+    //eval_man_.calculator().showSurroundingData(utn);
 }
 
 void SectionContentTable::showMenuSlot()
