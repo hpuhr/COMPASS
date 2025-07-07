@@ -137,8 +137,8 @@ max\_size \dots maximum number of results rows \\
 \textbf{get\_report} \\
 \textit{obtain report json data} \\
 report \dots name of the report to retrieve, e.g. 'EUROCAE ED-87E Evaluation' \\
-section \dots optional path of the section to retrieve, e.g. 'Report:Results:Overview:Results' \\
-See section \nameref{sec:report_json_struct} for how the JSON reply is structured. \\
+section \dots optional ID of the section to retrieve, e.g. 'Report:Results:Overview:Results' \\
+See section \nameref{sec:get_report} for more details. \\
 
 \textbf{get\_target} \\
 \textit{retrieves a target description for the given UTN} \\
@@ -311,6 +311,80 @@ See section \nameref{sec:appendix_view_points} for how the JSON definition has t
 %       object		name of an ui element, object names separated by '.', e.g. 'mainwindow.window1.geographicview1.toolbar'
 %       uidelay		delay added after each injected ui event
 %       value		new value to set, content depending on the addressed ui element
+
+
+\subsection{Fetching Reports via get\_report}
+\label{sec:get_report}
+
+The command \textbf{get\_report} can be used to obtain JSON data of stored reports. \\
+
+Calling it without the -{}-section parameter will fetch a list of all report sections that can be obtained, e.g.
+
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+{
+    "sections" = [          // section id's contained in the report
+        "Report:Results",
+        "Report:Results:Overview",
+        "Report:Results:Sectors",
+        "Report:Results:Appendix",
+        "Report:Results:Overview:General",
+        "Report:Results:Overview:Results",
+        "Report:Results:Overview:Targets",
+        "Report:Results:Overview:Standard",
+        "Report:Results:Sectors:Mandatory DOI",
+        "Report:Results:Sectors:Mandatory DOI:Sum",
+        "Report:Results:Sectors:Mandatory DOI:Sum:Acceleration Correct",
+        "Report:Results:Sectors:Mandatory DOI:Sum:Track Coasting Correct",
+        ...
+    ]
+}
+\end{lstlisting}
+
+A specific report section can then be obtained by using the command as follows. \\
+
+\textbf{get\_report} -{}-section=SECTION\_ID \\
+
+This will return the JSON serialized section as documented in section \nameref{sec:report_json_struct},
+but the "subsections" variable will not contain the fully serialized subsections,
+but only the name and id of each subsection. These can be used to fetch more sections 
+via the \textbf{get\_report} command as desired. \\
+
+\textit{Example}: \\
+
+\textbf{get\_report} -{}-section="test Evaluation" "Report:Results:Sectors:Mandatory DOI:Sum" \\
+
+Fetched JSON data: \\
+
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+{
+  "contents": [],
+  "id": "Report:Results:Sectors:Mandatory DOI:Sum",
+  "name": "Sum",
+  "sub_sections": [
+      {
+        "id": "Report:Results:Sectors:Mandatory DOI:Sum:Acceleration Correct",
+        "name": "Acceleration Correct"
+      },
+      {
+        "id": "Report:Results:Sectors:Mandatory DOI:Sum:Track Coasting Correct",
+        "name": "Track Coasting Correct"
+      },
+      {
+        "id": "Report:Results:Sectors:Mandatory DOI:Sum:Detection",
+        "name": "Detection"
+      },
+      {
+        "id": "Report:Results:Sectors:Mandatory DOI:Sum:Dubious Target",
+        "name": "Dubious Target"
+      },
+      {
+        "id": "Report:Results:Sectors:Mandatory DOI:Sum:Dubious Track",
+        "name": "Dubious Track"
+      },
+      ...
+  ]
+}
+\end{lstlisting}
 
 \subsection{Python Example}
 
