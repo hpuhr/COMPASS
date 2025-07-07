@@ -94,6 +94,20 @@ bool Grid2D::create(const QRectF& roi,
                                            cell_size_x_,
                                            cell_size_y_,
                                            roi);
+
+    //loginf << "x0: " << roi.x() << "\n"
+    //       << "y0: " << roi.y() << "\n"
+    //       << "w0: " << roi.width() << "\n"
+    //       << "h0: " << roi.height() << "\n"
+    //       << "x: " << roi_adj.x() << "\n"
+    //       << "y: " << roi_adj.y() << "\n"
+    //       << "w: " << roi_adj.width() << "\n"
+    //       << "h: " << roi_adj.height() << "\n"
+    //       << "nx: " << n_cells_x_ << "\n"
+    //       << "ny: " << n_cells_y_ << "\n"
+    //       << "sx: " << cell_size_x_ << "\n"
+    //       << "sy: " << cell_size_y_ << "\n";
+
     if (roi_adj.isEmpty())
     {
         if (err)
@@ -403,7 +417,10 @@ Grid2D::IndexError Grid2D::checkAdd(size_t& idx_x, size_t& idx_y, double x, doub
     auto err = index(idx_x, idx_y, x, y);
 
     if (err == IndexError::OOR)
+    {
+        //logerr << "position oor: " << x << "," << y;
         ++num_oor_;
+    }
     else if (err == IndexError::InfIndex)
         ++num_inf_;
 
