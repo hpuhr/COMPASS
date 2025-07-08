@@ -10,42 +10,37 @@ layout crop_features="true"
         <lighting>false</lighting>
         <terrain>
             <driver>rex</driver>
-            <min_tile_range_factor>8</min_tile_range_factor>
+            <tile_size>2</tile_size>
             <color>#000000FF</color>
         </terrain>
       
     </options>
 
-    <geodetic_graticule name="Geodetic" visible="true">
-        <color>#ffff007f</color>
-        <label_color>#ffffffff</label_color>
-        <grid_lines>10</grid_lines>
-        <resolutions>10 5 2.5 1.0 0.5 0.25 0.125 0.0625 0.3125</resolutions>
-        <grid_lines_visible>true</grid_lines_visible>
-        <grid_labels_visible>true</grid_labels_visible>
-        <edge_labels_visible>true</edge_labels_visible>
-    </geodetic_graticule>
+    <OGRFeatures name="world-data">
+        <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
+    </OGRFeatures>
+  
 
-    <feature_model name="world boundaries">
-        <features name="world boundaries" driver="ogr">
-            <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
-        </features>       
-        
-       
-        <styles>
-            <style type="text/css">
-                states {
-                   stroke:                   #ffff00;
-                   stroke-width:             2px;
-                   stroke-tessellation-size: 1km;
-                   render-lighting:          false;
-                   altitude-clamping:        terrain-gpu;
-                   render-depth-offset:      true;     
-                }                    
-            </style>
-        </styles>        
-    </feature_model>
-    
+  <FeatureModel name="world_boundaries" features="world-data">
+      <styles>
+          <style type="text/css">
+              world {
+                 stroke:       #ffff00;
+                 stroke-width: 2px;
+                 stroke-smooth:            true;
+                 render-anti-aliased:  true;
+                 stroke-tessellation-size: 500m;
+                 altitude-clamping:        terrain-gpu;
+                 altitude-technique:       scene;
+                 render-clip-plane: 0;
+                 render-anti-aliased:      true;
+                 render-depth-test: false;
+              }                
+          </style>
+      </styles>
+  </FeatureModel>
+
+ 
     <feature_model name="Airports Europe">
         <features name="Airports Europe" driver="ogr">
             <url>shapefiles/AIRP_PT_2013.shp</url>

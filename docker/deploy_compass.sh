@@ -16,9 +16,10 @@ mkdir -p appimage/appdir/bin/
 mkdir -p appimage/appdir/lib/
 #cp /usr/lib/libcompass.a appimage/appdir/lib/
 
-cp -r /usr/lib/osgPlugins-3.6.5 appimage/appdir/lib/
-cp -r /usr/lib64/osgPlugins-3.6.5/ appimage/appdir/lib/
-cp /usr/lib64/libosgEarth* appimage/appdir/lib/
+cp -r /usr/lib/osgPlugins-3.6.5 appimage/appdir/lib/ 2>/dev/null || true
+cp -r /usr/lib/x86_64-linux-gnu/osgPlugins-3.6.5 appimage/appdir/lib/ 2>/dev/null || true
+cp -r /usr/lib64/osgPlugins-3.6.5/ appimage/appdir/lib/ 2>/dev/null || true
+cp /usr/lib64/libosgEarth* appimage/appdir/lib/ 2>/dev/null || true
 
 mkdir -p appimage/appdir/compass/
 cp -r data appimage/appdir/compass/
