@@ -114,7 +114,7 @@ std::string SectionContent::resourceFilename(const std::string& postfix) const
  */
 std::string SectionContent::resourceRelDirectory(ResourceDir rdir) const
 {
-    return ReportExporter::resourceSubDir(rdir) + "/" + contentPath();
+    return ReportExporterDummDumm::resourceSubDir(rdir) + "/" + contentPath();
 }
 
 /**

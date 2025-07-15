@@ -37,7 +37,7 @@ ReportExporterJSON::ReportExporterJSON(const ReportExport* report_export,
                                        const std::string& export_resource_dir,
                                        bool interaction_mode,
                                        bool write_files)
-:   ReportExporter(report_export, export_fn, export_resource_dir, interaction_mode)
+:   ReportExporterDummDumm(report_export, export_fn, export_resource_dir, interaction_mode)
 ,   write_files_  (write_files)
 {
 }

@@ -35,19 +35,19 @@
 namespace ResultReport
 {
 
-const int ReportExporter::TableMaxRows    = 0;
-const int ReportExporter::TableMaxColumns = 0;
+const int ReportExporterDummDumm::TableMaxRows    = 0;
+const int ReportExporterDummDumm::TableMaxColumns = 0;
 
-const std::string ReportExporter::ResourceFolderScreenshots = "screenshots";
-const std::string ReportExporter::ResourceFolderTables      = "tables";
+const std::string ReportExporterDummDumm::ResourceFolderScreenshots = "screenshots";
+const std::string ReportExporterDummDumm::ResourceFolderTables      = "tables";
 
-const std::string ReportExporter::ExportImageFormat = ".jpg";
-const std::string ReportExporter::ExportTableFormat = ".json";
-const std::string ReportExporter::ExportTextFormat  = ".txt";
+const std::string ReportExporterDummDumm::ExportImageFormat = ".jpg";
+const std::string ReportExporterDummDumm::ExportTableFormat = ".json";
+const std::string ReportExporterDummDumm::ExportTextFormat  = ".txt";
 
 /**
  */
-ReportExporter::ReportExporter(const ReportExport* report_export,
+ReportExporterDummDumm::ReportExporterDummDumm(const ReportExport* report_export,
                                const std::string& export_fn,
                                const std::string& export_resource_dir,
                                bool interaction_mode)
@@ -61,27 +61,27 @@ ReportExporter::ReportExporter(const ReportExport* report_export,
 
 /**
  */
-ReportExporter::~ReportExporter()
+ReportExporterDummDumm::~ReportExporterDummDumm()
 {
 }
 
 /**
  */
-const ReportExportSettings& ReportExporter::settings() const
+const ReportExportSettings& ReportExporterDummDumm::settings() const
 {
     return report_export_->settings();
 }
 
 /**
  */
-std::string ReportExporter::exportPath() const
+std::string ReportExporterDummDumm::exportPath() const
 {
     return exportResourceDir() + "/" + exportFilename();
 }
 
 /**
  */
-std::string ReportExporter::resourceSubDir(ResourceDir dir)
+std::string ReportExporterDummDumm::resourceSubDir(ResourceDir dir)
 {
     switch (dir)
     {
@@ -98,21 +98,21 @@ std::string ReportExporter::resourceSubDir(ResourceDir dir)
 
 /**
  */
-Result ReportExporter::initExport(TaskResult& result)
+Result ReportExporterDummDumm::initExport(TaskResult& result)
 {
     return initExport_impl(result);
 }
 
 /**
  */
-ResultT<nlohmann::json> ReportExporter::finalizeExport(TaskResult& result)
+ResultT<nlohmann::json> ReportExporterDummDumm::finalizeExport(TaskResult& result)
 {
     return finalizeExport_impl(result);
 }
 
 /**
  */
-ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
+ResultT<nlohmann::json> ReportExporterDummDumm::exportReport(TaskResult& result,
                                                      const std::string& section,
                                                      const std::string& content)
 {
@@ -217,7 +217,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
 
 /**
  */
-ResultT<nlohmann::json> ReportExporter::exportReport_impl(TaskResult& result,
+ResultT<nlohmann::json> ReportExporterDummDumm::exportReport_impl(TaskResult& result,
                                                           Section* section,
                                                           const boost::optional<unsigned int>& content_id)
 {
@@ -239,7 +239,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport_impl(TaskResult& result,
 
 /**
  */
-Result ReportExporter::visitSection(Section& section, 
+Result ReportExporterDummDumm::visitSection(Section& section, 
                                     bool is_root_section,
                                     bool write_subsections,
                                     bool write_contents)
@@ -304,7 +304,7 @@ Result ReportExporter::visitSection(Section& section,
 
 /**
  */
-Result ReportExporter::visitContent(SectionContent& content, bool is_root_section)
+Result ReportExporterDummDumm::visitContent(SectionContent& content, bool is_root_section)
 {
     //skip content?
     if (!content.exportEnabled(exportMode()))
@@ -350,28 +350,28 @@ Result ReportExporter::visitContent(SectionContent& content, bool is_root_sectio
 
 /**
  */
-Result ReportExporter::exportFigure(SectionContentFigure& figure, bool is_root_section)
+Result ReportExporterDummDumm::exportFigure(SectionContentFigure& figure, bool is_root_section)
 {
     return exportFigure_impl(figure, is_root_section);
 }
 
 /**
  */
-Result ReportExporter::exportTable(SectionContentTable& table, bool is_root_section)
+Result ReportExporterDummDumm::exportTable(SectionContentTable& table, bool is_root_section)
 {
     return exportTable_impl(table, is_root_section);
 }
 
 /**
  */
-Result ReportExporter::exportText(SectionContentText& text, bool is_root_section)
+Result ReportExporterDummDumm::exportText(SectionContentText& text, bool is_root_section)
 {
     return exportText_impl(text, is_root_section);
 }
 
 /**
  */
-void ReportExporter::setStatus(const std::string& status)
+void ReportExporterDummDumm::setStatus(const std::string& status)
 {
     status_ = status;
 

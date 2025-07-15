@@ -37,7 +37,7 @@ namespace ResultReport
 class Section;
 class SectionContent;
 
-class ReportExporter;
+class ReportExporterDummDumm;
 
 /**
  */
@@ -67,11 +67,11 @@ signals:
     void progressChanged();
 
 private:
-    std::unique_ptr<ReportExporter> createExporter(ReportExportMode mode,
+    std::unique_ptr<ReportExporterDummDumm> createExporter(ReportExportMode mode,
                                                    const std::string& fn,
                                                    const std::string& resource_dir,
                                                    bool interaction_mode) const;
-    void updateProgress(ReportExporter* exporter);
+    void updateProgress(ReportExporterDummDumm* exporter);
 
     ReportExportSettings settings_;
 

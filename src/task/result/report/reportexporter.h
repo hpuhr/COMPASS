@@ -46,15 +46,15 @@ class ReportExport;
 
 /**
  */
-class ReportExporter : public QObject
+class ReportExporterDummDumm : public QObject
 {
     Q_OBJECT
 public:
-    ReportExporter(const ReportExport* report_export,
+    ReportExporterDummDumm(const ReportExport* report_export,
                    const std::string& export_fn,
                    const std::string& export_resource_dir,
                    bool interaction_mode);
-    virtual ~ReportExporter();
+    virtual ~ReportExporterDummDumm();
 
     const ReportExportSettings& settings() const;
 

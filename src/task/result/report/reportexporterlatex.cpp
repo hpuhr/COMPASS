@@ -51,7 +51,7 @@ ReportExporterLatex::ReportExporterLatex(const ReportExport* report_export,
                                          const std::string& export_resource_dir,
                                          bool interaction_mode,
                                          bool write_pdf)
-:   ReportExporter(report_export, export_fn, export_resource_dir, interaction_mode)
+:   ReportExporterDummDumm(report_export, export_fn, export_resource_dir, interaction_mode)
 ,   write_pdf_    (write_pdf)
 {
 }

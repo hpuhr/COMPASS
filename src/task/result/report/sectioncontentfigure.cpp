@@ -88,7 +88,7 @@ void SectionContentFigure::setViewableFunc(const SectionContentViewable::Viewabl
  */
 std::string SectionContentFigure::resourceExtension() const
 {
-    return ReportExporter::ExportImageFormat;
+    return ReportExporterDummDumm::ExportImageFormat;
 }
 
 /**

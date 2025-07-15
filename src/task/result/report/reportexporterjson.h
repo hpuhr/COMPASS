@@ -24,7 +24,7 @@ namespace ResultReport
 
 /**
  */
-class ReportExporterJSON : public ReportExporter
+class ReportExporterJSON : public ReportExporterDummDumm
 {
 public:
     ReportExporterJSON(const ReportExport* report_export,

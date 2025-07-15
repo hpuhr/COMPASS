@@ -59,7 +59,7 @@ void SectionContentText::addText(const std::string& text)
  */
 std::string SectionContentText::resourceExtension() const
 {
-    return ReportExporter::ExportTextFormat;
+    return ReportExporterDummDumm::ExportTextFormat;
 }
 
 /**

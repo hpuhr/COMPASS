@@ -28,7 +28,7 @@ namespace ResultReport
 
 /**
  */
-class ReportExporterLatex : public ReportExporter
+class ReportExporterLatex : public ReportExporterDummDumm
 {
 public:
     ReportExporterLatex(const ReportExport* report_export,

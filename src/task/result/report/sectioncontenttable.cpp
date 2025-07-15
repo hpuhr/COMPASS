@@ -310,7 +310,7 @@ const SectionContentTableWidget* SectionContentTable::getOrCreateTableWidget() c
  */
 std::string SectionContentTable::resourceExtension() const
 {
-    return ReportExporter::ExportTableFormat;
+    return ReportExporterDummDumm::ExportTableFormat;
 }
 
 /**
@@ -1263,8 +1263,8 @@ Result SectionContentTable::toJSONDocument_impl(nlohmann::json& j,
     if (!r.ok())
         return r;
 
-    bool write_to_file = (ReportExporter::TableMaxRows    >= 0 && numRows()    > (size_t)ReportExporter::TableMaxRows   ) ||
-                         (ReportExporter::TableMaxColumns >= 0 && numColumns() > (size_t)ReportExporter::TableMaxColumns);
+    bool write_to_file = (ReportExporterDummDumm::TableMaxRows    >= 0 && numRows()    > (size_t)ReportExporterDummDumm::TableMaxRows   ) ||
+                         (ReportExporterDummDumm::TableMaxColumns >= 0 && numColumns() > (size_t)ReportExporterDummDumm::TableMaxColumns);
 
     if (resource_dir && write_to_file)
     {

@@ -77,7 +77,7 @@ ResultT<nlohmann::json> ReportExport::exportReport(TaskResult& result,
 
     auto exporter_ptr = exporter.get();
 
-    connect(exporter.get(), &ReportExporter::progressChanged, 
+    connect(exporter.get(), &ReportExporterDummDumm::progressChanged, 
         [ this, exporter_ptr ] () { this->updateProgress(exporter_ptr); });
 
     //export using exporter
@@ -88,34 +88,34 @@ ResultT<nlohmann::json> ReportExport::exportReport(TaskResult& result,
 
 /**
  */
-std::unique_ptr<ReportExporter> ReportExport::createExporter(ReportExportMode mode,
+std::unique_ptr<ReportExporterDummDumm> ReportExport::createExporter(ReportExportMode mode,
                                                              const std::string& fn,
                                                              const std::string& resource_dir,
                                                              bool interaction_mode) const
 {
     if (mode == ReportExportMode::JSONFile)
     {
-        return std::unique_ptr<ReportExporter>(new ReportExporterJSONFile(this, fn, resource_dir, interaction_mode));
+        return std::unique_ptr<ReportExporterDummDumm>(new ReportExporterJSONFile(this, fn, resource_dir, interaction_mode));
     }
     else if (mode == ReportExportMode::JSONBlob)
     {
-        return std::unique_ptr<ReportExporter>(new ReportExporterJSONBlob(this, fn, resource_dir, interaction_mode));
+        return std::unique_ptr<ReportExporterDummDumm>(new ReportExporterJSONBlob(this, fn, resource_dir, interaction_mode));
     }
     else if (mode == ReportExportMode::Latex)
     {
-        return std::unique_ptr<ReportExporter>(new ReportExporterLatexFiles(this, fn, resource_dir, interaction_mode));
+        return std::unique_ptr<ReportExporterDummDumm>(new ReportExporterLatexFiles(this, fn, resource_dir, interaction_mode));
     }
     else if (mode == ReportExportMode::LatexPDF)
     {
-        return std::unique_ptr<ReportExporter>(new ReportExporterLatexPDF(this, fn, resource_dir, interaction_mode));
+        return std::unique_ptr<ReportExporterDummDumm>(new ReportExporterLatexPDF(this, fn, resource_dir, interaction_mode));
     }
 
-    return std::unique_ptr<ReportExporter>();
+    return std::unique_ptr<ReportExporterDummDumm>();
 }
 
 /**
  */
-void ReportExport::updateProgress(ReportExporter* exporter)
+void ReportExport::updateProgress(ReportExporterDummDumm* exporter)
 {
     assert(exporter);
 
