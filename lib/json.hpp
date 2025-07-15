@@ -15,8 +15,7 @@
  * file docs/README.md.                                                     *
 \****************************************************************************/
 
-#ifndef INCLUDE_NLOHMANN_JSON_HPP_
-#define INCLUDE_NLOHMANN_JSON_HPP_
+#pragma once
 
 #define NDEBUG
 
@@ -25627,4 +25626,3 @@ inline void swap(nlohmann::NLOHMANN_BASIC_JSON_TPL& j1, nlohmann::NLOHMANN_BASIC
 
 #undef NDEBUG
 
-#endif  // INCLUDE_NLOHMANN_JSON_HPP_
