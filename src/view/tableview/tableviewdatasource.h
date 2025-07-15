@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LISTBOXVIEWDATASOURCE_H_
-#define LISTBOXVIEWDATASOURCE_H_
+#pragma once
 
 //#include "buffer.h"
 #include "configurable.h"
@@ -67,4 +66,3 @@ protected:
     std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DB cont->varname
 };
 
-#endif /* LISTBOXVIEWDATASOURCE_H_ */

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HISTOGRAMVIEWDATASOURCE_H_
-#define HISTOGRAMVIEWDATASOURCE_H_
+#pragma once
 
 #include <QObject>
 
@@ -71,4 +70,3 @@ class HistogramViewDataSource : public QObject, public Configurable
     void removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set
 };
 
-#endif /* HISTOGRAMVIEWDATASOURCE_H_ */

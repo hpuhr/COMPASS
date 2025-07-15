@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRINGREPRESENTATIONCOMBOBOX_H_
-#define STRINGREPRESENTATIONCOMBOBOX_H_
+#pragma once
 
 #include "dbcontent/variable/variable.h"
 //#include "global.h"
@@ -82,4 +81,3 @@ class StringRepresentationComboBox : public QComboBox
     }
 };
 
-#endif /* STRINGREPRESENTATIONCOMBOBOX_H_ */

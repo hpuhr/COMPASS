@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXREFCOMBOBOX_H
-#define ASTERIXREFCOMBOBOX_H
+#pragma once
 
 #include <jasterix/jasterix.h>
 #include <jasterix/refedition.h>
@@ -82,4 +81,3 @@ class ASTERIXREFEditionComboBox : public QComboBox
     const std::shared_ptr<jASTERIX::Category> category_;
 };
 
-#endif  // ASTERIXREFCOMBOBOX_H

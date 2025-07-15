@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWPOINTSTOOLWIDGET_H
-#define VIEWPOINTSTOOLWIDGET_H
+#pragma once
 
 #include <QCursor>
 #include <QMenu>
@@ -76,4 +75,3 @@ private:
     void showStatusesMenu ();
 };
 
-#endif // VIEWPOINTSTOOLWIDGET_H

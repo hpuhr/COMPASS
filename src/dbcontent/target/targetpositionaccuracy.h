@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_TARGETPOSITIONACCURACY_H
-#define DBCONTENT_TARGETPOSITIONACCURACY_H
+#pragma once
 
 #include <boost/optional.hpp>
 
@@ -38,4 +37,3 @@ boost::optional<TargetPositionAccuracy> getXYPositionAccuracy(
 
 } // namespace dbContent
 
-#endif // DBCONTENT_TARGETPOSITIONACCURACY_H

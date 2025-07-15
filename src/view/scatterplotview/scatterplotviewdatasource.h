@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCATTERPLOTVIEWDATASOURCE_H_
-#define SCATTERPLOTVIEWDATASOURCE_H_
+#pragma once
 
 #include <QObject>
 
@@ -70,4 +69,3 @@ class ScatterPlotViewDataSource : public QObject, public Configurable
     void removeTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name); // only to set
 };
 
-#endif /* SCATTERPLOTVIEWDATASOURCE_H_ */

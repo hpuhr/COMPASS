@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWPOINTSTABLEMODEL_H
-#define VIEWPOINTSTABLEMODEL_H
+#pragma once
 
 #include "viewpoint.h"
 
@@ -129,4 +128,3 @@ private:
     unsigned int max_id_ {0};
 };
 
-#endif // VIEWPOINTSTABLEMODEL_H

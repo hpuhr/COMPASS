@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_DBCONTENTCOMBOBOX_H
-#define DBCONTENT_DBCONTENTCOMBOBOX_H
+#pragma once
 
 #include <QComboBox>
 
@@ -66,4 +65,3 @@ class DBContentComboBox : public QComboBox
     bool allow_meta_ {false};
 };
 
-#endif  // DBCONTENT_DBCONTENTCOMBOBOX_H

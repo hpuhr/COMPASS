@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWPOINT_H
-#define VIEWPOINT_H
+#pragma once
 
 #include "viewabledataconfig.h"
 
@@ -84,4 +83,3 @@ protected:
     void save();
 };
 
-#endif  // VIEWPOINT_H

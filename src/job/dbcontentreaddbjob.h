@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENTREADDBJOB_H_
-#define DBCONTENTREADDBJOB_H_
+#pragma once
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "dbcontent/variable/variableset.h"
@@ -60,4 +59,3 @@ protected:
     boost::posix_time::ptime stop_time_;
 };
 
-#endif /* DBCONTENTREADDBJOB_H_ */

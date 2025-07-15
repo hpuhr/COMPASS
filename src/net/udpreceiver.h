@@ -1,5 +1,4 @@
-#ifndef UDPRECEIVER_H
-#define UDPRECEIVER_H
+#pragma once
 
 #include "datasourcelineinfo.h"
 
@@ -31,4 +30,3 @@ private:
     char* data_ {nullptr};
 };
 
-#endif // UDPRECEIVER_H

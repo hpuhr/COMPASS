@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FORMAT_H
-#define FORMAT_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -46,4 +45,3 @@ class Format : public std::string
     static const std::map<PropertyDataType, std::vector<std::string>> format_options_;
 };
 
-#endif  // FORMAT_H

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UNITSELECTIONWIDGET_H_
-#define UNITSELECTIONWIDGET_H_
+#pragma once
 
 #include <QMenu>
 #include <QPushButton>
@@ -58,4 +57,3 @@ class UnitSelectionWidget : public QPushButton
     void createMenu();
 };
 
-#endif /* UNITSELECTIONWIDGET_H_ */

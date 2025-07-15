@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_VARIABLEORDEREDSETWIDGET_H_
-#define DBCONTENT_VARIABLEORDEREDSETWIDGET_H_
+#pragma once
 
 class QListWidget;
 
@@ -68,4 +67,3 @@ protected:
 
 }
 
-#endif /* DBCONTENT_VARIABLEORDEREDSETWIDGET_H_ */

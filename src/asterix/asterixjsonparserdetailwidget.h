@@ -1,5 +1,4 @@
-#ifndef ASTERIXJSONPARSERDETAILWIDGET_H
-#define ASTERIXJSONPARSERDETAILWIDGET_H
+#pragma once
 
 #include "asterixjsonparser.h"
 
@@ -86,4 +85,3 @@ private:
 
 };
 
-#endif // ASTERIXJSONPARSERDETAILWIDGET_H

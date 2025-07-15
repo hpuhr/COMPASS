@@ -1,5 +1,4 @@
-#ifndef ASTERIXJSONPARSERWIDGET_H
-#define ASTERIXJSONPARSERWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -37,4 +36,3 @@ private:
     virtual void keyPressEvent(QKeyEvent* event);
 };
 
-#endif // ASTERIXJSONPARSERWIDGET_H

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UNIT_H_
-#define UNIT_H_
+#pragma once
 
 #include <cmath>
 #include <map>
@@ -69,4 +68,3 @@ class Unit : public Configurable
     virtual void checkSubConfigurables() {}
 };
 
-#endif /* UNIT_H_ */

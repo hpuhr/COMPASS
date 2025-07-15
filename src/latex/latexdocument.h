@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LATEXDOCUMENT_H
-#define LATEXDOCUMENT_H
+#pragma once
 
 #include "latexcontent.h"
 
@@ -61,4 +60,3 @@ protected:
     std::string footer_right_;
 };
 
-#endif // LATEXDOCUMENT_H

@@ -1,5 +1,4 @@
-#ifndef APPMODE_H
-#define APPMODE_H
+#pragma once
 
 #include <string>
 #include <stdexcept>
@@ -30,4 +29,3 @@ enum class AppState
     Shutdown
 };
 
-#endif // APPMODE_H

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SINGLETON_H_
-#define SINGLETON_H_
+#pragma once
 
 /**
  * @brief Base class for singleton pattern
@@ -44,4 +43,3 @@ class Singleton
     void operator=(Singleton const&);
 };
 
-#endif

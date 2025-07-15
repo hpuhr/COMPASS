@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXCONFIGWIDGET_H
-#define ASTERIXCONFIGWIDGET_H
+#pragma once
 
 #include <jasterix/jasterix.h>
 
@@ -76,4 +75,3 @@ class ASTERIXConfigWidget : public QWidget
     void updateCategories();
 };
 
-#endif  // ASTERIXCONFIGWIDGET_H

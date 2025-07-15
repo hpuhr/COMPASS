@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOVARIABLEDATATYPECOMBOBOX_H_
-#define DBOVARIABLEDATATYPECOMBOBOX_H_
+#pragma once
 
 //#include "dbcontent/variable/variable.h"
 //#include "global.h"
@@ -85,4 +84,3 @@ class VariableDataTypeComboBox : public QComboBox
 
 }
 
-#endif /* DBOVARIABLEDATATYPECOMBOBOX_H_ */

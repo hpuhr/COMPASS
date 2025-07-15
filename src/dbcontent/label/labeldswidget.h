@@ -1,5 +1,4 @@
-#ifndef DBCONTENTLABELDSWIDGET_H
-#define DBCONTENTLABELDSWIDGET_H
+#pragma once
 
 #include "dbcontent/label/labelgenerator.h"
 
@@ -55,4 +54,3 @@ protected:
 
 }
 
-#endif // DBCONTENTLABELDSWIDGET_H

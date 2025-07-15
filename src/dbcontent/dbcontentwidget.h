@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_DBCONTENTWIDGET_H_
-#define DBCONTENT_DBCONTENTWIDGET_H_
+#pragma once
 
 #include <QWidget>
 
@@ -75,4 +74,3 @@ class DBContentWidget : public QWidget
     QGridLayout* dbovars_grid_{nullptr};
 };
 
-#endif /* DBCONTENT_DBCONTENTWIDGET_H_ */

@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_METAVARIABLEDETAILWIDGET_H
-#define DBCONTENT_METAVARIABLEDETAILWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -48,4 +47,3 @@ private:
 
 }
 
-#endif // DBCONTENT_METAVARIABLEDETAILWIDGET_H

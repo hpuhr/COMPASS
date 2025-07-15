@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_SELECTDIALOG_H
-#define DBCONTENT_SELECTDIALOG_H
+#pragma once
 
 #include "dbcontent/dbcontentcombobox.h"
 //#include "textfielddoublevalidator.h"
@@ -79,4 +78,3 @@ class SelectDBContentDialog : public QDialog
 
 }
 
-#endif  // DBCONTENT_SELECTDIALOG_H

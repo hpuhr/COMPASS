@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TRANSFORMATIONJOB_H_
-#define TRANSFORMATIONJOB_H_
+#pragma once
 
 #include "Job.h"
 
@@ -48,4 +47,3 @@ class TransformationJob : public Job
     Transformation* transformation_;
 };
 
-#endif /* TRANSFORMATIONJOB_H_ */

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LATEXIMAGE_H
-#define LATEXIMAGE_H
+#pragma once
 
 #include "latexcontent.h"
 
@@ -35,4 +34,3 @@ protected:
     std::string caption_;
 };
 
-#endif // LATEXIMAGE_H

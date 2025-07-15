@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWPOINTSREPORTGENERATOR_H
-#define VIEWPOINTSREPORTGENERATOR_H
+#pragma once
 
 #include "configurable.h"
 
@@ -110,4 +109,3 @@ protected:
     virtual void checkSubConfigurables();
 };
 
-#endif // VIEWPOINTSREPORTGENERATOR_H

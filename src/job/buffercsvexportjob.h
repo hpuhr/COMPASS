@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BUFFERCSVEXPORTJOB_H
-#define BUFFERCSVEXPORTJOB_H
+#pragma once
 
 #include <memory>
 
@@ -48,4 +47,3 @@ class BufferCSVExportJob : public Job
     boost::posix_time::ptime stop_time_;
 };
 
-#endif  // BUFFERCSVEXPORTJOB_H

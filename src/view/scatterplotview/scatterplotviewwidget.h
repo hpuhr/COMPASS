@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCATTERPLOTVIEWWIDGET_H_
-#define SCATTERPLOTVIEWWIDGET_H_
+#pragma once
 
 #include "variableviewwidget.h"
 
@@ -57,4 +56,3 @@ public:
     ScatterPlotView* getView();
 };
 
-#endif /* SCATTERPLOTVIEWWIDGET_H_ */

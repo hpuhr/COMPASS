@@ -1,5 +1,4 @@
-#ifndef LABELDIRECTION_H
-#define LABELDIRECTION_H
+#pragma once
 
 namespace dbContent
 {
@@ -14,4 +13,3 @@ enum LabelDirection
 
 }
 
-#endif // LABELDIRECTION_H

@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_TARGETREPORTCHAIN_H
-#define DBCONTENT_TARGETREPORTCHAIN_H
+#pragma once
 
 #include "dbcontent/target/targetreportdefs.h"
 #include "dbcontent/target/targetposition.h"
@@ -266,4 +265,3 @@ protected:
 
 } // namespace dbContent
 
-#endif // DBCONTENT_TARGETREPORTCHAIN_H

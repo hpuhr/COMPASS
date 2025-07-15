@@ -1,5 +1,4 @@
-#ifndef DBCONTENTDELETEDBJOB_H
-#define DBCONTENTDELETEDBJOB_H
+#pragma once
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include "job.h"
@@ -45,4 +44,3 @@ protected:
     bool cleanup_db_ = false;
 };
 
-#endif // DBCONTENTDELETEDBJOB_H

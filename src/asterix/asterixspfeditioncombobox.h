@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXSPFEDITIONCOMBOBOX_H
-#define ASTERIXSPFEDITIONCOMBOBOX_H
+#pragma once
 
 #include <jasterix/jasterix.h>
 #include <jasterix/spfedition.h>
@@ -82,4 +81,3 @@ class ASTERIXSPFEditionComboBox : public QComboBox
     const std::shared_ptr<jASTERIX::Category> category_;
 };
 
-#endif  // ASTERIXSPFEDITIONCOMBOBOX_H

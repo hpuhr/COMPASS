@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_VARIABLEEDITDIALOG_H
-#define DBCONTENT_VARIABLEEDITDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -56,4 +55,3 @@ protected:
 
 }
 
-#endif // DBCONTENT_VARIABLEEDITDIALOG_H

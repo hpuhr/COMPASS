@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LISTBOXVIEW_H_
-#define LISTBOXVIEW_H_
+#pragma once
 
 #include "view.h"
 #include "tableviewdatasource.h"
@@ -94,4 +93,3 @@ protected:
     Settings settings_;
 };
 
-#endif /* LISTBOXVIEW_H_ */
