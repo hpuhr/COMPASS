@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTPOSITIONDISTANCERMSCONFIG_H
-#define EVALUATIONREQUIREMENTPOSITIONDISTANCERMSCONFIG_H
+#pragma once
 
 #include "eval/requirement/base/baseconfig.h"
 
@@ -53,4 +52,3 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENTPOSITIONDISTANCERMSCONFIG_H

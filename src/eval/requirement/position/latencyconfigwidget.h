@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTPOSITIONLATENCYCONFIGWIDGET_H
-#define EVALUATIONREQUIREMENTPOSITIONLATENCYCONFIGWIDGET_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
@@ -47,4 +46,3 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENTPOSITIONLATENCYCONFIGWIDGET_H

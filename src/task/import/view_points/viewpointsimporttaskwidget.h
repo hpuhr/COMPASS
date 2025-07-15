@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWPOINTSIMPORTTASKWIDGET_H
-#define VIEWPOINTSIMPORTTASKWIDGET_H
+#pragma once
 
 #include <taskwidget.h>
 
@@ -47,4 +46,3 @@ protected:
 
 };
 
-#endif // VIEWPOINTSIMPORTTASKWIDGET_H

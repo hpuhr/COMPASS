@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_DATASOURCEBASE_H
-#define DBCONTENT_DATASOURCEBASE_H
+#pragma once
 
 #include <json.hpp>
 #include "datasourcelineinfo.h"
@@ -131,4 +130,3 @@ protected:
 
 }
 
-#endif // DBCONTENT_DATASOURCEBASE_H

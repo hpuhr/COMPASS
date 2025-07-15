@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_DBDATASOURCE_H
-#define DBCONTENT_DBDATASOURCE_H
+#pragma once
 
 #include "source/datasourcebase.h"
 #include "property.h"
@@ -98,4 +97,3 @@ protected:
 
 }
 
-#endif // DBCONTENT_DBDATASOURCE_H

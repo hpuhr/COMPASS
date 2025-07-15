@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef GPSIMPORTCSVTASKWIDGET_H
-#define GPSIMPORTCSVTASKWIDGET_H
+#pragma once
 
 #include <taskwidget.h>
 
@@ -93,4 +92,3 @@ protected:
     void addConfigTab();
 };
 
-#endif // GPSIMPORTCSVTASKWIDGET_H

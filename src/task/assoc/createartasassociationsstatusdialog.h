@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CREATEARTASASSOCIATIONSSTATUSDIALOG_H
-#define CREATEARTASASSOCIATIONSSTATUSDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -90,4 +89,3 @@ private:
     void updateDBContentAssociatedGrid();
 };
 
-#endif  // CREATEARTASASSOCIATIONSSTATUSDIALOG_H

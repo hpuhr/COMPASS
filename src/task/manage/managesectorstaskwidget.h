@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MANAGESECTORSTASKWIDGET_H
-#define MANAGESECTORSTASKWIDGET_H
+#pragma once
 
 #include <taskwidget.h>
 
@@ -94,4 +93,3 @@ protected:
                                "Altitude Maximum", "Color", "Delete"};
 };
 
-#endif // MANAGESECTORSTASKWIDGET_H

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FilterEditWidget_H_
-#define FilterEditWidget_H_
+#pragma once
 
 #include <QWidget>
 #include <vector>
@@ -75,4 +74,3 @@ class FilterEditWidget : public QWidget
     void updateConditionsGrid();
 };
 
-#endif /* FilterEditWidget_H_ */

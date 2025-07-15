@@ -1,5 +1,4 @@
-#ifndef IMPORTSECTORDIALOG_H
-#define IMPORTSECTORDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QColor>
@@ -33,4 +32,3 @@ protected:
     QColor color_;
 };
 
-#endif // IMPORTSECTORDIALOG_H

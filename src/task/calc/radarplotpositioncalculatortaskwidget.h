@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_
-#define RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_
+#pragma once
 
 #include <QWidget>
 
@@ -48,4 +47,3 @@ class RadarPlotPositionCalculatorTaskWidget : public QWidget
 
 };
 
-#endif /* RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_ */

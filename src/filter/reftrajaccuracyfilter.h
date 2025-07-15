@@ -1,5 +1,4 @@
-#ifndef REFTRAJACCURCYFILTER_H
-#define REFTRAJACCURCYFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 
@@ -34,4 +33,3 @@ protected:
     virtual DBFilterWidget* createWidget() override;
 };
 
-#endif // REFTRAJACCURCYFILTER_H

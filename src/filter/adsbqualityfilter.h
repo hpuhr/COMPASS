@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ADSBQUALITYFILTER_H
-#define ADSBQUALITYFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 
@@ -151,4 +150,3 @@ protected:
     virtual DBFilterWidget* createWidget() override;
 };
 
-#endif // ADSBQUALITYFILTER_H

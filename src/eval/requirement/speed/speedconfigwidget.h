@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTSPEEDCONFIGWIDGET_H
-#define EVALUATIONREQUIREMENTSPEEDCONFIGWIDGET_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
@@ -63,4 +62,3 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENTSPEEDCONFIGWIDGET_H

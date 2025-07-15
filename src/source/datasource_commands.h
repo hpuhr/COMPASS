@@ -16,8 +16,7 @@
  */
 
 
-#ifndef DATASOURCE_COMMANDS_H
-#define DATASOURCE_COMMANDS_H
+#pragma once
 
 #include "rtcommand/rtcommand.h"
 
@@ -75,4 +74,3 @@ protected:
 
 }
 
-#endif // DATASOURCE_COMMANDS_H

@@ -1,5 +1,4 @@
-#ifndef JSONIMPORTTASKDIALOG_H
-#define JSONIMPORTTASKDIALOG_H
+#pragma once
 
 
 #include <QDialog>
@@ -39,4 +38,3 @@ protected:
     QPushButton* test_button_{nullptr};
 };
 
-#endif // JSONIMPORTTASKDIALOG_H

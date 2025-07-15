@@ -1,5 +1,4 @@
-#ifndef DATASOURCECREATEDIALOG_H
-#define DATASOURCECREATEDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -58,4 +57,3 @@ protected:
     void checkInput();
 };
 
-#endif // DATASOURCECREATEDIALOG_H

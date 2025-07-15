@@ -1,5 +1,4 @@
-#ifndef GPSIMPORTCSVTASKDIALOG_H
-#define GPSIMPORTCSVTASKDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -32,4 +31,3 @@ protected:
     QPushButton* import_button_{nullptr};
 };
 
-#endif // GPSIMPORTCSVTASKDIALOG_H

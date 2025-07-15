@@ -1,5 +1,4 @@
-#ifndef MODECFILTER_H
-#define MODECFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 
@@ -45,4 +44,3 @@ protected:
     virtual DBFilterWidget* createWidget() override;
 };
 
-#endif // MODECFILTER_H

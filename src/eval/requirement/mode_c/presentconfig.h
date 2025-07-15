@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H
-#define EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybaseconfig.h"
 
@@ -48,4 +47,3 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENTMODECPRESENTCONFIG_H

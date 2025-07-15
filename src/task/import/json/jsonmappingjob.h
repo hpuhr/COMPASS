@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JSONMAPPINGJOB_H
-#define JSONMAPPINGJOB_H
+#pragma once
 
 #include <memory>
 #include <vector>
@@ -76,4 +75,3 @@ private:
     void parseASTERIX();
 };
 
-#endif  // JSONMAPPINGJOB_H

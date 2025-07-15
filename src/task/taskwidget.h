@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TASKWIDGET_H
-#define TASKWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -34,4 +33,3 @@ class TaskWidget : public QWidget
     }
 };
 
-#endif  // TASKWIDGET_H

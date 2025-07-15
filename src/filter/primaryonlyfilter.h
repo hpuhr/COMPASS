@@ -1,5 +1,4 @@
-#ifndef PRIMARYONLYFILTER_H
-#define PRIMARYONLYFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 
@@ -29,4 +28,3 @@ protected:
     virtual DBFilterWidget* createWidget() override;
 };
 
-#endif // PRIMARYONLYFILTER_H

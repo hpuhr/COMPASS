@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBFILTERCONDITION_H_
-#define DBFILTERCONDITION_H_
+#pragma once
 
 #include <QObject>
 #include <cassert>
@@ -120,4 +119,3 @@ private:
     bool checkValueInvalid(const std::string& new_value);
 };
 
-#endif /* DBFILTERCONDITION_H_ */

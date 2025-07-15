@@ -1,5 +1,4 @@
-#ifndef AUTORESUMEDIALOG_H
-#define AUTORESUMEDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QTimer>
@@ -30,4 +29,3 @@ protected:
     int time_remaining_ {0};
 };
 
-#endif // AUTORESUMEDIALOG_H

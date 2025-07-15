@@ -1,5 +1,4 @@
-#ifndef ACIDFILTER_H
-#define ACIDFILTER_H
+#pragma once
 
 
 #include "dbfilter.h"
@@ -42,4 +41,3 @@ protected:
     bool updateValuesFromStr(const std::string& values); // returns success
 };
 
-#endif // ACIDFILTER_H

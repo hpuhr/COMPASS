@@ -1,5 +1,4 @@
-#ifndef ACADFILTER_H
-#define ACADFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 
@@ -41,4 +40,3 @@ protected:
     bool updateValuesFromStr(const std::string& values); // returns success
 };
 
-#endif // ACADFILTER_H

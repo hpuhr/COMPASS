@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FilterGeneratorWidget_H_
-#define FilterGeneratorWidget_H_
+#pragma once
 
 #include <QDialog>
 #include <vector>
@@ -76,4 +75,3 @@ class FilterGeneratorWidget : public QWidget
     virtual void closeEvent(QCloseEvent* event);
 };
 
-#endif /* FilterGeneratorWidget_H_ */

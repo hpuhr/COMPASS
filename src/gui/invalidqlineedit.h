@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INVALIDQLINEEDIT_H
-#define INVALIDQLINEEDIT_H
+#pragma once
 
 #include <QLineEdit>
 
@@ -42,4 +41,3 @@ class InvalidQLineEdit : public QLineEdit
     }
 };
 
-#endif  // INVALIDQLINEEDIT_H

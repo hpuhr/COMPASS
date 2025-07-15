@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONRESULTSREPORTTREEITEM_H
-#define EVALUATIONRESULTSREPORTTREEITEM_H
+#pragma once
 
 #include <QVariant>
 
@@ -49,4 +48,3 @@ namespace EvaluationResultsReport
     };
 }
 
-#endif // EVALUATIONRESULTSREPORTTREEITEM_H

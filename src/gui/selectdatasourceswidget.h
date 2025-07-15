@@ -1,5 +1,4 @@
-#ifndef SELECTDATASOURCESWIDGET_H
-#define SELECTDATASOURCESWIDGET_H
+#pragma once
 
 #include <QFrame>
 
@@ -35,4 +34,3 @@ protected:
 
 };
 
-#endif // SELECTDATASOURCESWIDGET_H

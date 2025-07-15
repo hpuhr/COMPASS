@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONSTANDARDROOTITEM_H
-#define EVALUATIONSTANDARDROOTITEM_H
+#pragma once
 
 #include "evaluationstandardtreeitem.h"
 
@@ -37,4 +36,3 @@ protected:
     EvaluationStandard& standard_;
 };
 
-#endif // EVALUATIONSTANDARDROOTITEM_H

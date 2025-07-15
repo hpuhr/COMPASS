@@ -1,5 +1,4 @@
-#ifndef EVALUATIONREQUIREMENPOSITIONDETAIL_H
-#define EVALUATIONREQUIREMENPOSITIONDETAIL_H
+#pragma once
 
 #include "dbcontent/target/targetposition.h"
 
@@ -53,4 +52,3 @@ public:
 };
 }
 
-#endif // EVALUATIONREQUIREMENPOSITIONDETAIL_H

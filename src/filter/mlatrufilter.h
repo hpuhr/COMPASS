@@ -1,5 +1,4 @@
-#ifndef MLATRUFILTER_H
-#define MLATRUFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 
@@ -35,4 +34,3 @@ protected:
     bool updateRUsFromStr(const std::string& values_str); // returns success
 };
 
-#endif // MLATRUFILTER_H
