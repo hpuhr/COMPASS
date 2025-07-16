@@ -438,16 +438,12 @@ void ViewManager::doViewPointAfterLoad ()
         std::string dbcontent_name = dbo_it.first;
 
         if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_))
-//                 ||!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_)
-//                 || !dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_))
         {
             logerr << "ViewManager: doViewPointAfterLoad: required variables missing in " << dbcontent_name;
             continue;
         }
 
         const dbContent::Variable& ts_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
-//        const dbContent::Variable& latitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_);
-//        const dbContent::Variable& longitude_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_);
 
         if (dbcont_man.data().count(dbo_it.first))
         {
@@ -458,10 +454,6 @@ void ViewManager::doViewPointAfterLoad ()
 
             assert(buffer->has<boost::posix_time::ptime>(ts_var.name()));
             NullableVector<boost::posix_time::ptime>& tods = buffer->get<boost::posix_time::ptime>(ts_var.name());
-//            assert(buffer->has<double>(latitude_var.name()));
-//            NullableVector<double>& latitudes = buffer->get<double>(latitude_var.name());
-//            assert(buffer->has<double>(longitude_var.name()));
-//            NullableVector<double>& longitudes = buffer->get<double>(longitude_var.name());
 
             unsigned int buffer_size = buffer->size();
 

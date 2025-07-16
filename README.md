@@ -5,21 +5,18 @@ For a detailed list of features, as well as the offered commercial services, ple
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-## Released COMPASS Version v0.7.5
-- [Release](https://github.com/hpuhr/COMPASS/releases/tag/v0.7.5)
-- [Example Report EUROCAE ED-117A](https://github.com/hpuhr/COMPASS/releases/download/v0.6.2-alpha/example_report-eurocae_ed-117a.pdf)
-- [Improved Offline Map](https://github.com/hpuhr/COMPASS/releases/download/v0.5.4-beta/map_minimal_detailed.zip)
-
+## Released COMPASS Version v0.9.0
+- [Release](https://github.com/hpuhr/COMPASS/releases/tag/v0.9.0)
 
 ## Screenshots
 
-![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss1.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/ss1.png)
 
-![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss3.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/ss3.png)
 
-![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss2.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/ss2.png)
 
-![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/app_ss4.png)
+![alt text](https://github.com/hpuhr/COMPASS/blob/master/doc/screenshots/ss4.png)
 
 ## YouTube Videos
 ### v0.6.2
