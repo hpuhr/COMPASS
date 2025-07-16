@@ -56,7 +56,7 @@ Qt::ItemFlags ScatterSeriesModel::flags(const QModelIndex& index) const
     logdbg << "ScatterSeriesModel: flags: index valid " << index.isValid();
 
     if (!index.isValid())
-        return 0;
+        return Qt::NoItemFlags;
 
     return QAbstractItemModel::flags(index);
 }

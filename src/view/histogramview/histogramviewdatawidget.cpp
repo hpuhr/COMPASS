@@ -619,6 +619,7 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
             return ranges;
         };
+        UNUSED_VARIABLE(obtainRanges);
 
         info[ "result_range_min"      ] = range.first;
         info[ "result_range_max"      ] = range.second;
@@ -639,10 +640,10 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
         {
             nlohmann::json chart_info;
 
-            bool y_axis_log = dynamic_cast<QLogValueAxis*>(chart_view_->chart()->axisY()) != nullptr;
+            bool y_axis_log = dynamic_cast<QLogValueAxis*>(chart_view_->chart()->axes(Qt::Vertical).first()) != nullptr;
 
-            chart_info[ "x_axis_label" ] = chart_view_->chart()->axisX()->titleText().toStdString();
-            chart_info[ "y_axis_label" ] = chart_view_->chart()->axisY()->titleText().toStdString();
+            chart_info[ "x_axis_label" ] = chart_view_->chart()->axes(Qt::Horizontal).first()->titleText().toStdString();
+            chart_info[ "y_axis_label" ] = chart_view_->chart()->axes(Qt::Vertical).first()->titleText().toStdString();
             chart_info[ "y_axis_log"   ] = y_axis_log;
             chart_info[ "num_series"   ] = chart_view_->chart()->series().count();
 

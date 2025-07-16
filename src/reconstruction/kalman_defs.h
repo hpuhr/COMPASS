@@ -406,8 +406,8 @@ struct KalmanUpdate
 
     KalmanState              state;             // kalman internal state, can be used for rts smooting, state interpolation, etc.
     Eigen::Vector2d          projection_center; // center of the local stereographic projection used for this update
-    double                   lat;               // latitude of state position (do not confuse with center of local projection!)
-    double                   lon;               // longitude of state position (do not confuse with center of local projection!)
+    double                   lat{0};               // latitude of state position (do not confuse with center of local projection!)
+    double                   lon{0};               // longitude of state position (do not confuse with center of local projection!)
     boost::posix_time::ptime t;                 // time of update
 
     boost::optional<unsigned long> source_id;    // optional source id

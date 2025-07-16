@@ -341,14 +341,14 @@ void GridViewChart::paintCustomItems(QPaintEvent* event, QPainter& painter)
  */
 void GridViewChart::resetZoom()
 {
-    if (chart() && chart()->axisX() && chart()->axisY())
+    if (chart() && !chart()->axes(Qt::Horizontal).isEmpty() && !chart()->axes(Qt::Vertical).isEmpty())
     {
         const auto& bounds = data_widget_->gridBounds();
 
         if (!bounds.isEmpty())
         {
-            chart()->axisX()->setRange(bounds.x(), bounds.x() + bounds.width());
-            chart()->axisY()->setRange(bounds.y(), bounds.y() + bounds.height());
+            chart()->axes(Qt::Horizontal).first()->setRange(bounds.x(), bounds.x() + bounds.width());
+            chart()->axes(Qt::Vertical).first()->setRange(bounds.y(), bounds.y() + bounds.height());
         }
     }
 }
@@ -357,10 +357,10 @@ void GridViewChart::resetZoom()
  */
 void GridViewChart::zoom(const QPointF& p1, const QPointF& p2)
 {
-    if (chart() && chart()->axisX() && chart()->axisY())
+    if (chart() && !chart()->axes(Qt::Horizontal).isEmpty() && !chart()->axes(Qt::Vertical).isEmpty())
     {
-        chart()->axisX()->setRange(std::min(p1.x(), p2.x()), std::max(p1.x(), p2.x()));
-        chart()->axisY()->setRange(std::min(p1.y(), p2.y()), std::max(p1.y(), p2.y()));
+        chart()->axes(Qt::Horizontal).first()->setRange(std::min(p1.x(), p2.x()), std::max(p1.x(), p2.x()));
+        chart()->axes(Qt::Vertical).first()->setRange(std::min(p1.y(), p2.y()), std::max(p1.y(), p2.y()));
     }
 }
 

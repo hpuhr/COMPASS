@@ -129,7 +129,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (con
     {
         assert (false); // TODO
 
-        bool can_check = true;
+        //bool can_check = true;
 
         //        if (!target_data.canCheckTstMultipleSources())
         //        {

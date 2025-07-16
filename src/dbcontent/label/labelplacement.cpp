@@ -18,7 +18,7 @@
 #include <QDoubleSpinBox>
 #include <QLabel>
 #include <QTimer>
-#include <QTime>
+#include <QElapsedTimer>
 
 /**
  */
@@ -422,8 +422,8 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
         //place labels automatically if desired
         if (mode >= 0)
         {
-            QTime t;
-            t.restart();
+            QElapsedTimer t;
+            t.start();
 
             LabelPlacementEngine::Method    method    = (LabelPlacementEngine::Method)mode;
             label_placement::ForceDirection force_dir = (label_placement::ForceDirection)forceDirCombo->currentData().toInt();
@@ -465,7 +465,7 @@ void LabelPlacementEngine::runTest(const std::vector<TestLabel>& test_labels,
                 l.label.y = l_opt.y;
             }
 
-            loginf << "LabelPlacementEngine: runTest: Auto placement of labels in " << t.restart();
+            loginf << "LabelPlacementEngine: runTest: Auto placement of labels in " << t.elapsed() << "ms";
         }
         
         renderTestFrame(img, labels, config);

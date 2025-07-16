@@ -580,7 +580,7 @@ void ViewPresetItemWidget::createUI()
             sep->setContentsMargins(0, 0, 0, 0);
 
             auto p = sep->palette();
-            p.setColor(QPalette::ColorRole::HighlightedText, p.color(QPalette::ColorRole::Foreground));
+            p.setColor(QPalette::ColorRole::HighlightedText, p.color(QPalette::WindowText));
 
             sep->setPalette(p);
 
@@ -697,7 +697,7 @@ void ViewPresetItemWidget::updateContents()
     preview_label_->setText(preset_->preview.isNull() ? "No preview available" : "");
     preview_label_->setPixmap(preset_->preview.isNull() ? QPixmap() : QPixmap::fromImage(preset_->preview));
 
-    auto col = palette().color(QPalette::ColorRole::Background);
+    auto col = palette().color(QPalette::Window);
     col = QColor(col.red() - 20, col.green() - 20, col.blue() - 20);
 
     QPixmap pm = preset_->deployed ? decorate(QPixmap(Utils::Files::getImageFilepath("ats_transp.png").c_str()), col) : 
@@ -794,7 +794,7 @@ void ViewPresetItemWidget::leaveEvent(QEvent* event)
     if (inside_)
     {
         inside_ = false;
-        main_widget_->setBackgroundRole(QPalette::ColorRole::Background);
+        main_widget_->setBackgroundRole(QPalette::Window);
         main_widget_->setAutoFillBackground(false);
     }
 }

@@ -150,11 +150,12 @@ class Variable : public QObject, public Property, public Configurable
             }
             else if (representation_ == Variable::Representation::CLIMB_DESCENT)
             {
-                if (value == 0)
+                int numeric_value = static_cast<int>(value);
+                if (numeric_value == 0)
                     return "LVL";
-                else if (value == 1)
+                else if (numeric_value == 1)
                     return "CLB";
-                else if (value == 2)
+                else if (numeric_value == 2)
                     return "DSC";
                 else
                     return "UDF";

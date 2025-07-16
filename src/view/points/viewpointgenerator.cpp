@@ -17,6 +17,7 @@
 
 #include "viewpointgenerator.h"
 #include "viewpoint.h"
+#include "global.h"
 
 #include "util/stringconv.h"
 
@@ -612,7 +613,7 @@ std::string ViewPointGenFeatureGeoImage::imageToByteStringWithMetadata(const QIm
     ba.append((const char*)&format, sizeof(int));
     
     //add image data
-    ba.append((const char*)img.bits(), img.byteCount());
+    ba.append((const char*)img.bits(), img.sizeInBytes());
 
     //code base 64
     QString byte_str(ba.toBase64());
@@ -1189,19 +1190,19 @@ namespace
 {
     /**
     */
-    void appendID(std::string& id, const std::string& id_to_add, const std::string& sep)
-    {
-        if (id_to_add.empty())
-            return;
+    // void appendID(std::string& id, const std::string& id_to_add, const std::string& sep)
+    // {
+    //     if (id_to_add.empty())
+    //         return;
 
-        if (id.empty())
-        {
-            id = id_to_add;
-            return;
-        }
+    //     if (id.empty())
+    //     {
+    //         id = id_to_add;
+    //         return;
+    //     }
 
-        id += sep + id_to_add;
-    }
+    //     id += sep + id_to_add;
+    // }
 
     /**
     */

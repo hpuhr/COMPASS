@@ -37,7 +37,7 @@ QVariant FFTTableModel::data(const QModelIndex& index, int role) const
         logdbg << "FFTTableModel: data: display role: row " << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
-        assert (index.row() < fft_man_.getAllFFTNames().size());
+        assert (index.row() < static_cast<int>(fft_man_.getAllFFTNames().size()));
 
         string fft_name = fft_man_.getAllFFTNames().at(index.row());
 
@@ -70,7 +70,7 @@ QVariant FFTTableModel::data(const QModelIndex& index, int role) const
     case Qt::DecorationRole:
     {
         assert (index.row() >= 0);
-        assert (index.row() < fft_man_.getAllFFTNames().size());
+        assert (index.row() < static_cast<int>(fft_man_.getAllFFTNames().size()));
 
         string fft_name = fft_man_.getAllFFTNames().at(index.row());
 
@@ -133,7 +133,7 @@ std::string FFTTableModel::getNameOf (const QModelIndex& index)
     assert (index.isValid());
 
     assert (index.row() >= 0);
-    assert (index.row() < fft_man_.getAllFFTNames().size());
+    assert (index.row() < static_cast<int>(fft_man_.getAllFFTNames().size()));
 
     return fft_man_.getAllFFTNames().at(index.row());
 }
