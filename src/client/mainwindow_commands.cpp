@@ -393,7 +393,7 @@ void RTCommandReconstructReferences::assignVariables_impl(const VariablesMap& va
 RTCommandLoadData::RTCommandLoadData()
     : rtcommand::RTCommand()
 {
-    condition.setSignal("compass.dbcontentmanager.loadingDoneSignal", -1); // think about max duration
+    condition.setSignal("mainwindow.dataLoaded", -1); // think about max duration
 }
 
 bool RTCommandLoadData::run_impl()

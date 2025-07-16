@@ -543,14 +543,14 @@ void GridViewDataWidget::updateRendering()
             {
                 range.first = vmin.value();
 
-                if (vmin.value() > grid_value_max_)
+                if (vmin.value() > grid_value_max_.value())
                     range.second = vmin.value();
             }
             else if (vmax.has_value() && !vmin.has_value())
             {
                 range.second = vmax.value();
 
-                if (vmax.value() < grid_value_min_)
+                if (vmax.value() < grid_value_min_.value())
                     range.first = vmax.value();
             }
             else
