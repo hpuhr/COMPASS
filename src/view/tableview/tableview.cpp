@@ -237,11 +237,8 @@ void TableView::showViewPointSlot (const ViewableDataConfig* vp)
 
 void TableView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params)
 {
-    for (const auto& param : changed_params)
-    {
+    if (changed_params.size())
         widget_->getViewDataWidget()->updateToSettingsChange();
-        break;
-    }
 }
 
 /**

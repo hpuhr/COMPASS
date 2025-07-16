@@ -359,7 +359,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
 
         if (period_max_index_before_ts != -1)
         {
-            for (unsigned int period_cnt=0; period_cnt <= period_max_index_before_ts; ++period_cnt)
+            assert (period_max_index_before_ts >= 0);
+
+            for (unsigned int period_cnt=0; period_cnt <= static_cast<unsigned int>(period_max_index_before_ts); ++period_cnt)
             {
                 if (!finished_periods.count(period_cnt)) // previous not finalized
                 {

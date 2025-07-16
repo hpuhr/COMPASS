@@ -68,7 +68,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         return QVariant();
 
     assert (index.row() >= 0);
-    assert (index.row() < target_data_.size());
+    assert (static_cast<size_t>(index.row()) < target_data_.size());
 
     const Target& target = target_data_.at(index.row());
 
@@ -195,7 +195,7 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
     if (role == Qt::EditRole && index.column() == ColComment) // comment
     {
         assert (index.row() >= 0);
-        assert (index.row() < target_data_.size());
+        assert (static_cast<size_t>(index.row()) < target_data_.size());
 
         auto it = target_data_.begin() + index.row();
 
@@ -334,7 +334,7 @@ const dbContent::Target& TargetModel::getTargetOf (const QModelIndex& index)
     assert (index.isValid());
 
     assert (index.row() >= 0);
-    assert (index.row() < target_data_.size());
+    assert (static_cast<size_t>(index.row()) < target_data_.size());
 
     const dbContent::Target& target = target_data_.at(index.row());
 

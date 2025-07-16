@@ -36,13 +36,13 @@ const std::string Configuration::InstanceID           = "instance_id";
 const std::string Configuration::ClassID              = "class_id";
 const std::string Configuration::SubConfigFilePath    = "path";
 
-namespace
-{
-    std::string instanceIDFromUniqueName(const std::string& class_id, const std::string& unique_name)
-    {
-        return class_id + " " + unique_name;
-    }
-}
+// namespace
+// {
+//     std::string instanceIDFromUniqueName(const std::string& class_id, const std::string& unique_name)
+//     {
+//         return class_id + " " + unique_name;
+//     }
+// }
 
 /*
  *  Initializes members

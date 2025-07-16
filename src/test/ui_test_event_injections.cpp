@@ -271,12 +271,12 @@ bool injectClickEvent(QWidget* root,
             w = scroll_area->viewport();
         
         injectionMsg("widget");
-        QTest::mouseClick(w, button, 0, pos, delay);
+        QTest::mouseClick(w, button, Qt::NoModifier, pos, delay);
     }
     else //window
     {
         injectionMsg("window");
-        QTest::mouseClick(dynamic_cast<QWindow*>(obj.second), button, 0, pos, delay);
+        QTest::mouseClick(dynamic_cast<QWindow*>(obj.second), button, Qt::NoModifier, pos, delay);
     }
 
     return true;
@@ -324,16 +324,16 @@ bool injectRectEvent(QWidget* root,
             w = scroll_area->viewport();
 
         injectionMsg("widget");
-        QTest::mousePress(w, button, 0, pos0, 0);
+        QTest::mousePress(w, button, Qt::NoModifier, pos0, 0);
         QTest::mouseMove(w, pos1, 0);
-        QTest::mouseRelease(w, button, 0, pos1, 0);
+        QTest::mouseRelease(w, button, Qt::NoModifier, pos1, 0);
     }
     else //window
     {
         injectionMsg("window");
-        QTest::mousePress(dynamic_cast<QWindow*>(obj.second), button, 0, pos0, 0);
+        QTest::mousePress(dynamic_cast<QWindow*>(obj.second), button, Qt::NoModifier, pos0, 0);
         QTest::mouseMove(dynamic_cast<QWindow*>(obj.second), pos1, 0);
-        QTest::mouseRelease(dynamic_cast<QWindow*>(obj.second), button, 0, pos1, 0);
+        QTest::mouseRelease(dynamic_cast<QWindow*>(obj.second), button, Qt::NoModifier, pos1, 0);
     }
 
     return true;

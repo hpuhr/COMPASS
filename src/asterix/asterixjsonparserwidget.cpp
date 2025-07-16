@@ -124,7 +124,6 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
         loginf << "ASTERIXJSONParserWidget: keyPressEvent: copy";
 
         unsigned int num_rows = parser_.rowCount();
-        unsigned int num_cols = parser_.columnCount();
 
         std::ostringstream ss;
 

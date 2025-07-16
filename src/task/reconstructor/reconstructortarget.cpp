@@ -97,6 +97,8 @@ void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
         reconstruction::UpdateStats stats;
         bool ok = chain()->reestimate(&stats);
 
+        UNUSED_VARIABLE(ok);
+
         // assert(stats.num_fresh == num_added); //TODO UGAGUGA
         // assert(stats.num_updated >= num_added);
         // assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);

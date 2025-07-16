@@ -367,10 +367,13 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2) /
 
             //TODO: prevent from going nuts when zero rect is passed!
 
-            if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
+            auto axes_x = chart_view_->chart()->axes(Qt::Horizontal);
+            auto axes_y = chart_view_->chart()->axes(Qt::Vertical);
+            
+            if (!axes_x.empty() && !axes_y.empty())
             {
-                setAxisRange(chart_view_->chart()->axisX(), min(p1.x(), p2.x()), max(p1.x(), p2.x()));
-                setAxisRange(chart_view_->chart()->axisY(), min(p1.y(), p2.y()), max(p1.y(), p2.y()));
+                setAxisRange(axes_x.first(), min(p1.x(), p2.x()), max(p1.x(), p2.x()));
+                setAxisRange(axes_y.first(), min(p1.y(), p2.y()), max(p1.y(), p2.y()));
             }
         }
         else if (selected_tool_ == SP_SELECT_TOOL)
@@ -476,7 +479,10 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 
     if (chart_view_ && chart_view_->chart())
     {
-        if (chart_view_->chart()->axisX() && chart_view_->chart()->axisY())
+        auto axes_x = chart_view_->chart()->axes(Qt::Horizontal);
+        auto axes_y = chart_view_->chart()->axes(Qt::Vertical);
+        
+        if (!axes_x.empty() && !axes_y.empty())
         {
             auto bounds = getViewBounds();
             bool bounds_valid = bounds.has_value();
@@ -503,11 +509,12 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 
                 x0 -= bx;
                 y0 -= by;
-                x1 += bx;
-                y1 += by;
 
-                setAxisRange(chart_view_->chart()->axisX(), x0, x1);
-                setAxisRange(chart_view_->chart()->axisY(), y0, y1);
+                setAxisRange(axes_x.first(), x0, x1);
+                setAxisRange(axes_y.first(), y0, y1);
+
+                // setAxisRange(chart_view_->chart()->axisX(), x0, x1);
+                // setAxisRange(chart_view_->chart()->axisY(), y0, y1);
             }
         }
     }
@@ -862,11 +869,11 @@ void ScatterPlotViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
         auto series = chart_view_->chart()->series();
 
-        chart_info[ "x_axis_label" ] = chart_view_->chart()->axisX()->titleText().toStdString();
-        chart_info[ "y_axis_label" ] = chart_view_->chart()->axisY()->titleText().toStdString();
+        auto axis_x = dynamic_cast<QValueAxis*>(chart_view_->chart()->axes(Qt::Horizontal).first());
+        auto axis_y = dynamic_cast<QValueAxis*>(chart_view_->chart()->axes(Qt::Vertical).first());
 
-        auto axis_x = dynamic_cast<QValueAxis*>(chart_view_->chart()->axisX());
-        auto axis_y = dynamic_cast<QValueAxis*>(chart_view_->chart()->axisY());
+        chart_info[ "x_axis_label" ] = axis_x->titleText().toStdString();
+        chart_info[ "y_axis_label" ] = axis_y->titleText().toStdString();
 
         bool   has_axis_bounds = (axis_x != nullptr && axis_y != nullptr);
         QRectF axis_bounds     = has_axis_bounds ? QRectF(axis_x->min(), 

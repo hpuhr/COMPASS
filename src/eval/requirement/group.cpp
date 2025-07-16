@@ -474,7 +474,7 @@ void Group::checkSubConfigurables()
 
 EvaluationStandardTreeItem* Group::child(int row)
 {
-    if (row < 0 || row >= configs_.size())
+    if (row < 0 || row >= static_cast<int>(configs_.size()))
         return nullptr;
 
     return configs_.at(row).get();

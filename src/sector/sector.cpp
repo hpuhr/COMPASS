@@ -119,7 +119,6 @@ void SectorInsideTest::create(const std::vector<std::pair<double,double>>& point
     //!disable antialiasing!
     QPainter p(&img_);
     p.setRenderHint(QPainter::RenderHint::Antialiasing, false);
-    p.setRenderHint(QPainter::RenderHint::HighQualityAntialiasing, false);
 
     QPen pen;
     QBrush brush;
