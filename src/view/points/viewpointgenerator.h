@@ -23,6 +23,7 @@
 #include "grid2dlayer.h"
 #include "plotmetadata.h"
 #include "colorlegend.h"
+#include "grid2drendersettings.h"
 
 #include <memory>
 #include <vector>
@@ -401,6 +402,7 @@ class ViewPointGenFeatureGrid : public ViewPointGenFeature
 {
 public:
     ViewPointGenFeatureGrid(const Grid2DLayer& grid, 
+                            const boost::optional<Grid2DRenderSettings>& render_settings = boost::optional<Grid2DRenderSettings>(),
                             const boost::optional<PlotMetadata>& metadata = boost::optional<PlotMetadata>());
     virtual ~ViewPointGenFeatureGrid() = default;
 
@@ -408,12 +410,14 @@ public:
 
     static const std::string FeatureName;
     static const std::string FeatureGridFieldNameGrid;
+    static const std::string FeatureGridFieldNameRenderSettings;
 
 protected:
     virtual void toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const override;
 
 private:
     Grid2DLayer grid_;
+    boost::optional<Grid2DRenderSettings> render_settings_;
 };
 
 /**

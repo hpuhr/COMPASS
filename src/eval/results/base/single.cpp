@@ -43,9 +43,9 @@ using namespace nlohmann;
 namespace EvaluationRequirementResult
 {
 
-const std::string Single::TRDetailsTableName   = "Target Reports Details";
-
-const std::string Single::TargetOverviewID     = "target_errors_overview";
+const std::string Single::TRDetailsTableName         = "Target Report Details";
+const std::string Single::TRDetailsOverviewTableName = "Target Overview";
+const std::string Single::TargetOverviewID           = "Target Errors Overview";
 
 const int Single::AnnotationPointSizeOverview  = 8;
 const int Single::AnnotationPointSizeHighlight = 12;
@@ -311,14 +311,14 @@ void Single::addTargetToOverviewTable(shared_ptr<ResultReport::Report> report)
 {
     auto& tgt_overview_section = getRequirementSection(report);
 
-    addTargetToOverviewTable(tgt_overview_section, Joined::TargetsTableName);
+    addTargetToOverviewTable(tgt_overview_section, Joined::SectorTargetsTableName);
 
     if (calculator_.settings().report_split_results_by_mops_ || 
         calculator_.settings().report_split_results_by_aconly_ms_) // add to general sum table
     {
         auto& sum_section = report->getSection(getRequirementSumSectionID());
 
-        addTargetToOverviewTable(sum_section, Joined::TargetsTableName);
+        addTargetToOverviewTable(sum_section, Joined::SectorTargetsTableName);
     }
 }
 
@@ -361,11 +361,13 @@ void Single::addTargetDetailsToReport(std::shared_ptr<ResultReport::Report> repo
 
     utn_section.perTargetSection(true); // mark utn section per target
 
-    //generate details overview table
-    if (!utn_req_section.hasTable("details_overview_table"))
-        utn_req_section.addTable("details_overview_table", 3, {"Name", "Comment", "Value"}, false);
+    
 
-    auto& utn_req_table = utn_req_section.getTable("details_overview_table");
+    //generate details overview table
+    if (!utn_req_section.hasTable(TRDetailsOverviewTableName))
+        utn_req_section.addTable(TRDetailsOverviewTableName, 3, {"Name", "Comment", "Value"}, false);
+
+    auto& utn_req_table = utn_req_section.getTable(TRDetailsOverviewTableName);
 
     //add common infos
     auto common_infos = targetInfosCommon();
@@ -642,7 +644,7 @@ std::vector<Single::TargetInfo> Single::targetConditionInfos(bool& failed) const
 bool Single::hasReference (const ResultReport::SectionContentTable& table, 
                            const QVariant& annotation) const
 {
-    if (table.name() == Joined::TargetsTableName && annotation.toUInt() == utn_)
+    if (table.name() == Joined::SectorTargetsTableName && annotation.toUInt() == utn_)
         return true;
     else
         return false;
@@ -677,7 +679,7 @@ bool Single::hasViewableData (const ResultReport::SectionContentTable& table,
                               const QVariant& annotation) const
 {
     //check validity of annotation index
-    if (table.name() == Joined::TargetsTableName && annotation.toUInt() == utn_)
+    if (table.name() == Joined::SectorTargetsTableName && annotation.toUInt() == utn_)
         return true;
     else if (table.name() == TRDetailsTableName && annotation.isValid() && detailIndex(annotation).has_value())
         return true;
@@ -704,7 +706,7 @@ std::shared_ptr<nlohmann::json::object_t> Single::viewableData(const ResultRepor
 
     auto temp_details = temporaryDetails();
 
-    if (table.name() == Joined::TargetsTableName)
+    if (table.name() == Joined::SectorTargetsTableName)
     {
         //return target overview viewable
         return createViewable(AnnotationOptions().overview());

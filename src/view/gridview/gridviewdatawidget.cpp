@@ -20,6 +20,9 @@
 #include "gridview.h"
 #include "gridviewchart.h"
 #include "grid2d.h"
+#include "grid2dlayer.h"
+#include "grid2drendersettings.h"
+#include "grid2dlayerrenderer.h"
 
 #include "viewvariable.h"
 #include "viewpointgenerator.h"

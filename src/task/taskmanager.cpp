@@ -490,6 +490,15 @@ void TaskManager::resultHeaderChanged(const TaskResult& result)
 
 /**
  */
+void TaskManager::resultContentChanged(const TaskResult& result)
+{
+    //update result content upon change
+    auto res = COMPASS::instance().dbInterface().updateResultContent(result);
+    assert(res.ok());
+}
+
+/**
+ */
 MainWindow* TaskManager::getMainWindow()
 {
     for(QWidget* pWidget : QApplication::topLevelWidgets())

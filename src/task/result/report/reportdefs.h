@@ -99,4 +99,11 @@ namespace ResultReport
         int              json_table_max_rows_inline = 0;
         int              json_table_max_cols_inline = 0;
     };
+
+    enum class SectionContentType
+    {
+        Figure = 0,
+        Table,
+        Text
+    };
 }

@@ -122,6 +122,7 @@ public:
                                              task::TaskResultType type);
 
     void resultHeaderChanged(const TaskResult& result);
+    void resultContentChanged(const TaskResult& result);
     
     void setViewableDataConfig(const nlohmann::json::object_t& data);
     void unsetViewableDataConfig();

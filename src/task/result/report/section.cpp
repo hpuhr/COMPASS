@@ -285,14 +285,14 @@ void Section::updateContents(bool recursive)
 */
 bool Section::hasText (const std::string& name)
 {
-    return hasContent(name, SectionContent::ContentType::Text);
+    return hasContent(name, SectionContentType::Text);
 }
 
 /**
 */
 SectionContentText& Section::getText (const std::string& name)
 {
-    auto idx = findContent(name, SectionContent::ContentType::Text);
+    auto idx = findContent(name, SectionContentType::Text);
     assert(idx.has_value());
 
     auto c = loadOrGetContent(idx.value(), false);
@@ -326,21 +326,21 @@ SectionContentText& Section::addText(const std::string& name)
 */
 size_t Section::numTexts() const
 {
-    return numContents(SectionContent::ContentType::Text);
+    return numContents(SectionContentType::Text);
 }
 
 /**
 */
 bool Section::hasTable(const std::string& name)
 {
-    return hasContent(name, SectionContent::ContentType::Table);
+    return hasContent(name, SectionContentType::Table);
 }
 
 /**
 */
 SectionContentTable& Section::getTable(const std::string& name)
 {
-    auto idx = findContent(name, SectionContent::ContentType::Table);
+    auto idx = findContent(name, SectionContentType::Table);
     assert(idx.has_value());
 
     auto c = loadOrGetContent(idx.value(), false);
@@ -358,7 +358,7 @@ std::vector<std::string> Section::getTableNames() const
 {
     std::vector<std::string> names;
 
-    auto idxs = findContents(SectionContent::ContentType::Table);
+    auto idxs = findContents(SectionContentType::Table);
 
     for (auto idx : idxs)
         names.push_back(content_names_.at(idx));
@@ -401,21 +401,21 @@ SectionContentTable& Section::addTable(const std::string& name,
 */
 size_t Section::numTables() const
 {
-    return numContents(SectionContent::ContentType::Table);
+    return numContents(SectionContentType::Table);
 }
 
 /**
 */
 bool Section::hasFigure (const std::string& name)
 {
-    return hasContent(name, SectionContent::ContentType::Figure);
+    return hasContent(name, SectionContentType::Figure);
 }
 
 /**
 */
 SectionContentFigure& Section::getFigure (const std::string& name)
 {
-    auto idx = findContent(name, SectionContent::ContentType::Figure);
+    auto idx = findContent(name, SectionContentType::Figure);
     assert(idx.has_value());
 
     auto c = loadOrGetContent(idx.value(), false);
@@ -472,7 +472,7 @@ std::vector<SectionContentFigure*> Section::getFigures()
 {
     std::vector<SectionContentFigure*> figures;
 
-    auto idxs = findContents(SectionContent::ContentType::Figure);
+    auto idxs = findContents(SectionContentType::Figure);
 
     for (auto idx : idxs)
     {
@@ -492,7 +492,7 @@ std::vector<SectionContentFigure*> Section::getFigures()
 */
 size_t Section::numFigures() const
 {
-    return numContents(SectionContent::ContentType::Figure);
+    return numContents(SectionContentType::Figure);
 }
 
 /**
@@ -652,13 +652,13 @@ Section* Section::findSubSection(const std::string& heading)
 
 /**
 */
-boost::optional<size_t> Section::findContent(const std::string& name, SectionContent::ContentType type) const
+boost::optional<size_t> Section::findContent(const std::string& name, SectionContentType type) const
 {
     for (size_t i = 0; i < content_.size(); ++i)
     {
         //loginf << "name: " << content_names_[ i ] << " vs " << name << " - type: " << content_types_[ i ] << " vs " << (int)type;
 
-        if (content_names_[ i ] == name && (SectionContent::ContentType)content_types_[ i ] == type)
+        if (content_names_[ i ] == name && (SectionContentType)content_types_[ i ] == type)
             return i;
     }
 
@@ -667,7 +667,7 @@ boost::optional<size_t> Section::findContent(const std::string& name, SectionCon
 
 /**
 */
-boost::optional<size_t> Section::findContent(const std::string& name) const
+boost::optional<size_t> Section::findAnyContent(const std::string& name) const
 {
     for (size_t i = 0; i < content_.size(); ++i)
     {
@@ -680,13 +680,13 @@ boost::optional<size_t> Section::findContent(const std::string& name) const
 
 /**
 */
-std::vector<size_t> Section::findContents(SectionContent::ContentType type) const
+std::vector<size_t> Section::findContents(SectionContentType type) const
 {
     std::vector<size_t> idxs;
 
     for (size_t i = 0; i < content_.size(); ++i)
     {
-        if ((SectionContent::ContentType)content_types_[ i ] == type)
+        if ((SectionContentType)content_types_[ i ] == type)
             idxs.push_back(i);
     }
 
@@ -695,21 +695,23 @@ std::vector<size_t> Section::findContents(SectionContent::ContentType type) cons
 
 /**
 */
-bool Section::hasContent(const std::string& name, SectionContent::ContentType type) const
+bool Section::hasContent(const std::string& name, SectionContentType type) const
 {
     return findContent(name, type).has_value();
 }
 
 /**
 */
-bool Section::hasContent(const std::string& name) const
+bool Section::hasAnyContent(const std::string& name) const
 {
-    return findContent(name).has_value();
+    return findAnyContent(name).has_value();
 }
 
-unsigned int Section::contentID(const std::string& name) const
+/**
+ */
+unsigned int Section::contentID(const std::string& name, SectionContentType type) const
 {
-    auto idx = findContent(name);
+    auto idx = findContent(name, type);
     assert(idx.has_value());
 
     return content_ids_.at(idx.value());
@@ -717,12 +719,12 @@ unsigned int Section::contentID(const std::string& name) const
 
 /**
 */
-unsigned int Section::contentInfo(const std::string& name) const
+unsigned int Section::contentInfo(const std::string& name, SectionContentType type) const
 {
     unsigned int flags = 0;
 
     //has content of the given name?
-    auto idx = findContent(name);
+    auto idx = findContent(name, type);
     if (!idx.has_value())
         return flags;
 
@@ -751,13 +753,13 @@ unsigned int Section::contentInfo(const std::string& name) const
 
 /**
 */
-size_t Section::numContents(SectionContent::ContentType type) const
+size_t Section::numContents(SectionContentType type) const
 {
     size_t num = 0;
 
     for (size_t i = 0; i < content_.size(); ++i)
     {
-        if ((SectionContent::ContentType)content_types_[ i ] == type)
+        if ((SectionContentType)content_types_[ i ] == type)
             ++num;
     }
 
@@ -827,7 +829,7 @@ void Section::recreateContentUI(bool force_ui_reset,
             auto c = this->loadOrGetContent(i, false);
             if (c->isOnDemand() &&
                 !c->isLocked() &&
-                c->contentType() == SectionContent::ContentType::Table)
+                c->contentType() == SectionContentType::Table)
             {
                 c->loadOnDemandIfNeeded();
             }

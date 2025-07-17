@@ -50,6 +50,8 @@ class ReportExporter : public QObject
 {
     Q_OBJECT
 public:
+    typedef std::pair<std::string, SectionContentType> Content;
+
     ReportExporter(const ReportExport* report_export,
                    const std::string& export_fn,
                    const std::string& export_resource_dir,
@@ -60,7 +62,7 @@ public:
 
     ResultT<nlohmann::json> exportReport(TaskResult& result,
                                          const std::string& section = "",
-                                         const std::string& content = "");
+                                         const Content& content = Content("", SectionContentType::Table));
 
     virtual ReportExportMode exportMode() const = 0;
 

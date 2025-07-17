@@ -183,6 +183,24 @@ Result EvaluationTaskResult::canUpdate_impl(UpdateState state) const
     return Result::succeeded();
 }
 
+/**
+ */
+Result EvaluationTaskResult::updateContents_impl(const std::vector<ContentID>& contents)
+{
+    //first update eval targets from db targets
+    updateTargets();
+
+    //run base's default contents update
+    auto r = TaskResult::updateContents_impl(contents);
+    if (!r.ok())
+        return r;
+
+    //update result content in db (eval targets changed)
+    syncContent();
+
+    return Result::succeeded();
+}
+
 namespace helpers
 {
     /**
@@ -424,7 +442,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
     {
         //target report details table in single result section
     }
-    else if (table->name() == EvaluationRequirementResult::Joined::TargetsTableName)
+    else if (table->name() == EvaluationRequirementResult::Joined::SectorTargetsTableName)
     {
         //target table in joined result section
         auto info = helpers::joinedResultContentProperties(table);
@@ -521,7 +539,7 @@ void EvaluationTaskResult::postprocessTable_impl(ResultReport::SectionContentTab
     {
         //target report details table in single result section
     }
-    else if (table->name() == EvaluationRequirementResult::Joined::TargetsTableName)
+    else if (table->name() == EvaluationRequirementResult::Joined::SectorTargetsTableName)
     {
         //target table in joined result section
     }
@@ -579,6 +597,8 @@ void EvaluationTaskResult::updateTargets()
 
     for (auto& t : targets_)
         EvaluationTargetData::updateTarget(dbcontent_man, t.second);
+
+    
 }
 
 /**
@@ -660,7 +680,7 @@ void EvaluationTaskResult::setInterestFactorEnabled(const Evaluation::Requiremen
 
     interest_factor_enabled_.at(id.req_name) = ok;
 
-    updateContents({ std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName) });
+    updateContent(TaskResultContentID(EvaluationData::SectionID, EvaluationData::TargetsTableName, ResultReport::SectionContentType::Table));
 }
 
 /**
@@ -671,7 +691,7 @@ void EvaluationTaskResult::setInterestFactorEnabled(const std::string& req_name,
 
     interest_factor_enabled_.at(req_name) = ok;
 
-    updateContents({ std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName) });
+    updateContent(TaskResultContentID(EvaluationData::SectionID, EvaluationData::TargetsTableName, ResultReport::SectionContentType::Table));
 }
 
 /**
@@ -681,7 +701,7 @@ void EvaluationTaskResult::setInterestFactorsEnabled(bool ok)
     for (auto& it : interest_factor_enabled_)
         it.second = ok;
 
-    updateContents({ std::make_pair(EvaluationData::SectionID, EvaluationData::TargetsTableName) });
+    updateContent(TaskResultContentID(EvaluationData::SectionID, EvaluationData::TargetsTableName, ResultReport::SectionContentType::Table));
 }
 
 /**
@@ -842,8 +862,7 @@ void EvaluationTaskResult::informUpdateEvalResult(int update_type)
     TaskResult::ContentID content_id;
     if (update_type == task::ContentUpdateNeeded)
     {
-        content_id = TaskResult::ContentID(EvaluationData::SectionID, EvaluationData::TargetsTableName);
-        updateTargets();
+        content_id = TaskResult::ContentID(EvaluationData::SectionID, EvaluationData::TargetsTableName, ResultReport::SectionContentType::Table);
     }
 
     //inform update

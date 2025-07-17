@@ -114,7 +114,7 @@ ResultT<nlohmann::json> ReportExporter::finalizeExport(TaskResult& result)
  */
 ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
                                                      const std::string& section,
-                                                     const std::string& content)
+                                                     const Content& content)
 {
     loginf << "ReportExporter: exportReport: Exporting result '" << result.name() << "'";
 
@@ -150,12 +150,12 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
 
             section_ptr = &result.report()->getSection(section);
 
-            if (!content.empty())
+            if (!content.first.empty())
             {
-                if (!section_ptr->hasContent(content))
-                    return Result::failed("Content '" + content + "' not found in report section '" + section + "'");
+                if (!section_ptr->hasContent(content.first, content.second))
+                    return Result::failed("Content '" + content.first + "' not found in report section '" + section + "'");
 
-                content_id = section_ptr->contentID(content);
+                content_id = section_ptr->contentID(content.first, content.second);
             }
         }
 

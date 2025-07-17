@@ -101,12 +101,7 @@ struct SectionContentViewable
 class SectionContent : public ReportItem
 {
 public:
-    enum class ContentType
-    {
-        Figure = 0,
-        Table,
-        Text
-    };
+    typedef SectionContentType ContentType;
 
     SectionContent(ContentType type,
                    unsigned int id,

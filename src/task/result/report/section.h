@@ -109,10 +109,12 @@ public:
                                      const SectionContentViewable& viewable);
     std::vector<SectionContentFigure*> getFigures();
     size_t numFigures() const;
+    
+    bool hasAnyContent(const std::string& name) const;
+    bool hasContent(const std::string& name, SectionContentType type) const;
 
-    bool hasContent(const std::string& name) const;
-    unsigned int contentInfo(const std::string& name) const;
-    unsigned int contentID(const std::string& name) const;
+    unsigned int contentInfo(const std::string& name, SectionContentType type) const;
+    unsigned int contentID(const std::string& name, SectionContentType type) const;
 
     std::shared_ptr<SectionContent> retrieveContent(unsigned int id,
                                                     bool show_dialog = false) const;
@@ -165,11 +167,10 @@ protected:
                                const std::string* resource_dir) const override final;
 
     Section* findSubSection (const std::string& heading); // nullptr if not found
-    boost::optional<size_t> findContent(const std::string& name, SectionContent::ContentType type) const;
-    boost::optional<size_t> findContent(const std::string& name) const;
-    std::vector<size_t> findContents(SectionContent::ContentType type) const;
-    bool hasContent(const std::string& name, SectionContent::ContentType type) const;
-    size_t numContents(SectionContent::ContentType type) const;
+    boost::optional<size_t> findContent(const std::string& name, SectionContentType type) const;
+    boost::optional<size_t> findAnyContent(const std::string& name) const;
+    std::vector<size_t> findContents(SectionContentType type) const;
+    size_t numContents(SectionContentType type) const;
 
     void createContentWidget(bool preload_ondemand_contents);
     void recreateContentUI(bool force_ui_reset, 
