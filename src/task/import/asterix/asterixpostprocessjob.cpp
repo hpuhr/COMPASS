@@ -13,9 +13,11 @@ using namespace std;
 using namespace nlohmann;
 using namespace Utils;
 
-
+boost::mutex ASTERIXPostprocessJob::m3a_map_mutex_;
 tbb::concurrent_unordered_map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_m3a_map_;
+boost::mutex ASTERIXPostprocessJob::acad_map_mutex_;
 tbb::concurrent_unordered_map<unsigned int, unsigned int> ASTERIXPostprocessJob::obfuscate_acad_map_;
+boost::mutex ASTERIXPostprocessJob::acid_map_mutex_;
 tbb::concurrent_unordered_map<std::string, std::string> ASTERIXPostprocessJob::obfuscate_acid_map_;
 
 ASTERIXPostprocessJob::ASTERIXPostprocessJob(
@@ -40,6 +42,7 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(
     obfuscate_m3a_map_[512] = 512; // 1000
     obfuscate_m3a_map_[1024] = 1024; // 2000
     obfuscate_m3a_map_[3584] = 3584; // 7000
+    obfuscate_m3a_map_[4094] = 4094; // 7776
     obfuscate_m3a_map_[4095] = 4095; // 7777
 
 }
@@ -591,6 +594,7 @@ void ASTERIXPostprocessJob::doObfuscate()
 
     // filter / change mode 3/a codes
     {
+        boost::mutex::scoped_lock locker(m3a_map_mutex_);
         string var_name;
 
         for (auto& buf_it : buffers_)
@@ -637,6 +641,7 @@ void ASTERIXPostprocessJob::doObfuscate()
 
     // change acads
     {
+        boost::mutex::scoped_lock locker(acad_map_mutex_);
         string var_name;
 
         for (auto& buf_it : buffers_)
@@ -673,6 +678,7 @@ void ASTERIXPostprocessJob::doObfuscate()
 
     // change acids
     {
+        boost::mutex::scoped_lock locker(acid_map_mutex_);
         string var_name;
 
         for (auto& buf_it : buffers_)
