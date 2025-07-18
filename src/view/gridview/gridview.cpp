@@ -332,12 +332,17 @@ boost::optional<double> GridView::getMaxValue() const
  */
 PropertyDataType GridView::currentDataType() const
 {
+    //if annotation is shown, we always use double
+    //@TODO: this should be configurable
+    if (showsAnnotation())
+        return PropertyDataType::DOUBLE;
+
     auto data_type = variable(2).dataType();
 
     //counts are active => always override data type
     if (!data_type.has_value() ||
         settings_.value_type == (int)grid2d::ValueType::ValueTypeCountValid ||
-        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountNan ||
+        settings_.value_type == (int)grid2d::ValueType::ValueTypeCountNan   ||
         settings_.value_type == (int)grid2d::ValueType::ValueTypeCountValid)
     {
         return PropertyDataType::UINT;
@@ -351,6 +356,11 @@ PropertyDataType GridView::currentDataType() const
 */
 PropertyDataType GridView::currentLegendDataType() const
 {
+    //if annotation is shown, we always use double
+    //@TODO: this should be configurable
+    if (showsAnnotation())
+        return PropertyDataType::DOUBLE;
+
     auto data_type = variable(2).dataType();
 
     //counts are active => always override data type

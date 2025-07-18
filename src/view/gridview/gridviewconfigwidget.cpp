@@ -234,6 +234,7 @@ void GridViewConfigWidget::variableChangedEvent(int idx)
 */
 void GridViewConfigWidget::dataSourceChangedEvent()
 {
+    updateVariableDataType();
     updateExport();
     updateUIFromSource();
 }

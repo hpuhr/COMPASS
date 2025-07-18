@@ -597,8 +597,6 @@ void EvaluationTaskResult::updateTargets()
 
     for (auto& t : targets_)
         EvaluationTargetData::updateTarget(dbcontent_man, t.second);
-
-    
 }
 
 /**
