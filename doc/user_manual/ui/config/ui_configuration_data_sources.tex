@@ -35,14 +35,14 @@ However, for CAT010,CAT020 and CAT062 exists the option to project from a Cartes
 \end{itemize}
 \ \\
 
-When a data source is selected in the table, additional details are shown in the right side, where edting is also possible. \\
+When a data source is selected in the table, additional details are shown in the right side, where editing is also possible. \\
 
 Please \textbf{note} that all changes to a data sources are always written to the database as well as the configuration. \\
 
 Depending on the DSType, additional information can be set in a source. For a non-Radar source, the following information is given:
 
 \begin{itemize}
-\item ID: Number indentifier (unique)
+\item ID: Number identifier (unique)
 \item Network Line information
 \begin{itemize}
     \item 4 different lines are possible, each with 
@@ -56,11 +56,11 @@ Depending on the DSType, additional information can be set in a source. For a no
 \end{itemize}
 \ \\
 
-Please note that for using real multicast addressess (inside of 224.0.0.0 to 239.255.255.255), it is recommended to also define the Listen IP to the local address of the network interface to be used. Otherwise the multicast data might not be received, or the wrong network interface might be used, causing COMPASS to receive no data. \\
+Please note that for using real multicast addresses (inside of 224.0.0.0 to 239.255.255.255), it is recommended to also define the Listen IP to the local address of the network interface to be used. Otherwise the multicast data might not be received, or the wrong network interface might be used, causing COMPASS to receive no data. \\
 
 Please note that if e.g. only Multicast IP and port are set, and the Multicast IP is set to a non-multicast one (outside of 224.0.0.0 to 239.255.255.255), a local replay is possible (without real multi-casting). \\
 
-For sources of DSType 'Radar', the follwing additional information should be provided:
+For sources of DSType 'Radar', the following additional information should be provided:
 
 \begin{itemize}
 \item Latitude: Source center position as WGS-84 latitude, as floating point number in degrees, e.g. 42.0001
@@ -73,7 +73,7 @@ Additional optional information can be provided:
 
 \subsubsection{Detection Type}
 
-A detection type can be given of any data source, 'Mode S' is given as default. Currently only 'Primary Ground Only" used during reconstruction, but it is very important to set this type for SMRs, to mitigate sub-optimal association of primary-only target reports in close distances to clutter. \\
+A detection type can be given of any data source, 'Mode S' is given as default. Currently only 'Primary Ground Only' used during reconstruction, but it is very important to set this type for SMRs, to mitigate sub-optimal association of primary-only target reports in close distances to clutter. \\
 
 \begin{figure}[H]
   \center
@@ -91,11 +91,11 @@ A detection type can be given of any data source, 'Mode S' is given as default. 
 
 \begin{itemize}
 \item PSR Minimum: PSR minimum range, in nautical miles
-\item PSR Maxmimum: PSR maximum range, in nautical miles
+\item PSR Maximum: PSR maximum range, in nautical miles
 \item SSR Minimum: SSR minimum range, in nautical miles
-\item SSR Maxmimum: SSR maximum range, in nautical miles
+\item SSR Maximum: SSR maximum range, in nautical miles
 \item Mode S Minimum: Mode S minimum range, in nautical miles
-\item Mode S Maxmimum: Mode S maximum range, in nautical miles
+\item Mode S Maximum: Mode S maximum range, in nautical miles
 \item PSR Azimuth StdDev: PSR azimuth standard deviation, in degrees
 \item PSR Range StdDev: PSR range standard deviation, in meters
 \item SSR Azimuth StdDev: SSR azimuth standard deviation, in degrees
@@ -120,4 +120,4 @@ Using the 4 buttons on the bottom the following functions can be used:
 
 There are two versions of the data sources JSON file used for import/export. Please refer to \nameref{sec:appendix_data_sources}. \\
 
-Using these functions, the configuration data sources can be changed for sensor context switches, or e.g. exported before an COMPASS version upgrade.
+Using these functions, the configuration data sources can be changed for sensor context switches, or e.g. exported before a COMPASS version upgrade.
