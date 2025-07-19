@@ -1,12 +1,11 @@
-
 \section{Command Line Options}
 \label{sec:command_line} 
 
-Several command line options have been added to allow for semi-automated running of tasks or convinient usage. This also allows for (limited) automated batch processing of data. \\
+Several command line options have been added to allow for semi-automated running of tasks or convenient usage. This also allows for (limited) automated batch processing of data. \\
 
 \includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that configuration of the application still has to be performed using the GUI, therefore it is required to set up the application correctly before command line options can be used successfully.\\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note that error or warning message (or related confirmations) will still halt the automatic running of tasks, to ensure that the user is always aware of occuring issues. \\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note that error or warning messages (or related confirmations) will still halt the automatic running of tasks, to ensure that the user is always aware of occurring issues. \\
 
 To get a list of available command line options use e.g.:
 \begin{lstlisting}
@@ -139,7 +138,7 @@ In a nice formatting the string looks like this:
 \end{lstlisting}
 \ \\
 
-Please note the string "10" to identify catgory 010. \\
+Please note the string "10" to identify category 010. \\
 
 For one or a number of categories, the following options can be set:
 
@@ -321,54 +320,3 @@ Uses the given integer as maximum frames-per-second number in Geographic View, a
 
 After the other tasks were run, automatically quits the application.
 
-%TODOV7
-
-% \subsection{Examples}
-% 
-% In this section, a few possible use cases are given.
-% 
-% \subsubsection{Create, Import ASTERIX \& Start}
-% 
-% This command creates a new database, imports ASTERIX data, processess the data and starts the management window.
-% 
-% \begin{lstlisting}
-% ./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --start
-% \end{lstlisting}
-% \ \\
-% 
-% \subsubsection{Open \& Start}
-% 
-% This command opens an existing database and starts the management window.
-% 
-% \begin{lstlisting}
-% ./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --auto_process --start
-% \end{lstlisting}
-% \ \\
-% 
-% \subsubsection{Create, Import multiple ASTERIX \& Start}
-% 
-% This commands create a new database, imports multiple ASTERIX data files, processess the data and starts the management window.
-% 
-% \begin{lstlisting}
-% ./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_asterix /data/test.ff --quit
-% ./COMPASS-release_x86_64.AppImage --open_sqlite3_db /data/test.db --import_asterix /data/test2.ff --auto_process --start
-% \end{lstlisting}
-% \ \\
-% 
-% \subsubsection{Create, Import View Points \& Start}
-% 
-% This command creates a new database, imports ASTERIX data, processess the data and starts the management window.
-% 
-% \begin{lstlisting}
-% ./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --start
-% \end{lstlisting}
-% \ \\
-% 
-% \subsubsection{Create, Import View Points \& Start \& Export as PDF \& Quit}
-% 
-% This command creates a new database, imports ASTERIX data, processess the data, starts the management window and exports the View Points as PDF, and then quits.
-% 
-% \begin{lstlisting}
-% ./COMPASS-release_x86_64.AppImage --create_new_sqlite3_db /data/test.db --import_view_points /data/view_points.json --auto_process --start --export_view_points_report /data/test.db/report.tex --quit
-% \end{lstlisting}
-% \ \\
