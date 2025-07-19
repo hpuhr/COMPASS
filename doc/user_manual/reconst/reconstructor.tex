@@ -1,11 +1,11 @@
 \chapter{Reconstructor}
 \label{sec:reconst} 
 
-The reconstructor associates all available target reports to unique targets, each identifed by a \textbf{U}nique \textbf{T}arget \textbf{N}umber (\textbf{UTN}). For each of the targets, reference trajectories ("optimal" position estimates akin to system track updates) are calculated and written to the database. \\
+The reconstructor associates all available target reports to unique targets, each identified by a \textbf{U}nique \textbf{T}arget \textbf{N}umber (\textbf{UTN}). For each of the targets, reference trajectories ("optimal" position estimates akin to system track updates) are calculated and written to the database. \\
 
 Reference trajectories are calculated based on available sensors and System Trackers, as selected by the user. \\
 
-2 different reconstructors exist, but the advanced reference trajection calculation feature (Probabilistic + IMM Reconstructor) is only available under a commercial professional license. In the free license, a basic reconstructor (Scoring + UMKalman) is available. Please refer to \nameref{sec:ui_configure_licenses} for licensing information. \\
+2 different reconstructors exist, but the advanced reference trajectory calculation feature (Probabilistic + IMM Reconstructor) is only available under a commercial professional license. In the free license, a basic reconstructor (Scoring + UMKalman) is available. Please refer to \nameref{sec:ui_configure_licenses} for licensing information. \\
 
 \begin{itemize}  
    \item Basic: Scoring + UMKalman
@@ -171,7 +171,7 @@ It strongly depends on the correctness of Mode S addresses/identification, as we
 If this information is erroneous, the created association will be sub-optimal or plainly wrong. \\
 
 Also, when associating non-Mode S target reports a trade-off has to be made for the 'Maximum Acceptable Distance' parameter, 
-especially if the target reports are primary-only. The parameter should be set within the limits of Reference/Tracker error plus maximum sensor error (which can still include radar bias'), and the used target separation minima. 
+especially if the target reports are primary-only. The parameter should be set within the limits of Reference/Tracker error plus maximum sensor error (which can still include radar biases), and the used target separation minima. 
 This is of course not well-suited for strongly varied sensors accuracies and separations (e.g. when mixing ground and air surveillance data). \\
 
 \section{Probabilistic + IMM Features}
@@ -182,11 +182,11 @@ Without going into detail, in this section a short overview is given over the ca
 \item Rescaling accuracies
 \begin{itemize}
 \item Assess / verify accuracy of tracked data sources
-\item Assess / verify accuracy of ADS-B position quality indicators, per transponders
+\item Assess / verify accuracy of ADS-B position quality indicators, per transponder
 \item Estimate radar plot position accuracy
 \item Using parameters based models as well as 2D accuracy maps
 \end{itemize}
-\item Correct Radar bias': Estimate and correct azimuth bias, range bias \& gain
+\item Correct Radar biases: Estimate and correct azimuth bias, range bias \& gain
 \item Use ADS-B geometric altitude for slant-range correction
 \begin{itemize}
 \item Method based on published paper: \href{https://doi.org/10.3390/engproc2022028008}{'Usage of Geometric Altitude for Radar Plot Position Improvements' by H. Puhr, MDPI 2022}
