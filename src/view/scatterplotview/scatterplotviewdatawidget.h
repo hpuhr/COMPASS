@@ -107,6 +107,8 @@ private:
     void correctSeriesDateTime(ScatterSeriesCollection& collection);
     void setAxisRange(QtCharts::QAbstractAxis* axis, double vmin, double vmax);
 
+    bool hasChartData() const;
+
     ScatterPlotView*           view_       {nullptr};
     ScatterPlotViewDataSource* data_source_{nullptr};
 

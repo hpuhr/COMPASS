@@ -136,10 +136,12 @@ void ScatterPlotViewDataWidget::resetVariableDisplay()
 */
 bool ScatterPlotViewDataWidget::updateVariableDisplay() 
 {
+    loginf << "ScatterPlotViewDataWidget: updateVariableDisplay";
+
     bool updated = updateChart();
 
-    if (updated)
-        resetZoomSlot();
+    //reset zoom after update
+    resetZoomSlot();
 
     return updated;
 }
@@ -486,7 +488,7 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
         
         if (!axes_x.empty() && !axes_y.empty())
         {
-            auto bounds = getViewBounds();
+            auto bounds       = getViewBounds();
             bool bounds_valid = bounds.has_value();
 
             loginf << "ScatterPlotViewDataWidget: resetZoomSlot:"
@@ -511,12 +513,17 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 
                 x0 -= bx;
                 y0 -= by;
+                x1 += bx;
+                y1 += by;
 
                 setAxisRange(axes_x.first(), x0, x1);
                 setAxisRange(axes_y.first(), y0, y1);
-
-                // setAxisRange(chart_view_->chart()->axisX(), x0, x1);
-                // setAxisRange(chart_view_->chart()->axisY(), y0, y1);
+            }
+            else
+            {
+                // reset to default range
+                setAxisRange(axes_x.first(), 0, 1);
+                setAxisRange(axes_y.first(), 0, 1);
             }
         }
     }
@@ -526,10 +533,17 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 */
 void ScatterPlotViewDataWidget::updateChartSlot()
 {
-    bool updated = updateChart();
+    //trigger redraw without recompute
+    redrawData(false, false);
+}
 
-    if (updated)
-        resetZoomSlot();
+/**
+*/
+bool ScatterPlotViewDataWidget::hasChartData() const
+{
+    //we obtain valid data if a data range is available and if the variables are available in the buffer data
+    //exception: annotation
+    return scatter_series_.numDataSeries() > 0 && (variablesOk() || view_->showsAnnotation());
 }
 
 /**
@@ -549,8 +563,6 @@ bool ScatterPlotViewDataWidget::updateChart()
     chart->setTitle(QString::fromStdString(title_));
 
     // chart->legend()->setAlignment(Qt::AlignRight);
-
-    bool has_data = (scatter_series_.numDataSeries() > 0 && variablesOk());
 
     updateDataSeries(chart);
 
@@ -582,15 +594,14 @@ bool ScatterPlotViewDataWidget::updateChart()
 
     main_layout_->addWidget(chart_view_.get());
 
-    return has_data;
+    return true;
 }
 
 /**
 */
 void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 {
-    //we obtain valid data if a data range is available and if the variables are available in the buffer data
-    bool has_data = (scatter_series_.numDataSeries() > 0 && variablesOk());
+    bool has_data = hasChartData();
 
     //!take care: this functional may assert if it is called when no series has yet been added to the chart!
     auto createAxes = [ & ] ()
@@ -691,6 +702,8 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         assert (chart->axes(Qt::Vertical).size() == 1);
     };
 
+    bool show_default_empty_content = true;
+
     if (has_data)
     {
         //data available
@@ -759,7 +772,8 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
             //const auto& ds = data_series[ i ];
             const auto& ds = series_it.second;
 
-            assert (!ds.scatter_series.points.empty());
+            //PWa: empty series should not be a problem
+            //assert (!ds.scatter_series.points.empty());
 
             QScatterSeries* chart_symbol_series = s.scatter_series;
             chart_symbol_series->setColor(ds.color);
@@ -785,6 +799,9 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
                     assert (chart_line_series);
                     chart_line_series->append(x, y);
                 }
+
+                //visible content
+                show_default_empty_content = false;
             }
 
             chart_symbol_series->setName(ds.name.c_str());
@@ -802,12 +819,14 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         }
 
         //safe to create axes
-        createAxes();
+        if (!show_default_empty_content)
+            createAxes();
     }
-    else
+    
+    if (show_default_empty_content)
     {
         //bad data range or vars not in buffer
-        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no data, size " << getStash().groupedStashes().size();
+        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: content empty";
 
         //no data -> generate default empty layout
         //chart->legend()->setVisible(false);
