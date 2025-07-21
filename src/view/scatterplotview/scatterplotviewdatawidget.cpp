@@ -134,16 +134,16 @@ void ScatterPlotViewDataWidget::resetVariableDisplay()
 
 /**
 */
-bool ScatterPlotViewDataWidget::updateVariableDisplay() 
+ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateVariableDisplay() 
 {
     loginf << "ScatterPlotViewDataWidget: updateVariableDisplay";
 
-    bool updated = updateChart();
+    auto draw_state = updateChart();
 
     //reset zoom after update
     resetZoomSlot();
 
-    return updated;
+    return draw_state;
 }
 
 /**
@@ -539,16 +539,7 @@ void ScatterPlotViewDataWidget::updateChartSlot()
 
 /**
 */
-bool ScatterPlotViewDataWidget::hasChartData() const
-{
-    //we obtain valid data if a data range is available and if the variables are available in the buffer data
-    //exception: annotation
-    return scatter_series_.numDataSeries() > 0 && (variablesOk() || view_->showsAnnotation());
-}
-
-/**
-*/
-bool ScatterPlotViewDataWidget::updateChart()
+ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateChart()
 {
     logdbg << "ScatterPlotViewDataWidget: updateChart";
 
@@ -564,7 +555,7 @@ bool ScatterPlotViewDataWidget::updateChart()
 
     // chart->legend()->setAlignment(Qt::AlignRight);
 
-    updateDataSeries(chart);
+    auto draw_state = updateDataSeries(chart);
 
     chart->update();
 
@@ -594,14 +585,16 @@ bool ScatterPlotViewDataWidget::updateChart()
 
     main_layout_->addWidget(chart_view_.get());
 
-    return true;
+    return draw_state;
 }
 
 /**
 */
-void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
+ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 {
-    bool has_data = hasChartData();
+    bool has_data = scatter_series_.numPoints(true) > 0 && (variablesOk() || view_->showsAnnotation());
+
+    DrawState draw_state = DrawState::NotDrawn;
 
     //!take care: this functional may assert if it is called when no series has yet been added to the chart!
     auto createAxes = [ & ] ()
@@ -799,9 +792,6 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
                     assert (chart_line_series);
                     chart_line_series->append(x, y);
                 }
-
-                //visible content
-                show_default_empty_content = false;
             }
 
             chart_symbol_series->setName(ds.name.c_str());
@@ -819,11 +809,12 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         }
 
         //safe to create axes
-        if (!show_default_empty_content)
-            createAxes();
+        createAxes();
+
+        //content drawn
+        draw_state = DrawState::DrawnContent;
     }
-    
-    if (show_default_empty_content)
+    else
     {
         //bad data range or vars not in buffer
         logdbg << "ScatterPlotViewDataWidget: updateDataSeries: content empty";
@@ -831,10 +822,13 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         //no data -> generate default empty layout
         //chart->legend()->setVisible(false);
 
-        //!add empty series first! (otherwise createAxes() will crash)
-        QScatterSeries* series = new QScatterSeries;
-        chart->addSeries(series);
-
+        //!add at least one series first! (otherwise createAxes() will crash)
+        if (chart->series().isEmpty())
+        {
+            QScatterSeries* series = new QScatterSeries;
+            chart->addSeries(series);
+        }
+        
         createAxes();
 
         chart->axes(Qt::Horizontal).at(0)->setLabelsVisible(false);
@@ -844,7 +838,12 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         chart->axes(Qt::Vertical).at(0)->setLabelsVisible(false);
         chart->axes(Qt::Vertical).at(0)->setGridLineVisible(false);
         chart->axes(Qt::Vertical).at(0)->setMinorGridLineVisible(false);
+
+        //at least we have drawn something
+        draw_state = DrawState::Drawn;
     }
+
+    return draw_state;
 }
 
 /**

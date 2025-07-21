@@ -117,7 +117,7 @@ void VariableViewDataWidget::loadingDone_impl()
 
 /**
 */
-bool VariableViewDataWidget::redrawData_impl(bool recompute)
+ViewDataWidget::DrawState VariableViewDataWidget::redrawData_impl(bool recompute)
 {
     logdbg << "VariableViewDataWidget: redrawData_impl: recompute " << recompute
            << " shows anno " << variable_view_->showsAnnotation();
@@ -144,11 +144,11 @@ bool VariableViewDataWidget::redrawData_impl(bool recompute)
     }
 
     //update display
-    bool drawn = updateVariableDisplay();
+    auto draw_state = updateVariableDisplay();
 
     logdbg << "VariableViewDataWidget: redrawData_impl: end";
 
-    return drawn;
+    return draw_state;
 }
 
 /**

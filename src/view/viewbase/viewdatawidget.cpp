@@ -89,19 +89,21 @@ bool ViewDataWidget::hasContent() const
 }
 
 /**
- * Checks if the view has any visible content (data or annotations) and is drawn.
- * (Note: This is different from hasContent() as it also checks if the view has been drawn.)
+ * Checks if the view has any visible content (data or annotations) which is currently drawn.
+ * (Note: This is different from hasContent() as it also checks if content has been drawn.)
  */
 bool ViewDataWidget::hasVisibleContent() const
 {
-    return hasContent() && isDrawn();
+    return hasContent() && isContentDrawn();
 }
 
 /**
  */
 bool ViewDataWidget::hasScreenshotContent() const
 {
-    return hasVisibleContent();
+    //@TODO: we could also just call hasVisibleContent() here,
+    //then we could detect if content really has been drawn in a meaningful way
+    return hasContent() && isDrawn();
 }
 
 /**
@@ -117,12 +119,20 @@ unsigned int ViewDataWidget::loadedDataCount()
 }
 
 /**
- * Checks if the view currently shows any data.
+ * Checks if the view has been drawn.
  */
 bool ViewDataWidget::isDrawn() const
 {
-    //the view needs to obtain data, and the last redraw needs to be a valid one.
-    return drawn_;
+    return draw_state_ == DrawState::Drawn || 
+           draw_state_ == DrawState::DrawnContent;
+}
+
+/**
+ * Checks if any content has been drawn.
+ */
+bool ViewDataWidget::isContentDrawn() const
+{
+    return draw_state_ == DrawState::DrawnContent;
 }
 
 /**
@@ -255,8 +265,8 @@ void ViewDataWidget::clearData()
 {
     logdbg << "ViewDataWidget: clearData";
 
-    data_  = {};
-    drawn_ = false;
+    data_       = {};
+    draw_state_ = DrawState::NotDrawn;
 
     count_null_.reset();
     count_nan_.reset();
@@ -282,7 +292,7 @@ void ViewDataWidget::clearIntermediateRedrawData()
  * @param notify If set, signals will be emitted before and after the redraw (this is only needed for manual redraws like in ViewLoadStateWidget).
  * @return True if the redraw succeeded.
 */
-bool ViewDataWidget::redrawData(bool recompute, bool notify)
+ViewDataWidget::DrawState ViewDataWidget::redrawData(bool recompute, bool notify)
 {
     loginf << "ViewDataWidget: redrawData: recompute " << recompute << " notify " << notify;
 
@@ -299,7 +309,7 @@ bool ViewDataWidget::redrawData(bool recompute, bool notify)
     }
     
     //invoke derived: redraw and remember if data has been redrawn correctly
-    drawn_ = redrawData_impl(recompute);
+    draw_state_ = redrawData_impl(recompute);
 
     if (recompute)
     {
@@ -319,7 +329,7 @@ bool ViewDataWidget::redrawData(bool recompute, bool notify)
     //signal display changed to whom it may concern
     emit displayChanged();
     
-    return drawn_;
+    return draw_state_;
 }
 
 /**
@@ -381,7 +391,8 @@ nlohmann::json ViewDataWidget::viewInfoJSON() const
     //add general information
     info[ "has_data"            ] = hasData();
     info[ "has_annotations"     ] = hasAnnotations();
-    info[ "is_drawn"            ] = isDrawn();
+    info[ "drawn"               ] = isDrawn();
+    info[ "drawn_content"       ] = isContentDrawn();
     info[ "has_visible_content" ] = hasVisibleContent();
 
     info[ "num_buffers" ] = data_.size();

@@ -139,7 +139,7 @@ void HistogramViewDataWidget::postUpdateVariableDataEvent()
 
 /**
  */
-bool HistogramViewDataWidget::updateVariableDisplay()
+ViewDataWidget::DrawState HistogramViewDataWidget::updateVariableDisplay()
 {
     return updateChart();
 }
@@ -296,11 +296,16 @@ QPixmap HistogramViewDataWidget::renderPixmap()
 
 /**
  */
-bool HistogramViewDataWidget::updateChart()
+ViewDataWidget::DrawState HistogramViewDataWidget::updateChart()
 {
     loginf << "HistogramViewDataWidget: updateChart";
 
+    //check if data is present/valid
+    bool has_data = histogram_raw_.hasData() && (variablesOk() || view_->showsAnnotation());
+
     chart_view_.reset(nullptr);
+
+    ViewDataWidget::DrawState draw_state = ViewDataWidget::DrawState::NotDrawn;
 
     //create chart
     QChart* chart = new QChart();
@@ -356,9 +361,6 @@ bool HistogramViewDataWidget::updateChart()
         chart_series->attachAxis(chart_y_axis);
     };
 
-    //check if data is present/valid
-    bool has_data = histogram_raw_.hasData() && variablesOk();
-
     if (has_data)
     {
         //data available
@@ -405,6 +407,8 @@ bool HistogramViewDataWidget::updateChart()
         max_count = std::max(max_count, (unsigned)1);
 
         generateYAxis(use_log_scale, max_count);
+
+        draw_state = ViewDataWidget::DrawState::DrawnContent;
     }
     else 
     {
@@ -425,6 +429,8 @@ bool HistogramViewDataWidget::updateChart()
         chart_y_axis->setLabelsVisible(false);
         chart_y_axis->setGridLineVisible(false);
         chart_y_axis->setMinorGridLineVisible(false);
+
+        draw_state = ViewDataWidget::DrawState::Drawn;
     }
 
     //update chart
@@ -446,7 +452,7 @@ bool HistogramViewDataWidget::updateChart()
 
     loginf << "HistogramViewDataWidget: updateChart: done";
 
-    return has_data;
+    return draw_state;
 }
 
 /**
