@@ -72,6 +72,40 @@ bool ViewDataWidget::hasData() const
     return !data_.empty();
 }
 
+/**
+ * Checks if the view has any annotations.
+ */
+bool ViewDataWidget::hasAnnotations() const
+{
+    return hasAnnotations_impl();
+}
+
+/**
+ * Checks if the view has any visible content (data or annotations).
+ */
+bool ViewDataWidget::hasContent() const
+{
+    return (hasData() || hasAnnotations());
+}
+
+/**
+ * Checks if the view has any visible content (data or annotations) and is drawn.
+ * (Note: This is different from hasContent() as it also checks if the view has been drawn.)
+ */
+bool ViewDataWidget::hasVisibleContent() const
+{
+    return hasContent() && isDrawn();
+}
+
+/**
+ */
+bool ViewDataWidget::hasScreenshotContent() const
+{
+    return hasVisibleContent();
+}
+
+/**
+ */
 unsigned int ViewDataWidget::loadedDataCount()
 {
     unsigned int count = 0;
@@ -85,7 +119,7 @@ unsigned int ViewDataWidget::loadedDataCount()
 /**
  * Checks if the view currently shows any data.
  */
-bool ViewDataWidget::showsData() const
+bool ViewDataWidget::isDrawn() const
 {
     //the view needs to obtain data, and the last redraw needs to be a valid one.
     return drawn_;
@@ -345,7 +379,11 @@ nlohmann::json ViewDataWidget::viewInfoJSON() const
     nlohmann::json info;
 
     //add general information
-    info[ "has_data"    ] = hasData();
+    info[ "has_data"            ] = hasData();
+    info[ "has_annotations"     ] = hasAnnotations();
+    info[ "is_drawn"            ] = isDrawn();
+    info[ "has_visible_content" ] = hasVisibleContent();
+
     info[ "num_buffers" ] = data_.size();
 
     nlohmann::json buffer_infos = nlohmann::json::array();
@@ -371,7 +409,7 @@ nlohmann::json ViewDataWidget::viewInfoJSON() const
     }
 
     info[ "buffers" ] = buffer_infos;
-
+    
     //add view-specific information
     viewInfoJSON_impl(info);
 

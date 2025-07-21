@@ -264,14 +264,14 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
 
 /**
 */
-void ScatterPlotViewDataWidget::updateFromAnnotations()
+bool ScatterPlotViewDataWidget::updateFromAnnotations()
 {
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations";
 
     bounds_ = {};
 
     if (!view_->hasCurrentAnnotation())
-        return;
+        return false;
 
     const auto& anno = view_->currentAnnotation();
 
@@ -282,12 +282,12 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
     const auto& feature = anno.feature_json;
 
     if (!feature.is_object() || !feature.contains(ViewPointGenFeatureScatterSeries::FeatureHistogramFieldNameScatterSeries))
-        return;
+        return false;
     
     if (!scatter_series_.fromJSON(feature[ ViewPointGenFeatureScatterSeries::FeatureHistogramFieldNameScatterSeries ]))
     {
         scatter_series_.clear();
-        return;
+        return false;
     }
 
     x_axis_is_datetime_ = scatter_series_.commonDataTypeX() == ScatterSeries::DataTypeTimestamp;
@@ -306,6 +306,8 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
     }
 
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
+
+    return true;
 }
 
 /**

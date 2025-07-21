@@ -46,7 +46,7 @@ HistogramViewWidget::HistogramViewWidget(const std::string& class_id, const std:
 
     auto activeIfVariableDataShownCB = [ data_widget, view ] (QAction* a)
     {
-        a->setEnabled(data_widget->showsData() && view->showsVariables());
+        a->setEnabled(data_widget->isDrawn() && view->showsVariables());
     };
 
     getViewToolSwitcher()->addTool(Tool::HG_DEFAULT_TOOL, "", {}, QIcon(), Qt::ArrowCursor);

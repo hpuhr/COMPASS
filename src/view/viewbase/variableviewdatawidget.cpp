@@ -57,6 +57,8 @@ void VariableViewDataWidget::clearData_impl()
     resetIntermediateVariableData();
     resetVariableDisplay();
 
+    shows_annotations_ = false;
+
     logdbg << "VariableViewDataWidget: clearData_impl: end";
 }
 
@@ -70,6 +72,8 @@ void VariableViewDataWidget::clearIntermediateRedrawData_impl()
     //every variable-based view should support these counts, so init them to zero
     addNullCount(0);
     addNanCount(0);
+
+    shows_annotations_ = false;
 }
 
 /**
@@ -124,7 +128,7 @@ bool VariableViewDataWidget::redrawData_impl(bool recompute)
         if (variable_view_->showsAnnotation())
         {
             //update from annotations
-            updateFromAnnotations();
+            shows_annotations_ = updateFromAnnotations();
         }
         else
         {
@@ -156,6 +160,13 @@ void VariableViewDataWidget::liveReload_impl()
     //@TODO: implement live reload for variable based views
 
     logdbg << "VariableViewDataWidget: liveReload_impl: end";
+}
+
+/**
+*/
+bool VariableViewDataWidget::hasAnnotations_impl() const
+{
+    return shows_annotations_;
 }
 
 /**

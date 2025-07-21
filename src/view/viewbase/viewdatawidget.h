@@ -61,8 +61,14 @@ public:
     void liveReload();
 
     bool hasData() const;
+    bool hasAnnotations() const;
+    bool hasContent() const;
+    bool hasVisibleContent() const;
+    bool isDrawn() const;
+
+    virtual bool hasScreenshotContent() const;
+
     unsigned int loadedDataCount();
-    bool showsData() const;
 
     bool isVariableSetLoaded() const;
 
@@ -110,6 +116,7 @@ protected:
     virtual void clearIntermediateRedrawData_impl() = 0;   //implements clearing of any data collected during redraw
     virtual bool redrawData_impl(bool recompute) = 0;      //implements redrawing the display (and possibly needed computations), and returns if the redraw succeeded
     virtual void liveReload_impl() = 0;                    //implements data reload during live running mode
+    virtual bool hasAnnotations_impl() const = 0;          //implements checking if the view has any annotations
 
     virtual void viewInfoJSON_impl(nlohmann::json& info) const {}
 
@@ -117,6 +124,8 @@ protected:
     void addNanCount(size_t n);
 
     void endTool();
+
+    void setDrawn() { drawn_ = true; }
 
     const BufferData& viewData() const { return data_; }
     BufferData& viewData() { return data_; } //exposed because of selection

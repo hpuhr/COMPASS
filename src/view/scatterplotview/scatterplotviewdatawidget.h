@@ -88,7 +88,7 @@ protected:
     virtual bool postLoadTrigger() override final;
     virtual void resetVariableDisplay() override final;
     virtual bool updateVariableDisplay() override final;
-    virtual void updateFromAnnotations() override final;
+    virtual bool updateFromAnnotations() override final;
 
     virtual void processStash(const VariableViewStash<double>& stash) override final;
     virtual void resetStashDependentData() override final;

@@ -829,8 +829,8 @@ std::vector<std::pair<QImage, std::string>> TaskResult::renderFigure(const Resul
         if (view_it.second->classId() == "TableView")
             continue;
         
-        //skip views which show no data
-        if (view_it.second->classId() != "GeographicView" && !view_it.second->showsData())
+        //skip views which show no content
+        if (!view_it.second->hasScreenshotContent())
             continue;
 
         //render view and collect

@@ -146,12 +146,12 @@ bool HistogramViewDataWidget::updateVariableDisplay()
 
 /**
  */
-void HistogramViewDataWidget::updateFromAnnotations()
+bool HistogramViewDataWidget::updateFromAnnotations()
 {
     loginf << "HistogramViewDataWidget: updateFromAnnotations";
 
     if (!view_->hasCurrentAnnotation())
-        return;
+        return false;
 
     const auto& anno = view_->currentAnnotation();
 
@@ -161,12 +161,12 @@ void HistogramViewDataWidget::updateFromAnnotations()
     const auto& feature = anno.feature_json;
 
     if (!feature.is_object() || !feature.contains(ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram))
-        return;
-    
+        return false;
+
     if (!histogram_raw_.fromJSON(feature[ ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram ]))
     {
         histogram_raw_.clear();
-        return;
+        return false;
     }
 
     if (histogram_raw_.useLogScale().has_value())
@@ -176,6 +176,8 @@ void HistogramViewDataWidget::updateFromAnnotations()
     }
 
     loginf << "HistogramViewDataWidget: updateFromAnnotations: done";
+
+    return true;
 }
 
 /**

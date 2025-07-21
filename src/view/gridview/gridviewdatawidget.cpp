@@ -264,12 +264,12 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
 
 /**
 */
-void GridViewDataWidget::updateFromAnnotations()
+bool GridViewDataWidget::updateFromAnnotations()
 {
     loginf << "GridViewDataWidget: updateFromAnnotations";
 
     if (!view_->hasCurrentAnnotation())
-        return;
+        return false;
 
     const auto& anno = view_->currentAnnotation();
 
@@ -280,20 +280,20 @@ void GridViewDataWidget::updateFromAnnotations()
     const auto& feature = anno.feature_json;
 
     if (!feature.is_object() || !feature.contains(ViewPointGenFeatureGrid::FeatureGridFieldNameGrid))
-        return;
+        return false;
 
     std::unique_ptr<Grid2DLayer> layer(new Grid2DLayer);
     if (!layer->fromJSON(feature[ ViewPointGenFeatureGrid::FeatureGridFieldNameGrid ]))
     {
         logerr << "GridViewDataWidget: updateFromAnnotations: could not read grid layer";
-        return;
+        return false;
     }
 
     if (layer->data.cols() < 1 || 
         layer->data.rows() < 1)
     {
         logerr << "GridViewDataWidget: updateFromAnnotations: grid layer empty";
-        return;
+        return false;
     }
     
     grid_layers_.addLayer(std::move(layer));
@@ -313,9 +313,9 @@ void GridViewDataWidget::updateFromAnnotations()
         assert(grid_value_min_.value() <= grid_value_max_.value());
     }
 
-    
-
     loginf << "GridViewDataWidget: updateFromAnnotations: done, generated " << grid_layers_.numLayers() << " layers";
+
+    return true;
 }
 
 /**

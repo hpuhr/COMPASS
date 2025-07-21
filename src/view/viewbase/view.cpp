@@ -370,10 +370,10 @@ QImage View::renderView() const
 /**
  * Asks the data widget if it shows any data.
  */
-bool View::showsData() const
+bool View::hasScreenshotContent() const
 {
     assert (widget_ && widget_->getViewDataWidget());  
-    return widget_->getViewDataWidget()->showsData();
+    return widget_->getViewDataWidget()->hasScreenshotContent();
 }
 
 /**
