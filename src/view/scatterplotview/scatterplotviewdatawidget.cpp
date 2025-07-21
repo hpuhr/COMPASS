@@ -470,6 +470,29 @@ void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, d
 
 /**
 */
+boost::optional<std::pair<double, double>> ScatterPlotViewDataWidget::getAxisRange(QtCharts::QAbstractAxis* axis) const
+{
+    assert(axis);
+
+    //handle datetime axis
+    if (auto axis_dt = dynamic_cast<QDateTimeAxis*>(axis))
+    {
+        QDateTime dt_min = axis_dt->min();
+        QDateTime dt_max = axis_dt->max();
+
+        return std::pair<double, double>(dt_min.toMSecsSinceEpoch(), dt_max.toMSecsSinceEpoch());
+    }
+    else if (auto axis_value = dynamic_cast<QValueAxis*>(axis))
+    {
+        //return value axis range
+        return std::pair<double, double>(axis_value->min(), axis_value->max());
+    }
+
+    return {};
+}
+
+/**
+*/
 ScatterSeriesModel& ScatterPlotViewDataWidget::dataModel()
 {
     return data_model_;
@@ -533,8 +556,44 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 */
 void ScatterPlotViewDataWidget::updateChartSlot()
 {
-    //trigger redraw without recompute
-    redrawData(false, false);
+    //remember current axis ranges if available
+    bool has_axes0 = chart_view_ && 
+                     chart_view_->chart() &&
+                    !chart_view_->chart()->axes(Qt::Horizontal).empty() &&
+                    !chart_view_->chart()->axes(Qt::Vertical).empty();
+
+    boost::optional<std::pair<double, double>> x_range, y_range;
+    if (has_axes0)
+    {
+        x_range = getAxisRange(chart_view_->chart()->axes(Qt::Horizontal).first());
+        y_range = getAxisRange(chart_view_->chart()->axes(Qt::Vertical).first());
+    }
+
+    //redraw chart
+    auto draw_state = updateChart();
+    setDrawState(draw_state);
+
+    //recover original axis ranges if available
+    //(we assume that the type of axes has not changed)
+    bool has_axes1 = chart_view_ && 
+                     chart_view_->chart() &&
+                    !chart_view_->chart()->axes(Qt::Horizontal).empty() &&
+                    !chart_view_->chart()->axes(Qt::Vertical).empty();
+
+    if (has_axes0 && 
+        has_axes1 && 
+        x_range.has_value() &&
+        y_range.has_value())
+    {
+        //set to axes original range
+        setAxisRange(chart_view_->chart()->axes(Qt::Horizontal).first(), x_range.value().first, x_range.value().second);
+        setAxisRange(chart_view_->chart()->axes(Qt::Vertical).first(), y_range.value().first, y_range.value().second);
+    }
+    else
+    {
+        //no valid bounds => just reset zoom
+        resetZoomSlot();
+    }
 }
 
 /**
@@ -694,8 +753,6 @@ ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateDataSeries(QtCharts::
         assert (chart->axes(Qt::Horizontal).size() == 1);
         assert (chart->axes(Qt::Vertical).size() == 1);
     };
-
-    bool show_default_empty_content = true;
 
     if (has_data)
     {
