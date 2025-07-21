@@ -68,7 +68,7 @@ void DBContentReadDBJob::run_impl()
 
     unsigned int cnt = 0;
 
-    ViewManager &view_manager = COMPASS::instance().viewManager();
+    //ViewManager &view_manager = COMPASS::instance().viewManager();
 
     bool last_buffer;
 
@@ -101,7 +101,7 @@ void DBContentReadDBJob::run_impl()
         if (obsolete_)
             break;
 
-        if (!view_manager.isProcessingData() || last_buffer) // distribute data
+        if (last_buffer) // distribute data, !view_manager.isProcessingData() || 
         {
             logdbg << "DBContentReadDBJob: run: " << dbcontent_.name()
                    << ": emitting intermediate read, size " << row_count_;
