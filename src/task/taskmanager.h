@@ -131,6 +131,7 @@ public:
                                                               unsigned int content_id,
                                                               bool show_dialog = false) const;
 
+    void storeBackupSection();
     void restoreBackupSection();
 
     static const bool CleanupDBIfNeeded;

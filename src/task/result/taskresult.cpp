@@ -426,6 +426,10 @@ Result TaskResult::update(bool restore_section,
     if (!r.ok())
         return r;
 
+    //store current section + settings
+    if (restore_section)
+        task_manager_.storeBackupSection();
+
     r = Result::succeeded();
     bool restore_needed = false;
 

@@ -58,6 +58,7 @@ public:
 
     bool hasSection(const std::string& id) const;
     Section& getSection (const std::string& id); // bla:bla2
+    const Section& getSection (const std::string& id) const;
 
     std::vector<std::string> getReportSectionIDs(ReportExportMode* export_mode = nullptr) const;
 

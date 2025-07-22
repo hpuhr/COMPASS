@@ -747,6 +747,14 @@ void TaskManager::clearResults()
 
 /**
  */
+void TaskManager::storeBackupSection()
+{
+    if (widget_)
+        widget_->storeBackupSection();
+}
+
+/**
+ */
 void TaskManager::restoreBackupSection()
 {
     if (widget_)

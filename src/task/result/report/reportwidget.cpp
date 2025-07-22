@@ -18,11 +18,17 @@
 #include <QWidgetAction>
 #include <QApplication>
 #include <QClipboard>
+#include <QScrollBar>
+
+#include <osg/Group>
 
 using namespace Utils;
 
 namespace ResultReport
 {
+
+const std::string ReportWidget::FieldConfigScrollPosV = "container_scroll_pos_v";
+const std::string ReportWidget::FieldConfigScrollPosH = "container_scroll_pos_h";
 
 ReportWidget::ReportWidget(TaskResultsWidget& task_result_widget)
     : QWidget(nullptr), task_result_widget_(task_result_widget)
@@ -93,8 +99,11 @@ void ReportWidget::setReport(const std::shared_ptr<Report>& report)
 
     id_history_.clear();
 
+    current_section_ = nullptr;
+    current_section_label_->setText("");
+
     updateBackButton();
-    updateCurrentSection();
+    updateCurrentSectionLabel();
 
     showResultWidget(nullptr, false);
 }
@@ -104,8 +113,11 @@ void ReportWidget::clear()
     tree_model_.clear();
     id_history_.clear();
 
+    current_section_ = nullptr;
+    current_section_label_->setText("");
+
     updateBackButton();
-    updateCurrentSection();
+    updateCurrentSectionLabel();
 }
 
 void ReportWidget::expand()
@@ -116,7 +128,8 @@ void ReportWidget::expand()
 }
 
 void ReportWidget::selectId (const std::string& id,
-                             bool show_figure)
+                             bool show_figure,
+                             const nlohmann::json& config)
 {
     loginf << "ReportWidget: selectId: id '" << id << "'";
 
@@ -146,13 +159,20 @@ void ReportWidget::selectId (const std::string& id,
 
     if (show_figure)
         showFigure(index);
+
+    if (current_section_ && config.is_object() && !config.empty())
+    {
+        bool ok = configureSection(config);
+        if (ok)
+            loginf << "ReportWidget: selectId: restored config of section '" << id << "'";
+    }
 }
 
 void ReportWidget::reshowLastId ()
 {
     if (id_history_.size() >= 1)
     {
-        selectId(*id_history_.rbegin()); // select last one
+        selectId(*id_history_.rbegin(), false, {}); // select last one
 
         id_history_.pop_back(); // remove re-added id. slightly hacky
     }
@@ -183,7 +203,7 @@ void ReportWidget::triggerItem (const QModelIndex& index,
     }
 
     updateBackButton();
-    updateCurrentSection();
+    updateCurrentSectionLabel();
 }
 
 void ReportWidget::itemClickedSlot(const QModelIndex& index)
@@ -253,13 +273,15 @@ void ReportWidget::stepBackSlot()
     reshowLastId(); // show last id
 
     updateBackButton();
-    updateCurrentSection();
+    updateCurrentSectionLabel();
 }
 
 void ReportWidget::showResultWidget(Section* section, 
                                     bool preload_ondemand_contents)
 {
     assert(results_widget_);
+
+    current_section_ = section;
 
     if (!section)
     {
@@ -275,8 +297,6 @@ void ReportWidget::showResultWidget(Section* section,
         results_widget_->addWidget(widget);
 
     results_widget_->setCurrentWidget(widget);
-
-    auto id = QString::fromStdString(section->id());
 }
 
 void ReportWidget::expandAllParents (QModelIndex index)
@@ -301,14 +321,55 @@ void ReportWidget::updateBackButton ()
     back_button_->setEnabled(id_history_.size() > 1);
 }
 
-void ReportWidget::updateCurrentSection()
+void ReportWidget::updateCurrentSectionLabel()
 {
-    current_section_label_->setText(id_history_.empty() ? "" : QString::fromStdString(id_history_.back()));
+    current_section_label_->setText(current_section_ ? QString::fromStdString(current_section_->id()) : "");
 }
 
-std::string ReportWidget::currentSection() const
+std::string ReportWidget::currentSectionID() const
 {
-    return current_section_label_->text().toStdString();
+    return current_section_ ? current_section_->id() : "";
+}
+
+nlohmann::json ReportWidget::currentSectionConfig() const
+{
+    if (!current_section_)
+        return {};
+
+    auto config = current_section_->jsonConfig();
+    if (!config.is_object() || config.empty())
+        return {};
+
+    config[ FieldConfigScrollPosV ] = tree_view_->verticalScrollBar()->isVisible() ? tree_view_->verticalScrollBar()->value() : -1;
+    config[ FieldConfigScrollPosH ] = tree_view_->horizontalScrollBar()->isVisible() ? tree_view_->horizontalScrollBar()->value() : -1;
+
+    return config;
+}
+
+bool ReportWidget::configureSection(const nlohmann::json& config)
+{
+    if (!current_section_)
+        return false;
+
+    if (!config.is_object() || config.empty())
+        return false;
+
+    if (!config.contains(FieldConfigScrollPosV) || 
+        !config.contains(FieldConfigScrollPosH))
+        return false;
+
+    int scroll_pos_v = config[FieldConfigScrollPosV].get<int>();
+    int scroll_pos_h = config[FieldConfigScrollPosH].get<int>();
+
+    //restore widget scroll positions
+    if (scroll_pos_v >= 0 && tree_view_->verticalScrollBar()->isVisible())
+        tree_view_->verticalScrollBar()->setValue(scroll_pos_v);
+
+    if (scroll_pos_h >= 0 && tree_view_->horizontalScrollBar()->isVisible())
+        tree_view_->horizontalScrollBar()->setValue(scroll_pos_h);
+
+    //configure section
+    return current_section_->configure(config);
 }
 
 boost::optional<nlohmann::json> ReportWidget::getTableData(const std::string& result_id,

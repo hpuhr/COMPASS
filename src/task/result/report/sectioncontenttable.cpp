@@ -45,6 +45,7 @@
 #include <QApplication>
 #include <QInputDialog>
 #include <QThread>
+#include <QScrollBar>
 
 #include <cassert>
 #include <type_traits>
@@ -1297,6 +1298,26 @@ Result SectionContentTable::toJSONDocument_impl(nlohmann::json& j,
     return Result::succeeded();
 }
 
+/**
+ */
+nlohmann::json SectionContentTable::jsonConfig() const
+{
+    if (table_widget_)
+        return table_widget_->jsonConfig();
+
+    return nlohmann::json();
+}
+
+/**
+ */
+bool SectionContentTable::configure(const nlohmann::json& j)
+{
+    if (!table_widget_)
+        return true; // no table widget, nothing to configure
+
+    return table_widget_->configure(j);
+}
+
 /***************************************************************************************************
  * SectionContentTableModel
  ***************************************************************************************************/
@@ -1403,6 +1424,11 @@ void SectionContentTableModel::executeAndReset(const std::function<void()>& func
 
 const int SectionContentTableWidget::DoubleClickCheckIntervalMSecs = 300;
 
+const std::string SectionContentTableWidget::FieldConfigSortColumn = SectionContentTable::FieldSortColumn;
+const std::string SectionContentTableWidget::FieldConfigSortOrder  = SectionContentTable::FieldSortOrder;
+const std::string SectionContentTableWidget::FieldConfigScrollPosV = "scroll_pos_v";
+const std::string SectionContentTableWidget::FieldConfigScrollPosH = "scroll_pos_h";
+
 /**
  */
 SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* content_table, 
@@ -1412,6 +1438,8 @@ SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* conten
                                                      QWidget* parent)
 :   QWidget       (parent       )
 ,   content_table_(content_table)
+,   sort_column_  (sort_column  )
+,   sort_order_   (sort_order   )
 {
     assert(content_table_);
 
@@ -1716,6 +1744,83 @@ void SectionContentTableWidget::updateOptionsMenu()
         options_menu_->clear();
         content_table_->addActionsToMenu(options_menu_);
     }
+}
+
+/**
+ */
+int SectionContentTableWidget::scrollPosV() const
+{
+    if (table_view_ && table_view_->verticalScrollBar()->isVisible())
+        return table_view_->verticalScrollBar()->value();
+    
+    return -1;
+}
+
+/**
+ */
+int SectionContentTableWidget::scrollPosH() const
+{
+    if (table_view_ && table_view_->horizontalScrollBar()->isVisible())
+        return table_view_->horizontalScrollBar()->value();
+    
+    return -1;
+}
+
+/**
+ */
+nlohmann::json SectionContentTableWidget::jsonConfig() const
+{
+    if (!table_view_)
+        return nlohmann::json();
+
+    nlohmann::json j;
+
+    j[ FieldConfigSortOrder  ] = (sort_order_ == Qt::AscendingOrder ? "ascending" : "descending");
+    j[ FieldConfigSortColumn ] = sort_column_;
+    j[ FieldConfigScrollPosV ] = scrollPosV();
+    j[ FieldConfigScrollPosH ] = scrollPosH();
+
+    return j;
+}
+
+/**
+ */
+bool SectionContentTableWidget::configure(const nlohmann::json& j)
+{
+    if (!table_view_)
+        return true; // no table view, nothing to configure
+
+    if (!j.contains(FieldConfigSortOrder) ||
+        !j.contains(FieldConfigSortColumn) ||
+        !j.contains(FieldConfigScrollPosV) ||
+        !j.contains(FieldConfigScrollPosH))
+    {
+        return false;
+    }
+
+    int           sort_column    = j[FieldConfigSortColumn];
+    std::string   sort_order_str = j[FieldConfigSortOrder];   
+    Qt::SortOrder sort_order     = (sort_order_str == "ascending" ? Qt::AscendingOrder : Qt::DescendingOrder);
+    int           scroll_pos_v   = j[FieldConfigScrollPosV];
+    int           scroll_pos_h   = j[FieldConfigScrollPosH];
+
+    //configure sorting
+    bool valid_sorting = sort_column >= 0 && sort_column < table_view_->model()->columnCount();
+    table_view_->setSortingEnabled(valid_sorting);
+    table_view_->sortByColumn(valid_sorting ? sort_column : -1, sort_order);
+
+    //configure vertical scroll bar position
+    if (scroll_pos_v >= 0 && table_view_->verticalScrollBar()->isVisible())
+        table_view_->verticalScrollBar()->setValue(scroll_pos_v);
+
+    //configure horizontal scroll bar position
+    if (scroll_pos_h >= 0 && table_view_->horizontalScrollBar()->isVisible())
+    {
+        loginf << "restoring scrollbar h value " << scroll_pos_h << " (max = " << table_view_->horizontalScrollBar()->maximum() << ")";
+        table_view_->horizontalScrollBar()->setValue(scroll_pos_h);
+    }
+
+    return true;
 }
 
 }

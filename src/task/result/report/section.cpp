@@ -50,6 +50,11 @@ const std::string Section::FieldHiddenContentIDs    = "hidden_content_ids";
 
 const std::string Section::FieldDocContents         = "contents";
 
+const std::string Section::FieldConfigContentConfigs = "content_configs";
+const std::string Section::FieldConfigContentID      = "content_id";
+const std::string Section::FieldConfigContentType    = "content_type";
+const std::string Section::FieldConfigContentConfig  = "content_config";
+
 unsigned int Section::current_content_id_ = 0;
 
 /**
@@ -990,6 +995,105 @@ Result Section::toJSONDocument_impl(nlohmann::json& j,
     j[ FieldDocContents ] = nlohmann::json::array();
     
     return Result::succeeded();
+}
+
+/**
+ */
+nlohmann::json Section::jsonConfig() const
+{
+    nlohmann::json j;
+
+    auto table_ids = findContents(SectionContentType::Table);
+
+    auto contents_configs = nlohmann::json::array();
+
+    for (const auto& c : content_)
+    {
+        //not yet loaded => skip
+        if (!c)
+            continue;
+
+        //get config and check if it has any entries
+        auto config = c->jsonConfig();
+
+        if (config.is_object() && !config.empty())
+        {
+            //obtains non-zero config => remember
+            nlohmann::json j_content = nlohmann::json::object();
+
+            j_content[ FieldConfigContentID      ] = c->id();
+            j_content[ FieldConfigContentType    ] = (int)c->contentType();
+            j_content[ FieldConfigContentConfig  ] = config;
+
+            contents_configs.push_back(j_content);
+        }
+    }
+
+    j[ FieldConfigContentConfigs ] = contents_configs;
+
+    return j;
+}
+
+/**
+ */
+bool Section::configure(const nlohmann::json& j)
+{
+    if (!j.is_object() || 
+        !j.contains(FieldConfigContentConfigs))
+        return false;
+
+    auto content_configs = j[ FieldConfigContentConfigs ];
+    if (!content_configs.is_array())
+        return false;
+
+    bool ok = true;
+
+    for (const auto& j_content : content_configs)
+    {
+        if (!j_content.is_object() || 
+            !j_content.contains(FieldConfigContentID) || 
+            !j_content.contains(FieldConfigContentType) ||
+            !j_content.contains(FieldConfigContentConfig))
+            return false;
+
+        std::string id     = j_content[ FieldConfigContentID ].get<std::string>();
+        auto        type   = (SectionContentType)j_content[ FieldConfigContentType ].get<int>();
+        auto        config = j_content[ FieldConfigContentConfig ];
+
+        //find content of id and type
+        auto it = std::find_if(content_.begin(), content_.end(), [&id, &type] (const auto& c) { return c && c->id() == id && c->contentType() == type; });
+        if (it == content_.end())
+        {
+            //not found => skip
+            logwrn << "Section: configure: Failed to find loaded content with id " << id << " in section " << name();
+            ok = false;
+            continue;
+        }
+
+        size_t idx = std::distance(content_.begin(), it);
+        const auto& c = content_.at(idx);
+        assert(c);
+
+        bool content_available = !c->isLocked() &&
+                                 (!c->isOnDemand() || c->isComplete());
+        if (!content_available)
+        {
+            //not available => skip
+            logwrn << "Section: configure: Content " << c->name() << " of section " << name() << " is not available for configuration";
+            ok = false;
+            continue;
+        }
+        
+        //try to configure content
+        if (!c->configure(config))
+        {
+            logwrn << "Section: configure: Failed to configure content " << c->name() << " of section " << name();
+            ok = false;
+            continue;
+        }
+    }
+
+    return ok;
 }
 
 }

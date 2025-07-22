@@ -137,6 +137,9 @@ public:
     Report* report() { return report_; }
     const Report* report() const { return report_; }
 
+    nlohmann::json jsonConfig() const;
+    bool configure(const nlohmann::json& j);
+
     static const std::string DBTableName;
     static const Property    DBColumnSectionID;
     static const Property    DBColumnReportID;
@@ -153,6 +156,11 @@ public:
     static const std::string FieldHiddenContentIDs;
 
     static const std::string FieldDocContents;
+
+    static const std::string FieldConfigContentConfigs;
+    static const std::string FieldConfigContentID;
+    static const std::string FieldConfigContentType;
+    static const std::string FieldConfigContentConfig;
 
     static void setCurrentContentID(unsigned int id);
 

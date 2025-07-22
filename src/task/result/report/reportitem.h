@@ -44,6 +44,9 @@ public:
     virtual ReportItem* parentItem();
     virtual const ReportItem* parentItem() const;
 
+    virtual nlohmann::json jsonConfig() const { return nlohmann::json(); }
+    virtual bool configure(const nlohmann::json& j) { return false; }
+
     const std::string& name() const;
     const std::string& id() const;
 

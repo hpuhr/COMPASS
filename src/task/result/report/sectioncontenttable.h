@@ -117,7 +117,6 @@ public:
     typedef std::map<std::pair<int,int>, unsigned int> CellStyles;
     typedef std::map<std::string, ColumnGroup>         ColumnGroups;
     
-
     SectionContentTable(unsigned int id,
                         const std::string& name, 
                         unsigned int num_columns,
@@ -191,6 +190,9 @@ public:
     Utils::StringTable toStringTable() const;
     nlohmann::json toJSONTable(bool rowwise = true,
                                const std::vector<int>& cols = std::vector<int>()) const;
+
+    nlohmann::json jsonConfig() const override final;
+    bool configure(const nlohmann::json& j) override final;
 
     static boost::optional<QColor> cellTextColor(unsigned int style);
     static boost::optional<QColor> cellBGColor(unsigned int style);
@@ -352,10 +354,20 @@ public:
     void updateColumnVisibility();
 
     int fromProxy(int proxy_row) const;
+    int scrollPosV() const;
+    int scrollPosH() const;
 
     std::vector<std::string> sortedRowStrings(unsigned int row, bool latex) const;
 
+    nlohmann::json jsonConfig() const;
+    bool configure(const nlohmann::json& j);
+
     static const int DoubleClickCheckIntervalMSecs;
+
+    static const std::string FieldConfigSortColumn;
+    static const std::string FieldConfigSortOrder;
+    static const std::string FieldConfigScrollPosV;
+    static const std::string FieldConfigScrollPosH;
 
 private:
     void clicked(const QModelIndex& index);
@@ -370,6 +382,9 @@ private:
     QTableView*                 table_view_     = nullptr;
     QPushButton*                options_button_ = nullptr;
     QMenu*                      options_menu_   = nullptr;
+
+    int           sort_column_ = -1;
+    Qt::SortOrder sort_order_  = Qt::AscendingOrder;
 
     QTimer click_action_timer_;
     boost::optional<unsigned int> last_clicked_row_index_;

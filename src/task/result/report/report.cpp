@@ -245,6 +245,45 @@ Section& Report::getSection (const std::string& id)
     return *tmp;
 }
 
+const Section& Report::getSection (const std::string& id) const
+{
+    logdbg << "Report: getSection: id '" << id << "'";
+
+    assert (id.size());
+
+    std::string id_in = root_section_->relativeID(id);
+
+    std::vector<std::string> parts = SectionID::subSections(id_in);
+    assert (parts.size());
+
+    Section* tmp = nullptr;
+
+    for (unsigned int cnt=0; cnt < parts.size(); ++cnt)
+    {
+        std::string& heading = parts.at(cnt);
+
+        if (cnt == 0) // first
+        {
+            if (!root_section_->hasSubSection(heading))
+                root_section_->addSubSection(heading);
+
+            tmp = &root_section_->getSubSection(heading);
+        }
+        else // previous section
+        {
+            assert (tmp);
+
+            if (!tmp->hasSubSection(heading))
+                tmp->addSubSection(heading);
+
+            tmp = &tmp->getSubSection(heading);
+        }
+    }
+
+    assert (tmp);
+    return *tmp;
+}
+
 /**
  */
 void Report::toJSON_impl(nlohmann::json& j) const
