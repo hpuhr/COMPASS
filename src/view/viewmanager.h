@@ -125,7 +125,8 @@ class ViewManager : public QObject, public Configurable
     void clearViewPoints();
     void addViewPoints(const std::vector <nlohmann::json>& viewpoints);
 
-    void setCurrentViewPoint (const ViewableDataConfig* viewable);
+    void setCurrentViewPoint (const ViewableDataConfig* viewable, 
+                              bool load_blocking = false);
     void unsetCurrentViewPoint ();
     void doViewPointAfterLoad ();
 

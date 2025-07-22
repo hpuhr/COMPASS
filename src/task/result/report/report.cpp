@@ -323,9 +323,10 @@ Result Report::toJSONDocument_impl(nlohmann::json& j,
 
 /**
  */
-void Report::setCurrentViewable(const nlohmann::json::object_t& data)
+void Report::setCurrentViewable(const nlohmann::json::object_t& data,
+                                bool load_blocking)
 {
-    result_->taskManager().setViewableDataConfig(data);
+    result_->taskManager().setViewableDataConfig(data, load_blocking);
 }
 
 /**

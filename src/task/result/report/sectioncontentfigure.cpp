@@ -119,14 +119,14 @@ void SectionContentFigure::addContentUI(QVBoxLayout* layout,
 
 /**
  */
-void SectionContentFigure::view() const
+bool SectionContentFigure::view(bool load_blocking) const
 {
     loginf << "SectionContentFigure: view: viewing figure '" << name() << "'";
 
     if (isLocked())
     {
         loginf << "SectionContentFigure: view: on-demand figure is locked";
-        return;
+        return false;
     }
 
     auto content = viewableContent();
@@ -134,11 +134,13 @@ void SectionContentFigure::view() const
     {
         loginf << "SectionContentFigure: view: no content";
         report_->unsetCurrentViewable();
-        return;
+        return false;
     }
 
     //view content
-    report_->setCurrentViewable(*content);
+    report_->setCurrentViewable(*content, load_blocking);
+
+    return true;
 }
 
 /**

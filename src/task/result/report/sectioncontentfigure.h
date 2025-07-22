@@ -61,7 +61,7 @@ public:
     virtual void addContentUI(QVBoxLayout* layout,
                               bool force_ui_reset) override;
 
-    void view () const;
+    bool view (bool load_blocking = false) const;
     void executeRenderDelay() const;
 
     FigureType figureType() const { return fig_type_; }

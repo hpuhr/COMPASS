@@ -62,7 +62,8 @@ public:
 
     std::vector<std::string> getReportSectionIDs(ReportExportMode* export_mode = nullptr) const;
 
-    void setCurrentViewable(const nlohmann::json::object_t& data);
+    void setCurrentViewable(const nlohmann::json::object_t& data, 
+                            bool load_blocking = false);
     void unsetCurrentViewable();
     void setCurrentSection(const std::string& section_name, bool show_figure = false);
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 

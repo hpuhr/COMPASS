@@ -348,7 +348,8 @@ void ViewManager::addViewPoints(const std::vector <nlohmann::json>& viewpoints)
     viewPointsWidget()->addViewPoints(viewpoints);
 }
 
-void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
+void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable,
+                                       bool load_blocking)
 {
     if (current_viewable_)
         unsetCurrentViewPoint();
@@ -362,7 +363,10 @@ void ViewManager::setCurrentViewPoint (const ViewableDataConfig* viewable)
 
     emit showViewPointSignal(current_viewable_);
 
-    COMPASS::instance().dbContentManager().load();
+    if (load_blocking)
+        COMPASS::instance().dbContentManager().loadBlocking();
+    else
+        COMPASS::instance().dbContentManager().load();
 }
 
 

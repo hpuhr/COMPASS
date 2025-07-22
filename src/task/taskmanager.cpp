@@ -659,11 +659,12 @@ void TaskManager::databaseClosedSlot()
 
 /**
  */
-void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
+void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data,
+                                        bool load_blocking)
 {
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
 
-    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get(), load_blocking);
 }
 
 /**

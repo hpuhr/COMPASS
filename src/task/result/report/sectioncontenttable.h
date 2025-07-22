@@ -100,14 +100,6 @@ class SectionContentTableWidget;
 class SectionContentTable : public SectionContent
 {
 public:
-    /**
-     */
-    struct ColumnGroup
-    {
-        std::vector<int> columns;
-        bool             enabled = true;
-    };
-
     enum ColumnFlag
     {
         ColumnHidden      = 1 << 0,
@@ -115,7 +107,7 @@ public:
     };
 
     typedef std::map<std::pair<int,int>, unsigned int> CellStyles;
-    typedef std::map<std::string, ColumnGroup>         ColumnGroups;
+    typedef std::map<std::string, TableColumnGroup>    ColumnGroups;
     
     SectionContentTable(unsigned int id,
                         const std::string& name, 
@@ -162,13 +154,12 @@ public:
     unsigned int filteredRowCount () const;
     std::vector<std::string> sortedRowStrings(unsigned int row, bool latex=true) const;
 
-    ColumnGroup& setColumnGroup(const std::string& name, 
-                                const std::vector<int>& columns,
-                                bool enabled = true);
+    TableColumnGroup& setColumnGroup(const std::string& name, 
+                                     const std::vector<size_t>& columns,
+                                     bool enabled = true);
     void enableColumnGroup(const std::string& name,
                            bool ok);
     bool columnGroupEnabled(const std::string& name) const;
-
     bool columnVisible(int column) const;
 
     bool hasReference (unsigned int row) const;
@@ -182,7 +173,7 @@ public:
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
     
-    void clicked(unsigned int row);
+    bool clicked(unsigned int row);
     void doubleClicked(unsigned int row);
     void customContextMenu(unsigned int row, const QPoint& pos);
     void addActionsToMenu(QMenu* menu);
@@ -264,7 +255,7 @@ protected:
     
     void executeCallback(const std::string& name);
 
-    void updateGroupColumns(const ColumnGroup& col_group);
+    void updateGroupColumns(const TableColumnGroup& col_group);
 
     unsigned int               num_columns_ {0};
     std::vector<std::string>   headings_;
@@ -296,8 +287,8 @@ protected:
     mutable std::vector<nlohmann::json> rows_;
     mutable std::vector<RowAnnotation>  annotations_;
     
-    CellStyles                          cell_styles_;
-    std::map<std::string, ColumnGroup>  column_groups_;
+    CellStyles    cell_styles_;
+    ColumnGroups  column_groups_;
 
     mutable SectionContentTableWidget* table_widget_ {nullptr};
 

@@ -787,13 +787,14 @@ std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row,
 
 /**
  */
-SectionContentTable::ColumnGroup& SectionContentTable::setColumnGroup(const std::string& name, 
-                                                                      const std::vector<int>& columns,
-                                                                      bool enabled)
+TableColumnGroup& SectionContentTable::setColumnGroup(const std::string& name, 
+                                                      const std::vector<size_t>& columns,
+                                                      bool enabled)
 {
     auto& col_group = column_groups_[ name ];
 
     col_group         = {};
+    col_group.name    = name;
     col_group.columns = columns;
     col_group.enabled = enabled;
     
@@ -815,7 +816,7 @@ void SectionContentTable::enableColumnGroup(const std::string& name,
 
 /**
  */
-void SectionContentTable::updateGroupColumns(const ColumnGroup& col_group)
+void SectionContentTable::updateGroupColumns(const TableColumnGroup& col_group)
 {
     for (auto col : col_group.columns)
     {
@@ -904,9 +905,14 @@ void SectionContentTable::executeCallback(const std::string& name)
 
 /**
  */
-void SectionContentTable::clicked(unsigned int row)
+bool SectionContentTable::clicked(unsigned int row)
 {
     const auto& annotation = annotations_.at(row);
+
+    //always trigger a blocked load (to regain focus later on)
+    const bool BlockedReload = true;
+
+    bool reload_triggered = false;
 
     //generate on-demand viewable?
     if (annotation.on_demand)
@@ -919,8 +925,14 @@ void SectionContentTable::clicked(unsigned int row)
 
             if (ok)
             {
-                auto content = viewable.viewable_func();
-                report_->setCurrentViewable(*content);
+                QApplication::setOverrideCursor(Qt::WaitCursor);
+                {
+                    auto content = viewable.viewable_func();
+                    report_->setCurrentViewable(*content, BlockedReload);
+
+                    reload_triggered = true;
+                }
+                QApplication::restoreOverrideCursor();
             }
             else
             {
@@ -929,7 +941,7 @@ void SectionContentTable::clicked(unsigned int row)
             }
         }
 
-        return;
+        return reload_triggered;
     }
 
     //obtain figure from annotation
@@ -984,13 +996,19 @@ void SectionContentTable::clicked(unsigned int row)
 
             //show viewable (will now recompute internally if needed)
             //              (might get cancelled if the figure is locked)
-            figure->view();
+            QApplication::setOverrideCursor(Qt::WaitCursor);
+            {
+                reload_triggered = figure->view(BlockedReload);
+            }
+            QApplication::restoreOverrideCursor();
         }
         else
         {
             logerr << "SectionContentTable: clicked: figure could not be retrieved";
         }
     }
+
+    return reload_triggered;
 }
 
 /**
@@ -1483,6 +1501,7 @@ SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* conten
     table_view_->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
     table_view_->setContextMenuPolicy(Qt::CustomContextMenu);
     table_view_->setWordWrap(true);
+    table_view_->setFocusPolicy(Qt::StrongFocus);
 
     table_view_->reset();
 
@@ -1494,7 +1513,7 @@ SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* conten
             this, &SectionContentTableWidget::clicked);
     connect(table_view_, &QTableView::doubleClicked,
             this, &SectionContentTableWidget::doubleClicked);
-        
+    
     //    if (num_columns_ > 5)
     //        table_view_->horizontalHeader()->setMaximumSectionSize(150);
     
@@ -1647,8 +1666,15 @@ void SectionContentTableWidget::performClickAction()
     unsigned int row_index = last_clicked_row_index_.value();
     last_clicked_row_index_.reset();
 
-    //pass row to table
-    content_table_->clicked(row_index);
+    //pass row to table and potentially trigger a viewable
+    bool viewable_triggered = content_table_->clicked(row_index);
+
+    //regain focus lost during potential reload
+    if (viewable_triggered)
+    {
+        QApplication::processEvents();
+        table_view_->setFocus();
+    }
 }
 
 /**

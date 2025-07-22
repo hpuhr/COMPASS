@@ -106,4 +106,17 @@ namespace ResultReport
         Table,
         Text
     };
+
+    struct TableColumnGroup
+    {
+        std::string         name;
+        std::vector<size_t> columns;
+        bool                enabled = true;
+    };
+
+    struct TableHeader
+    {
+        std::vector<std::string>      headings;
+        std::vector<TableColumnGroup> column_groups;
+    };
 }
