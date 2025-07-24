@@ -68,6 +68,9 @@ public:
 
     size_t numSectionsTotal() const { return num_sections_total_; }
     size_t numSectionsExported() const { return num_sections_exported_; }
+
+    double progress() const;
+
     const std::string& status() const { return status_; }
     bool isDone() const { return done_; }
 
@@ -106,6 +109,8 @@ protected:
     virtual bool exportCreatesResources() const { return false; }
     virtual bool exportCreatesInMemoryData() const { return false; } 
     virtual bool exportNeedsRootSection() const { return false; }
+
+    virtual double finalizeFactor() const { return 0.01; }
 
     const std::string& exportFilename() const { return export_fn_; }
     const std::string& exportResourceDir() const { return export_resource_dir_; }

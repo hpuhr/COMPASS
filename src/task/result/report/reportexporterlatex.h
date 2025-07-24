@@ -55,6 +55,8 @@ protected:
     bool exportCreatesInMemoryData() const override final { return false; }
     bool exportNeedsRootSection() const override final { return false; }
 
+    double finalizeFactor() const override final { return write_pdf_ ? 0.1 : 0.01; }
+
 private:
     enum class LatexCmdResult
     {

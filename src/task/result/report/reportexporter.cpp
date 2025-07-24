@@ -281,6 +281,10 @@ Result ReportExporter::visitSection(Section& section,
                 return Result::failed("Contents could not be loaded in section '" + section.name() + "'");
 
             res = visitContent(*c, is_root_section);
+
+            num_contents_exported_[ c->contentType() ] += 1;
+            emit progressChanged();
+
             if (!res.ok())
                 return res;
         }
@@ -402,6 +406,51 @@ std::string ReportExporter::storeFile(ResourceDir dir, const std::string& fn) co
         return "";
 
     return rel_path;
+}
+
+/**
+ */
+double ReportExporter::progress() const
+{
+    double total    = 0.0;
+    double finished = 0.0;
+
+    const double FactorSection = 0.1;
+    const double FactorText    = 0.1;
+    const double FactorTable   = 0.2;
+    const double FactorFigure  = 10.0;
+
+    total    += num_sections_total_    * FactorSection;
+    finished += num_sections_exported_ * FactorSection;
+
+    auto getFactor = [ & ] (SectionContentType t)
+    {
+        if (t == SectionContentType::Figure)
+            return FactorFigure;
+        if (t == SectionContentType::Table)
+            return FactorTable;
+        if (t == SectionContentType::Text)
+            return FactorText;
+
+        return 1.0;
+    };
+
+    for (const auto& it : num_contents_total_)
+    {
+        total += it.second * getFactor(it.first);
+
+        auto it2 = num_contents_exported_.find(it.first);
+        if (it2 != num_contents_exported_.end())
+            finished += it2->second * getFactor(it.first);
+    }
+
+    double part0_progress = total == 0.0 ? 0.0 : finished / total;
+    double part1_progress = isDone() ? 1.0 : 0.0;
+
+    const double part1_factor = finalizeFactor();
+    const double part0_factor = 1.0 - part1_factor;
+
+    return part0_factor * part0_progress + part1_factor * part1_progress;
 }
 
 }
