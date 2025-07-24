@@ -47,7 +47,7 @@ void NullableVector<bool>::setFromFormat(unsigned int index, const std::string& 
                                       const std::string& value_str, bool debug)
 {
     logdbg << "NullableVector " << property_.name() << ": setFromFormat";
-    bool value;
+    bool value{false};
 
     if (format == "invert")
     {
@@ -157,3 +157,4 @@ nlohmann::json NullableVector<boost::posix_time::ptime>::asJSON(unsigned int max
 
     return list;
 }
+

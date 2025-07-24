@@ -536,11 +536,11 @@ void VariableViewStashDataWidget::selectData(double x_min,
         NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
-        std::map<unsigned long, std::vector<unsigned int>> rec_num_indexes =
+        std::map<boost::optional<unsigned long>, std::vector<unsigned int>> rec_num_indexes =
             rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.contentSize());
         // rec_num -> index
 
-        for (const auto rec_num : sel_cont_id_it.second) // iterator over all selected rec_nums
+        for (const auto& rec_num : sel_cont_id_it.second) // iterator over all selected rec_nums
         {
             assert (rec_num_indexes.count(rec_num));
             std::vector<unsigned int>& indexes = rec_num_indexes.at(rec_num);
