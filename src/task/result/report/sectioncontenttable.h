@@ -106,6 +106,11 @@ public:
         ColumnNotExported = 1 << 1
     };
 
+    enum SpecialRole
+    {
+        CellStyleRole = Qt::UserRole + 1
+    };
+
     typedef std::map<std::pair<int,int>, unsigned int> CellStyles;
     typedef std::map<std::string, TableColumnGroup>    ColumnGroups;
     
@@ -151,8 +156,6 @@ public:
     size_t numRows() const;
     size_t numColumns() const;
     const std::vector<std::string>& headings() const;
-    unsigned int filteredRowCount () const;
-    std::vector<std::string> sortedRowStrings(unsigned int row, bool latex=true) const;
 
     TableColumnGroup& setColumnGroup(const std::string& name, 
                                      const std::vector<size_t>& columns,
@@ -171,6 +174,7 @@ public:
     void registerCallBack(const std::string& name, const std::function<void()>& func);
 
     QVariant data(const QModelIndex& index, int role) const;
+    QVariant data(int row, int col, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
     
     bool clicked(unsigned int row);
@@ -178,16 +182,33 @@ public:
     void customContextMenu(unsigned int row, const QPoint& pos);
     void addActionsToMenu(QMenu* menu);
 
-    Utils::StringTable toStringTable() const;
-    nlohmann::json toJSONTable(bool rowwise = true,
-                               const std::vector<int>& cols = std::vector<int>()) const;
-
     nlohmann::json jsonConfig() const override final;
     bool configure(const nlohmann::json& j) override final;
 
+    nlohmann::json exportContent(unsigned int row, 
+                                 unsigned int col,
+                                 ReportExportMode mode,
+                                 bool* ok = nullptr) const;
+    nlohmann::json exportContent(unsigned int row,
+                                 ReportExportMode mode) const;
+    boost::optional<std::vector<nlohmann::json>> exportContent(ReportExportMode mode) const;
+
+    nlohmann::json exportProxyContent(unsigned int row, 
+                                      unsigned int col,
+                                      ReportExportMode mode,
+                                      bool* ok = nullptr) const;
+    nlohmann::json exportProxyContent(unsigned int row,
+                                      ReportExportMode mode) const;
+    boost::optional<std::vector<nlohmann::json>> exportProxyContent(ReportExportMode mode) const;
+
+    unsigned int numProxyRows () const;
+
     static boost::optional<QColor> cellTextColor(unsigned int style);
     static boost::optional<QColor> cellBGColor(unsigned int style);
-    static boost::optional<QIcon> cellIcon(const nlohmann::json& data);
+    static std::string cellTextColorLatex(unsigned int style);
+    static std::string cellBGColorLatex(unsigned int style);
+    static boost::optional<std::pair<std::string, std::string>> cellIconFn(const nlohmann::json& data);
+    static boost::optional<std::pair<QIcon, std::string>> cellIcon(const nlohmann::json& data);
     static boost::optional<bool> cellChecked(const nlohmann::json& data);
     static void cellFont(QFont& font, unsigned int style);
     static bool cellShowsText(unsigned int style);
@@ -232,13 +253,27 @@ public:
     static const QColor ColorBGGray;
     static const QColor ColorBGYellow;
 
+    static const std::string ColorTextLatexRed;
+    static const std::string ColorTextLatexOrange;
+    static const std::string ColorTextLatexGreen;
+    static const std::string ColorTextLatexGray;
+
+    static const std::string ColorBGLatexRed;
+    static const std::string ColorBGLatexOrange;
+    static const std::string ColorBGLatexGreen;
+    static const std::string ColorBGLatexGray;
+    static const std::string ColorBGLatexYellow;
+
+    static const double LatexIconWidth_cm;
+
 protected:
     void clearContent_impl() override final;
 
     void toJSON_impl(nlohmann::json& j) const override final; 
     bool fromJSON_impl(const nlohmann::json& j) override final;
     Result toJSONDocument_impl(nlohmann::json& j,
-                               const std::string* resource_dir) const override final;
+                               const std::string* resource_dir,
+                               ReportExportMode export_style) const override final;
 
     bool loadOnDemand() override final;
 
@@ -289,6 +324,7 @@ protected:
     
     CellStyles    cell_styles_;
     ColumnGroups  column_groups_;
+    unsigned int  latex_ref_column_ = 0;
 
     mutable SectionContentTableWidget* table_widget_ {nullptr};
 
@@ -347,8 +383,6 @@ public:
     int fromProxy(int proxy_row) const;
     int scrollPosV() const;
     int scrollPosH() const;
-
-    std::vector<std::string> sortedRowStrings(unsigned int row, bool latex) const;
 
     nlohmann::json jsonConfig() const;
     bool configure(const nlohmann::json& j);

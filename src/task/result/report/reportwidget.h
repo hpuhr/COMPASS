@@ -51,11 +51,6 @@ public:
     std::string currentSectionID() const;
     nlohmann::json currentSectionConfig() const;
 
-    boost::optional<nlohmann::json> getTableData(const std::string& result_id,
-                                                 const std::string& table_id,
-                                                 bool rowwise = true,
-                                                 const std::vector<int>& cols = std::vector<int>()) const;
-
     void showFigure(const QModelIndex& index);
 
     static const std::string FieldConfigScrollPosV;

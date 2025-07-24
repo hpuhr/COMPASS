@@ -22,6 +22,7 @@
 #include "latexsection.h"
 #include "compass.h"
 #include "licensemanager.h"
+#include "reportdefs.h"
 
 #include <QDateTime>
 
@@ -72,6 +73,8 @@ std::string LatexDocument::toString()
 {
     stringstream ss;
 
+    auto color_defs = ResultReport::Colors::latexCustomColorDefines();
+
     ss << R"(\documentclass[twoside,a4paper]{report}
           \usepackage{geometry}
           \geometry{legalpaper, margin=1.5cm}
@@ -91,9 +94,17 @@ std::string LatexDocument::toString()
           \usepackage{pdflscape}
 
           \usepackage{xcolor}
+          \usepackage[table]{xcolor}
           \definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
-          \definecolor{darkgreen}{rgb}{0.0, 0.5, 0.13}
+          \definecolor{darkgreen}{rgb}{0.0, 0.5, 0.13})";
 
+    ss << "\n";
+
+    //define additional report colors
+    for (const auto& cd : color_defs)
+        ss << "\t  " << cd << "\n";
+
+    ss << R"(
           \usepackage{silence}
 
           \pagestyle{fancy}       % Set the page style to fancy

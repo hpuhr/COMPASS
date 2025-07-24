@@ -56,7 +56,15 @@ protected:
     bool exportNeedsRootSection() const override final { return false; }
 
 private:
+    enum class LatexCmdResult
+    {
+        Handled = 0,
+        Skipped
+    };
+
     Result writePDF() const;
+
+    ResultT<LatexCmdResult> handleLatexCommand(std::string& cmd) const;
 
     bool write_pdf_ = false;
 

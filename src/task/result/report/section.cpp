@@ -502,19 +502,19 @@ size_t Section::numFigures() const
 
 /**
 */
-unsigned int Section::numSections() const
+unsigned int Section::totalNumSections() const
 {
     unsigned int num = 1; // me
 
     for (auto& sec_it : sub_sections_)
-        num += sec_it->numSections();
+        num += sec_it->totalNumSections();
 
     return num;
 }
 
 /**
 */
-unsigned int Section::numSections(const std::function<bool(const Section&)>& func) const
+unsigned int Section::totalNumSections(const std::function<bool(const Section&)>& func) const
 {
     if (!func(*this))
         return 0;
@@ -522,55 +522,50 @@ unsigned int Section::numSections(const std::function<bool(const Section&)>& fun
     unsigned int num = 1; // me
 
     for (auto& sec_it : sub_sections_)
-        num += sec_it->numSections(func);
+        num += sec_it->totalNumSections(func);
 
     return num;
 }
 
 /**
 */
-void Section::addSectionsFlat(std::vector<std::shared_ptr<Section>>& result, 
-                              bool include_target_details,
-                              bool report_skip_targets_wo_issues)
+std::map<SectionContentType, unsigned int> Section::totalNumContents() const
 {
-    //@TODO
-    // if (!include_target_details && compoundHeading() == SectionID::targetResultsID())
-    //     return;
+    std::map<SectionContentType, unsigned int> counts;
 
-    // if (report_skip_targets_wo_issues && perTargetSection())
-    // {
-    //     if (perTargetWithIssues())
-    //     {
-    //         logdbg << "Section: addSectionsFlat: not skipping section " << compoundHeading();
-    //     }
-    //     else
-    //     {
-    //         logdbg << "Section: addSectionsFlat: skipping section " << compoundHeading();
-    //         return;
-    //     }
-    // }
+    for (size_t i = 0; i < content_types_.size(); ++i)
+        counts[(SectionContentType)content_types_[i]]++;
 
-    // for (auto& sec_it : sub_sections_)
-    // {
-    //     if (!include_target_details && sec_it->compoundHeading() == SectionID::targetResultsID())
-    //         continue;
+    for (const auto& sec_it : sub_sections_)
+    {
+        auto sub_counts = sec_it->totalNumContents();
+        for (const auto& it : sub_counts)
+            counts[it.first] += it.second;
+    }
 
-    //     if (report_skip_targets_wo_issues && sec_it->perTargetSection())
-    //     {
-    //         if (sec_it->perTargetWithIssues())
-    //         {
-    //                 logdbg << "Section: addSectionsFlat: not skipping sub-section " << compoundHeading();
-    //         }
-    //         else
-    //         {
-    //             logdbg << "Section: addSectionsFlat: skipping sub-section" << compoundHeading();
-    //             continue;
-    //         }
-    //     }
+    return counts;
+}
 
-    //     result.push_back(sec_it);
-    //     sec_it->addSectionsFlat(result, include_target_details, report_skip_targets_wo_issues);
-    // }
+/**
+*/
+std::map<SectionContentType, unsigned int> Section::totalNumContents(const std::function<bool(const Section&)>& func_section) const
+{
+    std::map<SectionContentType, unsigned int> counts;
+
+    if (!func_section(*this))
+        return counts;
+
+    for (size_t i = 0; i < content_types_.size(); ++i)
+        counts[(SectionContentType)content_types_[i]]++;    
+
+    for (const auto& sec_it : sub_sections_)
+    {
+        auto sub_counts = sec_it->totalNumContents(func_section);
+        for (const auto& it : sub_counts)
+            counts[it.first] += it.second;
+    }
+
+    return counts;
 }
 
 /**
@@ -986,7 +981,8 @@ bool Section::fromJSON_impl(const nlohmann::json& j)
 /**
  */
 Result Section::toJSONDocument_impl(nlohmann::json& j,
-                                    const std::string* resource_dir) const
+                                    const std::string* resource_dir,
+                                    ReportExportMode export_style) const
 {
     //section id
     j[ FieldID ] = id();

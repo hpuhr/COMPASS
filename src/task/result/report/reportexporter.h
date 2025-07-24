@@ -76,6 +76,7 @@ public:
 
     static const std::string ResourceFolderScreenshots;
     static const std::string ResourceFolderTables;
+    static const std::string ResourceFolderIcons;
 
     static const std::string ExportImageFormat;
     static const std::string ExportTableFormat;
@@ -113,6 +114,8 @@ protected:
 
     void setStatus(const std::string& status);
 
+    std::string storeFile(ResourceDir dir, const std::string& fn) const;
+
 private:
     Result initExport(TaskResult& result);
     ResultT<nlohmann::json> finalizeExport(TaskResult& result);
@@ -135,10 +138,12 @@ private:
 
     Section* current_content_section_ = nullptr;
 
-    size_t      num_sections_total_    = 0;
-    size_t      num_sections_exported_ = 0;
-    bool        done_                  = false;
-    std::string status_;
+    size_t                                     num_sections_total_    = 0;
+    size_t                                     num_sections_exported_ = 0;
+    std::map<SectionContentType, unsigned int> num_contents_total_;
+    std::map<SectionContentType, unsigned int> num_contents_exported_;
+    bool                                       done_                  = false;
+    std::string                                status_;
 };
 
 } // namespace ResultReport

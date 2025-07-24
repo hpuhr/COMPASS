@@ -59,6 +59,19 @@ namespace ResultReport
         static const QColor BGGreen;
         static const QColor BGGray;
         static const QColor BGYellow;
+
+        static const std::string TextLatexRed;
+        static const std::string TextLatexOrange;
+        static const std::string TextLatexGreen;
+        static const std::string TextLatexGray;
+
+        static const std::string BGLatexRed;
+        static const std::string BGLatexOrange;
+        static const std::string BGLatexGreen;
+        static const std::string BGLatexGray;
+        static const std::string BGLatexYellow;
+
+        static std::vector<std::string> latexCustomColorDefines();
     };
 
     enum class ReportExportMode
@@ -66,7 +79,8 @@ namespace ResultReport
         JSONFile = 0,
         JSONBlob,
         Latex,
-        LatexPDF
+        LatexPDF,
+        CSV //@TODO: to be fully implemented
     };
 
     extern ReportExportMode reportExportModeFromString(const std::string& str);
@@ -78,7 +92,8 @@ namespace ResultReport
     {
         Root = 0,
         Screenshots,
-        Tables
+        Tables,
+        Icons
     };
 
     struct ReportExportSettings

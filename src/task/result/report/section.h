@@ -119,11 +119,10 @@ public:
     std::shared_ptr<SectionContent> retrieveContent(unsigned int id,
                                                     bool show_dialog = false) const;
 
-    unsigned int numSections() const;
-    unsigned int numSections(const std::function<bool(const Section&)>& func) const;
-    void addSectionsFlat (std::vector<std::shared_ptr<Section>>& result, 
-                          bool include_target_details,
-                          bool report_skip_targets_wo_issues);
+    unsigned int totalNumSections() const;
+    unsigned int totalNumSections(const std::function<bool(const Section&)>& func) const;
+    std::map<SectionContentType, unsigned int> totalNumContents() const;
+    std::map<SectionContentType, unsigned int> totalNumContents(const std::function<bool(const Section&)>& func_section) const;
 
     std::vector<std::shared_ptr<SectionContent>> sectionContent(bool with_hidden_content = false) const;
     std::vector<std::shared_ptr<SectionContent>> recursiveContent(bool with_hidden_content = false) const;
@@ -172,7 +171,8 @@ protected:
     void toJSON_impl(nlohmann::json& j) const override final;
     bool fromJSON_impl(const nlohmann::json& j) override final;
     Result toJSONDocument_impl(nlohmann::json& j, 
-                               const std::string* resource_dir) const override final;
+                               const std::string* resource_dir,
+                               ReportExportMode export_style) const override final;
 
     Section* findSubSection (const std::string& heading); // nullptr if not found
     boost::optional<size_t> findContent(const std::string& name, SectionContentType type) const;

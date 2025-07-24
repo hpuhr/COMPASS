@@ -92,6 +92,19 @@ const QColor SectionContentTable::ColorBGGreen    = Colors::BGGreen;
 const QColor SectionContentTable::ColorBGGray     = Colors::BGGray;
 const QColor SectionContentTable::ColorBGYellow   = Colors::BGYellow;
 
+const std::string SectionContentTable::ColorTextLatexRed    = Colors::TextLatexRed;
+const std::string SectionContentTable::ColorTextLatexOrange = Colors::TextLatexOrange;
+const std::string SectionContentTable::ColorTextLatexGreen  = Colors::TextLatexGreen;
+const std::string SectionContentTable::ColorTextLatexGray   = Colors::TextLatexGray;
+
+const std::string SectionContentTable::ColorBGLatexRed      = Colors::BGLatexRed;
+const std::string SectionContentTable::ColorBGLatexOrange   = Colors::BGLatexOrange;
+const std::string SectionContentTable::ColorBGLatexGreen    = Colors::BGLatexGreen;
+const std::string SectionContentTable::ColorBGLatexGray     = Colors::BGLatexGray;
+const std::string SectionContentTable::ColorBGLatexYellow   = Colors::BGLatexYellow;
+
+const double SectionContentTable::LatexIconWidth_cm = 0.5;
+
 /**
  */
 SectionContentTable::SectionContentTable(unsigned int id,
@@ -447,23 +460,84 @@ boost::optional<QColor> SectionContentTable::cellBGColor(unsigned int style)
 
 /**
  */
-boost::optional<QIcon> SectionContentTable::cellIcon(const nlohmann::json& data)
+std::string SectionContentTable::cellTextColorLatex(unsigned int style)
+{
+    if (style & CellStyleTextColorRed)
+        return ColorTextLatexRed;
+    else if (style & CellStyleTextColorOrange)
+        return ColorTextLatexOrange;
+    else if (style & CellStyleTextColorGreen)
+        return ColorTextLatexGreen;
+    else if (style & CellStyleTextColorGray)
+        return ColorTextLatexGray;
+
+    return "";
+}
+
+/**
+ */
+std::string SectionContentTable::cellBGColorLatex(unsigned int style)
+{
+    if (style & CellStyleBGColorRed)
+        return ColorBGLatexRed;
+    else if (style & CellStyleBGColorOrange)
+        return ColorBGLatexOrange;
+    else if (style & CellStyleBGColorGreen)
+        return ColorBGLatexGreen;
+    else if (style & CellStyleBGColorGray)
+        return ColorBGLatexGray;
+    else if (style & CellStyleBGColorYellow)
+        return ColorBGLatexYellow;
+
+    return "";
+}
+
+/**
+ */
+boost::optional<std::pair<std::string, std::string>> SectionContentTable::cellIconFn(const nlohmann::json& data)
 {
     if (!data.is_string())
-        return boost::optional<QIcon>();
+        return boost::optional<std::pair<std::string, std::string>>();
 
-    std::string icon_name;
+    QString icon_string;
     
     try
     {
-        icon_name = data;
+        icon_string = QString::fromStdString(data.get<std::string>());
     }
     catch(...)
     {
-        return boost::optional<QIcon>();
+        return boost::optional<std::pair<std::string, std::string>>();
+    }
+
+    if (icon_string.isEmpty())
+        return boost::optional<std::pair<std::string, std::string>>();
+
+    std::string icon_fn  = icon_string.toStdString();
+    std::string icon_txt = "";
+
+    if (icon_string.contains(';'))
+    {
+        auto parts = icon_string.split(';');
+        if (parts.size() != 2)
+            return boost::optional<std::pair<std::string, std::string>>();
+
+        icon_fn  = parts.at(0).toStdString();
+        icon_txt = parts.at(1).toStdString(); 
     }
     
-    return Utils::Files::IconProvider::getIcon(icon_name);
+    return std::make_pair(icon_fn, icon_txt);
+}
+
+/**
+ */
+boost::optional<std::pair<QIcon, std::string>> SectionContentTable::cellIcon(const nlohmann::json& data)
+{
+    auto fn = SectionContentTable::cellIconFn(data);
+    if (!fn)
+        return boost::optional<std::pair<QIcon, std::string>>();
+
+    return std::make_pair(Utils::Files::IconProvider::getIcon(fn->first), fn->second);
 }
 
 /**
@@ -596,29 +670,34 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
+    assert (index.row() >= 0);
+    assert (index.row() < (int)rows_.size());
+    assert (index.column() >= 0);
+    assert (index.column() < (int)num_columns_);
+
+    return data(index.row(), index.column(), role);
+}
+
+/**
+ */
+QVariant SectionContentTable::data(int row, int col, int role) const
+{
     switch (role)
     {
         case Qt::DisplayRole:
         {
-            logdbg << "SectionContentTable: data: display role: row " << index.row() << " col " << index.column();
+            logdbg << "SectionContentTable: data: display role: row " << row << " col " << col;
 
-            assert (index.row() >= 0);
-            assert (index.row() < (int)rows_.size());
-            assert (index.column() < (int)num_columns_);
-
-            auto style = cellStyle(index.row(), index.column());
+            auto style = cellStyle(row, col);
 
             if (cellShowsText(style))
-                return qVariantFromJSON(rows_.at(index.row()).at(index.column()));
+                return qVariantFromJSON(rows_.at(row).at(col));
 
             return QVariant(); 
         }
         case Qt::BackgroundRole:
         {
-            assert (index.row() >= 0);
-            assert (index.row() < (int)rows_.size());
-
-            auto style = cellStyle(index.row(), index.column());
+            auto style = cellStyle(row, col);
 
             if (cellShowsText(style))
             {
@@ -631,11 +710,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
         }
         case Qt::ForegroundRole:
         {
-            assert (index.row() >= 0);
-            assert (index.row() < (int)rows_.size());
-            assert (index.column() < (int)num_columns_);
-
-            auto style = cellStyle(index.row(), index.column());
+            auto style = cellStyle(row, col);
 
             if (style != 0)
             {
@@ -649,7 +724,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
             if (cellShowsText(style) &&
                 taskResult()->type() == task::TaskResultType::Evaluation)
             {
-                const auto& data = rows_.at(index.row()).at(index.column());
+                const auto& data = rows_.at(row).at(col);
 
                 if (data.is_string())
                 {
@@ -675,25 +750,25 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
         }
         case Qt::DecorationRole:
         {
-            auto style = cellStyle(index.row(), index.column());
+            auto style = cellStyle(row, col);
 
             if (cellShowsIcon(style))
             {
-                const auto& j = rows_.at(index.row()).at(index.column());
+                const auto& j = rows_.at(row).at(col);
                 auto icon = cellIcon(j);
                 if (icon.has_value())
-                    return icon.value();
+                    return icon.value().first;
             }
 
             return QVariant();
         }
         case Qt::CheckStateRole:
         {
-            auto style = cellStyle(index.row(), index.column());
+            auto style = cellStyle(row, col);
 
             if (cellShowsCheckBox(style))
             {
-                const auto& j = rows_.at(index.row()).at(index.column());
+                const auto& j = rows_.at(row).at(col);
                 auto c = cellChecked(j);
                 if (c.has_value())
                     return c.value() ? Qt::Checked : Qt::Unchecked;
@@ -703,7 +778,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
         }
         case Qt::FontRole:
         {
-            auto style = cellStyle(index.row(), index.column());
+            auto style = cellStyle(row, col);
 
             if (cellShowsSpecialFont(style))
             {
@@ -719,21 +794,40 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
             if (show_tooltips_)
             {
                 auto tResult = taskResult();
-                if (tResult->hasCustomTooltip(this, (unsigned int)index.row(), (unsigned int)index.column()))
+                if (tResult->hasCustomTooltip(this, (unsigned int)row, (unsigned int)col))
                 {
-                    auto ttip = tResult->customTooltip(this, (unsigned int)index.row(), (unsigned int)index.column());
+                    // custom tooltips
+                    auto ttip = tResult->customTooltip(this, (unsigned int)row, (unsigned int)col);
                     if (!ttip.empty())
                         return QString::fromStdString(ttip);
+                }
+                else
+                {
+                    // default tooltips
+                    auto style = cellStyle(row, col);
+
+                    if (cellShowsIcon(style))
+                    {
+                        auto fn = cellIconFn(rows_.at(row).at(col));
+                        if (fn.has_value() && !fn.value().second.empty())
+                            return QString::fromStdString(fn->second);
+                    }
                 }
             }
 
             return QVariant();
+        }
+        case CellStyleRole:
+        {
+            return cellStyle(row, col);
         }
         default:
         {
             return QVariant();
         }
     }
+
+    return QVariant();
 }
 
 /**
@@ -769,20 +863,6 @@ size_t SectionContentTable::numColumns() const
 const std::vector<std::string>& SectionContentTable::headings() const
 {
     return headings_;
-}
-
-/**
- */
-unsigned int SectionContentTable::filteredRowCount() const
-{
-    return getOrCreateTableWidget()->proxyModel()->rowCount();
-}
-
-/**
- */
-std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row, bool latex) const
-{
-    return getOrCreateTableWidget()->sortedRowStrings(row, latex);
 }
 
 /**
@@ -1099,43 +1179,30 @@ void SectionContentTable::copyContent()
     }
     ss << "\n";
 
-    auto proxy_model = getOrCreateTableWidget()->proxyModel();
+    unsigned int num_rows = numProxyRows();
 
-    unsigned int num_rows = proxy_model->rowCount();
-
-    std::vector<std::string> row_strings;
+    nlohmann::json row_data;
 
     for (unsigned int row=0; row < num_rows; ++row)
     {
-        row_strings = sortedRowStrings(row, false);
-        assert (row_strings.size() == num_cols);
+        row_data = exportProxyContent(row, ReportExportMode::CSV);
+        assert (row_data.is_array());
+        assert (row_data.size() == num_cols);
 
         for (unsigned int cnt=0; cnt < num_cols; ++cnt)
         {
+            const auto& d = row_data.at(cnt);
+            assert(d.is_string());
+
             if (cnt == 0)
-                ss << row_strings.at(cnt);
+                ss << d.get<std::string>();
             else
-                ss <<  ";" << row_strings.at(cnt);
+                ss <<  ";" << d.get<std::string>();
         }
         ss << "\n";
     }
 
     QApplication::clipboard()->setText(ss.str().c_str());
-}
-
-/**
- */
-Utils::StringTable SectionContentTable::toStringTable() const
-{
-    return Utils::StringTable(getOrCreateTableWidget()->itemModel());
-}
-
-/**
- */
-nlohmann::json SectionContentTable::toJSONTable(bool rowwise,
-                                                const std::vector<int>& cols) const
-{
-    return toStringTable().toJSON(rowwise, cols);
 }
 
 /**
@@ -1275,15 +1342,20 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 /**
  */
 Result SectionContentTable::toJSONDocument_impl(nlohmann::json& j,
-                                                const std::string* resource_dir) const
+                                                const std::string* resource_dir,
+                                                ReportExportMode export_style) const
 {
     //call base
-    auto r = SectionContent::toJSONDocument_impl(j, resource_dir);
+    auto r = SectionContent::toJSONDocument_impl(j, resource_dir, export_style);
     if (!r.ok())
         return r;
 
     bool write_to_file = (ReportExporter::TableMaxRows    >= 0 && numRows()    > (size_t)ReportExporter::TableMaxRows   ) ||
                          (ReportExporter::TableMaxColumns >= 0 && numColumns() > (size_t)ReportExporter::TableMaxColumns);
+
+    auto data = exportProxyContent(export_style);
+    if (!data.has_value())
+        return Result::failed("Could not prepare content '" + name() + "' for export");
 
     if (resource_dir && write_to_file)
     {
@@ -1293,7 +1365,7 @@ Result SectionContentTable::toJSONDocument_impl(nlohmann::json& j,
 
         nlohmann::json j_ext;
         j_ext[ FieldDocColumns ] = headings_;
-        j_ext[ FieldDocData    ] = rows_;
+        j_ext[ FieldDocData    ] = data.value();
 
         std::ofstream of(res.result().path);
         if (!of.is_open())
@@ -1310,7 +1382,7 @@ Result SectionContentTable::toJSONDocument_impl(nlohmann::json& j,
     else
     {
         j[ FieldDocColumns ] = headings_;
-        j[ FieldDocData    ] = rows_;
+        j[ FieldDocData    ] = data.value();
     }
 
     return Result::succeeded();
@@ -1334,6 +1406,270 @@ bool SectionContentTable::configure(const nlohmann::json& j)
         return true; // no table widget, nothing to configure
 
     return table_widget_->configure(j);
+}
+
+/**
+ * Exports a table cell to a certain format and returns it as a json object.
+ * Main method for preparing cell data for export.
+ * Allows fine-grained adjustments for specific export types,
+ * e.g. generation of latex special statements.
+ */
+nlohmann::json SectionContentTable::exportContent(unsigned int row, 
+                                                  unsigned int col,
+                                                  ReportExportMode mode,
+                                                  bool* ok) const
+{
+    if (ok)
+        *ok = false;
+
+    nlohmann::json j = rows_[ row ][ col ];
+
+    auto style = cellStyle((int)row, (int)col);
+
+    if (mode == ReportExportMode::Latex || 
+        mode == ReportExportMode::LatexPDF)
+    {
+        std::string s;
+
+        //cell export for latex
+        if (SectionContentTable::cellShowsIcon(style))
+        {
+            // generate latex icon
+            auto fn = SectionContentTable::cellIconFn(j);
+            if (!fn.has_value())
+                return {};
+
+            // check if icon exists
+            auto path = Utils::Files::getIconFilepath(fn.value().first, false);
+            if (!Utils::Files::fileExists(path))
+                return {};
+            
+            s = "\\includegraphics[width=" + std::to_string(LatexIconWidth_cm) + "cm]{" + fn.value().first + "}";
+        }
+        else if (cellShowsCheckBox(style))
+        {
+            // replace check state information with strings
+            auto c = cellChecked(j);
+            if (!c.has_value())
+                return {};
+            
+            s = c.value() ? "Yes" : "No";
+        }
+        else
+        {
+            // default latex export => convert displayed data to latex string
+            s = Utils::String::latexString(data((int)row, (int)col, Qt::DisplayRole).toString().toStdString());
+        }
+
+        // further format generated string depending on style flags
+
+        //handle special fonts
+        if (cellFontIsBold(style))
+            s = "\\textbf{" + s + "}";
+        else if (cellFontIsItalic(style))
+            s = "\\textit{" + s + "}";
+        //@TODO: strikeout text needs special latex package
+
+        //handle section links
+        const auto& slink = annotations_[ row ].section_link;
+        if (!slink.empty() && col == latex_ref_column_)
+        {
+            // \hyperref[sec:marker2]{SecondSection}
+            s = "\\hyperref[sec:" + slink + "]{" + s + "}";
+        }
+
+        //handle text coloring
+        auto col_txt = cellTextColorLatex(style);
+        if (!col_txt.empty())
+            s = "\\textcolor{" + col_txt + "}{" + s + "}";
+
+        //handle cell coloring
+        auto col_bg = cellBGColorLatex(style);
+        if (!col_bg.empty())
+            s = "\\cellcolor{" + col_bg + "}" + s;
+
+        j = s;
+    }
+    else if (mode == ReportExportMode::JSONFile || 
+             mode == ReportExportMode::JSONBlob)
+    {
+        //cell export for json
+        if (SectionContentTable::cellShowsIcon(style))
+        {
+            // replace internal icon information with replacement texts
+            auto fn = SectionContentTable::cellIconFn(j);
+            if (!fn.has_value())
+                return {};
+
+            j = fn.value().second;
+        }
+        else if (cellShowsCheckBox(style))
+        {
+            // replace check state information with strings
+            auto c = cellChecked(j);
+            if (!c.has_value())
+                return {};
+            
+            j = c.value() ? "Yes" : "No";
+        }
+
+        //else = just return data directly as json
+    }
+    else
+    {
+        std::string s;
+
+        //cell export for csv / default
+        if (SectionContentTable::cellShowsIcon(style))
+        {
+            // replace internal icon information with replacement texts
+            auto fn = SectionContentTable::cellIconFn(j);
+            if (!fn.has_value())
+                return {};
+
+            s = fn.value().second;
+        }
+        else if (cellShowsCheckBox(style))
+        {
+            // replace check state information with strings
+            auto c = cellChecked(j);
+            if (!c.has_value())
+                return {};
+            
+            s = c.value() ? "Yes" : "No";
+        }
+        else
+        {
+            // default text export => convert displayed data to string
+            s = data((int)row, (int)col, Qt::DisplayRole).toString().toStdString();
+        }
+
+        j = s;
+    }
+
+    if (ok)
+        *ok = true;
+
+    return j;
+}
+
+/**
+ */
+nlohmann::json SectionContentTable::exportContent(unsigned int row,
+                                                  ReportExportMode mode) const
+{
+    auto j_row = nlohmann::json::array();
+
+    bool ok;
+    for (unsigned int col = 0; col < num_columns_; ++col)
+    {
+        auto j_cell = exportContent(row, col, mode, &ok);
+        if (!ok)
+            return nlohmann::json();
+
+        j_row.push_back(j_cell);
+    }
+
+    return j_row;
+}
+
+/**
+ */
+boost::optional<std::vector<nlohmann::json>> SectionContentTable::exportContent(ReportExportMode mode) const
+{
+    std::vector<nlohmann::json> data;
+
+    size_t n = numRows();
+    data.reserve(n);
+
+    for (size_t r = 0; r < rows_.size(); ++r)
+    {
+        auto j_row = exportContent(r, mode);
+        if (j_row.is_null())
+            return boost::optional<std::vector<nlohmann::json>>();
+
+        assert(j_row.is_array());
+
+        data.push_back(j_row);
+    }
+
+    return data;
+}
+
+/**
+ */
+nlohmann::json SectionContentTable::exportProxyContent(unsigned int row, 
+                                                       unsigned int col,
+                                                       ReportExportMode mode,
+                                                       bool* ok) const
+{
+    auto w = getOrCreateTableWidget();
+    assert(w);
+
+    auto proxy_model = w->proxyModel();
+    assert(proxy_model);
+
+    auto index = proxy_model->index(row, col);
+    assert(index.isValid());
+
+    auto index_src = proxy_model->mapToSource(index);
+    assert(index_src.isValid());
+
+    return exportContent(index_src.row(), index_src.column(), mode, ok);
+}
+
+/**
+ */
+nlohmann::json SectionContentTable::exportProxyContent(unsigned int row,
+                                                       ReportExportMode mode) const
+{
+    assert (row >= 0);
+    assert (row < numProxyRows());
+    assert (row < numRows());
+
+    auto j_row = nlohmann::json::array();
+
+    bool ok;
+    for (unsigned int col = 0; col < num_columns_; ++col)
+    {
+        auto j_cell = exportProxyContent(row, col, mode, &ok);
+        if (!ok)
+            return nlohmann::json();
+
+        j_row.push_back(j_cell);
+    }
+
+    return j_row;
+}
+
+/**
+ */
+boost::optional<std::vector<nlohmann::json>> SectionContentTable::exportProxyContent(ReportExportMode mode) const
+{
+    auto num_rows = numProxyRows();
+    
+    std::vector<nlohmann::json> data;
+    data.reserve(num_rows);
+
+    for (unsigned int r = 0; r < num_rows; ++r)
+    {
+        auto j_row = exportProxyContent(r, mode);
+        if (j_row.is_null())
+            return boost::optional<std::vector<nlohmann::json>>();
+
+        assert(j_row.is_array());
+
+        data.push_back(j_row);
+    }
+
+    return data;
+}
+
+/**
+ */
+unsigned int SectionContentTable::numProxyRows() const
+{
+    return getOrCreateTableWidget()->proxyModel()->rowCount();
 }
 
 /***************************************************************************************************
@@ -1730,35 +2066,6 @@ void SectionContentTableWidget::customContextMenu(const QPoint& p)
 
     //pass row to table
     content_table_->customContextMenu(row_index, pos);
-}
-
-/**
- */
-std::vector<std::string> SectionContentTableWidget::sortedRowStrings(unsigned int row, bool latex) const
-{
-    logdbg << "SectionContentTableWidget: sortedRowStrings: row " << row << " rows " << proxy_model_->rowCount()
-           << " data rows " << content_table_->numRows();
-    
-    assert ((int)row < proxy_model_->rowCount());
-    assert (row < content_table_->numRows());
-
-    std::vector<std::string> result;
-
-    size_t nc = content_table_->numColumns();
-
-    for (size_t col=0; col < nc; ++col)
-    {
-        QModelIndex index = proxy_model_->index(row, col);
-        assert (index.isValid());
-
-        // get string can convert to latex
-        if (latex)
-            result.push_back(Utils::String::latexString(proxy_model_->data(index).toString().toStdString()));
-        else
-            result.push_back(proxy_model_->data(index).toString().toStdString());
-    }
-
-    return result;
 }
 
 /**

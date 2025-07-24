@@ -397,7 +397,8 @@ bool SectionContent::fromJSON_impl(const nlohmann::json& j)
 /**
  */
 Result SectionContent::toJSONDocument_impl(nlohmann::json& j,
-                                           const std::string* resource_dir) const
+                                           const std::string* resource_dir,
+                                           ReportExportMode export_style) const
 {
     j[ FieldContentType ] = contentTypeAsString(content_type_);
 

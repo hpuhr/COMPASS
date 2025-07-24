@@ -272,7 +272,8 @@ ResultT<std::vector<SectionContentFigure::ImageResource>> SectionContentFigure::
 /**
  */
 Result SectionContentFigure::toJSONDocument_impl(nlohmann::json& j,
-                                                 const std::string* resource_dir) const
+                                                 const std::string* resource_dir,
+                                                 ReportExportMode export_style) const
 {
     j = nlohmann::json::array();
 
@@ -283,7 +284,7 @@ Result SectionContentFigure::toJSONDocument_impl(nlohmann::json& j,
     for (const auto& r : resources.result())
     {
         nlohmann::json j_fig;
-        SectionContent::toJSONDocument_impl(j_fig, resource_dir);
+        SectionContent::toJSONDocument_impl(j_fig, resource_dir, export_style);
 
         if (resource_dir)
         {

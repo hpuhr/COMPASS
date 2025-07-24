@@ -626,7 +626,7 @@ std::pair<nlohmann::json, unsigned int> EvaluationData::rawCellData(const Evalua
     switch (column)
     {
         case ColUse:
-            return std::make_pair(dbContent::TargetModel::iconForTarget(target), 0);
+            return std::make_pair(dbContent::TargetModel::iconForTarget(target, true), 0);
         case ColUTN: 
             return std::make_pair(target.utn_, 0);
         case ColComment:

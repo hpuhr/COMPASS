@@ -32,6 +32,8 @@
 #include "geographicview.h"
 #endif
 
+#include <boost/filesystem.hpp>
+
 namespace ResultReport
 {
 
@@ -40,6 +42,7 @@ const int ReportExporter::TableMaxColumns = 0;
 
 const std::string ReportExporter::ResourceFolderScreenshots = "screenshots";
 const std::string ReportExporter::ResourceFolderTables      = "tables";
+const std::string ReportExporter::ResourceFolderIcons       = "icons";
 
 const std::string ReportExporter::ExportImageFormat = ".jpg";
 const std::string ReportExporter::ExportTableFormat = ".json";
@@ -91,6 +94,8 @@ std::string ReportExporter::resourceSubDir(ResourceDir dir)
             return ResourceFolderScreenshots;
         case ResourceDir::Tables:
             return ResourceFolderTables;
+        case ResourceDir::Icons:
+            return ResourceFolderIcons;
     }
 
     return "";
@@ -178,7 +183,8 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
         {
             return s.exportEnabled(this->exportMode());
         };
-        num_sections_total_ = section_ptr->numSections(func);
+        num_sections_total_ = section_ptr->totalNumSections(func);
+        num_contents_total_ = section_ptr->totalNumContents(func);
 
         //for immediate rendering of geographic view during image generation
 #if USE_EXPERIMENTAL_SOURCE == true
@@ -376,6 +382,26 @@ void ReportExporter::setStatus(const std::string& status)
     status_ = status;
 
     emit progressChanged();
+}
+
+/**
+ */
+std::string ReportExporter::storeFile(ResourceDir dir, const std::string& fn) const
+{
+    auto basename = Utils::Files::getFilenameFromPath(fn);
+    auto dst_dir  = exportResourceDir() + "/" + resourceSubDir(dir);
+    auto dst_path = dst_dir + "/" + basename;
+    auto rel_path = resourceSubDir(dir) + "/" + basename;
+
+    if (Utils::Files::fileExists(dst_path))
+        return rel_path;
+
+    Utils::Files::createMissingDirectories(dst_dir);
+
+    if (!boost::filesystem::copy_file(fn, dst_path, boost::filesystem::copy_options::overwrite_existing))
+        return "";
+
+    return rel_path;
 }
 
 }
