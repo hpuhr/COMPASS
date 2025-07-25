@@ -26,6 +26,8 @@
 #include "compass.h"
 #include "dbcontentmanager.h"
 
+#include "popupmenu.h"
+
 #include "logger.h"
 #include "stringconv.h"
 #include "stringmat.h"
@@ -46,6 +48,7 @@
 #include <QInputDialog>
 #include <QThread>
 #include <QScrollBar>
+#include <QToolBar>
 
 #include <cassert>
 #include <type_traits>
@@ -69,6 +72,7 @@ const std::string SectionContentTable::FieldColumnStyles  = "column_styles";
 const std::string SectionContentTable::FieldCellStyles    = "cell_styles";
 const std::string SectionContentTable::FieldShowTooltips  = "show_tooltips";
 const std::string SectionContentTable::FieldMaxRowCount   = "max_row_count";
+const std::string SectionContentTable::FieldColumnGroups  = "column_groups";
 
 const std::string SectionContentTable::FieldDocColumns  = "columns";
 const std::string SectionContentTable::FieldDocData     = "data";
@@ -80,6 +84,10 @@ const std::string SectionContentTable::FieldAnnoSectionFigure = "section_figure"
 const std::string SectionContentTable::FieldAnnoOnDemand      = "on_demand";
 const std::string SectionContentTable::FieldAnnoIndex         = "index";
 const std::string SectionContentTable::FieldAnnoStyle         = "style";
+
+const std::string SectionContentTable::FieldColGroupName          = "name";
+const std::string SectionContentTable::FieldColGroupColumns       = "column_indices";
+const std::string SectionContentTable::FieldColGroupEnabledOnInit = "enabled_on_init";
 
 const QColor SectionContentTable::ColorTextRed    = Colors::TextRed;
 const QColor SectionContentTable::ColorTextOrange = Colors::TextOrange;
@@ -116,13 +124,14 @@ SectionContentTable::SectionContentTable(unsigned int id,
                                          unsigned int sort_column,
                                          Qt::SortOrder sort_order)
 :   SectionContent(ContentType::Table, id, name, parent_section)
-,   num_columns_  (num_columns)
-,   headings_     (headings)
-,   column_styles_(num_columns, 0)
-,   column_flags_ (num_columns, 0)
-,   sortable_     (sortable)
-,   sort_column_  (sort_column)
-,   sort_order_   (sort_order)
+,   num_columns_      (num_columns)
+,   num_columns_proxy_(num_columns)
+,   headings_         (headings)
+,   column_styles_    (num_columns, 0)
+,   column_flags_     (num_columns, 0)
+,   sortable_         (sortable)
+,   sort_column_      (sort_column)
+,   sort_order_       (sort_order)
 {
 }
 
@@ -867,10 +876,12 @@ const std::vector<std::string>& SectionContentTable::headings() const
 
 /**
  */
-TableColumnGroup& SectionContentTable::setColumnGroup(const std::string& name, 
-                                                      const std::vector<size_t>& columns,
-                                                      bool enabled)
+void SectionContentTable::setColumnGroup(const std::string& name, 
+                                         const std::vector<int>& columns,
+                                         bool enabled)
 {
+    assert(!table_widget_); //!no config of column groups after widget is created!
+
     auto& col_group = column_groups_[ name ];
 
     col_group         = {};
@@ -878,9 +889,7 @@ TableColumnGroup& SectionContentTable::setColumnGroup(const std::string& name,
     col_group.columns = columns;
     col_group.enabled = enabled;
     
-    updateGroupColumns(col_group);
-
-    return col_group;
+    updateGroupColumns();
 }
 
 /**
@@ -891,23 +900,49 @@ void SectionContentTable::enableColumnGroup(const std::string& name,
     auto& column_group = column_groups_.at(name);
     column_group.enabled = ok;
 
-    updateGroupColumns(column_group);
+    updateGroupColumns();
 }
 
 /**
  */
-void SectionContentTable::updateGroupColumns(const TableColumnGroup& col_group)
+bool SectionContentTable::hasColumnGroup(const std::string& name) const
+{
+    return column_groups_.count(name) > 0;
+}
+
+/**
+ */
+void SectionContentTable::updateGroupColumns(bool update_widget)
+{
+    for (const auto& cg : column_groups_)
+        updateGroupColumns(cg.second, false);
+
+    num_columns_proxy_ = 0;
+    for (unsigned int c = 0; c < num_columns_; ++c)
+        if (columnVisible(c))
+            ++num_columns_proxy_;
+
+    assert(num_columns_proxy_ <= num_columns_);
+
+    if (update_widget && table_widget_)
+        table_widget_->updateColumnVisibility();
+}
+
+/**
+ */
+void SectionContentTable::updateGroupColumns(const TableColumnGroup& col_group,
+                                             bool update_widget)
 {
     for (auto col : col_group.columns)
     {
-        auto& f = column_flags_.at(col);
+        auto& f = column_flags_.at((size_t)col);
         if (col_group.enabled)
             f &= ~ColumnHidden;
         else
             f |= ColumnHidden;
     }
 
-    if (table_widget_)
+    if (update_widget && table_widget_)
         table_widget_->updateColumnVisibility();
 }
 
@@ -922,7 +957,14 @@ bool SectionContentTable::columnGroupEnabled(const std::string& name) const
  */
 bool SectionContentTable::columnVisible(int column) const
 {
-    return (column_flags_.at(column) & ColumnHidden) == 0;
+    return (column_flags_.at((size_t)column) & ColumnHidden) == 0;
+}
+
+/**
+ */
+bool SectionContentTable::columnsHidden() const
+{
+    return num_columns_proxy_ < num_columns_;
 }
 
 /**
@@ -1225,6 +1267,20 @@ void SectionContentTable::toJSON_impl(nlohmann::json& j) const
     if (max_row_count_.has_value())
         j[ FieldMaxRowCount ] = max_row_count_.value();
 
+    //write column groups
+    auto j_col_groups = nlohmann::json::array();
+    for (const auto& col_group : column_groups_)
+    {
+        nlohmann::json j_group;
+
+        j_group[ FieldColGroupName          ] = col_group.second.name;
+        j_group[ FieldColGroupColumns       ] = col_group.second.columns;
+        j_group[ FieldColGroupEnabledOnInit ] = col_group.second.enabled_on_init;
+
+        j_col_groups.push_back(j_group);
+    }
+    j[ FieldColumnGroups ] = j_col_groups;
+
     //write content only if not on demand
     if (!isOnDemand())
     {
@@ -1291,7 +1347,39 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         max_row_count_ = v;
     }
 
-    num_columns_ = headings_.size();
+    if (j.contains(FieldColumnGroups))
+    {
+        //read in defined column groups
+        const auto& j_col_groups = j[ FieldColumnGroups ];
+        if (!j_col_groups.is_array())
+        {
+            logerr << "SectionContentTable: fromJSON: Error: Could not read column groups";
+            return false;
+        }
+
+        for (const auto& j_col_group : j_col_groups)
+        {
+            if (!j_col_group.is_object() ||
+                !j_col_group.contains(FieldColGroupName)    ||
+                !j_col_group.contains(FieldColGroupColumns) ||
+                !j_col_group.contains(FieldColGroupEnabledOnInit))
+            {
+                logerr << "SectionContentTable: fromJSON: Error: Could not read column group";
+                return false;
+            }
+
+            TableColumnGroup col_group;
+            col_group.name            = j_col_group[ FieldColGroupName          ];
+            col_group.columns         = j_col_group[ FieldColGroupColumns       ].get<std::vector<int>>();
+            col_group.enabled_on_init = j_col_group[ FieldColGroupEnabledOnInit ];
+            col_group.enabled         = col_group.enabled_on_init;
+
+            column_groups_[ col_group.name ] = col_group;
+        }
+    }
+
+    num_columns_       = headings_.size();
+    num_columns_proxy_ = headings_.size();
 
     //@TODO: maybe serialize these flags in the future
     column_flags_.assign(num_columns_, 0);
@@ -1335,6 +1423,9 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 
     assert(rows_.size() == annotations_.size());
     assert(num_columns_ == column_styles_.size());
+
+    //run some updates
+    updateGroupColumns();
 
     return true;
 }
@@ -1629,9 +1720,14 @@ nlohmann::json SectionContentTable::exportProxyContent(unsigned int row,
 
     auto j_row = nlohmann::json::array();
 
+    bool cols_hidden = columnsHidden();
+
     bool ok;
     for (unsigned int col = 0; col < num_columns_; ++col)
     {
+        if (cols_hidden && !columnVisible(col))
+            continue;
+
         auto j_cell = exportProxyContent(row, col, mode, &ok);
         if (!ok)
             return nlohmann::json();
@@ -1670,6 +1766,13 @@ boost::optional<std::vector<nlohmann::json>> SectionContentTable::exportProxyCon
 unsigned int SectionContentTable::numProxyRows() const
 {
     return getOrCreateTableWidget()->proxyModel()->rowCount();
+}
+
+/**
+ */
+unsigned int SectionContentTable::numProxyColumns () const
+{
+    return num_columns_proxy_;
 }
 
 /***************************************************************************************************
@@ -1782,6 +1885,7 @@ const std::string SectionContentTableWidget::FieldConfigSortColumn = SectionCont
 const std::string SectionContentTableWidget::FieldConfigSortOrder  = SectionContentTable::FieldSortOrder;
 const std::string SectionContentTableWidget::FieldConfigScrollPosV = "scroll_pos_v";
 const std::string SectionContentTableWidget::FieldConfigScrollPosH = "scroll_pos_h";
+const std::string SectionContentTableWidget::FieldColGroupStates   = "col_group_states";
 
 /**
  */
@@ -1800,16 +1904,31 @@ SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* conten
     QVBoxLayout* main_layout = new QVBoxLayout();
     setLayout(main_layout);
 
-    QHBoxLayout* upper_layout = new QHBoxLayout();
+    QHBoxLayout* upper_layout  = new QHBoxLayout();
 
     upper_layout->addWidget(new QLabel(("Table: " + content_table_->name()).c_str()));
     upper_layout->addStretch();
+    
+    const auto& col_groups = content_table->columnGroups();
 
-    options_menu_ = new QMenu(options_button_);
-    connect(options_menu_, &QMenu::aboutToShow, this, &SectionContentTableWidget::updateOptionsMenu);
+    if (!col_groups.empty())
+    {
+        col_group_toolbar_ = new QToolBar;
+        col_group_toolbar_->setIconSize(UI_ICON_SIZE);
 
-    options_button_ = new QPushButton("Options");
-    options_button_->setMenu(options_menu_);
+        upper_layout->addWidget(col_group_toolbar_);
+    }
+
+    upper_layout->addStretch();
+
+    options_button_ = new QPushButton;
+    options_button_->setStyleSheet("QPushButton::menu-indicator { image: none; }");
+    options_button_->setIcon(Utils::Files::IconProvider::getIcon("edit.png"));
+    options_button_->setFixedSize(UI_ICON_SIZE); 
+    options_button_->setFlat(UI_ICON_BUTTON_FLAT);
+
+    options_menu_.reset(new PopupMenu(options_button_));
+    options_menu_->setPreShowCallback([ = ] () { this->updateOptionsMenu(); });
 
     upper_layout->addWidget(options_button_);
 
@@ -1849,12 +1968,19 @@ SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* conten
             this, &SectionContentTableWidget::clicked);
     connect(table_view_, &QTableView::doubleClicked,
             this, &SectionContentTableWidget::doubleClicked);
+
+    connect(table_view_->verticalScrollBar(), &QScrollBar::rangeChanged,
+            this, &SectionContentTableWidget::updateScrollBarV);
+    connect(table_view_->horizontalScrollBar(), &QScrollBar::rangeChanged,
+            this, &SectionContentTableWidget::updateScrollBarH);
     
     //    if (num_columns_ > 5)
     //        table_view_->horizontalHeader()->setMaximumSectionSize(150);
     
     table_view_->resizeColumnsToContents();
     table_view_->resizeRowsToContents();
+    table_view_->verticalScrollBar()->installEventFilter(this);
+    table_view_->horizontalScrollBar()->installEventFilter(this);
 
     main_layout->addWidget(table_view_);
 
@@ -1862,6 +1988,8 @@ SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* conten
     click_action_timer_.setInterval(DoubleClickCheckIntervalMSecs);
 
     QObject::connect(&click_action_timer_, &QTimer::timeout, this, &SectionContentTableWidget::performClickAction);
+
+    updateToolBar();
 }
 
 /**
@@ -1896,6 +2024,35 @@ void SectionContentTableWidget::updateColumnVisibility()
 {
     for (unsigned int c = 0; c < content_table_->numColumns(); ++c)
         table_view_->setColumnHidden(c, !content_table_->columnVisible(c));
+}
+
+/**
+ */
+void SectionContentTableWidget::updateToolBar()
+{
+    if (!col_group_toolbar_)
+        return;
+
+    col_group_toolbar_->clear();
+
+    const auto& col_groups = content_table_->columnGroups();
+
+    for (const auto& col_group : col_groups)
+    {
+        auto action = col_group_toolbar_->addAction(QString::fromStdString(col_group.first));
+        action->setCheckable(true);
+        action->setChecked(col_group.second.enabled);
+
+        std::string name          = col_group.first;
+        auto        content_table = content_table_;
+
+        auto cb = [ content_table, name ] (bool ok)
+        {
+            content_table->enableColumnGroup(name, ok);
+        };
+
+        connect(action, &QAction::toggled, cb);
+    }
 }
 
 /**
@@ -2072,10 +2229,81 @@ void SectionContentTableWidget::customContextMenu(const QPoint& p)
  */
 void SectionContentTableWidget::updateOptionsMenu()
 {
-    if (options_menu_ && content_table_)
+    if (!options_menu_ || 
+        !content_table_)
+        return;
+
+    options_menu_->clear();
+    content_table_->addActionsToMenu(options_menu_.get());
+
+    const auto& col_groups = content_table_->columnGroups();
+
+    if (col_groups.size() > 0)
     {
-        options_menu_->clear();
-        content_table_->addActionsToMenu(options_menu_);
+        if (options_menu_->actions().count() > 0)
+            options_menu_->addSeparator();
+
+        auto column_menu = options_menu_->addMenu("Edit Columns");
+
+        for (const auto& col_group : col_groups)
+        {
+            auto action = column_menu->addAction(QString::fromStdString(col_group.first));
+            action->setCheckable(true);
+            action->setChecked(col_group.second.enabled);
+
+            std::string group_name    = col_group.first;
+            auto        content_table = content_table_;
+
+            auto cb = [ this, content_table, group_name ] (bool ok)
+            {
+                content_table->enableColumnGroup(group_name, ok);
+                this->updateToolBar();
+            };
+
+            connect(action, &QAction::toggled, cb);
+        }
+    }
+}
+
+/**
+ */
+void SectionContentTableWidget::updateScrollBarV()
+{
+    //loginf << "SectionContentTableWidget: updateScrollBarV";
+
+    if (!content_table_->isComplete())
+        return;
+
+    //loginf << "SectionContentTableWidget: updateScrollBarV: applying new scroll limit: " 
+    //       << "v = " << (scroll_pos_v_.has_value() ? scroll_pos_v_.value() : -1);
+
+    //configure vertical scroll bar position
+    if (scroll_pos_v_.has_value() && scroll_pos_v_.value() > 0 && table_view_->verticalScrollBar()->isVisible())
+    {
+        loginf << "SectionContentTableWidget: updateScrollBarV: applying v limit " << scroll_pos_v_.value();
+        table_view_->verticalScrollBar()->setValue(scroll_pos_v_.value());
+        scroll_pos_v_.reset();
+    }
+}
+
+/**
+ */
+void SectionContentTableWidget::updateScrollBarH()
+{
+    //loginf << "SectionContentTableWidget: updateScrollBarH";
+
+    if (!content_table_->isComplete())
+        return;
+
+    //loginf << "SectionContentTableWidget: updateScrollBarH: applying new scroll limit: " 
+    //      << "h = " << (scroll_pos_h_.has_value() ? scroll_pos_h_.value() : -1);
+
+    //configure horizontal scroll bar position
+    if (scroll_pos_h_.has_value() && scroll_pos_h_.value() > 0 && table_view_->horizontalScrollBar()->isVisible())
+    {
+        loginf << "SectionContentTableWidget: updateScrollBarH: applying h limit " << scroll_pos_h_.value();
+        table_view_->horizontalScrollBar()->setValue(scroll_pos_h_.value());
+        scroll_pos_h_.reset();
     }
 }
 
@@ -2101,6 +2329,19 @@ int SectionContentTableWidget::scrollPosH() const
 
 /**
  */
+bool SectionContentTableWidget::eventFilter(QObject *watched, QEvent *event)
+{
+    //react on showing the scroll bars
+    if (table_view_ && watched == table_view_->verticalScrollBar() && event->type() == QEvent::Show)
+        updateScrollBarV();
+    if (table_view_ && watched == table_view_->horizontalScrollBar() && event->type() == QEvent::Show)
+        updateScrollBarH();
+
+    return false;
+}
+
+/**
+ */
 nlohmann::json SectionContentTableWidget::jsonConfig() const
 {
     if (!table_view_)
@@ -2112,6 +2353,18 @@ nlohmann::json SectionContentTableWidget::jsonConfig() const
     j[ FieldConfigSortColumn ] = sort_column_;
     j[ FieldConfigScrollPosV ] = scrollPosV();
     j[ FieldConfigScrollPosH ] = scrollPosH();
+
+    //store column group states
+    if (col_group_toolbar_)
+    {
+        int na = col_group_toolbar_->actions().count();
+
+        std::vector<bool> col_group_states(na);
+        for (int i = 0; i < na; ++i)
+            col_group_states[ i ] = col_group_toolbar_->actions().at(i)->isChecked();
+
+        j[ FieldColGroupStates ] = col_group_states;
+    }
 
     return j;
 }
@@ -2142,16 +2395,40 @@ bool SectionContentTableWidget::configure(const nlohmann::json& j)
     table_view_->setSortingEnabled(valid_sorting);
     table_view_->sortByColumn(valid_sorting ? sort_column : -1, sort_order);
 
-    //configure vertical scroll bar position
-    if (scroll_pos_v >= 0 && table_view_->verticalScrollBar()->isVisible())
-        table_view_->verticalScrollBar()->setValue(scroll_pos_v);
+    //configure vertical scroll bar position for later usage
+    if (scroll_pos_v >= 0)
+        scroll_pos_v_ = scroll_pos_v;
 
-    //configure horizontal scroll bar position
-    if (scroll_pos_h >= 0 && table_view_->horizontalScrollBar()->isVisible())
+    //configure horizontal scroll bar position for later usage
+    if (scroll_pos_h >= 0)
+        scroll_pos_h_ = scroll_pos_h;
+
+    //restore column group states
+    if (j.contains(FieldColGroupStates) && 
+        j.at(FieldColGroupStates).is_array() &&
+        col_group_toolbar_)
     {
-        loginf << "restoring scrollbar h value " << scroll_pos_h << " (max = " << table_view_->horizontalScrollBar()->maximum() << ")";
-        table_view_->horizontalScrollBar()->setValue(scroll_pos_h);
+        const auto& states = j.at(FieldColGroupStates);
+        int n = (int)states.size();
+
+        if (n != col_group_toolbar_->actions().count())
+            return false;
+
+        for (int i = 0; i < n; ++i)
+        {
+            std::string name = col_group_toolbar_->actions().at(i)->text().toStdString();
+            if (!content_table_->hasColumnGroup(name))
+                return false;
+
+            content_table_->enableColumnGroup(name, states.at(i).get<bool>());
+        }
+
+        updateToolBar();
     }
+
+    //try update the scroll bars in case they are already ready
+    updateScrollBarV();
+    updateScrollBarH();
 
     return true;
 }

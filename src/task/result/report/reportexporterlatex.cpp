@@ -32,6 +32,7 @@
 #include "files.h"
 #include "stringconv.h"
 #include "util/system.h"
+#include "asynctask.h"
 
 #include <fstream>
 
@@ -361,11 +362,25 @@ Result ReportExporterLatex::writePDF() const
 
     loginf << "ReportExporterLatex: writePDF: running pdflatex";
 
+    auto runPDFLatex = [ & ] ()
+    {
+        auto cb = [ & ] (const AsyncTaskState& state, AsyncTaskProgressWrapper& progress)
+        {
+            command_out = Utils::System::exec(command);
+
+            return Result::succeeded();
+        };
+
+        AsyncFuncTask task(cb, "Finalizing Report", "Finalizing report...", false);
+        task.runAsync();
+    };
+
     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     loginf << "ReportExporterLatex: writePDF: cmd '" << command << "'";
 
-    command_out = Utils::System::exec(command);
+    //initial run
+    runPDFLatex();
 
     logdbg << "ReportExporterLatex: writePDF: cmd done";
 
@@ -380,7 +395,8 @@ Result ReportExporterLatex::writePDF() const
     {
         loginf << "ReportExporterLatex: writePDF: re-running pdflatex";
         
-        command_out = Utils::System::exec(command);
+        //re-run
+        runPDFLatex();
 
         logdbg << "ReportExporterLatex: writePDF: re-run done";
 

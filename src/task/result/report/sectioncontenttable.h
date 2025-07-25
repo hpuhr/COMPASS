@@ -40,6 +40,8 @@ class Section;
 
 class ViewableDataConfig;
 
+class PopupMenu;
+
 namespace Utils
 {
     class StringTable;
@@ -48,6 +50,7 @@ namespace Utils
 class QPushButton;
 class QTableView;
 class QMenu;
+class QToolBar;
 
 namespace ResultReport
 {
@@ -157,13 +160,16 @@ public:
     size_t numColumns() const;
     const std::vector<std::string>& headings() const;
 
-    TableColumnGroup& setColumnGroup(const std::string& name, 
-                                     const std::vector<size_t>& columns,
-                                     bool enabled = true);
+    const ColumnGroups& columnGroups() const { return column_groups_; }
+    void setColumnGroup(const std::string& name, 
+                        const std::vector<int>& columns,
+                        bool enabled = true);
     void enableColumnGroup(const std::string& name,
                            bool ok);
+    bool hasColumnGroup(const std::string& name) const;
     bool columnGroupEnabled(const std::string& name) const;
     bool columnVisible(int column) const;
+    bool columnsHidden() const;
 
     bool hasReference (unsigned int row) const;
     std::string reference (unsigned int row) const;
@@ -202,6 +208,7 @@ public:
     boost::optional<std::vector<nlohmann::json>> exportProxyContent(ReportExportMode mode) const;
 
     unsigned int numProxyRows () const;
+    unsigned int numProxyColumns () const;
 
     static boost::optional<QColor> cellTextColor(unsigned int style);
     static boost::optional<QColor> cellBGColor(unsigned int style);
@@ -230,6 +237,7 @@ public:
     static const std::string FieldCellStyles;
     static const std::string FieldShowTooltips;
     static const std::string FieldMaxRowCount;
+    static const std::string FieldColumnGroups;
 
     static const std::string FieldDocColumns;
     static const std::string FieldDocData;
@@ -241,6 +249,10 @@ public:
     static const std::string FieldAnnoOnDemand;
     static const std::string FieldAnnoIndex;
     static const std::string FieldAnnoStyle;
+
+    static const std::string FieldColGroupName;
+    static const std::string FieldColGroupColumns;
+    static const std::string FieldColGroupEnabledOnInit;
 
     static const QColor ColorTextRed;
     static const QColor ColorTextOrange;
@@ -290,9 +302,12 @@ protected:
     
     void executeCallback(const std::string& name);
 
-    void updateGroupColumns(const TableColumnGroup& col_group);
+    void updateGroupColumns(bool update_widget = true);
+    void updateGroupColumns(const TableColumnGroup& col_group,
+                            bool update_widget = true);
 
-    unsigned int               num_columns_ {0};
+    unsigned int               num_columns_      {0};
+    unsigned int               num_columns_proxy_{0};
     std::vector<std::string>   headings_;
     std::vector<unsigned int>  column_styles_;
     std::vector<unsigned char> column_flags_;
@@ -393,6 +408,10 @@ public:
     static const std::string FieldConfigSortOrder;
     static const std::string FieldConfigScrollPosV;
     static const std::string FieldConfigScrollPosH;
+    static const std::string FieldColGroupStates;
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override final;
 
 private:
     void clicked(const QModelIndex& index);
@@ -400,19 +419,25 @@ private:
     void customContextMenu(const QPoint& p);
     void performClickAction();
     void updateOptionsMenu();
+    void updateToolBar();
+    void updateScrollBarV();
+    void updateScrollBarH();
 
-    SectionContentTable*        content_table_  = nullptr;
-    SectionContentTableModel*   model_          = nullptr;
-    TableQSortFilterProxyModel* proxy_model_    = nullptr;
-    QTableView*                 table_view_     = nullptr;
-    QPushButton*                options_button_ = nullptr;
-    QMenu*                      options_menu_   = nullptr;
+    SectionContentTable*        content_table_     = nullptr;
+    SectionContentTableModel*   model_             = nullptr;
+    TableQSortFilterProxyModel* proxy_model_       = nullptr;
+    QTableView*                 table_view_        = nullptr;
+    QPushButton*                options_button_    = nullptr;
+    std::unique_ptr<PopupMenu>  options_menu_;
+    QToolBar*                   col_group_toolbar_ = nullptr;
 
     int           sort_column_ = -1;
     Qt::SortOrder sort_order_  = Qt::AscendingOrder;
 
-    QTimer click_action_timer_;
+    QTimer                        click_action_timer_;
     boost::optional<unsigned int> last_clicked_row_index_;
+    boost::optional<int>          scroll_pos_h_;
+    boost::optional<int>          scroll_pos_v_;
 };
 
 }

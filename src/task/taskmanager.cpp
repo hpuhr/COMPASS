@@ -406,7 +406,7 @@ void TaskManager::beginTaskResultWriting(const std::string& name,
     if (!res.ok())
         logerr << "TaskManager: beginTaskResultWriting: result could not be initialized: " << res.error();
 
-    loginf << "TaskManager: beginTaskResultWriting: begining result id " << current_result_->id()
+    loginf << "TaskManager: beginTaskResultWriting: beginning result id " << current_result_->id()
            << " name " << current_result_->name();
     
     assert(res.ok());

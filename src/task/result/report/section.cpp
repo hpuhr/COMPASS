@@ -1069,16 +1069,6 @@ bool Section::configure(const nlohmann::json& j)
         size_t idx = std::distance(content_.begin(), it);
         const auto& c = content_.at(idx);
         assert(c);
-
-        bool content_available = !c->isLocked() &&
-                                 (!c->isOnDemand() || c->isComplete());
-        if (!content_available)
-        {
-            //not available => skip
-            logwrn << "Section: configure: Content " << c->name() << " of section " << name() << " is not available for configuration";
-            ok = false;
-            continue;
-        }
         
         //try to configure content
         if (!c->configure(config))

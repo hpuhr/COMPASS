@@ -124,9 +124,10 @@ namespace ResultReport
 
     struct TableColumnGroup
     {
-        std::string         name;
-        std::vector<size_t> columns;
-        bool                enabled = true;
+        std::string      name;
+        std::vector<int> columns;
+        bool             enabled_on_init = true;
+        bool             enabled         = true;
     };
 
     struct TableHeader
