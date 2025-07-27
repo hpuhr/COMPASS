@@ -1,6 +1,8 @@
 set(COMPASS_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${COMPASS_PATH}")
 
+SET(CMAKE_EXPORT_COMPILE_COMMANDS, ON)
+
 cmake_minimum_required(VERSION 3.3)
 
 set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
