@@ -50,7 +50,7 @@ set(CMAKE_AUTOMOC ON)
 #add_definitions(${Qt5Widgets_DEFINITIONS})
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
-find_package ( Boost 1.73.0 REQUIRED COMPONENTS regex system program_options filesystem iostreams thread)
+find_package (Boost 1.73.0 REQUIRED COMPONENTS regex system program_options filesystem iostreams thread stacktrace_backtrace)
 message("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message("  Boost_LIBRARIES: ${Boost_LIBRARIES}")
 
@@ -214,6 +214,14 @@ target_link_libraries ( compass
     ${DUCKDB_LIBRARIES}
     )
 
+target_compile_definitions(compass PRIVATE
+    BOOST_STACKTRACE_USE_BACKTRACE
+    #BOOST_ENABLE_ASSERT_HANDLER
+    BOOST_STACKTRACE_LINK
+)
+
+target_link_options(compass PRIVATE -rdynamic)
+
 # installation stuff
 
 message("Installing using prefix: ${CMAKE_INSTALL_PREFIX}")
@@ -231,7 +239,6 @@ set (CPACK_RESOURCE_FILE_LICENSE
      "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 include (CPack)
 
-
 # add a target to generate API documentation with Doxygen
 #find_package(Doxygen)
 #if(DOXYGEN_FOUND)
@@ -246,8 +253,3 @@ include (CPack)
 #file(GLOB DOT ".*")
 #file(GLOB TILD "*~")
 #file(GLOB TEMP "*.cmake")
-
-
-
-
-
