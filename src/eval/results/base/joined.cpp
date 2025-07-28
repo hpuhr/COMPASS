@@ -45,10 +45,10 @@
 namespace EvaluationRequirementResult
 {
 
-const std::string Joined::SectorOverviewID              = "sector_overview";
+const std::string Joined::SectorTargetsTableName        = "Targets";
+const std::string Joined::SectorOverviewTableName       = "Sector Overview";
+const std::string Joined::SectorOverviewID              = "Sector Overview";
 const int         Joined::SectorOverviewRenderDelayMSec = 2000;
-
-const std::string Joined::TargetsTableName              = "Targets";
 
 /**
 */
@@ -306,10 +306,10 @@ void Joined::addSectorDetailsToReport(std::shared_ptr<ResultReport::Report> repo
 {
     auto& sector_section = getRequirementSection(report);
 
-    if (!sector_section.hasTable("sector_details_table"))
-        sector_section.addTable("sector_details_table", 3, {"Name", "Comment", "Value"}, false);
+    if (!sector_section.hasTable(SectorOverviewTableName))
+        sector_section.addTable(SectorOverviewTableName, 3, {"Name", "Comment", "Value"}, false);
 
-    auto& sec_det_table = sector_section.getTable("sector_details_table");
+    auto& sec_det_table = sector_section.getTable(SectorOverviewTableName);
 
     // callbacks
     if (canExportCSV())

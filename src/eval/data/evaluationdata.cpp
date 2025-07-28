@@ -588,6 +588,11 @@ void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report) c
     table.setLockStateSafe(); // can be reloaded and exported in lock state
     table.enableTooltips();   // shows custom tooltips
     table.setMaxRowCount(-1); // override row count
+
+    //setup column groups
+    table.setColumnGroup("Duration", duration_columns_, false);
+    table.setColumnGroup("Mode S"  , mode_s_columns_  , true );
+    table.setColumnGroup("Mode A/C", mode_ac_columns_ , false);
 }
 
 /**
@@ -626,7 +631,7 @@ std::pair<nlohmann::json, unsigned int> EvaluationData::rawCellData(const Evalua
     switch (column)
     {
         case ColUse:
-            return std::make_pair(dbContent::TargetModel::iconForTarget(target), 0);
+            return std::make_pair(dbContent::TargetModel::iconForTarget(target, true), 0);
         case ColUTN: 
             return std::make_pair(target.utn_, 0);
         case ColComment:

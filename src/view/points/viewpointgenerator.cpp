@@ -649,15 +649,18 @@ QImage ViewPointGenFeatureGeoImage::byteStringWithMetadataToImage(const std::str
  * ViewPointGenFeatureGrid
  ********************************************************************************/
 
-const std::string ViewPointGenFeatureGrid::FeatureName              = "grid";
-const std::string ViewPointGenFeatureGrid::FeatureGridFieldNameGrid = "grid";
+const std::string ViewPointGenFeatureGrid::FeatureName                        = "grid";
+const std::string ViewPointGenFeatureGrid::FeatureGridFieldNameGrid           = "grid";
+const std::string ViewPointGenFeatureGrid::FeatureGridFieldNameRenderSettings = "render_settings";
 
 /**
 */
 ViewPointGenFeatureGrid::ViewPointGenFeatureGrid(const Grid2DLayer& grid,
+                                                 const boost::optional<Grid2DRenderSettings>& render_settings,
                                                  const boost::optional<PlotMetadata>& metadata)
 :   ViewPointGenFeature(FeatureName)
-,   grid_(grid)
+,   grid_           (grid           )
+,   render_settings_(render_settings)
 {
     plot_metadata_ = metadata;
 }
@@ -667,6 +670,9 @@ ViewPointGenFeatureGrid::ViewPointGenFeatureGrid(const Grid2DLayer& grid,
 void ViewPointGenFeatureGrid::toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const
 {
     j[FeatureGridFieldNameGrid] = grid_.toJSON(write_binary_if_possible);
+
+    if (render_settings_.has_value())
+        j[FeatureGridFieldNameRenderSettings] = render_settings_.value().toJSON();
 }
 
 /********************************************************************************

@@ -20,6 +20,9 @@
 #include "gridview.h"
 #include "gridviewchart.h"
 #include "grid2d.h"
+#include "grid2dlayer.h"
+#include "grid2drendersettings.h"
+#include "grid2dlayerrenderer.h"
 
 #include "viewvariable.h"
 #include "viewpointgenerator.h"
@@ -147,7 +150,7 @@ void GridViewDataWidget::resetStashDependentData()
 
 /**
 */
-bool GridViewDataWidget::updateVariableDisplay() 
+ViewDataWidget::DrawState GridViewDataWidget::updateVariableDisplay() 
 {
     return updateGridChart();
 }
@@ -173,7 +176,7 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
     if (!has_data)
         return;
 
-    auto bounds = getXYBounds(true);
+    auto bounds = getXYVariableBounds(true);
     if (!bounds.has_value() || bounds->isEmpty())
     {
         loginf << "GridViewDataWidget: processStash: bounds empty, skipping...";
@@ -181,7 +184,7 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
     }
     assert(bounds->isValid());
 
-    auto z_bounds = getZBounds(false);
+    auto z_bounds = getZVariableBounds(false);
     assert(z_bounds.has_value());
 
     const auto& settings = view_->settings();
@@ -261,12 +264,12 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
 
 /**
 */
-void GridViewDataWidget::updateFromAnnotations()
+bool GridViewDataWidget::updateFromAnnotations()
 {
     loginf << "GridViewDataWidget: updateFromAnnotations";
 
     if (!view_->hasCurrentAnnotation())
-        return;
+        return false;
 
     const auto& anno = view_->currentAnnotation();
 
@@ -277,20 +280,20 @@ void GridViewDataWidget::updateFromAnnotations()
     const auto& feature = anno.feature_json;
 
     if (!feature.is_object() || !feature.contains(ViewPointGenFeatureGrid::FeatureGridFieldNameGrid))
-        return;
+        return false;
 
     std::unique_ptr<Grid2DLayer> layer(new Grid2DLayer);
     if (!layer->fromJSON(feature[ ViewPointGenFeatureGrid::FeatureGridFieldNameGrid ]))
     {
         logerr << "GridViewDataWidget: updateFromAnnotations: could not read grid layer";
-        return;
+        return false;
     }
 
     if (layer->data.cols() < 1 || 
         layer->data.rows() < 1)
     {
         logerr << "GridViewDataWidget: updateFromAnnotations: grid layer empty";
-        return;
+        return false;
     }
     
     grid_layers_.addLayer(std::move(layer));
@@ -310,9 +313,9 @@ void GridViewDataWidget::updateFromAnnotations()
         assert(grid_value_min_.value() <= grid_value_max_.value());
     }
 
-    
-
     loginf << "GridViewDataWidget: updateFromAnnotations: done, generated " << grid_layers_.numLayers() << " layers";
+
+    return true;
 }
 
 /**
@@ -364,16 +367,16 @@ QPixmap GridViewDataWidget::renderPixmap()
 
 /**
 */
-boost::optional<QRectF> GridViewDataWidget::getXYBounds(bool fix_small_ranges) const
+boost::optional<QRectF> GridViewDataWidget::getXYVariableBounds(bool fix_small_ranges) const
 {
-    return getPlanarBounds(0, 1, false, fix_small_ranges);
+    return getPlanarVariableBounds(0, 1, false, fix_small_ranges);
 }
 
 /**
 */
-boost::optional<std::pair<double, double>> GridViewDataWidget::getZBounds(bool fix_small_ranges) const
+boost::optional<std::pair<double, double>> GridViewDataWidget::getZVariableBounds(bool fix_small_ranges) const
 {
-    return getBounds(2, false, fix_small_ranges);
+    return getVariableBounds(2, false, fix_small_ranges);
 }
 
 /**
@@ -460,18 +463,13 @@ void GridViewDataWidget::resetZoomSlot()
 
 /**
 */
-bool GridViewDataWidget::updateGridChart()
+ViewDataWidget::DrawState GridViewDataWidget::updateGridChart()
 {
-    bool has_data = (grid_layers_.numLayers() > 0 && variablesOk());
-
     resetGridChart();
     updateRendering();
 
-    if (grid_rendering_.isNull() || grid_roi_.isEmpty())
-        has_data = false;
-
     QtCharts::QChart* chart = new QtCharts::QChart();
-    updateChart(chart, has_data);
+    auto draw_state = updateChart(chart);
     
     grid_chart_.reset(new QtCharts::GridViewChart(this, chart));
     grid_chart_->setObjectName("chart_view");
@@ -497,7 +495,7 @@ bool GridViewDataWidget::updateGridChart()
         legend_->setVisible(true);
     }
 
-    return has_data;
+    return draw_state;
 }
 
 /**
@@ -611,8 +609,17 @@ void GridViewDataWidget::updateRendering()
 
 /**
 */
-void GridViewDataWidget::updateChart(QtCharts::QChart* chart, bool has_data)
+ViewDataWidget::DrawState GridViewDataWidget::updateChart(QtCharts::QChart* chart)
 {
+    bool has_valid_grid_data = grid_layers_.numLayers() > 0 &&
+                               !grid_rendering_.isNull() && 
+                               !grid_roi_.isEmpty();
+    
+    
+    bool has_data = has_valid_grid_data && (variablesOk() || view_->showsAnnotation());
+
+    auto draw_state = ViewDataWidget::DrawState::NotDrawn;
+
     chart->layout()->setContentsMargins(0, 0, 0, 0);
     chart->setBackgroundRoundness(0);
     chart->setDropShadowEnabled(false);
@@ -652,6 +659,8 @@ void GridViewDataWidget::updateChart(QtCharts::QChart* chart, bool has_data)
         chart->addSeries(series);
 
         createAxes();
+
+        draw_state = ViewDataWidget::DrawState::DrawnContent;
     }
     else
     {
@@ -670,9 +679,13 @@ void GridViewDataWidget::updateChart(QtCharts::QChart* chart, bool has_data)
         chart->axes(Qt::Vertical).at(0)->setLabelsVisible(false);
         chart->axes(Qt::Vertical).at(0)->setGridLineVisible(false);
         chart->axes(Qt::Vertical).at(0)->setMinorGridLineVisible(false);
+
+        draw_state = ViewDataWidget::DrawState::Drawn;
     }
 
     chart->update();
+
+    return draw_state;
 }
 
 /**
@@ -686,8 +699,8 @@ void GridViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     info[ "num_selected"] = getStash().selected_count_;
     info[ "num_nan"     ] = getStash().nan_value_count_;
 
-    auto xy_bounds    = getXYBounds(false);
-    auto z_bounds     = getZBounds(false);
+    auto xy_bounds    = getXYVariableBounds(false);
+    auto z_bounds     = getZVariableBounds(false);
     bool bounds_valid = xy_bounds.has_value() && xy_bounds->isValid() && z_bounds.has_value();
 
     info[ "data_bounds_valid" ] = bounds_valid;

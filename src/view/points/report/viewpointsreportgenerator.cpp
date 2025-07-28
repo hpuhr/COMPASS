@@ -127,7 +127,6 @@ void ViewPointsReportGenerator::run ()
 
     try
     {
-
         LatexDocument doc (report_path_, report_filename_);
         doc.title("OpenATS COMPASS View Points Report");
 
@@ -228,7 +227,6 @@ void ViewPointsReportGenerator::run ()
             {
                 loginf << "ViewPointsReportGenerator: run: setting vp " << vp_id
                        << " done after " << elapsed_time_str;
-
             }
 
             dialog_->setElapsedTime(elapsed_time_str);

@@ -45,19 +45,20 @@ void TargetModel::clear()
 
 /**
  */
-std::string TargetModel::iconForTarget(const Target& target)
+std::string TargetModel::iconForTarget(const Target& target, 
+                                       bool add_placeholder_txt)
 {
     if (!target.useInEval())
-        return "delete.png";
+        return add_placeholder_txt ? "delete.png;No" : "delete.png";
 
     // could be used
 
     if (COMPASS::instance().evaluationManager().useTimestampFilter()
         || target.evalExcludedTimeWindows().size()
         || target.evalExcludedRequirements().size())
-            return "partial_done.png";
+            return add_placeholder_txt ? "partial_done.png;Partial" : "partial_done.png";
 
-    return "done.png";
+    return add_placeholder_txt ? "done.png;Yes" : "done.png";
 }
 
 /**

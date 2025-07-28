@@ -47,12 +47,12 @@ GridViewWidget::GridViewWidget(const std::string& class_id,
 
     auto activeIfDataShownCB = [ data_widget ] (QAction* a)
     {
-        a->setEnabled(data_widget->showsData());
+        a->setEnabled(data_widget->isDrawn());
     };
 
     auto activeIfVariableDataShownCB = [ data_widget, view ] (QAction* a)
     {
-        a->setEnabled(data_widget->showsData() && view->showsVariables());
+        a->setEnabled(data_widget->isDrawn() && view->showsVariables());
     };
 
     UNUSED_VARIABLE(activeIfVariableDataShownCB);

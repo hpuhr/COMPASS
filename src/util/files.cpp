@@ -174,17 +174,19 @@ QStringList getSubdirectories(const std::string& path)
     return list;
 }
 
-std::string getIconFilepath(const std::string& filename)
+std::string getIconFilepath(const std::string& filename, bool verify)
 {
     std::string filepath = HOME_DATA_DIRECTORY + "icons/" + filename;
-    verifyFileExists(filepath);
+    if (verify)
+        verifyFileExists(filepath);
     return filepath;
 }
 
-std::string getImageFilepath(const std::string& filename)
+std::string getImageFilepath(const std::string& filename, bool verify)
 {
     std::string filepath = HOME_DATA_DIRECTORY + "images/" + filename;
-    verifyFileExists(filepath);
+    if (verify)
+        verifyFileExists(filepath);
     return filepath;
 }
 

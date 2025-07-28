@@ -195,7 +195,8 @@ bool ReportItem::fromJSON(const nlohmann::json& j)
 
 /**
 */
-ResultT<nlohmann::json> ReportItem::toJSONDocument(const std::string* resource_dir) const
+ResultT<nlohmann::json> ReportItem::toJSONDocument(const std::string* resource_dir,
+                                                   ReportExportMode export_style) const
 {
     nlohmann::json j;
 
@@ -206,7 +207,7 @@ ResultT<nlohmann::json> ReportItem::toJSONDocument(const std::string* resource_d
         // id is only added in sections
     };
 
-    auto res = toJSONDocument_impl(j, resource_dir);
+    auto res = toJSONDocument_impl(j, resource_dir, export_style);
     if (!res.ok())
         return res;
 

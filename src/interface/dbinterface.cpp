@@ -2212,6 +2212,44 @@ Result DBInterface::updateResultHeader(const TaskResult& result)
 
 /**
  */
+Result DBInterface::updateResultContent(const TaskResult& result)
+{
+    loginf << "DBInterface: updateResultContent: updating content of result '" << result.name() << "'";
+
+    assert(ready());
+
+    try
+    {
+        #ifdef PROTECT_INSTANCE
+        boost::mutex::scoped_lock locker(instance_mutex_);
+        #endif
+
+        string str = sqlGenerator().getUpdateCellStatement(TaskResult::DBTableName,
+                                                           TaskResult::DBColumnJSONContent.name(),
+                                                           result.toJSON(),
+                                                           TaskResult::DBColumnID.name(),
+                                                           result.id());
+        // uses replace with utn as unique key
+        auto res = execute(str);
+        if (!res.ok())
+            return res;
+    }
+    catch(const std::exception& ex)
+    {
+        return Result::failed(std::string(ex.what()));
+    }
+    catch(...)
+    {
+        return Result::failed("Unknown error");
+    }
+
+    loginf << "DBInterface: updateResultContent: done";
+
+    return Result::succeeded();
+}
+
+/**
+ */
 ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
 {
     assert(ready());

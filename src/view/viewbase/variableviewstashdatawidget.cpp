@@ -362,13 +362,13 @@ void VariableViewStashDataWidget::updateStash()
 
 /**
  */
-boost::optional<QRectF> VariableViewStashDataWidget::getPlanarBounds(int var_x, 
-                                                                     int var_y, 
-                                                                     bool correct_datetime,
-                                                                     bool fix_small_ranges) const
+boost::optional<QRectF> VariableViewStashDataWidget::getPlanarVariableBounds(int var_x, 
+                                                                             int var_y, 
+                                                                             bool correct_datetime,
+                                                                             bool fix_small_ranges) const
 {
-    auto bounds_x = getBounds(var_x, correct_datetime, fix_small_ranges);
-    auto bounds_y = getBounds(var_y, correct_datetime, fix_small_ranges);
+    auto bounds_x = getVariableBounds(var_x, correct_datetime, fix_small_ranges);
+    auto bounds_y = getVariableBounds(var_y, correct_datetime, fix_small_ranges);
     if (!bounds_x.has_value() || !bounds_y.has_value())
         return {};
 
@@ -382,9 +382,9 @@ boost::optional<QRectF> VariableViewStashDataWidget::getPlanarBounds(int var_x,
 
 /**
  */
-boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBounds(int var, 
-                                                                                  bool correct_datetime,
-                                                                                  bool fix_small_ranges) const
+boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getVariableBounds(int var, 
+                                                                                          bool correct_datetime,
+                                                                                          bool fix_small_ranges) const
 {
     boost::optional<std::pair<double, double>> b = getStash().dataRanges().at(var);
     if (!b.has_value())
@@ -423,7 +423,7 @@ boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBound
 boost::optional<QRectF> VariableViewStashDataWidget::getViewBounds() const
 {
     //meaningful default behaviour for most views
-    return getPlanarBounds(0, 1, false, true);
+    return getPlanarVariableBounds(0, 1, false, true);
 }
 
 /**

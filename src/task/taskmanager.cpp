@@ -406,7 +406,7 @@ void TaskManager::beginTaskResultWriting(const std::string& name,
     if (!res.ok())
         logerr << "TaskManager: beginTaskResultWriting: result could not be initialized: " << res.error();
 
-    loginf << "TaskManager: beginTaskResultWriting: begining result id " << current_result_->id()
+    loginf << "TaskManager: beginTaskResultWriting: beginning result id " << current_result_->id()
            << " name " << current_result_->name();
     
     assert(res.ok());
@@ -486,6 +486,15 @@ void TaskManager::resultHeaderChanged(const TaskResult& result)
     assert(res.ok());
 
     emit taskResultHeaderChangedSignal(QString::fromStdString(result.name()));
+}
+
+/**
+ */
+void TaskManager::resultContentChanged(const TaskResult& result)
+{
+    //update result content upon change
+    auto res = COMPASS::instance().dbInterface().updateResultContent(result);
+    assert(res.ok());
 }
 
 /**
@@ -650,11 +659,12 @@ void TaskManager::databaseClosedSlot()
 
 /**
  */
-void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
+void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data,
+                                        bool load_blocking)
 {
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
 
-    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get(), load_blocking);
 }
 
 /**
@@ -734,6 +744,14 @@ void TaskManager::clearResults()
     results_.clear();
     
     emit taskResultsChangedSignal();
+}
+
+/**
+ */
+void TaskManager::storeBackupSection()
+{
+    if (widget_)
+        widget_->storeBackupSection();
 }
 
 /**

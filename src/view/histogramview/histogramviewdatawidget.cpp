@@ -139,19 +139,19 @@ void HistogramViewDataWidget::postUpdateVariableDataEvent()
 
 /**
  */
-bool HistogramViewDataWidget::updateVariableDisplay()
+ViewDataWidget::DrawState HistogramViewDataWidget::updateVariableDisplay()
 {
     return updateChart();
 }
 
 /**
  */
-void HistogramViewDataWidget::updateFromAnnotations()
+bool HistogramViewDataWidget::updateFromAnnotations()
 {
     loginf << "HistogramViewDataWidget: updateFromAnnotations";
 
     if (!view_->hasCurrentAnnotation())
-        return;
+        return false;
 
     const auto& anno = view_->currentAnnotation();
 
@@ -161,12 +161,12 @@ void HistogramViewDataWidget::updateFromAnnotations()
     const auto& feature = anno.feature_json;
 
     if (!feature.is_object() || !feature.contains(ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram))
-        return;
-    
+        return false;
+
     if (!histogram_raw_.fromJSON(feature[ ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram ]))
     {
         histogram_raw_.clear();
-        return;
+        return false;
     }
 
     if (histogram_raw_.useLogScale().has_value())
@@ -176,6 +176,8 @@ void HistogramViewDataWidget::updateFromAnnotations()
     }
 
     loginf << "HistogramViewDataWidget: updateFromAnnotations: done";
+
+    return true;
 }
 
 /**
@@ -294,11 +296,16 @@ QPixmap HistogramViewDataWidget::renderPixmap()
 
 /**
  */
-bool HistogramViewDataWidget::updateChart()
+ViewDataWidget::DrawState HistogramViewDataWidget::updateChart()
 {
     loginf << "HistogramViewDataWidget: updateChart";
 
+    //check if data is present/valid
+    bool has_data = histogram_raw_.hasData() && (variablesOk() || view_->showsAnnotation());
+
     chart_view_.reset(nullptr);
+
+    ViewDataWidget::DrawState draw_state = ViewDataWidget::DrawState::NotDrawn;
 
     //create chart
     QChart* chart = new QChart();
@@ -354,9 +361,6 @@ bool HistogramViewDataWidget::updateChart()
         chart_series->attachAxis(chart_y_axis);
     };
 
-    //check if data is present/valid
-    bool has_data = histogram_raw_.hasData() && variablesOk();
-
     if (has_data)
     {
         //data available
@@ -403,6 +407,8 @@ bool HistogramViewDataWidget::updateChart()
         max_count = std::max(max_count, (unsigned)1);
 
         generateYAxis(use_log_scale, max_count);
+
+        draw_state = ViewDataWidget::DrawState::DrawnContent;
     }
     else 
     {
@@ -423,6 +429,8 @@ bool HistogramViewDataWidget::updateChart()
         chart_y_axis->setLabelsVisible(false);
         chart_y_axis->setGridLineVisible(false);
         chart_y_axis->setMinorGridLineVisible(false);
+
+        draw_state = ViewDataWidget::DrawState::Drawn;
     }
 
     //update chart
@@ -444,7 +452,7 @@ bool HistogramViewDataWidget::updateChart()
 
     loginf << "HistogramViewDataWidget: updateChart: done";
 
-    return has_data;
+    return draw_state;
 }
 
 /**

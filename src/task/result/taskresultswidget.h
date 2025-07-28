@@ -7,6 +7,8 @@
 
 #include <QWidget>
 
+#include "json.hpp"
+
 class TaskManager;
 
 namespace ResultReport
@@ -31,6 +33,8 @@ public:
     void setReport(const std::string name);
     void selectID(const std::string id,
                   bool show_figure = false);
+
+    void storeBackupSection();
     void restoreBackupSection();
 
     //ToolBoxWidget
@@ -63,9 +67,10 @@ protected:
     QPushButton* export_result_button_  {nullptr};
     QPushButton* refresh_result_button_ {nullptr};
 
-    std::string current_report_name_;
-    std::string current_report_name_backup_;
-    std::string current_section_name_backup_;
+    std::string    current_report_name_;
+    std::string    current_report_name_backup_;
+    std::string    current_section_name_backup_;
+    nlohmann::json current_section_config_backup_;
 
     ResultReport::ReportWidget* report_widget_;
 };

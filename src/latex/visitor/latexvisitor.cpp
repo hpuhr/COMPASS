@@ -247,7 +247,13 @@ void LatexVisitor::visit(HistogramView* e)
     HistogramViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
 
-    if (!data_widget->showsData())
+    loginf << "LatexVisitor: visit: " << e->instanceId() 
+           << " has visible content: " << data_widget->hasVisibleContent()
+           << " has data " << data_widget->hasData()
+           << " has annotations " << data_widget->hasAnnotations()
+           << " is drawn " << data_widget->isDrawn();
+
+    if (!data_widget->hasVisibleContent())
         return;
 
     // normal screenshot
@@ -302,6 +308,15 @@ void LatexVisitor::visit(GeographicView* e)
 
     GeographicViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
+
+    loginf << "LatexVisitor: visit: " << e->instanceId() 
+           << " has screenshot content: " << data_widget->hasScreenshotContent()
+           << " has data " << data_widget->hasData()
+           << " has annotations " << data_widget->hasAnnotations()
+           << " is drawn " << data_widget->isDrawn();
+
+    if (!data_widget->hasScreenshotContent())
+        return;
 
     if (wait_on_map_loading_)
         data_widget->waitUntilMapLoaded();
@@ -391,7 +406,13 @@ void LatexVisitor::visit(ScatterPlotView* e)
     ScatterPlotViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
 
-    if (!data_widget->showsData())
+    loginf << "LatexVisitor: visit: " << e->instanceId() 
+           << " has visible content: " << data_widget->hasVisibleContent()
+           << " has data " << data_widget->hasData()
+           << " has annotations " << data_widget->hasAnnotations()
+           << " is drawn " << data_widget->isDrawn();
+
+    if (!data_widget->hasVisibleContent())
         return;
 
     // normal screenshot
@@ -446,7 +467,13 @@ void LatexVisitor::visit(GridView* e)
     GridViewDataWidget* data_widget = e->getDataWidget();
     assert (data_widget);
 
-    if (!data_widget->showsData())
+    loginf << "LatexVisitor: visit: " << e->instanceId() 
+           << " has visible content: " << data_widget->hasVisibleContent()
+           << " has data " << data_widget->hasData()
+           << " has annotations " << data_widget->hasAnnotations()
+           << " is drawn " << data_widget->isDrawn();
+
+    if (!data_widget->hasVisibleContent())
         return;
 
     // normal screenshot

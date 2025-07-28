@@ -42,6 +42,8 @@
 #include "viewpointgenerator.h"
 #include "grid2d.h"
 #include "grid2dlayer.h"
+#include "grid2dlayerrenderer.h"
+#include "grid2drendersettings.h"
 
 #include <boost/algorithm/string.hpp>
 

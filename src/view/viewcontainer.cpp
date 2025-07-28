@@ -170,11 +170,13 @@ void ViewContainer::addView(View* view)
     tab_widget_->tabBar()->setTabButton(index, QTabBar::RightSide, manage_button);
 
     //in localbuild we show some info about how the view is reachable via rtcommands
+#if USE_EXPERIMENTAL_SOURCE == true
     if (!COMPASS::instance().isAppImage())
     {
         QString tt = rtcommand::getTooltip(view->getViewWidget(), view);
         tab_widget_->setTabToolTip(index, tt);
     }
+#endif
 }
 
 void ViewContainer::deleteViewSlot()
@@ -225,7 +227,6 @@ void ViewContainer::addNewViewSlot()
     }
     else
         logerr << "ViewContainer: addNewViewSlot: unknown location '" << location << "'";
-
 }
 
 const std::vector<std::unique_ptr<View>>& ViewContainer::getViews() const { return views_; }

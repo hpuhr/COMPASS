@@ -527,6 +527,8 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
 
     // generate results
 
+    loginf << "Adding joined results...";
+
     // first add all joined
     for (auto& result_it : results_vec_)
     {
@@ -537,8 +539,9 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
         }
     }
 
-    // then all singles
+    loginf << "Adding single results...";
 
+    // then all singles
     unsigned int cnt = 0;
     for (auto& result_it : results_vec_)
     {
@@ -553,8 +556,12 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
         }
     }
 
+    loginf << "Adding targets...";
+
     // generate target section
     addTargetSection(report);
+
+    loginf << "Adding non-results content...";
 
     // generate non-result details
     addNonResultsContent(report);
@@ -567,6 +574,8 @@ void EvaluationResultsGenerator::generateResultsReportGUI()
     // - fetching subnodes (=single targets) via get_result rtcommand still possible if really desired
     auto& target_sec = report->getSection(EvalSectionID::targetID());
     target_sec.enableExports(false);
+
+    loginf << "Storing targets...";
 
     // store targets to result
     eval_result->setTargets(calculator_.data().toTargets());

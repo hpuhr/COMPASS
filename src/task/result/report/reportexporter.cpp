@@ -32,6 +32,8 @@
 #include "geographicview.h"
 #endif
 
+#include <boost/filesystem.hpp>
+
 namespace ResultReport
 {
 
@@ -40,6 +42,7 @@ const int ReportExporter::TableMaxColumns = 0;
 
 const std::string ReportExporter::ResourceFolderScreenshots = "screenshots";
 const std::string ReportExporter::ResourceFolderTables      = "tables";
+const std::string ReportExporter::ResourceFolderIcons       = "icons";
 
 const std::string ReportExporter::ExportImageFormat = ".jpg";
 const std::string ReportExporter::ExportTableFormat = ".json";
@@ -91,6 +94,8 @@ std::string ReportExporter::resourceSubDir(ResourceDir dir)
             return ResourceFolderScreenshots;
         case ResourceDir::Tables:
             return ResourceFolderTables;
+        case ResourceDir::Icons:
+            return ResourceFolderIcons;
     }
 
     return "";
@@ -114,7 +119,7 @@ ResultT<nlohmann::json> ReportExporter::finalizeExport(TaskResult& result)
  */
 ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
                                                      const std::string& section,
-                                                     const std::string& content)
+                                                     const Content& content)
 {
     loginf << "ReportExporter: exportReport: Exporting result '" << result.name() << "'";
 
@@ -150,12 +155,12 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
 
             section_ptr = &result.report()->getSection(section);
 
-            if (!content.empty())
+            if (!content.first.empty())
             {
-                if (!section_ptr->hasContent(content))
-                    return Result::failed("Content '" + content + "' not found in report section '" + section + "'");
+                if (!section_ptr->hasContent(content.first, content.second))
+                    return Result::failed("Content '" + content.first + "' not found in report section '" + section + "'");
 
-                content_id = section_ptr->contentID(content);
+                content_id = section_ptr->contentID(content.first, content.second);
             }
         }
 
@@ -178,7 +183,8 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
         {
             return s.exportEnabled(this->exportMode());
         };
-        num_sections_total_ = section_ptr->numSections(func);
+        num_sections_total_ = section_ptr->totalNumSections(func);
+        num_contents_total_ = section_ptr->totalNumContents(func);
 
         //for immediate rendering of geographic view during image generation
 #if USE_EXPERIMENTAL_SOURCE == true
@@ -275,6 +281,10 @@ Result ReportExporter::visitSection(Section& section,
                 return Result::failed("Contents could not be loaded in section '" + section.name() + "'");
 
             res = visitContent(*c, is_root_section);
+
+            num_contents_exported_[ c->contentType() ] += 1;
+            emit progressChanged();
+
             if (!res.ok())
                 return res;
         }
@@ -376,6 +386,71 @@ void ReportExporter::setStatus(const std::string& status)
     status_ = status;
 
     emit progressChanged();
+}
+
+/**
+ */
+std::string ReportExporter::storeFile(ResourceDir dir, const std::string& fn) const
+{
+    auto basename = Utils::Files::getFilenameFromPath(fn);
+    auto dst_dir  = exportResourceDir() + "/" + resourceSubDir(dir);
+    auto dst_path = dst_dir + "/" + basename;
+    auto rel_path = resourceSubDir(dir) + "/" + basename;
+
+    if (Utils::Files::fileExists(dst_path))
+        return rel_path;
+
+    Utils::Files::createMissingDirectories(dst_dir);
+
+    if (!boost::filesystem::copy_file(fn, dst_path, boost::filesystem::copy_options::overwrite_existing))
+        return "";
+
+    return rel_path;
+}
+
+/**
+ */
+double ReportExporter::progress() const
+{
+    double total    = 0.0;
+    double finished = 0.0;
+
+    const double FactorSection = 0.1;
+    const double FactorText    = 0.1;
+    const double FactorTable   = 0.2;
+    const double FactorFigure  = 10.0;
+
+    total    += num_sections_total_    * FactorSection;
+    finished += num_sections_exported_ * FactorSection;
+
+    auto getFactor = [ & ] (SectionContentType t)
+    {
+        if (t == SectionContentType::Figure)
+            return FactorFigure;
+        if (t == SectionContentType::Table)
+            return FactorTable;
+        if (t == SectionContentType::Text)
+            return FactorText;
+
+        return 1.0;
+    };
+
+    for (const auto& it : num_contents_total_)
+    {
+        total += it.second * getFactor(it.first);
+
+        auto it2 = num_contents_exported_.find(it.first);
+        if (it2 != num_contents_exported_.end())
+            finished += it2->second * getFactor(it.first);
+    }
+
+    double part0_progress = total == 0.0 ? 0.0 : finished / total;
+    double part1_progress = isDone() ? 1.0 : 0.0;
+
+    const double part1_factor = finalizeFactor();
+    const double part0_factor = 1.0 - part1_factor;
+
+    return part0_factor * part0_progress + part1_factor * part1_progress;
 }
 
 }

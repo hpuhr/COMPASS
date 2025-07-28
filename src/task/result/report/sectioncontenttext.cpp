@@ -132,10 +132,11 @@ bool SectionContentText::fromJSON_impl(const nlohmann::json& j)
 /**
  */
 Result SectionContentText::toJSONDocument_impl(nlohmann::json& j, 
-                                               const std::string* resource_dir) const
+                                               const std::string* resource_dir,
+                                               ReportExportMode export_style) const
 {
     //call base
-    auto r = SectionContent::toJSONDocument_impl(j, resource_dir);
+    auto r = SectionContent::toJSONDocument_impl(j, resource_dir, export_style);
     if (!r.ok())
         return r;
 

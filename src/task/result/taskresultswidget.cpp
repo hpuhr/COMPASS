@@ -174,9 +174,9 @@ void TaskResultsWidget::setReport(const std::string name)
     std::string default_section = ResultReport::SectionID::reportResultOverviewID();
 
     if (!result->startSection().empty())
-        report_widget_->selectId(result->startSection());
+        report_widget_->selectId(result->startSection(), false, {});
     else if (report->hasSection(default_section))
-        report_widget_->selectId(default_section);
+        report_widget_->selectId(default_section, false, {});
 
     report_widget_->setDisabled(false);
 
@@ -195,9 +195,6 @@ void TaskResultsWidget::updateResultsSlot()
 void TaskResultsWidget::updateResults(const std::string& selected_result)
 {
     loginf << "TaskResultsWidget: updateResultsSlot";
-
-    current_report_name_backup_  = current_report_name_;
-    current_section_name_backup_ = report_widget_->currentSection();
 
     report_combo_->blockSignals(true);
     report_combo_->clear();
@@ -423,7 +420,20 @@ std::string TaskResultsWidget::currentReportName() const
  */
 void TaskResultsWidget::selectID(const std::string id, bool show_figure)
 {
-    report_widget_->selectId(id, show_figure);
+    report_widget_->selectId(id, show_figure, {});
+}
+
+/**
+ */
+void TaskResultsWidget::storeBackupSection()
+{
+    current_report_name_backup_    = current_report_name_;
+    current_section_name_backup_   = report_widget_ ? report_widget_->currentSectionID() : "";
+    current_section_config_backup_ = report_widget_ ? report_widget_->currentSectionConfig() : nlohmann::json();
+
+    loginf << "TaskResultsWidget: storeBackupSection: backing up section '" << current_section_name_backup_ << "'";
+           //<< " with config: \n" 
+           //<< current_section_config_backup_.dump(4);
 }
 
 /**
@@ -446,7 +456,7 @@ void TaskResultsWidget::restoreBackupSection()
     if (current_section_name_backup_.empty())
         return;
 
-    report_widget_->selectId(current_section_name_backup_);
-
+    report_widget_->selectId(current_section_name_backup_, false, current_section_config_backup_);
+    
     loginf << "TaskResultsWidget: restoreBackupSection: restored section '" << current_section_name_backup_ << "'";
 }

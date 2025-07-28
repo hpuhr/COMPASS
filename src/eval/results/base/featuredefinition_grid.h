@@ -24,6 +24,9 @@
 
 #include "view/gridview/grid2d.h"
 #include "view/gridview/grid2dlayer.h"
+#include "view/gridview/grid2drendersettings.h"
+#include "view/gridview/grid2dlayerrenderer.h"
+
 #include "view/points/viewpointgenerator.h"
 
 #include "evaluationcalculator.h"

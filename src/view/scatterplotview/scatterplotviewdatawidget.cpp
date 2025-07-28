@@ -134,14 +134,16 @@ void ScatterPlotViewDataWidget::resetVariableDisplay()
 
 /**
 */
-bool ScatterPlotViewDataWidget::updateVariableDisplay() 
+ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateVariableDisplay() 
 {
-    bool updated = updateChart();
+    loginf << "ScatterPlotViewDataWidget: updateVariableDisplay";
 
-    if (updated)
-        resetZoomSlot();
+    auto draw_state = updateChart();
 
-    return updated;
+    //reset zoom after update
+    resetZoomSlot();
+
+    return draw_state;
 }
 
 /**
@@ -264,14 +266,14 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
 
 /**
 */
-void ScatterPlotViewDataWidget::updateFromAnnotations()
+bool ScatterPlotViewDataWidget::updateFromAnnotations()
 {
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations";
 
     bounds_ = {};
 
     if (!view_->hasCurrentAnnotation())
-        return;
+        return false;
 
     const auto& anno = view_->currentAnnotation();
 
@@ -282,12 +284,12 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
     const auto& feature = anno.feature_json;
 
     if (!feature.is_object() || !feature.contains(ViewPointGenFeatureScatterSeries::FeatureHistogramFieldNameScatterSeries))
-        return;
+        return false;
     
     if (!scatter_series_.fromJSON(feature[ ViewPointGenFeatureScatterSeries::FeatureHistogramFieldNameScatterSeries ]))
     {
         scatter_series_.clear();
-        return;
+        return false;
     }
 
     x_axis_is_datetime_ = scatter_series_.commonDataTypeX() == ScatterSeries::DataTypeTimestamp;
@@ -306,6 +308,8 @@ void ScatterPlotViewDataWidget::updateFromAnnotations()
     }
 
     loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
+
+    return true;
 }
 
 /**
@@ -466,6 +470,29 @@ void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, d
 
 /**
 */
+boost::optional<std::pair<double, double>> ScatterPlotViewDataWidget::getAxisRange(QtCharts::QAbstractAxis* axis) const
+{
+    assert(axis);
+
+    //handle datetime axis
+    if (auto axis_dt = dynamic_cast<QDateTimeAxis*>(axis))
+    {
+        QDateTime dt_min = axis_dt->min();
+        QDateTime dt_max = axis_dt->max();
+
+        return std::pair<double, double>(dt_min.toMSecsSinceEpoch(), dt_max.toMSecsSinceEpoch());
+    }
+    else if (auto axis_value = dynamic_cast<QValueAxis*>(axis))
+    {
+        //return value axis range
+        return std::pair<double, double>(axis_value->min(), axis_value->max());
+    }
+
+    return {};
+}
+
+/**
+*/
 ScatterSeriesModel& ScatterPlotViewDataWidget::dataModel()
 {
     return data_model_;
@@ -484,7 +511,7 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
         
         if (!axes_x.empty() && !axes_y.empty())
         {
-            auto bounds = getViewBounds();
+            auto bounds       = getViewBounds();
             bool bounds_valid = bounds.has_value();
 
             loginf << "ScatterPlotViewDataWidget: resetZoomSlot:"
@@ -509,12 +536,17 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 
                 x0 -= bx;
                 y0 -= by;
+                x1 += bx;
+                y1 += by;
 
                 setAxisRange(axes_x.first(), x0, x1);
                 setAxisRange(axes_y.first(), y0, y1);
-
-                // setAxisRange(chart_view_->chart()->axisX(), x0, x1);
-                // setAxisRange(chart_view_->chart()->axisY(), y0, y1);
+            }
+            else
+            {
+                // reset to default range
+                setAxisRange(axes_x.first(), 0, 1);
+                setAxisRange(axes_y.first(), 0, 1);
             }
         }
     }
@@ -524,15 +556,49 @@ void ScatterPlotViewDataWidget::resetZoomSlot()
 */
 void ScatterPlotViewDataWidget::updateChartSlot()
 {
-    bool updated = updateChart();
+    //remember current axis ranges if available
+    bool has_axes0 = chart_view_ && 
+                     chart_view_->chart() &&
+                    !chart_view_->chart()->axes(Qt::Horizontal).empty() &&
+                    !chart_view_->chart()->axes(Qt::Vertical).empty();
 
-    if (updated)
+    boost::optional<std::pair<double, double>> x_range, y_range;
+    if (has_axes0)
+    {
+        x_range = getAxisRange(chart_view_->chart()->axes(Qt::Horizontal).first());
+        y_range = getAxisRange(chart_view_->chart()->axes(Qt::Vertical).first());
+    }
+
+    //redraw chart
+    auto draw_state = updateChart();
+    setDrawState(draw_state);
+
+    //recover original axis ranges if available
+    //(we assume that the type of axes has not changed)
+    bool has_axes1 = chart_view_ && 
+                     chart_view_->chart() &&
+                    !chart_view_->chart()->axes(Qt::Horizontal).empty() &&
+                    !chart_view_->chart()->axes(Qt::Vertical).empty();
+
+    if (has_axes0 && 
+        has_axes1 && 
+        x_range.has_value() &&
+        y_range.has_value())
+    {
+        //set to axes original range
+        setAxisRange(chart_view_->chart()->axes(Qt::Horizontal).first(), x_range.value().first, x_range.value().second);
+        setAxisRange(chart_view_->chart()->axes(Qt::Vertical).first(), y_range.value().first, y_range.value().second);
+    }
+    else
+    {
+        //no valid bounds => just reset zoom
         resetZoomSlot();
+    }
 }
 
 /**
 */
-bool ScatterPlotViewDataWidget::updateChart()
+ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateChart()
 {
     logdbg << "ScatterPlotViewDataWidget: updateChart";
 
@@ -548,9 +614,7 @@ bool ScatterPlotViewDataWidget::updateChart()
 
     // chart->legend()->setAlignment(Qt::AlignRight);
 
-    bool has_data = (scatter_series_.numDataSeries() > 0 && variablesOk());
-
-    updateDataSeries(chart);
+    auto draw_state = updateDataSeries(chart);
 
     chart->update();
 
@@ -580,15 +644,16 @@ bool ScatterPlotViewDataWidget::updateChart()
 
     main_layout_->addWidget(chart_view_.get());
 
-    return has_data;
+    return draw_state;
 }
 
 /**
 */
-void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
+ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 {
-    //we obtain valid data if a data range is available and if the variables are available in the buffer data
-    bool has_data = (scatter_series_.numDataSeries() > 0 && variablesOk());
+    bool has_data = scatter_series_.numPoints(true) > 0 && (variablesOk() || view_->showsAnnotation());
+
+    DrawState draw_state = DrawState::NotDrawn;
 
     //!take care: this functional may assert if it is called when no series has yet been added to the chart!
     auto createAxes = [ & ] ()
@@ -757,7 +822,8 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
             //const auto& ds = data_series[ i ];
             const auto& ds = series_it.second;
 
-            assert (!ds.scatter_series.points.empty());
+            //PWa: empty series should not be a problem
+            //assert (!ds.scatter_series.points.empty());
 
             QScatterSeries* chart_symbol_series = s.scatter_series;
             chart_symbol_series->setColor(ds.color);
@@ -801,19 +867,25 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
 
         //safe to create axes
         createAxes();
+
+        //content drawn
+        draw_state = DrawState::DrawnContent;
     }
     else
     {
         //bad data range or vars not in buffer
-        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: no data, size " << getStash().groupedStashes().size();
+        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: content empty";
 
         //no data -> generate default empty layout
         //chart->legend()->setVisible(false);
 
-        //!add empty series first! (otherwise createAxes() will crash)
-        QScatterSeries* series = new QScatterSeries;
-        chart->addSeries(series);
-
+        //!add at least one series first! (otherwise createAxes() will crash)
+        if (chart->series().isEmpty())
+        {
+            QScatterSeries* series = new QScatterSeries;
+            chart->addSeries(series);
+        }
+        
         createAxes();
 
         chart->axes(Qt::Horizontal).at(0)->setLabelsVisible(false);
@@ -823,7 +895,12 @@ void ScatterPlotViewDataWidget::updateDataSeries(QtCharts::QChart* chart)
         chart->axes(Qt::Vertical).at(0)->setLabelsVisible(false);
         chart->axes(Qt::Vertical).at(0)->setGridLineVisible(false);
         chart->axes(Qt::Vertical).at(0)->setMinorGridLineVisible(false);
+
+        //at least we have drawn something
+        draw_state = DrawState::Drawn;
     }
+
+    return draw_state;
 }
 
 /**

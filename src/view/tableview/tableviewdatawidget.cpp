@@ -121,7 +121,7 @@ void TableViewDataWidget::loadingDone_impl()
     logdbg << "TableViewDataWidget: loadingDone_impl: end";
 }
 
-bool TableViewDataWidget::redrawData_impl(bool recompute)
+ViewDataWidget::DrawState TableViewDataWidget::redrawData_impl(bool recompute)
 {
     logdbg << "TableViewDataWidget: redrawData_impl: start - recompute = " << recompute;
 
@@ -138,7 +138,7 @@ bool TableViewDataWidget::redrawData_impl(bool recompute)
 
     logdbg << "TableViewDataWidget: redrawData_impl: end";
 
-    return (all_buffer_table_widget_->rowCount() > 0);
+    return (all_buffer_table_widget_->rowCount() > 0 ? DrawState::DrawnContent : DrawState::Drawn);
 }
 
 void TableViewDataWidget::liveReload_impl()

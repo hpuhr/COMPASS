@@ -119,7 +119,7 @@ public:
     QImage renderData() const;
     QImage renderView() const;
 
-    bool showsData() const; 
+    bool hasScreenshotContent() const;
 
     bool reloadNeeded() const;
     bool redrawNeeded() const;

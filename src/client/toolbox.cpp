@@ -483,7 +483,7 @@ void ToolBox::screenRatioChanged(toolbox::ScreenRatio screen_ratio)
  */
 void ToolBox::shrink()
 {
-    if (active_tool_idx_ < 0)
+    if (expanded_ || active_tool_idx_ < 0)
         return;
 
     auto sr = tools_.at(active_tool_idx_).widget->screenRatio();
@@ -496,7 +496,7 @@ void ToolBox::shrink()
  */
 void ToolBox::grow()
 {
-    if (active_tool_idx_ < 0)
+    if (expanded_ || active_tool_idx_ < 0)
         return;
 
     auto sr = tools_.at(active_tool_idx_).widget->screenRatio();
@@ -509,13 +509,19 @@ void ToolBox::grow()
  */
 void ToolBox::updateButtons()
 {
+    bool shrink_enabled = true;
+    bool grow_enabled   = true;
+
     if (active_tool_idx_ >= 0)
     {
         auto sr = tools_.at(active_tool_idx_).widget->screenRatio();
 
-        shrink_action_->setEnabled((int)sr > 0);
-        grow_action_->setEnabled((int)sr < (int)toolbox::ScreenRatio::RatioMax - 1);
+        shrink_enabled = (int)sr > 0;
+        grow_enabled   = (int)sr < (int)toolbox::ScreenRatio::RatioMax - 1;
     }
+
+    shrink_action_->setEnabled(shrink_enabled && !expanded_);
+    grow_action_->setEnabled(grow_enabled && !expanded_);
 
     expand_action_->setIcon(Utils::Files::IconProvider::getIcon(expanded_ ? "fd_shrink.png" : "fd_expand.png"));
     expand_action_->setToolTip(QString(expanded_ ? "Collapse" : "Expand") + " Flight Deck [#]");
