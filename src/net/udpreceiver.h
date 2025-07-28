@@ -1,5 +1,4 @@
-#ifndef UDPRECEIVER_H
-#define UDPRECEIVER_H
+#pragma once
 
 #include "datasourcelineinfo.h"
 
@@ -30,5 +29,3 @@ private:
     unsigned int max_read_size_ {0};
     char* data_ {nullptr};
 };
-
-#endif // UDPRECEIVER_H

@@ -1,5 +1,4 @@
-#ifndef DBDATASOURCESELECTIONCOMBOBOX_H
-#define DBDATASOURCESELECTIONCOMBOBOX_H
+#pragma once
 
 #include "compass.h"
 #include "datasourcemanager.h"
@@ -97,5 +96,3 @@ class DBDataSourceComboBox : public QComboBox
 };
 
 }
-
-#endif // DBDATASOURCESELECTIONCOMBOBOX_H

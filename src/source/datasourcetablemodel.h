@@ -1,5 +1,4 @@
-#ifndef DATASOURCETABLEMODEL_H
-#define DATASOURCETABLEMODEL_H
+#pragma once
 
 #include <QAbstractItemModel>
 #include <QIcon>
@@ -39,5 +38,3 @@ protected:
     QIcon db_icon_;
     QIcon config_icon_;
 };
-
-#endif // DATASOURCETABLEMODEL_H

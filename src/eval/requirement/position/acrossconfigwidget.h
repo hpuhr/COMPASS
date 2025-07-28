@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTPOSITIONACROSSCONFIGWIDGET_H
-#define EVALUATIONREQUIREMENTPOSITIONACROSSCONFIGWIDGET_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybaseconfigwidget.h"
 
@@ -46,5 +45,3 @@ namespace EvaluationRequirement
     };
 
 }
-
-#endif // EVALUATIONREQUIREMENTPOSITIONACROSSCONFIGWIDGET_H

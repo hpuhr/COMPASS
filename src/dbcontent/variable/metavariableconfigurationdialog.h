@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_METAVARIABLECONFIGURATIONDIALOG_H
-#define DBCONTENT_METAVARIABLECONFIGURATIONDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QListWidget>
@@ -47,5 +46,3 @@ protected:
 };
 
 }
-
-#endif // DBCONTENT_METAVARIABLECONFIGURATIONDIALOG_H

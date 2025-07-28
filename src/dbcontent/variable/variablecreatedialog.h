@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_VARIABLECREATEDIALOG_H
-#define DBCONTENT_VARIABLECREATEDIALOG_H
+#pragma once
 
 #include "dbcontent/variable/variable.h"
 
@@ -84,5 +83,3 @@ protected:
 };
 
 }
-
-#endif // DBCONTENT_VARIABLECREATEDIALOG_H

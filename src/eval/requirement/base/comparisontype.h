@@ -1,5 +1,4 @@
-#ifndef EVALUATIONREQUIREMENTCOMPARISONTYPE
-#define EVALUATIONREQUIREMENTCOMPARISONTYPE
+#pragma once
 
 #include <string>
 #include <stdexcept>
@@ -18,5 +17,3 @@ extern std::string comparisonTypeString(COMPARISON_TYPE type);
 extern std::string comparisonTypeLongString(COMPARISON_TYPE type);
 
 }
-
-#endif // EVALUATIONREQUIREMENTCOMPARISONTYPE

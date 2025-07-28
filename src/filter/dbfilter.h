@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBFILTER_H_
-#define DBFILTER_H_
+#pragma once
 
 #include "configurable.h"
 #include "appmode.h"
@@ -116,5 +115,3 @@ protected:
     virtual void checkSubConfigurables();
     virtual DBFilterWidget* createWidget();
 };
-
-#endif /* DBFILTER_H_ */

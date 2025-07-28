@@ -1,5 +1,4 @@
-#ifndef MANAGESECTORSTASKDIALOG_H
-#define MANAGESECTORSTASKDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -29,5 +28,3 @@ protected:
 
     QPushButton* done_button_{nullptr};
 };
-
-#endif // MANAGESECTORSTASKDIALOG_H

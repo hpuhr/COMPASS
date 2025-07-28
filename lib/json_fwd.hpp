@@ -6,8 +6,7 @@
 // SPDX-FileCopyrightText: 2013 - 2025 Niels Lohmann <https://nlohmann.me>
 // SPDX-License-Identifier: MIT
 
-#ifndef INCLUDE_NLOHMANN_JSON_FWD_HPP_
-#define INCLUDE_NLOHMANN_JSON_FWD_HPP_
+#pragma once
 
 #include <cstdint> // int64_t, uint64_t
 #include <map> // map
@@ -183,5 +182,3 @@ struct ordered_map;
 using ordered_json = basic_json<nlohmann::ordered_map>;
 
 NLOHMANN_JSON_NAMESPACE_END
-
-#endif  // INCLUDE_NLOHMANN_JSON_FWD_HPP_

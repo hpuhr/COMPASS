@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWWIDGET_H
-#define VIEWWIDGET_H
+#pragma once
 
 #include <memory>
 
@@ -222,5 +221,3 @@ private:
 
     bool init_ = false;
 };
-
-#endif  // VIEWWIDGET_H

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ALLBUFFERCSVEXPORTJOB_H
-#define ALLBUFFERCSVEXPORTJOB_H
+#pragma once
 
 #include <memory>
 

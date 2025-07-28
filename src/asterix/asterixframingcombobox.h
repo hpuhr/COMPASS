@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXFRAMINGCOMBOBOX_H
-#define ASTERIXFRAMINGCOMBOBOX_H
+#pragma once
 
 #include <jasterix/jasterix.h>
 
@@ -72,5 +71,3 @@ protected:
 
     ASTERIXImportTask& task_;
 };
-
-#endif  // ASTERIXFRAMINGCOMBOBOX_H

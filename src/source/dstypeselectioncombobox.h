@@ -1,5 +1,4 @@
-#ifndef DSTYPESELECTIONCOMBOBOX_H
-#define DSTYPESELECTIONCOMBOBOX_H
+#pragma once
 
 #include "datasourcemanager.h"
 //#include "global.h"
@@ -86,5 +85,3 @@ protected:
     }
 
 };
-
-#endif // DSTYPESELECTIONCOMBOBOX_H

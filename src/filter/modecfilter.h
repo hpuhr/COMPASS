@@ -1,5 +1,4 @@
-#ifndef MODECFILTER_H
-#define MODECFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 
@@ -44,5 +43,3 @@ protected:
     virtual void checkSubConfigurables() override;
     virtual DBFilterWidget* createWidget() override;
 };
-
-#endif // MODECFILTER_H

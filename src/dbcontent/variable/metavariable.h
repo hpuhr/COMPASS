@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_METAVARIABLE_H
-#define DBCONTENT_METAVARIABLE_H
+#pragma once
 
 #include "configurable.h"
 #include "dbcontent/dbcontentmanager.h"
@@ -99,5 +98,3 @@ protected:
 };
 
 }
-
-#endif  // DBCONTENT_METAVARIABLE_H

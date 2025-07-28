@@ -1,5 +1,4 @@
-#ifndef FFTMANAGER_H
-#define FFTMANAGER_H
+#pragma once
 
 #include "configurable.h"
 
@@ -92,5 +91,3 @@ protected:
 
     void updateFFTNamesAll();
 };
-
-#endif // FFTMANAGER_H

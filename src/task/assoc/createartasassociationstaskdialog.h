@@ -1,5 +1,4 @@
-#ifndef CREATEARTASASSOCIATIONSTASKDIALOG_H
-#define CREATEARTASASSOCIATIONSTASKDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -33,5 +32,3 @@ protected:
     QPushButton* cancel_button_{nullptr};
     QPushButton* run_button_{nullptr};
 };
-
-#endif // CREATEARTASASSOCIATIONSTASKDIALOG_H

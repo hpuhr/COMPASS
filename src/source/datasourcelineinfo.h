@@ -1,5 +1,4 @@
-#ifndef DATASOURCELINEINFO_H
-#define DATASOURCELINEINFO_H
+#pragma once
 
 #include "json_fwd.hpp"
 
@@ -33,5 +32,3 @@ private:
     //    mcast: "239.192.21.24:8600", # notwendig
     //    sender: "139.192.21.24" # optional, wird nur gefiltert wenn gesetzt
 };
-
-#endif // DATASOURCELINEINFO_H

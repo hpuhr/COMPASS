@@ -1,5 +1,4 @@
-#ifndef ASTERIXJSONPARSERDETAILWIDGET_H
-#define ASTERIXJSONPARSERDETAILWIDGET_H
+#pragma once
 
 #include "asterixjsonparser.h"
 
@@ -85,5 +84,3 @@ private:
     void showDBContentVariable (const std::string& var_name, bool mapping_exists=false);
 
 };
-
-#endif // ASTERIXJSONPARSERDETAILWIDGET_H

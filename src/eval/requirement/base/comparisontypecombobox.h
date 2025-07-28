@@ -1,5 +1,4 @@
-#ifndef EVALUATIONREQUIREMENTCOMPARISONTYPECOMBOBOX_H
-#define EVALUATIONREQUIREMENTCOMPARISONTYPECOMBOBOX_H
+#pragma once
 
 #include "eval/requirement/base/comparisontype.h"
 
@@ -54,5 +53,3 @@ public:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTCOMPARISONTYPECOMBOBOX_H

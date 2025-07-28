@@ -1,5 +1,4 @@
-#ifndef VIEWPOINTSIMPORTTASKDIALOG_H
-#define VIEWPOINTSIMPORTTASKDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -34,5 +33,3 @@ protected:
     QPushButton* cancel_button_{nullptr};
     QPushButton* import_button_{nullptr};
 };
-
-#endif // VIEWPOINTSIMPORTTASKDIALOG_H

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXEDITIONCOMBOBOX_H
-#define ASTERIXEDITIONCOMBOBOX_H
+#pragma once
 
 #include <jasterix/category.h>
 #include <jasterix/jasterix.h>
@@ -78,5 +77,3 @@ class ASTERIXEditionComboBox : public QComboBox
     ASTERIXImportTask& task_;
     const std::shared_ptr<jASTERIX::Category> category_;
 };
-
-#endif  // ASTERIXEDITIONCOMBOBOX_H

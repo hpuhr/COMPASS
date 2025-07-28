@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CREATEARTASASSOCIATIONSTASK_H
-#define CREATEARTASASSOCIATIONSTASK_H
+#pragma once
 
 #include "configurable.h"
 #include "createartasassociationsjob.h"
@@ -171,5 +170,3 @@ protected:
 
     dbContent::VariableSet getReadSetFor(const std::string& dbcontent_name);
 };
-
-#endif  // CREATEARTASASSOCIATIONSTASK_H
