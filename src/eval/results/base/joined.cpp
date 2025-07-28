@@ -235,8 +235,8 @@ void Joined::addSectorToOverviewTable(std::shared_ptr<ResultReport::Report> repo
 std::vector<Joined::SectorInfo> Joined::sectorInfosCommon() const
 {
     return { { "Sector Layer"        , "Name of the sector layer"     , sector_layer_.name()       },
-             { "Reqirement Group"    , "Name of the requirement group", requirement_->groupName()  },
-             { "Reqirement"          , "Name of the requirement"      , requirement_->name()       },
+             { "Requirement Group"    , "Name of the requirement group", requirement_->groupName()  },
+             { "Requirement"          , "Name of the requirement"      , requirement_->name()       },
              { "Num Results"         , "Total number of results"      , numSingleResults()         },
              { "Num Usable Results"  , "Number of usable results"     , numUsableSingleResults()   },
              { "Num Unusable Results", "Number of unusable results"   , numUnusableSingleResults() },

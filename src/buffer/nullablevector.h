@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "global.h"
 #include "buffer.h"
 #include "property.h"
 #include "stringconv.h"
@@ -24,13 +25,10 @@
 
 #include <QDateTime>
 
-//#include <array>
-//#include <bitset>
-//#include <iomanip>
+#include <boost/optional.hpp>
+
 #include <map>
-//#include <memory>
 #include <set>
-//#include <sstream>
 #include <vector>
 #include <type_traits>
 
@@ -93,14 +91,15 @@ public:
     std::tuple<bool,T,T> minMaxValues(unsigned int index = 0); // set, min, max
     std::tuple<bool,T,T> minMaxValuesSorted(unsigned int index = 0); // set, min, max
 
-    std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(unsigned int from_index,
+    std::map<boost::optional<T>, std::vector<unsigned int>> distinctValuesWithIndexes(unsigned int from_index,
                                                                      unsigned int to_index);
-    std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes(
+    std::map<boost::optional<T>, std::vector<unsigned int>> distinctValuesWithIndexes(
             const std::vector<unsigned int>& indexes);
+
     std::map<T, unsigned int> uniqueValuesWithIndexes();
     std::map<T, unsigned int> uniqueValuesWithIndexes(const std::set<T>& values); // get indexes of given values
-    std::vector<unsigned int> nullValueIndexes(unsigned int from_index, unsigned int to_index);
-    std::vector<unsigned int> nullValueIndexes(const std::vector<unsigned int>& indexes);
+    // std::vector<unsigned int> nullValueIndexes(unsigned int from_index, unsigned int to_index);
+    // std::vector<unsigned int> nullValueIndexes(const std::vector<unsigned int>& indexes);
 
     void convertToStandardFormat(const std::string& from_format);
 
@@ -731,12 +730,12 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValuesSorted(unsigned int index)
 }
 
 template <class T>
-std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
+std::map<boost::optional<T>, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
         unsigned int from_index, unsigned int to_index)
 {
     logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
-    std::map<T, std::vector<unsigned int>> values;
+    std::map<boost::optional<T>, std::vector<unsigned int>> values;
 
     assert(from_index <= to_index);
 
@@ -754,13 +753,13 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
 
     for (unsigned int index = from_index; index <= to_index; ++index)
     {
-        if (!isNull(index))  // not for null
-        {
-            if (BUFFER_PEDANTIC_CHECKING)
-                assert(index < data_.size());
+        if (BUFFER_PEDANTIC_CHECKING)
+            assert(index < data_.size());
 
+        if (isNull(index))
+            values[{}].push_back(index);
+        else
             values[data_.at(index)].push_back(index);
-        }
     }
 
     logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
@@ -769,12 +768,12 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
 }
 
 template <class T>
-std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
+std::map<boost::optional<T>, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
         const std::vector<unsigned int>& indexes)
 {
     logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
-    std::map<T, std::vector<unsigned int>> values;
+    std::map<boost::optional<T>, std::vector<unsigned int>> values;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -784,13 +783,13 @@ std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithInde
 
     for (auto index : indexes)
     {
-        if (!isNull(index))  // not for null
-        {
-            if (BUFFER_PEDANTIC_CHECKING)
-                assert(index < data_.size());
+        if (BUFFER_PEDANTIC_CHECKING)
+            assert(index < data_.size());
 
+        if (isNull(index))
+            values[{}].push_back(index);
+        else
             values[data_.at(index)].push_back(index);
-        }
     }
 
     logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
@@ -858,64 +857,64 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes(const std::
     return value_indexes;
 }
 
-template <class T>
-std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_index,
-                                                              unsigned int to_index)
-{
-    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
+// template <class T>
+// std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_index,
+//                                                               unsigned int to_index)
+// {
+//     logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
 
-    std::vector<unsigned int> indexes;
+//     std::vector<unsigned int> indexes;
 
-    assert(from_index <= to_index);
+//     assert(from_index <= to_index);
 
-    if (BUFFER_PEDANTIC_CHECKING)
-    {
-        assert(from_index <= to_index);
-        assert(from_index < buffer_.size_);
-        assert(to_index < buffer_.size_);
-        assert(data_.size() <= buffer_.size_);
-        assert(null_flags_.size() <= buffer_.size_);
-    }
+//     if (BUFFER_PEDANTIC_CHECKING)
+//     {
+//         assert(from_index <= to_index);
+//         assert(from_index < buffer_.size_);
+//         assert(to_index < buffer_.size_);
+//         assert(data_.size() <= buffer_.size_);
+//         assert(null_flags_.size() <= buffer_.size_);
+//     }
 
-    //    if (from_index+1 >= data_.size()) // no data
-    //        return indexes;
+//     //    if (from_index+1 >= data_.size()) // no data
+//     //        return indexes;
 
-    for (unsigned int index = from_index; index <= to_index; ++index)
-    {
-        if (isNull(index))  // not for null
-        {
-            if (BUFFER_PEDANTIC_CHECKING)
-                assert(index < data_.size());
+//     for (unsigned int index = from_index; index <= to_index; ++index)
+//     {
+//         if (isNull(index))  // not for null
+//         {
+//             if (BUFFER_PEDANTIC_CHECKING)
+//                 assert(index < data_.size());
 
-            indexes.push_back(index);
-        }
-    }
+//             indexes.push_back(index);
+//         }
+//     }
 
-    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
-           << indexes.size();
-    return indexes;
-}
+//     logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
+//            << indexes.size();
+//     return indexes;
+// }
 
-template <class T>
-std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
-        const std::vector<unsigned int>& indexes)
-{
-    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
+// template <class T>
+// std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
+//         const std::vector<unsigned int>& indexes)
+// {
+//     logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
 
-    std::vector<unsigned int> ret_indexes;
+//     std::vector<unsigned int> ret_indexes;
 
-    for (auto index : indexes)
-    {
-        if (isNull(index))  // not for null
-        {
-            ret_indexes.push_back(index);
-        }
-    }
+//     for (auto index : indexes)
+//     {
+//         if (isNull(index))  // not for null
+//         {
+//             ret_indexes.push_back(index);
+//         }
+//     }
 
-    logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
-           << ret_indexes.size();
-    return ret_indexes;
-}
+//     logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
+//            << ret_indexes.size();
+//     return ret_indexes;
+// }
 
 template <class T>
 void NullableVector<T>::convertToStandardFormat(const std::string& from_format)

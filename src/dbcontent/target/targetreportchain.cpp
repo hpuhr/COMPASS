@@ -1215,12 +1215,12 @@ void Chain::updateACIDs() const
     if (timestamp_index_lookup_.size())
     {
         NullableVector<string>& value_vec = accessor_->getMetaVar<string>(dbcontent_name_, DBContent::meta_var_acid_);
-        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
+        map<boost::optional<string>, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
 
         for (auto& val_it : distinct_values)
         {
-            if (!acids_.count(String::trim(val_it.first)))
-                acids_.insert(String::trim(val_it.first));
+            if (val_it.first && !acids_.count(String::trim(*val_it.first)))
+                acids_.insert(String::trim(*val_it.first));
         }
     }
 }
@@ -1233,12 +1233,12 @@ void Chain::updateACADs() const
     {
         NullableVector<unsigned int>& value_vec = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name_, DBContent::meta_var_acad_);
-        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
+        map<boost::optional<unsigned int>, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
 
         for (auto& val_it : distinct_values)
         {
-            if (!acads_.count(val_it.first))
-                acads_.insert(val_it.first);
+            if (val_it.first && !acads_.count(*val_it.first))
+                acads_.insert(*val_it.first);
         }
     }
 
@@ -1254,16 +1254,16 @@ void Chain::updateModeACodes() const
     {
         NullableVector<unsigned int>& mode_a_codes = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name_, DBContent::meta_var_m3a_);
-        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(indexes_);
+        map<boost::optional<unsigned int>, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(indexes_);
         //unsigned int null_cnt = mode_a_codes.nullValueIndexes(ref_rec_nums_).size();
 
         for (auto& ma_it : distinct_codes)
         {
-            if (!mode_a_codes_.count(ma_it.first))
+            if (ma_it.first && !mode_a_codes_.count(*ma_it.first))
             {
                 logdbg << "Chain: updateModeACodes: new ref m3a "
-                       << String::octStringFromInt(ma_it.first, 4, '0');
-                mode_a_codes_.insert(ma_it.first);
+                       << String::octStringFromInt(*ma_it.first, 4, '0');
+                mode_a_codes_.insert(*ma_it.first);
             }
         }
     }

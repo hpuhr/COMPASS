@@ -1,6 +1,8 @@
 set(COMPASS_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${COMPASS_PATH}")
 
+SET(CMAKE_EXPORT_COMPILE_COMMANDS, ON)
+
 cmake_minimum_required(VERSION 3.3)
 
 set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
@@ -22,7 +24,7 @@ message("  Platform: Linux (inside docker)")
 add_definitions ( -UNDEBUG -Wall -std=c++14 -fext-numeric-literals) # -DQT_NO_KEYWORDS
 ELSE()
 message("  Platform: Linux (local)")
-add_definitions ( -UNDEBUG -Wall -std=c++17 -fext-numeric-literals) # -DQT_NO_KEYWORDS
+add_definitions ( -UNDEBUG -Wall -std=c++17 -fext-numeric-literals -fno-omit-frame-pointer) # -DQT_NO_KEYWORDS
 ENDIF()
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)

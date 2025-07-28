@@ -201,7 +201,6 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         ("evaluate_run_filter", po::bool_switch(&evaluate_run_filter_), "run evaluation filter before evaluation")
         ("export_eval_report", po::value<std::string>(&export_eval_report_filename_),
          "export evaluation report after start with given filename, e.g. '/data/eval_db2/report.tex")
-        ("max_fps", po::value<std::string>(&max_fps_), "maximum fps for display in GeographicView'")
         ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
         ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
         ("enable_event_log", po::bool_switch(&enable_event_log_), "collect warnings and errors in the event log")
@@ -391,9 +390,6 @@ bool Client::run ()
 
     if (expert_mode_)
         COMPASS::instance().expertMode(true);
-
-    if (max_fps_.size())
-        COMPASS::instance().maxFPS(stoul(max_fps_));
 
     MainWindow& main_window = COMPASS::instance().mainWindow();
     splash.raise();

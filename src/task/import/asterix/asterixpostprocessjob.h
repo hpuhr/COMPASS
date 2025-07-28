@@ -3,6 +3,7 @@
 #include "job.h"
 
 #include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "tbbhack.h"
 
@@ -52,8 +53,11 @@ private:
 
     bool do_obfuscate_secondary_info_{false};
 
+    static boost::mutex m3a_map_mutex_;
     static tbb::concurrent_unordered_map<unsigned int, unsigned int> obfuscate_m3a_map_;
+    static boost::mutex acad_map_mutex_;
     static tbb::concurrent_unordered_map<unsigned int, unsigned int> obfuscate_acad_map_;
+    static boost::mutex acid_map_mutex_;
     static tbb::concurrent_unordered_map<std::string, std::string> obfuscate_acid_map_;
 
     void doRadarPlotPositionCalculations();

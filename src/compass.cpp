@@ -941,16 +941,6 @@ bool COMPASS::disableLiveToOfflineSwitch() const
     return disable_live_to_offline_switch_;
 }
 
-unsigned int COMPASS::maxFPS() const
-{
-    return max_fps_;
-}
-
-void COMPASS::maxFPS(unsigned int max_fps)
-{
-    max_fps_ = max_fps;
-}
-
 bool COMPASS::isShutDown() const
 {
     return (app_state_ == AppState::Shutdown);
