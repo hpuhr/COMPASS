@@ -1,5 +1,4 @@
-#ifndef TRACKERTRACKNUMBERFILTER_H
-#define TRACKERTRACKNUMBERFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 #include "json_fwd.hpp"
@@ -40,5 +39,3 @@ protected:
     virtual void checkSubConfigurables() override;
     virtual DBFilterWidget* createWidget() override;
 };
-
-#endif // TRACKERTRACKNUMBERFILTER_H

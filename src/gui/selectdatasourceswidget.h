@@ -1,5 +1,4 @@
-#ifndef SELECTDATASOURCESWIDGET_H
-#define SELECTDATASOURCESWIDGET_H
+#pragma once
 
 #include <QFrame>
 
@@ -34,5 +33,3 @@ protected:
     void updateCheckboxesChecked();
 
 };
-
-#endif // SELECTDATASOURCESWIDGET_H

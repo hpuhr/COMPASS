@@ -1,6 +1,5 @@
 
-#ifndef SCATTERPLOTVIEWCHARTVIEW_H
-#define SCATTERPLOTVIEWCHARTVIEW_H
+#pragma once
 
 #include <chartview.h>
 
@@ -50,5 +49,3 @@ protected:
 };
 
 }
-
-#endif // SCATTERPLOTVIEWCHARTVIEW_H

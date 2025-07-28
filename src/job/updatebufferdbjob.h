@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UpdateBufferDBJob_H_
-#define UpdateBufferDBJob_H_
+#pragma once
 
 #include "job.h"
 
@@ -59,5 +58,3 @@ class UpdateBufferDBJob : public Job
     dbContent::Variable& key_var_;
     std::shared_ptr<Buffer> buffer_;
 };
-
-#endif /* UpdateBufferDBJob_H_ */

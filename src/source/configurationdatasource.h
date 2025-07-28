@@ -1,5 +1,4 @@
-#ifndef DBCONTENT_CONFIGURATIONDATASOURCE_H
-#define DBCONTENT_CONFIGURATIONDATASOURCE_H
+#pragma once
 
 #include "source/datasourcebase.h"
 #include "configurable.h"
@@ -28,5 +27,3 @@ protected:
 };
 
 }
-
-#endif // DBCONTENT_CONFIGURATIONDATASOURCE_H

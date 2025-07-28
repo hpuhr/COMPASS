@@ -1,5 +1,4 @@
-#ifndef DATASOURCESCONFIGURATIONDIALOG_H
-#define DATASOURCESCONFIGURATIONDIALOG_H
+#pragma once
 
 #include "datasourcecreatedialog.h"
 
@@ -51,5 +50,3 @@ protected:
 
     std::unique_ptr<DataSourceCreateDialog> create_dialog_;
 };
-
-#endif // DATASOURCESCONFIGURATIONDIALOG_H

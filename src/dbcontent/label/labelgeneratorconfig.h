@@ -1,5 +1,4 @@
-#ifndef LABELGENERATORCONFIG_H
-#define LABELGENERATORCONFIG_H
+#pragma once
 
 #include "json.hpp"
 
@@ -46,5 +45,3 @@ struct LabelGeneratorConfig
 };
 
 }
-
-#endif // LABELGENERATORCONFIG_H

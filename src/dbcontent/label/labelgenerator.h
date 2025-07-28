@@ -1,5 +1,4 @@
-#ifndef DBCONTENTLABELGENERATOR_H
-#define DBCONTENTLABELGENERATOR_H
+#pragma once
 
 #include "labelgeneratorconfig.h"
 #include "json_fwd.hpp"
@@ -173,5 +172,3 @@ protected:
 };
 
 }
-
-#endif // DBCONTENTLABELGENERATOR_H

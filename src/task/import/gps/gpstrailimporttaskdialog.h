@@ -1,5 +1,4 @@
-#ifndef GPSTRAILIMPORTTASKDIALOG_H
-#define GPSTRAILIMPORTTASKDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -31,5 +30,3 @@ protected:
     QPushButton* cancel_button_{nullptr};
     QPushButton* import_button_{nullptr};
 };
-
-#endif // GPSTRAILIMPORTTASKDIALOG_H

@@ -1,5 +1,4 @@
-#ifndef DBCONTENTLABELGENERATORWIDGET_H
-#define DBCONTENTLABELGENERATORWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -62,5 +61,3 @@ protected:
 };
 
 }
-
-#endif // DBCONTENTLABELGENERATORWIDGET_H

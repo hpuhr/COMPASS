@@ -1,5 +1,4 @@
-#ifndef RTCOMMANDRECEIVER_H
-#define RTCOMMANDRECEIVER_H
+#pragma once
 
 #include "configurable.h"
 #include "singleton.h"
@@ -108,5 +107,3 @@ private:
 
     nlohmann::json command_backlog_;
 };
-
-#endif // RTCOMMANDRECEIVER_H

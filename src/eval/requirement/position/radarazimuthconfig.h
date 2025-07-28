@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H
-#define EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H
+#pragma once
 
 #include "eval/requirement/base/baseconfig.h"
 
@@ -52,5 +51,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTPOSITIONRADARAZIMUTHCONFIG_H

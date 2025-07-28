@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JSONDATAMAPPING_H
-#define JSONDATAMAPPING_H
+#pragma once
 
 #include <memory>
 
@@ -187,5 +186,3 @@ class JSONDataMapping : public Configurable
 };
 
 Q_DECLARE_METATYPE(JSONDataMapping*)
-
-#endif  // JSONDATAMAPPING_H

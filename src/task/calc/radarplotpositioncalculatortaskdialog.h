@@ -1,5 +1,4 @@
-#ifndef RADARPLOTPOSITIONCALCULATORTASKDIALOG_H
-#define RADARPLOTPOSITIONCALCULATORTASKDIALOG_H
+#pragma once
 
 #include "radarplotpositioncalculatortaskwidget.h"
 
@@ -37,5 +36,3 @@ protected:
 
     bool run_wanted_ {false};
 };
-
-#endif // RADARPLOTPOSITIONCALCULATORTASKDIALOG_H

@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_VARIABLE_H_
-#define DBCONTENT_VARIABLE_H_
+#pragma once
 
 #include "configurable.h"
 //#include "global.h"
@@ -255,5 +254,3 @@ private:
 }
 
 Q_DECLARE_METATYPE(dbContent::Variable*)
-
-#endif /* DBCONTENT_VARIABLE_H_ */

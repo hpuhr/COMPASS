@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEWPOINTSIMPORTTASK_H
-#define VIEWPOINTSIMPORTTASK_H
+#pragma once
 
 #include "configurable.h"
 #include "task.h"
@@ -73,5 +72,3 @@ protected:
     void parseCurrentFile ();
     void checkParsedData (); // throws exceptions for errors
 };
-
-#endif // VIEWPOINTSIMPORTTASK_H

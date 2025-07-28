@@ -1,5 +1,4 @@
-#ifndef DBDATASOURCEWIDGET_H
-#define DBDATASOURCEWIDGET_H
+#pragma once
 
 #include <QWidget>
 
@@ -74,4 +73,3 @@ class DBDataSourceWidget : public QWidget
 };
 
 }
-#endif // DBDATASOURCEWIDGET_H

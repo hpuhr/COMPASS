@@ -1,5 +1,4 @@
-#ifndef ASTERIXJSONPARSINGSCHEMA_H
-#define ASTERIXJSONPARSINGSCHEMA_H
+#pragma once
 
 #include "configurable.h"
 #include "asterixjsonparser.h"
@@ -47,5 +46,3 @@ private:
     virtual void checkSubConfigurables() {}
 
 };
-
-#endif // ASTERIXJSONPARSINGSCHEMA_H

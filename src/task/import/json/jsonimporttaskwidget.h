@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef JSONIMPORTERTASKWIDGET_H
-#define JSONIMPORTERTASKWIDGET_H
+#pragma once
 
 #include <taskwidget.h>
 
@@ -100,5 +99,3 @@ class JSONImportTaskWidget : public TaskWidget
     void updateToCurrentSchema();
     void updateParserBox();
 };
-
-#endif  // JSONIMPORTERTASKWIDGET_H

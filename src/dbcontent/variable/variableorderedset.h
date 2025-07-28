@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBCONTENT_VARIABLEORDEREDSET_H_
-#define DBCONTENT_VARIABLEORDEREDSET_H_
+#pragma once
 
 #include "configurable.h"
 #include "dbcontent/variable/variable.h"
@@ -91,5 +90,3 @@ class VariableOrderedSet : public QObject, public Configurable
 };
 
 }
-
-#endif /* DBCONTENT_VARIABLEORDEREDSET_H_ */

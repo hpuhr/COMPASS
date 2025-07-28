@@ -1,5 +1,4 @@
-#ifndef ASTERIXIMPORTTASKDIALOG_H
-#define ASTERIXIMPORTTASKDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -34,5 +33,3 @@ protected:
     QPushButton* cancel_button_{nullptr};
     QPushButton* import_button_{nullptr};
 };
-
-#endif // ASTERIXIMPORTTASKDIALOG_H

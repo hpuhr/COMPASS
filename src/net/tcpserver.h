@@ -1,5 +1,4 @@
-#ifndef TCPSERVER_H
-#define TCPSERVER_H
+#pragma once
 
 #include <boost/asio.hpp>
 #include <boost/thread/mutex.hpp>
@@ -55,4 +54,3 @@ private:
 
     void do_accept();
 };
-#endif // TCPSERVER_H

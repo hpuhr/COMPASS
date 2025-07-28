@@ -1,5 +1,4 @@
-#ifndef DBCONTENTTARGETVELOCITY_H
-#define DBCONTENTTARGETVELOCITY_H
+#pragma once
 
 #include <boost/optional.hpp>
 
@@ -40,5 +39,3 @@ boost::optional<TargetVelocityAccuracy> getVelocityAccuracyTracker(
         std::shared_ptr<dbContent::DBContentAccessor> accessor, const std::string& dbcontent_name, unsigned int index);
 
 }
-
-#endif // DBCONTENTTARGETVELOCITY_H

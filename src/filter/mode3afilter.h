@@ -1,5 +1,4 @@
-#ifndef MODE3AFILTER_H
-#define MODE3AFILTER_H
+#pragma once
 
 #include "dbfilter.h"
 
@@ -40,5 +39,3 @@ protected:
 
     bool updateValuesFromStr(const std::string& values); // returns success
 };
-
-#endif // MODE3AFILTER_H
