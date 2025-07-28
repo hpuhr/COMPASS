@@ -24,7 +24,8 @@
  */
 
 
-#pragma once
+#ifndef TK_SPLINE_H
+#define TK_SPLINE_H
 
 #include <cstdio>
 #include <cassert>
@@ -942,3 +943,5 @@ std::vector<double> solve_cubic(double a, double b, double c, double d,
 } // namespace
 
 #pragma GCC diagnostic pop
+
+#endif /* TK_SPLINE_H */
