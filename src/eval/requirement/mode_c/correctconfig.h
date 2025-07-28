@@ -54,4 +54,3 @@ protected:
 
 }
 
-#endif // EVALUATIONREQUIREMENTMODECCONFIG_H

@@ -56,4 +56,3 @@ class AllBufferCSVExportJob : public Job
     boost::posix_time::ptime stop_time_;
 };
 
-#endif  // AllBufferCSVExportJob_H

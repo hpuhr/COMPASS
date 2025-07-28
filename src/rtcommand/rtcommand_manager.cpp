@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-﻿#include "rtcommand_manager.h"
+#include "rtcommand_manager.h"
 #include "rtcommand_string.h"
 #include "rtcommand_runner.h"
 #include "tcpserver.h"

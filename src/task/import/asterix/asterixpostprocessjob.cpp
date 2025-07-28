@@ -15,7 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-﻿#include "dbcontent/dbcontent.h"
+#include "dbcontent/dbcontent.h"
 #include "asterixpostprocessjob.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "buffer.h"
