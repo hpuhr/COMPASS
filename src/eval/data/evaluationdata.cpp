@@ -590,9 +590,9 @@ void EvaluationData::addToReport(std::shared_ptr<ResultReport::Report> report) c
     table.setMaxRowCount(-1); // override row count
 
     //setup column groups
-    table.setColumnGroup("Duration", duration_columns_, true);
-    table.setColumnGroup("Mode S"  , mode_s_columns_  , true);
-    table.setColumnGroup("Mode A/C", mode_ac_columns_ , true);
+    table.setColumnGroup("Duration", duration_columns_, false);
+    table.setColumnGroup("Mode S"  , mode_s_columns_  , true );
+    table.setColumnGroup("Mode A/C", mode_ac_columns_ , false);
 }
 
 /**

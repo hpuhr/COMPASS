@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.3)
 
 set ( CMAKE_BUILD_TYPE RelWithDebInfo ) #Debug RelWithDebInfo Release
 
+SET(CMAKE_EXPORT_COMPILE_COMMANDS, ON)
+
 project( COMPASS )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "9")
