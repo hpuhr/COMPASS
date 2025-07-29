@@ -85,7 +85,7 @@ void MetaVariableDetailWidget::show (MetaVariable& meta_var)
 {
     bool expert_mode = COMPASS::instance().expertMode();
 
-    loginf << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "' expert_mode " << expert_mode;
+    loginf << "var '" << meta_var.name() << "' expert_mode " << expert_mode;
 
     has_current_entry_ = true;
     meta_var_ = &meta_var;
@@ -98,7 +98,7 @@ void MetaVariableDetailWidget::show (MetaVariable& meta_var)
 
     for (auto& sel_it : selection_widgets_)
     {
-        logdbg << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "' exists in " << sel_it.first
+        logdbg << "var '" << meta_var.name() << "' exists in " << sel_it.first
                << " " << meta_var.existsIn(sel_it.first);
 
         if (meta_var.existsIn(sel_it.first))
@@ -142,7 +142,7 @@ void MetaVariableDetailWidget::nameEditedSlot()
 
     string new_name = name_edit_->text().toStdString();
 
-    loginf << "MetaVariableDetailWidget: nameEditedSlot: name '" << new_name << "'";
+    loginf << "name '" << new_name << "'";
 
     assert (has_current_entry_);
     assert (meta_var_);
@@ -152,7 +152,7 @@ void MetaVariableDetailWidget::nameEditedSlot()
 
 void MetaVariableDetailWidget::variableChangedSlot()
 {
-    loginf << "MetaVariableDetailWidget: variableChangedSlot";
+    loginf << "start";
 
     if (!has_current_entry_)
         return;
@@ -167,7 +167,7 @@ void MetaVariableDetailWidget::variableChangedSlot()
 
 void MetaVariableDetailWidget::deleteVariableSlot()
 {
-    loginf << "MetaVariableDetailWidget: deleteVariableSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (meta_var_);

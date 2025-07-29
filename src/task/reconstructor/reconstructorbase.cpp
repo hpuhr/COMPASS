@@ -64,7 +64,7 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
     if (tr.acad_)
     {
         if (acad_2_utn_.count(*tr.acad_))
-            logerr << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " acad already present in "
+            logerr << "tr " << tr.asStr() << " acad already present in "
                    << targets_.at(acad_2_utn_.at(*tr.acad_)).asStr();
 
         assert (!acad_2_utn_.count(*tr.acad_));
@@ -78,17 +78,17 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
 
             auto existing_target = targets_.at(acid_2_utn_.at(*tr.acid_));
 
-            logwrn << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " acid already present in "
+            logwrn << "tr " << tr.asStr() << " acid already present in "
                    << existing_target.asStr();
 
             if (tr.acad_ && existing_target.acads_.size()
                 && existing_target.hasACAD(*tr.acad_))
             {
-                logerr << "TargetsContainer: createNewTarget: acad matches, this seems to be an association error";
+                logerr << "acad matches, this seems to be an association error";
                 assert (false);
             }
 
-            logwrn << "TargetsContainer: createNewTarget: no acad match, assuming duplicate acid '"
+            logwrn << "no acad match, assuming duplicate acid '"
                 << *tr.acid_ << "', removing from association criteria";
 
             acid_2_utn_.erase(*tr.acid_);
@@ -101,7 +101,7 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
     if (tr.track_number_)
     {
         if (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_))
-            logerr << "TargetsContainer: createNewTarget: tr " << tr.asStr() << " track num already present in "
+            logerr << "tr " << tr.asStr() << " track num already present in "
                    << targets_.at(tn2utn_[tr.ds_id_][tr.line_id_].at(*tr.track_number_).first).asStr();
 
         assert (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
@@ -208,7 +208,7 @@ void ReconstructorBase::TargetsContainer::checkACADLookup()
             continue;
 
         if (target_it.second.acads_.size() != 1)
-            logerr << "ReconstructorBase: TargetsContainer: checkACADLookup: double acad in target "
+            logerr << "checkACADLookup: double acad in target "
                    << target_it.second.asStr();
 
         assert (target_it.second.acads_.size() == 1);
@@ -217,7 +217,7 @@ void ReconstructorBase::TargetsContainer::checkACADLookup()
 
         if (!acad_2_utn_.count(acad))
         {
-            logerr << "ReconstructorBase: TargetsContainer: getTALookupMap: acad "
+            logerr << "getTALookupMap: acad "
                    << String::hexStringFromInt(acad, 6, '0')
                    << " not in lookup";
         }
@@ -365,7 +365,7 @@ bool ReconstructorBase::TargetsContainer::canAssocByTrackNumber(
     if (tr.acad_ && targets_.at(utn).hasACAD()
         && !targets_.at(utn).hasACAD(!tr.acad_))
     {
-        logwrn << "ReconstructorBase: TargetsContainer: canAssocByTrackNumber:"
+        logwrn << "canAssocByTrackNumber:"
                   << " same track num reused by different ACAD transponders, tr " << *tr.track_number_ << ", utn "
                << targets_.at(utn).asStr() << " tr " << tr.asStr() << ", unassociating";
 
@@ -587,7 +587,7 @@ void ReconstructorBase::init()
     current_slice_begin_ = timestamp_min_;
     next_slice_begin_    = timestamp_min_; // first slice
 
-    loginf << "ReconstructorBase: init:" 
+    loginf << "start" 
            << " data time min " << Time::toString(timestamp_min_)
            << " data time max " << Time::toString(timestamp_max_);
 
@@ -634,7 +634,7 @@ void ReconstructorBase::resetTimeframe()
     auto timeframe = timeFrame();
 
     if (timeframe.first.is_not_a_date_time() || timeframe.second.is_not_a_date_time())
-        logerr << "ReconstructorBase: resetTimeframe: invalid data timeframe";
+        logerr << "invalid data timeframe";
     
     assert(!timeframe.first.is_not_a_date_time() && !timeframe.second.is_not_a_date_time());
 
@@ -654,7 +654,7 @@ void ReconstructorBase::applyTimeframeLimits()
     
     if (settings_t0 >= settings_t1)
     {
-        logwrn << "ReconstructorBase: applyTimeframeLimits: chosen timeframe is invalid, returning...";
+        logwrn << "chosen timeframe is invalid, returning...";
         return;
     }
 
@@ -664,7 +664,7 @@ void ReconstructorBase::applyTimeframeLimits()
 
     if (tmin >= tmax)
     {
-        logwrn << "ReconstructorBase: applyTimeframeLimits: combined timeframe is invalid, returning...";
+        logwrn << "combined timeframe is invalid, returning...";
         return;
     }
 
@@ -689,7 +689,7 @@ bool ReconstructorBase::hasNextTimeSlice()
 
     first_slice_ = current_slice_begin_ == timestamp_min_;
 
-    loginf << "ReconstructorBase: hasNextTimeSlice: first_slice " << first_slice_;
+    loginf << "first_slice " << first_slice_;
 
     return next_slice_begin_ < timestamp_max_;
 }
@@ -721,7 +721,7 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 
     //TimeWindow window {current_slice_begin_, current_slice_end};
 
-    logdbg << "ReconstructorBase: getNextTimeSlice: current_slice_begin " << Time::toString(current_slice_begin_)
+    logdbg << "current_slice_begin " << Time::toString(current_slice_begin_)
            << " current_slice_end " << Time::toString(current_slice_end);
 
     first_slice_ = current_slice_begin_ == timestamp_min_;
@@ -757,7 +757,7 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 
     ++slice_cnt_;
 
-    loginf << "ReconstructorBase: getNextTimeSlice: slice_cnt " << slice_cnt_
+    loginf << "slice_cnt " << slice_cnt_
            << " slice_begin " << Time::toString(slice->slice_begin_)
            << " next_slice_begin " << Time::toString(slice->next_slice_begin_)
            << " remove_before_time " << Time::toString(slice->remove_before_time_)
@@ -833,24 +833,24 @@ void ReconstructorBase::processSlice()
 {
     assert (!currentSlice().remove_before_time_.is_not_a_date_time());
 
-    loginf << "ReconstructorBase: processSlice: " << Time::toString(currentSlice().timestamp_min_)
+    loginf << "start" << Time::toString(currentSlice().timestamp_min_)
            << " first_slice " << currentSlice().first_slice_;
 
     processing_ = true;
 
     if (!currentSlice().first_slice_)
     {
-        logdbg << "ReconstructorBase: processSlice: removing data before "
+        logdbg << "removing data before "
                << Time::toString(currentSlice().remove_before_time_);
 
         accessor_->removeContentBeforeTimestamp(currentSlice().remove_before_time_);
     }
 
-    loginf << "ReconstructorBase: processSlice: adding, size " << currentSlice().data_.size();
+    loginf << "adding, size " << currentSlice().data_.size();
 
     accessor_->add(currentSlice().data_);
 
-    logdbg << "ReconstructorBase: processSlice: processing slice";
+    logdbg << "processing slice";
 
     processSlice_impl();
 
@@ -873,12 +873,12 @@ void ReconstructorBase::processSlice()
         }
     }
 
-    logdbg << "ReconstructorBase: processSlice: done";
+    logdbg << "done";
 }
 
 void ReconstructorBase::clearOldTargetReports()
 {
-    loginf << "ReconstructorBase: clearOldTargetReports: remove_before_time "
+    loginf << "remove_before_time "
            << Time::toString(currentSlice().remove_before_time_)
            << " size " << target_reports_.size();
 
@@ -889,12 +889,12 @@ void ReconstructorBase::clearOldTargetReports()
     {
         if (tr_it->second.timestamp_ < currentSlice().remove_before_time_)
         {
-            //loginf << "ReconstructorBase: clearOldTargetReports: removing " << Time::toString(ts_it->second.timestamp_);
+            //loginf << "removing " << Time::toString(ts_it->second.timestamp_);
             tr_it = target_reports_.erase(tr_it);
         }
         else
         {
-            //loginf << "ReconstructorBase: clearOldTargetReports: keeping " << Time::toString(ts_it->second.timestamp_);
+            //loginf << "keeping " << Time::toString(ts_it->second.timestamp_);
 
             tr_it->second.in_current_slice_ = false;
             tr_it->second.buffer_index_ = std::numeric_limits<unsigned int>::max(); // set to impossible value
@@ -923,7 +923,7 @@ void ReconstructorBase::clearOldTargetReports()
 
 #endif
 
-    loginf << "ReconstructorBase: clearOldTargetReports: size after " << target_reports_.size();
+    loginf << "size after " << target_reports_.size();
 
     // clear old data from targets
     for (auto& tgt_it : targets_container_.targets_)
@@ -938,7 +938,7 @@ void ReconstructorBase::clearOldTargetReports()
 
             if (!chain_it.second->checkMeasurementAvailability())
             {
-                logerr << "ProbIMMReconstructor: clearOldTargetReports: not all measurements available for chain with UTN " << chain_it.first;
+                logerr << "not all measurements available for chain with UTN " << chain_it.first;
                 assert( false);
             }
 
@@ -950,7 +950,7 @@ void ReconstructorBase::clearOldTargetReports()
 
 void ReconstructorBase::createTargetReports()
 {
-    loginf << "ReconstructorBase: createTargetReports: current_slice_begin "
+    loginf << "current_slice_begin "
            << Time::toString(currentSlice().slice_begin_);
 
     boost::posix_time::ptime ts;
@@ -989,7 +989,7 @@ void ReconstructorBase::createTargetReports()
 
             ts = tgt_acc.timestamp(cnt);
 
-            //loginf << "ReconstructorBase: createTargetReports: ts " << Time::toString(ts);
+            //loginf << "ts " << Time::toString(ts);
 
             if (!tgt_acc.position(cnt))
                 continue;
@@ -1002,7 +1002,7 @@ void ReconstructorBase::createTargetReports()
 
                 if (ts < currentSlice().remove_before_time_)
                 {
-                    logerr << "ReconstructorBase: createTargetReports: old data not removed ts "
+                    logerr << "old data not removed ts "
                            << Time::toString(ts)
                            << " dbcont " << buf_it.first
                            << " buffer_size " << buffer_size
@@ -1083,7 +1083,7 @@ void ReconstructorBase::createTargetReports()
     for (auto& tr_it : target_reports_)
     {
         if (tr_it.second.buffer_index_ >= accessor(tr_it.second).size())
-            logerr << "ReconstructorBase: createTargetReports: tr " << tr_it.second.asStr()
+            logerr << "tr " << tr_it.second.asStr()
                    << " buffer index " << tr_it.second.buffer_index_
                    << " accessor size " << accessor(tr_it.second).size() << " is maxint "
                    << (tr_it.second.buffer_index_ == std::numeric_limits<unsigned int>::max());
@@ -1092,7 +1092,7 @@ void ReconstructorBase::createTargetReports()
     }
 #endif
 
-    loginf << "ReconstructorBase: createTargetReports: done with " << num_new_target_reports_in_slice_
+    loginf << "done with " << num_new_target_reports_in_slice_
            << " new target reports";
 }
 
@@ -1105,7 +1105,7 @@ void ReconstructorBase::removeTargetReportsLaterOrEqualThan(const boost::posix_t
 
 std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase::createAssociations()
 {
-    loginf << "ReconstructorBase: createAssociations";
+    loginf << "start";
 
     std::map<unsigned int, std::map<unsigned long, unsigned int>> associations;
     unsigned int num_assoc {0};
@@ -1129,7 +1129,7 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase:
         tgt_it.second.updateCounts();
     }
 
-    loginf << "ReconstructorBase: createAssociations: done with " << num_assoc << " associated";
+    loginf << "done with " << num_assoc << " associated";
 
     return associations;
 }
@@ -1137,7 +1137,7 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase:
 std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociationBuffers(
     std::map<unsigned int, std::map<unsigned long,unsigned int>> associations)
 {
-    logdbg << "ReconstructorBase: createAssociationBuffers";
+    logdbg << "start";
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -1156,7 +1156,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
 
         std::map<unsigned long, unsigned int>& tr_associations = cont_assoc_it.second;
 
-        logdbg << "ReconstructorBase: createAssociationBuffers: db content " << dbcontent_name;
+        logdbg << "db content " << dbcontent_name;
 
         string rec_num_name =
             dbcontent_man.metaVariable(DBContent::meta_var_rec_num_.name()).getFor(dbcontent_name).name();
@@ -1205,21 +1205,21 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
             }
         }
 
-        logdbg << "ReconstructorBase: createAssociationBuffers: dcontent " << dbcontent_name
+        logdbg << "dcontent " << dbcontent_name
                <<  " assoc " << num_associated << " not assoc " << num_not_associated
                << " buffer size " << buffer->size();
 
-        logdbg << "ReconstructorBase: createAssociationBuffers: dcontent " << dbcontent_name << " done";
+        logdbg << "dcontent " << dbcontent_name << " done";
     }
 
-    logdbg << "ReconstructorBase: createAssociationBuffers: done";
+    logdbg << "done";
 
     return assoc_data;
 }
 
 std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenceBuffers()
 {
-    logdbg << "ReconstructorBase: createReferenceBuffers: num " << targets_container_.targets_.size();
+    logdbg << "num " << targets_container_.targets_.size();
 
     std::shared_ptr<Buffer> buffer;
 
@@ -1239,7 +1239,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
         NullableVector<boost::posix_time::ptime>& ts_vec = buffer->get<boost::posix_time::ptime>(
             DBContent::meta_var_timestamp_.name());
 
-        logdbg << "ReconstructorBase: createReferenceBuffers: buffer size " << buffer->size()
+        logdbg << "buffer size " << buffer->size()
                << " ts min " << Time::toString(ts_vec.get(0))
                << " max " << Time::toString(ts_vec.get(ts_vec.contentSize()-1));
 
@@ -1249,7 +1249,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
 
         if (!src_man.hasConfigDataSource(ds_id))
         {
-            logdbg << "ReconstructorBase: createReferenceBuffers: creating data source";
+            logdbg << "creating data source";
 
             src_man.createConfigDataSource(ds_id);
             assert (src_man.hasConfigDataSource(ds_id));
@@ -1264,7 +1264,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
     }
     else
     {
-        logdbg << "ReconstructorBase: createReferenceBuffers: empty buffer";
+        logdbg << "empty buffer";
 
         return std::map<std::string, std::shared_ptr<Buffer>> {};
     }
@@ -1513,7 +1513,7 @@ void ReconstructorBase::cancel()
 
 void ReconstructorBase::saveTargets()
 {
-    loginf << "ReconstructorBase: saveTargets: num " << targets_container_.targets_.size();
+    loginf << "num " << targets_container_.targets_.size();
 
     processing_ = true;
 
@@ -1525,7 +1525,7 @@ void ReconstructorBase::saveTargets()
 
     processing_ = false;
 
-    logdbg << "ReconstructorBase: saveTargets: done";
+    logdbg << "done";
 }
 
 const dbContent::TargetReportAccessor& ReconstructorBase::accessor(
@@ -1625,7 +1625,7 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
 
     if (pos_acc.x_stddev_ == 0 || pos_acc.y_stddev_ == 0)
     {
-        logerr << "ReconstructorBase: createMeasurement: stddevs 0,  x " << pos_acc.x_stddev_
+        logerr << "stddevs 0,  x " << pos_acc.x_stddev_
                << " y " << pos_acc.y_stddev_ << " ds_id " << ri.ds_id_ << " dbcont_id " << ri.dbcont_id_;
         assert (false);
     }
@@ -1740,11 +1740,11 @@ void ReconstructorBaseSettings::setVehicleACADs(const std::string& value)
             vehicle_acads_set_.insert(acad);
         } catch (...) {
 
-            logwrn << "ReconstructorBaseSettings: setVehicleACADs: impossible hex value '" << acad_str << "'";
+            logwrn << "impossible hex value '" << acad_str << "'";
         }
     }
 
-    loginf << "ReconstructorBaseSettings: setVehicleACADs: value '" << value
+    loginf << "value '" << value
            << "' vector " << String::compress(vehicle_acads_set_, ',');
 }
 
@@ -1761,6 +1761,6 @@ void ReconstructorBaseSettings::setVehicleACIDs(const std::string& value)
         vehicle_acids_set_.insert(acid_str);
     }
 
-    loginf << "ReconstructorBaseSettings: setVehicleACIDs: value '" << value
+    loginf << "value '" << value
            << "' vector " << String::compress(vehicle_acids_set_, ',');
 }

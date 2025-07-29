@@ -56,7 +56,7 @@ EvaluationSectorWidget::EvaluationSectorWidget(EvaluationCalculator& calculator,
 */
 void EvaluationSectorWidget::update()
 {
-    logdbg << "EvaluationSectorWidget: update";
+    logdbg << "start";
 
     assert (grid_layout_);
 
@@ -110,7 +110,7 @@ void EvaluationSectorWidget::update()
         grid_layout_->addItem(spacer, row, 0);
     }
 
-    logdbg << "EvaluationSectorWidget: update: done";
+    logdbg << "done";
 }
 
 /**

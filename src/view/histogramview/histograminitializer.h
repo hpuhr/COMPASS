@@ -238,7 +238,7 @@ public:
         if (num_bins.has_value())
             config.num_bins = num_bins.value();
 
-        logdbg << "HistogramInitializerT: generateConfiguration: valid = " << valid() 
+        logdbg << "valid = " << valid() 
                << ", has distinct = " << distinct_values_.has_value() 
                << ", num distinct = " << (distinct_values_.has_value() ? distinct_values_->size() : 0);
 

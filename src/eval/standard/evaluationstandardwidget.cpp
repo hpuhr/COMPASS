@@ -122,7 +122,7 @@ void EvaluationStandardWidget::showContextMenu(const QPoint& pos)
 
     if (dynamic_cast<EvaluationStandard*>(item))
     {
-        loginf << "EvaluationStandardWidget: showContextMenu: got standard";
+        loginf << "got standard";
 
         //EvaluationStandard* std = dynamic_cast<EvaluationStandard*>(item);
         showMenu();
@@ -130,7 +130,7 @@ void EvaluationStandardWidget::showContextMenu(const QPoint& pos)
     }
     else if (dynamic_cast<Group*>(item))
     {
-        loginf << "EvaluationStandardWidget: showContextMenu: got group";
+        loginf << "got group";
 
         Group* group = dynamic_cast<Group*>(item);
         assert (group);
@@ -152,19 +152,19 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 
     if (dynamic_cast<EvaluationStandard*>(item))
     {
-        loginf << "EvaluationStandardWidget: itemClickedSlot: got standard";
+        loginf << "got standard";
 
         showRequirementWidget(nullptr);
     }
     else if (dynamic_cast<Group*>(item))
     {
-        loginf << "EvaluationStandardWidget: itemClickedSlot: got group";
+        loginf << "got group";
 
         showRequirementWidget(nullptr);
     }
     else if (dynamic_cast<EvaluationRequirement::BaseConfig*>(item))
     {
-        loginf << "EvaluationStandardWidget: itemClickedSlot: got config";
+        loginf << "got config";
 
         EvaluationRequirement::BaseConfig* config =
                 dynamic_cast<EvaluationRequirement::BaseConfig*>(item);

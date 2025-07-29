@@ -370,7 +370,7 @@ void JoinedTrackAngle::accumulateSingleResult(const std::shared_ptr<Single>& sin
 */
 boost::optional<double> JoinedTrackAngle::computeResult_impl() const
 {
-    loginf << "JoinedTrackAngle: computeResult_impl:"
+    loginf << "start"
             << " num_pos " << num_pos_
             << " num_no_ref " << num_no_ref_
             << " num_no_tst_value " << num_no_tst_value_
@@ -410,7 +410,7 @@ std::vector<Joined::SectorInfo> JoinedTrackAngle::sectorInfos() const
 */
 bool JoinedTrackAngle::exportAsCSV(std::ofstream& strm) const
 {
-    // loginf << "JoinedTrackAngle: exportAsCSV";
+    // loginf << "start";
 
     // strm << "trackangle_offset\n";
 

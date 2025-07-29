@@ -123,7 +123,7 @@ DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
 
 void DetectionConfigWidget::updateIntervalEditSlot(QString value)
 {
-    loginf << "EvaluationRequirementDetectionConfigWidget: updateIntervalEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -131,13 +131,13 @@ void DetectionConfigWidget::updateIntervalEditSlot(QString value)
     if (ok)
         config().updateInterval(val);
     else
-        loginf << "EvaluationRequirementDetectionConfigWidget: updateIntervalEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 // min
 void DetectionConfigWidget::toggleUseMinGapLengthSlot()
 {
-    loginf << "EvaluationRequirementDetectionConfigWidget: toggleUseMinGapLengthSlot";
+    loginf << "start";
 
     assert (use_min_gap_length_check_);
     config().useMinGapLength(use_min_gap_length_check_->checkState() == Qt::Checked);
@@ -146,7 +146,7 @@ void DetectionConfigWidget::toggleUseMinGapLengthSlot()
 }
 void DetectionConfigWidget::minGapLengthEditSlot(QString value)
 {
-    loginf << "EvaluationRequirementDetectionConfigWidget: minGapLengthEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -154,13 +154,13 @@ void DetectionConfigWidget::minGapLengthEditSlot(QString value)
     if (ok)
         config().minGapLength(val);
     else
-        loginf << "EvaluationRequirementDetectionConfigWidget: minGapLengthEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 // max
 void DetectionConfigWidget::toggleUseMaxGapLengthSlot()
 {
-    loginf << "EvaluationRequirementDetectionConfigWidget: toggleUseMaxGapLengthSlot";
+    loginf << "start";
 
     assert (use_max_gap_length_check_);
     config().useMaxGapLength(use_max_gap_length_check_->checkState() == Qt::Checked);
@@ -169,7 +169,7 @@ void DetectionConfigWidget::toggleUseMaxGapLengthSlot()
 }
 void DetectionConfigWidget::maxGapLengthEditSlot(QString value)
 {
-    loginf << "EvaluationRequirementDetectionConfigWidget: maxGapLengthEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -177,13 +177,13 @@ void DetectionConfigWidget::maxGapLengthEditSlot(QString value)
     if (ok)
         config().maxGapLength(val);
     else
-        loginf << "EvaluationRequirementDetectionConfigWidget: maxGapLengthEditSlot: axvalid value";
+        loginf << "axvalid value";
 }
 
 // invert prob
 void DetectionConfigWidget::toggleInvertProbSlot()
 {
-    loginf << "EvaluationRequirementDetectionConfigWidget: toggleInvertProbSlot";
+    loginf << "start";
 
     assert (use_invert_prob_check_);
     config().invertProb(use_invert_prob_check_->checkState() == Qt::Checked);
@@ -194,7 +194,7 @@ void DetectionConfigWidget::toggleInvertProbSlot()
 // miss tol
 void DetectionConfigWidget::toggleUseMissToleranceSlot()
 {
-    loginf << "EvaluationRequirementDetectionConfigWidget: toggleUseMissToleranceSlot";
+    loginf << "start";
 
     assert (use_miss_tolerance_check_);
     config().useMissTolerance(use_miss_tolerance_check_->checkState() == Qt::Checked);
@@ -203,7 +203,7 @@ void DetectionConfigWidget::toggleUseMissToleranceSlot()
 }
 void DetectionConfigWidget::missToleranceEditSlot(QString value)
 {
-    loginf << "EvaluationRequirementDetectionConfigWidget: missToleranceEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -211,12 +211,12 @@ void DetectionConfigWidget::missToleranceEditSlot(QString value)
     if (ok)
         config().missTolerance(val);
     else
-        loginf << "EvaluationRequirementDetectionConfigWidget: missToleranceEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void DetectionConfigWidget::toggleHoldForAnyTargetSlot()
 {
-    loginf << "EvaluationRequirementDetectionConfigWidget: toggleHoldForAnyTargetSlot";
+    loginf << "start";
 
     assert (hold_for_any_target_check_);
     config().holdForAnyTarget(hold_for_any_target_check_->checkState() == Qt::Checked);

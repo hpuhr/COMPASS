@@ -294,7 +294,7 @@ void JoinedDubiousTarget::accumulateSingleResult(const std::shared_ptr<Single>& 
 */
 boost::optional<double> JoinedDubiousTarget::computeResult_impl() const
 {
-    loginf << "JoinedDubiousTarget: computeResult_impl:"
+    loginf << "start"
             << " num_updates " << num_updates_
             << " num_utns " << num_utns_
             << " num_utns_dubious " << num_utns_dubious_

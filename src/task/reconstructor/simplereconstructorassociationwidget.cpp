@@ -212,7 +212,7 @@ void SimpleReconstructorAssociationWidget::maxTimeDiffEditedSlot (const QString&
 {
     string value_str = text.toStdString();
 
-    loginf << "SimpleReconstructorAssociationWidget: maxTimeDiffEditedSlot: value '" << value_str << "'";
+    loginf << "value '" << value_str << "'";
 
     bool ok;
 
@@ -221,13 +221,13 @@ void SimpleReconstructorAssociationWidget::maxTimeDiffEditedSlot (const QString&
     if (ok)
         reconstructor_.settings().max_time_diff_ = value;
     else
-        logwrn << "SimpleReconstructorAssociationWidget: maxTimeDiffEditedSlot: unable to parse value '"
+        logwrn << "unable to parse value '"
                << value_str << "'";
 }
 
 void SimpleReconstructorAssociationWidget::maxTimeDiffTrackerEditedSlot (int value)
 {
-    loginf << "SimpleReconstructorAssociationWidget: maxTimeDiffTrackerEditedSlot: value '" << value << "'";
+    loginf << "value '" << value << "'";
 
     reconstructor_.settings().track_max_time_diff_ = value;
 }
@@ -236,7 +236,7 @@ void SimpleReconstructorAssociationWidget::maxDistanceNotOKEditedSlot (const QSt
 {
     string value_str = text.toStdString();
 
-    loginf << "SimpleReconstructorAssociationWidget: maxDistanceNotOKEditedSlot: value '" << value_str << "'";
+    loginf << "value '" << value_str << "'";
 
     bool ok;
 
@@ -245,7 +245,7 @@ void SimpleReconstructorAssociationWidget::maxDistanceNotOKEditedSlot (const QSt
     if (ok)
         reconstructor_.settings().max_distance_notok_ = value;
     else
-        logwrn << "SimpleReconstructorAssociationWidget: maxDistanceNotOKEditedSlot: unable to parse value '"
+        logwrn << "unable to parse value '"
                << value_str << "'";
 }
 
@@ -253,7 +253,7 @@ void SimpleReconstructorAssociationWidget::maxDistanceDubiousEditedSlot (const Q
 {
     string value_str = text.toStdString();
 
-    loginf << "SimpleReconstructorAssociationWidget: maxDistanceDubiousEditedSlot: value '" << value_str << "'";
+    loginf << "value '" << value_str << "'";
 
     bool ok;
 
@@ -262,7 +262,7 @@ void SimpleReconstructorAssociationWidget::maxDistanceDubiousEditedSlot (const Q
     if (ok)
         reconstructor_.settings().max_distance_dubious_ = value;
     else
-        logwrn << "SimpleReconstructorAssociationWidget: maxDistanceDubiousEditedSlot: unable to parse value '"
+        logwrn << "unable to parse value '"
                << value_str << "'";
 }
 
@@ -270,7 +270,7 @@ void SimpleReconstructorAssociationWidget::maxDistanceAcceptableEditedSlot (cons
 {
     string value_str = text.toStdString();
 
-    loginf << "SimpleReconstructorAssociationWidget: maxDistanceAcceptableEditedSlot: value '" << value_str << "'";
+    loginf << "value '" << value_str << "'";
 
     bool ok;
 
@@ -279,7 +279,7 @@ void SimpleReconstructorAssociationWidget::maxDistanceAcceptableEditedSlot (cons
     if (ok)
         reconstructor_.settings().max_distance_acceptable_ = value;
     else
-        logwrn << "SimpleReconstructorAssociationWidget: maxDistanceAcceptableEditedSlot: unable to parse value '"
+        logwrn << "unable to parse value '"
                << value_str << "'";
 }
 
@@ -287,7 +287,7 @@ void SimpleReconstructorAssociationWidget::maxAltitudeDiffEditedSlot (const QStr
 {
     string value_str = text.toStdString();
 
-    loginf << "SimpleReconstructorAssociationWidget: maxAltitudeDiffEditedSlot: value '" << value_str << "'";
+    loginf << "value '" << value_str << "'";
 
     bool ok;
 
@@ -296,7 +296,7 @@ void SimpleReconstructorAssociationWidget::maxAltitudeDiffEditedSlot (const QStr
     if (ok)
         reconstructor_.settings().max_altitude_diff_ = value;
     else
-        logwrn << "SimpleReconstructorAssociationWidget: maxAltitudeDiffEditedSlot: unable to parse value '"
+        logwrn << "unable to parse value '"
                << value_str << "'";
 }
 
@@ -304,7 +304,7 @@ void SimpleReconstructorAssociationWidget::probMinTimeOverlapEditedSlot (const Q
 {
     string value_str = text.toStdString();
 
-    loginf << "SimpleReconstructorAssociationWidget: probMinTimeOverlapEditedSlot: value '" << value_str << "'";
+    loginf << "value '" << value_str << "'";
 
     bool ok;
 
@@ -313,7 +313,7 @@ void SimpleReconstructorAssociationWidget::probMinTimeOverlapEditedSlot (const Q
     if (ok)
         reconstructor_.settings().target_prob_min_time_overlap_ = value;
     else
-        logwrn << "SimpleReconstructorAssociationWidget: probMinTimeOverlapEditedSlot: unable to parse value '"
+        logwrn << "unable to parse value '"
                << value_str << "'";
 }
 
@@ -321,7 +321,7 @@ void SimpleReconstructorAssociationWidget::minUpdatesEditedSlot (const QString& 
 {
     string value_str = text.toStdString();
 
-    loginf << "SimpleReconstructorAssociationWidget: minUpdatesEditedSlot: value '" << value_str << "'";
+    loginf << "value '" << value_str << "'";
 
     bool ok;
 
@@ -330,7 +330,7 @@ void SimpleReconstructorAssociationWidget::minUpdatesEditedSlot (const QString& 
     if (ok)
         reconstructor_.settings().target_min_updates_ = value;
     else
-        logwrn << "SimpleReconstructorAssociationWidget: minUpdatesEditedSlot: unable to parse value '"
+        logwrn << "unable to parse value '"
                << value_str << "'";
 }
 

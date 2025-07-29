@@ -258,7 +258,7 @@ void FilterGeneratorWidget::closeEvent(QCloseEvent* event) { emit filterWidgetAc
 
 void FilterGeneratorWidget::accept()
 {
-    loginf << "FilterGeneratorWidget: accept";
+    loginf << "start";
 
     std::string filter_name = filter_name_->text().toStdString();
 
@@ -269,7 +269,7 @@ void FilterGeneratorWidget::accept()
         ConditionTemplate& data_condition = data_conditions_.at(cnt);
         std::string condition_name = filter_name + "Condition" + std::to_string(cnt);
 
-        loginf << "FilterGeneratorWidget: accept: creating condition with operator '"
+        loginf << "creating condition with operator '"
                << data_condition.operator_ << "'";
 
         Configuration& condition_configuration = configuration->addNewSubConfiguration("DBFilterCondition", condition_name);

@@ -346,7 +346,7 @@ void DataSourceBase::addNetworkLines()
 
 //        if (existing_lines.count(ip+":"+to_string(port)))
 //        {
-//            logwrn << "DataSourceBase: networkLines: source " << name_
+//            logwrn << "source " << name_
 //                   << " line " << ip << ":" << port
 //                   << " already in use";
 //        }
@@ -555,7 +555,7 @@ void DataSourceBase::setCalculatedReferenceSource()
 
 void DataSourceBase::parseNetworkLineInfo()
 {
-    logdbg << "DataSourceBase: parseLineInfo: " << sac() << "/" << sic();
+    logdbg << "start" << sac() << "/" << sic();
 
     line_info_.clear();
 

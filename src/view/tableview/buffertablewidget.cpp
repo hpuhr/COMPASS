@@ -73,7 +73,7 @@ void BufferTableWidget::show(std::shared_ptr<Buffer> buffer)  //, DBOVariableSet
 {
     assert(buffer);
 
-    logdbg << "BufferTableWidget: show: object " << object_.name() << " buffer size "
+    logdbg << "object " << object_.name() << " buffer size "
            << buffer->size() << " properties " << buffer->properties().size();
     assert(table_);
     assert(model_);
@@ -86,7 +86,7 @@ void BufferTableWidget::show(std::shared_ptr<Buffer> buffer)  //, DBOVariableSet
 
 void BufferTableWidget::exportSlot()
 {
-    loginf << "BufferTableWidget: exportSlot: object " << object_.name();
+    loginf << "object " << object_.name();
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
@@ -109,7 +109,7 @@ void BufferTableWidget::exportSlot()
         if (!filename.endsWith(".csv"))  // in case of qt bug
             filename += ".csv";
 
-        loginf << "BufferTableWidget: exportSlot: export filename " << filename.toStdString();
+        loginf << "export filename " << filename.toStdString();
         assert(model_);
         model_->saveAsCSV(filename.toStdString());
     }
@@ -123,7 +123,7 @@ void BufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSignal(c
 
 void BufferTableWidget::updateToSettingsChange()
 {
-    logdbg << "BufferTableWidget: updateToSettingsChange";
+    logdbg << "start";
 
     assert(model_);
     model_->rebuild();
@@ -189,7 +189,7 @@ void BufferTableWidget::resizeColumns()
 
 void BufferTableWidget::keyPressEvent(QKeyEvent* event)
 {
-    loginf << "BufferTableWidget: keyPressEvent: got keypressed";
+    loginf << "got keypressed";
 
     assert(table_);
 
@@ -197,7 +197,7 @@ void BufferTableWidget::keyPressEvent(QKeyEvent* event)
     {
         if (event->key() == Qt::Key_C)
         {
-            loginf << "BufferTableWidget: keyPressEvent: copying";
+            loginf << "copying";
 
             QAbstractItemModel* model = table_->model();
             QItemSelectionModel* selection = table_->selectionModel();

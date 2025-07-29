@@ -70,7 +70,7 @@ bool VariableSet::add(const VariableSet& set)
 
 // bool VariableSet::addOnly (VariableSet &set, const std::string &dbo_type)
 //{
-//  logdbg  << "VariableSet: addOnly: type " << dbo_type;
+//  logdbg << "type " << dbo_type;
 //  std::vector <DBOVariable*> &setset = set.getSet();
 
 //  std::vector <DBOVariable*>::iterator it;
@@ -80,10 +80,10 @@ bool VariableSet::add(const VariableSet& set)
 //  {
 //    if (find (set_.begin(), set_.end(), *it) == set_.end())
 //    {
-//      //loginf  << "VariableSet: addOnly: new var";
+//      //loginf << "new var";
 //      if ((*it)->existsIn(dbo_type))
 //      {
-//        logdbg  << "VariableSet: addOnly: pushback";
+//        logdbg << "pushback";
 //        set_.push_back ((*it)->getFor(dbo_type));
 //        changed_=true;
 //        added=true;
@@ -110,7 +110,7 @@ void VariableSet::removeVariable(const Variable& var)
 
 // VariableSet *VariableSet::getFor (const std::string &dbo_type)
 //{
-//  logdbg  << "VariableSet: getFor: type " << dbo_type;
+//  logdbg << "type " << dbo_type;
 
 //  VariableSet *type_set = new VariableSet ();
 //  std::vector <DBOVariable*>::iterator it;
@@ -119,7 +119,7 @@ void VariableSet::removeVariable(const Variable& var)
 //  {
 //    if ((*it)->existsIn(dbo_type))
 //    {
-//      logdbg  << "VariableSet: getFor: add";
+//      logdbg << "add";
 //      assert (!(*it)->getFor(dbo_type)->isMetaVariable());
 //      type_set->add ((*it)->getFor(dbo_type));
 //    }
@@ -178,14 +178,14 @@ bool VariableSet::intersect(VariableSet& set)
             set_.push_back(*it);
     }
 
-    logdbg << "VariableSet: intersect: size " << set_.size() << " other size "
+    logdbg << "size " << set_.size() << " other size "
            << set.getSet().size() << " done";
     return added;
 }
 
 void VariableSet::print()
 {
-    logdbg << "VariableSet: print: size" << set_.size() << " changed " << changed_;
+    logdbg << "size" << set_.size() << " changed " << changed_;
     std::vector<Variable*>::iterator it;
 
     for (it = set_.begin(); it != set_.end(); it++)

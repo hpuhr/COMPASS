@@ -166,7 +166,7 @@ void ADSBQualityFilterWidget::minNUCPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: minNUCPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.minNUCP(val);
 }
@@ -185,7 +185,7 @@ void ADSBQualityFilterWidget::minNICEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: minNICEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.minNIC(val);
 }
@@ -204,7 +204,7 @@ void ADSBQualityFilterWidget::minNACPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: minNACPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.minNACp(val);
 }
@@ -223,7 +223,7 @@ void ADSBQualityFilterWidget::minSILv1PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: minSILv1PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.minSILv1(val);
 }
@@ -243,7 +243,7 @@ void ADSBQualityFilterWidget::minSILv2PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: minSILv2PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.minSILv2(val);
 }
@@ -262,7 +262,7 @@ void ADSBQualityFilterWidget::maxNUCPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: maxNUCPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.maxNUCP(val);
 }
@@ -281,7 +281,7 @@ void ADSBQualityFilterWidget::maxNICEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: maxNICEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.maxNIC(val);
 }
@@ -300,7 +300,7 @@ void ADSBQualityFilterWidget::maxNACPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: maxNACPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.maxNACp(val);
 }
@@ -319,7 +319,7 @@ void ADSBQualityFilterWidget::maxSILv1PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: maxSILv1PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.maxSILv1(val);
 }
@@ -339,7 +339,7 @@ void ADSBQualityFilterWidget::maxSILv2PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "ADSBQualityFilterWidget: maxSILv2PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         filter_.maxSILv2(val);
 }

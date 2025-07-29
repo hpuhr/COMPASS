@@ -341,7 +341,7 @@ std::string SectionContentTable::resourceExtension() const
 void SectionContentTable::addContentUI(QVBoxLayout* layout, 
                                        bool force_ui_reset)
 {
-    loginf << "SectionContentTable: addToLayout";
+    loginf << "start";
 
     assert (layout);
 
@@ -695,7 +695,7 @@ QVariant SectionContentTable::data(int row, int col, int role) const
     {
         case Qt::DisplayRole:
         {
-            logdbg << "SectionContentTable: data: display role: row " << row << " col " << col;
+            logdbg << "display role: row " << row << " col " << col;
 
             auto style = cellStyle(row, col);
 
@@ -1002,7 +1002,7 @@ bool SectionContentTable::showUnused() const
  */
 void SectionContentTable::showUnused(bool value)
 {
-    loginf << "SectionContentTable: showUnused: value " << value;
+    loginf << "value " << value;
 
     getOrCreateTableWidget()->showUnused(value);
 
@@ -1059,7 +1059,7 @@ bool SectionContentTable::clicked(unsigned int row)
             else
             {
                 report_->unsetCurrentViewable();
-                logerr << "SectionContentTable: clicked: on-demand viewable could not be retrieved";
+                logerr << "on-demand viewable could not be retrieved";
             }
         }
 
@@ -1072,7 +1072,7 @@ bool SectionContentTable::clicked(unsigned int row)
 
     if (annotation.figure_id.has_value())
     {
-        loginf << "SectionContentTable: clicked: index has associated viewable via id " << annotation.figure_id.value();
+        loginf << "index has associated viewable via id " << annotation.figure_id.value();
         has_valid_link = true;
 
         //figure from content in parent section
@@ -1081,7 +1081,7 @@ bool SectionContentTable::clicked(unsigned int row)
     }
     else if (!annotation.section_link.empty() && !annotation.section_figure.empty())
     {
-        loginf << "SectionContentTable: clicked: index has associated viewable via" 
+        loginf << "index has associated viewable via" 
                << " section '" << annotation.section_link << "'"
                << " figure '" << annotation.section_figure << "'";
         has_valid_link = true;
@@ -1126,7 +1126,7 @@ bool SectionContentTable::clicked(unsigned int row)
         }
         else
         {
-            logerr << "SectionContentTable: clicked: figure could not be retrieved";
+            logerr << "figure could not be retrieved";
         }
     }
 
@@ -1142,7 +1142,7 @@ void SectionContentTable::doubleClicked(unsigned int row)
     //link to other section stored in row?
     if (!annotation.section_link.empty())
     {
-        loginf << "SectionContentTable: doubleClicked: index has associated reference '"
+        loginf << "index has associated reference '"
                << annotation.section_link << "'";
 
         //jump to row link
@@ -1150,7 +1150,7 @@ void SectionContentTable::doubleClicked(unsigned int row)
     }
     else
     {
-        loginf << "SectionContentTable: doubleClicked: index has no associated reference";
+        loginf << "index has no associated reference";
     }
 }
 
@@ -1205,7 +1205,7 @@ void SectionContentTable::toggleShowUnused()
  */
 void SectionContentTable::copyContent()
 {
-    loginf << "SectionContentTable: copyContent";
+    loginf << "start";
 
     std::stringstream ss;
 
@@ -1328,7 +1328,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldCellStyles)   ||
         !j.contains(FieldShowTooltips))
     {
-        logerr << "SectionContentTable: fromJSON: Error: Section content table does not obtain needed fields";
+        logerr << "Error: Section content table does not obtain needed fields";
         return false;
     }
 
@@ -1353,7 +1353,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         const auto& j_col_groups = j[ FieldColumnGroups ];
         if (!j_col_groups.is_array())
         {
-            logerr << "SectionContentTable: fromJSON: Error: Could not read column groups";
+            logerr << "Error: Could not read column groups";
             return false;
         }
 
@@ -1364,7 +1364,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
                 !j_col_group.contains(FieldColGroupColumns) ||
                 !j_col_group.contains(FieldColGroupEnabledOnInit))
             {
-                logerr << "SectionContentTable: fromJSON: Error: Could not read column group";
+                logerr << "Error: Could not read column group";
                 return false;
             }
 
@@ -1389,7 +1389,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     auto& j_annos = j[ FieldAnnotations ];
     if (!j_annos.is_array() || j_annos.size() != rows_.size())
     {
-        logerr << "SectionContentTable: fromJSON: Error: Annotation array invalid";
+        logerr << "Error: Annotation array invalid";
         return false;
     }
 
@@ -1400,7 +1400,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
             !j_anno.contains(FieldAnnoOnDemand)      ||
             !j_anno.contains(FieldAnnoStyle))
         {
-            logerr << "SectionContentTable: fromJSON: Error: Could not read annotation";
+            logerr << "Error: Could not read annotation";
             return false;
         }
 
@@ -2120,17 +2120,17 @@ int SectionContentTableWidget::fromProxy(int proxy_row) const
  */
 void SectionContentTableWidget::clicked(const QModelIndex& index)
 {
-    loginf << "SectionContentTableWidget: clicked";
+    loginf << "start";
 
     if (!index.isValid())
     {
-        loginf << "SectionContentTableWidget: clicked: invalid index";
+        loginf << "invalid index";
         return;
     }
 
     if (QApplication::mouseButtons() & Qt::RightButton)
     {
-        loginf << "SectionContentTableWidget: clicked: RMB click ignored";
+        loginf << "RMB click ignored";
         return;
     }
 
@@ -2150,7 +2150,7 @@ void SectionContentTableWidget::clicked(const QModelIndex& index)
  */
 void SectionContentTableWidget::performClickAction()
 {
-    loginf << "SectionContentTableWidget: performClickAction";
+    loginf << "start";
 
     //double click did not interrupt click action => perform
     if (!last_clicked_row_index_.has_value())
@@ -2174,14 +2174,14 @@ void SectionContentTableWidget::performClickAction()
  */
 void SectionContentTableWidget::doubleClicked(const QModelIndex& index)
 {
-    loginf << "SectionContentTableWidget: doubleClicked";
+    loginf << "start";
 
     //double click detected => interrupt any previously triggered click action
     click_action_timer_.stop();
 
     if (!index.isValid())
     {
-        loginf << "SectionContentTableWidget: doubleClicked: invalid index";
+        loginf << "invalid index";
         return;
     }
 
@@ -2191,7 +2191,7 @@ void SectionContentTableWidget::doubleClicked(const QModelIndex& index)
     assert (source_index.row() >= 0);
     assert (source_index.row() < (int)content_table_->numRows());
 
-    loginf << "SectionContentTableWidget: doubleClicked: row " << source_index.row();
+    loginf << "row " << source_index.row();
 
     unsigned int row_index = source_index.row();
 
@@ -2203,7 +2203,7 @@ void SectionContentTableWidget::doubleClicked(const QModelIndex& index)
  */
 void SectionContentTableWidget::customContextMenu(const QPoint& p)
 {
-    logdbg << "SectionContentTableWidget: customContextMenu";
+    logdbg << "start";
 
     QModelIndex index = table_view_->indexAt(p);
     if (!index.isValid())
@@ -2212,7 +2212,7 @@ void SectionContentTableWidget::customContextMenu(const QPoint& p)
     auto const source_index = proxy_model_->mapToSource(index);
     assert (source_index.isValid());
 
-    loginf << "SectionContentTableWidget: customContextMenu: row " << index.row() << " src " << source_index.row();
+    loginf << "row " << index.row() << " src " << source_index.row();
 
     assert (source_index.row() >= 0);
     assert (source_index.row() < (int)content_table_->numRows());
@@ -2269,18 +2269,18 @@ void SectionContentTableWidget::updateOptionsMenu()
  */
 void SectionContentTableWidget::updateScrollBarV()
 {
-    //loginf << "SectionContentTableWidget: updateScrollBarV";
+    //loginf << "start";
 
     if (!content_table_->isComplete())
         return;
 
-    //loginf << "SectionContentTableWidget: updateScrollBarV: applying new scroll limit: " 
+    //loginf << "applying new scroll limit: " 
     //       << "v = " << (scroll_pos_v_.has_value() ? scroll_pos_v_.value() : -1);
 
     //configure vertical scroll bar position
     if (scroll_pos_v_.has_value() && scroll_pos_v_.value() > 0 && table_view_->verticalScrollBar()->isVisible())
     {
-        loginf << "SectionContentTableWidget: updateScrollBarV: applying v limit " << scroll_pos_v_.value();
+        loginf << "applying v limit " << scroll_pos_v_.value();
         table_view_->verticalScrollBar()->setValue(scroll_pos_v_.value());
         scroll_pos_v_.reset();
     }
@@ -2290,18 +2290,18 @@ void SectionContentTableWidget::updateScrollBarV()
  */
 void SectionContentTableWidget::updateScrollBarH()
 {
-    //loginf << "SectionContentTableWidget: updateScrollBarH";
+    //loginf << "start";
 
     if (!content_table_->isComplete())
         return;
 
-    //loginf << "SectionContentTableWidget: updateScrollBarH: applying new scroll limit: " 
+    //loginf << "applying new scroll limit: " 
     //      << "h = " << (scroll_pos_h_.has_value() ? scroll_pos_h_.value() : -1);
 
     //configure horizontal scroll bar position
     if (scroll_pos_h_.has_value() && scroll_pos_h_.value() > 0 && table_view_->horizontalScrollBar()->isVisible())
     {
-        loginf << "SectionContentTableWidget: updateScrollBarH: applying h limit " << scroll_pos_h_.value();
+        loginf << "applying h limit " << scroll_pos_h_.value();
         table_view_->horizontalScrollBar()->setValue(scroll_pos_h_.value());
         scroll_pos_h_.reset();
     }

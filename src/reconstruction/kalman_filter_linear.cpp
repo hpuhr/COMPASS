@@ -364,7 +364,7 @@ bool KalmanFilterLinear::smoothingStep_impl(Vector& x0_smooth,
 
     if (!Eigen::FullPivLU<Eigen::MatrixXd>(P1_pred).isInvertible())
     {
-        loginf << "KalmanFilterLinear: smoothingStep_impl: Could not invert P1_pred:\n" << P1_pred;
+        loginf << "Could not invert P1_pred:\n" << P1_pred;
         return false;
     }
 

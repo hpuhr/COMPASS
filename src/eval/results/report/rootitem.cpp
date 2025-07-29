@@ -76,7 +76,7 @@ namespace EvaluationResultsReport
 
     Section& RootItem::getSection (const std::string& id)
     {
-        logdbg << "RootItem: getSection: id '" << id << "'";
+        logdbg << "id '" << id << "'";
 
         assert (id.size());
 

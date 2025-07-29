@@ -107,7 +107,7 @@ EvaluationDataSourceWidget::~EvaluationDataSourceWidget() = default;
  */
 void EvaluationDataSourceWidget::updateDataSourcesSlot()
 {
-    loginf << "EvaluationDataSourceWidget: updateDataSourcesSlot: title " << title_;
+    loginf << "title " << title_;
     assert (data_source_layout_);
 
     QLayoutItem* child;
@@ -148,7 +148,7 @@ void EvaluationDataSourceWidget::updateDataSourcesSlot()
         checkbox->setProperty("id", ds_id);
         connect(checkbox, SIGNAL(clicked()), this, SLOT(toggleDataSourceSlot()));
 
-        loginf << "EvaluationDataSourceWidget: updateDataSourcesSlot: got sensor " << it.first << " name "
+        loginf << "got sensor " << it.first << " name "
                << ds.name() << " active " << checkbox->isChecked();
 
         data_sources_checkboxes_[ds_id] = checkbox;
@@ -176,7 +176,7 @@ void EvaluationDataSourceWidget::updateCheckboxesChecked()
     {
         assert(data_sources.count(to_string(checkit.first)));
         checkit.second->setChecked(data_sources.at(to_string(checkit.first)));
-        logdbg << "EvaluationDataSourceWidget: updateCheckboxesChecked: ds_id " << checkit.first
+        logdbg << "ds_id " << checkit.first
                << " active " << data_sources.at(to_string(checkit.first));
     }
 }
@@ -189,7 +189,7 @@ void EvaluationDataSourceWidget::dbContentNameChangedSlot()
 
     dbcontent_name_ = dbcont_combo_->getObjectName();
 
-    loginf << "EvaluationDataSourceWidget: dbContentNameChangedSlot: name " << dbcontent_name_;
+    loginf << "name " << dbcontent_name_;
 
     emit dbContentNameChangedSignal(dbcontent_name_);
 
@@ -202,14 +202,14 @@ void EvaluationDataSourceWidget::dbContentNameChangedSlot()
  */
 void EvaluationDataSourceWidget::toggleDataSourceSlot()
 {
-    logdbg << "EvaluationDataSourceWidget: toggleDataSource";
+    logdbg << "start";
     QCheckBox* check = (QCheckBox*)sender();
 
     unsigned int ds_id = check->property("id").toInt();
 
     if (title_ == "Reference Data")
     {
-        loginf << "EvaluationDataSourceWidget: toggleDataSource: ref id " << ds_id << " checked "
+        loginf << "ref id " << ds_id << " checked "
                << (check->checkState() == Qt::Checked);
 
         auto ds_name = to_string(ds_id);
@@ -217,7 +217,7 @@ void EvaluationDataSourceWidget::toggleDataSourceSlot()
     }
     else
     {
-        loginf << "EvaluationDataSourceWidget: toggleDataSource: tst id " << ds_id << " checked "
+        loginf << "tst id " << ds_id << " checked "
                << (check->checkState() == Qt::Checked);
 
         auto ds_name = to_string(ds_id);

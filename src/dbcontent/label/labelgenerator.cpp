@@ -66,7 +66,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(
     std::map<std::string, std::shared_ptr<Buffer>> buffers = dbcont_manager_.loadedData();
     if (!buffers.count(dbcontent_name))
     {
-        logerr << "LabelGenerator: getLabelTexts: dbcontent_name '" << dbcontent_name << "' not in buffers";
+        logerr << "dbcontent_name '" << dbcontent_name << "' not in buffers";
         return tmp;
     }
 
@@ -196,7 +196,7 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
     std::map<std::string, std::shared_ptr<Buffer>> buffers = dbcont_manager_.loadedData();
     if (!buffers.count(dbcontent_name))
     {
-        logerr << "LabelGenerator: getFullTexts: dbcontent_name '" << dbcontent_name << "' not in buffers";
+        logerr << "dbcontent_name '" << dbcontent_name << "' not in buffers";
         return tmp;
     }
 
@@ -625,7 +625,7 @@ void LabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
     else
         config_.current_lod_ = 1;
 
-    //loginf << "DBContentLabelGenerator: autoAdustCurrentLOD: old " << old_lod << " current " << current_lod_;
+    //loginf << "old " << old_lod << " current " << current_lod_;
 
     // failsafe
     if (config_.current_lod_ < 1)
@@ -636,7 +636,7 @@ void LabelGenerator::autoAdustCurrentLOD(unsigned int num_labels_on_screen)
     if (old_lod != config_.current_lod_)
         emit labelConfigChanged();
 
-    logdbg << "DBContentLabelGenerator: autoAdustCurrentLOD: num labels on screen "
+    logdbg << "num labels on screen "
            << num_labels_on_screen << " old " << (unsigned int) old_lod
            << " current " << round(config_.current_lod_) << " float " << config_.current_lod_;
 }
@@ -1258,7 +1258,7 @@ void LabelGenerator::labelLine (unsigned int ds_id, unsigned int line)
 // updates lines to be label according to available lines with loaded data
 void LabelGenerator::updateAvailableLabelLines()
 {
-    logdbg << "LabelGenerator: updateAvailableLabelLines";
+    logdbg << "start";
 
     unsigned int ds_id;
     unsigned int line_id;
@@ -1293,20 +1293,20 @@ void LabelGenerator::updateAvailableLabelLines()
             something_changed = true;
         }
 
-        logdbg << "LabelGenerator: updateAvailableLabelLines: ds_id " << ds_id
+        logdbg << "ds_id " << ds_id
                << " new line " << labelLine(ds_id);
     }
 
     if (something_changed)
     {
-        logdbg << "LabelGenerator: updateAvailableLabelLines: emitting change";
+        logdbg << "emitting change";
         emit labelLinesChangedSignal();
     }
 }
 
 void LabelGenerator::editLabelContentsDoneSlot()
 {
-    loginf << "LabelGenerator: editLabelContentsDoneSlot";
+    loginf << "start";
 
     auto cfg_new = label_edit_dialog_->labelConfig();
 
@@ -1340,7 +1340,7 @@ void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent:
 
         if (!db_content.hasVariable(var_it.second))
         {
-            logwrn << "LabelGenerator: addVariables: unknown var '" << var_it.second << "' in " << dbcontent_name;
+            logwrn << "unknown var '" << var_it.second << "' in " << dbcontent_name;
             continue;
         }
 
@@ -1456,7 +1456,7 @@ bool LabelGenerator::filterPrimaryOnlyActive() const
 
 void LabelGenerator::filterPrimaryOnlyActive(bool value)
 {
-    loginf << "LabelGenerator: filterPrimaryOnlyActive: value " << value;
+    loginf << "value " << value;
 
     if (config_.filter_primary_only_active_ != value)
         emit labelConfigChanged();
@@ -1515,7 +1515,7 @@ bool LabelGenerator::updateM3AValuesFromStr(const std::string& values)
 
         if (!ok)
         {
-            logerr << "DBContentLabelGenerator: updateM3AValuesFromStr: value '" << tmp_str << "' not valid";
+            logerr << "value '" << tmp_str << "' not valid";
             break;
         }
 
@@ -1574,7 +1574,7 @@ bool LabelGenerator::updateTAValuesFromStr(const std::string& values)
 
         if (!ok)
         {
-            logerr << "DBContentLabelGenerator: updateTAValuesFromStr: value '" << tmp_str << "' not valid";
+            logerr << "value '" << tmp_str << "' not valid";
             break;
         }
 
@@ -1876,7 +1876,7 @@ std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, 
         break;
     }
     default:
-        logerr << "LabelGenerator: getVariableValue: impossible for property type "
+        logerr << "impossible for property type "
                << Property::asString(data_type);
         throw std::runtime_error(
                     "LabelGenerator: getVariableValue: impossible property type " +

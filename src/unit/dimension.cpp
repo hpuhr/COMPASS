@@ -62,7 +62,7 @@ bool Dimension::hasUnit(const std::string& unit) const { return units_.find(unit
 double Dimension::getFactor(const std::string& unit_source,
                             const std::string& unit_destination) const
 {
-    logdbg << "Dimension: getFactor: unit src '" << unit_source << "' dst '" << unit_destination
+    logdbg << "unit src '" << unit_source << "' dst '" << unit_destination
            << "'";
 
     assert(units_.find(unit_source) != units_.end());
@@ -72,7 +72,7 @@ double Dimension::getFactor(const std::string& unit_source,
     factor /= units_.at(unit_source)->factor();
     factor *= units_.at(unit_destination)->factor();
 
-    logdbg << "Dimension: getFactor: src factor " << units_.at(unit_source)->factor()
+    logdbg << "src factor " << units_.at(unit_source)->factor()
            << " dest factor " << units_.at(unit_destination)->factor() << " result " << factor;
 
     assert(factor != 0);

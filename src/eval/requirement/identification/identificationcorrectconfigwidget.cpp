@@ -77,7 +77,7 @@ namespace EvaluationRequirement
 
     void IdentificationCorrectConfigWidget::toggleRequireCorrectnessOfAllSlot()
     {
-        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleRequireCorrectnessOfAllSlot";
+        loginf << "start";
 
         assert (require_correctness_of_all_check_);
         config().requireCorrectnessOfAll(require_correctness_of_all_check_->checkState() == Qt::Checked);
@@ -86,7 +86,7 @@ namespace EvaluationRequirement
 
     void IdentificationCorrectConfigWidget::toggleUseModeASlot()
     {
-        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleUseModeASlot";
+        loginf << "start";
 
         assert (use_mode_a_check_);
         config().useModeA(use_mode_a_check_->checkState() == Qt::Checked);
@@ -94,7 +94,7 @@ namespace EvaluationRequirement
 
     void IdentificationCorrectConfigWidget::toggleUseMsTaSlot()
     {
-        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleUseMsTaSlot";
+        loginf << "start";
 
         assert (use_ms_ta_check_);
         config().useMsTa(use_ms_ta_check_->checkState() == Qt::Checked);
@@ -103,7 +103,7 @@ namespace EvaluationRequirement
 
     void IdentificationCorrectConfigWidget::toggleUseMsTiSlot()
     {
-        loginf << "EvaluationRequirementIdentificationConfigWidget: toggleUseMsTiSlot";
+        loginf << "start";
 
         assert (use_ms_ti_check_);
         config().useMsTi(use_ms_ti_check_->checkState() == Qt::Checked);

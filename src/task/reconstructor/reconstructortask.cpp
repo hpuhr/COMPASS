@@ -190,7 +190,7 @@ bool ReconstructorTask::canRun()
 
 void ReconstructorTask::updateProgressSlot(const QString& msg, bool add_slice_progress)
 {
-    logdbg << "ReconstructorTask: updateProgress: slice " << add_slice_progress
+    logdbg << "slice " << add_slice_progress
            << " dialog " << (progress_dialog_ != nullptr);
 
     if (!progress_dialog_)
@@ -223,7 +223,7 @@ void ReconstructorTask::updateProgressSlot(const QString& msg, bool add_slice_pr
             progress = (double) sidx / (double) ns;
     }
 
-    logdbg << "ReconstructorTask: updateProgress: slice " << add_slice_progress
+    logdbg << "slice " << add_slice_progress
            << " dialog " << (progress_dialog_ != nullptr) << " progress " << progress << " done " << done_ ;
 
     pmsg += ("<br><br><div align='left'>Elapsed: "
@@ -239,7 +239,7 @@ void ReconstructorTask::updateProgressSlot(const QString& msg, bool add_slice_pr
         int num_slices_remaining = ns - sidx; // not -1, since will display and async run
         double time_remaining_s = num_slices_remaining * seconds_per_slice;
 
-        logdbg << "ReconstructorTask: updateProgress: current_slice_idx " << sidx
+        logdbg << "current_slice_idx " << sidx
                << " ns " << ns << " num_slices_remaining " << num_slices_remaining
                << " time_remaining_s " << time_remaining_s;
 
@@ -430,7 +430,7 @@ void ReconstructorTask::run()
     projection.clearCoordinateSystems();
     projection.addAllCoordinateSystems();
 
-    loginf << "ReconstructorTask: run: started";
+    loginf << "started";
 
     run_start_time_ = boost::posix_time::microsec_clock::local_time();
     run_start_time_after_del_ = {};
@@ -478,7 +478,7 @@ void ReconstructorTask::run()
             }
             catch (const std::exception& e)
             {
-                loginf << "ReconstructorTask: run: delete calculated references threw exception '" << e.what() << "'";
+                loginf << "delete calculated references threw exception '" << e.what() << "'";
                 assert (false);
             }
         }});
@@ -486,7 +486,7 @@ void ReconstructorTask::run()
 
 void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
 {
-    loginf << "ReconstructorTask: deleteCalculatedReferencesDoneSlot";
+    loginf << "start";
 
     updateProgressSlot("Deleting Previous Targets", false);
 
@@ -506,7 +506,7 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
             }
             catch (const std::exception& e)
             {
-                loginf << "ReconstructorTask: run: delete targets threw exception '" << e.what() << "'";
+                loginf << "delete targets threw exception '" << e.what() << "'";
                 assert (false);
             }
         }});
@@ -514,7 +514,7 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
 
 void ReconstructorTask::deleteTargetsDoneSlot()
 {
-    loginf << "ReconstructorTask: deleteTargetsDoneSlot";
+    loginf << "start";
 
     updateProgressSlot("Deleting Previous Associations", false);
 
@@ -544,7 +544,7 @@ void ReconstructorTask::deleteTargetsDoneSlot()
             }
             catch (const std::exception& e)
             {
-                loginf << "ReconstructorTask: run: delete associations threw exception '" << e.what() << "'";
+                loginf << "delete associations threw exception '" << e.what() << "'";
                 assert (false);
             }
 
@@ -554,7 +554,7 @@ void ReconstructorTask::deleteTargetsDoneSlot()
 
 void ReconstructorTask::deleteAssociationsDoneSlot()
 {
-    loginf << "ReconstructorTask: deleteAssociationsDoneSlot";
+    loginf << "start";
 
     // enable cancelling
 
@@ -591,14 +591,14 @@ void ReconstructorTask::loadDataSlice()
     assert (currentReconstructor()->hasNextTimeSlice());
     assert (!loading_slice_);
 
-    loginf << "ReconstructorTask: loadDataSlice";
+    loginf << "start";
 
     loading_slice_ = currentReconstructor()->getNextTimeSlice();
 
     assert (loading_slice_);
     loading_data_ = true;
 
-    loginf << "ReconstructorTask: loadDataSlice: min " << Time::toString(loading_slice_->slice_begin_)
+    loginf << "min " << Time::toString(loading_slice_->slice_begin_)
            << " max " << Time::toString(loading_slice_->next_slice_begin_)
            << " last " << loading_slice_->is_last_slice_;
 
@@ -615,7 +615,7 @@ void ReconstructorTask::loadDataSlice()
 
     for (auto& dbcont_it : dbcontent_man)
     {
-        logdbg << "ReconstructorTask: loadDataSlice: " << dbcont_it.first
+        logdbg << "start" << dbcont_it.first
                << " has data " << dbcont_it.second->hasData()
                << " has utn " << dbcont_it.second->hasVariable("UTN");
 
@@ -631,7 +631,7 @@ void ReconstructorTask::loadDataSlice()
 
 void ReconstructorTask::processDataSlice()
 {
-    loginf << "ReconstructorTask: processDataSlice";
+    loginf << "start";
 
     if (cancelled_)
         return;
@@ -645,7 +645,7 @@ void ReconstructorTask::processDataSlice()
 
     if (!processing_slice_->data_.size())
     {
-        logdbg << "ReconstructorTask: processDataSlice: empty buffer at ("
+        logdbg << "empty buffer at ("
                << Time::toString(loading_slice_->slice_begin_)<< ", no process";
 
         processing_slice_ = nullptr;
@@ -655,22 +655,22 @@ void ReconstructorTask::processDataSlice()
 
     processing_data_slice_ = true;
 
-    logdbg << "ReconstructorTask: processDataSlice: processing1 first slice "
+    logdbg << "processing1 first slice "
            << !processing_slice_->first_slice_
            << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
 
     assert (processing_slice_);
 
-    logdbg << "ReconstructorTask: processDataSlice: processing2 first slice "
+    logdbg << "processing2 first slice "
            << !processing_slice_->first_slice_
            << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
 
     process_future_ = std::async(std::launch::async, [&] {
         try
         {
-            logdbg << "ReconstructorTask: processDataSlice: async process";
+            logdbg << "async process";
 
-            logdbg << "ReconstructorTask: processDataSlice: async processing first slice "
+            logdbg << "async processing first slice "
                    << !processing_slice_->first_slice_
                    << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
 
@@ -681,13 +681,13 @@ void ReconstructorTask::processDataSlice()
             while (writing_slice_ && !cancelled_)
                 QThread::msleep(1);
 
-            logdbg << "ReconstructorTask: processDataSlice: done";
+            logdbg << "done";
 
             QMetaObject::invokeMethod(this, "processingDoneSlot", Qt::QueuedConnection);
         }
         catch (std::exception& e)
         {
-            loginf << "ReconstructorTask: run: processing slice threw exception '" << e.what() << "'";
+            loginf << "processing slice threw exception '" << e.what() << "'";
             assert (false);
         }
     });
@@ -695,7 +695,7 @@ void ReconstructorTask::processDataSlice()
 
 void ReconstructorTask::writeDataSlice()
 {
-    loginf << "ReconstructorTask: writeDataSlice";
+    loginf << "start";
 
     assert (writing_slice_);
 
@@ -703,7 +703,7 @@ void ReconstructorTask::writeDataSlice()
 
     for (auto& buf_it : writing_slice_->assoc_data_)
     {
-        logdbg << "ReconstructorTask: writeDataSlice: association dbcontent " << buf_it.first;
+        logdbg << "association dbcontent " << buf_it.first;
 
         DBContent& dbcontent = dbcontent_man.dbContent(buf_it.first);
 
@@ -715,7 +715,7 @@ void ReconstructorTask::writeDataSlice()
         connect(&dbcontent_man, &DBContentManager::insertDoneSignal,
                 this, &ReconstructorTask::writeDoneSlot);
 
-    loginf << "ReconstructorTask: writeDataSlice: references dbcontent";
+    loginf << "references dbcontent";
 
     dbcontent_man.insertData(writing_slice_->reftraj_data_);
 }
@@ -727,7 +727,7 @@ void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_p
 
 void ReconstructorTask::loadingDoneSlot()
 {
-    loginf << "ReconstructorTask: loadingDoneSlot";
+    loginf << "start";
 
     assert (loading_data_);
     loading_data_ = false;
@@ -746,7 +746,7 @@ void ReconstructorTask::loadingDoneSlot()
 
     bool last_slice = loading_slice_->is_last_slice_;
 
-    loginf << "ReconstructorTask: loadingDoneSlot: is_last_slice " << last_slice
+    loginf << "is_last_slice " << last_slice
            << " current_slice_idx " << current_slice_idx_;
 
     loading_slice_->data_ = dbcontent_man.data();
@@ -762,7 +762,7 @@ void ReconstructorTask::loadingDoneSlot()
         if (cancelled_)
             return;
 
-        logdbg << "ReconstructorTask: loadingDoneSlot: waiting on reconst processing "
+        logdbg << "waiting on reconst processing "
                << currentReconstructor()->processing()
                << " data slice proc " << processing_data_slice_;
 
@@ -773,7 +773,7 @@ void ReconstructorTask::loadingDoneSlot()
     if (cancelled_)
         return;
 
-    loginf << "ReconstructorTask: loadingDoneSlot: calling process";
+    loginf << "calling process";
 
     updateProgressSlot("Processing Slice", true);
     ++current_slice_idx_;
@@ -782,12 +782,12 @@ void ReconstructorTask::loadingDoneSlot()
 
     if (!loading_slice_)
     {
-        logwrn << "ReconstructorTask: loadingDoneSlot: no loading_slice_, cancelled_ " << cancelled_;
+        logwrn << "no loading_slice_, cancelled_ " << cancelled_;
         return;
     }
 
 
-    loginf << "ReconstructorTask: loadingDoneSlot: processing first slice "
+    loginf << "processing first slice "
            << !loading_slice_->first_slice_
            << " remove ts " << Time::toString(loading_slice_->remove_before_time_);
 
@@ -800,7 +800,7 @@ void ReconstructorTask::loadingDoneSlot()
     }
     else // loading slice empty
     {
-        loginf << "ReconstructorTask: loadingDoneSlot: empty buffer at ("
+        loginf << "empty buffer at ("
                << Time::toString(loading_slice_->slice_begin_)<< ", no process";
 
         loading_slice_ = nullptr;
@@ -808,7 +808,7 @@ void ReconstructorTask::loadingDoneSlot()
 
         if (last_slice)
         {
-            loginf << "ReconstructorTask: loadingDoneSlot: finalizing last empty slice";
+            loginf << "finalizing last empty slice";
 
             endReconstruction();
             // release unused memory
@@ -830,7 +830,7 @@ void ReconstructorTask::loadingDoneSlot()
     }
     else // do next load
     {
-        loginf << "ReconstructorTask: loadingDoneSlot: next slice";
+        loginf << "next slice";
 
         if (cancelled_)
             return;
@@ -841,7 +841,7 @@ void ReconstructorTask::loadingDoneSlot()
 
 void ReconstructorTask::processingDoneSlot()
 {
-    loginf << "ReconstructorTask: processingDoneSlot";
+    loginf << "start";
 
     if (cancelled_)
     {
@@ -864,7 +864,7 @@ void ReconstructorTask::processingDoneSlot()
 
     if (skip_reference_data_writing_)
     {
-        loginf << "ReconstructorTask: processingDoneSlot: skipping reference writing";
+        loginf << "skipping reference writing";
 
         //immediately finalize slice
         finalizeSlice(writing_slice_);
@@ -877,7 +877,7 @@ void ReconstructorTask::processingDoneSlot()
 
 void ReconstructorTask::writeDoneSlot()
 {
-    loginf << "ReconstructorTask: writeDoneSlot: last " << writing_slice_->is_last_slice_;
+    loginf << "last " << writing_slice_->is_last_slice_;
 
     assert (writing_slice_);
     writing_slice_->write_done_ = true;
@@ -891,14 +891,14 @@ void ReconstructorTask::writeDoneSlot()
     //writing finished, finalize slice
     finalizeSlice(writing_slice_);
 
-    loginf << "ReconstructorTask: writeDoneSlot: done";
+    loginf << "done";
 }
 
 void ReconstructorTask::finalizeSlice(std::unique_ptr<ReconstructorBase::DataSlice>& slice)
 {
     assert(slice);
 
-    loginf << "ReconstructorTask: finalizeSlice: is last = " << slice->is_last_slice_;
+    loginf << "is last = " << slice->is_last_slice_;
 
     if (slice->is_last_slice_)
     {
@@ -906,7 +906,7 @@ void ReconstructorTask::finalizeSlice(std::unique_ptr<ReconstructorBase::DataSli
         endReconstruction();
     }
 
-    loginf << "ReconstructorTask: finalizeSlice: trim";
+    loginf << "trim";
 
     // release unused memory
     malloc_trim(0); 
@@ -917,7 +917,7 @@ void ReconstructorTask::finalizeSlice(std::unique_ptr<ReconstructorBase::DataSli
 
 void ReconstructorTask::endReconstruction()
 {
-    loginf << "ReconstructorTask: endReconstruction: ending reconstruction...";
+    loginf << "ending reconstruction...";
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -952,7 +952,7 @@ void ReconstructorTask::endReconstruction()
     double time_elapsed_s_after_del = Time::partialSeconds(
         boost::posix_time::microsec_clock::local_time() - run_start_time_after_del_);
 
-    loginf << "ReconstructorTask: finalizeSlice: done after "
+    loginf << "done after "
            << String::timeStringFromDouble(time_elapsed_s, false)
            << ", after deletion " << String::timeStringFromDouble(time_elapsed_s_after_del, false);
 
@@ -1034,7 +1034,7 @@ void ReconstructorTask::endReconstruction()
 
 void ReconstructorTask::runCancelledSlot()
 {
-    loginf << "ReconstructorTask: runCancelledSlot";
+    loginf << "start";
 
     assert (progress_dialog_);
 
@@ -1079,7 +1079,7 @@ void ReconstructorTask::runCancelledSlot()
            || processing_data_slice_ || currentReconstructor()->processing()
            || dbcontent_man.insertInProgress())
     {
-        logdbg << "ReconstructorTask: runCancelledSlot: waiting, load "
+        logdbg << "waiting, load "
                << (loading_data_ || dbcontent_man.loadInProgress())
                << " proc " << (processing_data_slice_ || currentReconstructor()->processing())
                << " insert " << dbcontent_man.insertInProgress();
@@ -1087,7 +1087,7 @@ void ReconstructorTask::runCancelledSlot()
         Async::waitAndProcessEventsFor(500);
     }
 
-    loginf << "ReconstructorTask: runCancelledSlot: all done";
+    loginf << "all done";
 
     disconnect(&dbcontent_man, &DBContentManager::loadedDataSignal,
                this, &ReconstructorTask::loadedDataSlot);
@@ -1114,7 +1114,7 @@ void ReconstructorTask::runCancelledSlot()
 
     emit doneSignal();
 
-    loginf << "ReconstructorTask: runCancelledSlot: done";
+    loginf << "done";
 }
 
 bool ReconstructorTask::useDStype(const std::string& ds_type) const
@@ -1276,7 +1276,7 @@ std::unique_ptr<ViewPointGenVP> ReconstructorTask::getDebugViewpointForUTN(unsig
 
 // void ReconstructorTask::saveDebugViewPoints()
 // {
-//     loginf << "ReconstructorTask: saveDebugViewPoints";
+//     loginf << "start";
 
 //     COMPASS::instance().viewManager().clearViewPoints();
 
@@ -1324,12 +1324,12 @@ void ReconstructorTask::checkSubConfigurables()
 
 void ReconstructorTask::deleteCalculatedReferences() // called in async
 {
-    loginf << "ReconstructorTask: deleteCalculatedReferences: delete_all_calc_reftraj "
+    loginf << "delete_all_calc_reftraj "
            << currentReconstructor()->settings().delete_all_calc_reftraj;
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
-    loginf << "ReconstructorTask: deleteCalculatedReferences: deleting";
+    loginf << "deleting";
 
     //cleanup db on delete (for re-compression)
 
@@ -1343,7 +1343,7 @@ void ReconstructorTask::deleteCalculatedReferences() // called in async
             currentReconstructor()->settings().ds_sic,
             currentReconstructor()->settings().ds_line);
 
-    loginf << "ReconstructorTask: deleteCalculatedReferences: waiting on delete";
+    loginf << "waiting on delete";
 
     while (dbcontent_man.dbContent("RefTraj").isDeleting())
     {
@@ -1371,7 +1371,7 @@ void ReconstructorTask::deleteCalculatedReferences() // called in async
 
     // emit done in run
 
-    loginf << "ReconstructorTask: deleteCalculatedReferences: done";
+    loginf << "done";
 }
 
 void ReconstructorTask::showDialog()

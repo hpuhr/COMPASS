@@ -44,7 +44,7 @@ PositionRadarRangeConfigWidget::PositionRadarRangeConfigWidget(PositionRadarRang
 
 void PositionRadarRangeConfigWidget::thresholdValueEditSlot(QString value)
 {
-    loginf << "PositionRadarRangeConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     double val = value.toDouble(&ok);
@@ -52,7 +52,7 @@ void PositionRadarRangeConfigWidget::thresholdValueEditSlot(QString value)
     if (ok)
         config().thresholdValue(val);
     else
-        loginf << "PositionRadarRangeConfigWidget: thresholdValueEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 PositionRadarRangeConfig& PositionRadarRangeConfigWidget::config()

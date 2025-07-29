@@ -171,7 +171,7 @@ std::string VariableCreateDialog::dbColumnName() const
 
 void VariableCreateDialog::nameChangedSlot(const QString& name)
 {
-    loginf << "VariableCreateDialog: nameChangedSlot: name '" << name.toStdString() << "'";
+    loginf << "name '" << name.toStdString() << "'";
 
     assert (db_column_edit_);
 
@@ -207,7 +207,7 @@ void VariableCreateDialog::commentChangedSlot()
 
 void VariableCreateDialog::dbColumnChangedSlot(const QString& name)
 {
-    loginf << "VariableCreateDialog: dbColumnChangedSlot: name '" << name.toStdString() << "'";
+    loginf << "name '" << name.toStdString() << "'";
 
     assert (db_column_edit_);
 

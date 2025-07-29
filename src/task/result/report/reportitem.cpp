@@ -162,7 +162,7 @@ bool ReportItem::fromJSON(const nlohmann::json& j)
         !j.contains(FieldProperties) ||
         !j.contains(FieldExportFlags))
     {
-        logerr << "ReportItem: fromJSON: Error: Item does not obtain needed fields";
+        logerr << "Error: Item does not obtain needed fields";
         return false;
     }
 
@@ -181,12 +181,12 @@ bool ReportItem::fromJSON(const nlohmann::json& j)
     }
     catch(const std::exception& ex)
     {
-        logerr << "Section: fromJSON: Error: " << ex.what();
+        logerr << "Error: " << ex.what();
         return false;
     }
     catch(...)
     {
-        logerr << "Section: fromJSON: Error: Unknown JSON error";
+        logerr << "Error: Unknown JSON error";
         return false;
     }
 

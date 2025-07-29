@@ -51,7 +51,7 @@ bool ModeCFilter::filters(const std::string& dbo_type)
 
 std::string ModeCFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "ModeCFilter: getConditionString: dbcont " << dbcontent_name << " active " << active_;
+    logdbg << "dbcont " << dbcontent_name << " active " << active_;
 
     auto& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -141,14 +141,14 @@ std::string ModeCFilter::getConditionString(const std::string& dbcontent_name, b
         }
     }
 
-    logdbg << "ModeCFilter: getConditionString: here '" << ss.str() << "'";
+    logdbg << "here '" << ss.str() << "'";
 
     return ss.str();
 }
 
 void ModeCFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "ModeCFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id " << class_id;
 
     throw std::runtime_error("ModeCFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -161,7 +161,7 @@ DBFilterWidget* ModeCFilter::createWidget()
 
 void ModeCFilter::checkSubConfigurables()
 {
-    logdbg << "ModeCFilter: checkSubConfigurables";
+    logdbg << "start";
 }
 
 

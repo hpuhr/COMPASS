@@ -194,7 +194,7 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
 
 void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 {
-    loginf << "ASTERIXJSONParserDetailWidget: currentIndexChangedSlot: index " << index;
+    loginf << "index " << index;
 
     setting_new_content_ = true;
 
@@ -214,7 +214,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
     {
         JSONDataMapping& mapping = parser_.mapping(entry_index_);
 
-        loginf << "ASTERIXJSONParserDetailWidget: currentIndexChangedSlot: mapping " << entry_index_
+        loginf << "mapping " << entry_index_
                << " key '" << mapping.jsonKey() << "'";
 
         if (!parser_.existsJSONKeyInCATInfo(mapping.jsonKey()))
@@ -254,7 +254,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
         string key = parser_.unmappedJSONKey(entry_index_);
 
-        loginf << "ASTERIXJSONParserDetailWidget: currentIndexChangedSlot: not added JSON " << entry_index_
+        loginf << "not added JSON " << entry_index_
                << " key '" << key << "'";
 
         showJSONKey(key, false);
@@ -282,7 +282,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
         string dbovar = parser_.unmappedDBContentVariable(entry_index_);
 
-        loginf << "ASTERIXJSONParserDetailWidget: currentIndexChangedSlot: not added dbovar " << entry_index_
+        loginf << "not added dbovar " << entry_index_
                << " key '" << dbovar << "'";
 
         showJSONKey("", false);
@@ -306,7 +306,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
 
 void ASTERIXJSONParserDetailWidget::rowContentChangedSlot (unsigned int index)
 {
-    loginf << "ASTERIXJSONParserDetailWidget: rowChangedSlot: index " << index;
+    loginf << "index " << index;
 
     if (has_current_entry_ && entry_index_ == index)
     {
@@ -437,7 +437,7 @@ void ASTERIXJSONParserDetailWidget::mappingActiveChangedSlot()
     if (setting_new_content_)
         return;
 
-    loginf << "ASTERIXJSONParserDetailWidget: mappingActiveChangedSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping);
@@ -455,7 +455,7 @@ void ASTERIXJSONParserDetailWidget::mappingJSONKeyChangedSlot (const QString& te
     if (setting_new_content_)
         return;
 
-    loginf << "ASTERIXJSONParserDetailWidget: mappingJSONKeyChangedSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping);
@@ -473,7 +473,7 @@ void ASTERIXJSONParserDetailWidget::mappingInArrayChangedSlot()
     if (setting_new_content_)
         return;
 
-    loginf << "ASTERIXJSONParserDetailWidget: mappingInArrayChangedSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping);
@@ -487,7 +487,7 @@ void ASTERIXJSONParserDetailWidget::mappingAppendChangedSlot()
     if (setting_new_content_)
         return;
 
-    loginf << "ASTERIXJSONParserDetailWidget: mappingAppendChangedSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping);
@@ -501,7 +501,7 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
     if (setting_new_content_)
         return;
 
-    loginf << "ASTERIXJSONParserDetailWidget: mappingDBContentVariableChangedSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
@@ -567,7 +567,7 @@ void ASTERIXJSONParserDetailWidget::dboVariableCommentChangedSlot()
 
 void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 {
-    loginf << "ASTERIXJSONParserDetailWidget: createNewDBVariableSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
@@ -621,7 +621,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 
     if (ret == QDialog::Accepted)
     {
-        loginf << "ASTERIXJSONParserDetailWidget: createNewDBVariableSlot: accept";
+        loginf << "accept";
 
         // create new dbo var
         {
@@ -671,7 +671,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
     }
     else
     {
-        loginf << "ASTERIXJSONParserDetailWidget: createNewDBVariableSlot: reject";
+        loginf << "reject";
     }
 
 //    if (dialog.variableEdited())
@@ -690,13 +690,13 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 //            parser_.selectUnmappedDBOVariable(dialog.variable().name()); // search for new name
 //    }
 
-//    loginf << "ASTERIXJSONParserDetailWidget: editDBVariableSlot: done";
+//    loginf << "done";
 
 }
 
 void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
 {
-    loginf << "ASTERIXJSONParserDetailWidget: deleteDBVariableSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
@@ -708,11 +708,11 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
 
     string dbovar_name = dbcont_var_sel_->selectedVariable().name();
 
-    loginf << "ASTERIXJSONParserDetailWidget: deleteDBVariableSlot: deleting var '" << dbovar_name << "'";
+    loginf << "deleting var '" << dbovar_name << "'";
 
     // delete variable
     assert (parser_.dbContent().hasVariable(dbovar_name));
-    parser_.dbContent().deleteVariable(dbovar_name);loginf << "ASTERIXJSONParserDetailWidget: deleteDBVariableSlot";
+    parser_.dbContent().deleteVariable(dbovar_name);loginf << "start";
 
 
     if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)
@@ -751,7 +751,7 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
 }
 void ASTERIXJSONParserDetailWidget::editDBVariableSlot()
 {
-    loginf << "ASTERIXJSONParserDetailWidget: editDBVariableSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping
@@ -782,13 +782,13 @@ void ASTERIXJSONParserDetailWidget::editDBVariableSlot()
             parser_.selectUnmappedDBContentVariable(dialog.variable().name()); // search for new name
     }
 
-    loginf << "ASTERIXJSONParserDetailWidget: editDBVariableSlot: done";
+    loginf << "done";
 }
 
 void ASTERIXJSONParserDetailWidget::deleteMappingSlot()
 {
     assert (delete_mapping_button_);
-    loginf << "ASTERIXJSONParserDetailWidget: mappingActionSlot: delete";
+    loginf << "delete";
 
     assert (has_current_entry_);
     assert (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping);

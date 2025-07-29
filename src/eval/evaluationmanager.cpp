@@ -139,7 +139,7 @@ void EvaluationManager::checkSubConfigurables()
  */
 void EvaluationManager::init()
 {
-    loginf << "EvaluationManager: init";
+    loginf << "start";
 
     assert (!initialized_);
     initialized_ = true;
@@ -192,7 +192,7 @@ Result EvaluationManager::canEvaluate() const
  */
 Result EvaluationManager::evaluate(bool show_dialog)
 {
-    loginf << "EvaluationManager: evaluate";
+    loginf << "start";
 
     assert (initialized_);
     assert (calculator_);
@@ -209,7 +209,7 @@ Result EvaluationManager::evaluate(bool show_dialog)
     auto res = calculator_->clone();
 
     if (!res.ok())
-        logerr << "EvaluationManager: evaluate: Evaluation error: " << res.error();
+        logerr << "Evaluation error: " << res.error();
     assert(res.ok());
 
     auto calculator_local = res.result();
@@ -253,7 +253,7 @@ Result EvaluationManager::evaluate(bool show_dialog)
  */
 void EvaluationManager::databaseOpenedSlot()
 {
-    loginf << "EvaluationManager: databaseOpenedSlot";
+    loginf << "start";
 
     assert(calculator_);
 
@@ -292,7 +292,7 @@ void EvaluationManager::databaseOpenedSlot()
         }
         catch (std::exception& e)
         {
-            logerr << "EvaluationManager: databaseOpenedSlot: unsupported eval_time_ '"
+            logerr << "unsupported eval_time_ '"
                    << constraints_str << "': " << e.what();
         }
     }
@@ -320,7 +320,7 @@ void EvaluationManager::databaseOpenedSlot()
  */
 void EvaluationManager::databaseClosedSlot()
 {
-    loginf << "EvaluationManager: databaseClosedSlot";
+    loginf << "start";
 
     //disconnect result locking before clearing the sectors
     disconnect(this, &EvaluationManager::sectorsChangedSignal, this, &EvaluationManager::lockResultsSlot);
@@ -357,35 +357,35 @@ void EvaluationManager::associationStatusChangedSlot()
 
 void EvaluationManager::targetInfoChangedSlot()
 {
-    loginf << "EvaluationManager: targetInfoChangedSlot";
+    loginf << "start";
 
     emit resultsNeedUpdate(task::UpdateState::ContentUpdateNeeded);
 }
 
 void EvaluationManager::partialResultsUpdateNeededSlot()
 {
-    loginf << "EvaluationManager: partialResultsUpdateNeededSlot";
+    loginf << "start";
 
     emit resultsNeedUpdate(task::UpdateState::PartialUpdateNeeded);
 }
 
 void EvaluationManager::fullResultsUpdateNeededSlot()
 {
-    loginf << "EvaluationManager: fullResultsUpdateNeededSlot";
+    loginf << "start";
 
     emit resultsNeedUpdate(task::UpdateState::FullUpdateNeeded);
 }
 
 void EvaluationManager::lockResultsSlot()
 {
-    loginf << "EvaluationManager: lockResultsSlot";
+    loginf << "start";
 
     emit resultsNeedUpdate(task::UpdateState::Locked);
 }
 
 void EvaluationManager::saveTimeConstraints()
 {
-    loginf << "EvaluationManager: saveTimeConstraints";
+    loginf << "start";
 
     nlohmann::json constraints_json = nlohmann::json::object();
 
@@ -410,7 +410,7 @@ bool EvaluationManager::needsAdditionalVariables() const
  */
 void EvaluationManager::addVariables (const std::string dbcontent_name, dbContent::VariableSet& read_set)
 {
-    loginf << "EvaluationManager: addVariables: dbcontent_name " << dbcontent_name;
+    loginf << "dbcontent_name " << dbcontent_name;
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -545,7 +545,7 @@ void EvaluationManager::updateMaxSectorID()
 */
 void EvaluationManager::loadSectors()
 {
-    loginf << "EvaluationManager: loadSectors";
+    loginf << "start";
 
     assert (!sectors_loaded_);
 
@@ -567,7 +567,7 @@ void EvaluationManager::loadSectors()
 */
 void EvaluationManager::clearSectors()
 {
-    loginf << "EvaluationManager: clearSectors";
+    loginf << "start";
 
     sector_layers_.clear();
     sectors_loaded_ = false;
@@ -603,7 +603,7 @@ void EvaluationManager::createNewSector(const std::string& name,
                                         QColor color, 
                                         std::vector<std::pair<double,double>> points)
 {
-    loginf << "EvaluationManager: createNewSector:"
+    loginf << "start"
            << " name " << name 
            << " layer_name " << layer_name
            << " num points " << points.size();
@@ -689,7 +689,7 @@ std::shared_ptr<Sector> EvaluationManager::sector (unsigned int id)
             return *iter;
     }
 
-    logerr << "EvaluationManager: sector: id " << id << " not found";
+    logerr << "id " << id << " not found";
     assert (false);
 }
 
@@ -802,7 +802,7 @@ void EvaluationManager::deleteAllSectors()
  */
 void EvaluationManager::importSectors(const std::string& filename)
 {
-    loginf << "EvaluationManager: importSectors: filename '" << filename << "'";
+    loginf << "filename '" << filename << "'";
 
     assert (sectors_loaded_);
     assert (calculator_);
@@ -818,7 +818,7 @@ void EvaluationManager::importSectors(const std::string& filename)
 
         if (!j.contains("sectors"))
         {
-            logerr << "EvaluationManager: importSectors: file does not contain sectors";
+            logerr << "file does not contain sectors";
             return;
         }
 
@@ -826,7 +826,7 @@ void EvaluationManager::importSectors(const std::string& filename)
 
         if (!sectors.is_array())
         {
-            logerr << "EvaluationManager: importSectors: file sectors is not an array";
+            logerr << "file sectors is not an array";
             return;
         }
 
@@ -842,7 +842,7 @@ void EvaluationManager::importSectors(const std::string& filename)
                     || !j_sec_it.contains("layer_name")
                     || !j_sec_it.contains("points"))
             {
-                logerr << "EvaluationManager: importSectors: ill-defined sectors skipped, json '" << j_sec_it.dump(4)
+                logerr << "ill-defined sectors skipped, json '" << j_sec_it.dump(4)
                        << "'";
                 continue;
             }
@@ -863,13 +863,13 @@ void EvaluationManager::importSectors(const std::string& filename)
 
             eval_sector->save();
 
-            loginf << "EvaluationManager: importSectors: loaded sector '" << name << "' in layer '"
+            loginf << "loaded sector '" << name << "' in layer '"
                    << layer_name << "' num points " << sector(name, layer_name)->size() << " id " << id;
         }
     }
     catch (json::exception& e)
     {
-        logerr << "EvaluationManager: importSectors: could not load file '"
+        logerr << "could not load file '"
                << filename << "'";
         throw e;
     }
@@ -884,7 +884,7 @@ void EvaluationManager::importSectors(const std::string& filename)
  */
 void EvaluationManager::exportSectors (const std::string& filename)
 {
-    loginf << "EvaluationManager: exportSectors: filename '" << filename << "'";
+    loginf << "filename '" << filename << "'";
 
     assert (sectors_loaded_);
 
@@ -1183,7 +1183,7 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
  */
 void EvaluationManager::loadingDone()
 {
-    loginf << "EvaluationManager: loadingDone";
+    loginf << "start";
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -1269,7 +1269,7 @@ boost::posix_time::ptime EvaluationManager::loadTimestampBegin() const
  */
 void EvaluationManager::loadTimestampBegin(boost::posix_time::ptime value)
 {
-    loginf << "EvaluationManager: loadTimeBegin: value " << Time::toString(value);
+    loginf << "value " << Time::toString(value);
 
     load_timestamp_begin_ = value;
 
@@ -1287,7 +1287,7 @@ boost::posix_time::ptime EvaluationManager::loadTimestampEnd() const
  */
 void EvaluationManager::loadTimestampEnd(boost::posix_time::ptime value)
 {
-    loginf << "EvaluationManager: loadTimeEnd: value " << Time::toString(value);
+    loginf << "value " << Time::toString(value);
 
     load_timestamp_end_ = value;
 

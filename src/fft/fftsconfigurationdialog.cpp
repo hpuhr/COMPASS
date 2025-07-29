@@ -156,7 +156,7 @@ void FFTsConfigurationDialog::currentRowChanged(const QModelIndex& current, cons
 
     if (!current.isValid())
     {
-        loginf << "FFTsConfigurationDialog: currentRowChanged: invalid index";
+        loginf << "invalid index";
 
         edit_widget_->clear();
 
@@ -168,14 +168,14 @@ void FFTsConfigurationDialog::currentRowChanged(const QModelIndex& current, cons
 
     string name = table_model_->getNameOf(source_index);
 
-    loginf << "FFTsConfigurationDialog: currentRowChanged: current name " << name;
+    loginf << "current name " << name;
 
     edit_widget_->showFFT(name);
 }
 
 void FFTsConfigurationDialog::newFFTClickedSlot()
 {
-    loginf << "FFTsConfigurationDialog: newFFTClickedSlot";
+    loginf << "start";
 
     bool ok;
     QString text =
@@ -228,7 +228,7 @@ void FFTsConfigurationDialog::newFFTClickedSlot()
 
 void FFTsConfigurationDialog::importClickedSlot()
 {
-    loginf << "FFTsConfigurationDialog: importClickedSlot";
+    loginf << "start";
 
     string filename = QFileDialog::getOpenFileName(
                 this, "Import FFTs",
@@ -257,7 +257,7 @@ void FFTsConfigurationDialog::deleteAllClickedSlot()
 
     if (reply == QMessageBox::Yes)
     {
-        loginf << "FFTsConfigurationDialog: deleteAllClickedSlot: deletion confirmed";
+        loginf << "deletion confirmed";
 
         table_model_->beginModelReset();
 
@@ -270,7 +270,7 @@ void FFTsConfigurationDialog::deleteAllClickedSlot()
 
 void FFTsConfigurationDialog::exportClickedSlot()
 {
-    loginf << "FFTsConfigurationDialog: exportClickedSlot";
+    loginf << "start";
 
     string filename = QFileDialog::getSaveFileName(
                 this, "Export FFTs as JSON",
@@ -278,7 +278,7 @@ void FFTsConfigurationDialog::exportClickedSlot()
 
     if (filename.size() > 0)
     {
-        loginf << "FFTsConfigurationDialog: exportClickedSlot: file '" << filename << "'";
+        loginf << "file '" << filename << "'";
 
         fft_man_.exportFFTs(filename);
     }

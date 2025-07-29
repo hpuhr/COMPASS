@@ -45,7 +45,7 @@ void SimpleAssociator::associateNewData()
 {
     unassoc_rec_nums_.clear();
 
-    loginf << "SimpleAssociator: associateNewData: associating RefTraj data";
+    loginf << "associating RefTraj data";
 
     if (reconstructor().isCancelled())
         return;
@@ -57,7 +57,7 @@ void SimpleAssociator::associateNewData()
 
     // create tracker targets
 
-    loginf << "SimpleAssociator: associateNewData: associating CAT062 data";
+    loginf << "associating CAT062 data";
 
     associateTargetReports({62});
 
@@ -75,7 +75,7 @@ void SimpleAssociator::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
-    loginf << "SimpleAssociator: associateNewData: tracker targets " << reconstructor_.targets_container_.targets_.size()
+    loginf << "tracker targets " << reconstructor_.targets_container_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 
     // create non-tracker utns
@@ -90,7 +90,7 @@ void SimpleAssociator::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
-    loginf << "SimpleAssociator: associateNewData: associating remaining sensor data";
+    loginf << "associating remaining sensor data";
 
     associateTargetReports(sensor_dbcont_ids);
 
@@ -135,7 +135,7 @@ void SimpleAssociator::associateNewData()
 
     // unassoc_rec_nums_.clear(); moved to beginning for statistics
 
-    loginf << "SimpleAssociator: associateNewData: after non-tracker targets "
+    loginf << "after non-tracker targets "
            << reconstructor_.targets_container_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 }

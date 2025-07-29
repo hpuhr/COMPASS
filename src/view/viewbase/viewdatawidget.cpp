@@ -211,7 +211,7 @@ void ViewDataWidget::endTool()
  */
 void ViewDataWidget::loadingStarted()
 {
-    loginf << "ViewDataWidget: loadingStarted";
+    loginf << "start";
 
     //clear and update display
     clearData();
@@ -226,7 +226,7 @@ void ViewDataWidget::loadingStarted()
  */
 void ViewDataWidget::loadingDone()
 {
-    loginf << "ViewDataWidget: loadingDone";
+    loginf << "start";
 
     //invoke derived
     loadingDone_impl();
@@ -248,7 +248,7 @@ void ViewDataWidget::loadingDone_impl()
  */
 void ViewDataWidget::updateData(const BufferData& data, bool requires_reset)
 {
-    logdbg << "ViewDataWidget: updateData";
+    logdbg << "start";
 
     //store new data
     data_ = data;
@@ -263,7 +263,7 @@ void ViewDataWidget::updateData(const BufferData& data, bool requires_reset)
  */
 void ViewDataWidget::clearData()
 {
-    logdbg << "ViewDataWidget: clearData";
+    logdbg << "start";
 
     data_       = {};
     draw_state_ = DrawState::NotDrawn;
@@ -294,7 +294,7 @@ void ViewDataWidget::clearIntermediateRedrawData()
 */
 ViewDataWidget::DrawState ViewDataWidget::redrawData(bool recompute, bool notify)
 {
-    loginf << "ViewDataWidget: redrawData: recompute " << recompute << " notify " << notify;
+    loginf << "recompute " << recompute << " notify " << notify;
 
     if (notify)
     {
@@ -316,7 +316,7 @@ ViewDataWidget::DrawState ViewDataWidget::redrawData(bool recompute, bool notify
         //check for nan values in the data
         if (nanCount().has_value() && nanCount().value() > 0)
         {
-            logerr << "ViewDataWidget: redrawData: " << nanCount().value() << " inf value(s) detected "
+            logerr << "start" << nanCount().value() << " inf value(s) detected "
                    << "in view " << getWidget()->getView()->instanceId();
         }
     }

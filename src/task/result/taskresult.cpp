@@ -435,7 +435,7 @@ Result TaskResult::update(bool restore_section,
 
     if (update_state_ == UpdateState::ContentUpdateNeeded)
     {
-        loginf << "TaskResult: update: running content update";
+        loginf << "running content update";
 
         for (const auto& c : update_contents_)
             loginf << "   " << c.content_section_id << " " << c.content_name;
@@ -445,7 +445,7 @@ Result TaskResult::update(bool restore_section,
     }
     else if (update_state_ != UpdateState::UpToDate)
     {
-        loginf << "TaskResult: update: running " 
+        loginf << "running " 
                << (update_state_ == UpdateState::PartialUpdateNeeded ? "partial" : "full") << " update";
 
         //partial and full update
@@ -458,7 +458,7 @@ Result TaskResult::update(bool restore_section,
     //update failed?
     if (!r.ok())
     {
-        logerr << "TaskResult: update: update failed: " << r.error();
+        logerr << "update failed: " << r.error();
         return r;
     }
 
@@ -771,7 +771,7 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     task::TaskResultType stored_type = j[ FieldType ];
     if (stored_type != type())
     {
-        logerr << "TaskResult: fromJSON: Stored type " << stored_type
+        logerr << "Stored type " << stored_type
                << " does not match result type " << type();
         return false;
     }
@@ -795,7 +795,7 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     auto init_res = initResult();
     if (!init_res.ok())
     {
-        logerr << "TaskResult: fromJSON: Initializing result failed: " << init_res.error();
+        logerr << "Initializing result failed: " << init_res.error();
         return false;
     }
 

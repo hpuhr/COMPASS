@@ -121,7 +121,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
                                                      const std::string& section,
                                                      const Content& content)
 {
-    loginf << "ReportExporter: exportReport: Exporting result '" << result.name() << "'";
+    loginf << "Exporting result '" << result.name() << "'";
 
     num_sections_exported_ = 0;
     done_                  = false;
@@ -213,7 +213,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
         return Result::failed("Exporting report failed: " + std::string(ex.what())); 
     }
 
-    loginf << "ReportExporter: exportReport: Exporting result '" << result.name() << "' succeeded";
+    loginf << "Exporting result '" << result.name() << "' succeeded";
 
     done_ = true;
     emit progressChanged();
@@ -233,7 +233,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport_impl(TaskResult& result,
     if (!res.ok())
         return res;
 
-    loginf << "ReportExporter: exportReport_impl: start section = " << section->name();
+    loginf << "start section = " << section->name();
 
     //visit start section
     res = visitSection(*section, true, true, true);
@@ -253,7 +253,7 @@ Result ReportExporter::visitSection(Section& section,
     //skip section?
     if (!section.exportEnabled(exportMode()))
     {
-        loginf << "ReportExporter: visitSection: Skipping, section '" << section.id() << "' disabled for export";
+        loginf << "Skipping, section '" << section.id() << "' disabled for export";
         return Result::succeeded();
     }
 
@@ -319,13 +319,13 @@ Result ReportExporter::visitContent(SectionContent& content, bool is_root_sectio
     //skip content?
     if (!content.exportEnabled(exportMode()))
     {
-        loginf << "ReportExporter: visitContent: Skipping, content '" << content.id() << "' disabled for export";
+        loginf << "Skipping, content '" << content.id() << "' disabled for export";
         return Result::succeeded();
     }
 
     if (content.isLocked())
     {
-        loginf << "ReportExporter: visitContent: Skipping, content '" << content.id() << "' locked";
+        loginf << "Skipping, content '" << content.id() << "' locked";
         return Result::succeeded();
     }
 

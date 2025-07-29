@@ -90,7 +90,7 @@ EvaluationDataWidget::EvaluationDataWidget(EvaluationData& eval_data,
 
 void EvaluationDataWidget::resizeColumnsToContents()
 {
-    loginf << "EvaluationDataWidget: resizeColumnsToContents";
+    loginf << "start";
     //table_model_->update();
     table_view_->resizeColumnsToContents();
 }
@@ -220,7 +220,7 @@ namespace
 
 void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)
 {
-    logdbg << "EvaluationDataWidget: customContextMenuSlot";
+    logdbg << "start";
 
     assert (table_view_);
 
@@ -233,7 +233,7 @@ void EvaluationDataWidget::customContextMenuSlot(const QPoint& p)
     const EvaluationTargetData& target = eval_data_.getTargetOf(source_index);
 
     unsigned int utn = target.utn_;
-    loginf << "EvaluationDataWidget: customContextMenuSlot: row " << index.row() << " utn " << utn;
+    loginf << "row " << index.row() << " utn " << utn;
     assert (calculator_.data().hasTargetData(utn));
 
     QMenu menu;
@@ -280,11 +280,11 @@ void EvaluationDataWidget::jumpToRequirement(const std::string& req_id, unsigned
 {
     std::string sum_id = EvaluationResultsReport::SectionID::prependReportResultID(req_id);
 
-    loginf << "EvaluationDataWidget: jumpToRequirement: sum id: " << sum_id;
+    loginf << "sum id: " << sum_id;
 
     std::string utn_id = EvaluationResultsReport::SectionID::sumResult2Target(sum_id, utn, calculator_);
 
-    loginf << "EvaluationDataWidget: jumpToRequirement: utn id: " << utn_id;
+    loginf << "utn id: " << utn_id;
 
     //calculator_.manager().widget(showResultId(utn_id, true, true);
 }
@@ -296,7 +296,7 @@ void EvaluationDataWidget::showFullUTNSlot ()
 
     unsigned int utn = action->data().toUInt();
 
-    loginf << "EvaluationDataWidget: showFullUTNSlot: utn " << utn;
+    loginf << "utn " << utn;
 
     calculator_.showFullUTN(utn);
 }
@@ -308,7 +308,7 @@ void EvaluationDataWidget::showSurroundingDataSlot ()
 
     unsigned int utn = action->data().toUInt();
 
-    loginf << "EvaluationDataWidget: showSurroundingDataSlot: utn " << utn;
+    loginf << "utn " << utn;
 
     //calculator_.showSurroundingData(utn);
 }
@@ -322,7 +322,7 @@ void EvaluationDataWidget::itemClicked(const QModelIndex& index)
 {
     if (!index.isValid())
     {
-        loginf << "EvaluationDataWidget: itemClicked: invalid index";
+        loginf << "invalid index";
         return;
     }
 
@@ -331,7 +331,7 @@ void EvaluationDataWidget::itemClicked(const QModelIndex& index)
 
     const EvaluationTargetData& target = eval_data_.getTargetOf(source_index);
 
-    loginf << "EvaluationDataWidget: itemClicked: current target " << target.utn_;
+    loginf << "current target " << target.utn_;
     //restore_focus_ = true;
 
     calculator_.showUTN(target.utn_);

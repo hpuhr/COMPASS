@@ -136,7 +136,7 @@ void EvaluationTimestampConditionsDialog::timeBeginEditedSlot (const QDateTime& 
     if (update_active_)
         return;
 
-    loginf << "EvaluationTimestampConditionsDialog: timeBeginEditedSlot: value "
+    loginf << "value "
            << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
     eval_man_.loadTimestampBegin(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()));
@@ -151,7 +151,7 @@ void EvaluationTimestampConditionsDialog::timeEndEditedSlot (const QDateTime& da
     if (update_active_)
         return;
 
-    loginf << "EvaluationTimestampConditionsDialog: timeEndEditedSlot: value "
+    loginf << "value "
            << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
     eval_man_.loadTimestampEnd(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()));

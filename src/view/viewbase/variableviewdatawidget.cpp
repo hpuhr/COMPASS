@@ -42,14 +42,14 @@ VariableViewDataWidget::VariableViewDataWidget(ViewWidget* view_widget,
 */
 VariableViewDataWidget::~VariableViewDataWidget()
 {
-    logdbg << "VariableViewDataWidget: dtor";
+    logdbg << "start";
 }
 
 /**
 */
 void VariableViewDataWidget::clearData_impl()
 {
-    logdbg << "VariableViewDataWidget: clearData_impl: start";
+    logdbg << "start";
 
     //reset everything
     resetVariableStates();
@@ -59,7 +59,7 @@ void VariableViewDataWidget::clearData_impl()
 
     shows_annotations_ = false;
 
-    logdbg << "VariableViewDataWidget: clearData_impl: end";
+    logdbg << "end";
 }
 
 /**
@@ -80,30 +80,30 @@ void VariableViewDataWidget::clearIntermediateRedrawData_impl()
 */
 void VariableViewDataWidget::loadingStarted_impl()
 {
-    logdbg << "VariableViewDataWidget: loadingStarted_impl: start";
+    logdbg << "start";
 
     //nothing to do yet
 
-    logdbg << "VariableViewDataWidget: loadingStarted_impl: end";
+    logdbg << "end";
 }
 
 /**
 */
 void VariableViewDataWidget::updateData_impl(bool requires_reset)
 {
-    logdbg << "VariableViewDataWidget: updateData_impl: start";
+    logdbg << "start";
 
     //react on data update
     updateDataEvent(requires_reset);
 
-    logdbg << "VariableViewDataWidget: updateData_impl: end";
+    logdbg << "end";
 }
 
 /**
 */
 void VariableViewDataWidget::loadingDone_impl()
 {
-    logdbg << "VariableViewDataWidget: loadingDone_impl: start";
+    logdbg << "start";
 
     //redraw already triggered by post load trigger? => return
     if (postLoadTrigger())
@@ -112,14 +112,14 @@ void VariableViewDataWidget::loadingDone_impl()
     //default behavior
     ViewDataWidget::loadingDone_impl();
 
-    logdbg << "VariableViewDataWidget: loadingDone_impl: end";
+    logdbg << "end";
 }
 
 /**
 */
 ViewDataWidget::DrawState VariableViewDataWidget::redrawData_impl(bool recompute)
 {
-    logdbg << "VariableViewDataWidget: redrawData_impl: recompute " << recompute
+    logdbg << "recompute " << recompute
            << " shows anno " << variable_view_->showsAnnotation();
 
     //recompute data
@@ -146,7 +146,7 @@ ViewDataWidget::DrawState VariableViewDataWidget::redrawData_impl(bool recompute
     //update display
     auto draw_state = updateVariableDisplay();
 
-    logdbg << "VariableViewDataWidget: redrawData_impl: end";
+    logdbg << "end";
 
     return draw_state;
 }
@@ -155,11 +155,11 @@ ViewDataWidget::DrawState VariableViewDataWidget::redrawData_impl(bool recompute
 */
 void VariableViewDataWidget::liveReload_impl()
 {
-    logdbg << "VariableViewDataWidget: liveReload_impl: start";
+    logdbg << "start";
 
     //@TODO: implement live reload for variable based views
 
-    logdbg << "VariableViewDataWidget: liveReload_impl: end";
+    logdbg << "end";
 }
 
 /**
@@ -218,7 +218,7 @@ namespace
 
         void error(PropertyDataType dtype)
         {
-            logerr << "VariableViewDataWidget: CanUpdateFunc: impossible for property type " << Property::asString(dtype);
+            logerr << "impossible for property type " << Property::asString(dtype);
             throw std::runtime_error("VariableViewDataWidget: CanUpdateFunc: impossible property type " + Property::asString(dtype));
         }
 
@@ -241,7 +241,7 @@ bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent
     
     if (!viewData().count(dbcontent_name))
     {
-        logdbg << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no buffer";
+        logdbg << "variable " << variable.id() << " dbcontent " << dbcontent_name << ": no buffer";
         return false;
     }
 
@@ -255,7 +255,7 @@ bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent
     auto data_var = variable.getFor(dbcontent_name);
     if (!data_var)
     {
-        logdbg << "VariableViewDataWidget: canUpdate: variable " << variable.id() << " dbcontent " << dbcontent_name << ": no metavar";
+        logdbg << "variable " << variable.id() << " dbcontent " << dbcontent_name << ": no metavar";
         return false;
     }
 
@@ -273,7 +273,7 @@ bool VariableViewDataWidget::canUpdate(int var_idx, const std::string& dbcontent
 
     if (!ok)
     {
-        logdbg << "VariableViewDataWidget: canUpdate: variable " << variable.id()
+        logdbg << "variable " << variable.id()
                << " dbcontent " << dbcontent_name << ": data var '" << current_var_name
                << "' not in buffer or not supported by view";
     }
@@ -354,7 +354,7 @@ bool VariableViewDataWidget::variableIsDateTime(int var_idx) const
  */
 void VariableViewDataWidget::updateFromVariables()
 {
-    logdbg << "ScatterPlotViewDataWidget: updateData";
+    logdbg << "start";
 
     for (const auto& buf_it : viewData())
     {
@@ -364,7 +364,7 @@ void VariableViewDataWidget::updateFromVariables()
 
         bool can_update = canUpdate(dbcontent_name);
 
-        logdbg << "VariableViewDataWidget: updateData: dbo " << dbcontent_name << " canUpdate " << can_update;
+        logdbg << "dbo " << dbcontent_name << " canUpdate " << can_update;
 
         if (can_update)
             updateVariableData(dbcontent_name, *buffer);

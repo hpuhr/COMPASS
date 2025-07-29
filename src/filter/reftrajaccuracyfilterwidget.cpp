@@ -60,7 +60,7 @@ void RefTrajAccuracyFilterWidget::minValueEditedSlot(const QString& value)
 {
     if (!value.size())
     {
-        loginf << "RefTrajAccuracyFilterWidget: minValueEditedSlot: skipping empty string";
+        loginf << "skipping empty string";
         return;
     }
 
@@ -69,7 +69,7 @@ void RefTrajAccuracyFilterWidget::minValueEditedSlot(const QString& value)
     float value_float = value.toFloat(&ok);
     assert (ok);
 
-    loginf << "RefTrajAccuracyFilterWidget: minValueEditedSlot: '" << value_float << "'";
+    loginf << "'" << value_float << "'";
 
     filter_.minValue(value_float);
 }

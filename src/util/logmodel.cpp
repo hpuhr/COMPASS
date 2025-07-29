@@ -243,7 +243,7 @@ QVariant LogStore::data(const QModelIndex& index, int role) const
     case Qt::DisplayRole:
     //case Qt::EditRole:
     {
-        logdbg << "LogStore: data: display role: row " << index.row() << " col " << index.column();
+        logdbg << "display role: row " << index.row() << " col " << index.column();
 
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -342,7 +342,7 @@ bool LogStore::setData(const QModelIndex &index, const QVariant& value, int role
     //     auto it = target_data_.begin()+index.row();
 
     //     bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
-    //     loginf << "LogStore: setData: utn " << it->utn_ <<" check state " << checked;
+    //     loginf << "utn " << it->utn_ <<" check state " << checked;
 
     //     //eval_man_.useUTN(it->utn_, checked, false);
     //     target_data_.modify(it, [value,checked](Target& p) { p.useInEval(checked); });
@@ -361,7 +361,7 @@ bool LogStore::setData(const QModelIndex &index, const QVariant& value, int role
 
     //     auto it = target_data_.begin()+index.row();
 
-    //     loginf << "LogStore: setData: utn " << it->utn_ <<" comment '" << value.toString().toStdString() << "'";
+    //     loginf << "utn " << it->utn_ <<" comment '" << value.toString().toStdString() << "'";
 
     //     target_data_.modify(it, [value](Target& p) { p.comment(value.toString().toStdString()); });
 
@@ -458,7 +458,7 @@ LogStreamType LogStore::LogEntry::logStreamTypeFromStr (const std::string& type_
 
 void LogStore::clearMessages()
 {
-    loginf << "LogStore: clearMessages";
+    loginf << "start";
 
     beginResetModel();
 
@@ -469,7 +469,7 @@ void LogStore::clearMessages()
 }
 void LogStore::loadMessagesFromDB()
 {
-    loginf << "LogStore: loadMessagesFromDB";
+    loginf << "start";
 
     beginResetModel();
 

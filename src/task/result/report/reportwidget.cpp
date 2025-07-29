@@ -139,7 +139,7 @@ void ReportWidget::clear()
 
 void ReportWidget::expand()
 {
-    loginf << "ReportWidget: expand";
+    loginf << "start";
 
     tree_view_->expandToDepth(3);
 }
@@ -148,13 +148,13 @@ void ReportWidget::selectId (const std::string& id,
                              bool show_figure,
                              const nlohmann::json& config)
 {
-    loginf << "ReportWidget: selectId: id '" << id << "'";
+    loginf << "id '" << id << "'";
 
     QModelIndex index = tree_model_.findItem(id);
 
     if (!index.isValid())
     {
-        logerr << "ReportWidget: selectId: id '" << id << "' not found";
+        logerr << "id '" << id << "' not found";
         return;
     }
 
@@ -181,7 +181,7 @@ void ReportWidget::selectId (const std::string& id,
     {
         bool ok = configureSection(config);
         if (ok)
-            loginf << "ReportWidget: selectId: restored config of section '" << id << "'";
+            loginf << "restored config of section '" << id << "'";
     }
 }
 
@@ -203,11 +203,11 @@ void ReportWidget::triggerItem (const QModelIndex& index,
 
     id_history_.push_back(item->id());
 
-    loginf << "ReportWidget: triggerItem: name " << item->name() << " id " << item->id();
+    loginf << "name " << item->name() << " id " << item->id();
 
     if (dynamic_cast<ResultReport::Report*>(item))
     {
-        loginf << "ReportWidget: triggerItem: root report";
+        loginf << "root report";
         showResultWidget(nullptr, preload_ondemand_contents);
     }
     else if (dynamic_cast<ResultReport::Section*>(item))
@@ -215,7 +215,7 @@ void ReportWidget::triggerItem (const QModelIndex& index,
         ResultReport::Section* section = dynamic_cast<ResultReport::Section*>(item);
         assert (section);
 
-        loginf << "ReportWidget: triggerItem: section " << section->name();
+        loginf << "section " << section->name();
         showResultWidget(section, preload_ondemand_contents);
     }
 
@@ -259,7 +259,7 @@ void ReportWidget::showFigure(const QModelIndex& index)
     TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
     assert (item);
 
-    loginf << "ReportWidget: showFigure: name " << item->name() << " id " << item->id();
+    loginf << "name " << item->name() << " id " << item->id();
 
     if (dynamic_cast<ResultReport::Report*>(item))
     {
@@ -270,7 +270,7 @@ void ReportWidget::showFigure(const QModelIndex& index)
         ResultReport::Section* section = dynamic_cast<ResultReport::Section*>(item);
         assert (section);
 
-        loginf << "ReportWidget: showFigure: section " << section->name();
+        loginf << "section " << section->name();
 
         auto figures = section->getFigures();
         if (!figures.empty())
@@ -282,7 +282,7 @@ void ReportWidget::showFigure(const QModelIndex& index)
 
 void ReportWidget::stepBackSlot()
 {
-    loginf << "ReportWidget: stepBackSlot";
+    loginf << "start";
 
     assert (id_history_.size() > 1);
 

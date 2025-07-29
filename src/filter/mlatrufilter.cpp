@@ -50,7 +50,7 @@ bool MLATRUFilter::filters(const std::string& dbcontent_name)
 
 std::string MLATRUFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "MLATRUFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbo " << dbcontent_name << " active " << active_;
 
     stringstream ss;
 
@@ -106,7 +106,7 @@ std::string MLATRUFilter::getConditionString(const std::string& dbcontent_name, 
         first = false;
     }
 
-    logerr << "MLATRUFilter: getConditionString: here '" << ss.str() << "'";
+    logerr << "here '" << ss.str() << "'";
 
     return ss.str();
 }
@@ -114,14 +114,14 @@ std::string MLATRUFilter::getConditionString(const std::string& dbcontent_name, 
 void MLATRUFilter::generateSubConfigurable(const std::string& class_id,
                                            const std::string& instance_id)
 {
-    logdbg << "MLATRUFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id " << class_id;
 
     throw std::runtime_error("MLATRUFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void MLATRUFilter::checkSubConfigurables()
 {
-    logdbg << "MLATRUFilter: checkSubConfigurables";
+    logdbg << "start";
 
 }
 
@@ -205,7 +205,7 @@ bool MLATRUFilter::updateRUsFromStr(const std::string& values_str)
 
         if (!ok)
         {
-            logerr << "MLATRUFilter: updateRUsFromStr: utn '" << tmp_str << "' not valid";
+            logerr << "utn '" << tmp_str << "' not valid";
             break;
         }
 

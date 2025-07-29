@@ -59,7 +59,7 @@ void ASTERIXJSONParsingSchema::generateSubConfigurable(const std::string& class_
 
         assert(parsers_.find(category) == parsers_.end());
 
-        logdbg << "ASTERIXJSONParsingSchema: generateSubConfigurable: generating schema " << instance_id
+        logdbg << "generating schema " << instance_id
                << " for cat  " << category;
 
         parsers_[category].reset(new ASTERIXJSONParser(class_id, instance_id, this, task_));

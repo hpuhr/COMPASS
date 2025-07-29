@@ -84,14 +84,14 @@ void BaseConfigWidget::changedNameSlot()
 
     string value_str = edit->text().toStdString();
 
-    loginf << "BaseConfigWidget: changedNameSlot: name '" << value_str << "'";
+    loginf << "name '" << value_str << "'";
 
     if (value_str.size())
     {
         config_.name(value_str);
     }
     else
-        logerr << "BaseConfigWidget: changedNameSlot: impossible name '" << value_str << "'";
+        logerr << "impossible name '" << value_str << "'";
 }
 
 void BaseConfigWidget::changedShortNameSlot()
@@ -101,12 +101,12 @@ void BaseConfigWidget::changedShortNameSlot()
 
     string value_str = edit->text().toStdString();
 
-    loginf << "BaseConfigWidget: changedShortNameSlot: name '" << value_str << "'";
+    loginf << "name '" << value_str << "'";
 
     if (value_str.size())
         config_.shortName(value_str);
     else
-        logerr << "BaseConfigWidget: changedShortNameSlot: impossible name '" << value_str << "'";
+        logerr << "impossible name '" << value_str << "'";
 }
 
 void BaseConfigWidget::changedCommentSlot()
@@ -116,7 +116,7 @@ void BaseConfigWidget::changedCommentSlot()
 
     string value_str = edit->toPlainText().toStdString();
 
-    logdbg << "BaseConfigWidget: changedCommentSlot: comment '" << value_str << "'";
+    logdbg << "comment '" << value_str << "'";
 
     config_.comment(value_str);
 }

@@ -234,7 +234,7 @@ bool KalmanInterface::smoothUpdates(std::vector<kalman::KalmanUpdate>& updates,
     std::vector<bool>           state_valid_tmp;
 
     //if (debug_infos)
-    //    loginf << "KalmanInterface: smoothUpdates: #updates: " << updates.size() << ", idx0: " << idx0 << ", idx1: " << idx1 << ", n: " << n;
+    //    loginf << "#updates: " << updates.size() << ", idx0: " << idx0 << ", idx1: " << idx1 << ", n: " << n;
 
     //@TODO: duplicate states really needed!?
     std::vector<kalman::KalmanState> states(n);

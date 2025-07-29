@@ -232,7 +232,7 @@ void ASTERIXOverrideWidget::updateSlot()
 
 void ASTERIXOverrideWidget::overrideActiveCheckedSlot()
 {
-    loginf << "ASTERIXOverrideWidget: overrideActiveCheckedSlot";
+    loginf << "start";
     assert(override_active_check_);
 
     task_.settings().override_tod_active_ = override_active_check_->checkState() == Qt::Checked;
@@ -240,7 +240,7 @@ void ASTERIXOverrideWidget::overrideActiveCheckedSlot()
 
 void ASTERIXOverrideWidget::todOffsetEditedSlot(const QString& value)
 {
-    loginf << "ASTERIXOverrideWidget: todOffsetEditedSlot: value '" << value.toStdString() << "'";
+    loginf << "value '" << value.toStdString() << "'";
     TextFieldDoubleValidator::displayValidityAsColor(tod_offset_edit_);
 
     if (tod_offset_edit_->hasAcceptableInput())
@@ -249,7 +249,7 @@ void ASTERIXOverrideWidget::todOffsetEditedSlot(const QString& value)
 
 void ASTERIXOverrideWidget::filterTimeOfDayActiveCheckedSlot()
 {
-    loginf << "ASTERIXOverrideWidget: filterTimeOfDayActiveCheckedSlot";
+    loginf << "start";
     assert(filter_tod_active_check_);
 
     task_.settings().filter_tod_active_ = filter_tod_active_check_->checkState() == Qt::Checked;
@@ -258,7 +258,7 @@ void ASTERIXOverrideWidget::minTimeChanged(QTime time)
 {
     float value = String::timeFromString(time.toString().toStdString());
 
-    loginf << "ASTERIXOverrideWidget: minTimeChanged: value '" << time.toString().toStdString()
+    loginf << "value '" << time.toString().toStdString()
            << "' seconds " << value;
 
     task_.settings().filter_tod_min_ = value;
@@ -267,7 +267,7 @@ void ASTERIXOverrideWidget::maxTimeChanged(QTime time)
 {
     float value = String::timeFromString(time.toString().toStdString());
 
-    loginf << "ASTERIXOverrideWidget: maxTimeChanged: value '" << time.toString().toStdString()
+    loginf << "value '" << time.toString().toStdString()
            << "' seconds " << value;
 
     task_.settings().filter_tod_max_ = value;
@@ -275,14 +275,14 @@ void ASTERIXOverrideWidget::maxTimeChanged(QTime time)
 
 void ASTERIXOverrideWidget::filterPositionActiveCheckedSlot()
 {
-    loginf << "ASTERIXOverrideWidget: filterPositionActiveCheckedSlot";
+    loginf << "start";
     assert(filter_position_active_check_);
 
     task_.settings().filter_position_active_ = filter_position_active_check_->checkState() == Qt::Checked;
 }
 void ASTERIXOverrideWidget::latitudeMinEditedSlot(const QString& value_str)
 {
-    loginf << "ASTERIXOverrideWidget: latitudeMinEditedSlot: value '" << value_str.toStdString() << "'";
+    loginf << "value '" << value_str.toStdString() << "'";
 
     double value = value_str.toDouble();
 
@@ -292,7 +292,7 @@ void ASTERIXOverrideWidget::latitudeMinEditedSlot(const QString& value_str)
 
 void ASTERIXOverrideWidget::latitudeMaxEditedSlot(const QString& value_str)
 {
-    loginf << "ASTERIXOverrideWidget: latitudeMaxEditedSlot: value '" << value_str.toStdString() << "'";
+    loginf << "value '" << value_str.toStdString() << "'";
 
     double value = value_str.toDouble();
 
@@ -301,7 +301,7 @@ void ASTERIXOverrideWidget::latitudeMaxEditedSlot(const QString& value_str)
 
 void ASTERIXOverrideWidget::longitudeMinEditedSlot(const QString& value_str)
 {
-    loginf << "ASTERIXOverrideWidget: longitudeMinEditedSlot: value '" << value_str.toStdString() << "'";
+    loginf << "value '" << value_str.toStdString() << "'";
 
     double value = value_str.toDouble();
 
@@ -310,7 +310,7 @@ void ASTERIXOverrideWidget::longitudeMinEditedSlot(const QString& value_str)
 
 void ASTERIXOverrideWidget::longitudeMaxEditedSlot(const QString& value_str)
 {
-    loginf << "ASTERIXOverrideWidget: longitudeMaxEditedSlot: value '" << value_str.toStdString() << "'";
+    loginf << "value '" << value_str.toStdString() << "'";
 
     double value = value_str.toDouble();
 
@@ -319,7 +319,7 @@ void ASTERIXOverrideWidget::longitudeMaxEditedSlot(const QString& value_str)
 
 void ASTERIXOverrideWidget::filterModeCActiveCheckedSlot()
 {
-    loginf << "ASTERIXOverrideWidget: filterPositionActiveCheckedSlot";
+    loginf << "start";
     assert(filter_modec_active_check_);
 
     task_.settings().filter_modec_active_ = filter_modec_active_check_->checkState() == Qt::Checked;
@@ -327,7 +327,7 @@ void ASTERIXOverrideWidget::filterModeCActiveCheckedSlot()
 
 void ASTERIXOverrideWidget::modeCMinEditedSlot(const QString& value_str)
 {
-    loginf << "ASTERIXOverrideWidget: modeCMinEditedSlot: value '" << value_str.toStdString() << "'";
+    loginf << "value '" << value_str.toStdString() << "'";
 
     double value = value_str.toDouble();
 
@@ -336,7 +336,7 @@ void ASTERIXOverrideWidget::modeCMinEditedSlot(const QString& value_str)
 
 void ASTERIXOverrideWidget::modeCMaxEditedSlot(const QString& value_str)
 {
-    loginf << "ASTERIXOverrideWidget: modeCMaxEditedSlot: value '" << value_str.toStdString() << "'";
+    loginf << "value '" << value_str.toStdString() << "'";
 
     double value = value_str.toDouble();
 
@@ -345,7 +345,7 @@ void ASTERIXOverrideWidget::modeCMaxEditedSlot(const QString& value_str)
 
 void ASTERIXOverrideWidget::obfuscateSecondaryInfoCheckedSlot()
 {
-    loginf << "ASTERIXOverrideWidget: obfuscateSecondaryInfoCheckedSlot";
+    loginf << "start";
     assert(obfuscate_secondary_info_check_);
 
     task_.settings().obfuscate_secondary_info_ = obfuscate_secondary_info_check_->checkState() == Qt::Checked;

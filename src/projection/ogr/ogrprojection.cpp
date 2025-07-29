@@ -100,7 +100,7 @@ bool OGRProjection::polarToWGS84(unsigned int id, double azimuth_rad, double sla
     //    else
     //        z1 = 0.0;
 
-    //    logdbg << "OGRProjection: polarToWGS84: local x " << x1 << " y " << y1 << " z " << z1;
+    //    logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
 
     //    ret = coordinate_systems_.at(id)->cartesian2WGS84(x1, y1, latitude_deg, longitude_deg);
 

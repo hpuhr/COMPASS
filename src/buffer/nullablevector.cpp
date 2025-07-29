@@ -57,18 +57,18 @@ void NullableVector<bool>::setFromFormat(unsigned int index, const std::string& 
             value = 0;
         else
         {
-            logerr << "NullableVector: setFromFormat: unknown bool value '" << value_str << "'";
+            logerr << "unknown bool value '" << value_str << "'";
             assert(false);
         }
     }
     else
     {
-        logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
+        logerr << "unknown format '" << format << "'";
         assert(false);
     }
 
     if (debug)
-        loginf << "NullableVector: setFromFormat: index " << index << " value_str '" << value_str
+        loginf << "index " << index << " value_str '" << value_str
                << "' value '" << value << "'";
 
     set(index, value);

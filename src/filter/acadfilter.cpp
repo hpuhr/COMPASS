@@ -50,7 +50,7 @@ bool ACADFilter::filters(const std::string& dbo_type)
 
 std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "ACADFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbo " << dbcontent_name << " active " << active_;
 
     if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbcontent_name))
         return "";
@@ -86,21 +86,21 @@ std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bo
         first = false;
     }
 
-    logdbg << "ACADFilter: getConditionString: here '" << ss.str() << "'";
+    logdbg << "here '" << ss.str() << "'";
 
     return ss.str();
 }
 
 void ACADFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "ACADFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id " << class_id;
 
     throw std::runtime_error("ACADFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void ACADFilter::checkSubConfigurables()
 {
-    logdbg << "ACADFilter: checkSubConfigurables";
+    logdbg << "start";
 }
 
 DBFilterWidget* ACADFilter::createWidget()
@@ -211,7 +211,7 @@ bool ACADFilter::updateValuesFromStr(const std::string& values_str)
 
         if (!ok)
         {
-            logerr << "ACADFilter: updateUTNSFromStr: utn '" << tmp_str << "' not valid";
+            logerr << "utn '" << tmp_str << "' not valid";
             break;
         }
 

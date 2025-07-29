@@ -365,7 +365,7 @@ void JoinedGeneric::accumulateSingleResult(const std::shared_ptr<Single>& single
 */
 boost::optional<double> JoinedGeneric::computeResult_impl() const
 {
-    loginf << "JoinedGeneric: computeResult_impl:"
+    loginf << "start"
             << " num_updates " << num_updates_
             << " num_no_ref_pos " << num_no_ref_pos_
             << " num_no_ref_val " << num_no_ref_val_

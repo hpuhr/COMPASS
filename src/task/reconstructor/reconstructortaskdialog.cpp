@@ -186,7 +186,7 @@ void ReconstructorTaskDialog::showCurrentReconstructorWidget()
     const auto& reconst_str = task_.currentReconstructorStr();
     int idx = reconstructor_box_->findText(QString::fromStdString(reconst_str));
 
-    loginf << "ReconstructorTaskDialog: showCurrentReconstructorWidget: value " << idx;
+    loginf << "value " << idx;
 
     assert(idx >= 0);
 
@@ -204,7 +204,7 @@ void ReconstructorTaskDialog::updateButtons()
 
 void ReconstructorTaskDialog::reconstructorMethodChangedSlot(const QString& value)
 {
-    loginf << "ReconstructorTaskDialog: reconstructorMethodChangedSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     task_.currentReconstructorStr(value.toStdString());
 

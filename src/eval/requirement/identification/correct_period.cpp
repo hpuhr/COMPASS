@@ -269,7 +269,7 @@ void IdentificationCorrectPeriodConfigWidget::identificationTypeChanged()
 
     auto id_type = (IdentificationCorrectPeriodConfig::IdentificationType)data.toInt();
 
-    loginf << "IdentificationCorrectPeriodConfigWidget: identificationTypeChanged: value " << IdentificationCorrectPeriod::identificationName(id_type);
+    loginf << "value " << IdentificationCorrectPeriod::identificationName(id_type);
 
     config().identificationType(id_type);
 

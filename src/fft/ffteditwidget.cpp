@@ -146,7 +146,7 @@ void FFTEditWidget::showFFT(const std::string& name)
     current_name_ = name;
     current_fft_in_db_ = ds_man_.hasDBFFT(current_name_);
 
-    loginf << "FFTEditWidget: showID: name " << name << " in db " << current_fft_in_db_;
+    loginf << "name " << name << " in db " << current_fft_in_db_;
 
     assert (ds_man_.hasConfigFFT(current_name_));
 
@@ -155,7 +155,7 @@ void FFTEditWidget::showFFT(const std::string& name)
 
 void FFTEditWidget::clear()
 {
-    loginf << "FFTEditWidget: clear";
+    loginf << "start";
 
     has_current_fft_ = false;
     current_name_ = "";
@@ -233,7 +233,7 @@ void FFTEditWidget::modeCEditedSlot(const QString& value_str)
 {
     float value = value_str.toFloat();
 
-    loginf << "FFTEditWidget: modeCEditedSlot: '" << value << "'";
+    loginf << "'" << value << "'";
 
     if (current_fft_in_db_)
     {
@@ -249,7 +249,7 @@ void FFTEditWidget::latitudeEditedSlot(const QString& value_str)
 {
     double value = value_str.toDouble();
 
-    loginf << "FFTEditWidget: latitudeEditedSlot: '" << value << "'";
+    loginf << "'" << value << "'";
 
     if (current_fft_in_db_)
     {
@@ -265,7 +265,7 @@ void FFTEditWidget::longitudeEditedSlot(const QString& value_str)
 {
     double value = value_str.toDouble();
 
-    loginf << "FFTEditWidget: longitudeEditedSlot: '" << value << "'";
+    loginf << "'" << value << "'";
 
     if (current_fft_in_db_)
     {
@@ -281,7 +281,7 @@ void FFTEditWidget::altitudeEditedSlot(const QString& value_str)
 {
     double value = value_str.toDouble();
 
-    loginf << "FFTEditWidget: altitudeEditedSlot: '" << value << "'";
+    loginf << "'" << value << "'";
 
     if (current_fft_in_db_)
     {
@@ -296,7 +296,7 @@ void FFTEditWidget::altitudeEditedSlot(const QString& value_str)
 
 void FFTEditWidget::deleteSlot()
 {
-    loginf << "FFTEditWidget: deleteSlot";
+    loginf << "start";
 
     assert (has_current_fft_);
     //assert (!current_fft_in_db_);

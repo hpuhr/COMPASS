@@ -419,7 +419,7 @@ void JoinedPositionBase::common_accumulateSingleResult(unsigned int utn, const P
 
     if (single_result.accumulator().max() > 10000)
     {
-        loginf << "JoinedPositionBase: common_accumulateSingleResult: utn " << utn
+        loginf << "utn " << utn
                << " dist max " <<  single_result.accumulator().max()
                << " count " << single_result.accumulator().numValues();
     }
@@ -583,7 +583,7 @@ void JoinedPositionProbabilityBase::accumulateSingleResult(
 */
 boost::optional<double> JoinedPositionProbabilityBase::computeResult_impl() const
 {
-    loginf << "JoinedPositionProbabilityBase: computeResult_impl:" << type()
+    loginf << "start" << type()
             << " num_pos " << num_pos_
             << " num_no_ref " << num_no_ref_
             << " num_failed " << num_failed_
@@ -666,7 +666,7 @@ void JoinedPositionValueBase::accumulateSingleResult(
 */
 boost::optional<double> JoinedPositionValueBase::computeResult_impl() const
 {
-    loginf << "JoinedPositionValueBase: computeResult_impl:" << type()
+    loginf << "start" << type()
             << " num_pos " << num_pos_
             << " num_no_ref " << num_no_ref_
             << " num_failed " << num_failed_

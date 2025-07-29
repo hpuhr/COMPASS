@@ -174,7 +174,7 @@ void ReferenceCalculator::prepareForCurrentSlice()
  */
 void ReferenceCalculator::reset()
 {
-    loginf << "ReferenceCalculator: reset";
+    loginf << "start";
 
     references_.clear();
     interp_options_.clear();
@@ -211,7 +211,7 @@ void ReferenceCalculator::updateInterpOptions()
  */
 bool ReferenceCalculator::computeReferences()
 {
-    loginf << "ReferenceCalculator: computeReferences";
+    loginf << "start";
 
     resetDataStructs();
 
@@ -376,7 +376,7 @@ void ReferenceCalculator::reconstructMeasurements()
 
     unsigned int num_targets = refs.size();
 
-    loginf << "ReferenceCalculator: reconstructMeasurements: reconstructing " << num_targets
+    loginf << "reconstructing " << num_targets
            << " target(s) " << (settings_.multithreading ? "multithreaded" : "") << "...";
 
     //compute references in parallel
@@ -395,7 +395,7 @@ void ReferenceCalculator::reconstructMeasurements()
         }
     }
 
-    loginf << "ReferenceCalculator: reconstructMeasurements: done";
+    loginf << "done";
 }
 
 /**
@@ -522,7 +522,7 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
 
         if (debug)
         {
-            loginf << "ReferenceCalculator: reconstructMeasurements: Debugging recnum " << mm.source_id.value() 
+            loginf << "Debugging recnum " << mm.source_id.value() 
                    << " @t " << Utils::Time::toString(mm.t) 
                    << " interp " << mm.mm_interp;
             refs.updates.back().debugUpdate();
@@ -1012,7 +1012,7 @@ bool ReferenceCalculator::shallAddAnnotationData() const
 */
 void ReferenceCalculator::createAnnotations()
 {
-    loginf << "ReferenceCalculator: createAnnotations: Creating annotations from " << references_.size() << " reference(s)";
+    loginf << "Creating annotations from " << references_.size() << " reference(s)";
 
     if (references_.empty())
         return;
@@ -1027,7 +1027,7 @@ void ReferenceCalculator::createAnnotations()
         if (!ref.second.annotations.hasAnnotations())
             continue;
 
-        loginf << "ReferenceCalculator: createAnnotations: Creating annotation for UTN " << ref.second.utn;
+        loginf << "Creating annotation for UTN " << ref.second.utn;
 
         auto vp   = task.getDebugViewpointForUTN(ref.second.utn);
         auto anno = vp->annotations().getOrCreateAnnotation("Final Reconstruction");
@@ -1038,7 +1038,7 @@ void ReferenceCalculator::createAnnotations()
 
     unsigned int num_targets = refs.size();
 
-    loginf << "ReferenceCalculator: createAnnotations: creating annotations in parallel for " << refs.size() << " target(s)";
+    loginf << "creating annotations in parallel for " << refs.size() << " target(s)";
 
     tbb::parallel_for(uint(0), num_targets, [&](unsigned int tgt_cnt)
     {

@@ -33,7 +33,7 @@ const std::string DBInstance::InMemFilename = "In-Memory";
 DBInstance::DBInstance(DBInterface* interface)
 :   interface_(*interface)
 {
-    loginf << "DBInstance: constructor";
+    loginf << "start";
 }
 
 /**
@@ -51,7 +51,7 @@ db::SQLConfig DBInstance::sqlConfiguration(bool verbose) const
  */
 DBInstance::~DBInstance()
 {
-    loginf << "DBInstance: destructor";
+    loginf << "start";
 
     close();
 }
@@ -132,7 +132,7 @@ Result DBInstance::openInternal(const std::string& file_name)
     if (in_mem)
         fn = InMemFilename;
 
-    loginf << "DBInstance: open: '" << fn << "'";
+    loginf << "'" << fn << "'";
 
     //close first
     if (dbOpen())
@@ -170,7 +170,7 @@ Result DBInstance::openInternal(const std::string& file_name)
     if (!config_pragma_result.ok())
         return config_pragma_result;
 
-    loginf << "DBInstance: open: done";
+    loginf << "done";
 
     return Result::succeeded();
 }
@@ -220,20 +220,20 @@ Result DBInstance::reconnect(bool cleanup_db, Result* cleanup_result)
     //no reconnection to in-mem db
     if (db_in_mem_)
     {
-        logwrn << "DBInstance: reconnect: trying to reconnect to in-memory db, skipping";
+        logwrn << "trying to reconnect to in-memory db, skipping";
         return Result::succeeded();
     }
 
     auto fn = db_filename_;
 
-    loginf << "DBInstance: reconnect: closing db for reconnect...";
+    loginf << "closing db for reconnect...";
 
     //close db
     close();
 
     if (cleanup_db)
     {
-        loginf << "DBInstance: reconnect: cleaning db...";
+        loginf << "cleaning db...";
 
         //cleanup closed db file (cleanup might need closing of db handles)
         auto res = cleanupDB(fn);
@@ -242,7 +242,7 @@ Result DBInstance::reconnect(bool cleanup_db, Result* cleanup_result)
             *cleanup_result = res;
     }
 
-    loginf << "DBInstance: reconnect: reopening db...";
+    loginf << "reopening db...";
 
     //re-open db
     auto open_res = open(fn);

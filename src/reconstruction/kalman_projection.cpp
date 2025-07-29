@@ -55,7 +55,7 @@ void KalmanProjectionHandler::initProjection(double lat,
     proj_->update(lat, lon);
     assert(proj_->valid());
 
-    //loginf << "KalmanProjectionHandler: initProjection: " << proj_->centerLat() << "," << proj_->centerLon() << " (" << proj_->centerCart().x() << "," << proj_->centerCart().y() << ")";
+    //loginf << "start" << proj_->centerLat() << "," << proj_->centerLon() << " (" << proj_->centerCart().x() << "," << proj_->centerCart().y() << ")";
 }
 
 /**

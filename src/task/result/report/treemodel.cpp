@@ -167,12 +167,12 @@ QModelIndex TreeModel::findItem(const std::string& id) const
 
     if (items.size() == 1)
     {
-        loginf << "TreeModel: findItem: id '" << id << "' found";
+        loginf << "id '" << id << "' found";
         return items.at(0);
     }
     else
     {
-        loginf << "TreeModel: findItem: id '" << id << " found " << items.size() << " matches";
+        loginf << "id '" << id << " found " << items.size() << " matches";
         return QModelIndex(); // none or too many found
     }
 }

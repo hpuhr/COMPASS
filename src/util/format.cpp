@@ -45,7 +45,7 @@ const std::map<PropertyDataType, std::vector<std::string>> Format::format_option
 
 void Format::set(PropertyDataType data_type, const std::string& value)
 {
-    logdbg << "Format: set: data type '" << Property::asString(data_type) << "' value '" << value
+    logdbg << "data type '" << Property::asString(data_type) << "' value '" << value
            << "'";
 
     assert(format_options_.count(data_type) > 0);

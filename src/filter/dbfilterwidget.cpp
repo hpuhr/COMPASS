@@ -37,7 +37,7 @@ using namespace Utils;
 DBFilterWidget::DBFilterWidget(DBFilter& filter)
     : QFrame(), filter_(filter)
 {
-    logdbg << "DBFilterWidget: constructor";
+    logdbg << "start";
 
     QVBoxLayout* main_layout = new QVBoxLayout();
     main_layout->setContentsMargins(1, 1, 1, 1);
@@ -149,14 +149,14 @@ void DBFilterWidget::updateChildWidget()
 
 void DBFilterWidget::toggleVisible()
 {
-    logdbg << "DBFilterWidget: toggleVisible";
+    logdbg << "start";
     filter_.widgetVisible(!filter_.widgetVisible());
     child_->setVisible(filter_.widgetVisible());
 }
 
 void DBFilterWidget::toggleAnd()
 {
-    logdbg << "DBFilterWidget: toggleAnd";
+    logdbg << "start";
 
     // checked is or is false
     // unchecked is and is true
@@ -168,7 +168,7 @@ void DBFilterWidget::toggleAnd()
 
 void DBFilterWidget::toggleActive()
 {
-    logdbg << "DBFilterWidget: toggleActive";
+    logdbg << "start";
     filter_.setActive(active_checkbox_->checkState() == Qt::Checked);
 
     emit possibleFilterChange();
@@ -176,7 +176,7 @@ void DBFilterWidget::toggleActive()
 
 void DBFilterWidget::update(void)
 {
-    logdbg << "DBFilterWidget: update";
+    logdbg << "start";
 
     visible_checkbox_->setText(filter_.getName().c_str());
 
@@ -209,7 +209,7 @@ void DBFilterWidget::expand()
 
 void DBFilterWidget::possibleSubFilterChange()
 {
-    logdbg << "DBFilterWidget: possibleSubFilterChange";
+    logdbg << "start";
     emit possibleFilterChange();
 }
 
@@ -226,7 +226,7 @@ void DBFilterWidget::deleteFilter() { emit deleteFilterSignal(&filter_); }
 
 void DBFilterWidget::filterEditSlot()
 {
-    logdbg << "DBFilterWidget: filterEditSlot";
+    logdbg << "start";
     emit filterEdit(&filter_);
 }
 

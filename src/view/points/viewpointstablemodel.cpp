@@ -55,7 +55,7 @@ ViewPointsTableModel::ViewPointsTableModel(ViewManager& view_manager)
 
 void ViewPointsTableModel::loadViewPoints()
 {
-    loginf << "ViewPointsTableModel: loadViewPoints";
+    loginf << "start";
 
     beginResetModel();
 
@@ -85,7 +85,7 @@ void ViewPointsTableModel::loadViewPoints()
 }
 void ViewPointsTableModel::addViewPoints(const std::vector <nlohmann::json>& viewpoints)
 {
-    loginf << "ViewPointsTableModel: loadViewPoints";
+    loginf << "start";
 
     beginResetModel();
 
@@ -101,7 +101,7 @@ void ViewPointsTableModel::addViewPoints(const std::vector <nlohmann::json>& vie
 
 void ViewPointsTableModel::clearViewPoints()
 {
-    loginf << "ViewPointsTableModel: clearViewPoints";
+    loginf << "start";
 
     beginResetModel();
 
@@ -115,7 +115,7 @@ void ViewPointsTableModel::clearViewPoints()
 
     endResetModel();
 
-    loginf << "ViewPointsTableModel: clearViewPoints: done";
+    loginf << "done";
 }
 
 int ViewPointsTableModel::rowCount(const QModelIndex& parent) const
@@ -138,14 +138,14 @@ QVariant ViewPointsTableModel::data(const QModelIndex& index, int role) const
     case Qt::DisplayRole:
     case Qt::EditRole:
     {
-        logdbg << "ViewPointsTableModel: data: display role: row " << index.row() << " col " << index.column();
+        logdbg << "display role: row " << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
         assert ((unsigned int)index.row() < view_points_.size());
 
         const ViewPoint& vp = view_points_.at(index.row());
 
-        logdbg << "ViewPointsTableModel: data: got key " << view_points_.at(index.row()).id();
+        logdbg << "got key " << view_points_.at(index.row()).id();
 
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -245,7 +245,7 @@ bool ViewPointsTableModel::setData(const QModelIndex& index, const QVariant &val
     {
         unsigned int id = getIdOf(index);
 
-        loginf << "ViewPointsTableModel: setData: row " << index.row() << " col " << index.column()
+        loginf << "row " << index.row() << " col " << index.column()
                << " id " << id << " '" << value.toString().toStdString() << "'";
 
         //assert (id < view_points_.size());
@@ -282,7 +282,7 @@ bool ViewPointsTableModel::setData(const QModelIndex& index, const QVariant &val
 
 bool ViewPointsTableModel::updateTableColumns()
 {
-    loginf << "ViewPointsTableModel: updateTableColumns";
+    loginf << "start";
 
     bool changed = false;
 
@@ -293,7 +293,7 @@ bool ViewPointsTableModel::updateTableColumns()
         assert (data.is_object());
         for (auto& j_it : data.get<json::object_t>())
         {
-            logdbg << "ViewPointsTableModel: updateTableColumns: '" << j_it.first << "'";
+            logdbg << "'" << j_it.first << "'";
 
             if (j_it.second.is_object() || j_it.second.is_array()) // skip complex items
                 continue;
@@ -314,7 +314,7 @@ bool ViewPointsTableModel::updateTableColumns()
 
 void ViewPointsTableModel::updateTypes()
 {
-    loginf << "ViewPointsTableModel: updateTypes";
+    loginf << "start";
 
     QStringList old_types = types_;
     types_.clear();
@@ -333,7 +333,7 @@ void ViewPointsTableModel::updateTypes()
 
     if (types_ != old_types)
     {
-        loginf << "ViewPointsTableModel: updateTypes: changed";
+        loginf << "changed";
 
         emit typesChangedSignal(types_);
     }
@@ -342,7 +342,7 @@ void ViewPointsTableModel::updateTypes()
 
 void ViewPointsTableModel::updateStatuses()
 {
-    loginf << "ViewPointsTableModel: updateStatuses";
+    loginf << "start";
 
     QStringList old_statuses = statuses_;
     statuses_.clear();
@@ -361,7 +361,7 @@ void ViewPointsTableModel::updateStatuses()
 
     if (statuses_ != old_statuses)
     {
-        loginf << "ViewPointsTableModel: updateStatuses: changed";
+        loginf << "changed";
 
         emit statusesChangedSignal(statuses_);
     }
@@ -499,7 +499,7 @@ void ViewPointsTableModel::printViewPoints()
 
 void ViewPointsTableModel::exportViewPoints (const std::string& filename)
 {
-    loginf << "ViewPointsTableModel: exportViewPoints: filename '" << filename << "'";
+    loginf << "filename '" << filename << "'";
 
     json data;
 
@@ -530,7 +530,7 @@ void ViewPointsTableModel::exportViewPoints (const std::string& filename)
 
 //void ViewPointsTableModel::update()
 //{
-//    loginf << "ViewPointsTableModel: update";
+//    loginf << "start";
 //    beginResetModel();
 //    updateTableColumns();
 //    endResetModel();
@@ -562,7 +562,7 @@ void ViewPointsTableModel::setStatus (const QModelIndex& row_index, const std::s
 
     //    unsigned int id = getIdOf(index);
     //    assert (id < view_points_.size());
-    //    loginf << "ViewPointsTableModel: setStatus: id " << id << " status " << value;
+    //    loginf << "id " << id << " status " << value;
     //    view_points_.at(id).data()["status"] = value;
     //    view_points_.at(id).dirty(true);
 
