@@ -72,7 +72,7 @@ void ASTERIXDecodeJob::run_impl()
 
     if (!obsolete_)
     {
-        loginf << "ASTERIXDecodeJob: waiting for last data to be fetched...";
+        loginf << "waiting for last data to be fetched...";
 
         //wait until data is fetched
         while (!extracted_data_.empty())

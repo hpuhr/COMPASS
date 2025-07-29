@@ -283,7 +283,7 @@ bool SectionContent::loadOnDemand()
     //if the task result is locked we should never give an opportunity to load on demand content
     assert(!isLocked());
 
-    loginf << "Loading on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
+    loginf << "loading on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
 
     assert(isOnDemand());
     assert(!isComplete());

@@ -818,7 +818,7 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     bool debug_target  = general_debug && reconstructor_.task().debugSettings().debugUTN(refs.utn);
 
     if(settings_.activeVerbosity() > 0 || debug_target) 
-        loginf << "ReferenceCalculator: reconstructMeasurements [UTN = " << refs.utn << "]";
+        loginf << "[UTN = " << refs.utn << "]";
 
     std::vector<kalman::KalmanUpdate> updates;
 
@@ -1012,7 +1012,7 @@ bool ReferenceCalculator::shallAddAnnotationData() const
 */
 void ReferenceCalculator::createAnnotations()
 {
-    loginf << "Creating annotations from " << references_.size() << " reference(s)";
+    loginf << "creating annotations from " << references_.size() << " reference(s)";
 
     if (references_.empty())
         return;
@@ -1027,7 +1027,7 @@ void ReferenceCalculator::createAnnotations()
         if (!ref.second.annotations.hasAnnotations())
             continue;
 
-        loginf << "Creating annotation for UTN " << ref.second.utn;
+        loginf << "creating annotation for UTN " << ref.second.utn;
 
         auto vp   = task.getDebugViewpointForUTN(ref.second.utn);
         auto anno = vp->annotations().getOrCreateAnnotation("Final Reconstruction");

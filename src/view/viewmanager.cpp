@@ -318,7 +318,7 @@ std::pair<bool, std::string> ViewManager::loadViewPoints(nlohmann::json json_obj
         //reload viewpoints
         loadViewPoints();
 
-        loginf << "ViewManager::loadViewPoints: imported " << std::to_string(view_points.size()) << " view points";
+        loginf << "imported " << std::to_string(view_points.size()) << " view points";
     }
     catch (const std::exception& ex)
     {

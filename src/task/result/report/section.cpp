@@ -770,7 +770,7 @@ size_t Section::numContents(SectionContentType type) const
 */
 void Section::createContentWidget(bool preload_ondemand_contents)
 {
-    loginf << "Creating content widget for section '" << name() << "'";
+    loginf << "creating content widget for section '" << name() << "'";
 
     assert (!content_widget_container_);
 

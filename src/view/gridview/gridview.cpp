@@ -295,7 +295,7 @@ void GridView::updateSettings(const std::string& dbo, const std::string& name)
 
     if (is_empty)
     {
-        loginf << "Settings distributed variable to empty";
+        loginf << "settings distributed variable to empty";
 
         //set special settings for empty variable
         setValueType(grid2d::ValueType::ValueTypeCountValid, false);

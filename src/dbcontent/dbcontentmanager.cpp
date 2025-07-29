@@ -1670,8 +1670,6 @@ void DBContentManager::resizeTargetListWidget()
  */
 //void DBContentManager::updateMetaVarNames()
 //{
-//    loginf << "DBContentManager::updateMetaVarNames";
-
 //    //std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> tmp_meta_variables = std::move(meta_variables_);
 //    std::map<std::string, std::unique_ptr<dbContent::MetaVariable>> tmp_meta_variables;
 

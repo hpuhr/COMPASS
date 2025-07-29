@@ -105,7 +105,7 @@ bool ASTERIXPCAPDecoder::checkFile(ASTERIXImportFileInfo& file_info,
             memcpy(section.raw_data.data(), d.second.data.data(), n * sizeof(char));
         }
 
-        loginf << "Adding section '" << section.id << "': "
+        loginf << "adding section '" << section.id << "': "
                << "total size = " << section.total_size_bytes << " " 
                << "read size = " << section.raw_data.size();
 

@@ -270,7 +270,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
     assert (num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        loginf << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
+        loginf << "'" << name_ << "': utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_calc_errors " << num_pos_calc_errors

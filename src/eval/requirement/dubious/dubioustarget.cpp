@@ -392,7 +392,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTarget::evaluate (co
         detail.is_dubious = false;
     }
 
-    //        loginf << "EvaluationRequirementDubiousTarget '" << name_ << "': evaluate: utn " << target_data.utn_
+    //        loginf << "'" << name_ << "': utn " << target_data.utn_
     //               << " is_dubious_ " << track_detail.is_dubious_
     //               << " num_pos_inside_dubious_ " << track_detail.num_pos_inside_dubious_
     //               << " num_pos_inside_ " << track_detail.num_pos_inside_;

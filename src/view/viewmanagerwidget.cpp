@@ -185,7 +185,7 @@ void ViewManagerWidget::update()
 
 //    std::map<std::string, ViewContainer*> containers = view_manager_.getContainers();
 
-//    // loginf  << "ViewManagerWidget: update size containers " << containers.size();
+//    // loginf  << "update size containers " << containers.size();
 
 //    std::map<std::string, ViewContainer*>::iterator it;
 //    for (it = containers.begin(); it != containers.end(); it++)

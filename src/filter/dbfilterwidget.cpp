@@ -288,7 +288,7 @@ int DBFilterWidget::columnWidth(int layout_column) const
         {
             max_width = litem->widget()->sizeHint().width();
             //if (dynamic_cast<QLabel*>(litem->widget()))
-            //    loginf << "Scanned filter row '" << dynamic_cast<QLabel*>(litem->widget())->text().toStdString() << "'";
+            //    loginf << "scanned filter row '" << dynamic_cast<QLabel*>(litem->widget())->text().toStdString() << "'";
         }
     }
 

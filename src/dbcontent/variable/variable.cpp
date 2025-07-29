@@ -219,7 +219,7 @@ bool Variable::operator==(const Variable& var)
 
 void Variable::print() const
 {
-    loginf << "dbo " << Configurable::getParent().instanceId() << " id " << name_
+    loginf << "dbcont " << Configurable::getParent().instanceId() << " id " << name_
            << " data type " << data_type_str_;
 }
 

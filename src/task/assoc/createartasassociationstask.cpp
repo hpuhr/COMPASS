@@ -485,8 +485,7 @@ float CreateARTASAssociationsTask::associationDubiousCloseTimePast() const
 void CreateARTASAssociationsTask::associationDubiousCloseTimePast(
         float association_dubious_close_time_past)
 {
-    loginf << "CreateARTASAssociationsTask:: associationDubiousCloseTimePast: "
-           << association_dubious_close_time_past;
+    loginf << association_dubious_close_time_past;
 
     settings_.association_dubious_close_time_past_ = association_dubious_close_time_past;
 }

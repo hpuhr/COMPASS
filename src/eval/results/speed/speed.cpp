@@ -359,8 +359,7 @@ void JoinedSpeed::accumulateSingleResult(const std::shared_ptr<Single>& single_r
 */
 boost::optional<double> JoinedSpeed::computeResult_impl() const
 {
-    loginf << "start"
-            << " num_pos " << num_pos_
+    loginf << " num_pos " << num_pos_
             << " num_no_ref " << num_no_ref_
             << " num_no_tst_value " << num_no_tst_value_
             << " num_comp_failed " << num_comp_failed_

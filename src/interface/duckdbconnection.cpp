@@ -75,8 +75,6 @@ DuckDBInstance* DuckDBConnection::duckDBInstance()
  */
 Result DuckDBConnection::connect_impl()
 {
-    //loginf << "DuckDBConnection: connecting...";
-
     auto duck_db = duckDBInstance();
 
     assert(duck_db->dbOpen());
@@ -95,8 +93,6 @@ Result DuckDBConnection::connect_impl()
  */
 void DuckDBConnection::disconnect_impl()
 {
-    //loginf << "DuckDBConnection: disconnecting...";
-
     duckdb_disconnect(&connection_);
 
     connection_ = nullptr;

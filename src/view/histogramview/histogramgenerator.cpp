@@ -162,7 +162,7 @@ void HistogramGenerator::update()
  */
 bool HistogramGenerator::select(unsigned int bin0, unsigned int bin1)
 {
-    loginf << "HistogramGenerator: Selecting...";
+    loginf << "start";
 
     if (!hasData())
         return false;

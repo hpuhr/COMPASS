@@ -672,14 +672,14 @@ bool GeoTIFF::writeGeoTIFF(const std::string& fn,
     RasterReference ref_out = ref;
 
     if (verbose)
-        loginf << "GeoTIFF: converted to raw";
+        loginf << "converted to raw";
 
     //subsample if desired
     if (subsampling > 1)
     {
         if (!GeoTIFF::subsampleRaw(raw_data, subsampling))
         {
-            logError("GeoTIFF: writeGeoTIFF: ", "subsampling failed", error);
+            logError("", "subsampling failed", error);
             return false;
         }
 

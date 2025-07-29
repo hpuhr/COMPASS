@@ -61,7 +61,7 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     connect(report_combo_, QOverload<const QString &>::of(&QComboBox::currentTextChanged),
             [ = ] (const QString& text){
 
-                loginf << "TaskResultsWidget: report_combo_ currentText '" << text.toStdString() << "'";
+                loginf << "report_combo_ currentText '" << text.toStdString() << "'";
 
                 if (!text.size()) // happens on clear
                     return;
@@ -250,7 +250,7 @@ void TaskResultsWidget::updateResults(const std::string& selected_result)
 
     report_combo_->blockSignals(false);
 
-    loginf << "setReport";
+    loginf << "set report";
     setReport(current_report_name_);
 }
 

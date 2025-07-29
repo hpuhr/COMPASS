@@ -2127,7 +2127,7 @@ Result DBInterface::deleteResult(const TaskResult& result,
         for (size_t i = 0; i < n; ++i)
             ids_to_remove.push_back(id_vector.get(i));
 
-        loginf << "Deleting " << ids_to_remove.size() << " old result(s)";
+        loginf << "deleting " << ids_to_remove.size() << " old result(s)";
 
         //delete old result(s)
         for (auto old_id : ids_to_remove)

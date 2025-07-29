@@ -180,12 +180,12 @@ Result DBInstance::openInternal(const std::string& file_name)
  */
 void DBInstance::close()
 {
-    loginf << "DBInstance: close, db open " << db_open_;
+    loginf << "db open " << db_open_;
 
     if (!dbOpen())
         return;
 
-    loginf << "DBInstance: closing...";
+    loginf << "";
 
     //destroy connections
     if (default_connection_)

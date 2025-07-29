@@ -778,11 +778,11 @@ void COMPASS::init()
 
 void COMPASS::shutdown()
 {
-    loginf << "COMPASS: database shutdown";
+    loginf << "shutdown";
 
     if (app_state_ == AppState::Shutdown)
     {
-        logerr << "COMPASS: already shut down";
+        logerr << "already shut down";
         return;
     }
 

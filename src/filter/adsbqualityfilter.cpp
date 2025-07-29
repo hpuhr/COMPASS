@@ -76,7 +76,7 @@ ADSBQualityFilter::~ADSBQualityFilter() {}
 
 bool ADSBQualityFilter::filters(const std::string& dbo_type)
 {
-    loginf << "ADSBQualityFilter: filters " << dbo_type << " " << (dbo_type == "CAT021");
+    loginf << dbo_type << " " << (dbo_type == "CAT021");
 
     return dbo_type == "CAT021";
 }

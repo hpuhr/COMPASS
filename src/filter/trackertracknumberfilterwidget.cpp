@@ -69,7 +69,7 @@ void TrackerTrackNumberFilterWidget::update()
 
             addNameValuePair(ds_name + " " + String::lineStrFrom(line_it.first) + " Track Number IN", value_edit);
 
-            //loginf << "Adding track number filter for '" << (ds_name + " " + String::lineStrFrom(line_it.first)) << "'";
+            //loginf << "adding track number filter for '" << (ds_name + " " + String::lineStrFrom(line_it.first)) << "'";
         }
     }
 

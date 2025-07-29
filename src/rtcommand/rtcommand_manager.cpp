@@ -55,7 +55,10 @@ RTCommandManager::RTCommandManager()
 
 /**
  */
-RTCommandManager::~RTCommandManager() { loginf << "start"; }
+RTCommandManager::~RTCommandManager() 
+{
+     loginf << "start"; 
+}
 
 /**
  */

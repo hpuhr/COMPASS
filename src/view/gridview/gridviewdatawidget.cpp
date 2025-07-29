@@ -201,7 +201,7 @@ void GridViewDataWidget::processStash(const VariableViewStash<double>& stash)
 
     assert(ok);
 
-    loginf << "Created grid of " << grid_->numCellsX() << "x" << grid_->numCellsY();
+    loginf << "created grid of " << grid_->numCellsX() << "x" << grid_->numCellsY();
 
     size_t num_null_values = 0;
 

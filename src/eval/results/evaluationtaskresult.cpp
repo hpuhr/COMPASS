@@ -145,7 +145,7 @@ Result EvaluationTaskResult::update_impl(UpdateState state)
     if (state == UpdateState::FullUpdateNeeded ||
         state == UpdateState::Locked)
     {
-        loginf << "Running full update";
+        loginf << "running full update";
         res = calculator_->evaluate(true);
     }
     else if (state == UpdateState::PartialUpdateNeeded)
@@ -155,12 +155,12 @@ Result EvaluationTaskResult::update_impl(UpdateState state)
 
         if (needs_recompute)
         {
-            loginf << "Running initial full update";
+            loginf << "running initial full update";
             res = calculator_->evaluate(true);
         }
         else
         {
-            loginf << "Running partial update";
+            loginf << "running partial update";
             calculator_->updateResultsToChanges();
         }
     }
@@ -234,7 +234,7 @@ namespace helpers
     {
         auto info = singleResultContentProperties(content);
 
-        loginf << "obtainResult: Obtaining result for" 
+        loginf << "obtaining result for" 
                << " utn " << info.first 
                << " layer " << info.second.sec_layer_name
                << " group " << info.second.req_group_name
@@ -260,7 +260,7 @@ namespace helpers
     {
         auto info = joinedResultContentProperties(content);
 
-        loginf << "obtainResult: Obtaining result for" 
+        loginf << "obtaining result for" 
                << " layer " << info.sec_layer_name
                << " group " << info.req_group_name
                << " req " << info.req_name;
@@ -448,7 +448,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
         auto info = helpers::joinedResultContentProperties(table);
         auto utn  = helpers::utnFromTable(table, row);
         
-        loginf << "Context menu requested for utn " << utn;
+        loginf << "context menu requested for utn " << utn;
 
         if (calculator_ && !isLocked())
         {
@@ -481,7 +481,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
         //evaluation target table
         auto utn  = helpers::utnFromTable(table, row);
 
-        loginf << "Context menu requested for utn " << utn;
+        loginf << "context menu requested for utn " << utn;
 
         if (calculator_ && !isLocked())
         {

@@ -114,13 +114,13 @@ Result DBConnection::connect()
 void DBConnection::disconnect()
 {
     if (verbose_)
-        loginf << "DBConnection: disconnecting, connected " << connected_;
+        loginf << "connected " << connected_;
 
     if (!connected_)
         return;
 
     if (verbose_)
-        loginf << "DBConnection: disconnecting...";
+        loginf << "";
 
     //close any active reader
     stopRead();

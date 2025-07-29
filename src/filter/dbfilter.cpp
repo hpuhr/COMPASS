@@ -165,7 +165,7 @@ std::string DBFilter::getConditionString(const std::string& dbcontent_name, bool
 
     }
 
-    loginf << "DBFilter " << instanceId() << ": getConditionString: object " << dbcontent_name
+    loginf << instanceId() << ": dbcont " << dbcontent_name
            << " here '" << ss.str() << "' first " << first;
 
     return ss.str();

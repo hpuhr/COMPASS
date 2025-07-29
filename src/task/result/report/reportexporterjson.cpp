@@ -182,14 +182,14 @@ Result ReportExporterJSON::exportContentToJSON(SectionContent& content,
     //add to parent section's contents
     if (res_json.result().is_object())
     {
-        //loginf << "Adding content to parent " << parent->name();
+        //loginf << "adding content to parent " << parent->name();
 
         //add single json content
         contents.push_back(res_json.result());
     }
     else // array
     {
-        //loginf << "Adding " << res_json.result().size() << " content(s) to parent " << parent->name();
+        //loginf << "adding " << res_json.result().size() << " content(s) to parent " << parent->name();
 
         //add multiple json contents
         for (const auto& it : res_json.result())

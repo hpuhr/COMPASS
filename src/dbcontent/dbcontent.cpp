@@ -323,7 +323,7 @@ Variable& DBContent::getKeyVariable()
     {
         if (var_it.second->isKey())
         {
-            loginf << "DBContent " << name() << ": getKeyVariable: returning first found var "
+            loginf << name() << ": returning first found var "
                    << var_it.first;
             return *var_it.second.get();
         }
@@ -848,7 +848,7 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 
     if (!isLoading())  // is last one
     {
-        loginf << "DBContent: " << name_ << " finalizeReadJobDoneSlot: loading done";
+        loginf << name() << ": loading done";
         dbcont_manager_.loadingDone(*this);
     }
 }

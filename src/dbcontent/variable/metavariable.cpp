@@ -140,7 +140,7 @@ void MetaVariable::set(Variable& var)
 {
     string dbcontent_name = var.dbObject().name();
 
-    loginf << "MetaVariable " << name_ << ": set: dbo " << dbcontent_name << " name " << var.name();
+    loginf << name_ << ": dbcont " << dbcontent_name << " name " << var.name();
 
     if (existsIn(dbcontent_name))
         removeVariable(dbcontent_name);
@@ -150,7 +150,7 @@ void MetaVariable::set(Variable& var)
 
 void MetaVariable::removeVariable(const std::string& dbcontent_name)
 {
-    loginf << "MetaVariable " << name_ << ": removeVariable: dbo " << dbcontent_name;
+    loginf << name_ << ": dbcont " << dbcontent_name;
     assert(existsIn(dbcontent_name));
     delete definitions_.at(dbcontent_name);
     definitions_.erase(dbcontent_name);
@@ -161,7 +161,7 @@ void MetaVariable::removeVariable(const std::string& dbcontent_name)
 
 void MetaVariable::addVariable(const std::string& dbcontent_name, const std::string& dbovariable_name)
 {
-    loginf << "MetaVariable " << name_ << ": addVariable: dbo " << dbcontent_name << " varname "
+    loginf << name_ << ": dbcont " << dbcontent_name << " varname "
            << dbovariable_name;
 
     assert(!existsIn(dbcontent_name));
@@ -307,7 +307,7 @@ Variable::Representation MetaVariable::representation()
 
 void MetaVariable::removeOutdatedVariables()
 {
-    loginf << "MetaVariable " << name() << ": removeOutdatedVariables";
+    loginf << name();
 
     bool delete_var;
 

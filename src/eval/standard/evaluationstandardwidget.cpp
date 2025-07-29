@@ -177,7 +177,7 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 
 void EvaluationStandardWidget::addGroupSlot()
 {
-    loginf << "EvaluationStandardWidget " << standard_.name() << ": addGroupSlot";
+    loginf << standard_.name();
 
     bool ok;
     QString text =
@@ -211,13 +211,13 @@ void EvaluationStandardWidget::addGroupSlot()
         model().endReset();
         expandAll();
 
-        loginf << "EvaluationRequirementGroup " << standard_.name() << ": addGroupSlot: added " << name;
+         << "EvaluationRequirementGroup " << standard_.name() << ": addGroupSlot: added " << name;
     }
 }
 
 void EvaluationStandardWidget::deleteGroupSlot(Group& group)
 {
-    loginf << "EvaluationRequirementGroup " << group.name() << ": deleteGroupSlot";
+    loginf << standard_.name();
 
     standard_.removeGroup (group.name());
 
@@ -227,7 +227,7 @@ void EvaluationStandardWidget::deleteGroupSlot(Group& group)
 
 void EvaluationStandardWidget::addRequirementSlot(Group& group)
 {
-    loginf << "EvaluationRequirementGroup " << group.name() << ": addRequirementSlot";
+    loginf << standard_.name();
 
     QAction* action = dynamic_cast<QAction*>(QObject::sender());
     assert (action);
@@ -237,7 +237,7 @@ void EvaluationStandardWidget::addRequirementSlot(Group& group)
 
     string class_id = data.toString().toStdString();
 
-    loginf << "EvaluationRequirementGroup " << group.name() << ": addRequirementSlot: class_id " << class_id;
+     << "EvaluationRequirementGroup " << group.name() << ": addRequirementSlot: class_id " << class_id;
 
     bool ok;
     QString text =
@@ -282,7 +282,7 @@ void EvaluationStandardWidget::addRequirementSlot(Group& group)
     if (!text.isEmpty())
         req_short_name = text.toStdString();
 
-    loginf << "EvaluationRequirementGroup " << group.name() << ": addRequirementSlot: class_id " << class_id
+    loginf << group.name() << ": class_id " << class_id
            << " req_name '" << req_name << "' req_short_name '" << req_short_name << "'";
 
     if (req_name.size() && req_short_name.size())
@@ -305,7 +305,7 @@ void EvaluationStandardWidget::addRequirementSlot(Group& group)
 
 void EvaluationStandardWidget::deleteRequirementSlot(Group& group, EvaluationRequirement::BaseConfig& req)
 {
-    loginf << "EvaluationRequirementGroup " << group.name() << ": deleteRequirementSlot";
+    loginf << group.name();
 
     QAction* action = dynamic_cast<QAction*>(QObject::sender());
     assert (action);

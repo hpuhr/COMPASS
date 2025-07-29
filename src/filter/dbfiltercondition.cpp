@@ -160,7 +160,7 @@ std::string DBFilterCondition::getConditionString(const std::string& dbcontent_n
     }
 
     if (ss.str().size())
-        loginf << "DBFilterCondition " << instanceId() << ": getConditionString: '" << ss.str()
+        loginf << instanceId() << ": '" << ss.str()
                << "'";
 
     return ss.str();

@@ -178,7 +178,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     bool has_extra_test_data = num_extra;
 
 //    if (!ignore && test_data_only)
-//        loginf << "EvaluationRequirementResultExtraData '" << name_ << "': evaluate: utn " << target_data.utn_
+//        loginf << "'" << name_ << "': utn " << target_data.utn_
 //               << " not ignored tdo, ref " << num_ref_inside << " num_ok " << num_ok << " num_extra " << num_extra;
 
     return make_shared<EvaluationRequirementResult::SingleExtraData>(

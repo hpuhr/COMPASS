@@ -1370,7 +1370,7 @@ bool KalmanChain::reestimate(UpdateStats* stats)
     }
 
     if (settings_.verbosity >= 2 && !is_last)
-        loginf << "Refreshed " << reestimations << " measurement(s)";
+        loginf << "refreshed " << reestimations << " measurement(s)";
 
     //had to remove error-step updates?
     bool ok = tbr.empty();

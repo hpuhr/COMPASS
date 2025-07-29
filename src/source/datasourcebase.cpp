@@ -134,7 +134,7 @@ void DataSourceBase::removeShortName()
 
 void DataSourceBase::shortName(const std::string& short_name)
 {
-    loginf << "DataSourceBase " << name_ << ": shortName: " << short_name;
+    loginf << name_ << ": short_name " << short_name;
 
     has_short_name_ = short_name.size();
     this->short_name_ = short_name;

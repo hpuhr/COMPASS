@@ -660,7 +660,7 @@ void ASTERIXImportTask::testFileDecoding()
     if (!decoder_)
         return;
 
-    loginf << "Checking decoding with decoder " << decoder_->name();
+    loginf << "checking decoding with decoder " << decoder_->name();
 
     file_decoding_tested_ = false;
 
@@ -792,7 +792,7 @@ void ASTERIXImportTask::stop()
         QThread::msleep(1);
     }
 
-    loginf << "ASTERIXImportTask: stop done";
+    loginf << "done";
 }
 
 /**
@@ -1102,7 +1102,7 @@ void ASTERIXImportTask::mapJSONDoneSlot()
     //     {
     //         try
     //         {
-    //             //loginf << "ASTERIXImportTask: time stamp calc lambda: start";
+    //             //loginf << "time stamp calc lambda: start";
 
     //             ts_calculator_.calculate(current_source_name,
     //                                      settings.date_, settings.reset_date_between_files_,

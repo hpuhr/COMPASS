@@ -121,7 +121,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
                                                      const std::string& section,
                                                      const Content& content)
 {
-    loginf << "Exporting result '" << result.name() << "'";
+    loginf << "exporting result '" << result.name() << "'";
 
     num_sections_exported_ = 0;
     done_                  = false;
@@ -213,7 +213,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
         return Result::failed("Exporting report failed: " + std::string(ex.what())); 
     }
 
-    loginf << "Exporting result '" << result.name() << "' succeeded";
+    loginf << "exporting result '" << result.name() << "' succeeded";
 
     done_ = true;
     emit progressChanged();
@@ -253,13 +253,13 @@ Result ReportExporter::visitSection(Section& section,
     //skip section?
     if (!section.exportEnabled(exportMode()))
     {
-        loginf << "Skipping, section '" << section.id() << "' disabled for export";
+        loginf << "skipping, section '" << section.id() << "' disabled for export";
         return Result::succeeded();
     }
 
-    //loginf << "Exporting section '" << section.id() << "'";
+    //loginf << "exporting section '" << section.id() << "'";
 
-    setStatus("Exporting section '" + section.name() + "'");
+    setStatus("exporting section '" + section.name() + "'");
 
     //export section first
     auto res = exportSection_impl(section, 
@@ -319,17 +319,17 @@ Result ReportExporter::visitContent(SectionContent& content, bool is_root_sectio
     //skip content?
     if (!content.exportEnabled(exportMode()))
     {
-        loginf << "Skipping, content '" << content.id() << "' disabled for export";
+        loginf << "skipping, content '" << content.id() << "' disabled for export";
         return Result::succeeded();
     }
 
     if (content.isLocked())
     {
-        loginf << "Skipping, content '" << content.id() << "' locked";
+        loginf << "skipping, content '" << content.id() << "' locked";
         return Result::succeeded();
     }
 
-    //loginf << "Exporting content '" << content.id() << "'";
+    //loginf << "exporting content '" << content.id() << "'";
 
     //load content?
     if (content.isOnDemand() && !content.loadOnDemandIfNeeded())

@@ -35,7 +35,7 @@ class StringRepresentationComboBox : public QComboBox
   public slots:
     void changedSlot()
     {
-        loginf << "StringRepresentationComboBox: changed " << currentText().toStdString();
+        loginf << currentText().toStdString();
 
         representation_ = representation();
         representation_str_ = dbContent::Variable::representationToString(representation_);

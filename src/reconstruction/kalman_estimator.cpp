@@ -679,7 +679,7 @@ void KalmanEstimator::kalmanInterfaceReinit(kalman::KalmanUpdate& update,
                                             const Measurement& mm)
 {
     if (settings_.verbosity > 0)
-        loginf << "Reinitializing kalman filter at t = " << mm.t;
+        loginf << "reinitializing kalman filter at t = " << mm.t;
 
     //reinit kalman state
     kalman_interface_->kalmanInit(update.state, mm, defaultUncert(mm), settings_.Q_var);
@@ -698,7 +698,7 @@ kalman::KalmanError KalmanEstimator::kalmanInterfaceStep(kalman::KalmanUpdate& u
     if (err != kalman::KalmanError::NoError)
     {
         if (settings_.verbosity > 0)
-            logwrn << "Kalman step failed @ t=" << mm.t << " (ErrCode" << (int)err << ")";
+            logwrn << "kalman step failed @ t=" << mm.t << " (ErrCode" << (int)err << ")";
         return err;
     }
 
@@ -734,7 +734,7 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
         kalman_interface_->stateVecX(update.state);
 
         if (settings_.verbosity > 1)
-            loginf << "Changed map projection @t=" << update.t;
+            loginf << "rhanged map projection @t=" << update.t;
 
         step_info_.proj_changed = true;
         update.proj_changed = true;
