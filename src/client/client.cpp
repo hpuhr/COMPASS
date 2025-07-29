@@ -238,7 +238,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     if (import_count > 1)
     {
-        logerr << "COMPASSClient: unable run multiple ASTERIX import operations at the same time";
+        logerr << "unable run multiple ASTERIX import operations at the same time";
         return;
     }
 
@@ -247,7 +247,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     //    if (import_json_filename.size() && !import_json_schema.size())
     //    {
-    //        loginf << "COMPASSClient: schema name must be set for JSON import";
+    //        loginf << "schema name must be set for JSON import";
     //        return;
     //    }
 
@@ -265,7 +265,7 @@ bool Client::run ()
 
     num_threads = tbb::task_scheduler_init::default_num_threads();;
 
-    loginf << "COMPASSClient: started with " << num_threads << " threads (tbb old)";
+    loginf << "started with" << num_threads << " threads (tbb old)";
     tbb::task_scheduler_init init {num_threads};
 
 #else
@@ -273,10 +273,10 @@ bool Client::run ()
 
     tbb::global_control global_limit(tbb::global_control::max_allowed_parallelism, num_threads);
 
-    loginf << "COMPASSClient: started with " << num_threads << " threads";
+    loginf << "started with" << num_threads << " threads";
 #endif
 
-    loginf << "COMPASSClient: qt ideal thread count " << QThread::idealThreadCount()
+    loginf << "qt ideal thread count" << QThread::idealThreadCount()
            << " max thread count " << QThreadPool::globalInstance()->maxThreadCount()
            << " setting num_threads " << num_threads;
 
@@ -316,7 +316,7 @@ bool Client::run ()
         RTCommandManager::open_port_ = true; // has to be done before COMPASS ctor is called
     }
 
-    loginf << "COMPASSClient: creating COMPASS instance...";
+    loginf << "creating COMPASS instance...";
 
     //!this should be the first call to COMPASS instance!
     try
@@ -386,7 +386,7 @@ bool Client::run ()
         return false;
     }
     
-    loginf << "COMPASSClient: created COMPASS instance";
+    loginf << "created COMPASS instance";
 
     if (expert_mode_)
         COMPASS::instance().expertMode(true);
@@ -593,7 +593,7 @@ bool Client::run ()
 
 Client::~Client()
 {
-    loginf << "Client: destructor";
+    loginf << "destructor";
 }
 
 bool Client::notify(QObject* receiver, QEvent* event)
@@ -687,15 +687,15 @@ void Client::checkAndSetupConfig()
         cout << "COMPASSClient: initializing logger using '" << log_config_path << "'" << endl;
         Logger::getInstance().init(log_config_path, enable_event_log_);
 
-        loginf << "COMPASSClient: startup version " << VERSION;
+        loginf << "startup version" << VERSION;
         string config_version = config.getString("version");
-        loginf << "COMPASSClient: configuration version " << config_version;
+        loginf << "configuration version" << config_version;
 
         ConfigurationManager::getInstance().init(config.getString("main_configuration_file"));
 
         if (import_asterix_parameters_.size())
         {
-            loginf << "COMPASSClient: overriding ASTERIX import parameters";
+            loginf << "overriding ASTERIX import parameters";
             using namespace nlohmann;
 
             try {
@@ -718,14 +718,14 @@ void Client::checkAndSetupConfig()
             }
             catch (exception& e)
             {
-                logerr << "COMPASSClient: JSON parse error in '" << import_asterix_parameters_ << "'";
+                logerr << "JSON parse error in '" << import_asterix_parameters_ << "'";
                 throw e;
             }
         }
 
         if (import_gps_parameters_.size())
         {
-            loginf << "COMPASSClient: overriding gps import parameters";
+            loginf << "overriding gps import parameters";
             using namespace nlohmann;
 
             try {
@@ -748,14 +748,14 @@ void Client::checkAndSetupConfig()
             }
             catch (exception& e)
             {
-                logerr << "COMPASSClient: JSON parse error in '" << import_gps_parameters_ << "'";
+                logerr << "JSON parse error in '" << import_gps_parameters_ << "'";
                 throw e;
             }
         }
 
         if (evaluation_parameters_.size())
         {
-            loginf << "COMPASSClient: overriding evaluation parameters";
+            loginf << "overriding evaluation parameters";
             using namespace nlohmann;
 
             try {
@@ -778,14 +778,14 @@ void Client::checkAndSetupConfig()
             }
             catch (exception& e)
             {
-                logerr << "COMPASSClient: JSON parse error in '" << evaluation_parameters_ << "'";
+                logerr << "JSON parse error in '" << evaluation_parameters_ << "'";
                 throw e;
             }
         }
     }
     catch (exception& ex)
     {
-        logerr << "COMPASSClient: Caught Exception '" << ex.what() << "'";
+        logerr << "Caught Exception '" << ex.what() << "'";
         //logerr.flush();
         // assert (false);
 
@@ -794,7 +794,7 @@ void Client::checkAndSetupConfig()
     }
     catch (...)
     {
-        logerr << "COMPASSClient: Caught Exception";
+        logerr << "Caught Exception";
         //logerr.flush();
         // assert (false);
 

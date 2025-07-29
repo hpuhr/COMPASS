@@ -58,7 +58,7 @@ void UTNFilterWidget::valueEditedSlot(const QString& value)
 {
     string value_str = value.toStdString();
 
-    loginf << "UTNFilterWidget: valueEditedSlot: '" << value_str << "'";
+    loginf << "'" << value_str << "'";
 
     filter_.utns(value_str);
 }

@@ -87,7 +87,7 @@ void ModeCFilterWidget::minValueEditedSlot(const QString& value)
 {
     if (!value.size())
     {
-        loginf << "ModeCFilterWidget: minValueEditedSlot: skipping empty string";
+        loginf << "skipping empty string";
         return;
     }
 
@@ -96,7 +96,7 @@ void ModeCFilterWidget::minValueEditedSlot(const QString& value)
     float value_float = value.toFloat(&ok);
     assert (ok);
 
-    loginf << "ModeCFilterWidget: minValueEditedSlot: '" << value_float << "'";
+    loginf << "'" << value_float << "'";
 
     filter_.minValue(value_float);
 }
@@ -105,7 +105,7 @@ void ModeCFilterWidget::maxValueEditedSlot(const QString& value)
 {
     if (!value.size())
     {
-        loginf << "ModeCFilterWidget: maxValueEditedSlot: skipping empty string";
+        loginf << "skipping empty string";
         return;
     }
 
@@ -114,7 +114,7 @@ void ModeCFilterWidget::maxValueEditedSlot(const QString& value)
     float value_float = value.toFloat(&ok);
     assert (ok);
 
-    loginf << "ModeCFilterWidget: maxValueEditedSlot: '" << value_float << "'";
+    loginf << "'" << value_float << "'";
 
     filter_.maxValue(value_float);
 }

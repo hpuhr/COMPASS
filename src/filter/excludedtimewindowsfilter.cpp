@@ -50,7 +50,7 @@ bool ExcludedTimeWindowsFilter::filters(const std::string& dbo_type)
 
 std::string ExcludedTimeWindowsFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "ExcludedTimeWindowsFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbo" << dbcontent_name << " active " << active_;
 
     auto& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -87,7 +87,7 @@ std::string ExcludedTimeWindowsFilter::getConditionString(const std::string& dbc
         first = false;
     }
 
-    loginf << "ExcludedTimeWindowsFilter: getConditionString: here '" << ss.str() << "'";
+    loginf << "here '" << ss.str() << "'";
 
     return ss.str();
 }
@@ -95,7 +95,7 @@ std::string ExcludedTimeWindowsFilter::getConditionString(const std::string& dbc
 
 void ExcludedTimeWindowsFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "ExcludedTimeWindowsFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id" << class_id;
 
     throw std::runtime_error("ExcludedTimeWindowsFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -108,7 +108,7 @@ DBFilterWidget* ExcludedTimeWindowsFilter::createWidget()
 
 void ExcludedTimeWindowsFilter::checkSubConfigurables()
 {
-    logdbg << "ExcludedTimeWindowsFilter: checkSubConfigurables";
+    logdbg << "checkSubConfigurables";
 }
 
 
@@ -132,7 +132,7 @@ void ExcludedTimeWindowsFilter::saveViewPointConditions (nlohmann::json& filters
 
 void ExcludedTimeWindowsFilter::loadViewPointConditions (const nlohmann::json& filters)
 {
-    logdbg << "ExcludedTimeWindowsFilter: loadViewPointConditions: filter '" << filters.dump(4) << "'";
+    logdbg << "filter '" << filters.dump(4) << "'";
 
     assert (conditions_.size() == 0);
 

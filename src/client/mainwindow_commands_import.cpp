@@ -253,7 +253,7 @@ bool RTCommandImportASTERIXFile::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXFile: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error:" << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }
@@ -441,7 +441,7 @@ bool RTCommandImportASTERIXFiles::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXFiles: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error:" << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }
@@ -450,7 +450,7 @@ bool RTCommandImportASTERIXFiles::run_impl()
 
     for (const auto& filename : split_filenames_)
     {
-        loginf << "RTCommandImportASTERIXFiles: run_impl: file '" << filename << "'";
+        loginf << "file '" << filename << "'";
 
         assert (Files::fileExists(filename));
     }
@@ -630,7 +630,7 @@ bool RTCommandImportASTERIXPCAPFile::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXPCAPFile: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error:" << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }
@@ -799,7 +799,7 @@ bool RTCommandImportASTERIXPCAPFiles::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXPCAPFiles: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error:" << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }
@@ -808,7 +808,7 @@ bool RTCommandImportASTERIXPCAPFiles::run_impl()
 
     for (const auto& filename : split_filenames_)
     {
-        loginf << "RTCommandImportASTERIXPCAPFiles: run_impl: file '" << filename << "'";
+        loginf << "file '" << filename << "'";
 
         assert (Files::fileExists(filename));
     }
@@ -942,7 +942,7 @@ bool RTCommandImportASTERIXNetworkStart::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXFile: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error:" << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }

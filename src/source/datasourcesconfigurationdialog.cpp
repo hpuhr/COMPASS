@@ -156,7 +156,7 @@ void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& curren
 
     if (!current.isValid())
     {
-        loginf << "DataSourcesConfigurationDialog: currentRowChanged: invalid index";
+        loginf << "invalid index";
 
         edit_widget_->clear();
 
@@ -168,14 +168,14 @@ void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& curren
 
     unsigned int id = table_model_->getIdOf(source_index);
 
-    loginf << "DataSourcesConfigurationDialog: currentRowChanged: current id " << id;
+    loginf << "current id" << id;
 
     edit_widget_->showID(id);
 }
 
 void DataSourcesConfigurationDialog::newDSClickedSlot()
 {
-    loginf << "DataSourcesConfigurationDialog: newDSClickedSlot";
+    loginf << "newDSClickedSlot";
 
     create_dialog_.reset(new DataSourceCreateDialog(*this, ds_man_));
     connect(create_dialog_.get(), &DataSourceCreateDialog::doneSignal,
@@ -186,7 +186,7 @@ void DataSourcesConfigurationDialog::newDSClickedSlot()
 
 void DataSourcesConfigurationDialog::newDSDoneSlot()
 {
-    loginf << "DataSourcesConfigurationDialog: newDSDoneSlot";
+    loginf << "newDSDoneSlot";
 
     assert (create_dialog_);
 
@@ -197,7 +197,7 @@ void DataSourcesConfigurationDialog::newDSDoneSlot()
         unsigned int sac = create_dialog_->sac();
         unsigned int sic = create_dialog_->sic();
 
-        loginf << "DataSourcesConfigurationDialog: newDSDoneSlot: ds_type " << ds_type
+        loginf << "ds_type" << ds_type
                << " sac " << sac << " sic " << sic;
 
         unsigned int ds_id = Number::dsIdFrom(sac, sic);
@@ -226,7 +226,7 @@ void DataSourcesConfigurationDialog::newDSDoneSlot()
 
 void DataSourcesConfigurationDialog::importClickedSlot()
 {
-    loginf << "DataSourcesConfigurationDialog: importClickedSlot";
+    loginf << "importClickedSlot";
 
     string filename = QFileDialog::getOpenFileName(
                 this, "Import Data Sources",
@@ -255,7 +255,7 @@ void DataSourcesConfigurationDialog::deleteAllClickedSlot()
 
     if (reply == QMessageBox::Yes)
     {
-        loginf << "DataSourcesConfigurationDialog: deleteAllClickedSlot: deletion confirmed";
+        loginf << "deletion confirmed";
 
         table_model_->beginModelReset();
 
@@ -268,7 +268,7 @@ void DataSourcesConfigurationDialog::deleteAllClickedSlot()
 
 void DataSourcesConfigurationDialog::exportClickedSlot()
 {
-    loginf << "DataSourcesConfigurationDialog: exportClickedSlot";
+    loginf << "exportClickedSlot";
 
     string filename = QFileDialog::getSaveFileName(
                 this, "Export Data Sources as JSON",
@@ -276,7 +276,7 @@ void DataSourcesConfigurationDialog::exportClickedSlot()
 
     if (filename.size() > 0)
     {
-        loginf << "DataSourcesConfigurationDialog: exportClickedSlot: file '" << filename << "'";
+        loginf << "file '" << filename << "'";
 
         ds_man_.exportDataSources(filename);
     }

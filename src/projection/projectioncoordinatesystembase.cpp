@@ -63,7 +63,7 @@ double ProjectionCoordinateSystemBase::rs2gElevation(double H, double rho)
     //        elevation = asin((z - rs2g_hi_)/rho);
 
     //        //        if (rho < 50000)
-    //        //            loginf << "RS2GCoordinateSystem: rs2gElevation: z " << z << " rho " <<
+    //        //            loginf << "z" << z << " rho " <<
     //        rho << " elev " << elevation;
     //    }
 
@@ -75,7 +75,7 @@ void ProjectionCoordinateSystemBase::getGroundRange(
     double& ground_range_m, double& adjusted_altitude_m, bool debug)
 {
     if (debug)
-        loginf << "ProjectionCoordinateSystemBase: getGroundRange: slant_range_m "
+        loginf << "slant_range_m"
                << String::doubleToStringPrecision(slant_range_m, 2)
                << " has_altitude " << has_altitude
                << " altitude_m " << String::doubleToStringPrecision(altitude_m, 2);
@@ -94,7 +94,7 @@ void ProjectionCoordinateSystemBase::getGroundRange(
     adjusted_altitude_m = h_r_ + slant_range_m * sin(elev_angle_rad);
 
     if (debug)
-        loginf << "ProjectionCoordinateSystemBase: getGroundRange: has_altitude " << has_altitude
+        loginf << "has_altitude" << has_altitude
                << " elevation_m " << String::doubleToStringPrecision(elevation_m, 2)
                << " elev_angle_rad " << String::doubleToStringPrecision(elev_angle_rad, 6)
                << " ground_range_m " << String::doubleToStringPrecision(ground_range_m, 2)

@@ -45,7 +45,7 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
              DataSourceManager::data_source_types_.end(), ds_type_)
         == DataSourceManager::data_source_types_.end())
     {
-        logerr << "ConfigurationDataSource: sac/sic " << sac_ << sic_ << " ds_type '" << ds_type_
+        logerr << "sac/sic" << sac_ << sic_ << " ds_type '" << ds_type_
                << "' wrong";
     }
 
@@ -76,7 +76,7 @@ ConfigurationDataSource::~ConfigurationDataSource()
 
 void ConfigurationDataSource::setFromJSON(const json& j)
 {
-    logdbg << "ConfigurationDataSource: setFromJSON: '" << j.dump(4) << "'";
+    logdbg << "'" << j.dump(4) << "'";
 
     assert(j.contains("ds_type"));
 
@@ -121,7 +121,7 @@ DBDataSource* ConfigurationDataSource::getAsNewDBDS()
     if (!info_.is_null())
         new_ds->info(info_.dump());
 
-    loginf << "ConfigurationDataSource: getAsNewDBDS: name " << new_ds->name()
+    loginf << "name" << new_ds->name()
             << " sac/sic " << new_ds->sac() << "/" << new_ds->sic();
 
     return new_ds;

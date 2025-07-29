@@ -47,7 +47,7 @@ DBFFT* ConfigurationFFT::getAsNewDBFFT()
         new_fft->info(info_);
     }
 
-    loginf << "ConfigurationFFT: getAsNewDBDS: name " << new_fft->name()
+    loginf << "name" << new_fft->name()
             << " info '" << new_fft->info().dump() << "'";
 
     return new_fft;

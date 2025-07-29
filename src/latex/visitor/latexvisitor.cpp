@@ -89,7 +89,7 @@ void LatexVisitor::visit(const ViewPoint* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: ViewPoint id " << e->id(); 
+    loginf << "ViewPoint id" << e->id(); 
 
     const nlohmann::json& j_data = e->data();
 
@@ -176,7 +176,7 @@ void LatexVisitor::visit(TableView* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: TableView " << e->instanceId();
+    loginf << "TableView" << e->instanceId();
 
     if (ignore_table_views_)
         return;
@@ -225,11 +225,11 @@ void LatexVisitor::visit(HistogramView* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: HistogramView " << e->instanceId();
+    loginf << "HistogramView" << e->instanceId();
 
     std::string screenshot_path = report_.path()+"/screenshots";
 
-    loginf << "LatexVisitor: visit: path '" << screenshot_path << "'";
+    loginf << "path '" << screenshot_path << "'";
 
     if (!screenshot_folder_created_)
     {
@@ -264,7 +264,7 @@ void LatexVisitor::visit(HistogramView* e)
     std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
     assert (!screenshot.isNull());
 
-    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    loginf << "saving screenshot as '" << image_path << "'";
     bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
 
     if (!ret)
@@ -287,11 +287,11 @@ void LatexVisitor::visit(HistogramView* e)
 void LatexVisitor::visit(GeographicView* e)
 {
     assert (e);
-    loginf << "LatexVisitor: visit: GeographicView " << e->instanceId();
+    loginf << "GeographicView" << e->instanceId();
 
     std::string screenshot_path = report_.path()+"/screenshots";
 
-    loginf << "LatexVisitor: visit: path '" << screenshot_path << "'";
+    loginf << "path '" << screenshot_path << "'";
 
     if (!screenshot_folder_created_)
     {
@@ -341,7 +341,7 @@ void LatexVisitor::visit(GeographicView* e)
     std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
     assert (!screenshot.isNull());
 
-    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    loginf << "saving screenshot as '" << image_path << "'";
     bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
 
     if (!ret)
@@ -365,7 +365,7 @@ void LatexVisitor::visit(GeographicView* e)
         std::string overview_image_path = screenshot_path+"/"+image_prefix_+"_overview_"+e->instanceId()+".jpg";
         assert (!overview_screenshot.isNull());
 
-        loginf << "LatexVisitor: visit: saving overview screenshot as '" << overview_image_path << "'";
+        loginf << "saving overview screenshot as '" << overview_image_path << "'";
         ret = overview_screenshot.save(overview_image_path.c_str(), "JPG"); // , 50
         assert (ret);
 
@@ -384,11 +384,11 @@ void LatexVisitor::visit(ScatterPlotView* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: ScatterPlotView " << e->instanceId();
+    loginf << "ScatterPlotView" << e->instanceId();
 
     std::string screenshot_path = report_.path()+"/screenshots";
 
-    loginf << "LatexVisitor: visit: path '" << screenshot_path << "'";
+    loginf << "path '" << screenshot_path << "'";
 
     if (!screenshot_folder_created_)
     {
@@ -423,7 +423,7 @@ void LatexVisitor::visit(ScatterPlotView* e)
     std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
     assert (!screenshot.isNull());
 
-    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    loginf << "saving screenshot as '" << image_path << "'";
     bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
 
     if (!ret)
@@ -445,11 +445,11 @@ void LatexVisitor::visit(GridView* e)
 {
     assert (e);
 
-    loginf << "LatexVisitor: visit: GridView " << e->instanceId();
+    loginf << "GridView" << e->instanceId();
 
     std::string screenshot_path = report_.path()+"/screenshots";
 
-    loginf << "LatexVisitor: visit: path '" << screenshot_path << "'";
+    loginf << "path '" << screenshot_path << "'";
 
     if (!screenshot_folder_created_)
     {
@@ -482,7 +482,7 @@ void LatexVisitor::visit(GridView* e)
     std::string image_path = screenshot_path+"/"+image_prefix_+"_"+e->instanceId()+".jpg";
     assert (!screenshot.isNull());
 
-    loginf << "LatexVisitor: visit: saving screenshot as '" << image_path << "'";
+    loginf << "saving screenshot as '" << image_path << "'";
     bool ret = Files::createMissingDirectories(Files::getDirectoryFromPath(image_path));
 
     if (!ret)

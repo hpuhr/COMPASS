@@ -102,7 +102,7 @@ bool DBFilterCondition::filters(const std::string& dbcontent_name)
 
 std::string DBFilterCondition::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "DBFilterCondition: getConditionString: object " << dbcontent_name << " first " << first;
+    logdbg << "object" << dbcontent_name << " first " << first;
     assert(usable_);
 
     std::stringstream ss;
@@ -172,7 +172,7 @@ std::string DBFilterCondition::getConditionString(const std::string& dbcontent_n
  */
 void DBFilterCondition::valueChanged()
 {
-    logdbg << "DBFilterCondition: valueChanged";
+    logdbg << "valueChanged";
     assert(usable_);
     assert(edit_);
 
@@ -188,7 +188,7 @@ void DBFilterCondition::valueChanged()
         emit possibleFilterChange();
     }
 
-    loginf << "DBFilterCondition: valueChanged: value_ '" << value_ << "' invalid "
+    loginf << "value_ '" << value_ << "' invalid "
            << value_invalid_;
 
     if (value_invalid_)
@@ -213,7 +213,7 @@ std::string DBFilterCondition::getVariableName() const
 
 void DBFilterCondition::setVariableName(const std::string& variable_name)
 {
-    loginf << "DBFilterCondition: setVariableName: name '" << variable_name << "'";
+    loginf << "name '" << variable_name << "'";
 
     if (variable_name != variable_name_)
     {
@@ -272,7 +272,7 @@ void DBFilterCondition::update()
 
 void DBFilterCondition::setValue(const std::string& value)
 {
-    logdbg << "DBFilterCondition: setValue: len " << value.size();
+    logdbg << "len" << value.size();
 
     value_ = value;
 
@@ -292,13 +292,13 @@ void DBFilterCondition::reset()
 //            if (variable_)
 //            {
 //                value = variable_->getMinStringRepresentation();
-//                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+//                logdbg << "value" << value << " repr " << value;
 //            }
 //            else
 //            {
 //                assert(meta_variable_);
 //                value = meta_variable_->getMinStringRepresentation();
-//                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+//                logdbg << "value" << value << " repr " << value;
 //            }
 //        }
 //        else if (reset_value_.compare("MAX") == 0)
@@ -306,13 +306,13 @@ void DBFilterCondition::reset()
 //            if (variable_)
 //            {
 //                value = variable_->getMaxStringRepresentation();
-//                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+//                logdbg << "value" << value << " repr " << value;
 //            }
 //            else
 //            {
 //                assert(meta_variable_);
 //                value = meta_variable_->getMaxStringRepresentation();
-//                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+//                logdbg << "value" << value << " repr " << value;
 //            }
 //        }
 //    }
@@ -322,7 +322,7 @@ void DBFilterCondition::reset()
     value_ = value;
     value_invalid_ = checkValueInvalid(value_);
 
-    loginf << "DBFilterCondition: reset: value '" << value_ << " invalid " << value_invalid_;
+    loginf << "value '" << value_ << " invalid " << value_invalid_;
 
     update();
 }
@@ -340,7 +340,7 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 
     if (new_value.size() == 0)
     {
-        loginf << "DBFilterCondition: checkValueInvalid: no value, returning invalid";
+        loginf << "no value, returning invalid";
         return true;
     }
 
@@ -368,18 +368,18 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
             std::string transformed_value;
             bool null_contained;
             tie(transformed_value, null_contained) = getTransformedValue(new_value, var_it);
-            logdbg << "DBFilterCondition: valueChanged: transformed value " << transformed_value
+            logdbg << "transformed value" << transformed_value
                    << " null " << null_contained;
         }
         invalid = false;
     }
     catch (std::exception& e)
     {
-        logdbg << "DBFilterCondition: checkValueInvalid: exception thrown: " << e.what();
+        logdbg << "exception thrown:" << e.what();
     }
     catch (...)
     {
-        logdbg << "DBFilterCondition: checkValueInvalid: exception thrown";
+        logdbg << "exception thrown";
     }
 
     return invalid;
@@ -402,7 +402,7 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
         value_strings.push_back(untransformed_value);
     }
 
-    logdbg << "DBFilterCondition: getTransformedValue: in value strings '"
+    logdbg << "in value strings '"
            << boost::algorithm::join(value_strings, ",") << "'";
 
     bool null_set = find(value_strings.begin(), value_strings.end(), "NULL") != value_strings.end();
@@ -420,9 +420,9 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
             value_str =
                     variable->getValueStringFromRepresentation(value_str);  // fix representation
 
-        logdbg << "DBFilterCondition: getTransformedValue: value string " << value_str;
+        logdbg << "value string" << value_str;
 
-        logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
+        logdbg << "transformed value string" << value_str;
 
 //        if (column.dataFormat() == "")
 //            ;
@@ -431,10 +431,10 @@ std::pair<std::string, bool> DBFilterCondition::getTransformedValue(const std::s
 //        else if (column.dataFormat() == "octal")
 //            value_str = String::octStringFromInt(std::stoi(value_str));
 //        else
-//            logwrn << "DBFilterCondition: getTransformedValue: variable '" << var.name()
+//            logwrn << "variable '" << var.name()
 //                   << "' unknown format '" << column.dataFormat() << "'";
 
-//        logdbg << "DBFilterCondition: getTransformedValue: data format transformed value string "
+//        logdbg << "data format transformed value string"
 //               << value_str;
 
         if (variable->dataType() == PropertyDataType::STRING)

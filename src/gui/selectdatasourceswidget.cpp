@@ -62,7 +62,7 @@ SelectDataSourcesWidget::~SelectDataSourcesWidget()
 
 void SelectDataSourcesWidget::updateSelected(std::map<std::string, bool> selection)
 {
-    loginf << "SelectDataSourcesWidget: updateSelected: ds_type_ " << ds_type_;
+    loginf << "ds_type_" << ds_type_;
     assert (data_source_layout_);
 
     QLayoutItem* child;
@@ -100,7 +100,7 @@ void SelectDataSourcesWidget::updateSelected(std::map<std::string, bool> selecti
         checkbox->setProperty("id", ds_id);
         connect(checkbox, SIGNAL(clicked()), this, SLOT(toggleDataSourceSlot()));
 
-        loginf << "SelectDataSourcesWidget: updateSelected: got sensor " << ds_id << " name "
+        loginf << "got sensor" << ds_id << " name "
                << ds_it->name() << " active " << checkbox->isChecked();
 
         data_sources_checkboxes_[ds_id] = checkbox;
@@ -115,7 +115,7 @@ void SelectDataSourcesWidget::updateSelected(std::map<std::string, bool> selecti
 
 void SelectDataSourcesWidget::toggleDataSourceSlot()
 {
-    logdbg << "SelectDataSourcesWidget: toggleDataSource";
+    logdbg << "toggleDataSource";
 
     std::map<std::string, bool> selection;
 

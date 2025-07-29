@@ -61,7 +61,7 @@ std::tuple<bool, double, double> Transformation::distanceCart (double lat1,
                                                                double lat2, 
                                                                double lon2)
 {
-    logdbg << "Transformation: distanceCart: lat1 " << lat1 << " lon1 " << lon1 << " lat2 " << lat2 << " lon2 " << lon2;
+    logdbg << "lat1" << lat1 << " lon1 " << lon1 << " lat2 " << lat2 << " lon2 " << lon2;
 
     updateCenter(lat1, lon1);
 
@@ -143,7 +143,7 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (double lat1,
                                                                    double x_pos2, 
                                                                    double y_pos2)
 {
-    logdbg << "Transformation: wgsAddCartOffset: lat1 " << lat1 << " long1 " << lon1 << " x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
+    logdbg << "lat1" << lat1 << " long1 " << lon1 << " x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
 
     updateCenter(lat1, lon1);
 
@@ -160,7 +160,7 @@ std::tuple<bool, double, double> Transformation::wgsAddCartOffset (double lat1,
     if (!ok)
         return ret;
 
-    logdbg << "Transformation: wgsAddCartOffset: x_pos1 " << x_pos1 << " y_pos1 " << y_pos1
+    logdbg << "x_pos1" << x_pos1 << " y_pos1 " << y_pos1
            << " x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
 
     // add origin offset
@@ -233,7 +233,7 @@ FixedTransformation::~FixedTransformation() = default;
 */
 std::tuple<bool, double, double> FixedTransformation::distanceCart (double lat2, double lon2)
 {
-    logdbg << "FixedTransformation: distanceCart: lat2 " << lat2 << " long2 " << lon2;
+    logdbg << "lat2" << lat2 << " long2 " << lon2;
 
     double x_pos2, y_pos2;
     bool ok;
@@ -257,7 +257,7 @@ std::tuple<bool, double, double> FixedTransformation::distanceCart (double lat2,
 
     ret = std::tuple<bool, double, double>(true, x_pos2, y_pos2);
 
-    logdbg << "Transformation: distanceCart: p1 "
+    logdbg << "p1"
            << std::setprecision(14) << lat1_ << " / " << std::setprecision(14) << lon1_
            << " p2 "
            << std::setprecision(14) << lat2 << " / " << std::setprecision(14) << lon2
@@ -270,7 +270,7 @@ std::tuple<bool, double, double> FixedTransformation::distanceCart (double lat2,
 */
 std::tuple<bool, double, double> FixedTransformation::wgsAddCartOffset (double x_pos2, double y_pos2)
 {
-    logdbg << "FixedTransformation: wgsAddCartOffset: x_pos2 " << x_pos2 << " y_pos2 " << y_pos2;
+    logdbg << "x_pos2" << x_pos2 << " y_pos2 " << y_pos2;
 
     bool ok;
     std::tuple<bool, double, double> ret {false, 0, 0};

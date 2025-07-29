@@ -376,7 +376,7 @@ std::string Sector::colorStr()
 
 void Sector::colorStr(std::string value)
 {
-    loginf << "Sector: colorStr: '" << value << "'";
+    loginf << "'" << value << "'";
 
     color_str_ = value;
 
@@ -429,7 +429,7 @@ void Sector::setMinimumAltitude(double value)
 */
 void Sector::removeMinimumAltitude()
 {
-    loginf << "Sector: removeMinimumAltitude";
+    loginf << "removeMinimumAltitude";
 
     min_altitude_.reset();
 
@@ -462,7 +462,7 @@ void Sector::setMaximumAltitude(double value)
 */
 void Sector::removeMaximumAltitude()
 {
-    loginf << "Sector: removeMaximumAltitude";
+    loginf << "removeMaximumAltitude";
 
     max_altitude_.reset();
 
@@ -471,7 +471,7 @@ void Sector::removeMaximumAltitude()
 
 void Sector::name(const std::string& name)
 {
-    loginf << "Sector: name: '" << name << "'";
+    loginf << "'" << name << "'";
 
     name_ = name;
 
@@ -480,7 +480,7 @@ void Sector::name(const std::string& name)
 
 void Sector::layerName(const std::string& layer_name)
 {
-    loginf << "Sector: layerName: '" << layer_name << "'";
+    loginf << "'" << layer_name << "'";
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 

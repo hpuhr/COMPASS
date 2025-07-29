@@ -38,7 +38,7 @@ public slots:
         if (doing_update_)
             return;
 
-        loginf << "DSTypeSelectionComboBox: changed " << currentText().toStdString();
+        loginf << "changed" << currentText().toStdString();
 
         ds_type_ = currentText().toStdString();
 

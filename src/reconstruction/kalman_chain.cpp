@@ -592,7 +592,7 @@ void KalmanChain::insertAt(int idx,
     //         t1 = (idx < 0 || idx == lastIndex()) ? boost::posix_time::ptime() : updates_.at(idx + 1).t;
     //     }
 
-    //     loginf << "KalmanChain: insert: Inserting t = " << Utils::Time::toString(ts)
+    //     loginf << "Inserting t =" << Utils::Time::toString(ts)
     //           << " @idx " << idx << ", last_index = " << lastIndex() << " [" 
     //           << Utils::Time::toString(t0) << "," 
     //           << Utils::Time::toString(t1) << "]";
@@ -804,7 +804,7 @@ bool KalmanChain::predictMT(Measurement& mm_predicted,
                             PredictionStats* stats) const
 {
     if (thread_id >= predictors.size())
-        logerr << "KalmanChain: predictMT: thread_id " << thread_id << " >= predictors.size() " << predictors.size();
+        logerr << "thread_id" << thread_id << " >= predictors.size() " << predictors.size();
 
     assert (thread_id < predictors.size());
 
@@ -1080,7 +1080,7 @@ bool KalmanChain::reinit(int idx) const
     if (!tracker_.tracked_mm_id.has_value() || update.mm_id != tracker_.tracked_mm_id.value())
     {
         //if (settings_.verbosity > 0)
-        //    loginf << "KalmanChain: reinit: Reinit at idx=" << idx << " t=" << Utils::Time::toString(updates_[ idx ].kalman_update.t);
+        //    loginf << "Reinit at idx=" << idx << " t=" << Utils::Time::toString(updates_[ idx ].kalman_update.t);
 
         //reinit tracker
         tracker_.tracker_ptr->reset();
@@ -1146,7 +1146,7 @@ bool KalmanChain::reestimate(int idx,
     bool chain_input_mm_check = tracker_.tracker_ptr->estimator().checkPrediction(mm);
     if (!chain_input_mm_check)
     {
-        logerr << "KalmanChain: reestimate: invalid measurement retrieved\n\n"
+        logerr << "invalid measurement retrieved\n\n"
                << mm.asString() << "\n";
         assert(chain_input_mm_check);
     }
@@ -1234,7 +1234,7 @@ bool KalmanChain::reestimate(UpdateStats* stats)
 
     if (settings_.debug)
     {
-        loginf << "KalmanChain: reestimate: n_fresh = " << n_fresh;
+        loginf << "n_fresh =" << n_fresh;
 
         std::string str;
         for (int idx : fresh_indices_)
@@ -1262,11 +1262,11 @@ bool KalmanChain::reestimate(UpdateStats* stats)
         auto tstart     = updates_[ idx_start ].t;
 
         if (!is_last && settings_.verbosity >= 2)
-            loginf << "KalmanChain: reestimate: reestimating range [" << idx_start << "," << idx_end << "): "
+            loginf << "reestimating range [" << idx_start << "," << idx_end << "): "
                    << "idx cutoff = " << idx_cutoff; 
 
         if (settings_.debug)
-            loginf << "KalmanChain: reestimate: idx_start = " << idx_start << ", idx_end = " << idx_end << ", idx_cutoff = " << idx_cutoff;
+            loginf << "idx_start =" << idx_start << ", idx_end = " << idx_end << ", idx_cutoff = " << idx_cutoff;
 
         //reinit tracker
         if (idx_start == 0)
@@ -1275,7 +1275,7 @@ bool KalmanChain::reestimate(UpdateStats* stats)
             tracker_.reset();
 
             if (settings_.debug)
-                loginf << "KalmanChain: reestimate: idx = 0 => ressetting tracker";
+                loginf << "idx = 0 => ressetting tracker";
         }
         else
         {
@@ -1284,7 +1284,7 @@ bool KalmanChain::reestimate(UpdateStats* stats)
                 reinit_idx = last_valid_idx;
 
             if (settings_.debug)
-                loginf << "KalmanChain: reestimate: reinit_idx = " << reinit_idx;
+                loginf << "reinit_idx =" << reinit_idx;
 
             if (reinit_idx < 0)
             {
@@ -1364,13 +1364,13 @@ bool KalmanChain::reestimate(UpdateStats* stats)
     for (auto itr = tbr.rbegin(); itr != tbr.rend(); ++itr)
     {
         if (settings_.verbosity >= 2)
-            logwrn << "KalmanChain: reestimate: removing update " << *itr;
+            logwrn << "removing update" << *itr;
 
         removeUpdate(*itr);
     }
 
     if (settings_.verbosity >= 2 && !is_last)
-        loginf << "KalmanChain: reestimate: Refreshed " << reestimations << " measurement(s)";
+        loginf << "Refreshed" << reestimations << " measurement(s)";
 
     //had to remove error-step updates?
     bool ok = tbr.empty();

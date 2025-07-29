@@ -48,7 +48,7 @@ DBFilter::DBFilter(const std::string& class_id, const std::string& instance_id,
 
 DBFilter::~DBFilter()
 {
-    logdbg << "DBFilter: destructor: instance_id " << instanceId();
+    logdbg << "instance_id" << instanceId();
 
     widget_ = nullptr;
 
@@ -133,7 +133,7 @@ bool DBFilter::filters(const std::string& dbo_type)
         ret |= conditions_.at(cnt)->filters(dbo_type);
     }
 
-    logdbg << "DBFilter: filters: object " << dbo_type << " " << ret;
+    logdbg << "object" << dbo_type << " " << ret;
 
     return ret;
 }
@@ -177,7 +177,7 @@ void DBFilter::generateSubConfigurable(const std::string& class_id, const std::s
 
     if (class_id == "DBFilterCondition")
     {
-        logdbg << "DBFilter: generateSubConfigurable: generating condition";
+        logdbg << "generating condition";
         DBFilterCondition* condition = new DBFilterCondition(class_id, instance_id, this);
         conditions_.push_back(condition);
 
@@ -268,7 +268,7 @@ void DBFilter::loadViewPointConditions (const nlohmann::json& filters)
     for (auto& cond_it : filter.get<json::object_t>())
     {
         std::string cond_name = cond_it.first;
-        logdbg << "DBFilter: loadViewPointConditions: cond_name '"
+        logdbg << "cond_name '"
                << cond_name << "' value '" << cond_it.second.dump() << "'";
 
         assert (cond_it.second.is_string());

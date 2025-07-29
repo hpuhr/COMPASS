@@ -56,7 +56,7 @@ bool TimestampFilter::filters(const std::string& dbo_type)
 
 std::string TimestampFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "TimestampFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbo" << dbcontent_name << " active " << active_;
 
     auto& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -79,13 +79,13 @@ std::string TimestampFilter::getConditionString(const std::string& dbcontent_nam
         ss << " (" << var.dbColumnName() << " >= " << Time::toLong(min_value_)
            << " AND " << var.dbColumnName() << " <= " << Time::toLong(max_value_) << ")";
 
-        loginf << "TimestampFilter: getConditionString: dbo " << dbcontent_name << " active " << active_
+        loginf << "dbo" << dbcontent_name << " active " << active_
                << " min " << Time::toString(min_value_) << " max " << Time::toString(max_value_);
 
         first = false;
     }
 
-    logdbg << "TimestampFilter: getConditionString: here '" << ss.str() << "'";
+    logdbg << "here '" << ss.str() << "'";
 
     return ss.str();
 }
@@ -93,7 +93,7 @@ std::string TimestampFilter::getConditionString(const std::string& dbcontent_nam
 
 void TimestampFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "TimestampFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id" << class_id;
 
     throw std::runtime_error("TimestampFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -106,7 +106,7 @@ DBFilterWidget* TimestampFilter::createWidget()
 
 void TimestampFilter::checkSubConfigurables()
 {
-    logdbg << "TimestampFilter: checkSubConfigurables";
+    logdbg << "checkSubConfigurables";
 }
 
 
@@ -114,7 +114,7 @@ void TimestampFilter::reset()
 {
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    loginf << "TimestampFilter: reset: has db min/max " << dbcont_man.hasMinMaxTimestamp();
+    loginf << "has db min/max" << dbcont_man.hasMinMaxTimestamp();
 
     if (dbcont_man.hasMinMaxTimestamp())
     {
@@ -140,7 +140,7 @@ void TimestampFilter::saveViewPointConditions (nlohmann::json& filters)
 
 void TimestampFilter::loadViewPointConditions (const nlohmann::json& filters)
 {
-    logdbg << "TimestampFilter: loadViewPointConditions: filter '" << filters.dump(4) << "'";
+    logdbg << "filter '" << filters.dump(4) << "'";
 
     assert (conditions_.size() == 0);
 

@@ -44,7 +44,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
 
     if (ec)
     {
-        logerr << "UDPReceiver: ctor: mcast address error " << ec.message();
+        logerr << "mcast address error" << ec.message();
         return;
     }
 
@@ -61,7 +61,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
 
         if (ec)
         {
-            logerr << "UDPReceiver: ctor: listen address error " << ec.message();
+            logerr << "listen address error" << ec.message();
             return;
         }
 
@@ -75,7 +75,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
     socket_.open(socket_endpoint_.protocol(), ec);
     if (ec)
     {
-        logerr << "UDPReceiver: ctor: socket error " << ec.message();
+        logerr << "socket error" << ec.message();
         return;
     }
 
@@ -83,7 +83,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
     socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true), ec);
     if (ec)
     {
-        logerr << "UDPReceiver: ctor: socket reuse error " << ec.message();
+        logerr << "socket reuse error" << ec.message();
         return;
     }
 
@@ -91,7 +91,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
     socket_.bind(socket_endpoint_, ec);
     if (ec)
     {
-        logerr << "UDPReceiver: ctor: socket bind error " << ec.message();
+        logerr << "socket bind error" << ec.message();
         return;
     }
 
@@ -107,7 +107,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
                                    mcast_addr.to_v4()), ec);
         if (ec)
         {
-            logerr << "UDPReceiver: ctor: socket join group error " << ec.message();
+            logerr << "socket join group error" << ec.message();
             return;
         }
     }
@@ -118,7 +118,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
 
         if (ec)
         {
-            logerr << "UDPReceiver: ctor: sender address error " << ec.message();
+            logerr << "sender address error" << ec.message();
             return;
         }
 
@@ -135,12 +135,12 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
 void UDPReceiver::handle_receive_from(const boost::system::error_code& error,
                                              size_t bytes_recvd)
 {
-    logdbg << "handle_receive_from: from " << sender_endpoint_.address().to_string() << ":"
+    logdbg << "from" << sender_endpoint_.address().to_string() << ":"
            << sender_endpoint_.port() << " bytes " << bytes_recvd;
 
     if (error && error != boost::asio::error::message_size)
     {
-        logerr << "UDPReceiver: handle_receive_from: from "
+        logerr << "from"
                << sender_endpoint_.address().to_string()+":"+to_string(sender_endpoint_.port())
                << " error " << error;
         return;

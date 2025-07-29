@@ -77,14 +77,14 @@ std::string RefTrajAccuracyFilter::getConditionString(const std::string& dbconte
         first = false;
     }
 
-    loginf << "RefTrajAccuracyFilter: getConditionString: here '" << ss.str() << "'";
+    loginf << "here '" << ss.str() << "'";
 
     return ss.str();
 }
 
 void RefTrajAccuracyFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "RefTrajAccuracyFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id" << class_id;
 
     throw std::runtime_error("RefTrajAccuracyFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -97,7 +97,7 @@ DBFilterWidget* RefTrajAccuracyFilter::createWidget()
 
 void RefTrajAccuracyFilter::checkSubConfigurables()
 {
-    logdbg << "RefTrajAccuracyFilter: checkSubConfigurables";
+    logdbg << "checkSubConfigurables";
 }
 
 

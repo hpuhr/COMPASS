@@ -54,7 +54,7 @@ TimestampFilterWidget::~TimestampFilterWidget()
 
 void TimestampFilterWidget::update()
 {
-    loginf << "TimestampFilterWidget: update";
+    loginf << "update";
 
     update_active_ = true;
 
@@ -77,7 +77,7 @@ void TimestampFilterWidget::minDateTimeChanged(const QDateTime& datetime)
     if (update_active_)
         return;
 
-    loginf << "TimestampFilterWidget: minDateTimeChanged: value "
+    loginf << "value"
            << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
     filter_.minValue(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()), false);
@@ -88,7 +88,7 @@ void TimestampFilterWidget::maxDateTimeChanged(const QDateTime& datetime)
     if (update_active_)
         return;
 
-    loginf << "TimestampFilterWidget: maxDateTimeChanged: value "
+    loginf << "value"
            << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
     filter_.maxValue(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()), false);

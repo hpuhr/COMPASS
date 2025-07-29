@@ -202,7 +202,7 @@ void FilterManagerWidget::toggleUseFilters()
     assert(filters_check_);
 
     bool checked = filters_check_->checkState() == Qt::Checked;
-    logdbg << "FilterManagerWidget: toggleUseFilters: setting use limit to " << checked;
+    logdbg << "setting use limit to" << checked;
     filter_manager_.useFilters(checked);
 
     emit iconChangedSignal();
@@ -222,7 +222,7 @@ void FilterManagerWidget::updateUseFilters ()
  */
 void FilterManagerWidget::addFilter()
 {
-    loginf << "FilterManagerWidget: addFilter";
+    loginf << "addFilter";
     assert(!filter_generator_widget_);
 
     filter_generator_widget_.reset(new FilterGeneratorWidget());
@@ -234,7 +234,7 @@ void FilterManagerWidget::addFilter()
 
 void FilterManagerWidget::filterWidgetActionSlot(bool generated)
 {
-    loginf << "FilterManagerWidget: filterWidgetActionSlot: generated " << generated;
+    loginf << "generated" << generated;
 
     assert(filter_generator_widget_);
     filter_generator_widget_ = nullptr;
@@ -246,7 +246,7 @@ void FilterManagerWidget::filterWidgetActionSlot(bool generated)
  */
 void FilterManagerWidget::updateFilters()
 {
-    loginf << "FilterManagerWidget: updateFilters";
+    loginf << "updateFilters";
 
     QLayoutItem* child;
     while (!ds_filter_layout_->isEmpty() && (child = ds_filter_layout_->takeAt(0)))
@@ -263,7 +263,7 @@ void FilterManagerWidget::updateFilters()
 
     for (auto& it : filters)
     {
-        logdbg << "FilterManagerWidget: updateFilters: filter " << it->getName();
+        logdbg << "filter" << it->getName();
 
         if (!it->getActive())
             it->widget()->collapse();
@@ -275,7 +275,7 @@ void FilterManagerWidget::updateFilters()
 
     syncFilterLayouts();
 
-    loginf << "FilterManagerWidget: updateFilters: done";
+    loginf << "done";
 }
 
 /**

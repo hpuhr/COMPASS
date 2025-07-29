@@ -446,7 +446,7 @@ bool PacketSniffer::openPCAP(const std::string& fn)
     pcap_file_ = pcap_open_offline(fn.c_str(), errbuf);
     if (pcap_file_ == NULL)
     {
-        logerr << "PacketSniffer: openPCAP: open pcap file '" << Utils::Files::getFilenameFromPath(fn) << "' failed";
+        logerr << "open pcap file '" << Utils::Files::getFilenameFromPath(fn) << "' failed";
         return false;
     }
 
@@ -455,7 +455,7 @@ bool PacketSniffer::openPCAP(const std::string& fn)
 
     device_ = Device::File;
 
-    loginf << "PacketSniffer: openPCAP: opened pcap file '" << Utils::Files::getFilenameFromPath(fn) << "'" << " with link layer type " << link_layer_type_;
+    loginf << "opened pcap file '" << Utils::Files::getFilenameFromPath(fn) << "'" << " with link layer type " << link_layer_type_;
 
     return true;
  }
@@ -470,7 +470,7 @@ bool PacketSniffer::readFile(ReadStyle read_style,
 
     if (device_ != Device::File || pcap_file_ == nullptr)
     {
-        logerr << "PacketSniffer: read: no file device opened";
+        logerr << "no file device opened";
         return false;
     }
 
@@ -501,7 +501,7 @@ boost::optional<PacketSniffer::Chunk> PacketSniffer::readFileNext(size_t max_pac
     //correct device opened?
     if (device_ != Device::File || pcap_file_ == nullptr)
     {
-        logerr << "PacketSniffer: readFileNext: no file device opened";
+        logerr << "no file device opened";
         return {};
     }
 
@@ -545,7 +545,7 @@ boost::optional<PacketSniffer::Chunk> PacketSniffer::readFileNext(size_t max_pac
         //file ended?
         if (ret == PCAP_ERROR_BREAK)
         {
-            loginf << "PacketSniffer: readFileNext: pcap_next_ex reached end of data";
+            loginf << "pcap_next_ex reached end of data";
             reached_eof_ = true;
             break;
         }
@@ -563,18 +563,18 @@ boost::optional<PacketSniffer::Chunk> PacketSniffer::readFileNext(size_t max_pac
     //pcap error?
     if (error)
     {
-        logerr << "PacketSniffer: readFileNext: pcap_next_ex error";
+        logerr << "pcap_next_ex error";
         return {};
     }
 
     //no data? => strange
     if (data_.data.empty() && !reached_eof_)
     {
-        logerr << "PacketSniffer: readFileNext: reached eof but no data retrieved";
+        logerr << "reached eof but no data retrieved";
         return {};
     }
 
-    loginf << "PacketSniffer: readFileNext: extracted " << data_.data.size() << " byte(s)";
+    loginf << "extracted" << data_.data.size() << " byte(s)";
 
     Chunk c;
     c.chunk_data = data_;

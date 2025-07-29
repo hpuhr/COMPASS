@@ -50,7 +50,7 @@ class ASTERIXEditionComboBox : public QComboBox
     {
         for (const auto& ed_it : category_->editions())
         {
-            logdbg << "ASTERIXEditionComboBox: ctor: cat " << category->number() << " ed " << ed_it.first;
+            logdbg << "cat" << category->number() << " ed " << ed_it.first;
 
             addItem(ed_it.first.c_str());
         }

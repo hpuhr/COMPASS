@@ -149,7 +149,7 @@ const std::string& Property::asString(PropertyDataType type)
     if (!dataTypes2Strings().count(type))
     {
         //std::cout << "Property: asString: unkown type " << (unsigned int) type << std::endl;
-        logerr << "Property: asString: unkown type " << (unsigned int) type;
+        logerr << "unkown type" << (unsigned int) type;
     }
 
     assert(dataTypes2Strings().count(type) > 0);
@@ -163,7 +163,7 @@ PropertyDataType Property::asDataType(const std::string& type)
     if (!strings2DataTypes().count(type))
     {
         //std::cout << "Property: asDataType: unkown type " << type << std::endl;
-        logerr << "Property: asDataType: unkown type " << type;
+        logerr << "unkown type" << type;
     }
 
     assert(strings2DataTypes().count(type) > 0);
@@ -175,7 +175,7 @@ const std::string& Property::asDBString(PropertyDataType type, bool precise_type
     if (!dbDataTypes2Strings(precise_type).count(type))
     {
         //std::cout << "Property: asDBString: unkown type " << (unsigned int)type << std::endl;
-        logerr << "Property: asDBString: unkown type " << (unsigned int)type;
+        logerr << "unkown type" << (unsigned int)type;
     }
 
     assert(dbDataTypes2Strings(precise_type).count(type) > 0);
@@ -189,7 +189,7 @@ PropertyDataType Property::asDBDataType(const std::string& db_type)
     if (!strings2DBDataTypes().count(db_type))
     {
         //std::cout << "Property: asDBDataType: unkown type " << db_type << std::endl;
-        logerr << "Property: asDBDataType: unkown type " << db_type;
+        logerr << "unkown type" << db_type;
     }
 
     assert(strings2DBDataTypes().count(db_type) > 0);

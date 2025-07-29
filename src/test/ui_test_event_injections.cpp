@@ -96,13 +96,13 @@ bool injectKeysEvent(QWidget* root,
 
     const int nl = lines.count();
 
-    auto logLine = [ & ] (const QString& line) { loginf << "injectKeysEvent: Injecting key sequence " << line.toStdString(); };
+    auto logLine = [ & ] (const QString& line) { loginf << "Injecting key sequence" << line.toStdString(); };
 
     if (pb_mode == PageBreakMode::Forbidden)
     {
         if (nl != 1 || lines[ 0 ].isEmpty())
         {
-            loginf << "injectKeysEvent: Page break found but forbidden";
+            loginf << "Page break found but forbidden";
             return false;
         }
         //inject single line
@@ -134,7 +134,7 @@ bool injectKeysEvent(QWidget* root,
             //inject newlines as enter keys
             if (i < nl - 1)
             {
-                loginf << "injectKeysEvent: Injecting page break";
+                loginf << "Injecting page break";
                 QTest::keyClick(w.second, Qt::Key_Enter, Qt::NoModifier, delay);
             }    
         }
@@ -421,7 +421,7 @@ namespace
             current_action = findAction(current_menu, p, is_menu);
             if (!current_action)
             {
-                loginf << "traverseMenu: Item text '" << p.toStdString() << "' not found";
+                loginf << "Item text '" << p.toStdString() << "' not found";
                 return false;
             }
 
@@ -437,7 +437,7 @@ namespace
                 current_menu = current_action->menu();
         }
 
-        loginf << "traverseMenu: Final action is '" << current_action->text().toStdString() << "'";
+        loginf << "Final action is '" << current_action->text().toStdString() << "'";
 
         return true;
     }
@@ -519,7 +519,7 @@ namespace
             current_action = traverseMenuFor(current_menu, p, is_menu, delay);
             if (!current_action)
             {
-                loginf << "traverseMenuKeys: Item text '" << p.toStdString() << "' not found";
+                loginf << "Item text '" << p.toStdString() << "' not found";
                 return false;
             }
 
@@ -534,7 +534,7 @@ namespace
             }
         }
 
-        loginf << "traverseMenu: Final action is '" << current_action->text().toStdString() << "'";
+        loginf << "Final action is '" << current_action->text().toStdString() << "'";
 
         //fire the final action via enter key
         if (!injectKeyEvent(current_menu, "", Qt::Key_Return, delay))
@@ -634,7 +634,7 @@ bool injectComboBoxEditEvent(QWidget* root,
     int idx = obj.second->findText(entry_txt);
     if (idx < 0)
     {
-        loginf << "injectComboBoxEditEvent: Entry '" << entry_txt.toStdString() << "' not found";
+        loginf << "Entry '" << entry_txt.toStdString() << "' not found";
         return false;
     }
 
@@ -670,7 +670,7 @@ bool injectComboBoxEditEvent(QWidget* root,
 
     if (entry_idx < 0 || entry_idx >= obj.second->count())
     {
-        loginf << "injectComboBoxEditEvent: Index " << entry_idx << " out of bounds";
+        loginf << "Index" << entry_idx << " out of bounds";
         return false;
     }
 
@@ -706,7 +706,7 @@ bool injectTabSelectionEvent(QWidget* root,
 
     if (obj.second->count() < 1)
     {
-        loginf << "injectTabSelectionEvent: Tab empty";
+        loginf << "Tab empty";
         return false;
     }
 
@@ -722,7 +722,7 @@ bool injectTabSelectionEvent(QWidget* root,
         
     if (idx < 0)
     {
-        loginf << "injectTabSelectionEvent: Tab text '" << tab_txt.toStdString() << "' not found";
+        loginf << "Tab text '" << tab_txt.toStdString() << "' not found";
         return false;
     }
 
@@ -777,14 +777,14 @@ bool injectToolSelectionEvent(QWidget* root,
 
     if (idx < 0)
     {
-        loginf << "injectToolSelectionEvent: Tool name '" << tool_name.toStdString() << "' not found";
+        loginf << "Tool name '" << tool_name.toStdString() << "' not found";
         return false;
     }
 
     QWidget* w = obj.second->widgetForAction(action);
     if (!w)
     {
-        loginf << "injectToolSelectionEvent: Tool '" << tool_name.toStdString() << "' obtains no widget";
+        loginf << "Tool '" << tool_name.toStdString() << "' obtains no widget";
         return false;
     }
 

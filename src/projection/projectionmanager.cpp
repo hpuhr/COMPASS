@@ -46,7 +46,7 @@ ProjectionManager::ProjectionManager()
     : Configurable("ProjectionManager", "ProjectionManager0", 0, "projection.json"),
     mag_model_("wmm2020", HOME_DATA_DIRECTORY + "wmm") // WMM model (World Magnetic Model)
 {
-    loginf << "ProjectionManager: constructor";
+    loginf << "constructor";
 
     registerParameter("current_projection_name", &current_projection_name_, RS2G_NAME);
 
@@ -57,7 +57,7 @@ ProjectionManager::ProjectionManager()
 
     assert(hasCurrentProjection());
 
-    loginf << "ProjectionManager: constructor: loading EGM96 map";
+    loginf << "loading EGM96 map";
 
     std::string file_path = HOME_DATA_DIRECTORY + "geoid";
     assert (Files::fileExists(file_path+"/egm96-5.pgm"));
@@ -91,7 +91,7 @@ ProjectionManager::ProjectionManager()
     // for (float cnt=10; cnt < 50; cnt += 0.1)
     //     geoidHeightM(cnt, cnt);
 
-    loginf << "ProjectionManager: constructor: loading EGM96 map done";
+    loginf << "loading EGM96 map done";
 }
 
 ProjectionManager::~ProjectionManager()
@@ -164,7 +164,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
     std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
     NullableVector<double>& target_latitudes_vec, NullableVector<double>& target_longitudes_vec)
 {
-    logdbg << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name;
+    logdbg << "dbcontent_name" << dbcontent_name;
 
     bool ret;
 
@@ -271,7 +271,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
             if (ds_man.hasConfigDataSource(ds_id_it) && ds_man.configDataSource(ds_id_it).dsType() != "Radar")
                 continue; // ok for non-radars
 
-            logwrn << "ProjectionManager: calculateRadarPlotPositions: data source id "
+            logwrn << "data source id"
                    << ds_id_it << " not set up"; // should have been in ASTERIX import task
         }
     }
@@ -285,20 +285,20 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
 
         if (datasource_vec.isNull(cnt))
         {
-            logerr << "ProjectionManager: calculateRadarPlotPositions: data source null";
+            logerr << "data source null";
             continue;
         }
         ds_id = datasource_vec.get(cnt);
 
         if (azimuth_vec.isNull(cnt) || range_vec.isNull(cnt))
         {
-            logdbg << "ProjectionManager: calculateRadarPlotPositions: position null";
+            logdbg << "position null";
             continue;
         }
 
         if (!target_latitudes_vec.isNull(cnt) && !target_longitudes_vec.isNull(cnt))
         {
-            logdbg << "ProjectionManager: calculateRadarPlotPositions: position already set";
+            logdbg << "position already set";
             continue;
         }
 
@@ -361,7 +361,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
             double old_lat = lat;
             double old_lon = lon;
 
-            logdbg << "ProjectionManager: calculateRadarPlotPositions: mode_c_code " << mode_c_code
+            logdbg << "mode_c_code" << mode_c_code
                    << " fft_altitude_ft " << fft_altitude_ft;
 
             ret = projection.polarToWGS84(ds_id, azimuth_rad, range_m, true,
@@ -381,7 +381,7 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
 
             diff = 100 * sqrt(pow(lat-old_lat, 2) + pow(lon-old_lon, 2));
 
-            logdbg << "ProjectionManager: calculateRadarPlotPositions: lat/lon diff "
+            logdbg << "lat/lon diff"
                    << diff;
 
             diff_avg += diff;
@@ -395,12 +395,12 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
         target_longitudes_vec.set(cnt, lon);
     }
 
-    logdbg << "ProjectionManager: calculateRadarPlotPositions: dbcontent_name " << dbcontent_name
+    logdbg << "dbcontent_name" << dbcontent_name
            << " num_ffts_found " << num_ffts_found << " transformation_errors " << transformation_errors;
 
     if (diff_cnt)
     {
-        logdbg << "ProjectionManager: calculateRadarPlotPositions: lat/lon avg diff "
+        logdbg << "lat/lon avg diff"
                << diff_avg / (float) diff_cnt << " min " << diff_min << " max " << diff_max << " cnt " << diff_cnt;
     }
 
@@ -411,7 +411,7 @@ unsigned int ProjectionManager::doXYPositionCalculations (
     std:: string dbcontent_name, std::shared_ptr<Buffer> buffer,
     NullableVector<double>& target_latitudes_vec, NullableVector<double>& target_longitudes_vec)
 {
-    logdbg << "ProjectionManager: doXYPositionCalculations: dbcontent_name " << dbcontent_name;
+    logdbg << "dbcontent_name" << dbcontent_name;
 
     bool ret;
 
@@ -473,20 +473,20 @@ unsigned int ProjectionManager::doXYPositionCalculations (
 
         if (datasource_vec.isNull(cnt))
         {
-            logerr << "ProjectionManager: doXYPositionCalculations: data source null";
+            logerr << "data source null";
             continue;
         }
         ds_id = datasource_vec.get(cnt);
 
         if (!target_latitudes_vec.isNull(cnt) && !target_longitudes_vec.isNull(cnt))
         {
-            loginf << "ProjectionManager: doXYPositionCalculations: position already set";
+            loginf << "position already set";
             continue;
         }
 
         if (x_vec.isNull(cnt) || y_vec.isNull(cnt))
         {
-            loginf << "ProjectionManager: doXYPositionCalculations: position null";
+            loginf << "position null";
             continue;
         }
 
@@ -497,7 +497,7 @@ unsigned int ProjectionManager::doXYPositionCalculations (
 
         if (!projection.hasCoordinateSystem(ds_id))
         {
-            loginf << "ProjectionManager: doXYPositionCalculations: no coordinate system for " << ds_id;
+            loginf << "no coordinate system for" << ds_id;
             transformation_errors++;
             continue;
         }
@@ -506,7 +506,7 @@ unsigned int ProjectionManager::doXYPositionCalculations (
 
         if (!ret)
         {
-            loginf << "ProjectionManager: doXYPositionCalculations: transformation error using x "
+            loginf << "transformation error using x"
                    << x_m << " y " << y_m << " for " << ds_id;
 
             transformation_errors++;
@@ -518,7 +518,7 @@ unsigned int ProjectionManager::doXYPositionCalculations (
     }
 
     if (transformation_errors)
-        logwrn << "ProjectionManager: doXYPositionCalculations: dbcontent_name " << dbcontent_name
+        logwrn << "dbcontent_name" << dbcontent_name
                << " transformation_errors " << transformation_errors;
 
     return transformation_errors;
@@ -528,7 +528,7 @@ string ProjectionManager::currentProjectionName() const { return current_project
 
 void ProjectionManager::currentProjectionName(const string& name)
 {
-    loginf << "ProjectionManager: currentProjectionName: name " << name;
+    loginf << "name" << name;
     current_projection_name_ = name;
 }
 
@@ -611,7 +611,7 @@ unsigned int ProjectionManager::doXYPositionCalculations (
         if (dbcontent_name != "CAT010" && dbcontent_name != "CAT020" && dbcontent_name != "CAT062")
             continue;
 
-        logdbg << "ProjectionManager: doXYPositionCalculations: processing " << dbcontent_name;
+        logdbg << "processing" << dbcontent_name;
 
         shared_ptr<Buffer> buffer = buf_it.second;
 
@@ -632,7 +632,7 @@ unsigned int ProjectionManager::doXYPositionCalculations (
 
         if (latitude_vec.isNeverNull() && longitude_vec.isNeverNull())
         {
-            logdbg << "ProjectionManager: doXYPositionCalculations: skipping never null " << dbcontent_name;
+            logdbg << "skipping never null" << dbcontent_name;
 
             continue;
         }
@@ -838,7 +838,7 @@ REDO_LABEL:
                 // double lon_diff = fabs(longitude - longitude2);
 
                 // if (lat_diff >= 1E-6 || lon_diff >= 1E-6)
-                //     logerr << "ProjectionManager: test: lat_diff "
+                //     logerr << "lat_diff"
                 //            << String::doubleToStringPrecision(lat_diff, 7)
                 //            << " lon_diff " << String::doubleToStringPrecision(lon_diff, 7);
                 //            //<< " wgs_alt_diff " << String::doubleToStringPrecision(wgs_alt_diff, 1);
@@ -860,7 +860,7 @@ REDO_LABEL:
                 if (!do_prints
                     && (calc_azimuth_diff >= 1E-3 || calc_slant_range_diff >= 1E-2 || calc_ground_range_diff >= 1E-2))
                 {
-                    logerr << "ProjectionManager: test: calc_azimuth_diff "
+                    logerr << "calc_azimuth_diff"
                            << String::doubleToStringPrecision(calc_azimuth_diff, 5)
                            << " calc_slant_range_diff " << String::doubleToStringPrecision(calc_slant_range_diff, 2)
                         << " calc_ground_range_diff " << String::doubleToStringPrecision(calc_ground_range_diff, 2);
@@ -876,10 +876,10 @@ REDO_LABEL:
             }
         }
 
-        loginf << "ProjectionManager: test: done";
+        loginf << "done";
     }
     else
-        loginf << "ProjectionManager: test: no current projection set";
+        loginf << "no current projection set";
 
 
 }

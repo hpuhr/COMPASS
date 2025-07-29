@@ -46,7 +46,7 @@ LatexTable::LatexTable(const std::string& name,
         heading_alignment_ = ss.str();
     }
 
-    loginf << "LatexTable: constructor: name " << name << " num cols " << num_columns_
+    loginf << "name" << name << " num cols " << num_columns_
            << " heading alignment '" << heading_alignment_ << "'";
 
     assert (String::split(heading_alignment_, '|').size() == num_columns_+1);

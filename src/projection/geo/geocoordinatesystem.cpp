@@ -48,7 +48,7 @@ bool GeoCoordinateSystem::polarSlantToCartesian(double azimuth_rad, double slant
         // Check if delta_h is within valid range
         if (std::abs(delta_h) > slant_range_m)
         {
-            logerr << "GeoCoordinateSystem: polarSlantToCartesian: absolute value of delta_h "
+            logerr << "absolute value of delta_h"
                    << std::abs(delta_h) << " is greater than slant range " << slant_range_m;
 
             return polarHorizontalToCartesian(azimuth_rad, slant_range_m, x_pos_m, y_pos_m);
@@ -75,7 +75,7 @@ bool GeoCoordinateSystem::polarHorizontalToCartesian(double azimuth_rad, double 
 bool GeoCoordinateSystem::wgs842Cartesian(double latitude_deg, double longitude_deg, double& x_pos,
                                           double& y_pos)
 {
-    logdbg << "GeoCoordinateSystem: wgs842Cartesian: lat " << latitude_deg << " long "
+    logdbg << "lat" << latitude_deg << " long "
            << longitude_deg;
 
     double z;
@@ -93,7 +93,7 @@ bool GeoCoordinateSystem::wgs842Cartesian(double latitude_deg, double longitude_
 bool GeoCoordinateSystem::cartesian2WGS84(double x_pos, double y_pos, double& latitude,
                                           double& longitude)
 {
-    logdbg << "GeoCoordinateSystem: cartesian2WGS84: x_pos " << x_pos << " y_pos " << y_pos;
+    logdbg << "x_pos" << x_pos << " y_pos " << y_pos;
 
     double h_back;
 
