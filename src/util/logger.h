@@ -35,10 +35,10 @@
         if (class_start == std::string::npos) class_start = 0; else class_start++; \
         std::string class_name = func_str.substr(class_start, class_end - class_start); \
         std::string func_name = func_str.substr(class_end + 2, end_pos - class_end - 2); \
-        return class_name + ": " + func_name + ": "; \
+        return class_name + ": "; \
     } else { \
         std::string func_name = func_str.substr(start_pos, end_pos - start_pos); \
-        return func_name + ": "; \
+        return ""; \
     } \
 }()
 
