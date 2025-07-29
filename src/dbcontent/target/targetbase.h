@@ -145,7 +145,7 @@ public:
     static bool checkEmitterSpecs(Category ecat)
     {
         if (!emitter_specs_.count(toString(ecat)))
-            logerr << "TargetBase:: checkEmitterSpecs: unknown ecat " << (unsigned int) ecat;
+            logerr << "unknown ecat " << (unsigned int) ecat;
         assert (emitter_specs_.count(toString(ecat)));
         return true;
     }

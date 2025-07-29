@@ -875,7 +875,7 @@ string SQLGenerator::getCreateDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
     if (key_col_name != properties.at(size - 1).name())
     {
-        logerr << "SQLGenerator::createDBUpdateStringBind: key_col_name '" << key_col_name
+        logerr << "key_col_name '" << key_col_name
                << "' not at last position, but '" << properties.at(size - 1).name() << "'";
 
         throw runtime_error(

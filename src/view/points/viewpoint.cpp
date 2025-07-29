@@ -134,7 +134,7 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
     try
     {
         if (verbose)
-            loginf << "ViewPoint::isValidJSON";
+            loginf << "validating JSON";
 
         if (!json_obj.is_object())
             throw std::runtime_error("current data is not an object");
@@ -175,7 +175,7 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
                         std::string file = Utils::Files::getFilenameFromPath(filename);
                         
                         if (verbose)
-                            loginf << "ViewPoint::isValidJSON: filename '" << filename << "' not found";
+                            loginf << "filename '" << filename << "' not found";
                         
                         if (!json_filename.empty())
                         {
@@ -192,7 +192,7 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
 
                                 if (verbose)
                                 {
-                                    loginf << "ViewPoint::isValidJSON: filename '" << filename
+                                    loginf << "filename '" << filename
                                            << "' found at different path";
                                 }
                             }

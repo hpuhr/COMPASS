@@ -520,7 +520,7 @@ Configurable& Configurable::getChild(const std::string& class_id,
 */
 void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
 {
-    logdbg << "Configurable::setTmpDisableRemoveConfigOnDelete: value " << value;
+    logdbg << "value " << value;
 
     tmp_disable_remove_config_on_delete_ = value;
 

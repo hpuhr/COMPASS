@@ -36,7 +36,7 @@ namespace EvaluationResultsReport
 
     RootItem::~RootItem()
     {
-        loginf << "EvaluationResultsReport::RootItem: destructor";
+        loginf << "destructor";
     }
 
     TreeItem* RootItem::child(int row)
