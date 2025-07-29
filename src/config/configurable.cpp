@@ -149,7 +149,7 @@ std::string Configurable::keyID(const std::string& class_id,
 template <typename T>
 void Configurable::registerParameter(const std::string& parameter_id, T* pointer, const T& default_value)
 {
-    logdbg << "Configurable " << instance_id_ << ": registerParameter: parameter_id " << parameter_id;
+    logdbg << instance_id_ << ": parameter_id " << parameter_id;
 
     assert(configuration_);
     assert(pointer);
@@ -185,7 +185,7 @@ void Configurable::setParameter(T& param, const T& value)
 */
 Configuration& Configurable::registerSubConfigurable(Configurable& child, bool config_must_exist)
 {
-    logdbg << "Configurable " << instance_id_ << " registerSubConfigurable: child " << child.instanceId();
+    logdbg << instance_id_ << ": child " << child.instanceId();
 
     assert(configuration_);
 
@@ -197,7 +197,7 @@ Configuration& Configurable::registerSubConfigurable(Configurable& child, bool c
                                  "' already in use");
     }
 
-    logdbg << "Configurable " << instance_id_ << ": registerSubConfigurable: " << key;
+    logdbg << instance_id_ << ": " << key;
 
     children_.insert(std::pair<std::string, Configurable&>(key, child));
 
@@ -211,15 +211,14 @@ Configuration& Configurable::registerSubConfigurable(Configurable& child, bool c
 */
 void Configurable::removeChildConfigurable(Configurable& child, bool remove_config)
 {
-    logdbg << "Configurable " << instance_id_ << " removeChildConfigurable: child "
-           << child.instanceId();
+    logdbg << instance_id_ << ": child " << child.instanceId();
 
     assert(configuration_);
 
     const std::string& key = child.keyId();
     assert(children_.find(key) != children_.end());
 
-    logdbg << "Configurable " << instance_id_ << ": removeChildConfigurable: " << key;
+    logdbg << instance_id_ << ": " << key;
 
     children_.erase(children_.find(key));
 
@@ -232,7 +231,7 @@ void Configurable::removeChildConfigurable(Configurable& child, bool remove_conf
  */
 void Configurable::resetToDefault()
 {
-    logdbg << "Configurable " << instance_id_ << ": resetToDefault";
+    logdbg << instance_id_;
 
     assert(configuration_);
 
@@ -316,7 +315,7 @@ void Configurable::createSubConfigurables()
         //must be part of sub configurations
         if (sub_configs.count(key) != 0)
         {
-            logdbg << "generateSubConfigurable: class_id '" << key.first << "' instance_id '" << key.second << "' (custom order)";
+            logdbg << "class_id '" << key.first << "' instance_id '" << key.second << "' (custom order)";
 
             assert(!hasSubConfigurable(key.first, key.second));
             generateSubConfigurable(key.first, key.second);
@@ -329,12 +328,11 @@ void Configurable::createSubConfigurables()
         //not yet created from manual order?
         if (custom_order.empty() || std::find(custom_order.begin(), custom_order.end(), it->first) == custom_order.end())
         {
-            logdbg << "generateSubConfigurable: class_id '"
+            logdbg << "class_id '"
                    << it->first.first << "' instance_id '" << it->first.second << "'";
 
             if (hasSubConfigurable(it->first.first, it->first.second))
-                logerr << "generateSubConfigurable: class_id '"
-                       << it->first.first << "' instance_id '" << it->first.second << "' already exists";
+                logerr << "class_id '" << it->first.first << "' instance_id '" << it->first.second << "' already exists";
 
             assert(!hasSubConfigurable(it->first.first, it->first.second));
             generateSubConfigurable(it->first.first, it->first.second);
@@ -520,7 +518,7 @@ Configurable& Configurable::getChild(const std::string& class_id,
 */
 void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
 {
-    logdbg << "Configurable::setTmpDisableRemoveConfigOnDelete: value " << value;
+    logdbg << "value " << value;
 
     tmp_disable_remove_config_on_delete_ = value;
 

@@ -404,7 +404,7 @@ void DBContent::load(dbContent::VariableSet& read_set,
 
         if (ds_man.lineSpecificLoadingRequired(name_)) // ds specific line loading
         {
-            logdbg << "DBContent " << name_ << ": load: line specific loading wanted";
+            logdbg << name_ << ": load: line specific loading wanted";
 
             assert (hasVariable(DBContent::meta_var_line_id_.name()));
 
@@ -459,7 +459,7 @@ void DBContent::load(dbContent::VariableSet& read_set,
         }
         else // simple ds id in statement
         {
-            logdbg << "DBContent " << name_ << ": load: no line specific loading wanted";
+            logdbg << name_ << ": load: no line specific loading wanted";
 
             filter_clause = datasource_var.dbColumnName() + " IN (";
 
@@ -475,7 +475,7 @@ void DBContent::load(dbContent::VariableSet& read_set,
         }
     }
 
-    logdbg << "DBContent " << name_ << ": load: use_filters " << use_filters;
+    logdbg << name_ << ": load: use_filters " << use_filters;
 
     if (use_filters)
     {
@@ -552,7 +552,7 @@ void DBContent::quitLoading()
  */
 bool DBContent::prepareInsert(shared_ptr<Buffer>& buffer)
 {
-    logdbg << "DBContent " << name_ << ": prepareInsert: buffer " << buffer->size();
+    logdbg << name_ << ": prepareInsert: buffer " << buffer->size();
 
     assert (!insert_active_);
     insert_active_ = true;
@@ -585,7 +585,7 @@ bool DBContent::prepareInsert(shared_ptr<Buffer>& buffer)
  */
 void DBContent::updateDataSourcesBeforeInsert (shared_ptr<Buffer>& buffer)
 {
-    logdbg << "DBContent " << name_ << ": updateDataSourcesBeforeInsert";
+    logdbg << name_;
 
     assert (hasVariable(DBContent::meta_var_ds_id_.name()));
 
@@ -658,7 +658,7 @@ void DBContent::updateDataSourcesBeforeInsert (shared_ptr<Buffer>& buffer)
  */
 void DBContent::finalizeInsert(std::shared_ptr<Buffer>& buffer)
 {
-    logdbg << "DBContent " << name_ << ": finalizeInsert";
+    logdbg << name_;
 
     assert(buffer);
     assert(insert_active_);
@@ -816,7 +816,7 @@ void DBContent::deleteJobDoneSlot()
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
     assert(buffer);
-    logdbg << "DBContent: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
+    logdbg << name_ << " buffer size " << buffer->size();
 
     DBContentReadDBJob* sender = dynamic_cast<DBContentReadDBJob*>(QObject::sender());
 
@@ -834,7 +834,7 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
         assert(property.dataType() == var_it->dataType());
     }
 
-    logdbg << "DBContent: " << name_ << " readJobIntermediateSlot: got buffer with size "
+    logdbg << name_ << ": got buffer with size "
            << buffer->size();
 
     // finalize buffer
@@ -857,10 +857,10 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
  */
 void DBContent::readJobObsoleteSlot()
 {
-    logdbg << "DBContent: " << name_ << " readJobObsoleteSlot";
+    logdbg << name_;
     read_job_ = nullptr;
 
-    logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
+    logdbg << name_ << ": done";
     dbcont_manager_.loadingDone(*this);
 }
 
@@ -868,10 +868,10 @@ void DBContent::readJobObsoleteSlot()
  */
 void DBContent::readJobDoneSlot()
 {
-    logdbg << "DBContent: " << name_ << " readJobDoneSlot";
+    logdbg << name_;
     read_job_ = nullptr;
 
-    logdbg << "DBContent: " << name_ << " readJobDoneSlot: done";
+    logdbg << name_ << ": done";
     dbcont_manager_.loadingDone(*this);
 }
 
@@ -879,7 +879,7 @@ void DBContent::readJobDoneSlot()
  */
 void DBContent::databaseOpenedSlot()
 {
-    logdbg << "DBContent " << name_ << ": databaseOpenedSlot";
+    logdbg << name_;
 
     //string associations_table_name = associationsTableName();
 
@@ -888,7 +888,7 @@ void DBContent::databaseOpenedSlot()
     if (is_loadable_)
         count_ = COMPASS::instance().dbInterface().count(db_table_name_);
 
-    logdbg << "DBContent: " << name_ << " databaseOpenedSlot: table " << db_table_name_
+    logdbg << name_ << ": table " << db_table_name_
            << " count " << count_;
 }
 

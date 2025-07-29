@@ -211,7 +211,7 @@ void EvaluationStandardWidget::addGroupSlot()
         model().endReset();
         expandAll();
 
-         << "EvaluationRequirementGroup " << standard_.name() << ": addGroupSlot: added " << name;
+        loginf << standard_.name() << ": added " << name;
     }
 }
 
@@ -237,7 +237,7 @@ void EvaluationStandardWidget::addRequirementSlot(Group& group)
 
     string class_id = data.toString().toStdString();
 
-     << "EvaluationRequirementGroup " << group.name() << ": addRequirementSlot: class_id " << class_id;
+    loginf << standard_.name() << ": class_id " << class_id;
 
     bool ok;
     QString text =

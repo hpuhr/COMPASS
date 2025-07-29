@@ -1360,7 +1360,7 @@ void MainWindow::shutdown()
 
 // void MainWindow::keyPressEvent ( QKeyEvent * event )
 //{
-//    logdbg << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
+//    logdbg << "'" << event->text().toStdString() << "'";
 //}
 
 void MainWindow::createDebugMenu()

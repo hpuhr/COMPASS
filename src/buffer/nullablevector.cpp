@@ -46,7 +46,7 @@ template <>
 void NullableVector<bool>::setFromFormat(unsigned int index, const std::string& format,
                                       const std::string& value_str, bool debug)
 {
-    logdbg2 << "NullableVector " << property_.name() << ": setFromFormat";
+    logdbg2 << property_.name();
     bool value{false};
 
     if (format == "invert")
@@ -77,7 +77,7 @@ void NullableVector<bool>::setFromFormat(unsigned int index, const std::string& 
 template <>
 void NullableVector<bool>::append(unsigned int index, bool value)
 {
-    logdbg2 << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '"
+    logdbg2 << property_.name() << ": index " << index << " value '"
            << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
@@ -101,13 +101,13 @@ void NullableVector<bool>::append(unsigned int index, bool value)
 
     unsetNull(index);
 
-    // logdbg2 << "ArrayListTemplate: append: size " << size_ << " max_size " << max_size_;
+    // logdbg2 << "size " << size_ << " max_size " << max_size_;
 }
 
 template <>
 void NullableVector<std::string>::append(unsigned int index, std::string value)
 {
-    logdbg2 << "NullableVector " << property_.name() << ": append: index " << index << " value '"
+    logdbg2 << property_.name() << ": index " << index << " value '"
            << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
@@ -134,7 +134,7 @@ void NullableVector<std::string>::append(unsigned int index, std::string value)
 
     unsetNull(index);
 
-    // logdbg2 << "NullableVector: append: size " << size_ << " max_size " << max_size_;
+    // logdbg2 << "size " << size_ << " max_size " << max_size_;
 }
 
 template <>
