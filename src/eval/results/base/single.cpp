@@ -237,14 +237,14 @@ Single::EvaluationDetails Single::recomputeDetails() const
     assert(requirement_);
     assert(calculator_.data().hasTargetData(utn_));
 
-    logdbg << "Single: recomputeDetails: recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
+    logdbg << "recomputing target details for requirement '" << requirement_->name() << "' UTN " << utn_ << "...";
 
     const auto& data = calculator_.data().targetData(utn_);
 
     auto result = requirement_->evaluate(data, requirement_, sector_layer_);
     assert(result);
 
-    logdbg << "Single: recomputeDetails: target details recomputed!";
+    logdbg << "target details recomputed!";
 
     return result->getDetails();
 }
@@ -294,7 +294,7 @@ void Single::clearDetails()
 */
 void Single::addToReport(std::shared_ptr<ResultReport::Report> report)
 {
-    logdbg << "Single: addToReport: " <<  requirement_->name();
+    logdbg << "start" <<  requirement_->name();
 
     // add target to requirements->group->req
     addTargetToOverviewTable(report);
@@ -773,7 +773,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json,
 
     string anno_name = annotation_type_names_.at(type);
 
-    logdbg << "Single: getOrCreateAnnotation: anno_name '" << anno_name << "' overview " << overview;
+    logdbg << "anno_name '" << anno_name << "' overview " << overview;
 
     const std::string AnnotationArrayTypeField = "eval_annotation_array_type";
     const std::string FieldName                = ViewPointGenAnnotation::AnnotationFieldName;
@@ -788,11 +788,11 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json,
                                    const QColor& line_color,
                                    int line_width)
     {
-        logdbg << "Single: getOrCreateAnnotation: size " << annotations_json.size()
+        logdbg << "size " << annotations_json.size()
                << " creating '" << name << "' at pos " << position;
 
         for (unsigned int cnt=0; cnt < annotations_json.size(); ++cnt)
-            logdbg << "Single: getOrCreateAnnotation: start: index " << cnt <<" '" << annotations_json.at(cnt).at("name") << "'";
+            logdbg << "start: index " << cnt <<" '" << annotations_json.at(cnt).at("name") << "'";
 
         annotations_json.insert(annotations_json.begin() + position, json::object()); // errors
         assert (position < annotations_json.size());
@@ -825,7 +825,7 @@ nlohmann::json& Single::getOrCreateAnnotation(nlohmann::json& annotations_json,
         annotation_json[ AnnotationArrayTypeField ] = (int)type;
 
         for (unsigned int cnt=0; cnt < annotations_json.size(); ++cnt)
-            logdbg << "Single: getOrCreateAnnotation: end: index " << cnt <<" '" << annotations_json.at(cnt).at("name") << "'";
+            logdbg << "end: index " << cnt <<" '" << annotations_json.at(cnt).at("name") << "'";
     };
 
     struct Style

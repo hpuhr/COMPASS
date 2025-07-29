@@ -56,7 +56,7 @@ const bool COMPASS::is_app_image_ = {getenv("APPDIR") != nullptr};
 COMPASS::COMPASS()
     : Configurable("COMPASS", "COMPASS0", 0, "compass.json"), log_store_(!is_app_image_)
 {
-    logdbg << "COMPASS: constructor: start";
+    logdbg << "start";
 
     std::cout << "APPIMAGE: " << (is_app_image_ ? "yes" : "no") << std::endl;
 
@@ -203,16 +203,16 @@ COMPASS::COMPASS()
 
     appMode(app_mode_);
 
-    logdbg << "COMPASS: constructor: end";
+    logdbg << "end";
 }
 
 COMPASS::~COMPASS()
 {
-    logdbg << "COMPASS: destructor: start";
+    logdbg << "start";
 
     if (app_state_ != AppState::Shutdown)
     {
-        logerr << "COMPASS: destructor: not shut down";
+        logerr << "not shut down";
         shutdown();
     }
 
@@ -225,7 +225,7 @@ COMPASS::~COMPASS()
     assert(!fft_manager_);
     assert(!license_manager_);
 
-    logdbg << "COMPASS: destructor: end";
+    logdbg << "end";
 }
 
 void COMPASS::setAppState(AppState state)
@@ -242,7 +242,7 @@ std::string COMPASS::getPath() const
 
 void COMPASS::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "COMPASS: generateSubConfigurable: class_id " << class_id << " instance_id "
+    logdbg << "class_id " << class_id << " instance_id "
            << instance_id;
     if (class_id == "DBInterface")
     {
@@ -378,7 +378,7 @@ unsigned int COMPASS::minAppWidth() const
 
 bool COMPASS::openDBFile(const std::string& filename)
 {
-    loginf << "COMPASS: openDBFile: opening file '" << filename << "'";
+    loginf << "opening file '" << filename << "'";
 
     assert (!db_opened_);
 
@@ -431,7 +431,7 @@ Result COMPASS::openDBFileInternal(const std::string& filename)
 
 bool COMPASS::createNewDBFile(const std::string& filename)
 {
-    loginf << "COMPASS: createNewDBFile: creating new file '" << filename << "'";
+    loginf << "creating new file '" << filename << "'";
 
     assert (!db_opened_);
 
@@ -489,7 +489,7 @@ Result COMPASS::createNewDBFileInternal(const std::string& filename)
 
 bool COMPASS::createInMemDBFile(const std::string& future_filename)
 {
-    loginf << "COMPASS: createInMemDBFile: future filename '" << future_filename << "'";
+    loginf << "future filename '" << future_filename << "'";
 
     assert (!db_opened_);
 
@@ -535,7 +535,7 @@ Result COMPASS::createInMemDBFileInternal(const std::string& future_filename)
 
 bool COMPASS::createNewDBFileFromMemory()
 {
-    loginf << "COMPASS: createNewDBFileFromMemory: filename '" << inmem_future_filename_ << "'";
+    loginf << "filename '" << inmem_future_filename_ << "'";
 
     assert (canCreateDBFileFromMemory());
 
@@ -592,7 +592,7 @@ Result COMPASS::createNewDBFileFromMemoryInternal()
 
 bool COMPASS::exportDBFile(const std::string& filename)
 {
-    loginf << "COMPASS: exportDBFile: exporting as file '" << filename << "'";
+    loginf << "exporting as file '" << filename << "'";
 
     assert (db_opened_);
     assert (!db_export_in_progress_);
@@ -649,7 +649,7 @@ Result COMPASS::exportDBFileInternal(const std::string& filename)
 
 bool COMPASS::closeDB()
 {
-    loginf << "COMPASS: closeDB: closing db file '" << last_db_filename_ << "'";
+    loginf << "closing db file '" << last_db_filename_ << "'";
 
     assert (db_opened_);
 
@@ -835,7 +835,7 @@ void COMPASS::shutdown()
     //shut down command manager at the end
     RTCommandManager::instance().shutdown();
 
-    loginf << "COMPASS: shutdown: end";
+    loginf << "end";
 }
 
 MainWindow& COMPASS::mainWindow()
@@ -856,13 +856,13 @@ MainWindow& COMPASS::mainWindow()
 
 std::string COMPASS::lastUsedPath()
 {
-    loginf << "COMPASS: lastUsedPath: return '" << last_path_ << "'";
+    loginf << "return '" << last_path_ << "'";
     return last_path_;
 }
 
 void COMPASS::lastUsedPath(const std::string& last_path)
 {
-    loginf << "COMPASS: lastUsedPath: set '" << last_path << "'";
+    loginf << "set '" << last_path << "'";
     last_path_ = last_path;
 }
 
@@ -958,7 +958,7 @@ bool COMPASS::expertMode() const
 
 void COMPASS::expertMode(bool expert_mode)
 {
-    loginf << "COMPASS: expertMode: setting expert mode " << expert_mode;
+    loginf << "setting expert mode " << expert_mode;
 
     expert_mode_ = expert_mode;
 }
@@ -976,7 +976,7 @@ void COMPASS::appMode(const AppMode& app_mode)
 
         app_mode_ = app_mode;
 
-        loginf << "COMPASS: appMode: app_mode_current " << toString(app_mode_)
+        loginf << "app_mode_current " << toString(app_mode_)
                << " previous " << toString(last_app_mode);
 
         QMessageBox* msg_box{nullptr};
@@ -1026,7 +1026,7 @@ void COMPASS::appMode(const AppMode& app_mode)
 
             string custom_filter = "timestamp >= " + to_string(Time::toLong(min_ts));
 
-            loginf << "COMPASS: appMode: resuming with custom filter load '" << custom_filter << "'";
+            loginf << "resuming with custom filter load '" << custom_filter << "'";
 
             dbcontent_manager_->load(custom_filter);
 
@@ -1062,7 +1062,7 @@ std::string COMPASS::appModeStr() const
     if (!appModes2Strings().count(app_mode_))
     {
         std::cout << "COMPASS: appModeStr: unkown type " << (unsigned int) app_mode_ << std::endl;
-        logerr << "COMPASS: appModeStr: unkown type " << (unsigned int) app_mode_;
+        logerr << "unkown type " << (unsigned int) app_mode_;
     }
 
     assert(appModes2Strings().count(app_mode_) > 0);
@@ -1100,7 +1100,7 @@ void COMPASS::addDBFileToList(const std::string filename)
 
     if (find(tmp_list.begin(), tmp_list.end(), filename) == tmp_list.end())
     {
-        loginf << "COMPASS: addDBFileToList: adding filename '" << filename << "'";
+        loginf << "adding filename '" << filename << "'";
 
         tmp_list.push_back(filename);
 

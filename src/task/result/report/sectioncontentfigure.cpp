@@ -121,18 +121,18 @@ void SectionContentFigure::addContentUI(QVBoxLayout* layout,
  */
 bool SectionContentFigure::view(bool load_blocking) const
 {
-    loginf << "SectionContentFigure: view: viewing figure '" << name() << "'";
+    loginf << "viewing figure '" << name() << "'";
 
     if (isLocked())
     {
-        loginf << "SectionContentFigure: view: on-demand figure is locked";
+        loginf << "on-demand figure is locked";
         return false;
     }
 
     auto content = viewableContent();
     if (!content || content->empty())
     {
-        loginf << "SectionContentFigure: view: no content";
+        loginf << "no content";
         report_->unsetCurrentViewable();
         return false;
     }
@@ -218,7 +218,7 @@ bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldRenderDelayMSec) ||
         !j.contains(FieldViewable))
     {
-        logerr << "SectionContentFigure: fromJSON: Error: Section content figure does not obtain needed fields";
+        logerr << "Error: Section content figure does not obtain needed fields";
         return false;
     }
 

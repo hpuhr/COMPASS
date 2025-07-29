@@ -254,7 +254,7 @@ bool DBDataSource::loadingWanted() const
 
 void DBDataSource::loadingWanted(bool loading_wanted)
 {
-    logdbg << "DBDataSource: loadingWanted: ds " << name_ << " wanted " << loading_wanted;
+    logdbg << "ds " << name_ << " wanted " << loading_wanted;
 
     loading_wanted_ = loading_wanted;
 }
@@ -358,12 +358,12 @@ bool DBDataSource::hasLiveData(unsigned int line, boost::posix_time::ptime curre
         ret = false;
 
 //    if (hasMaxTimestamp(line))
-//        loginf << "DBDataSource: hasLiveData: name " << name_ << " current_ts " << Time::toString(current_ts)
+//        loginf << "name " << name_ << " current_ts " << Time::toString(current_ts)
 //               << " hasMax " << hasMaxTimestamp(line) << " hasUI " << hasUpdateInterval()
 //               << " maxTS " << Time::toString(maxTimestamp(line))
 //               << " diff " << Time::toString(current_ts - maxTimestamp(line)) << " ret " << ret;
 //    else
-//        loginf << "DBDataSource: hasLiveData: name " << name_ << " no maxTS";
+//        loginf << "name " << name_ << " no maxTS";
 
     return ret;
 }

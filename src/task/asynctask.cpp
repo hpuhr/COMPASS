@@ -126,7 +126,7 @@ bool AsyncTask::runAsyncDialog(bool auto_close,
             }
             catch (const std::exception& e)
             {
-                logerr << "AsyncTask: runAsyncDialog: exception '" << e.what() << "'";
+                logerr << "exception '" << e.what() << "'";
                 throw e;
             }
         });
@@ -155,7 +155,7 @@ bool AsyncTask::runAsync()
             }
             catch (const std::exception& e)
             {
-                logerr << "AsyncTask: runAsyncDialog: exception '" << e.what() << "'";
+                logerr << "exception '" << e.what() << "'";
                 throw e;
             }
         });

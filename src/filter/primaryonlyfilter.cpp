@@ -59,7 +59,7 @@ bool PrimaryOnlyFilter::filters(const std::string& dbcontent_name)
 
 std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "PrimaryOnlyFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbo " << dbcontent_name << " active " << active_;
 
     stringstream ss;
 
@@ -125,21 +125,21 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
         first = false;
     }
 
-    logdbg << "PrimaryOnlyFilter: getConditionString: here '" << ss.str() << "'";
+    logdbg << "here '" << ss.str() << "'";
 
     return ss.str();
 }
 
 void PrimaryOnlyFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "PrimaryOnlyFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id " << class_id;
 
     throw std::runtime_error("PrimaryOnlyFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void PrimaryOnlyFilter::checkSubConfigurables()
 {
-    logdbg << "PrimaryOnlyFilter: checkSubConfigurables";
+    logdbg << "start";
 }
 
 DBFilterWidget* PrimaryOnlyFilter::createWidget()

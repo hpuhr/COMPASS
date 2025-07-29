@@ -97,7 +97,7 @@ ASTERIXJSONParserWidget::~ASTERIXJSONParserWidget()
 
 void ASTERIXJSONParserWidget::resizeColumnsToContents()
 {
-    loginf << "ASTERIXJSONParserWidget: resizeColumnsToContents";
+    loginf << "start";
     //table_model_->update();
     table_view_->resizeColumnsToContents();
 }
@@ -117,7 +117,7 @@ void ASTERIXJSONParserWidget::currentRowChanged(const QModelIndex& current, cons
 {
     if (!current.isValid())
     {
-        loginf << "ASTERIXJSONParserWidget: currentRowChanged: invalid index";
+        loginf << "invalid index";
         return;
     }
 
@@ -126,7 +126,7 @@ void ASTERIXJSONParserWidget::currentRowChanged(const QModelIndex& current, cons
 
     unsigned int index = source_index.row();
 
-    loginf << "ASTERIXJSONParserWidget: currentRowChanged: current index " << index;
+    loginf << "current index " << index;
 
     assert (detail_widget_);
     detail_widget_->currentIndexChangedSlot(index);
@@ -138,7 +138,7 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
 
     if ((event->modifiers() & Qt::ControlModifier) && event->key() == Qt::Key_C)
     {
-        loginf << "ASTERIXJSONParserWidget: keyPressEvent: copy";
+        loginf << "copy";
 
         unsigned int num_rows = parser_.rowCount();
 

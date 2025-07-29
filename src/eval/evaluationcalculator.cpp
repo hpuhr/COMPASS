@@ -253,7 +253,7 @@ void EvaluationCalculator::generateSubConfigurable(const std::string& class_id,
     if (class_id == "EvaluationStandard")
     {
         EvaluationStandard* standard = new EvaluationStandard(class_id, instance_id, *this);
-        logdbg << "EvaluationCalculator: generateSubConfigurable: adding standard " << standard->name();
+        logdbg << "adding standard " << standard->name();
 
         assert(!hasStandard(standard->name()));
 
@@ -335,7 +335,7 @@ void EvaluationCalculator::reset()
  */
 void EvaluationCalculator::clearData()
 {
-    loginf << "EvaluationCalculator: clearLoadedDataAndResults";
+    loginf << "start";
 
     data_->clear();
     results_gen_->clear();
@@ -355,7 +355,7 @@ Result EvaluationCalculator::evaluate(bool update_report,
                                       const std::vector<unsigned int>& utns,
                                       const std::vector<Evaluation::RequirementResultID>& requirements)
 {
-    loginf << "EvaluationCalculator: evaluate";
+    loginf << "start";
 
     assert(canEvaluate().ok());
 
@@ -415,7 +415,7 @@ Result EvaluationCalculator::evaluate(bool update_report,
  */
 Result EvaluationCalculator::loadingDone()
 {
-    loginf << "EvaluationCalculator: loadingDone";
+    loginf << "start";
 
     if (active_load_connection_)
     {
@@ -447,7 +447,7 @@ Result EvaluationCalculator::loadingDone()
     //ready to evaluate?
     if (data_loaded_)
     {
-        loginf << "EvaluationCalculator: loadingDone: finalizing: has ref data " << has_ref_data << " has tst data " << has_tst_data;
+        loginf << "finalizing: has ref data " << has_ref_data << " has tst data " << has_tst_data;
 
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -456,10 +456,10 @@ Result EvaluationCalculator::loadingDone()
 
         boost::posix_time::time_duration time_diff =  boost::posix_time::microsec_clock::local_time() - start_time;
 
-        loginf << "EvaluationCalculator: loadingDone: finalize done "
+        loginf << "finalize done "
                 << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
 
-        loginf << "EvaluationCalculator: loadingDone: starting to evaluate";
+        loginf << "starting to evaluate";
 
         return evaluateData();
     }
@@ -472,7 +472,7 @@ Result EvaluationCalculator::loadingDone()
  */
 Result EvaluationCalculator::evaluateData()
 {
-    loginf << "EvaluationCalculator: evaluateData";
+    loginf << "start";
 
     assert(data_loaded_);
     assert(canEvaluate().ok());
@@ -515,10 +515,10 @@ std::map<unsigned int, std::set<unsigned int>> EvaluationCalculator::usedDataSou
     {
         ds_id = stoul(ds_it.first);
 
-        loginf << "EvaluationCalculator: usedDataSources: ref ds_id '" << ds_it.first << "' uint " << ds_id;
+        loginf << "ref ds_id '" << ds_it.first << "' uint " << ds_id;
 
         for (auto& line_it : line_ref_set)
-            loginf << "EvaluationCalculator: usedDataSources: ref line " << line_it;
+            loginf << "ref line " << line_it;
 
         assert (ds_man.hasDBDataSource(ds_id));
 
@@ -532,10 +532,10 @@ std::map<unsigned int, std::set<unsigned int>> EvaluationCalculator::usedDataSou
     {
         ds_id = stoul(ds_it.first);
 
-        loginf << "EvaluationCalculator: usedDataSources: tst ds_id '" << ds_it.first << "' uint " << ds_id;
+        loginf << "tst ds_id '" << ds_it.first << "' uint " << ds_id;
 
         for (auto& line_it : line_tst_set)
-            loginf << "EvaluationCalculator: usedDataSources: tst line " << line_it;
+            loginf << "tst line " << line_it;
 
         assert (ds_man.hasDBDataSource(ds_id));
 
@@ -571,7 +571,7 @@ void EvaluationCalculator::minHeightFilterLayerName(const std::string& layer_nam
 {
     assert(layer_name.empty() || eval_man_.hasSectorLayer(layer_name));
 
-    loginf << "EvaluationCalculator: minHeightFilterLayerName: layer changed to "
+    loginf << "layer changed to "
            << (layer_name.empty() ? "null" : "'" + layer_name + "'");
 
     settings_.min_height_filter_layer_ = layer_name;
@@ -596,7 +596,7 @@ void EvaluationCalculator::checkMinHeightFilterValid()
 {
     if (!settings_.min_height_filter_layer_.empty() && !eval_man_.hasSectorLayer(settings_.min_height_filter_layer_))
     {
-        logerr << "EvaluationCalculator: checkMinHeightFilterValid: Layer '" << settings_.min_height_filter_layer_ << "'"
+        logerr << "Layer '" << settings_.min_height_filter_layer_ << "'"
                << " not present, resetting min height filter";
         
         settings_.min_height_filter_layer_ = "";
@@ -614,7 +614,7 @@ std::string EvaluationCalculator::dbContentNameRef() const
  */
 void EvaluationCalculator::dbContentNameRef(const std::string& name)
 {
-    loginf << "EvaluationCalculator: dbContentNameRef: name " << name;
+    loginf << "name " << name;
 
     settings_.dbcontent_name_ref_ = name;
 
@@ -713,7 +713,7 @@ std::string EvaluationCalculator::dbContentNameTst() const
  */
 void EvaluationCalculator::dbContentNameTst(const std::string& name)
 {
-    loginf << "EvaluationCalculator: dbContentNameTst: name " << name;
+    loginf << "name " << name;
 
     settings_.dbcontent_name_tst_ = name;
 
@@ -851,7 +851,7 @@ void EvaluationCalculator::currentStandardName(const std::string& current_standa
  */
 void EvaluationCalculator::renameCurrentStandard (const std::string& new_name)
 {
-    loginf << "EvaluationCalculator: renameCurrentStandard: new name '" << new_name << "'";
+    loginf << "new name '" << new_name << "'";
 
     assert (hasCurrentStandard());
     assert (!hasStandard(new_name));
@@ -867,7 +867,7 @@ void EvaluationCalculator::renameCurrentStandard (const std::string& new_name)
  */
 void EvaluationCalculator::copyCurrentStandard (const std::string& new_name)
 {
-    loginf << "EvaluationCalculator: renameCurrentStandard: new name '" << new_name << "'";
+    loginf << "new name '" << new_name << "'";
 
     assert (hasCurrentStandard());
     assert (!hasStandard(new_name));
@@ -929,7 +929,7 @@ bool EvaluationCalculator::hasStandard(const std::string& name) const
  */
 void EvaluationCalculator::addStandard(const std::string& name)
 {
-    loginf << "EvaluationCalculator: addStandard: name " << name;
+    loginf << "name " << name;
 
     assert (!hasStandard(name));
 
@@ -949,7 +949,7 @@ void EvaluationCalculator::addStandard(const std::string& name)
  */
 void EvaluationCalculator::deleteCurrentStandard()
 {
-    loginf << "EvaluationCalculator: deleteCurrentStandard: name " << settings_.current_standard_;
+    loginf << "name " << settings_.current_standard_;
 
     assert (hasCurrentStandard());
 
@@ -1055,7 +1055,7 @@ void EvaluationCalculator::updateSectorLayers()
  */
 void EvaluationCalculator::checkReferenceDataSources(bool update_settings)
 {
-    loginf << "EvaluationCalculator: checkReferenceDataSources";
+    loginf << "start";
 
     if (!hasValidReferenceDBContent())
         return;
@@ -1097,7 +1097,7 @@ void EvaluationCalculator::checkReferenceDataSources(bool update_settings)
  */
 void EvaluationCalculator::checkTestDataSources(bool update_settings)
 {
-    loginf << "EvaluationCalculator: checkTestDataSources";
+    loginf << "start";
 
     if (!hasValidTestDBContent())
         return;
@@ -1383,12 +1383,12 @@ std::unique_ptr<nlohmann::json::object_t> EvaluationCalculator::getViewableForEv
  */
 void EvaluationCalculator::showUTN (unsigned int utn)
 {
-    loginf << "EvaluationCalculator: showUTN: utn " << utn;
+    loginf << "utn " << utn;
 
     nlohmann::json data = getBaseViewableDataConfig();
     data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
-    loginf << "EvaluationCalculator: showUTN: showing";
+    loginf << "showing";
     eval_man_.setViewableDataConfig(data);
 }
 
@@ -1504,7 +1504,7 @@ void EvaluationCalculator::useGroupInSectorLayer(const std::string& sector_layer
 {
     assert (hasCurrentStandard());
 
-    loginf << "EvaluationCalculator: useGroupInSector:"
+    loginf << "start"
            << " standard_name " << settings_.current_standard_
            << " sector_layer_name " << sector_layer_name
            << " group_name " << group_name 
@@ -1537,7 +1537,7 @@ void EvaluationCalculator::useRequirement(const std::string& standard_name,
                                           const std::string& req_name,
                                           bool value)
 {
-    loginf << "EvaluationCalculator: useRequirement:"
+    loginf << "start"
            << " standard_name " << standard_name
            << " group_name " << group_name 
            << " req_name " << req_name 
@@ -1550,7 +1550,7 @@ void EvaluationCalculator::useRequirement(const std::string& standard_name,
  */
 void EvaluationCalculator::updateSectorROI()
 {
-    loginf << "EvaluationCalculator: updateSectorROI";
+    loginf << "start";
 
     sector_roi_.reset();
 
@@ -1618,7 +1618,7 @@ void EvaluationCalculator::updateSectorROI()
  */
 void EvaluationCalculator::updateCompoundCoverage(std::set<unsigned int> tst_sources)
 {
-    loginf << "EvaluationCalculator: updateCompoundCoverage";
+    loginf << "start";
 
     tst_srcs_coverage_->clear();
 
@@ -1648,7 +1648,7 @@ void EvaluationCalculator::updateCompoundCoverage(std::set<unsigned int> tst_sou
 
             if (range_max_set && ds.hasPosition())
             {
-                loginf << "EvaluationCalculator: updateCompoundCoverage: adding src " << ds.name()
+                loginf << "adding src " << ds.name()
                        << " range " << range_max * NM2M;
 
                 tst_srcs_coverage_->addRangeCircle(ds_id, ds.latitude(), ds.longitude(), range_max * NM2M);

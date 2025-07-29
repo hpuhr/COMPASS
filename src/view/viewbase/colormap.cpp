@@ -443,7 +443,7 @@ size_t ColorMap::indexFromFactor(double t) const
 
         if (idx > n_colors_ - 2)
         {
-            logerr << "ColorMap: indexFromFactor: idx " << idx << " > " << n_colors_ - 2
+            logerr << "idx " << idx << " > " << n_colors_ - 2
                    << " for t " << t;
             idx = n_colors_ - 2;
         }
@@ -469,7 +469,7 @@ size_t ColorMap::indexFromFactor(double t) const
 
         if (idx > n_colors_ - 2)
         {
-            logerr << "ColorMap: indexFromFactor: idx " << idx << " > " << n_colors_ - 2
+            logerr << "idx " << idx << " > " << n_colors_ - 2
                    << " for t " << t;
             idx = n_colors_ - 2;
         }

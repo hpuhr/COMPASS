@@ -234,7 +234,7 @@ void JoinedIntervalBase::accumulateSingleResult(const std::shared_ptr<Single>& s
 */
 boost::optional<double> JoinedIntervalBase::computeResult_impl() const
 {
-    loginf << "JoinedIntervalBase: computeResult_impl:" << type()
+    loginf << "start" << type()
             << " sum_uis_ " << sum_uis_
             << " missed_uis_ " << missed_uis_;
 

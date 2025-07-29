@@ -66,12 +66,12 @@ ProjectionManagerWidget::ProjectionManagerWidget(ProjectionManager& proj_man, QW
 
 ProjectionManagerWidget::~ProjectionManagerWidget()
 {
-    loginf << "ProjectionManagerWidget: dtor";
+    loginf << "start";
 }
 
 void ProjectionManagerWidget::selectedObjectParserSlot(const QString& name)
 {
-    loginf << "ProjectionManagerWidget: selectedObjectParserSlot: name " << name.toStdString();
+    loginf << "name " << name.toStdString();
 
     assert(projection_manager_.hasProjection(name.toStdString()));
     projection_manager_.currentProjectionName(name.toStdString());

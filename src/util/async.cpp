@@ -88,7 +88,7 @@ bool waitDialogAsync(const std::function<bool()>& task,
         }
         catch (const std::exception& e)
         {
-            logerr << "Async: waitDialogAsync: exception '" << e.what() << "'";
+            logerr << "exception '" << e.what() << "'";
             throw e;
         }
     };

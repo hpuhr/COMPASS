@@ -216,7 +216,7 @@ void EvaluationTargetFilterDialog::removeSTMinUpdatesEditedSlot()
     if (ok)
         target_filter_.removeShortTargetsMinUpdates(value);
     else
-        logwrn << "EvaluationTargetFilterDialog: removeSTMinUpdatesEditedSlot: conversion of text '"
+        logwrn << "conversion of text '"
                << text.toStdString() << "' failed";
 }
 
@@ -231,7 +231,7 @@ void EvaluationTargetFilterDialog::removeSTMinDurationEditedSlot()
     if (ok)
         target_filter_.removeShortTargetsMinDuration(value);
     else
-        logwrn << "EvaluationTargetFilterDialog: removeSTMinDurationEditedSlot: conversion of text '"
+        logwrn << "conversion of text '"
                << text.toStdString() << "' failed";
 }
 

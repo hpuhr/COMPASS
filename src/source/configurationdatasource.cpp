@@ -66,7 +66,7 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
 
     parseNetworkLineInfo();
 
-    logdbg << "ConfigurationDataSource: ctor: " << name()
+    logdbg << "start" << name()
            << " sac/sic " << sac() << "/" << sic();
 }
 
@@ -76,7 +76,7 @@ ConfigurationDataSource::~ConfigurationDataSource()
 
 void ConfigurationDataSource::setFromJSON(const json& j)
 {
-    logdbg << "ConfigurationDataSource: setFromJSON: '" << j.dump(4) << "'";
+    logdbg << "'" << j.dump(4) << "'";
 
     assert(j.contains("ds_type"));
 
@@ -121,7 +121,7 @@ DBDataSource* ConfigurationDataSource::getAsNewDBDS()
     if (!info_.is_null())
         new_ds->info(info_.dump());
 
-    loginf << "ConfigurationDataSource: getAsNewDBDS: name " << new_ds->name()
+    loginf << "name " << new_ds->name()
             << " sac/sic " << new_ds->sac() << "/" << new_ds->sic();
 
     return new_ds;

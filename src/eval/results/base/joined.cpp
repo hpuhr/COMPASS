@@ -167,15 +167,15 @@ void Joined::iterateDetails(const DetailFunc& func,
 */
 void Joined::addToReport(std::shared_ptr<ResultReport::Report> report)
 {
-    logdbg << "Joined: addToReport: " <<  requirement_->name();
+    logdbg << "start" <<  requirement_->name();
 
     if (!results_.size()) // some data must exist
     {
-        logerr << "Joined: addToReport: " <<  requirement_->name() <<": no data";
+        logerr << "start" <<  requirement_->name() <<": no data";
         return;
     }
 
-    logdbg << "Joined: addToReport: " <<  requirement_->name() << ": adding joined result";
+    logdbg << "start" <<  requirement_->name() << ": adding joined result";
 
     addSectorToOverviewTable(report);
     addSectorDetailsToReport(report);
@@ -348,7 +348,7 @@ bool Joined::exportAsCSV() const
     if (!canExportCSV())
         return false;
 
-    loginf << "Joined: exportAsCSV: " << type();
+    loginf << "start" << type();
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
@@ -557,7 +557,7 @@ std::shared_ptr<nlohmann::json::object_t> Joined::getOrCreateCachedViewable() co
 {
     if (!viewable_)
     {
-        loginf << "Joined: getOrCreateCachedViewable: recreating viewable for "
+        loginf << "recreating viewable for "
                << "requirement '" << requirement_->name() << "' " 
                << "sector '" << sector_layer_.name() << "'..."; 
 

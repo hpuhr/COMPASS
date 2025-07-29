@@ -126,13 +126,13 @@ void applyFunctionToValues(nlohmann::json& j, const std::vector<std::string>& ke
                            std::vector<std::string>::const_iterator current_key_it,
                            std::function<void(nlohmann::json&)> function, bool required)
 {
-    //            loginf << "Utils: JSON: applyFunctionToValues: current_key '" << *current_key_it
+    //            loginf << "applyFunctionToValues: current_key '" << *current_key_it
     //            << "' data '"
     //                   << j.dump(4) << "'";
 
     if (current_key_it == keys.end())  // no more keys
     {
-        // loginf << "Utils: JSON: applyFunctionToValues: applying to '" << j.dump(4) << "'";
+        // loginf << "applyFunctionToValues: applying to '" << j.dump(4) << "'";
         function(j);
         return;
     }
@@ -141,17 +141,17 @@ void applyFunctionToValues(nlohmann::json& j, const std::vector<std::string>& ke
 
     if (j.contains(*current_key_it))
     {
-        // loginf << "Utils: JSON: applyFunctionToValues: contains";
+        // loginf << "start";
         nlohmann::json& value = j.at(*current_key_it);
 
         if (value.is_object())
         {
-            // loginf << "Utils: JSON: applyFunctionToValues: recursing into object";
+            // loginf << "applyFunctionToValues: recursing into object";
             applyFunctionToValues(value, keys, current_key_it + 1, function, required);
         }
         else if (value.is_array())
         {
-            // loginf << "Utils: JSON: applyFunctionToValues: recursing into array";
+            // loginf << "applyFunctionToValues: recursing into array";
 
             for (auto& value_it : value)
                 applyFunctionToValues(value_it, keys, current_key_it + 1, function, required);
@@ -167,7 +167,7 @@ void applyFunctionToValues(nlohmann::json& j, const std::vector<std::string>& ke
     }
     else
     {
-        // loginf << "Utils: JSON: applyFunctionToValues: not contained";
+        // loginf << "applyFunctionToValues: not contained";
 
         if (required)
             throw std::runtime_error("Utils: String: applyFunctionToValues: key '" +

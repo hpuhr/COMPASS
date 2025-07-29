@@ -188,7 +188,7 @@ void EvaluationFilterTabWidget::minRefTrajAccuracyEditedSlot (const QString& tex
     val = text.toFloat(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minRefTrajAccuracyEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().ref_traj_minimum_accuracy_ = val;
 }
@@ -253,7 +253,7 @@ void EvaluationFilterTabWidget::minNUCPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minNUCPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_nucp_ = val;
 }
@@ -278,7 +278,7 @@ void EvaluationFilterTabWidget::minNICEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minNICEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_nic_ = val;
 }
@@ -303,7 +303,7 @@ void EvaluationFilterTabWidget::minNACPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minNACPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_nacp_ = val;
 }
@@ -328,7 +328,7 @@ void EvaluationFilterTabWidget::minSILv1PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minSILv1PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_sil_v1_ = val;
 }
@@ -353,7 +353,7 @@ void EvaluationFilterTabWidget::minSILv2PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minSILv2PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_sil_v2_ = val;
 }
@@ -378,7 +378,7 @@ void EvaluationFilterTabWidget::maxNUCPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxNUCPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_nucp_ = val;
 }
@@ -403,7 +403,7 @@ void EvaluationFilterTabWidget::maxNICEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxNICEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_nic_ = val;
 }
@@ -428,7 +428,7 @@ void EvaluationFilterTabWidget::maxNACPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxNACPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_nacp_ = val;
 }
@@ -453,7 +453,7 @@ void EvaluationFilterTabWidget::maxSILv1PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxSILv1PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_sil_v1_ = val;
 }
@@ -478,7 +478,7 @@ void EvaluationFilterTabWidget::maxSILv2PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxSILv2PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_sil_v2_ = val;
 }

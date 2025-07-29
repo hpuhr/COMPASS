@@ -45,7 +45,7 @@ PositionRadarAzimuthConfigWidget::PositionRadarAzimuthConfigWidget(PositionRadar
 
 void PositionRadarAzimuthConfigWidget::thresholdValueEditSlot(QString value)
 {
-    loginf << "PositionRadarAzimuthConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     double val = value.toDouble(&ok);
@@ -53,7 +53,7 @@ void PositionRadarAzimuthConfigWidget::thresholdValueEditSlot(QString value)
     if (ok)
         config().thresholdValue(val);
     else
-        loginf << "PositionRadarAzimuthConfigWidget: thresholdValueEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 PositionRadarAzimuthConfig& PositionRadarAzimuthConfigWidget::config()

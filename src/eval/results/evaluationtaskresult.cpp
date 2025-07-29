@@ -145,7 +145,7 @@ Result EvaluationTaskResult::update_impl(UpdateState state)
     if (state == UpdateState::FullUpdateNeeded ||
         state == UpdateState::Locked)
     {
-        loginf << "EvaluationTaskResult: update_impl: Running full update";
+        loginf << "Running full update";
         res = calculator_->evaluate(true);
     }
     else if (state == UpdateState::PartialUpdateNeeded)
@@ -155,12 +155,12 @@ Result EvaluationTaskResult::update_impl(UpdateState state)
 
         if (needs_recompute)
         {
-            loginf << "EvaluationTaskResult: update_impl: Running initial full update";
+            loginf << "Running initial full update";
             res = calculator_->evaluate(true);
         }
         else
         {
-            loginf << "EvaluationTaskResult: update_impl: Running partial update";
+            loginf << "Running partial update";
             calculator_->updateResultsToChanges();
         }
     }
@@ -308,14 +308,14 @@ bool EvaluationTaskResult::loadOnDemandFigure_impl(ResultReport::SectionContentF
             auto result = helpers::obtainSingleResult(figure, calculator_.get());
             if (!result)
             {
-                logerr << "EvaluationTaskResult: loadOnDemandFigure_impl: result could not be obtained";
+                logerr << "result could not be obtained";
                 return false;
             }
 
             //add overview to figure
             if (!result->addOverviewToFigure(*figure))
             {
-                logerr << "EvaluationTaskResult: loadOnDemandFigure_impl: error configuring content";
+                logerr << "error configuring content";
                 return false;
             }
 
@@ -324,7 +324,7 @@ bool EvaluationTaskResult::loadOnDemandFigure_impl(ResultReport::SectionContentF
     }
     catch(...)
     {
-        logerr << "EvaluationTaskResult: loadOnDemandFigure_impl: critical error during load";
+        logerr << "critical error during load";
     }
     
     return false;
@@ -347,14 +347,14 @@ bool EvaluationTaskResult::loadOnDemandTable_impl(ResultReport::SectionContentTa
             auto result = helpers::obtainSingleResult(table, calculator_.get());
             if (!result)
             {
-                logerr << "EvaluationTaskResult: loadOnDemandTable_impl: result could not be obtained";
+                logerr << "result could not be obtained";
                 return false;
             }
 
             //add table details
             if (!result->addDetailsToTable(*table))
             {
-                logerr << "EvaluationTaskResult: loadOnDemandTable_impl: error configuring content";
+                logerr << "error configuring content";
                 return false;
             }
 
@@ -373,7 +373,7 @@ bool EvaluationTaskResult::loadOnDemandTable_impl(ResultReport::SectionContentTa
     }
     catch(...)
     {
-        logerr << "EvaluationTaskResult: loadOnDemandTable_impl: critical error during load";
+        logerr << "critical error during load";
     }
     
     return false;
@@ -397,14 +397,14 @@ bool EvaluationTaskResult::loadOnDemandViewable_impl(const ResultReport::Section
             auto result = helpers::obtainSingleResult(&content, calculator_.get());
             if (!result)
             {
-                logerr << "EvaluationTaskResult: loadOnDemandViewable_impl: result could not be obtained";
+                logerr << "result could not be obtained";
                 return false;
             }
 
             //configure detail highlight viewable 
             if (!result->addHighlightToViewable(viewable, index))
             {
-                logerr << "EvaluationTaskResult: loadOnDemandViewable_impl: error configuring content";
+                logerr << "error configuring content";
                 return false;
             }
 
@@ -436,7 +436,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
                                                   ResultReport::SectionContentTable* table, 
                                                   unsigned int row)
 {
-    logdbg << "EvaluationTaskResult: customContextMenu_impl";
+    logdbg << "start";
 
     if (table->name() == EvaluationRequirementResult::Single::TRDetailsTableName)
     {
@@ -448,7 +448,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
         auto info = helpers::joinedResultContentProperties(table);
         auto utn  = helpers::utnFromTable(table, row);
         
-        loginf << "EvaluationTaskResult: customContextMenu_impl: Context menu requested for utn " << utn;
+        loginf << "Context menu requested for utn " << utn;
 
         if (calculator_ && !isLocked())
         {
@@ -481,7 +481,7 @@ bool EvaluationTaskResult::customContextMenu_impl(QMenu& menu,
         //evaluation target table
         auto utn  = helpers::utnFromTable(table, row);
 
-        loginf << "EvaluationTaskResult: customContextMenu_impl: Context menu requested for utn " << utn;
+        loginf << "Context menu requested for utn " << utn;
 
         if (calculator_ && !isLocked())
         {
@@ -625,7 +625,7 @@ void EvaluationTaskResult::showSurroundingData(unsigned int utn) const
 {
     if (targets_.count(utn) == 0)
     {
-        logerr << "EvaluationTaskResult: showSurroundingData: utn " << utn << " not found in targets";
+        logerr << "utn " << utn << " not found in targets";
         return;
     }
 
@@ -842,11 +842,11 @@ void EvaluationTaskResult::jumpToRequirement(const Evaluation::RequirementSumRes
 
     std::string sum_id = EvalSectionID::requirementResultSumID(id);
 
-    loginf << "EvaluationTaskResult: jumpToRequirement: sum id: " << sum_id;
+    loginf << "sum id: " << sum_id;
 
     std::string utn_id = EvalSectionID::createForTargetResult(utn, id);
 
-    loginf << "EvaluationTaskResult: jumpToRequirement: utn id: " << utn_id;
+    loginf << "utn id: " << utn_id;
 
     report_->setCurrentSection(utn_id, show_image);
 }

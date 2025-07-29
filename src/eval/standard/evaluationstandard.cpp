@@ -61,7 +61,7 @@ void EvaluationStandard::generateSubConfigurable(const std::string& class_id,
     {
         Group* group = new Group(class_id, instance_id, *this, calculator_);
 
-        logdbg << "EvaluationStandard: generateSubConfigurable: adding group " << group->name();
+        logdbg << "adding group " << group->name();
 
         assert (!hasGroup(group->name()));
 
@@ -205,7 +205,7 @@ void EvaluationStandard::name(const std::string &name)
 
 void EvaluationStandard::groupsChangedSlot()
 {
-    loginf << "EvaluationStandard: groupsChangedSlot";
+    loginf << "start";
 
     emit configChangedSignal();
 }

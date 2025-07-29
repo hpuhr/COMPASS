@@ -128,7 +128,7 @@ Variable &VariableEditDialog::variable() const
 
 void VariableEditDialog::nameChangedSlot(const QString& name)
 {
-    loginf << "VariableEditDialog: nameChangedSlot: name '" << name.trimmed().toStdString() << "'";
+    loginf << "name '" << name.trimmed().toStdString() << "'";
 
     assert (name_edit_);
     string new_name = name.trimmed().toStdString();
@@ -144,7 +144,7 @@ void VariableEditDialog::nameChangedSlot(const QString& name)
 
     if (variable_.object().hasVariable(new_name))
     {
-        logwrn << "VariableEditDialog: nameChangedSlot: name '" << new_name << "' already in use";
+        logwrn << "name '" << new_name << "' already in use";
 
         name_edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
         name_edit_->setToolTip(("Variable name '"+new_name+"' already in use").c_str());
@@ -156,7 +156,7 @@ void VariableEditDialog::nameChangedSlot(const QString& name)
     name_edit_->setStyleSheet("");
     name_edit_->setToolTip("");
 
-    loginf << "VariableEditDialog: nameChangedSlot: renaming '" << variable_.name() << "' to '" << new_name << "'";
+    loginf << "renaming '" << variable_.name() << "' to '" << new_name << "'";
     variable_.object().renameVariable(std::string(variable_.name()), new_name); // copy, otherwise wrong
 
     if (new_name.size())
@@ -178,7 +178,7 @@ void VariableEditDialog::nameChangedSlot(const QString& name)
 
 void VariableEditDialog::shortNameChangedSlot(const QString& name)
 {
-    loginf << "VariableEditDialog: shortNameChangedSlot: name '" << name.trimmed().toStdString() << "'";
+    loginf << "name '" << name.trimmed().toStdString() << "'";
 
     variable_.shortName(name.trimmed().toStdString());
 
@@ -210,7 +210,7 @@ void VariableEditDialog::dbColumnChangedSlot(const QString& name)
 
     if (variable_.object().hasVariableDBColumnName(new_name))
     {
-        logwrn << "VariableEditDialog: dbColumnChangedSlot: name '" << new_name << "' already in use";
+        logwrn << "name '" << new_name << "' already in use";
 
         db_column_edit_->setStyleSheet(COMPASS::instance().lineEditInvalidStyle());
         db_column_edit_->setToolTip(("Variable DB Column name '"+new_name+"' already in use").c_str());
@@ -220,7 +220,7 @@ void VariableEditDialog::dbColumnChangedSlot(const QString& name)
     db_column_edit_->setStyleSheet("");
     db_column_edit_->setToolTip("");
 
-    loginf << "VariableEditDialog: dbColumnChangedSlot: changing '" << variable_.dbColumnName()
+    loginf << "changing '" << variable_.dbColumnName()
            << "' to '" << new_name << "'";
     variable_.dbColumnName(new_name);
 
@@ -229,7 +229,7 @@ void VariableEditDialog::dbColumnChangedSlot(const QString& name)
 
 void VariableEditDialog::doneSlot()
 {
-    loginf << "VariableEditDialog: doneSlot";
+    loginf << "start";
 
     accept();
 }

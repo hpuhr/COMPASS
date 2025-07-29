@@ -75,7 +75,7 @@ namespace
             !j_sector.contains("own_volume") ||
             !j_sector.contains("used_for_checking"))
         {
-            logerr << "AirSpace: readJSON: ill-defined sector, json '" << j_sector.dump(4);
+            logerr << "ill-defined sector, json '" << j_sector.dump(4);
             return {};
         }
 
@@ -93,7 +93,7 @@ namespace
             nlohmann::json& geographic_points = j_sector["geographic_points"];
             if (!geographic_points.is_array())
             {
-                logerr << "AirSpace: readJSON: geographic_points is not an array";
+                logerr << "geographic_points is not an array";
                 return {};
             }
 
@@ -103,7 +103,7 @@ namespace
                     !j_gp.contains("latitude") ||
                     !j_gp.contains("longitude"))
                 {
-                    logerr << "AirSpace: readJSON: ill-defined geographic point, json '" << j_gp.dump(4);
+                    logerr << "ill-defined geographic point, json '" << j_gp.dump(4);
                     return {};
                 }
 
@@ -113,7 +113,7 @@ namespace
 
                 if (!ordered_points.insert(std::make_pair(id, std::make_pair(lat, lon))).second)
                 {
-                    logerr << "AirSpace: readJSON: duplicate geographic point ID " << id;
+                    logerr << "duplicate geographic point ID " << id;
                     return {};
                 }
             }
@@ -149,7 +149,7 @@ namespace
         //!no double nestings!
         if (parent && has_nested_sectors)
         {
-            logerr << "AirSpace: readSectorRecursive: Double nesting of sectors detected in layer '" + parent->name() + "'";
+            logerr << "Double nesting of sectors detected in layer '" + parent->name() + "'";
             return nullptr;
         }
 
@@ -182,7 +182,7 @@ namespace
                 nlohmann::json& air_space_sectors = j_sector["air_space_sectors"];
                 if (!air_space_sectors.is_array())
                 {
-                    logerr << "AirSpace: readSectorRecursive: air_space_sectors is not an array";
+                    logerr << "air_space_sectors is not an array";
                     return nullptr;
                 }
 
@@ -228,7 +228,7 @@ bool AirSpace::readJSON(const std::string& fn,
 
         if (!j.contains("air_space_sector_definition"))
         {
-            logerr << "AirSpace: readJSON: file does not contain air_space_sector_definition";
+            logerr << "file does not contain air_space_sector_definition";
             return false;
         }
 
@@ -236,14 +236,14 @@ bool AirSpace::readJSON(const std::string& fn,
 
         if (!air_space_sector_definition.contains("air_space_sectors"))
         {
-            logerr << "AirSpace: readJSON: file does not contain air_space_sectors";
+            logerr << "file does not contain air_space_sectors";
             return false;
         }
 
         nlohmann::json& air_space_sectors = air_space_sector_definition["air_space_sectors"];
         if (!air_space_sectors.is_array())
         {
-            logerr << "AirSpace: readJSON: air_space_sectors is not an array";
+            logerr << "air_space_sectors is not an array";
             return false;
         }
 
@@ -262,7 +262,7 @@ bool AirSpace::readJSON(const std::string& fn,
 
         if (sec_id == base_id)
         {
-            logerr << "AirSpace: readJSON: no sectors found";
+            logerr << "no sectors found";
             return false;
         }
 
@@ -270,7 +270,7 @@ bool AirSpace::readJSON(const std::string& fn,
     }
     catch (nlohmann::json::exception& e)
     {
-        logerr << "AirSpace: readJSON: could not load file '" << fn << "': " << e.what();
+        logerr << "could not load file '" << fn << "': " << e.what();
 
         clear();
 

@@ -134,7 +134,7 @@ void addWithWeightedAverage(double value1, double std_dev1, unsigned int value1_
 
         if (!std::isfinite(new_weighted_avg))
         {
-            logerr << "Number: addWithWeightedAverage: new_weighted_avg " << new_weighted_avg
+            logerr << "new_weighted_avg " << new_weighted_avg
                    << " stddevsum " << (std_dev1 * std_dev1)
                    << " weightvalsum " << (value1 * weight1 + value2 * weight2)
                    << " weightsum " << (weight1 + weight2);
@@ -364,7 +364,7 @@ std::tuple<double,double,double,double> getStatistics (const T& values)
     double mean=0, stddev=0, min=0, max=0;
 
     if (values.empty()) {
-        logerr << "Number: getStatistics: empty vector";
+        logerr << "empty vector";
 
         return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(),
                 std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
@@ -392,7 +392,7 @@ template std::tuple<double,double,double,double> getStatistics (const tbb::concu
 std::tuple<double,double,double,double> getStatistics (const std::vector<double>& values)
 {
     if (values.empty()) {
-        logerr << "Number: getStatistics: empty vector";
+        logerr << "empty vector";
 
         return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN(),
                 std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
@@ -423,7 +423,7 @@ std::pair<double,double> calculateMeanStdDev (std::vector<double> values, float 
 
     if (values.empty())
     {
-        logerr << "Number: calculateMeanStdDev: empty vector";
+        logerr << "empty vector";
 
         return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
     }
@@ -434,7 +434,7 @@ std::pair<double,double> calculateMeanStdDev (std::vector<double> values, float 
 
     if (num_to_check == 0)
     {
-        logerr << "Number: calculateMeanStdDev: remove all values in vector";
+        logerr << "remove all values in vector";
         return {std::numeric_limits<double>::signaling_NaN(), std::numeric_limits<double>::signaling_NaN()};
     }
 
@@ -466,7 +466,7 @@ double calculateMedian(std::vector<double> data) {
     size_t size = data.size();
 
     if (size == 0) {
-        logerr << "Number: calculateMedian: empty vector";
+        logerr << "empty vector";
 
         return std::numeric_limits<double>::signaling_NaN();
     }
@@ -484,7 +484,7 @@ double calculateMedian(std::vector<double> data) {
 double calculateIQR(std::vector<double> data) {
     size_t size = data.size();
     if (size < 4) {
-        logerr << "Number: calculateIQR: too few data opints to compute IQR";
+        logerr << "too few data opints to compute IQR";
         return std::numeric_limits<double>::signaling_NaN();
     }
     std::sort(data.begin(), data.end());
@@ -508,7 +508,7 @@ double calculateIQR(std::vector<double> data) {
 // Function to calculate the median absolute deviation (MAD)
 double calculateMAD(std::vector<double> data) {
     if (data.empty()) {
-        logerr << "Number: calculateMAD: empty vector";
+        logerr << "empty vector";
 
         return std::numeric_limits<double>::signaling_NaN();
     }
@@ -538,7 +538,7 @@ std::tuple<double,double,double> getMedianStatistics (const std::vector<double>&
 
         return std::tuple<double,double,double>{median, iqr, mad};
     } catch (const std::domain_error& e) {
-        logerr << "Number: getMedianStatistics: " << e.what();
+        logerr << "start" << e.what();
         return {std::numeric_limits<double>::signaling_NaN(),
                 std::numeric_limits<double>::signaling_NaN(),
                 std::numeric_limits<double>::signaling_NaN()};

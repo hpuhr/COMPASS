@@ -626,7 +626,7 @@ void DataSourcesWidget::clear()
  */
 int DataSourcesWidget::generateContent(bool force_rebuild)
 {
-    logdbg << "DataSourcesWidget: createContent";
+    logdbg << "start";
 
     tree_widget_->blockSignals(true);
 
@@ -664,7 +664,7 @@ int DataSourcesWidget::generateContent(bool force_rebuild)
     int changes = 0;
     for (const auto& ds_type_name : data_source_types)
     {
-        logdbg << "DataSourcesWidget: createContent: type " << ds_type_name << " cnt " << cnt;
+        logdbg << "type " << ds_type_name << " cnt " << cnt;
 
         auto item = dynamic_cast<DataSourceTypeItem*>(tree_widget_->topLevelItem(cnt));
         assert(item);
@@ -746,7 +746,7 @@ int DataSourcesWidget::generateDataSource(DataSourceItem* item,
     unsigned int ds_id   = Utils::Number::dsIdFrom(data_source.sac(), data_source.sic());
     std::string  ds_name = data_source.name();
 
-    logdbg << "DataSourcesWidget: createDataSource: create '" << data_source.dsType() << "' '" << ds_name << "'";
+    logdbg << "create '" << data_source.dsType() << "' '" << ds_name << "'";
 
     //init item
     int changes = item->init(ds_id) ? 1 : 0;
@@ -823,12 +823,12 @@ int DataSourcesWidget::generateDataSourceCount(DataSourceCountItem* item,
  */
 void DataSourcesWidget::updateContent(bool recreate_required)
 {
-    logdbg << "DataSourcesWidget: updateContent: recreate_required " << recreate_required
+    logdbg << "recreate_required " << recreate_required
            << " num data sources " << ds_man_.dbDataSources().size();
 
     int changes = generateContent(recreate_required);
 
-    logdbg << "DataSourcesWidget: updateContent: update generated " << changes << " change(s)";
+    logdbg << "update generated " << changes << " change(s)";
 }
 
 /**
@@ -850,7 +850,7 @@ void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
             bool load = ds_type_item->checkState(0) == Qt::Checked;
             setUseDSType(ds_type_item->dsType(), load);
 
-            loginf << "DataSourcesWidget: itemChanged: ds_type " << ds_type_item->dsType() << " load " << load;
+            loginf << "ds_type " << ds_type_item->dsType() << " load " << load;
         }
     }
     else if (w_item->type() == DataSourcesWidgetItem::Type::DataSource)
@@ -863,7 +863,7 @@ void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
             bool load = ds_item->checkState(0) == Qt::Checked;
             setUseDS(ds_item->dsID(), load);
 
-            loginf << "DataSourcesWidget: itemChanged: ds_id " << ds_item->dsID() << " load " << load;
+            loginf << "ds_id " << ds_item->dsID() << " load " << load;
         }
     }
     else if (w_item->type() == DataSourcesWidgetItem::Type::DataSourceCount)
@@ -879,7 +879,7 @@ void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
  */
 void DataSourcesWidget::lineChanged(unsigned int ds_id, unsigned int ds_line, bool use)
 {
-    logdbg << "DataSourcesWidget: lineChanged: ds_id " << ds_id << " line " << ds_line << " use " << use;
+    logdbg << "ds_id " << ds_id << " line " << ds_line << " use " << use;
 
     setUseDSLine(ds_id, ds_line, use);
 }
@@ -944,7 +944,7 @@ void DataSourcesWidget::updateAdditionalInfo()
  */
 void DataSourcesWidget::selectAllDSTypes()
 {
-    loginf << "DataSourcesWidget: selectAllDSTypes";
+    loginf << "start";
 
     for (auto& ds_type_name : DataSourceManager::data_source_types_)
         setUseDSType(ds_type_name, true);
@@ -956,7 +956,7 @@ void DataSourcesWidget::selectAllDSTypes()
  */
 void DataSourcesWidget::deselectAllDSTypes()
 {
-    loginf << "DataSourcesWidget: deselectAllDSTypes";
+    loginf << "start";
 
     for (auto& ds_type_name : DataSourceManager::data_source_types_)
         setUseDSType(ds_type_name, false);
@@ -968,7 +968,7 @@ void DataSourcesWidget::deselectAllDSTypes()
  */
 void DataSourcesWidget::selectAllDataSources()
 {
-    loginf << "DataSourcesWidget: selectAllDataSources";
+    loginf << "start";
 
     for (const auto& ds_it : ds_man_.dbDataSources())
         setUseDS(ds_it->id(), true);
@@ -980,7 +980,7 @@ void DataSourcesWidget::selectAllDataSources()
  */
 void DataSourcesWidget::deselectAllDataSources()
 {
-    loginf << "DataSourcesWidget: deselectAllDataSources";
+    loginf << "start";
 
     for (const auto& ds_it : ds_man_.dbDataSources())
         setUseDS(ds_it->id(), false);
@@ -997,7 +997,7 @@ void DataSourcesWidget::selectDSTypeSpecificDataSources()
 
     std::string ds_type = action->property("ds_type").toString().toStdString();
 
-    loginf << "DataSourcesWidget: selectDSTypeSpecificDataSources: ds_type '" << ds_type << "'";
+    loginf << "ds_type '" << ds_type << "'";
 
     for (const auto& ds_it : ds_man_.dbDataSources())
         if (ds_it->dsType() == ds_type)
@@ -1015,7 +1015,7 @@ void DataSourcesWidget::deselectDSTypeSpecificDataSources()
 
     std::string ds_type = action->property("ds_type").toString().toStdString();
 
-    loginf << "DataSourcesWidget: deselectDSTypeSpecificDataSources: ds_type '" << ds_type << "'";
+    loginf << "ds_type '" << ds_type << "'";
 
     for (const auto& ds_it : ds_man_.dbDataSources())
         if (ds_it->dsType() == ds_type)
@@ -1028,7 +1028,7 @@ void DataSourcesWidget::deselectDSTypeSpecificDataSources()
  */
 void DataSourcesWidget::deselectAllLines()
 {
-    loginf << "DataSourcesWidget: deselectAllLines";
+    loginf << "start";
 
     for (const auto& ds_it : ds_man_.dbDataSources())
         for (int line = 0; line < 4; ++line)
@@ -1046,7 +1046,7 @@ void DataSourcesWidget::selectSpecificLines()
 
     unsigned int line_id = action->property("line_id").toUInt();
 
-    loginf << "DataSourcesWidget: selectSpecificLine: line_id " << line_id;
+    loginf << "line_id " << line_id;
 
     for (const auto& ds_it : ds_man_.dbDataSources())
         setUseDSLine(ds_it->id(), line_id, true);
@@ -1058,7 +1058,7 @@ void DataSourcesWidget::selectSpecificLines()
  */
 void DataSourcesWidget::toogleShowCounts()
 {
-    loginf << "DataSourcesWidget: toogleShowCounts";
+    loginf << "start";
 
     setShowCounts(!getShowCounts());
 

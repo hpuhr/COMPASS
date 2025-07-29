@@ -153,7 +153,7 @@ void JSONObjectParserWidget::update()
 
 void JSONObjectParserWidget::updateActive()
 {
-    loginf << "JSONObjectParserWidget: updateActive: value " << parser_->active();
+    loginf << "value " << parser_->active();
 
     assert (active_check_);
     active_check_->setChecked(parser_->active());
@@ -161,7 +161,7 @@ void JSONObjectParserWidget::updateActive()
 
 void JSONObjectParserWidget::updateMappingsGrid()
 {
-    loginf << "JSONObjectParserWidget: updateMappingsGrid";
+    loginf << "start";
     assert(parser_);
     assert(mappings_grid_);
 
@@ -309,7 +309,7 @@ void JSONObjectParserWidget::setParser(JSONObjectParser& parser) { parser_ = &pa
 
 //void JSONObjectParserWidget::toggleActiveSlot ()
 //{
-//    loginf << "JSONObjectParserWidget: toggleActiveSlot";
+//    loginf << "start";
 
 //    QCheckBox* widget = static_cast<QCheckBox*>(sender());
 //    assert(widget);
@@ -372,7 +372,7 @@ void JSONObjectParserWidget::addNewMappingSlot()
 
 void JSONObjectParserWidget::mappingActiveChangedSlot()
 {
-    loginf << "JSONObjectParserWidget: mappingActiveChangedSlot";
+    loginf << "start";
 
     QCheckBox* widget = static_cast<QCheckBox*>(sender());
     assert(widget);
@@ -410,7 +410,7 @@ void JSONObjectParserWidget::mappingActiveChangedSlot()
 
 void JSONObjectParserWidget::mappingKeyChangedSlot()
 {
-    loginf << "JSONObjectParserWidget: mappingKeyChangedSlot";
+    loginf << "start";
 
     QLineEdit* widget = static_cast<QLineEdit*>(sender());
     assert(widget);
@@ -424,7 +424,7 @@ void JSONObjectParserWidget::mappingKeyChangedSlot()
 
 void JSONObjectParserWidget::mappingCommentChangedSlot()
 {
-    loginf << "JSONObjectParserWidget: mappingCommentChangedSlot";
+    loginf << "start";
 
     QLineEdit* widget = static_cast<QLineEdit*>(sender());
     assert(widget);
@@ -438,7 +438,7 @@ void JSONObjectParserWidget::mappingCommentChangedSlot()
 
 void JSONObjectParserWidget::mappingDBContentVariableChangedSlot()
 {
-    loginf << "JSONObjectParserWidget: mappingDBContentVariableChangedSlot";
+    loginf << "start";
 
     dbContent::VariableSelectionWidget* var_widget =
             static_cast<dbContent::VariableSelectionWidget*>(sender());
@@ -451,13 +451,13 @@ void JSONObjectParserWidget::mappingDBContentVariableChangedSlot()
 
     if (var_widget->hasVariable())
     {
-        loginf << "JSONObjectParserWidget: mappingDBContentVariableChangedSlot: variable set";
+        loginf << "variable set";
 
         mapping->dboVariableName(var_widget->selectedVariable().name());
     }
     else
     {
-        loginf << "JSONObjectParserWidget: mappingDBContentVariableChangedSlot: variable removed";
+        loginf << "variable removed";
 
         mapping->dboVariableName("");
     }
@@ -465,7 +465,7 @@ void JSONObjectParserWidget::mappingDBContentVariableChangedSlot()
 
 void JSONObjectParserWidget::mappingMandatoryChangedSlot()
 {
-    loginf << "JSONObjectParserWidget: mappingMandatoryChangedSlot";
+    loginf << "start";
 
     QCheckBox* widget = static_cast<QCheckBox*>(sender());
     assert(widget);
@@ -479,7 +479,7 @@ void JSONObjectParserWidget::mappingMandatoryChangedSlot()
 
 void JSONObjectParserWidget::mappingInArrayChangedSlot()
 {
-    loginf << "JSONObjectParserWidget: mappingInArrayChangedSlot";
+    loginf << "start";
 
     QCheckBox* widget = static_cast<QCheckBox*>(sender());
     assert(widget);
@@ -493,7 +493,7 @@ void JSONObjectParserWidget::mappingInArrayChangedSlot()
 
 void JSONObjectParserWidget::mappingAppendChangedSlot()
 {
-    loginf << "JSONObjectParserWidget: mappingAppendChangedSlot";
+    loginf << "start";
 
     QCheckBox* widget = static_cast<QCheckBox*>(sender());
     assert(widget);
@@ -507,7 +507,7 @@ void JSONObjectParserWidget::mappingAppendChangedSlot()
 
 void JSONObjectParserWidget::mappingDeleteSlot()
 {
-    loginf << "JSONObjectParserWidget: mappingDeleteSlot";
+    loginf << "start";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
     assert(widget);

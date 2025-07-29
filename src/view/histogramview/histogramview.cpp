@@ -127,7 +127,7 @@ bool HistogramView::init_impl()
 void HistogramView::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {
-    logdbg << "HistogramView: generateSubConfigurable: class_id " << class_id << " instance_id "
+    logdbg << "class_id " << class_id << " instance_id "
            << instance_id;
     if (class_id == "HistogramViewDataSource")
     {
@@ -226,7 +226,7 @@ void HistogramView::useLogScale(bool use_log_scale, bool notify_changes)
  */
 void HistogramView::updateSelection()
 {
-    loginf << "HistogramView: updateSelection";
+    loginf << "start";
     assert(widget_);
     
     widget_->getViewDataWidget()->redrawData(true);

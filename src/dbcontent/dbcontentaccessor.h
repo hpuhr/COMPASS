@@ -85,7 +85,7 @@ inline NullableVector<T>& DBContentAccessor::getVar(const std::string& dbcontent
 {
     if (!has(dbcontent_name))
     {
-        logerr << "DBContentAccessor: getVar: dbcontent " << dbcontent_name << " not present";
+        logerr << "dbcontent " << dbcontent_name << " not present";
         assert (has(dbcontent_name));
     }
     return dbcontent_lookup_.at(dbcontent_name)->getVar<T>(var_property);
@@ -106,7 +106,7 @@ inline NullableVector<T>& DBContentAccessor::getMetaVar(const std::string& dbcon
 {
     if (!has(dbcontent_name))
     {
-        logerr << "DBContentAccessor: getMetaVar: dbcontent " << dbcontent_name << " not present";
+        logerr << "dbcontent " << dbcontent_name << " not present";
         assert (has(dbcontent_name));
     }
     return dbcontent_lookup_.at(dbcontent_name)->getMetaVar<T>(metavar_property);

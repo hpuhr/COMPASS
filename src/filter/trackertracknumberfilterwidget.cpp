@@ -41,7 +41,7 @@ TrackerTrackNumberFilterWidget::~TrackerTrackNumberFilterWidget() = default;
 
 void TrackerTrackNumberFilterWidget::update()
 {
-    loginf << "TrackerTrackNumberFilterWidget: update";
+    loginf << "start";
 
     assert (child_layout_);
 
@@ -84,7 +84,7 @@ void TrackerTrackNumberFilterWidget::valueEditedSlot(const QString& value)
     unsigned int ds_id = value_edit->property("ds_id").toUInt();
     unsigned int line_id = value_edit->property("line_id").toUInt();
 
-    loginf << "TrackerTrackNumberFilterWidget: valueEditedSlot: ds_id " << ds_id
+    loginf << "ds_id " << ds_id
            << " value '" << value.toStdString() << "'";
 
     filter_.setTrackerTrackNum(ds_id, line_id, value.toStdString());
@@ -95,7 +95,7 @@ void TrackerTrackNumberFilterWidget::valueEditedSlot(const QString& value)
 //    if (update_active_)
 //        return;
 
-//    loginf << "TrackerTrackNumberFilterWidget: minDateTimeChanged: value "
+//    loginf << "value "
 //           << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
 //    filter_.minValue(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()), false);
@@ -106,7 +106,7 @@ void TrackerTrackNumberFilterWidget::valueEditedSlot(const QString& value)
 //    if (update_active_)
 //        return;
 
-//    loginf << "TrackerTrackNumberFilterWidget: maxDateTimeChanged: value "
+//    loginf << "value "
 //           << datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString();
 
 //    filter_.maxValue(Time::fromString(datetime.toString(Time::QT_DATETIME_FORMAT.c_str()).toStdString()), false);

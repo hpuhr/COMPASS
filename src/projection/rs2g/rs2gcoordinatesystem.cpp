@@ -28,7 +28,7 @@ RS2GCoordinateSystem::RS2GCoordinateSystem(unsigned int id, double latitude_deg,
                                            double longitude_deg, double altitude_m)
     : ProjectionCoordinateSystemBase(id, latitude_deg, longitude_deg, altitude_m)
 {
-    logdbg << "RS2GCoordinateSystem: init: id " << id_ << " lat " << latitude_deg_ << " long "
+    logdbg << "id " << id_ << " lat " << latitude_deg_ << " long "
            << longitude_deg_ << " altitude " << altitude_m_;
 
     double lat_rad = latitude_deg_ * DEG2RAD;
@@ -137,7 +137,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
     ground_range_m = rho_m * cos(elev_angle_rad);
 
     if (debug)
-        loginf << "RS2GCoordinateSystem: radarSlant2LocalCart: has_altitude " << has_altitude
+        loginf << "has_altitude " << has_altitude
                << " elevation_m " << String::doubleToStringPrecision(elevation_m, 2)
                << " elev_angle_rad " << String::doubleToStringPrecision(elev_angle_rad, 6)
                << " ground_range_m " << String::doubleToStringPrecision(ground_range_m, 2);
@@ -145,7 +145,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
     //    if (rho < 50000)
     //    {
     //        loginf << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1] << " z: "
-    //        << local[2]; loginf << "radarSlant2LocalCart: rho: " << rho << " elevation: " <<
+    //        << local[2]; loginf << "start" << rho << " elevation: " <<
     //        elevation << " azimuth: " << azimuth;
     //    }
 
@@ -154,7 +154,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
     local_z = rho_m * sin(elev_angle_rad);
 
     if (debug)
-        loginf << "RS2GCoordinateSystem: radarSlant2LocalCart: local_x " << std::fixed << local_x
+        loginf << "local_x " << std::fixed << local_x
                << " local_y " << local_y << " local_z " << local_z;
 }
 
@@ -181,7 +181,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
     }
 
     if (debug)
-        loginf << "RS2GCoordinateSystem: radarSlant2LocalCart: has_altitude " << has_altitude
+        loginf << "has_altitude " << has_altitude
                << " elevation_m " << String::doubleToStringPrecision(elevation_m, 2)
                << " elev_angle_rad " << String::doubleToStringPrecision(elev_angle_rad, 6)
                << " ground_range_m " << String::doubleToStringPrecision(ground_range_m, 2);
@@ -191,7 +191,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
     local_z = rho_m * sin(elev_angle_rad);
 
     if (debug)
-        loginf << "RS2GCoordinateSystem: radarSlant2LocalCart: local_x " << std::fixed << local_x
+        loginf << "local_x " << std::fixed << local_x
                << " local_y " << local_y << " local_z " << local_z;
 }
 
@@ -274,7 +274,7 @@ bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double
                          ground_range_m, local_x, local_y, local_z, debug);
 
     if (debug)
-        loginf << "RS2GCoordinateSystem: calculateRadSlt2Geocentric: local_x " << std::fixed << local_x
+        loginf << "local_x " << std::fixed << local_x
                << " local_y " << local_y << " local_z " << local_z;
 
     // local cartesian to geocentric
@@ -304,7 +304,7 @@ bool RS2GCoordinateSystem::calculateRadSlt2Geocentric(double azimuth_rad, double
                          local_x, local_y, local_z, debug);
 
     if (debug)
-        loginf << "RS2GCoordinateSystem: calculateRadSlt2Geocentric: local_x " << std::fixed << local_x
+        loginf << "local_x " << std::fixed << local_x
                << " local_y " << local_y << " local_z " << local_z;
 
     // local cartesian to geocentric

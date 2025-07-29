@@ -123,7 +123,7 @@ void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
         addUpdateToGlobalStats(stats);
 
         // if (!ok) // collected in stats
-        //     logwrn << "ReconstructorTarget: addTargetReports: chain reestimation failed";
+        //     logwrn << "chain reestimation failed";
     }
 }
 
@@ -152,7 +152,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     // //assert (tr.in_current_slice_); // can be old one
     if (std::find(target_reports_.begin(), target_reports_.end(), rec_num) != target_reports_.end())
     {
-        logerr << "ReconstructorTarget: addTargetReport: utn " << utn_ << " tr " << tr.asStr() << " already added";
+        logerr << "utn " << utn_ << " tr " << tr.asStr() << " already added";
         assert(false);
     }
 #endif
@@ -160,7 +160,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     //    if (!timestamp_max_.is_not_a_date_time()) // there is time
     //    {
     //        if (tr.timestamp_ < timestamp_max_)
-    //            logerr << "ReconstructorTarget: addTargetReport: old max " << Time::toString(timestamp_max_)
+    //            logerr << "old max " << Time::toString(timestamp_max_)
     //                   << " tr ts " << Time::toString(tr.timestamp_);
 
     //        assert (tr.timestamp_ >= timestamp_max_);
@@ -694,7 +694,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         has_upper = true;
 
         if(debug)
-            loginf << "ReconstructorTarget: dataFor: found timestamp in target";
+            loginf << "found timestamp in target";
     }
     else if (num_ts_existing > 1)
     {
@@ -754,7 +754,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         has_upper = true;
 
         if (debug)
-            loginf << "ReconstructorTarget: dataFor: found multiple timestamps in target, chose:\n" << tr2String(dataFor(it_start->second));
+            loginf << "found multiple timestamps in target, chose:\n" << tr2String(dataFor(it_start->second));
     }
     else
     {
@@ -805,7 +805,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         }
         if (debug) 
         {
-            loginf << "ReconstructorTarget: dataFor: initial interval:\n" 
+            loginf << "initial interval:\n" 
                    << "   " << (has_lower ? tr2String(dataFor(it_lower->second)) : "") << "\n"
                    << "   " << (has_upper ? tr2String(dataFor(it_upper->second)) : "");
         }
@@ -818,7 +818,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
     if (ok_lower && ok_upper)
     {
         if (debug)
-            loginf << "ReconstructorTarget: dataFor: initial interval valid, has_lower " << has_lower
+            loginf << "initial interval valid, has_lower " << has_lower
                    << " has_upper " << has_upper;
 
         return {has_lower ? &dataFor(it_lower->second) : nullptr, has_upper ? &dataFor(it_upper->second) : nullptr};
@@ -843,7 +843,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             }
             else if (debug)
             {
-                loginf << "ReconstructorTarget: dataFor: skipping upper tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
+                loginf << "skipping upper tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
             }
         }
     }
@@ -867,7 +867,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             }
             else if (debug)
             {
-                loginf << "ReconstructorTarget: dataFor: skipping lower tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
+                loginf << "skipping lower tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
             }
 
             if (it == tr_timestamps_.begin())
@@ -879,7 +879,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
 
     if (debug) 
     {
-        loginf << "ReconstructorTarget: dataFor: final interval:\n" 
+        loginf << "final interval:\n" 
                << "   " << (has_lower ? tr2String(dataFor(it_lower->second)) : "") << "\n"
                << "   " << (has_upper ? tr2String(dataFor(it_upper->second)) : "");
     }
@@ -1013,7 +1013,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     dbContent::targetReport::Position& pos2 = *upper->position();
     float d_t = Time::partialSeconds(upper->timestamp_ - lower->timestamp_);
 
-    logdbg << "Target: interpolatedPosForTime: d_t " << d_t;
+    logdbg << "d_t " << d_t;
 
     assert (d_t >= 0);
 
@@ -1023,44 +1023,44 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     if (lower == upper) // same time
     {
-        logwrn << "Target: interpolatedPosForTime: ref has same time twice";
+        logwrn << "ref has same time twice";
         return {{}, false};
     }
 
-    logdbg << "Target: interpolatedPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
-    logdbg << "Target: interpolatedPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
+    logdbg << "pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
+    logdbg << "pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
 
     bool ok;
     double x_pos, y_pos;
 
-    logdbg << "Target: interpolatedPosForTime: geo2cart";
+    logdbg << "geo2cart";
 
     tie(ok, x_pos, y_pos) = trafo_.distanceCart(
         pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
 
     if (!ok)
     {
-        logerr << "Target: interpolatedPosForTime: error with latitude " << pos2.latitude_
+        logerr << "error with latitude " << pos2.latitude_
                << " longitude " << pos2.longitude_;
         return {{}, false};
     }
 
-    logdbg << "Target: interpolatedPosForTime: offsets x " << fixed << x_pos
+    logdbg << "offsets x " << fixed << x_pos
            << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
 
     double v_x = x_pos/d_t;
     double v_y = y_pos/d_t;
-    logdbg << "Target: interpolatedPosForTime: v_x " << v_x << " v_y " << v_y;
+    logdbg << "v_x " << v_x << " v_y " << v_y;
 
     float d_t2 = Time::partialSeconds(timestamp - lower->timestamp_);
-    logdbg << "Target: interpolatedPosForTime: d_t2 " << d_t2;
+    logdbg << "d_t2 " << d_t2;
 
     assert (d_t2 >= 0);
 
     x_pos = v_x * d_t2;
     y_pos = v_y * d_t2;
 
-    logdbg << "Target: interpolatedPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
+    logdbg << "interpolated offsets x " << x_pos << " y " << y_pos;
 
     tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1.latitude_, pos1.longitude_, x_pos, y_pos);
 
@@ -1068,7 +1068,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     // x_pos long, y_pos lat
 
-    logdbg << "Target: interpolatedPosForTime: interpolated lat " << x_pos << " long " << y_pos;
+    logdbg << "interpolated lat " << x_pos << " long " << y_pos;
 
     // calculate altitude
 
@@ -1094,7 +1094,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     //        altitude = pos1.altitude_ + v_alt*d_t2;
     //    }
 
-    //    logdbg << "Target: interpolatedPosForTime: pos1 has alt "
+    //    logdbg << "pos1 has alt "
     //           << pos1.has_altitude_ << " alt " << pos1.altitude_
     //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
     //           << " interpolated has alt " << has_altitude << " alt " << altitude;
@@ -1131,7 +1131,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     dbContent::targetReport::Position& pos2 = *upper_rec_num->position();
     float d_t = Time::partialSeconds(upper_rec_num->timestamp_ - lower_rec_num->timestamp_);
 
-    logdbg << "Target: interpolatedPosForTimeFast: d_t " << d_t;
+    logdbg << "d_t " << d_t;
 
     assert (d_t >= 0);
 
@@ -1141,23 +1141,23 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     if (lower_rec_num == upper_rec_num) // same time
     {
-        logwrn << "Target: interpolatedPosForTimeFast: ref has same time twice";
+        logwrn << "ref has same time twice";
         return {{}, false};
     }
 
     double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
     double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
-    logdbg << "Target: interpolatedPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
+    logdbg << "v_x " << v_lat << " v_y " << v_long;
 
     float d_t2 = Time::partialSeconds(timestamp - lower_rec_num->timestamp_);
-    logdbg << "Target: interpolatedPosForTimeFast: d_t2 " << d_t2;
+    logdbg << "d_t2 " << d_t2;
 
     assert (d_t2 >= 0);
 
     double int_lat = pos1.latitude_ + v_lat * d_t2;
     double int_long = pos1.longitude_ + v_long * d_t2;
 
-    logdbg << "Target: interpolatedPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
+    logdbg << "interpolated lat " << int_lat << " long " << int_long;
 
     // calculate altitude
     //    bool has_altitude = false;
@@ -1180,7 +1180,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     //        altitude = pos1.altitude_ + v_alt*d_t2;
     //    }
 
-    //    logdbg << "Target: interpolatedPosForTimeFast: pos1 has alt "
+    //    logdbg << "pos1 has alt "
     //           << pos1.has_altitude_ << " alt " << pos1.altitude_
     //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
     //           << " interpolated has alt " << has_altitude << " alt " << altitude;
@@ -1240,7 +1240,7 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
         float d_t = Time::partialSeconds(upper_ref->t - lower_ref->t);
 
-        logdbg << "Target: interpolatedRefPosForTimeFast: d_t " << d_t;
+        logdbg << "d_t " << d_t;
 
         assert (d_t >= 0);
 
@@ -1250,7 +1250,7 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
         if (lower_ref == upper_ref) // same time
         {
-            logwrn << "Target: interpolatedRefPosForTimeFast: ref has same time twice";
+            logwrn << "ref has same time twice";
             return {dbContent::targetReport::Position
                     { (pos1.latitude_ + pos2.latitude_)/2.0, (pos1.longitude_ + pos2.longitude_)/2.0},
                     lower_ref->positionAccuracy()};
@@ -1258,17 +1258,17 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
         double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
         double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
-        logdbg << "Target: interpolatedRefPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
+        logdbg << "v_x " << v_lat << " v_y " << v_long;
 
         float d_t2 = Time::partialSeconds(timestamp - lower_ref->t);
-        logdbg << "Target: interpolatedRefPosForTimeFast: d_t2 " << d_t2;
+        logdbg << "d_t2 " << d_t2;
 
         assert (d_t2 >= 0);
 
         double int_lat = pos1.latitude_ + v_lat * d_t2;
         double int_long = pos1.longitude_ + v_long * d_t2;
 
-        logdbg << "Target: interpolatedRefPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
+        logdbg << "interpolated lat " << int_lat << " long " << int_long;
 
         boost::optional<dbContent::targetReport::PositionAccuracy> ret_pos_acc =
             lower_ref->positionAccuracy().maxStdDev() > upper_ref->positionAccuracy().maxStdDev()
@@ -1594,7 +1594,7 @@ bool ReconstructorTarget::isPrimaryAt(boost::posix_time::ptime timestamp,
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (interp_options.debug()) loginf << "ReconstructorTarget: isPrimaryAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff, {}, interp_options);
 
@@ -1616,7 +1616,7 @@ boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptim
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (interp_options.debug()) loginf << "ReconstructorTarget: modeCCodeAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff, {}, interp_options);
     // [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); }
@@ -1660,7 +1660,7 @@ boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (interp_options.debug()) loginf << "ReconstructorTarget: groundBitAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
@@ -1706,7 +1706,7 @@ boost::optional<double> ReconstructorTarget::groundSpeedAt (boost::posix_time::p
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (interp_options.debug()) loginf << "ReconstructorTarget: groundSpeedAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
@@ -2120,7 +2120,7 @@ std::map <std::string, unsigned int> ReconstructorTarget::getDBContentCounts() c
 
 std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 {
-    logdbg << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref size " << references_.size();
+    logdbg << "utn " << utn_ << " ref size " << references_.size();
 
     string dbcontent_name = "RefTraj";
     unsigned int dbcontent_id = 255;
@@ -2287,7 +2287,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     for (auto& ref_it : references_)
     {
-        // loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_
+        // loginf << "utn " << utn_
         //        << " ref ts " << Time::toString(ref_it.second.t)
         //        << " wbt " << Time::toString(reconstructor_.currentSlice().write_before_time_) <<
         //     " skip " << (ref_it.second.t >= reconstructor_.currentSlice().write_before_time_);
@@ -2553,7 +2553,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     counts_[dbcontent_id] += buffer->size();
 
-    logdbg << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " buffer size " << buffer->size();
+    logdbg << "utn " << utn_ << " buffer size " << buffer->size();
     //assert (buffer->size());
 
     return buffer;

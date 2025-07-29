@@ -51,14 +51,14 @@ QVariant FFTTableModel::data(const QModelIndex& index, int role) const
     {
     case Qt::DisplayRole:
     {
-        logdbg << "FFTTableModel: data: display role: row " << index.row() << " col " << index.column();
+        logdbg << "display role: row " << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
         assert (index.row() < static_cast<int>(fft_man_.getAllFFTNames().size()));
 
         string fft_name = fft_man_.getAllFFTNames().at(index.row());
 
-        logdbg << "FFTTableModel: data: got fft_name " << fft_name;
+        logdbg << "got fft_name " << fft_name;
 
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -91,7 +91,7 @@ QVariant FFTTableModel::data(const QModelIndex& index, int role) const
 
         string fft_name = fft_man_.getAllFFTNames().at(index.row());
 
-        logdbg << "FFTTableModel: data: got fft_name " << fft_name;
+        logdbg << "got fft_name " << fft_name;
 
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -157,7 +157,7 @@ std::string FFTTableModel::getNameOf (const QModelIndex& index)
 
 QModelIndex FFTTableModel::fftIndex(const std::string& fft_name)
 {
-    loginf << "FFTTableModel: selectFFT: fft_name " << fft_name;
+    loginf << "fft_name " << fft_name;
 
     auto fft_names = fft_man_.getAllFFTNames();
 
@@ -171,7 +171,7 @@ QModelIndex FFTTableModel::fftIndex(const std::string& fft_name)
 
 void FFTTableModel::updateFFT(const std::string& fft_name)
 {
-    loginf << "FFTTableModel: updateFFT: fft_name " << fft_name;
+    loginf << "fft_name " << fft_name;
 
     auto fft_names = fft_man_.getAllFFTNames();
 

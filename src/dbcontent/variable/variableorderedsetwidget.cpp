@@ -200,7 +200,7 @@ void VariableOrderedSetWidget::removeSlot()
     assert(list_widget_);
     int index = list_widget_->currentRow();
 
-    loginf << "VariableOrderedSetWidget: remove: index " << index;
+    loginf << "index " << index;
 
     if (index < 0)
         return;
@@ -213,7 +213,7 @@ void VariableOrderedSetWidget::moveUpSlot()
 {
     assert(list_widget_);
     int index = list_widget_->currentRow();
-    loginf << "VariableOrderedSetWidget: moveUp: index " << index;
+    loginf << "index " << index;
 
     if (index <= 0)
         return;
@@ -228,7 +228,7 @@ void VariableOrderedSetWidget::moveDownSlot()
 {
     assert(list_widget_);
     int index = list_widget_->currentRow();
-    loginf << "VariableOrderedSetWidget: moveDown: index " << index;
+    loginf << "index " << index;
 
     if (index < 0 || index == (int)set_.getSize() - 1)
         return;
@@ -241,13 +241,13 @@ void VariableOrderedSetWidget::moveDownSlot()
 
 void VariableOrderedSetWidget::updateVariableListSlot()
 {
-    logdbg << "VariableOrderedSetWidget: updateVariableListSlot";
+    logdbg << "start";
 
     assert(list_widget_);
 
     list_widget_->clear();
 
-    logdbg << "VariableOrderedSetWidget: updateVariableListSlot: clear done";
+    logdbg << "clear done";
 
     DBContentManager& manager = COMPASS::instance().dbContentManager();
 
@@ -275,7 +275,7 @@ void VariableOrderedSetWidget::updateVariableListSlot()
 
     if (current_index_ != -1)
     {
-        logdbg << "VariableOrderedSetWidget: updateVariableListSlot: current index "
+        logdbg << "current index "
                << current_index_;
         list_widget_->setCurrentRow(current_index_);
         current_index_ = -1;

@@ -593,7 +593,7 @@ bool Client::run ()
 
 Client::~Client()
 {
-    loginf << "Client: destructor";
+    loginf << "start";
 }
 
 bool Client::notify(QObject* receiver, QEvent* event)

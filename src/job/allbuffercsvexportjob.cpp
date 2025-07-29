@@ -53,7 +53,7 @@ AllBufferCSVExportJob::~AllBufferCSVExportJob() {}
 
 void AllBufferCSVExportJob::run_impl()
 {
-    logdbg << "AllBufferCSVExportJob: execute: start";
+    logdbg << "start";
     started_ = true;
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
@@ -398,6 +398,6 @@ void AllBufferCSVExportJob::run_impl()
 
     done_ = true;
 
-    logdbg << "AllBufferCSVExportJob: execute: done";
+    logdbg << "done";
     return;
 }

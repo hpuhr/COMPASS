@@ -89,7 +89,7 @@ void VariableViewStashDataWidget::preUpdateVariableDataEvent()
 */
 void VariableViewStashDataWidget::postUpdateVariableDataEvent() 
 {
-    loginf << "VariableViewStashDataWidget: postUpdateVariableDataEvent";
+    loginf << "start";
 
     //update the stash (bounds, counts, etc.)
     updateStash();
@@ -108,7 +108,7 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
 {
     auto view = variableView();
 
-    loginf << "VariableViewStashDataWidget: updateVariableData: updating data for view " << view->classId();
+    loginf << "updating data for view " << view->classId();
 
     for (size_t i = 0; i < view->numVariables(); ++i)
     {
@@ -118,14 +118,14 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
         bool is_empty = view_var.settings().allow_empty_var && view_var.isEmpty();
         if (is_empty)
         {
-            loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.id() << " empty";
+            loginf << "view_var " << view_var.id() << " empty";
             continue;
         }
 
         //otherwise return on invalid variable
         if (!view_var.getFor(dbcontent_name))
         {
-            loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.variableName()
+            loginf << "view_var " << view_var.variableName()
                    << " not existing in " << dbcontent_name << ", skipping";
             return;
         }
@@ -223,7 +223,7 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
 
         auto& group_stash = stash_.groupedDataStash(group_name);
 
-        logdbg << "VariableViewStashDataWidget: updateVariableData: value counts before:";
+        logdbg << "value counts before:";
 
         for (size_t i = 0; i < view->numVariables(); ++i)
             logdbg << "   " << view->variable(i).id() << " " << group_stash.variable_stashes[ i ].values.size();
@@ -253,7 +253,7 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
         //check counts
         assert (stash_.isValid());
 
-        logdbg << "VariableViewStashDataWidget: updateVariableData: value counts after:";
+        logdbg << "value counts after:";
 
         for (size_t i = 0; i < view->numVariables(); ++i)
             logdbg << "   " << view->variable(i).id() << " " << group_stash.variable_stashes[ i ].values.size();
@@ -269,7 +269,7 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
                                                      const Buffer& buffer,
                                                      const std::vector<unsigned int>& indexes)
 {
-    logdbg << "VariableViewStashDataWidget: updateVariableData: group_name "
+    logdbg << "group_name "
            << group_name << " indexes size " << indexes.size();
 
     auto& group_stash = stash_.groupedDataStash(group_name);
@@ -288,7 +288,7 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     //handle special cases
     if (is_empty)
     {
-        loginf << "VariableViewStashDataWidget: updateVariableData: adding empty variable to stash";
+        loginf << "adding empty variable to stash";
 
         //empty variable selected => add zero values (valid values)
         //(a little bit hacky, but we do not want to count the values as Nan or NULL values)
@@ -302,14 +302,14 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     else if (!data_var)
     {
         //if not empty and no data var, something is fishy
-        logwrn << "VariableViewStashDataWidget: updateVariableData: could not retrieve data var";
+        logwrn << "could not retrieve data var";
         return;
     }
 
     PropertyDataType data_type        = data_var->dataType();
     std::string      current_var_name = data_var->name();
 
-    logdbg << "VariableViewStashDataWidget: updateVariableData: updating, last size " << last_size;
+    logdbg << "updating, last size " << last_size;
 
     
 
@@ -323,14 +323,14 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
         //buffer_counts = current_size;
 
 #define NotFoundFunc                                                                                          \
-        logerr << "VariableViewStashDataWidget: updateVariableData: impossible for property type "            \
+        logerr << "impossible for property type "            \
         << Property::asString(data_type);                                                                     \
         throw std::runtime_error("VariableViewStashDataWidget: updateVariableData: impossible property type " \
                                  + Property::asString(data_type));
 
     SwitchPropertyDataType(data_type, UpdateFunc, NotFoundFunc)
 
-    logdbg << "VariableViewStashDataWidget: updateVariableData: updated size " << buffer_counts;
+    logdbg << "updated size " << buffer_counts;
 }
 
 /**
@@ -349,7 +349,7 @@ void VariableViewStashDataWidget::updateStash()
 
     const auto& data_ranges = stash_.dataRanges();
 
-    logdbg << "VariableViewStashDataWidget: updateMinMax: ";
+    logdbg << "start";
 
     for (size_t i = 0; i < variableView()->numVariables(); ++i)
     {
@@ -438,7 +438,7 @@ void VariableViewStashDataWidget::selectData(double x_min,
 {
     bool ctrl_pressed = QApplication::keyboardModifiers() & Qt::ControlModifier;
 
-    loginf << "VariableViewStashDataWidget: selectData: "
+    loginf << "start"
            << "x_min " << x_min << " "
            << "x_max " << x_max << " "
            << "y_min " << y_min << " "
@@ -502,7 +502,7 @@ void VariableViewStashDataWidget::selectData(double x_min,
         }
     }
 
-    loginf << "VariableViewStashDataWidget: selectData: sel_cnt: 1 " << sel_cnt;
+    loginf << "sel_cnt: 1 " << sel_cnt;
     sel_cnt = 0;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
@@ -608,7 +608,7 @@ void VariableViewStashDataWidget::selectData(double x_min,
     //     }
     // }
 
-    loginf << "VariableViewStashDataWidget: selectData: sel_cnt 2: " << sel_cnt;
+    loginf << "sel_cnt 2: " << sel_cnt;
 
     emit variableView()->selectionChangedSignal();
 }

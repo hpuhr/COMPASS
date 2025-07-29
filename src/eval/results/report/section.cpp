@@ -291,11 +291,11 @@ namespace EvaluationResultsReport
         {
             if (perTargetWithIssues())
             {
-                logdbg << "Section: addSectionsFlat: not skipping section " << compoundHeading();
+                logdbg << "not skipping section " << compoundHeading();
             }
             else
             {
-                logdbg << "Section: addSectionsFlat: skipping section " << compoundHeading();
+                logdbg << "skipping section " << compoundHeading();
                 return;
             }
         }
@@ -309,11 +309,11 @@ namespace EvaluationResultsReport
             {
                 if (sec_it->perTargetWithIssues())
                 {
-                      logdbg << "Section: addSectionsFlat: not skipping sub-section " << compoundHeading();
+                      logdbg << "not skipping sub-section " << compoundHeading();
                 }
                 else
                 {
-                    logdbg << "Section: addSectionsFlat: skipping sub-section" << compoundHeading();
+                    logdbg << "skipping sub-section" << compoundHeading();
                     continue;
                 }
             }
@@ -327,7 +327,7 @@ namespace EvaluationResultsReport
     */
     void Section::accept(LatexVisitor& v) const
     {
-        loginf << "Section: accept";
+        loginf << "start";
         v.visit(this);
     }
 

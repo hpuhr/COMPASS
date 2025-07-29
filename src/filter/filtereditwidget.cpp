@@ -160,7 +160,7 @@ FilterEditWidget::FilterEditWidget(DBFilter* filter, QWidget* parent)
     setLayout(layout);
 }
 
-FilterEditWidget::~FilterEditWidget() { logdbg << "FilterEditWidget: destructor"; }
+FilterEditWidget::~FilterEditWidget() { logdbg << "start"; }
 
 void FilterEditWidget::addCondition()
 {

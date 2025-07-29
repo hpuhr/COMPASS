@@ -76,7 +76,7 @@ SpeedConfigWidget::SpeedConfigWidget(SpeedConfig& cfg)
 
 void SpeedConfigWidget::thresholdValueEditSlot(QString value)
 {
-    loginf << "SpeedConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -84,12 +84,12 @@ void SpeedConfigWidget::thresholdValueEditSlot(QString value)
     if (ok)
         config().thresholdValue(val);
     else
-        loginf << "SpeedConfigWidget: thresholdValueEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void SpeedConfigWidget::toggleUsePercentIfHigherSlot()
 {
-    loginf << "SpeedConfigWidget: toggleUsePercentIfHigherSlot";
+    loginf << "start";
 
     assert (use_percent_if_higher_check_);
     config().usePercentIfHigher(use_percent_if_higher_check_->checkState() == Qt::Checked);
@@ -99,7 +99,7 @@ void SpeedConfigWidget::toggleUsePercentIfHigherSlot()
 
 void SpeedConfigWidget::thresholdPercentEditSlot(QString value)
 {
-    loginf << "SpeedConfigWidget: thresholdPercentEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -107,20 +107,20 @@ void SpeedConfigWidget::thresholdPercentEditSlot(QString value)
     if (ok)
         config().thresholdPercent(val);
     else
-        loginf << "SpeedConfigWidget: thresholdPercentEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void SpeedConfigWidget::changedThresholdValueCheckTypeSlot()
 {
     assert (threshold_value_check_type_box_);
-    loginf << "SpeedConfigWidget: changedThresholdValueCheckTypeSlot: value "
+    loginf << "value "
            << threshold_value_check_type_box_->getType();
     config().thresholdValueCheckType(threshold_value_check_type_box_->getType());
 }
 
 void SpeedConfigWidget::toggleFailedValuesOfInterestSlot()
 {
-    loginf << "SpeedConfigWidget: toggleFailedValuesOfInterestSlot";
+    loginf << "start";
 
     assert (failed_values_of_interest_check_);
     config().failedValuesOfInterest(failed_values_of_interest_check_->checkState() == Qt::Checked);

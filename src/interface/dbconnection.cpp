@@ -49,7 +49,7 @@ DBConnection::DBConnection(DBInstance* instance, bool verbose)
 ,   verbose_  (verbose   )
 {
     if (verbose_)
-        loginf << "DBConnection: constructor";
+        loginf << "start";
 
     assert(instance_);
 }
@@ -59,7 +59,7 @@ DBConnection::DBConnection(DBInstance* instance, bool verbose)
 DBConnection::~DBConnection()
 {
     if (verbose_)
-        loginf << "DBConnection: destructor";
+        loginf << "start";
 
     assert(!connected());
 }
@@ -90,7 +90,7 @@ Result DBConnection::connect()
     assert(instance_->dbOpen());
 
     if (verbose_)
-        loginf << "DBConnection: connect: connecting to instance '" << instance_->dbFilename() << "'...";
+        loginf << "connecting to instance '" << instance_->dbFilename() << "'...";
 
     //close any opened connection
     if (connected())
@@ -103,7 +103,7 @@ Result DBConnection::connect()
     connected_ = true;
 
     if (verbose_)
-        loginf << "DBConnection: connect: done";
+        loginf << "done";
 
     return Result::succeeded();
 }
@@ -139,7 +139,7 @@ void DBConnection::disconnect()
 Result DBConnection::execute(const std::string& sql)
 {
     if (verbose_)
-        logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
+        logdbg << "sql statement execute: '" << sql << "'";
 
     assert(connected());
 
@@ -152,7 +152,7 @@ Result DBConnection::execute(const std::string& sql)
 std::shared_ptr<DBResult> DBConnection::execute(const std::string& sql, bool fetch_result_buffer)
 {
     if (verbose_)
-        logdbg << "DBConnection: execute: sql statement execute: '" << sql << "'";
+        logdbg << "sql statement execute: '" << sql << "'";
 
     assert(connected());
 
@@ -162,7 +162,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const std::string& sql, bool fet
 
     if (res.ok() && fetch_result_buffer && !result->buffer())
     {
-        //logerr << "DBConnection: execute: Query '" << sql << "': buffer creation failed";
+        //logerr << "Query '" << sql << "': buffer creation failed";
         result->setError("buffer creation failed");
     }
 
@@ -175,7 +175,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const std::string& sql, bool fet
 std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
 {
     if (verbose_)
-        logdbg << "DBConnection: execute: executing single command";
+        logdbg << "executing single command";
 
     assert(connected());
 
@@ -186,7 +186,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
 
     if (ok && fetch_buffer && !result->buffer())
     {
-        //logerr << "DBConnection: execute: DBCommand '" << command.get() << "': buffer creation failed";
+        //logerr << "DBCommand '" << command.get() << "': buffer creation failed";
         result->setError("buffer creation failed");
     }
     
@@ -199,7 +199,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
 std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_list)
 {
     if (verbose_)
-        logdbg << "DBConnection: execute: executing " << command_list.getNumCommands() << " command(s)";
+        logdbg << "executing " << command_list.getNumCommands() << " command(s)";
 
     assert(connected());
 
@@ -220,7 +220,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
         auto ok = executeCmd_impl(cmd, fetch_buffers ? &command_list.getResultList() : nullptr, result.get());
         if (!ok)
         {
-            //logerr << "DBConnection: execute: DBCommand '" << cmd << "' failed: " << result->error();
+            //logerr << "DBCommand '" << cmd << "' failed: " << result->error();
             dbresult->setError(result->error());
             break;
         }
@@ -228,7 +228,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
         {
             if (!result->buffer())
             {
-                //logerr << "DBConnection: execute: DBCommand '" << cmd << "': buffer creation failed";
+                //logerr << "DBCommand '" << cmd << "': buffer creation failed";
                 dbresult->setError("buffer creation failed");
                 break;
             }
@@ -242,7 +242,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
         dbresult->buffer(buffer);
 
     if (verbose_)
-        logdbg << "DBConnection: execute: end";
+        logdbg << "end";
 
     return dbresult;
 }
@@ -299,7 +299,7 @@ Result DBConnection::createTableInternal(const std::string& table_name,
 
     if (result->hasError())
     {
-        //logerr << "DBConnection: createTable: creating table '" << table_name << "' failed: " << result->error();
+        //logerr << "creating table '" << table_name << "' failed: " << result->error();
         return Result::failed(result->error());
     }
 
@@ -597,7 +597,7 @@ std::shared_ptr<DBResult> DBConnection::readChunk()
     assert(result->buffer() && result->containsData());
 
     if (verbose_)
-        logdbg << "DBConnection: readChunk: read " << result->buffer()->size()
+        logdbg << "read " << result->buffer()->size()
                << " left " << active_reader_->numLeft() << " hasmore " << result->hasMore();
 
     // if (!result->hasMore())

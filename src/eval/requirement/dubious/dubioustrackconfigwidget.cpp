@@ -185,7 +185,7 @@ DubiousTrackConfigWidget::DubiousTrackConfigWidget(DubiousTrackConfig& cfg)
 
 void DubiousTrackConfigWidget::toggleEvalOnlySingleDsId()
 {
-    loginf << "DubiousTrackConfigWidget: toggleEvalOnlySingleDsId";
+    loginf << "start";
 
     assert (eval_only_single_ds_id_check_);
     config().evalOnlySingleDsId(eval_only_single_ds_id_check_->checkState() == Qt::Checked);
@@ -195,7 +195,7 @@ void DubiousTrackConfigWidget::toggleEvalOnlySingleDsId()
 
 void DubiousTrackConfigWidget::evalOnlySingleDsIdEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: evalOnlySingleDsIdEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toUInt(&ok);
@@ -203,12 +203,12 @@ void DubiousTrackConfigWidget::evalOnlySingleDsIdEditSlot(QString value)
     if (ok)
         config().singleDsId(val);
     else
-        loginf << "DubiousTrackConfigWidget: evalOnlySingleDsIdEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void DubiousTrackConfigWidget::minCompTimeEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: minCompTimeEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -216,12 +216,12 @@ void DubiousTrackConfigWidget::minCompTimeEditSlot(QString value)
     if (ok)
         config().minimumComparisonTime(val);
     else
-        loginf << "DubiousTrackConfigWidget: minCompTimeEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void DubiousTrackConfigWidget::maxCompTimeEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: maxCompTimeEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -229,13 +229,13 @@ void DubiousTrackConfigWidget::maxCompTimeEditSlot(QString value)
     if (ok)
         config().maximumComparisonTime(val);
     else
-        loginf << "DubiousTrackConfigWidget: maxCompTimeEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 
 void DubiousTrackConfigWidget::toggleMarkPrimaryOnlySlot()
 {
-    loginf << "DubiousTrackConfigWidget: toggleMarkPrimaryOnlySlot";
+    loginf << "start";
 
     assert (mark_primary_only_check_);
     config().markPrimaryOnly(mark_primary_only_check_->checkState() == Qt::Checked);
@@ -245,7 +245,7 @@ void DubiousTrackConfigWidget::toggleMarkPrimaryOnlySlot()
 
 void DubiousTrackConfigWidget::toggleUseMinUpdatesSlot()
 {
-    loginf << "DubiousTrackConfigWidget: toggleUseMinUpdatesSlot";
+    loginf << "start";
 
     assert (use_min_updates_check_);
     config().useMinUpdates(use_min_updates_check_->checkState() == Qt::Checked);
@@ -255,7 +255,7 @@ void DubiousTrackConfigWidget::toggleUseMinUpdatesSlot()
 
 void DubiousTrackConfigWidget::minUpdatesEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: minUpdatesEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     unsigned int val = value.toUInt(&ok);
@@ -263,12 +263,12 @@ void DubiousTrackConfigWidget::minUpdatesEditSlot(QString value)
     if (ok)
         config().minUpdates(val);
     else
-        loginf << "DubiousTrackConfigWidget: thresholdPercentEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void DubiousTrackConfigWidget::toggleUseMinDurationSlot()
 {
-    loginf << "DubiousTrackConfigWidget: toggleUseMinDurationSlot";
+    loginf << "start";
 
     assert (use_min_duration_check_);
     config().useMinDuration(use_min_duration_check_->checkState() == Qt::Checked);
@@ -278,7 +278,7 @@ void DubiousTrackConfigWidget::toggleUseMinDurationSlot()
 
 void DubiousTrackConfigWidget::minDurationEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: minDurationEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -286,12 +286,12 @@ void DubiousTrackConfigWidget::minDurationEditSlot(QString value)
     if (ok)
         config().minDuration(val);
     else
-        loginf << "DubiousTrackConfigWidget: minDurationEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void DubiousTrackConfigWidget::toggleUseMaxGroundspeedSlot()
 {
-    loginf << "DubiousTrackConfigWidget: toggleUseMaxGroundspeedSlot";
+    loginf << "start";
 
     assert (use_max_groundspeed_check_);
     config().useMaxGroundspeed(use_max_groundspeed_check_->checkState() == Qt::Checked);
@@ -301,7 +301,7 @@ void DubiousTrackConfigWidget::toggleUseMaxGroundspeedSlot()
 
 void DubiousTrackConfigWidget::maxGroundspeedEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: maxGroundspeedEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -309,12 +309,12 @@ void DubiousTrackConfigWidget::maxGroundspeedEditSlot(QString value)
     if (ok)
         config().maxGroundspeedKts(val);
     else
-        loginf << "DubiousTrackConfigWidget: maxGroundspeedEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void DubiousTrackConfigWidget::toggleUseMaxAccelerationSlot()
 {
-    loginf << "DubiousTrackConfigWidget: toggleUseMaxAccelerationSlot";
+    loginf << "start";
 
     assert (use_max_acceleration_check_);
     config().useMaxAcceleration(use_max_acceleration_check_->checkState() == Qt::Checked);
@@ -324,7 +324,7 @@ void DubiousTrackConfigWidget::toggleUseMaxAccelerationSlot()
 
 void DubiousTrackConfigWidget::maxAccelerationEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: maxAccelerationEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -332,12 +332,12 @@ void DubiousTrackConfigWidget::maxAccelerationEditSlot(QString value)
     if (ok)
         config().maxAcceleration(val);
     else
-        loginf << "DubiousTrackConfigWidget: maxAccelerationEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void DubiousTrackConfigWidget::toggleUseMaxTurnrateSlot()
 {
-    loginf << "DubiousTrackConfigWidget: toggleUseMaxTurnrateSlot";
+    loginf << "start";
 
     assert (use_max_turnrate_check_);
     config().useMaxTurnrate(use_max_turnrate_check_->checkState() == Qt::Checked);
@@ -347,7 +347,7 @@ void DubiousTrackConfigWidget::toggleUseMaxTurnrateSlot()
 
 void DubiousTrackConfigWidget::maxTurnrateEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: maxTurnrateEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -355,12 +355,12 @@ void DubiousTrackConfigWidget::maxTurnrateEditSlot(QString value)
     if (ok)
         config().maxTurnrate(val);
     else
-        loginf << "DubiousTrackConfigWidget: maxTurnrateEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void DubiousTrackConfigWidget::toggleUseMaxROCDSlot()
 {
-    loginf << "DubiousTrackConfigWidget: toggleUseMaxROCDeSlot";
+    loginf << "start";
 
     assert (use_max_rocd_check_);
     config().useMaxROCD(use_max_rocd_check_->checkState() == Qt::Checked);
@@ -370,7 +370,7 @@ void DubiousTrackConfigWidget::toggleUseMaxROCDSlot()
 
 void DubiousTrackConfigWidget::maxROCDEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: maxROCDEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -378,12 +378,12 @@ void DubiousTrackConfigWidget::maxROCDEditSlot(QString value)
     if (ok)
         config().maxROCD(val);
     else
-        loginf << "DubiousTrackConfigWidget: maxROCDEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void DubiousTrackConfigWidget::dubiousProbEditSlot(QString value)
 {
-    loginf << "DubiousTrackConfigWidget: dubiousProbEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -391,7 +391,7 @@ void DubiousTrackConfigWidget::dubiousProbEditSlot(QString value)
     if (ok)
         config().dubiousProb(val);
     else
-        loginf << "DubiousTrackConfigWidget: dubiousProbEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 

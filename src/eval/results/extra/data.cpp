@@ -126,7 +126,7 @@ boost::optional<double> SingleExtraData::computeResult_impl() const
 
     boost::optional<double> result = (double)num_extra_ / (double)num_total;
 
-    logdbg << "SingleExtraData: updateProb: result_id " << result_id_ << " num_extra " << num_extra_ << " num_ok " << num_ok_;
+    logdbg << "result_id " << result_id_ << " num_extra " << num_extra_ << " num_ok " << num_ok_;
 
     return result;
 }
@@ -262,7 +262,7 @@ void JoinedExtraData::accumulateSingleResult(const std::shared_ptr<Single>& sing
 */
 boost::optional<double> JoinedExtraData::computeResult_impl() const
 {
-    loginf << "JoinedExtraData: computeResult_impl:"
+    loginf << "start"
             << " num_extra " << num_extra_
             << " num_ok " << num_ok_;
 

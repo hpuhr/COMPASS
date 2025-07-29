@@ -276,7 +276,7 @@ namespace force
 
         // auto coutBBox = [ & ] (const QRectF& bbox)
         // {
-        //     loginf << "label_placement: force: repelFromObjects: ("
+        //     loginf << "repelFromObjects: ("
         //            << bbox.x() << "," << bbox.y() << "," << bbox.width() << "x" << bbox.height() << ")";
         // };
 

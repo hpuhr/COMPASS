@@ -381,7 +381,7 @@ void JoinedDubiousTrack::accumulateSingleResult(const std::shared_ptr<Single>& s
 */
 boost::optional<double> JoinedDubiousTrack::computeResult_impl() const
 {
-    loginf << "JoinedDubiousTrack: computeResult_impl:"
+    loginf << "start"
             << " num_updates " << num_updates_
             << " num_tracks " << num_tracks_
             << " num_tracks_dubious " << num_tracks_dubious_
