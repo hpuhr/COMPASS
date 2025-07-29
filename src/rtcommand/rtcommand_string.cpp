@@ -317,7 +317,7 @@ RTCommandString::IssueResult RTCommandString::issue() const
     //check command string validity
     if (!valid())
     {
-        logdbg << "RTCommandString::issue(): Command string not valid";
+        logdbg << "Command string not valid";
         setResultCode(CmdErrorCode::Issue_CommandStringInvalid, "");
         return result;
     }
@@ -331,7 +331,7 @@ RTCommandString::IssueResult RTCommandString::issue() const
     //check if command is even registered
     if (!rtcommand::RTCommandRegistry::instance().hasCommand(cmd_name))
     {
-        logdbg << "RTCommandString::issue(): Command not registered";
+        logdbg << "Command not registered";
         setResultCode(CmdErrorCode::Issue_CommandNotFound, "");
         return result;
     }
@@ -355,7 +355,7 @@ RTCommandString::IssueResult RTCommandString::issue() const
     auto cmd_obj = rtcommand::RTCommandRegistry::instance().createCommandTemplate(cmd_name);
     if (!cmd_obj)
     {
-        logdbg << "RTCommandString::issue(): Registry returned nullptr";
+        logdbg << "Registry returned nullptr";
         setResultCode(CmdErrorCode::Issue_CommandCreationFailed, "");
         return result;
     }
@@ -363,7 +363,7 @@ RTCommandString::IssueResult RTCommandString::issue() const
     //check if command name matches
     if (cmd_obj->name() != cmd_name)
     {
-        logdbg << "RTCommandString::issue(): Issued command name mismatch";
+        logdbg << "Issued command name mismatch";
         setResultCode(CmdErrorCode::Issue_CommandStringMismatch, "");
         return result;
     }
@@ -373,7 +373,7 @@ RTCommandString::IssueResult RTCommandString::issue() const
     //configure command
     if (!cmd_obj->configure(*this))
     {
-        logdbg << "RTCommandString::issue(): Command could not be configured";
+        logdbg << "Command could not be configured";
         setResultCode(cmd_obj->result().error.code, cmd_obj->result().error.message);
         return result;
     }

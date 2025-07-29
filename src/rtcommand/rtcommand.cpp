@@ -235,13 +235,13 @@ namespace rtcommand
         }
         catch (const std::exception &ex)
         {
-            logerr << "RTCommand::collectOptions(): Error: " << ex.what();
+            logerr << "Error:" << ex.what();
             if (err_msg) *err_msg = QString(ex.what());
             return false;
         }
         catch (...)
         {
-            logerr << "RTCommand::collectOptions(): Unknown error";
+            logerr << "Unknown error";
             if (err_msg) *err_msg = "Unknown error";
             return false;
         }
@@ -296,13 +296,13 @@ namespace rtcommand
         }
         catch (const std::exception &ex)
         {
-            logerr << "RTCommand::assignVariables(): Error: " << ex.what();
+            logerr << "Error:" << ex.what();
             if (err_msg) *err_msg = QString(ex.what());
             return false;
         }
         catch (...)
         {
-            logerr << "RTCommand::assignVariables(): Unknown error";
+            logerr << "Unknown error";
             if (err_msg) *err_msg = "Unknown error";
             return false;
         }
