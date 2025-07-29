@@ -236,7 +236,7 @@ void Configuration::registerParameter(const std::string& parameter_id, T* pointe
 
     used_ = true;
 
-    logdbg << "Configuration " << instance_id_ << ": registerParameter " << parameter_id << ": " << param->getParameterType() << " value is " << *param->getStoredPointer();
+    //logdbg << "Configuration " << instance_id_ << ": registerParameter " << parameter_id << ": " << param->getParameterType() << " value is " << *param->getStoredPointer();
 }
 
 /**

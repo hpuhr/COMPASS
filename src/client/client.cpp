@@ -786,7 +786,7 @@ void Client::checkAndSetupConfig()
     catch (exception& ex)
     {
         logerr << "COMPASSClient: Caught Exception '" << ex.what() << "'";
-        logerr.flush();
+        //logerr.flush();
         // assert (false);
 
         quit_requested_ = true;
@@ -795,7 +795,7 @@ void Client::checkAndSetupConfig()
     catch (...)
     {
         logerr << "COMPASSClient: Caught Exception";
-        logerr.flush();
+        //logerr.flush();
         // assert (false);
 
         quit_requested_ = true;

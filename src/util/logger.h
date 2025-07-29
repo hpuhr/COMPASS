@@ -24,13 +24,17 @@
 
 #include <cstdint>
 
-#define logerr log4cpp::Category::getRoot().errorStream()
-#define logwrn log4cpp::Category::getRoot().warnStream()
-#define loginf log4cpp::Category::getRoot().infoStream()
-//#define logdbg log4cpp::Category::getRoot().debugStream()
-#define logdbg \
+#define logerr log4cpp::Category::getRoot().errorStream() << __PRETTY_FUNCTION__
+#define logwrn log4cpp::Category::getRoot().warnStream() << __PRETTY_FUNCTION__
+#define loginf log4cpp::Category::getRoot().infoStream() << __PRETTY_FUNCTION__
+#define logdbg if (log4cpp::Category::getRoot().isPriorityEnabled(log4cpp::Priority::DEBUG)) \
+    log4cpp::Category::getRoot().debugStream() << __PRETTY_FUNCTION__
+#define logdbg1 \
     if (false) \
     log4cpp::Category::getRoot().debugStream()  // for improved performance
+#define logdbg2 \
+    if (false) \
+    log4cpp::Category::getRoot().debugStream()  // for improved performance    
 
 namespace logger
 {
