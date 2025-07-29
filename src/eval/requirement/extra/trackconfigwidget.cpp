@@ -69,7 +69,7 @@ ExtraTrackConfigWidget::ExtraTrackConfigWidget(ExtraTrackConfig& cfg)
 
 void ExtraTrackConfigWidget::minDurationEditSlot(QString value)
 {
-    loginf << "TrackConfigWidget: minDurationEditSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -77,12 +77,12 @@ void ExtraTrackConfigWidget::minDurationEditSlot(QString value)
     if (ok)
         config().minDuration(val);
     else
-        loginf << "TrackConfigWidget: minDurationEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void ExtraTrackConfigWidget::minNumUpdatesEditSlot(QString value)
 {
-    loginf << "TrackConfigWidget: minNumUpdatesEditSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     bool ok;
     unsigned int val = value.toUInt(&ok);
@@ -90,12 +90,12 @@ void ExtraTrackConfigWidget::minNumUpdatesEditSlot(QString value)
     if (ok)
         config().minNumUpdates(val);
     else
-        loginf << "TrackConfigWidget: minNumUpdatesEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void ExtraTrackConfigWidget::toggleIgnorePrimaryOnlySlot()
 {
-    loginf << "TrackConfigWidget: toggleIgnorePrimaryOnlySlot";
+    loginf << "toggleIgnorePrimaryOnlySlot";
 
     assert (ignore_primary_only_check_);
     config().ignorePrimaryOnly(ignore_primary_only_check_->checkState() == Qt::Checked);

@@ -147,7 +147,7 @@ void ViewPointsToolWidget::actionTriggeredSlot(QAction* action)
         showStatusesMenu();
     }
     else
-        logwrn << "ViewPointsToolWidget: actionTriggeredSlot: unkown action '" << text << "'";
+        logwrn << "unkown action '" << text << "'";
 }
 
 void ViewPointsToolWidget::showTypesMenu ()

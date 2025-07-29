@@ -146,7 +146,7 @@ void MetaVariableConfigurationDialog::itemSelectedSlot(const QString& text)
 {
     string item_name = text.toStdString();
 
-    loginf << "MetaVariableConfigurationDialog: itemSelectedSlot: item '" << item_name << "'";
+    loginf << "item '" << item_name << "'";
 
     assert (detail_widget_);
 
@@ -173,7 +173,7 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
         {
             if (dbo_man_.usedInMetaVariable(*var_it.second.get()))
             {
-                loginf << "MetaVariableConfigurationDialog: addAllMetaVariablesSlot: not adding dbovariable "
+                loginf << "not adding dbovariable"
                        << var_it.first << " since already used";
                 continue;
             }
@@ -198,7 +198,7 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
                 if (!dbo_man_.existsMetaVariable(var_it.first))
                 {
                     loginf
-                            << "MetaVariableConfigurationDialog: addAllMetaVariablesSlot: adding meta variable "
+                            << "adding meta variable"
                         << var_it.first;
 
                     std::string instance = "MetaVariable" + var_it.first + "0";
@@ -216,7 +216,7 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
                 {
                     if (!meta_var.existsIn(*dbo_it2))
                     {
-                        loginf << "MetaVariableConfigurationDialog: addAllMetaVariablesSlot: adding meta "
+                        loginf << "adding meta"
                                   "variable "
                                << var_it.first << " dbo variable " << var_it.first;
                         meta_var.addVariable(*dbo_it2, var_it.first);

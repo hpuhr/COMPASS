@@ -99,7 +99,7 @@ void TableViewConfigWidget::toggleShowOnlySeletedSlot()
 {
     assert(only_selected_check_);
     bool checked = only_selected_check_->checkState() == Qt::Checked;
-    loginf << "TableViewConfigWidget: toggleShowOnlySeletedSlot: setting to " << checked;
+    loginf << "setting to" << checked;
     view_->showOnlySelected(checked);
 }
 
@@ -107,7 +107,7 @@ void TableViewConfigWidget::toggleUsePresentation()
 {
     assert(presentation_check_);
     bool checked = presentation_check_->checkState() == Qt::Checked;
-    logdbg << "TableViewConfigWidget: toggleUsePresentation: setting use presentation to "
+    logdbg << "setting use presentation to"
            << checked;
     view_->usePresentation(checked);
 }
@@ -116,14 +116,14 @@ void TableViewConfigWidget::toggleIgnoreNonTargetReports()
 {
     assert(ignore_non_target_reports_check_);
     bool checked = ignore_non_target_reports_check_->checkState() == Qt::Checked;
-    logdbg << "TableViewConfigWidget: toggleIgnoreNonTargetReports: setting to "
+    logdbg << "setting to"
            << checked;
     view_->ignoreNonTargetReports(checked);
 }
 
 void TableViewConfigWidget::exportSlot()
 {
-    logdbg << "TableViewConfigWidget: exportSlot";
+    logdbg << "exportSlot";
     assert(export_button_);
 
     export_button_->setDisabled(true);

@@ -247,7 +247,7 @@ void GPSTrailImportTaskWidget::nameEditedSlot(const QString& value)
 
 void GPSTrailImportTaskWidget::useTodOffsetCheckedSlot()
 {
-    loginf << "GPSTrailImportTaskWidget: useTodOffsetCheckedSlot";
+    loginf << "useTodOffsetCheckedSlot";
 
     assert (use_tod_offset_check_);
     task_.useTodOffset(use_tod_offset_check_->checkState() == Qt::Checked);
@@ -262,13 +262,13 @@ void GPSTrailImportTaskWidget::todOffsetEditedSlot(const QString& value)
     if (tod_offset_edit_->hasAcceptableInput())
         task_.todOffset(value.toDouble());
     else
-        logwrn << "GPSTrailImportTaskWidget: todOffsetEditedSlot: non-acceptable value '"
+        logwrn << "non-acceptable value '"
                << tod_offset_edit_->text().toStdString() << "'";
 }
 
 void GPSTrailImportTaskWidget::overrideDateCheckedSlot()
 {
-    loginf << "GPSTrailImportTaskWidget: overrideDateCheckedSlot";
+    loginf << "overrideDateCheckedSlot";
 
     assert (use_override_date_check_);
     task_.useOverrideDate(use_override_date_check_->checkState() == Qt::Checked);
@@ -285,7 +285,7 @@ void GPSTrailImportTaskWidget::overrideDateChangedSlot(QDate date)
 
 void GPSTrailImportTaskWidget::mode3ACheckedSlot()
 {
-    loginf << "GPSTrailImportTaskWidget: mode3ACheckedSlot";
+    loginf << "mode3ACheckedSlot";
 
     assert (set_mode_3a_code_check_);
     task_.setMode3aCode(set_mode_3a_code_check_->checkState() == Qt::Checked);
@@ -293,7 +293,7 @@ void GPSTrailImportTaskWidget::mode3ACheckedSlot()
 
 void GPSTrailImportTaskWidget::mode3AEditedSlot(const QString& value)
 {
-    loginf << "GPSTrailImportTaskWidget: mode3AEditedSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     assert (mode_3a_code_edit_);
 
@@ -303,7 +303,7 @@ void GPSTrailImportTaskWidget::mode3AEditedSlot(const QString& value)
 
 void GPSTrailImportTaskWidget::targetAddressCheckedSlot()
 {
-    loginf << "GPSTrailImportTaskWidget: targetAddressCheckedSlot";
+    loginf << "targetAddressCheckedSlot";
 
     assert (set_target_address_check_);
     task_.setTargetAddress(set_target_address_check_->checkState() == Qt::Checked);
@@ -311,7 +311,7 @@ void GPSTrailImportTaskWidget::targetAddressCheckedSlot()
 
 void GPSTrailImportTaskWidget::targetAddressEditedSlot(const QString& value)
 {
-    loginf << "GPSTrailImportTaskWidget: targetAddressEditedSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     assert (target_address_edit_);
 
@@ -321,7 +321,7 @@ void GPSTrailImportTaskWidget::targetAddressEditedSlot(const QString& value)
 
 void GPSTrailImportTaskWidget::callsignCheckedSlot()
 {
-    loginf << "GPSTrailImportTaskWidget: callsignCheckedSlot";
+    loginf << "callsignCheckedSlot";
 
     assert (set_callsign_check_);
     task_.setCallsign(set_callsign_check_->checkState() == Qt::Checked);
@@ -329,7 +329,7 @@ void GPSTrailImportTaskWidget::callsignCheckedSlot()
 
 void GPSTrailImportTaskWidget::callsignEditedSlot(const QString& value)
 {
-    loginf << "GPSTrailImportTaskWidget: callsignEditedSlot: value '" << value.toStdString() << "'";
+    loginf << "value '" << value.toStdString() << "'";
 
     QString upper_value = value.toUpper();
 
@@ -340,7 +340,7 @@ void GPSTrailImportTaskWidget::callsignEditedSlot(const QString& value)
 
 void GPSTrailImportTaskWidget::lineIDEditSlot(const QString& text)
 {
-    loginf << "GPSTrailImportTaskWidget: lineIDEditSlot: value '" << text.toStdString() << "'";
+    loginf << "value '" << text.toStdString() << "'";
 
     bool ok;
 
@@ -399,21 +399,21 @@ void GPSTrailImportTaskWidget::expertModeChangedSlot() {}
 
 //void GPSTrailImportTaskWidget::runStarted()
 //{
-//    loginf << "GPSTrailImportTaskWidget: runStarted";
+//    loginf << "runStarted";
 
 //    //test_button_->setDisabled(true);
 //}
 
 //void GPSTrailImportTaskWidget::runDone()
 //{
-//    loginf << "GPSTrailImportTaskWidget: runDone";
+//    loginf << "runDone";
 
 //    //test_button_->setDisabled(false);
 //}
 
 void GPSTrailImportTaskWidget::updateText ()
 {
-    loginf << "ViewPointsImportTaskWidget: updateText";
+    loginf << "updateText";
 
     assert (text_edit_);
 

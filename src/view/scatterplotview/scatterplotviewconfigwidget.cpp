@@ -52,7 +52,7 @@ ScatterPlotViewConfigWidget::ScatterPlotViewConfigWidget(ScatterPlotViewWidget* 
     auto layout = configLayout();
 
     {
-        loginf << "GeographicViewConfigWidget: ctor: creating lay view";
+        loginf << "creating lay view";
 
         layer_view_ = new QTreeView(this);
         ScatterSeriesTreeItemDelegate* delegate = new ScatterSeriesTreeItemDelegate(this);
@@ -96,7 +96,7 @@ ScatterPlotViewConfigWidget::~ScatterPlotViewConfigWidget() = default;
 */
 void ScatterPlotViewConfigWidget::useConnectionLinesSlot()
 {
-    loginf << "ScatterPlotViewConfigWidget: useConnectionLinesSlot";
+    loginf << "useConnectionLinesSlot";
 
     assert (use_connection_lines_);
     view_->useConnectionLines(use_connection_lines_->checkState() == Qt::Checked);
@@ -147,7 +147,7 @@ void ScatterPlotViewConfigWidget::configChanged_impl()
 
 //void ScatterPlotViewConfigWidget::exportSlot()
 //{
-//    logdbg << "ScatterPlotViewConfigWidget: exportSlot";
+//    logdbg << "exportSlot";
 //    //assert(overwrite_check_);
 //    assert(export_button_);
 

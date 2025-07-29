@@ -35,7 +35,7 @@
 ViewManagerWidget::ViewManagerWidget(ViewManager& view_manager)
     : view_manager_(view_manager), layout_(nullptr), cont_layout_(nullptr), add_button_(nullptr)
 {
-    logdbg << "ViewManagerWidget: constructor: start";
+    logdbg << "start";
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -64,7 +64,7 @@ ViewManagerWidget::ViewManagerWidget(ViewManager& view_manager)
 
     update();
 
-    logdbg << "ViewManagerWidget: constructor: end";
+    logdbg << "end";
 }
 
 ViewManagerWidget::~ViewManagerWidget() {}
@@ -164,7 +164,7 @@ void ViewManagerWidget::databaseIdle()
 //    unsigned int containter_id = number_str.toUInt(&ok);
 //    assert(ok);
 
-//    loginf << "ViewManagerWidget: addViewSlot: class " << class_name.toStdString();
+//    loginf << "class" << class_name.toStdString();
 
 //    if (containter_id < 0 || containter_id >= cont_widgets_.size())
 //        throw(std::runtime_error("ViewManagerWidget: addViewSlot: container out of bounds"));
@@ -173,7 +173,7 @@ void ViewManagerWidget::databaseIdle()
 
 void ViewManagerWidget::update()
 {
-    loginf << "ViewManagerWidget: update";
+    loginf << "update";
 
 //    cont_widgets_.clear();
 
@@ -185,7 +185,7 @@ void ViewManagerWidget::update()
 
 //    std::map<std::string, ViewContainer*> containers = view_manager_.getContainers();
 
-//    // loginf  << "ViewManagerWidget: update size containers " << containers.size();
+//    // loginf  << "update size containers" << containers.size();
 
 //    std::map<std::string, ViewContainer*>::iterator it;
 //    for (it = containers.begin(); it != containers.end(); it++)

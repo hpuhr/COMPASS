@@ -222,7 +222,7 @@ void NullableVector<T>::set(unsigned int index, T value)
     data_.at(index) = value;
     unsetNull(index);
 
-    // logdbg2 << "NullableVector: set: size " << size_ << " max_size " << max_size_;
+    // logdbg2 << "size" << size_ << " max_size " << max_size_;
 }
 
 template <class T>
@@ -268,12 +268,12 @@ void NullableVector<T>::setFromFormat(unsigned int index, const std::string& for
     }
     else
     {
-        logerr << "NullableVector: setFromFormat: unknown format '" << format << "'";
+        logerr << "unknown format '" << format << "'";
         assert(false);
     }
 
     if (debug)
-        loginf << "NullableVector: setFromFormat: index " << index << " value_str '" << value_str
+        loginf << "index" << index << " value_str '" << value_str
                << "' value '" << value << "'";
 
     set(index, value);
@@ -317,7 +317,7 @@ void NullableVector<T>::append(unsigned int index, T value)
     data_.at(index) += value;
     unsetNull(index);
 
-    // logdbg2 << "NullableVector: set: size " << size_ << " max_size " << max_size_;
+    // logdbg2 << "size" << size_ << " max_size " << max_size_;
 }
 
 template <class T>
@@ -349,7 +349,7 @@ void NullableVector<T>::appendFromFormat(unsigned int index, const std::string& 
     }
     else
     {
-        logerr << "NullableVector: appendFromFormat: unknown format '" << format << "'";
+        logerr << "unknown format '" << format << "'";
         assert(false);
     }
 
@@ -713,7 +713,7 @@ std::tuple<bool,T,T> NullableVector<T>::minMaxValuesSorted(unsigned int index)
 
     for (int tmp_index=(int) data_.size()-1; tmp_index >= 0 && tmp_index >= (int)index; --tmp_index)
     {
-        //loginf << "UGA: minMaxValuesSorted: tmp_index " << tmp_index << " index " << index << " size " << data_.size();
+        //loginf << "tmp_index" << tmp_index << " index " << index << " size " << data_.size();
 
         if (!isNull(tmp_index))  // not for null
         {
@@ -928,7 +928,7 @@ void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
 
     if (from_format != "octal")
     {
-        logerr << "NullableVector: convertToStandardFormat: unknown format '" << from_format
+        logerr << "unknown format '" << from_format
                << "'";
         assert(false);
     }
@@ -962,7 +962,7 @@ void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
     //        }
     //        else
     //        {
-    //            logerr << "NullableVector: convertToStandardFormat: unknown format '" <<
+    //            logerr << "unknown format '" <<
     //            from_format << "'"; assert (false);
     //        }
     //    }
@@ -999,7 +999,7 @@ void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to ind
 {
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        loginf << "NullableVector: cutUpToIndex: index " << index << " data_size " << data_.size()
+        loginf << "index" << index << " data_size " << data_.size()
                << " null_size " << null_flags_.size();
     }
 
@@ -1023,7 +1023,7 @@ void NullableVector<T>::cutUpToIndex(unsigned int index) // everything up to ind
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        loginf << "NullableVector: cutUpToIndex: after erase index " << index << " data_size " << data_.size()
+        loginf << "after erase index" << index << " data_size " << data_.size()
                << " null_size " << null_flags_.size();
     }
 

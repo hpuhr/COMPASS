@@ -85,7 +85,7 @@ void ASTERIXNetworkDecoder::start_impl()
 
     int max_lines = settings().max_network_lines_;
 
-    loginf << "ASTERIXNetworkDecoder: start: max lines " << max_lines;
+    loginf << "max lines" << max_lines;
 
     for (auto& ds_it : ds_lines_)
     {
@@ -99,7 +99,7 @@ void ASTERIXNetworkDecoder::start_impl()
             assert (line >= 1 && line <= 4);
             line--; // technical counting starts at 0
 
-            loginf << "ASTERIXNetworkDecoder: start: setting up ds_id " << ds_it.first
+            loginf << "setting up ds_id" << ds_it.first
                    << " line " << line << " info " << line_it.second->asString();
 
             auto data_callback = [this,line](const char* data, unsigned int length) {
@@ -115,7 +115,7 @@ void ASTERIXNetworkDecoder::start_impl()
         }
     }
 
-    loginf << "ASTERIXNetworkDecoder: start: running iocontext";
+    loginf << "running iocontext";
 
     boost::thread t(boost::bind(&boost::asio::io_context::run, &io_context));
     t.detach();
@@ -138,7 +138,7 @@ void ASTERIXNetworkDecoder::start_impl()
                     && (boost::posix_time::microsec_clock::local_time()
                         - last_receive_decode_time_).total_milliseconds() > 1000)
             {
-                logdbg << "ASTERIXNetworkDecoder: start: copying data "
+                logdbg << "copying data"
                        << receive_buffer_sizes_.size() << " buffers  max " << MAX_ALL_RECEIVE_SIZE;
 
                 // copy data
@@ -164,7 +164,7 @@ void ASTERIXNetworkDecoder::start_impl()
 
                 last_receive_decode_time_ = boost::posix_time::microsec_clock::local_time();
 
-                logdbg << "ASTERIXNetworkDecoder: start: processing copied data";
+                logdbg << "processing copied data";
 
                 for (auto& size_it : receive_copy_buffer_sizes_)
                 {
@@ -183,7 +183,7 @@ void ASTERIXNetworkDecoder::start_impl()
                                                    size_it.second, callback);
                 }
 
-                logdbg << "ASTERIXNetworkDecoder: start: done";
+                logdbg << "done";
 
                 receive_copy_buffer_sizes_.clear();
 
@@ -193,7 +193,7 @@ void ASTERIXNetworkDecoder::start_impl()
         }
     }
 
-    loginf << "ASTERIXNetworkDecoder: start: shutting down iocontext";
+    loginf << "shutting down iocontext";
 
     io_context.stop();
     assert (io_context.stopped());
@@ -202,7 +202,7 @@ void ASTERIXNetworkDecoder::start_impl()
 
     //done_ = true; // done set in outer run function
 
-    loginf << "ASTERIXNetworkDecoder: start: done";
+    loginf << "done";
 }
 
 /**
@@ -222,13 +222,13 @@ void ASTERIXNetworkDecoder::storeReceivedData(unsigned int line,
     if (!isRunning())
         return;
 
-    //loginf << "ASTERIXDecoderBase: storeReceivedData: sender " << sender_id;
+    //loginf << "sender" << sender_id;
 
     boost::mutex::scoped_lock lock(receive_buffers_mutex_);
 
     if (length + receive_buffer_sizes_[line] >= MAX_ALL_RECEIVE_SIZE)
     {
-        logerr << "ASTERIXNetworkDecoder: storeReceivedData: overload, too much data in buffer";
+        logerr << "overload, too much data in buffer";
         return;
     }
 

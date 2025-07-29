@@ -150,14 +150,14 @@ DBContentManagerWidget::~DBContentManagerWidget()
 
 // void DBContentManagerWidget::databaseOpenedSlot ()
 //{
-//    loginf << "DBContentManagerWidget: databaseOpenedSlot";
+//    loginf << "databaseOpenedSlot";
 //}
 
 void DBContentManagerWidget::addDBOSlot()
 {
 //    if (!schema_manager_.hasCurrentSchema())
 //    {
-//        logerr << "DBContentManagerWidget: addDBO: no schema was selected";
+//        logerr << "no schema was selected";
 //        return;
 //    }
 
@@ -171,7 +171,7 @@ void DBContentManagerWidget::addDBOSlot()
 
         if (object_manager_.existsDBContent(name))
         {
-            logerr << "DBContentManagerWidget: addDBO: DBContent same name already exists";
+            logerr << "DBContent same name already exists";
             return;
         }
 
@@ -324,7 +324,7 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
         {
             if (object_manager_.usedInMetaVariable(*var_it.second.get()))
             {
-                loginf << "DBContentManagerWidget: addAllMetaVariablesSlot: not adding dbovariable "
+                loginf << "not adding dbovariable"
                        << var_it.first << " since already used";
                 continue;
             }
@@ -348,7 +348,7 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
             {
                 if (!object_manager_.existsMetaVariable(var_it.first))
                 {
-                    loginf << "DBContentManagerWidget: addAllMetaVariablesSlot: adding meta variable "
+                    loginf << "adding meta variable"
                         << var_it.first;
 
                     std::string instance = "MetaVariable" + var_it.first + "0";
@@ -366,7 +366,7 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
                 {
                     if (!meta_var.existsIn(*dbo_it2))
                     {
-                        loginf << "DBContentManagerWidget: addAllMetaVariablesSlot: adding meta "
+                        loginf << "adding meta"
                                   "variable "
                                << var_it.first << " dbo variable " << var_it.first;
                         meta_var.addVariable(*dbo_it2, var_it.first);

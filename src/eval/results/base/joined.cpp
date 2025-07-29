@@ -557,7 +557,7 @@ std::shared_ptr<nlohmann::json::object_t> Joined::getOrCreateCachedViewable() co
 {
     if (!viewable_)
     {
-        loginf << "Joined: getOrCreateCachedViewable: recreating viewable for "
+        loginf << "recreating viewable for"
                << "requirement '" << requirement_->name() << "' " 
                << "sector '" << sector_layer_.name() << "'..."; 
 

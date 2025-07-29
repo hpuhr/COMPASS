@@ -59,7 +59,7 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
                                    COMPASS* compass)
     : Configurable(class_id, instance_id, compass, "db_content.json"), compass_(*compass)
 {
-    logdbg << "DBContentManager: constructor: creating subconfigurables";
+    logdbg << "creating subconfigurables";
 
     registerParameter("max_live_data_age_cache", &max_live_data_age_cache_, 5u);
     registerParameter("max_live_data_age_db", &max_live_data_age_db_, 60u);
@@ -91,7 +91,7 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
  */
 DBContentManager::~DBContentManager()
 {
-    loginf << "DBContentManager: dtor";
+    loginf << "dtor";
 
     data_.clear();
 
@@ -103,7 +103,7 @@ DBContentManager::~DBContentManager()
 
     widget_ = nullptr;
 
-    loginf << "DBContentManager: dtor: done";
+    loginf << "done";
 }
 
 /**
@@ -111,13 +111,13 @@ DBContentManager::~DBContentManager()
 void DBContentManager::generateSubConfigurable(const std::string& class_id,
                                                const std::string& instance_id)
 {
-    logdbg << "DBContentManager: generateSubConfigurable: class_id " << class_id << " instance_id "
+    logdbg << "class_id" << class_id << " instance_id "
            << instance_id;
 
     if (class_id == "DBContent")
     {
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
-        loginf << "DBContentManager: generateSubConfigurable: adding content " << object->name()
+        loginf << "adding content" << object->name()
                << " id " << object->id();
         assert(!dbcontent_.count(object->name()));
         assert(!dbcontent_ids_.count(object->id()));
@@ -128,7 +128,7 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
     else if (class_id == "MetaVariable")
     {
         MetaVariable* meta_var = new MetaVariable(class_id, instance_id, this);
-        logdbg << "DBContentManager: generateSubConfigurable: adding meta var type "
+        logdbg << "adding meta var type"
                << meta_var->name();
 
         assert(!existsMetaVariable(meta_var->name()));
@@ -155,7 +155,7 @@ void DBContentManager::checkSubConfigurables()
  */
 bool DBContentManager::existsDBContent(const std::string& dbcontent_name)
 {
-    logdbg << "DBContentManager: existsDBContent: '" << dbcontent_name << "'";
+    logdbg << "'" << dbcontent_name << "'";
 
     return (dbcontent_.find(dbcontent_name) != dbcontent_.end());
 }
@@ -164,7 +164,7 @@ bool DBContentManager::existsDBContent(const std::string& dbcontent_name)
  */
 DBContent& DBContentManager::dbContent(const std::string& dbcontent_name)
 {
-    logdbg << "DBContentManager: dbContent: name " << dbcontent_name;
+    logdbg << "name" << dbcontent_name;
 
     assert(dbcontent_.find(dbcontent_name) != dbcontent_.end());
 
@@ -175,7 +175,7 @@ DBContent& DBContentManager::dbContent(const std::string& dbcontent_name)
  */
 void DBContentManager::deleteDBContent(const std::string& dbcontent_name)
 {
-    logdbg << "DBContentManager: deleteDBContent: name " << dbcontent_name;
+    logdbg << "name" << dbcontent_name;
     assert(existsDBContent(dbcontent_name));
     delete dbcontent_.at(dbcontent_name);
     dbcontent_.erase(dbcontent_name);
@@ -187,7 +187,7 @@ void DBContentManager::deleteDBContent(const std::string& dbcontent_name)
  */
 void DBContentManager::deleteDBContentData(boost::posix_time::ptime before_timestamp)
 {
-    loginf << "DBContentManager: deleteDBContentData";
+    loginf << "deleteDBContentData";
 
     assert (!delete_job_);
 
@@ -249,7 +249,7 @@ bool DBContentManager::existsMetaVariable(const std::string& var_name)
  */
 MetaVariable& DBContentManager::metaVariable(const std::string& var_name)
 {
-    logdbg << "DBContentManager: metaVariable: name " << var_name;
+    logdbg << "name" << var_name;
 
     assert (meta_variables_.count(var_name));
     return *(meta_variables_.at(var_name).get());
@@ -278,7 +278,7 @@ void DBContentManager::renameMetaVariable(const std::string& old_var_name, const
  */
 void DBContentManager::deleteMetaVariable(const std::string& var_name)
 {
-    logdbg << "DBContentManager: deleteMetaVariable: name " << var_name;
+    logdbg << "name" << var_name;
     assert(existsMetaVariable(var_name));
 
     meta_variables_.erase(var_name);
@@ -341,13 +341,13 @@ void DBContentManager::load(const std::string& custom_filter_clause,
 {
     loading_done_ = false;
 
-    logdbg << "DBContentManager: load: custom_filter_clause '" << custom_filter_clause << "'";
+    logdbg << "custom_filter_clause '" << custom_filter_clause << "'";
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     if (load_in_progress_)
     {
-        logdbg << "DBContentManager: load: quitting previous load";
+        logdbg << "quitting previous load";
 
         for (auto& object : dbcontent_)
         {
@@ -357,14 +357,14 @@ void DBContentManager::load(const std::string& custom_filter_clause,
 
         while (load_in_progress_) // JobManager::instance().hasDBJobs()
         {
-            loginf << "DBContentManager: load: previous load to finish";
+            loginf << "previous load to finish";
 
             QCoreApplication::processEvents();
             QThread::msleep(1);
         }
     }
 
-    loginf << "DBContentManager: load: starting loading";
+    loginf << "starting loading";
 
     saveSelectedRecNums();
     clearData();
@@ -381,20 +381,20 @@ void DBContentManager::load(const std::string& custom_filter_clause,
 
     for (auto& object : dbcontent_)
     {
-        logdbg << "DBContentManager: load: object " << object.first
+        logdbg << "object" << object.first
                << " loadable " << object.second->loadable()
                << " loading wanted " << ds_man.loadingWanted(object.first)
                << " filters " << COMPASS::instance().filterManager().useFilters();
 
         if (object.second->loadable() && ds_man.loadingWanted(object.first))
         {
-            logdbg << "DBContentManager: load: loading object " << object.first;
+            logdbg << "loading object" << object.first;
             
             auto read_set = getReadSet(object.first);
 
             if (read_set.getSize() == 0)
             {
-                logwrn << "DBContentManager: load: skipping loading of object " << object.first
+                logwrn << "skipping loading of object" << object.first
                        << " since an empty read list was detected";
                 continue;
             }
@@ -432,7 +432,7 @@ void DBContentManager::loadBlocking(const std::string& custom_filter_clause,
  */
 void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffer>> data)
 {
-    logdbg << "DBContentManager: addLoadedData";
+    logdbg << "addLoadedData";
 
     // newest data batch has been finalized, ready to be added
 
@@ -447,19 +447,19 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
         if (data_.count(buf_it.first))
         {
-            logdbg << "DBContentManager: addLoadedData: adding buffer dbo " << buf_it.first
+            logdbg << "adding buffer dbo" << buf_it.first
                    << " adding size " << buf_it.second->size() << " current size " << data_.at(buf_it.first)->size();
 
             data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
 
-            logdbg << "DBContentManager: addLoadedData: new buffer dbo " << buf_it.first
+            logdbg << "new buffer dbo" << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
         else
         {
             data_[buf_it.first] = std::move(buf_it.second);
 
-            logdbg << "DBContentManager: addLoadedData: created buffer dbo " << buf_it.first
+            logdbg << "created buffer dbo" << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
 
@@ -471,7 +471,7 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
         updateNumLoadedCounts();
         restoreSelectedRecNums();
 
-        logdbg << "DBContentManager: addLoadedData: emitting signal";
+        logdbg << "emitting signal";
 
         emit loadedDataSignal(data_, false);
     }
@@ -488,7 +488,7 @@ std::map<std::string, std::shared_ptr<Buffer>> DBContentManager::loadedData()
  */
 void DBContentManager::quitLoading()
 {
-    loginf << "DBContentManager: quitLoading";
+    loginf << "quitLoading";
 
     assert (load_in_progress_);
 
@@ -505,7 +505,7 @@ void DBContentManager::quitLoading()
  */
 void DBContentManager::databaseOpenedSlot()
 {
-    loginf << "DBContentManager: databaseOpenedSlot";
+    loginf << "databaseOpenedSlot";
 
     loadMaxRecordNumberWODBContentID();
     loadMaxRefTrajTrackNum();
@@ -539,10 +539,10 @@ void DBContentManager::databaseOpenedSlot()
     }
 
     if (hasMinMaxTimestamp())
-        loginf << "DBContentManager: databaseOpenedSlot: timestamp_min_ " << Time::toString(*timestamp_min_)
+        loginf << "timestamp_min_" << Time::toString(*timestamp_min_)
                << " timestamp_max_ " << Time::toString(*timestamp_max_);
     else
-        loginf << "DBContentManager: databaseOpenedSlot: no min/max timestamp";
+        loginf << "no min/max timestamp";
 
     if (db_interface.hasProperty(PROP_LATITUDE_MIN_NAME))
         latitude_min_ = stod(db_interface.getProperty(PROP_LATITUDE_MIN_NAME));
@@ -555,11 +555,11 @@ void DBContentManager::databaseOpenedSlot()
         longitude_max_ = stod(db_interface.getProperty(PROP_LONGITUDE_MAX_NAME));
 
     if (hasMinMaxPosition())
-        loginf << "DBContentManager: databaseOpenedSlot: latitude_min_ " << *latitude_min_
+        loginf << "latitude_min_" << *latitude_min_
                << " latitude_max_ " << *latitude_max_ << " longitude_min_ " << *longitude_min_
                << " longitude_max_ " << *longitude_max_;
     else
-        loginf << "DBContentManager: databaseOpenedSlot: no min/max position";
+        loginf << "no min/max position";
 
     for (auto& object : dbcontent_)
         object.second->databaseOpenedSlot();
@@ -569,14 +569,14 @@ void DBContentManager::databaseOpenedSlot()
     emit associationStatusChangedSignal();
     emit dbContentStatusChanged();
 
-    loginf << "DBContentManager: databaseOpenedSlot: done";
+    loginf << "done";
 }
 
 /**
  */
 void DBContentManager::databaseClosedSlot()
 {
-    loginf << "DBContentManager: databaseClosedSlot";
+    loginf << "databaseClosedSlot";
 
     max_rec_num_wo_dbcontid_ = 0;
     has_max_rec_num_wo_dbcontid_ = false;
@@ -622,14 +622,14 @@ void DBContentManager::loadingDone(DBContent& object)
     if (done)
         finishLoading();
     else
-        logdbg << "DBContentManager: loadingDoneSlot: not done";
+        logdbg << "not done";
 }
 
 /**
  */
 void DBContentManager::deleteJobDoneSlot()
 {
-    logdbg << "DBContentManager: deleteJobDoneSlot";
+    logdbg << "deleteJobDoneSlot";
 
     assert (delete_job_);
 
@@ -648,7 +648,7 @@ void DBContentManager::metaDialogOKSlot()
  */
 void DBContentManager::finishLoading()
 {
-    loginf << "DBContentManager: finishLoading: all done";
+    loginf << "all done";
     load_in_progress_ = false;
 
     tmp_selected_rec_nums_.clear();
@@ -730,7 +730,7 @@ bool DBContentManager::loadInProgress() const
  */
 void DBContentManager::clearData()
 {
-    loginf << "DBContentManager: clearData";
+    loginf << "clearData";
 
     data_.clear();
 
@@ -741,7 +741,7 @@ void DBContentManager::clearData()
  */
 void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>> data)
 {
-    logdbg << "DBContentManager: insertData";
+    logdbg << "insertData";
 
     while (load_in_progress_) // pending insert
     {
@@ -754,7 +754,7 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
     assert (!insert_job_);
 
     insert_in_progress_ = true;
-    logdbg << "DBContentManager: insertData: insert in progress " << insert_in_progress_;
+    logdbg << "insert in progress" << insert_in_progress_;
 
     insert_data_ = data;
 
@@ -783,7 +783,7 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
  */
 void DBContentManager::finishInserting()
 {
-    logdbg << "DBContentManager: finishInserting";
+    logdbg << "finishInserting";
 
     //delete insert job
     insert_job_ = nullptr;
@@ -803,15 +803,15 @@ void DBContentManager::finishInserting()
     for (auto& buf_it : insert_data_)
         buffer_cnt += buf_it.second->size();
 
-    logdbg << "DBContentManager: finishInserting: size " << buffer_cnt;
+    logdbg << "size" << buffer_cnt;
 
     assert (existsMetaVariable(DBContent::meta_var_timestamp_.name()));
 
     insert_in_progress_ = false;
-    logdbg << "DBContentManager: finishInserting: insert in progress " << insert_in_progress_;
+    logdbg << "insert in progress" << insert_in_progress_;
     emit insertDoneSignal();
 
-    logdbg << "DBContentManager: finishInserting: done signal took "
+    logdbg << "done signal took"
            << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
            << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 
@@ -878,7 +878,7 @@ void DBContentManager::finishInserting()
             COMPASS::instance().dbInterface().setProperty(PROP_TIMESTAMP_MAX_NAME,
                                                         to_string(Time::toLong(timestamp_max_.get())));
 
-            logdbg << "DBContentManager: finishInserting: tod min " << timestamp_min_.get()
+            logdbg << "tod min" << timestamp_min_.get()
                    << " max " << timestamp_max_.get();
         }
 
@@ -930,7 +930,7 @@ void DBContentManager::finishInserting()
                     COMPASS::instance().dbInterface().setProperty(PROP_LONGITUDE_MIN_NAME, to_string(longitude_min_.get()));
                     COMPASS::instance().dbInterface().setProperty(PROP_LONGITUDE_MAX_NAME, to_string(longitude_max_.get()));
 
-                    logdbg << "DBContentManager: finishInserting: lat min " << latitude_min_.get()
+                    logdbg << "lat min" << latitude_min_.get()
                            << " max " << latitude_max_.get()
                            << " lon min " << longitude_min_.get()
                            << " max " << longitude_max_.get();
@@ -939,7 +939,7 @@ void DBContentManager::finishInserting()
         }
     }
 
-    logdbg << "DBContentManager: finishInserting: min/max took "
+    logdbg << "min/max took"
            << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
            << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 
@@ -956,12 +956,12 @@ void DBContentManager::finishInserting()
 
         ptime old_time = Time::currentUTCTime() - minutes(max_live_data_age_db_);
 
-        logdbg << "DBContentManager: finishInserting: deleting data before " << Time::toString(old_time);
+        logdbg << "deleting data before" << Time::toString(old_time);
 
         deleteDBContentData(old_time);
     }
 
-    logdbg << "DBContentManager: finishInserting: clear old took "
+    logdbg << "clear old took"
            << String::timeStringFromDouble(
                   (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
            << " full " << String::timeStringFromDouble(
@@ -977,7 +977,7 @@ void DBContentManager::finishInserting()
     {
         addInsertedDataToChache();
 
-        logdbg << "DBContentManager: finishInserting: insert cache took "
+        logdbg << "insert cache took"
                << String::timeStringFromDouble((microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
                << " full " << String::timeStringFromDouble((microsec_clock::local_time() - start_time).total_milliseconds() / 1000.0, true);
 
@@ -987,11 +987,11 @@ void DBContentManager::finishInserting()
         for (auto& buf_it : data_)
             buffer_cnt += buf_it.second->size();
 
-        logdbg << "DBContentManager: finishInserting: before cut data size " << buffer_cnt;
+        logdbg << "before cut data size" << buffer_cnt;
 
         cutCachedData();
 
-        logdbg << "DBContentManager: finishInserting: cut cache took "
+        logdbg << "cut cache took"
                << String::timeStringFromDouble(
                       (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
                << " full " << String::timeStringFromDouble(
@@ -1003,13 +1003,13 @@ void DBContentManager::finishInserting()
         for (auto& buf_it : data_)
             buffer_cnt += buf_it.second->size();
 
-        logdbg << "DBContentManager: finishInserting: after cut data size " << buffer_cnt;
+        logdbg << "after cut data size" << buffer_cnt;
 
         // INFO] DBContentManager: finishInserting: size 220692
         // filter ds took 00:00:13.266 full 00:00:13.395
         filterDataSources();
 
-        logdbg << "DBContentManager: finishInserting: filterDataSources took "
+        logdbg << "filterDataSources took"
                << String::timeStringFromDouble(
                       (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
                << " full " << String::timeStringFromDouble(
@@ -1019,7 +1019,7 @@ void DBContentManager::finishInserting()
         for (auto& buf_it : data_)
             buffer_cnt += buf_it.second->size();
 
-        logdbg << "DBContentManager: finishInserting: after ds filter data size " << buffer_cnt;
+        logdbg << "after ds filter data size" << buffer_cnt;
 
         tmp_time = microsec_clock::local_time();
 
@@ -1027,7 +1027,7 @@ void DBContentManager::finishInserting()
         {
             COMPASS::instance().filterManager().filterBuffers(data_);
 
-            logdbg << "DBContentManager: finishInserting: filter buffs took "
+            logdbg << "filter buffs took"
                    << String::timeStringFromDouble(
                           (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
                    << " full " << String::timeStringFromDouble(
@@ -1036,14 +1036,14 @@ void DBContentManager::finishInserting()
             tmp_time = microsec_clock::local_time();
         }
 
-        logdbg << "DBContentManager: finishInserting: distributing data " << (bool) data_.size();
+        logdbg << "distributing data" << (bool) data_.size();
 
         if (data_.size())
             emit loadedDataSignal(data_, true);
         else if (had_data)
             COMPASS::instance().viewManager().clearDataInViews();
 
-        logdbg << "DBContentManager: finishInserting: distribute took "
+        logdbg << "distribute took"
                << String::timeStringFromDouble(
                       (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
                << " full " << String::timeStringFromDouble(
@@ -1053,7 +1053,7 @@ void DBContentManager::finishInserting()
 
         updateNumLoadedCounts();
 
-        logdbg << "DBContentManager: finishInserting: update cnts took "
+        logdbg << "update cnts took"
                << String::timeStringFromDouble(
                       (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
                << " full " << String::timeStringFromDouble(
@@ -1062,7 +1062,7 @@ void DBContentManager::finishInserting()
         tmp_time = microsec_clock::local_time();
 
         if (!min_time_found.is_not_a_date_time())
-            loginf << "DBContentManager: finishInserting: max latency "
+            loginf << "max latency"
                    << Time::toString(Time::currentUTCTime() - min_time_found);
     }
 
@@ -1070,7 +1070,7 @@ void DBContentManager::finishInserting()
 
     //COMPASS::instance().dbContentManager().labelGenerator().updateAvailableLabelLines(); // update available lines
 
-    logdbg << "DBContentManager: finishInserting: update lines took "
+    logdbg << "update lines took"
            << String::timeStringFromDouble(
                   (microsec_clock::local_time() - tmp_time).total_milliseconds() / 1000.0, true)
            << " full " << String::timeStringFromDouble(
@@ -1081,7 +1081,7 @@ void DBContentManager::finishInserting()
  */
 void DBContentManager::addInsertedDataToChache()
 {
-    loginf << "DBContentManager: addInsertedDataToChache";
+    loginf << "addInsertedDataToChache";
 
     //assert (label_generator_);
 
@@ -1111,7 +1111,7 @@ void DBContentManager::addInsertedDataToChache()
 
                           for (auto& prop_it : buffer_properties_to_be_removed)
                           {
-                              logdbg << "DBContentManager: addInsertedDataToChache: deleting property " << prop_it.name();
+                              logdbg << "deleting property" << prop_it.name();
                               buf_it->second->deleteProperty(prop_it);
                           }
 
@@ -1162,7 +1162,7 @@ void DBContentManager::addInsertedDataToChache()
  */
 void DBContentManager::filterDataSources()
 {
-    logdbg << "DBContentManager: filterDataSources";
+    logdbg << "filterDataSources";
 
     std::map<unsigned int, std::set<unsigned int>> wanted_data_sources =
         COMPASS::instance().dataSourceManager().getLoadDataSources();
@@ -1209,7 +1209,7 @@ void DBContentManager::filterDataSources()
                                   indexes_to_remove.push_back(index);
                           }
 
-                          logdbg << "DBContentManager: filterDataSources: in " << buf_it->first << " remove "
+                          logdbg << "in" << buf_it->first << " remove "
                                  << indexes_to_remove.size() << " of " << buffer_size;
 
                           // remove unwanted indexes
@@ -1237,7 +1237,7 @@ void DBContentManager::cutCachedData()
     boost::posix_time::ptime min_ts = Time::currentUTCTime() - boost::posix_time::minutes(max_live_data_age_cache_);
     // max - x minutes
 
-    logdbg << "DBContentManager: cutCachedData: current ts " << Time::toString(Time::currentUTCTime())
+    logdbg << "current ts" << Time::toString(Time::currentUTCTime())
            << " min_ts " << Time::toString(min_ts);
 
     for (auto& buf_it : data_)
@@ -1261,7 +1261,7 @@ void DBContentManager::cutCachedData()
             {
                 if (!ts_vec.isNull(index) && ts_vec.get(index) > min_ts)
                 {
-                    logdbg << "DBContentManager: cutCachedData: found " << buf_it.first
+                    logdbg << "found" << buf_it.first
                            << " cutoff tod index " << index
                            << " ts " << Time::toString(ts_vec.get(index));
                     break;
@@ -1273,7 +1273,7 @@ void DBContentManager::cutCachedData()
             {
                 index--; // cut at previous
 
-                logdbg << "DBContentManager: cutCachedData: cutting " << buf_it.first
+                logdbg << "cutting" << buf_it.first
                        << " up to index " << index
                        << " total size " << buffer_size
                        << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
@@ -1282,7 +1282,7 @@ void DBContentManager::cutCachedData()
             }
         }
         else
-            logwrn << "DBContentManager: cutCachedData: buffer " << buf_it.first << " has not tod for cutoff";
+            logwrn << "buffer" << buf_it.first << " has not tod for cutoff";
     }
 
     // remove empty buffers
@@ -1297,7 +1297,7 @@ void DBContentManager::cutCachedData()
  */
 void DBContentManager::updateNumLoadedCounts()
 {
-    logdbg << "DBContentManager: updateNumLoadedCounts";
+    logdbg << "updateNumLoadedCounts";
 
     // ds id->dbcont->line->cnt
     std::map<unsigned int, std::map<std::string,
@@ -1494,7 +1494,7 @@ dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcon
 {
     if (!metaCanGetVariable(dbcont_name, meta_property))
     {
-        logerr << "DBContentManager: metaGetVariable: defined '" << meta_property.name()
+        logerr << "defined '" << meta_property.name()
                << "' in '" << dbcont_name << "'";
         assert (false);
     }
@@ -1553,7 +1553,7 @@ dbContent::Target& DBContentManager::target(unsigned int utn)
  */
 void DBContentManager::loadTargets()
 {
-    loginf << "DBContentManager: loadTargets";
+    loginf << "loadTargets";
 
     target_model_->loadFromDB();
 
@@ -1565,7 +1565,7 @@ void DBContentManager::loadTargets()
  */
 void DBContentManager::saveTargets()
 {
-    loginf << "DBContentManager: saveTargets";
+    loginf << "saveTargets";
 
     target_model_->saveToDB();
 }
@@ -1791,7 +1791,7 @@ void DBContentManager::storeSelectedRecNums(const std::vector<unsigned long>& se
 
 void DBContentManager::clearSelectedRecNums()
 {
-    loginf << "DBContentManager: clearSelectedRecNums";
+    loginf << "clearSelectedRecNums";
 
     tmp_selected_rec_nums_.clear();
 
@@ -1808,7 +1808,7 @@ void DBContentManager::clearSelectedRecNums()
  */
 void DBContentManager::saveSelectedRecNums()
 {
-    loginf << "DBContentManager: saveSelectedRecNums";
+    loginf << "saveSelectedRecNums";
 
     if(tmp_selected_rec_nums_.size())
         return; // already stored from view point
@@ -2133,7 +2133,7 @@ std::string DBContentManager::utnComment (unsigned int utn)
  */
 void DBContentManager::utnComment (unsigned int utn, std::string value)
 {
-    loginf << "DBContentManager: utnComment: utn " << utn << " comment '" << value << "'";
+    loginf << "utn" << utn << " comment '" << value << "'";
 
     assert (target_model_);
     assert (target_model_->existsTarget(utn));
@@ -2176,12 +2176,12 @@ void DBContentManager::autoFilterUTNS()
  */
 void DBContentManager::showUTN (unsigned int utn)
 {
-    loginf << "DBContentManager: showUTN: utn " << utn;
+    loginf << "utn" << utn;
 
     nlohmann::json data;
     data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = to_string(utn);
 
-    logdbg << "DBContentManager: showUTN: showing";
+    logdbg << "showing";
     setViewableDataConfig(data);
 }
 
@@ -2189,14 +2189,14 @@ void DBContentManager::showUTN (unsigned int utn)
  */
 void DBContentManager::showUTNs (std::set<unsigned int> utns)
 {
-    loginf << "DBContentManager: showUTNs: len " << utns.size();
+    loginf << "len" << utns.size();
 
     if (utns.size())
     {
         nlohmann::json data;
         data[ViewPoint::VP_FILTERS_KEY]["UTNs"]["utns"] = String::compress(utns, ',');
 
-        loginf << "DBContentManager: showUTNs: showing '" << String::compress(utns, ',') << "'";
+        loginf << "showing '" << String::compress(utns, ',') << "'";
         setViewableDataConfig(data);
     }
     else

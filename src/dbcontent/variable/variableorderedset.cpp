@@ -43,7 +43,7 @@ VariableOrderedSet::VariableOrderedSet(const std::string& class_id,
 
     // check set contents
 
-    loginf << "VariableOrderedSet: ctor: checking";
+    loginf << "checking";
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -55,20 +55,20 @@ VariableOrderedSet::VariableOrderedSet(const std::string& class_id,
         {
             if (!dbcont_man.existsMetaVariable(def_it.second))
             {
-                logwrn << "VariableOrderedSet: ctor: outdated meta variable " << def_it.second;
+                logwrn << "outdated meta variable" << def_it.second;
                 removeVariableAt(getIndexFor(def_it.first, def_it.second), false);
             }
         }
         else if (!dbcont_man.existsDBContent(def_it.first) ||
                  !dbcont_man.dbContent(def_it.first).hasVariable(def_it.second))
         {
-            logwrn << "VariableOrderedSet: ctor: outdated dbcont name "
+            logwrn << "outdated dbcont name"
                    << def_it.first << " variable " << def_it.second;
             removeVariableAt(getIndexFor(def_it.first, def_it.second), false);
         }
     }
 
-    loginf << "VariableOrderedSet: ctor: checking done";
+    loginf << "checking done";
 }
 
 VariableOrderedSet::~VariableOrderedSet() = default;
@@ -76,7 +76,7 @@ VariableOrderedSet::~VariableOrderedSet() = default;
 void VariableOrderedSet::generateSubConfigurable(const std::string& class_id,
                                                  const std::string& instance_id)
 {
-    logdbg << "VariableOrderedSet: generateSubConfigurable: class_id " << class_id
+    logdbg << "class_id" << class_id
            << " instance_id " << instance_id;
 
     throw std::runtime_error("VariableOrderedSet: generateSubConfigurable: unknown class_id " + class_id);
@@ -143,7 +143,7 @@ void VariableOrderedSet::removeVariableAt(unsigned int index)
 
 void VariableOrderedSet::removeVariableAt(unsigned int index, bool signal_changes)
 {
-    loginf << "VariableOrderedSet: removeVariableAt: index " << index;
+    loginf << "index" << index;
 
     assert(index < variable_definitions_.size());
 
@@ -185,12 +185,12 @@ template <typename t> void vec_move(std::vector<t>& v, size_t old_index, size_t 
 
 void VariableOrderedSet::moveVariableUp(unsigned int index)
 {
-    logdbg << "VariableOrderedSet: moveVariableUp: index " << index;
+    logdbg << "index" << index;
     assert(index < variable_definitions_.size());
 
     if (index == 0)
     {
-        logwrn << "VariableOrderedSet: moveVariableUp: tried to move up first variable";
+        logwrn << "tried to move up first variable";
         return;
     }
 
@@ -207,12 +207,12 @@ void VariableOrderedSet::moveVariableUp(unsigned int index)
 
 void VariableOrderedSet::moveVariableDown(unsigned int index)
 {
-    logdbg << "VariableOrderedSet: moveVariableDown: index " << index;
+    logdbg << "index" << index;
     assert(index < variable_definitions_.size());
 
     if (index == variable_definitions_.size() - 1)
     {
-        logerr << "VariableOrderedSet: moveVariableDown: tried to down up last variable";
+        logerr << "tried to down up last variable";
         return;
     }
 
@@ -229,7 +229,7 @@ void VariableOrderedSet::moveVariableDown(unsigned int index)
 
 VariableSet VariableOrderedSet::getFor(const std::string& dbcontent_name)
 {
-    logdbg << "VariableOrderedSet: getFor: dbcontent_name " << dbcontent_name;
+    logdbg << "dbcontent_name" << dbcontent_name;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 

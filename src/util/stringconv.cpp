@@ -216,7 +216,7 @@ int getAppendedInt(std::string text)
     }
 
     if (count == 0)
-        loginf << "Util: getAppendedInt: no int found, returning 0";
+        loginf << "no int found, returning 0";
 
     return ret;
 }

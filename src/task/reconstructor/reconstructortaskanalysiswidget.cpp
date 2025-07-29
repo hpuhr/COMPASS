@@ -169,7 +169,7 @@ ReconstructorTaskAnalysisWidget::~ReconstructorTaskAnalysisWidget()
 
 void ReconstructorTaskAnalysisWidget::updateValues()
 {
-    loginf << "ReconstructorTaskDebugWidget: updateValues";
+    loginf << "updateValues";
 
     bool add_debug_stuff = !COMPASS::isAppImage() || COMPASS::instance().expertMode();
 
@@ -253,7 +253,7 @@ void ReconstructorTaskAnalysisWidget::updateValues()
 
 void ReconstructorTaskAnalysisWidget::utnsChangedSlot(const QString& value)
 {
-    loginf << "ReconstructorTaskDebugWidget: utnsChangedSlot: value '" << value.toStdString() << "'";
+    loginf << "value '" << value.toStdString() << "'";
 
     set<unsigned int> values_tmp;
     vector<string> split_str = String::split(value.toStdString(), ',');
@@ -266,7 +266,7 @@ void ReconstructorTaskAnalysisWidget::utnsChangedSlot(const QString& value)
 
         if (!ok)
         {
-            logerr << "ReconstructorTaskDebugWidget: utnsChangedSlot: utn '" << tmp_str << "' not valid";
+            logerr << "utn '" << tmp_str << "' not valid";
             break;
         }
 
@@ -278,7 +278,7 @@ void ReconstructorTaskAnalysisWidget::utnsChangedSlot(const QString& value)
 
 void ReconstructorTaskAnalysisWidget::recNumsChangedSlot(const QString& value)
 {
-    loginf << "ReconstructorTaskDebugWidget: recNumsChangedSlot: value '" << value.toStdString() << "'";
+    loginf << "value '" << value.toStdString() << "'";
 
     set<unsigned long> values_tmp;
     vector<string> split_str = String::split(value.toStdString(), ',');
@@ -291,7 +291,7 @@ void ReconstructorTaskAnalysisWidget::recNumsChangedSlot(const QString& value)
 
         if (!ok)
         {
-            logerr << "ReconstructorTaskDebugWidget: utnsChangedSlot: utn '" << tmp_str << "' not valid";
+            logerr << "utn '" << tmp_str << "' not valid";
             break;
         }
 
@@ -324,13 +324,13 @@ void ReconstructorTaskAnalysisWidget::timestampsChanged()
     task_.debugSettings().debug_timestamp_min_ = ts_min.has_value() ? ts_min.value() : boost::posix_time::ptime();
 
     if (ts_min.has_value())
-        loginf << "ReconstructorTaskDebugWidget: timestampsChanged: set ts min to "
+        loginf << "set ts min to"
                << Utils::Time::toString(ts_min.value());
 
     auto ts_max = checkTimestamp(timestamp_max_edit_);
     task_.debugSettings().debug_timestamp_max_ = ts_max.has_value() ? ts_max.value() : boost::posix_time::ptime();
 
     if (ts_max.has_value())
-        loginf << "ReconstructorTaskDebugWidget: timestampsChanged: set ts max to "
+        loginf << "set ts max to"
                << Utils::Time::toString(ts_max.value());
 }

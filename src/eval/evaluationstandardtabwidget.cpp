@@ -132,7 +132,7 @@ EvaluationStandardTabWidget::EvaluationStandardTabWidget(EvaluationCalculator& c
  */
 void EvaluationStandardTabWidget::changedStandardsSlot()
 {
-    loginf << "EvaluationStandardTabWidget: changedStandardsSlot";
+    loginf << "changedStandardsSlot";
 
     assert (standard_box_);
     standard_box_->updateStandards();
@@ -142,7 +142,7 @@ void EvaluationStandardTabWidget::changedStandardsSlot()
  */
 void EvaluationStandardTabWidget::changedCurrentStandardSlot()
 {
-    loginf << "EvaluationStandardTabWidget: changedCurrentStandardSlot";
+    loginf << "changedCurrentStandardSlot";
 
     assert (standard_box_);
     standard_box_->setStandardName(calculator_.currentStandardName());
@@ -155,7 +155,7 @@ void EvaluationStandardTabWidget::changedCurrentStandardSlot()
  */
 void EvaluationStandardTabWidget::addStandardSlot ()
 {
-    loginf << "EvaluationStandardTabWidget: addStandardSlot";
+    loginf << "addStandardSlot";
 
     bool ok;
     QString text =
@@ -190,7 +190,7 @@ void EvaluationStandardTabWidget::addStandardSlot ()
  */
 void EvaluationStandardTabWidget::renameStandardSlot ()
 {
-    loginf << "EvaluationStandardTabWidget: renameStandardSlot";
+    loginf << "renameStandardSlot";
 
     bool ok;
     QString text =
@@ -226,7 +226,7 @@ void EvaluationStandardTabWidget::renameStandardSlot ()
  */
 void EvaluationStandardTabWidget::copyStandardSlot ()
 {
-    loginf << "EvaluationStandardTabWidget: copyStandardSlot";
+    loginf << "copyStandardSlot";
 
     bool ok;
     QString text =
@@ -261,7 +261,7 @@ void EvaluationStandardTabWidget::copyStandardSlot ()
  */
 void EvaluationStandardTabWidget::removeStandardSlot ()
 {
-    loginf << "EvaluationStandardTabWidget: removeStandardSlot";
+    loginf << "removeStandardSlot";
 
     assert (calculator_.hasCurrentStandard());
     calculator_.deleteCurrentStandard();
@@ -332,7 +332,7 @@ void EvaluationStandardTabWidget::updateStandardWidget()
  */
 void EvaluationStandardTabWidget::maxRefTimeDiffEditSlot(QString value)
 {
-    loginf << "EvaluationStandardTabWidget: maxRefTimeDiffEditSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -340,5 +340,5 @@ void EvaluationStandardTabWidget::maxRefTimeDiffEditSlot(QString value)
     if (ok)
         calculator_.settings().max_ref_time_diff_ = val;
     else
-        loginf << "EvaluationStandardTabWidget: maxRefTimeDiffEditSlot: invalid value";
+        loginf << "invalid value";
 }

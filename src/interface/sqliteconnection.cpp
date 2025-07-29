@@ -137,7 +137,7 @@ ResultT<std::vector<std::string>> SQLiteConnection::getTableList_impl()
 
     unsigned int size = buffer->size();
 
-    loginf << "SQLiteConnection: getTableList: buffer size " << size;
+    loginf << "buffer size" << size;
 
     std::string table_name;
 

@@ -88,7 +88,7 @@ ScatterPlotViewDataWidget::ScatterPlotViewDataWidget(ScatterPlotViewWidget* view
 */
 ScatterPlotViewDataWidget::~ScatterPlotViewDataWidget()
 {
-    logdbg << "ScatterPlotViewDataWidget: dtor";
+    logdbg << "dtor";
 }
 
 /**
@@ -116,7 +116,7 @@ bool ScatterPlotViewDataWidget::postLoadTrigger()
     // disable connection lines?
     if (view_->useConnectionLines() && loadedDataCount() > ConnectLinesDataCountMax) 
     {
-        loginf << "ScatterPlotViewDataWidget: loadingDone_impl: loaded data items >" << ConnectLinesDataCountMax << ", disabling connection lines";
+        loginf << "loaded data items >" << ConnectLinesDataCountMax << ", disabling connection lines";
 
         //no redraw, happens later anyway
         view_->useConnectionLines(false, false);
@@ -136,7 +136,7 @@ void ScatterPlotViewDataWidget::resetVariableDisplay()
 */
 ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateVariableDisplay() 
 {
-    loginf << "ScatterPlotViewDataWidget: updateVariableDisplay";
+    loginf << "updateVariableDisplay";
 
     auto draw_state = updateChart();
 
@@ -261,14 +261,14 @@ void ScatterPlotViewDataWidget::processStash(const VariableViewStash<double>& st
 
     bounds_ = scatter_series_.getDataBounds();
 
-    loginf << "ScatterPlotViewDataWidget: processStash: done, generated " << scatter_series_.numDataSeries() << " series";
+    loginf << "done, generated" << scatter_series_.numDataSeries() << " series";
 }
 
 /**
 */
 bool ScatterPlotViewDataWidget::updateFromAnnotations()
 {
-    loginf << "ScatterPlotViewDataWidget: updateFromAnnotations";
+    loginf << "updateFromAnnotations";
 
     bounds_ = {};
 
@@ -307,7 +307,7 @@ bool ScatterPlotViewDataWidget::updateFromAnnotations()
         view_->updateComponents();
     }
 
-    loginf << "ScatterPlotViewDataWidget: updateFromAnnotations: done, generated " << scatter_series_.numDataSeries() << " series";
+    loginf << "done, generated" << scatter_series_.numDataSeries() << " series";
 
     return true;
 }
@@ -345,7 +345,7 @@ boost::optional<QRectF> ScatterPlotViewDataWidget::getViewBounds() const
 {
     bool bounds_valid = bounds_.has_value();
 
-    loginf << "ScatterPlotViewDataWidget: getViewBounds: data range bounds"
+    loginf << "data range bounds"
            << " x min " << (bounds_valid ? bounds_->left() : 0)
            << " max " << (bounds_valid ? bounds_->right() : 0)
            << " y min " << (bounds_valid ? bounds_->top() : 0)
@@ -361,13 +361,13 @@ boost::optional<QRectF> ScatterPlotViewDataWidget::getViewBounds() const
 */
 void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2) // TODO
 {
-    loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot";
+    loginf << "rectangleSelectedSlot";
 
     if (chart_view_ && chart_view_->chart())
     {
         if (selected_tool_ == SP_ZOOM_RECT_TOOL)
         {
-            loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot: zoom";
+            loginf << "zoom";
 
             //TODO: prevent from going nuts when zero rect is passed!
 
@@ -382,7 +382,7 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2) /
         }
         else if (selected_tool_ == SP_SELECT_TOOL)
         {
-            loginf << "ScatterPlotViewDataWidget: rectangleSelectedSlot: select";
+            loginf << "select";
 
             //!datetime in the rect needs correction back to utc when selecting data!
             bool correct_datetime_utc = true;
@@ -402,7 +402,7 @@ void ScatterPlotViewDataWidget::rectangleSelectedSlot (QPointF p1, QPointF p2) /
 */
 void ScatterPlotViewDataWidget::invertSelectionSlot()
 {
-    loginf << "ScatterPlotViewDataWidget: invertSelectionSlot";
+    loginf << "invertSelectionSlot";
 
     for (auto& buf_it : viewData())
     {
@@ -425,7 +425,7 @@ void ScatterPlotViewDataWidget::invertSelectionSlot()
 */
 void ScatterPlotViewDataWidget::clearSelectionSlot()
 {
-    loginf << "ScatterPlotViewDataWidget: clearSelectionSlot";
+    loginf << "clearSelectionSlot";
 
     for (auto& buf_it : viewData())
     {
@@ -454,7 +454,7 @@ void ScatterPlotViewDataWidget::setAxisRange(QAbstractAxis* axis, double vmin, d
         QDateTime dt_min = QDateTime::fromMSecsSinceEpoch(vmin);
         QDateTime dt_max = QDateTime::fromMSecsSinceEpoch(vmax);
 
-        loginf << "ScatterPlotViewDataWidget: setAxisRange: ts min "
+        loginf << "ts min"
                << dt_min.toString().toStdString()
                << " max " << dt_max.toString().toStdString();
 
@@ -502,7 +502,7 @@ ScatterSeriesModel& ScatterPlotViewDataWidget::dataModel()
 */
 void ScatterPlotViewDataWidget::resetZoomSlot()
 {
-    loginf << "ScatterPlotViewDataWidget: resetZoomSlot";
+    loginf << "resetZoomSlot";
 
     if (chart_view_ && chart_view_->chart())
     {
@@ -600,7 +600,7 @@ void ScatterPlotViewDataWidget::updateChartSlot()
 */
 ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateChart()
 {
-    logdbg << "ScatterPlotViewDataWidget: updateChart";
+    logdbg << "updateChart";
 
     assert (main_layout_);
 
@@ -741,12 +741,12 @@ ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateDataSeries(QtCharts::
         };
 
         //config x axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title x '" << view_->variable(0).description() << "' is_datetime " << x_axis_is_datetime_;
+        loginf << "title x '" << view_->variable(0).description() << "' is_datetime " << x_axis_is_datetime_;
 
         createAxis(0, x_axis_name_, x_axis_is_datetime_, Qt::AlignBottom);
 
         //config y axis
-        loginf << "ScatterPlotViewDataWidget: updateDataSeries: title y '" << view_->variable(1).description() << "' is_datetime " << y_axis_is_datetime_;
+        loginf << "title y '" << view_->variable(1).description() << "' is_datetime " << y_axis_is_datetime_;
 
         createAxis(1, y_axis_name_, y_axis_is_datetime_, Qt::AlignLeft);
 
@@ -861,7 +861,7 @@ ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateDataSeries(QtCharts::
 
                 //chart->legend()->markers(chart_line_series)[0]->setVisible(false); // remove line marker in legend
 
-                logdbg << "ScatterPlotViewDataWidget: updateDataSeries: connection lines " << chart_line_series->count();
+                logdbg << "connection lines" << chart_line_series->count();
             }
         }
 
@@ -874,7 +874,7 @@ ViewDataWidget::DrawState ScatterPlotViewDataWidget::updateDataSeries(QtCharts::
     else
     {
         //bad data range or vars not in buffer
-        logdbg << "ScatterPlotViewDataWidget: updateDataSeries: content empty";
+        logdbg << "content empty";
 
         //no data -> generate default empty layout
         //chart->legend()->setVisible(false);

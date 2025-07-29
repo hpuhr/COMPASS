@@ -111,7 +111,7 @@ bool HistogramGenerator::hasValidResult() const
  */
 bool HistogramGenerator::refill()
 {
-    loginf << "HistogramGenerator: refill";
+    loginf << "refill";
 
     if (!hasData())
         return false;
@@ -124,13 +124,13 @@ bool HistogramGenerator::refill()
     if (!refill_impl())
         return false;
 
-    loginf << "HistogramGenerator: refill: finalizing results";
+    loginf << "finalizing results";
 
     //compile results from intermediate data
     if (!finalizeResults())
         return false;
 
-    loginf << "HistogramGenerator: refill: done";
+    loginf << "done";
 
     return true;
 }
@@ -140,7 +140,7 @@ bool HistogramGenerator::refill()
  */
 void HistogramGenerator::update()
 {
-    loginf << "HistogramGenerator: update";
+    loginf << "update";
 
     if (!hasData())
         return;
@@ -154,7 +154,7 @@ void HistogramGenerator::update()
     //refill data
     refill();
 
-    loginf << "HistogramGenerator: update: done";
+    loginf << "done";
 }
 
 /**
@@ -162,7 +162,7 @@ void HistogramGenerator::update()
  */
 bool HistogramGenerator::select(unsigned int bin0, unsigned int bin1)
 {
-    loginf << "HistogramGenerator: Selecting...";
+    loginf << "Selecting...";
 
     if (!hasData())
         return false;
@@ -193,7 +193,7 @@ bool HistogramGenerator::select_impl(unsigned int bin0, unsigned int bin1)
  */
 bool HistogramGenerator::zoom(unsigned int bin0, unsigned int bin1)
 {
-    loginf << "HistogramGenerator: zoom: zooming to bin range";
+    loginf << "zooming to bin range";
 
     if (!hasData())
         return false;
@@ -221,7 +221,7 @@ bool HistogramGenerator::zoom(unsigned int bin0, unsigned int bin1)
     if (!refill())
         return false;
 
-    loginf << "HistogramGenerator: zoom: done";
+    loginf << "done";
 
     return true;
 }

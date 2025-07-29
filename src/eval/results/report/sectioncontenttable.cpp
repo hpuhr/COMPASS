@@ -145,7 +145,7 @@ void SectionContentTable::addToLayout (QVBoxLayout* layout)
 
 void SectionContentTable::accept(LatexVisitor& v)
 {
-    loginf << "SectionContentTable: accept";
+    loginf << "accept";
 
     createOnDemandIfNeeded();
 
@@ -171,7 +171,7 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
     {
     case Qt::DisplayRole:
     {
-        logdbg << "SectionContentTable: data: display role: row " << index.row() << " col " << index.column();
+        logdbg << "display role: row" << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
         assert (index.row() < rows_.size());
@@ -313,7 +313,7 @@ std::vector<std::string> SectionContentTable::sortedRowStrings(unsigned int row,
                 this, &SectionContentTable::doubleClickedSlot);
     }
 
-    logdbg << "SectionContentTable: sortedRowStrings: row " << row << " rows " << proxy_model_->rowCount()
+    logdbg << "row" << row << " rows " << proxy_model_->rowCount()
            << " data rows " << rows_.size();
     assert (row < proxy_model_->rowCount());
     assert (row < rows_.size());
@@ -411,7 +411,7 @@ bool SectionContentTable::showUnused() const
 
 void SectionContentTable::showUnused(bool value)
 {
-    loginf << "SectionContentTable: showUnused: value " << value;
+    loginf << "value" << value;
 
     assert (proxy_model_);
 
@@ -458,7 +458,7 @@ void SectionContentTable::createOnDemandIfNeeded()
 {
     if (create_on_demand_ && !already_created_by_demand_)
     {
-        loginf << "SectionContentTable: createOnDemandIfNeeded: creating";
+        loginf << "creating";
 
         QApplication::setOverrideCursor(Qt::WaitCursor);
 
@@ -485,13 +485,13 @@ void SectionContentTable::clickedSlot(const QModelIndex& index)
 {
     if (!index.isValid())
     {
-        loginf << "SectionContentTable: clickedSlot: invalid index";
+        loginf << "invalid index";
         return;
     }
 
     if (QApplication::mouseButtons() & Qt::RightButton)
     {
-        loginf << "SectionContentTable: clickedSlot: RMB click ignored";
+        loginf << "RMB click ignored";
         return;
     }
 
@@ -518,7 +518,7 @@ void SectionContentTable::performClickAction()
 
     // if (result_ptrs_.at(row_index) && result_ptrs_.at(row_index)->hasViewableData(*this, annotations_.at(row_index)))
     // {
-    //     loginf << "SectionContentTable: performClickAction: index has associated viewable";
+    //     loginf << "index has associated viewable";
 
     //     std::shared_ptr<nlohmann::json::object_t> viewable;
 
@@ -553,7 +553,7 @@ void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
 
     // if (!index.isValid())
     // {
-    //     loginf << "SectionContentTable: doubleClickedSlot: invalid index";
+    //     loginf << "invalid index";
     //     return;
     // }
 
@@ -563,7 +563,7 @@ void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
     // assert (source_index.row() >= 0);
     // assert (source_index.row() < rows_.size());
 
-    // loginf << "SectionContentTable: doubleClickedSlot: row " << source_index.row();
+    // loginf << "row" << source_index.row();
 
     // unsigned int row_index = source_index.row();
 
@@ -572,18 +572,18 @@ void SectionContentTable::doubleClickedSlot(const QModelIndex& index)
     //     string reference = result_ptrs_.at(row_index)->reference(*this, annotations_.at(row_index));
     //     assert (reference.size());
 
-    //     loginf << "SectionContentTable: currentRowChangedSlot: index has associated reference '"
+    //     loginf << "index has associated reference '"
     //            << reference << "'";
 
     //     eval_man_.showResultId(reference);
     // }
     // else
-    //     loginf << "SectionContentTable: currentRowChangedSlot: index has no associated reference";
+    //     loginf << "index has no associated reference";
 }
 
 void SectionContentTable::customContextMenuSlot(const QPoint& p)
 {
-    logdbg << "SectionContentTable: customContextMenuSlot";
+    logdbg << "customContextMenuSlot";
 
     assert (table_view_);
 
@@ -594,7 +594,7 @@ void SectionContentTable::customContextMenuSlot(const QPoint& p)
     auto const source_index = proxy_model_->mapToSource(index);
     assert (source_index.isValid());
 
-    loginf << "SectionContentTable: customContextMenuSlot: row " << index.row() << " src " << source_index.row();
+    loginf << "row" << index.row() << " src " << source_index.row();
 
     assert (source_index.row() >= 0);
     assert (source_index.row() < rows_.size());
@@ -610,7 +610,7 @@ void SectionContentTable::customContextMenuSlot(const QPoint& p)
         QMenu menu;
 
         unsigned int utn = single_result->utn();
-        loginf << "SectionContentTable: customContextMenuSlot: utn " << utn;
+        loginf << "utn" << utn;
 
         assert (eval_man_.calculator().data().hasTargetData(utn));
 
@@ -646,7 +646,7 @@ void SectionContentTable::customContextMenuSlot(const QPoint& p)
         menu.exec(table_view_->viewport()->mapToGlobal(p));
     }
     else
-        loginf << "SectionContentTable: customContextMenuSlot: no associated utn";
+        loginf << "no associated utn";
 }
 
 void SectionContentTable::addUTNSlot ()
@@ -656,7 +656,7 @@ void SectionContentTable::addUTNSlot ()
 
     unsigned int utn = action->data().toUInt();
 
-    loginf << "SectionContentTable: addUTNSlot: utn " << utn;
+    loginf << "utn" << utn;
 
     COMPASS::instance().dbContentManager().utnUseEval(utn, true);
     //eval_man_.useUTN(utn, true, true);
@@ -677,7 +677,7 @@ void SectionContentTable::removeUTNSlot ()
     if (ok && !text.isEmpty())
     {
 
-        loginf << "SectionContentTable: removeUTNSlot: utn " << utn;
+        loginf << "utn" << utn;
 
         COMPASS::instance().dbContentManager().utnUseEval(utn, false);
         COMPASS::instance().dbContentManager().utnComment(utn, text.toStdString());
@@ -691,7 +691,7 @@ void SectionContentTable::showFullUTNSlot ()
 
     unsigned int utn = action->data().toUInt();
 
-    loginf << "SectionContentTable: showFullUTNSlot: utn " << utn;
+    loginf << "utn" << utn;
 
     eval_man_.calculator().showFullUTN(utn);
 }
@@ -703,7 +703,7 @@ void SectionContentTable::showSurroundingDataSlot ()
 
     unsigned int utn = action->data().toUInt();
 
-    loginf << "SectionContentTable: showSurroundingDataSlot: utn " << utn;
+    loginf << "utn" << utn;
 
     //eval_man_.calculator().showSurroundingData(utn);
 }
@@ -746,7 +746,7 @@ void SectionContentTable::toggleShowUnusedSlot()
 
 void SectionContentTable::copyContentSlot()
 {
-    loginf << "SectionContentTable: copyContentSlot";
+    loginf << "copyContentSlot";
 
     stringstream ss;
 
@@ -791,7 +791,7 @@ void SectionContentTable::executeCallBackSlot()
 
     string name = action->data().toString().toStdString();
 
-    loginf << "SectionContentTable: executeCallBackSlot: name " << name;
+    loginf << "name" << name;
 
     assert (callback_map_.count(name));
     executeCallBack(name);

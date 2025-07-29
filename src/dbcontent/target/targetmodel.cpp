@@ -106,7 +106,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         }
         case Qt::DisplayRole:
         {
-            logdbg << "TargetModel: data: display role: row " << index.row() << " col " << index.column();
+            logdbg << "display role: row" << index.row() << " col " << index.column();
 
             assert (index.column() < table_columns_.size());
             int col = index.column();
@@ -217,7 +217,7 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
 
         auto it = target_data_.begin() + index.row();
 
-        loginf << "TargetModel: setData: utn " << it->utn_ <<" comment '" << value.toString().toStdString() << "'";
+        loginf << "utn" << it->utn_ <<" comment '" << value.toString().toStdString() << "'";
 
         setTargetComment(it->utn_, value.toString().toStdString());
 
@@ -363,7 +363,7 @@ const dbContent::Target& TargetModel::getTargetOf (const QModelIndex& index)
  */
 void TargetModel::setEvalUseTarget (unsigned int utn, bool value)
 {
-    loginf << "TargetModel: setUseTargetData: utn " << utn << " value " << value;
+    loginf << "utn" << utn << " value " << value;
 
     assert (existsTarget(utn));
 
@@ -402,7 +402,7 @@ void TargetModel::setEvalUseTarget (std::set<unsigned int> utns, bool value)
  */
 void TargetModel::setAllUseTargets (bool value)
 {
-    loginf << "TargetModel: setUseAllTargetData: value " << value;
+    loginf << "value" << value;
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [value](Target& p) { p.useInEval(value); });
@@ -417,7 +417,7 @@ void TargetModel::setAllUseTargets (bool value)
  */
 void TargetModel::setTargetComment (unsigned int utn, std::string comment)
 {
-    loginf << "TargetModel: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
+    loginf << "utn" << utn << " comment '" << comment << "'";
 
     assert (existsTarget(utn));
 
@@ -429,7 +429,7 @@ void TargetModel::setTargetComment (unsigned int utn, std::string comment)
     //             1, // look *
     //             Qt::MatchExactly); // look *
 
-    //  loginf << "TargetModel: setTargetDataComment: size " << items.size();
+    //  loginf << "size" << items.size();
 
     // assert (items.size() == 1);
     // setData(items.at(0), comment.c_str(), Qt::EditRole);
@@ -457,7 +457,7 @@ void TargetModel::setTargetComment (std::set<unsigned int> utns, std::string com
  */
 void TargetModel::clearAllTargetComments ()
 {
-    loginf << "TargetModel: clearComments";
+    loginf << "clearComments";
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [](Target& p) { p.comment(""); });
@@ -494,7 +494,7 @@ void TargetModel::clearEvalExcludeTimeWindows(std::set<unsigned int> utns)
 
 void TargetModel::clearAllEvalExcludeTimeWindows()
 {
-    loginf << "TargetModel: clearEvalExcludeTimeWindows";
+    loginf << "clearEvalExcludeTimeWindows";
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [](Target& p) { p.clearEvalExcludedTimeWindows(); });
@@ -529,7 +529,7 @@ void TargetModel::clearEvalExcludeRequirements(std::set<unsigned int> utns)
 
 void TargetModel::clearAllEvalExcludeRequirements()
 {
-    loginf << "TargetModel: clearEvalExcludeTimeWindows";
+    loginf << "clearEvalExcludeTimeWindows";
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [](Target& p) { p.clearEvalExcludedRequirements(); });
@@ -544,7 +544,7 @@ void TargetModel::clearAllEvalExcludeRequirements()
  */
 void TargetModel::setUseByFilter ()
 {
-    loginf << "TargetModel: setUseByFilter";
+    loginf << "setUseByFilter";
 
     COMPASS::instance().evaluationManager().targetFilter().setUse(target_data_);
 
@@ -776,7 +776,7 @@ nlohmann::json TargetModel::utnsAsJSON() const
  */
 void TargetModel::loadFromDB()
 {
-    loginf << "TargetModel: loadFromDB";
+    loginf << "loadFromDB";
 
     beginResetModel();
 
@@ -790,14 +790,14 @@ void TargetModel::loadFromDB()
 
     endResetModel();
 
-    loginf << "TargetModel: loadFromDB: loaded " << target_data_.size() << " targets";
+    loginf << "loaded" << target_data_.size() << " targets";
 }
 
 /**
  */
 void TargetModel::saveToDB()
 {
-    loginf << "TargetModel: saveToDB: saving " << target_data_.size() << " targets";
+    loginf << "saving" << target_data_.size() << " targets";
 
     std::map<unsigned int, nlohmann::json> targets_info;
 
@@ -811,7 +811,7 @@ void TargetModel::saveToDB()
  */
 void TargetModel::updateToDB(unsigned int utn)
 {
-    loginf << "TargetModel: saveToDB: saving utn " << utn;
+    loginf << "saving utn" << utn;
 
     auto tr_tag_it = target_data_.get<target_tag>().find(utn);
 
@@ -826,7 +826,7 @@ void TargetModel::updateToDB(unsigned int utn)
 
 void TargetModel::updateToDB(std::set<unsigned int> utns)
 {
-    loginf << "TargetModel: saveToDB: saving utns " << String::compress(utns,',');
+    loginf << "saving utns" << String::compress(utns,',');
 
     std::map<unsigned int, nlohmann::json> targets_info;
 

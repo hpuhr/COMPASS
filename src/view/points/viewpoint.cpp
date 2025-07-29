@@ -114,13 +114,13 @@ void ViewPoint::print() const
 
 void ViewPoint::accept(LatexVisitor& v) const
 {
-    logdbg << "ViewPoint: accept";
+    logdbg << "accept";
     v.visit(this);
 }
 
 void ViewPoint::save()
 {
-    logdbg << "ViewPoint: save: id " << id_;
+    logdbg << "id" << id_;
 
     DBInterface& db_interface = COMPASS::instance().dbInterface();
     db_interface.setViewPoint(id_, data_.dump());
@@ -227,7 +227,7 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
 
         if (verbose)
         {
-            loginf << "ViewPointsImportTask: checkParsedData: current data seems to be valid, contains " << view_points.size()
+            loginf << "current data seems to be valid, contains" << view_points.size()
                 << " view points";
         }
     }

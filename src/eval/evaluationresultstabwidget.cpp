@@ -103,7 +103,7 @@ EvaluationResultsTabWidget::~EvaluationResultsTabWidget() = default;
 
 void EvaluationResultsTabWidget::expand()
 {
-    loginf << "EvaluationResultsTabWidget: expand";
+    loginf << "expand";
 
     tree_view_->expandToDepth(3);
 }
@@ -128,7 +128,7 @@ namespace
 void EvaluationResultsTabWidget::selectId (const std::string& id, 
                                            bool show_figure)
 {
-    loginf << "EvaluationResultsTabWidget: selectId: id '" << id << "'";
+    loginf << "id '" << id << "'";
 
     //const auto& model = eval_man_.resultsGenerator().resultsModel();
     //iterateTreeModel(model, model.index(0, 0), "");
@@ -137,7 +137,7 @@ void EvaluationResultsTabWidget::selectId (const std::string& id,
 
     // if (!index.isValid())
     // {
-    //     logerr << "EvaluationResultsTabWidget: selectId: id '" << id << "' not found";
+    //     logerr << "id '" << id << "' not found";
     //     return;
     // }
 
@@ -172,11 +172,11 @@ void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
 
     id_history_.push_back(item->id());
 
-    loginf << "EvaluationResultsTabWidget: itemClickedSlot: name " << item->name() << " id " << item->id();
+    loginf << "name" << item->name() << " id " << item->id();
 
     if (dynamic_cast<EvaluationResultsReport::RootItem*>(item))
     {
-        loginf << "EvaluationResultsTabWidget: itemClickedSlot: root";
+        loginf << "root";
         showResultWidget(nullptr);
     }
     else if (dynamic_cast<EvaluationResultsReport::Section*>(item))
@@ -184,7 +184,7 @@ void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
         EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
         assert (section);
 
-        loginf << "EvaluationResultsTabWidget: itemClickedSlot: section " << section->name();
+        loginf << "section" << section->name();
         showResultWidget(section->getContentWidget());
     }
 
@@ -196,7 +196,7 @@ void EvaluationResultsTabWidget::showFigure(const QModelIndex& index)
     TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
     assert (item);
 
-    loginf << "EvaluationResultsTabWidget: showFigure: name " << item->name() << " id " << item->id();
+    loginf << "name" << item->name() << " id " << item->id();
 
     if (dynamic_cast<EvaluationResultsReport::RootItem*>(item))
     {
@@ -207,7 +207,7 @@ void EvaluationResultsTabWidget::showFigure(const QModelIndex& index)
         EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
         assert (section);
 
-        loginf << "EvaluationResultsTabWidget: showFigure: section " << section->name();
+        loginf << "section" << section->name();
         
         auto figures = section->getFigures();
         if (!figures.empty())
@@ -217,7 +217,7 @@ void EvaluationResultsTabWidget::showFigure(const QModelIndex& index)
 
 void EvaluationResultsTabWidget::stepBackSlot()
 {
-    loginf << "EvaluationResultsTabWidget: stepBackSlot";
+    loginf << "stepBackSlot";
 
     assert (id_history_.size() > 1);
 

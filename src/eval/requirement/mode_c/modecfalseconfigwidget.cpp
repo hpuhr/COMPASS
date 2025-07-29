@@ -50,7 +50,7 @@ ModeCFalseConfigWidget::ModeCFalseConfigWidget(ModeCFalseConfig& cfg)
 
 void ModeCFalseConfigWidget::maxDiffEditSlot(QString value)
 {
-    loginf << "EvaluationRequirementModeCConfigWidget: maxDiffEditSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -58,7 +58,7 @@ void ModeCFalseConfigWidget::maxDiffEditSlot(QString value)
     if (ok)
         config().maxDifference(val);
     else
-        loginf << "EvaluationRequirementModeCConfigWidget: maxDiffEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 ModeCFalseConfig& ModeCFalseConfigWidget::config()

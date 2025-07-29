@@ -195,7 +195,7 @@ public:
                 data_[uidx] = Entry{ value_index, conf, insertion_time };
 
                 if (debug)
-                    loginf << "TDS: new conf " << conf
+                    loginf << "new conf" << conf
                            << " slot " << Utils::Time::toString(slot_ptime)
                            << " insert " << Utils::Time::toString(insertion_time);
             }
@@ -213,7 +213,7 @@ public:
                     data_[uidx] = Entry{ value_index, conf, insertion_time };
 
                     if (debug)
-                        loginf << "TDS: override conf " << conf
+                        loginf << "override conf" << conf
                                << " slot " << Utils::Time::toString(slot_ptime)
                                << " insert " << Utils::Time::toString(insertion_time)
                                << " existing_abs_secs " << Utils::String::doubleToStringPrecision(existing_abs_secs, 2)

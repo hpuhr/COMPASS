@@ -126,12 +126,12 @@ namespace EvaluationResultsReport
 
         if (items.size() == 1)
         {
-            loginf << "TreeModel: findItem: id '" << id << "' found";
+            loginf << "id '" << id << "' found";
             return items.at(0);
         }
         else
         {
-            loginf << "TreeModel: findItem: id '" << id << " found " << items.size() << " matches";
+            loginf << "id '" << id << " found " << items.size() << " matches";
             return QModelIndex(); // none or too many found
         }
     }
@@ -143,7 +143,7 @@ namespace EvaluationResultsReport
 
     void TreeModel::clear()
     {
-        loginf << "TreeModel: clear";
+        loginf << "clear";
 
         root_item_ = make_shared<RootItem>(eval_man_);
     }

@@ -134,7 +134,7 @@ ViewVariable& VariableView::addVariable(const std::string& id,
 */
 dbContent::VariableSet VariableView::getSet(const std::string& dbcontent_name)
 {
-    logdbg << "VariableView: getSet";
+    logdbg << "getSet";
 
     dbContent::VariableSet set = getBaseSet(dbcontent_name);
 
@@ -332,7 +332,7 @@ void VariableView::onEvalResultsChanged()
  */
 void VariableView::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "VariableView: unshowViewPoint";
+    loginf << "unshowViewPoint";
 
     unshowViewPoint(vp);
 
@@ -351,7 +351,7 @@ void VariableView::unshowViewPointSlot (const ViewableDataConfig* vp)
  */
 void VariableView::showViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "VariableView: showViewPoint";
+    loginf << "showViewPoint";
 
     showViewPoint(vp);
 

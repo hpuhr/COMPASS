@@ -51,12 +51,12 @@ BufferTableModel::~BufferTableModel()
 
 void BufferTableModel::setChangedSlot()
 {
-    logdbg << "BufferTableModel: setChangedSlot";
+    logdbg << "setChangedSlot";
 
     beginResetModel();
     read_set_ = data_source_.getSet()->getFor(object_.name());
 
-    logdbg << "BufferTableModel: setChangedSlot: read set size " << read_set_.getSize();
+    logdbg << "read set size" << read_set_.getSize();
 
     // read_set_.print();
 
@@ -88,7 +88,7 @@ QVariant BufferTableModel::headerData(int section,
 
     if (orientation == Qt::Horizontal)
     {
-        logdbg << "BufferTableModel: headerData: section " << section;
+        logdbg << "section" << section;
         unsigned int col = section;
 
         if (col == 0)
@@ -98,7 +98,7 @@ QVariant BufferTableModel::headerData(int section,
 
         assert(col < read_set_.getSize());
         dbContent::Variable& variable = read_set_.getVariable(col);
-        logdbg << "BufferTableModel: headerData: col " << col << " variable " << variable.name();
+        logdbg << "col" << col << " variable " << variable.name();
         return QString(variable.name().c_str());
     }
     else if (orientation == Qt::Vertical)
@@ -126,7 +126,7 @@ Qt::ItemFlags BufferTableModel::flags(const QModelIndex& index) const
 
 QVariant BufferTableModel::data(const QModelIndex& index, int role) const
 {
-    logdbg << "BufferTableModel: data: row " << index.row() - 1 << " col " << index.column() - 1;
+    logdbg << "row" << index.row() - 1 << " col " << index.column() - 1;
 
     bool null = false;
 
@@ -174,7 +174,7 @@ QVariant BufferTableModel::data(const QModelIndex& index, int role) const
 
         if (!properties.hasProperty(variable.name()))
         {
-            logdbg << "BufferTableModel: data: variable " << variable.name()
+            logdbg << "variable" << variable.name()
                    << " not present in buffer";
         }
         else
@@ -346,7 +346,7 @@ bool BufferTableModel::setData(const QModelIndex& index,
                                const QVariant& value, 
                                int role)
 {
-    logdbg << "BufferTableModel: setData: checked row " << index.row() << " col " << index.column();
+    logdbg << "checked row" << index.row() << " col " << index.column();
 
     if (role == Qt::CheckStateRole && index.column() == 0)
     {
@@ -361,12 +361,12 @@ bool BufferTableModel::setData(const QModelIndex& index,
 
         if (value == Qt::Checked)
         {
-            loginf << "BufferTableModel: setData: checked row index" << buffer_index;
+            loginf << "checked row index" << buffer_index;
             buffer_->get<bool>(DBContent::selected_var.name()).set(buffer_index, true);
         }
         else
         {
-            loginf << "BufferTableModel: setData: unchecked row index " << buffer_index;
+            loginf << "unchecked row index" << buffer_index;
             buffer_->get<bool>(DBContent::selected_var.name()).set(buffer_index, false);
         }
         assert(table_widget_);
@@ -397,7 +397,7 @@ void BufferTableModel::clearData()
 
 void BufferTableModel::setData(std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "BufferTableModel: setData";
+    logdbg << "setData";
     assert(buffer);
     beginResetModel();
 
@@ -469,7 +469,7 @@ void BufferTableModel::reset()
 
 void BufferTableModel::saveAsCSV(const std::string& file_name)
 {
-    loginf << "BufferTableModel: saveAsCSV: into filename " << file_name;
+    loginf << "into filename" << file_name;
 
     assert(buffer_);
     BufferCSVExportJob* export_job = new BufferCSVExportJob(buffer_, read_set_, file_name, true, view_.settings().show_only_selected_, view_.settings().use_presentation_);
@@ -485,14 +485,14 @@ void BufferTableModel::saveAsCSV(const std::string& file_name)
 
 void BufferTableModel::exportJobObsoleteSlot()
 {
-    logdbg << "BufferTableModel: exportJobObsoleteSlot";
+    logdbg << "exportJobObsoleteSlot";
 
     emit exportDoneSignal(true);
 }
 
 void BufferTableModel::exportJobDoneSlot()
 {
-    logdbg << "BufferTableModel: exportJobDoneSlot";
+    logdbg << "exportJobDoneSlot";
 
     emit exportDoneSignal(false);
 }

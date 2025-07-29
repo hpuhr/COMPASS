@@ -200,7 +200,7 @@ VariableViewConfigWidget::~VariableViewConfigWidget() = default;
 */
 void VariableViewConfigWidget::selectedVariableChangedSlot(int idx)
 {
-    loginf << "VariableViewConfigWidget: selectedVariableChangedSlot: idx = " << idx;
+    loginf << "idx =" << idx;
 
     auto selection = var_selection_widgets_.at(idx);
     assert(selection);

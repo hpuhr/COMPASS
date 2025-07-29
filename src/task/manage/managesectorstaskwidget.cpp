@@ -192,7 +192,7 @@ void ManageSectorsTaskWidget::addManageTab()
 
 void ManageSectorsTaskWidget::updateSectorTableSlot()
 {
-    logdbg << "ManageSectorsTaskWidget: updateSectorTableSlot";
+    logdbg << "updateSectorTableSlot";
 
     assert(sector_table_);
 
@@ -393,7 +393,7 @@ void ManageSectorsTaskWidget::selectFile(const std::string& filename)
 
 void ManageSectorsTaskWidget::updateParseMessage ()
 {
-    loginf << "ViewPointsImportTaskWidget: updateParseMessage";
+    loginf << "updateParseMessage";
 
     assert (parse_msg_edit_);
     parse_msg_edit_->setText(task_.parseMessage().c_str());
@@ -403,7 +403,7 @@ void ManageSectorsTaskWidget::updateParseMessage ()
 
 void ManageSectorsTaskWidget::deleteFileSlot()
 {
-    loginf << "ManageSectorsTaskWidget: deleteFileSlot";
+    loginf << "deleteFileSlot";
 
     if (!file_list_->currentItem() || !task_.currentFilename().size())
     {
@@ -420,7 +420,7 @@ void ManageSectorsTaskWidget::deleteFileSlot()
 
 void ManageSectorsTaskWidget::deleteAllFilesSlot()
 {
-    loginf << "ManageSectorsTaskWidget: deleteAllFilesSlot";
+    loginf << "deleteAllFilesSlot";
     task_.removeAllFiles();
 }
 
@@ -430,7 +430,7 @@ void ManageSectorsTaskWidget::selectedFileSlot()
 
     QString filename = file_list_->currentItem()->text();
 
-    loginf << "ManageSectorsTaskWidget: selectedFileSlot: filename '" << filename.toStdString();
+    loginf << "filename '" << filename.toStdString();
 
     assert(task_.hasFile(filename.toStdString()));
     task_.currentFilename(filename.toStdString());
@@ -446,7 +446,7 @@ void ManageSectorsTaskWidget::updateFileListSlot()
     {
         if (!Files::fileExists(it))
         {
-            logwrn << "ManageSectorsTaskWidget: updateFileListSlot: file '" << it << "' does not exist";
+            logwrn << "file '" << it << "' does not exist";
             continue;
         }
 
@@ -459,7 +459,7 @@ void ManageSectorsTaskWidget::updateFileListSlot()
 
 void ManageSectorsTaskWidget::importSlot()
 {
-    loginf << "ManageSectorsTaskWidget: importSlot";
+    loginf << "importSlot";
 
 
     string filename = task_.currentFilename();
@@ -474,7 +474,7 @@ void ManageSectorsTaskWidget::importSlot()
 
     if (ret == QDialog::Accepted)
     {
-        loginf << "ManageSectorsTaskWidget: importSlot: accepted, layer name '" << dialog.layerName()
+        loginf << "accepted, layer name '" << dialog.layerName()
                << "' exclude " << dialog.exclude();
 
         assert (task_.canImportFile());
@@ -483,12 +483,12 @@ void ManageSectorsTaskWidget::importSlot()
         updateSectorTableSlot();
     }
     else
-        loginf << "ManageSectorsTaskWidget: importSlot: cancelled";
+        loginf << "cancelled";
 }
 
 void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
 {
-    loginf << "ManageSectorsTaskWidget: sectorItemChangedSlot";
+    loginf << "sectorItemChangedSlot";
 
     assert(item);
     assert(sector_table_);
@@ -503,7 +503,7 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
 
     std::string text = item->text().toStdString();
 
-    loginf << "ManageSectorsTaskWidget: sectorItemChangedSlot: sector_id " << sector_id
+    loginf << "sector_id" << sector_id
            << " col_name " << col_name << " text '" << text << "'";
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
@@ -576,7 +576,7 @@ void ManageSectorsTaskWidget::sectorItemChangedSlot(QTableWidgetItem* item)
 
 void ManageSectorsTaskWidget::changeSectorColorSlot()
 {
-    loginf << "ManageSectorsTaskWidget: changeSectorColorSlot";
+    loginf << "changeSectorColorSlot";
 
     QPushButton* button = dynamic_cast<QPushButton*>(sender());
     assert (button);
@@ -599,7 +599,7 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
 
     if (color.isValid())
     {
-        loginf << "ManageSectorsTaskWidget: changeSectorColorSlot: color " << color.name().toStdString();
+        loginf << "color" << color.name().toStdString();
         sector->colorStr(color.name().toStdString());
         updateSectorTableSlot();
     }
@@ -607,7 +607,7 @@ void ManageSectorsTaskWidget::changeSectorColorSlot()
 
 void ManageSectorsTaskWidget::deleteSectorSlot()
 {
-    loginf << "ManageSectorsTaskWidget: deleteSectorSlot";
+    loginf << "deleteSectorSlot";
 
     QPushButton* button = dynamic_cast<QPushButton*>(sender());
     assert (button);
@@ -630,7 +630,7 @@ void ManageSectorsTaskWidget::deleteSectorSlot()
 
 void ManageSectorsTaskWidget::exportSectorsSlot ()
 {
-    loginf << "ManageSectorsTaskWidget: exportSectorsSlot";
+    loginf << "exportSectorsSlot";
 
     EvaluationManager& eval_man = COMPASS::instance().evaluationManager();
 
@@ -649,7 +649,7 @@ void ManageSectorsTaskWidget::exportSectorsSlot ()
     if (file_names.size() == 1)
         filename = file_names.at(0);
     else
-        loginf << "ManageDataSourcesTask: exportSectorsSlot: cancelled";
+        loginf << "cancelled";
 
     if (filename.size() > 0)
         eval_man.exportSectors(filename.toStdString());
@@ -657,7 +657,7 @@ void ManageSectorsTaskWidget::exportSectorsSlot ()
 
 void ManageSectorsTaskWidget::clearSectorsSlot ()
 {
-    loginf << "ManageSectorsTaskWidget: clearSectorsSlot";
+    loginf << "clearSectorsSlot";
 
     COMPASS::instance().evaluationManager().deleteAllSectors();
 
@@ -666,7 +666,7 @@ void ManageSectorsTaskWidget::clearSectorsSlot ()
 
 void ManageSectorsTaskWidget::importSectorsSlot ()
 {
-    loginf << "ManageSectorsTaskWidget: importSectorsSlot";
+    loginf << "importSectorsSlot";
 
     QString filename =
         QFileDialog::getOpenFileName(nullptr, "Import Sectors from JSON",
@@ -677,12 +677,12 @@ void ManageSectorsTaskWidget::importSectorsSlot ()
         importSectorsJSON(filename.toStdString());
     }
     else
-        loginf << "ManageDataSourcesTask: importSectorsSlot: cancelled";
+        loginf << "cancelled";
 }
 
 void ManageSectorsTaskWidget::importSectorsJSON (const std::string& filename)
 {
-    loginf << "ManageSectorsTaskWidget: importSectorsJSON: filename '" << filename << "'";
+    loginf << "filename '" << filename << "'";
 
     assert (Files::fileExists(filename));
 
@@ -693,7 +693,7 @@ void ManageSectorsTaskWidget::importSectorsJSON (const std::string& filename)
 
 void ManageSectorsTaskWidget::importAirSpaceSectorsSlot()
 {
-    loginf << "ManageSectorsTaskWidget: importAirSpaceSectorsSlot";
+    loginf << "importAirSpaceSectorsSlot";
 
     QString filename =
         QFileDialog::getOpenFileName(nullptr, "Import Air Space Sectors from JSON",
@@ -707,7 +707,7 @@ void ManageSectorsTaskWidget::importAirSpaceSectorsSlot()
 
 void ManageSectorsTaskWidget::importAirSpaceSectorsJSON(const std::string& filename)
 {
-    loginf << "ManageSectorsTaskWidget: importSectorsJSON: filename '" << filename << "'";
+    loginf << "filename '" << filename << "'";
 
     assert (Files::fileExists(filename));
 

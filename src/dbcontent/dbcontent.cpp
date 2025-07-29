@@ -164,7 +164,7 @@ DBContent::DBContent(COMPASS& compass,
 
     createSubConfigurables();
 
-    logdbg << "DBContent: constructor: created with instance_id " << instanceId() << " name "
+    logdbg << "created with instance_id" << instanceId() << " name "
            << name_;
 
     checkStaticVariable(DBContent::meta_var_ds_id_);
@@ -204,18 +204,18 @@ DBContent::~DBContent()
 void DBContent::generateSubConfigurable(const string& class_id, 
                                         const string& instance_id)
 {
-    logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id;
+    logdbg << "generating variable" << instance_id;
     if (class_id == "Variable")
     {
         Variable* var = new Variable(class_id, instance_id, this);
 
         if (hasVariable(var->name()))
-            logerr << "DBContent: generateSubConfigurable: duplicate variable " << instance_id
+            logerr << "duplicate variable" << instance_id
                    << " with name '" << var->name() << "'";
 
         assert(!hasVariable(var->name()));
 
-        logdbg << "DBContent: generateSubConfigurable: generating variable " << instance_id
+        logdbg << "generating variable" << instance_id
                << " with name " << var->name();
 
         variables_.emplace(std::piecewise_construct,
@@ -256,7 +256,7 @@ Variable& DBContent::variable(const string& name) const
  */
 void DBContent::renameVariable(const string& old_name, const string& new_name)
 {
-    loginf << "DBContent: renameVariable: name " << old_name << " new_name " << new_name;
+    loginf << "name" << old_name << " new_name " << new_name;
 
     assert(hasVariable(old_name));
     assert(!hasVariable(new_name));
@@ -498,7 +498,7 @@ void DBContent::load(dbContent::VariableSet& read_set,
         filter_clause += custom_filter_clause;
     }
 
-    logdbg << "DBContent: load: filter_clause '" << filter_clause << "'";
+    logdbg << "filter_clause '" << filter_clause << "'";
 
     loadFiltered(read_set, filter_clause);
 }
@@ -508,7 +508,7 @@ void DBContent::load(dbContent::VariableSet& read_set,
 void DBContent::loadFiltered(dbContent::VariableSet& read_set, 
                              std::string custom_filter_clause)
 {
-    logdbg << "DBContent: loadFiltered: name " << name_ << " loadable " << is_loadable_;
+    logdbg << "name" << name_ << " loadable " << is_loadable_;
 
     assert(is_loadable_);
     assert(existsInDB());
@@ -576,7 +576,7 @@ bool DBContent::prepareInsert(shared_ptr<Buffer>& buffer)
     // transform variable names from dbovars to dbcolumns
     buffer->transformVariables(list, false);
 
-    logdbg << "DBContent: prepareInsert: end";
+    logdbg << "end";
 
     return true;
 }
@@ -609,7 +609,7 @@ void DBContent::updateDataSourcesBeforeInsert (shared_ptr<Buffer>& buffer)
     string timestamp_col_str = timestamp_var.dbColumnName();
 
     if (!buffer->has<boost::posix_time::ptime>(timestamp_col_str))
-        logerr << "DBContent: updateDataSourcesBeforeInsert: no timestamp info given in " << name_;
+        logerr << "no timestamp info given in" << name_;
 
     assert (buffer->has<boost::posix_time::ptime>(timestamp_col_str));
 
@@ -709,7 +709,7 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
  */
 void DBContent::deleteDBContentData(bool cleanup_db)
 {
-    loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "'";
+    loginf << "dbcontent_name '" << name_ << "'";
 
     if (!existsInDB())
         return;
@@ -730,7 +730,7 @@ void DBContent::deleteDBContentData(bool cleanup_db)
  */
 void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, bool cleanup_db)
 {
-    loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic;
+    loginf << "dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic;
 
     if (!existsInDB())
         return;
@@ -752,7 +752,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, bool cle
  */
 void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned int line_id, bool cleanup_db)
 {
-    loginf << "DBContent: deleteDBContentData: dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic
+    loginf << "dbcontent_name '" << name_ << "' sac/sic " << sac << "/" << sic
            << " line_id " << line_id;
 
     if (!existsInDB())
@@ -792,7 +792,7 @@ void DBContent::updateDoneSlot()
  */
 void DBContent::deleteJobDoneSlot()
 {
-    loginf << "DBContent: deleteJobDoneSlot";
+    loginf << "deleteJobDoneSlot";
 
     assert (delete_job_);
 
@@ -896,7 +896,7 @@ void DBContent::databaseOpenedSlot()
  */
 void DBContent::databaseClosedSlot()
 {
-    logdbg << "DBContent: databaseClosedSlot";
+    logdbg << "databaseClosedSlot";
 
     is_loadable_ = false;
     count_ = 0;

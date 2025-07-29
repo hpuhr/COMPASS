@@ -65,7 +65,7 @@ bool ScatterPlotViewChartView::handleMousePress(Qt::MouseButtons buttons, const 
 
         if (tool == SP_NAVIGATE_TOOL)
         {
-            logdbg << "ScatterPlotViewChartView: handleMousePress: NAVIGATE x " << widget_pos.x() << " y " << widget_pos.y();
+            logdbg << "NAVIGATE x" << widget_pos.x() << " y " << widget_pos.y();
 
             drag_data_      = widget_pos;
             drag_data_init_ = true;
@@ -74,12 +74,12 @@ bool ScatterPlotViewChartView::handleMousePress(Qt::MouseButtons buttons, const 
         }
         else if (tool == SP_ZOOM_RECT_TOOL || tool == SP_SELECT_TOOL)
         {
-            loginf << "ScatterPlotViewChartView: handleMousePress: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+            loginf << "RECT x" << widget_pos.x() << " y " << widget_pos.y();
 
             // view widget coordinates to chart coordinates
             QPointF p = widgetToChart(widget_pos);
 
-            loginf << "ScatterPlotViewChartView: handleMousePress: RECT xc " << p.x() << " yc " << p.y();
+            loginf << "RECT xc" << p.x() << " yc " << p.y();
 
             p1_      = widget_pos.toPoint();
             p1_data_ = p;
@@ -106,7 +106,7 @@ bool ScatterPlotViewChartView::handleMouseMove(Qt::MouseButtons buttons, const Q
 
         if (tool == SP_NAVIGATE_TOOL)
         {
-            logdbg << "ScatterPlotViewChartView: handleMouseMove: NAVIGATE x " << widget_pos.x() << " y " << widget_pos.y() << " drag_data_init " << drag_data_init_;
+            logdbg << "NAVIGATE x" << widget_pos.x() << " y " << widget_pos.y() << " drag_data_init " << drag_data_init_;
 
             if (drag_data_init_)
             {
@@ -121,7 +121,7 @@ bool ScatterPlotViewChartView::handleMouseMove(Qt::MouseButtons buttons, const Q
         }
         else if ((tool == SP_ZOOM_RECT_TOOL || tool == SP_SELECT_TOOL) && isSelectionEnabled())
         {
-            logdbg << "ScatterPlotViewChartView: handleMouseMove: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+            logdbg << "RECT x" << widget_pos.x() << " y " << widget_pos.y();
 
             // view widget coordinates to chart coordinates
             QPointF p = widgetToChart(widget_pos);
@@ -148,7 +148,7 @@ bool ScatterPlotViewChartView::handleMouseRelease(Qt::MouseButtons buttons, cons
 
         if (tool == SP_NAVIGATE_TOOL)
         {
-            logdbg << "ScatterPlotViewChartView: handleMouseRelease: NAVIGATE x " << widget_pos.x() << " y " << widget_pos.y();
+            logdbg << "NAVIGATE x" << widget_pos.x() << " y " << widget_pos.y();
 
             drag_data_init_ = false;
 
@@ -156,12 +156,12 @@ bool ScatterPlotViewChartView::handleMouseRelease(Qt::MouseButtons buttons, cons
         }
         else if ((tool == SP_ZOOM_RECT_TOOL || tool == SP_SELECT_TOOL) && isSelectionEnabled())
         {
-            loginf << "ScatterPlotViewChartView: handleMouseRelease: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+            loginf << "RECT x" << widget_pos.x() << " y " << widget_pos.y();
 
             // view widget coordinates to chart coordinates
             QPointF p = widgetToChart(widget_pos);
 
-            loginf << "ScatterPlotViewChartView: handleMouseRelease: RECT xc " << p.x() << " yc " << p.y();
+            loginf << "RECT xc" << p.x() << " yc " << p.y();
 
             if (update_pos)
             {
@@ -169,7 +169,7 @@ bool ScatterPlotViewChartView::handleMouseRelease(Qt::MouseButtons buttons, cons
                 p2_data_ = p;
             }
             
-            loginf << "ScatterPlotViewChartView: handleMouseRelease: REGION p1 " << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
+            loginf << "REGION p1" << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
 
             updateSelection(p1_, p2_, p1_data_, p2_data_);
             sendSelectedRegion();

@@ -67,7 +67,7 @@ ScatterPlotView::ScatterPlotView(const std::string& class_id,
 */
 ScatterPlotView::~ScatterPlotView()
 {
-    loginf << "ScatterPlotView: dtor";
+    loginf << "dtor";
 
     if (data_source_)
     {
@@ -81,7 +81,7 @@ ScatterPlotView::~ScatterPlotView()
         widget_ = nullptr;
     }
 
-    loginf << "ScatterPlotView: dtor: done";
+    loginf << "done";
 }
 
 /**
@@ -124,7 +124,7 @@ bool ScatterPlotView::init_impl()
 void ScatterPlotView::generateSubConfigurable(const std::string& class_id,
                                             const std::string& instance_id)
 {
-    logdbg << "ScatterPlotView: generateSubConfigurable: class_id " << class_id << " instance_id "
+    logdbg << "class_id" << class_id << " instance_id "
            << instance_id;
     if (class_id == "ScatterPlotViewDataSource")
     {
@@ -214,7 +214,7 @@ void ScatterPlotView::useConnectionLines(bool value, bool redraw)
 */
 void ScatterPlotView::updateSelection()
 {
-    loginf << "ScatterPlotView: updateSelection";
+    loginf << "updateSelection";
     assert(widget_);
 
     widget_->getViewDataWidget()->redrawData(true);
@@ -229,7 +229,7 @@ void ScatterPlotView::updateSelection()
 */
 void ScatterPlotView::unshowViewPoint(const ViewableDataConfig* vp)
 {
-    loginf << "ScatterPlotView: unshowViewPoint";
+    loginf << "unshowViewPoint";
 
     assert (vp);
     assert (data_source_);
@@ -240,7 +240,7 @@ void ScatterPlotView::unshowViewPoint(const ViewableDataConfig* vp)
 */
 void ScatterPlotView::showViewPoint(const ViewableDataConfig* vp)
 {
-    loginf << "ScatterPlotView: showViewPoint";
+    loginf << "showViewPoint";
 
     assert (vp);
     assert (data_source_);

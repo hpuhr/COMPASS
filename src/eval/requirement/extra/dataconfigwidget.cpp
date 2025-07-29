@@ -69,7 +69,7 @@ ExtraDataConfigWidget::ExtraDataConfigWidget(ExtraDataConfig& cfg)
 
 void ExtraDataConfigWidget::minDurationEditSlot(QString value)
 {
-    loginf << "ExtraDataConfigWidget: minDurationEditSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -77,12 +77,12 @@ void ExtraDataConfigWidget::minDurationEditSlot(QString value)
     if (ok)
         config().minDuration(val);
     else
-        loginf << "ExtraDataConfigWidget: minDurationEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void ExtraDataConfigWidget::minNumUpdatesEditSlot(QString value)
 {
-    loginf << "ExtraDataConfigWidget: minNumUpdatesEditSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     bool ok;
     unsigned int val = value.toUInt(&ok);
@@ -90,12 +90,12 @@ void ExtraDataConfigWidget::minNumUpdatesEditSlot(QString value)
     if (ok)
         config().minNumUpdates(val);
     else
-        loginf << "ExtraDataConfigWidget: minNumUpdatesEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void ExtraDataConfigWidget::toggleIgnorePrimaryOnlySlot()
 {
-    loginf << "ExtraDataConfigWidget: toggleIgnorePrimaryOnlySlot";
+    loginf << "toggleIgnorePrimaryOnlySlot";
 
     assert (ignore_primary_only_check_);
     config().ignorePrimaryOnly(ignore_primary_only_check_->checkState() == Qt::Checked);

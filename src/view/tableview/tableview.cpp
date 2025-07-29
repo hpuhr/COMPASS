@@ -100,7 +100,7 @@ bool TableView::init_impl()
 void TableView::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
 {
-    logdbg << "TableView: generateSubConfigurable: class_id " << class_id << " instance_id "
+    logdbg << "class_id" << class_id << " instance_id "
            << instance_id;
     if (class_id == SubConfigDataSource)
     {
@@ -207,7 +207,7 @@ void TableView::accept(LatexVisitor& v)
 
 void TableView::updateSelection()
 {
-    loginf << "TableView: updateSelection";
+    loginf << "updateSelection";
     assert(widget_);
 
     if (settings_.show_only_selected_)
@@ -218,7 +218,7 @@ void TableView::updateSelection()
 
 void TableView::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "TableView: unshowViewPoint";
+    loginf << "unshowViewPoint";
 
     assert (vp);
     assert (data_source_);
@@ -227,7 +227,7 @@ void TableView::unshowViewPointSlot (const ViewableDataConfig* vp)
 
 void TableView::showViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "TableView: showViewPoint";
+    loginf << "showViewPoint";
 
     assert (vp);
     assert (data_source_);

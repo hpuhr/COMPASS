@@ -34,17 +34,17 @@ using namespace std;
 Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
     : dbcontent_name_(dbcontent_name) //, last_one_(false)
 {
-    logdbg << "Buffer: constructor: start";
+    logdbg << "start";
 
     for (unsigned int cnt = 0; cnt < properties.size(); cnt++)
         addProperty(properties.at(cnt));
 
-    logdbg << "Buffer: constructor: end";
+    logdbg << "end";
 }
 
 Buffer::~Buffer()
 {
-    logdbg << "Buffer: destructor: dbo " << dbcontent_name_;
+    logdbg << "dbo" << dbcontent_name_;
 
     properties_.clear();
 
@@ -63,7 +63,7 @@ Buffer::~Buffer()
 
     size_ = 0;
 
-    logdbg << "Buffer: destructor: end";
+    logdbg << "end";
 }
 
 bool Buffer::hasProperty(const Property& property)
@@ -71,7 +71,7 @@ bool Buffer::hasProperty(const Property& property)
     if (properties_.hasProperty(property.name()))
     {
         if (properties_.get(property.name()).dataType() != property.dataType())
-            logwrn << "Buffer: hasProperty: property '" << property.name()
+            logwrn << "property '" << property.name()
                    << " has same name but different data types (" << properties_.get(property.name()).dataTypeString()
                    << ", " << property.dataTypeString() << ")";
 
@@ -116,7 +116,7 @@ bool Buffer::hasProperty(const Property& property)
                 assert(getArrayListMap<boost::posix_time::ptime>().count(property.name()));
                 break;
             default:
-                logerr << "Buffer: hasProperty: unknown property type " << Property::asString(property.dataType());
+                logerr << "unknown property type" << Property::asString(property.dataType());
                 throw runtime_error("Buffer: hasProperty: unknown property type " +
                                     Property::asString(property.dataType()));
             }
@@ -135,7 +135,7 @@ bool Buffer::hasAnyPropertyNamed (const std::string& property_name)
 
 void Buffer::addProperty(string id, PropertyDataType type)
 {
-    logdbg << "Buffer: addProperty:  id '" << id << "' type " << Property::asString(type);
+    logdbg << "id '" << id << "' type " << Property::asString(type);
 
     assert(!id.empty());
 
@@ -208,14 +208,14 @@ void Buffer::addProperty(string id, PropertyDataType type)
                 new NullableVector<boost::posix_time::ptime>(property, *this));
             break;
         default:
-            logerr << "Buffer: addProperty: unknown property type " << Property::asString(type);
+            logerr << "unknown property type" << Property::asString(type);
             throw runtime_error("Buffer: addProperty: unknown property type " +
                                      Property::asString(type));
     }
 
     properties_.addProperty(id, type);
 
-    logdbg << "Buffer: addProperty: end";
+    logdbg << "end";
 }
 
 void Buffer::addProperty(const Property& property)
@@ -292,7 +292,7 @@ void Buffer::deleteProperty(const Property& property)
         assert (!has<boost::posix_time::ptime>(property.name()));
         break;
     default:
-        logerr << "Buffer: deleteProperty: unknown property type "
+        logerr << "unknown property type"
                    << Property::asString(property.dataType());
         throw runtime_error(
                     "Buffer: deleteProperty: unknown property type " +
@@ -302,7 +302,7 @@ void Buffer::deleteProperty(const Property& property)
 
 void Buffer::sortByProperty(const Property& property)
 {
-    logdbg << "Buffer: sortByProperty: name " << property.name();
+    logdbg << "name" << property.name();
 
     std::vector<unsigned int> perm;
 
@@ -345,7 +345,7 @@ void Buffer::sortByProperty(const Property& property)
         perm = get<boost::posix_time::ptime> (property.name()).sortPermutation();
         break;
     default:
-        logerr << "Buffer: sortByProperty: unknown property type "
+        logerr << "unknown property type"
                    << Property::asString(property.dataType());
         throw runtime_error(
                     "Buffer: sortByProperty: unknown property type " +
@@ -356,7 +356,7 @@ void Buffer::sortByProperty(const Property& property)
 
     for (auto& prop_it : properties_.properties())
     {
-        logdbg << "Buffer: sortByProperty: sorting name " << prop_it.name();
+        logdbg << "sorting name" << prop_it.name();
 
         switch (prop_it.dataType())
         {
@@ -397,7 +397,7 @@ void Buffer::sortByProperty(const Property& property)
             get<boost::posix_time::ptime> (prop_it.name()).sortByPermutation(perm);
             break;
         default:
-            logerr << "Buffer: sortByProperty: unknown property type "
+            logerr << "unknown property type"
                        << Property::asString(property.dataType());
             throw runtime_error(
                         "Buffer: sortByProperty: unknown property type " +
@@ -405,14 +405,14 @@ void Buffer::sortByProperty(const Property& property)
         }
     }
 
-    logdbg << "Buffer: sortByProperty: name " << property.name() << " done";
+    logdbg << "name" << property.name() << " done";
 }
 
 void Buffer::seizeBuffer(Buffer& org_buffer)
 {
-    logdbg << "Buffer: seizeBuffer: start";
+    logdbg << "start";
 
-    logdbg << "Buffer: seizeBuffer: size " << size() << " other size " << org_buffer.size();
+    logdbg << "size" << size() << " other size " << org_buffer.size();
 
     seizeArrayListMap<bool>(org_buffer);
     seizeArrayListMap<char>(org_buffer);
@@ -431,13 +431,13 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        loginf << "Buffer: seizeBuffer: size_ " << size_ << " org_buffer.size_ " << org_buffer.size_
+        loginf << "size_" << size_ << " org_buffer.size_ " << org_buffer.size_
                << " new size " << size_ + org_buffer.size_;
     }
 
     size_ += org_buffer.size_;
 
-    logdbg << "Buffer: seizeBuffer: end size " << size();
+    logdbg << "end size" << size();
 }
 
 size_t Buffer::size() const { return size_; }
@@ -503,7 +503,7 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
         for (auto& it : getArrayListMap<boost::posix_time::ptime>())
             assert (it.second->contentSize() <= size_);
 
-        loginf << "Buffer: cutUpToIndex: index " << index << " data_size_ " << size_;
+        loginf << "index" << index << " data_size_ " << size_;
     }
 
     for (auto& it : getArrayListMap<bool>())
@@ -535,7 +535,7 @@ void Buffer::cutUpToIndex(size_t index) // everything up to index is removed
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        loginf << "Buffer: cutUpToIndex: after cut index " << index << " data_size_ " << size_;
+        loginf << "after cut index" << index << " data_size_ " << size_;
 
         for (auto& it : getArrayListMap<bool>())
             assert (it.second->contentSize() <= size_);
@@ -596,7 +596,7 @@ void Buffer::removeIndexes(const std::vector<unsigned int>& indexes_to_remove)
         for (auto& it : getArrayListMap<boost::posix_time::ptime>())
             assert (it.second->contentSize() <= size_);
 
-        loginf << "Buffer: removeIndexes: indexes " << indexes_to_remove.size() << " data_size_ " << size_;
+        loginf << "indexes" << indexes_to_remove.size() << " data_size_ " << size_;
     }
 
     if (indexes_to_remove.size() == size_)
@@ -660,7 +660,7 @@ void Buffer::removeIndexes(const std::vector<unsigned int>& indexes_to_remove)
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
-        loginf << "Buffer: removeIndexes: after cut indexes " << indexes_to_remove.size() << " data_size_ " << size_;
+        loginf << "after cut indexes" << indexes_to_remove.size() << " data_size_ " << size_;
 
         for (auto& it : getArrayListMap<bool>())
             assert (it.second->contentSize() <= size_);
@@ -742,7 +742,7 @@ bool Buffer::isNull(const Property& property, unsigned int index)
             assert(getArrayListMap<boost::posix_time::ptime>().count(property.name()));
             return getArrayListMap<boost::posix_time::ptime>().at(property.name())->isNull(index);
         default:
-            logerr << "Buffer: isNull: unknown property type "
+            logerr << "unknown property type"
                    << Property::asString(property.dataType());
             throw runtime_error("Buffer: isNull: unknown property type " +
                                      Property::asString(property.dataType()));
@@ -818,7 +818,7 @@ void Buffer::deleteEmptyProperties()
                     properties_to_delete.push_back(property);
                 break;
             default:
-                logerr << "Buffer: deleteEmptyProperties: unknown property type "
+                logerr << "unknown property type"
                        << Property::asString(property.dataType());
                 throw runtime_error("Buffer: deleteEmptyProperties: unknown property type " +
                                          Property::asString(property.dataType()));
@@ -881,7 +881,7 @@ void Buffer::deleteEmptyProperties()
                 remove<boost::posix_time::ptime>(property.name());
                 break;
             default:
-                logerr << "Buffer: deleteEmptyProperties: unknown property type "
+                logerr << "unknown property type"
                        << Property::asString(property.dataType());
                 throw runtime_error("Buffer: deleteEmptyProperties: unknown property type " +
                                          Property::asString(property.dataType()));
@@ -893,7 +893,7 @@ void Buffer::deleteEmptyProperties()
 
 void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 {
-    logdbg << "Buffer: transformVariables: dbo '" << dbcontent_name_ << "' dbcol2dbovar " << dbcol2dbovar;
+    logdbg << "dbo '" << dbcontent_name_ << "' dbcol2dbovar " << dbcol2dbovar;
 
     const vector<dbContent::Variable*>& variables = list.getSet();
     string variable_name;
@@ -904,7 +904,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 
     for (auto var_it : variables)
     {
-        logdbg << "Buffer: transformVariables: variable " << var_it->name() << " db column " << db_column_name;
+        logdbg << "variable" << var_it->name() << " db column " << db_column_name;
 
         variable_name = var_it->name();
         db_column_name = var_it->dbColumnName();
@@ -915,7 +915,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
         {
             if (!properties_.hasProperty(db_column_name))
             {
-                //logerr << "Buffer: transformVariables: property '" << db_column_name << "' not found";
+                //logerr << "property '" << db_column_name << "' not found";
                 continue;
             }
 
@@ -929,7 +929,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
         {
             if (!properties_.hasProperty(var_it->name()))
             {
-                logerr << "Buffer: transformVariables: variable '" << variable_name << "' not found";
+                logerr << "variable '" << variable_name << "' not found";
                 continue;
             }
 
@@ -943,7 +943,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
         // rename to reflect dbo variable
         if (current_var_name != transformed_var_name)
         {
-            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
+            logdbg << "renaming variable" << current_var_name
                    << " to variable name " << transformed_var_name;
 
             switch (data_type)
@@ -1009,7 +1009,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
                     break;
                 }
                 default:
-                    logerr << "Buffer: transformVariables: unknown property type "
+                    logerr << "unknown property type"
                            << Property::asString(data_type);
                     throw runtime_error("Buffer: transformVariables: unknown property type " +
                                              Property::asString(data_type));

@@ -64,7 +64,7 @@ RadarPlotPositionCalculatorTaskDialog::RadarPlotPositionCalculatorTaskDialog(Rad
 
 RadarPlotPositionCalculatorTaskDialog::~RadarPlotPositionCalculatorTaskDialog()
 {
-    loginf << "RadarPlotPositionCalculatorTaskDialog: dtor";
+    loginf << "dtor";
     widget_ = nullptr;
 }
 

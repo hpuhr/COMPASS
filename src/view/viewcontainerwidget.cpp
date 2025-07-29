@@ -42,7 +42,7 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
       Configurable(class_id, instance_id, view_manager),
       view_manager_(*view_manager)
 {
-    logdbg << "ViewContainerWidget: constructor: instance " << instanceId();
+    logdbg << "instance" << instanceId();
 
     registerParameter("pos_x", &pos_x_, 0u);
     registerParameter("pos_y", &pos_y_, 0u);
@@ -81,18 +81,18 @@ ViewContainerWidget::ViewContainerWidget(const std::string& class_id,
 
     show();
 
-    logdbg << "ViewContainerGUI: constructor: end";
+    logdbg << "end";
 }
 
 ViewContainerWidget::~ViewContainerWidget()
 {
-    loginf << "ViewContainerWidget: dtor";
+    loginf << "dtor";
 
     assert(view_container_);
     delete view_container_;
     view_container_ = nullptr;
 
-    loginf << "ViewContainerWidget: dtor: done";
+    loginf << "done";
 }
 
 void ViewContainerWidget::generateSubConfigurable(const std::string& class_id,
@@ -124,7 +124,7 @@ ViewContainer& ViewContainerWidget::viewContainer() const { return *view_contain
 
 void ViewContainerWidget::closeEvent(QCloseEvent* event)
 {
-    loginf << "ViewContainerWidget: closeEvent: instance " << instanceId();
+    loginf << "instance" << instanceId();
 
     view_manager_.removeContainerWidget(instanceId());
     QWidget::closeEvent(event);

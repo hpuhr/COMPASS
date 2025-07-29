@@ -770,7 +770,7 @@ size_t Section::numContents(SectionContentType type) const
 */
 void Section::createContentWidget(bool preload_ondemand_contents)
 {
-    loginf << "Section: createContentWidget: Creating content widget for section '" << name() << "'";
+    loginf << "Creating content widget for section '" << name() << "'";
 
     assert (!content_widget_container_);
 
@@ -940,7 +940,7 @@ bool Section::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldContentTypes)        ||
         !j.contains(FieldHiddenContentIDs))
     {
-        logerr << "Section: fromJSON_impl: Error: Section does not obtain needed fields";
+        logerr << "Section does not obtain needed fields";
         return false;
     }
 
@@ -962,7 +962,7 @@ bool Section::fromJSON_impl(const nlohmann::json& j)
     const auto& j_subsections = j[ FieldSubSections ];
     if (!j_subsections.is_array())
     {
-        logerr << "Section: fromJSON_impl: Error: Subsection is not an array";
+        logerr << "Subsection is not an array";
         return false;
     }
 
@@ -1061,7 +1061,7 @@ bool Section::configure(const nlohmann::json& j)
         if (it == content_.end())
         {
             //not found => skip
-            logwrn << "Section: configure: Failed to find loaded content with id " << id << " in section " << name();
+            logwrn << "Failed to find loaded content with id" << id << " in section " << name();
             ok = false;
             continue;
         }
@@ -1073,7 +1073,7 @@ bool Section::configure(const nlohmann::json& j)
         //try to configure content
         if (!c->configure(config))
         {
-            logwrn << "Section: configure: Failed to configure content " << c->name() << " of section " << name();
+            logwrn << "Failed to configure content" << c->name() << " of section " << name();
             ok = false;
             continue;
         }

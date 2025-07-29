@@ -42,10 +42,10 @@ EvaluationTargetExcludedRequirementsDialog::EvaluationTargetExcludedRequirements
     , selected_requirements_(std::move(selected_requirements))
     , available_requirements_(std::move(available_requirements))
 {
-    logdbg << "EvaluationTargetExcludedRequirementsDialog: ctor: selected_requirements '"
+    logdbg << "selected_requirements '"
            << String::compress(selected_requirements_,',') << "'";
 
-    logdbg << "EvaluationTargetExcludedRequirementsDialog: ctor: available_requirements '"
+    logdbg << "available_requirements '"
            << String::compress(available_requirements_,',') << "'";
 
     setWindowTitle("Edit Evaluation Excluded Requirements");

@@ -410,7 +410,7 @@ std::vector<Joined::SectorInfo> JoinedTrackAngle::sectorInfos() const
 */
 bool JoinedTrackAngle::exportAsCSV(std::ofstream& strm) const
 {
-    // loginf << "JoinedTrackAngle: exportAsCSV";
+    // loginf << "exportAsCSV";
 
     // strm << "trackangle_offset\n";
 

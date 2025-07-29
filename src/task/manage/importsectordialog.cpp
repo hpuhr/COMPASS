@@ -123,7 +123,7 @@ void ImportSectorDialog::colorSlot()
 
     if (color.isValid())
     {
-        loginf << "ImportSectorDialog: colorSlot: color " << color.name().toStdString();
+        loginf << "color" << color.name().toStdString();
         color_ = color;
 
         assert (color_button_);

@@ -36,7 +36,7 @@ ScatterSeriesTreeItemDelegate::ScatterSeriesTreeItemDelegate(QObject* parent) : 
 void ScatterSeriesTreeItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
                                 const QModelIndex& index) const
 {
-    logdbg << "ScatterSeriesTreeItemDelegate: paint: r " << index.row() << " c " << index.column();
+    logdbg << "r" << index.row() << " c " << index.column();
 
     if (index.column() == 1)  // only do custom painting in column 0
     {
@@ -79,29 +79,29 @@ void ScatterSeriesTreeItemDelegate::paint(QPainter* painter, const QStyleOptionV
         x += w + space;
     }
 
-    logdbg << "ScatterSeriesTreeItemDelegate: paint: 1";
+    logdbg << "1";
 
     QStyleOptionButton button;
     button.rect = QRect(x, y, w, h);
     button.state = QStyle::State_Enabled;
     button.features = QStyleOptionButton::None;
 
-    logdbg << "ScatterSeriesTreeItemDelegate: paint: 2";
+    logdbg << "2";
 
     QIcon icon = qvariant_cast<QIcon>(index.data(ScatterSeriesModel::DataRole::IconRole));
-    logdbg << "ScatterSeriesTreeItemDelegate: paint: 2b";
+    logdbg << "2b";
     button.icon = icon;
     button.iconSize = QSize(w - space, h - space);
 
     QApplication::style()->drawControl(QStyle::CE_PushButton, &button, painter);
 
-    logdbg << "ScatterSeriesTreeItemDelegate: paint: 3";
+    logdbg << "3";
 
     QString headerText = qvariant_cast<QString>(index.data(0));
 
     QSize iconsize(w, h);
 
-    logdbg << "ScatterSeriesTreeItemDelegate: paint: 4";
+    logdbg << "4";
 
     QRect headerRect = option.rect;
     QRect iconRect(0, 0, w, h);
@@ -117,11 +117,11 @@ void ScatterSeriesTreeItemDelegate::paint(QPainter* painter, const QStyleOptionV
     text_option.setWrapMode(QTextOption::WordWrap);
     painter->drawText(headerRect, headerText, text_option);
 
-    logdbg << "ScatterSeriesTreeItemDelegate: paint: 5";
+    logdbg << "5";
 
     painter->restore();
 
-    logdbg << "ScatterSeriesTreeItemDelegate: paint: done";
+    logdbg << "done";
 }
 
 bool ScatterSeriesTreeItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model,
@@ -132,7 +132,7 @@ bool ScatterSeriesTreeItemDelegate::editorEvent(QEvent* event, QAbstractItemMode
 
     if (event->type() == QEvent::MouseButtonRelease)
     {
-        logdbg << "ScatterSeriesTreeItemDelegate: editorEvent: release";
+        logdbg << "release";
 
         QMouseEvent* e = (QMouseEvent*)event;
         int clickX = e->x();
@@ -155,7 +155,7 @@ bool ScatterSeriesTreeItemDelegate::editorEvent(QEvent* event, QAbstractItemMode
         {
             if (clickX > x && clickX < x + w && clickY > y && clickY < y + h)
             {
-                logdbg << "ScatterSeriesTreeItemDelegate: editorEvent: checkbox";
+                logdbg << "checkbox";
                 item->hide(!item->hidden()); // , true
 
                 return true;
@@ -166,10 +166,10 @@ bool ScatterSeriesTreeItemDelegate::editorEvent(QEvent* event, QAbstractItemMode
 
         if (clickX > x && clickX < x + w && clickY > y && clickY < y + h)
         {
-            logdbg << "ScatterSeriesTreeItemDelegate: editorEvent: button";
+            logdbg << "button";
             if (item->hasMenu())
             {
-                logdbg << "ScatterSeriesTreeItemDelegate: editorEvent:menu at x " << e->globalX() << " y "
+                logdbg << "menu at x" << e->globalX() << " y "
                        << e->globalY();
 
                 item->execMenu(QPoint(e->globalX(), e->globalY()));

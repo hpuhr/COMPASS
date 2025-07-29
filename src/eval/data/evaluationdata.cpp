@@ -70,7 +70,7 @@ EvaluationData::EvaluationData(EvaluationCalculator& calculator,
  */
 void EvaluationData::setBuffers(std::map<std::string, std::shared_ptr<Buffer>> buffers)
 {
-    loginf << "EvaluationData: setBuffers";
+    loginf << "setBuffers";
 
     accessor_->clear();
     accessor_->add(buffers);
@@ -80,11 +80,11 @@ void EvaluationData::setBuffers(std::map<std::string, std::shared_ptr<Buffer>> b
  */
 void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsigned int line_id)
 {
-    loginf << "EvaluationData: addReferenceData: dbcontent " << dbcontent_name;
+    loginf << "dbcontent" << dbcontent_name;
 
     if (!dbcont_man_.hasAssociations())
     {
-        logwrn << "EvaluationData: addReferenceData: dbcontent has no associations";
+        logwrn << "dbcontent has no associations";
 
         return;
     }
@@ -117,8 +117,8 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
 
         unsigned int utn;
 
-        loginf << "EvaluationData: addReferenceData: adding target data";
-        loginf << "EvaluationData: addReferenceData: use_active_srcs " << use_active_srcs;
+        loginf << "adding target data";
+        loginf << "use_active_srcs" << use_active_srcs;
 
         for (auto ds_id : active_srcs)
             loginf << "EvaluationData: addReferenceData: " << ds_id;
@@ -158,7 +158,7 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
             utn = utn_vec.get(cnt);
             if (!dbcont_man_.existsTarget(utn))
             {
-                logerr << "EvaluationData: addReferenceData: ignoring unknown utn " << utn;
+                logerr << "ignoring unknown utn" << utn;
                 continue;
             }
 
@@ -176,7 +176,7 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
         }
     }
 
-    loginf << "EvaluationData: addReferenceData: num targets " << target_data_.size()
+    loginf << "num targets" << target_data_.size()
            << " ref associated cnt " << associated_ref_cnt_ << " unassoc " << unassociated_ref_cnt_
            << " num_skipped " << num_skipped;
 }
@@ -185,11 +185,11 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
  */
 void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned int line_id)
 {
-    loginf << "EvaluationData: addTestData: dbcontent " << dbcontent_name;
+    loginf << "dbcontent" << dbcontent_name;
 
     if (!dbcont_man_.hasAssociations())
     {
-        logwrn << "EvaluationData: addTestData: dbcontent has no associations";
+        logwrn << "dbcontent has no associations";
         return;
     }
 
@@ -221,9 +221,9 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
 
         unsigned int utn;
 
-        loginf << "EvaluationData: addTestData: adding target data";
+        loginf << "adding target data";
 
-        loginf << "EvaluationData: addTestData: use_active_srcs " << use_active_srcs;
+        loginf << "use_active_srcs" << use_active_srcs;
 
         for (auto ds_id : active_srcs)
             loginf << "EvaluationData: addTestData: " << ds_id;
@@ -263,7 +263,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
             utn = utn_vec.get(cnt);
             if (!dbcont_man_.existsTarget(utn))
             {
-                logerr << "EvaluationData: addTestData: ignoring unknown utn " << utn;
+                logerr << "ignoring unknown utn" << utn;
                 continue;
             }
 
@@ -281,7 +281,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
         }
     }
 
-    loginf << "EvaluationData: addTestData: num targets " << target_data_.size()
+    loginf << "num targets" << target_data_.size()
            << " tst associated cnt " << associated_tst_cnt_ << " unassoc " << unassociated_tst_cnt_
            << " num_skipped " << num_skipped;
 }
@@ -290,7 +290,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
  */
 void EvaluationData::finalize ()
 {
-    loginf << "EvaluationData: finalize";
+    loginf << "finalize";
 
     assert (!finalized_);
 
@@ -304,7 +304,7 @@ void EvaluationData::finalize ()
 
     if (!num_targets)
     {
-        logerr << "EvaluationData: finalize: no targets loaded";
+        logerr << "no targets loaded";
     }
     else
     {
@@ -409,14 +409,14 @@ void EvaluationData::clear()
 //     case Qt::DisplayRole:
 //     case Qt::EditRole:
 //     {
-//         logdbg << "EvaluationData: data: display role: row " << index.row() << " col " << index.column();
+//         logdbg << "display role: row" << index.row() << " col " << index.column();
 
 //         assert (index.row() >= 0);
 //         assert (index.row() < (int)target_data_.size());
 
 //         const EvaluationTargetData& target = target_data_.at(index.row());
 
-//         logdbg << "EvaluationData: data: got utn " << target.utn_;
+//         logdbg << "got utn" << target.utn_;
 
 //         assert (index.column() < table_columns_.size());
 //         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -502,14 +502,14 @@ void EvaluationData::clear()
 //     }
 //     case Qt::ToolTipRole:
 //     {
-//         logdbg << "EvaluationData: data: tooltip role: row " << index.row() << " col " << index.column();
+//         logdbg << "tooltip role: row" << index.row() << " col " << index.column();
 
 //         assert (index.row() >= 0);
 //         assert (index.row() < (int)target_data_.size());
 
 //         const EvaluationTargetData& target = target_data_.at(index.row());
 
-//         logdbg << "EvaluationData: data: got utn " << target.utn_;
+//         logdbg << "got utn" << target.utn_;
 
 //         assert (index.column() < table_columns_.size());
 //         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -539,7 +539,7 @@ void EvaluationData::clear()
 //         auto it = target_data_.begin()+index.row();
 
 //         bool checked = (Qt::CheckState)value.toInt() == Qt::Checked;
-//         loginf << "EvaluationData: setData: utn " << it->utn_ <<" check state " << checked;
+//         loginf << "utn" << it->utn_ <<" check state " << checked;
 
 //         dbcont_man_.utnUseEval(it->utn_, checked);
 

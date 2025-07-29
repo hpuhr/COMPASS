@@ -76,7 +76,7 @@ void HistogramViewConfigWidget::toggleLogScale()
 {
     assert(log_check_);
     bool checked = log_check_->checkState() == Qt::Checked;
-    logdbg << "HistogramViewConfigWidget: toggleLogScale: setting overwrite to " << checked;
+    logdbg << "setting overwrite to" << checked;
     view_->useLogScale(checked, true);
 }
 
@@ -115,7 +115,7 @@ void HistogramViewConfigWidget::viewInfoJSON_impl(nlohmann::json& info) const
  */
 //void HistogramViewConfigWidget::exportSlot()
 //{
-//    logdbg << "HistogramViewConfigWidget: exportSlot";
+//    logdbg << "exportSlot";
 //    //assert(overwrite_check_);
 //    assert(export_button_);
 

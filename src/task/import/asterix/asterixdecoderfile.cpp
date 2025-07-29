@@ -109,7 +109,7 @@ void ASTERIXDecoderFile::processCurrentFile()
         COMPASS::instance().logError("ASTERIX Import") << "file '" << current_file.filename
                                        << "' decode error '" << e.what() << "'";
 
-        logerr << "ASTERIXDecoderFile: processCurrentFile: decode error '" << e.what() << "'";
+        logerr << "decode error '" << e.what() << "'";
         logError(e.what());
     }
     catch(...)
@@ -117,7 +117,7 @@ void ASTERIXDecoderFile::processCurrentFile()
         COMPASS::instance().logError("ASTERIX Import") << "file '" << current_file.filename
                                        << "' unknown decode error";
 
-        logerr << "ASTERIXDecoderFile: processCurrentFile: unknown decode error";
+        logerr << "unknown decode error";
         logError("Unknown decode error");
     }
 }

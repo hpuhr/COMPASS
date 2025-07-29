@@ -161,7 +161,7 @@ void CreateARTASAssociationsStatusDialog::setDone()
     updateTime();
     updateDBContentAssociatedGrid();
 
-    loginf << "CreateARTASAssociationsStatusDialog: setDone: done after " << elapsed_time_str_;
+    loginf << "done after" << elapsed_time_str_;
 
     ok_button_->setVisible(true);
 }
@@ -243,13 +243,13 @@ void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
 {
     assert(dbo_associated_grid_);
 
-    // loginf << "CreateARTASAssociationsStatusDialog: updateDBODoneGrid: rowcount " <<
+    // loginf << "rowcount" <<
     // cat_counters_grid_->rowCount();
 
     int row = 1;
     if (dbo_associated_grid_->rowCount() == 1)
     {
-        // loginf << "CreateARTASAssociationsStatusDialog: updateDBODoneGrid: adding first row";
+        // loginf << "adding first row";
 
         QFont font_bold;
         font_bold.setBold(true);
@@ -297,7 +297,7 @@ void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
 
         if (dbo_associated_grid_->rowCount() < row + 1)
         {
-            // loginf << "CreateARTASAssociationsStatusDialog: updateDBODoneGrid: adding row " <<
+            // loginf << "adding row" <<
             // row;
 
             dbo_associated_grid_->addWidget(new QLabel(), row, 0);
@@ -315,7 +315,7 @@ void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
             dbo_associated_grid_->addWidget(percent_label, row, 3);
         }
 
-        // loginf << "CreateARTASAssociationsStatusDialog: updateDBODoneGrid: setting row " << row;
+        // loginf << "setting row" << row;
 
         QLabel* dbo_label =
             dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 0)->widget());

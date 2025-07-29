@@ -362,7 +362,7 @@ void ChartView::seriesPressedSlot(const QPointF& point)
 {
     QPointF p = widgetFromChart(point); // widget pos
 
-    logdbg << "ChartView: seriesPressedSlot: x " << point.x() << " y " << point.y();
+    logdbg << "x" << point.x() << " y " << point.y();
 
     //forward to handler method
     handleMousePress(Qt::LeftButton, p);
@@ -376,7 +376,7 @@ void ChartView::seriesReleasedSlot(const QPointF& point)
 {
     QPointF p = widgetFromChart(point); // widget pos
 
-    logdbg << "ChartView: seriesReleasedSlot: x " << point.x() << " y " << point.y();
+    logdbg << "x" << point.x() << " y " << point.y();
 
     //forward to handler method
     handleMouseRelease(Qt::LeftButton, p, false);
@@ -386,7 +386,7 @@ void ChartView::seriesReleasedSlot(const QPointF& point)
  */
 void ChartView::mousePressEvent(QMouseEvent* event)
 {
-    logdbg << "ChartView: mousePressEvent: BUTTON = " << event->button() << " BUTTONS = " << event->buttons();
+    logdbg << "BUTTON =" << event->button() << " BUTTONS = " << event->buttons();
 
     //forward to handler method
     if (handleMousePress(event->button(), event->pos()))
@@ -401,7 +401,7 @@ void ChartView::mousePressEvent(QMouseEvent* event)
  */
 void ChartView::mouseMoveEvent(QMouseEvent* event)
 {
-    logdbg << "ChartView: mouseMoveEvent: BUTTON = " << event->button() << " BUTTONS = " << event->buttons();
+    logdbg << "BUTTON =" << event->button() << " BUTTONS = " << event->buttons();
 
     //forward to handler method
     if (handleMouseMove(event->buttons(), event->pos()))
@@ -416,7 +416,7 @@ void ChartView::mouseMoveEvent(QMouseEvent* event)
  */
 void ChartView::mouseReleaseEvent(QMouseEvent* event)
 {
-    logdbg << "ChartView: mouseReleaseEvent: BUTTON = " << event->button() << " BUTTONS = " << event->buttons();
+    logdbg << "BUTTON =" << event->button() << " BUTTONS = " << event->buttons();
 
     //forward to handler method
     if (handleMouseRelease(event->button(), event->pos(), true))

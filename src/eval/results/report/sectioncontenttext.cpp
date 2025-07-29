@@ -53,7 +53,7 @@ void SectionContentText::addToLayout (QVBoxLayout* layout)
 
 void SectionContentText::accept(LatexVisitor& v)
 {
-    loginf << "SectionContentText: accept";
+    loginf << "accept";
     v.visit(this);
 }
 

@@ -491,7 +491,7 @@ bool ParquetWriter::writeBufferToParquet(const DBContent& dbcontent,
     if (!Utils::Files::directoryExists(parquet_path) &&
         !Utils::Files::createMissingDirectories(parquet_path))
     {
-        logerr << "writeBufferToParquet: could not create parquet path at " << parquet_path;
+        logerr << "could not create parquet path at" << parquet_path;
         return false;
     }
 
@@ -531,7 +531,7 @@ bool ParquetWriter::writeBufferToParquet(const DBContent& dbcontent,
     auto result = writer.writer->WriteTable(*table, 64 * 1024 * 1024);
     if (!result.ok())
     {
-        logerr << "writeBufferToParquet: could not write table " << dbcontent.name() << ": " << result.message();
+        logerr << "could not write table" << dbcontent.name() << ": " << result.message();
         return false;
     }
 

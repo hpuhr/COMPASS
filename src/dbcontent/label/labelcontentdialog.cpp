@@ -75,7 +75,7 @@ void LabelContentDialog::selectedVarChangedSlot()
 
     unsigned int key = var_widget->property("key").toUInt();
 
-    loginf << "LabelContentDialog: selectedVarChangedSlot: key " << key;
+    loginf << "key" << key;
 
     assert (label_config_.contains(dbcontent_name_));
     json& dbcont_def = label_config_.at(dbcontent_name_);

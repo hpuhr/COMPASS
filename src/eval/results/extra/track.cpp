@@ -121,7 +121,7 @@ std::shared_ptr<Joined> SingleExtraTrack::createEmptyJoined(const std::string& r
 */
 boost::optional<double> SingleExtraTrack::computeResult_impl() const
 {
-    logdbg << "SingleTrack: updateProb: result_id " << result_id_ << " num_extra " << num_extra_ << " num_ok " << num_ok_;
+    logdbg << "result_id" << result_id_ << " num_extra " << num_extra_ << " num_ok " << num_ok_;
 
     assert (num_inside_ >= num_extra_ + num_ok_);
 

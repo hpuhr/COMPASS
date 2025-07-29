@@ -177,7 +177,7 @@ void ViewInfoWidget::updateInfos()
 
     auto infos = view_->viewInfos();
 
-    //loginf << "ViewInfoWidget: updateInfos: adding " << infos.numInfos() 
+    //loginf << "adding" << infos.numInfos() 
     //      << " info(s) in " << infos.numSections() << " section(s)"
     //      << " to " << view_->instanceId();
 

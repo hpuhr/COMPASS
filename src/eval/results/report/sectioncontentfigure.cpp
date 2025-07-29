@@ -64,13 +64,13 @@ void SectionContentFigure::addToLayout (QVBoxLayout* layout)
 
 void SectionContentFigure::accept(LatexVisitor& v)
 {
-    loginf << "SectionContentFigure: accept";
+    loginf << "accept";
     v.visit(this);
 }
 
 void SectionContentFigure::viewSlot()
 {
-    loginf << "SectionContentFigure: viewSlot";
+    loginf << "viewSlot";
     view();
 }
 

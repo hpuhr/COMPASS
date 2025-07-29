@@ -140,7 +140,7 @@ unsigned int JobManagerBase::numJobs() const
  */
 void JobManagerBase::run()
 {
-    logdbg << "JobManagerBase: run: start";
+    logdbg << "start";
 
     //boost::posix_time::ptime log_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -182,7 +182,7 @@ void JobManagerBase::run()
 
 //        if ((boost::posix_time::microsec_clock::local_time() - log_time_).total_seconds() > 1)
 //        {
-//            loginf << "JobManager: run: jobs " << numJobs() << " db " << numDBJobs();
+//            loginf << "jobs" << numJobs() << " db " << numDBJobs();
 //            log_time_ = boost::posix_time::microsec_clock::local_time();
 //        }
     }
@@ -193,24 +193,24 @@ void JobManagerBase::run()
 
     stopped_ = true;
 
-    loginf << "JobManagerBase: run: stopped";
+    loginf << "stopped";
 }
 
 /**
  */
 void JobManagerBase::shutdown()
 {
-    loginf << "JobManagerBase: shutdown: setting jobs obsolete";
+    loginf << "setting jobs obsolete";
 
     stop_requested_ = true;
 
     setJobsObsolete();
 
-    loginf << "JobManagerBase: shutdown: waiting on jobs to quit";
+    loginf << "waiting on jobs to quit";
 
     while (hasAnyJobs())
     {
-        loginf << "JobManagerBase: shutdown: waiting on jobs to finish: db " << hasDBJobs()
+        loginf << "waiting on jobs to finish: db" << hasDBJobs()
                << " blocking " << hasBlockingJobs() << " non-locking " << hasNonBlockingJobs();
 
         msleep(1000);
@@ -218,13 +218,13 @@ void JobManagerBase::shutdown()
 
     while (!stopped_)
     {
-        loginf << "JobManagerBase: shutdown: waiting on run stop";
+        loginf << "waiting on run stop";
         msleep(1000);
     }
 
     assert(numJobs() == 0);
 
-    loginf << "JobManager: shutdown: done";
+    loginf << "done";
 }
 
 /*************************************************************************************
@@ -363,12 +363,12 @@ void JobManagerAsync::handleBlockingJobs(bool debug)
     {
         if (active_blocking_job_->done())
         {
-            loginf << "JobManagerAsync: run: flushing blocking done job";
+            loginf << "flushing blocking done job";
 
             if (!stop_requested_)
             {
                 active_blocking_job_->job_->emitDone();
-                loginf << "JobManagerAsync: run: blocking job " << active_blocking_job_->job_->name() << " emitted done ";
+                loginf << "blocking job" << active_blocking_job_->job_->name() << " emitted done ";
             }
 
             active_blocking_job_ = nullptr;
@@ -379,7 +379,7 @@ void JobManagerAsync::handleBlockingJobs(bool debug)
     {
         if (blocking_jobs_.try_pop(active_blocking_job_))
         {
-            loginf << "JobManagerAsync: run: running blocking job";
+            loginf << "running blocking job";
 
             assert(!active_blocking_job_->is_running_ && !active_blocking_job_->job_->started());
             active_blocking_job_->exec();
@@ -400,12 +400,12 @@ void JobManagerAsync::handleNonBlockingJobs(bool debug)
     //     {
     //         if (active_non_blocking_job_->done())  // can be finalized
     //         {
-    //             logdbg << "JobManagerAsync: run: flushing non-blocking done job";
+    //             logdbg << "flushing non-blocking done job";
 
     //             if (!stop_requested_)
     //             {
     //                 active_non_blocking_job_->job_->emitDone();
-    //                 logdbg << "JobManagerAsync: run: done non-blocking job emitted " + active_non_blocking_job_->job_->name();
+    //                 logdbg << "done non-blocking job emitted" + active_non_blocking_job_->job_->name();
     //             }
 
     //             active_non_blocking_job_ = nullptr;
@@ -465,18 +465,18 @@ void JobManagerAsync::handleDBJobs(bool debug)
         {
 //            if (active_db_job_->obsolete())
 //            {
-//                logdbg << "JobManagerAsync: run: flushing obsolete non-blocking job";
+//                logdbg << "flushing obsolete non-blocking job";
 
 //                if (!stop_requested_)
 //                    active_db_job_->emitObsolete();
 //            }
 
-            logdbg << "JobManagerAsync: run: flushing non-blocking done job";
+            logdbg << "flushing non-blocking done job";
 
             if (!stop_requested_)
             {
                 active_db_job_->job_->emitDone();
-                logdbg << "JobManagerAsync: run: done non-blocking job emitted " + active_db_job_->job_->name();
+                logdbg << "done non-blocking job emitted" + active_db_job_->job_->name();
             }
 
             active_db_job_ = nullptr;
@@ -678,18 +678,18 @@ void JobManagerThreadPool::handleBlockingJobs(bool debug)
         {
 //            if (active_blocking_job_->obsolete())
 //            {
-//                logdbg << "JobManagerThreadPool: run: flushing obsolete blocking job";
+//                logdbg << "flushing obsolete blocking job";
 
 //                if (!stop_requested_)
 //                    active_blocking_job_->emitObsolete();
 //            }
 
-            logdbg << "JobManagerThreadPool: run: flushing blocking done job";
+            logdbg << "flushing blocking done job";
 
             if (!stop_requested_)
             {
                 active_blocking_job_->job_->emitDone();
-                logdbg << "JobManagerThreadPool: run: done blocking job emitted " +
+                logdbg << "done blocking job emitted" +
                               active_blocking_job_->job_->name();
             }
 
@@ -775,18 +775,18 @@ void JobManagerThreadPool::handleNonBlockingJobs(bool debug)
             {
 //                if (active_non_blocking_job_->obsolete())
 //                {
-//                    logdbg << "JobManagerThreadPool: run: flushing obsolete non-blocking job";
+//                    logdbg << "flushing obsolete non-blocking job";
 
 //                    if (!stop_requested_)
 //                        active_non_blocking_job_->emitObsolete();
 //                }
 
-                logdbg << "JobManagerThreadPool: run: flushing non-blocking done job";
+                logdbg << "flushing non-blocking done job";
 
                 if (!stop_requested_)
                 {
                     active_non_blocking_job_->job_->emitDone();
-                    logdbg << "JobManagerThreadPool: run: done non-blocking job emitted " +
+                    logdbg << "done non-blocking job emitted" +
                                   active_non_blocking_job_->job_->name();
                 }
 
@@ -827,18 +827,18 @@ void JobManagerThreadPool::handleDBJobs(bool debug)
         {
 //            if (active_db_job_->obsolete())
 //            {
-//                logdbg << "JobManagerThreadPool: run: flushing obsolete non-blocking job";
+//                logdbg << "flushing obsolete non-blocking job";
 
 //                if (!stop_requested_)
 //                    active_db_job_->emitObsolete();
 //            }
 
-            logdbg << "JobManagerThreadPool: run: flushing non-blocking done job";
+            logdbg << "flushing non-blocking done job";
 
             if (!stop_requested_)
             {
                 active_db_job_->job_->emitDone();
-                logdbg << "JobManagerThreadPool: run: done non-blocking job emitted " +
+                logdbg << "done non-blocking job emitted" +
                               active_db_job_->job_->name();
             }
 
@@ -893,12 +893,12 @@ void JobManagerThreadPool::setJobsObsolete()
 JobManager::JobManager()
 :   Configurable("JobManager", "JobManager0", 0, "threads.json")
 {
-    logdbg << "JobManager: constructor";
+    logdbg << "constructor";
 }
 
 /**
  */
 JobManager::~JobManager() 
 { 
-    logdbg << "JobManager: destructor"; 
+    logdbg << "destructor"; 
 }

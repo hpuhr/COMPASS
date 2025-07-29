@@ -360,7 +360,7 @@ Result ReportExporterLatex::writePDF() const
     std::string command = "cd \"" + latex_doc_->path() + "\" && pdflatex --interaction=nonstopmode \"" + latex_doc_->filename()
             + "\" | awk 'BEGIN{IGNORECASE = 1}/warning|!/,/^$/;'";
 
-    loginf << "ReportExporterLatex: writePDF: running pdflatex";
+    loginf << "running pdflatex";
 
     auto runPDFLatex = [ & ] ()
     {
@@ -377,12 +377,12 @@ Result ReportExporterLatex::writePDF() const
 
     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-    loginf << "ReportExporterLatex: writePDF: cmd '" << command << "'";
+    loginf << "cmd '" << command << "'";
 
     //initial run
     runPDFLatex();
 
-    logdbg << "ReportExporterLatex: writePDF: cmd done";
+    logdbg << "cmd done";
 
     const auto& s = settings();
 
@@ -393,17 +393,17 @@ Result ReportExporterLatex::writePDF() const
            (command_out.find("Rerun to get outlines right"        ) != std::string::npos) || 
            (command_out.find("Rerun to get cross-references right") != std::string::npos))
     {
-        loginf << "ReportExporterLatex: writePDF: re-running pdflatex";
+        loginf << "re-running pdflatex";
         
         //re-run
         runPDFLatex();
 
-        logdbg << "ReportExporterLatex: writePDF: re-run done";
+        logdbg << "re-run done";
 
         ++run_cnt;
     }
 
-    loginf << "ReportExporterLatex: writePDF: result '" << command_out << "'";
+    loginf << "result '" << command_out << "'";
 
     if (command_out.size())
         return Result::failed("PDF Latex failed with warnings:\n\n" + std::string(command_out.c_str()));
@@ -414,10 +414,10 @@ Result ReportExporterLatex::writePDF() const
         if (Utils::String::hasEnding(fullpath, ".tex"))
             Utils::String::replace(fullpath, ".tex", ".pdf");
 
-        loginf << "ReportExporterLatex: writePDF: opening '" << fullpath << "'";
+        loginf << "opening '" << fullpath << "'";
 
         if (!QDesktopServices::openUrl(QUrl(fullpath.c_str())))
-            logerr << "ReportExporterLatex: writePDF: could not open created file";
+            logerr << "could not open created file";
     }
 
     return Result::succeeded();

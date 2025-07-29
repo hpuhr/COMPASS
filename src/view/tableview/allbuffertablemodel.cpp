@@ -70,7 +70,7 @@ QVariant AllBufferTableModel::headerData(int section, Qt::Orientation orientatio
 
     if (orientation == Qt::Horizontal)
     {
-        logdbg << "AllBufferTableModel: headerData: section " << section;
+        logdbg << "section" << section;
         unsigned int col = section;
 
         if (col == 0)
@@ -109,7 +109,7 @@ Qt::ItemFlags AllBufferTableModel::flags(const QModelIndex& index) const
 
 QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 {
-    logdbg << "AllBufferTableModel: data: row " << index.row() - 1 << " col " << index.column() - 1;
+    logdbg << "row" << index.row() - 1 << " col " << index.column() - 1;
 
     bool null = false;
 
@@ -150,7 +150,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 
         if (buffer_index >= buffer->size())
         {
-            logerr << "AllBufferTableModel: data: index " << buffer_index << " too large for "
+            logerr << "index" << buffer_index << " too large for "
                    << dbcontent_name << "  size " << buffer->size();
             return QVariant();
         }
@@ -164,7 +164,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 
         col -= 2;  // for the actual properties
 
-        //        loginf << "AllBufferTableModel: data: col " << col << " set size " <<
+        //        loginf << "col" << col << " set size " <<
         //        data_source_.getSet()->getSize()
         //               << " show assoc " << show_associations_;
         assert(col < data_source_.getSet()->getSize());
@@ -200,7 +200,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 
         if (!properties.hasProperty(variable.name()))
         {
-            logdbg << "AllBufferTableModel: data: variable " << variable.name()
+            logdbg << "variable" << variable.name()
                    << " not present in buffer";
         }
         else
@@ -369,7 +369,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 
 bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    logdbg << "AllBufferTableModel: setData: checked row " << index.row() << " col "
+    logdbg << "checked row" << index.row() << " col "
            << index.column();
 
     if (role == Qt::CheckStateRole && index.column() == 0)
@@ -392,12 +392,12 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
 
         if (value == Qt::Checked)
         {
-            logdbg << "AllBufferTableModel: setData: checked row index" << buffer_index;
+            logdbg << "checked row index" << buffer_index;
             buffer->get<bool>(DBContent::selected_var.name()).set(buffer_index, true);
         }
         else
         {
-            logdbg << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
+            logdbg << "unchecked row index" << buffer_index;
             buffer->get<bool>(DBContent::selected_var.name()).set(buffer_index, false);
         }
         assert(table_widget_);
@@ -413,7 +413,7 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
 
 void AllBufferTableModel::clearData()
 {
-    logdbg << "AllBufferTableModel: clearData";
+    logdbg << "clearData";
 
     beginResetModel();
 
@@ -453,7 +453,7 @@ void AllBufferTableModel::setData(std::map<std::string, std::shared_ptr<Buffer>>
 
 void AllBufferTableModel::updateTimeIndexes()
 {
-    logdbg << "AllBufferTableModel: updateTimeIndexes";
+    logdbg << "updateTimeIndexes";
 
     unsigned int buffer_index;
     std::string dbcontent_name;
@@ -481,7 +481,7 @@ void AllBufferTableModel::updateTimeIndexes()
 
         if (buffer_size > buffer_index + 1)  // new data
         {
-            logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbcontent_name
+            logdbg << "new" << dbcontent_name
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
             const dbContent::Variable& ts_var =
@@ -520,7 +520,7 @@ void AllBufferTableModel::updateTimeIndexes()
             }
 
             if (num_time_none)
-                loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbcontent_name << " skipped "
+                loginf << "new" << dbcontent_name << " skipped "
                        << num_time_none << " indexes with no time";
         }
     }
@@ -544,7 +544,7 @@ void AllBufferTableModel::reset()
 
 void AllBufferTableModel::saveAsCSV(const std::string& file_name)
 {
-    loginf << "AllBufferTableModel: saveAsCSV: into filename " << file_name;
+    loginf << "into filename" << file_name;
 
     if (!buffers_.size())
         return;
@@ -564,14 +564,14 @@ void AllBufferTableModel::saveAsCSV(const std::string& file_name)
 
 void AllBufferTableModel::exportJobObsoleteSlot()
 {
-    logdbg << "AllBufferTableModel: exportJobObsoleteSlot";
+    logdbg << "exportJobObsoleteSlot";
 
     emit exportDoneSignal(true);
 }
 
 void AllBufferTableModel::exportJobDoneSlot()
 {
-    logdbg << "AllBufferTableModel: exportJobDoneSlot";
+    logdbg << "exportJobDoneSlot";
 
     emit exportDoneSignal(false);
 }
@@ -591,7 +591,7 @@ void AllBufferTableModel::rebuild()
 
 std::pair<int,int> AllBufferTableModel::getSelectedRows()
 {
-    loginf << "AllBufferTableModel: getFirstSelectedRow";
+    loginf << "getFirstSelectedRow";
 
     unsigned int dbo_num;
     unsigned int buffer_index;

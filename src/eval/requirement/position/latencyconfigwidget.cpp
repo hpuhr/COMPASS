@@ -49,7 +49,7 @@ PositionLatencyConfigWidget::PositionLatencyConfigWidget(PositionLatencyConfig& 
 
 void PositionLatencyConfigWidget::maxAbsValueEditSlot(QString value)
 {
-    loginf << "PositionLatencyConfigWidget: maxAbsValueEditSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     bool ok;
     float val = String::timeFromString(value.toStdString(), &ok);
@@ -59,7 +59,7 @@ void PositionLatencyConfigWidget::maxAbsValueEditSlot(QString value)
         config().maxAbsValue(val);
     }
     else
-        loginf << "PositionLatencyConfigWidget: maxAbsValueEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 PositionLatencyConfig& PositionLatencyConfigWidget::config()

@@ -52,7 +52,7 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(
 
 RadarPlotPositionCalculatorTaskWidget::~RadarPlotPositionCalculatorTaskWidget()
 {
-    loginf << "RadarPlotPositionCalculatorTaskWidget: dtor";
+    loginf << "dtor";
 
     ProjectionManager::instance().deleteWidget();
 }

@@ -161,7 +161,7 @@ void EvaluationReportTabWidget::toggleSkipNoDataDetailsSlot()
  */
 void EvaluationReportTabWidget::resultDetailZoomEditSlot(QString value)
 {
-    loginf << "EvaluationReportTabWidget: resultDetailZoomEditSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -169,5 +169,5 @@ void EvaluationReportTabWidget::resultDetailZoomEditSlot(QString value)
     if (ok)
         calculator_.settings().result_detail_zoom_ = val;
     else
-        loginf << "EvaluationReportTabWidget: resultDetailZoomEditSlot: axvalid value";
+        loginf << "axvalid value";
 }

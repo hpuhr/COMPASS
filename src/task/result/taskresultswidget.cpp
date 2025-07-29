@@ -61,7 +61,7 @@ TaskResultsWidget::TaskResultsWidget(TaskManager& task_man)
     connect(report_combo_, QOverload<const QString &>::of(&QComboBox::currentTextChanged),
             [ = ] (const QString& text){
 
-                loginf << "TaskResultsWidget: report_combo_ currentText '" << text.toStdString() << "'";
+                loginf << "report_combo_ currentText '" << text.toStdString() << "'";
 
                 if (!text.size()) // happens on clear
                     return;
@@ -152,13 +152,13 @@ TaskResultsWidget::~TaskResultsWidget() {}
  */
 void TaskResultsWidget::setReport(const std::string name)
 {
-    loginf << "TaskResultsWidget: setReport: name '" << name << "'";
+    loginf << "name '" << name << "'";
 
     current_report_name_ = name;
 
     int name_idx = report_combo_->findText(current_report_name_.c_str());
 
-    loginf << "TaskResultsWidget: setReport: name_idx " << name_idx;
+    loginf << "name_idx" << name_idx;
 
     if (name_idx < 0)
     {
@@ -211,7 +211,7 @@ void TaskResultsWidget::updateResultsSlot()
  */
 void TaskResultsWidget::updateResults(const std::string& selected_result)
 {
-    loginf << "TaskResultsWidget: updateResultsSlot";
+    loginf << "updateResultsSlot";
 
     report_combo_->blockSignals(true);
     report_combo_->clear();
@@ -223,7 +223,7 @@ void TaskResultsWidget::updateResults(const std::string& selected_result)
     bool current_found = false;
     for (auto& res_it : task_man_.results())
     {
-        loginf << "TaskResultsWidget: updateResultsSlot: adding '" << res_it.second->name() << "'";
+        loginf << "adding '" << res_it.second->name() << "'";
 
         report_combo_->addItem(res_it.second->name().c_str());
 
@@ -239,7 +239,7 @@ void TaskResultsWidget::updateResults(const std::string& selected_result)
     if (current_report_name_.empty() && !task_man_.results().empty())
         current_report_name_ = task_man_.results().begin()->second->name();
 
-    loginf << "TaskResultsWidget: updateResultsSlot: count " << report_combo_->count();
+    loginf << "count" << report_combo_->count();
 
     if (!report_combo_->count())
         current_report_name_ = "";
@@ -250,7 +250,7 @@ void TaskResultsWidget::updateResults(const std::string& selected_result)
 
     report_combo_->blockSignals(false);
 
-    loginf << "TaskResultsWidget: updateResultsSlot: setReport";
+    loginf << "setReport";
     setReport(current_report_name_);
 }
 
@@ -362,7 +362,7 @@ void TaskResultsWidget::refreshCurrentResult()
     auto res = task_man_.result(name)->update(true);
     if (!res.ok())
     {
-        logerr << "TaskResultsWidget: refreshCurrentResult: failed: " << res.error();
+        logerr << "failed:" << res.error();
         QMessageBox::critical(this, "Error", "Refreshing report failed.");
     }
 }
@@ -448,7 +448,7 @@ void TaskResultsWidget::storeBackupSection()
     current_section_name_backup_   = report_widget_ ? report_widget_->currentSectionID() : "";
     current_section_config_backup_ = report_widget_ ? report_widget_->currentSectionConfig() : nlohmann::json();
 
-    loginf << "TaskResultsWidget: storeBackupSection: backing up section '" << current_section_name_backup_ << "'";
+    loginf << "backing up section '" << current_section_name_backup_ << "'";
            //<< " with config: \n" 
            //<< current_section_config_backup_.dump(4);
 }
@@ -457,7 +457,7 @@ void TaskResultsWidget::storeBackupSection()
  */
 void TaskResultsWidget::restoreBackupSection()
 {
-    loginf << "TaskResultsWidget: restoreBackupSection: trying to restore section";
+    loginf << "trying to restore section";
 
     if (current_report_name_backup_.empty())
         return;
@@ -468,12 +468,12 @@ void TaskResultsWidget::restoreBackupSection()
     if (current_report_name_backup_ != current_report_name_)
         return;
 
-    loginf << "TaskResultsWidget: restoreBackupSection: restored report '" << current_report_name_backup_ << "'";
+    loginf << "restored report '" << current_report_name_backup_ << "'";
 
     if (current_section_name_backup_.empty())
         return;
 
     report_widget_->selectId(current_section_name_backup_, false, current_section_config_backup_);
     
-    loginf << "TaskResultsWidget: restoreBackupSection: restored section '" << current_section_name_backup_ << "'";
+    loginf << "restored section '" << current_section_name_backup_ << "'";
 }

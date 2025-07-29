@@ -35,7 +35,7 @@ JSONParseJob::~JSONParseJob() {}
 
 void JSONParseJob::run_impl()
 {
-    loginf << "JSONParseJob: run: start with " << objects_.size() << " objects schema '" << current_schema_ << "'";
+    loginf << "start with" << objects_.size() << " objects schema '" << current_schema_ << "'";
 
     started_ = true;
     assert(!json_objects_);
@@ -57,7 +57,7 @@ void JSONParseJob::run_impl()
 
             if (json_objects_->contains("data_blocks")) // no framing
             {
-                logdbg << "JSONParseJob: run: data blocks found";
+                logdbg << "data blocks found";
 
                 assert(json_objects_->at("data_blocks").is_array());
 
@@ -68,7 +68,7 @@ void JSONParseJob::run_impl()
                     if (!data_block.contains("category"))
                     {
                         logwrn
-                            << "JSONParseJob: run: data block without asterix category";
+                            << "data block without asterix category";
                         continue;
                     }
 
@@ -77,13 +77,13 @@ void JSONParseJob::run_impl()
                     if (category == 1)
                         checkCAT001SacSics(data_block);
 
-                    logdbg << "JSONParseJob: run: applying JSON function without framing";
+                    logdbg << "applying JSON function without framing";
                     JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
                 }
             }
             else // framed
             {
-                logdbg << "JSONParseJob: run: no data blocks found, framed";
+                logdbg << "no data blocks found, framed";
 
                 assert(json_objects_->contains("frames"));
                 assert(json_objects_->at("frames").is_array());
@@ -106,7 +106,7 @@ void JSONParseJob::run_impl()
                     {
                         if (!data_block.contains("category"))  // data block with errors
                         {
-                            logwrn << "JSONParseJob: run: data block without asterix "
+                            logwrn << "data block without asterix"
                                       "category";
                             continue;
                         }
@@ -123,7 +123,7 @@ void JSONParseJob::run_impl()
         }
         catch (nlohmann::detail::parse_error& e)
         {
-            logwrn << "JSONParseJob: run: parse error " << e.what() << " in '" << objects_.at(0) << "'";
+            logwrn << "parse error" << e.what() << " in '" << objects_.at(0) << "'";
             ++parse_errors_;
         }
         ++objects_parsed_;
@@ -142,7 +142,7 @@ void JSONParseJob::run_impl()
             }
             catch (nlohmann::detail::parse_error& e)
             {
-                logwrn << "JSONParseJob: run: parse error " << e.what() << " in '" << str_it << "'";
+                logwrn << "parse error" << e.what() << " in '" << str_it << "'";
                 ++parse_errors_;
                 continue;
             }
@@ -150,7 +150,7 @@ void JSONParseJob::run_impl()
         }
     }
 
-    loginf << "JSONParseJob: run: done with " << objects_parsed_ << " objects, errors "
+    loginf << "done with" << objects_parsed_ << " objects, errors "
            << parse_errors_;
 
     done_ = true;
@@ -167,7 +167,7 @@ void JSONParseJob::checkCAT001SacSics(nlohmann::json& data_block)
 {
     if (!data_block.contains("content"))
     {
-        logdbg << "JSONParseJob: checkCAT001SacSics: no content in data block";
+        logdbg << "no content in data block";
         return;
     }
 
@@ -175,7 +175,7 @@ void JSONParseJob::checkCAT001SacSics(nlohmann::json& data_block)
 
     if (!content.contains("records"))
     {
-        logdbg << "JSONParseJob: checkCAT001SacSics: no records in content";
+        logdbg << "no records in content";
         return;
     }
 
@@ -198,14 +198,14 @@ void JSONParseJob::checkCAT001SacSics(nlohmann::json& data_block)
                 found_any_sac_sic = true;
             }
             else  // not found, can not set values
-                logwrn << "JSONParseJob: checkCAT001SacSics: record without any SAC/SIC found";
+                logwrn << "record without any SAC/SIC found";
         }
         else
         {
             if (record.contains("010"))  // found, check values
             {
                 if (record.at("010").at("SAC") != sac || record.at("010").at("SIC") != sic)
-                    logwrn << "JSONParseJob: checkCAT001SacSics: record with differing "
+                    logwrn << "record with differing"
                               "SAC/SICs found";
             }
             else  // not found, set values

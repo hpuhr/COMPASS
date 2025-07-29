@@ -366,7 +366,7 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
 
     for (const auto& value_defs : defs.definitions())
     {
-        loginf << "Base: addCustomAnnotations: Adding annotation for value '" << value_defs.first << "'"; 
+        loginf << "Adding annotation for value '" << value_defs.first << "'"; 
 
         //create annotation for value features
         ViewPointGenAnnotation value_annotation(value_defs.first);
@@ -379,11 +379,11 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
             auto f = def->createFeature(this);
             if (!f)
             {
-                loginf << "Base: addCustomAnnotations: Skipping empty feature of definition type '" << def->type() << "'";
+                loginf << "Skipping empty feature of definition type '" << def->type() << "'";
                 continue;
             }
 
-            loginf << "Base: addCustomAnnotations: Adding feature '" << f->name() << "' of definition type '" << def->type() << "'";
+            loginf << "Adding feature '" << f->name() << "' of definition type '" << def->type() << "'";
 
             PlotMetadata metadata;
             metadata.plot_group_   = group_name;
@@ -401,7 +401,7 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
             value_annotation.addAnnotation(std::unique_ptr<ViewPointGenAnnotation>(feat_annotation));
         }
 
-        loginf << "Base: addCustomAnnotations: Added " << value_annotation.numFeatures() << " feature(s) to annotation";
+        loginf << "Added" << value_annotation.numFeatures() << " feature(s) to annotation";
 
         //convert to json and collect
         nlohmann::json anno_json;

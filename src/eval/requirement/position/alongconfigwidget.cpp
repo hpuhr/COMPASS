@@ -49,7 +49,7 @@ PositionAlongConfigWidget::PositionAlongConfigWidget(PositionAlongConfig& cfg)
 
 void PositionAlongConfigWidget::maxAbsValueEditSlot(QString value)
 {
-    loginf << "PositionAlongConfigWidget: maxAbsValueEditSlot: value " << value.toStdString();
+    loginf << "value" << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -57,7 +57,7 @@ void PositionAlongConfigWidget::maxAbsValueEditSlot(QString value)
     if (ok)
         config().maxAbsValue(val);
     else
-        loginf << "PositionAlongConfigWidget: maxDistanceEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 PositionAlongConfig& PositionAlongConfigWidget::config()

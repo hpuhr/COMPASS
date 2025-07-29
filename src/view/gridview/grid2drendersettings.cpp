@@ -42,12 +42,12 @@ bool Grid2DRenderSettings::fromJSON(const nlohmann::json& obj)
 {
     // if (!obj.contains("color_map"))
     // {
-    //     logerr << "Grid2DRenderSettings: fromJSON: color_map not found";
+    //     logerr << "color_map not found";
     //     return false;
     // }
     // if (!color_map.fromJSON(obj.at("color_map")))
     // {
-    //     logerr << "Grid2DRenderSettings: fromJSON: color_map parsing failed";
+    //     logerr << "color_map parsing failed";
     //     return false;
     // }
 

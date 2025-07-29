@@ -154,7 +154,7 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
 
 void SimpleReconstructor::reset()
 {
-    loginf << "SimpleReconstructor: reset";
+    loginf << "reset";
 
 //    target_reports_.clear(); // done in base
 //    tr_timestamps_.clear();
@@ -188,7 +188,7 @@ void SimpleReconstructor::updateWidgets()
 
 void SimpleReconstructor::processSlice_impl()
 {
-    loginf << "SimpleReconstructor: processSlice_impl: current_slice_begin "
+    loginf << "current_slice_begin"
            << Time::toString(currentSlice().slice_begin_)
            << " end " << Time::toString(currentSlice().slice_begin_ + settings().sliceDuration())
            << " is last " << currentSlice().is_last_slice_;

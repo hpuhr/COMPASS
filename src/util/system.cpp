@@ -87,7 +87,7 @@ std::string exec(const std::string& cmd)
 
     if (!pipe)
     {
-        logerr  << "Utils: exec: command '" << cmd << "' popen failed";
+        logerr  << "command '" << cmd << "' popen failed";
         throw std::runtime_error("Utils: exec: popen failed");
     }
     

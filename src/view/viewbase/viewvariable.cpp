@@ -134,7 +134,7 @@ void ViewVariable::set(const std::string& dbo, const std::string& name, bool not
         return;
     }
 
-    loginf << "ViewVariable: set: setting var '" << id_ << "' "
+    loginf << "setting var '" << id_ << "' "
         << "of view '" << view_->getName() << " to "
         << "dbo " << dbo << " name " << name;
 
@@ -198,7 +198,7 @@ void ViewVariable::setVariable(dbContent::Variable& var, bool notify_changes)
         return;
     }
 
-    loginf << "ViewVariable: setVariable: setting var '" << id_ << "' "
+    loginf << "setting var '" << id_ << "' "
         << "of view '" << view_->getName() << " to "
         << "dbo " << var.dbContentName() << " name " << var.name();
 
@@ -261,7 +261,7 @@ void ViewVariable::setMetaVariable(dbContent::MetaVariable& var, bool notify_cha
         return;
     }
     
-    loginf << "ViewVariable: setMetaVariable: setting metavar '" << id_ << "' "
+    loginf << "setting metavar '" << id_ << "' "
            << "of view '" << view_->getName() << " to "
            << "name " << var.name();
 
@@ -296,7 +296,7 @@ void ViewVariable::setEmpty(bool notify_changes)
         return;
     }
 
-    loginf << "ViewVariable: setEmpty: setting to empty";
+    loginf << "setting to empty";
 
     view_->preVariableChangedEvent(idx_, "", "");
 

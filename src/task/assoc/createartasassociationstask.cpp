@@ -95,7 +95,7 @@ CreateARTASAssociationsTask::Error CreateARTASAssociationsTask::checkError() con
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    logdbg << "CreateARTASAssociationsTask: checkError: tracker " << dbcontent_man.existsDBContent("CAT062");
+    logdbg << "tracker" << dbcontent_man.existsDBContent("CAT062");
 
     if (!dbcontent_man.existsDBContent("CAT062"))
         return CreateARTASAssociationsTask::Error::NoDataSource;
@@ -103,17 +103,17 @@ CreateARTASAssociationsTask::Error CreateARTASAssociationsTask::checkError() con
     DBContent& tracker_object = dbcontent_man.dbContent("CAT062");
 
     // tracker stuff
-    logdbg << "CreateARTASAssociationsTask: checkError: tracker loadable " << tracker_object.loadable();
+    logdbg << "tracker loadable" << tracker_object.loadable();
 
     if (!tracker_object.loadable())
         return CreateARTASAssociationsTask::Error::NoDataSource;
 
-    logdbg << "CreateARTASAssociationsTask: checkError: tracker count " << tracker_object.count();
+    logdbg << "tracker count" << tracker_object.count();
     if (!tracker_object.count())
         return CreateARTASAssociationsTask::Error::NoDataSource;
 
     // no data sources
-    logdbg << "CreateARTASAssociationsTask: checkError: num tracker data sources "
+    logdbg << "num tracker data sources"
            << ds_man.hasDataSourcesOfDBContent("CAT062");
 
     if (!ds_man.hasDataSourcesOfDBContent("CAT062"))
@@ -142,17 +142,17 @@ CreateARTASAssociationsTask::Error CreateARTASAssociationsTask::checkError() con
         }
     }
 
-    logdbg << "CreateARTASAssociationsTask: checkError: tracker ds_found " << ds_found << " id " << current_ds_id;
+    logdbg << "tracker ds_found" << ds_found << " id " << current_ds_id;
 
     if (!ds_found)
         return CreateARTASAssociationsTask::Error::NoDataSource;
 
-    logdbg << "CreateARTASAssociationsTask: checkError: line count " << line_count << " line id " << settings_.current_data_source_line_id_;
+    logdbg << "line count" << line_count << " line id " << settings_.current_data_source_line_id_;
 
     if (!line_count)
         return CreateARTASAssociationsTask::Error::NoDataForLineID;
 
-    logdbg << "CreateARTASAssociationsTask: checkError: tracker vars";
+    logdbg << "tracker vars";
 
     bool has_needed_cat_62_vars = tracker_object.hasVariable(DBContent::var_cat062_tris_.name()) &&
                                   tracker_object.hasVariable(DBContent::var_cat062_track_begin_.name()) &&
@@ -160,7 +160,7 @@ CreateARTASAssociationsTask::Error CreateARTASAssociationsTask::checkError() con
                                   tracker_object.hasVariable(DBContent::var_cat062_track_end_.name());
     
     if (!has_needed_cat_62_vars)
-        logerr << "CreateARTASAssociationsTask: checkError: needed CAT062 vars not available";
+        logerr << "needed CAT062 vars not available";
 
     assert(has_needed_cat_62_vars);
 
@@ -172,11 +172,11 @@ CreateARTASAssociationsTask::Error CreateARTASAssociationsTask::checkError() con
                                dbcontent_man.existsMetaVariable(DBContent::meta_var_utn_.name());
 
     if (!has_needed_metavars)
-        logerr << "CreateARTASAssociationsTask: checkError: needed metavars not available";
+        logerr << "needed metavars not available";
 
     assert(has_needed_metavars);
 
-    loginf << "CreateARTASAssociationsTask: checkError: no error";
+    loginf << "no error";
 
     return CreateARTASAssociationsTask::Error::NoError;
 }
@@ -190,7 +190,7 @@ void CreateARTASAssociationsTask::run()
 {
     assert(canRun());
 
-    loginf << "CreateARTASAssociationsTask: run: started";
+    loginf << "started";
 
     save_associations_ = true;
 
@@ -287,7 +287,7 @@ void CreateARTASAssociationsTask::loadedDataDataSlot(
 
 void CreateARTASAssociationsTask::loadingDoneSlot()
 {
-    loginf << "CreateARTASAssociationsTask: loadingDoneSlot";
+    loginf << "loadingDoneSlot";
 
     assert(status_dialog_);
     //status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
@@ -327,7 +327,7 @@ void CreateARTASAssociationsTask::loadingDoneSlot()
 
 void CreateARTASAssociationsTask::dialogRunSlot()
 {
-    loginf << "CreateARTASAssociationsTask: dialogRunSlot";
+    loginf << "dialogRunSlot";
 
     assert (dialog_);
     dialog_->hide();
@@ -338,7 +338,7 @@ void CreateARTASAssociationsTask::dialogRunSlot()
 
 void CreateARTASAssociationsTask::dialogCancelSlot()
 {
-    loginf << "CreateARTASAssociationsTask: dialogCancelSlot";
+    loginf << "dialogCancelSlot";
 
     assert (dialog_);
     dialog_->hide();
@@ -347,7 +347,7 @@ void CreateARTASAssociationsTask::dialogCancelSlot()
 
 void CreateARTASAssociationsTask::createDoneSlot()
 {
-    loginf << "CreateARTASAssociationsTask: createDoneSlot";
+    loginf << "createDoneSlot";
 
     assert (create_job_);
 
@@ -383,7 +383,7 @@ void CreateARTASAssociationsTask::createDoneSlot()
         done_ = true;
     }
     else
-        logwrn << "CreateARTASAssociationsTask: done after " << time_str << " without saving";
+        logwrn << "done after" << time_str << " without saving";
 
     QApplication::restoreOverrideCursor();
 
@@ -512,7 +512,7 @@ bool CreateARTASAssociationsTask::ignoreTrackEndAssociations() const
 
 void CreateARTASAssociationsTask::ignoreTrackEndAssociations(bool value)
 {
-    loginf << "CreateARTASAssociationsTask: ignoreTrackEndAssociations: value " << value;
+    loginf << "value" << value;
     settings_.ignore_track_end_associations_ = value;
 }
 
@@ -523,7 +523,7 @@ bool CreateARTASAssociationsTask::markTrackEndAssociationsDubious() const
 
 void CreateARTASAssociationsTask::markTrackEndAssociationsDubious(bool value)
 {
-    loginf << "CreateARTASAssociationsTask: markTrackEndAssociationsDubious: value " << value;
+    loginf << "value" << value;
     settings_.mark_track_end_associations_dubious_ = value;
 }
 
@@ -534,7 +534,7 @@ bool CreateARTASAssociationsTask::ignoreTrackCoastingAssociations() const
 
 void CreateARTASAssociationsTask::ignoreTrackCoastingAssociations(bool value)
 {
-    loginf << "CreateARTASAssociationsTask: ignoreTrackCoastingAssociations: value " << value;
+    loginf << "value" << value;
     settings_.ignore_track_coasting_associations_ = value;
 }
 
@@ -545,7 +545,7 @@ bool CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious() const
 
 void CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious(bool value)
 {
-    loginf << "CreateARTASAssociationsTask: markTrackCoastingAssociationsDubious: value " << value;
+    loginf << "value" << value;
     settings_.mark_track_coasting_associations_dubious_ = value;
 }
 
