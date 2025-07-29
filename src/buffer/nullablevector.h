@@ -54,7 +54,7 @@ public:
     //T_& getRef(unsigned int index)
     T& getRef(unsigned int index)
     {
-        logdbg << "NullableVector " << property_.name() << ": getRef: index " << index;
+        logdbg2 << "NullableVector " << property_.name() << ": getRef: index " << index;
         if (BUFFER_PEDANTIC_CHECKING)
         {
             assert(data_.size() <= buffer_.size_);
@@ -157,7 +157,7 @@ NullableVector<T>::NullableVector(Property& property, Buffer& buffer)
 template <class T>
 void NullableVector<T>::clear()
 {
-    logdbg << "NullableVector " << property_.name() << ": clear";
+    logdbg2 << "NullableVector " << property_.name() << ": clear";
     std::fill(data_.begin(), data_.end(), T());
     std::fill(null_flags_.begin(), null_flags_.end(), true);
 }
@@ -172,7 +172,7 @@ void NullableVector<T>::clearData() // removes all data
 template <class T>
 const T NullableVector<T>::get(unsigned int index) const
 {
-    logdbg << "NullableVector " << property_.name() << ": get: index " << index;
+    logdbg2 << "NullableVector " << property_.name() << ": get: index " << index;
     if (BUFFER_PEDANTIC_CHECKING)
     {
         assert(data_.size() <= buffer_.size_);
@@ -192,14 +192,14 @@ const T NullableVector<T>::get(unsigned int index) const
 template <class T>
 const std::string NullableVector<T>::getAsString(unsigned int index) const
 {
-    logdbg << "NullableVector " << property_.name() << ": getAsString";
+    logdbg2 << "NullableVector " << property_.name() << ": getAsString";
     return Utils::String::getValueString(get(index));
 }
 
 template <class T>
 void NullableVector<T>::set(unsigned int index, T value)
 {
-    logdbg << "NullableVector " << property_.name() << ": set: index " << index << " value '"
+    logdbg2 << "NullableVector " << property_.name() << ": set: index " << index << " value '"
            << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
@@ -222,14 +222,14 @@ void NullableVector<T>::set(unsigned int index, T value)
     data_.at(index) = value;
     unsetNull(index);
 
-    // logdbg << "NullableVector: set: size " << size_ << " max_size " << max_size_;
+    // logdbg2 << "NullableVector: set: size " << size_ << " max_size " << max_size_;
 }
 
 template <class T>
 void NullableVector<T>::setFromFormat(unsigned int index, const std::string& format,
                                       const std::string& value_str, bool debug)
 {
-    logdbg << "NullableVector " << property_.name() << ": setFromFormat";
+    logdbg2 << "NullableVector " << property_.name() << ": setFromFormat";
     T value{};
 
     if (format == "octal")
@@ -294,7 +294,7 @@ void NullableVector<T>::setAll(T value)
 template <class T>
 void NullableVector<T>::append(unsigned int index, T value)
 {
-    logdbg << "NullableVector " << property_.name() << ": append: index " << index << " value '"
+    logdbg2 << "NullableVector " << property_.name() << ": append: index " << index << " value '"
            << value << "'";
 
     if (BUFFER_PEDANTIC_CHECKING)
@@ -317,14 +317,14 @@ void NullableVector<T>::append(unsigned int index, T value)
     data_.at(index) += value;
     unsetNull(index);
 
-    // logdbg << "NullableVector: set: size " << size_ << " max_size " << max_size_;
+    // logdbg2 << "NullableVector: set: size " << size_ << " max_size " << max_size_;
 }
 
 template <class T>
 void NullableVector<T>::appendFromFormat(unsigned int index, const std::string& format,
                                          const std::string& value_str)
 {
-    logdbg << "NullableVector " << property_.name() << ": appendFromFormat";
+    logdbg2 << "NullableVector " << property_.name() << ": appendFromFormat";
     T value;
 
     if (format == "octal")
@@ -359,7 +359,7 @@ void NullableVector<T>::appendFromFormat(unsigned int index, const std::string& 
 template <class T>
 void NullableVector<T>::setNull(unsigned int index)
 {
-    logdbg << "NullableVector " << property_.name() << ": setNull: index " << index;
+    logdbg2 << "NullableVector " << property_.name() << ": setNull: index " << index;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -390,7 +390,7 @@ void NullableVector<T>::setAllNull()
 template <class T>
 bool NullableVector<T>::isNull(unsigned int index) const
 {
-    logdbg << "NullableVector " << property_.name() << ": isNull: index " << index;
+    logdbg2 << "NullableVector " << property_.name() << ": isNull: index " << index;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -414,7 +414,7 @@ bool NullableVector<T>::isNull(unsigned int index) const
 template <class T>
 void NullableVector<T>::resizeDataTo(unsigned int size)
 {
-    logdbg << "NullableVector " << property_.name() << ": resizeDataTo: size " << size;
+    logdbg2 << "NullableVector " << property_.name() << ": resizeDataTo: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -431,7 +431,7 @@ void NullableVector<T>::resizeDataTo(unsigned int size)
 template <class T>
 void NullableVector<T>::resizeNullTo(unsigned int size)
 {
-    logdbg << "NullableVector " << property_.name() << ": resizeNullTo: size " << size;
+    logdbg2 << "NullableVector " << property_.name() << ": resizeNullTo: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -455,7 +455,7 @@ void NullableVector<T>::resizeNullTo(unsigned int size)
 template <class T>
 void NullableVector<T>::addData(NullableVector<T>& other)
 {
-    logdbg << "NullableVector " << property_.name() << ": addData";
+    logdbg2 << "NullableVector " << property_.name() << ": addData";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -466,60 +466,60 @@ void NullableVector<T>::addData(NullableVector<T>& other)
     if (!other.data_.size() &&
             other.null_flags_.size())  // if other has null flags set, need to fill my nulls
     {
-        logdbg << "NullableVector " << property_.name()
+        logdbg2 << "NullableVector " << property_.name()
                << ": addData: 1: other no data resizing null";
         resizeNullTo(buffer_.size_);
-        logdbg << "NullableVector " << property_.name() << ": addData: 1: inserting null";
+        logdbg2 << "NullableVector " << property_.name() << ": addData: 1: inserting null";
         null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
         return;
     }
 
     if (other.data_.size() && !other.null_flags_.size())  // if other has everything set
     {
-        logdbg << "NullableVector " << property_.name()
+        logdbg2 << "NullableVector " << property_.name()
                << ": addData: 2: other has everything set";
 
         if (data_.size() < buffer_.size_)  // need to size data up
         {
-            logdbg << "NullableVector " << property_.name()
+            logdbg2 << "NullableVector " << property_.name()
                    << ": addData: 2: data not full, setting null";
             resizeNullTo(buffer_.size_);
 
-            logdbg << "NullableVector " << property_.name() << ": addData: 2: resizing data";
+            logdbg2 << "NullableVector " << property_.name() << ": addData: 2: resizing data";
             resizeDataTo(buffer_.size_);
         }
 
-        logdbg << "NullableVector " << property_.name() << ": addData: 2: inserting data";
+        logdbg2 << "NullableVector " << property_.name() << ": addData: 2: inserting data";
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
         return;
     }
 
-    logdbg << "NullableVector " << property_.name()
+    logdbg2 << "NullableVector " << property_.name()
            << ": addData: 3: mixture, both have data & nulls";
 
-    logdbg << "NullableVector " << property_.name() << ": addData: 3: resizing null to "
+    logdbg2 << "NullableVector " << property_.name() << ": addData: 3: resizing null to "
            << buffer_.size_;
     resizeNullTo(buffer_.size_);
-    logdbg << "NullableVector " << property_.name() << ": addData: 3: inserting nulls";
+    logdbg2 << "NullableVector " << property_.name() << ": addData: 3: inserting nulls";
     null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
 
     if (data_.size() < buffer_.size_)  // need to size data up
     {
-        logdbg << "NullableVector " << property_.name() << ": addData: 3: resizing data";
+        logdbg2 << "NullableVector " << property_.name() << ": addData: 3: resizing data";
         resizeDataTo(buffer_.size_);
     }
 
-    logdbg << "NullableVector " << property_.name() << ": addData: 3: inserting data";
+    logdbg2 << "NullableVector " << property_.name() << ": addData: 3: inserting data";
     data_.insert(data_.end(), other.data_.begin(), other.data_.end());
 
     // size is adjusted in Buffer::seizeBuffer
-    logdbg << "NullableVector " << property_.name() << ": addData: end";
+    logdbg2 << "NullableVector " << property_.name() << ": addData: end";
 }
 
 template <class T>
 void NullableVector<T>::copyData(NullableVector<T>& other)
 {
-    logdbg << "NullableVector " << property_.name() << ": copyData";
+    logdbg2 << "NullableVector " << property_.name() << ": copyData";
 
     data_ = other.data_;
     null_flags_ = other.null_flags_;
@@ -532,13 +532,13 @@ void NullableVector<T>::copyData(NullableVector<T>& other)
     if (buffer_.size_ < null_flags_.size())
         buffer_.size_ = null_flags_.size();
 
-    logdbg << "NullableVector " << property_.name() << ": copyData: end";
+    logdbg2 << "NullableVector " << property_.name() << ": copyData: end";
 }
 
 template <class T>
 NullableVector<T>& NullableVector<T>::operator*=(double factor)
 {
-    logdbg << "NullableVector " << property_.name() << ": operator*=";
+    logdbg2 << "NullableVector " << property_.name() << ": operator*=";
 
     unsigned int data_size = data_.size();
 
@@ -564,7 +564,7 @@ NullableVector<T>& NullableVector<T>::operator*=(double factor)
 template <class T>
 std::set<T> NullableVector<T>::distinctValues(unsigned int index)
 {
-    logdbg << "NullableVector " << property_.name() << ": distinctValues";
+    logdbg2 << "NullableVector " << property_.name() << ": distinctValues";
 
     std::set<T> values;
 
@@ -586,7 +586,7 @@ std::set<T> NullableVector<T>::distinctValues(unsigned int index)
 template <class T>
 std::map<T, unsigned int> NullableVector<T>::distinctValuesWithCounts(unsigned int index)
 {
-    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithCounts";
+    logdbg2 << "NullableVector " << property_.name() << ": distinctValuesWithCounts";
 
     std::map<T, unsigned int> values;
 
@@ -733,7 +733,7 @@ template <class T>
 std::map<boost::optional<T>, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
         unsigned int from_index, unsigned int to_index)
 {
-    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
+    logdbg2 << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
     std::map<boost::optional<T>, std::vector<unsigned int>> values;
 
@@ -762,7 +762,7 @@ std::map<boost::optional<T>, std::vector<unsigned int>> NullableVector<T>::disti
             values[data_.at(index)].push_back(index);
     }
 
-    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
+    logdbg2 << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
            << values.size();
     return values;
 }
@@ -771,7 +771,7 @@ template <class T>
 std::map<boost::optional<T>, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes(
         const std::vector<unsigned int>& indexes)
 {
-    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
+    logdbg2 << "NullableVector " << property_.name() << ": distinctValuesWithIndexes";
 
     std::map<boost::optional<T>, std::vector<unsigned int>> values;
 
@@ -792,7 +792,7 @@ std::map<boost::optional<T>, std::vector<unsigned int>> NullableVector<T>::disti
             values[data_.at(index)].push_back(index);
     }
 
-    logdbg << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
+    logdbg2 << "NullableVector " << property_.name() << ": distinctValuesWithIndexes: done with "
            << values.size();
     return values;
 }
@@ -800,7 +800,7 @@ std::map<boost::optional<T>, std::vector<unsigned int>> NullableVector<T>::disti
 template <class T>
 std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes()
 {
-    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
+    logdbg2 << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
 
     std::map<T, unsigned int> value_indexes;
 
@@ -822,7 +822,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes()
         }
     }
 
-    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
+    logdbg2 << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
            << value_indexes.size();
     return value_indexes;
 }
@@ -830,7 +830,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes()
 template <class T>
 std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes(const std::set<T>& values)
 {
-    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
+    logdbg2 << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes";
 
     std::map<T, unsigned int> value_indexes;
 
@@ -852,7 +852,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes(const std::
         }
     }
 
-    logdbg << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
+    logdbg2 << "NullableVector " << property_.name() << ": uniqueValuesWithIndexes: done with "
            << value_indexes.size();
     return value_indexes;
 }
@@ -861,7 +861,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes(const std::
 // std::vector<unsigned int> NullableVector<T>::nullValueIndexes(unsigned int from_index,
 //                                                               unsigned int to_index)
 // {
-//     logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
+//     logdbg2 << "NullableVector " << property_.name() << ": nullValueIndexes";
 
 //     std::vector<unsigned int> indexes;
 
@@ -890,7 +890,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes(const std::
 //         }
 //     }
 
-//     logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
+//     logdbg2 << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
 //            << indexes.size();
 //     return indexes;
 // }
@@ -899,7 +899,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes(const std::
 // std::vector<unsigned int> NullableVector<T>::nullValueIndexes(
 //         const std::vector<unsigned int>& indexes)
 // {
-//     logdbg << "NullableVector " << property_.name() << ": nullValueIndexes";
+//     logdbg2 << "NullableVector " << property_.name() << ": nullValueIndexes";
 
 //     std::vector<unsigned int> ret_indexes;
 
@@ -911,7 +911,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes(const std::
 //         }
 //     }
 
-//     logdbg << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
+//     logdbg2 << "NullableVector " << property_.name() << ": nullValueIndexes: done with "
 //            << ret_indexes.size();
 //     return ret_indexes;
 // }
@@ -919,7 +919,7 @@ std::map<T, unsigned int> NullableVector<T>::uniqueValuesWithIndexes(const std::
 template <class T>
 void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
 {
-    logdbg << "NullableVector " << property_.name() << ": convertToStandardFormat";
+    logdbg2 << "NullableVector " << property_.name() << ": convertToStandardFormat";
 
     static_assert(std::is_integral<T>::value, "only defined for integer types");
 
@@ -977,7 +977,7 @@ unsigned int NullableVector<T>::contentSize()
 template <class T>
 void NullableVector<T>::cutToSize(unsigned int size)
 {
-    logdbg << "NullableVector " << property_.name() << ": cutToSize: size " << size;
+    logdbg2 << "NullableVector " << property_.name() << ": cutToSize: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -1137,7 +1137,7 @@ void NullableVector<T>::removeIndexes(const std::vector<unsigned int>& indexes_t
 template <class T>
 bool NullableVector<T>::isAlwaysNull() const
 {
-    logdbg << "NullableVector " << property_.name() << ": isAlwaysNull";
+    logdbg2 << "NullableVector " << property_.name() << ": isAlwaysNull";
 
     if (data_.size() == 0)
         return true;
@@ -1155,7 +1155,7 @@ bool NullableVector<T>::isAlwaysNull() const
 template <class T>
 bool NullableVector<T>::isNeverNull() const
 {
-    logdbg << "NullableVector " << property_.name() << ": isNeverNull";
+    logdbg2 << "NullableVector " << property_.name() << ": isNeverNull";
 
     for (unsigned int cnt = 0; cnt < buffer_.size_; cnt++)
     {
@@ -1315,7 +1315,7 @@ nlohmann::json NullableVector<T>::asJSON(unsigned int max_size)
 template <class T>
 void NullableVector<T>::unsetNull(unsigned int index)
 {
-    logdbg << "NullableVector " << property_.name() << ": unsetNull";
+    logdbg2 << "NullableVector " << property_.name() << ": unsetNull";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
