@@ -48,10 +48,10 @@ TimestampFilter::TimestampFilter(const std::string& class_id, const std::string&
 
 TimestampFilter::~TimestampFilter() {}
 
-bool TimestampFilter::filters(const std::string& dbcont_type)
+bool TimestampFilter::filters(const std::string& dbcont_name)
 {
     return COMPASS::instance().dbContentManager().metaVariable(
-                DBContent::meta_var_timestamp_.name()).existsIn(dbcont_type);
+                DBContent::meta_var_timestamp_.name()).existsIn(dbcont_name);
 }
 
 std::string TimestampFilter::getConditionString(const std::string& dbcontent_name, bool& first)

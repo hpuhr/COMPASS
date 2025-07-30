@@ -43,13 +43,13 @@ ACIDFilter::ACIDFilter(const std::string& class_id, const std::string& instance_
 
 ACIDFilter::~ACIDFilter() {}
 
-bool ACIDFilter::filters(const std::string& dbcont_type)
+bool ACIDFilter::filters(const std::string& dbcont_name)
 {
-    if (dbcont_type == "CAT062")
+    if (dbcont_name == "CAT062")
         return true; // acid and callsign fpl
     else
         return COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_acid_.name()).existsIn(dbcont_type);
+                    DBContent::meta_var_acid_.name()).existsIn(dbcont_name);
 }
 
 std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bool& first)

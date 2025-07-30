@@ -42,10 +42,10 @@ ExcludedTimeWindowsFilter::ExcludedTimeWindowsFilter(const std::string& class_id
 
 ExcludedTimeWindowsFilter::~ExcludedTimeWindowsFilter() {}
 
-bool ExcludedTimeWindowsFilter::filters(const std::string& dbcont_type)
+bool ExcludedTimeWindowsFilter::filters(const std::string& dbcont_name)
 {
     return COMPASS::instance().dbContentManager().metaVariable(
-                                                     DBContent::meta_var_timestamp_.name()).existsIn(dbcont_type);
+                                                     DBContent::meta_var_timestamp_.name()).existsIn(dbcont_name);
 }
 
 std::string ExcludedTimeWindowsFilter::getConditionString(const std::string& dbcontent_name, bool& first)

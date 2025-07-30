@@ -44,9 +44,9 @@ ModeCFilter::ModeCFilter(const std::string& class_id, const std::string& instanc
 
 ModeCFilter::~ModeCFilter() {}
 
-bool ModeCFilter::filters(const std::string& dbcont_type)
+bool ModeCFilter::filters(const std::string& dbcont_name)
 {
-    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbcont_type);
+    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbcont_name);
 }
 
 std::string ModeCFilter::getConditionString(const std::string& dbcontent_name, bool& first)

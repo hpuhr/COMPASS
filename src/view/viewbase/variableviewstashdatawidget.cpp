@@ -630,7 +630,7 @@ void VariableViewStashDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
     {
         nlohmann::json dbcont_info;
 
-        dbcont_info[ "dbcont_type"       ] = it.first;
+        dbcont_info[ "dbcont_name"       ] = it.first;
 
         for (size_t i = 0; i < variableView()->numVariables(); ++i)
             dbcont_info[ "num_input_" + variableView()->variable(i).id() ] = it.second.variable_stashes[ i ].values.size();

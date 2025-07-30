@@ -68,7 +68,7 @@ class VariableOrderedSet : public QObject, public Configurable
     bool hasVariable(const Variable& variable) const;
     bool hasMetaVariable(const MetaVariable& variable) const;
     /// @brief Returns if variable is in set
-    bool hasVariable(const std::string& dbcont_type, const std::string& name) const;
+    bool hasVariable(const std::string& dbcont_name, const std::string& name) const;
     unsigned int getIndexFor(const std::string& dbcontent_name, const std::string var_name);
 
     VariableSet getFor(const std::string& dbcontent_name);
