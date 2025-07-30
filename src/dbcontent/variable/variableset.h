@@ -41,13 +41,13 @@ class VariableSet
     /// @brief Sets the change occurred flag
     void setChanged(bool changed) { changed_ = changed; }
 
-    /// @brief Adds a DBOVariable
+    /// @brief Adds a DBContVariable
     bool add(Variable& var);
     bool add(const Variable& var);
     /// @brief Adds another set of variables
     bool add(const VariableSet& set);
     /// @brief Adds variables for a given type from a given set of variables
-    // bool addOnly (DBOVariableSet &set, const std::string &dbcont_name);
+    // bool addOnly (DBContVariableSet &set, const std::string &dbcont_name);
     /// @brief Removes variable at a given index
     void removeVariableAt(unsigned int index);
     void removeVariable(const Variable& var);
@@ -61,7 +61,7 @@ class VariableSet
     unsigned int getVariableWithDBColumnName(const std::string& db_column_name);
 
     VariableSet& operator=(const VariableSet& source);
-    // DBOVariableSet *clone ();
+    // DBContVariableSet *clone ();
 
     /// @brief Returns container with all variables
     const std::vector<Variable*>& getSet() const { return set_; }

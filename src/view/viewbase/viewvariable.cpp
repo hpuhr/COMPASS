@@ -30,7 +30,7 @@
 
 const std::string ViewVariable::ParamDataVar     = "data_var";
 const std::string ViewVariable::ParamDataVarName = "name";
-const std::string ViewVariable::ParamDataVarDBO  = "dbcont";
+const std::string ViewVariable::ParamDataVarDBCont  = "dbcont";
 
 /**
  */
@@ -49,9 +49,9 @@ ViewVariable::~ViewVariable() = default;
 
 /**
  */
-std::string ViewVariable::regParamDBO() const
+std::string ViewVariable::regParamDBCont() const
 {
-    return (ParamDataVar + (settings_.var_name.empty() ? "" : "_" + settings_.var_name + "_") + ParamDataVarDBO);
+    return (ParamDataVar + (settings_.var_name.empty() ? "" : "_" + settings_.var_name + "_") + ParamDataVarDBCont);
     
 }
 

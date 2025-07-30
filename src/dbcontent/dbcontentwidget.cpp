@@ -157,7 +157,7 @@ DBContentWidget::DBContentWidget(DBContent* object, QWidget* parent,
     dbcont_frame->setLineWidth(frame_width_small);
 
     dbcontvars_grid_ = new QGridLayout();
-    updateDBOVarsGridSlot();
+    updateDBContVarsGridSlot();
 
     dbcont_frame->setLayout(dbcontvars_grid_);
 
@@ -182,7 +182,7 @@ void DBContentWidget::editNameSlot()
     std::string text = name_edit_->text().toStdString();
     assert(text.size() > 0);
     object_->name(text);
-    emit changedDBOSignal();
+    emit changedDBContSignal();
 }
 void DBContentWidget::editInfoSlot()
 {
@@ -192,7 +192,7 @@ void DBContentWidget::editInfoSlot()
     std::string text = info_edit_->text().toStdString();
     assert(text.size() > 0);
     object_->info(text);
-    emit changedDBOSignal();
+    emit changedDBContSignal();
 }
 
 void DBContentWidget::editDBContentVariableNameSlot()
@@ -235,7 +235,7 @@ void DBContentWidget::editDBContentVariableDBColumnSlot(const QString& text)
     assert (false); // TODO
 }
 
-void DBContentWidget::deleteDBOVarSlot()
+void DBContentWidget::deleteDBContVarSlot()
 {
     QPushButton* button = static_cast<QPushButton*>(sender());
     assert(button);
@@ -246,7 +246,7 @@ void DBContentWidget::deleteDBOVarSlot()
     assert(variable);
     object_->deleteVariable(variable->name());
 
-    updateDBOVarsGridSlot();
+    updateDBContVarsGridSlot();
 }
 
 void DBContentWidget::updateDataSourcesGridSlot()
@@ -281,7 +281,7 @@ void DBContentWidget::updateDataSourcesGridSlot()
     QIcon del_icon(Files::IconProvider::getIcon("delete.png"));
 }
 
-void DBContentWidget::updateDBOVarsGridSlot()
+void DBContentWidget::updateDBContVarsGridSlot()
 {
     assert(object_);
     assert(dbcontvars_grid_);
@@ -392,7 +392,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
 //                    test.currentMetaTable().name(), var_it.second);
 //        box->setProperty("variable", data);
 //        connect(box, SIGNAL(activated(const QString&)), this,
-//                SLOT(editDBOVariableDBColumnSlot(const QString&)));
+//                SLOT(editDBContVariableDBColumnSlot(const QString&)));
 //        dbcontvars_grid_->addWidget(box, row, col);
 
         col++;
@@ -400,7 +400,7 @@ void DBContentWidget::updateDBOVarsGridSlot()
         del->setIcon(del_icon);
         del->setFixedSize(UI_ICON_SIZE);
         del->setFlat(UI_ICON_BUTTON_FLAT);
-        connect(del, SIGNAL(clicked()), this, SLOT(deleteDBOVarSlot()));
+        connect(del, SIGNAL(clicked()), this, SLOT(deleteDBContVarSlot()));
         del->setProperty("variable", data);
         dbcontvars_grid_->addWidget(del, row, col);
 

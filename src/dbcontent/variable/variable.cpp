@@ -188,19 +188,6 @@ Variable::~Variable()
 void Variable::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
 {
-    //"variable_identifier": "sd_ads.ALT_REPORTING_CAPABILITY_FT"
-
-//    if (class_id == "DBOSchemaVariableDefinition")
-//    {
-//        std::string var_id = configuration()
-//                                   .getSubConfiguration(class_id, instance_id)
-//                                   .getParameterConfigValue<std::string>("variable_identifier");
-//        if (var_id.size())
-//            variable_identifier_ = var_id;
-
-//        //configuration().removeSubConfiguration(class_id, instance_id);
-//    }
-//    else
         throw std::runtime_error("Variable: generateSubConfigurable: unknown class_id " +
                                      class_id);
 }

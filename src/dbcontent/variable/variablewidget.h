@@ -44,9 +44,9 @@ class VariableWidget : public QWidget
     void dbcontVariableChangedSignal();
 
   public slots:
-    /// @brief Changes DBO name
+    /// @brief Changes DBCont name
     void editNameSlot();
-    /// @brief Changes DBO info
+    /// @brief Changes DBCont info
     void editDescriptionSlot();
     //void editDataTypeSlot();
 
@@ -69,9 +69,9 @@ class VariableWidget : public QWidget
 
     bool locked_{false};
 
-    /// @brief DBOVariable name
+    /// @brief DBContVariable name
     QLineEdit* name_edit_{nullptr};
-    /// @brief DBOVariable info
+    /// @brief DBContVariable info
     QLineEdit* description_edit_{nullptr};
     VariableDataTypeComboBox* type_combo_{nullptr};
     StringRepresentationComboBox* representation_box_{nullptr};

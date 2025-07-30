@@ -22,7 +22,6 @@
 class JSONImportTask;
 class RadarPlotPositionCalculatorTask;
 class DBContentComboBox;
-class DBOVariableSelectionWidget;
 
 class QPushButton;
 class QListWidget;

@@ -69,7 +69,7 @@ void BufferTableWidget::clear()
     model_->clearData();
 }
 
-void BufferTableWidget::show(std::shared_ptr<Buffer> buffer)  //, DBOVariableSet *variables, bool database_view
+void BufferTableWidget::show(std::shared_ptr<Buffer> buffer) 
 {
     assert(buffer);
 

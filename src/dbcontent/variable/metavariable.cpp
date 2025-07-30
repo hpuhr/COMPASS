@@ -38,7 +38,7 @@ MetaVariable::MetaVariable(const std::string& class_id, const std::string& insta
 {
     registerParameter("name", &name_, std::string());
 
-    // DBOVAR LOWERCASE HACK
+    // DBContVAR LOWERCASE HACK
     // boost::algorithm::to_lower(name_);
 
     assert(name_.size() > 0);
@@ -79,7 +79,7 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
         const std::string& dbcontent_name = definition->dbContentName();
         std::string dbcontvar_name = definition->variableName();
 
-        // DBOVAR LOWERCASE HACK
+        // DBContVAR LOWERCASE HACK
         // boost::algorithm::to_lower(dbcontvar_name);
 
         if (!object_manager_.existsDBContent(dbcontent_name))

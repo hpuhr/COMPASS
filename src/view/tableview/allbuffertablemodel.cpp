@@ -59,7 +59,7 @@ int AllBufferTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
     logdbg << "start" << data_source_.getSet()->getSize();
 
-    // cnt, DBO
+    // cnt, DBCont
     return data_source_.getSet()->getSize() + 2;
 }
 

@@ -58,24 +58,24 @@ DBContentManagerWidget::DBContentManagerWidget(DBContentManager& object_manager)
     main_label->setFont(font_bold);
     main_layout->addWidget(main_label);
 
-    QFrame* dob_frame = new QFrame();
-    dob_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    dob_frame->setLineWidth(1);
+    QFrame* dbcont_frame = new QFrame();
+    dbcont_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    dbcont_frame->setLineWidth(1);
 
-    dbcontbjects_grid_ = new QGridLayout();
+    dbconts_grid_ = new QGridLayout();
     updateDBContentsSlot();
 
-    dob_frame->setLayout(dbcontbjects_grid_);
+    dbcont_frame->setLayout(dbconts_grid_);
 
     QScrollArea* dbcont_scroll = new QScrollArea();
     dbcont_scroll->setWidgetResizable(true);
-    dbcont_scroll->setWidget(dob_frame);
+    dbcont_scroll->setWidget(dbcont_frame);
 
     main_layout->addWidget(dbcont_scroll);
 
     // new dbcontbject
     add_dbcont_button_ = new QPushButton("Add");
-    connect(add_dbcont_button_, SIGNAL(clicked()), this, SLOT(addDBOSlot()));
+    connect(add_dbcont_button_, SIGNAL(clicked()), this, SLOT(addDBContSlot()));
     main_layout->addWidget(add_dbcont_button_);
 
     main_layout->addStretch();
@@ -153,7 +153,7 @@ DBContentManagerWidget::~DBContentManagerWidget()
 //    loginf << "start";
 //}
 
-void DBContentManagerWidget::addDBOSlot()
+void DBContentManagerWidget::addDBContSlot()
 {
 //    if (!schema_manager_.hasCurrentSchema())
 //    {
@@ -187,9 +187,9 @@ void DBContentManagerWidget::addDBOSlot()
     }
 }
 
-void DBContentManagerWidget::changedDBOSlot() { updateDBContentsSlot(); }
+void DBContentManagerWidget::changedDBContSlot() { updateDBContentsSlot(); }
 
-void DBContentManagerWidget::editDBOSlot()
+void DBContentManagerWidget::editDBContSlot()
 {
     assert(edit_dbcont_buttons_.find((QPushButton*)sender()) != edit_dbcont_buttons_.end());
 
@@ -198,14 +198,14 @@ void DBContentManagerWidget::editDBOSlot()
     if (edit_dbcont_widgets_.find(object) == edit_dbcont_widgets_.end())
     {
         DBContentWidget* widget = object->widget();
-        connect(widget, SIGNAL(changedDBOSignal()), this, SLOT(changedDBOSlot()));
+        connect(widget, SIGNAL(changedDBContSignal()), this, SLOT(changedDBContSlot()));
         edit_dbcont_widgets_[object] = widget;
     }
     else
         edit_dbcont_widgets_[object]->show();
 }
 
-void DBContentManagerWidget::deleteDBOSlot()
+void DBContentManagerWidget::deleteDBContSlot()
 {
     assert(delete_dbcont_buttons_.find((QPushButton*)sender()) != delete_dbcont_buttons_.end());
 
@@ -217,10 +217,10 @@ void DBContentManagerWidget::deleteDBOSlot()
 
 void DBContentManagerWidget::updateDBContentsSlot()
 {
-    assert(dbcontbjects_grid_);
+    assert(dbconts_grid_);
 
     QLayoutItem* child;
-    while (!dbcontbjects_grid_->isEmpty() && (child = dbcontbjects_grid_->takeAt(0)) != nullptr)
+    while (!dbconts_grid_->isEmpty() && (child = dbconts_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();
@@ -238,11 +238,11 @@ void DBContentManagerWidget::updateDBContentsSlot()
 
     QLabel* name_label = new QLabel("Name");
     name_label->setFont(font_bold);
-    dbcontbjects_grid_->addWidget(name_label, 0, 0);
+    dbconts_grid_->addWidget(name_label, 0, 0);
 
     QLabel* numel_label = new QLabel("# columns");
     numel_label->setFont(font_bold);
-    dbcontbjects_grid_->addWidget(numel_label, 0, 1);
+    dbconts_grid_->addWidget(numel_label, 0, 1);
 
     unsigned int row = 1;
 
@@ -255,10 +255,10 @@ void DBContentManagerWidget::updateDBContentsSlot()
         //            font.setStrikeOut(true);
         //            name->setFont(font);
         //        }
-        dbcontbjects_grid_->addWidget(name, row, 0);
+        dbconts_grid_->addWidget(name, row, 0);
 
         QLabel* numel = new QLabel((std::to_string(obj_it.second->numVariables())).c_str());
-        dbcontbjects_grid_->addWidget(numel, row, 1);
+        dbconts_grid_->addWidget(numel, row, 1);
 
         QPushButton* edit = new QPushButton();
         edit->setIcon(edit_icon);
@@ -266,8 +266,8 @@ void DBContentManagerWidget::updateDBContentsSlot()
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         edit->setFlat(UI_ICON_BUTTON_FLAT);
         // edit->setDisabled(!active || locked_);
-        connect(edit, SIGNAL(clicked()), this, SLOT(editDBOSlot()));
-        dbcontbjects_grid_->addWidget(edit, row, 3);
+        connect(edit, SIGNAL(clicked()), this, SLOT(editDBContSlot()));
+        dbconts_grid_->addWidget(edit, row, 3);
         edit_dbcont_buttons_[edit] = obj_it.second;
 
         QPushButton* del = new QPushButton();
@@ -276,8 +276,8 @@ void DBContentManagerWidget::updateDBContentsSlot()
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         del->setFlat(UI_ICON_BUTTON_FLAT);
         // del->setDisabled(locked_);
-        connect(del, SIGNAL(clicked()), this, SLOT(deleteDBOSlot()));
-        dbcontbjects_grid_->addWidget(del, row, 4);
+        connect(del, SIGNAL(clicked()), this, SLOT(deleteDBContSlot()));
+        dbconts_grid_->addWidget(del, row, 4);
         delete_dbcont_buttons_[del] = obj_it.second;
 
         row++;

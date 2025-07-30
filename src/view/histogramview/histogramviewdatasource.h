@@ -62,7 +62,7 @@ class HistogramViewDataSource : public QObject, public Configurable
     /// Selected DBContent records
     //ViewSelectionEntries& selection_entries_;
 
-    std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBO->varname
+    std::vector<std::pair<std::string, std::string>> temporary_added_variables_; // not persisted, DBCont->varname
 
     virtual void checkSubConfigurables();
 

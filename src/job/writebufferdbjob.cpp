@@ -42,7 +42,7 @@ void WriteBufferDBJob::execute()
 
     loading_start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    logdbg << "writing type " << buffer_->getDBOType() << " size "
+    logdbg << "writing type " << buffer_->getDBContType() << " size "
            << buffer_->getSize();
     db_interface_->writeBuffer(buffer_);
 

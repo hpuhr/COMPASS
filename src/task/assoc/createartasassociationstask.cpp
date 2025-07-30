@@ -257,20 +257,12 @@ void CreateARTASAssociationsTask::run()
                         + " in (" + std::to_string(settings_.current_data_source_line_id_) + ")"
             };
 
-            //        void DBContent::load (DBOVariableSet& read_set,  std::string
-            //        custom_filter_clause,
-            //                             std::vector <DBOVariable*> filtered_variables, bool
-            //                             use_order, DBOVariable* order_variable, bool
-            //                             use_order_ascending, const std::string &limit_str)
-
             dbcont_it.second->loadFiltered(read_set, custom_filter_clause);
         }
         else
             dbcont_it.second->load(read_set, false, false);
 
     }
-
-    //status_dialog_->setDBODoneFlags(dbcont_loading_done_flags_);
 }
 
 bool CreateARTASAssociationsTask::wasRun()
@@ -290,7 +282,6 @@ void CreateARTASAssociationsTask::loadingDoneSlot()
     loginf << "start";
 
     assert(status_dialog_);
-    //status_dialog_->setDBODoneFlags(dbcont_loading_done_flags_);
 
     dbcont_loading_done_ = true;
 

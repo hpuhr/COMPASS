@@ -924,7 +924,6 @@ void GPSTrailImportTask::run()
     connect(&dbcontent_man, &DBContentManager::insertDoneSignal,
             this, &GPSTrailImportTask::insertDoneSlot, Qt::UniqueConnection);
 
-    //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
     dbcontent_man.insertData({{dbcontent_name, buffer_}});
 }
 

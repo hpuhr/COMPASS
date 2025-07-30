@@ -91,14 +91,14 @@ public:
     void configureWidget(dbContent::VariableSelectionWidget& selection);
     void updateWidget(dbContent::VariableSelectionWidget& selection);
 
-    std::string regParamDBO() const;
+    std::string regParamDBCont() const;
     std::string regParamName() const;
 
     const Settings& settings() const { return settings_; }
     Settings& settings() { return settings_; }
 
     static const std::string ParamDataVar;
-    static const std::string ParamDataVarDBO;
+    static const std::string ParamDataVarDBCont;
     static const std::string ParamDataVarName;
 
 private:

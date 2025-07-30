@@ -686,8 +686,8 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 
 //        if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)
 //            parser_.selectMapping(entry_index_); // ok since order in mappings is the same
-//        else if (entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBOVariable)
-//            parser_.selectUnmappedDBOVariable(dialog.variable().name()); // search for new name
+//        else if (entry_type_ == ASTERIXJSONParser::EntryType::UnmappedDBContVariable)
+//            parser_.selectUnmappedDBContVariable(dialog.variable().name()); // search for new name
 //    }
 
 //    loginf << "done";

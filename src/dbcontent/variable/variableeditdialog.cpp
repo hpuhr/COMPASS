@@ -85,7 +85,7 @@ VariableEditDialog::VariableEditDialog(Variable& variable, QWidget* parent, Qt::
 
     form_layout->addRow("Comment", description_edit_);
 
-    //    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
+    //    VariableDataTypeComboBox* type_combo_ {nullptr};
     type_combo_ = new VariableDataTypeComboBox(variable_.dataTypeRef(), variable_.dataTypeStringRef());
     type_combo_->setEnabled(expert_mode_);
     form_layout->addRow("Data Type", type_combo_);

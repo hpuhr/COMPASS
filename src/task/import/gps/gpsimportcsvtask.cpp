@@ -632,8 +632,6 @@ void GPSImportCSVTask::run()
         ++cnt;
     }
 
-    //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
-
     dbcontent_man.maxRefTrajTrackNum(track_num+1); // increment for next
 
     loginf << "inserting data";

@@ -39,7 +39,7 @@ class DBContentWidget : public QWidget
     Q_OBJECT
 
   signals:
-    void changedDBOSignal();
+    void changedDBContSignal();
 
   public slots:
     void updateDataSourcesGridSlot();
@@ -50,9 +50,9 @@ class DBContentWidget : public QWidget
     void editDBContentVariableNameSlot();
     void editDBContentVariableDescriptionSlot();
     void editDBContentVariableDBColumnSlot(const QString& text);
-    void deleteDBOVarSlot();
+    void deleteDBContVarSlot();
 
-    void updateDBOVarsGridSlot();
+    void updateDBContVarsGridSlot();
 
   public:
     DBContentWidget(DBContent* object, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());

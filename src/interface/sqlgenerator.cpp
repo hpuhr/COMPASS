@@ -354,28 +354,6 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcon
        return getDeleteCommand(dbcontent.dbTableName(), ss.str());
 }
 
-//shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBContent& object)
-//{
-//    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE
-//    // mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY
-//    // sensor_number__value;";
-//    // return distinct_radar_numbers_statement_;
-
-//    assert (false); // TODO
-
-//    //    string local_key_dbcontvar = object.currentDataSourceDefinition().localKey();
-//    //    assert(object.hasVariable(local_key_dbcontvar));
-//    //    const DBTableColumn& local_key_col = object.variable(local_key_dbcontvar).currentDBColumn();
-
-//    //    vector<const DBTableColumn*> columns;
-//    //    columns.push_back(&local_key_col);
-
-//    //    PropertyList list;
-//    //    list.addProperty(local_key_col.name(), PropertyDataType::INT);
-
-//    //    return getSelectCommand(object.currentMetaTable(), columns, true);
-//}
-
 /**
  */
 std::shared_ptr<DBCommand> SQLGenerator::getMaxUIntValueCommand(const std::string& table_name,

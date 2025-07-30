@@ -64,19 +64,9 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-    //table_view_->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    //table_view_->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    //table_view_->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     table_view_->setIconSize(QSize(24, 24));
     table_view_->setWordWrap(true);
     table_view_->reset();
-    //table_view_->show();
-//    table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
-//    table_->setColumnCount(table_columns_.size());
-//    table_->setHorizontalHeaderLabels(table_columns_);
-//    //table_->verticalHeader()->setVisible(false);
-//    connect(table_, &QTableWidget::itemChanged, this,
-//            &DBOEditDataSourcesWidget::configItemChangedSlot);
     // update done later
 
     connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,

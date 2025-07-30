@@ -53,7 +53,7 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
 
     registerParameter("display_instance_id", &display_instance_id_, false);
 
-    // DBOVAR LOWERCASE HACK
+    // DBContVAR LOWERCASE HACK
     // boost::algorithm::to_lower(variable_name_);
 
     registerParameter("reset_value", &reset_value_, std::string(""));

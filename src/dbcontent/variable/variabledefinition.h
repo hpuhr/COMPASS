@@ -34,7 +34,7 @@ class VariableDefinition : public Configurable
         registerParameter("dbcontent_name", &dbcontent_name_, std::string());
         registerParameter("variable_name", &variable_name_, std::string());
 
-        // DBOVAR LOWERCASE HACK
+        // DBContVAR LOWERCASE HACK
         // boost::algorithm::to_lower(dbcont_variable_name_);
 
         assert(variable_name_.size() > 0);

@@ -124,7 +124,7 @@ ViewVariable& VariableView::addVariable(const std::string& id,
     var.settings().allow_empty_var  = allow_empty_var;
     var.settings().valid_data_types = std::set<PropertyDataType>(valid_data_types.begin(), valid_data_types.end());
 
-    registerParameter(var.regParamDBO() , &var.settings().data_var_dbcont , default_dbcont );
+    registerParameter(var.regParamDBCont() , &var.settings().data_var_dbcont , default_dbcont );
     registerParameter(var.regParamName(), &var.settings().data_var_name, default_name);
 
     return var;
@@ -159,7 +159,7 @@ void VariableView::viewInfoJSON_impl(nlohmann::json& info) const
     //variable related
     for (const auto& v : variables_)
     {
-        info[ v->regParamDBO()  ] = v->settings().data_var_dbcont;
+        info[ v->regParamDBCont()  ] = v->settings().data_var_dbcont;
         info[ v->regParamName() ] = v->settings().data_var_name;
     }
 

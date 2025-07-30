@@ -275,7 +275,7 @@ void FilterEditWidget::updateConditionsGrid()
 
         TODO_ASSERT
 
-//        DBOVariableSelectionWidget* var_select = new DBOVariableSelectionWidget(true);
+//        DBContVariableSelectionWidget* var_select = new DBContVariableSelectionWidget(true);
 //        var_select->selectedVariable(*(*it)->getVariable());
 //        conditions_grid_->addWidget(var_select, row, 1);
 //        connect(var_select, SIGNAL(selectionChanged()), this, SLOT(changedConditionVariable()));
@@ -337,7 +337,7 @@ void FilterEditWidget::changedName()
 
 void FilterEditWidget::changedConditionVariable()
 {
-//    DBOVariableSelectionWidget* source = (DBOVariableSelectionWidget*)sender();
+//    DBContVariableSelectionWidget* source = (DBContVariableSelectionWidget*)sender();
 //    assert(conditions_variable_selects_.find(source) != conditions_variable_selects_.end());
 //    conditions_variable_selects_[source]->setVariable(&source->selectedVariable());
 
