@@ -76,7 +76,7 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
         dbcont_ids.insert(object_it.second->id());
     }
 
-    qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbo read job
+    qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>"); // for dbcont read job
     // for signal about new data
     qRegisterMetaType<std::map<std::string, std::shared_ptr<Buffer>>>("std::map<std::string, std::shared_ptr<Buffer>>");
 
@@ -447,19 +447,19 @@ void DBContentManager::addLoadedData(std::map<std::string, std::shared_ptr<Buffe
 
         if (data_.count(buf_it.first))
         {
-            logdbg << "adding buffer dbo " << buf_it.first
+            logdbg << "adding buffer dbcont " << buf_it.first
                    << " adding size " << buf_it.second->size() << " current size " << data_.at(buf_it.first)->size();
 
             data_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
 
-            logdbg << "new buffer dbo " << buf_it.first
+            logdbg << "new buffer dbcont " << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
         else
         {
             data_[buf_it.first] = std::move(buf_it.second);
 
-            logdbg << "created buffer dbo " << buf_it.first
+            logdbg << "created buffer dbcont " << buf_it.first
                    << " size " << data_.at(buf_it.first)->size();
         }
 
@@ -1125,7 +1125,7 @@ void DBContentManager::addInsertedDataToChache()
                                   buf_it->second->addProperty(utn_prop);
                           }
 
-                          // change db column names to dbo var names
+                          // change db column names to dbcont var names
                           buf_it->second->transformVariables(read_set, true);
 
                           // add selection flags

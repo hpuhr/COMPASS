@@ -44,7 +44,7 @@ Buffer::Buffer(PropertyList properties, const string& dbcontent_name)
 
 Buffer::~Buffer()
 {
-    logdbg << "dbo " << dbcontent_name_;
+    logdbg << "dbcont " << dbcontent_name_;
 
     properties_.clear();
 
@@ -891,9 +891,9 @@ void Buffer::deleteEmptyProperties()
 
 }
 
-void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
+void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbcontvar)
 {
-    logdbg << "dbo '" << dbcontent_name_ << "' dbcol2dbovar " << dbcol2dbovar;
+    logdbg << "dbcont '" << dbcontent_name_ << "' dbcol2dbcontvar " << dbcol2dbcontvar;
 
     const vector<dbContent::Variable*>& variables = list.getSet();
     string variable_name;
@@ -911,7 +911,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
 
         PropertyDataType data_type = var_it->dataType();
 
-        if (dbcol2dbovar)
+        if (dbcol2dbcontvar)
         {
             if (!properties_.hasProperty(db_column_name))
             {
@@ -940,7 +940,7 @@ void Buffer::transformVariables(dbContent::VariableSet& list, bool dbcol2dbovar)
             transformed_var_name = db_column_name;
         }
 
-        // rename to reflect dbo variable
+        // rename to reflect dbcont variable
         if (current_var_name != transformed_var_name)
         {
             logdbg << "renaming variable " << current_var_name

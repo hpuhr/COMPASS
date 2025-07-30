@@ -115,12 +115,12 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 
     assert(index.row() >= 0);
     assert((unsigned int)index.row() < row_indexes_.size());
-    unsigned int dbo_num = row_indexes_.at(index.row()).first;
+    unsigned int dbcont_num = row_indexes_.at(index.row()).first;
     unsigned int buffer_index = row_indexes_.at(index.row()).second;
     unsigned int col = index.column();
 
-    assert(number_to_dbo_.count(dbo_num) == 1);
-    const std::string& dbcontent_name = number_to_dbo_.at(dbo_num);
+    assert(number_to_dbcont_.count(dbcont_num) == 1);
+    const std::string& dbcontent_name = number_to_dbcont_.at(dbcont_num);
 
     assert(buffers_.count(dbcontent_name) == 1);
     std::shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
@@ -184,7 +184,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         }
         else
         {
-            if (dbcontent_name != variable_dbcontent_name)  // check if other dbo
+            if (dbcontent_name != variable_dbcontent_name)  // check if other dbcont
                 return QString();
 
             assert(manager.existsDBContent(dbcontent_name));
@@ -378,11 +378,11 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
 
         assert(index.row() >= 0);
         assert((unsigned int)index.row() < row_indexes_.size());
-        unsigned int dbo_num = row_indexes_.at(index.row()).first;
+        unsigned int dbcont_num = row_indexes_.at(index.row()).first;
         unsigned int buffer_index = row_indexes_.at(index.row()).second;
 
-        assert(number_to_dbo_.count(dbo_num) == 1);
-        std::string dbcontent_name = number_to_dbo_.at(dbo_num);
+        assert(number_to_dbcont_.count(dbcont_num) == 1);
+        std::string dbcontent_name = number_to_dbcont_.at(dbcont_num);
 
         assert(buffers_.count(dbcontent_name) == 1);
         std::shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
@@ -433,15 +433,15 @@ void AllBufferTableModel::setData(std::map<std::string, std::shared_ptr<Buffer>>
     {
         std::string dbcontent_name = buf_it.first;
 
-        if (dbcont_to_number_.count(dbcontent_name) == 0)  // new dbo from the wild
+        if (dbcont_to_number_.count(dbcontent_name) == 0)  // new dbcont from the wild
         {
             unsigned int num = dbcont_to_number_.size();
-            number_to_dbo_[num] = dbcontent_name;
+            number_to_dbcont_[num] = dbcontent_name;
             dbcont_to_number_[dbcontent_name] = num;
         }
     }
 
-    assert(dbcont_to_number_.size() == number_to_dbo_.size());
+    assert(dbcont_to_number_.size() == number_to_dbcont_.size());
 
     buffers_ = buffers;
 
@@ -550,7 +550,7 @@ void AllBufferTableModel::saveAsCSV(const std::string& file_name)
         return;
 
     AllBufferCSVExportJob* export_job = new AllBufferCSVExportJob(
-        buffers_, data_source_.getSet(), number_to_dbo_, row_indexes_, file_name, true,
+        buffers_, data_source_.getSet(), number_to_dbcont_, row_indexes_, file_name, true,
         view_.settings().show_only_selected_, view_.settings().use_presentation_);
 
     export_job_ = std::shared_ptr<AllBufferCSVExportJob>(export_job);
@@ -593,7 +593,7 @@ std::pair<int,int> AllBufferTableModel::getSelectedRows()
 {
     loginf << "start";
 
-    unsigned int dbo_num;
+    unsigned int dbcont_num;
     unsigned int buffer_index;
 
     int first_row = -1;
@@ -601,11 +601,11 @@ std::pair<int,int> AllBufferTableModel::getSelectedRows()
 
     for (unsigned int cnt=0; cnt < row_indexes_.size(); ++cnt)
     {
-        dbo_num = row_indexes_.at(cnt).first;
+        dbcont_num = row_indexes_.at(cnt).first;
         buffer_index = row_indexes_.at(cnt).second;
 
-        assert(number_to_dbo_.count(dbo_num) == 1);
-        const std::string& dbcontent_name = number_to_dbo_.at(dbo_num);
+        assert(number_to_dbcont_.count(dbcont_num) == 1);
+        const std::string& dbcontent_name = number_to_dbcont_.at(dbcont_num);
 
         assert(buffers_.count(dbcontent_name) == 1);
 

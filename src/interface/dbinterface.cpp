@@ -2721,7 +2721,7 @@ void DBInterface::prepareRead(const DBContent& dbcontent,
 
 /**
  */
-std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBContent& dbobject)
+std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBContent& dbcontbject)
 {
     // locked by prepareRead
     assert(ready());
@@ -2757,7 +2757,7 @@ std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBCont
 
     shared_ptr<Buffer> buffer = result->buffer();
 
-    buffer->dbContentName(dbobject.name());
+    buffer->dbContentName(dbcontbject.name());
 
     assert(buffer);
 
@@ -2766,7 +2766,7 @@ std::pair<std::shared_ptr<Buffer>, bool> DBInterface::readDataChunk(const DBCont
 
 /**
  */
-void DBInterface::finalizeReadStatement(const DBContent& dbobject)
+void DBInterface::finalizeReadStatement(const DBContent& dbcontbject)
 {
     assert(ready());
 

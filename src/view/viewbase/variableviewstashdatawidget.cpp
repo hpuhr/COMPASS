@@ -628,16 +628,16 @@ void VariableViewStashDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
     for (const auto& it : stash_.groupedStashes())
     {
-        nlohmann::json dbo_info;
+        nlohmann::json dbcont_info;
 
-        dbo_info[ "dbo_type"       ] = it.first;
+        dbcont_info[ "dbcont_type"       ] = it.first;
 
         for (size_t i = 0; i < variableView()->numVariables(); ++i)
-            dbo_info[ "num_input_" + variableView()->variable(i).id() ] = it.second.variable_stashes[ i ].values.size();
+            dbcont_info[ "num_input_" + variableView()->variable(i).id() ] = it.second.variable_stashes[ i ].values.size();
 
-        dbo_info[ "num_input_valid"] = it.second.valid_count;
+        dbcont_info[ "num_input_valid"] = it.second.valid_count;
 
-        input_value_info.push_back(dbo_info);
+        input_value_info.push_back(dbcont_info);
     }
 
     info[ "input_values" ] = input_value_info;

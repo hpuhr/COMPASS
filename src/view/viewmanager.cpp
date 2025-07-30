@@ -437,9 +437,9 @@ void ViewManager::doViewPointAfterLoad ()
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     bool selection_changed = false;
-    for (auto& dbo_it : dbcont_man)
+    for (auto& dbcont_it : dbcont_man)
     {
-        std::string dbcontent_name = dbo_it.first;
+        std::string dbcontent_name = dbcont_it.first;
 
         if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_))
         {
@@ -449,9 +449,9 @@ void ViewManager::doViewPointAfterLoad ()
 
         const dbContent::Variable& ts_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
 
-        if (dbcont_man.data().count(dbo_it.first))
+        if (dbcont_man.data().count(dbcont_it.first))
         {
-            std::shared_ptr<Buffer> buffer = dbcont_man.data().at(dbo_it.first);
+            std::shared_ptr<Buffer> buffer = dbcont_man.data().at(dbcont_it.first);
 
             assert(buffer->has<bool>(DBContent::selected_var.name()));
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
@@ -508,9 +508,9 @@ void ViewManager::selectTimeWindow(boost::posix_time::ptime ts_min, boost::posix
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     bool selection_changed = false;
-    for (auto& dbo_it : dbcont_man)
+    for (auto& dbcont_it : dbcont_man)
     {
-        std::string dbcontent_name = dbo_it.first;
+        std::string dbcontent_name = dbcont_it.first;
 
         if (!dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_))
         {
@@ -520,9 +520,9 @@ void ViewManager::selectTimeWindow(boost::posix_time::ptime ts_min, boost::posix
 
         const dbContent::Variable& ts_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
 
-        if (dbcont_man.data().count(dbo_it.first))
+        if (dbcont_man.data().count(dbcont_it.first))
         {
-            std::shared_ptr<Buffer> buffer = dbcont_man.data().at(dbo_it.first);
+            std::shared_ptr<Buffer> buffer = dbcont_man.data().at(dbcont_it.first);
 
             assert(buffer->has<bool>(DBContent::selected_var.name()));
             NullableVector<bool>& selected_vec = buffer->get<bool>(DBContent::selected_var.name());
@@ -856,7 +856,7 @@ void ViewManager::loadedDataSlot (const std::map<std::string, std::shared_ptr<Bu
     logdbg << "done";
 }
 
-void ViewManager::loadingDoneSlot() // emitted when all dbos have finished loading
+void ViewManager::loadingDoneSlot() // emitted when all dbconts have finished loading
 {
     if (disable_data_distribution_)
         return;

@@ -33,8 +33,8 @@ using namespace std;
 namespace dbContent
 {
 
-MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbo_man, QWidget *parent)
-    : QWidget(parent), dbo_man_(dbo_man)
+MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbcont_man, QWidget *parent)
+    : QWidget(parent), dbcont_man_(dbcont_man)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -52,7 +52,7 @@ MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbo_man, QW
 
     form_layout->addRow("Comment", description_edit_);
 
-    for (auto dbcont_it = dbo_man_.begin(); dbcont_it != dbo_man_.end(); ++dbcont_it)
+    for (auto dbcont_it = dbcont_man_.begin(); dbcont_it != dbcont_man_.end(); ++dbcont_it)
     {
         VariableSelectionWidget* var_sel = new VariableSelectionWidget(true);
         var_sel->showDBContentOnly(dbcont_it->first);
@@ -147,7 +147,7 @@ void MetaVariableDetailWidget::nameEditedSlot()
     assert (has_current_entry_);
     assert (meta_var_);
 
-    dbo_man_.renameMetaVariable(meta_var_->name(), new_name);
+    dbcont_man_.renameMetaVariable(meta_var_->name(), new_name);
 }
 
 void MetaVariableDetailWidget::variableChangedSlot()
@@ -172,7 +172,7 @@ void MetaVariableDetailWidget::deleteVariableSlot()
     assert (has_current_entry_);
     assert (meta_var_);
 
-    dbo_man_.deleteMetaVariable(meta_var_->name());
+    dbcont_man_.deleteMetaVariable(meta_var_->name());
 }
 
 }

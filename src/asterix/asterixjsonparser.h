@@ -114,7 +114,7 @@ public:
     void selectMapping (unsigned int index);
     void selectUnmappedDBContentVariable (const std::string& name);
 
-    // index is not model index but directly in data_mappings_ + not_added_json_keys_ + not_added_dbo_variables_
+    // index is not model index but directly in data_mappings_ + not_added_json_keys_ + not_added_dbcont_variables_
     EntryType entryType (unsigned int index) const;
     JSONDataMapping& mapping (unsigned int index);
     const JSONDataMapping& mapping (unsigned int index) const;
@@ -147,7 +147,7 @@ private:
     bool mapping_checks_dirty_ {true};
     std::set<std::string> not_existing_json_keys_; // mapped keys not existing in cat info
     std::vector<std::string> not_added_json_keys_; // keys existing in cat info not in mappings
-    std::vector<std::string> not_added_dbo_variables_; // existing dbovars not in mappings
+    std::vector<std::string> not_added_dbcont_variables_; // existing dbcontvars not in mappings
 
     QStringList table_columns_ {"Active", "JSON Key", "DBContent Variable"};
 

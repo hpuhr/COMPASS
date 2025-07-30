@@ -53,7 +53,7 @@ public:
 
     void removeVariable(const std::string& dbcontent_name);
     /// @brief Sets sub-variable name for DBContent
-    void addVariable(const std::string& dbcontent_name, const std::string& dbovariable_name);
+    void addVariable(const std::string& dbcontent_name, const std::string& dbcontvariable_name);
 
     const std::map<std::string, Variable&>& variables() { return variables_; }
     bool uses(const Variable& variable);
@@ -88,8 +88,8 @@ protected:
 
     bool locked_{false};
 
-    std::map<std::string, VariableDefinition*> definitions_; // dbo name -> def
-    std::map<std::string, Variable&> variables_; // dbo name -> var
+    std::map<std::string, VariableDefinition*> definitions_; // dbcont name -> def
+    std::map<std::string, Variable&> variables_; // dbcont name -> var
 
     virtual void checkSubConfigurables();
     void updateDescription();

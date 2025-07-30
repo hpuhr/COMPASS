@@ -187,7 +187,7 @@ bool FilterManager::checkDBContent (const std::string& dbcontent_name)
 {
     if (!COMPASS::instance().dbContentManager().existsDBContent(dbcontent_name))
     {
-        loginf << "failed because of non-existing dbobject '" << dbcontent_name << "'";
+        loginf << "failed because of non-existing dbcontbject '" << dbcontent_name << "'";
         return false;
     }
 
@@ -195,7 +195,7 @@ bool FilterManager::checkDBContent (const std::string& dbcontent_name)
 
     if (!object.existsInDB())
     {
-        loginf << "failed because of empty dbobject '" << dbcontent_name << "'";
+        loginf << "failed because of empty dbcontbject '" << dbcontent_name << "'";
         return false;
     }
 

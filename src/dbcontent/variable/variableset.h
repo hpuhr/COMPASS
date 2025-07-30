@@ -47,7 +47,7 @@ class VariableSet
     /// @brief Adds another set of variables
     bool add(const VariableSet& set);
     /// @brief Adds variables for a given type from a given set of variables
-    // bool addOnly (DBOVariableSet &set, const std::string &dbo_type);
+    // bool addOnly (DBOVariableSet &set, const std::string &dbcont_type);
     /// @brief Removes variable at a given index
     void removeVariableAt(unsigned int index);
     void removeVariable(const Variable& var);

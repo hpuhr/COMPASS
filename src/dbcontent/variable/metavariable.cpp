@@ -77,23 +77,23 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
         VariableDefinition* definition = new VariableDefinition(class_id, instance_id, this);
 
         const std::string& dbcontent_name = definition->dbContentName();
-        std::string dbovar_name = definition->variableName();
+        std::string dbcontvar_name = definition->variableName();
 
         // DBOVAR LOWERCASE HACK
-        // boost::algorithm::to_lower(dbovar_name);
+        // boost::algorithm::to_lower(dbcontvar_name);
 
         if (!object_manager_.existsDBContent(dbcontent_name))
         {
             logerr << "name " << name_
-                   << " dbovariable definition " << instance_id << " has unknown dbo, ignoring";
+                   << " dbcontvariable definition " << instance_id << " has unknown dbcont, ignoring";
             // delete definition;
             return;
         }
 
-        if (!object_manager_.dbContent(dbcontent_name).hasVariable(dbovar_name))
+        if (!object_manager_.dbContent(dbcontent_name).hasVariable(dbcontvar_name))
         {
             logerr << "name " << name_
-                   << " dbovariable definition " << instance_id << " has unknown dbo variable, ignoring";
+                   << " dbcontvariable definition " << instance_id << " has unknown dbcont variable, ignoring";
             // delete definition;
             return;
         }
@@ -101,18 +101,18 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
         if (variables_.find(dbcontent_name) != variables_.end())
         {
             logerr << "name " << name_
-                   << " dbovariable definition " << instance_id << " has already defined dbo, ignoring";
+                   << " dbcontvariable definition " << instance_id << " has already defined dbcont, ignoring";
             // delete definition;
             return;
         }
 
         assert(object_manager_.existsDBContent(dbcontent_name));
-        assert(object_manager_.dbContent(dbcontent_name).hasVariable(dbovar_name));
+        assert(object_manager_.dbContent(dbcontent_name).hasVariable(dbcontvar_name));
         assert(variables_.find(dbcontent_name) == variables_.end());
 
         definitions_[dbcontent_name] = definition;
         variables_.insert(std::pair<std::string, Variable&>(
-            dbcontent_name, object_manager_.dbContent(dbcontent_name).variable(dbovar_name)));
+            dbcontent_name, object_manager_.dbContent(dbcontent_name).variable(dbcontvar_name)));
     }
     else
         throw std::runtime_error("MetaVariable: generateSubConfigurable: unknown class_id " +
@@ -159,18 +159,18 @@ void MetaVariable::removeVariable(const std::string& dbcontent_name)
     updateDescription();
 }
 
-void MetaVariable::addVariable(const std::string& dbcontent_name, const std::string& dbovariable_name)
+void MetaVariable::addVariable(const std::string& dbcontent_name, const std::string& dbcontvariable_name)
 {
     loginf << name_ << ": dbcont " << dbcontent_name << " varname "
-           << dbovariable_name;
+           << dbcontvariable_name;
 
     assert(!existsIn(dbcontent_name));
 
-    std::string instance_id = "VariableDefinition" + dbcontent_name + dbovariable_name + "0";
+    std::string instance_id = "VariableDefinition" + dbcontent_name + dbcontvariable_name + "0";
 
     auto config = Configuration::create("VariableDefinition", instance_id);
     config->addParameter<std::string>("dbcontent_name", dbcontent_name);
-    config->addParameter<std::string>("variable_name", dbovariable_name);
+    config->addParameter<std::string>("variable_name", dbcontvariable_name);
 
     generateSubConfigurableFromConfig(std::move(config));
     updateDescription();

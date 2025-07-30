@@ -259,7 +259,7 @@ void JSONMappingJob::parseASTERIX()
         catch (exception& e)
         {
             logerr << "caught exception '" << e.what() << "' in \n'"
-                       << record.dump(4) << "' parser dbo " << dbcontent_name;
+                       << record.dump(4) << "' parser dbcont " << dbcontent_name;
 
             ++num_errors_;
 

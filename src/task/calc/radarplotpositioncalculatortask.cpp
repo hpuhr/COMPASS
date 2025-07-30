@@ -148,17 +148,17 @@ void RadarPlotPositionCalculatorTask::run()
 
     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-    for (auto& dbo_it : dbcontent_man)
+    for (auto& dbcont_it : dbcontent_man)
     {
-        if (dbo_it.first != "CAT001" && dbo_it.first != "CAT010" && dbo_it.first != "CAT048")
+        if (dbcont_it.first != "CAT001" && dbcont_it.first != "CAT010" && dbcont_it.first != "CAT048")
             continue;
 
-        if (!dbo_it.second->hasData())
+        if (!dbcont_it.second->hasData())
             continue;
 
-        VariableSet read_set = getReadSetFor(dbo_it.first);
+        VariableSet read_set = getReadSetFor(dbcont_it.first);
 
-        dbo_it.second->load(read_set, false, false);
+        dbcont_it.second->load(read_set, false, false);
     }
 }
 

@@ -284,14 +284,14 @@ void GridView::updateSettingsFromVariable()
 {
     const auto& var = variable(2);
 
-    updateSettings(var.settings().data_var_dbo, var.settings().data_var_name);
+    updateSettings(var.settings().data_var_dbcont, var.settings().data_var_name);
 }
 
 /**
  */
-void GridView::updateSettings(const std::string& dbo, const std::string& name)
+void GridView::updateSettings(const std::string& dbcont, const std::string& name)
 {
-    bool is_empty = dbo.empty() && name.empty();
+    bool is_empty = dbcont.empty() && name.empty();
 
     if (is_empty)
     {

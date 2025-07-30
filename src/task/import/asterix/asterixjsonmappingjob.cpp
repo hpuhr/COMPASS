@@ -51,7 +51,7 @@ ASTERIXJSONMappingJob::~ASTERIXJSONMappingJob()
 
 void ASTERIXJSONMappingJob::run_impl()
 {
-    logdbg "run on thread " << QThread::currentThreadId() << " on cpu " << sched_getcpu();
+    logdbg << "run on thread " << QThread::currentThreadId() << " on cpu " << sched_getcpu();
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -116,7 +116,7 @@ void ASTERIXJSONMappingJob::run_impl()
         catch (exception& e)
         {
             logerr << "caught exception '" << e.what() << "' in \n'"
-                       << record.dump(4) << "' parser dbo " << dbcontent_name;
+                       << record.dump(4) << "' parser dbcont " << dbcontent_name;
 
             ++num_errors_;
 

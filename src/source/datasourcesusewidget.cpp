@@ -391,7 +391,7 @@ void DataSourcesUseWidget::clearAndCreateContent()
 
     using namespace dbContent;
 
-    //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    //DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     bool ds_found;
 
     logdbg << "iterating data source types";

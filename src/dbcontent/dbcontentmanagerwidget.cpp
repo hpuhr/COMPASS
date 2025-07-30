@@ -62,21 +62,21 @@ DBContentManagerWidget::DBContentManagerWidget(DBContentManager& object_manager)
     dob_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     dob_frame->setLineWidth(1);
 
-    dbobjects_grid_ = new QGridLayout();
+    dbcontbjects_grid_ = new QGridLayout();
     updateDBContentsSlot();
 
-    dob_frame->setLayout(dbobjects_grid_);
+    dob_frame->setLayout(dbcontbjects_grid_);
 
-    QScrollArea* dbo_scroll = new QScrollArea();
-    dbo_scroll->setWidgetResizable(true);
-    dbo_scroll->setWidget(dob_frame);
+    QScrollArea* dbcont_scroll = new QScrollArea();
+    dbcont_scroll->setWidgetResizable(true);
+    dbcont_scroll->setWidget(dob_frame);
 
-    main_layout->addWidget(dbo_scroll);
+    main_layout->addWidget(dbcont_scroll);
 
-    // new dbobject
-    add_dbo_button_ = new QPushButton("Add");
-    connect(add_dbo_button_, SIGNAL(clicked()), this, SLOT(addDBOSlot()));
-    main_layout->addWidget(add_dbo_button_);
+    // new dbcontbject
+    add_dbcont_button_ = new QPushButton("Add");
+    connect(add_dbcont_button_, SIGNAL(clicked()), this, SLOT(addDBOSlot()));
+    main_layout->addWidget(add_dbcont_button_);
 
     main_layout->addStretch();
 
@@ -111,20 +111,20 @@ DBContentManagerWidget::DBContentManagerWidget(DBContentManager& object_manager)
 
 DBContentManagerWidget::~DBContentManagerWidget()
 {
-    edit_dbo_buttons_.clear();
-    delete_dbo_buttons_.clear();
-    edit_dbo_widgets_.clear();
+    edit_dbcont_buttons_.clear();
+    delete_dbcont_buttons_.clear();
+    edit_dbcont_widgets_.clear();
 }
 
 // void DBContentManagerWidget::lock ()
 //{
-////    for (auto it : edit_dbo_buttons_)
+////    for (auto it : edit_dbcont_buttons_)
 ////        it.first->setDisabled (true);
 
-//    for (auto it : delete_dbo_buttons_)
+//    for (auto it : delete_dbcont_buttons_)
 //        it.first->setDisabled (true);
 
-//    add_dbo_button_->setDisabled (true);
+//    add_dbcont_button_->setDisabled (true);
 
 //    for (auto it : delete_meta_buttons_)
 //        it.first->setDisabled (true);
@@ -134,13 +134,13 @@ DBContentManagerWidget::~DBContentManagerWidget()
 
 // void DBContentManagerWidget::unlock ()
 //{
-////    for (auto it : edit_dbo_buttons_)
+////    for (auto it : edit_dbcont_buttons_)
 ////        it.first->setDisabled (!it.second->hasCurrentMetaTable());
 
-//    for (auto it : delete_dbo_buttons_)
+//    for (auto it : delete_dbcont_buttons_)
 //        it.first->setDisabled (false);
 
-//    add_dbo_button_->setDisabled (false);
+//    add_dbcont_button_->setDisabled (false);
 
 //    for (auto it : delete_meta_buttons_)
 //        it.first->setDisabled (false);
@@ -191,25 +191,25 @@ void DBContentManagerWidget::changedDBOSlot() { updateDBContentsSlot(); }
 
 void DBContentManagerWidget::editDBOSlot()
 {
-    assert(edit_dbo_buttons_.find((QPushButton*)sender()) != edit_dbo_buttons_.end());
+    assert(edit_dbcont_buttons_.find((QPushButton*)sender()) != edit_dbcont_buttons_.end());
 
-    DBContent* object = edit_dbo_buttons_[(QPushButton*)sender()];
+    DBContent* object = edit_dbcont_buttons_[(QPushButton*)sender()];
 
-    if (edit_dbo_widgets_.find(object) == edit_dbo_widgets_.end())
+    if (edit_dbcont_widgets_.find(object) == edit_dbcont_widgets_.end())
     {
         DBContentWidget* widget = object->widget();
         connect(widget, SIGNAL(changedDBOSignal()), this, SLOT(changedDBOSlot()));
-        edit_dbo_widgets_[object] = widget;
+        edit_dbcont_widgets_[object] = widget;
     }
     else
-        edit_dbo_widgets_[object]->show();
+        edit_dbcont_widgets_[object]->show();
 }
 
 void DBContentManagerWidget::deleteDBOSlot()
 {
-    assert(delete_dbo_buttons_.find((QPushButton*)sender()) != delete_dbo_buttons_.end());
+    assert(delete_dbcont_buttons_.find((QPushButton*)sender()) != delete_dbcont_buttons_.end());
 
-    DBContent* object = delete_dbo_buttons_[(QPushButton*)sender()];
+    DBContent* object = delete_dbcont_buttons_[(QPushButton*)sender()];
     object_manager_.deleteDBContent(object->name());
 
     updateDBContentsSlot();
@@ -217,10 +217,10 @@ void DBContentManagerWidget::deleteDBOSlot()
 
 void DBContentManagerWidget::updateDBContentsSlot()
 {
-    assert(dbobjects_grid_);
+    assert(dbcontbjects_grid_);
 
     QLayoutItem* child;
-    while (!dbobjects_grid_->isEmpty() && (child = dbobjects_grid_->takeAt(0)) != nullptr)
+    while (!dbcontbjects_grid_->isEmpty() && (child = dbcontbjects_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();
@@ -230,19 +230,19 @@ void DBContentManagerWidget::updateDBContentsSlot()
     QIcon edit_icon(Files::IconProvider::getIcon("edit.png"));
     QIcon del_icon(Files::IconProvider::getIcon("delete.png"));
 
-    edit_dbo_buttons_.clear();
-    delete_dbo_buttons_.clear();
+    edit_dbcont_buttons_.clear();
+    delete_dbcont_buttons_.clear();
 
     QFont font_bold;
     font_bold.setBold(true);
 
     QLabel* name_label = new QLabel("Name");
     name_label->setFont(font_bold);
-    dbobjects_grid_->addWidget(name_label, 0, 0);
+    dbcontbjects_grid_->addWidget(name_label, 0, 0);
 
     QLabel* numel_label = new QLabel("# columns");
     numel_label->setFont(font_bold);
-    dbobjects_grid_->addWidget(numel_label, 0, 1);
+    dbcontbjects_grid_->addWidget(numel_label, 0, 1);
 
     unsigned int row = 1;
 
@@ -255,10 +255,10 @@ void DBContentManagerWidget::updateDBContentsSlot()
         //            font.setStrikeOut(true);
         //            name->setFont(font);
         //        }
-        dbobjects_grid_->addWidget(name, row, 0);
+        dbcontbjects_grid_->addWidget(name, row, 0);
 
         QLabel* numel = new QLabel((std::to_string(obj_it.second->numVariables())).c_str());
-        dbobjects_grid_->addWidget(numel, row, 1);
+        dbcontbjects_grid_->addWidget(numel, row, 1);
 
         QPushButton* edit = new QPushButton();
         edit->setIcon(edit_icon);
@@ -267,8 +267,8 @@ void DBContentManagerWidget::updateDBContentsSlot()
         edit->setFlat(UI_ICON_BUTTON_FLAT);
         // edit->setDisabled(!active || locked_);
         connect(edit, SIGNAL(clicked()), this, SLOT(editDBOSlot()));
-        dbobjects_grid_->addWidget(edit, row, 3);
-        edit_dbo_buttons_[edit] = obj_it.second;
+        dbcontbjects_grid_->addWidget(edit, row, 3);
+        edit_dbcont_buttons_[edit] = obj_it.second;
 
         QPushButton* del = new QPushButton();
         del->setIcon(del_icon);
@@ -277,8 +277,8 @@ void DBContentManagerWidget::updateDBContentsSlot()
         del->setFlat(UI_ICON_BUTTON_FLAT);
         // del->setDisabled(locked_);
         connect(del, SIGNAL(clicked()), this, SLOT(deleteDBOSlot()));
-        dbobjects_grid_->addWidget(del, row, 4);
-        delete_dbo_buttons_[del] = obj_it.second;
+        dbcontbjects_grid_->addWidget(del, row, 4);
+        delete_dbcont_buttons_[del] = obj_it.second;
 
         row++;
     }
@@ -314,7 +314,7 @@ void DBContentManagerWidget::deleteMetaVariableSlot()
 
 void DBContentManagerWidget::addAllMetaVariablesSlot()
 {
-    std::vector<std::string> found_dbos;
+    std::vector<std::string> found_dbconts;
 
     bool changed = false;
 
@@ -324,13 +324,13 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
         {
             if (object_manager_.usedInMetaVariable(*var_it.second.get()))
             {
-                loginf << "not adding dbovariable "
+                loginf << "not adding dbcontvariable "
                        << var_it.first << " since already used";
                 continue;
             }
 
-            found_dbos.clear();
-            found_dbos.push_back(obj_it.first);  // original object
+            found_dbconts.clear();
+            found_dbconts.push_back(obj_it.first);  // original object
 
             for (auto& obj_it2 : object_manager_)
             {
@@ -340,11 +340,11 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
                 if (obj_it2.second->hasVariable(var_it.first) &&
                     var_it.second->dataType() == obj_it2.second->variable(var_it.first).dataType())
                 {
-                    found_dbos.push_back(obj_it2.first);
+                    found_dbconts.push_back(obj_it2.first);
                 }
             }
 
-            if (found_dbos.size() > 1)
+            if (found_dbconts.size() > 1)
             {
                 if (!object_manager_.existsMetaVariable(var_it.first))
                 {
@@ -362,14 +362,14 @@ void DBContentManagerWidget::addAllMetaVariablesSlot()
                 assert(object_manager_.existsMetaVariable(var_it.first));
                 MetaVariable& meta_var = object_manager_.metaVariable(var_it.first);
 
-                for (auto dbo_it2 = found_dbos.begin(); dbo_it2 != found_dbos.end(); dbo_it2++)
+                for (auto dbcont_it2 = found_dbconts.begin(); dbcont_it2 != found_dbconts.end(); dbcont_it2++)
                 {
-                    if (!meta_var.existsIn(*dbo_it2))
+                    if (!meta_var.existsIn(*dbcont_it2))
                     {
                         loginf << "adding meta "
                                   "variable "
-                               << var_it.first << " dbo variable " << var_it.first;
-                        meta_var.addVariable(*dbo_it2, var_it.first);
+                               << var_it.first << " dbcont variable " << var_it.first;
+                        meta_var.addVariable(*dbcont_it2, var_it.first);
                     }
                 }
 

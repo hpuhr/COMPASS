@@ -169,7 +169,7 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
 
         DBContent& dbcontent = parser_.dbContent();
         const auto& cat_info = parser_.categoryItemInfo();
-        string dbovar_name;
+        string dbcontvar_name;
         string json_key;
 
         unsigned int model_row;
@@ -188,7 +188,7 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
             {
                 auto& mapping = parser_.mapping(model_row);
 
-                dbovar_name = mapping.dboVariableName();
+                dbcontvar_name = mapping.dbcontVariableName();
                 json_key = mapping.jsonKey();
 
                 ss << "\"" << (mapping.active() ? "Y" : "N") << "\""; // Active
@@ -201,20 +201,20 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
 
                 ss << ";\"" << mapping.dimensionUnitStr() << "\""; // JSON Unit
 
-                ss << ";\"" << dbovar_name << "\""; // DBContVar
+                ss << ";\"" << dbcontvar_name << "\""; // DBContVar
 
-                if (dbcontent.hasVariable(dbovar_name))
+                if (dbcontent.hasVariable(dbcontvar_name))
                 {
-                    if (dbcontent.variable(dbovar_name).hasShortName())
-                        ss << ";\"" << dbcontent.variable(dbovar_name).shortName() << "\""; // DBContVar SN
+                    if (dbcontent.variable(dbcontvar_name).hasShortName())
+                        ss << ";\"" << dbcontent.variable(dbcontvar_name).shortName() << "\""; // DBContVar SN
                     else
                         ss << ";"; // DBContVar SN
 
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dataTypeString() << "\""; // DBContVar DataType
+                    ss << ";\"" << dbcontent.variable(dbcontvar_name).dataTypeString() << "\""; // DBContVar DataType
 
-                    ss << ";\"" << dbcontent.variable(dbovar_name).description() << "\""; // DBContVar Comment
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dimensionUnitStr() << "\""; // DBContVar Unit
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dbColumnName() << "\""; // DBContVar DBColumn
+                    ss << ";\"" << dbcontent.variable(dbcontvar_name).description() << "\""; // DBContVar Comment
+                    ss << ";\"" << dbcontent.variable(dbcontvar_name).dimensionUnitStr() << "\""; // DBContVar Unit
+                    ss << ";\"" << dbcontent.variable(dbcontvar_name).dbColumnName() << "\""; // DBContVar DBColumn
                 }
                 else
                 {
@@ -247,26 +247,26 @@ void ASTERIXJSONParserWidget::keyPressEvent(QKeyEvent* event)
             }
             else if (entry_type == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable)
             {
-                dbovar_name = parser_.unmappedDBContentVariable(model_row);
+                dbcontvar_name = parser_.unmappedDBContentVariable(model_row);
 
                 ss << ""; // Active
                 ss << ";"; // JSON Key
                 ss << ";"; // JSON Comment
                 ss << ";"; // JSON Unit
-                ss << ";\"" << dbovar_name << "\""; // DBContVar
+                ss << ";\"" << dbcontvar_name << "\""; // DBContVar
 
-                if (dbcontent.hasVariable(dbovar_name))
+                if (dbcontent.hasVariable(dbcontvar_name))
                 {
-                    if (dbcontent.variable(dbovar_name).hasShortName())
-                        ss << ";\"" << dbcontent.variable(dbovar_name).shortName() << "\""; // DBContVar SN
+                    if (dbcontent.variable(dbcontvar_name).hasShortName())
+                        ss << ";\"" << dbcontent.variable(dbcontvar_name).shortName() << "\""; // DBContVar SN
                     else
                         ss << ";"; // DBContVar SN
 
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dataTypeString() << "\""; // DBContVar DataType
+                    ss << ";\"" << dbcontent.variable(dbcontvar_name).dataTypeString() << "\""; // DBContVar DataType
 
-                    ss << ";\"" << dbcontent.variable(dbovar_name).description() << "\""; // DBContVar Comment
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dimensionUnitStr() << "\""; // DBContVar Unit
-                    ss << ";\"" << dbcontent.variable(dbovar_name).dbColumnName() << "\""; // DBContVar DBColumn
+                    ss << ";\"" << dbcontent.variable(dbcontvar_name).description() << "\""; // DBContVar Comment
+                    ss << ";\"" << dbcontent.variable(dbcontvar_name).dimensionUnitStr() << "\""; // DBContVar Unit
+                    ss << ";\"" << dbcontent.variable(dbcontvar_name).dbColumnName() << "\""; // DBContVar DBColumn
                 }
                 else
                 {

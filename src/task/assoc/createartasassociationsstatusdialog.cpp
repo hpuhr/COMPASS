@@ -123,14 +123,14 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(
 
     main_layout->addStretch();
 
-    // per dbo associations
-    //    QLabel* dbo_associated_label = new QLabel("DBContent Associations");
-    //    dbo_associated_label->setFont(font_big);
-    //    main_layout->addWidget(dbo_associated_label);
+    // per dbcont associations
+    //    QLabel* dbcont_associated_label = new QLabel("DBContent Associations");
+    //    dbcont_associated_label->setFont(font_big);
+    //    main_layout->addWidget(dbcont_associated_label);
 
-    dbo_associated_grid_ = new QGridLayout();
+    dbcont_associated_grid_ = new QGridLayout();
     updateDBContentAssociatedGrid();
-    main_layout->addLayout(dbo_associated_grid_);
+    main_layout->addLayout(dbcont_associated_grid_);
 
     main_layout->addStretch();
 
@@ -241,43 +241,43 @@ void CreateARTASAssociationsStatusDialog::updateTime()
 
 void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
 {
-    assert(dbo_associated_grid_);
+    assert(dbcont_associated_grid_);
 
     // loginf << "rowcount " <<
     // cat_counters_grid_->rowCount();
 
     int row = 1;
-    if (dbo_associated_grid_->rowCount() == 1)
+    if (dbcont_associated_grid_->rowCount() == 1)
     {
         // loginf << "adding first row";
 
         QFont font_bold;
         font_bold.setBold(true);
 
-        QLabel* dbo_label = new QLabel("DBContent");
-        dbo_label->setFont(font_bold);
-        dbo_associated_grid_->addWidget(dbo_label, row, 0);
+        QLabel* dbcont_label = new QLabel("DBContent");
+        dbcont_label->setFont(font_bold);
+        dbcont_associated_grid_->addWidget(dbcont_label, row, 0);
 
         QLabel* count_label = new QLabel("Count");
         count_label->setFont(font_bold);
         count_label->setAlignment(Qt::AlignRight);
-        dbo_associated_grid_->addWidget(count_label, row, 1);
+        dbcont_associated_grid_->addWidget(count_label, row, 1);
 
         QLabel* associated_label = new QLabel("Associated");
         associated_label->setFont(font_bold);
         associated_label->setAlignment(Qt::AlignRight);
-        dbo_associated_grid_->addWidget(associated_label, row, 2);
+        dbcont_associated_grid_->addWidget(associated_label, row, 2);
 
         QLabel* percent_label = new QLabel("Percent");
         percent_label->setFont(font_bold);
         percent_label->setAlignment(Qt::AlignRight);
-        dbo_associated_grid_->addWidget(percent_label, row, 3);
+        dbcont_associated_grid_->addWidget(percent_label, row, 3);
     }
 
-    for (auto& dbo_it : COMPASS::instance().dbContentManager())
+    for (auto& dbcont_it : COMPASS::instance().dbContentManager())
     {
-        if (dbo_it.second->isStatusContent() ||
-            dbo_it.second->isReferenceContent())
+        if (dbcont_it.second->isStatusContent() ||
+            dbcont_it.second->isReferenceContent())
             continue;
 
         ++row;
@@ -286,54 +286,54 @@ void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
         unsigned int assoc_cnt = 0;
         float assoc_perc = 0;
 
-        if (association_counts_.count(dbo_it.first))
+        if (association_counts_.count(dbcont_it.first))
         {
-            total_cnt = get<0>(association_counts_.at(dbo_it.first));
-            assoc_cnt = get<1>(association_counts_.at(dbo_it.first));
+            total_cnt = get<0>(association_counts_.at(dbcont_it.first));
+            assoc_cnt = get<1>(association_counts_.at(dbcont_it.first));
 
             if (total_cnt)
                 assoc_perc = 100.0 * (float) assoc_cnt / (float) total_cnt;
         }
 
-        if (dbo_associated_grid_->rowCount() < row + 1)
+        if (dbcont_associated_grid_->rowCount() < row + 1)
         {
             // loginf << "adding row " <<
             // row;
 
-            dbo_associated_grid_->addWidget(new QLabel(), row, 0);
+            dbcont_associated_grid_->addWidget(new QLabel(), row, 0);
 
             QLabel* count_label = new QLabel();
             count_label->setAlignment(Qt::AlignRight);
-            dbo_associated_grid_->addWidget(count_label, row, 1);
+            dbcont_associated_grid_->addWidget(count_label, row, 1);
 
             QLabel* associated_label = new QLabel();
             associated_label->setAlignment(Qt::AlignRight);
-            dbo_associated_grid_->addWidget(associated_label, row, 2);
+            dbcont_associated_grid_->addWidget(associated_label, row, 2);
 
             QLabel* percent_label = new QLabel();
             percent_label->setAlignment(Qt::AlignRight);
-            dbo_associated_grid_->addWidget(percent_label, row, 3);
+            dbcont_associated_grid_->addWidget(percent_label, row, 3);
         }
 
         // loginf << "setting row " << row;
 
-        QLabel* dbo_label =
-            dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 0)->widget());
-        assert(dbo_label);
-        dbo_label->setText(dbo_it.first.c_str());
+        QLabel* dbcont_label =
+            dynamic_cast<QLabel*>(dbcont_associated_grid_->itemAtPosition(row, 0)->widget());
+        assert(dbcont_label);
+        dbcont_label->setText(dbcont_it.first.c_str());
 
         QLabel* count_label =
-            dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 1)->widget());
+            dynamic_cast<QLabel*>(dbcont_associated_grid_->itemAtPosition(row, 1)->widget());
         assert(count_label);
         count_label->setText(QString::number(total_cnt));
 
         QLabel* associated_label =
-            dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 2)->widget());
+            dynamic_cast<QLabel*>(dbcont_associated_grid_->itemAtPosition(row, 2)->widget());
         assert(associated_label);
         associated_label->setText(QString::number(assoc_cnt));
 
         QLabel* percent_label =
-            dynamic_cast<QLabel*>(dbo_associated_grid_->itemAtPosition(row, 3)->widget());
+            dynamic_cast<QLabel*>(dbcont_associated_grid_->itemAtPosition(row, 3)->widget());
         assert(percent_label);
 
         if (total_cnt)

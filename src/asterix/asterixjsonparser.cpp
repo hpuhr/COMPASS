@@ -113,13 +113,13 @@ void ASTERIXJSONParser::doMappingChecks()
             not_added_json_keys_.push_back(info_it.first);
     }
 
-    // update not mapped dbo vars
-    not_added_dbo_variables_.clear();
+    // update not mapped dbcont vars
+    not_added_dbcont_variables_.clear();
 
-    for (auto& dbovar_it : dbContent().variables())
+    for (auto& dbcontvar_it : dbContent().variables())
     {
-        if (!hasDBContentVariableMapped(dbovar_it.first))
-            not_added_dbo_variables_.push_back(dbovar_it.first);
+        if (!hasDBContentVariableMapped(dbcontvar_it.first))
+            not_added_dbcont_variables_.push_back(dbcontvar_it.first);
     }
 
     mapping_checks_dirty_ = false;
@@ -129,7 +129,7 @@ void ASTERIXJSONParser::doMappingChecks()
 
 unsigned int ASTERIXJSONParser::totalEntrySize () const
 {
-    return data_mappings_.size() + not_added_json_keys_.size() + not_added_dbo_variables_.size();
+    return data_mappings_.size() + not_added_json_keys_.size() + not_added_dbcont_variables_.size();
 }
 
 bool ASTERIXJSONParser::existsJSONKeyInCATInfo(const std::string& key)
@@ -148,7 +148,7 @@ bool ASTERIXJSONParser::hasDBContentVariableMapped (const std::string& var_name)
 {
     return std::find_if(data_mappings_.begin(), data_mappings_.end(),
                         [var_name](const unique_ptr<JSONDataMapping>& mapping) -> bool {
-        return mapping->dboVariableName() == var_name; }) != data_mappings_.end();
+        return mapping->dbcontVariableName() == var_name; }) != data_mappings_.end();
 }
 
 bool ASTERIXJSONParser::hasJSONKeyInMapping (const std::string& key)
@@ -184,12 +184,12 @@ void ASTERIXJSONParser::selectMapping (unsigned int index)
 
 void ASTERIXJSONParser::selectUnmappedDBContentVariable (const std::string& name)
 {
-    auto iter = find(not_added_dbo_variables_.begin(), not_added_dbo_variables_.end(), name);
-    assert (iter != not_added_dbo_variables_.end());
+    auto iter = find(not_added_dbcont_variables_.begin(), not_added_dbcont_variables_.end(), name);
+    assert (iter != not_added_dbcont_variables_.end());
 
-    unsigned int pos = iter - not_added_dbo_variables_.begin();
+    unsigned int pos = iter - not_added_dbcont_variables_.begin();
 
-    assert (pos < not_added_dbo_variables_.size());
+    assert (pos < not_added_dbcont_variables_.size());
 
     unsigned int index = data_mappings_.size() + not_added_json_keys_.size() + pos;
 
@@ -214,7 +214,7 @@ ASTERIXJSONParser::EntryType ASTERIXJSONParser::entryType (unsigned int index) c
 
     index -= not_added_json_keys_.size();
 
-    assert (index < not_added_dbo_variables_.size());
+    assert (index < not_added_dbcont_variables_.size());
 
     return ASTERIXJSONParser::EntryType::UnmappedDBContentVariable;
 }
@@ -244,7 +244,7 @@ const std::string& ASTERIXJSONParser::unmappedJSONKey (unsigned int index) const
 const std::string& ASTERIXJSONParser::unmappedDBContentVariable (unsigned int index) const
 {
     assert (entryType(index) == ASTERIXJSONParser::EntryType::UnmappedDBContentVariable);
-    return not_added_dbo_variables_.at(index - data_mappings_.size() - not_added_json_keys_.size());
+    return not_added_dbcont_variables_.at(index - data_mappings_.size() - not_added_json_keys_.size());
 }
 
 const jASTERIX::CategoryItemInfo& ASTERIXJSONParser::categoryItemInfo() const
@@ -263,7 +263,7 @@ DBContent& ASTERIXJSONParser::dbContent() const
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (!dbcont_man.existsDBContent(db_content_name_))
-        throw runtime_error ("ASTERIXJSONParser: dbObject: dbobject '" + db_content_name_+ "' does not exist");
+        throw runtime_error ("ASTERIXJSONParser: dbObject: dbcontbject '" + db_content_name_+ "' does not exist");
     else
         return dbcont_man.dbContent(db_content_name_);
 }
@@ -584,7 +584,7 @@ void ASTERIXJSONParser::checkIfKeysExistsInMappings(const std::string& location,
 
     if (!found)
     {
-        loginf << "creating new mapping for dbo "
+        loginf << "creating new mapping for dbcont "
                  << db_content_name_ << "'" << location << "' type " << j.type_name() << " value "
                  << j.dump() << " in array " << is_in_array;
 
@@ -620,7 +620,7 @@ void ASTERIXJSONParser::removeMapping(unsigned int index)
 
     if (mapping->active() && mapping->initialized() && mapping->hasVariable())
     {
-        if (list_.hasProperty(mapping->dboVariableName()))
+        if (list_.hasProperty(mapping->dbcontVariableName()))
             list_.removeProperty(mapping->variable().name());
 
         if (var_list_.hasVariable(mapping->variable()))
@@ -745,7 +745,7 @@ QVariant ASTERIXJSONParser::data(const QModelIndex& index, int role) const
             else if (col_name == "JSON Key")
                 return current_mapping.jsonKey().c_str();
             else if (col_name == "DBContent Variable")
-                return current_mapping.dboVariableName().c_str();
+                return current_mapping.dbcontVariableName().c_str();
             else
                 return QVariant();
         }

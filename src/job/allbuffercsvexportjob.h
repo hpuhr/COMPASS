@@ -33,7 +33,7 @@ class AllBufferCSVExportJob : public Job
   public:
     AllBufferCSVExportJob(std::map<std::string, std::shared_ptr<Buffer>> buffers,
                           dbContent::VariableOrderedSet* read_set,
-                          std::map<unsigned int, std::string> number_to_dbo,
+                          std::map<unsigned int, std::string> number_to_dbcont,
                           const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes,
                           const std::string& file_name, bool overwrite, bool only_selected,
                           bool use_presentation);
@@ -44,7 +44,7 @@ class AllBufferCSVExportJob : public Job
 
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
     dbContent::VariableOrderedSet* read_set_;
-    std::map<unsigned int, std::string> number_to_dbo_;
+    std::map<unsigned int, std::string> number_to_dbcont_;
     const std::vector<std::pair<unsigned int, unsigned int>>& row_indexes_;
 
     std::string file_name_;

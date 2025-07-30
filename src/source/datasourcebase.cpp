@@ -395,8 +395,8 @@ void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)
     info_.clear();
 
     //    j["dbcontent_name"] = dbcontent_name_;
-    assert(j.contains("dbo_name"));
-    ds_type_ = j.at("dbo_name");
+    assert(j.contains("dbcont_name"));
+    ds_type_ = j.at("dbcont_name");
 
 
     //    j["name"] = name_;

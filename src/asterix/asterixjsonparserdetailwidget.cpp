@@ -130,11 +130,11 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
     line2->setFrameShadow(QFrame::Sunken);
     form_layout->addRow(line2);
 
-    // dbo var
+    // dbcont var
 
-    QLabel* dbovar_label = new QLabel("DBContent Variable");
-    dbovar_label->setFont(font_bold);
-    form_layout->addRow(dbovar_label);
+    QLabel* dbcontvar_label = new QLabel("DBContent Variable");
+    dbcontvar_label->setFont(font_bold);
+    form_layout->addRow(dbcontvar_label);
 
     dbcont_var_sel_ = new dbContent::VariableSelectionWidget();
     dbcont_var_sel_->showMetaVariables(false);
@@ -146,39 +146,39 @@ ASTERIXJSONParserDetailWidget::ASTERIXJSONParserDetailWidget(ASTERIXJSONParser& 
             this, &ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot);
     form_layout->addRow("Name", dbcont_var_sel_);
 
-    dbo_var_data_type_label_ = new QLabel();
-    form_layout->addRow("Data Type", dbo_var_data_type_label_);
+    dbcont_var_data_type_label_ = new QLabel();
+    form_layout->addRow("Data Type", dbcont_var_data_type_label_);
 
-    dbo_var_comment_edit_ = new QTextEdit();
-    dbo_var_comment_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
+    dbcont_var_comment_edit_ = new QTextEdit();
+    dbcont_var_comment_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
 
-    connect(dbo_var_comment_edit_, &QTextEdit::textChanged, this,
-        &ASTERIXJSONParserDetailWidget::dboVariableCommentChangedSlot);
+    connect(dbcont_var_comment_edit_, &QTextEdit::textChanged, this,
+        &ASTERIXJSONParserDetailWidget::dbcontVariableCommentChangedSlot);
 
-    form_layout->addRow("Comment", dbo_var_comment_edit_);
+    form_layout->addRow("Comment", dbcont_var_comment_edit_);
 
     main_layout->addLayout(form_layout);
 
     // buttons
 
-    new_dbovar_button_ = new QPushButton("New DBContent Variable");
-    new_dbovar_button_->setHidden(true);
-    connect(new_dbovar_button_, &QPushButton::clicked,
+    new_dbcontvar_button_ = new QPushButton("New DBContent Variable");
+    new_dbcontvar_button_->setHidden(true);
+    connect(new_dbcontvar_button_, &QPushButton::clicked,
             this, &ASTERIXJSONParserDetailWidget::createNewDBVariableSlot);
-    main_layout->addWidget(new_dbovar_button_);
+    main_layout->addWidget(new_dbcontvar_button_);
 
-    dbovar_edit_button_ = new QPushButton("Edit DBContent Variable");
-    dbovar_edit_button_->setHidden(true);
-    connect(dbovar_edit_button_, &QPushButton::clicked,
+    dbcontvar_edit_button_ = new QPushButton("Edit DBContent Variable");
+    dbcontvar_edit_button_->setHidden(true);
+    connect(dbcontvar_edit_button_, &QPushButton::clicked,
             this, &ASTERIXJSONParserDetailWidget::editDBVariableSlot);
-    main_layout->addWidget(dbovar_edit_button_);
+    main_layout->addWidget(dbcontvar_edit_button_);
 
-    dbovar_delete_button_ = new QPushButton("Delete DBContent Variable");
-    dbovar_delete_button_->setToolTip("Deletes the DBContent Variable from the DBContent, not just from the Mapping.");
-    dbovar_delete_button_->setHidden(true);
-    connect(dbovar_delete_button_, &QPushButton::clicked,
+    dbcontvar_delete_button_ = new QPushButton("Delete DBContent Variable");
+    dbcontvar_delete_button_->setToolTip("Deletes the DBContent Variable from the DBContent, not just from the Mapping.");
+    dbcontvar_delete_button_->setHidden(true);
+    connect(dbcontvar_delete_button_, &QPushButton::clicked,
             this, &ASTERIXJSONParserDetailWidget::deleteDBVariableSlot);
-    main_layout->addWidget(dbovar_delete_button_);
+    main_layout->addWidget(dbcontvar_delete_button_);
 
     delete_mapping_button_ = new QPushButton("Delete Mapping");
     delete_mapping_button_->setHidden(true);
@@ -235,7 +235,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         data_format_widget_->update(mapping.formatDataTypeRef(), mapping.jsonValueFormatRef());
         data_format_widget_->setEnabled(expert_mode_);
 
-        showDBContentVariable(mapping.dboVariableName(), true);
+        showDBContentVariable(mapping.dbcontVariableName(), true);
 
         delete_mapping_button_->setHidden(false);
         delete_mapping_button_->setEnabled(expert_mode_);
@@ -280,10 +280,10 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         active_check_->setEnabled(false);
         active_check_->setChecked(false);
 
-        string dbovar = parser_.unmappedDBContentVariable(entry_index_);
+        string dbcontvar = parser_.unmappedDBContentVariable(entry_index_);
 
-        loginf << "not added dbovar " << entry_index_
-               << " key '" << dbovar << "'";
+        loginf << "not added dbcontvar " << entry_index_
+               << " key '" << dbcontvar << "'";
 
         showJSONKey("", false);
 
@@ -293,7 +293,7 @@ void ASTERIXJSONParserDetailWidget::currentIndexChangedSlot (unsigned int index)
         data_format_widget_->clear();
         data_format_widget_->setEnabled(expert_mode_);
 
-        showDBContentVariable(dbovar);
+        showDBContentVariable(dbcontvar);
 
         delete_mapping_button_->setHidden(true);
 
@@ -378,7 +378,7 @@ void ASTERIXJSONParserDetailWidget::showJSONKey (const std::string& key, bool un
 void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& var_name, bool mapping_exists)
 {
     assert (dbcont_var_sel_);
-    assert (dbo_var_comment_edit_);
+    assert (dbcont_var_comment_edit_);
 
     if (var_name.size())
     {
@@ -386,48 +386,48 @@ void ASTERIXJSONParserDetailWidget::showDBContentVariable (const std::string& va
 
         assert (parser_.dbContent().hasVariable(var_name));
         dbcont_var_sel_->selectedVariable(parser_.dbContent().variable(var_name));
-        dbo_var_data_type_label_->setText(dbcont_var_sel_->selectedVariable().dataTypeString().c_str());
+        dbcont_var_data_type_label_->setText(dbcont_var_sel_->selectedVariable().dataTypeString().c_str());
 
-        dbo_var_comment_edit_->setEnabled(expert_mode_);
-        dbo_var_comment_edit_->setText(parser_.dbContent().variable(var_name).description().c_str());
+        dbcont_var_comment_edit_->setEnabled(expert_mode_);
+        dbcont_var_comment_edit_->setText(parser_.dbContent().variable(var_name).description().c_str());
 
         if (mapping_exists)
         {
-            new_dbovar_button_->setText("New DBContent Variable");
-            new_dbovar_button_->setHidden(!expert_mode_);
+            new_dbcontvar_button_->setText("New DBContent Variable");
+            new_dbcontvar_button_->setHidden(!expert_mode_);
         }
         else
         {
-            new_dbovar_button_->setHidden(true);
+            new_dbcontvar_button_->setHidden(true);
         }
 
         if (expert_mode_)
-            dbovar_edit_button_->setText("Edit DBContent Variable");
+            dbcontvar_edit_button_->setText("Edit DBContent Variable");
         else
-            dbovar_edit_button_->setText("Show DBContent Variable");
+            dbcontvar_edit_button_->setText("Show DBContent Variable");
 
-        dbovar_edit_button_->setHidden(false);
-        dbovar_delete_button_->setHidden(!expert_mode_);
+        dbcontvar_edit_button_->setHidden(false);
+        dbcontvar_delete_button_->setHidden(!expert_mode_);
     }
     else
     {
         dbcont_var_sel_->setDisabled(false);
         dbcont_var_sel_->selectEmptyVariable();
-        dbo_var_data_type_label_->setText("");
+        dbcont_var_data_type_label_->setText("");
 
-        dbo_var_comment_edit_->setDisabled(true);
+        dbcont_var_comment_edit_->setDisabled(true);
 
-        dbo_var_comment_edit_->setText("");
+        dbcont_var_comment_edit_->setText("");
 
-        new_dbovar_button_->setHidden(!expert_mode_);
+        new_dbcontvar_button_->setHidden(!expert_mode_);
 
         if (mapping_exists)
-            new_dbovar_button_->setText("New DBContent Variable");
+            new_dbcontvar_button_->setText("New DBContent Variable");
         else
-            new_dbovar_button_->setText("New DBContent Variable && Mapping");
+            new_dbcontvar_button_->setText("New DBContent Variable && Mapping");
 
-        dbovar_edit_button_->setHidden(true);
-        dbovar_delete_button_->setHidden(true);
+        dbcontvar_edit_button_->setHidden(true);
+        dbcontvar_delete_button_->setHidden(true);
     }
 }
 
@@ -514,13 +514,13 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
 
         if (dbcont_var_sel_->hasVariable())
         {
-            parser_.mapping(entry_index_).dboVariableName(dbcont_var_sel_->selectedVariable().name());
-            dbo_var_data_type_label_->setText(dbcont_var_sel_->selectedVariable().dataTypeString().c_str());
+            parser_.mapping(entry_index_).dbcontVariableName(dbcont_var_sel_->selectedVariable().name());
+            dbcont_var_data_type_label_->setText(dbcont_var_sel_->selectedVariable().dataTypeString().c_str());
         }
         else
         {
-            parser_.mapping(entry_index_).dboVariableName("");
-            dbo_var_data_type_label_->setText("");
+            parser_.mapping(entry_index_).dbcontVariableName("");
+            dbcont_var_data_type_label_->setText("");
         }
 
         parser_.doMappingChecks();
@@ -529,7 +529,7 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
     }
     else if (dbcont_var_sel_->hasVariable())
     {
-        dbo_var_data_type_label_->setText(dbcont_var_sel_->selectedVariable().dataTypeString().c_str());
+        dbcont_var_data_type_label_->setText(dbcont_var_sel_->selectedVariable().dataTypeString().c_str());
 
         // create new mapping
 
@@ -551,7 +551,7 @@ void ASTERIXJSONParserDetailWidget::mappingDBContentVariableChangedSlot()
     }
 }
 
-void ASTERIXJSONParserDetailWidget::dboVariableCommentChangedSlot()
+void ASTERIXJSONParserDetailWidget::dbcontVariableCommentChangedSlot()
 {
     if (setting_new_content_)
         return;
@@ -559,9 +559,9 @@ void ASTERIXJSONParserDetailWidget::dboVariableCommentChangedSlot()
     assert (has_current_entry_);
     assert (dbcont_var_sel_);
     assert (dbcont_var_sel_->hasVariable());
-    assert (dbo_var_comment_edit_);
+    assert (dbcont_var_comment_edit_);
 
-    dbcont_var_sel_->selectedVariable().description(dbo_var_comment_edit_->document()->toPlainText().toStdString());
+    dbcont_var_sel_->selectedVariable().description(dbcont_var_comment_edit_->document()->toPlainText().toStdString());
 }
 
 
@@ -623,7 +623,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
     {
         loginf << "accept";
 
-        // create new dbo var
+        // create new dbcont var
         {
             assert (!parser_.dbContent().hasVariable(dialog.name()));
 
@@ -645,7 +645,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 
         if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping) // set in existing mapping
         {
-            parser_.mapping(entry_index_).dboVariableName(dialog.name());
+            parser_.mapping(entry_index_).dbcontVariableName(dialog.name());
 
             parser_.doMappingChecks();
 
@@ -679,7 +679,7 @@ void ASTERIXJSONParserDetailWidget::createNewDBVariableSlot()
 //        if (dialog.variable().name() != current_var_name) // renaming done
 //        {
 //            if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping) // change in mapping
-//                parser_.mapping(entry_index_).dboVariableName(dialog.variable().name());
+//                parser_.mapping(entry_index_).dbcontVariableName(dialog.variable().name());
 //        }
 
 //        parser_.doMappingChecks();
@@ -706,26 +706,26 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
     assert (dbcont_var_sel_->hasVariable());
 
 
-    string dbovar_name = dbcont_var_sel_->selectedVariable().name();
+    string dbcontvar_name = dbcont_var_sel_->selectedVariable().name();
 
-    loginf << "deleting var '" << dbovar_name << "'";
+    loginf << "deleting var '" << dbcontvar_name << "'";
 
     // delete variable
-    assert (parser_.dbContent().hasVariable(dbovar_name));
-    parser_.dbContent().deleteVariable(dbovar_name);
+    assert (parser_.dbContent().hasVariable(dbcontvar_name));
+    parser_.dbContent().deleteVariable(dbcontvar_name);
     
     loginf << "start";
 
     if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)
     {
         // remove from mapping
-        parser_.mapping(entry_index_).dboVariableName("");
+        parser_.mapping(entry_index_).dbcontVariableName("");
 
         parser_.doMappingChecks();
 
         parser_.selectMapping(entry_index_);
     }
-    else // deleted unmapped dbovar, clear widget
+    else // deleted unmapped dbcontvar, clear widget
     {
         parser_.doMappingChecks();
 
@@ -743,9 +743,9 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
         showDBContentVariable("");
 
         delete_mapping_button_->setHidden(true);
-        new_dbovar_button_->setHidden(true);
-        dbovar_edit_button_->setHidden(true);
-        dbovar_delete_button_->setHidden(true);
+        new_dbcontvar_button_->setHidden(true);
+        dbcontvar_edit_button_->setHidden(true);
+        dbcontvar_delete_button_->setHidden(true);
 
         setting_new_content_ = false;
     }
@@ -772,7 +772,7 @@ void ASTERIXJSONParserDetailWidget::editDBVariableSlot()
         if (dialog.variable().name() != current_var_name) // renaming done
         {
             if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping) // change in mapping
-                parser_.mapping(entry_index_).dboVariableName(dialog.variable().name());
+                parser_.mapping(entry_index_).dbcontVariableName(dialog.variable().name());
         }
 
         parser_.doMappingChecks();
@@ -813,9 +813,9 @@ void ASTERIXJSONParserDetailWidget::deleteMappingSlot()
     showDBContentVariable("");
 
     delete_mapping_button_->setHidden(true);
-    new_dbovar_button_->setHidden(true);
-    dbovar_edit_button_->setHidden(true);
-    dbovar_delete_button_->setHidden(true);
+    new_dbcontvar_button_->setHidden(true);
+    dbcontvar_edit_button_->setHidden(true);
+    dbcontvar_delete_button_->setHidden(true);
 
     setting_new_content_ = false;
 

@@ -68,9 +68,9 @@ bool VariableSet::add(const VariableSet& set)
     return added;
 }
 
-// bool VariableSet::addOnly (VariableSet &set, const std::string &dbo_type)
+// bool VariableSet::addOnly (VariableSet &set, const std::string &dbcont_type)
 //{
-//  logdbg << "type " << dbo_type;
+//  logdbg << "type " << dbcont_type;
 //  std::vector <DBOVariable*> &setset = set.getSet();
 
 //  std::vector <DBOVariable*>::iterator it;
@@ -81,10 +81,10 @@ bool VariableSet::add(const VariableSet& set)
 //    if (find (set_.begin(), set_.end(), *it) == set_.end())
 //    {
 //      //loginf << "new var";
-//      if ((*it)->existsIn(dbo_type))
+//      if ((*it)->existsIn(dbcont_type))
 //      {
 //        logdbg << "pushback";
-//        set_.push_back ((*it)->getFor(dbo_type));
+//        set_.push_back ((*it)->getFor(dbcont_type));
 //        changed_=true;
 //        added=true;
 //      }
@@ -108,20 +108,20 @@ void VariableSet::removeVariable(const Variable& var)
     set_.erase(std::remove(set_.begin(), set_.end(), &var), set_.end());
 }
 
-// VariableSet *VariableSet::getFor (const std::string &dbo_type)
+// VariableSet *VariableSet::getFor (const std::string &dbcont_type)
 //{
-//  logdbg << "type " << dbo_type;
+//  logdbg << "type " << dbcont_type;
 
 //  VariableSet *type_set = new VariableSet ();
 //  std::vector <DBOVariable*>::iterator it;
 
 //  for (it=set_.begin(); it != set_.end(); it++)
 //  {
-//    if ((*it)->existsIn(dbo_type))
+//    if ((*it)->existsIn(dbcont_type))
 //    {
 //      logdbg << "add";
-//      assert (!(*it)->getFor(dbo_type)->isMetaVariable());
-//      type_set->add ((*it)->getFor(dbo_type));
+//      assert (!(*it)->getFor(dbcont_type)->isMetaVariable());
+//      type_set->add ((*it)->getFor(dbcont_type));
 //    }
 //  }
 

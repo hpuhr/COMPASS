@@ -35,7 +35,7 @@ class QListWidget;
 typedef struct
 {
     std::string variable_name_;
-    std::string variable_dbo_type_;
+    std::string variable_dbcont_type_;
     std::string operator_;
     std::string value_;
     std::string reset_value_;

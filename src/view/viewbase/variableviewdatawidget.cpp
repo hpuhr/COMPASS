@@ -364,7 +364,7 @@ void VariableViewDataWidget::updateFromVariables()
 
         bool can_update = canUpdate(dbcontent_name);
 
-        logdbg << "dbo " << dbcontent_name << " canUpdate " << can_update;
+        logdbg << "dbcont " << dbcontent_name << " canUpdate " << can_update;
 
         if (can_update)
             updateVariableData(dbcontent_name, *buffer);

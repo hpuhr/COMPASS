@@ -321,13 +321,13 @@ bool VariableOrderedSetWidget::uiSet(const QString& str)
         if (idx < 1 || idx >= vs.count() - nsep)
             return false;
 
-        QString dbo   = vs.mid(0, idx);
+        QString dbcont   = vs.mid(0, idx);
         QString param = vs.mid(idx + nsep);
 
-        if (dbo.isEmpty() || param.isEmpty())
+        if (dbcont.isEmpty() || param.isEmpty())
             return false;
 
-        vars.emplace_back(dbo.toStdString(), param.toStdString());
+        vars.emplace_back(dbcont.toStdString(), param.toStdString());
     }
 
     set_.set(vars);

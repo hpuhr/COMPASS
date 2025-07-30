@@ -35,7 +35,7 @@ class VariableDefinition : public Configurable
         registerParameter("variable_name", &variable_name_, std::string());
 
         // DBOVAR LOWERCASE HACK
-        // boost::algorithm::to_lower(dbo_variable_name_);
+        // boost::algorithm::to_lower(dbcont_variable_name_);
 
         assert(variable_name_.size() > 0);
     }
@@ -57,9 +57,9 @@ class VariableDefinition : public Configurable
     void dbContentName(const std::string& dbcontent_name) { dbcontent_name_ = dbcontent_name; }
 
     const std::string& variableName() { return variable_name_; }
-    void variableName(const std::string& dbo_variable_name)
+    void variableName(const std::string& dbcont_variable_name)
     {
-        variable_name_ = dbo_variable_name;
+        variable_name_ = dbcont_variable_name;
     }
 
   protected:

@@ -573,7 +573,7 @@ bool DBContent::prepareInsert(shared_ptr<Buffer>& buffer)
     if (!variable(DBContent::meta_var_rec_num_.name()).hasDBContent())
         variable(DBContent::meta_var_rec_num_.name()).setHasDBContent();
 
-    // transform variable names from dbovars to dbcolumns
+    // transform variable names from dbcontvars to dbcolumns
     buffer->transformVariables(list, false);
 
     logdbg << "end";
@@ -691,7 +691,7 @@ void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
             variable(prop_it.name()).setHasDBContent();
     }
 
-    // transform variable names from dbovars to dbcolumns
+    // transform variable names from dbcontvars to dbcolumns
     buffer->transformVariables(list, false);
 
     update_job_ =

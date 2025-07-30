@@ -56,18 +56,18 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(EvaluationCalculator& cal
     line->setFrameShadow(QFrame::Sunken);
     main_layout->addWidget(line);
 
-    // dbo
-    QGridLayout* dbo_lay = new QGridLayout();
+    // dbcont
+    QGridLayout* dbcont_lay = new QGridLayout();
 
-    dbo_lay->addWidget(new QLabel("DBContent"), 0, 0);
+    dbcont_lay->addWidget(new QLabel("DBContent"), 0, 0);
 
     dbcont_combo_ = new DBContentComboBox(false, true);
     dbcont_combo_->setObjectName(dbcontent_name_);
     connect (dbcont_combo_, &DBContentComboBox::changedObject, this, &EvaluationDataSourceWidget::dbContentNameChangedSlot);
 
-    dbo_lay->addWidget(dbcont_combo_, 0, 1);
+    dbcont_lay->addWidget(dbcont_combo_, 0, 1);
 
-    main_layout->addLayout(dbo_lay);
+    main_layout->addLayout(dbcont_lay);
 
     // data sources
     data_source_layout_ = new QGridLayout();

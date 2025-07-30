@@ -217,14 +217,14 @@ void FilterGeneratorWidget::addCondition()
     {
         const dbContent::Variable& var = condition_variable_widget_->selectedVariable();
         data_condition.variable_name_ = var.name();
-        data_condition.variable_dbo_type_ = var.dbContentName();
+        data_condition.variable_dbcont_type_ = var.dbContentName();
     }
     else
     {
         assert(condition_variable_widget_->hasMetaVariable());
         dbContent::MetaVariable& var = condition_variable_widget_->selectedMetaVariable();
         data_condition.variable_name_ = var.name();
-        data_condition.variable_dbo_type_ = META_OBJECT_NAME;
+        data_condition.variable_dbcont_type_ = META_OBJECT_NAME;
     }
 
     data_condition.absolute_value_ = condition_absolute_->checkState() == Qt::Checked;
@@ -275,7 +275,7 @@ void FilterGeneratorWidget::accept()
         Configuration& condition_configuration = configuration->addNewSubConfiguration("DBFilterCondition", condition_name);
         condition_configuration.addParameter<std::string>("operator", data_condition.operator_);
         condition_configuration.addParameter<std::string>("variable_name", data_condition.variable_name_);
-        condition_configuration.addParameter<std::string>("variable_dbcontent_name", data_condition.variable_dbo_type_);
+        condition_configuration.addParameter<std::string>("variable_dbcontent_name", data_condition.variable_dbcont_type_);
         condition_configuration.addParameter<bool>("absolute_value", data_condition.absolute_value_);
         condition_configuration.addParameter<std::string>("value", data_condition.value_);
 

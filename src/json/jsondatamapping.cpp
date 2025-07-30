@@ -113,7 +113,7 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
 //    other.configuration().updateParameterPointer("active", &active_);
 //    other.configuration().updateParameterPointer("json_key", &json_key_);
 //    other.configuration().updateParameterPointer("dbcontent_name", &db_content_name_);
-//    other.configuration().updateParameterPointer("dbovariable_name", &dbcontent_variable_name_);
+//    other.configuration().updateParameterPointer("dbcontvariable_name", &dbcontent_variable_name_);
 //    other.configuration().updateParameterPointer("mandatory", &mandatory_);
 //    other.configuration().updateParameterPointer("comment", &comment_);
 //    other.configuration().updateParameterPointer("format_data_type", &format_data_type_);
@@ -211,7 +211,7 @@ Format& JSONDataMapping::jsonValueFormatRef()
 
 std::string JSONDataMapping::dbObjectName() const { return db_content_name_; }
 
-void JSONDataMapping::dboVariableName(const std::string& name)
+void JSONDataMapping::dbcontVariableName(const std::string& name)
 {
     loginf << "start" << name;
 
@@ -224,7 +224,7 @@ void JSONDataMapping::dboVariableName(const std::string& name)
     initialize();
 }
 
-std::string JSONDataMapping::dboVariableName() const { return dbcontent_variable_name_; }
+std::string JSONDataMapping::dbcontVariableName() const { return dbcontent_variable_name_; }
 
 std::string JSONDataMapping::dimensionUnitStr()
 {
@@ -288,12 +288,12 @@ void JSONDataMapping::initialize()
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (db_content_name_.size() && !dbcont_man.existsDBContent(db_content_name_))
-        logwrn << "dbobject '" << db_content_name_
+        logwrn << "dbcontbject '" << db_content_name_
                << "' does not exist";
 
     if (db_content_name_.size() && dbcont_man.existsDBContent(db_content_name_) &&
             dbcontent_variable_name_.size() && !dbcont_man.dbContent(db_content_name_).hasVariable(dbcontent_variable_name_))
-        logwrn << "dbobject " << db_content_name_ << " variable '"
+        logwrn << "dbcontbject " << db_content_name_ << " variable '"
                << dbcontent_variable_name_ << "' does not exist";
 
     if (db_content_name_.size() && dbcont_man.existsDBContent(db_content_name_) &&

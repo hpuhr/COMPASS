@@ -523,13 +523,13 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    for (auto& dbo_it : dbcont_man)
+    for (auto& dbcont_it : dbcont_man)
     {
-        if (dbo_it.first != tracker_dbcontent_name_ && dbo_it.second->hasData())
+        if (dbcont_it.first != tracker_dbcontent_name_ && dbcont_it.second->hasData())
         {
-            string status = "Creating " + dbo_it.first + " Hash List";
+            string status = "Creating " + dbcont_it.first + " Hash List";
             emit statusSignal(status.c_str());
-            createSensorHashes(*dbo_it.second);
+            createSensorHashes(*dbcont_it.second);
         }
     }
 
@@ -789,7 +789,7 @@ void CreateARTASAssociationsJob::createSensorHashes(DBContent& object)
         if (ts_vec.isNull(cnt))
         {
             logwrn << "rec_num "
-                   << rec_nums.get(cnt) << " of dbo " << object.name() << " has no time, skipping";
+                   << rec_nums.get(cnt) << " of dbcont " << object.name() << " has no time, skipping";
             continue;
         }
 

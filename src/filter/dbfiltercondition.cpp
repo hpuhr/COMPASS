@@ -225,24 +225,24 @@ void DBFilterCondition::setVariableName(const std::string& variable_name)
 
 bool DBFilterCondition::hasVariable (const std::string& dbcontent_name)
 {
-    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (variable_dbcontent_name_ == META_OBJECT_NAME)
     {
-        if (!dbo_man.existsMetaVariable(variable_name_))
+        if (!dbcont_man.existsMetaVariable(variable_name_))
             return false;
 
-        return dbo_man.metaVariable(variable_name_).existsIn(dbcontent_name);
+        return dbcont_man.metaVariable(variable_name_).existsIn(dbcontent_name);
     }
     else
     {
         if (dbcontent_name != variable_dbcontent_name_)
             return false;
 
-        if (!dbo_man.existsDBContent(variable_dbcontent_name_))
+        if (!dbcont_man.existsDBContent(variable_dbcontent_name_))
             return false;
 
-        return dbo_man.dbContent(variable_dbcontent_name_).hasVariable(variable_name_);
+        return dbcont_man.dbContent(variable_dbcontent_name_).hasVariable(variable_name_);
     }
 }
 
@@ -251,12 +251,12 @@ dbContent::Variable& DBFilterCondition::variable (const std::string& dbcontent_n
 {
     assert (hasVariable(dbcontent_name));
 
-    DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (variable_dbcontent_name_ == META_OBJECT_NAME)
-        return dbo_man.metaVariable(variable_name_).getFor(dbcontent_name);
+        return dbcont_man.metaVariable(variable_name_).getFor(dbcontent_name);
     else
-         return dbo_man.dbContent(variable_dbcontent_name_).variable(variable_name_);
+         return dbcont_man.dbContent(variable_dbcontent_name_).variable(variable_name_);
 }
 
 
@@ -346,11 +346,11 @@ bool DBFilterCondition::checkValueInvalid(const std::string& new_value)
 
     if (variable_dbcontent_name_ == META_OBJECT_NAME)
     {
-         DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+         DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-        assert (dbo_man.existsMetaVariable(variable_name_));
+        assert (dbcont_man.existsMetaVariable(variable_name_));
 
-        for (auto var_it : dbo_man.metaVariable(variable_name_).variables())
+        for (auto var_it : dbcont_man.metaVariable(variable_name_).variables())
             variables.push_back(&var_it.second);
     }
     else

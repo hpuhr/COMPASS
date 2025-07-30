@@ -114,7 +114,7 @@ void JSONObjectParser::initialize()
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     if (!dbcont_man.existsDBContent(db_content_name_))
-        logwrn << "dbobject '" << db_content_name_
+        logwrn << "dbcontbject '" << db_content_name_
                << "' does not exist";
     else
         dbcontent_ = &dbcont_man.dbContent(db_content_name_);
@@ -555,7 +555,7 @@ void JSONObjectParser::checkIfKeysExistsInMappings(const std::string& location,
 
     if (!found)
     {
-        loginf << "creating new mapping for dbo "
+        loginf << "creating new mapping for dbcont "
                << db_content_name_ << "'" << location << "' type " << j.type_name() << " value "
                << j.dump() << " in array " << is_in_array;
 

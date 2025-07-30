@@ -41,7 +41,7 @@ class ViewVariable
 public:
     struct Settings
     {
-        std::string data_var_dbo;
+        std::string data_var_dbcont;
         std::string data_var_name;
 
         std::string display_name;
@@ -65,7 +65,7 @@ public:
 
     boost::optional<PropertyDataType> dataType() const;
 
-    void set(const std::string& dbo, const std::string& name, bool notify_changes);
+    void set(const std::string& dbcont, const std::string& name, bool notify_changes);
 
     dbContent::Variable& variable();
     const dbContent::Variable& variable() const;

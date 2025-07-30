@@ -43,9 +43,9 @@ Mode3AFilter::Mode3AFilter(const std::string& class_id, const std::string& insta
 
 Mode3AFilter::~Mode3AFilter() {}
 
-bool Mode3AFilter::filters(const std::string& dbo_type)
+bool Mode3AFilter::filters(const std::string& dbcont_type)
 {
-    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbo_type);
+    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbcont_type);
 }
 
 std::string Mode3AFilter::getConditionString(const std::string& dbcontent_name, bool& first)

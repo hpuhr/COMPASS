@@ -43,9 +43,9 @@ ACADFilter::ACADFilter(const std::string& class_id, const std::string& instance_
 
 ACADFilter::~ACADFilter() {}
 
-bool ACADFilter::filters(const std::string& dbo_type)
+bool ACADFilter::filters(const std::string& dbcont_type)
 {
-    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbo_type);
+    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbcont_type);
 }
 
 std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bool& first)

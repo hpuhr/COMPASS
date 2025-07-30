@@ -71,5 +71,5 @@ class DBContentWidget : public QWidget
 
     QPushButton* new_meta_button_{nullptr};
 
-    QGridLayout* dbovars_grid_{nullptr};
+    QGridLayout* dbcontvars_grid_{nullptr};
 };

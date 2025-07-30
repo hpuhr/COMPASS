@@ -218,18 +218,18 @@ void CreateARTASAssociationsTask::run()
     connect(&dbcontent_man, &DBContentManager::loadingDoneSignal,
             this, &CreateARTASAssociationsTask::loadingDoneSlot);
 
-    for (auto& dbo_it : dbcontent_man)
+    for (auto& dbcont_it : dbcontent_man)
     {
-        if (!dbo_it.second->hasData())
+        if (!dbcont_it.second->hasData())
             continue;
 
-        if (dbo_it.second->isStatusContent() ||
-            dbo_it.second->isReferenceContent()) // not covered by ARTAS
+        if (dbcont_it.second->isStatusContent() ||
+            dbcont_it.second->isReferenceContent()) // not covered by ARTAS
             continue;
 
-        VariableSet read_set = getReadSetFor(dbo_it.first);
+        VariableSet read_set = getReadSetFor(dbcont_it.first);
 
-        if (dbo_it.first == "CAT062")
+        if (dbcont_it.first == "CAT062")
         {
             bool ds_found{false};
             unsigned int current_ds_id;
@@ -251,9 +251,9 @@ void CreateARTASAssociationsTask::run()
 
             assert(ds_found);
             std::string custom_filter_clause {
-                dbcontent_man.metaGetVariable(dbo_it.first, DBContent::meta_var_ds_id_).dbColumnName()
+                dbcontent_man.metaGetVariable(dbcont_it.first, DBContent::meta_var_ds_id_).dbColumnName()
                         + " in (" + std::to_string(current_ds_id) + ") AND " +
-                dbcontent_man.metaGetVariable(dbo_it.first, DBContent::meta_var_line_id_).dbColumnName()
+                dbcontent_man.metaGetVariable(dbcont_it.first, DBContent::meta_var_line_id_).dbColumnName()
                         + " in (" + std::to_string(settings_.current_data_source_line_id_) + ")"
             };
 
@@ -263,14 +263,14 @@ void CreateARTASAssociationsTask::run()
             //                             use_order, DBOVariable* order_variable, bool
             //                             use_order_ascending, const std::string &limit_str)
 
-            dbo_it.second->loadFiltered(read_set, custom_filter_clause);
+            dbcont_it.second->loadFiltered(read_set, custom_filter_clause);
         }
         else
-            dbo_it.second->load(read_set, false, false);
+            dbcont_it.second->load(read_set, false, false);
 
     }
 
-    //status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
+    //status_dialog_->setDBODoneFlags(dbcont_loading_done_flags_);
 }
 
 bool CreateARTASAssociationsTask::wasRun()
@@ -290,9 +290,9 @@ void CreateARTASAssociationsTask::loadingDoneSlot()
     loginf << "start";
 
     assert(status_dialog_);
-    //status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
+    //status_dialog_->setDBODoneFlags(dbcont_loading_done_flags_);
 
-    dbo_loading_done_ = true;
+    dbcont_loading_done_ = true;
 
     assert(!create_job_);
 

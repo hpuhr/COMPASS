@@ -82,8 +82,8 @@ class JSONDataMapping : public Configurable
 
     std::string dbObjectName() const;
 
-    void dboVariableName(const std::string& name);
-    std::string dboVariableName() const;
+    void dbcontVariableName(const std::string& name);
+    std::string dbcontVariableName() const;
 
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id)

@@ -75,23 +75,23 @@ class DBContentManagerWidget : public QWidget
     DBContentManager& object_manager_;
 
     /// Grid with all DBContents
-    QGridLayout* dbobjects_grid_{nullptr};
+    QGridLayout* dbcontbjects_grid_{nullptr};
     QGridLayout* meta_variables_grid_{nullptr};
 
     /// Editing functionality unlocked flag
     // bool locked_ {false};
 
     /// New DBO add button
-    QPushButton* add_dbo_button_{nullptr};
+    QPushButton* add_dbcont_button_{nullptr};
     QPushButton* add_metavar_button_{nullptr};
 
     /// Container with DBO edit buttons
-    std::map<QPushButton*, DBContent*> edit_dbo_buttons_;
+    std::map<QPushButton*, DBContent*> edit_dbcont_buttons_;
     /// Container with DBO edit buttons
-    std::map<QPushButton*, DBContent*> delete_dbo_buttons_;
+    std::map<QPushButton*, DBContent*> delete_dbcont_buttons_;
 
     /// Container with already existing edit DBO widgets
-    std::map<DBContent*, DBContentWidget*> edit_dbo_widgets_;
+    std::map<DBContent*, DBContentWidget*> edit_dbcont_widgets_;
 
     std::map<QPushButton*, dbContent::MetaVariable*> edit_meta_buttons_;
     /// Container with DBO edit buttons

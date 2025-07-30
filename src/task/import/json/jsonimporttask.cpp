@@ -713,20 +713,20 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 
 //        if (!buffer->size())
 //        {
-//            logdbg << "dbo " << dbcontent_name << " with empty buffer";
+//            logdbg << "dbcont " << dbcontent_name << " with empty buffer";
 //            continue;
 //        }
 
 //        if (!dbcont_variable_sets_.count(dbcontent_name))
 //        {
-//            logerr << "dbo " << dbcontent_name << " has no variable set, buffer size "
+//            logerr << "dbcont " << dbcontent_name << " has no variable set, buffer size "
 //                   << buffer->size();
 //            continue;
 //        }
 
 //        assert(dbcont_variable_sets_.count(dbcontent_name));
 
-//        loginf << "insert dbo " << dbcontent_name << " size " << buffer->size()
+//        loginf << "insert dbcont " << dbcontent_name << " size " << buffer->size()
 //               << " num prop " << buffer->properties().size();
 //        //buffer->properties().print();
 
@@ -750,7 +750,7 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 
 //        std::string data_source_var_name = std::get<0>(dbcont_variable_sets_.at(dbcontent_name));
 
-//        logdbg << "adding new data sources in dbo " << dbcontent.name()
+//        logdbg << "adding new data sources in dbcont " << dbcontent.name()
 //               << " ds varname '" << data_source_var_name << "'";
 
 //        TODO_ASSERT
@@ -830,7 +830,7 @@ void JSONImportTask::insertData(std::map<std::string, std::shared_ptr<Buffer>> j
 
 //        dbContent::VariableSet& set = std::get<1>(dbcont_variable_sets_.at(dbcontent_name));
 
-//        loginf << "calling dbo insert buffer size " << buffer->size()
+//        loginf << "calling dbcont insert buffer size " << buffer->size()
 //               << " num set " << set.getSize();
 
 //        //set.print();

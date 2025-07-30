@@ -163,7 +163,7 @@ void VariableWidget::editNameSlot()
     std::string text = name_edit_->text().toStdString();
     assert(text.size() > 0);
     variable_->name(text);
-    emit dboVariableChangedSignal();
+    emit dbcontVariableChangedSignal();
 }
 void VariableWidget::editDescriptionSlot()
 {
@@ -173,7 +173,7 @@ void VariableWidget::editDescriptionSlot()
     std::string text = description_edit_->text().toStdString();
     assert(text.size() > 0);
     variable_->description(text);
-    emit dboVariableChangedSignal();
+    emit dbcontVariableChangedSignal();
 }
 
 //void VariableWidget::editDataTypeSlot()
@@ -181,7 +181,7 @@ void VariableWidget::editDescriptionSlot()
 //    logdbg << "start";
 //    assert(type_combo_);
 //    variable_->dataType(type_combo_->getType());
-//    emit dboVariableChangedSignal();
+//    emit dbcontVariableChangedSignal();
 //}
 
 }

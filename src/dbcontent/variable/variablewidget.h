@@ -41,7 +41,7 @@ class VariableWidget : public QWidget
     Q_OBJECT
 
   signals:
-    void dboVariableChangedSignal();
+    void dbcontVariableChangedSignal();
 
   public slots:
     /// @brief Changes DBO name

@@ -48,10 +48,10 @@ TimestampFilter::TimestampFilter(const std::string& class_id, const std::string&
 
 TimestampFilter::~TimestampFilter() {}
 
-bool TimestampFilter::filters(const std::string& dbo_type)
+bool TimestampFilter::filters(const std::string& dbcont_type)
 {
     return COMPASS::instance().dbContentManager().metaVariable(
-                DBContent::meta_var_timestamp_.name()).existsIn(dbo_type);
+                DBContent::meta_var_timestamp_.name()).existsIn(dbcont_type);
 }
 
 std::string TimestampFilter::getConditionString(const std::string& dbcontent_name, bool& first)
@@ -79,7 +79,7 @@ std::string TimestampFilter::getConditionString(const std::string& dbcontent_nam
         ss << " (" << var.dbColumnName() << " >= " << Time::toLong(min_value_)
            << " AND " << var.dbColumnName() << " <= " << Time::toLong(max_value_) << ")";
 
-        loginf << "dbo " << dbcontent_name << " active " << active_
+        loginf << "dbcont " << dbcontent_name << " active " << active_
                << " min " << Time::toString(min_value_) << " max " << Time::toString(max_value_);
 
         first = false;

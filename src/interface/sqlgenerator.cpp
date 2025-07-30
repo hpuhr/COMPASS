@@ -363,9 +363,9 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcon
 
 //    assert (false); // TODO
 
-//    //    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
-//    //    assert(object.hasVariable(local_key_dbovar));
-//    //    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
+//    //    string local_key_dbcontvar = object.currentDataSourceDefinition().localKey();
+//    //    assert(object.hasVariable(local_key_dbcontvar));
+//    //    const DBTableColumn& local_key_col = object.variable(local_key_dbcontvar).currentDBColumn();
 
 //    //    vector<const DBTableColumn*> columns;
 //    //    columns.push_back(&local_key_col);

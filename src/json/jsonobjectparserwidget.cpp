@@ -194,9 +194,9 @@ void JSONObjectParserWidget::updateMappingsGrid()
     comment_label->setFont(font_bold);
     mappings_grid_->addWidget(comment_label, row, 2);
 
-    QLabel* dbovar_label = new QLabel("DBContent Variable");
-    dbovar_label->setFont(font_bold);
-    mappings_grid_->addWidget(dbovar_label, row, 3);
+    QLabel* dbcontvar_label = new QLabel("DBContent Variable");
+    dbcontvar_label->setFont(font_bold);
+    mappings_grid_->addWidget(dbcontvar_label, row, 3);
 
     QLabel* mandatory_label = new QLabel("Mandatory");
     mandatory_label->setFont(font_bold);
@@ -453,13 +453,13 @@ void JSONObjectParserWidget::mappingDBContentVariableChangedSlot()
     {
         loginf << "variable set";
 
-        mapping->dboVariableName(var_widget->selectedVariable().name());
+        mapping->dbcontVariableName(var_widget->selectedVariable().name());
     }
     else
     {
         loginf << "variable removed";
 
-        mapping->dboVariableName("");
+        mapping->dbcontVariableName("");
     }
 }
 

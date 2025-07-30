@@ -48,7 +48,7 @@ EvaluationTargetFilter::EvaluationTargetFilter(const std::string& class_id, cons
     registerParameter("filter_target_addresses", &filter_target_addresses_, false);
     registerParameter("filter_target_addresses_blacklist", &filter_target_addresses_blacklist_, true);
     registerParameter("filter_target_address_values", &filter_target_address_values_, std::string());
-    // dbo
+    // dbcont
     registerParameter("remove_not_detected_dbconts", &remove_not_detected_dbconts_, false);
     registerParameter("remove_not_detected_dbcont_values", &remove_not_detected_dbcont_values_, json::object());
 
@@ -408,7 +408,7 @@ bool EvaluationTargetFilter::removeNotDetectedDBContent(const std::string& dbcon
  */
 void EvaluationTargetFilter::removeNotDetectedDBContents(const std::string& dbcontent_name, bool value)
 {
-    loginf << "dbo " << dbcontent_name << " value " << value;
+    loginf << "dbcont " << dbcontent_name << " value " << value;
 
     remove_not_detected_dbcont_values_[dbcontent_name] = value;
 }
