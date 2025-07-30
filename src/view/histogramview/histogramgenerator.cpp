@@ -305,7 +305,7 @@ bool HistogramGenerator::finalizeResults()
     assert(subRangeActive() || results_.not_inserted_count == 0);
 
     // if(!subRangeActive() && results_.not_inserted_count != 0)
-    //     logerr << "HistogramGenerator::finalizeResults: error subRangeActive " << subRangeActive()
+    //     logerr << "subRangeActive " << subRangeActive()
     //            << " not_inserted_count " << results_.not_inserted_count;
 
     return true;

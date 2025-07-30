@@ -301,7 +301,7 @@ std::string Variable::dbColumnIdentifier() const
 //    assert(!min_max_set_);
 
 //    assert(dbcontent_);
-//    logdbg << "Variable " << dbcontent_->name() << " " << name_ << ": setMinMax";
+//    logdbg << "variable " << dbcontent_->name() << " " << name_ << ": setMinMax";
 
 //    if (!dbObject().existsInDB() || !dbObject().count())
 //    {

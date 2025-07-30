@@ -131,7 +131,7 @@ namespace EvaluationResultsReport
     */
     void Section::addSubSection (const std::string& heading)
     {
-        logdbg << "Section " << heading_ << ": addSubSection: adding " << heading;
+        logdbg << "heading '" << heading_ << "': adding " << heading;
 
         assert (!hasSubSection(heading));
 

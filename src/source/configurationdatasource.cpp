@@ -45,7 +45,7 @@ ConfigurationDataSource::ConfigurationDataSource(const std::string& class_id, co
              DataSourceManager::data_source_types_.end(), ds_type_)
         == DataSourceManager::data_source_types_.end())
     {
-        logerr << "ConfigurationDataSource: sac/sic " << sac_ << sic_ << " ds_type '" << ds_type_
+        logerr << "sac/sic " << sac_ << sic_ << " ds_type '" << ds_type_
                << "' wrong";
     }
 

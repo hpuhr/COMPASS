@@ -120,11 +120,11 @@ protected:
 
         auto range = histogram_init_.getRange();
 
-        logdbg << "RANGE: min = " << range->first << ", max = " << range->second;
+        logdbg << "range: min = " << range->first << ", max = " << range->second;
 
         auto config = histogram_init_.generateConfiguration();
 
-        logdbg << "CONFIG: num bins = " << config.num_bins << ", sorted = " << config.sorted_bins << ", type = " << (int)config.type;
+        logdbg << "config: num bins = " << config.num_bins << ", sorted = " << config.sorted_bins << ", type = " << (int)config.type;
 
         //init needed histograms
         for (const auto& db_content : scanned_contents)
@@ -152,7 +152,7 @@ protected:
         //add all buffers
         for (auto& elem : *currentData())
         {
-            logdbg << "addBuffer " << elem.first;
+            logdbg << "add buffer " << elem.first;
 
             bool ok = addBuffer(elem.first, *elem.second);
 

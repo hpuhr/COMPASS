@@ -328,7 +328,7 @@ void BufferCSVExportJob::run_impl()
     }
     else
     {
-        logerr << "BufferCSVExportJob: runFailure opening " << file_name_;
+        logerr << "failure opening " << file_name_;
     }
 
     done_ = true;

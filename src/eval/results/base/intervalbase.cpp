@@ -77,7 +77,7 @@ boost::optional<double> SingleIntervalBase::computeResult_impl() const
     if (sum_uis_ == 0)
         return {};
 
-    logdbg << type() << ": updatePD: utn " << utn_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
+    logdbg << type() << ": utn " << utn_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
 
     return (1.0 - (double)missed_uis_ / (double)sum_uis_);
 }

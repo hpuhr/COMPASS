@@ -771,7 +771,7 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     task::TaskResultType stored_type = j[ FieldType ];
     if (stored_type != type())
     {
-        logerr << "Stored type " << stored_type
+        logerr << "stored type " << stored_type
                << " does not match result type " << type();
         return false;
     }
@@ -795,7 +795,7 @@ bool TaskResult::fromJSON(const nlohmann::json& j)
     auto init_res = initResult();
     if (!init_res.ok())
     {
-        logerr << "Initializing result failed: " << init_res.error();
+        logerr << "initializing result failed: " << init_res.error();
         return false;
     }
 

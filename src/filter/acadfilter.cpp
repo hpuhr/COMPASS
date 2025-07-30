@@ -50,7 +50,7 @@ bool ACADFilter::filters(const std::string& dbo_type)
 
 std::string ACADFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbcont " << dbcontent_name << " active " << active_;
 
     if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acad_.name()).existsIn(dbcontent_name))
         return "";

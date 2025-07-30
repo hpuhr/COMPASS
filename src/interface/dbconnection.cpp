@@ -162,7 +162,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const std::string& sql, bool fet
 
     if (res.ok() && fetch_result_buffer && !result->buffer())
     {
-        //logerr << "Query '" << sql << "': buffer creation failed";
+        //logerr << "query '" << sql << "': buffer creation failed";
         result->setError("buffer creation failed");
     }
 
@@ -186,7 +186,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommand& command)
 
     if (ok && fetch_buffer && !result->buffer())
     {
-        //logerr << "DBCommand '" << command.get() << "': buffer creation failed";
+        //logerr << "command '" << command.get() << "': buffer creation failed";
         result->setError("buffer creation failed");
     }
     
@@ -220,7 +220,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
         auto ok = executeCmd_impl(cmd, fetch_buffers ? &command_list.getResultList() : nullptr, result.get());
         if (!ok)
         {
-            //logerr << "DBCommand '" << cmd << "' failed: " << result->error();
+            //logerr << "command '" << cmd << "' failed: " << result->error();
             dbresult->setError(result->error());
             break;
         }
@@ -228,7 +228,7 @@ std::shared_ptr<DBResult> DBConnection::execute(const DBCommandList& command_lis
         {
             if (!result->buffer())
             {
-                //logerr << "DBCommand '" << cmd << "': buffer creation failed";
+                //logerr << "command '" << cmd << "': buffer creation failed";
                 dbresult->setError("buffer creation failed");
                 break;
             }
@@ -355,7 +355,7 @@ Result DBConnection::insertBuffer(const std::string& table_name,
     }
 
     //if (!res.first)
-    //    logerr << "DBConnection: : insertBuffer: inserting into table '" << table_name << "' failed: " << res.second;
+    //    logerr << "inserting into table '" << table_name << "' failed: " << res.second;
 
     return res;
 }
@@ -395,7 +395,7 @@ Result DBConnection::updateBuffer(const std::string& table_name,
     }
 
     //if (!res.first)
-    //    logerr << "DBConnection: : updateBuffer: updating table '" << table_name 
+    //    logerr << "updating table '" << table_name 
     //           << "' at key column '" << key_column << "' failed: " << res.second;
 
     return res;
@@ -467,7 +467,7 @@ ResultT<std::vector<std::string>> DBConnection::getTableList()
     auto res = getTableList_impl();
 
     //if (!res.first)
-    //    logerr << "DBConnection: : getTableList: retrieving table list failed"; 
+    //    logerr << "retrieving table list failed"; 
 
     return res;
 }
@@ -482,7 +482,7 @@ ResultT<DBTableInfo> DBConnection::getColumnList(const std::string& table)
     auto res = getColumnList_impl(table);
 
     //if (!res.first)
-    //    logerr << "DBConnection: : getColumnList: retrieving column list failed"; 
+    //    logerr << "retrieving column list failed"; 
 
     return res;
 }

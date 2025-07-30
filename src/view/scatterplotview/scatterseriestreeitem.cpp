@@ -79,29 +79,20 @@ void ScatterSeriesTreeItemDelegate::paint(QPainter* painter, const QStyleOptionV
         x += w + space;
     }
 
-    logdbg << "1";
-
     QStyleOptionButton button;
     button.rect = QRect(x, y, w, h);
     button.state = QStyle::State_Enabled;
     button.features = QStyleOptionButton::None;
 
-    logdbg << "2";
-
     QIcon icon = qvariant_cast<QIcon>(index.data(ScatterSeriesModel::DataRole::IconRole));
-    logdbg << "2b";
     button.icon = icon;
     button.iconSize = QSize(w - space, h - space);
 
     QApplication::style()->drawControl(QStyle::CE_PushButton, &button, painter);
 
-    logdbg << "3";
-
     QString headerText = qvariant_cast<QString>(index.data(0));
 
     QSize iconsize(w, h);
-
-    logdbg << "4";
 
     QRect headerRect = option.rect;
     QRect iconRect(0, 0, w, h);
@@ -116,8 +107,6 @@ void ScatterSeriesTreeItemDelegate::paint(QPainter* painter, const QStyleOptionV
     QTextOption text_option;
     text_option.setWrapMode(QTextOption::WordWrap);
     painter->drawText(headerRect, headerText, text_option);
-
-    logdbg << "5";
 
     painter->restore();
 
@@ -203,7 +192,7 @@ ScatterSeriesTreeItem::~ScatterSeriesTreeItem()
 
 void ScatterSeriesTreeItem::appendChild(ScatterSeriesTreeItem* item)
 {
-    logdbg << "ScatterSeriesTreeItem " << name_ << ": appendChild: " << item->name();
+    logdbg << item->name();
 
     assert (!child_items_.count(item->name()));
 
@@ -212,7 +201,7 @@ void ScatterSeriesTreeItem::appendChild(ScatterSeriesTreeItem* item)
 
 // void ScatterSeriesTreeItem::removeChild(ScatterSeriesTreeItem* item)
 // {
-//     logdbg << "ScatterSeriesTreeItem " << name_ << ": removeChild: " << item->name();
+//     logdbg << item->name();
 //     auto it = std::find(child_items_.begin(), child_items_.end(), item);
 //     assert(it != child_items_.end());
 
@@ -315,13 +304,13 @@ ScatterSeriesTreeItem* ScatterSeriesTreeItem::child(int row)
     auto it = std::next(child_items_.begin(), row);
     assert (it != child_items_.end());
 
-    logdbg << "ScatterSeriesTreeItem " << name_ << ": child: " << it->second->name();
+    logdbg  << "child: " << it->second->name();
     return it->second.get();
 }
 
 int ScatterSeriesTreeItem::childCount() const
 {
-    logdbg << "ScatterSeriesTreeItem " << name_ << ": childCount: " << child_items_.size();
+    logdbg << "count " << child_items_.size();
     return child_items_.size();
 }
 

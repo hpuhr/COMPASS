@@ -113,7 +113,7 @@ boost::optional<double> SingleDubiousTarget::computeResult_impl() const
     if (num_pos_inside_)
         p_dubious_update_ = (double)num_pos_inside_dubious_ / (double)num_pos_inside_;
 
-    logdbg << "SingleDubiousTarget "      << requirement_->name() << " " << target_->utn_
+    logdbg << "'" << requirement_->name() << "': " << target_->utn_
            << " has_p_dubious_update_ "   << p_dubious_update_.has_value()
            << " num_pos_inside_dubious_ " << num_pos_inside_dubious_
            << " num_pos_inside_ "         << num_pos_inside_

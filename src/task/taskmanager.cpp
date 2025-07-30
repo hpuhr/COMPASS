@@ -705,7 +705,7 @@ std::shared_ptr<ResultReport::SectionContent> TaskManager::loadContent(ResultRep
 
     if (!result.ok())
     {
-        logerr << "Could not load stored content: " << result.error();
+        logerr << "could not load stored content: " << result.error();
         return std::shared_ptr<ResultReport::SectionContent>();
     }
 
@@ -723,7 +723,7 @@ void TaskManager::loadResults()
     auto res = COMPASS::instance().dbInterface().loadResults();
     if (!res.ok())
     {
-        logerr << "Could not load stored results: " << res.error();
+        logerr << "could not load stored results: " << res.error();
         return;
     }
 

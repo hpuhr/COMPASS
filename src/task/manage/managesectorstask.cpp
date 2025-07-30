@@ -350,7 +350,7 @@ void ManageSectorsTask::parseCurrentFile (bool import)
                     && geometry->getGeometryType() != wkbMultiPolygon
                     && geometry->getGeometryType() != wkbMultiPolygon25D)
                 {
-                    loginf << "ManageSectorsTask: parseCurrentFile skipping unsupported geometry name "
+                    loginf << "skipping unsupported geometry name "
                            << geometry->getGeometryName()
                            << " type " << geometry->getGeometryType();
                     continue;

@@ -45,7 +45,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_;
+    logdbg << "'" << name_ << "': utn " << target_data.utn_;
 
     typedef EvaluationRequirementResult::SingleModeCCorrect Result;
     typedef EvaluationDetail                                         Detail;
@@ -53,7 +53,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
 
     if (target_data.isPrimaryOnly())
     {
-        logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "'" << name_ << "': utn " << target_data.utn_
                << " ignored since primary only";
 
         return make_shared<EvaluationRequirementResult::SingleModeCCorrect>(
@@ -224,7 +224,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCCorrect::evaluate (
                         num_correct, num_not_correct, comment);
     }
 
-    logdbg << "EvaluationRequirementModeC '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
            << " num_no_ref_id " << num_no_ref_id
            << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside

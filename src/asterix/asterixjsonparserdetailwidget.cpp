@@ -712,8 +712,9 @@ void ASTERIXJSONParserDetailWidget::deleteDBVariableSlot()
 
     // delete variable
     assert (parser_.dbContent().hasVariable(dbovar_name));
-    parser_.dbContent().deleteVariable(dbovar_name);loginf << "start";
-
+    parser_.dbContent().deleteVariable(dbovar_name);
+    
+    loginf << "start";
 
     if (entry_type_ == ASTERIXJSONParser::EntryType::ExistingMapping)
     {

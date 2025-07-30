@@ -238,7 +238,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     if (import_count > 1)
     {
-        logerr << "COMPASSClient: unable run multiple ASTERIX import operations at the same time";
+        logerr << "unable run multiple ASTERIX import operations at the same time";
         return;
     }
 
@@ -373,7 +373,7 @@ bool Client::run ()
     }
     catch(const std::exception& e)
     {
-        logerr << "COMPASSClient: creating COMPASS instance failed: " << e.what();
+        logerr << "creating COMPASS instance failed: " << e.what();
         quit_requested_ = true;
         System::printBacktrace();
 
@@ -381,7 +381,7 @@ bool Client::run ()
     }
     catch(...)
     {
-        logerr << "COMPASSClient: creating COMPASS instance failed: unknown error";
+        logerr << "creating COMPASS instance failed: unknown error";
         quit_requested_ = true;
         return false;
     }
@@ -425,7 +425,7 @@ bool Client::run ()
     }
     catch (exception& e)
     {
-        logerr << "COMPASSClient: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error: " << e.what();
         quit_requested_ = true;
         return false;
     }
@@ -604,7 +604,7 @@ bool Client::notify(QObject* receiver, QEvent* event)
     }
     catch (exception& e)
     {
-        logerr << "COMPASSClient: Exception thrown: " << e.what();
+        logerr << "exception thrown: " << e.what();
         // assert (false);
         QMessageBox::critical(nullptr, "COMPASSClient: notify: exception", QString(e.what()));
     }
@@ -718,7 +718,7 @@ void Client::checkAndSetupConfig()
             }
             catch (exception& e)
             {
-                logerr << "COMPASSClient: JSON parse error in '" << import_asterix_parameters_ << "'";
+                logerr << "JSON parse error in '" << import_asterix_parameters_ << "'";
                 throw e;
             }
         }
@@ -748,7 +748,7 @@ void Client::checkAndSetupConfig()
             }
             catch (exception& e)
             {
-                logerr << "COMPASSClient: JSON parse error in '" << import_gps_parameters_ << "'";
+                logerr << "JSON parse error in '" << import_gps_parameters_ << "'";
                 throw e;
             }
         }
@@ -778,14 +778,14 @@ void Client::checkAndSetupConfig()
             }
             catch (exception& e)
             {
-                logerr << "COMPASSClient: JSON parse error in '" << evaluation_parameters_ << "'";
+                logerr << "JSON parse error in '" << evaluation_parameters_ << "'";
                 throw e;
             }
         }
     }
     catch (exception& ex)
     {
-        logerr << "COMPASSClient: Caught Exception '" << ex.what() << "'";
+        logerr << "caught exception '" << ex.what() << "'";
         //logerr.flush();
         // assert (false);
 
@@ -794,7 +794,7 @@ void Client::checkAndSetupConfig()
     }
     catch (...)
     {
-        logerr << "COMPASSClient: Caught Exception";
+        logerr << "caught exception";
         //logerr.flush();
         // assert (false);
 

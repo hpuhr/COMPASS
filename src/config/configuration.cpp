@@ -249,7 +249,7 @@ void Configuration::addParameter(const std::string& parameter_id, const T& defau
     if (hasParameter(parameter_id))
     {
         //@TODO: maybe assert on this?
-        logwrn << "Configuration " << instance_id_ << ": addParameter: " << parameter_id << " already exists";
+        logwrn << instance_id_ << ": " << parameter_id << " already exists";
         return;
     }
 

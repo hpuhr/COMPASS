@@ -561,7 +561,10 @@ void JSONImportTask::mapJSONDoneSlot()
     logdbg << "done";
 }
 
-void JSONImportTask::mapJSONObsoleteSlot() { logdbg << "start"; }
+void JSONImportTask::mapJSONObsoleteSlot()
+{
+     logdbg << "start"; 
+}
 
 
 void JSONImportTask::postprocessDoneSlot()

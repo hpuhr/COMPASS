@@ -704,7 +704,7 @@ void ViewManager::registerView(View* view)
 
 void ViewManager::unregisterView(View* view)
 {
-    logdbg << "ViewManager: unregisterView " << view->getName().c_str();
+    logdbg << view->getName().c_str();
     assert(view);
     assert(isRegistered(view));
 
@@ -938,13 +938,13 @@ void ViewManager::notifyReloadStateChanged()
         if (!elem.second->reloadNeeded())
             continue;
 
-        logdbg << "ViewManager::notifyReloadStateChanged: view '" << elem.first << "' needs to reload";
+        logdbg << "view '" << elem.first << "' needs to reload";
 
         reload_needed = true;
         break;
     }
 
-    logdbg << "ViewManager::notifyReloadStateChanged: reload needed before: " << reload_needed_ << ", now: " << reload_needed;
+    logdbg << "reload needed before: " << reload_needed_ << ", now: " << reload_needed;
 
     //reload state has not changed? => just return
     if (reload_needed_ == reload_needed)
@@ -953,7 +953,7 @@ void ViewManager::notifyReloadStateChanged()
     //update global reload flag
     reload_needed_ = reload_needed;
 
-    logdbg << "ViewManager::notifyReloadStateChanged: emitting new reload state " << reload_needed_;
+    logdbg << "emitting new reload state " << reload_needed_;
 
     //inform views about changed reload state
     emit reloadStateChanged();

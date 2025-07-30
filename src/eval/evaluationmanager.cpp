@@ -209,7 +209,7 @@ Result EvaluationManager::evaluate(bool show_dialog)
     auto res = calculator_->clone();
 
     if (!res.ok())
-        logerr << "Evaluation error: " << res.error();
+        logerr << "evaluation error: " << res.error();
     assert(res.ok());
 
     auto calculator_local = res.result();

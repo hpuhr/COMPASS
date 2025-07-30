@@ -56,7 +56,7 @@ bool TimestampFilter::filters(const std::string& dbo_type)
 
 std::string TimestampFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbcont_name " << dbcontent_name << " active " << active_;
 
     auto& dbcont_man = COMPASS::instance().dbContentManager();
 

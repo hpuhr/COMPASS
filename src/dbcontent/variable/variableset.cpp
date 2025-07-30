@@ -130,7 +130,7 @@ void VariableSet::removeVariable(const Variable& var)
 
 VariableSet& VariableSet::operator=(const VariableSet& source)
 {
-    logdbg << "VariableSet: copy constructor";
+    logdbg << "start";
 
     if (this == &source)  // self assignment
         return *this;
@@ -139,7 +139,7 @@ VariableSet& VariableSet::operator=(const VariableSet& source)
 
     std::vector<Variable*>::const_iterator it;
 
-    logdbg << "VariableSet: copy constructor: copying " << source.set_.size() << " elements";
+    logdbg << "copying " << source.set_.size() << " elements";
 
     // do the copy
     for (it = source.set_.begin(); it != source.set_.end(); it++)

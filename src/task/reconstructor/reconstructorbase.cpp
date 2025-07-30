@@ -208,7 +208,7 @@ void ReconstructorBase::TargetsContainer::checkACADLookup()
             continue;
 
         if (target_it.second.acads_.size() != 1)
-            logerr << "checkACADLookup: double acad in target "
+            logerr << "double acad in target "
                    << target_it.second.asStr();
 
         assert (target_it.second.acads_.size() == 1);
@@ -217,7 +217,7 @@ void ReconstructorBase::TargetsContainer::checkACADLookup()
 
         if (!acad_2_utn_.count(acad))
         {
-            logerr << "getTALookupMap: acad "
+            logerr << "acad "
                    << String::hexStringFromInt(acad, 6, '0')
                    << " not in lookup";
         }
@@ -365,8 +365,7 @@ bool ReconstructorBase::TargetsContainer::canAssocByTrackNumber(
     if (tr.acad_ && targets_.at(utn).hasACAD()
         && !targets_.at(utn).hasACAD(!tr.acad_))
     {
-        logwrn << "canAssocByTrackNumber:"
-                  << " same track num reused by different ACAD transponders, tr " << *tr.track_number_ << ", utn "
+        logwrn << " same track num reused by different ACAD transponders, tr " << *tr.track_number_ << ", utn "
                << targets_.at(utn).asStr() << " tr " << tr.asStr() << ", unassociating";
 
         eraseTrackNumberLookup(tr);
@@ -771,7 +770,7 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 
 void ReconstructorBase::reset()
 {
-    loginf << "ReconstructorBase: reset/init";
+    loginf << "start";
 
     dbContent::ReconstructorTarget::globalStats().reset();
 

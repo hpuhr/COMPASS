@@ -62,7 +62,7 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
     registerParameter("in_array", &in_array_, false);
     registerParameter("append_value", &append_value_, false);
 
-    logdbg2 << "dbo " << db_content_name_ << " var " << dbcontent_variable_name_
+    logdbg2 << "dbcont " << db_content_name_ << " var " << dbcontent_variable_name_
            << " dim " << dimension_ << " unit " << unit_;
 
     sub_keys_ = Utils::String::split(json_key_, '.');
@@ -131,7 +131,7 @@ JSONDataMapping::JSONDataMapping(const std::string& class_id, const std::string&
 //    return static_cast<JSONDataMapping&>(Configurable::operator=(std::move(other)));
 //}
 
-JSONDataMapping::~JSONDataMapping() { logdbg2 << "this " << this; }
+JSONDataMapping::~JSONDataMapping(){}
 
 void JSONDataMapping::initializeIfRequired()
 {
@@ -748,7 +748,7 @@ void JSONDataMapping::setValue(const json* val_ptr, NullableVector<bool>& array_
     else
         array_list.setFromFormat(row_cnt, json_value_format_, JSON::toString(tmp_bool));
 
-    logdbg2 << "JSONDataMapping: setValue(bool): json " << tmp_bool << " buffer "
+    logdbg2 << "(bool): json " << tmp_bool << " buffer "
            << array_list.get(row_cnt);
 }
 
@@ -777,7 +777,7 @@ void JSONDataMapping::appendValue(const json* val_ptr, NullableVector<bool>& arr
     else
         array_list.appendFromFormat(row_cnt, json_value_format_, JSON::toString(tmp_bool));
 
-    logdbg2 << "JSONDataMapping: appendValue(bool): json " << tmp_bool << " buffer "
+    logdbg2 << "(bool): json " << tmp_bool << " buffer "
            << array_list.get(row_cnt);
 }
 
@@ -796,7 +796,7 @@ void JSONDataMapping::setValue(const json* val_ptr, NullableVector<char>& array_
         array_list.setFromFormat(row_cnt, json_value_format_,
                                  JSON::toString(static_cast<int>(*val_ptr)));
 
-    logdbg2 << "JSONDataMapping: setValue(char): json " << static_cast<int>(*val_ptr) << " buffer "
+    logdbg2 << "(char): json " << static_cast<int>(*val_ptr) << " buffer "
            << array_list.get(row_cnt);
 }
 
@@ -815,7 +815,7 @@ void JSONDataMapping::appendValue(const json* val_ptr, NullableVector<char>& arr
         array_list.appendFromFormat(row_cnt, json_value_format_,
                                     JSON::toString(static_cast<int>(*val_ptr)));
 
-    logdbg2 << "JSONDataMapping: appendValue(char): json " << static_cast<int>(*val_ptr)
+    logdbg2 << "(char): json " << static_cast<int>(*val_ptr)
            << " buffer " << array_list.get(row_cnt);
 }
 
@@ -878,7 +878,7 @@ void JSONDataMapping::setValue(const json* val_ptr,
         array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr), debug);
     }
 
-    logdbg2 << "JSONDataMapping: setValue(string): json " << Utils::JSON::toString(*val_ptr)
+    logdbg2 << "(string): json " << Utils::JSON::toString(*val_ptr)
            << " buffer " << array_list.get(row_cnt);
 }
 
@@ -896,7 +896,7 @@ void JSONDataMapping::appendValue(const json* val_ptr,
     else
         array_list.appendFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
 
-    logdbg2 << "JSONDataMapping: setValue(string): json " << Utils::JSON::toString(*val_ptr)
+    logdbg2 << "(string): json " << Utils::JSON::toString(*val_ptr)
            << " buffer " << array_list.get(row_cnt);
 }
 

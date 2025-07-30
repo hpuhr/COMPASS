@@ -218,7 +218,7 @@ bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldRenderDelayMSec) ||
         !j.contains(FieldViewable))
     {
-        logerr << "Error: Section content figure does not obtain needed fields";
+        logerr << "section content figure does not obtain needed fields";
         return false;
     }
 

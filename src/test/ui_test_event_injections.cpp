@@ -63,7 +63,7 @@ bool injectKeyEvent(QWidget* root,
         return false;
     }
 
-    loginf << "Injecting key " << QKeySequence(key).toString(QKeySequence::NativeText).toStdString();
+    loginf << "injecting key " << QKeySequence(key).toString(QKeySequence::NativeText).toStdString();
 
     QTest::keyClick(w.second, key, Qt::NoModifier, delay);
 
@@ -104,7 +104,7 @@ bool injectKeysEvent(QWidget* root,
     {
         if (nl != 1 || lines[ 0 ].isEmpty())
         {
-            loginf << "injectKeysEvent: Page break found but forbidden";
+            loginf << "page break found but forbidden";
             return false;
         }
         //inject single line
@@ -136,7 +136,7 @@ bool injectKeysEvent(QWidget* root,
             //inject newlines as enter keys
             if (i < nl - 1)
             {
-                loginf << "injectKeysEvent: Injecting page break";
+                loginf << "injecting page break";
                 QTest::keyClick(w.second, Qt::Key_Enter, Qt::NoModifier, delay);
             }    
         }
@@ -169,7 +169,7 @@ bool injectKeyCmdEvent(QWidget* root,
     
     auto injectionMsg = [ & ] (const std::string& obj_type) 
     {
-        loginf << "Injecting key into " << obj_type;
+        loginf << "injecting key into " << obj_type;
     };
  
     if (obj.second->isWidgetType())
@@ -207,7 +207,7 @@ bool injectKeySequenceEvent(QWidget* root,
     
     auto injectionMsg = [ & ] (const std::string& obj_type) 
     {
-        loginf << "Injecting key sequence into " << obj_type;
+        loginf << "injecting key sequence into " << obj_type;
     };
  
     if (obj.second->isWidgetType())
@@ -260,7 +260,7 @@ bool injectClickEvent(QWidget* root,
 
     auto injectionMsg = [ & ] (const std::string& obj_type) 
     {
-        loginf << "Injecting mouse button '" << (int)button << "' click at (" << std::to_string(x) << "," << std::to_string(y) << ")";
+        loginf << "injecting mouse button '" << (int)button << "' click at (" << std::to_string(x) << "," << std::to_string(y) << ")";
     };
  
     if (obj.second->isWidgetType())
@@ -313,7 +313,7 @@ bool injectRectEvent(QWidget* root,
 
     auto injectionMsg = [ & ] (const std::string& obj_type) 
     {
-        loginf << "Injecting mouse button '" << (int)button << "' rectangle from (" << std::to_string(x0) << "," << std::to_string(y0) << ") to (" << std::to_string(x1) << "," << std::to_string(y1) << ")";
+        loginf << "injecting mouse button '" << (int)button << "' rectangle from (" << std::to_string(x0) << "," << std::to_string(y0) << ") to (" << std::to_string(x1) << "," << std::to_string(y1) << ")";
     };
 
     if (obj.second->isWidgetType())

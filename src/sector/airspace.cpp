@@ -149,7 +149,7 @@ namespace
         //!no double nestings!
         if (parent && has_nested_sectors)
         {
-            logerr << "Double nesting of sectors detected in layer '" + parent->name() + "'";
+            logerr << "double nesting of sectors detected in layer '" + parent->name() + "'";
             return nullptr;
         }
 

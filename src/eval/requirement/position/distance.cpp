@@ -61,7 +61,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementPositionDistance '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " threshold_value " << threshold_value_ << " threshold_value_check_type " << threshold_value_check_type_;
 
     time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
@@ -221,7 +221,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistance::evaluate 
                     comment);
     }
 
-    //        logdbg << "EvaluationRequirementPositionDistance '" << name_ << "': evaluate: utn " << target_data.utn_
+    //        logdbg << "'" << name_ << "': utn " << target_data.utn_
     //               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
     //               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok

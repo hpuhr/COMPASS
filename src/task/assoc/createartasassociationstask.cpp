@@ -383,7 +383,7 @@ void CreateARTASAssociationsTask::createDoneSlot()
         done_ = true;
     }
     else
-        logwrn << "CreateARTASAssociationsTask: done after " << time_str << " without saving";
+        loginf << "done after " << time_str << " without saving";
 
     QApplication::restoreOverrideCursor();
 

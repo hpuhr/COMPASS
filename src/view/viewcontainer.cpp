@@ -271,7 +271,7 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
 #else
-        loginf << "GeographicView ignored since compiled w/o experimental source";
+        loginf << "ignored GeographicView since compiled w/o experimental source";
 #endif
 
     }

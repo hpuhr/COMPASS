@@ -121,7 +121,7 @@ void DBFilter::setName(const std::string& name)
         widget_->update();
 }
 
-bool DBFilter::filters(const std::string& dbo_type)
+bool DBFilter::filters(const std::string& dbcont_name)
 {
     if (unusable_)
         return false;
@@ -130,10 +130,10 @@ bool DBFilter::filters(const std::string& dbo_type)
 
     for (unsigned int cnt = 0; cnt < conditions_.size(); cnt++)
     {
-        ret |= conditions_.at(cnt)->filters(dbo_type);
+        ret |= conditions_.at(cnt)->filters(dbcont_name);
     }
 
-    logdbg << "object " << dbo_type << " " << ret;
+    logdbg << "dbcont " << dbcont_name << " " << ret;
 
     return ret;
 }
@@ -278,7 +278,7 @@ void DBFilter::loadViewPointConditions (const nlohmann::json& filters)
                           [cond_name] (const DBFilterCondition* c) { return c->instanceId() == cond_name; } );
 
         if (it == conditions_.end())
-            logerr << "DBFilter " << name_ << ": loadViewPointConditions: cond_name '" << cond_name << "' not found";
+            logerr << name_ << ": cond_name '" << cond_name << "' not found";
         else
             (*it)->setValue(value);
     }

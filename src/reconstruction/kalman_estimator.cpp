@@ -1423,7 +1423,7 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
         *num_steps_failed += failed_steps;
 
     if (settings_.verbosity >= 1 && small_intervals > 0)
-        logdbg << "Encountered " << small_intervals << " small interval(s) during resampling";
+        logdbg << "encountered " << small_intervals << " small interval(s) during resampling";
 
     if (interp_updates.size() >= 2)
     {

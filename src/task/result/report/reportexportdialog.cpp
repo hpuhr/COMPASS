@@ -323,7 +323,7 @@ void ReportExportDialog::exportReport()
 
     if (!export_result_.ok())
     {
-        logerr << "Error: " << export_result_.error();
+        logerr << export_result_.error();
 
         progress_bar_->setValue(0);
         status_label_->setText("Exporting report failed");

@@ -132,14 +132,14 @@ void ViewContainerWidget::closeEvent(QCloseEvent* event)
 
 void ViewContainerWidget::moveEvent(QMoveEvent* event)
 {
-    logdbg << "ViewContainerWidget " << instanceId() << ": moveEvent";
+    logdbg << instanceId();
     pos_x_ = event->pos().x();
     pos_y_ = event->pos().y();
 }
 
 void ViewContainerWidget::resizeEvent(QResizeEvent* event)
 {
-    logdbg << "ViewContainerWidget " << instanceId() << ": resizeEvent";
+    logdbg << instanceId();
     width_ = event->size().width();
     height_ = event->size().height();
 }

@@ -160,7 +160,10 @@ FilterEditWidget::FilterEditWidget(DBFilter* filter, QWidget* parent)
     setLayout(layout);
 }
 
-FilterEditWidget::~FilterEditWidget() { logdbg << "start"; }
+FilterEditWidget::~FilterEditWidget() 
+{
+     logdbg << "start"; 
+}
 
 void FilterEditWidget::addCondition()
 {

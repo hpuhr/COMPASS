@@ -31,7 +31,7 @@ public:
     virtual void generateSubConfigurable(const std::string& class_id,
                                          const std::string& instance_id) override;
 
-    virtual bool filters(const std::string& dbcontent_name) override;
+    virtual bool filters(const std::string& dbcont_name) override;
     virtual void reset() override;
 
     virtual void saveViewPointConditions (nlohmann::json& filters) override;

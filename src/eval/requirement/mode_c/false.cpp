@@ -44,7 +44,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementModeCFalse '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " prob " << maximum_probability_false_;
 
     time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
@@ -207,7 +207,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCFalse::evaluate (
                         num_unknown, num_correct, num_false, comment);
     }
 
-    logdbg << "EvaluationRequirementModeCFalse '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
            << " num_no_ref_val " << num_no_ref_val
            << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside

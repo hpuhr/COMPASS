@@ -51,7 +51,7 @@ ASTERIXJSONMappingJob::~ASTERIXJSONMappingJob()
 
 void ASTERIXJSONMappingJob::run_impl()
 {
-    logdbg << "ASTERIXJSONMappingJob: " << this << " run on thread " << QThread::currentThreadId() << " on cpu " << sched_getcpu();
+    logdbg "run on thread " << QThread::currentThreadId() << " on cpu " << sched_getcpu();
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 

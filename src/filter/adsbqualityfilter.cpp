@@ -74,16 +74,16 @@ ADSBQualityFilter::ADSBQualityFilter(const std::string& class_id, const std::str
 
 ADSBQualityFilter::~ADSBQualityFilter() {}
 
-bool ADSBQualityFilter::filters(const std::string& dbo_type)
+bool ADSBQualityFilter::filters(const std::string& dbcont_name)
 {
-    loginf << dbo_type << " " << (dbo_type == "CAT021");
+    loginf << dbcont_name << " " << (dbcont_name == "CAT021");
 
-    return dbo_type == "CAT021";
+    return dbcont_name == "CAT021";
 }
 
 std::string ADSBQualityFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    loginf << "dbo " << dbcontent_name << " active " << active_;
+    loginf << "dbcont_name " << dbcontent_name << " active " << active_;
 
     if (dbcontent_name != "CAT021")
         return "";

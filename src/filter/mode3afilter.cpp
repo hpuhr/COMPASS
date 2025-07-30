@@ -50,7 +50,7 @@ bool Mode3AFilter::filters(const std::string& dbo_type)
 
 std::string Mode3AFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbcont_name " << dbcontent_name << " active " << active_;
 
     if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_m3a_.name()).existsIn(dbcontent_name))
         return "";

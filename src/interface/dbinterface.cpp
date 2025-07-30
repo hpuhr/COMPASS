@@ -227,8 +227,8 @@ void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite
 
         if (!open_result.ok())
         {
-            logerr << "Database could not be opened: " << open_result.second;
-            throw std::runtime_error ("Database could not be opened: " + open_result.second);
+            logerr << "database could not be opened: " << open_result.second;
+            throw std::runtime_error ("database could not be opened: " + open_result.second);
         }
 
         if (created_new_db)
@@ -290,7 +290,7 @@ void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite
     {
         reset();
 
-        logerr << "Error: " << ex.what();
+        logerr << "error: " << ex.what();
         throw std::runtime_error(ex.what());
     }
 }
@@ -313,8 +313,8 @@ void DBInterface::openDBFileFromMemory(const std::string& filename)
 
         if (!export_result.ok())
         {
-            logerr << "Database could not be exported: " << export_result.second;
-            throw std::runtime_error ("Database could not be exported: " + export_result.second);
+            logerr << "database could not be exported: " << export_result.second;
+            throw std::runtime_error ("database could not be exported: " + export_result.second);
         }
 
         //close current (in-mem) db
@@ -327,7 +327,7 @@ void DBInterface::openDBFileFromMemory(const std::string& filename)
     {
         reset();
 
-        logerr << "Error: " << ex.what();
+        logerr << "error: " << ex.what();
         throw std::runtime_error(ex.what());
     }
 }
@@ -382,14 +382,14 @@ void DBInterface::exportDBFile(const std::string& filename)
     }
     catch(const std::exception& ex)
     {
-        logerr << "Database could not be exported: " << ex.what();
-        throw std::runtime_error ("Database could not be exported: " + std::string(ex.what()));
+        logerr << "database could not be exported: " << ex.what();
+        throw std::runtime_error ("database could not be exported: " + std::string(ex.what()));
     }
 
     if (!export_result.ok())
     {
-        logerr << "Database could not be exported: " << export_result.second;
-        throw std::runtime_error ("Database could not be exported: " + export_result.second);
+        logerr << "database could not be exported: " << export_result.second;
+        throw std::runtime_error ("database could not be exported: " + export_result.second);
     }
 }
 
@@ -470,7 +470,7 @@ Result DBInterface::cleanupDBInternal()
 
         reset();
 
-        logerr << "Error: " << res_critical.error();
+        logerr << "error: " << res_critical.error();
         throw std::runtime_error(res_critical.error());
     }
 
@@ -498,8 +498,8 @@ Result DBInterface::execute(const std::string& sql)
 
     if (!res.ok())
     {
-        logerr << "Error executing statement '" << sql << "': " << res.error();
-        throw std::runtime_error("Error executing statement '" + sql + "': " + res.error());
+        logerr << "error executing statement '" << sql << "': " << res.error();
+        throw std::runtime_error("error executing statement '" + sql + "': " + res.error());
     }
 
     return res;
@@ -516,8 +516,8 @@ std::shared_ptr<DBResult> DBInterface::execute(const DBCommand& cmd)
 
     if (res->hasError())
     {
-        logerr << "Error executing command '" << cmd.get() << "': " << res->error();
-        throw std::runtime_error("Error executing command '" + cmd.get() + "': " + res->error());
+        logerr << "error executing command '" << cmd.get() << "': " << res->error();
+        throw std::runtime_error("error executing command '" + cmd.get() + "': " + res->error());
     }
 
     return res;
@@ -534,8 +534,8 @@ void DBInterface::updateTableInfo()
 
     if (!res.ok())
     {
-        logerr << "Error updating table info: " << res.error();
-        throw std::runtime_error("Error updating table info: " + res.error());
+        logerr << "error updating table info: " << res.error();
+        throw std::runtime_error("error updating table info: " + res.error());
     }
 }
 
@@ -2075,12 +2075,12 @@ Result DBInterface::saveResult(const TaskResult& result, bool cleanup_db_if_need
     }
     catch(const std::exception& ex)
     {
-        logerr << "Could not store result: " << ex.what();
+        logerr << "could not store result: " << ex.what();
         return Result::failed(ex.what());
     }
     catch(...)
     {
-        logerr << "Could not store result: Unknown error";
+        logerr << "could not store result: Unknown error";
         return Result::failed("Unknown error");
     }
 
@@ -2101,7 +2101,7 @@ Result DBInterface::deleteResult(const TaskResult& result,
     if (!existsTaskResultsTable() || 
         !existsReportContentsTable())
     {
-        logerr << "Result tables do not exist";
+        logerr << "result tables do not exist";
         return Result::failed("Result tables do not exist");
     }
 
@@ -2153,12 +2153,12 @@ Result DBInterface::deleteResult(const TaskResult& result,
     }
     catch(const std::exception& ex)
     {
-        logerr << "Could not delete result: " << ex.what();
+        logerr << "could not delete result: " << ex.what();
         return Result::failed(ex.what());
     }
     catch(...)
     {
-        logerr << "Could not delete result: Unknown error";
+        logerr << "could not delete result: Unknown error";
         return Result::failed("Unknown error");
     }
 
@@ -2323,12 +2323,12 @@ ResultT<std::vector<std::shared_ptr<TaskResult>>> DBInterface::loadResults()
     }
     catch(const std::exception& ex)
     {
-        logerr << "Could not load results: " << ex.what();
+        logerr << "could not load results: " << ex.what();
         return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed(ex.what());
     }
     catch(...)
     {
-        logerr << "Could not load results: Unknown error";
+        logerr << "could not load results: Unknown error";
         return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed("Unknown error");
     }
 
@@ -2344,7 +2344,7 @@ ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(
 
     std::shared_ptr<ResultReport::SectionContent> content;
 
-    loginf << "Loading content id " << content_id << "...";
+    loginf << "loading content id " << content_id << "...";
 
     try
     {
@@ -2418,7 +2418,7 @@ ResultT<std::shared_ptr<ResultReport::SectionContent>> DBInterface::loadContent(
         return ResultT<std::shared_ptr<ResultReport::SectionContent>>::failed("Unknown error");
     }
 
-    loginf << "Loaded.";
+    loginf << "loaded";
 
     return ResultT<std::shared_ptr<ResultReport::SectionContent>>::succeeded(content);
 }
@@ -2460,7 +2460,7 @@ void DBInterface::initDBContentBuffer(DBContent& dbcontent,
  */
 void DBInterface::insertDBContent(DBContent& dbcontent, std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "dbo " << dbcontent.name() << " buffer size " << buffer->size();
+    logdbg << "dbcont " << dbcontent.name() << " buffer size " << buffer->size();
 
     assert(ready());
     assert(buffer);
@@ -2686,19 +2686,19 @@ void DBInterface::updateBuffer(const std::string& table_name,
 
 /**
  */
-void DBInterface::prepareRead(const DBContent& dbobject, 
+void DBInterface::prepareRead(const DBContent& dbcontent, 
                               VariableSet read_list, 
                               string custom_filter_clause,
                               bool use_order, 
                               Variable* order_variable)
 {
-    logdbg << "dbo " << dbobject.name();
+    logdbg << "dbcont_name " << dbcontent.name();
 
     assert(ready());
-    assert(dbobject.existsInDB());
+    assert(dbcontent.existsInDB());
 
     shared_ptr<DBCommand> read = sqlGenerator().getSelectCommand(
-        dbobject, read_list, custom_filter_clause, use_order, order_variable);
+        dbcontent, read_list, custom_filter_clause, use_order, order_variable);
 
     logdbg << "sql '" << read->get() << "'";
 
@@ -2714,8 +2714,8 @@ void DBInterface::prepareRead(const DBContent& dbobject,
     
     if (!res.ok())
     {
-        logerr << "preparing read for dbcontent '" << dbobject.name() << "' failed: " << res.error();
-        throw runtime_error("DBInterface: prepareRead: preparing read for dbcontent '" + dbobject.name() + "' failed: " + res.error());
+        logerr << "preparing read for dbcontent '" << dbcontent.name() << "' failed: " << res.error();
+        throw runtime_error("DBInterface: prepareRead: preparing read for dbcontent '" + dbcontent.name() + "' failed: " + res.error());
     }
 }
 
@@ -2890,12 +2890,12 @@ ResultT<std::shared_ptr<Buffer>> DBInterface::select(const std::string& table_na
     }
     catch(const std::exception& ex)
     {
-        logerr << "Could not select data: " << ex.what();
+        logerr << "could not select data: " << ex.what();
         return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed(ex.what());
     }
     catch(...)
     {
-        logerr << "Could not select data: Unknown error";
+        logerr << "could not select data: Unknown error";
         return ResultT<std::vector<std::shared_ptr<TaskResult>>>::failed("Unknown error");
     }
 

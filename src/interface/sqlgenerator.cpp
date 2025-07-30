@@ -979,7 +979,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBContent& object,
                                                      bool use_order, 
                                                      Variable* order_variable)
 {
-    logdbg << "dbo " << object.name() << " read list size " << read_list.getSize();
+    logdbg << "dbcont " << object.name() << " read list size " << read_list.getSize();
     assert(read_list.getSize() != 0);
 
     //collect needed properties

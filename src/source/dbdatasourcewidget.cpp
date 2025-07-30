@@ -124,7 +124,7 @@ void DBDataSourceWidget::recreateWidgets()
 {
     bool show_counts = show_counts_func_();
 
-    logdbg << "DBDataSourceWidget " << src_.name() << ": recreateWidgets: show_counts " << show_counts;
+    logdbg << "'" << src_.name() << "': show_counts " << show_counts;
 
     QLayoutItem* child;
     while (!grid_layout_->isEmpty() && (child = grid_layout_->takeAt(0)) != nullptr)

@@ -174,7 +174,7 @@ void SectionContentTable::addRow (const nlohmann::json::array_t& row,
     anno.on_demand      = viewable.on_demand;
     anno.style          = row_style;
 
-    logdbg<< "SectionContentTable " << name() << ": addRow: viewable has callback " << viewable.hasCallback();
+    logdbg<< "'" << name() << "': viewable has callback " << viewable.hasCallback();
 
     if (!viewable.on_demand && viewable.hasCallback())
     {
@@ -1328,7 +1328,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldCellStyles)   ||
         !j.contains(FieldShowTooltips))
     {
-        logerr << "Error: Section content table does not obtain needed fields";
+        logerr << "section content table does not obtain needed fields";
         return false;
     }
 
@@ -1353,7 +1353,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
         const auto& j_col_groups = j[ FieldColumnGroups ];
         if (!j_col_groups.is_array())
         {
-            logerr << "Error: Could not read column groups";
+            logerr << "could not read column groups";
             return false;
         }
 
@@ -1364,7 +1364,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
                 !j_col_group.contains(FieldColGroupColumns) ||
                 !j_col_group.contains(FieldColGroupEnabledOnInit))
             {
-                logerr << "Error: Could not read column group";
+                logerr << "could not read column group";
                 return false;
             }
 
@@ -1389,7 +1389,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
     auto& j_annos = j[ FieldAnnotations ];
     if (!j_annos.is_array() || j_annos.size() != rows_.size())
     {
-        logerr << "Error: Annotation array invalid";
+        logerr << "annotation array invalid";
         return false;
     }
 
@@ -1400,7 +1400,7 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
             !j_anno.contains(FieldAnnoOnDemand)      ||
             !j_anno.contains(FieldAnnoStyle))
         {
-            logerr << "Error: Could not read annotation";
+            logerr << "could not read annotation";
             return false;
         }
 

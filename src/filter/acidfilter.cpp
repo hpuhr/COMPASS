@@ -54,7 +54,7 @@ bool ACIDFilter::filters(const std::string& dbcont_type)
 
 std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbcont " << dbcontent_name << " active " << active_;
 
     if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acid_.name()).existsIn(dbcontent_name))
         return "";

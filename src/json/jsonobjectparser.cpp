@@ -447,7 +447,7 @@ bool JSONObjectParser::parseTargetReport(const nlohmann::json& tr, Buffer& buffe
         if (mandatory_missing)
         {
             // TODO make configurable
-            logdbg << "JSONObjectParser '" << name_ << "': parseTargetReport: mandatory variable '"
+            logdbg << "'" << name_ << "': mandatory variable '"
                    << current_var_name << "' missing in: \n"
                    << tr.dump(4);
             break;

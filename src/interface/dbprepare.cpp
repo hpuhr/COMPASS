@@ -39,15 +39,15 @@ DBPrepare::DBPrepare()
 DBPrepare::~DBPrepare()
 {
     if (active_transaction_)
-        logerr << "DBPrepare: ~DBPrepare: transaction still active";
+        logerr << "transaction still active";
     assert(!active_transaction_);
 
     if (active_binds_)
-        logerr << "DBPrepare: ~DBPrepare: binds still active";
+        logerr << "binds still active";
     assert(!active_binds_);
 
     if (prepared_stmnt_ok_)
-        logerr << "DBPrepare: ~DBPrepare: cleanup not called";
+        logerr << "cleanup not called";
     assert(!prepared_stmnt_ok_);
 }
 
@@ -66,11 +66,11 @@ bool DBPrepare::init(const std::string& sql_statement)
 void DBPrepare::cleanup()
 {
     if (active_transaction_)
-        logerr << "DBPrepare: ~DBPrepare: transaction still active";
+        logerr << "transaction still active";
     assert(!active_transaction_);
 
     if (active_binds_)
-        logerr << "DBPrepare: ~DBPrepare: binds still active";
+        logerr << "binds still active";
     assert(!active_binds_);
 
     if (prepared_stmnt_ok_)

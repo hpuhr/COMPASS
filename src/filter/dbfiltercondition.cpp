@@ -102,7 +102,7 @@ bool DBFilterCondition::filters(const std::string& dbcontent_name)
 
 std::string DBFilterCondition::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "object " << dbcontent_name << " first " << first;
+    logdbg << "dbcont_name " << dbcontent_name << " first " << first;
     assert(usable_);
 
     std::stringstream ss;
@@ -188,7 +188,7 @@ void DBFilterCondition::valueChanged()
         emit possibleFilterChange();
     }
 
-    loginf << "value_ '" << value_ << "' invalid "
+    loginf << "value '" << value_ << "' invalid "
            << value_invalid_;
 
     if (value_invalid_)

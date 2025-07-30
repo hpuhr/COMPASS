@@ -241,7 +241,7 @@ void Configurable::resetToDefault()
 
     for (it = children_.begin(); it != children_.end(); it++)
     {
-        // loginf  << "Configurable " << instance_id_ << ": resetToDefault: child " << it->first;
+        // loginf  << instance_id_ << ": child " << it->first;
         it->second.resetToDefault();
     }
 }

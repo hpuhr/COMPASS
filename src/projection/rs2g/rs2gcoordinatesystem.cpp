@@ -122,7 +122,7 @@ void RS2GCoordinateSystem::radarSlant2LocalCart(double azimuth_rad, double rho_m
                                                 bool has_altitude, double altitude_m, double& ground_range_m,
                                                 double& local_x, double& local_y, double& local_z, bool debug)
 {
-    // logdbg << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1]
+    // logdbg << "in x: " << local[0] << " y: " << local[1]
     //        << " z: " << local[2];
 
     double elevation_m {0};

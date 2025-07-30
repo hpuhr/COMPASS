@@ -940,7 +940,7 @@ bool Section::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldContentTypes)        ||
         !j.contains(FieldHiddenContentIDs))
     {
-        logerr << "Error: Section does not obtain needed fields";
+        logerr << "section does not obtain needed fields";
         return false;
     }
 
@@ -962,7 +962,7 @@ bool Section::fromJSON_impl(const nlohmann::json& j)
     const auto& j_subsections = j[ FieldSubSections ];
     if (!j_subsections.is_array())
     {
-        logerr << "Error: Subsection is not an array";
+        logerr << "subsection is not an array";
         return false;
     }
 
@@ -1061,7 +1061,7 @@ bool Section::configure(const nlohmann::json& j)
         if (it == content_.end())
         {
             //not found => skip
-            logwrn << "Failed to find loaded content with id " << id << " in section " << name();
+            logwrn << "failed to find loaded content with id " << id << " in section " << name();
             ok = false;
             continue;
         }
@@ -1073,7 +1073,7 @@ bool Section::configure(const nlohmann::json& j)
         //try to configure content
         if (!c->configure(config))
         {
-            logwrn << "Failed to configure content " << c->name() << " of section " << name();
+            logwrn << "failed to configure content " << c->name() << " of section " << name();
             ok = false;
             continue;
         }

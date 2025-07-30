@@ -248,7 +248,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
         if (ecat_)
         {
             if (*tr.ecat_ != ecat_)
-                logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: ecat mismatch, target ecat "
+                logwrn << utn_ << ": ecat mismatch, target ecat "
                        << *ecat_ << " " << String::ecatToString(*ecat_)
                        << " tr " << *tr.ecat_ << " " << String::ecatToString(*tr.ecat_) << "";
         }
@@ -260,7 +260,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     {
         if (acads_.size() && !acads_.count(*tr.acad_))
         {
-            logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: acad mismatch, target "
+            logwrn << utn_ << ": acad mismatch, target "
                    << asStr() << " tr '" << tr.asStr() << "'";
         }
 
@@ -631,7 +631,7 @@ bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) 
 
     // ptime lower = lb_it->first;
 
-    // logdbg << "Target " << utn_ << ": hasDataForTime: found " << Time::toString(lower)
+    // logdbg << utn_ << ": found " << Time::toString(lower)
     //        << " <= " << Time::toString(timestamp)
     //        << " <= " << Time::toString(upper);
 

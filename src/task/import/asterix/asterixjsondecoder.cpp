@@ -295,7 +295,7 @@ std::unique_ptr<nlohmann::json> ASTERIXJSONDecoder::parseObjects(const std::vect
         }
         catch (nlohmann::detail::parse_error& e)
         {
-            logwrn << "ASTERIXJSONDecoder: parseObjects (jASTERIX): parse error " << e.what() << " in '" << data->at(0) << "'";
+            logwrn << "jASTERIX: parse error " << e.what() << " in '" << data->at(0) << "'";
             ++num_errors;
         }
     }
@@ -399,7 +399,7 @@ void ASTERIXJSONDecoder::processFile(ASTERIXImportFileInfo& file_info)
     {
         if (!read_ok)
         {
-            logerr << "Could not read JSON objects";
+            logerr << "could not read JSON objects";
             logError("Could not read JSON objects");
             return false;
         }
@@ -419,7 +419,7 @@ void ASTERIXJSONDecoder::processFile(ASTERIXImportFileInfo& file_info)
         auto data = parseObjects(objects, num_frames, num_records, num_errors);
         if (!data)
         {
-            logerr << "Could not parse JSON objects";
+            logerr << "could not parse JSON objects";
             logError("Could not parse JSON objects");
             break;
         }

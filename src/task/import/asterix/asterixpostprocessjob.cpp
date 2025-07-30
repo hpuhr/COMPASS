@@ -79,7 +79,7 @@ ASTERIXPostprocessJob::~ASTERIXPostprocessJob()
 
 void ASTERIXPostprocessJob::run_impl()
 {
-    logdbg << "ASTERIXPostprocessJob: " << this << " run on thread " << QThread::currentThreadId()
+    logdbg << "run on thread " << QThread::currentThreadId()
            << " on cpu " << sched_getcpu();
 
     unsigned cnt=0;

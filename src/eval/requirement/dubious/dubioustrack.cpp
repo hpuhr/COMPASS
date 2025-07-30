@@ -88,7 +88,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> DubiousTrack::evaluate (con
                                                                              std::shared_ptr<Base> instance,
                                                                              const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementDubiousTrack '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " mark_primary_only " << mark_primary_only_ << " prob " << threshold()
            << " use_min_updates " << use_min_updates_ << " min_updates " << min_updates_
            << " use_min_duration " << use_min_duration_ << " min_duration " << min_duration_;
