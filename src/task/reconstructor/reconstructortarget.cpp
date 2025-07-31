@@ -631,7 +631,7 @@ bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) 
 
     // ptime lower = lb_it->first;
 
-    // logdbg << utn_ << ": found " << Time::toString(lower)
+    // logdbg2 << utn_ << ": found " << Time::toString(lower)
     //        << " <= " << Time::toString(timestamp)
     //        << " <= " << Time::toString(upper);
 
@@ -1013,7 +1013,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     dbContent::targetReport::Position& pos2 = *upper->position();
     float d_t = Time::partialSeconds(upper->timestamp_ - lower->timestamp_);
 
-    logdbg << "d_t " << d_t;
+    logdbg2 << "d_t " << d_t;
 
     assert (d_t >= 0);
 
@@ -1027,13 +1027,13 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
         return {{}, false};
     }
 
-    logdbg << "pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
-    logdbg << "pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
+    logdbg2 << "pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
+    logdbg2 << "pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
 
     bool ok;
     double x_pos, y_pos;
 
-    logdbg << "geo2cart";
+    logdbg2 << "geo2cart";
 
     tie(ok, x_pos, y_pos) = trafo_.distanceCart(
         pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
@@ -1045,22 +1045,22 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
         return {{}, false};
     }
 
-    logdbg << "offsets x " << fixed << x_pos
+    logdbg2 << "offsets x " << fixed << x_pos
            << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
 
     double v_x = x_pos/d_t;
     double v_y = y_pos/d_t;
-    logdbg << "v_x " << v_x << " v_y " << v_y;
+    logdbg2 << "v_x " << v_x << " v_y " << v_y;
 
     float d_t2 = Time::partialSeconds(timestamp - lower->timestamp_);
-    logdbg << "d_t2 " << d_t2;
+    logdbg2 << "d_t2 " << d_t2;
 
     assert (d_t2 >= 0);
 
     x_pos = v_x * d_t2;
     y_pos = v_y * d_t2;
 
-    logdbg << "interpolated offsets x " << x_pos << " y " << y_pos;
+    logdbg2 << "interpolated offsets x " << x_pos << " y " << y_pos;
 
     tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1.latitude_, pos1.longitude_, x_pos, y_pos);
 
@@ -1068,7 +1068,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     // x_pos long, y_pos lat
 
-    logdbg << "interpolated lat " << x_pos << " long " << y_pos;
+    logdbg2 << "interpolated lat " << x_pos << " long " << y_pos;
 
     // calculate altitude
 
@@ -1094,7 +1094,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     //        altitude = pos1.altitude_ + v_alt*d_t2;
     //    }
 
-    //    logdbg << "pos1 has alt "
+    //    logdbg2 << "pos1 has alt "
     //           << pos1.has_altitude_ << " alt " << pos1.altitude_
     //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
     //           << " interpolated has alt " << has_altitude << " alt " << altitude;
@@ -1131,7 +1131,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     dbContent::targetReport::Position& pos2 = *upper_rec_num->position();
     float d_t = Time::partialSeconds(upper_rec_num->timestamp_ - lower_rec_num->timestamp_);
 
-    logdbg << "d_t " << d_t;
+    logdbg2 << "d_t " << d_t;
 
     assert (d_t >= 0);
 
@@ -1147,17 +1147,17 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
     double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
-    logdbg << "v_x " << v_lat << " v_y " << v_long;
+    logdbg2 << "v_x " << v_lat << " v_y " << v_long;
 
     float d_t2 = Time::partialSeconds(timestamp - lower_rec_num->timestamp_);
-    logdbg << "d_t2 " << d_t2;
+    logdbg2 << "d_t2 " << d_t2;
 
     assert (d_t2 >= 0);
 
     double int_lat = pos1.latitude_ + v_lat * d_t2;
     double int_long = pos1.longitude_ + v_long * d_t2;
 
-    logdbg << "interpolated lat " << int_lat << " long " << int_long;
+    logdbg2 << "interpolated lat " << int_lat << " long " << int_long;
 
     // calculate altitude
     //    bool has_altitude = false;
@@ -1180,7 +1180,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     //        altitude = pos1.altitude_ + v_alt*d_t2;
     //    }
 
-    //    logdbg << "pos1 has alt "
+    //    logdbg2 << "pos1 has alt "
     //           << pos1.has_altitude_ << " alt " << pos1.altitude_
     //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
     //           << " interpolated has alt " << has_altitude << " alt " << altitude;
@@ -1240,7 +1240,7 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
         float d_t = Time::partialSeconds(upper_ref->t - lower_ref->t);
 
-        logdbg << "d_t " << d_t;
+        logdbg2 << "d_t " << d_t;
 
         assert (d_t >= 0);
 
@@ -1258,17 +1258,17 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
         double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
         double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
-        logdbg << "v_x " << v_lat << " v_y " << v_long;
+        logdbg2 << "v_x " << v_lat << " v_y " << v_long;
 
         float d_t2 = Time::partialSeconds(timestamp - lower_ref->t);
-        logdbg << "d_t2 " << d_t2;
+        logdbg2 << "d_t2 " << d_t2;
 
         assert (d_t2 >= 0);
 
         double int_lat = pos1.latitude_ + v_lat * d_t2;
         double int_long = pos1.longitude_ + v_long * d_t2;
 
-        logdbg << "interpolated lat " << int_lat << " long " << int_long;
+        logdbg2 << "interpolated lat " << int_lat << " long " << int_long;
 
         boost::optional<dbContent::targetReport::PositionAccuracy> ret_pos_acc =
             lower_ref->positionAccuracy().maxStdDev() > upper_ref->positionAccuracy().maxStdDev()
@@ -2120,7 +2120,7 @@ std::map <std::string, unsigned int> ReconstructorTarget::getDBContentCounts() c
 
 std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 {
-    logdbg << "utn " << utn_ << " ref size " << references_.size();
+    logdbg2 << "utn " << utn_ << " ref size " << references_.size();
 
     string dbcontent_name = "RefTraj";
     unsigned int dbcontent_id = 255;
@@ -2553,7 +2553,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     counts_[dbcontent_id] += buffer->size();
 
-    logdbg << "utn " << utn_ << " buffer size " << buffer->size();
+    logdbg2 << "utn " << utn_ << " buffer size " << buffer->size();
     //assert (buffer->size());
 
     return buffer;
