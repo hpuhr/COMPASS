@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "logstream.h"
+
 #include "json.hpp"
 #include "property.h"
 #include "propertylist.h"
@@ -32,53 +34,6 @@
 #include <QAbstractItemModel>
 
 enum class LogStreamType { Info, Warning, Error };
-
-class LogStream
-{
-public:
-    using CommitFunc = std::function<void(const std::string&)>;
-
-    LogStream(CommitFunc commit)
-        : commit_func_(std::move(commit)) {}
-
-    ~LogStream() {
-        if (commit_func_)
-            commit_func_(buffer_.str());
-    }
-
-    LogStream(const LogStream&) = delete;
-    LogStream& operator=(const LogStream&) = delete;
-
-    LogStream(LogStream&& other) noexcept
-        : buffer_(std::move(other.buffer_)),          // Move the stream buffer
-        commit_func_(std::move(other.commit_func_)) // Move the commit function
-    {
-        // After moving, 'other' is left in a valid but unspecified state.
-    }
-
-    // Move assignment operator
-    LogStream& operator=(LogStream&& other) noexcept {
-        if (this != &other) {
-            // Move assign the stream buffer.
-            buffer_ = std::move(other.buffer_);
-            // Move assign the commit function.
-            commit_func_ = std::move(other.commit_func_);
-            // 'other' is now in a moved-from state, and its destructor
-            // will not perform the commit action if commit_func_ is empty.
-        }
-        return *this;
-    }
-
-    template <typename T>
-    LogStream& operator<<(const T& val) {
-        buffer_ << val;
-        return *this;
-    }
-
-private:
-    std::ostringstream buffer_;
-    CommitFunc commit_func_;
-};
 
 class LogStore : public QAbstractItemModel
 {
@@ -166,4 +121,3 @@ protected:
 
     QIcon checked_icon_;
 };
-

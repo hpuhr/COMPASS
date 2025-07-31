@@ -24,9 +24,12 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/geotiff.h"
         "${CMAKE_CURRENT_LIST_DIR}/parquettools.h"
         "${CMAKE_CURRENT_LIST_DIR}/result.h"
+        "${CMAKE_CURRENT_LIST_DIR}/logstream.h"
         "${CMAKE_CURRENT_LIST_DIR}/logmodel.h"
         "${CMAKE_CURRENT_LIST_DIR}/timewindow.h"
         "${CMAKE_CURRENT_LIST_DIR}/timeddataseries.h"
+        "${CMAKE_CURRENT_LIST_DIR}/msghandler.h"
+        "${CMAKE_CURRENT_LIST_DIR}/compass_assert.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/config.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/files.cpp"
@@ -45,4 +48,5 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/parquettools.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/logmodel.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/timewindow.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/msghandler.cpp"
 )

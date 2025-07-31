@@ -887,18 +887,21 @@ const char* COMPASS::lineEditInvalidStyle()
 }
 
 LogStream COMPASS::logInfo(const std::string& component,
-                           boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
+                           boost::optional<unsigned int> error_code, nlohmann::json json_blob) 
+{
     return log_store_.logInfo(component, error_code, json_blob);
 }
 
 LogStream COMPASS::logWarn(const std::string& component,
-                           boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
-    return log_store_.logInfo(component, error_code, json_blob);
+                           boost::optional<unsigned int> error_code, nlohmann::json json_blob) 
+{
+    return log_store_.logWarn(component, error_code, json_blob);
 }
 
 LogStream COMPASS::logError(const std::string& component,
-                            boost::optional<unsigned int> error_code, nlohmann::json json_blob) {
-    return log_store_.logInfo(component, error_code, json_blob);
+                            boost::optional<unsigned int> error_code, nlohmann::json json_blob) 
+{
+    return log_store_.logError(component, error_code, json_blob);
 }
 
 bool COMPASS::disableConfirmResetViews() const

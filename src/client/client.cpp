@@ -34,6 +34,8 @@
 #include "json.hpp"
 #include "util/tbbhack.h"
 
+#include "compass_assert.h"
+
 #include <QApplication>
 #include <QMessageBox>
 #include <QSurfaceFormat>
@@ -604,14 +606,19 @@ bool Client::notify(QObject* receiver, QEvent* event)
     }
     catch (exception& e)
     {
-        logerr << "exception thrown: " << e.what();
+        std::string msg = "Unhandled exception '" + std::string(e.what()) + "'";
+        compass_assert_msg(false, msg.c_str());
+
         // assert (false);
-        QMessageBox::critical(nullptr, "COMPASSClient: notify: exception", QString(e.what()));
+        //QMessageBox::critical(nullptr, "COMPASSClient: notify: exception", QString(e.what()));
     }
     catch (...)
     {
+        std::string msg = "Unhandled exception";
+        compass_assert_msg(false, msg.c_str());
+
         // assert (false);
-        QMessageBox::critical(nullptr, "COMPASSClient: notify: exception", "Unknown exception");
+        //QMessageBox::critical(nullptr, "COMPASSClient: notify: exception", "Unknown exception");
     }
     return false;
 }
