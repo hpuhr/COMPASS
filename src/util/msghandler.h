@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "message.h"
 #include "logstream.h"
 #include "logger.h"
 #include "json.hpp"
@@ -58,14 +59,6 @@
     msghandler::MessageHandler::getStream((logerr), msghandler::Severity::Critical, GET_COMPONENT(Component), ErrCode, __FILE__, __LINE__, {}, "", false)
 #define slogcrit(...) GET_MACRO_012(__VA_ARGS__, slogcrit2, slogcrit1, slogcrit0)(__VA_ARGS__)
 
-#define slogabrt0() \
-    msghandler::MessageHandler::getStream((logerr), msghandler::Severity::Abort, FORMAT_FUNC_NAME(), -1, __FILE__, __LINE__, {}, GET_STACKTRACE(), false)
-#define slogabrt1(Component) \
-    msghandler::MessageHandler::getStream((logerr), msghandler::Severity::Abort, GET_COMPONENT(Component), -1, __FILE__, __LINE__, {}, GET_STACKTRACE(), false)
-#define slogabrt2(Component, ErrCode) \
-    msghandler::MessageHandler::getStream((logerr), msghandler::Severity::Abort, GET_COMPONENT(Component), ErrCode, __FILE__, __LINE__, {}, GET_STACKTRACE(), false)
-#define slogabrt(...) GET_MACRO_012(__VA_ARGS__, slogabrt2, slogabrt1, slogabrt0)(__VA_ARGS__)
-
 #define uloginf0() \
     msghandler::MessageHandler::getStream((loginf), msghandler::Severity::Info, FORMAT_FUNC_NAME(), -1, __FILE__, __LINE__, {}, "", true)
 #define uloginf1(Component) \
@@ -102,42 +95,8 @@
     msghandler::MessageHandler::getStream((logerr), msghandler::Severity::Critical, GET_COMPONENT(Component), ErrCode, __FILE__, __LINE__, JSONInfo, "", true)
 #define ulogcrit(...) GET_MACRO_0123(__VA_ARGS__, ulogcrit3, ulogcrit2, ulogcrit1, ulogcrit0)(__VA_ARGS__)
 
-#define ulogabrt0() \
-    msghandler::MessageHandler::getStream((logerr), msghandler::Severity::Abort, FORMAT_FUNC_NAME(), -1, __FILE__, __LINE__, {}, GET_STACKTRACE(), true)
-#define ulogabrt1(Component) \
-    msghandler::MessageHandler::getStream((logerr), msghandler::Severity::Abort, GET_COMPONENT(Component), -1, __FILE__, __LINE__, {}, GET_STACKTRACE(), true)
-#define ulogabrt2(Component, ErrCode) \
-    msghandler::MessageHandler::getStream((logerr), msghandler::Severity::Abort, GET_COMPONENT(Component), ErrCode, __FILE__, __LINE__, {}, GET_STACKTRACE(), true)
-#define ulogabrt3(Component, ErrCode, JSONInfo) \
-    msghandler::MessageHandler::getStream((logerr), msghandler::Severity::Abort, GET_COMPONENT(Component), ErrCode, __FILE__, __LINE__, JSONInfo, GET_STACKTRACE(), true)
-#define ulogabrt(...) GET_MACRO_0123(__VA_ARGS__, ulogabrt3, ulogabrt2, ulogabrt1, ulogabrt0)(__VA_ARGS__)
-
 namespace msghandler
 {
-
-enum class Severity
-{
-    Info = 0,
-    Warning,
-    Error,
-    Critical,
-    Abort 
-};
-
-/**
- */
-struct Message
-{
-    std::string    content;
-    Severity       severity     = Severity::Info;
-    std::string    component;
-    int            err_code     = -1;
-    std::string    file;
-    int            line         = -1;
-    nlohmann::json info;
-    std::string    stack_trace;
-    bool           user_level   = false;
-};
 
 /**
  */
@@ -157,7 +116,15 @@ public:
                                bool user_level);
     static void log(log4cpp::CategoryStream& strm,
                     const Message& msg);
-   
+
+    static void reportCriticalError(const Message& msg);
+    static bool hasCriticalError();
+    static Message criticalError();
+
+    static bool handleCriticalError();
+    static void handleException();
+
+private:
     static void logMessageFancy(log4cpp::CategoryStream& strm,
                                 const Message& msg);
     static void handleSystemLevelMessage(log4cpp::CategoryStream& strm,
@@ -165,11 +132,15 @@ public:
     static void handleUserLevelMessage(log4cpp::CategoryStream& strm,
                                        const Message& msg);
 
-    static bool addToTaskLog(const Message& msg);
-    static void showMessage(const Message& msg);
-    static void showAbortMessage(const Message& msg);
+    static void addToTaskLog(const Message& msg);
     static bool shutdownCOMPASS();
     static bool compileBugReport(const Message& msg);
+
+    static bool showMessage(const Message& msg);
+    static bool showAbortMessage(const Message& msg);
+
+    static Message critical_error_msg_;
+    static bool    critical_error_msg_set_;   
 };
 
 } // namespace msghandler

@@ -22,9 +22,16 @@
 
 #include <QMessageBox>
 #include <QApplication>
+#include <QMetaObject>
+#include <QThread>
+
+#include <boost/thread/mutex.hpp>
 
 namespace msghandler
 {
+
+Message MessageHandler::critical_error_msg_     = Message();
+bool    MessageHandler::critical_error_msg_set_ = false;
 
 /**
  */
@@ -123,7 +130,7 @@ void MessageHandler::logMessageFancy(log4cpp::CategoryStream& strm,
         bool aborting = msg.severity == Severity::Abort;
         bool show_st  = aborting && !msg.stack_trace.empty();
 
-        strm << "Encountered critical failure, going into shutdown" << "\n"
+        strm << "Encountered critical error" << (aborting ? ", going into shutdown" : "") << "\n"
              << "\n"
              << "Error:       " << (msg.content.empty() ? "Unknown error" : msg.content) << "\n"
              << "Error Code:  " << msg.err_code << "\n"
@@ -147,19 +154,119 @@ bool MessageHandler::shutdownCOMPASS()
 
 /**
  */
-bool MessageHandler::addToTaskLog(const Message& msg)
+void MessageHandler::addToTaskLog(const Message& msg)
 {
     if (!COMPASS::instance().dbInterface().ready())
-        return true;
+        return;
 
+    //execute in thread space of QApplication (main thread)
+    if (msg.severity == Severity::Info)
+    {
+        QMetaObject::invokeMethod(qApp, 
+                                  [ msg ] () { COMPASS::instance().logInfo(msg.component, {}, msg.info) << msg.content; }, 
+                                  Qt::AutoConnection);
+    }
+    else if (msg.severity == Severity::Warning)
+    {
+        QMetaObject::invokeMethod(qApp, 
+                                  [ msg ] () { COMPASS::instance().logWarn(msg.component, {}, msg.info) << msg.content; }, 
+                                  Qt::AutoConnection);
+    }
+    else if (msg.severity == Severity::Error)
+    {
+        QMetaObject::invokeMethod(qApp, 
+                                  [ msg ] () { COMPASS::instance().logError(msg.component, msg.err_code, msg.info) << msg.content; }, 
+                                  Qt::AutoConnection);
+    }
+}
+
+/**
+ */
+bool MessageHandler::showMessage(const Message& msg)
+{
     try
     {
+        // no gui application no ui
+        if (!QApplication::instance() || QApplication::closingDown())
+            return false;
+
+        // get some parent (if existing)
+        auto parent = QApplication::activeWindow();
+
         if (msg.severity == Severity::Info)
-            COMPASS::instance().logInfo(msg.component, {}, msg.info) << msg.content;
+        {
+            QMessageBox::information(parent, "Information", QString::fromStdString(msg.content));
+        }
         else if (msg.severity == Severity::Warning)
-            COMPASS::instance().logWarn(msg.component, {}, msg.info) << msg.content;
+        {
+            QMessageBox::warning(parent, "Warning", QString::fromStdString(msg.content));
+        }
         else if (msg.severity == Severity::Error)
-            COMPASS::instance().logError(msg.component, msg.err_code, msg.info) << msg.content;
+        {
+            QMessageBox::critical(parent, "Error", QString::fromStdString(msg.content));
+        }
+        else if (msg.severity == Severity::Critical ||
+                msg.severity == Severity::Abort)
+        {
+            if (!showAbortMessage(msg))
+                return false;
+        }
+    }
+    catch(...)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ */
+bool MessageHandler::showAbortMessage(const Message& msg)
+{
+    try
+    {
+        // no gui application no ui
+        if (!QApplication::instance() || QApplication::closingDown())
+            return false;
+
+        bool is_shutdown = msg.severity == Severity::Abort;
+
+        auto parent = QApplication::activeWindow();
+
+        std::string component = (msg.component.empty() ? "Unknown" : msg.component);
+
+        std::stringstream ss;
+        ss << "<html><body><table>";
+        ss << "<tr><td><b>Error:      </b></td><td>" << msg.content  << "</td></tr>";
+        ss << "<tr><td><b>Code:       </b></td><td>" << msg.err_code << "</td></tr>";
+        ss << "<tr><td><b>Component:  </b></td><td>" << component    << "</td></tr>";
+        ss << "<tr><td><b>File:       </b></td><td>" << msg.file     << "</td></tr>";
+        ss << "<tr><td><b>Line:       </b></td><td>" << msg.line     << "</td></tr>";
+        ss << "</table></body></html>";
+
+        QString info = QString::fromStdString(ss.str());
+        QString txt;
+        
+        if (is_shutdown)
+        {
+            txt = "The application has encountered a critical error and will shut down.";
+        }
+        else
+        {
+            txt = "The application has encountered a critical error";
+        }
+
+        QMessageBox msg_box(parent);
+        msg_box.setIcon(QMessageBox::Critical);
+        msg_box.setTextFormat(Qt::TextFormat::RichText);
+        msg_box.setWindowTitle("Critical Error");
+        msg_box.setText(txt);
+        msg_box.setInformativeText(info);
+        msg_box.setStandardButtons(QMessageBox::Button::Ok);
+        msg_box.setDefaultButton(QMessageBox::Button::Ok);
+
+        msg_box.exec();
     }
     catch(...)
     {
@@ -167,68 +274,6 @@ bool MessageHandler::addToTaskLog(const Message& msg)
     }
     
     return true;
-}
-
-/**
- */
-void MessageHandler::showMessage(const Message& msg)
-{
-    // no gui application no ui
-    if (!QApplication::instance() || QApplication::closingDown())
-        return;
-
-    // get some parent (if existing)
-    auto parent = QApplication::activeWindow();
-
-    if (msg.severity == Severity::Error    ||
-        msg.severity == Severity::Critical)
-    {
-        //show simple message box to user
-        QString title = msg.severity == Severity::Error ? "Error" : "Critical Error";
-        QString txt   = QString::fromStdString(msg.content);
-
-        QMessageBox::critical(parent, title, txt);
-    }
-    else if (msg.severity == Severity::Abort)
-    {
-        //show abort ui
-        MessageHandler::showAbortMessage(msg);
-    }
-}
-
-/**
- */
-void MessageHandler::showAbortMessage(const Message& msg)
-{
-    if (!QApplication::instance() || QApplication::closingDown())
-        return;
-
-    auto parent = QApplication::activeWindow();
-
-    std::string component = (msg.component.empty() ? "Unknown" : msg.component);
-
-    std::stringstream ss;
-    ss << "<html><body><table>";
-    ss << "<tr><td><b>Error:    </b></td><td>" << msg.content  << "</td></tr>";
-    ss << "<tr><td><b>Code:     </b></td><td>" << msg.err_code << "</td></tr>";
-    ss << "<tr><td><b>Component:</b></td><td>" << component    << "</td></tr>";
-    ss << "<tr><td><b>File:     </b></td><td>" << msg.file     << "</td></tr>";
-    ss << "<tr><td><b>Line:     </b></td><td>" << msg.line     << "</td></tr>";
-    ss << "</table></body></html>";
-
-    QString info = QString::fromStdString(ss.str());
-    QString txt  = "The application has encountered a critical error and will shut down.";
-
-    QMessageBox msg_box(parent);
-    msg_box.setIcon(QMessageBox::Critical);
-    msg_box.setTextFormat(Qt::TextFormat::RichText);
-    msg_box.setWindowTitle("Critical Error");
-    msg_box.setText(txt);
-    msg_box.setInformativeText(info);
-    msg_box.setStandardButtons(QMessageBox::Button::Ok);
-    msg_box.setDefaultButton(QMessageBox::Button::Ok);
-
-    msg_box.exec();
 }
 
 /**
@@ -249,10 +294,9 @@ void MessageHandler::handleSystemLevelMessage(log4cpp::CategoryStream& strm,
     //log message first
     MessageHandler::logMessageFancy(strm, msg);
 
-    //then abort if needed
-    bool aborting = msg.severity == Severity::Abort;
-    if (aborting && !MessageHandler::shutdownCOMPASS())
-        logerr << "Shutting down COMPASS failed";
+    //report critical error
+    if (msg.severity == Severity::Critical)
+        MessageHandler::reportCriticalError(msg);
 }
 
 /**
@@ -264,16 +308,125 @@ void MessageHandler::handleUserLevelMessage(log4cpp::CategoryStream& strm,
     MessageHandler::logMessageFancy(strm, msg);
 
     //add to task log
-    if (!MessageHandler::addToTaskLog(msg))
-        logerr << "Adding message to task log failed";
+    MessageHandler::addToTaskLog(msg);
 
-    //show to user
-    MessageHandler::showMessage(msg);
+    //report critical error
+    if (msg.severity == Severity::Critical)
+        MessageHandler::reportCriticalError(msg);
+}
 
-    //abort if needed
-    bool aborting = msg.severity == Severity::Abort;
-    if (aborting && !MessageHandler::shutdownCOMPASS())
-        logerr << "Shutting down COMPASS failed";
+/**
+ * Reports a critical error to the message handler.
+ * - thread-safe
+ * - critical error can only be set once
+ */
+void MessageHandler::reportCriticalError(const Message& msg)
+{
+    static boost::mutex m;
+    boost::mutex::scoped_lock lock(m);
+
+    if (critical_error_msg_set_)
+        return;
+
+    critical_error_msg_set_ = true;
+    critical_error_msg_     = msg;
+}
+
+/**
+ */
+bool MessageHandler::hasCriticalError()
+{
+    return critical_error_msg_set_;
+}
+
+/**
+ */
+Message MessageHandler::criticalError()
+{
+    return critical_error_msg_;
+}
+
+/**
+ * Handles any set critical error.
+ * - thread-safe
+ */
+bool MessageHandler::handleCriticalError()
+{
+    static boost::mutex m;
+    boost::mutex::scoped_lock lock(m);
+
+    if (!critical_error_msg_set_)
+        return false;
+
+    auto msg = critical_error_msg_;
+
+    //callback to be executed on main thread
+    auto cb = [ msg ] ()
+    {
+        //log exception
+        MessageHandler::logMessageFancy(logerr, msg);
+
+        //show UI
+        MessageHandler::showAbortMessage(msg);
+    };
+
+    //queue exception handling to main thread's event loop
+    //(threads will wait for the main thread to execute it => do not call this if the main thread is blocked!)
+    QMetaObject::invokeMethod(qApp, cb, qApp->thread() == QThread::currentThread() ? Qt::DirectConnection : Qt::BlockingQueuedConnection);
+
+    //handled => reset flag
+    critical_error_msg_set_ = false;
+
+    return true;
+}
+
+/**
+ * Handles an exception.
+ * - thread-safe
+ * - non-reentrant
+ * - handling of the exception is passed to main thread
+ * - threads go to sleep until abort() is called from the main thread
+ */
+void MessageHandler::handleException()
+{
+    static bool handled = false;
+    static boost::mutex m;
+
+    {
+        //lock for other threads
+        boost::mutex::scoped_lock lock(m);
+
+        //handle if not yet handled
+        if (!handled)
+        {
+            handled = true;
+
+            auto msg = critical_error_msg_;
+
+            //callback to be executed on main thread
+            auto cb = [ msg ] ()
+            {
+                //log exception
+                MessageHandler::logMessageFancy(logerr, msg);
+
+                //show UI
+                MessageHandler::showAbortMessage(msg);
+
+                //then abort
+                std::abort();
+            };
+
+            //queue exception handling to main thread's event loop
+            QMetaObject::invokeMethod(qApp, cb, Qt::AutoConnection);
+        }
+    }
+
+    // main thread should process events to be able to handle exception
+    if (qApp->thread() == QThread::currentThread())
+        QApplication::processEvents();
+
+    // put to sleep until abort()
+    std::promise<void>().get_future().wait(); 
 }
 
 }

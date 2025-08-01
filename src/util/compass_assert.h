@@ -38,6 +38,7 @@ namespace boost
                                  const std::string& stack_trace,
                                  bool expr_is_message)
     {
+        //compile message
         msghandler::Message msg;
         msg.severity    = msghandler::Severity::Abort;
         msg.content     = expr_is_message ? std::string(expr) : "Assertion '" + std::string(expr) + "' failed";
@@ -46,9 +47,10 @@ namespace boost
         msg.stack_trace = stack_trace;
         msg.user_level  = false;
 
-        msghandler::MessageHandler::logMessageFancy((logerr), msg);
-        msghandler::MessageHandler::showAbortMessage(msg);
+        //report critical error
+        msghandler::MessageHandler::reportCriticalError(msg);
 
-        std::abort();
+        //handle exception
+        msghandler::MessageHandler::handleException();
     }
 }

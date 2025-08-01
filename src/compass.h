@@ -23,7 +23,7 @@
 #include "appmode.h"
 #include "result.h"
 #include "logmodel.h"
-
+#include "message.h"
 
 #include <QObject>
 
@@ -142,11 +142,14 @@ public:
     const char* lineEditInvalidStyle();
 
     LogStream logInfo(const std::string& component,
-                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+                      boost::optional<unsigned int> error_code={}, 
+                      nlohmann::json json_blob={});
     LogStream logWarn(const std::string& component,
-                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+                      boost::optional<unsigned int> error_code={}, 
+                      nlohmann::json json_blob={});
     LogStream logError(const std::string& component,
-                       boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+                       boost::optional<unsigned int> error_code={}, 
+                       nlohmann::json json_blob={});
 
     unsigned int minAppWidth() const;
 

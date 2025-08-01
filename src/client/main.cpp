@@ -34,7 +34,16 @@ using namespace std;
 
 void signalHandler(int signum) 
 {
-    logerr << "Caught signal " << signum;
+    std::cerr << "Caught signal " << signum << std::endl;
+
+    //handle any reported critical error
+    // if (msghandler::MessageHandler::hasCriticalError())
+    // {
+    //     auto err = msghandler::MessageHandler::criticalError();
+
+    //     msghandler::MessageHandler::logMessageFancy(logerr, err);
+    //     msghandler::MessageHandler::showAbortMessage(err);
+    // }
 
     // invoke the default handler and process the signal
     signal(signum, SIG_DFL);
