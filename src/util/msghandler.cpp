@@ -25,13 +25,12 @@
 #include <QMetaObject>
 #include <QThread>
 
-#include <boost/thread/mutex.hpp>
-
 namespace msghandler
 {
 
-Message MessageHandler::critical_error_msg_     = Message();
-bool    MessageHandler::critical_error_msg_set_ = false;
+boost::mutex MessageHandler::critical_error_mutex_   = boost::mutex();
+Message      MessageHandler::critical_error_msg_     = Message();
+bool         MessageHandler::critical_error_msg_set_ = false;
 
 /**
  */
@@ -79,7 +78,7 @@ LogStream MessageHandler::getStream(log4cpp::CategoryStream& strm,
         msg.user_level  = user_level;
 
         //log message on stream end
-        MessageHandler::log(strm, msg);
+        MessageHandler::commit(strm, msg);
     };
 
     return LogStream(cb);
@@ -87,7 +86,7 @@ LogStream MessageHandler::getStream(log4cpp::CategoryStream& strm,
 
 /**
  */
-void MessageHandler::log(log4cpp::CategoryStream& strm,
+void MessageHandler::commit(log4cpp::CategoryStream& strm,
                          const Message& msg)
 {
 #if 0
@@ -108,6 +107,14 @@ void MessageHandler::log(log4cpp::CategoryStream& strm,
         MessageHandler::handleUserLevelMessage(strm, msg);
     else
         MessageHandler::handleSystemLevelMessage(strm, msg);
+}
+
+/**
+ */
+void MessageHandler::log(log4cpp::CategoryStream& strm,
+                         const Message& msg)
+{
+    logMessageFancy(strm, msg);
 }
 
 /**
@@ -142,14 +149,6 @@ void MessageHandler::logMessageFancy(log4cpp::CategoryStream& strm,
              << (show_st ? "\n" : "")
              << (aborting ? "Aborting..." : "");
     }
-}
-
-/**
- */
-bool MessageHandler::shutdownCOMPASS()
-{
-    //@TODO
-    return true;
 }
 
 /**
@@ -292,7 +291,7 @@ void MessageHandler::handleSystemLevelMessage(log4cpp::CategoryStream& strm,
                                               const Message& msg)
 {
     //log message first
-    MessageHandler::logMessageFancy(strm, msg);
+    MessageHandler::log(strm, msg);
 
     //report critical error
     if (msg.severity == Severity::Critical)
@@ -305,7 +304,7 @@ void MessageHandler::handleUserLevelMessage(log4cpp::CategoryStream& strm,
                                             const Message& msg)
 {
     //log message first
-    MessageHandler::logMessageFancy(strm, msg);
+    MessageHandler::log(strm, msg);
 
     //add to task log
     MessageHandler::addToTaskLog(msg);
@@ -322,9 +321,9 @@ void MessageHandler::handleUserLevelMessage(log4cpp::CategoryStream& strm,
  */
 void MessageHandler::reportCriticalError(const Message& msg)
 {
-    static boost::mutex m;
-    boost::mutex::scoped_lock lock(m);
+    boost::mutex::scoped_lock lock(critical_error_mutex_);
 
+    //already set?
     if (critical_error_msg_set_)
         return;
 
@@ -352,9 +351,9 @@ Message MessageHandler::criticalError()
  */
 bool MessageHandler::handleCriticalError()
 {
-    static boost::mutex m;
-    boost::mutex::scoped_lock lock(m);
+    boost::mutex::scoped_lock lock(critical_error_mutex_);
 
+    //already fetched?
     if (!critical_error_msg_set_)
         return false;
 
@@ -363,70 +362,18 @@ bool MessageHandler::handleCriticalError()
     //callback to be executed on main thread
     auto cb = [ msg ] ()
     {
-        //log exception
-        MessageHandler::logMessageFancy(logerr, msg);
-
         //show UI
         MessageHandler::showAbortMessage(msg);
     };
 
     //queue exception handling to main thread's event loop
     //(threads will wait for the main thread to execute it => do not call this if the main thread is blocked!)
-    QMetaObject::invokeMethod(qApp, cb, qApp->thread() == QThread::currentThread() ? Qt::DirectConnection : Qt::BlockingQueuedConnection);
+    QMetaObject::invokeMethod(qApp, cb, qApp->thread() == QThread::currentThread() ? Qt::DirectConnection : Qt::QueuedConnection);
 
     //handled => reset flag
     critical_error_msg_set_ = false;
 
     return true;
-}
-
-/**
- * Handles an exception.
- * - thread-safe
- * - non-reentrant
- * - handling of the exception is passed to main thread
- * - threads go to sleep until abort() is called from the main thread
- */
-void MessageHandler::handleException()
-{
-    static bool handled = false;
-    static boost::mutex m;
-
-    {
-        //lock for other threads
-        boost::mutex::scoped_lock lock(m);
-
-        //handle if not yet handled
-        if (!handled)
-        {
-            handled = true;
-
-            auto msg = critical_error_msg_;
-
-            //callback to be executed on main thread
-            auto cb = [ msg ] ()
-            {
-                //log exception
-                MessageHandler::logMessageFancy(logerr, msg);
-
-                //show UI
-                MessageHandler::showAbortMessage(msg);
-
-                //then abort
-                std::abort();
-            };
-
-            //queue exception handling to main thread's event loop
-            QMetaObject::invokeMethod(qApp, cb, Qt::AutoConnection);
-        }
-    }
-
-    // main thread should process events to be able to handle exception
-    if (qApp->thread() == QThread::currentThread())
-        QApplication::processEvents();
-
-    // put to sleep until abort()
-    std::promise<void>().get_future().wait(); 
 }
 
 }

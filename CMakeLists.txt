@@ -220,7 +220,7 @@ target_compile_definitions(compass PRIVATE
     BOOST_STACKTRACE_LINK
 )
 
-target_link_options(compass PRIVATE -rdynamic)
+# target_link_options(compass PRIVATE -rdynamic)
 
 # installation stuff
 
@@ -253,3 +253,16 @@ include (CPack)
 #file(GLOB DOT ".*")
 #file(GLOB TILD "*~")
 #file(GLOB TEMP "*.cmake")
+
+#message("Installing watchdog")
+
+#target_link_libraries ( compass_handler
+#    Qt5::Widgets
+#    Qt5::Core
+#    Qt5::OpenGL
+#    Qt5::Charts
+#    Qt5::Test
+#    ${Boost_LIBRARIES}
+#    )
+
+#install (TARGETS compass_handler DESTINATION bin)

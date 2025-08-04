@@ -1057,7 +1057,7 @@ bool Section::configure(const nlohmann::json& j)
         auto        config = j_content[ FieldConfigContentConfig ];
 
         //find content of id and type
-        auto it = std::find_if(content_.begin(), content_.end(), [&id, &type] (const auto& c) { return c && c->id() == id && c->contentType() == type; });
+        auto it = std::find_if(content_.begin(), content_.end(), [&id, &type] (const std::shared_ptr<SectionContent>& c) { return c && c->id() == id && c->contentType() == type; });
         if (it == content_.end())
         {
             //not found => skip
