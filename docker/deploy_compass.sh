@@ -34,9 +34,8 @@ export DEPLOY_GTK_VERSION=3
 
 export NO_STRIP=1
 
-
 cd /app/workspace/compass/docker/linuxdeploy/
-./linuxdeploy-x86_64.AppImage --appdir /app/workspace/compass/appimage/appdir --executable /usr/bin/compass_client --desktop-file=/app/workspace/compass/appimage/compass.desktop --plugin qt --plugin gtk --icon-file /app/workspace/compass/appimage/ats.png --output appimage
+./linuxdeploy-x86_64.AppImage --appdir /app/workspace/compass/appimage/appdir --executable=/usr/bin/compass_handler --executable=/usr/bin/compass_client --desktop-file=/app/workspace/compass/appimage/compass.desktop --plugin qt --plugin gtk --icon-file /app/workspace/compass/appimage/ats.png --output appimage
 
 mv COMPASS-x86_64.AppImage /app/workspace/compass/COMPASS_$1-x86_64.AppImage
 

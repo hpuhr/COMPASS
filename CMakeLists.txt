@@ -254,15 +254,15 @@ include (CPack)
 #file(GLOB TILD "*~")
 #file(GLOB TEMP "*.cmake")
 
-#message("Installing watchdog")
+message("Installing handler")
 
-#target_link_libraries ( compass_handler
-#    Qt5::Widgets
-#    Qt5::Core
-#    Qt5::OpenGL
-#    Qt5::Charts
-#    Qt5::Test
-#    ${Boost_LIBRARIES}
-#    )
+target_link_libraries ( compass_handler
+    Qt5::Widgets
+    Qt5::Core
+    Qt5::OpenGL
+    Qt5::Charts
+    Qt5::Test
+    ${Boost_LIBRARIES}
+    )
 
-#install (TARGETS compass_handler DESTINATION bin)
+install (TARGETS compass_handler DESTINATION bin)
