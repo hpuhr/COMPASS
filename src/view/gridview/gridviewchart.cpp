@@ -108,7 +108,7 @@ bool GridViewChart::handleMousePress(Qt::MouseButtons buttons, const QPointF& wi
 
         if (tool == GV_NAVIGATE_TOOL)
         {
-            logdbg << "GridViewChart: handleMousePress: NAVIGATE x " << widget_pos.x() << " y " << widget_pos.y();
+            logdbg << "navigate x " << widget_pos.x() << " y " << widget_pos.y();
 
             drag_data_      = widget_pos;
             drag_data_init_ = true;
@@ -117,12 +117,12 @@ bool GridViewChart::handleMousePress(Qt::MouseButtons buttons, const QPointF& wi
         }
         else if (tool == GV_ZOOM_RECT_TOOL || tool == GV_SELECT_TOOL)
         {
-            loginf << "GridViewChart: handleMousePress: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+            loginf << "rect x " << widget_pos.x() << " y " << widget_pos.y();
 
             // view widget coordinates to chart coordinates
             QPointF p = widgetToChart(widget_pos);
 
-            loginf << "GridViewChart: handleMousePress: RECT xc " << p.x() << " yc " << p.y();
+            loginf << "rect xc " << p.x() << " yc " << p.y();
 
             p1_      = widget_pos.toPoint();
             p1_data_ = p;
@@ -149,7 +149,7 @@ bool GridViewChart::handleMouseMove(Qt::MouseButtons buttons, const QPointF& wid
 
         if (tool == GV_NAVIGATE_TOOL)
         {
-            logdbg << "GridViewChart: handleMouseMove: NAVIGATE x " << widget_pos.x() << " y " << widget_pos.y() << " drag_data_init " << drag_data_init_;
+            logdbg << "navigate x " << widget_pos.x() << " y " << widget_pos.y() << " drag_data_init " << drag_data_init_;
 
             if (drag_data_init_)
             {
@@ -164,7 +164,7 @@ bool GridViewChart::handleMouseMove(Qt::MouseButtons buttons, const QPointF& wid
         }
         else if ((tool == GV_ZOOM_RECT_TOOL || tool == GV_SELECT_TOOL) && isSelectionEnabled())
         {
-            logdbg << "GridViewChart: handleMouseMove: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+            logdbg << "rect x " << widget_pos.x() << " y " << widget_pos.y();
 
             // view widget coordinates to chart coordinates
             QPointF p = widgetToChart(widget_pos);
@@ -191,7 +191,7 @@ bool GridViewChart::handleMouseRelease(Qt::MouseButtons buttons, const QPointF& 
 
         if (tool == GV_NAVIGATE_TOOL)
         {
-            logdbg << "GridViewChart: handleMouseRelease: NAVIGATE x " << widget_pos.x() << " y " << widget_pos.y();
+            logdbg << "navigate x " << widget_pos.x() << " y " << widget_pos.y();
 
             drag_data_init_ = false;
 
@@ -199,12 +199,12 @@ bool GridViewChart::handleMouseRelease(Qt::MouseButtons buttons, const QPointF& 
         }
         else if ((tool == GV_ZOOM_RECT_TOOL || tool == GV_SELECT_TOOL) && isSelectionEnabled())
         {
-            loginf << "GridViewChart: handleMouseRelease: RECT x " << widget_pos.x() << " y " << widget_pos.y();
+            loginf << "rect x " << widget_pos.x() << " y " << widget_pos.y();
 
             // view widget coordinates to chart coordinates
             QPointF p = widgetToChart(widget_pos);
 
-            loginf << "GridViewChart: handleMouseRelease: RECT xc " << p.x() << " yc " << p.y();
+            loginf << "rect xc " << p.x() << " yc " << p.y();
 
             if (update_pos)
             {
@@ -212,7 +212,7 @@ bool GridViewChart::handleMouseRelease(Qt::MouseButtons buttons, const QPointF& 
                 p2_data_ = p;
             }
             
-            loginf << "GridViewChart: handleMouseRelease: REGION p1 " << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
+            loginf << "region p1 " << p1_data_.x() << "," << p1_data_.y() << " p2 " << p2_data_.x() << "," << p2_data_.y();
 
             updateSelection(p1_, p2_, p1_data_, p2_data_);
             sendSelectedRegion();

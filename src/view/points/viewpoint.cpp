@@ -109,18 +109,18 @@ void ViewPoint::setComment (const std::string& comment)
 
 void ViewPoint::print() const
 {
-    loginf << "ViewPoint id " << id_ <<": print: data '" << data_.dump(4) << "'";
+    loginf << id_ <<": data '" << data_.dump(4) << "'";
 }
 
 void ViewPoint::accept(LatexVisitor& v) const
 {
-    logdbg << "ViewPoint: accept";
+    logdbg << "start";
     v.visit(this);
 }
 
 void ViewPoint::save()
 {
-    logdbg << "ViewPoint: save: id " << id_;
+    logdbg << "id " << id_;
 
     DBInterface& db_interface = COMPASS::instance().dbInterface();
     db_interface.setViewPoint(id_, data_.dump());
@@ -134,7 +134,7 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
     try
     {
         if (verbose)
-            loginf << "ViewPoint::isValidJSON";
+            loginf << "";
 
         if (!json_obj.is_object())
             throw std::runtime_error("current data is not an object");
@@ -175,14 +175,14 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
                         std::string file = Utils::Files::getFilenameFromPath(filename);
                         
                         if (verbose)
-                            loginf << "ViewPoint::isValidJSON: filename '" << filename << "' not found";
+                            loginf << "filename '" << filename << "' not found";
                         
                         if (!json_filename.empty())
                         {
                             std::string dir = Utils::Files::getDirectoryFromPath(json_filename);
                         
                             if (verbose)
-                                loginf << "Checking for file '" << file << "' in dir '" << dir << "'";
+                                loginf << "checking for file '" << file << "' in dir '" << dir << "'";
 
                             filename = dir+"/"+file;
 
@@ -192,7 +192,7 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
 
                                 if (verbose)
                                 {
-                                    loginf << "ViewPoint::isValidJSON: filename '" << filename
+                                    loginf << "filename '" << filename
                                            << "' found at different path";
                                 }
                             }
@@ -227,7 +227,7 @@ bool ViewPoint::isValidJSON(nlohmann::json json_obj,
 
         if (verbose)
         {
-            loginf << "ViewPointsImportTask: checkParsedData: current data seems to be valid, contains " << view_points.size()
+            loginf << "current data seems to be valid, contains " << view_points.size()
                 << " view points";
         }
     }

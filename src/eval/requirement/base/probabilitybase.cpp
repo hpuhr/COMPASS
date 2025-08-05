@@ -69,7 +69,7 @@ bool ProbabilityBase::invertProb() const
 //         ++decimals;
 //     }
 
-//     //loginf << "ProbabilityBase: getNumThresholdDecimals: threshold " << thres << " dec " << decimals;
+//     //loginf << "threshold " << thres << " dec " << decimals;
 //     return decimals;
 // }
 

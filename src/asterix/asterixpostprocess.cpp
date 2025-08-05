@@ -41,7 +41,7 @@ void ASTERIXPostProcess::postProcess(unsigned int category, nlohmann::json& reco
 
     if (!record.contains("010"))
     {
-        logwrn << "ASTERIXPostProcess: postProcess: record without item 010: '" << record.dump(4)
+        logwrn << "record without item 010: '" << record.dump(4)
                << "', setting 256/256";
 
         record["010"]["SAC"] = 0;
@@ -116,7 +116,7 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
 
                 if (tod < 0 || tod >= tod_24h)
                 {
-                    logwrn << "ASTERIXPostProcess: postProcessCAT001: impossible tod "
+                    logwrn << "impossible tod "
                            << String::timeStringFromDouble(tod);
                     record["140"]["Time-of-Day"] = nullptr;
                     return;
@@ -124,7 +124,7 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
 
                 if (cat002_last_tod_period_.at(sac_sic) < 0 || cat002_last_tod_period_.at(sac_sic) >= tod_24h)
                 {
-                    logwrn << "ASTERIXPostProcess: postProcessCAT001: impossible cat002 time "
+                    logwrn << "impossible cat002 time "
                            << String::timeStringFromDouble(cat002_last_tod_period_.at(sac_sic));
                     record["140"]["Time-of-Day"] = nullptr;
                     return;
@@ -134,7 +134,7 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
 
                 if (tod < 0 || tod >= tod_24h)
                 {
-                    logwrn << "ASTERIXPostProcess: postProcessCAT001: impossible corrected tod "
+                    logwrn << "impossible corrected tod "
                            << String::timeStringFromDouble(tod);
                     record["140"]["Time-of-Day"] = nullptr;
                     return;
@@ -149,7 +149,7 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
             }
             else
             {
-                loginf << "ASTERIXPostProcess: processRecord: removing truncated tod "
+                loginf << "removing truncated tod "
                        << String::timeStringFromDouble(record.at("141").at("Truncated Time of Day"))
                        << " since to CAT002 from sensor " << sac << "/" << sic << " is not present";
                 record["140"]["Time-of-Day"] = nullptr;
@@ -164,7 +164,7 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
         }
         else
         {
-            logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without sac/sic";
+            logdbg << "skipping cat001 report without sac/sic";
             record["140"]["Time-of-Day"] = nullptr;
         }
     }
@@ -183,12 +183,12 @@ void ASTERIXPostProcess::postProcessCAT001(int sac, int sic, nlohmann::json& rec
 
             }
             else
-                logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without "
+                logdbg << "skipping cat001 report without "
                           "truncated time of day"
                        << " or last cat002 time";
         }
         else
-            logdbg << "ASTERIXPostProcess: processRecord: skipping cat001 report without truncated "
+            logdbg << "skipping cat001 report without truncated "
                       "time of day"
                    << " or sac/sic";
     }
@@ -208,14 +208,14 @@ void ASTERIXPostProcess::postProcessCAT002(int sac, int sic, nlohmann::json& rec
 
             if (cat002_last_tod < 0 || cat002_last_tod > tod_24h)
             {
-                logerr << "ASTERIXPostProcess: postProcessCAT002: cat002_last_tod "
+                logerr << "cat002_last_tod "
                        << String::timeStringFromDouble(cat002_last_tod);
                 return;
             }
 
             if (cat002_last_tod_period < 0 || cat002_last_tod_period > tod_24h)
             {
-                logerr << "ASTERIXPostProcess: postProcessCAT002: cat002_last_tod_period "
+                logerr << "cat002_last_tod_period "
                        << String::timeStringFromDouble(cat002_last_tod_period);
                 return;
             }
@@ -289,7 +289,7 @@ void ASTERIXPostProcess::postProcessCAT020(int sac, int sic, nlohmann::json& rec
         nlohmann::json& contr_rvs = record.at("400").at("Contributing Receivers");
         assert (contr_rvs.is_array());
 
-        logdbg << "ASTERIXPostProcess: postProcessCAT020: processing '" << contr_rvs.dump() << "'";
+        logdbg << "processing '" << contr_rvs.dump() << "'";
 
         unsigned int prev_bit_cnt = 0;
 
@@ -297,7 +297,7 @@ void ASTERIXPostProcess::postProcessCAT020(int sac, int sic, nlohmann::json& rec
         {
             assert (it.contains("RUx"));
 
-            logdbg << "ASTERIXPostProcess: postProcessCAT020: processing '" << it.at("RUx").dump() << "'";
+            logdbg << "processing '" << it.at("RUx").dump() << "'";
 
             unsigned int rux_bits = it.at("RUx");
             assert (rux_bits < 256);
@@ -320,7 +320,7 @@ void ASTERIXPostProcess::postProcessCAT020(int sac, int sic, nlohmann::json& rec
 
         record.at("400").at("Contributing Receivers") = new_contrib_rus;
 
-        logdbg << "ASTERIXPostProcess: postProcessCAT020: result '" << record.at("400").at("Contributing Receivers").dump() << "'";
+        logdbg << "result '" << record.at("400").at("Contributing Receivers").dump() << "'";
     }
 }
 

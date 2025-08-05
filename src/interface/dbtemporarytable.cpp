@@ -77,7 +77,7 @@ void DBTemporaryTable::remove()
 
     auto res = connection_->deleteTable(table_name_.value());
     if (!res.ok())
-        logerr << "DBTemporaryTable: remove: could not remove temporary table '" << table_name_.value() << "': " << res.error();
+        logerr << "could not remove temporary table '" << table_name_.value() << "': " << res.error();
     assert(res.ok());
 
     table_name_.reset();

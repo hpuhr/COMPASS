@@ -43,13 +43,13 @@ public slots:
     void deleteVariableSlot();
 
 public:
-    MetaVariableDetailWidget(DBContentManager& dbo_man, QWidget* parent = nullptr);
+    MetaVariableDetailWidget(DBContentManager& dbcont_man, QWidget* parent = nullptr);
 
     void show (MetaVariable& meta_var);
     void clear();
 
 private:
-    DBContentManager& dbo_man_;
+    DBContentManager& dbcont_man_;
 
     bool has_current_entry_ {false};
     MetaVariable* meta_var_ {nullptr};

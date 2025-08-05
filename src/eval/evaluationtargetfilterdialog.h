@@ -56,7 +56,7 @@ public slots:
     void removeTASlot(bool checked);
     void removeTABlackListSlot(bool checked);
     void removeTAValuesSlot();
-    // dbo
+    // dbcont
     void removeDBContentsSlot(bool checked);
     void removeSpecificDBContentsSlot(bool checked);
 
@@ -90,8 +90,8 @@ protected:
     QCheckBox* remove_ta_blacklist_check_ {nullptr};
     QTextEdit* remove_ta_edit_ {nullptr};
 
-    QCheckBox* remove_dbo_check_ {nullptr};
-    std::map<std::string, QCheckBox*> remove_dbo_checks_;
+    QCheckBox* remove_dbcont_check_ {nullptr};
+    std::map<std::string, QCheckBox*> remove_dbcont_checks_;
 
     QPushButton* run_button_{nullptr};
     QPushButton* cancel_button_{nullptr};

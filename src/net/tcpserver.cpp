@@ -25,7 +25,7 @@ using namespace Utils;
 TCPSession::TCPSession(boost::asio::ip::tcp::socket socket)
     : socket_(std::move(socket))
 {
-    loginf << "TCPSession: ctor";
+    loginf << "start";
 }
 
 void TCPSession::start()

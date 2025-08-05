@@ -120,7 +120,7 @@ std::string ViewPointsImportTask::currentError() const
 
 void ViewPointsImportTask::parseCurrentFile ()
 {
-    loginf << "ViewPointsImportTask: parseCurrentFile: file '" << current_filename_ << "'";
+    loginf << "file '" << current_filename_ << "'";
 
     current_error_ = "";
 
@@ -129,7 +129,7 @@ void ViewPointsImportTask::parseCurrentFile ()
     if (!Files::fileExists(current_filename_))
     {
         current_error_ = "file '" + current_filename_ + "' does not exist";
-        logerr << "ViewPointsImportTask: parseCurrentFile: " << current_error_;
+        logerr << "start" << current_error_;
         return;
     }
 
@@ -144,15 +144,15 @@ void ViewPointsImportTask::parseCurrentFile ()
     catch (exception& e)
     {
         current_error_ = "parsing file '" + current_filename_ + "' resulted in error '" + e.what() + "'";
-        logerr << "ViewPointsImportTask: parseCurrentFile: " << current_error_;
+        logerr << "start" << current_error_;
     }
 
-    loginf << "ViewPointsImportTask: parseCurrentFile: done";
+    loginf << "done";
 }
 
 void ViewPointsImportTask::checkParsedData ()
 {
-    loginf << "ViewPointsImportTask: checkParsedData";
+    loginf << "start";
 
     std::string err;
     if (!ViewPoint::isValidJSON(current_data_, current_filename_, &err, true))
@@ -171,7 +171,7 @@ bool ViewPointsImportTask::canRun()
 
 void ViewPointsImportTask::run()
 {
-    loginf << "ViewPointsImportTask: import";
+    loginf << "start";
 
     assert (canImport()); // checked file content, version etc
     done_ = false;
@@ -191,11 +191,11 @@ void ViewPointsImportTask::run()
 
         if (reply == QMessageBox::Yes)
         {
-            loginf << "ViewPointsImportTask: import: deleting all view points";
+            loginf << "deleting all view points";
         }
         else
         {
-            loginf << "ViewPointsImportTask: import: aborted";
+            loginf << "aborted";
 
             done_ = true;
             return;
@@ -230,7 +230,7 @@ void ViewPointsImportTask::run()
 
                 std::string filename = ds_it.at(ViewPoint::VP_CONTEXT_DATASET_FILENAME_KEY);
 
-                loginf << "ViewPointsImportTask: import: importing dataset file '" << filename << "'";
+                loginf << "importing dataset file '" << filename << "'";
 
                 if (!Files::fileExists(filename))
                 {
@@ -254,7 +254,7 @@ void ViewPointsImportTask::run()
 
                     task.settings().file_line_id_ = line_id;
 
-                    loginf << "ViewPointsImportTask: import: line_id " << line_id;
+                    loginf << "line_id " << line_id;
                 }
 
 
@@ -269,7 +269,7 @@ void ViewPointsImportTask::run()
                 }
                 else
                 {
-                    loginf << "ViewPointsImportTask: import: override information not set";
+                    loginf << "override information not set";
                     task.settings().override_tod_active_ = false;
                     task.settings().override_tod_offset_ = 0;
                 }
@@ -279,7 +279,7 @@ void ViewPointsImportTask::run()
                     assert (ds_it.at("date").is_string());
                     string date_str = ds_it.at("date");
 
-                    loginf << "ViewPointsImportTask: import: date " << date_str;
+                    loginf << "date " << date_str;
 
                     boost::posix_time::ptime date = Time::fromDateString(date_str);
 
@@ -292,7 +292,7 @@ void ViewPointsImportTask::run()
                 task.allowUserInteractions(false);
 
                 //widget->runCurrentTaskSlot();
-                loginf << "ViewPointsImportTask: import: running task";
+                loginf << "running task";
                 task.run();
 
                 while (!task.done())
@@ -301,7 +301,7 @@ void ViewPointsImportTask::run()
                     QThread::msleep(1);
                 }
 
-                loginf << "ViewPointsImportTask: import: importing dataset file '" << filename << "' done";
+                loginf << "importing dataset file '" << filename << "' done";
 
             }
 
@@ -317,7 +317,7 @@ void ViewPointsImportTask::run()
 
     emit doneSignal();
 
-    loginf << "ViewPointsImportTask: done";
+    loginf << "start";
 }
 void ViewPointsImportTask::stop()
 {

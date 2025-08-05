@@ -166,7 +166,7 @@ bool ViewPresets::scanForPresets()
 
     if (!Utils::Files::directoryExists(preset_base_dir))
     {
-        logwrn << "ViewPresets: scanForPresets: view preset base directory not found";
+        logwrn << "view preset base directory not found";
         return true;
     }
 
@@ -200,14 +200,14 @@ bool ViewPresets::scanForPresets()
             
             if (!ok)
             {
-                logwrn << "ViewPresets: scanForPresets: Could not read preset '" << f.toStdString() << "'";
+                logwrn << "Could not read preset '" << f.toStdString() << "'";
                 continue;
             }
                 
             //view id must match preset view directory
             if (p.view != sub_dir.toStdString())
             {
-                logwrn << "ViewPresets: scanForPresets: Skipping preset '" << f.toStdString() << "' - bad preset configuration";
+                logwrn << "Skipping preset '" << f.toStdString() << "' - bad preset configuration";
                 continue;
             }
 
@@ -220,7 +220,7 @@ bool ViewPresets::scanForPresets()
         }
     }
 
-    loginf << "ViewPresets: scanForPresets: read " << presets_.size() << " preset(s)";
+    loginf << "read " << presets_.size() << " preset(s)";
 
     return true;
 }
@@ -287,7 +287,7 @@ bool ViewPresets::readPreset(Preset& p, const std::string& fn)
     if (Utils::Files::fileExists(preview_path))
     {
         if (!p.preview.load(QString::fromStdString(preview_path)))
-            logwrn << "ViewPresets: readPreset: could not read preview image for preset '" << p.name << "'";
+            logwrn << "could not read preview image for preset '" << p.name << "'";
     }
 
     return true;
@@ -348,7 +348,7 @@ bool ViewPresets::writePreset(const Preset& preset) const
 
     //try to write preview image
     if (!preset.preview.isNull() && !writePreview(preset))
-        logwrn << "ViewPresets: writePreset: preview image for view preset '" << preset.name << "' could not be written";
+        logwrn << "preview image for view preset '" << preset.name << "' could not be written";
 
     //write json content
     std::string content = obj.dump(4);
@@ -430,7 +430,7 @@ bool ViewPresets::createPreset(const Preset& preset, const View* view, bool sign
     //try to write
     if (!writePreset(p))
     {
-        logwrn << "ViewPresets: createPreset: could not write view preset '" << p.name << "'";
+        logwrn << "could not write view preset '" << p.name << "'";
         return false;
     }
 
@@ -681,7 +681,7 @@ bool ViewPresets::writePreset(const Key& key) const
 
     if (!writePreset(p))
     {
-        logwrn << "ViewPresets: writePreset: could not write view preset '" << key.second << "'";
+        logwrn << "could not write view preset '" << key.second << "'";
         return false;
     }
 

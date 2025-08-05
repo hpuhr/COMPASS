@@ -93,7 +93,7 @@ GridView::GridView(const std::string& class_id,
 */
 GridView::~GridView()
 {
-    loginf << "GridView: dtor";
+    loginf << "start";
 
     if (widget_)
     {
@@ -101,7 +101,7 @@ GridView::~GridView()
         widget_ = nullptr;
     }
 
-    loginf << "GridView: dtor: done";
+    loginf << "done";
 }
 
 /**
@@ -118,7 +118,7 @@ bool GridView::init_impl()
 void GridView::generateSubConfigurable(const std::string& class_id,
                                        const std::string& instance_id)
 {
-    logdbg << "GridView: generateSubConfigurable: class_id " << class_id << " instance_id "
+    logdbg << "class_id " << class_id << " instance_id "
            << instance_id;
     
     if (class_id == "GridViewWidget")
@@ -174,7 +174,7 @@ void GridView::accept(LatexVisitor& v)
 */
 void GridView::updateSelection()
 {
-    loginf << "GridView: updateSelection";
+    loginf << "start";
     assert(widget_);
 
     widget_->getViewDataWidget()->redrawData(true);
@@ -284,18 +284,18 @@ void GridView::updateSettingsFromVariable()
 {
     const auto& var = variable(2);
 
-    updateSettings(var.settings().data_var_dbo, var.settings().data_var_name);
+    updateSettings(var.settings().data_var_dbcont, var.settings().data_var_name);
 }
 
 /**
  */
-void GridView::updateSettings(const std::string& dbo, const std::string& name)
+void GridView::updateSettings(const std::string& dbcont, const std::string& name)
 {
-    bool is_empty = dbo.empty() && name.empty();
+    bool is_empty = dbcont.empty() && name.empty();
 
     if (is_empty)
     {
-        loginf << "GridView: updateSettings: Settings distributed variable to empty";
+        loginf << "settings distributed variable to empty";
 
         //set special settings for empty variable
         setValueType(grid2d::ValueType::ValueTypeCountValid, false);

@@ -43,18 +43,18 @@ ACIDFilter::ACIDFilter(const std::string& class_id, const std::string& instance_
 
 ACIDFilter::~ACIDFilter() {}
 
-bool ACIDFilter::filters(const std::string& dbcont_type)
+bool ACIDFilter::filters(const std::string& dbcont_name)
 {
-    if (dbcont_type == "CAT062")
+    if (dbcont_name == "CAT062")
         return true; // acid and callsign fpl
     else
         return COMPASS::instance().dbContentManager().metaVariable(
-                    DBContent::meta_var_acid_.name()).existsIn(dbcont_type);
+                    DBContent::meta_var_acid_.name()).existsIn(dbcont_name);
 }
 
 std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "ACIDFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbcont " << dbcontent_name << " active " << active_;
 
     if (!COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_acid_.name()).existsIn(dbcontent_name))
         return "";
@@ -117,21 +117,21 @@ std::string ACIDFilter::getConditionString(const std::string& dbcontent_name, bo
         first = false;
     }
 
-    loginf << "ACIDFilter: getConditionString: here '" << ss.str() << "'";
+    loginf << "here '" << ss.str() << "'";
 
     return ss.str();
 }
 
 void ACIDFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "ACIDFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id " << class_id;
 
     throw std::runtime_error("ACIDFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void ACIDFilter::checkSubConfigurables()
 {
-    logdbg << "ACIDFilter: checkSubConfigurables";
+    logdbg << "start";
 }
 
 DBFilterWidget* ACIDFilter::createWidget()
@@ -263,7 +263,7 @@ std::vector<unsigned int> ACIDFilter::filterBuffer(const std::string& dbcontent_
         }
     }
 
-    loginf << "ACIDFilter: filterBuffer: content " << dbcontent_name << " erase '" << values_str_ << "' num "
+    loginf << "content " << dbcontent_name << " erase '" << values_str_ << "' num "
            << to_be_removed.size() << " total " << buffer->size();
 
     return to_be_removed;

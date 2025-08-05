@@ -334,13 +334,13 @@ void ViewPointsReportGeneratorDialog::openPDFChangedSlot (bool checked)
 
 void ViewPointsReportGeneratorDialog::runSlot()
 {
-    loginf << "ViewPointsReportGeneratorDialog: runSlot";
+    loginf << "start";
     generator_.run();
 }
 
 void ViewPointsReportGeneratorDialog::cancelSlot()
 {
-    loginf << "ViewPointsReportGeneratorDialog: cancelSlot";
+    loginf << "start";
     generator_.cancel();
 }
 

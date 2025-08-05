@@ -121,7 +121,7 @@ public:
     void deleteEmptyProperties();
 
     void transformVariables(dbContent::VariableSet& list,
-                            bool dbcol2dbovar);  // tc2dbovar true for db col -> dbo var, false dbo var -> db column
+                            bool dbcol2dbcontvar);  // tc2dbcontvar true for db col -> dbcont var, false dbcont var -> db column
 
     nlohmann::json asJSON(unsigned int max_size=0);
     nlohmann::json asJSON(std::set<std::string> variable_names, unsigned int max_size=0);
@@ -161,7 +161,7 @@ NullableVector<T>& Buffer::get(const std::string& id)
 {
     if (!(std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
           ArrayListMapTupel>::value>(array_list_tuple_)).count(id))
-        logerr << "Buffer: get: id '" << id << "' type " << typeid(T).name() << " not found";
+        logerr << "id '" << id << "' type " << typeid(T).name() << " not found";
 
     assert ((std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
              ArrayListMapTupel>::value>(array_list_tuple_)).count(id));
@@ -176,7 +176,7 @@ const NullableVector<T>& Buffer::get(const std::string& id) const
 {
     if (!(std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
           ArrayListMapTupel>::value>(array_list_tuple_)).count(id))
-        logerr << "Buffer: get: id '" << id << "' type " << typeid(T).name() << " not found";
+        logerr << "id '" << id << "' type " << typeid(T).name() << " not found";
 
     assert ((std::get<BufferIndex<std::map<std::string, std::shared_ptr<NullableVector<T>>>,
              ArrayListMapTupel>::value>(array_list_tuple_)).count(id));
@@ -241,20 +241,20 @@ void Buffer::seizeArrayListMap(Buffer& other_buffer)
 {
     //assert(getArrayListMap<T>().size() == other_buffer.getArrayListMap<T>().size());
 
-    //    loginf << "Buffer: seizeArrayListMap: this properties";
+    //    loginf << "this properties";
     //    printProperties();
-    //    loginf << "Buffer: seizeArrayListMap: other properties";
+    //    loginf << "other properties";
     //    other_buffer.printProperties();
 
     // add all properties of other vector
     for(auto& prop_it : other_buffer.properties().properties())
     {
-        logdbg << "Buffer: seizeArrayListMap: checking prop name '" << prop_it.name() << "' type "
+        logdbg << "checking prop name '" << prop_it.name() << "' type "
                << prop_it.dataTypeString() << " contained " << hasProperty(prop_it);
 
         if (!hasProperty(prop_it))
         {
-            logdbg << "Buffer: seizeArrayListMap: adding prop name '" << prop_it.name() << "' type "
+            logdbg << "adding prop name '" << prop_it.name() << "' type "
                    << prop_it.dataTypeString();
             addProperty(prop_it);
         }
@@ -262,7 +262,7 @@ void Buffer::seizeArrayListMap(Buffer& other_buffer)
 
     for (auto& it : other_buffer.getArrayListMap<T>())
     {
-        logdbg << "Buffer: seizeArrayListMap: seizing '" << it.first << "'";
+        logdbg << "seizing '" << it.first << "'";
         assert (other_buffer.properties().hasProperty(it.first));
 
         assert (getArrayListMap<T>().count(it.first));

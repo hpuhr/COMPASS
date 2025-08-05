@@ -48,7 +48,7 @@ Report::Report(TaskResult* result)
  */
 Report::~Report()
 {
-    logdbg << "Report: destructor";
+    logdbg << "start";
 }
 
 /**
@@ -167,11 +167,11 @@ bool Report::hasSection(const std::string& id) const
     if (id.empty())
         return false;
 
-    loginf << "Report: hasSection: Checking for section '" << id << "'";
+    loginf << "Checking for section '" << id << "'";
 
     std::string id_in = root_section_->relativeID(id);
 
-    loginf << "Report: hasSection: Checking for relative section '" << id_in << "'";
+    loginf << "Checking for relative section '" << id_in << "'";
 
     std::vector<std::string> parts = SectionID::subSections(id_in);
     if (parts.empty())
@@ -208,7 +208,7 @@ bool Report::hasSection(const std::string& id) const
  */
 Section& Report::getSection (const std::string& id)
 {
-    logdbg << "Report: getSection: id '" << id << "'";
+    logdbg << "id '" << id << "'";
 
     assert (id.size());
 
@@ -247,7 +247,7 @@ Section& Report::getSection (const std::string& id)
 
 const Section& Report::getSection (const std::string& id) const
 {
-    logdbg << "Report: getSection: id '" << id << "'";
+    logdbg << "id '" << id << "'";
 
     assert (id.size());
 
@@ -298,13 +298,13 @@ bool Report::fromJSON_impl(const nlohmann::json& j)
     if (!j.is_object() ||
         !j.contains(FieldRootSection))
     {
-        logerr << "Report: fromJSON_impl: Report does not contain needed fields: isobject = " << j.is_object();
+        logerr << "report does not contain needed fields: isobject = " << j.is_object();
         return false;
     }
 
     if (!root_section_->fromJSON(j[ FieldRootSection ]))
     {
-        logerr << "Report: fromJSON_impl: Could not read root section";
+        logerr << "could not read root section";
         return false;
     }
 

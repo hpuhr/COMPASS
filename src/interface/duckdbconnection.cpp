@@ -51,14 +51,14 @@
 DuckDBConnection::DuckDBConnection(DuckDBInstance* instance, bool verbose)
 :   DBConnection(instance, verbose)
 {
-    //loginf << "DuckDBConnection: constructor";
+    //loginf << "start";
 }
 
 /**
  */
 DuckDBConnection::~DuckDBConnection()
 {
-    //loginf << "DuckDBConnection: destructor";
+    //loginf << "start";
 
     if (connected())
         disconnect();
@@ -75,8 +75,6 @@ DuckDBInstance* DuckDBConnection::duckDBInstance()
  */
 Result DuckDBConnection::connect_impl()
 {
-    //loginf << "DuckDBConnection: connecting...";
-
     auto duck_db = duckDBInstance();
 
     assert(duck_db->dbOpen());
@@ -95,8 +93,6 @@ Result DuckDBConnection::connect_impl()
  */
 void DuckDBConnection::disconnect_impl()
 {
-    //loginf << "DuckDBConnection: disconnecting...";
-
     duckdb_disconnect(&connection_);
 
     connection_ = nullptr;
@@ -197,7 +193,7 @@ Result DuckDBConnection::insertBuffer_impl(const std::string& table_name,
                                            const boost::optional<size_t>& idx_to,
                                            PropertyList* table_properties)
 {
-    //loginf << "DuckDBConnection: insertBuffer_impl: inserting into table '" << table_name << "'";
+    //loginf << "inserting into table '" << table_name << "'";
 
     if (!buffer || buffer->properties().size() == 0 || buffer->size() == 0)
         return Result::failed("Input buffer invalid");
@@ -268,7 +264,7 @@ Result DuckDBConnection::insertBuffer_impl(const std::string& table_name,
         importers[ c ] = cb;
 
     #define NotFoundFunc                                                                                      \
-        logerr << "DuckDBConnection: insertBuffer_impl: unknown property type " << Property::asString(dtype); \
+        logerr << "unknown property type " << Property::asString(dtype); \
         assert(false);
 
     auto n = buffer->size();
@@ -319,7 +315,7 @@ Result DuckDBConnection::insertBuffer_impl(const std::string& table_name,
             bool ok = importers[ c ](r);
 
             if (!ok)
-                logerr << "DuckDBConnection: insertBuffer_impl: appending column " << c << " failed: " << appender->lastError();
+                logerr << "appending column " << c << " failed: " << appender->lastError();
             assert(ok);
         }
         assert(appender->currentColumnCount() == np);
@@ -469,7 +465,7 @@ std::string DuckDBConnection::tableInfo(const std::string& table_name)
         // auto result = execute(sql, true);
 
         // if (result->hasError())
-        //     loginf << "DuckDBConnection: tableInfo: retrieving compression info failed: " << result->error();
+        //     loginf << "retrieving compression info failed: " << result->error();
 
         // bool has_result = !result->hasError() && result->buffer();
 

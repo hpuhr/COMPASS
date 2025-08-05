@@ -155,13 +155,13 @@ EvaluationTargetFilterDialog::EvaluationTargetFilterDialog(
 
     config_layout->addRow("\tTarget Addresses (hex)", remove_ta_edit_);
 
-    // dbos
-    remove_dbo_check_ = new QCheckBox();
-    remove_dbo_check_->setChecked(target_filter_.removeNotDetectedDBContents());
-    connect(remove_dbo_check_, &QCheckBox::clicked, this,
+    // dbconts
+    remove_dbcont_check_ = new QCheckBox();
+    remove_dbcont_check_->setChecked(target_filter_.removeNotDetectedDBContents());
+    connect(remove_dbcont_check_, &QCheckBox::clicked, this,
             &EvaluationTargetFilterDialog::removeDBContentsSlot);
 
-    config_layout->addRow("Remove By Non-Detection in DBContent", remove_dbo_check_);
+    config_layout->addRow("Remove By Non-Detection in DBContent", remove_dbcont_check_);
 
     for (auto& dbcont_it : COMPASS::instance().dbContentManager())
     {
@@ -216,7 +216,7 @@ void EvaluationTargetFilterDialog::removeSTMinUpdatesEditedSlot()
     if (ok)
         target_filter_.removeShortTargetsMinUpdates(value);
     else
-        logwrn << "EvaluationTargetFilterDialog: removeSTMinUpdatesEditedSlot: conversion of text '"
+        logwrn << "conversion of text '"
                << text.toStdString() << "' failed";
 }
 
@@ -231,7 +231,7 @@ void EvaluationTargetFilterDialog::removeSTMinDurationEditedSlot()
     if (ok)
         target_filter_.removeShortTargetsMinDuration(value);
     else
-        logwrn << "EvaluationTargetFilterDialog: removeSTMinDurationEditedSlot: conversion of text '"
+        logwrn << "conversion of text '"
                << text.toStdString() << "' failed";
 }
 

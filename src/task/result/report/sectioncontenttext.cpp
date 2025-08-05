@@ -120,7 +120,7 @@ bool SectionContentText::fromJSON_impl(const nlohmann::json& j)
     if (!j.is_object() ||
         !j.contains(FieldTexts))
     {
-        logerr << "SectionContentText: fromJSON: Error: Section content text does not obtain needed fields";
+        logerr << "section content text does not obtain needed fields";
         return false;
     }
 

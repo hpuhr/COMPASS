@@ -49,7 +49,7 @@ DataSourceLineInfo::DataSourceLineInfo(const std::string& key, nlohmann::json& c
         mcastIP(ip);
         mcastPort(port);
 
-        logdbg << "DataSourceLineInfo: ctor: created info from deprecated " << asString()
+        logdbg << "created info from deprecated " << asString()
                << " '" << config_.dump() << "'";
     }
 

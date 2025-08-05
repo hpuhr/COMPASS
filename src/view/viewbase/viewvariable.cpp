@@ -30,7 +30,7 @@
 
 const std::string ViewVariable::ParamDataVar     = "data_var";
 const std::string ViewVariable::ParamDataVarName = "name";
-const std::string ViewVariable::ParamDataVarDBO  = "dbo";
+const std::string ViewVariable::ParamDataVarDBCont  = "dbcont";
 
 /**
  */
@@ -49,9 +49,9 @@ ViewVariable::~ViewVariable() = default;
 
 /**
  */
-std::string ViewVariable::regParamDBO() const
+std::string ViewVariable::regParamDBCont() const
 {
-    return (ParamDataVar + (settings_.var_name.empty() ? "" : "_" + settings_.var_name + "_") + ParamDataVarDBO);
+    return (ParamDataVar + (settings_.var_name.empty() ? "" : "_" + settings_.var_name + "_") + ParamDataVarDBCont);
     
 }
 
@@ -80,27 +80,27 @@ std::string ViewVariable::description() const
  */
 bool ViewVariable::hasVariable () const
 {
-    if (settings_.data_var_dbo.empty() || settings_.data_var_name.empty())
+    if (settings_.data_var_dbcont.empty() || settings_.data_var_name.empty())
         return false;
 
-    if (settings_.data_var_dbo == META_OBJECT_NAME)
+    if (settings_.data_var_dbcont == META_OBJECT_NAME)
         return COMPASS::instance().dbContentManager().existsMetaVariable(settings_.data_var_name);
     else
-        return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).hasVariable(settings_.data_var_name);
+        return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbcont).hasVariable(settings_.data_var_name);
 }
 
 /**
  */
 bool ViewVariable::isMetaVariable () const
 {
-    return (settings_.data_var_dbo == META_OBJECT_NAME);
+    return (settings_.data_var_dbcont == META_OBJECT_NAME);
 }
 
 /**
  */
 bool ViewVariable::isEmpty() const
 {
-    return (settings_.data_var_dbo.empty() && settings_.data_var_name.empty());
+    return (settings_.data_var_dbcont.empty() && settings_.data_var_name.empty());
 }
 
 /**
@@ -118,29 +118,29 @@ boost::optional<PropertyDataType> ViewVariable::dataType() const
 
 /**
  */
-void ViewVariable::set(const std::string& dbo, const std::string& name, bool notify_changes)
+void ViewVariable::set(const std::string& dbcont, const std::string& name, bool notify_changes)
 {
-    bool empty = dbo.empty() && name.empty();
+    bool empty = dbcont.empty() && name.empty();
     assert(!empty || settings_.allow_empty_var);
 
-    if (settings_.data_var_dbo == dbo && 
+    if (settings_.data_var_dbcont == dbcont && 
         settings_.data_var_name == name)
         return;
 
     if (!view_)
     {
-        settings_.data_var_dbo  = dbo;
+        settings_.data_var_dbcont  = dbcont;
         settings_.data_var_name = name;
         return;
     }
 
-    loginf << "ViewVariable: set: setting var '" << id_ << "' "
+    loginf << "setting var '" << id_ << "' "
         << "of view '" << view_->getName() << " to "
-        << "dbo " << dbo << " name " << name;
+        << "dbcont " << dbcont << " name " << name;
 
-    view_->preVariableChangedEvent(idx_, dbo, name);
+    view_->preVariableChangedEvent(idx_, dbcont, name);
 
-    view_->setParameter(settings_.data_var_dbo, dbo);
+    view_->setParameter(settings_.data_var_dbcont, dbcont);
     view_->setParameter(settings_.data_var_name, name);
 
     view_->postVariableChangedEvent(idx_);
@@ -157,9 +157,9 @@ dbContent::Variable& ViewVariable::variable()
 {
     assert (hasVariable());
     assert (!isMetaVariable());
-    assert (COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).hasVariable(settings_.data_var_name));
+    assert (COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbcont).hasVariable(settings_.data_var_name));
 
-    return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).variable(settings_.data_var_name);
+    return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbcont).variable(settings_.data_var_name);
 }
 
 /**
@@ -168,9 +168,9 @@ const dbContent::Variable& ViewVariable::variable() const
 {
     assert (hasVariable());
     assert (!isMetaVariable());
-    assert (COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).hasVariable(settings_.data_var_name));
+    assert (COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbcont).hasVariable(settings_.data_var_name));
 
-    return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbo).variable(settings_.data_var_name);
+    return COMPASS::instance().dbContentManager().dbContent(settings_.data_var_dbcont).variable(settings_.data_var_name);
 }
 
 /**
@@ -187,24 +187,24 @@ dbContent::Variable* ViewVariable::variablePtr()
  */
 void ViewVariable::setVariable(dbContent::Variable& var, bool notify_changes)
 {
-    if (settings_.data_var_dbo == var.dbContentName() && 
+    if (settings_.data_var_dbcont == var.dbContentName() && 
         settings_.data_var_name == var.name())
         return;
 
     if (!view_)
     {
-        settings_.data_var_dbo  = var.dbContentName();
+        settings_.data_var_dbcont  = var.dbContentName();
         settings_.data_var_name = var.name();
         return;
     }
 
-    loginf << "ViewVariable: setVariable: setting var '" << id_ << "' "
+    loginf << "setting var '" << id_ << "' "
         << "of view '" << view_->getName() << " to "
-        << "dbo " << var.dbContentName() << " name " << var.name();
+        << "dbcont " << var.dbContentName() << " name " << var.name();
 
     view_->preVariableChangedEvent(idx_, var.dbContentName(), var.name());
 
-    view_->setParameter(settings_.data_var_dbo, var.dbContentName());
+    view_->setParameter(settings_.data_var_dbcont, var.dbContentName());
     view_->setParameter(settings_.data_var_name, var.name());
 
     view_->postVariableChangedEvent(idx_);
@@ -250,24 +250,24 @@ dbContent::MetaVariable* ViewVariable::metaVariablePtr()
  */
 void ViewVariable::setMetaVariable(dbContent::MetaVariable& var, bool notify_changes)
 {
-    if (settings_.data_var_dbo == META_OBJECT_NAME && 
+    if (settings_.data_var_dbcont == META_OBJECT_NAME && 
         settings_.data_var_name == var.name())
         return;
 
     if (!view_)
     {
-        settings_.data_var_dbo  = META_OBJECT_NAME;
+        settings_.data_var_dbcont  = META_OBJECT_NAME;
         settings_.data_var_name = var.name();
         return;
     }
     
-    loginf << "ViewVariable: setMetaVariable: setting metavar '" << id_ << "' "
+    loginf << "setting metavar '" << id_ << "' "
            << "of view '" << view_->getName() << " to "
            << "name " << var.name();
 
     view_->preVariableChangedEvent(idx_, META_OBJECT_NAME, var.name());
 
-    view_->setParameter(settings_.data_var_dbo, META_OBJECT_NAME);
+    view_->setParameter(settings_.data_var_dbcont, META_OBJECT_NAME);
     view_->setParameter(settings_.data_var_name, var.name());
 
     view_->postVariableChangedEvent(idx_);
@@ -285,22 +285,22 @@ void ViewVariable::setEmpty(bool notify_changes)
 {
     assert(settings_.allow_empty_var);
 
-    if (settings_.data_var_dbo == "" && 
+    if (settings_.data_var_dbcont == "" && 
         settings_.data_var_name == "")
         return;
 
     if (!view_)
     {
-        settings_.data_var_dbo  = "";
+        settings_.data_var_dbcont  = "";
         settings_.data_var_name = "";
         return;
     }
 
-    loginf << "ViewVariable: setEmpty: setting to empty";
+    loginf << "setting to empty";
 
     view_->preVariableChangedEvent(idx_, "", "");
 
-    view_->setParameter(settings_.data_var_dbo , std::string());
+    view_->setParameter(settings_.data_var_dbcont , std::string());
     view_->setParameter(settings_.data_var_name, std::string());
 
     view_->postVariableChangedEvent(idx_);
@@ -332,7 +332,7 @@ dbContent::Variable* ViewVariable::getFor(const std::string& dbcontent_name)
     }
     else
     {
-        if (settings_.data_var_dbo != dbcontent_name)
+        if (settings_.data_var_dbcont != dbcontent_name)
             return nullptr;
 
         var = &variable();
@@ -364,7 +364,7 @@ const dbContent::Variable* ViewVariable::getFor(const std::string& dbcontent_nam
     }
     else
     {
-        if (settings_.data_var_dbo != dbcontent_name)
+        if (settings_.data_var_dbcont != dbcontent_name)
             return nullptr;
 
         var = &variable();
@@ -379,7 +379,7 @@ const dbContent::Variable* ViewVariable::getFor(const std::string& dbcontent_nam
  */
 const std::string& ViewVariable::variableDBContent() const
 {
-    return settings_.data_var_dbo;
+    return settings_.data_var_dbcont;
 }
 
 /**

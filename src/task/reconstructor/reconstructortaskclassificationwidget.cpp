@@ -70,7 +70,7 @@ void ReconstructorTaskClassificationWidget::updateValues()
 
 void ReconstructorTaskClassificationWidget::minAircraftModeCEditedSlot (int value)
 {
-    loginf << "ProbabilisticAssociationWidget: maxAltitudeDiffEditedSlot: value '" << value << "'";
+    loginf << "value '" << value << "'";
 
     reconstructor_.settings().max_altitude_diff_ = value;
 }

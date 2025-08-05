@@ -30,7 +30,7 @@ TimeWindowDialog::TimeWindowDialog(
     QWidget* parent, const boost::posix_time::ptime& begin, const boost::posix_time::ptime& end)
     : QDialog(parent)
 {
-    loginf << "TimeWindowDialog: ctor: begin " << Time::toString(begin) << " end " << Time::toString(end);
+    loginf << "begin " << Time::toString(begin) << " end " << Time::toString(end);
 
     begin_edit_ = new QDateTimeEdit(this);
     end_edit_ = new QDateTimeEdit(this);

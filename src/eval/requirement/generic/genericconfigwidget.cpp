@@ -78,7 +78,7 @@ GenericDoubleConfig& GenericDoubleConfigWidget::config()
 
 void GenericDoubleConfigWidget::thresholdValueEditSlot(QString value)
 {
-    loginf << "EvaluationRequirement GenericDoubleConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     double val = value.toDouble(&ok);
@@ -86,7 +86,7 @@ void GenericDoubleConfigWidget::thresholdValueEditSlot(QString value)
     if (ok)
         config().threshold(val);
     else
-        loginf << "EvaluationRequirement GenericDoubleConfigWidget: thresholdValueEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 }

@@ -283,7 +283,7 @@ bool SectionContent::loadOnDemand()
     //if the task result is locked we should never give an opportunity to load on demand content
     assert(!isLocked());
 
-    loginf << "SectionContent: loadOnDemand: Loading on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
+    loginf << "loading on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
 
     assert(isOnDemand());
     assert(!isComplete());
@@ -296,7 +296,7 @@ bool SectionContent::loadOnDemand()
 
     if (!ok)
     {
-        logerr << "SectionContent: loadOnDemand: Could not load on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
+        logerr << "could not load on-demand data for content '" << name() << "' of type '" << contentTypeAsString() << "'";
         return false;
     }
 
@@ -372,7 +372,7 @@ bool SectionContent::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldContentID)   ||
         !j.contains(FieldOnDemand))
     {
-        logerr << "SectionContent: fromJSON_impl: Error: Section content does not obtain needed fields";
+        logerr << "section content does not obtain needed fields";
         return false;
     }
 
@@ -383,7 +383,7 @@ bool SectionContent::fromJSON_impl(const nlohmann::json& j)
     auto t = contentTypeFromString(t_str);
     if (!t.has_value())
     {
-        logerr << "SectionContent: fromJSON_impl: Error: Could not deduce section content type";
+        logerr << "could not deduce section content type";
         return false;
     }
 

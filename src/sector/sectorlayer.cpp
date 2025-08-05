@@ -110,7 +110,7 @@ bool SectorLayer::isInside(const dbContent::TargetPosition& pos,
 
         if (sec_it->isInside(pos, has_ground_bit, ground_bit_set))
         {
-            logdbg << "SectorLayer " << name_ << ": isInside: true, has alt " << pos.has_altitude_ << " alt " << pos.altitude_ ;
+            logdbg << "'" << name_ << "' true, has alt " << pos.has_altitude_ << " alt " << pos.altitude_ ;
 
             is_inside = true;
             break;
@@ -133,7 +133,7 @@ bool SectorLayer::isInside(const dbContent::TargetPosition& pos,
 
         if (sec_it->isInside(pos, has_ground_bit, ground_bit_set))
         {
-            logdbg << "SectorLayer " << name_ << " (exclusion): isInside: true, has alt " << pos.has_altitude_ << " alt " << pos.altitude_;
+            logdbg << "'" << name_ << "' (exclusion): true, has alt " << pos.has_altitude_ << " alt " << pos.altitude_;
 
             is_inside_exclude = true;
             break;

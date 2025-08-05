@@ -76,7 +76,7 @@ void LabelDSWidget::forceUpdateList()
 
 void LabelDSWidget::updateListSlot()
 {
-    logdbg << "LabelDSWidget: updateListSlot";
+    logdbg << "start";
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
@@ -161,7 +161,7 @@ void LabelDSWidget::sourceClickedSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "LabelDSWidget: sourceClickedSlot: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     if (label_generator_.labelWanted(ds_id))
         label_generator_.removeLabelDSID(ds_id);
@@ -177,7 +177,7 @@ void LabelDSWidget::changeLineSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "LabelDSWidget: changeLineSlot: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
     assert (ds_man.hasDBDataSource(ds_id));
@@ -208,7 +208,7 @@ void LabelDSWidget::changeDirectionSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "LabelDSWidget: changeDirectionSlot: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     QMenu menu;
 
@@ -260,7 +260,7 @@ void LabelDSWidget::selectDirectionSlot()
     unsigned int dir = dir_var.value<unsigned int>();
     assert (dir <= 3);
 
-    loginf << "LabelDSWidget: selectDirectionSlot: ds_id " << ds_id << " dir " << dir;
+    loginf << "ds_id " << ds_id << " dir " << dir;
 
     LabelDirection direction = LabelDirection(dir);
     label_generator_.labelDirection(ds_id, direction);
@@ -278,7 +278,7 @@ void LabelDSWidget::selectLineSlot()
     unsigned int line = line_var.value<unsigned int>();
     assert (line <= 3);
 
-    loginf << "LabelDSWidget: selectLineSlot: ds_id " << ds_id << " line " << line;
+    loginf << "ds_id " << ds_id << " line " << line;
 
     label_generator_.labelLine(ds_id, line);
 

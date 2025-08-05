@@ -49,7 +49,7 @@ PropertyDataType DuckDBExecResult::dataTypeFromDuckDB(duckdb_type type)
     
     //@TODO: more types needed (how to handle types like 'list'?)
 
-    logerr << "DuckDBExecResult: dataTypeFromDuckDB: data type not implemented: " << type;
+    logerr << "data type not implemented: " << type;
     assert(false);
 
     return PropertyDataType::BOOL;
@@ -184,7 +184,7 @@ bool DuckDBExecResult::toBuffer(Buffer& buffer,
         }
 
     #define NotFoundFuncToBuffer                                                                     \
-        logerr << "DuckDBExecResult: toBuffer: unknown property type " << Property::asString(dtype); \
+        logerr << "unknown property type " << Property::asString(dtype); \
         assert(false);
 
     size_t r0 = offset.has_value() ? offset.value() : 0;
@@ -263,7 +263,7 @@ ResultT<bool> DuckDBExecResult::readNextChunk(Buffer& buffer,
     const auto& properties = buffer.properties();
     size_t np = properties.size();
 
-    // loginf << "DuckDBExecResult: readNextChunk: reading...";
+    // loginf << "reading...";
     // loginf << "   chunk idx:   " << chunk_idx_;
     // loginf << "   chunk rows:  " << chunk_num_rows_;
     // loginf << "   max entries: " << max_entries;
@@ -299,7 +299,7 @@ ResultT<bool> DuckDBExecResult::readNextChunk(Buffer& buffer,
         readers[ c ] = cb;
 
     #define NotFoundFuncNextChunk                                                                         \
-        logerr << "DuckDBExecResult: readNextChunk: unknown property type " << Property::asString(dtype); \
+        logerr << "unknown property type " << Property::asString(dtype); \
         assert(false);
 
     std::vector<std::function<void(size_t, size_t)>> readers(np);

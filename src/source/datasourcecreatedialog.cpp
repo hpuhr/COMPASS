@@ -91,7 +91,7 @@ DataSourceCreateDialog::~DataSourceCreateDialog()
 void DataSourceCreateDialog::dsTypeEditedSlot(const QString& value)
 {
     ds_type_ = value.toStdString();
-    loginf << "DataSourceEditWidget: dsTypeEditedSlot: " << ds_type_;
+    loginf << "start" << ds_type_;
 
     checkInput();
 }
@@ -100,7 +100,7 @@ void DataSourceCreateDialog::sacEditedSlot(const QString& value_str)
 {
     sac_ = value_str.toUInt();
 
-    loginf << "DataSourceEditWidget: sacEditedSlot: " << sac_;
+    loginf << "start" << sac_;
 
     checkInput();
 }
@@ -108,7 +108,7 @@ void DataSourceCreateDialog::sicEditedSlot(const QString& value_str)
 {
     sic_ = value_str.toUInt();
 
-    loginf << "DataSourceEditWidget: sacEditedSlot: " << sic_;
+    loginf << "start" << sic_;
 
     checkInput();
 }

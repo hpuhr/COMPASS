@@ -38,7 +38,7 @@ MetaVariable::MetaVariable(const std::string& class_id, const std::string& insta
 {
     registerParameter("name", &name_, std::string());
 
-    // DBOVAR LOWERCASE HACK
+    // DBContVAR LOWERCASE HACK
     // boost::algorithm::to_lower(name_);
 
     assert(name_.size() > 0);
@@ -77,42 +77,42 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
         VariableDefinition* definition = new VariableDefinition(class_id, instance_id, this);
 
         const std::string& dbcontent_name = definition->dbContentName();
-        std::string dbovar_name = definition->variableName();
+        std::string dbcontvar_name = definition->variableName();
 
-        // DBOVAR LOWERCASE HACK
-        // boost::algorithm::to_lower(dbovar_name);
+        // DBContVAR LOWERCASE HACK
+        // boost::algorithm::to_lower(dbcontvar_name);
 
         if (!object_manager_.existsDBContent(dbcontent_name))
         {
-            logerr << "MetaVariable: generateSubConfigurable: name " << name_
-                   << " dbovariable definition " << instance_id << " has unknown dbo, ignoring";
+            logerr << "name " << name_
+                   << " dbcontvariable definition " << instance_id << " has unknown dbcont, ignoring";
             // delete definition;
             return;
         }
 
-        if (!object_manager_.dbContent(dbcontent_name).hasVariable(dbovar_name))
+        if (!object_manager_.dbContent(dbcontent_name).hasVariable(dbcontvar_name))
         {
-            logerr << "MetaVariable: generateSubConfigurable: name " << name_
-                   << " dbovariable definition " << instance_id << " has unknown dbo variable, ignoring";
+            logerr << "name " << name_
+                   << " dbcontvariable definition " << instance_id << " has unknown dbcont variable, ignoring";
             // delete definition;
             return;
         }
 
         if (variables_.find(dbcontent_name) != variables_.end())
         {
-            logerr << "MetaVariable: generateSubConfigurable: name " << name_
-                   << " dbovariable definition " << instance_id << " has already defined dbo, ignoring";
+            logerr << "name " << name_
+                   << " dbcontvariable definition " << instance_id << " has already defined dbcont, ignoring";
             // delete definition;
             return;
         }
 
         assert(object_manager_.existsDBContent(dbcontent_name));
-        assert(object_manager_.dbContent(dbcontent_name).hasVariable(dbovar_name));
+        assert(object_manager_.dbContent(dbcontent_name).hasVariable(dbcontvar_name));
         assert(variables_.find(dbcontent_name) == variables_.end());
 
         definitions_[dbcontent_name] = definition;
         variables_.insert(std::pair<std::string, Variable&>(
-            dbcontent_name, object_manager_.dbContent(dbcontent_name).variable(dbovar_name)));
+            dbcontent_name, object_manager_.dbContent(dbcontent_name).variable(dbcontvar_name)));
     }
     else
         throw std::runtime_error("MetaVariable: generateSubConfigurable: unknown class_id " +
@@ -140,7 +140,7 @@ void MetaVariable::set(Variable& var)
 {
     string dbcontent_name = var.dbObject().name();
 
-    loginf << "MetaVariable " << name_ << ": set: dbo " << dbcontent_name << " name " << var.name();
+    loginf << name_ << ": dbcont " << dbcontent_name << " name " << var.name();
 
     if (existsIn(dbcontent_name))
         removeVariable(dbcontent_name);
@@ -150,7 +150,7 @@ void MetaVariable::set(Variable& var)
 
 void MetaVariable::removeVariable(const std::string& dbcontent_name)
 {
-    loginf << "MetaVariable " << name_ << ": removeVariable: dbo " << dbcontent_name;
+    loginf << name_ << ": dbcont " << dbcontent_name;
     assert(existsIn(dbcontent_name));
     delete definitions_.at(dbcontent_name);
     definitions_.erase(dbcontent_name);
@@ -159,18 +159,18 @@ void MetaVariable::removeVariable(const std::string& dbcontent_name)
     updateDescription();
 }
 
-void MetaVariable::addVariable(const std::string& dbcontent_name, const std::string& dbovariable_name)
+void MetaVariable::addVariable(const std::string& dbcontent_name, const std::string& dbcontvariable_name)
 {
-    loginf << "MetaVariable " << name_ << ": addVariable: dbo " << dbcontent_name << " varname "
-           << dbovariable_name;
+    loginf << name_ << ": dbcont " << dbcontent_name << " varname "
+           << dbcontvariable_name;
 
     assert(!existsIn(dbcontent_name));
 
-    std::string instance_id = "VariableDefinition" + dbcontent_name + dbovariable_name + "0";
+    std::string instance_id = "VariableDefinition" + dbcontent_name + dbcontvariable_name + "0";
 
     auto config = Configuration::create("VariableDefinition", instance_id);
     config->addParameter<std::string>("dbcontent_name", dbcontent_name);
-    config->addParameter<std::string>("variable_name", dbovariable_name);
+    config->addParameter<std::string>("variable_name", dbcontvariable_name);
 
     generateSubConfigurableFromConfig(std::move(config));
     updateDescription();
@@ -307,7 +307,7 @@ Variable::Representation MetaVariable::representation()
 
 void MetaVariable::removeOutdatedVariables()
 {
-    loginf << "MetaVariable " << name() << ": removeOutdatedVariables";
+    loginf << name();
 
     bool delete_var;
 
@@ -325,7 +325,7 @@ void MetaVariable::removeOutdatedVariables()
 
         if (delete_var)
         {
-            loginf << "MetaVariable: removeOutdatedVariables: removing var " << var_it->first;
+            loginf << "removing var " << var_it->first;
             assert(variables_.count(var_it->first));
             variables_.erase(var_it->first);
 
@@ -370,7 +370,7 @@ void MetaVariable::checkSubVariables()
         {
             if (variable_it.second.dataType() != data_type)
             {
-                logerr << "MetaVariable: checkSubVariables: meta var " << name_
+                logerr << "meta var " << name_
                        << " has different data types in sub variables ("
                        << Property::asString(data_type) << ", " << variable_it.second.dataTypeString() << ")";
                 throw std::runtime_error("Conflicting data types in metavariable '" + name_ + "' (" +
@@ -384,7 +384,7 @@ void MetaVariable::checkSubVariables()
         {
             if (variable_it.second.representationString() != rep_str)
             {
-                logerr << "MetaVariable: checkSubVariables: meta var " << name_
+                logerr << "meta var " << name_
                        << " has different representations in sub variables ("
                        << rep_str << ", " << variable_it.second.representationString() << ")";
                 throw std::runtime_error("Conflicting representations in metavariable '" + name_ + "' (" +

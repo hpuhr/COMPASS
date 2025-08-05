@@ -331,7 +331,7 @@ void PDFGeneratorDialog::includeTargetTRDetailsEditedSlot(bool checked)
 void PDFGeneratorDialog::numMaxTableRowsEditedSlot(const QString& text)
 {
     string value_str = text.toStdString();
-    loginf << "PDFGeneratorDialog: numMaxTableRowsEditedSlot: value '" << value_str << "'";
+    loginf << "value '" << value_str << "'";
 
     bool ok;
 
@@ -340,14 +340,14 @@ void PDFGeneratorDialog::numMaxTableRowsEditedSlot(const QString& text)
     if (ok)
         eval_settings_.report_num_max_table_rows_ = value;
     else
-        logwrn << "PDFGeneratorDialog: numMaxTableRowsEditedSlot: unable to parse '" << value_str << "'";
+        logwrn << "unable to parse '" << value_str << "'";
 
 }
 
 void PDFGeneratorDialog::numMaxTableColWidthEditedSlot(const QString& text)
 {
     string value_str = text.toStdString();
-    loginf << "PDFGeneratorDialog: numMaxTableColWidthEditedSlot: value '" << value_str << "'";
+    loginf << "value '" << value_str << "'";
 
     bool ok;
 
@@ -356,7 +356,7 @@ void PDFGeneratorDialog::numMaxTableColWidthEditedSlot(const QString& text)
     if (ok)
         eval_settings_.report_num_max_table_col_width_ = value;
     else
-        logwrn << "PDFGeneratorDialog: numMaxTableColWidthEditedSlot: unable to parse '" << value_str << "'";
+        logwrn << "unable to parse '" << value_str << "'";
 
 }
 
@@ -373,14 +373,14 @@ void PDFGeneratorDialog::openPDFChangedSlot (bool checked)
 
 void PDFGeneratorDialog::runSlot()
 {
-    loginf << "PDFGeneratorDialog: runSlot";
+    loginf << "start";
 
     generator_.run();
 }
 
 void PDFGeneratorDialog::cancelSlot()
 {
-    loginf << "PDFGeneratorDialog: cancelSlot";
+    loginf << "start";
     generator_.cancel();
 }
 

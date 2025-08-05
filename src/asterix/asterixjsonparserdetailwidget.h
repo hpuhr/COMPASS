@@ -51,9 +51,9 @@ public slots:
     void mappingAppendChangedSlot();
 
     void mappingDBContentVariableChangedSlot();
-    void dboVariableCommentChangedSlot();
+    void dbcontVariableCommentChangedSlot();
 
-    void createNewDBVariableSlot(); // create new dbovar, and mapping if required
+    void createNewDBVariableSlot(); // create new dbcontvar, and mapping if required
     void editDBVariableSlot();
     void deleteDBVariableSlot();
 
@@ -85,15 +85,15 @@ private:
     DataTypeFormatSelectionWidget* data_format_widget_ {nullptr};
 
     dbContent::VariableSelectionWidget* dbcont_var_sel_ {nullptr};
-    QLabel* dbo_var_data_type_label_ {nullptr};
+    QLabel* dbcont_var_data_type_label_ {nullptr};
 
-    QTextEdit* dbo_var_comment_edit_ {nullptr};
+    QTextEdit* dbcont_var_comment_edit_ {nullptr};
 
     QPushButton* delete_mapping_button_ {nullptr}; // delete mapping
-    QPushButton* new_dbovar_button_ {nullptr}; // create new dbovar, and mapping if required
+    QPushButton* new_dbcontvar_button_ {nullptr}; // create new dbcontvar, and mapping if required
 
-    QPushButton* dbovar_edit_button_ {nullptr};
-    QPushButton* dbovar_delete_button_ {nullptr};
+    QPushButton* dbcontvar_edit_button_ {nullptr};
+    QPushButton* dbcontvar_delete_button_ {nullptr};
 
     bool setting_new_content_ {false};
 

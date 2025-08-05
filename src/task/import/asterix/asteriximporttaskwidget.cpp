@@ -85,11 +85,11 @@ void ASTERIXImportTaskWidget::addMainTab()
 
         if (task_.source().isNetworkType())
         {
-            loginf << "ASTERIXImportTaskWidget: addMainTab: is network import";
+            loginf << "is network import";
         }
         else
         {
-            loginf << "ASTERIXImportTaskWidget: addMainTab: is file import";
+            loginf << "is file import";
 
             // line
             QComboBox* file_line_box = new QComboBox();
@@ -230,7 +230,7 @@ void ASTERIXImportTaskWidget::addParserSlot()
     {
         unsigned int cat = dialog.category();
         std::string dbcontent_name = dialog.selectedObject();
-        loginf << "ASTERIXImportTaskWidget: addObjectParserSlot: cat " << cat << " obj "
+        loginf << "cat " << cat << " obj "
                << dbcontent_name;
 
         std::shared_ptr<ASTERIXJSONParsingSchema> current = task_.schema();
@@ -256,7 +256,7 @@ void ASTERIXImportTaskWidget::addParserSlot()
 }
 void ASTERIXImportTaskWidget::removeObjectParserSlot()
 {
-    loginf << "ASTERIXImportTaskWidget: removeObjectParserSlot";
+    loginf << "start";
 
     assert(object_parser_box_);
 
@@ -277,7 +277,7 @@ void ASTERIXImportTaskWidget::removeObjectParserSlot()
 
 void ASTERIXImportTaskWidget::selectedObjectParserSlot(const QString& text)
 {
-    loginf << "ASTERIXImportTaskWidget: selectedObjectParserSlot: text '" << text.toStdString()
+    loginf << "text '" << text.toStdString()
            << "'";
 
     assert(object_parser_widget_);
@@ -326,7 +326,7 @@ void ASTERIXImportTaskWidget::fileLineIDEditSlot(const QString& text)
 
     assert (line_id > 0 && line_id <= 4);
 
-    loginf << "ASTERIXImportTaskWidget: fileLineIDEditSlot: value '" << text.toStdString()
+    loginf << "value '" << text.toStdString()
            << "' line id " << line_id;
 
     task_.settings().file_line_id_ = line_id-1; // from 1...4
@@ -336,14 +336,14 @@ void ASTERIXImportTaskWidget::dateChangedSlot(QDate date)
 {
     string tmp = date.toString("yyyy-MM-dd").toStdString();
 
-    loginf << "ASTERIXImportTaskWidget: dateChangedSlot: " << tmp;
+    loginf << "start" << tmp;
 
     task_.settings().date_ = Time::fromDateString(tmp);
 }
 
 void ASTERIXImportTaskWidget::updateParserBox()
 {
-    loginf << "ASTERIXImportTaskWidget: updateParserList";
+    loginf << "start";
 
     assert(object_parser_box_);
     object_parser_box_->clear();
@@ -367,7 +367,7 @@ void ASTERIXImportTaskWidget::resetDateChangedSlot()
 
 void ASTERIXImportTaskWidget::ignoreTimeJumpsCheckedSlot()
 {
-    loginf << "ASTERIXImportTaskWidget: ignoreTimeJumpsCheckedSlot";
+    loginf << "start";
     assert(ignore_timejumps_check_);
 
     task_.settings().ignore_time_jumps_ = ignore_timejumps_check_->checkState() == Qt::Checked;

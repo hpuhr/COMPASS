@@ -134,7 +134,7 @@ void DataSourceBase::removeShortName()
 
 void DataSourceBase::shortName(const std::string& short_name)
 {
-    loginf << "DataSourceBase " << name_ << ": shortName: " << short_name;
+    loginf << name_ << ": short_name " << short_name;
 
     has_short_name_ = short_name.size();
     this->short_name_ = short_name;
@@ -346,7 +346,7 @@ void DataSourceBase::addNetworkLines()
 
 //        if (existing_lines.count(ip+":"+to_string(port)))
 //        {
-//            logwrn << "DataSourceBase: networkLines: source " << name_
+//            logwrn << "source " << name_
 //                   << " line " << ip << ":" << port
 //                   << " already in use";
 //        }
@@ -395,8 +395,8 @@ void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)
     info_.clear();
 
     //    j["dbcontent_name"] = dbcontent_name_;
-    assert(j.contains("dbo_name"));
-    ds_type_ = j.at("dbo_name");
+    assert(j.contains("dbcont_name"));
+    ds_type_ = j.at("dbcont_name");
 
 
     //    j["name"] = name_;
@@ -555,7 +555,7 @@ void DataSourceBase::setCalculatedReferenceSource()
 
 void DataSourceBase::parseNetworkLineInfo()
 {
-    logdbg << "DataSourceBase: parseLineInfo: " << sac() << "/" << sic();
+    logdbg << "start" << sac() << "/" << sic();
 
     line_info_.clear();
 

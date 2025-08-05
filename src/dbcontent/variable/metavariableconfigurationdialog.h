@@ -44,7 +44,7 @@ public slots:
     void addAllMetaVariablesSlot();
 
 public:
-    MetaVariableConfigurationDialog(DBContentManager& dbo_man);
+    MetaVariableConfigurationDialog(DBContentManager& dbcont_man);
     virtual ~MetaVariableConfigurationDialog();
 
     void updateList();
@@ -52,7 +52,7 @@ public:
     void clearDetails();
 
 protected:
-    DBContentManager& dbo_man_;
+    DBContentManager& dbcont_man_;
 
     QSplitter* splitter_{nullptr};
 

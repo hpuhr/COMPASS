@@ -420,7 +420,7 @@ void GridViewConfigWidget::updateDistributedVariable()
 
     if (var_empty)
     {
-        loginf << "GridViewConfigWidget: updateDistributedVariable: setting distributed variable to empty";
+        loginf << "setting distributed variable to empty";
 
         value_type_combo_->blockSignals(true);
         value_type_combo_->setCurrentIndex(value_type_combo_->findData(QVariant((int)grid2d::ValueType::ValueTypeCountValid)));

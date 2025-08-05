@@ -75,7 +75,7 @@ public:
         //stream already ended?
         if (file_stream_.eof())
         {
-            loginf << "ASTERIXJSONReaderTextFile: readObjects: eof reached";
+            loginf << "eof reached";
             return false;
         }
 
@@ -116,7 +116,7 @@ public:
             }
         }
 
-        loginf << "ASTERIXJSONReaderTextFile: readObjects: parsed " << objects.size() << " object(s)";
+        loginf << "parsed " << objects.size() << " object(s)";
 
         assert(open_count_ == 0);  // nothing left open
         assert(tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
@@ -242,7 +242,7 @@ std::unique_ptr<nlohmann::json> ASTERIXJSONDecoder::parseObjects(const std::vect
         {
             if (has_data_blocks) // no framing
             {
-                logdbg << "ASTERIXJSONDecoder: parseObjects: data blocks found";
+                logdbg << "data blocks found";
 
                 assert(data->at("data_blocks").is_array());
 
@@ -252,7 +252,7 @@ std::unique_ptr<nlohmann::json> ASTERIXJSONDecoder::parseObjects(const std::vect
                 {
                     if (!data_block.contains("category"))
                     {
-                        logwrn << "ASTERIXJSONDecoder: parseObjects: data block without asterix category";
+                        logwrn << "data block without asterix category";
                         continue;
                     }
                     ++num_records;
@@ -260,7 +260,7 @@ std::unique_ptr<nlohmann::json> ASTERIXJSONDecoder::parseObjects(const std::vect
             }
             else // framed
             {
-                logdbg << "ASTERIXJSONDecoder: parseObjects: no data blocks found, framed";
+                logdbg << "no data blocks found, framed";
 
                 assert(has_frames);
                 assert(data->at("frames").is_array());
@@ -283,7 +283,7 @@ std::unique_ptr<nlohmann::json> ASTERIXJSONDecoder::parseObjects(const std::vect
                     {
                         if (!data_block.contains("category"))  // data block with errors
                         {
-                            logwrn << "ASTERIXJSONDecoder: parseObjects: data block without asterix category";
+                            logwrn << "data block without asterix category";
                             continue;
                         }
                         ++num_records;
@@ -295,7 +295,7 @@ std::unique_ptr<nlohmann::json> ASTERIXJSONDecoder::parseObjects(const std::vect
         }
         catch (nlohmann::detail::parse_error& e)
         {
-            logwrn << "ASTERIXJSONDecoder: parseObjects (jASTERIX): parse error " << e.what() << " in '" << data->at(0) << "'";
+            logwrn << "jASTERIX: parse error " << e.what() << " in '" << data->at(0) << "'";
             ++num_errors;
         }
     }
@@ -315,7 +315,7 @@ std::unique_ptr<nlohmann::json> ASTERIXJSONDecoder::parseObjects(const std::vect
             }
             catch (nlohmann::detail::parse_error& e)
             {
-                logwrn << "ASTERIXJSONDecoder: parseObjects: parse error " << e.what() << " in '" << str_it << "'";
+                logwrn << "parse error " << e.what() << " in '" << str_it << "'";
                 ++num_errors;
             }
         }
@@ -399,7 +399,7 @@ void ASTERIXJSONDecoder::processFile(ASTERIXImportFileInfo& file_info)
     {
         if (!read_ok)
         {
-            logerr << "ASTERIXJSONDecoder: processFile: Could not read JSON objects";
+            logerr << "could not read JSON objects";
             logError("Could not read JSON objects");
             return false;
         }
@@ -419,7 +419,7 @@ void ASTERIXJSONDecoder::processFile(ASTERIXImportFileInfo& file_info)
         auto data = parseObjects(objects, num_frames, num_records, num_errors);
         if (!data)
         {
-            logerr << "ASTERIXJSONDecoder: processFile: Could not parse JSON objects";
+            logerr << "could not parse JSON objects";
             logError("Could not parse JSON objects");
             break;
         }

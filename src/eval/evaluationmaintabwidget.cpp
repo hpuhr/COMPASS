@@ -201,7 +201,7 @@ void EvaluationMainTabWidget::minHeightFilterChangedSlot(int idx)
  */
 void EvaluationMainTabWidget::dbContentRefNameChangedSlot(const std::string& dbcontent_name)
 {
-    loginf << "EvaluationMainTabWidget: dboRefNameChangedSlot: name " << dbcontent_name;
+    loginf << "name " << dbcontent_name;
 
     calculator_.dbContentNameRef(dbcontent_name);
 
@@ -212,7 +212,7 @@ void EvaluationMainTabWidget::dbContentRefNameChangedSlot(const std::string& dbc
  */
 void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
 {
-    loginf << "EvaluationMainTabWidget: lineRefChangedSlot: value " << line_id;
+    loginf << "value " << line_id;
 
     calculator_.settings().line_id_ref_ = line_id;
 }
@@ -221,7 +221,7 @@ void EvaluationMainTabWidget::lineRefChangedSlot(unsigned int line_id)
  */
 void EvaluationMainTabWidget::dbContentTstNameChangedSlot(const std::string& dbcontent_name)
 {
-    loginf << "EvaluationMainTabWidget: dboTstNameChangedSlot: name " << dbcontent_name;
+    loginf << "name " << dbcontent_name;
 
     calculator_.dbContentNameTst(dbcontent_name);
 
@@ -232,7 +232,7 @@ void EvaluationMainTabWidget::dbContentTstNameChangedSlot(const std::string& dbc
  */
 void EvaluationMainTabWidget::lineTstChangedSlot(unsigned int line_id)
 {
-    loginf << "EvaluationMainTabWidget: lineTstChangedSlot: value " << line_id;
+    loginf << "value " << line_id;
 
     calculator_.settings().line_id_tst_ = line_id;
 }
@@ -248,7 +248,7 @@ void EvaluationMainTabWidget::usedDataSourcesChangedSlot()
  */
 void EvaluationMainTabWidget::changedStandardsSlot()
 {
-    loginf << "EvaluationMainTabWidget: changedStandardsSlot";
+    loginf << "start";
 
     assert (standard_box_);
     standard_box_->updateStandards();
@@ -258,17 +258,17 @@ void EvaluationMainTabWidget::changedStandardsSlot()
  */
 void EvaluationMainTabWidget::changedCurrentStandardSlot()
 {
-    loginf << "EvaluationMainTabWidget: changedCurrentStandardSlot";
+    loginf << "start";
 
     assert (standard_box_);
     standard_box_->setStandardName(calculator_.currentStandardName());
 
-    logdbg << "EvaluationMainTabWidget: changedCurrentStandardSlot: sectors";
+    logdbg << "sectors";
 
     assert (sector_widget_);
     sector_widget_->update();
 
     dialog_.updateButtons();
 
-    logdbg << "EvaluationMainTabWidget: changedCurrentStandardSlot: done";
+    logdbg << "done";
 }

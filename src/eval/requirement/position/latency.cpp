@@ -48,7 +48,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " max_abs_value " << max_abs_value_;
 
     time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
@@ -261,7 +261,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
                     comment);
     }
 
-    //        logdbg << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
+    //        logdbg << "'" << name_ << "': utn " << target_data.utn_
     //               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
     //               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
@@ -270,7 +270,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionLatency::evaluate (
     assert (num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        loginf << "EvaluationRequirementPositionLatency '" << name_ << "': evaluate: utn " << target_data.utn_
+        loginf << "'" << name_ << "': utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_calc_errors " << num_pos_calc_errors

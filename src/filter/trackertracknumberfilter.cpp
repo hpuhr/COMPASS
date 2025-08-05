@@ -51,7 +51,7 @@ bool TrackerTrackNumberFilter::filters(const std::string& dbcontent_name)
 
 std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "TrackerTrackNumberFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbcont_name " << dbcontent_name << " active " << active_;
 
     if (dbcontent_name != "CAT062")
         return "";
@@ -109,7 +109,7 @@ std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbco
         first = false;
     }
 
-    loginf << "TrackerTrackNumberFilter: getConditionString: here '" << ss.str() << "'";
+    loginf << "here '" << ss.str() << "'";
 
     return ss.str();
 }
@@ -117,7 +117,7 @@ std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbco
 
 void TrackerTrackNumberFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "TrackerTrackNumberFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id " << class_id;
 
     throw std::runtime_error("TrackerTrackNumberFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -130,7 +130,7 @@ DBFilterWidget* TrackerTrackNumberFilter::createWidget()
 
 void TrackerTrackNumberFilter::checkSubConfigurables()
 {
-    logdbg << "TrackerTrackNumberFilter: checkSubConfigurables";
+    logdbg << "start";
 }
 
 
@@ -149,7 +149,7 @@ void TrackerTrackNumberFilter::saveViewPointConditions (nlohmann::json& filters)
 
 void TrackerTrackNumberFilter::loadViewPointConditions (const nlohmann::json& filters)
 {
-    logdbg << "TrackerTrackNumberFilter: loadViewPointConditions: filter '" << filters.dump(4) << "'";
+    logdbg << "filter '" << filters.dump(4) << "'";
 
     assert (conditions_.size() == 0);
 
@@ -178,7 +178,7 @@ void TrackerTrackNumberFilter::loadViewPointConditions (const nlohmann::json& fi
 
 void TrackerTrackNumberFilter::setTrackerTrackNum(unsigned int ds_id, unsigned int line_id, const std::string& value)
 {
-    loginf << "TrackerTrackNumberFilter: setTrackerTrackNum: ds_id " << ds_id
+    loginf << "ds_id " << ds_id
            << " line_id " << line_id << " value '" << value << "'";
 
     if (!tracker_track_nums_.contains(to_string(ds_id)))
@@ -264,7 +264,7 @@ std::map<std::string, std::map<std::string, std::string>> TrackerTrackNumberFilt
 
 void TrackerTrackNumberFilter::updateDataSourcesSlot()
 {
-    loginf << "TrackerTrackNumberFilter: updateDataSourcesSlot";
+    loginf << "start";
 
     if (widget_)
         widget_->update();

@@ -46,7 +46,7 @@ class DBFilter : public Configurable
     bool getActive();
 
     // returns if the DBContent is filtered by this filter
-    virtual bool filters(const std::string& dbo_type);
+    virtual bool filters(const std::string& dbcont_name);
 
     //get if the filter configuration has changed
     bool getChanged();

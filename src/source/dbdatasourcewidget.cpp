@@ -76,7 +76,7 @@ void DBDataSourceWidget::updateContent()
     try {
      updateWidgets();
     } catch (std::exception& e) {
-        logerr << "DBDataSourceWidget: updateContent: exception " << e.what();
+        logerr << "exception " << e.what();
     }
 
 }
@@ -124,7 +124,7 @@ void DBDataSourceWidget::recreateWidgets()
 {
     bool show_counts = show_counts_func_();
 
-    logdbg << "DBDataSourceWidget " << src_.name() << ": recreateWidgets: show_counts " << show_counts;
+    logdbg << "'" << src_.name() << "': show_counts " << show_counts;
 
     QLayoutItem* child;
     while (!grid_layout_->isEmpty() && (child = grid_layout_->takeAt(0)) != nullptr)
@@ -250,7 +250,7 @@ QWidget* DBDataSourceWidget::createLinesWidget()
 
 void DBDataSourceWidget::updateWidgets()
 {
-    logdbg << "DBDataSourceWidget: updateWidgets";
+    logdbg << "start";
 
     bool show_counts = show_counts_func_();
 
@@ -323,7 +323,7 @@ void DBDataSourceWidget::updateWidgets()
                 {
                     button->setChecked(get_use_ds_line_func_(line_cnt));
 
-                    logdbg << "DBDataSourceWidget: updateWidgets: src " << src_.name()
+                    logdbg << "src " << src_.name()
                            << " " << line_str << " live " << src_.hasLiveData(line_cnt, current_time);
 
                     if (src_.hasLiveData(line_cnt, current_time))
@@ -397,7 +397,7 @@ void DBDataSourceWidget::updateWidgets()
 
 void DBDataSourceWidget::loadingChangedSlot()
 {
-    loginf << "DBDataSourceWidget: loadingChangedSlot";
+    loginf << "start";
 
     set_use_ds_func_(!get_use_ds_func_());
 
@@ -412,7 +412,7 @@ void DBDataSourceWidget::lineButtonClickedSlot()
 
     unsigned int line_id = sender->property("Line ID").toUInt();
 
-    loginf << "DBDataSourceWidget: lineButtonClickedSlot: line " << line_id;
+    loginf << "line " << line_id;
 
     //src_.lineLoadingWanted(line_id, !src_.lineLoadingWanted(line_id));
     set_use_ds_line_func_(line_id, !get_use_ds_line_func_(line_id));

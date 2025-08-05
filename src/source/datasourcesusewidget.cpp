@@ -192,7 +192,7 @@ void DataSourcesUseWidget::loadDSTypeChangedSlot()
 
     bool load = box->checkState() == Qt::Checked;
 
-    loginf << "DataSourcesUseWidget: loadDSTypeChangedSlot: ds_type " << ds_type_name << " load " << load;
+    loginf << "ds_type " << ds_type_name << " load " << load;
 
     //COMPASS::instance().dataSourceManager().dsTypeLoadingWanted(ds_type_name, load);
     set_use_dstype_func_(ds_type_name, load);
@@ -209,7 +209,7 @@ void DataSourcesUseWidget::loadDSTypeChangedSlot()
 
 //    bool load = box->checkState() == Qt::Checked;
 
-//    loginf << "DataSourcesUseWidget: loadDSChangedSlot: ds_id " << ds_id << " load " << load;
+//    loginf << "ds_id " << ds_id << " load " << load;
 
 //    //ds_man_.dbDataSource(ds_id).loadingWanted(load);
 //    set_use_ds_func_(ds_id, load);
@@ -217,34 +217,34 @@ void DataSourcesUseWidget::loadDSTypeChangedSlot()
 
 void DataSourcesUseWidget::editClickedSlot()
 {
-    loginf << "DataSourcesUseWidget: editClickedSlot";
+    loginf << "start";
 
     edit_menu_.exec(QCursor::pos());
 }
 
 void DataSourcesUseWidget::selectAllDSTypesSlot()
 {
-    loginf << "DataSourcesUseWidget: selectAllDSTypesSlot";
+    loginf << "start";
 
     ds_man_.selectAllDSTypes();
 
 }
 void DataSourcesUseWidget::deselectAllDSTypesSlot()
 {
-    loginf << "DataSourcesUseWidget: deselectAllDSTypesSlot";
+    loginf << "start";
 
     ds_man_.deselectAllDSTypes();
 }
 
 void DataSourcesUseWidget::selectAllDataSourcesSlot()
 {
-    loginf << "DataSourcesUseWidget: selectAllDataSourcesSlot";
+    loginf << "start";
 
     ds_man_.selectAllDataSources();
 }
 void DataSourcesUseWidget::deselectAllDataSourcesSlot()
 {
-    loginf << "DataSourcesUseWidget: deselectAllDataSourcesSlot";
+    loginf << "start";
 
     ds_man_.deselectAllDataSources();
 }
@@ -256,7 +256,7 @@ void DataSourcesUseWidget::selectDSTypeSpecificDataSourcesSlot()
 
     string ds_type = action->property("ds_type").toString().toStdString();
 
-    loginf << "DataSourcesUseWidget: selectDSTypeSpecificDataSourcesSlot: ds_type '" << ds_type << "'";
+    loginf << "ds_type '" << ds_type << "'";
 
     ds_man_.selectDSTypeSpecificDataSources(ds_type);
 }
@@ -268,14 +268,14 @@ void DataSourcesUseWidget::deselectDSTypeSpecificDataSourcesSlot()
 
     string ds_type = action->property("ds_type").toString().toStdString();
 
-    loginf << "DataSourcesUseWidget: deselectDSTypeSpecificDataSourcesSlot: ds_type '" << ds_type << "'";
+    loginf << "ds_type '" << ds_type << "'";
 
     ds_man_.deselectDSTypeSpecificDataSources(ds_type);
 }
 
 void DataSourcesUseWidget::deselectAllLinesSlot()
 {
-    loginf << "DataSourcesUseWidget: deselectAllLinesSlot";
+    loginf << "start";
 
     ds_man_.deselectAllLines();
 }
@@ -287,14 +287,14 @@ void DataSourcesUseWidget::selectSpecificLineSlot()
 
     unsigned int line_id = action->property("line_id").toUInt();
 
-    loginf << "DataSourcesUseWidget: selectSpecificLineSlot: line_id " << line_id;
+    loginf << "line_id " << line_id;
 
     ds_man_.selectSpecificLineSlot(line_id);
 }
 
 void DataSourcesUseWidget::updateContent()
 {
-    logdbg << "DataSourcesUseWidget: updateContent: num data sources " << ds_man_.dbDataSources().size();
+    logdbg << "num data sources " << ds_man_.dbDataSources().size();
 
     bool recreate_required = false;
 
@@ -310,7 +310,7 @@ void DataSourcesUseWidget::updateContent()
         {
             if (!ds_widgets_.count(ds_it->id()))
             {
-                logdbg << "DataSourcesUseWidget: updateContent: ds_box " << ds_it->name() << " missing ";
+                logdbg << "ds_box " << ds_it->name() << " missing ";
 
                 recreate_required = true;
                 break;
@@ -318,7 +318,7 @@ void DataSourcesUseWidget::updateContent()
         }
     }
 
-    logdbg << "DataSourcesUseWidget: updateContent: recreate_required " << recreate_required;
+    logdbg << "recreate_required " << recreate_required;
 
     if (recreate_required)
     {
@@ -354,7 +354,7 @@ void DataSourcesUseWidget::clear()
 
 void DataSourcesUseWidget::arrangeSourceWidgetWidths()
 {
-    logdbg << "DataSourcesUseWidget: arrangeSourceWidgetWidths";
+    logdbg << "start";
 
     unsigned int min_width = 0;
 
@@ -363,7 +363,7 @@ void DataSourcesUseWidget::arrangeSourceWidgetWidths()
 
     if (min_width)
     {
-        logdbg << "DataSourcesUseWidget: arrangeSourceWidgetWidths: setting width " << min_width;
+        logdbg << "setting width " << min_width;
 
         for (auto& widget_it : ds_widgets_)
             widget_it.second->updateLabelMinWidth(min_width);
@@ -372,7 +372,7 @@ void DataSourcesUseWidget::arrangeSourceWidgetWidths()
 
 void DataSourcesUseWidget::clearAndCreateContent()
 {
-    logdbg << "DataSourcesUseWidget: clearAndCreateContent";
+    logdbg << "start";
 
     clear();
 
@@ -391,14 +391,14 @@ void DataSourcesUseWidget::clearAndCreateContent()
 
     using namespace dbContent;
 
-    //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    //DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
     bool ds_found;
 
-    logdbg << "DataSourcesUseWidget: clearAndCreateContent: iterating data source types";
+    logdbg << "iterating data source types";
 
     for (auto& ds_type_name : DataSourceManager::data_source_types_)
     {
-        logdbg << "DataSourcesUseWidget: clearAndCreateContent: typ " << ds_type_name << " cnt " << dstyp_cnt;
+        logdbg << "typ " << ds_type_name << " cnt " << dstyp_cnt;
 
         if (ds_type_name == "MLAT" || ds_type_name == "Tracker")  // break into next column
         {
@@ -425,7 +425,7 @@ void DataSourcesUseWidget::clearAndCreateContent()
 
         ds_found = false;
 
-        logdbg << "DataSourcesUseWidget: clearAndCreateContent: data sources for type " << ds_type_name;
+        logdbg << "data sources for type " << ds_type_name;
 
         for (const auto& ds_it : ds_man_.dbDataSources())
         {
@@ -436,7 +436,7 @@ void DataSourcesUseWidget::clearAndCreateContent()
 
             ds_id = Number::dsIdFrom(ds_it->sac(), ds_it->sic());
             ds_name = ds_it->name();
-            logdbg << "DataSourcesUseWidget: clearAndCreateContent: create '" << ds_it->dsType()
+            logdbg << "create '" << ds_it->dsType()
                    << "' '" << ds_name << "'";
 
             std::function<bool()> get_use_ds_func =
@@ -472,12 +472,12 @@ void DataSourcesUseWidget::clearAndCreateContent()
         dstyp_cnt++;
     }
 
-    logdbg << "DataSourcesUseWidget: clearAndCreateContent: setting columns";
+    logdbg << "setting columns";
 
     for(int c=0; c < type_layout_->columnCount(); c++)
         type_layout_->setColumnStretch(c,1);
 
-    logdbg << "DataSourcesUseWidget: clearAndCreateContent: done";
+    logdbg << "done";
 }
 
 

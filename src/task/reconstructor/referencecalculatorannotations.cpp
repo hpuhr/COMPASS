@@ -804,7 +804,7 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
         {
             auto anno_rts = data_anno->getOrCreateAnnotation("RTS Infos", true);
 
-            loginf << "Adding " << data.rts_annotations.size() << " RTS info(s)";
+            loginf << "adding " << data.rts_annotations.size() << " RTS info(s)";
 
             size_t cnt = 0;
             for (const auto& rts_anno : data.rts_annotations)
@@ -857,7 +857,7 @@ void ReferenceCalculatorAnnotations::createAnnotations(ViewPointGenAnnotation* a
         {
             auto anno_rts = data_anno->getOrCreateAnnotation("IMM Infos", true);
 
-            loginf << "Adding " << data.imm_annotations.size() << " IMM info(s)";
+            loginf << "adding " << data.imm_annotations.size() << " IMM info(s)";
 
             size_t cnt = 0;
             for (const auto& imm_anno : data.imm_annotations)

@@ -68,7 +68,7 @@ private:
 
     size_t missing_hashes_at_beginning_{0};
     size_t missing_hashes_{0};
-    size_t found_hashes_{0};  // dbo name -> cnt
+    size_t found_hashes_{0};  // dbcont name -> cnt
     size_t dubious_associations_{0};
     size_t found_duplicates_{0};
 
@@ -81,7 +81,7 @@ private:
     QLabel* dubious_label_{nullptr};
     QLabel* found_duplicates_label_{nullptr};
 
-    QGridLayout* dbo_associated_grid_{nullptr};
+    QGridLayout* dbcont_associated_grid_{nullptr};
 
     QPushButton* ok_button_{nullptr};
 

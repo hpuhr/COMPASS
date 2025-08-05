@@ -188,12 +188,12 @@ class Variable : public QObject, public Property, public Configurable
         }
         catch (std::exception& e)
         {
-            logerr << "Variable: getAsSpecialRepresentationString: exception thrown: "
+            logerr << "exception thrown: "
                    << e.what();
         }
         catch (...)
         {
-            logerr << "Variable: getAsSpecialRepresentationString: exception thrown";
+            logerr << "exception thrown";
             ;
         }
 

@@ -18,19 +18,37 @@
 #include <iostream>
 
 #include "client.h"
+#include "logger.h"
+#include "msghandler.h"
 
 #include <iostream>
+#include <signal.h>
 
 #include <QThread>
 
 #include <osgEarth/Registry>
 
+#include <boost/stacktrace.hpp>
+
 using namespace std;
+
+void signalHandler(int signum) 
+{
+    std::cerr << "Caught signal " << signum << std::endl;
+
+    // invoke the default handler and process the signal
+    signal(signum, SIG_DFL);
+    raise(signum);
+}
 
 int main(int argc, char** argv)
 {
     try
     {
+        signal(SIGSEGV, signalHandler);
+        signal(SIGABRT, signalHandler);
+        signal(SIGTERM, signalHandler);
+        
         const bool is_app_image = getenv("APPDIR") != nullptr;
 
         if (!is_app_image)

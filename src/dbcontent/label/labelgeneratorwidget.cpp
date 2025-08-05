@@ -288,14 +288,14 @@ void LabelGeneratorWidget::editDBContentSlot()
 
     string dbcontent_name = name.toString().toStdString();
 
-    loginf << "DBContentLabelGeneratorWidget: editDBContentSlot: dbcontent " << dbcontent_name;
+    loginf << "dbcontent " << dbcontent_name;
 
     label_generator_.editLabelContents(dbcontent_name);
 }
 
 void LabelGeneratorWidget::toggleUseUTNSlot()
 {
-    loginf << "LabelGeneratorWidget: toggleUseUTNSlot";
+    loginf << "start";
 
     label_generator_.toggleUseUTN();
 }
@@ -303,7 +303,7 @@ void LabelGeneratorWidget::toggleUseUTNSlot()
 
 void LabelGeneratorWidget::labelAllDSSlot()
 {
-    loginf << "LabelGeneratorWidget: labelAllDSSlot";
+    loginf << "start";
 
     label_generator_.labelAllDSIDs();
 
@@ -313,7 +313,7 @@ void LabelGeneratorWidget::labelAllDSSlot()
 
 void LabelGeneratorWidget::labelNoDSSlot()
 {
-    loginf << "LabelGeneratorWidget: labelNoDSSlot";
+    loginf << "start";
 
     label_generator_.labelNoDSIDs();
 
@@ -323,7 +323,7 @@ void LabelGeneratorWidget::labelNoDSSlot()
 
 void LabelGeneratorWidget::autoLabelChangedSlot(bool checked)
 {
-    loginf << "DBContentLabelGeneratorWidget: autoLabelChangedSlot: checked " << checked;
+    loginf << "checked " << checked;
 
     label_generator_.autoLabel(checked);
 }
@@ -332,7 +332,7 @@ void LabelGeneratorWidget::lodChangedSlot(const QString& text)
 {
     string lod = text.toStdString();
 
-    loginf << "DBContentLabelGeneratorWidget: lodChangedSlot: value " << lod;
+    loginf << "value " << lod;
 
     if (lod == "Auto")
         label_generator_.autoLOD(true);
@@ -345,14 +345,14 @@ void LabelGeneratorWidget::lodChangedSlot(const QString& text)
 
 void LabelGeneratorWidget::declutterLabelsChangedSlot(bool checked)
 {
-    loginf << "DBContentLabelGeneratorWidget: declutterLabelsChangedSlot: checked " << checked;
+    loginf << "checked " << checked;
 
     label_generator_.declutterLabels(checked);
 }
 
 void LabelGeneratorWidget::filterMode3AActiveChangedSlot(bool checked)
 {
-    loginf << "DBContentLabelGeneratorWidget: filterMode3AActiveChangedSlot: checked " << checked;
+    loginf << "checked " << checked;
 
     label_generator_.filterMode3aActive(checked);
 }
@@ -360,14 +360,14 @@ void LabelGeneratorWidget::filterMode3AChangedSlot(const QString& text)
 {
     string values = text.toStdString();
 
-    loginf << "DBContentLabelGeneratorWidget: filterMode3ChangedSlot: value " << values;
+    loginf << "value " << values;
 
     label_generator_.filterMode3aValues(values);
 }
 
 void LabelGeneratorWidget::filterModeCMinActiveChangedSlot(bool checked)
 {
-    loginf << "DBContentLabelGeneratorWidget: filterModeCMinActiveChangedSlot: checked " << checked;
+    loginf << "checked " << checked;
 
     label_generator_.filterModecMinActive(checked);
 }
@@ -380,13 +380,13 @@ void LabelGeneratorWidget::filterModeCMinChangedSlot(const QString& text)
     if (ok)
         label_generator_.filterModecMinValue(value);
     else
-        loginf << "DBContentLabelGeneratorWidget: filterModeCMinChangedSlot: impossible value '"
+        loginf << "impossible value '"
                << text.toStdString() << "'";
 
 }
 void LabelGeneratorWidget::filterModeCMaxActiveChangedSlot(bool checked)
 {
-    loginf << "DBContentLabelGeneratorWidget: filterModeCMaxActiveChangedSlot: checked " << checked;
+    loginf << "checked " << checked;
 
     label_generator_.filterModecMaxActive(checked);
 }
@@ -399,18 +399,18 @@ void LabelGeneratorWidget::filterModeCMaxChangedSlot(const QString& text)
     if (ok)
         label_generator_.filterModecMaxValue(value);
     else
-        loginf << "DBContentLabelGeneratorWidget: filterModeCMaxChangedSlot: impossible value '"
+        loginf << "impossible value '"
                << text.toStdString() << "'";
 }
 void LabelGeneratorWidget::filterModeCNullWantedChangedSlot(bool checked)
 {
-    loginf << "DBContentLabelGeneratorWidget: filterModeCNullWantedChangedSlot: checked " << checked;
+    loginf << "checked " << checked;
     label_generator_.filterModecNullWanted(checked);
 }
 
 void LabelGeneratorWidget::filterTIActiveChangedSlot(bool checked)
 {
-    loginf << "DBContentLabelGeneratorWidget: filterTIActiveChangedSlot: checked " << checked;
+    loginf << "checked " << checked;
 
     label_generator_.filterTIActive(checked);
 }
@@ -418,14 +418,14 @@ void LabelGeneratorWidget::filterTIChangedSlot(const QString& text)
 {
     string values = text.toStdString();
 
-    loginf << "DBContentLabelGeneratorWidget: filterTIChangedSlot: value " << values;
+    loginf << "value " << values;
 
     label_generator_.filterTIValues(values);
 }
 
 void LabelGeneratorWidget::filterTAActiveChangedSlot(bool checked)
 {
-    loginf << "DBContentLabelGeneratorWidget: filterTAActiveChangedSlot: checked " << checked;
+    loginf << "checked " << checked;
 
     label_generator_.filterTAActive(checked);
 }
@@ -433,25 +433,25 @@ void LabelGeneratorWidget::filterTAChangedSlot(const QString& text)
 {
     string values = text.toStdString();
 
-    loginf << "DBContentLabelGeneratorWidget: filterTAChangedSlot: value " << values;
+    loginf << "value " << values;
 
     label_generator_.filterTAValues(values);
 }
 
 void LabelGeneratorWidget::filterPSROnlyActiveChangedSlot(bool checked)
 {
-    loginf << "DBContentLabelGeneratorWidget: filterPSROnlyActiveChangedSlot: checked " << checked;
+    loginf << "checked " << checked;
 
     label_generator_.filterPrimaryOnlyActive(checked);
 }
 
 void LabelGeneratorWidget::opacitySliderChangedSlot(int value)
 {
-    logdbg << "LabelGeneratorWidget: opacitySliderChangedSlot: value " << value;
+    logdbg << "value " << value;
 
     float new_op = 1 - ((float) value) / 100.0;
 
-    logdbg << "LabelGeneratorWidget: opacitySliderChangedSlot: new_op " << new_op;
+    logdbg << "new_op " << new_op;
 
     label_generator_.labelOpacity(new_op);
 }

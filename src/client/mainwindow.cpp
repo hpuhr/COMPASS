@@ -97,7 +97,7 @@ using namespace std;
 
 MainWindow::MainWindow()
 {
-    logdbg << "MainWindow: constructor";
+    logdbg << "start";
 
     QLocale::setDefault(QLocale::c());
     setLocale(QLocale::c());
@@ -134,7 +134,7 @@ MainWindow::MainWindow()
 
         // if (settings.value("MainWindow/isMaximized", false).toBool())
         // {
-        //     loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
+        //     loginf << "isMaximized";
         //     showMaximized();
         // }
         // else
@@ -161,7 +161,7 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-    logdbg << "MainWindow: destructor";
+    logdbg << "start";
 
             // remember: this not called! insert deletes into closeEvent function
 }
@@ -636,12 +636,12 @@ void MainWindow::updateBottomWidget()
             live_stop_button_->setHidden(false);
     }
     else
-        logerr << "MainWindow: updateBottomWidget: unknown app mode " << (unsigned int) COMPASS::instance().appMode();
+        logerr << "unknown app mode " << (unsigned int) COMPASS::instance().appMode();
 }
 
 void MainWindow::disableConfigurationSaving()
 {
-    logdbg << "MainWindow: disableConfigurationSaving";
+    logdbg << "start";
     save_configuration_ = false;
 
     assert (quit_wo_cfg_sav_action_);
@@ -650,7 +650,7 @@ void MainWindow::disableConfigurationSaving()
 
 void MainWindow::openExistingDB(const std::string& filename)
 {
-    loginf << "MainWindow: openExistingDB: filename '" << filename << "'";
+    loginf << "filename '" << filename << "'";
 
     COMPASS::instance().openDBFile(filename);
 
@@ -660,7 +660,7 @@ void MainWindow::openExistingDB(const std::string& filename)
 
 void MainWindow::createDB(const std::string& filename)
 {
-    loginf << "MainWindow: createDB: filename '" << filename << "'";
+    loginf << "filename '" << filename << "'";
 
     COMPASS::instance().createNewDBFile(filename);
 
@@ -670,7 +670,7 @@ void MainWindow::createDB(const std::string& filename)
 
 void MainWindow::createInMemoryDB(const std::string& future_filename)
 {
-    loginf << "MainWindow: createInMemoryDB: future filename '" << future_filename << "'";
+    loginf << "future filename '" << future_filename << "'";
 
     COMPASS::instance().createInMemDBFile(future_filename);
 
@@ -680,7 +680,7 @@ void MainWindow::createInMemoryDB(const std::string& future_filename)
 
 void MainWindow::createDBFromMemory()
 {
-    loginf << "MainWindow: createDBFromMemory";
+    loginf << "start";
 
     COMPASS::instance().createNewDBFileFromMemory();
 
@@ -690,7 +690,7 @@ void MainWindow::createDBFromMemory()
 
 void MainWindow::newDBSlot()
 {
-    loginf << "MainWindow: newDBSlot";
+    loginf << "start";
 
     string filename = QFileDialog::getSaveFileName(
                           this, "New Database File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
@@ -701,7 +701,7 @@ void MainWindow::newDBSlot()
 
 void MainWindow::openExistingDBSlot()
 {
-    loginf << "MainWindow: openExistingDBSlot";
+    loginf << "start";
 
     string filename = QFileDialog::getOpenFileName(
                           this, "Open Database File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
@@ -712,7 +712,7 @@ void MainWindow::openExistingDBSlot()
 
 void MainWindow::openRecentDBSlot()
 {
-    loginf << "MainWindow: openRecentDBSlot";
+    loginf << "start";
 
     QAction* action = dynamic_cast<QAction*> (QObject::sender());
     assert (action);
@@ -726,7 +726,7 @@ void MainWindow::openRecentDBSlot()
 
 void MainWindow::exportDBSlot()
 {
-    loginf << "MainWindow: exportDBSlot";
+    loginf << "start";
 
     string filename = QFileDialog::getSaveFileName(
                           this, "Export Database File", COMPASS::instance().lastUsedPath().c_str()).toStdString();
@@ -739,7 +739,7 @@ void MainWindow::exportDBSlot()
 
 void MainWindow::clearExistingDBsSlot()
 {
-    loginf << "MainWindow: clearExistingDBsSlot";
+    loginf << "start";
 
     COMPASS::instance().clearDBFileList();
 
@@ -749,7 +749,7 @@ void MainWindow::clearExistingDBsSlot()
 
 void MainWindow::closeDBSlot()
 {
-    loginf << "MainWindow: closeDBSlot";
+    loginf << "start";
 
     COMPASS::instance().closeDB();
 
@@ -759,7 +759,7 @@ void MainWindow::closeDBSlot()
 
 void MainWindow::saveConfigSlot()
 {
-    loginf << "MainWindow: saveConfigSlot";
+    loginf << "start";
 
     assert (!COMPASS::instance().disableMenuConfigSave());
 
@@ -768,7 +768,7 @@ void MainWindow::saveConfigSlot()
 
 void MainWindow::quitWOConfigSlot()
 {
-    loginf << "MainWindow: quitWOConfigSlot";
+    loginf << "start";
 
     save_configuration_ = false;
 
@@ -778,7 +778,7 @@ void MainWindow::quitWOConfigSlot()
 }
 void MainWindow::quitSlot()
 {
-    loginf << "MainWindow: quitSlot";
+    loginf << "start";
 
     shutdown();
 
@@ -787,7 +787,7 @@ void MainWindow::quitSlot()
 
 void MainWindow::importAsterixRecordingSlot()
 {
-    loginf << "MainWindow: importAsterixRecordingSlot";
+    loginf << "start";
 
     QFileDialog dialog(this, "Import ASTERIX File(s)");
     dialog.setViewMode(QFileDialog::Detail);
@@ -822,7 +822,7 @@ void MainWindow::importAsterixRecordingSlot()
 
 void MainWindow::importRecentAsterixRecordingSlot()
 {
-    loginf << "MainWindow: importRecentAsterixRecordingSlot";
+    loginf << "start";
 
     QAction* action = dynamic_cast<QAction*> (QObject::sender());
     assert (action);
@@ -842,7 +842,7 @@ void MainWindow::importRecentAsterixRecordingSlot()
 
 void MainWindow::importAsterixFromPCAPSlot()
 {
-    loginf << "MainWindow: importAsterixFromPCAPSlot";
+    loginf << "start";
 
     // auto fn = QFileDialog::getOpenFileName(this,
     //                                        "Import PCAP File",
@@ -892,7 +892,7 @@ void MainWindow::importAsterixFromPCAPSlot()
 
 void MainWindow::importAsterixFromJSONSlot()
 {
-    loginf << "MainWindow: importAsterixFromJSONSlot";
+    loginf << "start";
 
     auto fn = QFileDialog::getOpenFileName(this, 
                                            "Import JSON File", 
@@ -911,7 +911,7 @@ void MainWindow::importAsterixFromJSONSlot()
 
 void MainWindow::importAsterixFromNetworkSlot()
 {
-    loginf << "MainWindow: importAsterixFromNetworkSlot";
+    loginf << "start";
 
     ASTERIXImportTask& task = COMPASS::instance().taskManager().asterixImporterTask();
 
@@ -990,42 +990,42 @@ void MainWindow::importViewPointsSlot()
 
 void MainWindow::calculateRadarPlotPositionsSlot()
 {
-    loginf << "MainWindow: calculateRadarPlotPositionsSlot";
+    loginf << "start";
 
     COMPASS::instance().taskManager().radarPlotPositionCalculatorTask().dialog()->show();
 }
 
 void MainWindow::calculateAssociationsARTASSlot()
 {
-    loginf << "MainWindow: calculateAssociationsARTASSlot";
+    loginf << "start";
 
     COMPASS::instance().taskManager().createArtasAssociationsTask().dialog()->show();
 }
 
 void MainWindow::reconstructReferencesSlot()
 {
-    loginf << "MainWindow: reconstructReferencesSlot";
+    loginf << "start";
 
     COMPASS::instance().taskManager().reconstructReferencesTask().showDialog();
 }
 
 void MainWindow::evaluateSlot()
 {
-    loginf << "MainWindow: evaluateSlot";
+    loginf << "start";
 
     COMPASS::instance().evaluationManager().evaluate(true);
 }
 
 void MainWindow::configureDataSourcesSlot()
 {
-    loginf << "MainWindow: configureDataSourcesSlot";
+    loginf << "start";
 
     COMPASS::instance().dataSourceManager().configurationDialog()->show();
 }
 
 void MainWindow::configureFFTsSlot()
 {
-    loginf << "MainWindow: configureFFTsSlot";
+    loginf << "start";
 
     COMPASS::instance().fftManager().configurationDialog()->show();
 }
@@ -1033,14 +1033,14 @@ void MainWindow::configureFFTsSlot()
 
 void MainWindow::configureMetaVariablesSlot()
 {
-    loginf << "MainWindow: configureMetaVariablesSlot";
+    loginf << "start";
 
     COMPASS::instance().dbContentManager().metaVariableConfigdialog()->show();
 }
 
 void MainWindow::configureSectorsSlot()
 {
-    loginf << "MainWindow: configureSectorsSlot";
+    loginf << "start";
 
     COMPASS::instance().taskManager().manageSectorsTask().dialog()->show();
 }
@@ -1053,7 +1053,7 @@ void MainWindow::quitRequestedSlot()
 
 void MainWindow::showAddViewMenuSlot()
 {
-    loginf << "MainWindow: showAddViewMenuSlot";
+    loginf << "start";
 
     assert (!COMPASS::instance().disableAddRemoveViews());
     COMPASS::instance().viewManager().showMainViewContainerAddView();
@@ -1061,7 +1061,7 @@ void MainWindow::showAddViewMenuSlot()
 
 void MainWindow::resetViewsMenuSlot()
 {
-    loginf << "MainWindow: resetViewsMenuSlot";
+    loginf << "start";
 
     QMessageBox::StandardButton reply;
 
@@ -1133,7 +1133,7 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
 {
     bool enable_tabs = app_mode_current == AppMode::Offline;
 
-    loginf << "MainWindow: appModeSwitch: app_mode " << COMPASS::instance().appModeStr()
+    loginf << "app_mode " << COMPASS::instance().appModeStr()
            << " enable_tabs " << enable_tabs;
 
     assert (tool_box_);
@@ -1172,7 +1172,7 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
 
 void MainWindow::autoResumeTimerSlot()
 {
-    loginf << "MainWindow: autoResumeTimerSlot";
+    loginf << "start";
 
     assert (!auto_resume_dialog_);
 
@@ -1187,7 +1187,7 @@ void MainWindow::autoResumeTimerSlot()
 
 void MainWindow::autoResumeResumeSlot()
 {
-    loginf << "MainWindow: autoResumeResumeSlot";
+    loginf << "start";
 
     assert (auto_resume_dialog_);
     auto_resume_dialog_->close();
@@ -1199,7 +1199,7 @@ void MainWindow::autoResumeResumeSlot()
 
 void MainWindow::autoResumeStaySlot()
 {
-    loginf << "MainWindow: autoResumeStaySlot";
+    loginf << "start";
 
     auto_resume_dialog_->close();
 
@@ -1211,7 +1211,7 @@ void MainWindow::autoResumeStaySlot()
 
 void MainWindow::toggleDarkModeSlot()
 {
-    loginf << "MainWindow: toggleDarkModeSlot";
+    loginf << "start";
 
     COMPASS::instance().darkMode(!COMPASS::instance().darkMode());
 
@@ -1222,7 +1222,7 @@ void MainWindow::toggleDarkModeSlot()
 
 void MainWindow::toggleFullscreenSlot()
 {
-    loginf << "MainWindow: toggleFullscreenSlot: isFullScreen " << isFullScreen();
+    loginf << "isFullScreen " << isFullScreen();
 
     if (isFullScreen())
     {
@@ -1235,7 +1235,7 @@ void MainWindow::toggleFullscreenSlot()
 
         // if (settings.value("MainWindow/isMaximized", false).toBool())
         // {
-        //     loginf << "MainWindow: toggleFullscreenSlot: isMaximized";
+        //     loginf << "isMaximized";
         //     showMaximized();
         // }
         // else
@@ -1260,7 +1260,7 @@ void MainWindow::toggleFullscreenSlot()
 
 void MainWindow::loadButtonSlot()
 {
-    loginf << "MainWindow: loadButtonSlot";
+    loginf << "start";
 
     if (COMPASS::instance().viewManager().getViews().size() == 0)
     {
@@ -1289,7 +1289,7 @@ void MainWindow::loadButtonSlot()
 
 void MainWindow::loadingDoneSlot()
 {
-    loginf << "MainWindow: loadingDoneSlot";
+    loginf << "start";
 
     assert (load_button_);
 
@@ -1302,7 +1302,7 @@ void MainWindow::loadingDoneSlot()
 
 void MainWindow::livePauseResumeSlot()
 {
-    loginf << "MainWindow: livePauseSlot";
+    loginf << "start";
 
     AppMode app_mode = COMPASS::instance().appMode();
 
@@ -1316,7 +1316,7 @@ void MainWindow::livePauseResumeSlot()
 
 void MainWindow::liveStopSlot()
 {
-    loginf << "MainWindow: liveStopSlot";
+    loginf << "start";
 
     COMPASS::instance().appMode(AppMode::Offline);
 
@@ -1327,12 +1327,12 @@ void MainWindow::liveStopSlot()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    loginf << "MainWindow: closeEvent";
+    loginf << "start";
 
     shutdown();
     event->accept();
 
-    logdbg << "MainWindow: closeEvent: done";
+    logdbg << "done";
 }
 
 void MainWindow::shutdown()
@@ -1347,7 +1347,7 @@ void MainWindow::shutdown()
     if (save_configuration_)
         ConfigurationManager::getInstance().saveConfiguration();
     else
-        loginf << "MainWindow: shutdown: configuration not saved";
+        loginf << "configuration not saved";
 
     COMPASS::instance().shutdown();
 
@@ -1360,7 +1360,7 @@ void MainWindow::shutdown()
 
 // void MainWindow::keyPressEvent ( QKeyEvent * event )
 //{
-//    logdbg << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
+//    logdbg << "'" << event->text().toStdString() << "'";
 //}
 
 void MainWindow::createDebugMenu()
@@ -1443,7 +1443,7 @@ void MainWindow::loadingDone()
 
 void MainWindow::selectTool(const std::string& name)
 {
-    loginf << "MainWindow: selectTool: selecting tool '" << name << "'";
+    loginf << "selecting tool '" << name << "'";
 
     if (tool_box_)
         tool_box_->selectTool(name);
@@ -1451,7 +1451,7 @@ void MainWindow::selectTool(const std::string& name)
 
 void MainWindow::showResult(const std::string& name)
 {
-    loginf << "MainWindow: showResult: showing result '" << name << "'";
+    loginf << "showing result '" << name << "'";
 
     auto& task_manager = COMPASS::instance().taskManager();
 

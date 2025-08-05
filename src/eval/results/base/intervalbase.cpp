@@ -77,7 +77,7 @@ boost::optional<double> SingleIntervalBase::computeResult_impl() const
     if (sum_uis_ == 0)
         return {};
 
-    logdbg << type() << ": updatePD: utn " << utn_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
+    logdbg << type() << ": utn " << utn_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
 
     return (1.0 - (double)missed_uis_ / (double)sum_uis_);
 }
@@ -234,7 +234,7 @@ void JoinedIntervalBase::accumulateSingleResult(const std::shared_ptr<Single>& s
 */
 boost::optional<double> JoinedIntervalBase::computeResult_impl() const
 {
-    loginf << "JoinedIntervalBase: computeResult_impl:" << type()
+    loginf << "start" << type()
             << " sum_uis_ " << sum_uis_
             << " missed_uis_ " << missed_uis_;
 

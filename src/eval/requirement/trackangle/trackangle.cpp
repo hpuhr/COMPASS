@@ -80,7 +80,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " threshold_percent " << threshold_
            << " threshold_value_check_type " << threshold_value_check_type_;
 
@@ -316,7 +316,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                   comment);
     }
 
-    //        logdbg << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
+    //        logdbg << "'" << name_ << "': utn " << target_data.utn_
     //               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
     //               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
@@ -325,14 +325,14 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     assert (num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        logwrn << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
+        logwrn << "'" << name_ << "': utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside;
     assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
 
     if (num_trackangle_comp != num_comp_failed + num_comp_passed)
-        logwrn << "EvaluationRequirementTrackAngle '" << name_ << "': evaluate: utn " << target_data.utn_
+        logwrn << "'" << name_ << "': utn " << target_data.utn_
                << " num_speeds " << num_trackangle_comp
                << " num_comp_failed " <<  num_comp_failed << " num_comp_passed " << num_comp_passed;
 

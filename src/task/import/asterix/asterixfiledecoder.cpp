@@ -58,7 +58,7 @@ bool ASTERIXFileDecoder::checkDecoding(ASTERIXImportFileInfo& file_info, int sec
 
     bool has_framing = settings().current_file_framing_.size() > 0;
 
-    loginf << "ASTERIXFileDecoder: checkDecoding: file '" << file_info.filename << "' decoding now...";
+    loginf << "file '" << file_info.filename << "' decoding now...";
 
     //analyze asterix file
     std::unique_ptr<nlohmann::json> analysis_info;
@@ -71,7 +71,7 @@ bool ASTERIXFileDecoder::checkDecoding(ASTERIXImportFileInfo& file_info, int sec
     //store analysis info for later usage
     file_error.analysis_info = *analysis_info;
 
-    loginf << "ASTERIXFileDecoder: checkDecoding: file '" << file_info.filename << "' json '" << file_error.analysis_info.dump(4) << "'";
+    loginf << "file '" << file_info.filename << "' json '" << file_error.analysis_info.dump(4) << "'";
     //            json '{
     //               "data_items": {},
     //               "num_errors": 12,
@@ -110,7 +110,7 @@ void ASTERIXFileDecoder::processFile(ASTERIXImportFileInfo& file_info)
     string       current_filename  = file_info.filename;
     unsigned int current_file_line = settings().file_line_id_; //files_info_.at(current_file_count_).line_id_;
 
-    loginf << "ASTERIXFileDecoder: processFile: file '" << current_filename
+    loginf << "file '" << current_filename
            << "' framing '" << settings().current_file_framing_ << "' line " << current_file_line;
 
     //jasterix callback

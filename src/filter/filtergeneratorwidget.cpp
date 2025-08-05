@@ -217,14 +217,14 @@ void FilterGeneratorWidget::addCondition()
     {
         const dbContent::Variable& var = condition_variable_widget_->selectedVariable();
         data_condition.variable_name_ = var.name();
-        data_condition.variable_dbo_type_ = var.dbContentName();
+        data_condition.variable_dbcont_name_ = var.dbContentName();
     }
     else
     {
         assert(condition_variable_widget_->hasMetaVariable());
         dbContent::MetaVariable& var = condition_variable_widget_->selectedMetaVariable();
         data_condition.variable_name_ = var.name();
-        data_condition.variable_dbo_type_ = META_OBJECT_NAME;
+        data_condition.variable_dbcont_name_ = META_OBJECT_NAME;
     }
 
     data_condition.absolute_value_ = condition_absolute_->checkState() == Qt::Checked;
@@ -258,7 +258,7 @@ void FilterGeneratorWidget::closeEvent(QCloseEvent* event) { emit filterWidgetAc
 
 void FilterGeneratorWidget::accept()
 {
-    loginf << "FilterGeneratorWidget: accept";
+    loginf << "start";
 
     std::string filter_name = filter_name_->text().toStdString();
 
@@ -269,13 +269,13 @@ void FilterGeneratorWidget::accept()
         ConditionTemplate& data_condition = data_conditions_.at(cnt);
         std::string condition_name = filter_name + "Condition" + std::to_string(cnt);
 
-        loginf << "FilterGeneratorWidget: accept: creating condition with operator '"
+        loginf << "creating condition with operator '"
                << data_condition.operator_ << "'";
 
         Configuration& condition_configuration = configuration->addNewSubConfiguration("DBFilterCondition", condition_name);
         condition_configuration.addParameter<std::string>("operator", data_condition.operator_);
         condition_configuration.addParameter<std::string>("variable_name", data_condition.variable_name_);
-        condition_configuration.addParameter<std::string>("variable_dbcontent_name", data_condition.variable_dbo_type_);
+        condition_configuration.addParameter<std::string>("variable_dbcontent_name", data_condition.variable_dbcont_name_);
         condition_configuration.addParameter<bool>("absolute_value", data_condition.absolute_value_);
         condition_configuration.addParameter<std::string>("value", data_condition.value_);
 

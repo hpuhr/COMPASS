@@ -242,7 +242,7 @@ void GPSImportCSVTaskWidget::todOffsetEditedSlot(const QString& value)
 
 void GPSImportCSVTaskWidget::mode3ACheckedSlot()
 {
-    loginf << "GPSImportCSVTaskWidget: mode3ACheckedSlot";
+    loginf << "start";
 
     assert (set_mode_3a_code_check_);
     task_.setMode3aCode(set_mode_3a_code_check_->checkState() == Qt::Checked);
@@ -250,7 +250,7 @@ void GPSImportCSVTaskWidget::mode3ACheckedSlot()
 
 void GPSImportCSVTaskWidget::mode3AEditedSlot(const QString& value)
 {
-    loginf << "GPSImportCSVTaskWidget: mode3AEditedSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     assert (mode_3a_code_edit_);
 
@@ -260,7 +260,7 @@ void GPSImportCSVTaskWidget::mode3AEditedSlot(const QString& value)
 
 void GPSImportCSVTaskWidget::targetAddressCheckedSlot()
 {
-    loginf << "GPSImportCSVTaskWidget: targetAddressCheckedSlot";
+    loginf << "start";
 
     assert (set_target_address_check_);
     task_.setTargetAddress(set_target_address_check_->checkState() == Qt::Checked);
@@ -268,7 +268,7 @@ void GPSImportCSVTaskWidget::targetAddressCheckedSlot()
 
 void GPSImportCSVTaskWidget::targetAddressEditedSlot(const QString& value)
 {
-    loginf << "GPSImportCSVTaskWidget: targetAddressEditedSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     assert (target_address_edit_);
 
@@ -278,7 +278,7 @@ void GPSImportCSVTaskWidget::targetAddressEditedSlot(const QString& value)
 
 void GPSImportCSVTaskWidget::callsignCheckedSlot()
 {
-    loginf << "GPSImportCSVTaskWidget: callsignCheckedSlot";
+    loginf << "start";
 
     assert (set_callsign_check_);
     task_.setCallsign(set_callsign_check_->checkState() == Qt::Checked);
@@ -286,7 +286,7 @@ void GPSImportCSVTaskWidget::callsignCheckedSlot()
 
 void GPSImportCSVTaskWidget::callsignEditedSlot(const QString& value)
 {
-    loginf << "GPSImportCSVTaskWidget: callsignEditedSlot: value '" << value.toStdString() << "'";
+    loginf << "value '" << value.toStdString() << "'";
 
     QString upper_value = value.toUpper();
 
@@ -297,7 +297,7 @@ void GPSImportCSVTaskWidget::callsignEditedSlot(const QString& value)
 
 void GPSImportCSVTaskWidget::lineIDEditSlot(const QString& text)
 {
-    loginf << "GPSImportCSVTaskWidget: lineIDEditSlot: value '" << text.toStdString() << "'";
+    loginf << "value '" << text.toStdString() << "'";
 
     bool ok;
 
@@ -345,21 +345,21 @@ void GPSImportCSVTaskWidget::expertModeChangedSlot() {}
 
 //void GPSImportCSVTaskWidget::runStarted()
 //{
-//    loginf << "GPSImportCSVTaskWidget: runStarted";
+//    loginf << "start";
 
 //    //test_button_->setDisabled(true);
 //}
 
 //void GPSImportCSVTaskWidget::runDone()
 //{
-//    loginf << "GPSImportCSVTaskWidget: runDone";
+//    loginf << "start";
 
 //    //test_button_->setDisabled(false);
 //}
 
 void GPSImportCSVTaskWidget::updateText ()
 {
-    loginf << "ViewPointsImportTaskWidget: updateText";
+    loginf << "start";
 
     assert (text_edit_);
 

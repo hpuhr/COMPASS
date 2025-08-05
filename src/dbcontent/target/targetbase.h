@@ -153,7 +153,7 @@ public:
     // Accessor helpers
     static double getAvgSize(Category ecat) {
 
-        //loginf << "getAvgSize " << (unsigned int) ecat << " str " << toString(ecat);
+        //loginf << (unsigned int) ecat << " str " << toString(ecat);
         assert (checkEmitterSpecs(ecat));
         assert (emitter_specs_.at(toString(ecat)).count("avg_size_m"));
         return emitter_specs_.at(toString(ecat)).at("avg_size_m");

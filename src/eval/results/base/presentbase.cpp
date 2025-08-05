@@ -299,7 +299,7 @@ void JoinedPresentBase::accumulateSingleResult(const std::shared_ptr<Single>& si
 */
 boost::optional<double> JoinedPresentBase::computeResult_impl() const
 {
-    loginf << "JoinedPresentBase: computeResult_impl:" << type()
+    loginf << "start" << type()
             << " num_updates " << num_updates_
             << " num_no_ref_pos " << num_no_ref_pos_
             << " num_no_ref_val " << num_no_ref_val_

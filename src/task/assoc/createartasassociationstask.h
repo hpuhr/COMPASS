@@ -163,7 +163,7 @@ protected:
 
     std::unique_ptr<CreateARTASAssociationsStatusDialog> status_dialog_{nullptr};
 
-    bool dbo_loading_done_{false};
+    bool dbcont_loading_done_{false};
 
     std::shared_ptr<CreateARTASAssociationsJob> create_job_;
     bool create_job_done_{false};

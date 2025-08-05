@@ -46,7 +46,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " threshold_value " << threshold();
 
     time_duration max_ref_time_diff = Time::partialSeconds(calculator_.settings().max_ref_time_diff_);
@@ -265,7 +265,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
                     comment);
     }
 
-    //        logdbg << "EvaluationRequirementPositionRange '" << name_ << "': evaluate: utn " << target_data.utn_
+    //        logdbg << "'" << name_ << "': utn " << target_data.utn_
     //               << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
     //               << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
@@ -274,7 +274,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     assert (num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
-        loginf << "EvaluationRequirementPositionRadarRange '" << name_ << "': evaluate: utn " << target_data.utn_
+        loginf << "'" << name_ << "': utn " << target_data.utn_
                << " num_pos " << num_pos<< " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
                << " num_pos_calc_errors " << num_pos_calc_errors

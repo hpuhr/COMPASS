@@ -24,13 +24,35 @@
 
 #include <cstdint>
 
-#define logerr log4cpp::Category::getRoot().errorStream()
-#define logwrn log4cpp::Category::getRoot().warnStream()
-#define loginf log4cpp::Category::getRoot().infoStream()
-//#define logdbg log4cpp::Category::getRoot().debugStream()
-#define logdbg \
+#define FORMAT_FUNC_NAME() [&]() -> std::string { \
+    std::string func_str(__PRETTY_FUNCTION__); \
+    size_t end_pos = func_str.find('('); \
+    if (end_pos == std::string::npos) end_pos = func_str.length(); \
+    size_t start_pos = func_str.rfind(' ', end_pos) + 1; \
+    size_t class_end = func_str.rfind("::", end_pos); \
+    if (class_end != std::string::npos && class_end > start_pos) { \
+        size_t class_start = func_str.rfind(' ', class_end - 1); \
+        if (class_start == std::string::npos) class_start = 0; else class_start++; \
+        std::string class_name = func_str.substr(class_start, class_end - class_start); \
+        std::string func_name = func_str.substr(class_end + 2, end_pos - class_end - 2); \
+        return class_name + ": " + func_name + ": "; \
+    } else { \
+        std::string func_name = func_str.substr(start_pos, end_pos - start_pos); \
+        return func_name + ": "; \
+    } \
+}()
+
+#define logerr log4cpp::Category::getRoot().errorStream() << FORMAT_FUNC_NAME()
+#define logwrn log4cpp::Category::getRoot().warnStream() << FORMAT_FUNC_NAME()
+#define loginf log4cpp::Category::getRoot().infoStream() << FORMAT_FUNC_NAME()
+#define logdbg if (log4cpp::Category::getRoot().isPriorityEnabled(log4cpp::Priority::DEBUG)) \
+    log4cpp::Category::getRoot().debugStream() << FORMAT_FUNC_NAME()
+#define logdbg1 \
     if (false) \
     log4cpp::Category::getRoot().debugStream()  // for improved performance
+#define logdbg2 \
+    if (false) \
+    log4cpp::Category::getRoot().debugStream()  // for improved performance    
 
 namespace logger
 {

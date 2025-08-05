@@ -111,7 +111,7 @@ boost::optional<double> SingleDetection::computeResult_impl() const
     if (!sum_uis_)
         return {};
 
-    logdbg << "SingleDetection: updatePD: utn " << utn_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
+    logdbg << "utn " << utn_ << " missed_uis " << missed_uis_ << " sum_uis " << sum_uis_;
 
     assert (missed_uis_ <= sum_uis_);
 
@@ -263,7 +263,7 @@ void JoinedDetection::accumulateSingleResult(const std::shared_ptr<Single>& sing
 */
 boost::optional<double> JoinedDetection::computeResult_impl() const
 {
-    loginf << "JoinedDetection: computeResult_impl:"
+    loginf << "start"
             << " missed_uis " << missed_uis_
             << " sum_uis " << sum_uis_;
 

@@ -65,7 +65,7 @@ class DBDataSourceComboBox : public QComboBox
         updateBox();
     }
 
-    void disableShowDBOOnly()
+    void disableShowDBContOnly()
     {
         only_dbcontent_name_ = "";
         show_dbcontent_only_ = false;

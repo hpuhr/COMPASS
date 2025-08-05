@@ -77,7 +77,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementResultExtraData '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " min_duration " << min_duration_ << " min_num_updates " << min_num_updates_
            << " ignore_primary_only " << ignore_primary_only_ << " prob " << threshold();
 
@@ -178,7 +178,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraData::evaluate (
     bool has_extra_test_data = num_extra;
 
 //    if (!ignore && test_data_only)
-//        loginf << "EvaluationRequirementResultExtraData '" << name_ << "': evaluate: utn " << target_data.utn_
+//        loginf << "'" << name_ << "': utn " << target_data.utn_
 //               << " not ignored tdo, ref " << num_ref_inside << " num_ok " << num_ok << " num_extra " << num_extra;
 
     return make_shared<EvaluationRequirementResult::SingleExtraData>(

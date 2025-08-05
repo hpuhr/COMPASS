@@ -52,7 +52,7 @@ void Mode3AFilterWidget::valueEditedSlot(const QString& value)
 {
     string value_str = value.toStdString();
 
-    loginf << "Mode3AFilterWidget: valueEditedSlot: '" << value_str << "'";
+    loginf << "'" << value_str << "'";
 
     filter_.valuesString(value_str);
 }

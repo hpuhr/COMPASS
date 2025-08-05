@@ -59,7 +59,7 @@ ScatterPlotViewDataSource::~ScatterPlotViewDataSource()
 void ScatterPlotViewDataSource::generateSubConfigurable(const std::string& class_id,
                                                     const std::string& instance_id)
 {
-    logdbg << "ScatterPlotViewDataSource: generateSubConfigurable: class_id " << class_id
+    logdbg << "class_id " << class_id
            << " instance_id " << instance_id;
 
     if (class_id.compare("VariableOrderedSet") == 0)
@@ -90,7 +90,7 @@ void ScatterPlotViewDataSource::unshowViewPoint (const ViewableDataConfig* vp)
 {
     for (auto& var_it : temporary_added_variables_)
     {
-        loginf << "ScatterPlotViewDataSource: unshowViewPoint: removing var " << var_it.first << ", " << var_it.second;
+        loginf << "removing var " << var_it.first << ", " << var_it.second;
 
         removeTemporaryVariable(var_it.first, var_it.second);
     }
@@ -129,7 +129,7 @@ void ScatterPlotViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
                 if (addTemporaryVariable(dbcontent_name, var_name))
                 {
-                    loginf << "ScatterPlotViewDataSource: showViewPoint: added var " << dbcontent_name << ", " << var_name;
+                    loginf << "added var " << dbcontent_name << ", " << var_name;
                     temporary_added_variables_.push_back({dbcontent_name, var_name});
                 }
             }

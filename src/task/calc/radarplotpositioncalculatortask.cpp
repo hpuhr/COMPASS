@@ -105,7 +105,7 @@ bool RadarPlotPositionCalculatorTask::canRun()
 
 void RadarPlotPositionCalculatorTask::run()
 {
-    loginf << "RadarPlotPositionCalculatorTask: run: start";
+    loginf << "start";
 
     assert(canRun());
 
@@ -148,17 +148,17 @@ void RadarPlotPositionCalculatorTask::run()
 
     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-    for (auto& dbo_it : dbcontent_man)
+    for (auto& dbcont_it : dbcontent_man)
     {
-        if (dbo_it.first != "CAT001" && dbo_it.first != "CAT010" && dbo_it.first != "CAT048")
+        if (dbcont_it.first != "CAT001" && dbcont_it.first != "CAT010" && dbcont_it.first != "CAT048")
             continue;
 
-        if (!dbo_it.second->hasData())
+        if (!dbcont_it.second->hasData())
             continue;
 
-        VariableSet read_set = getReadSetFor(dbo_it.first);
+        VariableSet read_set = getReadSetFor(dbcont_it.first);
 
-        dbo_it.second->load(read_set, false, false);
+        dbcont_it.second->load(read_set, false, false);
     }
 }
 
@@ -170,7 +170,7 @@ void RadarPlotPositionCalculatorTask::loadedDataSlot(
 
 void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 {
-    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: starting calculation";
+    loginf << "starting calculation";
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -219,7 +219,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
 
         if (reply == QMessageBox::No)
         {
-            loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of "
+            loginf << "aborted by user because of "
                       "transformation errors";
 
             COMPASS::instance().logInfo("Radar Plot Position Calculation") << "save declined";
@@ -239,7 +239,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
         msg_box_->setStandardButtons(QMessageBox::NoButton);
         msg_box_->show();
 
-        logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing size " << buffers_size;
+        logdbg << "writing size " << buffers_size;
 
         for (auto& buf_it : update_buffers)
         {
@@ -252,12 +252,12 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot()
         }
     }
 
-    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
+    loginf << "end";
 }
 
 void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
 {
-    loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot";
+    loginf << "start";
 
     disconnect(&db_content, &DBContent::updateDoneSignal,
                this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
@@ -269,7 +269,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
 
     if (dbcontent_done_.size() == data_.size())
     {
-        loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot: fully done";
+        loginf << "fully done";
 
         dialog_ = nullptr;
         data_.clear();
@@ -307,7 +307,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot(DBContent& db_content)
         emit doneSignal();
     }
     else
-        loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot: not yet done";
+        loginf << "not yet done";
 }
 
 void RadarPlotPositionCalculatorTask::dialogCloseSlot()

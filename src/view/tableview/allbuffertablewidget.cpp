@@ -82,7 +82,7 @@ void AllBufferTableWidget::show(std::map<std::string, std::shared_ptr<Buffer>> b
 
 void AllBufferTableWidget::exportSlot()
 {
-    loginf << "AllBufferTableWidget: exportSlot";
+    loginf << "start";
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
@@ -105,7 +105,7 @@ void AllBufferTableWidget::exportSlot()
         if (!filename.endsWith(".csv"))  // in case of qt bug
             filename += ".csv";
 
-        loginf << "AllBufferTableWidget: exportSlot: export filename " << filename.toStdString();
+        loginf << "export filename " << filename.toStdString();
         assert(model_);
         model_->saveAsCSV(filename.toStdString());
     }
@@ -119,7 +119,7 @@ void AllBufferTableWidget::exportDoneSlot(bool cancelled) { emit exportDoneSigna
 
 void AllBufferTableWidget::updateToSettingsChange()
 {
-    logdbg << "AllBufferTableWidget: updateToSettingsChange";
+    logdbg << "start";
 
     assert(model_);
     model_->rebuild();
@@ -149,7 +149,7 @@ void AllBufferTableWidget::resizeColumns()
 
 void AllBufferTableWidget::selectSelectedRows()
 {
-    loginf << "AllBufferTableWidget: selectSelectedRows";
+    loginf << "start";
 
     assert(table_);
     assert(model_);
@@ -157,7 +157,7 @@ void AllBufferTableWidget::selectSelectedRows()
 
     if (rows.first >= 0 && rows.second >= 0)
     {
-        loginf << "AllBufferTableWidget: selectSelectedRows: rows " << rows.first << " to " << rows.second;
+        loginf << "rows " << rows.first << " to " << rows.second;
 
         assert (rows.first <= rows.second);
 
@@ -175,14 +175,14 @@ void AllBufferTableWidget::selectSelectedRows()
         QTimer::singleShot(10, [this,first]{table_->scrollTo(first, QAbstractItemView::PositionAtCenter);});
     }
     else
-        loginf << "AllBufferTableWidget: selectSelectedRows: nothing selected";
+        loginf << "nothing selected";
 }
 
 TableView& AllBufferTableWidget::view() const { return view_; }
 
 void AllBufferTableWidget::keyPressEvent(QKeyEvent* event)
 {
-    loginf << "AllBufferTableWidget: keyPressEvent: got keypressed";
+    loginf << "got keypressed";
 
     assert(table_);
 
@@ -190,7 +190,7 @@ void AllBufferTableWidget::keyPressEvent(QKeyEvent* event)
     {
         if (event->key() == Qt::Key_C)
         {
-            loginf << "AllBufferTableWidget: keyPressEvent: copying";
+            loginf << "copying";
 
             QAbstractItemModel* model = table_->model();
             QItemSelectionModel* selection = table_->selectionModel();
@@ -258,7 +258,7 @@ void AllBufferTableWidget::keyPressEvent(QKeyEvent* event)
         }
     }
 
-    loginf << "AllBufferTableWidget: keyPressEvent: done";
+    loginf << "done";
 }
 
 std::vector<std::vector<std::string>> AllBufferTableWidget::getSelectedText ()
