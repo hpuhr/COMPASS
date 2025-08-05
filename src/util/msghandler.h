@@ -23,6 +23,7 @@
 #include "json.hpp"
 
 #include <boost/stacktrace.hpp>
+#include <boost/thread/mutex.hpp>
 
 #define GET_MACRO_01(_1,NAME,...) NAME
 #define GET_MACRO_012(_1,_2,NAME,...) NAME
@@ -114,15 +115,16 @@ public:
                                const nlohmann::json& info,
                                const std::string& stack_trace,
                                bool user_level);
+    static void commit(log4cpp::CategoryStream& strm,
+                       const Message& msg);
+    
     static void log(log4cpp::CategoryStream& strm,
                     const Message& msg);
 
     static void reportCriticalError(const Message& msg);
     static bool hasCriticalError();
     static Message criticalError();
-
     static bool handleCriticalError();
-    static void handleException();
 
 private:
     static void logMessageFancy(log4cpp::CategoryStream& strm,
@@ -133,14 +135,14 @@ private:
                                        const Message& msg);
 
     static void addToTaskLog(const Message& msg);
-    static bool shutdownCOMPASS();
     static bool compileBugReport(const Message& msg);
 
     static bool showMessage(const Message& msg);
     static bool showAbortMessage(const Message& msg);
 
-    static Message critical_error_msg_;
-    static bool    critical_error_msg_set_;   
+    static boost::mutex critical_error_mutex_;
+    static Message      critical_error_msg_;
+    static bool         critical_error_msg_set_;   
 };
 
 } // namespace msghandler

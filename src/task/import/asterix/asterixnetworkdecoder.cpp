@@ -32,6 +32,9 @@ using namespace nlohmann;
 using namespace Utils;
 using namespace std;
 
+const unsigned int ASTERIXNetworkDecoder::MaxUDPReadSize    = MAX_UDP_READ_SIZE;
+const unsigned int ASTERIXNetworkDecoder::MaxAllReceiveSize = MAX_ALL_RECEIVE_SIZE;
+
 /**
  * @param source Import source to retrieve data from.
  * @param settings If set, external settings will be applied, otherwise settings will be retrieved from the import task.
@@ -106,7 +109,7 @@ void ASTERIXNetworkDecoder::start_impl()
                 this->storeReceivedData(line, data, length);
             };
 
-            udp_receivers.emplace_back(new UDPReceiver(io_context, line_it.second, data_callback, MAX_UDP_READ_SIZE));
+            udp_receivers.emplace_back(new UDPReceiver(io_context, line_it.second, data_callback, MaxUDPReadSize));
 
             ++line_cnt;
 
@@ -139,7 +142,7 @@ void ASTERIXNetworkDecoder::start_impl()
                         - last_receive_decode_time_).total_milliseconds() > 1000)
             {
                 logdbg << "copying data "
-                       << receive_buffer_sizes_.size() << " buffers  max " << MAX_ALL_RECEIVE_SIZE;
+                       << receive_buffer_sizes_.size() << " buffers  max " << MaxAllReceiveSize;
 
                 // copy data
                 for (auto& size_it : receive_buffer_sizes_)
@@ -148,10 +151,10 @@ void ASTERIXNetworkDecoder::start_impl()
 
                     assert (receive_buffers_.count(line_id));
 
-                    assert (receive_buffer_sizes_.at(line_id) <= MAX_ALL_RECEIVE_SIZE);
+                    assert (receive_buffer_sizes_.at(line_id) <= MaxAllReceiveSize);
 
                     if (!receive_buffers_copy_.count(line_id))
-                        receive_buffers_copy_[line_id].reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
+                        receive_buffers_copy_[line_id].reset(new boost::array<char, MaxAllReceiveSize>());
 
                     *receive_buffers_copy_.at(line_id) = *receive_buffers_.at(line_id);
                     receive_copy_buffer_sizes_[line_id] = size_it.second;
@@ -226,14 +229,14 @@ void ASTERIXNetworkDecoder::storeReceivedData(unsigned int line,
 
     boost::mutex::scoped_lock lock(receive_buffers_mutex_);
 
-    if (length + receive_buffer_sizes_[line] >= MAX_ALL_RECEIVE_SIZE)
+    if (length + receive_buffer_sizes_[line] >= MaxAllReceiveSize)
     {
         logerr << "overload, too much data in buffer";
         return;
     }
 
     if (!receive_buffers_.count(line))
-        receive_buffers_[line].reset(new boost::array<char, MAX_ALL_RECEIVE_SIZE>());
+        receive_buffers_[line].reset(new boost::array<char, MaxAllReceiveSize>());
 
     assert (receive_buffers_[line]);
 

@@ -24,10 +24,10 @@
 #include "msghandler.h"
 
 #define compass_assert(expr) \
-    (BOOST_LIKELY(!!(expr))? ((void)0): ::boost::assertion_failed(#expr, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__, (std::stringstream() << boost::stacktrace::stacktrace()).str(), false))
+    (BOOST_LIKELY(!!(expr))? ((void)0): ::boost::assertion_failed(#expr, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__, boost::stacktrace::stacktrace(), false))
 
 #define compass_assert_msg(expr, msg) \
-    (BOOST_LIKELY(!!(expr))? ((void)0): ::boost::assertion_failed(msg, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__, (std::stringstream() << boost::stacktrace::stacktrace()).str(), true))
+    (BOOST_LIKELY(!!(expr))? ((void)0): ::boost::assertion_failed(msg, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__, boost::stacktrace::stacktrace(), true))
 
 namespace boost
 {
@@ -35,22 +35,25 @@ namespace boost
                                  char const * function,
                                  char const * file, 
                                  long line,
-                                 const std::string& stack_trace,
+                                 const boost::stacktrace::stacktrace& stack_trace,
                                  bool expr_is_message)
     {
+        std::stringstream ss;
+        ss << stack_trace;
+
         //compile message
         msghandler::Message msg;
         msg.severity    = msghandler::Severity::Abort;
         msg.content     = expr_is_message ? std::string(expr) : "Assertion '" + std::string(expr) + "' failed";
         msg.file        = std::string(file);
         msg.line        = (int)line;
-        msg.stack_trace = stack_trace;
+        msg.stack_trace = ss.str();
         msg.user_level  = false;
 
-        //report critical error
-        msghandler::MessageHandler::reportCriticalError(msg);
+        //log assert msg
+        msghandler::MessageHandler::log(logerr, msg);
 
-        //handle exception
-        msghandler::MessageHandler::handleException();
+        //then abort
+        std::abort();
     }
 }
