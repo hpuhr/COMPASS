@@ -679,135 +679,148 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
     bool has_lower = false;
     bool has_upper = false;
 
-    auto num_ts_existing = tr_timestamps_.count(timestamp);
-    auto range = tr_timestamps_.equal_range(timestamp);
+    auto it = tr_timestamps_.find(timestamp);  // more efficient than count for just checking existence
 
-    //look for initial upper and lower datum
-    if (num_ts_existing == 1)
+    if (it == tr_timestamps_.end()) // no match
     {
-        assert(range.first != tr_timestamps_.end());
-        
-        //unique timestamp in map => start from this timestamp
-        it_lower  = range.first;
-        it_upper  = range.first;
-        has_lower = true;
-        has_upper = true;
+        // No match case (most common)
 
-        if(debug)
-            loginf << "found timestamp in target";
-    }
-    else if (num_ts_existing > 1)
-    {
-        assert(range.first != tr_timestamps_.end());
-
-        //multiple timestamps in map => choose one depending on init mode
-        std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_start = tr_timestamps_.end();
-
-        auto init_mode = interp_options.initMode();
-
-        if (init_mode == InterpOptions::InitMode::First)
-        {
-            //choose first
-            it_start = range.first;
-        }
-        else if (init_mode == InterpOptions::InitMode::Last)
-        {
-            //choose last
-            it_start = range.second == tr_timestamps_.end() ? range.first : --range.second;
-        }
-        else
-        {
-            //choose a valid datum or a datum with a certain record number
-            bool look_for_recnum = init_mode == InterpOptions::InitMode::RecNum;
-            auto rec_num         = interp_options.initRecNum();
-
-            for (auto it = range.first; it != range.second; ++it)
-            {
-                const auto& d = dataFor(it->second);
-
-                //if recnum has been found break immediately
-                if (look_for_recnum && d.record_num_ == rec_num)
-                {
-                    it_start = it;
-                    break;
-                }
-
-                //if valid break immediately if no recnum is specified, otherwise remember as fallback and continue search
-                if (skipTargetReport(d, tr_valid_func) == TargetReportSkipResult::Valid)
-                {
-                    it_start = it;
-                    if (!look_for_recnum)
-                        break;
-                }
-            }
-        }
-
-        //fallback: use first
-        if (it_start == tr_timestamps_.end())
-            it_start = range.first;
-
-        assert(it_start != tr_timestamps_.end());
-
-        it_lower  = it_start;
-        it_upper  = it_start;
-        has_lower = true;
-        has_upper = true;
-
-        if (debug)
-            loginf << "found multiple timestamps in target, chose:\n" << tr2String(dataFor(it_start->second));
-    }
-    else
-    {
-        //get lower bound
+        // get lower bound
         it_upper = tr_timestamps_.lower_bound(timestamp);
 
         // all tr_timestamps_ smaller than timestamp
         if (it_upper == tr_timestamps_.end())
         {
-            assert (tr_timestamps_.rbegin()->first <= timestamp);
+            assert(tr_timestamps_.rbegin()->first <= timestamp);
             if ((timestamp - tr_timestamps_.rbegin()->first) < d_max)
             {
-                it_lower  = std::prev(tr_timestamps_.end());
-                it_upper  = tr_timestamps_.end();
+                it_lower = std::prev(tr_timestamps_.end());
+                it_upper = tr_timestamps_.end();
                 has_lower = true;
                 has_upper = false;
             }
         }
-        else if (it_upper == tr_timestamps_.begin())// all tr_timestamps_ bigger than timestamp
+        else if (it_upper == tr_timestamps_.begin())  // all tr_timestamps_ bigger than timestamp
         {
-            assert (tr_timestamps_.begin()->first >= timestamp);
+            assert(tr_timestamps_.begin()->first >= timestamp);
 
             if ((tr_timestamps_.begin()->first - timestamp) < d_max)
             {
-                it_lower  = tr_timestamps_.end();
-                //it_upper  = tr_timestamps_.begin(); // is already on this value
+                it_lower = tr_timestamps_.end();
+                // it_upper  = tr_timestamps_.begin(); // is already on this value
                 has_lower = false;
                 has_upper = true;
             }
         }
         else
         {
-            assert (it_upper->first >= timestamp);
+            assert(it_upper->first >= timestamp);
 
-            //too much time difference?
+            // too much time difference?
             if (it_upper->first - timestamp <= d_max)
                 has_upper = true;
 
-            //set lower iterator to last elem
+            // set lower iterator to last elem
             it_lower = it_upper;
             --it_lower;
 
-            assert (it_lower->first < timestamp);
+            assert(it_lower->first < timestamp);
 
-            //lower item too far away?
+            // lower item too far away?
             if (timestamp - it_lower->first <= d_max)
                 has_lower = true;
         }
-        if (debug) 
+        if (debug)
         {
-            loginf << "initial interval:\n" 
+            loginf << "initial interval:\n"
                    << "   " << (has_lower ? tr2String(dataFor(it_lower->second)) : "") << "\n"
                    << "   " << (has_upper ? tr2String(dataFor(it_upper->second)) : "");
+        }
+    }
+    else // at least one match
+    {
+        auto range = tr_timestamps_.equal_range(timestamp);
+        bool exists_one = range.first != range.second;
+        bool exist_multiple = exists_one && std::next(range.first) != range.second;
+
+        assert (exists_one || exist_multiple);
+
+        // look for initial upper and lower datum
+        if (exists_one && !exist_multiple)  // exists one
+        {
+            assert(range.first != tr_timestamps_.end());
+
+            // unique timestamp in map => start from this timestamp
+            it_lower = range.first;
+            it_upper = range.first;
+            has_lower = true;
+            has_upper = true;
+
+            if (debug)
+                loginf << "found timestamp in target";
+        }
+        else if (exist_multiple)
+        {
+            assert(range.first != tr_timestamps_.end());
+
+            // multiple timestamps in map => choose one depending on init mode
+            std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_start =
+                tr_timestamps_.end();
+
+            auto init_mode = interp_options.initMode();
+
+            if (init_mode == InterpOptions::InitMode::First)
+            {
+                // choose first
+                it_start = range.first;
+            }
+            else if (init_mode == InterpOptions::InitMode::Last)
+            {
+                // choose last
+                it_start = range.second == tr_timestamps_.end() ? range.first : --range.second;
+            }
+            else
+            {
+                // choose a valid datum or a datum with a certain record number
+                bool look_for_recnum = init_mode == InterpOptions::InitMode::RecNum;
+                auto rec_num = interp_options.initRecNum();
+
+                for (auto it = range.first; it != range.second; ++it)
+                {
+                    const auto& d = dataFor(it->second);
+
+                    // if recnum has been found break immediately
+                    if (look_for_recnum && d.record_num_ == rec_num)
+                    {
+                        it_start = it;
+                        break;
+                    }
+
+                    // if valid break immediately if no recnum is specified, otherwise remember as
+                    // fallback and continue search
+                    if (skipTargetReport(d, tr_valid_func) == TargetReportSkipResult::Valid)
+                    {
+                        it_start = it;
+                        if (!look_for_recnum)
+                            break;
+                    }
+                }
+            }
+
+            // fallback: use first
+            if (it_start == tr_timestamps_.end())
+                it_start = range.first;
+
+            assert(it_start != tr_timestamps_.end());
+
+            it_lower = it_start;
+            it_upper = it_start;
+            has_lower = true;
+            has_upper = true;
+
+            if (debug)
+                loginf << "found multiple timestamps in target, chose:\n"
+                       << tr2String(dataFor(it_start->second));
         }
     }
 
@@ -1313,7 +1326,7 @@ bool ReconstructorTarget::hasDataFor (unsigned long rec_num) const
 
 dbContent::targetReport::ReconstructorInfo& ReconstructorTarget::dataFor (unsigned long rec_num) const
 {
-    assert (reconstructor_.target_reports_.count(rec_num));
+    //assert (reconstructor_.target_reports_.count(rec_num));
     return reconstructor_.target_reports_.at(rec_num);
 }
 
