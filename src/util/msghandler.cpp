@@ -28,9 +28,9 @@
 namespace msghandler
 {
 
-boost::mutex MessageHandler::critical_error_mutex_   = boost::mutex();
-Message      MessageHandler::critical_error_msg_     = Message();
-bool         MessageHandler::critical_error_msg_set_ = false;
+boost::mutex MessageHandler::critical_error_mutex_;
+Message      MessageHandler::critical_error_msg_;
+bool         MessageHandler::critical_error_msg_set_{false};
 
 /**
  */
