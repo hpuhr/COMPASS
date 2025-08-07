@@ -165,7 +165,7 @@ EvaluationTargetFilterDialog::EvaluationTargetFilterDialog(
 
     for (auto& dbcont_it : COMPASS::instance().dbContentManager())
     {
-        if (dbcont_it.second->isStatusContent())
+        if (dbcont_it.second->containsStatusContent())
             continue;
 
         QCheckBox* tmp = new QCheckBox();

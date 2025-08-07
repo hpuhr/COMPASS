@@ -276,7 +276,7 @@ void CreateARTASAssociationsStatusDialog::updateDBContentAssociatedGrid()
 
     for (auto& dbcont_it : COMPASS::instance().dbContentManager())
     {
-        if (dbcont_it.second->isStatusContent() ||
+        if (dbcont_it.second->containsStatusContent() ||
             dbcont_it.second->isReferenceContent())
             continue;
 

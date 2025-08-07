@@ -223,7 +223,7 @@ void CreateARTASAssociationsTask::run()
         if (!dbcont_it.second->hasData())
             continue;
 
-        if (dbcont_it.second->isStatusContent() ||
+        if (dbcont_it.second->containsStatusContent() ||
             dbcont_it.second->isReferenceContent()) // not covered by ARTAS
             continue;
 

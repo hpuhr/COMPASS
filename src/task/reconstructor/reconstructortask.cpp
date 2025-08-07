@@ -619,8 +619,7 @@ void ReconstructorTask::loadDataSlice()
                << " has data " << dbcont_it.second->hasData()
                << " has utn " << dbcont_it.second->hasVariable("UTN");
 
-        if (!dbcont_it.second->hasData()
-            || !dbcont_it.second->hasVariable("UTN"))
+        if (!dbcont_it.second->hasData() || !dbcont_it.second->hasVariable("UTN"))
             continue;
 
         VariableSet read_set = currentReconstructor()->getReadSetFor(dbcont_it.first);

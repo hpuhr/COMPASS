@@ -140,10 +140,15 @@ void VariableSelectionWidget::showMenuSlot()
 
         for (auto& var_it : dbcont_man_.dbContent(only_dbcontent_name_).variables())
         {
+            bool has_dbc = var_it.second->hasDBContent();
+
+            logdbg << var_it.first << "show_data_types_only " << show_data_types_only_
+            << " showDataType " << showDataType(var_it.second->dataType())
+            << " show_existing_in_db_only " << show_existing_in_db_only_ << " has dbcont " << has_dbc;
+
             if (show_data_types_only_ && !showDataType(var_it.second->dataType()))
                 continue;
 
-            bool has_dbc = var_it.second->hasDBContent();
             if (show_existing_in_db_only_ && !has_dbc)
                 continue;
 

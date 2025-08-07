@@ -96,6 +96,8 @@ const Property DBContent::meta_var_climb_descent_{"Track Climbing/Descending", P
 const Property DBContent::meta_var_rocd_ {"Rate Of Climb/Descent", PropertyDataType::FLOAT};
 const Property DBContent::meta_var_spi_{"SPI", PropertyDataType::BOOL};
 
+const Property DBContent::meta_var_message_type_ {"Message Type", PropertyDataType::UCHAR};
+
 const Property DBContent::var_radar_range_ {"Range", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_azimuth_ {"Azimuth", PropertyDataType::DOUBLE};
 const Property DBContent::var_radar_altitude_ {"Mode C Code", PropertyDataType::FLOAT};
@@ -176,11 +178,21 @@ DBContent::DBContent(COMPASS& compass,
     {
         checkStaticVariable(DBContent::meta_var_latitude_);
         checkStaticVariable(DBContent::meta_var_longitude_);
+        checkStaticVariable(DBContent::meta_var_utn_);
 
-        is_status_content_ = false;
+        contains_target_reports_ = true;
     }
-    else
-        is_status_content_ = true;
+
+    if (name_ == "CAT002" || name_ == "CAT010"
+        || name_ == "CAT019"|| name_ == "CAT023"
+        || name_ == "CAT034" || name_ == "CAT065")
+    {
+        checkStaticVariable(DBContent::meta_var_message_type_);
+        checkStaticVariable(DBContent::meta_var_longitude_);
+        checkStaticVariable(DBContent::meta_var_utn_);
+
+        contains_status_content_ = true;
+    }
 
     is_reftraj_content_ = name_ == "RefTraj";
 
@@ -958,11 +970,16 @@ void DBContent::checkStaticVariable(const Property& property)
     }
 }
 
+bool DBContent::containsTargetReports() const
+{
+    return contains_target_reports_;
+}
+
 /**
  */
-bool DBContent::isStatusContent() const
+bool DBContent::containsStatusContent() const
 {
-    return is_status_content_;
+    return contains_status_content_;
 }
 
 /**

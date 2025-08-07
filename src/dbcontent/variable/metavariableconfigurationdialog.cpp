@@ -173,7 +173,7 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
         {
             if (dbcont_man_.usedInMetaVariable(*var_it.second.get()))
             {
-                loginf << "not adding dbcontvariable "
+                logdbg << "not adding dbcontvariable "
                        << var_it.first << " since already used";
                 continue;
             }
@@ -215,9 +215,7 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
                 {
                     if (!meta_var.existsIn(*dbcont_it2))
                     {
-                        loginf << "adding meta "
-                                  "variable "
-                               << var_it.first << " dbcont variable " << var_it.first;
+                        loginf << "adding meta variable " << var_it.first << " dbcont variable " << var_it.first;
                         meta_var.addVariable(*dbcont_it2, var_it.first);
                     }
                 }

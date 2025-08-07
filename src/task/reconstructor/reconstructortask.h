@@ -18,8 +18,6 @@
 #pragma once
 
 #include "configurable.h"
-//#include "dbcontent/variable/variableset.h"
-//#include "dbcontent/dbcontentaccessor.h"
 #include "reconstructorbase.h"
 #include "task.h"
 #include "global.h"
@@ -29,8 +27,6 @@
 
 #include <memory>
 #include <future>
-
-//#include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
 class DBContent;

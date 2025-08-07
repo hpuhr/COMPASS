@@ -174,6 +174,8 @@ public:
     static const Property meta_var_rocd_;
     static const Property meta_var_spi_;
 
+    static const Property meta_var_message_type_;
+
     static const Property var_radar_range_;
     static const Property var_radar_azimuth_;
     static const Property var_radar_altitude_;
@@ -308,7 +310,8 @@ public:
 
     std::string dbTableName() const;
 
-    bool isStatusContent() const;
+    bool containsTargetReports() const;
+    bool containsStatusContent() const;
     bool isReferenceContent() const;
 
 protected:
@@ -325,7 +328,8 @@ protected:
     std::string  db_table_name_;
     std::string  ds_type_;
 
-    bool is_status_content_ {false};
+    bool contains_target_reports_ {false};
+    bool contains_status_content_ {false};
     bool is_reftraj_content_ {false};
 
     bool is_loadable_{false};  // loadable on its own
