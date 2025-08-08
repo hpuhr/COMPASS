@@ -80,7 +80,7 @@ Configuration& ConfigurationManager::registerRootConfigurable(Configurable& conf
 
     if (root_configurations_.find(key) == root_configurations_.end())  // does not exist
     {
-        loginf << "creating new configuration for class "
+        logdbg << "creating new configuration for class "
             << configurable.classId() << " instance " << configurable.instanceId();
 
         auto ptr = new Configuration(configurable.classId(), configurable.instanceId());
@@ -147,8 +147,7 @@ void ConfigurationManager::parseJSONConfigurationFile(const std::string& filenam
                     assert(root_configurations_.find(key) ==
                            root_configurations_.end());  // should not exist
 
-                    loginf << "creating new "
-                              "configuration for class "
+                    logdbg << "creating new configuration for class "
                            << class_id << " instance " << instance_id;
 
                     auto ptr = new Configuration(class_id, instance_id);

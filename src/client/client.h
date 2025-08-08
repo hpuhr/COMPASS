@@ -94,6 +94,11 @@ private:
 
     bool expert_mode_ {false};
 
+    bool do_assert_ {false};
+    bool do_throw_ {false};
+    bool do_numerical_crash_ {false};
+    bool do_segfault_ {false};
+
     void checkAndSetupConfig();
 
     void checkNeededActions();

@@ -134,6 +134,8 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     cout << "COMPASSClient: qt platform in use " << QGuiApplication::platformName().toStdString() << endl;
 
     po::options_description desc("Allowed options");
+    po::options_description hidden_options("Hidden options");
+
     desc.add_options()("help", "produce help message")
         ("reset,r", po::bool_switch(&config_and_data_copy_wanted_) ,"reset user configuration and data")
         ("override_cfg_path", po::value<std::string>(&override_cfg_path_),
@@ -206,12 +208,24 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         ("no_cfg_save", po::bool_switch(&no_config_save_), "do not save configuration upon quitting")
         ("open_rt_cmd_port", po::bool_switch(&open_rt_cmd_port_), "open runtime command port (default at 27960)")
         ("enable_event_log", po::bool_switch(&enable_event_log_), "collect warnings and errors in the event log")
-        ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps");
+        ("quit", po::bool_switch(&quit_), "quit after finishing all previous steps")
+        ;
+
+    // add hidden options
+    hidden_options.add_options()
+        ("assert", po::bool_switch(&do_assert_), "")
+        ("throw", po::bool_switch(&do_throw_), "")
+        ("numerical_crash", po::bool_switch(&do_numerical_crash_), "")
+        ("segfault", po::bool_switch(&do_segfault_), "")
+        ;
 
     try
     {
+        po::options_description all_options;
+        all_options.add(desc).add(hidden_options);
+
         po::variables_map vm;
-        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::store(po::parse_command_line(argc, argv, all_options), vm);
         po::notify(vm);
 
         if (vm.count("help"))
@@ -231,6 +245,25 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
 
     // check if more than 1 ASTERIX import operations are defined
     unsigned int import_count = 0;
+
+    if (do_assert_)
+        assert(!do_assert_);
+
+    if (do_throw_)
+        throw std::runtime_error("error of interest");
+
+    if (do_numerical_crash_)
+    {
+        int crash = 0/0;  // Integer division by zero
+        double crash2 = std::sqrt(-1.0);  // NaN
+        double crash3 = std::log(0.0);    // -Infinity
+    }
+
+    if (do_segfault_)
+    {
+        int* ptr = nullptr;
+        *ptr = 42;  // Classic segfault
+    }
 
     if (import_asterix_network_) import_count++;
     if (!import_asterix_filename_.empty()) import_count++;
