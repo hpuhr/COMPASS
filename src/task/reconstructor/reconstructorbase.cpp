@@ -38,6 +38,8 @@
 #include "dbcontent/variable/metavariable.h"
 #include "targetreportaccessor.h"
 #include "number.h"
+#include "dbcontentstatusinfo.h"
+
 #include "viewpoint.h"
 #include "viewpointgenerator.h"
 #include "grid2d.h"
@@ -1093,6 +1095,55 @@ void ReconstructorBase::createTargetReports()
 
     loginf << "done with " << num_new_target_reports_in_slice_
            << " new target reports";
+}
+
+void ReconstructorBase::createTargetReportBatches()
+{
+    loginf << "begin";
+
+    dbContent::DBContentStatusInfo status_info;
+
+    status_info.process(currentSlice().status_data_);
+
+    //std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>> tr_ds_;
+    // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
+
+    std::vector<std::string> data_source_type_order {"RefTraj", "ADSB", "MLAT", "Radar", "Other", "Tracker"};
+
+    DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
+
+    for (auto& ds_type : data_source_type_order)
+    {
+
+        for (auto& dbcont_it : tr_ds_)
+        {
+            for (auto& ds_it : dbcont_it.second)
+            {
+                if (ds_man.dbDataSource(ds_it.first).dsType() != ds_type)
+                    continue;
+
+                for (auto& line_it : ds_it.second)
+                {
+                    const std::vector<unsigned long>& ds_record_numbers = line_it.second;
+                    
+                    std::vector<boost::posix_time::ptime> ds_ui_times;
+
+                    if (status_info.hasInfo(ds_it.first, line_it.first))
+                        ds_ui_times = status_info.getInfo(ds_it.first, line_it.first);
+
+                    std::map<boost::posix_time::ptime, std::vector<unsigned long>> batches;
+
+                    for (auto& rn_it : line_it.second)
+                    {
+                        assert(target_reports_.count(rn_it));
+
+                        auto timestamp = target_reports_.at(rn_it).timestamp_;
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 void ReconstructorBase::removeTargetReportsLaterOrEqualThan(const boost::posix_time::ptime& ts)

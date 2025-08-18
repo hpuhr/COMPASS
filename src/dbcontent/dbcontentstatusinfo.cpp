@@ -56,6 +56,8 @@ dbContent::VariableSet DBContentStatusInfo::getReadSetFor(const std::string& dbc
 }
 void DBContentStatusInfo::process(std::map<std::string, std::shared_ptr<Buffer>> buffers)
 {
+    scan_info_.clear();
+
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     for (auto& buf_it : buffers)
@@ -65,6 +67,33 @@ void DBContentStatusInfo::process(std::map<std::string, std::shared_ptr<Buffer>>
 
         if (!dbcontent.containsStatusContent())
             continue;
+
+        // cat002: 001 North marker message;002 Sector crossing message;
+        // cat010: 002 Start of Update Cycle
+        // cat019: 001 Start of Update Cycle
+        // cat023: ?
+        // cat034: 001 North marker message;002 Sector crossing message;
+        // cat065: 002 End of Batch
+
+        unsigned char message_type_cycle{255};
+
+        if (dbcontent_name == "CAT002")
+            message_type_cycle = 1;
+        else if (dbcontent_name == "CAT010")
+            message_type_cycle = 2;
+        else if (dbcontent_name == "CAT019")
+            message_type_cycle = 1;
+        else if (dbcontent_name == "CAT023")
+            continue;
+        else if (dbcontent_name == "CAT034")
+            message_type_cycle = 1;
+        else if (dbcontent_name == "CAT065")
+            message_type_cycle = 2;
+        else
+        {
+            logwrn << dbcontent_name << " not yet implemented";
+            continue;
+        }
 
         assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
         assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
@@ -79,41 +108,51 @@ void DBContentStatusInfo::process(std::map<std::string, std::shared_ptr<Buffer>>
         NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
         NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
         NullableVector<boost::posix_time::ptime>& timestamp_vec = buf_it.second->get<boost::posix_time::ptime>(timestamp_var.name());
-        NullableVector<unsigned char>& message_type_vec = buf_it.second->get<unsigned char>(line_id_var.name());
+        NullableVector<unsigned char>& message_type_vec = buf_it.second->get<unsigned char>(message_type_var.name());
 
         assert (ds_id_vec.isNeverNull());
         assert (line_id_vec.isNeverNull());
 
         unsigned int buffer_size = buf_it.second->size();
 
-        unsigned char message_type;
-
         for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+        {
+            if (!message_type_vec.isNull(cnt) 
+                && message_type_vec.get(cnt) == message_type_cycle 
+                && !timestamp_vec.isNull(cnt))
             {
-                
-
-                if (!message_type_vec.isNull(cnt))
-                {
-                    message_type = message_type_vec.get(cnt);
-
-                    // cat002: 001 North marker message;002 Sector crossing message;
-                    // cat010: 002 Start of Update Cycle
-                    // cat019: 001 Start of Update Cycle
-                    // cat023: ?
-                    // cat034: 001 North marker message;002 Sector crossing message;
-                    // cat065: 002 End of Batch
-
-                    
-                }
+                scan_info_[ds_id_vec.get(cnt)][line_id_vec.get(cnt)].push_back(
+                    timestamp_vec.get(cnt));
             }
+        }
     }
 }
 
-bool DBContentStatusInfo::hasInfo(unsigned int ds_id, unsigned int line_id) const {}
-
-std::vector<boost::posix_time::ptime> DBContentStatusInfo::getInfo(unsigned int ds_id,
-                                                                   unsigned int line_id) const
+bool DBContentStatusInfo::hasInfo(unsigned int ds_id, unsigned int line_id) const
 {
+    if (!scan_info_.count(ds_id))
+        return false;
+
+    if (!scan_info_.at(ds_id).count(line_id))
+        return false;
+
+    return true;
+}
+
+std::vector<boost::posix_time::ptime> DBContentStatusInfo::getInfo(
+    unsigned int ds_id, unsigned int line_id)
+{
+    assert(hasInfo(ds_id, line_id));
+
+    auto outer_it = scan_info_.find(ds_id);
+    auto inner_it = outer_it->second.find(line_id);
+
+    std::vector<boost::posix_time::ptime> result = std::move(inner_it->second);
+    outer_it->second.erase(inner_it);
+    if (outer_it->second.empty())
+        scan_info_.erase(outer_it);
+
+    return result;
 }
 
 }  // namespace dbContent

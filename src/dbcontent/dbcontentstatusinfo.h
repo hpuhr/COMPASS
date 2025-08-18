@@ -31,7 +31,10 @@ public:
     void process(std::map<std::string,std::shared_ptr<Buffer>> buffers);
 
     bool hasInfo(unsigned int ds_id, unsigned int line_id) const;
-    std::vector<boost::posix_time::ptime> getInfo(unsigned int ds_id, unsigned int line_id) const;
+    std::vector<boost::posix_time::ptime> getInfo(unsigned int ds_id, unsigned int line_id);
+
+  protected:
+    std::map<unsigned int, std::map<unsigned int, std::vector<boost::posix_time::ptime>>> scan_info_; // ds_id -> line_id-> times
 };
 
 }

@@ -156,6 +156,7 @@ public:
         boost::posix_time::ptime write_before_time_;
 
         std::map<std::string, std::shared_ptr<Buffer>> data_;
+        std::map<std::string, std::shared_ptr<Buffer>> status_data_;
         bool loading_done_ {false}; // set if data_ is set correctly and can be processed
 
         std::map<std::string, std::shared_ptr<Buffer>> assoc_data_;
@@ -280,6 +281,7 @@ public:
     // all sources sorted by time, ts -> record_num
     std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>> tr_ds_;
     // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
+    
 
     TargetsContainer targets_container_;
 
@@ -339,6 +341,7 @@ protected:
 
     void clearOldTargetReports();
     void createTargetReports();
+    void createTargetReportBatches();
     void removeTargetReportsLaterOrEqualThan(const boost::posix_time::ptime& ts); // for slice recalc
 
     std::map<unsigned int, std::map<unsigned long, unsigned int>> createAssociations();

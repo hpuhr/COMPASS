@@ -748,7 +748,18 @@ void ReconstructorTask::loadingDoneSlot()
     loginf << "is_last_slice " << last_slice
            << " current_slice_idx " << current_slice_idx_;
 
-    loading_slice_->data_ = dbcontent_man.data();
+    // add data to slice
+    loading_slice_->data_.clear();
+    loading_slice_->status_data_.clear();
+
+    for (auto& buf_it : dbcontent_man.data())
+    {
+        if (dbcontent_man.dbContent(buf_it.first).containsTargetReports())
+            loading_slice_->data_[buf_it.first] = buf_it.second;
+
+        if (dbcontent_man.dbContent(buf_it.first).containsStatusContent())
+            loading_slice_->status_data_[buf_it.first] = buf_it.second;
+    }
 
     dbcontent_man.clearData(); // clear previous
 

@@ -219,6 +219,11 @@ void SimpleReconstructor::processSlice_impl()
     if (cancelled_)
         return;
 
+    createTargetReportBatches();
+
+    if (cancelled_)
+        return;
+
     associatior_.associateNewData();
 
     if (cancelled_)
