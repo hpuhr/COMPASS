@@ -18,8 +18,50 @@
 
 #include "measurement.h"
 
+#include "kalman_filter.h"
+
+#include "global.h"
+#include "accuracy.h"
+#include "timeconv.h"
+
+#include <osgEarth/GeoMath>
+
 namespace reconstruction
 {
+
+const std::string Measurement::FieldSourceID   = "source_id";
+const std::string Measurement::FieldTS         = "t";
+
+const std::string Measurement::FieldInterp     = "mm_interp";
+const std::string Measurement::FieldPosAccCorr = "pos_acc_corrected";
+
+const std::string Measurement::FieldLat        = "lat";
+const std::string Measurement::FieldLon        = "lon";
+
+const std::string Measurement::FieldX          = "x";
+const std::string Measurement::FieldY          = "y";
+const std::string Measurement::FieldZ          = "z";
+
+const std::string Measurement::FieldVX         = "vx";
+const std::string Measurement::FieldVY         = "vy";
+const std::string Measurement::FieldVZ         = "vz";
+
+const std::string Measurement::FieldAX         = "ax";
+const std::string Measurement::FieldAY         = "ay";
+const std::string Measurement::FieldAZ         = "az";
+
+const std::string Measurement::FieldXStdDev    = "x_stddev";
+const std::string Measurement::FieldYStdDev    = "y_stddev";
+const std::string Measurement::FieldXYCov      = "xy_cov";
+
+const std::string Measurement::FieldVXStdDev   = "vx_stddev";
+const std::string Measurement::FieldVYStdDev   = "vy_stddev";
+
+const std::string Measurement::FieldAXStdDev   = "ax_stddev";
+const std::string Measurement::FieldAYStdDev   = "ay_stddev";
+
+const std::string Measurement::FieldQVar       = "Q_var";
+const std::string Measurement::FieldQVarInterp = "Q_var_interp";
 
 /**
 */
@@ -71,6 +113,102 @@ double Measurement::distanceSqr(const Measurement& other, CoordSystem cs) const
 
 /**
 */
+double Measurement::geodeticDistance(const Measurement& other) const
+{
+    return osgEarth::GeoMath::distance(lat       * DEG2RAD,
+                                       lon       * DEG2RAD,
+                                       other.lat * DEG2RAD, 
+                                       other.lon * DEG2RAD);
+}
+
+/**
+*/
+double Measurement::bearing(const Measurement& other) const
+{
+    return osgEarth::GeoMath::bearing(lat       * DEG2RAD,
+                                      lon       * DEG2RAD,
+                                      other.lat * DEG2RAD, 
+                                      other.lon * DEG2RAD);
+}
+
+/**
+*/
+double Measurement::mahalanobisDistanceGeodetic(const Measurement& other) const
+{
+    double d = geodeticDistance(other);
+    double b = bearing(other);
+
+    Utils::Accuracy::EllipseDef acc_ell;
+
+    Utils::Accuracy::estimateEllipse(acc_ell, x_stddev.value(), y_stddev.value(), xy_cov.value());
+    double stddev0 = Utils::Accuracy::estimateAccuracyAt(acc_ell, b);
+
+    Utils::Accuracy::estimateEllipse(acc_ell, other.x_stddev.value(), other.y_stddev.value(), other.xy_cov.value());
+    double stddev1 = Utils::Accuracy::estimateAccuracyAt(acc_ell, b);
+
+    double sum_std_dev = std::max(1e-06, stddev0 + stddev1);
+
+    return d / sum_std_dev;
+}
+
+/**
+*/
+double Measurement::approxLikelihood(const Measurement& other) const
+{
+    double dm = mahalanobisDistanceGeodetic(other);
+    return std::exp(-0.5*std::pow(dm, 2));
+}
+
+/**
+*/
+boost::optional<double> Measurement::mahalanobisDistance(const Measurement& other,
+                                                         unsigned char components) const
+{
+    auto P = covMat(components);
+    auto R = other.covMat(components);
+
+    auto x = stateVec(components);
+    auto z = other.stateVec(components);
+
+    auto y = z - x;
+
+    return kalman::KalmanFilter::mahalanobis(y, P + R, false);
+}
+
+/**
+*/
+boost::optional<double> Measurement::likelihood(const Measurement& other,
+                                                unsigned char components) const
+{
+    auto P = covMat(components);
+    auto R = other.covMat(components);
+
+    auto x = stateVec(components);
+    auto z = other.stateVec(components);
+
+    auto y = z - x;
+
+    return kalman::KalmanFilter::likelihood(y, P + R, true);
+}
+
+/**
+*/
+boost::optional<double> Measurement::logLikelihood(const Measurement& other,
+                                                   unsigned char components) const
+{
+    auto P = covMat(components);
+    auto R = other.covMat(components);
+
+    auto x = stateVec(components);
+    auto z = other.stateVec(components);
+
+    auto y = z - x;
+
+    return kalman::KalmanFilter::logLikelihood(y, P + R, true);
+}
+
+/**
+*/
 bool Measurement::hasVelocity() const
 {
     if (!vx.has_value() || !vy.has_value())
@@ -100,6 +238,13 @@ bool Measurement::hasAcceleration() const
 bool Measurement::hasStdDevPosition() const
 {
     return (x_stddev.has_value() && y_stddev.has_value());
+}
+
+/**
+ */
+bool Measurement::hasCovPosition() const
+{
+    return xy_cov.has_value();
 }
 
 /**
@@ -179,13 +324,75 @@ std::string Measurement::asString(const std::string& prefix) const
 
 /**
 */
+Eigen::VectorXd Measurement::stateVec(unsigned char flags) const
+{
+    bool with_position = (flags & CovMatFlags::CovMatPos);
+    bool with_velocity = (flags & CovMatFlags::CovMatVel);
+    bool with_accell   = (flags & CovMatFlags::CovMatAcc);
+
+    assert(!with_velocity || hasVelocity()    );
+    assert(!with_accell   || hasAcceleration());
+
+    if (with_position)
+    {
+        if (with_velocity)
+        {
+            if (with_accell)
+            {
+                //generate 6 from position, velocity and acceleration
+                Eigen::VectorXd X = Eigen::VectorXd::Zero(6);
+                X[ 0 ] = x;
+                X[ 1 ] = vx.value();
+                X[ 2 ] = ax.value();
+                X[ 3 ] = y;
+                X[ 4 ] = vy.value();
+                X[ 5 ] = ay.value();
+
+                return X;
+            }
+            else
+            {
+                //generate 4 from position and velocity
+                Eigen::VectorXd X = Eigen::VectorXd::Zero(4);
+                X[ 0 ] = x;
+                X[ 1 ] = vx.value();
+                X[ 2 ] = y;
+                X[ 3 ] = vy.value();
+
+                return X;
+            }
+        }
+        else
+        {
+            //generate 2 from position
+            Eigen::VectorXd X = Eigen::VectorXd::Zero(2);
+            X[ 0 ] =  x;
+            X[ 1 ] =  y;
+
+            return X;
+        }
+    }
+
+    return Eigen::VectorXd();
+}
+
+/**
+*/
 Eigen::MatrixXd Measurement::covMat(unsigned char flags) const
 {
-    if (hasStdDevPosition() && (flags & CovMatFlags::CovMatPos))
+    bool with_position = (flags & CovMatFlags::CovMatPos);
+    bool with_velocity = (flags & CovMatFlags::CovMatVel);
+    bool with_accell   = (flags & CovMatFlags::CovMatAcc);
+
+    assert(!with_position || hasStdDevPosition());
+    assert(!with_velocity || hasStdDevVelocity());
+    assert(!with_accell   || hasStdDevAccel()   );
+
+    if (with_position)
     {
-        if (hasStdDevVelocity() && (flags & CovMatFlags::CovMatVel))
+        if (with_velocity)
         {
-            if (hasStdDevAccel() && (flags & CovMatFlags::CovMatAcc))
+            if (with_accell)
             {
                 //generate 6x6 from position, velocity and acceleration
                 Eigen::MatrixXd C = Eigen::MatrixXd::Zero(6, 6);
@@ -196,11 +403,13 @@ Eigen::MatrixXd Measurement::covMat(unsigned char flags) const
                 C(4, 4) = vy_stddev.value() * vy_stddev.value();
                 C(5, 5) = ay_stddev.value() * ay_stddev.value();
 
-                if (xy_cov.has_value())
+                if (hasCovPosition())
                 {
                     C(0, 3) = xy_cov.value();
                     C(3, 0) = xy_cov.value();
                 }
+
+                return C;
             }
             else
             {
@@ -211,11 +420,13 @@ Eigen::MatrixXd Measurement::covMat(unsigned char flags) const
                 C(2, 2) =  y_stddev.value() *  y_stddev.value();
                 C(3, 3) = vy_stddev.value() * vy_stddev.value();
 
-                if (xy_cov.has_value())
+                if (hasCovPosition())
                 {
                     C(0, 2) = xy_cov.value();
                     C(2, 0) = xy_cov.value();
                 }
+
+                return C;
             }
         }
         else
@@ -225,11 +436,13 @@ Eigen::MatrixXd Measurement::covMat(unsigned char flags) const
             C(0, 0) =  x_stddev.value() *  x_stddev.value();
             C(1, 1) =  y_stddev.value() *  y_stddev.value();
 
-            if (xy_cov.has_value())
+            if (hasCovPosition())
             {
                 C(0, 1) = xy_cov.value();
                 C(1, 0) = xy_cov.value();
             }
+
+            return C;
         }
     }
 
@@ -248,8 +461,6 @@ unsigned char Measurement::covMatFlags() const
         flags |= CovMatFlags::CovMatVel;
     if (hasStdDevAccel())
         flags |= CovMatFlags::CovMatAcc;
-    if (xy_cov.has_value())
-        flags |= CovMatFlags::CovMatCov;
 
     return flags;
 }
@@ -283,23 +494,32 @@ bool Measurement::setFromCovMat(const Eigen::MatrixXd& C, unsigned char flags)
 {
     if (C.cols() == 2 && C.rows() == 2)
     {
-        if (flags & CovMatFlags::CovMatPos) covmat::setMMPosAcc(*this, C, 0, 1);
-        if (flags & CovMatFlags::CovMatCov) covmat::setMMPosCov(*this, C, 0, 1);
+        if (flags & CovMatFlags::CovMatPos) 
+        {
+            covmat::setMMPosAcc(*this, C, 0, 1);
+            covmat::setMMPosCov(*this, C, 0, 1);
+        }
 
         return true;
     }
     else if (C.cols() == 4 && C.rows() == 4)
     {
-        if (flags & CovMatFlags::CovMatPos) covmat::setMMPosAcc(*this, C, 0, 2);
-        if (flags & CovMatFlags::CovMatCov) covmat::setMMPosCov(*this, C, 0, 2);
+        if (flags & CovMatFlags::CovMatPos) 
+        {
+            covmat::setMMPosAcc(*this, C, 0, 2);
+            covmat::setMMPosCov(*this, C, 0, 2);
+        }
         if (flags & CovMatFlags::CovMatVel) covmat::setMMVelAcc(*this, C, 1, 3);
 
         return true;
     }
     else if (C.cols() == 6 && C.rows() == 6)
     {
-        if (flags & CovMatFlags::CovMatPos) covmat::setMMPosAcc(*this, C, 0, 3);
-        if (flags & CovMatFlags::CovMatCov) covmat::setMMPosCov(*this, C, 0, 3);
+        if (flags & CovMatFlags::CovMatPos) 
+        {
+            covmat::setMMPosAcc(*this, C, 0, 3);
+            covmat::setMMPosCov(*this, C, 0, 3);
+        }
         if (flags & CovMatFlags::CovMatVel) covmat::setMMVelAcc(*this, C, 1, 4);
         if (flags & CovMatFlags::CovMatAcc) covmat::setMMAccAcc(*this, C, 2, 5);
 
@@ -316,6 +536,139 @@ std::pair<unsigned long, boost::posix_time::ptime> Measurement::uniqueID() const
 {
     assert(source_id.has_value());
     return std::pair<unsigned long, boost::posix_time::ptime>(source_id.value(), t);
+}
+
+/**
+*/
+nlohmann::json Measurement::toJSON() const
+{
+    nlohmann::json j;
+
+    if (source_id.has_value())
+        j[ FieldSourceID ] = source_id.value();
+
+    j[ FieldTS ] = Utils::Time::toString(t);
+    j[ FieldInterp ] = mm_interp;
+    j[ FieldPosAccCorr ] = pos_acc_corrected;
+
+    j[ FieldLat ] = lat;
+    j[ FieldLon ] = lon;
+
+    j[ FieldX ] = x;
+    j[ FieldY ] = y;
+    if (z.has_value())
+        j[ FieldZ ] = z.value();
+
+    if (vx.has_value())
+        j[ FieldVX ] = vx.value();
+    if (vy.has_value())
+        j[ FieldVY ] = vy.value();
+    if (vz.has_value())
+        j[ FieldVZ ] = vz.value();
+
+    if (ax.has_value())
+        j[ FieldAX ] = ax.value();
+    if (ay.has_value())
+        j[ FieldAY ] = ay.value();
+    if (az.has_value())
+        j[ FieldAZ ] = az.value();
+    
+    if (x_stddev.has_value())
+        j[ FieldXStdDev ] = x_stddev.value();
+    if (y_stddev.has_value())
+        j[ FieldYStdDev ] = y_stddev.value();
+    if (xy_cov.has_value())
+        j[ FieldXYCov ] = xy_cov.value();
+
+    if (vx_stddev.has_value())
+        j[ FieldVXStdDev ] = vx_stddev.value();
+    if (vy_stddev.has_value())
+        j[ FieldVYStdDev ] = vy_stddev.value();
+    
+    if (ax_stddev.has_value())
+        j[ FieldAXStdDev ] = ax_stddev.value();
+    if (ay_stddev.has_value())
+        j[ FieldAYStdDev ] = ay_stddev.value();
+
+    if (Q_var.has_value())
+        j[ FieldQVar ] = Q_var.value();
+    if (Q_var_interp.has_value())
+        j[ FieldQVarInterp ] = Q_var_interp.value();
+
+    return j;
+}
+
+/**
+*/
+bool Measurement::fromJSON(const nlohmann::json& j)
+{
+    if (!j.is_object())
+        return false;
+
+    if (!j.contains(FieldTS)         ||
+        !j.contains(FieldLat)        ||
+        !j.contains(FieldLon)        ||
+        !j.contains(FieldX)          ||
+        !j.contains(FieldY))
+    {
+        return false;
+    }
+
+    if (j.contains(FieldSourceID))
+        source_id = j[ FieldSourceID ].get<unsigned long>();
+
+    t = Utils::Time::fromString(j[ FieldTS ].get<std::string>());
+
+    if (j.contains(FieldInterp))
+        mm_interp = j[ FieldInterp ].get<bool>();
+    if (j.contains(FieldPosAccCorr))
+        pos_acc_corrected = j[ FieldPosAccCorr ].get<bool>();
+
+    lat = j[ FieldLat ].get<double>();
+    lon = j[ FieldLon ].get<double>();
+
+    x = j[ FieldX ].get<double>();
+    y = j[ FieldY ].get<double>();
+    if (j.contains(FieldZ))
+        z = j[ FieldZ ].get<double>();
+
+    if (j.contains(FieldVX))
+        vx = j[ FieldVX ].get<double>();
+    if (j.contains(FieldVY))
+        vy = j[ FieldVY ].get<double>();
+    if (j.contains(FieldVZ))
+        vz = j[ FieldVZ ].get<double>();
+
+    if (j.contains(FieldAX))
+        ax = j[ FieldAX ].get<double>();
+    if (j.contains(FieldAY))
+        ay = j[ FieldAY ].get<double>();
+    if (j.contains(FieldAZ))
+        az = j[ FieldAZ ].get<double>();
+
+    if (j.contains(FieldXStdDev))
+        x_stddev = j[ FieldXStdDev ].get<double>();
+    if (j.contains(FieldYStdDev))
+        y_stddev = j[ FieldYStdDev ].get<double>();
+    if (j.contains(FieldXYCov))
+        xy_cov = j[ FieldXYCov ].get<double>();
+
+    if (j.contains(FieldVXStdDev))
+        vx_stddev = j[ FieldVXStdDev ].get<double>();
+    if (j.contains(FieldVYStdDev))
+        vy_stddev = j[ FieldVYStdDev ].get<double>();
+
+    if (j.contains(FieldAXStdDev))
+        ax_stddev = j[ FieldAXStdDev ].get<double>();
+    if (j.contains(FieldAYStdDev))
+        ay_stddev = j[ FieldAYStdDev ].get<double>();
+
+    if (j.contains(FieldQVar))
+        Q_var = j[ FieldQVar ].get<double>();
+    if (j.contains(FieldQVarInterp))
+        Q_var_interp = j[ FieldQVarInterp ].get<double>();
+
+    return true;
 }
 
 }  // namespace reconstruction

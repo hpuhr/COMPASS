@@ -71,28 +71,140 @@ typedef boost::optional<Vector> OVector;
 typedef std::function<void(Vector&,const Vector&,size_t,size_t)> XTransferFunc;
 
 /**
+ */
+struct ProbState
+{
+    ProbState() {}
+    ProbState(const Vector& _x, const Matrix& _P) : x(_x), P(_P) {}
+    ProbState(const ProbState& other)
+    :   x(other.x)
+    ,   P(other.P) {}
+    ProbState(ProbState&& other)
+    :   x(other.x)
+    ,   P(other.P) {}
+
+    ProbState& operator=(const ProbState& other)
+    {
+        x = other.x;
+        P = other.P;
+
+        return *this;
+    }
+
+    ProbState& operator=(ProbState&& other)
+    {
+        x = other.x;
+        P = other.P;
+
+        return *this;
+    }
+
+    bool operator==(const ProbState& other) const
+    {
+        if (x  != other.x ||
+            P  != other.P)
+            return false;
+
+        return true;
+    }
+
+    bool operator!=(const ProbState& other) const
+    {
+        return !operator==(other);
+    }
+
+    virtual std::string print() const
+    {
+        std::stringstream ss;
+        ss << "x:\n" << x << "\n"
+           << "P:\n" << P << "\n";
+
+        return ss.str();
+    }
+
+    Vector x; // state
+    Matrix P; // state uncertainty
+};
+
+/**
+ */
+struct GeoProbState : public ProbState
+{
+    GeoProbState() {}
+    GeoProbState(const Vector& _x, const Matrix& _P, const Eigen::Vector2d& _proj_center) : ProbState(x, P), proj_center(_proj_center) {}
+    GeoProbState(const GeoProbState& other)
+    :   ProbState  (other)
+    ,   proj_center(other.proj_center) {}
+    GeoProbState(GeoProbState&& other)
+    :   ProbState  (other)
+    ,   proj_center(other.proj_center) {}
+
+    GeoProbState& operator=(const GeoProbState& other)
+    {
+        ProbState::operator=(other);
+        proj_center = other.proj_center;
+
+        return *this;
+    }
+
+    GeoProbState& operator=(GeoProbState&& other)
+    {
+        ProbState::operator=(other);
+        proj_center = other.proj_center;
+
+        return *this;
+    }
+
+    bool operator==(const GeoProbState& other) const
+    {
+        if (!ProbState::operator==(other))
+            return false;
+
+        if (proj_center != other.proj_center)
+            return false;
+
+        return true;
+    }
+
+    bool operator!=(const GeoProbState& other) const
+    {
+        return !operator==(other);
+    }
+
+    virtual std::string print() const override
+    {
+        std::stringstream ss;
+        ss << ProbState::print();
+
+        ss << "proj_center:\n" << proj_center << "\n";
+
+        return ss.str();
+    }
+
+    Eigen::Vector2d proj_center;
+};
+
+/**
 */
-struct BasicKalmanState
+struct BasicKalmanState : public ProbState
 {
     BasicKalmanState() {}
-    BasicKalmanState(const Vector& _x, const Matrix& _P) : x(_x), P(_P) {}
+    BasicKalmanState(const Vector& _x, const Matrix& _P) : ProbState(_x, _P) {}
     BasicKalmanState(const BasicKalmanState& other)
-    :   x    (other.x    )
-    ,   P    (other.P    )
-    ,   F    (other.F    )
-    ,   Q    (other.Q    )
-    ,   debug(other.debug) {}
+    :   ProbState(other      )
+    ,   F        (other.F    )
+    ,   Q        (other.Q    )
+    ,   debug    (other.debug) {}
     BasicKalmanState(BasicKalmanState&& other)
-    :   x    (other.x    )
-    ,   P    (other.P    )
-    ,   F    (other.F    )
-    ,   Q    (other.Q    )
-    ,   debug(other.debug) {}
+    :   ProbState(other      )
+    ,   F        (other.F    )
+    ,   Q        (other.Q    )
+    ,   debug    (other.debug) {}
 
     BasicKalmanState& operator=(const BasicKalmanState& other)
     {
-        x     = other.x;
-        P     = other.P;
+        ProbState::operator=(other);
+
         F     = other.F;
         Q     = other.Q;
         debug = other.debug;
@@ -102,8 +214,8 @@ struct BasicKalmanState
 
     BasicKalmanState& operator=(BasicKalmanState&& other)
     {
-        x     = other.x;
-        P     = other.P;
+        ProbState::operator=(other);
+
         F     = other.F;
         Q     = other.Q;
         debug = other.debug;
@@ -113,10 +225,11 @@ struct BasicKalmanState
 
     bool operator==(const BasicKalmanState& other) const
     {
-        if (x  != other.x  ||
-            P  != other.P  ||
-            F  != other.F  ||
-            Q  != other.Q)
+        if (!ProbState::operator==(other))
+            return false;
+        
+        if (F != other.F ||
+            Q != other.Q)
             return false;
 
         return true;
@@ -127,12 +240,12 @@ struct BasicKalmanState
         return !operator==(other);
     }
 
-    virtual std::string print() const
+    virtual std::string print() const override
     {
         std::stringstream ss;
-        ss << "x:\n" << x << "\n"
-           << "P:\n" << P << "\n"
-           << "F:\n" << F << "\n"
+        ss << ProbState::print();
+
+        ss << "F:\n" << F << "\n"
            << "Q:\n" << Q << "\n";
 
         return ss.str();
@@ -140,8 +253,6 @@ struct BasicKalmanState
 
     virtual void debugState() { debug = true; }
 
-    Vector x;             // state
-    Matrix P;             // state uncertainty
     Matrix F;             // transition mat
     Matrix Q;             // process noise mat
     bool   debug = false; // debug this state

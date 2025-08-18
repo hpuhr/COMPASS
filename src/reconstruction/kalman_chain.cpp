@@ -797,7 +797,9 @@ bool KalmanChain::canPredict(const boost::posix_time::ptime& ts) const
 
 /**
 */
-bool KalmanChain::predictMT(Measurement& mm_predicted,
+bool KalmanChain::predictMT(Measurement* mm,
+                            kalman::GeoProbState* gp_state,
+                            kalman::GeoProbState* gp_state_mm,
                             const boost::posix_time::ptime& ts,
                             KalmanChainPredictors& predictors,
                             unsigned int thread_id,
@@ -808,22 +810,26 @@ bool KalmanChain::predictMT(Measurement& mm_predicted,
 
     assert (thread_id < predictors.size());
 
-    return predictInternal(mm_predicted, ts, &predictors, (int)thread_id, stats);
+    return predictInternal(mm, gp_state, gp_state_mm, ts, &predictors, (int)thread_id, stats);
 }
 
 /**
 */
-bool KalmanChain::predict(Measurement& mm_predicted,
+bool KalmanChain::predict(Measurement* mm,
+                          kalman::GeoProbState* gp_state,
+                          kalman::GeoProbState* gp_state_mm,
                           const boost::posix_time::ptime& ts,
                           PredictionStats* stats) const
 {
-    return predictInternal(mm_predicted, ts, nullptr, 0, stats);
+    return predictInternal(mm, gp_state, gp_state_mm, ts, nullptr, 0, stats);
 }
 
 /**
  * Predicts the given timestamp from the nearest existing update in the chain.
 */
-bool KalmanChain::predictInternal(Measurement& mm_predicted,
+bool KalmanChain::predictInternal(Measurement* mm,
+                                  kalman::GeoProbState* gp_state,
+                                  kalman::GeoProbState* gp_state_mm,
                                   const boost::posix_time::ptime& ts,
                                   KalmanChainPredictors* predictors,
                                   unsigned int thread_id,
@@ -835,7 +841,7 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         assert (!predictors);
 
         bool fixed;
-        auto err = tracker_.tracker_ptr->predict(mm_predicted, ts, &fixed);
+        auto err = tracker_.tracker_ptr->predict(mm, gp_state, gp_state_mm, ts, &fixed);
 
         bool ok = (err == kalman::KalmanError::NoError);
 
@@ -870,8 +876,8 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         //predict
         bool fixed;
         bool proj_changed = false;
-        auto err = ref_changed ? p.kalmanPrediction(mm_predicted, update.kalman_update, ts, &fixed, &proj_changed) :
-                                 p.kalmanPrediction(mm_predicted, ts, &fixed);
+        auto err = ref_changed ? p.kalmanPrediction(mm, gp_state, gp_state_mm, update.kalman_update, ts, &fixed, &proj_changed) :
+                                 p.kalmanPrediction(mm, gp_state, gp_state_mm, ts, &fixed);
 
         bool ok = (err == kalman::KalmanError::NoError);
 
@@ -903,7 +909,7 @@ bool KalmanChain::predictInternal(Measurement& mm_predicted,
         //@TODO: interpolate
         size_t num_fixed;
         size_t num_proj_changed;
-        auto err = p.kalmanPrediction(mm_predicted, update0.kalman_update, update1.kalman_update, ts, &num_fixed, &num_proj_changed);
+        auto err = p.kalmanPrediction(mm, gp_state, gp_state_mm, update0.kalman_update, update1.kalman_update, ts, &num_fixed, &num_proj_changed);
 
         bool ok = (err == kalman::KalmanError::NoError);
 

@@ -125,14 +125,16 @@ bool KalmanOnlineTracker::canPredict(const boost::posix_time::ptime& ts,
 
 /**
 */
-kalman::KalmanError KalmanOnlineTracker::predict(Measurement& mm_predicted,
+kalman::KalmanError KalmanOnlineTracker::predict(Measurement* mm,
+                                                 kalman::GeoProbState* gp_state,
+                                                 kalman::GeoProbState* gp_state_mm,
                                                  const boost::posix_time::ptime& ts,
                                                  bool* fixed) const
 {
     assert(isInit());
     assert(isTracking());
 
-    return estimator_->kalmanPrediction(mm_predicted, ts, fixed);
+    return estimator_->kalmanPrediction(mm, gp_state, gp_state_mm, ts, fixed);
 }
 
 /**
@@ -188,6 +190,21 @@ KalmanEstimator::Settings& KalmanOnlineTracker::settings()
 const boost::optional<kalman::KalmanUpdate>& KalmanOnlineTracker::currentState() const
 {
     return current_update_;
+}
+
+/**
+*/
+boost::optional<reconstruction::Measurement> KalmanOnlineTracker::currentMeasurement() const
+{
+    if (!current_update_.has_value())
+        return {};
+
+    assert(isInit());
+
+    reconstruction::Measurement mm;
+    estimator_->storeUpdate(mm, current_update_.value());
+
+    return mm;
 }
 
 /**

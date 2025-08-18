@@ -194,8 +194,10 @@ kalman::KalmanError KalmanInterface::kalmanPrediction(kalman::Vector& x,
     assert(kalman_filter_);
 
     auto err = kalman_filter_->predictState(x, P, dt, fix_estimate, fixed, {}, nullptr, Q_var);
+    if (err != kalman::KalmanError::NoError)
+            return err;
 
-    return err;
+    return kalman::KalmanError::NoError;
 }
 
 /**
@@ -209,6 +211,72 @@ kalman::KalmanError KalmanInterface::kalmanPrediction(kalman::Vector& x,
 {
     double dt = KalmanInterface::timestep(ts_, ts);
     return kalmanPrediction(x, P, dt, fix_estimate, fixed, Q_var);
+}
+
+/**
+*/
+kalman::KalmanError KalmanInterface::kalmanPredictionMM(kalman::ProbState& pred_mm,
+                                                        const kalman::Vector& x_pred,
+                                                        const kalman::Matrix& P_pred) const
+{
+    assert(kalman_filter_);
+
+    auto err = kalman_filter_->generateMeasurement(pred_mm.x, pred_mm.P, x_pred, P_pred);
+    if (err != kalman::KalmanError::NoError)
+        return err;
+
+    return kalman::KalmanError::NoError;
+}
+
+/**
+*/
+kalman::KalmanError KalmanInterface::comparePrediction(PredictionComparison& comparison,
+                                                       const kalman::ProbState& pred_mm,
+                                                       const Measurement& mm,
+                                                       const reconstruction::Uncertainty& default_uncert,
+                                                       int comparison_flags) const
+{
+    //get measurement vector from mm
+    kalman::Vector z;
+    measurementVecZ(z, mm);
+
+    //get measurement uncert mat
+    kalman::Matrix R;
+    measurementUncertMatR(R, mm, default_uncert);
+
+    //residual
+    const auto y = z - pred_mm.x;
+
+    //add measurement uncertainty
+    const kalman::Matrix S = pred_mm.P + R;
+
+    const bool CheckEps = true;
+
+    bool has_num_error = false;
+
+    if (comparison_flags & PredictionCompareFlags::PredCompLikelihood)
+    {
+        comparison.likelihood = kalman::KalmanFilter::likelihood(y, S, CheckEps);
+        if (!comparison.likelihood.has_value())
+            has_num_error = true;
+    }
+    if (comparison_flags & PredictionCompareFlags::PredCompLogLikelihood)
+    {
+        comparison.log_likelihood = kalman::KalmanFilter::logLikelihood(y, S, CheckEps);
+        if (!comparison.log_likelihood.has_value())
+            has_num_error = true;
+    }
+    if (comparison_flags & PredictionCompareFlags::PredCompMahalanobis)
+    {
+        comparison.mahalanobis = kalman::KalmanFilter::mahalanobis(y, S, false);
+        if (!comparison.mahalanobis.has_value())
+            has_num_error = true;
+    }
+
+    if (has_num_error || !comparison.valid())
+        return kalman::KalmanError::Numeric;
+    
+    return kalman::KalmanError::NoError;
 }
 
 /**

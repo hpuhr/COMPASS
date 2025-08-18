@@ -153,34 +153,52 @@ public:
     StepResult kalmanStep(kalman::KalmanUpdate& update,
                           const Measurement& mm);
     
-    kalman::KalmanError kalmanPrediction(Measurement& mm,
+    kalman::KalmanError kalmanPrediction(Measurement* mm,
+                                         kalman::GeoProbState* gp_state,
+                                         kalman::GeoProbState* gp_state_mm,
                                          double dt,
                                          bool* fixed = nullptr) const;
-    kalman::KalmanError kalmanPrediction(Measurement& mm,
+    kalman::KalmanError kalmanPrediction(Measurement* mm,
+                                         kalman::GeoProbState* gp_state,
+                                         kalman::GeoProbState* gp_state_mm,
                                          const boost::posix_time::ptime& ts,
                                          bool* fixed = nullptr) const;
-    kalman::KalmanError kalmanPrediction(Measurement& mm,
+    kalman::KalmanError kalmanPrediction(Measurement* mm,
+                                         kalman::GeoProbState* gp_state,
+                                         kalman::GeoProbState* gp_state_mm,
                                          const kalman::KalmanUpdate& ref_update,
                                          const boost::posix_time::ptime& ts,
                                          bool* fixed = nullptr,
                                          bool* proj_changed = nullptr);
-    kalman::KalmanError kalmanPrediction(Measurement& mm,
+    kalman::KalmanError kalmanPrediction(Measurement* mm,
+                                         kalman::GeoProbState* gp_state,
+                                         kalman::GeoProbState* gp_state_mm,
                                          const kalman::KalmanUpdateMinimal& ref_update,
                                          const boost::posix_time::ptime& ts,
                                          bool* fixed = nullptr,
                                          bool* proj_changed = nullptr);
-    kalman::KalmanError kalmanPrediction(Measurement& mm,
+    kalman::KalmanError kalmanPrediction(Measurement* mm,
+                                         kalman::GeoProbState* gp_state,
+                                         kalman::GeoProbState* gp_state_mm,
                                          const kalman::KalmanUpdate& ref_update0,
                                          const kalman::KalmanUpdate& ref_update1,
                                          const boost::posix_time::ptime& ts,
                                          size_t* num_fixed = nullptr,
                                          size_t* num_proj_changed = nullptr);
-    kalman::KalmanError kalmanPrediction(Measurement& mm,
+    kalman::KalmanError kalmanPrediction(Measurement* mm,
+                                         kalman::GeoProbState* gp_state,
+                                         kalman::GeoProbState* gp_state_mm,
                                          const kalman::KalmanUpdateMinimal& ref_update0,
                                          const kalman::KalmanUpdateMinimal& ref_update1,
                                          const boost::posix_time::ptime& ts,
                                          size_t* num_fixed = nullptr,
                                          size_t* num_proj_changed = nullptr);
+
+    kalman::KalmanError comparePrediction(PredictionComparison& comparison,
+                                          const kalman::GeoProbState& pred_state_mm,
+                                          const Measurement& mm,
+                                          int comparison_flags,
+                                          KalmanProjectionHandler* phandler = nullptr) const;
 
     void storeUpdate(Measurement& mm, 
                      const kalman::KalmanUpdate& update) const;
