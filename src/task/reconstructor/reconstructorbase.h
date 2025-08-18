@@ -215,6 +215,19 @@ public:
         void clear();
     };
 
+    struct TargetReportBatch
+    {
+        TargetReportBatch(unsigned int ds_id, unsigned int line_id, 
+            boost::posix_time::ptime batch_time, std::vector<unsigned long> rec_nums)
+        : ds_id_(ds_id), line_id_(line_id), batch_time_(batch_time), rec_nums_(rec_nums)
+        {}
+
+        unsigned int ds_id_{0};
+        unsigned int line_id_{0};
+        boost::posix_time::ptime batch_time_;
+        std::vector<unsigned long> rec_nums_;
+    };
+
     typedef std::map<std::string, std::shared_ptr<Buffer>> Buffers;
 
     ReconstructorBase(const std::string& class_id, 

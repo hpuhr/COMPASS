@@ -1112,6 +1112,8 @@ void ReconstructorBase::createTargetReportBatches()
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
+    std::multimap<boost::posix_time::ptime, TargetReportBatch> final_batches_;
+
     for (auto& ds_type : data_source_type_order)
     {
 
@@ -1124,8 +1126,6 @@ void ReconstructorBase::createTargetReportBatches()
 
                 for (auto& line_it : ds_it.second)
                 {
-                    const std::vector<unsigned long>& ds_record_numbers = line_it.second;
-                    
                     std::vector<boost::posix_time::ptime> ds_ui_times;
 
                     if (status_info.hasInfo(ds_it.first, line_it.first))
@@ -1138,7 +1138,36 @@ void ReconstructorBase::createTargetReportBatches()
                         assert(target_reports_.count(rn_it));
 
                         auto timestamp = target_reports_.at(rn_it).timestamp_;
+
+                        boost::posix_time::ptime batch_time;
+                        
+                        if (!ds_ui_times.empty())
+                        {
+                            // Find the appropriate batch time from ds_ui_times
+                            auto it = std::lower_bound(ds_ui_times.begin(), ds_ui_times.end(), timestamp);
+                            
+                            if (it != ds_ui_times.end() && 
+                                (it == ds_ui_times.begin() || timestamp >= *it))
+                            {
+                                // Use the batch time from ds_ui_times
+                                batch_time = *it;
+                            }
+                            else
+                            {
+                                // Outside of given times, use truncated UTC 1 second timestamps
+                                batch_time = Time::truncateToFullSeconds(timestamp);
+                            }
+                        }
+                        else
+                        {
+                            // No ds_ui_times given, use truncated UTC 1 second timestamps
+                            batch_time = Time::truncateToFullSeconds(timestamp);
+                        }
+                        
+                        batches[batch_time].push_back(rn_it);
                     }
+
+
                 }
             }
         }

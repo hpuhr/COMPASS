@@ -292,6 +292,14 @@ QDateTime qtFrom (const boost::posix_time::ptime& value, bool include_ms)
         return QDateTime::fromString(Time::toString(value, false).c_str(), Time::QT_DATETIME_FORMAT_SHORT.c_str());
 }
 
+boost::posix_time::ptime truncateToFullSeconds(const boost::posix_time::ptime& timestamp)
+{
+    return boost::posix_time::ptime(
+        timestamp.date(), boost::posix_time::time_duration(timestamp.time_of_day().hours(),
+                                                           timestamp.time_of_day().minutes(),
+                                                           timestamp.time_of_day().seconds(), 0));
+}
+
 }
 
 }
