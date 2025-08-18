@@ -294,6 +294,7 @@ public:
     // all sources sorted by time, ts -> record_num
     std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>> tr_ds_;
     // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
+    std::multimap<boost::posix_time::ptime, TargetReportBatch> tr_batches_;
     
 
     TargetsContainer targets_container_;

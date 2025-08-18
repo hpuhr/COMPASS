@@ -179,100 +179,104 @@ void ReconstructorAssociatorBase::associateTargetReports()
     auto five_min = boost::posix_time::seconds(5*60);
     unsigned int ts_cnt=0;
 
-    for (auto& ts_it : reconstructor().tr_timestamps_)
+    for (auto& batch_it : reconstructor().tr_batches_)
     {
         if (reconstructor().isCancelled())
             return;
 
-        if (last_ts.is_not_a_date_time())
+        for (auto& rn_it : batch_it.second.rec_nums_)
         {
-            last_ts = ts_it.first;
-            loginf << "start time "
-                   << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
-        }
+            rec_num = rn_it;
+            assert(reconstructor().target_reports_.count(rec_num));
 
-        if (ts_it.first - last_ts > five_min)
-        {
-            last_ts = ts_it.first;
-            loginf << "processed time "
-                   << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
-        }
+            dbContent::targetReport::ReconstructorInfo& tr =
+                reconstructor().target_reports_.at(rec_num);
 
-        rec_num = ts_it.second;
-
-        assert (reconstructor().target_reports_.count(rec_num));
-
-        do_debug_rec_num = reconstructor().task().debugSettings().debug_association_ &&
-                   reconstructor().task().debugSettings().debugRecNum(rec_num);
-
-        if (do_debug_rec_num)
-            loginf << "DBG tr " << rec_num;
-
-        dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
-
-        if (!tr.in_current_slice_)
-        {
-            if (do_debug_rec_num)
-                loginf << "DBG tr " << rec_num << " not in current slice";
-
-            continue;
-        }
-
-        if (reconstructor().acc_estimator_->canCorrectPosition(tr))
-        {
-            if (do_debug_rec_num)
-                loginf << "DBG correcting position";
-
-            reconstructor().acc_estimator_->correctPosition(tr);
-        }
-
-        utn = -1;
-
-        is_unreliable_primary_only = tr.dbcont_id_ != 62 && tr.dbcont_id_  != 255 && tr.isPrimaryOnlyDetection();
-
-        if (do_debug_rec_num)
-            loginf << "is_unreliable_primary_only " << is_unreliable_primary_only;
-
-        if (!is_unreliable_primary_only) // if unreliable primary only, delay association until retry
-        {
-            if (do_debug_rec_num)
-                loginf << "DBG !is_unreliable_primary_only finding UTN";
-
-            utn = findUTNFor(tr);
-
-            if (do_debug_rec_num
-                || (reconstructor().task().debugSettings().debug_association_ &&
-                    reconstructor().task().debugSettings().debugUTN(utn)))
-                loginf << "DBG !is_unreliable_primary_only got UTN " << utn;
-        }
-
-        if (utn != -1) // estimate accuracy and associate
-        {
-            bool do_debug_utn = reconstructor().task().debugSettings().debug_association_ &&
-                                reconstructor().task().debugSettings().debugUTN(utn);
-
-            if (do_debug_rec_num || do_debug_utn)
-                loginf << "DBG associating tr " << rec_num << " to UTN " << utn;
-
-            associate(tr, utn);
-
-            if (do_debug_rec_num || do_debug_utn)
+            if (last_ts.is_not_a_date_time())
             {
-                assert (reconstructor().targets_container_.targets_.count(utn));
-
-                loginf << "DBG target after assoc "
-                       << reconstructor().targets_container_.targets_.at(utn).asStr();
+                last_ts = tr.timestamp_;
+                loginf << "start time " << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
             }
-        }
-        else // not associated
-        {
+
+            if (tr.timestamp_ - last_ts > five_min)
+            {
+                last_ts = tr.timestamp_;
+                loginf << "processed time " << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
+            }
+
+
+            do_debug_rec_num = reconstructor().task().debugSettings().debug_association_ &&
+                               reconstructor().task().debugSettings().debugRecNum(rec_num);
+
             if (do_debug_rec_num)
-                loginf << "DBG adding to unassoc_rec_nums_";
+                loginf << "DBG tr " << rec_num;
 
-            unassoc_rec_nums_.push_back(rec_num);
+            if (!tr.in_current_slice_)
+            {
+                if (do_debug_rec_num)
+                    loginf << "DBG tr " << rec_num << " not in current slice";
+
+                continue;
+            }
+
+            if (reconstructor().acc_estimator_->canCorrectPosition(tr))
+            {
+                if (do_debug_rec_num)
+                    loginf << "DBG correcting position";
+
+                reconstructor().acc_estimator_->correctPosition(tr);
+            }
+
+            utn = -1;
+
+            is_unreliable_primary_only =
+                tr.dbcont_id_ != 62 && tr.dbcont_id_ != 255 && tr.isPrimaryOnlyDetection();
+
+            if (do_debug_rec_num)
+                loginf << "is_unreliable_primary_only " << is_unreliable_primary_only;
+
+            if (!is_unreliable_primary_only)  // if unreliable primary only, delay association until
+                                              // retry
+            {
+                if (do_debug_rec_num)
+                    loginf << "DBG !is_unreliable_primary_only finding UTN";
+
+                utn = findUTNFor(tr);
+
+                if (do_debug_rec_num ||
+                    (reconstructor().task().debugSettings().debug_association_ &&
+                     reconstructor().task().debugSettings().debugUTN(utn)))
+                    loginf << "DBG !is_unreliable_primary_only got UTN " << utn;
+            }
+
+            if (utn != -1)  // estimate accuracy and associate
+            {
+                bool do_debug_utn = reconstructor().task().debugSettings().debug_association_ &&
+                                    reconstructor().task().debugSettings().debugUTN(utn);
+
+                if (do_debug_rec_num || do_debug_utn)
+                    loginf << "DBG associating tr " << rec_num << " to UTN " << utn;
+
+                associate(tr, utn);
+
+                if (do_debug_rec_num || do_debug_utn)
+                {
+                    assert(reconstructor().targets_container_.targets_.count(utn));
+
+                    loginf << "DBG target after assoc "
+                           << reconstructor().targets_container_.targets_.at(utn).asStr();
+                }
+            }
+            else  // not associated
+            {
+                if (do_debug_rec_num)
+                    loginf << "DBG adding to unassoc_rec_nums_";
+
+                unassoc_rec_nums_.push_back(rec_num);
+            }
+
+            ++ts_cnt;
         }
-
-        ++ts_cnt;
     }
 
     loginf << "done";
@@ -289,48 +293,50 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
     reconstructor().targets_container_.checkACADLookup();
 
-    for (auto& ts_it : reconstructor().tr_timestamps_)
+    for (auto& batch_it : reconstructor().tr_batches_)
     {
         if (reconstructor().isCancelled())
             return;
 
-        rec_num = ts_it.second;
-
-        assert (reconstructor().target_reports_.count(rec_num));
-
-        do_debug = reconstructor().task().debugSettings().debug_association_
-                   && reconstructor().task().debugSettings().debugRecNum(rec_num);
-
-        if (do_debug)
-            loginf << "DBG tr " << rec_num;
-
-        dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
-
-        if (!dbcont_ids.count(tr.dbcont_id_))
-            continue;
-
-        if (!tr.in_current_slice_)
+        for (auto& rn_it : batch_it.second.rec_nums_)
         {
-            if(do_debug)
-                loginf << "DBG tr " << rec_num << " not in current slice";
+            rec_num = rn_it;
+            assert(reconstructor().target_reports_.count(rec_num));
 
-            continue;
+            do_debug = reconstructor().task().debugSettings().debug_association_ &&
+                       reconstructor().task().debugSettings().debugRecNum(rec_num);
+
+            if (do_debug)
+                loginf << "DBG tr " << rec_num;
+
+            dbContent::targetReport::ReconstructorInfo& tr =
+                reconstructor().target_reports_.at(rec_num);
+
+            if (!dbcont_ids.count(tr.dbcont_id_))
+                continue;
+
+            if (!tr.in_current_slice_)
+            {
+                if (do_debug)
+                    loginf << "DBG tr " << rec_num << " not in current slice";
+
+                continue;
+            }
+
+            utn = findUTNFor(tr);
+
+            if (utn != -1)  // estimate accuracy and associate
+            {
+                if (reconstructor().task().debugSettings().debug_association_ &&
+                    reconstructor().task().debugSettings().debugUTN(utn))
+                    loginf << "DBG associating (dbcont_ids) tr " << rec_num << " to UTN " << utn;
+
+                associate(tr, utn);
+            }
+            else  // not associated
+                unassoc_rec_nums_.push_back(rec_num);
         }
-
-        utn = findUTNFor(tr);
-
-        if (utn != -1) // estimate accuracy and associate
-        {
-            if (reconstructor().task().debugSettings().debug_association_
-                && reconstructor().task().debugSettings().debugUTN(utn))
-                loginf << "DBG associating (dbcont_ids) tr " << rec_num << " to UTN " << utn;
-
-            associate(tr, utn);
-        }
-        else // not associated
-            unassoc_rec_nums_.push_back(rec_num);
     }
-
 }
 
 void ReconstructorAssociatorBase::selfAssociateNewUTNs()

@@ -792,6 +792,7 @@ void ReconstructorBase::reset()
     target_reports_.clear();
     tr_timestamps_.clear();
     tr_ds_.clear();
+    tr_batches_.clear();
 
     targets_container_.clear();
 
@@ -885,6 +886,7 @@ void ReconstructorBase::clearOldTargetReports()
 
     tr_timestamps_.clear();
     tr_ds_.clear();
+    tr_batches_.clear();
 
     for (auto tr_it = target_reports_.begin(); tr_it != target_reports_.end() /* not hoisted */; /* no increment */)
     {
@@ -1112,8 +1114,6 @@ void ReconstructorBase::createTargetReportBatches()
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
-    std::multimap<boost::posix_time::ptime, TargetReportBatch> final_batches_;
-
     for (auto& ds_type : data_source_type_order)
     {
 
@@ -1167,8 +1167,15 @@ void ReconstructorBase::createTargetReportBatches()
                         batches[batch_time].push_back(rn_it);
                     }
 
-
-                }
+                    // Insert batches into final_batches_ using TargetReportBatch struct
+                    for (auto& batch_it : batches)
+                    {
+                        tr_batches_.emplace(
+                            batch_it.first,
+                            TargetReportBatch(ds_it.first, line_it.first, batch_it.first, std::move(batch_it.second))
+                        );
+                    }
+                }                
             }
         }
     }
