@@ -510,7 +510,7 @@ void DBContent::load(dbContent::VariableSet& read_set,
         filter_clause += custom_filter_clause;
     }
 
-    logdbg << "filter_clause '" << filter_clause << "'";
+    loginf << "filter_clause '" << filter_clause << "'";
 
     loadFiltered(read_set, filter_clause);
 }

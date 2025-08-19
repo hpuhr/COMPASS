@@ -188,6 +188,7 @@ protected:
 
     bool use_sectors_extend_{false};
     std::map<std::string, bool> used_sectors_;
+    float sector_delta_deg_ {0.1};
 
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
 

@@ -612,20 +612,76 @@ void ReconstructorTask::loadDataSlice()
     else
         timestamp_filter += " AND timestamp < " + to_string(Time::toLong(loading_slice_->next_slice_begin_));
 
+    string position_filter;
+
+    if (use_sectors_extend_)
+    {
+        auto& eval_man = COMPASS::instance().evaluationManager();
+
+        bool first = true;
+        double lat_min{0}, lat_max{0}, long_min{0}, long_max{0};
+        double tmp_lat_min{0}, tmp_lat_max{0}, tmp_long_min{0}, tmp_long_max{0};
+
+        for (auto& sect_it : used_sectors_)
+        {
+            assert(eval_man.hasSectorLayer(sect_it.first));
+
+            if (!sect_it.second)
+                continue;
+
+            std::shared_ptr<SectorLayer> sect_lay = eval_man.sectorLayer(sect_it.first);
+
+            if (first)
+            {
+                tie(lat_min, lat_max) = sect_lay->getMinMaxLatitude();
+                tie(long_min, long_max) = sect_lay->getMinMaxLongitude();
+                first = false;
+            }
+            else
+            {
+                tie(tmp_lat_min, tmp_lat_max) = sect_lay->getMinMaxLatitude();
+                tie(tmp_long_min, tmp_long_max) = sect_lay->getMinMaxLongitude();
+
+                lat_min = min(lat_min, tmp_lat_min);
+                lat_max = max(lat_max, tmp_lat_max);
+                long_min = min(long_min, tmp_long_min);
+                long_max = max(long_max, tmp_long_max);
+            }
+        }
+
+        if (!first)
+        {
+            if (timestamp_filter.size())
+                position_filter += " AND";
+
+            lat_min -= sector_delta_deg_;
+            lat_max += sector_delta_deg_;
+            long_min -= sector_delta_deg_;
+            long_max += sector_delta_deg_;
+
+            position_filter += " latitude >= " + String::doubleToStringPrecision(lat_min, 10) +
+                          " AND latitude <= " + String::doubleToStringPrecision(lat_max, 10) +
+                          " AND longitude >= " + String::doubleToStringPrecision(long_min, 10) +
+                          " AND longitude <= " + String::doubleToStringPrecision(long_max, 10);
+        }
+    }
+
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
     for (auto& dbcont_it : dbcontent_man)
     {
         logdbg << "start" << dbcont_it.first
-               << " has data " << dbcont_it.second->hasData()
-               << " has utn " << dbcont_it.second->hasVariable("UTN");
+               << " has data " << dbcont_it.second->hasData();
 
-        if (!dbcont_it.second->hasData()) //  || !dbcont_it.second->hasVariable("UTN")
+        if (!dbcont_it.second->hasData()) // also include status messages
             continue;
 
         VariableSet read_set = currentReconstructor()->getReadSetFor(dbcont_it.first);
 
-        dbcont_it.second->load(read_set, false, false, timestamp_filter);
+        if (dbcont_it.second->containsTargetReports())
+            dbcont_it.second->load(read_set, false, false, timestamp_filter+position_filter);
+        else
+            dbcont_it.second->load(read_set, false, false, timestamp_filter);
     }
 }
 
