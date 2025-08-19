@@ -224,6 +224,58 @@ bool SectorInsideTest::isValid() const
     return !img_.isNull();
 }
 
+SectorInsideTest::CheckResult SectorInsideTest::isInside(double x, double y, double delta) const
+{
+    assert (isValid());
+
+    // First check the point itself
+    auto result = isInside(x, y);
+    
+    // If already inside, return inside
+    if (result == CheckResult::Inside)
+    {
+        loginf << "true inside";
+        return CheckResult::Inside;
+    }
+    
+    // If outside or border, check within delta distance
+    // Sample points around the original point within delta distance
+    const int num_samples = 16;
+    const double angle_step = 2.0 * M_PI / num_samples;
+    
+    for (int i = 0; i < num_samples; ++i)
+    {
+        double angle = i * angle_step;
+        double test_x = x + delta * std::cos(angle);
+        double test_y = y + delta * std::sin(angle);
+        
+        auto test_result = isInside(test_x, test_y);
+        if (test_result == CheckResult::Inside)
+        {
+            loginf << "second inside";
+            return CheckResult::Inside;
+        }
+    }
+    
+    // Also check at half delta distance
+    for (int i = 0; i < num_samples; ++i)
+    {
+        double angle = i * angle_step;
+        double test_x = x + (delta * 0.5) * std::cos(angle);
+        double test_y = y + (delta * 0.5) * std::sin(angle);
+        
+        auto test_result = isInside(test_x, test_y);
+        if (test_result == CheckResult::Inside)
+        {
+            loginf << "thirst inside";
+            return CheckResult::Inside;
+        }
+    }
+    
+    loginf << "not inside";
+    return result; // Return original result if no nearby point is inside
+}
+
 /***********************************************************************************
  * Sector
  ***********************************************************************************/
@@ -570,6 +622,47 @@ bool Sector::isInside(const dbContent::TargetPosition& pos,
     }
 
     return true;
+}
+
+bool Sector::isInside(double latitude, double longitude, double delta_deg) const
+{
+    OGRPoint ogr_pos(latitude, longitude);
+    if (ogr_polygon_->Contains(&ogr_pos))
+        return true;
+
+    // If outside or border, check within delta distance
+    // Sample points around the original point within delta distance
+    const int num_samples = 16;
+    const double angle_step = 2.0 * M_PI / num_samples;
+
+    double angle, test_x, test_y;
+
+    for (int i = 0; i < num_samples; ++i)
+    {
+        angle = i * angle_step;
+        test_x = latitude + delta_deg * std::cos(angle);
+        test_y = longitude + delta_deg * std::sin(angle);
+        
+        ogr_pos = {test_x, test_y};
+
+        if (ogr_polygon_->Contains(&ogr_pos))
+            return true;
+    }
+    
+    // Also check at half delta distance
+    for (int i = 0; i < num_samples; ++i)
+    {
+        angle = i * angle_step;
+        test_x = latitude + (delta_deg * 0.5) * std::cos(angle);
+        test_y = longitude + (delta_deg * 0.5) * std::sin(angle);
+        
+        ogr_pos = {test_x, test_y};
+
+        if (ogr_polygon_->Contains(&ogr_pos))
+            return true;
+    }
+
+    return false;
 }
 
 std::pair<double, double> Sector::getMinMaxLatitude() const

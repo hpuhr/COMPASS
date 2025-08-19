@@ -150,6 +150,8 @@ public:
     const std::map<std::string, bool>& usedSectors() const;
     void useSector(const std::string& sector_name, bool value);
 
+    float sectorDeltaDeg() const { return sector_delta_deg_; }
+
     ReconstructorBase::DataSlice& processingSlice();
     const ReconstructorBase::DataSlice& processingSlice() const;
 

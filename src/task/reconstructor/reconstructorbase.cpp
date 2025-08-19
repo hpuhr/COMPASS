@@ -47,6 +47,8 @@
 #include "grid2dlayerrenderer.h"
 #include "grid2drendersettings.h"
 
+#include "sector/sectorlayer.h"
+
 #include <boost/algorithm/string.hpp>
 
 using namespace std;
@@ -976,6 +978,27 @@ void ReconstructorBase::createTargetReports()
 
     std::set<unsigned int> ground_only_ds_ids = ds_man.groundOnlyDBDataSources();
 
+    std::vector<std::shared_ptr<SectorLayer>> used_sector_layers;
+    bool inside_any;
+
+    if (task_.useSectorsExtend())
+    {
+        auto& eval_man = COMPASS::instance().evaluationManager();
+
+        for (auto& sect_it : task_.usedSectors())
+        {
+            assert(eval_man.hasSectorLayer(sect_it.first));
+
+            if (!sect_it.second)
+                continue;
+
+            for (const auto& s : eval_man.sectorLayer(sect_it.first)->sectors())
+                s->createFastInsideTest();
+
+            used_sector_layers.push_back(eval_man.sectorLayer(sect_it.first));
+        }
+    }
+
     for (auto& buf_it : *accessor_)
     {
         assert (dbcont_man.existsDBContent(buf_it.first));
@@ -996,6 +1019,27 @@ void ReconstructorBase::createTargetReports()
 
             if (!tgt_acc.position(cnt))
                 continue;
+
+            if (task_.useSectorsExtend())
+            {
+                inside_any = false;
+
+                for (const auto& sect_lay_it : used_sector_layers)
+                {
+                    if (sect_lay_it->isInside(tgt_acc.position(cnt)->latitude_, tgt_acc.position(cnt)->longitude_, task_.sectorDeltaDeg()))
+                    {
+                        inside_any = true;
+                        break;
+                    }
+                }
+
+                if (!inside_any)
+                {
+                    logdbg2 << "lat " << tgt_acc.position(cnt)->latitude_ << " lon " << tgt_acc.position(cnt)->longitude_ 
+                        << " !inside_any " << !inside_any;
+                    continue;
+                }
+            }
 
             if (target_reports_.count(record_num)) // already exist, update buffer_index_
             {

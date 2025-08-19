@@ -143,6 +143,27 @@ bool SectorLayer::isInside(const dbContent::TargetPosition& pos,
     return !is_inside_exclude; // true if in no exclude, false if in include
 }
 
+bool SectorLayer::isInside(double latitude, double longitude, double delta_deg) const
+{
+    bool is_inside         = false;
+
+    // check if inside normal ones
+    for (auto& sec_it : sectors_)
+    {
+        if (sec_it->isExclusionSector())
+            continue;
+
+        if (sec_it->isInside(latitude, longitude, delta_deg))
+        {
+            is_inside = true;
+            break;
+        }
+    }
+
+    logdbg2 << "'" << name_ << "' is_inside " << is_inside; 
+    return is_inside; // not inside normal sector
+}
+
 std::pair<double, double> SectorLayer::getMinMaxLatitude() const
 {
     double min{0}, max{0};
