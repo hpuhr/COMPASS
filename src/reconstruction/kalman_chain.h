@@ -167,12 +167,16 @@ public:
     bool reestimate(UpdateStats* stats = nullptr);
 
     bool canPredict(const boost::posix_time::ptime& ts) const;
-    bool predictMT(Measurement& mm_predicted,
+    bool predictMT(Measurement* mm,
+                   kalman::GeoProbState* gp_state,
+                   kalman::GeoProbState* gp_state_mm,
                    const boost::posix_time::ptime& ts,
                    KalmanChainPredictors& predictors,
                    unsigned int thread_id,
                    PredictionStats* stats = nullptr) const;
-    bool predict(Measurement& mm_predicted,
+    bool predict(Measurement* mm,
+                 kalman::GeoProbState* gp_state,
+                 kalman::GeoProbState* gp_state_mm,
                  const boost::posix_time::ptime& ts,
                  PredictionStats* stats = nullptr) const;
     bool predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const;
@@ -232,7 +236,9 @@ private:
     int predictionRefIndex(const boost::posix_time::ptime& ts) const;
     Interval predictionRefInterval(const boost::posix_time::ptime& ts) const;
 
-    bool predictInternal(Measurement& mm_predicted,
+    bool predictInternal(Measurement* mm, 
+                         kalman::GeoProbState* gp_state,
+                         kalman::GeoProbState* gp_state_mm,
                          const boost::posix_time::ptime& ts,
                          KalmanChainPredictors* predictors,
                          unsigned int thread_id,

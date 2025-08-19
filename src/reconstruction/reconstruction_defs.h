@@ -153,4 +153,35 @@ struct PredictionStats
     size_t num_proj_changed = 0;
 };
 
+/**
+ */
+enum PredictionCompareFlags
+{
+    PredCompLikelihood    = 1 << 0,  // compute the likelihood of the prediction to the provided reference measurement
+    PredCompLogLikelihood = 1 << 1,  // compute the log-likelihood of the prediction to the provided reference measurement
+    PredCompMahalanobis   = 1 << 2   // compute the mahalanobis distance of the prediction to the provided reference measurement
+};
+
+/**
+ * Values comparing a predicted kalman state to a reference measurement.
+ */
+struct PredictionComparison
+{
+    bool valid() const
+    {
+        if (likelihood.has_value() && !std::isfinite(likelihood.value()))
+            return false;
+        if (log_likelihood.has_value() && !std::isfinite(log_likelihood.value()))
+            return false;
+        if (mahalanobis.has_value() && !std::isfinite(mahalanobis.value()))
+            return false;
+        
+        return true;
+    }
+
+    boost::optional<double> likelihood;
+    boost::optional<double> log_likelihood;
+    boost::optional<double> mahalanobis;
+};
+
 } // namespace reconstruction

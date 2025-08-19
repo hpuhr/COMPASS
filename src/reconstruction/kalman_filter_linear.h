@@ -97,6 +97,10 @@ protected:
                             bool mt_safe,
                             const OVector& u,
                             KalmanState* state) const override final;
+    Error generateMeasurement_impl(Vector& x_pred_mm,
+                                   Matrix& P_pred_mm,
+                                   const Vector& x_pred, 
+                                   const Matrix& P_pred) const override final;
     Error update_impl(const Vector& z,
                       const Matrix& R) override final;
     bool smooth_impl(std::vector<kalman::Vector>& x_smooth,

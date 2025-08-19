@@ -198,10 +198,9 @@ KalmanFilter::Error KalmanFilterLinear::update(const Vector& z,
     // project system uncertainty into measurement space
     S_  = (H * PHT) + R;
 
-    if (!Eigen::FullPivLU<Eigen::MatrixXd>(S_).isInvertible())
+    // check if S is invertible
+    if (!KalmanFilter::invertMatrix(SI_, S_))
         return Error::Numeric;
-
-    SI_ = S_.inverse();
 
     // K = PH'inv(S)
     // map system uncertainty into kalman gain
@@ -219,7 +218,7 @@ KalmanFilter::Error KalmanFilterLinear::update(const Vector& z,
     Matrix I_KH = I_ - K_ * H;
     P_ = I_KH * P_ * I_KH.transpose() + K_ * R * K_.transpose();
 
-    // save measurement and posterior state
+    // save measurement
     z_ = z;
 
     return Error::NoError;
@@ -232,6 +231,24 @@ KalmanFilter::Error KalmanFilterLinear::update_impl(const Vector& z,
                                                     const Matrix& R)
 {
     return update(z, R, H_);
+}
+
+/**
+*/
+KalmanFilter::Error KalmanFilterLinear::generateMeasurement_impl(Vector& x_pred_mm,
+                                                                 Matrix& P_pred_mm,
+                                                                 const Vector& x_pred, 
+                                                                 const Matrix& P_pred) const
+{
+    // x_mm = Hx
+    // project state to measurement space
+    x_pred_mm = H_ * x_pred;
+
+    // S = HPH' + R
+    // project system uncertainty into measurement space
+    P_pred_mm  = (H_ * P_pred * H_.transpose());
+
+    return Error::NoError;
 }
 
 /**

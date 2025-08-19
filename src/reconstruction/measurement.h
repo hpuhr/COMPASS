@@ -24,6 +24,8 @@
 #include <boost/optional.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include "json.hpp"
+
 namespace reconstruction
 {
 
@@ -38,8 +40,7 @@ enum CovMatFlags
 {
     CovMatPos = 1 << 0,
     CovMatVel = 1 << 1,
-    CovMatAcc = 1 << 2,
-    CovMatCov = 1 << 3
+    CovMatAcc = 1 << 2
 };
 
 /**
@@ -53,9 +54,22 @@ struct Measurement
     double distance(const Measurement& other, CoordSystem cs) const;
     double distanceSqr(const Measurement& other, CoordSystem cs) const;
 
+    double geodeticDistance(const Measurement& other) const;
+    double bearing(const Measurement& other) const;
+    double mahalanobisDistanceGeodetic(const Measurement& other) const;
+    double approxLikelihood(const Measurement& other) const;
+
+    boost::optional<double> mahalanobisDistance(const Measurement& other, 
+                                                unsigned char components = CovMatPos) const;
+    boost::optional<double> likelihood(const Measurement& other, 
+                                       unsigned char components = CovMatPos) const;
+    boost::optional<double> logLikelihood(const Measurement& other, 
+                                          unsigned char components = CovMatPos) const;
+
     bool hasVelocity() const;
     bool hasAcceleration() const;
     bool hasStdDevPosition() const;
+    bool hasCovPosition() const;
 
     dbContent::targetReport::Position position() const;
     dbContent::targetReport::PositionAccuracy positionAccuracy() const;
@@ -65,11 +79,49 @@ struct Measurement
 
     std::string asString(const std::string& prefix = "") const;
 
-    Eigen::MatrixXd covMat(unsigned char flags = 255) const;
+    Eigen::VectorXd stateVec(unsigned char components = 255) const;
+    Eigen::MatrixXd covMat(unsigned char components = 255) const;
     unsigned char covMatFlags() const;
-    bool setFromCovMat(const Eigen::MatrixXd& C, unsigned char flags = 255);
+    bool setFromCovMat(const Eigen::MatrixXd& C, unsigned char components = 255);
 
     std::pair<unsigned long, boost::posix_time::ptime> uniqueID() const;
+
+    nlohmann::json toJSON() const;
+    bool fromJSON(const nlohmann::json& j);
+
+    static const std::string FieldSourceID;
+    static const std::string FieldTS;
+    
+    static const std::string FieldInterp;
+    static const std::string FieldPosAccCorr;
+
+    static const std::string FieldLat;
+    static const std::string FieldLon;
+
+    static const std::string FieldX;
+    static const std::string FieldY;
+    static const std::string FieldZ;
+
+    static const std::string FieldVX;
+    static const std::string FieldVY;
+    static const std::string FieldVZ;
+
+    static const std::string FieldAX;
+    static const std::string FieldAY;
+    static const std::string FieldAZ;
+
+    static const std::string FieldXStdDev;
+    static const std::string FieldYStdDev;
+    static const std::string FieldXYCov;
+
+    static const std::string FieldVXStdDev;
+    static const std::string FieldVYStdDev;
+
+    static const std::string FieldAXStdDev;
+    static const std::string FieldAYStdDev;
+
+    static const std::string FieldQVar;
+    static const std::string FieldQVarInterp;
 
     boost::optional<unsigned long> source_id;           // source of the measurement
 

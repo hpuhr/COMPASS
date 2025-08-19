@@ -928,7 +928,9 @@ bool KalmanEstimator::checkState(const kalman::KalmanUpdate& update) const
 
 /**
 */
-kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
+kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement* mm,
+                                                      kalman::GeoProbState* gp_state,
+                                                      kalman::GeoProbState* gp_state_mm,
                                                       double dt,
                                                       bool* fixed) const
 {
@@ -938,7 +940,7 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
     auto kalman_err = kalman_interface_->kalmanPrediction(state.x, 
                                                           state.P, 
                                                           dt,
-                                                          settings_.fix_predictions, 
+                                                          settings_.fix_predictions,
                                                           fixed);
     if (kalman_err != kalman::KalmanError::NoError)
     {
@@ -948,15 +950,33 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
         return kalman_err;
     }
 
-    kalman_interface_->storeState(mm, state);
-    proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
-
-    bool kalman_prediction_check = checkPrediction(mm);
-    if (!kalman_prediction_check)
+    if (mm)
     {
-        logerr << "prediction yielded nan for dt = " << dt << "\n\n"
-               << kalman_interface_->asString(kalman::KalmanInfoFlags::InfoAll) << "\n";
-        assert(kalman_prediction_check);
+        kalman_interface_->storeState(*mm, state);
+        proj_handler_->unproject(mm->lat, mm->lon, mm->x, mm->y);
+
+        bool kalman_prediction_check = checkPrediction(*mm);
+        if (!kalman_prediction_check)
+        {
+            logerr << "prediction yielded nan for dt = " << dt << "\n\n"
+                << kalman_interface_->asString(kalman::KalmanInfoFlags::InfoAll) << "\n";
+            assert(kalman_prediction_check);
+        }
+    }
+
+    if (gp_state)
+    {
+        gp_state->x           = state.x;
+        gp_state->P           = state.P;
+        gp_state->proj_center = proj_handler_->projectionCenter();
+    }
+
+    if (gp_state_mm)
+    {
+        auto kalman_err = kalman_interface_->kalmanPredictionMM(*gp_state_mm, state.x, state.P);
+        assert(kalman_err == kalman::KalmanError::NoError);
+
+        gp_state->proj_center = proj_handler_->projectionCenter();
     }
 
     return kalman::KalmanError::NoError;
@@ -964,7 +984,9 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
 
 /**
 */
-kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
+kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement* mm,
+                                                      kalman::GeoProbState* gp_state,
+                                                      kalman::GeoProbState* gp_state_mm,
                                                       const boost::posix_time::ptime& ts,
                                                       bool* fixed) const
 {
@@ -999,22 +1021,40 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
         }
     }
 
-    kalman_interface_->storeState(mm, state);
-    proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
-
-    bool kalman_prediction_check = checkPrediction(mm);
-    if (!kalman_prediction_check)
+    if (mm)
     {
-        logerr << "STATE x = \n" << state.x << "\n"
-               << "STATE P = \n" << state.P;
+        kalman_interface_->storeState(*mm, state);
+        proj_handler_->unproject(mm->lat, mm->lon, mm->x, mm->y);
 
-        logerr << "prediction yielded nan\n\n"
-               << "ts_cur: " << Utils::Time::toString(kalman_interface_->currentTime()) << "\n"
-               << "ts:     " << Utils::Time::toString(ts) << "\n"
-               << "dt:     " << KalmanInterface::timestep(kalman_interface_->currentTime(), ts) << "\n"
-               << kalman_interface_->asString(kalman::KalmanInfoFlags::InfoAll) << "\n"
-               << mm.asString() << "\n";
-        assert(kalman_prediction_check);
+        bool kalman_prediction_check = checkPrediction(*mm);
+        if (!kalman_prediction_check)
+        {
+            logerr << "STATE x = \n" << state.x << "\n"
+                << "STATE P = \n" << state.P;
+
+            logerr << "prediction yielded nan\n\n"
+                << "ts_cur: " << Utils::Time::toString(kalman_interface_->currentTime()) << "\n"
+                << "ts:     " << Utils::Time::toString(ts) << "\n"
+                << "dt:     " << KalmanInterface::timestep(kalman_interface_->currentTime(), ts) << "\n"
+                << kalman_interface_->asString(kalman::KalmanInfoFlags::InfoAll) << "\n"
+                << mm->asString() << "\n";
+            assert(kalman_prediction_check);
+        }
+    }
+
+    if (gp_state)
+    {
+        gp_state->x           = state.x;
+        gp_state->P           = state.P;
+        gp_state->proj_center = proj_handler_->projectionCenter();
+    }
+
+    if (gp_state_mm)
+    {
+        auto kalman_err = kalman_interface_->kalmanPredictionMM(*gp_state_mm, state.x, state.P);
+        assert(kalman_err == kalman::KalmanError::NoError);
+
+        gp_state->proj_center = proj_handler_->projectionCenter();
     }
 
     return kalman::KalmanError::NoError;
@@ -1023,7 +1063,9 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
 /**
  * Note: Changes the estimator's current state to the passed one.
 */
-kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
+kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement* mm,
+                                                      kalman::GeoProbState* gp_state,
+                                                      kalman::GeoProbState* gp_state_mm,
                                                       const kalman::KalmanUpdate& ref_update,
                                                       const boost::posix_time::ptime& ts,
                                                       bool* fixed,
@@ -1034,13 +1076,15 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
     if (proj_changed)
         *proj_changed = stepInfo().proj_changed;
 
-    return kalmanPrediction(mm, ts, fixed);
+    return kalmanPrediction(mm, gp_state, gp_state_mm, ts, fixed);
 }
 
 /**
  * Note: Changes the estimator's current state to the passed one.
 */
-kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
+kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement* mm,
+                                                      kalman::GeoProbState* gp_state,
+                                                      kalman::GeoProbState* gp_state_mm,
                                                       const kalman::KalmanUpdateMinimal& ref_update,
                                                       const boost::posix_time::ptime& ts,
                                                       bool* fixed,
@@ -1051,28 +1095,32 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
     if (proj_changed)
         *proj_changed = stepInfo().proj_changed;
 
-    return kalmanPrediction(mm, ts, fixed);
+    return kalmanPrediction(mm, gp_state, gp_state_mm, ts, fixed);
 }
 
 /**
  * Prediction by interpolation of two reference update predictions.
  * Note: Changes the estimator's current state to the passed one.
  */
-kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
+kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement* mm,
+                                                      kalman::GeoProbState* gp_state,
+                                                      kalman::GeoProbState* gp_state_mm,
                                                       const kalman::KalmanUpdate& ref_update0,
                                                       const kalman::KalmanUpdate& ref_update1,
                                                       const boost::posix_time::ptime& ts,
                                                       size_t* num_fixed,
                                                       size_t* num_proj_changed)
 {
-    return kalmanPrediction(mm, ref_update0.minimalInfo(), ref_update1.minimalInfo(), ts, num_fixed, num_proj_changed);
+    return kalmanPrediction(mm, gp_state, gp_state_mm, ref_update0.minimalInfo(), ref_update1.minimalInfo(), ts, num_fixed, num_proj_changed);
 }
 
 /**
  * Prediction by interpolation of two reference update predictions.
  * Note: Changes the estimator's current state to the passed one.
  */
-kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
+kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement* mm,
+                                                      kalman::GeoProbState* gp_state,
+                                                      kalman::GeoProbState* gp_state_mm,
                                                       const kalman::KalmanUpdateMinimal& ref_update0,
                                                       const kalman::KalmanUpdateMinimal& ref_update1,
                                                       const boost::posix_time::ptime& ts,
@@ -1100,24 +1148,73 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
         return kalman_error;
     }
 
-    kalman_interface_->storeState(mm, update_interp.x, update_interp.P);
-    proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y, &update_interp.projection_center);
-
-    bool kalman_prediction_check = checkPrediction(mm);
-    if (!kalman_prediction_check)
+    if (mm)
     {
-        logerr << "prediction yielded nan in interval\n\n"
-               << "t0: " << Utils::Time::toString(ref_update0.t) << "\n"
-               << "t1: " << Utils::Time::toString(ref_update1.t) << "\n"
-               << "ts: " << Utils::Time::toString(ts)            << "\n"
-               << "x0:\n" << ref_update0.x << "\n"
-               << "P0:\n" << ref_update0.P << "\n"
-               << "x1:\n" << ref_update0.x << "\n"
-               << "P1:\n" << ref_update0.P << "\n";
-        assert(kalman_prediction_check);
+        kalman_interface_->storeState(*mm, update_interp.x, update_interp.P);
+        proj_handler_->unproject(mm->lat, mm->lon, mm->x, mm->y, &update_interp.projection_center);
+
+        bool kalman_prediction_check = checkPrediction(*mm);
+        if (!kalman_prediction_check)
+        {
+            logerr << "prediction yielded nan in interval\n\n"
+                << "t0: " << Utils::Time::toString(ref_update0.t) << "\n"
+                << "t1: " << Utils::Time::toString(ref_update1.t) << "\n"
+                << "ts: " << Utils::Time::toString(ts)            << "\n"
+                << "x0:\n" << ref_update0.x << "\n"
+                << "P0:\n" << ref_update0.P << "\n"
+                << "x1:\n" << ref_update0.x << "\n"
+                << "P1:\n" << ref_update0.P << "\n";
+            assert(kalman_prediction_check);
+        }
+    }
+
+    if (gp_state)
+    {
+        gp_state->x           = update_interp.x;
+        gp_state->P           = update_interp.P;
+        gp_state->proj_center = update_interp.projection_center;
+    }
+
+    if (gp_state_mm)
+    {
+        auto kalman_err = kalman_interface_->kalmanPredictionMM(*gp_state_mm, update_interp.x, update_interp.P);
+        assert(kalman_err == kalman::KalmanError::NoError);
+
+        gp_state->proj_center = update_interp.projection_center;
     }
 
     return kalman::KalmanError::NoError;
+}
+
+/**
+*/
+kalman::KalmanError KalmanEstimator::comparePrediction(PredictionComparison& comparison,
+                                                       const kalman::GeoProbState& pred_state_mm,
+                                                       const Measurement& mm,
+                                                       int comparison_flags,
+                                                       KalmanProjectionHandler* phandler) const
+{
+    assert(isInit());
+
+    KalmanProjectionHandler* phandler_used = phandler ? phandler : proj_handler_.get();
+    assert(phandler_used);
+
+    //backup cart coords
+    double x_backup = mm.x;
+    double y_backup = mm.y;
+
+    //project measurement to prediction coord system
+    phandler_used->initProjection(pred_state_mm.proj_center.x(), pred_state_mm.proj_center.y());
+    phandler_used->project(mm.x, mm.y, mm.lat, mm.lon);
+
+    //compare measurement to prediction
+    auto err = kalman_interface_->comparePrediction(comparison, pred_state_mm, mm, defaultUncert(mm), comparison_flags);
+
+    //restore cart coords
+    mm.x = x_backup;
+    mm.y = y_backup;
+
+    return err;
 }
 
 /**

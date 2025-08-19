@@ -2812,7 +2812,9 @@ bool ReconstructorTarget::predictPositionClose(boost::posix_time::ptime ts, doub
     return chain()->predictPositionClose(ts, lat, lon);
 }
 
-bool ReconstructorTarget::predict(reconstruction::Measurement& mm, 
+bool ReconstructorTarget::predict(reconstruction::Measurement* mm,
+                                  kalman::GeoProbState* gp_state,
+                                  kalman::GeoProbState* gp_state_mm,
                                   const boost::posix_time::ptime& ts,
                                   reconstruction::PredictionStats* stats) const
 {
@@ -2822,12 +2824,12 @@ bool ReconstructorTarget::predict(reconstruction::Measurement& mm,
 
     if (stats)
     {
-        ok = chain()->predict(mm, ts, stats);
+        ok = chain()->predict(mm, gp_state, gp_state_mm, ts, stats);
     }
     else
     {
         reconstruction::PredictionStats pstats;
-        ok = chain()->predict(mm, ts, &pstats);
+        ok = chain()->predict(mm, gp_state, gp_state_mm, ts, &pstats);
 
         //log immediately (!take care when using this method in a multithreaded context!)
         ReconstructorTarget::addPredictionToGlobalStats(pstats);
@@ -2838,14 +2840,16 @@ bool ReconstructorTarget::predict(reconstruction::Measurement& mm,
     return ok;
 }
 
-bool ReconstructorTarget::predictMT(reconstruction::Measurement& mm, 
+bool ReconstructorTarget::predictMT(reconstruction::Measurement* mm,
+                                    kalman::GeoProbState* gp_state,
+                                    kalman::GeoProbState* gp_state_mm,
                                     const boost::posix_time::ptime& ts,
                                     unsigned int thread_id,
                                     reconstruction::PredictionStats* stats) const
 {
     assert(chain());
 
-    bool ok = chain()->predictMT(mm, ts, reconstructor_.chainPredictors(), thread_id, stats);
+    bool ok = chain()->predictMT(mm, gp_state, gp_state_mm, ts, reconstructor_.chainPredictors(), thread_id, stats);
     assert(ok);
 
     return ok;

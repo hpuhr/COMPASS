@@ -366,10 +366,14 @@ public:
     bool canPredict(boost::posix_time::ptime ts) const;
     bool hasChainState(boost::posix_time::ptime ts) const;
     bool predictPositionClose(boost::posix_time::ptime ts, double lat, double lon) const;
-    bool predict(reconstruction::Measurement& mm, 
+    bool predict(reconstruction::Measurement* mm,
+                 kalman::GeoProbState* gp_state,
+                 kalman::GeoProbState* gp_state_mm,
                  const boost::posix_time::ptime& ts,
                  reconstruction::PredictionStats* stats = nullptr) const;
-    bool predictMT(reconstruction::Measurement& mm, 
+    bool predictMT(reconstruction::Measurement* mm,
+                   kalman::GeoProbState* gp_state,
+                   kalman::GeoProbState* gp_state_mm,
                    const boost::posix_time::ptime& ts,
                    unsigned int thread_id,
                    reconstruction::PredictionStats* stats = nullptr) const;
