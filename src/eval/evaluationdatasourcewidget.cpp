@@ -63,7 +63,8 @@ EvaluationDataSourceWidget::EvaluationDataSourceWidget(EvaluationCalculator& cal
 
     dbcont_combo_ = new DBContentComboBox(false, true);
     dbcont_combo_->setObjectName(dbcontent_name_);
-    connect (dbcont_combo_, &DBContentComboBox::changedObject, this, &EvaluationDataSourceWidget::dbContentNameChangedSlot);
+    connect (dbcont_combo_, &DBContentComboBox::changedObject, 
+        this, &EvaluationDataSourceWidget::dbContentNameChangedSlot);
 
     dbcont_lay->addWidget(dbcont_combo_, 0, 1);
 

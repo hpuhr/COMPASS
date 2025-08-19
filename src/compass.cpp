@@ -29,6 +29,7 @@
 #include "mainwindow.h"
 #include "files.h"
 #include "asteriximporttask.h"
+#include "reconstructortask.h"
 #include "rtcommand_runner.h"
 #include "rtcommand_manager.h"
 #include "rtcommand.h"
@@ -180,6 +181,10 @@ COMPASS::COMPASS()
     // data sources changed
     QObject::connect(ds_manager_.get(), &DataSourceManager::dataSourcesChangedSignal,
                      eval_manager_.get(), &EvaluationManager::dataSourcesChangedSlot); // update if data sources changed
+
+    // sectors changed
+    connect (eval_manager_.get(), &EvaluationManager::sectorsChangedSignal, // this includes db open/close
+             &task_manager_->reconstructReferencesTask(), &ReconstructorTask::sectorsChangedSlot);
 
     // data exchange
     QObject::connect(dbcontent_manager_.get(), &DBContentManager::loadingStartedSignal,

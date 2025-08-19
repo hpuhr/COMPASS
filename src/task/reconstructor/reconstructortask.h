@@ -95,6 +95,8 @@ public slots:
     void deleteTargetsDoneSlot();
     void deleteAssociationsDoneSlot();
 
+    void sectorsChangedSlot();
+
     void loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset);
     void loadingDoneSlot();
 
@@ -142,6 +144,12 @@ public:
     std::set<unsigned int> unusedDSIDs() const;
     std::map<unsigned int, std::set<unsigned int>> unusedDSIDLines() const;
 
+    bool useSectorsExtend() const;
+    void useSectorsExtend(bool value);
+    
+    const std::map<std::string, bool>& usedSectors() const;
+    void useSector(const std::string& sector_name, bool value);
+
     ReconstructorBase::DataSlice& processingSlice();
     const ReconstructorBase::DataSlice& processingSlice() const;
 
@@ -177,6 +185,9 @@ protected:
     nlohmann::json use_dstypes_; // dstype -> bool
     nlohmann::json use_data_sources_; // ds_id -> bool
     nlohmann::json use_data_sources_lines_; // ds_id -> line_id -> bool
+
+    bool use_sectors_extend_{false};
+    std::map<std::string, bool> used_sectors_;
 
     std::unique_ptr<SimpleReconstructor> simple_reconstructor_; // has to be reset after each calculation
 

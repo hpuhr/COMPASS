@@ -39,6 +39,7 @@
 #include "projectionmanager.h"
 #include "projection.h"
 #include "licensemanager.h"
+#include "sectorlayer.h"
 
 #include "report/report.h"
 #include "report/section.h"
@@ -719,6 +720,18 @@ void ReconstructorTask::writeDataSlice()
     dbcontent_man.insertData(writing_slice_->reftraj_data_);
 }
 
+void ReconstructorTask::sectorsChangedSlot()
+{
+    auto& sectors_layers = COMPASS::instance().evaluationManager().sectorsLayers();
+
+    use_sectors_extend_ = sectors_layers.size();
+
+    used_sectors_.clear();
+
+    for (const auto& sect_it : sectors_layers)
+        used_sectors_[sect_it->name()] = true;
+}
+
 void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
     assert (loading_slice_);
@@ -1209,6 +1222,26 @@ std::map<unsigned int, std::set<unsigned int>> ReconstructorTask::unusedDSIDLine
     }
 
     return unused_lines;
+}
+
+bool ReconstructorTask::useSectorsExtend() const
+{
+    return use_sectors_extend_;
+}
+
+void ReconstructorTask::useSectorsExtend(bool value)
+{
+    use_sectors_extend_ = value;
+}
+
+const std::map<std::string, bool>& ReconstructorTask::usedSectors() const
+{
+    return used_sectors_;
+}
+
+void ReconstructorTask::useSector(const std::string& sector_name, bool value)
+{
+    used_sectors_[sector_name] = value;
 }
 
 ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
