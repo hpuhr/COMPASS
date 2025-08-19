@@ -111,12 +111,12 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
         read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_track_end_));
 
             // mode 3a
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
+    if(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_m3a_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_m3a_));
 
             // mode c
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
+    if(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_mc_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_mc_));
 
     if (dbcontent_name == "CAT062")
     {
@@ -125,16 +125,16 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
     }
 
             // latitude
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
+    if(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_latitude_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_latitude_));
 
             // longitude
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
+    if(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_longitude_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_longitude_));
 
             // assoc
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_));
-    read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
+    if(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_utn_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
 
             // rec num, must be last for update process
     assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
@@ -146,6 +146,9 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
         assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
         read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
     }
+
+    if(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_message_type_))
+        read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_message_type_));
 
     read_set.add(dbContent::TargetReportAccessor::getReadSetFor(dbcontent_name));
 
