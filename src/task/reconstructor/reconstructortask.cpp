@@ -786,14 +786,21 @@ void ReconstructorTask::writeDataSlice()
 
 void ReconstructorTask::sectorsChangedSlot()
 {
-    auto& sectors_layers = COMPASS::instance().evaluationManager().sectorsLayers();
-
-    use_sectors_extend_ = sectors_layers.size();
-
     used_sectors_.clear();
 
-    for (const auto& sect_it : sectors_layers)
-        used_sectors_[sect_it->name()] = true;
+    if (COMPASS::instance().evaluationManager().sectorsLoaded())
+    {
+        auto& sectors_layers = COMPASS::instance().evaluationManager().sectorsLayers();
+
+        use_sectors_extend_ = sectors_layers.size();
+
+        for (const auto& sect_it : sectors_layers)
+            used_sectors_[sect_it->name()] = true;
+    }
+    else
+    {
+        use_sectors_extend_ = false;
+    }
 }
 
 void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
