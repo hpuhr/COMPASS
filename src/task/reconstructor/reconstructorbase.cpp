@@ -979,7 +979,7 @@ void ReconstructorBase::createTargetReports()
     std::set<unsigned int> ground_only_ds_ids = ds_man.groundOnlyDBDataSources();
 
     std::vector<std::shared_ptr<SectorLayer>> used_sector_layers;
-    bool inside_any;
+    //bool inside_any;
 
     if (task_.useSectorsExtend())
     {
@@ -1013,6 +1013,36 @@ void ReconstructorBase::createTargetReports()
         dbContent::TargetReportAccessor& tgt_acc = accessors_.at(dbcont_id);
         unsigned int buffer_size = tgt_acc.size();
 
+        std::vector<bool> position_usable;
+        position_usable.resize(buffer_size);
+
+        tbb::parallel_for(uint(0), buffer_size, [&](unsigned int cnt)
+            {
+                if (!tgt_acc.position(cnt))
+                {
+                    position_usable[cnt] = false;
+                    return;
+                }
+
+                if (task_.useSectorsExtend())
+                {
+                    bool inside_any = false;
+
+                    for (const auto& sect_lay_it : used_sector_layers)
+                    {
+                        if (sect_lay_it->isInside(tgt_acc.position(cnt)->latitude_,
+                                                  tgt_acc.position(cnt)->longitude_,
+                                                  task_.sectorDeltaDeg()))
+                        {
+                            inside_any = true;
+                            break;
+                        }
+                    }
+
+                    position_usable[cnt] = inside_any;
+                }
+            });
+
         for (unsigned int cnt=0; cnt < buffer_size; cnt++)
         {
             record_num = tgt_acc.recordNumber(cnt);
@@ -1021,29 +1051,8 @@ void ReconstructorBase::createTargetReports()
 
             //loginf << "ts " << Time::toString(ts);
 
-            if (!tgt_acc.position(cnt))
+            if (!position_usable.at(cnt))
                 continue;
-
-            if (task_.useSectorsExtend())
-            {
-                inside_any = false;
-
-                for (const auto& sect_lay_it : used_sector_layers)
-                {
-                    if (sect_lay_it->isInside(tgt_acc.position(cnt)->latitude_, tgt_acc.position(cnt)->longitude_, task_.sectorDeltaDeg()))
-                    {
-                        inside_any = true;
-                        break;
-                    }
-                }
-
-                if (!inside_any)
-                {
-                    logdbg2 << "lat " << tgt_acc.position(cnt)->latitude_ << " lon " << tgt_acc.position(cnt)->longitude_ 
-                        << " !inside_any " << !inside_any;
-                    continue;
-                }
-            }
 
             if (target_reports_.count(record_num)) // already exist, update buffer_index_
             {

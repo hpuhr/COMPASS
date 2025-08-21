@@ -56,6 +56,8 @@ ReconstructorSectorWidget::ReconstructorSectorWidget(ReconstructorTask& task,
     
     layout->addLayout(grid_cont_lay);
 
+    layout->addWidget(new QLabel("Surrounding Delta [WGS84 deg]"));
+
     sectors_delta_edit_ = new QLineEdit();
     connect(sectors_delta_edit_, &QLineEdit::textEdited, 
         this, &ReconstructorSectorWidget::sectorsDeltaChangedSlot);
