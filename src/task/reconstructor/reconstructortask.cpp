@@ -122,6 +122,8 @@ ReconstructorTask::ReconstructorTask(const std::string& class_id, const std::str
                       &debug_settings_.debug_write_reconstruction_viewpoints_,
                       debug_settings_.debug_write_reconstruction_viewpoints_);
 
+    registerParameter("sector_delta_deg", &sector_delta_deg_, sector_delta_deg_);
+
     createSubConfigurables();
 }
 
@@ -721,6 +723,12 @@ void ReconstructorTask::processDataSlice()
            << !processing_slice_->first_slice_
            << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
 
+    for (auto& buf_it : processing_slice_->data_)
+    {
+        loginf << buf_it.first << " size " << buf_it.second->size() 
+        << " num prop " << buf_it.second->properties().size();
+    }
+
     process_future_ = std::async(std::launch::async, [&] {
         try
         {
@@ -818,17 +826,24 @@ void ReconstructorTask::loadingDoneSlot()
            << " current_slice_idx " << current_slice_idx_;
 
     // add data to slice
-    loading_slice_->data_.clear();
-    loading_slice_->status_data_.clear();
+    loading_slice_->data_ = dbcontent_man.data();
 
-    for (auto& buf_it : dbcontent_man.data())
+    for (auto& buf_it : loading_slice_->data_)
     {
-        if (dbcontent_man.dbContent(buf_it.first).containsTargetReports())
-            loading_slice_->data_[buf_it.first] = buf_it.second;
-
-        if (dbcontent_man.dbContent(buf_it.first).containsStatusContent())
-            loading_slice_->status_data_[buf_it.first] = buf_it.second;
+        loginf << buf_it.first << " size " << buf_it.second->size() 
+        << " num prop " << buf_it.second->properties().size();
     }
+
+    //loading_slice_->data_.clear();
+
+    // for (auto& buf_it : dbcontent_man.data())
+    // {
+    //     if (dbcontent_man.dbContent(buf_it.first).containsTargetReports())
+    //         loading_slice_->data_[buf_it.first] = buf_it.second;
+
+    //     if (dbcontent_man.dbContent(buf_it.first).containsStatusContent())
+    //         loading_slice_->status_data_[buf_it.first] = buf_it.second;
+    // }
 
     dbcontent_man.clearData(); // clear previous
 
@@ -846,7 +861,7 @@ void ReconstructorTask::loadingDoneSlot()
                << " data slice proc " << processing_data_slice_;
 
         QCoreApplication::processEvents();
-        QThread::msleep(1000);
+        QThread::msleep(10);
     }
 
     if (cancelled_)

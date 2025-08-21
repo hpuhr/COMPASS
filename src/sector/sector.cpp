@@ -21,6 +21,7 @@
 #include "dbcontent/target/targetposition.h"
 
 #include <cassert>
+#include <cmath>
 
 #include <ogr_geometry.h>
 
@@ -659,6 +660,14 @@ bool Sector::isInside(double latitude, double longitude, double delta_deg) const
         ogr_pos = {test_x, test_y};
 
         if (ogr_polygon_->Contains(&ogr_pos))
+            return true;
+    }
+
+    // final: check distance to polygon points (for small geometry)
+
+    for (auto& point_it : points_)
+    {
+        if (sqrt(pow(point_it.first-latitude, 2)+pow(point_it.second-longitude, 2)) < delta_deg)
             return true;
     }
 

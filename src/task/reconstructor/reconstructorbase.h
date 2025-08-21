@@ -156,7 +156,6 @@ public:
         boost::posix_time::ptime write_before_time_;
 
         std::map<std::string, std::shared_ptr<Buffer>> data_;
-        std::map<std::string, std::shared_ptr<Buffer>> status_data_;
         bool loading_done_ {false}; // set if data_ is set correctly and can be processed
 
         std::map<std::string, std::shared_ptr<Buffer>> assoc_data_;

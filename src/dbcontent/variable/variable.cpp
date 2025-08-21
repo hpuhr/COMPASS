@@ -204,10 +204,14 @@ bool Variable::operator==(const Variable& var)
     return true;
 }
 
+std::string Variable::str() const
+{
+    return Configurable::getParent().instanceId() + ": " + name_ + " (" + data_type_str_ + ")";
+}
+
 void Variable::print() const
 {
-    loginf << "dbcont " << Configurable::getParent().instanceId() << " id " << name_
-           << " data type " << data_type_str_;
+    loginf << str();
 }
 
 void Variable::checkSubConfigurables()

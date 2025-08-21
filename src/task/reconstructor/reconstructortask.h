@@ -151,6 +151,7 @@ public:
     void useSector(const std::string& sector_name, bool value);
 
     float sectorDeltaDeg() const { return sector_delta_deg_; }
+    void sectorDeltaDeg(float value) { sector_delta_deg_ = value; }
 
     ReconstructorBase::DataSlice& processingSlice();
     const ReconstructorBase::DataSlice& processingSlice() const;

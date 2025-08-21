@@ -18,7 +18,6 @@
 #pragma once
 
 #include "configurable.h"
-//#include "global.h"
 #include "property.h"
 #include "stringconv.h"
 #include "logger.h"
@@ -68,6 +67,7 @@ class Variable : public QObject, public Property, public Configurable
 
     bool operator==(const Variable& var);
 
+    std::string str() const;
     void print() const;
 
     virtual void generateSubConfigurable(const std::string& class_id,

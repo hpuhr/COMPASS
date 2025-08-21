@@ -410,9 +410,8 @@ void Buffer::sortByProperty(const Property& property)
 
 void Buffer::seizeBuffer(Buffer& org_buffer)
 {
-    logdbg << "start";
-
-    logdbg << "size " << size() << " other size " << org_buffer.size();
+    logdbg << dbcontent_name_ << " size " << size() << " num prop " << properties_.size() 
+     << " other size " << org_buffer.size() << " num prop " << properties_.size() ;
 
     seizeArrayListMap<bool>(org_buffer);
     seizeArrayListMap<char>(org_buffer);
@@ -437,7 +436,9 @@ void Buffer::seizeBuffer(Buffer& org_buffer)
 
     size_ += org_buffer.size_;
 
-    logdbg << "end size " << size();
+    org_buffer.size_ = 0;
+
+    logdbg << dbcontent_name_ << " end size " << size() << " num prop " << properties_.size();
 }
 
 size_t Buffer::size() const { return size_; }

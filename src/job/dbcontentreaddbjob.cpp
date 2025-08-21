@@ -22,7 +22,6 @@
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/variable/variable.h"
 #include "logger.h"
-//#include "propertylist.h"
 #include "compass.h"
 #include "viewmanager.h"
 
@@ -103,8 +102,9 @@ void DBContentReadDBJob::run_impl()
 
         if (last_buffer) // distribute data, !view_manager.isProcessingData() || 
         {
-            logdbg << "start" << dbcontent_.name()
-                   << ": emitting intermediate read, size " << row_count_;
+            logdbg << dbcontent_.name()
+                   << ": emitting intermediate read, size " << cached_buffer_->size();
+            //cached_buffer_->printProperties();
 
             emit intermediateSignal(cached_buffer_);
 

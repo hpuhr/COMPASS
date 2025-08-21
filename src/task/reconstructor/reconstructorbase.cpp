@@ -837,7 +837,7 @@ void ReconstructorBase::processSlice()
 {
     assert (!currentSlice().remove_before_time_.is_not_a_date_time());
 
-    loginf << "start" << Time::toString(currentSlice().timestamp_min_)
+    loginf << "start " << Time::toString(currentSlice().timestamp_min_)
            << " first_slice " << currentSlice().first_slice_;
 
     processing_ = true;
@@ -854,7 +854,7 @@ void ReconstructorBase::processSlice()
 
     accessor_->add(currentSlice().data_);
 
-    logdbg << "processing slice";
+    loginf << "processing slice";
 
     processSlice_impl();
 
@@ -1002,6 +1002,10 @@ void ReconstructorBase::createTargetReports()
     for (auto& buf_it : *accessor_)
     {
         assert (dbcont_man.existsDBContent(buf_it.first));
+
+        if (!dbcont_man.dbContent(buf_it.first).containsTargetReports())
+            continue;
+
         unsigned int dbcont_id = dbcont_man.dbContent(buf_it.first).id();
 
         accessors_.emplace(dbcont_id, accessor_->targetReportAccessor(buf_it.first));
@@ -1149,7 +1153,7 @@ void ReconstructorBase::createTargetReportBatches()
 
     dbContent::DBContentStatusInfo status_info;
 
-    status_info.process(currentSlice().status_data_);
+    status_info.process(accessor_->buffers());
 
     //std::map<unsigned int, std::map<unsigned int, std::map<unsigned int, std::vector<unsigned long>>>> tr_ds_;
     // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
@@ -1160,16 +1164,23 @@ void ReconstructorBase::createTargetReportBatches()
 
     for (auto& ds_type : data_source_type_order)
     {
+        logdbg << "ds_type " << ds_type;
 
         for (auto& dbcont_it : tr_ds_)
         {
+            logdbg << "dbcont " << dbcont_it.first;
+
             for (auto& ds_it : dbcont_it.second)
             {
                 if (ds_man.dbDataSource(ds_it.first).dsType() != ds_type)
                     continue;
 
+                logdbg << "ds_type " << ds_type << " dbcont " << dbcont_it.first << " ds " << ds_man.dbDataSource(ds_it.first).name();
+
                 for (auto& line_it : ds_it.second)
                 {
+                    logdbg << "line " << line_it.first;
+
                     std::vector<boost::posix_time::ptime> ds_ui_times;
 
                     if (status_info.hasInfo(ds_it.first, line_it.first))
@@ -1223,7 +1234,7 @@ void ReconstructorBase::createTargetReportBatches()
             }
         }
     }
-
+    logdbg << "done";
 }
 
 void ReconstructorBase::removeTargetReportsLaterOrEqualThan(const boost::posix_time::ptime& ts)

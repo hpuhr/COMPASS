@@ -19,6 +19,7 @@
 #include "reconstructortask.h"
 #include "sectorlayer.h"
 #include "logger.h"
+#include "stringconv.h"
 
 #include <QLabel>
 #include <QCheckBox>
@@ -26,8 +27,10 @@
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QLineEdit>
 
 using namespace std;
+using namespace Utils;
 
 /**
 */
@@ -52,6 +55,13 @@ ReconstructorSectorWidget::ReconstructorSectorWidget(ReconstructorTask& task,
     grid_cont_lay->addLayout(grid_layout_);
     
     layout->addLayout(grid_cont_lay);
+
+    sectors_delta_edit_ = new QLineEdit();
+    connect(sectors_delta_edit_, &QLineEdit::textEdited, 
+        this, &ReconstructorSectorWidget::sectorsDeltaChangedSlot);
+
+    layout->addWidget(sectors_delta_edit_);
+
     layout->addStretch();
 
     widget->setLayout(layout);
@@ -127,8 +137,25 @@ void ReconstructorSectorWidget::update()
     }
 
     use_sectors_check_->setEnabled(used_sectors.size());
-        
+
+    sectors_delta_edit_->setText(QString::number(task_.sectorDeltaDeg()));
 
     logdbg << "done";
+}
+
+void ReconstructorSectorWidget::sectorsDeltaChangedSlot(const QString& value_str)
+{
+    assert (sectors_delta_edit_);
+
+    bool ok;
+    float value = value_str.toDouble(&ok);
+
+    if (ok)
+    {
+        loginf << "sectors_delta " << value;
+        task_.sectorDeltaDeg(value);
+    }
+    else
+        loginf << "unable to parse string '" << value_str.toStdString() << "'";
 }
 

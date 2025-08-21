@@ -510,7 +510,7 @@ void DBContent::load(dbContent::VariableSet& read_set,
         filter_clause += custom_filter_clause;
     }
 
-    loginf << "filter_clause '" << filter_clause << "'";
+    logdbg << name_ << " read set " << read_set.str() << " filter_clause '" << filter_clause << "'";
 
     loadFiltered(read_set, filter_clause);
 }
@@ -846,8 +846,7 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
         assert(property.dataType() == var_it->dataType());
     }
 
-    logdbg << name_ << ": got buffer with size "
-           << buffer->size();
+    logdbg << name_ << ": got buffer with size " << buffer->size();
 
     // finalize buffer
     buffer->transformVariables(sender->readList(), true);

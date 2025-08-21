@@ -63,6 +63,14 @@ void DBContentStatusInfo::process(std::map<std::string, std::shared_ptr<Buffer>>
     for (auto& buf_it : buffers)
     {
         const std::string dbcontent_name = buf_it.first;
+
+        if (!dbcont_man.dbContent(buf_it.first).containsStatusContent())
+            continue;
+
+        logdbg << "dbcontent " << dbcontent_name << " size " << buf_it.second->size()
+        << " properties " << buf_it.second->properties().size();
+        //buf_it.second->printProperties();
+
         auto& dbcontent = dbcont_man.dbContent(dbcontent_name);
 
         if (!dbcontent.containsStatusContent())
@@ -105,9 +113,13 @@ void DBContentStatusInfo::process(std::map<std::string, std::shared_ptr<Buffer>>
         Variable& timestamp_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
         Variable& message_type_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_message_type_);
 
+        assert (buf_it.second->has<unsigned int>(ds_id_var.name()));
         NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
+        assert (buf_it.second->has<unsigned int>(line_id_var.name()));
         NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
+        assert (buf_it.second->has<boost::posix_time::ptime>(timestamp_var.name()));
         NullableVector<boost::posix_time::ptime>& timestamp_vec = buf_it.second->get<boost::posix_time::ptime>(timestamp_var.name());
+        assert (buf_it.second->has<unsigned char>(message_type_var.name()));
         NullableVector<unsigned char>& message_type_vec = buf_it.second->get<unsigned char>(message_type_var.name());
 
         assert (ds_id_vec.isNeverNull());

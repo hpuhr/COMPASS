@@ -23,6 +23,7 @@ class ReconstructorTask;
 
 class QCheckBox;
 class QGridLayout;
+class QLineEdit;
 
 /**
 */
@@ -33,6 +34,7 @@ class ReconstructorSectorWidget : public QScrollArea
 public slots:
     void toggleUseSectorsSlot();
     void toggleSectorSlot();
+    void sectorsDeltaChangedSlot(const QString& value_str);
 
 public:
     ReconstructorSectorWidget(ReconstructorTask& task, 
@@ -46,4 +48,5 @@ protected:
 
     QCheckBox* use_sectors_check_{nullptr};
     QGridLayout* grid_layout_ {nullptr};
+    QLineEdit* sectors_delta_edit_ {nullptr};
 };

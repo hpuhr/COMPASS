@@ -43,6 +43,7 @@ public:
 
     bool has(const std::string& dbcontent_name) const;
     std::shared_ptr<Buffer> get(const std::string& dbcontent_name);
+    std::map<std::string, std::shared_ptr<Buffer>> buffers() { return buffers_; }
 
     template <typename T>
     bool hasVar(const std::string& dbcontent_name, const Property& var_property) const;

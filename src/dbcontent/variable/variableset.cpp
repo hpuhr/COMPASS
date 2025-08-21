@@ -137,15 +137,24 @@ bool VariableSet::intersect(VariableSet& set)
     return added;
 }
 
-void VariableSet::print()
+std::string VariableSet::str() const
 {
-    logdbg << "size" << set_.size() << " changed " << changed_;
-    std::vector<Variable*>::iterator it;
+    std::ostringstream out;
 
-    for (it = set_.begin(); it != set_.end(); it++)
+    for (auto& var_it : set_)
     {
-        (*it)->print();
+        if (out.str().size())
+            out << ", ";
+
+        out << var_it->str();
     }
+
+    return out.str();
+}
+
+void VariableSet::print() const
+{
+    loginf << str();
 }
 
 void VariableSet::clear()
