@@ -128,11 +128,13 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
     //this method should only be called if there is no active connection
     assert(!dbOpen());
 
-    std::string dir      = boost::filesystem::path(db_fn).parent_path().string();
-    std::string basename = boost::filesystem::path(db_fn).stem().string();
-    std::string ext      = boost::filesystem::path(db_fn).extension().string();
+    // std::string dir      = boost::filesystem::path(db_fn).parent_path().string();
+    // std::string basename = boost::filesystem::path(db_fn).stem().string();
+    // std::string ext      = boost::filesystem::path(db_fn).extension().string();
 
-    std::string fn_temp  = dir + "/" + basename + ext + ".tmp";
+    //std::string fn_temp  = dir + "/" + basename + ext + ".tmp";
+
+    std::string fn_temp = db_fn + ".tmp";
 
     if (Files::fileExists(fn_temp))
     {
@@ -146,9 +148,16 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
         }
     }
 
+    loginf << "moving db '" << db_fn << "' exists " << Files::fileExists(db_fn) << " to '"
+           << fn_temp << "' exists " << Files::fileExists(fn_temp);
+
     //try to prepare current database for compression
-    if (!QFile::rename(QString::fromStdString(db_fn), QString::fromStdString(fn_temp)))
+
+    if (!Files::moveFile(db_fn, fn_temp))
         return Result::failed("Could not create temorary database");
+
+    // if (!QFile::rename(QString::fromStdString(db_fn), QString::fromStdString(fn_temp)))
+    //     return Result::failed("Could not create temorary database");
 
     //connect to in-mem db
     duckdb_database   db;
@@ -157,13 +166,18 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
     if (duckdb_open(NULL, &db) == DuckDBError) 
     {
         //revert back to old file (if possible)
-        QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
+        //QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
+        Files::moveFile(fn_temp, db_fn);
+
         return Result::failed("Could not open memory db");
     }
     if (duckdb_connect(db, &con) == DuckDBError) 
     {
         //revert back to old file (if possible)
-        QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
+        //QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
+
+        Files::moveFile(fn_temp, db_fn);
+
         return Result::failed("Could not open connection to memory db");
     }
 
@@ -177,7 +191,9 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
     {
         //remove any failed result + revert back to old file (if possible)
         QFile::remove(QString::fromStdString(db_fn));
-        QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
+        //QFile::rename(QString::fromStdString(fn_temp), QString::fromStdString(db_fn));
+
+        Files::moveFile(fn_temp, db_fn);
         return Result::failed("Compressing database failed");
     }
 
