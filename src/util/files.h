@@ -67,6 +67,8 @@ QIcon getIcon(const std::string& name, const QColor& color = QColor());
 void deleteFile(const std::string& filename);
 void deleteFolder(const std::string& path);
 
+bool moveFile(const std::string& fp_old, const std::string& fp_new); // only works for existing folders
+
 std::string getDirectoryFromPath(const std::string& path);
 std::string getFilenameFromPath(const std::string& path);
 bool createMissingDirectories(const std::string& path); // true if successful
