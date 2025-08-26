@@ -204,7 +204,6 @@ void ReconstructorAssociatorBase::associateTargetReports()
                 loginf << "processed time " << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
             }
 
-
             do_debug_rec_num = reconstructor().task().debugSettings().debug_association_ &&
                                reconstructor().task().debugSettings().debugRecNum(rec_num);
 

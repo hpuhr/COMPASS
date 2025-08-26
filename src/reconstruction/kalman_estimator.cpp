@@ -264,15 +264,31 @@ void KalmanEstimator::storeUpdate(Measurement& mm,
                                   const kalman::KalmanUpdate& update) const
 {
     assert(isInit());
-    assert(update.has_wgs84_pos);
 
     kalman_interface_->storeState(mm, update.state);
 
-    mm.t   = update.t;
-    mm.lat = update.lat;
-    mm.lon = update.lon;
-
+    mm.t         = update.t;
     mm.source_id = update.source_id;
+
+    //determine wgs84 pos
+    bool wgs84_pos_handled = true;
+    if (update.has_wgs84_pos)
+    {
+        //update has its own wgs84 pos => use it
+        mm.lat = update.lat;
+        mm.lon = update.lon;
+    }
+    else if (update.projection_center == proj_handler_->projectionCenter())
+    {
+        //update at least has the current projection center => unproject to lat/lon
+        proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
+    }
+    else
+    {
+        //no way to determine wgs84 pos (at least not in a cheap way due to needed projection center change)
+        wgs84_pos_handled = false;
+    }
+    assert(wgs84_pos_handled);
 }
 
 /**
@@ -286,9 +302,27 @@ void KalmanEstimator::storeUpdate(Measurement& mm,
 
     kalman_interface_->storeState(mm, update.x, update.P);
 
-    mm.t   = update.t;
-    mm.lat = update.lat;
-    mm.lon = update.lon;
+    mm.t = update.t;
+
+    //determine wgs84 pos
+    bool wgs84_pos_handled = true;
+    if (update.has_wgs84_pos)
+    {
+        //update has its own wgs84 pos => use it
+        mm.lat = update.lat;
+        mm.lon = update.lon;
+    }
+    else if (update.projection_center == proj_handler_->projectionCenter())
+    {
+        //update at least has the current projection center => unproject to lat/lon
+        proj_handler_->unproject(mm.lat, mm.lon, mm.x, mm.y);
+    }
+    else
+    {
+        //no way to determine wgs84 pos (at least not in a cheap way due to needed projection center change)
+        wgs84_pos_handled = false;
+    }
+    assert(wgs84_pos_handled);
 }
 
 /**
@@ -302,13 +336,29 @@ void KalmanEstimator::storeUpdate(Reference& ref,
 
     kalman_interface_->storeState(ref, update.state);
 
-    ref.t   = update.t;
-    ref.lat = update.lat;
-    ref.lon = update.lon;
-
-    ref.cov = update.state.P;
-
+    ref.t         = update.t;
+    ref.cov       = update.state.P;
     ref.source_id = update.source_id;
+
+    //determine wgs84 pos
+    bool wgs84_pos_handled = true;
+    if (update.has_wgs84_pos)
+    {
+        //update has its own wgs84 pos => use it
+        ref.lat = update.lat;
+        ref.lon = update.lon;
+    }
+    else if (update.projection_center == proj_handler_->projectionCenter())
+    {
+        //update at least has the current projection center => unproject to lat/lon
+        proj_handler_->unproject(ref.lat, ref.lon, ref.x, ref.y);
+    }
+    else
+    {
+        //no way to determine wgs84 pos (at least not in a cheap way due to needed projection center change)
+        wgs84_pos_handled = false;
+    }
+    assert(wgs84_pos_handled);
 }
 
 /**
@@ -323,10 +373,27 @@ void KalmanEstimator::storeUpdate(Reference& ref,
     kalman_interface_->storeState(ref, update.x, update.P);
 
     ref.t   = update.t;
-    ref.lat = update.lat;
-    ref.lon = update.lon;
-
     ref.cov = update.P;
+
+    //determine wgs84 pos
+    bool wgs84_pos_handled = true;
+    if (update.has_wgs84_pos)
+    {
+        //update has its own wgs84 pos => use it
+        ref.lat = update.lat;
+        ref.lon = update.lon;
+    }
+    else if (update.projection_center == proj_handler_->projectionCenter())
+    {
+        //update at least has the current projection center => unproject to lat/lon
+        proj_handler_->unproject(ref.lat, ref.lon, ref.x, ref.y);
+    }
+    else
+    {
+        //no way to determine wgs84 pos (at least not in a cheap way due to needed projection center change)
+        wgs84_pos_handled = false;
+    }
+    assert(wgs84_pos_handled);
 }
 
 /**

@@ -697,9 +697,9 @@ boost::optional<double> KalmanFilter::logLikelihood(const Vector& x, const Matri
 
 namespace helpers
 {
-    double mahalanobisPInv(const Vector& dx, const Matrix& P_inv)
+    double mahalanobisSqrPInv(const Vector& dx, const Matrix& P_inv)
     {
-        return std::sqrt(double(dx.transpose() * P_inv * dx));
+        return double(dx.transpose() * P_inv * dx);
     }
 }
 
@@ -707,14 +707,25 @@ namespace helpers
 */
 boost::optional<double> KalmanFilter::mahalanobis(const Vector& dx, const Matrix& P, bool P_is_inv)
 {
+    auto d_sqr = KalmanFilter::mahalanobisSqr(dx, P, P_is_inv);
+    if (!d_sqr.has_value())
+        return {};
+
+    return std::sqrt(d_sqr.value());
+}
+
+/**
+*/
+boost::optional<double> KalmanFilter::mahalanobisSqr(const Vector& dx, const Matrix& P, bool P_is_inv)
+{
     if (P_is_inv)
-        return helpers::mahalanobisPInv(dx, P);
+        return helpers::mahalanobisSqrPInv(dx, P);
     
     Matrix P_inv;
     if (!KalmanFilter::invertMatrix(P_inv, P))
         return {};
     
-    return helpers::mahalanobisPInv(dx, P_inv);
+    return helpers::mahalanobisSqrPInv(dx, P_inv);
 }
 
 /**

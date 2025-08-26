@@ -44,6 +44,11 @@ public:
     static void normalizeLikelihoods(Eigen::VectorXd& likelihoods, 
                                      NormalizeMode mode, 
                                      bool debug = false);
+    static void normalizeLikelihoods(std::vector<double>& likelihoods, 
+                                     NormalizeMode mode, 
+                                     bool debug = false);
+    static double probabilityFromMahalanobisSqr(double d2_m, 
+                                                unsigned int n);
 
     static const double LikelihoodEpsilon;
     static const double LogLikelihoodEpsilon;

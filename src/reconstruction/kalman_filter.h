@@ -167,6 +167,7 @@ public:
     static boost::optional<double> likelihood(const Vector& x, const Matrix& P, bool check_eps);
     static boost::optional<double> logLikelihood(const Vector& x, const Matrix& P, bool check_eps);
     static boost::optional<double> mahalanobis(const Vector& dx, const Matrix& P, bool P_is_inv);
+    static boost::optional<double> mahalanobisSqr(const Vector& dx, const Matrix& P, bool P_is_inv);
     
 protected:
 #if USE_EXPERIMENTAL_SOURCE

@@ -31,6 +31,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/msghandler.h"
         "${CMAKE_CURRENT_LIST_DIR}/compass_assert.h"
         "${CMAKE_CURRENT_LIST_DIR}/accuracy.h"
+        "${CMAKE_CURRENT_LIST_DIR}/cartesian_product.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/config.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/files.cpp"

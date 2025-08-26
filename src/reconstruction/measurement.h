@@ -60,11 +60,17 @@ struct Measurement
     double approxLikelihood(const Measurement& other) const;
 
     boost::optional<double> mahalanobisDistance(const Measurement& other, 
-                                                unsigned char components = CovMatPos) const;
+                                                unsigned char components = CovMatPos,
+                                                bool verbose = false) const;
+    boost::optional<double> mahalanobisDistanceSqr(const Measurement& other, 
+                                                   unsigned char components = CovMatPos,
+                                                   bool verbose = false) const;
     boost::optional<double> likelihood(const Measurement& other, 
-                                       unsigned char components = CovMatPos) const;
+                                       unsigned char components = CovMatPos,
+                                       bool verbose = false) const;
     boost::optional<double> logLikelihood(const Measurement& other, 
-                                          unsigned char components = CovMatPos) const;
+                                          unsigned char components = CovMatPos,
+                                          bool verbose = false) const;
 
     bool hasVelocity() const;
     bool hasAcceleration() const;
@@ -129,6 +135,7 @@ struct Measurement
 
     bool                     mm_interp         = false; // measurement has been interpolated (e.g. by spline interpolator)
     bool                     pos_acc_corrected = false; // position accuracy has been corrected due to invalid correlation coefficient
+    bool                     test_clutter      = false; // measurement is test clutter (for debugging purpose)
 
     double                   lat;                       // wgs84 latitude 
     double                   lon;                       // wgs84 longitude

@@ -19,6 +19,8 @@
 
 #include "logger.h"
 
+#include <boost/math/distributions/chi_squared.hpp>
+
 const double GaussianPDF::LikelihoodEpsilon    = std::numeric_limits<double>::epsilon();
 const double GaussianPDF::LogLikelihoodEpsilon = -16.0;
 const double GaussianPDF::NormalizeThreshold   = 1e-09;
@@ -224,4 +226,38 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
     //likelihoods.array() -= likelihoods.maxCoeff();
     //likelihoods = likelihoods.array().exp();
     //likelihoods /= likelihoods.sum();
+}
+
+/**
+ * Some overhead due to conversion to intermediate Eigen::VectorXd.
+*/
+void GaussianPDF::normalizeLikelihoods(std::vector<double>& likelihoods, 
+                                       NormalizeMode mode, 
+                                       bool debug)
+{
+    size_t n = likelihoods.size();
+
+    Eigen::VectorXd l;
+    l.resize(n);
+
+    for (size_t i = 0; i < n; ++i)
+        l[ i ] = likelihoods[ i ];
+
+    normalizeLikelihoods(l, mode, debug);
+
+    for (size_t i = 0; i < n; ++i)
+        likelihoods[ i ] = l[ i ];
+}
+
+/**
+ * Computes a gate probability given a squared mahalanobis distance threshold.
+ */
+double GaussianPDF::probabilityFromMahalanobisSqr(double d2_m, 
+                                                  unsigned int n) 
+{
+    assert(n > 0);
+    assert(d2_m >= 0.0);
+
+    boost::math::chi_squared dist(n);
+    return boost::math::cdf(dist, d2_m);
 }

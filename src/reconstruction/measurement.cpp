@@ -23,6 +23,7 @@
 #include "global.h"
 #include "accuracy.h"
 #include "timeconv.h"
+#include "logger.h"
 
 #include <osgEarth/GeoMath>
 
@@ -162,7 +163,8 @@ double Measurement::approxLikelihood(const Measurement& other) const
 /**
 */
 boost::optional<double> Measurement::mahalanobisDistance(const Measurement& other,
-                                                         unsigned char components) const
+                                                         unsigned char components,
+                                                         bool verbose) const
 {
     auto P = covMat(components);
     auto R = other.covMat(components);
@@ -171,14 +173,23 @@ boost::optional<double> Measurement::mahalanobisDistance(const Measurement& othe
     auto z = other.stateVec(components);
 
     auto y = z - x;
+
+    if (verbose)
+    {
+        loginf << "detection state:\n" << z;
+        loginf << "detection covmat:\n" << R;
+        loginf << "predicted state:\n" << x;
+        loginf << "predicted covmat:\n" << P + R;
+    }
 
     return kalman::KalmanFilter::mahalanobis(y, P + R, false);
 }
 
 /**
 */
-boost::optional<double> Measurement::likelihood(const Measurement& other,
-                                                unsigned char components) const
+boost::optional<double> Measurement::mahalanobisDistanceSqr(const Measurement& other, 
+                                                            unsigned char components,
+                                                            bool verbose) const
 {
     auto P = covMat(components);
     auto R = other.covMat(components);
@@ -187,6 +198,39 @@ boost::optional<double> Measurement::likelihood(const Measurement& other,
     auto z = other.stateVec(components);
 
     auto y = z - x;
+
+    if (verbose)
+    {
+        loginf << "detection state:\n" << z;
+        loginf << "detection covmat:\n" << R;
+        loginf << "predicted state:\n" << x;
+        loginf << "predicted covmat:\n" << P + R;
+    }
+
+    return kalman::KalmanFilter::mahalanobisSqr(y, P + R, false);
+}
+
+/**
+*/
+boost::optional<double> Measurement::likelihood(const Measurement& other,
+                                                unsigned char components,
+                                                bool verbose) const
+{
+    auto P = covMat(components);
+    auto R = other.covMat(components);
+
+    auto x = stateVec(components);
+    auto z = other.stateVec(components);
+
+    auto y = z - x;
+
+    if (verbose)
+    {
+        loginf << "detection state:\n" << z;
+        loginf << "detection covmat:\n" << R;
+        loginf << "predicted state:\n" << x;
+        loginf << "predicted covmat:\n" << P + R;
+    }
 
     return kalman::KalmanFilter::likelihood(y, P + R, true);
 }
@@ -194,7 +238,8 @@ boost::optional<double> Measurement::likelihood(const Measurement& other,
 /**
 */
 boost::optional<double> Measurement::logLikelihood(const Measurement& other,
-                                                   unsigned char components) const
+                                                   unsigned char components,
+                                                   bool verbose) const
 {
     auto P = covMat(components);
     auto R = other.covMat(components);
@@ -203,6 +248,14 @@ boost::optional<double> Measurement::logLikelihood(const Measurement& other,
     auto z = other.stateVec(components);
 
     auto y = z - x;
+
+    if (verbose)
+    {
+        loginf << "detection state:\n" << z;
+        loginf << "detection covmat:\n" << R;
+        loginf << "predicted state:\n" << x;
+        loginf << "predicted covmat:\n" << P + R;
+    }
 
     return kalman::KalmanFilter::logLikelihood(y, P + R, true);
 }

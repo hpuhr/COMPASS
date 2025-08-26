@@ -295,7 +295,6 @@ public:
     // dbcontent id -> ds_id -> line id -> record_num, sorted by ts
     std::multimap<boost::posix_time::ptime, TargetReportBatch> tr_batches_;
     
-
     TargetsContainer targets_container_;
 
     std::unique_ptr<AccuracyEstimatorBase> acc_estimator_;
@@ -351,6 +350,10 @@ protected:
     virtual void processSlice_impl() = 0;
 
     virtual void init_impl() {}
+
+    virtual void targetAdded(unsigned int utn) {}
+    virtual void targetToBeRemoved(unsigned int utn) {}
+    virtual void targetsToBeCleared() {}
 
     void clearOldTargetReports();
     void createTargetReports();
