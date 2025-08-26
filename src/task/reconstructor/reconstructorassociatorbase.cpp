@@ -291,7 +291,8 @@ void ReconstructorAssociatorBase::associateTargetReportBatch(const boost::posix_
         }
     }
 
-    associateUnreliablePrimaryOnly(ts, unreliable_primary_only_trs, do_debug_rec_num);
+    if (!unreliable_primary_only_trs.empty())
+        associateUnreliablePrimaryOnly(ts, unreliable_primary_only_trs, do_debug_rec_num);
 }
 
 void ReconstructorAssociatorBase::associateUnreliablePrimaryOnly(const boost::posix_time::ptime& ts,

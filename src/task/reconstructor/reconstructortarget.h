@@ -382,6 +382,7 @@ public:
                        reconstruction::PredictionStats* stats = nullptr) const;
     // hp: plz rework to tr -> posix timestamp, mm to targetreportdefs structs pos, posacc, maybe by return
 
+    bool hasChain() const;
     const reconstruction::KalmanChain& getChain() const;
 
     //    bool hasADSBMOPSVersion();
