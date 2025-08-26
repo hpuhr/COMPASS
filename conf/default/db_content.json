@@ -148,6 +148,57 @@
                     }
                 }
             },
+            "MetaMessageType0": {
+                "parameters": {
+                    "name": "Message Type"
+                },
+                "sub_configs": {
+                    "VariableDefinition": {
+                        "VariableDefinitionCAT002Message Type0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT002",
+                                "variable_name": "Message Type"
+                            }
+                        },
+                        "VariableDefinitionCAT004Message Type0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT004",
+                                "variable_name": "Message Type"
+                            }
+                        },
+                        "VariableDefinitionCAT010Message Type0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT010",
+                                "variable_name": "Message Type"
+                            }
+                        },
+                        "VariableDefinitionCAT019Message Type0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT019",
+                                "variable_name": "Message Type"
+                            }
+                        },
+                        "VariableDefinitionCAT023Report Type0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT023",
+                                "variable_name": "Report Type"
+                            }
+                        },
+                        "VariableDefinitionCAT034Message Type0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT034",
+                                "variable_name": "Message Type"
+                            }
+                        },
+                        "VariableDefinitionCAT065Message Type0": {
+                            "parameters": {
+                                "dbcontent_name": "CAT065",
+                                "variable_name": "Message Type"
+                            }
+                        }
+                    }
+                }
+            },
             "MetaVariableARTAS Hash0": {
                 "parameters": {
                     "name": "ARTAS Hash"
