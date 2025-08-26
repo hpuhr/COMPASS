@@ -351,10 +351,6 @@ protected:
 
     virtual void init_impl() {}
 
-    virtual void targetAdded(unsigned int utn) {}
-    virtual void targetToBeRemoved(unsigned int utn) {}
-    virtual void targetsToBeCleared() {}
-
     void clearOldTargetReports();
     void createTargetReports();
     void createTargetReportBatches();

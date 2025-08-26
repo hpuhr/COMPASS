@@ -99,7 +99,13 @@ protected:
     boost::posix_time::time_duration time_retry_assoc_trs_;
 
     void associateTargetReports();
+    void associateTargetReportBatch(const boost::posix_time::ptime& ts, 
+                                    const ReconstructorBase::TargetReportBatch& batch);
     void associateTargetReports(std::set<unsigned int> dbcont_ids);
+
+    virtual void associateUnreliablePrimaryOnly(const boost::posix_time::ptime& ts,
+                                                const std::vector<unsigned long>& rec_nums,
+                                                bool debug);
 
     void selfAssociateNewUTNs();
     void retryAssociateTargetReports();

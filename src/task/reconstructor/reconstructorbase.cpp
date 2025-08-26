@@ -126,8 +126,6 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
 
     utn_vec_.push_back(utn);
 
-    reconstructor_->targetAdded(utn);
-
     return utn;
 }
 
@@ -135,8 +133,6 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
 void ReconstructorBase::TargetsContainer::removeUTN(unsigned int other_utn)
 {
     assert (targets_.count(other_utn));
-
-    reconstructor_->targetToBeRemoved(other_utn);
 
     targets_.erase(other_utn);
 
@@ -441,8 +437,6 @@ void ReconstructorBase::TargetsContainer::eraseTrackNumberLookup(dbContent::targ
 
 void ReconstructorBase::TargetsContainer::clear()
 {
-    reconstructor_->targetsToBeCleared();
-
     utn_vec_.clear();
 
     acad_2_utn_.clear(); // acad dec -> utn

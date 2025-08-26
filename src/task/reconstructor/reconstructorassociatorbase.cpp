@@ -165,120 +165,147 @@ void ReconstructorAssociatorBase::associateTargetReports()
     loginf << "num timestamps "
            << reconstructor().tr_timestamps_.size();
 
-    unsigned long rec_num;
-    int utn;
-
-    bool do_debug_rec_num = false;
-
     reconstructor().targets_container_.checkACADLookup();
 
-    bool is_unreliable_primary_only;
-
     boost::posix_time::ptime last_ts;
-
     auto five_min = boost::posix_time::seconds(5*60);
-    unsigned int ts_cnt=0;
+    unsigned int batch_cnt=0;
 
     for (auto& batch_it : reconstructor().tr_batches_)
     {
         if (reconstructor().isCancelled())
             return;
 
-        for (auto& rn_it : batch_it.second.rec_nums_)
+        if (last_ts.is_not_a_date_time())
         {
-            rec_num = rn_it;
-            assert(reconstructor().target_reports_.count(rec_num));
-
-            dbContent::targetReport::ReconstructorInfo& tr =
-                reconstructor().target_reports_.at(rec_num);
-
-            if (last_ts.is_not_a_date_time())
-            {
-                last_ts = tr.timestamp_;
-                loginf << "start time " << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
-            }
-
-            if (tr.timestamp_ - last_ts > five_min)
-            {
-                last_ts = tr.timestamp_;
-                loginf << "processed time " << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
-            }
-
-            do_debug_rec_num = reconstructor().task().debugSettings().debug_association_ &&
-                               reconstructor().task().debugSettings().debugRecNum(rec_num);
-
-            if (do_debug_rec_num)
-                loginf << "DBG tr " << rec_num;
-
-            if (!tr.in_current_slice_)
-            {
-                if (do_debug_rec_num)
-                    loginf << "DBG tr " << rec_num << " not in current slice";
-
-                continue;
-            }
-
-            if (reconstructor().acc_estimator_->canCorrectPosition(tr))
-            {
-                if (do_debug_rec_num)
-                    loginf << "DBG correcting position";
-
-                reconstructor().acc_estimator_->correctPosition(tr);
-            }
-
-            utn = -1;
-
-            is_unreliable_primary_only =
-                tr.dbcont_id_ != 62 && tr.dbcont_id_ != 255 && tr.isPrimaryOnlyDetection();
-
-            if (do_debug_rec_num)
-                loginf << "is_unreliable_primary_only " << is_unreliable_primary_only;
-
-            if (!is_unreliable_primary_only)  // if unreliable primary only, delay association until
-                                              // retry
-            {
-                if (do_debug_rec_num)
-                    loginf << "DBG !is_unreliable_primary_only finding UTN";
-
-                utn = findUTNFor(tr);
-
-                if (do_debug_rec_num ||
-                    (reconstructor().task().debugSettings().debug_association_ &&
-                     reconstructor().task().debugSettings().debugUTN(utn)))
-                    loginf << "DBG !is_unreliable_primary_only got UTN " << utn;
-            }
-
-            if (utn != -1)  // estimate accuracy and associate
-            {
-                bool do_debug_utn = reconstructor().task().debugSettings().debug_association_ &&
-                                    reconstructor().task().debugSettings().debugUTN(utn);
-
-                if (do_debug_rec_num || do_debug_utn)
-                    loginf << "DBG associating tr " << rec_num << " to UTN " << utn;
-
-                associate(tr, utn);
-
-                if (do_debug_rec_num || do_debug_utn)
-                {
-                    assert(reconstructor().targets_container_.targets_.count(utn));
-
-                    loginf << "DBG target after assoc "
-                           << reconstructor().targets_container_.targets_.at(utn).asStr();
-                }
-            }
-            else  // not associated
-            {
-                if (do_debug_rec_num)
-                    loginf << "DBG adding to unassoc_rec_nums_";
-
-                unassoc_rec_nums_.push_back(rec_num);
-            }
-
-            ++ts_cnt;
+            last_ts = batch_it.first;
+            loginf << "start time " << Time::toString(last_ts) << " batch_cnt " << batch_cnt;
         }
+
+        if (batch_it.first - last_ts > five_min)
+        {
+            last_ts = batch_it.first;
+            loginf << "processed time " << Time::toString(last_ts) << " batch_cnt " << batch_cnt;
+        }
+
+        associateTargetReportBatch(batch_it.first, batch_it.second);
+
+        ++batch_cnt;
     }
 
     loginf << "done";
+}
+
+void ReconstructorAssociatorBase::associateTargetReportBatch(const boost::posix_time::ptime& ts, 
+                                                             const ReconstructorBase::TargetReportBatch& batch)
+{
+    bool do_debug_rec_num = false;
+    
+    unsigned long rec_num;
+    int utn;
+    bool is_unreliable_primary_only;
+
+    std::vector<unsigned long> unreliable_primary_only_trs;
+    for (auto& rn_it : batch.rec_nums_)
+    {
+        rec_num = rn_it;
+        assert(reconstructor().target_reports_.count(rec_num));
+
+        dbContent::targetReport::ReconstructorInfo& tr =
+            reconstructor().target_reports_.at(rec_num);
+
+        do_debug_rec_num = reconstructor().task().debugSettings().debug_association_ &&
+                            reconstructor().task().debugSettings().debugRecNum(rec_num);
+
+        if (do_debug_rec_num)
+            loginf << "DBG tr " << rec_num;
+
+        if (!tr.in_current_slice_)
+        {
+            if (do_debug_rec_num)
+                loginf << "DBG tr " << rec_num << " not in current slice";
+
+            continue;
+        }
+
+        if (reconstructor().acc_estimator_->canCorrectPosition(tr))
+        {
+            if (do_debug_rec_num)
+                loginf << "DBG correcting position";
+
+            reconstructor().acc_estimator_->correctPosition(tr);
+        }
+
+        is_unreliable_primary_only =
+            tr.dbcont_id_ != 62 && tr.dbcont_id_ != 255 && tr.isPrimaryOnlyDetection();
+
+        if (do_debug_rec_num)
+            loginf << "is_unreliable_primary_only " << is_unreliable_primary_only;
+
+        if (is_unreliable_primary_only)
+        {
+            unreliable_primary_only_trs.push_back(rec_num);
+            continue;
+        }
+
+        utn = -1;
+
+        if (!is_unreliable_primary_only)  // if unreliable primary only, delay association until
+                                            // retry
+        {
+            if (do_debug_rec_num)
+                loginf << "DBG !is_unreliable_primary_only finding UTN";
+
+            utn = findUTNFor(tr);
+
+            if (do_debug_rec_num ||
+                (reconstructor().task().debugSettings().debug_association_ &&
+                    reconstructor().task().debugSettings().debugUTN(utn)))
+                loginf << "DBG !is_unreliable_primary_only got UTN " << utn;
+        }
+
+        if (utn != -1)  // estimate accuracy and associate
+        {
+            bool do_debug_utn = reconstructor().task().debugSettings().debug_association_ &&
+                                reconstructor().task().debugSettings().debugUTN(utn);
+
+            if (do_debug_rec_num || do_debug_utn)
+                loginf << "DBG associating tr " << rec_num << " to UTN " << utn;
+
+            associate(tr, utn);
+
+            if (do_debug_rec_num || do_debug_utn)
+            {
+                assert(reconstructor().targets_container_.targets_.count(utn));
+
+                loginf << "DBG target after assoc "
+                        << reconstructor().targets_container_.targets_.at(utn).asStr();
+            }
+        }
+        else  // not associated
+        {
+            if (do_debug_rec_num)
+                loginf << "DBG adding to unassoc_rec_nums_";
+
+            unassoc_rec_nums_.push_back(rec_num);
+        }
+    }
+
+    associateUnreliablePrimaryOnly(ts, unreliable_primary_only_trs, do_debug_rec_num);
+}
+
+void ReconstructorAssociatorBase::associateUnreliablePrimaryOnly(const boost::posix_time::ptime& ts,
+                                                                 const std::vector<unsigned long>& rec_nums,
+                                                                 bool debug)
+{
+    //default: just add to unassociated and retry later on
+    for (auto rec_num : rec_nums) 
+    {
+        if (debug)
+            loginf << "DBG adding tr " << rec_num << " to unassoc_rec_nums_";
+
+        unassoc_rec_nums_.push_back(rec_num);
+    }
 }
 
 void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> dbcont_ids)
