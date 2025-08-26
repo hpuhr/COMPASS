@@ -1524,6 +1524,29 @@ void ReconstructorBase::doReconstructionReporting()
     table.addRow({"", "", "", ""});
     table.addRow({"Rec interp steps", "", "", ""});
     table.addRow({"", "failed", stats.num_rec_interp_failed, ""});
+
+    for (const auto& batch_stats : associator().batchStatistics())
+    {
+        auto& ds = COMPASS::instance().dataSourceManager().dbDataSource(batch_stats.first);
+
+        loginf << "* batch statistics for data source '" << ds.name() << "':";
+        loginf << "";
+        loginf << "   #batches:        " << batch_stats.second.num_batches;
+        loginf << "   batch size min:  " << batch_stats.second.batch_size_min;
+        loginf << "   batch size max:  " << batch_stats.second.batch_size_max;
+        loginf << "   batch size mean: " << batch_stats.second.batchSizeMean();
+        loginf << "";
+        loginf << "   #in slice batches:        " << batch_stats.second.num_batches_slice;
+        loginf << "   in slice batch size min:  " << batch_stats.second.batch_slice_size_min;
+        loginf << "   in slice batch size max:  " << batch_stats.second.batch_slice_size_max;
+        loginf << "   in slice batch size mean: " << batch_stats.second.batchSizeInSliceMean();
+        loginf << "";
+        loginf << "   #primary only batches:        " << batch_stats.second.num_batches_po;
+        loginf << "   primary only batch size min:  " << batch_stats.second.batch_po_size_min;
+        loginf << "   primary only batch size max:  " << batch_stats.second.batch_po_size_max;
+        loginf << "   primary only batch size mean: " << batch_stats.second.batchSizePrimaryOnlyMean();
+        loginf << "";
+    }
 }
 
 void ReconstructorBase::doUnassociatedAnalysis()
