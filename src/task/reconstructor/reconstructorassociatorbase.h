@@ -72,8 +72,8 @@ class ReconstructorAssociatorBase
     struct BatchStats
     {
         double batchSizeMean() const { return num_batches == 0 ? 0.0 : (double)batch_size_mean / (double)num_batches; } 
-        double batchSizeInSliceMean() const { return num_batches == 0 ? 0.0 : (double)batch_slice_size_mean / (double)num_batches_slice; } 
-        double batchSizePrimaryOnlyMean() const { return num_batches == 0 ? 0.0 : (double)batch_po_size_mean / (double)num_batches_po; } 
+        double batchSizeInSliceMean() const { return num_batches_slice == 0 ? 0.0 : (double)batch_slice_size_mean / (double)num_batches_slice; } 
+        double batchSizePrimaryOnlyMean() const { return num_batches_po == 0 ? 0.0 : (double)batch_po_size_mean / (double)num_batches_po; } 
 
         size_t num_batches       = 0;
         size_t num_batches_slice = 0;

@@ -337,7 +337,8 @@ VariableSet DBContentManager::getReadSet(const std::string& dbcontent_name)
 /**
  */
 void DBContentManager::load(const std::string& custom_filter_clause, 
-                            bool measure_db_performance)
+                            bool measure_db_performance,
+                            const std::map<std::string, dbContent::VariableSet>* custom_read_set)
 {
     loading_done_ = false;
 
@@ -392,6 +393,9 @@ void DBContentManager::load(const std::string& custom_filter_clause,
             
             auto read_set = getReadSet(object.first);
 
+            if (custom_read_set && custom_read_set->count(object.first))
+                read_set.add(custom_read_set->at(object.first));
+
             if (read_set.getSize() == 0)
             {
                 logwrn << "skipping loading of object " << object.first
@@ -417,9 +421,10 @@ void DBContentManager::load(const std::string& custom_filter_clause,
  */
 void DBContentManager::loadBlocking(const std::string& custom_filter_clause, 
                                     bool measure_db_performance,
-                                    unsigned int sleep_msecs)
+                                    unsigned int sleep_msecs,
+                                    const std::map<std::string, dbContent::VariableSet>* custom_read_set)
 {
-    load(custom_filter_clause, measure_db_performance);
+    load(custom_filter_clause, measure_db_performance, custom_read_set);
 
     while (!loading_done_)
     {

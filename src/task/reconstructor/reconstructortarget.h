@@ -96,6 +96,15 @@ public:
             num_rec_smooth_steps_failed     = 0;
             num_rec_smooth_target_failed    = 0;
             num_rec_interp_failed           = 0;
+
+            num_jpda_runs             = 0;
+            num_jpda_success          = 0;
+            num_jpda_failed           = 0;
+            num_jpda_hyp_max          = 0;
+            num_jpda_mms_max          = 0;
+            num_jpda_assignments      = 0;
+            num_jpda_clutters         = 0;
+            jpda_assignment_ratio_sum = 0.0;
         }
 
         size_t num_chain_checked                 = 0;
@@ -135,6 +144,15 @@ public:
         size_t num_rec_smooth_steps_failed     = 0;
         size_t num_rec_smooth_target_failed    = 0;
         size_t num_rec_interp_failed           = 0;
+
+        size_t num_jpda_runs             = 0;
+        size_t num_jpda_success          = 0;
+        size_t num_jpda_failed           = 0;
+        size_t num_jpda_hyp_max          = 0;
+        size_t num_jpda_mms_max          = 0;
+        size_t num_jpda_assignments      = 0;
+        size_t num_jpda_clutters         = 0;
+        double jpda_assignment_ratio_sum = 0.0;
     };
 
     struct InterpOptions

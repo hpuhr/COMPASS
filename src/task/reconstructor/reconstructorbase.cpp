@@ -1171,6 +1171,10 @@ void ReconstructorBase::createTargetReportBatches()
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
+    size_t num_truncated_noinfo = 0;
+    size_t num_truncated_oor    = 0;
+    size_t num_status_info      = 0;
+
     for (auto& ds_type : data_source_type_order)
     {
         logdbg << "ds_type " << ds_type;
@@ -1205,25 +1209,62 @@ void ReconstructorBase::createTargetReportBatches()
 
                         boost::posix_time::ptime batch_time;
                         
-                        if (!ds_ui_times.empty())
+                        if (ds_ui_times.size() >= 2)
                         {
+                            boost::posix_time::ptime t_interval;
+#if 0
                             // Find the appropriate batch time from ds_ui_times
-                            auto it = std::lower_bound(ds_ui_times.begin(), ds_ui_times.end(), timestamp);
-                            
+                            //PWa: lower_bound = first element in range which is not ordered before value => it >= value!
+                            auto it = std::lower_bound(ds_ui_times.begin(), ds_ui_times.end(), timestamp); 
                             if (it != ds_ui_times.end() && 
                                 (it == ds_ui_times.begin() || timestamp >= *it))
+                                t_interval = *it;
+#else
+                            //assume intervals as [t0,t1)
+                            //first elem in ds_ui_times > timestamp
+                            auto it = std::upper_bound(ds_ui_times.begin(), ds_ui_times.end(), timestamp); 
+
+                            if (it == ds_ui_times.end())
                             {
-                                // Use the batch time from ds_ui_times
-                                batch_time = *it;
+                                // last value <= timestamp => check if timestamp is exactly the last value
+                                if (ds_ui_times.back() == timestamp)
+                                {
+                                    // it is => add to last interval
+                                    // alternatively: skip as out of range
+                                    t_interval = ds_ui_times[ ds_ui_times.size() - 2 ];
+                                }
+                            }
+                            else if (it == ds_ui_times.begin())
+                            {
+                                // first value > timestamp => out of range
                             }
                             else
                             {
+                                // in interval => use interval begin
+                                size_t idx = std::distance(ds_ui_times.begin(), it) - 1;
+                                t_interval = ds_ui_times[ idx ];
+                            }
+#endif
+
+                            if (!t_interval.is_not_a_date_time())
+                            {
+                                ++num_status_info;
+
+                                // Use the batch time from ds_ui_times
+                                batch_time = t_interval;
+                            }
+                            else
+                            {
+                                ++num_truncated_oor;
+
                                 // Outside of given times, use truncated UTC 1 second timestamps
                                 batch_time = Time::truncateToFullSeconds(timestamp);
                             }
                         }
                         else
                         {
+                            ++num_truncated_noinfo;
+                            
                             // No ds_ui_times given, use truncated UTC 1 second timestamps
                             batch_time = Time::truncateToFullSeconds(timestamp);
                         }
@@ -1243,6 +1284,10 @@ void ReconstructorBase::createTargetReportBatches()
             }
         }
     }
+
+    //loginf << "BATCHES truncated noinfo " << num_truncated_noinfo << " truncated oor " << num_truncated_oor << " status info used " << num_status_info;
+    //assert(false);
+
     logdbg << "done";
 }
 
@@ -1524,6 +1569,21 @@ void ReconstructorBase::doReconstructionReporting()
     table.addRow({"", "", "", ""});
     table.addRow({"Rec interp steps", "", "", ""});
     table.addRow({"", "failed", stats.num_rec_interp_failed, ""});
+
+    if (stats.num_jpda_runs > 0)
+    {
+        table.addRow({"", "", "", ""});
+        table.addRow({"JPDA", "", "", ""});
+        table.addRow({"runs", stats.num_jpda_runs, "", ""});
+        table.addRow({"success", stats.num_jpda_success, "", ""});
+        table.addRow({"failed", stats.num_jpda_failed, "", ""});
+        table.addRow({"hypotheses max", stats.num_jpda_hyp_max, "", ""});
+        table.addRow({"measurements max", stats.num_jpda_mms_max, "", ""});
+        table.addRow({"assignments total", stats.num_jpda_assignments, "", ""});
+        table.addRow({"clutter total", stats.num_jpda_clutters, "", ""});
+        table.addRow({"assignment ratio 1", (double)stats.num_jpda_assignments / (double)(stats.num_jpda_assignments + stats.num_jpda_clutters) * 100, "", ""});
+        table.addRow({"assignment ratio 2", stats.jpda_assignment_ratio_sum / stats.num_jpda_success * 100, "", ""});
+    }
 
     for (const auto& batch_stats : associator().batchStatistics())
     {
