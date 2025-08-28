@@ -106,20 +106,20 @@ ASTERIXConfigWidget::~ASTERIXConfigWidget() {}
 
 void ASTERIXConfigWidget::editDataBlockSlot()
 {
-    loginf << "ASTERIXConfigWidget: editDataBlockSlot: open '"
+    loginf << "open '"
            << task_.jASTERIX()->dataBlockDefinitionPath() << "'";
     QDesktopServices::openUrl(QUrl(task_.jASTERIX()->dataBlockDefinitionPath().c_str()));
 }
 void ASTERIXConfigWidget::editCategoriesSlot()
 {
-    loginf << "ASTERIXConfigWidget: editCategoriesSlot: open '"
+    loginf << "open '"
            << task_.jASTERIX()->categoriesDefinitionPath() << "'";
     QDesktopServices::openUrl(QUrl(task_.jASTERIX()->categoriesDefinitionPath().c_str()));
 }
 
 void ASTERIXConfigWidget::refreshjASTERIXSlot()
 {
-    loginf << "ASTERIXConfigWidget: refreshjASTERIXSlot";
+    loginf << "start";
 
     task_.jASTERIX(true);
     task_.testFileDecoding(); // in case anything was changed
@@ -129,7 +129,7 @@ void ASTERIXConfigWidget::refreshjASTERIXSlot()
 
 void ASTERIXConfigWidget::updateSlot()
 {
-    loginf << "ASTERIXConfigWidget: updateSlot";
+    loginf << "start";
     updateFraming();
     updateCategories();
 }
@@ -137,7 +137,7 @@ void ASTERIXConfigWidget::updateSlot()
 void ASTERIXConfigWidget::framingChangedSlot()
 {
     assert(framing_combo_);
-    loginf << "ASTERIXConfigWidget: framingChangedSlot: " << framing_combo_->getFraming();
+    loginf << "start" << framing_combo_->getFraming();
 
     task_.settings().current_file_framing_ = framing_combo_->getFraming();
 
@@ -153,7 +153,7 @@ void ASTERIXConfigWidget::framingEditSlot()
 {
     std::string framing_path = "file:///" + task_.jASTERIX()->framingsFolderPath() + "/" +
             task_.settings().current_file_framing_ + ".json";
-    loginf << "ASTERIXConfigWidget: framingEditSlot: path '" << framing_path << "'";
+    loginf << "path '" << framing_path << "'";
     QDesktopServices::openUrl(QUrl(framing_path.c_str()));
 }
 
@@ -226,7 +226,7 @@ void ASTERIXConfigWidget::updateCategories()
     {
         unsigned int category = cat_it.first;
 
-        logdbg << "ASTERIXConfigWidget: updateCategories: cat " << category;
+        logdbg << "cat " << category;
 
         QCheckBox* cat_check = new QCheckBox(String::categoryString(category).c_str());
         connect(cat_check, &QCheckBox::clicked, this, &ASTERIXConfigWidget::categoryCheckedSlot);
@@ -312,14 +312,14 @@ void ASTERIXConfigWidget::categoryCheckedSlot()
     bool decode = widget->checkState() == Qt::Checked;
     unsigned int cat = cat_var.toUInt();
 
-    loginf << "ASTERIXConfigWidget: categoryCheckedSlot: cat " << cat;
+    loginf << "cat " << cat;
 
     task_.decodeCategory(cat, decode);
 }
 
 void ASTERIXConfigWidget::editionChangedSlot(const std::string& cat_str, const std::string& ed_str)
 {
-    loginf << "ASTERIXConfigWidget: editionChangedSlot: cat " << cat_str << " edition " << ed_str;
+    loginf << "cat " << cat_str << " edition " << ed_str;
 
     unsigned int cat = std::stoul(cat_str);
     task_.editionForCategory(cat, ed_str);
@@ -328,7 +328,7 @@ void ASTERIXConfigWidget::editionChangedSlot(const std::string& cat_str, const s
 void ASTERIXConfigWidget::refEditionChangedSlot(const std::string& cat_str,
                                                 const std::string& ed_str)
 {
-    loginf << "ASTERIXConfigWidget: refEditionChangedSlot: cat " << cat_str << " ref '" << ed_str
+    loginf << "cat " << cat_str << " ref '" << ed_str
            << "'";
 
     unsigned int cat = std::stoul(cat_str);
@@ -344,7 +344,7 @@ void ASTERIXConfigWidget::refEditionChangedSlot(const std::string& cat_str,
 void ASTERIXConfigWidget::spfEditionChangedSlot(const std::string& cat_str,
                                                 const std::string& ed_str)
 {
-    loginf << "ASTERIXConfigWidget: spfEditionChangedSlot: cat " << cat_str << " ref '" << ed_str
+    loginf << "cat " << cat_str << " ref '" << ed_str
            << "'";
 
     unsigned int cat = std::stoul(cat_str);
@@ -359,7 +359,7 @@ void ASTERIXConfigWidget::spfEditionChangedSlot(const std::string& cat_str,
 
 void ASTERIXConfigWidget::categoryEditionEditSlot()
 {
-    loginf << "ASTERIXConfigWidget: categoryEditionEditSlot";
+    loginf << "start";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
     assert(widget);
@@ -376,14 +376,14 @@ void ASTERIXConfigWidget::categoryEditionEditSlot()
     assert(task_.jASTERIX()->category(cat)->hasEdition(edition_str));
     std::string def_path = task_.jASTERIX()->category(cat)->editionPath(edition_str);
 
-    loginf << "ASTERIXConfigWidget: categoryEditSlot: cat " << cat << " path '" << def_path << "'";
+    loginf << "cat " << cat << " path '" << def_path << "'";
 
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
 }
 
 void ASTERIXConfigWidget::categoryREFEditionEditSlot()
 {
-    loginf << "ASTERIXConfigWidget: categoryREFEditionEditSlot";
+    loginf << "start";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
     assert(widget);
@@ -396,13 +396,13 @@ void ASTERIXConfigWidget::categoryREFEditionEditSlot()
     else
         ref_edition_str = task_.jASTERIX()->category(cat)->defaultREFEdition();
 
-    loginf << "ASTERIXConfigWidget: categoryREFEditionEditSlot: ref '" << ref_edition_str << "'";
+    loginf << "ref '" << ref_edition_str << "'";
 
     assert(task_.jASTERIX()->hasCategory(cat));
     assert(task_.jASTERIX()->category(cat)->hasREFEdition(ref_edition_str));
     std::string def_path = task_.jASTERIX()->category(cat)->refEditionPath(ref_edition_str);
 
-    loginf << "ASTERIXConfigWidget: categoryREFEditionEditSlot: cat " << cat << " ref path '"
+    loginf << "cat " << cat << " ref path '"
            << def_path << "'";
 
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
@@ -410,7 +410,7 @@ void ASTERIXConfigWidget::categoryREFEditionEditSlot()
 
 void ASTERIXConfigWidget::categorySPFEditionEditSlot()
 {
-    loginf << "ASTERIXConfigWidget: categorySPFEditionEditSlot";
+    loginf << "start";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
     assert(widget);
@@ -423,13 +423,13 @@ void ASTERIXConfigWidget::categorySPFEditionEditSlot()
     else
         spf_edition_str = task_.jASTERIX()->category(cat)->defaultSPFEdition();
 
-    loginf << "ASTERIXConfigWidget: categorySPFEditionEditSlot: spf '" << spf_edition_str << "'";
+    loginf << "spf '" << spf_edition_str << "'";
 
     assert(task_.jASTERIX()->hasCategory(cat));
     assert(task_.jASTERIX()->category(cat)->hasSPFEdition(spf_edition_str));
     std::string def_path = task_.jASTERIX()->category(cat)->spfEditionPath(spf_edition_str);
 
-    loginf << "ASTERIXConfigWidget: categorySPFEditionEditSlot: cat " << cat << " ref path '"
+    loginf << "cat " << cat << " ref path '"
            << def_path << "'";
 
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
@@ -437,7 +437,7 @@ void ASTERIXConfigWidget::categorySPFEditionEditSlot()
 
 //void ASTERIXConfigWidget::categoryMappingChangedSlot(unsigned int cat, const std::string& mapping_str)
 //{
-//    loginf << "ASTERIXConfigWidget: categoryMappingChangedSlot: cat " << cat
+//    loginf << "cat " << cat
 //           << " mapping '" << mapping_str << "'";
 
 //    task_.setActiveMapping(cat, mapping_str);

@@ -51,15 +51,15 @@ void AllBufferTableModel::setChangedSlot()
 
 int AllBufferTableModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    logdbg << "AllBufferTableModel: rowCount: " << row_indexes_.size();
+    logdbg << "start" << row_indexes_.size();
     return row_indexes_.size();
 }
 
 int AllBufferTableModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    logdbg << "AllBufferTableModel: columnCount: " << data_source_.getSet()->getSize();
+    logdbg << "start" << data_source_.getSet()->getSize();
 
-    // cnt, DBO
+    // cnt, DBCont
     return data_source_.getSet()->getSize() + 2;
 }
 
@@ -70,7 +70,7 @@ QVariant AllBufferTableModel::headerData(int section, Qt::Orientation orientatio
 
     if (orientation == Qt::Horizontal)
     {
-        logdbg << "AllBufferTableModel: headerData: section " << section;
+        logdbg << "section " << section;
         unsigned int col = section;
 
         if (col == 0)
@@ -109,18 +109,18 @@ Qt::ItemFlags AllBufferTableModel::flags(const QModelIndex& index) const
 
 QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 {
-    logdbg << "AllBufferTableModel: data: row " << index.row() - 1 << " col " << index.column() - 1;
+    logdbg << "row " << index.row() - 1 << " col " << index.column() - 1;
 
     bool null = false;
 
     assert(index.row() >= 0);
     assert((unsigned int)index.row() < row_indexes_.size());
-    unsigned int dbo_num = row_indexes_.at(index.row()).first;
+    unsigned int dbcont_num = row_indexes_.at(index.row()).first;
     unsigned int buffer_index = row_indexes_.at(index.row()).second;
     unsigned int col = index.column();
 
-    assert(number_to_dbo_.count(dbo_num) == 1);
-    const std::string& dbcontent_name = number_to_dbo_.at(dbo_num);
+    assert(number_to_dbcont_.count(dbcont_num) == 1);
+    const std::string& dbcontent_name = number_to_dbcont_.at(dbcont_num);
 
     assert(buffers_.count(dbcontent_name) == 1);
     std::shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
@@ -150,7 +150,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 
         if (buffer_index >= buffer->size())
         {
-            logerr << "AllBufferTableModel: data: index " << buffer_index << " too large for "
+            logerr << "index " << buffer_index << " too large for "
                    << dbcontent_name << "  size " << buffer->size();
             return QVariant();
         }
@@ -164,7 +164,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 
         col -= 2;  // for the actual properties
 
-        //        loginf << "AllBufferTableModel: data: col " << col << " set size " <<
+        //        loginf << "col " << col << " set size " <<
         //        data_source_.getSet()->getSize()
         //               << " show assoc " << show_associations_;
         assert(col < data_source_.getSet()->getSize());
@@ -184,7 +184,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
         }
         else
         {
-            if (dbcontent_name != variable_dbcontent_name)  // check if other dbo
+            if (dbcontent_name != variable_dbcontent_name)  // check if other dbcont
                 return QString();
 
             assert(manager.existsDBContent(dbcontent_name));
@@ -200,7 +200,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 
         if (!properties.hasProperty(variable.name()))
         {
-            logdbg << "AllBufferTableModel: data: variable " << variable.name()
+            logdbg << "variable " << variable.name()
                    << " not present in buffer";
         }
         else
@@ -369,7 +369,7 @@ QVariant AllBufferTableModel::data(const QModelIndex& index, int role) const
 
 bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    logdbg << "AllBufferTableModel: setData: checked row " << index.row() << " col "
+    logdbg << "checked row " << index.row() << " col "
            << index.column();
 
     if (role == Qt::CheckStateRole && index.column() == 0)
@@ -378,11 +378,11 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
 
         assert(index.row() >= 0);
         assert((unsigned int)index.row() < row_indexes_.size());
-        unsigned int dbo_num = row_indexes_.at(index.row()).first;
+        unsigned int dbcont_num = row_indexes_.at(index.row()).first;
         unsigned int buffer_index = row_indexes_.at(index.row()).second;
 
-        assert(number_to_dbo_.count(dbo_num) == 1);
-        std::string dbcontent_name = number_to_dbo_.at(dbo_num);
+        assert(number_to_dbcont_.count(dbcont_num) == 1);
+        std::string dbcontent_name = number_to_dbcont_.at(dbcont_num);
 
         assert(buffers_.count(dbcontent_name) == 1);
         std::shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
@@ -392,12 +392,12 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
 
         if (value == Qt::Checked)
         {
-            logdbg << "AllBufferTableModel: setData: checked row index" << buffer_index;
+            logdbg << "checked row index" << buffer_index;
             buffer->get<bool>(DBContent::selected_var.name()).set(buffer_index, true);
         }
         else
         {
-            logdbg << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
+            logdbg << "unchecked row index " << buffer_index;
             buffer->get<bool>(DBContent::selected_var.name()).set(buffer_index, false);
         }
         assert(table_widget_);
@@ -413,7 +413,7 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant& valu
 
 void AllBufferTableModel::clearData()
 {
-    logdbg << "AllBufferTableModel: clearData";
+    logdbg << "start";
 
     beginResetModel();
 
@@ -433,15 +433,15 @@ void AllBufferTableModel::setData(std::map<std::string, std::shared_ptr<Buffer>>
     {
         std::string dbcontent_name = buf_it.first;
 
-        if (dbcont_to_number_.count(dbcontent_name) == 0)  // new dbo from the wild
+        if (dbcont_to_number_.count(dbcontent_name) == 0)  // new dbcont from the wild
         {
             unsigned int num = dbcont_to_number_.size();
-            number_to_dbo_[num] = dbcontent_name;
+            number_to_dbcont_[num] = dbcontent_name;
             dbcont_to_number_[dbcontent_name] = num;
         }
     }
 
-    assert(dbcont_to_number_.size() == number_to_dbo_.size());
+    assert(dbcont_to_number_.size() == number_to_dbcont_.size());
 
     buffers_ = buffers;
 
@@ -453,7 +453,7 @@ void AllBufferTableModel::setData(std::map<std::string, std::shared_ptr<Buffer>>
 
 void AllBufferTableModel::updateTimeIndexes()
 {
-    logdbg << "AllBufferTableModel: updateTimeIndexes";
+    logdbg << "start";
 
     unsigned int buffer_index;
     std::string dbcontent_name;
@@ -481,7 +481,7 @@ void AllBufferTableModel::updateTimeIndexes()
 
         if (buffer_size > buffer_index + 1)  // new data
         {
-            logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbcontent_name
+            logdbg << "new " << dbcontent_name
                    << " data, last index " << buffer_index << " size " << buf_it.second->size();
 
             const dbContent::Variable& ts_var =
@@ -520,7 +520,7 @@ void AllBufferTableModel::updateTimeIndexes()
             }
 
             if (num_time_none)
-                loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbcontent_name << " skipped "
+                loginf << "new " << dbcontent_name << " skipped "
                        << num_time_none << " indexes with no time";
         }
     }
@@ -544,13 +544,13 @@ void AllBufferTableModel::reset()
 
 void AllBufferTableModel::saveAsCSV(const std::string& file_name)
 {
-    loginf << "AllBufferTableModel: saveAsCSV: into filename " << file_name;
+    loginf << "into filename " << file_name;
 
     if (!buffers_.size())
         return;
 
     AllBufferCSVExportJob* export_job = new AllBufferCSVExportJob(
-        buffers_, data_source_.getSet(), number_to_dbo_, row_indexes_, file_name, true,
+        buffers_, data_source_.getSet(), number_to_dbcont_, row_indexes_, file_name, true,
         view_.settings().show_only_selected_, view_.settings().use_presentation_);
 
     export_job_ = std::shared_ptr<AllBufferCSVExportJob>(export_job);
@@ -564,14 +564,14 @@ void AllBufferTableModel::saveAsCSV(const std::string& file_name)
 
 void AllBufferTableModel::exportJobObsoleteSlot()
 {
-    logdbg << "AllBufferTableModel: exportJobObsoleteSlot";
+    logdbg << "start";
 
     emit exportDoneSignal(true);
 }
 
 void AllBufferTableModel::exportJobDoneSlot()
 {
-    logdbg << "AllBufferTableModel: exportJobDoneSlot";
+    logdbg << "start";
 
     emit exportDoneSignal(false);
 }
@@ -591,9 +591,9 @@ void AllBufferTableModel::rebuild()
 
 std::pair<int,int> AllBufferTableModel::getSelectedRows()
 {
-    loginf << "AllBufferTableModel: getFirstSelectedRow";
+    loginf << "start";
 
-    unsigned int dbo_num;
+    unsigned int dbcont_num;
     unsigned int buffer_index;
 
     int first_row = -1;
@@ -601,11 +601,11 @@ std::pair<int,int> AllBufferTableModel::getSelectedRows()
 
     for (unsigned int cnt=0; cnt < row_indexes_.size(); ++cnt)
     {
-        dbo_num = row_indexes_.at(cnt).first;
+        dbcont_num = row_indexes_.at(cnt).first;
         buffer_index = row_indexes_.at(cnt).second;
 
-        assert(number_to_dbo_.count(dbo_num) == 1);
-        const std::string& dbcontent_name = number_to_dbo_.at(dbo_num);
+        assert(number_to_dbcont_.count(dbcont_num) == 1);
+        const std::string& dbcontent_name = number_to_dbcont_.at(dbcont_num);
 
         assert(buffers_.count(dbcontent_name) == 1);
 

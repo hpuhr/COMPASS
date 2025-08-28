@@ -51,14 +51,14 @@ void ConfigurationManager::init(const std::string& main_config_filename)
     std::string path_filename = CURRENT_CONF_DIRECTORY + main_config_filename;
     Files::verifyFileExists(path_filename);
 
-    loginf << "ConfigurationManager: init: opening main configuration file '" << path_filename
+    loginf << "opening main configuration file '" << path_filename
            << "'";
     parseJSONConfigurationFile(path_filename);
 }
 
 ConfigurationManager::~ConfigurationManager()
 {
-    logdbg << "ConfigurationManager: destructor";
+    logdbg << "start";
     initialized_ = false;
 }
 
@@ -70,7 +70,7 @@ Configuration& ConfigurationManager::registerRootConfigurable(Configurable& conf
 {
     assert(initialized_);
 
-    logdbg << "ConfigurationManager: registerRootConfigurable: " << configurable.instanceId();
+    logdbg << "start" << configurable.instanceId();
     std::pair<std::string, std::string> key(configurable.classId(), configurable.instanceId());
     assert(root_configurables_.find(key) == root_configurables_.end());
 
@@ -80,8 +80,7 @@ Configuration& ConfigurationManager::registerRootConfigurable(Configurable& conf
 
     if (root_configurations_.find(key) == root_configurations_.end())  // does not exist
     {
-        loginf
-            << "ConfigurationManager: getRootConfiguration: creating new configuration for class "
+        loginf << "creating new configuration for class "
             << configurable.classId() << " instance " << configurable.instanceId();
 
         auto ptr = new Configuration(configurable.classId(), configurable.instanceId());
@@ -98,7 +97,7 @@ void ConfigurationManager::unregisterRootConfigurable(Configurable& configurable
 {
     assert(initialized_);
 
-    logdbg << "ConfigurationManager: unregisterRootConfigurable: " << configurable.instanceId();
+    logdbg << "start" << configurable.instanceId();
     std::pair<std::string, std::string> key(configurable.classId(), configurable.instanceId());
     assert(root_configurables_.find(key) != root_configurables_.end());
     root_configurables_.erase(root_configurables_.find(key));
@@ -108,11 +107,11 @@ void ConfigurationManager::parseJSONConfigurationFile(const std::string& filenam
 {
     assert(initialized_);
 
-    logdbg << "ConfigurationManager: parseJSONConfigurationFile: opening '" << filename << "'";
+    logdbg << "opening '" << filename << "'";
     // XMLDocument *config_file_doc = new XMLDocument ();
 
     Files::verifyFileExists(filename);
-    logdbg << "ConfigurationManager: parseJSONConfigurationFile: opening file '" << filename << "'";
+    logdbg << "opening file '" << filename << "'";
 
     std::ifstream config_file(filename, std::ifstream::in);
 
@@ -148,7 +147,7 @@ void ConfigurationManager::parseJSONConfigurationFile(const std::string& filenam
                     assert(root_configurations_.find(key) ==
                            root_configurations_.end());  // should not exist
 
-                    loginf << "ConfigurationManager: parseJSONConfigurationFile: creating new "
+                    loginf << "creating new "
                               "configuration for class "
                            << class_id << " instance " << instance_id;
 
@@ -168,7 +167,7 @@ void ConfigurationManager::parseJSONConfigurationFile(const std::string& filenam
     }
     catch (json::exception& e)
     {
-        logerr << "ConfigurationManager: parseJSONConfigurationFile: could not load file '"
+        logerr << "could not load file '"
                << filename << "'";
         throw e;
     }
@@ -176,7 +175,7 @@ void ConfigurationManager::parseJSONConfigurationFile(const std::string& filenam
 
 void ConfigurationManager::saveConfiguration()
 {
-    loginf << "ConfigurationManager: saveConfiguration";
+    loginf << "start";
     saveJSONConfiguration();
 }
 
@@ -196,11 +195,11 @@ void ConfigurationManager::saveJSONConfiguration()
 
     json main_config;
 
-    logdbg << "ConfigurationManager: saveJSONConfiguration";
+    logdbg << "start";
 
     for (const auto& it : root_configurables_)  // iterate over root configurables
     {
-        loginf << "ConfigurationManager: saveJSONConfiguration: for configurable "
+        loginf << "for configurable "
                << it.first.second;
         it.second.writeJSON(main_config, Configuration::JSONExportType::General);
         // root_element->LinkEndChild(it.second.configuration().generateXMLElement(document));
@@ -211,7 +210,7 @@ void ConfigurationManager::saveJSONConfiguration()
         if (root_configurables_.find(it.first) ==
             root_configurables_.end())  // unused root configuration, not yet in save_info
         {
-            loginf << "ConfigurationManager: saveJSONConfiguration: configuration "
+            loginf << "configuration "
                    << it.second->getInstanceId() << " unused";
 
             it.second->writeJSON(main_config, Configuration::JSONExportType::General);
@@ -222,7 +221,7 @@ void ConfigurationManager::saveJSONConfiguration()
     std::string main_config_path = CURRENT_CONF_DIRECTORY + main_config_filename_;
     // String::replace(main_config_path, ".xml", ".json");
 
-    loginf << "ConfigurationManager: saveJSONConfiguration: saving main configuration file '"
+    loginf << "saving main configuration file '"
            << main_config_path << "'";
 
     // save file

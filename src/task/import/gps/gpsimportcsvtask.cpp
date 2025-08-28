@@ -116,7 +116,7 @@ GPSImportCSVTaskDialog* GPSImportCSVTask::dialog()
 
 void GPSImportCSVTask::importFilename(const std::string& filename)
 {
-    loginf << "GPSImportCSVTask: importFilename: filename '" << filename << "'";
+    loginf << "filename '" << filename << "'";
 
     current_filename_ = filename;
 
@@ -153,7 +153,7 @@ std::string GPSImportCSVTask::dsName() const
 
 void GPSImportCSVTask::dsName(const std::string& ds_name)
 {
-    loginf << "GPSImportCSVTask: dsName: value '" << ds_name << "'";
+    loginf << "value '" << ds_name << "'";
 
     ds_name_ = ds_name;
 }
@@ -165,7 +165,7 @@ unsigned int GPSImportCSVTask::dsSAC() const
 
 void GPSImportCSVTask::dsSAC(unsigned int ds_sac)
 {
-    loginf << "GPSImportCSVTask: dsSAC: value " << ds_sac;
+    loginf << "value " << ds_sac;
 
     ds_sac_ = ds_sac;
 }
@@ -177,7 +177,7 @@ unsigned int GPSImportCSVTask::dsSIC() const
 
 void GPSImportCSVTask::dsSIC(unsigned int ds_sic)
 {
-    loginf << "GPSImportCSVTask: dsSIC: value " << ds_sic;
+    loginf << "value " << ds_sic;
 
     ds_sic_ = ds_sic;
 }
@@ -189,7 +189,7 @@ float GPSImportCSVTask::todOffset() const
 
 void GPSImportCSVTask::todOffset(float tod_offset)
 {
-    loginf << "GPSImportCSVTask: todOffset: value " << tod_offset;
+    loginf << "value " << tod_offset;
 
     tod_offset_ = tod_offset;
 }
@@ -201,7 +201,7 @@ bool GPSImportCSVTask::setMode3aCode() const
 
 void GPSImportCSVTask::setMode3aCode(bool value)
 {
-    loginf << "GPSImportCSVTask: setMode3aCode: value " << value;
+    loginf << "value " << value;
 
     set_mode_3a_code_ = value;
 }
@@ -213,7 +213,7 @@ unsigned int GPSImportCSVTask::mode3aCode() const
 
 void GPSImportCSVTask::mode3aCode(unsigned int value)
 {
-    loginf << "GPSImportCSVTask: mode3aCode: value " << value;
+    loginf << "value " << value;
 
     mode_3a_code_ = value;
 }
@@ -225,7 +225,7 @@ bool GPSImportCSVTask::setTargetAddress() const
 
 void GPSImportCSVTask::setTargetAddress(bool value)
 {
-    loginf << "GPSImportCSVTask: setTargetAddress: value " << value;
+    loginf << "value " << value;
 
     set_target_address_ = value;
 }
@@ -237,7 +237,7 @@ unsigned int GPSImportCSVTask::targetAddress() const
 
 void GPSImportCSVTask::targetAddress(unsigned int target_address)
 {
-    loginf << "GPSImportCSVTask: targetAddress: value " << target_address;
+    loginf << "value " << target_address;
 
     target_address_ = target_address;
 }
@@ -249,7 +249,7 @@ bool GPSImportCSVTask::setCallsign() const
 
 void GPSImportCSVTask::setCallsign(bool value)
 {
-    loginf << "GPSImportCSVTask: setCallsign: value " << value;
+    loginf << "value " << value;
 
     set_callsign_ = value;
 }
@@ -261,7 +261,7 @@ std::string GPSImportCSVTask::callsign() const
 
 void GPSImportCSVTask::callsign(const std::string& callsign)
 {
-    loginf << "GPSImportCSVTask: callsign: value '" << callsign << "'";
+    loginf << "value '" << callsign << "'";
 
     callsign_ = callsign;
 }
@@ -273,7 +273,7 @@ unsigned int GPSImportCSVTask::lineID() const
 
 void GPSImportCSVTask::lineID(unsigned int line_id)
 {
-    loginf << "GPSImportCSVTask: lineID: value " << line_id;
+    loginf << "value " << line_id;
 
     line_id_ = line_id;
 }
@@ -291,7 +291,7 @@ bool GPSImportCSVTask::canImportFile()
 
     if (!Files::fileExists(current_filename_))
     {
-        loginf << "GPSImportCSVTask: canImportFile: not possible since file '" << current_filename_
+        loginf << "not possible since file '" << current_filename_
                << "does not exist";
         return false;
     }
@@ -301,7 +301,7 @@ bool GPSImportCSVTask::canImportFile()
 
 void GPSImportCSVTask::parseCurrentFile ()
 {
-    loginf << "GPSImportCSVTask: parseCurrentFile: file '" << current_filename_ << "'";
+    loginf << "file '" << current_filename_ << "'";
 
     current_error_ = "";
     current_text_ = "";
@@ -324,7 +324,7 @@ void GPSImportCSVTask::parseCurrentFile ()
 
     while (getline(file, line))
     {
-        logdbg << "GPSImportCSVTask: parseCurrentFile: line '" << line << "'";
+        logdbg << "line '" << line << "'";
 
         //        "GPSTime","Latitude","Longitude","MSL"
         if (line_cnt == 0)
@@ -337,7 +337,7 @@ void GPSImportCSVTask::parseCurrentFile ()
 
             if (parts.size() != 4)
             {
-                logerr << "GPSImportCSVTask: parseCurrentFile: wrong number of parts " << parts.size();
+                logerr << "wrong number of parts " << parts.size();
                 continue;
             }
 
@@ -345,7 +345,7 @@ void GPSImportCSVTask::parseCurrentFile ()
 
             if (fix.timestamp_.is_not_a_date_time())
             {
-                logerr << "GPSImportCSVTask: parseCurrentFile: wrong timestamp '" << parts.at(0) << "'";
+                logerr << "wrong timestamp '" << parts.at(0) << "'";
                 continue;
             }
 
@@ -354,7 +354,7 @@ void GPSImportCSVTask::parseCurrentFile ()
 
             if (std::isnan(fix.latitude_))
             {
-                logerr << "GPSImportCSVTask: parseCurrentFile: wrong latitude '" << parts.at(1) << "'";
+                logerr << "wrong latitude '" << parts.at(1) << "'";
                 continue;
             }
 
@@ -363,7 +363,7 @@ void GPSImportCSVTask::parseCurrentFile ()
 
             if (std::isnan(fix.longitude_))
             {
-                logerr << "GPSImportCSVTask: parseCurrentFile: wrong longitude '" << parts.at(2) << "'";
+                logerr << "wrong longitude '" << parts.at(2) << "'";
                 continue;
             }
 
@@ -372,7 +372,7 @@ void GPSImportCSVTask::parseCurrentFile ()
 
             if (std::isnan(fix.altitude_))
             {
-                logerr << "GPSImportCSVTask: parseCurrentFile: wrong altitude '" << parts.at(3) << "'";
+                logerr << "wrong altitude '" << parts.at(3) << "'";
                 continue;
             }
 
@@ -387,29 +387,29 @@ void GPSImportCSVTask::parseCurrentFile ()
 
                 if (!ok)
                 {
-                    logerr << "GPSImportCSVTask: parseCurrentFile: error with latitude " << fix.latitude_
+                    logerr << "error with latitude " << fix.latitude_
                            << " longitude " << fix.longitude_;
                 }
                 else
                 {
 
-                    logdbg << "GPSImportCSVTask: parseCurrentFile: offsets x " << fixed << x_pos
+                    logdbg << "offsets x " << fixed << x_pos
                            << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
 
                     d_t = Time::partialSeconds(fix.timestamp_ - prev_fix.timestamp_);
 
                     double v_x = x_pos/d_t;
                     double v_y = y_pos/d_t;
-                    logdbg << "EvaluationTargetData: parseCurrentFile: v_x " << v_x << " v_y " << v_y;
+                    logdbg << "v_x " << v_x << " v_y " << v_y;
 
 
-                    logdbg << "GPSImportCSVTask: parseCurrentFile: d_t " << d_t;
+                    logdbg << "d_t " << d_t;
 
                     //assert (ok); TODO?
 
                     // x_pos long, y_pos lat
 
-                    logdbg << "GPSImportCSVTask: parseCurrentFile: interpolated lat "
+                    logdbg << "interpolated lat "
                            << x_pos << " long " << y_pos;
 
                     track_angle = atan2(v_x,v_y); // bearing rad
@@ -441,7 +441,7 @@ void GPSImportCSVTask::parseCurrentFile ()
 
     current_text_ = ss.str();
 
-    loginf << "GPSImportCSVTask: parseCurrentFile: parsed " << gps_positions_.size() << " fixes in "
+    loginf << "parsed " << gps_positions_.size() << " fixes in "
            << line_cnt << " lines";
 
     QApplication::restoreOverrideCursor();
@@ -451,7 +451,7 @@ bool GPSImportCSVTask::canRun() { return canImportFile(); }
 
 void GPSImportCSVTask::run()
 {
-    loginf << "GPSImportCSVTask: run: filename '" << current_filename_ << " fixes " << gps_positions_.size();
+    loginf << "filename '" << current_filename_ << " fixes " << gps_positions_.size();
 
     assert (gps_positions_.size());
     assert (!buffer_);
@@ -479,7 +479,7 @@ void GPSImportCSVTask::run()
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ground_speed_));
     assert (dbcontent_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_track_angle_));
 
-    loginf << "GPSImportCSVTask: run: getting variables";
+    loginf << "getting variables";
 
     using namespace dbContent;
 
@@ -529,7 +529,7 @@ void GPSImportCSVTask::run()
     properties.addProperty(speed_var.name(), PropertyDataType::DOUBLE);
     properties.addProperty(track_angle_var.name(), PropertyDataType::DOUBLE);
 
-    loginf << "GPSImportCSVTask: run: creating buffer";
+    loginf << "creating buffer";
 
     buffer_ = make_shared<Buffer>(properties, dbcontent_name);
 
@@ -556,7 +556,7 @@ void GPSImportCSVTask::run()
     assert (dbcontent_man.hasMaxRefTrajTrackNum());
     unsigned int track_num = dbcontent_man.maxRefTrajTrackNum();
 
-    loginf << "GPSImportCSVTask: run: max reftraj track num " << track_num;
+    loginf << "max reftraj track num " << track_num;
 
     // config data source
     {
@@ -578,7 +578,7 @@ void GPSImportCSVTask::run()
     //boost::posix_time::ptime timestamp;
     //double speed_ms, track_angle_rad, vx, vy;
 
-    loginf << "GPSImportCSVTask: run: filling buffer";
+    loginf << "filling buffer";
 
     for (auto& fix_it : gps_positions_)
     {
@@ -632,11 +632,9 @@ void GPSImportCSVTask::run()
         ++cnt;
     }
 
-    //void insertData(DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change = true);
-
     dbcontent_man.maxRefTrajTrackNum(track_num+1); // increment for next
 
-    loginf << "GPSImportCSVTask: run: inserting data";
+    loginf << "inserting data";
 
     connect(&dbcontent_man, &DBContentManager::insertDoneSignal, this, &GPSImportCSVTask::insertDoneSlot,
             Qt::UniqueConnection);
@@ -646,7 +644,7 @@ void GPSImportCSVTask::run()
 
 void GPSImportCSVTask::insertDoneSlot()
 {
-    loginf << "GPSImportCSVTask: insertDoneSlot";
+    loginf << "start";
 
     buffer_ = nullptr;
 
@@ -693,5 +691,5 @@ void GPSImportCSVTask::dialogCancelSlot()
 
 //void GPSImportCSVTask::checkParsedData ()
 //{
-//    loginf << "GPSImportCSVTask: checkParsedData";
+//    loginf << "start";
 //}

@@ -64,19 +64,9 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::SingleSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
-    //table_view_->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    //table_view_->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    //table_view_->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     table_view_->setIconSize(QSize(24, 24));
     table_view_->setWordWrap(true);
     table_view_->reset();
-    //table_view_->show();
-//    table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
-//    table_->setColumnCount(table_columns_.size());
-//    table_->setHorizontalHeaderLabels(table_columns_);
-//    //table_->verticalHeader()->setVisible(false);
-//    connect(table_, &QTableWidget::itemChanged, this,
-//            &DBOEditDataSourcesWidget::configItemChangedSlot);
     // update done later
 
     connect(table_view_->selectionModel(), &QItemSelectionModel::currentRowChanged,
@@ -116,7 +106,7 @@ ViewPointsWidget::ViewPointsWidget(ViewManager& view_manager)
 
     setLayout(main_layout);
 
-    //DBContentManager& dbo_man = COMPASS::instance().dbContentManager();
+    //DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     // shortcuts
     {
@@ -317,7 +307,7 @@ void ViewPointsWidget::loadingDone()
 
 void ViewPointsWidget::loadViewPoints()
 {
-    loginf << "ViewPointsWidget: loadViewPoints";
+    loginf << "start";
 
     assert (table_model_);
     table_model_->clearViewPoints();
@@ -345,7 +335,7 @@ void ViewPointsWidget::addViewPoints(const std::vector <nlohmann::json>& viewpoi
 
 void ViewPointsWidget::resizeColumnsToContents()
 {
-    loginf << "ViewPointsWidget: resizeColumnsToContents";
+    loginf << "start";
     //table_model_->update();
     table_view_->resizeColumnsToContents();
 }
@@ -393,7 +383,7 @@ void ViewPointsWidget::showNoTypes ()
 
 void ViewPointsWidget::selectPreviousSlot()
 {
-    logdbg << "ViewPointsWidget: selectPrevious";
+    logdbg << "start";
 
     if (load_in_progress_)
         return;
@@ -415,22 +405,22 @@ void ViewPointsWidget::selectPreviousSlot()
 
         if (next_index.isValid())
         {
-            logdbg << "ViewPointsWidget: selectNext: setting index row " << next_index.row();
+            logdbg << "setting index row " << next_index.row();
             table_view_->selectRow(next_index.row());
         }
         else
         {
-            logdbg << "ViewPointsWidget: selectNext: invalid next index, step to last";
+            logdbg << "invalid next index, step to last";
             table_view_->selectRow(table_view_->model()->rowCount()-1);
         }
     }
     else
-        logwrn << "ViewPointsWidget: selectNext: invalid current index";
+        logwrn << "invalid current index";
 }
 
 void ViewPointsWidget::selectNextSlot()
 {
-    logdbg << "ViewPointsWidget: selectNext";
+    logdbg << "start";
 
     if (load_in_progress_)
         return;
@@ -452,17 +442,17 @@ void ViewPointsWidget::selectNextSlot()
 
         if (next_index.isValid())
         {
-            logdbg << "ViewPointsWidget: selectNext: setting index row " << next_index.row();
+            logdbg << "setting index row " << next_index.row();
             table_view_->selectRow(next_index.row());
         }
         else
         {
-            logdbg << "ViewPointsWidget: selectNext: invalid next index, step to first";
+            logdbg << "invalid next index, step to first";
             table_view_->selectRow(0);
         }
     }
     else
-        logwrn << "ViewPointsWidget: selectNext: invalid current index";
+        logwrn << "invalid current index";
 }
 
 void ViewPointsWidget::setSelectedOpenSlot()
@@ -472,7 +462,7 @@ void ViewPointsWidget::setSelectedOpenSlot()
 
     if (!list.size()) // none selected yet, start with first
     {
-        logwrn << "ViewPointsWidget: setSelectedOpenSlot: no row selected";
+        logwrn << "no row selected";
         return;
     }
 
@@ -485,7 +475,7 @@ void ViewPointsWidget::setSelectedOpenSlot()
         table_model_->setStatus(source_index, "open");
     }
     else
-        logwrn << "ViewPointsWidget: setSelectedOpenSlot: invalid current index";
+        logwrn << "invalid current index";
 }
 
 void ViewPointsWidget::setSelectedClosedSlot()
@@ -495,7 +485,7 @@ void ViewPointsWidget::setSelectedClosedSlot()
 
     if (!list.size()) // none selected yet, start with first
     {
-        logwrn << "ViewPointsWidget: setSelectedClosedSlot: no row selected";
+        logwrn << "no row selected";
         return;
     }
 
@@ -508,7 +498,7 @@ void ViewPointsWidget::setSelectedClosedSlot()
         table_model_->setStatus(source_index, "closed");
     }
     else
-        logwrn << "ViewPointsWidget: setSelectedClosedSlot: invalid current index";
+        logwrn << "invalid current index";
 }
 
 void ViewPointsWidget::setSelectedTodoSlot()
@@ -518,7 +508,7 @@ void ViewPointsWidget::setSelectedTodoSlot()
 
     if (!list.size()) // none selected yet, start with first
     {
-        logwrn << "ViewPointsWidget: setSelectedTodoSlot: no row selected";
+        logwrn << "no row selected";
         return;
     }
 
@@ -531,7 +521,7 @@ void ViewPointsWidget::setSelectedTodoSlot()
         table_model_->setStatus(source_index, "todo");
     }
     else
-        logwrn << "ViewPointsWidget: setSelectedTodoSlot: invalid current index";
+        logwrn << "invalid current index";
 }
 
 void ViewPointsWidget::editCommentSlot()
@@ -541,7 +531,7 @@ void ViewPointsWidget::editCommentSlot()
 
     if (!list.size()) // none selected yet, start with first
     {
-        logwrn << "ViewPointsWidget: editCommentSlot: no row selected";
+        logwrn << "no row selected";
         return;
     }
 
@@ -561,30 +551,30 @@ void ViewPointsWidget::editCommentSlot()
         table_view_->edit(comment_index);
     }
     else
-        logwrn << "ViewPointsWidget: setSelectedTodoSlot: invalid current index";
+        logwrn << "invalid current index";
 }
 
 
 //void ViewPointsWidget::openCurrentSelectNext()
 //{
-//    loginf << "ViewPointsWidget: openCurrentSelectNext";
+//    loginf << "start";
 //}
 
 //void ViewPointsWidget::closeCurrentSelectNext()
 //{
-//    loginf << "ViewPointsWidget: closeCurrentSelectNext";
+//    loginf << "start";
 //}
 
 void ViewPointsWidget::databaseOpenedSlot()
 {
-    loginf << "ViewPointsWidget: databaseOpenedSlot";
+    loginf << "start";
 
     loadViewPoints();
 }
 
 void ViewPointsWidget::databaseClosedSlot()
 {
-    loginf << "ViewPointsWidget: databaseClosedSlot";
+    loginf << "start";
 
     assert (table_model_);
     table_model_->clearViewPoints();
@@ -593,7 +583,7 @@ void ViewPointsWidget::databaseClosedSlot()
 
 void ViewPointsWidget::exportSlot()
 {
-    loginf << "ViewPointsWidget: exportSlot";
+    loginf << "start";
 
     QFileDialog dialog(nullptr);
     dialog.setFileMode(QFileDialog::AnyFile);
@@ -611,7 +601,7 @@ void ViewPointsWidget::exportSlot()
         assert (file_names.size() == 1);
         std::string filename = file_names.at(0).toStdString();
 
-        loginf << "ViewPointsWidget: exportSlot: filename '" << filename << "'";
+        loginf << "filename '" << filename << "'";
         assert (table_model_);
         table_model_->exportViewPoints(filename);
     }
@@ -619,7 +609,7 @@ void ViewPointsWidget::exportSlot()
 
 void ViewPointsWidget::exportPDFSlot()
 {
-    loginf << "ViewPointsWidget: exportPDFSlot";
+    loginf << "start";
 
     ViewPointsReportGeneratorDialog& dialog = view_manager_.viewPointsGenerator().dialog();
     dialog.exec();
@@ -627,7 +617,7 @@ void ViewPointsWidget::exportPDFSlot()
 
 void ViewPointsWidget::deleteAllSlot()
 {
-    loginf << "ViewPointsWidget: deleteAllSlot";
+    loginf << "start";
 
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(nullptr, "Delete All", "Delete All Viewpoints?",
@@ -643,7 +633,7 @@ void ViewPointsWidget::deleteAllSlot()
 
 void ViewPointsWidget::importSlot()
 {
-    loginf << "ViewPointsWidget: importSlot";
+    loginf << "start";
 
     COMPASS::instance().mainWindow().importViewPointsSlot();
 
@@ -654,7 +644,7 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
 {
     if (!current.isValid())
     {
-        loginf << "ViewPointsWidget: currentRowChanged: invalid index";
+        loginf << "invalid index";
         return;
     }
 
@@ -663,7 +653,7 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
 
     unsigned int id = table_model_->getIdOf(source_index);
 
-    loginf << "ViewPointsWidget: currentRowChanged: current id " << id;
+    loginf << "current id " << id;
     restore_focus_ = true;
 
     view_manager_.setCurrentViewPoint(&table_model_->viewPoint(id));
@@ -671,14 +661,14 @@ void ViewPointsWidget::currentRowChanged(const QModelIndex& current, const QMode
 
 void ViewPointsWidget::typesChangedSlot(QStringList types)
 {
-    loginf << "ViewPointsWidget: typesChangedSlot";
+    loginf << "start";
 
     types_ = types;
 }
 
 void ViewPointsWidget::statusesChangedSlot(QStringList statuses)
 {
-    loginf << "ViewPointsWidget: statusesChangedSlot";
+    loginf << "start";
 
     statuses_ = statuses;
 }
@@ -693,7 +683,7 @@ void ViewPointsWidget::updateFilteredTypes ()
 
     //"^(Correlation|banana)$"
     QString regex = "^(" + regex_list.join("|") + ")$";
-    loginf << "ViewPointsWidget: updateFilteredTypes: '" << regex.toStdString() << "'";
+    loginf << "'" << regex.toStdString() << "'";
 
     assert (proxy_model_);
     proxy_model_->setFilterRegExp(QRegExp(regex, Qt::CaseSensitive, QRegExp::RegExp));
@@ -710,7 +700,7 @@ void ViewPointsWidget::updateFilteredStatuses ()
 
     //"^(Correlation|banana)$"
     QString regex = "^(" + regex_list.join("|") + ")$";
-    loginf << "ViewPointsWidget: updateFilteredStatuses: '" << regex.toStdString() << "'";
+    loginf << "'" << regex.toStdString() << "'";
 
     assert (proxy_model_);
     proxy_model_->setFilterRegExp(QRegExp(regex, Qt::CaseSensitive, QRegExp::RegExp));
@@ -836,14 +826,14 @@ std::vector<unsigned int> ViewPointsWidget::viewedViewPoints()
 
     while (index.isValid())
     {
-        loginf << "ViewPointsWidget: viewedViewPoints: row " << index.row();
+        loginf << "row " << index.row();
 
         auto const source_index = proxy_model_->mapToSource(index);
         assert (source_index.isValid());
 
         unsigned int id = table_model_->getIdOf(source_index);
 
-        loginf << "ViewPointsWidget: viewedViewPoints: id " << id;
+        loginf << "id " << id;
 
         data.push_back(id);
 

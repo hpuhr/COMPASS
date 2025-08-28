@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is part of OpenATS COMPASS.
  *
  * COMPASS is free software: you can redistribute it and/or modify
@@ -121,7 +121,7 @@ bool EvaluationTargetData::hasTstData () const
  */
 void EvaluationTargetData::finalize () const
 {
-    //    loginf << "EvaluationTargetData: finalize: utn " << utn_
+    //    loginf << "utn " << utn_
     //           << " ref " << hasRefData() << " up " << ref_rec_nums_.size()
     //           << " tst " << hasTstData() << " up " << tst_rec_nums_.size();
 
@@ -303,7 +303,7 @@ std::string EvaluationTargetData::timeDurationStr() const
  */
 std::set<unsigned int> EvaluationTargetData::modeACodes() const
 {
-    logdbg << "EvaluationTargetData: modeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
+    logdbg << "utn " << utn_ << " num codes " << mode_a_codes_.size();
     return mode_a_codes_;
 }
 
@@ -511,19 +511,19 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
     auto index     = tst_chain_.indexFromDataID(tst_id);
 
     if (debug)
-        loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " timestamp "
+        loginf << "utn " << utn_ << " timestamp "
                << Time::toString(timestamp) << " d_max " << Time::toString(d_max);
 
     const DataMapping& mapping = tst_data_mappings_.at(index.idx_internal);
 
     if (debug)
-        loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " has_ref1 "
+        loginf << "utn " << utn_ << " has_ref1 "
                << mapping.has_ref1_ << " has_ref2 " << mapping.has_ref2_;
 
     if (!mapping.has_ref1_ && !mapping.has_ref2_) // no ref data
     {
         if (debug)
-            loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " no ref data";
+            loginf << "utn " << utn_ << " no ref data";
 
         return {};
     }
@@ -531,7 +531,7 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
     if (mapping.has_ref1_ && mapping.timestamp_ref1_ == timestamp && mapping.has_ref_pos_)
     {
         if (debug)
-            loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " exact match";
+            loginf << "utn " << utn_ << " exact match";
 
         return mapping.pos_ref_;
     }
@@ -539,7 +539,7 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
     if (mapping.has_ref1_ && mapping.has_ref2_) // interpolated
     {
         if (debug)
-            loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " both ref data";
+            loginf << "utn " << utn_ << " both ref data";
 
         assert (mapping.timestamp_ref1_ <= timestamp);
         assert (mapping.timestamp_ref2_ >= timestamp);
@@ -547,10 +547,10 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
         if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
         {
             //            if (utn_ == debug_utn)
-            //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
+            //                loginf << "lower too far";
 
             if (debug)
-                loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " lower too far "
+                loginf << "utn " << utn_ << " lower too far "
                     << Time::toString(mapping.timestamp_ref1_ - timestamp);
 
             return {};
@@ -559,10 +559,10 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
         if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
         {
             //            if (utn_ == debug_utn)
-            //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
+            //                loginf << "upper too far";
 
             if (debug)
-                loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " higher too far "
+                loginf << "utn " << utn_ << " higher too far "
                        << Time::toString(mapping.timestamp_ref2_ - timestamp);
 
             return {};
@@ -571,16 +571,16 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
         if (!mapping.has_ref_pos_)
         {
             //            if (utn_ == debug_utn)
-            //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: no ref pos";
+            //                loginf << "no ref pos";
 
             if (debug)
-                loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " no ref_pos in mapping";
+                loginf << "utn " << utn_ << " no ref_pos in mapping";
 
             return {};
         }
 
         //        if (utn_ == debug_utn)
-        //            loginf << "EvaluationTargetData: interpolatedRefPosForTime: 2pos tod " << String::timeStringFromDouble(tod)
+        //            loginf << "2pos tod " << String::timeStringFromDouble(tod)
         //                   << " has_alt " << mapping.pos_ref_.has_altitude_
         //                   << " alt_calc " << mapping.pos_ref_.altitude_calculated_
         //                   << " alt " << mapping.pos_ref_.altitude_;
@@ -589,7 +589,7 @@ boost::optional<dbContent::TargetPosition> EvaluationTargetData::mappedRefPos(
     }
 
     if (debug)
-        loginf << "EvaluationTargetData: mappedRefPos: utn " << utn_ << " only 1";
+        loginf << "utn " << utn_ << " only 1";
 
     return {};
 }
@@ -618,7 +618,7 @@ boost::optional<dbContent::TargetVelocity> EvaluationTargetData::mappedRefSpeed(
         if (timestamp - mapping.timestamp_ref1_ > d_max) // lower to far
         {
             //            if (utn_ == debug_utn)
-            //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: lower too far";
+            //                loginf << "lower too far";
 
             return {};
         }
@@ -626,7 +626,7 @@ boost::optional<dbContent::TargetVelocity> EvaluationTargetData::mappedRefSpeed(
         if (mapping.timestamp_ref2_ - timestamp > d_max) // upper to far
         {
             //            if (utn_ == debug_utn)
-            //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: upper too far";
+            //                loginf << "upper too far";
 
             return {};
         }
@@ -634,13 +634,13 @@ boost::optional<dbContent::TargetVelocity> EvaluationTargetData::mappedRefSpeed(
         if (!mapping.has_ref_spd_)
         {
             //            if (utn_ == debug_utn)
-            //                loginf << "EvaluationTargetData: interpolatedRefPosForTime: no ref pos";
+            //                loginf << "no ref pos";
 
             return {};
         }
 
         //        if (utn_ == debug_utn)
-        //            loginf << "EvaluationTargetData: interpolatedRefPosForTime: 2pos tod " << String::timeStringFromDouble(tod)
+        //            loginf << "2pos tod " << String::timeStringFromDouble(tod)
         //                   << " has_alt " << mapping.pos_ref_.has_altitude_
         //                   << " alt_calc " << mapping.pos_ref_.altitude_calculated_
         //                   << " alt " << mapping.pos_ref_.altitude_;
@@ -1024,7 +1024,7 @@ void EvaluationTargetData::addInterestFactor (const Evaluation::RequirementSumRe
                                               double factor, 
                                               bool reset) const
 {
-    logdbg << "EvaluationTargetData: addInterestFactor: utn " << utn_
+    logdbg << "utn " << utn_
            << " req_section_id " << EvalSectionID::requirementResultSumID(id)
            << " factor " << factor
            << " reset " << reset;
@@ -1240,7 +1240,7 @@ void EvaluationTargetData::updateACADs() const
  */
 void EvaluationTargetData::updateModeACodes() const
 {
-    logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_;
+    logdbg << "utn " << utn_;
 
     mode_a_codes_.clear();
 
@@ -1256,14 +1256,14 @@ void EvaluationTargetData::updateModeACodes() const
         mode_a_codes_.insert(values.begin(), values.end());
     }
 
-    logdbg << "EvaluationTargetData: updateModeACodes: utn " << utn_ << " num codes " << mode_a_codes_.size();
+    logdbg << "utn " << utn_ << " num codes " << mode_a_codes_.size();
 }
 
 /**
  */
 void EvaluationTargetData::updateModeCMinMax() const
 {
-    logdbg << "EvaluationTargetData: updateModeC: utn " << utn_;
+    logdbg << "utn " << utn_;
 
     // garbled, valid flags?
 
@@ -1422,7 +1422,7 @@ void EvaluationTargetData::updatePositionMinMax() const
  */
 void EvaluationTargetData::calculateTestDataMappings() const
 {
-    logdbg << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_;
+    logdbg << "utn " << utn_;
 
     assert (!tst_data_mappings_.size());
 
@@ -1441,7 +1441,7 @@ void EvaluationTargetData::calculateTestDataMappings() const
             ++cnt;
     }
 
-    logdbg << "EvaluationTargetData: calculateTestDataMappings: utn " << utn_ << " done, num map "
+    logdbg << "utn " << utn_ << " done, num map "
            << tst_data_mappings_.size() << " ref pos " << cnt;
 }
 

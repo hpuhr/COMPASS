@@ -23,7 +23,7 @@
 #include "appmode.h"
 #include "result.h"
 #include "logmodel.h"
-
+#include "message.h"
 
 #include <QObject>
 
@@ -126,9 +126,6 @@ public:
     bool isShutDown() const;
     bool isRunning() const;
 
-    unsigned int maxFPS() const;
-    void maxFPS(unsigned int max_fps);
-
     bool disableLiveToOfflineSwitch() const;
     bool disableMenuConfigSave() const;
     bool disableGeographicViewRotate() const;
@@ -145,11 +142,14 @@ public:
     const char* lineEditInvalidStyle();
 
     LogStream logInfo(const std::string& component,
-                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+                      boost::optional<unsigned int> error_code={}, 
+                      nlohmann::json json_blob={});
     LogStream logWarn(const std::string& component,
-                      boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+                      boost::optional<unsigned int> error_code={}, 
+                      nlohmann::json json_blob={});
     LogStream logError(const std::string& component,
-                       boost::optional<unsigned int> error_code={}, nlohmann::json json_blob={});
+                       boost::optional<unsigned int> error_code={}, 
+                       nlohmann::json json_blob={});
 
     unsigned int minAppWidth() const;
 
@@ -192,8 +192,6 @@ protected:
 
     unsigned int auto_live_running_resume_ask_time_ {60}; // minutes
     unsigned int auto_live_running_resume_ask_wait_time_ {1}; // minutes
-
-    unsigned int max_fps_ {30};
 
     unsigned int min_app_width_ {1600};
     unsigned int min_app_height_ {800};

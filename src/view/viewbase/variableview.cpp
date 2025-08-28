@@ -99,14 +99,14 @@ size_t VariableView::numVariables() const
 ViewVariable& VariableView::addVariable(const std::string& id,
                                         const std::string& display_name,
                                         const std::string& var_name,
-                                        const std::string& default_dbo,
+                                        const std::string& default_dbcont,
                                         const std::string& default_name,
                                         bool show_meta_vars,
                                         bool show_empty_vars,
                                         bool allow_empty_var,
                                         const std::vector<PropertyDataType>& valid_data_types)
 {
-    bool empty = default_dbo.empty() || default_name.empty();
+    bool empty = default_dbcont.empty() || default_name.empty();
 
     assert(!empty || allow_empty_var);
 
@@ -124,7 +124,7 @@ ViewVariable& VariableView::addVariable(const std::string& id,
     var.settings().allow_empty_var  = allow_empty_var;
     var.settings().valid_data_types = std::set<PropertyDataType>(valid_data_types.begin(), valid_data_types.end());
 
-    registerParameter(var.regParamDBO() , &var.settings().data_var_dbo , default_dbo );
+    registerParameter(var.regParamDBCont() , &var.settings().data_var_dbcont , default_dbcont );
     registerParameter(var.regParamName(), &var.settings().data_var_name, default_name);
 
     return var;
@@ -134,7 +134,7 @@ ViewVariable& VariableView::addVariable(const std::string& id,
 */
 dbContent::VariableSet VariableView::getSet(const std::string& dbcontent_name)
 {
-    logdbg << "VariableView: getSet";
+    logdbg << "start";
 
     dbContent::VariableSet set = getBaseSet(dbcontent_name);
 
@@ -159,7 +159,7 @@ void VariableView::viewInfoJSON_impl(nlohmann::json& info) const
     //variable related
     for (const auto& v : variables_)
     {
-        info[ v->regParamDBO()  ] = v->settings().data_var_dbo;
+        info[ v->regParamDBCont()  ] = v->settings().data_var_dbcont;
         info[ v->regParamName() ] = v->settings().data_var_name;
     }
 
@@ -202,14 +202,14 @@ void VariableView::switchVariables(int var0, int var1, bool inform_config_widget
     auto& variable0 = variable(var0);
     auto& variable1 = variable(var1);
 
-    std::string var0_dbo  = variable0.settings().data_var_dbo;
+    std::string var0_dbcont  = variable0.settings().data_var_dbcont;
     std::string var0_name = variable0.settings().data_var_name;
 
-    std::string var1_dbo  = variable1.settings().data_var_dbo;
+    std::string var1_dbcont  = variable1.settings().data_var_dbcont;
     std::string var1_name = variable1.settings().data_var_name;
 
-    variable0.set(var1_dbo, var1_name, true);
-    variable1.set(var0_dbo, var0_name, true);
+    variable0.set(var1_dbcont, var1_name, true);
+    variable1.set(var0_dbcont, var0_name, true);
 
     if (inform_config_widget) 
         getConfigWidget()->configChanged();
@@ -332,7 +332,7 @@ void VariableView::onEvalResultsChanged()
  */
 void VariableView::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "VariableView: unshowViewPoint";
+    loginf << "start";
 
     unshowViewPoint(vp);
 
@@ -351,7 +351,7 @@ void VariableView::unshowViewPointSlot (const ViewableDataConfig* vp)
  */
 void VariableView::showViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "VariableView: showViewPoint";
+    loginf << "start";
 
     showViewPoint(vp);
 

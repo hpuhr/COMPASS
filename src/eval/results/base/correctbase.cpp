@@ -339,7 +339,7 @@ void JoinedCorrectBase::accumulateSingleResult(const std::shared_ptr<Single>& si
 */
 boost::optional<double> JoinedCorrectBase::computeResult_impl() const
 {
-    loginf << "JoinedCorrectBase: computeResult_impl: " << type()
+    loginf << "start" << type()
             << " num_updates " << num_updates_
             << " num_no_ref_pos " << num_no_ref_pos_
             << " num_no_ref_id " << num_no_ref_id_

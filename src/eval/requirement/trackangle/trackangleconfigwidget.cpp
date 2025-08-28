@@ -76,7 +76,7 @@ TrackAngleConfigWidget::TrackAngleConfigWidget(TrackAngleConfig& cfg)
 
 void TrackAngleConfigWidget::thresholdValueEditSlot(QString value)
 {
-    loginf << "TrackAngleConfigWidget: thresholdValueEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -84,12 +84,12 @@ void TrackAngleConfigWidget::thresholdValueEditSlot(QString value)
     if (ok)
         config().threshold(val);
     else
-        loginf << "TrackAngleConfigWidget: thresholdValueEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void TrackAngleConfigWidget::toggleUseMinimumSpeedSlot()
 {
-    loginf << "TrackAngleConfigWidget: toggleUseMinimumSpeedSlot";
+    loginf << "start";
 
     assert (use_minimum_speed_check_);
     config().useMinimumSpeed(use_minimum_speed_check_->checkState() == Qt::Checked);
@@ -99,7 +99,7 @@ void TrackAngleConfigWidget::toggleUseMinimumSpeedSlot()
 
 void TrackAngleConfigWidget::minimumSpeedEditSlot(QString value)
 {
-    loginf << "TrackAngleConfigWidget: minimumSpeedEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -107,20 +107,20 @@ void TrackAngleConfigWidget::minimumSpeedEditSlot(QString value)
     if (ok)
         config().minimumSpeed(val);
     else
-        loginf << "TrackAngleConfigWidget: minimumSpeedEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 void TrackAngleConfigWidget::changedThresholdValueCheckTypeSlot()
 {
     assert (threshold_value_check_type_box_);
-    loginf << "TrackAngleConfigWidget: changedThresholdValueCheckTypeSlot: value "
+    loginf << "value "
            << threshold_value_check_type_box_->getType();
     config().thresholdValueCheckType(threshold_value_check_type_box_->getType());
 }
 
 void TrackAngleConfigWidget::toggleFailedValuesOfInterestSlot()
 {
-    loginf << "TrackAngleConfigWidget: toggleFailedValuesOfInterestSlot";
+    loginf << "start";
 
     assert (failed_values_of_interest_check_);
     config().failedValuesOfInterest(failed_values_of_interest_check_->checkState() == Qt::Checked);

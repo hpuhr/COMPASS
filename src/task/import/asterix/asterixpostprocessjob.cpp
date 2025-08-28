@@ -1,4 +1,21 @@
-﻿#include "dbcontent/dbcontent.h"
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "dbcontent/dbcontent.h"
 #include "asterixpostprocessjob.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "buffer.h"
@@ -55,14 +72,14 @@ ASTERIXPostprocessJob::ASTERIXPostprocessJob(map<string, shared_ptr<Buffer>> buf
 
 ASTERIXPostprocessJob::~ASTERIXPostprocessJob()
 {
-    logdbg << "ASTERIXPostprocessJob: dtor";
+    logdbg << "start";
 }
 
 
 
 void ASTERIXPostprocessJob::run_impl()
 {
-    logdbg << "ASTERIXPostprocessJob: " << this << " run on thread " << QThread::currentThreadId()
+    logdbg << "run on thread " << QThread::currentThreadId()
            << " on cpu " << sched_getcpu();
 
     unsigned cnt=0;
@@ -70,7 +87,7 @@ void ASTERIXPostprocessJob::run_impl()
     for (auto& buf_it : buffers_)
         cnt += buf_it.second->size();
 
-    logdbg << "ASTERIXPostprocessJob: run: num buffers " << buffers_.size() << " size " << cnt;
+    logdbg << "num buffers " << buffers_.size() << " size " << cnt;
 
     started_ = true;
 
@@ -99,7 +116,7 @@ void ASTERIXPostprocessJob::run_impl()
 
     float num_secs =  t_diff.total_milliseconds() ? t_diff.total_milliseconds() / 1000.0 : 10E-6;
 
-    logdbg << "ASTERIXPostprocessJob: run: done: took "
+    logdbg << "done: took "
            << String::timeStringFromDouble(num_secs, true)
            << " full " << String::timeStringFromDouble(num_secs, true)
            << " " << ((float) num_processed) / num_secs << " rec/s";
@@ -117,7 +134,7 @@ void ASTERIXPostprocessJob::doRadarPlotPositionCalculations()
 
 void ASTERIXPostprocessJob::doXYPositionCalculations()
 {
-    logdbg << "ASTERIXPostprocessJob: doXYPositionCalculations";
+    logdbg << "start";
 
     // tracked data sources with only x/y coordinates
     ProjectionManager::instance().doXYPositionCalculations(buffers_);
@@ -241,7 +258,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
             && buffer->get<double>(speed_var_name).isNeverNull()
             && buffer->get<double>(track_angle_var_name).isNeverNull())
         {
-            logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: "
+            logdbg << "start"
                    << dbcontent_name << " speed and track angle already set";
 
             continue; // no need for calculation
@@ -282,7 +299,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
             ++cnt;
         }
 
-        logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: "
+        logdbg << "start"
                << dbcontent_name << " speed and track angle calc " << cnt << " / " << buffer_size;
     }
 
@@ -294,7 +311,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
     unsigned int spd_already_set {0}, sgv_spd_no_val {0}, sgv_hgt_no_value {0},
         sgv_is_heading {0}, sgv_is_magnetic {0}, sgv_usable {0};
 
-    logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: got ads-b "
+    logdbg << "got ads-b "
            << (buffers_.count(dbcontent_name) && buffers_.at(dbcontent_name)->size());
 
     if (buffers_.count(dbcontent_name) && buffers_.at(dbcontent_name)->size())
@@ -304,7 +321,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
         unsigned int buffer_size = buffer->size();
         assert(buffer_size);
 
-        logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: got ads-b sgv gss "
+        logdbg << "got ads-b sgv gss "
                << buffer->has<float>(DBContent::var_cat021_sgv_gss_.name())
                << " hgt " << buffer->has<double>(DBContent::var_cat021_sgv_hgt_.name())
                << " htt " << buffer->has<bool>(DBContent::var_cat021_sgv_htt_.name())
@@ -428,7 +445,7 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
             sgv_usable++; // there
         }
 
-        logdbg << "ASTERIXPostprocessJob: doGroundSpeedCalculations: CAT021 spd_already_set " << spd_already_set
+        logdbg << "CAT021 spd_already_set " << spd_already_set
                << " sgv_spd_no_val " << sgv_spd_no_val << " sgv_hgt_no_value " << sgv_hgt_no_value
                << " sgv_is_heading " << sgv_is_heading << " sgv_is_magnetic " << sgv_is_magnetic
                << " sgv_usable " << sgv_usable;

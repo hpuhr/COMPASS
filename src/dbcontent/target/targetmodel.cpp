@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "targetmodel.h"
 #include "compass.h"
 #include "dbinterface.h"
@@ -45,19 +62,20 @@ void TargetModel::clear()
 
 /**
  */
-std::string TargetModel::iconForTarget(const Target& target)
+std::string TargetModel::iconForTarget(const Target& target, 
+                                       bool add_placeholder_txt)
 {
     if (!target.useInEval())
-        return "delete.png";
+        return add_placeholder_txt ? "delete.png;No" : "delete.png";
 
     // could be used
 
     if (COMPASS::instance().evaluationManager().useTimestampFilter()
         || target.evalExcludedTimeWindows().size()
         || target.evalExcludedRequirements().size())
-            return "partial_done.png";
+            return add_placeholder_txt ? "partial_done.png;Partial" : "partial_done.png";
 
-    return "done.png";
+    return add_placeholder_txt ? "done.png;Yes" : "done.png";
 }
 
 /**
@@ -68,7 +86,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         return QVariant();
 
     assert (index.row() >= 0);
-    assert (index.row() < target_data_.size());
+    assert (static_cast<size_t>(index.row()) < target_data_.size());
 
     const Target& target = target_data_.at(index.row());
 
@@ -88,7 +106,7 @@ QVariant TargetModel::data(const QModelIndex& index, int role) const
         }
         case Qt::DisplayRole:
         {
-            logdbg << "TargetModel: data: display role: row " << index.row() << " col " << index.column();
+            logdbg << "display role: row " << index.row() << " col " << index.column();
 
             assert (index.column() < table_columns_.size());
             int col = index.column();
@@ -195,11 +213,11 @@ bool TargetModel::setData(const QModelIndex &index, const QVariant& value, int r
     if (role == Qt::EditRole && index.column() == ColComment) // comment
     {
         assert (index.row() >= 0);
-        assert (index.row() < target_data_.size());
+        assert (static_cast<size_t>(index.row()) < target_data_.size());
 
         auto it = target_data_.begin() + index.row();
 
-        loginf << "TargetModel: setData: utn " << it->utn_ <<" comment '" << value.toString().toStdString() << "'";
+        loginf << "utn " << it->utn_ <<" comment '" << value.toString().toStdString() << "'";
 
         setTargetComment(it->utn_, value.toString().toStdString());
 
@@ -334,7 +352,7 @@ const dbContent::Target& TargetModel::getTargetOf (const QModelIndex& index)
     assert (index.isValid());
 
     assert (index.row() >= 0);
-    assert (index.row() < target_data_.size());
+    assert (static_cast<size_t>(index.row()) < target_data_.size());
 
     const dbContent::Target& target = target_data_.at(index.row());
 
@@ -345,7 +363,7 @@ const dbContent::Target& TargetModel::getTargetOf (const QModelIndex& index)
  */
 void TargetModel::setEvalUseTarget (unsigned int utn, bool value)
 {
-    loginf << "TargetModel: setUseTargetData: utn " << utn << " value " << value;
+    loginf << "utn " << utn << " value " << value;
 
     assert (existsTarget(utn));
 
@@ -384,7 +402,7 @@ void TargetModel::setEvalUseTarget (std::set<unsigned int> utns, bool value)
  */
 void TargetModel::setAllUseTargets (bool value)
 {
-    loginf << "TargetModel: setUseAllTargetData: value " << value;
+    loginf << "value " << value;
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [value](Target& p) { p.useInEval(value); });
@@ -399,7 +417,7 @@ void TargetModel::setAllUseTargets (bool value)
  */
 void TargetModel::setTargetComment (unsigned int utn, std::string comment)
 {
-    loginf << "TargetModel: setTargetDataComment: utn " << utn << " comment '" << comment << "'";
+    loginf << "utn " << utn << " comment '" << comment << "'";
 
     assert (existsTarget(utn));
 
@@ -411,7 +429,7 @@ void TargetModel::setTargetComment (unsigned int utn, std::string comment)
     //             1, // look *
     //             Qt::MatchExactly); // look *
 
-    //  loginf << "TargetModel: setTargetDataComment: size " << items.size();
+    //  loginf << "size " << items.size();
 
     // assert (items.size() == 1);
     // setData(items.at(0), comment.c_str(), Qt::EditRole);
@@ -439,7 +457,7 @@ void TargetModel::setTargetComment (std::set<unsigned int> utns, std::string com
  */
 void TargetModel::clearAllTargetComments ()
 {
-    loginf << "TargetModel: clearComments";
+    loginf << "start";
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [](Target& p) { p.comment(""); });
@@ -476,7 +494,7 @@ void TargetModel::clearEvalExcludeTimeWindows(std::set<unsigned int> utns)
 
 void TargetModel::clearAllEvalExcludeTimeWindows()
 {
-    loginf << "TargetModel: clearEvalExcludeTimeWindows";
+    loginf << "start";
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [](Target& p) { p.clearEvalExcludedTimeWindows(); });
@@ -511,7 +529,7 @@ void TargetModel::clearEvalExcludeRequirements(std::set<unsigned int> utns)
 
 void TargetModel::clearAllEvalExcludeRequirements()
 {
-    loginf << "TargetModel: clearEvalExcludeTimeWindows";
+    loginf << "start";
 
     for (auto target_it = target_data_.begin(); target_it != target_data_.end(); ++target_it)
         target_data_.modify(target_it, [](Target& p) { p.clearEvalExcludedRequirements(); });
@@ -526,7 +544,7 @@ void TargetModel::clearAllEvalExcludeRequirements()
  */
 void TargetModel::setUseByFilter ()
 {
-    loginf << "TargetModel: setUseByFilter";
+    loginf << "start";
 
     COMPASS::instance().evaluationManager().targetFilter().setUse(target_data_);
 
@@ -758,7 +776,7 @@ nlohmann::json TargetModel::utnsAsJSON() const
  */
 void TargetModel::loadFromDB()
 {
-    loginf << "TargetModel: loadFromDB";
+    loginf << "start";
 
     beginResetModel();
 
@@ -772,14 +790,14 @@ void TargetModel::loadFromDB()
 
     endResetModel();
 
-    loginf << "TargetModel: loadFromDB: loaded " << target_data_.size() << " targets";
+    loginf << "loaded " << target_data_.size() << " targets";
 }
 
 /**
  */
 void TargetModel::saveToDB()
 {
-    loginf << "TargetModel: saveToDB: saving " << target_data_.size() << " targets";
+    loginf << "saving " << target_data_.size() << " targets";
 
     std::map<unsigned int, nlohmann::json> targets_info;
 
@@ -793,7 +811,7 @@ void TargetModel::saveToDB()
  */
 void TargetModel::updateToDB(unsigned int utn)
 {
-    loginf << "TargetModel: saveToDB: saving utn " << utn;
+    loginf << "saving utn " << utn;
 
     auto tr_tag_it = target_data_.get<target_tag>().find(utn);
 
@@ -808,7 +826,7 @@ void TargetModel::updateToDB(unsigned int utn)
 
 void TargetModel::updateToDB(std::set<unsigned int> utns)
 {
-    loginf << "TargetModel: saveToDB: saving utns " << String::compress(utns,',');
+    loginf << "saving utns " << String::compress(utns,',');
 
     std::map<unsigned int, nlohmann::json> targets_info;
 

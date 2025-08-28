@@ -158,7 +158,7 @@ std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
     }
 
     if (config_.verbose)
-        loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
+        loginf << "sql '" << ss.str() << "'";
 
     return ss.str();
 }
@@ -185,7 +185,7 @@ std::string SQLGenerator::getCreateTableStatement(const std::string& table_name,
     ss << ");";
 
     if (config_.verbose)
-        loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
+        loginf << "sql '" << ss.str() << "'";
 
     return ss.str();
 }
@@ -291,7 +291,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const std::string& tab
 
     ss << ";";
 
-    logdbg << "SQLGenerator: getDeleteCommand: sql '" << ss.str() << "'";
+    logdbg << "sql '" << ss.str() << "'";
 
     shared_ptr<DBCommand> command = make_shared<DBCommand>(DBCommand());
     command->set(ss.str());
@@ -353,28 +353,6 @@ std::shared_ptr<DBCommand> SQLGenerator::getDeleteCommand(const DBContent& dbcon
 
        return getDeleteCommand(dbcontent.dbTableName(), ss.str());
 }
-
-//shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand(DBContent& object)
-//{
-//    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE
-//    // mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY
-//    // sensor_number__value;";
-//    // return distinct_radar_numbers_statement_;
-
-//    assert (false); // TODO
-
-//    //    string local_key_dbovar = object.currentDataSourceDefinition().localKey();
-//    //    assert(object.hasVariable(local_key_dbovar));
-//    //    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
-
-//    //    vector<const DBTableColumn*> columns;
-//    //    columns.push_back(&local_key_col);
-
-//    //    PropertyList list;
-//    //    list.addProperty(local_key_col.name(), PropertyDataType::INT);
-
-//    //    return getSelectCommand(object.currentMetaTable(), columns, true);
-//}
 
 /**
  */
@@ -497,7 +475,7 @@ string SQLGenerator::getCountStatement(const string& table)
  */
 shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DBContent& object)
 {
-    logdbg << "SQLGenerator: getTableSelectMinMaxNormalStatement: start for table " << object.dbTableName();
+    logdbg << "start for table " << object.dbTableName();
 
     stringstream ss;
 
@@ -512,7 +490,7 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
 
     for (auto& var_it : object.variables())
     {
-        logdbg << "SQLGenerator: getTableSelectMinMaxNormalStatement: current name "
+        logdbg << "current name "
                << var_it.first;
 
         if (!first)
@@ -531,7 +509,7 @@ shared_ptr<DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement(const DB
     command->set(ss.str());
     command->list(command_list);
 
-    logdbg << "SQLGenerator: getTableSelectMinMaxNormalStatement: sql '" << ss.str() << "'";
+    logdbg << "sql '" << ss.str() << "'";
 
     return command;
 }
@@ -822,7 +800,7 @@ string SQLGenerator::getInsertDBUpdateStringBind(shared_ptr<Buffer> buffer,
     // INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);
 
     unsigned int size = properties.size();
-    logdbg << "SQLGenerator: insertDBUpdateStringBind: creating db string";
+    logdbg << "creating db string";
     stringstream ss;  // create a stringstream
 
     ss << "INSERT INTO " << tablename << " (";
@@ -845,7 +823,7 @@ string SQLGenerator::getInsertDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
     ss << ") " << values_ss.str() << ");";
 
-    logdbg << "SQLGenerator: insertDBUpdateStringBind: var insert string '" << ss.str() << "'";
+    logdbg << "var insert string '" << ss.str() << "'";
 
     return ss.str();
 }
@@ -866,10 +844,10 @@ string SQLGenerator::getCreateDBUpdateStringBind(shared_ptr<Buffer> buffer,
     unsigned int size = properties.size();
     assert (size);
 
-    logdbg << "SQLGenerator: createDBUpdateStringBind: creating db string";
+    logdbg << "creating db string";
     stringstream ss;  // create a stringstream
 
-    logdbg << "SQLGenerator: createDBUpdateStringBind: idvar name " << key_col_name;
+    logdbg << "idvar name " << key_col_name;
 
     ss << "UPDATE " << table_name << " SET ";
 
@@ -909,7 +887,7 @@ string SQLGenerator::getCreateDBUpdateStringBind(shared_ptr<Buffer> buffer,
 
     ss << ";";
 
-    logdbg << "SQLGenerator: createDBUpdateStringBind: var update string '" << ss.str() << "'";
+    logdbg << "var update string '" << ss.str() << "'";
 
     return ss.str();
 }
@@ -939,7 +917,7 @@ std::string SQLGenerator::getUpdateTableFromTableStatement(const std::string& ta
     ss << " WHERE " << table_name_dst << "." << key_col << "=" << table_name_src << "." << key_col;
     ss << ";";
 
-    logdbg << "SQLGenerator: getUpdateTableFromTableStatement: sql '" << ss.str() << "'";
+    logdbg << "sql '" << ss.str() << "'";
 
     return ss.str();
 }
@@ -979,7 +957,7 @@ shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBContent& object,
                                                      bool use_order, 
                                                      Variable* order_variable)
 {
-    logdbg << "SQLGenerator: getSelectCommand: dbo " << object.name() << " read list size " << read_list.getSize();
+    logdbg << "dbcont " << object.name() << " read list size " << read_list.getSize();
     assert(read_list.getSize() != 0);
 
     //collect needed properties
@@ -1005,7 +983,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& tab
                                                           bool use_order, 
                                                           const std::string& order_variable)
 {
-    logdbg << "SQLGenerator: getSelectCommand: table " << table_name << " num properties " << properties.size();
+    logdbg << "table " << table_name << " num properties " << properties.size();
 
     assert(properties.size() != 0);
 
@@ -1033,7 +1011,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& tab
 //    for (auto& from_part : extra_from_parts)
 //        ss << ", " << from_part;
 
-    logdbg << "SQLGenerator: getSelectCommand: filtering statement";
+    logdbg << "filtering statement";
 
     // add filter statement
     if (filter.size() > 0)
@@ -1053,7 +1031,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& tab
     command->set(ss.str());
     command->list(properties);
 
-    logdbg << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
+    logdbg << "command sql '" << ss.str() << "'";
 
     return command;
 }
@@ -1062,7 +1040,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& tab
 //                                                     const vector<string>& columns,
 //                                                     bool distinct)
 //{
-//        logdbg << "SQLGenerator: getSelectCommand: meta table " << meta_table.name()
+//        logdbg << "meta table " << meta_table.name()
 //               << " db columns size " << columns.size();
 //        assert(columns.size() != 0);
 
@@ -1077,7 +1055,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& tab
 
 //        vector<string> used_tables;
 
-//        logdbg << "SQLGenerator: getSelectCommand: collecting required variables";
+//        logdbg << "collecting required variables";
 
 //        PropertyList property_list;
 
@@ -1107,7 +1085,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& tab
 
 //        string main_table_name = meta_table.mainTableName();
 
-//        logdbg << "SQLGenerator: getSelectCommand: left join query";
+//        logdbg << "left join query";
 //        //    SELECT news.id, users.username, news.title, news.date, news.body, COUNT(comments.id)
 //        //    FROM news
 //        //    LEFT JOIN users
@@ -1133,7 +1111,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const std::string& tab
 //        command->set(ss.str());
 //        command->list(property_list);
 
-//        logdbg << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
+//        logdbg << "command sql '" << ss.str() << "'";
 
 //        return command;
 //}

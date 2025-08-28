@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "primaryonlyfilter.h"
 #include "primaryonlyfilterwidget.h"
 #include "dbcontent/dbcontent.h"
@@ -42,7 +59,7 @@ bool PrimaryOnlyFilter::filters(const std::string& dbcontent_name)
 
 std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "PrimaryOnlyFilter: getConditionString: dbo " << dbcontent_name << " active " << active_;
+    logdbg << "dbcont_name " << dbcontent_name << " active " << active_;
 
     stringstream ss;
 
@@ -108,21 +125,21 @@ std::string PrimaryOnlyFilter::getConditionString(const std::string& dbcontent_n
         first = false;
     }
 
-    logdbg << "PrimaryOnlyFilter: getConditionString: here '" << ss.str() << "'";
+    logdbg << "here '" << ss.str() << "'";
 
     return ss.str();
 }
 
 void PrimaryOnlyFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "PrimaryOnlyFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id " << class_id;
 
     throw std::runtime_error("PrimaryOnlyFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
 
 void PrimaryOnlyFilter::checkSubConfigurables()
 {
-    logdbg << "PrimaryOnlyFilter: checkSubConfigurables";
+    logdbg << "start";
 }
 
 DBFilterWidget* PrimaryOnlyFilter::createWidget()

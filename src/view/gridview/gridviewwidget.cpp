@@ -47,13 +47,15 @@ GridViewWidget::GridViewWidget(const std::string& class_id,
 
     auto activeIfDataShownCB = [ data_widget ] (QAction* a)
     {
-        a->setEnabled(data_widget->showsData());
+        a->setEnabled(data_widget->isDrawn());
     };
 
     auto activeIfVariableDataShownCB = [ data_widget, view ] (QAction* a)
     {
-        a->setEnabled(data_widget->showsData() && view->showsVariables());
+        a->setEnabled(data_widget->isDrawn() && view->showsVariables());
     };
+
+    UNUSED_VARIABLE(activeIfVariableDataShownCB);
 
     getViewToolSwitcher()->addTool(Tool::GV_NAVIGATE_TOOL, "Navigate", {}, QIcon(), Qt::OpenHandCursor);
     //getViewToolSwitcher()->addTool(Tool::GV_SELECT_TOOL, "Select", Qt::Key_S, getIcon("select_action.png"), Qt::CrossCursor);

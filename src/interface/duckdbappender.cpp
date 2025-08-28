@@ -58,7 +58,7 @@ size_t DuckDBScopedAppender::endRow()
     auto state = duckdb_appender_end_row(appender_);
 
     if (state != DuckDBSuccess)
-        logerr << "DuckDBScopedAppender: endRow: failed: " << duckdb_appender_error(appender_);
+        logerr << "failed: " << duckdb_appender_error(appender_);
     assert(state == DuckDBSuccess);
 
     size_t last_appended = appended_;

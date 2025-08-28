@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "datasourcetablemodel.h"
 #include "datasourcemanager.h"
 #include "logger.h"
@@ -32,14 +49,14 @@ QVariant DataSourceTableModel::data(const QModelIndex& index, int role) const
     {
     case Qt::DisplayRole:
     {
-        logdbg << "DataSourceTableModel: data: display role: row " << index.row() << " col " << index.column();
+        logdbg << "display role: row " << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
         assert ((unsigned int)index.row() < ds_man_.getAllDsIDs().size());
 
         unsigned int ds_id = ds_man_.getAllDsIDs().at(index.row());
 
-        logdbg << "DataSourceTableModel: data: got ds_id " << ds_id;
+        logdbg << "got ds_id " << ds_id;
 
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -99,7 +116,7 @@ QVariant DataSourceTableModel::data(const QModelIndex& index, int role) const
 
         unsigned int ds_id = ds_man_.getAllDsIDs().at(index.row());
 
-        logdbg << "DataSourceTableModel: data: got ds_id " << ds_id;
+        logdbg << "got ds_id " << ds_id;
 
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -169,7 +186,7 @@ unsigned int DataSourceTableModel::getIdOf (const QModelIndex& index)
 
 QModelIndex DataSourceTableModel::dataSourceIndex(unsigned int ds_id)
 {
-    loginf << "DataSourceTableModel: selectDataSource: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     auto ds_ids = ds_man_.getAllDsIDs();
 
@@ -183,7 +200,7 @@ QModelIndex DataSourceTableModel::dataSourceIndex(unsigned int ds_id)
 
 void DataSourceTableModel::updateDataSource(unsigned int ds_id)
 {
-    loginf << "DataSourceTableModel: updateDataSource: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     auto ds_ids = ds_man_.getAllDsIDs();
 

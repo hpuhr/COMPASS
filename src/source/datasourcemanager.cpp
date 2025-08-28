@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 
 #include "datasourcemanager.h"
 #include "datasourceswidget.h"
@@ -68,7 +85,7 @@ DataSourceManager::DataSourceManager(const std::string& class_id, const std::str
 
 DataSourceManager::~DataSourceManager()
 {
-    loginf << "DataSourceManager: dtor";
+    loginf << "start";
 
     config_data_sources_.clear();
     db_data_sources_.clear(); // delete their widgets, which removes them from load_widget_
@@ -83,7 +100,7 @@ void DataSourceManager::generateSubConfigurable(const std::string& class_id,
     {
         unique_ptr<dbContent::ConfigurationDataSource> ds {
             new dbContent::ConfigurationDataSource(class_id, instance_id, *this)};
-        logdbg << "DataSourceManager: generateSubConfigurable: adding config ds "
+        logdbg << "adding config ds "
                    << ds->name() << " sac/sic " <<  ds->sac() << "/" << ds->sic();
 
         assert (!hasConfigDataSource(Number::dsIdFrom(ds->sac(), ds->sic())));
@@ -131,7 +148,7 @@ DataSourcesConfigurationDialog* DataSourceManager::configurationDialog()
 
 void DataSourceManager::importDataSources(const std::string& filename)
 {
-    loginf << "DataSourceManager: importDataSources: file '" << filename << "'";
+    loginf << "file '" << filename << "'";
 
     try
     {
@@ -149,7 +166,7 @@ void DataSourceManager::importDataSources(const std::string& filename)
     }
     catch (json::exception& e)
     {
-        logerr << "DataSourceManager: importDataSources: could not load file '"
+        logerr << "could not load file '"
                    << filename << "'";
         throw e;
     }
@@ -162,18 +179,18 @@ void DataSourceManager::importDataSources(const std::string& filename)
 
 void DataSourceManager::importDataSourcesJSONDeprecated(const nlohmann::json& j)
 {
-    loginf << "DataSourceManager: importDataSourcesJSONDeprecated";
+    loginf << "start";
 
-    for (auto& j_dbo_it : j.items())
+    for (auto& j_dbcont_it : j.items())
     {
-        std::string dbcontent_name = j_dbo_it.key();
+        std::string dbcontent_name = j_dbcont_it.key();
 
-        for (auto& j_ds_it : j_dbo_it.value().get<json::array_t>())
+        for (auto& j_ds_it : j_dbcont_it.value().get<json::array_t>())
         {
-            loginf << "DataSourceManager: importDataSources: found dbcontent " << dbcontent_name
+            loginf << "found dbcontent " << dbcontent_name
                    << " ds '" << j_ds_it.dump(4) << "'";
 
-            assert(j_ds_it.contains("dbo_name"));
+            assert(j_ds_it.contains("dbcont_name"));
             assert(j_ds_it.contains("name"));
             assert(j_ds_it.contains("sac"));
             assert(j_ds_it.contains("sic"));
@@ -196,7 +213,7 @@ void DataSourceManager::importDataSourcesJSONDeprecated(const nlohmann::json& j)
 
 void DataSourceManager::importDataSourcesJSON(const nlohmann::json& j)
 {
-    loginf << "DataSourceManager: importDataSourcesJSON";
+    loginf << "start";
 
     if (!j.contains("content_type")
             || !j.at("content_type").is_string()
@@ -239,7 +256,7 @@ void DataSourceManager::importDataSourcesJSON(const nlohmann::json& j)
 
 void DataSourceManager::deleteAllConfigDataSources()
 {
-    loginf << "DataSourceManager: deleteAllConfigDataSources";
+    loginf << "start";
 
     for(auto it = config_data_sources_.begin(); it != config_data_sources_.end();)
     {
@@ -260,7 +277,7 @@ void DataSourceManager::deleteAllConfigDataSources()
 
 void DataSourceManager::exportDataSources(const std::string& filename)
 {
-    loginf << "DataSourceManager: exportDataSources: file '" << filename << "'";
+    loginf << "file '" << filename << "'";
 
     json data = getDataSourcesAsJSON();
 
@@ -545,7 +562,7 @@ bool DataSourceManager::lineSpecificLoadingRequired(const std::string& dbcontent
 
 void DataSourceManager::setLoadDataSources (bool loading_wanted)
 {
-    loginf << "DataSourceManager: setLoadDataSources: wanted " << loading_wanted;
+    loginf << "wanted " << loading_wanted;
 
     for (auto& ds_it : db_data_sources_)
         ds_it->loadingWanted(loading_wanted);
@@ -556,7 +573,7 @@ void DataSourceManager::setLoadDataSources (bool loading_wanted)
 
 void DataSourceManager::setLoadAllDataSourceLines ()
 {
-    loginf << "DataSourceManager: setLoadAllDataSourceLines";
+    loginf << "start";
 
     for (auto& ds_it : db_data_sources_)
         ds_it->enableAllLines();
@@ -567,7 +584,7 @@ void DataSourceManager::setLoadAllDataSourceLines ()
 
 void DataSourceManager::setLoadOnlyDataSources (std::map<unsigned int, std::set<unsigned int>> ds_ids)
 {
-    loginf << "DataSourceManager: setLoadOnlyDataSources";
+    loginf << "start";
 
     // deactivate all loading
     setLoadDataSources(false);
@@ -610,7 +627,7 @@ std::map<unsigned int, std::set<unsigned int>> DataSourceManager::getLoadDataSou
 
 void DataSourceManager::resetToStartupConfiguration()
 {
-    loginf << "DataSourceManager: resetToStartupConfiguration";
+    loginf << "start";
 
     selectAllDSTypes();
     selectAllDataSources();
@@ -620,7 +637,7 @@ void DataSourceManager::resetToStartupConfiguration()
 void DataSourceManager::databaseOpenedSlot()
 {
 
-    loginf << "DataSourceManager: databaseOpenedSlot";
+    loginf << "start";
 
     loadDBDataSources();
 
@@ -644,7 +661,7 @@ void DataSourceManager::databaseClosedSlot()
 
 void DataSourceManager::configurationDialogDoneSlot()
 {
-    loginf << "DataSourceManager: configurationDialogDoneSlot";
+    loginf << "start";
 
     config_dialog_->hide();
     config_dialog_ = nullptr;
@@ -682,7 +699,7 @@ void DataSourceManager::createConfigDataSource(unsigned int ds_id)
 
 void DataSourceManager::deleteConfigDataSource(unsigned int ds_id)
 {
-    loginf << "DataSourceManager: deleteConfigDataSource: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     assert (hasConfigDataSource(ds_id));
     assert (!hasDBDataSource(ds_id)); // can not delete config data sources in existing db
@@ -786,18 +803,18 @@ void DataSourceManager::createConfigDataSourcesFromDB()
             if (!ds_it->info().is_null())
                 cfg_ds.info(ds_it->info().dump());
 
-            loginf << "ConfigurationDataSource: createConfigDataSourcesFromDB: added name " << cfg_ds.name()
+            loginf << "added name " << cfg_ds.name()
                    << " sac/sic " << cfg_ds.sac() << "/" << cfg_ds.sic();
         }
         else
-            logdbg << "DataSourceManager: createConfigDataSourcesFromDB: ds " << ds_it->name()
+            logdbg << "ds " << ds_it->name()
                    << " sac/sic " << ds_it->sac() << "/" << ds_it->sic() << " already exists";
     }
 }
 
 void DataSourceManager::saveDBDataSources()
 {
-    loginf << "DataSourceManager: saveDBDataSources";
+    loginf << "start";
 
     DBInterface& db_interface = COMPASS::instance().dbInterface();
 
@@ -849,13 +866,13 @@ bool DataSourceManager::hasDataSourcesOfDBContent(const std::string dbcontent_na
 
 void DataSourceManager::addNewDataSource (unsigned int ds_id)
 {
-    loginf << "DataSourceManager: addNewDataSource: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     assert (!hasDBDataSource(ds_id));
 
     if (hasConfigDataSource(ds_id))
     {
-        loginf << "DataSourceManager: addNewDataSource: ds_id " << ds_id << " from config";
+        loginf << "ds_id " << ds_id << " from config";
 
         dbContent::ConfigurationDataSource& cfg_ds = configDataSource(ds_id);
 
@@ -864,7 +881,7 @@ void DataSourceManager::addNewDataSource (unsigned int ds_id)
     }
     else
     {
-        loginf << "DataSourceManager: addNewDataSource: ds_id " << ds_id << " create new";
+        loginf << "ds_id " << ds_id << " create new";
 
         createConfigDataSource(ds_id);
 
@@ -885,7 +902,7 @@ void DataSourceManager::addNewDataSource (unsigned int ds_id)
 
     emit dataSourcesChangedSignal();
 
-    loginf << "DataSourceManager: addNewDataSource: ds_id " << ds_id << " done";
+    loginf << "ds_id " << ds_id << " done";
 }
 
 dbContent::DBDataSource& DataSourceManager::dbDataSource(unsigned int ds_id)
@@ -923,7 +940,7 @@ std::set<std::string> DataSourceManager::wantedDSTypes()
 
 void DataSourceManager::dsTypeLoadingWanted (const std::string& ds_type, bool wanted)
 {
-    loginf << "DataSourceManager: dsTypeLoadingWanted: ds_type " << ds_type << " wanted " << wanted;
+    loginf << "ds_type " << ds_type << " wanted " << wanted;
 
     ds_type_loading_wanted_[ds_type] = wanted;
 }
@@ -938,11 +955,11 @@ bool DataSourceManager::dsTypeLoadingWanted (const std::string& ds_type)
 
 void DataSourceManager::setLoadDSTypes (bool loading_wanted)
 {
-    loginf << "DataSourceManager: setLoadDSTypes: wanted " << loading_wanted;
+    loginf << "wanted " << loading_wanted;
 
     for (auto& ds_type_it : data_source_types_)
     {
-        logdbg << "DataSourceManager: setLoadDSTypes: wanted " << loading_wanted;
+        logdbg << "wanted " << loading_wanted;
         ds_type_loading_wanted_[ds_type_it] = loading_wanted;
     }
 
@@ -994,7 +1011,7 @@ void DataSourceManager::createNetworkDBDataSources()
         {
             if (!hasDBDataSource(ds_id))
             {
-                loginf << "DataSourceManager: createNetworkDBDataSources: ds_id " << ds_id << " from config";
+                loginf << "ds_id " << ds_id << " from config";
 
                 db_data_sources_.emplace_back(ds_it->getAsNewDBDS());
                 //addNewDataSource(ds_it->id());

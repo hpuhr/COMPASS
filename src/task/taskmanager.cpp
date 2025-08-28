@@ -259,7 +259,7 @@ void TaskManager::init()
  */
 void TaskManager::shutdown()
 {
-    loginf << "TaskManager: shutdown";
+    loginf << "start";
 
     asterix_importer_task_->stop(); // stops if active
     asterix_importer_task_ = nullptr;
@@ -278,7 +278,7 @@ void TaskManager::shutdown()
  */
 void TaskManager::runTask(const std::string& task_name)
 {
-    loginf << "TaskManager: runTask: name " << task_name;
+    loginf << "name " << task_name;
 
     assert(tasks_.count(task_name));
     assert(tasks_.at(task_name)->canRun());
@@ -398,7 +398,7 @@ void TaskManager::beginTaskResultWriting(const std::string& name,
         widget_->setDisabled(true);
 
     if (current_result_)
-        logerr << "TaskManager: beginTaskResultWriting: result id " << current_result_->id()
+        logerr << "result id " << current_result_->id()
                << " name " << current_result_->name() << " already present";
 
     assert (!current_result_);
@@ -407,9 +407,9 @@ void TaskManager::beginTaskResultWriting(const std::string& name,
     //prepare result for new content
     auto res = current_result_->prepareResult();
     if (!res.ok())
-        logerr << "TaskManager: beginTaskResultWriting: result could not be initialized: " << res.error();
+        logerr << "result could not be initialized: " << res.error();
 
-    loginf << "TaskManager: beginTaskResultWriting: begining result id " << current_result_->id()
+    loginf << "beginning result id " << current_result_->id()
            << " name " << current_result_->name();
     
     assert(res.ok());
@@ -433,7 +433,7 @@ std::shared_ptr<ResultReport::Report>& TaskManager::currentReport()
  */
 void TaskManager::endTaskResultWriting(bool store_result, bool show_dialog)
 {
-    loginf << "TaskManager: endTaskResultWriting: store_result " << store_result;
+    loginf << "store_result " << store_result;
 
     if (widget_)
         widget_->setDisabled(false);
@@ -443,14 +443,14 @@ void TaskManager::endTaskResultWriting(bool store_result, bool show_dialog)
     //finalize result after adding content
     auto res = current_result_->finalizeResult();
     if (!res.ok())
-        logerr << "TaskManager: endTaskResultWriting: Result could not be finalized: " << res.error();
+        logerr << "Result could not be finalized: " << res.error();
 
     assert(res.ok());
 
     //store result?
     if (store_result)
     {
-        loginf << "TaskManager: endTaskResultWriting: Storing result...";
+        loginf << "Storing result...";
 
         auto result_ptr = current_result_.get();
         bool cleanup_db = CleanupDBIfNeeded;
@@ -465,14 +465,14 @@ void TaskManager::endTaskResultWriting(bool store_result, bool show_dialog)
 
         //@TODO
         if (!ok)
-            logerr << "TaskManager: endTaskResultWriting: Storing result failed: " << task.taskState().error;
+            logerr << "Storing result failed: " << task.taskState().error;
         
         assert(ok);
     }
 
     assert (current_result_);
 
-    loginf << "TaskManager: endTaskResultWriting: ending result id " << current_result_->id()
+    loginf << "ending result id " << current_result_->id()
            << " name " << current_result_->name();
 
     current_result_ = nullptr;
@@ -489,6 +489,15 @@ void TaskManager::resultHeaderChanged(const TaskResult& result)
     assert(res.ok());
 
     emit taskResultHeaderChangedSignal(QString::fromStdString(result.name()));
+}
+
+/**
+ */
+void TaskManager::resultContentChanged(const TaskResult& result)
+{
+    //update result content upon change
+    auto res = COMPASS::instance().dbInterface().updateResultContent(result);
+    assert(res.ok());
 }
 
 /**
@@ -653,11 +662,12 @@ void TaskManager::databaseClosedSlot()
 
 /**
  */
-void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data)
+void TaskManager::setViewableDataConfig(const nlohmann::json::object_t& data,
+                                        bool load_blocking)
 {
     viewable_data_cfg_.reset(new ViewableDataConfig(data));
 
-    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get());
+    COMPASS::instance().viewManager().setCurrentViewPoint(viewable_data_cfg_.get(), load_blocking);
 }
 
 /**
@@ -698,7 +708,7 @@ std::shared_ptr<ResultReport::SectionContent> TaskManager::loadContent(ResultRep
 
     if (!result.ok())
     {
-        logerr << "TaskManager: loadResults: Could not load stored content: " << result.error();
+        logerr << "could not load stored content: " << result.error();
         return std::shared_ptr<ResultReport::SectionContent>();
     }
 
@@ -716,14 +726,14 @@ void TaskManager::loadResults()
     auto res = COMPASS::instance().dbInterface().loadResults();
     if (!res.ok())
     {
-        logerr << "TaskManager: loadResults: Could not load stored results: " << res.error();
+        logerr << "could not load stored results: " << res.error();
         return;
     }
 
     for (const auto& r : res.result())
         results_[ r->id() ] = r;
 
-    loginf << "TaskManager: loadResults: Loaded " << results_.size() << " result(s)";
+    loginf << "Loaded " << results_.size() << " result(s)";
 
     emit taskResultsChangedSignal();
 }
@@ -737,6 +747,14 @@ void TaskManager::clearResults()
     results_.clear();
     
     emit taskResultsChangedSignal();
+}
+
+/**
+ */
+void TaskManager::storeBackupSection()
+{
+    if (widget_)
+        widget_->storeBackupSection();
 }
 
 /**

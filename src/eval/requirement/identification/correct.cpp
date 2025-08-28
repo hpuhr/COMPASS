@@ -47,7 +47,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
         const EvaluationTargetData& target_data, std::shared_ptr<Base> instance,
         const SectorLayer& sector_layer)
 {
-    logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_;
+    logdbg << "'" << name_ << "': utn " << target_data.utn_;
 
     typedef EvaluationRequirementResult::SingleIdentificationCorrect Result;
     typedef EvaluationDetail                                         Detail;
@@ -55,7 +55,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
 
     if (target_data.isPrimaryOnly())
     {
-        logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+        logdbg << "'" << name_ << "': utn " << target_data.utn_
                << " ignored since primary only";
 
         return make_shared<EvaluationRequirementResult::SingleIdentificationCorrect>(
@@ -298,7 +298,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
                         num_correct, num_not_correct, comment);
     }
 
-    logdbg << "EvaluationRequirementIdentification '" << name_ << "': evaluate: utn " << target_data.utn_
+    logdbg << "'" << name_ << "': utn " << target_data.utn_
            << " num_updates " << num_updates << " num_no_ref_pos " << num_no_ref_pos
            << " num_no_ref_id " << num_no_ref_id
            << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside

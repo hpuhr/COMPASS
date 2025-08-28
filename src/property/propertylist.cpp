@@ -1,28 +1,45 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "propertylist.h"
 #include "logger.h"
 
 PropertyList::PropertyList()
 {
-    logdbg << "PropertyList: constructor";
+    logdbg << "start";
 }
 
 PropertyList::PropertyList(const std::vector<Property>& properties)
 :   properties_(properties)
 {
-    logdbg << "PropertyList: constructor";
+    logdbg << "start";
 }
 
 PropertyList::~PropertyList()
 {
-    logdbg << "PropertyList: destructor: start";
+    logdbg << "start";
     clear();
-    logdbg << "PropertyList: destructor: end";
+    logdbg << "end";
 }
 
 PropertyList::PropertyList(const PropertyList& org)
 {
     properties_ = org.properties_;
-    // loginf << "PropertyList: constructor: properties " << properties_.size();
+    // loginf << "properties " << properties_.size();
 }
 
 
@@ -38,46 +55,46 @@ void PropertyList::addPropertyList(const PropertyList& org)
 
 void PropertyList::addProperty(std::string id, PropertyDataType type)
 {
-    logdbg << "PropertyList: addProperty: start";
-    logdbg << "PropertyList: addProperty:  id '" << id << "' type " << Property::asString(type);
+    logdbg << "start";
+    logdbg << "id '" << id << "' type " << Property::asString(type);
     assert(!id.empty());
 
     if (hasProperty(id))
     {
-        logwrn << "PropertyList: addProperty: property " << id << " already added";
+        logwrn << "property " << id << " already added";
         return;
     }
 
     properties_.push_back(Property(id, type));
-    logdbg << "PropertyList: addProperty: end";
+    logdbg << "end";
 }
 
 void PropertyList::addProperty(Property& property)
 {
-    logdbg << "PropertyList: addProperty: start";
+    logdbg << "start";
 
     if (hasProperty(property.name()))
     {
-        logwrn << "PropertyList: addProperty: property " << property.name() << " already added";
+        logwrn << "property " << property.name() << " already added";
         return;
     }
 
     properties_.push_back(property);
-    logdbg << "PropertyList: addProperty: end";
+    logdbg << "end";
 }
 
 void PropertyList::addProperty(const Property& property)
 {
-    logdbg << "PropertyList: addProperty: start";
+    logdbg << "start";
 
     if (hasProperty(property.name()))
     {
-        logwrn << "PropertyList: addProperty: property " << property.name() << " already added";
+        logwrn << "property " << property.name() << " already added";
         return;
     }
 
     properties_.push_back(property);
-    logdbg << "PropertyList: addProperty: end";
+    logdbg << "end";
 }
 
 const Property& PropertyList::at(unsigned int index) const
@@ -88,7 +105,7 @@ const Property& PropertyList::at(unsigned int index) const
 
 void PropertyList::removeProperty(const std::string& id)
 {
-    logdbg << "PropertyList: removeProperty: start";
+    logdbg << "start";
     assert(hasProperty(id));
 
     std::vector<Property>::iterator it;
@@ -98,17 +115,17 @@ void PropertyList::removeProperty(const std::string& id)
         if (it->name().compare(id) == 0)
         {
             properties_.erase(it);
-            logdbg << "PropertyList: removeProperty: end";
+            logdbg << "end";
             return;
         }
     }
-    logerr << "PropertyList: removeProperty: property " << id << " could not be removed";
+    logerr << "property " << id << " could not be removed";
     assert(false);
 }
 
 const Property& PropertyList::get(const std::string& id) const
 {
-    logdbg << "PropertyList: get: start";
+    logdbg << "start";
     assert(hasProperty(id));
 
     std::vector<Property>::const_iterator it;
@@ -120,13 +137,13 @@ const Property& PropertyList::get(const std::string& id) const
             return *it;
         }
     }
-    logerr << "PropertyList: get: property " << id << " not found";
+    logerr << "property " << id << " not found";
     throw std::runtime_error("PropertyList: get: property " + id + " not found");
 }
 
 unsigned int PropertyList::getPropertyIndex(const std::string& id) const
 {
-    logdbg << "PropertyList: getPropertyIndex: start";
+    logdbg << "start";
     if (!hasProperty(id))
         throw std::runtime_error("PropertyList: getPropertyIndex: property " + id +
                                  " does not exists");
@@ -145,7 +162,7 @@ unsigned int PropertyList::getPropertyIndex(const std::string& id) const
 
 bool PropertyList::hasProperty(const std::string& id) const
 {
-    logdbg << "PropertyList: hasProperty: start";
+    logdbg << "start";
 
     for (auto& it : properties_)
     {
@@ -158,7 +175,7 @@ bool PropertyList::hasProperty(const std::string& id) const
 
 bool PropertyList::hasProperty(const Property& prop) const
 {
-    logdbg << "PropertyList: hasProperty: start";
+    logdbg << "start";
 
     for (auto& it : properties_)
     {
@@ -171,9 +188,9 @@ bool PropertyList::hasProperty(const Property& prop) const
 
 void PropertyList::clear()
 {
-    logdbg << "PropertyList: clear: start";
+    logdbg << "start";
     properties_.clear();
-    logdbg << "PropertyList: clear: end";
+    logdbg << "end";
 }
 
 void PropertyList::print () const

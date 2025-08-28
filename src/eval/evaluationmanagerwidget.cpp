@@ -195,25 +195,7 @@ void EvaluationManagerWidget::reshowLastResultId()
  */
 void EvaluationManagerWidget::generateReportSlot()
 {
-    loginf << "EvaluationManagerWidget: generateReportSlot";
+    loginf << "start";
 
     eval_man_.generateReport();
-}
-
-/**
- */
-boost::optional<nlohmann::json> EvaluationManagerWidget::getTableData(const std::string& result_id, 
-                                                                      const std::string& table_id,
-                                                                      bool rowwise,
-                                                                      const std::vector<int>& cols) const
-{
-    //@TODO: solve this in a better way via task results
-    return boost::optional<nlohmann::json>();
-
-    // //retrieve special tables
-    // if (table_id == "Targets")
-    //     return eval_man_.calculator().data().getTableData(rowwise, cols);
-
-    // //retrieve result table
-    // return results_tab_widget_->getTableData(result_id, table_id, rowwise, cols);
 }

@@ -614,9 +614,9 @@ Eigen::MatrixXd Grid2D::getValues(grid2d::ValueType vtype) const
     double* d = l.data();
 
     const auto&   count_valid  = layers_[ IndexCountValid ];
-    const auto&   count_nan    = layers_[ IndexCountNan   ];
+    //const auto&   count_nan    = layers_[ IndexCountNan   ];
     const double* dcount_valid = count_valid.data();
-    const double* dcount_nan   = count_nan.data();
+    //const double* dcount_nan   = count_nan.data();
 
     size_t n = (size_t)l.size();
 

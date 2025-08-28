@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "simplereconstructor.h"
 #include "simplereconstructorwidget.h"
 #include "compass.h"
@@ -137,7 +154,7 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
 
 void SimpleReconstructor::reset()
 {
-    loginf << "SimpleReconstructor: reset";
+    loginf << "start";
 
 //    target_reports_.clear(); // done in base
 //    tr_timestamps_.clear();
@@ -171,7 +188,7 @@ void SimpleReconstructor::updateWidgets()
 
 void SimpleReconstructor::processSlice_impl()
 {
-    loginf << "SimpleReconstructor: processSlice_impl: current_slice_begin "
+    loginf << "current_slice_begin "
            << Time::toString(currentSlice().slice_begin_)
            << " end " << Time::toString(currentSlice().slice_begin_ + settings().sliceDuration())
            << " is last " << currentSlice().is_last_slice_;

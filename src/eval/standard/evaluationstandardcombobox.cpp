@@ -39,18 +39,18 @@ void EvaluationStandardComboBox::changedStandardSlot(const QString& standard_nam
 {
     string std_name = standard_name.toStdString();
 
-    loginf << "EvaluationStandardComboBox: changedStandardSlot: standard '" << std_name << "'";
+    loginf << "standard '" << std_name << "'";
 
     if (calculator_.currentStandardName() != std_name)
     {
-        loginf << "EvaluationStandardComboBox: changedStandardSlot: setting standard '" << std_name << "'";
+        loginf << "setting standard '" << std_name << "'";
         calculator_.currentStandardName(std_name);
     }
 }
 
 void EvaluationStandardComboBox::setStandardName(const std::string& value)
 {
-    loginf << "EvaluationStandardComboBox: setStandardName: standard '" << value << "'";
+    loginf << "standard '" << value << "'";
 
     int index = findText(QString(value.c_str()));
     assert(index >= 0);
@@ -59,7 +59,7 @@ void EvaluationStandardComboBox::setStandardName(const std::string& value)
 
 void EvaluationStandardComboBox::updateStandards()
 {
-    loginf << "EvaluationStandardComboBox: updateStandards";
+    loginf << "start";
 
     clear();
 

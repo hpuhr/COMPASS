@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "modecfilter.h"
 #include "compass.h"
 #include "modecfilterwidget.h"
@@ -27,14 +44,14 @@ ModeCFilter::ModeCFilter(const std::string& class_id, const std::string& instanc
 
 ModeCFilter::~ModeCFilter() {}
 
-bool ModeCFilter::filters(const std::string& dbo_type)
+bool ModeCFilter::filters(const std::string& dbcont_name)
 {
-    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbo_type);
+    return COMPASS::instance().dbContentManager().metaVariable(DBContent::meta_var_mc_.name()).existsIn(dbcont_name);
 }
 
 std::string ModeCFilter::getConditionString(const std::string& dbcontent_name, bool& first)
 {
-    logdbg << "ModeCFilter: getConditionString: dbcont " << dbcontent_name << " active " << active_;
+    logdbg << "dbcont " << dbcontent_name << " active " << active_;
 
     auto& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -124,14 +141,14 @@ std::string ModeCFilter::getConditionString(const std::string& dbcontent_name, b
         }
     }
 
-    logdbg << "ModeCFilter: getConditionString: here '" << ss.str() << "'";
+    logdbg << "here '" << ss.str() << "'";
 
     return ss.str();
 }
 
 void ModeCFilter::generateSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
-    logdbg << "ModeCFilter: generateSubConfigurable: class_id " << class_id;
+    logdbg << "class_id " << class_id;
 
     throw std::runtime_error("ModeCFilter: generateSubConfigurable: unknown class_id " + class_id);
 }
@@ -144,7 +161,7 @@ DBFilterWidget* ModeCFilter::createWidget()
 
 void ModeCFilter::checkSubConfigurables()
 {
-    logdbg << "ModeCFilter: checkSubConfigurables";
+    logdbg << "start";
 }
 
 

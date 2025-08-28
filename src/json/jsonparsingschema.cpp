@@ -49,7 +49,7 @@ void JSONParsingSchema::generateSubConfigurable(const std::string& class_id,
         assert(name.size());
         assert(parsers_.find(name) == parsers_.end());
 
-        logdbg << "JSONParsingSchema: generateSubConfigurable: generating schema " << instance_id
+        logdbg << "generating schema " << instance_id
                << " with name " << name;
 
 //        parsers_.emplace(

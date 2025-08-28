@@ -86,8 +86,6 @@ private:
     bool evaluate_ {false};
     std::string export_eval_report_filename_;
 
-    std::string max_fps_;
-
     bool no_config_save_ {false};
 
     bool open_rt_cmd_port_ {false};

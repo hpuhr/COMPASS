@@ -36,7 +36,7 @@ namespace EvaluationResultsReport
 
     RootItem::~RootItem()
     {
-        loginf << "EvaluationResultsReport::RootItem: destructor";
+        loginf << "end";
     }
 
     TreeItem* RootItem::child(int row)
@@ -76,7 +76,7 @@ namespace EvaluationResultsReport
 
     Section& RootItem::getSection (const std::string& id)
     {
-        logdbg << "RootItem: getSection: id '" << id << "'";
+        logdbg << "id '" << id << "'";
 
         assert (id.size());
 

@@ -139,19 +139,19 @@ void HistogramViewDataWidget::postUpdateVariableDataEvent()
 
 /**
  */
-bool HistogramViewDataWidget::updateVariableDisplay()
+ViewDataWidget::DrawState HistogramViewDataWidget::updateVariableDisplay()
 {
     return updateChart();
 }
 
 /**
  */
-void HistogramViewDataWidget::updateFromAnnotations()
+bool HistogramViewDataWidget::updateFromAnnotations()
 {
-    loginf << "HistogramViewDataWidget: updateFromAnnotations";
+    loginf << "start";
 
     if (!view_->hasCurrentAnnotation())
-        return;
+        return false;
 
     const auto& anno = view_->currentAnnotation();
 
@@ -161,12 +161,12 @@ void HistogramViewDataWidget::updateFromAnnotations()
     const auto& feature = anno.feature_json;
 
     if (!feature.is_object() || !feature.contains(ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram))
-        return;
-    
+        return false;
+
     if (!histogram_raw_.fromJSON(feature[ ViewPointGenFeatureHistogram::FeatureHistogramFieldNameHistogram ]))
     {
         histogram_raw_.clear();
-        return;
+        return false;
     }
 
     if (histogram_raw_.useLogScale().has_value())
@@ -175,7 +175,9 @@ void HistogramViewDataWidget::updateFromAnnotations()
         view_->updateComponents();
     }
 
-    loginf << "HistogramViewDataWidget: updateFromAnnotations: done";
+    loginf << "done";
+
+    return true;
 }
 
 /**
@@ -183,7 +185,7 @@ void HistogramViewDataWidget::updateFromAnnotations()
  */
 void HistogramViewDataWidget::updateFromVariables()
 {
-    loginf << "HistogramViewDataWidget: updateVariableData";
+    loginf << "start";
 
     assert(view_->numVariables() == 1);
     assert(view_->variable(0).hasVariable());
@@ -233,7 +235,7 @@ void HistogramViewDataWidget::updateFromVariables()
     addNullCount(generator->getResults().buffer_null_count);
     addNanCount (generator->getResults().buffer_nan_count );
 
-    loginf << "HistogramViewDataWidget: updateVariableData: done";
+    loginf << "done";
 }
 
 /**
@@ -294,11 +296,16 @@ QPixmap HistogramViewDataWidget::renderPixmap()
 
 /**
  */
-bool HistogramViewDataWidget::updateChart()
+ViewDataWidget::DrawState HistogramViewDataWidget::updateChart()
 {
-    loginf << "HistogramViewDataWidget: updateChart";
+    loginf << "start";
+
+    //check if data is present/valid
+    bool has_data = histogram_raw_.hasData() && (variablesOk() || view_->showsAnnotation());
 
     chart_view_.reset(nullptr);
+
+    ViewDataWidget::DrawState draw_state = ViewDataWidget::DrawState::NotDrawn;
 
     //create chart
     QChart* chart = new QChart();
@@ -354,9 +361,6 @@ bool HistogramViewDataWidget::updateChart()
         chart_series->attachAxis(chart_y_axis);
     };
 
-    //check if data is present/valid
-    bool has_data = histogram_raw_.hasData() && variablesOk();
-
     if (has_data)
     {
         //data available
@@ -403,6 +407,8 @@ bool HistogramViewDataWidget::updateChart()
         max_count = std::max(max_count, (unsigned)1);
 
         generateYAxis(use_log_scale, max_count);
+
+        draw_state = ViewDataWidget::DrawState::DrawnContent;
     }
     else 
     {
@@ -423,6 +429,8 @@ bool HistogramViewDataWidget::updateChart()
         chart_y_axis->setLabelsVisible(false);
         chart_y_axis->setGridLineVisible(false);
         chart_y_axis->setMinorGridLineVisible(false);
+
+        draw_state = ViewDataWidget::DrawState::Drawn;
     }
 
     //update chart
@@ -442,16 +450,16 @@ bool HistogramViewDataWidget::updateChart()
 
     main_layout_->addWidget(chart_view_.get());
 
-    loginf << "HistogramViewDataWidget: updateChart: done";
+    loginf << "done";
 
-    return has_data;
+    return draw_state;
 }
 
 /**
  */
 void HistogramViewDataWidget::exportDataSlot(bool overwrite)
 {
-    logdbg << "HistogramViewDataWidget: exportDataSlot";
+    logdbg << "start";
 
 }
 
@@ -466,7 +474,7 @@ void HistogramViewDataWidget::exportDoneSlot(bool cancelled)
  */
 void HistogramViewDataWidget::selectData(unsigned int index1, unsigned int index2)
 {
-    loginf << "HistogramViewDataWidget: rectangleSelectedSlot: index1 " << index1 << " index2 " << index2;
+    loginf << "index1 " << index1 << " index2 " << index2;
 
     if (histogram_generator_)
         histogram_generator_->select(index1, index2);
@@ -510,7 +518,7 @@ void HistogramViewDataWidget::rectangleSelectedSlot(unsigned int index1, unsigne
  */
 void HistogramViewDataWidget::invertSelectionSlot()
 {
-    loginf << "HistogramViewDataWidget: invertSelectionSlot";
+    loginf << "start";
 
     for (auto& buf_it : viewData())
     {
@@ -533,7 +541,7 @@ void HistogramViewDataWidget::invertSelectionSlot()
  */
 void HistogramViewDataWidget::clearSelectionSlot()
 {
-    loginf << "HistogramViewDataWidget: clearSelectionSlot";
+    loginf << "start";
 
     for (auto& buf_it : viewData())
     {
@@ -551,7 +559,7 @@ void HistogramViewDataWidget::clearSelectionSlot()
  */
 void HistogramViewDataWidget::resetZoomSlot()
 {
-    loginf << "HistogramViewDataWidget: resetZoomSlot";
+    loginf << "start";
 
     if (histogram_generator_ && histogram_generator_->subRangeActive())
     {
@@ -619,6 +627,7 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
             return ranges;
         };
+        UNUSED_VARIABLE(obtainRanges);
 
         info[ "result_range_min"      ] = range.first;
         info[ "result_range_max"      ] = range.second;
@@ -639,10 +648,10 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
         {
             nlohmann::json chart_info;
 
-            bool y_axis_log = dynamic_cast<QLogValueAxis*>(chart_view_->chart()->axisY()) != nullptr;
+            bool y_axis_log = dynamic_cast<QLogValueAxis*>(chart_view_->chart()->axes(Qt::Vertical).first()) != nullptr;
 
-            chart_info[ "x_axis_label" ] = chart_view_->chart()->axisX()->titleText().toStdString();
-            chart_info[ "y_axis_label" ] = chart_view_->chart()->axisY()->titleText().toStdString();
+            chart_info[ "x_axis_label" ] = chart_view_->chart()->axes(Qt::Horizontal).first()->titleText().toStdString();
+            chart_info[ "y_axis_label" ] = chart_view_->chart()->axes(Qt::Vertical).first()->titleText().toStdString();
             chart_info[ "y_axis_log"   ] = y_axis_log;
             chart_info[ "num_series"   ] = chart_view_->chart()->series().count();
 

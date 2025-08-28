@@ -103,7 +103,7 @@ EvaluationResultsTabWidget::~EvaluationResultsTabWidget() = default;
 
 void EvaluationResultsTabWidget::expand()
 {
-    loginf << "EvaluationResultsTabWidget: expand";
+    loginf << "start";
 
     tree_view_->expandToDepth(3);
 }
@@ -128,7 +128,7 @@ namespace
 void EvaluationResultsTabWidget::selectId (const std::string& id, 
                                            bool show_figure)
 {
-    loginf << "EvaluationResultsTabWidget: selectId: id '" << id << "'";
+    loginf << "id '" << id << "'";
 
     //const auto& model = eval_man_.resultsGenerator().resultsModel();
     //iterateTreeModel(model, model.index(0, 0), "");
@@ -137,7 +137,7 @@ void EvaluationResultsTabWidget::selectId (const std::string& id,
 
     // if (!index.isValid())
     // {
-    //     logerr << "EvaluationResultsTabWidget: selectId: id '" << id << "' not found";
+    //     logerr << "id '" << id << "' not found";
     //     return;
     // }
 
@@ -172,11 +172,11 @@ void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
 
     id_history_.push_back(item->id());
 
-    loginf << "EvaluationResultsTabWidget: itemClickedSlot: name " << item->name() << " id " << item->id();
+    loginf << "name " << item->name() << " id " << item->id();
 
     if (dynamic_cast<EvaluationResultsReport::RootItem*>(item))
     {
-        loginf << "EvaluationResultsTabWidget: itemClickedSlot: root";
+        loginf << "root";
         showResultWidget(nullptr);
     }
     else if (dynamic_cast<EvaluationResultsReport::Section*>(item))
@@ -184,7 +184,7 @@ void EvaluationResultsTabWidget::itemClickedSlot(const QModelIndex& index)
         EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
         assert (section);
 
-        loginf << "EvaluationResultsTabWidget: itemClickedSlot: section " << section->name();
+        loginf << "section " << section->name();
         showResultWidget(section->getContentWidget());
     }
 
@@ -196,7 +196,7 @@ void EvaluationResultsTabWidget::showFigure(const QModelIndex& index)
     TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
     assert (item);
 
-    loginf << "EvaluationResultsTabWidget: showFigure: name " << item->name() << " id " << item->id();
+    loginf << "name " << item->name() << " id " << item->id();
 
     if (dynamic_cast<EvaluationResultsReport::RootItem*>(item))
     {
@@ -207,7 +207,7 @@ void EvaluationResultsTabWidget::showFigure(const QModelIndex& index)
         EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
         assert (section);
 
-        loginf << "EvaluationResultsTabWidget: showFigure: section " << section->name();
+        loginf << "section " << section->name();
         
         auto figures = section->getFigures();
         if (!figures.empty())
@@ -217,7 +217,7 @@ void EvaluationResultsTabWidget::showFigure(const QModelIndex& index)
 
 void EvaluationResultsTabWidget::stepBackSlot()
 {
-    loginf << "EvaluationResultsTabWidget: stepBackSlot";
+    loginf << "start";
 
     assert (id_history_.size() > 1);
 
@@ -264,55 +264,4 @@ void EvaluationResultsTabWidget::updateBackButton ()
     assert (back_button_);
 
     back_button_->setEnabled(id_history_.size() > 1);
-}
-
-boost::optional<nlohmann::json> EvaluationResultsTabWidget::getTableData(const std::string& result_id, 
-                                                                         const std::string& table_id,
-                                                                         bool rowwise,
-                                                                         const std::vector<int>& cols) const
-{
-    QString result_id_corr = QString::fromStdString(result_id);
-
-    //this is just for convenience
-    if (!result_id_corr.startsWith("Report:Results:"))
-    {
-        if (result_id_corr.startsWith("Results:"))
-            result_id_corr = "Report:" + result_id_corr;
-        else
-            result_id_corr = "Report:Results:" + result_id_corr;
-    }
-
-    //get result section
-    // QModelIndex index = eval_man_.calculator().resultsGenerator().resultsModel().findItem(result_id_corr.toStdString());
-
-    // if (!index.isValid())
-    // {
-    //     logerr << "EvaluationResultsTabWidget: getTableData: id '" << result_id_corr.toStdString() << "' not found";
-    //     return {};
-    // }
-
-    // TreeItem* item = static_cast<TreeItem*>(index.internalPointer());
-    // if (!item)
-    // {
-    //     logerr << "EvaluationResultsTabWidget: getTableData: item null";
-    //     return {};
-    // }
-
-    // EvaluationResultsReport::Section* section = dynamic_cast<EvaluationResultsReport::Section*>(item);
-    // if (!section)
-    // {   
-    //     logerr << "EvaluationResultsTabWidget: getTableData: no section found";
-    //     return {};
-    // }
-
-    // //check if table is available
-    // if (!section->hasTable(table_id))
-    // {
-    //     logerr << "EvaluationResultsTabWidget: getTableData: no table found";
-    //     return {};
-    // }
-
-    // return section->getTable(table_id).toJSON(rowwise, cols);
-
-    return {};
 }

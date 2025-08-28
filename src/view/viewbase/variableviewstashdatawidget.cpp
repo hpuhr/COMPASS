@@ -89,7 +89,7 @@ void VariableViewStashDataWidget::preUpdateVariableDataEvent()
 */
 void VariableViewStashDataWidget::postUpdateVariableDataEvent() 
 {
-    loginf << "VariableViewStashDataWidget: postUpdateVariableDataEvent";
+    loginf << "start";
 
     //update the stash (bounds, counts, etc.)
     updateStash();
@@ -108,7 +108,7 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
 {
     auto view = variableView();
 
-    loginf << "VariableViewStashDataWidget: updateVariableData: updating data for view " << view->classId();
+    loginf << "updating data for view " << view->classId();
 
     for (size_t i = 0; i < view->numVariables(); ++i)
     {
@@ -118,14 +118,14 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
         bool is_empty = view_var.settings().allow_empty_var && view_var.isEmpty();
         if (is_empty)
         {
-            loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.id() << " empty";
+            loginf << "view_var " << view_var.id() << " empty";
             continue;
         }
 
         //otherwise return on invalid variable
         if (!view_var.getFor(dbcontent_name))
         {
-            loginf << "VariableViewStashDataWidget: updateVariableData: view_var " << view_var.variableName()
+            loginf << "view_var " << view_var.variableName()
                    << " not existing in " << dbcontent_name << ", skipping";
             return;
         }
@@ -223,7 +223,7 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
 
         auto& group_stash = stash_.groupedDataStash(group_name);
 
-        logdbg << "VariableViewStashDataWidget: updateVariableData: value counts before:";
+        logdbg << "value counts before:";
 
         for (size_t i = 0; i < view->numVariables(); ++i)
             logdbg << "   " << view->variable(i).id() << " " << group_stash.variable_stashes[ i ].values.size();
@@ -253,7 +253,7 @@ void VariableViewStashDataWidget::updateVariableData(const std::string& dbconten
         //check counts
         assert (stash_.isValid());
 
-        logdbg << "VariableViewStashDataWidget: updateVariableData: value counts after:";
+        logdbg << "value counts after:";
 
         for (size_t i = 0; i < view->numVariables(); ++i)
             logdbg << "   " << view->variable(i).id() << " " << group_stash.variable_stashes[ i ].values.size();
@@ -269,7 +269,7 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
                                                      const Buffer& buffer,
                                                      const std::vector<unsigned int>& indexes)
 {
-    logdbg << "VariableViewStashDataWidget: updateVariableData: group_name "
+    logdbg << "group_name "
            << group_name << " indexes size " << indexes.size();
 
     auto& group_stash = stash_.groupedDataStash(group_name);
@@ -288,7 +288,7 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     //handle special cases
     if (is_empty)
     {
-        loginf << "VariableViewStashDataWidget: updateVariableData: adding empty variable to stash";
+        loginf << "adding empty variable to stash";
 
         //empty variable selected => add zero values (valid values)
         //(a little bit hacky, but we do not want to count the values as Nan or NULL values)
@@ -302,14 +302,14 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
     else if (!data_var)
     {
         //if not empty and no data var, something is fishy
-        logwrn << "VariableViewStashDataWidget: updateVariableData: could not retrieve data var";
+        logwrn << "could not retrieve data var";
         return;
     }
 
     PropertyDataType data_type        = data_var->dataType();
     std::string      current_var_name = data_var->name();
 
-    logdbg << "VariableViewStashDataWidget: updateVariableData: updating, last size " << last_size;
+    logdbg << "updating, last size " << last_size;
 
     
 
@@ -323,14 +323,14 @@ void VariableViewStashDataWidget::updateVariableData(size_t var_idx,
         //buffer_counts = current_size;
 
 #define NotFoundFunc                                                                                          \
-        logerr << "VariableViewStashDataWidget: updateVariableData: impossible for property type "            \
+        logerr << "impossible for property type "            \
         << Property::asString(data_type);                                                                     \
         throw std::runtime_error("VariableViewStashDataWidget: updateVariableData: impossible property type " \
                                  + Property::asString(data_type));
 
     SwitchPropertyDataType(data_type, UpdateFunc, NotFoundFunc)
 
-    logdbg << "VariableViewStashDataWidget: updateVariableData: updated size " << buffer_counts;
+    logdbg << "updated size " << buffer_counts;
 }
 
 /**
@@ -349,7 +349,7 @@ void VariableViewStashDataWidget::updateStash()
 
     const auto& data_ranges = stash_.dataRanges();
 
-    logdbg << "VariableViewStashDataWidget: updateMinMax: ";
+    logdbg << "start";
 
     for (size_t i = 0; i < variableView()->numVariables(); ++i)
     {
@@ -362,13 +362,13 @@ void VariableViewStashDataWidget::updateStash()
 
 /**
  */
-boost::optional<QRectF> VariableViewStashDataWidget::getPlanarBounds(int var_x, 
-                                                                     int var_y, 
-                                                                     bool correct_datetime,
-                                                                     bool fix_small_ranges) const
+boost::optional<QRectF> VariableViewStashDataWidget::getPlanarVariableBounds(int var_x, 
+                                                                             int var_y, 
+                                                                             bool correct_datetime,
+                                                                             bool fix_small_ranges) const
 {
-    auto bounds_x = getBounds(var_x, correct_datetime, fix_small_ranges);
-    auto bounds_y = getBounds(var_y, correct_datetime, fix_small_ranges);
+    auto bounds_x = getVariableBounds(var_x, correct_datetime, fix_small_ranges);
+    auto bounds_y = getVariableBounds(var_y, correct_datetime, fix_small_ranges);
     if (!bounds_x.has_value() || !bounds_y.has_value())
         return {};
 
@@ -382,9 +382,9 @@ boost::optional<QRectF> VariableViewStashDataWidget::getPlanarBounds(int var_x,
 
 /**
  */
-boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBounds(int var, 
-                                                                                  bool correct_datetime,
-                                                                                  bool fix_small_ranges) const
+boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getVariableBounds(int var, 
+                                                                                          bool correct_datetime,
+                                                                                          bool fix_small_ranges) const
 {
     boost::optional<std::pair<double, double>> b = getStash().dataRanges().at(var);
     if (!b.has_value())
@@ -423,7 +423,7 @@ boost::optional<std::pair<double, double>> VariableViewStashDataWidget::getBound
 boost::optional<QRectF> VariableViewStashDataWidget::getViewBounds() const
 {
     //meaningful default behaviour for most views
-    return getPlanarBounds(0, 1, false, true);
+    return getPlanarVariableBounds(0, 1, false, true);
 }
 
 /**
@@ -438,7 +438,7 @@ void VariableViewStashDataWidget::selectData(double x_min,
 {
     bool ctrl_pressed = QApplication::keyboardModifiers() & Qt::ControlModifier;
 
-    loginf << "VariableViewStashDataWidget: selectData: "
+    loginf << "start"
            << "x_min " << x_min << " "
            << "x_max " << x_max << " "
            << "y_min " << y_min << " "
@@ -502,7 +502,7 @@ void VariableViewStashDataWidget::selectData(double x_min,
         }
     }
 
-    loginf << "VariableViewStashDataWidget: selectData: sel_cnt: 1 " << sel_cnt;
+    loginf << "sel_cnt: 1 " << sel_cnt;
     sel_cnt = 0;
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
@@ -536,11 +536,11 @@ void VariableViewStashDataWidget::selectData(double x_min,
         NullableVector<unsigned long>& rec_num_vec = buffer->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
-        std::map<unsigned long, std::vector<unsigned int>> rec_num_indexes =
+        std::map<boost::optional<unsigned long>, std::vector<unsigned int>> rec_num_indexes =
             rec_num_vec.distinctValuesWithIndexes(0, rec_num_vec.contentSize());
         // rec_num -> index
 
-        for (const auto rec_num : sel_cont_id_it.second) // iterator over all selected rec_nums
+        for (const auto& rec_num : sel_cont_id_it.second) // iterator over all selected rec_nums
         {
             assert (rec_num_indexes.count(rec_num));
             std::vector<unsigned int>& indexes = rec_num_indexes.at(rec_num);
@@ -608,7 +608,7 @@ void VariableViewStashDataWidget::selectData(double x_min,
     //     }
     // }
 
-    loginf << "VariableViewStashDataWidget: selectData: sel_cnt 2: " << sel_cnt;
+    loginf << "sel_cnt 2: " << sel_cnt;
 
     emit variableView()->selectionChangedSignal();
 }
@@ -628,16 +628,16 @@ void VariableViewStashDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
 
     for (const auto& it : stash_.groupedStashes())
     {
-        nlohmann::json dbo_info;
+        nlohmann::json dbcont_info;
 
-        dbo_info[ "dbo_type"       ] = it.first;
+        dbcont_info[ "dbcont_name"       ] = it.first;
 
         for (size_t i = 0; i < variableView()->numVariables(); ++i)
-            dbo_info[ "num_input_" + variableView()->variable(i).id() ] = it.second.variable_stashes[ i ].values.size();
+            dbcont_info[ "num_input_" + variableView()->variable(i).id() ] = it.second.variable_stashes[ i ].values.size();
 
-        dbo_info[ "num_input_valid"] = it.second.valid_count;
+        dbcont_info[ "num_input_valid"] = it.second.valid_count;
 
-        input_value_info.push_back(dbo_info);
+        input_value_info.push_back(dbcont_info);
     }
 
     info[ "input_values" ] = input_value_info;

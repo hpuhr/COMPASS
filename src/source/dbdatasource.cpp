@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "source/dbdatasource.h"
 #include "source/dbdatasourcewidget.h"
 #include "source/configurationdatasource.h"
@@ -237,7 +254,7 @@ bool DBDataSource::loadingWanted() const
 
 void DBDataSource::loadingWanted(bool loading_wanted)
 {
-    logdbg << "DBDataSource: loadingWanted: ds " << name_ << " wanted " << loading_wanted;
+    logdbg << "ds " << name_ << " wanted " << loading_wanted;
 
     loading_wanted_ = loading_wanted;
 }
@@ -341,12 +358,12 @@ bool DBDataSource::hasLiveData(unsigned int line, boost::posix_time::ptime curre
         ret = false;
 
 //    if (hasMaxTimestamp(line))
-//        loginf << "DBDataSource: hasLiveData: name " << name_ << " current_ts " << Time::toString(current_ts)
+//        loginf << "name " << name_ << " current_ts " << Time::toString(current_ts)
 //               << " hasMax " << hasMaxTimestamp(line) << " hasUI " << hasUpdateInterval()
 //               << " maxTS " << Time::toString(maxTimestamp(line))
 //               << " diff " << Time::toString(current_ts - maxTimestamp(line)) << " ret " << ret;
 //    else
-//        loginf << "DBDataSource: hasLiveData: name " << name_ << " no maxTS";
+//        loginf << "name " << name_ << " no maxTS";
 
     return ret;
 }

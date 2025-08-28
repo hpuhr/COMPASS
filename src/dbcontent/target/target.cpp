@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "target.h"
 #include "stringconv.h"
 #include "timeconv.h"
@@ -357,7 +374,7 @@ void Target::adsbCount(unsigned int count)
 
 unsigned int Target::adsbCount() const
 {
-    logdbg << "Target: adsbCount";
+    logdbg << "start";
 
     unsigned int count = 0;
 
@@ -372,7 +389,7 @@ unsigned int Target::adsbCount() const
 
 void Target::adsbMOPSCount(std::map<std::string, unsigned int> adsb_mops_count)
 {
-    logdbg << "Target: adsbMOPSCount";
+    logdbg << "start";
 
     info_[KEY_ADSB_INFO][KEY_ADSB_MOPS] = adsb_mops_count;
 }
@@ -385,7 +402,7 @@ bool Target::hasADSBMOPS() const
 
 std::set<unsigned int> Target::adsbMopsList() const
 {
-    logdbg << "Target: adsbMopsList";
+    logdbg << "start";
 
     std::set<unsigned int> ret;
 
@@ -401,7 +418,7 @@ std::set<unsigned int> Target::adsbMopsList() const
 
 std::string Target::adsbMopsStr() const
 {
-    logdbg << "Target: adsbMopsStr";
+    logdbg << "start";
 
     assert (hasADSBMOPS());
 

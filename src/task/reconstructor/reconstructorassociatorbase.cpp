@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "reconstructorassociatorbase.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -28,7 +45,7 @@ ReconstructorAssociatorBase::ReconstructorAssociatorBase()
 
 void ReconstructorAssociatorBase::associateNewData()
 {
-    loginf << "ReconstructorAssociatorBase: associateNewData: slice " << reconstructor().currentSlice().slice_count_
+    loginf << "slice " << reconstructor().currentSlice().slice_count_
            << " run " << reconstructor().currentSlice().run_count_;
 
     max_time_diff_ = Time::partialSeconds(reconstructor().settings().max_time_diff_);
@@ -40,7 +57,7 @@ void ReconstructorAssociatorBase::associateNewData()
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-    loginf << "ReconstructorAssociatorBase: associateNewData: associateTargetReports";
+    loginf << "associateTargetReports";
 
 #if DO_VALGRIND_BENCH
     CALLGRIND_START_INSTRUMENTATION;
@@ -79,7 +96,7 @@ void ReconstructorAssociatorBase::associateNewData()
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
-    loginf << "ReconstructorAssociatorBase: associateNewData: selfAssociateNewUTNs";
+    loginf << "selfAssociateNewUTNs";
 
     selfAssociateNewUTNs(); // self-associate created utns
 
@@ -95,20 +112,20 @@ void ReconstructorAssociatorBase::associateNewData()
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
-    loginf << "ReconstructorAssociatorBase: associateNewData: retryAssociateTargetReports";
+    loginf << "retryAssociateTargetReports";
 
     retryAssociateTargetReports();  // try second time
 
     time_retry_assoc_trs_ += boost::posix_time::microsec_clock::local_time() - start_time;
 
-    loginf << "ReconstructorAssociatorBase: associateNewData: countUnAssociated";
+    loginf << "countUnAssociated";
 
     countUnAssociated();
 
     if (reconstructor().isCancelled())
         return;
 
-    loginf << "ReconstructorAssociatorBase: associateNewData: clear new flags";
+    loginf << "clear new flags";
 
     // clear new flags
     for (auto& tgt_it : reconstructor().targets_container_.targets_)
@@ -116,17 +133,17 @@ void ReconstructorAssociatorBase::associateNewData()
 
     // unassoc_rec_nums_.clear(); moved to beginning for statistics
 
-    loginf << "ReconstructorAssociatorBase: associateNewData: time_assoc_trs " << Time::toString(time_assoc_trs_)
+    loginf << "time_assoc_trs " << Time::toString(time_assoc_trs_)
            << " time_assoc_new_utns " << Time::toString(time_assoc_new_utns_)
            << " time_retry_assoc_trs " << Time::toString(time_retry_assoc_trs_);
 
     if (reconstructor().currentSlice().is_last_slice_)
-        loginf << "ReconstructorAssociatorBase: associateNewData: done, num_merges " << num_merges_;
+        loginf << "done, num_merges " << num_merges_;
 }
 
 void ReconstructorAssociatorBase::reset()
 {
-    logdbg << "ReconstructorAssociatorBase: reset";
+    logdbg << "start";
 
     reconstructor().targets_container_.utn_vec_.clear();
     reconstructor().targets_container_.acad_2_utn_.clear();
@@ -145,7 +162,7 @@ void ReconstructorAssociatorBase::reset()
 
 void ReconstructorAssociatorBase::associateTargetReports()
 {
-    loginf << "ReconstructorAssociatorBase: associateTargetReports: num timestamps "
+    loginf << "num timestamps "
            << reconstructor().tr_timestamps_.size();
 
     unsigned long rec_num;
@@ -170,14 +187,14 @@ void ReconstructorAssociatorBase::associateTargetReports()
         if (last_ts.is_not_a_date_time())
         {
             last_ts = ts_it.first;
-            loginf << "ReconstructorAssociatorBase: associateTargetReports: start time "
+            loginf << "start time "
                    << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
         }
 
         if (ts_it.first - last_ts > five_min)
         {
             last_ts = ts_it.first;
-            loginf << "ReconstructorAssociatorBase: associateTargetReports: processed time "
+            loginf << "processed time "
                    << Time::toString(last_ts) << " ts_cnt " << ts_cnt;
         }
 
@@ -258,12 +275,12 @@ void ReconstructorAssociatorBase::associateTargetReports()
         ++ts_cnt;
     }
 
-    loginf << "ReconstructorAssociatorBase: associateTargetReports: done";
+    loginf << "done";
 }
 
 void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> dbcont_ids)
 {
-    loginf << "ReconstructorAssociatorBase: associateTargetReports: dbcont_ids " << String::compress(dbcont_ids, ',');
+    loginf << "dbcont_ids " << String::compress(dbcont_ids, ',');
 
     unsigned long rec_num;
     int utn;
@@ -318,7 +335,7 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
 
 void ReconstructorAssociatorBase::selfAssociateNewUTNs()
 {
-    loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs";
+    loginf << "start";
 
     unsigned int loop_cnt {0};
 
@@ -339,7 +356,7 @@ RESTART_SELF_ASSOC:
     if (reconstructor().isCancelled())
         return;
 
-    logdbg << "ReconstructorAssociatorBase: selfAssociateNewUTNs: loop " << loop_cnt;
+    logdbg << "loop " << loop_cnt;
 
     reconstructor().targets_container_.checkACADLookup();
 
@@ -356,7 +373,7 @@ RESTART_SELF_ASSOC:
                         && reconstructor().task().debugSettings().debugUTN(utn);
 
         if (do_debug)
-            loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: checking utn " << utn;
+            loginf << "checking utn " << utn;
 
         tie(score, utn_pair) = findUTNsForTarget(utn); // , utns_to_remove
 
@@ -396,7 +413,7 @@ RESTART_SELF_ASSOC:
                 dbContent::ReconstructorTarget& other_target =
                     reconstructor().targets_container_.targets_.at(other_utn);
 
-                loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: loop " << loop_cnt
+                loginf << "loop " << loop_cnt
                        << ": merging '" << target.asStr()
                        << "' with '" << other_target.asStr() << "' using score "
                        << String::doubleToStringPrecision(score, 2);
@@ -440,12 +457,12 @@ RESTART_SELF_ASSOC:
         goto RESTART_SELF_ASSOC; // here we go again
     }
 
-    loginf << "ReconstructorAssociatorBase: selfAssociateNewUTNs: done at loop cnt " << loop_cnt;
+    loginf << "done at loop cnt " << loop_cnt;
 }
 
 void ReconstructorAssociatorBase::retryAssociateTargetReports()
 {
-    loginf << "ReconstructorAssociatorBase: retryAssociateTargetReports";
+    loginf << "start";
 
     if (!unassoc_rec_nums_.size())
         return;
@@ -515,7 +532,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
             ++rec_num_it;
     }
 
-    loginf << "ReconstructorAssociatorBase: retryAssociateTargetReports: done with count " << assocated_cnt;
+    loginf << "done with count " << assocated_cnt;
 }
 
 void ReconstructorAssociatorBase::associate(
@@ -531,7 +548,7 @@ void ReconstructorAssociatorBase::associate(
     //AccuracyEstimatorBase::AssociatedDistance dist;
 
     if (!reconstructor().targets_container_.targets_.count(utn))
-        logerr << "ReconstructorAssociatorBase: associate: utn " << utn << " missing";
+        logerr << "utn " << utn << " missing";
 
     // add associated target reports
     assert (reconstructor().targets_container_.targets_.count(utn));
@@ -743,7 +760,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
                     && reconstructor().task().debugSettings().debugRecNum(tr.record_num_);
 
     if (do_debug)
-        loginf << "ReconstructorAssociatorBase: findUTNByModeACPos: rn " << tr.record_num_;
+        loginf << "rn " << tr.record_num_;
 
 #ifdef FIND_UTN_FOR_TARGET_REPORT_MT
     tbb::parallel_for(uint(0), num_targets, [&](unsigned int target_cnt)

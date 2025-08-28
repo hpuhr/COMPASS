@@ -24,6 +24,9 @@
 
 #include "view/gridview/grid2d.h"
 #include "view/gridview/grid2dlayer.h"
+#include "view/gridview/grid2drendersettings.h"
+#include "view/gridview/grid2dlayerrenderer.h"
+
 #include "view/points/viewpointgenerator.h"
 
 #include "evaluationcalculator.h"
@@ -85,7 +88,7 @@ public:
         assert(isValid());
         assert(converter_);
 
-        loginf << "FeatureDefinitionGridBase: createFeature_impl: creating grid...";
+        loginf << "creating grid...";
 
         //create suitably sized grid
         QRectF roi = gridBounds(result->sectorLayer(), {});
@@ -103,7 +106,7 @@ public:
         //!shall not fail! (otherwise sector bounds might be strange)
         assert(grid_ok);
 
-        loginf << "FeatureDefinitionGridBase: createFeature_impl: filling grid...";
+        loginf << "filling grid...";
 
         //generate grid layers
         Grid2DLayers layers;
@@ -167,11 +170,11 @@ public:
             render_settings_map[ ds.series_name ] = render_settings;
         }
 
-        loginf << "FeatureDefinitionGridBase: createFeature_impl: creating features...";
+        loginf << "creating features...";
 
         if (layers.numLayers() < 1)
         {
-            loginf << "FeatureDefinitionGridBase: createFeature_impl: no layers created, skipping...";
+            loginf << "no layers created, skipping...";
             return {};
         }
 

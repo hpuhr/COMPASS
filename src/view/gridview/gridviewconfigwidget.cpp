@@ -82,7 +82,16 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
 
     connect(value_type_combo_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &GridViewConfigWidget::valueTypeChanged);
 
-    layout->addRow("Value Type:", value_type_combo_);
+    value_type_placeh_label_ = new QLabel("-");
+    value_type_placeh_label_->setVisible(false);
+
+    QHBoxLayout* value_type_layout = new QHBoxLayout;
+    value_type_layout->setContentsMargins(0, 0, 0, 0);
+    value_type_layout->setSpacing(0);
+    value_type_layout->addWidget(value_type_combo_);
+    value_type_layout->addWidget(value_type_placeh_label_);
+
+    layout->addRow("Value Type:", value_type_layout);
 
     grid_resolution_box_ = new QSpinBox;
     grid_resolution_box_->setMinimum(1);
@@ -93,7 +102,16 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
 
     connect(grid_resolution_box_, QOverload<int>::of(&QSpinBox::valueChanged), this, &GridViewConfigWidget::gridResolutionChanged);
 
-    layout->addRow("Grid Resolution:", grid_resolution_box_);
+    grid_resolution_placeh_label_ = new QLabel("-");
+    grid_resolution_placeh_label_->setVisible(false);   
+
+    QHBoxLayout* grid_resolution_layout = new QHBoxLayout;
+    grid_resolution_layout->setContentsMargins(0, 0, 0, 0);
+    grid_resolution_layout->setSpacing(0);
+    grid_resolution_layout->addWidget(grid_resolution_box_);
+    grid_resolution_layout->addWidget(grid_resolution_placeh_label_);
+
+    layout->addRow("Grid Resolution:", grid_resolution_layout);
 
     color_selection_ = new ColorScaleSelection;
 
@@ -163,6 +181,7 @@ GridViewConfigWidget::GridViewConfigWidget(GridViewWidget* view_widget,
     updateConfig();
     updateExport();
     updateDistributedVariable();
+    updateUIFromSource();
 
     //showSwitch(0, true);
 }
@@ -215,7 +234,9 @@ void GridViewConfigWidget::variableChangedEvent(int idx)
 */
 void GridViewConfigWidget::dataSourceChangedEvent()
 {
+    updateVariableDataType();
     updateExport();
+    updateUIFromSource();
 }
 
 /**
@@ -399,7 +420,7 @@ void GridViewConfigWidget::updateDistributedVariable()
 
     if (var_empty)
     {
-        loginf << "GridViewConfigWidget: updateDistributedVariable: setting distributed variable to empty";
+        loginf << "setting distributed variable to empty";
 
         value_type_combo_->blockSignals(true);
         value_type_combo_->setCurrentIndex(value_type_combo_->findData(QVariant((int)grid2d::ValueType::ValueTypeCountValid)));
@@ -423,6 +444,19 @@ void GridViewConfigWidget::updateVariableDataType()
     color_value_max_box_->blockSignals(true);
     color_value_max_box_->setPropertyDataType(dtype);
     color_value_max_box_->blockSignals(false);
+}
+
+/**
+*/
+void GridViewConfigWidget::updateUIFromSource()
+{
+    bool shows_anno = showsAnnotation();
+
+    grid_resolution_box_->setVisible(!shows_anno);
+    grid_resolution_placeh_label_->setVisible(shows_anno);
+
+    value_type_combo_->setVisible(!shows_anno);
+    value_type_placeh_label_->setVisible(shows_anno);
 }
 
 /**

@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "simpleassociator.h"
 #include "simplereconstructor.h"
 #include "compass.h"
@@ -28,7 +45,7 @@ void SimpleAssociator::associateNewData()
 {
     unassoc_rec_nums_.clear();
 
-    loginf << "SimpleAssociator: associateNewData: associating RefTraj data";
+    loginf << "associating RefTraj data";
 
     if (reconstructor().isCancelled())
         return;
@@ -40,7 +57,7 @@ void SimpleAssociator::associateNewData()
 
     // create tracker targets
 
-    loginf << "SimpleAssociator: associateNewData: associating CAT062 data";
+    loginf << "associating CAT062 data";
 
     associateTargetReports({62});
 
@@ -58,7 +75,7 @@ void SimpleAssociator::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
-    loginf << "SimpleAssociator: associateNewData: tracker targets " << reconstructor_.targets_container_.targets_.size()
+    loginf << "tracker targets " << reconstructor_.targets_container_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 
     // create non-tracker utns
@@ -73,7 +90,7 @@ void SimpleAssociator::associateNewData()
     if (reconstructor().isCancelled())
         return;
 
-    loginf << "SimpleAssociator: associateNewData: associating remaining sensor data";
+    loginf << "associating remaining sensor data";
 
     associateTargetReports(sensor_dbcont_ids);
 
@@ -118,7 +135,7 @@ void SimpleAssociator::associateNewData()
 
     // unassoc_rec_nums_.clear(); moved to beginning for statistics
 
-    loginf << "SimpleAssociator: associateNewData: after non-tracker targets "
+    loginf << "after non-tracker targets "
            << reconstructor_.targets_container_.targets_.size()
            << " multiple " << multiple_associated << " single " << single_associated;
 }

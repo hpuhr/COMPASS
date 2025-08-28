@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "ffttablemodel.h"
 #include "fftmanager.h"
 #include "logger.h"
@@ -34,14 +51,14 @@ QVariant FFTTableModel::data(const QModelIndex& index, int role) const
     {
     case Qt::DisplayRole:
     {
-        logdbg << "FFTTableModel: data: display role: row " << index.row() << " col " << index.column();
+        logdbg << "display role: row " << index.row() << " col " << index.column();
 
         assert (index.row() >= 0);
-        assert (index.row() < fft_man_.getAllFFTNames().size());
+        assert (index.row() < static_cast<int>(fft_man_.getAllFFTNames().size()));
 
         string fft_name = fft_man_.getAllFFTNames().at(index.row());
 
-        logdbg << "FFTTableModel: data: got fft_name " << fft_name;
+        logdbg << "got fft_name " << fft_name;
 
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -70,11 +87,11 @@ QVariant FFTTableModel::data(const QModelIndex& index, int role) const
     case Qt::DecorationRole:
     {
         assert (index.row() >= 0);
-        assert (index.row() < fft_man_.getAllFFTNames().size());
+        assert (index.row() < static_cast<int>(fft_man_.getAllFFTNames().size()));
 
         string fft_name = fft_man_.getAllFFTNames().at(index.row());
 
-        logdbg << "FFTTableModel: data: got fft_name " << fft_name;
+        logdbg << "got fft_name " << fft_name;
 
         assert (index.column() < table_columns_.size());
         std::string col_name = table_columns_.at(index.column()).toStdString();
@@ -133,14 +150,14 @@ std::string FFTTableModel::getNameOf (const QModelIndex& index)
     assert (index.isValid());
 
     assert (index.row() >= 0);
-    assert (index.row() < fft_man_.getAllFFTNames().size());
+    assert (index.row() < static_cast<int>(fft_man_.getAllFFTNames().size()));
 
     return fft_man_.getAllFFTNames().at(index.row());
 }
 
 QModelIndex FFTTableModel::fftIndex(const std::string& fft_name)
 {
-    loginf << "FFTTableModel: selectFFT: fft_name " << fft_name;
+    loginf << "fft_name " << fft_name;
 
     auto fft_names = fft_man_.getAllFFTNames();
 
@@ -154,7 +171,7 @@ QModelIndex FFTTableModel::fftIndex(const std::string& fft_name)
 
 void FFTTableModel::updateFFT(const std::string& fft_name)
 {
-    loginf << "FFTTableModel: updateFFT: fft_name " << fft_name;
+    loginf << "fft_name " << fft_name;
 
     auto fft_names = fft_man_.getAllFFTNames();
 

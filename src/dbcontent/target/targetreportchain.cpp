@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "targetreportchain.h"
 #include "targetposition.h"
 #include "targetvelocity.h"
@@ -762,7 +779,7 @@ std::pair<bool, float> Chain::estimateAltitude (const boost::posix_time::ptime& 
 
         if (timestamp_after <= timestamp_prev || timestamp_prev >= timestamp)
         {
-            logerr << "Chain: estimateRefAltitude: ts_prev " << Time::toString(timestamp_prev)
+            logerr << "ts_prev " << Time::toString(timestamp_prev)
                    << " ts " << Time::toString(timestamp) << " ts_after " << Time::toString(timestamp_after);
 
             return {false, 0}; // should never happen
@@ -931,7 +948,7 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
     boost::optional<double> rocd1, rocd2;
     double delta_rocd;
 
-    logdbg << "Chain: addPositionsSpeedsToMapping: d_t " << d_t;
+    logdbg << "d_t " << d_t;
 
     assert (d_t > 0);
 
@@ -947,13 +964,13 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
     {
         if (lower_ts == upper_ts) // same time
         {
-            logwrn << "Chain: addPositionsSpeedsToMapping: ref has same time twice";
+            logwrn << "ref has same time twice";
         }
         else
         {
-            logdbg << "Chain: addPositionsSpeedsToMapping: pos1 "
+            logdbg << "pos1 "
                    << pos1->latitude_ << ", " << pos1->longitude_;
-            logdbg << "Chain: addPositionsSpeedsToMapping: pos2 "
+            logdbg << "pos2 "
                    << pos2->latitude_ << ", " << pos2->longitude_;
 
             bool ok;
@@ -962,16 +979,16 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
             tie(ok, x_pos, y_pos) = trafo_.distanceCart(
                         pos1->latitude_, pos1->longitude_, pos2->latitude_, pos2->longitude_);
 
-            //                logdbg << "Chain: addRefPositiosToMapping: geo2cart";
+            //                logdbg << "geo2cart";
             //                bool ret = ogr_geo2cart->Transform(1, &x_pos, &y_pos); // wgs84 to cartesian offsets
             if (!ok)
             {
-                logerr << "Chain: addPositionsSpeedsToMapping: error with latitude " << pos2->latitude_
+                logerr << "error with latitude " << pos2->latitude_
                        << " longitude " << pos2->longitude_;
             }
             else // calculate interpolated position
             {
-                logdbg << "Chain: addPositionsSpeedsToMapping: offsets x " << fixed << x_pos
+                logdbg << "offsets x " << fixed << x_pos
                        << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
 
                 // double x_pos_orig = x_pos;
@@ -979,24 +996,24 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
 
                 double v_x = x_pos/d_t;
                 double v_y = y_pos/d_t;
-                logdbg << "Chain: addPositionsSpeedsToMapping: v_x " << v_x << " v_y " << v_y;
+                logdbg << "v_x " << v_x << " v_y " << v_y;
 
                 float d_t2 = Time::partialSeconds(mapping.timestamp_ - lower_ts);
-                logdbg << "Chain: addPositionsSpeedsToMapping: d_t2 " << d_t2;
+                logdbg << "d_t2 " << d_t2;
 
                 assert (d_t2 >= 0);
 
                 x_pos = v_x * d_t2;
                 y_pos = v_y * d_t2;
 
-                logdbg << "Chain: addPositionsSpeedsToMapping: interpolated offsets x "
+                logdbg << "interpolated offsets x "
                        << x_pos << " y " << y_pos;
 
                 tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1->latitude_, pos1->longitude_, x_pos, y_pos);
 
                 // x_pos long, y_pos lat
 
-                logdbg << "Chain: addPositionsSpeedsToMapping: interpolated lat "
+                logdbg << "interpolated lat "
                        << x_pos << " long " << y_pos;
 
                 // calculate altitude
@@ -1020,7 +1037,7 @@ void Chain::addPositionsSpeedsToMapping (DataMapping& mapping) const
                     altitude = pos1->altitude_ + v_alt*d_t2;
                 }
 
-                logdbg << "Chain: addPositionsSpeedsToMapping: pos1 has alt "
+                logdbg << "pos1 has alt "
                        << pos1->has_altitude_ << " alt " << pos1->altitude_
                        << " pos2 has alt " << pos2->has_altitude_ << " alt " << pos2->altitude_
                        << " interpolated has alt " << has_altitude << " alt " << altitude;
@@ -1215,12 +1232,12 @@ void Chain::updateACIDs() const
     if (timestamp_index_lookup_.size())
     {
         NullableVector<string>& value_vec = accessor_->getMetaVar<string>(dbcontent_name_, DBContent::meta_var_acid_);
-        map<string, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
+        map<boost::optional<string>, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
 
         for (auto& val_it : distinct_values)
         {
-            if (!acids_.count(String::trim(val_it.first)))
-                acids_.insert(String::trim(val_it.first));
+            if (val_it.first && !acids_.count(String::trim(*val_it.first)))
+                acids_.insert(String::trim(*val_it.first));
         }
     }
 }
@@ -1233,12 +1250,12 @@ void Chain::updateACADs() const
     {
         NullableVector<unsigned int>& value_vec = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name_, DBContent::meta_var_acad_);
-        map<unsigned int, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
+        map<boost::optional<unsigned int>, vector<unsigned int>> distinct_values = value_vec.distinctValuesWithIndexes(indexes_);
 
         for (auto& val_it : distinct_values)
         {
-            if (!acads_.count(val_it.first))
-                acads_.insert(val_it.first);
+            if (val_it.first && !acads_.count(*val_it.first))
+                acads_.insert(*val_it.first);
         }
     }
 
@@ -1246,7 +1263,7 @@ void Chain::updateACADs() const
 
 void Chain::updateModeACodes() const
 {
-    logdbg << "Chain: updateModeACodes";
+    logdbg << "start";
 
     mode_a_codes_.clear();
 
@@ -1254,27 +1271,27 @@ void Chain::updateModeACodes() const
     {
         NullableVector<unsigned int>& mode_a_codes = accessor_->getMetaVar<unsigned int>(
                     dbcontent_name_, DBContent::meta_var_m3a_);
-        map<unsigned int, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(indexes_);
+        map<boost::optional<unsigned int>, vector<unsigned int>> distinct_codes = mode_a_codes.distinctValuesWithIndexes(indexes_);
         //unsigned int null_cnt = mode_a_codes.nullValueIndexes(ref_rec_nums_).size();
 
         for (auto& ma_it : distinct_codes)
         {
-            if (!mode_a_codes_.count(ma_it.first))
+            if (ma_it.first && !mode_a_codes_.count(*ma_it.first))
             {
-                logdbg << "Chain: updateModeACodes: new ref m3a "
-                       << String::octStringFromInt(ma_it.first, 4, '0');
-                mode_a_codes_.insert(ma_it.first);
+                logdbg << "new ref m3a "
+                       << String::octStringFromInt(*ma_it.first, 4, '0');
+                mode_a_codes_.insert(*ma_it.first);
             }
         }
     }
 
 
-    logdbg << "Chain: updateModeACodes: num codes " << mode_a_codes_.size();
+    logdbg << "num codes " << mode_a_codes_.size();
 }
 
 void Chain::updateModeCMinMax() const
 {
-    logdbg << "Chain: updateModeC";
+    logdbg << "start";
 
     // garbled, valid flags?
 

@@ -122,14 +122,17 @@ public:
                                              task::TaskResultType type);
 
     void resultHeaderChanged(const TaskResult& result);
+    void resultContentChanged(const TaskResult& result);
     
-    void setViewableDataConfig(const nlohmann::json::object_t& data);
+    void setViewableDataConfig(const nlohmann::json::object_t& data,
+                               bool load_blocking = false);
     void unsetViewableDataConfig();
 
     std::shared_ptr<ResultReport::SectionContent> loadContent(ResultReport::Section* section, 
                                                               unsigned int content_id,
                                                               bool show_dialog = false) const;
 
+    void storeBackupSection();
     void restoreBackupSection();
 
     static const bool CleanupDBIfNeeded;

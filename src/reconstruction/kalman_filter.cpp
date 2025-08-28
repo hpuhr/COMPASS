@@ -1,4 +1,3 @@
-
 /*
  * This file is part of OpenATS COMPASS.
  *
@@ -150,13 +149,13 @@ void KalmanFilter::state(kalman::BasicKalmanState& s, bool xP_only) const
 */
 bool KalmanFilter::validateState(const kalman::KalmanState& s, bool xP_only) const
 {
-    if (s.x.size() != dim_x_ ||
-        s.P.cols() != dim_x_ ||
-        s.P.rows() != dim_x_)
+    if (static_cast<size_t>(s.x.size()) != dim_x_ ||
+        static_cast<size_t>(s.P.cols()) != dim_x_ ||
+        static_cast<size_t>(s.P.rows()) != dim_x_)
         return false;
 
-    if (!xP_only && (s.Q.cols() != dim_x_ ||
-                     s.Q.rows() != dim_x_))
+    if (!xP_only && (static_cast<size_t>(s.Q.cols()) != dim_x_ ||
+                     static_cast<size_t>(s.Q.rows()) != dim_x_))
         return false;
 
     return true;
@@ -166,14 +165,15 @@ bool KalmanFilter::validateState(const kalman::KalmanState& s, bool xP_only) con
 */
 bool KalmanFilter::validateState(const kalman::BasicKalmanState& s, bool xP_only) const
 {
-    if (s.x.size() != dim_x_ ||
-        s.P.cols() != dim_x_ ||
-        s.P.rows() != dim_x_)
+    if (static_cast<size_t>(s.x.size()) != dim_x_ ||
+        static_cast<size_t>(s.P.cols()) != dim_x_ ||
+        static_cast<size_t>(s.P.rows()) != dim_x_)
         return false;
 
-    if (!xP_only && (s.Q.cols() != dim_x_ ||
-                     s.Q.rows() != dim_x_))
+    if (!xP_only && (static_cast<size_t>(s.Q.cols()) != dim_x_ ||
+                     static_cast<size_t>(s.Q.rows()) != dim_x_))
         return false;
+
 
     return true;
 }

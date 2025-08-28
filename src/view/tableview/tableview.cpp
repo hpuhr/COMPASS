@@ -100,7 +100,7 @@ bool TableView::init_impl()
 void TableView::generateSubConfigurable(const std::string& class_id,
                                           const std::string& instance_id)
 {
-    logdbg << "TableView: generateSubConfigurable: class_id " << class_id << " instance_id "
+    logdbg << "class_id " << class_id << " instance_id "
            << instance_id;
     if (class_id == SubConfigDataSource)
     {
@@ -157,7 +157,7 @@ bool TableView::usePresentation() const
 
 void TableView::usePresentation(bool value)
 {
-    loginf << "TableView: usePresentation: " << value;
+    loginf << "start" << value;
 
     setParameter(settings_.use_presentation_, value);
 
@@ -171,7 +171,7 @@ bool TableView::showOnlySelected() const
 
 void TableView::showOnlySelected(bool value)
 {
-    loginf << "TableView: showOnlySelected: " << value;
+    loginf << "start" << value;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -189,7 +189,7 @@ bool TableView::ignoreNonTargetReports() const
 
 void TableView::ignoreNonTargetReports(bool value)
 {
-    loginf << "TableView: ignoreNonTargetReports: " << value;
+    loginf << "start" << value;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -207,7 +207,7 @@ void TableView::accept(LatexVisitor& v)
 
 void TableView::updateSelection()
 {
-    loginf << "TableView: updateSelection";
+    loginf << "start";
     assert(widget_);
 
     if (settings_.show_only_selected_)
@@ -218,7 +218,7 @@ void TableView::updateSelection()
 
 void TableView::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "TableView: unshowViewPoint";
+    loginf << "start";
 
     assert (vp);
     assert (data_source_);
@@ -227,7 +227,7 @@ void TableView::unshowViewPointSlot (const ViewableDataConfig* vp)
 
 void TableView::showViewPointSlot (const ViewableDataConfig* vp)
 {
-    loginf << "TableView: showViewPoint";
+    loginf << "start";
 
     assert (vp);
     assert (data_source_);
@@ -237,11 +237,8 @@ void TableView::showViewPointSlot (const ViewableDataConfig* vp)
 
 void TableView::onConfigurationChanged_impl(const std::vector<std::string>& changed_params)
 {
-    for (const auto& param : changed_params)
-    {
+    if (changed_params.size())
         widget_->getViewDataWidget()->updateToSettingsChange();
-        break;
-    }
 }
 
 /**

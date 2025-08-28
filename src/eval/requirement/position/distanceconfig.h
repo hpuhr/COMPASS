@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H
-#define EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H
+#pragma once
 
 #include "eval/requirement/base/probabilitybaseconfig.h"
 
@@ -60,5 +59,3 @@ protected:
 };
 
 }
-
-#endif // EVALUATIONREQUIREMENTPOSITIONDISTANCECONFIG_H

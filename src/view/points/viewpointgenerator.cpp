@@ -17,6 +17,7 @@
 
 #include "viewpointgenerator.h"
 #include "viewpoint.h"
+#include "global.h"
 
 #include "util/stringconv.h"
 
@@ -612,7 +613,7 @@ std::string ViewPointGenFeatureGeoImage::imageToByteStringWithMetadata(const QIm
     ba.append((const char*)&format, sizeof(int));
     
     //add image data
-    ba.append((const char*)img.bits(), img.byteCount());
+    ba.append((const char*)img.bits(), img.sizeInBytes());
 
     //code base 64
     QString byte_str(ba.toBase64());
@@ -648,15 +649,18 @@ QImage ViewPointGenFeatureGeoImage::byteStringWithMetadataToImage(const std::str
  * ViewPointGenFeatureGrid
  ********************************************************************************/
 
-const std::string ViewPointGenFeatureGrid::FeatureName              = "grid";
-const std::string ViewPointGenFeatureGrid::FeatureGridFieldNameGrid = "grid";
+const std::string ViewPointGenFeatureGrid::FeatureName                        = "grid";
+const std::string ViewPointGenFeatureGrid::FeatureGridFieldNameGrid           = "grid";
+const std::string ViewPointGenFeatureGrid::FeatureGridFieldNameRenderSettings = "render_settings";
 
 /**
 */
 ViewPointGenFeatureGrid::ViewPointGenFeatureGrid(const Grid2DLayer& grid,
+                                                 const boost::optional<Grid2DRenderSettings>& render_settings,
                                                  const boost::optional<PlotMetadata>& metadata)
 :   ViewPointGenFeature(FeatureName)
-,   grid_(grid)
+,   grid_           (grid           )
+,   render_settings_(render_settings)
 {
     plot_metadata_ = metadata;
 }
@@ -666,6 +670,9 @@ ViewPointGenFeatureGrid::ViewPointGenFeatureGrid(const Grid2DLayer& grid,
 void ViewPointGenFeatureGrid::toJSON_impl(nlohmann::json& j, bool write_binary_if_possible) const
 {
     j[FeatureGridFieldNameGrid] = grid_.toJSON(write_binary_if_possible);
+
+    if (render_settings_.has_value())
+        j[FeatureGridFieldNameRenderSettings] = render_settings_.value().toJSON();
 }
 
 /********************************************************************************
@@ -1189,19 +1196,19 @@ namespace
 {
     /**
     */
-    void appendID(std::string& id, const std::string& id_to_add, const std::string& sep)
-    {
-        if (id_to_add.empty())
-            return;
+    // void appendID(std::string& id, const std::string& id_to_add, const std::string& sep)
+    // {
+    //     if (id_to_add.empty())
+    //         return;
 
-        if (id.empty())
-        {
-            id = id_to_add;
-            return;
-        }
+    //     if (id.empty())
+    //     {
+    //         id = id_to_add;
+    //         return;
+    //     }
 
-        id += sep + id_to_add;
-    }
+    //     id += sep + id_to_add;
+    // }
 
     /**
     */

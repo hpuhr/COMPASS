@@ -39,15 +39,15 @@ DBPrepare::DBPrepare()
 DBPrepare::~DBPrepare()
 {
     if (active_transaction_)
-        logerr << "DBPrepare: ~DBPrepare: transaction still active";
+        logerr << "transaction still active";
     assert(!active_transaction_);
 
     if (active_binds_)
-        logerr << "DBPrepare: ~DBPrepare: binds still active";
+        logerr << "binds still active";
     assert(!active_binds_);
 
     if (prepared_stmnt_ok_)
-        logerr << "DBPrepare: ~DBPrepare: cleanup not called";
+        logerr << "cleanup not called";
     assert(!prepared_stmnt_ok_);
 }
 
@@ -66,11 +66,11 @@ bool DBPrepare::init(const std::string& sql_statement)
 void DBPrepare::cleanup()
 {
     if (active_transaction_)
-        logerr << "DBPrepare: ~DBPrepare: transaction still active";
+        logerr << "transaction still active";
     assert(!active_transaction_);
 
     if (active_binds_)
-        logerr << "DBPrepare: ~DBPrepare: binds still active";
+        logerr << "binds still active";
     assert(!active_binds_);
 
     if (prepared_stmnt_ok_)
@@ -99,7 +99,7 @@ bool DBPrepare::execute(const ExecOptions* options,
                         DBResult* result)
 {
     if (!prepared_stmnt_ok_)
-        logerr << "DBPrepare: execute: prepared statement invalid";
+        logerr << "prepared statement invalid";
     assert(prepared_stmnt_ok_);
 
     bool ok = false;
@@ -142,7 +142,7 @@ Result DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
                                 const boost::optional<size_t>& idx_to)
 {
     if (!prepared_stmnt_ok_)
-        logerr << "DBPrepare: executeBuffer: prepared statement invalid";
+        logerr << "prepared statement invalid";
     assert(prepared_stmnt_ok_);
 
     assert(buffer);
@@ -164,11 +164,11 @@ Result DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
         bool is_null = b->isNull(p, r);                                                                 \
         bool ok = is_null ? bind_null(bind_idx) : bind_##Suffix(bind_idx, b->get<DType>(pname).get(r)); \
         if (!ok)                                                                                        \
-            logerr << "DBPrepare: executeBuffer: updating '" << pname << "' failed";                    \
+            logerr << "updating '" << pname << "' failed";                    \
         assert(ok);
 
     #define NotFoundFunc                                                                           \
-        logerr << "DBPrepare: executeBuffer: unknown property type " << Property::asString(dtype); \
+        logerr << "unknown property type " << Property::asString(dtype); \
         assert(false);
 
     for (size_t r = idx0; r <= idx1; ++r)
@@ -197,7 +197,7 @@ Result DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
         #endif
         
         if (!ok)
-            logerr << "DBPrepare: executeBuffer: updating buffer row " << r << " failed";
+            logerr << "updating buffer row " << r << " failed";
         assert(ok);
     }
 
@@ -209,11 +209,11 @@ Result DBPrepare::executeBuffer(const std::shared_ptr<Buffer>& buffer,
 bool DBPrepare::beginTransaction()
 {
     if (!prepared_stmnt_ok_)
-        logerr << "DBPrepare: beginTransaction: prepared statement invalid";
+        logerr << "prepared statement invalid";
     assert(prepared_stmnt_ok_);
 
     if (active_transaction_)
-        logerr << "DBPrepare: beginTransaction: transaction already active";
+        logerr << "transaction already active";
     assert(!active_transaction_);
 
     bool ok = beginTransaction_impl();
@@ -230,11 +230,11 @@ bool DBPrepare::beginTransaction()
 bool DBPrepare::commitTransaction()
 {
     if (!prepared_stmnt_ok_)
-        logerr << "DBPrepare: commitTransaction: prepared statement invalid";
+        logerr << "prepared statement invalid";
     assert(prepared_stmnt_ok_);
 
     if (!active_transaction_)
-        logerr << "DBPrepare: commitTransaction: no transaction active";
+        logerr << "no transaction active";
     assert(active_transaction_);
 
     bool ok = commitTransaction_impl();

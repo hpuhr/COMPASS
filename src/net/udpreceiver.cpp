@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "udpreceiver.h"
 //#include "util/files.h"
 #include "logger.h"
@@ -27,7 +44,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
 
     if (ec)
     {
-        logerr << "UDPReceiver: ctor: mcast address error " << ec.message();
+        logerr << "mcast address error " << ec.message();
         return;
     }
 
@@ -44,7 +61,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
 
         if (ec)
         {
-            logerr << "UDPReceiver: ctor: listen address error " << ec.message();
+            logerr << "listen address error " << ec.message();
             return;
         }
 
@@ -58,7 +75,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
     socket_.open(socket_endpoint_.protocol(), ec);
     if (ec)
     {
-        logerr << "UDPReceiver: ctor: socket error " << ec.message();
+        logerr << "socket error " << ec.message();
         return;
     }
 
@@ -66,7 +83,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
     socket_.set_option(boost::asio::ip::udp::socket::reuse_address(true), ec);
     if (ec)
     {
-        logerr << "UDPReceiver: ctor: socket reuse error " << ec.message();
+        logerr << "socket reuse error " << ec.message();
         return;
     }
 
@@ -74,7 +91,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
     socket_.bind(socket_endpoint_, ec);
     if (ec)
     {
-        logerr << "UDPReceiver: ctor: socket bind error " << ec.message();
+        logerr << "socket bind error " << ec.message();
         return;
     }
 
@@ -90,7 +107,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
                                    mcast_addr.to_v4()), ec);
         if (ec)
         {
-            logerr << "UDPReceiver: ctor: socket join group error " << ec.message();
+            logerr << "socket join group error " << ec.message();
             return;
         }
     }
@@ -101,7 +118,7 @@ UDPReceiver::UDPReceiver(boost::asio::io_context& io_context, //const std::strin
 
         if (ec)
         {
-            logerr << "UDPReceiver: ctor: sender address error " << ec.message();
+            logerr << "sender address error " << ec.message();
             return;
         }
 
@@ -123,7 +140,7 @@ void UDPReceiver::handle_receive_from(const boost::system::error_code& error,
 
     if (error && error != boost::asio::error::message_size)
     {
-        logerr << "UDPReceiver: handle_receive_from: from "
+        logerr << "from "
                << sender_endpoint_.address().to_string()+":"+to_string(sender_endpoint_.port())
                << " error " << error;
         return;

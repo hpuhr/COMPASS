@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 
 #include "targetlistwidget.h"
 #include "targetmodel.h"
@@ -45,7 +62,7 @@ TargetListWidget::TargetListWidget(TargetModel& model, DBContentManager& dbcont_
     table_view_ = new QTableView();
     table_view_->setModel(proxy_model_);
     table_view_->setSortingEnabled(true);
-    table_view_->sortByColumn(1, Qt::AscendingOrder);
+    table_view_->sortByColumn(0, Qt::AscendingOrder);
     table_view_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     table_view_->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
@@ -255,7 +272,7 @@ void TargetListWidget::loadingDone()
 
 void TargetListWidget::resizeColumnsToContents()
 {
-    loginf << "TargetListWidget: resizeColumnsToContents";
+    loginf << "start";
 
     table_view_->resizeColumnsToContents();
 }
@@ -272,7 +289,7 @@ void TargetListWidget::evalUseNoneSlot()
 
 void TargetListWidget::evalFilterSlot()
 {
-    loginf << "TargetListWidget: evalFilterSlot";
+    loginf << "start";
 
     EvaluationTargetFilterDialog dialog (COMPASS::instance().evaluationManager().targetFilter(), model_);
     dialog.exec();
@@ -287,7 +304,7 @@ void TargetListWidget::clearAllCommentsSlot()
 
 void TargetListWidget::evalClearAllExcludeTimeWindowsSlot()
 {
-    loginf << "TargetListWidget: evalClearAllExcludeTimeWindowsSlot";
+    loginf << "start";
 
     model_.clearAllEvalExcludeTimeWindows();
 
@@ -296,7 +313,7 @@ void TargetListWidget::evalClearAllExcludeTimeWindowsSlot()
 
 void TargetListWidget::evalClearAllExcludeRequirementsSlot()
 {
-    loginf << "TargetListWidget: evalClearAllExcludeTimeWindowsSlot";
+    loginf << "start";
 
     model_.clearAllEvalExcludeRequirements();
 
@@ -305,7 +322,7 @@ void TargetListWidget::evalClearAllExcludeRequirementsSlot()
 
 void TargetListWidget::evalEditGlobalExcludeTimeWindowsSlot()
 {
-    loginf << "TargetListWidget: filterSlot";
+    loginf << "start";
 
     EvaluationTimestampConditionsDialog dialog (COMPASS::instance().evaluationManager());
     dialog.exec();
@@ -322,7 +339,7 @@ void TargetListWidget::evalEditGlobalExcludeTimeWindowsSlot()
 
 void TargetListWidget::customContextMenuSlot(const QPoint& p)
 {
-    logdbg << "TargetListWidget: customContextMenuSlot";
+    logdbg << "start";
 
     assert (table_view_);
 
@@ -354,7 +371,7 @@ void TargetListWidget::showSurroundingDataSlot ()
 
     std::set<unsigned int> selected_utns = selectedUTNs();
 
-    logdbg << "TargetListWidget: showSurroundingDataSlot: utns " << String::compress(selected_utns,',');
+    logdbg << "utns " << String::compress(selected_utns,',');
 
     dbcont_man.showSurroundingData(selected_utns);
 }
@@ -433,7 +450,7 @@ void TargetListWidget::createTargetEvalMenu(QMenu& menu,
 
 void TargetListWidget::clearSelectedTargetsComments(const std::set<unsigned int>& utns)
 {
-    loginf << "TargetListWidget: clearTargetsComments";
+    loginf << "start";
 
     model_.setTargetComment(utns, "");
 
@@ -442,21 +459,21 @@ void TargetListWidget::clearSelectedTargetsComments(const std::set<unsigned int>
 
 void TargetListWidget::evalUseSelectedTargets(const std::set<unsigned int>& utns)
 {
-    loginf << "TargetListWidget: evalUseSelectedTargets";
+    loginf << "start";
 
     model_.setEvalUseTarget(utns, true);
 }
 
 void TargetListWidget::evalDisableSelectedTargets(const std::set<unsigned int>& utns)
 {
-    loginf << "TargetListWidget: evalDisableSelectedTargets";
+    loginf << "start";
 
     model_.setEvalUseTarget(utns, false);
 }
 
 void TargetListWidget::evalClearTargetsExcludeTimeWindows(const std::set<unsigned int>& utns)
 {
-    loginf << "TargetListWidget: evalClearTargetsExcludeTimeWindows";
+    loginf << "start";
 
     model_.clearEvalExcludeTimeWindows(utns);
 
@@ -465,7 +482,7 @@ void TargetListWidget::evalClearTargetsExcludeTimeWindows(const std::set<unsigne
 
 void TargetListWidget::evalClearTargetsExcludeRequirements(const std::set<unsigned int>& utns)
 {
-    loginf << "TargetListWidget: evalClearTargetsExcludeRequirements";
+    loginf << "start";
 
     model_.clearEvalExcludeRequirements(utns);
 
@@ -475,7 +492,7 @@ void TargetListWidget::evalClearTargetsExcludeRequirements(const std::set<unsign
 void TargetListWidget::evalExcludeTimeWindowsTarget(const std::set<unsigned int>& utns,
                                                     const Utils::TimeWindowCollection* exclude_windows)
 {
-    loginf << "TargetListWidget: evalExcludeTimeWindowsTarget";
+    loginf << "start";
 
     auto& dbcont_man = COMPASS::instance().dbContentManager();
 
@@ -529,7 +546,7 @@ void TargetListWidget::evalExcludeTimeWindowsTarget(const std::set<unsigned int>
 void TargetListWidget::evalExcludeRequirementsTarget(const std::set<unsigned int>& utns,
                                                      const std::set<std::string>* exclude_requirements)
 {
-    loginf << "TargetListWidget: evalExcludeRequirementsTarget";
+    loginf << "start";
 
     auto& dbcont_man = COMPASS::instance().dbContentManager();
     auto& eval_man = COMPASS::instance().evaluationManager();
@@ -658,7 +675,7 @@ void TargetListWidget::currentRowChanged(const QModelIndex& current, const QMode
 {
     if (!current.isValid())
     {
-        loginf << "TargetListWidget: currentRowChanged: invalid index";
+        loginf << "invalid index";
         return;
     }
 
@@ -667,7 +684,7 @@ void TargetListWidget::currentRowChanged(const QModelIndex& current, const QMode
 
     const dbContent::Target& target = model_.getTargetOf(source_index);
 
-    loginf << "TargetListWidget: currentRowChanged: current target " << target.utn_;
+    loginf << "current target " << target.utn_;
 
     dbcont_manager_.showUTN(target.utn_);
 }
@@ -768,7 +785,7 @@ std::set<unsigned int> TargetListWidget::selectedUTNs() const
         selected_indexes.insert(target.utn_);
     }
 
-    loginf << "TargetListWidget: selectedUTNs: " << String::compress(selected_indexes, ',');
+    loginf << "start" << String::compress(selected_indexes, ',');
 
     return selected_indexes;
 }

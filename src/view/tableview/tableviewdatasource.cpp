@@ -52,7 +52,7 @@ TableViewDataSource::~TableViewDataSource()
 void TableViewDataSource::generateSubConfigurable(const std::string& class_id,
                                                     const std::string& instance_id)
 {
-    logdbg << "TableViewDataSource: generateSubConfigurable: class_id " << class_id
+    logdbg << "class_id " << class_id
            << " instance_id " << instance_id;
 
     if (class_id.compare("VariableOrderedSet") == 0)
@@ -187,7 +187,7 @@ void TableViewDataSource::unshowViewPoint (const ViewableDataConfig* vp)
 {
     for (auto& var_it : temporary_added_variables_)
     {
-        loginf << "TableViewDataSource: unshowViewPoint: removing var " << var_it.first << ", " << var_it.second;
+        loginf << "removing var " << var_it.first << ", " << var_it.second;
 
         removeTemporaryVariable(var_it.first, var_it.second);
     }
@@ -226,7 +226,7 @@ void TableViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
                 if (addTemporaryVariable(dbcontent_name, var_name))
                 {
-                    loginf << "TableViewDataSource: showViewPoint: added var " << dbcontent_name << ", " << var_name;
+                    loginf << "added var " << dbcontent_name << ", " << var_name;
                     temporary_added_variables_.push_back({dbcontent_name, var_name});
                 }
             }
@@ -236,7 +236,7 @@ void TableViewDataSource::showViewPoint (const ViewableDataConfig* vp)
 
 bool TableViewDataSource::addTemporaryVariable (const std::string& dbcontent_name, const std::string& var_name)
 {
-    loginf << "TableViewDataSource: addTemporaryVariable: dbcontent_name '" << dbcontent_name
+    loginf << "dbcontent_name '" << dbcontent_name
            << "' var_name '" << var_name << "'";
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();

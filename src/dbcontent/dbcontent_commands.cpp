@@ -58,7 +58,7 @@ RTCommandGetData::RTCommandGetData()
 
 bool RTCommandGetData::run_impl()
 {
-    loginf << "RTCommandGetData: run_impl";
+    loginf << "start";
 
     if (!COMPASS::instance().dbOpened())
     {

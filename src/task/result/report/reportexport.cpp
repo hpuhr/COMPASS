@@ -122,8 +122,7 @@ void ReportExport::updateProgress(ReportExporter* exporter)
     //loginf << "num exported: " << exporter->numSectionsExported() << ", num total: " << exporter->numSectionsTotal();
 
     status_   = exporter->status();
-    progress_ = (double)exporter->numSectionsExported() / (double)exporter->numSectionsTotal() * 0.9 + 
-                exporter->isDone() * 0.1;
+    progress_ = exporter->progress();
 
     emit progressChanged();
 }

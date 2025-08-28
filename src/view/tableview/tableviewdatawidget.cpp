@@ -77,7 +77,7 @@ TableViewDataWidget::~TableViewDataWidget()
 
 void TableViewDataWidget::clearData_impl()
 {
-    logdbg << "TableViewDataWidget: clearData_impl: begin";
+    logdbg << "begin";
 
     if (all_buffer_table_widget_)
         all_buffer_table_widget_->clear();
@@ -85,7 +85,7 @@ void TableViewDataWidget::clearData_impl()
     for (auto buffer_table : buffer_tables_)
         buffer_table.second->clear();
 
-    logdbg << "TableViewDataWidget: clearData_impl: end";
+    logdbg << "end";
 }
 
 void TableViewDataWidget::clearIntermediateRedrawData_impl()
@@ -95,22 +95,22 @@ void TableViewDataWidget::clearIntermediateRedrawData_impl()
 
 void TableViewDataWidget::loadingStarted_impl()
 {
-    loginf << "TableViewDataWidget: loadingStarted_impl";
+    loginf << "start";
     //nothing to do yet
 }
 
 void TableViewDataWidget::updateData_impl(bool requires_reset)
 {
-    logdbg << "TableViewDataWidget: updateData_impl: begin";
+    logdbg << "begin";
 
     //nothing to do yet
 
-    logdbg << "TableViewDataWidget: updateData_impl: end";
+    logdbg << "end";
 }
 
 void TableViewDataWidget::loadingDone_impl()
 {
-    logdbg << "TableViewDataWidget: loadingDone_impl: begin";
+    logdbg << "begin";
 
     //default behavior
     ViewDataWidget::loadingDone_impl();
@@ -118,12 +118,12 @@ void TableViewDataWidget::loadingDone_impl()
     for (auto& buf_widget : buffer_tables_)
         showTab(buf_widget.second, buf_widget.second->hasData());
 
-    logdbg << "TableViewDataWidget: loadingDone_impl: end";
+    logdbg << "end";
 }
 
-bool TableViewDataWidget::redrawData_impl(bool recompute)
+ViewDataWidget::DrawState TableViewDataWidget::redrawData_impl(bool recompute)
 {
-    logdbg << "TableViewDataWidget: redrawData_impl: start - recompute = " << recompute;
+    logdbg << "start - recompute = " << recompute;
 
     assert(all_buffer_table_widget_);
     all_buffer_table_widget_->show(viewData());
@@ -136,9 +136,9 @@ bool TableViewDataWidget::redrawData_impl(bool recompute)
 
     selectFirstSelectedRow();
 
-    logdbg << "TableViewDataWidget: redrawData_impl: end";
+    logdbg << "end";
 
-    return (all_buffer_table_widget_->rowCount() > 0);
+    return (all_buffer_table_widget_->rowCount() > 0 ? DrawState::DrawnContent : DrawState::Drawn);
 }
 
 void TableViewDataWidget::liveReload_impl()
@@ -148,7 +148,7 @@ void TableViewDataWidget::liveReload_impl()
 
 void TableViewDataWidget::exportDataSlot()
 {
-    logdbg << "TableViewDataWidget: exportDataSlot";
+    logdbg << "start";
     assert(tab_widget_);
 
     AllBufferTableWidget* all_buffer_widget =
@@ -184,7 +184,7 @@ void TableViewDataWidget::exportDoneSlot(bool cancelled)
 
 void TableViewDataWidget::updateToSettingsChange()
 {
-    loginf << "TableViewDataWidget: updateToSettingsChange";
+    loginf << "start";
 
     if (all_buffer_table_widget_)
         all_buffer_table_widget_->updateToSettingsChange();

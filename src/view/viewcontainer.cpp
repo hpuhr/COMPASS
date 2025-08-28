@@ -63,7 +63,7 @@ ViewContainer::ViewContainer(const std::string& class_id,
       tab_widget_(tab_widget),
       window_cnt_(window_cnt)
 {
-    logdbg << "ViewContainer: ctor: window " << window_cnt_;
+    logdbg << "window " << window_cnt_;
     assert(tab_widget_);
 
     creation_time_ = boost::posix_time::to_time_t(boost::posix_time::microsec_clock::local_time());
@@ -91,17 +91,17 @@ ViewContainer::ViewContainer(const std::string& class_id,
 
 ViewContainer::~ViewContainer()
 {
-    logdbg << "ViewContainer: dtor";
+    logdbg << "start";
 
     view_manager_.removeContainer(instanceId());
 
-    logdbg << "ViewContainer: dtor: views list";
+    logdbg << "views list";
     for (auto& view : views_)
-        logdbg << "ViewContainer: dtor: view " << view->instanceId();
+        logdbg << "view " << view->instanceId();
 
     views_.clear();
 
-    logdbg << "ViewContainer: dtor: done";
+    logdbg << "done";
 }
 
 void ViewContainer::addView(const std::string& class_id)
@@ -170,11 +170,13 @@ void ViewContainer::addView(View* view)
     tab_widget_->tabBar()->setTabButton(index, QTabBar::RightSide, manage_button);
 
     //in localbuild we show some info about how the view is reachable via rtcommands
+#if USE_EXPERIMENTAL_SOURCE == true
     if (!COMPASS::instance().isAppImage())
     {
         QString tt = rtcommand::getTooltip(view->getViewWidget(), view);
         tab_widget_->setTabToolTip(index, tt);
     }
+#endif
 }
 
 void ViewContainer::deleteViewSlot()
@@ -214,7 +216,7 @@ void ViewContainer::addNewViewSlot()
 
     string class_id = class_id_var.toString().toStdString();
 
-    loginf << "ViewContainer: addNewViewSlot: location " << location << " class_id " << class_id;
+    loginf << "location " << location << " class_id " << class_id;
 
     if (location == "here")
         addView(class_id);
@@ -224,8 +226,7 @@ void ViewContainer::addNewViewSlot()
         container_widget->viewContainer().addView(class_id);
     }
     else
-        logerr << "ViewContainer: addNewViewSlot: unknown location '" << location << "'";
-
+        logerr << "unknown location '" << location << "'";
 }
 
 const std::vector<std::unique_ptr<View>>& ViewContainer::getViews() const { return views_; }
@@ -270,7 +271,7 @@ void ViewContainer::generateSubConfigurable(const std::string& class_id,
         (*views_.rbegin())->init();
         addView(views_.rbegin()->get());
 #else
-        loginf << "ViewContainer: generateSubConfigurable: GeographicView ignored since compiled w/o experimental source";
+        loginf << "ignored GeographicView since compiled w/o experimental source";
 #endif
 
     }
@@ -304,7 +305,7 @@ std::string ViewContainer::getWindowName()
 
 void ViewContainer::showAddViewMenuSlot()
 {
-    loginf << "ViewContainer: showAddViewMenuSlot: window " << window_cnt_;
+    loginf << "window " << window_cnt_;
     assert (!disable_add_remove_views_);
 
     QMenu menu;
@@ -333,7 +334,7 @@ void ViewContainer::showAddViewMenuSlot()
 
 void ViewContainer::showViewMenuSlot()
 {
-    loginf << "ViewContainer: showViewMenuSlot: window " << window_cnt_;
+    loginf << "window " << window_cnt_;
 
     assert (!disable_add_remove_views_);
 
@@ -380,7 +381,7 @@ void ViewContainer::resetToStartupConfiguration()
 //                                         view->getInstanceId().c_str(), &ok);
 //    if (ok && !text.isEmpty())
 //    {
-//        loginf << "ViewContainerWidget: saveViewTemplate: for view " << view->getInstanceId() <<
+//        loginf << "for view " << view->getInstanceId() <<
 //                " as template " << text.toStdString();
 //        //TODO
 //        //ViewManager::getInstance().saveViewAsTemplate (view, text.toStdString());

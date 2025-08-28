@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 
 #include "json.hpp"
@@ -136,7 +153,7 @@ public:
     // Accessor helpers
     static double getAvgSize(Category ecat) {
 
-        //loginf << "getAvgSize " << (unsigned int) ecat << " str " << toString(ecat);
+        //loginf << (unsigned int) ecat << " str " << toString(ecat);
         assert (checkEmitterSpecs(ecat));
         assert (emitter_specs_.at(toString(ecat)).count("avg_size_m"));
         return emitter_specs_.at(toString(ecat)).at("avg_size_m");

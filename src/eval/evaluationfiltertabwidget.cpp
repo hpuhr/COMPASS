@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "evaluationfiltertabwidget.h"
 #include "evaluationmanager.h"
 #include "textfielddoublevalidator.h"
@@ -171,7 +188,7 @@ void EvaluationFilterTabWidget::minRefTrajAccuracyEditedSlot (const QString& tex
     val = text.toFloat(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minRefTrajAccuracyEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().ref_traj_minimum_accuracy_ = val;
 }
@@ -236,7 +253,7 @@ void EvaluationFilterTabWidget::minNUCPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minNUCPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_nucp_ = val;
 }
@@ -261,7 +278,7 @@ void EvaluationFilterTabWidget::minNICEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minNICEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_nic_ = val;
 }
@@ -286,7 +303,7 @@ void EvaluationFilterTabWidget::minNACPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minNACPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_nacp_ = val;
 }
@@ -311,7 +328,7 @@ void EvaluationFilterTabWidget::minSILv1PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minSILv1PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_sil_v1_ = val;
 }
@@ -336,7 +353,7 @@ void EvaluationFilterTabWidget::minSILv2PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: minSILv2PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().min_sil_v2_ = val;
 }
@@ -361,7 +378,7 @@ void EvaluationFilterTabWidget::maxNUCPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxNUCPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_nucp_ = val;
 }
@@ -386,7 +403,7 @@ void EvaluationFilterTabWidget::maxNICEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxNICEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_nic_ = val;
 }
@@ -411,7 +428,7 @@ void EvaluationFilterTabWidget::maxNACPEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxNACPEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_nacp_ = val;
 }
@@ -436,7 +453,7 @@ void EvaluationFilterTabWidget::maxSILv1PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxSILv1PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_sil_v1_ = val;
 }
@@ -461,7 +478,7 @@ void EvaluationFilterTabWidget::maxSILv2PEditedSlot (const QString& text)
     val = text.toUInt(&ok);
 
     if (!ok)
-        logwrn << "EvaluationFilterTabWidget: maxSILv2PEditedSlot: unable to parse value '" << text.toStdString() << "'";
+        logwrn << "unable to parse value '" << text.toStdString() << "'";
     else
         calculator_.settings().max_sil_v2_ = val;
 }

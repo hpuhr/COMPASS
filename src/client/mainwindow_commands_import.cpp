@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "mainwindow_commands_import.h"
 #include "mainwindow.h"
 #include "compass.h"
@@ -247,7 +264,7 @@ bool RTCommandImportASTERIXFile::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXFile: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error: " << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }
@@ -446,7 +463,7 @@ bool RTCommandImportASTERIXFiles::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXFiles: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error: " << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }
@@ -455,7 +472,7 @@ bool RTCommandImportASTERIXFiles::run_impl()
 
     for (const auto& filename : split_filenames_)
     {
-        loginf << "RTCommandImportASTERIXFiles: run_impl: file '" << filename << "'";
+        loginf << "file '" << filename << "'";
 
         assert (Files::fileExists(filename));
     }
@@ -635,7 +652,7 @@ bool RTCommandImportASTERIXPCAPFile::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXPCAPFile: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error: " << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }
@@ -804,7 +821,7 @@ bool RTCommandImportASTERIXPCAPFiles::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXPCAPFiles: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error: " << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }
@@ -813,7 +830,7 @@ bool RTCommandImportASTERIXPCAPFiles::run_impl()
 
     for (const auto& filename : split_filenames_)
     {
-        loginf << "RTCommandImportASTERIXPCAPFiles: run_impl: file '" << filename << "'";
+        loginf << "file '" << filename << "'";
 
         assert (Files::fileExists(filename));
     }
@@ -947,7 +964,7 @@ bool RTCommandImportASTERIXNetworkStart::run_impl()
     }
     catch (exception& e)
     {
-        logerr << "RTCommandImportASTERIXFile: run_impl: setting ASTERIX options resulted in error: " << e.what();
+        logerr << "setting ASTERIX options resulted in error: " << e.what();
         setResultMessage(string("Setting ASTERIX options resulted in error: ")+e.what());
         return false;
     }

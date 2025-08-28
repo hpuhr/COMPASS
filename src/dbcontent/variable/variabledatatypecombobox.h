@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBOVARIABLEDATATYPECOMBOBOX_H_
-#define DBOVARIABLEDATATYPECOMBOBOX_H_
+#pragma once
 
 //#include "dbcontent/variable/variable.h"
 //#include "global.h"
@@ -37,7 +36,7 @@ class VariableDataTypeComboBox : public QComboBox
     /// @brief Sets the data type
     void changed()
     {
-        loginf << "VariableDataTypeComboBox: changed: " << currentText().toStdString();
+        loginf << "start" << currentText().toStdString();
 
         data_type_str_ = currentText().toStdString();
         data_type_ = Property::asDataType(data_type_str_);
@@ -84,5 +83,3 @@ class VariableDataTypeComboBox : public QComboBox
 };
 
 }
-
-#endif /* DBOVARIABLEDATATYPECOMBOBOX_H_ */

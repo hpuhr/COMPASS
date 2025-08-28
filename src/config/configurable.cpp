@@ -52,7 +52,7 @@ Configurable::Configurable(const std::string& class_id,
       parent_      (parent),
       is_transient_(config != nullptr)
 {
-    logdbg << "Configurable: constructor: class_id " << class_id_ << " instance_id " << instance_id_;
+    logdbg << "class_id " << class_id_ << " instance_id " << instance_id_;
 
     if (config)
     {
@@ -82,12 +82,12 @@ Configurable::Configurable(const std::string& class_id,
 
     if (root_configuration_filename.size() != 0)
     {
-        loginf << "Configurable: constructor: got root filename " << root_configuration_filename;
+        loginf << "got root filename " << root_configuration_filename;
 
         configuration_->setConfigurationFilename(root_configuration_filename);
     }
 
-    logdbg << "Configurable: constructor: class_id " << class_id_ << " instance_id " << instance_id_ << " end";
+    logdbg << "class_id " << class_id_ << " instance_id " << instance_id_ << " end";
 }
 
 /**
@@ -98,14 +98,14 @@ Configurable::Configurable(const std::string& class_id,
  */
 Configurable::~Configurable()
 {
-    logdbg << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_;
+    logdbg << "class_id " << class_id_ << " instance_id " << instance_id_;
 
     //@TODO: most likely destroying a connection will disconnect both parties automatically...
     changed_connection_.disconnect();
 
     if (parent_)
     {
-        logdbg << "Configurable: destructor: class_id " << class_id_ << " instance_id "
+        logdbg << "class_id " << class_id_ << " instance_id "
                << instance_id_ << ": removal from parent";
         
         parent_->removeChildConfigurable(*this, !tmp_disable_remove_config_on_delete_);
@@ -117,12 +117,12 @@ Configurable::~Configurable()
 
     if (children_.size() != 0)
     {
-        logwrn << "Configurable: destructor: class_id " << class_id_ << " instance_id "
+        logwrn << "class_id " << class_id_ << " instance_id "
                << instance_id_ << " still " << children_.size() << " undeleted";
 
         for (auto& child_it : children_)
         {
-            logwrn << "Configurable: destructor: class_id " << class_id_ << " instance_id "
+            logwrn << "class_id " << class_id_ << " instance_id "
                    << instance_id_ << " undelete child ptr " << &child_it.second;
         }
     }
@@ -149,7 +149,7 @@ std::string Configurable::keyID(const std::string& class_id,
 template <typename T>
 void Configurable::registerParameter(const std::string& parameter_id, T* pointer, const T& default_value)
 {
-    logdbg << "Configurable " << instance_id_ << ": registerParameter: parameter_id " << parameter_id;
+    logdbg << instance_id_ << ": parameter_id " << parameter_id;
 
     assert(configuration_);
     assert(pointer);
@@ -185,7 +185,7 @@ void Configurable::setParameter(T& param, const T& value)
 */
 Configuration& Configurable::registerSubConfigurable(Configurable& child, bool config_must_exist)
 {
-    logdbg << "Configurable " << instance_id_ << " registerSubConfigurable: child " << child.instanceId();
+    logdbg << instance_id_ << ": child " << child.instanceId();
 
     assert(configuration_);
 
@@ -197,7 +197,7 @@ Configuration& Configurable::registerSubConfigurable(Configurable& child, bool c
                                  "' already in use");
     }
 
-    logdbg << "Configurable " << instance_id_ << ": registerSubConfigurable: " << key;
+    logdbg << instance_id_ << ": " << key;
 
     children_.insert(std::pair<std::string, Configurable&>(key, child));
 
@@ -211,15 +211,14 @@ Configuration& Configurable::registerSubConfigurable(Configurable& child, bool c
 */
 void Configurable::removeChildConfigurable(Configurable& child, bool remove_config)
 {
-    logdbg << "Configurable " << instance_id_ << " removeChildConfigurable: child "
-           << child.instanceId();
+    logdbg << instance_id_ << ": child " << child.instanceId();
 
     assert(configuration_);
 
     const std::string& key = child.keyId();
     assert(children_.find(key) != children_.end());
 
-    logdbg << "Configurable " << instance_id_ << ": removeChildConfigurable: " << key;
+    logdbg << instance_id_ << ": " << key;
 
     children_.erase(children_.find(key));
 
@@ -232,7 +231,7 @@ void Configurable::removeChildConfigurable(Configurable& child, bool remove_conf
  */
 void Configurable::resetToDefault()
 {
-    logdbg << "Configurable " << instance_id_ << ": resetToDefault";
+    logdbg << instance_id_;
 
     assert(configuration_);
 
@@ -242,7 +241,7 @@ void Configurable::resetToDefault()
 
     for (it = children_.begin(); it != children_.end(); it++)
     {
-        // loginf  << "Configurable " << instance_id_ << ": resetToDefault: child " << it->first;
+        // loginf  << instance_id_ << ": child " << it->first;
         it->second.resetToDefault();
     }
 }
@@ -304,7 +303,7 @@ void Configurable::createSubConfigurables()
 {
     assert(configuration_);
 
-    logdbg << "Configurable: createSubConfigurables: config instance " << configuration_->getInstanceId()
+    logdbg << "config instance " << configuration_->getInstanceId()
            << " configurable instance " << instanceId();
 
     const auto& sub_configs = configuration_->subConfigurations();
@@ -316,7 +315,7 @@ void Configurable::createSubConfigurables()
         //must be part of sub configurations
         if (sub_configs.count(key) != 0)
         {
-            logdbg << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '" << key.first << "' instance_id '" << key.second << "' (custom order)";
+            logdbg << "class_id '" << key.first << "' instance_id '" << key.second << "' (custom order)";
 
             assert(!hasSubConfigurable(key.first, key.second));
             generateSubConfigurable(key.first, key.second);
@@ -329,12 +328,11 @@ void Configurable::createSubConfigurables()
         //not yet created from manual order?
         if (custom_order.empty() || std::find(custom_order.begin(), custom_order.end(), it->first) == custom_order.end())
         {
-            logdbg << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '"
+            logdbg << "class_id '"
                    << it->first.first << "' instance_id '" << it->first.second << "'";
 
             if (hasSubConfigurable(it->first.first, it->first.second))
-                logerr << "Configurable: createSubConfigurables: generateSubConfigurable: class_id '"
-                       << it->first.first << "' instance_id '" << it->first.second << "' already exists";
+                logerr << "class_id '" << it->first.first << "' instance_id '" << it->first.second << "' already exists";
 
             assert(!hasSubConfigurable(it->first.first, it->first.second));
             generateSubConfigurable(it->first.first, it->first.second);
@@ -344,14 +342,14 @@ void Configurable::createSubConfigurables()
     //check if every needed subconfigurable has been created yet
     checkSubConfigurables();
 
-    logdbg << "Configurable: createSubConfigurables: instance " << instance_id_ << " end";
+    logdbg << "instance " << instance_id_ << " end";
 }
 
 /**
 */
 void Configurable::checkSubConfigurables()
 {
-    logerr << "Configurable: checkSubConfigurables: class " << class_id_ << " failed to override me";
+    logerr << "class " << class_id_ << " failed to override me";
 }
 
 /**
@@ -359,7 +357,7 @@ void Configurable::checkSubConfigurables()
 void Configurable::generateSubConfigurable(const std::string& class_id,
                                            const std::string& instance_id)
 {
-    loginf << "Configurable: generateSubConfigurable: class " << class_id_ << " does not override ";
+    loginf << "class " << class_id_ << " does not override ";
 }
 
 /**
@@ -490,7 +488,7 @@ Configurable* Configurable::getApproximateChildNamed (const std::string& approx_
 
     if (class_id_match_iter != children_.end())
     {
-        loginf << "Configurable: getApproximateChildNamed: key_id " << key_id_ << " found approximate name '"
+        loginf << "key_id " << key_id_ << " found approximate name '"
                << approx_name << "' with child instance_id " << class_id_match_iter->second.instanceId();
         return &class_id_match_iter->second;
     }
@@ -520,7 +518,7 @@ Configurable& Configurable::getChild(const std::string& class_id,
 */
 void Configurable::setTmpDisableRemoveConfigOnDelete(bool value)
 {
-    logdbg << "Configurable::setTmpDisableRemoveConfigOnDelete: value " << value;
+    logdbg << "value " << value;
 
     tmp_disable_remove_config_on_delete_ = value;
 

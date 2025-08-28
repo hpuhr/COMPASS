@@ -52,11 +52,11 @@ View::View(const std::string& class_id,
       widget_(nullptr),
       container_(container)
 {
-    logdbg << "View: constructor";
+    logdbg << "start";
 
     registerParameter("name", &name_, std::string());
 
-    loginf << "View: constructor: name '" << name_ << "'";
+    loginf << "name '" << name_ << "'";
     assert (name_.size());
 
     creation_time_ = boost::posix_time::to_time_t(boost::posix_time::microsec_clock::local_time());
@@ -101,7 +101,7 @@ then the model, which will need the widget in it's constructor.
  */
 bool View::init()
 {
-    logdbg << "View: init";
+    logdbg << "start";
 
     assert(!init_);
 
@@ -239,7 +239,7 @@ void View::selectionChangedSlot()
 */
 void View::loadingStarted()
 {
-    logdbg << "View: loadingStarted";
+    logdbg << "start";
 
     //reload reverts any pending view updates
     issued_update_.reset();
@@ -252,7 +252,7 @@ void View::loadingStarted()
 */
 void View::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-    logdbg << "View: loadedData";
+    logdbg << "start";
 
     if (widget_ && widget_->getViewDataWidget())
         widget_->getViewDataWidget()->updateData(data, requires_reset);
@@ -262,7 +262,7 @@ void View::loadedData(const std::map<std::string, std::shared_ptr<Buffer>>& data
 */
 void View::loadingDone()
 {
-    logdbg << "View: loadingDone";
+    logdbg << "start";
 
     if (widget_)
         widget_->loadingDone();
@@ -272,7 +272,7 @@ void View::loadingDone()
 */
 void View::clearData()
 {
-    logdbg << "View: clearData";
+    logdbg << "start";
 
     if (widget_)
         widget_->clearData();
@@ -282,7 +282,7 @@ void View::clearData()
 */
 void View::appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current)
 {
-    logdbg << "View: appModeSwitch: app_mode " << toString(app_mode_current)
+    logdbg << "app_mode " << toString(app_mode_current)
            << " prev " << toString(app_mode_previous);
 
     app_mode_ = app_mode_current;
@@ -296,7 +296,7 @@ void View::appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current)
  */
 void View::onConfigurationChanged(const std::vector<std::string>& changed_params)
 {
-    logdbg << "View: onConfigurationChanged";
+    logdbg << "start";
 
     //invoke derived for view-specific updates
     onConfigurationChanged_impl(changed_params);
@@ -370,10 +370,10 @@ QImage View::renderView() const
 /**
  * Asks the data widget if it shows any data.
  */
-bool View::showsData() const
+bool View::hasScreenshotContent() const
 {
     assert (widget_ && widget_->getViewDataWidget());  
-    return widget_->getViewDataWidget()->showsData();
+    return widget_->getViewDataWidget()->hasScreenshotContent();
 }
 
 /**
@@ -627,7 +627,7 @@ View::PresetError View::applyPreset(const ViewPresets::Preset& preset,
 
     if (!preset.app_version.empty() && preset.app_version != version)
     {
-        loginf << "View: applyPreset: preset version mismatch, "
+        loginf << "preset version mismatch, "
                << preset.app_version << ", app version " << version;
         //return PresetError::IncompatibleVersion;
     }

@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "reconstructortarget.h"
 #include "reconstructorbase.h"
 #include "compass.h"
@@ -97,6 +114,8 @@ void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
         reconstruction::UpdateStats stats;
         bool ok = chain()->reestimate(&stats);
 
+        UNUSED_VARIABLE(ok);
+
         // assert(stats.num_fresh == num_added); //TODO UGAGUGA
         // assert(stats.num_updated >= num_added);
         // assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
@@ -104,7 +123,7 @@ void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
         addUpdateToGlobalStats(stats);
 
         // if (!ok) // collected in stats
-        //     logwrn << "ReconstructorTarget: addTargetReports: chain reestimation failed";
+        //     logwrn << "chain reestimation failed";
     }
 }
 
@@ -133,7 +152,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     // //assert (tr.in_current_slice_); // can be old one
     if (std::find(target_reports_.begin(), target_reports_.end(), rec_num) != target_reports_.end())
     {
-        logerr << "ReconstructorTarget: addTargetReport: utn " << utn_ << " tr " << tr.asStr() << " already added";
+        logerr << "utn " << utn_ << " tr " << tr.asStr() << " already added";
         assert(false);
     }
 #endif
@@ -141,7 +160,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     //    if (!timestamp_max_.is_not_a_date_time()) // there is time
     //    {
     //        if (tr.timestamp_ < timestamp_max_)
-    //            logerr << "ReconstructorTarget: addTargetReport: old max " << Time::toString(timestamp_max_)
+    //            logerr << "old max " << Time::toString(timestamp_max_)
     //                   << " tr ts " << Time::toString(tr.timestamp_);
 
     //        assert (tr.timestamp_ >= timestamp_max_);
@@ -229,7 +248,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
         if (ecat_)
         {
             if (*tr.ecat_ != ecat_)
-                logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: ecat mismatch, target ecat "
+                logwrn << utn_ << ": ecat mismatch, target ecat "
                        << *ecat_ << " " << String::ecatToString(*ecat_)
                        << " tr " << *tr.ecat_ << " " << String::ecatToString(*tr.ecat_) << "";
         }
@@ -241,7 +260,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     {
         if (acads_.size() && !acads_.count(*tr.acad_))
         {
-            logwrn << "ReconstructorTarget " << utn_ << " addTargetReport: acad mismatch, target "
+            logwrn << utn_ << ": acad mismatch, target "
                    << asStr() << " tr '" << tr.asStr() << "'";
         }
 
@@ -612,7 +631,7 @@ bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) 
 
     // ptime lower = lb_it->first;
 
-    // logdbg << "Target " << utn_ << ": hasDataForTime: found " << Time::toString(lower)
+    // logdbg2 << utn_ << ": found " << Time::toString(lower)
     //        << " <= " << Time::toString(timestamp)
     //        << " <= " << Time::toString(upper);
 
@@ -660,135 +679,148 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
     bool has_lower = false;
     bool has_upper = false;
 
-    auto num_ts_existing = tr_timestamps_.count(timestamp);
-    auto range = tr_timestamps_.equal_range(timestamp);
+    auto it = tr_timestamps_.find(timestamp);  // more efficient than count for just checking existence
 
-    //look for initial upper and lower datum
-    if (num_ts_existing == 1)
+    if (it == tr_timestamps_.end()) // no match
     {
-        assert(range.first != tr_timestamps_.end());
-        
-        //unique timestamp in map => start from this timestamp
-        it_lower  = range.first;
-        it_upper  = range.first;
-        has_lower = true;
-        has_upper = true;
+        // No match case (most common)
 
-        if(debug)
-            loginf << "ReconstructorTarget: dataFor: found timestamp in target";
-    }
-    else if (num_ts_existing > 1)
-    {
-        assert(range.first != tr_timestamps_.end());
-
-        //multiple timestamps in map => choose one depending on init mode
-        std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_start = tr_timestamps_.end();
-
-        auto init_mode = interp_options.initMode();
-
-        if (init_mode == InterpOptions::InitMode::First)
-        {
-            //choose first
-            it_start = range.first;
-        }
-        else if (init_mode == InterpOptions::InitMode::Last)
-        {
-            //choose last
-            it_start = range.second == tr_timestamps_.end() ? range.first : --range.second;
-        }
-        else
-        {
-            //choose a valid datum or a datum with a certain record number
-            bool look_for_recnum = init_mode == InterpOptions::InitMode::RecNum;
-            auto rec_num         = interp_options.initRecNum();
-
-            for (auto it = range.first; it != range.second; ++it)
-            {
-                const auto& d = dataFor(it->second);
-
-                //if recnum has been found break immediately
-                if (look_for_recnum && d.record_num_ == rec_num)
-                {
-                    it_start = it;
-                    break;
-                }
-
-                //if valid break immediately if no recnum is specified, otherwise remember as fallback and continue search
-                if (skipTargetReport(d, tr_valid_func) == TargetReportSkipResult::Valid)
-                {
-                    it_start = it;
-                    if (!look_for_recnum)
-                        break;
-                }
-            }
-        }
-
-        //fallback: use first
-        if (it_start == tr_timestamps_.end())
-            it_start = range.first;
-
-        assert(it_start != tr_timestamps_.end());
-
-        it_lower  = it_start;
-        it_upper  = it_start;
-        has_lower = true;
-        has_upper = true;
-
-        if (debug)
-            loginf << "ReconstructorTarget: dataFor: found multiple timestamps in target, chose:\n" << tr2String(dataFor(it_start->second));
-    }
-    else
-    {
-        //get lower bound
+        // get lower bound
         it_upper = tr_timestamps_.lower_bound(timestamp);
 
         // all tr_timestamps_ smaller than timestamp
         if (it_upper == tr_timestamps_.end())
         {
-            assert (tr_timestamps_.rbegin()->first <= timestamp);
+            assert(tr_timestamps_.rbegin()->first <= timestamp);
             if ((timestamp - tr_timestamps_.rbegin()->first) < d_max)
             {
-                it_lower  = std::prev(tr_timestamps_.end());
-                it_upper  = tr_timestamps_.end();
+                it_lower = std::prev(tr_timestamps_.end());
+                it_upper = tr_timestamps_.end();
                 has_lower = true;
                 has_upper = false;
             }
         }
-        else if (it_upper == tr_timestamps_.begin())// all tr_timestamps_ bigger than timestamp
+        else if (it_upper == tr_timestamps_.begin())  // all tr_timestamps_ bigger than timestamp
         {
-            assert (tr_timestamps_.begin()->first >= timestamp);
+            assert(tr_timestamps_.begin()->first >= timestamp);
 
             if ((tr_timestamps_.begin()->first - timestamp) < d_max)
             {
-                it_lower  = tr_timestamps_.end();
-                //it_upper  = tr_timestamps_.begin(); // is already on this value
+                it_lower = tr_timestamps_.end();
+                // it_upper  = tr_timestamps_.begin(); // is already on this value
                 has_lower = false;
                 has_upper = true;
             }
         }
         else
         {
-            assert (it_upper->first >= timestamp);
+            assert(it_upper->first >= timestamp);
 
-            //too much time difference?
+            // too much time difference?
             if (it_upper->first - timestamp <= d_max)
                 has_upper = true;
 
-            //set lower iterator to last elem
+            // set lower iterator to last elem
             it_lower = it_upper;
             --it_lower;
 
-            assert (it_lower->first < timestamp);
+            assert(it_lower->first < timestamp);
 
-            //lower item too far away?
+            // lower item too far away?
             if (timestamp - it_lower->first <= d_max)
                 has_lower = true;
         }
-        if (debug) 
+        if (debug)
         {
-            loginf << "ReconstructorTarget: dataFor: initial interval:\n" 
+            loginf << "initial interval:\n"
                    << "   " << (has_lower ? tr2String(dataFor(it_lower->second)) : "") << "\n"
                    << "   " << (has_upper ? tr2String(dataFor(it_upper->second)) : "");
+        }
+    }
+    else // at least one match
+    {
+        auto range = tr_timestamps_.equal_range(timestamp);
+        bool exists_one = range.first != range.second;
+        bool exist_multiple = exists_one && std::next(range.first) != range.second;
+
+        assert (exists_one || exist_multiple);
+
+        // look for initial upper and lower datum
+        if (exists_one && !exist_multiple)  // exists one
+        {
+            assert(range.first != tr_timestamps_.end());
+
+            // unique timestamp in map => start from this timestamp
+            it_lower = range.first;
+            it_upper = range.first;
+            has_lower = true;
+            has_upper = true;
+
+            if (debug)
+                loginf << "found timestamp in target";
+        }
+        else if (exist_multiple)
+        {
+            assert(range.first != tr_timestamps_.end());
+
+            // multiple timestamps in map => choose one depending on init mode
+            std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_start =
+                tr_timestamps_.end();
+
+            auto init_mode = interp_options.initMode();
+
+            if (init_mode == InterpOptions::InitMode::First)
+            {
+                // choose first
+                it_start = range.first;
+            }
+            else if (init_mode == InterpOptions::InitMode::Last)
+            {
+                // choose last
+                it_start = range.second == tr_timestamps_.end() ? range.first : --range.second;
+            }
+            else
+            {
+                // choose a valid datum or a datum with a certain record number
+                bool look_for_recnum = init_mode == InterpOptions::InitMode::RecNum;
+                auto rec_num = interp_options.initRecNum();
+
+                for (auto it = range.first; it != range.second; ++it)
+                {
+                    const auto& d = dataFor(it->second);
+
+                    // if recnum has been found break immediately
+                    if (look_for_recnum && d.record_num_ == rec_num)
+                    {
+                        it_start = it;
+                        break;
+                    }
+
+                    // if valid break immediately if no recnum is specified, otherwise remember as
+                    // fallback and continue search
+                    if (skipTargetReport(d, tr_valid_func) == TargetReportSkipResult::Valid)
+                    {
+                        it_start = it;
+                        if (!look_for_recnum)
+                            break;
+                    }
+                }
+            }
+
+            // fallback: use first
+            if (it_start == tr_timestamps_.end())
+                it_start = range.first;
+
+            assert(it_start != tr_timestamps_.end());
+
+            it_lower = it_start;
+            it_upper = it_start;
+            has_lower = true;
+            has_upper = true;
+
+            if (debug)
+                loginf << "found multiple timestamps in target, chose:\n"
+                       << tr2String(dataFor(it_start->second));
         }
     }
 
@@ -799,7 +831,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
     if (ok_lower && ok_upper)
     {
         if (debug)
-            loginf << "ReconstructorTarget: dataFor: initial interval valid, has_lower " << has_lower
+            loginf << "initial interval valid, has_lower " << has_lower
                    << " has_upper " << has_upper;
 
         return {has_lower ? &dataFor(it_lower->second) : nullptr, has_upper ? &dataFor(it_upper->second) : nullptr};
@@ -824,7 +856,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             }
             else if (debug)
             {
-                loginf << "ReconstructorTarget: dataFor: skipping upper tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
+                loginf << "skipping upper tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
             }
         }
     }
@@ -848,7 +880,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             }
             else if (debug)
             {
-                loginf << "ReconstructorTarget: dataFor: skipping lower tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
+                loginf << "skipping lower tr " << tr2String(dataFor(it->second)) << ": " << (int)skip_result;
             }
 
             if (it == tr_timestamps_.begin())
@@ -860,7 +892,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
 
     if (debug) 
     {
-        loginf << "ReconstructorTarget: dataFor: final interval:\n" 
+        loginf << "final interval:\n" 
                << "   " << (has_lower ? tr2String(dataFor(it_lower->second)) : "") << "\n"
                << "   " << (has_upper ? tr2String(dataFor(it_upper->second)) : "");
     }
@@ -994,7 +1026,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     dbContent::targetReport::Position& pos2 = *upper->position();
     float d_t = Time::partialSeconds(upper->timestamp_ - lower->timestamp_);
 
-    logdbg << "Target: interpolatedPosForTime: d_t " << d_t;
+    logdbg2 << "d_t " << d_t;
 
     assert (d_t >= 0);
 
@@ -1004,44 +1036,44 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     if (lower == upper) // same time
     {
-        logwrn << "Target: interpolatedPosForTime: ref has same time twice";
+        logwrn << "ref has same time twice";
         return {{}, false};
     }
 
-    logdbg << "Target: interpolatedPosForTime: pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
-    logdbg << "Target: interpolatedPosForTime: pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
+    logdbg2 << "pos1 " << pos1.latitude_ << ", " << pos1.longitude_;
+    logdbg2 << "pos2 " << pos2.latitude_ << ", " << pos2.longitude_;
 
     bool ok;
     double x_pos, y_pos;
 
-    logdbg << "Target: interpolatedPosForTime: geo2cart";
+    logdbg2 << "geo2cart";
 
     tie(ok, x_pos, y_pos) = trafo_.distanceCart(
         pos1.latitude_, pos1.longitude_, pos2.latitude_, pos2.longitude_);
 
     if (!ok)
     {
-        logerr << "Target: interpolatedPosForTime: error with latitude " << pos2.latitude_
+        logerr << "error with latitude " << pos2.latitude_
                << " longitude " << pos2.longitude_;
         return {{}, false};
     }
 
-    logdbg << "Target: interpolatedPosForTime: offsets x " << fixed << x_pos
+    logdbg2 << "offsets x " << fixed << x_pos
            << " y " << fixed << y_pos << " dist " << fixed << sqrt(pow(x_pos,2)+pow(y_pos,2));
 
     double v_x = x_pos/d_t;
     double v_y = y_pos/d_t;
-    logdbg << "Target: interpolatedPosForTime: v_x " << v_x << " v_y " << v_y;
+    logdbg2 << "v_x " << v_x << " v_y " << v_y;
 
     float d_t2 = Time::partialSeconds(timestamp - lower->timestamp_);
-    logdbg << "Target: interpolatedPosForTime: d_t2 " << d_t2;
+    logdbg2 << "d_t2 " << d_t2;
 
     assert (d_t2 >= 0);
 
     x_pos = v_x * d_t2;
     y_pos = v_y * d_t2;
 
-    logdbg << "Target: interpolatedPosForTime: interpolated offsets x " << x_pos << " y " << y_pos;
+    logdbg2 << "interpolated offsets x " << x_pos << " y " << y_pos;
 
     tie (ok, x_pos, y_pos) = trafo_.wgsAddCartOffset(pos1.latitude_, pos1.longitude_, x_pos, y_pos);
 
@@ -1049,7 +1081,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     // x_pos long, y_pos lat
 
-    logdbg << "Target: interpolatedPosForTime: interpolated lat " << x_pos << " long " << y_pos;
+    logdbg2 << "interpolated lat " << x_pos << " long " << y_pos;
 
     // calculate altitude
 
@@ -1075,7 +1107,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     //        altitude = pos1.altitude_ + v_alt*d_t2;
     //    }
 
-    //    logdbg << "Target: interpolatedPosForTime: pos1 has alt "
+    //    logdbg2 << "pos1 has alt "
     //           << pos1.has_altitude_ << " alt " << pos1.altitude_
     //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
     //           << " interpolated has alt " << has_altitude << " alt " << altitude;
@@ -1112,7 +1144,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     dbContent::targetReport::Position& pos2 = *upper_rec_num->position();
     float d_t = Time::partialSeconds(upper_rec_num->timestamp_ - lower_rec_num->timestamp_);
 
-    logdbg << "Target: interpolatedPosForTimeFast: d_t " << d_t;
+    logdbg2 << "d_t " << d_t;
 
     assert (d_t >= 0);
 
@@ -1122,23 +1154,23 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     if (lower_rec_num == upper_rec_num) // same time
     {
-        logwrn << "Target: interpolatedPosForTimeFast: ref has same time twice";
+        logwrn << "ref has same time twice";
         return {{}, false};
     }
 
     double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
     double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
-    logdbg << "Target: interpolatedPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
+    logdbg2 << "v_x " << v_lat << " v_y " << v_long;
 
     float d_t2 = Time::partialSeconds(timestamp - lower_rec_num->timestamp_);
-    logdbg << "Target: interpolatedPosForTimeFast: d_t2 " << d_t2;
+    logdbg2 << "d_t2 " << d_t2;
 
     assert (d_t2 >= 0);
 
     double int_lat = pos1.latitude_ + v_lat * d_t2;
     double int_long = pos1.longitude_ + v_long * d_t2;
 
-    logdbg << "Target: interpolatedPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
+    logdbg2 << "interpolated lat " << int_lat << " long " << int_long;
 
     // calculate altitude
     //    bool has_altitude = false;
@@ -1161,7 +1193,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     //        altitude = pos1.altitude_ + v_alt*d_t2;
     //    }
 
-    //    logdbg << "Target: interpolatedPosForTimeFast: pos1 has alt "
+    //    logdbg2 << "pos1 has alt "
     //           << pos1.has_altitude_ << " alt " << pos1.altitude_
     //           << " pos2 has alt " << pos2.has_altitude_ << " alt " << pos2.altitude_
     //           << " interpolated has alt " << has_altitude << " alt " << altitude;
@@ -1221,7 +1253,7 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
         float d_t = Time::partialSeconds(upper_ref->t - lower_ref->t);
 
-        logdbg << "Target: interpolatedRefPosForTimeFast: d_t " << d_t;
+        logdbg2 << "d_t " << d_t;
 
         assert (d_t >= 0);
 
@@ -1231,7 +1263,7 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
         if (lower_ref == upper_ref) // same time
         {
-            logwrn << "Target: interpolatedRefPosForTimeFast: ref has same time twice";
+            logwrn << "ref has same time twice";
             return {dbContent::targetReport::Position
                     { (pos1.latitude_ + pos2.latitude_)/2.0, (pos1.longitude_ + pos2.longitude_)/2.0},
                     lower_ref->positionAccuracy()};
@@ -1239,17 +1271,17 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
         double v_lat = (pos2.latitude_ - pos1.latitude_)/d_t;
         double v_long = (pos2.longitude_ - pos1.longitude_)/d_t;
-        logdbg << "Target: interpolatedRefPosForTimeFast: v_x " << v_lat << " v_y " << v_long;
+        logdbg2 << "v_x " << v_lat << " v_y " << v_long;
 
         float d_t2 = Time::partialSeconds(timestamp - lower_ref->t);
-        logdbg << "Target: interpolatedRefPosForTimeFast: d_t2 " << d_t2;
+        logdbg2 << "d_t2 " << d_t2;
 
         assert (d_t2 >= 0);
 
         double int_lat = pos1.latitude_ + v_lat * d_t2;
         double int_long = pos1.longitude_ + v_long * d_t2;
 
-        logdbg << "Target: interpolatedRefPosForTimeFast: interpolated lat " << int_lat << " long " << int_long;
+        logdbg2 << "interpolated lat " << int_lat << " long " << int_long;
 
         boost::optional<dbContent::targetReport::PositionAccuracy> ret_pos_acc =
             lower_ref->positionAccuracy().maxStdDev() > upper_ref->positionAccuracy().maxStdDev()
@@ -1294,7 +1326,7 @@ bool ReconstructorTarget::hasDataFor (unsigned long rec_num) const
 
 dbContent::targetReport::ReconstructorInfo& ReconstructorTarget::dataFor (unsigned long rec_num) const
 {
-    assert (reconstructor_.target_reports_.count(rec_num));
+    //assert (reconstructor_.target_reports_.count(rec_num));
     return reconstructor_.target_reports_.at(rec_num);
 }
 
@@ -1575,7 +1607,7 @@ bool ReconstructorTarget::isPrimaryAt(boost::posix_time::ptime timestamp,
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (interp_options.debug()) loginf << "ReconstructorTarget: isPrimaryAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff, {}, interp_options);
 
@@ -1597,7 +1629,7 @@ boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptim
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (interp_options.debug()) loginf << "ReconstructorTarget: modeCCodeAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(timestamp, max_time_diff, {}, interp_options);
     // [ & ] (const dbContent::targetReport::ReconstructorInfo& tr) {return tr.barometric_altitude_.has_value() && tr.barometric_altitude_->hasReliableValue(); }
@@ -1641,7 +1673,7 @@ boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (interp_options.debug()) loginf << "ReconstructorTarget: groundBitAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
@@ -1687,7 +1719,7 @@ boost::optional<double> ReconstructorTarget::groundSpeedAt (boost::posix_time::p
 
     dbContent::targetReport::ReconstructorInfo* lower_tr, *upper_tr;
 
-    if (interp_options.debug()) loginf << "ReconstructorTarget: groundSpeedAt: t = " << Utils::Time::toString(timestamp);
+    if (interp_options.debug()) loginf << "t = " << Utils::Time::toString(timestamp);
 
     tie(lower_tr, upper_tr) = dataFor(
         timestamp, max_time_diff,
@@ -2101,7 +2133,7 @@ std::map <std::string, unsigned int> ReconstructorTarget::getDBContentCounts() c
 
 std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 {
-    logdbg << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " ref size " << references_.size();
+    logdbg2 << "utn " << utn_ << " ref size " << references_.size();
 
     string dbcontent_name = "RefTraj";
     unsigned int dbcontent_id = 255;
@@ -2268,7 +2300,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     for (auto& ref_it : references_)
     {
-        // loginf << "ReconstructorTarget: getReferenceBuffer: utn " << utn_
+        // loginf << "utn " << utn_
         //        << " ref ts " << Time::toString(ref_it.second.t)
         //        << " wbt " << Time::toString(reconstructor_.currentSlice().write_before_time_) <<
         //     " skip " << (ref_it.second.t >= reconstructor_.currentSlice().write_before_time_);
@@ -2534,7 +2566,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
 
     counts_[dbcontent_id] += buffer->size();
 
-    logdbg << "ReconstructorTarget: getReferenceBuffer: utn " << utn_ << " buffer size " << buffer->size();
+    logdbg2 << "utn " << utn_ << " buffer size " << buffer->size();
     //assert (buffer->size());
 
     return buffer;

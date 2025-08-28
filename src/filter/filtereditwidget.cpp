@@ -160,7 +160,10 @@ FilterEditWidget::FilterEditWidget(DBFilter* filter, QWidget* parent)
     setLayout(layout);
 }
 
-FilterEditWidget::~FilterEditWidget() { logdbg << "FilterEditWidget: destructor"; }
+FilterEditWidget::~FilterEditWidget() 
+{
+     logdbg << "start"; 
+}
 
 void FilterEditWidget::addCondition()
 {
@@ -252,7 +255,7 @@ void FilterEditWidget::updateConditionsGrid()
 
     //  QLabel *unit_label = new QLabel ("Unit");
     //  unit_label->setFont (font_bold);
-    //  dbovars_grid_->addWidget (unit_label, 0, 5);
+    //  dbcontvars_grid_->addWidget (unit_label, 0, 5);
 
     std::vector<DBFilterCondition*>& conditions = filter_->getConditions();
 
@@ -272,7 +275,7 @@ void FilterEditWidget::updateConditionsGrid()
 
         TODO_ASSERT
 
-//        DBOVariableSelectionWidget* var_select = new DBOVariableSelectionWidget(true);
+//        DBContVariableSelectionWidget* var_select = new DBContVariableSelectionWidget(true);
 //        var_select->selectedVariable(*(*it)->getVariable());
 //        conditions_grid_->addWidget(var_select, row, 1);
 //        connect(var_select, SIGNAL(selectionChanged()), this, SLOT(changedConditionVariable()));
@@ -301,15 +304,15 @@ void FilterEditWidget::updateConditionsGrid()
         conditions_grid_->addWidget(resetbox, row, 4);
 
         //    PropertyDataTypeComboBox *type = new PropertyDataTypeComboBox (it->second);
-        //    dbo_vars_grid_data_type_boxes_[type] = it->second;
-        //    dbovars_grid_->addWidget (type, row, 3);
+        //    dbcont_vars_grid_data_type_boxes_[type] = it->second;
+        //    dbcontvars_grid_->addWidget (type, row, 3);
         //
         //    StringRepresentationComboBox *repr = new StringRepresentationComboBox (it->second);
-        //    dbo_vars_grid_representation_boxes_[repr] = it->second;
-        //    dbovars_grid_->addWidget (repr, row, 4);
+        //    dbcont_vars_grid_representation_boxes_[repr] = it->second;
+        //    dbcontvars_grid_->addWidget (repr, row, 4);
         //
         //    UnitSelectionWidget *unit_sel = new UnitSelectionWidget
-        //    (it->second->getUnitDimension(), it->second->getUnitUnit()); dbovars_grid_->addWidget
+        //    (it->second->getUnitDimension(), it->second->getUnitUnit()); dbcontvars_grid_->addWidget
         //    (unit_sel, row, 5);
         //
         //    unsigned col=6;
@@ -319,7 +322,7 @@ void FilterEditWidget::updateConditionsGrid()
         //        continue;
         //
         //      DBTableColumnComboBox *box = new DBTableColumnComboBox (sit->second->getName(),
-        //      metas[sit->second->getName()], it->second); dbovars_grid_->addWidget (box, row,
+        //      metas[sit->second->getName()], it->second); dbcontvars_grid_->addWidget (box, row,
         //      col); col++;
         //    }
         row++;
@@ -334,7 +337,7 @@ void FilterEditWidget::changedName()
 
 void FilterEditWidget::changedConditionVariable()
 {
-//    DBOVariableSelectionWidget* source = (DBOVariableSelectionWidget*)sender();
+//    DBContVariableSelectionWidget* source = (DBContVariableSelectionWidget*)sender();
 //    assert(conditions_variable_selects_.find(source) != conditions_variable_selects_.end());
 //    conditions_variable_selects_[source]->setVariable(&source->selectedVariable());
 

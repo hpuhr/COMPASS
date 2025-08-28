@@ -52,7 +52,7 @@ void Projection::getGroundRange(
 
 void Projection::addAllCoordinateSystems()
 {
-    loginf << "Projection: addAllCoordinateSystems: adding";
+    loginf << "adding";
 
     if (!coordinate_systems_added_)
     {
@@ -70,7 +70,7 @@ void Projection::addAllCoordinateSystems()
                 if (!ds_it->hasPosition())
                     continue;
 
-                loginf << "Projection: addAllCoordinateSystems: adding " << ds_it->name();
+                loginf << "adding " << ds_it->name();
                 addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());
             }
         }
@@ -82,7 +82,7 @@ void Projection::addAllCoordinateSystems()
                 if (!ds_it->hasPosition())
                     continue;
 
-                loginf << "Projection: addAllCoordinateSystems: adding " << ds_it->name();
+                loginf << "adding " << ds_it->name();
                 addCoordinateSystem(ds_it->id(), ds_it->latitude(), ds_it->longitude(), ds_it->altitude());
             }
         }

@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "reconstructortaskanalysiswidget.h"
 #include "reconstructortask.h"
 #include "stringconv.h"
@@ -152,7 +169,7 @@ ReconstructorTaskAnalysisWidget::~ReconstructorTaskAnalysisWidget()
 
 void ReconstructorTaskAnalysisWidget::updateValues()
 {
-    loginf << "ReconstructorTaskDebugWidget: updateValues";
+    loginf << "start";
 
     bool add_debug_stuff = !COMPASS::isAppImage() || COMPASS::instance().expertMode();
 
@@ -236,7 +253,7 @@ void ReconstructorTaskAnalysisWidget::updateValues()
 
 void ReconstructorTaskAnalysisWidget::utnsChangedSlot(const QString& value)
 {
-    loginf << "ReconstructorTaskDebugWidget: utnsChangedSlot: value '" << value.toStdString() << "'";
+    loginf << "value '" << value.toStdString() << "'";
 
     set<unsigned int> values_tmp;
     vector<string> split_str = String::split(value.toStdString(), ',');
@@ -249,7 +266,7 @@ void ReconstructorTaskAnalysisWidget::utnsChangedSlot(const QString& value)
 
         if (!ok)
         {
-            logerr << "ReconstructorTaskDebugWidget: utnsChangedSlot: utn '" << tmp_str << "' not valid";
+            logerr << "utn '" << tmp_str << "' not valid";
             break;
         }
 
@@ -261,7 +278,7 @@ void ReconstructorTaskAnalysisWidget::utnsChangedSlot(const QString& value)
 
 void ReconstructorTaskAnalysisWidget::recNumsChangedSlot(const QString& value)
 {
-    loginf << "ReconstructorTaskDebugWidget: recNumsChangedSlot: value '" << value.toStdString() << "'";
+    loginf << "value '" << value.toStdString() << "'";
 
     set<unsigned long> values_tmp;
     vector<string> split_str = String::split(value.toStdString(), ',');
@@ -274,7 +291,7 @@ void ReconstructorTaskAnalysisWidget::recNumsChangedSlot(const QString& value)
 
         if (!ok)
         {
-            logerr << "ReconstructorTaskDebugWidget: utnsChangedSlot: utn '" << tmp_str << "' not valid";
+            logerr << "utn '" << tmp_str << "' not valid";
             break;
         }
 
@@ -307,13 +324,13 @@ void ReconstructorTaskAnalysisWidget::timestampsChanged()
     task_.debugSettings().debug_timestamp_min_ = ts_min.has_value() ? ts_min.value() : boost::posix_time::ptime();
 
     if (ts_min.has_value())
-        loginf << "ReconstructorTaskDebugWidget: timestampsChanged: set ts min to "
+        loginf << "set ts min to "
                << Utils::Time::toString(ts_min.value());
 
     auto ts_max = checkTimestamp(timestamp_max_edit_);
     task_.debugSettings().debug_timestamp_max_ = ts_max.has_value() ? ts_max.value() : boost::posix_time::ptime();
 
     if (ts_max.has_value())
-        loginf << "ReconstructorTaskDebugWidget: timestampsChanged: set ts max to "
+        loginf << "set ts max to "
                << Utils::Time::toString(ts_max.value());
 }

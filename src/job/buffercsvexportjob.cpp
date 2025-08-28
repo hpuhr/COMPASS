@@ -42,7 +42,7 @@ BufferCSVExportJob::~BufferCSVExportJob() {}
 
 void BufferCSVExportJob::run_impl()
 {
-    logdbg << "BufferCSVExportJob: execute: start";
+    logdbg << "start";
     started_ = true;
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
@@ -323,16 +323,16 @@ void BufferCSVExportJob::run_impl()
         boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
         if (diff.total_seconds() > 0)
-            loginf << "BufferCSVExportJob: run: done after " << diff << ", "
+            loginf << "done after " << diff << ", "
                    << 1000.0 * row / diff.total_milliseconds() << " el/s";
     }
     else
     {
-        logerr << "BufferCSVExportJob: runFailure opening " << file_name_;
+        logerr << "failure opening " << file_name_;
     }
 
     done_ = true;
 
-    logdbg << "BufferCSVExportJob: execute: done";
+    logdbg << "done";
     return;
 }

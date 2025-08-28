@@ -199,7 +199,7 @@ Result DuckDBInstance::cleanupDB_impl(const std::string& db_fn)
 
     //compression successful => try to remove old file
     if (!QFile::remove(QString::fromStdString(fn_temp)))
-        logwrn << "DuckDBConnection: cleanupDB_impl: Could not remove intermediate database file";
+        logwrn << "Could not remove intermediate database file";
     
     duckdb_disconnect(&con);
     duckdb_close(&db);

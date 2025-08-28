@@ -50,7 +50,7 @@ ModeCCorrectConfigWidget::ModeCCorrectConfigWidget(ModeCCorrectConfig& cfg)
 
 void ModeCCorrectConfigWidget::distanceValueEditSlot(QString value)
 {
-    loginf << "ModeCCorrectConfigWidget: distanceValueEditSlot: value " << value.toStdString();
+    loginf << "value " << value.toStdString();
 
     bool ok;
     float val = value.toFloat(&ok);
@@ -58,7 +58,7 @@ void ModeCCorrectConfigWidget::distanceValueEditSlot(QString value)
     if (ok)
         config().maxDistanceFt(val);
     else
-        loginf << "ModeCCorrectConfigWidget: distanceValueEditSlot: invalid value";
+        loginf << "invalid value";
 }
 
 ModeCCorrectConfig& ModeCCorrectConfigWidget::config()

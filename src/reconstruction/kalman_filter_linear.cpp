@@ -1,4 +1,3 @@
-
 /*
  * This file is part of OpenATS COMPASS.
  *
@@ -88,8 +87,8 @@ bool KalmanFilterLinear::validateState(const kalman::KalmanState& s, bool xP_onl
     if (!KalmanFilter::validateState(s, xP_only))
         return false;
 
-    if (!xP_only && (s.F.cols() != dim_x_ ||
-                     s.F.rows() != dim_x_))
+    if (!xP_only && (static_cast<size_t>(s.F.cols()) != dim_x_ ||
+                     static_cast<size_t>(s.F.rows()) != dim_x_))
         return false;
 
     return true;
@@ -102,8 +101,8 @@ bool KalmanFilterLinear::validateState(const kalman::BasicKalmanState& s, bool x
     if (!KalmanFilter::validateState(s, xP_only))
         return false;
 
-    if (!xP_only && (s.F.cols() != dim_x_ ||
-                     s.F.rows() != dim_x_))
+    if (!xP_only && (static_cast<size_t>(s.F.cols()) != dim_x_ ||
+                     static_cast<size_t>(s.F.rows()) != dim_x_))
         return false;
 
     return true;
@@ -365,7 +364,7 @@ bool KalmanFilterLinear::smoothingStep_impl(Vector& x0_smooth,
 
     if (!Eigen::FullPivLU<Eigen::MatrixXd>(P1_pred).isInvertible())
     {
-        loginf << "KalmanFilterLinear: smoothingStep_impl: Could not invert P1_pred:\n" << P1_pred;
+        loginf << "Could not invert P1_pred:\n" << P1_pred;
         return false;
     }
 

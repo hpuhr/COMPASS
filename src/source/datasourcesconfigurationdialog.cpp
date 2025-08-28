@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "datasourcesconfigurationdialog.h"
 #include "datasourcetablemodel.h"
 #include "datasourceeditwidget.h"
@@ -139,7 +156,7 @@ void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& curren
 
     if (!current.isValid())
     {
-        loginf << "DataSourcesConfigurationDialog: currentRowChanged: invalid index";
+        loginf << "invalid index";
 
         edit_widget_->clear();
 
@@ -151,14 +168,14 @@ void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& curren
 
     unsigned int id = table_model_->getIdOf(source_index);
 
-    loginf << "DataSourcesConfigurationDialog: currentRowChanged: current id " << id;
+    loginf << "current id " << id;
 
     edit_widget_->showID(id);
 }
 
 void DataSourcesConfigurationDialog::newDSClickedSlot()
 {
-    loginf << "DataSourcesConfigurationDialog: newDSClickedSlot";
+    loginf << "start";
 
     create_dialog_.reset(new DataSourceCreateDialog(*this, ds_man_));
     connect(create_dialog_.get(), &DataSourceCreateDialog::doneSignal,
@@ -169,7 +186,7 @@ void DataSourcesConfigurationDialog::newDSClickedSlot()
 
 void DataSourcesConfigurationDialog::newDSDoneSlot()
 {
-    loginf << "DataSourcesConfigurationDialog: newDSDoneSlot";
+    loginf << "start";
 
     assert (create_dialog_);
 
@@ -180,7 +197,7 @@ void DataSourcesConfigurationDialog::newDSDoneSlot()
         unsigned int sac = create_dialog_->sac();
         unsigned int sic = create_dialog_->sic();
 
-        loginf << "DataSourcesConfigurationDialog: newDSDoneSlot: ds_type " << ds_type
+        loginf << "ds_type " << ds_type
                << " sac " << sac << " sic " << sic;
 
         unsigned int ds_id = Number::dsIdFrom(sac, sic);
@@ -209,7 +226,7 @@ void DataSourcesConfigurationDialog::newDSDoneSlot()
 
 void DataSourcesConfigurationDialog::importClickedSlot()
 {
-    loginf << "DataSourcesConfigurationDialog: importClickedSlot";
+    loginf << "start";
 
     string filename = QFileDialog::getOpenFileName(
                 this, "Import Data Sources",
@@ -238,7 +255,7 @@ void DataSourcesConfigurationDialog::deleteAllClickedSlot()
 
     if (reply == QMessageBox::Yes)
     {
-        loginf << "DataSourcesConfigurationDialog: deleteAllClickedSlot: deletion confirmed";
+        loginf << "deletion confirmed";
 
         table_model_->beginModelReset();
 
@@ -251,7 +268,7 @@ void DataSourcesConfigurationDialog::deleteAllClickedSlot()
 
 void DataSourcesConfigurationDialog::exportClickedSlot()
 {
-    loginf << "DataSourcesConfigurationDialog: exportClickedSlot";
+    loginf << "start";
 
     string filename = QFileDialog::getSaveFileName(
                 this, "Export Data Sources as JSON",
@@ -259,7 +276,7 @@ void DataSourcesConfigurationDialog::exportClickedSlot()
 
     if (filename.size() > 0)
     {
-        loginf << "DataSourcesConfigurationDialog: exportClickedSlot: file '" << filename << "'";
+        loginf << "file '" << filename << "'";
 
         ds_man_.exportDataSources(filename);
     }

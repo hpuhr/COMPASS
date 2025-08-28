@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "datasourceeditwidget.h"
 #include "datasourcemanager.h"
 #include "configurationdatasource.h"
@@ -408,7 +425,7 @@ void DataSourceEditWidget::showID(unsigned int ds_id)
     current_ds_id_ = ds_id;
     current_ds_in_db_ = ds_man_.hasDBDataSource(current_ds_id_);
 
-    loginf << "DataSourceEditWidget: showID: id " << ds_id << " in db " << current_ds_in_db_;
+    loginf << "id " << ds_id << " in db " << current_ds_in_db_;
 
     assert (ds_man_.hasConfigDataSource(current_ds_id_));
 
@@ -417,7 +434,7 @@ void DataSourceEditWidget::showID(unsigned int ds_id)
 
 void DataSourceEditWidget::clear()
 {
-    loginf << "DataSourceEditWidget: clear";
+    loginf << "start";
 
     has_current_ds_ = false;
     current_ds_id_ = 0;
@@ -431,7 +448,7 @@ void DataSourceEditWidget::nameEditedSlot(const QString& value)
 {
     string text = value.toStdString();
 
-    loginf << "DataSourceEditWidget: nameEditedSlot: '" << text << "'";
+    loginf << "'" << text << "'";
 
     if (!text.size())
     {
@@ -461,7 +478,7 @@ void DataSourceEditWidget::shortNameEditedSlot(const QString& value)
 {
     string text = value.toStdString();
 
-    loginf << "DataSourceEditWidget: shortNameEditedSlot: '" << text << "'";
+    loginf << "'" << text << "'";
 
     assert (has_current_ds_);
 
@@ -481,7 +498,7 @@ void DataSourceEditWidget::dsTypeEditedSlot(const QString& value)
 {
     string text = value.toStdString();
 
-    loginf << "DataSourceEditWidget: dsTypeEditedSlot: '" << text << "'";
+    loginf << "'" << text << "'";
 
     assert (has_current_ds_);
 
@@ -503,7 +520,7 @@ void DataSourceEditWidget::updateIntervalEditedSlot(const QString& value_str)
 {
     string text = value_str.toStdString();
 
-    loginf << "DataSourceEditWidget: updateIntervalEditedSlot: '" << text << "'";
+    loginf << "'" << text << "'";
 
     if (!value_str.size()) // remove if empty
     {
@@ -571,7 +588,7 @@ void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
         }
     }
 
-    loginf << "DataSourceEditWidget: latitudeEditedSlot: '" << value << "' ok " << ok;
+    loginf << "'" << value << "' ok " << ok;
 
     if (!ok)
         return;
@@ -603,7 +620,7 @@ void DataSourceEditWidget::longitudeEditedSlot(const QString& value_str)
         }
     }
 
-    loginf << "DataSourceEditWidget: longitudeEditedSlot: '" << value << "'";
+    loginf << "'" << value << "'";
 
     if (current_ds_in_db_)
     {
@@ -619,7 +636,7 @@ void DataSourceEditWidget::altitudeEditedSlot(const QString& value_str)
 {
     double value = value_str.toDouble();
 
-    loginf << "DataSourceEditWidget: altitudeEditedSlot: '" << value << "'";
+    loginf << "'" << value << "'";
 
     if (current_ds_in_db_)
     {
@@ -633,7 +650,7 @@ void DataSourceEditWidget::altitudeEditedSlot(const QString& value_str)
 
 void DataSourceEditWidget::addRadarRangesSlot()
 {
-    loginf << "DataSourceEditWidget: addRadarRangesSlot";
+    loginf << "start";
 
     assert (has_current_ds_);
 
@@ -659,7 +676,7 @@ void DataSourceEditWidget::radarRangeEditedSlot(const QString& value_str)
     if (!value_str.size() || value_str.toDouble() == 0)
     {
         // remove key
-        loginf << "DataSourceEditWidget: radarRangeEditedSlot: removing key '" << key << "'";
+        loginf << "removing key '" << key << "'";
 
         if (current_ds_in_db_)
         {
@@ -675,7 +692,7 @@ void DataSourceEditWidget::radarRangeEditedSlot(const QString& value_str)
 
     double value = value_str.toDouble();
 
-    loginf << "DataSourceEditWidget: radarRangeEditedSlot: key '" << key << "' value '" << value << "'";
+    loginf << "key '" << key << "' value '" << value << "'";
 
     if (current_ds_in_db_)
     {
@@ -689,7 +706,7 @@ void DataSourceEditWidget::radarRangeEditedSlot(const QString& value_str)
 
 void DataSourceEditWidget::addRadarAccuraciesSlot()
 {
-    loginf << "DataSourceEditWidget: addRadarAccuraciesSlot";
+    loginf << "start";
 
     assert (has_current_ds_);
 
@@ -714,7 +731,7 @@ void DataSourceEditWidget::radarAccuraciesEditedSlot(const QString& value_str)
 
     string key = line_edit->property("key").toString().toStdString();
 
-    loginf << "DataSourceEditWidget: radarAccuraciesEditedSlot: key '" << key << "' value '" << value << "'";
+    loginf << "key '" << key << "' value '" << value << "'";
 
     if (current_ds_in_db_)
     {
@@ -728,7 +745,7 @@ void DataSourceEditWidget::radarAccuraciesEditedSlot(const QString& value_str)
 
 void DataSourceEditWidget::addNetLinesSlot()
 {
-    loginf << "DataSourceEditWidget: addNetLinesSlot";
+    loginf << "start";
 
     assert (has_current_ds_);
 
@@ -761,7 +778,7 @@ void DataSourceEditWidget::netLineEditedSlot(const QString& value_str)
     {
         string value = value_str.toStdString();
 
-        loginf << "DataSourceEditWidget: netLineEditedSlot: " << line_id << " " << item << " ip '" << value << "'";
+        loginf << "start" << line_id << " " << item << " ip '" << value << "'";
 
         if (current_ds_in_db_)
             assert (ds_man_.hasDBDataSource(current_ds_id_));
@@ -794,7 +811,7 @@ void DataSourceEditWidget::netLineEditedSlot(const QString& value_str)
     {
         unsigned int value = value_str.toUInt();
 
-        loginf << "DataSourceEditWidget: netLineEditedSlot: " << line_id << " " << item << " port '" << value << "'";
+        loginf << "start" << line_id << " " << item << " port '" << value << "'";
 
         if (current_ds_in_db_)
             assert (ds_man_.hasDBDataSource(current_ds_id_));
@@ -812,7 +829,7 @@ void DataSourceEditWidget::netLineEditedSlot(const QString& value_str)
 
 void DataSourceEditWidget::deleteSlot()
 {
-    loginf << "DataSourceEditWidget: deleteSlot";
+    loginf << "start";
 
     assert (has_current_ds_);
     assert (!current_ds_in_db_);
@@ -917,7 +934,7 @@ void DataSourceEditWidget::updateContent()
         auto current_type = ds->detectionType();
         detection_type_combo_->setCurrentIndex((int) current_type);
 
-        loginf << "DataSourceEditWidget: updateContent: ds_type " << ds->dsType()
+        loginf << "ds_type " << ds->dsType()
                << " has pos " << ds->hasPosition();
 
         // position

@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "datasourcecompoundcoverage.h"
 #include "logger.h"
 
@@ -31,7 +48,7 @@ bool DataSourceCompoundCoverage::isInside (double pos_lat, double pos_long) cons
     // if no info, true
     if (!range_circles_cs_.size())
     {
-        logdbg << "DataSourceCompoundCoverage: isInside: no circ, true";
+        logdbg << "no circ, true";
 
         return true;
     }
@@ -49,15 +66,15 @@ bool DataSourceCompoundCoverage::isInside (double pos_lat, double pos_long) cons
 
         if (pos_rng_m <= rng_circ.second)
         {
-            logdbg << "DataSourceCompoundCoverage: isInside: inside circ, true";
+            logdbg << "inside circ, true";
             return true;
         }
         else
-            logdbg << "DataSourceCompoundCoverage: isInside: outside circ, range "
+            logdbg << "outside circ, range "
                    << pos_rng_m << " max " << rng_circ.second << ", false";
     }
 
-    logdbg << "DataSourceCompoundCoverage: isInside: not inside any circ, false";
+    logdbg << "not inside any circ, false";
     return false;
 }
 

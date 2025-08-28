@@ -119,26 +119,28 @@ void SectionContentFigure::addContentUI(QVBoxLayout* layout,
 
 /**
  */
-void SectionContentFigure::view() const
+bool SectionContentFigure::view(bool load_blocking) const
 {
-    loginf << "SectionContentFigure: view: viewing figure '" << name() << "'";
+    loginf << "viewing figure '" << name() << "'";
 
     if (isLocked())
     {
-        loginf << "SectionContentFigure: view: on-demand figure is locked";
-        return;
+        loginf << "on-demand figure is locked";
+        return false;
     }
 
     auto content = viewableContent();
     if (!content || content->empty())
     {
-        loginf << "SectionContentFigure: view: no content";
+        loginf << "no content";
         report_->unsetCurrentViewable();
-        return;
+        return false;
     }
 
     //view content
-    report_->setCurrentViewable(*content);
+    report_->setCurrentViewable(*content, load_blocking);
+
+    return true;
 }
 
 /**
@@ -216,7 +218,7 @@ bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
         !j.contains(FieldRenderDelayMSec) ||
         !j.contains(FieldViewable))
     {
-        logerr << "SectionContentFigure: fromJSON: Error: Section content figure does not obtain needed fields";
+        logerr << "section content figure does not obtain needed fields";
         return false;
     }
 
@@ -270,7 +272,8 @@ ResultT<std::vector<SectionContentFigure::ImageResource>> SectionContentFigure::
 /**
  */
 Result SectionContentFigure::toJSONDocument_impl(nlohmann::json& j,
-                                                 const std::string* resource_dir) const
+                                                 const std::string* resource_dir,
+                                                 ReportExportMode export_style) const
 {
     j = nlohmann::json::array();
 
@@ -281,7 +284,7 @@ Result SectionContentFigure::toJSONDocument_impl(nlohmann::json& j,
     for (const auto& r : resources.result())
     {
         nlohmann::json j_fig;
-        SectionContent::toJSONDocument_impl(j_fig, resource_dir);
+        SectionContent::toJSONDocument_impl(j_fig, resource_dir, export_style);
 
         if (resource_dir)
         {

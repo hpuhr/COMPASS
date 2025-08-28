@@ -403,7 +403,7 @@ void KalmanEstimator::storeUpdate(Measurement& mm,
                            &update.projection_center);
     }
 
-    //loginf << "KalmanEstimator: storeUpdate: (" << update.projection_center.x() << "," << update.projection_center.y() << ") "
+    //loginf << "(" << update.projection_center.x() << "," << update.projection_center.y() << ") "
     //                                            << mm.x << "," << mm.y << " => " << mm.lat << "," << mm.lon;
 }
 
@@ -570,7 +570,7 @@ void KalmanEstimator::kalmanInit(kalman::KalmanUpdate& update,
     bool kalman_update_check = checkState(update);
     if (!kalman_update_check)
     {
-        logerr << "KalmanEstimator: kalmanInit: init from mm yielded nan\n\n"
+        logerr << "init from mm yielded nan\n\n"
                << update.state.print() << "\n"
                << mm.asString() << "\n";
         assert(kalman_update_check);
@@ -597,7 +597,7 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdate& update)
     bool kalman_update_check = checkState(update);
     if (!kalman_update_check)
     {
-        logerr << "KalmanEstimator: kalmanInit: init from update yielded nan\n\n"
+        logerr << "init from update yielded nan\n\n"
                << update.state.print() << "\n";
         assert(kalman_update_check);
     }
@@ -623,7 +623,7 @@ void KalmanEstimator::kalmanInit(const kalman::KalmanUpdateMinimal& update)
     bool kalman_update_check = checkState(update);
     if (!kalman_update_check)
     {
-        logerr << "KalmanEstimator: kalmanInit: init from minimal update yielded nan\n\n"
+        logerr << "init from minimal update yielded nan\n\n"
                << update.x << "\n"
                << update.P << "\n"
                << update.t << "\n"
@@ -679,7 +679,7 @@ void KalmanEstimator::kalmanInterfaceReinit(kalman::KalmanUpdate& update,
                                             const Measurement& mm)
 {
     if (settings_.verbosity > 0)
-        loginf << "KalmanEstimator: reinit: Reinitializing kalman filter at t = " << mm.t;
+        loginf << "reinitializing kalman filter at t = " << mm.t;
 
     //reinit kalman state
     kalman_interface_->kalmanInit(update.state, mm, defaultUncert(mm), settings_.Q_var);
@@ -698,7 +698,7 @@ kalman::KalmanError KalmanEstimator::kalmanInterfaceStep(kalman::KalmanUpdate& u
     if (err != kalman::KalmanError::NoError)
     {
         if (settings_.verbosity > 0)
-            logwrn << "KalmanEstimator: step: Kalman step failed @ t=" << mm.t << " (ErrCode" << (int)err << ")";
+            logwrn << "kalman step failed @ t=" << mm.t << " (ErrCode" << (int)err << ")";
         return err;
     }
 
@@ -734,7 +734,7 @@ void KalmanEstimator::checkProjection(kalman::KalmanUpdate& update)
         kalman_interface_->stateVecX(update.state);
 
         if (settings_.verbosity > 1)
-            loginf << "Changed map projection @t=" << update.t;
+            loginf << "rhanged map projection @t=" << update.t;
 
         step_info_.proj_changed = true;
         update.proj_changed = true;
@@ -803,7 +803,7 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
     if (tstep < settings_.min_dt)
     {
         if (settings_.verbosity > 0)
-            logwrn << "KalmanEstimator: kalmanStep: step " << kalman_interface_->timestep(mm) << " too small (<" << settings_.min_dt << "), skipping...";
+            logwrn << "step " << kalman_interface_->timestep(mm) << " too small (<" << settings_.min_dt << "), skipping...";
         return KalmanEstimator::StepResult::FailStepTooSmall;
     }
 
@@ -826,7 +826,7 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
         if (!update_ok)
         {
             if (settings_.verbosity > 0)
-                logwrn << "KalmanEstimator: kalmanStep: step failed";
+                logwrn << "step failed";
 
             KalmanEstimator::StepResult result = !kalman_step_ok ? KalmanEstimator::StepResult::FailKalmanError :
                                                                    KalmanEstimator::StepResult::FailResultInvalid;
@@ -834,7 +834,7 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
             //kalman_interface_->printState();
 
             //print mm
-            //loginf << "KalmanEstimator: kalmanStep: could not integrate measurement:\n" << mm.toString();
+            //loginf << "could not integrate measurement:\n" << mm.toString();
 
             //!note: the interface should always revert to the old state if a step fails!
             //!we thus assume that the last state is fully intact!
@@ -863,7 +863,7 @@ KalmanEstimator::StepResult KalmanEstimator::kalmanStepInternal(kalman::KalmanUp
     bool kalman_update_check = checkState(update);
     if (!kalman_update_check)
     {
-        logerr << "KalmanEstimator: kalmanStepInternal: step yielded nan for dt = " << tstep << "\n\n"
+        logerr << "step yielded nan for dt = " << tstep << "\n\n"
                << kalman_interface_->asString(kalman::KalmanInfoFlags::InfoAll) << "\n"
                << update.state.print() << "\n";
         assert(kalman_update_check);
@@ -954,7 +954,7 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
     bool kalman_prediction_check = checkPrediction(mm);
     if (!kalman_prediction_check)
     {
-        logerr << "KalmanEstimator: kalmanPrediction: prediction yielded nan for dt = " << dt << "\n\n"
+        logerr << "prediction yielded nan for dt = " << dt << "\n\n"
                << kalman_interface_->asString(kalman::KalmanInfoFlags::InfoAll) << "\n";
         assert(kalman_prediction_check);
     }
@@ -1008,7 +1008,7 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
         logerr << "STATE x = \n" << state.x << "\n"
                << "STATE P = \n" << state.P;
 
-        logerr << "KalmanEstimator: kalmanPrediction: prediction yielded nan\n\n"
+        logerr << "prediction yielded nan\n\n"
                << "ts_cur: " << Utils::Time::toString(kalman_interface_->currentTime()) << "\n"
                << "ts:     " << Utils::Time::toString(ts) << "\n"
                << "dt:     " << KalmanInterface::timestep(kalman_interface_->currentTime(), ts) << "\n"
@@ -1106,7 +1106,7 @@ kalman::KalmanError KalmanEstimator::kalmanPrediction(Measurement& mm,
     bool kalman_prediction_check = checkPrediction(mm);
     if (!kalman_prediction_check)
     {
-        logerr << "KalmanEstimator: kalmanPrediction: prediction yielded nan in interval\n\n"
+        logerr << "prediction yielded nan in interval\n\n"
                << "t0: " << Utils::Time::toString(ref_update0.t) << "\n"
                << "t1: " << Utils::Time::toString(ref_update1.t) << "\n"
                << "ts: " << Utils::Time::toString(ts)            << "\n"
@@ -1339,7 +1339,7 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
         double Q_var1 = update1.Q_var_interp.has_value() ? update1.Q_var_interp.value() : Q_var;
 
         //if (settings_.debug)
-        //    loginf << "KalmanEstimator: interpUpdates: interpolating using Q_var " << Q_var0 << " / " << Q_var1; 
+        //    loginf << "interpolating using Q_var " << Q_var0 << " / " << Q_var1; 
 
         auto t0 = update0.t;
         auto t1 = update1.t;
@@ -1423,7 +1423,7 @@ bool KalmanEstimator::interpUpdates(std::vector<kalman::KalmanUpdate>& interp_up
         *num_steps_failed += failed_steps;
 
     if (settings_.verbosity >= 1 && small_intervals > 0)
-        logdbg << "KalmanEstimator: interpUpdates: Encountered " << small_intervals << " small interval(s) during resampling";
+        logdbg << "encountered " << small_intervals << " small interval(s) during resampling";
 
     if (interp_updates.size() >= 2)
     {

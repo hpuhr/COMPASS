@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "dbcontent/variable/metavariabledetailwidget.h"
 #include "dbcontent/variable/metavariable.h"
 #include "dbcontent/dbcontentmanager.h"
@@ -16,8 +33,8 @@ using namespace std;
 namespace dbContent
 {
 
-MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbo_man, QWidget *parent)
-    : QWidget(parent), dbo_man_(dbo_man)
+MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbcont_man, QWidget *parent)
+    : QWidget(parent), dbcont_man_(dbcont_man)
 {
     QVBoxLayout* main_layout = new QVBoxLayout();
 
@@ -35,7 +52,7 @@ MetaVariableDetailWidget::MetaVariableDetailWidget(DBContentManager& dbo_man, QW
 
     form_layout->addRow("Comment", description_edit_);
 
-    for (auto dbcont_it = dbo_man_.begin(); dbcont_it != dbo_man_.end(); ++dbcont_it)
+    for (auto dbcont_it = dbcont_man_.begin(); dbcont_it != dbcont_man_.end(); ++dbcont_it)
     {
         VariableSelectionWidget* var_sel = new VariableSelectionWidget(true);
         var_sel->showDBContentOnly(dbcont_it->first);
@@ -68,7 +85,7 @@ void MetaVariableDetailWidget::show (MetaVariable& meta_var)
 {
     bool expert_mode = COMPASS::instance().expertMode();
 
-    loginf << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "' expert_mode " << expert_mode;
+    loginf << "var '" << meta_var.name() << "' expert_mode " << expert_mode;
 
     has_current_entry_ = true;
     meta_var_ = &meta_var;
@@ -81,7 +98,7 @@ void MetaVariableDetailWidget::show (MetaVariable& meta_var)
 
     for (auto& sel_it : selection_widgets_)
     {
-        logdbg << "MetaVariableDetailWidget: show: var '" << meta_var.name() << "' exists in " << sel_it.first
+        logdbg << "var '" << meta_var.name() << "' exists in " << sel_it.first
                << " " << meta_var.existsIn(sel_it.first);
 
         if (meta_var.existsIn(sel_it.first))
@@ -125,17 +142,17 @@ void MetaVariableDetailWidget::nameEditedSlot()
 
     string new_name = name_edit_->text().toStdString();
 
-    loginf << "MetaVariableDetailWidget: nameEditedSlot: name '" << new_name << "'";
+    loginf << "name '" << new_name << "'";
 
     assert (has_current_entry_);
     assert (meta_var_);
 
-    dbo_man_.renameMetaVariable(meta_var_->name(), new_name);
+    dbcont_man_.renameMetaVariable(meta_var_->name(), new_name);
 }
 
 void MetaVariableDetailWidget::variableChangedSlot()
 {
-    loginf << "MetaVariableDetailWidget: variableChangedSlot";
+    loginf << "start";
 
     if (!has_current_entry_)
         return;
@@ -150,12 +167,12 @@ void MetaVariableDetailWidget::variableChangedSlot()
 
 void MetaVariableDetailWidget::deleteVariableSlot()
 {
-    loginf << "MetaVariableDetailWidget: deleteVariableSlot";
+    loginf << "start";
 
     assert (has_current_entry_);
     assert (meta_var_);
 
-    dbo_man_.deleteMetaVariable(meta_var_->name());
+    dbcont_man_.deleteMetaVariable(meta_var_->name());
 }
 
 }

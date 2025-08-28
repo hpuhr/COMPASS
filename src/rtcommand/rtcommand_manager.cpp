@@ -1,4 +1,21 @@
-﻿#include "rtcommand_manager.h"
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "rtcommand_manager.h"
 #include "rtcommand_string.h"
 #include "rtcommand_runner.h"
 #include "tcpserver.h"
@@ -29,7 +46,7 @@ const std::string RTCommandManager::PingName = "ping";
 RTCommandManager::RTCommandManager()
     : Configurable("RTCommandManager", "RTCommandManager0", 0, "rtcommand.json")
 {
-    loginf << "JobManager: constructor";
+    loginf << "start";
 
     registerParameter("port_num", &port_num_, 27960u);
     registerParameter("db_file_list", &command_backlog_, nlohmann::json::array());
@@ -37,15 +54,18 @@ RTCommandManager::RTCommandManager()
 
 /**
  */
-RTCommandManager::~RTCommandManager() { loginf << "JobManager: destructor"; }
+RTCommandManager::~RTCommandManager() 
+{
+     loginf << "start"; 
+}
 
 /**
  */
 void RTCommandManager::run()
 {
-    loginf<< "RTCommandManager: run: start";
+    loginf << "start";
 
-    loginf<< "RTCommandManager: run: io context";
+    loginf << "io context";
 
     boost::asio::io_context io_context;
 
@@ -53,7 +73,7 @@ void RTCommandManager::run()
 
     if (open_port_)
     {
-        loginf<< "RTCommandManager: run: running io context for rt command port";
+        loginf << "running io context for rt command port";
 
         server_.reset(new TCPServer (io_context, port_num_));
         server_->start();
@@ -62,7 +82,7 @@ void RTCommandManager::run()
         t.detach();
     }
 
-    loginf<< "RTCommandManager: run: starting loop";
+    loginf << "starting loop";
 
     while (1)
     {
@@ -76,12 +96,13 @@ void RTCommandManager::run()
         {
             if (open_port_ && server_ && server_->hasSession() && server_->hasStrData())
             {
-                logdbg << "RTCommandManager: run: getting commands";
+                logdbg << "getting commands";
+
 
                 std::vector<std::string> cmds = server_->getStrData();
 
-                loginf << "RTCommandManager: run: got " << cmds.size() << " commands '"
-                       << String::compress(cmds, ';') << "'";
+                loginf << "got " << cmds.size() << " commands '"
+                  << String::compress(cmds, ';') << "'";
 
                 // create commands from strings
                 for (const auto& cmd_str : cmds)
@@ -89,9 +110,8 @@ void RTCommandManager::run()
                     auto issue_info = addCommand(cmd_str, Source::Server);
                     rtcommand::RTCommandResponse cmd_response(issue_info);
 
-                    if (issue_info.issued)
-                        loginf << "RTCommandManager: run: added command " << cmd_str
-                               << " to queue, size " << command_queue_.size();
+                if (issue_info.issued)
+                    loginf << "added command " << cmd_str << " to queue, size " << command_queue_.size();
 
                     server_->sendStrData(cmd_response.toJSONString());
                 }
@@ -99,9 +119,10 @@ void RTCommandManager::run()
 
             // do commands
 
+
             if (command_queue_.size())
             {
-                loginf << "RTCommandManager: run: issuing command";
+                loginf << "issuing command";
 
                 rtcommand::RTCommandRunner& cmd_runner = COMPASS::instance().rtCmdRunner();
 
@@ -120,7 +141,8 @@ void RTCommandManager::run()
                     command_queue_.pop();
                 }
 
-                loginf << "RTCommandManager: run: waiting for result";
+ 
+                 loginf << "waiting for result";
 
                 current_result.wait();
 
@@ -130,9 +152,8 @@ void RTCommandManager::run()
                 rtcommand::RTCommandResult cmd_result = results.at(0);
                 rtcommand::RTCommandResponse cmd_response(cmd_result);
 
-                loginf << "RTCommandManager: run: result wait done, success "
-                       << cmd_response.isOk();
-                loginf << "RTCommandManager: run: response = ";
+                loginf << "result wait done, success " << cmd_response.isOk();
+                loginf << "response = ";
                 loginf << cmd_response.toJSONString();
 
                 if (source == Source::Application)
@@ -173,7 +194,7 @@ void RTCommandManager::run()
     }
 
     stopped_ = true;
-    loginf << "RTCommandManager: run: stopped";
+    loginf << "stopped";
 }
 
 void RTCommandManager::startCommandProcessing()
@@ -186,7 +207,7 @@ void RTCommandManager::startCommandProcessing()
  */
 void RTCommandManager::shutdown()
 {
-    loginf << "RTCommandManager: shutdown";
+    loginf << "start";
 
     stop_requested_ = true;
 
@@ -202,7 +223,7 @@ void RTCommandManager::shutdown()
 
     //    while (hasAnyJobs())
     //    {
-    //        loginf << "JobManager: shutdown: waiting on jobs to finish: db " << hasDBJobs()
+    //        loginf << "waiting on jobs to finish: db " << hasDBJobs()
     //               << " blocking " << hasBlockingJobs() << " non-locking " << hasNonBlockingJobs();
 
     //        msleep(1000);
@@ -213,7 +234,8 @@ void RTCommandManager::shutdown()
         if (!started_)
             stopped_ = true;
 
-        loginf << "RTCommandManager: shutdown: waiting on run stop";
+        loginf << "waiting on run stop";
+
         msleep(1000);
     }
 
@@ -222,7 +244,7 @@ void RTCommandManager::shutdown()
     //    assert(!active_blocking_job_);
     //    assert(blocking_jobs_.empty());
 
-    loginf << "RTCommandManager: shutdown: done";
+    loginf << "done";
 }
 
 /**
@@ -289,7 +311,7 @@ rtcommand::IssueInfo RTCommandManager::addCommand(const std::string& cmd_str, So
 
     rtcommand::RTCommandResponse response(issue_result.second);
 
-    loginf << "RTCommandManager: addCommand: response = ";
+    loginf << "response = ";
     loginf << response.toJSONString();
 
     //if issue went well push to command queue

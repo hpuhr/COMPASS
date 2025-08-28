@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "asterixtimestampcalculator.h"
 #include "compass.h"
 #include "buffer.h"
@@ -35,7 +52,7 @@ void ASTERIXTimestampCalculator::calculate(
                bool override_tod_active, float override_tod_offset,
                bool ignore_time_jumps, bool do_timestamp_checks)
 {
-    logdbg << "ASTERIXTimestampCalculator: calculate";
+    logdbg << "start";
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -45,12 +62,12 @@ void ASTERIXTimestampCalculator::calculate(
 
     if (prev_source_name_ != source_name && source_name != "File ''") // new file
     {
-        loginf << "ASTERIXTimestampCalculator: calculate: current data source name changed, '"
+        loginf << "current data source name changed, '"
                << prev_source_name_ << "' to '" << source_name << "'";
 
         if (reset_date_between_files)
         {
-            loginf << "ASTERIXTimestampCalculator: calculate: resetting date";
+            loginf << "resetting date";
             resetDateInfo();
         }
 
@@ -83,13 +100,13 @@ void ASTERIXTimestampCalculator::calculate(
     doTimeStampCalculation(ignore_time_jumps);
 
     boost::posix_time::time_duration time_diff = boost::posix_time::microsec_clock::local_time() - start_time;
-    logdbg << "ASTERIXTimestampCalculator: calculate: done after "
+    logdbg << "done after "
            << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, true);
 }
 
 std::map<std::string, std::shared_ptr<Buffer>> ASTERIXTimestampCalculator::buffers()
 {
-    logdbg << "ASTERIXTimestampCalculator: buffers";
+    logdbg << "start";
     assert (processing_);
 
     return std::move(buffers_);
@@ -182,7 +199,7 @@ void ASTERIXTimestampCalculator::doADSBTimeProcessing()
 
 void ASTERIXTimestampCalculator::doTodOverride(float override_tod_offset)
 {
-    loginf << "ASTERIXTimestampCalculator: doTodOverride: offset "
+    loginf << "offset "
            << String::doubleToStringPrecision(override_tod_offset, 3);
 
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
@@ -248,7 +265,7 @@ void ASTERIXTimestampCalculator::doFutureTimestampsCheck()
     for (auto& buf_it : buffers_)
         cnt += buf_it.second->size();
 
-    logdbg << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: maximum time is "
+    logdbg << "maximum time is "
            << String::timeStringFromDouble(tod_utc_max) << " 24h vicinity " << in_vicinity_of_24h_time
            << " buf size " << cnt;
 
@@ -269,7 +286,7 @@ void ASTERIXTimestampCalculator::doFutureTimestampsCheck()
         std::tuple<bool,float,float> min_max_tod = tod_vec.minMaxValues();
 
         if (get<0>(min_max_tod))
-            logdbg << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: " << buf_it.first
+            logdbg << "start" << buf_it.first
                    << " min tod " << String::timeStringFromDouble(get<1>(min_max_tod))
                    << " max " << String::timeStringFromDouble(get<2>(min_max_tod));
 
@@ -282,7 +299,7 @@ void ASTERIXTimestampCalculator::doFutureTimestampsCheck()
                     // not at end of day and bigger than max
                     if (tod_vec.get(index) < (tod_24h - T24H_OFFSET) && tod_vec.get(index) > tod_utc_max)
                     {
-                        logwrn << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: vic doing " << buf_it.first
+                        logwrn << "vic doing " << buf_it.first
                                << " cutoff tod index " << index
                                << " tod " << String::timeStringFromDouble(tod_vec.get(index));
 
@@ -294,7 +311,7 @@ void ASTERIXTimestampCalculator::doFutureTimestampsCheck()
                 {
                     if (tod_vec.get(index) > tod_utc_max)
                     {
-                        logwrn << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: doing " << buf_it.first
+                        logwrn << "doing " << buf_it.first
                                << " cutoff tod index " << index
                                << " tod " << String::timeStringFromDouble(tod_vec.get(index));
 
@@ -319,7 +336,7 @@ void ASTERIXTimestampCalculator::doFutureTimestampsCheck()
     for (auto& buf_it : buffers_)
         cnt += buf_it.second->size();
 
-    logdbg << "ASTERIXTimestampCalculator: doFutureTimestampsCheck: buf size " << cnt;
+    logdbg << "buf size " << cnt;
 }
 
 void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
@@ -368,7 +385,7 @@ void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
 
                 if (tod < 0 || tod > tod_24h)
                 {
-                    logwrn << "ASTERIXTimestampCalculator: doTimeStampCalculation: impossible tod "
+                    logwrn << "impossible tod "
                            << String::timeStringFromDouble(tod);
                     continue;
                 }
@@ -385,14 +402,14 @@ void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
                     outside_vicinity_of_24h_time = tod >= not_close_to_midgnight_offset_s;
 
                 if (in_vicinity_of_24h_time)
-                    logdbg << "ASTERIXTimestampCalculator: doTimeStampCalculation: tod "
+                    logdbg << "tod "
                            << String::timeStringFromDouble(tod)
                            << " in 24h vicinity, had_late_time_ " << had_late_time_
                            << " did_recent_time_jump " << did_recent_time_jump_;
 
                 if (did_recent_time_jump_ && outside_vicinity_of_24h_time) // clear if set and 10min outside again
                 {
-                    loginf << "ASTERIXTimestampCalculator: doTimeStampCalculation: clearing did_recent_time_jump_";
+                    loginf << "clearing did_recent_time_jump_";
                     did_recent_time_jump_ = false;
                 }
 
@@ -406,7 +423,7 @@ void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
                         current_date_ += boost::posix_time::seconds((unsigned int) tod_24h);
                         previous_date_ = current_date_ - boost::posix_time::seconds((unsigned int) tod_24h);
 
-                        loginf << "ASTERIXTimestampCalculator: doTimeStampCalculation: tod "
+                        loginf << "tod "
                                << String::timeStringFromDouble(tod)
                                << " detected time-jump from previous " << Time::toDateString(previous_date_)
                                << " to current " << Time::toDateString(current_date_);
@@ -430,7 +447,7 @@ void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
                 }
 
                 if (in_vicinity_of_24h_time)
-                    logdbg << "ASTERIXTimestampCalculator: doTimeStampCalculation: tod "
+                    logdbg << "tod "
                            << String::timeStringFromDouble(tod)
                            << " timestamp " << Time::toString(timestamp);
 
@@ -440,7 +457,7 @@ void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
                     had_late_time_ = false;
                 }
 
-                logdbg << "ASTERIXTimestampCalculator: doTimeStampCalculation: tod "
+                logdbg << "tod "
                        << String::timeStringFromDouble(tod)
                        << " ts " << Time::toString(timestamp);
 
@@ -468,7 +485,7 @@ void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
 
                 if (tod - last_reported_tod_ >= 3600) // 1h
                 {
-                    loginf << "ASTERIXTimestampCalculator: doTimeStampCalculation: processing tod "
+                    loginf << "processing tod "
                            << String::timeStringFromDouble(tod);
                     last_reported_tod_ = tod;
                 }
@@ -482,7 +499,7 @@ void ASTERIXTimestampCalculator::doTimeStampCalculation(bool ignore_time_jumps)
 
 void ASTERIXTimestampCalculator::setProcessingDone()
 {
-    logdbg << "ASTERIXTimestampCalculator: setProcessingDone";
+    logdbg << "start";
 
     assert (!buffers_.size());
     assert (processing_);
@@ -512,7 +529,7 @@ void ASTERIXTimestampCalculator::resetDateInfo()
 
 void ASTERIXTimestampCalculator::clearTimeStats()
 {
-    logdbg << "ASTERIXTimestampCalculator: clearTimeJumpStats";
+    logdbg << "start";
 
     first_time_ = true;
     timestamp_first_ = {};

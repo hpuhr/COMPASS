@@ -21,6 +21,7 @@
 
 #include "view/gridview/grid2d.h"
 #include "view/gridview/grid2dlayer.h"
+#include "view/gridview/grid2drendersettings.h"
 
 #include <vector>
 
@@ -200,7 +201,7 @@ public:
     std::string sumSectionName() const override final;
 
     static const std::string TRDetailsTableName;
-    
+    static const std::string TRDetailsOverviewTableName;
     static const std::string TargetOverviewID;
 
     static const int AnnotationPointSizeOverview;

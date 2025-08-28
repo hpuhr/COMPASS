@@ -40,7 +40,7 @@ DBReader::DBReader()
 DBReader::~DBReader()
 {
     if (ready_)
-        logerr << "DBReader: ~DBReader: finish not called";
+        logerr << "finish not called";
     assert(!ready_);
 }
 

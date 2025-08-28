@@ -62,7 +62,7 @@ void SimpleConfig::loadFile()
     }
     catch (json::exception& e)
     {
-        logerr << "SimpleConfig: loadFile: could not load file '" << config_path << "'";
+        logerr << "could not load file '" << config_path << "'";
         throw e;
     }
 

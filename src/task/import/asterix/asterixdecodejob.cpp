@@ -44,7 +44,7 @@ ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task,
     decoder_     (task.decoder()),
     post_process_(post_process)
 {
-    logdbg << "ASTERIXDecodeJob: ctor";
+    logdbg << "start";
 
     assert(decoder_);
 }
@@ -53,7 +53,7 @@ ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task,
 */
 ASTERIXDecodeJob::~ASTERIXDecodeJob()
 {
-    loginf << "ASTERIXDecodeJob: dtor";
+    loginf << "start";
     assert (done_);
 }
 
@@ -61,7 +61,7 @@ ASTERIXDecodeJob::~ASTERIXDecodeJob()
 */
 void ASTERIXDecodeJob::run_impl()
 {
-    loginf << "ASTERIXDecodeJob: run";
+    loginf << "start";
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
     started_    = true;
@@ -72,7 +72,7 @@ void ASTERIXDecodeJob::run_impl()
 
     if (!obsolete_)
     {
-        loginf << "ASTERIXDecodeJob: waiting for last data to be fetched...";
+        loginf << "waiting for last data to be fetched...";
 
         //wait until data is fetched
         while (!extracted_data_.empty())
@@ -83,14 +83,14 @@ void ASTERIXDecodeJob::run_impl()
 
     done_ = true;
 
-    loginf << "ASTERIXDecodeJob: run: done";
+    loginf << "done";
 }
 
 /**
 */
 void ASTERIXDecodeJob::setObsolete()
 {
-    logdbg << "ASTERIXDecodeJob: setObsolete";
+    logdbg << "start";
 
     Job::setObsolete();
 
@@ -106,23 +106,23 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
                                             size_t num_records, 
                                             size_t num_errors)
 {
-    logdbg << "ASTERIXDecodeJob: fileJasterixCallback: running on cpu " << sched_getcpu();
+    logdbg << "running on cpu " << sched_getcpu();
 
     if (obsolete_)
         return;
 
     if (decoder_ && decoder_->error())
     {
-        loginf << "ASTERIXDecodeJob: fileJasterixCallback: errors state";
+        loginf << "errors state";
         return;
     }
 
-    //loginf << "ASTERIXDecodeJob: fileJasterixCallback: data '" << data->dump(2) << "'";
-    logdbg << "ASTERIXDecodeJob: fileJasterixCallback: line_id " << line_id << " num_records " << num_records;
+    //loginf << "data '" << data->dump(2) << "'";
+    logdbg << "line_id " << line_id << " num_records " << num_records;
 
     if (num_records == 0)
     {
-        loginf << "ASTERIXDecodeJob: fileJasterixCallback: omitting zero data in '"
+        loginf << "omitting zero data in '"
                << data->dump(2) << "'";
         return;
     }
@@ -135,7 +135,7 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
     num_errors_  = num_errors;
 
     if (num_errors_)
-        logwrn << "ASTERIXDecodeJob: fileJasterixCallback: num errors " << num_errors_;
+        logwrn << "num errors " << num_errors_;
 
     unsigned int category{0};
 
@@ -161,7 +161,7 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
         {
             if (!data_block.contains("category"))
             {
-                logwrn << "ASTERIXDecodeJob: fileJasterixCallback: data block without asterix category";
+                logwrn << "data block without asterix category";
                 continue;
             }
 
@@ -173,7 +173,7 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
             if (category == 1)
                 checkCAT001SacSics(data_block);
 
-            logdbg << "ASTERIXDecodeJob: fileJasterixCallback: applying JSON function without framing";
+            logdbg << "applying JSON function without framing";
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
             JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda  , false);
         }
@@ -201,7 +201,7 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
             {
                 if (!data_block.contains("category"))  // data block with errors
                 {
-                    logwrn << "ASTERIXDecodeJob: fileJasterixCallback: data block without asterix "
+                    logwrn << "data block without asterix "
                               "category";
                     continue;
                 }
@@ -232,15 +232,15 @@ void ASTERIXDecodeJob::fileJasterixCallback(std::unique_ptr<nlohmann::json> data
 
     ++signal_count_;
 
-    logdbg << "ASTERIXDecodeJob: fileJasterixCallback: emitting signal " << signal_count_;
+    logdbg << "emitting signal " << signal_count_;
 
     emit decodedASTERIXSignal();
 
-    logdbg << "ASTERIXDecodeJob: fileJasterixCallback: wait " << signal_count_;
+    logdbg << "wait " << signal_count_;
 
     //QThread::msleep(10);
 
-    logdbg << "ASTERIXDecodeJob: fileJasterixCallback: waiting done " << signal_count_;
+    logdbg << "waiting done " << signal_count_;
 }
 
 /**
@@ -256,19 +256,19 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
 
     if (decoder_ && decoder_->error())
     {
-        loginf << "ASTERIXDecodeJob: netJasterixCallback: errors state";
+        loginf << "errors state";
         return;
     }
 
-    //loginf << "ASTERIXDecodeJob: fileJasterixCallback: data '" << data->dump(2) << "'";
-    loginf << "ASTERIXDecodeJob: netJasterixCallback: line_id " << line_id << " num_records " << num_records;
+    //loginf << "data '" << data->dump(2) << "'";
+    loginf << "line_id " << line_id << " num_records " << num_records;
 
     num_frames_  = num_frames;
     num_records_ = num_records;
     num_errors_  = num_errors;
 
     if (num_errors_)
-        logwrn << "ASTERIXDecodeJob: netJasterixCallback: num errors " << num_errors_;
+        logwrn << "num errors " << num_errors_;
 
     unsigned int category{0};
 
@@ -293,8 +293,7 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
     {
         if (!data_block.contains("category"))
         {
-            logwrn
-                    << "ASTERIXDecodeJob: netJasterixCallback: data block without asterix category";
+            logwrn << "data block without asterix category";
             continue;
         }
 
@@ -306,7 +305,7 @@ void ASTERIXDecodeJob::netJasterixCallback(std::unique_ptr<nlohmann::json> data,
         if (category == 1)
             checkCAT001SacSics(data_block);
 
-        logdbg << "ASTERIXDecodeJob: netJasterixCallback: applying JSON function without framing";
+        logdbg << "applying JSON function without framing";
         JSON::applyFunctionToValues(data_block, keys, keys.begin(), process_lambda, false);
         JSON::applyFunctionToValues(data_block, keys, keys.begin(), count_lambda  , false);
     }
@@ -342,7 +341,7 @@ bool ASTERIXDecodeJob::error() const
 */
 void ASTERIXDecodeJob::countRecord(unsigned int category, nlohmann::json& record)
 {
-    logdbg << "ASTERIXDecodeJob: countRecord: cat " << category << " record '" << record.dump(4)
+    logdbg << "cat " << category << " record '" << record.dump(4)
            << "'";
 
     category_counts_[category] += 1;
@@ -359,7 +358,7 @@ std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const
 */
 std::vector<std::unique_ptr<nlohmann::json>> ASTERIXDecodeJob::extractedData()
 {
-    logdbg << "ASTERIXDecodeJob: extractedData: signal cnt " << signal_count_;
+    logdbg << "signal cnt " << signal_count_;
 
     boost::mutex::scoped_lock locker(extracted_data_mutex_);
 
@@ -399,7 +398,7 @@ std::string ASTERIXDecodeJob::currentDataSourceName()
 */
 void ASTERIXDecodeJob::forceBlockingDataProcessing()
 {
-    logdbg << "ASTERIXDecodeJob: forceBlockingDataProcessing: emitting signal";
+    logdbg << "emitting signal";
 
     if (obsolete_)
         extracted_data_.clear();
@@ -431,7 +430,7 @@ void ASTERIXDecodeJob::checkCAT001SacSics(nlohmann::json& data_block)
 {
     if (!data_block.contains("content"))
     {
-        logdbg << "ASTERIXDecodeJob: checkCAT001SacSics: no content in data block";
+        logdbg << "no content in data block";
         return;
     }
 
@@ -439,7 +438,7 @@ void ASTERIXDecodeJob::checkCAT001SacSics(nlohmann::json& data_block)
 
     if (!content.contains("records"))
     {
-        logdbg << "ASTERIXDecodeJob: checkCAT001SacSics: no records in content";
+        logdbg << "no records in content";
         return;
     }
 
@@ -462,14 +461,14 @@ void ASTERIXDecodeJob::checkCAT001SacSics(nlohmann::json& data_block)
                 found_any_sac_sic = true;
             }
             else  // not found, can not set values
-                logwrn << "ASTERIXDecodeJob: checkCAT001SacSics: record without any SAC/SIC found";
+                logwrn << "record without any SAC/SIC found";
         }
         else
         {
             if (record.contains("010"))  // found, check values
             {
                 if (record.at("010").at("SAC") != sac || record.at("010").at("SIC") != sic)
-                    logwrn << "ASTERIXDecodeJob: checkCAT001SacSics: record with differing "
+                    logwrn << "record with differing "
                               "SAC/SICs found";
             }
             else  // not found, set values

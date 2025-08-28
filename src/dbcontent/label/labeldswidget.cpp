@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "dbcontent/label/labeldswidget.h"
 #include "compass.h"
 #include "datasourcemanager.h"
@@ -59,7 +76,7 @@ void LabelDSWidget::forceUpdateList()
 
 void LabelDSWidget::updateListSlot()
 {
-    logdbg << "LabelDSWidget: updateListSlot";
+    logdbg << "start";
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
@@ -144,7 +161,7 @@ void LabelDSWidget::sourceClickedSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "LabelDSWidget: sourceClickedSlot: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     if (label_generator_.labelWanted(ds_id))
         label_generator_.removeLabelDSID(ds_id);
@@ -160,7 +177,7 @@ void LabelDSWidget::changeLineSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "LabelDSWidget: changeLineSlot: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
     assert (ds_man.hasDBDataSource(ds_id));
@@ -191,7 +208,7 @@ void LabelDSWidget::changeDirectionSlot()
     QVariant ds_id_var = widget->property("ds_id");
     unsigned int ds_id = ds_id_var.value<unsigned int>();
 
-    loginf << "LabelDSWidget: changeDirectionSlot: ds_id " << ds_id;
+    loginf << "ds_id " << ds_id;
 
     QMenu menu;
 
@@ -243,7 +260,7 @@ void LabelDSWidget::selectDirectionSlot()
     unsigned int dir = dir_var.value<unsigned int>();
     assert (dir <= 3);
 
-    loginf << "LabelDSWidget: selectDirectionSlot: ds_id " << ds_id << " dir " << dir;
+    loginf << "ds_id " << ds_id << " dir " << dir;
 
     LabelDirection direction = LabelDirection(dir);
     label_generator_.labelDirection(ds_id, direction);
@@ -261,7 +278,7 @@ void LabelDSWidget::selectLineSlot()
     unsigned int line = line_var.value<unsigned int>();
     assert (line <= 3);
 
-    loginf << "LabelDSWidget: selectLineSlot: ds_id " << ds_id << " line " << line;
+    loginf << "ds_id " << ds_id << " line " << line;
 
     label_generator_.labelLine(ds_id, line);
 

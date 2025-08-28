@@ -15,8 +15,7 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SECTORLAYER_H
-#define SECTORLAYER_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -68,5 +67,3 @@ protected:
 
     unsigned int num_exclusion_sectors_ = 0;
 };
-
-#endif // SECTORLAYER_H

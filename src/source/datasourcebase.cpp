@@ -1,3 +1,20 @@
+/*
+ * This file is part of OpenATS COMPASS.
+ *
+ * COMPASS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * COMPASS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "source/datasourcebase.h"
 #include "logger.h"
 #include "number.h"
@@ -117,7 +134,7 @@ void DataSourceBase::removeShortName()
 
 void DataSourceBase::shortName(const std::string& short_name)
 {
-    loginf << "DataSourceBase " << name_ << ": shortName: " << short_name;
+    loginf << name_ << ": short_name " << short_name;
 
     has_short_name_ = short_name.size();
     this->short_name_ = short_name;
@@ -329,7 +346,7 @@ void DataSourceBase::addNetworkLines()
 
 //        if (existing_lines.count(ip+":"+to_string(port)))
 //        {
-//            logwrn << "DataSourceBase: networkLines: source " << name_
+//            logwrn << "source " << name_
 //                   << " line " << ip << ":" << port
 //                   << " already in use";
 //        }
@@ -378,8 +395,8 @@ void DataSourceBase::setFromJSONDeprecated (const nlohmann::json& j)
     info_.clear();
 
     //    j["dbcontent_name"] = dbcontent_name_;
-    assert(j.contains("dbo_name"));
-    ds_type_ = j.at("dbo_name");
+    assert(j.contains("dbcont_name"));
+    ds_type_ = j.at("dbcont_name");
 
 
     //    j["name"] = name_;
@@ -538,7 +555,7 @@ void DataSourceBase::setCalculatedReferenceSource()
 
 void DataSourceBase::parseNetworkLineInfo()
 {
-    logdbg << "DataSourceBase: parseLineInfo: " << sac() << "/" << sic();
+    logdbg << "start" << sac() << "/" << sic();
 
     line_info_.clear();
 
