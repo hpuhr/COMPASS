@@ -265,8 +265,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationFalse::evalua
            << " num_unknown " << num_unknown << " num_correct " << num_correct
            << " num_false " << num_false;
 
-    assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
-    assert (num_pos_inside == num_no_ref_val+num_unknown+num_correct+num_false);
+    traced_assert(num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos_inside == num_no_ref_val+num_unknown+num_correct+num_false);
 
     //assert (details.size() == tst_data.size());
 

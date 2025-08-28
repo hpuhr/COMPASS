@@ -40,7 +40,7 @@
 #include "grid2dlayer.h"
 
 #include <sstream>
-#include <cassert>
+#include "traced_assert.h"
 
 using namespace std;
 using namespace Utils;
@@ -70,7 +70,7 @@ Base::Base(const std::string& type,
 ,   sector_layer_(sector_layer)
 ,   calculator_  (calculator)
 {
-    assert (requirement_);
+    traced_assert(requirement_);
 
     req_grp_id_ = EvalSectionID::requirementGroupResultID(*this);
 }
@@ -319,7 +319,7 @@ std::unique_ptr<nlohmann::json::object_t> Base::createViewable(const AnnotationO
 
     //add root annotation and retrieve its annotation array
     std::string root_anno_name = getRequirementAnnotationID();
-    assert(!root_anno_name.empty());
+    traced_assert(!root_anno_name.empty());
 
     ViewPointGenAnnotation root_anno(root_anno_name);
 
@@ -357,7 +357,7 @@ FeatureDefinitions Base::getCustomAnnotationDefinitions() const
 */
 void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
 {
-    assert(annotations_json.is_array());
+    traced_assert(annotations_json.is_array());
 
     //get custom annotations
     auto defs = getCustomAnnotationDefinitions();
@@ -373,7 +373,7 @@ void Base::addCustomAnnotations(nlohmann::json& annotations_json) const
 
         for (const auto& def : value_defs.second)
         {
-            assert(def);
+            traced_assert(def);
 
             //create feature and add to annotation
             auto f = def->createFeature(this);

@@ -111,7 +111,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     Projection& projection = proj_man.currentProjection();
-    assert (projection.coordinateSystemsAdded());
+    traced_assert(projection.coordinateSystemsAdded());
 
     unsigned int tst_ds_id;
 
@@ -271,7 +271,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
     //               << " num_distances " << num_distances;
 
-    assert (num_no_ref <= num_pos);
+    traced_assert(num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
         loginf << "'" << name_ << "': utn " << target_data.utn_
@@ -280,9 +280,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarRange::evaluat
                << " num_pos_calc_errors " << num_pos_calc_errors
                << " num_distances " << num_distances;
 
-    assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
-    assert (num_distances == num_comp_failed + num_comp_passed);
+    traced_assert(num_distances == num_comp_failed + num_comp_passed);
     
     //assert (tst_range_values.size() == ref_range_values.size());
 

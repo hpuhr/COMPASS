@@ -108,14 +108,14 @@ void UnitSelectionWidget::showMenuSlot()
 {
     loginf << "start";
 
-    assert (pointers_set_);
+    traced_assert(pointers_set_);
 
     menu_.exec(QCursor::pos());
 }
 
 void UnitSelectionWidget::triggerSlot(QAction* action)
 {
-    assert (pointers_set_);
+    traced_assert(pointers_set_);
 
     QVariantMap vmap = action->data().toMap();
     std::string dimension, unit;

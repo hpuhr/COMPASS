@@ -41,7 +41,7 @@ MetaVariable::MetaVariable(const std::string& class_id, const std::string& insta
     // DBContVAR LOWERCASE HACK
     // boost::algorithm::to_lower(name_);
 
-    assert(name_.size() > 0);
+    traced_assert(name_.size() > 0);
 
     createSubConfigurables();
 
@@ -106,9 +106,9 @@ void MetaVariable::generateSubConfigurable(const std::string& class_id,
             return;
         }
 
-        assert(object_manager_.existsDBContent(dbcontent_name));
-        assert(object_manager_.dbContent(dbcontent_name).hasVariable(dbcontvar_name));
-        assert(variables_.find(dbcontent_name) == variables_.end());
+        traced_assert(object_manager_.existsDBContent(dbcontent_name));
+        traced_assert(object_manager_.dbContent(dbcontent_name).hasVariable(dbcontvar_name));
+        traced_assert(variables_.find(dbcontent_name) == variables_.end());
 
         definitions_[dbcontent_name] = definition;
         variables_.insert(std::pair<std::string, Variable&>(
@@ -126,13 +126,13 @@ bool MetaVariable::existsIn(const std::string& dbcontent_name)
 
 Variable& MetaVariable::getFor(const std::string& dbcontent_name)
 {
-    assert(existsIn(dbcontent_name));
+    traced_assert(existsIn(dbcontent_name));
     return variables_.at(dbcontent_name);
 }
 
 std::string MetaVariable::getNameFor(const std::string& dbcontent_name)
 {
-    assert(existsIn(dbcontent_name));
+    traced_assert(existsIn(dbcontent_name));
     return variables_.at(dbcontent_name).name();
 }
 
@@ -151,7 +151,7 @@ void MetaVariable::set(Variable& var)
 void MetaVariable::removeVariable(const std::string& dbcontent_name)
 {
     loginf << name_ << ": dbcont " << dbcontent_name;
-    assert(existsIn(dbcontent_name));
+    traced_assert(existsIn(dbcontent_name));
     delete definitions_.at(dbcontent_name);
     definitions_.erase(dbcontent_name);
     variables_.erase(dbcontent_name);
@@ -164,7 +164,7 @@ void MetaVariable::addVariable(const std::string& dbcontent_name, const std::str
     loginf << name_ << ": dbcont " << dbcontent_name << " varname "
            << dbcontvariable_name;
 
-    assert(!existsIn(dbcontent_name));
+    traced_assert(!existsIn(dbcontent_name));
 
     std::string instance_id = "VariableDefinition" + dbcontent_name + dbcontvariable_name + "0";
 
@@ -194,7 +194,7 @@ MetaVariableWidget* MetaVariable::widget()
         if (locked_)
             widget_->lock();
     }
-    assert(widget_);
+    traced_assert(widget_);
     return widget_;
 }
 
@@ -239,7 +239,7 @@ std::string MetaVariable::info() const
 
 PropertyDataType MetaVariable::dataType() const
 {
-    assert(hasVariables());
+    traced_assert(hasVariables());
 
     //checked in checkSubVariables
 
@@ -248,13 +248,13 @@ PropertyDataType MetaVariable::dataType() const
 
 const std::string& MetaVariable::dataTypeString() const
 {
-    assert(hasVariables());
+    traced_assert(hasVariables());
     return Property::asString(dataType());
 }
 
 Variable::Representation MetaVariable::representation()
 {
-    assert(hasVariables());
+    traced_assert(hasVariables());
 
     //checked in checkSubVariables
 
@@ -273,7 +273,7 @@ Variable::Representation MetaVariable::representation()
 //            value_string = variable_it.second.getSmallerValueString(
 //                value_string, variable_it.second.getMinString());
 //    }
-//    // assert (value_string.size());
+//    // traced_assert(value_string.size());
 //    return value_string;
 //}
 
@@ -289,19 +289,19 @@ Variable::Representation MetaVariable::representation()
 //            value_string = variable_it.second.getLargerValueString(
 //                value_string, variable_it.second.getMaxString());
 //    }
-//    // assert (value_string.size());
+//    // traced_assert(value_string.size());
 //    return value_string;
 //}
 
 //std::string MetaVariable::getMinStringRepresentation() const
 //{
-//    assert(variables_.size());
+//    traced_assert(variables_.size());
 //    return variables_.begin()->second.getRepresentationStringFromValue(getMinString());
 //}
 
 //std::string MetaVariable::getMaxStringRepresentation() const
 //{
-//    assert(variables_.size());
+//    traced_assert(variables_.size());
 //    return variables_.begin()->second.getRepresentationStringFromValue(getMaxString());
 //}
 
@@ -326,7 +326,7 @@ void MetaVariable::removeOutdatedVariables()
         if (delete_var)
         {
             loginf << "removing var " << var_it->first;
-            assert(variables_.count(var_it->first));
+            traced_assert(variables_.count(var_it->first));
             variables_.erase(var_it->first);
 
             delete var_it->second;

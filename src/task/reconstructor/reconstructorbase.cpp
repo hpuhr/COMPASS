@@ -71,14 +71,14 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
             logerr << "tr " << tr.asStr() << " acad already present in "
                    << targets_.at(acad_2_utn_.at(*tr.acad_)).asStr();
 
-        assert (!acad_2_utn_.count(*tr.acad_));
+        traced_assert(!acad_2_utn_.count(*tr.acad_));
     }
 
     if (tr.acid_ && !unspecific_acids_.count(*tr.acid_))
     {
         if (acid_2_utn_.count(*tr.acid_))
         {
-            assert (targets_.count(acid_2_utn_.at(*tr.acid_)));
+            traced_assert(targets_.count(acid_2_utn_.at(*tr.acid_)));
 
             auto existing_target = targets_.at(acid_2_utn_.at(*tr.acid_));
 
@@ -89,7 +89,7 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
                 && existing_target.hasACAD(*tr.acad_))
             {
                 logerr << "acad matches, this seems to be an association error";
-                assert (false);
+                traced_assert(false);
             }
 
             logwrn << "no acad match, assuming duplicate acid '"
@@ -99,7 +99,7 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
             unspecific_acids_.insert(*tr.acid_);
         }
 
-        assert (!acid_2_utn_.count(*tr.acid_));
+        traced_assert(!acid_2_utn_.count(*tr.acid_));
     }
 
     if (tr.track_number_)
@@ -108,12 +108,12 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
             logerr << "tr " << tr.asStr() << " track num already present in "
                    << targets_.at(tn2utn_[tr.ds_id_][tr.line_id_].at(*tr.track_number_).first).asStr();
 
-        assert (!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
+        traced_assert(!tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
     }
 
-    assert (reconstructor_);
+    traced_assert(reconstructor_);
 
-    assert (!targets_.count(utn));
+    traced_assert(!targets_.count(utn));
 
     targets_.emplace(
         std::piecewise_construct,
@@ -132,13 +132,13 @@ unsigned int ReconstructorBase::TargetsContainer::createNewTarget(const dbConten
 
 void ReconstructorBase::TargetsContainer::removeUTN(unsigned int other_utn)
 {
-    assert (targets_.count(other_utn));
+    traced_assert(targets_.count(other_utn));
 
     targets_.erase(other_utn);
 
     // remove from utn list
     auto other_it = std::find(utn_vec_.begin(), utn_vec_.end(), other_utn);
-    assert (other_it != utn_vec_.end());
+    traced_assert(other_it != utn_vec_.end());
     utn_vec_.erase(other_it);
 
     // add to removed utns for re-use
@@ -147,7 +147,7 @@ void ReconstructorBase::TargetsContainer::removeUTN(unsigned int other_utn)
 
 void ReconstructorBase::TargetsContainer::replaceInLookup(unsigned int other_utn, unsigned int utn)
 {
-    assert (targets_.count(utn));
+    traced_assert(targets_.count(utn));
 
     // remove from acad lookup
     for (auto& acad_it : acad_2_utn_)
@@ -185,7 +185,7 @@ void ReconstructorBase::TargetsContainer::replaceInLookup(unsigned int other_utn
 
 void ReconstructorBase::TargetsContainer::addToLookup(unsigned int utn, dbContent::targetReport::ReconstructorInfo& tr)
 {
-    assert (targets_.count(utn));
+    traced_assert(targets_.count(utn));
 
     unsigned int dbcont_id  = Number::recNumGetDBContId(tr.record_num_);
 
@@ -215,7 +215,7 @@ void ReconstructorBase::TargetsContainer::checkACADLookup()
             logerr << "double acad in target "
                    << target_it.second.asStr();
 
-        assert (target_it.second.acads_.size() == 1);
+        traced_assert(target_it.second.acads_.size() == 1);
 
         acad = *target_it.second.acads_.begin();
 
@@ -231,11 +231,11 @@ void ReconstructorBase::TargetsContainer::checkACADLookup()
 
     for (auto& acad_it : acad_2_utn_)
     {
-        assert (targets_.count(acad_it.second));
-        assert (targets_.at(acad_it.second).hasACAD(acad_it.first));
+        traced_assert(targets_.count(acad_it.second));
+        traced_assert(targets_.at(acad_it.second).hasACAD(acad_it.first));
     }
 
-    assert (acad_2_utn_.size() == count);
+    traced_assert(acad_2_utn_.size() == count);
 }
 
 bool ReconstructorBase::TargetsContainer::canAssocByACAD(
@@ -254,16 +254,16 @@ bool ReconstructorBase::TargetsContainer::canAssocByACAD(
 int ReconstructorBase::TargetsContainer::assocByACAD(
     dbContent::targetReport::ReconstructorInfo& tr, bool do_debug)
 {
-    assert (tr.acad_);
-    assert (acad_2_utn_.count(*tr.acad_));
+    traced_assert(tr.acad_);
+    traced_assert(acad_2_utn_.count(*tr.acad_));
 
     if (do_debug)
         loginf << "DBG use stored utn in acad_2_utn_: " << acad_2_utn_.at(*tr.acad_);
 
     int utn = acad_2_utn_.at(*tr.acad_);
 
-    assert (targets_.count(utn));
-    assert (targets_.at(utn).hasACAD(*tr.acad_));
+    traced_assert(targets_.count(utn));
+    traced_assert(targets_.at(utn).hasACAD(*tr.acad_));
 
     return utn;
 }
@@ -297,7 +297,7 @@ bool ReconstructorBase::TargetsContainer::canAssocByACID(
 
     if (acid_2_utn_.count(*tr.acid_)) // already exists, but check if mode s address changed
     {
-        assert (targets_.count(acid_2_utn_.at(*tr.acid_)));
+        traced_assert(targets_.count(acid_2_utn_.at(*tr.acid_)));
 
         // tr has acad, target has an acad but not the target reports
         // happens if same acid is used by 2 different transponders
@@ -322,17 +322,17 @@ bool ReconstructorBase::TargetsContainer::canAssocByACID(
  // -1 if failed, else utn
 int ReconstructorBase::TargetsContainer::assocByACID(dbContent::targetReport::ReconstructorInfo& tr, bool do_debug)
 {
-    assert (tr.acid_);
-    assert (acid_2_utn_.count(*tr.acid_));
-    assert (!unspecific_acids_.count(*tr.acid_));
+    traced_assert(tr.acid_);
+    traced_assert(acid_2_utn_.count(*tr.acid_));
+    traced_assert(!unspecific_acids_.count(*tr.acid_));
 
     if (do_debug)
         loginf << "DBG use stored utn in acid_2_utn_: " << acid_2_utn_.at(*tr.acid_);
 
     int utn = acid_2_utn_.at(*tr.acid_);
 
-    assert (targets_.count(utn));
-    assert (targets_.at(utn).hasACID(*tr.acid_));
+    traced_assert(targets_.count(utn));
+    traced_assert(targets_.at(utn).hasACID(*tr.acid_));
 
     return utn;
 }
@@ -397,11 +397,11 @@ int ReconstructorBase::TargetsContainer::assocByTrackNumber(
 
     boost::posix_time::ptime timestamp_prev;
 
-    assert (tr.track_number_);
+    traced_assert(tr.track_number_);
 
-    assert (tn2utn_.at(tr.ds_id_).at(tr.line_id_).count(*tr.track_number_));
+    traced_assert(tn2utn_.at(tr.ds_id_).at(tr.line_id_).count(*tr.track_number_));
     std::tie(utn, timestamp_prev) = tn2utn_.at(tr.ds_id_).at(tr.line_id_).at(*tr.track_number_);
-    assert (targets_.count(utn));
+    traced_assert(targets_.count(utn));
 
     // check for larger time offset
     if (tr.timestamp_ - timestamp_prev > track_max_time_diff) // too old
@@ -413,7 +413,7 @@ int ReconstructorBase::TargetsContainer::assocByTrackNumber(
                       << "), remove & create new target";
 
         // remove previous track number assoc
-        assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
+        traced_assert(tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
         tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
 
         if (reconstructor_->task().debugSettings().debugUTN(utn))
@@ -430,8 +430,8 @@ int ReconstructorBase::TargetsContainer::assocByTrackNumber(
 
 void ReconstructorBase::TargetsContainer::eraseTrackNumberLookup(dbContent::targetReport::ReconstructorInfo& tr)
 {
-    assert (tr.track_number_);
-    assert (tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
+    traced_assert(tr.track_number_);
+    traced_assert(tn2utn_[tr.ds_id_][tr.line_id_].count(*tr.track_number_));
     tn2utn_[tr.ds_id_][tr.line_id_].erase(*tr.track_number_);
 }
 
@@ -563,7 +563,7 @@ ReconstructorBase::ReconstructorBase(const std::string& class_id,
                           ReferenceCalculatorSettings().filter_references_max_stddev_m_);
     }
 
-    assert (acc_estimator_);
+    traced_assert(acc_estimator_);
 }
 
 /**
@@ -575,7 +575,7 @@ ReconstructorBase::~ReconstructorBase()
 
 void ReconstructorBase::init()
 {
-    assert(!init_);
+    traced_assert(!init_);
 
     //call before init_impl()
     resetTimeframe();
@@ -639,7 +639,7 @@ void ReconstructorBase::resetTimeframe()
     if (timeframe.first.is_not_a_date_time() || timeframe.second.is_not_a_date_time())
         logerr << "invalid data timeframe";
     
-    assert(!timeframe.first.is_not_a_date_time() && !timeframe.second.is_not_a_date_time());
+    traced_assert(!timeframe.first.is_not_a_date_time() && !timeframe.second.is_not_a_date_time());
 
     timestamp_min_ = timeframe.first;
     timestamp_max_ = timeframe.second;
@@ -680,15 +680,15 @@ void ReconstructorBase::initIfNeeded()
     if (!init_)
         init();
 
-    assert(init_);
+    traced_assert(init_);
 }
 
 bool ReconstructorBase::hasNextTimeSlice()
 {
     initIfNeeded();
 
-    assert (!current_slice_begin_.is_not_a_date_time());
-    assert (!timestamp_max_.is_not_a_date_time());
+    traced_assert(!current_slice_begin_.is_not_a_date_time());
+    traced_assert(!timestamp_max_.is_not_a_date_time());
 
     first_slice_ = current_slice_begin_ == timestamp_min_;
 
@@ -710,15 +710,15 @@ std::unique_ptr<ReconstructorBase::DataSlice> ReconstructorBase::getNextTimeSlic
 {
     initIfNeeded();
 
-    assert (isInit());
-    assert (hasNextTimeSlice());
+    traced_assert(isInit());
+    traced_assert(hasNextTimeSlice());
 
     current_slice_begin_ = next_slice_begin_;
 
-    assert (!current_slice_begin_.is_not_a_date_time());
-    assert (!timestamp_max_.is_not_a_date_time());
+    traced_assert(!current_slice_begin_.is_not_a_date_time());
+    traced_assert(!timestamp_max_.is_not_a_date_time());
 
-    assert (current_slice_begin_ <= timestamp_max_);
+    traced_assert(current_slice_begin_ <= timestamp_max_);
 
     boost::posix_time::ptime current_slice_end = current_slice_begin_ + base_settings_.sliceDuration();
 
@@ -800,7 +800,7 @@ void ReconstructorBase::reset()
 
     chains_.clear();
 
-    assert (acc_estimator_);
+    traced_assert(acc_estimator_);
     acc_estimator_->init(this);
 
     cancelled_ = false;
@@ -822,9 +822,9 @@ void ReconstructorBase::initChainPredictors()
     int num_threads = tbb::info::default_concurrency();
 #endif
 
-    assert (num_threads > 0);
+    traced_assert(num_threads > 0);
 
-    assert(chain_predictors_);
+    traced_assert(chain_predictors_);
 
     chain_predictors_->init(referenceCalculatorSettings().kalman_type_assoc,
                             referenceCalculatorSettings().chainEstimatorSettings(),
@@ -835,7 +835,7 @@ void ReconstructorBase::initChainPredictors()
  */
 void ReconstructorBase::processSlice()
 {
-    assert (!currentSlice().remove_before_time_.is_not_a_date_time());
+    traced_assert(!currentSlice().remove_before_time_.is_not_a_date_time());
 
     loginf << "start " << Time::toString(currentSlice().timestamp_min_)
            << " first_slice " << currentSlice().first_slice_;
@@ -919,12 +919,12 @@ void ReconstructorBase::clearOldTargetReports()
 
     for (auto& tr_it : target_reports_)
     {
-        assert (tr_it.second.timestamp_ >= currentSlice().remove_before_time_);
-        assert (!tr_it.second.in_current_slice_);
+        traced_assert(tr_it.second.timestamp_ >= currentSlice().remove_before_time_);
+        traced_assert(!tr_it.second.in_current_slice_);
     }
 
     for (auto& ts_it : tr_timestamps_)
-        assert (ts_it.first >= currentSlice().remove_before_time_);
+        traced_assert(ts_it.first >= currentSlice().remove_before_time_);
 
 #endif
 
@@ -944,7 +944,7 @@ void ReconstructorBase::clearOldTargetReports()
             if (!chain_it.second->checkMeasurementAvailability())
             {
                 logerr << "not all measurements available for chain with UTN " << chain_it.first;
-                assert( false);
+                traced_assert( false);
             }
 
             if (!chain_it.second->hasData())
@@ -987,7 +987,7 @@ void ReconstructorBase::createTargetReports()
 
         for (auto& sect_it : task_.usedSectors())
         {
-            assert(eval_man.hasSectorLayer(sect_it.first));
+            traced_assert(eval_man.hasSectorLayer(sect_it.first));
 
             if (!sect_it.second)
                 continue;
@@ -1001,7 +1001,7 @@ void ReconstructorBase::createTargetReports()
 
     for (auto& buf_it : *accessor_)
     {
-        assert (dbcont_man.existsDBContent(buf_it.first));
+        traced_assert(dbcont_man.existsDBContent(buf_it.first));
 
         if (!dbcont_man.dbContent(buf_it.first).containsTargetReports())
             continue;
@@ -1058,7 +1058,7 @@ void ReconstructorBase::createTargetReports()
             {
 #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
                 //assert (target_reports_.count(record_num));
-                assert (!target_reports_.at(record_num).in_current_slice_);
+                traced_assert(!target_reports_.at(record_num).in_current_slice_);
 
                 if (ts < currentSlice().remove_before_time_)
                 {
@@ -1069,10 +1069,10 @@ void ReconstructorBase::createTargetReports()
                            << " remove before " << Time::toString(currentSlice().remove_before_time_);
                 }
 
-                assert (ts >= currentSlice().remove_before_time_);
+                traced_assert(ts >= currentSlice().remove_before_time_);
 
-                assert (target_reports_.at(record_num).record_num_ == record_num); // be sure
-                assert (target_reports_.at(record_num).timestamp_ == ts); // be very sure
+                traced_assert(target_reports_.at(record_num).record_num_ == record_num); // be sure
+                traced_assert(target_reports_.at(record_num).timestamp_ == ts); // be very sure
 #endif
 
                 target_reports_.at(record_num).buffer_index_ = cnt;
@@ -1148,7 +1148,7 @@ void ReconstructorBase::createTargetReports()
                    << " accessor size " << accessor(tr_it.second).size() << " is maxint "
                    << (tr_it.second.buffer_index_ == std::numeric_limits<unsigned int>::max());
 
-        assert (tr_it.second.buffer_index_ < accessor(tr_it.second).size()); // fails
+        traced_assert(tr_it.second.buffer_index_ < accessor(tr_it.second).size()); // fails
     }
 #endif
 
@@ -1199,7 +1199,7 @@ void ReconstructorBase::createTargetReportBatches()
 
                     for (auto& rn_it : line_it.second)
                     {
-                        assert(target_reports_.count(rn_it));
+                        traced_assert(target_reports_.count(rn_it));
 
                         auto timestamp = target_reports_.at(rn_it).timestamp_;
 
@@ -1264,7 +1264,7 @@ std::map<unsigned int, std::map<unsigned long, unsigned int>> ReconstructorBase:
     {
         for (auto rn_it : tgt_it.second.target_reports_)
         {
-            assert (target_reports_.count(rn_it));
+            traced_assert(target_reports_.count(rn_it));
 
             dbContent::targetReport::ReconstructorInfo& tr = target_reports_.at(rn_it);
 
@@ -1325,7 +1325,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
         NullableVector<unsigned int>& utn_col_vec = buffer->get<unsigned int>(utn_name);
         NullableVector<unsigned long>& rec_num_col_vec = buffer->get<unsigned long>(rec_num_name);
 
-        assert (tr_ds_.count(dbcontent_id));
+        traced_assert(tr_ds_.count(dbcontent_id));
 
         unsigned int buf_cnt = 0;
         for (auto& ds_it : tr_ds_.at(dbcontent_id))  // iterate over all rec nums
@@ -1334,7 +1334,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createAssociat
             {
                 for (auto& rn_it : line_it.second)
                 {
-                    assert (target_reports_.count(rn_it));
+                    traced_assert(target_reports_.count(rn_it));
 
                     if (target_reports_.at(rn_it).timestamp_ >= currentSlice().write_before_time_)
                         continue;
@@ -1402,7 +1402,7 @@ std::map<std::string, std::shared_ptr<Buffer>> ReconstructorBase::createReferenc
             logdbg << "creating data source";
 
             src_man.createConfigDataSource(ds_id);
-            assert (src_man.hasConfigDataSource(ds_id));
+            traced_assert(src_man.hasConfigDataSource(ds_id));
         }
 
         dbContent::ConfigurationDataSource& src = src_man.configDataSource(ds_id);
@@ -1530,7 +1530,7 @@ void ReconstructorBase::doUnassociatedAnalysis()
 {
     auto& dbcont_man = COMPASS::instance().dbContentManager();
 
-    assert (dbcont_man.hasMinMaxPosition());
+    traced_assert(dbcont_man.hasMinMaxPosition());
 
     unsigned int slice_cnt = currentSlice().slice_count_;
     unsigned int run_cnt = currentSlice().run_count_;
@@ -1544,7 +1544,7 @@ void ReconstructorBase::doUnassociatedAnalysis()
     tie(lon_min, lon_max) = dbcont_man.minMaxLongitude();
 
     QRectF roi(lon_min, lat_min, lon_max - lon_min, lat_max - lat_min);
-    assert (!roi.isEmpty());
+    traced_assert(!roi.isEmpty());
 
     auto vp = task().getDebugViewpoint(
         name+" Unassociated Grid", "Grid");
@@ -1565,11 +1565,11 @@ void ReconstructorBase::doUnassociatedAnalysis()
 
     for (auto rec_num : associator().unassociatedRecNums())
     {
-        assert (target_reports_.count(rec_num));
+        traced_assert(target_reports_.count(rec_num));
 
         auto& tr = target_reports_.at(rec_num);
 
-        assert(tr.position_);
+        traced_assert(tr.position_);
 
         grid.addValue(tr.position_->longitude_, tr.position_->latitude_, 1.0);
     }
@@ -1681,7 +1681,7 @@ void ReconstructorBase::saveTargets()
 const dbContent::TargetReportAccessor& ReconstructorBase::accessor(
     const dbContent::targetReport::ReconstructorInfo& tr) const
 {
-    assert (accessors_.count(tr.dbcont_id_));
+    traced_assert(accessors_.count(tr.dbcont_id_));
     return accessors_.at(tr.dbcont_id_);
 }
 
@@ -1742,7 +1742,7 @@ double ReconstructorBase::determineProcessNoise(const dbContent::targetReport::R
 
 #if 0
     //interp between min/max altitude
-    assert (ref_calc_settings_.Q_altitude_min_ft < ref_calc_settings_.Q_altitude_max_ft);
+    traced_assert(ref_calc_settings_.Q_altitude_min_ft < ref_calc_settings_.Q_altitude_max_ft);
 
     double alt_ft = std::max(ref_calc_settings_.Q_altitude_min_ft,
                             std::min(ref_calc_settings_.Q_altitude_max_ft, (double)alt_state.alt_baro_ft));
@@ -1767,7 +1767,7 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     mm.t         = ri.timestamp_;
     
     auto pos = ri.position();
-    assert(pos.has_value());
+    traced_assert(pos.has_value());
 
     auto vel = ri.velocity_;
 
@@ -1777,7 +1777,7 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
     {
         logerr << "stddevs 0,  x " << pos_acc.x_stddev_
                << " y " << pos_acc.y_stddev_ << " ds_id " << ri.ds_id_ << " dbcont_id " << ri.dbcont_id_;
-        assert (false);
+        traced_assert(false);
     }
 
     auto vel_acc = acc_estimator_->velocityAccuracy(ri);
@@ -1841,7 +1841,7 @@ void ReconstructorBase::createMeasurement(reconstruction::Measurement& mm,
                                           const dbContent::ReconstructorTarget* target)
 {
     auto it = target_reports_.find(rec_num);
-    assert(it != target_reports_.end());
+    traced_assert(it != target_reports_.end());
 
     createMeasurement(mm, it->second, target);
 }
@@ -1857,7 +1857,7 @@ const dbContent::targetReport::ReconstructorInfo* ReconstructorBase::getInfo(uns
 
 reconstruction::KalmanChainPredictors& ReconstructorBase::chainPredictors()
 {
-    assert(chain_predictors_);
+    traced_assert(chain_predictors_);
 
     return *chain_predictors_;
 }

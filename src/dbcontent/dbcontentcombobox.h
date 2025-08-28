@@ -35,7 +35,7 @@ class DBContentComboBox : public QComboBox
     DBContentComboBox(bool allow_meta, bool no_status_content, QWidget* parent = nullptr)
         : QComboBox(parent), allow_meta_(allow_meta)
     {
-        assert(COMPASS::instance().dbContentManager().size());
+        traced_assert(COMPASS::instance().dbContentManager().size());
         if (allow_meta_)
             addItem(META_OBJECT_NAME.c_str());
 
@@ -57,7 +57,7 @@ class DBContentComboBox : public QComboBox
     void setObjectName(const std::string& object_name)
     {
         int index = findText(QString(object_name.c_str()));
-        assert(index >= 0);
+        traced_assert(index >= 0);
         setCurrentIndex(index);
     }
 

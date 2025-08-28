@@ -190,7 +190,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         double distance, angle;
 
         std::tie(transform_ok, distance, angle) = ogr_geo2cart.distanceAngleCart(ref_pos->latitude_, ref_pos->longitude_, tst_pos.latitude_, tst_pos.longitude_);
-        assert(transform_ok);
+        traced_assert(transform_ok);
 
         angle = ref_spd->track_angle_ - angle;
 
@@ -219,7 +219,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
         }
 
         d_along = distance * cos(angle);
-        assert (!std::isnan(d_along) && !std::isinf(d_along));
+        traced_assert(!std::isnan(d_along) && !std::isinf(d_along));
 
         ++num_distances;
 
@@ -249,7 +249,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
     //               << " num_distances " << num_distances;
 
-    assert (num_no_ref <= num_pos);
+    traced_assert(num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
         loginf << "'" << name_ << "': utn " << target_data.utn_
@@ -258,8 +258,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAlong::evaluate (
                << " num_pos_calc_errors " << num_pos_calc_errors
                << " num_distances " << num_distances;
 
-    assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
-    assert (num_distances == num_value_ok + num_value_nok);
+    traced_assert(num_pos - num_no_ref == num_pos_inside + num_pos_outside);
+    traced_assert(num_distances == num_value_ok + num_value_nok);
 
     return std::make_shared<EvaluationRequirementResult::SinglePositionAlong>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,

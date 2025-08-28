@@ -144,7 +144,7 @@ ResultT<EvaluationCalculator*> EvaluationCalculator::clone(const nlohmann::json&
         return ResultT<EvaluationCalculator*>::failed("Could not create calculator from stored config: Unknown error");
     }
 
-    assert(c);
+    traced_assert(c);
 
     if (c->canEvaluate().ok())
     {
@@ -153,7 +153,7 @@ ResultT<EvaluationCalculator*> EvaluationCalculator::clone(const nlohmann::json&
     }
 
     auto res = ResultT<EvaluationCalculator*>::succeeded(c);
-    assert(res.hasResult() && res.result());
+    traced_assert(res.hasResult() && res.result());
 
     return res;
 }
@@ -255,7 +255,7 @@ void EvaluationCalculator::generateSubConfigurable(const std::string& class_id,
         EvaluationStandard* standard = new EvaluationStandard(class_id, instance_id, *this);
         logdbg << "adding standard " << standard->name();
 
-        assert(!hasStandard(standard->name()));
+        traced_assert(!hasStandard(standard->name()));
 
         standards_.push_back(std::unique_ptr<EvaluationStandard>(standard));
 
@@ -357,7 +357,7 @@ Result EvaluationCalculator::evaluate(bool update_report,
 {
     loginf << "start";
 
-    assert(canEvaluate().ok());
+    traced_assert(canEvaluate().ok());
 
     //always load blocking for now
     const bool Blocking = true;
@@ -396,7 +396,7 @@ Result EvaluationCalculator::evaluate(bool update_report,
         }
         else
         {
-            assert(!active_load_connection_);
+            traced_assert(!active_load_connection_);
 
             QObject::connect(&eval_man_, &EvaluationManager::hasNewData, this, &EvaluationCalculator::loadingDone);
             active_load_connection_ = true;
@@ -474,8 +474,8 @@ Result EvaluationCalculator::evaluateData()
 {
     loginf << "start";
 
-    assert(data_loaded_);
-    assert(canEvaluate().ok());
+    traced_assert(data_loaded_);
+    traced_assert(canEvaluate().ok());
 
     Projection& projection = ProjectionManager::instance().currentProjection();
     projection.clearCoordinateSystems();
@@ -520,7 +520,7 @@ std::map<unsigned int, std::set<unsigned int>> EvaluationCalculator::usedDataSou
         for (auto& line_it : line_ref_set)
             loginf << "ref line " << line_it;
 
-        assert (ds_man.hasDBDataSource(ds_id));
+        traced_assert(ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
             data_sources.insert(make_pair(ds_id, line_ref_set));
@@ -537,7 +537,7 @@ std::map<unsigned int, std::set<unsigned int>> EvaluationCalculator::usedDataSou
         for (auto& line_it : line_tst_set)
             loginf << "tst line " << line_it;
 
-        assert (ds_man.hasDBDataSource(ds_id));
+        traced_assert(ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
         {
@@ -569,7 +569,7 @@ const std::string& EvaluationCalculator::minHeightFilterLayerName() const
  */
 void EvaluationCalculator::minHeightFilterLayerName(const std::string& layer_name)
 {
-    assert(layer_name.empty() || eval_man_.hasSectorLayer(layer_name));
+    traced_assert(layer_name.empty() || eval_man_.hasSectorLayer(layer_name));
 
     loginf << "layer changed to "
            << (layer_name.empty() ? "null" : "'" + layer_name + "'");
@@ -656,7 +656,7 @@ set<unsigned int> EvaluationCalculator::activeDataSourcesRef()
     for (auto& ds_it : data_sources_ref_[settings_.dbcontent_name_ref_])
     {
         unsigned int ds_id = stoul(ds_it.first);
-        assert (ds_man.hasDBDataSource(ds_id));
+        traced_assert(ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
             srcs.insert(ds_id);
@@ -680,7 +680,7 @@ EvaluationCalculator::EvaluationDSInfo EvaluationCalculator::activeDataSourceInf
             continue;
 
         unsigned int ds_id = stoul(ds_it.first);
-        assert (ds_man.hasDBDataSource(ds_id));
+        traced_assert(ds_man.hasDBDataSource(ds_id));
 
         const auto& name = ds_man.dbDataSource(ds_id).name();
 
@@ -754,7 +754,7 @@ set<unsigned int> EvaluationCalculator::activeDataSourcesTst()
     for (auto& ds_it : data_sources_tst_[settings_.dbcontent_name_tst_])
     {
         unsigned int ds_id = stoul(ds_it.first);
-        assert (ds_man.hasDBDataSource(ds_id));
+        traced_assert(ds_man.hasDBDataSource(ds_id));
 
         if (ds_it.second)
             srcs.insert(ds_id);
@@ -778,7 +778,7 @@ EvaluationCalculator::EvaluationDSInfo EvaluationCalculator::activeDataSourceInf
             continue;
 
         unsigned int ds_id = stoul(ds_it.first);
-        assert (ds_man.hasDBDataSource(ds_id));
+        traced_assert(ds_man.hasDBDataSource(ds_id));
 
         const auto& name = ds_man.dbDataSource(ds_id).name();
 
@@ -842,7 +842,7 @@ void EvaluationCalculator::currentStandardName(const std::string& current_standa
     settings_.current_standard_ = current_standard;
 
     if (settings_.current_standard_.size())
-        assert (hasStandard(settings_.current_standard_));
+        traced_assert(hasStandard(settings_.current_standard_));
 
     emit currentStandardChanged();
 }
@@ -853,8 +853,8 @@ void EvaluationCalculator::renameCurrentStandard (const std::string& new_name)
 {
     loginf << "new name '" << new_name << "'";
 
-    assert (hasCurrentStandard());
-    assert (!hasStandard(new_name));
+    traced_assert(hasCurrentStandard());
+    traced_assert(!hasStandard(new_name));
 
     currentStandard().name(new_name);
     settings_.current_standard_ = new_name;
@@ -869,8 +869,8 @@ void EvaluationCalculator::copyCurrentStandard (const std::string& new_name)
 {
     loginf << "new name '" << new_name << "'";
 
-    assert (hasCurrentStandard());
-    assert (!hasStandard(new_name));
+    traced_assert(hasCurrentStandard());
+    traced_assert(!hasStandard(new_name));
 
     nlohmann::json data;
     data["parameters"]["name"] = new_name;
@@ -887,14 +887,14 @@ void EvaluationCalculator::copyCurrentStandard (const std::string& new_name)
  */
 EvaluationStandard& EvaluationCalculator::currentStandard()
 {
-    assert (hasCurrentStandard());
+    traced_assert(hasCurrentStandard());
 
     string name = settings_.current_standard_;
 
     auto iter = std::find_if(standards_.begin(), standards_.end(),
                              [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
 
-    assert (iter != standards_.end());
+    traced_assert(iter != standards_.end());
 
     return *iter->get();
 }
@@ -903,14 +903,14 @@ EvaluationStandard& EvaluationCalculator::currentStandard()
  */
 const EvaluationStandard& EvaluationCalculator::currentStandard() const
 {
-    assert (hasCurrentStandard());
+    traced_assert(hasCurrentStandard());
 
     string name = settings_.current_standard_;
 
     auto iter = std::find_if(standards_.begin(), standards_.end(),
                              [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
 
-    assert (iter != standards_.end());
+    traced_assert(iter != standards_.end());
 
     return *iter->get();
 }
@@ -931,7 +931,7 @@ void EvaluationCalculator::addStandard(const std::string& name)
 {
     loginf << "name " << name;
 
-    assert (!hasStandard(name));
+    traced_assert(!hasStandard(name));
 
     std::string instance = "EvaluationStandard" + name + "0";
 
@@ -951,14 +951,14 @@ void EvaluationCalculator::deleteCurrentStandard()
 {
     loginf << "name " << settings_.current_standard_;
 
-    assert (hasCurrentStandard());
+    traced_assert(hasCurrentStandard());
 
     string name = settings_.current_standard_;
 
     auto iter = std::find_if(standards_.begin(), standards_.end(),
                              [&name](const unique_ptr<EvaluationStandard>& x) { return x->name() == name;});
 
-    assert (iter != standards_.end());
+    traced_assert(iter != standards_.end());
 
     standards_.erase(iter);
 
@@ -1209,7 +1209,7 @@ EvaluationRequirementResult::Single* EvaluationCalculator::singleResult(const Ev
                 continue;
 
             auto single_ptr = dynamic_cast<EvaluationRequirementResult::Single*>(result.second.get());
-            assert(single_ptr);
+            traced_assert(single_ptr);
 
             if (!single_ptr->isResult(id) || single_ptr->utn() != utn)
                 continue;
@@ -1233,7 +1233,7 @@ EvaluationRequirementResult::Joined* EvaluationCalculator::joinedResult(const Ev
                 continue;
 
             auto joined_ptr = dynamic_cast<EvaluationRequirementResult::Joined*>(result.second.get());
-            assert(joined_ptr);
+            traced_assert(joined_ptr);
 
             if (!joined_ptr->isResult(id))
                 continue;
@@ -1483,7 +1483,7 @@ void EvaluationCalculator::showSurroundingData (const EvaluationTarget& target)
 const json::boolean_t& EvaluationCalculator::useGroupInSectorLayer(const std::string& sector_layer_name,
                                                                    const std::string& group_name) const
 {
-    assert (hasCurrentStandard());
+    traced_assert(hasCurrentStandard());
 
     nlohmann::json& use_grp_in_sector = const_cast<nlohmann::json&>(settings_.use_grp_in_sector_);
 
@@ -1502,7 +1502,7 @@ void EvaluationCalculator::useGroupInSectorLayer(const std::string& sector_layer
                                                  const std::string& group_name, 
                                                  bool value)
 {
-    assert (hasCurrentStandard());
+    traced_assert(hasCurrentStandard());
 
     loginf << "start"
            << " standard_name " << settings_.current_standard_
@@ -1626,7 +1626,7 @@ void EvaluationCalculator::updateCompoundCoverage(std::set<unsigned int> tst_sou
 
     for (auto ds_id : tst_sources)
     {
-        assert (ds_man.hasDBDataSource(ds_id));
+        traced_assert(ds_man.hasDBDataSource(ds_id));
 
         dbContent::DBDataSource& ds = ds_man.dbDataSource(ds_id);
 

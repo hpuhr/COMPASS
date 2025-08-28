@@ -158,20 +158,20 @@ void VariableWidget::update()
 void VariableWidget::editNameSlot()
 {
     logdbg << "start";
-    assert(name_edit_);
+    traced_assert(name_edit_);
 
     std::string text = name_edit_->text().toStdString();
-    assert(text.size() > 0);
+    traced_assert(text.size() > 0);
     variable_->name(text);
     emit dbcontVariableChangedSignal();
 }
 void VariableWidget::editDescriptionSlot()
 {
     logdbg << "start";
-    assert(description_edit_);
+    traced_assert(description_edit_);
 
     std::string text = description_edit_->text().toStdString();
-    assert(text.size() > 0);
+    traced_assert(text.size() > 0);
     variable_->description(text);
     emit dbcontVariableChangedSignal();
 }
@@ -179,7 +179,7 @@ void VariableWidget::editDescriptionSlot()
 //void VariableWidget::editDataTypeSlot()
 //{
 //    logdbg << "start";
-//    assert(type_combo_);
+//    traced_assert(type_combo_);
 //    variable_->dataType(type_combo_->getType());
 //    emit dbcontVariableChangedSignal();
 //}

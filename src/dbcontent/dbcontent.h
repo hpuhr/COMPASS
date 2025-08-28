@@ -20,6 +20,7 @@
 #include "configurable.h"
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/variable/variableset.h"
+#include "traced_assert.h"
 
 #include <QObject>
 
@@ -251,7 +252,7 @@ public:
     const std::string& name() const { return name_; }
     void name(const std::string& name)
     {
-        assert(name.size() > 0);
+        traced_assert(name.size() > 0);
         name_ = name;
     }
 

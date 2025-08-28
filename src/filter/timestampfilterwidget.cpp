@@ -60,8 +60,8 @@ void TimestampFilterWidget::update()
 
     DBFilterWidget::update();
 
-    assert (min_edit_);
-    assert (max_edit_);
+    traced_assert(min_edit_);
+    traced_assert(max_edit_);
 
     min_edit_->setDateTime(QDateTime::fromString(Time::toString(filter_.minValue()).c_str(),
                                                  Time::QT_DATETIME_FORMAT.c_str()));

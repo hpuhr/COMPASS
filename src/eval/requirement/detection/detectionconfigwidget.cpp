@@ -33,10 +33,10 @@ namespace EvaluationRequirement
 DetectionConfigWidget::DetectionConfigWidget(DetectionConfig& cfg)
     : ProbabilityBaseConfigWidget(cfg)
 {
-    assert (prob_edit_);
+    traced_assert(prob_edit_);
     prob_edit_->setToolTip("Probability of detection or miss (inverted probability)");
 
-    assert (check_type_box_);
+    traced_assert(check_type_box_);
 
     // ui
     update_interval_edit_ = new QLineEdit(QString::number(config().updateInterval()));
@@ -139,7 +139,7 @@ void DetectionConfigWidget::toggleUseMinGapLengthSlot()
 {
     loginf << "start";
 
-    assert (use_min_gap_length_check_);
+    traced_assert(use_min_gap_length_check_);
     config().useMinGapLength(use_min_gap_length_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -162,7 +162,7 @@ void DetectionConfigWidget::toggleUseMaxGapLengthSlot()
 {
     loginf << "start";
 
-    assert (use_max_gap_length_check_);
+    traced_assert(use_max_gap_length_check_);
     config().useMaxGapLength(use_max_gap_length_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -185,7 +185,7 @@ void DetectionConfigWidget::toggleInvertProbSlot()
 {
     loginf << "start";
 
-    assert (use_invert_prob_check_);
+    traced_assert(use_invert_prob_check_);
     config().invertProb(use_invert_prob_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -196,7 +196,7 @@ void DetectionConfigWidget::toggleUseMissToleranceSlot()
 {
     loginf << "start";
 
-    assert (use_miss_tolerance_check_);
+    traced_assert(use_miss_tolerance_check_);
     config().useMissTolerance(use_miss_tolerance_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -218,27 +218,27 @@ void DetectionConfigWidget::toggleHoldForAnyTargetSlot()
 {
     loginf << "start";
 
-    assert (hold_for_any_target_check_);
+    traced_assert(hold_for_any_target_check_);
     config().holdForAnyTarget(hold_for_any_target_check_->checkState() == Qt::Checked);
 }
 
 DetectionConfig& DetectionConfigWidget::config()
 {
     DetectionConfig* config = dynamic_cast<DetectionConfig*>(&config_);
-    assert (config);
+    traced_assert(config);
 
     return *config;
 }
 
 void DetectionConfigWidget::updateActive()
 {
-    assert (min_gap_length_edit_);
+    traced_assert(min_gap_length_edit_);
     min_gap_length_edit_->setEnabled(config().useMinGapLength());
 
-    assert (max_gap_length_edit_);
+    traced_assert(max_gap_length_edit_);
     max_gap_length_edit_->setEnabled(config().useMaxGapLength());
 
-    assert (miss_tolerance_edit_);
+    traced_assert(miss_tolerance_edit_);
     miss_tolerance_edit_->setEnabled(config().useMissTolerance());
 }
 

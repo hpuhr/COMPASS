@@ -24,7 +24,7 @@
 
 #include <boost/optional/optional_io.hpp>
 
-#include <cassert>
+#include "traced_assert.h"
 #include <algorithm>
 #include <sstream>
 
@@ -165,7 +165,7 @@ void PositionAccuracy::scaleToMinStdDev(double min_stddev)
 
 void PositionAccuracy::scaleUsing(double scale_factor)
 {
-    assert (std::isfinite(scale_factor));
+    traced_assert(std::isfinite(scale_factor));
 
     x_stddev_ *= scale_factor;
     y_stddev_ *= scale_factor;

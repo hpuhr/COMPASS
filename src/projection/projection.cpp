@@ -28,7 +28,7 @@ Projection::Projection(const std::string& class_id, const std::string& instance_
 {
     registerParameter("name", &name_, std::string());
 
-    assert(name_.size());
+    traced_assert(name_.size());
 
     // createSubConfigurables called in subclasses
 }

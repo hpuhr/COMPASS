@@ -58,7 +58,7 @@ void PositionRadarRangeConfigWidget::thresholdValueEditSlot(QString value)
 PositionRadarRangeConfig& PositionRadarRangeConfigWidget::config()
 {
     PositionRadarRangeConfig* config = dynamic_cast<PositionRadarRangeConfig*>(&config_);
-    assert (config);
+    traced_assert(config);
 
     return *config;
 }

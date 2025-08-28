@@ -28,8 +28,8 @@ void mixStates(Vector& x_mixed,
                const std::vector<Matrix>& Ps,
                const std::vector<double>& weights)
 {
-    assert(xs.size() == Ps.size());
-    assert(xs.size() == weights.size());
+    traced_assert(xs.size() == Ps.size());
+    traced_assert(xs.size() == weights.size());
 
     size_t n = xs.size();
 

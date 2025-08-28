@@ -138,8 +138,8 @@ void KalmanFilterLinear::printIntermSteps(std::stringstream& strm, const std::st
 */
 void KalmanFilterLinear::updateInternalMatrices_impl(double dt, double Q_var)
 {
-    assert(F_func_);
-    assert(Q_func_);
+    traced_assert(F_func_);
+    traced_assert(Q_func_);
 
     F_func_(F_, dt);
     Q_func_(Q_, dt, Q_var);
@@ -261,8 +261,8 @@ KalmanFilter::Error KalmanFilterLinear::predictState_impl(Vector& x,
                                                           const OVector& u,
                                                           KalmanState* state) const
 {
-    assert(F_func_);
-    assert(Q_func_);
+    traced_assert(F_func_);
+    traced_assert(Q_func_);
 
     KalmanFilter::Error err;
 

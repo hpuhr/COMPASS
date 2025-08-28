@@ -16,6 +16,7 @@
  */
 
 #include "dbcontent/variable/variableset.h"
+#include "traced_assert.h"
 
 #include <algorithm>
 
@@ -70,7 +71,7 @@ bool VariableSet::add(const VariableSet& set)
 
 void VariableSet::removeVariableAt(unsigned int index)
 {
-    assert(index < set_.size());
+    traced_assert(index < set_.size());
 
     set_.erase(set_.begin() + index);
 
@@ -106,7 +107,7 @@ VariableSet& VariableSet::operator=(const VariableSet& source)
 
 Variable& VariableSet::getVariable(unsigned int index) const
 {
-    assert(index < set_.size());
+    traced_assert(index < set_.size());
     return *set_.at(index);
 }
 
@@ -181,7 +182,7 @@ bool VariableSet::hasDBColumnName(const std::string& db_column_name)
 
 unsigned int VariableSet::getVariableWithDBColumnName(const std::string& db_column_name)
 {
-    assert(hasDBColumnName(db_column_name));
+    traced_assert(hasDBColumnName(db_column_name));
 
     unsigned int cnt = 0;
     for (auto var_it : set_)
@@ -192,7 +193,7 @@ unsigned int VariableSet::getVariableWithDBColumnName(const std::string& db_colu
         ++cnt;
     }
 
-    assert(false);
+    traced_assert(false);
 }
 
 }

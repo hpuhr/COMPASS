@@ -166,7 +166,7 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
     tie(ref_pos, ok) = target.interpolatedPosForTimeFast(
         tr.timestamp_, max_time_diff_);
 
-    assert (ok);
+    traced_assert(ok);
 
     double distance_m = osgEarth::GeoMath::distance(tr.position_->latitude_ * DEG2RAD,
                                                     tr.position_->longitude_ * DEG2RAD,
@@ -206,11 +206,11 @@ boost::optional<std::tuple<double, double, double>> SimpleAssociator::getPositio
     bool ok;
 
     tie(target0_pos, ok) = target0.interpolatedPosForTimeFast(ts, max_time_diff_);
-    assert (ok);
+    traced_assert(ok);
 
     dbContent::targetReport::Position target1_pos;
     tie(target1_pos, ok) = target1.interpolatedPosForTimeFast(ts, max_time_diff_);
-    assert (ok);
+    traced_assert(ok);
 
     double distance_m = osgEarth::GeoMath::distance(target0_pos.latitude_ * DEG2RAD, target0_pos.longitude_ * DEG2RAD,
                                                     target1_pos.latitude_ * DEG2RAD, target1_pos.longitude_ * DEG2RAD);

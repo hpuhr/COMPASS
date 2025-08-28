@@ -322,13 +322,13 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
     //               << " num_speeds " << num_speeds;
 
-    assert (num_no_ref <= num_pos);
+    traced_assert(num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
         logwrn << "'" << name_ << "': utn " << target_data.utn_
                << " num_pos " << num_pos << " num_no_ref " <<  num_no_ref
                << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside;
-    assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
 
     if (num_trackangle_comp != num_comp_failed + num_comp_passed)
@@ -336,7 +336,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> TrackAngle::evaluate (
                << " num_speeds " << num_trackangle_comp
                << " num_comp_failed " <<  num_comp_failed << " num_comp_passed " << num_comp_passed;
 
-    assert (num_trackangle_comp == num_comp_failed + num_comp_passed);
+    traced_assert(num_trackangle_comp == num_comp_failed + num_comp_passed);
 
     return make_shared<EvaluationRequirementResult::SingleTrackAngle>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
@@ -358,7 +358,7 @@ dbContent::TargetPosition TrackAngle::getPositionAtAngle(
     new_pos = org;
 
     tie (ok, new_pos.latitude_, new_pos.longitude_) = trafo_.wgsAddCartOffset(org.latitude_, org.longitude_, x, y);
-    assert (ok);
+    traced_assert(ok);
 
     return new_pos;
 }

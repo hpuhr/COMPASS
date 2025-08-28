@@ -172,7 +172,7 @@ public:
         static std::set<std::string> unspecific_acids_;
 
         TargetsContainer(ReconstructorBase* reconstructor)
-            :reconstructor_(reconstructor) { assert(reconstructor_); }
+            :reconstructor_(reconstructor) { traced_assert(reconstructor_); }
 
         ReconstructorBase* reconstructor_;
 

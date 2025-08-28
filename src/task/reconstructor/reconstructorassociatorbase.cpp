@@ -209,7 +209,7 @@ void ReconstructorAssociatorBase::associateTargetReportBatch(const boost::posix_
     for (auto& rn_it : batch.rec_nums_)
     {
         rec_num = rn_it;
-        assert(reconstructor().target_reports_.count(rec_num));
+        traced_assert(reconstructor().target_reports_.count(rec_num));
 
         dbContent::targetReport::ReconstructorInfo& tr =
             reconstructor().target_reports_.at(rec_num);
@@ -276,7 +276,7 @@ void ReconstructorAssociatorBase::associateTargetReportBatch(const boost::posix_
 
             if (do_debug_rec_num || do_debug_utn)
             {
-                assert(reconstructor().targets_container_.targets_.count(utn));
+                traced_assert(reconstructor().targets_container_.targets_.count(utn));
 
                 loginf << "DBG target after assoc "
                         << reconstructor().targets_container_.targets_.at(utn).asStr();
@@ -327,7 +327,7 @@ void ReconstructorAssociatorBase::associateTargetReports(std::set<unsigned int> 
         for (auto& rn_it : batch_it.second.rec_nums_)
         {
             rec_num = rn_it;
-            assert(reconstructor().target_reports_.count(rec_num));
+            traced_assert(reconstructor().target_reports_.count(rec_num));
 
             do_debug = reconstructor().task().debugSettings().debug_association_ &&
                        reconstructor().task().debugSettings().debugRecNum(rec_num);
@@ -395,7 +395,7 @@ RESTART_SELF_ASSOC:
     // collect scored pairs
     for (auto utn : reconstructor().targets_container_.utn_vec_)
     {
-        assert (reconstructor().targets_container_.targets_.count(utn));
+        traced_assert(reconstructor().targets_container_.targets_.count(utn));
         dbContent::ReconstructorTarget& target = reconstructor().targets_container_.targets_.at(utn);
 
         if (!target.target_reports_.size()) // can not compare
@@ -437,11 +437,11 @@ RESTART_SELF_ASSOC:
                 && !utns_to_remove.count(utn) && !utns_to_remove.count(other_utn))
             {
                 // join and schedule for remove
-                assert (reconstructor().targets_container_.targets_.count(utn));
+                traced_assert(reconstructor().targets_container_.targets_.count(utn));
                 dbContent::ReconstructorTarget& target =
                     reconstructor().targets_container_.targets_.at(utn);
 
-                assert (reconstructor().targets_container_.targets_.count(other_utn));
+                traced_assert(reconstructor().targets_container_.targets_.count(other_utn));
                 dbContent::ReconstructorTarget& other_target =
                     reconstructor().targets_container_.targets_.at(other_utn);
 
@@ -475,7 +475,7 @@ RESTART_SELF_ASSOC:
     {
         for (auto other_utn : utns_to_remove)
         {
-            assert (reconstructor().targets_container_.targets_.count(other_utn));
+            traced_assert(reconstructor().targets_container_.targets_.count(other_utn));
 
             reconstructor().targets_container_.removeUTN(other_utn);
         }
@@ -517,7 +517,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 
         dbcont_id = Number::recNumGetDBContId(rec_num);
 
-        assert (reconstructor().target_reports_.count(rec_num));
+        traced_assert(reconstructor().target_reports_.count(rec_num));
 
         do_debug = reconstructor().task().debugSettings().debug_association_
                    && reconstructor().task().debugSettings().debugRecNum(rec_num);
@@ -539,11 +539,11 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
         }
 
         // check if should have been associated
-        assert (!tr.acad_);
-        assert (!tr.acid_);
+        traced_assert(!tr.acad_);
+        traced_assert(!tr.acid_);
 
         if (dbcont_id == 62 || dbcont_id == 255)
-            assert (!tr.track_number_);
+            traced_assert(!tr.track_number_);
 
         utn = findUTNByModeACPos (tr);
 
@@ -570,7 +570,7 @@ void ReconstructorAssociatorBase::retryAssociateTargetReports()
 void ReconstructorAssociatorBase::associate(
     dbContent::targetReport::ReconstructorInfo& tr, int utn)
 {
-    assert (utn >= 0);
+    traced_assert(utn >= 0);
 
     bool do_debug = reconstructor().task().debugSettings().debug_association_
                     && (reconstructor().task().debugSettings().debugRecNum(tr.record_num_)
@@ -583,7 +583,7 @@ void ReconstructorAssociatorBase::associate(
         logerr << "utn " << utn << " missing";
 
     // add associated target reports
-    assert (reconstructor().targets_container_.targets_.count(utn));
+    traced_assert(reconstructor().targets_container_.targets_.count(utn));
 
     if(do_debug)
         loginf << "DBG associate tr " << tr.asStr() << " to utn "
@@ -637,7 +637,7 @@ void ReconstructorAssociatorBase::countUnAssociated()
 
         dbcont_id = Number::recNumGetDBContId(rec_num);
 
-        assert (reconstructor().target_reports_.count(rec_num));
+        traced_assert(reconstructor().target_reports_.count(rec_num));
 
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rec_num);
 
@@ -661,7 +661,7 @@ int ReconstructorAssociatorBase::findUTNFor (dbContent::targetReport::Reconstruc
     const boost::posix_time::time_duration track_max_time_diff =
         Time::partialSeconds(reconstructor().settings().track_max_time_diff_);
 
-    assert (reconstructor().targets_container_.targets_.size() == reconstructor().targets_container_.utn_vec_.size());
+    traced_assert(reconstructor().targets_container_.targets_.size() == reconstructor().targets_container_.utn_vec_.size());
 
 START_TR_ASSOC:
 
@@ -691,7 +691,7 @@ START_TR_ASSOC:
                 if (do_debug)
                     loginf << "DBG restart assoc due to track_num disassoc";
 
-                assert (!reconstructor().targets_container_.canAssocByTrackNumber(tr, do_debug));
+                traced_assert(!reconstructor().targets_container_.canAssocByTrackNumber(tr, do_debug));
 
                 goto START_TR_ASSOC;
             }
@@ -702,7 +702,7 @@ START_TR_ASSOC:
             if (utn != -1 && reconstructor().settings().do_track_number_disassociate_using_distance_
                 && canGetPositionOffsetTR(tr, reconstructor().targets_container_.targets_.at(utn)))
             {
-                assert (reconstructor().targets_container_.targets_.count(utn));
+                traced_assert(reconstructor().targets_container_.targets_.count(utn));
 
                 if (do_debug)
                     loginf << "DBG stored utn in tn2utn_ checking position offset";
@@ -742,24 +742,24 @@ START_TR_ASSOC:
                 if (do_debug)
                     loginf << "DBG use mode a/c/pos assoc to new utn " << utn;
 
-                assert (reconstructor().targets_container_.targets_.count(utn));
+                traced_assert(reconstructor().targets_container_.targets_.count(utn));
             }
             else
             {
-                assert (reconstructor().targets_container_.targets_.count(utn));
+                traced_assert(reconstructor().targets_container_.targets_.count(utn));
 
                 if (do_debug)
                     loginf << "DBG use mode a/c/pos assoc to existing utn " << utn;
             }
         }
-        assert (utn != -1);
+        traced_assert(utn != -1);
 
         if(do_debug)
             loginf << "DBG tr " << tr.record_num_ << " utn by acad/acid/track num";
     }
     else // not associated by trustworty id
     {
-        assert (utn == -1);
+        traced_assert(utn == -1);
 
         if(do_debug)
             loginf << "DBG tr " << tr.record_num_ << " no utn by acad, doing mode a/c + pos";
@@ -767,7 +767,7 @@ START_TR_ASSOC:
         utn = findUTNByModeACPos (tr);
 
         if (utn != -1)
-            assert (reconstructor().targets_container_.targets_.count(utn));
+            traced_assert(reconstructor().targets_container_.targets_.count(utn));
     }
 
     return utn;
@@ -777,7 +777,7 @@ int ReconstructorAssociatorBase::findUTNByModeACPos (
     const dbContent::targetReport::ReconstructorInfo& tr)
 {
     unsigned int num_targets = reconstructor().targets_container_.targets_.size();
-    assert (reconstructor().targets_container_.utn_vec_.size() == num_targets);
+    traced_assert(reconstructor().targets_container_.utn_vec_.size() == num_targets);
 
     vector<tuple<bool, unsigned int, double>> results;
     vector<reconstruction::PredictionStats> prediction_stats;
@@ -996,7 +996,7 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
     if (!reconstructor().targets_container_.targets_.size()) // check if targets exist
         return std::pair<float, std::pair<unsigned int, unsigned int>>{std::numeric_limits<float>::lowest(), {0,0}};
 
-    assert (reconstructor().targets_container_.targets_.count(utn));
+    traced_assert(reconstructor().targets_container_.targets_.count(utn));
 
     const dbContent::ReconstructorTarget& target = reconstructor().targets_container_.targets_.at(utn);
 
@@ -1038,7 +1038,7 @@ std::pair<float, std::pair<unsigned int, unsigned int>> ReconstructorAssociatorB
 
         for (auto rn_it : rec_nums)
         {
-            assert (reconstructor().target_reports_.count(rn_it));
+            traced_assert(reconstructor().target_reports_.count(rn_it));
 
             const dbContent::targetReport::ReconstructorInfo& tr = reconstructor().target_reports_.at(rn_it);
 

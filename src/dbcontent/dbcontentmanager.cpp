@@ -71,8 +71,8 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     for (auto& object_it : dbcontent_)
     {
-        assert (object_it.second->id() < 256);
-        assert (dbcont_ids.count(object_it.second->id()) == 0);
+        traced_assert(object_it.second->id() < 256);
+        traced_assert(dbcont_ids.count(object_it.second->id()) == 0);
         dbcont_ids.insert(object_it.second->id());
     }
 
@@ -82,9 +82,9 @@ DBContentManager::DBContentManager(const std::string& class_id, const std::strin
 
     dbContent::init_dbcontent_commands();
 
-    assert (!target_model_);
+    traced_assert(!target_model_);
     target_model_.reset(new dbContent::TargetModel(*this));
-    assert (target_model_);
+    traced_assert(target_model_);
 }
 
 /**
@@ -119,8 +119,8 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
         DBContent* object = new DBContent(compass_, class_id, instance_id, this);
         loginf << "adding content " << object->name()
                << " id " << object->id();
-        assert(!dbcontent_.count(object->name()));
-        assert(!dbcontent_ids_.count(object->id()));
+        traced_assert(!dbcontent_.count(object->name()));
+        traced_assert(!dbcontent_ids_.count(object->id()));
 
         dbcontent_[object->name()] = object;
         dbcontent_ids_[object->id()] = object;
@@ -131,7 +131,7 @@ void DBContentManager::generateSubConfigurable(const std::string& class_id,
         logdbg << "adding meta var type "
                << meta_var->name();
 
-        assert(!existsMetaVariable(meta_var->name()));
+        traced_assert(!existsMetaVariable(meta_var->name()));
         //meta_variables_.emplace(meta_var->name(), meta_var);
         //meta_variables_.emplace_back(meta_var);
 
@@ -166,7 +166,7 @@ DBContent& DBContentManager::dbContent(const std::string& dbcontent_name)
 {
     logdbg << "name " << dbcontent_name;
 
-    assert(dbcontent_.find(dbcontent_name) != dbcontent_.end());
+    traced_assert(dbcontent_.find(dbcontent_name) != dbcontent_.end());
 
     return *dbcontent_.at(dbcontent_name);
 }
@@ -176,7 +176,7 @@ DBContent& DBContentManager::dbContent(const std::string& dbcontent_name)
 void DBContentManager::deleteDBContent(const std::string& dbcontent_name)
 {
     logdbg << "name " << dbcontent_name;
-    assert(existsDBContent(dbcontent_name));
+    traced_assert(existsDBContent(dbcontent_name));
     delete dbcontent_.at(dbcontent_name);
     dbcontent_.erase(dbcontent_name);
 
@@ -189,7 +189,7 @@ void DBContentManager::deleteDBContentData(boost::posix_time::ptime before_times
 {
     loginf << "start";
 
-    assert (!delete_job_);
+    traced_assert(!delete_job_);
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setBeforeTimestamp(before_timestamp);
@@ -234,7 +234,7 @@ bool DBContentManager::existsDBContentWithId (unsigned int id)
  */
 const std::string& DBContentManager::dbContentWithId (unsigned int id)
 {
-    assert (dbcontent_ids_.count(id));
+    traced_assert(dbcontent_ids_.count(id));
     return dbcontent_ids_.at(id)->name();
 }
 
@@ -251,7 +251,7 @@ MetaVariable& DBContentManager::metaVariable(const std::string& var_name)
 {
     logdbg << "name " << var_name;
 
-    assert (meta_variables_.count(var_name));
+    traced_assert(meta_variables_.count(var_name));
     return *(meta_variables_.at(var_name).get());
 }
 
@@ -259,7 +259,7 @@ MetaVariable& DBContentManager::metaVariable(const std::string& var_name)
  */
 void DBContentManager::renameMetaVariable(const std::string& old_var_name, const std::string& new_var_name)
 {
-    assert(existsMetaVariable(old_var_name));
+    traced_assert(existsMetaVariable(old_var_name));
 
     std::unique_ptr<dbContent::MetaVariable> meta_var = std::move(meta_variables_.at(old_var_name));
     meta_variables_.erase(old_var_name);
@@ -279,7 +279,7 @@ void DBContentManager::renameMetaVariable(const std::string& old_var_name, const
 void DBContentManager::deleteMetaVariable(const std::string& var_name)
 {
     logdbg << "name " << var_name;
-    assert(existsMetaVariable(var_name));
+    traced_assert(existsMetaVariable(var_name));
 
     meta_variables_.erase(var_name);
 
@@ -310,7 +310,7 @@ DBContentManagerWidget* DBContentManager::widget()
         widget_.reset(new DBContentManagerWidget(*this));
     }
 
-    assert(widget_);
+    traced_assert(widget_);
     return widget_.get();
 }
 
@@ -490,7 +490,7 @@ void DBContentManager::quitLoading()
 {
     loginf << "start";
 
-    assert (load_in_progress_);
+    traced_assert(load_in_progress_);
 
     for (auto& object : dbcontent_)
     {
@@ -514,7 +514,7 @@ void DBContentManager::databaseOpenedSlot()
 
     if (db_interface.hasProperty("associations_generated"))
     {
-        assert(db_interface.hasProperty("associations_id"));
+        traced_assert(db_interface.hasProperty("associations_id"));
 
         has_associations_ =
             db_interface.getProperty("associations_generated") == "1";
@@ -530,12 +530,12 @@ void DBContentManager::databaseOpenedSlot()
     if (db_interface.hasProperty(PROP_TIMESTAMP_MIN_NAME))
     {
         timestamp_min_ = Time::fromLong(stol(db_interface.getProperty(PROP_TIMESTAMP_MIN_NAME)));
-        assert (!timestamp_min_->is_not_a_date_time());
+        traced_assert(!timestamp_min_->is_not_a_date_time());
     }
     if (db_interface.hasProperty(PROP_TIMESTAMP_MAX_NAME))
     {
         timestamp_max_ = Time::fromLong(stol(db_interface.getProperty(PROP_TIMESTAMP_MAX_NAME)));
-        assert (!timestamp_max_->is_not_a_date_time());
+        traced_assert(!timestamp_max_->is_not_a_date_time());
     }
 
     if (hasMinMaxTimestamp())
@@ -631,7 +631,7 @@ void DBContentManager::deleteJobDoneSlot()
 {
     logdbg << "start";
 
-    assert (delete_job_);
+    traced_assert(delete_job_);
 
     delete_job_ = nullptr;
 }
@@ -640,7 +640,7 @@ void DBContentManager::deleteJobDoneSlot()
  */
 void DBContentManager::metaDialogOKSlot()
 {
-    assert (meta_cfg_dialog_);
+    traced_assert(meta_cfg_dialog_);
     meta_cfg_dialog_->hide();
 }
 
@@ -749,9 +749,9 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
         QThread::msleep(1);
     }
 
-    assert (!insert_in_progress_);
-    assert (!insert_data_.size());
-    assert (!insert_job_);
+    traced_assert(!insert_in_progress_);
+    traced_assert(!insert_data_.size());
+    traced_assert(!insert_job_);
 
     insert_in_progress_ = true;
     logdbg << "insert in progress " << insert_in_progress_;
@@ -761,7 +761,7 @@ void DBContentManager::insertData(std::map<std::string, std::shared_ptr<Buffer>>
     //@TODO: prepare insert in dbcontents in parallel
     for (auto& buf_it : insert_data_)
     {
-        assert(existsDBContent(buf_it.first));
+        traced_assert(existsDBContent(buf_it.first));
         dbContent(buf_it.first).prepareInsert(buf_it.second);
     }
 
@@ -805,7 +805,7 @@ void DBContentManager::finishInserting()
 
     logdbg << "size " << buffer_cnt;
 
-    assert (existsMetaVariable(DBContent::meta_var_timestamp_.name()));
+    traced_assert(existsMetaVariable(DBContent::meta_var_timestamp_.name()));
 
     insert_in_progress_ = false;
     logdbg << "insert in progress " << insert_in_progress_;
@@ -827,7 +827,7 @@ void DBContentManager::finishInserting()
     {
         string dbcont_name = buf_it.first;
 
-        assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
+        traced_assert(metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
 
         unsigned int buffer_size = buf_it.second->size();
 
@@ -1142,13 +1142,13 @@ void DBContentManager::addInsertedDataToChache()
                               data_.at(buf_it->first)->seizeBuffer(*buf_it->second.get());
 
                               // sort by tod
-                              assert (metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it->first));
+                              traced_assert(metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it->first));
 
                               Variable& ts_var = metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it->first);
 
                               Property ts_prop {ts_var.name(), ts_var.dataType()};
 
-                              assert (data_.at(buf_it->first)->hasProperty(ts_prop));
+                              traced_assert(data_.at(buf_it->first)->hasProperty(ts_prop));
 
                               data_.at(buf_it->first)->sortByProperty(ts_prop);
                           }
@@ -1175,8 +1175,8 @@ void DBContentManager::filterDataSources()
                           std::advance(buf_it, buffer_cnt);
 
                           // remove unwanted data sources
-                          assert (metaVariable(DBContent::meta_var_ds_id_.name()).existsIn(buf_it->first));
-                          assert (metaVariable(DBContent::meta_var_line_id_.name()).existsIn(buf_it->first));
+                          traced_assert(metaVariable(DBContent::meta_var_ds_id_.name()).existsIn(buf_it->first));
+                          traced_assert(metaVariable(DBContent::meta_var_line_id_.name()).existsIn(buf_it->first));
 
                           Variable& ds_id_var =
                               metaVariable(DBContent::meta_var_ds_id_.name()).getFor(buf_it->first);
@@ -1184,10 +1184,10 @@ void DBContentManager::filterDataSources()
                               metaVariable(DBContent::meta_var_line_id_.name()).getFor(buf_it->first);
 
                           Property ds_id_prop {ds_id_var.name(), ds_id_var.dataType()};
-                          assert (buf_it->second->hasProperty(ds_id_prop));
+                          traced_assert(buf_it->second->hasProperty(ds_id_prop));
 
                           Property line_id_prop {line_id_var.name(), line_id_var.dataType()};
-                          assert (buf_it->second->hasProperty(ds_id_prop));
+                          traced_assert(buf_it->second->hasProperty(ds_id_prop));
 
                           NullableVector<unsigned int>& ds_id_vec =
                               buf_it->second->get<unsigned int>(ds_id_var.name());
@@ -1201,8 +1201,8 @@ void DBContentManager::filterDataSources()
 
                           for (unsigned int index=0; index < buffer_size; ++index)
                           {
-                              assert (!ds_id_vec.isNull(index));
-                              assert (!line_id_vec.isNull(index));
+                              traced_assert(!ds_id_vec.isNull(index));
+                              traced_assert(!line_id_vec.isNull(index));
 
                               if (!wanted_data_sources.count(ds_id_vec.get(index)) // unwanted ds
                                   || !wanted_data_sources.at(ds_id_vec.get(index)).count(line_id_vec.get(index))) // unwanted line
@@ -1244,7 +1244,7 @@ void DBContentManager::cutCachedData()
     {
         buffer_size = buf_it.second->size();
 
-        assert (metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
+        traced_assert(metaVariable(DBContent::meta_var_timestamp_.name()).existsIn(buf_it.first));
 
         Variable& ts_var = metaVariable(DBContent::meta_var_timestamp_.name()).getFor(buf_it.first);
 
@@ -1277,7 +1277,7 @@ void DBContentManager::cutCachedData()
                        << " up to index " << index
                        << " total size " << buffer_size
                        << " index time " << (ts_vec.isNull(index) ? "null" : Time::toString(ts_vec.get(index)));
-                assert (index < buffer_size);
+                traced_assert(index < buffer_size);
                 buf_it.second->cutUpToIndex(index);
             }
         }
@@ -1305,8 +1305,8 @@ void DBContentManager::updateNumLoadedCounts()
 
     for (auto& buf_it : data_)
     {
-        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_ds_id_));
-        assert (metaCanGetVariable(buf_it.first, DBContent::meta_var_line_id_));
+        traced_assert(metaCanGetVariable(buf_it.first, DBContent::meta_var_ds_id_));
+        traced_assert(metaCanGetVariable(buf_it.first, DBContent::meta_var_line_id_));
 
         Variable& ds_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_ds_id_);
         Variable& line_id_var = metaGetVariable(buf_it.first, DBContent::meta_var_line_id_);
@@ -1314,8 +1314,8 @@ void DBContentManager::updateNumLoadedCounts()
         NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
         NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
 
-        assert (ds_id_vec.isNeverNull());
-        assert (line_id_vec.isNeverNull());
+        traced_assert(ds_id_vec.isNeverNull());
+        traced_assert(line_id_vec.isNeverNull());
 
         unsigned int buffer_size = buf_it.second->size();
 
@@ -1330,7 +1330,7 @@ void DBContentManager::updateNumLoadedCounts()
  */
 unsigned long DBContentManager::maxRecordNumberWODBContentID() const
 {
-    assert (has_max_rec_num_wo_dbcontid_);
+    traced_assert(has_max_rec_num_wo_dbcontid_);
     return max_rec_num_wo_dbcontid_;
 }
 
@@ -1348,7 +1348,7 @@ void DBContentManager::maxRecordNumberWODBContentID(unsigned long value)
  */
 unsigned int DBContentManager::maxRefTrajTrackNum() const
 {
-    assert (has_max_reftraj_track_num_);
+    traced_assert(has_max_reftraj_track_num_);
     return max_reftraj_track_num_;
 }
 
@@ -1382,8 +1382,8 @@ bool DBContentManager::hasMinMaxTimestamp() const
  */
 void DBContentManager::setMinMaxTimestamp(boost::posix_time::ptime min, boost::posix_time::ptime max)
 {
-    assert (!min.is_not_a_date_time());
-    assert (!max.is_not_a_date_time());
+    traced_assert(!min.is_not_a_date_time());
+    traced_assert(!max.is_not_a_date_time());
 
     timestamp_min_ = min;
     timestamp_max_ = max;
@@ -1396,7 +1396,7 @@ void DBContentManager::setMinMaxTimestamp(boost::posix_time::ptime min, boost::p
  */
 std::pair<boost::posix_time::ptime , boost::posix_time::ptime> DBContentManager::minMaxTimestamp() const
 {
-    assert (hasMinMaxTimestamp());
+    traced_assert(hasMinMaxTimestamp());
     return {timestamp_min_.get(), timestamp_max_.get()};
 }
 
@@ -1423,7 +1423,7 @@ void DBContentManager::setMinMaxLatitude(double min, double max)
  */
 std::pair<double, double> DBContentManager::minMaxLatitude() const
 {
-    assert (hasMinMaxPosition());
+    traced_assert(hasMinMaxPosition());
     return {latitude_min_.get(), latitude_max_.get()};
 }
 
@@ -1442,7 +1442,7 @@ void DBContentManager::setMinMaxLongitude(double min, double max)
  */
 std::pair<double, double> DBContentManager::minMaxLongitude() const
 {
-    assert (hasMinMaxPosition());
+    traced_assert(hasMinMaxPosition());
     return {longitude_min_.get(), longitude_max_.get()};
 }
 
@@ -1457,7 +1457,7 @@ const std::map<std::string, std::shared_ptr<Buffer>>& DBContentManager::data() c
  */
 bool DBContentManager::canGetVariable (const std::string& dbcont_name, const Property& property)
 {
-    assert (dbcontent_.count(dbcont_name));
+    traced_assert(dbcontent_.count(dbcont_name));
 
     return dbcontent_.at(dbcont_name)->hasVariable(property.name());
 }
@@ -1466,12 +1466,12 @@ bool DBContentManager::canGetVariable (const std::string& dbcont_name, const Pro
  */
 dbContent::Variable& DBContentManager::getVariable (const std::string& dbcont_name, const Property& property)
 {
-    assert (canGetVariable(dbcont_name, property));
-    assert (dbcontent_.at(dbcont_name)->hasVariable(property.name()));
+    traced_assert(canGetVariable(dbcont_name, property));
+    traced_assert(dbcontent_.at(dbcont_name)->hasVariable(property.name()));
 
     Variable& variable = dbcontent_.at(dbcont_name)->variable(property.name());
 
-    assert (variable.dataType() == property.dataType());
+    traced_assert(variable.dataType() == property.dataType());
 
     return variable;
 }
@@ -1480,7 +1480,7 @@ dbContent::Variable& DBContentManager::getVariable (const std::string& dbcont_na
  */
 bool DBContentManager::metaCanGetVariable (const std::string& dbcont_name, const Property& meta_property)
 {
-    assert (dbcontent_.count(dbcont_name));
+    traced_assert(dbcontent_.count(dbcont_name));
 
     if (!existsMetaVariable(meta_property.name()))
         return false;
@@ -1496,7 +1496,7 @@ dbContent::Variable& DBContentManager::metaGetVariable (const std::string& dbcon
     {
         logerr << "defined '" << meta_property.name()
                << "' in '" << dbcont_name << "'";
-        assert (false);
+        traced_assert(false);
     }
 
     return metaVariable(meta_property.name()).getFor(dbcont_name);
@@ -1537,7 +1537,7 @@ void DBContentManager::createNewTargets(const std::map<unsigned int, dbContent::
  */
 dbContent::Target& DBContentManager::target(unsigned int utn)
 {
-    assert (existsTarget(utn));
+    traced_assert(existsTarget(utn));
     return target_model_->target(utn);
 }
 
@@ -1579,8 +1579,8 @@ unsigned int DBContentManager::numTargets() const
  */
 nlohmann::json DBContentManager::targetsInfoAsJSON() const
 {
-    assert (hasAssociations());
-    assert (hasTargetsInfo());
+    traced_assert(hasAssociations());
+    traced_assert(hasTargetsInfo());
 
     return target_model_->asJSON();
 }
@@ -1589,8 +1589,8 @@ nlohmann::json DBContentManager::targetsInfoAsJSON() const
  */
 nlohmann::json DBContentManager::targetInfoAsJSON(unsigned int utn) const
 {
-    assert (hasAssociations());
-    assert (hasTargetsInfo());
+    traced_assert(hasAssociations());
+    traced_assert(hasTargetsInfo());
 
     return target_model_->targetAsJSON(utn);
 }
@@ -1599,8 +1599,8 @@ nlohmann::json DBContentManager::targetInfoAsJSON(unsigned int utn) const
  */
 nlohmann::json DBContentManager::targetStatsAsJSON() const
 {
-    assert (hasAssociations());
-    assert (hasTargetsInfo());
+    traced_assert(hasAssociations());
+    traced_assert(hasTargetsInfo());
 
     return target_model_->targetStatsAsJSON();
 }
@@ -1609,8 +1609,8 @@ nlohmann::json DBContentManager::targetStatsAsJSON() const
  */
 nlohmann::json DBContentManager::utnsAsJSON() const
 {
-    assert (hasAssociations());
-    assert (hasTargetsInfo());
+    traced_assert(hasAssociations());
+    traced_assert(hasTargetsInfo());
 
     return target_model_->utnsAsJSON();
 }
@@ -1633,7 +1633,7 @@ void DBContentManager::resetToStartupConfiguration()
     //        label_generator_ = nullptr;
 
     //        generateSubConfigurable("DBContentLabelGenerator", "DBContentLabelGenerator0");
-    //        assert (label_generator_);
+    //        traced_assert(label_generator_);
     //    }
 }
 
@@ -1641,7 +1641,7 @@ void DBContentManager::resetToStartupConfiguration()
  */
 const dbContent::TargetModel* DBContentManager::targetModel() const
 {
-    assert(target_model_);
+    traced_assert(target_model_);
     return target_model_.get();
 }
 
@@ -1651,7 +1651,7 @@ dbContent::TargetListWidget* DBContentManager::targetListWidget()
 {
     if (!target_list_widget_)
     {
-        assert (target_model_);
+        traced_assert(target_model_);
         target_list_widget_.reset (new dbContent::TargetListWidget(*target_model_, *this));
     }
 
@@ -1675,7 +1675,7 @@ void DBContentManager::resizeTargetListWidget()
 
 //    tmp_meta_variables.insert(make_move_iterator(std::begin(meta_variables_)),
 //                              make_move_iterator(std::end(meta_variables_)));
-//    assert (!meta_variables_.size());
+//    traced_assert(!meta_variables_.size());
 
 //    for (auto it = tmp_meta_variables.begin(); it != tmp_meta_variables.end() /* not hoisted */; /* no increment */)
 //    {
@@ -1698,7 +1698,7 @@ bool DBContentManager::insertInProgress() const
  */
 void DBContentManager::loadMaxRecordNumberWODBContentID()
 {
-    assert (COMPASS::instance().dbInterface().ready());
+    traced_assert(COMPASS::instance().dbInterface().ready());
 
     max_rec_num_wo_dbcontid_ = 0;
     unsigned long max_rec_num_with_dbcontid = 0;
@@ -1722,7 +1722,7 @@ void DBContentManager::loadMaxRecordNumberWODBContentID()
  */
 void DBContentManager::loadMaxRefTrajTrackNum()
 {
-    assert (COMPASS::instance().dbInterface().ready());
+    traced_assert(COMPASS::instance().dbInterface().ready());
 
     max_reftraj_track_num_ = COMPASS::instance().dbInterface().getMaxRefTrackTrackNum();
     has_max_reftraj_track_num_ = true;
@@ -1734,16 +1734,16 @@ void DBContentManager::loadMaxRefTrajTrackNum()
  */
 void DBContentManager::addStandardVariables(std::string dbcont_name, dbContent::VariableSet& read_set)
 {
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_rec_num_));
+    traced_assert(metaCanGetVariable(dbcont_name, DBContent::meta_var_rec_num_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_rec_num_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_ds_id_));
+    traced_assert(metaCanGetVariable(dbcont_name, DBContent::meta_var_ds_id_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_ds_id_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_line_id_));
+    traced_assert(metaCanGetVariable(dbcont_name, DBContent::meta_var_line_id_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_line_id_));
 
-    assert (metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
+    traced_assert(metaCanGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
     read_set.add(metaGetVariable(dbcont_name, DBContent::meta_var_timestamp_));
 
     if(metaCanGetVariable(dbcont_name, DBContent::meta_var_utn_))
@@ -1762,7 +1762,7 @@ MetaVariableConfigurationDialog* DBContentManager::metaVariableConfigdialog()
                 this, &DBContentManager::metaDialogOKSlot);
     }
 
-    assert(meta_cfg_dialog_);
+    traced_assert(meta_cfg_dialog_);
     return meta_cfg_dialog_.get();
 }
 
@@ -1795,7 +1795,7 @@ void DBContentManager::clearSelectedRecNums()
 
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {
-        assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
+        traced_assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
 
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
         selected_vec.setAll(false);
@@ -1813,11 +1813,11 @@ void DBContentManager::saveSelectedRecNums()
 
     for (const auto& buf_it : data_) // std::map<std::string, std::shared_ptr<Buffer>>
     {
-        assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
+        traced_assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
 
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
-        assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
+        traced_assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
         NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
@@ -1852,11 +1852,11 @@ void DBContentManager::restoreSelectedRecNums()
         if (sel_recnums.empty())
             continue;
 
-        assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
+        traced_assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
 
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
-        assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
+        traced_assert(buf_it.second->has<unsigned long>(DBContent::meta_var_rec_num_.name()));
         NullableVector<unsigned long>& rec_num_vec = buf_it.second->get<unsigned long>(
             DBContent::meta_var_rec_num_.name());
 
@@ -1879,8 +1879,8 @@ void DBContentManager::showSurroundingData (unsigned int utn)
 {
     nlohmann::json::object_t data;
 
-    assert (target_model_);
-    assert (target_model_->existsTarget(utn));
+    traced_assert(target_model_);
+    traced_assert(target_model_->existsTarget(utn));
 
     dbContent::Target& target = target_model_->target(utn);
 
@@ -1963,7 +1963,7 @@ void DBContentManager::showSurroundingData (std::set<unsigned int> utns)
 
     using namespace boost::posix_time;
 
-    assert (target_model_);
+    traced_assert(target_model_);
 
     ptime sum_time_begin, sum_time_end;
 
@@ -1977,7 +1977,7 @@ void DBContentManager::showSurroundingData (std::set<unsigned int> utns)
 
     for (auto utn : utns)
     {
-        assert (target_model_->existsTarget(utn));
+        traced_assert(target_model_->existsTarget(utn));
 
         dbContent::Target& target = target_model_->target(utn);
 
@@ -2122,8 +2122,8 @@ void DBContentManager::showSurroundingData (std::set<unsigned int> utns)
  */
 std::string DBContentManager::utnComment (unsigned int utn)
 {
-    assert (target_model_);
-    assert (target_model_->existsTarget(utn));
+    traced_assert(target_model_);
+    traced_assert(target_model_->existsTarget(utn));
     return target_model_->target(utn).comment();
 }
 
@@ -2133,8 +2133,8 @@ void DBContentManager::utnComment (unsigned int utn, std::string value)
 {
     loginf << "utn " << utn << " comment '" << value << "'";
 
-    assert (target_model_);
-    assert (target_model_->existsTarget(utn));
+    traced_assert(target_model_);
+    traced_assert(target_model_->existsTarget(utn));
     target_model_->setTargetComment(utn, value);
 }
 
@@ -2142,8 +2142,8 @@ void DBContentManager::utnComment (unsigned int utn, std::string value)
  */
 TargetBase::Category DBContentManager::emitterCategory(unsigned int utn) const
 {
-    assert (target_model_);
-    assert (target_model_->existsTarget(utn));
+    traced_assert(target_model_);
+    traced_assert(target_model_->existsTarget(utn));
 
     return target_model_->target(utn).targetCategory();
 }
@@ -2152,8 +2152,8 @@ TargetBase::Category DBContentManager::emitterCategory(unsigned int utn) const
  */
 std::string DBContentManager::emitterCategoryStr(unsigned int utn) const
 {
-    assert (target_model_);
-    assert (target_model_->existsTarget(utn));
+    traced_assert(target_model_);
+    traced_assert(target_model_->existsTarget(utn));
 
     return target_model_->target(utn).emitterCategoryStr();
 }
@@ -2162,7 +2162,7 @@ std::string DBContentManager::emitterCategoryStr(unsigned int utn) const
  */
 void DBContentManager::autoFilterUTNS()
 {
-    assert (target_model_);
+    traced_assert(target_model_);
     target_model_->setUseByFilter();
 
     //    data_.setUseAllTargetData(true);

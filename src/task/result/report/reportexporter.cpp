@@ -59,7 +59,7 @@ ReportExporter::ReportExporter(const ReportExport* report_export,
 ,   export_resource_dir_(export_resource_dir)
 ,   interaction_mode_   (interaction_mode   )
 {
-    assert(report_export_);
+    traced_assert(report_export_);
 }
 
 /**
@@ -176,7 +176,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport(TaskResult& result,
         if (!section_ptr->exportEnabled(exportMode()))
             return Result::failed("Parent section '" + section_ptr->name() + "' is disabled for export");
 
-        assert(section_ptr);
+        traced_assert(section_ptr);
 
         //pre-compute total number of exported sections
         auto func = [ this ] (const Section& s)
@@ -227,7 +227,7 @@ ResultT<nlohmann::json> ReportExporter::exportReport_impl(TaskResult& result,
                                                           Section* section,
                                                           const boost::optional<unsigned int>& content_id)
 {
-    assert(section);
+    traced_assert(section);
 
     auto res = initExport(result);
     if (!res.ok())

@@ -136,13 +136,13 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "SimpleReconstructor")
     {
-        assert(!simple_reconstructor_);
+        traced_assert(!simple_reconstructor_);
 
         std::unique_ptr<AccuracyEstimatorBase> acc_estimator;
         acc_estimator.reset(new SimpleAccuracyEstimator());
 
         simple_reconstructor_.reset(new SimpleReconstructor(class_id, instance_id, *this, std::move(acc_estimator)));
-        assert(simple_reconstructor_);
+        traced_assert(simple_reconstructor_);
 
         connect(simple_reconstructor_.get(), &ReconstructorBase::configChanged, this, &ReconstructorTask::configChanged);
     }
@@ -150,13 +150,13 @@ void ReconstructorTask::generateSubConfigurable(const std::string& class_id,
     {
 #if USE_EXPERIMENTAL_SOURCE == true
 
-        assert(!probimm_reconstructor_);
+        traced_assert(!probimm_reconstructor_);
 
         std::unique_ptr<AccuracyEstimatorBase> acc_estimator;
         acc_estimator.reset(new ComplexAccuracyEstimator());
 
         probimm_reconstructor_.reset(new ProbIMMReconstructor(class_id, instance_id, *this, std::move(acc_estimator)));
-        assert(probimm_reconstructor_);
+        traced_assert(probimm_reconstructor_);
 
         connect(probimm_reconstructor_.get(), &ReconstructorBase::configChanged, this, &ReconstructorTask::configChanged);
 #endif
@@ -186,7 +186,7 @@ void ReconstructorTask::updateFeatures()
 
 bool ReconstructorTask::canRun()
 {
-    assert (currentReconstructor());
+    traced_assert(currentReconstructor());
 
     return COMPASS::instance().dbContentManager().hasData() && currentReconstructor()->hasNextTimeSlice();
 }
@@ -343,10 +343,10 @@ void ReconstructorTask::currentReconstructorStr(const std::string& value)
 {
 
 #if USE_EXPERIMENTAL_SOURCE == true
-    assert (value == ReconstructorTask::ScoringUMReconstructorName
+    traced_assert(value == ReconstructorTask::ScoringUMReconstructorName
            || value == ReconstructorTask::ProbImmReconstructorName);
 #else
-    assert (value == ReconstructorTask::ScoringUMReconstructorName);
+    traced_assert(value == ReconstructorTask::ScoringUMReconstructorName);
 #endif
 
     current_reconstructor_str_ = value;
@@ -355,7 +355,7 @@ void ReconstructorTask::currentReconstructorStr(const std::string& value)
 ReconstructorBase* ReconstructorTask::currentReconstructor() const
 {
 #if USE_EXPERIMENTAL_SOURCE == true
-    assert (current_reconstructor_str_ == ReconstructorTask::ScoringUMReconstructorName
+    traced_assert(current_reconstructor_str_ == ReconstructorTask::ScoringUMReconstructorName
            || current_reconstructor_str_ == ReconstructorTask::ProbImmReconstructorName);
 
     if (current_reconstructor_str_ == ReconstructorTask::ScoringUMReconstructorName)
@@ -363,7 +363,7 @@ ReconstructorBase* ReconstructorTask::currentReconstructor() const
     else
         return dynamic_cast<ReconstructorBase*> (probimm_reconstructor_.get());
 #else
-    assert (current_reconstructor_str_ == ReconstructorTask::ScoringUMReconstructorName);
+    traced_assert(current_reconstructor_str_ == ReconstructorTask::ScoringUMReconstructorName);
 
     return dynamic_cast<ReconstructorBase*> (simple_reconstructor_.get());
 #endif
@@ -404,7 +404,7 @@ std::set<unsigned int> ReconstructorTask::disabledDataSources() const
 
 void ReconstructorTask::run()
 {
-    assert(canRun());
+    traced_assert(canRun());
 
     loading_slice_ = nullptr;
     loading_data_ = false;
@@ -482,7 +482,7 @@ void ReconstructorTask::run()
             catch (const std::exception& e)
             {
                 loginf << "delete calculated references threw exception '" << e.what() << "'";
-                assert (false);
+                traced_assert(false);
             }
         }});
 }
@@ -510,7 +510,7 @@ void ReconstructorTask::deleteCalculatedReferencesDoneSlot()
             catch (const std::exception& e)
             {
                 loginf << "delete targets threw exception '" << e.what() << "'";
-                assert (false);
+                traced_assert(false);
             }
         }});
 }
@@ -548,7 +548,7 @@ void ReconstructorTask::deleteTargetsDoneSlot()
             catch (const std::exception& e)
             {
                 loginf << "delete associations threw exception '" << e.what() << "'";
-                assert (false);
+                traced_assert(false);
             }
 
 
@@ -561,7 +561,7 @@ void ReconstructorTask::deleteAssociationsDoneSlot()
 
     // enable cancelling
 
-    assert (progress_dialog_);
+    traced_assert(progress_dialog_);
     progress_dialog_->setCancelButton(new QPushButton("Cancel"));
 
     connect(progress_dialog_.get(), &QProgressDialog::canceled,
@@ -590,15 +590,15 @@ void ReconstructorTask::deleteAssociationsDoneSlot()
 
 void ReconstructorTask::loadDataSlice()
 {
-    assert (currentReconstructor());
-    assert (currentReconstructor()->hasNextTimeSlice());
-    assert (!loading_slice_);
+    traced_assert(currentReconstructor());
+    traced_assert(currentReconstructor()->hasNextTimeSlice());
+    traced_assert(!loading_slice_);
 
     loginf << "start";
 
     loading_slice_ = currentReconstructor()->getNextTimeSlice();
 
-    assert (loading_slice_);
+    traced_assert(loading_slice_);
     loading_data_ = true;
 
     loginf << "min " << Time::toString(loading_slice_->slice_begin_)
@@ -626,7 +626,7 @@ void ReconstructorTask::loadDataSlice()
 
         for (auto& sect_it : used_sectors_)
         {
-            assert(eval_man.hasSectorLayer(sect_it.first));
+            traced_assert(eval_man.hasSectorLayer(sect_it.first));
 
             if (!sect_it.second)
                 continue;
@@ -694,12 +694,12 @@ void ReconstructorTask::processDataSlice()
     if (cancelled_)
         return;
 
-    assert (loading_slice_);
-    assert (!processing_slice_);
+    traced_assert(loading_slice_);
+    traced_assert(!processing_slice_);
 
     processing_slice_ = std::move(loading_slice_);
 
-    assert (!processing_data_slice_);
+    traced_assert(!processing_data_slice_);
 
     if (!processing_slice_->data_.size())
     {
@@ -717,7 +717,7 @@ void ReconstructorTask::processDataSlice()
            << !processing_slice_->first_slice_
            << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
 
-    assert (processing_slice_);
+    traced_assert(processing_slice_);
 
     logdbg << "processing2 first slice "
            << !processing_slice_->first_slice_
@@ -738,7 +738,7 @@ void ReconstructorTask::processDataSlice()
                    << !processing_slice_->first_slice_
                    << " remove ts " << Time::toString(processing_slice_->remove_before_time_);
 
-            assert (!currentReconstructor()->processing());
+            traced_assert(!currentReconstructor()->processing());
             currentReconstructor()->processSlice();
 
             // wait for previous writing done
@@ -752,7 +752,7 @@ void ReconstructorTask::processDataSlice()
         catch (std::exception& e)
         {
             loginf << "processing slice threw exception '" << e.what() << "'";
-            assert (false);
+            traced_assert(false);
         }
     });
 }
@@ -761,7 +761,7 @@ void ReconstructorTask::writeDataSlice()
 {
     loginf << "start";
 
-    assert (writing_slice_);
+    traced_assert(writing_slice_);
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -805,18 +805,18 @@ void ReconstructorTask::sectorsChangedSlot()
 
 void ReconstructorTask::loadedDataSlot(const std::map<std::string, std::shared_ptr<Buffer>>& data, bool requires_reset)
 {
-    assert (loading_slice_);
+    traced_assert(loading_slice_);
 }
 
 void ReconstructorTask::loadingDoneSlot()
 {
     loginf << "start";
 
-    assert (loading_data_);
+    traced_assert(loading_data_);
     loading_data_ = false;
 
-    assert (currentReconstructor());
-    assert (loading_slice_);
+    traced_assert(currentReconstructor());
+    traced_assert(loading_slice_);
 
     DBContentManager& dbcontent_man = COMPASS::instance().dbContentManager();
 
@@ -879,7 +879,7 @@ void ReconstructorTask::loadingDoneSlot()
     updateProgressSlot("Processing Slice", true);
     ++current_slice_idx_;
 
-    assert (!processing_data_slice_);
+    traced_assert(!processing_data_slice_);
 
     if (!loading_slice_)
     {
@@ -896,8 +896,8 @@ void ReconstructorTask::loadingDoneSlot()
     {
         processDataSlice();
 
-        assert (!loading_slice_);
-        assert (processing_data_slice_);
+        traced_assert(!loading_slice_);
+        traced_assert(processing_data_slice_);
     }
     else // loading slice empty
     {
@@ -905,7 +905,7 @@ void ReconstructorTask::loadingDoneSlot()
                << Time::toString(loading_slice_->slice_begin_)<< ", no process";
 
         loading_slice_ = nullptr;
-        assert (!processing_data_slice_);
+        traced_assert(!processing_data_slice_);
 
         if (last_slice)
         {
@@ -953,14 +953,14 @@ void ReconstructorTask::processingDoneSlot()
     }
 
     // processing done
-    assert(currentReconstructor()->currentSlice().processing_done_);
-    assert (processing_data_slice_);
-    assert (processing_slice_);
-    assert (!writing_slice_);
+    traced_assert(currentReconstructor()->currentSlice().processing_done_);
+    traced_assert(processing_data_slice_);
+    traced_assert(processing_slice_);
+    traced_assert(!writing_slice_);
 
     processing_data_slice_ = false;
 
-    assert (!writing_slice_);
+    traced_assert(!writing_slice_);
     writing_slice_ = std::move(processing_slice_);
 
     if (skip_reference_data_writing_)
@@ -980,7 +980,7 @@ void ReconstructorTask::writeDoneSlot()
 {
     loginf << "last " << writing_slice_->is_last_slice_;
 
-    assert (writing_slice_);
+    traced_assert(writing_slice_);
     writing_slice_->write_done_ = true;
 
     if (cancelled_)
@@ -997,7 +997,7 @@ void ReconstructorTask::writeDoneSlot()
 
 void ReconstructorTask::finalizeSlice(std::unique_ptr<ReconstructorBase::DataSlice>& slice)
 {
-    assert(slice);
+    traced_assert(slice);
 
     loginf << "is last = " << slice->is_last_slice_;
 
@@ -1033,7 +1033,7 @@ void ReconstructorTask::endReconstruction()
 
     done_ = true;
 
-    assert (progress_dialog_);
+    traced_assert(progress_dialog_);
     progress_dialog_->setCancelButtonText("OK");
 
     updateProgressSlot("Reference Calculation Done", true);
@@ -1137,7 +1137,7 @@ void ReconstructorTask::runCancelledSlot()
 {
     loginf << "start";
 
-    assert (progress_dialog_);
+    traced_assert(progress_dialog_);
 
     if (done_) // already done, cancel only to close
     {
@@ -1324,13 +1324,13 @@ void ReconstructorTask::useSector(const std::string& sector_name, bool value)
 
 ReconstructorBase::DataSlice& ReconstructorTask::processingSlice()
 {
-    assert (processing_slice_);
+    traced_assert(processing_slice_);
     return *processing_slice_;
 }
 
 const ReconstructorBase::DataSlice& ReconstructorTask::processingSlice() const
 {
-    assert (processing_slice_);
+    traced_assert(processing_slice_);
     return *processing_slice_;
 }
 
@@ -1431,14 +1431,14 @@ void ReconstructorTask::checkSubConfigurables()
     if (!simple_reconstructor_)
     {
         generateSubConfigurable("SimpleReconstructor", "SimpleReconstructor0");
-        assert (simple_reconstructor_);
+        traced_assert(simple_reconstructor_);
     }
 
 #if USE_EXPERIMENTAL_SOURCE == true
     if (!probimm_reconstructor_)
     {
         generateSubConfigurable("ProbIMMReconstructor", "ProbIMMReconstructor0");
-        assert (probimm_reconstructor_);
+        traced_assert(probimm_reconstructor_);
     }
 #endif
 }
@@ -1501,6 +1501,6 @@ void ReconstructorTask::showDialog()
     if (dlg.exec() == QDialog::Rejected)
         return;
 
-    assert(canRun());
+    traced_assert(canRun());
     run();
 }

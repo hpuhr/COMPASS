@@ -109,7 +109,7 @@ std::function<std::string(const unsigned char&)> Base::printMomTransAcc =
         else if (val == 3)
             return "Undetermined";
 
-        assert (false);
+        traced_assert(false);
     };
 
 std::function<std::string(const unsigned char&)> Base::printMomLongAcc =
@@ -124,7 +124,7 @@ std::function<std::string(const unsigned char&)> Base::printMomLongAcc =
         else if (val == 3)
             return "Undetermined";
 
-        assert (false);
+        traced_assert(false);
     };
 
 std::function<std::string(const unsigned char&)> Base::printMomVertRate =
@@ -139,7 +139,7 @@ std::function<std::string(const unsigned char&)> Base::printMomVertRate =
         else if (val == 3)
             return "Undetermined";
 
-        assert (false);
+        traced_assert(false);
     };
 
 // rocd

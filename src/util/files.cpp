@@ -24,7 +24,7 @@
 #include <QApplication>
 #include <QStyle>
 
-#include <cassert>
+#include "traced_assert.h"
 #include <iostream>
 #include <stdexcept>
 
@@ -158,7 +158,7 @@ bool copyRecursively(const std::string& source_folder, const std::string& dest_f
 
 QStringList getFilesInDirectory(const std::string& path)
 {
-    assert(directoryExists(path));
+    traced_assert(directoryExists(path));
     QDir directory(path.c_str());
     QStringList list =
         directory.entryList(QStringList({"*"}), QDir::Files);  // << "*.jpg" << "*.JPG"
@@ -167,7 +167,7 @@ QStringList getFilesInDirectory(const std::string& path)
 
 QStringList getSubdirectories(const std::string& path)
 {
-    assert(directoryExists(path));
+    traced_assert(directoryExists(path));
     QDir directory(path.c_str());
     QStringList list =
         directory.entryList(QStringList({"*"}), QDir::Dirs | QDir::NoSymLinks | QDir::NoDotAndDotDot);

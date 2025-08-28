@@ -233,8 +233,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ModeCPresent::evaluate (
            << " num_no_ref_id " << num_no_ref_id << " num_present_id " << num_present_id
            << " num_missing_id " << num_missing_id;
 
-    assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
-    assert (num_pos_inside == num_no_ref_id+num_present_id+num_missing_id);
+    traced_assert(num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos_inside == num_no_ref_id+num_present_id+num_missing_id);
 
     //assert (details.size() == tst_data.size());
 

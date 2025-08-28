@@ -275,8 +275,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> ExtraTrack::evaluate (
     if (!ignore && ignore_primary_only_ && target_data.isPrimaryOnly())
         ignore = true;
 
-    assert (num_pos == num_pos_inside + num_pos_outside);
-    assert (num_pos_inside == num_no_track_num + num_extra + num_ok);
+    traced_assert(num_pos == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos_inside == num_no_track_num + num_extra + num_ok);
 
     return make_shared<EvaluationRequirementResult::SingleExtraTrack>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,

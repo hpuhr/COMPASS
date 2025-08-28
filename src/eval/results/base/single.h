@@ -75,7 +75,7 @@ public:
         TemporaryDetails(const Single* single) 
         :   single_(single) 
         { 
-            assert(single_); 
+            traced_assert(single_); 
 
             //recompute details if not available
             if (!single_->details_.has_value())

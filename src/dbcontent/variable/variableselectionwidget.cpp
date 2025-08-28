@@ -95,7 +95,7 @@ VariableSelectionWidget::~VariableSelectionWidget() {}
 
 void VariableSelectionWidget::setReadOnly(bool read_only)
 {
-    assert (sel_button_);
+    traced_assert(sel_button_);
 
     sel_button_->setDisabled(read_only);
 }
@@ -136,7 +136,7 @@ void VariableSelectionWidget::showMenuSlot()
 
     if (show_dbcont_only_)
     {
-        assert(dbcont_man_.existsDBContent(only_dbcontent_name_));
+        traced_assert(dbcont_man_.existsDBContent(only_dbcontent_name_));
 
         for (auto& var_it : dbcont_man_.dbContent(only_dbcontent_name_).variables())
         {
@@ -251,8 +251,8 @@ void VariableSelectionWidget::showMenuSlot()
 
 void VariableSelectionWidget::triggerSlot(QAction* action)
 {
-    assert(object_label_);
-    assert(variable_label_);
+    traced_assert(object_label_);
+    traced_assert(variable_label_);
 
     QVariantMap vmap = action->data().toMap();
     std::string var_name = vmap.begin().key().toStdString();
@@ -272,7 +272,7 @@ void VariableSelectionWidget::triggerSlot(QAction* action)
         }
         else
         {
-            assert(dbcont_man_.dbContent(obj_name).hasVariable(var_name));
+            traced_assert(dbcont_man_.dbContent(obj_name).hasVariable(var_name));
 
             meta_variable_selected_ = false;
             variable_selected_ = true;
@@ -292,8 +292,8 @@ void VariableSelectionWidget::triggerSlot(QAction* action)
 
 void VariableSelectionWidget::selectedVariable(Variable& variable)
 {
-    assert(object_label_);
-    assert(variable_label_);
+    traced_assert(object_label_);
+    traced_assert(variable_label_);
 
     object_label_->setText(QString::fromStdString(variable.dbObject().name()));
     variable_label_->setText(variable.name().c_str());
@@ -306,10 +306,10 @@ void VariableSelectionWidget::selectedVariable(Variable& variable)
 
 void VariableSelectionWidget::selectEmptyVariable()
 {
-    assert (show_empty_variable_);
+    traced_assert(show_empty_variable_);
 
-    assert(object_label_);
-    assert(variable_label_);
+    traced_assert(object_label_);
+    traced_assert(variable_label_);
 
     object_label_->setText("");
     variable_label_->setText("");
@@ -322,22 +322,22 @@ void VariableSelectionWidget::selectEmptyVariable()
 
 Variable& VariableSelectionWidget::selectedVariable() const
 {
-    assert(object_label_);
-    assert(variable_label_);
-    assert(variable_selected_);
+    traced_assert(object_label_);
+    traced_assert(variable_label_);
+    traced_assert(variable_selected_);
 
     std::string obj_name = object_label_->text().toStdString();
     std::string var_name = variable_label_->text().toStdString();
 
-    assert(dbcont_man_.dbContent(obj_name).hasVariable(var_name));
+    traced_assert(dbcont_man_.dbContent(obj_name).hasVariable(var_name));
 
     return dbcont_man_.dbContent(obj_name).variable(var_name);
 }
 
 void VariableSelectionWidget::selectedMetaVariable(MetaVariable& variable)
 {
-    assert(object_label_);
-    assert(variable_label_);
+    traced_assert(object_label_);
+    traced_assert(variable_label_);
 
     object_label_->setText(QString::fromStdString(META_OBJECT_NAME));
     variable_label_->setText(variable.name().c_str());
@@ -350,23 +350,23 @@ void VariableSelectionWidget::selectedMetaVariable(MetaVariable& variable)
 
 MetaVariable& VariableSelectionWidget::selectedMetaVariable() const
 {
-    assert(object_label_);
-    assert(variable_label_);
-    assert(meta_variable_selected_);
+    traced_assert(object_label_);
+    traced_assert(variable_label_);
+    traced_assert(meta_variable_selected_);
 
     std::string obj_name = object_label_->text().toStdString();
     std::string var_name = variable_label_->text().toStdString();
 
-    assert(obj_name == META_OBJECT_NAME);
-    assert(dbcont_man_.existsMetaVariable(var_name));
+    traced_assert(obj_name == META_OBJECT_NAME);
+    traced_assert(dbcont_man_.existsMetaVariable(var_name));
 
     return dbcont_man_.metaVariable(var_name);
 }
 
 std::pair<std::string, std::string> VariableSelectionWidget::selectionAsString() const
 {
-    assert(object_label_);
-    assert(variable_label_);
+    traced_assert(object_label_);
+    traced_assert(variable_label_);
 
     std::string obj_name = object_label_->text().toStdString();
     std::string var_name = variable_label_->text().toStdString();
@@ -379,7 +379,7 @@ void VariableSelectionWidget::showDBContentOnly(const std::string& only_dbconten
     show_dbcont_only_ = true;
     only_dbcontent_name_ = only_dbcontent_name;
 
-    assert(object_label_);
+    traced_assert(object_label_);
     object_label_->hide();
 }
 
@@ -388,7 +388,7 @@ void VariableSelectionWidget::disableShowDBContentOnly()
     show_dbcont_only_ = false;
     only_dbcontent_name_ = "";
 
-    assert(object_label_);
+    traced_assert(object_label_);
     object_label_->show();
 }
 

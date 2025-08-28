@@ -16,7 +16,7 @@
  */
 
 #include "datatypeformatselectionwidget.h"
-
+#include "traced_assert.h"
 #include "logger.h"
 
 DataTypeFormatSelectionWidget::DataTypeFormatSelectionWidget(std::string& data_type_str,
@@ -76,7 +76,7 @@ void DataTypeFormatSelectionWidget::DataTypeFormatSelectionWidget::clear()
 
 void DataTypeFormatSelectionWidget::showValues()
 {
-    assert (pointers_set_);
+    traced_assert(pointers_set_);
 
     if (data_type_str_->size() && format_->size())
         setText(QString::fromStdString(*data_type_str_ + ":" + *format_));
@@ -88,7 +88,7 @@ void DataTypeFormatSelectionWidget::createMenu()
 {
     logdbg << "start";
 
-    assert (pointers_set_);
+    traced_assert(pointers_set_);
 
     menu_.reset(new QMenu());
 
@@ -121,8 +121,8 @@ void DataTypeFormatSelectionWidget::showMenuSlot()
 {
     logdbg << "start";
 
-    assert (pointers_set_);
-    assert (menu_);
+    traced_assert(pointers_set_);
+    traced_assert(menu_);
 
     menu_->exec(QCursor::pos());
 }
@@ -131,7 +131,7 @@ void DataTypeFormatSelectionWidget::triggerSlot(QAction* action)
 {
     loginf << "start";
 
-    assert (pointers_set_);
+    traced_assert(pointers_set_);
 
     QVariantMap vmap = action->data().toMap();
     std::string data_type_str, format_str;

@@ -427,7 +427,7 @@ void DataSourceEditWidget::showID(unsigned int ds_id)
 
     loginf << "id " << ds_id << " in db " << current_ds_in_db_;
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
 
     updateContent();
 }
@@ -460,15 +460,15 @@ void DataSourceEditWidget::nameEditedSlot(const QString& value)
         return;
     }
 
-    assert (has_current_ds_);
+    traced_assert(has_current_ds_);
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).name(text);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).name(text);
 
     dialog_.updateDataSource(current_ds_id_);
@@ -480,15 +480,15 @@ void DataSourceEditWidget::shortNameEditedSlot(const QString& value)
 
     loginf << "'" << text << "'";
 
-    assert (has_current_ds_);
+    traced_assert(has_current_ds_);
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).shortName(text);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).shortName(text);
 
     dialog_.updateDataSource(current_ds_id_);
@@ -500,15 +500,15 @@ void DataSourceEditWidget::dsTypeEditedSlot(const QString& value)
 
     loginf << "'" << text << "'";
 
-    assert (has_current_ds_);
+    traced_assert(has_current_ds_);
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).dsType(text);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).dsType(text);
 
     dialog_.updateDataSource(current_ds_id_);
@@ -526,13 +526,13 @@ void DataSourceEditWidget::updateIntervalEditedSlot(const QString& value_str)
     {
         if (current_ds_in_db_)
         {
-            assert (ds_man_.hasDBDataSource(current_ds_id_));
+            traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
 
             if (ds_man_.dbDataSource(current_ds_id_).hasUpdateInterval())
                 ds_man_.dbDataSource(current_ds_id_).removeUpdateInterval();
         }
 
-        assert (ds_man_.hasConfigDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
 
         if (ds_man_.configDataSource(current_ds_id_).hasUpdateInterval())
             ds_man_.configDataSource(current_ds_id_).removeUpdateInterval();
@@ -544,11 +544,11 @@ void DataSourceEditWidget::updateIntervalEditedSlot(const QString& value_str)
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).updateInterval(value);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).updateInterval(value);
 }
 
@@ -563,11 +563,11 @@ void DataSourceEditWidget::detectionTypeChangedSlot(int index)
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).detectionType(selected_type);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).detectionType(selected_type);
 }
 
@@ -583,7 +583,7 @@ void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
 
         if (ok)
         {
-            assert (latitude_edit_);
+            traced_assert(latitude_edit_);
             latitude_edit_->setText(QString::number(value, 'g', 12));
         }
     }
@@ -595,11 +595,11 @@ void DataSourceEditWidget::latitudeEditedSlot(const QString& value_str)
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).latitude(value);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).latitude(value);
 }
 
@@ -615,7 +615,7 @@ void DataSourceEditWidget::longitudeEditedSlot(const QString& value_str)
 
         if (ok)
         {
-            assert (longitude_edit_);
+            traced_assert(longitude_edit_);
             longitude_edit_->setText(QString::number(value, 'g', 12));
         }
     }
@@ -624,11 +624,11 @@ void DataSourceEditWidget::longitudeEditedSlot(const QString& value_str)
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).longitude(value);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).longitude(value);
 }
 
@@ -640,11 +640,11 @@ void DataSourceEditWidget::altitudeEditedSlot(const QString& value_str)
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).altitude(value);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).altitude(value);
 }
 
@@ -652,15 +652,15 @@ void DataSourceEditWidget::addRadarRangesSlot()
 {
     loginf << "start";
 
-    assert (has_current_ds_);
+    traced_assert(has_current_ds_);
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).addRadarRanges();
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).addRadarRanges();
 
     updateContent();
@@ -669,7 +669,7 @@ void DataSourceEditWidget::addRadarRangesSlot()
 void DataSourceEditWidget::radarRangeEditedSlot(const QString& value_str)
 {
     QLineEdit* line_edit = dynamic_cast<QLineEdit*> (QObject::sender());
-    assert (line_edit);
+    traced_assert(line_edit);
 
     string key = line_edit->property("key").toString().toStdString();
 
@@ -680,11 +680,11 @@ void DataSourceEditWidget::radarRangeEditedSlot(const QString& value_str)
 
         if (current_ds_in_db_)
         {
-            assert (ds_man_.hasDBDataSource(current_ds_id_));
+            traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
             ds_man_.dbDataSource(current_ds_id_).removeRadarRange(key);
         }
 
-        assert (ds_man_.hasConfigDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
         ds_man_.configDataSource(current_ds_id_).removeRadarRange(key);
 
         return;
@@ -696,11 +696,11 @@ void DataSourceEditWidget::radarRangeEditedSlot(const QString& value_str)
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).radarRange(key, value);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).radarRange(key, value);
 }
 
@@ -708,15 +708,15 @@ void DataSourceEditWidget::addRadarAccuraciesSlot()
 {
     loginf << "start";
 
-    assert (has_current_ds_);
+    traced_assert(has_current_ds_);
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).addRadarAccuracies();
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).addRadarAccuracies();
 
     updateContent();
@@ -727,7 +727,7 @@ void DataSourceEditWidget::radarAccuraciesEditedSlot(const QString& value_str)
     double value = value_str.toDouble();
 
     QLineEdit* line_edit = dynamic_cast<QLineEdit*> (QObject::sender());
-    assert (line_edit);
+    traced_assert(line_edit);
 
     string key = line_edit->property("key").toString().toStdString();
 
@@ -735,11 +735,11 @@ void DataSourceEditWidget::radarAccuraciesEditedSlot(const QString& value_str)
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).radarAccuracy(key, value);
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).radarAccuracy(key, value);
 }
 
@@ -747,15 +747,15 @@ void DataSourceEditWidget::addNetLinesSlot()
 {
     loginf << "start";
 
-    assert (has_current_ds_);
+    traced_assert(has_current_ds_);
 
     if (current_ds_in_db_)
     {
-        assert (ds_man_.hasDBDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
         ds_man_.dbDataSource(current_ds_id_).addNetworkLines();
     }
 
-    assert (ds_man_.hasConfigDataSource(current_ds_id_));
+    traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
     ds_man_.configDataSource(current_ds_id_).addNetworkLines();
 
     updateContent();
@@ -764,15 +764,15 @@ void DataSourceEditWidget::addNetLinesSlot()
 void DataSourceEditWidget::netLineEditedSlot(const QString& value_str)
 {
     QLineEdit* edit = dynamic_cast<QLineEdit*> (sender());
-    assert (edit);
+    traced_assert(edit);
 
     string line_id = edit->property("line").toString().toStdString();
     string item = edit->property("item").toString().toStdString();
 
-    assert (line_id == "L1" || line_id == "L2" || line_id == "L3" || line_id == "L4");
-    assert (item == "Listen IP" || item == "MCast IP" || item == "MCast Port" || item == "Sender IP");
+    traced_assert(line_id == "L1" || line_id == "L2" || line_id == "L3" || line_id == "L4");
+    traced_assert(item == "Listen IP" || item == "MCast IP" || item == "MCast Port" || item == "Sender IP");
 
-    assert (has_current_ds_);
+    traced_assert(has_current_ds_);
 
     if (item == "Listen IP" || item == "MCast IP" || item == "Sender IP")
     {
@@ -781,9 +781,9 @@ void DataSourceEditWidget::netLineEditedSlot(const QString& value_str)
         loginf << "start" << line_id << " " << item << " ip '" << value << "'";
 
         if (current_ds_in_db_)
-            assert (ds_man_.hasDBDataSource(current_ds_id_));
+            traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
 
-        assert (ds_man_.hasConfigDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
 
         if (item == "Listen IP")
         {
@@ -814,11 +814,11 @@ void DataSourceEditWidget::netLineEditedSlot(const QString& value_str)
         loginf << "start" << line_id << " " << item << " port '" << value << "'";
 
         if (current_ds_in_db_)
-            assert (ds_man_.hasDBDataSource(current_ds_id_));
+            traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
 
-        assert (ds_man_.hasConfigDataSource(current_ds_id_));
+        traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
 
-        assert (item == "MCast Port");
+        traced_assert(item == "MCast Port");
 
             if (current_ds_in_db_)
                 ds_man_.dbDataSource(current_ds_id_).networkLine(line_id)->mcastPort(value);
@@ -831,8 +831,8 @@ void DataSourceEditWidget::deleteSlot()
 {
     loginf << "start";
 
-    assert (has_current_ds_);
-    assert (!current_ds_in_db_);
+    traced_assert(has_current_ds_);
+    traced_assert(!current_ds_in_db_);
 
     dialog_.beginResetModel();
     ds_man_.deleteConfigDataSource(current_ds_id_);
@@ -843,20 +843,20 @@ void DataSourceEditWidget::deleteSlot()
 
 void DataSourceEditWidget::updateContent()
 {
-    assert (name_edit_);
-    assert (short_name_edit_);
-    assert (dstype_combo_);
-    assert (sac_label_);
-    assert (sic_label_);
-    assert (ds_id_label_);
-    assert (position_widget_);
-    assert (add_ranges_button_);
-    assert (ranges_widget_);
-    assert (accuracies_widget_);
-    assert (add_accuracies_button_);
-    assert (add_lines_button_);
-    assert (net_widget_);
-    assert (delete_button_);
+    traced_assert(name_edit_);
+    traced_assert(short_name_edit_);
+    traced_assert(dstype_combo_);
+    traced_assert(sac_label_);
+    traced_assert(sic_label_);
+    traced_assert(ds_id_label_);
+    traced_assert(position_widget_);
+    traced_assert(add_ranges_button_);
+    traced_assert(ranges_widget_);
+    traced_assert(accuracies_widget_);
+    traced_assert(add_accuracies_button_);
+    traced_assert(add_lines_button_);
+    traced_assert(net_widget_);
+    traced_assert(delete_button_);
 
     detection_type_combo_->blockSignals(true);
 
@@ -898,16 +898,16 @@ void DataSourceEditWidget::updateContent()
 
         if (current_ds_in_db_) // db && cfg
         {
-            assert (ds_man_.hasDBDataSource(current_ds_id_));
-            assert (ds_man_.hasConfigDataSource(current_ds_id_));
+            traced_assert(ds_man_.hasDBDataSource(current_ds_id_));
+            traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
             ds = dynamic_cast<dbContent::DataSourceBase*>(&ds_man_.dbDataSource(current_ds_id_));
         }
         else
         {
-            assert (ds_man_.hasConfigDataSource(current_ds_id_));
+            traced_assert(ds_man_.hasConfigDataSource(current_ds_id_));
             ds = dynamic_cast<dbContent::DataSourceBase*>(&ds_man_.configDataSource(current_ds_id_));
         }
-        assert (ds);
+        traced_assert(ds);
 
         name_edit_->setText(ds->name().c_str());
         name_edit_->setDisabled(false);
@@ -1067,7 +1067,7 @@ void DataSourceEditWidget::updateContent()
 
             for (auto& edit_it : net_edits_) // line -> edits
             {
-                assert (edit_it.second.size() == 4);
+                traced_assert(edit_it.second.size() == 4);
 
                 if (lines.count(edit_it.first)) // exists, set
                 {

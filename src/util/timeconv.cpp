@@ -17,6 +17,7 @@
 
 #include "timeconv.h"
 #include "logger.h"
+#include "traced_assert.h"
 
 #include <QDateTime>
 
@@ -150,7 +151,7 @@ string toString(const boost::posix_time::ptime& value, unsigned int partial_digi
 
 string toString(const boost::posix_time::time_duration& duration, unsigned int partial_digits)
 {
-    assert (partial_digits <= 3);
+    traced_assert(partial_digits <= 3);
 
     ostringstream date_stream;
 

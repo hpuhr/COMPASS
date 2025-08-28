@@ -162,7 +162,7 @@ DBContent::DBContent(COMPASS& compass,
     registerParameter("info", &info_, std::string());
     registerParameter("db_table_name", &db_table_name_, std::string());
 
-    assert (db_table_name_.size());
+    traced_assert(db_table_name_.size());
 
     createSubConfigurables();
 
@@ -225,7 +225,7 @@ void DBContent::generateSubConfigurable(const string& class_id,
             logerr << "duplicate variable " << instance_id
                    << " with name '" << var->name() << "'";
 
-        assert(!hasVariable(var->name()));
+        traced_assert(!hasVariable(var->name()));
 
         logdbg << "generating variable " << instance_id
                << " with name " << var->name();
@@ -258,8 +258,8 @@ bool DBContent::hasVariable(const string& name) const
  */
 Variable& DBContent::variable(const string& name) const
 {
-    assert(hasVariable(name));
-    assert (variables_.at(name));
+    traced_assert(hasVariable(name));
+    traced_assert(variables_.at(name));
 
     return *(variables_.at(name).get());
 }
@@ -270,28 +270,28 @@ void DBContent::renameVariable(const string& old_name, const string& new_name)
 {
     loginf << "name " << old_name << " new_name " << new_name;
 
-    assert(hasVariable(old_name));
-    assert(!hasVariable(new_name));
+    traced_assert(hasVariable(old_name));
+    traced_assert(!hasVariable(new_name));
 
     std::unique_ptr<Variable> var = std::move(variables_.at(old_name));
     variables_.erase(old_name);
     var->name(new_name);
-    assert (!variables_.count(old_name));
+    traced_assert(!variables_.count(old_name));
     variables_.emplace(new_name, std::move(var));
-    assert (variables_.count(new_name));
+    traced_assert(variables_.count(new_name));
 
-    assert(!hasVariable(old_name));
-    assert(hasVariable(new_name));
+    traced_assert(!hasVariable(old_name));
+    traced_assert(hasVariable(new_name));
 }
 
 /**
  */
 void DBContent::deleteVariable(const string& name)
 {
-    assert(hasVariable(name));
+    traced_assert(hasVariable(name));
 
     variables_.erase(name);
-    assert(!hasVariable(name));
+    traced_assert(!hasVariable(name));
 }
 
 /**
@@ -329,7 +329,7 @@ bool DBContent::hasKeyVariable()
  */
 Variable& DBContent::getKeyVariable()
 {
-    assert(hasKeyVariable());
+    traced_assert(hasKeyVariable());
 
     for (const auto& var_it : variables_)  // search in any
     {
@@ -377,7 +377,7 @@ DBContentWidget* DBContent::widget()
     if (!widget_)
     {
         widget_.reset(new DBContentWidget(this));
-        assert(widget_);
+        traced_assert(widget_);
     }
 
     return widget_.get();  // needed for qt integration, not pretty
@@ -397,8 +397,8 @@ void DBContent::load(dbContent::VariableSet& read_set,
                      bool use_filters,
                      const std::string& custom_filter_clause)
 {
-    assert(is_loadable_);
-    assert(existsInDB());
+    traced_assert(is_loadable_);
+    traced_assert(existsInDB());
 
     string filter_clause;
 
@@ -407,27 +407,27 @@ void DBContent::load(dbContent::VariableSet& read_set,
     if (use_datasrc_filters && (ds_man.hasDSFilter(name_) || ds_man.lineSpecificLoadingRequired(name_)))
     {
         vector<unsigned int> ds_ids_to_load = ds_man.unfilteredDS(name_);
-        assert (ds_ids_to_load.size());
+        traced_assert(ds_ids_to_load.size());
 
-        assert (hasVariable(DBContent::meta_var_ds_id_.name()));
+        traced_assert(hasVariable(DBContent::meta_var_ds_id_.name()));
 
         Variable& datasource_var = variable(DBContent::meta_var_ds_id_.name());
-        assert (datasource_var.dataType() == PropertyDataType::UINT);
+        traced_assert(datasource_var.dataType() == PropertyDataType::UINT);
 
         if (ds_man.lineSpecificLoadingRequired(name_)) // ds specific line loading
         {
             logdbg << name_ << ": load: line specific loading wanted";
 
-            assert (hasVariable(DBContent::meta_var_line_id_.name()));
+            traced_assert(hasVariable(DBContent::meta_var_line_id_.name()));
 
             Variable& line_var = variable(DBContent::meta_var_line_id_.name());
-            assert (line_var.dataType() == PropertyDataType::UINT);
+            traced_assert(line_var.dataType() == PropertyDataType::UINT);
 
             bool any_added = false;
 
             for (auto ds_id_it : ds_ids_to_load)
             {
-                assert (ds_man.hasDBDataSource(ds_id_it));
+                traced_assert(ds_man.hasDBDataSource(ds_id_it));
 
                 DBDataSource& src = ds_man.dbDataSource(ds_id_it);
 
@@ -522,19 +522,19 @@ void DBContent::loadFiltered(dbContent::VariableSet& read_set,
 {
     logdbg << "name " << name_ << " loadable " << is_loadable_;
 
-    assert(is_loadable_);
-    assert(existsInDB());
+    traced_assert(is_loadable_);
+    traced_assert(existsInDB());
 
-    assert (!read_job_);
+    traced_assert(!read_job_);
 
     // add required vars for processing
-    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_rec_num_));
+    traced_assert(dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_rec_num_));
     read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_rec_num_));
 
-    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_ds_id_));
+    traced_assert(dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_ds_id_));
     read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_ds_id_));
 
-    assert (dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_line_id_));
+    traced_assert(dbcont_manager_.metaCanGetVariable(name_, DBContent::meta_var_line_id_));
     read_set.add(dbcont_manager_.metaGetVariable(name_, DBContent::meta_var_line_id_));
 
     read_job_ = shared_ptr<DBContentReadDBJob>(
@@ -566,14 +566,14 @@ bool DBContent::prepareInsert(shared_ptr<Buffer>& buffer)
 {
     logdbg << name_ << ": prepareInsert: buffer " << buffer->size();
 
-    assert (!insert_active_);
+    traced_assert(!insert_active_);
     insert_active_ = true;
 
     VariableSet list;
 
     for (auto prop_it : buffer->properties().properties())
     {
-        assert (hasVariable(prop_it.name()));
+        traced_assert(hasVariable(prop_it.name()));
 
         list.add(variable(prop_it.name()));
 
@@ -581,7 +581,7 @@ bool DBContent::prepareInsert(shared_ptr<Buffer>& buffer)
             variable(prop_it.name()).setHasDBContent();
     }
 
-    assert (hasVariable(DBContent::meta_var_rec_num_.name())); // added during final db insert
+    traced_assert(hasVariable(DBContent::meta_var_rec_num_.name())); // added during final db insert
     if (!variable(DBContent::meta_var_rec_num_.name()).hasDBContent())
         variable(DBContent::meta_var_rec_num_.name()).setHasDBContent();
 
@@ -599,31 +599,31 @@ void DBContent::updateDataSourcesBeforeInsert (shared_ptr<Buffer>& buffer)
 {
     logdbg << name_;
 
-    assert (hasVariable(DBContent::meta_var_ds_id_.name()));
+    traced_assert(hasVariable(DBContent::meta_var_ds_id_.name()));
 
     // ds
     Variable& datasource_var = variable(DBContent::meta_var_ds_id_.name());
-    assert (datasource_var.dataType() == PropertyDataType::UINT);
+    traced_assert(datasource_var.dataType() == PropertyDataType::UINT);
 
     string datasource_col_str = datasource_var.dbColumnName();
-    assert (buffer->has<unsigned int>(datasource_col_str));
+    traced_assert(buffer->has<unsigned int>(datasource_col_str));
 
     // line
     Variable& line_var = variable(DBContent::meta_var_line_id_.name());
-    assert (line_var.dataType() == PropertyDataType::UINT);
+    traced_assert(line_var.dataType() == PropertyDataType::UINT);
 
     string line_col_str = line_var.dbColumnName();
-    assert (buffer->has<unsigned int>(line_col_str));
+    traced_assert(buffer->has<unsigned int>(line_col_str));
 
     // timestamp
     Variable& timestamp_var = variable(DBContent::meta_var_timestamp_.name());
-    assert (timestamp_var.dataType() == PropertyDataType::TIMESTAMP);
+    traced_assert(timestamp_var.dataType() == PropertyDataType::TIMESTAMP);
     string timestamp_col_str = timestamp_var.dbColumnName();
 
     if (!buffer->has<boost::posix_time::ptime>(timestamp_col_str))
         logerr << "no timestamp info given in " << name_;
 
-    assert (buffer->has<boost::posix_time::ptime>(timestamp_col_str));
+    traced_assert(buffer->has<boost::posix_time::ptime>(timestamp_col_str));
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
@@ -636,8 +636,8 @@ void DBContent::updateDataSourcesBeforeInsert (shared_ptr<Buffer>& buffer)
 
     unsigned int buffer_size = buffer->size();
 
-    assert (datasource_vec.isNeverNull());
-    assert (line_vec.isNeverNull());
+    traced_assert(datasource_vec.isNeverNull());
+    traced_assert(line_vec.isNeverNull());
 
     for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
     {
@@ -653,7 +653,7 @@ void DBContent::updateDataSourcesBeforeInsert (shared_ptr<Buffer>& buffer)
         if (!ds_man.hasDBDataSource(ds_id_it.first))
             ds_man.addNewDataSource(ds_id_it.first);
 
-        assert (ds_man.hasDBDataSource(ds_id_it.first));
+        traced_assert(ds_man.hasDBDataSource(ds_id_it.first));
 
         for (auto& line_cnt_it : ds_id_it.second) // line -> cnt
             ds_man.dbDataSource(ds_id_it.first).addNumInserted(name_, line_cnt_it.first, line_cnt_it.second);
@@ -672,31 +672,31 @@ void DBContent::finalizeInsert(std::shared_ptr<Buffer>& buffer)
 {
     logdbg << name_;
 
-    assert(buffer);
-    assert(insert_active_);
+    traced_assert(buffer);
+    traced_assert(insert_active_);
 
     insert_active_ = false;
 
     is_loadable_ = true;
     count_ += buffer->size();
 
-    assert (existsInDB()); // check
+    traced_assert(existsInDB()); // check
 }
 
 /**
  */
 void DBContent::updateData(Variable& key_var, shared_ptr<Buffer> buffer)
 {
-    assert(!update_job_);
-    assert(!insert_active_);
+    traced_assert(!update_job_);
+    traced_assert(!insert_active_);
 
-    assert(existsInDB());
+    traced_assert(existsInDB());
 
     VariableSet list;
 
     for (auto prop_it : buffer->properties().properties())
     {
-        assert (hasVariable(prop_it.name()));
+        traced_assert(hasVariable(prop_it.name()));
         list.add(variable(prop_it.name()));
 
         if (!variable(prop_it.name()).hasDBContent())
@@ -726,7 +726,7 @@ void DBContent::deleteDBContentData(bool cleanup_db)
     if (!existsInDB())
         return;
 
-    assert (!delete_job_);
+    traced_assert(!delete_job_);
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setSpecificDBContent(name_);
@@ -747,7 +747,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, bool cle
     if (!existsInDB())
         return;
 
-    assert (!delete_job_);
+    traced_assert(!delete_job_);
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setSpecificDBContent(name_);
@@ -770,7 +770,7 @@ void DBContent::deleteDBContentData(unsigned int sac, unsigned int sic, unsigned
     if (!existsInDB())
         return;
 
-    assert (!delete_job_);
+    traced_assert(!delete_job_);
 
     delete_job_ = make_shared<DBContentDeleteDBJob>(COMPASS::instance().dbInterface());
     delete_job_->setSpecificDBContent(name_);
@@ -806,7 +806,7 @@ void DBContent::deleteJobDoneSlot()
 {
     loginf << "start";
 
-    assert (delete_job_);
+    traced_assert(delete_job_);
 
     delete_job_ = nullptr;
 
@@ -827,13 +827,13 @@ void DBContent::deleteJobDoneSlot()
  */
 void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 {
-    assert(buffer);
+    traced_assert(buffer);
     logdbg << name_ << " buffer size " << buffer->size();
 
     DBContentReadDBJob* sender = dynamic_cast<DBContentReadDBJob*>(QObject::sender());
 
-    assert (sender);
-    assert(sender == read_job_.get());
+    traced_assert(sender);
+    traced_assert(sender == read_job_.get());
 
     // check variables
     const vector<Variable*>& variables = sender->readList().getSet();
@@ -841,9 +841,9 @@ void DBContent::readJobIntermediateSlot(shared_ptr<Buffer> buffer)
 
     for (auto var_it : variables)
     {
-        assert(properties.hasProperty(var_it->dbColumnName()));
+        traced_assert(properties.hasProperty(var_it->dbColumnName()));
         const Property& property = properties.get(var_it->dbColumnName());
-        assert(property.dataType() == var_it->dataType());
+        traced_assert(property.dataType() == var_it->dataType());
     }
 
     logdbg << name_ << ": got buffer with size " << buffer->size();

@@ -58,10 +58,10 @@ std::string TrackerTrackNumberFilter::getConditionString(const std::string& dbco
 
     stringstream ss;
 
-    assert (COMPASS::instance().dbContentManager().metaVariable(
+    traced_assert(COMPASS::instance().dbContentManager().metaVariable(
                 DBContent::meta_var_ds_id_.name()).existsIn(dbcontent_name));
 
-    assert (COMPASS::instance().dbContentManager().metaVariable(
+    traced_assert(COMPASS::instance().dbContentManager().metaVariable(
                 DBContent::meta_var_track_num_.name()).existsIn(dbcontent_name));
 
     // ds_id -> line_id -> values
@@ -136,14 +136,14 @@ void TrackerTrackNumberFilter::checkSubConfigurables()
 
 void TrackerTrackNumberFilter::saveViewPointConditions (nlohmann::json& filters)
 {
-    assert (conditions_.size() == 0);
+    traced_assert(conditions_.size() == 0);
 
-    assert (!filters.contains(name_));
+    traced_assert(!filters.contains(name_));
     filters[name_] = json::object();
 
     json& filter = filters.at(name_);
 
-    assert (!filter.contains("Values"));
+    traced_assert(!filter.contains("Values"));
     filter["Values"] = getActiveTrackerTrackNumsStr();
 }
 
@@ -151,12 +151,12 @@ void TrackerTrackNumberFilter::loadViewPointConditions (const nlohmann::json& fi
 {
     logdbg << "filter '" << filters.dump(4) << "'";
 
-    assert (conditions_.size() == 0);
+    traced_assert(conditions_.size() == 0);
 
-    assert (filters.contains(name_));
+    traced_assert(filters.contains(name_));
     const json& filter = filters.at(name_);
 
-    assert (filter.contains("Values"));
+    traced_assert(filter.contains("Values"));
 
     std::map<std::string, std::map<std::string, std::string>> vp_values =
             filter.at("Values").get<std::map<std::string, std::map<std::string, std::string>>>();

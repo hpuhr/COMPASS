@@ -31,10 +31,10 @@ namespace EvaluationRequirement
 PositionAcrossConfigWidget::PositionAcrossConfigWidget(PositionAcrossConfig& cfg)
     : ProbabilityBaseConfigWidget(cfg)
 {
-    assert (prob_edit_);
+    traced_assert(prob_edit_);
     prob_edit_->setToolTip("Probability of acceptable across-track position");
 
-    assert (check_type_box_);
+    traced_assert(check_type_box_);
 
     // max dist
     max_abs_value_edit_ = new QLineEdit(QString::number(config().maxAbsValue()));
@@ -63,7 +63,7 @@ void PositionAcrossConfigWidget::maxAbsValueEditSlot(QString value)
 PositionAcrossConfig& PositionAcrossConfigWidget::config()
 {
     PositionAcrossConfig* config = dynamic_cast<PositionAcrossConfig*>(&config_);
-    assert (config);
+    traced_assert(config);
 
     return *config;
 }

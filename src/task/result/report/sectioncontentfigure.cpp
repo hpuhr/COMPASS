@@ -96,7 +96,7 @@ std::string SectionContentFigure::resourceExtension() const
 void SectionContentFigure::addContentUI(QVBoxLayout* layout, 
                                         bool force_ui_reset)
 {
-    assert (layout);
+    traced_assert(layout);
 
     if (isLocked())
     {
@@ -238,7 +238,7 @@ bool SectionContentFigure::fromJSON_impl(const nlohmann::json& j)
  */
 ResultT<std::vector<SectionContentFigure::ImageResource>> SectionContentFigure::obtainImages(const std::string* resource_dir) const
 {
-    assert(!isLocked());
+    traced_assert(!isLocked());
 
     std::vector<SectionContentFigure::ImageResource> resources;
 

@@ -17,6 +17,7 @@
 
 #include "propertylist.h"
 #include "logger.h"
+#include "traced_assert.h"
 
 PropertyList::PropertyList()
 {
@@ -57,7 +58,7 @@ void PropertyList::addProperty(std::string id, PropertyDataType type)
 {
     logdbg << "start";
     logdbg << "id '" << id << "' type " << Property::asString(type);
-    assert(!id.empty());
+    traced_assert(!id.empty());
 
     if (hasProperty(id))
     {
@@ -99,14 +100,14 @@ void PropertyList::addProperty(const Property& property)
 
 const Property& PropertyList::at(unsigned int index) const
 {
-    assert(index < properties_.size());
+    traced_assert(index < properties_.size());
     return properties_.at(index);
 }
 
 void PropertyList::removeProperty(const std::string& id)
 {
     logdbg << "start";
-    assert(hasProperty(id));
+    traced_assert(hasProperty(id));
 
     std::vector<Property>::iterator it;
 
@@ -120,13 +121,13 @@ void PropertyList::removeProperty(const std::string& id)
         }
     }
     logerr << "property " << id << " could not be removed";
-    assert(false);
+    traced_assert(false);
 }
 
 const Property& PropertyList::get(const std::string& id) const
 {
     logdbg << "start";
-    assert(hasProperty(id));
+    traced_assert(hasProperty(id));
 
     std::vector<Property>::const_iterator it;
 

@@ -29,7 +29,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/timewindow.h"
         "${CMAKE_CURRENT_LIST_DIR}/timeddataseries.h"
         "${CMAKE_CURRENT_LIST_DIR}/msghandler.h"
-        "${CMAKE_CURRENT_LIST_DIR}/compass_assert.h"
+        "${CMAKE_CURRENT_LIST_DIR}/traced_assert.h"
         "${CMAKE_CURRENT_LIST_DIR}/accuracy.h"
         "${CMAKE_CURRENT_LIST_DIR}/cartesian_product.h"
     PRIVATE

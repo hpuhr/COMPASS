@@ -34,7 +34,7 @@
 #include "util/timeconv.h"
 #include "viewpoint.h"
 
-#include <cassert>
+#include "traced_assert.h"
 
 using namespace std;
 using namespace Utils;
@@ -123,7 +123,7 @@ boost::optional<double> SingleExtraTrack::computeResult_impl() const
 {
     logdbg << "result_id " << result_id_ << " num_extra " << num_extra_ << " num_ok " << num_ok_;
 
-    assert (num_inside_ >= num_extra_ + num_ok_);
+    traced_assert(num_inside_ >= num_extra_ + num_ok_);
 
     unsigned int num_total = num_extra_ + num_ok_;
 
@@ -189,7 +189,7 @@ nlohmann::json::array_t SingleExtraTrack::detailValues(const EvaluationDetail& d
 bool SingleExtraTrack::detailIsOk(const EvaluationDetail& detail) const
 {
     auto is_extra = detail.getValueAs<bool>(DetailKey::Extra);
-    assert(is_extra.has_value());
+    traced_assert(is_extra.has_value());
 
     return !is_extra.value();
 }
@@ -201,7 +201,7 @@ void SingleExtraTrack::addAnnotationForDetail(nlohmann::json& annotations_json,
                                               TargetAnnotationType type,
                                               bool is_ok) const
 {
-    assert (detail.numPositions() >= 1);
+    traced_assert(detail.numPositions() >= 1);
 
     if (type == TargetAnnotationType::Highlight)
     {
@@ -271,7 +271,7 @@ boost::optional<double> JoinedExtraTrack::computeResult_impl() const
             << " num_extra " << num_extra_
             << " num_ok " << num_ok_;
 
-    assert (num_inside_ >= num_extra_ + num_ok_);
+    traced_assert(num_inside_ >= num_extra_ + num_ok_);
 
     unsigned int total = num_extra_ + num_ok_;
 

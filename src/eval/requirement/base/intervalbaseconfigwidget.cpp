@@ -34,12 +34,12 @@ namespace EvaluationRequirement
 IntervalBaseConfigWidget::IntervalBaseConfigWidget(IntervalBaseConfig& cfg)
 :   ProbabilityBaseConfigWidget(cfg)
 {
-    assert (form_layout_);
+    traced_assert(form_layout_);
 
-    assert (prob_edit_);
+    traced_assert(prob_edit_);
     prob_edit_->setToolTip("Probability of code detection or miss (inverted probability)");
 
-    assert (check_type_box_);
+    traced_assert(check_type_box_);
 
     uint32_t config_flags = config().configFlags();
 
@@ -132,7 +132,7 @@ IntervalBaseConfigWidget::IntervalBaseConfigWidget(IntervalBaseConfig& cfg)
 IntervalBaseConfig& IntervalBaseConfigWidget::config()
 {
     IntervalBaseConfig* config = dynamic_cast<IntervalBaseConfig*>(&config_);
-    assert (config);
+    traced_assert(config);
 
     return *config;
 }

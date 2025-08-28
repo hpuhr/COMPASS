@@ -98,7 +98,7 @@ EvaluationStandardWidget::EvaluationStandardWidget(EvaluationStandard& standard)
 
 EvaluationStandardWidget::~EvaluationStandardWidget()
 {
-    assert (splitter_);
+    traced_assert(splitter_);
 
     QSettings settings("COMPASS", ("EvalStandardWidget"+standard_.name()).c_str());
     settings.setValue("splitterSizes", splitter_->saveState());
@@ -111,14 +111,14 @@ EvaluationStandardTreeModel& EvaluationStandardWidget::model()
 
 void EvaluationStandardWidget::showContextMenu(const QPoint& pos)
 {
-    assert(tree_view_);
+    traced_assert(tree_view_);
 
     QModelIndex index = tree_view_->indexAt(pos);
     if (!index.isValid())
         return;
 
     EvaluationStandardTreeItem* item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
-    assert (item);
+    traced_assert(item);
 
     if (dynamic_cast<EvaluationStandard*>(item))
     {
@@ -133,7 +133,7 @@ void EvaluationStandardWidget::showContextMenu(const QPoint& pos)
         loginf << "got group";
 
         Group* group = dynamic_cast<Group*>(item);
-        assert (group);
+        traced_assert(group);
         showGroupMenu(*group);
     }
 }
@@ -148,7 +148,7 @@ void EvaluationStandardWidget::standardConfigChangedSlot()
 void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
 {
     EvaluationStandardTreeItem* item = static_cast<EvaluationStandardTreeItem*>(index.internalPointer());
-    assert (item);
+    traced_assert(item);
 
     if (dynamic_cast<EvaluationStandard*>(item))
     {
@@ -172,7 +172,7 @@ void EvaluationStandardWidget::itemClickedSlot(const QModelIndex& index)
         showRequirementWidget(config->widget());
     }
     else
-        assert (false);
+        traced_assert(false);
 }
 
 void EvaluationStandardWidget::addGroupSlot()
@@ -230,10 +230,10 @@ void EvaluationStandardWidget::addRequirementSlot(Group& group)
     loginf << standard_.name();
 
     QAction* action = dynamic_cast<QAction*>(QObject::sender());
-    assert (action);
+    traced_assert(action);
 
     QVariant data = action->data();
-    assert (data.isValid());
+    traced_assert(data.isValid());
 
     string class_id = data.toString().toStdString();
 
@@ -308,10 +308,10 @@ void EvaluationStandardWidget::deleteRequirementSlot(Group& group, EvaluationReq
     loginf << group.name();
 
     QAction* action = dynamic_cast<QAction*>(QObject::sender());
-    assert (action);
+    traced_assert(action);
 
     QVariant data = action->data();
-    assert (data.isValid());
+    traced_assert(data.isValid());
 
     string name = data.toString().toStdString();
 
@@ -336,7 +336,7 @@ void EvaluationStandardWidget::expandAll()
 
 void EvaluationStandardWidget::showRequirementWidget(QWidget* widget)
 {
-    assert(requirements_widget_);
+    traced_assert(requirements_widget_);
 
     if (!widget)
     {

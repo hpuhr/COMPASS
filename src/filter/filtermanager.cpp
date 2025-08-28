@@ -256,7 +256,7 @@ void FilterManager::checkSubConfigurables()
 
 std::string FilterManager::getSQLCondition(const std::string& dbcontent_name)
 {
-    assert(COMPASS::instance().dbContentManager().dbContent(dbcontent_name).loadable());
+    traced_assert(COMPASS::instance().dbContentManager().dbContent(dbcontent_name).loadable());
 
     std::stringstream ss;
 
@@ -288,7 +288,7 @@ unsigned int FilterManager::getNumFilters() { return filters_.size(); }
 
 DBFilter* FilterManager::getFilter(unsigned int index)
 {
-    assert(index < filters_.size());
+    traced_assert(index < filters_.size());
 
     return filters_.at(index).get();
 }
@@ -306,7 +306,7 @@ DBFilter* FilterManager::getFilter (const std::string& name)
     auto it = find_if(filters_.begin(), filters_.end(), [name] (const unique_ptr<DBFilter>& f)
     { return f->getName() == name; } );
 
-    assert (it != filters_.end());
+    traced_assert(it != filters_.end());
 
     return it->get();
 }
@@ -337,13 +337,13 @@ void FilterManager::reset()
 void FilterManager::unshowViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "start";
-    assert (vp);
+    traced_assert(vp);
 }
 
 void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 {
     loginf << "start";
-    assert (vp);
+    traced_assert(vp);
 
     const json& data = vp->data();
 
@@ -370,7 +370,7 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
     if (data.contains(ViewPoint::VP_SELECTED_RECNUMS_KEY))
     {
         auto& selected = data.at(ViewPoint::VP_SELECTED_RECNUMS_KEY);
-        assert (selected.is_array());
+        traced_assert(selected.is_array());
         std::vector<unsigned long> vec = selected.get<std::vector<unsigned long>>();
 
         COMPASS::instance().dbContentManager().storeSelectedRecNums(vec);
@@ -407,7 +407,7 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
 
         logdbg << "filter data '" << filters.dump(4) << "'";
 
-        assert (filters.is_object());
+        traced_assert(filters.is_object());
 
         for (auto& fil_it : filters.get<json::object_t>())
         {
@@ -467,7 +467,7 @@ FilterManagerWidget* FilterManager::widget()
         connect(this, &FilterManager::changedFiltersSignal, widget_, &FilterManagerWidget::updateFilters);
     }
 
-    assert(widget_);
+    traced_assert(widget_);
     return widget_;
 }
 
@@ -478,7 +478,7 @@ void FilterManager::databaseOpenedSlot()
     if (widget_)
         widget_->setDisabled(false);
 
-    assert (hasFilter("Timestamp"));
+    traced_assert(hasFilter("Timestamp"));
     getFilter("Timestamp")->reset();
 }
 
@@ -497,7 +497,7 @@ void FilterManager::dataSourcesChangedSlot()
     if (hasFilter("Tracker Track Number"))
     {
         TrackerTrackNumberFilter* filter = dynamic_cast<TrackerTrackNumberFilter*>(getFilter("Tracker Track Number"));
-        assert (filter);
+        traced_assert(filter);
         filter->updateDataSourcesSlot();
     }
 }

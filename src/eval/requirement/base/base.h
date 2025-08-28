@@ -258,7 +258,7 @@ std::pair<ValueComparisonResult, std::string> Base::compare (
         bool value_ok;
         bool lower_nok, upper_nok;
 
-        assert (has_ref_data); // ref times possible
+        traced_assert(has_ref_data); // ref times possible
 
         value_ok = false;
 
@@ -291,7 +291,7 @@ std::pair<ValueComparisonResult, std::string> Base::compare (
             }
             else
             {
-                assert (upper_nok);
+                traced_assert(upper_nok);
                 comment += " tst '" + to_str(*tst_value)
                            +"' ref at " + Utils::Time::toString(ref_upper)
                            + " '" + to_str(*ref_value_upper)

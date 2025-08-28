@@ -70,9 +70,9 @@ void ModeCFilterWidget::update()
 {
     DBFilterWidget::update();
 
-    assert (min_value_edit_);
-    assert (max_value_edit_);
-    assert(null_check_);
+    traced_assert(min_value_edit_);
+    traced_assert(max_value_edit_);
+    traced_assert(null_check_);
 
     const QString r0 = QString::number(filter_.minValue(), 'f', Precision);
     const QString r1 = QString::number(filter_.maxValue(), 'f', Precision);
@@ -94,7 +94,7 @@ void ModeCFilterWidget::minValueEditedSlot(const QString& value)
     bool ok;
 
     float value_float = value.toFloat(&ok);
-    assert (ok);
+    traced_assert(ok);
 
     loginf << "'" << value_float << "'";
 
@@ -112,7 +112,7 @@ void ModeCFilterWidget::maxValueEditedSlot(const QString& value)
     bool ok;
 
     float value_float = value.toFloat(&ok);
-    assert (ok);
+    traced_assert(ok);
 
     loginf << "'" << value_float << "'";
 
@@ -121,7 +121,7 @@ void ModeCFilterWidget::maxValueEditedSlot(const QString& value)
 
 void ModeCFilterWidget::nullWantedChangedSlot()
 {
-     assert(null_check_);
+     traced_assert(null_check_);
     bool wanted = null_check_->checkState() == Qt::Checked;
 
     loginf << "start" << wanted;

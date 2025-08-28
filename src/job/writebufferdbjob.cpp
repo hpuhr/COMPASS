@@ -28,7 +28,7 @@ WriteBufferDBJob::WriteBufferDBJob(JobOrderer* orderer, boost::function<void(Job
                                    DBInterface* db_interface, Buffer* buffer)
     : DBJob(orderer, done_function, obsolete_function, db_interface), buffer_(buffer)
 {
-    assert(buffer_);
+    traced_assert(buffer_);
 }
 
 WriteBufferDBJob::~WriteBufferDBJob() {}

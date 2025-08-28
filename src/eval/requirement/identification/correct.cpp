@@ -304,8 +304,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> IdentificationCorrect::eval
            << " num_pos_outside " << num_pos_outside << " num_pos_inside " << num_pos_inside
            << " num_correct " << num_correct << " num_not_correct " << num_not_correct;
 
-    assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
-    assert (num_pos_inside == num_no_ref_id+num_correct+num_not_correct);
+    traced_assert(num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos_inside == num_no_ref_id+num_correct+num_not_correct);
 
     return make_shared<EvaluationRequirementResult::SingleIdentificationCorrect>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,

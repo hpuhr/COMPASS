@@ -86,7 +86,7 @@ void ReportExportDialog::showEvent(QShowEvent *event)
 QLabel* ReportExportDialog::configLabel(QWidget* w)
 {
     auto label = dynamic_cast<QLabel*>(config_layout_->labelForField(w));
-    assert(label);
+    traced_assert(label);
     return label;
 }
 
@@ -95,7 +95,7 @@ QLabel* ReportExportDialog::configLabel(QWidget* w)
 QLabel* ReportExportDialog::configLabel(QLayout* l)
 {
     auto label = dynamic_cast<QLabel*>(config_layout_->labelForField(l));
-    assert(label);
+    traced_assert(label);
     return label;
 }
 
@@ -233,7 +233,7 @@ void ReportExportDialog::configureUI(const boost::optional<std::string>& export_
     auto res_name   = task_result_.name();
     auto exp_folder = reportExportMode2Folder(export_mode_);
 
-    assert(!exp_folder.empty());
+    traced_assert(!exp_folder.empty());
 
     auto report_dir  = Utils::Files::normalizeFilename(base_name + " " + res_name, false) +
                        "/" + exp_folder;

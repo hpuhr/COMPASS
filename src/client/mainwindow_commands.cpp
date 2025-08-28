@@ -230,7 +230,7 @@ bool RTCommandImportSectorsJSON::run_impl()
 
     size_t num_sectors = 0;
 
-    assert (COMPASS::instance().evaluationManager().sectorsLoaded());
+    traced_assert(COMPASS::instance().evaluationManager().sectorsLoaded());
     const auto& sector_layers = COMPASS::instance().evaluationManager().sectorsLayers();
 
     for (const auto& sl : sector_layers)
@@ -428,7 +428,7 @@ bool RTCommandLoadData::run_impl()
     }
 
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
-    assert (main_window);
+    traced_assert(main_window);
 
     main_window->loadButtonSlot();
 
@@ -465,7 +465,7 @@ bool RTCommandExportViewPointsReport::run_impl()
     }
 
     MainWindow* main_window = dynamic_cast<MainWindow*> (rtcommand::mainWindow());
-    assert (main_window);
+    traced_assert(main_window);
 
     //main_window->showViewPointsTab();
 

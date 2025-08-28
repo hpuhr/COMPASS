@@ -83,15 +83,15 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
             // ds id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
 
             // line id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
+    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
 
             // timestamp
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
+    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
 
             // aircraft address
@@ -120,7 +120,7 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
 
     if (dbcontent_name == "CAT062")
     {
-        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
+        traced_assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
         read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat062_fl_measured_));
     }
 
@@ -137,13 +137,13 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
         read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_utn_));
 
             // rec num, must be last for update process
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
+    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_rec_num_));
 
             // adsb mops
     if (dbcontent_name == "CAT021")
     {
-        assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
+        traced_assert(dbcont_man.canGetVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
         read_set.add(dbcont_man.getVariable(dbcontent_name, DBContent::var_cat021_mops_version_));
     }
 

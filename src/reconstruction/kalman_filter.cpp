@@ -275,7 +275,7 @@ void KalmanFilter::invertState(Vector& x_inv, const Vector& x) const
 */
 void KalmanFilter::invertState(Vector& x) const
 {
-    assert(invert_state_func_);
+    traced_assert(invert_state_func_);
     invert_state_func_(x);
 }
 
@@ -776,7 +776,7 @@ void KalmanFilter::xPos(double& x, double& y) const
 void KalmanFilter::xPos(double& x, double& y, const kalman::Vector& x_vec) const
 {
     bool implemented = false;
-    assert(implemented);
+    traced_assert(implemented);
 }
 
 /**
@@ -784,7 +784,7 @@ void KalmanFilter::xPos(double& x, double& y, const kalman::Vector& x_vec) const
 void KalmanFilter::xPos(kalman::Vector& x_vec, double x, double y) const
 {
     bool implemented = false;
-    assert(implemented);
+    traced_assert(implemented);
 }
 
 /**
@@ -792,7 +792,7 @@ void KalmanFilter::xPos(kalman::Vector& x_vec, double x, double y) const
 double KalmanFilter::xVar(const kalman::Matrix& P) const
 {
     bool implemented = false;
-    assert(implemented);
+    traced_assert(implemented);
 
     return 0.0;
 }
@@ -802,7 +802,7 @@ double KalmanFilter::xVar(const kalman::Matrix& P) const
 double KalmanFilter::yVar(const kalman::Matrix& P) const
 {
     bool implemented = false;
-    assert(implemented);
+    traced_assert(implemented);
 
     return 0.0;
 }
@@ -812,7 +812,7 @@ double KalmanFilter::yVar(const kalman::Matrix& P) const
 double KalmanFilter::xyCov(const kalman::Matrix& P) const
 {
     bool implemented = false;
-    assert(implemented);
+    traced_assert(implemented);
 
     return 0.0;
 }

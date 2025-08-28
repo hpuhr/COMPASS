@@ -34,7 +34,7 @@
 #include "json.hpp"
 #include "util/tbbhack.h"
 
-#include "compass_assert.h"
+#include "traced_assert.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -247,7 +247,7 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
     unsigned int import_count = 0;
 
     if (do_assert_)
-        assert(!do_assert_);
+        traced_assert(!do_assert_);
 
     if (do_throw_)
         throw std::runtime_error("error of interest");
@@ -640,17 +640,17 @@ bool Client::notify(QObject* receiver, QEvent* event)
     catch (exception& e)
     {
         std::string msg = "Unhandled exception '" + std::string(e.what()) + "'";
-        compass_assert_msg(false, msg.c_str());
+        traced_assert_msg(false, msg.c_str());
 
-        // assert (false);
+        // traced_assert(false);
         //QMessageBox::critical(nullptr, "COMPASSClient: notify: exception", QString(e.what()));
     }
     catch (...)
     {
         std::string msg = "Unhandled exception";
-        compass_assert_msg(false, msg.c_str());
+        traced_assert_msg(false, msg.c_str());
 
-        // assert (false);
+        // traced_assert(false);
         //QMessageBox::critical(nullptr, "COMPASSClient: notify: exception", "Unknown exception");
     }
     return false;
@@ -675,7 +675,7 @@ void Client::checkAndSetupConfig()
         {
             cout << "COMPASSClient: assuming fuse environment in '" << appdir << "'" << endl;
             assert(appdir);
-            assert (Files::directoryExists(appdir));
+            assert(Files::directoryExists(appdir));
 
             system_install_path_ = string(appdir) + "/compass/";
 
@@ -741,16 +741,16 @@ void Client::checkAndSetupConfig()
             try {
                 json json_config = json::parse(import_asterix_parameters_);
 
-                assert (ConfigurationManager::getInstance().hasRootConfiguration(
+                traced_assert(ConfigurationManager::getInstance().hasRootConfiguration(
                     "COMPASS", "COMPASS0"));
                 Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
                     "COMPASS", "COMPASS0");
 
-                assert (compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
+                traced_assert(compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
                 Configuration& task_man_config = compass_config.getOrCreateSubConfiguration(
                     "TaskManager", "TaskManager0");
 
-                assert (task_man_config.hasSubConfiguration("ASTERIXImportTask", "ASTERIXImportTask0"));
+                traced_assert(task_man_config.hasSubConfiguration("ASTERIXImportTask", "ASTERIXImportTask0"));
                 Configuration& task_config = task_man_config.getOrCreateSubConfiguration(
                     "ASTERIXImportTask", "ASTERIXImportTask0");
 
@@ -771,16 +771,16 @@ void Client::checkAndSetupConfig()
             try {
                 json json_config = json::parse(import_gps_parameters_);
 
-                assert (ConfigurationManager::getInstance().hasRootConfiguration(
+                traced_assert(ConfigurationManager::getInstance().hasRootConfiguration(
                     "COMPASS", "COMPASS0"));
                 Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
                     "COMPASS", "COMPASS0");
 
-                assert (compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
+                traced_assert(compass_config.hasSubConfiguration("TaskManager", "TaskManager0"));
                 Configuration& task_man_config = compass_config.getOrCreateSubConfiguration(
                     "TaskManager", "TaskManager0");
 
-                assert (task_man_config.hasSubConfiguration("GPSTrailImportTask", "GPSTrailImportTask0"));
+                traced_assert(task_man_config.hasSubConfiguration("GPSTrailImportTask", "GPSTrailImportTask0"));
                 Configuration& task_config = task_man_config.getOrCreateSubConfiguration(
                     "GPSTrailImportTask", "GPSTrailImportTask0");
 
@@ -801,16 +801,16 @@ void Client::checkAndSetupConfig()
             try {
                 json json_config = json::parse(evaluation_parameters_);
 
-                assert (ConfigurationManager::getInstance().hasRootConfiguration(
+                traced_assert(ConfigurationManager::getInstance().hasRootConfiguration(
                     "COMPASS", "COMPASS0"));
                 Configuration& compass_config = ConfigurationManager::getInstance().getRootConfiguration(
                     "COMPASS", "COMPASS0");
 
-                assert (compass_config.hasSubConfiguration("EvaluationManager", "EvaluationManager0"));
+                traced_assert(compass_config.hasSubConfiguration("EvaluationManager", "EvaluationManager0"));
                 Configuration& eval_man_config = compass_config.getOrCreateSubConfiguration(
                     "EvaluationManager", "EvaluationManager0");
 
-                assert (eval_man_config.hasSubConfiguration("EvaluationCalculator", "EvaluationCalculator0"));
+                traced_assert(eval_man_config.hasSubConfiguration("EvaluationCalculator", "EvaluationCalculator0"));
                 Configuration& eval_calc_config = eval_man_config.getOrCreateSubConfiguration(
                     "EvaluationCalculator", "EvaluationCalculator0");
 
@@ -827,7 +827,7 @@ void Client::checkAndSetupConfig()
     {
         logerr << "caught exception '" << ex.what() << "'";
         //logerr.flush();
-        // assert (false);
+        // traced_assert(false);
 
         quit_requested_ = true;
         return;
@@ -836,7 +836,7 @@ void Client::checkAndSetupConfig()
     {
         logerr << "caught exception";
         //logerr.flush();
-        // assert (false);
+        // traced_assert(false);
 
         quit_requested_ = true;
         return;
@@ -900,7 +900,7 @@ void Client::checkNeededActions()
         if (String::compareVersions(VERSION, config_version) != 0)
             cerr << "COMPASSClient: app version '" << VERSION << "' config version " << config_version << "'" << endl;
 
-        assert (String::compareVersions(VERSION, config_version) == 0);  // must be same
+        assert(String::compareVersions(VERSION, config_version) == 0);  // must be same
         return; // nothing to do
     }
     else
@@ -970,7 +970,7 @@ void Client::copyConfigurationAndData()
         cout << "COMPASSClient: creating GDAL cache directory '" << OSGEARTH_CACHE_SUBDIRECTORY
              << "'";
         Files::createMissingDirectories(OSGEARTH_CACHE_SUBDIRECTORY);
-        assert (Files::directoryExists(OSGEARTH_CACHE_SUBDIRECTORY));
+        assert(Files::directoryExists(OSGEARTH_CACHE_SUBDIRECTORY));
     }
 
     cout << "COMPASSClient: copying files from system installation from '" << system_install_path_

@@ -21,6 +21,7 @@
 #include "property.h"
 #include "stringconv.h"
 #include "logger.h"
+#include "traced_assert.h"
 
 #include <QObject>
 
@@ -102,7 +103,7 @@ class Variable : public QObject, public Property, public Configurable
 
     DBContent& dbObject() const
     {
-        assert(dbcontent_);
+        traced_assert(dbcontent_);
         return *dbcontent_;
     }
 
@@ -122,7 +123,7 @@ class Variable : public QObject, public Property, public Configurable
     template <typename T>
     std::string getAsSpecialRepresentationString(T value) const
     {
-        assert(representation_ != Variable::Representation::STANDARD);
+        traced_assert(representation_ != Variable::Representation::STANDARD);
 
         std::ostringstream out;
         try

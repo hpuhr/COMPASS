@@ -262,7 +262,7 @@ void ReferenceCalculator::generateLineMeasurements(const dbContent::Reconstructo
 
     std::vector<reconstruction::Measurement> line_measurements;
 
-    assert (reconstructor_.acc_estimator_);
+    traced_assert(reconstructor_.acc_estimator_);
 
     for (const auto& elem : target_reports)
     {
@@ -305,7 +305,7 @@ void ReferenceCalculator::addMeasurements(unsigned int utn,
 
     //final check on available source ids
     for (const auto& mm : utn_ref.measurements)
-        assert(mm.source_id.has_value());
+        traced_assert(mm.source_id.has_value());
 }
 
 /**
@@ -451,7 +451,7 @@ ReferenceCalculator::InitRecResult ReferenceCalculator::initReconstruction(Targe
         refs.init_update = *refs.updates.rbegin();
 
         //first measurement of new slice must be after the last slice's last update
-        assert(refs.init_update->t <= refs.measurements[ refs.start_index.value() ].t);
+        traced_assert(refs.init_update->t <= refs.measurements[ refs.start_index.value() ].t);
     }
 
     return InitRecResult::Success;
@@ -480,7 +480,7 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
         loginf << "    init update:   " << (refs.init_update.has_value() ? "yes" : "no");
     }
 
-    assert(refs.start_index.has_value());
+    traced_assert(refs.start_index.has_value());
 
     //if (refs.utn == 21)
     //    writeTargetData(refs, "/home/mcphatty/track_utn21.json");
@@ -568,7 +568,7 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
 
         //reinit kalman with first measurement
         estimator.kalmanInit(update, mm0);
-        assert(update.valid);
+        traced_assert(update.valid);
 
         collectUpdate(update, mm0, refs.start_index.value(), debug_mm);
 
@@ -611,7 +611,7 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
         //check result
         if (res == reconstruction::KalmanEstimator::StepResult::Success)
         {
-            assert(update.valid);
+            traced_assert(update.valid);
 
             const auto& step_info = estimator.stepInfo();
 
@@ -632,7 +632,7 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
         }
         else if (res == reconstruction::KalmanEstimator::StepResult::FailStepTooSmall)
         {
-            assert(!update.valid);
+            traced_assert(!update.valid);
 
             if (debug_target)
                 skipped_updates.push_back(estimator.currentPositionWGS84());
@@ -641,7 +641,7 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
         }
         else if (res == reconstruction::KalmanEstimator::StepResult::FailKalmanError)
         {
-            assert(!update.valid);
+            traced_assert(!update.valid);
 
             if (debug_target)
                 failed_updates.push_back(estimator.currentPositionWGS84());
@@ -659,7 +659,7 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
         }
         else
         {
-            assert(!update.valid);
+            traced_assert(!update.valid);
 
             ++refs.num_updates_failed;
             ++refs.num_updates_failed_other;
@@ -707,7 +707,7 @@ void ReferenceCalculator::reconstructSmoothMeasurements(std::vector<kalman::Kalm
                                           kalman::SmoothFailStrategy::SetInvalid,
                                           debug_target ? &rts_debug_infos : nullptr);
         //assert(ok);
-        assert(updates.size() == refs.updates.size());
+        traced_assert(updates.size() == refs.updates.size());
 
         if (!ok)
         {
@@ -827,7 +827,7 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
     estimator.settings() = settings_.kalmanEstimatorSettings();
 
 #if USE_EXPERIMENTAL_SOURCE == false
-    assert(settings_.kalman_type_final == kalman::KalmanType::UMKalman2D);
+    traced_assert(settings_.kalman_type_final == kalman::KalmanType::UMKalman2D);
 #endif
 
     estimator.init(settings_.kalman_type_final);
@@ -860,7 +860,7 @@ void ReferenceCalculator::reconstructMeasurements(TargetReferences& refs)
 
     //@TODO: remove check
     for (const auto& u : updates)
-        assert(u.source_id.has_value());
+        traced_assert(u.source_id.has_value());
 
     //resample?
     if (settings_.resample_result)
@@ -913,7 +913,7 @@ void ReferenceCalculator::updateReferences()
 {
     for (auto& ref : references_)
     {
-        assert(reconstructor_.targets_container_.targets_.count(ref.first));
+        traced_assert(reconstructor_.targets_container_.targets_.count(ref.first));
 
         auto& target = reconstructor_.targets_container_.targets_.at(ref.first);
         //target.references_ = std::move(ref.second.references);

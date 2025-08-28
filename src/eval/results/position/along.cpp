@@ -19,7 +19,7 @@
 
 #include "logger.h"
 
-#include <cassert>
+#include "traced_assert.h"
 
 namespace EvaluationRequirementResult
 {

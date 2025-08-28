@@ -121,7 +121,7 @@ void DBFilterWidget::createMenu()
 
 void DBFilterWidget::addChildWidget(QWidget* widget)
 {
-    assert(widget);
+    traced_assert(widget);
     child_layout_->addWidget(widget);
 }
 
@@ -135,8 +135,8 @@ void DBFilterWidget::updateChildWidget()
         auto label = conditions.at(cnt)->getLabel();
         auto edit  = conditions.at(cnt)->getEdit();
 
-        assert(label);
-        assert(edit);
+        traced_assert(label);
+        traced_assert(edit);
 
         int row = child_layout_->rowCount();
         child_layout_->addWidget(label, row, 0);

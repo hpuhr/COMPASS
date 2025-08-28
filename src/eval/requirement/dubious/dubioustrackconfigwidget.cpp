@@ -187,7 +187,7 @@ void DubiousTrackConfigWidget::toggleEvalOnlySingleDsId()
 {
     loginf << "start";
 
-    assert (eval_only_single_ds_id_check_);
+    traced_assert(eval_only_single_ds_id_check_);
     config().evalOnlySingleDsId(eval_only_single_ds_id_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -237,7 +237,7 @@ void DubiousTrackConfigWidget::toggleMarkPrimaryOnlySlot()
 {
     loginf << "start";
 
-    assert (mark_primary_only_check_);
+    traced_assert(mark_primary_only_check_);
     config().markPrimaryOnly(mark_primary_only_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -247,7 +247,7 @@ void DubiousTrackConfigWidget::toggleUseMinUpdatesSlot()
 {
     loginf << "start";
 
-    assert (use_min_updates_check_);
+    traced_assert(use_min_updates_check_);
     config().useMinUpdates(use_min_updates_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -270,7 +270,7 @@ void DubiousTrackConfigWidget::toggleUseMinDurationSlot()
 {
     loginf << "start";
 
-    assert (use_min_duration_check_);
+    traced_assert(use_min_duration_check_);
     config().useMinDuration(use_min_duration_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -293,7 +293,7 @@ void DubiousTrackConfigWidget::toggleUseMaxGroundspeedSlot()
 {
     loginf << "start";
 
-    assert (use_max_groundspeed_check_);
+    traced_assert(use_max_groundspeed_check_);
     config().useMaxGroundspeed(use_max_groundspeed_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -316,7 +316,7 @@ void DubiousTrackConfigWidget::toggleUseMaxAccelerationSlot()
 {
     loginf << "start";
 
-    assert (use_max_acceleration_check_);
+    traced_assert(use_max_acceleration_check_);
     config().useMaxAcceleration(use_max_acceleration_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -339,7 +339,7 @@ void DubiousTrackConfigWidget::toggleUseMaxTurnrateSlot()
 {
     loginf << "start";
 
-    assert (use_max_turnrate_check_);
+    traced_assert(use_max_turnrate_check_);
     config().useMaxTurnrate(use_max_turnrate_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -362,7 +362,7 @@ void DubiousTrackConfigWidget::toggleUseMaxROCDSlot()
 {
     loginf << "start";
 
-    assert (use_max_rocd_check_);
+    traced_assert(use_max_rocd_check_);
     config().useMaxROCD(use_max_rocd_check_->checkState() == Qt::Checked);
 
     updateActive();
@@ -398,32 +398,32 @@ void DubiousTrackConfigWidget::dubiousProbEditSlot(QString value)
 DubiousTrackConfig& DubiousTrackConfigWidget::config()
 {
     DubiousTrackConfig* config = dynamic_cast<DubiousTrackConfig*>(&config_);
-    assert (config);
+    traced_assert(config);
 
     return *config;
 }
 
 void DubiousTrackConfigWidget::updateActive()
 {
-    assert (single_ds_id_edit_);
+    traced_assert(single_ds_id_edit_);
     single_ds_id_edit_->setEnabled(config().evalOnlySingleDsId());
 
-    assert (min_updates_edit_);
+    traced_assert(min_updates_edit_);
     min_updates_edit_->setEnabled(config().useMinUpdates());
 
-    assert (min_duration_edit_);
+    traced_assert(min_duration_edit_);
     min_duration_edit_->setEnabled(config().useMinDuration());
 
-    assert (max_groundspeed_kts_edit_);
+    traced_assert(max_groundspeed_kts_edit_);
     max_groundspeed_kts_edit_->setEnabled(config().useMaxGroundspeed());
 
-    assert (max_acceleration_edit_);
+    traced_assert(max_acceleration_edit_);
     max_acceleration_edit_->setEnabled(config().useMaxAcceleration());
 
-    assert (max_turnrate_edit_);
+    traced_assert(max_turnrate_edit_);
     max_turnrate_edit_->setEnabled(config().useMaxTurnrate());
 
-    assert (max_rocd_edit_);
+    traced_assert(max_rocd_edit_);
     max_rocd_edit_->setEnabled(config().useMaxROCD());
 }
 

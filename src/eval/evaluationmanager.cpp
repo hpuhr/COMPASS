@@ -101,12 +101,12 @@ void EvaluationManager::generateSubConfigurable(const std::string& class_id,
 {
     if (class_id == "EvaluationTargetFilter")
     {
-        assert (!target_filter_);
+        traced_assert(!target_filter_);
         target_filter_.reset(new EvaluationTargetFilter(class_id, instance_id, *this));
     }
     else if (class_id == "EvaluationCalculator")
     {
-        assert(!calculator_);
+        traced_assert(!calculator_);
 
         EvaluationCalculator* calculator = new EvaluationCalculator(class_id, instance_id, *this, dbcontent_man_);
         calculator_.reset(calculator);
@@ -124,14 +124,14 @@ void EvaluationManager::checkSubConfigurables()
     if (!target_filter_)
     {
         generateSubConfigurable("EvaluationTargetFilter", "EvaluationTargetFilter0");
-        assert(target_filter_);
+        traced_assert(target_filter_);
     }
 
     if (!calculator_)
     {
         //generate default calculator
         generateSubConfigurable("EvaluationCalculator", "EvaluationCalculator0");
-        assert(calculator_);
+        traced_assert(calculator_);
     }
 }
 
@@ -141,7 +141,7 @@ void EvaluationManager::init()
 {
     loginf << "start";
 
-    assert (!initialized_);
+    traced_assert(!initialized_);
     initialized_ = true;
 
     auto& dbc_manager = COMPASS::instance().dbContentManager();
@@ -174,7 +174,7 @@ void EvaluationManager::close()
  */
 void EvaluationManager::clearData()
 {
-    assert (calculator_);
+    traced_assert(calculator_);
     return calculator_->clearData();
 }
 
@@ -182,8 +182,8 @@ void EvaluationManager::clearData()
  */
 Result EvaluationManager::canEvaluate() const
 {
-    assert (initialized_);
-    assert (calculator_);
+    traced_assert(initialized_);
+    traced_assert(calculator_);
 
     return calculator_->canEvaluate();
 }
@@ -194,8 +194,8 @@ Result EvaluationManager::evaluate(bool show_dialog)
 {
     loginf << "start";
 
-    assert (initialized_);
-    assert (calculator_);
+    traced_assert(initialized_);
+    traced_assert(calculator_);
 
     //show config dialog?
     if (show_dialog)
@@ -210,10 +210,10 @@ Result EvaluationManager::evaluate(bool show_dialog)
 
     if (!res.ok())
         logerr << "evaluation error: " << res.error();
-    assert(res.ok());
+    traced_assert(res.ok());
 
     auto calculator_local = res.result();
-    assert(calculator_local);
+    traced_assert(calculator_local);
 
     //evaluate
     auto eval_res = calculator_local->evaluate(true);
@@ -227,18 +227,18 @@ Result EvaluationManager::evaluate(bool show_dialog)
         return eval_res;
     }
 
-    assert(calculator_local->evaluated());
+    traced_assert(calculator_local->evaluated());
 
     //store calculator to task result
     auto& task_man = COMPASS::instance().taskManager();
 
-    assert(task_man.hasResult(calculator_local->resultName()));
+    traced_assert(task_man.hasResult(calculator_local->resultName()));
 
     auto task_result = task_man.result(calculator_local->resultName());
-    assert(task_result);
+    traced_assert(task_result);
 
     auto eval_result = dynamic_cast<EvaluationTaskResult*>(task_result.get());
-    assert(eval_result);
+    traced_assert(eval_result);
 
     eval_result->injectCalculator(calculator_local);
 
@@ -255,9 +255,9 @@ void EvaluationManager::databaseOpenedSlot()
 {
     loginf << "start";
 
-    assert(calculator_);
+    traced_assert(calculator_);
 
-    assert (!sectors_loaded_);
+    traced_assert(!sectors_loaded_);
     loadSectors();
 
     //load sectors before locking any results via this connections
@@ -330,7 +330,7 @@ void EvaluationManager::databaseClosedSlot()
     load_timestamp_end_ = {};
     load_filtered_time_windows_.clear();
 
-    assert(calculator_);
+    traced_assert(calculator_);
 
     calculator_->reset();
 
@@ -342,7 +342,7 @@ void EvaluationManager::databaseClosedSlot()
  */
 void EvaluationManager::dataSourcesChangedSlot()
 {
-    assert(calculator_);
+    traced_assert(calculator_);
 
     calculator_->checkReferenceDataSources();
     calculator_->checkTestDataSources();
@@ -501,7 +501,7 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
 */
 bool EvaluationManager::hasSectorLayer(const std::string& layer_name) const
 {
-    assert (sectors_loaded_);
+    traced_assert(sectors_loaded_);
 
     auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
                              [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
@@ -520,12 +520,12 @@ bool EvaluationManager::hasSectorLayer(const std::string& layer_name) const
 */
 std::shared_ptr<SectorLayer> EvaluationManager::sectorLayer (const std::string& layer_name) const
 {
-    assert (sectors_loaded_);
-    assert (hasSectorLayer(layer_name));
+    traced_assert(sectors_loaded_);
+    traced_assert(hasSectorLayer(layer_name));
 
     auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
                              [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
-    assert (iter != sector_layers_.end());
+    traced_assert(iter != sector_layers_.end());
 
     return *iter;
 }
@@ -547,7 +547,7 @@ void EvaluationManager::loadSectors()
 {
     loginf << "start";
 
-    assert (!sectors_loaded_);
+    traced_assert(!sectors_loaded_);
 
     if (!COMPASS::instance().dbInterface().ready())
     {
@@ -591,7 +591,7 @@ void EvaluationManager::updateSectorLayers()
  */
 unsigned int EvaluationManager::getMaxSectorId ()
 {
-    assert (sectors_loaded_);
+    traced_assert(sectors_loaded_);
     return max_sector_id_;
 }
 
@@ -608,9 +608,9 @@ void EvaluationManager::createNewSector(const std::string& name,
            << " layer_name " << layer_name
            << " num points " << points.size();
 
-    assert (sectors_loaded_);
-    assert (!hasSector(name, layer_name));
-    assert (calculator_);
+    traced_assert(sectors_loaded_);
+    traced_assert(!hasSector(name, layer_name));
+    traced_assert(calculator_);
 
     ++max_sector_id_; // new max
 
@@ -622,11 +622,11 @@ void EvaluationManager::createNewSector(const std::string& name,
         sector_layers_.push_back(make_shared<SectorLayer>(layer_name));
     }
 
-    assert (hasSectorLayer(layer_name));
+    traced_assert(hasSectorLayer(layer_name));
 
     sectorLayer(layer_name)->addSector(sector);
 
-    assert (hasSector(name, layer_name));
+    traced_assert(hasSector(name, layer_name));
     sector->save();
 
     calculator_->clearData();
@@ -638,7 +638,7 @@ void EvaluationManager::createNewSector(const std::string& name,
  */
 bool EvaluationManager::hasSector (const string& name, const string& layer_name)
 {
-    assert (sectors_loaded_);
+    traced_assert(sectors_loaded_);
 
     if (!hasSectorLayer(layer_name))
         return false;
@@ -650,7 +650,7 @@ bool EvaluationManager::hasSector (const string& name, const string& layer_name)
  */
 bool EvaluationManager::hasSector (unsigned int id)
 {
-    assert (sectors_loaded_);
+    traced_assert(sectors_loaded_);
 
     for (auto& sec_lay_it : sector_layers_)
     {
@@ -667,8 +667,8 @@ bool EvaluationManager::hasSector (unsigned int id)
  */
 std::shared_ptr<Sector> EvaluationManager::sector (const string& name, const string& layer_name)
 {
-    assert (sectors_loaded_);
-    assert (hasSector(name, layer_name));
+    traced_assert(sectors_loaded_);
+    traced_assert(hasSector(name, layer_name));
 
     return sectorLayer(layer_name)->sector(name);
 }
@@ -677,8 +677,8 @@ std::shared_ptr<Sector> EvaluationManager::sector (const string& name, const str
  */
 std::shared_ptr<Sector> EvaluationManager::sector (unsigned int id)
 {
-    assert (sectors_loaded_);
-    assert (hasSector(id));
+    traced_assert(sectors_loaded_);
+    traced_assert(hasSector(id));
 
     for (auto& sec_lay_it : sector_layers_)
     {
@@ -690,29 +690,29 @@ std::shared_ptr<Sector> EvaluationManager::sector (unsigned int id)
     }
 
     logerr << "id " << id << " not found";
-    assert (false);
+    traced_assert(false);
 }
 
 /**
  */
 void EvaluationManager::moveSector(unsigned int id, const std::string& old_layer_name, const std::string& new_layer_name)
 {
-    assert (sectors_loaded_);
-    assert (hasSector(id));
-    assert (calculator_);
+    traced_assert(sectors_loaded_);
+    traced_assert(hasSector(id));
+    traced_assert(calculator_);
 
     shared_ptr<Sector> tmp_sector = sector(id);
 
-    assert (hasSectorLayer(old_layer_name));
+    traced_assert(hasSectorLayer(old_layer_name));
     sectorLayer(old_layer_name)->removeSector(tmp_sector);
 
     if (!hasSectorLayer(new_layer_name))
         sector_layers_.push_back(make_shared<SectorLayer>(new_layer_name));
 
-    assert (hasSectorLayer(new_layer_name));
+    traced_assert(hasSectorLayer(new_layer_name));
     sectorLayer(new_layer_name)->addSector(tmp_sector);
 
-    assert (hasSector(tmp_sector->name(), new_layer_name));
+    traced_assert(hasSector(tmp_sector->name(), new_layer_name));
     tmp_sector->save();
 
     calculator_->clearData();
@@ -724,7 +724,7 @@ void EvaluationManager::moveSector(unsigned int id, const std::string& old_layer
  */
 std::vector<std::shared_ptr<SectorLayer>>& EvaluationManager::sectorsLayers()
 {
-    assert (sectors_loaded_);
+    traced_assert(sectors_loaded_);
 
     return sector_layers_;
 }
@@ -733,8 +733,8 @@ std::vector<std::shared_ptr<SectorLayer>>& EvaluationManager::sectorsLayers()
  */
 void EvaluationManager::saveSector(unsigned int id)
 {
-    assert (sectors_loaded_);
-    assert (hasSector(id));
+    traced_assert(sectors_loaded_);
+    traced_assert(hasSector(id));
 
     saveSector(sector(id));
 }
@@ -743,8 +743,8 @@ void EvaluationManager::saveSector(unsigned int id)
  */
 void EvaluationManager::saveSector(std::shared_ptr<Sector> sector)
 {
-    assert (sectors_loaded_);
-    assert (hasSector(sector->name(), sector->layerName()));
+    traced_assert(sectors_loaded_);
+    traced_assert(hasSector(sector->name(), sector->layerName()));
     COMPASS::instance().dbInterface().saveSector(sector);
 }
 
@@ -752,13 +752,13 @@ void EvaluationManager::saveSector(std::shared_ptr<Sector> sector)
  */
 void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
 {
-    assert (sectors_loaded_);
-    assert (hasSector(sector->name(), sector->layerName()));
-    assert (calculator_);
+    traced_assert(sectors_loaded_);
+    traced_assert(hasSector(sector->name(), sector->layerName()));
+    traced_assert(calculator_);
 
     string layer_name = sector->layerName();
 
-    assert (hasSectorLayer(layer_name));
+    traced_assert(hasSectorLayer(layer_name));
 
     sectorLayer(layer_name)->removeSector(sector);
 
@@ -768,7 +768,7 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
         auto iter = std::find_if(sector_layers_.begin(), sector_layers_.end(),
                                  [&layer_name](const shared_ptr<SectorLayer>& x) { return x->name() == layer_name;});
 
-        assert (iter != sector_layers_.end());
+        traced_assert(iter != sector_layers_.end());
         sector_layers_.erase(iter);
 
         calculator_->checkMinHeightFilterValid();
@@ -785,8 +785,8 @@ void EvaluationManager::deleteSector(shared_ptr<Sector> sector)
  */
 void EvaluationManager::deleteAllSectors()
 {
-    assert (sectors_loaded_);
-    assert (calculator_);
+    traced_assert(sectors_loaded_);
+    traced_assert(calculator_);
 
     sector_layers_.clear();
 
@@ -804,8 +804,8 @@ void EvaluationManager::importSectors(const std::string& filename)
 {
     loginf << "filename '" << filename << "'";
 
-    assert (sectors_loaded_);
-    assert (calculator_);
+    traced_assert(sectors_loaded_);
+    traced_assert(calculator_);
 
     sector_layers_.clear();
     COMPASS::instance().dbInterface().clearSectorsTable();
@@ -859,7 +859,7 @@ void EvaluationManager::importSectors(const std::string& filename)
 
             sectorLayer(layer_name)->addSector(shared_ptr<Sector>(eval_sector));
 
-            assert (hasSector(name, layer_name));
+            traced_assert(hasSector(name, layer_name));
 
             eval_sector->save();
 
@@ -886,7 +886,7 @@ void EvaluationManager::exportSectors (const std::string& filename)
 {
     loginf << "filename '" << filename << "'";
 
-    assert (sectors_loaded_);
+    traced_assert(sectors_loaded_);
 
     json j;
 
@@ -1001,7 +1001,7 @@ void EvaluationManager::onConfigurationChanged(const std::vector<std::string>& c
 void EvaluationManager::loadData(const EvaluationCalculator& calculator,
                                  bool blocking)
 {
-    assert(!raw_data_available_);
+    traced_assert(!raw_data_available_);
 
     DataSourceManager& ds_man = COMPASS::instance().dataSourceManager();
 
@@ -1055,7 +1055,7 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
     // position data
     if (roi.has_value())
     {
-        assert (fil_man.hasFilter("Position"));
+        traced_assert(fil_man.hasFilter("Position"));
         DBFilter* pos_fil = fil_man.getFilter("Position");
 
         json filter;
@@ -1072,7 +1072,7 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
 
     if (!utns.empty())
     {
-        assert (fil_man.hasFilter("UTNs"));
+        traced_assert(fil_man.hasFilter("UTNs"));
         DBFilter* utn_fil = fil_man.getFilter("UTNs");
 
         json filter;
@@ -1094,7 +1094,7 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
 
     if (use_timestamp_filter_)
     {
-        assert (fil_man.hasFilter("Timestamp"));
+        traced_assert(fil_man.hasFilter("Timestamp"));
         DBFilter* fil = fil_man.getFilter("Timestamp");
 
         fil->setActive(true);
@@ -1119,7 +1119,7 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
     {
         if (settings.use_ref_traj_accuracy_filter_)
         {
-            assert (fil_man.hasFilter("RefTraj Accuracy"));
+            traced_assert(fil_man.hasFilter("RefTraj Accuracy"));
             DBFilter* fil = fil_man.getFilter("RefTraj Accuracy");
 
             fil->setActive(true);
@@ -1133,7 +1133,7 @@ void EvaluationManager::configureLoadFilters(const EvaluationCalculator& calcula
 
         if (settings.use_adsb_filter_)
         {
-            assert (fil_man.hasFilter("ADSB Quality"));
+            traced_assert(fil_man.hasFilter("ADSB Quality"));
             DBFilter* adsb_fil = fil_man.getFilter("ADSB Quality");
 
             adsb_fil->setActive(true);
@@ -1196,7 +1196,7 @@ void EvaluationManager::loadingDone()
     //!reenable distribution to views!
     COMPASS::instance().viewManager().disableDataDistribution(false);
 
-    assert(!raw_data_available_);
+    traced_assert(!raw_data_available_);
 
     //obtain data
     raw_data_ = dbcontent_man.loadedData();
@@ -1213,7 +1213,7 @@ void EvaluationManager::loadingDone()
 */
 EvaluationTargetFilter& EvaluationManager::targetFilter() const
 {
-    assert (target_filter_);
+    traced_assert(target_filter_);
     return *target_filter_.get();
 }
 
@@ -1221,7 +1221,7 @@ EvaluationTargetFilter& EvaluationManager::targetFilter() const
  */
 std::map<std::string, std::shared_ptr<Buffer>> EvaluationManager::fetchData()
 {
-    assert(raw_data_available_);
+    traced_assert(raw_data_available_);
 
     auto data_cpy = raw_data_;
     raw_data_ = {};
@@ -1305,7 +1305,7 @@ Utils::TimeWindowCollection& EvaluationManager::excludedTimeWindows()
  */
 bool EvaluationManager::hasCurrentStandard() const
 {
-    assert(calculator_);
+    traced_assert(calculator_);
     return calculator_->hasCurrentStandard();
 }
 
@@ -1313,6 +1313,6 @@ bool EvaluationManager::hasCurrentStandard() const
  */
 const EvaluationStandard& EvaluationManager::currentStandard() const
 {
-    assert(calculator_);
+    traced_assert(calculator_);
     return calculator_->currentStandard();
 }

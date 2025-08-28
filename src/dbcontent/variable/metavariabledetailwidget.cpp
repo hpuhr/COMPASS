@@ -140,14 +140,14 @@ void MetaVariableDetailWidget::nameEditedSlot()
     if (!has_current_entry_)
         return;
 
-    assert (name_edit_);
+    traced_assert(name_edit_);
 
     string new_name = name_edit_->text().toStdString();
 
     loginf << "name '" << new_name << "'";
 
-    assert (has_current_entry_);
-    assert (meta_var_);
+    traced_assert(has_current_entry_);
+    traced_assert(meta_var_);
 
     dbcont_man_.renameMetaVariable(meta_var_->name(), new_name);
 }
@@ -160,10 +160,10 @@ void MetaVariableDetailWidget::variableChangedSlot()
         return;
 
     VariableSelectionWidget* sel_widget = dynamic_cast<VariableSelectionWidget*>(QObject::sender());
-    assert (sel_widget);
-    assert (sel_widget->hasVariable());
+    traced_assert(sel_widget);
+    traced_assert(sel_widget->hasVariable());
 
-    assert (meta_var_);
+    traced_assert(meta_var_);
     meta_var_->set(sel_widget->selectedVariable());
 }
 
@@ -171,8 +171,8 @@ void MetaVariableDetailWidget::deleteVariableSlot()
 {
     loginf << "start";
 
-    assert (has_current_entry_);
-    assert (meta_var_);
+    traced_assert(has_current_entry_);
+    traced_assert(meta_var_);
 
     dbcont_man_.deleteMetaVariable(meta_var_->name());
 }

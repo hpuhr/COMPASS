@@ -79,14 +79,14 @@ ReconstructorSectorWidget::ReconstructorSectorWidget(ReconstructorTask& task,
 
 void ReconstructorSectorWidget::toggleUseSectorsSlot()
 {
-    assert (use_sectors_check_);
+    traced_assert(use_sectors_check_);
     task_.useSectorsExtend(use_sectors_check_->checkState() == Qt::Checked);
 }
 
 void ReconstructorSectorWidget::toggleSectorSlot()
 {
     QCheckBox* check = (QCheckBox*)sender();
-    assert (check);
+    traced_assert(check);
 
     std::string name = check->property("name").toString().toStdString();
 
@@ -99,10 +99,10 @@ void ReconstructorSectorWidget::update()
 {
     logdbg << "start";
 
-    assert(use_sectors_check_);
+    traced_assert(use_sectors_check_);
     use_sectors_check_->setChecked(task_.useSectorsExtend());
 
-    assert (grid_layout_);
+    traced_assert(grid_layout_);
 
     QLayoutItem* child;
     while (!grid_layout_->isEmpty() && (child = grid_layout_->takeAt(0)) != nullptr)
@@ -147,7 +147,7 @@ void ReconstructorSectorWidget::update()
 
 void ReconstructorSectorWidget::sectorsDeltaChangedSlot(const QString& value_str)
 {
-    assert (sectors_delta_edit_);
+    traced_assert(sectors_delta_edit_);
 
     bool ok;
     float value = value_str.toDouble(&ok);

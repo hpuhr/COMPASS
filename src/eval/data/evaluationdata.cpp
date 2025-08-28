@@ -90,7 +90,7 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
     }
 
     ref_line_id_ = line_id;
-    assert (ref_line_id_ <= 3);
+    traced_assert(ref_line_id_ <= 3);
 
     set<unsigned int> active_srcs = calculator_.activeDataSourcesRef();
     bool use_active_srcs = (calculator_.dbContentNameRef() == calculator_.dbContentNameTst());
@@ -125,7 +125,7 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
 
         for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
         {
-            assert (!ds_ids.isNull(cnt));
+            traced_assert(!ds_ids.isNull(cnt));
 
             if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
             {
@@ -133,7 +133,7 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
                 continue;
             }
 
-            assert (!line_ids.isNull(cnt));
+            traced_assert(!line_ids.isNull(cnt));
 
             if (line_ids.get(cnt) != ref_line_id_)
             {
@@ -165,7 +165,7 @@ void EvaluationData::addReferenceData (const std::string& dbcontent_name, unsign
             if (!hasTargetData(utn))
                 target_data_.emplace_back(utn, *this, accessor_, calculator_, eval_man_, dbcont_man_);
 
-            assert (hasTargetData(utn));
+            traced_assert(hasTargetData(utn));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn);
             auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
@@ -194,7 +194,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
     }
 
     tst_line_id_ = line_id;
-    assert (tst_line_id_ <= 3);
+    traced_assert(tst_line_id_ <= 3);
 
     set<unsigned int> active_srcs = calculator_.activeDataSourcesTst();
     bool use_active_srcs = (calculator_.dbContentNameRef() == calculator_.dbContentNameTst());
@@ -230,7 +230,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
 
         for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
         {
-            assert (!ds_ids.isNull(cnt));
+            traced_assert(!ds_ids.isNull(cnt));
 
             if (use_active_srcs && !active_srcs.count(ds_ids.get(cnt))) // skip those entries not for tst src
             {
@@ -238,7 +238,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
                 continue;
             }
 
-            assert (!line_ids.isNull(cnt));
+            traced_assert(!line_ids.isNull(cnt));
 
             if (line_ids.get(cnt) != tst_line_id_)
             {
@@ -270,7 +270,7 @@ void EvaluationData::addTestData (const std::string& dbcontent_name, unsigned in
             if (!hasTargetData(utn))
                 target_data_.emplace_back(utn, *this, accessor_, calculator_, eval_man_, dbcont_man_);
 
-            assert (hasTargetData(utn));
+            traced_assert(hasTargetData(utn));
 
             auto tr_tag_it = target_data_.get<target_tag>().find(utn);
             auto index_it = target_data_.project<0>(tr_tag_it); // get iterator for random access
@@ -292,7 +292,7 @@ void EvaluationData::finalize ()
 {
     loginf << "start";
 
-    assert (!finalized_);
+    traced_assert(!finalized_);
 
     unsigned int num_targets = target_data_.size();
 
@@ -335,7 +335,7 @@ bool EvaluationData::hasTargetData (unsigned int utn)
  */
 const EvaluationTargetData& EvaluationData::targetData(unsigned int utn)
 {
-    assert (hasTargetData(utn));
+    traced_assert(hasTargetData(utn));
 
     return *target_data_.get<target_tag>().find(utn);
 }
@@ -369,8 +369,8 @@ void EvaluationData::clear()
 //     {
 //         if (index.column() == 0)  // selected special case
 //         {
-//             assert (index.row() >= 0);
-//             assert (index.row() < (int)target_data_.size());
+//             traced_assert(index.row() >= 0);
+//             traced_assert(index.row() < (int)target_data_.size());
 
 //             const EvaluationTargetData& target = target_data_.at(index.row());
 
@@ -384,12 +384,12 @@ void EvaluationData::clear()
 //     }
 //     case Qt::BackgroundRole:
 //     {
-//         assert (index.row() >= 0);
-//         assert (index.row() < (int)target_data_.size());
+//         traced_assert(index.row() >= 0);
+//         traced_assert(index.row() < (int)target_data_.size());
 
 //         const EvaluationTargetData& target = target_data_.at(index.row());
 
-//         assert (index.column() < table_columns_.size());
+//         traced_assert(index.column() < table_columns_.size());
 //         std::string col_name = table_columns_.at(index.column()).toStdString();
 
 //         if (!dbcont_man_.utnUseEval(target.utn_))
@@ -411,14 +411,14 @@ void EvaluationData::clear()
 //     {
 //         logdbg << "display role: row " << index.row() << " col " << index.column();
 
-//         assert (index.row() >= 0);
-//         assert (index.row() < (int)target_data_.size());
+//         traced_assert(index.row() >= 0);
+//         traced_assert(index.row() < (int)target_data_.size());
 
 //         const EvaluationTargetData& target = target_data_.at(index.row());
 
 //         logdbg << "got utn " << target.utn_;
 
-//         assert (index.column() < table_columns_.size());
+//         traced_assert(index.column() < table_columns_.size());
 //         std::string col_name = table_columns_.at(index.column()).toStdString();
 
 //         if (col_name == "Use")
@@ -484,8 +484,8 @@ void EvaluationData::clear()
 //     {
 //         if (index.column() == 0)
 //         {
-//             assert (index.row() >= 0);
-//             assert (index.row() < (int)target_data_.size());
+//             traced_assert(index.row() >= 0);
+//             traced_assert(index.row() < (int)target_data_.size());
 
 //             const EvaluationTargetData& target = target_data_.at(index.row());
 
@@ -493,8 +493,8 @@ void EvaluationData::clear()
 //         }
 //         else if (index.column() == 2) // comment
 //         {
-//             assert (index.row() >= 0);
-//             assert (index.row() < (int)target_data_.size());
+//             traced_assert(index.row() >= 0);
+//             traced_assert(index.row() < (int)target_data_.size());
 
 //             const EvaluationTargetData& target = target_data_.at(index.row());
 //             return ("comment_"+to_string(target.utn_)).c_str();
@@ -504,14 +504,14 @@ void EvaluationData::clear()
 //     {
 //         logdbg << "tooltip role: row " << index.row() << " col " << index.column();
 
-//         assert (index.row() >= 0);
-//         assert (index.row() < (int)target_data_.size());
+//         traced_assert(index.row() >= 0);
+//         traced_assert(index.row() < (int)target_data_.size());
 
 //         const EvaluationTargetData& target = target_data_.at(index.row());
 
 //         logdbg << "got utn " << target.utn_;
 
-//         assert (index.column() < table_columns_.size());
+//         traced_assert(index.column() < table_columns_.size());
 //         std::string col_name = table_columns_.at(index.column()).toStdString();
 
 //         if (col_name == "Interest")
@@ -533,8 +533,8 @@ void EvaluationData::clear()
 
 //     if (role == Qt::CheckStateRole && index.column() == 0)
 //     {
-//         assert (index.row() >= 0);
-//         assert (index.row() < (int)target_data_.size());
+//         traced_assert(index.row() >= 0);
+//         traced_assert(index.row() < (int)target_data_.size());
 
 //         auto it = target_data_.begin()+index.row();
 
@@ -548,8 +548,8 @@ void EvaluationData::clear()
 //     }
 //     else if (role == Qt::EditRole && index.column() == 2) // comment
 //     {
-//         assert (index.row() >= 0);
-//         assert (index.row() < (int)target_data_.size());
+//         traced_assert(index.row() >= 0);
+//         traced_assert(index.row() < (int)target_data_.size());
 
 //         auto it = target_data_.begin()+index.row();
 

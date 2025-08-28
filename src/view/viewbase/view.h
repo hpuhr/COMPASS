@@ -110,7 +110,7 @@ public:
     AppMode appMode() const { return app_mode_; }
     time_t created() const { return creation_time_; }
 
-    const ViewWidget* getViewWidget() const { assert (widget_); return widget_; }
+    const ViewWidget* getViewWidget() const { traced_assert(widget_); return widget_; }
 
     virtual void accept(LatexVisitor& v) = 0;
 
@@ -182,7 +182,7 @@ protected:
     void updateView(int flags);
 
     /// @brief Returns the view's widget, override this method in derived classes.
-    ViewWidget* getWidget() { assert (widget_); return widget_; }
+    ViewWidget* getWidget() { traced_assert(widget_); return widget_; }
 
     ViewManager& view_manager_;
 

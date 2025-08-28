@@ -512,16 +512,16 @@ void MainWindow::createMenus ()
 
 void MainWindow::updateMenus()
 {
-    assert (new_db_action_);
-    assert (open_existing_db_action_);
-    assert (open_recent_db_menu_);
-    assert (close_db_action_);
+    traced_assert(new_db_action_);
+    traced_assert(open_existing_db_action_);
+    traced_assert(open_recent_db_menu_);
+    traced_assert(close_db_action_);
 
-    assert (sectors_action_);
+    traced_assert(sectors_action_);
 
-    assert (import_menu_);
+    traced_assert(import_menu_);
 
-    assert (license_action_);
+    traced_assert(license_action_);
 
     bool in_live_running        = COMPASS::instance().appMode() == AppMode::LiveRunning;
     bool in_live_paused         = COMPASS::instance().appMode() == AppMode::LivePaused;
@@ -568,7 +568,7 @@ void MainWindow::updateMenus()
     import_menu_->setDisabled(!db_open || asterix_import_running || in_live);
     process_menu_->setDisabled(!db_open || asterix_import_running || in_live);
 
-    assert (config_menu_);
+    traced_assert(config_menu_);
     config_menu_->setDisabled(asterix_import_running || in_live);
 
     for (auto a : config_menu_->actions())
@@ -582,18 +582,18 @@ void MainWindow::updateBottomWidget()
 {
     COMPASS& compass = COMPASS::instance();
 
-    assert (db_label_);
+    traced_assert(db_label_);
 
     if (compass.dbOpened())
         db_label_->setText(("DB: "+compass.lastDbFilename()).c_str());
     else
         db_label_->setText("No Database");
 
-    assert (status_label_);
+    traced_assert(status_label_);
     status_label_->setText(compass.appModeStr().c_str());
 
-    assert (load_button_);
-    assert (live_pause_resume_button_);
+    traced_assert(load_button_);
+    traced_assert(live_pause_resume_button_);
 
     AppMode app_mode = compass.appMode();
 
@@ -644,7 +644,7 @@ void MainWindow::disableConfigurationSaving()
     logdbg << "start";
     save_configuration_ = false;
 
-    assert (quit_wo_cfg_sav_action_);
+    traced_assert(quit_wo_cfg_sav_action_);
     quit_wo_cfg_sav_action_->setEnabled(save_configuration_);
 }
 
@@ -715,11 +715,11 @@ void MainWindow::openRecentDBSlot()
     loginf << "start";
 
     QAction* action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
+    traced_assert(action);
 
     string filename = action->data().toString().toStdString();
 
-    assert (filename.size());
+    traced_assert(filename.size());
 
     openExistingDB(filename);
 }
@@ -761,7 +761,7 @@ void MainWindow::saveConfigSlot()
 {
     loginf << "start";
 
-    assert (!COMPASS::instance().disableMenuConfigSave());
+    traced_assert(!COMPASS::instance().disableMenuConfigSave());
 
     ConfigurationManager::getInstance().saveConfiguration();
 }
@@ -806,7 +806,7 @@ void MainWindow::importAsterixRecordingSlot()
 
         for (auto& filename : filenames)
         {
-            assert (Files::fileExists(filename.toStdString()));
+            traced_assert(Files::fileExists(filename.toStdString()));
             COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename.toStdString()));
 
             filenames_vec.push_back(filename.toStdString());
@@ -825,11 +825,11 @@ void MainWindow::importRecentAsterixRecordingSlot()
     loginf << "start";
 
     QAction* action = dynamic_cast<QAction*> (QObject::sender());
-    assert (action);
+    traced_assert(action);
 
     string filename = action->data().toString().toStdString();
 
-    assert (filename.size());
+    traced_assert(filename.size());
 
     auto& task = COMPASS::instance().taskManager().asterixImporterTask();
 
@@ -876,7 +876,7 @@ void MainWindow::importAsterixFromPCAPSlot()
 
         for (auto& filename : filenames)
         {
-            assert (Files::fileExists(filename.toStdString()));
+            traced_assert(Files::fileExists(filename.toStdString()));
             COMPASS::instance().lastUsedPath(Files::getDirectoryFromPath(filename.toStdString()));
 
             filenames_vec.push_back(filename.toStdString());
@@ -1055,7 +1055,7 @@ void MainWindow::showAddViewMenuSlot()
 {
     loginf << "start";
 
-    assert (!COMPASS::instance().disableAddRemoveViews());
+    traced_assert(!COMPASS::instance().disableAddRemoveViews());
     COMPASS::instance().viewManager().showMainViewContainerAddView();
 }
 
@@ -1081,7 +1081,7 @@ void MainWindow::resetViewsMenuSlot()
     {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-        assert (tab_widget_);
+        traced_assert(tab_widget_);
         //int index = tab_widget_->currentIndex();
 
         {
@@ -1136,7 +1136,7 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
     loginf << "app_mode " << COMPASS::instance().appModeStr()
            << " enable_tabs " << enable_tabs;
 
-    assert (tool_box_);
+    traced_assert(tool_box_);
     if (app_mode_current == AppMode::LiveRunning)
     {
         tool_box_->disableTools({2,3,4});
@@ -1150,7 +1150,7 @@ void MainWindow::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_
 
     if (app_mode_current == AppMode::LivePaused)
     {
-        assert (!auto_resume_timer_);
+        traced_assert(!auto_resume_timer_);
 
         auto_resume_timer_ = new QTimer();
 
@@ -1174,7 +1174,7 @@ void MainWindow::autoResumeTimerSlot()
 {
     loginf << "start";
 
-    assert (!auto_resume_dialog_);
+    traced_assert(!auto_resume_dialog_);
 
     auto_resume_dialog_.reset(new AutoResumeDialog(COMPASS::instance().autoLiveRunningResumeAskWaitTime() * 60));
 
@@ -1189,7 +1189,7 @@ void MainWindow::autoResumeResumeSlot()
 {
     loginf << "start";
 
-    assert (auto_resume_dialog_);
+    traced_assert(auto_resume_dialog_);
     auto_resume_dialog_->close();
 
     auto_resume_dialog_ = nullptr;
@@ -1272,7 +1272,7 @@ void MainWindow::loadButtonSlot()
         return;
     }
 
-    assert(load_button_);
+    traced_assert(load_button_);
 
     if (loading_)
     {
@@ -1291,7 +1291,7 @@ void MainWindow::loadingDoneSlot()
 {
     loginf << "start";
 
-    assert (load_button_);
+    traced_assert(load_button_);
 
     loading_ = false;
     load_button_->setText("Load");
@@ -1306,7 +1306,7 @@ void MainWindow::livePauseResumeSlot()
 
     AppMode app_mode = COMPASS::instance().appMode();
 
-    assert (app_mode == AppMode::LivePaused || AppMode::LiveRunning);
+    traced_assert(app_mode == AppMode::LivePaused || AppMode::LiveRunning);
 
     if (app_mode == AppMode::LiveRunning)
         COMPASS::instance().appMode(AppMode::LivePaused);

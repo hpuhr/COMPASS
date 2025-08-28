@@ -51,7 +51,7 @@ ViewDataWidget::ViewDataWidget(ViewWidget* view_widget, QWidget* parent, Qt::Win
 :   QWidget     (parent, f)
 ,   view_widget_(view_widget)
 {
-    assert(view_widget_);
+    traced_assert(view_widget_);
 
     setObjectName("datawidget");
 

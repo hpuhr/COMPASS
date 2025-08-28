@@ -77,11 +77,11 @@ void ReconstructorTaskClassificationWidget::minAircraftModeCEditedSlot (int valu
 
 void ReconstructorTaskClassificationWidget::vehicleACIDsChangedSlot()
 {
-    assert (vehicle_acids_edit_);
+    traced_assert(vehicle_acids_edit_);
     reconstructor_.settings().setVehicleACIDs(vehicle_acids_edit_->document()->toPlainText().toStdString());
 }
 void ReconstructorTaskClassificationWidget::vehicleACADsChangedSlot()
 {
-    assert (vehicle_acads_edit_);
+    traced_assert(vehicle_acads_edit_);
     reconstructor_.settings().setVehicleACADs(vehicle_acads_edit_->document()->toPlainText().toStdString());
 }

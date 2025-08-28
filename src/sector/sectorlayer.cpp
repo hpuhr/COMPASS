@@ -20,7 +20,7 @@
 #include "dbcontent/target/targetposition.h"
 #include "logger.h"
 
-#include <cassert>
+#include "traced_assert.h"
 
 using namespace std;
 
@@ -49,19 +49,19 @@ bool SectorLayer::hasSector (const std::string& name)
 
 std::shared_ptr<Sector> SectorLayer::sector(const std::string& name)
 {
-    assert (hasSector(name));
+    traced_assert(hasSector(name));
 
     auto iter = std::find_if(sectors_.begin(), sectors_.end(),
                              [&name](const shared_ptr<Sector>& x) { return x->name() == name;});
-    assert (iter != sectors_.end());
+    traced_assert(iter != sectors_.end());
 
     return *iter;
 }
 
 void SectorLayer::addSector (std::shared_ptr<Sector> sector)
 {
-    assert (!hasSector(sector->name()));
-    assert (sector->layerName() == name_);
+    traced_assert(!hasSector(sector->name()));
+    traced_assert(sector->layerName() == name_);
     sectors_.push_back(sector);
 
     if (sector->isExclusionSector())
@@ -70,21 +70,21 @@ void SectorLayer::addSector (std::shared_ptr<Sector> sector)
 
 void SectorLayer::removeSector (std::shared_ptr<Sector> sector)
 {
-    assert (hasSector(sector->name()));
+    traced_assert(hasSector(sector->name()));
 
     string name = sector->name();
     auto iter = std::find_if(sectors_.begin(), sectors_.end(),
                              [&name](const shared_ptr<Sector>& x) { return x->name() == name;});
-    assert (iter != sectors_.end());
+    traced_assert(iter != sectors_.end());
 
     bool is_exclusion = sector->isExclusionSector();
 
     sectors_.erase(iter);
-    assert (!hasSector(sector->name()));
+    traced_assert(!hasSector(sector->name()));
 
     if (is_exclusion)
     {
-        assert(num_exclusion_sectors_ > 0);
+        traced_assert(num_exclusion_sectors_ > 0);
         --num_exclusion_sectors_;
     }
 }
@@ -170,7 +170,7 @@ std::pair<double, double> SectorLayer::getMinMaxLatitude() const
     double tmp_min{0}, tmp_max{0};
     bool first = true;
 
-    assert (sectors_.size());
+    traced_assert(sectors_.size());
 
     for (auto& sec_it : sectors_)
     {
@@ -196,7 +196,7 @@ std::pair<double, double> SectorLayer::getMinMaxLongitude() const
     double tmp_min{0}, tmp_max{0};
     bool first = true;
 
-    assert (sectors_.size());
+    traced_assert(sectors_.size());
 
     for (auto& sec_it : sectors_)
     {

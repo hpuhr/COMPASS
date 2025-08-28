@@ -341,7 +341,7 @@ void TargetListWidget::customContextMenuSlot(const QPoint& p)
 {
     logdbg << "start";
 
-    assert (table_view_);
+    traced_assert(table_view_);
 
     QMenu menu;
 
@@ -502,7 +502,7 @@ void TargetListWidget::evalExcludeTimeWindowsTarget(const std::set<unsigned int>
     // collect all time windows from all targets
     for (auto utn : utns)
     {
-        assert (dbcont_man.existsTarget(utn));
+        traced_assert(dbcont_man.existsTarget(utn));
 
         auto& target = dbcont_man.target(utn);
 
@@ -568,7 +568,7 @@ void TargetListWidget::evalExcludeRequirementsTarget(const std::set<unsigned int
     // collect all requirements from all targets
     for (auto utn : utns)
     {
-        assert (dbcont_man.existsTarget(utn));
+        traced_assert(dbcont_man.existsTarget(utn));
 
         auto& target = dbcont_man.target(utn);
 
@@ -680,7 +680,7 @@ void TargetListWidget::currentRowChanged(const QModelIndex& current, const QMode
     }
 
     auto const source_index = proxy_model_->mapToSource(current);
-    assert (source_index.isValid());
+    traced_assert(source_index.isValid());
 
     const dbContent::Target& target = model_.getTargetOf(source_index);
 
@@ -764,7 +764,7 @@ void TargetListWidget::showModeACColumns(bool show)
 
 std::set<unsigned int> TargetListWidget::selectedUTNs() const
 {
-    assert (table_view_);
+    traced_assert(table_view_);
 
     std::set<unsigned int> selected_indexes;
 
@@ -778,7 +778,7 @@ std::set<unsigned int> TargetListWidget::selectedUTNs() const
             continue;
 
         auto const source_index = proxy_model_->mapToSource(index);
-        assert (source_index.isValid());
+        traced_assert(source_index.isValid());
 
         const dbContent::Target& target = model_.getTargetOf(source_index);
 

@@ -59,7 +59,7 @@ void PositionDistanceRMSConfigWidget::thresholdValueEditSlot(QString value)
 PositionDistanceRMSConfig& PositionDistanceRMSConfigWidget::config()
 {
     PositionDistanceRMSConfig* config = dynamic_cast<PositionDistanceRMSConfig*>(&config_);
-    assert (config);
+    traced_assert(config);
 
     return *config;
 }

@@ -32,7 +32,7 @@
 #include "util/timeconv.h"
 #include "viewpoint.h"
 
-#include <cassert>
+#include "traced_assert.h"
 
 using namespace std;
 using namespace Utils;
@@ -164,8 +164,8 @@ SingleCorrectBase::SingleCorrectBase(const std::string& result_type,
 */
 boost::optional<double> SingleCorrectBase::computeResult_impl() const
 {
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_id_ + num_correct_ + num_not_correct_);
+    traced_assert(num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    traced_assert(num_pos_inside_ == num_no_ref_id_ + num_correct_ + num_not_correct_);
 
     unsigned int num_total = num_correct_ + num_not_correct_;
 
@@ -250,7 +250,7 @@ nlohmann::json::array_t SingleCorrectBase::detailValues(const EvaluationDetail& 
 bool SingleCorrectBase::detailIsOk(const EvaluationDetail& detail) const
 {
     auto is_not_correct = detail.getValueAs<bool>(DetailKey::IsNotCorrect);
-    assert(is_not_correct.has_value());
+    traced_assert(is_not_correct.has_value());
 
     return !is_not_correct.value();
 }
@@ -262,7 +262,7 @@ void SingleCorrectBase::addAnnotationForDetail(nlohmann::json& annotations_json,
                                                TargetAnnotationType type,
                                                bool is_ok) const
 {
-    assert (detail.numPositions() >= 1);
+    traced_assert(detail.numPositions() >= 1);
 
     if (type == TargetAnnotationType::Highlight)
     {
@@ -346,8 +346,8 @@ boost::optional<double> JoinedCorrectBase::computeResult_impl() const
             << " num_correct " << num_correct_
             << " num_not_correct " << num_not_correct_;
 
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_id_+ num_correct_ + num_not_correct_);
+    traced_assert(num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    traced_assert(num_pos_inside_ == num_no_ref_id_+ num_correct_ + num_not_correct_);
 
     unsigned int total = num_correct_ + num_not_correct_;
 

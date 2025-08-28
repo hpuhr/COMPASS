@@ -117,7 +117,7 @@ MetaVariableConfigurationDialog::~MetaVariableConfigurationDialog()
 
 void MetaVariableConfigurationDialog::updateList()
 {
-    assert (list_widget_);
+    traced_assert(list_widget_);
     list_widget_->clear();
 
     unsigned int row_cnt = 0;
@@ -131,14 +131,14 @@ void MetaVariableConfigurationDialog::updateList()
 
 void MetaVariableConfigurationDialog::selectMetaVariable (const std::string& name)
 {
-    assert (list_widget_->findItems(name.c_str(), Qt::MatchExactly).size() == 1);
+    traced_assert(list_widget_->findItems(name.c_str(), Qt::MatchExactly).size() == 1);
     list_widget_->setCurrentItem(list_widget_->findItems(name.c_str(), Qt::MatchExactly).at(0));
 }
 
 
 void MetaVariableConfigurationDialog::clearDetails()
 {
-    assert (detail_widget_);
+    traced_assert(detail_widget_);
     detail_widget_->clear();
 }
 
@@ -148,7 +148,7 @@ void MetaVariableConfigurationDialog::itemSelectedSlot(const QString& text)
 
     loginf << "item '" << item_name << "'";
 
-    assert (detail_widget_);
+    traced_assert(detail_widget_);
 
     if (!item_name.size())
     {
@@ -156,7 +156,7 @@ void MetaVariableConfigurationDialog::itemSelectedSlot(const QString& text)
     }
     else
     {
-        assert (dbcont_man_.existsMetaVariable(item_name));
+        traced_assert(dbcont_man_.existsMetaVariable(item_name));
         detail_widget_->show(dbcont_man_.metaVariable(item_name));
     }
 }
@@ -208,7 +208,7 @@ void MetaVariableConfigurationDialog::addAllMetaVariablesSlot()
                     dbcont_man_.generateSubConfigurableFromConfig(std::move(config));
                 }
 
-                assert(dbcont_man_.existsMetaVariable(var_it.first));
+                traced_assert(dbcont_man_.existsMetaVariable(var_it.first));
                 MetaVariable& meta_var = dbcont_man_.metaVariable(var_it.first);
 
                 for (auto dbcont_it2 = found_dbconts.begin(); dbcont_it2 != found_dbconts.end(); dbcont_it2++)

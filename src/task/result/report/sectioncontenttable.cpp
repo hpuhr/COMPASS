@@ -50,7 +50,7 @@
 #include <QScrollBar>
 #include <QToolBar>
 
-#include <cassert>
+#include "traced_assert.h"
 #include <type_traits>
 #include <iostream>
 #include <fstream>
@@ -162,7 +162,7 @@ void SectionContentTable::addRow (const nlohmann::json::array_t& row,
                                   const QVariant& viewable_index,
                                   unsigned int row_style)
 {
-    assert (row.size() == num_columns_);
+    traced_assert(row.size() == num_columns_);
 
     rows_.push_back(row);
 
@@ -197,7 +197,7 @@ const nlohmann::json& SectionContentTable::getData(int row, int column) const
 const nlohmann::json& SectionContentTable::getData(int row, const std::string& col_name) const
 {
     int col = columnIndex(col_name);
-    assert(col >= 0);
+    traced_assert(col >= 0);
 
     return getData(row, col);
 }
@@ -282,8 +282,8 @@ unsigned int SectionContentTable::addFigure(const SectionContentViewable& viewab
  */
 SectionContentTableWidget* SectionContentTable::createTableWidget() const
 {
-    assert(!isLocked());
-    assert(!table_widget_);
+    traced_assert(!isLocked());
+    traced_assert(!table_widget_);
 
     SectionContentTable* tmp = const_cast<SectionContentTable*>(this); // hacky
     table_widget_ = new SectionContentTableWidget(tmp, 
@@ -297,7 +297,7 @@ SectionContentTableWidget* SectionContentTable::createTableWidget() const
  */
 const SectionContentTableWidget* SectionContentTable::tableWidget() const
 {
-    assert(table_widget_);
+    traced_assert(table_widget_);
     return table_widget_;
 }
 
@@ -305,7 +305,7 @@ const SectionContentTableWidget* SectionContentTable::tableWidget() const
  */
 SectionContentTableWidget* SectionContentTable::tableWidget()
 {
-    assert(table_widget_);
+    traced_assert(table_widget_);
     return table_widget_;
 }
 
@@ -343,7 +343,7 @@ void SectionContentTable::addContentUI(QVBoxLayout* layout,
 {
     loginf << "start";
 
-    assert (layout);
+    traced_assert(layout);
 
     //force recreation of table widget?
     if (force_ui_reset)
@@ -679,10 +679,10 @@ QVariant SectionContentTable::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    assert (index.row() >= 0);
-    assert (index.row() < (int)rows_.size());
-    assert (index.column() >= 0);
-    assert (index.column() < (int)num_columns_);
+    traced_assert(index.row() >= 0);
+    traced_assert(index.row() < (int)rows_.size());
+    traced_assert(index.column() >= 0);
+    traced_assert(index.column() < (int)num_columns_);
 
     return data(index.row(), index.column(), role);
 }
@@ -880,7 +880,7 @@ void SectionContentTable::setColumnGroup(const std::string& name,
                                          const std::vector<int>& columns,
                                          bool enabled)
 {
-    assert(!table_widget_); //!no config of column groups after widget is created!
+    traced_assert(!table_widget_); //!no config of column groups after widget is created!
 
     auto& col_group = column_groups_[ name ];
 
@@ -922,7 +922,7 @@ void SectionContentTable::updateGroupColumns(bool update_widget)
         if (columnVisible(c))
             ++num_columns_proxy_;
 
-    assert(num_columns_proxy_ <= num_columns_);
+    traced_assert(num_columns_proxy_ <= num_columns_);
 
     if (update_widget && table_widget_)
         table_widget_->updateColumnVisibility();
@@ -1013,7 +1013,7 @@ void SectionContentTable::showUnused(bool value)
  */
 void SectionContentTable::registerCallBack (const std::string& name, const std::function<void()>& func)
 {
-    assert (!callback_map_.count(name));
+    traced_assert(!callback_map_.count(name));
     callback_map_.emplace(name, func);
 }
 
@@ -1021,7 +1021,7 @@ void SectionContentTable::registerCallBack (const std::string& name, const std::
  */
 void SectionContentTable::executeCallback(const std::string& name)
 {
-    assert (callback_map_.count(name));
+    traced_assert(callback_map_.count(name));
     callback_map_.at(name)();
 }
 
@@ -1228,13 +1228,13 @@ void SectionContentTable::copyContent()
     for (unsigned int row=0; row < num_rows; ++row)
     {
         row_data = exportProxyContent(row, ReportExportMode::CSV);
-        assert (row_data.is_array());
-        assert (row_data.size() == num_cols);
+        traced_assert(row_data.is_array());
+        traced_assert(row_data.size() == num_cols);
 
         for (unsigned int cnt=0; cnt < num_cols; ++cnt)
         {
             const auto& d = row_data.at(cnt);
-            assert(d.is_string());
+            traced_assert(d.is_string());
 
             if (cnt == 0)
                 ss << d.get<std::string>();
@@ -1421,8 +1421,8 @@ bool SectionContentTable::fromJSON_impl(const nlohmann::json& j)
 
     cell_styles_ = j[ FieldCellStyles ].get<CellStyles>();
 
-    assert(rows_.size() == annotations_.size());
-    assert(num_columns_ == column_styles_.size());
+    traced_assert(rows_.size() == annotations_.size());
+    traced_assert(num_columns_ == column_styles_.size());
 
     //run some updates
     updateGroupColumns();
@@ -1679,7 +1679,7 @@ boost::optional<std::vector<nlohmann::json>> SectionContentTable::exportContent(
         if (j_row.is_null())
             return boost::optional<std::vector<nlohmann::json>>();
 
-        assert(j_row.is_array());
+        traced_assert(j_row.is_array());
 
         data.push_back(j_row);
     }
@@ -1695,16 +1695,16 @@ nlohmann::json SectionContentTable::exportProxyContent(unsigned int row,
                                                        bool* ok) const
 {
     auto w = getOrCreateTableWidget();
-    assert(w);
+    traced_assert(w);
 
     auto proxy_model = w->proxyModel();
-    assert(proxy_model);
+    traced_assert(proxy_model);
 
     auto index = proxy_model->index(row, col);
-    assert(index.isValid());
+    traced_assert(index.isValid());
 
     auto index_src = proxy_model->mapToSource(index);
-    assert(index_src.isValid());
+    traced_assert(index_src.isValid());
 
     return exportContent(index_src.row(), index_src.column(), mode, ok);
 }
@@ -1714,9 +1714,9 @@ nlohmann::json SectionContentTable::exportProxyContent(unsigned int row,
 nlohmann::json SectionContentTable::exportProxyContent(unsigned int row,
                                                        ReportExportMode mode) const
 {
-    assert (row >= 0);
-    assert (row < numProxyRows());
-    assert (row < numRows());
+    traced_assert(row >= 0);
+    traced_assert(row < numProxyRows());
+    traced_assert(row < numRows());
 
     auto j_row = nlohmann::json::array();
 
@@ -1753,7 +1753,7 @@ boost::optional<std::vector<nlohmann::json>> SectionContentTable::exportProxyCon
         if (j_row.is_null())
             return boost::optional<std::vector<nlohmann::json>>();
 
-        assert(j_row.is_array());
+        traced_assert(j_row.is_array());
 
         data.push_back(j_row);
     }
@@ -1785,7 +1785,7 @@ SectionContentTableModel::SectionContentTableModel(SectionContentTable* content_
 :   QAbstractItemModel(parent)
 ,   content_table_    (content_table)
 {
-    assert(content_table_);
+    traced_assert(content_table_);
 }
 
 /**
@@ -1801,7 +1801,7 @@ QVariant SectionContentTableModel::headerData(int section, Qt::Orientation orien
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
-        assert (section < (int)content_table_->numColumns());
+        traced_assert(section < (int)content_table_->numColumns());
         return content_table_->headings().at(section).c_str();
     }
 
@@ -1899,7 +1899,7 @@ SectionContentTableWidget::SectionContentTableWidget(SectionContentTable* conten
 ,   sort_column_  (sort_column  )
 ,   sort_order_   (sort_order   )
 {
-    assert(content_table_);
+    traced_assert(content_table_);
 
     QVBoxLayout* main_layout = new QVBoxLayout();
     setLayout(main_layout);
@@ -2102,14 +2102,14 @@ const QTableView* SectionContentTableWidget::tableView() const
  */
 int SectionContentTableWidget::fromProxy(int proxy_row) const
 {
-    assert (proxy_row < proxy_model_->rowCount());
-    assert (proxy_row < (int)content_table_->numRows());
+    traced_assert(proxy_row < proxy_model_->rowCount());
+    traced_assert(proxy_row < (int)content_table_->numRows());
 
     QModelIndex index = proxy_model_->index(proxy_row, 0);
-    assert (index.isValid());
+    traced_assert(index.isValid());
 
     auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
+    traced_assert(source_index.isValid());
 
     unsigned int row_index = source_index.row();
 
@@ -2135,10 +2135,10 @@ void SectionContentTableWidget::clicked(const QModelIndex& index)
     }
 
     auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
+    traced_assert(source_index.isValid());
 
-    assert (source_index.row() >= 0);
-    assert (source_index.row() < (int)content_table_->numRows());
+    traced_assert(source_index.row() >= 0);
+    traced_assert(source_index.row() < (int)content_table_->numRows());
 
     last_clicked_row_index_ = source_index.row();
 
@@ -2186,10 +2186,10 @@ void SectionContentTableWidget::doubleClicked(const QModelIndex& index)
     }
 
     auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
+    traced_assert(source_index.isValid());
 
-    assert (source_index.row() >= 0);
-    assert (source_index.row() < (int)content_table_->numRows());
+    traced_assert(source_index.row() >= 0);
+    traced_assert(source_index.row() < (int)content_table_->numRows());
 
     loginf << "row " << source_index.row();
 
@@ -2210,12 +2210,12 @@ void SectionContentTableWidget::customContextMenu(const QPoint& p)
         return;
 
     auto const source_index = proxy_model_->mapToSource(index);
-    assert (source_index.isValid());
+    traced_assert(source_index.isValid());
 
     loginf << "row " << index.row() << " src " << source_index.row();
 
-    assert (source_index.row() >= 0);
-    assert (source_index.row() < (int)content_table_->numRows());
+    traced_assert(source_index.row() >= 0);
+    traced_assert(source_index.row() < (int)content_table_->numRows());
 
     unsigned int row_index = source_index.row();
 

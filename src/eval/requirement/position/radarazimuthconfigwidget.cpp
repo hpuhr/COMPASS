@@ -59,7 +59,7 @@ void PositionRadarAzimuthConfigWidget::thresholdValueEditSlot(QString value)
 PositionRadarAzimuthConfig& PositionRadarAzimuthConfigWidget::config()
 {
     PositionRadarAzimuthConfig* config = dynamic_cast<PositionRadarAzimuthConfig*>(&config_);
-    assert (config);
+    traced_assert(config);
 
     return *config;
 }

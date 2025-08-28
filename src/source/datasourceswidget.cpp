@@ -48,15 +48,15 @@ DataSourcesWidgetItem::DataSourcesWidgetItem(DataSourcesWidget* widget,
 ,   parent_(parent) 
 ,   type_  (type  )
 {
-    assert(widget_);
+    traced_assert(widget_);
 }
 
 /**
  */
 void DataSourcesWidgetItem::setItemWidget(int column, QWidget* w)
 {
-    assert(widget_);
-    assert(widget_->tree_widget_);
+    traced_assert(widget_);
+    traced_assert(widget_->tree_widget_);
 
     widget_->tree_widget_->setItemWidget(this, column, w);
 }
@@ -102,8 +102,8 @@ bool DataSourceTypeItem::init(const std::string& ds_type)
  */
 void DataSourceTypeItem::updateContent()
 {
-    assert(is_init_);
-    assert(!ds_type_.empty());
+    traced_assert(is_init_);
+    traced_assert(!ds_type_.empty());
 
     bool has_sources = false;
 
@@ -146,7 +146,7 @@ bool DataSourceItem::init(unsigned int ds_id)
         ds_id_ = ds_id;
 
         auto& ds_man = widget_->dsManager();
-        assert(ds_man.hasDBDataSource(ds_id));
+        traced_assert(ds_man.hasDBDataSource(ds_id));
 
         const auto& data_source = ds_man.dbDataSource(ds_id);
         ds_ = &data_source;
@@ -180,8 +180,8 @@ bool DataSourceItem::init(unsigned int ds_id)
  */
 void DataSourceItem::updateContent()
 {
-    assert(is_init_);
-    assert(has_widget_);
+    traced_assert(is_init_);
+    traced_assert(has_widget_);
 
     setCheckState(0, widget_->getUseDS(ds_id_) ? Qt::Checked : Qt::Unchecked);
 
@@ -238,7 +238,7 @@ bool DataSourceCountItem::init(unsigned int ds_id,
         dbc_name_ = dbc_name;
 
         auto& ds_man = widget_->dsManager();
-        assert(ds_man.hasDBDataSource(ds_id));
+        traced_assert(ds_man.hasDBDataSource(ds_id));
 
         const auto& data_source = ds_man.dbDataSource(ds_id);
         ds_ = &data_source;
@@ -258,12 +258,12 @@ bool DataSourceCountItem::init(unsigned int ds_id,
 */
 void DataSourceCountItem::updateContent()
 {
-    assert(is_init_);
-    assert(!dbc_name_.empty());
+    traced_assert(is_init_);
+    traced_assert(!dbc_name_.empty());
 
     auto num_inserted = ds_->numInsertedSummedLinesMap();
     auto it = num_inserted.find(dbc_name_);
-    assert(it != num_inserted.end());
+    traced_assert(it != num_inserted.end());
 
     setText(2, QString::number(ds_->numLoaded(dbc_name_)));
     setText(3, QString::number(it->second));
@@ -281,7 +281,7 @@ DataSourceLineButton::DataSourceLineButton(DataSourcesWidget* widget,
 :   widget_ (widget )
 ,   line_id_(line_id)
 {
-    assert(widget_);
+    traced_assert(widget_);
 
     line_str_ = "L" + std::to_string(line_id_ + 1);
 
@@ -322,7 +322,7 @@ bool DataSourceLineButton::init(unsigned int ds_id)
         ds_id_ = ds_id;
 
         auto& ds_man = widget_->dsManager();
-        assert(ds_man.hasDBDataSource(ds_id_));
+        traced_assert(ds_man.hasDBDataSource(ds_id_));
 
         auto& ds_src = ds_man.dbDataSource(ds_id_);
         ds_ = &ds_src;
@@ -340,7 +340,7 @@ bool DataSourceLineButton::init(unsigned int ds_id)
  */
 void DataSourceLineButton::updateContent()
 {
-    assert(is_init_);
+    traced_assert(is_init_);
 
     AppMode app_mode = COMPASS::instance().appMode();
 
@@ -667,7 +667,7 @@ int DataSourcesWidget::generateContent(bool force_rebuild)
         logdbg << "type " << ds_type_name << " cnt " << cnt;
 
         auto item = dynamic_cast<DataSourceTypeItem*>(tree_widget_->topLevelItem(cnt));
-        assert(item);
+        traced_assert(item);
 
         changes += generateDataSourceType(item, ds_type_name);
 
@@ -726,7 +726,7 @@ int DataSourcesWidget::generateDataSourceType(DataSourceTypeItem* item,
         if (ds_it->dsType() == ds_type_name)
         {
             auto ds_item = dynamic_cast<DataSourceItem*>(item->child(cnt));
-            assert(ds_item);
+            traced_assert(ds_item);
 
             changes += generateDataSource(ds_item, item, *ds_it);
 
@@ -795,7 +795,7 @@ int DataSourcesWidget::generateDataSource(DataSourceItem* item,
         for (auto& cnt_it : count_map)
         {
             auto ds_cnt_item = dynamic_cast<DataSourceCountItem*>(item->child(cnt));
-            assert(ds_cnt_item);
+            traced_assert(ds_cnt_item);
 
             changes += generateDataSourceCount(ds_cnt_item, item, data_source, cnt_it.first);
 
@@ -843,7 +843,7 @@ void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
     if (w_item->type() == DataSourcesWidgetItem::Type::DataSourceType)
     {   
         auto ds_type_item = dynamic_cast<DataSourceTypeItem*>(w_item);
-        assert(ds_type_item);
+        traced_assert(ds_type_item);
 
         if (column == 0)
         {
@@ -856,7 +856,7 @@ void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
     else if (w_item->type() == DataSourcesWidgetItem::Type::DataSource)
     {   
         auto ds_item = dynamic_cast<DataSourceItem*>(w_item);
-        assert(ds_item);
+        traced_assert(ds_item);
 
         if (column == 0)
         {
@@ -869,7 +869,7 @@ void DataSourcesWidget::itemChanged(QTreeWidgetItem *item, int column)
     else if (w_item->type() == DataSourcesWidgetItem::Type::DataSourceCount)
     {   
         auto ds_cnt_item = dynamic_cast<DataSourceCountItem*>(w_item);
-        assert(ds_cnt_item);
+        traced_assert(ds_cnt_item);
 
         //nothing to do yet
     }
@@ -914,8 +914,8 @@ void DataSourcesWidget::updateAdditionalInfo()
 {
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
-    assert (ts_min_label_);
-    assert (ts_max_label_);
+    traced_assert(ts_min_label_);
+    traced_assert(ts_max_label_);
 
     if (dbcont_man.hasMinMaxTimestamp())
     {
@@ -928,7 +928,7 @@ void DataSourcesWidget::updateAdditionalInfo()
         ts_max_label_->setText("None");
     }
 
-    assert(associations_label_);
+    traced_assert(associations_label_);
     if (dbcont_man.hasAssociations())
     {
         std::string tmp = "From " + dbcont_man.associationsID();
@@ -993,7 +993,7 @@ void DataSourcesWidget::deselectAllDataSources()
 void DataSourcesWidget::selectDSTypeSpecificDataSources()
 {
     QAction* action = dynamic_cast<QAction*>(sender());
-    assert (action);
+    traced_assert(action);
 
     std::string ds_type = action->property("ds_type").toString().toStdString();
 
@@ -1011,7 +1011,7 @@ void DataSourcesWidget::selectDSTypeSpecificDataSources()
 void DataSourcesWidget::deselectDSTypeSpecificDataSources()
 {
     QAction* action = dynamic_cast<QAction*>(sender());
-    assert (action);
+    traced_assert(action);
 
     std::string ds_type = action->property("ds_type").toString().toStdString();
 
@@ -1042,7 +1042,7 @@ void DataSourcesWidget::deselectAllLines()
 void DataSourcesWidget::selectSpecificLines()
 {
     QAction* action = dynamic_cast<QAction*>(sender());
-    assert (action);
+    traced_assert(action);
 
     unsigned int line_id = action->property("line_id").toUInt();
 

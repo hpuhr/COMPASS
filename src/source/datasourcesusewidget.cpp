@@ -186,7 +186,7 @@ void DataSourcesUseWidget::disableDataSources (const std::set<unsigned int>& dis
 void DataSourcesUseWidget::loadDSTypeChangedSlot()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
-    assert (box);
+    traced_assert(box);
 
     string ds_type_name =box->property("DSType").toString().toStdString();
 
@@ -203,7 +203,7 @@ void DataSourcesUseWidget::loadDSTypeChangedSlot()
 //void DataSourcesUseWidget::loadDSChangedSlot()
 //{
 //    QCheckBox* box = dynamic_cast<QCheckBox*>(QObject::sender());
-//    assert (box);
+//    traced_assert(box);
 
 //    unsigned int ds_id = box->property("DS ID").toUInt();
 
@@ -252,7 +252,7 @@ void DataSourcesUseWidget::deselectAllDataSourcesSlot()
 void DataSourcesUseWidget::selectDSTypeSpecificDataSourcesSlot()
 {
     QAction* action = dynamic_cast<QAction*>(sender());
-    assert (action);
+    traced_assert(action);
 
     string ds_type = action->property("ds_type").toString().toStdString();
 
@@ -264,7 +264,7 @@ void DataSourcesUseWidget::selectDSTypeSpecificDataSourcesSlot()
 void DataSourcesUseWidget::deselectDSTypeSpecificDataSourcesSlot()
 {
     QAction* action = dynamic_cast<QAction*>(sender());
-    assert (action);
+    traced_assert(action);
 
     string ds_type = action->property("ds_type").toString().toStdString();
 
@@ -283,7 +283,7 @@ void DataSourcesUseWidget::deselectAllLinesSlot()
 void DataSourcesUseWidget::selectSpecificLineSlot()
 {
     QAction* action = dynamic_cast<QAction*>(sender());
-    assert (action);
+    traced_assert(action);
 
     unsigned int line_id = action->property("line_id").toUInt();
 
@@ -418,7 +418,7 @@ void DataSourcesUseWidget::clearAndCreateContent()
 
         type_layout_->addWidget(dstyp_box, row, col);
 
-        assert (!ds_type_boxes_.count(ds_type_name));
+        traced_assert(!ds_type_boxes_.count(ds_type_name));
         ds_type_boxes_[ds_type_name] = dstyp_box;
 
         ++row;
@@ -457,7 +457,7 @@ void DataSourcesUseWidget::clearAndCreateContent()
 
             type_layout_->addWidget(ds_widget, row, col);
 
-            assert (!ds_widgets_.count(ds_id));
+            traced_assert(!ds_widgets_.count(ds_id));
             ds_widgets_[ds_id] = ds_widget;
 
             ++row;

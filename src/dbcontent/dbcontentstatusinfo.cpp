@@ -35,21 +35,21 @@ dbContent::VariableSet DBContentStatusInfo::getReadSetFor(const std::string& dbc
     DBContentManager& dbcont_man = COMPASS::instance().dbContentManager();
 
     auto& dbcont = dbcont_man.dbContent(dbcontent_name);
-    assert (dbcont.containsStatusContent());
+    traced_assert(dbcont.containsStatusContent());
 
     // ds id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
 
     // line id
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
+    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
 
     // timestamp
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
+    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
 
-    assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_message_type_));
+    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_message_type_));
     read_set.add(dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_message_type_));
 
     return read_set;
@@ -103,27 +103,27 @@ void DBContentStatusInfo::process(std::map<std::string, std::shared_ptr<Buffer>>
             continue;
         }
 
-        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
-        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
-        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
-        assert (dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_message_type_));
+        traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_ds_id_));
+        traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_line_id_));
+        traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_timestamp_));
+        traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, DBContent::meta_var_message_type_));
 
         Variable& ds_id_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_ds_id_);
         Variable& line_id_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_line_id_);
         Variable& timestamp_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_timestamp_);
         Variable& message_type_var = dbcont_man.metaGetVariable(dbcontent_name, DBContent::meta_var_message_type_);
 
-        assert (buf_it.second->has<unsigned int>(ds_id_var.name()));
+        traced_assert(buf_it.second->has<unsigned int>(ds_id_var.name()));
         NullableVector<unsigned int>& ds_id_vec = buf_it.second->get<unsigned int>(ds_id_var.name());
-        assert (buf_it.second->has<unsigned int>(line_id_var.name()));
+        traced_assert(buf_it.second->has<unsigned int>(line_id_var.name()));
         NullableVector<unsigned int>& line_id_vec = buf_it.second->get<unsigned int>(line_id_var.name());
-        assert (buf_it.second->has<boost::posix_time::ptime>(timestamp_var.name()));
+        traced_assert(buf_it.second->has<boost::posix_time::ptime>(timestamp_var.name()));
         NullableVector<boost::posix_time::ptime>& timestamp_vec = buf_it.second->get<boost::posix_time::ptime>(timestamp_var.name());
-        assert (buf_it.second->has<unsigned char>(message_type_var.name()));
+        traced_assert(buf_it.second->has<unsigned char>(message_type_var.name()));
         NullableVector<unsigned char>& message_type_vec = buf_it.second->get<unsigned char>(message_type_var.name());
 
-        assert (ds_id_vec.isNeverNull());
-        assert (line_id_vec.isNeverNull());
+        traced_assert(ds_id_vec.isNeverNull());
+        traced_assert(line_id_vec.isNeverNull());
 
         unsigned int buffer_size = buf_it.second->size();
 
@@ -154,7 +154,7 @@ bool DBContentStatusInfo::hasInfo(unsigned int ds_id, unsigned int line_id) cons
 std::vector<boost::posix_time::ptime> DBContentStatusInfo::getInfo(
     unsigned int ds_id, unsigned int line_id)
 {
-    assert(hasInfo(ds_id, line_id));
+    traced_assert(hasInfo(ds_id, line_id));
 
     auto outer_it = scan_info_.find(ds_id);
     auto inner_it = outer_it->second.find(line_id);

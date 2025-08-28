@@ -24,6 +24,7 @@
 #include "files.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "traced_assert.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
@@ -136,7 +137,7 @@ void ASTERIXConfigWidget::updateSlot()
 
 void ASTERIXConfigWidget::framingChangedSlot()
 {
-    assert(framing_combo_);
+    traced_assert(framing_combo_);
     loginf << "start" << framing_combo_->getFraming();
 
     task_.settings().current_file_framing_ = framing_combo_->getFraming();
@@ -159,8 +160,8 @@ void ASTERIXConfigWidget::framingEditSlot()
 
 void ASTERIXConfigWidget::updateFraming()
 {
-    assert(framing_combo_);
-    assert(framing_edit_);
+    traced_assert(framing_combo_);
+    traced_assert(framing_edit_);
 
     framing_combo_->loadFramings();
     framing_combo_->setFraming(task_.settings().current_file_framing_);
@@ -174,7 +175,7 @@ void ASTERIXConfigWidget::updateFraming()
 
 void ASTERIXConfigWidget::updateCategories()
 {
-    assert(categories_grid_);
+    traced_assert(categories_grid_);
 
     QLayoutItem* child;
     while (!categories_grid_->isEmpty() && (child = categories_grid_->takeAt(0)) != nullptr)
@@ -273,7 +274,7 @@ void ASTERIXConfigWidget::updateCategories()
             ref_edit->setDisabled(true);
 
         categories_grid_->addWidget(ref_edit, row, 4);
-        assert(!ref_edit_buttons_.count(category));
+        traced_assert(!ref_edit_buttons_.count(category));
         ref_edit_buttons_[category] = ref_edit;
 
         // spf
@@ -296,7 +297,7 @@ void ASTERIXConfigWidget::updateCategories()
             spf_edit->setDisabled(true);
 
         categories_grid_->addWidget(spf_edit, row, 6);
-        assert(!spf_edit_buttons_.count(category));
+        traced_assert(!spf_edit_buttons_.count(category));
         spf_edit_buttons_[category] = spf_edit;
 
         row++;
@@ -306,7 +307,7 @@ void ASTERIXConfigWidget::updateCategories()
 void ASTERIXConfigWidget::categoryCheckedSlot()
 {
     QCheckBox* widget = static_cast<QCheckBox*>(sender());
-    assert(widget);
+    traced_assert(widget);
 
     QVariant cat_var = widget->property("category");
     bool decode = widget->checkState() == Qt::Checked;
@@ -334,7 +335,7 @@ void ASTERIXConfigWidget::refEditionChangedSlot(const std::string& cat_str,
     unsigned int cat = std::stoul(cat_str);
     task_.refEditionForCategory(cat, ed_str);
 
-    assert(ref_edit_buttons_.count(cat));
+    traced_assert(ref_edit_buttons_.count(cat));
     if (ed_str.size())  // enable or disable button if edition is empty
         ref_edit_buttons_.at(cat)->setDisabled(false);
     else
@@ -350,7 +351,7 @@ void ASTERIXConfigWidget::spfEditionChangedSlot(const std::string& cat_str,
     unsigned int cat = std::stoul(cat_str);
     task_.spfEditionForCategory(cat, ed_str);
 
-    assert(spf_edit_buttons_.count(cat));
+    traced_assert(spf_edit_buttons_.count(cat));
     if (ed_str.size())  // enable or disable button if edition is empty
         spf_edit_buttons_.at(cat)->setDisabled(false);
     else
@@ -362,7 +363,7 @@ void ASTERIXConfigWidget::categoryEditionEditSlot()
     loginf << "start";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
-    assert(widget);
+    traced_assert(widget);
 
     QVariant cat_var = widget->property("category");
     unsigned int cat = cat_var.toUInt();
@@ -372,8 +373,8 @@ void ASTERIXConfigWidget::categoryEditionEditSlot()
     else
         edition_str = task_.jASTERIX()->category(cat)->defaultEdition();
 
-    assert(task_.jASTERIX()->hasCategory(cat));
-    assert(task_.jASTERIX()->category(cat)->hasEdition(edition_str));
+    traced_assert(task_.jASTERIX()->hasCategory(cat));
+    traced_assert(task_.jASTERIX()->category(cat)->hasEdition(edition_str));
     std::string def_path = task_.jASTERIX()->category(cat)->editionPath(edition_str);
 
     loginf << "cat " << cat << " path '" << def_path << "'";
@@ -386,7 +387,7 @@ void ASTERIXConfigWidget::categoryREFEditionEditSlot()
     loginf << "start";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
-    assert(widget);
+    traced_assert(widget);
 
     QVariant cat_var = widget->property("category");
     unsigned int cat = cat_var.toUInt();
@@ -398,8 +399,8 @@ void ASTERIXConfigWidget::categoryREFEditionEditSlot()
 
     loginf << "ref '" << ref_edition_str << "'";
 
-    assert(task_.jASTERIX()->hasCategory(cat));
-    assert(task_.jASTERIX()->category(cat)->hasREFEdition(ref_edition_str));
+    traced_assert(task_.jASTERIX()->hasCategory(cat));
+    traced_assert(task_.jASTERIX()->category(cat)->hasREFEdition(ref_edition_str));
     std::string def_path = task_.jASTERIX()->category(cat)->refEditionPath(ref_edition_str);
 
     loginf << "cat " << cat << " ref path '"
@@ -413,7 +414,7 @@ void ASTERIXConfigWidget::categorySPFEditionEditSlot()
     loginf << "start";
 
     QPushButton* widget = static_cast<QPushButton*>(sender());
-    assert(widget);
+    traced_assert(widget);
 
     QVariant cat_var = widget->property("category");
     unsigned int cat = cat_var.toUInt();
@@ -425,8 +426,8 @@ void ASTERIXConfigWidget::categorySPFEditionEditSlot()
 
     loginf << "spf '" << spf_edition_str << "'";
 
-    assert(task_.jASTERIX()->hasCategory(cat));
-    assert(task_.jASTERIX()->category(cat)->hasSPFEdition(spf_edition_str));
+    traced_assert(task_.jASTERIX()->hasCategory(cat));
+    traced_assert(task_.jASTERIX()->category(cat)->hasSPFEdition(spf_edition_str));
     std::string def_path = task_.jASTERIX()->category(cat)->spfEditionPath(spf_edition_str);
 
     loginf << "cat " << cat << " ref path '"

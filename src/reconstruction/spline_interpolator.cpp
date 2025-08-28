@@ -164,7 +164,7 @@ void SplineInterpolator::interpCovarianceMat(Measurement& mm_interp,
         //interpolate covmats
         bool cov_mat_ok;
         auto C = interpCovarianceMat(mm0.covMat(flags), mm0.covMat(flags), interp_factor, covmat_interp_mode, &cov_mat_ok);
-        assert(cov_mat_ok);
+        traced_assert(cov_mat_ok);
 
         //set entries which were available in the original matrices
         mm_interp.setFromCovMat(C, flags);
@@ -296,7 +296,7 @@ MeasurementInterp SplineInterpolator::interpMeasurement(const Eigen::Vector2d& p
     mm_interp.t         = t;
     mm_interp.mm_interp = true;
 
-    assert(interp_factor >= 0.0 && interp_factor <= 1.0);
+    traced_assert(interp_factor >= 0.0 && interp_factor <= 1.0);
     
     //set position
     mm_interp.position2D(pos, coord_sys);
@@ -651,7 +651,7 @@ std::vector<MeasurementInterp> SplineInterpolator::interpolatePart(const std::ve
             Eigen::Vector2d pos_interp(sx(p), sy(p));
             pos_interp += offs;
 
-            assert(num_refs_segment < tmp_refs.size());
+            traced_assert(num_refs_segment < tmp_refs.size());
 
             //collect temporary references
             tmp_refs[num_refs_segment++] = generateMeasurement(pos_interp, t_cur_seg, mm0, mm1, f, false);
@@ -676,7 +676,7 @@ std::vector<MeasurementInterp> SplineInterpolator::interpolatePart(const std::ve
 
                 Eigen::Vector2d pos_interp = pos0 * (1.0 - f) + pos1 * f;
             
-                assert(num_refs_segment < tmp_refs.size());
+                traced_assert(num_refs_segment < tmp_refs.size());
 
                 tmp_refs[num_refs_segment++] = generateMeasurement(pos_interp, t_cur_seg, mm0, mm1, f, true);
 

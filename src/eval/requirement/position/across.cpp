@@ -173,7 +173,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
         }
 
 //        ref_spd = ret_spd.first;
-//        assert (ret_pos.second); // must be set of ref pos exists
+//        traced_assert(ret_pos.second); // must be set of ref pos exists
 
         is_inside = target_data.isTimeStampNotExcluded(timestamp)
                     && target_data.mappedRefPosInside(sector_layer, tst_id);
@@ -196,7 +196,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
         double distance, angle;
 
         std::tie(transform_ok, distance, angle) = ogr_geo2cart.distanceAngleCart(ref_pos->latitude_, ref_pos->longitude_, tst_pos.latitude_, tst_pos.longitude_);
-        assert(transform_ok);
+        traced_assert(transform_ok);
 
         angle = ref_spd->track_angle_ - angle;
 
@@ -225,7 +225,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
         }
 
         d_across = distance * sin(angle);
-        assert (!std::isnan(d_across) && !std::isinf(d_across));
+        traced_assert(!std::isnan(d_across) && !std::isinf(d_across));
 
         ++num_distances;
 
@@ -255,7 +255,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
     //               << " num_distances " << num_distances;
 
-    assert (num_no_ref <= num_pos);
+    traced_assert(num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
         loginf << "'" << name_ << "': utn " << target_data.utn_
@@ -264,9 +264,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionAcross::evaluate (
                << " num_pos_calc_errors " << num_pos_calc_errors
                << " num_distances " << num_distances;
 
-    assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
-    assert (num_distances == num_value_ok + num_value_nok);
+    traced_assert(num_distances == num_value_ok + num_value_nok);
 
     //assert (details.size() == num_pos);
 

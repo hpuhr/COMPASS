@@ -126,7 +126,7 @@ void EvaluationDialog::updateSectors()
  */
 void EvaluationDialog::updateFilterWidget()
 {
-    assert (filter_widget_);
+    traced_assert(filter_widget_);
     filter_widget_->update();
 }
 
@@ -134,7 +134,7 @@ void EvaluationDialog::updateFilterWidget()
  */
 void EvaluationDialog::updateButtons()
 {
-    assert (run_button_);
+    traced_assert(run_button_);
 
     auto r = calculator_.canEvaluate();
 

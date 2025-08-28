@@ -152,7 +152,7 @@ void DataSourcesConfigurationDialog::endResetModel()
 
 void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-    assert (edit_widget_);
+    traced_assert(edit_widget_);
 
     if (!current.isValid())
     {
@@ -164,7 +164,7 @@ void DataSourcesConfigurationDialog::currentRowChanged(const QModelIndex& curren
     }
 
     auto const source_index = proxy_model_->mapToSource(current);
-    assert (source_index.isValid());
+    traced_assert(source_index.isValid());
 
     unsigned int id = table_model_->getIdOf(source_index);
 
@@ -188,7 +188,7 @@ void DataSourcesConfigurationDialog::newDSDoneSlot()
 {
     loginf << "start";
 
-    assert (create_dialog_);
+    traced_assert(create_dialog_);
 
     if (!create_dialog_->cancelled())
     {
@@ -202,12 +202,12 @@ void DataSourcesConfigurationDialog::newDSDoneSlot()
 
         unsigned int ds_id = Number::dsIdFrom(sac, sic);
 
-        assert (!ds_man_.hasConfigDataSource(ds_id));
+        traced_assert(!ds_man_.hasConfigDataSource(ds_id));
 
         beginResetModel();
 
         ds_man_.createConfigDataSource(ds_id);
-        assert (ds_man_.hasConfigDataSource(ds_id));
+        traced_assert(ds_man_.hasConfigDataSource(ds_id));
         ds_man_.configDataSource(ds_id).dsType(ds_type);
 
         endResetModel();
@@ -215,7 +215,7 @@ void DataSourcesConfigurationDialog::newDSDoneSlot()
         auto const model_index = table_model_->dataSourceIndex(ds_id);
 
         auto const source_index = proxy_model_->mapFromSource(model_index);
-        assert (source_index.isValid());
+        traced_assert(source_index.isValid());
 
         table_view_->selectRow(source_index.row());
     }

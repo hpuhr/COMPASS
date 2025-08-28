@@ -124,13 +124,13 @@ void TargetReportAccessor::cacheVectors()
 
     //general
     meta_timestamp_vec_ = metaVarVector<boost::posix_time::ptime>(DBContent::meta_var_timestamp_);
-    assert (meta_timestamp_vec_);
+    traced_assert(meta_timestamp_vec_);
     meta_rec_num_vec_   = metaVarVector<unsigned long>(DBContent::meta_var_rec_num_);
-    assert (meta_rec_num_vec_);
+    traced_assert(meta_rec_num_vec_);
     meta_ds_id_vec_     = metaVarVector<unsigned int>(DBContent::meta_var_ds_id_);
-    assert (meta_ds_id_vec_);
+    traced_assert(meta_ds_id_vec_);
     meta_line_id_vec_   = metaVarVector<unsigned int>(DBContent::meta_var_line_id_);
-    assert (meta_line_id_vec_);
+    traced_assert(meta_line_id_vec_);
 
     meta_acad_vec_      = metaVarVector<unsigned int>(DBContent::meta_var_acad_);
     meta_acid_vec_      = metaVarVector<std::string>(DBContent::meta_var_acid_);

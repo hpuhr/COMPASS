@@ -134,7 +134,7 @@ void EvaluationStandardTabWidget::changedStandardsSlot()
 {
     loginf << "start";
 
-    assert (standard_box_);
+    traced_assert(standard_box_);
     standard_box_->updateStandards();
 }
 
@@ -144,7 +144,7 @@ void EvaluationStandardTabWidget::changedCurrentStandardSlot()
 {
     loginf << "start";
 
-    assert (standard_box_);
+    traced_assert(standard_box_);
     standard_box_->setStandardName(calculator_.currentStandardName());
 
     updateButtons();
@@ -263,7 +263,7 @@ void EvaluationStandardTabWidget::removeStandardSlot ()
 {
     loginf << "start";
 
-    assert (calculator_.hasCurrentStandard());
+    traced_assert(calculator_.hasCurrentStandard());
     calculator_.deleteCurrentStandard();
 }
 
@@ -271,13 +271,13 @@ void EvaluationStandardTabWidget::removeStandardSlot ()
  */
 void EvaluationStandardTabWidget::updateButtons()
 {
-    assert (add_button_);
+    traced_assert(add_button_);
     add_button_->setDisabled(false);
-    assert (rename_button_);
+    traced_assert(rename_button_);
     rename_button_->setEnabled(calculator_.hasCurrentStandard());
-    assert (copy_button_);
+    traced_assert(copy_button_);
     copy_button_->setEnabled(calculator_.hasCurrentStandard());
-    assert (remove_button_);
+    traced_assert(remove_button_);
     remove_button_->setEnabled(calculator_.hasCurrentStandard());
 }
 
@@ -285,7 +285,7 @@ void EvaluationStandardTabWidget::updateButtons()
  */
 void EvaluationStandardTabWidget::updateStandardWidget()
 {
-    // assert(standards_widget_);
+    // traced_assert(standards_widget_);
 
     // string standard_name = calculator_.currentStandardName();
 
@@ -307,7 +307,7 @@ void EvaluationStandardTabWidget::updateStandardWidget()
 
     // standards_widget_->setCurrentWidget(standard.widget());
 
-    assert (standards_layout_);
+    traced_assert(standards_layout_);
     QLayoutItem* item;
     while ((item = standards_layout_->takeAt(0)) != nullptr)
     {

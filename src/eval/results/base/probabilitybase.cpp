@@ -29,10 +29,10 @@ namespace common
     */
     EvaluationRequirement::ProbabilityBase& castRequirement(const std::shared_ptr<EvaluationRequirement::Base>& base_req)
     {
-        assert (base_req);
+        traced_assert(base_req);
 
         EvaluationRequirement::ProbabilityBase* req_ptr = dynamic_cast<EvaluationRequirement::ProbabilityBase*>(base_req.get());
-        assert (req_ptr);
+        traced_assert(req_ptr);
 
         return *req_ptr;
     }

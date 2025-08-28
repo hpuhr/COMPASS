@@ -64,7 +64,7 @@ JSONImportTaskWidget::JSONImportTaskWidget(JSONImportTask& task, QWidget* parent
 
 void JSONImportTaskWidget::addMainTab()
 {
-    assert(tab_widget_);
+    traced_assert(tab_widget_);
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -212,7 +212,7 @@ void JSONImportTaskWidget::updateSourceLabel()
 
 void JSONImportTaskWidget::selectSchema(const std::string& schema_name)
 {
-    assert(task_.hasSchema(schema_name));
+    traced_assert(task_.hasSchema(schema_name));
     task_.currentSchemaName(schema_name);
 
     updateToCurrentSchema();
@@ -282,7 +282,7 @@ void JSONImportTaskWidget::selectedSchemaChangedSlot(const QString& text)
 {
     loginf << "text " << text.toStdString();
 
-    assert(task_.hasSchema(text.toStdString()));
+    traced_assert(task_.hasSchema(text.toStdString()));
     task_.currentSchemaName(text.toStdString());
 
     updateToCurrentSchema();
@@ -384,10 +384,10 @@ void JSONImportTaskWidget::removeObjectParserSlot()
     {
         std::string name = object_parser_box_->currentText().toStdString();
 
-        assert(task_.hasCurrentSchema());
+        traced_assert(task_.hasCurrentSchema());
         shared_ptr<JSONParsingSchema> current = task_.currentJSONSchema();
 
-        assert(current->hasObjectParser(name));
+        traced_assert(current->hasObjectParser(name));
         current->removeParser(name);
 
         updateParserBox();
@@ -402,15 +402,15 @@ void JSONImportTaskWidget::selectedObjectParserSlot(const QString& text)
         while (object_parser_widget_->count() > 0)
             object_parser_widget_->removeWidget(object_parser_widget_->widget(0));
 
-    assert(object_parser_box_);
+    traced_assert(object_parser_box_);
 
     if (object_parser_box_->currentIndex() >= 0)
     {
         std::string name = object_parser_box_->currentText().toStdString();
 
-        assert(task_.hasCurrentSchema());
-        assert(task_.currentJSONSchema()->hasObjectParser(name));
-        assert(object_parser_widget_);
+        traced_assert(task_.hasCurrentSchema());
+        traced_assert(task_.currentJSONSchema()->hasObjectParser(name));
+        traced_assert(object_parser_widget_);
 
         if (object_parser_widget_->indexOf(task_.currentJSONSchema()->parser(name).widget()) < 0)
             object_parser_widget_->addWidget(task_.currentJSONSchema()->parser(name).widget());
@@ -430,9 +430,9 @@ void JSONImportTaskWidget::fileLineIDEditSlot(const QString& text)
 
     unsigned int line_id = text.toUInt(&ok);
 
-    assert (ok);
+    traced_assert(ok);
 
-    assert (line_id > 0 && line_id <= 4);
+    traced_assert(line_id > 0 && line_id <= 4);
 
     task_.fileLineID(line_id-1);
 }
@@ -480,7 +480,7 @@ void JSONImportTaskWidget::updateParserBox()
 {
     loginf << "start";
 
-    assert(object_parser_box_);
+    traced_assert(object_parser_box_);
     object_parser_box_->clear();
 
     if (task_.hasCurrentSchema())

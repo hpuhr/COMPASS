@@ -140,7 +140,7 @@ void RTCommandManager::run()
             current_result.wait();
 
             std::vector<rtcommand::RTCommandResult> results = current_result.get();
-            assert (results.size() == 1);
+            traced_assert(results.size() == 1);
 
             rtcommand::RTCommandResult   cmd_result = results.at(0);
             rtcommand::RTCommandResponse cmd_response(cmd_result);
@@ -167,7 +167,7 @@ void RTCommandManager::run()
             {
                 if (open_port_ && server_->hasSession())
                 {
-                    assert (server_);
+                    traced_assert(server_);
                     //@TODO: get state from command result and compile reply
                     server_->sendStrData(cmd_response.toJSONString());
                 }
@@ -180,7 +180,7 @@ void RTCommandManager::run()
     if (open_port_)
     {
         io_context.stop();
-        assert (io_context.stopped());
+        traced_assert(io_context.stopped());
 
         t.timed_join(100);
     }
@@ -218,8 +218,8 @@ void RTCommandManager::shutdown()
         msleep(1000);
     }
 
-    //    assert(!active_blocking_job_);
-    //    assert(blocking_jobs_.empty());
+    //    traced_assert(!active_blocking_job_);
+    //    traced_assert(blocking_jobs_.empty());
 
     loginf << "done";
 }

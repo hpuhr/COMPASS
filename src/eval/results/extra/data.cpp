@@ -34,7 +34,7 @@
 #include "util/timeconv.h"
 #include "viewpoint.h"
 
-#include <cassert>
+#include "traced_assert.h"
 
 using namespace std;
 using namespace Utils;
@@ -188,7 +188,7 @@ nlohmann::json::array_t SingleExtraData::detailValues(const EvaluationDetail& de
 bool SingleExtraData::detailIsOk(const EvaluationDetail& detail) const
 {
     auto is_extra = detail.getValueAs<bool>(DetailKey::Extra);
-    assert(is_extra.has_value());
+    traced_assert(is_extra.has_value());
 
     return !is_extra.value();
 }
@@ -200,7 +200,7 @@ void SingleExtraData::addAnnotationForDetail(nlohmann::json& annotations_json,
                                              TargetAnnotationType type,
                                              bool is_ok) const
 {
-    assert (detail.numPositions() >= 1);
+    traced_assert(detail.numPositions() >= 1);
 
     if (type == TargetAnnotationType::Highlight)
     {

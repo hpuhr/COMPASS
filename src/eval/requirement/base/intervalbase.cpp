@@ -113,7 +113,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
         auto timestamp = tst_it.first;
 
         bool inside_period = periods.isInside(timestamp);
-        assert(inside_period); //!should _always_ land in a period!
+        traced_assert(inside_period); //!should _always_ land in a period!
 
         TimePeriodUpdate update;
         update.data_id = dbContent::TargetReport::DataID(tst_it);
@@ -160,7 +160,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> IntervalBase::evaluate(cons
             continue;
 
         //!events which cause misses should generate comments!
-        assert(event.misses == 0 || !detail_info.evt_comment.empty());
+        traced_assert(event.misses == 0 || !detail_info.evt_comment.empty());
 
         std::vector<dbContent::TargetPosition> positions;
         if (detail_info.evt_ref_updates_idx0.has_value() && detail_info.evt_ref_updates_idx1.has_value())
@@ -256,7 +256,7 @@ std::vector<Event> IntervalBase::periodEvents(const TimePeriod& period,
                            bool has_ref_data,
                            bool compute_misses)
     {
-        assert(time1 >= time0);
+        traced_assert(time1 >= time0);
 
         Event e;
         e.type           = type;
@@ -424,7 +424,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
     {
         //map to ref pos
         auto ref_pos = target_data.mappedRefPos(id_tst);
-        assert (ref_pos.has_value());
+        traced_assert(ref_pos.has_value());
 
         //store index range into detail info
         dinfo.evt_ref_updates_idx0 = ref_updates.size();
@@ -450,7 +450,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         if (!pos1.has_value()) pos1 = target_data.mappedRefPos(id_tst1);
 
         //interpolation of ref should always be possible, since the period is inside a valid reference period
-        assert(pos0.has_value() && pos1.has_value());
+        traced_assert(pos0.has_value() && pos1.has_value());
 
         //retrieve all ref updates inside the interval
         auto positions = target_data.refChain().positionsBetween(id_tst0.timestamp(), 
@@ -475,7 +475,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
     {
         case Event::TypeNoReference:
         {
-            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            traced_assert(target_data.tstChain().posOpt(event.data_id).has_value());
 
             dinfo.evt_time        = event.data_id.timestamp();
             dinfo.evt_comment     = "Outside sector/reference period";
@@ -489,7 +489,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeEnterPeriod:
         {
-            assert(target_data.refChain().posOpt(event.interval_time0).has_value());
+            traced_assert(target_data.refChain().posOpt(event.interval_time0).has_value());
 
             dinfo.evt_time        = event.interval_time0;
             dinfo.evt_comment     = "Entering " + period;
@@ -503,7 +503,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeFirstValidUpdateInPeriod:
         {
-            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            traced_assert(target_data.tstChain().posOpt(event.data_id).has_value());
 
             dinfo.evt_time        = event.data_id.timestamp();
             dinfo.evt_comment     = "First valid target report of " + period;
@@ -517,8 +517,8 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeValidFirst:
         {
-            assert(target_data.tstChain().posOpt(event.data_id).has_value());
-            assert(target_data.refChain().posOpt(event.interval_time0).has_value());
+            traced_assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            traced_assert(target_data.refChain().posOpt(event.interval_time0).has_value());
 
             dinfo.evt_time         = event.data_id.timestamp();
             dinfo.evt_comment      = has_miss ? "Miss detected at start of current " + period + " " + miss + ", between " + evt_interval : 
@@ -538,8 +538,8 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeValid:
         {
-            assert(target_data.tstChain().posOpt(event.data_id).has_value());
-            assert(target_data.tstChain().posOpt(event.interval_time0).has_value());
+            traced_assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            traced_assert(target_data.tstChain().posOpt(event.interval_time0).has_value());
 
             dinfo.evt_time         = event.data_id.timestamp();
             dinfo.evt_comment      = has_miss ? "Miss detected in current " + period + " " + miss + ", between " + evt_interval : "OK " + hit;
@@ -560,8 +560,8 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeValidLast:
         {
-            assert(target_data.tstChain().posOpt(event.data_id).has_value());
-            assert(target_data.refChain().posOpt(event.interval_time1).has_value());
+            traced_assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            traced_assert(target_data.refChain().posOpt(event.interval_time1).has_value());
 
             dinfo.evt_time         = event.data_id.timestamp();
             dinfo.evt_comment      = has_miss ? "Miss detected at end of current " + period + " " + miss + ", between " + evt_interval : 
@@ -581,7 +581,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeInvalid:
         {
-            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            traced_assert(target_data.tstChain().posOpt(event.data_id).has_value());
 
             dinfo.evt_time        = event.data_id.timestamp();
             dinfo.evt_comment     = "Invalid target report: " + error;
@@ -595,7 +595,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeDataMissing:
         {
-            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            traced_assert(target_data.tstChain().posOpt(event.data_id).has_value());
 
             dinfo.evt_time        = event.data_id.timestamp();
             dinfo.evt_comment     = "Invalid target report: " + error;
@@ -609,7 +609,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeLastValidUpdateInPeriod:
         {
-            assert(target_data.tstChain().posOpt(event.data_id).has_value());
+            traced_assert(target_data.tstChain().posOpt(event.data_id).has_value());
 
             dinfo.evt_time        = event.data_id.timestamp();
             dinfo.evt_comment     = "Last valid target report of " + period;
@@ -623,7 +623,7 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeLeavePeriod:
         {
-            assert(target_data.refChain().posOpt(event.interval_time1).has_value());
+            traced_assert(target_data.refChain().posOpt(event.interval_time1).has_value());
 
             dinfo.evt_time        = event.interval_time1;
             dinfo.evt_comment     = "Leaving " + period;
@@ -637,8 +637,8 @@ IntervalBase::DetailInfo IntervalBase::eventDetailInfo(const EvaluationTargetDat
         }
         case Event::TypeEmptyPeriod:
         {
-            assert(target_data.refChain().posOpt(event.interval_time0).has_value());
-            assert(target_data.refChain().posOpt(event.interval_time1).has_value());
+            traced_assert(target_data.refChain().posOpt(event.interval_time0).has_value());
+            traced_assert(target_data.refChain().posOpt(event.interval_time1).has_value());
 
             dinfo.evt_time         = event.interval_time1;
             dinfo.evt_comment      = has_miss ? "Miss detected in empty period " + period + " " + miss + ", between " + evt_interval : "";

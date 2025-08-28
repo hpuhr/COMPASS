@@ -311,7 +311,7 @@ dbContent::targetReport::Position Measurement::position() const
 */
 dbContent::targetReport::PositionAccuracy Measurement::positionAccuracy() const
 {
-    assert (hasStdDevPosition());
+    traced_assert(hasStdDevPosition());
 
     if (xy_cov.has_value())
         return dbContent::targetReport::PositionAccuracy(*x_stddev, *y_stddev, *xy_cov);
@@ -383,8 +383,8 @@ Eigen::VectorXd Measurement::stateVec(unsigned char flags) const
     bool with_velocity = (flags & CovMatFlags::CovMatVel);
     bool with_accell   = (flags & CovMatFlags::CovMatAcc);
 
-    assert(!with_velocity || hasVelocity()    );
-    assert(!with_accell   || hasAcceleration());
+    traced_assert(!with_velocity || hasVelocity()    );
+    traced_assert(!with_accell   || hasAcceleration());
 
     if (with_position)
     {
@@ -437,9 +437,9 @@ Eigen::MatrixXd Measurement::covMat(unsigned char flags) const
     bool with_velocity = (flags & CovMatFlags::CovMatVel);
     bool with_accell   = (flags & CovMatFlags::CovMatAcc);
 
-    assert(!with_position || hasStdDevPosition());
-    assert(!with_velocity || hasStdDevVelocity());
-    assert(!with_accell   || hasStdDevAccel()   );
+    traced_assert(!with_position || hasStdDevPosition());
+    traced_assert(!with_velocity || hasStdDevVelocity());
+    traced_assert(!with_accell   || hasStdDevAccel()   );
 
     if (with_position)
     {
@@ -587,7 +587,7 @@ bool Measurement::setFromCovMat(const Eigen::MatrixXd& C, unsigned char flags)
 */
 std::pair<unsigned long, boost::posix_time::ptime> Measurement::uniqueID() const
 {
-    assert(source_id.has_value());
+    traced_assert(source_id.has_value());
     return std::pair<unsigned long, boost::posix_time::ptime>(source_id.value(), t);
 }
 

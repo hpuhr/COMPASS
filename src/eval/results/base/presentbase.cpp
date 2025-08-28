@@ -134,8 +134,8 @@ SinglePresentBase::SinglePresentBase(const std::string& result_type,
 */
 boost::optional<double> SinglePresentBase::computeResult_impl() const
 {
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);
+    traced_assert(num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    traced_assert(num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);
 
     unsigned int total = num_no_ref_val_ + num_present_ + num_missing_;
 
@@ -212,7 +212,7 @@ nlohmann::json::array_t SinglePresentBase::detailValues(const EvaluationDetail& 
 bool SinglePresentBase::detailIsOk(const EvaluationDetail& detail) const
 {
     auto is_not_ok = detail.getValueAs<bool>(DetailKey::IsNotOk);
-    assert(is_not_ok.has_value());
+    traced_assert(is_not_ok.has_value());
 
     return !is_not_ok.value();
 }
@@ -224,7 +224,7 @@ void SinglePresentBase::addAnnotationForDetail(nlohmann::json& annotations_json,
                                                TargetAnnotationType type,
                                                bool is_ok) const
 {
-    assert (detail.numPositions() >= 1);
+    traced_assert(detail.numPositions() >= 1);
 
     if (type == TargetAnnotationType::Highlight)
     {
@@ -306,8 +306,8 @@ boost::optional<double> JoinedPresentBase::computeResult_impl() const
             << " num_present_id " << num_present_
             << " num_missing_id " << num_missing_;
 
-    assert (num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
-    assert (num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);
+    traced_assert(num_updates_ - num_no_ref_pos_ == num_pos_inside_ + num_pos_outside_);
+    traced_assert(num_pos_inside_ == num_no_ref_val_ + num_present_ + num_missing_);
 
     unsigned int total = num_no_ref_val_ + num_present_ + num_missing_;
 

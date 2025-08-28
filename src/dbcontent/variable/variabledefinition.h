@@ -37,7 +37,7 @@ class VariableDefinition : public Configurable
         // DBContVAR LOWERCASE HACK
         // boost::algorithm::to_lower(dbcont_variable_name_);
 
-        assert(variable_name_.size() > 0);
+        traced_assert(variable_name_.size() > 0);
     }
 
     VariableDefinition& operator=(VariableDefinition&& other)

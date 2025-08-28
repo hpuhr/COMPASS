@@ -29,7 +29,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include <cassert>
+#include "traced_assert.h"
 
 #include <fstream>
 
@@ -57,7 +57,7 @@ View::View(const std::string& class_id,
     registerParameter("name", &name_, std::string());
 
     loginf << "name '" << name_ << "'";
-    assert (name_.size());
+    traced_assert(name_.size());
 
     creation_time_ = boost::posix_time::to_time_t(boost::posix_time::microsec_clock::local_time());
 
@@ -103,7 +103,7 @@ bool View::init()
 {
     logdbg << "start";
 
-    assert(!init_);
+    traced_assert(!init_);
 
     // register in manager
     view_manager_.registerView(this);
@@ -118,7 +118,7 @@ bool View::init()
         return false;
     
     auto w = getWidget();
-    assert (w);
+    traced_assert(w);
 
     //init view widget
     w->init();
@@ -150,7 +150,7 @@ const std::string& View::getName() const { return name_; }
 */
 void View::enableInTabWidget(bool value)
 {
-    assert (container_);
+    traced_assert(container_);
     container_->enableViewTab(getCentralWidget(), value);
 }
 
@@ -158,7 +158,7 @@ void View::enableInTabWidget(bool value)
 */
 void View::showInTabWidget()
 {
-    assert (container_);
+    traced_assert(container_);
     container_->showView(getCentralWidget());
 }
 
@@ -193,8 +193,8 @@ void View::setWidget(ViewWidget* widget)
  */
 void View::constructWidget()
 {
-    assert(widget_);
-    assert(central_widget_);
+    traced_assert(widget_);
+    traced_assert(central_widget_);
 
     QVBoxLayout* central_vlayout = new QVBoxLayout();
     central_vlayout->setMargin(0);
@@ -219,7 +219,7 @@ void View::viewShutdown(const std::string& err) { view_manager_.viewShutdown(thi
 */
 void View::emitSelectionChange()
 {
-    //    assert (!selection_change_emitted_);
+    //    traced_assert(!selection_change_emitted_);
     //    selection_change_emitted_ = true;
 
     emit selectionChangedSignal();
@@ -302,7 +302,7 @@ void View::onConfigurationChanged(const std::vector<std::string>& changed_params
     onConfigurationChanged_impl(changed_params);
 
     //inform the view widget
-    assert (widget_);
+    traced_assert(widget_);
     widget_->configChanged();
 
     //signal view + config changes
@@ -354,7 +354,7 @@ void View::onModified()
  */
 QImage View::renderData() const
 {
-    assert (widget_ && widget_->getViewDataWidget());  
+    traced_assert(widget_ && widget_->getViewDataWidget());  
     return widget_->getViewDataWidget()->renderData();
 }
 
@@ -363,7 +363,7 @@ QImage View::renderData() const
  */
 QImage View::renderView() const
 {
-    assert (widget_);  
+    traced_assert(widget_);  
     return widget_->renderContents();
 }
 
@@ -372,7 +372,7 @@ QImage View::renderView() const
  */
 bool View::hasScreenshotContent() const
 {
-    assert (widget_ && widget_->getViewDataWidget());  
+    traced_assert(widget_ && widget_->getViewDataWidget());  
     return widget_->getViewDataWidget()->hasScreenshotContent();
 }
 
@@ -381,7 +381,7 @@ bool View::hasScreenshotContent() const
  */
 void View::viewManagerReloadStateChanged()
 {
-    assert (widget_);
+    traced_assert(widget_);
 
     //inform dependent components of changed reload state
     widget_->updateComponents();
@@ -392,7 +392,7 @@ void View::viewManagerReloadStateChanged()
  */
 void View::viewManagerAutoUpdatesChanged()
 {
-    assert (widget_);
+    traced_assert(widget_);
 
     //run any needed automatic updates
     //runAutomaticUpdates();
@@ -456,7 +456,7 @@ void View::runAutomaticUpdates()
  */
 void View::notifyViewUpdateNeeded(int flags, bool add)
 {
-    assert (widget_);
+    traced_assert(widget_);
 
     //live mode updates are handled immediately in their own way
     if (COMPASS::instance().appMode() == AppMode::LiveRunning)
@@ -525,7 +525,7 @@ void View::notifyReloadNeeded(bool add)
  */
 void View::notifyRefreshNeeded()
 {
-    assert(widget_);
+    traced_assert(widget_);
 
     //reset already issued updates, since we can determine which updates are needed on-the-fly (either redraw or reload),
     //no matter what the last config state has looked like
@@ -551,7 +551,7 @@ void View::notifyRefreshNeeded()
  */
 void View::updateView()
 {
-    assert (widget_);
+    traced_assert(widget_);
 
     int update_flags = 0;
 
@@ -589,7 +589,7 @@ void View::updateView()
 */
 void View::updateView(int flags)
 {
-    assert (widget_);
+    traced_assert(widget_);
 
     if (flags & VU_Reload) //reload = complete update
     {
@@ -610,7 +610,7 @@ void View::updateView(int flags)
 */
 void View::updateComponents()
 {
-    assert(widget_);
+    traced_assert(widget_);
 
     widget_->updateComponents();
 }
@@ -663,7 +663,7 @@ View::PresetError View::applyPreset(const ViewPresets::Preset& preset,
  */
 void View::presetEdited(ViewPresets::EditAction ea)
 {
-    assert(ea.valid());
+    traced_assert(ea.valid());
 
     const auto& presets = view_manager_.viewPresets().presets();
 
@@ -781,7 +781,7 @@ ViewInfos View::viewInfos() const
  */
 nlohmann::json View::viewInfoJSON() const
 {
-    assert(widget_);
+    traced_assert(widget_);
 
     nlohmann::json info;
 

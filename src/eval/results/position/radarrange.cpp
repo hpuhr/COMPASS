@@ -21,7 +21,7 @@
 
 #include <Eigen/Dense>
 
-#include <cassert>
+#include "traced_assert.h"
 
 namespace EvaluationRequirementResult
 {
@@ -52,7 +52,7 @@ SinglePositionRadarRange::SinglePositionRadarRange(const std::string& result_id,
 ,   range_values_ref_(range_values_ref)
 ,   range_values_tst_(range_values_tst)
 {
-    assert (range_values_ref_.size() == range_values_tst_.size());
+    traced_assert(range_values_ref_.size() == range_values_tst_.size());
 
     updateResult();
 }
@@ -149,7 +149,7 @@ boost::optional<double> SinglePositionRadarRange::computeFinalResultValue() cons
     // linear regression
     size_t num_distances = accumulator_.numValues();
 
-    assert (num_distances == range_values_ref_.size());
+    traced_assert(num_distances == range_values_ref_.size());
 
     Eigen::MatrixXd x_mat = Eigen::MatrixXd::Ones(num_distances, 2);
     Eigen::MatrixXd y_mat = Eigen::MatrixXd::Ones(num_distances, 1);
@@ -230,7 +230,7 @@ boost::optional<double> JoinedPositionRadarRange::computeFinalResultValue() cons
     for (const auto& single_result : single_results)
     {
         const SinglePositionRadarRange* single_radar_range = dynamic_cast<const SinglePositionRadarRange*>(single_result.get());
-        assert(single_radar_range);
+        traced_assert(single_radar_range);
 
         const auto& values_ref = single_radar_range->rangeValuesRef();
         const auto& values_tst = single_radar_range->rangeValuesTst();
@@ -241,7 +241,7 @@ boost::optional<double> JoinedPositionRadarRange::computeFinalResultValue() cons
 
     unsigned int num_distances = accumulator_.numValues();
 
-    assert (num_distances == range_values_ref.size() && range_values_ref.size() == range_values_tst.size());
+    traced_assert(num_distances == range_values_ref.size() && range_values_ref.size() == range_values_tst.size());
 
     Eigen::MatrixXd x_mat = Eigen::MatrixXd::Ones(num_distances, 2);
     Eigen::MatrixXd y_mat = Eigen::MatrixXd::Ones(num_distances, 1);

@@ -16,8 +16,8 @@
  */
 
 #include "gaussian_pdf.h"
-
 #include "logger.h"
+#include "traced_assert.h"
 
 #include <boost/math/distributions/chi_squared.hpp>
 
@@ -217,10 +217,10 @@ void GaussianPDF::normalizeLikelihoods(Eigen::VectorXd& likelihoods,
 
     //final check
     // for (auto& lh : likelihoods)
-    //     assert(std::isfinite(lh));
+    //     traced_assert(std::isfinite(lh));
 
     for (unsigned int i = 0; i < likelihoods.size(); ++i)
-        assert(std::isfinite(likelihoods[i]));
+        traced_assert(std::isfinite(likelihoods[i]));
 
     //likelihoods = likelihoods.array().log();
     //likelihoods.array() -= likelihoods.maxCoeff();
@@ -255,8 +255,8 @@ void GaussianPDF::normalizeLikelihoods(std::vector<double>& likelihoods,
 double GaussianPDF::probabilityFromMahalanobisSqr(double d2_m, 
                                                   unsigned int n) 
 {
-    assert(n > 0);
-    assert(d2_m >= 0.0);
+    traced_assert(n > 0);
+    traced_assert(d2_m >= 0.0);
 
     boost::math::chi_squared dist(n);
     return boost::math::cdf(dist, d2_m);

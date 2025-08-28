@@ -58,7 +58,7 @@ JSONMappingJob::JSONMappingJob(std::unique_ptr<nlohmann::json> data,
 JSONMappingJob::~JSONMappingJob()
 {
     loginf << "start";
-    assert (done_);
+    traced_assert(done_);
 }
 
 void JSONMappingJob::run_impl()
@@ -71,7 +71,7 @@ void JSONMappingJob::run_impl()
         parseJSON();
     else
     {
-        assert (asterix_parsers_);
+        traced_assert(asterix_parsers_);
         parseASTERIX();
     }
 
@@ -119,7 +119,7 @@ size_t JSONMappingJob::numErrors() const
 
 void JSONMappingJob::parseJSON()
 {
-    assert (!asterix_parsers_);
+    traced_assert(!asterix_parsers_);
 
     for (auto& parser_it : *json_parsers_)
     {
@@ -154,7 +154,7 @@ void JSONMappingJob::parseJSON()
 
             logdbg << "mapping json: obj " << map_it.second->dbContentName();
             std::shared_ptr<Buffer>& buffer = buffers_.at(map_it.second->dbContentName());
-            assert(buffer);
+            traced_assert(buffer);
             try
             {
                 logdbg << "obj " << map_it.second->dbContentName() << " parsing JSON";
@@ -195,7 +195,7 @@ void JSONMappingJob::parseJSON()
         done_ = true;
         return;
     }
-    assert(data_);
+    traced_assert(data_);
     logdbg << "applying JSON function";
 
     JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),
@@ -204,7 +204,7 @@ void JSONMappingJob::parseJSON()
 
 void JSONMappingJob::parseASTERIX()
 {
-    assert (!json_parsers_);
+    traced_assert(!json_parsers_);
 
     for (auto& parser_it : *asterix_parsers_)
     {
@@ -219,7 +219,7 @@ void JSONMappingJob::parseASTERIX()
         //loginf << "UGA '" << record.dump(4) << "'";
 
         unsigned int category{0};
-        assert (record.contains("category"));
+        traced_assert(record.contains("category"));
 
         category = record.at("category");
 
@@ -238,7 +238,7 @@ void JSONMappingJob::parseASTERIX()
         logdbg << "mapping json: cat " << category;
 
         std::shared_ptr<Buffer>& buffer = buffers_.at(dbcontent_name);
-        assert(buffer);
+        traced_assert(buffer);
 
         try
         {
@@ -284,7 +284,7 @@ void JSONMappingJob::parseASTERIX()
         return;
     }
 
-    assert(data_);
+    traced_assert(data_);
     logdbg << "applying JSON function";
 
     JSON::applyFunctionToValues(*data_.get(), data_record_keys_, data_record_keys_.begin(),

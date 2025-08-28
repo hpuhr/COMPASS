@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "traced_assert.h"
+
 #include <Eigen/Core>
 
 #include <boost/optional.hpp>
@@ -511,7 +513,7 @@ struct KalmanUpdate
 
     UniqueUpdateID uniqueID() const
     {
-        assert(source_id.has_value());
+        traced_assert(source_id.has_value());
         return UniqueUpdateID(source_id.value(), t);
     }
 

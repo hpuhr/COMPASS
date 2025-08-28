@@ -130,19 +130,19 @@ SinglePositionBaseCommon::SinglePositionBaseCommon(unsigned int num_pos,
 */
 boost::optional<double> SinglePositionBaseCommon::common_computeResult(const Single* single_result) const
 {
-    assert (single_result);
-    assert (num_no_ref_ <= num_pos_);
-    assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+    traced_assert(single_result);
+    traced_assert(num_no_ref_ <= num_pos_);
+    traced_assert(num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
     accumulator_.reset();
 
     auto values = single_result->getValues(DetailKey::Value);
 
-    assert (values.size() == num_passed_ + num_failed_);
+    traced_assert(values.size() == num_passed_ + num_failed_);
 
     unsigned int num_distances = values.size();
 
-    assert (num_passed_ <= num_distances);
+    traced_assert(num_passed_ <= num_distances);
 
     if (num_distances > 0)
         accumulator_.accumulate(values, true);
@@ -165,7 +165,7 @@ bool SinglePositionBaseCommon::common_detailIsOk(const EvaluationDetail& detail,
     const EvaluationRequirement::PositionDistance* req = dynamic_cast<const EvaluationRequirement::PositionDistance*>(requirement.get());
 
     auto check_passed = detail.getValueAs<bool>(DetailKey::CheckPassed);
-    assert(check_passed.has_value());
+    traced_assert(check_passed.has_value());
 
     if (req)
     {
@@ -261,7 +261,7 @@ void SinglePositionProbabilityBase::addAnnotationForDetail(nlohmann::json& annot
                                                            TargetAnnotationType type,
                                                            bool is_ok) const
 {
-    assert (detail.numPositions() >= 1);
+    traced_assert(detail.numPositions() >= 1);
 
     if (detail.numPositions() == 1) // no ref pos
         return;
@@ -344,7 +344,7 @@ void SinglePositionValueBase::addAnnotationForDetail(nlohmann::json& annotations
                                                      TargetAnnotationType type,
                                                      bool is_ok) const
 {
-    assert (detail.numPositions() >= 1);
+    traced_assert(detail.numPositions() >= 1);
 
     if (detail.numPositions() == 1) // no ref pos
         return;
@@ -431,8 +431,8 @@ void JoinedPositionBase::common_accumulateSingleResult(unsigned int utn, const P
 */
 boost::optional<double> JoinedPositionBase::common_computeResult() const
 {
-    assert (num_no_ref_ <= num_pos_);
-    assert (num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
+    traced_assert(num_no_ref_ <= num_pos_);
+    traced_assert(num_pos_ - num_no_ref_ == num_pos_inside_ + num_pos_outside_);
 
     // nothing to do
 
@@ -444,7 +444,7 @@ boost::optional<double> JoinedPositionBase::common_computeResult() const
 bool JoinedPositionBase::common_exportAsCSV(std::ofstream& strm,
                                             const Joined* result) const
 {
-    // assert(result);
+    // traced_assert(result);
 
     // strm << csv_header_ << "\n";
 

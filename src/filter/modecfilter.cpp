@@ -172,9 +172,9 @@ void ModeCFilter::reset()
 
 void ModeCFilter::saveViewPointConditions (nlohmann::json& filters)
 {
-    assert (conditions_.size() == 0);
+    traced_assert(conditions_.size() == 0);
 
-    assert (!filters.contains(name_));
+    traced_assert(!filters.contains(name_));
     filters[name_] = json::object();
     json& filter = filters.at(name_);
 
@@ -185,15 +185,15 @@ void ModeCFilter::saveViewPointConditions (nlohmann::json& filters)
 
 void ModeCFilter::loadViewPointConditions (const nlohmann::json& filters)
 {
-    assert (conditions_.size() == 0);
+    traced_assert(conditions_.size() == 0);
 
-    assert (filters.contains(name_));
+    traced_assert(filters.contains(name_));
     const json& filter = filters.at(name_);
 
-    assert (filter.contains("Barometric Altitude Minimum"));
+    traced_assert(filter.contains("Barometric Altitude Minimum"));
     min_value_ = filter.at("Barometric Altitude Minimum");
 
-    assert (filter.contains("Barometric Altitude Maximum"));
+    traced_assert(filter.contains("Barometric Altitude Maximum"));
     max_value_ = filter.at("Barometric Altitude Maximum");
 
     if (filter.contains("Barometric Altitude NULL"))
@@ -221,7 +221,7 @@ std::vector<unsigned int> ModeCFilter::filterBuffer(const std::string& dbcontent
     dbContent::Variable& var = COMPASS::instance().dbContentManager().metaVariable(
                                                                          DBContent::meta_var_mc_.name()).getFor(dbcontent_name);
 
-    assert (buffer->has<float> (var.name()));
+    traced_assert(buffer->has<float> (var.name()));
 
     NullableVector<float>& data_vec = buffer->get<float> (var.name());
 

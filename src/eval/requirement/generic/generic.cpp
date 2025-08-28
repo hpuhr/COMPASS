@@ -233,8 +233,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericInteger::evaluate (
            << " num_unknown " << num_unknown << " num_correct " << num_correct
            << " num_false " << num_false;
 
-    assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
-    assert (num_pos_inside == num_no_ref_val+num_unknown+num_correct+num_false);
+    traced_assert(num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos_inside == num_no_ref_val+num_unknown+num_correct+num_false);
 
     return make_shared<EvaluationRequirementResult::SingleGeneric>(
                 result_type_, "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,
@@ -423,8 +423,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> GenericDouble::evaluate (
            << " num_unknown " << num_unknown << " num_correct " << num_correct
            << " num_false " << num_false;
 
-    assert (num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
-    assert (num_pos_inside == num_no_ref_val+num_unknown+num_correct+num_false);
+    traced_assert(num_updates - num_no_ref_pos == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos_inside == num_no_ref_val+num_unknown+num_correct+num_false);
 
     return make_shared<EvaluationRequirementResult::SingleGeneric>(
         result_type_, "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,

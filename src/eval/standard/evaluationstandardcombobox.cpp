@@ -53,7 +53,7 @@ void EvaluationStandardComboBox::setStandardName(const std::string& value)
     loginf << "standard '" << value << "'";
 
     int index = findText(QString(value.c_str()));
-    assert(index >= 0);
+    traced_assert(index >= 0);
     setCurrentIndex(index);
 }
 

@@ -84,7 +84,7 @@ void ASTERIXJSONMappingJob::run_impl()
             return;
         }
 
-        assert (record.contains("category"));
+        traced_assert(record.contains("category"));
 
         category = record.at("category");
 
@@ -101,7 +101,7 @@ void ASTERIXJSONMappingJob::run_impl()
         logdbg << "mapping json: cat " << category;
 
         std::shared_ptr<Buffer>& buffer = buffers_.at(dbcontent_name);
-        assert(buffer);
+        traced_assert(buffer);
 
         try
         {

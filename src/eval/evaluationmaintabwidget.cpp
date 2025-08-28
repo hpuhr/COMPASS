@@ -143,8 +143,8 @@ void EvaluationMainTabWidget::updateDataSources()
  */
 void EvaluationMainTabWidget::updateSectors()
 {
-    assert (sector_widget_);
-    assert (min_height_filter_combo_);
+    traced_assert(sector_widget_);
+    traced_assert(min_height_filter_combo_);
 
     sector_widget_->update();
 
@@ -155,7 +155,7 @@ void EvaluationMainTabWidget::updateSectors()
  */
 void EvaluationMainTabWidget::updateMinHeightFilterCombo()
 {
-    assert (min_height_filter_combo_);
+    traced_assert(min_height_filter_combo_);
 
     min_height_filter_combo_->blockSignals(true);
 
@@ -250,7 +250,7 @@ void EvaluationMainTabWidget::changedStandardsSlot()
 {
     loginf << "start";
 
-    assert (standard_box_);
+    traced_assert(standard_box_);
     standard_box_->updateStandards();
 }
 
@@ -260,12 +260,12 @@ void EvaluationMainTabWidget::changedCurrentStandardSlot()
 {
     loginf << "start";
 
-    assert (standard_box_);
+    traced_assert(standard_box_);
     standard_box_->setStandardName(calculator_.currentStandardName());
 
     logdbg << "sectors";
 
-    assert (sector_widget_);
+    traced_assert(sector_widget_);
     sector_widget_->update();
 
     dialog_.updateButtons();

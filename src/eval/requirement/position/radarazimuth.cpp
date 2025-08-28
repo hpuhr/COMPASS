@@ -113,7 +113,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
     ProjectionManager& proj_man = ProjectionManager::instance();
 
     Projection& projection = proj_man.currentProjection();
-    assert (projection.coordinateSystemsAdded());
+    traced_assert(projection.coordinateSystemsAdded());
 
     double ref_slant_range_m, ref_ground_range_m, ref_alt_m, ref_azm_rad,
         tst_slant_range_m, tst_ground_range_m, tst_alt_m, tst_azm_rad;
@@ -265,7 +265,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
     //               << " num_distances " << num_distances;
 
-    assert (num_no_ref <= num_pos);
+    traced_assert(num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
         loginf << "'" << name_ << "': utn " << target_data.utn_
@@ -274,8 +274,8 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionRadarAzimuth::evalu
                << " num_pos_calc_errors " << num_pos_calc_errors
                << " num_distances " << num_distances;
 
-    assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
-    assert (num_distances == num_comp_failed + num_comp_passed);
+    traced_assert(num_pos - num_no_ref == num_pos_inside + num_pos_outside);
+    traced_assert(num_distances == num_comp_failed + num_comp_passed);
 
     return make_shared<EvaluationRequirementResult::SinglePositionRadarAzimuth>(
                 "UTN:"+to_string(target_data.utn_), instance, sector_layer, target_data.utn_, &target_data,

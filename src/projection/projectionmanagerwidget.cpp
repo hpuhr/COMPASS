@@ -28,7 +28,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QVBoxLayout>
-#include <cassert>
+#include "traced_assert.h"
 
 
 
@@ -73,6 +73,6 @@ void ProjectionManagerWidget::selectedObjectParserSlot(const QString& name)
 {
     loginf << "name " << name.toStdString();
 
-    assert(projection_manager_.hasProjection(name.toStdString()));
+    traced_assert(projection_manager_.hasProjection(name.toStdString()));
     projection_manager_.currentProjectionName(name.toStdString());
 }

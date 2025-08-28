@@ -166,7 +166,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
         double distance;
 
         std::tie(transform_ok, distance) = ogr_geo2cart.distanceL2Cart(ref_pos->latitude_, ref_pos->longitude_, tst_pos.latitude_, tst_pos.longitude_);
-        assert(transform_ok);
+        traced_assert(transform_ok);
 
         if (std::isnan(distance) || std::isinf(distance))
         {
@@ -208,7 +208,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
     //               << " num_pos_ok " << num_pos_ok << " num_pos_nok " << num_pos_nok
     //               << " num_distances " << num_distances;
 
-    assert (num_no_ref <= num_pos);
+    traced_assert(num_no_ref <= num_pos);
 
     if (num_pos - num_no_ref != num_pos_inside + num_pos_outside)
         loginf << "'" << name_ << "': utn " << target_data.utn_
@@ -217,9 +217,9 @@ std::shared_ptr<EvaluationRequirementResult::Single> PositionDistanceRMS::evalua
                << " num_pos_calc_errors " << num_pos_calc_errors
                << " num_distances " << num_distances;
 
-    assert (num_pos - num_no_ref == num_pos_inside + num_pos_outside);
+    traced_assert(num_pos - num_no_ref == num_pos_inside + num_pos_outside);
 
-    assert (num_distances == num_comp_failed + num_comp_passed);
+    traced_assert(num_distances == num_comp_failed + num_comp_passed);
 
     //assert (details.size() == num_pos);
 

@@ -63,7 +63,7 @@ public:
     void setProcessMMCrossCorrMat(const Matrix& M) { setM(M); }
 
     const boost::optional<Matrix>& getB() const { return B_; }
-    Matrix& bMat() { assert(B_.has_value()); return B_.value(); }
+    Matrix& bMat() { traced_assert(B_.has_value()); return B_.value(); }
     const Matrix& getF() const { return F_; }
     Matrix& fMat() { return F_; }
     const Matrix& getH() const { return H_; }

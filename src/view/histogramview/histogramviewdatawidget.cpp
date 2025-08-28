@@ -64,10 +64,10 @@ HistogramViewDataWidget::HistogramViewDataWidget(HistogramViewWidget* view_widge
 :   VariableViewDataWidget(view_widget, view_widget->getView(), parent, f)
 {
     view_ = view_widget->getView();
-    assert(view_);
+    traced_assert(view_);
 
     data_source_ = view_->getDataSource();
-    assert(data_source_);
+    traced_assert(data_source_);
 
     main_layout_ = new QHBoxLayout();
     main_layout_->setMargin(0);
@@ -187,8 +187,8 @@ void HistogramViewDataWidget::updateFromVariables()
 {
     loginf << "start";
 
-    assert(view_->numVariables() == 1);
-    assert(view_->variable(0).hasVariable());
+    traced_assert(view_->numVariables() == 1);
+    traced_assert(view_->variable(0).hasVariable());
 
     auto& variable = view_->variable(0);
 
@@ -201,7 +201,7 @@ void HistogramViewDataWidget::updateFromVariables()
     dbContent::Variable*     data_var = variable.variablePtr();
     dbContent::MetaVariable* meta_var = variable.metaVariablePtr();
 
-    assert (meta_var || data_var);
+    traced_assert(meta_var || data_var);
 
     auto data_type = meta_var ? meta_var->dataType() : data_var->dataType();
 
@@ -213,17 +213,17 @@ void HistogramViewDataWidget::updateFromVariables()
         logerr << msg;                                                                                                                        \
         throw std::runtime_error(msg);
 
-    #define UnsupportedFunc(PDType, DType, Suffix) assert(true);
+    #define UnsupportedFunc(PDType, DType, Suffix) traced_assert(true);
 
     SwitchPropertyDataTypeNumeric(data_type, UpdateFunc, UnsupportedFunc, UnsupportedFunc, NotFoundFunc)
 
-    assert (histogram_generator_);
+    traced_assert(histogram_generator_);
     
     histogram_generator_->update();
     //histogram_generator_->print();
 
     HistogramGeneratorBuffer* generator = dynamic_cast<HistogramGeneratorBuffer*>(histogram_generator_.get());
-    assert(generator);
+    traced_assert(generator);
     
     //variable missing from buffer?
     if (generator->dataNotInBuffer())
@@ -290,7 +290,7 @@ QCursor HistogramViewDataWidget::currentCursor() const
  */
 QPixmap HistogramViewDataWidget::renderPixmap()
 {
-    assert (chart_view_);
+    traced_assert(chart_view_);
     return chart_view_->grab();
 }
 
@@ -353,7 +353,7 @@ ViewDataWidget::DrawState HistogramViewDataWidget::updateChart()
             chart_y_axis = new QValueAxis;
             chart_y_axis->setRange(0, (int)max_count);
         }
-        assert (chart_y_axis);
+        traced_assert(chart_y_axis);
 
         chart_y_axis->setTitleText(y_axis_name);
 
@@ -522,7 +522,7 @@ void HistogramViewDataWidget::invertSelectionSlot()
 
     for (auto& buf_it : viewData())
     {
-        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        traced_assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
@@ -545,7 +545,7 @@ void HistogramViewDataWidget::clearSelectionSlot()
 
     for (auto& buf_it : viewData())
     {
-        assert (buf_it.second->has<bool>(DBContent::selected_var.name()));
+        traced_assert(buf_it.second->has<bool>(DBContent::selected_var.name()));
         NullableVector<bool>& selected_vec = buf_it.second->get<bool>(DBContent::selected_var.name());
 
         for (unsigned int cnt=0; cnt < buf_it.second->size(); ++cnt)
@@ -663,7 +663,7 @@ void HistogramViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
             for (auto s : series)
             {
                 QBarSeries* bar_series = dynamic_cast<QBarSeries*>(s);
-                assert(bar_series);
+                traced_assert(bar_series);
 
                 nlohmann::json series_info;
                 series_info[ "name"     ] = bar_series->name().toStdString();

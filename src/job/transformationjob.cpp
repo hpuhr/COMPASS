@@ -35,7 +35,7 @@ TransformationJob::TransformationJob(JobOrderer* orderer, boost::function<void(J
 
     logdbg << "start";
 
-    assert(transformation);
+    traced_assert(transformation);
     transformation_ = transformation;
 }
 
@@ -47,14 +47,14 @@ TransformationJob::~TransformationJob() {}
 void TransformationJob::execute()
 {
     logdbg << "start";
-    assert(!done_);
-    assert(transformation_);
+    traced_assert(!done_);
+    traced_assert(transformation_);
     transformation_->doExecute();
     done_ = true;
 }
 
 Transformation* TransformationJob::getTransformation()
 {
-    assert(transformation_);
+    traced_assert(transformation_);
     return transformation_;
 }

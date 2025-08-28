@@ -116,9 +116,9 @@ void ReconstructorTarget::addTargetReports (const ReconstructorTarget& other,
 
         UNUSED_VARIABLE(ok);
 
-        // assert(stats.num_fresh == num_added); //TODO UGAGUGA
-        // assert(stats.num_updated >= num_added);
-        // assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
+        // traced_assert(stats.num_fresh == num_added); //TODO UGAGUGA
+        // traced_assert(stats.num_updated >= num_added);
+        // traced_assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
 
         addUpdateToGlobalStats(stats);
 
@@ -133,7 +133,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
 {
     bool do_debug = false;
 
-    assert (reconstructor_.target_reports_.count(rec_num));
+    traced_assert(reconstructor_.target_reports_.count(rec_num));
 
     const dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rec_num);
 
@@ -143,17 +143,17 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     if (tr.acad_ && acads_.size() && !acads_.count(*tr.acad_))
     {
         logerr << "ReconstructorTarget " << utn_ << ": addTargetReport: acad mismatch, target " << asStr() << " tr '" << tr.asStr() << "'";
-        assert (false);
+        traced_assert(false);
     }
 
 #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
-    assert (rec_num == tr.record_num_);
+    traced_assert(rec_num == tr.record_num_);
 
     // //assert (tr.in_current_slice_); // can be old one
     if (std::find(target_reports_.begin(), target_reports_.end(), rec_num) != target_reports_.end())
     {
         logerr << "utn " << utn_ << " tr " << tr.asStr() << " already added";
-        assert(false);
+        traced_assert(false);
     }
 #endif
 
@@ -163,7 +163,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
     //            logerr << "old max " << Time::toString(timestamp_max_)
     //                   << " tr ts " << Time::toString(tr.timestamp_);
 
-    //        assert (tr.timestamp_ >= timestamp_max_);
+    //        traced_assert(tr.timestamp_ >= timestamp_max_);
     //    }
 
     if (do_debug)
@@ -353,11 +353,11 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addTargetReport 
 
         if (reestimate && result != TargetReportAddResult::Skipped)
         {
-            assert(stats.num_replaced <= 2);
-            assert(stats.num_fresh <= 2);
-            assert(stats.num_replaced >= 0 || stats.num_fresh == 1);
-            assert(stats.num_updated >= 1);
-            assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
+            traced_assert(stats.num_replaced <= 2);
+            traced_assert(stats.num_fresh <= 2);
+            traced_assert(stats.num_replaced >= 0 || stats.num_fresh == 1);
+            traced_assert(stats.num_updated >= 1);
+            traced_assert(stats.num_failed + stats.num_skipped + stats.num_valid == stats.num_updated);
         }
 
         if (do_debug)
@@ -379,7 +379,7 @@ unsigned int ReconstructorTarget::numAssociated() const
 
 unsigned long ReconstructorTarget::lastAssociated() const
 {
-    assert (target_reports_.size());
+    traced_assert(target_reports_.size());
     return target_reports_.back();
 }
 
@@ -395,7 +395,7 @@ bool ReconstructorTarget::hasACAD (unsigned int ta) const
 
 bool ReconstructorTarget::hasAllOfACADs (std::set<unsigned int> tas) const
 {
-    assert (hasACAD() && tas.size());
+    traced_assert(hasACAD() && tas.size());
 
     for (auto other_ta : tas)
     {
@@ -408,7 +408,7 @@ bool ReconstructorTarget::hasAllOfACADs (std::set<unsigned int> tas) const
 
 bool ReconstructorTarget::hasAnyOfACADs (std::set<unsigned int> tas) const
 {
-    assert (hasACAD() && tas.size());
+    traced_assert(hasACAD() && tas.size());
 
     for (auto other_ta : tas)
     {
@@ -582,26 +582,26 @@ bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) 
     // all tr_timestamps_ smaller than timestamp
     if (it_upper == tr_timestamps_.end())
     {
-        assert (tr_timestamps_.rbegin()->first <= timestamp);
+        traced_assert(tr_timestamps_.rbegin()->first <= timestamp);
         return (timestamp - tr_timestamps_.rbegin()->first) < d_max;
     }
 
     // all tr_timestamps_ bigger than timestamp
     if (it_upper == tr_timestamps_.begin())
     {
-        assert (tr_timestamps_.begin()->first >= timestamp);
+        traced_assert(tr_timestamps_.begin()->first >= timestamp);
         return (tr_timestamps_.begin()->first - timestamp) < d_max;
     }
 
     // have lb_it which has >= timestamp
-    assert (it_upper->first >= timestamp);
+    traced_assert(it_upper->first >= timestamp);
 
     if (timestamp - it_upper->first < d_max)
         return true; // got one in d_max
 
     it_upper--;
 
-    assert (it_upper->first < timestamp);
+    traced_assert(it_upper->first < timestamp);
     return (timestamp - tr_timestamps_.begin()->first) < d_max;
 
     // save value
@@ -624,7 +624,7 @@ bool ReconstructorTarget::hasDataForTime (ptime timestamp, time_duration d_max) 
     // if (lb_it == tr_timestamps_.end())
     //     return false;
 
-    // assert (timestamp >= lb_it->first);
+    // traced_assert(timestamp >= lb_it->first);
 
     // if (timestamp - lb_it->first > d_max)
     //     return false; // too much time difference
@@ -691,7 +691,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         // all tr_timestamps_ smaller than timestamp
         if (it_upper == tr_timestamps_.end())
         {
-            assert(tr_timestamps_.rbegin()->first <= timestamp);
+            traced_assert(tr_timestamps_.rbegin()->first <= timestamp);
             if ((timestamp - tr_timestamps_.rbegin()->first) < d_max)
             {
                 it_lower = std::prev(tr_timestamps_.end());
@@ -702,7 +702,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         }
         else if (it_upper == tr_timestamps_.begin())  // all tr_timestamps_ bigger than timestamp
         {
-            assert(tr_timestamps_.begin()->first >= timestamp);
+            traced_assert(tr_timestamps_.begin()->first >= timestamp);
 
             if ((tr_timestamps_.begin()->first - timestamp) < d_max)
             {
@@ -714,7 +714,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         }
         else
         {
-            assert(it_upper->first >= timestamp);
+            traced_assert(it_upper->first >= timestamp);
 
             // too much time difference?
             if (it_upper->first - timestamp <= d_max)
@@ -724,7 +724,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             it_lower = it_upper;
             --it_lower;
 
-            assert(it_lower->first < timestamp);
+            traced_assert(it_lower->first < timestamp);
 
             // lower item too far away?
             if (timestamp - it_lower->first <= d_max)
@@ -743,12 +743,12 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         bool exists_one = range.first != range.second;
         bool exist_multiple = exists_one && std::next(range.first) != range.second;
 
-        assert (exists_one || exist_multiple);
+        traced_assert(exists_one || exist_multiple);
 
         // look for initial upper and lower datum
         if (exists_one && !exist_multiple)  // exists one
         {
-            assert(range.first != tr_timestamps_.end());
+            traced_assert(range.first != tr_timestamps_.end());
 
             // unique timestamp in map => start from this timestamp
             it_lower = range.first;
@@ -761,7 +761,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
         }
         else if (exist_multiple)
         {
-            assert(range.first != tr_timestamps_.end());
+            traced_assert(range.first != tr_timestamps_.end());
 
             // multiple timestamps in map => choose one depending on init mode
             std::multimap<boost::posix_time::ptime, unsigned long>::const_iterator it_start =
@@ -811,7 +811,7 @@ ReconstructorTarget::ReconstructorInfoPair ReconstructorTarget::dataFor (ptime t
             if (it_start == tr_timestamps_.end())
                 it_start = range.first;
 
-            assert(it_start != tr_timestamps_.end());
+            traced_assert(it_start != tr_timestamps_.end());
 
             it_lower = it_start;
             it_upper = it_start;
@@ -916,7 +916,7 @@ ReconstructorTarget::ReferencePair ReconstructorTarget::refDataFor (ptime timest
     if (lb_it == references_.end())
         return {nullptr, nullptr};
 
-    assert (lb_it->first >= timestamp);
+    traced_assert(lb_it->first >= timestamp);
 
     if (lb_it->first - timestamp > d_max)
         return {nullptr, nullptr}; // too much time difference
@@ -941,7 +941,7 @@ ReconstructorTarget::ReferencePair ReconstructorTarget::refDataFor (ptime timest
     if (lb_it == references_.end())
         return {nullptr, &references_.at(upper)};
 
-    assert (timestamp >= lb_it->first);
+    traced_assert(timestamp >= lb_it->first);
 
     if (timestamp - lb_it->first > d_max)
         return {nullptr, &references_.at(upper)}; // too much time difference
@@ -967,7 +967,7 @@ ReconstructorTarget::ReferencePair ReconstructorTarget::refDataFor (ptime timest
 //    if (lb_it == tr_timestamps_.end())
 //        return {{}, {}};
 
-//    assert (lb_it->first >= timestamp);
+//    traced_assert(lb_it->first >= timestamp);
 
 //    if (lb_it->first - timestamp > d_max)
 //        return {{}, {}}; // too much time difference
@@ -992,7 +992,7 @@ ReconstructorTarget::ReferencePair ReconstructorTarget::refDataFor (ptime timest
 //    if (lb_it == tr_timestamps_.end())
 //        return {{}, upper};
 
-//    assert (timestamp >= lb_it->first);
+//    traced_assert(timestamp >= lb_it->first);
 
 //    if (timestamp - lb_it->first > d_max)
 //        return {{}, upper}; // too much time difference
@@ -1028,7 +1028,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     logdbg2 << "d_t " << d_t;
 
-    assert (d_t >= 0);
+    traced_assert(d_t >= 0);
 
     if (pos1.latitude_ == pos2.latitude_
         && pos1.longitude_ == pos2.longitude_) // same pos
@@ -1068,7 +1068,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     float d_t2 = Time::partialSeconds(timestamp - lower->timestamp_);
     logdbg2 << "d_t2 " << d_t2;
 
-    assert (d_t2 >= 0);
+    traced_assert(d_t2 >= 0);
 
     x_pos = v_x * d_t2;
     y_pos = v_y * d_t2;
@@ -1146,7 +1146,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
 
     logdbg2 << "d_t " << d_t;
 
-    assert (d_t >= 0);
+    traced_assert(d_t >= 0);
 
     if (pos1.latitude_ == pos2.latitude_
         && pos1.longitude_ == pos2.longitude_) // same pos
@@ -1165,7 +1165,7 @@ std::pair<dbContent::targetReport::Position, bool> ReconstructorTarget::interpol
     float d_t2 = Time::partialSeconds(timestamp - lower_rec_num->timestamp_);
     logdbg2 << "d_t2 " << d_t2;
 
-    assert (d_t2 >= 0);
+    traced_assert(d_t2 >= 0);
 
     double int_lat = pos1.latitude_ + v_lat * d_t2;
     double int_long = pos1.longitude_ + v_long * d_t2;
@@ -1255,7 +1255,7 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
         logdbg2 << "d_t " << d_t;
 
-        assert (d_t >= 0);
+        traced_assert(d_t >= 0);
 
         if (pos1.latitude_ == pos2.latitude_
             && pos1.longitude_ == pos2.longitude_) // same pos
@@ -1276,7 +1276,7 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
         float d_t2 = Time::partialSeconds(timestamp - lower_ref->t);
         logdbg2 << "d_t2 " << d_t2;
 
-        assert (d_t2 >= 0);
+        traced_assert(d_t2 >= 0);
 
         double int_lat = pos1.latitude_ + v_lat * d_t2;
         double int_long = pos1.longitude_ + v_long * d_t2;
@@ -1298,14 +1298,14 @@ std::pair<boost::optional<dbContent::targetReport::Position>,
 
 //unsigned long  ReconstructorTarget::dataForExactTime (ptime timestamp) const
 //{
-//    assert (hasDataForExactTime(timestamp));
-//    assert (target_reports_.size() > tr_timestamps_.at(timestamp));
+//    traced_assert(hasDataForExactTime(timestamp));
+//    traced_assert(target_reports_.size() > tr_timestamps_.at(timestamp));
 //    return *target_reports_.at(tr_timestamps_.at(timestamp));
 //}
 
 //dbContent::targetReport::Position ReconstructorTarget::posForExactTime (ptime timestamp) const
 //{
-//    assert (hasDataForExactTime(timestamp));
+//    traced_assert(hasDataForExactTime(timestamp));
 
 //    TargetReport& tr = dataForExactTime(timestamp);
 
@@ -1337,7 +1337,7 @@ bool ReconstructorTarget::hasPositionFor (unsigned long rec_num) const
 
 dbContent::targetReport::Position ReconstructorTarget::positionFor (unsigned long rec_num) const
 {
-    assert (hasPositionFor(rec_num));
+    traced_assert(hasPositionFor(rec_num));
     return *dataFor(rec_num).position();
 }
 
@@ -1355,7 +1355,7 @@ bool ReconstructorTarget::timeOverlaps (const ReconstructorTarget& other) const
     if (!target_reports_.size() || !other.target_reports_.size())
         return false;
 
-    assert (!timestamp_max_.is_not_a_date_time() && !timestamp_min_.is_not_a_date_time());
+    traced_assert(!timestamp_max_.is_not_a_date_time() && !timestamp_min_.is_not_a_date_time());
 
     //a.start < b.end && b.start < a.end;
     return timestamp_min_ < other.timestamp_max_ && other.timestamp_min_ < timestamp_max_;
@@ -1376,7 +1376,7 @@ float ReconstructorTarget::probTimeOverlaps (const ReconstructorTarget& other) c
 
     float targets_min_duration = min(duration(), other.duration());
 
-    assert (overlap_duration <= targets_min_duration);
+    traced_assert(overlap_duration <= targets_min_duration);
 
     if (targets_min_duration == 0)
         return 0.0;
@@ -1419,7 +1419,7 @@ ReconstructorTarget::compareModeACodes (
             different.push_back(tr.record_num_);
     }
 
-    assert (target_reports_.size() == unknown.size()+same.size()+different.size());
+    traced_assert(target_reports_.size() == unknown.size()+same.size()+different.size());
 
     return std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>>(unknown, same, different);
 }
@@ -1572,7 +1572,7 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
 
     for (auto rn_it : rec_nums)
     {
-        assert (hasDataFor(rn_it));
+        traced_assert(hasDataFor(rn_it));
         dbContent::targetReport::ReconstructorInfo& tr = dataFor(rn_it);
 
         cmp_res = other.compareModeCCode(tr, max_time_diff, max_alt_diff, do_debug);
@@ -1591,7 +1591,7 @@ std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>> 
             different.push_back(tr.record_num_);
     }
 
-    assert (rec_nums.size() == unknown.size()+same.size()+different.size());
+    traced_assert(rec_nums.size() == unknown.size()+same.size()+different.size());
 
     return std::tuple<vector<unsigned long>, vector<unsigned long>, vector<unsigned long>>(unknown, same, different);
 }
@@ -1649,7 +1649,7 @@ boost::optional<float> ReconstructorTarget::modeCCodeAt (boost::posix_time::ptim
         || (!lower_mc_usable && upper_mc_usable)) // only 1 usable
     {
         dbContent::targetReport::ReconstructorInfo& ref1 = lower_mc_usable ? *lower_tr : *upper_tr;
-        assert (ref1.barometric_altitude_);
+        traced_assert(ref1.barometric_altitude_);
 
         return ref1.barometric_altitude_->altitude_;
     }
@@ -1695,7 +1695,7 @@ boost::optional<bool> ReconstructorTarget::groundBitAt (boost::posix_time::ptime
         || (!lower_has_val && upper_has_val)) // only 1 usable
     {
         dbContent::targetReport::ReconstructorInfo& ref1 = lower_has_val ? *lower_tr : *upper_tr;
-        assert (ref1.ground_bit_);
+        traced_assert(ref1.ground_bit_);
 
         return *ref1.ground_bit_;
     }
@@ -1737,7 +1737,7 @@ boost::optional<double> ReconstructorTarget::groundSpeedAt (boost::posix_time::p
         || (!lower_has_val && upper_has_val)) // only 1 usable
     {
         dbContent::targetReport::ReconstructorInfo& ref1 = lower_has_val ? *lower_tr : *upper_tr;
-        assert (ref1.velocity_);
+        traced_assert(ref1.velocity_);
 
         return ref1.velocity_->speed_;
     }
@@ -1746,8 +1746,8 @@ boost::optional<double> ReconstructorTarget::groundSpeedAt (boost::posix_time::p
     dbContent::targetReport::ReconstructorInfo& ref1 = *lower_tr;
     dbContent::targetReport::ReconstructorInfo& ref2 = *upper_tr;
 
-    assert (ref1.velocity_.has_value());
-    assert (ref2.velocity_.has_value());
+    traced_assert(ref1.velocity_.has_value());
+    traced_assert(ref2.velocity_.has_value());
 
     if ((ref1.timestamp_ - timestamp).total_milliseconds() <= (ref2.timestamp_ - timestamp).total_milliseconds())
         return ref1.velocity_->speed_;
@@ -1826,7 +1826,7 @@ ComparisonResult ReconstructorTarget::compareModeCCode (
                    << " only 1 usable";
 
         dbContent::targetReport::ReconstructorInfo& ref1 = lower_mc_usable ? *lower_tr : *upper_tr;
-        assert (ref1.barometric_altitude_);
+        traced_assert(ref1.barometric_altitude_);
 
         if (!tr.barometric_altitude_.has_value())
         {
@@ -2107,7 +2107,7 @@ void ReconstructorTarget::updateCounts()
 {
     for (auto& rn_it : target_reports_)
     {
-        assert (reconstructor_.target_reports_.count(rn_it));
+        traced_assert(reconstructor_.target_reports_.count(rn_it));
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(rn_it);
 
         if (tr.timestamp_ >= reconstructor_.currentSlice().write_before_time_) // tr.in_current_slice_
@@ -2280,7 +2280,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
     unsigned int ref_sac = reconstructor_.settings().ds_sac;
     unsigned int ref_sic = reconstructor_.settings().ds_sic;
     unsigned int ref_ds_id = Number::dsIdFrom(ref_sac, ref_sic);
-    assert (reconstructor_.settings().ds_line >= 0 && reconstructor_.settings().ds_line <= 3);
+    traced_assert(reconstructor_.settings().ds_line >= 0 && reconstructor_.settings().ds_line <= 3);
 
     double speed_ms, bearing_rad, xy_cov;
     double ax, ay, bearing_new_rad, turnrate_rad, a_ms2;
@@ -2309,7 +2309,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
             continue;
 
         if (!ts_prev_.is_not_a_date_time())
-            assert (ref_it.second.t > ts_prev_);
+            traced_assert(ref_it.second.t > ts_prev_);
 
         // final filtering using max stddev
         if (ref_calc_settings.filter_references_max_stddev_ &&
@@ -2417,7 +2417,7 @@ std::shared_ptr<Buffer> ReconstructorTarget::getReferenceBuffer()
                 while (turnrate_rad < -M_PI)
                     turnrate_rad += 2*M_PI;
 
-                assert (fabs(turnrate_rad) <= M_PI);
+                traced_assert(fabs(turnrate_rad) <= M_PI);
 
                 // TRANS ACC
                 if (fabs(turnrate_rad) < M_PI/20) // like 0
@@ -2588,7 +2588,7 @@ void ReconstructorTarget::removeOutdatedTargetReports()
         if (reconstructor_.target_reports_.count(ts_it.second))
         {
 #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
-            assert (!reconstructor_.target_reports_.at(ts_it.second).in_current_slice_);
+            traced_assert(!reconstructor_.target_reports_.at(ts_it.second).in_current_slice_);
 #endif
 
             addTargetReport(ts_it.second, false, false);
@@ -2612,10 +2612,10 @@ void ReconstructorTarget::removeTargetReportsLaterOrEqualThan(boost::posix_time:
     for (auto& ts_it : tmp_tr_timestamps)
     {
 #if DO_RECONSTRUCTOR_PEDANTIC_CHECKING
-        assert (reconstructor_.target_reports_.count(ts_it.second));
+        traced_assert(reconstructor_.target_reports_.count(ts_it.second));
 
         dbContent::targetReport::ReconstructorInfo& tr = reconstructor_.target_reports_.at(ts_it.second);
-        assert (tr.timestamp_ == ts_it.first);
+        traced_assert(tr.timestamp_ == ts_it.first);
 #endif
 
         if (ts_it.first < ts) // add if older than ts
@@ -2700,7 +2700,7 @@ bool ReconstructorTarget::checkChainBeforeAdd(const dbContent::targetReport::Rec
                                               int idx) const
 {
     unsigned long rec_num  = chain()->getUpdate(idx).mm_id; // UGA not unsigned int
-    assert (reconstructor_.target_reports_.count(rec_num));
+    traced_assert(reconstructor_.target_reports_.count(rec_num));
     const auto&  tr_chain = reconstructor_.target_reports_.at(rec_num);
 
     return compareChainUpdates(tr, tr_chain);
@@ -2727,7 +2727,7 @@ ReconstructorTarget::TargetReportAddResult ReconstructorTarget::addToTracker(con
 {
     bool do_debug = false;
 
-    assert(chain());
+    traced_assert(chain());
 
     if (stats)
         ++stats->num_checked;
@@ -2818,7 +2818,7 @@ bool ReconstructorTarget::predict(reconstruction::Measurement* mm,
                                   const boost::posix_time::ptime& ts,
                                   reconstruction::PredictionStats* stats) const
 {
-    assert(chain());
+    traced_assert(chain());
 
     bool ok = false;
 
@@ -2835,7 +2835,7 @@ bool ReconstructorTarget::predict(reconstruction::Measurement* mm,
         ReconstructorTarget::addPredictionToGlobalStats(pstats);
     }
     
-    assert(ok);
+    traced_assert(ok);
 
     return ok;
 }
@@ -2847,10 +2847,10 @@ bool ReconstructorTarget::predictMT(reconstruction::Measurement* mm,
                                     unsigned int thread_id,
                                     reconstruction::PredictionStats* stats) const
 {
-    assert(chain());
+    traced_assert(chain());
 
     bool ok = chain()->predictMT(mm, gp_state, gp_state_mm, ts, reconstructor_.chainPredictors(), thread_id, stats);
-    assert(ok);
+    traced_assert(ok);
 
     return ok;
 }
@@ -2859,7 +2859,7 @@ bool ReconstructorTarget::getChainState(reconstruction::Measurement& mm,
                                         const boost::posix_time::ptime& ts,
                                         reconstruction::PredictionStats* stats) const
 {
-    assert(chain());
+    traced_assert(chain());
 
     bool ok = false;
 
@@ -2876,14 +2876,14 @@ bool ReconstructorTarget::getChainState(reconstruction::Measurement& mm,
         ReconstructorTarget::addPredictionToGlobalStats(pstats);
     }
     
-    assert(ok);
+    traced_assert(ok);
 
     return ok;
 }
 
 const reconstruction::KalmanChain& ReconstructorTarget::getChain() const
 {
-    assert(chain());
+    traced_assert(chain());
 
     return *chain();
 }
@@ -2895,7 +2895,7 @@ const reconstruction::KalmanChain& ReconstructorTarget::getChain() const
 
 //std::set<unsigned int> ReconstructorTarget::getADSBMOPSVersions()
 //{
-//    assert (hasADSBMOPSVersion());
+//    traced_assert(hasADSBMOPSVersion());
 
 //    return mops_versions_;
 //}

@@ -237,7 +237,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
     {
         //map to ref pos
         auto ref_pos = target_data.mappedRefPos(id_tst);
-        assert (ref_pos.has_value());
+        traced_assert(ref_pos.has_value());
 
         ref_updates = { ref_pos.value() };
     };
@@ -260,7 +260,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
         if (!pos1.has_value()) pos1 = target_data.mappedRefPos(id1);
 
         //interpolation of ref should always be possible, since the period is inside a valid reference period
-        assert(pos0.has_value() && pos1.has_value());
+        traced_assert(pos0.has_value() && pos1.has_value());
 
         //retrieve all ref updates inside the interval
         auto positions = target_data.refChain().positionsBetween(id0.timestamp(), 
@@ -357,7 +357,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
 
         if (period_max_index_before_ts != -1)
         {
-            assert (period_max_index_before_ts >= 0);
+            traced_assert(period_max_index_before_ts >= 0);
 
             for (unsigned int period_cnt=0; period_cnt <= static_cast<unsigned int>(period_max_index_before_ts); ++period_cnt)
             {
@@ -373,7 +373,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
                         tst_time_found = true;
                     }
 
-                    assert (last_period_ts_end >= last_period_ts);
+                    traced_assert(last_period_ts_end >= last_period_ts);
 
                     t_diff = Time::partialSeconds(last_period_ts_end - last_period_ts);
 
@@ -532,7 +532,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
             continue;
         }
 
-        assert (timestamp >= last_ts);
+        traced_assert(timestamp >= last_ts);
         t_diff = Time::partialSeconds(timestamp - last_ts);
 
         if (debug)
@@ -592,7 +592,7 @@ std::shared_ptr<EvaluationRequirementResult::Single> Detection::evaluate (const 
                 tst_time_found = true;
             }
 
-            assert (last_period_end >= last_period_tod);
+            traced_assert(last_period_end >= last_period_tod);
 
             t_diff = Time::partialSeconds(last_period_end - last_period_tod);
 
@@ -666,7 +666,7 @@ bool Detection::isMiss (float d_tod) const
 */
 unsigned int Detection::getNumMisses(float d_tod) const
 {
-    assert (isMiss(d_tod));
+    traced_assert(isMiss(d_tod));
 
     if (use_miss_tolerance_)
         d_tod -= miss_tolerance_s_;
