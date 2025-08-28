@@ -146,12 +146,12 @@ void ViewManager::close()
         //containers_.erase(first_it);  // TODO CAUSES SEGFAULT, FIX THIS
     }
 
-    if (view_points_widget_)
-    {
+    // if (view_points_widget_)
+    // {
         //view_points_widget_->tableModel()->saveViewPoints();
-        delete view_points_widget_;
+        //delete view_points_widget_;
         view_points_widget_ = nullptr;
-    }
+    //}
 
     view_points_report_gen_ = nullptr;
 
@@ -165,6 +165,8 @@ ViewManager::~ViewManager()
     assert(!container_widgets_.size());
     assert(!containers_.size());
     assert(!initialized_);
+
+    view_points_widget_ = nullptr;
 }
 
 void ViewManager::generateSubConfigurable(const std::string& class_id,
