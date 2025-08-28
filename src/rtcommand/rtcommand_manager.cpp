@@ -63,9 +63,7 @@ RTCommandManager::~RTCommandManager()
  */
 void RTCommandManager::run()
 {
-    loginf << "start";
-
-    loginf << "io context";
+    loginf << "starting io context";
 
     boost::asio::io_context io_context;
 
@@ -88,7 +86,7 @@ void RTCommandManager::run()
     {
         if (stop_requested_) //  && !hasAnyJobs()
         {
-            loginf << "RTCommandManager: run: stop requested, breaking";
+            loginf << "stop requested, breaking";
             break;
         }
 
@@ -199,7 +197,7 @@ void RTCommandManager::run()
 
 void RTCommandManager::startCommandProcessing()
 {
-    loginf << "RTCommandManager: startCommandProcessing";
+    loginf << "start";
     started_ = true;
 }
 
@@ -260,12 +258,12 @@ void RTCommandManager::addCommandFromConsole(const std::string& cmd_str)
 
     if (info.error.hasError())
     {
-        logerr << "RTCommandManager:: addCommandFromConsole: command '" 
-         << cmd_str << "' resulted in error "
-         << rtcommand::RTCommandResponse::errCode2String(info.error.code)
-         << ": '" << info.error.message << "', aborting";
+        logerr << "command '" << cmd_str << "' resulted in error "
+               << rtcommand::RTCommandResponse::errCode2String(info.error.code) 
+               << ": '" << info.error.message << "', aborting";
 
-         throw runtime_error("RTCommandManager: addCommandFromConsole: incorrect command from console");
+        throw runtime_error(
+            "RTCommandManager: addCommandFromConsole: incorrect command from console");
     }
 }
 

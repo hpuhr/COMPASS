@@ -615,7 +615,7 @@ bool Client::run ()
     }
     catch (exception& e)
     {
-        logerr << "COMPASSClient: error: " << e.what();
+        logerr << "error: " << e.what();
         return false;
     }
 }
