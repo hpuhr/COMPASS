@@ -217,7 +217,7 @@ protected:
     COMPASS& compass_;
 
     std::unique_ptr<dbContent::TargetModel> target_model_;
-    std::unique_ptr<dbContent::TargetListWidget> target_list_widget_;
+    dbContent::TargetListWidget* target_list_widget_{nullptr}; // deleted by qt
 
     bool has_associations_{false};
     std::string associations_id_;

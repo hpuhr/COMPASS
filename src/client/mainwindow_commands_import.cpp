@@ -170,8 +170,19 @@ rtcommand::IsValid  RTCommandImportASTERIXFile::valid() const
 
     if (date_str_.size())
     {
-        boost::posix_time::ptime date = Time::fromDateString(date_str_);
-        CHECK_RTCOMMAND_INVALID_CONDITION(date.is_not_a_date_time(), "Given date '"+date_str_+"' invalid")
+        try
+        {
+            boost::posix_time::ptime date = Time::fromDateString(date_str_);
+            CHECK_RTCOMMAND_INVALID_CONDITION(date.is_not_a_date_time(), "Given date '"+date_str_+"' invalid")
+        }
+        catch (const boost::bad_lexical_cast& e)
+        {
+            CHECK_RTCOMMAND_INVALID_CONDITION(true, "Given date '"+date_str_+"' has invalid format: " + string(e.what()))
+        }
+        catch (const std::exception& e)
+        {
+            CHECK_RTCOMMAND_INVALID_CONDITION(true, "Given date '"+date_str_+"' parsing failed: " + string(e.what()))
+        }
     }
 
     if (time_offset_str_.size())
@@ -354,8 +365,19 @@ rtcommand::IsValid RTCommandImportASTERIXFiles::valid() const
 
     if (date_str_.size())
     {
-        boost::posix_time::ptime date = Time::fromDateString(date_str_);
-        CHECK_RTCOMMAND_INVALID_CONDITION(date.is_not_a_date_time(), "Given date '"+date_str_+"' invalid")
+        try
+        {
+            boost::posix_time::ptime date = Time::fromDateString(date_str_);
+            CHECK_RTCOMMAND_INVALID_CONDITION(date.is_not_a_date_time(), "Given date '"+date_str_+"' invalid")
+        }
+        catch (const boost::bad_lexical_cast& e)
+        {
+            CHECK_RTCOMMAND_INVALID_CONDITION(true, "Given date '"+date_str_+"' has invalid format: " + string(e.what()))
+        }
+        catch (const std::exception& e)
+        {
+            CHECK_RTCOMMAND_INVALID_CONDITION(true, "Given date '"+date_str_+"' parsing failed: " + string(e.what()))
+        }
     }
 
     if (time_offset_str_.size())

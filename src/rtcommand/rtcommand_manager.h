@@ -76,6 +76,7 @@ public:
 
     virtual ~RTCommandManager();
 
+    void startCommandProcessing(); // only process command after start has been called
     void shutdown();
 
     static RTCommandManager& instance()
@@ -85,6 +86,7 @@ public:
     }
 
     rtcommand::IssueInfo addCommand(const std::string& cmd_str, CommandId* id = nullptr);
+    void addCommandFromConsole(const std::string& cmd_str); // throws on failure
 
     void clearBacklog();
     std::vector<std::string> commandBacklog() const;
@@ -94,8 +96,9 @@ signals:
     void shellCommandProcessed(const QString& msg, const QString& data, bool is_error);
 
 protected:
-    volatile bool stop_requested_;
-    volatile bool stopped_;
+    volatile bool started_ {false};
+    volatile bool stop_requested_ {false};
+    volatile bool stopped_ {false};
 
     std::unique_ptr<TCPServer> server_;
     unsigned int port_num_ {27960};
