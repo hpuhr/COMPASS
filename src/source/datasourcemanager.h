@@ -173,7 +173,7 @@ class DataSourceManager : public QObject, public Configurable
     std::vector<std::unique_ptr<dbContent::DBDataSource>> db_data_sources_;
     std::vector<unsigned int> ds_ids_all_; // both from config and db, vector to have order
 
-    std::unique_ptr<DataSourcesWidget> load_widget_;
+    DataSourcesWidget* load_widget_{nullptr}; // deleted by qt
 
     std::unique_ptr<DataSourcesConfigurationDialog> config_dialog_;
 

@@ -1657,10 +1657,10 @@ dbContent::TargetListWidget* DBContentManager::targetListWidget()
     if (!target_list_widget_)
     {
         assert (target_model_);
-        target_list_widget_.reset (new dbContent::TargetListWidget(*target_model_, *this));
+        target_list_widget_ = new dbContent::TargetListWidget(*target_model_, *this);
     }
 
-    return target_list_widget_.get();
+    return target_list_widget_;
 }
 
 /**

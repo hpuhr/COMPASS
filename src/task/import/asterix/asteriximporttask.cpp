@@ -1524,7 +1524,7 @@ void ASTERIXImportTask::checkAllDone()
         loginf << "import done after "
                << String::timeStringFromDouble(time_diff.total_milliseconds() / 1000.0, false);
 
-        int records_per_second = num_records_ / time_diff.total_seconds();
+        int records_per_second = num_records_ / std::max(1.0, time_diff.total_milliseconds() / 1000.0);
 
         COMPASS::instance().logInfo("ASTERIX Import")
             << " finished after "

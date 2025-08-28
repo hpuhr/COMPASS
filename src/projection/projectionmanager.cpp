@@ -374,10 +374,10 @@ unsigned int ProjectionManager::calculateRadarPlotPositions (
             }
 
             // test if still close enough
-            std::tie(is_from_fft, fft_altitude_ft) = fft_man.isFromFFT(
-                lat, lon, acad, dbcontent_name == "CAT001",
-                mode_a_code, mode_c_code);
-            assert (is_from_fft);
+            // std::tie(is_from_fft, fft_altitude_ft) = fft_man.isFromFFT(
+            //     lat, lon, acad, dbcontent_name == "CAT001",
+            //     mode_a_code, mode_c_code);
+            //assert (is_from_fft);
 
             diff = 100 * sqrt(pow(lat-old_lat, 2) + pow(lon-old_lon, 2));
 

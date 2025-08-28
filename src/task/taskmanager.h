@@ -162,7 +162,7 @@ protected:
 
     std::map<std::string, Task*> tasks_;
 
-    std::unique_ptr<TaskResultsWidget> widget_;
+    TaskResultsWidget* widget_{nullptr}; // deleted by qt
 
     std::map<unsigned int, std::shared_ptr<TaskResult>> results_; // id -> result
     std::shared_ptr<TaskResult> current_result_;

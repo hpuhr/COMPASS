@@ -96,7 +96,12 @@ COMPASS::COMPASS()
     registerParameter("disable_confirm_reset_views", &disable_confirm_reset_views_, false);
 
     registerParameter("min_app_width", &min_app_width_, min_app_width_);
+    if (min_app_width_ > 1600)
+        min_app_width_ = 1600;
+    
     registerParameter("min_app_height", &min_app_height_, min_app_height_);
+    if (min_app_height_ > 800)
+        min_app_height_ = 800;
 
     registerParameter("app_font_scale", &app_font_scale_, app_font_scale_);
 
