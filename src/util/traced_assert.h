@@ -17,68 +17,21 @@
 
 #pragma once
 
-#define BOOST_ENABLE_ASSERT_HANDLER
-#include <boost/assert.hpp>
 #include <boost/stacktrace.hpp>
-
-#include "msghandler.h"
-
-#include <cstdlib>
+#include <boost/current_function.hpp>
 
 #define traced_assert(expr) \
-    (BOOST_LIKELY(!!(expr))? ((void)0): ::boost::assertion_failed(#expr, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__, boost::stacktrace::stacktrace(), false), ::std::abort())
+    (BOOST_LIKELY(!!(expr))? ((void)0): (::compass_assert::assertion_failed(#expr, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__, boost::stacktrace::stacktrace(), false), ::std::abort()))
 
 #define traced_assert_msg(expr, msg) \
-    (BOOST_LIKELY(!!(expr))? ((void)0): ::boost::assertion_failed(msg, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__, boost::stacktrace::stacktrace(), true), ::std::abort())
+    (BOOST_LIKELY(!!(expr))? ((void)0): (::compass_assert::assertion_failed(msg, BOOST_CURRENT_FUNCTION, __FILE__, __LINE__, boost::stacktrace::stacktrace(), true), ::std::abort()))
 
-namespace boost
+namespace compass_assert
 {
-    inline void assertion_failed(char const * expr, 
+    extern void assertion_failed(char const * expr, 
                                  char const * function,
                                  char const * file, 
                                  long line,
                                  const boost::stacktrace::stacktrace& stack_trace,
-                                 bool expr_is_message)
-    {
-        std::stringstream ss;
-        ss << stack_trace;
-
-        //compile message
-        msghandler::Message msg;
-        msg.severity    = msghandler::Severity::Abort;
-        msg.content     = expr_is_message ? std::string(expr) : "Assertion '" + std::string(expr) + "' failed";
-        msg.file        = std::string(file);
-        msg.line        = (int)line;
-        msg.stack_trace = ss.str();
-        msg.user_level  = false;
-
-        //log assert msg
-        msghandler::MessageHandler::log(logerr, msg);
-
-        //then abort
-        std::abort();
-    }
-
-    inline void assertion_failed(char const * expr, 
-                                 char const * function,
-                                 char const * file, 
-                                 long line)
-    {
-        std::stringstream ss;
-
-        //compile message
-        msghandler::Message msg;
-        msg.severity    = msghandler::Severity::Abort;
-        msg.content     = "Assertion '" + std::string(expr) + "' failed";
-        msg.file        = std::string(file);
-        msg.line        = (int)line;
-        msg.stack_trace = ss.str();
-        msg.user_level  = false;
-
-        //log assert msg
-        msghandler::MessageHandler::log(logerr, msg);
-
-        //then abort
-        std::abort();
-    }
+                                 bool expr_is_message);
 }

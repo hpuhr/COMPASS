@@ -50,6 +50,7 @@ target_sources(compass
         "${CMAKE_CURRENT_LIST_DIR}/parquettools.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/logmodel.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/timewindow.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/traced_assert.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/msghandler.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/accuracy.cpp"
 )
