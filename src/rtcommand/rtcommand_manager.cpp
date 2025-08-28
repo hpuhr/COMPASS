@@ -108,8 +108,8 @@ void RTCommandManager::run()
                     auto issue_info = addCommand(cmd_str, Source::Server);
                     rtcommand::RTCommandResponse cmd_response(issue_info);
 
-                if (issue_info.issued)
-                    loginf << "added command " << cmd_str << " to queue, size " << command_queue_.size();
+                    if (issue_info.issued)
+                        loginf << "added command " << cmd_str << " to queue, size " << command_queue_.size();
 
                     server_->sendStrData(cmd_response.toJSONString());
                 }
@@ -144,8 +144,8 @@ void RTCommandManager::run()
 
                 current_result.wait();
 
-            std::vector<rtcommand::RTCommandResult> results = current_result.get();
-            traced_assert(results.size() == 1);
+                std::vector<rtcommand::RTCommandResult> results = current_result.get();
+                traced_assert(results.size() == 1);
 
                 rtcommand::RTCommandResult cmd_result = results.at(0);
                 rtcommand::RTCommandResponse cmd_response(cmd_result);
@@ -154,27 +154,28 @@ void RTCommandManager::run()
                 loginf << "response = ";
                 loginf << cmd_response.toJSONString();
 
-            if (source == Source::Application)
-            {
-                std::string msg  = cmd_response.errorToString();
-                std::string data = cmd_response.stringifiedReply();
-                emit commandProcessed(id, msg, data, cmd_response.error.hasError());
-            }
-            else if (source == Source::Shell)
-            {
-                std::string msg  = cmd_response.errorToString();
-                std::string data = cmd_response.stringifiedReply();
-                emit shellCommandProcessed(QString::fromStdString(msg), 
-                                           QString::fromStdString(data), 
-                                           cmd_response.error.hasError());
-            }
-            else if (source == Source::Server)
-            {
-                if (open_port_ && server_->hasSession())
+                if (source == Source::Application)
                 {
-                    traced_assert(server_);
-                    //@TODO: get state from command result and compile reply
-                    server_->sendStrData(cmd_response.toJSONString());
+                    std::string msg  = cmd_response.errorToString();
+                    std::string data = cmd_response.stringifiedReply();
+                    emit commandProcessed(id, msg, data, cmd_response.error.hasError());
+                }
+                else if (source == Source::Shell)
+                {
+                    std::string msg  = cmd_response.errorToString();
+                    std::string data = cmd_response.stringifiedReply();
+                    emit shellCommandProcessed(QString::fromStdString(msg), 
+                                            QString::fromStdString(data), 
+                                            cmd_response.error.hasError());
+                }
+                else if (source == Source::Server)
+                {
+                    if (open_port_ && server_->hasSession())
+                    {
+                        traced_assert(server_);
+                        //@TODO: get state from command result and compile reply
+                        server_->sendStrData(cmd_response.toJSONString());
+                    }
                 }
             }
         }
@@ -235,8 +236,6 @@ void RTCommandManager::shutdown()
 
         msleep(1000);
     }
-
-    started_ = false;
 
     started_ = false;
 

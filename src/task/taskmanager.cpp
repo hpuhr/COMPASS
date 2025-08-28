@@ -366,7 +366,7 @@ TaskResultsWidget* TaskManager::widget()
         widget_ =new TaskResultsWidget(*this);
 
     traced_assert(widget_);
-    return widget_.get();
+    return widget_;
 }
 
 /**
