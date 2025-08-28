@@ -44,8 +44,7 @@ const std::string RTCommandManager::PingName = "ping";
 /**
  */
 RTCommandManager::RTCommandManager()
-    : Configurable("RTCommandManager", "RTCommandManager0", 0, "rtcommand.json"),
-      stop_requested_(false), stopped_(false)
+    : Configurable("RTCommandManager", "RTCommandManager0", 0, "rtcommand.json")
 {
     loginf << "start";
 
@@ -64,9 +63,7 @@ RTCommandManager::~RTCommandManager()
  */
 void RTCommandManager::run()
 {
-    loginf << "start";
-
-    loginf << "io context";
+    loginf << "starting io context";
 
     boost::asio::io_context io_context;
 
@@ -88,66 +85,74 @@ void RTCommandManager::run()
     while (1)
     {
         if (stop_requested_) //  && !hasAnyJobs()
-            break;
-
-        if (open_port_ && server_ && server_->hasSession() && server_->hasStrData())
         {
-            logdbg << "getting commands";
+            loginf << "stop requested, breaking";
+            break;
+        }
 
-            std::vector<std::string> cmds = server_->getStrData();
+        if (started_)
+        {
+            if (open_port_ && server_ && server_->hasSession() && server_->hasStrData())
+            {
+                logdbg << "getting commands";
 
-            loginf << "got " << cmds.size() << " commands '"
+
+                std::vector<std::string> cmds = server_->getStrData();
+
+                loginf << "got " << cmds.size() << " commands '"
                   << String::compress(cmds, ';') << "'";
 
-            // create commands from strings
-            for (const auto& cmd_str : cmds)
-            {
-                auto issue_info = addCommand(cmd_str, Source::Server);
-                rtcommand::RTCommandResponse cmd_response(issue_info);
+                // create commands from strings
+                for (const auto& cmd_str : cmds)
+                {
+                    auto issue_info = addCommand(cmd_str, Source::Server);
+                    rtcommand::RTCommandResponse cmd_response(issue_info);
 
                 if (issue_info.issued)
                     loginf << "added command " << cmd_str << " to queue, size " << command_queue_.size();
 
-                server_->sendStrData(cmd_response.toJSONString());
+                    server_->sendStrData(cmd_response.toJSONString());
+                }
             }
-        }
 
-        // do commands
+            // do commands
 
-        if (command_queue_.size())
-        {
-            loginf << "issuing command";
 
-            rtcommand::RTCommandRunner& cmd_runner = COMPASS::instance().rtCmdRunner();
-
-            std::future<std::vector<rtcommand::RTCommandResult>> current_result;
-
-            Source    source;
-            CommandId id;
+            if (command_queue_.size())
             {
-                boost::mutex::scoped_lock lock(command_queue_mutex_);
+                loginf << "issuing command";
 
-                auto cmd = std::move(command_queue_.front());
-                source = cmd.source;
-                id     = cmd.id;
+                rtcommand::RTCommandRunner& cmd_runner = COMPASS::instance().rtCmdRunner();
 
-                current_result = cmd_runner.runCommand(move(cmd.command));
-                command_queue_.pop();
-            }
+                std::future<std::vector<rtcommand::RTCommandResult>> current_result;
 
-            loginf << "waiting for result";
+                Source source;
+                CommandId id;
+                {
+                    boost::mutex::scoped_lock lock(command_queue_mutex_);
 
-            current_result.wait();
+                    auto cmd = std::move(command_queue_.front());
+                    source = cmd.source;
+                    id = cmd.id;
+
+                    current_result = cmd_runner.runCommand(move(cmd.command));
+                    command_queue_.pop();
+                }
+
+ 
+                 loginf << "waiting for result";
+
+                current_result.wait();
 
             std::vector<rtcommand::RTCommandResult> results = current_result.get();
             traced_assert(results.size() == 1);
 
-            rtcommand::RTCommandResult   cmd_result = results.at(0);
-            rtcommand::RTCommandResponse cmd_response(cmd_result);
+                rtcommand::RTCommandResult cmd_result = results.at(0);
+                rtcommand::RTCommandResponse cmd_response(cmd_result);
 
-            loginf << "result wait done, success " << cmd_response.isOk();
-            loginf << "response = ";
-            loginf << cmd_response.toJSONString();
+                loginf << "result wait done, success " << cmd_response.isOk();
+                loginf << "response = ";
+                loginf << cmd_response.toJSONString();
 
             if (source == Source::Application)
             {
@@ -189,6 +194,12 @@ void RTCommandManager::run()
     loginf << "stopped";
 }
 
+void RTCommandManager::startCommandProcessing()
+{
+    loginf << "start";
+    started_ = true;
+}
+
 /**
  */
 void RTCommandManager::shutdown()
@@ -196,6 +207,9 @@ void RTCommandManager::shutdown()
     loginf << "start";
 
     stop_requested_ = true;
+
+    if (!started_)
+        stopped_ = true;
 
     //    if (active_db_job_)
     //        active_db_job_->setObsolete();
@@ -214,12 +228,17 @@ void RTCommandManager::shutdown()
 
     while (!stopped_)
     {
+        if (!started_)
+            stopped_ = true;
+
         loginf << "waiting on run stop";
+
         msleep(1000);
     }
 
-    //    traced_assert(!active_blocking_job_);
-    //    traced_assert(blocking_jobs_.empty());
+    started_ = false;
+
+    started_ = false;
 
     loginf << "done";
 }
@@ -229,6 +248,21 @@ void RTCommandManager::shutdown()
 rtcommand::IssueInfo RTCommandManager::addCommand(const std::string& cmd_str, CommandId* id)
 {
     return addCommand(cmd_str, Source::Application, id);
+}
+
+void RTCommandManager::addCommandFromConsole(const std::string& cmd_str)
+{
+    rtcommand::IssueInfo info = addCommand(cmd_str);
+
+    if (info.error.hasError())
+    {
+        logerr << "command '" << cmd_str << "' resulted in error "
+               << rtcommand::RTCommandResponse::errCode2String(info.error.code) 
+               << ": '" << info.error.message << "', aborting";
+
+        throw runtime_error(
+            "RTCommandManager: addCommandFromConsole: incorrect command from console");
+    }
 }
 
 /**

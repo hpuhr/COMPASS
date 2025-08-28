@@ -16,6 +16,7 @@
  */
 
 #include "files.h"
+#include "logger.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -200,6 +201,17 @@ void deleteFolder(const std::string& path)
 {
     QDir dir(path.c_str());
     dir.removeRecursively();
+}
+
+bool moveFile(const std::string& fp_old, const std::string& fp_new)
+{
+    if (rename(fp_old.c_str(), fp_new.c_str()) != 0)
+    {
+        logerr << "renaming file from '" << fp_old << "' to '" << fp_new << "' failed with error " << std::strerror(errno);
+
+        return false;
+    }
+    return true;
 }
 
 std::string getDirectoryFromPath(const std::string& path)

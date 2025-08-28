@@ -219,6 +219,14 @@ Client::Client(int& argc, char** argv) : QApplication(argc, argv)
         ("segfault", po::bool_switch(&do_segfault_), "")
         ;
 
+    // Print full command line for debugging
+    cout << "COMPASSClient: command line: ";
+    for (int i = 0; i < argc; ++i) {
+        cout << "'" << argv[i] << "'";
+        if (i < argc - 1) cout << " ";
+    }
+    cout << endl;
+
     try
     {
         po::options_description all_options;
@@ -429,8 +437,24 @@ bool Client::run ()
     MainWindow& main_window = COMPASS::instance().mainWindow();
     splash.raise();
 
+    start_time = boost::posix_time::microsec_clock::local_time();
+    while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds()
+            < 10)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
+
     main_window.show();
     splash.raise();
+
+    start_time = boost::posix_time::microsec_clock::local_time();
+    while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds()
+            < 10)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep(1);
+    }
 
     splash.finish(&main_window);
 
@@ -439,191 +463,194 @@ bool Client::run ()
     if (no_config_save_)
         main_window.disableConfigurationSaving();
 
-    if (create_new_db_filename_.size())
-        rt_man.addCommand("create_db "+create_new_db_filename_);
-
-    if (open_db_filename_.size())
-        rt_man.addCommand("open_db "+open_db_filename_);
-
-    if (import_data_sources_filename_.size())
-        rt_man.addCommand("import_data_sources "+import_data_sources_filename_);
-
-    if (import_view_points_filename_.size())
-        rt_man.addCommand("import_view_points "+import_view_points_filename_);
-
-    TaskManager& task_man = COMPASS::instance().taskManager();
-
     try
     {
+        if (create_new_db_filename_.size())
+            rt_man.addCommandFromConsole("create_db " + create_new_db_filename_);
+
+        if (open_db_filename_.size())
+            rt_man.addCommandFromConsole("open_db " + open_db_filename_);
+
+        if (import_data_sources_filename_.size())
+            rt_man.addCommandFromConsole("import_data_sources " + import_data_sources_filename_);
+
+        if (import_view_points_filename_.size())
+            rt_man.addCommandFromConsole("import_view_points " + import_view_points_filename_);
+
+        TaskManager& task_man = COMPASS::instance().taskManager();
+
         if (asterix_decoder_cfg.size())
             task_man.asterixImporterTask().asterixDecoderConfig(asterix_decoder_cfg);
+
+        if (import_asterix_filename_.size())
+        {
+            string cmd = "import_asterix_file " + import_asterix_filename_;
+
+            if (asterix_framing.size() && asterix_framing != "none")
+                cmd += " --framing " + asterix_framing;
+            else
+                cmd += " --framing none";
+
+            if (import_asterix_file_line_.size())
+                cmd += " --line " + import_asterix_file_line_;
+            else
+                cmd += " --line L1";
+
+            if (import_asterix_date_.size())
+                cmd += " --date " + import_asterix_date_;
+
+            if (import_asterix_file_time_offset_.size())
+                cmd += " --time_offset " + import_asterix_file_time_offset_;
+
+            if (import_asterix_ignore_time_jumps_)
+                cmd += " --ignore_time_jumps";
+
+            rt_man.addCommandFromConsole(cmd);
+        }
+
+        if (import_asterix_filenames_.size())
+        {
+            string cmd = "import_asterix_files '" + import_asterix_filenames_ + "'";
+
+            if (asterix_framing.size() && asterix_framing != "none")
+                cmd += " --framing " + asterix_framing;
+            else
+                cmd += " --framing none";
+
+            if (import_asterix_file_line_.size())
+                cmd += " --line " + import_asterix_file_line_;
+            else
+                cmd += " --line L1";
+
+            if (import_asterix_date_.size())
+                cmd += " --date " + import_asterix_date_;
+
+            if (import_asterix_file_time_offset_.size())
+                cmd += " --time_offset " + import_asterix_file_time_offset_;
+
+            if (import_asterix_ignore_time_jumps_)
+                cmd += " --ignore_time_jumps";
+
+            rt_man.addCommandFromConsole(cmd);
+        }
+
+        if (import_asterix_pcap_filename_.size())
+        {
+            string cmd = "import_asterix_pcap_file " + import_asterix_pcap_filename_;
+
+            if (import_asterix_file_line_.size())
+                cmd += " --line " + import_asterix_file_line_;
+            else
+                cmd += " --line L1";
+
+            if (import_asterix_date_.size())
+                cmd += " --date " + import_asterix_date_;
+
+            if (import_asterix_file_time_offset_.size())
+                cmd += " --time_offset " + import_asterix_file_time_offset_;
+
+            if (import_asterix_ignore_time_jumps_)
+                cmd += " --ignore_time_jumps";
+
+            rt_man.addCommandFromConsole(cmd);
+        }
+
+        if (import_asterix_pcap_filenames_.size())
+        {
+            string cmd = "import_asterix_pcap_files '" + import_asterix_pcap_filenames_ + "'";
+
+            if (import_asterix_file_line_.size())
+                cmd += " --line " + import_asterix_file_line_;
+            else
+                cmd += " --line L1";
+
+            if (import_asterix_date_.size())
+                cmd += " --date " + import_asterix_date_;
+
+            if (import_asterix_file_time_offset_.size())
+                cmd += " --time_offset " + import_asterix_file_time_offset_;
+
+            if (import_asterix_ignore_time_jumps_)
+                cmd += " --ignore_time_jumps";
+
+            rt_man.addCommandFromConsole(cmd);
+        }
+
+        if (import_asterix_network_)
+        {
+            string cmd = "import_asterix_network";
+
+            if (import_asterix_network_time_offset_.size())
+                cmd += " --time_offset " + import_asterix_network_time_offset_;
+
+            if (import_asterix_network_max_lines_ != -1)
+            {
+                if (import_asterix_network_max_lines_ < 1 || import_asterix_network_max_lines_ > 4)
+                    throw runtime_error(
+                        "COMPASSClient: number of maximum network lines must be between 1 and 4");
+
+                cmd += " --max_lines " + to_string(import_asterix_network_max_lines_);
+            }
+
+            if (import_asterix_network_ignore_future_ts_)
+                cmd += " --ignore_future_ts";
+
+            rt_man.addCommandFromConsole(cmd);
+        }
+
+        if (import_json_filename_.size())
+            rt_man.addCommandFromConsole("import_json " + import_json_filename_);
+
+        if (import_gps_trail_filename_.size())
+            rt_man.addCommandFromConsole("import_gps_trail " + import_gps_trail_filename_);
+
+        if (import_sectors_filename_.size())
+            rt_man.addCommandFromConsole("import_sectors_json " + import_sectors_filename_);
+
+        if (calculate_radar_plot_positions_)
+            rt_man.addCommandFromConsole("calculate_radar_plot_positions");
+
+        if (calculate_artas_tr_usage_)
+            rt_man.addCommandFromConsole("calculate_artas_tr_usage");
+
+        if (reconstruct_references_)
+            rt_man.addCommandFromConsole("reconstruct_references");
+
+        if (load_data_)
+            rt_man.addCommandFromConsole("load_data");
+
+        if (export_view_points_report_filename_.size())
+            rt_man.addCommandFromConsole("export_view_points_report " +
+                                         export_view_points_report_filename_);
+
+        if (evaluate_)
+        {
+            string cmd = "evaluate";
+
+            if (evaluate_run_filter_)
+                cmd += " --run_filter";
+
+            rt_man.addCommandFromConsole(cmd);
+        }
+
+        if (export_eval_report_filename_.size())
+            rt_man.addCommandFromConsole("export_eval_report " + export_eval_report_filename_);
+
+        if (quit_)
+            rt_man.addCommandFromConsole("quit");
+
+        rt_man.startCommandProcessing();
+
+        // finally => set compass as running
+        COMPASS::instance().setAppState(AppState::Running);
+
+        return true;
     }
     catch (exception& e)
     {
-        logerr << "setting ASTERIX options resulted in error: " << e.what();
-        quit_requested_ = true;
+        logerr << "error: " << e.what();
         return false;
     }
-
-    if (import_asterix_filename_.size())
-    {
-        string cmd = "import_asterix_file "+import_asterix_filename_;
-
-        if (asterix_framing.size() && asterix_framing != "none")
-            cmd += " --framing "+asterix_framing;
-        else
-            cmd += " --framing none";
-
-        if (import_asterix_file_line_.size())
-            cmd += " --line "+import_asterix_file_line_;
-        else
-            cmd += " --line L1";
-
-        if (import_asterix_date_.size())
-            cmd += " --date "+import_asterix_date_;
-
-        if (import_asterix_file_time_offset_.size())
-            cmd += " --time_offset "+import_asterix_file_time_offset_;
-
-        if (import_asterix_ignore_time_jumps_)
-            cmd += " --ignore_time_jumps";
-
-        rt_man.addCommand(cmd);
-    }
-
-    if (import_asterix_filenames_.size())
-    {
-        string cmd = "import_asterix_files '"+import_asterix_filenames_+"'";
-
-        if (asterix_framing.size() && asterix_framing != "none")
-            cmd += " --framing "+asterix_framing;
-        else
-            cmd += " --framing none";
-
-        if (import_asterix_file_line_.size())
-            cmd += " --line "+import_asterix_file_line_;
-        else
-            cmd += " --line L1";
-
-        if (import_asterix_date_.size())
-            cmd += " --date "+import_asterix_date_;
-
-        if (import_asterix_file_time_offset_.size())
-            cmd += " --time_offset "+import_asterix_file_time_offset_;
-
-        if (import_asterix_ignore_time_jumps_)
-            cmd += " --ignore_time_jumps";
-
-        rt_man.addCommand(cmd);
-    }
-
-    if (import_asterix_pcap_filename_.size())
-    {
-        string cmd = "import_asterix_pcap_file "+import_asterix_pcap_filename_;
-
-        if (import_asterix_file_line_.size())
-            cmd += " --line "+import_asterix_file_line_;
-        else
-            cmd += " --line L1";
-
-        if (import_asterix_date_.size())
-            cmd += " --date "+import_asterix_date_;
-
-        if (import_asterix_file_time_offset_.size())
-            cmd += " --time_offset "+import_asterix_file_time_offset_;
-
-        if (import_asterix_ignore_time_jumps_)
-            cmd += " --ignore_time_jumps";
-
-        rt_man.addCommand(cmd);
-    }
-
-    if (import_asterix_pcap_filenames_.size())
-    {
-        string cmd = "import_asterix_pcap_files '"+import_asterix_pcap_filenames_+"'";
-
-        if (import_asterix_file_line_.size())
-            cmd += " --line "+import_asterix_file_line_;
-        else
-            cmd += " --line L1";
-
-        if (import_asterix_date_.size())
-            cmd += " --date "+import_asterix_date_;
-
-        if (import_asterix_file_time_offset_.size())
-            cmd += " --time_offset "+import_asterix_file_time_offset_;
-
-        if (import_asterix_ignore_time_jumps_)
-            cmd += " --ignore_time_jumps";
-
-        rt_man.addCommand(cmd);
-    }
-
-    if (import_asterix_network_)
-    {
-        string cmd = "import_asterix_network";
-
-        if (import_asterix_network_time_offset_.size())
-            cmd += " --time_offset "+import_asterix_network_time_offset_;
-
-        if (import_asterix_network_max_lines_ != -1)
-        {
-            if (import_asterix_network_max_lines_ < 1 || import_asterix_network_max_lines_ > 4)
-                throw runtime_error("COMPASSClient: number of maximum network lines must be between 1 and 4");
-
-            cmd += " --max_lines "+to_string(import_asterix_network_max_lines_);
-        }
-
-        if (import_asterix_network_ignore_future_ts_)
-            cmd += " --ignore_future_ts";
-
-        rt_man.addCommand(cmd);
-    }
-
-    if (import_json_filename_.size())
-        rt_man.addCommand("import_json "+import_json_filename_);
-
-    if (import_gps_trail_filename_.size())
-        rt_man.addCommand("import_gps_trail "+import_gps_trail_filename_);
-
-    if (import_sectors_filename_.size())
-        rt_man.addCommand("import_sectors_json "+import_sectors_filename_);
-
-    if (calculate_radar_plot_positions_)
-        rt_man.addCommand("calculate_radar_plot_positions");
-
-    if (calculate_artas_tr_usage_)
-        rt_man.addCommand("calculate_artas_tr_usage");
-
-    if (reconstruct_references_)
-        rt_man.addCommand("reconstruct_references");
-
-    if (load_data_)
-        rt_man.addCommand("load_data");
-
-    if (export_view_points_report_filename_.size())
-        rt_man.addCommand("export_view_points_report "+export_view_points_report_filename_);
-
-    if (evaluate_)
-    {
-        string cmd = "evaluate";
-
-        if (evaluate_run_filter_)
-            cmd += " --run_filter";
-
-        rt_man.addCommand(cmd);
-    }
-
-    if (export_eval_report_filename_.size())
-        rt_man.addCommand("export_eval_report "+export_eval_report_filename_);
-
-    if (quit_)
-        rt_man.addCommand("quit");
-
-    //finally => set compass as running
-    COMPASS::instance().setAppState(AppState::Running);
-
-    return true;
 }
 
 Client::~Client()

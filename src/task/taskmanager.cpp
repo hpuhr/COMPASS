@@ -70,7 +70,10 @@ TaskManager::TaskManager(const std::string& class_id, const std::string& instanc
 
 /**
  */
-TaskManager::~TaskManager() {}
+TaskManager::~TaskManager()
+{
+    widget_ = nullptr;
+}
 
 /**
  */
@@ -360,7 +363,7 @@ ReconstructorTask& TaskManager::reconstructReferencesTask() const
 TaskResultsWidget* TaskManager::widget()
 {
     if (!widget_)
-        widget_.reset(new TaskResultsWidget(*this));
+        widget_ =new TaskResultsWidget(*this);
 
     traced_assert(widget_);
     return widget_.get();

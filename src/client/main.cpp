@@ -15,20 +15,21 @@
  * along with COMPASS. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-
 #include "client.h"
+#include "compass.h"
 #include "logger.h"
 #include "msghandler.h"
 
-#include <iostream>
-#include <signal.h>
-
 #include <QThread>
+#include <QTimer>
 
 #include <osgEarth/Registry>
 
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include <boost/stacktrace.hpp>
+
+#include <iostream>
+#include <signal.h>
 
 using namespace std;
 
@@ -82,7 +83,19 @@ int main(int argc, char** argv)
         // note: do not use COMPASS::instance functions here
 
         if (!client.run())
+        {
+            // // process events a bit to allow for correct cleanup
+            // auto start_time = boost::posix_time::microsec_clock::local_time();
+            // while ((boost::posix_time::microsec_clock::local_time() - start_time).total_milliseconds()
+            //         < 50)
+            // {
+            //     QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            //     QThread::msleep(1);
+            // }
+            COMPASS::instance().shutdown();
+
             return -1;
+        }
 
         return client.exec();
     }

@@ -90,7 +90,7 @@ DataSourceManager::~DataSourceManager()
     config_data_sources_.clear();
     db_data_sources_.clear(); // delete their widgets, which removes them from load_widget_
 
-    load_widget_ = nullptr;
+    load_widget_ = nullptr; // deleted by qt
 }
 
 void DataSourceManager::generateSubConfigurable(const std::string& class_id,
@@ -120,11 +120,14 @@ DataSourcesWidget* DataSourceManager::loadWidget()
 {
     if (!load_widget_)
     {
-        load_widget_.reset(new DataSourcesWidget(*this));
+        load_widget_ = new DataSourcesWidget(*this);
     }
 
+
     traced_assert(load_widget_);
-    return load_widget_.get();
+    
+    return load_widget_;
+
 }
 
 void DataSourceManager::updateWidget()
