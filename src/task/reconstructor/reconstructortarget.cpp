@@ -2881,6 +2881,11 @@ bool ReconstructorTarget::getChainState(reconstruction::Measurement& mm,
     return ok;
 }
 
+bool ReconstructorTarget::hasChain() const
+{
+    return chain().get() != nullptr;
+}
+
 const reconstruction::KalmanChain& ReconstructorTarget::getChain() const
 {
     traced_assert(chain());

@@ -69,6 +69,29 @@ class ReconstructorAssociatorBase
         float avg_distance_{0};
     };
 
+    struct BatchStats
+    {
+        double batchSizeMean() const { return num_batches == 0 ? 0.0 : (double)batch_size_mean / (double)num_batches; } 
+        double batchSizeInSliceMean() const { return num_batches_slice == 0 ? 0.0 : (double)batch_slice_size_mean / (double)num_batches_slice; } 
+        double batchSizePrimaryOnlyMean() const { return num_batches_po == 0 ? 0.0 : (double)batch_po_size_mean / (double)num_batches_po; } 
+
+        size_t num_batches       = 0;
+        size_t num_batches_slice = 0;
+        size_t num_batches_po    = 0;
+
+        size_t batch_size_min  = std::numeric_limits<unsigned int>::max();
+        size_t batch_size_max  = std::numeric_limits<unsigned int>::lowest();
+        size_t batch_size_mean = 0;
+
+        size_t batch_slice_size_min  = std::numeric_limits<unsigned int>::max();
+        size_t batch_slice_size_max  = std::numeric_limits<unsigned int>::lowest();
+        size_t batch_slice_size_mean = 0;
+
+        size_t batch_po_size_min  = std::numeric_limits<unsigned int>::max();
+        size_t batch_po_size_max  = std::numeric_limits<unsigned int>::lowest();
+        size_t batch_po_size_mean = 0;
+    };
+
     virtual bool canGetPositionOffsetTR(
         const dbContent::targetReport::ReconstructorInfo& tr,
         const dbContent::ReconstructorTarget& target, bool use_max_distance=true) = 0;
@@ -83,6 +106,7 @@ class ReconstructorAssociatorBase
         double tgt_est_std_dev, unsigned int utn, const dbContent::targetReport::ReconstructorInfo& tr, bool do_debug) = 0;
 
     const std::vector<unsigned long>& unassociatedRecNums() const;
+    const std::map<unsigned int, BatchStats>& batchStatistics() const;
 
 protected:
 
@@ -97,6 +121,8 @@ protected:
     boost::posix_time::time_duration time_assoc_trs_;
     boost::posix_time::time_duration time_assoc_new_utns_;
     boost::posix_time::time_duration time_retry_assoc_trs_;
+
+    std::map<unsigned int, BatchStats> batch_stats_;
 
     void associateTargetReports();
     void associateTargetReportBatch(const boost::posix_time::ptime& ts, 
