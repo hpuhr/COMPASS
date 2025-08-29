@@ -1041,6 +1041,8 @@ void ReconstructorBase::createTargetReports()
 
                     position_usable[cnt] = inside_any;
                 }
+                else
+                    position_usable[cnt] = true;
             });
 
         for (unsigned int cnt=0; cnt < buffer_size; cnt++)
