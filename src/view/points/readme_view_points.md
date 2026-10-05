@@ -192,6 +192,22 @@ A view point can pin a label on individual target reports with the `"labels"` ke
 - Apply: `GeometryItemProvider::finalizeContent()` calls `applyViewPointLabels()` on every layer
 - Draw: `GeometryItemGroupLabels::applyViewPointLabels()` pins the level with `setCustomLOD()`
 
+## Sectors (`show_sectors`)
+
+A view point can restrict the sector layers that the Geographic View shows with the `"show_sectors"` key. The value is an array of sector layer names, as defined in the active Data Context. The Geographic View hides all sector layers, then shows the listed ones. Without the key the sector layers keep their current visibility.
+
+```json
+{
+    "show_sectors": ["TMA", "CTR"]
+}
+```
+
+**Errors.** `GeographicViewDataWidget::loadingDone_impl()` throws if `show_sectors` is not an array of strings. It catches the error, reports it as `sector error: <what>` through `ViewableDataConfig::reportError()`, and leaves the sector layers untouched. A name that matches no sector layer of the active Data Context is reported as `sector error: unknown sector layer '<name>'` and skipped. The other listed layers are still shown. Both checks run in phase 2, after the load.
+
+**Key source files**:
+- Read: `GeographicViewDataWidget::loadingDone_impl()` in `geographicviewdatawidget.cpp`
+- Apply: `OSGSectorRootTreeItem::showSectors()` in `sector/osgsectorroottreeitem.cpp`, returns the unknown names
+
 ## Collection Content Version
 
 A view point collection file carries `"content_type": "view_points"` and `"content_version"`. `ViewPoint::isValidJSON()` compares the version against `ViewPoint::VP_COLLECTION_CONTENT_VERSION` in `viewpoint.cpp` and accepts that value only. The current value is **0.4**. An older file fails the import with `current data content version is not supported`, so a generator script has to be updated when the constant changes.
@@ -218,6 +234,8 @@ An empty `data_sources` list makes `FilterManager::showViewPointSlot()` call `DB
 | `src/view/points/viewpoint_commands.cpp` | `checkResult_impl()` reads errors, populates command reply |
 | `src/view/points/viewpoint.cpp` | JSON keys and `isValidJSON()`, including the collection content version |
 | `experimental_src/.../geographicview.cpp` | `updateViewPointLabels()`: parses the `labels` key, reports label errors |
+| `experimental_src/.../geographicviewdatawidget.cpp` | `loadingDone_impl()`: parses the `show_sectors` key, reports sector errors |
+| `experimental_src/.../sector/osgsectorroottreeitem.cpp` | `showSectors()`: shows the listed sector layers, returns the unknown names |
 | `src/db/dbcontent/label/labelgenerator.h/.cpp` | Holds the pinned view point labels while the view point is shown |
 | `experimental_src/.../annotations/osgannotationsroottreeitem_viewpoint.cpp` | Viewpoint catch site: per-annotation try/catch, reports errors |
 | `experimental_src/.../annotations/osgannotationstreeitem_viewpoint.cpp` | Viewpoint annotation `build()`: throws on bad JSON |
