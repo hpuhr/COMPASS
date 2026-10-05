@@ -151,16 +151,12 @@ std::set<std::string> SMRCoverageInspector::testDBContentNames() const
     return {"CAT010"};
 }
 
-bool SMRCoverageInspector::prerequisitesMet(std::string& reason_out) const
+std::vector<InspectorVariable> SMRCoverageInspector::testVariables() const
 {
-    reason_out.clear();
-
-    if (task_.selectedDataSourceIDs().empty())
-    {
-        reason_out = "No data source selected.";
-        return false;
-    }
-    return true;
+    return {
+        {dbcontent_vars::var_cat010_target_length_, false, false, "the size class of targets without a known category"},
+        {dbcontent_vars::meta_var_message_type_, true, false, "the measured scan cycles (the nominal scan period is used)"},
+    };
 }
 
 namespace

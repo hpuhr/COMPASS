@@ -18,6 +18,7 @@
 #pragma once
 
 #include "dbcontent/target/targetreportchain.h"
+#include "property.h"
 
 #include <boost/optional.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -174,6 +175,13 @@ public:
 
     /// Number of CAT010 rows that were skipped by the SMR-only filter.
     unsigned int numNonPSRRecordsSkipped() const { return num_non_psr_skipped_; }
+
+    /// Whether the loaded test buffer of `dbcontent_name` holds at least one value of the
+    /// variable `property` (meta variable when `meta` is true). boost::none when that data
+    /// content was not loaded or has no such variable.
+    boost::optional<bool> testVariableHasValues(const std::string& dbcontent_name,
+                                                const Property& property,
+                                                bool meta) const;
 
     /// Accessor over the loaded buffers, for reading raw columns of pool rows
     /// (unassociated reports) by buffer index.

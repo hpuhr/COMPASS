@@ -144,32 +144,22 @@ void AnalyzeDataSourceDialog::buildTree()
 
         auto* item = new QTreeWidgetItem(tree_);
         item->setText(0, QString::fromStdString(ins->name()));
-        if (ins->requiresProfessionalLicense())
-        {
-            item->setText(1, "[pro]");
-            item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
-            QFont f = item->font(1);
-            f.setItalic(true);
-            item->setFont(1, f);
-        }
         item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-        item->setCheckState(0, task_.inspectorEnabled(ins->className())
-                                   ? Qt::Checked : Qt::Unchecked);
 
-        std::string reason;
-        bool ok = ins->prerequisitesMet(reason);
-        if (!ok)
-        {
-            item->setDisabled(true);
-            item->setToolTip(0, QString::fromStdString(reason));
-        }
-        else if (!ins->description().empty())
-        {
-            item->setToolTip(0, QString::fromStdString(ins->description()));
-        }
+        // inspector page with the unmet prerequisite on top
+        auto* page        = new QWidget();
+        auto* page_layout = new QVBoxLayout(page);
+        page_layout->setContentsMargins(0, 0, 0, 0);
 
-        stack_->insertWidget(stack_idx++, wrapInScroll(buildInspectorWidget(ins)));
-        inspector_rows_.push_back({item, ins});
+        auto* reason_label = new QLabel();
+        reason_label->setWordWrap(true);
+        reason_label->setStyleSheet("QLabel { color: #b00000; }");
+        page_layout->addWidget(reason_label);
+        page_layout->addWidget(buildInspectorWidget(ins), 1);
+
+        stack_->insertWidget(stack_idx++, wrapInScroll(page));
+        inspector_rows_.push_back({item, ins, reason_label});
+        updateInspectorRow(inspector_rows_.back());
     }
 
     report_item_ = new QTreeWidgetItem(tree_);
@@ -242,6 +232,7 @@ QWidget* AnalyzeDataSourceDialog::buildDataSourcesWidget()
         if (!ok)
             return;
         task_.useReferenceDataSource(ds_id, it->checkState() == Qt::Checked);
+        refreshInspectorRows();
         updateRunEnabled();
     });
     ref_layout->addWidget(ref_list, 1);
@@ -285,6 +276,8 @@ QWidget* AnalyzeDataSourceDialog::buildDataSourcesWidget()
                 if (updating_ui_ || idx < 0)
                     return;
                 task_.setLineIDRef(static_cast<unsigned int>(idx));
+                refreshInspectorRows();
+                updateRunEnabled();
             });
     ref_line_row->addWidget(ref_line_combo_, 1);
     ref_layout->addLayout(ref_line_row);
@@ -355,7 +348,9 @@ QWidget* AnalyzeDataSourceDialog::buildDataSourcesWidget()
                 if (updating_ui_ || idx < 0)
                     return;
                 task_.setLineIDTst(static_cast<unsigned int>(idx));
+                refreshInspectorRows();
                 updateSuggestedReportName();
+                updateRunEnabled();
             });
     tst_line_row->addWidget(tst_line_combo_, 1);
     tst_layout->addLayout(tst_line_row);
@@ -1006,17 +1001,45 @@ void AnalyzeDataSourceDialog::refreshInspectorRows()
 {
     updating_ui_ = true;
     for (auto& row : inspector_rows_)
-    {
-        std::string reason;
-        bool ok = row.inspector->prerequisitesMet(reason);
-        row.item->setDisabled(!ok);
-        row.item->setToolTip(0, QString::fromStdString(ok ? row.inspector->description()
-                                                          : reason));
-        // Preserve the user's check state even when prerequisites are
-        // temporarily unmet (e.g. no test data sources selected); the Run
-        // button gates execution.
-    }
+        updateInspectorRow(row);
     updating_ui_ = false;
+}
+
+void AnalyzeDataSourceDialog::updateInspectorRow(InspectorRow& row)
+{
+    auto* ins  = row.inspector;
+    auto* item = row.item;
+
+    std::string reason;
+    bool ok = ins->prerequisitesMet(reason);
+
+    // An inspector with unmet prerequisites shows unchecked and disabled. The
+    // task keeps the user's enabled flag, so the check returns once the
+    // prerequisites are met again (e.g. after a test data source is selected).
+    item->setDisabled(!ok);
+    item->setCheckState(0, ok && task_.inspectorEnabled(ins->className())
+                               ? Qt::Checked : Qt::Unchecked);
+
+    // column 1: short tag, the full reason is in the tooltip and on the page
+    QString tag = ins->requiresProfessionalLicense() ? "[pro]" : "";
+    if (!ok)
+        tag = tag.isEmpty() ? "[not available]" : tag + " [not available]";
+
+    item->setText(1, tag);
+    item->setTextAlignment(1, Qt::AlignRight | Qt::AlignVCenter);
+    QFont f = item->font(1);
+    f.setItalic(true);
+    item->setFont(1, f);
+
+    QString tooltip = QString::fromStdString(ok ? ins->description() : "Not available: " + reason);
+    item->setToolTip(0, tooltip);
+    item->setToolTip(1, tooltip);
+
+    if (row.reason_label)
+    {
+        row.reason_label->setText(QString::fromStdString("Not available: " + reason));
+        row.reason_label->setVisible(!ok);
+    }
 }
 
 void AnalyzeDataSourceDialog::treeSelectionChangedSlot()
@@ -1076,28 +1099,12 @@ void AnalyzeDataSourceDialog::updateRunEnabled()
     if (!run_button_)
         return;
 
-    bool can_run = !task_.selectedDataSourceIDs().empty()
-                   && !task_.selectedReferenceDataSourceIDs().empty();
-    if (can_run)
-    {
-        bool any_enabled = false;
-        for (const auto& row : inspector_rows_)
-        {
-            if (row.item->isDisabled())
-                continue;
-            if (row.item->checkState(0) == Qt::Checked
-                && task_.inspectorEnabled(row.inspector->className()))
-            {
-                any_enabled = true;
-                break;
-            }
-        }
-        can_run = any_enabled;
-    }
-    // Limit by sectors requires at least one selected sector layer.
-    if (can_run && task_.limitBySectors() && task_.selectedSectorLayers().empty())
-        can_run = false;
+    std::string reason;
+    bool can_run = task_.canRunConfiguration(&reason);
+
     run_button_->setEnabled(can_run);
+    run_button_->setToolTip(can_run ? "Run the analysis with the current selection"
+                                    : QString::fromStdString("Cannot run: " + reason));
 }
 
 void AnalyzeDataSourceDialog::runSlot()

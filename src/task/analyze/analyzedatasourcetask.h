@@ -207,9 +207,19 @@ public:
     /// True if any selected data source has CAT020 reports (asterixInfo lookup).
     bool selectionContainsCAT020() const;
 
-    /// Inspector enabled / ticked state, keyed by inspector className().
+    /// Inspector enabled / ticked state, keyed by inspector className(). This is
+    /// the user's choice, kept while the inspector's prerequisites are not met.
     bool inspectorEnabled(const std::string& inspector_class) const;
     void inspectorEnabled(const std::string& inspector_class, bool value);
+
+    /// True if the inspector runs: enabled and its prerequisites are met.
+    /// `reason_out`, when given, holds the unmet prerequisite.
+    bool inspectorActive(const DataSourceInspectorBase& inspector,
+                         std::string* reason_out = nullptr) const;
+
+    /// True if the configuration allows a run: at least one active inspector,
+    /// and a selected sector layer when limited by sectors.
+    bool canRunConfiguration(std::string* reason_out = nullptr) const;
 
     /// Inspectors registered with this task. Pointers are owned by the task.
     const std::vector<std::unique_ptr<DataSourceInspectorBase>>& inspectors() const { return inspectors_; }

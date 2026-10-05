@@ -21,6 +21,7 @@
 #include "inspectorsettingsbase.h"
 #include "dbcontent/target/targetreportchain.h"
 #include "compass.h"
+#include "db_context_manager.h"
 #include "taskmanager.h"
 #include "taskresult.h"
 #include "reporttable.h"
@@ -34,10 +35,204 @@ DataSourceInspectorBase::DataSourceInspectorBase(AnalyzeDataSourceTask& task,
 {
 }
 
+namespace
+{
+std::string joinNames(const std::set<std::string>& names, const std::string& sep = ", ")
+{
+    std::string out;
+    for (const auto& n : names)
+        out += (out.empty() ? "" : sep) + n;
+    return out;
+}
+
+/// Sum of the inserted counts of `dbcontents` on `line_id` over `ds_ids`.
+unsigned long numInsertedOnLine(const context::DBContextManager& ctx,
+                                const std::set<unsigned int>& ds_ids,
+                                const std::set<std::string>& dbcontents,
+                                unsigned int line_id)
+{
+    unsigned long num = 0;
+    for (auto ds_id : ds_ids)
+    {
+        for (const auto& dbc : dbcontents)
+        {
+            auto counts = ctx.numInsertedPerLine(ds_id, dbc);
+            auto it = counts.find(line_id);
+            if (it != counts.end())
+                num += it->second;
+        }
+    }
+    return num;
+}
+}
+
 bool DataSourceInspectorBase::prerequisitesMet(std::string& reason_out) const
 {
     reason_out.clear();
+
+    if (requiresProfessionalLicense() && !task_.professionalLicenseEnabled())
+    {
+        reason_out = "Requires the Professional license.";
+        return false;
+    }
+
+    if (task_.selectedDataSourceIDs().empty())
+    {
+        reason_out = "No test data source selected.";
+        return false;
+    }
+
+    if (requiresCAT020Source() && !task_.selectionContainsCAT020())
+    {
+        reason_out = "Requires at least one CAT020 test data source.";
+        return false;
+    }
+
+    auto& ctx = task_.compass().dbContextManager();
+
+    const auto tst_dbcontents = testDBContentNames();
+    if (!tst_dbcontents.empty()
+        && numInsertedOnLine(ctx, task_.selectedDataSourceIDs(), tst_dbcontents, task_.lineIDTst()) == 0)
+    {
+        reason_out = "No " + joinNames(tst_dbcontents, "/") + " data in the selected test data sources on line L"
+                     + std::to_string(task_.lineIDTst() + 1) + ".";
+        return false;
+    }
+
+    if (requiresLoadedDataset())
+    {
+        // the dataset load needs a reference data source, also when the
+        // inspector does not compare against the Reference Trajectory
+        const auto ref_ds_ids = task_.selectedReferenceDataSourceIDs();
+        if (ref_ds_ids.empty())
+        {
+            reason_out = "No reference data source selected.";
+            return false;
+        }
+
+        if (requiresReferenceTrajectory()
+            && numInsertedOnLine(ctx, ref_ds_ids, {AnalysisDataset::referenceDBContentName()},
+                                 task_.lineIDRef()) == 0)
+        {
+            reason_out = "No Reference Trajectory data in the selected reference data sources on line L"
+                         + std::to_string(task_.lineIDRef() + 1) + ".";
+            return false;
+        }
+    }
+
+    return specificPrerequisitesMet(reason_out);
+}
+
+bool DataSourceInspectorBase::specificPrerequisitesMet(std::string& reason_out) const
+{
+    reason_out.clear();
     return true;
+}
+
+bool DataSourceInspectorBase::canCompute(const AnalysisDataset* dataset, std::string& reason_out) const
+{
+    reason_out.clear();
+
+    if (requiresLoadedDataset())
+    {
+        if (!dataset)
+        {
+            reason_out = "The combined dataset could not be built.";
+            return false;
+        }
+
+        // test data contents with in-scope rows, associated or not
+        std::set<std::string> present;
+        for (const auto& dbc : testDBContentNames())
+        {
+            if (dataset->testDbContentsPresent().count(dbc) || !dataset->unassociatedIndices(dbc).empty())
+                present.insert(dbc);
+        }
+
+        if (present.empty())
+        {
+            reason_out = "The loaded data holds no " + joinNames(testDBContentNames(), "/")
+                         + " test data inside the scope filter.";
+            return false;
+        }
+
+        if (requiresReferenceTrajectory() && dataset->numReferenceRecordsTotal() == 0)
+        {
+            reason_out = "The loaded data holds no Reference Trajectory data.";
+            return false;
+        }
+
+        for (const auto& var : testVariables())
+        {
+            if (!var.required)
+                continue;
+
+            bool has_values = false;
+            for (const auto& dbc : present)
+            {
+                auto values = dataset->testVariableHasValues(dbc, var.property, var.meta);
+                if (values && *values)
+                {
+                    has_values = true;
+                    break;
+                }
+            }
+
+            if (!has_values)
+            {
+                reason_out = "The loaded " + joinNames(present, "/") + " test data holds no values for '"
+                             + var.property.name() + "'"
+                             + (var.usage.empty() ? std::string() : ", required for " + var.usage) + ".";
+                return false;
+            }
+        }
+    }
+
+    return specificCanCompute(dataset, reason_out);
+}
+
+bool DataSourceInspectorBase::specificCanCompute(const AnalysisDataset* dataset, std::string& reason_out) const
+{
+    (void)dataset;
+    reason_out.clear();
+    return true;
+}
+
+std::vector<std::string> DataSourceInspectorBase::missingOptionalVariableNotes(const AnalysisDataset& dataset) const
+{
+    std::vector<std::string> notes;
+
+    for (const auto& var : testVariables())
+    {
+        if (var.required)
+            continue;
+
+        std::set<std::string> without_values;
+        bool has_values = false;
+
+        for (const auto& dbc : testDBContentNames())
+        {
+            auto values = dataset.testVariableHasValues(dbc, var.property, var.meta);
+            if (!values)
+                continue; // data content not loaded or without this variable
+
+            if (*values)
+            {
+                has_values = true;
+                break;
+            }
+            without_values.insert(dbc);
+        }
+
+        if (has_values || without_values.empty())
+            continue;
+
+        notes.push_back("The loaded " + joinNames(without_values, "/") + " test data holds no values for '"
+                        + var.property.name() + "'"
+                        + (var.usage.empty() ? std::string() : ", " + var.usage + " is not available") + ".");
+    }
+
+    return notes;
 }
 
 ReportTableWriter& DataSourceInspectorBase::tableWriter() const

@@ -129,7 +129,8 @@ boost::optional<TargetPositionAccuracy> getADSBPositionAccuracy(
 
     if (mops_version == 0)
     {
-        traced_assert(!nucp_nic_vec.isNull(index));
+        if (nucp_nic_vec.isNull(index))
+            return ret; // NUCp missing, only NACp set
 
         nuc_p = nucp_nic_vec.get(index);
 
@@ -141,7 +142,8 @@ boost::optional<TargetPositionAccuracy> getADSBPositionAccuracy(
     }
     else if (mops_version == 1 || mops_version == 2)
     {
-        traced_assert(!nac_p_vec.isNull(index));
+        if (nac_p_vec.isNull(index))
+            return ret; // NACp missing, only NIC set
 
         nac_p = nac_p_vec.get(index);
 

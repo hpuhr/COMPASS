@@ -107,18 +107,6 @@ std::set<std::string> MLATCoverageInspector::testDBContentNames() const
     return {"CAT020", "CAT010"};
 }
 
-bool MLATCoverageInspector::prerequisitesMet(std::string& reason_out) const
-{
-    reason_out.clear();
-
-    if (task_.selectedDataSourceIDs().empty())
-    {
-        reason_out = "No data source selected.";
-        return false;
-    }
-    return true;
-}
-
 namespace
 {
 using Settings = MLATCoverageInspectorSettings;

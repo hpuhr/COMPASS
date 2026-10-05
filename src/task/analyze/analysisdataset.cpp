@@ -706,6 +706,43 @@ unsigned int AnalysisDataset::numTestChains() const
     return static_cast<unsigned int>(tst_chains_.size());
 }
 
+boost::optional<bool> AnalysisDataset::testVariableHasValues(const std::string& dbcontent_name,
+                                                             const Property& property,
+                                                             bool meta) const
+{
+    if (!accessor_ || !accessor_->has(dbcontent_name))
+        return boost::none;
+
+    auto& m = compass_.dbContentManager();
+
+    if (meta ? !m.metaCanGetVariable(dbcontent_name, property)
+             : !m.canGetVariable(dbcontent_name, property))
+        return boost::none;
+
+    // same type check as in buildReadSet, getVariable() asserts on a type mismatch
+    if (!meta && m.dbContent(dbcontent_name).variable(property.name()).dataType() != property.dataType())
+        return boost::none;
+
+    auto& var = meta ? m.metaGetVariable(dbcontent_name, property)
+                     : m.getVariable(dbcontent_name, property);
+
+    Property column(var.name(), var.dataType());
+
+    auto buffer = accessor_->get(dbcontent_name);
+    if (!buffer || !buffer->hasProperty(column))
+    {
+        logwrn << "variable " << var.name() << " not loaded for " << dbcontent_name;
+        return false;
+    }
+
+    for (unsigned int i = 0; i < buffer->size(); ++i)
+    {
+        if (!buffer->isNull(column, i))
+            return true;
+    }
+    return false;
+}
+
 const std::vector<unsigned int>&
 AnalysisDataset::unassociatedIndices(const std::string& dbcontent_name) const
 {

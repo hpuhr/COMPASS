@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include "property.h"
+
 #include <boost/optional.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
 
@@ -57,6 +59,19 @@ struct AccuracyRow
     boost::optional<double> dt_prev_s;           // time to the previous test report of the target
 
     std::pair<boost::optional<unsigned long>, boost::optional<unsigned long>> ref_rec_nums;
+};
+
+/**
+ * One DBContent variable an inspector reads from the test data. Checked after the load: a
+ * required variable without any value in all loaded test data contents that have it stops
+ * the inspector, an optional one adds a note to its report section.
+ */
+struct InspectorVariable
+{
+    Property    property;
+    bool        meta     = true;   // meta variable (meta_var_*) or plain variable (var_*)
+    bool        required = true;
+    std::string usage;             // what the inspector uses it for, shown in the reason / note
 };
 
 /**
@@ -109,10 +124,24 @@ public:
     /// Only consulted when `requiresLoadedDataset()` is true. Empty by default.
     virtual std::set<std::string> testDBContentNames() const { return {}; }
 
-    /// Returns true if all prerequisites for this inspector are met, given the
-    /// current task state. On false, `reason_out` is filled with a human-readable
-    /// explanation suitable for a tooltip.
-    virtual bool prerequisitesMet(std::string& reason_out) const;
+    /// DBContent variables this inspector reads from the test data, see InspectorVariable.
+    /// Only consulted when `requiresLoadedDataset()` is true. Empty by default.
+    virtual std::vector<InspectorVariable> testVariables() const { return {}; }
+
+    /// Check before the load, from the task state and the inserted counts: Professional
+    /// license, selected data sources, CAT020 source, test data on the test line, then
+    /// `specificPrerequisitesMet()`. On false, `reason_out` holds a short explanation for
+    /// the dialog and the log. The task skips an inspector that fails it.
+    bool prerequisitesMet(std::string& reason_out) const;
+
+    /// Check after the load, on the main thread before `compute()`: dataset present, test
+    /// and reference data in scope, values in the required `testVariables()`, then
+    /// `specificCanCompute()`. On false, the task does not run the inspector and writes
+    /// `reason_out` as a note into the inspector's report section.
+    bool canCompute(const AnalysisDataset* dataset, std::string& reason_out) const;
+
+    /// Notes about optional `testVariables()` without values in the loaded test data.
+    std::vector<std::string> missingOptionalVariableNotes(const AnalysisDataset& dataset) const;
 
     /// Heavy data-side computation: the per-target / per-cell walk, statistics,
     /// 3D-grid population. The task may invoke this from a worker thread so it
@@ -163,6 +192,14 @@ public:
                                  const boost::posix_time::ptime& t1);
 
 protected:
+    /// Inspector-specific part of `prerequisitesMet()`, called after the common checks
+    /// passed. Default: true.
+    virtual bool specificPrerequisitesMet(std::string& reason_out) const;
+
+    /// Inspector-specific part of `canCompute()`, called after the common checks passed.
+    /// `dataset` is non-null when `requiresLoadedDataset()` is true. Default: true.
+    virtual bool specificCanCompute(const AnalysisDataset* dataset, std::string& reason_out) const;
+
     AnalyzeDataSourceTask&  task_;
     InspectorSettingsBase&  settings_;
 };

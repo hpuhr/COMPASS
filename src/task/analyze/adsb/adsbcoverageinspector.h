@@ -98,7 +98,7 @@ public:
 
     std::set<std::string> testDBContentNames() const override;
 
-    bool prerequisitesMet(std::string& reason_out) const override;
+    std::vector<InspectorVariable> testVariables() const override;
 
     void compute(AnalysisDataset* dataset) override;
     void writeReport(ResultReport::Section& root) override;

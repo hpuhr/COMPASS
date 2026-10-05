@@ -515,11 +515,10 @@ bool RTCommandAnalyzeDataSource::run_impl()
         }
     }
 
-    if (!task.canRun())
+    std::string reason;
+    if (!task.canRunConfiguration(&reason))
     {
-        setResultMessage("Analyze data source task cannot be run "
-                         "(no selected data source / no enabled inspectors / "
-                         "unmet prerequisites)");
+        setResultMessage("Analyze data source task cannot be run: " + reason);
         return false;
     }
 

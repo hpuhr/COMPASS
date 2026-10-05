@@ -16,6 +16,7 @@
  */
 
 #include "adsbcoverageinspector.h"
+#include "idbvariableresolver.h"
 #include "analyzedatasourcetask.h"
 #include "analysisdataset.h"
 #include "reporttable.h"
@@ -110,16 +111,12 @@ std::set<std::string> ADSBCoverageInspector::testDBContentNames() const
     return {"CAT021"};
 }
 
-bool ADSBCoverageInspector::prerequisitesMet(std::string& reason_out) const
+std::vector<InspectorVariable> ADSBCoverageInspector::testVariables() const
 {
-    reason_out.clear();
-
-    if (task_.selectedDataSourceIDs().empty())
-    {
-        reason_out = "No data source selected.";
-        return false;
-    }
-    return true;
+    return {
+        {dbcontent_vars::meta_var_acad_, true, false, "the per-transponder breakdown"},
+        {dbcontent_vars::var_cat021_mops_version_, false, false, "the per-MOPS version breakdown"},
+    };
 }
 
 namespace

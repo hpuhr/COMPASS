@@ -839,53 +839,79 @@ void AnalyzeDataSourceTask::showDialog()
     if (dlg.exec() == QDialog::Rejected)
         return;
 
-    if (!canRun())
+    std::string reason;
+    if (!canRunConfiguration(&reason))
     {
         QMessageBox::warning(QApplication::activeWindow(), "Analyze Data Source",
-                             "The task cannot run with the current selection.");
+                             QString::fromStdString("The task cannot run with the current selection: "
+                                                    + reason));
         return;
     }
 
     run();
 }
 
-bool AnalyzeDataSourceTask::canRun()
+bool AnalyzeDataSourceTask::inspectorActive(const DataSourceInspectorBase& inspector,
+                                            std::string* reason_out) const
 {
-    if (selectedDataSourceIDs().empty())
+    if (reason_out)
+        reason_out->clear();
+
+    if (!inspectorEnabled(inspector.className()))
     {
-        loginf << "no test data source selected";
+        if (reason_out)
+            *reason_out = "Not enabled.";
         return false;
     }
 
-    if (selectedReferenceDataSourceIDs().empty())
+    std::string reason;
+    bool ok = inspector.prerequisitesMet(reason);
+    if (reason_out)
+        *reason_out = reason;
+    return ok;
+}
+
+bool AnalyzeDataSourceTask::canRunConfiguration(std::string* reason_out) const
+{
+    if (reason_out)
+        reason_out->clear();
+
+    if (limit_by_sectors_ && selectedSectorLayers().empty())
     {
-        loginf << "no reference data source selected";
+        if (reason_out)
+            *reason_out = "Limit by sectors is set, but no sector layer is selected.";
         return false;
     }
 
-    bool any_enabled = false;
     for (const auto& ins : inspectors_)
     {
-        if (!inspectorEnabled(ins->className()))
-        {
-            loginf << "inspector '" << ins->className() << "' not enabled";
-            continue;
-        }
-
-        std::string reason;
-        if (!ins->prerequisitesMet(reason))
-        {
-            loginf << "inspector '" << ins->className()
-                   << "' prerequisites not met: " << reason;
-            return false;
-        }
-
-        loginf << "inspector '" << ins->className() << "' OK";
-        any_enabled = true;
+        if (inspectorActive(*ins))
+            return true;
     }
-    if (!any_enabled)
-        loginf << "no inspector enabled";
-    return any_enabled;
+
+    if (reason_out)
+        *reason_out = "No enabled inspector has its prerequisites met.";
+    return false;
+}
+
+bool AnalyzeDataSourceTask::canRun()
+{
+    std::string reason;
+    bool ok = canRunConfiguration(&reason);
+
+    for (const auto& ins : inspectors_)
+    {
+        std::string ins_reason;
+        if (inspectorActive(*ins, &ins_reason))
+            loginf << "inspector '" << ins->className() << "' active";
+        else
+            loginf << "inspector '" << ins->className() << "' not active: " << ins_reason;
+    }
+
+    if (!ok)
+        logwrn << "cannot run: " << reason;
+
+    return ok;
 }
 
 void AnalyzeDataSourceTask::run()
@@ -910,10 +936,10 @@ void AnalyzeDataSourceTask::run()
             continue;
 
         std::string reason;
-        if (!ins->prerequisitesMet(reason))
+        if (!inspectorActive(*ins, &reason))
         {
             logwrn << "skipping inspector " << ins->name()
-                   << " (prerequisites not met " << reason << ")";
+                   << " (prerequisites not met: " << reason << ")";
             continue;
         }
 
@@ -1156,6 +1182,18 @@ void AnalyzeDataSourceTask::run()
         advanceStep("Running inspector: " + ins->name() + "...");
         AnalysisDataset* ds = ins->requiresLoadedDataset() ? dataset.get() : nullptr;
 
+        // Check after the load: an inspector that cannot work on the loaded
+        // data gets a note in its section instead of results.
+        std::string reason;
+        if (!ins->canCompute(ds, reason))
+        {
+            logwrn << "not running inspector " << ins->name() << ": " << reason;
+
+            auto& section = root.addSubSection(ins->name());
+            section.addText("Note").addText("The inspector was not run. " + reason);
+            continue;
+        }
+
         if (ins->requiresLoadedDataset())
         {
             // Heavy compute on a worker thread; keep the Qt event loop free on
@@ -1184,6 +1222,13 @@ void AnalyzeDataSourceTask::run()
 
         // Report writing is always on the main thread.
         ins->writeReport(root);
+
+        if (ds)
+        {
+            auto notes = ins->missingOptionalVariableNotes(*ds);
+            if (!notes.empty() && root.hasSubSection(ins->name()))
+                root.getSubSection(ins->name()).addText("Variables Without Values").addList(notes);
+        }
 
         logRAM("inspector " + ins->name() + " after writeReport");
     }
