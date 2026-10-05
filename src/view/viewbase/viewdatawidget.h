@@ -189,6 +189,7 @@ protected:
     void clearIntermediateRedrawData();
 
     void endTool();
+    ViewToolSwitcher* toolSwitcher() { return tool_switcher_; } // null before the view widget set it
 
     void setDrawState(DrawState state) { draw_state_ = state; }
     DrawState drawState() const { return draw_state_; }

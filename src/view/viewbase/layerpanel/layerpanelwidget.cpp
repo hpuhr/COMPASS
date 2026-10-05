@@ -69,6 +69,7 @@ void LayerPanelWidget::init(LayerTreeItemDelegate* delegate)
     layout->setMargin(0);
 
     tree_view_ = new QTreeView(this);
+    tree_view_->setObjectName("layer_tree"); // ui tests: item paths and context menus
     tree_view_->setModel(model_);
 
     delegate_ = delegate ? delegate : new LayerTreeItemDelegate(this);

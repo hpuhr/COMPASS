@@ -385,18 +385,44 @@ const std::vector<std::pair<double, double>>& Sector::points() const
     return points_;
 }
 
+void Sector::points(const std::vector<std::pair<double,double>>& points, bool notify)
+{
+    loginf << "num points " << points.size();
+
+    traced_assert(points.size() >= 3);
+
+    points_ = points;
+
+    createPolygon();
+
+    // the fast inside test and the delta shape were built from the old polygon
+    inside_test_.reset();
+    inside_test_built_     = false;
+    inside_test_delta_deg_ = 0.0;
+    ogr_polygon_delta_.reset();
+    delta_shape_empty_ = false;
+    lat_min_delta_.reset();
+    lat_max_delta_.reset();
+    lon_min_delta_.reset();
+    lon_max_delta_.reset();
+
+    if (notify)
+        save();
+}
+
 std::string Sector::colorStr()
 {
     return color_str_;
 }
 
-void Sector::colorStr(std::string value)
+void Sector::colorStr(std::string value, bool notify)
 {
     loginf << "'" << value << "'";
 
     color_str_ = value;
 
-    save();
+    if (notify)
+        save();
 }
 
 void Sector::removeColorStr()
@@ -404,6 +430,11 @@ void Sector::removeColorStr()
     color_str_ = default_color;
 
     save();
+}
+
+std::string Sector::defaultColorStr()
+{
+    return default_color;
 }
 
 void Sector::exclude(bool ok)
@@ -485,13 +516,14 @@ void Sector::removeMaximumAltitude()
     save();
 }
 
-void Sector::name(const std::string& name)
+void Sector::name(const std::string& name, bool notify)
 {
     loginf << "'" << name << "'";
 
     name_ = name;
 
-    save();
+    if (notify)
+        save();
 }
 
 void Sector::layerName(const std::string& layer_name, bool notify)

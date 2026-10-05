@@ -334,6 +334,15 @@ public:
     void moveSector(unsigned int id, const std::string& old_layer, const std::string& new_layer);
     void renameSectorLayer(const std::string& old_name, const std::string& new_name);
 
+    // edits of existing sectors from the views: apply, save to disk and DB, emit
+    // sectorsChangedSignal. The Sector setters alone save but emit nothing.
+    // returns false if a sector of the new name already exists in the layer
+    bool renameSector(std::shared_ptr<Sector> sector, const std::string& new_name);
+    void setSectorPoints(std::shared_ptr<Sector> sector,
+                         const std::vector<std::pair<double,double>>& points);
+    void setSectorColor(std::shared_ptr<Sector> sector, QColor color);
+    void setSectorLayerColor(const std::string& layer_name, QColor color);
+
     void importAirSpace(const AirSpace& air_space,
                         const std::map<std::string, bool>& sectors_to_import,
                         const std::string& target_layer_name = "");
@@ -396,6 +405,7 @@ public:
     // Utility
     // ================================================================
     void rebuildSectorLayers();
+    void persistSectorEdit();
     static std::string basePath();
     COMPASS& compass() { return compass_; }
 

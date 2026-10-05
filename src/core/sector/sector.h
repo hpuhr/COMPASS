@@ -146,7 +146,7 @@ public:
     unsigned int id() const;
 
     std::string name() const;
-    void name(const std::string& name);
+    void name(const std::string& name, bool notify = true); // notify: save via the save callback
 
     std::string layerName() const;
     void layerName(const std::string& layer_name, bool notify = true);
@@ -159,9 +159,13 @@ public:
     unsigned int size () { return points_.size(); }
 
     const std::vector<std::pair<double, double>>& points() const;
+    /// replaces the polygon (lat, lon pairs, at least 3), rebuilds the polygon and the inside
+    /// test caches. notify: save via the save callback
+    void points(const std::vector<std::pair<double,double>>& points, bool notify = true);
 
     std::string colorStr();
-    void colorStr(std::string value);
+    void colorStr(std::string value, bool notify = true); // notify: save via the save callback
+    static std::string defaultColorStr();
     void removeColorStr();
 
     bool isExclusionSector() const { return exclusion_sector_; }

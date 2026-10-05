@@ -228,9 +228,14 @@ bool injectUIEvent(QWidget* parent,
     }
     else if (evt_type == "contextmenu")
     {
-        //no parameters - posts a context menu event to the widget
-        //(at the current item for item views)
-        return injectContextMenuEvent(w.second, "", delay);
+        //optional parameter: item path (A|B|C) for tree views, else the event is
+        //posted at the current item for item views
+        if (params.size() > 1)
+            return false;
+
+        QStringList path_to_item = params.size() == 1 ? params[ 0 ].split("|") : QStringList();
+
+        return injectContextMenuEvent(w.second, "", path_to_item, delay);
     }
     else if (evt_type == "focusout")
     {

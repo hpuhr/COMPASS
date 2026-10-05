@@ -2222,6 +2222,82 @@ void DBContextManager::saveSector(shared_ptr<Sector> sector)
         writeContextToDB();
 }
 
+bool DBContextManager::renameSector(shared_ptr<Sector> sector, const string& new_name)
+{
+    traced_assert(sectors_loaded_);
+    traced_assert(sector);
+    traced_assert(!new_name.empty());
+
+    if (sector->name() == new_name)
+        return true;
+
+    if (hasSector(new_name, sector->layerName()))
+    {
+        logwrn << "sector '" << new_name << "' already exists in layer '" << sector->layerName() << "'";
+        return false;
+    }
+
+    sector->name(new_name, false);
+
+    persistSectorEdit();
+
+    return true;
+}
+
+void DBContextManager::setSectorPoints(shared_ptr<Sector> sector,
+                                       const vector<pair<double,double>>& points)
+{
+    traced_assert(sectors_loaded_);
+    traced_assert(sector);
+    traced_assert(points.size() >= 3);
+
+    sector->points(points, false);
+
+    persistSectorEdit();
+}
+
+void DBContextManager::setSectorColor(shared_ptr<Sector> sector, QColor color)
+{
+    traced_assert(sectors_loaded_);
+    traced_assert(sector);
+
+    sector->colorStr(color.name().toStdString(), false);
+
+    persistSectorEdit();
+}
+
+void DBContextManager::setSectorLayerColor(const string& layer_name, QColor color)
+{
+    traced_assert(sectors_loaded_);
+
+    bool changed = false;
+
+    for (auto& s : activeContext().sectors())
+    {
+        if (s->layerName() == layer_name)
+        {
+            s->colorStr(color.name().toStdString(), false);
+            changed = true;
+        }
+    }
+
+    if (!changed)
+        return;
+
+    persistSectorEdit();
+}
+
+// persists an edit of existing sectors and notifies the listeners. The cached layers hold the
+// same objects, so no rebuild is needed.
+void DBContextManager::persistSectorEdit()
+{
+    saveContext(activeContextName());
+    if (compass_.dbOpened())
+        writeContextToDB();
+
+    emit sectorsChangedSignal();
+}
+
 void DBContextManager::moveSector(unsigned int id, const string& old_layer, const string& new_layer)
 {
     traced_assert(sectors_loaded_);

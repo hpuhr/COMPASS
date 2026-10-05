@@ -114,6 +114,7 @@ namespace ui_test
                              int delay = -1);
     bool injectContextMenuEvent(QWidget* root,
                                 const QString& obj_name,
+                                const QStringList& path_to_item = QStringList(),
                                 int delay = -1);
     bool injectComboBoxEditEvent(QWidget* root,
                                  const QString& obj_name,

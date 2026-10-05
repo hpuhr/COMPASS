@@ -22,6 +22,9 @@
 #include <QCursor>
 #include <QKeySequence>
 
+#include <functional>
+#include <map>
+
 class QWidget;
 class QShortcut;
 
@@ -67,6 +70,10 @@ public:
 
     void update();
 
+    /// Called on the Escape shortcut before the current tool is ended. Returns true if the
+    /// active tool consumed the Escape, e.g. to cancel a running step, the tool then stays.
+    void setEscapeHandler(std::function<bool()> handler) { escape_handler_ = handler; }
+
 signals:
     void toolChanged(int id, const QCursor& cursor);
 
@@ -77,4 +84,6 @@ private:
     int default_tool_ = -1;
 
     QWidget* data_widget_ = nullptr;
+
+    std::function<bool()> escape_handler_;
 };

@@ -763,26 +763,15 @@ bool injectMenuEvent(QWidget* root,
 }
 
 /**
- * Selects an item of a tree view via a path of display texts, by expanding
- * the parent items and injecting a click event onto the item.
+ * Resolves a tree item via a path of display texts, expanding the parents on the
+ * way and scrolling to the item. Returns an invalid index if a part is not found.
  */
-bool injectTreeViewEvent(QWidget* root,
-                         const QString& obj_name,
-                         const QStringList& path_to_item,
-                         int delay)
+static QModelIndex resolveTreeItem(QTreeView* tree, const QStringList& path_to_item)
 {
-    auto obj = findObjectAs<QTreeView>(root, obj_name);
-    if (obj.first != rtcommand::FindObjectErrCode::NoError)
-    {
-        logObjectError("injectTreeViewEvent", obj_name, obj.first);
-        return false;
-    }
-
-    QTreeView* tree = obj.second;
     QAbstractItemModel* model = tree->model();
 
     if (!model || path_to_item.empty())
-        return false;
+        return QModelIndex();
 
     //traverse the model along the given display text path
     QModelIndex current; //invalid index = root
@@ -805,7 +794,7 @@ bool injectTreeViewEvent(QWidget* root,
         if (!found.isValid())
         {
             loginf << "item text '" << part.toStdString() << "' not found";
-            return false;
+            return QModelIndex();
         }
 
         current = found;
@@ -817,6 +806,31 @@ bool injectTreeViewEvent(QWidget* root,
 
     tree->scrollTo(current);
 
+    return current;
+}
+
+/**
+ * Selects an item of a tree view via a path of display texts, by expanding
+ * the parent items and injecting a click event onto the item.
+ */
+bool injectTreeViewEvent(QWidget* root,
+                         const QString& obj_name,
+                         const QStringList& path_to_item,
+                         int delay)
+{
+    auto obj = findObjectAs<QTreeView>(root, obj_name);
+    if (obj.first != rtcommand::FindObjectErrCode::NoError)
+    {
+        logObjectError("injectTreeViewEvent", obj_name, obj.first);
+        return false;
+    }
+
+    QTreeView* tree = obj.second;
+
+    QModelIndex current = resolveTreeItem(tree, path_to_item);
+    if (!current.isValid())
+        return false;
+
     QRect r = tree->visualRect(current);
     if (!r.isValid())
         return false;
@@ -827,13 +841,17 @@ bool injectTreeViewEvent(QWidget* root,
 
 /**
  * Posts a context menu event to the given widget. For item views the event is
- * posted at the current item, otherwise at the widget center.
+ * posted at the given item (path of display texts, tree views only), else at the
+ * current item, otherwise at the widget center. The item path avoids a click,
+ * which a delegate may consume (e.g. a visibility toggle) without making the
+ * item current.
  * The event is posted (not sent), so this returns before a context menu shown
  * via QMenu::exec() blocks - the resulting popup menu can then be driven via
  * injectPopupMenuEvent.
  */
 bool injectContextMenuEvent(QWidget* root,
                             const QString& obj_name,
+                            const QStringList& path_to_item,
                             int delay)
 {
     auto obj = findObjectAs<QWidget>(root, obj_name);
@@ -848,8 +866,26 @@ bool injectContextMenuEvent(QWidget* root,
 
     if (auto* view = dynamic_cast<QAbstractItemView*>(target))
     {
-        //for item views: target the current item inside the viewport
-        QModelIndex idx = view->currentIndex();
+        QModelIndex idx;
+
+        if (!path_to_item.empty())
+        {
+            auto* tree = dynamic_cast<QTreeView*>(view);
+            if (!tree)
+            {
+                loginf << "item path given for a non-tree view";
+                return false;
+            }
+
+            idx = resolveTreeItem(tree, path_to_item);
+            if (!idx.isValid())
+                return false;
+
+            view->setCurrentIndex(idx);
+        }
+        else
+            idx = view->currentIndex(); //for item views: target the current item inside the viewport
+
         if (idx.isValid())
         {
             view->scrollTo(idx);

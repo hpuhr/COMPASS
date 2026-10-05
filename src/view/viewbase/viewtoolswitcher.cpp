@@ -31,9 +31,15 @@ void ViewToolSwitcher::setDataWidget(QWidget* data_widget)
 
     if (data_widget_)
     {
-        //register shortcut for ending a tool
+        //register shortcut for ending a tool, the active tool may consume the Escape first
         auto end_tool_shortcut = new QShortcut(Qt::Key_Escape, data_widget_);
-        connect(end_tool_shortcut, &QShortcut::activated, [ = ] () { this->endCurrentTool(); });
+        connect(end_tool_shortcut, &QShortcut::activated, [ = ] ()
+        {
+            if (escape_handler_ && escape_handler_())
+                return;
+
+            this->endCurrentTool();
+        });
     }
 }
 
