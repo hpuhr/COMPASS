@@ -284,7 +284,16 @@ void DBFilter::deleteCondition(DBFilterCondition* condition)
 DBFilterWidget* DBFilter::widget()
 {
     if (!widget_)
+    {
         widget_.reset(createWidget());
+
+        //a filter marked unusable before its widget existed
+        if (unusable_)
+        {
+            widget_->collapse();
+            widget_->setDisabled(true);
+        }
+    }
 
     traced_assert(widget_);
     return widget_.get();
@@ -330,6 +339,29 @@ void DBFilter::loadViewPointConditions (const nlohmann::json& filters)
             logerr << name_ << ": cond_name '" << cond_name << "' not found";
         else
             (*it)->setValue(value);
+    }
+}
+
+void DBFilter::setUnusable(bool unusable)
+{
+    if (unusable_ == unusable)
+        return;
+
+    unusable_ = unusable;
+
+    if (!widget_)
+        return;
+
+    if (unusable_)
+    {
+        widget_->collapse();
+        widget_->setDisabled(true);
+    }
+    else
+    {
+        widget_->setDisabled(disabled_);
+        widget_->expand();
+        widget_->update();
     }
 }
 

@@ -35,6 +35,7 @@
 
 #include "sector.h"
 #include "sectorlayer.h"
+#include "sectorinsidecache.h"
 
 #include "task/taskmanager.h"
 #include "task/result/taskresult.h"
@@ -136,6 +137,8 @@ DBInterface::DBInterface(nlohmann::json& config, COMPASS& compass)
     }
 
     registerParameter("preserve_insert_order", &preserve_insert_order_, preserve_insert_order_);
+
+    sector_inside_cache_ = std::make_shared<SectorInsideCache>();
 
     createSubConfigurables();
 }
@@ -244,6 +247,12 @@ void DBInterface::openDBInMemory()
 
 /**
  */
+SectorInsideCache& DBInterface::sectorInsideCache()
+{
+    traced_assert(sector_inside_cache_);
+    return *sector_inside_cache_;
+}
+
 void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite)
 {
     try
@@ -318,6 +327,11 @@ void DBInterface::openDBFileInternal(const std::string& filename, bool overwrite
 
         if (!existsTaskLogTable())
             createTaskLogTable();
+
+        //the sector_inside() function of the Sectors filter, per database instance
+        auto function_result = db_instance_->defaultConnection().registerSectorInsideFunction(sector_inside_cache_);
+        if (!function_result.ok())
+            logwrn << "sector inside function not registered: " << function_result.error();
 
         //determine maximum report content id
         auto max_id = getMaxReportContentID();

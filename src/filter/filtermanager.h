@@ -55,6 +55,8 @@ public slots:
     void databaseOpenedSlot();
     void databaseClosedSlot();
     void dataSourcesChangedSlot();
+    /// sector layers or the active context changed, refreshes the Sectors filter
+    void sectorsChangedSlot();
 
     void appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode_current);
 

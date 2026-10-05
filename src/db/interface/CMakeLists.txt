@@ -23,6 +23,7 @@ target_sources(compass_core
         "${CMAKE_CURRENT_LIST_DIR}/duckdbsettings.h"
         "${CMAKE_CURRENT_LIST_DIR}/duckdbexecresult.h"
         "${CMAKE_CURRENT_LIST_DIR}/duckdbreader.h"
+        "${CMAKE_CURRENT_LIST_DIR}/duckdbsectorfunctions.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbdefs.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbinstance.cpp"
@@ -41,4 +42,5 @@ target_sources(compass_core
         "${CMAKE_CURRENT_LIST_DIR}/duckdbsettings.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/duckdbexecresult.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/duckdbreader.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/duckdbsectorfunctions.cpp"
 )

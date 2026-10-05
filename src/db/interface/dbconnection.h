@@ -42,6 +42,8 @@ class SQLGenerator;
 
 /**
  */
+class SectorInsideCache;
+
 class DBConnection
 {
 public:
@@ -103,6 +105,13 @@ public:
                                                          size_t offset, 
                                                          size_t chunk_size) = 0;
     virtual std::string dbInfo() { return ""; }
+
+    /// registers the sector_inside() function of the Sectors filter in the database, see
+    /// DuckDBSectorFunctions::registerCacheFunction(). Not supported by default.
+    virtual Result registerSectorInsideFunction(const std::shared_ptr<SectorInsideCache>& cache)
+    {
+        return Result::failed("sector inside function not supported by this database");
+    }
 
     const DBInstance* instance() const { return instance_; }
     

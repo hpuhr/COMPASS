@@ -47,6 +47,7 @@ class BufferWriter;
 class Job;
 class Sector;
 class SectorLayer;
+class SectorInsideCache;
 class Result;
 class DBContent;
 
@@ -115,6 +116,11 @@ public:
     bool ready() const;
 
     const DBInstance& dbInstance() const;
+
+    /// sector geometry behind the sector_inside() database function, fed by the Sectors filter.
+    /// The function is registered on every database open.
+    SectorInsideCache& sectorInsideCache();
+    std::shared_ptr<SectorInsideCache> sectorInsideCachePtr() const { return sector_inside_cache_; }
 
     // insert data and create associated data sources
     void insertDBContent(DBContent& dbcontent, std::shared_ptr<Buffer> buffer);
@@ -303,6 +309,8 @@ protected:
     Result cleanupDBInternal();
 
     std::unique_ptr<DBInstance> db_instance_;
+
+    std::shared_ptr<SectorInsideCache> sector_inside_cache_;
 
     bool properties_loaded_ {false};
     const std::string dbcolumn_content_property_name_{"dbcolumn_content"};

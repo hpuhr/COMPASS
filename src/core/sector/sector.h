@@ -25,6 +25,7 @@
 
 #include <functional>
 #include <memory>
+#include <vector>
 
 #include <boost/optional.hpp>
 
@@ -35,6 +36,7 @@ class TargetPosition;
 }
 
 class OGRPolygon;
+class OGRGeometry;
 
 /**
  * Fast sector inside test via image discretization.
@@ -54,11 +56,27 @@ public:
         Border
     };
 
+    using Ring = std::vector<std::pair<double,double>>;
+
+    /**
+     * One polygon part, an exterior ring and its holes.
+     */
+    struct Part
+    {
+        Ring              exterior;
+        std::vector<Ring> holes;
+    };
+
     SectorInsideTest();
-    SectorInsideTest(const std::vector<std::pair<double,double>>& points, 
-                     double xmin, 
-                     double ymin, 
-                     double xmax, 
+    SectorInsideTest(const Ring& points,
+                     double xmin,
+                     double ymin,
+                     double xmax,
+                     double ymax);
+    SectorInsideTest(const std::vector<Part>& parts,
+                     double xmin,
+                     double ymin,
+                     double xmax,
                      double ymax);
     virtual ~SectorInsideTest();
 
@@ -75,10 +93,10 @@ private:
 
     void map2Image(double& xm, double& ym, double x, double y) const;
 
-    void create(const std::vector<std::pair<double,double>>& points, 
-                double xmin, 
-                double ymin, 
-                double xmax, 
+    void create(const std::vector<Part>& parts,
+                double xmin,
+                double ymin,
+                double xmax,
                 double ymax);
 
     QImage img_;
@@ -170,6 +188,15 @@ public:
                           bool has_ground_bit,
                           bool ground_bit_set,
                           InsideCheckType check_type = InsideCheckType::XYZ) const;
+    /**
+     * Planar inside check with a tolerance in degrees.
+     * delta_deg > 0: inside the sector inflated by delta_deg (within delta_deg of the sector).
+     * delta_deg < 0: inside the sector deflated by |delta_deg| (deeper than |delta_deg| inside).
+     * delta_deg = 0: plain containment.
+     * Fast only after createFastInsideTest(delta_deg) was called for the same delta, otherwise
+     * the slow probe ring is used (delta_deg >= 0 only, a negative delta then degrades to plain
+     * containment).
+     */
     bool isInside(double latitude, double longitude, double delta_deg) const;
 
     std::pair<double, double> getMinMaxLatitude() const;
@@ -177,9 +204,11 @@ public:
 
     /**
      * Creates the fast inside test.
-     * If delta_deg > 0 the polygon is inflated by delta_deg first, so that
-     * isInside(lat, lon, delta_deg) reduces to a plain containment check against
-     * the inflated shape. Rebuilds only if the requested delta differs from the cached one.
+     * If delta_deg != 0 the polygon is inflated (delta_deg > 0) or deflated (delta_deg < 0) by
+     * delta_deg first, so that isInside(lat, lon, delta_deg) reduces to a plain containment check
+     * against that shape. Rebuilds only if the requested delta differs from the cached one.
+     * Thread safety: isInside() is read-only afterwards and may be called from several threads,
+     * this method is not.
      */
     void createFastInsideTest(double delta_deg = 0.0) const;
 
@@ -220,8 +249,12 @@ protected:
     mutable double inside_test_delta_deg_ = 0.0;
     mutable bool   inside_test_built_     = false;
 
-    //polygon inflated by inside_test_delta_deg_, only set if that delta is > 0
-    mutable std::unique_ptr<OGRPolygon> ogr_polygon_delta_;
+    //polygon inflated (delta > 0) or deflated (delta < 0) by inside_test_delta_deg_, only set if
+    //that delta is != 0. A deflated concave sector can split, so this is a general geometry.
+    mutable std::unique_ptr<OGRGeometry> ogr_polygon_delta_;
+
+    //true if deflating by inside_test_delta_deg_ left nothing, every position is outside then
+    mutable bool delta_shape_empty_ = false;
 
     //bounding rect of ogr_polygon_delta_
     mutable boost::optional<double> lat_min_delta_;

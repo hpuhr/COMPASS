@@ -126,4 +126,8 @@ protected:
     std::unique_ptr<DBFilterWidget> widget_{nullptr};
 
     virtual DBFilterWidget* createWidget();
+
+    /// marks the filter unusable (no clause, widget collapsed and disabled) or usable again,
+    /// for filters whose preconditions change at runtime
+    void setUnusable(bool unusable);
 };

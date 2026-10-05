@@ -21,11 +21,13 @@
 #include "json.hpp"
 
 #include "traced_assert.h"
+#include <algorithm>
 #include <cmath>
 
 #include <ogr_geometry.h>
 
 #include <QPainter>
+#include <QPainterPath>
 
 using namespace nlohmann;
 using namespace std;
@@ -38,14 +40,25 @@ const string default_color{"#AAAAAA"};
 
 SectorInsideTest::SectorInsideTest() = default;
 
-SectorInsideTest::SectorInsideTest(const std::vector<std::pair<double,double>>& points, 
-                                   double xmin, 
-                                   double ymin, 
-                                   double xmax, 
+SectorInsideTest::SectorInsideTest(const Ring& points,
+                                   double xmin,
+                                   double ymin,
+                                   double xmax,
                                    double ymax)
-
 {
-    create(points, xmin, ymin, xmax, ymax);
+    Part part;
+    part.exterior = points;
+
+    create({ part }, xmin, ymin, xmax, ymax);
+}
+
+SectorInsideTest::SectorInsideTest(const std::vector<Part>& parts,
+                                   double xmin,
+                                   double ymin,
+                                   double xmax,
+                                   double ymax)
+{
+    create(parts, xmin, ymin, xmax, ymax);
 }
 
 SectorInsideTest::~SectorInsideTest() = default;
@@ -56,13 +69,16 @@ void SectorInsideTest::map2Image(double& xm, double& ym, double x, double y) con
     ym = ImgBorder + BorderRegion + (y - ymin_) * ty_;
 }
 
-void SectorInsideTest::create(const std::vector<std::pair<double,double>>& points, 
-                              double xmin, 
-                              double ymin, 
-                              double xmax, 
+void SectorInsideTest::create(const std::vector<Part>& parts,
+                              double xmin,
+                              double ymin,
+                              double xmax,
                               double ymax)
 {
     img_ = QImage();
+
+    if (parts.empty())
+        return;
 
     //check if bounds are even valid
     if (!std::isfinite(xmin) ||
@@ -105,58 +121,55 @@ void SectorInsideTest::create(const std::vector<std::pair<double,double>>& point
     img_ = QImage(imgw , imgh, QImage::Format_Grayscale8);
     img_.fill(Qt::black); //initially fill with black color (= all outside)
 
-    size_t n = points.size();
-
-    //convert points to image space
-    QPolygonF poly(n);
-    double xm, ym;
-
-    for (size_t i = 0; i < n; ++i)
+    //convert a ring to image space
+    auto toImage = [&](const Ring& ring)
     {
-        map2Image(xm, ym, points[ i ].first, points[ i ].second);
-        poly[ i ] = QPointF(xm, ym);
+        QPolygonF poly(ring.size());
+        double xm, ym;
+
+        for (size_t i = 0; i < ring.size(); ++i)
+        {
+            map2Image(xm, ym, ring[ i ].first, ring[ i ].second);
+            poly[ i ] = QPointF(xm, ym);
+        }
+
+        return poly;
+    };
+
+    //all rings in one path. the odd-even fill rule paints the exterior of a part white, its
+    //holes black again and a part inside a hole white again, in any part order
+    QPainterPath path;
+    path.setFillRule(Qt::OddEvenFill);
+
+    for (const auto& part : parts)
+    {
+        path.addPolygon(toImage(part.exterior));
+        path.closeSubpath();
+
+        for (const auto& hole : part.holes)
+        {
+            path.addPolygon(toImage(hole));
+            path.closeSubpath();
+        }
     }
 
     //!disable antialiasing!
     QPainter p(&img_);
     p.setRenderHint(QPainter::RenderHint::Antialiasing, false);
 
-    QPen pen;
-    QBrush brush;
-
-    pen.setCapStyle(Qt::PenCapStyle::RoundCap);
-    pen.setJoinStyle(Qt::PenJoinStyle::RoundJoin);
-
     //draw inside region (= region where we assume inside for sure)
-    {
-        pen.setColor(Qt::white);
-        pen.setWidth(1);
+    p.fillPath(path, QBrush(Qt::white, Qt::BrushStyle::SolidPattern));
 
-        brush.setColor(Qt::white);
-        brush.setStyle(Qt::BrushStyle::SolidPattern);
-
-        p.setPen(pen);
-        p.setBrush(brush);
-        p.drawPolygon(poly);
-    }
-    
-    //draw border region (= region where we need an accurate - geometrical - inside check)
+    //draw border region (= region where we need an accurate - geometrical - inside check) along
+    //every ring, exterior and hole alike
     {
+        QPen pen;
+        pen.setCapStyle(Qt::PenCapStyle::RoundCap);
+        pen.setJoinStyle(Qt::PenJoinStyle::RoundJoin);
         pen.setColor(Qt::gray);
         pen.setWidth(BorderRegion); //thicker pen for border region
-    
-        p.setPen(pen);
-        p.setBrush(Qt::NoBrush);
-        p.drawPolygon(poly);
 
-#if 0
-        //[DEBUG]
-        pen.setColor(Qt::black);
-        pen.setWidth(1);
-
-        p.setPen(pen);
-        p.drawPolygon(poly);
-#endif
+        p.strokePath(path, pen);
     }
 }
 
@@ -588,15 +601,38 @@ bool Sector::isInside(const dbContent::TargetPosition& pos,
 
 bool Sector::isInside(double latitude, double longitude, double delta_deg) const
 {
-    //no inflated polygon for this delta available => fall back to the slow probe ring
-    if (!ogr_polygon_delta_ || inside_test_delta_deg_ != delta_deg)
-        return isInsideProbeRing(latitude, longitude, delta_deg);
+    //no fast test prepared for this delta
+    if (!inside_test_built_ || inside_test_delta_deg_ != delta_deg)
+    {
+        //the probe ring samples around the position, it has no meaning for a deflation
+        if (delta_deg < 0.0)
+        {
+            logwrn << "sector '" << name_ << "' has no prepared shape for delta " << delta_deg
+                   << ", using plain containment";
+            return isInsideProbeRing(latitude, longitude, 0.0);
+        }
 
-    //check bounding rect of the inflated polygon
-    if ((lat_min_delta_.has_value() && latitude  < lat_min_delta_.value()) ||
-        (lat_max_delta_.has_value() && latitude  > lat_max_delta_.value()) ||
-        (lon_min_delta_.has_value() && longitude < lon_min_delta_.value()) ||
-        (lon_max_delta_.has_value() && longitude > lon_max_delta_.value()))
+        return isInsideProbeRing(latitude, longitude, delta_deg);
+    }
+
+    //deflating removed the whole sector
+    if (delta_shape_empty_)
+        return false;
+
+    //delta shape wanted but not available (buffering failed) => slow fallback
+    if (delta_deg != 0.0 && !ogr_polygon_delta_)
+        return isInsideProbeRing(latitude, longitude, std::max(delta_deg, 0.0));
+
+    //check bounding rect of the shape in use
+    const auto& lat_min = ogr_polygon_delta_ ? lat_min_delta_ : lat_min_;
+    const auto& lat_max = ogr_polygon_delta_ ? lat_max_delta_ : lat_max_;
+    const auto& lon_min = ogr_polygon_delta_ ? lon_min_delta_ : lon_min_;
+    const auto& lon_max = ogr_polygon_delta_ ? lon_max_delta_ : lon_max_;
+
+    if ((lat_min.has_value() && latitude  < lat_min.value()) ||
+        (lat_max.has_value() && latitude  > lat_max.value()) ||
+        (lon_min.has_value() && longitude < lon_min.value()) ||
+        (lon_max.has_value() && longitude > lon_max.value()))
     {
         return false;
     }
@@ -611,12 +647,14 @@ bool Sector::isInside(double latitude, double longitude, double delta_deg) const
         else if (res == SectorInsideTest::CheckResult::Inside)
             return true;
 
-        //SectorInsideTest::CheckResult::Border => check the inflated polygon geometrically
+        //SectorInsideTest::CheckResult::Border => check the shape geometrically
     }
 
     OGRPoint ogr_pos(latitude, longitude);
 
-    return ogr_polygon_delta_->Contains(&ogr_pos);
+    const OGRGeometry* shape = ogr_polygon_delta_ ? ogr_polygon_delta_.get() : ogr_polygon_.get();
+
+    return shape->Contains(&ogr_pos);
 }
 
 bool Sector::isInsideProbeRing(double latitude, double longitude, double delta_deg) const
@@ -724,86 +762,121 @@ void Sector::createFastInsideTest(double delta_deg) const
     inside_test_delta_deg_ = delta_deg;
 
     ogr_polygon_delta_.reset();
+    delta_shape_empty_ = false;
     lat_min_delta_.reset();
     lat_max_delta_.reset();
     lon_min_delta_.reset();
     lon_max_delta_.reset();
 
-    //points and bounds the raster is generated from, by default the uninflated polygon
-    const std::vector<std::pair<double,double>>* points = &points_;
+    //shape and bounds the raster is generated from, by default the unbuffered polygon
+    std::vector<SectorInsideTest::Part> parts;
     double lat_min = lat_min_.value();
     double lat_max = lat_max_.value();
     double lon_min = lon_min_.value();
     double lon_max = lon_max_.value();
 
-    std::vector<std::pair<double,double>> points_delta;
+    bool parts_from_delta = false;
 
-    if (delta_deg > 0.0)
+    if (delta_deg != 0.0)
     {
-        //inflate the polygon by delta once, so that the delta check reduces to plain containment.
-        //num quadrant segments 8 => the arcs around convex corners are approximated well below
-        //the raster resolution
+        //inflate (delta > 0) or deflate (delta < 0) the polygon by delta once, so that the delta
+        //check reduces to plain containment. num quadrant segments 8 => the arcs around convex
+        //corners are approximated well below the raster resolution
         std::unique_ptr<OGRGeometry> buffered (ogr_polygon_->Buffer(delta_deg, 8));
 
-        if (buffered && wkbFlatten(buffered->getGeometryType()) == wkbPolygon)
+        auto ringPoints = [](const OGRLinearRing* ring)
         {
-            std::unique_ptr<OGRPolygon> buffered_poly (buffered.release()->toPolygon());
+            SectorInsideTest::Ring points;
+            points.reserve(ring->getNumPoints());
 
-            const OGRLinearRing* ring = buffered_poly->getExteriorRing();
+            for (int cnt = 0; cnt < ring->getNumPoints(); ++cnt)
+                points.emplace_back(ring->getX(cnt), ring->getY(cnt));
 
-            if (ring && ring->getNumPoints() >= 3)
-            {
-                OGREnvelope env;
-                buffered_poly->getEnvelope(&env);
+            return points;
+        };
 
-                lat_min_delta_ = env.MinX;
-                lat_max_delta_ = env.MaxX;
-                lon_min_delta_ = env.MinY;
-                lon_max_delta_ = env.MaxY;
+        //collects one polygon as raster part, exterior ring plus holes
+        auto addPart = [&](const OGRPolygon* poly)
+        {
+            const OGRLinearRing* exterior = poly->getExteriorRing();
+            if (!exterior || exterior->getNumPoints() < 3)
+                return false;
 
-                //inflating a concave sector can close an opening and create a hole. the raster
-                //stores a single ring only and would report such a hole as inside, so in that
-                //case no raster is generated and the inflated polygon is checked geometrically.
-                if (buffered_poly->getNumInteriorRings() == 0)
-                {
-                    points_delta.reserve(ring->getNumPoints());
+            SectorInsideTest::Part part;
+            part.exterior = ringPoints(exterior);
 
-                    for (int cnt = 0; cnt < ring->getNumPoints(); ++cnt)
-                        points_delta.emplace_back(ring->getX(cnt), ring->getY(cnt));
+            for (int cnt = 0; cnt < poly->getNumInteriorRings(); ++cnt)
+                part.holes.push_back(ringPoints(poly->getInteriorRing(cnt)));
 
-                    points  = &points_delta;
-                    lat_min = env.MinX;
-                    lat_max = env.MaxX;
-                    lon_min = env.MinY;
-                    lon_max = env.MaxY;
-                }
-                else
-                {
-                    loginf << "sector '" << name_ << "' inflated by " << delta_deg
-                           << " has " << buffered_poly->getNumInteriorRings()
-                           << " holes, using the geometric check only";
+            parts.push_back(std::move(part));
+            return true;
+        };
 
-                    points = nullptr;
-                }
+        if (buffered && buffered->IsEmpty())
+        {
+            //deflating removed the whole sector
+            loginf << "sector '" << name_ << "' deflated by " << delta_deg << " is empty";
 
-                ogr_polygon_delta_ = std::move(buffered_poly);
-            }
+            delta_shape_empty_ = true;
+        }
+        else if (buffered && wkbFlatten(buffered->getGeometryType()) == wkbPolygon)
+        {
+            //inflating a concave sector can close an opening and create a hole, the raster
+            //paints holes as outside
+            parts_from_delta = addPart(buffered->toPolygon());
+        }
+        else if (buffered && wkbFlatten(buffered->getGeometryType()) == wkbMultiPolygon)
+        {
+            //deflating a concave sector can split it into several parts
+            const OGRMultiPolygon* multi = buffered->toMultiPolygon();
+
+            for (int cnt = 0; cnt < multi->getNumGeometries(); ++cnt)
+                addPart(multi->getGeometryRef(cnt)->toPolygon());
+
+            parts_from_delta = !parts.empty();
         }
 
-        if (!ogr_polygon_delta_)
-            logwrn << "sector '" << name_ << "' could not be inflated by delta " << delta_deg
+        if (parts_from_delta)
+        {
+            OGREnvelope env;
+            buffered->getEnvelope(&env);
+
+            lat_min_delta_ = env.MinX;
+            lat_max_delta_ = env.MaxX;
+            lon_min_delta_ = env.MinY;
+            lon_max_delta_ = env.MaxY;
+
+            lat_min = env.MinX;
+            lat_max = env.MaxX;
+            lon_min = env.MinY;
+            lon_max = env.MaxY;
+
+            ogr_polygon_delta_ = std::move(buffered);
+        }
+        else if (!delta_shape_empty_)
+        {
+            logwrn << "sector '" << name_ << "' could not be buffered by delta " << delta_deg
                    << ", falling back to the slow inside check";
+        }
     }
 
-    if (!points)
+    if (delta_shape_empty_)
     {
-        //no raster for this shape, the geometric check on the inflated polygon is used instead
+        //nothing left to test
         inside_test_.reset();
         return;
     }
 
+    if (!parts_from_delta)
+    {
+        SectorInsideTest::Part part;
+        part.exterior = points_;
+
+        parts.push_back(std::move(part));
+    }
+
     //create sector inside test
-    inside_test_ = SectorInsideTest(*points, lat_min, lon_min, lat_max, lon_max);
+    inside_test_ = SectorInsideTest(parts, lat_min, lon_min, lat_max, lon_max);
 
 #if 0
     //[DEBUG]

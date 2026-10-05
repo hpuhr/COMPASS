@@ -38,6 +38,7 @@
 #include "reftrajaccuracyfilter.h"
 #include "mlatrufilter.h"
 #include "excludedtimewindowsfilter.h"
+#include "sectorsfilter.h"
 
 #include "json.hpp"
 
@@ -169,6 +170,11 @@ void FilterManager::generateSubConfigurable(nlohmann::json& child_json)
         MLATRUFilter* filter = new MLATRUFilter(child_json, this, var_resolver_);
         filters_.emplace_back(filter);
     }
+    else if (class_name == "SectorsFilter")
+    {
+        SectorsFilter* filter = new SectorsFilter(child_json, this, var_resolver_);
+        filters_.emplace_back(filter);
+    }
     else if (class_name == "ExcludedTimeWindowsFilter")
     {
         ExcludedTimeWindowsFilter* filter = new ExcludedTimeWindowsFilter(child_json, this, var_resolver_);
@@ -216,6 +222,7 @@ void FilterManager::checkSubConfigurables()
     ensureFilter("RefTrajAccuracyFilter");
     ensureFilter("MLATRUFilter");
     ensureFilter("ExcludedTimeWindowsFilter");
+    ensureFilter("SectorsFilter");
 }
 
 std::string FilterManager::getSQLCondition(const std::string& dbcontent_name, dbContent::VariableSet& read_set)
@@ -418,6 +425,12 @@ void FilterManager::showViewPointSlot (const ViewableDataConfig* vp)
                 continue;
             }
 
+            if ((*it)->unusable())
+            {
+                logwrn << "filter '" << filter_name << "' is unusable, view point conditions ignored";
+                continue;
+            }
+
             (*it)->setActive(true);
             (*it)->loadViewPointConditions(filters);
         }
@@ -499,6 +512,19 @@ void FilterManager::databaseOpenedSlot()
 
     if (hasFilter("Time of Day"))
         getFilter("Time of Day")->widget()->update();
+
+    //the context of the database is active now, drop sector layers of a previous context
+    if (hasFilter("Sectors"))
+    {
+        SectorsFilter* sectors_filter = dynamic_cast<SectorsFilter*>(getFilter("Sectors"));
+        traced_assert(sectors_filter);
+
+        bool was_unusable = sectors_filter->unusable();
+        sectors_filter->removeLayersNotInContext();
+
+        if (was_unusable != sectors_filter->unusable())
+            emit changedFiltersSignal();
+    }
 }
 
 void FilterManager::databaseClosedSlot()
@@ -507,6 +533,23 @@ void FilterManager::databaseClosedSlot()
 
     if (widget_)
         widget_->setDisabled(true);
+}
+
+void FilterManager::sectorsChangedSlot()
+{
+    loginf;
+
+    if (!hasFilter("Sectors"))
+        return;
+
+    SectorsFilter* filter = dynamic_cast<SectorsFilter*>(getFilter("Sectors"));
+    traced_assert(filter);
+
+    bool usability_changed = filter->updateUsability();
+    filter->updateWidget();
+
+    if (usability_changed)
+        emit changedFiltersSignal();
 }
 
 void FilterManager::dataSourcesChangedSlot()

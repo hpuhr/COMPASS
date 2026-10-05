@@ -21,6 +21,7 @@
 #include "duckdbprepare.h"
 #include "duckdbexecresult.h"
 #include "duckdbreader.h"
+#include "duckdbsectorfunctions.h"
 
 #include "dbtemporarytable.h"
 #include "sqlgenerator.h"
@@ -474,6 +475,19 @@ ResultT<std::vector<std::string>> DuckDBConnection::getTableList_impl()
 
 /**
  */
+Result DuckDBConnection::registerSectorInsideFunction(const std::shared_ptr<SectorInsideCache>& cache)
+{
+    if (!connected() || !connection_)
+        return Result::failed("not connected");
+
+    std::string error;
+
+    if (!DuckDBSectorFunctions::registerCacheFunction(connection_, cache, &error))
+        return Result::failed(error);
+
+    return Result::succeeded();
+}
+
 std::string DuckDBConnection::dbInfo()
 {
     const std::string& fn = instance()->dbFilename();

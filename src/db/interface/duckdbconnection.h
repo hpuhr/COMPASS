@@ -53,6 +53,8 @@ public:
                                                  size_t chunk_size) override final;
     std::string dbInfo() override final;
 
+    Result registerSectorInsideFunction(const std::shared_ptr<SectorInsideCache>& cache) override final;
+
 protected:
     Result connect_impl() override final;
     void disconnect_impl() override final;

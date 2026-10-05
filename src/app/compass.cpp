@@ -185,6 +185,11 @@ COMPASS::COMPASS(ConfigurationManager& config_manager)
     QObject::connect(context_manager_.get(), &context::DBContextManager::dataSourcesChangedSignal,
                      filter_manager_.get(), &FilterManager::dataSourcesChangedSlot);
 
+    QObject::connect(context_manager_.get(), &context::DBContextManager::activeContextChangedSignal,
+                     filter_manager_.get(), &FilterManager::sectorsChangedSlot);
+    QObject::connect(context_manager_.get(), &context::DBContextManager::sectorsChangedSignal,
+                     filter_manager_.get(), &FilterManager::sectorsChangedSlot);
+
     QObject::connect(this, &COMPASS::databaseOpenedSignal,
                      view_manager_.get(), &ViewManager::databaseOpenedSlot);
     QObject::connect(this, &COMPASS::databaseClosedSignal,
