@@ -116,7 +116,7 @@ struct RTCommandAnalyzeDataSource : public rtcommand::RTCommand
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(analyze_data_source, "analyze a data source by DSType (e.g. 'MLAT')")
+    DECLARE_RTCOMMAND(analyze_data_source, "analyze a data source by DSType (e.g. 'MLAT'), replies with the name of the stored report")
     DECLARE_RTCOMMAND_OPTIONS
 };
 

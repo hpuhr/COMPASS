@@ -100,7 +100,9 @@ loaded), `import_asterix_network_resume`, `import_asterix_network_stop`,
 `calculate_artas_tr_usage`, `calculate_radar_plot_positions`, `load_data`, `delete_data`
 (with `delete_info` JSON array)
 
-**Evaluation**: `evaluate` (with `config`, `result`, `run_filter`),
+**Evaluation**: `evaluate` (with `config`, `result`, `run_filter`; without `result` the report
+gets the default name "<standard> <test data source> L<line> Evaluation", the reply
+`{"report": <name>}` gives the stored name),
 `get_eval_standards` (standards with requirement groups/requirements, no DB needed)
 
 **Data retrieval**: `get_utns` (with `nodesc`), `get_target`, `get_target_stats`,
@@ -123,7 +125,10 @@ drill-down, see below), `export_report` (with `report`, `dir`, `mode`),
 `import_sectors_gdal` (with `layer`, `color`, `exclude`), `export_sectors_json`,
 `delete_all_sectors`, `export_data_sources_json`
 
-**Analyze**: `analyze_data_source` (with `ds_type`, `config`), `get_analyze_inspectors`
+**Analyze**: `analyze_data_source` (with `ds_type`, `config`; without `custom_report_name` in
+`config` the report gets the default name "<test data source> L<line> Analysis", the
+`custom_report_name` is a stored task parameter, so pass `""` to get the default name, the reply
+`{"report": <name>}` gives the stored name), `get_analyze_inspectors`
 
 **Geographic View**: `set_map`, `get_maps`
 

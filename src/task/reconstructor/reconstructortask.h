@@ -192,6 +192,7 @@ protected:
     std::string loadFilterClause(const std::string& dbcontent_name, bool has_bbox,
                                  double lat_min, double lat_max,
                                  double long_min, double long_max);
+    void processLoadedSliceIfReady();
     void processDataSlice();
     void writeDataSlice();
     void endReconstruction();

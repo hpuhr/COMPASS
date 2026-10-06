@@ -41,7 +41,7 @@ struct RTCommandEvaluate : public rtcommand::RTCommand
 protected:
     virtual bool run_impl() override;
 
-    DECLARE_RTCOMMAND(evaluate, "run evaluation")
+    DECLARE_RTCOMMAND(evaluate, "run evaluation, replies with the name of the stored report")
     DECLARE_RTCOMMAND_OPTIONS
 };
 

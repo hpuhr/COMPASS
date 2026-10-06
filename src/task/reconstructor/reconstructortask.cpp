@@ -804,25 +804,40 @@ void ReconstructorTask::loadingDoneSlot()
     if (cancelled_)
         return;
 
-    // check if not already processing
-    unsigned int cnt{0};
-    while (currentReconstructor()->processing() || processing_data_slice_)
-    {
-        if (cancelled_)
-            return;
+    processLoadedSliceIfReady();
+}
 
-        if (cnt % 100 == 0)
-            logdbg << "waiting on reconst processing "
-                << currentReconstructor()->processing()
-                << " data slice proc " << processing_data_slice_;
-
-        QCoreApplication::processEvents();
-        QThread::msleep(10);
-        ++cnt;
-    }
-
+/**
+ * Starts the processing of the loaded slice if the previous slice is done. Never waits: this
+ * slot can run inside the event loop of a pending insert (DBContentDataEngine::insert waits
+ * for running loads), and waiting here for the processing, which itself waits for that
+ * insert, deadlocks. If not ready, processingDoneSlot() or writeDoneSlot() calls it again.
+ */
+void ReconstructorTask::processLoadedSliceIfReady()
+{
     if (cancelled_)
         return;
+
+    if (!loading_slice_ || !loading_slice_->loading_done_)
+        return; // nothing loaded yet
+
+    // check if not already processing
+    if (currentReconstructor()->processing() || processing_data_slice_)
+    {
+        logdbg << "waiting on reconst processing "
+               << currentReconstructor()->processing()
+               << " data slice proc " << processing_data_slice_;
+        return;
+    }
+
+    // a slice without data is marked processed at once, which needs the current write to end
+    if (!loading_slice_->has_data_ && writing_slice_)
+    {
+        logdbg << "waiting on writing slice";
+        return;
+    }
+
+    bool last_slice = loading_slice_->is_last_slice_;
 
     loginf << "calling process";
 
@@ -937,12 +952,8 @@ void ReconstructorTask::processDataSlice()
         //no data no processing => immediately mark as done
         processing_slice_->processing_done_ = true;
 
-        //wait for current write to end
-        while (writing_slice_ && !cancelled_)
-        {
-            QCoreApplication::processEvents();
-            QThread::msleep(10);
-        }
+        //no current write, guaranteed by processLoadedSliceIfReady()
+        traced_assert(!writing_slice_);
 
         //directly skip to processing done
         processingDoneSlot();
@@ -975,6 +986,9 @@ void ReconstructorTask::processingDoneSlot()
     writing_slice_ = std::move(processing_slice_);
 
     writeDataSlice(); // starts the async jobs
+
+    // a loaded slice may wait for the processing to end, queued so it never runs inside a wait
+    QMetaObject::invokeMethod(this, [ this ] { processLoadedSliceIfReady(); }, Qt::QueuedConnection);
 }
 
 void ReconstructorTask::writeDataSlice()
@@ -1093,6 +1107,10 @@ void ReconstructorTask::writeDoneSlot()
 
     // release unused memory
     malloc_trim(0);
+
+    // a loaded slice without data may wait for this write to end
+    if (!was_last)
+        QMetaObject::invokeMethod(this, [ this ] { processLoadedSliceIfReady(); }, Qt::QueuedConnection);
 
     // doneSignal must mean "all cleanup is complete" so that the RT-command
     // gating on it (RTCommandReconstructReferences) doesn't release the

@@ -522,6 +522,11 @@ bool RTCommandAnalyzeDataSource::run_impl()
         return false;
     }
 
+    //name under which the task stores the report
+    nlohmann::json reply;
+    reply["report"] = task.reportName();
+    setJSONReply(reply);
+
     task.allowUserInteractions(false);
     task.run();
 

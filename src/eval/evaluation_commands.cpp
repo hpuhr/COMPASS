@@ -93,6 +93,10 @@ bool RTCommandEvaluate::run_impl()
         return false;
     }
 
+    nlohmann::json reply;
+    reply["report"] = eval_man.lastResultName();
+    setJSONReply(reply);
+
     return true;
 }
 
@@ -101,7 +105,7 @@ void RTCommandEvaluate::collectOptions_impl(OptionsDescription& options,
 {
     ADD_RTCOMMAND_OPTIONS(options)
         ("config,c", po::value<std::string>()->default_value(""), "evaluation configuration as json string")
-        ("result,r", po::value<std::string>()->default_value(""), "name under which the evaluation result will be stored")
+        ("result,r", po::value<std::string>()->default_value(""), "name under which the evaluation result will be stored, default name if empty")
         ("run_filter,f", "run evaluation filter before evaluation");
 }
 
