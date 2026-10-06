@@ -219,11 +219,11 @@ When active, this filter forces loading of RefTraj data with a lower Square-Root
   \caption{Sectors filter}
 \end{figure}
 
-When active, this filter forces loading of data with a position inside the selected sector layers of the active Data Context. One checkbox per sector layer is shown, whole layers are selected. A target report is loaded when its position is inside any sector of any selected layer. Exclusion sectors and the altitude limits of the sectors are not applied, the check uses latitude and longitude only. Data without position is not loaded. \\
+When active, this filter forces loading of data with a position inside the selected sector layers of the active Data Context. One checkbox per sector layer is shown, whole layers are selected. A target report is loaded when it is inside a selected layer. It is inside a layer when it is inside a sector of the layer and not inside an exclusion sector of the layer. A target report is inside a sector when its position is inside the sector area and its barometric altitude is within the altitude limits of the sector. If the target report has no barometric altitude, the altitude limits are not checked. Data without position is not loaded. \\
 
-With the 'Surrounding Delta [WGS84]' checkbox the sectors are enlarged by the given delta in degrees (default 0.1). Target reports slightly outside the sectors are then loaded too, for example to see a target approach a sector. \\
+With the 'Surrounding Delta [WGS84]' checkbox the sectors are enlarged by the given delta in degrees (default 0.1). Target reports slightly outside the sectors are then loaded too, for example to see a target approach a sector. Exclusion sectors are reduced by the same delta, so target reports slightly inside an exclusion sector are loaded too. The delta changes only the sector areas, not the altitude limits. \\
 
-A selected layer that does not exist in the active Data Context is shown disabled and has no effect. When a database is opened, such layers are removed from the selection. Without a selected layer the filter does not restrict the loaded data. If the active Data Context has no sector layers at all, the filter is shown collapsed and disabled, and view points that use it are loaded without it. The filter can be set in view points and is also applied in live mode.
+Only the sector layers of the active Data Context are shown and used. When the sectors or the active Data Context change, and when a view point is loaded, selected layers that do not exist in the active Data Context are removed from the selection. Without a selected layer the filter does not restrict the loaded data. If the active Data Context has no sector layers at all, the filter is shown collapsed and disabled, and view points that use it are loaded without it. The filter can be set in view points and is also applied in live mode.
 
 \subsubsection{Time of Day Filter}
 

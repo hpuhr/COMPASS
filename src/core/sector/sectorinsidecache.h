@@ -44,7 +44,8 @@ class SectorInsideCache
 {
 public:
     /// name of the database function fed by this cache,
-    /// sector_inside(layer VARCHAR, latitude DOUBLE, longitude DOUBLE, delta_deg DOUBLE)
+    /// sector_inside(layer VARCHAR, latitude DOUBLE, longitude DOUBLE, altitude DOUBLE, delta_deg DOUBLE),
+    /// altitude is the barometric altitude in feet, NULL if not available
     static constexpr const char* DBFunctionName = "sector_inside";
 
     /**
@@ -56,6 +57,8 @@ public:
         std::string  name;
         bool         exclusion = false;
         std::vector<std::pair<double,double>> points; //latitude, longitude
+        boost::optional<double> min_altitude; //barometric, feet
+        boost::optional<double> max_altitude; //barometric, feet
 
         bool operator==(const SectorGeometry& other) const;
         bool operator!=(const SectorGeometry& other) const { return !(*this == other); }
@@ -73,9 +76,11 @@ public:
     };
 
     /**
-     * The non-exclusion sectors of one layer, prepared for one delta. Read only after
-     * construction, usable from several threads.
-     * delta_deg > 0 inflates the sectors, delta_deg < 0 deflates them, 0 is plain containment.
+     * The sectors of one layer, prepared for one delta. Read only after construction, usable
+     * from several threads.
+     * delta_deg > 0 inflates the normal sectors, delta_deg < 0 deflates them, 0 is plain
+     * containment. The exclusion sectors are prepared with the opposite delta, an inflation of
+     * the layer deflates its exclusion sectors.
      */
     class PreparedLayer
     {
@@ -85,17 +90,38 @@ public:
                       double delta_deg);
         ~PreparedLayer();
 
-        /// inside any non-exclusion sector of the layer, with the delta
-        bool isInside(double latitude, double longitude) const;
+        /**
+         * Inside the layer: inside a normal sector and not inside an exclusion sector. A sector
+         * contains a position if it is inside its 2D shape and, if an altitude is given, the
+         * altitude is inside the altitude limits of the sector. Without altitude the limits
+         * are not checked.
+         */
+        bool isInside(double latitude, double longitude,
+                      bool has_altitude = false, double altitude = 0.0) const;
 
         const std::string& layerName() const { return layer_name_; }
         double deltaDeg() const { return delta_deg_; }
         size_t numSectors() const { return sectors_.size(); }
+        size_t numExclusionSectors() const { return exclusion_sectors_.size(); }
 
     private:
-        std::string                          layer_name_;
-        double                               delta_deg_ = 0.0;
-        std::vector<std::shared_ptr<Sector>> sectors_;
+        /**
+         * One prepared sector with its altitude limits.
+         */
+        struct Entry
+        {
+            std::shared_ptr<Sector> sector;
+            double                  delta_deg = 0.0;
+            boost::optional<double> min_altitude;
+            boost::optional<double> max_altitude;
+
+            bool contains(double latitude, double longitude, bool has_altitude, double altitude) const;
+        };
+
+        std::string        layer_name_;
+        double             delta_deg_ = 0.0;
+        std::vector<Entry> sectors_;
+        std::vector<Entry> exclusion_sectors_;
     };
 
     SectorInsideCache();

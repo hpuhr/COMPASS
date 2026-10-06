@@ -160,3 +160,82 @@ TEST_CASE("SectorInsideCache ignores exclusion sectors", "[sector][cache]")
     CHECK(cache.layerNames().empty());
     CHECK(cache.prepared("L1", 0.0) == nullptr);
 }
+
+TEST_CASE("SectorInsideCache altitude limits", "[sector][cache]")
+{
+    SectorInsideCache cache;
+
+    Geometry sector = squareSector(1, "S1", 47.0, 48.0, 15.0, 16.0);
+    sector.min_altitude = 1000.0;
+    sector.max_altitude = 5000.0;
+
+    cache.setLayer("L1", { sector });
+
+    auto prepared = cache.prepared("L1", 0.0);
+    REQUIRE(prepared);
+
+    //inside the limits
+    CHECK(prepared->isInside(47.5, 15.5, true, 3000.0));
+    CHECK(prepared->isInside(47.5, 15.5, true, 1000.0));
+    CHECK(prepared->isInside(47.5, 15.5, true, 5000.0));
+
+    //outside the limits
+    CHECK_FALSE(prepared->isInside(47.5, 15.5, true, 900.0));
+    CHECK_FALSE(prepared->isInside(47.5, 15.5, true, 5100.0));
+
+    //without altitude the limits are not checked
+    CHECK(prepared->isInside(47.5, 15.5));
+    CHECK(prepared->isInside(47.5, 15.5, false, 900.0));
+
+    //outside the shape
+    CHECK_FALSE(prepared->isInside(49.0, 15.5, true, 3000.0));
+
+    //changed limits are a changed geometry
+    sector.max_altitude = 2000.0;
+    CHECK(cache.setLayer("L1", { sector }));
+
+    auto changed = cache.prepared("L1", 0.0);
+    REQUIRE(changed);
+    CHECK_FALSE(changed->isInside(47.5, 15.5, true, 3000.0));
+}
+
+TEST_CASE("SectorInsideCache exclusion sectors", "[sector][cache]")
+{
+    SectorInsideCache cache;
+
+    //exclusion square inside the normal one, with altitude limits
+    Geometry exclusion = squareSector(2, "X1", 47.4, 47.6, 15.4, 15.6, true);
+    exclusion.max_altitude = 2000.0;
+
+    cache.setLayer("L1", { squareSector(1, "S1", 47.0, 48.0, 15.0, 16.0), exclusion });
+
+    auto plain = cache.prepared("L1", 0.0);
+    REQUIRE(plain);
+    CHECK(plain->numSectors() == 1);
+    CHECK(plain->numExclusionSectors() == 1);
+
+    //inside the exclusion sector and its altitude limits
+    CHECK_FALSE(plain->isInside(47.5, 15.5, true, 1000.0));
+
+    //inside the exclusion shape, above its limit
+    CHECK(plain->isInside(47.5, 15.5, true, 3000.0));
+
+    //without altitude the exclusion sector applies like a normal sector
+    CHECK_FALSE(plain->isInside(47.5, 15.5));
+
+    //outside the exclusion sector
+    CHECK(plain->isInside(47.2, 15.2, true, 1000.0));
+
+    //the delta inflates the normal sector and deflates the exclusion sector
+    auto inflated = cache.prepared("L1", 0.05);
+    REQUIRE(inflated);
+
+    CHECK(inflated->isInside(48.02, 15.5));          //grown normal sector
+    CHECK(inflated->isInside(47.42, 15.5));          //border of the exclusion sector, shrunk away
+    CHECK_FALSE(inflated->isInside(47.5, 15.5));     //center of the exclusion sector
+
+    //a delta larger than the exclusion sector removes it
+    auto removed = cache.prepared("L1", 0.2);
+    REQUIRE(removed);
+    CHECK(removed->isInside(47.5, 15.5));
+}

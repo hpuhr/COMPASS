@@ -29,10 +29,12 @@
 
 bool SectorInsideCache::SectorGeometry::operator==(const SectorGeometry& other) const
 {
-    return id        == other.id &&
-           name      == other.name &&
-           exclusion == other.exclusion &&
-           points    == other.points;
+    return id           == other.id &&
+           name         == other.name &&
+           exclusion    == other.exclusion &&
+           points       == other.points &&
+           min_altitude == other.min_altitude &&
+           max_altitude == other.max_altitude;
 }
 
 /***********************************************************************************
@@ -46,10 +48,6 @@ SectorInsideCache::PreparedLayer::PreparedLayer(const std::string& layer_name,
 {
     for (const auto& geometry : sectors)
     {
-        //exclusion sectors do not count as inside, see SectorLayer::isInside()
-        if (geometry.exclusion)
-            continue;
-
         if (geometry.points.size() < 3)
         {
             logwrn << "sector '" << geometry.name << "' of layer '" << layer_name
@@ -57,28 +55,67 @@ SectorInsideCache::PreparedLayer::PreparedLayer(const std::string& layer_name,
             continue;
         }
 
-        auto sector = std::make_shared<Sector>(geometry.id, geometry.name, layer_name,
-                                               false, false, QColor(), geometry.points);
-        sector->createFastInsideTest(delta_deg);
+        //an exclusion sector removes positions, it shrinks where the normal sectors grow
+        Entry entry;
+        entry.delta_deg    = geometry.exclusion ? -delta_deg : delta_deg;
+        entry.min_altitude = geometry.min_altitude;
+        entry.max_altitude = geometry.max_altitude;
 
-        sectors_.push_back(sector);
+        entry.sector = std::make_shared<Sector>(geometry.id, geometry.name, layer_name,
+                                                false, geometry.exclusion, QColor(), geometry.points);
+        entry.sector->createFastInsideTest(entry.delta_deg);
+
+        if (geometry.exclusion)
+            exclusion_sectors_.push_back(entry);
+        else
+            sectors_.push_back(entry);
     }
 
     loginf << "prepared layer '" << layer_name << "' delta_deg " << delta_deg
-           << " sectors " << sectors_.size();
+           << " sectors " << sectors_.size() << " exclusion sectors " << exclusion_sectors_.size();
 }
 
 SectorInsideCache::PreparedLayer::~PreparedLayer() = default;
 
-bool SectorInsideCache::PreparedLayer::isInside(double latitude, double longitude) const
+bool SectorInsideCache::PreparedLayer::Entry::contains(double latitude, double longitude,
+                                                       bool has_altitude, double altitude) const
 {
-    for (const auto& sector : sectors_)
+    if (has_altitude)
     {
-        if (sector->isInside(latitude, longitude, delta_deg_))
-            return true;
+        if (min_altitude.has_value() && altitude < min_altitude.value())
+            return false;
+
+        if (max_altitude.has_value() && altitude > max_altitude.value())
+            return false;
     }
 
-    return false;
+    return sector->isInside(latitude, longitude, delta_deg);
+}
+
+bool SectorInsideCache::PreparedLayer::isInside(double latitude, double longitude,
+                                                bool has_altitude, double altitude) const
+{
+    bool inside = false;
+
+    for (const auto& entry : sectors_)
+    {
+        if (entry.contains(latitude, longitude, has_altitude, altitude))
+        {
+            inside = true;
+            break;
+        }
+    }
+
+    if (!inside)
+        return false;
+
+    for (const auto& entry : exclusion_sectors_)
+    {
+        if (entry.contains(latitude, longitude, has_altitude, altitude))
+            return false;
+    }
+
+    return true;
 }
 
 /***********************************************************************************
@@ -97,6 +134,12 @@ SectorInsideCache::SectorGeometry SectorInsideCache::geometryOf(const Sector& se
     geometry.name      = sector.name();
     geometry.exclusion = sector.isExclusionSector();
     geometry.points    = sector.points();
+
+    if (sector.hasMinimumAltitude())
+        geometry.min_altitude = sector.minimumAltitude();
+
+    if (sector.hasMaximumAltitude())
+        geometry.max_altitude = sector.maximumAltitude();
 
     return geometry;
 }

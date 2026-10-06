@@ -372,7 +372,7 @@ TEST_CASE("DuckDB sector inside function filters a database load", "[.][sector_d
         {
             if (!first)
                 ss << " OR ";
-            ss << SectorInsideCache::DBFunctionName << "('" << name << "', latitude, longitude, " << delta << ")";
+            ss << SectorInsideCache::DBFunctionName << "('" << name << "', latitude, longitude, NULL, " << delta << ")";
             first = false;
         }
 
@@ -384,7 +384,7 @@ TEST_CASE("DuckDB sector inside function filters a database load", "[.][sector_d
         duckdb_result r;
         auto state = duckdb_query(con, ("SELECT count(*) FROM data_cat062 WHERE " +
                                         std::string(SectorInsideCache::DBFunctionName) +
-                                        "('no_such_layer', latitude, longitude, 0.0)").c_str(), &r);
+                                        "('no_such_layer', latitude, longitude, NULL, 0.0)").c_str(), &r);
         CHECK(state == DuckDBError);
         if (state == DuckDBError)
             WARN("unknown layer error: " << duckdb_result_error(&r));
@@ -514,4 +514,63 @@ TEST_CASE("DuckDB sector inside function filters a database load", "[.][sector_d
             CHECK(mismatches == 0);
         }
     }
+}
+
+TEST_CASE("DuckDB sector inside function with altitude and exclusion", "[sectors][sector_function]")
+{
+    duckdb_database db;
+    duckdb_connection con;
+
+    REQUIRE(duckdb_open(nullptr, &db) == DuckDBSuccess);
+    REQUIRE(duckdb_connect(db, &con) == DuckDBSuccess);
+
+    //normal sector 47-48 / 15-16 up to 5000 ft, exclusion sector 47.4-47.6 / 15.4-15.6
+    SectorInsideCache::SectorGeometry normal;
+    normal.id           = 1;
+    normal.name         = "S1";
+    normal.points       = { {47.0, 15.0}, {47.0, 16.0}, {48.0, 16.0}, {48.0, 15.0} };
+    normal.max_altitude = 5000.0;
+
+    SectorInsideCache::SectorGeometry exclusion;
+    exclusion.id        = 2;
+    exclusion.name      = "X1";
+    exclusion.exclusion = true;
+    exclusion.points    = { {47.4, 15.4}, {47.4, 15.6}, {47.6, 15.6}, {47.6, 15.4} };
+
+    auto cache = std::make_shared<SectorInsideCache>();
+    cache->setLayer("L1", { normal, exclusion });
+
+    std::string error;
+    REQUIRE(DuckDBSectorFunctions::registerCacheFunction(con, cache, &error));
+
+    auto query = [&](const std::string& sql)
+    {
+        duckdb_result r;
+        REQUIRE(duckdb_query(con, sql.c_str(), &r) == DuckDBSuccess);
+        int64_t value = duckdb_value_int64(&r, 0, 0);
+        duckdb_destroy_result(&r);
+        return value;
+    };
+
+    query("CREATE TABLE t (id INTEGER, latitude DOUBLE, longitude DOUBLE, alt FLOAT)");
+    query("INSERT INTO t VALUES "
+          "(1, 47.2, 15.2, 3000),"   //inside
+          "(2, 47.2, 15.2, NULL),"   //inside, no altitude
+          "(3, 47.2, 15.2, 6000),"   //above the normal sector
+          "(4, 47.5, 15.5, 3000),"   //in the exclusion sector
+          "(5, 47.5, 15.5, NULL),"   //in the exclusion sector, no altitude
+          "(6, 49.0, 15.5, NULL),"   //outside
+          "(7, NULL, 15.5, 3000)");  //no position
+
+    CHECK(query("SELECT count(*) FROM t WHERE sector_inside('L1', latitude, longitude, alt, 0.0)") == 2);
+    CHECK(query("SELECT sum(id) FROM t WHERE sector_inside('L1', latitude, longitude, alt, 0.0)") == 3);
+
+    //a NULL altitude literal for a content without altitude
+    CHECK(query("SELECT count(*) FROM t WHERE sector_inside('L1', latitude, longitude, NULL, 0.0)") == 3);
+
+    //a delta larger than the exclusion sector removes it
+    CHECK(query("SELECT count(*) FROM t WHERE sector_inside('L1', latitude, longitude, alt, 0.2)") == 4);
+
+    duckdb_disconnect(&con);
+    duckdb_close(&db);
 }

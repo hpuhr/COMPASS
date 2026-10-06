@@ -118,6 +118,7 @@ TEST_CASE("SectorsFilter sqlFor", "[filter][sectors]")
 
     const std::string lat = mock.metaGetVariableDBColumn("CAT048", dbcontent_vars::meta_var_latitude_);
     const std::string lon = mock.metaGetVariableDBColumn("CAT048", dbcontent_vars::meta_var_longitude_);
+    const std::string alt = mock.metaGetVariableDBColumn("CAT048", dbcontent_vars::meta_var_mc_);
 
     std::vector<SectorsFilter::Layer> layers = { { "L1", { 47.0, 48.0, 15.0, 16.0 } } };
 
@@ -126,7 +127,7 @@ TEST_CASE("SectorsFilter sqlFor", "[filter][sectors]")
         auto clause = SectorsFilter::sqlFor(mock, "CAT048", layers, 0.0);
 
         CHECK(clause.sql == "(" + lat + " BETWEEN 47 AND 48 AND " + lon + " BETWEEN 15 AND 16 AND "
-                            "sector_inside('L1', " + lat + ", " + lon + ", 0))");
+                            "sector_inside('L1', " + lat + ", " + lon + ", " + alt + ", 0))");
     }
 
     SECTION("two layers, inflating delta widens the box")
@@ -136,8 +137,8 @@ TEST_CASE("SectorsFilter sqlFor", "[filter][sectors]")
         auto clause = SectorsFilter::sqlFor(mock, "CAT048", layers, 0.1);
 
         CHECK(clause.sql == "(" + lat + " BETWEEN 46.4 AND 48.1 AND " + lon + " BETWEEN 14.9 AND 17.1 AND "
-                            "(sector_inside('L1', " + lat + ", " + lon + ", 0.1) OR "
-                            "sector_inside('L2', " + lat + ", " + lon + ", 0.1)))");
+                            "(sector_inside('L1', " + lat + ", " + lon + ", " + alt + ", 0.1) OR "
+                            "sector_inside('L2', " + lat + ", " + lon + ", " + alt + ", 0.1)))");
     }
 
     SECTION("deflating delta keeps the box")
@@ -145,7 +146,7 @@ TEST_CASE("SectorsFilter sqlFor", "[filter][sectors]")
         auto clause = SectorsFilter::sqlFor(mock, "CAT048", layers, -0.1);
 
         CHECK(clause.sql == "(" + lat + " BETWEEN 47 AND 48 AND " + lon + " BETWEEN 15 AND 16 AND "
-                            "sector_inside('L1', " + lat + ", " + lon + ", -0.1))");
+                            "sector_inside('L1', " + lat + ", " + lon + ", " + alt + ", -0.1))");
     }
 
     SECTION("layer name quoting")
@@ -180,11 +181,12 @@ TEST_CASE("SectorsFilter getClause uses the cache layers", "[filter][sectors]")
 
     const std::string lat = mock.metaGetVariableDBColumn("CAT048", dbcontent_vars::meta_var_latitude_);
     const std::string lon = mock.metaGetVariableDBColumn("CAT048", dbcontent_vars::meta_var_longitude_);
+    const std::string alt = mock.metaGetVariableDBColumn("CAT048", dbcontent_vars::meta_var_mc_);
 
     //the unknown layer contributes nothing
     auto clause = filter.getClause("CAT048");
     CHECK(clause.sql == "(" + lat + " BETWEEN 47 AND 48 AND " + lon + " BETWEEN 15 AND 16 AND "
-                        "sector_inside('L1', " + lat + ", " + lon + ", 0))");
+                        "sector_inside('L1', " + lat + ", " + lon + ", " + alt + ", 0))");
 
     //legacy path
     dbContent::VariableSet read_set;
@@ -284,11 +286,22 @@ TEST_CASE("SectorsFilter view point conditions", "[filter][sectors]")
     auto cfg2 = makeFilterConfig("SectorsFilter", "SectorsFilter1");
     SectorsFilter other(cfg2, nullptr, mock);
 
+    //without a filter manager the cache layers stand in for the context layers
+    other.cache().setLayer("L1", layerOf(squareSector(1, "S1", 47.0, 48.0, 15.0, 16.0)));
+
     other.loadViewPointConditions(filters);
 
     CHECK(other.selectedLayers() == std::vector<std::string>{"L1"});
     CHECK(other.useDelta());
     CHECK(other.deltaDeg() == Approx(0.05));
+
+    //layers not in the context are dropped
+    json unknown = filters;
+    unknown["Sectors"]["Layers"] = json::array({"L1", "Old"});
+
+    other.loadViewPointConditions(unknown);
+
+    CHECK(other.selectedLayers() == std::vector<std::string>{"L1"});
 
     //missing keys fall back to defaults, the delta value stays
     json minimal;

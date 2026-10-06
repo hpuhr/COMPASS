@@ -158,6 +158,11 @@ FilterClause SectorsFilter::sqlFor(IDBVariableResolver& resolver,
     const std::string lat_col = resolver.metaGetVariableDBColumn(dbcontent_name, dbcontent_vars::meta_var_latitude_);
     const std::string lon_col = resolver.metaGetVariableDBColumn(dbcontent_name, dbcontent_vars::meta_var_longitude_);
 
+    //barometric altitude for the altitude limits of the sectors, without it the limits are not checked
+    const std::string alt_col = resolver.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_mc_)
+                                ? resolver.metaGetVariableDBColumn(dbcontent_name, dbcontent_vars::meta_var_mc_)
+                                : std::string("NULL");
+
     //bounding box over all layers, widened by an inflating delta. a deflating delta keeps the box
     double lat_min = layers.front().bounds.lat_min;
     double lat_max = layers.front().bounds.lat_max;
@@ -192,7 +197,7 @@ FilterClause SectorsFilter::sqlFor(IDBVariableResolver& resolver,
             ss << " OR ";
 
         ss << SectorInsideCache::DBFunctionName << "(" << sqlString(layer.name) << ", "
-           << lat_col << ", " << lon_col << ", " << delta_deg << ")";
+           << lat_col << ", " << lon_col << ", " << alt_col << ", " << delta_deg << ")";
 
         first = false;
     }
@@ -391,7 +396,8 @@ void SectorsFilter::loadViewPointConditions (const nlohmann::json& filters)
     if (filter.contains(ViewPointKeyDelta) && filter.at(ViewPointKeyDelta).is_number())
         delta_deg_ = filter.at(ViewPointKeyDelta).get<double>();
 
-    updateWidget();
+    //only the layers of the active context count, also updates the widget
+    removeLayersNotInContext();
 }
 
 /**
@@ -441,6 +447,17 @@ std::vector<unsigned int> SectorsFilter::filterBuffer(const std::string& dbconte
     const NullableVector<double>& lat_vec = buffer->get<double>(lat_name);
     const NullableVector<double>& lon_vec = buffer->get<double>(lon_name);
 
+    //barometric altitude for the altitude limits of the sectors, without it the limits are not checked
+    const NullableVector<float>* alt_vec = nullptr;
+
+    if (variableResolver().metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_mc_))
+    {
+        const std::string alt_name = variableResolver().metaGetVariableName(dbcontent_name, dbcontent_vars::meta_var_mc_);
+
+        if (buffer->has<float>(alt_name))
+            alt_vec = &buffer->get<float>(alt_name);
+    }
+
     for (unsigned int cnt = 0; cnt < buffer->size(); ++cnt)
     {
         //a report without position is outside, as the null result of the database function
@@ -453,11 +470,14 @@ std::vector<unsigned int> SectorsFilter::filterBuffer(const std::string& dbconte
         const double lat = lat_vec.get(cnt);
         const double lon = lon_vec.get(cnt);
 
+        const bool   has_alt = alt_vec && !alt_vec->isNull(cnt);
+        const double alt     = has_alt ? alt_vec->get(cnt) : 0.0;
+
         bool inside = false;
 
         for (const auto& prepared_layer : prepared)
         {
-            if (prepared_layer->isInside(lat, lon))
+            if (prepared_layer->isInside(lat, lon, has_alt, alt))
             {
                 inside = true;
                 break;

@@ -53,7 +53,8 @@ namespace
 
     /**
      * Evaluates one input chunk of the cache function. The input vectors are layer name as
-     * VARCHAR, latitude and longitude as DOUBLE and the delta as DOUBLE, the output is BOOLEAN.
+     * VARCHAR, latitude, longitude, barometric altitude and the delta as DOUBLE, the output is
+     * BOOLEAN. A null altitude means no altitude, the altitude limits are then not checked.
      * The layer and the delta are constants in practice, so the prepared layer is looked up
      * only when they change from one row to the next.
      */
@@ -67,17 +68,20 @@ namespace
         duckdb_vector layer_vector = duckdb_data_chunk_get_vector(input, 0);
         duckdb_vector lat_vector   = duckdb_data_chunk_get_vector(input, 1);
         duckdb_vector lon_vector   = duckdb_data_chunk_get_vector(input, 2);
-        duckdb_vector delta_vector = duckdb_data_chunk_get_vector(input, 3);
+        duckdb_vector alt_vector   = duckdb_data_chunk_get_vector(input, 3);
+        duckdb_vector delta_vector = duckdb_data_chunk_get_vector(input, 4);
 
         duckdb_string_t* layers     = static_cast<duckdb_string_t*>(duckdb_vector_get_data(layer_vector));
         const double*    latitudes  = static_cast<const double*>(duckdb_vector_get_data(lat_vector));
         const double*    longitudes = static_cast<const double*>(duckdb_vector_get_data(lon_vector));
+        const double*    altitudes  = static_cast<const double*>(duckdb_vector_get_data(alt_vector));
         const double*    deltas     = static_cast<const double*>(duckdb_vector_get_data(delta_vector));
 
         //null if no row is null
         uint64_t* layer_validity = duckdb_vector_get_validity(layer_vector);
         uint64_t* lat_validity   = duckdb_vector_get_validity(lat_vector);
         uint64_t* lon_validity   = duckdb_vector_get_validity(lon_vector);
+        uint64_t* alt_validity   = duckdb_vector_get_validity(alt_vector);
         uint64_t* delta_validity = duckdb_vector_get_validity(delta_vector);
 
         bool*     result          = static_cast<bool*>(duckdb_vector_get_data(output));
@@ -119,7 +123,10 @@ namespace
                 }
             }
 
-            result[row] = prepared->isInside(latitudes[row], longitudes[row]);
+            const bool has_altitude = !alt_validity || duckdb_validity_row_is_valid(alt_validity, row);
+
+            result[row] = prepared->isInside(latitudes[row], longitudes[row],
+                                             has_altitude, has_altitude ? altitudes[row] : 0.0);
         }
     }
 }
@@ -156,10 +163,14 @@ bool DuckDBSectorFunctions::registerCacheFunction(duckdb_connection connection,
     duckdb_logical_type bool_type    = duckdb_create_logical_type(DUCKDB_TYPE_BOOLEAN);
 
     duckdb_scalar_function_add_parameter(function, varchar_type);
-    duckdb_scalar_function_add_parameter(function, double_type);
-    duckdb_scalar_function_add_parameter(function, double_type);
-    duckdb_scalar_function_add_parameter(function, double_type);
+    duckdb_scalar_function_add_parameter(function, double_type); //latitude
+    duckdb_scalar_function_add_parameter(function, double_type); //longitude
+    duckdb_scalar_function_add_parameter(function, double_type); //barometric altitude, may be null
+    duckdb_scalar_function_add_parameter(function, double_type); //delta
     duckdb_scalar_function_set_return_type(function, bool_type);
+
+    //a null altitude is a valid input, the function handles nulls itself
+    duckdb_scalar_function_set_special_handling(function);
 
     duckdb_destroy_logical_type(&varchar_type);
     duckdb_destroy_logical_type(&double_type);

@@ -545,10 +545,11 @@ void FilterManager::sectorsChangedSlot()
     SectorsFilter* filter = dynamic_cast<SectorsFilter*>(getFilter("Sectors"));
     traced_assert(filter);
 
-    bool usability_changed = filter->updateUsability();
-    filter->updateWidget();
+    //only the layers of the active context count, drop all others
+    bool was_unusable = filter->unusable();
+    unsigned int num_removed = filter->removeLayersNotInContext();
 
-    if (usability_changed)
+    if (num_removed || was_unusable != filter->unusable())
         emit changedFiltersSignal();
 }
 

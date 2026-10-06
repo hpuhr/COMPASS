@@ -79,8 +79,8 @@ void SectorsFilterWidget::update()
 }
 
 /**
- * Recreates the layer checkboxes from the layers of the active context. A selected layer the
- * context does not have is shown disabled.
+ * Recreates the layer checkboxes from the layers of the active context. Layers of other contexts
+ * are not shown, the filter drops them from its selection.
  */
 void SectorsFilterWidget::rebuildLayerChecks()
 {
@@ -95,15 +95,7 @@ void SectorsFilterWidget::rebuildLayerChecks()
     std::vector<std::string> names    = sectors_filter_.availableLayers();
     std::vector<std::string> selected = sectors_filter_.selectedLayers();
 
-    std::vector<std::string> missing;
-
-    for (const auto& name : selected)
-    {
-        if (std::find(names.begin(), names.end(), name) == names.end())
-            missing.push_back(name);
-    }
-
-    if (names.empty() && missing.empty())
+    if (names.empty())
     {
         QLabel* label = new QLabel("No sector layers in the active Data Context");
         label->setObjectName("filter_layers_empty_label");
@@ -113,16 +105,11 @@ void SectorsFilterWidget::rebuildLayerChecks()
         return;
     }
 
-    auto addCheck = [this, &selected](const std::string& name, bool in_context)
+    for (const auto& name : names)
     {
-        QString text = QString::fromStdString(name);
-        if (!in_context)
-            text += " (not in context)";
-
-        QCheckBox* check = new QCheckBox(text);
+        QCheckBox* check = new QCheckBox(QString::fromStdString(name));
         check->setObjectName(QString::fromStdString("filter_layer_check_" + name));
         check->setChecked(std::find(selected.begin(), selected.end(), name) != selected.end());
-        check->setEnabled(in_context);
 
         connect(check, &QCheckBox::clicked, this, [this, name](bool checked)
         {
@@ -130,13 +117,7 @@ void SectorsFilterWidget::rebuildLayerChecks()
         });
 
         layers_layout_->addWidget(check);
-    };
-
-    for (const auto& name : names)
-        addCheck(name, true);
-
-    for (const auto& name : missing)
-        addCheck(name, false);
+    }
 }
 
 /**
