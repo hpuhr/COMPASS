@@ -34,6 +34,7 @@
 
 using namespace nlohmann;
 
+const std::string SectorsFilter::FilterName           = "Sectors";
 const std::string SectorsFilter::ViewPointKeyLayers   = "Layers";
 const std::string SectorsFilter::ViewPointKeyUseDelta = "Use Surrounding Delta";
 const std::string SectorsFilter::ViewPointKeyDelta    = "Surrounding Delta";
@@ -68,7 +69,7 @@ SectorsFilter::SectorsFilter(nlohmann::json& config, FilterManager* parent, IDBV
     if (!layers_.is_array())
         layers_ = json::array();
 
-    name_ = "Sectors";
+    name_ = FilterName;
 
     createSubConfigurables();
 

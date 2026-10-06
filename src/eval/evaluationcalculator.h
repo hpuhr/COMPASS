@@ -74,14 +74,6 @@ public:
         std::vector<EvaluationDS> data_sources;
     };
 
-    struct ROI
-    {
-        double latitude_min  {0};
-        double latitude_max  {0};
-        double longitude_min {0};
-        double longitude_max {0};
-    };
-
     typedef std::shared_ptr<EvaluationRequirementResult::Base>      ResultPtr;
     typedef std::map<std::string, std::map<std::string, ResultPtr>> ResultMap;
     typedef ResultMap::const_iterator                               ResultIterator;
@@ -188,7 +180,9 @@ public:
     std::vector<std::shared_ptr<SectorLayer>>& sectorLayers();
     const std::vector<std::shared_ptr<SectorLayer>>& sectorLayers() const;
     void updateSectorLayers();
-    void updateSectorROI();
+    void updateUsedSectorLayers();
+    /// names of the sector layers in which the current standard uses a requirement group
+    std::vector<std::string> usedSectorLayerNames() const;
 
     bool filterMinimumHeight() const;
     const std::string& minHeightFilterLayerName() const;
@@ -233,7 +227,11 @@ public:
     EvaluationSettings& settings() { return settings_; }
     const EvaluationSettings& settings() const { return settings_; }
     const dbContent::DataSourceCompoundCoverage& tstSrcsCoverage() const { return *tst_srcs_coverage_; }
-    const boost::optional<ROI>& sectorROI() const { return sector_roi_; }
+    /// sector layers the load and the view points are restricted to, empty if not restricted
+    const std::vector<std::string>& usedSectorLayers() const { return used_sector_layers_; }
+
+    /// surrounding delta of the sector restriction, keeps target reports near the sector borders
+    static constexpr double SectorDeltaDeg = 0.2;
 
     bool globalTimeFilterEnabled() const;
     const Utils::TimeWindow& globalTimeWindow() const { return global_time_window_; }
@@ -307,7 +305,7 @@ protected:
     std::map<std::string, std::map<std::string, bool>> data_sources_ref_; // db_content -> ds_id -> active flag
     std::map<std::string, std::map<std::string, bool>> data_sources_tst_; // db_content -> ds_id -> active flag
 
-    boost::optional<ROI> sector_roi_;
+    std::vector<std::string> used_sector_layers_;
 
     bool data_loaded_            {false};
     bool reference_data_loaded_  {false};

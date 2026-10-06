@@ -41,6 +41,7 @@
 //#include "dbcontent/variable/variable.h"
 //#include "buffer.h"
 #include "filtermanager.h"
+#include "sectorsfilter.h"
 //#include "dbfilter.h"
 //#include "viewabledataconfig.h"
 #include "viewmanager.h"
@@ -161,7 +162,7 @@ ResultT<EvaluationCalculator*> EvaluationCalculator::clone(EvaluationManager& ev
     if (c->canEvaluate().ok())
     {
         //update some stuff in case the cloned calculator can evaluate
-        c->updateSectorROI();
+        c->updateUsedSectorLayers();
     }
 
     auto res = ResultT<EvaluationCalculator*>::succeeded(c);
@@ -429,7 +430,7 @@ void EvaluationCalculator::clearEvalData()
     data_->clear();
     results_gen_->clear();
 
-    sector_roi_.reset();
+    used_sector_layers_.clear();
 
     reference_data_loaded_  = false;
     test_data_loaded_       = false;
@@ -505,7 +506,7 @@ Result EvaluationCalculator::evaluateInternal(bool update_constraints,
 
         // update stuff before load
         updateCompoundCoverage(activeDataSourcesTst());
-        updateSectorROI();
+        updateUsedSectorLayers();
 
         if (update_constraints)
             updateConstraints();
@@ -1446,12 +1447,14 @@ nlohmann::json::object_t EvaluationCalculator::getBaseViewableDataConfig () cons
 
     data["data_sources"] = data_sources;
 
-    if (settings_.load_only_sector_data_ && sector_roi_.has_value())
+    // restrict to the evaluated sector layers, with their exclusion sectors and altitude limits
+    if (!used_sector_layers_.empty())
     {
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Maximum"] = to_string(sector_roi_->latitude_max);
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Latitude Minimum"] = to_string(sector_roi_->latitude_min);
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Maximum"] = to_string(sector_roi_->longitude_max);
-        data[ViewPoint::VP_FILTERS_KEY]["Position"]["Longitude Minimum"] = to_string(sector_roi_->longitude_min);
+        auto& sectors_filter = data[ViewPoint::VP_FILTERS_KEY][SectorsFilter::FilterName];
+
+        sectors_filter[SectorsFilter::ViewPointKeyLayers]   = used_sector_layers_;
+        sectors_filter[SectorsFilter::ViewPointKeyUseDelta] = true;
+        sectors_filter[SectorsFilter::ViewPointKeyDelta]    = SectorDeltaDeg;
     }
 
     // if (settings_.use_adsb_filter_)
@@ -1715,70 +1718,44 @@ void EvaluationCalculator::useRequirement(const std::string& standard_name,
 
 /**
  */
-void EvaluationCalculator::updateSectorROI()
+void EvaluationCalculator::updateUsedSectorLayers()
 {
     loginf;
 
-    sector_roi_.reset();
+    used_sector_layers_.clear();
 
-    if (!settings_.load_only_sector_data_ || 
-        !hasCurrentStandard() || 
-        !sectorsLoaded() || 
-        sectorLayers().empty())
+    if (!settings_.load_only_sector_data_)
         return;
 
-    bool first = true;
-    double lat_min, lat_max, long_min, long_max;
-    double tmp_lat_min, tmp_lat_max, tmp_long_min, tmp_long_max;
+    used_sector_layers_ = usedSectorLayerNames();
+}
 
-    const auto& standard      = currentStandard();
-    const auto& sector_layers = sectorLayers();
-    
-    for (auto& sec_it : sector_layers)
+/**
+ */
+std::vector<std::string> EvaluationCalculator::usedSectorLayerNames() const
+{
+    std::vector<std::string> names;
+
+    if (!hasCurrentStandard() || !sectorsLoaded())
+        return names;
+
+    const auto& standard = currentStandard();
+
+    for (auto& sec_it : sectorLayers())
     {
         const string& sector_layer_name = sec_it->name();
 
         for (auto& req_group_it : standard)
         {
-            const string& requirement_group_name = req_group_it->name();
-
-            if (!useGroupInSectorLayer(sector_layer_name, requirement_group_name))
-                continue; // skip if not used
-
-            if (first)
+            if (useGroupInSectorLayer(sector_layer_name, req_group_it->name()))
             {
-                tie(lat_min, lat_max) = sec_it->getMinMaxLatitude();
-                tie(long_min, long_max) = sec_it->getMinMaxLongitude();
-                first = false;
-            }
-            else
-            {
-                tie(tmp_lat_min, tmp_lat_max) = sec_it->getMinMaxLatitude();
-                tie(tmp_long_min, tmp_long_max) = sec_it->getMinMaxLongitude();
-
-                lat_min = min(lat_min, tmp_lat_min);
-                lat_max = max(lat_max, tmp_lat_max);
-                long_min = min(long_min, tmp_long_min);
-                long_max = max(long_max, tmp_long_max);
+                names.push_back(sector_layer_name);
+                break;
             }
         }
     }
 
-    //        lat_min = 46.49;
-    //        lat_max = 49.16;
-    //        long_min = 11.39;
-    //        long_max = 17.43;
-
-    if (!first)
-    {
-        ROI roi;
-        roi.latitude_min  = lat_min  - 0.2;
-        roi.latitude_max  = lat_max  + 0.2;
-        roi.longitude_min = long_min - 0.2;
-        roi.longitude_max = long_max + 0.2;
-
-        sector_roi_ = roi;
-    }
+    return names;
 }
 
 /**

@@ -107,6 +107,7 @@ public:
     /// Returns true if the state changed
     bool updateUsability();
 
+    static const std::string FilterName;
     static const std::string ViewPointKeyLayers;
     static const std::string ViewPointKeyUseDelta;
     static const std::string ViewPointKeyDelta;
