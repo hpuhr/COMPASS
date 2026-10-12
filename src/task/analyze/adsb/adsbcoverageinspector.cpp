@@ -348,6 +348,10 @@ void ADSBCoverageInspector::compute(AnalysisDataset* dataset)
     result_ = ComputeResult{};
     grid_.reset();
 
+    //the inspector lives as long as the task, a second run must not append to the first
+    mops_groups_.clear();
+    type_groups_.clear();
+
     if (!dataset)
         return;
 
