@@ -933,7 +933,9 @@ ReportTableDefinition Single::reportTableDefinition() const
     std::string key = ReportTableDefinition::identifierFrom(sector_layer_.name() + "_"
                                                             + requirement_->groupName() + "_"
                                                             + requirement_->name());
-    std::string display_name = sector_layer_.name() + " - " + requirement_->shortname();
+    //the group keeps the tables apart if a requirement name appears in two groups of the layer
+    std::string display_name = sector_layer_.name() + " - " + requirement_->groupName() + "/"
+                               + requirement_->shortname();
 
     auto def = ReportTableDefinition::record(key, display_name, { host });
 
