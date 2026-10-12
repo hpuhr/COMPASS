@@ -301,7 +301,84 @@ void GridViewDataWidget::buildGridFromStash()
     auto z_bounds = getZVariableBounds(false);
     traced_assert(z_bounds.has_value());
 
-    const auto& settings = view_->settings();
+    const auto& settings   = view_->settings();
+    const auto  value_type = (grid2d::ValueType)settings.value_type;
+
+    const std::set<std::string> hidden_series =
+        layer_model_ ? layer_model_->storedHiddenIds() : std::set<std::string>{};
+
+    //extent of the rows the grid will hold: a finite position and, except for the count of
+    //missing values, a value of the distributed variable. For a Report Variable most rows have
+    //no value, and the rows without one can lie far from the rows with one, the stash ranges
+    //then spend the cells on empty area
+    {
+        const bool need_value = value_type != grid2d::ValueType::ValueTypeCountNan;
+
+        size_t num_rows = 0;
+        double xmin = 0.0, xmax = 0.0, ymin = 0.0, ymax = 0.0;
+
+        for (const auto& dbc_values : getStash().groupedStashes())
+        {
+            if (hidden_series.count(dbc_values.first))
+                continue;
+
+            const auto& gds      = dbc_values.second;
+            const auto& x_values = gds.variable_stashes[ 0 ].values;
+            const auto& y_values = gds.variable_stashes[ 1 ].values;
+            const auto& z_values = gds.variable_stashes[ 2 ].values;
+
+            for (size_t i = 0; i < z_values.size(); ++i)
+            {
+                if (gds.isNan(0, i) || gds.isNan(1, i))
+                    continue;
+
+                if (need_value && (gds.isNan(2, i) || !std::isfinite(z_values[ i ])))
+                    continue;
+
+                const double x = x_values[ i ];
+                const double y = y_values[ i ];
+
+                if (!std::isfinite(x) || !std::isfinite(y))
+                    continue;
+
+                if (num_rows == 0)
+                {
+                    xmin = xmax = x;
+                    ymin = ymax = y;
+                }
+                else
+                {
+                    xmin = std::min(xmin, x);
+                    xmax = std::max(xmax, x);
+                    ymin = std::min(ymin, y);
+                    ymax = std::max(ymax, y);
+                }
+
+                ++num_rows;
+            }
+        }
+
+        if (num_rows > 0)
+        {
+            //broaden a degenerate extent as getVariableBounds() does
+            auto broaden = [] (double& v0, double& v1)
+            {
+                if (v1 - v0 < RangeMinDefault)
+                {
+                    const double mid = (v0 + v1) / 2.0;
+                    v0 = mid - RangeMinDefault / 2.0;
+                    v1 = mid + RangeMinDefault / 2.0;
+                }
+            };
+            broaden(xmin, xmax);
+            broaden(ymin, ymax);
+
+            bounds = QRectF(xmin, ymin, xmax - xmin, ymax - ymin);
+
+            loginf << "extent from " << num_rows << " rows with values x " << xmin << " to " << xmax
+                   << " y " << ymin << " to " << ymax;
+        }
+    }
 
     grid2d::GridResolution res = grid2d::GridResolution().setCellCount(
         settings.grid_resolution, settings.grid_resolution);
@@ -317,9 +394,6 @@ void GridViewDataWidget::buildGridFromStash()
     traced_assert(ok);
 
     loginf << "created grid of " << grid_->numCellsX() << "x" << grid_->numCellsY();
-
-    const std::set<std::string> hidden_series =
-        layer_model_ ? layer_model_->storedHiddenIds() : std::set<std::string>{};
 
     for (const auto& dbc_values : getStash().groupedStashes())
     {
