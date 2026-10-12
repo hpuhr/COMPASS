@@ -118,6 +118,10 @@ COMPASS::COMPASS(ConfigurationManager& config_manager)
     registerParameter("max_live_data_age_cache", &max_live_data_age_cache_, 5u);
     registerParameter("max_live_data_age_db", &max_live_data_age_db_, 60u);
 
+    registerParameter("live_overload_max_packets", &live_overload_max_packets_, 4u);
+    registerParameter("live_overload_max_latency_s", &live_overload_max_latency_s_, -1.0);
+    registerParameter("live_overload_show_debug_info", &live_overload_show_debug_info_, false);
+
     registerParameter("auto_live_running_resume_ask_time", &auto_live_running_resume_ask_time_, 60u);
     registerParameter("auto_live_running_resume_ask_wait_time", &auto_live_running_resume_ask_wait_time_, 1u);
 
@@ -1262,6 +1266,27 @@ void COMPASS::appMode(const AppMode& app_mode)
 
         QApplication::restoreOverrideCursor();
     }
+}
+
+/**
+ */
+void COMPASS::liveOverloaded(bool overloaded)
+{
+    if (live_overloaded_ == overloaded)
+        return;
+
+    live_overloaded_ = overloaded;
+
+    loginf << "live overload " << (overloaded ? "detected" : "cleared");
+
+    emit liveOverloadChangedSignal(overloaded);
+}
+
+/**
+ */
+unsigned int COMPASS::liveImportBacklogSize() const
+{
+    return taskManager().asterixImporterTask().numPacketsInProcessing();
 }
 
 std::string COMPASS::appModeStr() const

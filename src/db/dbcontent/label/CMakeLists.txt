@@ -7,6 +7,7 @@ target_sources(compass_core
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/labeldirection.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelgenerator.h"
+        "${CMAKE_CURRENT_LIST_DIR}/labelsettings.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelgeneratorwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/labeldswidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelcontentdialog.h"

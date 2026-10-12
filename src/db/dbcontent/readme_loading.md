@@ -338,7 +338,11 @@ accessor, and emits **one** change signal:
 
 **`ViewManager` is the sole subscriber** (`sourceDataChangedSlot`). Per registered view it
 drives, in one guarded turn, the single callback `View::updateFromSource(source, names, reset,
-last)` (the old dual `loadedData`/`updateData` path is gone — step 8). The base
+last)` (the old dual `loadedData`/`updateData` path is gone — step 8). In live running only views
+with `View::followsLiveData()` (the geographic view) get the ticks; the others are cleared once on
+live entry (`clearData()`, `ViewManager::appModeSwitchSlot`), disabled, and filled again by the next
+offline or paused display load - they would otherwise keep data that the ticks change in place
+(e.g. the table view's row indices). The base
 `ViewDataWidget::updateFromSource` mirrors `data_ = source.buffers()` (so the existing
 `viewData()`/redraw/selection machinery is undisturbed), feeds the borrowed
 `DBContentItemProvider` if the view has one, and calls the view's `updateFromSource_impl`:
@@ -348,7 +352,8 @@ last)` (the old dual `loadedData`/`updateData` path is gone — step 8). The bas
   `applyChange(names, reset, last)` → `resetData()` (if `reset`) → `rebuildContent(id)` per name
   → `contentRebuilt()` (if `last`), reading `source.index()`/`source.buffers()`. So OSG never
   paints the empty intermediate state between wipe and rebuild. `GeographicView::updateFromSource`
-  overrides to skip the **whole** update (provider + finalize) on live overload. Offline (and
+  only adds the live label line update and **never skips** a dispatch - the views share the
+  buffers, a live overload holds the tick instead (see *Overload hold* under *Live mode*). Offline (and
   paused) the layer geometry itself is built asynchronously: `rebuildContent_impl` stages the
   layers, one worker per arrival builds them (its layers in parallel), and they attach in a queued
   completion turn - the live tick stays fully synchronous (see the deferred done edge under
@@ -366,8 +371,9 @@ last)` (the old dual `loadedData`/`updateData` path is gone — step 8). The bas
   re-requests a frame every ~30 ms while compiles are outstanding
   (`setFramePumpActive`). `hasPendingBuilds()` includes this stage, so the done edge,
   `viewRefreshed`, the busy dialog and the command gate all wait for the RESIDENT
-  result; `cancelPendingBuilds` bumps a compile generation, and superseded completions
-  only clean up.
+  result; `cancelPendingBuilds` and every provider reset (`reset_impl`, e.g. the live
+  dispatch after a resume) bump a compile generation, and superseded completions only
+  clean up.
 
 Also in `sourceDataChangedSlot`: selection carry-over (`applyCarriedSelection`), data-source
 loaded counts (`dbContextManager().setLoadedCounts`), and — on `last` — `dataDistributedSignal`
@@ -395,7 +401,9 @@ load lifecycle as suspect; prefer `repaint()` on the specific widget.
 `ViewManager` owns a **`LiveController`** ([livecontroller.h](../../view/livecontroller.h))
 that holds the `LiveDataFeed`, subscribes to the engine's `insertedDataSignal`, and runs the
 per-tick orchestration. The feed and both controllers are **private** — the ASTERIX watchdog
-fires `ViewManager::forceLiveUpdate()` and the latency façade reads `ViewManager::hasMaxLatency()/maxLatency()`.
+fires `ViewManager::forceLiveUpdate()` and the latency façade reads `ViewManager::hasMaxLatency()/maxLatency()`
+(the latency taken by the last tick attempt; unused since the overload detection moved into the
+`LiveController`).
 
 The session runs an explicit state machine — **`Stopped` / `Running` / `Paused`** — driven by
 `ViewManager::appModeSwitchSlot` through `startSession()` / `pauseSession()` / `resumeSession()` /
@@ -414,9 +422,9 @@ and emits):
 
 | Transition | Action |
 |---|---|
-| **Fresh entry** (Offline→Live) | `current_source_ = feed`, `startSession()` → `reloadWindow()` primes the feed with the recent window, `refreshDisplay()` distributes it, one `started` bookend |
+| **Fresh entry** (Offline→Live) | `current_source_ = feed` (the outgoing source is kept alive until `refreshDisplay()`), `startSession()` → `reloadWindow()` primes the feed with the recent window, `refreshDisplay()` distributes it, one `started` bookend |
 | **Pause** (Live→Paused) | `pauseSession()` (ticks off, DB keeps ingesting) + a **queued** `ViewManager::loadPausedDisplay()` that swaps the display to a plain offline `LoadOperation` — so paused behaves like offline: load button, filters and the time window all work, and `reload()` is allowed |
-| **Resume** (Paused→Live) | `current_source_ = feed` **first** (cancelling the paused op), then `resumeSession()` → `reloadWindow()` catch-up, then `refreshDisplay()` |
+| **Resume** (Paused→Live) | `current_source_ = feed` **first** (cancelling the paused op, which is kept alive until `refreshDisplay()`), then `resumeSession()` → `reloadWindow()` catch-up, then `refreshDisplay()` |
 | **Exit** (Live→Offline) | `current_source_ = null`, `stopSession()` → `clearFeed()`, one `done` bookend |
 
 Entry and resume are the **same fetch**: `reloadWindow()` runs while the state is still
@@ -428,18 +436,57 @@ no bookend/dialog — it raises its own modal) and `seedFrom`-**replaces** the f
 window. Overlap is prevented by the state machine rather than a flag: the load runs while the
 state is not yet `Running`, so `processLiveModeSlot`'s `if (!running()) return;` suppresses any
 pump-fired tick (inserts still stage and merge on the first tick after). `refreshDisplay()` then
-runs `processTick()` (feed `cutCachedData` + distribute) **without** a DB delete — the every-tick
-bound resumes on the next real tick.
+runs the feed tick (`cutCachedData` + distribute) **without** a DB delete — the every-tick
+bound resumes on the next real tick. `refreshDisplay()` is never held (see *Overload hold*) and
+clears the views if the window is empty (an empty feed distributes nothing), so afterwards no view
+refers to the outgoing source anymore.
+
+**Staging** — `LiveDataFeed::addInserted()` (from `insertedDataSlot`) reduces each insert to the
+live view read set, renames the DB columns to variable names and adds the selection flag
+(`transformInserted()`), then keeps it as a **batch** per content with its newest timestamp.
+Batches entirely older than the live window are dropped (`dropOutdatedBatches()`, only matters
+while ticks are held). The latency of the insert (now - oldest target report) is recorded and taken
+once per tick attempt (`takeInsertLatency()`).
 
 **The per-tick** (`processLiveModeSlot`, from `insertedDataSlot` + the watchdog): `if (!running())
 return;`, then the DB bound `deleteDBContentData(now - maxLiveDataAgeDb)` — **skipped with a
 `logwrn` when a delete is still in flight** (`hasActiveDeleteJob()`; the display cut is
-independent, so the next tick re-bounds) — then `processTick()`. `LiveDataFeed::processTick()` merges
-staged inserts, `cutCachedData` (trims the display to `maxLiveDataAgeCache`), filters, updates
-latency, and emits **one** atomic `dataChangedSignal(all, reset=true, last=true)` →
-`sourceDataChangedSlot`. The single queued event means the geo provider wipes + rebuilds +
+independent, so the next tick re-bounds) — then `tryTick()`, which holds the tick or runs it (see
+*Overload hold*). `LiveDataFeed::processTick()` merges the staged batches, `cutCachedData` (trims the
+display to `maxLiveDataAgeCache`), filters, and emits **one** atomic
+`dataChangedSignal(all, reset=true, last=true)` → `sourceDataChangedSlot` (direct connection, the
+distribution runs inside the tick). The single event means the geo provider wipes + rebuilds +
 finalizes in one event-loop turn (no empty intermediate OSG paint). The **display window** is
 bound by the feed's `cutCachedData`, independent of the DB delete.
+
+### Overload hold
+
+**Invariant:** the distributed buffers only change inside a feed tick, and every feed tick is
+distributed synchronously to all views. Views never see buffers ahead of their own data (point
+indices, row indices, selection writes stay valid). Nothing else changes rows of distributed
+buffers (view filters run inside the tick).
+
+`LiveController::tryTick()` therefore **holds** the tick instead of letting a view skip it - the
+inserts stay staged in the feed and are merged by the first tick after the hold:
+- while `ViewManager::isProcessingData()` (a dispatch is still running, re-entrancy): one queued
+  retry (`scheduleTickRetry()`)
+- while overloaded (`checkOverload()`): `LiveOverloadDetector` ([liveoverloaddetector.h](../../view/liveoverloaddetector.h))
+  is fed per tick attempt with the import backlog (`COMPASS::liveImportBacklogSize()`, ASTERIX
+  packets in processing) and the insert latency. Above `live_overload_max_packets` (default 4) the
+  next `backlog + 4` attempts are held, above `live_overload_max_latency_s` (default -1 = off) the next
+  5; then it checks again. Debug: `COMPASS::liveOverloadForced()` holds every attempt until switched off
+  (runtime only, no UI).
+
+Each attempt sets `COMPASS::liveOverloaded()` (`liveOverloadChangedSignal`) and emits
+`LiveController::overloadCheckedSignal` (forwarded as `ViewManager::liveOverloadCheckedSignal`:
+backlog, latency, held/total ticks). The geo view shows "Overload Detected (Ns)" and, with the
+`COMPASS` parameter `live_overload_show_debug_info`, a debug line with these values. Start, pause,
+resume and stop reset the overload; `refreshDisplay()` is never held.
+
+Notice: in live mode the tick runs on the import's critical path - the engine runs the tick
+synchronously inside the insert completion, and the importer only starts the next insert in its
+queued `insertDoneSlot()` afterwards. Slow ticks therefore raise the backlog (see B33 in
+`experimental_src/view/geographicview/overlay/readme_overlay_issues.md`).
 
 ### Layer keep-alive in the per-tick rebuild
 

@@ -20,17 +20,23 @@
 #include "labelgeneratorconfig.h"
 #include "json_fwd.hpp"
 #include "labeldirection.h"
+#include "labelsettings.h"
 
 //#include <osg/Matrixd>
 
 #include <QObject>
 
+#include <cstdint>
 #include <map>
+#include <optional>
 #include <set>
 
 class Buffer;
 class DBContentManager;
 class GeometryLeafItemLabels;
+
+template <class T>
+class NullableVector;
 
 namespace dbContent
 {
@@ -40,7 +46,7 @@ class VariableSet;
 
 /**
 */
-class LabelGenerator : public QObject
+class LabelGenerator : public QObject, public LabelSettings
 {
     Q_OBJECT
 
@@ -50,12 +56,36 @@ signals:
     void labelContentsChangedSignal(); // label texts of existing labels need to be regenerated
     void labelLinesChangedSignal();
     void labelClearAllSignal();
+    void labelOpacityChangedSignal(); // only the label display needs a refresh
     //void configChanged();
 
 public slots:
     void editLabelContentsDoneSlot();
 
 public:
+    /**
+     * Resolved columns of one buffer for evaluating the label filters of many of its rows,
+     * avoids the name based variable and column lookups per row.
+     * Notice: Only valid while the buffer is unchanged => build it per pass, never store it.
+     */
+    struct FilterContext
+    {
+        const NullableVector<unsigned int>*  line_vec   {nullptr};
+        const NullableVector<unsigned int>*  ds_id_vec  {nullptr};
+        const NullableVector<unsigned int>*  m3a_vec    {nullptr}; // mode 3/a filter or primary only
+        const NullableVector<float>*         mc_vec     {nullptr}; // mode c filter or primary only
+        const NullableVector<std::string>*   acid_vec   {nullptr}; // ti filter or primary only
+        const NullableVector<std::string>*   cs_fpl_vec {nullptr}; // ti filter, cat062 only
+        const NullableVector<unsigned int>*  acad_vec   {nullptr}; // ta filter or primary only
+        const NullableVector<unsigned char>* type_vec   {nullptr}; // primary only
+
+        // variable of an active filter not available in the dbcontent => rows fail that filter
+        bool m3a_missing  {false};
+        bool mc_missing   {false};
+        bool acid_missing {false};
+        bool acad_missing {false};
+    };
+
     LabelGenerator(DBContentManager& manager);
     virtual ~LabelGenerator();
 
@@ -75,8 +105,9 @@ public:
 
     void autoAdustCurrentLOD(unsigned int num_labels_on_screen);
 
-    unsigned int currentLOD() const;
+    unsigned int currentLOD() const override;
     void currentLOD(unsigned int current_lod);
+    void fixedLOD(unsigned int lod); // switches auto lod off and selects the given lod
 
     bool autoLOD() const;
     void autoLOD(bool auto_lod);
@@ -94,6 +125,8 @@ public:
     bool anyDSIDLabelWanted();
     bool labelWanted(unsigned int ds_id);
     bool labelWanted(std::shared_ptr<Buffer> buffer, unsigned int index);
+    FilterContext filterContext(const std::shared_ptr<Buffer>& buffer);
+    bool labelWanted(const FilterContext& context, unsigned int index);
 
     bool filterMode3aActive() const;
     void filterMode3aActive(bool filter_active);
@@ -125,7 +158,7 @@ public:
     bool filterModecNullWanted() const;
     void filterModecNullWanted(bool value);
 
-    LabelDirection labelDirection (unsigned int ds_id);
+    LabelDirection labelDirection (unsigned int ds_id) override;
     float labelDirectionAngle (unsigned int ds_id);
     void labelDirection (unsigned int ds_id, LabelDirection direction);
 
@@ -134,6 +167,12 @@ public:
     unsigned int labelLine (unsigned int ds_id); // returns 0...3
     void labelLine (unsigned int ds_id, unsigned int line);
     void updateAvailableLabelLines(); // updates lines to be label according to available lines with loaded data
+
+    void invalidateDSLabelSettings(); // to be called if the per data source config was changed from outside
+
+    // increased on every change of the label config, lets derived caches (e.g. label filter
+    // results) detect that they are outdated
+    uint64_t configGeneration() const { return config_generation_; }
 
     void editLabelContents(const std::string& dbcontent_name);
 
@@ -154,7 +193,7 @@ public:
     bool filterPrimaryOnlyActive() const;
     void filterPrimaryOnlyActive(bool value);
 
-    float labelOpacity() const;
+    float labelOpacity() const override;
     void labelOpacity(float label_opacity);
 
     // view point defined labels: rec_num to label level (LOD 1-3), set when a view
@@ -162,7 +201,7 @@ public:
     void setViewPointLabels(const std::map<unsigned long, unsigned int>& labels);
     void clearViewPointLabels();
     bool hasViewPointLabels() const { return !view_point_labels_.empty(); }
-    const std::map<unsigned long, unsigned int>& viewPointLabels() const { return view_point_labels_; }
+    const std::map<unsigned long, unsigned int>& viewPointLabels() const override { return view_point_labels_; }
 
     LabelGeneratorConfig& config() { return config_; }
     void updateFilterValuesFromStrings();
@@ -207,6 +246,8 @@ protected:
 
     bool show_decluttering_info_once_ {false};
 
+    float auto_lod_value_ {1}; // runtime lod adjusted by auto lod, not part of the config (1...3, float for filter function)
+
     float label_distance_ {0.5}; // 0 ... 1
 
     std::set<unsigned int> filter_m3a_values_set_; // dec
@@ -218,6 +259,18 @@ protected:
 
     // view point defined labels: rec_num to label level (LOD 1-3)
     std::map<unsigned long, unsigned int> view_point_labels_;
+
+    // per data source settings cached from the config (string + json lookups are too expensive
+    // for per row and per frame use), filled on first access, cleared on every change
+    struct DSLabelSettings
+    {
+        std::optional<bool>           wanted;
+        std::optional<unsigned int>   line;
+        std::optional<LabelDirection> direction;
+    };
+    std::map<unsigned int, DSLabelSettings> ds_label_settings_; // ds id -> cached settings
+
+    uint64_t config_generation_ {0}; // see configGeneration()
 
     //std::set<GeometryLeafItemLabels*> item_labels_;
     std::unique_ptr<LabelContentDialog> label_edit_dialog_;

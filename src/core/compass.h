@@ -67,6 +67,7 @@ signals:
     void databaseOpenedSignal();
     void databaseClosedSignal();
     void appModeSwitchSignal (AppMode app_mode_previous, AppMode app_mode_current);
+    void liveOverloadChangedSignal(bool overloaded);
     void colorModeChangedSignal(unsigned int mode);
     void darkModeChangedSignal(bool dark);
 
@@ -184,6 +185,19 @@ public:
     unsigned int maxLiveDataAgeCache() const { return max_live_data_age_cache_; }
     unsigned int maxLiveDataAgeDb() const { return max_live_data_age_db_; }
 
+    // live overload: while set, live ticks are held (the views keep the last distributed data)
+    bool liveOverloaded() const { return live_overloaded_; }
+    void liveOverloaded(bool overloaded);
+
+    unsigned int liveImportBacklogSize() const; // ASTERIX packets in processing
+    unsigned int liveOverloadMaxPackets() const { return live_overload_max_packets_; }
+    double liveOverloadMaxLatency() const { return live_overload_max_latency_s_; }
+    bool liveOverloadShowDebugInfo() const { return live_overload_show_debug_info_; }
+
+    // debug: force a live overload (runtime only, not persisted; no UI, set from code)
+    bool liveOverloadForced() const { return live_overload_forced_; }
+    void liveOverloadForced(bool forced) { live_overload_forced_ = forced; }
+
     bool darkMode() const;
     void darkMode(bool value);
 
@@ -254,6 +268,12 @@ protected:
 
     unsigned int max_live_data_age_cache_ {5};
     unsigned int max_live_data_age_db_ {60};
+
+    bool         live_overloaded_            {false};
+    unsigned int live_overload_max_packets_  {4};    // import backlog above which live ticks are held
+    double       live_overload_max_latency_s_{-1.0}; // latency in seconds above which live ticks are held (<= 0 = off)
+    bool         live_overload_show_debug_info_{false}; // show backlog/latency in the geographic view (debug)
+    bool         live_overload_forced_       {false};   // debug: live ticks held until switched off (not persisted)
 
     unsigned int auto_live_running_resume_ask_time_ {60}; // minutes
     unsigned int auto_live_running_resume_ask_wait_time_ {1}; // minutes

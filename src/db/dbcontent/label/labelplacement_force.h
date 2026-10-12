@@ -38,7 +38,7 @@ namespace force
 {
     /**
      */
-    int sign(double v)
+    inline int sign(double v)
     {
         if (v < 0)
             return -1;
@@ -49,10 +49,10 @@ namespace force
 
     /**
      */
-    QPointF repelFromPosition(const QRectF& bbox, 
-                              double x, 
-                              double y, 
-                              bool simple)
+    inline QPointF repelFromPosition(const QRectF& bbox,
+                                     double x,
+                                     double y,
+                                     bool simple)
     {
         if (!bbox.contains(x, y))
             return QPointF(0, 0);
@@ -85,10 +85,13 @@ namespace force
     }
 
     /**
+     * Notice: If the repel direction is undefined (coincident boxes), the box is repelled vertically
+     * into tie_dir (+1/-1), pass opposite values for the two boxes of a pair.
      */
-    QPointF repelFromBox(const QRectF& bbox, 
-                         const QRectF& bbox2, 
-                         bool simple)
+    inline QPointF repelFromBox(const QRectF& bbox,
+                                const QRectF& bbox2,
+                                bool simple,
+                                int tie_dir)
     {
         if (!bbox.intersects(bbox2))
         {
@@ -106,6 +109,9 @@ namespace force
             const int    sx = sign(bbox.left() - bbox2.left());
             const int    sy = sign(bbox.top()  - bbox2.top() );
 
+            if (sx == 0 && sy == 0)
+                return {0, dy * tie_dir};
+
             return {dx * sx, dy * sy};
         }
 
@@ -114,6 +120,10 @@ namespace force
 
         double dx = c0.x() - c1.x();
         double dy = c0.y() - c1.y();
+
+        if (dx == 0 && dy == 0)
+            dy = tie_dir;
+
         double d_sqr = std::max(dx * dx + dy * dy, 1e-06);
         double d = std::sqrt(d_sqr);
         dx /= d;
@@ -126,12 +136,12 @@ namespace force
 
     /**
      */
-    void repelFromLabels(std::vector<Eigen::Vector2d>& movements,
-                         std::vector<Eigen::Vector2d>& totals,
-                         const std::vector<Label>& labels, 
-                         double tx, 
-                         double ty,
-                         bool simple)
+    inline void repelFromLabels(std::vector<Eigen::Vector2d>& movements,
+                                std::vector<Eigen::Vector2d>& totals,
+                                const std::vector<Label>& labels,
+                                double tx,
+                                double ty,
+                                bool simple)
     {
         /*"""
         Repel texts from each other while expanding their bounding boxes by expand
@@ -203,7 +213,8 @@ namespace force
 
                 const auto& bbox2 = bboxes[ j ];
 
-                auto offset = repelFromBox(bbox, bbox2, simple);
+                //coincident labels => separate them by index order (deterministic)
+                auto offset = repelFromBox(bbox, bbox2, simple, i < j ? -1 : 1);
 
                 movements[ i ] += Eigen::Vector2d(offset.x(), offset.y());
                 totals[ i ]    += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
@@ -214,13 +225,13 @@ namespace force
 
     /**
      */
-    void repelFromObjects(std::vector<Eigen::Vector2d>& movements,
-                          std::vector<Eigen::Vector2d>& totals,
-                          const std::vector<QRectF>& objects,
-                          const std::vector<Label>& labels, 
-                          double tx, 
-                          double ty,
-                          bool simple)
+    inline void repelFromObjects(std::vector<Eigen::Vector2d>& movements,
+                                 std::vector<Eigen::Vector2d>& totals,
+                                 const std::vector<QRectF>& objects,
+                                 const std::vector<Label>& labels,
+                                 double tx,
+                                 double ty,
+                                 bool simple)
     {
         /*"""
         Repel texts from other objects' bboxes while expanding their (texts')
@@ -299,7 +310,8 @@ namespace force
                 // coutBBox(bbox2);
                 // std::cout << " => " << bbox.intersects(bbox2) << std::endl;
 
-                auto offset = repelFromBox(bbox, bbox2, simple);
+                //objects do not move => any fixed direction separates a coincident label
+                auto offset = repelFromBox(bbox, bbox2, simple, 1);
 
                 movements[ i ] += Eigen::Vector2d(offset.x(), offset.y());
                 totals[ i ]    += Eigen::Vector2d(std::fabs(offset.x()), std::fabs(offset.y()));
@@ -310,13 +322,13 @@ namespace force
 
     /**
      */
-    void repelFromPoints(std::vector<Eigen::Vector2d>& movements,
-                         std::vector<Eigen::Vector2d>& totals,
-                         const std::vector<QPointF>& points,
-                         const std::vector<Label>& labels, 
-                         double tx, 
-                         double ty,
-                         bool simple)
+    inline void repelFromPoints(std::vector<Eigen::Vector2d>& movements,
+                                std::vector<Eigen::Vector2d>& totals,
+                                const std::vector<QPointF>& points,
+                                const std::vector<Label>& labels,
+                                double tx,
+                                double ty,
+                                bool simple)
     {
         /*""
         Repel texts from all points specified by x and y while expanding their
@@ -383,12 +395,12 @@ namespace force
 
     /**
      */
-    void repelFromROI(std::vector<Eigen::Vector2d>& movements,
-                      std::vector<Eigen::Vector2d>& totals,
-                      const QRectF& roi,
-                      const std::vector<Label>& labels, 
-                      double tx, 
-                      double ty)
+    inline void repelFromROI(std::vector<Eigen::Vector2d>& movements,
+                             std::vector<Eigen::Vector2d>& totals,
+                             const QRectF& roi,
+                             const std::vector<Label>& labels,
+                             double tx,
+                             double ty)
     {
         size_t n = labels.size();
 
@@ -426,9 +438,11 @@ namespace force
     }
 
     /**
+     * Notice: Returns true if no error occurred, also if the maximum number of iterations was reached without
+     * convergence (the improved positions are kept, a false return value would revert them).
      */
-    bool placeLabels(std::vector<Label>& labels,
-                     const Settings& settings)
+    inline bool placeLabels(std::vector<Label>& labels,
+                            const Settings& settings)
     {
         /*
         """Iteratively adjusts the locations of texts.
@@ -870,7 +884,7 @@ namespace force
             last_dy = total.y();
             
             //convergence if total movement is below precomputed threshold
-            if (total.x() <= tol_x && total.y() < tol_y)
+            if (total.x() <= tol_x && total.y() <= tol_y)
             {
                 converged = true;
                 //used_iter = i + 1;

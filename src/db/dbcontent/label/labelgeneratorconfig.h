@@ -56,7 +56,7 @@ struct LabelGeneratorConfig
     float label_opacity_ {0.9};
 
     bool  auto_lod_    {true};
-    float current_lod_ {1}; // 1, 2, 3, float for filter function
+    unsigned int current_lod_ {1}; // selected lod (1...3), used if auto lod is off
 
     bool use_utn_as_id_ {false};
 };

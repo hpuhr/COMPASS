@@ -110,6 +110,9 @@ ViewManager::ViewManager(nlohmann::json& config, COMPASS& compass)
 
     load_controller_.reset(new LoadController(compass_));
     live_controller_.reset(new LiveController(compass_, *this));
+
+    connect(live_controller_.get(), &LiveController::overloadCheckedSignal,
+            this, &ViewManager::liveOverloadCheckedSignal);
 }
 
 /**
@@ -1138,8 +1141,14 @@ void ViewManager::sourceDataChangedSlot(const std::vector<std::string>& names, b
     using namespace boost::posix_time;
     ptime tmp_time;
 
+    bool live_running = compass_.appMode() == AppMode::LiveRunning;
+
     for (auto& view_it : views_)
     {
+        // live ticks only reach views following live data, the others were cleared on live entry
+        if (live_running && !view_it.second->followsLiveData())
+            continue;
+
         tmp_time = microsec_clock::local_time();
 
         // the single data-delivery callback: the view pulls buffers/index from the source
@@ -1647,6 +1656,11 @@ void ViewManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode
     // the pause window and points back at the feed, an exit drops it.
     if (app_mode_current == AppMode::LiveRunning)
     {
+        // the views (and the geo item provider) still refer to the outgoing source until
+        // refreshDisplay below hands them the feed, and the catch-up load pumps events in
+        // between => keep the outgoing source alive until the end of this block
+        std::shared_ptr<DBContentDataSet> outgoing_source = current_source_;
+
         // leave the paused display FIRST: this cancels and disconnects a still-running paused
         // load, so it cannot drive bookends or the progress dialog while the catch-up below
         // pumps events. The feed emits nothing until refreshDisplay, so pointing at it early
@@ -1662,7 +1676,8 @@ void ViewManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode
             live_controller_->startSession();
 
         // show that window + distribute, without a DB delete here (the every-tick bound
-        // resumes on the next real tick)
+        // resumes on the next real tick); always replaces the views' data, so the outgoing
+        // source is no longer referenced afterwards
         live_controller_->refreshDisplay();
     }
     else if (app_mode_current == AppMode::LivePaused)
@@ -1687,9 +1702,21 @@ void ViewManager::appModeSwitchSlot (AppMode app_mode_previous, AppMode app_mode
         view_it.second->appModeSwitch(app_mode_previous, app_mode_current);
 
         if (app_mode_current == AppMode::LiveRunning)
-            view_it.second->enableInTabWidget(view_it.second->className() == "GeographicView");
+        {
+            bool follows_live = view_it.second->followsLiveData();
+
+            view_it.second->enableInTabWidget(follows_live);
+
+            // views not following the live ticks would keep showing data of the previous source (e.g. the
+            // table view with row indices into buffers the ticks change) => empty until the next offline
+            // or paused display load
+            if (!follows_live)
+                view_it.second->clearData();
+        }
         else
+        {
             view_it.second->enableInTabWidget(true);
+        }
     }
 
     // live-session bookends: entering the session opens the "one long load cycle", leaving it

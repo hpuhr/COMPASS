@@ -117,6 +117,13 @@ void LabelPlacementEngine::removeLabel(size_t idx)
 
     label_map_.erase(l.id);
     labels_.erase(labels_.begin() + idx);
+
+    //labels behind the removed one moved one index down
+    for (auto& [ id, label_idx ] : label_map_)
+    {
+        if (label_idx > idx)
+            --label_idx;
+    }
 }
 
 /**
@@ -126,9 +133,8 @@ void LabelPlacementEngine::removeLabel(const std::string& id)
     auto it = label_map_.find(id);
     if (it == label_map_.end())
         return;
-  
-    labels_.erase(labels_.begin() + it->second);
-    label_map_.erase(id);
+
+    removeLabel(it->second);
 }
 
 /**
