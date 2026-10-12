@@ -762,6 +762,9 @@ Result TaskResult::initResult()
  */
 Result TaskResult::prepareResult()
 {
+    //read the stored content first, reading it later overwrites the timestamps set here with the stored ones
+    ensureContentLoaded();
+
     auto now = Utils::Time::currentUTCTime();
 
     if (metadata_.ts_created.is_not_a_date_time())
