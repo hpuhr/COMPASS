@@ -165,6 +165,43 @@ TEST_CASE("SectorsFilter sqlFor", "[filter][sectors]")
     }
 }
 
+TEST_CASE("SectorsFilter extentDeltaDeg", "[filter][sectors]")
+{
+    using Layer  = SectorsFilter::Layer;
+    using Bounds = SectorInsideCache::LayerBounds;
+
+    SECTION("no layers gives 0")
+    {
+        CHECK(SectorsFilter::extentDeltaDeg({}, 0.1, 200.0, 0.2) == 0.0);
+    }
+
+    SECTION("fraction of the larger side, the longitude side scaled by the latitude")
+    {
+        // 0.1 deg of latitude by 0.3 deg of longitude at 60 N, the longitude side is 0.15 deg
+        Layer layer{"L", Bounds{59.95, 60.05, 10.0, 10.3}};
+
+        CHECK(SectorsFilter::extentDeltaDeg({layer}, 0.1, 0.0, 1.0) == Approx(0.015).epsilon(1e-6));
+    }
+
+    SECTION("combined bounds of several layers")
+    {
+        Layer a{"A", Bounds{48.0, 48.1, 16.0, 16.1}};
+        Layer b{"B", Bounds{48.4, 48.5, 16.0, 16.1}}; // 0.5 deg of latitude together
+
+        CHECK(SectorsFilter::extentDeltaDeg({a, b}, 0.1, 0.0, 1.0) == Approx(0.05).epsilon(1e-6));
+    }
+
+    SECTION("minimum in meters, maximum in degrees")
+    {
+        Layer small{"S", Bounds{48.0, 48.001, 16.0, 16.001}}; // about 110 m
+        CHECK(SectorsFilter::extentDeltaDeg({small}, 0.1, 200.0, 0.2)
+              == Approx(200.0 / 111320.0).epsilon(1e-6));
+
+        Layer large{"F", Bounds{45.0, 50.0, 9.0, 19.0}}; // 5 deg of latitude
+        CHECK(SectorsFilter::extentDeltaDeg({large}, 0.1, 200.0, 0.2) == Approx(0.2).epsilon(1e-9));
+    }
+}
+
 TEST_CASE("SectorsFilter getClause uses the cache layers", "[filter][sectors]")
 {
     auto mock = createStandardMock();

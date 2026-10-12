@@ -190,6 +190,10 @@ void EvaluationCalculator::readSettings()
     registerParameter("use_grp_in_sector", &settings_.use_grp_in_sector_, Settings().use_grp_in_sector_);
     registerParameter("use_requirement", &settings_.use_requirement_, Settings().use_requirement_);
 
+    registerParameter("sector_delta_fraction", &settings_.sector_delta_fraction_, Settings().sector_delta_fraction_);
+    registerParameter("sector_delta_min_m", &settings_.sector_delta_min_m_, Settings().sector_delta_min_m_);
+    registerParameter("sector_delta_max_deg", &settings_.sector_delta_max_deg_, Settings().sector_delta_max_deg_);
+
     // registerParameter("max_ref_time_diff", &settings_.max_ref_time_diff_, Settings().max_ref_time_diff_);
 
     // // load filter
@@ -1454,7 +1458,7 @@ nlohmann::json::object_t EvaluationCalculator::getBaseViewableDataConfig () cons
 
         sectors_filter[SectorsFilter::ViewPointKeyLayers]   = used_sector_layers_;
         sectors_filter[SectorsFilter::ViewPointKeyUseDelta] = true;
-        sectors_filter[SectorsFilter::ViewPointKeyDelta]    = SectorDeltaDeg;
+        sectors_filter[SectorsFilter::ViewPointKeyDelta]    = sector_delta_deg_;
     }
 
     // if (settings_.use_adsb_filter_)
@@ -1720,14 +1724,55 @@ void EvaluationCalculator::useRequirement(const std::string& standard_name,
  */
 void EvaluationCalculator::updateUsedSectorLayers()
 {
-    loginf;
-
     used_sector_layers_.clear();
+    sector_delta_deg_ = 0.0;
 
     if (!settings_.load_only_sector_data_)
         return;
 
     used_sector_layers_ = usedSectorLayerNames();
+
+    sector_delta_deg_ = SectorsFilter::extentDeltaDeg(usedSectorFilterLayers(),
+                                                      settings_.sector_delta_fraction_,
+                                                      settings_.sector_delta_min_m_,
+                                                      settings_.sector_delta_max_deg_);
+
+    loginf << "num_layers " << used_sector_layers_.size() << " sector_delta_deg " << sector_delta_deg_;
+}
+
+/**
+ */
+std::vector<SectorsFilter::Layer> EvaluationCalculator::usedSectorFilterLayers() const
+{
+    std::vector<SectorsFilter::Layer> layers;
+
+    if (used_sector_layers_.empty())
+        return layers;
+
+    auto sector_cache = eval_man_.compass().dbInterface().sectorInsideCachePtr();
+
+    if (!sector_cache)
+    {
+        logerr << "no sector inside cache";
+        return layers;
+    }
+
+    for (const auto& layer : sectorLayers())
+    {
+        if (std::find(used_sector_layers_.begin(), used_sector_layers_.end(), layer->name())
+                == used_sector_layers_.end())
+            continue;
+
+        //geometry for the sector_inside() database function
+        sector_cache->setLayer(layer->name(), layer->sectors());
+
+        auto bounds = sector_cache->bounds(layer->name());
+
+        if (bounds.has_value()) // no non-exclusion sectors otherwise
+            layers.push_back(SectorsFilter::Layer{layer->name(), bounds.value()});
+    }
+
+    return layers;
 }
 
 /**

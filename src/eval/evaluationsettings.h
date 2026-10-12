@@ -101,6 +101,12 @@ struct EvaluationSettings
     //histogram generation
     unsigned int histogram_num_bins = 20;
 
+    //surrounding delta of the sector restriction of the load and the result view points: the
+    //fraction of the extent of the used sector layers, clamped to [min in meters, max in degrees]
+    double sector_delta_fraction_ {0.1};
+    double sector_delta_min_m_    {200.0};
+    double sector_delta_max_deg_  {0.2};
+
     //not written to config
     bool load_only_sector_data_ {true};
 

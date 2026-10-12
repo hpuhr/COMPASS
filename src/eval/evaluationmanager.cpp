@@ -48,7 +48,6 @@
 #include "dbfiltercondition.h"
 #include "timestampfilter.h"
 #include "sectorsfilter.h"
-#include "sectorinsidecache.h"
 #include "utnfilter.h"
 #include "filterclause.h"
 #include "idbvariableresolver.h"
@@ -765,32 +764,13 @@ std::string EvaluationManager::loadFilterClause(const std::string& dbcontent_nam
 
     std::vector<FilterClause> parts;
 
-    // the used sector layers, as the Sectors filter renders them. sqlFor yields an empty clause
-    // for contents without position, so no guards needed
+    // the used sector layers, as the Sectors filter renders them, with the surrounding delta
+    // from their extent. sqlFor yields an empty clause for contents without position, so no
+    // guards needed
     if (!calculator.usedSectorLayers().empty())
-    {
-        SectorInsideCache& sector_cache = compass_.dbInterface().sectorInsideCache();
-
-        std::vector<SectorsFilter::Layer> layers;
-
-        for (const auto& layer : calculator.sectorLayers())
-        {
-            const auto& used = calculator.usedSectorLayers();
-
-            if (std::find(used.begin(), used.end(), layer->name()) == used.end())
-                continue;
-
-            //geometry for the sector_inside() database function
-            sector_cache.setLayer(layer->name(), layer->sectors());
-
-            auto bounds = sector_cache.bounds(layer->name());
-            if (bounds.has_value()) // no non-exclusion sectors
-                layers.push_back(SectorsFilter::Layer{layer->name(), bounds.value()});
-        }
-
-        parts.push_back(SectorsFilter::sqlFor(resolver, dbcontent_name, layers,
-                                              EvaluationCalculator::SectorDeltaDeg));
-    }
+        parts.push_back(SectorsFilter::sqlFor(resolver, dbcontent_name,
+                                              calculator.usedSectorFilterLayers(),
+                                              calculator.sectorDeltaDeg()));
 
     if (use_timestamp_filter_)
         parts.push_back(TimestampFilter::sqlFor(

@@ -29,6 +29,7 @@
 #include "json.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <iomanip>
 #include <sstream>
 
@@ -211,6 +212,38 @@ FilterClause SectorsFilter::sqlFor(IDBVariableResolver& resolver,
     clause.sql = ss.str();
 
     return clause;
+}
+
+/**
+ */
+double SectorsFilter::extentDeltaDeg(const std::vector<Layer>& layers,
+                                     double fraction, double min_m, double max_deg)
+{
+    if (layers.empty())
+        return 0.0;
+
+    double lat_min = layers.front().bounds.lat_min;
+    double lat_max = layers.front().bounds.lat_max;
+    double lon_min = layers.front().bounds.lon_min;
+    double lon_max = layers.front().bounds.lon_max;
+
+    for (const auto& layer : layers)
+    {
+        lat_min = std::min(lat_min, layer.bounds.lat_min);
+        lat_max = std::max(lat_max, layer.bounds.lat_max);
+        lon_min = std::min(lon_min, layer.bounds.lon_min);
+        lon_max = std::max(lon_max, layer.bounds.lon_max);
+    }
+
+    //larger side of the combined bounds, in degrees of latitude
+    const double center_lat_rad = (lat_min + lat_max) / 2.0 * M_PI / 180.0;
+    const double extent_deg     = std::max(lat_max - lat_min,
+                                           (lon_max - lon_min) * std::cos(center_lat_rad));
+
+    //one degree of latitude is 111320 m
+    const double min_deg = min_m / 111320.0;
+
+    return std::min(std::max(fraction * extent_deg, min_deg), max_deg);
 }
 
 /**

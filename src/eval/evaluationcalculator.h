@@ -24,6 +24,7 @@
 #include "evaluationdata.h"
 #include "evaluationresultsgenerator.h"
 #include "datasourcecompoundcoverage.h"
+#include "sectorsfilter.h"
 
 #include "target.h"
 
@@ -230,8 +231,12 @@ public:
     /// sector layers the load and the view points are restricted to, empty if not restricted
     const std::vector<std::string>& usedSectorLayers() const { return used_sector_layers_; }
 
-    /// surrounding delta of the sector restriction, keeps target reports near the sector borders
-    static constexpr double SectorDeltaDeg = 0.2;
+    /// the used sector layers with their bounds, their geometry set in the SectorInsideCache for
+    /// the sector_inside() database function. Empty if not restricted
+    std::vector<SectorsFilter::Layer> usedSectorFilterLayers() const;
+    /// surrounding delta of the sector restriction in degrees, from the extent of the used layers
+    /// (SectorsFilter::extentDeltaDeg), keeps target reports near the sector borders
+    double sectorDeltaDeg() const { return sector_delta_deg_; }
 
     bool globalTimeFilterEnabled() const;
     const Utils::TimeWindow& globalTimeWindow() const { return global_time_window_; }
@@ -306,6 +311,7 @@ protected:
     std::map<std::string, std::map<std::string, bool>> data_sources_tst_; // db_content -> ds_id -> active flag
 
     std::vector<std::string> used_sector_layers_;
+    double                   sector_delta_deg_ {0.0};
 
     bool data_loaded_            {false};
     bool reference_data_loaded_  {false};

@@ -29,8 +29,8 @@
  *
  * A report passes if its position is inside any non-exclusion sector of any selected layer,
  * whole layers only. With the surrounding delta the sectors are inflated by the delta in
- * degrees, so reports slightly outside pass too. Altitude limits of the sectors are not
- * applied, the check is planar.
+ * degrees, so reports slightly outside pass too. The altitude limits of the sectors apply to
+ * reports with a barometric altitude, a report without one passes the planar check alone.
  *
  * Offline the WHERE clause holds a bounding box over the selected layers plus a call of the
  * database function sector_inside() per layer, see SectorInsideCache::DBFunctionName. In live
@@ -65,6 +65,14 @@ public:
                                const std::string& dbcontent_name,
                                const std::vector<Layer>& layers,
                                double delta_deg);
+
+    /**
+     * Surrounding delta from the extent of the layers: the fraction of the larger side of the
+     * combined bounds (the longitude side scaled by the cosine of the center latitude), clamped
+     * to [min_m converted to degrees of latitude, max_deg]. 0 without layers.
+     */
+    static double extentDeltaDeg(const std::vector<Layer>& layers,
+                                 double fraction, double min_m, double max_deg);
 
     virtual bool filters(const std::string& dbcontent_name) override;
     virtual void reset() override;
