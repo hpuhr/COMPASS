@@ -849,7 +849,7 @@ namespace force
                 }
                 
             }
-            if (settings.fb_avoid_objects && !settings.additional_objects.empty())
+            if (settings.avoid_objects && !settings.additional_objects.empty())
             {
                 label_placement::force::repelFromObjects(displacements_objects, 
                                                          totals, 

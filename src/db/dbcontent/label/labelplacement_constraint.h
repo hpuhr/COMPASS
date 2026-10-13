@@ -869,7 +869,7 @@ namespace constraint
             h [ i ] = l.h;
         }
 
-        //fixed obstacles: anchors
+        //fixed obstacles: anchors, then the additional objects
         std::vector<QRectF> obstacles;
         if (settings.cs_avoid_anchors && settings.cs_anchor_radius > 0)
         {
@@ -879,6 +879,11 @@ namespace constraint
             for (const auto& l : labels)
                 obstacles.emplace_back(l.x_anchor - r, l.y_anchor - r, 2 * r, 2 * r);
         }
+
+        const size_t no_anchors = obstacles.size();
+
+        if (settings.avoid_objects)
+            obstacles.insert(obstacles.end(), settings.additional_objects.begin(), settings.additional_objects.end());
 
         const size_t no = obstacles.size();
 
@@ -1028,17 +1033,18 @@ namespace constraint
                                                       std::min(w[ i ], ob.width()), std::min(h[ i ], ob.height()),
                                                       (w[ i ] + ob.width()) / 2, (h[ i ] + ob.height()) / 2,
                                                       settings).front();
-                    const int a = (int)i;
+                    const int    a  = (int)i;
+                    const double wo = o < no_anchors ? soft : settings.cs_object_weight;
 
                     //soft: a label squeezed between obstacles may cover one rather than another label
                     if (d == Left)
-                        ax.addSoftUpper(a, ob.left() - w[ i ] - gap_x,      soft);
+                        ax.addSoftUpper(a, ob.left() - w[ i ] - gap_x,      wo);
                     else if (d == Right)
-                        ax.addSoftLower(a, ob.left() + ob.width() + gap_x,  soft);
+                        ax.addSoftLower(a, ob.left() + ob.width() + gap_x,  wo);
                     else if (d == Up)
-                        ay.addSoftUpper(a, ob.top() - h[ i ] - gap_y,       soft);
+                        ay.addSoftUpper(a, ob.top() - h[ i ] - gap_y,       wo);
                     else
-                        ay.addSoftLower(a, ob.top() + ob.height() + gap_y,  soft);
+                        ay.addSoftLower(a, ob.top() + ob.height() + gap_y,  wo);
 
                     dir   = (signed char)d;
                     added = true;

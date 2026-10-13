@@ -49,13 +49,14 @@ namespace label_placement
     }
 
     /**
-     * Compute a minimum frame covering all given label data.
+     * Compute a minimum frame covering all given label data (and the given additional objects).
      */
-    inline QRectF dataFrame(const std::vector<Label>& labels)
+    inline QRectF dataFrame(const std::vector<Label>& labels,
+                            const std::vector<QRectF>* objects = nullptr)
     {
         size_t n = labels.size();
 
-        if (n < 2)
+        if (n + (objects ? objects->size() : 0) < 2)
             return QRectF();
 
         double xmin = std::numeric_limits<double>::max();
@@ -81,6 +82,15 @@ namespace label_placement
 
             checkPos(l.x, l.y);
             checkPos(l.x_anchor, l.y_anchor);
+        }
+
+        if (objects)
+        {
+            for (const auto& obj : *objects)
+            {
+                checkPos(obj.left(),  obj.top());
+                checkPos(obj.right(), obj.bottom());
+            }
         }
 
         if (xmin > xmax || ymin > ymax)

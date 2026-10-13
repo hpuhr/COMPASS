@@ -614,7 +614,8 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 null = buffer->get<std::string>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->get<std::string>(property_name).getAsString(buffer_index);
+                    // fixed length strings are padded with spaces => trimmed as elsewhere
+                    value_str = String::trim(buffer->get<std::string>(property_name).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::JSON)
@@ -2119,7 +2120,8 @@ std::string LabelGenerator::getVariableValue(const std::string& dbcontent_name, 
             if (values.isNull(index))
                 return "";
 
-            value = values.getAsString(index);
+            // fixed length strings are padded with spaces (e.g. SID/STAR, aircraft type) => trimmed as elsewhere
+            value = String::trim(values.getAsString(index));
 
             return value;
         }

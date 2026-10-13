@@ -66,6 +66,46 @@ TEST_CASE("LabelPlacementEngine coincident labels", "[labelplacement]")
     REQUIRE(a->y < b->y);
 }
 
+TEST_CASE("LabelPlacementEngine fixed objects", "[labelplacement]")
+{
+    const auto method = GENERATE(label_placement::Method::ForceBasedSimple,
+                                 label_placement::Method::ForceBasedExtended,
+                                 label_placement::Method::ForceBasedExact,
+                                 label_placement::Method::ForceBasedRelaxed,
+                                 label_placement::Method::ConstraintBased);
+    CAPTURE((int)method);
+
+    LabelPlacementEngine engine;
+
+    auto& settings = engine.settings();
+    settings.method = method;
+    settings.roi    = QRectF(0, 0, 400, 300);
+
+    //fixed object (e.g. a manually placed label) covering the home position of label a
+    const QRectF object(100.0, 80.0, 60.0, 20.0);
+
+    settings.avoid_objects      = true;
+    settings.additional_objects = { object };
+
+    double ax = 95.0, ay = 85.0;
+    double bx = 300.0, by = 200.0;
+
+    engine.addLabel("a",  90.0, 100.0, 40.0, 10.0, &ax, &ay, &ax, &ay);
+    engine.addLabel("b", 290.0, 215.0, 40.0, 10.0, &bx, &by, &bx, &by);
+
+    REQUIRE(engine.placeLabels());
+
+    const auto* a = engine.getLabel("a");
+    const auto* b = engine.getLabel("b");
+    REQUIRE(a);
+    REQUIRE(b);
+
+    //the label avoids the object, the object does not move anything else
+    REQUIRE(!a->boundingBox().intersects(object));
+    REQUIRE(!b->boundingBox().intersects(object));
+    REQUIRE(QLineF(QPointF(b->x, b->y), QPointF(bx, by)).length() <= 1.0);
+}
+
 TEST_CASE("LabelPlacementEngine regularisation", "[labelplacement]")
 {
     LabelPlacementEngine engine;

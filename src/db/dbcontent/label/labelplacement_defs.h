@@ -135,7 +135,6 @@ namespace label_placement
         double    fb_expand_y        = 1.1;   //bounding box expansion in y direction (TODO: per avoidance type)
         bool      fb_avoid_labels    = true;  //avoid other labels (should be on)
         bool      fb_avoid_anchors   = false; //avoid anchor locations (= positions the labels are attached to)
-        bool      fb_avoid_objects   = false; //avoid objects added as 'fb_additional_objects'
         bool      fb_avoid_roi       = false; //avoid region of interest specified in 'roi'
         double    fb_weight_labels   = 0.2;   //force weight for label avoidance (TODO: separate x and y part)
         double    fb_weight_anchors  = 0.4;   //force weight for anchor avoidance (TODO: separate x and y part)
@@ -176,12 +175,14 @@ namespace label_placement
         double cs_prev_tolerance= 0.5;   //previous placements count as separated up to this overlap, as fraction of the
                                          //  smaller label size along the axis (tight solutions, relative movement)
         double cs_soft_weight   = 100.0; //cost weight of violating an obstacle or the region of interest (labels: hard)
+        double cs_object_weight = 1e4;   //cost weight of violating an additional object (fixed labels => practically hard)
         int    cs_max_rounds    = 20;    //max rounds of constraint generation (new overlaps after solving)
         double cs_weight_prev   = 0.0;   //weight of the distance from the previous placement relative to the distance
                                          //  from home (0 = off; smoothness between runs, costs locality)
 
         bool verbose = false;
 
-        Objects additional_objects; //additional objects to avoid, must be enabled by 'fb_avoid_objects'
+        bool    avoid_objects = false; //avoid the 'additional_objects' (all methods)
+        Objects additional_objects;    //additional fixed objects to avoid (e.g. manually placed labels)
     };
 }

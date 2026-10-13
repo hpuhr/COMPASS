@@ -561,7 +561,8 @@ namespace force_exact
         //get data frame for normalization.
         //Note: for this method to work, all data is internally normalized.
         //Not doing the normalization would result in range-dependent effects!
-        auto data_frame = dataFrame(labels);
+        //(additional objects included, e.g. a single label next to fixed objects)
+        auto data_frame = dataFrame(labels, settings.avoid_objects ? &settings.additional_objects : nullptr);
 
         const double anchor_radius = settings.fbe_anchor_radius;
    
@@ -645,6 +646,15 @@ namespace force_exact
         QRectF roi = settings.roi;
         if (!roi.isEmpty())
             normalizeData(roi, data_frame);
+
+        //normalize additional objects
+        std::vector<QRectF> objects;
+        if (settings.avoid_objects)
+        {
+            objects = settings.additional_objects;
+            for (auto& obj : objects)
+                normalizeData(obj, data_frame);
+        }
 
         QPointF f, ci, cj;
 
@@ -758,6 +768,20 @@ namespace force_exact
                                 f = f + repelForce(ci, anchor_points[ j ], anchor_radius_frame * force_point_size * force_push, settings.fbe_force_dir);
                             }
                         }
+                    }
+
+                    // Repel the box from overlapping additional objects (fixed boxes).
+                    for (const auto& obj : objects)
+                    {
+                        if (!text_boxes[ i ].intersects(obj))
+                            continue;
+
+                        overlaps_detected   += 1;
+                        n_overlaps          += 1;
+                        i_overlaps           = true;
+                        total_overlaps[ i ] += 1;
+
+                        f = f + repelForce(ci, obj.center(), force_push, settings.fbe_force_dir);
                     }
 
                     //std::cout << "force" << i << ": (" << f.x() << "," << f.y() << ")" << std::endl;
