@@ -19,6 +19,7 @@
 #include "dbcontent/label/labelgenerator.h"
 #include "dbcontent/label/labeldswidget.h"
 #include "dbcontentmanager.h"
+#include "compass.h"
 #include "logger.h"
 #include "files.h"
 #include "gui/rangeedit.h"
@@ -103,7 +104,36 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     declutter_box->setChecked(label_generator_.declutterLabels());
     connect(declutter_box, &QCheckBox::clicked,
             this, &LabelGeneratorWidget::declutterLabelsChangedSlot);
-    form_layout1->addRow(tr("Declutter Labels"), declutter_box);
+
+    QHBoxLayout* declutter_layout = new QHBoxLayout();
+    declutter_layout->setContentsMargins(0, 0, 0, 0);
+    declutter_layout->addWidget(declutter_box);
+
+    // placement method (development only)
+    if (!COMPASS::isAppImage())
+    {
+        QComboBox* placement_box = new QComboBox();
+        placement_box->addItem("Force Simple"    , (int)label_placement::Method::ForceBasedSimple);
+        placement_box->addItem("Force Extended"  , (int)label_placement::Method::ForceBasedExtended);
+        placement_box->addItem("Force Relaxed"   , (int)label_placement::Method::ForceBasedRelaxed);
+        placement_box->addItem("Force Exact"     , (int)label_placement::Method::ForceBasedExact);
+        placement_box->addItem("Constraint Based", (int)label_placement::Method::ConstraintBased);
+        placement_box->setCurrentIndex(placement_box->findData((int)label_generator_.labelPlacementMethod()));
+        placement_box->setToolTip("Label placement method");
+
+        connect(placement_box, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+                [ this, placement_box ] (int index)
+                {
+                    if (index >= 0)
+                        label_generator_.labelPlacementMethod((label_placement::Method)placement_box->itemData(index).toInt());
+                });
+
+        declutter_layout->addWidget(placement_box);
+    }
+
+    declutter_layout->addStretch();
+
+    form_layout1->addRow(tr("Declutter Labels"), declutter_layout);
 
     main_layout->addLayout(form_layout1);
 

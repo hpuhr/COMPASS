@@ -185,10 +185,14 @@ public:
     bool declutterLabels() const;
     void declutterLabels(bool declutter_labels);
 
+    label_placement::Method labelPlacementMethod() const;
+    void labelPlacementMethod(label_placement::Method method);
+
     bool showDeclutteringInfoOnce() const;
     void showDeclutteringInfoOnce(bool value);
 
     unsigned int maxDeclutterlabels() const;
+    float maxDeclutterScreenRatio() const;
 
     bool filterPrimaryOnlyActive() const;
     void filterPrimaryOnlyActive(bool value);

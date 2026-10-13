@@ -149,7 +149,7 @@
                         "label_lines": {},
                         "label_opacity": 0.8999999761581421,
                         "label_placement_forcedir": 2,
-                        "label_placement_method": 1,
+                        "label_placement_method": 3,
                         "layer_config": {
                             "ffts": {
                                 "show_fft": {
@@ -195,6 +195,7 @@
                         "map_name": "minimal_2d.earth",
                         "map_opacity": 0.0,
                         "max_declutter_labels": 200,
+                        "max_declutter_screen_ratio": 0.4,
                         "name": "Geographic View 0",
                         "null_height_offset": 0.0,
                         "num_accuracy_ellipse_points_factor": 16.0,

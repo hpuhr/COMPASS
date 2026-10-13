@@ -92,13 +92,18 @@ namespace label_placement
 
         boost::optional<double> x_ref; //a reference x position, which is deemed 'optimal' and MIGHT get enforced by a label algorithm
         boost::optional<double> y_ref; //a reference y position, which is deemed 'optimal' and MIGHT get enforced by a label algorithm
+
+        bool has_last = true; //initial position is a previous placement (false: no history, e.g. a new label)
     };
 
     enum class Method
     {
         ForceBasedSimple = 0, //simple force based approach, just repels into ANY direction to avoid label conflicts
         ForceBasedExtended,   //extended force based approach, tries to estimate the correct repel force directions
-        ForceBasedExact       //exact approach, computes the correct repel force directions using intersections
+        ForceBasedExact,      //exact approach, computes the correct repel force directions using intersections
+        ConstraintBased,      //minimal displacement from the reference positions subject to non-overlap constraints
+        ForceBasedRelaxed     //extended force based approach, starting from the initial positions moved partly towards
+                              //the reference positions (see 'fb_start_relax')
     };
 
     enum ForceDirection
@@ -123,7 +128,7 @@ namespace label_placement
         Method method = Method::ForceBasedSimple; //used label placement approach
         QRectF roi;                               //region of interest, MIGHT be enforced by a specific labeling algorithm
 
-        //settings for methods'ForceBasedSimple' and 'ForceBasedExtended'
+        //settings for methods 'ForceBasedSimple', 'ForceBasedExtended' and 'ForceBasedRelaxed'
         int       fb_max_iter        = 500;   //maximum number of iterations
         double    fb_precision       = 0.001;  //precision = convergence limit
         double    fb_expand_x        = 1.2;   //bounding box expansion in x direction (TODO: per avoidance type)
@@ -137,6 +142,11 @@ namespace label_placement
         double    fb_weight_objects  = 0.2;   //force weight for object avoidance (TODO: separate x and y part)
         double    fb_weight_roi      = 0.2;   //force weight for roi avoidance (TODO: separate x and y part)
         double    fb_anchor_radius   = 0.0;   //repel radius around anchors if 'fb_avoid_anchors' is on
+        double    fb_weight_ref      = 0.0;   //pull towards the reference position (x_ref, y_ref) while a label is not in conflict (0 = off)
+        double    fb_weight_init     = 0.0;   //pull towards the initial position (x_last, y_last) while a label is not in conflict (0 = off)
+        double    fb_max_ref_dist    = 0.0;   //max distance of a label from its reference position (0 = unlimited)
+    double    fb_start_relax     = 0.2;   //method 'ForceBasedRelaxed': fraction the initial position is moved towards the
+                                          //  reference position before the run
 
         //settings for method 'ForceBasedExact'
         int            fbe_max_iter      = 10000;
@@ -146,6 +156,29 @@ namespace label_placement
         double         fbe_anchor_radius = 0.0;
         ForceDirection fbe_force_dir     = ForceDirection::XY;
         StickyPosition fbe_sticky_pos    = StickyPosition::InitPos;
+
+        //settings for method 'ConstraintBased' (target: reference position, previous placement: initial position)
+        double cs_gap_x         = 2.0;   //min horizontal gap between labels and between labels and obstacles
+        double cs_gap_y         = 2.0;   //min vertical gap between labels and between labels and obstacles
+        double cs_balance       = 0.0;   //separation direction by the needed displacement divided by size^cs_balance of the
+                                         //  pair along the axis (0 = absolute => wide labels stack vertically, 1 = relative)
+        int    cs_candidates    = 1;     //candidate positions around the anchor (at the anchor distance of the reference
+                                         //  position): 1 = reference position only, 4 = diagonal, 8 = also axis-aligned
+        double cs_cand_penalty  = 0.0;   //cost of leaving the reference position, fraction of the label area
+                                         //  (0 = all directions equal)
+        double cs_cand_switch   = 0.5;   //cost of leaving the candidate of the previous placement, fraction of the label area
+        int    cs_cand_sweeps   = 10;    //max sweeps of the candidate choice
+        bool   cs_avoid_anchors = true;  //anchors are obstacles (squares of 2 * cs_anchor_radius)
+        double cs_anchor_radius = 0.0;   //obstacle radius around anchors (0 = anchors not avoided)
+        bool   cs_keep_in_roi   = false; //keep labels within the region of interest 'roi'
+        double cs_keep_factor   = 2.0;   //the previous separation direction of a pair is kept unless it needs more than
+        double cs_keep_abs      = 10.0;  //  cs_keep_factor * cheapest + cs_keep_abs separation
+        double cs_prev_tolerance= 0.5;   //previous placements count as separated up to this overlap, as fraction of the
+                                         //  smaller label size along the axis (tight solutions, relative movement)
+        double cs_soft_weight   = 100.0; //cost weight of violating an obstacle or the region of interest (labels: hard)
+        int    cs_max_rounds    = 20;    //max rounds of constraint generation (new overlaps after solving)
+        double cs_weight_prev   = 0.0;   //weight of the distance from the previous placement relative to the distance
+                                         //  from home (0 = off; smoothness between runs, costs locality)
 
         bool verbose = false;
 

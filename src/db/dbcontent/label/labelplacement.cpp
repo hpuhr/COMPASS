@@ -19,6 +19,7 @@
 #include "labelplacement.h"
 #include "labelplacement_force.h"
 #include "labelplacement_spring.h"
+#include "labelplacement_constraint.h"
 
 #include <limits>
 #include <iostream>
@@ -53,7 +54,8 @@ void LabelPlacementEngine::addLabel(const std::string& id,
                                     double* x_init, 
                                     double* y_init,
                                     double* x_ref,
-                                    double* y_ref)
+                                    double* y_ref,
+                                    bool has_last)
 {
     Label l;
     l.id       = id;
@@ -65,6 +67,7 @@ void LabelPlacementEngine::addLabel(const std::string& id,
     l.y_last   = l.y;
     l.w        = w;
     l.h        = h;
+    l.has_last = has_last;
 
     if (x_ref && y_ref)
     {
@@ -163,10 +166,13 @@ bool LabelPlacementEngine::placeLabels()
 {
     bool ok = false;
     if (settings_.method == Method::ForceBasedSimple ||
-        settings_.method == Method::ForceBasedExtended)
+        settings_.method == Method::ForceBasedExtended ||
+        settings_.method == Method::ForceBasedRelaxed)
         ok = label_placement::force::placeLabels(labels_, settings_);
     else if (settings_.method == Method::ForceBasedExact)
         ok = label_placement::force_exact::placeLabels(labels_, settings_);
+    else if (settings_.method == Method::ConstraintBased)
+        ok = label_placement::constraint::placeLabels(labels_, settings_);
     else
         return false; //unknown method
 

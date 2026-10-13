@@ -732,6 +732,19 @@ namespace force
 
         size_t n = labels.size();
 
+        //relaxed method: start from the initial position moved partly towards the reference position
+        if (settings.method == Method::ForceBasedRelaxed && settings.fb_start_relax > 0)
+        {
+            for (auto& l : labels)
+            {
+                if (l.x_ref.has_value() && l.y_ref.has_value())
+                {
+                    l.x += settings.fb_start_relax * (*l.x_ref - l.x);
+                    l.y += settings.fb_start_relax * (*l.y_ref - l.y);
+                }
+            }
+        }
+
         //compute convergence limits
         auto bboxes = collectBoundingBoxes(labels, 1, 1);
         double sum_widths  = 0.0;
@@ -867,17 +880,58 @@ namespace force
                 displacements[ j ] += displacements_roi    [ j ] * settings.fb_weight_roi;
             }
 
+            //pull labels without conflict towards their reference and initial positions (keeps them local and
+            //stable between runs); a label in conflict is only pushed, otherwise it would settle where push and
+            //pull balance, i.e. still overlapping
+            Eigen::Vector2d total_springs(0, 0);
+
+            for (size_t j = 0; j < n; ++j)
+            {
+                if (displacements[ j ].squaredNorm() > 0)
+                    continue;
+
+                const auto& l = labels[ j ];
+
+                Eigen::Vector2d spring(0, 0);
+
+                if (settings.fb_weight_ref > 0 && l.x_ref && l.y_ref)
+                    spring += settings.fb_weight_ref * Eigen::Vector2d(*l.x_ref - l.x, *l.y_ref - l.y);
+                if (settings.fb_weight_init > 0)
+                    spring += settings.fb_weight_init * Eigen::Vector2d(l.x_last - l.x, l.y_last - l.y);
+
+                displacements[ j ] += spring;
+                total_springs      += spring.cwiseAbs();
+            }
+
             //sum up total absolute movement
             total += total_labels;
             total += total_anchors;
             total += total_objects;
             total += total_roi;
+            total += total_springs;
 
-            //move labels
+            //move labels, keep them within the max distance from their reference position
             for (size_t j = 0; j < n; ++j)
             {
-                labels[ j ].x += displacements[ j ].x();
-                labels[ j ].y += displacements[ j ].y();
+                auto& l = labels[ j ];
+
+                l.x += displacements[ j ].x();
+                l.y += displacements[ j ].y();
+
+                if (settings.fb_max_ref_dist > 0 && l.x_ref && l.y_ref)
+                {
+                    Eigen::Vector2d d(l.x - *l.x_ref, l.y - *l.y_ref);
+
+                    const double dist = d.norm();
+
+                    if (dist > settings.fb_max_ref_dist)
+                    {
+                        d *= settings.fb_max_ref_dist / dist;
+
+                        l.x = *l.x_ref + d.x();
+                        l.y = *l.y_ref + d.y();
+                    }
+                }
             }
 
             last_dx = total.x();

@@ -1680,6 +1680,24 @@ void LabelGenerator::declutterLabels(bool declutter_labels)
     emit labelOptionsChangedSignal(); // updates
 }
 
+label_placement::Method LabelGenerator::labelPlacementMethod() const
+{
+    return (label_placement::Method)config_.label_placement_method_;
+}
+
+void LabelGenerator::labelPlacementMethod(label_placement::Method method)
+{
+    loginf << "value " << (int)method;
+
+    if (config_.label_placement_method_ == (int)method)
+        return;
+
+    config_.label_placement_method_ = (int)method;
+
+    emit labelConfigChanged();
+    emit labelOptionsChangedSignal(); // updates
+}
+
 bool LabelGenerator::showDeclutteringInfoOnce() const
 {
     return show_decluttering_info_once_;
@@ -1693,6 +1711,11 @@ void LabelGenerator::showDeclutteringInfoOnce(bool show_decluttering_info_once)
 unsigned int LabelGenerator::maxDeclutterlabels() const
 {
     return config_.max_declutter_labels_;
+}
+
+float LabelGenerator::maxDeclutterScreenRatio() const
+{
+    return config_.max_declutter_screen_ratio_;
 }
 
 bool LabelGenerator::filterPrimaryOnlyActive() const

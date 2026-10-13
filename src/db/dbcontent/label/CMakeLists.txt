@@ -15,6 +15,7 @@ target_sources(compass_core
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_force.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_spring.h"
+        "${CMAKE_CURRENT_LIST_DIR}/labelplacement_constraint.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_helpers.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelgeneratorconfig.h"
     PRIVATE

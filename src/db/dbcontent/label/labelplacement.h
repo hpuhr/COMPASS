@@ -101,7 +101,8 @@ public:
                   double* x_init = nullptr, 
                   double* y_init = nullptr,
                   double* x_ref = nullptr,
-                  double* y_ref = nullptr);
+                  double* y_ref = nullptr,
+                  bool has_last = true);
     const Label& getLabel(size_t idx) const;
     const Label* getLabel(const std::string& id) const;
     void removeLabel(size_t idx);
