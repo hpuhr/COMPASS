@@ -14,6 +14,7 @@
             "class_name": "Variable",
             "instance_name": "Variable1",
             "parameters": {
+                "data_item": "I023/000.Report Type",
                 "data_type_str": "UCHAR",
                 "db_column_name": "report_type",
                 "db_expression": "",
@@ -21,11 +22,14 @@
                 "description": "1 Ground Station Status report\n2 Service Status report\n3 Service Statistics report",
                 "dimension": "",
                 "group": "Type",
+                "inputs": [],
                 "is_key": false,
                 "name": "Report Type",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/000.Report Type",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -33,6 +37,7 @@
             "class_name": "Variable",
             "instance_name": "Variable10",
             "parameters": {
+                "data_item": "I023/100.ODP",
                 "data_type_str": "BOOL",
                 "db_column_name": "odp",
                 "db_expression": "",
@@ -40,11 +45,14 @@
                 "description": "Data Processor Overload Indicator\n0 Default, no overload\n1 Overload in DP",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "ODP",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/100.ODP",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -52,6 +60,7 @@
             "class_name": "Variable",
             "instance_name": "Variable11",
             "parameters": {
+                "data_item": "I023/100.OXT",
                 "data_type_str": "BOOL",
                 "db_column_name": "oxt",
                 "db_expression": "",
@@ -59,11 +68,14 @@
                 "description": "Ground Interface Data Communications Overload\n0 Default, no overload\n1 Overload in transmission subsystem",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "OXT",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/100.OXT",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -71,6 +83,7 @@
             "class_name": "Variable",
             "instance_name": "Variable12",
             "parameters": {
+                "data_item": "I023/100.RN",
                 "data_type_str": "BOOL",
                 "db_column_name": "rn",
                 "db_expression": "",
@@ -78,11 +91,14 @@
                 "description": "Renumbering Indication for Track ID\n0 default\n1 track numbering has restarted",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "RN",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/100.RN",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -90,6 +106,7 @@
             "class_name": "Variable",
             "instance_name": "Variable13",
             "parameters": {
+                "data_item": "I023/100.SPO",
                 "data_type_str": "BOOL",
                 "db_column_name": "spo",
                 "db_expression": "",
@@ -97,11 +114,14 @@
                 "description": "Indication of spoofing attack\n0 no spoofing detected\n1 potential spoofing attack",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "SPO",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/100.SPO",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -109,6 +129,7 @@
             "class_name": "Variable",
             "instance_name": "Variable14",
             "parameters": {
+                "data_item": "I023/100.TSV",
                 "data_type_str": "BOOL",
                 "db_column_name": "tsv",
                 "db_expression": "",
@@ -116,11 +137,14 @@
                 "description": "Time Source Validity\n0 valid\n1 invalid",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "TSV",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/100.TSV",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -128,6 +152,7 @@
             "class_name": "Variable",
             "instance_name": "Variable15",
             "parameters": {
+                "data_item": "I023/101.RP",
                 "data_type_str": "FLOAT",
                 "db_column_name": "rp",
                 "db_expression": "",
@@ -135,11 +160,14 @@
                 "description": "Report Period for Category 021 Reports\n0: Data driven mode",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "RP",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/101.RP",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -147,6 +175,7 @@
             "class_name": "Variable",
             "instance_name": "Variable16",
             "parameters": {
+                "data_item": "I023/101.SC",
                 "data_type_str": "UCHAR",
                 "db_column_name": "sc",
                 "db_expression": "",
@@ -154,11 +183,14 @@
                 "description": "Service Class\n0 No information\n1 NRA class\n2-7 reserved for future use",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "SC",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/101.SC",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -166,6 +198,7 @@
             "class_name": "Variable",
             "instance_name": "Variable17",
             "parameters": {
+                "data_item": "I023/101.SSRP",
                 "data_type_str": "CHAR",
                 "db_column_name": "ssrp",
                 "db_expression": "",
@@ -173,11 +206,14 @@
                 "description": "Service Status Reporting Period\nValid range: 1 <= GSSP <= 127s",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "SSRP",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/101.SSRP",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -185,6 +221,7 @@
             "class_name": "Variable",
             "instance_name": "Variable18",
             "parameters": {
+                "data_item": "I023/110.STAT",
                 "data_type_str": "UCHAR",
                 "db_column_name": "stat",
                 "db_expression": "",
@@ -192,11 +229,14 @@
                 "description": "Status of the Service\n0 Unknown\n1 Failed\n2 Disabled\n3 Degraded\n4 Normal\n5 Initialisation",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "STAT",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/110.STAT",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -204,6 +244,7 @@
             "class_name": "Variable",
             "instance_name": "Variable19",
             "parameters": {
+                "data_item": "I023/120.service_statistics.COUNTER VALUE",
                 "data_type_str": "JSON",
                 "db_column_name": "counter_value",
                 "db_expression": "",
@@ -211,11 +252,14 @@
                 "description": "32-bit counter value",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Counter Value",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/120.service_statistics.COUNTER VALUE",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -223,6 +267,7 @@
             "class_name": "Variable",
             "instance_name": "Variable2",
             "parameters": {
+                "data_item": "I023/010.SAC",
                 "data_type_str": "UCHAR",
                 "db_column_name": "sac",
                 "db_expression": "",
@@ -230,11 +275,14 @@
                 "description": "System Area Code",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": false,
                 "name": "SAC",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/010.SAC",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -242,6 +290,7 @@
             "class_name": "Variable",
             "instance_name": "Variable20",
             "parameters": {
+                "data_item": "I023/120.service_statistics.TYPE",
                 "data_type_str": "JSON",
                 "db_column_name": "counter_type",
                 "db_expression": "",
@@ -249,11 +298,14 @@
                 "description": "0 Number of unknown messages received\n1 Number of ‘too old’ messages received\n2 Number of failed message conversions\n3 Total Number of messages received\n4 Total number of messages transmitted\n20 Number of TIS-B management messages received\n21 Number of 'Basic' messages received\n22 Number of 'High Dynamic' messages received\n23 Number of 'Full Position' messages received\n24 Number of 'Basic Ground' messages received\n25 Number of 'TCP' messages received\n26 Number of 'UTC time' messages received\n27 Number of 'Data' messages received\n28 Number of 'High Resolution' messages received\n29 Number of 'Aircraft Target Airborne' messages received.\n30 Number of 'Aircraft Target 'Ground' messages received.\n31 Number of 'Ground Vehicle Target' messages received.\n32 Number of '2 slots TCP messages received.",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Counter Type",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/120.service_statistics.TYPE",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -261,6 +313,7 @@
             "class_name": "Variable",
             "instance_name": "Variable21",
             "parameters": {
+                "data_item": "I023/200.Range",
                 "data_type_str": "UCHAR",
                 "db_column_name": "range",
                 "db_expression": "",
@@ -268,11 +321,14 @@
                 "description": "Operational range of the GS",
                 "dimension": "",
                 "group": "Position",
+                "inputs": [],
                 "is_key": false,
                 "name": "Range",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/200.Range",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -280,6 +336,7 @@
             "class_name": "Variable",
             "instance_name": "Variable22",
             "parameters": {
+                "data_item": "I023/120.service_statistics.REF",
                 "data_type_str": "JSON",
                 "db_column_name": "counter_ref",
                 "db_expression": "",
@@ -287,11 +344,14 @@
                 "description": "Reference from which the messages are countered\n0 From midnight\n1 From the last report",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Counter Ref",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/120.service_statistics.REF",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -299,6 +359,7 @@
             "class_name": "Variable",
             "instance_name": "Variable3",
             "parameters": {
+                "data_item": "I023/010.SIC",
                 "data_type_str": "UCHAR",
                 "db_column_name": "sic",
                 "db_expression": "",
@@ -306,11 +367,14 @@
                 "description": "System Identification Code",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": false,
                 "name": "SIC",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/010.SIC",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -318,6 +382,7 @@
             "class_name": "Variable",
             "instance_name": "Variable4",
             "parameters": {
+                "data_item": "I023/015.SID",
                 "data_type_str": "UCHAR",
                 "db_column_name": "sid",
                 "db_expression": "",
@@ -325,11 +390,14 @@
                 "description": "Service Identification",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": false,
                 "name": "SID",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/015.SID",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -337,6 +405,7 @@
             "class_name": "Variable",
             "instance_name": "Variable5",
             "parameters": {
+                "data_item": "I023/015.STYP",
                 "data_type_str": "UCHAR",
                 "db_column_name": "styp",
                 "db_expression": "",
@@ -344,11 +413,14 @@
                 "description": "Type of Service\n1 ADS-B VDL4\n2 ADS-B Ext Squitter\n3 ADS-B UAT\n4 TIS-B VDL4\n5 TIS-B Ext Squitter\n6 TIS-B UAT\n7 FIS-B VDL4\n8 GRAS VDL4\n9 MLT",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "STYP",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/015.STYP",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -356,6 +428,7 @@
             "class_name": "Variable",
             "instance_name": "Variable6",
             "parameters": {
+                "data_item": "I023/070.Time of Day",
                 "data_type_str": "FLOAT",
                 "db_column_name": "time_of_day",
                 "db_expression": "",
@@ -363,11 +436,14 @@
                 "description": "",
                 "dimension": "Time",
                 "group": "Time",
+                "inputs": [],
                 "is_key": false,
                 "name": "Time of Day",
+                "origin": "asterix",
                 "representation_str": "SECONDS_TO_TIME",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/070.Time of Day",
+                "source_variable": "",
                 "unit": "Second"
             }
         },
@@ -375,6 +451,7 @@
             "class_name": "Variable",
             "instance_name": "Variable7",
             "parameters": {
+                "data_item": "I023/100.GSSP",
                 "data_type_str": "UCHAR",
                 "db_column_name": "gssp",
                 "db_expression": "",
@@ -382,11 +459,14 @@
                 "description": "Ground Station Status Reporting Period\nValid range: 1 <= GSSP <= 127s",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "GSSP",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/100.GSSP",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -394,6 +474,7 @@
             "class_name": "Variable",
             "instance_name": "Variable8",
             "parameters": {
+                "data_item": "I023/100.NOGO",
                 "data_type_str": "BOOL",
                 "db_column_name": "nogo",
                 "db_expression": "",
@@ -401,11 +482,14 @@
                 "description": "Operational Release Status of the Data\n0 Data is released for operational use\n1 Data must not be used operationally",
                 "dimension": "",
                 "group": "Warning/Alert",
+                "inputs": [],
                 "is_key": false,
                 "name": "NOGO",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/100.NOGO",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -413,6 +497,7 @@
             "class_name": "Variable",
             "instance_name": "Variable9",
             "parameters": {
+                "data_item": "I023/100.MSC",
                 "data_type_str": "BOOL",
                 "db_column_name": "msc",
                 "db_expression": "",
@@ -420,11 +505,14 @@
                 "description": "Monitoring System Connected Status\n0 Monitoring system not connected or unknown\n1 Monitoring system connected",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "MSC",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I023/100.MSC",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -432,6 +520,7 @@
             "class_name": "Variable",
             "instance_name": "VariableTimestamp0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "TIMESTAMP",
                 "db_column_name": "timestamp",
                 "db_expression": "",
@@ -439,11 +528,16 @@
                 "description": "Epoch timestamp computed from Time of Day plus the resolved calendar date (handles midnight wrap).",
                 "dimension": "",
                 "group": "Time",
+                "inputs": [
+                    "Time of Day*"
+                ],
                 "is_key": false,
                 "name": "Timestamp",
+                "origin": "calculated",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Calculated from Time of Day, calendar date",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -451,6 +545,7 @@
             "class_name": "Variable",
             "instance_name": "Variableds_id0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "UINT",
                 "db_column_name": "ds_id",
                 "db_expression": "",
@@ -458,11 +553,17 @@
                 "description": "Data Source Identifier (bit-packed SAC/SIC)",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [
+                    "SAC",
+                    "SIC"
+                ],
                 "is_key": false,
                 "name": "DS ID",
+                "origin": "calculated",
                 "representation_str": "DATA_SRC_NAME",
+                "selection": [],
                 "short_name": "",
-                "source": "Calculated from I023/010.SAC, I023/010.SIC",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -470,6 +571,7 @@
             "class_name": "Variable",
             "instance_name": "Variableline_id0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "UINT",
                 "db_column_name": "line_id",
                 "db_expression": "",
@@ -477,11 +579,14 @@
                 "description": "Communication line ID determining the origin of the record.",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": false,
                 "name": "Line ID",
+                "origin": "internal",
                 "representation_str": "LINE_NAME",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: import line/source identifier",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -489,6 +594,7 @@
             "class_name": "Variable",
             "instance_name": "Variablerec_num0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "ULONGINT",
                 "db_column_name": "record_number",
                 "db_expression": "",
@@ -496,11 +602,14 @@
                 "description": "Unique record id starting with 0 on every new recording.",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": true,
                 "name": "Record Number",
+                "origin": "internal",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: ascending record number assigned at import",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -508,18 +617,22 @@
             "class_name": "Variable",
             "instance_name": "Variablerecording_time0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "recording_time",
                 "db_expression": "",
                 "db_expression_variables": {},
-                "description": "Recording time of the record's frame or packet in seconds since midnight. IOSS and RFF frame header, PCAP capture time. Null when the source carries no recording time.",
+                "description": "Recording time of the record's frame or packet in seconds since midnight. IOSS and RFF frame header, PCAP capture time. Null when the source carries no recording time.\nDecoder column recording_time.",
                 "dimension": "Time",
                 "group": "Time",
+                "inputs": [],
                 "is_key": false,
                 "name": "Recording Time",
+                "origin": "internal",
                 "representation_str": "SECONDS_TO_TIME",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: recording_time column",
+                "source_variable": "",
                 "unit": "Second"
             }
         },
@@ -527,18 +640,22 @@
             "class_name": "Variable",
             "instance_name": "Variablerecording_day0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "UINT",
                 "db_column_name": "recording_day",
                 "db_expression": "",
                 "db_expression_variables": {},
-                "description": "Recording day counter of the record's frame, 0 at the start of the recording. IOSS frame header, RFF computed from the file header. Null when the source carries no day counter.",
+                "description": "Recording day counter of the record's frame, 0 at the start of the recording. IOSS frame header, RFF computed from the file header. Null when the source carries no day counter.\nDecoder column recording_day.",
                 "dimension": "",
                 "group": "Time",
+                "inputs": [],
                 "is_key": false,
                 "name": "Recording Day",
+                "origin": "internal",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: recording_day column",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -546,18 +663,74 @@
             "class_name": "Variable",
             "instance_name": "Variablerecording_date0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "UINT",
                 "db_column_name": "recording_date",
                 "db_expression": "",
                 "db_expression_variables": {},
-                "description": "UTC date of the record's frame or packet as YYYYMMDD. RFF file header, PCAP capture time. Null when the source carries no absolute date.",
+                "description": "UTC date of the record's frame or packet as YYYYMMDD. RFF file header, PCAP capture time. Null when the source carries no absolute date.\nDecoder column recording_date.",
                 "dimension": "",
                 "group": "Time",
+                "inputs": [],
                 "is_key": false,
                 "name": "Recording Date",
+                "origin": "internal",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: recording_date column",
+                "source_variable": "",
+                "unit": ""
+            }
+        },
+        {
+            "class_name": "Variable",
+            "instance_name": "VariableTimeofDayUsed0",
+            "parameters": {
+                "data_item": "",
+                "data_type_str": "FLOAT",
+                "db_column_name": "time_of_day_used",
+                "db_expression": "",
+                "db_expression_variables": {},
+                "description": "Time of day COMPASS uses for this record, the decoded value shifted by the override offset of the import settings when configured.",
+                "dimension": "Time",
+                "group": "Time",
+                "inputs": [],
+                "is_key": false,
+                "name": "Time of Day*",
+                "origin": "selection",
+                "representation_str": "SECONDS_TO_TIME",
+                "selection": [
+                    {
+                        "variable": "Time of Day"
+                    }
+                ],
+                "short_name": "",
+                "source_variable": "Time of Day Source",
+                "unit": "Second"
+            }
+        },
+        {
+            "class_name": "Variable",
+            "instance_name": "VariableTimeofDaySource0",
+            "parameters": {
+                "data_item": "",
+                "data_type_str": "UCHAR",
+                "db_column_name": "time_of_day_source",
+                "db_expression": "",
+                "db_expression_variables": {},
+                "description": "1-based position of the candidate that supplied the time of day COMPASS uses, null when none did.",
+                "dimension": "",
+                "group": "Time",
+                "inputs": [
+                    "Time of Day*"
+                ],
+                "is_key": false,
+                "name": "Time of Day Source",
+                "origin": "calculated",
+                "representation_str": "STANDARD",
+                "selection": [],
+                "short_name": "",
+                "source_variable": "",
                 "unit": ""
             }
         }

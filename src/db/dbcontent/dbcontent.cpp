@@ -49,6 +49,7 @@ DBContent::DBContent(nlohmann::json& config, DBContentManager* parent)
     registerParameter("id", &id_, 0u);
     registerParameter("info", &info_, std::string());
     registerParameter("db_table_name", &db_table_name_, std::string());
+    registerParameter("origin", &origin_, std::string());
 
     if (name_ == "CAT001" || name_ == "CAT010"
         || name_ == "CAT020"|| name_ == "CAT021"
@@ -662,14 +663,21 @@ bool DBContent::existsInDB() const
  */
 void DBContent::checkStaticVariable(const Property& property)
 {
-    if (!hasVariable(property.name()))
+    // a derived variable with a decoded namesake carries the asterisk in its name, "Latitude*"
+    // is the position COMPASS uses, see readme_dbcontent.md
+    std::string var_name = property.name();
+
+    if (!hasVariable(var_name) && hasVariable(var_name + "*"))
+        var_name += "*";
+
+    if (!hasVariable(var_name))
     {
         logwrn << "start " << name_ << " has no variable " << property.name();
     }
-    else if (variable(property.name()).dataType() != property.dataType())
+    else if (variable(var_name).dataType() != property.dataType())
     {
-        logwrn << "start " << name_ << " variable " << property.name()
-               << " has wrong data type (" << variable(property.name()).dataTypeString()
+        logwrn << "start " << name_ << " variable " << var_name
+               << " has wrong data type (" << variable(var_name).dataTypeString()
                << " insteaf of " << property.dataTypeString() << ")";
     }
 }

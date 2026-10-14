@@ -483,7 +483,7 @@
                 "append_value": false,
                 "comment": "",
                 "db_content_name": "CAT021",
-                "db_content_variable_name": "Time of Day Deprecated",
+                "db_content_variable_name": "Time of Day",
                 "dimension": "Time",
                 "format_data_type": "",
                 "in_array": false,

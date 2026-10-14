@@ -59,7 +59,9 @@ namespace
         "Secondary Identification", "Altitude", "Track", "Ages", "Warning/Alert"};
 
     const std::string OtherGroupName = "Other";
-    const std::string InternalItemName = "Internal/Calculated";
+    // data item mode groups of the variables without an ASTERIX item, sorted last
+    const std::string CalculatedItemName = "Calculated";
+    const std::string InternalItemName = "Internal";
 
     const int ContentNameRole  = Qt::UserRole + 1;
     const int VariableNameRole = Qt::UserRole + 2;
@@ -433,18 +435,38 @@ bool VariableSelectionDialog::contentShown(const std::string& content_name) cons
 
 /**
  */
-std::string VariableSelectionDialog::dataItemOf(const std::string& source) const
+std::string VariableSelectionDialog::dataItemOf(const Variable* variable) const
 {
-    if (source.empty())
+    // data item mode group: the item of a decoded variable, the item of the first decoded
+    // candidate of a selection, "Calculated" for the computed ones, empty for internal
+
+    if (!variable)
         return "";
 
-    QString first_line = QString::fromStdString(source).section('\n', 0, 0);
+    if (variable->isAsterix())
+        return variable->dataItemPart();
 
-    static const QRegularExpression item_regex("^(I\\d{3}/[A-Za-z0-9]+)");
+    if (variable->isSelection())
+    {
+        const DBContent& dbcontent = variable->object();
 
-    auto match = item_regex.match(first_line);
-    if (match.hasMatch())
-        return match.captured(1).toStdString();
+        for (const auto& candidate : variable->selection())
+        {
+            if (!candidate.is_object() || !candidate.contains("variable")
+                || !candidate.at("variable").is_string())
+                continue;
+
+            std::string candidate_name = candidate.at("variable");
+
+            if (dbcontent.hasVariable(candidate_name) && dbcontent.variable(candidate_name).isAsterix())
+                return dbcontent.variable(candidate_name).dataItemPart();
+        }
+
+        return CalculatedItemName;
+    }
+
+    if (variable->isCalculated())
+        return CalculatedItemName;
 
     return "";
 }
@@ -467,7 +489,7 @@ QStandardItem* VariableSelectionDialog::makeVariableRow(const std::string& conte
     name_item->setData(QString::fromStdString(content_name), ContentNameRole);
     name_item->setData(QString::fromStdString(var_name), VariableNameRole);
 
-    std::string source = variable ? variable->source() : "";
+    std::string origin = variable ? variable->originInfo() : "";
     std::string type_str;
     std::string description;
     std::string info;
@@ -491,8 +513,7 @@ QStandardItem* VariableSelectionDialog::makeVariableRow(const std::string& conte
         info        = report_variable->info();
     }
 
-    QStandardItem* item_item = new QStandardItem(
-        QString::fromStdString(source).section('\n', 0, 0).simplified());
+    QStandardItem* item_item = new QStandardItem(QString::fromStdString(origin).simplified());
     QStandardItem* type_item = new QStandardItem(QString::fromStdString(type_str));
     QStandardItem* descr_item = new QStandardItem(QString::fromStdString(description).simplified());
 
@@ -543,7 +564,7 @@ void VariableSelectionDialog::addVariableRows(QStandardItem* content_item,
         }
         else
         {
-            group_name = dataItemOf(variable ? variable->source() : "");
+            group_name = dataItemOf(variable);
             if (group_name.empty())
                 group_name = InternalItemName;
         }
@@ -601,8 +622,13 @@ void VariableSelectionDialog::addVariableRows(QStandardItem* content_item,
         std::stable_sort(group_names.begin(), group_names.end(),
                          [](const std::string& a, const std::string& b)
                          {
-                             if ((a == InternalItemName) != (b == InternalItemName))
-                                 return b == InternalItemName;
+                             // items first, then "Calculated", then "Internal"
+                             auto rank = [](const std::string& name)
+                             { return name == InternalItemName ? 2 : name == CalculatedItemName ? 1 : 0; };
+
+                             int ra = rank(a), rb = rank(b);
+                             if (ra != rb)
+                                 return ra < rb;
                              return a < b;
                          });
 
@@ -712,7 +738,7 @@ void VariableSelectionDialog::addReportVariableRows(QStandardItem* content_item,
 void VariableSelectionDialog::updateModel()
 {
     model_->clear();
-    model_->setHorizontalHeaderLabels({"Name", "Data Item", "Type", "Description"});
+    model_->setHorizontalHeaderLabels({"Name", "Origin", "Type", "Description"});
 
     bool by_group = grouping_combo_->currentIndex() == 1;
 

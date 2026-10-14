@@ -133,6 +133,9 @@ public:
 
     size_t numVariables() const { return variables_.size(); }
 
+    /// origin of the variables without their own origin, "calculated" for RefTraj, else empty
+    const std::string& origin() const { return origin_; }
+
     const std::string& name() const { return name_; }
     void name(const std::string& name)
     {
@@ -210,6 +213,7 @@ protected:
     unsigned int id_ {0};
     std::string  info_;
     std::string  db_table_name_;
+    std::string  origin_;
     std::string  ds_type_;
 
     bool contains_target_reports_ {false};

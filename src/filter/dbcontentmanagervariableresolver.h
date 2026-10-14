@@ -72,6 +72,13 @@ public:
     std::string variableDBExpression(const std::string& dbcontent_name,
                                      const std::string& var_name,
                                      const std::string& var_dbcontent_name) const override;
+    std::string variableSourceVariableName(const std::string& dbcontent_name,
+                                           const std::string& var_name,
+                                           const std::string& var_dbcontent_name) const override;
+    unsigned int variableSelectionCandidateIndex(const std::string& dbcontent_name,
+                                                 const std::string& var_name,
+                                                 const std::string& var_dbcontent_name,
+                                                 const std::string& calculation) const override;
     PropertyDataType variableDataType(const std::string& dbcontent_name,
                                       const std::string& var_name,
                                       const std::string& var_dbcontent_name) const override;

@@ -77,7 +77,6 @@ public:
 
     void doRadarPlotPositionCalculations();
     void doXYPositionCalculations();
-    void doADSBPositionProcessing();
     void doGroundSpeedCalculations();
     void doFilters();
     void doObfuscate();

@@ -71,10 +71,10 @@ VariableDetailWidget::VariableDetailWidget(DBContentManager& dbcont_man, QWidget
     connect(description_edit_, &QTextEdit::textChanged, this, &VariableDetailWidget::descriptionChangedSlot);
     form_layout->addRow("Comment", description_edit_);
 
-    source_edit_ = new QTextEdit();
-    source_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
-    connect(source_edit_, &QTextEdit::textChanged, this, &VariableDetailWidget::sourceChangedSlot);
-    form_layout->addRow("Source", source_edit_);
+    // origin, data item, inputs or candidate list: set by the definition files, shown read only
+    origin_edit_ = new QLineEdit();
+    origin_edit_->setReadOnly(true);
+    form_layout->addRow("Origin", origin_edit_);
 
     type_combo_ = new VariableDataTypeComboBox(g_dummy_type, g_dummy_type_str);
     form_layout->addRow("Data Type", type_combo_);
@@ -126,12 +126,9 @@ void VariableDetailWidget::show(Variable& variable)
     description_edit_->setReadOnly(!expert_mode);
     description_edit_->setEnabled(true);
 
-    {
-        QSignalBlocker block(source_edit_);
-        source_edit_->document()->setPlainText(variable.source().c_str());
-    }
-    source_edit_->setReadOnly(!expert_mode);
-    source_edit_->setEnabled(true);
+    origin_edit_->setText(variable.originInfo().c_str());
+    origin_edit_->setToolTip(variable.info().c_str());
+    origin_edit_->setEnabled(true);
 
     {
         QSignalBlocker block(db_column_edit_);
@@ -174,11 +171,9 @@ void VariableDetailWidget::clear()
     }
     description_edit_->setEnabled(false);
 
-    {
-        QSignalBlocker block(source_edit_);
-        source_edit_->clear();
-    }
-    source_edit_->setEnabled(false);
+    origin_edit_->clear();
+    origin_edit_->setToolTip("");
+    origin_edit_->setEnabled(false);
 
     {
         QSignalBlocker block(db_column_edit_);
@@ -242,14 +237,6 @@ void VariableDetailWidget::descriptionChangedSlot()
         return;
 
     variable_->description(description_edit_->document()->toPlainText().trimmed().toStdString());
-}
-
-void VariableDetailWidget::sourceChangedSlot()
-{
-    if (!has_current_entry_)
-        return;
-
-    variable_->source(source_edit_->document()->toPlainText().trimmed().toStdString());
 }
 
 void VariableDetailWidget::dbColumnChangedSlot(const QString& name)

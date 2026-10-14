@@ -132,7 +132,8 @@ void ASTERIXTimestampCalculator::calculate(
         }
     }
 
-    doADSBTimeProcessing(compass);
+    // the CAT021 chain over I021/071, 073, 077 and 030 is the selection "Time of Day*",
+    // filled from its definition by dbContent::SelectionFiller before this calculator runs
 
     if (override_tod_active)
         doTodOverride(override_tod_offset, compass);
@@ -153,91 +154,6 @@ std::map<std::string, std::shared_ptr<Buffer>> ASTERIXTimestampCalculator::buffe
     traced_assert(processing_);
 
     return std::move(buffers_);
-}
-
-void ASTERIXTimestampCalculator::doADSBTimeProcessing(COMPASS& compass)
-{
-    DBContentManager& dbcont_man = compass.dbContentManager();
-
-    string dbcontent_name = "CAT021";
-
-    if (!buffers_.count(dbcontent_name))
-        return;
-
-    shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
-    unsigned int buffer_size = buffer->size();
-
-    if (!buffer_size)
-        return;
-
-    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_time_of_day_));
-
-    traced_assert(dbcont_man.canGetVariable(dbcontent_name, dbcontent_vars::meta_var_time_of_day_));
-
-    dbContent::Variable& tod_var = dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_time_of_day_);
-
-    traced_assert(tod_var.dataType() == PropertyDataType::FLOAT);
-
-    string tod_var_name = tod_var.name();
-
-    if (!buffer->has<float>(tod_var_name))
-        buffer->addProperty(tod_var_name, PropertyDataType::FLOAT); // add if needed
-
-    NullableVector<float>& tod_vec = buffer->get<float>(tod_var_name);
-
-    // check if other sources for tod exist
-
-    // "ToA Position" 071.Time of Applicability for Position
-    // "ToMR Position" 0.73 Time of Message Reception for Position
-    // "ToRT" 077.Time of Report Transmission
-    // "Time of Day Deprecated" 030.Time of Day
-
-    NullableVector<float>* toa_position_vec {nullptr};
-    NullableVector<float>* tomr_position_vec {nullptr};
-    NullableVector<float>* tort_vec {nullptr};
-    NullableVector<float>* tod_dep_vec {nullptr};
-
-    if (buffer->has<float>(dbcontent_vars::var_cat021_toa_position_.name()))
-        toa_position_vec = &buffer->get<float>(dbcontent_vars::var_cat021_toa_position_.name());
-
-    if (buffer->has<float>(dbcontent_vars::var_cat021_tomr_position_.name()))
-        tomr_position_vec = &buffer->get<float>(dbcontent_vars::var_cat021_tomr_position_.name());
-
-    if (buffer->has<float>(dbcontent_vars::var_cat021_tort_.name()))
-        tort_vec = &buffer->get<float>(dbcontent_vars::var_cat021_tort_.name());
-
-    if (buffer->has<float>(dbcontent_vars::var_cat021_tod_dep_.name()))
-        tod_dep_vec = &buffer->get<float>(dbcontent_vars::var_cat021_tod_dep_.name());
-
-    for (unsigned int index=0; index < buffer_size; index++)
-    {
-        if (!tod_vec.isNull(index)) // no need to copy, should not happen
-            continue;
-
-        if (toa_position_vec && !toa_position_vec->isNull(index))
-        {
-            tod_vec.set(index, toa_position_vec->get(index));
-            continue;
-        }
-
-        if (tomr_position_vec && !tomr_position_vec->isNull(index))
-        {
-            tod_vec.set(index, tomr_position_vec->get(index));
-            continue;
-        }
-
-        if (tort_vec && !tort_vec->isNull(index))
-        {
-            tod_vec.set(index, tort_vec->get(index));
-            continue;
-        }
-
-        if (tod_dep_vec && !tod_dep_vec->isNull(index))
-        {
-            tod_vec.set(index, tod_dep_vec->get(index));
-            continue;
-        }
-    }
 }
 
 void ASTERIXTimestampCalculator::doTodOverride(float override_tod_offset, COMPASS& compass)

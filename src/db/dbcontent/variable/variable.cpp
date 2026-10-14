@@ -88,8 +88,13 @@ Variable::Variable(nlohmann::json& config, DBContent* parent,
     registerParameter("name", &name_, std::string());
     registerParameter("short_name", &short_name_, std::string());
     registerParameter("description", &description_, std::string());
-    registerParameter("source", &source_, std::string());
     registerParameter("group", &group_, std::string());
+
+    registerParameter("origin", &origin_, std::string());
+    registerParameter("data_item", &data_item_, std::string());
+    registerParameter("inputs", &inputs_, nlohmann::json::array());
+    registerParameter("selection", &selection_, nlohmann::json::array());
+    registerParameter("source_variable", &source_variable_, std::string());
 
     registerParameter("db_column_name", &db_column_name_, std::string());
     registerParameter("is_key", &is_key_, false);
@@ -115,7 +120,178 @@ Variable::Variable(nlohmann::json& config, DBContent* parent,
 
     representation_ = stringToRepresentation(representation_str_);
 
+    traced_assert_msg(origin_.empty() || origin_ == OriginAsterix || origin_ == OriginCalculated
+                      || origin_ == OriginInternal || origin_ == OriginSelection,
+                      ("Unknown origin '" + origin_ + "' of variable '" + name_ + "'").c_str());
+    traced_assert_msg(inputs_.is_array(), ("Inputs of variable '" + name_ + "' must be a list").c_str());
+    traced_assert_msg(selection_.is_array(), ("Selection of variable '" + name_ + "' must be a list").c_str());
+    traced_assert_msg(origin_ != OriginSelection || selection_.size(),
+                      ("Selection variable '" + name_ + "' has no candidates").c_str());
+
     createSubConfigurables();
+}
+
+const std::string Variable::OriginAsterix    = "asterix";
+const std::string Variable::OriginCalculated = "calculated";
+const std::string Variable::OriginInternal   = "internal";
+const std::string Variable::OriginSelection  = "selection";
+const std::string Variable::OriginReport     = "report";
+
+const std::string& Variable::origin() const
+{
+    if (origin_.size())
+        return origin_;
+
+    if (isReportVariable())
+        return OriginReport;
+
+    if (dbcontent_)
+        return dbcontent_->origin();
+
+    return origin_;
+}
+
+void Variable::origin(const std::string& origin)
+{
+    traced_assert(origin.empty() || origin == OriginAsterix || origin == OriginCalculated
+                  || origin == OriginInternal || origin == OriginSelection);
+    origin_ = origin;
+}
+
+std::string Variable::dataItemPart() const
+{
+    return dataItemPartOf(data_item_);
+}
+
+std::string Variable::dataItemPartOf(const std::string& data_item)
+{
+    // "I021/071.Time of Applicability for Position" -> "I021/071", "I021/REF.SGV.GSS" -> "I021/REF.SGV"
+
+    if (data_item.empty())
+        return "";
+
+    size_t slash = data_item.find('/');
+
+    if (slash == std::string::npos)
+        return data_item;
+
+    size_t first_dot = data_item.find('.', slash);
+
+    if (first_dot == std::string::npos)
+        return data_item;
+
+    std::string first_segment = data_item.substr(slash + 1, first_dot - slash - 1);
+
+    if (first_segment == "REF" || first_segment == "SPF")
+    {
+        size_t second_dot = data_item.find('.', first_dot + 1);
+
+        if (second_dot == std::string::npos)
+            return data_item;
+
+        return data_item.substr(0, second_dot);
+    }
+
+    return data_item.substr(0, first_dot);
+}
+
+std::vector<std::string> Variable::inputs() const
+{
+    std::vector<std::string> inputs;
+
+    for (const auto& input : inputs_)
+        if (input.is_string())
+            inputs.push_back(input.get<std::string>());
+
+    return inputs;
+}
+
+void Variable::inputs(const std::vector<std::string>& inputs)
+{
+    inputs_ = inputs;
+}
+
+unsigned int Variable::numSelectionCandidates() const
+{
+    return selection_.size();
+}
+
+unsigned int Variable::selectionCandidateIndex(const std::string& calculation) const
+{
+    for (unsigned int cnt = 0; cnt < selection_.size(); ++cnt)
+    {
+        const auto& candidate = selection_.at(cnt);
+
+        if (candidate.is_object() && candidate.contains("calculation")
+            && candidate.at("calculation") == calculation)
+            return cnt + 1;
+    }
+
+    return 0;
+}
+
+std::string Variable::selectionCandidateLabel(unsigned int index) const
+{
+    traced_assert(index >= 1 && index <= selection_.size());
+
+    const auto& candidate = selection_.at(index - 1);
+
+    if (!candidate.is_object())
+        return "";
+
+    if (candidate.contains("label") && candidate.at("label").is_string())
+        return candidate.at("label");
+
+    if (candidate.contains("variable") && candidate.at("variable").is_string())
+    {
+        std::string var_name = candidate.at("variable");
+
+        if (dbcontent_ && dbcontent_->hasVariable(var_name))
+        {
+            const Variable& var = dbcontent_->variable(var_name);
+
+            if (var.dataItem().size())
+                return var.dataItemPart();
+        }
+
+        return var_name;
+    }
+
+    if (candidate.contains("calculation") && candidate.at("calculation").is_string())
+        return candidate.at("calculation");
+
+    return "";
+}
+
+std::string Variable::originInfo() const
+{
+    const std::string& orig = origin();
+
+    if (orig == OriginAsterix)
+        return orig + (data_item_.size() ? " " + data_item_ : "");
+
+    if (orig == OriginCalculated)
+    {
+        std::string text = orig;
+        auto input_names = inputs();
+
+        for (unsigned int cnt = 0; cnt < input_names.size(); ++cnt)
+            text += (cnt ? ", " : " from ") + input_names.at(cnt);
+
+        return text;
+    }
+
+    if (orig == OriginSelection)
+    {
+        std::string text = orig;
+
+        for (unsigned int cnt = 1; cnt <= selection_.size(); ++cnt)
+            text += (cnt > 1 ? ", " : " ") + selectionCandidateLabel(cnt);
+
+        return text;
+    }
+
+    return orig;
 }
 
 //Variable& Variable::operator=(Variable&& other)
@@ -241,8 +417,7 @@ std::string Variable::info() const
         ss << "Short Name: " << shortName() << endl;
 
     ss << "Description: " << description() << endl;
-    if (source_.size())
-        ss << "Source: " << source_ << endl;
+    ss << "Origin: " << originInfo() << endl;
     ss << "Data Type: " << dataTypeString() << endl;
     ss << "Unit: " << dimensionUnitStr() << endl;
 

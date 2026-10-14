@@ -83,6 +83,20 @@ public:
     virtual std::string variableDBExpression(const std::string& dbcontent_name,
                                              const std::string& var_name,
                                              const std::string& var_dbcontent_name) const = 0;
+
+    // selection variables, see readme_dbcontent.md: the companion variable holding the
+    // candidate index, and the 1-based index of the candidate running a named calculation.
+    // Empty respectively 0 when the variable is no selection, resolvers without
+    // variable definitions keep the defaults
+    virtual std::string variableSourceVariableName(const std::string& dbcontent_name,
+                                                   const std::string& var_name,
+                                                   const std::string& var_dbcontent_name) const
+    { return ""; }
+    virtual unsigned int variableSelectionCandidateIndex(const std::string& dbcontent_name,
+                                                         const std::string& var_name,
+                                                         const std::string& var_dbcontent_name,
+                                                         const std::string& calculation) const
+    { return 0; }
     virtual PropertyDataType variableDataType(const std::string& dbcontent_name,
                                               const std::string& var_name,
                                               const std::string& var_dbcontent_name) const = 0;
@@ -166,9 +180,7 @@ namespace dbcontent_vars
     inline const Property meta_var_longitude_stddev_  {"Longitude StdDev", PropertyDataType::DOUBLE};
     inline const Property meta_var_latlon_cov_        {"Lat/Lon Cov", PropertyDataType::DOUBLE};
 
-    inline const Property meta_var_climb_descent_   {"Track Climbing/Descending", PropertyDataType::UCHAR};
     inline const Property meta_var_rocd_            {"Rate Of Climb/Descent", PropertyDataType::FLOAT};
-    inline const Property meta_var_spi_             {"SPI", PropertyDataType::BOOL};
 
     inline const Property meta_var_message_type_    {"Message Type", PropertyDataType::UCHAR};
 
@@ -187,11 +199,10 @@ namespace dbcontent_vars
 
     inline const Property var_cat020_contrib_recv_  {"Contributing Receivers", PropertyDataType::JSON};
 
+    // decoded CAT021 times, the Meta "Time of Day" is the selection "Time of Day*" over them
     inline const Property var_cat021_toa_position_  {"ToA Position", PropertyDataType::FLOAT};
     inline const Property var_cat021_tomr_position_ {"ToMR Position", PropertyDataType::FLOAT};
     inline const Property var_cat021_tort_          {"ToRT", PropertyDataType::FLOAT};
-    inline const Property var_cat021_tod_dep_       {"Time of Day Deprecated", PropertyDataType::FLOAT};
-    inline const Property var_cat021_toa_pos_       {"ToA Position", PropertyDataType::FLOAT};
 
     inline const Property var_cat021_mops_version_  {"MOPS Version", PropertyDataType::UCHAR};
     inline const Property var_cat021_nacp_          {"NACp", PropertyDataType::UCHAR};
@@ -206,8 +217,10 @@ namespace dbcontent_vars
     inline const Property var_cat021_geo_alt_accuracy_ {"Geometric Altitude Accuracy", PropertyDataType::UCHAR};
     inline const Property var_cat021_ecat_          {"Emitter Category", PropertyDataType::UINT};
 
-    inline const Property var_cat021_latitude_hr_   {"Latitude HR", PropertyDataType::DOUBLE};
-    inline const Property var_cat021_longitude_hr_  {"Longitude HR", PropertyDataType::DOUBLE};
+    // decoded I021/160 values, the Meta "Track Groundspeed" and "Track Angle" are the
+    // calculated "Ground Speed*" and "Track Angle*" filled from them and the SGV fields
+    inline const Property var_cat021_ground_speed_  {"Ground Speed", PropertyDataType::DOUBLE};
+    inline const Property var_cat021_track_angle_   {"Track Angle", PropertyDataType::DOUBLE};
 
     inline const Property var_cat021_sgv_gss_       {"SGV GSS", PropertyDataType::FLOAT};
     inline const Property var_cat021_sgv_hgt_       {"SGV HGT", PropertyDataType::DOUBLE};
@@ -220,17 +233,13 @@ namespace dbcontent_vars
     inline const Property var_cat062_track_begin_   {"Track Begin", PropertyDataType::BOOL};
     inline const Property var_cat062_coasting_      {"Coasting", PropertyDataType::UCHAR};
     inline const Property var_cat062_track_end_     {"Track End", PropertyDataType::BOOL};
-    inline const Property var_cat062_mono_sensor_   {"Monosensor", PropertyDataType::BOOL};
-    inline const Property var_cat062_type_lm_       {"Type LM", PropertyDataType::UCHAR};
     inline const Property var_cat062_baro_alt_      {"Barometric Altitude Calculated", PropertyDataType::FLOAT};
     inline const Property var_cat062_fl_measured_    {"Flight Level Measured", PropertyDataType::FLOAT};
     inline const Property var_cat062_m3a_age_        {"Mode 3/A Age", PropertyDataType::FLOAT};
 
     inline const Property var_cat062_num_contrib_sensors_     {"Num Contributing Sensors", PropertyDataType::UCHAR};
     inline const Property var_cat062_num_contrib_sensors_tn_  {"Num Contributing Sensors Track Number", PropertyDataType::UCHAR};
-    inline const Property var_cat062_sum_num_contrib_sensors_ {"Sum Number Contributing Sensors", PropertyDataType::UCHAR};
 
-    inline const Property var_cat062_wtc_           {"Wake Turbulence Category FPL", PropertyDataType::STRING};
     inline const Property var_cat062_callsign_fpl_  {"Callsign FPL", PropertyDataType::STRING};
 
     inline const Property var_cat062_vx_stddev_     {"Vx StdDev", PropertyDataType::DOUBLE};

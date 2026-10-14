@@ -75,8 +75,50 @@ class Variable : public QObject, public Property, public Configurable
     const std::string& description() const { return description_; }
     void description(const std::string& description) { description_ = description; }
 
-    const std::string& source() const { return source_; }
-    void source(const std::string& source) { source_ = source; }
+    /// origin of the value: asterix, calculated, internal, selection or report, see readme_dbcontent.md.
+    /// Falls back to the origin of the DBContent when the variable has none, RefTraj
+    const std::string& origin() const;
+    void origin(const std::string& origin);
+    bool isAsterix() const { return origin() == OriginAsterix; }
+    bool isCalculated() const { return origin() == OriginCalculated; }
+    bool isInternal() const { return origin() == OriginInternal; }
+    bool isSelection() const { return origin() == OriginSelection; }
+
+    /// ASTERIX item of an asterix variable in EUROCONTROL notation, "I021/071.Time of Applicability for Position"
+    const std::string& dataItem() const { return data_item_; }
+    void dataItem(const std::string& data_item) { data_item_ = data_item; }
+    /// item part of the data item, "I021/071", for REF and SPF the first two segments, "I021/REF.SGV"
+    std::string dataItemPart() const;
+    static std::string dataItemPartOf(const std::string& data_item);
+
+    /// names of the variables of the same DBContent a calculated variable is computed from
+    std::vector<std::string> inputs() const;
+    void inputs(const std::vector<std::string>& inputs);
+
+    /// ordered candidate list of a selection variable, see readme_dbcontent.md.
+    /// Each candidate is a JSON object with "variable" or "calculation" plus "label",
+    /// optional "require_true" and "require_false" lists of boolean variable names
+    const nlohmann::json& selection() const { return selection_; }
+    void selection(const nlohmann::json& selection) { selection_ = selection; }
+    unsigned int numSelectionCandidates() const;
+    /// 1-based index of the candidate running the named calculation, 0 when there is none
+    unsigned int selectionCandidateIndex(const std::string& calculation) const;
+    /// label of the 1-based candidate: the data item part of a variable candidate or the explicit label
+    std::string selectionCandidateLabel(unsigned int index) const;
+
+    /// name of the companion variable holding the 1-based candidate index per record, selection only
+    const std::string& sourceVariableName() const { return source_variable_; }
+    void sourceVariableName(const std::string& name) { source_variable_ = name; }
+
+    /// one-line summary of the origin for tooltips and dialogs,
+    /// "asterix I021/071.Time of Applicability for Position", "calculated from Vx, Vy", ...
+    std::string originInfo() const;
+
+    static const std::string OriginAsterix;
+    static const std::string OriginCalculated;
+    static const std::string OriginInternal;
+    static const std::string OriginSelection;
+    static const std::string OriginReport;
 
     const std::string& group() const { return group_; }
     void group(const std::string& group) { group_ = group; }
@@ -220,8 +262,13 @@ private:
     Representation representation_;
 
     std::string description_;
-    std::string source_;
     std::string group_;
+
+    std::string origin_;
+    std::string data_item_;
+    nlohmann::json inputs_;
+    nlohmann::json selection_;
+    std::string source_variable_;
 
     std::string db_column_name_;
     bool is_key_ {false};

@@ -49,7 +49,6 @@ class DBContentWidget : public QWidget
 
     void editDBContentVariableNameSlot();
     void editDBContentVariableDescriptionSlot();
-    void editDBContentVariableSourceSlot();
     void editDBContentVariableDBColumnSlot(const QString& text);
     void deleteDBContVarSlot();
 

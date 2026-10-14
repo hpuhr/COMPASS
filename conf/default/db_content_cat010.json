@@ -14,6 +14,7 @@
             "class_name": "Variable",
             "instance_name": "Variable0",
             "parameters": {
+                "data_item": "I010/000.Message Type",
                 "data_type_str": "UCHAR",
                 "db_column_name": "message_type",
                 "db_expression": "",
@@ -21,11 +22,14 @@
                 "description": "001, Target Report;\n002, Start of Update Cycle;\n003, Periodic Status Message;\n004, Event-triggered Status Message.",
                 "dimension": "",
                 "group": "Type",
+                "inputs": [],
                 "is_key": false,
                 "name": "Message Type",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/000.Message Type",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -33,6 +37,7 @@
             "class_name": "Variable",
             "instance_name": "Variable1",
             "parameters": {
+                "data_item": "I010/010.SAC",
                 "data_type_str": "UCHAR",
                 "db_column_name": "sac",
                 "db_expression": "",
@@ -40,11 +45,14 @@
                 "description": "System Area Code",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": false,
                 "name": "SAC",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/010.SAC",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -52,6 +60,7 @@
             "class_name": "Variable",
             "instance_name": "Variable10",
             "parameters": {
+                "data_item": "I010/020.SPI",
                 "data_type_str": "BOOL",
                 "db_column_name": "spi",
                 "db_expression": "",
@@ -59,11 +68,14 @@
                 "description": "0 Absence of SPI\n1 Special Position Identification",
                 "dimension": "",
                 "group": "Secondary Identification",
+                "inputs": [],
                 "is_key": false,
                 "name": "SPI",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/020.SPI",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -71,6 +83,7 @@
             "class_name": "Variable",
             "instance_name": "Variable11",
             "parameters": {
+                "data_item": "I010/020.TOT",
                 "data_type_str": "UCHAR",
                 "db_column_name": "target_type",
                 "db_expression": "",
@@ -78,11 +91,14 @@
                 "description": "00 Undetermined\n01 Aircraft\n10 Ground vehicle\n11 Helicopter",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Target Type",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TOT",
-                "source": "I010/020.TOT",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -90,6 +106,7 @@
             "class_name": "Variable",
             "instance_name": "Variable12",
             "parameters": {
+                "data_item": "I010/020.TST",
                 "data_type_str": "BOOL",
                 "db_column_name": "test",
                 "db_expression": "",
@@ -97,11 +114,14 @@
                 "description": "0 Default\n1 Test Target",
                 "dimension": "",
                 "group": "Type",
+                "inputs": [],
                 "is_key": false,
                 "name": "Test",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TST",
-                "source": "I010/020.TST",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -109,6 +129,7 @@
             "class_name": "Variable",
             "instance_name": "Variable13",
             "parameters": {
+                "data_item": "I010/020.TYP",
                 "data_type_str": "UCHAR",
                 "db_column_name": "detection_type",
                 "db_expression": "",
@@ -116,11 +137,14 @@
                 "description": "000 SSR multilateration\n001 Mode S multilateration\n010 ADS-B\n011 PSR\n100 Magnetic Loop System\n101 HF multilateration\n110 Not defined\n111 Other types",
                 "dimension": "",
                 "group": "Type",
+                "inputs": [],
                 "is_key": false,
                 "name": "Detection Type",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TYP",
-                "source": "I010/020.TYP",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -128,6 +152,7 @@
             "class_name": "Variable",
             "instance_name": "Variable14",
             "parameters": {
+                "data_item": "I010/040.RHO",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "range",
                 "db_expression": "",
@@ -135,11 +160,14 @@
                 "description": "Max. range = 65536 m",
                 "dimension": "Length",
                 "group": "Position",
+                "inputs": [],
                 "is_key": false,
                 "name": "Range",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "RHO",
-                "source": "I010/040.RHO",
+                "source_variable": "",
                 "unit": "Nautical Mile"
             }
         },
@@ -147,6 +175,7 @@
             "class_name": "Variable",
             "instance_name": "Variable15",
             "parameters": {
+                "data_item": "I010/040.THETA",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "azimuth",
                 "db_expression": "",
@@ -154,11 +183,14 @@
                 "description": "",
                 "dimension": "Angle",
                 "group": "Position",
+                "inputs": [],
                 "is_key": false,
                 "name": "Azimuth",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "THETA",
-                "source": "I010/040.THETA",
+                "source_variable": "",
                 "unit": "Degree"
             }
         },
@@ -166,6 +198,7 @@
             "class_name": "Variable",
             "instance_name": "Variable16",
             "parameters": {
+                "data_item": "I010/041.Latitude",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "latitude",
                 "db_expression": "",
@@ -173,11 +206,14 @@
                 "description": "In WGS-84 in two’s complement.\nRange -90 <= latitude <= 90 deg.",
                 "dimension": "Angle",
                 "group": "Position",
+                "inputs": [],
                 "is_key": false,
                 "name": "Latitude",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/041.Latitude\nCalculated from X, Y (Cartesian->WGS-84 projection when 041 absent)",
+                "source_variable": "",
                 "unit": "Degree"
             }
         },
@@ -185,6 +221,7 @@
             "class_name": "Variable",
             "instance_name": "Variable17",
             "parameters": {
+                "data_item": "I010/041.Longitude",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "longitude",
                 "db_expression": "",
@@ -192,11 +229,14 @@
                 "description": "In WGS-84 in two’s complement.\nRange -180 <= longitude < 180 deg.",
                 "dimension": "Angle",
                 "group": "Position",
+                "inputs": [],
                 "is_key": false,
                 "name": "Longitude",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/041.Longitude\nCalculated from X, Y (Cartesian->WGS-84 projection when 041 absent)",
+                "source_variable": "",
                 "unit": "Degree"
             }
         },
@@ -204,6 +244,7 @@
             "class_name": "Variable",
             "instance_name": "Variable18",
             "parameters": {
+                "data_item": "I010/042.X",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "x",
                 "db_expression": "",
@@ -211,11 +252,14 @@
                 "description": "max range=+/-32768m (~17.7 NM)",
                 "dimension": "Length",
                 "group": "Position",
+                "inputs": [],
                 "is_key": false,
                 "name": "X",
+                "origin": "asterix",
                 "representation_str": "FLOAT_PREC2",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/042.X",
+                "source_variable": "",
                 "unit": "Meter"
             }
         },
@@ -223,6 +267,7 @@
             "class_name": "Variable",
             "instance_name": "Variable19",
             "parameters": {
+                "data_item": "I010/042.Y",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "y",
                 "db_expression": "",
@@ -230,11 +275,14 @@
                 "description": "max range=+/-32768m (~17.7 NM)",
                 "dimension": "Length",
                 "group": "Position",
+                "inputs": [],
                 "is_key": false,
                 "name": "Y",
+                "origin": "asterix",
                 "representation_str": "FLOAT_PREC2",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/042.Y",
+                "source_variable": "",
                 "unit": "Meter"
             }
         },
@@ -242,6 +290,7 @@
             "class_name": "Variable",
             "instance_name": "Variable2",
             "parameters": {
+                "data_item": "I010/010.SIC",
                 "data_type_str": "UCHAR",
                 "db_column_name": "sic",
                 "db_expression": "",
@@ -249,11 +298,14 @@
                 "description": "System Identification Code",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": false,
                 "name": "SIC",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/010.SIC",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -261,6 +313,7 @@
             "class_name": "Variable",
             "instance_name": "Variable20",
             "parameters": {
+                "data_item": "I010/060.G",
                 "data_type_str": "BOOL",
                 "db_column_name": "mode_3a_garbled",
                 "db_expression": "",
@@ -268,11 +321,14 @@
                 "description": "0 Default\n1 Garbled code",
                 "dimension": "",
                 "group": "Secondary Identification",
+                "inputs": [],
                 "is_key": false,
                 "name": "Mode 3/A Garbled",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "M3A G",
-                "source": "I010/060.G",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -280,6 +336,7 @@
             "class_name": "Variable",
             "instance_name": "Variable21",
             "parameters": {
+                "data_item": "I010/060.L",
                 "data_type_str": "BOOL",
                 "db_column_name": "mode_3a_smoothed",
                 "db_expression": "",
@@ -287,11 +344,14 @@
                 "description": "0 Mode-3/A code derived from the reply of the transponder\n1 Mode-3/A code not extracted during the last scan",
                 "dimension": "",
                 "group": "Secondary Identification",
+                "inputs": [],
                 "is_key": false,
                 "name": "Mode 3/A Smoothed",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "M3A S",
-                "source": "I010/060.L",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -299,6 +359,7 @@
             "class_name": "Variable",
             "instance_name": "Variable22",
             "parameters": {
+                "data_item": "I010/060.Mode-3/A reply",
                 "data_type_str": "UINT",
                 "db_column_name": "mode_3a_code",
                 "db_expression": "",
@@ -306,11 +367,14 @@
                 "description": "",
                 "dimension": "",
                 "group": "Secondary Identification",
+                "inputs": [],
                 "is_key": false,
                 "name": "Mode 3/A Code",
+                "origin": "asterix",
                 "representation_str": "DEC_TO_OCTAL",
+                "selection": [],
                 "short_name": "M3A",
-                "source": "I010/060.Mode-3/A reply",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -318,6 +382,7 @@
             "class_name": "Variable",
             "instance_name": "Variable23",
             "parameters": {
+                "data_item": "I010/060.V",
                 "data_type_str": "BOOL",
                 "db_column_name": "mode_3a_valid",
                 "db_expression": "",
@@ -325,11 +390,14 @@
                 "description": "0 Code not validated\n1 Code validated",
                 "dimension": "",
                 "group": "Secondary Identification",
+                "inputs": [],
                 "is_key": false,
                 "name": "Mode 3/A Valid",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "M3A V",
-                "source": "I010/060.V",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -337,6 +405,7 @@
             "class_name": "Variable",
             "instance_name": "Variable24",
             "parameters": {
+                "data_item": "I010/090.Flight Level",
                 "data_type_str": "FLOAT",
                 "db_column_name": "mode_c_code",
                 "db_expression": "",
@@ -344,11 +413,14 @@
                 "description": "",
                 "dimension": "Height",
                 "group": "Altitude",
+                "inputs": [],
                 "is_key": false,
                 "name": "Mode C Code",
+                "origin": "asterix",
                 "representation_str": "FLOAT_PREC2",
+                "selection": [],
                 "short_name": "MC",
-                "source": "I010/090.Flight Level",
+                "source_variable": "",
                 "unit": "Feet"
             }
         },
@@ -356,6 +428,7 @@
             "class_name": "Variable",
             "instance_name": "Variable25",
             "parameters": {
+                "data_item": "I010/090.G",
                 "data_type_str": "BOOL",
                 "db_column_name": "mode_c_garbled",
                 "db_expression": "",
@@ -363,11 +436,14 @@
                 "description": "0 Default\n1 Garbled code",
                 "dimension": "",
                 "group": "Altitude",
+                "inputs": [],
                 "is_key": false,
                 "name": "Mode C Garbled",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "MC G",
-                "source": "I010/090.G",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -375,6 +451,7 @@
             "class_name": "Variable",
             "instance_name": "Variable26",
             "parameters": {
+                "data_item": "I010/090.V",
                 "data_type_str": "BOOL",
                 "db_column_name": "mode_c_valid",
                 "db_expression": "",
@@ -382,11 +459,14 @@
                 "description": "0 Code not validated\n1 Code validated",
                 "dimension": "",
                 "group": "Altitude",
+                "inputs": [],
                 "is_key": false,
                 "name": "Mode C Valid",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "MC V",
-                "source": "I010/090.V",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -394,6 +474,7 @@
             "class_name": "Variable",
             "instance_name": "Variable27",
             "parameters": {
+                "data_item": "I010/091.Measured Height",
                 "data_type_str": "FLOAT",
                 "db_column_name": "measured_height",
                 "db_expression": "",
@@ -401,11 +482,14 @@
                 "description": "Range= +/- 204 800 ft",
                 "dimension": "Height",
                 "group": "Altitude",
+                "inputs": [],
                 "is_key": false,
                 "name": "Measured Height",
+                "origin": "asterix",
                 "representation_str": "FLOAT_PREC2",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/091.Measured Height",
+                "source_variable": "",
                 "unit": "Feet"
             }
         },
@@ -413,6 +497,7 @@
             "class_name": "Variable",
             "instance_name": "Variable28",
             "parameters": {
+                "data_item": "I010/131.PAM",
                 "data_type_str": "UCHAR",
                 "db_column_name": "psr_amplitude",
                 "db_expression": "",
@@ -420,11 +505,14 @@
                 "description": "Amplitude of Primary Plot.\n\nThe value is radar-dependent, 0 \nbeing the minimum detectable level\nfor that radar.\n\nRange=0..255",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "PSR Amplitude",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "PAM",
-                "source": "I010/131.PAM",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -432,6 +520,7 @@
             "class_name": "Variable",
             "instance_name": "Variable29",
             "parameters": {
+                "data_item": "I010/140.Time-of-Day",
                 "data_type_str": "FLOAT",
                 "db_column_name": "time_of_day",
                 "db_expression": "",
@@ -439,11 +528,14 @@
                 "description": "Acceptable Range of values: 0<= Time-of-Day<=24 hrs",
                 "dimension": "Time",
                 "group": "Time",
+                "inputs": [],
                 "is_key": false,
                 "name": "Time of Day",
+                "origin": "asterix",
                 "representation_str": "SECONDS_TO_TIME",
+                "selection": [],
                 "short_name": "ToD",
-                "source": "I010/140.Time-of-Day",
+                "source_variable": "",
                 "unit": "Second"
             }
         },
@@ -451,6 +543,7 @@
             "class_name": "Variable",
             "instance_name": "Variable3",
             "parameters": {
+                "data_item": "I010/020.CHN",
                 "data_type_str": "BOOL",
                 "db_column_name": "chain",
                 "db_expression": "",
@@ -458,11 +551,14 @@
                 "description": "1 Chain 2\n0 Chain 1",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Chain",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "CHN",
-                "source": "I010/020.CHN",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -470,6 +566,7 @@
             "class_name": "Variable",
             "instance_name": "Variable30",
             "parameters": {
+                "data_item": "I010/161.TRACK NUMBER",
                 "data_type_str": "UINT",
                 "db_column_name": "track_number",
                 "db_expression": "",
@@ -477,11 +574,14 @@
                 "description": "Acceptable Range of values: 0<=Track-number<=4095",
                 "dimension": "",
                 "group": "Track",
+                "inputs": [],
                 "is_key": false,
                 "name": "Track Number",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TN",
-                "source": "I010/161.TRACK NUMBER",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -489,6 +589,7 @@
             "class_name": "Variable",
             "instance_name": "Variable31",
             "parameters": {
+                "data_item": "I010/170.CNF",
                 "data_type_str": "BOOL",
                 "db_column_name": "track_confirmed",
                 "db_expression": "",
@@ -496,11 +597,14 @@
                 "description": "0 Track in initiation phase\n1 Confirmed track",
                 "dimension": "",
                 "group": "Track",
+                "inputs": [],
                 "is_key": false,
                 "name": "Track Confirmed",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "CNF",
-                "source": "I010/170.CNF",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -508,6 +612,7 @@
             "class_name": "Variable",
             "instance_name": "Variable32",
             "parameters": {
+                "data_item": "I010/170.CST",
                 "data_type_str": "UCHAR",
                 "db_column_name": "track_coasting",
                 "db_expression": "",
@@ -515,11 +620,14 @@
                 "description": "0 No extrapolation\n1 Predictable extrapolation due to sensor refresh period\n2 Predictable extrapolation in masked area\n3 Extrapolation due to unpredictable absence of detection",
                 "dimension": "",
                 "group": "Track",
+                "inputs": [],
                 "is_key": false,
                 "name": "Track Coasting",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "CST",
-                "source": "I010/170.CST",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -527,6 +635,7 @@
             "class_name": "Variable",
             "instance_name": "Variable33",
             "parameters": {
+                "data_item": "I010/170.DOU",
                 "data_type_str": "UCHAR",
                 "db_column_name": "track_doubtful",
                 "db_expression": "",
@@ -534,11 +643,14 @@
                 "description": "0 No doubt\n1 Doubtful correlation (undetermined reason)\n2 Doubtful correlation in clutter\n3 Loss of accuracy\n4 Loss of accuracy in clutter\n5 Unstable track\n6 Previously coasted\n7 Not defined",
                 "dimension": "",
                 "group": "Track",
+                "inputs": [],
                 "is_key": false,
                 "name": "Track Doubtful",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "DOU",
-                "source": "I010/170.DOU",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -546,6 +658,7 @@
             "class_name": "Variable",
             "instance_name": "Variable34",
             "parameters": {
+                "data_item": "I010/170.GHO",
                 "data_type_str": "BOOL",
                 "db_column_name": "track_ghost_target",
                 "db_expression": "",
@@ -553,11 +666,14 @@
                 "description": "0 Default\n1 Ghost track",
                 "dimension": "",
                 "group": "Track",
+                "inputs": [],
                 "is_key": false,
                 "name": "Track Ghost Target",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "GHO",
-                "source": "I010/170.GHO",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -565,6 +681,7 @@
             "class_name": "Variable",
             "instance_name": "Variable35",
             "parameters": {
+                "data_item": "I010/170.MAH",
                 "data_type_str": "BOOL",
                 "db_column_name": "track_horizontal_manoeuvre",
                 "db_expression": "",
@@ -572,11 +689,14 @@
                 "description": "0 Default\n1 Horizontal manoeuvre",
                 "dimension": "",
                 "group": "Track",
+                "inputs": [],
                 "is_key": false,
                 "name": "Track Horizontal Manoeuvre",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "MAH",
-                "source": "I010/170.MAH",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -584,6 +704,7 @@
             "class_name": "Variable",
             "instance_name": "Variable36",
             "parameters": {
+                "data_item": "I010/170.MRS",
                 "data_type_str": "UCHAR",
                 "db_column_name": "track_merged_split",
                 "db_expression": "",
@@ -591,11 +712,14 @@
                 "description": "0 Merge or split indication undetermined\n1 Track merged by association to plot\n2 Track merged by non-association to plot\n3 Split track",
                 "dimension": "",
                 "group": "Track",
+                "inputs": [],
                 "is_key": false,
                 "name": "Track Merged/Split",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "MRS",
-                "source": "I010/170.MRS",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -603,6 +727,7 @@
             "class_name": "Variable",
             "instance_name": "Variable37",
             "parameters": {
+                "data_item": "I010/170.STH",
                 "data_type_str": "BOOL",
                 "db_column_name": "position_smoothed",
                 "db_expression": "",
@@ -610,11 +735,14 @@
                 "description": "0 Measured position\n1 Smoothed position",
                 "dimension": "",
                 "group": "Position",
+                "inputs": [],
                 "is_key": false,
                 "name": "Position Smoothed",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "STH",
-                "source": "I010/170.STH",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -622,6 +750,7 @@
             "class_name": "Variable",
             "instance_name": "Variable38",
             "parameters": {
+                "data_item": "I010/170.TCC",
                 "data_type_str": "BOOL",
                 "db_column_name": "slant_range_corrected",
                 "db_expression": "",
@@ -629,11 +758,14 @@
                 "description": "0 Tracking performed in Sensor Plane, i.e. neither slant range correction nor projection was applied\n1 Slant range correction and a suitable projection technique are used to track in a 2D.reference plane, tangential to the earth model at the Sensor Site co-ordinates",
                 "dimension": "",
                 "group": "Position",
+                "inputs": [],
                 "is_key": false,
                 "name": "Slant Range Corrected",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TCC",
-                "source": "I010/170.TCC",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -641,6 +773,7 @@
             "class_name": "Variable",
             "instance_name": "Variable39",
             "parameters": {
+                "data_item": "I010/170.TOM",
                 "data_type_str": "UCHAR",
                 "db_column_name": "type_of_movement",
                 "db_expression": "",
@@ -648,11 +781,14 @@
                 "description": "0 Unknown type of movement\n1 Taking-off\n2 Landing\n3 Other types of movement",
                 "dimension": "",
                 "group": "Movement",
+                "inputs": [],
                 "is_key": false,
                 "name": "Type of Movement",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TOM",
-                "source": "I010/170.TOM",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -660,6 +796,7 @@
             "class_name": "Variable",
             "instance_name": "Variable4",
             "parameters": {
+                "data_item": "I010/020.CRT",
                 "data_type_str": "BOOL",
                 "db_column_name": "corrupted_mlat",
                 "db_expression": "",
@@ -667,11 +804,14 @@
                 "description": "1 Corrupted replies in multilateration\n0 No Corrupted reply in multilateration",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Corrupted MLAT",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "CRT",
-                "source": "I010/020.CRT",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -679,6 +819,7 @@
             "class_name": "Variable",
             "instance_name": "Variable40",
             "parameters": {
+                "data_item": "I010/170.TRE",
                 "data_type_str": "BOOL",
                 "db_column_name": "track_end",
                 "db_expression": "",
@@ -686,11 +827,14 @@
                 "description": "0 Default\n1 Last report for a track",
                 "dimension": "",
                 "group": "Track",
+                "inputs": [],
                 "is_key": false,
                 "name": "Track End",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TRE",
-                "source": "I010/170.TRE",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -698,6 +842,7 @@
             "class_name": "Variable",
             "instance_name": "Variable41",
             "parameters": {
+                "data_item": "I010/200.Ground Speed",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "ground_speed",
                 "db_expression": "",
@@ -705,11 +850,14 @@
                 "description": "Max. val. = 2 NM/s = 7200kt",
                 "dimension": "Speed",
                 "group": "Movement",
+                "inputs": [],
                 "is_key": false,
                 "name": "Ground Speed",
+                "origin": "asterix",
                 "representation_str": "FLOAT_PREC1",
+                "selection": [],
                 "short_name": "GSpd",
-                "source": "I010/200.Ground Speed",
+                "source_variable": "",
                 "unit": "Knots"
             }
         },
@@ -717,6 +865,7 @@
             "class_name": "Variable",
             "instance_name": "Variable42",
             "parameters": {
+                "data_item": "I010/200.Track Angle",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "track_angle",
                 "db_expression": "",
@@ -724,11 +873,14 @@
                 "description": "",
                 "dimension": "Angle",
                 "group": "Movement",
+                "inputs": [],
                 "is_key": false,
                 "name": "Track Angle",
+                "origin": "asterix",
                 "representation_str": "FLOAT_PREC1",
+                "selection": [],
                 "short_name": "Ang",
-                "source": "I010/200.Track Angle",
+                "source_variable": "",
                 "unit": "Degree"
             }
         },
@@ -736,6 +888,7 @@
             "class_name": "Variable",
             "instance_name": "Variable43",
             "parameters": {
+                "data_item": "I010/202.Vx",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "vx",
                 "db_expression": "",
@@ -743,11 +896,14 @@
                 "description": "",
                 "dimension": "Speed",
                 "group": "Movement",
+                "inputs": [],
                 "is_key": false,
                 "name": "Vx",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/202.Vx",
+                "source_variable": "",
                 "unit": "Meter/Second"
             }
         },
@@ -755,6 +911,7 @@
             "class_name": "Variable",
             "instance_name": "Variable44",
             "parameters": {
+                "data_item": "I010/202.Vy",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "vy",
                 "db_expression": "",
@@ -762,11 +919,14 @@
                 "description": "",
                 "dimension": "Speed",
                 "group": "Movement",
+                "inputs": [],
                 "is_key": false,
                 "name": "Vy",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/202.Vy",
+                "source_variable": "",
                 "unit": "Meter/Second"
             }
         },
@@ -774,6 +934,7 @@
             "class_name": "Variable",
             "instance_name": "Variable45",
             "parameters": {
+                "data_item": "I010/210.Ax",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "ax",
                 "db_expression": "",
@@ -781,11 +942,14 @@
                 "description": "Max. range +/- 31 m/s^2\nMaximum value means “maximum value or above”",
                 "dimension": "",
                 "group": "Movement",
+                "inputs": [],
                 "is_key": false,
                 "name": "Ax",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/210.Ax",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -793,6 +957,7 @@
             "class_name": "Variable",
             "instance_name": "Variable46",
             "parameters": {
+                "data_item": "I010/210.Ay",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "ay",
                 "db_expression": "",
@@ -800,11 +965,14 @@
                 "description": "Max. range +/- 31 m/s^2\nMaximum value means “maximum value or above”",
                 "dimension": "",
                 "group": "Movement",
+                "inputs": [],
                 "is_key": false,
                 "name": "Ay",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/210.Ay",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -812,6 +980,7 @@
             "class_name": "Variable",
             "instance_name": "Variable47",
             "parameters": {
+                "data_item": "I010/220.Target Address",
                 "data_type_str": "UINT",
                 "db_column_name": "aircraft_address",
                 "db_expression": "",
@@ -819,11 +988,14 @@
                 "description": "",
                 "dimension": "",
                 "group": "Secondary Identification",
+                "inputs": [],
                 "is_key": false,
                 "name": "Aircraft Address",
+                "origin": "asterix",
                 "representation_str": "DEC_TO_HEX",
+                "selection": [],
                 "short_name": "ACAD",
-                "source": "I010/220.Target Address",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -831,6 +1003,7 @@
             "class_name": "Variable",
             "instance_name": "Variable48",
             "parameters": {
+                "data_item": "I010/245.STI",
                 "data_type_str": "UCHAR",
                 "db_column_name": "acid_source",
                 "db_expression": "",
@@ -838,11 +1011,14 @@
                 "description": "00 Callsign or registration downlinked from transponder\n01 Callsign downlinked from transponder\n10 Registration not downlinked from transponder\n11 Not defined",
                 "dimension": "",
                 "group": "Secondary Identification",
+                "inputs": [],
                 "is_key": false,
                 "name": "ACID Source",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "STI",
-                "source": "I010/245.STI",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -850,6 +1026,7 @@
             "class_name": "Variable",
             "instance_name": "Variable49",
             "parameters": {
+                "data_item": "I010/245.Target Identification",
                 "data_type_str": "STRING",
                 "db_column_name": "aircraft_identification",
                 "db_expression": "",
@@ -857,11 +1034,14 @@
                 "description": "",
                 "dimension": "",
                 "group": "Secondary Identification",
+                "inputs": [],
                 "is_key": false,
                 "name": "Aircraft Identification",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "ACID",
-                "source": "I010/245.Target Identification",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -869,6 +1049,7 @@
             "class_name": "Variable",
             "instance_name": "Variable5",
             "parameters": {
+                "data_item": "I010/020.DCR",
                 "data_type_str": "BOOL",
                 "db_column_name": "adsb_differential_correction",
                 "db_expression": "",
@@ -876,11 +1057,14 @@
                 "description": "1 Differential correction (ADS-B)\n0 No differential correction (ADS-B)",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "ADS-B Differential Correction",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "DCR",
-                "source": "I010/020.DCR",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -888,6 +1072,7 @@
             "class_name": "Variable",
             "instance_name": "Variable50",
             "parameters": {
+                "data_item": "I010/270.LENGTH",
                 "data_type_str": "FLOAT",
                 "db_column_name": "target_length",
                 "db_expression": "",
@@ -895,11 +1080,14 @@
                 "description": "When the length only is sent, the largest dimension is provided.",
                 "dimension": "Length",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Target Length",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/270.LENGTH",
+                "source_variable": "",
                 "unit": "Meter"
             }
         },
@@ -907,6 +1095,7 @@
             "class_name": "Variable",
             "instance_name": "Variable51",
             "parameters": {
+                "data_item": "I010/270.ORIENTATION",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "target_orientation",
                 "db_expression": "",
@@ -914,11 +1103,14 @@
                 "description": "The orientation gives the direction which the target nose is pointing to, relative to the Geographical North.",
                 "dimension": "Angle",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Target Orientation",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/270.ORIENTATION",
+                "source_variable": "",
                 "unit": "Degree"
             }
         },
@@ -926,6 +1118,7 @@
             "class_name": "Variable",
             "instance_name": "Variable52",
             "parameters": {
+                "data_item": "I010/270.WIDTH",
                 "data_type_str": "FLOAT",
                 "db_column_name": "target_width",
                 "db_expression": "",
@@ -933,11 +1126,14 @@
                 "description": "",
                 "dimension": "Length",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Target Width",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/270.WIDTH",
+                "source_variable": "",
                 "unit": "Meter"
             }
         },
@@ -945,6 +1141,7 @@
             "class_name": "Variable",
             "instance_name": "Variable53",
             "parameters": {
+                "data_item": "I010/300.VFI",
                 "data_type_str": "UCHAR",
                 "db_column_name": "vehicle_fleet_identification",
                 "db_expression": "",
@@ -952,11 +1149,14 @@
                 "description": "0 Unknown\n1 ATC equipment maintenance\n2 Airport maintenance\n3 Fire\n4 Bird scarer\n5 Snow plough\n6 Runway sweeper\n7 Emergency\n8 Police\n9 Bus\n10 Tug (push/tow)\n11 Grass cutter\n12 Fuel\n13 Baggage\n14 Catering\n15 Aircraft maintenance\n16 Flyco (follow me)",
                 "dimension": "",
                 "group": "Type",
+                "inputs": [],
                 "is_key": false,
                 "name": "Vehicle Fleet Identification",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "VFI",
-                "source": "I010/300.VFI",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -964,6 +1164,7 @@
             "class_name": "Variable",
             "instance_name": "Variable54",
             "parameters": {
+                "data_item": "I010/310.MSG",
                 "data_type_str": "UCHAR",
                 "db_column_name": "preprogrammed_message",
                 "db_expression": "",
@@ -971,11 +1172,14 @@
                 "description": "0 Not defined\n1 Towing aircraft\n2 Follow me operation\n3 Runway check\n4 Emergency operation (fire, medical... )\n5 Work in progress (maintenance, birds scarer, sweepers... )",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Preprogrammed Message",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "MSG",
-                "source": "I010/310.MSG",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -983,6 +1187,7 @@
             "class_name": "Variable",
             "instance_name": "Variable55",
             "parameters": {
+                "data_item": "I010/310.TRB",
                 "data_type_str": "BOOL",
                 "db_column_name": "in_trouble",
                 "db_expression": "",
@@ -990,11 +1195,14 @@
                 "description": "0 Default\n1 In Trouble",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "In Trouble",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TRB",
-                "source": "I010/310.TRB",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1002,6 +1210,7 @@
             "class_name": "Variable",
             "instance_name": "Variable56",
             "parameters": {
+                "data_item": "I010/500.SDP-x",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "x_stddev",
                 "db_expression": "",
@@ -1009,11 +1218,14 @@
                 "description": "Standard Deviation of X component",
                 "dimension": "",
                 "group": "Accuracy",
+                "inputs": [],
                 "is_key": false,
                 "name": "X StdDev",
+                "origin": "asterix",
                 "representation_str": "FLOAT_PREC2",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/500.SDP-x",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1021,6 +1233,7 @@
             "class_name": "Variable",
             "instance_name": "Variable57",
             "parameters": {
+                "data_item": "I010/500.SDP-xy",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "x_y_covariance",
                 "db_expression": "",
@@ -1028,11 +1241,14 @@
                 "description": "Covariance in two’s complement form",
                 "dimension": "",
                 "group": "Accuracy",
+                "inputs": [],
                 "is_key": false,
                 "name": "X/Y Covariance",
+                "origin": "asterix",
                 "representation_str": "FLOAT_PREC4",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/500.SDP-xy",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1040,6 +1256,7 @@
             "class_name": "Variable",
             "instance_name": "Variable58",
             "parameters": {
+                "data_item": "I010/500.SDP-y",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "y_stddev",
                 "db_expression": "",
@@ -1047,11 +1264,14 @@
                 "description": "Standard Deviation of Y component",
                 "dimension": "",
                 "group": "Accuracy",
+                "inputs": [],
                 "is_key": false,
                 "name": "Y StdDev",
+                "origin": "asterix",
                 "representation_str": "FLOAT_PREC2",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/500.SDP-y",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1059,6 +1279,7 @@
             "class_name": "Variable",
             "instance_name": "Variable59",
             "parameters": {
+                "data_item": "I010/550.NOGO",
                 "data_type_str": "UCHAR",
                 "db_column_name": "system_status",
                 "db_expression": "",
@@ -1066,11 +1287,14 @@
                 "description": "Operational Release Status of the System\n0 Operational\n1 Degraded\n2 NOGO\n3 undefined",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "System Status",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/550.NOGO",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1078,6 +1302,7 @@
             "class_name": "Variable",
             "instance_name": "Variable6",
             "parameters": {
+                "data_item": "I010/020.GBS",
                 "data_type_str": "BOOL",
                 "db_column_name": "ground_bit",
                 "db_expression": "",
@@ -1085,11 +1310,14 @@
                 "description": "1 Transponder Ground bit set\n0 Transponder Ground bit not set",
                 "dimension": "",
                 "group": "Altitude",
+                "inputs": [],
                 "is_key": false,
                 "name": "Ground Bit",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "GBS",
-                "source": "I010/020.GBS",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1097,6 +1325,7 @@
             "class_name": "Variable",
             "instance_name": "Variable60",
             "parameters": {
+                "data_item": "I010/550.DIV",
                 "data_type_str": "BOOL",
                 "db_column_name": "diversity_degraded",
                 "db_expression": "",
@@ -1104,11 +1333,14 @@
                 "description": "0 Normal Operation\n1 Diversity degraded",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Diversity Degraded",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "DIV",
-                "source": "I010/550.DIV",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1116,6 +1348,7 @@
             "class_name": "Variable",
             "instance_name": "Variable61",
             "parameters": {
+                "data_item": "I010/550.OVL",
                 "data_type_str": "BOOL",
                 "db_column_name": "overload",
                 "db_expression": "",
@@ -1123,11 +1356,14 @@
                 "description": "Overload indicator\n0 No overload\n1 Overload",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Overload",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "OVL",
-                "source": "I010/550.OVL",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1135,6 +1371,7 @@
             "class_name": "Variable",
             "instance_name": "Variable62",
             "parameters": {
+                "data_item": "I010/550.TSV",
                 "data_type_str": "BOOL",
                 "db_column_name": "time_source_invalid",
                 "db_expression": "",
@@ -1142,11 +1379,14 @@
                 "description": "Time Source Validity\n0 valid\n1 invalid",
                 "dimension": "",
                 "group": "Time",
+                "inputs": [],
                 "is_key": false,
                 "name": "Time Source Invalid",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TSV",
-                "source": "I010/550.TSV",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1154,6 +1394,7 @@
             "class_name": "Variable",
             "instance_name": "Variable63",
             "parameters": {
+                "data_item": "I010/550.TTF",
                 "data_type_str": "BOOL",
                 "db_column_name": "test_target_failure",
                 "db_expression": "",
@@ -1161,11 +1402,14 @@
                 "description": "0 Test Target Operative\n1 Test Target Failure",
                 "dimension": "",
                 "group": "Type",
+                "inputs": [],
                 "is_key": false,
                 "name": "Test Target Failure",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "TTF",
-                "source": "I010/550.TTF",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1173,6 +1417,7 @@
             "class_name": "Variable",
             "instance_name": "Variable64",
             "parameters": {
+                "data_item": "I010/250.Mode S MB Data",
                 "data_type_str": "JSON",
                 "db_column_name": "mode_s_mb_data",
                 "db_expression": "",
@@ -1180,11 +1425,14 @@
                 "description": "56-bit message conveying Mode S Comm B message data",
                 "dimension": "",
                 "group": "Secondary Identification",
+                "inputs": [],
                 "is_key": false,
                 "name": "Mode S MB Data",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/250.Mode S MB Data.MB Data",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1192,6 +1440,7 @@
             "class_name": "Variable",
             "instance_name": "Variable7",
             "parameters": {
+                "data_item": "I010/020.LOP",
                 "data_type_str": "UCHAR",
                 "db_column_name": "loop",
                 "db_expression": "",
@@ -1199,11 +1448,14 @@
                 "description": "00 Undetermined\n01 Loop start\n10 Loop finish\n11 Not defined",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Loop",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "LOP",
-                "source": "I010/020.LOP",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1211,6 +1463,7 @@
             "class_name": "Variable",
             "instance_name": "Variable8",
             "parameters": {
+                "data_item": "I010/020.RAB",
                 "data_type_str": "BOOL",
                 "db_column_name": "fft",
                 "db_expression": "",
@@ -1218,11 +1471,14 @@
                 "description": "0 Report from target transponder\n1 Report from field monitor (fixed transponder)",
                 "dimension": "",
                 "group": "Type",
+                "inputs": [],
                 "is_key": false,
                 "name": "FFT",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/020.RAB",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1230,6 +1486,7 @@
             "class_name": "Variable",
             "instance_name": "Variable9",
             "parameters": {
+                "data_item": "I010/020.SIM",
                 "data_type_str": "BOOL",
                 "db_column_name": "simulated",
                 "db_expression": "",
@@ -1237,11 +1494,14 @@
                 "description": "0 Actual target report\n1 Simulated target report",
                 "dimension": "",
                 "group": "Type",
+                "inputs": [],
                 "is_key": false,
                 "name": "Simulated",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "SIM",
-                "source": "I010/020.SIM",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1249,6 +1509,7 @@
             "class_name": "Variable",
             "instance_name": "VariableTimestamp0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "TIMESTAMP",
                 "db_column_name": "timestamp",
                 "db_expression": "",
@@ -1256,11 +1517,16 @@
                 "description": "Epoch timestamp computed from Time of Day plus the resolved calendar date (handles midnight wrap).",
                 "dimension": "",
                 "group": "Time",
+                "inputs": [
+                    "Time of Day*"
+                ],
                 "is_key": false,
                 "name": "Timestamp",
+                "origin": "calculated",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Calculated from Time of Day, calendar date",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1268,6 +1534,7 @@
             "class_name": "Variable",
             "instance_name": "VariableUTN0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "UINT",
                 "db_column_name": "utn",
                 "db_expression": "",
@@ -1275,11 +1542,14 @@
                 "description": "Unique Target Number, assigned by the reconstructor.",
                 "dimension": "",
                 "group": "Track",
+                "inputs": [],
                 "is_key": false,
                 "name": "UTN",
+                "origin": "internal",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "UTN",
-                "source": "Filled by the reconstructor",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1287,6 +1557,7 @@
             "class_name": "Variable",
             "instance_name": "Variableds_id0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "UINT",
                 "db_column_name": "ds_id",
                 "db_expression": "",
@@ -1294,11 +1565,17 @@
                 "description": "Data Source Identifier (bit-packed SAC/SIC)",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [
+                    "SAC",
+                    "SIC"
+                ],
                 "is_key": false,
                 "name": "DS ID",
+                "origin": "calculated",
                 "representation_str": "DATA_SRC_NAME",
+                "selection": [],
                 "short_name": "",
-                "source": "Calculated from I010/010.SAC, I010/010.SIC",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1306,18 +1583,22 @@
             "class_name": "Variable",
             "instance_name": "Variablehash_code0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "STRING",
                 "db_column_name": "artas_hash",
                 "db_expression": "",
                 "db_expression_variables": {},
-                "description": "ARTAS MD5 Hash Code",
+                "description": "ARTAS MD5 Hash Code\nDecoder column artas_md5.",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": false,
                 "name": "ARTAS Hash",
+                "origin": "internal",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: artas_md5 column",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1325,6 +1606,7 @@
             "class_name": "Variable",
             "instance_name": "Variableline_id0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "UINT",
                 "db_column_name": "line_id",
                 "db_expression": "",
@@ -1332,11 +1614,14 @@
                 "description": "Communication line ID determining the origin of the record.",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": false,
                 "name": "Line ID",
+                "origin": "internal",
                 "representation_str": "LINE_NAME",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: import line/source identifier",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1344,6 +1629,7 @@
             "class_name": "Variable",
             "instance_name": "Variablepos_max_std_dev_m0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "xy_std_dev_max",
                 "db_expression": "greatest(x_stddev,y_stddev)",
@@ -1351,14 +1637,20 @@
                     "X StdDev",
                     "Y StdDev"
                 ],
-                "description": "Derived maximum standard deviation based on X StdDev,Y StdDev in meters",
+                "description": "Derived maximum standard deviation based on X StdDev,Y StdDev in meters\nMax of the two.",
                 "dimension": "Length",
                 "group": "Accuracy",
+                "inputs": [
+                    "X StdDev",
+                    "Y StdDev"
+                ],
                 "is_key": false,
                 "name": "X/Y StdDev Max",
+                "origin": "calculated",
                 "representation_str": "FLOAT_PREC2",
+                "selection": [],
                 "short_name": "",
-                "source": "Calculated from X StdDev, Y StdDev (max of the two)",
+                "source_variable": "",
                 "unit": "Meter"
             }
         },
@@ -1366,6 +1658,7 @@
             "class_name": "Variable",
             "instance_name": "Variablerec_num0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "ULONGINT",
                 "db_column_name": "record_number",
                 "db_expression": "",
@@ -1373,11 +1666,14 @@
                 "description": "Unique record id starting with 0 on every new recording.",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": true,
                 "name": "Record Number",
+                "origin": "internal",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: ascending record number assigned at import",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1385,18 +1681,22 @@
             "class_name": "Variable",
             "instance_name": "Variablerecord_data0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "STRING",
                 "db_column_name": "record_data",
                 "db_expression": "",
                 "db_expression_variables": {},
-                "description": "Original ASTERIX record bytes in hexadecimal, as received from the data source.",
+                "description": "Original ASTERIX record bytes in hexadecimal, as received from the data source.\nDecoder column record_data.",
                 "dimension": "",
                 "group": "Origin",
+                "inputs": [],
                 "is_key": false,
                 "name": "Record Data",
+                "origin": "internal",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: record_data column",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1404,6 +1704,7 @@
             "class_name": "Variable",
             "instance_name": "VariableAdd1",
             "parameters": {
+                "data_item": "I010/280.Presence.DRHO",
                 "data_type_str": "JSON",
                 "db_column_name": "presence_drho",
                 "db_expression": "",
@@ -1411,11 +1712,14 @@
                 "description": "Difference between the radial distance of the plot centre and that of the presence\nMax. Range = +/- 127 m",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Presence DRHO",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/280.Presence.DRHO",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1423,6 +1727,7 @@
             "class_name": "Variable",
             "instance_name": "VariableAdd2",
             "parameters": {
+                "data_item": "I010/280.Presence.DTHETA",
                 "data_type_str": "JSON",
                 "db_column_name": "presence_dtheta",
                 "db_expression": "",
@@ -1430,11 +1735,14 @@
                 "description": "Difference between the azimuth of the plot centre and that of the presence\nMax. Range = +/- 19.05 deg",
                 "dimension": "",
                 "group": "Other",
+                "inputs": [],
                 "is_key": false,
                 "name": "Presence DTHETA",
+                "origin": "asterix",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "I010/280.Presence.DTHETA",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1442,18 +1750,22 @@
             "class_name": "Variable",
             "instance_name": "Variablerecording_time0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "DOUBLE",
                 "db_column_name": "recording_time",
                 "db_expression": "",
                 "db_expression_variables": {},
-                "description": "Recording time of the record's frame or packet in seconds since midnight. IOSS and RFF frame header, PCAP capture time. Null when the source carries no recording time.",
+                "description": "Recording time of the record's frame or packet in seconds since midnight. IOSS and RFF frame header, PCAP capture time. Null when the source carries no recording time.\nDecoder column recording_time.",
                 "dimension": "Time",
                 "group": "Time",
+                "inputs": [],
                 "is_key": false,
                 "name": "Recording Time",
+                "origin": "internal",
                 "representation_str": "SECONDS_TO_TIME",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: recording_time column",
+                "source_variable": "",
                 "unit": "Second"
             }
         },
@@ -1461,18 +1773,22 @@
             "class_name": "Variable",
             "instance_name": "Variablerecording_day0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "UINT",
                 "db_column_name": "recording_day",
                 "db_expression": "",
                 "db_expression_variables": {},
-                "description": "Recording day counter of the record's frame, 0 at the start of the recording. IOSS frame header, RFF computed from the file header. Null when the source carries no day counter.",
+                "description": "Recording day counter of the record's frame, 0 at the start of the recording. IOSS frame header, RFF computed from the file header. Null when the source carries no day counter.\nDecoder column recording_day.",
                 "dimension": "",
                 "group": "Time",
+                "inputs": [],
                 "is_key": false,
                 "name": "Recording Day",
+                "origin": "internal",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: recording_day column",
+                "source_variable": "",
                 "unit": ""
             }
         },
@@ -1480,18 +1796,162 @@
             "class_name": "Variable",
             "instance_name": "Variablerecording_date0",
             "parameters": {
+                "data_item": "",
                 "data_type_str": "UINT",
                 "db_column_name": "recording_date",
                 "db_expression": "",
                 "db_expression_variables": {},
-                "description": "UTC date of the record's frame or packet as YYYYMMDD. RFF file header, PCAP capture time. Null when the source carries no absolute date.",
+                "description": "UTC date of the record's frame or packet as YYYYMMDD. RFF file header, PCAP capture time. Null when the source carries no absolute date.\nDecoder column recording_date.",
                 "dimension": "",
                 "group": "Time",
+                "inputs": [],
                 "is_key": false,
                 "name": "Recording Date",
+                "origin": "internal",
                 "representation_str": "STANDARD",
+                "selection": [],
                 "short_name": "",
-                "source": "Internal: recording_date column",
+                "source_variable": "",
+                "unit": ""
+            }
+        },
+        {
+            "class_name": "Variable",
+            "instance_name": "VariableTimeofDayUsed0",
+            "parameters": {
+                "data_item": "",
+                "data_type_str": "FLOAT",
+                "db_column_name": "time_of_day_used",
+                "db_expression": "",
+                "db_expression_variables": {},
+                "description": "Time of day COMPASS uses for this record, the decoded value shifted by the override offset of the import settings when configured.",
+                "dimension": "Time",
+                "group": "Time",
+                "inputs": [],
+                "is_key": false,
+                "name": "Time of Day*",
+                "origin": "selection",
+                "representation_str": "SECONDS_TO_TIME",
+                "selection": [
+                    {
+                        "variable": "Time of Day"
+                    }
+                ],
+                "short_name": "",
+                "source_variable": "Time of Day Source",
+                "unit": "Second"
+            }
+        },
+        {
+            "class_name": "Variable",
+            "instance_name": "VariableTimeofDaySource0",
+            "parameters": {
+                "data_item": "",
+                "data_type_str": "UCHAR",
+                "db_column_name": "time_of_day_source",
+                "db_expression": "",
+                "db_expression_variables": {},
+                "description": "1-based position of the candidate that supplied the time of day COMPASS uses, null when none did.",
+                "dimension": "",
+                "group": "Time",
+                "inputs": [
+                    "Time of Day*"
+                ],
+                "is_key": false,
+                "name": "Time of Day Source",
+                "origin": "calculated",
+                "representation_str": "STANDARD",
+                "selection": [],
+                "short_name": "",
+                "source_variable": "",
+                "unit": ""
+            }
+        },
+        {
+            "class_name": "Variable",
+            "instance_name": "VariableLatitudeUsed0",
+            "parameters": {
+                "data_item": "",
+                "data_type_str": "DOUBLE",
+                "db_column_name": "latitude_used",
+                "db_expression": "",
+                "db_expression_variables": {},
+                "description": "Position in WGS-84 coordinates COMPASS uses for this report, chosen from the candidates, see Position Source.",
+                "dimension": "Angle",
+                "group": "Position",
+                "inputs": [],
+                "is_key": false,
+                "name": "Latitude*",
+                "origin": "selection",
+                "representation_str": "STANDARD",
+                "selection": [
+                    {
+                        "variable": "Latitude"
+                    },
+                    {
+                        "calculation": "xy_projection_rs2g",
+                        "label": "X/Y projection RS2G"
+                    }
+                ],
+                "short_name": "",
+                "source_variable": "Position Source",
+                "unit": "Degree"
+            }
+        },
+        {
+            "class_name": "Variable",
+            "instance_name": "VariableLongitudeUsed0",
+            "parameters": {
+                "data_item": "",
+                "data_type_str": "DOUBLE",
+                "db_column_name": "longitude_used",
+                "db_expression": "",
+                "db_expression_variables": {},
+                "description": "Position in WGS-84 coordinates COMPASS uses for this report, chosen from the candidates, see Position Source.",
+                "dimension": "Angle",
+                "group": "Position",
+                "inputs": [],
+                "is_key": false,
+                "name": "Longitude*",
+                "origin": "selection",
+                "representation_str": "STANDARD",
+                "selection": [
+                    {
+                        "variable": "Longitude"
+                    },
+                    {
+                        "calculation": "xy_projection_rs2g",
+                        "label": "X/Y projection RS2G"
+                    }
+                ],
+                "short_name": "",
+                "source_variable": "Position Source",
+                "unit": "Degree"
+            }
+        },
+        {
+            "class_name": "Variable",
+            "instance_name": "VariablePositionSource0",
+            "parameters": {
+                "data_item": "",
+                "data_type_str": "UCHAR",
+                "db_column_name": "position_source",
+                "db_expression": "",
+                "db_expression_variables": {},
+                "description": "1-based position of the candidate that supplied the position COMPASS uses, null when none did.",
+                "dimension": "",
+                "group": "Position",
+                "inputs": [
+                    "Latitude*",
+                    "Longitude*"
+                ],
+                "is_key": false,
+                "name": "Position Source",
+                "origin": "calculated",
+                "representation_str": "STANDARD",
+                "selection": [],
+                "short_name": "",
+                "source_variable": "",
                 "unit": ""
             }
         }

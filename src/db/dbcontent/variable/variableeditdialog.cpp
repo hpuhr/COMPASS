@@ -85,15 +85,11 @@ VariableEditDialog::VariableEditDialog(Variable& variable, QWidget* parent, Qt::
 
     form_layout->addRow("Comment", description_edit_);
 
-    source_edit_ = new QTextEdit();
-    source_edit_->document()->setPlainText(variable_.source().c_str());
-    source_edit_->setReadOnly(!expert_mode_);
-    source_edit_->setWordWrapMode(QTextOption::WrapMode::WrapAnywhere);
-
-    connect(source_edit_, &QTextEdit::textChanged, this,
-            &VariableEditDialog::sourceChangedSlot);
-
-    form_layout->addRow("Source", source_edit_);
+    // origin, data item, inputs or candidate list: set by the definition files, shown read only
+    origin_edit_ = new QLineEdit(variable_.originInfo().c_str());
+    origin_edit_->setReadOnly(true);
+    origin_edit_->setToolTip(variable_.info().c_str());
+    form_layout->addRow("Origin", origin_edit_);
 
     //    VariableDataTypeComboBox* type_combo_ {nullptr};
     type_combo_ = new VariableDataTypeComboBox(variable_.dataTypeRef(), variable_.dataTypeStringRef());
@@ -200,15 +196,6 @@ void VariableEditDialog::commentChangedSlot()
     traced_assert(description_edit_);
 
     variable_.description(description_edit_->document()->toPlainText().trimmed().toStdString());
-
-    variable_edited_ = true;
-}
-
-void VariableEditDialog::sourceChangedSlot()
-{
-    traced_assert(source_edit_);
-
-    variable_.source(source_edit_->document()->toPlainText().trimmed().toStdString());
 
     variable_edited_ = true;
 }

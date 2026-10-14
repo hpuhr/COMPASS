@@ -37,6 +37,7 @@
 #include "dbinterface.h"
 #include "dbcontent/dbcontentmanager.h"
 #include "dbcontent/dbcontentdataengine.h"
+#include "dbcontent/variable/selectionfiller.h"
 #include "db_context_manager.h"
 #include "files.h"
 #include "logger.h"
@@ -1158,6 +1159,10 @@ void ASTERIXImportTask::mapJSONDoneSlot()
         num_packets_in_processing_--;
         return;
     }
+
+    // selection variables first: "Time of Day*" must hold the chosen time before the shift and
+    // the timestamp, the positions before the projections fill the rows still null
+    dbContent::SelectionFiller::fill(compass_.dbContentManager(), job_buffers);
 
     logdbg << "starting ts calc";
 

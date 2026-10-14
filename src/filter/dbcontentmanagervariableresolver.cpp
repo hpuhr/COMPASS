@@ -154,6 +154,20 @@ std::string DBContentManagerVariableResolver::variableDBExpression(
     return resolveVariable(dbcontent_name, var_name, var_dbcontent_name).dbExpression();
 }
 
+std::string DBContentManagerVariableResolver::variableSourceVariableName(
+    const std::string& dbcontent_name, const std::string& var_name,
+    const std::string& var_dbcontent_name) const
+{
+    return resolveVariable(dbcontent_name, var_name, var_dbcontent_name).sourceVariableName();
+}
+
+unsigned int DBContentManagerVariableResolver::variableSelectionCandidateIndex(
+    const std::string& dbcontent_name, const std::string& var_name,
+    const std::string& var_dbcontent_name, const std::string& calculation) const
+{
+    return resolveVariable(dbcontent_name, var_name, var_dbcontent_name).selectionCandidateIndex(calculation);
+}
+
 PropertyDataType DBContentManagerVariableResolver::variableDataType(
     const std::string& dbcontent_name, const std::string& var_name,
     const std::string& var_dbcontent_name) const

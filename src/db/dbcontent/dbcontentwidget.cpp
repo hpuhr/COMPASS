@@ -231,17 +231,6 @@ void DBContentWidget::editDBContentVariableDescriptionSlot()
     variable->description(edit->text().toStdString());
 }
 
-void DBContentWidget::editDBContentVariableSourceSlot()
-{
-    QLineEdit* edit = static_cast<QLineEdit*>(sender());
-    traced_assert(edit);
-
-    Variable* variable = edit->property("variable").value<Variable*>();
-    traced_assert(variable);
-
-    variable->source(edit->text().toStdString());
-}
-
 void DBContentWidget::editDBContentVariableDBColumnSlot(const QString& text)
 {
     traced_assert(false); // TODO
@@ -328,9 +317,9 @@ void DBContentWidget::updateDBContVarsGridSlot()
     dbcontvars_grid_->addWidget(info_label, row, col);
 
     col++;
-    QLabel* source_label = new QLabel("Source");
-    source_label->setFont(font_bold);
-    dbcontvars_grid_->addWidget(source_label, row, col);
+    QLabel* origin_label = new QLabel("Origin");
+    origin_label->setFont(font_bold);
+    dbcontvars_grid_->addWidget(origin_label, row, col);
 
     col++;
     QLabel* type_label = new QLabel("Data type");
@@ -388,12 +377,11 @@ void DBContentWidget::updateDBContVarsGridSlot()
         dbcontvars_grid_->addWidget(description_edit, row, col);
 
         col++;
-        QLineEdit* source_edit = new QLineEdit(var_it.second->source().c_str());
-        source_edit->setMaximumWidth(300);
-        source_edit->setProperty("variable", data);
-        connect(source_edit, SIGNAL(returnPressed()), this,
-                SLOT(editDBContentVariableSourceSlot()));
-        dbcontvars_grid_->addWidget(source_edit, row, col);
+        QLineEdit* origin_edit = new QLineEdit(var_it.second->originInfo().c_str());
+        origin_edit->setMaximumWidth(300);
+        origin_edit->setReadOnly(true);
+        origin_edit->setToolTip(var_it.second->info().c_str());
+        dbcontvars_grid_->addWidget(origin_edit, row, col);
 
         col++;
         VariableDataTypeComboBox* type_combo = new VariableDataTypeComboBox(

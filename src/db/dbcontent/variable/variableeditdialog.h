@@ -41,7 +41,6 @@ public slots:
     void nameChangedSlot(const QString& name);
     void shortNameChangedSlot(const QString& name);
     void commentChangedSlot();
-    void sourceChangedSlot();
     void dbColumnChangedSlot(const QString& name);
 
     void doneSlot();
@@ -61,7 +60,7 @@ protected:
     QLineEdit* name_edit_ {nullptr};
     QLineEdit* short_name_edit_ {nullptr};
     QTextEdit* description_edit_ {nullptr};
-    QTextEdit* source_edit_ {nullptr};
+    QLineEdit* origin_edit_ {nullptr};
     VariableDataTypeComboBox* type_combo_ {nullptr};
     UnitSelectionWidget* unit_sel_ {nullptr};
     StringRepresentationComboBox* representation_box_ {nullptr};

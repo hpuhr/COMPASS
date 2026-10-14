@@ -1035,24 +1035,6 @@
         },
         {
             "class_name": "JSONDataMapping",
-            "instance_name": "JSONDataMapping156",
-            "parameters": {
-                "active": false,
-                "append_value": false,
-                "comment": "Type string, value \"7a08f115\"",
-                "db_content_name": "CAT062",
-                "db_content_variable_name": "",
-                "dimension": "",
-                "format_data_type": "",
-                "in_array": false,
-                "json_key": "artas_md5",
-                "json_value_format": "",
-                "mandatory": false,
-                "unit": ""
-            }
-        },
-        {
-            "class_name": "JSONDataMapping",
             "instance_name": "JSONDataMappingRecordData",
             "parameters": {
                 "active": true,
@@ -1496,24 +1478,6 @@
                 "format_data_type": "",
                 "in_array": true,
                 "json_key": "510.Composed Track Number.SYSTEM UNIT IDENTIFICATION",
-                "json_value_format": "",
-                "mandatory": false,
-                "unit": ""
-            }
-        },
-        {
-            "class_name": "JSONDataMapping",
-            "instance_name": "JSONDataMapping199",
-            "parameters": {
-                "active": false,
-                "append_value": false,
-                "comment": "Type number, value 0",
-                "db_content_name": "CAT062",
-                "db_content_variable_name": "",
-                "dimension": "",
-                "format_data_type": "",
-                "in_array": true,
-                "json_key": "510.Composed Track Number.extend",
                 "json_value_format": "",
                 "mandatory": false,
                 "unit": ""

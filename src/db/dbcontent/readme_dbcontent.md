@@ -68,14 +68,14 @@ The read path is in [readme_loading.md](readme_loading.md). The insert path is t
   - `data_type_str` - `BOOL`, `CHAR`, `UCHAR`, `INT`, `UINT`, `LONGINT`, `ULONGINT`, `FLOAT`, `DOUBLE`, `STRING`, `JSON`, `TIMESTAMP`. Maps directly to `PropertyDataType` and to the DuckDB column type.
   - `dimension` + `unit` - physical units (`Time`/`Second`, `Length`/`Meter`, `Angle`/`Degree`, ...). Used for unit conversion when crossing variables and for display.
   - `representation_str` - display formatter (`STANDARD`, `SECONDS_TO_TIME`, `DEC_TO_OCTAL`, `FLOAT_PREC2`, ...).
-  - `description` - free-form semantic description of what the value means. Should *not* repeat the origin (that goes in `source`).
-  - `source` - documents where the value comes from. One of these shapes (multi-line shapes use a literal `\n` between alternatives):
-    - **ASTERIX item** in EUROCONTROL notation: `"I048/140.Time-of-Day"`.
-    - **ASTERIX item with rewrite note** when the buffer value is not the raw decoded number: `"I020/500.SDP.rho-xy (rescaled to covariance: rho * sigma_x * sigma_y)"`. See "Post-import derivations" below.
-    - **Multi-source / fallback chain** in priority order, `\n`-separated: `"I021/071.Time of Applicability for Position\nI021/073.Time of Message Reception for Position\nI021/077.Time of Report Transmission\nI021/030.Time of Day (deprecated)"`.
-    - **Calculated from other variables**: `"Calculated from Vx, Vy"`, `"Calculated from Range, Azimuth, 3D Height (radar polar->WGS-84 projection)"`, `"Calculated from Time of Day, calendar date"`. Names other DBContent variables on the same record, since the computation reads the buffer columns by then.
-    - **Internal**: `"Internal: ASTERIX category number"`, `"Internal: import line/source identifier"`, `"Calculated from I048/010.SAC, I048/010.SIC"` (ds_id).
-    - **Empty** for variables with no canonical source (e.g. `Unique Target Number`, `Ascending record number`).
+  - `description` - free-form semantic description of what the value means. A rewrite of the wire value, "Rescaled to covariance: rho * sigma_x * sigma_y.", is one sentence at its end.
+  - `origin` - where the value comes from, one of:
+    - `asterix` - decoded from one ASTERIX item. `data_item` names it in EUROCONTROL notation, `"I048/140.Time-of-Day"`, REF and SPF items as `"I021/REF.SGV.GSS"`. The item is the mapping key of the Variable in `task_import_asterix_cat<NNN>.json` with the category prefix, an edition variant with two mapping keys under one item, CAT021 `NUCp or NIC`, names the first. `scripts/check_asterix_mapping_coverage.py` fails on a `data_item` that is no mapping key of its Variable.
+    - `calculated` - computed by COMPASS from other Variables of the same record, listed in `inputs`: `["Vx", "Vy"]`, `["Range", "Azimuth", "3D Height"]`, `["Time of Day*"]` for `Timestamp`. The 6 `db_expression` Variables are calculated too, their inputs are the `db_expression_variables`.
+    - `internal` - bookkeeping, not from the data: `Line ID`, `Record Number`, `ARTAS Hash`, `Record Data`, the recording columns, `UTN`.
+    - `selection` - chosen per record from an ordered candidate list, see "Selection variables" under "Post-import derivations". `selection` holds the candidates, `source_variable` names the companion UCHAR Variable with the 1-based index of the candidate that supplied the value.
+    - empty on the 77 RefTraj Variables: the DBContent carries `"origin": "calculated"` for all of them, `Variable::origin()` falls back to it. A Report Variable answers `report`.
+  - A derived Variable with a decoded namesake in the same content carries an asterisk in its stored name: `Latitude` is I062/105, `Latitude*` is the position COMPASS uses. A derived Variable without such a namesake keeps its plain name, `Timestamp`, `DS ID`, CAT062 `Mode C Code`. `Variable::originInfo()` gives the one-line summary the dialogs show, `info()` the tooltip.
   - `db_expression` - optional SQL expression for *computed* columns (the column doesn't physically exist; SQL evaluates it on read).
   - `is_key` - primary-key flag.
   - `group` - semantic group used by the variable selection dialog's "Group" mode. One of: `Origin`, `Type`, `Time`, `Position`, `Accuracy`, `Movement`, `Secondary Identification`, `Altitude`, `Track`, `Ages`, `Warning/Alert`; empty falls into the `Other` bucket. Initially assigned by [`scripts/assign_variable_groups.py`](../../../scripts/assign_variable_groups.py) (name heuristics + per-item defaults + explicit overrides); hand-editable per variable. `MetaVariable` carries the same parameter.
@@ -118,7 +118,9 @@ All schema is JSON; nothing is hard-coded. There are two parallel families of fi
       "dimension": "Time", "unit": "Second",
       "representation_str": "SECONDS_TO_TIME",
       "description": "Absolute time stamping expressed as Co-ordinated Universal Time (UTC)",
-      "source": "I048/140.Time-of-Day",
+      "origin": "asterix",
+      "data_item": "I048/140.Time-of-Day",
+      "inputs": [], "selection": [], "source_variable": "",
       "is_key": false,
       "db_expression": ""
     }
@@ -188,7 +190,7 @@ Other DB tables (no DBContent backing them):
 
 ## Post-import derivations
 
-Most DBContent Variables are filled by direct `JSONDataMapping` from a single jASTERIX JSON key. The cases that are *not* a direct mapping fall into four groups; all of them are documented in the per-Variable `source` field (see "Variable model" above).
+Most DBContent Variables are filled by direct `JSONDataMapping` from a single jASTERIX JSON key, origin `asterix`. The cases that are *not* a direct mapping fall into four groups; the `origin`, `inputs` and `selection` parameters of the Variable say which one (see "Variable model" above).
 
 ### Synthesized columns (added to every record)
 
@@ -218,24 +220,33 @@ All five keys are listed in `SYNTHESIZED_KEYS` of [`check_asterix_mapping_covera
 
 ### In-place wire-value rewrites
 
-The Variable still maps from a single ASTERIX item, but the value written into the buffer is no longer the raw decoded number. The `source` field includes a parenthetical note explaining the rewrite.
+The Variable still maps from a single ASTERIX item, but the value written into the buffer is no longer the raw decoded number. The last sentence of the `description` explains the rewrite.
 
 | DBContent | Variable | Wire item | Rewrite |
 |---|---|---|---|
-| CAT020 | `X/Y StdDev Cov` | `I020/500.SDP.rho-xy` | correlation `rho` -> covariance `rho * sigma_x * sigma_y` |
-| CAT020 | `X/Y StdDev Cov` (REF variant) | `I020/REF.PA.SDC.COV-XY` | sign-square encoded -> `sign(v) * v^2` |
+| CAT020 | `X/Y StdDev Cov SDP` | `I020/500.SDP.rho-xy` | correlation `rho` -> covariance `rho * sigma_x * sigma_y` |
+| CAT020 | `X/Y StdDev Cov PA` | `I020/REF.PA.SDC.COV-XY` | sign-square encoded -> `sign(v) * v^2` |
 | CAT020 | `RUs` | `I020/400.Contributing Receivers` | per-record `[{RUx: byte}, ...]` 8-RU bitmaps -> array of 1-based receiver indices, written under `400.Contributing Receivers.RUx` |
 | CAT062 | `XY StdDev Cov` | `I062/500.COV.COV (XY Covariance Component)` | sign-square encoded -> `sign(v) * v^2` |
 
-### Fallback chains (variable filled from one of several alternatives)
+### Selection variables (variable filled from one of several alternatives)
 
-Listed in priority order; the first non-null source wins.
+A Variable with origin `selection` carries an ordered candidate list in `selection`. A candidate is a Variable of the same DBContent, `{"variable": "Latitude HR"}`, or a named calculation, `{"calculation": "xy_projection_rs2g", "label": "X/Y projection RS2G"}`. A Variable candidate can require boolean Variables to be true or false, `"require_true": ["Mode C Valid LM"]`, `"require_false": ["Mode C Garbled LM"]`, a missing or null flag does not block it. The companion `source_variable`, an UCHAR Variable named `<name> Source`, holds the 1-based position of the candidate that supplied the value, null when none did.
 
-| DBContent | Variable | Where | Sources tried |
+[`selectionfiller.cpp`](variable/selectionfiller.cpp) `dbContent::SelectionFiller` fills them, called by `ASTERIXImportTask` on every decoded buffer before the timestamp calculation and the post-processing job: per row the first candidate with a value wins, its value is copied and its index written. Selections sharing a `source_variable` are chosen together, a candidate position counts only when every member has a value there, so `Latitude*` and `Longitude*` always come from the same item. A calculation candidate ends the search for a row, the code running that calculation fills the rows still null and sets their index, `ProjectionManager::doXYPositionCalculations` for the X/Y projection. A candidate of another data type than the selection is skipped with an error, no unit conversion is done. A string selection stores no copy: `Aircraft Identification*` has a `db_expression` with a CASE over the source index, resolved on read, the filler writes the index only.
+
+| DBContent | Variable | Candidates in order | Source variable |
 |---|---|---|---|
-| CAT021 | `Time of Day` | [`asterixtimestampcalculator.cpp`](../../task/import/asterix/asterixtimestampcalculator.cpp) `doADSBTimeProcessing` | `I021/071.Time of Applicability for Position`, then `I021/073.Time of Message Reception for Position`, then `I021/077.Time of Report Transmission`, then `I021/030.Time of Day (deprecated)` |
-| CAT021 | `Latitude` / `Longitude` | [`asterixpostprocessjob.cpp`](../../task/import/asterix/asterixpostprocessjob.cpp) `doADSBPositionProcessing` | normal `I021/130` low-resolution position; if null, the `Latitude HR` / `Longitude HR` from `I021/131` high-resolution position is copied in |
-| CAT020 / CAT021 | various position-accuracy variables | `task_import_asterix_cat020.json`, `task_import_asterix_cat021.json` | multiple `JSONDataMapping` entries with the same `db_content_variable_name` (legacy `I020/500` *or* `I020/REF.PA`; DO-260 `I021/090.NUCp or NIC` *or* DO-260A `I021/090.PA`) |
+| all 14 | `Time of Day*` (`Time of Day` in CAT004, CAT063 and CAT065, which decode `Time of Message` and have no namesake) | the decoded `Time of Day`; CAT021: `ToA Position` I021/071, `ToMR Position` I021/073, `ToRT` I021/077, `Time of Day` I021/030 | `Time of Day Source` |
+| CAT021 | `Latitude*` / `Longitude*` | `Latitude` I021/130, `Latitude HR` I021/131 | `Position Source` |
+| CAT010, CAT020, CAT062 | `Latitude*` / `Longitude*` | `Latitude` I0xx/041 or I062/105, calculation `xy_projection_rs2g` | `Position Source` |
+| CAT062 | `Aircraft Identification*` | `Target Identification` I062/245, `Aircraft Identification` I062/380.ID, `Callsign FPL` I062/390.CSN, `Callsign Pre-Em FPL` I062/390.PEC | `Aircraft Identification Source` |
+| CAT062 | `Mode C Code` | `Mode C Code LM` I062/340 when `Mode C Valid LM` and not `Mode C Garbled LM`, `Barometric Altitude Calculated` I062/135, `Flight Level Measured` I062/136 | `Mode C Code Source` |
+| CAT020 | `X StdDev`, `Y StdDev`, `X/Y StdDev Cov`, `X DoP`, `Y DoP`, `X/Y DoP Cov`, `Geometric Height StdDev` | `<name> PA` from I020/REF.PA first, `<name> SDP`, `<name> DOP` or `<name> SDH` from the outdated I020/500 last | `<name> Source` |
+
+The MetaVariables `Latitude`, `Longitude` and `Time of Day` point at the starred Variables, `Track Groundspeed` and `Track Angle` of CAT021 at `Ground Speed*` and `Track Angle*`. The MetaVariables `Aircraft Identification` and `Mode C Code` of CAT062 still point at `Aircraft Identification` and `Mode C Code LM`: the consumers with their own fallback chains, the label generator, the ACID and Mode C filters, the Mode C evaluation requirement and the reconstructors, move to the selections in a later step. The MetaVariables `Position Source` and `Time of Day Source` reach the source columns across contents.
+
+An edition variant is not a selection: CAT021 `NUCp or NIC` keeps two mappings, DO-260 `I021/090.NUCp or NIC` and DO-260A `I021/090.PA`, under one `data_item`.
 
 ### Computed variables (not from any single ASTERIX item)
 
@@ -243,15 +254,15 @@ Listed in priority order; the first non-null source wins.
 
 | Variable | DBContent(s) | Inputs | Computation |
 |---|---|---|---|
-| `Latitude` / `Longitude` | CAT001, CAT010, CAT048 | `Range`, `Azimuth`, `3D Height` (or FFT lookup when missing), sensor coordinate system from `ds_id` | `ProjectionManager::calculateRadarPlotPositions` -> `Projection::polarSlantToWGS84` (RS2G / OGR / ...) |
-| `Latitude` / `Longitude` | CAT010, CAT020, CAT062 | `X`, `Y`, sensor coordinate system from `ds_id` | `ProjectionManager::doXYPositionCalculations` -> `Projection::localXYToWGS84` |
-| `Ground Speed` | any DBContent with vx/vy | `Vx`, `Vy` | `sqrt(vx^2 + vy^2)`, then m/s -> knots |
-| `Track Angle` | any DBContent with vx/vy | `Vx`, `Vy` | `atan2(vx, vy)` -> radians -> degrees, normalised to [0, 360) |
-| `Ground Speed` | CAT021 (when no vx/vy) | `SGV GSS` (I021/160), or `0.0` when `SGV STP` stopped bit is set | direct copy / hard zero |
-| `Track Angle` | CAT021 (when no vx/vy) | `SGV HGT`, `SGV HTT`, `SGV HRD`, plus `Latitude` / `Longitude` / `Mode C` (for declination) | when `HTT`=track and `HRD`=magnetic, add `ProjectionManager::declination(year, lat, lon, alt)`; otherwise pass through |
-| `Time of Day` | CAT063 | `Time of Day` from CAT063 record, plus first ToD seen in CAT062 and CAT063 | `tod += tod0_cat062 - tod0_cat063` to align CAT063 service messages with the corresponding CAT062 stream |
-| `Time of Day` | all categories | `Time of Day` and `override_tod_offset` setting | additive shift when `override_tod_active` is set |
-| `Timestamp` (`ptime`) | all target-report DBContents | `Time of Day`, resolved calendar date | `doTimeStampCalculation` adds the per-file resolved date, handling midnight wrap (`had_late_time_`) and time-jumps from previous-day offsets |
+| `Latitude*` / `Longitude*` | CAT001, CAT048 (origin `calculated`, no decoded position exists) | `Range`, `Azimuth`, `3D Height` (or FFT lookup when missing), sensor coordinate system from `ds_id` | `ProjectionManager::calculateRadarPlotPositions` -> `Projection::polarSlantToWGS84` (RS2G / OGR / ...) |
+| `Latitude*` / `Longitude*` | CAT010, CAT020, CAT062 (the `xy_projection_rs2g` candidate of the selection) | `X`, `Y`, sensor coordinate system from `ds_id` | `ProjectionManager::doXYPositionCalculations` -> `Projection::localXYToWGS84` for the rows the decoded item left null, `Position Source` set to the candidate index |
+| `Ground Speed` | CAT020, CAT062 | `Vx`, `Vy` | `sqrt(vx^2 + vy^2)`, then m/s -> knots |
+| `Track Angle` | CAT020, CAT062 | `Vx`, `Vy` | `atan2(vx, vy)` -> radians -> degrees, normalised to [0, 360) |
+| `Ground Speed*` | CAT021 | `Ground Speed` I021/160, `SGV GSS`, `SGV STP` | the decoded value, else the SGV ground speed, else `0.0` when the SGV stopped bit is set |
+| `Track Angle*` | CAT021 | `Track Angle` I021/160, `SGV HGT`, `SGV HTT`, `SGV HRD`, plus `Latitude*` / `Longitude*` / `Mode C Code` (for declination) | the decoded value, else the SGV ground track: when `HTT`=track and `HRD`=magnetic, add `ProjectionManager::declination(year, lat, lon, alt)`; otherwise pass through |
+| `Time of Day` (the selection) | CAT063 | the selected value, plus first ToD seen in CAT062 and CAT063 | `tod += tod0_cat062 - tod0_cat063` to align CAT063 service messages with the corresponding CAT062 stream |
+| `Time of Day*` | all categories | the selected value and the `override_tod_offset` setting | additive shift when `override_tod_active` is set, the decoded `Time of Day` stays unshifted |
+| `Timestamp` (`ptime`) | all target-report DBContents | `Time of Day*`, resolved calendar date | `doTimeStampCalculation` adds the per-file resolved date, handling midnight wrap (`had_late_time_`) and time-jumps from previous-day offsets |
 
 ### Filtering and obfuscation
 
@@ -290,8 +301,8 @@ ToD is the most error-prone field in real recordings. ASTERIX encodes it as a 24
 - `override_tod_offset` (in `task_import_asterix.json`) - additive offset applied before wrap accounting. Used to correct sensor clock skew that has been characterised in QA.
 - `reset_date_between_files` - whether wrap accounting starts fresh per file or carries over (matters for chunked recordings of a single recording session).
 - `filter_tod_min/max` - wire-time drop filter (default `0` to `86399`).
-- CAT021 fine-grained time items (`I021/071..077`) are mapped to separate Variables - `Time of Applicability for Position`, `Time of Applicability for Velocity`, `Time of Message Reception for Position`, `Time of ASTERIX Report Transmission` - because for ADS-B they are not the same instant.
-- The unified MetaVariable `Time of Day` resolves to the appropriate per-category variable (CAT021 uses the position-applicability time).
+- CAT021 fine-grained time items (`I021/071..077`) are mapped to separate Variables - `ToA Position`, `Time of Applicability for Velocity`, `ToMR Position`, `ToRT` - because for ADS-B they are not the same instant. `Time of Day` of CAT021 is the decoded I021/030, outdated and mostly absent.
+- Every content has the decoded, unshifted `Time of Day` and the selection `Time of Day*` COMPASS uses (plain `Time of Day` in CAT004, CAT063 and CAT065, see "Selection variables"). The unified MetaVariable `Time of Day` resolves to the selection, `Time of Day Source` says which item supplied it. The override offset and the CAT063 alignment shift the selection only.
 
 If `tod` is wrong, *everything* downstream - association, evaluation requirements, reconstruction, view selection - is wrong. This is the first thing to check when diagnosing weird import behavior.
 

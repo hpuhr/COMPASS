@@ -118,10 +118,13 @@ void ASTERIXPostprocessJob::run_impl()
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
+    // the selection variables, "Latitude*" from the decoded item or "Latitude HR", are filled
+    // by dbContent::SelectionFiller before the timestamp calculation, the calculations below
+    // fill the rows still null
+
     checkARTASHashes();
     doRadarPlotPositionCalculations();
     doXYPositionCalculations();
-    doADSBPositionProcessing();
     doGroundSpeedCalculations();
 
     if (settings_.filter_tod_active_  || settings_.filter_position_rec_active_ 
@@ -210,70 +213,6 @@ void ASTERIXPostprocessJob::doXYPositionCalculations()
 
     // tracked data sources with only x/y coordinates
     compass_.projectionManager().doXYPositionCalculations(buffers_);
-}
-
-void ASTERIXPostprocessJob::doADSBPositionProcessing()
-{
-    DBContentManager& dbcont_man = compass_.dbContentManager();
-
-    string dbcontent_name = "CAT021";
-
-    if (!buffers_.count(dbcontent_name))
-        return;
-
-    shared_ptr<Buffer> buffer = buffers_.at(dbcontent_name);
-    unsigned int buffer_size = buffer->size();
-
-    if (!buffer_size)
-        return;
-
-    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_latitude_));
-    traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_longitude_));
-
-    traced_assert(dbcont_man.canGetVariable(dbcontent_name, dbcontent_vars::var_cat021_latitude_hr_));
-    traced_assert(dbcont_man.canGetVariable(dbcontent_name, dbcontent_vars::var_cat021_longitude_hr_));
-
-    dbContent::Variable& lat_var = dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_latitude_);
-    dbContent::Variable& lon_var = dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_longitude_);
-
-    dbContent::Variable& lat_hr_var = dbcont_man.getVariable(dbcontent_name, dbcontent_vars::var_cat021_latitude_hr_);
-    dbContent::Variable& lon_hr_var = dbcont_man.getVariable(dbcontent_name, dbcontent_vars::var_cat021_longitude_hr_);
-
-    traced_assert(lat_var.dataType() == PropertyDataType::DOUBLE);
-    traced_assert(lon_var.dataType() == PropertyDataType::DOUBLE);
-    traced_assert(lat_hr_var.dataType() == PropertyDataType::DOUBLE);
-    traced_assert(lon_hr_var.dataType() == PropertyDataType::DOUBLE);
-
-    string lat_var_name = lat_var.name();
-    string lon_var_name = lon_var.name();
-    string lat_hr_var_name = lat_hr_var.name();
-    string lon_hr_var_name = lon_hr_var.name();
-
-    if (!buffer->has<double>(lat_hr_var_name) || !buffer->has<double>(lon_hr_var_name)) // can not copy
-        return;
-
-    if (!buffer->has<double>(lat_var_name))
-        buffer->addProperty(lat_var_name, PropertyDataType::DOUBLE); // add if needed
-
-    if (!buffer->has<double>(lon_var_name))
-        buffer->addProperty(lon_var_name, PropertyDataType::DOUBLE); // add if needed
-
-    NullableVector<double>& lat_vec = buffer->get<double>(lat_var_name);
-    NullableVector<double>& lon_vec = buffer->get<double>(lon_var_name);
-    NullableVector<double>& lat_hr_vec = buffer->get<double>(lat_hr_var_name);
-    NullableVector<double>& lon_hr_vec = buffer->get<double>(lon_hr_var_name);
-
-    for (unsigned int index=0; index < buffer_size; index++)
-    {
-        if (!lat_vec.isNull(index) || !lon_vec.isNull(index)) // no need to copy
-            continue;
-
-        if (lat_hr_vec.isNull(index) || lon_hr_vec.isNull(index)) // can not copy
-            continue;
-
-        lat_vec.set(index, lat_hr_vec.get(index));
-        lon_vec.set(index, lon_hr_vec.get(index));
-    }
 }
 
 void ASTERIXPostprocessJob::doGroundSpeedCalculations()
@@ -376,121 +315,165 @@ void ASTERIXPostprocessJob::doGroundSpeedCalculations()
     }
 
 
-    // cat021 sgv conversion
+    // cat021: the Meta Variables are "Ground Speed*" and "Track Angle*", filled from the
+    // decoded I021/160 values first, then from the SGV fields of the REF for surface targets
 
     dbcontent_name = "CAT021";
-
-    unsigned int spd_already_set {0}, sgv_spd_no_val {0}, sgv_hgt_no_value {0},
-        sgv_is_heading {0}, sgv_is_magnetic {0}, sgv_usable {0};
-
-    logdbg << "got ads-b "
-           << (buffers_.count(dbcontent_name) && buffers_.at(dbcontent_name)->size());
 
     if (buffers_.count(dbcontent_name) && buffers_.at(dbcontent_name)->size())
     {
         auto& buffer = buffers_.at(dbcontent_name);
 
         unsigned int buffer_size = buffer->size();
-        traced_assert(buffer_size);
 
-        if (!buffer->has<float>(dbcontent_vars::var_cat021_sgv_gss_.name()) &&
-            buffer->has<bool>(dbcontent_vars::var_cat021_sgv_stp_.name()))
-        {  // no speed but sgv stopped bit
-            logdbg << "got ads-b no gss but stp";
-
-            unsigned int stp_set {0};
-
-            dbContent::Variable& speed_var =
-                dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_ground_speed_);
-            traced_assert(speed_var.dataType() == PropertyDataType::DOUBLE);
-
-            NullableVector<double>& speed_vec = buffer->get<double>(speed_var_name);
-            NullableVector<bool>& sgv_stp_vec = buffer->get<bool>(dbcontent_vars::var_cat021_sgv_stp_.name());
-
-            for (unsigned int index = 0; index < buffer_size; index++)
-            {
-                if (!speed_vec.isNull(index))  // already set
-                {
-                    spd_already_set++;
-                    continue;
-                }
-
-                if (sgv_stp_vec.isNull(index)) // speed not set
-                {
-                    ++sgv_spd_no_val;
-                    continue;
-                }
-
-                if (sgv_stp_vec.get(index))
-                {
-                    speed_vec.set(index, 0.0);
-                    ++stp_set;
-                }
-            }
-
-            logdbg << "CAT021 spd_already_set " << spd_already_set << " sgv_spd_no_val "
-                   << sgv_spd_no_val << " stp_set " << stp_set;
-
-            return;
-        }
-
-        logdbg << "got ads-b sgv gss "
-               << buffer->has<float>(dbcontent_vars::var_cat021_sgv_gss_.name())
-               << " hgt " << buffer->has<double>(dbcontent_vars::var_cat021_sgv_hgt_.name())
-               << " htt " << buffer->has<bool>(dbcontent_vars::var_cat021_sgv_htt_.name())
-               << " hrd " << buffer->has<bool>(dbcontent_vars::var_cat021_sgv_hrd_.name());
-
-        if (!buffer->has<float>(dbcontent_vars::var_cat021_sgv_gss_.name())
-            || !buffer->has<double>(dbcontent_vars::var_cat021_sgv_hgt_.name())
-            || !buffer->has<bool>(dbcontent_vars::var_cat021_sgv_htt_.name())
-            || !buffer->has<bool>(dbcontent_vars::var_cat021_sgv_hrd_.name()))
-            return;
+        traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_ground_speed_));
+        traced_assert(dbcont_man.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_track_angle_));
 
         dbContent::Variable& speed_var = dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_ground_speed_);
         dbContent::Variable& track_angle_var =
             dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_track_angle_);
 
-        speed_var_name = speed_var.name();
-        track_angle_var_name = track_angle_var.name();
-
         traced_assert(speed_var.dataType() == PropertyDataType::DOUBLE);
         traced_assert(track_angle_var.dataType() == PropertyDataType::DOUBLE);
 
+        speed_var_name = speed_var.name();
+        track_angle_var_name = track_angle_var.name();
+
+        if (!buffer->has<double>(speed_var_name))
+            buffer->addProperty(speed_var_name, PropertyDataType::DOUBLE); // add if needed
+
+        if (!buffer->has<double>(track_angle_var_name))
+            buffer->addProperty(track_angle_var_name, PropertyDataType::DOUBLE); // add if needed
+
         NullableVector<double>& speed_vec = buffer->get<double>(speed_var_name);
         NullableVector<double>& track_angle_vec = buffer->get<double>(track_angle_var_name);
+
+        // decoded I021/160 values first
+
+        unsigned int decoded_spd {0}, decoded_ta {0};
+
+        if (buffer->has<double>(dbcontent_vars::var_cat021_ground_speed_.name()))
+        {
+            NullableVector<double>& decoded_vec =
+                buffer->get<double>(dbcontent_vars::var_cat021_ground_speed_.name());
+
+            for (unsigned int index=0; index < buffer_size; index++)
+            {
+                if (speed_vec.isNull(index) && !decoded_vec.isNull(index))
+                {
+                    speed_vec.set(index, decoded_vec.get(index));
+                    ++decoded_spd;
+                }
+            }
+        }
+
+        if (buffer->has<double>(dbcontent_vars::var_cat021_track_angle_.name()))
+        {
+            NullableVector<double>& decoded_vec =
+                buffer->get<double>(dbcontent_vars::var_cat021_track_angle_.name());
+
+            for (unsigned int index=0; index < buffer_size; index++)
+            {
+                if (track_angle_vec.isNull(index) && !decoded_vec.isNull(index))
+                {
+                    track_angle_vec.set(index, decoded_vec.get(index));
+                    ++decoded_ta;
+                }
+            }
+        }
+
+        logdbg << "CAT021 decoded speed " << decoded_spd << " track angle " << decoded_ta
+               << " of " << buffer_size;
+
+        // then the SGV fields
+
+        unsigned int spd_already_set {0}, sgv_spd_no_val {0}, sgv_hgt_no_value {0},
+            sgv_is_heading {0}, sgv_is_magnetic {0}, sgv_usable {0};
+
+        bool has_gss = buffer->has<float>(dbcontent_vars::var_cat021_sgv_gss_.name());
+        bool has_stp = buffer->has<bool>(dbcontent_vars::var_cat021_sgv_stp_.name());
+        bool has_hgt = buffer->has<double>(dbcontent_vars::var_cat021_sgv_hgt_.name());
+        bool has_htt = buffer->has<bool>(dbcontent_vars::var_cat021_sgv_htt_.name());
+        bool has_hrd = buffer->has<bool>(dbcontent_vars::var_cat021_sgv_hrd_.name());
+
+        logdbg << "got ads-b sgv gss " << has_gss << " stp " << has_stp << " hgt " << has_hgt
+               << " htt " << has_htt << " hrd " << has_hrd;
+
+        if (!has_gss)
+        {
+            if (has_stp)
+            {  // no speed but sgv stopped bit, a stopped target has speed 0
+                unsigned int stp_set {0};
+
+                NullableVector<bool>& sgv_stp_vec = buffer->get<bool>(dbcontent_vars::var_cat021_sgv_stp_.name());
+
+                for (unsigned int index = 0; index < buffer_size; index++)
+                {
+                    if (!speed_vec.isNull(index))  // already set
+                    {
+                        spd_already_set++;
+                        continue;
+                    }
+
+                    if (sgv_stp_vec.isNull(index)) // speed not set
+                    {
+                        ++sgv_spd_no_val;
+                        continue;
+                    }
+
+                    if (sgv_stp_vec.get(index))
+                    {
+                        speed_vec.set(index, 0.0);
+                        ++stp_set;
+                    }
+                }
+
+                logdbg << "CAT021 spd_already_set " << spd_already_set << " sgv_spd_no_val "
+                       << sgv_spd_no_val << " stp_set " << stp_set;
+            }
+
+            return;
+        }
+
+        if (!has_hgt || !has_htt || !has_hrd)
+            return;
 
         NullableVector<float>& sgv_gss_vec = buffer->get<float>(dbcontent_vars::var_cat021_sgv_gss_.name());
         NullableVector<double>& sgv_hgt_vec = buffer->get<double>(dbcontent_vars::var_cat021_sgv_hgt_.name());
         NullableVector<bool>& sgv_htt_vec = buffer->get<bool>(dbcontent_vars::var_cat021_sgv_htt_.name());
         NullableVector<bool>& sgv_hrd_vec = buffer->get<bool>(dbcontent_vars::var_cat021_sgv_hrd_.name());
 
-        traced_assert(buffer->has<boost::posix_time::ptime>(dbcontent_vars::meta_var_timestamp_.name()));
-        NullableVector<boost::posix_time::ptime> ts_vec =
-            buffer->get<boost::posix_time::ptime>(dbcontent_vars::meta_var_timestamp_.name());
+        dbContent::Variable& ts_var = dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_timestamp_);
+
+        traced_assert(buffer->has<boost::posix_time::ptime>(ts_var.name()));
+        NullableVector<boost::posix_time::ptime> ts_vec = buffer->get<boost::posix_time::ptime>(ts_var.name());
+
+        // position and altitude for the declination, "Latitude*" and "Longitude*" through the Meta
 
         NullableVector<double>* lat_vec {nullptr};
         NullableVector<double>* lon_vec {nullptr};
         NullableVector<float>* mode_c_vec {nullptr};
 
-        if(buffer->has<double>(dbcontent_vars::meta_var_latitude_.name())
-            && buffer->has<double>(dbcontent_vars::meta_var_longitude_.name()))
+        if (dbcont_man.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_latitude_)
+            && dbcont_man.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_longitude_))
         {
+            std::string lat_var_name = dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_latitude_).name();
+            std::string lon_var_name = dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_longitude_).name();
 
-            lat_vec = &buffer->get<double>(dbcontent_vars::meta_var_latitude_.name());
-            lon_vec = &buffer->get<double>(dbcontent_vars::meta_var_longitude_.name());
+            if (buffer->has<double>(lat_var_name) && buffer->has<double>(lon_var_name))
+            {
+                lat_vec = &buffer->get<double>(lat_var_name);
+                lon_vec = &buffer->get<double>(lon_var_name);
+            }
         }
 
-        if(buffer->has<float>(dbcontent_vars::meta_var_mc_.name()))
-            mode_c_vec = &buffer->get<float>(dbcontent_vars::meta_var_mc_.name());
+        if (dbcont_man.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_mc_))
+        {
+            std::string mode_c_var_name = dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_mc_).name();
 
-        // Define position and date parameters
-        // double latitude = 37.7749;   // Latitude in degrees (example: San Francisco)
-        // double longitude = -122.4194; // Longitude in degrees
-        // double altitude = 0;         // Altitude in meters
-        // double time = 2024.0;        // Year (decimal format)
-
-        // Magnetic heading angle in degrees (example)
-        //double magneticHeading = 45.0;
+            if (buffer->has<float>(mode_c_var_name))
+                mode_c_vec = &buffer->get<float>(mode_c_var_name);
+        }
 
         for (unsigned int index=0; index < buffer_size; index++)
         {

@@ -295,12 +295,12 @@
             "instance_name": "MetaVariableLatitude0",
             "parameters": {
                 "dbcont_variables": {
-                    "CAT001": "Latitude",
-                    "CAT010": "Latitude",
-                    "CAT020": "Latitude",
-                    "CAT021": "Latitude",
-                    "CAT048": "Latitude",
-                    "CAT062": "Latitude",
+                    "CAT001": "Latitude*",
+                    "CAT010": "Latitude*",
+                    "CAT020": "Latitude*",
+                    "CAT021": "Latitude*",
+                    "CAT048": "Latitude*",
+                    "CAT062": "Latitude*",
                     "RefTraj": "Latitude"
                 },
                 "group": "Position",
@@ -325,12 +325,12 @@
             "instance_name": "MetaVariableLongitude0",
             "parameters": {
                 "dbcont_variables": {
-                    "CAT001": "Longitude",
-                    "CAT010": "Longitude",
-                    "CAT020": "Longitude",
-                    "CAT021": "Longitude",
-                    "CAT048": "Longitude",
-                    "CAT062": "Longitude",
+                    "CAT001": "Longitude*",
+                    "CAT010": "Longitude*",
+                    "CAT020": "Longitude*",
+                    "CAT021": "Longitude*",
+                    "CAT048": "Longitude*",
+                    "CAT062": "Longitude*",
                     "RefTraj": "Longitude"
                 },
                 "group": "Position",
@@ -705,20 +705,20 @@
             "instance_name": "MetaVariableTime of Day0",
             "parameters": {
                 "dbcont_variables": {
-                    "CAT001": "Time of Day",
-                    "CAT002": "Time of Day",
-                    "CAT004": "Time of Message",
-                    "CAT010": "Time of Day",
-                    "CAT019": "Time of Day",
-                    "CAT020": "Time of Day",
-                    "CAT021": "Time of Day",
-                    "CAT023": "Time of Day",
-                    "CAT025": "Time of Day",
-                    "CAT034": "Time of Day",
-                    "CAT048": "Time of Day",
-                    "CAT062": "Time of Day",
-                    "CAT063": "Time of Message",
-                    "CAT065": "Time of Message",
+                    "CAT001": "Time of Day*",
+                    "CAT002": "Time of Day*",
+                    "CAT004": "Time of Day",
+                    "CAT010": "Time of Day*",
+                    "CAT019": "Time of Day*",
+                    "CAT020": "Time of Day*",
+                    "CAT021": "Time of Day*",
+                    "CAT023": "Time of Day*",
+                    "CAT025": "Time of Day*",
+                    "CAT034": "Time of Day*",
+                    "CAT048": "Time of Day*",
+                    "CAT062": "Time of Day*",
+                    "CAT063": "Time of Day",
+                    "CAT065": "Time of Day",
                     "RefTraj": "Time of Day"
                 },
                 "group": "Time",
@@ -770,7 +770,7 @@
                     "CAT001": "Track Angle",
                     "CAT010": "Track Angle",
                     "CAT020": "Track Angle",
-                    "CAT021": "Track Angle",
+                    "CAT021": "Track Angle*",
                     "CAT048": "Track Angle",
                     "CAT062": "Track Angle",
                     "RefTraj": "Track Angle"
@@ -885,7 +885,7 @@
                     "CAT001": "Track Groundspeed",
                     "CAT010": "Ground Speed",
                     "CAT020": "Ground Speed",
-                    "CAT021": "Ground Speed",
+                    "CAT021": "Ground Speed*",
                     "CAT048": "Track Groundspeed",
                     "CAT062": "Ground Speed",
                     "RefTraj": "Ground Speed"
@@ -1245,6 +1245,44 @@
                 },
                 "group": "Time",
                 "name": "Recording Date"
+            }
+        },
+        {
+            "class_name": "MetaVariable",
+            "instance_name": "MetaVariablePosition Source0",
+            "parameters": {
+                "dbcont_variables": {
+                    "CAT010": "Position Source",
+                    "CAT020": "Position Source",
+                    "CAT021": "Position Source",
+                    "CAT062": "Position Source"
+                },
+                "group": "Position",
+                "name": "Position Source"
+            }
+        },
+        {
+            "class_name": "MetaVariable",
+            "instance_name": "MetaVariableTime of Day Source0",
+            "parameters": {
+                "dbcont_variables": {
+                    "CAT001": "Time of Day Source",
+                    "CAT002": "Time of Day Source",
+                    "CAT004": "Time of Day Source",
+                    "CAT010": "Time of Day Source",
+                    "CAT019": "Time of Day Source",
+                    "CAT020": "Time of Day Source",
+                    "CAT021": "Time of Day Source",
+                    "CAT023": "Time of Day Source",
+                    "CAT025": "Time of Day Source",
+                    "CAT034": "Time of Day Source",
+                    "CAT048": "Time of Day Source",
+                    "CAT062": "Time of Day Source",
+                    "CAT063": "Time of Day Source",
+                    "CAT065": "Time of Day Source"
+                },
+                "group": "Time",
+                "name": "Time of Day Source"
             }
         }
     ]

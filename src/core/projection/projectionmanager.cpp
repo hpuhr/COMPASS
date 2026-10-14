@@ -31,7 +31,9 @@
 #include <math.h>
 
 #include <boost/optional/optional_io.hpp>
+#include <boost/algorithm/string.hpp>
 #include <cmath>
+#include <vector>
 
 using namespace std;
 using namespace Utils;
@@ -637,7 +639,43 @@ unsigned int ProjectionManager::doXYPositionCalculations (
             continue;
         }
 
+        // rows without a position before the projection, the projection becomes their source
+        unsigned int buffer_size = buffer->size();
+        std::vector<bool> was_null(buffer_size, false);
+
+        for (unsigned int cnt = 0; cnt < buffer_size; ++cnt)
+            was_null[cnt] = latitude_vec.isNull(cnt) || longitude_vec.isNull(cnt);
+
         transformation_errors += doXYPositionCalculations (dbcontent_name, buffer, latitude_vec, longitude_vec);
+
+        // "Latitude*" is a selection with the projection as a candidate, record it per projected row
+        std::string source_var_name =
+            var_resolver.variableSourceVariableName(dbcontent_name, latitude_var_name, dbcontent_name);
+
+        if (source_var_name.empty())
+            continue;
+
+        std::string calculation = "xy_projection_" + boost::algorithm::to_lower_copy(current_projection_name_);
+        unsigned int candidate_index = var_resolver.variableSelectionCandidateIndex(
+            dbcontent_name, latitude_var_name, dbcontent_name, calculation);
+
+        if (!candidate_index)
+        {
+            logwrn << dbcontent_name << " '" << latitude_var_name << "' has no candidate for '"
+                   << calculation << "', source not recorded";
+            continue;
+        }
+
+        if (!buffer->has<unsigned char>(source_var_name))
+            buffer->addProperty(source_var_name, PropertyDataType::UCHAR);
+
+        NullableVector<unsigned char>& source_vec = buffer->get<unsigned char>(source_var_name);
+
+        for (unsigned int cnt = 0; cnt < buffer_size; ++cnt)
+        {
+            if (was_null[cnt] && !latitude_vec.isNull(cnt) && !longitude_vec.isNull(cnt))
+                source_vec.set(cnt, candidate_index);
+        }
     }
 
     return transformation_errors;

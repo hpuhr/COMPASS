@@ -125,7 +125,7 @@ class VariableSelectionDialog : public QDialog
                                const std::string& host_dbcontent_name);
     void addVariableRows(QStandardItem* content_item, const std::string& content_name,
                          bool group_content_by_group);
-    std::string dataItemOf(const std::string& source) const;
+    std::string dataItemOf(const Variable* variable) const;
 
     DBContentManager& dbcont_man_;
     Settings settings_;
