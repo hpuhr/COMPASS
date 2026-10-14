@@ -164,6 +164,9 @@ void LabelPlacementEngine::revertPlacements()
  */
 bool LabelPlacementEngine::placeLabels()
 {
+    time_exhausted_  = false;
+    num_overcrowded_ = 0;
+
     bool ok = false;
     if (settings_.method == Method::ForceBasedSimple ||
         settings_.method == Method::ForceBasedExtended ||
@@ -172,7 +175,13 @@ bool LabelPlacementEngine::placeLabels()
     else if (settings_.method == Method::ForceBasedExact)
         ok = label_placement::force_exact::placeLabels(labels_, settings_);
     else if (settings_.method == Method::ConstraintBased)
-        ok = label_placement::constraint::placeLabels(labels_, settings_);
+    {
+        label_placement::constraint::Stats stats;
+        ok = label_placement::constraint::placeLabels(labels_, settings_, &stats);
+
+        time_exhausted_  = stats.time_exhausted;
+        num_overcrowded_ = (size_t)stats.overcrowded;
+    }
     else
         return false; //unknown method
 

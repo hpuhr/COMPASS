@@ -179,6 +179,10 @@ namespace label_placement
         int    cs_max_rounds    = 20;    //max rounds of constraint generation (new overlaps after solving)
         double cs_weight_prev   = 0.0;   //weight of the distance from the previous placement relative to the distance
                                          //  from home (0 = off; smoothness between runs, costs locality)
+        double cs_max_time_ms   = 0.0;   //runtime limit in ms (0 = unlimited): when reached, the last complete state is
+                                         //  returned (see constraint::placeLabels())
+        double cs_max_group_density = 0.0; //groups of labels with overlapping homes above this density (label area relative
+                                           //  to the area around their anchors) are not decluttered (0 = off)
 
         bool verbose = false;
 

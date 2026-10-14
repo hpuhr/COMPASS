@@ -32,12 +32,8 @@ class LabelContentDialog : public QDialog
 {
     Q_OBJECT
 
-signals:
-    void doneSignal();
-
 public slots:
     void selectedVarChangedSlot();
-    void doneClickedSlot();
 
 public:
     LabelContentDialog(const std::string& dbcontent_name, LabelGenerator& label_generator);

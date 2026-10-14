@@ -21,9 +21,11 @@
 #include "labelplacement_defs.h"
 
 #include <vector>
+#include <chrono>
 #include <cmath>
 #include <algorithm>
 #include <limits>
+#include <numeric>
 
 #include <QRectF>
 #include <QLineF>
@@ -49,6 +51,36 @@ namespace constraint
         Right, //second left of first
         Up,    //first above second
         Down   //second above first
+    };
+
+    /**
+     * Runtime limit of a placement run, checked between interruptible steps.
+     */
+    class Deadline
+    {
+    public:
+        explicit Deadline(double max_ms)
+        :   start_ (Clock::now())
+        ,   max_ms_(max_ms)
+        {
+        }
+
+        bool active() const { return max_ms_ > 0.0; }
+        bool expired() const { return active() && elapsedMS() >= max_ms_; }
+
+        //true if a step of the given duration would not end before the limit
+        bool exceededBy(double step_ms) const { return active() && elapsedMS() + step_ms >= max_ms_; }
+
+        double elapsedMS() const
+        {
+            return std::chrono::duration<double, std::milli>(Clock::now() - start_).count();
+        }
+
+    private:
+        typedef std::chrono::steady_clock Clock;
+
+        Clock::time_point start_;
+        double            max_ms_ = 0.0; // 0 = unlimited
     };
 
     /**
@@ -108,22 +140,41 @@ namespace constraint
             mark_.assign(n, 0);
         }
 
-        /**
-         * Returns false if the solution is not optimal and feasible (cyclic constraints, split limit).
-         */
-        bool solve(std::vector<double>& v)
+        enum class Status
         {
-            bool ok = satisfy() && refine();
+            Optimal,    // optimal and feasible
+            NotOptimal, // cyclic constraints, split limit (positions set, possibly infeasible)
+            Feasible,   // stopped by the deadline while optimizing: feasible, not optimal (positions set)
+            Expired     // stopped by the deadline before feasible (positions not set)
+        };
+
+        /**
+         * Solves, checking the given deadline between the merge and split steps.
+         */
+        Status solve(std::vector<double>& v, const Deadline* deadline = nullptr)
+        {
+            deadline_ = deadline;
+            expired_  = false;
+
+            const bool satisfied = satisfy();
+            if (expired_)
+                return Status::Expired;
+
+            const bool optimal = satisfied && refine();
 
             v.resize(vars_.size());
             for (size_t i = 0; i < vars_.size(); ++i)
                 v[ i ] = position((int)i);
 
+            bool feasible = true;
             for (size_t c = 0; c < cons_.size(); ++c)
                 if (violation((int)c) > FeasibilityTolerance)
-                    ok = false;
+                    feasible = false;
 
-            return ok;
+            if (expired_)
+                return feasible ? Status::Feasible : Status::NotOptimal;
+
+            return optimal && feasible ? Status::Optimal : Status::NotOptimal;
         }
 
         static constexpr double FeasibilityTolerance = 1e-6;  // max violation of a satisfied constraint
@@ -300,7 +351,15 @@ namespace constraint
                 return false; // cycle
 
             for (int v : order)
+            {
+                if (deadline_ && deadline_->expired())
+                {
+                    expired_ = true;
+                    return false;
+                }
+
                 mergeLeft(vars_[ v ].block);
+            }
 
             return true;
         }
@@ -427,6 +486,13 @@ namespace constraint
                 if (++splits > max_splits)
                     return false;
 
+                //stopped between splits => still feasible
+                if (deadline_ && deadline_->expired())
+                {
+                    expired_ = true;
+                    return false;
+                }
+
                 split(b, min_c);
 
                 todo.push_back(vars_[ cons_[ min_c ].left  ].block);
@@ -442,6 +508,9 @@ namespace constraint
 
         std::vector<int> mark_;         // variable marks of split(), current mark = mark_gen_
         int              mark_gen_ = 0;
+
+        const Deadline* deadline_ = nullptr; // runtime limit of the current solve (optional)
+        bool            expired_  = false;   // the current solve was stopped by the deadline
     };
 
     /**
@@ -476,15 +545,117 @@ namespace constraint
             constraints.push_back({ a, addDummy(bound, weight), 0.0 });
         }
 
-        bool solve(std::vector<double>& v) const
+        /**
+         * Label positions in v, solved per connected component of the constraints (independent problems => same
+         * optimum as one solve), smallest first. Marks the labels of the solved components in solved (optional).
+         * When the deadline expires, the components solved so far keep their new positions, the others are left
+         * untouched (Expired; Feasible if the last component was stopped while optimizing, its positions are set).
+         */
+        AxisSolver::Status solve(std::vector<double>& v,
+                                 const Deadline* deadline = nullptr,
+                                 std::vector<char>* solved = nullptr) const
         {
-            std::vector<double> all;
+            typedef AxisSolver::Status Status;
 
-            AxisSolver solver(desired, weights, constraints);
-            bool ok = solver.solve(all);
+            const size_t nv = desired.size();
+            const size_t nl = v.size(); // labels, dummies follow
 
-            v.assign(all.begin(), all.begin() + v.size());
-            return ok;
+            //components (union-find over the constraints)
+            std::vector<int> root(nv);
+            std::iota(root.begin(), root.end(), 0);
+
+            auto find = [ & ] (int a)
+            {
+                while (root[ a ] != a)
+                    a = root[ a ] = root[ root[ a ] ];
+                return a;
+            };
+
+            for (const auto& c : constraints)
+                root[ find(c.left) ] = find(c.right);
+
+            std::vector<int> comp_index(nv, -1);
+            std::vector<std::vector<int>> comps;
+
+            for (size_t i = 0; i < nv; ++i)
+            {
+                const int r = find((int)i);
+                if (comp_index[ r ] < 0)
+                {
+                    comp_index[ r ] = (int)comps.size();
+                    comps.emplace_back();
+                }
+                comps[ comp_index[ r ] ].push_back((int)i);
+            }
+
+            std::vector<std::vector<Separation>> comp_cons(comps.size());
+            for (const auto& c : constraints)
+                comp_cons[ comp_index[ find(c.left) ] ].push_back(c);
+
+            //smallest first (stable => deterministic)
+            std::vector<size_t> order(comps.size());
+            std::iota(order.begin(), order.end(), 0);
+            std::stable_sort(order.begin(), order.end(),
+                             [ & ] (size_t a, size_t b) { return comps[ a ].size() < comps[ b ].size(); });
+
+            Status status = Status::Optimal;
+
+            std::vector<int>    local(nv, -1);
+            std::vector<double> d, w, positions;
+            std::vector<Separation> cons;
+
+            for (size_t ci : order)
+            {
+                const auto& vars = comps[ ci ];
+
+                //unconstrained variable => at its desired position
+                if (vars.size() == 1)
+                {
+                    if ((size_t)vars[ 0 ] < nl)
+                    {
+                        v[ vars[ 0 ] ] = desired[ vars[ 0 ] ];
+                        if (solved)
+                            (*solved)[ vars[ 0 ] ] = 1;
+                    }
+                    continue;
+                }
+
+                d.clear();
+                w.clear();
+                for (size_t k = 0; k < vars.size(); ++k)
+                {
+                    local[ vars[ k ] ] = (int)k;
+                    d.push_back(desired[ vars[ k ] ]);
+                    w.push_back(weights[ vars[ k ] ]);
+                }
+
+                cons.clear();
+                for (const auto& c : comp_cons[ ci ])
+                    cons.push_back({ local[ c.left ], local[ c.right ], c.gap });
+
+                AxisSolver solver(d, w, cons);
+                const Status s = solver.solve(positions, deadline);
+
+                if (s == Status::Expired)
+                    return Status::Expired;
+
+                for (size_t k = 0; k < vars.size(); ++k)
+                {
+                    if ((size_t)vars[ k ] >= nl)
+                        continue;
+
+                    v[ vars[ k ] ] = positions[ k ];
+                    if (solved)
+                        (*solved)[ vars[ k ] ] = 1;
+                }
+
+                if (s == Status::Feasible)
+                    return Status::Feasible;
+                if (s == Status::NotOptimal)
+                    status = Status::NotOptimal;
+            }
+
+            return status;
         }
 
         bool empty() const { return constraints.empty(); }
@@ -504,7 +675,10 @@ namespace constraint
     };
 
     /**
-     * Directed graph of the ordering constraints of one axis, rejects edges closing a cycle (infeasible).
+     * Directed graph of the ordering constraints of one axis, rejects edges closing a cycle (infeasible) and detects
+     * implied ones: a path from a to b implies 'a before b' with the needed separation (its first edge already
+     * separates by the size of a plus the gap, all further edges by positive amounts) => no constraint needed, the
+     * solution is unchanged (same feasible set).
      */
     class OrderGraph
     {
@@ -537,14 +711,23 @@ namespace constraint
             return false;
         }
 
-        //adds 'from' before 'to', fails if 'to' already reaches 'from'
-        bool add(int from, int to)
+        enum class AddResult
+        {
+            Added,   // new ordering
+            Implied, // 'from' already reaches 'to' (not added)
+            Cycle    // 'to' already reaches 'from' (infeasible, not added)
+        };
+
+        //adds 'from' before 'to'
+        AddResult add(int from, int to)
         {
             if (reaches(to, from))
-                return false;
+                return AddResult::Cycle;
+            if (reaches(from, to))
+                return AddResult::Implied;
 
             edges_[ from ].push_back(to);
-            return true;
+            return AddResult::Added;
         }
 
     private:
@@ -664,8 +847,9 @@ namespace constraint
      * Minimizes the overlap with the other labels, the obstacles and the area outside the region of interest;
      * leaving the candidate of the previous placement costs cs_cand_switch, leaving the reference position
      * cs_cand_penalty (fractions of the label area). Labels without a previous placement choose freely (ties =>
-     * reference position). Deterministic sweeps over the labels until no label changes. Replaces hx/hy by the chosen
-     * positions, flags labels which keep the candidate of their previous placement.
+     * reference position). Deterministic sweeps over the labels until no label changes (or the deadline expired,
+     * the current choice is kept). Replaces hx/hy by the chosen positions, flags labels which keep the candidate of
+     * their previous placement. Excluded labels (optional) are left out (they keep their reference position).
      */
     inline void chooseCandidates(const std::vector<Label>& labels,
                                  const std::vector<QRectF>& obstacles,
@@ -673,8 +857,12 @@ namespace constraint
                                  std::vector<double>& hx,
                                  std::vector<double>& hy,
                                  std::vector<char>& keeps_prev,
-                                 int* side_changes = nullptr)
+                                 int* side_changes = nullptr,
+                                 const Deadline* deadline = nullptr,
+                                 const std::vector<char>* excluded = nullptr)
     {
+        auto isExcluded = [ & ] (size_t i) { return excluded && (*excluded)[ i ]; };
+
         const size_t n = labels.size();
 
         keeps_prev.assign(n, 0);
@@ -737,9 +925,12 @@ namespace constraint
         std::vector<std::vector<int>> neighbours(n), near_obstacles(n);
         for (size_t i = 0; i < n; ++i)
         {
+            if (isExcluded(i))
+                continue;
+
             for (size_t j = i + 1; j < n; ++j)
             {
-                if (reach[ i ].intersects(reach[ j ]))
+                if (!isExcluded(j) && reach[ i ].intersects(reach[ j ]))
                 {
                     neighbours[ i ].push_back((int)j);
                     neighbours[ j ].push_back((int)i);
@@ -774,12 +965,23 @@ namespace constraint
             return c;
         };
 
-        for (int sweep = 0; sweep < settings.cs_cand_sweeps; ++sweep)
+        bool expired = false;
+
+        for (int sweep = 0; sweep < settings.cs_cand_sweeps && !expired; ++sweep)
         {
             bool changed = false;
 
             for (size_t i = 0; i < n; ++i)
             {
+                if (deadline && deadline->expired())
+                {
+                    expired = true;
+                    break;
+                }
+
+                if (isExcluded(i))
+                    continue;
+
                 int    best      = cur[ i ];
                 double best_cost = cost(i, cur[ i ]);
 
@@ -809,6 +1011,9 @@ namespace constraint
 
         for (size_t i = 0; i < n; ++i)
         {
+            if (isExcluded(i))
+                continue;
+
             const QRectF& box = cands[ i * nc + cur[ i ] ];
 
             hx[ i ] = box.left();
@@ -822,23 +1027,98 @@ namespace constraint
     }
 
     /**
+     * Density per label of its group: groups are labels with overlapping home boxes (gaps included, transitively),
+     * the density is their label area (gaps included) relative to the area of the region of their candidate
+     * positions (bounding box of the boxes around each anchor at the anchor distance of its home in all directions).
+     * A label without overlaps forms a group of its own.
+     */
+    inline std::vector<double> groupDensities(const std::vector<Label>& labels,
+                                              const std::vector<double>& hx,
+                                              const std::vector<double>& hy,
+                                              double gap_x,
+                                              double gap_y)
+    {
+        const size_t n = labels.size();
+
+        std::vector<int> root(n);
+        std::iota(root.begin(), root.end(), 0);
+
+        auto find = [ & ] (int a)
+        {
+            while (root[ a ] != a)
+                a = root[ a ] = root[ root[ a ] ];
+            return a;
+        };
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            for (size_t j = i + 1; j < n; ++j)
+            {
+                const auto& li = labels[ i ];
+                const auto& lj = labels[ j ];
+
+                if (hx[ i ] < hx[ j ] + lj.w + gap_x && hx[ j ] < hx[ i ] + li.w + gap_x &&
+                    hy[ i ] < hy[ j ] + lj.h + gap_y && hy[ j ] < hy[ i ] + li.h + gap_y)
+                    root[ find((int)i) ] = find((int)j);
+            }
+        }
+
+        std::vector<double> area(n, 0.0);
+        std::vector<QRectF> region(n);
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            const auto&  l    = labels[ i ];
+            const double dist = pointBoxDistance(l.x_anchor, l.y_anchor, QRectF(hx[ i ], hy[ i ], l.w, l.h));
+            const QRectF reach(l.x_anchor - dist - l.w, l.y_anchor - dist - l.h, 2 * (dist + l.w), 2 * (dist + l.h));
+
+            const int r = find((int)i);
+
+            area  [ r ] += (l.w + gap_x) * (l.h + gap_y);
+            region[ r ]  = region[ r ].isNull() ? reach : region[ r ] | reach;
+        }
+
+        std::vector<double> density(n, 0.0);
+        for (size_t i = 0; i < n; ++i)
+        {
+            const int    r = find((int)i);
+            const double a = region[ r ].width() * region[ r ].height();
+
+            density[ i ] = a > 0.0 ? area[ r ] / a : 0.0;
+        }
+
+        return density;
+    }
+
+    /**
      * Diagnostics of a placement run.
      */
     struct Stats
     {
-        int  rounds           = 0;     // rounds of constraint generation
-        bool rounds_exhausted = false; // new overlaps were still found in the last round
-        bool solver_converged = true;  // all axis solves optimal and feasible
-        int  unresolvable     = 0;     // overlapping pairs without an acyclic separation direction
-        int  overlaps         = 0;     // overlapping label pairs left (without gap)
-        int  side_changes     = 0;     // labels placed on another side of their anchor than before (candidates)
+        int    rounds            = 0;     // rounds of constraint generation
+        bool   rounds_exhausted  = false; // new overlaps were still found in the last round
+        bool   solver_converged  = true;  // all axis solves optimal and feasible
+        int    unresolvable      = 0;     // overlapping pairs without an acyclic separation direction
+        int    overlaps          = 0;     // overlapping label pairs left (without gap)
+        int    side_changes      = 0;     // labels placed on another side of their anchor than before (candidates)
+        int    implied           = 0;     // separations implied by others (no constraint needed)
+        int    separations       = 0;     // hard separation constraints between labels (both axes)
+        int    obstacle_bounds   = 0;     // soft bounds of obstacles (anchors, additional objects)
+        bool   time_exhausted    = false; // stopped by the runtime limit (cs_max_time_ms), last complete state returned
+        double max_group_density = 0.0;   // highest group density (only computed if cs_max_group_density is set)
+        int    overcrowded       = 0;     // labels of overcrowded groups, not decluttered (at home)
     };
 
     /**
      * Places the labels, see namespace description. Reference position = target (falls back to the initial
      * position), initial position = previous placement (only used for the separation directions).
+     * Runtime limit (cs_max_time_ms): checked in the candidate choice, between the rounds (a round is not started if
+     * the last one would not fit anymore) and in the solver. The axes are solved per component of the constraints,
+     * smallest first. When reached, the last complete state is returned: per label and axis the position of the last
+     * completed solve of its component (feasible for its constraints, also if stopped while optimizing), or the
+     * previous placement if its component was never solved.
      * Notice: Returns true unless an error occurred, also if overlaps remain (no feasible direction, too dense
-     * for the region of interest, solver limits), see stats.
+     * for the region of interest, solver limits, runtime limit), see stats.
      */
     inline bool placeLabels(std::vector<Label>& labels,
                             const Settings& settings,
@@ -847,6 +1127,8 @@ namespace constraint
         Stats tmp_stats;
         Stats& st = stats ? *stats : tmp_stats;
         st = Stats();
+
+        const Deadline deadline(settings.cs_max_time_ms);
 
         const size_t n = labels.size();
         if (n == 0)
@@ -867,6 +1149,26 @@ namespace constraint
             py[ i ] = l.y_last;
             w [ i ] = l.w;
             h [ i ] = l.h;
+        }
+
+        //overcrowded groups (much more label area than space around their anchors, e.g. local pile-ups) are not
+        //decluttered: left out of the candidate choice and the constraints, the labels stay at home (their anchors
+        //are still obstacles for the others)
+        std::vector<char> excluded(n, 0);
+        if (settings.cs_max_group_density > 0.0)
+        {
+            const auto density = groupDensities(labels, hx, hy, gap_x, gap_y);
+
+            for (size_t i = 0; i < n; ++i)
+            {
+                st.max_group_density = std::max(st.max_group_density, density[ i ]);
+
+                if (density[ i ] > settings.cs_max_group_density)
+                {
+                    excluded[ i ] = 1;
+                    ++st.overcrowded;
+                }
+            }
         }
 
         //fixed obstacles: anchors, then the additional objects
@@ -891,7 +1193,7 @@ namespace constraint
 
         //candidate positions: home on the side of the anchor with the least conflicts
         std::vector<char> keeps_prev;
-        chooseCandidates(labels, obstacles, settings, hx, hy, keeps_prev, &st.side_changes);
+        chooseCandidates(labels, obstacles, settings, hx, hy, keeps_prev, &st.side_changes, &deadline, &excluded);
 
         //labels without a valid previous placement (no history, changed sides): no previous separation sides, no
         //smoothness
@@ -927,6 +1229,9 @@ namespace constraint
 
             for (size_t i = 0; i < n; ++i)
             {
+                if (excluded[ i ])
+                    continue;
+
                 ax.addSoftLower((int)i, roi.left(),            soft);
                 ax.addSoftUpper((int)i, roi.right()  - w[ i ], soft);
                 ay.addSoftLower((int)i, roi.top(),             soft);
@@ -948,7 +1253,12 @@ namespace constraint
                    y0 < y1 + h1 + gap_y && y1 < y0 + h0 + gap_y;
         };
 
-        bool solved = false;
+        typedef AxisSolver::Status Status;
+
+        bool   solved        = false; // solved at least once
+        double last_solve_ms = 0.0;   // duration of the last solve (deadline)
+
+        std::vector<char> solved_x(n, 0), solved_y(n, 0); // labels of solved components per axis (deadline)
 
         for (int round = 0; round < settings.cs_max_rounds; ++round)
         {
@@ -957,12 +1267,21 @@ namespace constraint
             st.rounds = round + 1;
 
             //label pairs
-            for (size_t i = 0; i < n; ++i)
+            for (size_t i = 0; i < n && !st.time_exhausted; ++i)
             {
+                if (deadline.expired())
+                {
+                    st.time_exhausted = true;
+                    break;
+                }
+
+                if (excluded[ i ])
+                    continue;
+
                 for (size_t j = i + 1; j < n; ++j)
                 {
                     auto& dir = pair_dir[ i * n + j ];
-                    if (dir != None)
+                    if (dir != None || excluded[ j ])
                         continue;
 
                     if (!overlaps(x[ i ], y[ i ], w[ i ], h[ i ], x[ j ], y[ j ], w[ j ], h[ j ]))
@@ -980,29 +1299,38 @@ namespace constraint
                         const int a = (int)i;
                         const int b = (int)j;
 
-                        bool ok = false;
+                        OrderGraph::AddResult res;
 
                         if (d == Left)
-                            ok = graph_x.add(a, b);
+                            res = graph_x.add(a, b);
                         else if (d == Right)
-                            ok = graph_x.add(b, a);
+                            res = graph_x.add(b, a);
                         else if (d == Up)
-                            ok = graph_y.add(a, b);
+                            res = graph_y.add(a, b);
                         else
-                            ok = graph_y.add(b, a);
+                            res = graph_y.add(b, a);
 
-                        if (!ok)
+                        if (res == OrderGraph::AddResult::Cycle)
                             continue;
 
-                        //second - first >= size of the first + gap (hard)
-                        if (d == Left)
-                            ax.addHard(a, b, w[ i ] + gap_x);
-                        else if (d == Right)
-                            ax.addHard(b, a, w[ j ] + gap_x);
-                        else if (d == Up)
-                            ay.addHard(a, b, h[ i ] + gap_y);
+                        //second - first >= size of the first + gap (hard), not needed if implied by others
+                        if (res == OrderGraph::AddResult::Implied)
+                        {
+                            ++st.implied;
+                        }
                         else
-                            ay.addHard(b, a, h[ j ] + gap_y);
+                        {
+                            if (d == Left)
+                                ax.addHard(a, b, w[ i ] + gap_x);
+                            else if (d == Right)
+                                ax.addHard(b, a, w[ j ] + gap_x);
+                            else if (d == Up)
+                                ay.addHard(a, b, h[ i ] + gap_y);
+                            else
+                                ay.addHard(b, a, h[ j ] + gap_y);
+
+                            ++st.separations;
+                        }
 
                         dir   = (signed char)d;
                         added = true;
@@ -1012,8 +1340,17 @@ namespace constraint
             }
 
             //labels vs obstacles
-            for (size_t i = 0; i < n; ++i)
+            for (size_t i = 0; i < n && !st.time_exhausted; ++i)
             {
+                if (deadline.expired())
+                {
+                    st.time_exhausted = true;
+                    break;
+                }
+
+                if (excluded[ i ])
+                    continue;
+
                 for (size_t o = 0; o < no; ++o)
                 {
                     auto& dir = obstacle_dir[ i * no + o ];
@@ -1046,24 +1383,71 @@ namespace constraint
                     else
                         ay.addSoftLower(a, ob.top() + ob.height() + gap_y,  wo);
 
+                    ++st.obstacle_bounds;
+
                     dir   = (signed char)d;
                     added = true;
                 }
             }
 
+            if (st.time_exhausted)
+                break;
+
             //no new overlaps => done (but solve at least once if there are constraints, e.g. the region of interest)
             if (!added && (solved || (ax.empty() && ay.empty())))
                 break;
 
+            //another solve would not end before the deadline (estimated by the last one)
+            if (solved && deadline.exceededBy(last_solve_ms))
+            {
+                st.time_exhausted = true;
+                break;
+            }
+
             st.rounds_exhausted = added && round + 1 == settings.cs_max_rounds;
 
-            //minimal displacement from the reference positions per axis
-            if (!ax.solve(x))
-                st.solver_converged = false;
-            if (!ay.solve(y))
+            //minimal displacement from the reference positions per axis (per component, smallest first); components
+            //not solved before the deadline keep the positions of their last completed solve
+            const double solve_start = deadline.elapsedMS();
+
+            const Status sx = ax.solve(x, &deadline, &solved_x);
+            const Status sy = sx == Status::Expired ? Status::Expired : ay.solve(y, &deadline, &solved_y);
+
+            if (sx == Status::NotOptimal || sy == Status::NotOptimal)
                 st.solver_converged = false;
 
             solved = true;
+
+            last_solve_ms = deadline.elapsedMS() - solve_start;
+
+            if (sx == Status::Feasible || sx == Status::Expired ||
+                sy == Status::Feasible || sy == Status::Expired)
+            {
+                st.time_exhausted = true;
+                break;
+            }
+        }
+
+        //runtime limit before a label's component was solved => previous placement (home for labels without one)
+        if (st.time_exhausted)
+        {
+            for (size_t i = 0; i < n; ++i)
+            {
+                if (!solved_x[ i ])
+                    x[ i ] = px[ i ];
+                if (!solved_y[ i ])
+                    y[ i ] = py[ i ];
+            }
+        }
+
+        //overcrowded => home
+        for (size_t i = 0; i < n; ++i)
+        {
+            if (!excluded[ i ])
+                continue;
+
+            x[ i ] = hx[ i ];
+            y[ i ] = hy[ i ];
         }
 
         for (size_t i = 0; i < n; ++i)

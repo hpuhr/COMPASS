@@ -21,6 +21,7 @@
 #include "json_fwd.hpp"
 #include "labeldirection.h"
 #include "labelsettings.h"
+#include "labelplacement_defs.h"
 
 //#include <osg/Matrixd>
 
@@ -41,7 +42,6 @@ class NullableVector;
 namespace dbContent
 {
 
-class LabelContentDialog;
 class VariableSet;
 
 /**
@@ -58,9 +58,6 @@ signals:
     void labelClearAllSignal();
     void labelOpacityChangedSignal(); // only the label display needs a refresh
     //void configChanged();
-
-public slots:
-    void editLabelContentsDoneSlot();
 
 public:
     /**
@@ -191,8 +188,7 @@ public:
     bool showDeclutteringInfoOnce() const;
     void showDeclutteringInfoOnce(bool value);
 
-    unsigned int maxDeclutterlabels() const;
-    float maxDeclutterScreenRatio() const;
+    unsigned int maxDeclutterLabels() const;
 
     bool filterPrimaryOnlyActive() const;
     void filterPrimaryOnlyActive(bool value);
@@ -212,7 +208,12 @@ public:
 
     DBContentManager& dbContentManager() { return dbcont_manager_; }
 
-    static const int LabelAnchorLengthPxDefault;
+    static const int          LabelAnchorLengthPxDefault;
+    static const float        MaxTransparency;                   // max transparency of the label background selectable in the ui
+    static const unsigned int MaxDeclutterLabels;                // no decluttering above this number of visible labels
+    static const unsigned int MaxDeclutterLabelsConstraintBased; // the same for the constraint based method
+    static const float        MaxDeclutterScreenRatio;           // no decluttering if the labels cover more of the screen
+                                                                 // (0 = no limit)
 
 protected:
     //virtual void checkSubConfigurables();
@@ -250,6 +251,8 @@ protected:
 
     bool show_decluttering_info_once_ {false};
 
+    label_placement::Method label_placement_method_ {label_placement::Method::ConstraintBased}; // not part of the config
+
     float auto_lod_value_ {1}; // runtime lod adjusted by auto lod, not part of the config (1...3, float for filter function)
 
     float label_distance_ {0.5}; // 0 ... 1
@@ -277,7 +280,6 @@ protected:
     uint64_t config_generation_ {0}; // see configGeneration()
 
     //std::set<GeometryLeafItemLabels*> item_labels_;
-    std::unique_ptr<LabelContentDialog> label_edit_dialog_;
 };
 
 }

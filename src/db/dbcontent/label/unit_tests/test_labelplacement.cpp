@@ -590,13 +590,15 @@ TEST_CASE("Constraint based placement axis solver", "[labelplacement]")
     using label_placement::constraint::AxisSolver;
     using label_placement::constraint::Separation;
 
+    const auto Optimal = AxisSolver::Status::Optimal;
+
     std::vector<double> v;
 
     SECTION("a violated constraint is split by the weights")
     {
         //min (a - 0)^2 + 3 (b - 0)^2 with b - a >= 10 => a = -7.5, b = 2.5
         AxisSolver solver({ 0.0, 0.0 }, { 1.0, 3.0 }, { { 0, 1, 10.0 } });
-        REQUIRE(solver.solve(v));
+        REQUIRE(solver.solve(v) == Optimal);
 
         REQUIRE(v[ 0 ] == Approx(-7.5));
         REQUIRE(v[ 1 ] == Approx(2.5));
@@ -605,7 +607,7 @@ TEST_CASE("Constraint based placement axis solver", "[labelplacement]")
     SECTION("a satisfied constraint does not move anything")
     {
         AxisSolver solver({ 0.0, 20.0 }, { 1.0, 1.0 }, { { 0, 1, 10.0 } });
-        REQUIRE(solver.solve(v));
+        REQUIRE(solver.solve(v) == Optimal);
 
         REQUIRE(v[ 0 ] == Approx(0.0));
         REQUIRE(v[ 1 ] == Approx(20.0));
@@ -616,7 +618,7 @@ TEST_CASE("Constraint based placement axis solver", "[labelplacement]")
         //a and b are merged first, then the heavy c pulls the block far left => b's multiplier is negative, b is
         //split off and stays at its desired position; a and c: min a^2 + 10 (c + 100)^2 with a <= c => -1000 / 11
         AxisSolver solver({ 0.0, 0.0, -100.0 }, { 1.0, 1.0, 10.0 }, { { 0, 1, 10.0 }, { 0, 2, 0.0 } });
-        REQUIRE(solver.solve(v));
+        REQUIRE(solver.solve(v) == Optimal);
 
         REQUIRE(v[ 0 ] == Approx(-1000.0 / 11.0));
         REQUIRE(v[ 1 ] == Approx(0.0).margin(1e-9));
@@ -626,7 +628,7 @@ TEST_CASE("Constraint based placement axis solver", "[labelplacement]")
     SECTION("cyclic constraints are reported")
     {
         AxisSolver solver({ 0.0, 0.0 }, { 1.0, 1.0 }, { { 0, 1, 10.0 }, { 1, 0, 10.0 } });
-        REQUIRE(!solver.solve(v));
+        REQUIRE(solver.solve(v) == AxisSolver::Status::NotOptimal);
     }
 
     SECTION("random problems: same optimum as the reference solver")
@@ -672,7 +674,7 @@ TEST_CASE("Constraint based placement axis solver", "[labelplacement]")
             CAPTURE(problem);
 
             AxisSolver solver(desired, weights, constraints);
-            REQUIRE(solver.solve(v));
+            REQUIRE(solver.solve(v) == Optimal);
 
             const auto ref = referenceSolve(desired, weights, constraints);
 
@@ -725,7 +727,158 @@ TEST_CASE("Constraint based placement of an overcrowded cluster", "[labelplaceme
 
     REQUIRE(stats.solver_converged);
     REQUIRE(!stats.rounds_exhausted);
+    REQUIRE(!stats.time_exhausted); // no limit by default
     REQUIRE(stats.overlaps == 0);
+}
+
+TEST_CASE("Constraint based placement implied separations and runtime limit", "[labelplacement]")
+{
+    label_placement::Settings settings;
+    settings.method = label_placement::Method::ConstraintBased;
+
+    SECTION("a separation implied by others adds no constraint")
+    {
+        //tall labels in a row (horizontal separation cheapest): 1 left of 0 (pair 0-1), 0 left of 2 (pair 0-2)
+        //=> 1 left of 2 (pair 1-2, checked last) is implied
+        std::vector<label_placement::Label> labels(3);
+
+        const double xs[ 3 ] = { 4.0, 0.0, 8.0 };
+        for (size_t i = 0; i < labels.size(); ++i)
+        {
+            auto& l = labels[ i ];
+
+            l.id       = std::to_string(i);
+            l.w        = 16.0;
+            l.h        = 60.0;
+            l.x_anchor = xs[ i ];
+            l.y_anchor = 200.0;
+            l.x        = l.x_last = xs[ i ];
+            l.y        = l.y_last = 100.0;
+            l.x_ref    = l.x;
+            l.y_ref    = l.y;
+        }
+
+        label_placement::constraint::Stats stats;
+        REQUIRE(label_placement::constraint::placeLabels(labels, settings, &stats));
+
+        REQUIRE(stats.implied     == 1);
+        REQUIRE(stats.separations == 2);
+        REQUIRE(stats.overlaps    == 0);
+
+        //order and gaps hold (the implied one too)
+        REQUIRE(labels[ 0 ].x - labels[ 1 ].x >= 16.0 + settings.cs_gap_x - 1e-6);
+        REQUIRE(labels[ 2 ].x - labels[ 0 ].x >= 16.0 + settings.cs_gap_x - 1e-6);
+        REQUIRE(labels[ 2 ].x - labels[ 1 ].x >= 16.0 + settings.cs_gap_x - 1e-6);
+    }
+
+    SECTION("a runtime limit stops the placement, the previous placement is kept")
+    {
+        //overlapping cluster, previous placement = home
+        std::mt19937 rng(7);
+        std::uniform_real_distribution<double> ux(650.0, 750.0), uy(400.0, 460.0);
+
+        std::vector<label_placement::Label> labels(50);
+        for (size_t i = 0; i < labels.size(); ++i)
+        {
+            auto& l = labels[ i ];
+
+            l.id       = std::to_string(i);
+            l.w        = 60.0;
+            l.h        = 16.0;
+            l.x_anchor = ux(rng);
+            l.y_anchor = uy(rng);
+            l.x        = l.x_last = l.x_anchor + 14.0;
+            l.y        = l.y_last = l.y_anchor - 30.0;
+            l.x_ref    = l.x;
+            l.y_ref    = l.y;
+        }
+
+        //expired before the first solve
+        settings.cs_max_time_ms = 1e-6;
+
+        label_placement::constraint::Stats stats;
+        REQUIRE(label_placement::constraint::placeLabels(labels, settings, &stats));
+
+        REQUIRE(stats.time_exhausted);
+
+        for (const auto& l : labels)
+        {
+            REQUIRE(l.x == l.x_last);
+            REQUIRE(l.y == l.y_last);
+        }
+    }
+}
+
+TEST_CASE("Constraint based placement of overcrowded groups", "[labelplacement]")
+{
+    //20 labels at the same anchor (pile-up) and a label far away
+    std::vector<label_placement::Label> labels(21);
+    for (size_t i = 0; i < labels.size(); ++i)
+    {
+        auto& l = labels[ i ];
+
+        const double ax = i < 20 ? 400.0 : 1200.0;
+
+        l.id       = std::to_string(i);
+        l.w        = 60.0;
+        l.h        = 16.0;
+        l.x_anchor = ax;
+        l.y_anchor = 400.0;
+        l.x        = l.x_last = ax + 14.0;
+        l.y        = l.y_last = 400.0 - 30.0;
+        l.x_ref    = l.x;
+        l.y_ref    = l.y;
+    }
+
+    SECTION("group densities: the pile-up needs much more space than available, the single label not")
+    {
+        std::vector<double> hx, hy;
+        for (const auto& l : labels)
+        {
+            hx.push_back(l.x_last);
+            hy.push_back(l.y_last);
+        }
+
+        const auto density = label_placement::constraint::groupDensities(labels, hx, hy, 2.0, 2.0);
+
+        REQUIRE(density[ 0 ]  > 1.0);
+        REQUIRE(density[ 19 ] == Approx(density[ 0 ]));
+        REQUIRE(density[ 20 ] < 0.5);
+    }
+
+    SECTION("an overcrowded group is not decluttered, the others are")
+    {
+        label_placement::Settings settings;
+        settings.method               = label_placement::Method::ConstraintBased;
+        settings.cs_max_group_density = 1.0;
+
+        label_placement::constraint::Stats stats;
+        REQUIRE(label_placement::constraint::placeLabels(labels, settings, &stats));
+
+        REQUIRE(stats.overcrowded == 20);
+        REQUIRE(stats.max_group_density > 1.0);
+        REQUIRE(stats.separations == 0);
+
+        //at home
+        for (const auto& l : labels)
+        {
+            REQUIRE(l.x == Approx(l.x_ref.value()));
+            REQUIRE(l.y == Approx(l.y_ref.value()));
+        }
+    }
+
+    SECTION("without the threshold the pile-up is decluttered")
+    {
+        label_placement::Settings settings;
+        settings.method = label_placement::Method::ConstraintBased;
+
+        label_placement::constraint::Stats stats;
+        REQUIRE(label_placement::constraint::placeLabels(labels, settings, &stats));
+
+        REQUIRE(stats.overcrowded == 0);
+        REQUIRE(stats.separations > 0);
+        REQUIRE(stats.overlaps == 0);
+    }
 }
 
 TEST_CASE("LabelPlacementEngine label lookup after removal", "[labelplacement]")

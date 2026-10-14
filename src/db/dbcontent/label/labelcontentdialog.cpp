@@ -54,7 +54,7 @@ LabelContentDialog::LabelContentDialog(const std::string& dbcontent_name, LabelG
     QHBoxLayout* button_layout = new QHBoxLayout();
 
     done_button_ = new QPushButton("Done");
-    connect(done_button_, &QPushButton::clicked, this, &LabelContentDialog::doneClickedSlot);
+    connect(done_button_, &QPushButton::clicked, this, &QDialog::accept);
     button_layout->addWidget(done_button_);
 
     main_layout->addLayout(button_layout);
@@ -90,11 +90,6 @@ void LabelContentDialog::selectedVarChangedSlot()
         if (dbcont_def.count(to_string(key)))
             dbcont_def.erase(to_string(key));
     }
-}
-
-void LabelContentDialog::doneClickedSlot()
-{
-    emit doneSignal();
 }
 
 void LabelContentDialog::createVariableGrid()

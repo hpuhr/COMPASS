@@ -49,7 +49,11 @@ using namespace Utils;
 namespace dbContent
 {
 
-const int LabelGenerator::LabelAnchorLengthPxDefault = 20;
+const int          LabelGenerator::LabelAnchorLengthPxDefault        = 20;
+const float        LabelGenerator::MaxTransparency                   = 0.67f;
+const unsigned int LabelGenerator::MaxDeclutterLabels                = 200;
+const unsigned int LabelGenerator::MaxDeclutterLabelsConstraintBased = 500;
+const float        LabelGenerator::MaxDeclutterScreenRatio           = 0.4f;
 
 LabelGenerator::LabelGenerator(DBContentManager& manager)
     : dbcont_manager_(manager)
@@ -1387,14 +1391,23 @@ void LabelGenerator::labelDirection (unsigned int ds_id, LabelDirection directio
 
 void LabelGenerator::editLabelContents(const std::string& dbcontent_name)
 {
-    traced_assert(!label_edit_dialog_);
+    // created on demand and modal (no second one can be opened meanwhile), applied on "Done"
+    LabelContentDialog dialog(dbcontent_name, *this);
 
-    label_edit_dialog_.reset(new LabelContentDialog(dbcontent_name, *this));
+    if (dialog.exec() != QDialog::Accepted)
+        return;
 
-    connect(label_edit_dialog_.get(), &LabelContentDialog::doneSignal,
-            this, &LabelGenerator::editLabelContentsDoneSlot);
+    auto cfg_new = dialog.labelConfig();
 
-    label_edit_dialog_->show();
+    bool changed = config_.label_config_ != cfg_new;
+
+    config_.label_config_ = cfg_new;
+
+    if (changed)
+    {
+        emit labelConfigChanged();
+        emit labelContentsChangedSignal(); // emit after assignment, receivers regenerate texts
+    }
 }
 
 unsigned int LabelGenerator::labelLine (unsigned int ds_id) // returns 0...3
@@ -1511,32 +1524,6 @@ void LabelGenerator::updateAvailableLabelLines()
         emit labelLinesChangedSignal();
         emit labelOptionsChangedSignal(); // emit once for all changed lines
     }
-}
-
-void LabelGenerator::editLabelContentsDoneSlot()
-{
-    loginf;
-
-    traced_assert(label_edit_dialog_);
-
-    auto cfg_new = label_edit_dialog_->labelConfig();
-
-    bool changed = config_.label_config_ != cfg_new;
-
-    config_.label_config_ = cfg_new;
-
-    if (changed)
-    {
-        emit labelConfigChanged();
-        emit labelContentsChangedSignal(); // emit after assignment, receivers regenerate texts
-    }
-
-    label_edit_dialog_->close();
-
-    // this slot runs from the dialog's own doneSignal, i.e. while the
-    // dialog's button-click handling is still on the stack: destroy it
-    // deferred instead of synchronously via the unique_ptr reset
-    label_edit_dialog_.release()->deleteLater();
 }
 
 nlohmann::json LabelGenerator::labelConfig() const
@@ -1683,17 +1670,17 @@ void LabelGenerator::declutterLabels(bool declutter_labels)
 
 label_placement::Method LabelGenerator::labelPlacementMethod() const
 {
-    return (label_placement::Method)config_.label_placement_method_;
+    return label_placement_method_;
 }
 
 void LabelGenerator::labelPlacementMethod(label_placement::Method method)
 {
     loginf << "value " << (int)method;
 
-    if (config_.label_placement_method_ == (int)method)
+    if (label_placement_method_ == method)
         return;
 
-    config_.label_placement_method_ = (int)method;
+    label_placement_method_ = method;
 
     emit labelConfigChanged();
     emit labelOptionsChangedSignal(); // updates
@@ -1709,14 +1696,11 @@ void LabelGenerator::showDeclutteringInfoOnce(bool show_decluttering_info_once)
     show_decluttering_info_once_ = show_decluttering_info_once;
 }
 
-unsigned int LabelGenerator::maxDeclutterlabels() const
+unsigned int LabelGenerator::maxDeclutterLabels() const
 {
-    return config_.max_declutter_labels_;
-}
-
-float LabelGenerator::maxDeclutterScreenRatio() const
-{
-    return config_.max_declutter_screen_ratio_;
+    // the constraint based method places more labels in the same time (measured: 500 labels ~13 ms on real data)
+    return label_placement_method_ == label_placement::Method::ConstraintBased ? MaxDeclutterLabelsConstraintBased
+                                                                               : MaxDeclutterLabels;
 }
 
 bool LabelGenerator::filterPrimaryOnlyActive() const

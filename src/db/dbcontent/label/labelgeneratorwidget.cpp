@@ -19,11 +19,14 @@
 #include "dbcontent/label/labelgenerator.h"
 #include "dbcontent/label/labeldswidget.h"
 #include "dbcontentmanager.h"
+#include "dbcontent.h"
 #include "compass.h"
 #include "logger.h"
 #include "files.h"
 #include "gui/rangeedit.h"
 #include "textfielddoublevalidator.h"
+
+#include <algorithm>
 
 #include <QFormLayout>
 #include <QComboBox>
@@ -83,7 +86,9 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
     opacity_slider->setMinimum(0);
     opacity_slider->setMaximum(100);
     opacity_slider->setSingleStep(1);
-    opacity_slider->setSliderPosition((1.0 - label_generator_.labelOpacity()) * 100);
+    // slider = transparency, max position = LabelGenerator::MaxTransparency (the slider limits the opacity)
+    const int opacity_pos = qRound((1.0 - label_generator_.labelOpacity()) / LabelGenerator::MaxTransparency * 100);
+    opacity_slider->setSliderPosition(std::clamp(opacity_pos, 0, 100));
     opacity_slider->setMaximumWidth(100);
 
     connect (opacity_slider, &QSlider::valueChanged,
@@ -120,6 +125,9 @@ LabelGeneratorWidget::LabelGeneratorWidget(LabelGenerator& label_generator)
         placement_box->addItem("Constraint Based", (int)label_placement::Method::ConstraintBased);
         placement_box->setCurrentIndex(placement_box->findData((int)label_generator_.labelPlacementMethod()));
         placement_box->setToolTip("Label placement method");
+
+        //@TODO hidden for now (constraint based method only), remove this line to select the method again
+        placement_box->setVisible(false);
 
         connect(placement_box, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
                 [ this, placement_box ] (int index)
@@ -297,31 +305,36 @@ void LabelGeneratorWidget::editSettingsSlot()
 {
     QMenu menu;
 
-    QAction* action_all = new QAction("Label All", this);
+    //actions and submenu are owned by the menu
+    QAction* action_all = menu.addAction("Select All Data Sources");
     connect (action_all, &QAction::triggered, this, &LabelGeneratorWidget::labelAllDSSlot);
-    menu.addAction(action_all);
 
-    QAction* action_none = new QAction("Label None", this);
+    QAction* action_none = menu.addAction("Deselect All Data Sources");
     connect (action_none, &QAction::triggered, this, &LabelGeneratorWidget::labelNoDSSlot);
-    menu.addAction(action_none);
 
     menu.addSeparator();
 
-    QAction* action_utn = new QAction("Use UTN as Identification", this);
+    QAction* action_utn = menu.addAction("Use UTN as Identification");
     action_utn->setCheckable(true);
     action_utn->setChecked(label_generator_.useUTN());
     connect (action_utn, &QAction::triggered, this, &LabelGeneratorWidget::toggleUseUTNSlot);
-    menu.addAction(action_utn);
 
     menu.addSeparator();
 
+    //label contents of the dbcontents with target reports
+    QMenu* edit_menu = menu.addMenu("Edit Contents");
+
     for (auto& db_cont_it : label_generator_.dbContentManager())
     {
-        QAction* action = new QAction(("Edit "+db_cont_it.first).c_str(), this);
+        if (!db_cont_it.second->containsTargetReports())
+            continue;
+
+        QAction* action = edit_menu->addAction(QString::fromStdString(db_cont_it.first));
         connect (action, &QAction::triggered, this, &LabelGeneratorWidget::editDBContentSlot);
         action->setProperty("dbcontent_name", db_cont_it.first.c_str());
-        menu.addAction(action);
     }
+
+    edit_menu->setEnabled(!edit_menu->actions().isEmpty());
 
     menu.exec(QCursor::pos());
 }
@@ -505,7 +518,7 @@ void LabelGeneratorWidget::opacitySliderChangedSlot(int value)
 {
     logdbg << "value " << value;
 
-    float new_op = 1 - ((float) value) / 100.0;
+    float new_op = 1 - ((float) value) / 100.0 * LabelGenerator::MaxTransparency;
 
     logdbg << "new_op " << new_op;
 

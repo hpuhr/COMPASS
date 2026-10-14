@@ -18,7 +18,6 @@
 #pragma once
 
 #include "json.hpp"
-#include "labelplacement_defs.h"
 
 namespace dbContent
 {
@@ -35,9 +34,6 @@ struct LabelGeneratorConfig
     nlohmann::json label_ds_ids_; // dsid str -> label flag
 
     bool declutter_labels_ {true};
-    unsigned int max_declutter_labels_ {200};
-    float max_declutter_screen_ratio_ {0.4f}; // max share of the screen covered by the labels to declutter (0 = no limit)
-    int label_placement_method_ {(int)label_placement::Method::ConstraintBased}; // label_placement::Method
 
     bool filter_mode3a_active_;
     std::string filter_mode3a_values_;

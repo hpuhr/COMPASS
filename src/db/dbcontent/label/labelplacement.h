@@ -110,8 +110,10 @@ public:
     void clearLabels();
 
     bool placeLabels();
+    bool   timeExhausted() const { return time_exhausted_; }   // last placement stopped by the runtime limit
+    size_t numOvercrowded() const { return num_overcrowded_; } // labels of overcrowded groups in the last placement
 
-    Settings& settings() { return settings_; } 
+    Settings& settings() { return settings_; }
 
     void showData(const TestConfig& test_config) const;
     void runTest(const TestConfig& test_config) const;
@@ -131,4 +133,6 @@ private:
     std::map<std::string, size_t> label_map_;
 
     Settings                      settings_;
+    bool                          time_exhausted_  = false; // see timeExhausted()
+    size_t                        num_overcrowded_ = 0;     // see numOvercrowded()
 };
