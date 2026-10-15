@@ -253,9 +253,10 @@ void ViewScreenshotDialog::generateScreenshots()
         preview = preview_img;
     };
 
-    //obtain screenshots
-    screener_data_ = view_->renderData();
-    screener_view_ = view_->renderView();
+    //obtain screenshots, opaque: an OpenGL framebuffer keeps the alpha of blended drawables,
+    //viewers would show such pixels faded over their background instead of as on screen
+    screener_data_ = view_->renderData().convertToFormat(QImage::Format_RGB32);
+    screener_view_ = view_->renderView().convertToFormat(QImage::Format_RGB32);
 
     //create preview versions
     createPreview(preview_data_, screener_data_);
