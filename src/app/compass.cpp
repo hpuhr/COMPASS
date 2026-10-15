@@ -1052,6 +1052,12 @@ void COMPASS::shutdown()
 
     traced_assert(db_interface_);
 
+    // Views still ask the managers below while their widgets are torn down, e.g. a Table View
+    // header reads the display names from the DBContent manager. So close the views first.
+    traced_assert(view_manager_);
+    view_manager_->close();
+    view_manager_ = nullptr;
+
     context_manager_ = nullptr;
 
     traced_assert(dbcontent_manager_);
@@ -1062,10 +1068,6 @@ void COMPASS::shutdown()
     traced_assert(eval_manager_);
     eval_manager_->close();
     eval_manager_ = nullptr;
-
-    traced_assert(view_manager_);
-    view_manager_->close();
-    view_manager_ = nullptr;
 
 #if USE_EXPERIMENTAL_SOURCE == true
     // Release cached textures, retired GL contexts, and drain osgEarth's
