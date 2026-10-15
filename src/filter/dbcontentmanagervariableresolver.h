@@ -79,6 +79,10 @@ public:
                                                  const std::string& var_name,
                                                  const std::string& var_dbcontent_name,
                                                  const std::string& calculation) const override;
+    std::vector<std::string> variableSelectionCandidateVariables(
+        const std::string& dbcontent_name,
+        const std::string& var_name,
+        const std::string& var_dbcontent_name) const override;
     PropertyDataType variableDataType(const std::string& dbcontent_name,
                                       const std::string& var_name,
                                       const std::string& var_dbcontent_name) const override;

@@ -59,6 +59,13 @@ public:
     template <typename T>
     NullableVector<T>& getMetaVar(const std::string& dbcontent_name, const Property& metavar_property);
 
+    /// see DBContentVariableLookup::metaVarIsSelection()
+    bool metaVarIsSelection(const std::string& dbcontent_name, const Property& metavar_property) const
+    {
+        return dbcontent_lookup_.count(dbcontent_name)
+               && dbcontent_lookup_.at(dbcontent_name)->metaVarIsSelection(metavar_property);
+    }
+
     using BufferIterator = typename std::map<std::string, std::shared_ptr<Buffer>>::iterator;
     BufferIterator begin() { return buffers_.begin(); }
     BufferIterator end() { return buffers_.end(); }

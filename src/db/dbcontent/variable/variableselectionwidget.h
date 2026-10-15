@@ -86,6 +86,9 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
 
     void setReadOnly(bool read_only);
 
+    /// soft limit of the shown variable name, see Variable::displayName(), 24 by default
+    void setLabelMaxChars(unsigned int max_chars);
+
     virtual boost::optional<QString> uiGet(const QString& what = QString()) const override;
     virtual bool uiSet(const QString& str) override;
     virtual QWidget* uiRerouteToNative() const override;
@@ -100,7 +103,7 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
     // the selection, the labels show the brief display name of it, see Variable::displayName()
     std::string selected_object_name_;
     std::string selected_variable_name_;
-    static const unsigned int LabelMaxChars = 24;
+    unsigned int label_max_chars_{24};
 
     bool variable_selected_{false};
     bool meta_variable_selected_{false};

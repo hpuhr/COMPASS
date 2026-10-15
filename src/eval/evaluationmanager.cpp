@@ -491,14 +491,8 @@ void EvaluationManager::addVariables (const std::string dbcontent_name, dbConten
     if (dbcontent_man.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_mc_v_))
         read_set.add(dbcontent_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_mc_v_));
 
-    //if (settings_.dbcontent_name_ref_ == dbcontent_name && settings_.dbcontent_name_ref_ == "CAT062")
-
-    // flight level trusted
-    if (dbcontent_name == "CAT062")
-    {
-        read_set.add(dbcontent_man.getVariable("CAT062", dbcontent_vars::var_cat062_baro_alt_));
-        read_set.add(dbcontent_man.getVariable("CAT062", dbcontent_vars::var_cat062_fl_measured_));
-    }
+    // the CAT062 Mode C is the selection "Mode C Code" over I062/340, I062/135 and I062/136,
+    // reached through the Meta Variable above
 
     // CAT021 time stamps for the ADS-B Latency requirement
     if (dbcontent_name == "CAT021")

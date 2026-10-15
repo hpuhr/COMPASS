@@ -309,16 +309,9 @@ dbContent::TargetPosition Chain::pos(const DataID& id) const
 
     NullableVector<double>& latitude_vec  = accessor_->getMetaVar<double>(dbcontent_name_, dbcontent_vars::meta_var_latitude_);
     NullableVector<double>& longitude_vec = accessor_->getMetaVar<double>(dbcontent_name_, dbcontent_vars::meta_var_longitude_);
+    // the Mode C Meta Variable, CAT062 is the selection "Mode C Code" over I062/340 when
+    // valid and not garbled, I062/135 and I062/136
     NullableVector<float>& altitude_vec   = accessor_->getMetaVar<float>(dbcontent_name_, dbcontent_vars::meta_var_mc_);
-
-    NullableVector<float>* altitude_trusted_vec {nullptr};
-    NullableVector<float>* altitude_secondary_vec {nullptr};
-
-    if (dbcontent_name_ == "CAT062")
-    {
-        altitude_trusted_vec = &accessor_->getVar<float>(dbcontent_name_, dbcontent_vars::var_cat062_fl_measured_);
-        altitude_secondary_vec = &accessor_->getVar<float>(dbcontent_name_, dbcontent_vars::var_cat062_baro_alt_);
-    }
 
     traced_assert(!latitude_vec.isNull(index_ext));
     traced_assert(!longitude_vec.isNull(index_ext));
@@ -326,23 +319,11 @@ dbContent::TargetPosition Chain::pos(const DataID& id) const
     pos.latitude_  = latitude_vec.get(index_ext);
     pos.longitude_ = longitude_vec.get(index_ext);
 
-    if (altitude_trusted_vec && !altitude_trusted_vec->isNull(index_ext))
-    {
-        pos.has_altitude_        = true;
-        pos.altitude_calculated_ = false;
-        pos.altitude_            = altitude_trusted_vec->get(index_ext);
-    }
-    else if (!altitude_vec.isNull(index_ext))
+    if (!altitude_vec.isNull(index_ext))
     {
         pos.has_altitude_        = true;
         pos.altitude_calculated_ = false;
         pos.altitude_            = altitude_vec.get(index_ext);
-    }
-    else if (altitude_secondary_vec && !altitude_secondary_vec->isNull(index_ext))
-    {
-        pos.has_altitude_        = true;
-        pos.altitude_calculated_ = true;
-        pos.altitude_            = altitude_secondary_vec->get(index_ext);
     }
     else // calculate
     {
@@ -517,19 +498,15 @@ boost::optional<float> Chain::modeC(const DataID& id, bool ignore_invalid, bool 
 
     unsigned int index_ext = index.idx_external;
 
-    if (dbcontent_name_ == "CAT062")
-    {
-        NullableVector<float>& altitude_trusted_vec = accessor_->getVar<float>(
-                    dbcontent_name_, dbcontent_vars::var_cat062_fl_measured_);
-
-        if (!altitude_trusted_vec.isNull(index_ext))
-            return altitude_trusted_vec.get(index_ext);
-    }
-
     NullableVector<float>& modec_vec = accessor_->getMetaVar<float>(dbcontent_name_, dbcontent_vars::meta_var_mc_);
 
     if (modec_vec.isNull(index_ext))
         return {};
+
+    // a selection, CAT062 "Mode C Code", applied the flag conditions of its candidates, the
+    // flags of the decoded item do not describe a value from another candidate
+    if (accessor_->metaVarIsSelection(dbcontent_name_, dbcontent_vars::meta_var_mc_))
+        return modec_vec.get(index_ext);
 
     if (ignore_invalid && accessor_->hasMetaVar<bool>(dbcontent_name_, dbcontent_vars::meta_var_mc_v_))
     {
@@ -904,11 +881,6 @@ std::pair<bool, float> Chain::estimateAltitude (const boost::posix_time::ptime& 
     NullableVector<float>& altitude_vec = accessor_->getMetaVar<float>(dbcontent_name_, dbcontent_vars::meta_var_mc_);
     NullableVector<ptime>& ts_vec = accessor_->getMetaVar<ptime>(dbcontent_name_, dbcontent_vars::meta_var_timestamp_);
 
-    NullableVector<float>* altitude_trusted_vec {nullptr};
-
-    if (dbcontent_name_ == "CAT062")
-        altitude_trusted_vec = &accessor_->getVar<float>(dbcontent_name_, dbcontent_vars::var_cat062_fl_measured_);
-
     bool found_prev {false};
     float altitude_prev {0.0};
     bool found_after {false};
@@ -923,15 +895,7 @@ std::pair<bool, float> Chain::estimateAltitude (const boost::posix_time::ptime& 
 
     while (prev_it != indexes_.end() && timestamp - ts_vec.get(*prev_it) < max_tdiff)
     {
-        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*prev_it))
-        {
-            found_prev = true;
-            altitude_prev = altitude_trusted_vec->get(*prev_it);
-            timestamp_prev = ts_vec.get(*prev_it);
-
-            break;
-        }
-        else if (!altitude_vec.isNull(*prev_it))
+        if (!altitude_vec.isNull(*prev_it))
         {
             found_prev = true;
             altitude_prev = altitude_vec.get(*prev_it);
@@ -951,15 +915,7 @@ std::pair<bool, float> Chain::estimateAltitude (const boost::posix_time::ptime& 
 
     while (after_it != indexes_.end() && ts_vec.get(*after_it) - timestamp < max_tdiff)
     {
-        if (altitude_trusted_vec && !altitude_trusted_vec->isNull(*after_it))
-        {
-            found_after = true;
-            altitude_after = altitude_trusted_vec->get(*after_it);
-            timestamp_after = ts_vec.get(*after_it);
-
-            break;
-        }
-        else if (!altitude_vec.isNull(*after_it))
+        if (!altitude_vec.isNull(*after_it))
         {
             found_after = true;
             altitude_after = altitude_vec.get(*after_it);
@@ -1508,16 +1464,9 @@ void Chain::updateModeCMinMax() const
     {
         NullableVector<float>& modec_codes_ft = accessor_->getMetaVar<float>(dbcontent_name_, dbcontent_vars::meta_var_mc_);
 
-        NullableVector<float>* altitude_trusted_vec {nullptr};
-
-        if (dbcontent_name_ == "CAT062")
-            altitude_trusted_vec = &accessor_->getVar<float>(dbcontent_name_, dbcontent_vars::var_cat062_fl_measured_);
-
         for (auto ind_it : indexes_)
         {
-            if (altitude_trusted_vec && !altitude_trusted_vec->isNull(ind_it))
-                mode_c_value = altitude_trusted_vec->get(ind_it);
-            else if (!modec_codes_ft.isNull(ind_it))
+            if (!modec_codes_ft.isNull(ind_it))
                 mode_c_value = modec_codes_ft.get(ind_it);
             else
                 continue;

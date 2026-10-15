@@ -79,8 +79,7 @@ dbContent::VariableSet TargetReportAccessor::getReadSetFor(const std::string& db
 
     add(dbcontent_vars::meta_var_latitude_, true);
     add(dbcontent_vars::meta_var_longitude_, true);
-    add(dbcontent_vars::var_cat062_fl_measured_, false);
-    add(dbcontent_vars::var_cat062_baro_alt_, false);
+    add(dbcontent_vars::var_cat062_baro_alt_, false); // trackedBarometricAltitude()
     add(dbcontent_vars::meta_var_ground_bit_, true);
     add(dbcontent_vars::meta_var_detection_type_, true);
 
@@ -155,7 +154,6 @@ void TargetReportAccessor::cacheVectors()
     //position
     meta_latitude_vec_      = metaVarVector<double>(dbcontent_vars::meta_var_latitude_);
     meta_longitude_vec_     = metaVarVector<double>(dbcontent_vars::meta_var_longitude_);
-    cat062_alt_trusted_vec_ = varVector<float>(dbcontent_vars::var_cat062_fl_measured_);
     cat062_alt_sec_vec_     = varVector<float>(dbcontent_vars::var_cat062_baro_alt_);
     cat021_alt_geo_vec_     = varVector<float>(dbcontent_vars::var_cat021_geo_alt_);
     meta_ground_bit_vec_    = metaVarVector<bool>(dbcontent_vars::meta_var_ground_bit_);
@@ -204,6 +202,7 @@ void TargetReportAccessor::cacheVectors()
     meta_mode_c_vec_         = metaVarVector<float>(dbcontent_vars::meta_var_mc_);
     meta_mode_c_garbled_vec_ = metaVarVector<bool>(dbcontent_vars::meta_var_mc_g_);
     meta_mode_c_valid_vec_   = metaVarVector<bool>(dbcontent_vars::meta_var_mc_v_);
+    mode_c_is_selection_     = lookup_->metaVarIsSelection(dbcontent_vars::meta_var_mc_);
 
     //track
     meta_track_num_vec_   = metaVarVector<unsigned int>(dbcontent_vars::meta_var_track_num_);
@@ -454,37 +453,21 @@ boost::optional<targetReport::PositionAccuracy> TargetReportAccessor::positionAc
 */
 boost::optional<targetReport::BarometricAltitude> TargetReportAccessor::barometricAltitude(unsigned int index) const
 {
-    if (is_tracker_ && cat062_alt_trusted_vec_ && !cat062_alt_trusted_vec_->isNull(index))
-    {
-        return targetReport::BarometricAltitude(targetReport::BarometricAltitude::Source::Barometric_CAT062_Trusted,
-                                                cat062_alt_trusted_vec_->get(index),
-                                                meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
-                                                meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
-    }
-    else if (meta_mode_c_vec_ && !meta_mode_c_vec_->isNull(index))
-    {
-        return targetReport::BarometricAltitude(targetReport::BarometricAltitude::Source::Barometric_ModeC,
-                                                meta_mode_c_vec_->get(index),
-                                                meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
-                                                meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
-    }
-    else if (is_tracker_ && cat062_alt_sec_vec_ && !cat062_alt_sec_vec_->isNull(index))
-    {
-        return targetReport::BarometricAltitude(targetReport::BarometricAltitude::Source::Barometric_CAT062_Secondary,
-                                                cat062_alt_sec_vec_->get(index),
-                                                meta_mode_c_valid_vec_ && !meta_mode_c_valid_vec_->isNull(index) ? meta_mode_c_valid_vec_->get(index) : boost::optional<bool>(),
-                                                meta_mode_c_garbled_vec_ && !meta_mode_c_garbled_vec_->isNull(index) ? meta_mode_c_garbled_vec_->get(index) : boost::optional<bool>());
-    }
+    // the Mode C Meta Variable, CAT062 is the selection "Mode C Code" over I062/340 when
+    // valid and not garbled, I062/135 and I062/136, the altitude the labels and the
+    // evaluation show
+    if (meta_mode_c_vec_ && !meta_mode_c_vec_->isNull(index))
+        return targetReport::BarometricAltitude(meta_mode_c_vec_->get(index),
+                                                modeCValid(index), modeCGarbled(index));
 
-    //not implemented for dbcontent
     return {};
 }
 
 boost::optional<float> TargetReportAccessor::trackedBarometricAltitude(unsigned int index) const
 {
-    // CAT062 Barometric Altitude Calculated (I062/135) - the tracker's own
-    // altitude output, in contrast to the per-sensor measured FL that
-    // barometricAltitude() prefers for trackers
+    // CAT062 Barometric Altitude Calculated (I062/135) - the tracker's own altitude output,
+    // in contrast to the Mode C selection of barometricAltitude(), which can hold the
+    // measured FL of the contributing sensor
     if (!is_tracker_)
         return boost::none;
 
@@ -678,6 +661,16 @@ boost::optional<float> TargetReportAccessor::modeC(unsigned int index) const
 */
 boost::optional<bool> TargetReportAccessor::modeCValid(unsigned int index) const
 {
+    // a selection applied the flag conditions of its candidates, the flags of the decoded
+    // item do not describe a value from another candidate: a chosen value is valid
+    if (mode_c_is_selection_)
+    {
+        if (meta_mode_c_vec_ && !meta_mode_c_vec_->isNull(index))
+            return true;
+
+        return boost::none;
+    }
+
     return getOptional<bool>(meta_mode_c_valid_vec_, index);
 }
 
@@ -685,6 +678,14 @@ boost::optional<bool> TargetReportAccessor::modeCValid(unsigned int index) const
 */
 boost::optional<bool> TargetReportAccessor::modeCGarbled(unsigned int index) const
 {
+    if (mode_c_is_selection_) // see modeCValid()
+    {
+        if (meta_mode_c_vec_ && !meta_mode_c_vec_->isNull(index))
+            return false;
+
+        return boost::none;
+    }
+
     return getOptional<bool>(meta_mode_c_garbled_vec_, index);
 }
 

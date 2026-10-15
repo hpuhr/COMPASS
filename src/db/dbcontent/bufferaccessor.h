@@ -46,6 +46,10 @@ public:
     template <typename T>
     NullableVector<T>& getMetaVar(const Property& metavar_property);
 
+    /// see DBContentVariableLookup::metaVarIsSelection()
+    bool metaVarIsSelection(const Property& metavar_property) const
+    { return lookup_->metaVarIsSelection(metavar_property); }
+
     unsigned int size() const;
 
 protected:

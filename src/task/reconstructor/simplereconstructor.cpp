@@ -118,9 +118,6 @@ dbContent::VariableSet SimpleReconstructor::getReadSetFor(const std::string& dbc
 
     if (dbcontent_name == "CAT062")
     {
-        traced_assert(dbcont_man.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_fl_measured_));
-        read_set.add(dbcont_man.getVariable(dbcontent_name, dbcontent_vars::var_cat062_fl_measured_));
-
         // mode 3a age, for measurement-time stamping of identity values
         if (dbcont_man.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_m3a_age_))
             read_set.add(dbcont_man.getVariable(dbcontent_name, dbcontent_vars::var_cat062_m3a_age_));

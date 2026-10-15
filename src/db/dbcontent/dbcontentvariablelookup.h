@@ -19,6 +19,8 @@
 
 #include "buffer.h"
 
+#include <set>
+
 class DBContentManager;
 
 namespace dbContent 
@@ -47,6 +49,12 @@ public:
     template <typename T>
     NullableVector<T>& getMetaVar(const Property& metavar_property);
 
+    /// true when the variable of the Meta Variable in this DBContent is a selection, see
+    /// readme_dbcontent.md: its value passed the flag conditions of its candidates, the
+    /// flag variables of one decoded item do not describe it
+    bool metaVarIsSelection(const Property& metavar_property) const
+    { return meta_var_selections_.count(metavar_property.name()) > 0; }
+
     void update(const DBContentManager& dbcontent_manager);
 
     void print() const;
@@ -58,6 +66,7 @@ private:
     std::string                        dbcontent_name_;
     std::shared_ptr<Buffer>            buffer_;
     std::map<std::string, std::string> meta_var_lookup_; // metavarname -> varname
+    std::set<std::string>              meta_var_selections_; // metavarnames resolving to a selection
 };
 
 /**

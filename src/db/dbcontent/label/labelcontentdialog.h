@@ -45,6 +45,9 @@ public:
     nlohmann::json labelConfig() const;
 
 protected:
+    /// soft limit of a variable name in a field of the 3x3 grid, see Variable::displayName()
+    static const unsigned int LabelFieldMaxChars = 12;
+
     std::string dbcontent_name_;
     LabelGenerator& label_generator_;
 

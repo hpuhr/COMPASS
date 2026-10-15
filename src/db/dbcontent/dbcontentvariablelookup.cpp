@@ -42,6 +42,7 @@ DBContentVariableLookup::~DBContentVariableLookup() = default;
 void DBContentVariableLookup::update(const DBContentManager& dbcontent_manager)
 {
     meta_var_lookup_.clear();
+    meta_var_selections_.clear();
 
     //collect metavars existing for buffer's dbcontent
     for (const auto& meta_var_it : dbcontent_manager.metaVariables())
@@ -51,6 +52,9 @@ void DBContentVariableLookup::update(const DBContentManager& dbcontent_manager)
         {
             // meta var -> var exists in buffer
             meta_var_lookup_[meta_var_it.first] = meta_var_it.second->getNameFor(dbcontent_name_);
+
+            if (meta_var_it.second->getFor(dbcontent_name_).isSelection())
+                meta_var_selections_.insert(meta_var_it.first);
         }
     }
 }

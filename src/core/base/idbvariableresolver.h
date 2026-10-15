@@ -85,9 +85,9 @@ public:
                                              const std::string& var_dbcontent_name) const = 0;
 
     // selection variables, see readme_dbcontent.md: the companion variable holding the
-    // candidate index, and the 1-based index of the candidate running a named calculation.
-    // Empty respectively 0 when the variable is no selection, resolvers without
-    // variable definitions keep the defaults
+    // candidate index, the 1-based index of the candidate running a named calculation, and
+    // the names of the variable candidates in their order. Empty respectively 0 when the
+    // variable is no selection, resolvers without variable definitions keep the defaults
     virtual std::string variableSourceVariableName(const std::string& dbcontent_name,
                                                    const std::string& var_name,
                                                    const std::string& var_dbcontent_name) const
@@ -97,6 +97,11 @@ public:
                                                          const std::string& var_dbcontent_name,
                                                          const std::string& calculation) const
     { return 0; }
+    virtual std::vector<std::string> variableSelectionCandidateVariables(
+        const std::string& dbcontent_name,
+        const std::string& var_name,
+        const std::string& var_dbcontent_name) const
+    { return {}; }
     virtual PropertyDataType variableDataType(const std::string& dbcontent_name,
                                               const std::string& var_name,
                                               const std::string& var_dbcontent_name) const = 0;

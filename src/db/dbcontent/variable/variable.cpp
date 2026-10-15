@@ -265,6 +265,22 @@ std::string Variable::selectionCandidateLabel(unsigned int index) const
     return "";
 }
 
+std::vector<std::string> Variable::selectionCandidateVariables() const
+{
+    std::vector<std::string> names;
+
+    if (!isSelection())
+        return names;
+
+    for (const auto& candidate : selection_)
+    {
+        if (candidate.is_object() && candidate.contains("variable") && candidate.at("variable").is_string())
+            names.push_back(candidate.at("variable"));
+    }
+
+    return names;
+}
+
 std::string Variable::displayName(unsigned int max_chars) const
 {
     std::vector<std::string> forms;

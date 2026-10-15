@@ -142,6 +142,7 @@ void LabelContentDialog::createVariableGrid()
                 var_widget->setProperty("key", row*3 + col);
                 var_widget->setObjectName(QString("label_var_%1").arg(row*3 + col));
                 var_widget->showDBContentOnly(dbcontent_name_);
+                var_widget->setLabelMaxChars(LabelFieldMaxChars); // a field of the 3x3 grid is narrow
 
                 if (dbcont_def.contains(key))
                 {

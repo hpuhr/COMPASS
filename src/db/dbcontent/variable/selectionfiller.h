@@ -39,8 +39,9 @@ namespace dbContent
  * code running that calculation fills the rows still null and sets their index.
  *
  * A string selection without a column, resolved on read by its db_expression, gets the index
- * only. A candidate of another data type than the selection is skipped with an error, unit
- * conversion is not done here.
+ * only. A candidate of another data type or dimension than the selection is skipped with an
+ * error. A candidate with another unit of the same dimension is converted on copy, the
+ * factor comes from the UnitManager.
  */
 class SelectionFiller
 {

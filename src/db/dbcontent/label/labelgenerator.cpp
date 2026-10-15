@@ -104,20 +104,11 @@ std::vector<std::string> LabelGenerator::getLabelTexts(const std::string& dbcont
 
     Variable& utn_var = dbcont_manager_.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_utn_);
 
+    // the identification Meta Variable, CAT062 is the selection "Aircraft Identification*"
+    // over I062/245, I062/380 and the flight plan callsigns, no own fallback chain here
     Variable* acid_var {nullptr};
     if (dbcont_manager_.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_acid_))
         acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_acid_);
-
-    dbContent::Variable* acid_fpl_var {nullptr}; // only set in cat062
-
-    if (dbcontent_name == "CAT062")
-    {
-        traced_assert(dbcont_manager_.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_callsign_fpl_));
-
-        acid_fpl_var = &dbcont_manager_.getVariable(dbcontent_name, dbcontent_vars::var_cat062_callsign_fpl_);
-
-        traced_assert(buffer->has<string> (acid_fpl_var->name()));
-    }
 
     Variable* acad_var {nullptr};
     if (dbcont_manager_.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_acad_))
@@ -137,7 +128,7 @@ std::vector<std::string> LabelGenerator::getLabelTexts(const std::string& dbcont
         }
         else
         {
-            // identification hierarchy: ACID > flight-plan ACID > ACAD > Mode 3/A.
+            // identification hierarchy: ACID > ACAD > Mode 3/A.
             // an unspecific ACID (e.g. "00000000") is demoted below ACAD/Mode 3/A,
             // but still shown if no other identification is available.
 
@@ -146,11 +137,6 @@ std::vector<std::string> LabelGenerator::getLabelTexts(const std::string& dbcont
             if (acid_var && buffer->has<string>(acid_var->name())
                     && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
                 classifyIdentification(buffer->get<string>(acid_var->name()).get(buffer_index),
-                                       usable_id, fallback_id);
-
-            if (usable_id.empty() && acid_fpl_var && buffer->has<string>(acid_fpl_var->name())
-                    && !buffer->get<string>(acid_fpl_var->name()).isNull(buffer_index))
-                classifyIdentification(buffer->get<string>(acid_fpl_var->name()).get(buffer_index),
                                        usable_id, fallback_id);
 
             if (usable_id.size())
@@ -178,9 +164,6 @@ std::vector<std::string> LabelGenerator::getLabelTexts(const std::string& dbcont
     if (acid_var && buffer->has<string>(acid_var->name())
             && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
         acid = buffer->get<string>(acid_var->name()).get(buffer_index);
-    else if (acid_fpl_var && buffer->has<string>(acid_fpl_var->name())
-             && !buffer->get<string>(acid_fpl_var->name()).isNull(buffer_index))
-        acid = buffer->get<string>(acid_fpl_var->name()).get(buffer_index);
 
     acid.erase(std::remove(acid.begin(), acid.end(), ' '), acid.end());
     tmp.push_back(acid);
@@ -269,17 +252,6 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
         if (dbcont_manager_.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_acid_))
             acid_var = &dbcont_manager_.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_acid_);
 
-        dbContent::Variable* acid_fpl_var {nullptr}; // only set in cat062
-
-        if (dbcontent_name == "CAT062")
-        {
-            traced_assert(dbcont_manager_.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_callsign_fpl_));
-
-            acid_fpl_var = &dbcont_manager_.getVariable(dbcontent_name, dbcontent_vars::var_cat062_callsign_fpl_);
-
-            traced_assert(buffer->has<string> (acid_fpl_var->name()));
-        }
-
         Variable* acad_var {nullptr};
         if (dbcont_manager_.metaCanGetVariable(dbcontent_name, dbcontent_vars::meta_var_acad_))
             acad_var = &dbcont_manager_.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_acad_);
@@ -320,10 +292,6 @@ std::vector<std::string> LabelGenerator::getFullTexts(const std::string& dbconte
                 if (acid_var && buffer->has<string>(acid_var->name())
                         && !buffer->get<string>(acid_var->name()).isNull(buffer_index))
                     apply(buffer->get<string>(acid_var->name()).get(buffer_index), acid_var->name());
-
-                if (usable_id.empty() && acid_fpl_var && buffer->has<string>(acid_fpl_var->name())
-                        && !buffer->get<string>(acid_fpl_var->name()).isNull(buffer_index))
-                    apply(buffer->get<string>(acid_fpl_var->name()).get(buffer_index), acid_fpl_var->name());
 
                 if (usable_id.size())
                     value = usable_id + " ("+usable_name+")";
@@ -1553,33 +1521,8 @@ void LabelGenerator::addVariables (const std::string& dbcontent_name, dbContent:
             read_set.add(var);
     }
 
-    if (dbcontent_name == "CAT062")
-    {
-        {
-            traced_assert(dbcont_manager_.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_baro_alt_));
-
-            Variable& var = dbcont_manager_.getVariable(dbcontent_name, dbcontent_vars::var_cat062_baro_alt_);
-
-            if (!read_set.hasVariable(var))
-                read_set.add(var);
-        }
-
-        {
-            traced_assert(dbcont_manager_.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_fl_measured_));
-            Variable& var = dbcont_manager_.getVariable(dbcontent_name, dbcontent_vars::var_cat062_fl_measured_);
-
-            if (!read_set.hasVariable(var))
-                read_set.add(var);
-        }
-
-        {
-            traced_assert(dbcont_manager_.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_callsign_fpl_));
-            Variable& var = dbcont_manager_.getVariable(dbcontent_name, dbcontent_vars::var_cat062_callsign_fpl_);
-
-            if (!read_set.hasVariable(var))
-                read_set.add(var);
-        }
-    }
+    // the CAT062 identification and Mode C are the selections "Aircraft Identification*" and
+    // "Mode C Code", reached through the Meta Variables above
 }
 
 bool LabelGenerator::labelVariablesLoaded()
@@ -2203,27 +2146,19 @@ std::string LabelGenerator::getModeCText (const std::string& dbcontent_name,
 {
     string text;
 
+    // the Mode C Meta Variable, CAT062 is the selection "Mode C Code" over I062/340 when valid
+    // and not garbled, I062/135 and I062/136, no own fallback chain here
     Variable& mc_var = dbcont_manager_.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_mc_);
-
-    dbContent::Variable* cat062_baro_alt_var {nullptr}; // only set in cat062
-    dbContent::Variable* cat062_fl_meas_var {nullptr}; // only set in cat062
-
-    if (dbcontent_name == "CAT062")
-    {
-        traced_assert(dbcont_manager_.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_baro_alt_));
-        traced_assert(dbcont_manager_.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_fl_measured_));
-
-        cat062_baro_alt_var = &dbcont_manager_.getVariable(dbcontent_name, dbcontent_vars::var_cat062_baro_alt_);
-        cat062_fl_meas_var = &dbcont_manager_.getVariable(dbcontent_name, dbcontent_vars::var_cat062_fl_measured_);
-
-        traced_assert(buffer->has<float> (cat062_baro_alt_var->name()));
-        traced_assert(buffer->has<float> (cat062_fl_meas_var->name()));
-    }
 
     if (buffer->has<float>(mc_var.name()) &&
             !buffer->get<float>(mc_var.name()).isNull(buffer_index))
     {
         text = String::doubleToStringPrecision(buffer->get<float>(mc_var.name()).get(buffer_index)/100.0,2);
+
+        // a selection applied the flag conditions of its candidates, the flags of the decoded
+        // item do not describe a value from another candidate
+        if (mc_var.isSelection())
+            return text;
 
         bool valid=true, garbled=false;
 
@@ -2252,18 +2187,6 @@ std::string LabelGenerator::getModeCText (const std::string& dbcontent_name,
 
         if (garbled)
             text += "G";
-    }
-    else if (cat062_baro_alt_var && buffer->has<float>(cat062_baro_alt_var->name()) &&
-             !buffer->get<float>(cat062_baro_alt_var->name()).isNull(buffer_index))
-    {
-        text = String::doubleToStringPrecision(
-                    buffer->get<float>(cat062_baro_alt_var->name()).get(buffer_index)/100.0,2);
-    }
-    else if (cat062_fl_meas_var && buffer->has<float>(cat062_fl_meas_var->name()) &&
-             !buffer->get<float>(cat062_fl_meas_var->name()).isNull(buffer_index))
-    {
-        text = String::doubleToStringPrecision(
-                    buffer->get<float>(cat062_fl_meas_var->name()).get(buffer_index)/100.0,2);
     }
 
     return text;

@@ -105,6 +105,9 @@ class Variable : public QObject, public Property, public Configurable
     unsigned int selectionCandidateIndex(const std::string& calculation) const;
     /// label of the 1-based candidate: the data item part of a variable candidate or the explicit label
     std::string selectionCandidateLabel(unsigned int index) const;
+    /// names of the variable candidates in their order, calculation candidates left out,
+    /// empty when this is no selection. A filter matches every candidate, not the chosen value only
+    std::vector<std::string> selectionCandidateVariables() const;
 
     /// name of the companion variable holding the 1-based candidate index per record, selection only
     const std::string& sourceVariableName() const { return source_variable_; }

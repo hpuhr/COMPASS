@@ -126,7 +126,7 @@
                     "CAT020": "Aircraft Identification",
                     "CAT021": "Aircraft Identification",
                     "CAT048": "Aircraft Identification",
-                    "CAT062": "Aircraft Identification",
+                    "CAT062": "Aircraft Identification*",
                     "RefTraj": "Aircraft Identification"
                 },
                 "group": "Secondary Identification",
@@ -464,7 +464,7 @@
                     "CAT020": "Mode C Code",
                     "CAT021": "Mode C Code",
                     "CAT048": "Mode C Code",
-                    "CAT062": "Mode C Code LM",
+                    "CAT062": "Mode C Code",
                     "RefTraj": "Mode C Code"
                 },
                 "group": "Altitude",

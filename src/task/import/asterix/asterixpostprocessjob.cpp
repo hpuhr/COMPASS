@@ -635,18 +635,9 @@ void ASTERIXPostprocessJob::doFilters()
 
             NullableVector<double>& lat_vec = buffer->get<double>(lat_var_name);
             NullableVector<double>& lon_vec = buffer->get<double>(lon_var_name);
+            // the Mode C Meta Variable, CAT062 is the selection "Mode C Code", filled by the
+            // SelectionFiller before this job
             NullableVector<float>& mc_vec = buffer->get<float>(mc_var_name);
-
-            NullableVector<float>* mc_vec2 {nullptr};
-
-            if (dbcontent_name == "CAT062")
-            {
-                traced_assert(dbcont_man.canGetVariable(dbcontent_name, dbcontent_vars::var_cat062_fl_measured_));
-                dbContent::Variable& mc_var2 = dbcont_man.getVariable(dbcontent_name, dbcontent_vars::var_cat062_fl_measured_);
-
-                if (buffer->has<float>(mc_var2.name()))
-                    mc_vec2 = &buffer->get<float>(mc_var2.name());
-            }
 
             std::vector<unsigned int> to_be_removed;
 
@@ -686,12 +677,6 @@ void ASTERIXPostprocessJob::doFilters()
                 {
                     if (!mc_vec.isNull(cnt)
                         && (mc_vec.get(cnt) < settings_.filter_modec_min_ || mc_vec.get(cnt) > settings_.filter_modec_max_))
-                    {
-                        to_be_removed.push_back(cnt);
-                        continue;
-                    }
-                    else if (mc_vec2 && !mc_vec2->isNull(cnt)
-                             && (mc_vec2->get(cnt) < settings_.filter_modec_min_ || mc_vec2->get(cnt) > settings_.filter_modec_max_))
                     {
                         to_be_removed.push_back(cnt);
                         continue;

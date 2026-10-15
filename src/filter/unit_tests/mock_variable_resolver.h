@@ -255,6 +255,37 @@ public:
         // no-op
     }
 
+    // --- Selection variables ---
+
+    /// registers the variable candidates of a selection variable of a DBContent, each candidate
+    /// is a direct variable registered with addDirectVariable
+    void addSelectionCandidates(const std::string& dbcontent_name, const std::string& var_name,
+                                const std::vector<std::string>& candidates)
+    {
+        selection_candidates_[{dbcontent_name, var_name}] = candidates;
+    }
+
+    std::vector<std::string> variableSelectionCandidateVariables(
+        const std::string& dbcontent_name,
+        const std::string& var_name,
+        const std::string& var_dbcontent_name) const override
+    {
+        std::string name = var_name;
+
+        if (var_dbcontent_name == "Meta")
+        {
+            auto it = meta_vars_.find(var_name);
+            if (it != meta_vars_.end() && it->second.dbcontent_to_varname.count(dbcontent_name))
+                name = it->second.dbcontent_to_varname.at(dbcontent_name);
+        }
+
+        auto it = selection_candidates_.find({dbcontent_name, name});
+        if (it == selection_candidates_.end())
+            return {};
+
+        return it->second;
+    }
+
 private:
     struct MetaVarInfo {
         std::map<std::string, std::string> dbcontent_to_column;
@@ -270,6 +301,7 @@ private:
 
     std::map<std::string, MetaVarInfo> meta_vars_;
     std::map<std::pair<std::string, std::string>, DirectVarInfo> direct_vars_;
+    std::map<std::pair<std::string, std::string>, std::vector<std::string>> selection_candidates_;
     std::set<std::string> known_dbcontents_;
 };
 
@@ -403,6 +435,15 @@ inline MockVariableResolver createStandardMock()
     mock.addDirectVariable("CAT062", dbcontent_vars::var_cat062_fl_measured_, "fl_measured");
     mock.addDirectVariable("CAT062", dbcontent_vars::var_cat062_callsign_fpl_, "callsign_fpl",
                            "Callsign FPL");
+
+    // CAT062 selections, the Meta Variables point at them: a filter searches every candidate
+    mock.addDirectVariable("CAT062", Property("Mode C Code LM", PropertyDataType::FLOAT), "mode_c_code_lm");
+    mock.addSelectionCandidates("CAT062", "Mode C Code",
+                                {"Mode C Code LM", "Barometric Altitude Calculated", "Flight Level Measured"});
+
+    mock.addDirectVariable("CAT062", Property("Target Identification", PropertyDataType::STRING), "target_id");
+    mock.addSelectionCandidates("CAT062", "Aircraft Identification",
+                                {"Target Identification", "Callsign FPL"});
 
     return mock;
 }

@@ -19,6 +19,9 @@
 #include "dbcontent/variable/variable.h"
 #include "dbcontent/dbcontent.h"
 #include "dbcontent/dbcontentmanager.h"
+#include "compass.h"
+#include "unitmanager.h"
+#include "dimension.h"
 #include "buffer.h"
 #include "logger.h"
 #include "traced_assert.h"
@@ -26,6 +29,7 @@
 #include <json.hpp>
 
 #include <functional>
+#include <type_traits>
 #include <vector>
 
 using namespace std;
@@ -75,10 +79,11 @@ struct Member
     std::vector<CandidateAccess> candidates;
 };
 
+// factor is the unit conversion from the candidate to the selection, 1 when none is needed
 template <typename T>
 void makeTypedAccess(Buffer& buffer, const std::string& candidate_name,
                      const std::string& selection_name, bool selection_has_column,
-                     CandidateAccess& access)
+                     double factor, CandidateAccess& access)
 {
     NullableVector<T>& candidate_vec = buffer.get<T>(candidate_name);
 
@@ -88,59 +93,117 @@ void makeTypedAccess(Buffer& buffer, const std::string& candidate_name,
     {
         NullableVector<T>& selection_vec = buffer.get<T>(selection_name);
 
-        access.copy = [&candidate_vec, &selection_vec](unsigned int index)
-        { selection_vec.set(index, candidate_vec.get(index)); };
+        if constexpr (std::is_arithmetic<T>::value && !std::is_same<T, bool>::value)
+        {
+            if (factor != 1.0) // the candidate has another unit than the selection
+            {
+                access.copy = [&candidate_vec, &selection_vec, factor](unsigned int index)
+                { selection_vec.set(index, static_cast<T>(candidate_vec.get(index) * factor)); };
+            }
+        }
+
+        if (!access.copy)
+        {
+            access.copy = [&candidate_vec, &selection_vec](unsigned int index)
+            { selection_vec.set(index, candidate_vec.get(index)); };
+        }
     }
 
     access.usable = true;
 }
 
 void makeAccess(Buffer& buffer, PropertyDataType data_type, const std::string& candidate_name,
-                const std::string& selection_name, bool selection_has_column, CandidateAccess& access)
+                const std::string& selection_name, bool selection_has_column, double factor,
+                CandidateAccess& access)
 {
     switch (data_type)
     {
     case PropertyDataType::BOOL:
-        makeTypedAccess<bool>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<bool>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::CHAR:
-        makeTypedAccess<char>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<char>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::UCHAR:
-        makeTypedAccess<unsigned char>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<unsigned char>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::INT:
-        makeTypedAccess<int>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<int>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::UINT:
-        makeTypedAccess<unsigned int>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<unsigned int>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::LONGINT:
-        makeTypedAccess<long>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<long>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::ULONGINT:
-        makeTypedAccess<unsigned long>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<unsigned long>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::FLOAT:
-        makeTypedAccess<float>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<float>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::DOUBLE:
-        makeTypedAccess<double>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<double>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::STRING:
-        makeTypedAccess<std::string>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<std::string>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::JSON:
-        makeTypedAccess<nlohmann::json>(buffer, candidate_name, selection_name, selection_has_column, access);
+        makeTypedAccess<nlohmann::json>(buffer, candidate_name, selection_name, selection_has_column, factor, access);
         break;
     case PropertyDataType::TIMESTAMP:
         makeTypedAccess<boost::posix_time::ptime>(buffer, candidate_name, selection_name,
-                                                  selection_has_column, access);
+                                                  selection_has_column, factor, access);
         break;
     default:
         logerr << "unknown data type for selection '" << selection_name << "'";
         break;
     }
+}
+
+// the unit conversion factor from the candidate to the selection: 1 when the units agree or
+// one of them has no unit, false with an error when the dimensions differ or a unit is unknown
+bool unitFactor(DBContentManager& dbcont_man, const Variable& candidate, const Variable& selection,
+                double& factor)
+{
+    factor = 1.0;
+
+    const std::string& cand_dim  = candidate.dimensionConst();
+    const std::string& sel_dim   = selection.dimensionConst();
+    const std::string& cand_unit = candidate.unitConst();
+    const std::string& sel_unit  = selection.unitConst();
+
+    if (cand_dim.empty() || sel_dim.empty() || cand_unit.empty() || sel_unit.empty())
+        return true;
+
+    if (cand_dim != sel_dim)
+    {
+        logerr << selection.dbContentName() << " selection '" << selection.name() << "' candidate '"
+               << candidate.name() << "' has dimension '" << cand_dim << "' instead of '" << sel_dim << "'";
+        return false;
+    }
+
+    if (cand_unit == sel_unit)
+        return true;
+
+    UnitManager& unit_man = dbcont_man.compass().unitManager();
+
+    if (!unit_man.hasDimension(sel_dim) || !unit_man.dimension(sel_dim).hasUnit(cand_unit)
+        || !unit_man.dimension(sel_dim).hasUnit(sel_unit))
+    {
+        logerr << selection.dbContentName() << " selection '" << selection.name() << "' candidate '"
+               << candidate.name() << "' unit '" << cand_unit << "' or '" << sel_unit
+               << "' unknown in dimension '" << sel_dim << "'";
+        return false;
+    }
+
+    factor = unit_man.dimension(sel_dim).getFactor(cand_unit, sel_unit);
+
+    logdbg << selection.dbContentName() << " selection '" << selection.name() << "' candidate '"
+           << candidate.name() << "' converted from " << cand_unit << " to " << sel_unit
+           << " factor " << factor;
+
+    return true;
 }
 
 void collectFlags(const DBContent& dbcontent, Buffer& buffer, const nlohmann::json& candidate,
@@ -293,11 +356,16 @@ void SelectionFiller::fill(DBContentManager& dbcont_man, const std::string& dbco
                                << candidate_name << "' has another data type";
                     else if (buffer.hasAnyPropertyNamed(candidate_name)) // absent column: never a value
                     {
-                        makeAccess(buffer, var->dataType(), candidate_name, var->name(),
-                                   selection_has_column, access);
+                        double factor = 1.0;
 
-                        collectFlags(dbcontent, buffer, candidate, "require_true", access.require_true);
-                        collectFlags(dbcontent, buffer, candidate, "require_false", access.require_false);
+                        if (unitFactor(dbcont_man, dbcontent.variable(candidate_name), *var, factor))
+                        {
+                            makeAccess(buffer, var->dataType(), candidate_name, var->name(),
+                                       selection_has_column, factor, access);
+
+                            collectFlags(dbcontent, buffer, candidate, "require_true", access.require_true);
+                            collectFlags(dbcontent, buffer, candidate, "require_false", access.require_false);
+                        }
                     }
                 }
                 else

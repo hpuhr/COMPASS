@@ -52,24 +52,16 @@ class BarometricAltitude
 {
   public:
 
-    enum class Source
-    {
-        Barometric_ModeC = 0,
-        Barometric_CAT062_Trusted,
-        Barometric_CAT062_Secondary
-    };
-
+    // the value of the Mode C Meta Variable, for CAT062 the selection "Mode C Code", see
+    // readme_dbcontent.md "Selection variables"
     BarometricAltitude() {}
-    BarometricAltitude(Source source,
-                       float alt,
+    BarometricAltitude(float alt,
                        const boost::optional<bool>& v,
                        const boost::optional<bool>& g)
-        :   source_  (source)
-          ,   altitude_(alt   )
+        :   altitude_(alt   )
           ,   valid_   (v     )
           ,   garbled_ (g     ) {}
 
-    Source                source_   = Source::Barometric_ModeC;
     float                 altitude_ = 0.0f;
     boost::optional<bool> valid_;
     boost::optional<bool> garbled_;

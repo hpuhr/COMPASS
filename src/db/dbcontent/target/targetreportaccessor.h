@@ -156,8 +156,7 @@ private:
     //position
     const NullableVector<double>* meta_latitude_vec_      = nullptr;
     const NullableVector<double>* meta_longitude_vec_     = nullptr;
-    const NullableVector<float>*  cat062_alt_trusted_vec_ = nullptr;
-    const NullableVector<float>*  cat062_alt_sec_vec_     = nullptr;
+    const NullableVector<float>*  cat062_alt_sec_vec_     = nullptr; // I062/135, trackedBarometricAltitude()
     const NullableVector<float>*  cat021_alt_geo_vec_     = nullptr;
     const NullableVector<bool>*   meta_ground_bit_vec_    = nullptr;
     const NullableVector<unsigned char>* meta_detection_type_vec_ = nullptr;
@@ -205,6 +204,9 @@ private:
     const NullableVector<float>* meta_mode_c_vec_         = nullptr;
     const NullableVector<bool>*  meta_mode_c_garbled_vec_ = nullptr;
     const NullableVector<bool>*  meta_mode_c_valid_vec_   = nullptr;
+    // the Mode C of the content is a selection, CAT062 "Mode C Code": its value passed the flag
+    // conditions of its candidates, the flags of the decoded item do not describe it
+    bool mode_c_is_selection_ = false;
 
     //track
     const NullableVector<unsigned int>* meta_track_num_vec_   = nullptr;

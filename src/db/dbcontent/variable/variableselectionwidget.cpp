@@ -102,6 +102,13 @@ void VariableSelectionWidget::setReadOnly(bool read_only)
     sel_button_->setDisabled(read_only);
 }
 
+void VariableSelectionWidget::setLabelMaxChars(unsigned int max_chars)
+{
+    label_max_chars_ = max_chars;
+
+    updateLabels();
+}
+
 void VariableSelectionWidget::updateLabels()
 {
     traced_assert(object_label_);
@@ -113,10 +120,10 @@ void VariableSelectionWidget::updateLabels()
     std::string shown = selected_variable_name_;
 
     if (meta_variable_selected_ && dbcont_man_.existsMetaVariable(selected_variable_name_))
-        shown = dbcont_man_.metaVariable(selected_variable_name_).displayName(LabelMaxChars);
+        shown = dbcont_man_.metaVariable(selected_variable_name_).displayName(label_max_chars_);
     else if (variable_selected_ && dbcont_man_.existsDBContent(selected_object_name_)
              && dbcont_man_.dbContent(selected_object_name_).hasVariable(selected_variable_name_))
-        shown = dbcont_man_.dbContent(selected_object_name_).variable(selected_variable_name_).displayName(LabelMaxChars);
+        shown = dbcont_man_.dbContent(selected_object_name_).variable(selected_variable_name_).displayName(label_max_chars_);
 
     variable_label_->setText(QString::fromStdString(shown));
 }

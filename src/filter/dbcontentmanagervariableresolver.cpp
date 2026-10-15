@@ -168,6 +168,13 @@ unsigned int DBContentManagerVariableResolver::variableSelectionCandidateIndex(
     return resolveVariable(dbcontent_name, var_name, var_dbcontent_name).selectionCandidateIndex(calculation);
 }
 
+std::vector<std::string> DBContentManagerVariableResolver::variableSelectionCandidateVariables(
+    const std::string& dbcontent_name, const std::string& var_name,
+    const std::string& var_dbcontent_name) const
+{
+    return resolveVariable(dbcontent_name, var_name, var_dbcontent_name).selectionCandidateVariables();
+}
+
 PropertyDataType DBContentManagerVariableResolver::variableDataType(
     const std::string& dbcontent_name, const std::string& var_name,
     const std::string& var_dbcontent_name) const
