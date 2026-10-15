@@ -36,13 +36,15 @@ the 'Select Variable' dialog is opened by clicking the respective variable butto
 
 \begin{itemize}
 \item 'Search': Filters the shown variables by name, ASTERIX data item or description
-\item 'Grouping': The variables are grouped either by ASTERIX 'Data Item' or by variable 'Group' (e.g. 'Position', 'Time', 'Accuracy')
+\item 'Grouping': The variables are grouped either by ASTERIX 'Data Item' or by variable 'Group' (e.g. 'Position', 'Time', 'Accuracy'). In the 'Data Item' grouping, a selection is listed under the data item of its first alternative, calculated variables under 'Calculated' and internal ones under 'Internal'
 \item Content selection: One radio button per DBContent, and 'Meta' for the Meta Variables. In the \includegraphics[width=0.5cm,frame]{../../data/icons/edit.png} menu, 'Hide Status Categories' hides the DBContents which do not contain target reports (e.g. CAT034)
 \item 'Reports': A collapsible second row of radio buttons below the DBContents, one per report offering Report Variables (see \nameref{sec:report_variables})
-\item Variable tree: The variables of the selected content, with their data item, data type and description. A variable is selected by clicking 'Select' or by double-clicking it
+\item Variable tree: The variables of the selected content, with their origin, data type and description. The 'Origin' column shows the ASTERIX data item, the input variables of a calculated variable or the alternatives of a selection (see \nameref{sec:key_concepts}). A variable is selected by clicking 'Select' or by double-clicking it
 \item 'Select None': Clears the selection, only shown where an empty selection is allowed
 \end{itemize}
 \ \\
+
+The variable button shows a brief form of the name when the full name is long, e.g. 'I062/136 Meas FL' for 'Flight Level Measured'. Its tooltip lists the full name, the short name, the description, the origin, the data type and the unit. \\
 
 Please \textbf{note} that some dialogs allow selecting multiple variables at once, e.g. the columns of a Table View. \\
 
