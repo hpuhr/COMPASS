@@ -817,7 +817,6 @@ void ASTERIXPostprocessJob::doObfuscate()
     // change acids
     {
         boost::mutex::scoped_lock locker(acid_map_mutex_);
-        string var_name;
 
         for (auto& buf_it : buffers_)
         {
@@ -834,22 +833,55 @@ void ASTERIXPostprocessJob::doObfuscate()
 
             dbContent::Variable& var = dbcont_man.metaGetVariable(dbcontent_name, dbcontent_vars::meta_var_acid_);
 
-            var_name = var.name();
+            // the identification columns: the Meta variable when it has a column, and every
+            // decoded candidate of a string selection over it, "Aircraft Identification*" of
+            // CAT062 is resolved on read from its candidates and has no column of its own
+            std::set<std::string> var_names;
 
-            traced_assert(buffer->has<string>(var_name));
+            if (var.dbExpression().empty())
+                var_names.insert(var.name());
 
-            NullableVector<string>& var_vec = buffer->get<string>(var_name);
-
-            for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
+            for (const auto& var_it : dbcont_man.dbContent(dbcontent_name).variables())
             {
-                if (var_vec.isNull(cnt))
+                const dbContent::Variable& sel_var = *var_it.second;
+
+                if (!sel_var.isSelection() || sel_var.dataType() != PropertyDataType::STRING)
                     continue;
 
-                // obfuscate
+                bool over_acid = sel_var.name() == var.name();
+
+                for (const auto& candidate : sel_var.selection())
+                    if (candidate.is_object() && candidate.contains("variable")
+                        && candidate.at("variable").is_string() && candidate.at("variable") == var.name())
+                        over_acid = true;
+
+                if (!over_acid)
+                    continue;
+
+                for (const auto& candidate : sel_var.selection())
+                    if (candidate.is_object() && candidate.contains("variable")
+                        && candidate.at("variable").is_string())
+                        var_names.insert(candidate.at("variable").get<std::string>());
+            }
+
+            for (const auto& name : var_names)
+            {
+                if (!buffer->has<string>(name))
+                    continue;
+
+                NullableVector<string>& var_vec = buffer->get<string>(name);
+
+                for (unsigned int cnt=0; cnt < buffer_size; ++cnt)
                 {
-                    std::string tmp = var_vec.get(cnt);
-                    obfuscateACID(tmp);
-                    var_vec.set(cnt, tmp);
+                    if (var_vec.isNull(cnt))
+                        continue;
+
+                    // obfuscate
+                    {
+                        std::string tmp = var_vec.get(cnt);
+                        obfuscateACID(tmp);
+                        var_vec.set(cnt, tmp);
+                    }
                 }
             }
         }

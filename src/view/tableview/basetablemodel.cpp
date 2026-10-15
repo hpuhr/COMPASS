@@ -72,7 +72,7 @@ int BaseBufferTableModel::columnCount(const QModelIndex& /*parent*/) const
 
 QVariant BaseBufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (role != Qt::DisplayRole)
+    if (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != VariableNameRole)
         return QVariant();
 
     if (orientation == Qt::Horizontal)
@@ -81,12 +81,22 @@ QVariant BaseBufferTableModel::headerData(int section, Qt::Orientation orientati
         unsigned int col = section;
 
         if (col < prefixColumnCount())
-            return prefixColumnHeader(col);
+            return role == Qt::ToolTipRole ? QVariant() : prefixColumnHeader(col);
 
         unsigned int data_col = col - prefixColumnCount();
         traced_assert(data_col < dataColumnCount());
-        return dataColumnHeader(data_col);
+
+        if (role == Qt::ToolTipRole)
+            return dataColumnTooltip(data_col);
+
+        if (role == VariableNameRole)
+            return dataColumnHeader(data_col);
+
+        return dataColumnDisplayName(data_col);
     }
+
+    if (role != Qt::DisplayRole)
+        return QVariant();
     else if (orientation == Qt::Vertical)
         return section;
 

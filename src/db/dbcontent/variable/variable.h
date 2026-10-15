@@ -114,6 +114,19 @@ class Variable : public QObject, public Property, public Configurable
     /// "asterix I021/071.Time of Applicability for Position", "calculated from Vx, Vy", ...
     std::string originInfo() const;
 
+    /// name shown in the GUI: the longest of item plus name, item plus short name, name and
+    /// short name that fits into max_chars, the shortest form when none fits, 0 means no limit.
+    /// Variables without a data item have the forms name and short name only. Never truncates
+    std::string displayName(unsigned int max_chars = 0) const;
+
+    /// the selection variable this variable is the source variable of, nullptr when none
+    const Variable* selectionOf() const;
+    /// SELECTION_SOURCE representation: the candidate label of a 1-based index string, the
+    /// index itself when this is no source variable or the index is out of range
+    std::string selectionSourceLabel(const std::string& index_str) const;
+    /// the reverse: the 1-based index string of a candidate label, the label when unknown
+    std::string selectionSourceIndex(const std::string& label) const;
+
     static const std::string OriginAsterix;
     static const std::string OriginCalculated;
     static const std::string OriginInternal;
@@ -180,6 +193,9 @@ class Variable : public QObject, public Property, public Configurable
             //the rest needs the application context
             if (representation_ == Variable::Representation::DATA_SRC_NAME)
                 return getDataSourcesAsString(std::to_string(value));
+
+            if (representation_ == Variable::Representation::SELECTION_SOURCE)
+                return selectionSourceLabel(std::to_string(value));
 
             throw std::runtime_error(
                 "Variable: getAsSpecialRepresentationString: unknown representation " +

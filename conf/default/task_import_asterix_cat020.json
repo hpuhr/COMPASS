@@ -861,7 +861,7 @@
                 "append_value": false,
                 "comment": "Type number, value 1, weird mapping",
                 "db_content_name": "CAT020",
-                "db_content_variable_name": "Altitude Reporting Capability\n",
+                "db_content_variable_name": "Altitude Reporting Capability",
                 "dimension": "",
                 "format_data_type": "",
                 "in_array": false,

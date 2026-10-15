@@ -47,13 +47,15 @@ enum class Representation
     FLOAT_PREC2,
     FLOAT_PREC4,
     LINE_NAME,
-    MLAT_RUS  // JSON int-array of contributing receiver indices, formatted via DBContextManager RU names
+    MLAT_RUS,  // JSON int-array of contributing receiver indices, formatted via DBContextManager RU names
+    SELECTION_SOURCE  // 1-based candidate index of a selection variable, formatted as the candidate label
 };
 
 /**
  * True if the representation can be resolved from the value alone.
- * DATA_SRC_NAME and MLAT_RUS need the DBContextManager, so they are resolved by
- * Variable and not here. STANDARD is not a special representation at all.
+ * DATA_SRC_NAME and MLAT_RUS need the DBContextManager, SELECTION_SOURCE the candidate list
+ * of the selection variable, so they are resolved by Variable and not here. STANDARD is not
+ * a special representation at all.
  */
 bool representationIsContextFree(Representation repr);
 

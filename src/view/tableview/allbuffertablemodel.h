@@ -133,6 +133,8 @@ class AllBufferTableModel : public BaseBufferTableModel
     bool resolveVariable(unsigned int data_col, const std::string& dbcontent_name,
                          dbContent::Variable*& out_var) const override;
     QVariant dataColumnHeader(unsigned int data_col) const override;
+    QVariant dataColumnDisplayName(unsigned int data_col) const override;
+    QVariant dataColumnTooltip(unsigned int data_col) const override;
     void applyRowPermutation(const std::vector<unsigned int>& perm) override;
     void sortRowIndexes() override;
 

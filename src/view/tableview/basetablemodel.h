@@ -108,8 +108,20 @@ class BaseBufferTableModel : public QAbstractTableModel
     virtual bool resolveVariable(unsigned int data_col, const std::string& dbcontent_name,
                                  dbContent::Variable*& out_var) const = 0;
 
-    /// Returns header text for a data column
+    /// Returns the variable name of a data column, the header under VariableNameRole
     virtual QVariant dataColumnHeader(unsigned int data_col) const = 0;
+    /// Returns the shown header of a data column, the brief display name of the variable,
+    /// the variable name by default
+    virtual QVariant dataColumnDisplayName(unsigned int data_col) const { return dataColumnHeader(data_col); }
+    /// Returns the header tooltip of a data column, the variable info, empty by default
+    virtual QVariant dataColumnTooltip(unsigned int data_col) const { return QVariant(); }
+
+public:
+    /// header role giving the variable name of a column, the DisplayRole gives the brief
+    /// display name, see Variable::displayName()
+    static const int VariableNameRole = Qt::UserRole + 101;
+    /// soft maximum of the shown header, characters
+    static const unsigned int HeaderMaxChars = 16;
 
     /// Reorders the subclass's row_indexes_ according to a permutation vector.
     /// perm[i] = j means new row i takes the value from old row j.

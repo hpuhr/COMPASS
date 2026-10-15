@@ -55,7 +55,15 @@ public:
     void name(const std::string& name);
 
     std::string description() const;
+    /// name, data type, description and the origin per content
     std::string info() const;
+
+    /// the short name of the members when they agree, else empty
+    std::string shortName() const;
+    bool hasShortName() const { return shortName().size(); }
+    /// name shown in the GUI: the name when it fits into max_chars, else the short name,
+    /// 0 means no limit. Never an item, never a marker
+    std::string displayName(unsigned int max_chars = 0) const;
 
     const std::string& group() const { return group_; }
     void group(const std::string& group) { group_ = group; }

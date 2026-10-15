@@ -201,10 +201,43 @@ std::string MetaVariable::info() const
     std::ostringstream ss;
 
     ss << "Name: '" << name_ << "'" << endl;
+
+    if (hasShortName())
+        ss << "Short Name: " << shortName() << endl;
+
     ss << "Data Type: " << dataTypeString() << endl;
     ss << "Description: " << description() << endl;
 
+    for (const auto& var_it : variables_)
+        ss << var_it.first << ": " << var_it.second.name() << ", " << var_it.second.originInfo() << endl;
+
     return ss.str();
+}
+
+std::string MetaVariable::shortName() const
+{
+    std::string short_name;
+
+    for (const auto& var_it : variables_)
+    {
+        if (!var_it.second.hasShortName())
+            continue;
+
+        if (short_name.empty())
+            short_name = var_it.second.shortName();
+        else if (short_name != var_it.second.shortName())
+            return "";
+    }
+
+    return short_name;
+}
+
+std::string MetaVariable::displayName(unsigned int max_chars) const
+{
+    if (!max_chars || name_.size() <= max_chars || !hasShortName())
+        return name_;
+
+    return shortName();
 }
 
 PropertyDataType MetaVariable::dataType() const

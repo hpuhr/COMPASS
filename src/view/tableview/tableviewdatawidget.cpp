@@ -371,7 +371,7 @@ void TableViewDataWidget::viewInfoJSON_impl(nlohmann::json& info) const
         //get properties
         std::vector<std::string> properties;
         for(int i = 0; i < table->model()->columnCount(); i++)
-            properties.push_back(table->model()->headerData(i, Qt::Horizontal).toString().toStdString());
+            properties.push_back(table->model()->headerData(i, Qt::Horizontal, BaseBufferTableModel::VariableNameRole).toString().toStdString());
 
         table_info[ "properties" ] = properties;
 

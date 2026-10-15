@@ -127,7 +127,7 @@ std::vector<std::vector<std::string>> AllBufferTableWidget::getSelectedText(unsi
     std::vector<std::string> header_data;
     std::vector<std::string> current_row_data;
 
-    header_data.push_back(model->headerData(previous.column(), Qt::Horizontal).toString().toStdString());
+    header_data.push_back(model->headerData(previous.column(), Qt::Horizontal, BaseBufferTableModel::VariableNameRole).toString().toStdString());
     current_row_data.push_back(model->data(previous).toString().toStdString());
     indexes.removeFirst();
 
@@ -153,7 +153,7 @@ std::vector<std::vector<std::string>> AllBufferTableWidget::getSelectedText(unsi
         current_row_data.push_back(model->data(current).toString().toStdString());
 
         if (!row_count)  // first row
-            header_data.push_back(model->headerData(current.column(), Qt::Horizontal).toString().toStdString());
+            header_data.push_back(model->headerData(current.column(), Qt::Horizontal, BaseBufferTableModel::VariableNameRole).toString().toStdString());
 
         previous = current;
     }
@@ -177,7 +177,7 @@ std::vector<std::vector<std::string>> AllBufferTableWidget::getText(unsigned int
     std::vector<std::string> header_data;
     std::vector<std::string> current_row_data;
 
-    header_data.push_back(model->headerData(previous_index.column(), Qt::Horizontal).toString().toStdString());
+    header_data.push_back(model->headerData(previous_index.column(), Qt::Horizontal, BaseBufferTableModel::VariableNameRole).toString().toStdString());
     current_row_data.push_back(model->data(previous_index).toString().toStdString());
 
     QModelIndex current_index;
@@ -222,7 +222,7 @@ std::vector<std::vector<std::string>> AllBufferTableWidget::getText(unsigned int
             current_row_data.push_back(model->data(current_index).toString().toStdString());
 
             if (!row_count)  // first row
-                header_data.push_back(model->headerData(current_index.column(), Qt::Horizontal).toString().toStdString());
+                header_data.push_back(model->headerData(current_index.column(), Qt::Horizontal, BaseBufferTableModel::VariableNameRole).toString().toStdString());
 
             previous_index = current_index;
         }

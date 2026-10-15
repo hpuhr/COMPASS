@@ -97,6 +97,11 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
     QLabel* variable_label_{nullptr};
     QPushButton* sel_button_{nullptr};
 
+    // the selection, the labels show the brief display name of it, see Variable::displayName()
+    std::string selected_object_name_;
+    std::string selected_variable_name_;
+    static const unsigned int LabelMaxChars = 24;
+
     bool variable_selected_{false};
     bool meta_variable_selected_{false};
     bool report_variable_selected_{false};
@@ -115,6 +120,7 @@ class VariableSelectionWidget : public QFrame, public ui_test::UITestable
     bool show_existing_in_db_only_{false};
 
     void applySelection(const std::string& obj_name, const std::string& var_name);
+    void updateLabels();
     void updateToolTip();
 };
 

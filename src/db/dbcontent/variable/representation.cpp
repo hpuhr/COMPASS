@@ -25,8 +25,9 @@ bool representationIsContextFree(Representation repr)
     switch (repr)
     {
         case Representation::STANDARD:      //not a special representation
-        case Representation::DATA_SRC_NAME: //needs the data sources
-        case Representation::MLAT_RUS:      //needs the remote unit names
+        case Representation::DATA_SRC_NAME:    //needs the data sources
+        case Representation::MLAT_RUS:         //needs the remote unit names
+        case Representation::SELECTION_SOURCE: //needs the candidate list of the selection
             return false;
         default:
             return true;

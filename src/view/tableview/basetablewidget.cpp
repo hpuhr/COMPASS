@@ -62,7 +62,7 @@ void BaseBufferTableWidget::initModel(BaseBufferTableModel* model)
     int ts_col = -1;
     for (int col = 0; col < model_->columnCount(); ++col)
     {
-        if (model_->headerData(col, Qt::Horizontal).toString() == "Timestamp")
+        if (model_->headerData(col, Qt::Horizontal, BaseBufferTableModel::VariableNameRole).toString() == "Timestamp")
         {
             ts_col = col;
             break;
@@ -173,7 +173,8 @@ void BaseBufferTableWidget::keyPressEvent(QKeyEvent* event)
             QModelIndex previous = indexes.first();
             unsigned int row_count = 0;
 
-            selected_headers = model->headerData(previous.column(), Qt::Horizontal).toString();
+            selected_headers = model->headerData(previous.column(), Qt::Horizontal,
+                                                 BaseBufferTableModel::VariableNameRole).toString();
             selected_text = model->data(previous).toString();
             indexes.removeFirst();
 
@@ -206,7 +207,8 @@ void BaseBufferTableWidget::keyPressEvent(QKeyEvent* event)
 
                 if (!row_count)  // first row
                     selected_headers.append(
-                                model->headerData(current.column(), Qt::Horizontal).toString());
+                                model->headerData(current.column(), Qt::Horizontal,
+                                                  BaseBufferTableModel::VariableNameRole).toString());
 
                 previous = current;
             }

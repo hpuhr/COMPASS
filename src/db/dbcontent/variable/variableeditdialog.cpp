@@ -27,6 +27,8 @@
 
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QListWidget>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -36,6 +38,9 @@
 #include <QTextEdit>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/join.hpp>
+
+#include <json.hpp>
 
 using namespace std;
 
@@ -85,11 +90,93 @@ VariableEditDialog::VariableEditDialog(Variable& variable, QWidget* parent, Qt::
 
     form_layout->addRow("Comment", description_edit_);
 
-    // origin, data item, inputs or candidate list: set by the definition files, shown read only
-    origin_edit_ = new QLineEdit(variable_.originInfo().c_str());
-    origin_edit_->setReadOnly(true);
-    origin_edit_->setToolTip(variable_.info().c_str());
-    form_layout->addRow("Origin", origin_edit_);
+    // origin model, see readme_dbcontent.md: editable in expert mode, a change of the
+    // candidates applies to the next import
+
+    origin_combo_ = new QComboBox();
+    for (const auto& origin : {Variable::OriginAsterix, Variable::OriginCalculated,
+                               Variable::OriginInternal, Variable::OriginSelection})
+        origin_combo_->addItem(origin.c_str());
+    origin_combo_->setCurrentText(variable_.origin().c_str());
+    origin_combo_->setEnabled(expert_mode_);
+    origin_combo_->setToolTip(variable_.info().c_str());
+    connect(origin_combo_, &QComboBox::currentTextChanged, this, &VariableEditDialog::originChangedSlot);
+    form_layout->addRow("Origin", origin_combo_);
+
+    data_item_edit_ = new QLineEdit(variable_.dataItem().c_str());
+    data_item_edit_->setReadOnly(!expert_mode_);
+    data_item_edit_->setToolTip("ASTERIX item in EUROCONTROL notation, I021/071.Time of Applicability for Position");
+    connect(data_item_edit_, &QLineEdit::textChanged, this, &VariableEditDialog::dataItemChangedSlot);
+    form_layout->addRow("Data Item", data_item_edit_);
+
+    inputs_edit_ = new QLineEdit(boost::algorithm::join(variable_.inputs(), ", ").c_str());
+    inputs_edit_->setReadOnly(!expert_mode_);
+    inputs_edit_->setToolTip("Variables of this content the value is calculated from, comma separated");
+    connect(inputs_edit_, &QLineEdit::textChanged, this, &VariableEditDialog::inputsChangedSlot);
+    form_layout->addRow("Inputs", inputs_edit_);
+
+    {
+        QWidget* candidates_widget = new QWidget();
+        QHBoxLayout* candidates_layout = new QHBoxLayout();
+        candidates_layout->setContentsMargins(0, 0, 0, 0);
+
+        candidates_list_ = new QListWidget();
+        candidates_list_->setToolTip("Candidates in priority order, the first with a value supplies the record. "
+                                     "A change applies to the next import.");
+        candidates_layout->addWidget(candidates_list_);
+
+        QVBoxLayout* buttons_layout = new QVBoxLayout();
+
+        candidate_up_button_ = new QPushButton("Up");
+        candidate_up_button_->setToolTip("Move the selected candidate up in the priority order");
+        connect(candidate_up_button_, &QPushButton::clicked, this, &VariableEditDialog::moveCandidateUpSlot);
+        buttons_layout->addWidget(candidate_up_button_);
+
+        candidate_down_button_ = new QPushButton("Down");
+        candidate_down_button_->setToolTip("Move the selected candidate down in the priority order");
+        connect(candidate_down_button_, &QPushButton::clicked, this, &VariableEditDialog::moveCandidateDownSlot);
+        buttons_layout->addWidget(candidate_down_button_);
+
+        candidate_remove_button_ = new QPushButton("Remove");
+        candidate_remove_button_->setToolTip("Remove the selected candidate");
+        connect(candidate_remove_button_, &QPushButton::clicked, this, &VariableEditDialog::removeCandidateSlot);
+        buttons_layout->addWidget(candidate_remove_button_);
+
+        buttons_layout->addStretch();
+        candidates_layout->addLayout(buttons_layout);
+        candidates_widget->setLayout(candidates_layout);
+
+        form_layout->addRow("Candidates", candidates_widget);
+    }
+
+    {
+        QWidget* add_widget = new QWidget();
+        QHBoxLayout* add_layout = new QHBoxLayout();
+        add_layout->setContentsMargins(0, 0, 0, 0);
+
+        candidate_add_combo_ = new QComboBox();
+        candidate_add_combo_->setToolTip("Variable of this content to add as the last candidate");
+        for (const auto& var_it : variable_.object().variables())
+            if (var_it.first != variable_.name())
+                candidate_add_combo_->addItem(var_it.first.c_str());
+        add_layout->addWidget(candidate_add_combo_);
+
+        candidate_add_button_ = new QPushButton("Add");
+        connect(candidate_add_button_, &QPushButton::clicked, this, &VariableEditDialog::addCandidateSlot);
+        add_layout->addWidget(candidate_add_button_);
+
+        add_widget->setLayout(add_layout);
+        form_layout->addRow("Add Candidate", add_widget);
+    }
+
+    source_variable_edit_ = new QLineEdit(variable_.sourceVariableName().c_str());
+    source_variable_edit_->setReadOnly(!expert_mode_);
+    source_variable_edit_->setToolTip("UCHAR variable of this content holding the 1-based index of the chosen candidate");
+    connect(source_variable_edit_, &QLineEdit::textChanged, this, &VariableEditDialog::sourceVariableChangedSlot);
+    form_layout->addRow("Source Variable", source_variable_edit_);
+
+    updateCandidates();
+    updateOriginWidgets();
 
     //    VariableDataTypeComboBox* type_combo_ {nullptr};
     type_combo_ = new VariableDataTypeComboBox(variable_.dataTypeRef(), variable_.dataTypeStringRef());
@@ -186,9 +273,187 @@ void VariableEditDialog::shortNameChangedSlot(const QString& name)
 {
     loginf << "name '" << name.trimmed().toStdString() << "'";
 
-    variable_.shortName(name.trimmed().toStdString());
+    std::string short_name = name.trimmed().toStdString();
+
+    // at most 10 characters, see readme_dbcontent.md
+    if (short_name.size() > 10)
+    {
+        short_name_edit_->setStyleSheet(variable_.dbContent().compass().lineEditInvalidStyle());
+        short_name_edit_->setToolTip("A short name has at most 10 characters");
+        return;
+    }
+
+    short_name_edit_->setStyleSheet("");
+    short_name_edit_->setToolTip("");
+
+    variable_.shortName(short_name);
 
     variable_edited_ = true;
+}
+
+void VariableEditDialog::originChangedSlot(const QString& origin)
+{
+    variable_.origin(origin.toStdString());
+
+    updateOriginWidgets();
+
+    variable_edited_ = true;
+}
+
+void VariableEditDialog::dataItemChangedSlot(const QString& data_item)
+{
+    variable_.dataItem(data_item.trimmed().toStdString());
+
+    variable_edited_ = true;
+}
+
+void VariableEditDialog::inputsChangedSlot(const QString& inputs)
+{
+    std::vector<std::string> input_names;
+
+    for (const QString& part : inputs.split(','))
+    {
+        std::string input_name = part.trimmed().toStdString();
+
+        if (input_name.size())
+            input_names.push_back(input_name);
+    }
+
+    variable_.inputs(input_names);
+
+    variable_edited_ = true;
+}
+
+void VariableEditDialog::sourceVariableChangedSlot(const QString& name)
+{
+    variable_.sourceVariableName(name.trimmed().toStdString());
+
+    variable_edited_ = true;
+}
+
+void VariableEditDialog::moveCandidateUpSlot()
+{
+    int row = candidates_list_->currentRow();
+
+    if (row > 0)
+        moveCandidate(row, row - 1);
+}
+
+void VariableEditDialog::moveCandidateDownSlot()
+{
+    int row = candidates_list_->currentRow();
+
+    if (row >= 0 && row + 1 < candidates_list_->count())
+        moveCandidate(row, row + 1);
+}
+
+void VariableEditDialog::moveCandidate(int from, int to)
+{
+    nlohmann::json selection = variable_.selection();
+
+    traced_assert(from >= 0 && from < (int) selection.size());
+    traced_assert(to >= 0 && to < (int) selection.size());
+
+    nlohmann::json candidate = selection.at(from);
+    selection.erase(from);
+    selection.insert(selection.begin() + to, candidate);
+
+    variable_.selection(selection);
+
+    updateCandidates(to);
+
+    variable_edited_ = true;
+}
+
+void VariableEditDialog::removeCandidateSlot()
+{
+    int row = candidates_list_->currentRow();
+
+    nlohmann::json selection = variable_.selection();
+
+    if (row < 0 || row >= (int) selection.size())
+        return;
+
+    selection.erase(row);
+    variable_.selection(selection);
+
+    updateCandidates(std::min(row, (int) selection.size() - 1));
+
+    variable_edited_ = true;
+}
+
+void VariableEditDialog::addCandidateSlot()
+{
+    std::string var_name = candidate_add_combo_->currentText().toStdString();
+
+    if (var_name.empty() || !variable_.object().hasVariable(var_name))
+        return;
+
+    nlohmann::json selection = variable_.selection();
+    selection.push_back({{"variable", var_name}});
+    variable_.selection(selection);
+
+    updateCandidates(selection.size() - 1);
+
+    variable_edited_ = true;
+}
+
+void VariableEditDialog::updateOriginWidgets()
+{
+    bool is_asterix = variable_.isAsterix();
+    bool is_calculated = variable_.isCalculated();
+    bool is_selection = variable_.isSelection();
+
+    data_item_edit_->setEnabled(is_asterix);
+    inputs_edit_->setEnabled(is_calculated);
+
+    candidates_list_->setEnabled(is_selection);
+    candidate_up_button_->setEnabled(is_selection && expert_mode_);
+    candidate_down_button_->setEnabled(is_selection && expert_mode_);
+    candidate_remove_button_->setEnabled(is_selection && expert_mode_);
+    candidate_add_combo_->setEnabled(is_selection && expert_mode_);
+    candidate_add_button_->setEnabled(is_selection && expert_mode_);
+    source_variable_edit_->setEnabled(is_selection);
+}
+
+void VariableEditDialog::updateCandidates(int current_row)
+{
+    candidates_list_->clear();
+
+    const nlohmann::json& selection = variable_.selection();
+
+    for (unsigned int index = 1; index <= selection.size(); ++index)
+    {
+        const nlohmann::json& candidate = selection.at(index - 1);
+
+        std::string text = std::to_string(index) + ": " + variable_.selectionCandidateLabel(index);
+
+        if (candidate.is_object() && candidate.contains("variable") && candidate.at("variable").is_string())
+        {
+            std::string var_name = candidate.at("variable");
+
+            if (var_name != variable_.selectionCandidateLabel(index))
+                text += " " + var_name;
+
+            for (const auto& key : {"require_true", "require_false"})
+            {
+                if (!candidate.contains(key) || !candidate.at(key).is_array())
+                    continue;
+
+                for (const auto& flag : candidate.at(key))
+                    if (flag.is_string())
+                        text += std::string(", requires ") + flag.get<std::string>()
+                                + (std::string(key) == "require_true" ? " true" : " false");
+            }
+        }
+        else if (candidate.is_object() && candidate.contains("calculation") && candidate.at("calculation").is_string())
+            text += ", calculation " + candidate.at("calculation").get<std::string>();
+
+        candidates_list_->addItem(text.c_str());
+    }
+
+    if (current_row >= 0 && current_row < candidates_list_->count())
+        candidates_list_->setCurrentRow(current_row);
 }
 
 void VariableEditDialog::commentChangedSlot()

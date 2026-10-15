@@ -28,7 +28,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "ANT",
+                "short_name": "",
                 "source_variable": "",
                 "unit": ""
             }
@@ -97,7 +97,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "Trun ToD",
+                "short_name": "Trunc ToD",
                 "source_variable": "",
                 "unit": ""
             }
@@ -120,7 +120,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "RDP",
+                "short_name": "",
                 "source_variable": "",
                 "unit": ""
             }
@@ -189,7 +189,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "Track Qual",
                 "source_variable": "",
                 "unit": ""
             }
@@ -212,7 +212,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "Plot Char",
                 "source_variable": "",
                 "unit": ""
             }
@@ -281,7 +281,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "RAD",
+                "short_name": "Sens Types",
                 "source_variable": "",
                 "unit": ""
             }
@@ -329,7 +329,7 @@
                 "origin": "internal",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "UTN",
+                "short_name": "",
                 "source_variable": "",
                 "unit": ""
             }
@@ -352,7 +352,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "TYP",
+                "short_name": "",
                 "source_variable": "",
                 "unit": ""
             }
@@ -470,7 +470,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "ME",
+                "short_name": "Mil Emerg",
                 "source_variable": "",
                 "unit": ""
             }
@@ -493,7 +493,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "MI",
+                "short_name": "Mil Ident",
                 "source_variable": "",
                 "unit": ""
             }
@@ -516,7 +516,7 @@
                 "origin": "asterix",
                 "representation_str": "DEC_TO_OCTAL",
                 "selection": [],
-                "short_name": "MA",
+                "short_name": "M3A",
                 "source_variable": "",
                 "unit": ""
             }
@@ -539,7 +539,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "MA G",
+                "short_name": "M3A G",
                 "source_variable": "",
                 "unit": ""
             }
@@ -562,7 +562,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "MA S",
+                "short_name": "M3A S",
                 "source_variable": "",
                 "unit": ""
             }
@@ -585,7 +585,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "MA V",
+                "short_name": "M3A V",
                 "source_variable": "",
                 "unit": ""
             }
@@ -608,7 +608,7 @@
                 "origin": "asterix",
                 "representation_str": "FLOAT_PREC2",
                 "selection": [],
-                "short_name": "MC",
+                "short_name": "",
                 "source_variable": "",
                 "unit": "Feet"
             }
@@ -654,7 +654,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "MC V",
+                "short_name": "",
                 "source_variable": "",
                 "unit": ""
             }
@@ -677,7 +677,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "Azm",
+                "short_name": "",
                 "source_variable": "",
                 "unit": "Degree"
             }
@@ -703,7 +703,7 @@
                 "origin": "calculated",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "Lat",
+                "short_name": "",
                 "source_variable": "",
                 "unit": "Degree"
             }
@@ -729,7 +729,7 @@
                 "origin": "calculated",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "Lon",
+                "short_name": "",
                 "source_variable": "",
                 "unit": "Degree"
             }
@@ -775,7 +775,7 @@
                 "origin": "internal",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "Rec Num",
                 "source_variable": "",
                 "unit": ""
             }
@@ -867,7 +867,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "SIM",
+                "short_name": "",
                 "source_variable": "",
                 "unit": ""
             }
@@ -913,7 +913,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "TST",
+                "short_name": "",
                 "source_variable": "",
                 "unit": ""
             }
@@ -936,7 +936,7 @@
                 "origin": "asterix",
                 "representation_str": "SECONDS_TO_TIME",
                 "selection": [],
-                "short_name": "ToD",
+                "short_name": "",
                 "source_variable": "",
                 "unit": "Second"
             }
@@ -959,7 +959,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "CNF",
+                "short_name": "Confirmed",
                 "source_variable": "",
                 "unit": ""
             }
@@ -982,7 +982,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "DOU",
+                "short_name": "Doubtful",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1028,7 +1028,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "GHO",
+                "short_name": "Ghost Tgt",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1051,7 +1051,7 @@
                 "origin": "asterix",
                 "representation_str": "FLOAT_PREC1",
                 "selection": [],
-                "short_name": "GSpd",
+                "short_name": "Gnd Speed",
                 "source_variable": "",
                 "unit": "Knots"
             }
@@ -1074,7 +1074,7 @@
                 "origin": "asterix",
                 "representation_str": "FLOAT_PREC1",
                 "selection": [],
-                "short_name": "Ang",
+                "short_name": "",
                 "source_variable": "",
                 "unit": "Degree"
             }
@@ -1097,7 +1097,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "MAH",
+                "short_name": "Horiz Man",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1120,7 +1120,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "TN",
+                "short_name": "",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1189,7 +1189,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "M2 G",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1212,7 +1212,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "M2 S",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1235,7 +1235,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "M2 Conf",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1258,7 +1258,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "M3A Conf",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1281,7 +1281,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "MC Reply",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1304,7 +1304,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "MC Reply V",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1327,7 +1327,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "MC Reply G",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1350,7 +1350,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "MC Conf",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1373,7 +1373,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "Doppler",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1396,7 +1396,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "XP M3A",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1419,7 +1419,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "XP M2",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1442,7 +1442,7 @@
                 "origin": "asterix",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "XP MC",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1465,7 +1465,7 @@
                 "origin": "internal",
                 "representation_str": "SECONDS_TO_TIME",
                 "selection": [],
-                "short_name": "",
+                "short_name": "Rec Time",
                 "source_variable": "",
                 "unit": "Second"
             }
@@ -1488,7 +1488,7 @@
                 "origin": "internal",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "Rec Day",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1511,7 +1511,7 @@
                 "origin": "internal",
                 "representation_str": "STANDARD",
                 "selection": [],
-                "short_name": "",
+                "short_name": "Rec Date",
                 "source_variable": "",
                 "unit": ""
             }
@@ -1561,9 +1561,9 @@
                 "is_key": false,
                 "name": "Time of Day Source",
                 "origin": "calculated",
-                "representation_str": "STANDARD",
+                "representation_str": "SELECTION_SOURCE",
                 "selection": [],
-                "short_name": "",
+                "short_name": "ToD Source",
                 "source_variable": "",
                 "unit": ""
             }

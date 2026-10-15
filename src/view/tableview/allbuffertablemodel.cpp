@@ -373,6 +373,49 @@ QVariant AllBufferTableModel::dataColumnHeader(unsigned int data_col) const
     return QString(variable_name.c_str());
 }
 
+QVariant AllBufferTableModel::dataColumnDisplayName(unsigned int data_col) const
+{
+    // the brief form, item plus short name where the full name does not fit
+
+    traced_assert(data_col < data_source_.getSet()->getSize());
+
+    auto definition = data_source_.getSet()->variableDefinition(data_col); // content name, variable name
+    DBContentManager& dbcont_man = view_.compass().dbContentManager();
+
+    if (definition.first == META_OBJECT_NAME)
+    {
+        if (dbcont_man.existsMetaVariable(definition.second))
+            return QString::fromStdString(dbcont_man.metaVariable(definition.second).displayName(HeaderMaxChars));
+    }
+    else if (dbcont_man.existsDBContent(definition.first)
+             && dbcont_man.dbContent(definition.first).hasVariable(definition.second))
+        return QString::fromStdString(
+            dbcont_man.dbContent(definition.first).variable(definition.second).displayName(HeaderMaxChars));
+
+    return QString::fromStdString(definition.second);
+}
+
+QVariant AllBufferTableModel::dataColumnTooltip(unsigned int data_col) const
+{
+    // the variable info: full name, origin per content of a Meta Variable, description
+
+    traced_assert(data_col < data_source_.getSet()->getSize());
+
+    auto definition = data_source_.getSet()->variableDefinition(data_col); // content name, variable name
+    DBContentManager& dbcont_man = view_.compass().dbContentManager();
+
+    if (definition.first == META_OBJECT_NAME)
+    {
+        if (dbcont_man.existsMetaVariable(definition.second))
+            return QString::fromStdString(dbcont_man.metaVariable(definition.second).info());
+    }
+    else if (dbcont_man.existsDBContent(definition.first)
+             && dbcont_man.dbContent(definition.first).hasVariable(definition.second))
+        return QString::fromStdString(dbcont_man.dbContent(definition.first).variable(definition.second).info());
+
+    return QVariant();
+}
+
 void AllBufferTableModel::clearData()
 {
     logdbg;

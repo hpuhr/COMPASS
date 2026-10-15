@@ -102,6 +102,25 @@ void VariableSelectionWidget::setReadOnly(bool read_only)
     sel_button_->setDisabled(read_only);
 }
 
+void VariableSelectionWidget::updateLabels()
+{
+    traced_assert(object_label_);
+    traced_assert(variable_label_);
+
+    object_label_->setText(QString::fromStdString(selected_object_name_));
+
+    // the brief display name, the full name and the origin are in the tooltip
+    std::string shown = selected_variable_name_;
+
+    if (meta_variable_selected_ && dbcont_man_.existsMetaVariable(selected_variable_name_))
+        shown = dbcont_man_.metaVariable(selected_variable_name_).displayName(LabelMaxChars);
+    else if (variable_selected_ && dbcont_man_.existsDBContent(selected_object_name_)
+             && dbcont_man_.dbContent(selected_object_name_).hasVariable(selected_variable_name_))
+        shown = dbcont_man_.dbContent(selected_object_name_).variable(selected_variable_name_).displayName(LabelMaxChars);
+
+    variable_label_->setText(QString::fromStdString(shown));
+}
+
 void VariableSelectionWidget::updateToolTip()
 {
     if (hasVariable())
@@ -174,8 +193,9 @@ void VariableSelectionWidget::applySelection(const std::string& obj_name,
         }
     }
 
-    object_label_->setText(obj_name.c_str());
-    variable_label_->setText(var_name.c_str());
+    selected_object_name_ = obj_name;
+    selected_variable_name_ = var_name;
+    updateLabels();
 
     loginf << "obj " << obj_name.c_str() << " var "
            << var_name.c_str();
@@ -190,13 +210,14 @@ void VariableSelectionWidget::selectedVariable(Variable& variable)
     traced_assert(object_label_);
     traced_assert(variable_label_);
 
-    object_label_->setText(QString::fromStdString(variable.dbContentName()));
-    variable_label_->setText(variable.name().c_str());
+    selected_object_name_ = variable.dbContentName();
+    selected_variable_name_ = variable.name();
 
     variable_selected_        = true;
     meta_variable_selected_   = false;
     report_variable_selected_ = false;
 
+    updateLabels();
     updateToolTip();
 }
 
@@ -207,13 +228,14 @@ void VariableSelectionWidget::selectEmptyVariable()
     traced_assert(object_label_);
     traced_assert(variable_label_);
 
-    object_label_->setText("");
-    variable_label_->setText("");
+    selected_object_name_ = "";
+    selected_variable_name_ = "";
 
     variable_selected_        = false;
     meta_variable_selected_   = false;
     report_variable_selected_ = false;
 
+    updateLabels();
     updateToolTip();
 }
 
@@ -223,8 +245,8 @@ ReportVariable& VariableSelectionWidget::selectedReportVariable() const
     traced_assert(variable_label_);
     traced_assert(report_variable_selected_);
 
-    std::string obj_name = object_label_->text().toStdString();
-    std::string var_name = variable_label_->text().toStdString();
+    std::string obj_name = selected_object_name_;
+    std::string var_name = selected_variable_name_;
 
     traced_assert(dbcont_man_.existsReportVariable(obj_name, var_name));
 
@@ -245,13 +267,14 @@ void VariableSelectionWidget::selectedReportVariable(ReportVariable& variable)
 
     traced_assert(!report_name.empty());
 
-    object_label_->setText(QString::fromStdString(report_name));
-    variable_label_->setText(QString::fromStdString(variable.name()));
+    selected_object_name_ = report_name;
+    selected_variable_name_ = variable.name();
 
     variable_selected_        = false;
     meta_variable_selected_   = false;
     report_variable_selected_ = true;
 
+    updateLabels();
     updateToolTip();
 }
 
@@ -261,8 +284,8 @@ Variable& VariableSelectionWidget::selectedVariable() const
     traced_assert(variable_label_);
     traced_assert(variable_selected_);
 
-    std::string obj_name = object_label_->text().toStdString();
-    std::string var_name = variable_label_->text().toStdString();
+    std::string obj_name = selected_object_name_;
+    std::string var_name = selected_variable_name_;
 
     traced_assert(dbcont_man_.dbContent(obj_name).hasVariable(var_name));
 
@@ -274,12 +297,14 @@ void VariableSelectionWidget::selectedMetaVariable(MetaVariable& variable)
     traced_assert(object_label_);
     traced_assert(variable_label_);
 
-    object_label_->setText(QString::fromStdString(META_OBJECT_NAME));
-    variable_label_->setText(variable.name().c_str());
+    selected_object_name_ = META_OBJECT_NAME;
+    selected_variable_name_ = variable.name();
 
     variable_selected_        = false;
     meta_variable_selected_   = true;
     report_variable_selected_ = false;
+
+    updateLabels();
 
     updateToolTip();
 }
@@ -290,8 +315,8 @@ MetaVariable& VariableSelectionWidget::selectedMetaVariable() const
     traced_assert(variable_label_);
     traced_assert(meta_variable_selected_);
 
-    std::string obj_name = object_label_->text().toStdString();
-    std::string var_name = variable_label_->text().toStdString();
+    std::string obj_name = selected_object_name_;
+    std::string var_name = selected_variable_name_;
 
     traced_assert(obj_name == META_OBJECT_NAME);
     traced_assert(dbcont_man_.existsMetaVariable(var_name));
@@ -304,8 +329,8 @@ std::pair<std::string, std::string> VariableSelectionWidget::selectionAsString()
     traced_assert(object_label_);
     traced_assert(variable_label_);
 
-    std::string obj_name = object_label_->text().toStdString();
-    std::string var_name = variable_label_->text().toStdString();
+    std::string obj_name = selected_object_name_;
+    std::string var_name = selected_variable_name_;
 
     return std::make_pair(obj_name, var_name);
 }
@@ -377,8 +402,9 @@ void VariableSelectionWidget::showExistingInDBOnly(bool show_existing_only)
 
 boost::optional<QString> VariableSelectionWidget::uiGet(const QString& what) const
 {
-    QString obj_str = object_label_->text();
-    QString var_str = variable_label_->text();
+    // the selection itself, not the brief display name the labels show
+    QString obj_str = QString::fromStdString(selected_object_name_);
+    QString var_str = QString::fromStdString(selected_variable_name_);
 
     QStringList strings;
     strings.push_back(obj_str);

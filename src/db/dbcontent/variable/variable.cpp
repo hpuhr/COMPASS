@@ -48,7 +48,8 @@ std::map<Variable::Representation, std::string> Variable::representation_2_strin
     {Variable::Representation::FLOAT_PREC2, "FLOAT_PREC2"},
     {Variable::Representation::FLOAT_PREC4, "FLOAT_PREC4"},
     {Variable::Representation::LINE_NAME, "LINE_NAME"},
-    {Variable::Representation::MLAT_RUS, "MLAT_RUS"}};
+    {Variable::Representation::MLAT_RUS, "MLAT_RUS"},
+    {Variable::Representation::SELECTION_SOURCE, "SELECTION_SOURCE"}};
 
 std::map<std::string, Variable::Representation> Variable::string_2_representation_{
     {"STANDARD", Variable::Representation::STANDARD},
@@ -63,7 +64,8 @@ std::map<std::string, Variable::Representation> Variable::string_2_representatio
     {"FLOAT_PREC2", Variable::Representation::FLOAT_PREC2},
     {"FLOAT_PREC4", Variable::Representation::FLOAT_PREC4},
     {"LINE_NAME", Variable::Representation::LINE_NAME},
-    {"MLAT_RUS", Variable::Representation::MLAT_RUS}};
+    {"MLAT_RUS", Variable::Representation::MLAT_RUS},
+    {"SELECTION_SOURCE", Variable::Representation::SELECTION_SOURCE}};
 
 Variable::Representation Variable::stringToRepresentation(
     const std::string& representation_str)
@@ -261,6 +263,97 @@ std::string Variable::selectionCandidateLabel(unsigned int index) const
         return candidate.at("calculation");
 
     return "";
+}
+
+std::string Variable::displayName(unsigned int max_chars) const
+{
+    std::vector<std::string> forms;
+
+    std::string item = isAsterix() ? dataItemPart() : "";
+
+    if (item.size())
+    {
+        forms.push_back(item + " " + name_);
+
+        if (hasShortName())
+            forms.push_back(item + " " + short_name_);
+    }
+
+    forms.push_back(name_);
+
+    if (hasShortName())
+        forms.push_back(short_name_);
+
+    if (!max_chars)
+        return forms.front();
+
+    const std::string* longest_fitting {nullptr};
+    const std::string* shortest = &forms.front();
+
+    for (const auto& form : forms)
+    {
+        if (form.size() <= max_chars && (!longest_fitting || form.size() > longest_fitting->size()))
+            longest_fitting = &form;
+
+        if (form.size() < shortest->size())
+            shortest = &form;
+    }
+
+    return longest_fitting ? *longest_fitting : *shortest;
+}
+
+std::string Variable::selectionSourceLabel(const std::string& index_str) const
+{
+    const Variable* selection = selectionOf();
+
+    if (!selection)
+        return index_str;
+
+    unsigned int index {0};
+
+    try
+    {
+        index = std::stoul(index_str);
+    }
+    catch (const std::exception&)
+    {
+        return index_str;
+    }
+
+    if (index < 1 || index > selection->numSelectionCandidates())
+        return index_str;
+
+    return selection->selectionCandidateLabel(index);
+}
+
+std::string Variable::selectionSourceIndex(const std::string& label) const
+{
+    const Variable* selection = selectionOf();
+
+    if (!selection)
+        return label;
+
+    for (unsigned int index = 1; index <= selection->numSelectionCandidates(); ++index)
+        if (selection->selectionCandidateLabel(index) == label)
+            return std::to_string(index);
+
+    return label;
+}
+
+const Variable* Variable::selectionOf() const
+{
+    if (!dbcontent_)
+        return nullptr;
+
+    for (const auto& var_it : dbcontent_->variables())
+    {
+        const Variable& var = *var_it.second;
+
+        if (var.isSelection() && var.sourceVariableName() == name_)
+            return &var;
+    }
+
+    return nullptr;
 }
 
 std::string Variable::originInfo() const
@@ -736,6 +829,10 @@ std::string Variable::getValueStringFromRepresentation(
         // not found, return original
 
         return representation_str;
+    }
+    else if (representation_ == Variable::Representation::SELECTION_SOURCE)
+    {
+        return selectionSourceIndex(representation_str);
     }
     else if (representation_ == Variable::Representation::CLIMB_DESCENT)
     {

@@ -24,6 +24,8 @@ class StringRepresentationComboBox;
 
 class QLineEdit;
 class QCheckBox;
+class QComboBox;
+class QListWidget;
 class QPushButton;
 class QTextEdit;
 
@@ -43,6 +45,15 @@ public slots:
     void commentChangedSlot();
     void dbColumnChangedSlot(const QString& name);
 
+    void originChangedSlot(const QString& origin);
+    void dataItemChangedSlot(const QString& data_item);
+    void inputsChangedSlot(const QString& inputs);
+    void sourceVariableChangedSlot(const QString& name);
+    void moveCandidateUpSlot();
+    void moveCandidateDownSlot();
+    void removeCandidateSlot();
+    void addCandidateSlot();
+
     void doneSlot();
 
 public:
@@ -60,7 +71,22 @@ protected:
     QLineEdit* name_edit_ {nullptr};
     QLineEdit* short_name_edit_ {nullptr};
     QTextEdit* description_edit_ {nullptr};
-    QLineEdit* origin_edit_ {nullptr};
+
+    // origin model, see readme_dbcontent.md: the widgets of the other origins are disabled
+    QComboBox* origin_combo_ {nullptr};
+    QLineEdit* data_item_edit_ {nullptr};
+    QLineEdit* inputs_edit_ {nullptr};
+    QListWidget* candidates_list_ {nullptr};
+    QPushButton* candidate_up_button_ {nullptr};
+    QPushButton* candidate_down_button_ {nullptr};
+    QPushButton* candidate_remove_button_ {nullptr};
+    QComboBox* candidate_add_combo_ {nullptr};
+    QPushButton* candidate_add_button_ {nullptr};
+    QLineEdit* source_variable_edit_ {nullptr};
+
+    void updateOriginWidgets();
+    void updateCandidates(int current_row = -1);
+    void moveCandidate(int from, int to);
     VariableDataTypeComboBox* type_combo_ {nullptr};
     UnitSelectionWidget* unit_sel_ {nullptr};
     StringRepresentationComboBox* representation_box_ {nullptr};
