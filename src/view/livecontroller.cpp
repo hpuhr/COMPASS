@@ -112,6 +112,7 @@ void LiveController::startSession()
         return;
     }
     reloadWindow("Starting Live Mode");
+    resetOverload();
     state_ = State::Running;
 }
 
@@ -130,6 +131,7 @@ void LiveController::pauseSession()
         return;
     }
     state_ = State::Paused;
+    resetOverload();
 }
 
 /**
@@ -146,6 +148,7 @@ void LiveController::resumeSession()
         return;
     }
     reloadWindow("Resuming Live Mode");
+    resetOverload();
     state_ = State::Running;
 }
 
@@ -161,6 +164,7 @@ void LiveController::stopSession()
         return;
     }
     state_ = State::Stopped;
+    resetOverload();
     clearFeed();
 }
 
@@ -272,23 +276,118 @@ void LiveController::processLiveModeSlot()
         compass_.dbContentManager().deleteDBContentData(old_time);
     }
 
-    processTick();
+    tryTick();
 }
 
 /**
  * Live-entry refresh: trim the feed to the window + distribute, without the DB delete (the
  * every-tick DB bound resumes on the next real tick, so no delete overlaps here).
+ * Never held: the views still show the outgoing source and have to get the feed now. An empty
+ * window distributes nothing => the views are cleared explicitly.
  */
 void LiveController::refreshDisplay()
 {
+    // inserts staged during the catch-up load reflect the load, not an overload
+    feed_->takeInsertLatency();
+
+    feed_->processTick();
+
+    if (feed_->buffers().empty())
+        view_manager_.clearDataInViews();
+}
+
+/**
+ * Runs the in-memory tick unless it has to be held: while the views are still being dispatched to
+ * (retried in the next event loop turn) or while the application is overloaded (the inserts stay
+ * staged in the feed and are merged by the first tick after the overload).
+ */
+void LiveController::tryTick()
+{
+    if (view_manager_.isProcessingData())
+    {
+        loginf << "views still processing data, retrying the tick";
+
+        scheduleTickRetry();
+        return;
+    }
+
+    if (checkOverload())
+        return;
+
     processTick();
+}
+
+/**
+ * Overload check of a tick attempt (see LiveOverloadDetector), updates COMPASS::liveOverloaded().
+ * Returns true if the tick has to be held.
+ */
+bool LiveController::checkOverload()
+{
+    auto& settings = overload_detector_.settings();
+    settings.max_packets_in_processing = compass_.liveOverloadMaxPackets();
+    settings.max_latency_s             = compass_.liveOverloadMaxLatency();
+    settings.force                     = compass_.liveOverloadForced();
+
+    unsigned int packets = compass_.liveImportBacklogSize();
+
+    std::optional<double> latency_s;
+    auto latency = feed_->takeInsertLatency();
+    if (latency)
+        latency_s = latency->total_milliseconds() / 1000.0;
+
+    bool hold = overload_detector_.update(packets, latency_s);
+
+    if (hold)
+        loginf << "holding live tick " << overload_detector_.heldTicks() + 1 << "/" << overload_detector_.holdTicks()
+               << ", packets in processing " << packets
+               << ", latency " << (latency_s ? std::to_string(*latency_s) + " s" : "-");
+
+    compass_.liveOverloaded(overload_detector_.isOverloaded());
+
+    emit overloadCheckedSignal(packets,
+                               latency_s.value_or(-1.0),
+                               overload_detector_.isOverloaded(),
+                               overload_detector_.heldTicks(),
+                               overload_detector_.holdTicks());
+    return hold;
+}
+
+/**
+ * Ends a pending overload (session transitions), the next session starts unloaded.
+ */
+void LiveController::resetOverload()
+{
+    overload_detector_.reset();
+    compass_.liveOverloaded(false);
+}
+
+/**
+ * Retries the tick in the next event loop turn (views were still being dispatched to).
+ */
+void LiveController::scheduleTickRetry()
+{
+    if (tick_retry_scheduled_)
+        return;
+
+    tick_retry_scheduled_ = true;
+
+    auto retryTick = [ this ] ()
+    {
+        tick_retry_scheduled_ = false;
+
+        if (running())
+            tryTick();
+    };
+
+    QMetaObject::invokeMethod(this, retryTick, Qt::QueuedConnection);
 }
 
 /**
  * In-memory merge/trim/filter on the feed. The feed's own dataChangedSignal drives
  * ViewManager::sourceDataChangedSlot (distribution + counts + dataDistributedSignal).
- * @TODO: the explicit clear on an emptied feed is only needed by the table view, whose
- * updateFromSource_impl is a no-op; drop it once that redraws on last=true.
+ * @TODO: the explicit clear on an emptied feed was only needed by the table view, whose
+ * updateFromSource_impl is a no-op; it no longer gets live ticks (View::followsLiveData()),
+ * so the clear can probably be dropped (to be checked with the geo view).
  */
 void LiveController::processTick()
 {

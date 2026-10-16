@@ -6,6 +6,11 @@
 
 int main(int argc, char* argv[])
 {
+    // Run without visible windows (and without a display, e.g. in CI) unless a platform
+    // is requested explicitly, e.g. QT_QPA_PLATFORM=xcb to watch widget tests.
+    if (!qEnvironmentVariableIsSet("QT_QPA_PLATFORM"))
+        qputenv("QT_QPA_PLATFORM", "offscreen");
+
     QApplication app(argc, argv);
 
     // Force C locale *after* QApplication ctor (which may reset it from env)

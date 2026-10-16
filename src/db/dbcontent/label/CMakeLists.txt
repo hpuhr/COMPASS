@@ -7,6 +7,7 @@ target_sources(compass_core
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/labeldirection.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelgenerator.h"
+        "${CMAKE_CURRENT_LIST_DIR}/labelsettings.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelgeneratorwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/labeldswidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelcontentdialog.h"
@@ -14,6 +15,7 @@ target_sources(compass_core
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_defs.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_force.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_spring.h"
+        "${CMAKE_CURRENT_LIST_DIR}/labelplacement_constraint.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelplacement_helpers.h"
         "${CMAKE_CURRENT_LIST_DIR}/labelgeneratorconfig.h"
     PRIVATE

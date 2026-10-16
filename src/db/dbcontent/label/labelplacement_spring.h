@@ -43,12 +43,12 @@ namespace force_exact
         Circle(double x, double y, double r) : pos(x, y), radius(r) {}
 
         QPointF pos;
-        double  radius;
+        double  radius = 0.0;
     };
 
     /**
      */
-    bool intersectCircleRect(const Circle& circle, const QRectF& rect) 
+    inline bool intersectCircleRect(const Circle& circle, const QRectF& rect)
     {
         const double c_x  = circle.pos.x();
         const double r_x  = (rect.left() + rect.right()) / 2;
@@ -80,7 +80,7 @@ namespace force_exact
 
     /**
      */
-    QPointF intersectLineCircle(const QPointF& line_pos, const Circle& circle) 
+    inline QPointF intersectLineCircle(const QPointF& line_pos, const Circle& circle)
     {
         // 0 = x, 1 = y
         double theta = std::atan2(line_pos.y() - circle.pos.y(), line_pos.x() - circle.pos.x());
@@ -92,7 +92,7 @@ namespace force_exact
 
     /**
      */
-    QPointF intersectLineRectangle(const QPointF& p1, const QPointF& p2, const QRectF& rect)
+    inline QPointF intersectLineRectangle(const QPointF& p1, const QPointF& p2, const QRectF& rect)
     {
         const double dy = p2.y() - p1.y();
         const double dx = p2.x() - p1.x();
@@ -159,7 +159,7 @@ namespace force_exact
 
     /**
      */
-    QPointF selectLineConnection(const QPointF& p, const QRectF& rect)
+    inline QPointF selectLineConnection(const QPointF& p, const QRectF& rect)
     {
         Eigen::Vector2d out;
 
@@ -242,14 +242,14 @@ namespace force_exact
 
     /**
      */
-    bool approxEqual(double x1, double x2) 
+    inline bool approxEqual(double x1, double x2)
     {
         return std::fabs(x2 - x1) < (std::numeric_limits<double>::epsilon() * 100);
     }
 
     /**
      */
-    bool intersectLineLine(const QPointF& p1, const QPointF& p2, const QPointF& q1, const QPointF& q2) 
+    inline bool intersectLineLine(const QPointF& p1, const QPointF& p2, const QPointF& q1, const QPointF& q2)
     {
         // Special exception, where q1 and q2 are equal (do intersect)
         if (q1.x() == q2.x() && q1.y() == q2.y())
@@ -340,7 +340,7 @@ namespace force_exact
 
     /**
      */
-    QRectF putWithinBounds(const QRectF& rect, const QRectF& roi, double force = 1e-5) 
+    inline QRectF putWithinBounds(const QRectF& rect, const QRectF& roi, double force = 1e-5)
     {
         double x0 = rect.left();
         double x1 = rect.right();
@@ -355,9 +355,9 @@ namespace force_exact
             x0 = roi.left();
             x1 = x0 + width;
         } 
-        else if (x1 > rect.right()) 
+        else if (x1 > roi.right())
         {
-            x1 = rect.right();
+            x1 = roi.right();
             x0 = x1 - width;
         }
         if (y0 < roi.top()) 
@@ -375,7 +375,7 @@ namespace force_exact
 
     /**
      */
-    Eigen::Vector2d repelForceXY(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001) 
+    inline Eigen::Vector2d repelForceXY(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001)
     {
         const double dx = std::fabs(a[ 0 ] - b[ 0 ]);
         const double dy = std::fabs(a[ 1 ] - b[ 1 ]);
@@ -403,7 +403,7 @@ namespace force_exact
 
     /**
      */
-    Eigen::Vector2d repelForceY(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001) 
+    inline Eigen::Vector2d repelForceY(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001)
     {
         const double dx = std::fabs(a[ 0 ] - b[ 0 ]);
         const double dy = std::fabs(a[ 1 ] - b[ 1 ]);
@@ -424,7 +424,7 @@ namespace force_exact
 
     /**
      */
-    Eigen::Vector2d repelForceX(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001) 
+    inline Eigen::Vector2d repelForceX(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001)
     {
         const double dx = std::fabs(a[ 0 ] - b[ 0 ]);
         const double dy = std::fabs(a[ 1 ] - b[ 1 ]);
@@ -445,7 +445,7 @@ namespace force_exact
 
     /**
      */
-    QPointF repelForce(const QPointF& a, const QPointF& b, double force = 0.000001, ForceDirection direction = ForceDirection::XY) 
+    inline QPointF repelForce(const QPointF& a, const QPointF& b, double force = 0.000001, ForceDirection direction = ForceDirection::XY)
     {
         Eigen::Vector2d out;
         if (direction == ForceDirection::X) 
@@ -473,7 +473,7 @@ namespace force_exact
 
     /**
      */
-    Eigen::Vector2d springForceXY(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001) 
+    inline Eigen::Vector2d springForceXY(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001)
     {
         Eigen::Vector2d f = {0, 0};
         Eigen::Vector2d v = (a - b) ;
@@ -483,7 +483,7 @@ namespace force_exact
 
     /**
      */
-    Eigen::Vector2d springForceY(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001) 
+    inline Eigen::Vector2d springForceY(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001)
     {
         Eigen::Vector2d f = {0, 0};
         Eigen::Vector2d v = {0, (a.y() - b.y())};
@@ -493,7 +493,7 @@ namespace force_exact
    
     /**
      */
-    Eigen::Vector2d springForceX(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001) 
+    inline Eigen::Vector2d springForceX(const Eigen::Vector2d& a, const Eigen::Vector2d& b, double force = 0.000001)
     {
         Eigen::Vector2d f = {0, 0};
         Eigen::Vector2d v = {(a.x() - b.x()), 0};
@@ -503,7 +503,7 @@ namespace force_exact
 
     /**
      */
-    QPointF springForce(const QPointF& a, const QPointF& b, double force = 0.000001, ForceDirection direction = ForceDirection::XY) 
+    inline QPointF springForce(const QPointF& a, const QPointF& b, double force = 0.000001, ForceDirection direction = ForceDirection::XY)
     {
         Eigen::Vector2d out;
         if (direction == ForceDirection::X) 
@@ -531,7 +531,7 @@ namespace force_exact
 
     /**
      */
-    void rescale(std::vector<double>& v) 
+    inline void rescale(std::vector<double>& v)
     {
         const double min_value = *std::min_element(v.begin(), v.end());
         const double max_value = *std::max_element(v.begin(), v.end());
@@ -550,8 +550,8 @@ namespace force_exact
 
     /**
      */
-    bool placeLabels(std::vector<Label>& labels,
-                     const Settings& settings)
+    inline bool placeLabels(std::vector<Label>& labels,
+                            const Settings& settings)
     {
         size_t nl = labels.size();
 
@@ -561,7 +561,8 @@ namespace force_exact
         //get data frame for normalization.
         //Note: for this method to work, all data is internally normalized.
         //Not doing the normalization would result in range-dependent effects!
-        auto data_frame = dataFrame(labels);
+        //(additional objects included, e.g. a single label next to fixed objects)
+        auto data_frame = dataFrame(labels, settings.avoid_objects ? &settings.additional_objects : nullptr);
 
         const double anchor_radius = settings.fbe_anchor_radius;
    
@@ -645,6 +646,15 @@ namespace force_exact
         QRectF roi = settings.roi;
         if (!roi.isEmpty())
             normalizeData(roi, data_frame);
+
+        //normalize additional objects
+        std::vector<QRectF> objects;
+        if (settings.avoid_objects)
+        {
+            objects = settings.additional_objects;
+            for (auto& obj : objects)
+                normalizeData(obj, data_frame);
+        }
 
         QPointF f, ci, cj;
 
@@ -758,6 +768,20 @@ namespace force_exact
                                 f = f + repelForce(ci, anchor_points[ j ], anchor_radius_frame * force_point_size * force_push, settings.fbe_force_dir);
                             }
                         }
+                    }
+
+                    // Repel the box from overlapping additional objects (fixed boxes).
+                    for (const auto& obj : objects)
+                    {
+                        if (!text_boxes[ i ].intersects(obj))
+                            continue;
+
+                        overlaps_detected   += 1;
+                        n_overlaps          += 1;
+                        i_overlaps           = true;
+                        total_overlaps[ i ] += 1;
+
+                        f = f + repelForce(ci, obj.center(), force_push, settings.fbe_force_dir);
                     }
 
                     //std::cout << "force" << i << ": (" << f.x() << "," << f.y() << ")" << std::endl;

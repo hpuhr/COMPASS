@@ -34,7 +34,6 @@ struct LabelGeneratorConfig
     nlohmann::json label_ds_ids_; // dsid str -> label flag
 
     bool declutter_labels_ {true};
-    unsigned int max_declutter_labels_ {200};
 
     bool filter_mode3a_active_;
     std::string filter_mode3a_values_;
@@ -56,7 +55,7 @@ struct LabelGeneratorConfig
     float label_opacity_ {0.9};
 
     bool  auto_lod_    {true};
-    float current_lod_ {1}; // 1, 2, 3, float for filter function
+    unsigned int current_lod_ {1}; // selected lod (1...3), used if auto lod is off
 
     bool use_utn_as_id_ {false};
 };

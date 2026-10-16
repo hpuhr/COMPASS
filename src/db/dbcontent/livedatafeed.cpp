@@ -30,6 +30,7 @@
 #include "util/tbbhack.h"
 #include "logger.h"
 
+#include <algorithm>
 
 using namespace std;
 using namespace Utils;
@@ -54,17 +55,164 @@ void LiveDataFeed::setReadSetProvider(std::function<dbContent::VariableSet(const
 }
 
 /**
- * Stages newly inserted buffers, accumulating with any not yet merged.
+ * Stages newly inserted buffers: each is reduced to the live view read set (see transformInserted()) and
+ * kept as a batch with its newest timestamp until the next tick merges it. Records the latency of the
+ * insert (now - oldest target report) and drops batches which are entirely older than the live window.
  */
 void LiveDataFeed::addInserted(BufferMap inserted)
 {
+    transformInserted(inserted);
+
+    boost::optional<boost::posix_time::ptime> min_tr_time;
+
     for (auto& buf_it : inserted)
     {
-        if (staged_.count(buf_it.first))
-            staged_.at(buf_it.first)->seizeBuffer(*buf_it.second.get());
-        else
-            staged_[buf_it.first] = buf_it.second;
+        const string& name = buf_it.first;
+
+        StagedBatch batch;
+        batch.buffer = buf_it.second;
+
+        auto& ts_meta_var = dbcont_man_.metaVariable(dbcontent_vars::meta_var_timestamp_.name());
+
+        if (ts_meta_var.existsIn(name))
+        {
+            Variable& ts_var = ts_meta_var.getFor(name);
+
+            // columns carry variable names after the transform
+            if (batch.buffer->has<boost::posix_time::ptime>(ts_var.name()))
+            {
+                bool has_min_max;
+                boost::posix_time::ptime ts_min, ts_max;
+                tie(has_min_max, ts_min, ts_max) =
+                    batch.buffer->get<boost::posix_time::ptime>(ts_var.name()).minMaxValues();
+
+                if (has_min_max)
+                {
+                    batch.ts_max = ts_max;
+
+                    if (dbcont_man_.dbContent(name).containsTargetReports())
+                        min_tr_time = min_tr_time ? std::min(*min_tr_time, ts_min) : ts_min;
+                }
+            }
+        }
+
+        staged_[ name ].push_back(batch);
     }
+
+    if (min_tr_time)
+    {
+        auto latency = Time::currentUTCTime() - *min_tr_time;
+
+        if (!pending_latency_ || latency > *pending_latency_)
+            pending_latency_ = latency;
+    }
+
+    dropOutdatedBatches();
+}
+
+/**
+ * Reduces wide decoded inserts to the live view read set (incl. the assoc column), renames the DB columns
+ * to variable names and adds the selection flag. Runs in parallel per content.
+ */
+void LiveDataFeed::transformInserted(BufferMap& inserted)
+{
+    traced_assert(read_set_provider_);
+
+    struct InsertedItem
+    {
+        std::shared_ptr<Buffer>   buffer;
+        VariableSet               read_set;
+        boost::optional<Property> utn_prop; // assoc column, ensured before the transform
+    };
+
+    // resolve everything that reads the view read sets / variable model here, on the calling
+    // thread - the parallel phase below must touch buffers only
+    std::vector<InsertedItem> items;
+    items.reserve(inserted.size());
+
+    for (auto& buf_it : inserted)
+    {
+        const string& name = buf_it.first;
+
+        items.emplace_back();
+        InsertedItem& item = items.back();
+
+        item.buffer = buf_it.second;
+
+        // prune target: the live view read set (incl. standard/CAT063 vars) from ViewManager
+        item.read_set = read_set_provider_(name);
+
+        if (dbcont_man_.metaCanGetVariable(name, dbcontent_vars::meta_var_utn_))
+        {
+            Variable& utn_var = dbcont_man_.metaGetVariable(name, dbcontent_vars::meta_var_utn_);
+            item.utn_prop = Property(utn_var.dbColumnName(), utn_var.dataType());
+        }
+    }
+
+    // per-content work on disjoint buffers
+    tbb::parallel_for(uint(0), (unsigned int) items.size(), [&](unsigned int item_cnt)
+    {
+        InsertedItem& item   = items[item_cnt];
+        Buffer&       buffer = *item.buffer;
+
+        // remove all columns not in the read set
+        vector<Property> to_remove;
+        for (const auto& prop_it : buffer.properties().properties())
+            if (!item.read_set.hasDBColumnName(prop_it.name()))
+                to_remove.push_back(prop_it);
+
+        for (auto& prop_it : to_remove)
+            buffer.deleteProperty(prop_it);
+
+        // ensure the assoc (utn) column exists so it survives the transform
+        if (item.utn_prop && !buffer.hasProperty(*item.utn_prop))
+            buffer.addProperty(*item.utn_prop);
+
+        // rename DB columns to variable names
+        buffer_utils::transformVariables(buffer, item.read_set, true);
+
+        // add selection flag
+        buffer.addProperty(dbcontent_vars::selected_var_);
+    });
+}
+
+/**
+ * Drops staged batches whose newest timestamp is outside the live cache window - the merge would cut
+ * all their rows anyway. Batches without timestamps are kept.
+ * Notice: Only matters while ticks are held, otherwise a single fresh batch is staged.
+ */
+void LiveDataFeed::dropOutdatedBatches()
+{
+    boost::posix_time::ptime min_ts =
+        Time::currentUTCTime() - boost::posix_time::minutes(dbcont_man_.compass().maxLiveDataAgeCache());
+
+    size_t num_dropped = 0;
+
+    for (auto& [ name, batches ] : staged_)
+    {
+        size_t n = batches.size();
+
+        batches.erase(std::remove_if(batches.begin(), batches.end(),
+                                     [ & ] (const StagedBatch& b) { return b.ts_max && *b.ts_max <= min_ts; }),
+                      batches.end());
+
+        num_dropped += n - batches.size();
+    }
+
+    if (num_dropped)
+        logdbg << "dropped " << num_dropped << " outdated staged batch(es)";
+}
+
+/**
+ * Returns the max latency of the inserts staged since the last call and resets it.
+ * Notice: Taken per tick attempt, so it does not grow with ticks held during an overload.
+ */
+boost::optional<boost::posix_time::time_duration> LiveDataFeed::takeInsertLatency()
+{
+    latency_         = pending_latency_;
+    pending_latency_ = boost::none;
+
+    return latency_;
 }
 
 /**
@@ -91,19 +239,20 @@ void LiveDataFeed::clear()
 {
     buffers_.clear();
     staged_.clear();
-    latency_ = boost::none;
+    pending_latency_ = boost::none;
+    latency_         = boost::none;
     invalidateIndex();
 }
 
 /**
  * One live tick, in memory only: merge staged buffers, trim the live window, apply
- * data-source and view filters, update the latency, then emit a single atomic change
- * event so listeners reset + rebuild + finalize in one event-loop turn.
+ * data-source and view filters, then emit a single atomic change event so listeners
+ * reset + rebuild + finalize in one event-loop turn.
+ * Notice: The only place where distributed buffers change, always followed by the synchronous
+ * distribution (ticks are held by the LiveController instead of being skipped by views).
  */
 void LiveDataFeed::processTick()
 {
-    auto min_tr_time = minTargetReportTime(); // over staged_, before it is consumed
-
     bool had_data = !buffers_.empty();
 
     addStagedToCache();
@@ -114,13 +263,6 @@ void LiveDataFeed::processTick()
         dbcont_man_.compass().filterManager().filterBuffers(buffers_);
 
     invalidateIndex();
-
-    // before the emit: the geo view reads the latency during distribution to detect overload,
-    // and would otherwise see the previous tick's value
-    if (min_tr_time)
-        latency_ = Time::currentUTCTime() - *min_tr_time;
-    else
-        latency_ = boost::none;
 
     if (!buffers_.empty())
     {
@@ -138,87 +280,36 @@ void LiveDataFeed::processTick()
 }
 
 /**
- * Minimum target-report timestamp across the staged buffers, used to report the
- * live latency (now - oldest freshly-arrived target report).
- */
-boost::optional<boost::posix_time::ptime> LiveDataFeed::minTargetReportTime() const
-{
-    boost::optional<boost::posix_time::ptime> min_time;
-
-    for (const auto& buf_it : staged_)
-    {
-        const string& dbcont_name = buf_it.first;
-
-        if (!dbcont_man_.dbContent(dbcont_name).containsTargetReports())
-            continue;
-
-        traced_assert(dbcont_man_.metaCanGetVariable(dbcont_name, dbcontent_vars::meta_var_timestamp_));
-        Variable& var = dbcont_man_.metaGetVariable(dbcont_name, dbcontent_vars::meta_var_timestamp_);
-
-        if (!buf_it.second->has<boost::posix_time::ptime>(var.dbColumnName()))
-            continue;
-
-        NullableVector<boost::posix_time::ptime>& data_vec =
-            buf_it.second->get<boost::posix_time::ptime>(var.dbColumnName());
-
-        bool has_min_max;
-        boost::posix_time::ptime ts_min, ts_max;
-        tie(has_min_max, ts_min, ts_max) = data_vec.minMaxValues();
-
-        if (!has_min_max)
-            continue;
-
-        if (!min_time)
-            min_time = ts_min;
-        else
-            min_time = std::min(*min_time, ts_min);
-    }
-
-    return min_time;
-}
-
-/**
- * Merges the staged buffers into the cache: prune each wide decoded buffer to the
- * live view read set, ensure the utn column, rename DB columns to variable names,
- * add the selection flag, seize into buffers_, and sort by timestamp.
+ * Merges the staged batches (already reduced, see transformInserted()) into the cache:
+ * seize them into buffers_ and sort by timestamp.
  */
 void LiveDataFeed::addStagedToCache()
 {
-    traced_assert(read_set_provider_);
-
     struct StagedItem
     {
-        std::string               name;
-        std::shared_ptr<Buffer>   buffer;
-        VariableSet               read_set;
-        boost::optional<Property> utn_prop; // assoc column, ensured before the transform
-        boost::optional<Property> ts_prop;  // sort key (variable name, i.e. post-transform)
-        bool                      merge {false};
+        std::string                          name;
+        std::vector<std::shared_ptr<Buffer>> batches;
+        boost::optional<Property>            ts_prop; // sort key (variable name)
     };
 
-    // resolve everything that reads the view read sets / variable model here, on the calling
-    // thread - the parallel phase below must touch buffers only
+    // resolve the variable model here, on the calling thread - the parallel phase below must
+    // touch buffers only
     std::vector<StagedItem> items;
     items.reserve(staged_.size());
 
-    for (auto& buf_it : staged_)
+    for (auto& [ name, batches ] : staged_)
     {
-        const string& name = buf_it.first;
+        if (batches.empty()) // all dropped as outdated
+            continue;
 
         items.emplace_back();
         StagedItem& item = items.back();
 
-        item.name   = name;
-        item.buffer = buf_it.second;
+        item.name = name;
 
-        // prune target: the live view read set (incl. standard/CAT063 vars) from ViewManager
-        item.read_set = read_set_provider_(name);
-
-        if (dbcont_man_.metaCanGetVariable(name, dbcontent_vars::meta_var_utn_))
-        {
-            Variable& utn_var = dbcont_man_.metaGetVariable(name, dbcontent_vars::meta_var_utn_);
-            item.utn_prop = Property(utn_var.dbColumnName(), utn_var.dataType());
-        }
+        item.batches.reserve(batches.size());
+        for (auto& batch : batches)
+            item.batches.push_back(batch.buffer);
 
         traced_assert(dbcont_man_.metaVariable(dbcontent_vars::meta_var_timestamp_.name()).existsIn(name));
         Variable& ts_var = dbcont_man_.metaVariable(dbcontent_vars::meta_var_timestamp_.name()).getFor(name);
@@ -227,45 +318,25 @@ void LiveDataFeed::addStagedToCache()
 
     // make the cache map structurally final before any worker runs: a std::map insert
     // rebalances the tree, so inserting from a worker would race the unlocked lookups the
-    // other workers do. A content not yet cached adopts its staged buffer as the cache buffer
-    // (mutated in place below, exactly as before).
+    // other workers do. A content not yet cached adopts its first staged batch as the cache
+    // buffer (mutated in place below).
     for (auto& item : items)
     {
-        if (buffers_.count(item.name))
-            item.merge = true;
-        else
-            buffers_[item.name] = item.buffer;
+        if (!buffers_.count(item.name))
+            buffers_[item.name] = item.batches.front();
     }
 
     // per-content work on disjoint buffers; buffers_ is only read from here on
     tbb::parallel_for(uint(0), (unsigned int) items.size(), [&](unsigned int item_cnt)
     {
         StagedItem& item   = items[item_cnt];
-        Buffer&     staged = *item.buffer;
+        auto&       cached = buffers_.at(item.name);
 
-        // remove all columns not in the read set
-        vector<Property> to_remove;
-        for (const auto& prop_it : staged.properties().properties())
-            if (!item.read_set.hasDBColumnName(prop_it.name()))
-                to_remove.push_back(prop_it);
-
-        for (auto& prop_it : to_remove)
-            staged.deleteProperty(prop_it);
-
-        // ensure the assoc (utn) column exists so it survives the transform
-        if (item.utn_prop && !staged.hasProperty(*item.utn_prop))
-            staged.addProperty(*item.utn_prop);
-
-        // rename DB columns to variable names
-        buffer_utils::transformVariables(staged, item.read_set, true);
-
-        // add selection flag
-        staged.addProperty(dbcontent_vars::selected_var_);
-
-        auto& cached = buffers_.at(item.name);
-
-        if (item.merge)
-            cached->seizeBuffer(staged);
+        for (auto& batch : item.batches)
+        {
+            if (batch != cached) // an adopted batch is the cache buffer itself
+                cached->seizeBuffer(*batch);
+        }
 
         // sort by timestamp
         traced_assert(cached->hasProperty(*item.ts_prop));

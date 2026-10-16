@@ -89,10 +89,15 @@ public:
 
     virtual void loadingStarted();
 
-    // the single data-delivery callback (virtual so GeographicView can gate it for
-    // live-overload skipping); drives the data widget's updateFromSource
+    // the single data-delivery callback, drives the data widget's updateFromSource.
+    // Notice: must not be skipped, the views share the buffers (live overload is handled by
+    // holding the tick, see LiveController)
     virtual void updateFromSource(const DBContentDataSet& source,
                                   const std::vector<std::string>& names, bool reset, bool last);
+
+    // true if the view follows the live ticks in live running; other views are cleared on live entry,
+    // get no ticks and are disabled until the next offline or paused display load (see ViewManager)
+    virtual bool followsLiveData() const { return false; }
     virtual void loadingDone();
     virtual void clearData();
     virtual void appModeSwitch(AppMode app_mode_previous, AppMode app_mode_current);

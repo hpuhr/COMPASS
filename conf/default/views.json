@@ -148,8 +148,6 @@
                         "label_ds_ids": {},
                         "label_lines": {},
                         "label_opacity": 0.8999999761581421,
-                        "label_placement_forcedir": 2,
-                        "label_placement_method": 1,
                         "layer_config": {
                             "ffts": {
                                 "show_fft": {
@@ -194,18 +192,15 @@
                         "layer_mode": "DBContent:DS ID:Line ID:Aircraft Address",
                         "map_name": "minimal_2d.earth",
                         "map_opacity": 0.0,
-                        "max_declutter_labels": 200,
                         "name": "Geographic View 0",
                         "null_height_offset": 0.0,
                         "num_accuracy_ellipse_points_factor": 16.0,
                         "num_accuracy_ellipse_points_max": 32.0,
-                        "num_overload_packets": 4,
                         "offline_text": "Offline",
                         "offline_text_color_str": "#FF0000",
                         "online_text": "Online",
                         "online_text_color_str": "#00FF00",
                         "overlay_text_color_invert": false,
-                        "overload_max_latency_seconds": -1.0,
                         "overload_text_color_str": "#FF0000",
                         "position_accuracy_vars_scale": 2.0,
                         "selection_color": "#FFFF00",

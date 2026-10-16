@@ -70,6 +70,12 @@ class ViewManager : public QObject, public Configurable
     void reloadStateChanged();
     void automaticUpdatesChanged();
     void presetEdited(ViewPresets::EditAction ea);
+    // live overload check of a tick attempt, forwarded from the live session (see LiveController)
+    void liveOverloadCheckedSignal(unsigned int packets,
+                                   double latency_s,
+                                   bool overloaded,
+                                   unsigned int held_ticks,
+                                   unsigned int hold_ticks);
 
   public slots:
     void selectionChangedSlot();

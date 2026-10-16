@@ -28,7 +28,6 @@ LabelGeneratorConfig::LabelGeneratorConfig()
     , label_config_               (nlohmann::json::object())
     , label_ds_ids_               (nlohmann::json::object())
     , declutter_labels_           (true)
-    , max_declutter_labels_       (200)
     , filter_mode3a_active_       (false)
     , filter_mode3a_values_       ("7000,7777")
     , filter_modec_min_active_    (false)
@@ -52,7 +51,6 @@ LabelGeneratorConfig::LabelGeneratorConfig()
 //    registerParameter("label_config", &label_config_, label_config_);
 //    registerParameter("label_ds_ids", &label_ds_ids_, label_ds_ids_);
 //    registerParameter("declutter_labels", &declutter_labels_, declutter_labels_);
-//    registerParameter("max_declutter_labels", &max_declutter_labels_, max_declutter_labels_);
 
 //    registerParameter("filter_mode3a_active", &filter_mode3a_active_, filter_mode3a_active_);
 //    registerParameter("filter_mode3a_values", &filter_mode3a_values_, filter_mode3a_values_);

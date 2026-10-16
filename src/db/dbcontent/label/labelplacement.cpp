@@ -19,6 +19,7 @@
 #include "labelplacement.h"
 #include "labelplacement_force.h"
 #include "labelplacement_spring.h"
+#include "labelplacement_constraint.h"
 
 #include <limits>
 #include <iostream>
@@ -53,18 +54,22 @@ void LabelPlacementEngine::addLabel(const std::string& id,
                                     double* x_init, 
                                     double* y_init,
                                     double* x_ref,
-                                    double* y_ref)
+                                    double* y_ref,
+                                    bool has_last,
+                                    bool excluded_last)
 {
     Label l;
-    l.id       = id;
-    l.x_anchor = x_anchor;
-    l.y_anchor = y_anchor;
-    l.x        = x_init ? *x_init : x_anchor;
-    l.y        = y_init ? *y_init : y_anchor;
-    l.x_last   = l.x;
-    l.y_last   = l.y;
-    l.w        = w;
-    l.h        = h;
+    l.id            = id;
+    l.x_anchor      = x_anchor;
+    l.y_anchor      = y_anchor;
+    l.x             = x_init ? *x_init : x_anchor;
+    l.y             = y_init ? *y_init : y_anchor;
+    l.x_last        = l.x;
+    l.y_last        = l.y;
+    l.w             = w;
+    l.h             = h;
+    l.has_last      = has_last;
+    l.excluded_last = excluded_last;
 
     if (x_ref && y_ref)
     {
@@ -117,6 +122,13 @@ void LabelPlacementEngine::removeLabel(size_t idx)
 
     label_map_.erase(l.id);
     labels_.erase(labels_.begin() + idx);
+
+    //labels behind the removed one moved one index down
+    for (auto& [ id, label_idx ] : label_map_)
+    {
+        if (label_idx > idx)
+            --label_idx;
+    }
 }
 
 /**
@@ -126,9 +138,8 @@ void LabelPlacementEngine::removeLabel(const std::string& id)
     auto it = label_map_.find(id);
     if (it == label_map_.end())
         return;
-  
-    labels_.erase(labels_.begin() + it->second);
-    label_map_.erase(id);
+
+    removeLabel(it->second);
 }
 
 /**
@@ -155,12 +166,24 @@ void LabelPlacementEngine::revertPlacements()
  */
 bool LabelPlacementEngine::placeLabels()
 {
+    time_exhausted_  = false;
+    num_overcrowded_ = 0;
+
     bool ok = false;
     if (settings_.method == Method::ForceBasedSimple ||
-        settings_.method == Method::ForceBasedExtended)
+        settings_.method == Method::ForceBasedExtended ||
+        settings_.method == Method::ForceBasedRelaxed)
         ok = label_placement::force::placeLabels(labels_, settings_);
     else if (settings_.method == Method::ForceBasedExact)
         ok = label_placement::force_exact::placeLabels(labels_, settings_);
+    else if (settings_.method == Method::ConstraintBased)
+    {
+        label_placement::constraint::Stats stats;
+        ok = label_placement::constraint::placeLabels(labels_, settings_, &stats);
+
+        time_exhausted_  = stats.time_exhausted;
+        num_overcrowded_ = (size_t)stats.overcrowded;
+    }
     else
         return false; //unknown method
 

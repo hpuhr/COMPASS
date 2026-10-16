@@ -29,9 +29,9 @@ namespace label_placement
     /**
      * Collect the (scaled) bounding boxes for all given labels.
      */
-    std::vector<QRectF> collectBoundingBoxes(const std::vector<Label>& labels, 
-                                             double tx, 
-                                             double ty)
+    inline std::vector<QRectF> collectBoundingBoxes(const std::vector<Label>& labels,
+                                                    double tx,
+                                                    double ty)
     {
         if (labels.empty())
             return {};
@@ -49,19 +49,20 @@ namespace label_placement
     }
 
     /**
-     * Compute a minimum frame covering all given label data.
+     * Compute a minimum frame covering all given label data (and the given additional objects).
      */
-    QRectF dataFrame(const std::vector<Label>& labels)
+    inline QRectF dataFrame(const std::vector<Label>& labels,
+                            const std::vector<QRectF>* objects = nullptr)
     {
         size_t n = labels.size();
 
-        if (n < 2)
+        if (n + (objects ? objects->size() : 0) < 2)
             return QRectF();
 
         double xmin = std::numeric_limits<double>::max();
         double ymin = std::numeric_limits<double>::max();
-        double xmax = std::numeric_limits<double>::min();
-        double ymax = std::numeric_limits<double>::min();
+        double xmax = std::numeric_limits<double>::lowest();
+        double ymax = std::numeric_limits<double>::lowest();
 
         auto checkPos = [ & ] (double x, double y) 
         {
@@ -83,6 +84,15 @@ namespace label_placement
             checkPos(l.x_anchor, l.y_anchor);
         }
 
+        if (objects)
+        {
+            for (const auto& obj : *objects)
+            {
+                checkPos(obj.left(),  obj.top());
+                checkPos(obj.right(), obj.bottom());
+            }
+        }
+
         if (xmin > xmax || ymin > ymax)
             return QRectF();
 
@@ -92,7 +102,7 @@ namespace label_placement
     /**
      * Normalize the position using the given data frame.
      */
-    void normalizeData(QPointF& pos, const QRectF& frame)
+    inline void normalizeData(QPointF& pos, const QRectF& frame)
     {
         if (frame.isEmpty())
             return;
@@ -105,7 +115,7 @@ namespace label_placement
     /**
      * Denormalize the position using the given data frame.
      */
-    void denormalizeData(QPointF& pos, const QRectF& frame)
+    inline void denormalizeData(QPointF& pos, const QRectF& frame)
     {
         if (frame.isEmpty())
             return;
@@ -118,7 +128,7 @@ namespace label_placement
     /**
      * Normalize the value using the given data frame.
      */
-    void normalizeData(double& v, const QRectF& frame)
+    inline void normalizeData(double& v, const QRectF& frame)
     {
         if (frame.isEmpty())
             return;
@@ -131,7 +141,7 @@ namespace label_placement
     /**
      * Normalize the rectangle using the given data frame.
      */
-    void normalizeData(QRectF& r, const QRectF& frame)
+    inline void normalizeData(QRectF& r, const QRectF& frame)
     {
         if (frame.isEmpty())
             return;
