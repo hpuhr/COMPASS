@@ -1643,6 +1643,27 @@ void LabelGenerator::declutterLabels(bool declutter_labels)
     emit labelOptionsChangedSignal(); // updates
 }
 
+/**
+ * Adaptive decluttering of the constraint based method: labels in crowded areas stay at home, the rest is decluttered.
+ */
+bool LabelGenerator::declutterLabelsSmart() const
+{
+    return config_.declutter_labels_smart_;
+}
+
+/**
+ */
+void LabelGenerator::declutterLabelsSmart(bool declutter_labels_smart)
+{
+    if (config_.declutter_labels_smart_ == declutter_labels_smart)
+        return;
+
+    config_.declutter_labels_smart_ = declutter_labels_smart;
+
+    emit labelConfigChanged();
+    emit labelOptionsChangedSignal(); // updates
+}
+
 label_placement::Method LabelGenerator::labelPlacementMethod() const
 {
     return label_placement_method_;

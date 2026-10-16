@@ -22,6 +22,7 @@
                         "connect_last_layer": false,
                         "current_lod": 1.0,
                         "declutter_labels": true,
+                        "declutter_labels_smart": true,
                         "extra_lines_opacity": 0.5,
                         "filter_mode3a_active": false,
                         "filter_mode3a_values": "7000,7777",

@@ -187,6 +187,9 @@ public:
     bool declutterLabels() const;
     void declutterLabels(bool declutter_labels);
 
+    bool declutterLabelsSmart() const;
+    void declutterLabelsSmart(bool declutter_labels_smart);
+
     label_placement::Method labelPlacementMethod() const;
     void labelPlacementMethod(label_placement::Method method);
 

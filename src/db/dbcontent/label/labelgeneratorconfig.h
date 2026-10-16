@@ -34,6 +34,7 @@ struct LabelGeneratorConfig
     nlohmann::json label_ds_ids_; // dsid str -> label flag
 
     bool declutter_labels_ {true};
+    bool declutter_labels_smart_ {true}; // adaptive decluttering of the constraint based method (crowded areas stay at home)
 
     bool filter_mode3a_active_;
     std::string filter_mode3a_values_;
