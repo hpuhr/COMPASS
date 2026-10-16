@@ -187,6 +187,9 @@ public:
     bool declutterLabels() const;
     void declutterLabels(bool declutter_labels);
 
+    bool declutterLabelsSmart() const;
+    void declutterLabelsSmart(bool declutter_labels_smart);
+
     label_placement::Method labelPlacementMethod() const;
     void labelPlacementMethod(label_placement::Method method);
 
@@ -214,8 +217,7 @@ public:
     DBContentManager& dbContentManager() { return dbcont_manager_; }
 
     static const int          LabelAnchorLengthPxDefault;
-    static const float        MaxTransparency;                   // max transparency of the label background selectable in the ui
-    static const unsigned int MaxDeclutterLabels;                // no decluttering above this number of visible labels
+    static const unsigned int MaxDeclutterLabels;               // no decluttering above this number of visible labels
     static const unsigned int MaxDeclutterLabelsConstraintBased; // the same for the constraint based method
     static const float        MaxDeclutterScreenRatio;           // no decluttering if the labels cover more of the screen
                                                                  // (0 = no limit)

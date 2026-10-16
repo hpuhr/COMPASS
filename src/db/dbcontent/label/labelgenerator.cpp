@@ -51,7 +51,6 @@ namespace dbContent
 {
 
 const int          LabelGenerator::LabelAnchorLengthPxDefault        = 20;
-const float        LabelGenerator::MaxTransparency                   = 0.67f;
 const unsigned int LabelGenerator::MaxDeclutterLabels                = 200;
 const unsigned int LabelGenerator::MaxDeclutterLabelsConstraintBased = 500;
 const float        LabelGenerator::MaxDeclutterScreenRatio           = 0.4f;
@@ -1641,6 +1640,27 @@ void LabelGenerator::declutterLabels(bool declutter_labels)
     //if (!config_.declutter_labels_)
     //    emit labelClearAllSignal(); // since since do not update otherwise - reason unknown
 
+    emit labelOptionsChangedSignal(); // updates
+}
+
+/**
+ * Adaptive decluttering of the constraint based method: labels in crowded areas stay at home, the rest is decluttered.
+ */
+bool LabelGenerator::declutterLabelsSmart() const
+{
+    return config_.declutter_labels_smart_;
+}
+
+/**
+ */
+void LabelGenerator::declutterLabelsSmart(bool declutter_labels_smart)
+{
+    if (config_.declutter_labels_smart_ == declutter_labels_smart)
+        return;
+
+    config_.declutter_labels_smart_ = declutter_labels_smart;
+
+    emit labelConfigChanged();
     emit labelOptionsChangedSignal(); // updates
 }
 
