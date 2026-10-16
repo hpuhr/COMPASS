@@ -841,7 +841,11 @@ void ReconstructorTask::processLoadedSliceIfReady()
 
     loginf << "calling process";
 
-    updateProgressSlot("Processing Slice", true);
+    // queued: on the modal dialog setValue() processes events, a queued processLoadedSliceIfReady()
+    // would run nested in this half-done transition and load the next slice twice
+    QMetaObject::invokeMethod(this, "updateProgressSlot", Qt::QueuedConnection,
+                              Q_ARG(const QString&, "Processing Slice"),
+                              Q_ARG(bool, true));
     ++current_slice_idx_;
 
     traced_assert(!processing_data_slice_);
@@ -878,6 +882,10 @@ void ReconstructorTask::processLoadedSliceIfReady()
 
         if (cancelled_)
             return;
+
+        // the previous slice load must be finished, the engine's wait for a running load
+        // processes events and the old load's done slot would fill the new slice
+        traced_assert(!manager().compass().dbContentManager().dataEngine().isLoading());
 
         loadDataSlice();
     }

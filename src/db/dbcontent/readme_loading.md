@@ -508,7 +508,10 @@ only the engine drives them. Tasks build a `LoadOperation` and call `dataEngine(
 
 - **Time-sliced (Reconstructor).** One op per slice with `dbcontents_` explicit, `apply_*_filters_=false`,
   `read_set_`/`custom_filter_clause_` lambdas; iterate by connecting the op's `finishedSignal` and
-  issuing the next slice.
+  issuing the next slice. A follow-up slice load must find the engine idle (asserted): the engine's
+  wait for a running load processes events, and the old op's `finishedSignal` would then fill the
+  new slice. So nothing in `processLoadedSliceIfReady()` may process events - its progress update
+  is queued, because `setValue` on the modal progress dialog does.
 - **Single content (RT `get_data`).** `LoadRequest::forContent(name, rs, clause)`; `op->wait()`
   synchronously, with an `isLoading()` guard (RT bypasses UI modality).
 - **Restricted fan-out (ARTAS, RadarPlot).** Explicit `dbcontents_`, `apply_*_filters_=false`,
