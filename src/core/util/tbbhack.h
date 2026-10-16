@@ -22,6 +22,9 @@
 //#pragma pop_macro("X")
 //int x [X];
 
+// moc of Qt 5.15 fails on the #include inside an enum in tbb/profiling.h, moc does not need the TBB declarations
+#ifndef Q_MOC_RUN
+
 #ifdef emit
 
 #pragma push_macro("emit")
@@ -40,4 +43,6 @@
 #include <tbb/concurrent_unordered_map.h>
 
 #endif
+
+#endif // Q_MOC_RUN
 
