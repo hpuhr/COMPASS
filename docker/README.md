@@ -1,13 +1,14 @@
 # Docker Build Scripts
 
-Dockerfiles and scripts for building COMPASS AppImages inside Debian containers.
+Dockerfiles and scripts for building COMPASS AppImages inside Debian and AlmaLinux containers.
 
 ## Dockerfiles
 
 - **Dockerfile_deb10** - Debian 10 (Buster) build environment (primary)
+- **Dockerfile_alma8** - AlmaLinux 8 build environment (glibc 2.28 as Debian 10, Qt 5.15, gcc-toolset-13)
 - **Dockerfile_deb9** - Debian 9 (Stretch) build environment (deprecated)
 
-Each Dockerfile bakes in an `OS_NAME` env var (`deb10` / `deb9`) used by the build scripts.
+Each Dockerfile bakes in an `OS_NAME` env var (`deb10` / `alma8` / `deb9`) used by the build scripts.
 
 ## Host-side scripts (run on your machine)
 
@@ -51,7 +52,10 @@ Each Dockerfile bakes in an `OS_NAME` env var (`deb10` / `deb9`) used by the bui
 ```bash
 ./run_make_appimage.sh              # incremental deb10 build
 ./run_make_appimage.sh deb10 --clean  # clean deb10 build
+./run_make_appimage.sh alma8        # incremental alma8 build
 ./run_make_appimage.sh deb9         # incremental deb9 build
 ```
+
+Each OS has its own build directories (`build_<os>` in compass and jasterix), so the builds do not interfere.
 
 The resulting AppImage is written to the repository root as `COMPASS_<os>-x86_64.AppImage`.

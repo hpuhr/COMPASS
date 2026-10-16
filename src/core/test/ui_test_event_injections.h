@@ -22,6 +22,7 @@
 #include <functional>
 
 #include <QString>
+#include <QStringList>
 #include <QKeySequence>
 
 class QObject;
