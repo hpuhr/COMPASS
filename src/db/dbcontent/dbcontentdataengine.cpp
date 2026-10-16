@@ -328,7 +328,7 @@ unsigned long DBContentDataEngine::queryMaxRecordNumberWODBContentID() const
 
 /**
  */
-unsigned int DBContentDataEngine::queryMaxRefTrajTrackNum() const
+boost::optional<unsigned int> DBContentDataEngine::queryMaxRefTrajTrackNum() const
 {
     traced_assert(dbcont_man_.compass().dbInterface().ready());
     return dbcont_man_.compass().dbInterface().getMaxRefTrackTrackNum();
@@ -362,7 +362,10 @@ void DBContentDataEngine::maxRecordNumberWODBContentID(unsigned long value)
  */
 void DBContentDataEngine::loadMaxRefTrajTrackNum()
 {
-    max_reftraj_track_num_ = queryMaxRefTrajTrackNum();
+    // the cache holds the next free track number: the highest used one + 1, or 0 without
+    // RefTraj data, so a later import does not reuse the number of an existing trail
+    auto max_tn = queryMaxRefTrajTrackNum();
+    max_reftraj_track_num_ = max_tn ? *max_tn + 1 : 0;
     loginf << "start" << *max_reftraj_track_num_;
 }
 

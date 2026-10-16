@@ -891,14 +891,14 @@ unsigned long DBInterface::getMaxRecordNumber(DBContent& object)
 
 /**
  */
-unsigned int DBInterface::getMaxRefTrackTrackNum()
+boost::optional<unsigned int> DBInterface::getMaxRefTrackTrackNum()
 {
     traced_assert(ready());
 
     DBContent& reftraj_content = dbcontent_man_.dbContent("RefTraj");
 
     if(!reftraj_content.existsInDB())
-        return 0;
+        return {};
 
     traced_assert(dbcontent_man_.existsMetaVariable(dbcontent_vars::meta_var_track_num_.name()));
     traced_assert(dbcontent_man_.metaVariable(
@@ -923,13 +923,12 @@ unsigned int DBInterface::getMaxRefTrackTrackNum()
 
         shared_ptr<Buffer> buffer = result->buffer();
 
-        if (!buffer->size())
+        // empty table: no row, or a row with a NULL max
+        if (!buffer->size() || buffer->get<unsigned int>(track_num_var.dbColumnName()).isNull(0))
         {
             logwrn << "no max track number found";
-            return 0;
+            return {};
         }
-
-        traced_assert(!buffer->get<unsigned int>(track_num_var.dbColumnName()).isNull(0));
 
         max_tn = buffer->get<unsigned int>(track_num_var.dbColumnName()).get(0);
     }

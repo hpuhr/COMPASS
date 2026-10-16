@@ -18,6 +18,7 @@
 #pragma once
 
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/optional.hpp>
 
 #include "json.hpp"
 #include "loadspec.h"
@@ -88,7 +89,7 @@ public:
 
     void loadMaxRefTrajTrackNum();             // query DB into the cache
     bool         hasMaxRefTrajTrackNum() const { return max_reftraj_track_num_.has_value(); }
-    unsigned int maxRefTrajTrackNum() const;   // cached
+    unsigned int maxRefTrajTrackNum() const;   // cached, next free RefTraj track number
     void         maxRefTrajTrackNum(unsigned int value);
 
     // DB closed: drop the transient load/insert/delete state + the cached DB metadata
@@ -130,7 +131,7 @@ private:
     FilterClause dataSourceClause(const std::string& dbcontent_name, const LoadSpec& spec);
 
     unsigned long queryMaxRecordNumberWODBContentID() const; // DB scan
-    unsigned int  queryMaxRefTrajTrackNum() const;           // DB scan
+    boost::optional<unsigned int> queryMaxRefTrajTrackNum() const; // DB scan, none if no RefTraj data
 
     DBContentManager& dbcont_man_;
 

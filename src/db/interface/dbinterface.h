@@ -243,7 +243,7 @@ public:
                                             const std::string& filter);
 
     unsigned long getMaxRecordNumber(DBContent& object);
-    unsigned int getMaxRefTrackTrackNum();
+    boost::optional<unsigned int> getMaxRefTrackTrackNum(); // none if no RefTraj data
     boost::optional<unsigned long> getMaxReportContentID();
 
     void startPerformanceMetrics() const;
