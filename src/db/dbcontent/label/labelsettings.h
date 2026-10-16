@@ -33,6 +33,8 @@ class LabelSettings
 public:
     virtual ~LabelSettings() = default;
 
+    static constexpr float MaxTransparency = 0.67f; // max transparency of the label background selectable in the ui
+
     virtual unsigned int currentLOD() const = 0;                     // current label level of detail (1-3)
     virtual float labelOpacity() const = 0;                          // 0 = transparent, 1 = opaque
     virtual LabelDirection labelDirection(unsigned int ds_id) = 0;   // label direction of the data source

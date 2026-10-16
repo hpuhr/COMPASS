@@ -51,7 +51,6 @@ namespace dbContent
 {
 
 const int          LabelGenerator::LabelAnchorLengthPxDefault        = 20;
-const float        LabelGenerator::MaxTransparency                   = 0.67f;
 const unsigned int LabelGenerator::MaxDeclutterLabels                = 200;
 const unsigned int LabelGenerator::MaxDeclutterLabelsConstraintBased = 500;
 const float        LabelGenerator::MaxDeclutterScreenRatio           = 0.4f;

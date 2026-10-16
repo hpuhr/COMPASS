@@ -394,6 +394,8 @@ When adding a new View:
 - Existing examples worth following:
   - `ASTERIXReportHelpers::renderDataItemTablesForDS(...)` ([asterixreporthelpers.h](../task/import/asterix/asterixreporthelpers.h)) — shared between the ASTERIX Import report and the Analyze-Data-Source data-item inspector. Both build a small `CategoryView` map and hand it to the helper.
   - `populateDSList(...)` in `analyzedatasourcedialog.cpp` — used by the Reference and Test panes to populate their checkbox lists from a set of IDs and a "checked?" predicate.
+- Reusable widgets in `src/gui`:
+  - `StyledLabel` ([styledlabel.h](styledlabel.h)) — `QLabel` with an optional text shadow (color, offset), for plain text that must stay readable on a semi-transparent background (e.g. the geographic view labels). With the shadow disabled it behaves like a `QLabel`.
 
 ---
 
